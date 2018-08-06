@@ -47,9 +47,9 @@ function testDirMake()
 {
   var context = this;
   if( !isBrowser )
-  context.testRootDirectory = _.path.dirTempMake( _.path.pathJoin( __dirname, '../..'  ) );
+  context.testRootDirectory = _.path.dirTempMake( _.path.join( __dirname, '../..'  ) );
   else
-  context.testRootDirectory = _.path.pathCurrent();
+  context.testRootDirectory = _.path.current();
 }
 
 //
@@ -248,7 +248,7 @@ function appArgs( test )
 function shell( test )
 {
   var context = this;
-  var testRoutineDir = _.path.pathJoin( context.testRootDirectory, test.name );
+  var testRoutineDir = _.path.join( context.testRootDirectory, test.name );
   var commonDefaults =
   {
     outputPiping : 1,
@@ -304,7 +304,7 @@ function shell( test )
 
   /* */
 
-  var testAppPath = _.fileProvider.pathNativize( _.path.pathJoin( testRoutineDir, 'testApp.js' ) );
+  var testAppPath = _.fileProvider.nativize( _.path.join( testRoutineDir, 'testApp.js' ) );
   var testApp = testApp.toString() + '\ntestApp();';
   _.fileProvider.fileWrite( testAppPath, testApp );
 
@@ -583,7 +583,7 @@ shell.timeOut = 30000;
 function shell2( test )
 {
   var context = this;
-  var testRoutineDir = _.path.pathJoin( context.testRootDirectory, test.name );
+  var testRoutineDir = _.path.join( context.testRootDirectory, test.name );
   var commonDefaults =
   {
     outputPiping : 1,
@@ -629,7 +629,7 @@ function shell2( test )
 
   /* */
 
-  var testAppPath = _.fileProvider.pathNativize( _.path.pathJoin( testRoutineDir, 'testApp.js' ) );
+  var testAppPath = _.fileProvider.nativize( _.path.join( testRoutineDir, 'testApp.js' ) );
   var testApp = testApp.toString() + '\ntestApp();';
   _.fileProvider.fileWrite( testAppPath, testApp );
 

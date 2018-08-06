@@ -400,7 +400,7 @@ function shellNode( o )
     argumentsForNode = '--expose-gc --stack-trace-limit=999 --max_old_space_size=' + totalmem;
   }
 
-  let path = _.fileProvider.pathNativize( o.path );
+  let path = _.fileProvider.nativize( o.path );
   path = _.strConcat([ 'node', argumentsForNode, path ]);
 
   let shellOptions = _.mapOnly( o, _.shell.defaults );
@@ -499,16 +499,16 @@ function routineSourceGet( o )
 
   if( o.usingInline && o.routine.inlines )
   {
-    debugger;
+    // debugger;
     let prefix = '\n';
     for( let i in o.routine.inlines )
     {
       let inline = o.routine.inlines[ i ];
-      prefix += '  let ' + i + ' = ' + _.toJs( inline, o.toJsOptions || Object.create( null ) ) + ';\n';
+      prefix += '  var ' + i + ' = ' + _.toJs( inline, o.toJsOptions || Object.create( null ) ) + ';\n';
     }
-    debugger;
+    // debugger;
     let splits = unwrap( result );
-    debugger;
+    // debugger;
     splits[ 1 ] = prefix + '\n' + splits[ 1 ];
     result = splits.join( '' );
   }
@@ -974,8 +974,8 @@ function _appArgsInSamFormatNodejs( o )
 
     _.assert( _.longIs( o.argv ) );
 
-    result.interpreterPath = _.path.pathNormalize( o.argv[ 0 ] );
-    result.mainPath = _.path.pathNormalize( o.argv[ 1 ] );
+    result.interpreterPath = _.path.normalize( o.argv[ 0 ] );
+    result.mainPath = _.path.normalize( o.argv[ 1 ] );
     result.interpreterArgs = process.execArgv;
     result.delimeter = o.delimeter;
     result.map = Object.create( null );
@@ -1354,6 +1354,14 @@ function appRepairExitHandler()
 
 }
 
+//
+
+function appMemoryUsageInfo()
+{
+  var usage = process.memoryUsage();
+  return ( usage.heapUsed >> 20 ) + ' / ' + ( usage.heapTotal >> 20 ) + ' / ' + ( usage.rss >> 20 ) + ' Mb';
+}
+
 // --
 // define class
 // --
@@ -1395,6 +1403,8 @@ let Proto =
   appExitWithBeep : appExitWithBeep,
 
   appRepairExitHandler : appRepairExitHandler,
+
+  appMemoryUsageInfo : appMemoryUsageInfo,
 
 }
 
