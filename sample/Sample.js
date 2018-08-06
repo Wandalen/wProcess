@@ -1,6 +1,6 @@
 
 if( typeof module !== 'undefined' )
-require( 'wexectools' );
+require( 'wexternalfundamentals' );
 var _ = wTools;
 
 /**/
