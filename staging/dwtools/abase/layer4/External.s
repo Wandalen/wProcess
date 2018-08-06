@@ -392,7 +392,6 @@ function shellNode( o )
     let totalmem = System.totalmem();
     if( o.verbosity )
     logger.log( 'System.totalmem()',_.strMetricFormatBytes( totalmem ) );
-    let totalmem;
     if( totalmem < 1024*1024*1024 )
     Math.floor( ( totalmem / ( 1024*1024*1.4 ) - 1 ) / 256 ) * 256;
     else
@@ -420,26 +419,11 @@ function shellNode( o )
   return result;
 }
 
-shellNode.defaults =
-{
-
-  path : null,
-  verbosity : 1,
-  passingThrough : 0,
-  maximumMemory : 1,
-
-  outputPrefixing : 1,
-  outputCollecting : 0,
-  applyingExitCode : 1,
-  throwingExitCode : 1,
-
-  stdio : 'inherit',
-
-}
-
 var defaults = shellNode.defaults = Object.create( shell.defaults );
 
-defaults.context = null;
+defaults.passingThrough = 0;
+defaults.maximumMemory = 1;
+defaults.stdio = 'inherit';
 
 //
 
@@ -788,7 +772,7 @@ makeWorker.defaults =
 
 function execStages( stages,o )
 {
-  let o = o || Object.create( null );
+  o = o || Object.create( null );
 
   _.routineOptionsPreservingUndefines( execStages,o );
 
@@ -1167,7 +1151,7 @@ appArgsReadTo.defaults =
 
 function appAnchor( o )
 {
-  let o = o || {};
+  o = o || {};
 
   _.routineOptions( appAnchor,arguments );
 
