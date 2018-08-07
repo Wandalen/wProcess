@@ -540,29 +540,9 @@ function routineMake( o )
     _realGlobal_.__wTools__externals__ = [];
     _realGlobal_.__wTools__externals__.push( o.externals );
     prefix += '\n';
-    for( e in o.externals )
+    for( let e in o.externals )
     prefix += 'let ' + e + ' = ' + '_realGlobal_.__wTools__externals__[ ' + String( _realGlobal_.__wTools__externals__.length-1 ) + ' ].' + e + ';\n';
     prefix += '\n';
-  }
-
-  /* */
-
-  function make( code )
-  {
-    try
-    {
-      if( o.name )
-      code = 'return function ' + o.name + '()\n{\n' + code + '\n}';
-      let result = new Function( code );
-      if( o.name )
-      result = result();
-      return result;
-    }
-    catch( err )
-    {
-      debugger;
-      throw _.err( err );
-    }
   }
 
   /* */
@@ -630,6 +610,27 @@ function routineMake( o )
   }
 
   return result;
+
+  /* */
+
+  function make( code )
+  {
+    try
+    {
+      if( o.name )
+      code = 'return function ' + o.name + '()\n{\n' + code + '\n}';
+      let result = new Function( code );
+      if( o.name )
+      result = result();
+      return result;
+    }
+    catch( err )
+    {
+      debugger;
+      throw _.err( err );
+    }
+  }
+
 }
 
 routineMake.defaults =
