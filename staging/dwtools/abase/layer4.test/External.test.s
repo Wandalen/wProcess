@@ -31,7 +31,7 @@ if( typeof module !== 'undefined' )
   _.include( 'wTesting' );
   _.include( 'wFiles' );
 
-  require( '../layer3/ExecTools.s' );
+  require( '../layer4/External.s' );
 
 }
 
