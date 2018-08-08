@@ -72,46 +72,47 @@ function appArgs( test )
 
   /* */
 
-  var argv = [];
-  argv.unshift.apply( argv, _argv );
-  var got = _.appArgs({ argv : argv, caching : 0 });
-  var expected =
-  {
-    interpreterPath : _argv[ 0 ],
-    mainPath : _argv[ 1 ],
-    interpreterArgs : [],
-    delimeter : ':',
-    subject : '',
-    scriptArgs : [],
-    scriptString : '',
-  }
-  test.contains( got, expected );
-  got = null;
-
-
-  /* */
-
-  var argv = [ '' ];
-  argv.unshift.apply( argv, _argv );
-  var got = _.appArgs({ argv : argv, caching : 0 });
-  var expected =
-  {
-    interpreterPath : _argv[ 0 ],
-    mainPath : _argv[ 1 ],
-    interpreterArgs : [],
-    delimeter : ':',
-    subject : '',
-    scriptArgs : [''],
-    scriptString : '',
-  }
-  test.contains( got, expected );
-
+  // var argv = [];
+  // argv.unshift.apply( argv, _argv );
+  // var got = _.appArgs({ argv : argv, caching : 0 });
+  // var expected =
+  // {
+  //   interpreterPath : _argv[ 0 ],
+  //   mainPath : _argv[ 1 ],
+  //   interpreterArgs : [],
+  //   delimeter : ':',
+  //   subject : '',
+  //   scriptArgs : [],
+  //   scriptString : '',
+  // }
+  // test.contains( got, expected );
+  // got = null;
+  //
+  //
+  // /* */
+  //
+  // var argv = [ '' ];
+  // argv.unshift.apply( argv, _argv );
+  // var got = _.appArgs({ argv : argv, caching : 0 });
+  // var expected =
+  // {
+  //   interpreterPath : _argv[ 0 ],
+  //   mainPath : _argv[ 1 ],
+  //   interpreterArgs : [],
+  //   delimeter : ':',
+  //   subject : '',
+  //   scriptArgs : [''],
+  //   scriptString : '',
+  // }
+  // test.contains( got, expected );
 
   /* */
 
   var argv = [ 'x', ':', 'aa', 'bbb :' ];
   argv.unshift.apply( argv, _argv );
+  debugger;
   var got = _.appArgs({ argv : argv, caching : 0 });
+  debugger;
   var expected =
   {
     interpreterPath : _argv[ 0 ],
@@ -272,8 +273,8 @@ function shell( test )
       {
         require( 'wTools' );
       }
-
-      var _global = _global_; var _ = _global_.wTools;
+      var _global = _global_;
+      var _ = _global_.wTools;
 
       _.include( 'wConsequence' );
       _.include( 'wStringsExtra' );
@@ -282,8 +283,8 @@ function shell( test )
       _.include( 'wExternalFundamentals' );
 
     }
-
-    var _global = _global_; var _ = _global_.wTools;
+    var _global = _global_;
+    var _ = _global_.wTools;
 
     var args = _.appArgs();
     var con = new _.Consequence().give();
@@ -607,8 +608,8 @@ function shell2( test )
       {
         require( 'wTools' );
       }
-
-      var _global = _global_; var _ = _global_.wTools;
+      var _global = _global_;
+      var _ = _global_.wTools;
 
       _.include( 'wConsequence' );
       _.include( 'wStringsExtra' );
@@ -616,8 +617,8 @@ function shell2( test )
       _.include( 'wPathFundamentals'/*ttt*/ );
 
     }
-
-    var _global = _global_; var _ = _global_.wTools;
+    var _global = _global_;
+    var _ = _global_.wTools;
 
     var con = new _.Consequence().give();
     con.timeOutThen( _.numberRandomInt( [ 300, 2000 ] ), function()
