@@ -1348,7 +1348,7 @@ function appMemoryUsageInfo()
 }
 
 // --
-// define class
+// declare
 // --
 
 let Proto =
