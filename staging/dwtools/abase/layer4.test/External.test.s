@@ -305,7 +305,7 @@ function shell( test )
 
   /* */
 
-  var testAppPath = _.fileProvider.nativize( _.path.join( testRoutineDir, 'testApp.js' ) );
+  var testAppPath = _.fileProvider.pathNativize( _.path.join( testRoutineDir, 'testApp.js' ) );
   var testApp = testApp.toString() + '\ntestApp();';
   _.fileProvider.fileWrite( testAppPath, testApp );
 
@@ -630,7 +630,7 @@ function shell2( test )
 
   /* */
 
-  var testAppPath = _.fileProvider.nativize( _.path.join( testRoutineDir, 'testApp.js' ) );
+  var testAppPath = _.fileProvider.pathNativize( _.path.join( testRoutineDir, 'testApp.js' ) );
   var testApp = testApp.toString() + '\ntestApp();';
   _.fileProvider.fileWrite( testAppPath, testApp );
 

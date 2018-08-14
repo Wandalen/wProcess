@@ -399,7 +399,7 @@ function shellNode( o )
     argumentsForNode = '--expose-gc --stack-trace-limit=999 --max_old_space_size=' + totalmem;
   }
 
-  let path = _.fileProvider.nativize( o.path );
+  let path = _.fileProvider.pathNativize( o.path );
   path = _.strConcat([ 'node', argumentsForNode, path ]);
 
   let shellOptions = _.mapOnly( o, _.shell.defaults );
