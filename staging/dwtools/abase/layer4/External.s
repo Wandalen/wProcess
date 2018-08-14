@@ -547,23 +547,24 @@ function routineMake( o )
 
   /* */
 
+  let code;
   try
   {
 
     if( o.prependingReturn )
     try
     {
-      let code = prefix + 'return ' + o.code.trimLeft();
+      code = prefix + 'return ' + o.code.trimLeft();
       result = make( code );
     }
     catch( err )
     {
-      let code = prefix + o.code;
+      code = prefix + o.code;
       result = make( code );
     }
     else
     {
-      let code = prefix + o.code;
+      code = prefix + o.code;
       result = make( code );
     }
 
