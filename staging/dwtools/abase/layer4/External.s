@@ -84,8 +84,6 @@ function shell( o )
   if( o.outputPiping === null )
   o.outputPiping = o.verbosity >= 2;
 
-  // console.log( 'shell', o.verbosity, o.outputPiping );
-
   o.con = new _.Consequence();
 
   if( o.args )
