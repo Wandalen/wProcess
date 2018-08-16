@@ -166,7 +166,7 @@ function shell( o )
 
       if( !o.args )
       {
-        o.args = _.strSplitNonPreserving/**1**/({ src : o.path, preservingDelimeters : 0 });
+        o.args = _.strSplitNonPreserving({ src : o.path, preservingDelimeters : 0 });
         app = o.args.shift();
       }
       else
@@ -180,7 +180,7 @@ function shell( o )
         */
 
         if( app.length )
-        _.assert( _.strSplitNonPreserving/**1**/({ src : app, preservingDelimeters : 0 }).length === 1, ' o.path must not contain arguments if those were provided through options' )
+        _.assert( _.strSplitNonPreserving({ src : app, preservingDelimeters : 0 }).length === 1, ' o.path must not contain arguments if those were provided through options' )
       }
 
       o.process = ChildProcess.spawn( app,o.args,optionsForSpawn );
@@ -966,51 +966,6 @@ function _appArgsInSamFormatNodejs( o )
     result.delimeter = o.delimeter;
     result.map = Object.create( null );
     result.subject = '';
-
-    // if( !result.scriptArgs.length )
-    // return result;
-    //
-    // let scriptArgs = [];
-    // result.scriptArgs.forEach( function( arg, pos )
-    // {
-    //   if( arg.length > 1 && arg.indexOf( o.delimeter ) !== -1 )
-    //   {
-    //     let argSplitted = _.strSplit/**1**/
-    //     ({
-    //       src : arg,
-    //       delimeter : o.delimeter,
-    //       stripping : 1,
-    //       preservingDelimeters : 1,
-    //       preservingEmpty : 1,
-    //     })
-    //     scriptArgs.push.apply( scriptArgs, argSplitted );
-    //   }
-    //   else
-    //   {
-    //     scriptArgs.push( arg );
-    //   }
-    // })
-    //
-    // result.scriptArgs = scriptArgs;
-    //
-    // if( result.scriptArgs.length === 1 )
-    // {
-    //   result.subject = result.scriptArgs[ 0 ];
-    //   return result;
-    // }
-
-    // let i = result.scriptArgs.indexOf( o.delimeter );
-    // if( i > 1 )
-    // {
-    //   let part = result.scriptArgs.slice( 0, i - 1 );
-    //   let subject = part.join( ' ' );
-    //   // let regexp = new RegExp( '.?\h*\\' + o.delimeter + '\\h*.?' );
-    //   // if( !regexp.test( subject ) )
-    //   result.subject = subject;
-    // }
-    //
-    // if( i < 0 )
-    // result.subject = result.scriptArgs.shift();
 
     result.scriptArgs = o.argv.slice( 2 );
     result.scriptString = result.scriptArgs.join( ' ' );
