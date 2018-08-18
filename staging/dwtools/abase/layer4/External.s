@@ -89,6 +89,8 @@ function shell( o )
   if( o.args )
   _.assert( _.arrayIs( o.args ) );
 
+  debugger;
+
   /* ipc */
 
   if( o.ipc )
@@ -240,8 +242,10 @@ function shell( o )
     if( o.outputPrefixing )
     data = 'stdout :\n' + _.strIndentation( data,'  ' );
 
-    if( _.color && !o.outputGray )
-    data = _.color.strFormat( data,'pipe.neutral' );
+    // console.log( 'o.outputGrayRegularOutput', o.outputGrayRegularOutput );
+
+    if( _.color && !o.outputGray && !o.outputGrayRegularOutput )
+    data = _.color.strFormat( data, 'pipe.neutral' );
 
     logger.log( data );
   });
@@ -350,6 +354,7 @@ shell.defaults =
 
   verbosity : 1,
   outputGray : 0,
+  outputGrayRegularOutput : 0,
   outputPrefixing : 0,
   outputPiping : 1,
   outputCollecting : 0,
@@ -1048,26 +1053,6 @@ function appArgsReadTo( o )
   _.assert( _.objectIs( o.dst ), 'expects map {-o.dst-}' );
   _.assert( _.objectIs( o.namesMap ), 'expects map {-o.namesMap-}' );
 
-  function set( k,v )
-  {
-    _.assert( o.dst[ k ] !== undefined );
-    if( _.numberIs( o.dst[ k ] ) )
-    {
-      v = Number( v );
-      _.assert( !isNaN( v ) );
-      o.dst[ k ] = v;
-    }
-    else if( _.boolIs( o.dst[ k ] ) )
-    {
-      v = !!v;
-      o.dst[ k ] = v;
-    }
-    else
-    {
-      o.dst[ k ] = v;
-    }
-  }
-
   for( let n in o.namesMap )
   {
     if( o.appArgs.map[ n ] !== undefined )
@@ -1090,6 +1075,29 @@ function appArgsReadTo( o )
   }
 
   return o.appArgs;
+
+  /* */
+
+  function set( k,v )
+  {
+    _.assert( o.dst[ k ] !== undefined );
+    if( _.numberIs( o.dst[ k ] ) )
+    {
+      v = Number( v );
+      _.assert( !isNaN( v ) );
+      o.dst[ k ] = v;
+    }
+    else if( _.boolIs( o.dst[ k ] ) )
+    {
+      v = !!v;
+      o.dst[ k ] = v;
+    }
+    else
+    {
+      o.dst[ k ] = v;
+    }
+  }
+
 }
 
 appArgsReadTo.defaults =
