@@ -89,8 +89,6 @@ function shell( o )
   if( o.args )
   _.assert( _.arrayIs( o.args ) );
 
-  debugger;
-
   /* ipc */
 
   if( o.ipc )
@@ -938,6 +936,7 @@ var defaults = _appArgsInSamFormat.defaults = Object.create( null );
 defaults.delimeter = ':';
 defaults.argv = null;
 defaults.caching = true;
+defaults.parsingArrays = true;
 
 //
 
@@ -1000,6 +999,14 @@ function _appArgsInSamFormatNodejs( o )
     cuts1[ 0 ] = cuts2[ 2 ];
     result.map = _.strParseMap( cuts1.join( '' ) );
 
+    if( o.parsingArrays )
+    for( let m in result.map )
+    {
+      let em = result.map[ m ];
+      // if( _.strInsideOf( result, '[', ']' ) )
+      // xxx
+    }
+
   }
 
   return result;
@@ -1040,8 +1047,6 @@ _appArgsInSamFormatBrowser.defaults = Object.create( _appArgsInSamFormat.default
 function appArgsReadTo( o )
 {
 
-  _.assert( arguments.length === 1 || arguments.length === 2 )
-
   if( arguments[ 1 ] !== undefined )
   o = { dst : arguments[ 0 ], namesMap : arguments[ 1 ] };
 
@@ -1050,6 +1055,7 @@ function appArgsReadTo( o )
   if( !o.appArgs )
   o.appArgs = _.appArgs();
 
+  _.assert( arguments.length === 1 || arguments.length === 2 )
   _.assert( _.objectIs( o.dst ), 'expects map {-o.dst-}' );
   _.assert( _.objectIs( o.namesMap ), 'expects map {-o.namesMap-}' );
 
@@ -1080,7 +1086,7 @@ function appArgsReadTo( o )
 
   function set( k,v )
   {
-    _.assert( o.dst[ k ] !== undefined );
+    _.assert( o.dst[ k ] !== undefined, () => 'Entry ' + _.strQuote( k ) + ' is not defined' );
     if( _.numberIs( o.dst[ k ] ) )
     {
       v = Number( v );
