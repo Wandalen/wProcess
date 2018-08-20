@@ -368,7 +368,7 @@ function shellNode( o )
   if( !System )
   System = require( 'os' );
 
-  _.include( 'wPathFundamentals'/*ttt*/ );
+  _.include( 'wPathFundamentals' );
   _.include( 'wFiles' );
 
   if( _.strIs( o ) )
@@ -1002,17 +1002,45 @@ function _appArgsInSamFormatNodejs( o )
     if( o.parsingArrays )
     for( let m in result.map )
     {
-      let em = result.map[ m ];
-      // if( _.strInsideOf( result, '[', ']' ) )
-      // xxx
+      result.map[ m ] = parseArrayMaybe( result.map[ m ] );
     }
 
   }
 
   return result;
+
+  /**/
+
+  function parseArrayMaybe( str )
+  {
+    let result = str;
+    if( !_.strIs( result ) )
+    return result;
+    let inside = _.strInsideOf( result, '[', ']' );
+    if( inside !== false )
+    {
+      let splits = _.strSplit
+      ({
+        src : inside,
+        delimeter : [ ' ', ',' ],
+        stripping : 1,
+        quoting : 1,
+        preservingDelimeters : 0,
+        preservingEmpty : 0,
+      });
+      result = splits;
+    }
+    return result;
+  }
+
 }
 
 _appArgsInSamFormatNodejs.defaults = Object.create( _appArgsInSamFormat.defaults );
+
+/*
+qqq : does not work
+filePath : [ "./a ./b" ]
+*/
 
 //
 
