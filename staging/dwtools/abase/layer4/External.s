@@ -393,14 +393,14 @@ function shellNode( o )
     let totalmem = System.totalmem();
     if( o.verbosity )
     logger.log( 'System.totalmem()',_.strMetricFormatBytes( totalmem ) );
-    if( totalmem < 1024*1024*1024 )
-    totalmem = Math.floor( ( totalmem / ( 1024*1024*1.4 ) - 1 ) / 256 ) * 256;
-    else
-    totalmem = Math.floor( ( totalmem / ( 1024*1024*1.1 ) - 1 ) / 256 ) * 256;
+    // if( totalmem < 1024*1024*1024 )
+    // Math.floor( ( totalmem / ( 1024*1024*1.4 ) - 1 ) / 256 ) * 256;
+    // else
+    // Math.floor( ( totalmem / ( 1024*1024*1.1 ) - 1 ) / 256 ) * 256;
     argumentsForNode = '--expose-gc --stack-trace-limit=999 --max_old_space_size=' + totalmem;
   }
 
-  let path = _.fileProvider.pathNativize( o.path );
+  let path = _.fileProvider.path.nativize( o.path );
   path = _.strConcat([ 'node', argumentsForNode, path ]);
 
   let shellOptions = _.mapOnly( o, _.shell.defaults );

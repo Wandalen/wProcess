@@ -47,7 +47,7 @@ function testDirMake()
 {
   var context = this;
   if( !isBrowser )
-  context.testRootDirectory = _.path.dirTempMake( _.path.join( __dirname, '../..'  ) );
+  context.testRootDirectory = _.path.dirTempOpen( _.path.join( __dirname, '../..'  ) );
   else
   context.testRootDirectory = _.path.current();
 }
@@ -305,7 +305,7 @@ function shell( test )
 
   /* */
 
-  var testAppPath = _.fileProvider.pathNativize( _.path.join( testRoutineDir, 'testApp.js' ) );
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp.js' ) );
   var testApp = testApp.toString() + '\ntestApp();';
   _.fileProvider.fileWrite( testAppPath, testApp );
 
@@ -630,7 +630,7 @@ function shell2( test )
 
   /* */
 
-  var testAppPath = _.fileProvider.pathNativize( _.path.join( testRoutineDir, 'testApp.js' ) );
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp.js' ) );
   var testApp = testApp.toString() + '\ntestApp();';
   _.fileProvider.fileWrite( testAppPath, testApp );
 
