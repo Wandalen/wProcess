@@ -47,7 +47,7 @@ function testDirMake()
 {
   var context = this;
   if( !isBrowser )
-  context.testRootDirectory = _.path.dirTempOpen( _.path.join( __dirname, '../..'  ) );
+  context.testRootDirectory = _.path.dirTempOpen( _.path.join( __dirname, '../..'  ), 'ExternalFundamentals' );
   else
   context.testRootDirectory = _.path.current();
 }
