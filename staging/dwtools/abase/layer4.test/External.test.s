@@ -68,7 +68,7 @@ function cleanTestDir()
 function appArgs( test )
 {
   var _argv =  process.argv.slice( 0, 2 );
-  _argv = _.path.pathsNormalize( _argv );
+  _argv = _.path.s.normalize( _argv );
 
   /* */
 
