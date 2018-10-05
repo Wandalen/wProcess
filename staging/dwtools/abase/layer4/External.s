@@ -1078,10 +1078,10 @@ function appArgsReadTo( o )
   if( arguments[ 1 ] !== undefined )
   o = { dst : arguments[ 0 ], namesMap : arguments[ 1 ] };
 
-  o = _.routineOptions( appArgsReadTo,o );
+  o = _.routineOptions( appArgsReadTo, o );
 
-  if( !o.appArgs )
-  o.appArgs = _.appArgs();
+  if( !o.propertiesMap )
+  o.propertiesMap = _.appArgs().map;
 
   _.assert( arguments.length === 1 || arguments.length === 2 )
   _.assert( _.objectIs( o.dst ), 'expects map {-o.dst-}' );
@@ -1089,26 +1089,27 @@ function appArgsReadTo( o )
 
   for( let n in o.namesMap )
   {
-    if( o.appArgs.map[ n ] !== undefined )
+    if( o.propertiesMap[ n ] !== undefined )
     {
-      set( o.namesMap[ n ], o.appArgs.map[ n ] );
+      set( o.namesMap[ n ], o.propertiesMap[ n ] );
       if( o.removing )
-      delete o.appArgs.map[ n ];
+      delete o.propertiesMap[ n ];
     }
   }
 
   if( o.only )
   {
-    let but = Object.keys( _.mapBut( o.appArgs.map, o.namesMap ) );
+    let but = Object.keys( _.mapBut( o.propertiesMap, o.namesMap ) );
     if( but.length )
     {
-      o.appArgs.err = _.err( 'Unknown application arguments : ' + _.strQuote( but ).join( ', ' ) );
-      if( o.throwing )
-      throw o.appArgs.err;
+      throw _.err( 'Unknown application arguments : ' + _.strQuote( but ).join( ', ' ) );
+      // o.appArgs.err = _.err( 'Unknown application arguments : ' + _.strQuote( but ).join( ', ' ) );
+      // if( o.throwing )
+      // throw o.appArgs.err;
     }
   }
 
-  return o.appArgs;
+  return o.propertiesMap;
 
   /* */
 
@@ -1137,11 +1138,12 @@ function appArgsReadTo( o )
 appArgsReadTo.defaults =
 {
   dst : null,
-  appArgs : null,
+  // appArgs : null,
+  propertiesMap : null,
   namesMap : null,
   removing : 1,
   only : 1,
-  throwing : 1,
+  // throwing : 1,
 }
 
 //
