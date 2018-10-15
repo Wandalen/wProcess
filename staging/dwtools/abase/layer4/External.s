@@ -73,8 +73,8 @@ function shell( o )
 
   _.routineOptions( shell, o );
   _.assert( arguments.length === 1, 'expects single argument' );
-  _.accessorForbid( o, 'child' );
-  _.accessorForbid( o, 'returnCode' );
+  _.accessor.forbid( o, 'child' );
+  _.accessor.forbid( o, 'returnCode' );
 
   if( !_.numberIs( o.verbosity ) )
   o.verbosity = o.verbosity ? 1 : 0;
@@ -377,8 +377,8 @@ function shellNode( o )
   _.routineOptions( shellNode,o );
   _.assert( _.strIs( o.path ) );
   _.assert( !o.code );
-  _.accessorForbid( o,'child' );
-  _.accessorForbid( o,'returnCode' );
+  _.accessor.forbid( o,'child' );
+  _.accessor.forbid( o,'returnCode' );
   _.assert( arguments.length === 1, 'expects single argument' );
 
   /*
