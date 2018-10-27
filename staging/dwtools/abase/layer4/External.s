@@ -73,79 +73,128 @@ function shell( o )
 
   _.routineOptions( shell, o );
   _.assert( arguments.length === 1, 'expects single argument' );
-  _.accessor.forbid( o, 'child' );
-  _.accessor.forbid( o, 'returnCode' );
+  _.assert( o.args === null || _.arrayIs( o.args ) );
 
-  if( !_.numberIs( o.verbosity ) )
-  o.verbosity = o.verbosity ? 1 : 0;
-  if( o.verbosity < 0 )
-  o.verbosity = 0;
+  o.con = o.con || new _.Consequence().give();
+  o.logger = o.logger || _global_.logger;
 
-  if( o.outputPiping === null )
-  o.outputPiping = o.verbosity >= 2;
-
-  o.con = new _.Consequence();
-
-  if( o.args )
-  _.assert( _.arrayIs( o.args ) );
-
-  /* ipc */
-
-  if( o.ipc )
-  {
-    if( _.strIs( o.stdio ) )
-    o.stdio = _.dup( o.stdio,3 );
-    if( !_.arrayHas( o.stdio,'ipc' ) )
-    o.stdio.push( 'ipc' );
-  }
-
-  /* passingThrough */
-
-  if( o.passingThrough )
-  {
-    let argumentsManual = process.argv.slice( 2 );
-    if( argumentsManual.length )
-    o.args = _.arrayAppendArray( o.args || [],argumentsManual );
-  }
-
-  /* outputCollecting */
-
-  if( o.outputCollecting && !o.output )
-  o.output = '';
+  let done = false;
+  let currentExitCode;
 
   /* */
 
-  if( !ChildProcess )
-  ChildProcess = require( 'child_process' );
-
-  if( !o.outputGray && typeof module !== 'undefined' )
-  try
+  o.con.got( function()
   {
-    _.include( 'wLogger' );
-    _.include( 'wColor' );
+
+    prepare();
+
+    if( !o.outputGray && typeof module !== 'undefined' )
+    try
+    {
+      _.include( 'wLogger' );
+      _.include( 'wColor' );
+    }
+    catch( err )
+    {
+      if( o.verbosity )
+      _.errLogOnce( err );
+    }
+
+    /* logger */
+
+    o.argsStr = _.strConcat( _.arrayAppendArray( [ o.path ], o.args || [] ) );
+
+    if( o.verbosity && o.outputMirroring )
+    {
+      let prefix = ' > ';
+      if( !o.outputGray )
+      prefix = _.color.strFormat( prefix, { fg : 'bright white' } );
+      o.logger.log( prefix + o.argsStr );
+    }
+
+    /* create process */
+
+    try
+    {
+      launch();
+    }
+    catch( err )
+    {
+      appExitCode( -1 );
+      return o.con.error( _.errLogOnce( err ) );
+    }
+
+    /* piping out channel */
+
+    if( o.outputPiping )
+    if( o.process.stdout )
+    o.process.stdout.on( 'data', handleStdout );
+
+    /* piping error channel */
+
+    if( o.outputPiping )
+    if( o.process.stderr )
+    o.process.stderr.on( 'data', handleStderr );
+
+    /* error */
+
+    o.process.on( 'error', handleError );
+
+    /* close */
+
+    o.process.on( 'close', handleClose );
+
+  });
+
+  return o.con;
+
+  /* */
+
+  function prepare()
+  {
+
+    /* verbosity */
+
+    if( !_.numberIs( o.verbosity ) )
+    o.verbosity = o.verbosity ? 1 : 0;
+    if( o.verbosity < 0 )
+    o.verbosity = 0;
+    if( o.outputPiping === null )
+    o.outputPiping = o.verbosity >= 2;
+    if( o.outputCollecting && !o.output )
+    o.output = '';
+
+    /* ipc */
+
+    if( o.ipc )
+    {
+      if( _.strIs( o.stdio ) )
+      o.stdio = _.dup( o.stdio,3 );
+      if( !_.arrayHas( o.stdio,'ipc' ) )
+      o.stdio.push( 'ipc' );
+    }
+
+    /* passingThrough */
+
+    if( o.passingThrough )
+    {
+      let argumentsManual = process.argv.slice( 2 );
+      if( argumentsManual.length )
+      o.args = _.arrayAppendArray( o.args || [],argumentsManual );
+    }
+
+    /* etc */
+
+    if( !ChildProcess )
+    ChildProcess = require( 'child_process' );
+
   }
-  catch( err )
+
+  /* */
+
+  function launch()
   {
-    if( o.verbosity )
-    _.errLogOnce( err );
-  }
 
-  /* logger */
-
-  o.argsStr = _.strConcat( _.arrayAppendArray( [ o.path ], o.args || [] ) );
-
-  if( o.verbosity && o.outputMirroring )
-  {
-    let prefix = ' > ';
-    if( !o.outputGray )
-    prefix = _.color.strFormat( prefix, { fg : 'bright white' } );
-    logger.log( prefix + o.argsStr );
-  }
-
-  /* create process */
-
-  try
-  {
     let optionsForSpawn = Object.create( null );
 
     if( o.stdio )
@@ -158,6 +207,11 @@ function shell( o )
     {
       o.process = ChildProcess.fork( o.path,'',{ silent : false } );
     }
+    else if( o.mode === 'exec' )
+    {
+      o.logger.warn( '{ shell.mode } "exec" is deprecated' );
+      o.process = ChildProcess.exec( o.path );
+    }
     else if( o.mode === 'spawn' )
     {
       let app = o.path;
@@ -169,14 +223,6 @@ function shell( o )
       }
       else
       {
-        /*
-         o.path can contain arguments but only if those were not specified through options, otherwise it will lead to 'ENOENT' error:
-
-          _.shell({ path : 'node /path/to/file arg1', mode : 'spawn' }) - ok
-          _.shell({ path : 'node', args : [ '/path/to/file', 'arg1' ], mode : 'spawn' }) - ok
-          _.shell({ path : 'node /path/to/file', args : [ 'arg1' ], mode : 'spawn' }) - error
-        */
-
         if( app.length )
         _.assert( _.strSplitNonPreserving({ src : app, preservingDelimeters : 0 }).length === 1, ' o.path must not contain arguments if those were provided through options' )
       }
@@ -196,63 +242,80 @@ function shell( o )
 
       o.process = ChildProcess.spawn( app,[ arg1,arg2 ],optionsForSpawn );
     }
-    else if( o.mode === 'exec' )
+    else _.assert( 0,'Unknown mode', _.strQuote( o.mode ), 'to shell path', _.strQuote( o.paths ) );
+
+  }
+
+  /* */
+
+  function appExitCode( exitCode )
+  {
+    if( currentExitCode )
+    return;
+    if( o.applyingExitCode && exitCode !== 0 )
     {
-      logger.warn( '{ shell.mode } "exec" is deprecated' );
-      o.process = ChildProcess.exec( o.path );
+      currentExitCode = _.numberIs( exitCode ) ? exitCode : -1;
+      _.appExitCode( currentExitCode );
     }
-    else _.assert( 0,'unknown mode',o.mode );
-
-  }
-  catch( err )
-  {
-    return o.con.error( _.errLogOnce( err ) );
   }
 
-  // /* ipc */
-  //
-  // if( o.ipc )
-  // {
-  //   let ipcChannelIndex = o.stdio.indexOf( 'ipc' );
-  //   logger.log( 'ipcChannelIndex',ipcChannelIndex );
-  //   logger.log( 'o.process.stdio',o.process.stdio );
-  //   _.assert( o.process.stdio[ ipcChannelIndex ] );
-  //   o.process.stdio[ ipcChannelIndex ].writable = true;
-  //   xxx
-  // }
+  /* */
 
-  /* piping out channel */
-
-  if( o.outputPiping )
-  if( o.process.stdout )
-  o.process.stdout.on( 'data', function( data )
+  function handleClose( exitCode, signal )
   {
 
-    if( _.bufferAnyIs( data ) )
-    data = _.bufferToStr( data );
+    o.exitCode = exitCode;
+    o.signal = signal;
 
-    if( _.strEnds( data,'\n' ) )
-    data = _.strRemoveEnd( data,'\n' );
+    if( o.verbosity >= 5 )
+    {
+      o.logger.log( 'Process returned error code :', exitCode );
+      if( exitCode )
+      o.logger.log( 'Launched as :', o.path );
+    }
 
-    if( o.outputCollecting )
-    o.output += data;
+    if( done )
+    return;
 
-    if( o.outputPrefixing )
-    data = 'stdout :\n' + _.strIndentation( data,'  ' );
+    done = true;
 
-    // console.log( 'o.outputGrayRegularOutput', o.outputGrayRegularOutput );
+    appExitCode( exitCode );
 
-    if( _.color && !o.outputGray && !o.outputGrayRegularOutput )
-    data = _.color.strFormat( data, 'pipe.neutral' );
+    if( exitCode !== 0 && o.throwingExitCode )
+    {
+      debugger;
+      if( _.numberIs( exitCode ) )
+      o.con.error( _.err( 'Process returned error code :', exitCode, '\nLaunched as :', _.strQuote( o.argsStr ) ) );
+      else
+      o.con.error( _.err( 'Process wass killed by signal :', signal, '\nLaunched as :', _.strQuote( o.argsStr ) ) );
+    }
+    else
+    {
+      o.con.give( o );
+    }
+  }
 
-    logger.log( data );
-  });
+  /* */
 
-  /* piping error channel */
+  function handleError( err )
+  {
 
-  if( o.outputPiping )
-  if( o.process.stderr )
-  o.process.stderr.on( 'data', function( data )
+    appExitCode( -1 );
+
+    if( done )
+    return;
+
+    done = true;
+
+    if( o.verbosity )
+    err = _.errLogOnce( err );
+
+    o.con.error( err );
+  }
+
+  /* */
+
+  function handleStderr( data )
   {
 
     if( _.bufferAnyIs( data ) )
@@ -267,71 +330,32 @@ function shell( o )
     if( _.color && !o.outputGray )
     data = _.color.strFormat( data,'pipe.negative' );
 
-    logger.warn( data );
-  });
+    o.logger.warn( data );
+  }
 
-  /* error */
+  /* */
 
-  let done = false;
-  o.process.on( 'error', function( err )
+  function handleStdout( data )
   {
 
-    debugger;
-    if( o.verbosity )
-    err = _.errLogOnce( err );
+    if( _.bufferAnyIs( data ) )
+    data = _.bufferToStr( data );
 
-    if( done )
-    return;
+    if( _.strEnds( data,'\n' ) )
+    data = _.strRemoveEnd( data,'\n' );
 
-    done = true;
-    o.con.error( err );
-  });
+    if( o.outputCollecting )
+    o.output += data;
 
-  /* close */
+    if( o.outputPrefixing )
+    data = 'stdout :\n' + _.strIndentation( data,'  ' );
 
-  o.process.on( 'close', function( exitCode,signal )
-  {
+    if( _.color && !o.outputGray && !o.outputGrayStdout )
+    data = _.color.strFormat( data, 'pipe.neutral' );
 
-    o.exitCode = exitCode;
-    o.signal = signal;
+    o.logger.log( data );
+  }
 
-    if( o.verbosity >= 5 )
-    {
-      logger.log( 'Process returned error code :', exitCode );
-      if( exitCode )
-      logger.log( 'Launched as :', o.path );
-    }
-
-    if( done )
-    return;
-
-    done = true;
-
-    if( o.applyingExitCode )
-    if( exitCode !== 0 || o.signal )
-    {
-      if( _.numberIs( exitCode ) )
-      _.appExitCode( exitCode );
-      else
-      _.appExitCode( -1 );
-    }
-
-    if( exitCode !== 0 && o.throwingExitCode )
-    {
-      debugger;
-      if( _.numberIs( exitCode ) )
-      o.con.error( _.err( 'Process returned error code :', exitCode, '\nLaunched as :', _.strQuote( o.argsStr ) ) );
-      else
-      o.con.error( _.err( 'Process wass killed by signal :', signal, '\nLaunched as :', _.strQuote( o.argsStr ) ) );
-    }
-    else
-    {
-      o.con.give( o );
-    }
-
-  });
-
-  return o.con;
 }
 
 shell.defaults =
@@ -340,6 +364,8 @@ shell.defaults =
   path : null,
   args : null,
   mode : 'shell',
+  con : null,
+  logger : null,
 
   env : null,
   stdio : 'pipe', /* 'pipe' / 'ignore' / 'inherit' */
@@ -352,13 +378,39 @@ shell.defaults =
 
   verbosity : 1,
   outputGray : 0,
-  outputGrayRegularOutput : 0,
+  outputGrayStdout : 0,
   outputPrefixing : 0,
-  outputPiping : 1,
+  outputPiping : null,
   outputCollecting : 0,
   outputMirroring : 1,
 
 }
+
+//
+
+function sheller( o0 )
+{
+  _.assert( arguments.length === 0 || arguments.length === 1 );
+  if( _.strIs( o0 ) )
+  o0 = { path : o0 }
+  o0 = _.routineOptions( sheller, o0 );
+  o0.con = new _.Consequence().give();
+  return function er()
+  {
+    let o = _.mapExtend( null, o0 );
+    for( let a = 0 ; a < arguments.length ; a++ )
+    {
+      let o1 = arguments[ 0 ];
+      if( _.strIs( o1 ) )
+      o1 = { path : o1 }
+      _.assertMapHasOnly( o1, sheller.defaults );
+      _.mapExtend( o, o1 );
+    }
+    return _.shell( o );
+  }
+}
+
+sheller.defaults = Object.create( shell.defaults );
 
 //
 
@@ -1353,6 +1405,7 @@ let Proto =
 {
 
   shell : shell,
+  sheller : sheller,
   shellNode : shellNode,
   shellNodePassingThrough : shellNodePassingThrough,
 
