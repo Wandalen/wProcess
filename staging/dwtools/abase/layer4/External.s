@@ -72,7 +72,7 @@ function shell( o )
   o = { path : o };
 
   _.routineOptions( shell, o );
-  _.assert( arguments.length === 1, 'expects single argument' );
+  _.assert( arguments.length === 1, 'Expects single argument' );
   _.assert( o.args === null || _.arrayIs( o.args ) );
 
   o.con = o.con || new _.Consequence().give();
@@ -202,6 +202,10 @@ function shell( o )
     optionsForSpawn.detached = !!o.detaching;
     if( o.env )
     optionsForSpawn.env = o.env;
+    if( o.currentPath )
+    debugger;
+    if( o.currentPath )
+    optionsForSpawn.cwd = _.path.nativize( o.currentPath );
 
     if( o.mode === 'fork')
     {
@@ -227,7 +231,7 @@ function shell( o )
         _.assert( _.strSplitNonPreserving({ src : app, preservingDelimeters : 0 }).length === 1, ' o.path must not contain arguments if those were provided through options' )
       }
 
-      o.process = ChildProcess.spawn( app,o.args,optionsForSpawn );
+      o.process = ChildProcess.spawn( app, o.args, optionsForSpawn );
     }
     else if( o.mode === 'shell' )
     {
@@ -358,10 +362,16 @@ function shell( o )
 
 }
 
+/*
+qqq : implement currentPath for all modes
+*/
+
 shell.defaults =
 {
 
   path : null,
+  currentPath : null,
+
   args : null,
   mode : 'shell',
   con : null,
@@ -431,7 +441,7 @@ function shellNode( o )
   _.assert( !o.code );
   _.accessor.forbid( o,'child' );
   _.accessor.forbid( o,'returnCode' );
-  _.assert( arguments.length === 1, 'expects single argument' );
+  _.assert( arguments.length === 1, 'Expects single argument' );
 
   /*
   1024*1024 for megabytes
@@ -487,7 +497,7 @@ function shellNodePassingThrough( o )
   o = { path : o }
 
   _.routineOptions( shellNodePassingThrough,o );
-  _.assert( arguments.length === 1, 'expects single argument' );
+  _.assert( arguments.length === 1, 'Expects single argument' );
   let result = _.shellNode( o );
 
   return result;
@@ -508,7 +518,7 @@ function routineSourceGet( o )
   o = { routine : o };
 
   _.routineOptions( routineSourceGet,o );
-  _.assert( arguments.length === 1, 'expects single argument' );
+  _.assert( arguments.length === 1, 'Expects single argument' );
   _.assert( _.routineIs( o.routine ) );
 
   let result = o.routine.toSource ? o.routine.toSource() : o.routine.toString();
@@ -572,7 +582,7 @@ function routineMake( o )
   o = { code : o };
 
   _.routineOptions( routineMake,o );
-  _.assert( arguments.length === 1, 'expects single argument' );
+  _.assert( arguments.length === 1, 'Expects single argument' );
   _.assert( _.objectIs( o.externals ) || o.externals === null );
   _.assert( !!_realGlobal_ );
 
@@ -707,7 +717,7 @@ function routineExec( o )
 
   if( _.strIs( o ) )
   o = { code : o };
-  _.assert( arguments.length === 1, 'expects single argument' );
+  _.assert( arguments.length === 1, 'Expects single argument' );
   _.routineOptions( routineExec,o );
 
   o.routine = routineMake
@@ -751,7 +761,7 @@ defaults.context = null;
 
 function exec( o )
 {
-  _.assert( arguments.length === 1, 'expects single argument' );
+  _.assert( arguments.length === 1, 'Expects single argument' );
   if( _.strIs( o ) )
   o = { code : o };
   routineExec( o );
@@ -768,7 +778,7 @@ function execInWorker( o )
 
   if( _.strIs( o ) )
   o = { code : o };
-  _.assert( arguments.length === 1, 'expects single argument' );
+  _.assert( arguments.length === 1, 'Expects single argument' );
   _.routineOptions( execInWorker,o );
 
   let blob = new Blob( [ o.code ], { type : 'text/javascript' } );
@@ -791,7 +801,7 @@ function makeWorker( o )
 
   if( _.strIs( o ) )
   o = { code : o };
-  _.assert( arguments.length === 1, 'expects single argument' );
+  _.assert( arguments.length === 1, 'Expects single argument' );
   _.routineOptions( makeWorker,o );
 
   let blob = new Blob( [ o.code ], { type : 'text/javascript' } );
@@ -809,7 +819,7 @@ makeWorker.defaults =
 
 // function execAsyn( routine,onEnd,context )
 // {
-//   _.assert( arguments.length >= 3,'execAsyn :','expects 3 arguments or more' );
+//   _.assert( arguments.length >= 3,'execAsyn :','Expects 3 arguments or more' );
 //
 //   let args = longSlice( arguments,3 ); throw _.err( 'not tested' );
 //
@@ -837,7 +847,7 @@ function execStages( stages,o )
 
   /* validation */
 
-  _.assert( _.objectIs( stages ) || _.longIs( stages ),'expects array or object ( stages ), but got',_.strTypeOf( stages ) );
+  _.assert( _.objectIs( stages ) || _.longIs( stages ),'Expects array or object ( stages ), but got',_.strTypeOf( stages ) );
 
   for( let s in stages )
   {
@@ -961,7 +971,7 @@ execStages.defaults =
 
 function moduleRequire( filePath )
 {
-  _.assert( arguments.length === 1, 'expects single argument' );
+  _.assert( arguments.length === 1, 'Expects single argument' );
 
   if( typeof require !== 'undefined' )
   {
@@ -1136,8 +1146,8 @@ function appArgsReadTo( o )
   o.propertiesMap = _.appArgs().map;
 
   _.assert( arguments.length === 1 || arguments.length === 2 )
-  _.assert( _.objectIs( o.dst ), 'expects map {-o.dst-}' );
-  _.assert( _.objectIs( o.namesMap ), 'expects map {-o.namesMap-}' );
+  _.assert( _.objectIs( o.dst ), 'Expects map {-o.dst-}' );
+  _.assert( _.objectIs( o.namesMap ), 'Expects map {-o.namesMap-}' );
 
   for( let n in o.namesMap )
   {
