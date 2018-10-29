@@ -160,7 +160,7 @@ function shell( o )
     if( o.verbosity < 0 )
     o.verbosity = 0;
     if( o.outputPiping === null )
-    o.outputPiping = o.verbosity >= 2;
+    o.outputPiping = o.verbosity >= 1;
     if( o.outputCollecting && !o.output )
     o.output = '';
 
