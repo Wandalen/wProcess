@@ -203,8 +203,6 @@ function shell( o )
     if( o.env )
     optionsForSpawn.env = o.env;
     if( o.currentPath )
-    debugger;
-    if( o.currentPath )
     optionsForSpawn.cwd = _.path.nativize( o.currentPath );
 
     if( o.mode === 'fork')
