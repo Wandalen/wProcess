@@ -39,6 +39,6 @@
     "wexternalfundamentals": "."
   },
   "keywords": [
-    "wTools"
+    "wTools", "exec file", "shell script", "run program"
   ]
 }

@@ -80,6 +80,7 @@ function shell( o )
 
   let done = false;
   let currentExitCode;
+  let currentPath = o.currentPath || _.path.current();
 
   /* */
 
@@ -273,7 +274,10 @@ function shell( o )
     {
       o.logger.log( 'Process returned error code :', exitCode );
       if( exitCode )
-      o.logger.log( 'Launched as :', o.path );
+      {
+        o.logger.log( 'Launched as :', _.strQuote( o.path ) );
+        o.logger.log( 'Launched at :', _.strQuote( currentPath ) );
+      }
     }
 
     if( done )
