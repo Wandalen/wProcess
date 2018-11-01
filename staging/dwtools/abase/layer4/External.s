@@ -208,12 +208,12 @@ function shell( o )
 
     if( o.mode === 'fork')
     {
-      o.process = ChildProcess.fork( o.path,'',{ silent : false } );
+      o.process = ChildProcess.fork( o.path,{ silent : false, env : o.env, cwd : optionsForSpawn.cwd } );
     }
     else if( o.mode === 'exec' )
     {
       o.logger.warn( '{ shell.mode } "exec" is deprecated' );
-      o.process = ChildProcess.exec( o.path );
+      o.process = ChildProcess.exec( o.path,{ env : o.env, cwd : optionsForSpawn.cwd } );
     }
     else if( o.mode === 'spawn' )
     {

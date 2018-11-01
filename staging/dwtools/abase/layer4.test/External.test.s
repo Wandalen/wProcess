@@ -780,6 +780,126 @@ shell2.timeOut = 30000;
 
 //
 
+function shellCurrentPath( test )
+{
+  var context = this;
+  var testRoutineDir = _.path.join( context.testRootDirectory, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    console.log( process.cwd() )
+    if( process.send )
+    process.send({ currentPath : process.cwd() })
+  }
+
+  /* */
+
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp.js' ) );
+  var testApp = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testApp );
+
+  //
+
+  var con = new _.Consequence().give();
+
+  con.doThen( function()
+  {
+    test.case = 'mode : shell';
+
+    let o =
+    {
+      path : 'node ' + testAppPath,
+      currentPath : __dirname,
+      mode : 'shell',
+      stdio : 'pipe',
+      outputCollecting : 1,
+    }
+    return _.shell( o )
+    .doThen( function( err, got )
+    {
+      test.identical( o.output, __dirname );
+    })
+  })
+
+  /**/
+
+  con.doThen( function()
+  {
+    test.case = 'mode : spawn';
+
+    let o =
+    {
+      path : 'node ' + testAppPath,
+      currentPath : __dirname,
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputCollecting : 1,
+    }
+    return _.shell( o )
+    .doThen( function( err, got )
+    {
+      test.identical( o.output, __dirname );
+    })
+  })
+
+  /**/
+
+  con.doThen( function()
+  {
+    test.case = 'mode : exec';
+
+    let o =
+    {
+      path : 'node ' + testAppPath,
+      currentPath : __dirname,
+      mode : 'exec',
+      stdio : 'pipe',
+      outputCollecting : 1,
+    }
+    return _.shell( o )
+    .doThen( function( err, got )
+    {
+      test.identical( o.output, __dirname );
+    })
+  })
+
+  /**/
+
+  con.doThen( function()
+  {
+    test.case = 'mode : fork';
+
+    let output;
+
+    let o =
+    {
+      path : testAppPath,
+      currentPath : __dirname,
+      mode : 'fork',
+    }
+    let con = _.shell( o );
+    o.process.on( 'message', ( m ) =>
+    {
+      output = m;
+    })
+    con.doThen( function( err, got )
+    {
+      test.identical( output.currentPath, __dirname );
+    })
+
+    return con;
+  })
+
+  return con;
+}
+
+shellCurrentPath.timeOut = 30000;
+
+
+//
+
 var Proto =
 {
 
@@ -803,6 +923,7 @@ var Proto =
 
     shell : shell,
     shell2 : shell2,
+    shellCurrentPath : shellCurrentPath,
 
   },
 
