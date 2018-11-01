@@ -24,17 +24,29 @@ path :
   bugs : https://github.com/Wandalen/wExternalFundamentals/issues
   entry.debug : '{path::out.debug}/dwtools/abase/____'
   entry.release : '{path::out.release}/dwtools/abase/____'
+  entry.proto : '{path::out.proto}/dwtools/abase/____'
 
 build :
+
+  .proto.export :
+    filesPath : path::out.proto
+    entryPath : path::entry.proto
+    criterion :
+      proto : 1
+      export : 1
+      tar : 1
+    steps :
+      - step::export
 
   .debug.raw.export :
     default : 1
     filesPath : path::out.debug
     entryPath : path::entry.debug
-    setting :
+    criterion :
       debug : 1
       raw : 1
       export : 1
+      tar : 1
     steps :
       - build::.debug
       - step::export
@@ -42,11 +54,17 @@ build :
   .release.compiled.export :
     filesPath : path::out.release
     entryPath : path::entry.release
-    setting :
+    criterion :
       debug : 0
       raw : 0
       export : 1
+      tar : 1
     steps :
       - build::.release.compiled
       - step::export
 
+  export.all :
+    steps :
+      - .proto.export
+      - .debug.raw.export
+      - .release.compiled.export
