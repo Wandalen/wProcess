@@ -74,6 +74,7 @@ function shell( o )
   _.routineOptions( shell, o );
   _.assert( arguments.length === 1, 'Expects single argument' );
   _.assert( o.args === null || _.arrayIs( o.args ) );
+  _.assert( _.arrayHas( [ 'fork', 'exec', 'spawn', 'shell' ], o.mode ) );
 
   o.con = o.con || new _.Consequence().give();
   o.logger = o.logger || _global_.logger;
@@ -375,7 +376,7 @@ shell.defaults =
   currentPath : null,
 
   args : null,
-  mode : 'shell',
+  mode : 'shell', /* 'fork', 'exec', 'spawn', 'shell' */
   con : null,
   logger : null,
 
