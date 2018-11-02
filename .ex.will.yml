@@ -65,6 +65,6 @@ build :
 
   export.all :
     steps :
-      - .proto.export
-      - .debug.raw.export
-      - .release.compiled.export
+      - build::.proto.export
+      - build::.debug.raw.export
+      - build::.release.compiled.export
