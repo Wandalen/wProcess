@@ -31,7 +31,7 @@ if( typeof module !== 'undefined' )
   _.include( 'wTesting' );
   _.include( 'wFiles' );
 
-  require( '../layer4/External.s' );
+  require( '../l4/External.s' );
 
 }
 
@@ -903,7 +903,7 @@ shellCurrentPath.timeOut = 30000;
 var Proto =
 {
 
-  name : 'Tools/base/layer4/ExternalFundamentals',
+  name : 'Tools/base/l4/ExternalFundamentals',
   silencing : 1,
 
   onSuiteBegin : testDirMake,
@@ -936,6 +936,6 @@ _.mapExtend( Self,Proto );
 Self = wTestSuite( Self );
 
 if( typeof module !== 'undefined' && !module.parent )
-_.Tester.test( Self )
+/*_.*/wTester.test( Self )
 
 })();
