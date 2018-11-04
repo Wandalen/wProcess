@@ -789,7 +789,7 @@ function shellCurrentPath( test )
 
   function testApp()
   {
-    console.log( process.cwd() )
+    console.log( process.cwd() ); /* qqq : hide it from console if possible */
     if( process.send )
     process.send({ currentPath : process.cwd() })
   }
@@ -896,7 +896,6 @@ function shellCurrentPath( test )
 }
 
 shellCurrentPath.timeOut = 30000;
-
 
 //
 
