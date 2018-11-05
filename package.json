@@ -21,7 +21,7 @@
   ],
   "scripts": {
     "test": "wtest proto",
-    "make_doc": "./doc.sh"
+    "docgen": "wdocgen proto"
   },
   "repository": {
     "type": "git",
