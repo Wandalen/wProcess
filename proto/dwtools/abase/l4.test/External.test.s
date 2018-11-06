@@ -294,9 +294,7 @@ function shell( test )
       process.exit( args.map.exitWithCode )
 
       if( args.map.loop )
-      while( true )
-      {
-      }
+      return _.timeOut( 10000 );
 
       console.log( __filename );
     });
