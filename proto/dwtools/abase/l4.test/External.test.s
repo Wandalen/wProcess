@@ -294,9 +294,7 @@ function shell( test )
       process.exit( args.map.exitWithCode )
 
       if( args.map.loop )
-      while( true )
-      {
-      }
+      return _.timeOut( 4000 )
 
       console.log( __filename );
     });
@@ -433,18 +431,15 @@ function shell( test )
     var options = _.mapSupplement( {}, o, commonDefaults );
 
     var shell = _.shell( options );
-    shell.give();
-    shell.doThen(function()
+    _.timeOut( 500, () => 
     {
       test.identical( options.process.killed, false );
       options.process.kill( 'SIGINT' );
-
     })
-    shell.got(function()
+    shell.doThen(function()
     {
       test.identical( options.process.killed, true );
       test.identical( !options.exitCode, true );
-      shell.give();
     })
 
     return shell;
@@ -463,17 +458,15 @@ function shell( test )
     var options = _.mapSupplement( {}, o, commonDefaults );
 
     var shell = _.shell( options );
-    shell.give();
-    shell.doThen(function()
+    _.timeOut( 500, () => 
     {
       test.identical( options.process.killed, false );
       options.process.kill( 'SIGINT' );
     })
-    shell.got(function()
+    shell.doThen(function()
     {
       test.identical( options.process.killed, true );
       test.identical( !options.exitCode, true );
-      shell.give();
     })
 
     return shell;
