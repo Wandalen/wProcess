@@ -9,24 +9,7 @@ if( typeof module !== 'undefined' )
 
   isBrowser = false;
 
-  if( typeof _global_ === 'undefined' || !_global_.wBase )
-  {
-    let toolsPath = '../../../dwtools/Base.s';
-    let toolsExternal = 0;
-    try
-    {
-      toolsPath = require.resolve( toolsPath );
-    }
-    catch( err )
-    {
-      toolsExternal = 1;
-      require( 'wTools' );
-    }
-    if( !toolsExternal )
-    require( toolsPath );
-  }
-
-  var _ = _global_.wTools;
+  let _ = require( '../../Tools.s' );
 
   _.include( 'wTesting' );
   _.include( 'wFiles' );
@@ -265,16 +248,7 @@ function shell( test )
 
     if( typeof module !== 'undefined' )
     {
-      try
-      {
-        require( '../../../Base.s' );
-      }
-      catch( err )
-      {
-        require( 'wTools' );
-      }
-      var _global = _global_;
-      var _ = _global_.wTools;
+      let _ = require( '../../../../Tools.s' );
 
       _.include( 'wConsequence' );
       _.include( 'wStringsExtra' );
@@ -431,7 +405,7 @@ function shell( test )
     var options = _.mapSupplement( {}, o, commonDefaults );
 
     var shell = _.shell( options );
-    _.timeOut( 500, () => 
+    _.timeOut( 500, () =>
     {
       test.identical( options.process.killed, false );
       options.process.kill( 'SIGINT' );
@@ -458,7 +432,7 @@ function shell( test )
     var options = _.mapSupplement( {}, o, commonDefaults );
 
     var shell = _.shell( options );
-    _.timeOut( 500, () => 
+    _.timeOut( 500, () =>
     {
       test.identical( options.process.killed, false );
       options.process.kill( 'SIGINT' );
