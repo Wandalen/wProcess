@@ -569,7 +569,7 @@ function shell2( test )
     {
       try
       {
-        require( '../../../Base.s' );
+        require( '../../../../Base.s' );
       }
       catch( err )
       {
