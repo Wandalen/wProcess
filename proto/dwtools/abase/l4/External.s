@@ -85,7 +85,7 @@ function shell( o )
 
   /* */
 
-  o.con.got( function()
+  o.con.ifNoErrorGot( function()
   {
 
     prepare();
@@ -407,7 +407,7 @@ function sheller( o0 )
   if( _.strIs( o0 ) )
   o0 = { path : o0 }
   o0 = _.routineOptions( sheller, o0 );
-  o0.con = new _.Consequence().give();
+  o0.con = o0.con || new _.Consequence().give();
   return function er()
   {
     let o = _.mapExtend( null, o0 );
