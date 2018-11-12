@@ -76,17 +76,22 @@ function shell( o )
   _.assert( o.args === null || _.arrayIs( o.args ) );
   _.assert( _.arrayHas( [ 'fork', 'exec', 'spawn', 'shell' ], o.mode ) );
 
-  o.con = o.con || new _.Consequence().give();
-  o.logger = o.logger || _global_.logger;
-
   let done = false;
   let currentExitCode;
-  let currentPath = o.currentPath || _.path.current();
+  let currentPath;
+
+  o.con = o.con || new _.Consequence().give();
 
   /* */
 
   o.con.ifNoErrorGot( function()
   {
+
+    let done = false;
+    let currentExitCode;
+    currentPath = o.currentPath || _.path.current();
+
+    o.logger = o.logger || _global_.logger;
 
     prepare();
 
@@ -147,6 +152,14 @@ function shell( o )
     o.process.on( 'close', handleClose );
 
   });
+
+  // o.con.doThen( ( err, arg ) =>
+  // {
+  //   debugger;
+  //   if( err )
+  //   throw err;
+  //   return arg;
+  // });
 
   return o.con;
 
