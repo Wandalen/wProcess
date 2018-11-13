@@ -1161,6 +1161,14 @@ function appArgsReadTo( o )
   if( !o.propertiesMap )
   o.propertiesMap = _.appArgs().map;
 
+  if( _.arrayIs( o.namesMap ) )
+  {
+    let namesMap = Object.create( null );
+    for( let n = 0 ; n < o.namesMap.length ; n++ )
+    namesMap[ o.namesMap[ n ] ] = o.namesMap[ n ];
+    o.namesMap = namesMap;
+  }
+
   _.assert( arguments.length === 1 || arguments.length === 2 )
   _.assert( _.objectIs( o.dst ), 'Expects map {-o.dst-}' );
   _.assert( _.objectIs( o.namesMap ), 'Expects map {-o.namesMap-}' );
