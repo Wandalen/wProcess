@@ -470,11 +470,11 @@ function shellNode( o )
   {
     let totalmem = System.totalmem();
     if( o.verbosity )
-    logger.log( 'System.totalmem()',_.strMetricFormatBytes( totalmem ) );
-    // if( totalmem < 1024*1024*1024 )
-    // Math.floor( ( totalmem / ( 1024*1024*1.4 ) - 1 ) / 256 ) * 256;
-    // else
-    // Math.floor( ( totalmem / ( 1024*1024*1.1 ) - 1 ) / 256 ) * 256;
+    logger.log( 'System.totalmem()', _.strMetricFormatBytes( totalmem ) );
+    if( totalmem < 1024*1024*1024 )
+    Math.floor( ( totalmem / ( 1024*1024*1.4 ) - 1 ) / 256 ) * 256;
+    else
+    Math.floor( ( totalmem / ( 1024*1024*1.1 ) - 1 ) / 256 ) * 256;
     argumentsForNode = '--expose-gc --stack-trace-limit=999 --max_old_space_size=' + totalmem;
   }
 
@@ -501,7 +501,7 @@ function shellNode( o )
 var defaults = shellNode.defaults = Object.create( shell.defaults );
 
 defaults.passingThrough = 0;
-defaults.maximumMemory = 1;
+defaults.maximumMemory = 0;
 defaults.stdio = 'inherit';
 
 //
