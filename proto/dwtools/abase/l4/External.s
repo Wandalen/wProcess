@@ -80,7 +80,7 @@ function shell( o )
   let currentExitCode;
   let currentPath;
 
-  o.con = o.con || new _.Consequence().give();
+  o.con = o.con || new _.Consequence().give( null );
 
   /* */
 
@@ -257,7 +257,7 @@ function shell( o )
       if( o.args && o.args.length )
       arg2 = arg2 + ' ' + '"' + o.args.join( '" "' ) + '"';
 
-      o.process = ChildProcess.spawn( app,[ arg1,arg2 ],optionsForSpawn );
+      o.process = ChildProcess.spawn( app, [ arg1, arg2 ], optionsForSpawn );
     }
     else _.assert( 0,'Unknown mode', _.strQuote( o.mode ), 'to shell path', _.strQuote( o.paths ) );
 
@@ -420,20 +420,40 @@ function sheller( o0 )
   if( _.strIs( o0 ) )
   o0 = { path : o0 }
   o0 = _.routineOptions( sheller, o0 );
-  o0.con = o0.con || new _.Consequence().give();
+  o0.con = o0.con || new _.Consequence().give( null );
+
   return function er()
   {
     let o = _.mapExtend( null, o0 );
     for( let a = 0 ; a < arguments.length ; a++ )
     {
       let o1 = arguments[ 0 ];
-      if( _.strIs( o1 ) )
+      if( _.strIs( o1 ) || _.arrayIs( o1 ) )
       o1 = { path : o1 }
       _.assertMapHasOnly( o1, sheller.defaults );
       _.mapExtend( o, o1 );
     }
+
+    if( _.arrayIs( o.path ) )
+    {
+      // debugger;
+      let os = o.path.map( ( path ) =>
+      {
+        let o2 = _.mapExtend( null, o );
+        o2.path = path;
+        o2.con = null;
+        return function onPath()
+        {
+          return _.shell( o2 );
+        }
+      });
+      // debugger;
+      return o.con.andThen( os );
+    }
+
     return _.shell( o );
   }
+
 }
 
 sheller.defaults = Object.create( shell.defaults );
@@ -1338,10 +1358,10 @@ function appExitWithBeep( exitCode )
   _.assert( arguments.length === 0 || arguments.length === 1 );
   _.assert( exitCode === undefined || _.numberIs( exitCode ) );
 
-  _.beep();
+  _.diagnosticBeep();
 
   if( exitCode )
-  _.beep();
+  _.diagnosticBeep();
 
   _.appExit( exitCode );
 }

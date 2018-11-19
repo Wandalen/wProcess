@@ -261,7 +261,7 @@ function shell( test )
     var _ = _global_.wTools;
 
     var args = _.appArgs();
-    var con = new _.Consequence().give();
+    var con = new _.Consequence().give( null );
     con.timeOutThen( _.numberRandomInt( [ 300, 2000 ] ), function()
     {
       if( args.map.exitWithCode )
@@ -282,7 +282,7 @@ function shell( test )
   _.fileProvider.fileWrite( testAppPath, testApp );
 
   var o;
-  var con = new _.Consequence().give();
+  var con = new _.Consequence().give( null );
 
   con.doThen( function()
   {
@@ -295,7 +295,7 @@ function shell( test )
       stdio : 'pipe'
     }
   })
-  .ifNoErrorThen( function()
+  .ifNoErrorThen( function( arg/*aaa*/ )
   {
     /* mode : spawn, stdio : pipe */
 
@@ -308,7 +308,7 @@ function shell( test )
       test.identical( options.output, testAppPath );
     })
   })
-  .ifNoErrorThen( function()
+  .ifNoErrorThen( function( arg/*aaa*/ )
   {
     /* mode : spawn, stdio : ignore */
 
@@ -322,7 +322,7 @@ function shell( test )
       test.identical( options.output.length, 0 );
     })
   })
-  // .ifNoErrorThen( function()
+  // .ifNoErrorThen( function( arg/*aaa*/ )
   // {
   //   /* mode : spawn, stdio : inherit */
 
@@ -337,7 +337,7 @@ function shell( test )
   //     test.identical( options.output.length, 0 );
   //   })
   // })
-  .ifNoErrorThen( function()
+  .ifNoErrorThen( function( arg/*aaa*/ )
   {
     test.case = 'mode : shell';
 
@@ -348,7 +348,7 @@ function shell( test )
       stdio : 'pipe'
     }
   })
-  .ifNoErrorThen( function()
+  .ifNoErrorThen( function( arg/*aaa*/ )
   {
     /* mode : shell, stdio : pipe */
 
@@ -361,7 +361,7 @@ function shell( test )
       test.identical( options.output, testAppPath );
     })
   })
-  .ifNoErrorThen( function()
+  .ifNoErrorThen( function( arg/*aaa*/ )
   {
     /* mode : shell, stdio : ignore */
 
@@ -376,7 +376,7 @@ function shell( test )
       test.identical( options.output.length, 0 );
     })
   })
-  // .ifNoErrorThen( function()
+  // .ifNoErrorThen( function( arg/*aaa*/ )
   // {
   //   /* mode : shell, stdio : inherit */
 
@@ -391,7 +391,7 @@ function shell( test )
   //     test.identical( options.output.length, 0 );
   //   })
   // })
-  .ifNoErrorThen( function()
+  .ifNoErrorThen( function( arg/*aaa*/ )
   {
     test.case = 'spawn, stop process using kill';
 
@@ -418,7 +418,7 @@ function shell( test )
 
     return shell;
   })
-  .ifNoErrorThen( function()
+  .ifNoErrorThen( function( arg/*aaa*/ )
   {
     test.case = 'shell, stop process using kill';
 
@@ -445,7 +445,7 @@ function shell( test )
 
     return shell;
   })
-  .ifNoErrorThen( function()
+  .ifNoErrorThen( function( arg/*aaa*/ )
   {
     test.case = 'spawn, return good code';
 
@@ -461,7 +461,7 @@ function shell( test )
     return test.mustNotThrowError( _.shell( options ) )
     .doThen( () => test.identical( options.exitCode, 0 ) );
   })
-  .ifNoErrorThen( function()
+  .ifNoErrorThen( function( arg/*aaa*/ )
   {
     test.case = 'spawn, return bad code';
 
@@ -477,7 +477,7 @@ function shell( test )
     return test.shouldThrowError( _.shell( options ) )
     .doThen( () => test.identical( options.exitCode, 1 ) );
   })
-  .ifNoErrorThen( function()
+  .ifNoErrorThen( function( arg/*aaa*/ )
   {
     test.case = 'shell, return good code';
 
@@ -493,7 +493,7 @@ function shell( test )
     return test.mustNotThrowError( _.shell( options ) )
     .doThen( () => test.identical( options.exitCode, 0 ) );
   })
-  .ifNoErrorThen( function()
+  .ifNoErrorThen( function( arg/*aaa*/ )
   {
     test.case = 'shell, return bad code';
 
@@ -514,25 +514,25 @@ function shell( test )
   // test.identical( 0, 0 );
 
   // con
-  // .ifNoErrorThen( function()
+  // .ifNoErrorThen( function( arg/*aaa*/ )
   // {
   //   test.case = 'simple command';
   //   var con = _.shell( 'exit' );
   //   return test.shouldMessageOnlyOnce( con );
   // })
-  // .ifNoErrorThen( function()
+  // .ifNoErrorThen( function( arg/*aaa*/ )
   // {
   //   test.case = 'bad command, shell';
   //   var con = _.shell({ code : 'xxx', throwingExitCode : 1, mode : 'shell' });
   //   return test.shouldThrowErrorSync( con );
   // })
-  // .ifNoErrorThen( function()
+  // .ifNoErrorThen( function( arg/*aaa*/ )
   // {
   //   test.case = 'bad command, spawn';
   //   var con = _.shell({ code : 'xxx', throwingExitCode : 1, mode : 'spawn' });
   //   return test.shouldThrowErrorSync( con );
   // })
-  // .ifNoErrorThen( function()
+  // .ifNoErrorThen( function( arg/*aaa*/ )
   // {
   //   test.case = 'several arguments';
   //   var con = _.shell( 'echo echo something' );
@@ -587,7 +587,7 @@ function shell2( test )
     var _global = _global_;
     var _ = _global_.wTools;
 
-    var con = new _.Consequence().give();
+    var con = new _.Consequence().give( null );
     con.timeOutThen( _.numberRandomInt( [ 300, 2000 ] ), function()
     {
       console.log( process.argv.slice( 2 ).join( ' ' ) );
@@ -602,7 +602,7 @@ function shell2( test )
   _.fileProvider.fileWrite( testAppPath, testApp );
 
   var o;
-  var con = new _.Consequence().give();
+  var con = new _.Consequence().give( null );
 
   con.doThen( function()
   {
@@ -616,7 +616,7 @@ function shell2( test )
       stdio : 'pipe'
     }
   })
-  .ifNoErrorThen( function()
+  .ifNoErrorThen( function( arg/*aaa*/ )
   {
     /* mode : shell, stdio : pipe */
 
@@ -644,7 +644,7 @@ function shell2( test )
       stdio : 'pipe'
     }
   })
-  .ifNoErrorThen( function()
+  .ifNoErrorThen( function( arg/*aaa*/ )
   {
     /* mode : shell, stdio : pipe, passingThrough : true */
 
@@ -674,7 +674,7 @@ function shell2( test )
       stdio : 'pipe'
     }
   })
-  .ifNoErrorThen( function()
+  .ifNoErrorThen( function( arg/*aaa*/ )
   {
     /* mode : spawn, stdio : pipe, passingThrough : true */
 
@@ -704,7 +704,7 @@ function shell2( test )
       stdio : 'pipe'
     }
   })
-  .ifNoErrorThen( function()
+  .ifNoErrorThen( function( arg/*aaa*/ )
   {
     var options = _.mapSupplement( {}, o, commonDefaults );
     return test.shouldThrowError( _.shell( options ) );
@@ -725,7 +725,7 @@ function shell2( test )
       stdio : 'pipe'
     }
   })
-  .ifNoErrorThen( function()
+  .ifNoErrorThen( function( arg/*aaa*/ )
   {
     /* mode : shell, stdio : pipe, passingThrough : true */
 
@@ -769,7 +769,7 @@ function shellCurrentPath( test )
 
   //
 
-  var con = new _.Consequence().give();
+  var con = new _.Consequence().give( null );
 
   con.doThen( function()
   {
