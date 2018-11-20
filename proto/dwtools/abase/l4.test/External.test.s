@@ -294,6 +294,8 @@ function shell( test )
       mode : 'spawn',
       stdio : 'pipe'
     }
+
+    return null;
   })
   .ifNoErrorThen( function( arg/*aaa*/ )
   {
@@ -306,6 +308,7 @@ function shell( test )
     {
       test.identical( options.exitCode, 0 );
       test.identical( options.output, testAppPath );
+      return null;
     })
   })
   .ifNoErrorThen( function( arg/*aaa*/ )
@@ -320,6 +323,7 @@ function shell( test )
     {
       test.identical( options.exitCode, 0 );
       test.identical( options.output.length, 0 );
+      return null;
     })
   })
   // .ifNoErrorThen( function( arg/*aaa*/ )
@@ -347,6 +351,7 @@ function shell( test )
       mode : 'shell',
       stdio : 'pipe'
     }
+    return null;
   })
   .ifNoErrorThen( function( arg/*aaa*/ )
   {
@@ -359,6 +364,7 @@ function shell( test )
     {
       test.identical( options.exitCode, 0 );
       test.identical( options.output, testAppPath );
+      return null;
     })
   })
   .ifNoErrorThen( function( arg/*aaa*/ )
@@ -374,6 +380,7 @@ function shell( test )
     {
       test.identical( options.exitCode, 0 );
       test.identical( options.output.length, 0 );
+      return null;
     })
   })
   // .ifNoErrorThen( function( arg/*aaa*/ )
@@ -409,11 +416,13 @@ function shell( test )
     {
       test.identical( options.process.killed, false );
       options.process.kill( 'SIGINT' );
+      return null;
     })
     shell.doThen(function()
     {
       test.identical( options.process.killed, true );
       test.identical( !options.exitCode, true );
+      return null;
     })
 
     return shell;
@@ -436,11 +445,13 @@ function shell( test )
     {
       test.identical( options.process.killed, false );
       options.process.kill( 'SIGINT' );
+      return null;
     })
     shell.doThen(function()
     {
       test.identical( options.process.killed, true );
       test.identical( !options.exitCode, true );
+      return null;
     })
 
     return shell;
@@ -459,7 +470,11 @@ function shell( test )
     var options = _.mapSupplement( {}, o, commonDefaults );
 
     return test.mustNotThrowError( _.shell( options ) )
-    .doThen( () => test.identical( options.exitCode, 0 ) );
+    .doThen( () =>
+    {
+      test.identical( options.exitCode, 0 );
+      return null;
+    });
   })
   .ifNoErrorThen( function( arg/*aaa*/ )
   {
@@ -475,7 +490,11 @@ function shell( test )
     var options = _.mapSupplement( {}, o, commonDefaults );
 
     return test.shouldThrowError( _.shell( options ) )
-    .doThen( () => test.identical( options.exitCode, 1 ) );
+    .doThen( () =>
+    {
+      test.identical( options.exitCode, 1 );
+      return null;
+    });
   })
   .ifNoErrorThen( function( arg/*aaa*/ )
   {
@@ -491,7 +510,11 @@ function shell( test )
     var options = _.mapSupplement( {}, o, commonDefaults );
 
     return test.mustNotThrowError( _.shell( options ) )
-    .doThen( () => test.identical( options.exitCode, 0 ) );
+    .doThen( () =>
+    {
+      test.identical( options.exitCode, 0 );
+      return null;
+    });
   })
   .ifNoErrorThen( function( arg/*aaa*/ )
   {
@@ -507,7 +530,11 @@ function shell( test )
     var options = _.mapSupplement( {}, o, commonDefaults );
 
     return test.shouldThrowError( _.shell( options ) )
-    .doThen( () => test.identical( options.exitCode, 1 ) );
+    .doThen( () =>
+    {
+      test.identical( options.exitCode, 1 );
+      return null;
+    });
   })
   //
   // test.case = 'test';
@@ -615,6 +642,7 @@ function shell2( test )
       mode : 'shell',
       stdio : 'pipe'
     }
+    return null;
   })
   .ifNoErrorThen( function( arg/*aaa*/ )
   {
@@ -627,6 +655,7 @@ function shell2( test )
     {
       test.identical( options.exitCode, 0 );
       test.identical( options.output, o.args.join( ' ' ) );
+      return null;
     })
   })
 
@@ -656,6 +685,7 @@ function shell2( test )
       test.identical( options.exitCode, 0 );
       var expectedArgs= _.arrayAppendArray( [], process.argv.slice( 2 ) );
       test.identical( options.output, expectedArgs.join( ' ' ) );
+      return null;
     })
   })
 
@@ -686,6 +716,7 @@ function shell2( test )
       test.identical( options.exitCode, 0 );
       var expectedArgs = _.arrayAppendArray( [], process.argv.slice( 2 ) );
       test.identical( options.output, expectedArgs.join( ' ' ) );
+      return null;
     })
   })
 
@@ -724,6 +755,7 @@ function shell2( test )
       passingThrough : 1,
       stdio : 'pipe'
     }
+    return null;
   })
   .ifNoErrorThen( function( arg/*aaa*/ )
   {
@@ -737,6 +769,7 @@ function shell2( test )
       test.identical( options.exitCode, 0 );
       var expectedArgs = _.arrayAppendArray( [ 'staging', 'debug' ], process.argv.slice( 2 ) );
       test.identical( options.output, expectedArgs.join( ' ' ) );
+      return null;
     })
   })
 
@@ -787,6 +820,7 @@ function shellCurrentPath( test )
     .doThen( function( err, got )
     {
       test.identical( o.output, __dirname );
+      return null;
     })
   })
 
@@ -808,6 +842,7 @@ function shellCurrentPath( test )
     .doThen( function( err, got )
     {
       test.identical( o.output, __dirname );
+      return null;
     })
   })
 
@@ -829,6 +864,7 @@ function shellCurrentPath( test )
     .doThen( function( err, got )
     {
       test.identical( o.output, __dirname );
+      return null;
     })
   })
 
@@ -854,6 +890,7 @@ function shellCurrentPath( test )
     con.doThen( function( err, got )
     {
       test.identical( output.currentPath, __dirname );
+      return null;
     })
 
     return con;
