@@ -75,12 +75,26 @@ function shell( o )
   _.assert( arguments.length === 1, 'Expects single argument' );
   _.assert( o.args === null || _.arrayIs( o.args ) );
   _.assert( _.arrayHas( [ 'fork', 'exec', 'spawn', 'shell' ], o.mode ) );
+  _.assert( _.strIs( o.path ) || _.arrayIs( o.path ) );
 
   let done = false;
   let currentExitCode;
   let currentPath;
 
   o.con = o.con || new _.Consequence().give( null );
+
+  /* xxx qqq : problem */
+
+  if( _.arrayIs( o.path ) )
+  {
+    for( let p = 0 ; p < o.path.length ; p++ )
+    {
+      let o2 = _.mapExtend( null, o );
+      o2.path = o.path[ p ];
+      _.shell( o2 );
+    }
+    return o.con;
+  }
 
   /* */
 
