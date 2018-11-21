@@ -234,9 +234,13 @@ function shell( o )
     if( o.currentPath )
     optionsForSpawn.cwd = _.path.nativize( o.currentPath );
 
+    if( _.strIs( o.execArgv ) )
+    o.execArgv = _.strSplitNonPreserving({ src : o.execArgv, preservingDelimeters : 0 });
+
     if( o.mode === 'fork')
     {
-      o.process = ChildProcess.fork( o.path,{ silent : false, env : o.env, cwd : optionsForSpawn.cwd } );
+      let execArgv = o.execArgv || process.execArgv;
+      o.process = ChildProcess.fork( o.path,{ silent : false, env : o.env, cwd : optionsForSpawn.cwd, execArgv : execArgv } );
     }
     else if( o.mode === 'exec' )
     {
@@ -403,6 +407,7 @@ shell.defaults =
   currentPath : null,
 
   args : null,
+  execArgv : null,
   mode : 'shell', /* 'fork', 'exec', 'spawn', 'shell' */
   con : null,
   logger : null,
@@ -513,10 +518,10 @@ function shellNode( o )
   }
 
   let path = _.fileProvider.path.nativize( o.path );
-  let prefix = 'node';
   if( o.mode === 'fork' )
-  prefix = '';
-  path = _.strConcat([ prefix, argumentsForNode, path ]);
+  o.execArgv = argumentsForNode;
+  else
+  path = _.strConcat([ 'node', argumentsForNode, path ]);
 
   let shellOptions = _.mapOnly( o, _.shell.defaults );
   shellOptions.path = path;

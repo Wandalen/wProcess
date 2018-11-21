@@ -967,6 +967,33 @@ function shellNode( test )
         return true;
       })
     })
+
+    con.doThen( () =>
+    {
+      var o = { path : testAppPath,  mode : mode, applyingExitCode : 0, throwingExitCode : 0 };
+      return _.shellNode( o )
+      .doThen( ( err, got ) =>
+      {
+        test.identical( o.exitCode, 1 );
+        test.identical( process.exitCode, 0 );
+        test.is( !_.errIs( err ) );
+        return true;
+      })
+    })
+
+    con.doThen( () =>
+    {
+      var o = { path : testAppPath,  mode : mode, maximumMemory : 1, applyingExitCode : 0, throwingExitCode : 0 };
+      return _.shellNode( o )
+      .doThen( ( err, got ) =>
+      {
+        test.identical( o.exitCode, 1 );
+        test.identical( process.exitCode, 0 );
+        test.is( _.strHas( o.process.spawnargs.join( ' ' ), '--expose-gc --stack-trace-limit=999 --max_old_space_size' ) )
+        test.is( !_.errIs( err ) );
+        return true;
+      })
+    })
   })
 
   return con;
