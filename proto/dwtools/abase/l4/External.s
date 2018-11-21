@@ -562,6 +562,49 @@ defaults.maximumMemory = 1;
 //
 // --
 
+function jsonParse( o )
+{
+  let result;
+
+  if( _.strIs( o ) )
+  o = { src : o }
+  _.routineOptions( jsonParse, o );
+  _.assert( arguments.length === 1 );
+
+  try
+  {
+    result = JSON.parse( o.src );
+  }
+  catch( err )
+  {
+    // debugger;
+    let src = o.src;
+    let position = /at position (\d+)/.exec( err.message );
+    if( position )
+    position = Number( position[ 1 ] );
+    // debugger;
+    let first = 0;
+    if( !isNaN( position ) )
+    {
+      let nearest = _.strLinesNearest( src, position );
+      // debugger;
+      first = _.strLinesCount( src.substring( 0, nearest.spans[ 0 ] ) );
+      src = nearest.splits.join( '' );
+    }
+    let err2 = _.err( 'Error parsing JSON\n', err, '\n', _.strLinesNumber( src, first ) );
+    throw err2;
+  }
+
+  return result;
+}
+
+jsonParse.defaults =
+{
+  src : null,
+}
+
+//
+
 function routineSourceGet( o )
 {
   if( _.routineIs( o ) )
@@ -672,8 +715,12 @@ function routineMake( o )
     }
     catch( err )
     {
-      code = prefix + o.code;
-      result = make( code );
+      if( o.fallingBack )
+      {
+        code = prefix + o.code;
+        result = make( code );
+      }
+      else throw err;
     }
     else
     {
@@ -754,6 +801,7 @@ routineMake.defaults =
   filePath : null,
   // prependingReturn : 1,
   prependingReturn : 0,
+  fallingBack : 1,
   usingStrict : 0,
   externals : null,
   name : null,
@@ -1478,6 +1526,8 @@ let Proto =
   shellNodePassingThrough : shellNodePassingThrough,
 
   //
+
+  jsonParse : jsonParse,
 
   routineSourceGet : routineSourceGet,
 
