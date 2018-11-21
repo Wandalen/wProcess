@@ -513,7 +513,10 @@ function shellNode( o )
   }
 
   let path = _.fileProvider.path.nativize( o.path );
-  path = _.strConcat([ 'node', argumentsForNode, path ]);
+  let prefix = 'node';
+  if( o.mode === 'fork' )
+  prefix = '';
+  path = _.strConcat([ prefix, argumentsForNode, path ]);
 
   let shellOptions = _.mapOnly( o, _.shell.defaults );
   shellOptions.path = path;

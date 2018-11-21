@@ -903,6 +903,80 @@ shellCurrentPath.timeOut = 30000;
 
 //
 
+function shellNode( test )
+{
+  var context = this;
+  var testRoutineDir = _.path.join( context.testRootDirectory, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    throw 1;
+  }
+
+  /* */
+
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp.js' ) );
+  var testApp = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testApp );
+
+  var con = new _.Consequence().give( null );
+
+  var modes = [ 'fork', 'exec', 'spawn', 'shell' ];
+
+  modes.forEach( ( mode ) =>
+  {
+    con.doThen( () =>
+    {
+      var o = { path : testAppPath, mode : mode, applyingExitCode : 1, throwingExitCode : 1 };
+      return _.shellNode( o )
+      .doThen( ( err, got ) =>
+      {
+        test.identical( o.exitCode, 1 );
+        test.identical( process.exitCode, 1 );
+        process.exitCode = 0;
+        test.is( _.errIs( err ) );
+        return true;
+      })
+    })
+
+    con.doThen( () =>
+    {
+      var o = { path : testAppPath, mode : mode,  applyingExitCode : 1, throwingExitCode : 0 };
+      return _.shellNode( o )
+      .doThen( ( err, got ) =>
+      {
+        test.identical( o.exitCode, 1 );
+        test.identical( process.exitCode, 1 );
+        process.exitCode = 0;
+        test.is( !_.errIs( err ) );
+        return true;
+      })
+    })
+
+    con.doThen( () =>
+    {
+      var o = { path : testAppPath,  mode : mode, applyingExitCode : 0, throwingExitCode : 1 };
+      return _.shellNode( o )
+      .doThen( ( err, got ) =>
+      {
+        test.identical( o.exitCode, 1 );
+        test.identical( process.exitCode, 0 );
+        test.is( _.errIs( err ) );
+        return true;
+      })
+    })
+  })
+
+  return con;
+
+}
+
+shellNode.timeOut = 10000;
+
+//
+
 var Proto =
 {
 
@@ -916,7 +990,6 @@ var Proto =
   {
 
     testRootDirectory : null,
-
   },
 
   tests :
@@ -927,6 +1000,7 @@ var Proto =
     shell : shell,
     shell2 : shell2,
     shellCurrentPath : shellCurrentPath,
+    shellNode : shellNode,
 
   },
 
