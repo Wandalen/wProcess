@@ -60,8 +60,6 @@ path:
       - ./dwtools/abase/l4/External.s
       - ./dwtools/abase/l4.test
       - ./dwtools/abase/l4.test/External.test.s
-      - ./dwtools/amid
-      - ./dwtools/atop
     criterion:
       default: 1
       debug: 1
