@@ -1,10 +1,9 @@
 
-
 about :
 
   name : wExternalFundamentals
   description : Collection of routines to execute system commands, run shell, batches, launch external processes from JavaScript application. ExecTools leverages not only outputting data from an application but also inputting, makes application arguments parsing and accounting easier. Use the module to get uniform experience from interaction with an external processes on different platforms and operating systems.
-  version : 0.3.89
+  version : 0.3.99
   enabled : 1
   interpreters :
   - nodejs >= 6.0.0
@@ -24,33 +23,27 @@ path :
   repository : git+https://github.com/Wandalen/wExternalFundamentals.git
   bugs : https://github.com/Wandalen/wExternalFundamentals/issues
 
+step :
+
+  export.proto :
+    inherit : export
+    export : path::proto
+    tar : 0
+    criterion :
+      debug : 1
+      proto : 1
+
 build :
 
-  debug.raw.export :
-    exportDirPath : path::out.debug
+  proto.export :
     criterion :
       default : 1
       debug : 1
       raw : 1
+      proto : 1
       export : 1
-      tar : 0
+      tar : 1
     steps :
-      # - build::.debug.raw
-      - step::export
-
-  release.compiled.export :
-    exportDirPath : path::out.release
-    criterion :
-      debug : 0
-      raw : 0
-      export : 1
-      tar : 0
-    steps :
-      - build::release.compiled
-      - step::export
-
-  export.all :
-    steps :
-      - build::debug.raw.export
-      - build::release.compiled.export
+      - build::debug.raw
+      - step::export.proto
 
