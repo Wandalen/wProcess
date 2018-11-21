@@ -209,7 +209,7 @@ function shell( o )
     {
       let argumentsManual = process.argv.slice( 2 );
       if( argumentsManual.length )
-      o.args = _.arrayAppendArray( o.args || [],argumentsManual );
+      o.args = _.arrayAppendArray( o.args || [], argumentsManual );
     }
 
     /* etc */
@@ -521,6 +521,8 @@ function shellNode( o )
   let result = _.shell( shellOptions )
   .got( function( err,arg )
   {
+    // if( shellOptions.exitCode )
+    // _.appExit( -1 );
     o.exitCode = shellOptions.exitCode;
     o.signal = shellOptions.signal;
     this.give( err,arg );
@@ -536,6 +538,7 @@ var defaults = shellNode.defaults = Object.create( shell.defaults );
 
 defaults.passingThrough = 0;
 defaults.maximumMemory = 0;
+defaults.applyingExitCode = 1;
 defaults.stdio = 'inherit';
 
 //
@@ -557,6 +560,7 @@ var defaults = shellNodePassingThrough.defaults = Object.create( shellNode.defau
 
 defaults.passingThrough = 1;
 defaults.maximumMemory = 1;
+defaults.applyingExitCode = 1;
 
 // --
 //
