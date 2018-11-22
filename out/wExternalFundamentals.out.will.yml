@@ -8,7 +8,7 @@ about:
     application arguments parsing and accounting easier. Use the module to get
     uniform experience from interaction with an external processes on different
     platforms and operating systems.
-  version: 0.3.101
+  version: 0.3.102
   enabled: 1
   interpreters:
     - nodejs >= 6.0.0
@@ -84,7 +84,7 @@ path:
 submodule: {}
 reflector:
   reflect.proto.0:
-    reflectMap:
+    filePath:
       ./proto: ./out.release
     srcFilter:
       maskAll:
@@ -108,7 +108,7 @@ reflector:
     inherit:
       - predefined.*
   reflect.proto.1:
-    reflectMap:
+    filePath:
       ./proto: ./out.debug
     srcFilter:
       maskAll:
@@ -154,15 +154,14 @@ reflector:
     inherit:
       - predefined.*
   exported.0:
-    reflectMap:
-      ./proto: true
+    filePath: ./proto
     srcFilter:
       prefixPath: .
     dstFilter:
       prefixPath: .
   exportedFiles.0:
     recursive: 0
-    reflectMap:
+    filePath:
       ./dwtools/Tools.s: true
       ./dwtools/abase/l4/External.s: true
       ./dwtools/abase/l4.test/External.test.s: true
@@ -273,7 +272,7 @@ build:
       - 'step::export.proto'
 exported:
   proto.export:
-    version: 0.3.101
+    version: 0.3.102
     criterion:
       default: 1
       debug: 1

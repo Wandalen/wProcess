@@ -300,7 +300,7 @@ function shell( o )
 
     if( o.verbosity >= 5 )
     {
-      o.logger.log( 'Process returned error code :', exitCode );
+      o.logger.log( 'Process returned error code', exitCode );
       if( exitCode )
       {
         o.logger.log( 'Launched as :', _.strQuote( o.path ) );
@@ -319,9 +319,9 @@ function shell( o )
     {
       debugger;
       if( _.numberIs( exitCode ) )
-      o.con.error( _.err( 'Process returned error code :', exitCode, '\nLaunched as :', _.strQuote( o.argsStr ) ) );
+      o.con.error( _.err( 'Process returned error code', exitCode, '\nLaunched as :', _.strQuote( o.argsStr ) ) );
       else
-      o.con.error( _.err( 'Process wass killed by signal :', signal, '\nLaunched as :', _.strQuote( o.argsStr ) ) );
+      o.con.error( _.err( 'Process wass killed by signal', signal, '\nLaunched as :', _.strQuote( o.argsStr ) ) );
     }
     else
     {
