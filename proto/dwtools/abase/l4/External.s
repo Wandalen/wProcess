@@ -240,7 +240,7 @@ function shell( o )
     if( o.mode === 'fork')
     {
       let execArgv = o.execArgv || process.execArgv;
-      o.process = ChildProcess.fork( o.path,{ silent : false, env : o.env, cwd : optionsForSpawn.cwd, execArgv : execArgv } );
+      o.process = ChildProcess.fork( o.path, o.args, { silent : false, env : o.env, cwd : optionsForSpawn.cwd, execArgv : execArgv } );
     }
     else if( o.mode === 'exec' )
     {
