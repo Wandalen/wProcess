@@ -13,25 +13,7 @@
 if( typeof module !== 'undefined' )
 {
 
-  if( typeof _global_ === 'undefined' || !_global_.wBase )
-  {
-    let toolsPath = '../../../dwtools/Base.s';
-    let toolsExternal = 0;
-    try
-    {
-      toolsPath = require.resolve( toolsPath );
-    }
-    catch( err )
-    {
-      toolsExternal = 1;
-      require( 'wTools' );
-    }
-    if( !toolsExternal )
-    require( toolsPath );
-  }
-
-  let _global = _global_;
-  let _ = _global_.wTools;
+  let _ = require( '../../Tools.s' );
 
   _.include( 'wPathFundamentals' );
 
@@ -234,13 +216,13 @@ function shell( o )
     if( o.currentPath )
     optionsForSpawn.cwd = _.path.nativize( o.currentPath );
 
-    if( _.strIs( o.execArgv ) )
-    o.execArgv = _.strSplitNonPreserving({ src : o.execArgv, preservingDelimeters : 0 });
+    if( _.strIs( o.interpreterArgs ) )
+    o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs, preservingDelimeters : 0 });
 
     if( o.mode === 'fork')
     {
-      let execArgv = o.execArgv || process.execArgv;
-      o.process = ChildProcess.fork( o.path, o.args, { silent : false, env : o.env, cwd : optionsForSpawn.cwd, execArgv : execArgv } );
+      let interpreterArgs = o.interpreterArgs || process.execArgv;
+      o.process = ChildProcess.fork( o.path, o.args, { silent : false, env : o.env, cwd : optionsForSpawn.cwd, execArgv : interpreterArgs } );
     }
     else if( o.mode === 'exec' )
     {
@@ -407,7 +389,7 @@ shell.defaults =
   currentPath : null,
 
   args : null,
-  execArgv : null,
+  interpreterArgs : null,
   mode : 'shell', /* 'fork', 'exec', 'spawn', 'shell' */
   con : null,
   logger : null,
@@ -504,7 +486,7 @@ function shellNode( o )
       implementation of nodejs for other OSs could be able to use more memory
   */
 
-  let argumentsForNode = '';
+  let interpreterArgs = '';
   if( o.maximumMemory )
   {
     let totalmem = System.totalmem();
@@ -514,14 +496,14 @@ function shellNode( o )
     Math.floor( ( totalmem / ( 1024*1024*1.4 ) - 1 ) / 256 ) * 256;
     else
     Math.floor( ( totalmem / ( 1024*1024*1.1 ) - 1 ) / 256 ) * 256;
-    argumentsForNode = '--expose-gc --stack-trace-limit=999 --max_old_space_size=' + totalmem;
+    interpreterArgs = '--expose-gc --stack-trace-limit=999 --max_old_space_size=' + totalmem;
   }
 
   let path = _.fileProvider.path.nativize( o.path );
   if( o.mode === 'fork' )
-  o.execArgv = argumentsForNode;
+  o.interpreterArgs = interpreterArgs;
   else
-  path = _.strConcat([ 'node', argumentsForNode, path ]);
+  path = _.strConcat([ 'node', interpreterArgs, path ]);
 
   let shellOptions = _.mapOnly( o, _.shell.defaults );
   shellOptions.path = path;
@@ -957,7 +939,7 @@ function execStages( stages,o )
 
   /* validation */
 
-  _.assert( _.objectIs( stages ) || _.longIs( stages ),'Expects array or object ( stages ), but got',_.strTypeOf( stages ) );
+  _.assert( _.objectIs( stages ) || _.longIs( stages ),'Expects array or object ( stages ), but got',_.strType( stages ) );
 
   for( let s in stages )
   {

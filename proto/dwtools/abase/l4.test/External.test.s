@@ -29,7 +29,7 @@ var Self = {};
 function testDirMake()
 {
   var context = this;
-  if( !isBrowser )
+  if( Config.platform === 'nodejs' )
   context.testRootDirectory = _.path.dirTempOpen( _.path.join( __dirname, '../..'  ), 'ExternalFundamentals' );
   else
   context.testRootDirectory = _.path.current();
@@ -40,7 +40,7 @@ function testDirMake()
 function cleanTestDir()
 {
   var context = this;
-  if( !isBrowser )
+  if( Config.platform === 'nodejs' )
   _.fileProvider.filesDelete( context.testRootDirectory );
 }
 
