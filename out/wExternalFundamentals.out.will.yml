@@ -166,8 +166,8 @@ reflector:
       ./dwtools/abase/l4/External.s: true
       ./dwtools/abase/l4.test/External.test.s: true
     srcFilter:
-      basePath: ./proto
-      prefixPath: .
+      basePath: .
+      prefixPath: proto
     dstFilter:
       basePath: .
       prefixPath: .
