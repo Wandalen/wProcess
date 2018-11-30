@@ -47,6 +47,11 @@ _.assert( !!_realGlobal_ );
 // exec
 // --
 
+/*
+qqq : implement multiple commands
+qqq : implement option timeOut
+*/
+
 function shell( o )
 {
 
@@ -278,6 +283,16 @@ function shell( o )
 
   /* */
 
+  function infoGet()
+  {
+    let result = '';
+    result += 'Launched as ' + _.strQuote( o.argsStr ) + '\n';
+    result += 'Launched at ' + _.strQuote( currentPath ) + '\n';
+    return result;
+  }
+
+  /* */
+
   function handleClose( exitCode, signal )
   {
 
@@ -289,8 +304,7 @@ function shell( o )
       o.logger.log( 'Process returned error code', exitCode );
       if( exitCode )
       {
-        o.logger.log( 'Launched as :', _.strQuote( o.path ) );
-        o.logger.log( 'Launched at :', _.strQuote( currentPath ) );
+        o.logger.log( infoGet() );
       }
     }
 
@@ -305,14 +319,15 @@ function shell( o )
     {
       debugger;
       if( _.numberIs( exitCode ) )
-      o.con.error( _.err( 'Process returned error code', exitCode, '\nLaunched as :', _.strQuote( o.argsStr ) ) );
+      o.con.error( _.err( 'Process returned error code', exitCode, '\n', infoGet() ) );
       else
-      o.con.error( _.err( 'Process wass killed by signal', signal, '\nLaunched as :', _.strQuote( o.argsStr ) ) );
+      o.con.error( _.err( 'Process wass killed by signal', signal, '\n', infoGet() ) );
     }
     else
     {
       o.con.give( o );
     }
+
   }
 
   /* */
@@ -448,7 +463,7 @@ function sheller( o0 )
           return _.shell( o2 );
         }
       });
-      // debugger;
+      debugger;
       return o.con.andThen( os );
     }
 
