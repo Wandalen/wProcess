@@ -62,7 +62,7 @@ function shell( o )
   _.assert( arguments.length === 1, 'Expects single argument' );
   _.assert( o.args === null || _.arrayIs( o.args ) );
   _.assert( _.arrayHas( [ 'fork', 'exec', 'spawn', 'shell' ], o.mode ) );
-  _.assert( _.strIs( o.path ) || _.arrayIs( o.path ) );
+  _.assert( _.strIs( o.path ) || _.strsAre( o.path ), 'Expects string or strings {-o.path-}, but got', _.strType( o.path ) );
 
   let done = false;
   let currentExitCode;
@@ -175,6 +175,7 @@ function shell( o )
     o.verbosity = o.verbosity ? 1 : 0;
     if( o.verbosity < 0 )
     o.verbosity = 0;
+    // debugger;
     if( o.outputPiping === null )
     o.outputPiping = o.verbosity >= 1;
     if( o.outputCollecting && !o.output )
