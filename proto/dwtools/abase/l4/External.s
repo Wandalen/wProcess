@@ -175,7 +175,7 @@ function shell( o )
     o.verbosity = o.verbosity ? 1 : 0;
     if( o.verbosity < 0 )
     o.verbosity = 0;
-    // debugger;
+    debugger;
     if( o.outputPiping === null )
     o.outputPiping = o.verbosity >= 2;
     if( o.outputCollecting && !o.output )
@@ -419,7 +419,7 @@ shell.defaults =
   throwingExitCode : 1, /* must be on by default */
   applyingExitCode : 0,
 
-  verbosity : 1,
+  verbosity : 2,
   outputGray : 0,
   outputGrayStdout : 0,
   outputPrefixing : 0,
