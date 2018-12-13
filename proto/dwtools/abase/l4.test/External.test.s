@@ -51,62 +51,60 @@ function appArgs( test )
 
   /* */
 
-  // var argv = [];
-  // argv.unshift.apply( argv, _argv );
-  // var got = _.appArgs({ argv : argv, caching : 0 });
-  // var expected =
-  // {
-  //   interpreterPath : _argv[ 0 ],
-  //   mainPath : _argv[ 1 ],
-  //   interpreterArgs : [],
-  //   delimeter : ':',
-  //   subject : '',
-  //   scriptArgs : [],
-  //   scriptString : '',
-  // }
-  // test.contains( got, expected );
-  // got = null;
-  //
-  //
-  // /* */
-  //
-  // var argv = [ '' ];
-  // argv.unshift.apply( argv, _argv );
-  // var got = _.appArgs({ argv : argv, caching : 0 });
-  // var expected =
-  // {
-  //   interpreterPath : _argv[ 0 ],
-  //   mainPath : _argv[ 1 ],
-  //   interpreterArgs : [],
-  //   delimeter : ':',
-  //   subject : '',
-  //   scriptArgs : [''],
-  //   scriptString : '',
-  // }
-  // test.contains( got, expected );
-
-  /* */
-
-  var argv = [ 'x', ':', 'aa', 'bbb :' ];
+  var argv = [];
   argv.unshift.apply( argv, _argv );
-  debugger;
   var got = _.appArgs({ argv : argv, caching : 0 });
-  debugger;
   var expected =
   {
     interpreterPath : _argv[ 0 ],
     mainPath : _argv[ 1 ],
     interpreterArgs : [],
-    delimeter : ':',
-    // map : { x : 'aa bbb' },
-    map : { x : 'aa', bbb : '' },
+    keyValDelimeter : ':',
     subject : '',
-    // scriptArgs : [ 'x', ':', 'aa', 'bbb', ':' ]
-    scriptArgs : [ 'x', ':', 'aa', 'bbb :' ]
+    map : Object.create( null ),
+    scriptArgs : [],
+    scriptString : '',
+    subjects : [],
+    maps : [],
   }
   test.contains( got, expected );
 
-  // logger.log( _.toStr( got.scriptArgs ) )
+  /* */
+
+  var argv = [ '' ];
+  argv.unshift.apply( argv, _argv );
+  var got = _.appArgs({ argv : argv, caching : 0 });
+  var expected =
+  {
+    interpreterPath : _argv[ 0 ],
+    mainPath : _argv[ 1 ],
+    interpreterArgs : [],
+    keyValDelimeter : ':',
+    subject : '',
+    map : Object.create( null ),
+    scriptArgs : [''],
+    scriptString : '',
+    subjects : [],
+    maps : [],
+  }
+  test.contains( got, expected );
+
+  /* */
+
+  var argv = [ 'x', ':', 'aa', 'bbb :' ];
+  argv.unshift.apply( argv, _argv );
+  var got = _.appArgs({ argv : argv, caching : 0 });
+  var expected =
+  {
+    interpreterPath : _argv[ 0 ],
+    mainPath : _argv[ 1 ],
+    interpreterArgs : [],
+    keyValDelimeter : ':',
+    map : { x : 'aa', bbb : '' },
+    subject : '',
+    scriptArgs : [ 'x', ':', 'aa', 'bbb :' ]
+  }
+  test.contains( got, expected );
 
   /* */
 
@@ -118,10 +116,9 @@ function appArgs( test )
     interpreterPath : _argv[ 0 ],
     mainPath : _argv[ 1 ],
     interpreterArgs : [],
-    delimeter : ':',
+    keyValDelimeter : ':',
     map : { x : 'y' },
     subject : '',
-    // scriptArgs :[ 'x', ':', 'y' ]
     scriptArgs :[ 'x', ' : ', 'y' ]
   }
   test.contains( got, expected );
@@ -136,10 +133,9 @@ function appArgs( test )
     interpreterPath : _argv[ 0 ],
     mainPath : _argv[ 1 ],
     interpreterArgs : [],
-    delimeter : ':',
+    keyValDelimeter : ':',
     map : { x : 1 },
     subject : '',
-    // scriptArgs : [ 'x', ':', 'y', 'x', ':', '1' ]
     scriptArgs : [ 'x', ' :', 'y', 'x', ' :', '1']
   }
   test.contains( got, expected );
@@ -154,10 +150,9 @@ function appArgs( test )
     interpreterPath : _argv[ 0 ],
     mainPath : _argv[ 1 ],
     interpreterArgs : [],
-    delimeter : ':',
+    keyValDelimeter : ':',
     map : { x : 'y xyz', y : 1 },
     subject : 'a b c d',
-    // scriptArgs : [ 'a b c d', 'x', ':', 'y', 'xyz', 'y', ':', 1 ]
     scriptArgs : [ 'a b c d', 'x', ' :', 'y', 'xyz', 'y', ' :', 1 ]
   }
   test.contains( got, expected );
@@ -180,18 +175,9 @@ function appArgs( test )
     interpreterPath : _argv[ 0 ],
     mainPath : _argv[ 1 ],
     interpreterArgs : [],
-    delimeter : ':',
+    keyValDelimeter : ':',
     map : { a : 1, b : 2, c : 3, d : 4, e : 5 },
     subject : 'filePath',
-    // scriptArgs :
-    // [
-    //   'filePath',
-    //   'a', ':', 1,
-    //   'b', ':', '2',
-    //   'c', ':', 3,
-    //   'd', ':', '4',
-    //   'e', ':', 5
-    // ]
     scriptArgs :
     [
       'filePath',
@@ -214,13 +200,53 @@ function appArgs( test )
     interpreterPath : _argv[ 0 ],
     mainPath : _argv[ 1 ],
     interpreterArgs : [],
-    delimeter : ':',
+    keyValDelimeter : ':',
     map : { a : '', b : '', c : 'd', x : 0, y : 1 },
     subject : '',
-    // scriptArgs : [ 'a', ':', 'b', ':', 'c', ':', 'd', 'x', ':', 0, 'y', ':', 1 ]
     scriptArgs : [ 'a :b :c :d', 'x', ' :', 0, 'y', ' :', 1 ]
   }
   test.contains( got, expected );
+
+  /* */
+
+  var argv = [];
+  var got = _.appArgs({ argv : [ 'interpreter', 'main.js', '.set v:5 ; .build debug:1 ; .export' ], caching : 0 });
+  var expected =
+  {
+    interpreterPath : 'interpreter',
+    mainPath : 'main.js',
+    interpreterArgs : [],
+    keyValDelimeter : ':',
+    subjectsDelimeter : ';',
+    subject : '.set',
+    map : { v : 5 },
+    scriptArgs : [ '.set v:5 ; .build debug:1 ; .export' ],
+    scriptString : '.set v:5 ; .build debug:1 ; .export',
+    subjects : [ '.set', '.build', '.export' ],
+    maps : [ { v : 5 }, { debug : 1 }, {} ],
+  }
+  test.contains( got, expected );
+
+  /* */
+
+  var argv = [];
+  var got = _.appArgs({ argv : [ 'interpreter', 'main.js', '.set v:[1 2  3 ] ; .build debug:1 ; .export' ], caching : 0 });
+  var expected =
+  {
+    interpreterPath : 'interpreter',
+    mainPath : 'main.js',
+    interpreterArgs : [],
+    keyValDelimeter : ':',
+    subjectsDelimeter : ';',
+    subject : '.set',
+    map : { v : [ 1,2,3 ] },
+    scriptArgs : [ '.set v:[1 2  3 ] ; .build debug:1 ; .export' ],
+    scriptString : '.set v:[1 2  3 ] ; .build debug:1 ; .export',
+    subjects : [ '.set', '.build', '.export' ],
+    maps : [ { v : [ 1,2,3 ] }, { debug : 1 }, {} ],
+  }
+  test.contains( got, expected );
+
 }
 
 //

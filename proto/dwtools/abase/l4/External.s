@@ -177,7 +177,7 @@ function shell( o )
     o.verbosity = 0;
     // debugger;
     if( o.outputPiping === null )
-    o.outputPiping = o.verbosity >= 1;
+    o.outputPiping = o.verbosity >= 2;
     if( o.outputCollecting && !o.output )
     o.output = '';
 
@@ -1099,11 +1099,12 @@ function moduleRequire( filePath )
 //
 // --
 
-let _appArgsInSamFormatCache;
+let _appArgsCache;
 let _appArgsInSamFormat = Object.create( null )
 var defaults = _appArgsInSamFormat.defaults = Object.create( null );
 
-defaults.delimeter = ':';
+defaults.keyValDelimeter = ':';
+defaults.subjectsDelimeter = ';';
 defaults.argv = null;
 defaults.caching = true;
 defaults.parsingArrays = true;
@@ -1117,92 +1118,115 @@ function _appArgsInSamFormatNodejs( o )
   o = _.routineOptions( _appArgsInSamFormatNodejs,arguments );
 
   if( o.caching )
-  if( _appArgsInSamFormatCache && o.delimeter === _appArgsInSamFormatCache.delimeter )
-  return _appArgsInSamFormatCache;
+  if( _appArgsCache && o.keyValDelimeter === _appArgsCache.keyValDelimeter && o.subjectsDelimeter === _appArgsCache.subjectsDelimeter )
+  return _appArgsCache;
 
   let result = Object.create( null );
 
   if( o.caching )
-  if( o.delimeter === _appArgsInSamFormatNodejs.defaults.delimeter )
-  _appArgsInSamFormatCache = result;
+  if( o.keyValDelimeter === _appArgsInSamFormatNodejs.defaults.keyValDelimeter )
+  _appArgsCache = result;
 
-  if( _global.process )
+  if( !_global.process )
   {
-    o.argv = o.argv || process.argv;
-
-    _.assert( _.longIs( o.argv ) );
-
-    result.interpreterPath = _.path.normalize( o.argv[ 0 ] );
-    result.mainPath = _.path.normalize( o.argv[ 1 ] );
-    result.interpreterArgs = process.execArgv;
-    result.delimeter = o.delimeter;
-    result.map = Object.create( null );
     result.subject = '';
-
-    result.scriptArgs = o.argv.slice( 2 );
-    result.scriptString = result.scriptArgs.join( ' ' );
-    result.scriptString = result.scriptString.trim();
-
-    if( !result.scriptString )
+    result.map = Object.create( null );
+    result.subjects = [];
+    result.maps = [];
     return result;
-
-    /* should be strSplit, but not strIsolateBeginOrAll because of quoting */
-
-    let cuts1 = _.strSplit
-    ({
-      src : result.scriptString,
-      delimeter : o.delimeter,
-      stripping : 1,
-      quoting : 1,
-      preservingDelimeters : 1,
-      preservingEmpty : 0,
-    });
-
-    if( cuts1.length === 1 )
-    {
-      result.subject = cuts1[ 0 ];
-      return result;
-    }
-
-    let cuts2 = _.strIsolateEndOrAll( cuts1[ 0 ], ' ' );
-    result.subject = cuts2[ 0 ];
-    cuts1[ 0 ] = cuts2[ 2 ];
-    result.map = _.strParseMap( cuts1.join( '' ) );
-
-    if( o.parsingArrays )
-    for( let m in result.map )
-    {
-      result.map[ m ] = parseArrayMaybe( result.map[ m ] );
-    }
-
   }
+
+  o.argv = o.argv || process.argv;
+
+  _.assert( _.longIs( o.argv ) );
+
+  result.interpreterPath = _.path.normalize( o.argv[ 0 ] );
+  result.mainPath = _.path.normalize( o.argv[ 1 ] );
+  result.interpreterArgs = process.execArgv;
+
+  // result.keyValDelimeter = o.keyValDelimeter;
+  // result.subjectsDelimeter = o.subjectsDelimeter;
+  // result.map = Object.create( null );
+  // result.subject = '';
+
+  result.scriptArgs = o.argv.slice( 2 );
+  result.scriptString = result.scriptArgs.join( ' ' );
+  result.scriptString = result.scriptString.trim();
+
+  let r = _.strRequestParse
+  ({
+    src : result.scriptString,
+    keyValDelimeter : o.keyValDelimeter,
+    subjectsDelimeter : o.subjectsDelimeter,
+    parsingArrays : o.parsingArrays,
+  });
+
+  _.mapExtend( result, r );
 
   return result;
 
-  /**/
-
-  function parseArrayMaybe( str )
-  {
-    let result = str;
-    if( !_.strIs( result ) )
-    return result;
-    let inside = _.strInsideOf( result, '[', ']' );
-    if( inside !== false )
-    {
-      let splits = _.strSplit
-      ({
-        src : inside,
-        delimeter : [ ' ', ',' ],
-        stripping : 1,
-        quoting : 1,
-        preservingDelimeters : 0,
-        preservingEmpty : 0,
-      });
-      result = splits;
-    }
-    return result;
-  }
-
+  // // if( !result.scriptString )
+  // // return result;
+  //
+  // /* should be strSplit, but not strIsolateBeginOrAll because of quoting */
+  //
+  // let commands = _.strSplit
+  // ({
+  //   src : result.scriptString,
+  //   delimeter : o.subjectsDelimeter,
+  //   stripping : 1,
+  //   quoting : 1,
+  //   preservingDelimeters : 0,
+  //   preservingEmpty : 0,
+  // });
+  //
+  // /* */
+  //
+  // for( let c = 0 ; c < commands.length ; c++ )
+  // {
+  //
+  //   let mapEntries = _.strSplit
+  //   ({
+  //     src : commands[ c ],
+  //     delimeter : o.keyValDelimeter,
+  //     stripping : 1,
+  //     quoting : 1,
+  //     preservingDelimeters : 1,
+  //     preservingEmpty : 0,
+  //   });
+  //
+  //   let subject, map;
+  //
+  //   if( mapEntries.length === 1 )
+  //   {
+  //     subject = mapEntries[ 0 ];
+  //     map = Object.create( null );
+  //   }
+  //   else
+  //   {
+  //     let subjectAndKey = _.strIsolateEndOrAll( mapEntries[ 0 ], ' ' );
+  //     subject = subjectAndKey[ 0 ];
+  //     mapEntries[ 0 ] = subjectAndKey[ 2 ];
+  //
+  //     map = _.strToMap
+  //     ({
+  //       src : mapEntries.join( '' ),
+  //       keyValDelimeter : o.keyValDelimeter,
+  //       parsingArrays : o.parsingArrays,
+  //     });
+  //
+  //   }
+  //
+  //   result.subjects.push( subject );
+  //   result.maps.push( map );
+  // }
+  //
+  // if( result.subjects.length )
+  // result.subject = result.subjects[ 0 ];
+  // if( result.maps.length )
+  // result.map = result.maps[ 0 ];
+  //
+  // return result;
 }
 
 _appArgsInSamFormatNodejs.defaults = Object.create( _appArgsInSamFormat.defaults );
@@ -1222,16 +1246,16 @@ function _appArgsInSamFormatBrowser( o )
   o = _.routineOptions( _appArgsInSamFormatNodejs,arguments );
 
   if( o.caching )
-  if( _appArgsInSamFormatCache && o.delimeter === _appArgsInSamFormatCache.delimeter )
-  return _appArgsInSamFormatCache;
+  if( _appArgsCache && o.keyValDelimeter === _appArgsCache.keyValDelimeter )
+  return _appArgsCache;
 
   let result = Object.create( null );
 
   result.map =  Object.create( null );
 
   if( o.caching )
-  if( o.delimeter === _appArgsInSamFormatNodejs.defaults.delimeter )
-  _appArgsInSamFormatCache = result;
+  if( o.keyValDelimeter === _appArgsInSamFormatNodejs.defaults.keyValDelimeter )
+  _appArgsCache = result;
 
   /* xxx */
 
@@ -1281,9 +1305,6 @@ function appArgsReadTo( o )
     if( but.length )
     {
       throw _.err( 'Unknown application arguments : ' + _.strQuote( but ).join( ', ' ) );
-      // o.appArgs.err = _.err( 'Unknown application arguments : ' + _.strQuote( but ).join( ', ' ) );
-      // if( o.throwing )
-      // throw o.appArgs.err;
     }
   }
 
@@ -1316,12 +1337,10 @@ function appArgsReadTo( o )
 appArgsReadTo.defaults =
 {
   dst : null,
-  // appArgs : null,
   propertiesMap : null,
   namesMap : null,
   removing : 1,
   only : 1,
-  // throwing : 1,
 }
 
 //
@@ -1332,10 +1351,10 @@ function appAnchor( o )
 
   _.routineOptions( appAnchor,arguments );
 
-  let a = _.strParseMap
+  let a = _.strToMap
   ({
     src : _.strRemoveBegin( window.location.hash,'#' ),
-    valKeyDelimeter : ':',
+    keyValDelimeter : ':',
     entryDelimeter : ';',
   });
 
@@ -1355,7 +1374,7 @@ function appAnchor( o )
     let newHash = '#' + _.mapToStr
     ({
       src : a,
-      valKeyDelimeter : ':',
+      keyValDelimeter : ':',
       entryDelimeter : ';',
     });
 
@@ -1578,9 +1597,9 @@ _.mapExtend( Self, Proto );
 // export
 // --
 
-if( typeof module !== 'undefined' )
-if( _global_.WTOOLS_PRIVATE )
-{ /* delete require.cache[ module.id ]; */ }
+// if( typeof module !== 'undefined' )
+// if( _global_.WTOOLS_PRIVATE )
+// { /* delete require.cache[ module.id ]; */ }
 
 if( typeof module !== 'undefined' && module !== null )
 module[ 'exports' ] = Self;
