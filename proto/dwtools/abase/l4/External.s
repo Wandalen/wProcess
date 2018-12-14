@@ -120,6 +120,9 @@ function shell( o )
       o.logger.log( prefix + o.argsStr );
     }
 
+    // let prefix = ' > ';
+    // o.logger.log( prefix + o.argsStr ); // xxx
+
     /* create process */
 
     try
@@ -134,13 +137,13 @@ function shell( o )
 
     /* piping out channel */
 
-    if( o.outputPiping )
+    if( o.outputPiping || o.outputCollecting )
     if( o.process.stdout )
     o.process.stdout.on( 'data', handleStdout );
 
     /* piping error channel */
 
-    if( o.outputPiping )
+    if( o.outputPiping || o.outputCollecting )
     if( o.process.stderr )
     o.process.stderr.on( 'data', handleStderr );
 
@@ -179,6 +182,10 @@ function shell( o )
     o.outputPiping = o.verbosity >= 2;
     if( o.outputCollecting && !o.output )
     o.output = '';
+
+    // _.assert( !o.outputCollecting || !!o.outputPiping, 'If {-o.outputCollecting-} enabled then {-o.outputPiping-} either should be' );
+
+    // console.log( 'o.outputCollecting', o.outputCollecting );
 
     /* ipc */
 
@@ -356,6 +363,11 @@ function shell( o )
     if( _.bufferAnyIs( data ) )
     data = _.bufferToStr( data );
 
+    if( o.outputCollecting )
+    o.output += data;
+    if( !o.outputPiping )
+    return;
+
     if( _.strEnds( data,'\n' ) )
     data = _.strRemoveEnd( data,'\n' );
 
@@ -365,7 +377,7 @@ function shell( o )
     if( _.color && !o.outputGray )
     data = _.color.strFormat( data,'pipe.negative' );
 
-    o.logger.warn( data );
+    o.logger.error( data );
   }
 
   /* */
@@ -376,11 +388,13 @@ function shell( o )
     if( _.bufferAnyIs( data ) )
     data = _.bufferToStr( data );
 
-    if( _.strEnds( data,'\n' ) )
-    data = _.strRemoveEnd( data,'\n' );
-
     if( o.outputCollecting )
     o.output += data;
+    if( !o.outputPiping )
+    return;
+
+    if( _.strEnds( data,'\n' ) )
+    data = _.strRemoveEnd( data,'\n' );
 
     if( o.outputPrefixing )
     data = 'stdout :\n' + _.strIndentation( data,'  ' );
@@ -463,7 +477,7 @@ function sheller( o0 )
           return _.shell( o2 );
         }
       });
-      debugger;
+      // debugger;
       return o.con.andThen( os );
     }
 
