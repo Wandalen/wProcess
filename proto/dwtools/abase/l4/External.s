@@ -175,7 +175,6 @@ function shell( o )
     o.verbosity = o.verbosity ? 1 : 0;
     if( o.verbosity < 0 )
     o.verbosity = 0;
-    debugger;
     if( o.outputPiping === null )
     o.outputPiping = o.verbosity >= 2;
     if( o.outputCollecting && !o.output )
