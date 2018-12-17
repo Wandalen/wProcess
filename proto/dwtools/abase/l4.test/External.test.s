@@ -293,6 +293,8 @@ function shell( test )
       return _.timeOut( 4000 )
 
       console.log( __filename );
+
+      return true;
     });
 
   }
@@ -301,6 +303,7 @@ function shell( test )
 
   var testAppPath = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp.js' ) );
   var testApp = testApp.toString() + '\ntestApp();';
+  var expectedOutput = testAppPath + '\n';
   _.fileProvider.fileWrite( testAppPath, testApp );
 
   var o;
@@ -329,7 +332,7 @@ function shell( test )
     .finally( function()
     {
       test.identical( options.exitCode, 0 );
-      test.identical( options.output, testAppPath );
+      test.identical( options.output, expectedOutput );
       return null;
     })
   })
@@ -385,7 +388,7 @@ function shell( test )
     .finally( function()
     {
       test.identical( options.exitCode, 0 );
-      test.identical( options.output, testAppPath );
+      test.identical( options.output, expectedOutput );
       return null;
     })
   })
@@ -640,6 +643,7 @@ function shell2( test )
     con.timeOut( _.numberRandomInt( [ 300, 2000 ] ), function()
     {
       console.log( process.argv.slice( 2 ).join( ' ' ) );
+      return true;
     });
 
   }
@@ -676,7 +680,7 @@ function shell2( test )
     .finally( function()
     {
       test.identical( options.exitCode, 0 );
-      test.identical( options.output, o.args.join( ' ' ) );
+      test.identical( options.output, o.args.join( ' ' ) + '\n' );
       return null;
     })
   })
@@ -790,7 +794,7 @@ function shell2( test )
     {
       test.identical( options.exitCode, 0 );
       var expectedArgs = _.arrayAppendArray( [ 'staging', 'debug' ], process.argv.slice( 2 ) );
-      test.identical( options.output, expectedArgs.join( ' ' ) );
+      test.identical( options.output, expectedArgs.join( ' ' ) + '\n');
       return null;
     })
   })
@@ -811,6 +815,7 @@ function shellCurrentPath( test )
 
   function testApp()
   {
+    debugger
     console.log( process.cwd() ); /* qqq : hide it from console if possible */
     if( process.send )
     process.send({ currentPath : process.cwd() })
@@ -820,6 +825,7 @@ function shellCurrentPath( test )
 
   var testAppPath = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp.js' ) );
   var testApp = testApp.toString() + '\ntestApp();';
+  var expectedOutput = __dirname + '\n'
   _.fileProvider.fileWrite( testAppPath, testApp );
 
   //
@@ -841,7 +847,7 @@ function shellCurrentPath( test )
     return _.shell( o )
     .finally( function( err, got )
     {
-      test.identical( o.output, __dirname );
+      test.identical( o.output, expectedOutput );
       return null;
     })
   })
@@ -863,7 +869,7 @@ function shellCurrentPath( test )
     return _.shell( o )
     .finally( function( err, got )
     {
-      test.identical( o.output, __dirname );
+      test.identical( o.output, expectedOutput );
       return null;
     })
   })
@@ -885,7 +891,7 @@ function shellCurrentPath( test )
     return _.shell( o )
     .finally( function( err, got )
     {
-      test.identical( o.output, __dirname );
+      test.identical( o.output, expectedOutput );
       return null;
     })
   })
