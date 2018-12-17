@@ -283,8 +283,8 @@ function shell( test )
     var _ = _global_.wTools;
 
     var args = _.appArgs();
-    var con = new _.Consequence().give( null );
-    con.timeOutThen( _.numberRandomInt( [ 300, 2000 ] ), function()
+    var con = new _.Consequence().take( null );
+    con.timeOut( _.numberRandomInt( [ 300, 2000 ] ), function()
     {
       if( args.map.exitWithCode )
       process.exit( args.map.exitWithCode )
@@ -304,9 +304,9 @@ function shell( test )
   _.fileProvider.fileWrite( testAppPath, testApp );
 
   var o;
-  var con = new _.Consequence().give( null );
+  var con = new _.Consequence().take( null );
 
-  con.doThen( function()
+  con.finally( function()
   {
     test.case = 'mode : spawn';
 
@@ -326,7 +326,7 @@ function shell( test )
     var options = _.mapSupplement( {}, o, commonDefaults );
 
     return _.shell( options )
-    .doThen( function()
+    .finally( function()
     {
       test.identical( options.exitCode, 0 );
       test.identical( options.output, testAppPath );
@@ -341,7 +341,7 @@ function shell( test )
     var options = _.mapSupplement( {}, o, commonDefaults );
 
     return _.shell( options )
-    .doThen( function()
+    .finally( function()
     {
       test.identical( options.exitCode, 0 );
       test.identical( options.output.length, 0 );
@@ -357,7 +357,7 @@ function shell( test )
   //   var options = _.mapSupplement( {}, o, commonDefaults );
 
   //   return _.shell( options )
-  //   .doThen( function()
+  //   .finally( function()
   //   {
   //     test.identical( options.exitCode, 0 );
   //     test.identical( options.output.length, 0 );
@@ -382,7 +382,7 @@ function shell( test )
     var options = _.mapSupplement( {}, o, commonDefaults );
 
     return _.shell( options )
-    .doThen( function()
+    .finally( function()
     {
       test.identical( options.exitCode, 0 );
       test.identical( options.output, testAppPath );
@@ -398,7 +398,7 @@ function shell( test )
     var options = _.mapSupplement( {}, o, commonDefaults );
 
     return _.shell( options )
-    .doThen( function()
+    .finally( function()
     {
       test.identical( options.exitCode, 0 );
       test.identical( options.output.length, 0 );
@@ -414,7 +414,7 @@ function shell( test )
   //   var options = _.mapSupplement( {}, o, commonDefaults );
 
   //   return _.shell( options )
-  //   .doThen( function()
+  //   .finally( function()
   //   {
   //     test.identical( options.exitCode, 0 );
   //     test.identical( options.output.length, 0 );
@@ -440,7 +440,7 @@ function shell( test )
       options.process.kill( 'SIGINT' );
       return null;
     })
-    shell.doThen(function()
+    shell.finally(function()
     {
       test.identical( options.process.killed, true );
       test.identical( !options.exitCode, true );
@@ -469,7 +469,7 @@ function shell( test )
       options.process.kill( 'SIGINT' );
       return null;
     })
-    shell.doThen(function()
+    shell.finally(function()
     {
       test.identical( options.process.killed, true );
       test.identical( !options.exitCode, true );
@@ -492,7 +492,7 @@ function shell( test )
     var options = _.mapSupplement( {}, o, commonDefaults );
 
     return test.mustNotThrowError( _.shell( options ) )
-    .doThen( () =>
+    .finally( () =>
     {
       test.identical( options.exitCode, 0 );
       return null;
@@ -512,7 +512,7 @@ function shell( test )
     var options = _.mapSupplement( {}, o, commonDefaults );
 
     return test.shouldThrowError( _.shell( options ) )
-    .doThen( () =>
+    .finally( () =>
     {
       test.identical( options.exitCode, 1 );
       return null;
@@ -532,7 +532,7 @@ function shell( test )
     var options = _.mapSupplement( {}, o, commonDefaults );
 
     return test.mustNotThrowError( _.shell( options ) )
-    .doThen( () =>
+    .finally( () =>
     {
       test.identical( options.exitCode, 0 );
       return null;
@@ -552,7 +552,7 @@ function shell( test )
     var options = _.mapSupplement( {}, o, commonDefaults );
 
     return test.shouldThrowError( _.shell( options ) )
-    .doThen( () =>
+    .finally( () =>
     {
       test.identical( options.exitCode, 1 );
       return null;
@@ -589,7 +589,7 @@ function shell( test )
   // })
   // ;
 
-  // con.doThen( () =>  _.fileProvider.fileDelete( testAppPath ) );
+  // con.finally( () =>  _.fileProvider.fileDelete( testAppPath ) );
   return con;
 }
 
@@ -636,8 +636,8 @@ function shell2( test )
     var _global = _global_;
     var _ = _global_.wTools;
 
-    var con = new _.Consequence().give( null );
-    con.timeOutThen( _.numberRandomInt( [ 300, 2000 ] ), function()
+    var con = new _.Consequence().take( null );
+    con.timeOut( _.numberRandomInt( [ 300, 2000 ] ), function()
     {
       console.log( process.argv.slice( 2 ).join( ' ' ) );
     });
@@ -651,9 +651,9 @@ function shell2( test )
   _.fileProvider.fileWrite( testAppPath, testApp );
 
   var o;
-  var con = new _.Consequence().give( null );
+  var con = new _.Consequence().take( null );
 
-  con.doThen( function()
+  con.finally( function()
   {
     test.case = 'mode : shell';
 
@@ -673,7 +673,7 @@ function shell2( test )
     var options = _.mapSupplement( {}, o, commonDefaults );
 
     return _.shell( options )
-    .doThen( function()
+    .finally( function()
     {
       test.identical( options.exitCode, 0 );
       test.identical( options.output, o.args.join( ' ' ) );
@@ -683,7 +683,7 @@ function shell2( test )
 
   //
 
-  con.doThen( function()
+  con.finally( function()
   {
     test.case = 'mode : shell, passingThrough : true, no args';
 
@@ -702,7 +702,7 @@ function shell2( test )
     var options = _.mapSupplement( {}, o, commonDefaults );
 
     return _.shell( options )
-    .doThen( function()
+    .finally( function()
     {
       test.identical( options.exitCode, 0 );
       var expectedArgs= _.arrayAppendArray( [], process.argv.slice( 2 ) );
@@ -713,7 +713,7 @@ function shell2( test )
 
   //
 
-  con.doThen( function()
+  con.finally( function()
   {
     test.case = 'mode : spawn, passingThrough : true, only filePath in args';
 
@@ -733,7 +733,7 @@ function shell2( test )
     var options = _.mapSupplement( {}, o, commonDefaults );
 
     return _.shell( options )
-    .doThen( function()
+    .finally( function()
     {
       test.identical( options.exitCode, 0 );
       var expectedArgs = _.arrayAppendArray( [], process.argv.slice( 2 ) );
@@ -744,7 +744,7 @@ function shell2( test )
 
   //
 
-  con.doThen( function()
+  con.finally( function()
   {
     test.case = 'mode : spawn, passingThrough : true, incorrect usage of o.path in spawn mode';
 
@@ -765,7 +765,7 @@ function shell2( test )
 
   //
 
-  con.doThen( function()
+  con.finally( function()
   {
     test.case = 'mode : shell, passingThrough : true';
 
@@ -786,7 +786,7 @@ function shell2( test )
     var options = _.mapSupplement( {}, o, commonDefaults );
 
     return _.shell( options )
-    .doThen( function()
+    .finally( function()
     {
       test.identical( options.exitCode, 0 );
       var expectedArgs = _.arrayAppendArray( [ 'staging', 'debug' ], process.argv.slice( 2 ) );
@@ -824,9 +824,9 @@ function shellCurrentPath( test )
 
   //
 
-  var con = new _.Consequence().give( null );
+  var con = new _.Consequence().take( null );
 
-  con.doThen( function()
+  con.finally( function()
   {
     test.case = 'mode : shell';
 
@@ -839,7 +839,7 @@ function shellCurrentPath( test )
       outputCollecting : 1,
     }
     return _.shell( o )
-    .doThen( function( err, got )
+    .finally( function( err, got )
     {
       test.identical( o.output, __dirname );
       return null;
@@ -848,7 +848,7 @@ function shellCurrentPath( test )
 
   /**/
 
-  con.doThen( function()
+  con.finally( function()
   {
     test.case = 'mode : spawn';
 
@@ -861,7 +861,7 @@ function shellCurrentPath( test )
       outputCollecting : 1,
     }
     return _.shell( o )
-    .doThen( function( err, got )
+    .finally( function( err, got )
     {
       test.identical( o.output, __dirname );
       return null;
@@ -870,7 +870,7 @@ function shellCurrentPath( test )
 
   /**/
 
-  con.doThen( function()
+  con.finally( function()
   {
     test.case = 'mode : exec';
 
@@ -883,7 +883,7 @@ function shellCurrentPath( test )
       outputCollecting : 1,
     }
     return _.shell( o )
-    .doThen( function( err, got )
+    .finally( function( err, got )
     {
       test.identical( o.output, __dirname );
       return null;
@@ -892,7 +892,7 @@ function shellCurrentPath( test )
 
   /**/
 
-  con.doThen( function()
+  con.finally( function()
   {
     test.case = 'mode : fork';
 
@@ -909,7 +909,7 @@ function shellCurrentPath( test )
     {
       output = m;
     })
-    con.doThen( function( err, got )
+    con.finally( function( err, got )
     {
       test.identical( output.currentPath, __dirname );
       return null;
@@ -943,17 +943,17 @@ function shellNode( test )
   var testApp = testApp.toString() + '\ntestApp();';
   _.fileProvider.fileWrite( testAppPath, testApp );
 
-  var con = new _.Consequence().give( null );
+  var con = new _.Consequence().take( null );
 
   var modes = [ 'fork', 'exec', 'spawn', 'shell' ];
 
   modes.forEach( ( mode ) =>
   {
-    con.doThen( () =>
+    con.finally( () =>
     {
       var o = { path : testAppPath, mode : mode, applyingExitCode : 1, throwingExitCode : 1 };
       return _.shellNode( o )
-      .doThen( ( err, got ) =>
+      .finally( ( err, got ) =>
       {
         test.identical( o.exitCode, 1 );
         test.identical( process.exitCode, 1 );
@@ -963,11 +963,11 @@ function shellNode( test )
       })
     })
 
-    con.doThen( () =>
+    con.finally( () =>
     {
       var o = { path : testAppPath, mode : mode,  applyingExitCode : 1, throwingExitCode : 0 };
       return _.shellNode( o )
-      .doThen( ( err, got ) =>
+      .finally( ( err, got ) =>
       {
         test.identical( o.exitCode, 1 );
         test.identical( process.exitCode, 1 );
@@ -977,11 +977,11 @@ function shellNode( test )
       })
     })
 
-    con.doThen( () =>
+    con.finally( () =>
     {
       var o = { path : testAppPath,  mode : mode, applyingExitCode : 0, throwingExitCode : 1 };
       return _.shellNode( o )
-      .doThen( ( err, got ) =>
+      .finally( ( err, got ) =>
       {
         test.identical( o.exitCode, 1 );
         test.identical( process.exitCode, 0 );
@@ -990,11 +990,11 @@ function shellNode( test )
       })
     })
 
-    con.doThen( () =>
+    con.finally( () =>
     {
       var o = { path : testAppPath,  mode : mode, applyingExitCode : 0, throwingExitCode : 0 };
       return _.shellNode( o )
-      .doThen( ( err, got ) =>
+      .finally( ( err, got ) =>
       {
         test.identical( o.exitCode, 1 );
         test.identical( process.exitCode, 0 );
@@ -1003,11 +1003,11 @@ function shellNode( test )
       })
     })
 
-    con.doThen( () =>
+    con.finally( () =>
     {
       var o = { path : testAppPath,  mode : mode, maximumMemory : 1, applyingExitCode : 0, throwingExitCode : 0 };
       return _.shellNode( o )
-      .doThen( ( err, got ) =>
+      .finally( ( err, got ) =>
       {
         test.identical( o.exitCode, 1 );
         test.identical( process.exitCode, 0 );

@@ -68,7 +68,7 @@ function shell( o )
   let currentExitCode;
   let currentPath;
 
-  o.con = o.con || new _.Consequence().give( null );
+  o.con = o.con || new _.Consequence().take( null );
 
   /* xxx qqq : problem */
 
@@ -157,7 +157,7 @@ function shell( o )
 
   });
 
-  // o.con.doThen( ( err, arg ) =>
+  // o.con.finally( ( err, arg ) =>
   // {
   //   debugger;
   //   if( err )
@@ -332,7 +332,7 @@ function shell( o )
     }
     else
     {
-      o.con.give( o );
+      o.con.take( o );
     }
 
   }
@@ -450,7 +450,7 @@ function sheller( o0 )
   if( _.strIs( o0 ) )
   o0 = { path : o0 }
   o0 = _.routineOptions( sheller, o0 );
-  o0.con = o0.con || new _.Consequence().give( null );
+  o0.con = o0.con || new _.Consequence().take( null );
 
   return function er()
   {
@@ -478,7 +478,7 @@ function sheller( o0 )
         }
       });
       // debugger;
-      return o.con.andThen( os );
+      return o.con.andKeep( os );
     }
 
     return _.shell( o );
@@ -544,7 +544,7 @@ function shellNode( o )
     // _.appExit( -1 );
     o.exitCode = shellOptions.exitCode;
     o.signal = shellOptions.signal;
-    this.give( err,arg );
+    this.take( err,arg );
   });
 
   o.con = shellOptions.con;
@@ -994,14 +994,14 @@ function execStages( stages,o )
   /* begin */
 
   if( o.onBegin )
-  con.doThen( o.onBegin );
+  con.finally( o.onBegin );
 
   /* end */
 
   function handleEnd()
   {
 
-    con.doThen( function( err,data )
+    con.finally( function( err,data )
     {
 
       if( err )
@@ -1012,7 +1012,7 @@ function execStages( stages,o )
     });
 
     if( o.onEnd )
-    con.doThen( o.onEnd );
+    con.finally( o.onEnd );
 
   }
 
@@ -1060,7 +1060,7 @@ function execStages( stages,o )
     if( !o.manual )
     con.ifNoErrorThen( routineCall );
 
-    con.timeOutThen( o.delay );
+    con.timeOut( o.delay );
 
     handleStage();
 
