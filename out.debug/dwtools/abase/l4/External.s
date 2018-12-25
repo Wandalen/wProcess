@@ -1434,7 +1434,7 @@ function appExitCode( status )
 function appExit( exitCode )
 {
 
-  debugger;
+  // debugger; // xxx
 
   exitCode = exitCode !== undefined ? exitCode : appExitCode();
 
