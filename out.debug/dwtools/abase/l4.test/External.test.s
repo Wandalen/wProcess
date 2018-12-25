@@ -309,7 +309,7 @@ function shell( test )
   var o;
   var con = new _.Consequence().take( null );
 
-  con.finally( function()
+  con.thenKeep( function()
   {
     test.case = 'mode : spawn';
 
@@ -322,21 +322,21 @@ function shell( test )
 
     return null;
   })
-  .ifNoErrorThen( function( arg/*aaa*/ )
+  .thenKeep( function( arg/*aaa*/ )
   {
     /* mode : spawn, stdio : pipe */
 
     var options = _.mapSupplement( {}, o, commonDefaults );
 
     return _.shell( options )
-    .finally( function()
+    .thenKeep( function()
     {
       test.identical( options.exitCode, 0 );
       test.identical( options.output, expectedOutput );
       return null;
     })
   })
-  .ifNoErrorThen( function( arg/*aaa*/ )
+  .thenKeep( function( arg/*aaa*/ )
   {
     /* mode : spawn, stdio : ignore */
 
@@ -344,14 +344,14 @@ function shell( test )
     var options = _.mapSupplement( {}, o, commonDefaults );
 
     return _.shell( options )
-    .finally( function()
+    .thenKeep( function()
     {
       test.identical( options.exitCode, 0 );
       test.identical( options.output.length, 0 );
       return null;
     })
   })
-  // .ifNoErrorThen( function( arg/*aaa*/ )
+  // .thenKeep( function( arg/*aaa*/ )
   // {
   //   /* mode : spawn, stdio : inherit */
 
@@ -360,13 +360,13 @@ function shell( test )
   //   var options = _.mapSupplement( {}, o, commonDefaults );
 
   //   return _.shell( options )
-  //   .finally( function()
+  //   .thenKeep( function()
   //   {
   //     test.identical( options.exitCode, 0 );
   //     test.identical( options.output.length, 0 );
   //   })
   // })
-  .ifNoErrorThen( function( arg/*aaa*/ )
+  .thenKeep( function( arg/*aaa*/ )
   {
     test.case = 'mode : shell';
 
@@ -378,21 +378,21 @@ function shell( test )
     }
     return null;
   })
-  .ifNoErrorThen( function( arg/*aaa*/ )
+  .thenKeep( function( arg/*aaa*/ )
   {
     /* mode : shell, stdio : pipe */
 
     var options = _.mapSupplement( {}, o, commonDefaults );
 
     return _.shell( options )
-    .finally( function()
+    .thenKeep( function()
     {
       test.identical( options.exitCode, 0 );
       test.identical( options.output, expectedOutput );
       return null;
     })
   })
-  .ifNoErrorThen( function( arg/*aaa*/ )
+  .thenKeep( function( arg/*aaa*/ )
   {
     /* mode : shell, stdio : ignore */
 
@@ -401,14 +401,14 @@ function shell( test )
     var options = _.mapSupplement( {}, o, commonDefaults );
 
     return _.shell( options )
-    .finally( function()
+    .thenKeep( function()
     {
       test.identical( options.exitCode, 0 );
       test.identical( options.output.length, 0 );
       return null;
     })
   })
-  // .ifNoErrorThen( function( arg/*aaa*/ )
+  // .thenKeep( function( arg/*aaa*/ )
   // {
   //   /* mode : shell, stdio : inherit */
 
@@ -417,13 +417,13 @@ function shell( test )
   //   var options = _.mapSupplement( {}, o, commonDefaults );
 
   //   return _.shell( options )
-  //   .finally( function()
+  //   .thenKeep( function()
   //   {
   //     test.identical( options.exitCode, 0 );
   //     test.identical( options.output.length, 0 );
   //   })
   // })
-  .ifNoErrorThen( function( arg/*aaa*/ )
+  .thenKeep( function( arg/*aaa*/ )
   {
     test.case = 'spawn, stop process using kill';
 
@@ -452,7 +452,7 @@ function shell( test )
 
     return shell;
   })
-  .ifNoErrorThen( function( arg/*aaa*/ )
+  .thenKeep( function( arg/*aaa*/ )
   {
     test.case = 'shell, stop process using kill';
 
@@ -481,7 +481,7 @@ function shell( test )
 
     return shell;
   })
-  .ifNoErrorThen( function( arg/*aaa*/ )
+  .thenKeep( function( arg/*aaa*/ )
   {
     test.case = 'spawn, return good code';
 
@@ -495,13 +495,13 @@ function shell( test )
     var options = _.mapSupplement( {}, o, commonDefaults );
 
     return test.mustNotThrowError( _.shell( options ) )
-    .finally( () =>
+    .thenKeep( () =>
     {
       test.identical( options.exitCode, 0 );
       return null;
     });
   })
-  .ifNoErrorThen( function( arg/*aaa*/ )
+  .thenKeep( function( arg/*aaa*/ )
   {
     test.case = 'spawn, return bad code';
 
@@ -515,13 +515,13 @@ function shell( test )
     var options = _.mapSupplement( {}, o, commonDefaults );
 
     return test.shouldThrowError( _.shell( options ) )
-    .finally( () =>
+    .thenKeep( () =>
     {
       test.identical( options.exitCode, 1 );
       return null;
     });
   })
-  .ifNoErrorThen( function( arg/*aaa*/ )
+  .thenKeep( function( arg/*aaa*/ )
   {
     test.case = 'shell, return good code';
 
@@ -535,13 +535,13 @@ function shell( test )
     var options = _.mapSupplement( {}, o, commonDefaults );
 
     return test.mustNotThrowError( _.shell( options ) )
-    .finally( () =>
+    .thenKeep( () =>
     {
       test.identical( options.exitCode, 0 );
       return null;
     });
   })
-  .ifNoErrorThen( function( arg/*aaa*/ )
+  .thenKeep( function( arg/*aaa*/ )
   {
     test.case = 'shell, return bad code';
 
@@ -555,7 +555,7 @@ function shell( test )
     var options = _.mapSupplement( {}, o, commonDefaults );
 
     return test.shouldThrowError( _.shell( options ) )
-    .finally( () =>
+    .thenKeep( () =>
     {
       test.identical( options.exitCode, 1 );
       return null;
@@ -566,25 +566,25 @@ function shell( test )
   // test.identical( 0, 0 );
 
   // con
-  // .ifNoErrorThen( function( arg/*aaa*/ )
+  // .thenKeep( function( arg/*aaa*/ )
   // {
   //   test.case = 'simple command';
   //   var con = _.shell( 'exit' );
   //   return test.shouldMessageOnlyOnce( con );
   // })
-  // .ifNoErrorThen( function( arg/*aaa*/ )
+  // .thenKeep( function( arg/*aaa*/ )
   // {
   //   test.case = 'bad command, shell';
   //   var con = _.shell({ code : 'xxx', throwingExitCode : 1, mode : 'shell' });
   //   return test.shouldThrowErrorSync( con );
   // })
-  // .ifNoErrorThen( function( arg/*aaa*/ )
+  // .thenKeep( function( arg/*aaa*/ )
   // {
   //   test.case = 'bad command, spawn';
   //   var con = _.shell({ code : 'xxx', throwingExitCode : 1, mode : 'spawn' });
   //   return test.shouldThrowErrorSync( con );
   // })
-  // .ifNoErrorThen( function( arg/*aaa*/ )
+  // .thenKeep( function( arg/*aaa*/ )
   // {
   //   test.case = 'several arguments';
   //   var con = _.shell( 'echo echo something' );
@@ -592,7 +592,7 @@ function shell( test )
   // })
   // ;
 
-  // con.finally( () =>  _.fileProvider.fileDelete( testAppPath ) );
+  // con.thenKeep( () =>  _.fileProvider.fileDelete( testAppPath ) );
   return con;
 }
 
@@ -657,7 +657,7 @@ function shell2( test )
   var o;
   var con = new _.Consequence().take( null );
 
-  con.finally( function()
+  con.thenKeep( function()
   {
     test.case = 'mode : shell';
 
@@ -670,14 +670,14 @@ function shell2( test )
     }
     return null;
   })
-  .ifNoErrorThen( function( arg/*aaa*/ )
+  .thenKeep( function( arg/*aaa*/ )
   {
     /* mode : shell, stdio : pipe */
 
     var options = _.mapSupplement( {}, o, commonDefaults );
 
     return _.shell( options )
-    .finally( function()
+    .thenKeep( function()
     {
       test.identical( options.exitCode, 0 );
       test.identical( options.output, o.args.join( ' ' ) + '\n' );
@@ -687,7 +687,7 @@ function shell2( test )
 
   //
 
-  con.finally( function()
+  con.thenKeep( function()
   {
     test.case = 'mode : shell, passingThrough : true, no args';
 
@@ -698,26 +698,28 @@ function shell2( test )
       passingThrough : 1,
       stdio : 'pipe'
     }
+
+    return null;
   })
-  .ifNoErrorThen( function( arg/*aaa*/ )
+  .thenKeep( function( arg/*aaa*/ )
   {
     /* mode : shell, stdio : pipe, passingThrough : true */
 
     var options = _.mapSupplement( {}, o, commonDefaults );
 
     return _.shell( options )
-    .finally( function()
+    .thenKeep( function()
     {
       test.identical( options.exitCode, 0 );
       var expectedArgs= _.arrayAppendArray( [], process.argv.slice( 2 ) );
-      test.identical( options.output, expectedArgs.join( ' ' ) );
+      test.identical( options.output, expectedArgs.join( ' ' ) + '\n' );
       return null;
     })
   })
 
   //
 
-  con.finally( function()
+  con.thenKeep( function()
   {
     test.case = 'mode : spawn, passingThrough : true, only filePath in args';
 
@@ -729,26 +731,27 @@ function shell2( test )
       passingThrough : 1,
       stdio : 'pipe'
     }
+    return null;
   })
-  .ifNoErrorThen( function( arg/*aaa*/ )
+  .thenKeep( function( arg/*aaa*/ )
   {
     /* mode : spawn, stdio : pipe, passingThrough : true */
 
     var options = _.mapSupplement( {}, o, commonDefaults );
 
     return _.shell( options )
-    .finally( function()
+    .thenKeep( function()
     {
       test.identical( options.exitCode, 0 );
       var expectedArgs = _.arrayAppendArray( [], process.argv.slice( 2 ) );
-      test.identical( options.output, expectedArgs.join( ' ' ) );
+      test.identical( options.output, expectedArgs.join( ' ' ) + '\n' );
       return null;
     })
   })
 
   //
 
-  con.finally( function()
+  con.thenKeep( function()
   {
     test.case = 'mode : spawn, passingThrough : true, incorrect usage of o.path in spawn mode';
 
@@ -760,8 +763,9 @@ function shell2( test )
       passingThrough : 1,
       stdio : 'pipe'
     }
+    return null;
   })
-  .ifNoErrorThen( function( arg/*aaa*/ )
+  .thenKeep( function( arg/*aaa*/ )
   {
     var options = _.mapSupplement( {}, o, commonDefaults );
     return test.shouldThrowError( _.shell( options ) );
@@ -769,7 +773,7 @@ function shell2( test )
 
   //
 
-  con.finally( function()
+  con.thenKeep( function()
   {
     test.case = 'mode : shell, passingThrough : true';
 
@@ -783,14 +787,14 @@ function shell2( test )
     }
     return null;
   })
-  .ifNoErrorThen( function( arg/*aaa*/ )
+  .thenKeep( function( arg/*aaa*/ )
   {
     /* mode : shell, stdio : pipe, passingThrough : true */
 
     var options = _.mapSupplement( {}, o, commonDefaults );
 
     return _.shell( options )
-    .finally( function()
+    .thenKeep( function()
     {
       test.identical( options.exitCode, 0 );
       var expectedArgs = _.arrayAppendArray( [ 'staging', 'debug' ], process.argv.slice( 2 ) );
@@ -832,7 +836,7 @@ function shellCurrentPath( test )
 
   var con = new _.Consequence().take( null );
 
-  con.finally( function()
+  con.thenKeep( function()
   {
     test.case = 'mode : shell';
 
@@ -845,7 +849,7 @@ function shellCurrentPath( test )
       outputCollecting : 1,
     }
     return _.shell( o )
-    .finally( function( err, got )
+    .thenKeep( function( got )
     {
       test.identical( o.output, expectedOutput );
       return null;
@@ -854,7 +858,7 @@ function shellCurrentPath( test )
 
   /**/
 
-  con.finally( function()
+  con.thenKeep( function()
   {
     test.case = 'mode : spawn';
 
@@ -867,7 +871,7 @@ function shellCurrentPath( test )
       outputCollecting : 1,
     }
     return _.shell( o )
-    .finally( function( err, got )
+    .thenKeep( function( got )
     {
       test.identical( o.output, expectedOutput );
       return null;
@@ -876,7 +880,7 @@ function shellCurrentPath( test )
 
   /**/
 
-  con.finally( function()
+  con.thenKeep( function()
   {
     test.case = 'mode : exec';
 
@@ -889,7 +893,7 @@ function shellCurrentPath( test )
       outputCollecting : 1,
     }
     return _.shell( o )
-    .finally( function( err, got )
+    .thenKeep( function( got )
     {
       test.identical( o.output, expectedOutput );
       return null;
@@ -898,7 +902,7 @@ function shellCurrentPath( test )
 
   /**/
 
-  con.finally( function()
+  con.thenKeep( function()
   {
     test.case = 'mode : fork';
 
@@ -915,7 +919,7 @@ function shellCurrentPath( test )
     {
       output = m;
     })
-    con.finally( function( err, got )
+    con.thenKeep( function( got )
     {
       test.identical( output.currentPath, __dirname );
       return null;
@@ -955,7 +959,7 @@ function shellNode( test )
 
   modes.forEach( ( mode ) =>
   {
-    con.finally( () =>
+    con.thenKeep( () =>
     {
       var o = { path : testAppPath, mode : mode, applyingExitCode : 1, throwingExitCode : 1 };
       return _.shellNode( o )
@@ -969,7 +973,7 @@ function shellNode( test )
       })
     })
 
-    con.finally( () =>
+    con.thenKeep( () =>
     {
       var o = { path : testAppPath, mode : mode,  applyingExitCode : 1, throwingExitCode : 0 };
       return _.shellNode( o )
@@ -983,7 +987,7 @@ function shellNode( test )
       })
     })
 
-    con.finally( () =>
+    con.thenKeep( () =>
     {
       var o = { path : testAppPath,  mode : mode, applyingExitCode : 0, throwingExitCode : 1 };
       return _.shellNode( o )
@@ -996,7 +1000,7 @@ function shellNode( test )
       })
     })
 
-    con.finally( () =>
+    con.thenKeep( () =>
     {
       var o = { path : testAppPath,  mode : mode, applyingExitCode : 0, throwingExitCode : 0 };
       return _.shellNode( o )
@@ -1009,7 +1013,7 @@ function shellNode( test )
       })
     })
 
-    con.finally( () =>
+    con.thenKeep( () =>
     {
       var o = { path : testAppPath,  mode : mode, maximumMemory : 1, applyingExitCode : 0, throwingExitCode : 0 };
       return _.shellNode( o )
@@ -1029,6 +1033,105 @@ function shellNode( test )
 }
 
 shellNode.timeOut = 10000;
+
+//
+
+
+function outputHandling( test )
+{
+  var context = this;
+  var testRoutineDir = _.path.join( context.testRootDirectory, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    console.log( 'testApp-output\n' );
+  }
+
+  /* */
+
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp.js' ) );
+  var testApp = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testApp );
+
+  var con = new _.Consequence().take( null );
+
+  var modes = [ 'shell', 'spawn', 'exec', 'fork' ];
+  var loggerOutput = '';
+
+  function onTransformEnd( o )
+  {
+    loggerOutput += o.outputForPrinter[ 0 ];
+  }
+  var logger = new _.Logger({ output : null, onTransformEnd : onTransformEnd });
+
+  modes.forEach( ( mode ) =>
+  {
+    let path = testAppPath;
+    if( mode !== 'fork' )
+    path = 'node ' + path;
+
+    console.log( mode )
+
+    con.thenKeep( () =>
+    {
+      loggerOutput = '';
+      var o = { path : path, mode : mode, outputPiping : 0, outputCollecting : 0, logger : logger };
+      return _.shell( o )
+      .thenKeep( () =>
+      {
+        test.identical( o.output, undefined );
+        test.is( !_.strHas( loggerOutput, 'testApp-output') );
+        console.log( loggerOutput )
+        return true;
+      })
+    })
+
+    con.thenKeep( () =>
+    {
+      loggerOutput = '';
+      var o = { path : path, mode : mode, outputPiping : 1, outputCollecting : 0, logger : logger };
+      return _.shell( o )
+      .thenKeep( () =>
+      {
+        test.identical( o.output, undefined );
+        test.is( _.strHas( loggerOutput, 'testApp-output') );
+        return true;
+      })
+    })
+
+    con.thenKeep( () =>
+    {
+      loggerOutput = '';
+      var o = { path : path, mode : mode, outputPiping : 0, outputCollecting : 1, logger : logger };
+      return _.shell( o )
+      .thenKeep( () =>
+      {
+        test.identical( o.output, 'testApp-output\n\n' );
+        test.is( !_.strHas( loggerOutput, 'testApp-output') );
+        return true;
+      })
+    })
+
+    con.thenKeep( () =>
+    {
+      loggerOutput = '';
+      var o = { path : path, mode : mode, outputPiping : 1, outputCollecting : 1, logger : logger };
+      return _.shell( o )
+      .thenKeep( () =>
+      {
+        test.identical( o.output, 'testApp-output\n\n' );
+        test.is( _.strHas( loggerOutput, 'testApp-output') );
+        return true;
+      })
+    })
+  })
+
+  return con;
+}
+
+outputHandling.timeOut = 10000;
 
 //
 
@@ -1056,6 +1159,8 @@ var Proto =
     shell2 : shell2,
     shellCurrentPath : shellCurrentPath,
     shellNode : shellNode,
+
+    outputHandling : outputHandling
 
   },
 

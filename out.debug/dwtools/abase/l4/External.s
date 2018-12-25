@@ -234,7 +234,7 @@ function shell( o )
     if( o.mode === 'fork')
     {
       let interpreterArgs = o.interpreterArgs || process.execArgv;
-      o.process = ChildProcess.fork( o.path, o.args, { silent : false, env : o.env, cwd : optionsForSpawn.cwd, execArgv : interpreterArgs } );
+      o.process = ChildProcess.fork( o.path, o.args, { silent : false, env : o.env, cwd : optionsForSpawn.cwd, stdio : optionsForSpawn.stdio, execArgv : interpreterArgs } );
     }
     else if( o.mode === 'exec' )
     {
