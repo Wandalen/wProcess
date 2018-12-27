@@ -36,8 +36,7 @@
     "wpathfundamentals": ""
   },
   "devDependencies": {
-    "wTesting": "",
-    "wexternalfundamentals": "."
+    "wTesting": ""
   },
   "keywords": [
     "wTools",
