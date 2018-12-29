@@ -26,9 +26,9 @@ function testDirMake()
 {
   var context = this;
   if( Config.platform === 'nodejs' )
-  context.testRootDirectory = _.path.dirTempOpen( _.path.join( __dirname, '../..'  ), 'ExternalFundamentals' );
+  context.testSuitePath = _.path.dirTempOpen( _.path.join( __dirname, '../..'  ), 'ExternalFundamentals' );
   else
-  context.testRootDirectory = _.path.current();
+  context.testSuitePath = _.path.current();
 }
 
 //
@@ -37,7 +37,7 @@ function cleanTestDir()
 {
   var context = this;
   if( Config.platform === 'nodejs' )
-  _.fileProvider.filesDelete( context.testRootDirectory );
+  _.fileProvider.filesDelete( context.testSuitePath );
 }
 
 // --
@@ -254,7 +254,7 @@ function appArgs( test )
 function shell( test )
 {
   var context = this;
-  var testRoutineDir = _.path.join( context.testRootDirectory, test.name );
+  var testRoutineDir = _.path.join( context.testSuitePath, test.name );
   var commonDefaults =
   {
     outputPiping : 1,
@@ -603,7 +603,7 @@ shell.timeOut = 30000;
 function shell2( test )
 {
   var context = this;
-  var testRoutineDir = _.path.join( context.testRootDirectory, test.name );
+  var testRoutineDir = _.path.join( context.testSuitePath, test.name );
   var commonDefaults =
   {
     outputPiping : 1,
@@ -813,7 +813,7 @@ shell2.timeOut = 30000;
 function shellCurrentPath( test )
 {
   var context = this;
-  var testRoutineDir = _.path.join( context.testRootDirectory, test.name );
+  var testRoutineDir = _.path.join( context.testSuitePath, test.name );
 
   /* */
 
@@ -938,7 +938,7 @@ shellCurrentPath.timeOut = 30000;
 function shellNode( test )
 {
   var context = this;
-  var testRoutineDir = _.path.join( context.testRootDirectory, test.name );
+  var testRoutineDir = _.path.join( context.testSuitePath, test.name );
 
   /* */
 
@@ -1040,7 +1040,7 @@ shellNode.timeOut = 10000;
 function outputHandling( test )
 {
   var context = this;
-  var testRoutineDir = _.path.join( context.testRootDirectory, test.name );
+  var testRoutineDir = _.path.join( context.testSuitePath, test.name );
 
   /* */
 
@@ -1147,7 +1147,7 @@ var Proto =
   context :
   {
 
-    testRootDirectory : null,
+    testSuitePath : null,
   },
 
   tests :
