@@ -68,7 +68,7 @@ function shell( o )
   let currentExitCode;
   let currentPath;
 
-  o.con = o.con || new _.Consequence().take( null );
+  o.ready = o.ready || new _.Consequence().take( null );
 
   /* xxx qqq : problem */
 
@@ -80,12 +80,12 @@ function shell( o )
       o2.path = o.path[ p ];
       _.shell( o2 );
     }
-    return o.con;
+    return o.ready;
   }
 
   /* */
 
-  o.con.ifNoErrorGot( function()
+  o.ready.ifNoErrorGot( function()
   {
 
     let done = false;
@@ -132,7 +132,7 @@ function shell( o )
     catch( err )
     {
       appExitCode( -1 );
-      return o.con.error( _.errLogOnce( err ) );
+      return o.ready.error( _.errLogOnce( err ) );
     }
 
     /* piping out channel */
@@ -157,7 +157,7 @@ function shell( o )
 
   });
 
-  // o.con.finally( ( err, arg ) =>
+  // o.ready.finally( ( err, arg ) =>
   // {
   //   debugger;
   //   if( err )
@@ -165,7 +165,7 @@ function shell( o )
   //   return arg;
   // });
 
-  return o.con;
+  return o.ready;
 
   /* */
 
@@ -326,13 +326,13 @@ function shell( o )
     {
       debugger;
       if( _.numberIs( exitCode ) )
-      o.con.error( _.err( 'Process returned error code', exitCode, '\n', infoGet() ) );
+      o.ready.error( _.err( 'Process returned error code', exitCode, '\n', infoGet() ) );
       else
-      o.con.error( _.err( 'Process wass killed by signal', signal, '\n', infoGet() ) );
+      o.ready.error( _.err( 'Process wass killed by signal', signal, '\n', infoGet() ) );
     }
     else
     {
-      o.con.take( o );
+      o.ready.take( o );
     }
 
   }
@@ -352,7 +352,7 @@ function shell( o )
     if( o.verbosity )
     err = _.errLogOnce( err );
 
-    o.con.error( err );
+    o.ready.error( err );
   }
 
   /* */
@@ -420,7 +420,7 @@ shell.defaults =
   args : null,
   interpreterArgs : null,
   mode : 'shell', /* 'fork', 'exec', 'spawn', 'shell' */
-  con : null,
+  ready : null,
   logger : null,
 
   env : null,
@@ -450,7 +450,7 @@ function sheller( o0 )
   if( _.strIs( o0 ) )
   o0 = { path : o0 }
   o0 = _.routineOptions( sheller, o0 );
-  o0.con = o0.con || new _.Consequence().take( null );
+  o0.ready = o0.ready || new _.Consequence().take( null );
 
   return function er()
   {
@@ -471,14 +471,14 @@ function sheller( o0 )
       {
         let o2 = _.mapExtend( null, o );
         o2.path = path;
-        o2.con = null;
+        o2.ready = null;
         return function onPath()
         {
           return _.shell( o2 );
         }
       });
       // debugger;
-      return o.con.andKeep( os );
+      return o.ready.andKeep( os );
     }
 
     return _.shell( o );
@@ -547,7 +547,7 @@ function shellNode( o )
     this.take( err,arg );
   });
 
-  o.con = shellOptions.con;
+  o.ready = shellOptions.ready;
   o.process = shellOptions.process;
 
   return result;
@@ -985,7 +985,7 @@ function execStages( stages,o )
 
   /*  let */
 
-  let con = _.timeOut( 1 );
+  let ready = _.timeOut( 1 );
   let keys = Object.keys( stages );
   let s = 0;
 
@@ -994,14 +994,14 @@ function execStages( stages,o )
   /* begin */
 
   if( o.onBegin )
-  con.finally( o.onBegin );
+  ready.finally( o.onBegin );
 
   /* end */
 
   function handleEnd()
   {
 
-    con.finally( function( err,data )
+    ready.finally( function( err,data )
     {
 
       if( err )
@@ -1012,7 +1012,7 @@ function execStages( stages,o )
     });
 
     if( o.onEnd )
-    con.finally( o.onEnd );
+    ready.finally( o.onEnd );
 
   }
 
@@ -1054,13 +1054,13 @@ function execStages( stages,o )
 
     if( o.onEachRoutine )
     {
-      con.ifNoErrorThen( _.routineSeal( o.context, o.onEachRoutine, [ iteration.stage, iteration, o ] ) );
+      ready.ifNoErrorThen( _.routineSeal( o.context, o.onEachRoutine, [ iteration.stage, iteration, o ] ) );
     }
 
     if( !o.manual )
-    con.ifNoErrorThen( routineCall );
+    ready.ifNoErrorThen( routineCall );
 
-    con.timeOut( o.delay );
+    ready.timeOut( o.delay );
 
     handleStage();
 
@@ -1070,7 +1070,7 @@ function execStages( stages,o )
 
   handleStage();
 
-  return con;
+  return ready;
 }
 
 execStages.defaults =
