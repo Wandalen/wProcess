@@ -68,6 +68,7 @@ function shell( o )
   let currentExitCode;
   let currentPath;
 
+  debugger;
   o.ready = o.ready || new _.Consequence().take( null );
 
   /* xxx qqq : problem */
@@ -174,6 +175,7 @@ function shell( o )
 
     /* verbosity */
 
+    debugger;
     if( !_.numberIs( o.verbosity ) )
     o.verbosity = o.verbosity ? 1 : 0;
     if( o.verbosity < 0 )
@@ -217,7 +219,6 @@ function shell( o )
 
   function launch()
   {
-
     let optionsForSpawn = Object.create( null );
 
     if( o.stdio )
@@ -264,7 +265,7 @@ function shell( o )
       let arg1 = process.platform === 'win32' ? '/c' : '-c';
       let arg2 = o.path;
 
-      optionsForSpawn.windowsVerbatimArguments = true;
+      optionsForSpawn.windowsVerbatimArguments = true; /* qqq : explain why is it needed please */
 
       if( o.args && o.args.length )
       arg2 = arg2 + ' ' + '"' + o.args.join( '" "' ) + '"';
