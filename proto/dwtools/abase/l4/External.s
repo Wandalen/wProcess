@@ -68,7 +68,7 @@ function shell( o )
   let currentExitCode;
   let currentPath;
 
-  debugger;
+  // debugger;
   o.ready = o.ready || new _.Consequence().take( null );
 
   /* xxx qqq : problem */
