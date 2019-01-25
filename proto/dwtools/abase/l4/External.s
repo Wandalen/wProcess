@@ -50,7 +50,7 @@ _.assert( !!_realGlobal_ );
 
 /*
 qqq : implement multiple commands
-qqq : implement option timeOut
+qqq : implement option timeOut aaa : done, needs review
 */
 
 function shell( o )
@@ -64,10 +64,12 @@ function shell( o )
   _.assert( o.args === null || _.arrayIs( o.args ) );
   _.assert( _.arrayHas( [ 'fork', 'exec', 'spawn', 'shell' ], o.mode ) );
   _.assert( _.strIs( o.path ) || _.strsAre( o.path ), 'Expects string or strings {-o.path-}, but got', _.strType( o.path ) );
+  _.assert( o.timeOut === null || _.numberIs( o.timeOut ), 'Expects null or number {-o.timeOut-}, but got', _.strType( o.timeOut ) );
 
   let done = false;
   let currentExitCode;
   let currentPath;
+  let killedByTimeout = false;
 
   // debugger;
   o.ready = o.ready || new _.Consequence().take( null );
@@ -266,6 +268,9 @@ function shell( o )
     if( o.currentPath )
     optionsForSpawn.cwd = _.path.nativize( o.currentPath );
 
+    if( o.timeOut && o.sync )
+    optionsForSpawn.timeout = o.timeOut;
+
     if( _.strIs( o.interpreterArgs ) )
     o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs, preservingDelimeters : 0 });
 
@@ -320,6 +325,16 @@ function shell( o )
       o.process = ChildProcess.spawn( app, [ arg1, arg2 ], optionsForSpawn );
     }
     else _.assert( 0,'Unknown mode', _.strQuote( o.mode ), 'to shell path', _.strQuote( o.paths ) );
+
+    if( o.timeOut && !o.sync )
+    _.timeOut( o.timeOut, () =>
+    {
+      if( done )
+      return true;
+      killedByTimeout = true;
+      o.process.kill( 'SIGTERM' );
+      return true;
+    });
 
   }
 
@@ -378,6 +393,8 @@ function shell( o )
 
       if( _.numberIs( exitCode ) )
       err = _.err( 'Process returned error code', exitCode, '\n', infoGet() );
+      else if( killedByTimeout )
+      err = _.err( 'Process timed out, killed by signal', signal, '\n', infoGet() );
       else
       err = _.err( 'Process wass killed by signal', signal, '\n', infoGet() );
 
@@ -489,6 +506,7 @@ shell.defaults =
   ipc : 0,
   detaching : 0,
   passingThrough : 0,
+  timeOut : null,
 
   throwingExitCode : 1, /* must be on by default */
   applyingExitCode : 0,

@@ -593,6 +593,32 @@ function shell( test )
   // ;
 
   // con.thenKeep( () =>  _.fileProvider.fileDelete( testAppPath ) );
+
+  .thenKeep( function( arg/*aaa*/ )
+  {
+    test.case = 'shell, stop using timeOut';
+
+    o =
+    {
+      path : 'node ' + testAppPath + ' loop : 1',
+      mode : 'shell',
+      stdio : 'pipe',
+      timeOut : 500
+    }
+
+    var options = _.mapSupplement( {}, o, commonDefaults );
+
+    var shell = _.shell( options );
+    return test.shouldThrowErrorAsync( shell )
+    .thenKeep( () =>
+    {
+      test.identical( options.process.killed, true );
+      test.identical( !options.exitCode, true );
+      return null;
+    })
+  })
+
+
   return con;
 }
 
@@ -705,35 +731,19 @@ function shellSync( test )
   test.identical( options.exitCode, 0 );
   test.identical( options.output.length, 0 );
 
-  // .thenKeep( function( arg/*aaa*/ )
-  // {
-  //   test.case = 'shell, stop process using kill';
+  //
 
-  //   o =
-  //   {
-  //     path : 'node ' + testAppPath + ' loop : 1',
-  //     mode : 'shell',
-  //     stdio : 'pipe'
-  //   }
+  test.case = 'shell, stop process using timeOut';
+  o =
+  {
+    path : 'node ' + testAppPath + ' loop : 1',
+    mode : 'shell',
+    stdio : 'pipe',
+    timeOut : 500
+  }
 
-  //   var options = _.mapSupplement( {}, o, commonDefaults );
-
-  //   var shell = _.shell( options );
-  //   _.timeOut( 500, () =>
-  //   {
-  //     test.identical( options.process.killed, false );
-  //     options.process.kill( 'SIGINT' );
-  //     return null;
-  //   })
-  //   shell.finally(function()
-  //   {
-  //     test.identical( options.process.killed, true );
-  //     test.identical( !options.exitCode, true );
-  //     return null;
-  //   })
-
-  //   return shell;
-  // })
+  var options = _.mapSupplement( {}, o, commonDefaults );
+  test.shouldThrowErrorSync( () => _.shell( options ) );
 
   //
 
