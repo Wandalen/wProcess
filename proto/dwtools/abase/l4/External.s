@@ -214,7 +214,7 @@ function shell( o )
 
     /* verbosity */
 
-    debugger;
+    // debugger;
     if( !_.numberIs( o.verbosity ) )
     o.verbosity = o.verbosity ? 1 : 0;
     if( o.verbosity < 0 )
