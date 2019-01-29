@@ -270,7 +270,7 @@ function shell( test )
 
     if( typeof module !== 'undefined' )
     {
-      let _ = require( '../../../../Tools.s' );
+      let _ = require( '../../../Tools.s' );
 
       _.include( 'wConsequence' );
       _.include( 'wStringsExtra' );
@@ -646,7 +646,7 @@ function shellSync( test )
 
     if( typeof module !== 'undefined' )
     {
-      let _ = require( '../../../../Tools.s' );
+      let _ = require( '../../../Tools.s' );
 
       _.include( 'wConsequence' );
       _.include( 'wStringsExtra' );
