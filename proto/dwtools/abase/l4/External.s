@@ -50,7 +50,7 @@ _.assert( !!_realGlobal_ );
 
 /*
 qqq : implement multiple commands
-qqq : implement option timeOut
+qqq : implement option timeOut aaa : done, needs review
 */
 
 function shell( o )
@@ -64,10 +64,12 @@ function shell( o )
   _.assert( o.args === null || _.arrayIs( o.args ) );
   _.assert( _.arrayHas( [ 'fork', 'exec', 'spawn', 'shell' ], o.mode ) );
   _.assert( _.strIs( o.path ) || _.strsAre( o.path ), 'Expects string or strings {-o.path-}, but got', _.strType( o.path ) );
+  _.assert( o.timeOut === null || _.numberIs( o.timeOut ), 'Expects null or number {-o.timeOut-}, but got', _.strType( o.timeOut ) );
 
   let done = false;
   let currentExitCode;
   let currentPath;
+  let killedByTimeout = false;
 
   // debugger;
   o.ready = o.ready || new _.Consequence().take( null );
@@ -82,12 +84,36 @@ function shell( o )
       o2.path = o.path[ p ];
       _.shell( o2 );
     }
+    if( o.sync )
+    return o;
     return o.ready;
   }
 
-  /* */
+  /*  */
 
-  o.ready.ifNoErrorGot( function()
+  if( o.sync )
+  {
+    main();
+    return o;
+  }
+  else
+  {
+    o.ready.ifNoErrorGot( main );
+
+    // o.ready.finally( ( err, arg ) =>
+    // {
+    //   debugger;
+    //   if( err )
+    //   throw err;
+    //   return arg;
+    // });
+
+    return o.ready;
+  }
+
+  /*  */
+
+  function main()
   {
 
     let done = false;
@@ -133,41 +159,53 @@ function shell( o )
     }
     catch( err )
     {
+      debugger
       appExitCode( -1 );
+      if( o.sync )
+      throw _.errLogOnce( err );
+      else
       return o.ready.error( _.errLogOnce( err ) );
     }
+
 
     /* piping out channel */
 
     if( o.outputPiping || o.outputCollecting )
     if( o.process.stdout )
+    if( o.sync )
+    handleStdout( o.process.stdout );
+    else
     o.process.stdout.on( 'data', handleStdout );
 
     /* piping error channel */
 
     if( o.outputPiping || o.outputCollecting )
     if( o.process.stderr )
+    if( o.sync )
+    handleStderr( o.process.stderr );
+    else
     o.process.stderr.on( 'data', handleStderr );
 
-    /* error */
+    if( o.sync )
+    {
+      if( o.process.error )
+      handleError( o.process.error );
+      else
+      handleClose( o.process.status, o.process.signal );
+    }
+    else
+    {
+      /* error */
 
-    o.process.on( 'error', handleError );
+      o.process.on( 'error', handleError );
 
-    /* close */
+      /* close */
 
-    o.process.on( 'close', handleClose );
+      o.process.on( 'close', handleClose );
+    }
 
-  });
+  }
 
-  // o.ready.finally( ( err, arg ) =>
-  // {
-  //   debugger;
-  //   if( err )
-  //   throw err;
-  //   return arg;
-  // });
-
-  return o.ready;
 
   /* */
 
@@ -230,17 +268,24 @@ function shell( o )
     if( o.currentPath )
     optionsForSpawn.cwd = _.path.nativize( o.currentPath );
 
+    if( o.timeOut && o.sync )
+    optionsForSpawn.timeout = o.timeOut;
+
     if( _.strIs( o.interpreterArgs ) )
     o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs, preservingDelimeters : 0 });
 
     if( o.mode === 'fork')
     {
+      _.assert( !o.sync, '{ shell.mode } "fork" is available only in async version of shell' );
       let interpreterArgs = o.interpreterArgs || process.execArgv;
       o.process = ChildProcess.fork( o.path, o.args, { silent : false, env : o.env, cwd : optionsForSpawn.cwd, stdio : optionsForSpawn.stdio, execArgv : interpreterArgs } );
     }
     else if( o.mode === 'exec' )
     {
       o.logger.warn( '{ shell.mode } "exec" is deprecated' );
+      if( o.sync )
+      o.process = ChildProcess.execSync( o.path,{ env : o.env, cwd : optionsForSpawn.cwd } );
+      else
       o.process = ChildProcess.exec( o.path,{ env : o.env, cwd : optionsForSpawn.cwd } );
     }
     else if( o.mode === 'spawn' )
@@ -258,6 +303,9 @@ function shell( o )
         _.assert( _.strSplitNonPreserving({ src : app, preservingDelimeters : 0 }).length === 1, ' o.path must not contain arguments if those were provided through options' )
       }
 
+      if( o.sync )
+      o.process = ChildProcess.spawnSync( app, o.args, optionsForSpawn );
+      else
       o.process = ChildProcess.spawn( app, o.args, optionsForSpawn );
     }
     else if( o.mode === 'shell' )
@@ -271,9 +319,22 @@ function shell( o )
       if( o.args && o.args.length )
       arg2 = arg2 + ' ' + '"' + o.args.join( '" "' ) + '"';
 
+      if( o.sync )
+      o.process = ChildProcess.spawnSync( app, [ arg1, arg2 ], optionsForSpawn );
+      else
       o.process = ChildProcess.spawn( app, [ arg1, arg2 ], optionsForSpawn );
     }
     else _.assert( 0,'Unknown mode', _.strQuote( o.mode ), 'to shell path', _.strQuote( o.paths ) );
+
+    if( o.timeOut && !o.sync )
+    _.timeOut( o.timeOut, () =>
+    {
+      if( done )
+      return true;
+      killedByTimeout = true;
+      o.process.kill( 'SIGTERM' );
+      return true;
+    });
 
   }
 
@@ -327,12 +388,22 @@ function shell( o )
     if( exitCode !== 0 && o.throwingExitCode )
     {
       debugger;
+
+      let err;
+
       if( _.numberIs( exitCode ) )
-      o.ready.error( _.err( 'Process returned error code', exitCode, '\n', infoGet() ) );
+      err = _.err( 'Process returned error code', exitCode, '\n', infoGet() );
+      else if( killedByTimeout )
+      err = _.err( 'Process timed out, killed by signal', signal, '\n', infoGet() );
       else
-      o.ready.error( _.err( 'Process wass killed by signal', signal, '\n', infoGet() ) );
+      err = _.err( 'Process wass killed by signal', signal, '\n', infoGet() );
+
+      if( o.sync )
+      throw err;
+      else
+      o.ready.error( err );
     }
-    else
+    else if( !o.sync )
     {
       o.ready.take( o );
     }
@@ -354,6 +425,9 @@ function shell( o )
     if( o.verbosity )
     err = _.errLogOnce( err );
 
+    if( o.sync )
+    throw err;
+    else
     o.ready.error( err );
   }
 
@@ -419,6 +493,8 @@ shell.defaults =
   path : null,
   currentPath : null,
 
+  sync : 0,
+
   args : null,
   interpreterArgs : null,
   mode : 'shell', /* 'fork', 'exec', 'spawn', 'shell' */
@@ -430,6 +506,7 @@ shell.defaults =
   ipc : 0,
   detaching : 0,
   passingThrough : 0,
+  timeOut : null,
 
   throwingExitCode : 1, /* must be on by default */
   applyingExitCode : 0,

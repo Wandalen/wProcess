@@ -270,7 +270,7 @@ function shell( test )
 
     if( typeof module !== 'undefined' )
     {
-      let _ = require( '../../../../Tools.s' );
+      let _ = require( '../../../Tools.s' );
 
       _.include( 'wConsequence' );
       _.include( 'wStringsExtra' );
@@ -593,10 +593,214 @@ function shell( test )
   // ;
 
   // con.thenKeep( () =>  _.fileProvider.fileDelete( testAppPath ) );
+
+  .thenKeep( function( arg/*aaa*/ )
+  {
+    test.case = 'shell, stop using timeOut';
+
+    o =
+    {
+      path : 'node ' + testAppPath + ' loop : 1',
+      mode : 'shell',
+      stdio : 'pipe',
+      timeOut : 500
+    }
+
+    var options = _.mapSupplement( {}, o, commonDefaults );
+
+    var shell = _.shell( options );
+    return test.shouldThrowErrorAsync( shell )
+    .thenKeep( () =>
+    {
+      test.identical( options.process.killed, true );
+      test.identical( !options.exitCode, true );
+      return null;
+    })
+  })
+
+
   return con;
 }
 
 shell.timeOut = 30000;
+
+//
+
+function shellSync( test )
+{
+  var context = this;
+  var testRoutineDir = _.path.join( context.testSuitePath, test.name );
+  var commonDefaults =
+  {
+    outputPiping : 1,
+    outputCollecting : 1,
+    applyingExitCode : 0,
+    throwingExitCode : 1,
+    sync : 1
+  }
+
+  /* */
+
+  function testApp()
+  {
+
+    if( typeof module !== 'undefined' )
+    {
+      let _ = require( '../../../Tools.s' );
+
+      _.include( 'wConsequence' );
+      _.include( 'wStringsExtra' );
+      _.include( 'wStringer' );
+      _.include( 'wPathFundamentals'/*ttt*/ );
+      _.include( 'wExternalFundamentals' );
+
+    }
+    var _global = _global_;
+    var _ = _global_.wTools;
+
+    var args = _.appArgs();
+    var con = new _.Consequence().take( null );
+    con.timeOut( _.numberRandomInt( [ 300, 2000 ] ), function()
+    {
+      if( args.map.exitWithCode )
+      process.exit( args.map.exitWithCode )
+
+      if( args.map.loop )
+      return _.timeOut( 4000 )
+
+      console.log( __filename );
+
+      return true;
+    });
+
+  }
+
+  /* */
+
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp.js' ) );
+  var testApp = testApp.toString() + '\ntestApp();';
+  var expectedOutput = testAppPath + '\n';
+  _.fileProvider.fileWrite( testAppPath, testApp );
+
+  var o;
+
+  //
+
+  test.case = 'mode : spawn';
+  o =
+  {
+    path : 'node ' + testAppPath,
+    mode : 'spawn',
+    stdio : 'pipe'
+  }
+
+  /* mode : spawn, stdio : pipe */
+
+  var options = _.mapSupplement( {}, o, commonDefaults );
+  _.shell( options )
+  test.identical( options.exitCode, 0 );
+  test.identical( options.output, expectedOutput );
+
+  /* mode : spawn, stdio : ignore */
+
+  o.stdio = 'ignore';
+  var options = _.mapSupplement( {}, o, commonDefaults );
+  _.shell( options )
+  test.identical( options.exitCode, 0 );
+  test.identical( options.output.length, 0 );
+
+  //
+
+  test.case = 'mode : shell';
+  o =
+  {
+    path : 'node ' + testAppPath,
+    mode : 'shell',
+    stdio : 'pipe'
+  }
+  var options = _.mapSupplement( {}, o, commonDefaults );
+  _.shell( options )
+  test.identical( options.exitCode, 0 );
+  test.identical( options.output, expectedOutput );
+
+  /* mode : shell, stdio : ignore */
+
+  o.stdio = 'ignore'
+  var options = _.mapSupplement( {}, o, commonDefaults );
+  _.shell( options )
+  test.identical( options.exitCode, 0 );
+  test.identical( options.output.length, 0 );
+
+  //
+
+  test.case = 'shell, stop process using timeOut';
+  o =
+  {
+    path : 'node ' + testAppPath + ' loop : 1',
+    mode : 'shell',
+    stdio : 'pipe',
+    timeOut : 500
+  }
+
+  var options = _.mapSupplement( {}, o, commonDefaults );
+  test.shouldThrowErrorSync( () => _.shell( options ) );
+
+  //
+
+  test.case = 'spawn, return good code';
+  o =
+  {
+    path : 'node ' + testAppPath + ' exitWithCode : 0',
+    mode : 'spawn',
+    stdio : 'pipe'
+  }
+  var options = _.mapSupplement( {}, o, commonDefaults );
+  test.mustNotThrowError( () => _.shell( options ) )
+  test.identical( options.exitCode, 0 );
+
+  //
+
+  test.case = 'spawn, return bad code';
+  o =
+  {
+    path : 'node ' + testAppPath + ' exitWithCode : 1',
+    mode : 'spawn',
+    stdio : 'pipe'
+  }
+  var options = _.mapSupplement( {}, o, commonDefaults );
+  test.shouldThrowErrorSync( () => _.shell( options ) )
+  test.identical( options.exitCode, 1 );
+
+  //
+
+  test.case = 'shell, return good code';
+  o =
+  {
+    path : 'node ' + testAppPath + ' exitWithCode : 0',
+    mode : 'shell',
+    stdio : 'pipe'
+  }
+
+  var options = _.mapSupplement( {}, o, commonDefaults );
+  test.mustNotThrowError( () => _.shell( options ) )
+  test.identical( options.exitCode, 0 );
+
+  //
+
+  test.case = 'shell, return bad code';
+  o =
+  {
+    path : 'node ' + testAppPath + ' exitWithCode : 1',
+    mode : 'shell',
+    stdio : 'pipe'
+  }
+  var options = _.mapSupplement( {}, o, commonDefaults );
+  test.shouldThrowErrorSync( () => _.shell( options ) )
+  test.identical( options.exitCode, 1 );
+
+}
+
+shellSync.timeOut = 30000;
 
 //
 
@@ -1156,6 +1360,7 @@ var Proto =
     appArgs : appArgs,
 
     shell : shell,
+    shellSync : shellSync,
     shell2 : shell2,
     shellCurrentPath : shellCurrentPath,
     shellNode : shellNode,
