@@ -33,7 +33,8 @@
   },
   "dependencies": {
     "wTools": "",
-    "wpathfundamentals": ""
+    "wpathfundamentals": "",
+    "wgdfstrategy": ""
   },
   "devDependencies": {
     "wTesting": ""
