@@ -26,6 +26,8 @@ if( typeof module !== 'undefined' )
   {
   }
 
+  _global_.Deasync = require( 'deasync' );
+
 }
 
 let System, ChildProcess, Net, Stream;
@@ -84,14 +86,19 @@ function shell( o )
       o2.path = o.path[ p ];
       _.shell( o2 );
     }
-    if( o.sync )
+
+    if( o.sync && !o.deasync )
     return o;
+
+    if( o.deasync )
+    return waitForCon( o.ready );
+
     return o.ready;
   }
 
   /*  */
 
-  if( o.sync )
+  if( o.sync && !o.deasync )
   {
     main();
     return o;
@@ -107,6 +114,9 @@ function shell( o )
     //   throw err;
     //   return arg;
     // });
+
+    if( o.sync && o.deasync )
+    return waitForCon( o.ready );
 
     return o.ready;
   }
@@ -161,7 +171,7 @@ function shell( o )
     {
       debugger
       appExitCode( -1 );
-      if( o.sync )
+      if( o.sync && !o.deasync )
       throw _.errLogOnce( err );
       else
       return o.ready.error( _.errLogOnce( err ) );
@@ -172,7 +182,7 @@ function shell( o )
 
     if( o.outputPiping || o.outputCollecting )
     if( o.process.stdout )
-    if( o.sync )
+    if( o.sync && !o.deasync )
     handleStdout( o.process.stdout );
     else
     o.process.stdout.on( 'data', handleStdout );
@@ -181,12 +191,12 @@ function shell( o )
 
     if( o.outputPiping || o.outputCollecting )
     if( o.process.stderr )
-    if( o.sync )
+    if( o.sync && !o.deasync )
     handleStderr( o.process.stderr );
     else
     o.process.stderr.on( 'data', handleStderr );
 
-    if( o.sync )
+    if( o.sync && !o.deasync )
     {
       if( o.process.error )
       handleError( o.process.error );
@@ -283,7 +293,7 @@ function shell( o )
     else if( o.mode === 'exec' )
     {
       o.logger.warn( '{ shell.mode } "exec" is deprecated' );
-      if( o.sync )
+      if( o.sync && !o.deasync )
       o.process = ChildProcess.execSync( o.path,{ env : o.env, cwd : optionsForSpawn.cwd } );
       else
       o.process = ChildProcess.exec( o.path,{ env : o.env, cwd : optionsForSpawn.cwd } );
@@ -303,7 +313,7 @@ function shell( o )
         _.assert( _.strSplitNonPreserving({ src : app, preservingDelimeters : 0 }).length === 1, ' o.path must not contain arguments if those were provided through options' )
       }
 
-      if( o.sync )
+      if( o.sync && !o.deasync )
       o.process = ChildProcess.spawnSync( app, o.args, optionsForSpawn );
       else
       o.process = ChildProcess.spawn( app, o.args, optionsForSpawn );
@@ -319,14 +329,14 @@ function shell( o )
       if( o.args && o.args.length )
       arg2 = arg2 + ' ' + '"' + o.args.join( '" "' ) + '"';
 
-      if( o.sync )
+      if( o.sync && !o.deasync )
       o.process = ChildProcess.spawnSync( app, [ arg1, arg2 ], optionsForSpawn );
       else
       o.process = ChildProcess.spawn( app, [ arg1, arg2 ], optionsForSpawn );
     }
     else _.assert( 0,'Unknown mode', _.strQuote( o.mode ), 'to shell path', _.strQuote( o.paths ) );
 
-    if( o.timeOut && !o.sync )
+    if( o.timeOut && !( o.sync && !o.deasync ) )
     _.timeOut( o.timeOut, () =>
     {
       if( done )
@@ -398,12 +408,12 @@ function shell( o )
       else
       err = _.err( 'Process wass killed by signal', signal, '\n', infoGet() );
 
-      if( o.sync )
+      if( o.sync && !o.deasync )
       throw err;
       else
       o.ready.error( err );
     }
-    else if( !o.sync )
+    else if( !( o.sync && !o.deasync ) )
     {
       o.ready.take( o );
     }
@@ -425,7 +435,7 @@ function shell( o )
     if( o.verbosity )
     err = _.errLogOnce( err );
 
-    if( o.sync )
+    if( o.sync && !o.deasync )
     throw err;
     else
     o.ready.error( err );
@@ -481,6 +491,27 @@ function shell( o )
     o.logger.log( data );
   }
 
+  /* */
+
+  function waitForCon( con )
+  {
+    let ready = false;
+    let result = {};
+    con.got( ( err, data ) =>
+    {
+      result.err = err;
+      result.data = data;
+      ready = true;
+    })
+
+    _global_.Deasync.loopWhile( () => !ready )
+
+    if( result.err )
+    throw result.err;
+
+    return result.data;
+  }
+
 }
 
 /*
@@ -494,6 +525,7 @@ shell.defaults =
   currentPath : null,
 
   sync : 0,
+  deasync : 1,
 
   args : null,
   interpreterArgs : null,
