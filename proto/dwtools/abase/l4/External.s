@@ -90,7 +90,7 @@ function shell( o )
     if( o.sync && !o.deasync )
     return o;
 
-    if( o.deasync )
+    if( o.sync && o.deasync )
     return waitForCon( o.ready );
 
     return o.ready;
@@ -286,7 +286,7 @@ function shell( o )
 
     if( o.mode === 'fork')
     {
-      _.assert( !o.sync, '{ shell.mode } "fork" is available only in async version of shell' );
+      _.assert( !o.sync || o.deasync, '{ shell.mode } "fork" is available only in async/deasync version of shell' );
       let interpreterArgs = o.interpreterArgs || process.execArgv;
       o.process = ChildProcess.fork( o.path, o.args, { silent : false, env : o.env, cwd : optionsForSpawn.cwd, stdio : optionsForSpawn.stdio, execArgv : interpreterArgs } );
     }
