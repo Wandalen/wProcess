@@ -3,7 +3,7 @@ about :
 
   name : "wExternalFundamentals"
   description : "Collection of routines to execute system commands, run shell, batches, launch external processes from JavaScript application. ExecTools leverages not only outputting data from an application but also inputting, makes application arguments parsing and accounting easier. Use the module to get uniform experience from interaction with an external processes on different platforms and operating systems."
-  version : "0.3.129"
+  version : "0.3.130"
   enabled : 1
   interpreters :
   - nodejs >= 6.0.0

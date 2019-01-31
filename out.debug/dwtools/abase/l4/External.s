@@ -673,23 +673,22 @@ function jsonParse( o )
   _.routineOptions( jsonParse, o );
   _.assert( arguments.length === 1 );
 
+  debugger; /* xxx: implement via GDF */
+
   try
   {
     result = JSON.parse( o.src );
   }
   catch( err )
   {
-    // debugger;
     let src = o.src;
     let position = /at position (\d+)/.exec( err.message );
     if( position )
     position = Number( position[ 1 ] );
-    // debugger;
     let first = 0;
     if( !isNaN( position ) )
     {
       let nearest = _.strLinesNearest( src, position );
-      // debugger;
       first = _.strLinesCount( src.substring( 0, nearest.spans[ 0 ] ) );
       src = nearest.splits.join( '' );
     }
