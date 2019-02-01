@@ -11,22 +11,14 @@
  * @file ExternalFundamentals.s.
  */
 
+let Esprima, Deasync;
+
 if( typeof module !== 'undefined' )
 {
 
   let _ = require( '../../Tools.s' );
 
   _.include( 'wPathFundamentals' );
-
-  try
-  {
-    _global_.Esprima = require( 'esprima' );
-  }
-  catch( err )
-  {
-  }
-
-  _global_.Deasync = require( 'deasync' );
 
 }
 
@@ -504,7 +496,10 @@ function shell( o )
       ready = true;
     })
 
-    _global_.Deasync.loopWhile( () => !ready )
+    if( !Deasync )
+    Deasync = require( 'deasync' );
+
+    Deasync.loopWhile( () => !ready )
 
     if( result.err )
     throw result.err;
@@ -880,22 +875,35 @@ function routineMake( o )
     {
       let worker = _.makeWorker( code )
     }
-    else if( _global.Esprima || _global.esprima )
+    else
     {
-      let Esprima = _global.Esprima || _global.esprima;
+
+      if( !Esprima && !_global.esprima )
       try
       {
-        let parsed = Esprima.parse( '(function(){\n' + code + '\n})();' );
+        Esprima = require( 'esprima' );
       }
-      catch( err2 )
+      catch( err )
       {
-        debugger;
-        throw _._err
-        ({
-          args : [ err , err2 ],
-          level : 1,
-          sourceCode : code,
-        });
+      }
+
+      if( Esprima || _global.esprima )
+      {
+        let Esp = Esprima || _global.esprima;
+        try
+        {
+          let parsed = Esp.parse( '(function(){\n' + code + '\n})();' );
+        }
+        catch( err2 )
+        {
+          debugger;
+          throw _._err
+          ({
+            args : [ err , err2 ],
+            level : 1,
+            sourceCode : code,
+          });
+        }
       }
     }
 
