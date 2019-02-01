@@ -8,7 +8,7 @@ about:
     application arguments parsing and accounting easier. Use the module to get
     uniform experience from interaction with an external processes on different
     platforms and operating systems.
-  version: 0.3.130
+  version: 0.3.133
   enabled: 1
   interpreters:
     - nodejs >= 6.0.0
@@ -71,7 +71,7 @@ path:
       public: 1
 submodule: {}
 reflector:
-  reflect.proto:
+  reflect.proto.:
     filePath:
       ./proto: ./out.release
     srcFilter:
@@ -165,7 +165,7 @@ reflector:
       basePath: .
       prefixPath: proto
 step:
-  clean.out:
+  clean.out.:
     criterion:
       debug: 0
     opts:
@@ -179,7 +179,7 @@ step:
       filePath: 'path::out.debug'
     inherit:
       - predefined.delete
-  reflect.proto:
+  reflect.proto.:
     criterion:
       debug: 0
       raw: 0
@@ -211,7 +211,7 @@ step:
       reflector: 'reflector::reflect.proto.*=1'
     inherit:
       - predefined.reflect
-  reflect.submodules.debug:
+  reflect.submodules.:
     criterion:
       debug: 1
       raw: 0
@@ -219,7 +219,7 @@ step:
       reflector: 'reflector::reflect.submodules*=1'
     inherit:
       - predefined.reflect
-  reflect.submodules.debug.raw:
+  reflect.submodules.raw:
     criterion:
       debug: 1
       raw: 1
@@ -284,7 +284,7 @@ build:
       - 'step::export.proto'
 exported:
   proto.export:
-    version: 0.3.130
+    version: 0.3.133
     criterion:
       default: 1
       debug: 1
@@ -293,82 +293,7 @@ exported:
       export: 1
       tar: 1
       public: 1
-    exportedReflector:
-      filePath: ./proto
-      srcFilter:
-        filePath: ./proto
-        prefixPath: /C/pro/web/Port/package/wExternalFundamentals
-    exportedReflectorData:
-      filePath: ./proto
-      srcFilter:
-        filePath: /C/pro/web/Port/package/wExternalFundamentals/proto
-        maskAll:
-          excludeAny:
-            - !<tag:yaml.org,2002:js/regexp> /(\W|^)node_modules(\W|$)/
-            - !<tag:yaml.org,2002:js/regexp> /\.unique$/
-            - !<tag:yaml.org,2002:js/regexp> /\.git$/
-            - !<tag:yaml.org,2002:js/regexp> /\.svn$/
-            - !<tag:yaml.org,2002:js/regexp> /\.hg$/
-            - !<tag:yaml.org,2002:js/regexp> /\.tmp($|\/)/
-            - !<tag:yaml.org,2002:js/regexp> /\.DS_Store$/
-            - !<tag:yaml.org,2002:js/regexp> /(^|\/)\.(?!$|\/|\.)/
-            - !<tag:yaml.org,2002:js/regexp> /(^|\/)-/
-        basePath:
-          /C/pro/web/Port/package/wExternalFundamentals/proto: /C/pro/web/Port/package/wExternalFundamentals/proto
-    exportedFilesReflector:
-      recursive: 0
-      filePath:
-        .: true
-        ./dwtools: true
-        ./dwtools/Tools.s: true
-        ./dwtools/abase: true
-        ./dwtools/abase/l4: true
-        ./dwtools/abase/l4/External.s: true
-        ./dwtools/abase/l4.test: true
-        ./dwtools/abase/l4.test/External.test.s: true
-        ./dwtools/amid: true
-        ./dwtools/atop: true
-      srcFilter:
-        filePath:
-          .: true
-          ./dwtools: true
-          ./dwtools/Tools.s: true
-          ./dwtools/abase: true
-          ./dwtools/abase/l4: true
-          ./dwtools/abase/l4/External.s: true
-          ./dwtools/abase/l4.test: true
-          ./dwtools/abase/l4.test/External.test.s: true
-          ./dwtools/amid: true
-          ./dwtools/atop: true
-        basePath: .
-        prefixPath: /C/pro/web/Port/package/wExternalFundamentals/proto
-    exportedDirPath:
-      path: ./proto
-      criterion:
-        default: 1
-        debug: 1
-        raw: 1
-        proto: 1
-        export: 1
-        tar: 1
-        public: 1
-    exportedFilesPath:
-      path:
-        - .
-        - ./dwtools
-        - ./dwtools/Tools.s
-        - ./dwtools/abase
-        - ./dwtools/abase/l4
-        - ./dwtools/abase/l4/External.s
-        - ./dwtools/abase/l4.test
-        - ./dwtools/abase/l4.test/External.test.s
-        - ./dwtools/amid
-        - ./dwtools/atop
-      criterion:
-        default: 1
-        debug: 1
-        raw: 1
-        proto: 1
-        export: 1
-        tar: 1
-        public: 1
+    exportedReflector: 'reflector::exported.0'
+    exportedFilesReflector: 'reflector::exportedFiles.0'
+    exportedDirPath: 'path::exportedDir.0'
+    exportedFilesPath: 'path::exportedFiles.0'
