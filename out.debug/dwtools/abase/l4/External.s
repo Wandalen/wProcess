@@ -58,7 +58,7 @@ function shell( o )
   _.assert( arguments.length === 1, 'Expects single argument' );
   _.assert( o.args === null || _.arrayIs( o.args ) );
   _.assert( _.arrayHas( [ 'fork', 'exec', 'spawn', 'shell' ], o.mode ) );
-  _.assert( _.strIs( o.path ) || _.strsAre( o.path ), 'Expects string or strings {-o.path-}, but got', _.strType( o.path ) );
+  _.assert( _.strIs( o.path ) || _.strsAreAll( o.path ), 'Expects string or strings {-o.path-}, but got', _.strType( o.path ) );
   _.assert( o.timeOut === null || _.numberIs( o.timeOut ), 'Expects null or number {-o.timeOut-}, but got', _.strType( o.timeOut ) );
 
   let done = false;
