@@ -39,7 +39,7 @@ path:
     path: 'git+https://github.com/Wandalen/wExternalFundamentals.git'
   bugs:
     path: 'https://github.com/Wandalen/wExternalFundamentals/issues'
-  exportedDir.0:
+  exportedDir.proto.export:
     path: ./proto
     criterion:
       default: 1
@@ -49,7 +49,7 @@ path:
       export: 1
       tar: 1
       public: 1
-  exportedFiles.0:
+  exportedFiles.proto.export:
     path:
       - .
       - ./dwtools
@@ -72,8 +72,6 @@ path:
 submodule: {}
 reflector:
   reflect.proto.:
-    filePath:
-      ./proto: ./out.release
     srcFilter:
       filePath:
         ./proto: ./out.release
@@ -95,8 +93,6 @@ reflector:
     inherit:
       - predefined.*
   reflect.proto.debug:
-    filePath:
-      ./proto: ./out.debug
     srcFilter:
       filePath:
         ./proto: ./out.debug
@@ -132,24 +128,12 @@ reflector:
       debug: 1
     inherit:
       - predefined.*
-  exported.0:
-    filePath: ./proto
+  exported.proto.export:
     srcFilter:
       filePath: ./proto
       prefixPath: .
-  exportedFiles.0:
+  exportedFiles.proto.export:
     recursive: 0
-    filePath:
-      .: true
-      ./dwtools: true
-      ./dwtools/Tools.s: true
-      ./dwtools/abase: true
-      ./dwtools/abase/l4: true
-      ./dwtools/abase/l4/External.s: true
-      ./dwtools/abase/l4.test: true
-      ./dwtools/abase/l4.test/External.test.s: true
-      ./dwtools/amid: true
-      ./dwtools/atop: true
     srcFilter:
       filePath:
         .: true
@@ -293,7 +277,7 @@ exported:
       export: 1
       tar: 1
       public: 1
-    exportedReflector: 'reflector::exported.0'
-    exportedFilesReflector: 'reflector::exportedFiles.0'
-    exportedDirPath: 'path::exportedDir.0'
-    exportedFilesPath: 'path::exportedFiles.0'
+    exportedReflector: 'reflector::exported.proto.export'
+    exportedFilesReflector: 'reflector::exportedFiles.proto.export'
+    exportedDirPath: 'path::exportedDir.proto.export'
+    exportedFilesPath: 'path::exportedFiles.proto.export'
