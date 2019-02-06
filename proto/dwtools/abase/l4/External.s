@@ -483,6 +483,7 @@ function shell( o )
 
   /* */
 
+  /* qqq : use Consequence.deasync */
   function waitForCon( con )
   {
     let ready = false;
