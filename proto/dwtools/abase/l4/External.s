@@ -274,6 +274,7 @@ function shell( o )
     if( _.strIs( o.interpreterArgs ) )
     o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs, preservingDelimeters : 0 });
 
+    // debugger;
     if( o.mode === 'fork')
     {
       _.assert( !o.sync || o.deasync, '{ shell.mode } "fork" is available only in async/deasync version of shell' );
@@ -356,6 +357,7 @@ function shell( o )
   function infoGet()
   {
     let result = '';
+    debugger;
     result += 'Launched as ' + _.strQuote( o.argsStr ) + '\n';
     result += 'Launched at ' + _.strQuote( currentPath ) + '\n';
     return result;
@@ -422,6 +424,8 @@ function shell( o )
 
     done = true;
 
+    debugger;
+    err = _.err( 'Error shelling command\n', o.path, '\nat', o.currentPath, '\n', err );
     if( o.verbosity )
     err = _.errLogOnce( err );
 
@@ -559,18 +563,27 @@ function sheller( o0 )
   return function er()
   {
     let o = _.mapExtend( null, o0 );
+
     for( let a = 0 ; a < arguments.length ; a++ )
     {
       let o1 = arguments[ 0 ];
       if( _.strIs( o1 ) || _.arrayIs( o1 ) )
       o1 = { path : o1 }
       _.assertMapHasOnly( o1, sheller.defaults );
+      if( o1.path && o.path )
+      {
+        _.assert( _.arrayIs( o1.path ) || _.strIs( o1.path ), () => 'Expects string or array, but got ' + _.strType( o1.path ) );
+        if( _.arrayIs( o1.path ) )
+        o.path = _.arrayAppendArrayOnce( _.arrayAs( o.path ), o1.path );
+        else
+        o.path = o.path + ' ' + o1.path;
+        delete o1.path;
+      }
       _.mapExtend( o, o1 );
     }
 
     if( _.arrayIs( o.path ) )
     {
-      // debugger;
       let os = o.path.map( ( path ) =>
       {
         let o2 = _.mapExtend( null, o );
@@ -581,7 +594,6 @@ function sheller( o0 )
           return _.shell( o2 );
         }
       });
-      // debugger;
       return o.ready.andKeep( os );
     }
 
