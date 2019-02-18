@@ -559,6 +559,9 @@ function sheller( o0 )
   return function er()
   {
     let o = _.mapExtend( null, o0 );
+    let path0 = o0.path;
+    let path1 = null;
+
     for( let a = 0 ; a < arguments.length ; a++ )
     {
       let o1 = arguments[ 0 ];
@@ -566,21 +569,33 @@ function sheller( o0 )
       o1 = { path : o1 }
       _.assertMapHasOnly( o1, sheller.defaults );
       _.mapExtend( o, o1 );
+
+      if( o1.path )
+      path1 = o1.path;
     }
+
+    if( path0 && path1 )
+    o.path = _.eachSample( [ path0, path1 ] );
 
     if( _.arrayIs( o.path ) )
     {
       // debugger;
+
       let os = o.path.map( ( path ) =>
       {
         let o2 = _.mapExtend( null, o );
-        o2.path = path;
+        if( _.arrayIs( path ) )
+        {
+          o2.path = _.arrayFlatten( path );
+          o2.path = o2.path.join( ' ' );
+        }
         o2.ready = null;
         return function onPath()
         {
           return _.shell( o2 );
         }
-      });
+      })
+
       // debugger;
       return o.ready.andKeep( os );
     }
