@@ -1134,20 +1134,19 @@ function appRegisterExitHandler( routine )
   if( typeof process === 'undefined' )
   return;
 
-  let onExitHandler = function( code )
-  {
-    routine( code );
-    process.removeListener( 'SIGINT', onTerminateHandler );
-  }
-
-  let onTerminateHandler = function( signal )
-  {
-    routine( signal );
-    process.removeListener( 'exit', onExitHandler );
-  }
-
   process.once( 'exit', onExitHandler );
-  process.once( 'SIGINT', onTerminateHandler );
+  process.once( 'SIGINT', onExitHandler );
+  process.once( 'SIGTERM', onExitHandler );
+
+  /*  */
+
+  function onExitHandler( arg )
+  {
+    routine( arg );
+    process.removeListener( 'exit', onExitHandler );
+    process.removeListener( 'SIGINT', onExitHandler );
+    process.removeListener( 'SIGTERM', onExitHandler );
+  }
 }
 
 //
