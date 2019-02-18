@@ -251,6 +251,117 @@ function appArgs( test )
 
 //
 
+function appRegisterExitHandler( test )
+{
+  var context = this;
+  var testRoutineDir = _.path.join( context.testSuitePath, test.name );
+  var commonDefaults =
+  {
+    outputPiping : 1,
+    outputCollecting : 1,
+    applyingExitCode : 0,
+    throwingExitCode : 1,
+    sync : 1
+  }
+
+  function testApp()
+  {
+
+    if( typeof module !== 'undefined' )
+    {
+      let _ = require( '../../../Tools.s' );
+
+      _.include( 'wConsequence' );
+      _.include( 'wStringsExtra' );
+      _.include( 'wStringer' );
+      _.include( 'wPathFundamentals'/*ttt*/ );
+      _.include( 'wExternalFundamentals' );
+
+    }
+    var _global = _global_;
+    var _ = _global_.wTools;
+    var args = _.appArgs();
+
+    _.appRegisterExitHandler( ( arg ) =>
+    {
+      console.log( 'appRegisterExitHandler:', arg );
+    });
+
+    _.timeOut( 1000, () =>
+    {
+      console.log( 'timeOut handler executed' );
+      return 1;
+    })
+
+    if( args.map.terminate )
+    process.exit( 'SIGINT' );
+
+  }
+
+  /* */
+
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp.js' ) );
+  var testApp = testApp.toString() + '\ntestApp();';
+  var expectedOutput = testAppPath + '\n';
+  _.fileProvider.fileWrite( testAppPath, testApp );
+
+  var o;
+  var con = new _.Consequence().take( null )
+
+
+  /*  */
+
+  .thenKeep( () =>
+  {
+    var o =
+    {
+      path : 'node ' + testAppPath,
+      mode : 'spawn',
+      stdio : 'pipe',
+      sync : 0,
+      outputPiping : 1,
+      outputCollecting : 1,
+    }
+
+    return _.shell( o )
+    .thenKeep( ( got ) =>
+    {
+      test.is( got.exitCode === 0 );
+      test.is( _.strHas( got.output, 'timeOut handler executed' ) )
+      test.is( _.strHas( got.output, 'appRegisterExitHandler: 0' ) );
+      return null;
+    })
+
+  })
+
+  .thenKeep( () =>
+  {
+    var o =
+    {
+      path : 'node ' + testAppPath + ' terminate : 1',
+      mode : 'spawn',
+      stdio : 'pipe',
+      sync : 0,
+      outputPiping : 1,
+      outputCollecting : 1,
+    }
+
+    return _.shell( o )
+    .thenKeep( ( got ) =>
+    {
+      test.is( got.exitCode === 0 );
+      test.is( !_.strHas( got.output, 'timeOut handler executed' ) )
+      test.is( !_.strHas( got.output, 'appRegisterExitHandler: 0' ) );
+      test.is( _.strHas( got.output, 'appRegisterExitHandler: SIGINT' ) );
+      return null;
+    });
+  })
+
+  return con;
+}
+
+//
+
 function shell( test )
 {
   var context = this;
@@ -1578,6 +1689,7 @@ var Proto =
   {
 
     appArgs : appArgs,
+    appRegisterExitHandler : appRegisterExitHandler,
 
     shell : shell,
     shellSync : shellSync,

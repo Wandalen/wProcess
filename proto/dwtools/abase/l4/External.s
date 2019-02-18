@@ -1126,6 +1126,32 @@ function appRepairExitHandler()
 
 //
 
+function appRegisterExitHandler( routine )
+{
+  _.assert( arguments.length === 1 );
+  _.assert( _.routineIs( routine ) );
+
+  if( typeof process === 'undefined' )
+  return;
+
+  let onExitHandler = function( code )
+  {
+    routine( code );
+    process.removeListener( 'SIGINT', onTerminateHandler );
+  }
+
+  let onTerminateHandler = function( signal )
+  {
+    routine( signal );
+    process.removeListener( 'exit', onExitHandler );
+  }
+
+  process.once( 'exit', onExitHandler );
+  process.once( 'SIGINT', onTerminateHandler );
+}
+
+//
+
 function appMemoryUsageInfo()
 {
   var usage = process.memoryUsage();
@@ -1160,6 +1186,7 @@ let Proto =
   appExitWithBeep,
 
   appRepairExitHandler,
+  appRegisterExitHandler,
 
   appMemoryUsageInfo,
 
