@@ -274,6 +274,7 @@ function shell( o )
     if( _.strIs( o.interpreterArgs ) )
     o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs, preservingDelimeters : 0 });
 
+    // debugger;
     if( o.mode === 'fork')
     {
       _.assert( !o.sync || o.deasync, '{ shell.mode } "fork" is available only in async/deasync version of shell' );
@@ -356,6 +357,7 @@ function shell( o )
   function infoGet()
   {
     let result = '';
+    debugger;
     result += 'Launched as ' + _.strQuote( o.argsStr ) + '\n';
     result += 'Launched at ' + _.strQuote( currentPath ) + '\n';
     return result;
@@ -422,6 +424,8 @@ function shell( o )
 
     done = true;
 
+    debugger;
+    err = _.err( 'Error shelling command\n', o.path, '\nat', o.currentPath, '\n', err );
     if( o.verbosity )
     err = _.errLogOnce( err );
 
@@ -559,8 +563,9 @@ function sheller( o0 )
   return function er()
   {
     let o = _.mapExtend( null, o0 );
-    let path0 = o0.path;
-    let path1 = null;
+
+    if( _.arrayIs( o.path  ) )
+    o.path = _.arrayFlatten( o.path );
 
     for( let a = 0 ; a < arguments.length ; a++ )
     {
@@ -568,14 +573,22 @@ function sheller( o0 )
       if( _.strIs( o1 ) || _.arrayIs( o1 ) )
       o1 = { path : o1 }
       _.assertMapHasOnly( o1, sheller.defaults );
+      if( o1.path && o.path )
+      {
+        _.assert( _.arrayIs( o1.path ) || _.strIs( o1.path ), () => 'Expects string or array, but got ' + _.strType( o1.path ) );
+        // if( _.arrayIs( o1.path ) )
+        // o.path = _.arrayAppendArrayOnce( _.arrayAs( o.path ), o1.path );
+        // else
+        // o.path = o.path + ' ' + o1.path;
+        if( _.arrayIs( o1.path ) )
+        o1.path = _.arrayFlatten( o1.path );
+        o.path = _.eachSample( [ o.path, o1.path ] );
+        delete o1.path;
+      }
+
       _.mapExtend( o, o1 );
 
-      if( o1.path )
-      path1 = o1.path;
     }
-
-    if( path0 && path1 )
-    o.path = _.eachSample( [ path0, path1 ] );
 
     if( _.arrayIs( o.path ) )
     {
@@ -584,11 +597,9 @@ function sheller( o0 )
       let os = o.path.map( ( path ) =>
       {
         let o2 = _.mapExtend( null, o );
+        o2.path = path;
         if( _.arrayIs( path ) )
-        {
-          o2.path = _.arrayFlatten( path );
-          o2.path = o2.path.join( ' ' );
-        }
+        o2.path = o2.path.join( ' ' );
         o2.ready = null;
         return function onPath()
         {
