@@ -279,7 +279,8 @@ function shell( o )
     {
       _.assert( !o.sync || o.deasync, '{ shell.mode } "fork" is available only in async/deasync version of shell' );
       let interpreterArgs = o.interpreterArgs || process.execArgv;
-      o.process = ChildProcess.fork( o.path, o.args, { silent : false, env : o.env, cwd : optionsForSpawn.cwd, stdio : optionsForSpawn.stdio, execArgv : interpreterArgs } );
+      let args = o.args || [];
+      o.process = ChildProcess.fork( o.path, args, { silent : false, env : o.env, cwd : optionsForSpawn.cwd, stdio : optionsForSpawn.stdio, execArgv : interpreterArgs } );
     }
     else if( o.mode === 'exec' )
     {
