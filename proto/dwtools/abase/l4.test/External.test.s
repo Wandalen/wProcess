@@ -1571,6 +1571,208 @@ shellNode.timeOut = 10000;
 
 //
 
+function sheller( test )
+{
+  var context = this;
+  var testRoutineDir = _.path.join( context.testSuitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+
+  /* */
+
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp.js' ) );
+  var testApp = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testApp );
+
+  var con = new _.Consequence().take( null )
+
+
+  .thenKeep( () =>
+  {
+    let shell = _.sheller
+    ({
+      path : 'node ' + testAppPath,
+      outputCollecting : 1,
+      outputPiping : 1
+    })
+
+    return shell({ path : [ 'arg1', 'arg2' ] })
+    .thenKeep( ( got ) =>
+    {
+      test.identical( got.length, 3 );
+      test.identical( got[ got.length - 1 ], null );
+
+      let o1 = got[ 0 ];
+      let o2 = got[ 1 ];
+
+      test.is( _.strHas( o1.path, 'arg1' ) );
+      test.is( _.strHas( o2.path, 'arg2' ) );
+      test.is( _.strHas( o1.output, "[ 'arg1' ]" ) );
+      test.is( _.strHas( o2.output, "[ 'arg2' ]" ) );
+
+      return got;
+    })
+  })
+
+  .thenKeep( () =>
+  {
+    let shell = _.sheller
+    ({
+      path : 'node ' + testAppPath + ' arg0',
+      outputCollecting : 1,
+      outputPiping : 1
+    })
+
+    return shell({ path : [ 'arg1', 'arg2' ] })
+    .thenKeep( ( got ) =>
+    {
+      test.identical( got.length, 3 );
+      test.identical( got[ got.length - 1 ], null );
+
+      let o1 = got[ 0 ];
+      let o2 = got[ 1 ];
+
+      test.is( _.strHas( o1.path, 'arg0 arg1' ) );
+      test.is( _.strHas( o2.path, 'arg0 arg2' ) );
+      test.is( _.strHas( o1.output, "[ 'arg0', 'arg1' ]" ) );
+      test.is( _.strHas( o2.output, "[ 'arg0', 'arg2' ]" ) );
+
+      return got;
+    })
+  })
+
+
+  .thenKeep( () =>
+  {
+    let shell = _.sheller
+    ({
+      path : 'node ' + testAppPath,
+      outputCollecting : 1,
+      outputPiping : 1
+    })
+
+    return shell({ path : [ 'arg1', 'arg2' ], args : [ 'arg3' ] })
+    .thenKeep( ( got ) =>
+    {
+      test.identical( got.length, 3 );
+      test.identical( got[ got.length - 1 ], null );
+
+      let o1 = got[ 0 ];
+      let o2 = got[ 1 ];
+
+      test.is( _.strHas( o1.path, 'arg1' ) );
+      test.is( _.strHas( o2.path, 'arg2' ) );
+      test.identical( o1.args, [ 'arg3' ] );
+      test.identical( o2.args, [ 'arg3' ] );
+      test.is( _.strHas( o1.output, "[ 'arg1', 'arg3' ]" ) );
+      test.is( _.strHas( o2.output, "[ 'arg2', 'arg3' ]" ) );
+
+      return got;
+    })
+  })
+
+  .thenKeep( () =>
+  {
+    let shell = _.sheller
+    ({
+      path : 'node ' + testAppPath,
+      outputCollecting : 1,
+      outputPiping : 1
+    })
+
+    return shell({ path : 'arg1' })
+    .thenKeep( ( got ) =>
+    {
+      test.identical( got.length, 2 );
+      test.identical( got[ got.length - 1 ], null );
+
+      let o1 = got[ 0 ];
+
+      test.is( _.strHas( o1.path, 'arg1' ) );
+      test.is( _.strHas( o1.output, "[ 'arg1' ]" ) );
+
+      return got;
+    })
+  })
+
+  .thenKeep( () =>
+  {
+    let shell = _.sheller
+    ({
+      path :
+      [
+        'node ' + testAppPath,
+        'node ' + testAppPath
+      ],
+      outputCollecting : 1,
+      outputPiping : 1
+    })
+
+    return shell({ path : 'arg1' })
+    .thenKeep( ( got ) =>
+    {
+      test.identical( got.length, 3 );
+      test.identical( got[ got.length - 1 ], null );
+
+      let o1 = got[ 0 ];
+      let o2 = got[ 1 ];
+
+      test.is( _.strHas( o1.path, 'arg1' ) );
+      test.is( _.strHas( o2.path, 'arg1' ) );
+      test.is( _.strHas( o1.output, "[ 'arg1' ]" ) );
+      test.is( _.strHas( o2.output, "[ 'arg1' ]" ) );
+
+      return got;
+    })
+  })
+
+  .thenKeep( () =>
+  {
+    let shell = _.sheller
+    ({
+      path :
+      [
+        'node ' + testAppPath,
+        'node ' + testAppPath
+      ],
+      outputCollecting : 1,
+      outputPiping : 1
+    })
+
+    return shell({ path : [ 'arg1', 'arg2' ]})
+    .thenKeep( ( got ) =>
+    {
+      test.identical( got.length, 5 );
+      test.identical( got[ got.length - 1 ], null );
+
+      let o1 = got[ 0 ];
+      let o2 = got[ 1 ];
+      let o3 = got[ 2 ];
+      let o4 = got[ 3 ];
+
+      test.is( _.strHas( o1.path, 'arg1' ) );
+      test.is( _.strHas( o2.path, 'arg1' ) );
+      test.is( _.strHas( o3.path, 'arg2' ) );
+      test.is( _.strHas( o4.path, 'arg2' ) );
+      test.is( _.strHas( o1.output, "[ 'arg1' ]" ) );
+      test.is( _.strHas( o2.output, "[ 'arg1' ]" ) );
+      test.is( _.strHas( o3.output, "[ 'arg2' ]" ) );
+      test.is( _.strHas( o4.output, "[ 'arg2' ]" ) );
+
+      return got;
+    })
+  })
+
+  return con;
+}
+
+//
+
 
 function outputHandling( test )
 {
@@ -1697,6 +1899,8 @@ var Proto =
     shell2 : shell2,
     shellCurrentPath : shellCurrentPath,
     shellNode : shellNode,
+
+    sheller : sheller,
 
     outputHandling : outputHandling
 
