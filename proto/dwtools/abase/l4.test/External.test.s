@@ -1470,6 +1470,365 @@ shellCurrentPath.timeOut = 30000;
 
 //
 
+function shellFork( test )
+{
+  var context = this;
+  var testRoutineDir = _.path.join( context.testSuitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+
+  /* */
+
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp.js' ) );
+  var testApp = testApp.toString() + '\ntestApp();';
+  var expectedOutput = __dirname + '\n'
+  _.fileProvider.fileWrite( testAppPath, testApp );
+
+  //
+
+  var con = new _.Consequence().take( null );
+
+  con.thenKeep( function()
+  {
+    test.case = 'no args';
+
+    let o =
+    {
+      path :  testAppPath,
+      args : null,
+      mode : 'fork',
+      stdio : 'pipe',
+      outputCollecting : 1,
+      outputPiping : 1,
+    }
+    return _.shell( o )
+    .thenKeep( function( got )
+    {
+      test.identical( o.exitCode, 0 );
+      test.is( _.strHas( o.output, '[]' ) );
+      return null;
+    })
+  })
+
+  //
+
+  con.thenKeep( function()
+  {
+    test.case = 'args';
+
+    let o =
+    {
+      path :  testAppPath,
+      args : [ 'arg1', 'arg2' ],
+      mode : 'fork',
+      stdio : 'pipe',
+      outputCollecting : 1,
+      outputPiping : 1,
+    }
+    return _.shell( o )
+    .thenKeep( function( got )
+    {
+      test.identical( o.exitCode, 0 );
+      test.is( _.strHas( o.output,  "[ 'arg1', 'arg2' ]" ) );
+      return null;
+    })
+  })
+
+  //
+
+  // con.thenKeep( function()
+  // {
+  //   test.case = 'stdio : inherit';
+
+  //   let o =
+  //   {
+  //     path :  testAppPath,
+  //     args : [ 'arg1', 'arg2' ],
+  //     mode : 'fork',
+  //     stdio : 'inherit',
+  //     outputCollecting : 1,
+  //     outputPiping : 1,
+  //   }
+
+  //   return _.shell( o )
+  //   .thenKeep( function( got )
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( o.output.length, 0 );
+  //     return null;
+  //   })
+  // })
+
+  //
+
+  con.thenKeep( function()
+  {
+    test.case = 'stdio : ignore';
+
+    let o =
+    {
+      path :  testAppPath,
+      args : [ 'arg1', 'arg2' ],
+      mode : 'fork',
+      stdio : 'ignore',
+      outputCollecting : 1,
+      outputPiping : 1,
+    }
+
+    return _.shell( o )
+    .thenKeep( function( got )
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.output.length, 0 );
+      return null;
+    })
+  })
+
+  //
+
+  con.thenKeep( function()
+  {
+    test.case = 'complex';
+
+    function testApp2()
+    {
+      console.log( process.argv.slice( 2 ) );
+      console.log( process.env );
+      console.log( process.cwd() );
+      console.log( process.execArgv );
+    }
+
+    let testAppPath2 = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp2.js' ) );
+    var testApp2 = testApp2.toString() + '\ntestApp2();';
+    _.fileProvider.fileWrite( testAppPath2, testApp2 );
+
+    let o =
+    {
+      path :  testAppPath2,
+      currentPath : testRoutineDir,
+      env : { 'key1' : 'val' },
+      args : [ 'arg1', 'arg2' ],
+      interpreterArgs : [ '--no-warnings' ],
+      mode : 'fork',
+      stdio : 'pipe',
+      outputCollecting : 1,
+      outputPiping : 1,
+    }
+    return _.shell( o )
+    .thenKeep( function( got )
+    {
+      test.identical( o.exitCode, 0 );
+      test.is( _.strHas( o.output,  "[ 'arg1', 'arg2' ]" ) );
+      test.is( _.strHas( o.output,  "key1: 'val'," ) );
+      test.is( _.strHas( o.output,  _.fileProvider.path.nativize( testRoutineDir ) ) );
+      test.is( _.strHas( o.output,  "[ '--no-warnings' ]" ) );
+
+      return null;
+    })
+  })
+
+  //
+
+  con.thenKeep( function()
+  {
+    test.case = 'complex + deasync';
+
+    function testApp2()
+    {
+      console.log( process.argv.slice( 2 ) );
+      console.log( process.env );
+      console.log( process.cwd() );
+      console.log( process.execArgv );
+    }
+
+    let testAppPath2 = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp2.js' ) );
+    var testApp2 = testApp2.toString() + '\ntestApp2();';
+    _.fileProvider.fileWrite( testAppPath2, testApp2 );
+
+    let o =
+    {
+      path :  testAppPath2,
+      currentPath : testRoutineDir,
+      env : { 'key1' : 'val' },
+      args : [ 'arg1', 'arg2' ],
+      interpreterArgs : [ '--no-warnings' ],
+      mode : 'fork',
+      stdio : 'pipe',
+      outputCollecting : 1,
+      outputPiping : 1,
+      sync : 1,
+      deasync : 1
+    }
+
+    _.shell( o );
+
+    test.identical( o.exitCode, 0 );
+    test.is( _.strHas( o.output,  "[ 'arg1', 'arg2' ]" ) );
+    test.is( _.strHas( o.output,  "key1: 'val'," ) );
+    test.is( _.strHas( o.output,  _.fileProvider.path.nativize( testRoutineDir ) ) );
+    test.is( _.strHas( o.output,  "[ '--no-warnings' ]" ) );
+
+    return null;
+  })
+
+  //
+
+  //
+
+  con.thenKeep( function()
+  {
+    test.case = 'test is ipc works';
+
+    function testApp2()
+    {
+      process.on( 'message', ( got ) =>
+      {
+        process.send({ message : 'child received ' + got.message })
+        process.exit();
+      })
+    }
+
+    let testAppPath2 = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp2.js' ) );
+    var testApp2 = testApp2.toString() + '\ntestApp2();';
+    _.fileProvider.fileWrite( testAppPath2, testApp2 );
+
+    let o =
+    {
+      path :  testAppPath2,
+      mode : 'fork',
+      stdio : 'pipe',
+    }
+
+    let gotMessage;
+    let con = _.shell( o );
+
+    o.process.send({ message : 'message from parent' });
+    o.process.on( 'message', ( got ) =>
+    {
+      gotMessage = got.message;
+    })
+
+    con.thenKeep( function( got )
+    {
+      test.identical( gotMessage, 'child received message from parent' )
+      test.identical( o.exitCode, 0 );
+      return null;
+    })
+
+    return con;
+  })
+
+  //
+
+  con.thenKeep( function()
+  {
+    test.case = 'path should contain only path to js file';
+
+    let o =
+    {
+      path :  testAppPath + ' arg0',
+      mode : 'fork',
+      stdio : 'pipe',
+      outputCollecting : 1,
+      outputPiping : 1,
+    }
+
+    return test.shouldThrowError( _.shell( o ) )
+    .thenKeep( function( got )
+    {
+      test.identical( o.exitCode, 1 );
+      test.is( _.strHas( o.output,  'Error: Cannot find module' ) );
+      return null;
+    })
+  })
+
+  //
+
+  con.thenKeep( function()
+  {
+    test.case = 'test timeOut';
+
+    function testApp2()
+    {
+      setTimeout( () =>
+      {
+        console.log( 'timeOut' );
+      }, 5000 )
+    }
+
+    let testAppPath2 = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp2.js' ) );
+    var testApp2 = testApp2.toString() + '\ntestApp2();';
+    _.fileProvider.fileWrite( testAppPath2, testApp2 );
+
+    let o =
+    {
+      path :  testAppPath2,
+      mode : 'fork',
+      stdio : 'pipe',
+      outputCollecting : 1,
+      outputPiping : 1,
+      throwingExitCode : 1,
+      timeOut : 1000,
+    }
+
+    return test.shouldThrowError( _.shell( o ) )
+    .thenKeep( function( got )
+    {
+      test.identical( o.exitCode, null );
+      return null;
+    })
+  })
+
+  //
+
+  con.thenKeep( function()
+  {
+    test.case = 'test timeOut';
+
+    function testApp2()
+    {
+      setTimeout( () =>
+      {
+        console.log( 'timeOut' );
+      }, 5000 )
+    }
+
+    let testAppPath2 = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp2.js' ) );
+    var testApp2 = testApp2.toString() + '\ntestApp2();';
+    _.fileProvider.fileWrite( testAppPath2, testApp2 );
+
+    let o =
+    {
+      path :  testAppPath2,
+      mode : 'fork',
+      stdio : 'pipe',
+      outputCollecting : 1,
+      outputPiping : 1,
+      throwingExitCode : 0,
+      timeOut : 1000,
+    }
+
+    return _.shell( o )
+    .thenKeep( function( got )
+    {
+      test.identical( o.exitCode, null );
+      return null;
+    })
+  })
+
+  return con;
+
+}
+
+shellFork.timeOut = 30000;
+
+//
+
 function shellNode( test )
 {
   var context = this;
@@ -1898,6 +2257,7 @@ var Proto =
     shellSyncAsync : shellSyncAsync,
     shell2 : shell2,
     shellCurrentPath : shellCurrentPath,
+    shellFork : shellFork,
     shellNode : shellNode,
 
     sheller : sheller,

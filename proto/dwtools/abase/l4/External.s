@@ -333,10 +333,12 @@ function shell( o )
     if( o.timeOut && !( o.sync && !o.deasync ) )
     _.timeOut( o.timeOut, () =>
     {
-      if( done )
-      return true;
-      killedByTimeout = true;
-      o.process.kill( 'SIGTERM' );
+      if( !done )
+      {
+        killedByTimeout = true;
+        o.process.kill( 'SIGTERM' );
+      }
+
       return true;
     });
 
