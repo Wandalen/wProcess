@@ -63,6 +63,7 @@ function shell( o )
   let currentExitCode;
   let currentPath;
   let killedByTimeout = false;
+  let stderrOutput = '';
 
   o.ready = o.ready || new _.Consequence().take( null );
 
@@ -178,7 +179,7 @@ function shell( o )
 
     /* piping error channel */
 
-    if( o.outputPiping || o.outputCollecting )
+    // if( o.outputPiping || o.outputCollecting )
     if( o.process.stderr )
     if( o.sync && !o.deasync )
     handleStderr( o.process.stderr );
@@ -365,6 +366,8 @@ function shell( o )
     debugger;
     result += 'Launched as ' + _.strQuote( o.argsStr ) + '\n';
     result += 'Launched at ' + _.strQuote( currentPath ) + '\n';
+    if( stderrOutput.length )
+    result += 'Process returned error: ' + '\n' + _.strQuote( stderrOutput ) + '\n';
     return result;
   }
 
@@ -447,6 +450,8 @@ function shell( o )
 
     if( _.bufferAnyIs( data ) )
     data = _.bufferToStr( data );
+
+    stderrOutput += data;
 
     if( o.outputCollecting )
     o.output += data;

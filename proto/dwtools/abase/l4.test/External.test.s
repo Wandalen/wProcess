@@ -1829,6 +1829,284 @@ shellFork.timeOut = 30000;
 
 //
 
+function shellErrorHadling( test )
+{
+  var context = this;
+  var testRoutineDir = _.path.join( context.testSuitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    if( typeof module !== 'undefined' )
+    {
+      try
+      {
+        require( '../../../../Base.s' );
+      }
+      catch( err )
+      {
+        require( 'wTools' );
+      }
+    }
+
+    var _ = _global_.wTools;
+
+    _.include( 'wExternalFundamentals' );
+
+    throw _.err( 'Error message from child' );
+  }
+
+  /* */
+
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp.js' ) );
+  var testApp = testApp.toString() + '\ntestApp();';
+  var expectedOutput = __dirname + '\n'
+  _.fileProvider.fileWrite( testAppPath, testApp );
+
+  //
+
+  var con = new _.Consequence().take( null );
+
+  con.thenKeep( function()
+  {
+    test.case = 'collecting, verbosity and piping off';
+
+    let o =
+    {
+      path :  'node ' + testAppPath,
+      mode : 'spawn',
+      stdio : 'pipe',
+      verbosity : 0,
+      outputCollecting : 0,
+      outputPiping : 0
+    }
+    return test.shouldThrowError( _.shell( o ) )
+    .thenKeep( function( got )
+    {
+      test.is( _.errIs( got ) );
+      test.is( _.strHas( got.message, 'Process returned error code' ) )
+      test.is( _.strHas( got.message, 'Launched as' ) )
+      test.is( _.strHas( got.message, 'Process returned error:' ) )
+      test.is( _.strHas( got.message, 'Error message from child' ) )
+
+      test.notIdentical( o.exitCode, 0 );
+
+      return null;
+    })
+
+  })
+
+  con.thenKeep( function()
+  {
+    test.case = 'collecting, verbosity and piping off';
+
+    let o =
+    {
+      path :  'node ' + testAppPath,
+      mode : 'shell',
+      stdio : 'pipe',
+      verbosity : 0,
+      outputCollecting : 0,
+      outputPiping : 0
+    }
+    return test.shouldThrowError( _.shell( o ) )
+    .thenKeep( function( got )
+    {
+      test.is( _.errIs( got ) );
+      test.is( _.strHas( got.message, 'Process returned error code' ) )
+      test.is( _.strHas( got.message, 'Launched as' ) )
+      test.is( _.strHas( got.message, 'Process returned error:' ) )
+      test.is( _.strHas( got.message, 'Error message from child' ) )
+
+      test.notIdentical( o.exitCode, 0 );
+
+      return null;
+    })
+
+  })
+
+  con.thenKeep( function()
+  {
+    test.case = 'collecting, verbosity and piping off';
+
+    let o =
+    {
+      path :  testAppPath,
+      mode : 'fork',
+      stdio : 'pipe',
+      verbosity : 0,
+      outputCollecting : 0,
+      outputPiping : 0
+    }
+    return test.shouldThrowError( _.shell( o ) )
+    .thenKeep( function( got )
+    {
+      test.is( _.errIs( got ) );
+      test.is( _.strHas( got.message, 'Process returned error code' ) )
+      test.is( _.strHas( got.message, 'Launched as' ) )
+      test.is( _.strHas( got.message, 'Process returned error:' ) )
+      test.is( _.strHas( got.message, 'Error message from child' ) )
+
+      test.notIdentical( o.exitCode, 0 );
+
+      return null;
+    })
+
+  })
+
+  con.thenKeep( function()
+  {
+    test.case = 'sync, collecting, verbosity and piping off';
+
+    let o =
+    {
+      path :  'node ' + testAppPath,
+      mode : 'spawn',
+      stdio : 'pipe',
+      sync : 1,
+      deasync : 1,
+      verbosity : 0,
+      outputCollecting : 0,
+      outputPiping : 0
+    }
+    var got = test.shouldThrowErrorSync( () => _.shell( o ) )
+
+    test.is( _.errIs( got ) );
+    test.is( _.strHas( got.message, 'Process returned error code' ) )
+    test.is( _.strHas( got.message, 'Launched as' ) )
+    test.is( _.strHas( got.message, 'Process returned error:' ) )
+    test.is( _.strHas( got.message, 'Error message from child' ) )
+
+    test.notIdentical( o.exitCode, 0 );
+
+    return null;
+
+  })
+
+  con.thenKeep( function()
+  {
+    test.case = 'sync, collecting, verbosity and piping off';
+
+    let o =
+    {
+      path :  'node ' + testAppPath,
+      mode : 'shell',
+      stdio : 'pipe',
+      sync : 1,
+      deasync : 1,
+      verbosity : 0,
+      outputCollecting : 0,
+      outputPiping : 0
+    }
+    var got = test.shouldThrowErrorSync( () => _.shell( o ) )
+
+    test.is( _.errIs( got ) );
+    test.is( _.strHas( got.message, 'Process returned error code' ) )
+    test.is( _.strHas( got.message, 'Launched as' ) )
+    test.is( _.strHas( got.message, 'Process returned error:' ) )
+    test.is( _.strHas( got.message, 'Error message from child' ) )
+
+    test.notIdentical( o.exitCode, 0 );
+
+    return null;
+
+  })
+
+  con.thenKeep( function()
+  {
+    test.case = 'sync, collecting, verbosity and piping off';
+
+    let o =
+    {
+      path :  testAppPath,
+      mode : 'fork',
+      stdio : 'pipe',
+      sync : 1,
+      deasync : 1,
+      verbosity : 0,
+      outputCollecting : 0,
+      outputPiping : 0
+    }
+    var got = test.shouldThrowErrorSync( () => _.shell( o ) )
+
+    test.is( _.errIs( got ) );
+    test.is( _.strHas( got.message, 'Process returned error code' ) )
+    test.is( _.strHas( got.message, 'Launched as' ) )
+    test.is( _.strHas( got.message, 'Process returned error:' ) )
+    test.is( _.strHas( got.message, 'Error message from child' ) )
+
+    test.notIdentical( o.exitCode, 0 );
+
+    return null;
+
+  })
+
+  con.thenKeep( function()
+  {
+    test.case = 'stdio ignore, sync, collecting, verbosity and piping off';
+
+    let o =
+    {
+      path :  testAppPath,
+      mode : 'fork',
+      stdio : 'ignore',
+      sync : 1,
+      deasync : 1,
+      verbosity : 0,
+      outputCollecting : 0,
+      outputPiping : 0
+    }
+    var got = test.shouldThrowErrorSync( () => _.shell( o ) )
+
+    test.is( _.errIs( got ) );
+    test.is( _.strHas( got.message, 'Process returned error code' ) )
+    test.is( _.strHas( got.message, 'Launched as' ) )
+    test.is( !_.strHas( got.message, 'Process returned error:' ) )
+    test.is( !_.strHas( got.message, 'Error message from child' ) )
+
+    test.notIdentical( o.exitCode, 0 );
+
+    return null;
+
+  })
+
+  // con.thenKeep( function()
+  // {
+  //   test.case = 'stdio inherit, sync, collecting, verbosity and piping off';
+
+  //   let o =
+  //   {
+  //     path :  testAppPath,
+  //     mode : 'fork',
+  //     stdio : 'inherit',
+  //     sync : 1,
+  //     deasync : 1,
+  //     verbosity : 0,
+  //     outputCollecting : 0,
+  //     outputPiping : 0
+  //   }
+  //   var got = test.shouldThrowErrorSync( () => _.shell( o ) )
+
+  //   test.is( _.errIs( got ) );
+  //   test.is( _.strHas( got.message, 'Process returned error code' ) )
+  //   test.is( _.strHas( got.message, 'Launched as' ) )
+  //   test.is( !_.strHas( got.message, 'Process returned error:' ) )
+  //   test.is( !_.strHas( got.message, 'Error message from child' ) )
+
+  //   test.notIdentical( o.exitCode, 0 );
+
+  //   return null;
+
+  // })
+
+  return con;
+
+}
+
+
+//
+
 function shellNode( test )
 {
   var context = this;
@@ -2258,6 +2536,7 @@ var Proto =
     shell2 : shell2,
     shellCurrentPath : shellCurrentPath,
     shellFork : shellFork,
+    shellErrorHadling : shellErrorHadling,
     shellNode : shellNode,
 
     sheller : sheller,
