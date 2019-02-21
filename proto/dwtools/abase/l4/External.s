@@ -167,7 +167,6 @@ function shell( o )
       return o.ready.error( _.errLogOnce( err ) );
     }
 
-
     /* piping out channel */
 
     if( o.outputPiping || o.outputCollecting )
@@ -309,9 +308,11 @@ function shell( o )
       o.process = ChildProcess.spawnSync( app, o.args, optionsForSpawn );
       else
       o.process = ChildProcess.spawn( app, o.args, optionsForSpawn );
+
     }
     else if( o.mode === 'shell' )
     {
+
       let app = process.platform === 'win32' ? 'cmd' : 'sh';
       let arg1 = process.platform === 'win32' ? '/c' : '-c';
       let arg2 = o.path;
@@ -325,6 +326,7 @@ function shell( o )
       o.process = ChildProcess.spawnSync( app, [ arg1, arg2 ], optionsForSpawn );
       else
       o.process = ChildProcess.spawn( app, [ arg1, arg2 ], optionsForSpawn );
+
     }
     else _.assert( 0,'Unknown mode', _.strQuote( o.mode ), 'to shell path', _.strQuote( o.paths ) );
 
@@ -1023,8 +1025,6 @@ function appExitCode( status )
 
   if( _global.process )
   {
-    // if( status !== undefined )
-    // debugger;
     if( status !== undefined )
     process.exitCode = status;
     result = process.exitCode;
