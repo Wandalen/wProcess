@@ -178,7 +178,7 @@ function shell( o )
 
     /* piping error channel */
 
-    if( o.outputErrorPiping || o.outputCollecting )
+    if( o.outputPiping || o.outputCollecting )
     if( o.process.stderr )
     if( o.sync && !o.deasync )
     handleStderr( o.process.stderr );
@@ -218,8 +218,6 @@ function shell( o )
     o.verbosity = o.verbosity ? 1 : 0;
     if( o.verbosity < 0 )
     o.verbosity = 0;
-    if( o.outputErrorPiping === null )
-    o.outputErrorPiping = o.verbosity >= 1;
     if( o.outputPiping === null )
     o.outputPiping = o.verbosity >= 2;
     if( o.outputCollecting && !o.output )
@@ -452,7 +450,7 @@ function shell( o )
 
     if( o.outputCollecting )
     o.output += data;
-    if( !o.outputErrorPiping )
+    if( !o.outputPiping )
     return;
 
     if( _.strEnds( data,'\n' ) )
@@ -552,7 +550,6 @@ shell.defaults =
   outputGrayStdout : 0,
   outputPrefixing : 0,
   outputPiping : null,
-  outputErrorPiping : null,
   outputCollecting : 0,
   outputMirroring : 1,
 
