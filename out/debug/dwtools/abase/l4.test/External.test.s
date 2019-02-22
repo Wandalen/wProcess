@@ -251,6 +251,117 @@ function appArgs( test )
 
 //
 
+function appRegisterExitHandler( test )
+{
+  var context = this;
+  var testRoutineDir = _.path.join( context.testSuitePath, test.name );
+  var commonDefaults =
+  {
+    outputPiping : 1,
+    outputCollecting : 1,
+    applyingExitCode : 0,
+    throwingExitCode : 1,
+    sync : 1
+  }
+
+  function testApp()
+  {
+
+    if( typeof module !== 'undefined' )
+    {
+      let _ = require( '../../../Tools.s' );
+
+      _.include( 'wConsequence' );
+      _.include( 'wStringsExtra' );
+      _.include( 'wStringer' );
+      _.include( 'wPathFundamentals'/*ttt*/ );
+      _.include( 'wExternalFundamentals' );
+
+    }
+    var _global = _global_;
+    var _ = _global_.wTools;
+    var args = _.appArgs();
+
+    _.appRegisterExitHandler( ( arg ) =>
+    {
+      console.log( 'appRegisterExitHandler:', arg );
+    });
+
+    _.timeOut( 1000, () =>
+    {
+      console.log( 'timeOut handler executed' );
+      return 1;
+    })
+
+    if( args.map.terminate )
+    process.exit( 'SIGINT' );
+
+  }
+
+  /* */
+
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp.js' ) );
+  var testApp = testApp.toString() + '\ntestApp();';
+  var expectedOutput = testAppPath + '\n';
+  _.fileProvider.fileWrite( testAppPath, testApp );
+
+  var o;
+  var con = new _.Consequence().take( null )
+
+
+  /*  */
+
+  .thenKeep( () =>
+  {
+    var o =
+    {
+      path : 'node ' + testAppPath,
+      mode : 'spawn',
+      stdio : 'pipe',
+      sync : 0,
+      outputPiping : 1,
+      outputCollecting : 1,
+    }
+
+    return _.shell( o )
+    .thenKeep( ( got ) =>
+    {
+      test.is( got.exitCode === 0 );
+      test.is( _.strHas( got.output, 'timeOut handler executed' ) )
+      test.is( _.strHas( got.output, 'appRegisterExitHandler: 0' ) );
+      return null;
+    })
+
+  })
+
+  .thenKeep( () =>
+  {
+    var o =
+    {
+      path : 'node ' + testAppPath + ' terminate : 1',
+      mode : 'spawn',
+      stdio : 'pipe',
+      sync : 0,
+      outputPiping : 1,
+      outputCollecting : 1,
+    }
+
+    return _.shell( o )
+    .thenKeep( ( got ) =>
+    {
+      test.is( got.exitCode === 0 );
+      test.is( !_.strHas( got.output, 'timeOut handler executed' ) )
+      test.is( !_.strHas( got.output, 'appRegisterExitHandler: 0' ) );
+      test.is( _.strHas( got.output, 'appRegisterExitHandler: SIGINT' ) );
+      return null;
+    });
+  })
+
+  return con;
+}
+
+//
+
 function shell( test )
 {
   var context = this;
@@ -1359,6 +1470,643 @@ shellCurrentPath.timeOut = 30000;
 
 //
 
+function shellFork( test )
+{
+  var context = this;
+  var testRoutineDir = _.path.join( context.testSuitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+
+  /* */
+
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp.js' ) );
+  var testApp = testApp.toString() + '\ntestApp();';
+  var expectedOutput = __dirname + '\n'
+  _.fileProvider.fileWrite( testAppPath, testApp );
+
+  //
+
+  var con = new _.Consequence().take( null );
+
+  con.thenKeep( function()
+  {
+    test.case = 'no args';
+
+    let o =
+    {
+      path :  testAppPath,
+      args : null,
+      mode : 'fork',
+      stdio : 'pipe',
+      outputCollecting : 1,
+      outputPiping : 1,
+    }
+    return _.shell( o )
+    .thenKeep( function( got )
+    {
+      test.identical( o.exitCode, 0 );
+      test.is( _.strHas( o.output, '[]' ) );
+      return null;
+    })
+  })
+
+  //
+
+  con.thenKeep( function()
+  {
+    test.case = 'args';
+
+    let o =
+    {
+      path :  testAppPath,
+      args : [ 'arg1', 'arg2' ],
+      mode : 'fork',
+      stdio : 'pipe',
+      outputCollecting : 1,
+      outputPiping : 1,
+    }
+    return _.shell( o )
+    .thenKeep( function( got )
+    {
+      test.identical( o.exitCode, 0 );
+      test.is( _.strHas( o.output,  "[ 'arg1', 'arg2' ]" ) );
+      return null;
+    })
+  })
+
+  //
+
+  // con.thenKeep( function()
+  // {
+  //   test.case = 'stdio : inherit';
+
+  //   let o =
+  //   {
+  //     path :  testAppPath,
+  //     args : [ 'arg1', 'arg2' ],
+  //     mode : 'fork',
+  //     stdio : 'inherit',
+  //     outputCollecting : 1,
+  //     outputPiping : 1,
+  //   }
+
+  //   return _.shell( o )
+  //   .thenKeep( function( got )
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( o.output.length, 0 );
+  //     return null;
+  //   })
+  // })
+
+  //
+
+  con.thenKeep( function()
+  {
+    test.case = 'stdio : ignore';
+
+    let o =
+    {
+      path :  testAppPath,
+      args : [ 'arg1', 'arg2' ],
+      mode : 'fork',
+      stdio : 'ignore',
+      outputCollecting : 1,
+      outputPiping : 1,
+    }
+
+    return _.shell( o )
+    .thenKeep( function( got )
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.output.length, 0 );
+      return null;
+    })
+  })
+
+  //
+
+  con.thenKeep( function()
+  {
+    test.case = 'complex';
+
+    function testApp2()
+    {
+      console.log( process.argv.slice( 2 ) );
+      console.log( process.env );
+      console.log( process.cwd() );
+      console.log( process.execArgv );
+    }
+
+    let testAppPath2 = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp2.js' ) );
+    var testApp2 = testApp2.toString() + '\ntestApp2();';
+    _.fileProvider.fileWrite( testAppPath2, testApp2 );
+
+    let o =
+    {
+      path :  testAppPath2,
+      currentPath : testRoutineDir,
+      env : { 'key1' : 'val' },
+      args : [ 'arg1', 'arg2' ],
+      interpreterArgs : [ '--no-warnings' ],
+      mode : 'fork',
+      stdio : 'pipe',
+      outputCollecting : 1,
+      outputPiping : 1,
+    }
+    return _.shell( o )
+    .thenKeep( function( got )
+    {
+      test.identical( o.exitCode, 0 );
+      test.is( _.strHas( o.output,  "[ 'arg1', 'arg2' ]" ) );
+      test.is( _.strHas( o.output,  "key1: 'val'," ) );
+      test.is( _.strHas( o.output,  _.fileProvider.path.nativize( testRoutineDir ) ) );
+      test.is( _.strHas( o.output,  "[ '--no-warnings' ]" ) );
+
+      return null;
+    })
+  })
+
+  //
+
+  con.thenKeep( function()
+  {
+    test.case = 'complex + deasync';
+
+    function testApp2()
+    {
+      console.log( process.argv.slice( 2 ) );
+      console.log( process.env );
+      console.log( process.cwd() );
+      console.log( process.execArgv );
+    }
+
+    let testAppPath2 = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp2.js' ) );
+    var testApp2 = testApp2.toString() + '\ntestApp2();';
+    _.fileProvider.fileWrite( testAppPath2, testApp2 );
+
+    let o =
+    {
+      path :  testAppPath2,
+      currentPath : testRoutineDir,
+      env : { 'key1' : 'val' },
+      args : [ 'arg1', 'arg2' ],
+      interpreterArgs : [ '--no-warnings' ],
+      mode : 'fork',
+      stdio : 'pipe',
+      outputCollecting : 1,
+      outputPiping : 1,
+      sync : 1,
+      deasync : 1
+    }
+
+    _.shell( o );
+
+    test.identical( o.exitCode, 0 );
+    test.is( _.strHas( o.output,  "[ 'arg1', 'arg2' ]" ) );
+    test.is( _.strHas( o.output,  "key1: 'val'," ) );
+    test.is( _.strHas( o.output,  _.fileProvider.path.nativize( testRoutineDir ) ) );
+    test.is( _.strHas( o.output,  "[ '--no-warnings' ]" ) );
+
+    return null;
+  })
+
+  //
+
+  //
+
+  con.thenKeep( function()
+  {
+    test.case = 'test is ipc works';
+
+    function testApp2()
+    {
+      process.on( 'message', ( got ) =>
+      {
+        process.send({ message : 'child received ' + got.message })
+        process.exit();
+      })
+    }
+
+    let testAppPath2 = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp2.js' ) );
+    var testApp2 = testApp2.toString() + '\ntestApp2();';
+    _.fileProvider.fileWrite( testAppPath2, testApp2 );
+
+    let o =
+    {
+      path :  testAppPath2,
+      mode : 'fork',
+      stdio : 'pipe',
+    }
+
+    let gotMessage;
+    let con = _.shell( o );
+
+    o.process.send({ message : 'message from parent' });
+    o.process.on( 'message', ( got ) =>
+    {
+      gotMessage = got.message;
+    })
+
+    con.thenKeep( function( got )
+    {
+      test.identical( gotMessage, 'child received message from parent' )
+      test.identical( o.exitCode, 0 );
+      return null;
+    })
+
+    return con;
+  })
+
+  //
+
+  con.thenKeep( function()
+  {
+    test.case = 'path should contain only path to js file';
+
+    let o =
+    {
+      path :  testAppPath + ' arg0',
+      mode : 'fork',
+      stdio : 'pipe',
+      outputCollecting : 1,
+      outputPiping : 1,
+    }
+
+    return test.shouldThrowError( _.shell( o ) )
+    .thenKeep( function( got )
+    {
+      test.identical( o.exitCode, 1 );
+      test.is( _.strHas( o.output,  'Error: Cannot find module' ) );
+      return null;
+    })
+  })
+
+  //
+
+  con.thenKeep( function()
+  {
+    test.case = 'test timeOut';
+
+    function testApp2()
+    {
+      setTimeout( () =>
+      {
+        console.log( 'timeOut' );
+      }, 5000 )
+    }
+
+    let testAppPath2 = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp2.js' ) );
+    var testApp2 = testApp2.toString() + '\ntestApp2();';
+    _.fileProvider.fileWrite( testAppPath2, testApp2 );
+
+    let o =
+    {
+      path :  testAppPath2,
+      mode : 'fork',
+      stdio : 'pipe',
+      outputCollecting : 1,
+      outputPiping : 1,
+      throwingExitCode : 1,
+      timeOut : 1000,
+    }
+
+    return test.shouldThrowError( _.shell( o ) )
+    .thenKeep( function( got )
+    {
+      test.identical( o.exitCode, null );
+      return null;
+    })
+  })
+
+  //
+
+  con.thenKeep( function()
+  {
+    test.case = 'test timeOut';
+
+    function testApp2()
+    {
+      setTimeout( () =>
+      {
+        console.log( 'timeOut' );
+      }, 5000 )
+    }
+
+    let testAppPath2 = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp2.js' ) );
+    var testApp2 = testApp2.toString() + '\ntestApp2();';
+    _.fileProvider.fileWrite( testAppPath2, testApp2 );
+
+    let o =
+    {
+      path :  testAppPath2,
+      mode : 'fork',
+      stdio : 'pipe',
+      outputCollecting : 1,
+      outputPiping : 1,
+      throwingExitCode : 0,
+      timeOut : 1000,
+    }
+
+    return _.shell( o )
+    .thenKeep( function( got )
+    {
+      test.identical( o.exitCode, null );
+      return null;
+    })
+  })
+
+  return con;
+
+}
+
+shellFork.timeOut = 30000;
+
+//
+
+function shellErrorHadling( test )
+{
+  var context = this;
+  var testRoutineDir = _.path.join( context.testSuitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    if( typeof module !== 'undefined' )
+    {
+      try
+      {
+        require( '../../../../Base.s' );
+      }
+      catch( err )
+      {
+        require( 'wTools' );
+      }
+    }
+
+    var _ = _global_.wTools;
+
+    _.include( 'wExternalFundamentals' );
+
+    throw _.err( 'Error message from child' );
+  }
+
+  /* */
+
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp.js' ) );
+  var testApp = testApp.toString() + '\ntestApp();';
+  var expectedOutput = __dirname + '\n'
+  _.fileProvider.fileWrite( testAppPath, testApp );
+
+  //
+
+  var con = new _.Consequence().take( null );
+
+  con.thenKeep( function()
+  {
+    test.case = 'collecting, verbosity and piping off';
+
+    let o =
+    {
+      path :  'node ' + testAppPath,
+      mode : 'spawn',
+      stdio : 'pipe',
+      verbosity : 0,
+      outputCollecting : 0,
+      outputPiping : 0
+    }
+    return test.shouldThrowError( _.shell( o ) )
+    .thenKeep( function( got )
+    {
+      test.is( _.errIs( got ) );
+      test.is( _.strHas( got.message, 'Process returned error code' ) )
+      test.is( _.strHas( got.message, 'Launched as' ) )
+      test.is( _.strHas( got.message, 'Process returned error:' ) )
+      test.is( _.strHas( got.message, 'Error message from child' ) )
+
+      test.notIdentical( o.exitCode, 0 );
+
+      return null;
+    })
+
+  })
+
+  con.thenKeep( function()
+  {
+    test.case = 'collecting, verbosity and piping off';
+
+    let o =
+    {
+      path :  'node ' + testAppPath,
+      mode : 'shell',
+      stdio : 'pipe',
+      verbosity : 0,
+      outputCollecting : 0,
+      outputPiping : 0
+    }
+    return test.shouldThrowError( _.shell( o ) )
+    .thenKeep( function( got )
+    {
+      test.is( _.errIs( got ) );
+      test.is( _.strHas( got.message, 'Process returned error code' ) )
+      test.is( _.strHas( got.message, 'Launched as' ) )
+      test.is( _.strHas( got.message, 'Process returned error:' ) )
+      test.is( _.strHas( got.message, 'Error message from child' ) )
+
+      test.notIdentical( o.exitCode, 0 );
+
+      return null;
+    })
+
+  })
+
+  con.thenKeep( function()
+  {
+    test.case = 'collecting, verbosity and piping off';
+
+    let o =
+    {
+      path :  testAppPath,
+      mode : 'fork',
+      stdio : 'pipe',
+      verbosity : 0,
+      outputCollecting : 0,
+      outputPiping : 0
+    }
+    return test.shouldThrowError( _.shell( o ) )
+    .thenKeep( function( got )
+    {
+      test.is( _.errIs( got ) );
+      test.is( _.strHas( got.message, 'Process returned error code' ) )
+      test.is( _.strHas( got.message, 'Launched as' ) )
+      test.is( _.strHas( got.message, 'Process returned error:' ) )
+      test.is( _.strHas( got.message, 'Error message from child' ) )
+
+      test.notIdentical( o.exitCode, 0 );
+
+      return null;
+    })
+
+  })
+
+  con.thenKeep( function()
+  {
+    test.case = 'sync, collecting, verbosity and piping off';
+
+    let o =
+    {
+      path :  'node ' + testAppPath,
+      mode : 'spawn',
+      stdio : 'pipe',
+      sync : 1,
+      deasync : 1,
+      verbosity : 0,
+      outputCollecting : 0,
+      outputPiping : 0
+    }
+    var got = test.shouldThrowErrorSync( () => _.shell( o ) )
+
+    test.is( _.errIs( got ) );
+    test.is( _.strHas( got.message, 'Process returned error code' ) )
+    test.is( _.strHas( got.message, 'Launched as' ) )
+    test.is( _.strHas( got.message, 'Process returned error:' ) )
+    test.is( _.strHas( got.message, 'Error message from child' ) )
+
+    test.notIdentical( o.exitCode, 0 );
+
+    return null;
+
+  })
+
+  con.thenKeep( function()
+  {
+    test.case = 'sync, collecting, verbosity and piping off';
+
+    let o =
+    {
+      path :  'node ' + testAppPath,
+      mode : 'shell',
+      stdio : 'pipe',
+      sync : 1,
+      deasync : 1,
+      verbosity : 0,
+      outputCollecting : 0,
+      outputPiping : 0
+    }
+    var got = test.shouldThrowErrorSync( () => _.shell( o ) )
+
+    test.is( _.errIs( got ) );
+    test.is( _.strHas( got.message, 'Process returned error code' ) )
+    test.is( _.strHas( got.message, 'Launched as' ) )
+    test.is( _.strHas( got.message, 'Process returned error:' ) )
+    test.is( _.strHas( got.message, 'Error message from child' ) )
+
+    test.notIdentical( o.exitCode, 0 );
+
+    return null;
+
+  })
+
+  con.thenKeep( function()
+  {
+    test.case = 'sync, collecting, verbosity and piping off';
+
+    let o =
+    {
+      path :  testAppPath,
+      mode : 'fork',
+      stdio : 'pipe',
+      sync : 1,
+      deasync : 1,
+      verbosity : 0,
+      outputCollecting : 0,
+      outputPiping : 0
+    }
+    var got = test.shouldThrowErrorSync( () => _.shell( o ) )
+
+    test.is( _.errIs( got ) );
+    test.is( _.strHas( got.message, 'Process returned error code' ) )
+    test.is( _.strHas( got.message, 'Launched as' ) )
+    test.is( _.strHas( got.message, 'Process returned error:' ) )
+    test.is( _.strHas( got.message, 'Error message from child' ) )
+
+    test.notIdentical( o.exitCode, 0 );
+
+    return null;
+
+  })
+
+  con.thenKeep( function()
+  {
+    test.case = 'stdio ignore, sync, collecting, verbosity and piping off';
+
+    let o =
+    {
+      path :  testAppPath,
+      mode : 'fork',
+      stdio : 'ignore',
+      sync : 1,
+      deasync : 1,
+      verbosity : 0,
+      outputCollecting : 0,
+      outputPiping : 0
+    }
+    var got = test.shouldThrowErrorSync( () => _.shell( o ) )
+
+    test.is( _.errIs( got ) );
+    test.is( _.strHas( got.message, 'Process returned error code' ) )
+    test.is( _.strHas( got.message, 'Launched as' ) )
+    test.is( !_.strHas( got.message, 'Process returned error:' ) )
+    test.is( !_.strHas( got.message, 'Error message from child' ) )
+
+    test.notIdentical( o.exitCode, 0 );
+
+    return null;
+
+  })
+
+  // con.thenKeep( function()
+  // {
+  //   test.case = 'stdio inherit, sync, collecting, verbosity and piping off';
+
+  //   let o =
+  //   {
+  //     path :  testAppPath,
+  //     mode : 'fork',
+  //     stdio : 'inherit',
+  //     sync : 1,
+  //     deasync : 1,
+  //     verbosity : 0,
+  //     outputCollecting : 0,
+  //     outputPiping : 0
+  //   }
+  //   var got = test.shouldThrowErrorSync( () => _.shell( o ) )
+
+  //   test.is( _.errIs( got ) );
+  //   test.is( _.strHas( got.message, 'Process returned error code' ) )
+  //   test.is( _.strHas( got.message, 'Launched as' ) )
+  //   test.is( !_.strHas( got.message, 'Process returned error:' ) )
+  //   test.is( !_.strHas( got.message, 'Error message from child' ) )
+
+  //   test.notIdentical( o.exitCode, 0 );
+
+  //   return null;
+
+  // })
+
+  return con;
+
+}
+
+
+//
+
 function shellNode( test )
 {
   var context = this;
@@ -1457,6 +2205,208 @@ function shellNode( test )
 }
 
 shellNode.timeOut = 10000;
+
+//
+
+function sheller( test )
+{
+  var context = this;
+  var testRoutineDir = _.path.join( context.testSuitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+
+  /* */
+
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp.js' ) );
+  var testApp = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testApp );
+
+  var con = new _.Consequence().take( null )
+
+
+  .thenKeep( () =>
+  {
+    let shell = _.sheller
+    ({
+      path : 'node ' + testAppPath,
+      outputCollecting : 1,
+      outputPiping : 1
+    })
+
+    return shell({ path : [ 'arg1', 'arg2' ] })
+    .thenKeep( ( got ) =>
+    {
+      test.identical( got.length, 3 );
+      test.identical( got[ got.length - 1 ], null );
+
+      let o1 = got[ 0 ];
+      let o2 = got[ 1 ];
+
+      test.is( _.strHas( o1.path, 'arg1' ) );
+      test.is( _.strHas( o2.path, 'arg2' ) );
+      test.is( _.strHas( o1.output, "[ 'arg1' ]" ) );
+      test.is( _.strHas( o2.output, "[ 'arg2' ]" ) );
+
+      return got;
+    })
+  })
+
+  .thenKeep( () =>
+  {
+    let shell = _.sheller
+    ({
+      path : 'node ' + testAppPath + ' arg0',
+      outputCollecting : 1,
+      outputPiping : 1
+    })
+
+    return shell({ path : [ 'arg1', 'arg2' ] })
+    .thenKeep( ( got ) =>
+    {
+      test.identical( got.length, 3 );
+      test.identical( got[ got.length - 1 ], null );
+
+      let o1 = got[ 0 ];
+      let o2 = got[ 1 ];
+
+      test.is( _.strHas( o1.path, 'arg0 arg1' ) );
+      test.is( _.strHas( o2.path, 'arg0 arg2' ) );
+      test.is( _.strHas( o1.output, "[ 'arg0', 'arg1' ]" ) );
+      test.is( _.strHas( o2.output, "[ 'arg0', 'arg2' ]" ) );
+
+      return got;
+    })
+  })
+
+
+  .thenKeep( () =>
+  {
+    let shell = _.sheller
+    ({
+      path : 'node ' + testAppPath,
+      outputCollecting : 1,
+      outputPiping : 1
+    })
+
+    return shell({ path : [ 'arg1', 'arg2' ], args : [ 'arg3' ] })
+    .thenKeep( ( got ) =>
+    {
+      test.identical( got.length, 3 );
+      test.identical( got[ got.length - 1 ], null );
+
+      let o1 = got[ 0 ];
+      let o2 = got[ 1 ];
+
+      test.is( _.strHas( o1.path, 'arg1' ) );
+      test.is( _.strHas( o2.path, 'arg2' ) );
+      test.identical( o1.args, [ 'arg3' ] );
+      test.identical( o2.args, [ 'arg3' ] );
+      test.is( _.strHas( o1.output, "[ 'arg1', 'arg3' ]" ) );
+      test.is( _.strHas( o2.output, "[ 'arg2', 'arg3' ]" ) );
+
+      return got;
+    })
+  })
+
+  .thenKeep( () =>
+  {
+    let shell = _.sheller
+    ({
+      path : 'node ' + testAppPath,
+      outputCollecting : 1,
+      outputPiping : 1
+    })
+
+    return shell({ path : 'arg1' })
+    .thenKeep( ( got ) =>
+    {
+      test.identical( got.length, 2 );
+      test.identical( got[ got.length - 1 ], null );
+
+      let o1 = got[ 0 ];
+
+      test.is( _.strHas( o1.path, 'arg1' ) );
+      test.is( _.strHas( o1.output, "[ 'arg1' ]" ) );
+
+      return got;
+    })
+  })
+
+  .thenKeep( () =>
+  {
+    let shell = _.sheller
+    ({
+      path :
+      [
+        'node ' + testAppPath,
+        'node ' + testAppPath
+      ],
+      outputCollecting : 1,
+      outputPiping : 1
+    })
+
+    return shell({ path : 'arg1' })
+    .thenKeep( ( got ) =>
+    {
+      test.identical( got.length, 3 );
+      test.identical( got[ got.length - 1 ], null );
+
+      let o1 = got[ 0 ];
+      let o2 = got[ 1 ];
+
+      test.is( _.strHas( o1.path, 'arg1' ) );
+      test.is( _.strHas( o2.path, 'arg1' ) );
+      test.is( _.strHas( o1.output, "[ 'arg1' ]" ) );
+      test.is( _.strHas( o2.output, "[ 'arg1' ]" ) );
+
+      return got;
+    })
+  })
+
+  .thenKeep( () =>
+  {
+    let shell = _.sheller
+    ({
+      path :
+      [
+        'node ' + testAppPath,
+        'node ' + testAppPath
+      ],
+      outputCollecting : 1,
+      outputPiping : 1
+    })
+
+    return shell({ path : [ 'arg1', 'arg2' ]})
+    .thenKeep( ( got ) =>
+    {
+      test.identical( got.length, 5 );
+      test.identical( got[ got.length - 1 ], null );
+
+      let o1 = got[ 0 ];
+      let o2 = got[ 1 ];
+      let o3 = got[ 2 ];
+      let o4 = got[ 3 ];
+
+      test.is( _.strHas( o1.path, 'arg1' ) );
+      test.is( _.strHas( o2.path, 'arg1' ) );
+      test.is( _.strHas( o3.path, 'arg2' ) );
+      test.is( _.strHas( o4.path, 'arg2' ) );
+      test.is( _.strHas( o1.output, "[ 'arg1' ]" ) );
+      test.is( _.strHas( o2.output, "[ 'arg1' ]" ) );
+      test.is( _.strHas( o3.output, "[ 'arg2' ]" ) );
+      test.is( _.strHas( o4.output, "[ 'arg2' ]" ) );
+
+      return got;
+    })
+  })
+
+  return con;
+}
 
 //
 
@@ -1578,13 +2528,18 @@ var Proto =
   {
 
     appArgs : appArgs,
+    appRegisterExitHandler : appRegisterExitHandler,
 
     shell : shell,
     shellSync : shellSync,
     shellSyncAsync : shellSyncAsync,
     shell2 : shell2,
     shellCurrentPath : shellCurrentPath,
+    shellFork : shellFork,
+    shellErrorHadling : shellErrorHadling,
     shellNode : shellNode,
+
+    sheller : sheller,
 
     outputHandling : outputHandling
 

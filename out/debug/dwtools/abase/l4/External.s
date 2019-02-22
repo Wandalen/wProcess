@@ -63,6 +63,7 @@ function shell( o )
   let currentExitCode;
   let currentPath;
   let killedByTimeout = false;
+  let stderrOutput = '';
 
   o.ready = o.ready || new _.Consequence().take( null );
 
@@ -178,7 +179,7 @@ function shell( o )
 
     /* piping error channel */
 
-    if( o.outputPiping || o.outputCollecting )
+    // if( o.outputPiping || o.outputCollecting )
     if( o.process.stderr )
     if( o.sync && !o.deasync )
     handleStderr( o.process.stderr );
@@ -278,7 +279,8 @@ function shell( o )
     {
       _.assert( !o.sync || o.deasync, '{ shell.mode } "fork" is available only in async/deasync version of shell' );
       let interpreterArgs = o.interpreterArgs || process.execArgv;
-      o.process = ChildProcess.fork( o.path, o.args, { silent : false, env : o.env, cwd : optionsForSpawn.cwd, stdio : optionsForSpawn.stdio, execArgv : interpreterArgs } );
+      let args = o.args || [];
+      o.process = ChildProcess.fork( o.path, args, { silent : false, env : o.env, cwd : optionsForSpawn.cwd, stdio : optionsForSpawn.stdio, execArgv : interpreterArgs } );
     }
     else if( o.mode === 'exec' )
     {
@@ -332,10 +334,12 @@ function shell( o )
     if( o.timeOut && !( o.sync && !o.deasync ) )
     _.timeOut( o.timeOut, () =>
     {
-      if( done )
-      return true;
-      killedByTimeout = true;
-      o.process.kill( 'SIGTERM' );
+      if( !done )
+      {
+        killedByTimeout = true;
+        o.process.kill( 'SIGTERM' );
+      }
+
       return true;
     });
 
@@ -362,6 +366,8 @@ function shell( o )
     debugger;
     result += 'Launched as ' + _.strQuote( o.argsStr ) + '\n';
     result += 'Launched at ' + _.strQuote( currentPath ) + '\n';
+    if( stderrOutput.length )
+    result += 'Process returned error: ' + '\n' + _.strQuote( stderrOutput ) + '\n';
     return result;
   }
 
@@ -444,6 +450,8 @@ function shell( o )
 
     if( _.bufferAnyIs( data ) )
     data = _.bufferToStr( data );
+
+    stderrOutput += data;
 
     if( o.outputCollecting )
     o.output += data;
@@ -566,6 +574,9 @@ function sheller( o0 )
   {
     let o = _.mapExtend( null, o0 );
 
+    if( _.arrayIs( o.path  ) )
+    o.path = _.arrayFlatten( o.path );
+
     for( let a = 0 ; a < arguments.length ; a++ )
     {
       let o1 = arguments[ 0 ];
@@ -575,27 +586,38 @@ function sheller( o0 )
       if( o1.path && o.path )
       {
         _.assert( _.arrayIs( o1.path ) || _.strIs( o1.path ), () => 'Expects string or array, but got ' + _.strType( o1.path ) );
+        // if( _.arrayIs( o1.path ) )
+        // o.path = _.arrayAppendArrayOnce( _.arrayAs( o.path ), o1.path );
+        // else
+        // o.path = o.path + ' ' + o1.path;
         if( _.arrayIs( o1.path ) )
-        o.path = _.arrayAppendArrayOnce( _.arrayAs( o.path ), o1.path );
-        else
-        o.path = o.path + ' ' + o1.path;
+        o1.path = _.arrayFlatten( o1.path );
+        o.path = _.eachSample( [ o.path, o1.path ] );
         delete o1.path;
       }
+
       _.mapExtend( o, o1 );
+
     }
 
     if( _.arrayIs( o.path ) )
     {
+      // debugger;
+
       let os = o.path.map( ( path ) =>
       {
         let o2 = _.mapExtend( null, o );
         o2.path = path;
+        if( _.arrayIs( path ) )
+        o2.path = o2.path.join( ' ' );
         o2.ready = null;
         return function onPath()
         {
           return _.shell( o2 );
         }
-      });
+      })
+
+      // debugger;
       return o.ready.andKeep( os );
     }
 
@@ -1138,6 +1160,31 @@ function appRepairExitHandler()
 
 //
 
+function appRegisterExitHandler( routine )
+{
+  _.assert( arguments.length === 1 );
+  _.assert( _.routineIs( routine ) );
+
+  if( typeof process === 'undefined' )
+  return;
+
+  process.once( 'exit', onExitHandler );
+  process.once( 'SIGINT', onExitHandler );
+  process.once( 'SIGTERM', onExitHandler );
+
+  /*  */
+
+  function onExitHandler( arg )
+  {
+    routine( arg );
+    process.removeListener( 'exit', onExitHandler );
+    process.removeListener( 'SIGINT', onExitHandler );
+    process.removeListener( 'SIGTERM', onExitHandler );
+  }
+}
+
+//
+
 function appMemoryUsageInfo()
 {
   var usage = process.memoryUsage();
@@ -1172,6 +1219,7 @@ let Proto =
   appExitWithBeep,
 
   appRepairExitHandler,
+  appRegisterExitHandler,
 
   appMemoryUsageInfo,
 
