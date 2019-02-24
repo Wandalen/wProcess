@@ -367,7 +367,7 @@ function shell( o )
     result += 'Launched as ' + _.strQuote( o.argsStr ) + '\n';
     result += 'Launched at ' + _.strQuote( currentPath ) + '\n';
     if( stderrOutput.length )
-    result += 'Process returned error: ' + '\n' + _.strQuote( stderrOutput ) + '\n';
+    result += '\n * Stderr' + '\n' + stderrOutput + '\n'; // !!! : implemen error's collectors
     return result;
   }
 

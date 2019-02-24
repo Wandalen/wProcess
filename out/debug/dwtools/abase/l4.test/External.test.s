@@ -1887,7 +1887,7 @@ function shellErrorHadling( test )
       test.is( _.errIs( got ) );
       test.is( _.strHas( got.message, 'Process returned error code' ) )
       test.is( _.strHas( got.message, 'Launched as' ) )
-      test.is( _.strHas( got.message, 'Process returned error:' ) )
+      test.is( _.strHas( got.message, 'Stderr' ) )
       test.is( _.strHas( got.message, 'Error message from child' ) )
 
       test.notIdentical( o.exitCode, 0 );
@@ -1916,7 +1916,7 @@ function shellErrorHadling( test )
       test.is( _.errIs( got ) );
       test.is( _.strHas( got.message, 'Process returned error code' ) )
       test.is( _.strHas( got.message, 'Launched as' ) )
-      test.is( _.strHas( got.message, 'Process returned error:' ) )
+      test.is( _.strHas( got.message, 'Stderr' ) )
       test.is( _.strHas( got.message, 'Error message from child' ) )
 
       test.notIdentical( o.exitCode, 0 );
@@ -1945,7 +1945,7 @@ function shellErrorHadling( test )
       test.is( _.errIs( got ) );
       test.is( _.strHas( got.message, 'Process returned error code' ) )
       test.is( _.strHas( got.message, 'Launched as' ) )
-      test.is( _.strHas( got.message, 'Process returned error:' ) )
+      test.is( _.strHas( got.message, 'Stderr' ) )
       test.is( _.strHas( got.message, 'Error message from child' ) )
 
       test.notIdentical( o.exitCode, 0 );
@@ -1975,7 +1975,7 @@ function shellErrorHadling( test )
     test.is( _.errIs( got ) );
     test.is( _.strHas( got.message, 'Process returned error code' ) )
     test.is( _.strHas( got.message, 'Launched as' ) )
-    test.is( _.strHas( got.message, 'Process returned error:' ) )
+    test.is( _.strHas( got.message, 'Stderr' ) )
     test.is( _.strHas( got.message, 'Error message from child' ) )
 
     test.notIdentical( o.exitCode, 0 );
@@ -2004,7 +2004,7 @@ function shellErrorHadling( test )
     test.is( _.errIs( got ) );
     test.is( _.strHas( got.message, 'Process returned error code' ) )
     test.is( _.strHas( got.message, 'Launched as' ) )
-    test.is( _.strHas( got.message, 'Process returned error:' ) )
+    test.is( _.strHas( got.message, 'Stderr' ) )
     test.is( _.strHas( got.message, 'Error message from child' ) )
 
     test.notIdentical( o.exitCode, 0 );
@@ -2033,7 +2033,7 @@ function shellErrorHadling( test )
     test.is( _.errIs( got ) );
     test.is( _.strHas( got.message, 'Process returned error code' ) )
     test.is( _.strHas( got.message, 'Launched as' ) )
-    test.is( _.strHas( got.message, 'Process returned error:' ) )
+    test.is( _.strHas( got.message, 'Stderr' ) )
     test.is( _.strHas( got.message, 'Error message from child' ) )
 
     test.notIdentical( o.exitCode, 0 );
@@ -2062,7 +2062,7 @@ function shellErrorHadling( test )
     test.is( _.errIs( got ) );
     test.is( _.strHas( got.message, 'Process returned error code' ) )
     test.is( _.strHas( got.message, 'Launched as' ) )
-    test.is( !_.strHas( got.message, 'Process returned error:' ) )
+    test.is( !_.strHas( got.message, 'Stderr' ) )
     test.is( !_.strHas( got.message, 'Error message from child' ) )
 
     test.notIdentical( o.exitCode, 0 );
@@ -2091,7 +2091,7 @@ function shellErrorHadling( test )
   //   test.is( _.errIs( got ) );
   //   test.is( _.strHas( got.message, 'Process returned error code' ) )
   //   test.is( _.strHas( got.message, 'Launched as' ) )
-  //   test.is( !_.strHas( got.message, 'Process returned error:' ) )
+  //   test.is( !_.strHas( got.message, 'Stderr' ) )
   //   test.is( !_.strHas( got.message, 'Error message from child' ) )
 
   //   test.notIdentical( o.exitCode, 0 );
