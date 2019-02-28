@@ -769,12 +769,6 @@ function _appArgsInSamFormatNodejs( o )
   result.interpreterPath = _.path.normalize( o.argv[ 0 ] );
   result.mainPath = _.path.normalize( o.argv[ 1 ] );
   result.interpreterArgs = process.execArgv;
-
-  // result.keyValDelimeter = o.keyValDelimeter;
-  // result.subjectsDelimeter = o.subjectsDelimeter;
-  // result.map = Object.create( null );
-  // result.subject = '';
-
   result.scriptArgs = o.argv.slice( 2 );
   result.scriptString = result.scriptArgs.join( ' ' );
   result.scriptString = result.scriptString.trim();
@@ -790,69 +784,6 @@ function _appArgsInSamFormatNodejs( o )
   _.mapExtend( result, r );
 
   return result;
-
-  // // if( !result.scriptString )
-  // // return result;
-  //
-  // /* should be strSplit, but not strIsolateBeginOrAll because of quoting */
-  //
-  // let commands = _.strSplit
-  // ({
-  //   src : result.scriptString,
-  //   delimeter : o.subjectsDelimeter,
-  //   stripping : 1,
-  //   quoting : 1,
-  //   preservingDelimeters : 0,
-  //   preservingEmpty : 0,
-  // });
-  //
-  // /* */
-  //
-  // for( let c = 0 ; c < commands.length ; c++ )
-  // {
-  //
-  //   let mapEntries = _.strSplit
-  //   ({
-  //     src : commands[ c ],
-  //     delimeter : o.keyValDelimeter,
-  //     stripping : 1,
-  //     quoting : 1,
-  //     preservingDelimeters : 1,
-  //     preservingEmpty : 0,
-  //   });
-  //
-  //   let subject, map;
-  //
-  //   if( mapEntries.length === 1 )
-  //   {
-  //     subject = mapEntries[ 0 ];
-  //     map = Object.create( null );
-  //   }
-  //   else
-  //   {
-  //     let subjectAndKey = _.strIsolateEndOrAll( mapEntries[ 0 ], ' ' );
-  //     subject = subjectAndKey[ 0 ];
-  //     mapEntries[ 0 ] = subjectAndKey[ 2 ];
-  //
-  //     map = _.strToMap
-  //     ({
-  //       src : mapEntries.join( '' ),
-  //       keyValDelimeter : o.keyValDelimeter,
-  //       parsingArrays : o.parsingArrays,
-  //     });
-  //
-  //   }
-  //
-  //   result.subjects.push( subject );
-  //   result.maps.push( map );
-  // }
-  //
-  // if( result.subjects.length )
-  // result.subject = result.subjects[ 0 ];
-  // if( result.maps.length )
-  // result.map = result.maps[ 0 ];
-  //
-  // return result;
 }
 
 _appArgsInSamFormatNodejs.defaults = Object.create( _appArgsInSamFormat.defaults );
