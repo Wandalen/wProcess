@@ -359,6 +359,15 @@ function shell( o )
       let arg2 = o.execPath;
       let o2 = optionsForSpawn();
 
+     /*
+      windowsVerbatimArguments allows to have arguments with space(s) in shell on Windows
+      Following calls will not work as expected( argument will be splitted by space ), if windowsVerbatimArguments is disabled:
+
+      _.shell( 'node path/to/script.js "path with space"' );
+      _.shell({ execPath : 'node path/to/script.js', args : [ "path with space" ] });
+
+     */
+
       o2.windowsVerbatimArguments = true; /* qqq : explain why is it needed please */
 
       if( o.args && o.args.length )
