@@ -11,8 +11,6 @@
  * @file ExternalFundamentals.s.
  */
 
-let Esprima, Deasync;
-
 if( typeof module !== 'undefined' )
 {
 
@@ -23,17 +21,10 @@ if( typeof module !== 'undefined' )
 
 }
 
-let System, ChildProcess, Net, Stream;
-
+let System, ChildProcess, Deasync;
 let _global = _global_;
 let _ = _global_.wTools;
 let Self = _global_.wTools;
-
-let _ArraySlice = Array.prototype.slice;
-let _FunctionBind = Function.prototype.bind;
-let _ObjectToString = Object.prototype.toString;
-let _ObjectHasOwnProperty = Object.hasOwnProperty;
-let _arraySlice = _.longSlice;
 
 _.assert( !!_realGlobal_ );
 
@@ -41,71 +32,112 @@ _.assert( !!_realGlobal_ );
 // exec
 // --
 
-/*
-qqq : implement multiple commands
-resolved : implement option timeOut aaa : done, needs review
-*/
-
 function shell( o )
 {
 
   if( _.strIs( o ) )
-  o = { path : o };
+  o = { execPath : o };
 
   _.routineOptions( shell, o );
   _.assert( arguments.length === 1, 'Expects single argument' );
   _.assert( o.args === null || _.arrayIs( o.args ) );
   _.assert( _.arrayHas( [ 'fork', 'exec', 'spawn', 'shell' ], o.mode ) );
-  _.assert( _.strIs( o.path ) || _.strsAreAll( o.path ), 'Expects string or strings {-o.path-}, but got', _.strType( o.path ) );
+  _.assert( _.strIs( o.execPath ) || _.strsAreAll( o.execPath ), 'Expects string or strings {-o.execPath-}, but got', _.strType( o.execPath ) );
   _.assert( o.timeOut === null || _.numberIs( o.timeOut ), 'Expects null or number {-o.timeOut-}, but got', _.strType( o.timeOut ) );
 
-  let done = false;
+  let state = 0;
   let currentExitCode;
-  let currentPath;
   let killedByTimeout = false;
   let stderrOutput = '';
+  let decoratedOutput = '';
+  let decoratedErrorOutput = '';
 
   o.ready = o.ready || new _.Consequence().take( null );
+  // if( o.execPath.length === 1 )
+  // o.execPath = o.execPath[ 0 ];
 
-  /* xxx : problem */
+  /* */
 
-  if( _.arrayIs( o.path ) )
-  {
-    for( let p = 0 ; p < o.path.length ; p++ )
-    {
-      let o2 = _.mapExtend( null, o );
-      o2.path = o.path[ p ];
-      _.shell( o2 );
-    }
-
-    if( o.sync && !o.deasync )
-    return o;
-
-    if( o.sync && o.deasync )
-    return waitForCon( o.ready );
-
-    return o.ready;
-  }
+  if( _.arrayIs( o.execPath ) )
+  return multiple();
 
   /*  */
 
   if( o.sync && !o.deasync )
   {
-    main();
+    let arg = o.ready.toResource();
+    if( _.err( arg ) )
+    throw err;
+    single();
+    end( undefined, o )
     return o;
   }
   else
   {
-    o.ready.ifNoErrorGot( main );
+    o.ready.thenGive( single );
+    o.ready.finallyKeep( end );
+    if( o.sync && o.deasync )
+    return waitForCon( o.ready );
+    return o.ready;
+  }
 
-    // o.ready.finally( ( err, arg ) =>
-    // {
-    //   debugger;
-    //   if( err )
-    //   throw err;
-    //   return arg;
-    // });
+  /*  */
 
+  function multiple()
+  {
+
+    if( o.execPath.length > 1 && o.outputAdditive === null )
+    o.outputAdditive = 0;
+
+    let prevReady = o.ready;
+    let readies = [];
+    let options = [];
+
+    for( let p = 0 ; p < o.execPath.length ; p++ )
+    {
+
+      let currentReady = new _.Consequence();
+      readies.push( currentReady );
+
+      if( o.concurrent )
+      {
+        prevReady.then( currentReady );
+      }
+      else
+      {
+        prevReady.finally( currentReady );
+        prevReady = currentReady;
+      }
+
+      let o2 = _.mapExtend( null, o );
+      o2.execPath = o.execPath[ p ];
+      o2.ready = currentReady;
+      options.push( o2 );
+      _.shell( o2 );
+
+    }
+
+    o.ready
+    .andKeep( readies )
+    .finally( ( err, arg ) =>
+    {
+
+      o.exitCode = 0;
+      for( let a = 0 ; a < options.length-1 ; a++ )
+      {
+        let o2 = options[ a ];
+        if( !o.exitCode && o2.exitCode )
+        o.exitCode = o2.exitCode;
+      }
+
+      if( err )
+      throw err;
+
+      return arg;
+    });
+
+    if( o.sync && !o.deasync )
+    return o;
     if( o.sync && o.deasync )
     return waitForCon( o.ready );
 
@@ -114,16 +146,92 @@ function shell( o )
 
   /*  */
 
-  function main()
+  function single()
   {
 
-    let done = false;
-    let currentExitCode;
-    currentPath = o.currentPath || _.path.current();
-
-    o.logger = o.logger || _global_.logger;
+    _.assert( state === 0 );
+    state = 1;
 
     prepare();
+    launch();
+    pipe();
+
+  }
+
+  /* */
+
+  function end( err, arg )
+  {
+
+    if( state > 0 )
+    {
+      if( !o.outputAdditive )
+      {
+        if( decoratedOutput )
+        o.logger.log( decoratedOutput );
+        if( decoratedErrorOutput )
+        o.logger.error( decoratedErrorOutput );
+      }
+    }
+
+    if( err )
+    throw err;
+    return arg;
+  }
+
+  /* */
+
+  function prepare()
+  {
+
+    if( o.outputAdditive === null )
+    o.outputAdditive = true;
+    o.outputAdditive = !!o.outputAdditive;
+    o.currentPath = o.currentPath || _.path.current();
+    o.logger = o.logger || _global_.logger;
+
+    /* verbosity */
+
+    if( !_.numberIs( o.verbosity ) )
+    o.verbosity = o.verbosity ? 1 : 0;
+    if( o.verbosity < 0 )
+    o.verbosity = 0;
+    if( o.outputPiping === null )
+    o.outputPiping = o.verbosity >= 2;
+    if( o.outputCollecting && !o.output )
+    o.output = '';
+
+    /* ipc */
+
+    if( o.ipc )
+    {
+      if( _.strIs( o.stdio ) )
+      o.stdio = _.dup( o.stdio, 3 );
+      if( !_.arrayHas( o.stdio, 'ipc' ) )
+      o.stdio.push( 'ipc' );
+    }
+
+    /* passingThrough */
+
+    if( o.passingThrough )
+    {
+      let argumentsManual = process.argv.slice( 2 );
+      if( argumentsManual.length )
+      o.args = _.arrayAppendArray( o.args || [], argumentsManual );
+    }
+
+    /* out options */
+
+    o.fullPath = _.strConcat( _.arrayAppendArray( [ o.execPath ], o.args || [] ) );
+    o.exitCode = null;
+    o.exitSignal = null;
+    o.process = null;
+    Object.preventExtensions( o );
+
+    /* dependencies */
+
+    if( !ChildProcess )
+    ChildProcess = require( 'child_process' );
 
     if( !o.outputGray && typeof module !== 'undefined' )
     try
@@ -137,26 +245,40 @@ function shell( o )
       _.errLogOnce( err );
     }
 
+  }
+
+  /* */
+
+  function launch()
+  {
+
     /* logger */
-
-    o.argsStr = _.strConcat( _.arrayAppendArray( [ o.path ], o.args || [] ) );
-
-    if( o.verbosity && o.outputMirroring )
-    {
-      let prefix = ' > ';
-      if( !o.outputGray )
-      prefix = _.color.strFormat( prefix, { fg : 'bright white' } );
-      o.logger.log( prefix + o.argsStr );
-    }
-
-    // let prefix = ' > ';
-    // o.logger.log( prefix + o.argsStr ); // xxx
-
-    /* create process */
 
     try
     {
-      launch();
+
+      if( o.verbosity && o.inputMirroring )
+      {
+        let prefix = ' > ';
+        if( !o.outputGray )
+        prefix = _.color.strFormat( prefix, { fg : 'bright white' } );
+        log( prefix + o.fullPath );
+      }
+
+    }
+    catch( err )
+    {
+      debugger;
+      _.errLogOnce( err );
+    }
+
+    /* launch */
+
+    try
+    {
+
+      launchAct();
+
     }
     catch( err )
     {
@@ -167,6 +289,128 @@ function shell( o )
       else
       return o.ready.error( _.errLogOnce( err ) );
     }
+
+    /* time out */
+
+    if( o.timeOut )
+    if( !o.sync || o.deasync )
+    _.timeBegin( o.timeOut, () =>
+    {
+      if( state === 2 )
+      return;
+      killedByTimeout = true;
+      o.process.kill( 'SIGTERM' );
+    });
+
+  }
+
+  /* */
+
+  function launchAct()
+  {
+
+    if( _.strIs( o.interpreterArgs ) )
+    o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs });
+
+    if( o.mode === 'fork')
+    {
+      _.assert( !o.sync || o.deasync, '{ shell.mode } "fork" is available only in async/deasync version of shell' );
+      let args = o.args || [];
+      let o2 = optionsForFork();
+      o.process = ChildProcess.fork( o.execPath, args, o2 );
+    }
+    else if( o.mode === 'exec' )
+    {
+      let currentPath = _.path.nativize( o.currentPath );
+      log( '{ shell.mode } "exec" is deprecated' );
+      if( o.sync && !o.deasync )
+      o.process = ChildProcess.execSync( o.execPath, { env : o.env, cwd : currentPath } );
+      else
+      o.process = ChildProcess.exec( o.execPath, { env : o.env, cwd : currentPath } );
+    }
+    else if( o.mode === 'spawn' )
+    {
+      let appPath = o.execPath;
+
+      if( !o.args )
+      {
+        o.args = _.strSplitNonPreserving({ src : o.execPath });
+        appPath = o.args.shift();
+      }
+      else
+      {
+        if( appPath.length )
+        _.assert( _.strSplitNonPreserving({ src : appPath }).length === 1, ' o.execPath must not contain arguments if those were provided through options' )
+      }
+
+      let o2 = optionsForSpawn();
+
+      if( o.sync && !o.deasync )
+      o.process = ChildProcess.spawnSync( appPath, o.args, o2 );
+      else
+      o.process = ChildProcess.spawn( appPath, o.args, o2 );
+
+    }
+    else if( o.mode === 'shell' )
+    {
+
+      let appPath = process.platform === 'win32' ? 'cmd' : 'sh';
+      let arg1 = process.platform === 'win32' ? '/c' : '-c';
+      let arg2 = o.execPath;
+      let o2 = optionsForSpawn();
+
+      o2.windowsVerbatimArguments = true; /* qqq : explain why is it needed please */
+
+      if( o.args && o.args.length )
+      arg2 = arg2 + ' ' + '"' + o.args.join( '" "' ) + '"';
+
+      if( o.sync && !o.deasync )
+      o.process = ChildProcess.spawnSync( appPath, [ arg1, arg2 ], o2 );
+      else
+      o.process = ChildProcess.spawn( appPath, [ arg1, arg2 ], o2 );
+
+    }
+    else _.assert( 0, 'Unknown mode', _.strQuote( o.mode ), 'to shell path', _.strQuote( o.paths ) );
+
+  }
+
+  /* */
+
+  function optionsForSpawn()
+  {
+    let o2 = Object.create( null );
+    if( o.stdio )
+    o2.stdio = o.stdio;
+    o2.detached = !!o.detaching;
+    if( o.env )
+    o2.env = o.env;
+    if( o.currentPath )
+    o2.cwd = _.path.nativize( o.currentPath );
+    if( o.timeOut && o.sync )
+    o2.timeout = o.timeOut;
+    return o2;
+  }
+
+  /* */
+
+  function optionsForFork()
+  {
+    let interpreterArgs = o.interpreterArgs || process.execArgv;
+    let o2 =
+    {
+      silent : false,
+      env : o.env,
+      cwd : _.path.nativize( o.currentPath ),
+      stdio : o.stdio,
+      execArgv : interpreterArgs,
+    }
+    return o2;
+  }
+
+  /* */
+
+  function pipe()
+  {
 
     /* piping out channel */
 
@@ -179,7 +423,6 @@ function shell( o )
 
     /* piping error channel */
 
-    // if( o.outputPiping || o.outputCollecting )
     if( o.process.stderr )
     if( o.sync && !o.deasync )
     handleStderr( o.process.stderr );
@@ -195,153 +438,9 @@ function shell( o )
     }
     else
     {
-      /* error */
-
       o.process.on( 'error', handleError );
-
-      /* close */
-
       o.process.on( 'close', handleClose );
     }
-
-  }
-
-
-  /* */
-
-  function prepare()
-  {
-
-    /* verbosity */
-
-    // debugger;
-    if( !_.numberIs( o.verbosity ) )
-    o.verbosity = o.verbosity ? 1 : 0;
-    if( o.verbosity < 0 )
-    o.verbosity = 0;
-    if( o.outputPiping === null )
-    o.outputPiping = o.verbosity >= 2;
-    if( o.outputCollecting && !o.output )
-    o.output = '';
-
-    // _.assert( !o.outputCollecting || !!o.outputPiping, 'If {-o.outputCollecting-} enabled then {-o.outputPiping-} either should be' );
-
-    // console.log( 'o.outputCollecting', o.outputCollecting );
-
-    /* ipc */
-
-    if( o.ipc )
-    {
-      if( _.strIs( o.stdio ) )
-      o.stdio = _.dup( o.stdio,3 );
-      if( !_.arrayHas( o.stdio,'ipc' ) )
-      o.stdio.push( 'ipc' );
-    }
-
-    /* passingThrough */
-
-    if( o.passingThrough )
-    {
-      let argumentsManual = process.argv.slice( 2 );
-      if( argumentsManual.length )
-      o.args = _.arrayAppendArray( o.args || [], argumentsManual );
-    }
-
-    /* etc */
-
-    if( !ChildProcess )
-    ChildProcess = require( 'child_process' );
-
-  }
-
-  /* */
-
-  function launch()
-  {
-    let optionsForSpawn = Object.create( null );
-
-    if( o.stdio )
-    optionsForSpawn.stdio = o.stdio;
-    optionsForSpawn.detached = !!o.detaching;
-    if( o.env )
-    optionsForSpawn.env = o.env;
-    if( o.currentPath )
-    optionsForSpawn.cwd = _.path.nativize( o.currentPath );
-
-    if( o.timeOut && o.sync )
-    optionsForSpawn.timeout = o.timeOut;
-
-    if( _.strIs( o.interpreterArgs ) )
-    o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs, preservingDelimeters : 0 });
-
-    // debugger;
-    if( o.mode === 'fork')
-    {
-      _.assert( !o.sync || o.deasync, '{ shell.mode } "fork" is available only in async/deasync version of shell' );
-      let interpreterArgs = o.interpreterArgs || process.execArgv;
-      let args = o.args || [];
-      o.process = ChildProcess.fork( o.path, args, { silent : false, env : o.env, cwd : optionsForSpawn.cwd, stdio : optionsForSpawn.stdio, execArgv : interpreterArgs } );
-    }
-    else if( o.mode === 'exec' )
-    {
-      o.logger.warn( '{ shell.mode } "exec" is deprecated' );
-      if( o.sync && !o.deasync )
-      o.process = ChildProcess.execSync( o.path,{ env : o.env, cwd : optionsForSpawn.cwd } );
-      else
-      o.process = ChildProcess.exec( o.path,{ env : o.env, cwd : optionsForSpawn.cwd } );
-    }
-    else if( o.mode === 'spawn' )
-    {
-      let app = o.path;
-
-      if( !o.args )
-      {
-        o.args = _.strSplitNonPreserving({ src : o.path, preservingDelimeters : 0 });
-        app = o.args.shift();
-      }
-      else
-      {
-        if( app.length )
-        _.assert( _.strSplitNonPreserving({ src : app, preservingDelimeters : 0 }).length === 1, ' o.path must not contain arguments if those were provided through options' )
-      }
-
-      if( o.sync && !o.deasync )
-      o.process = ChildProcess.spawnSync( app, o.args, optionsForSpawn );
-      else
-      o.process = ChildProcess.spawn( app, o.args, optionsForSpawn );
-
-    }
-    else if( o.mode === 'shell' )
-    {
-
-      let app = process.platform === 'win32' ? 'cmd' : 'sh';
-      let arg1 = process.platform === 'win32' ? '/c' : '-c';
-      let arg2 = o.path;
-
-      optionsForSpawn.windowsVerbatimArguments = true; /* qqq : explain why is it needed please */
-
-      if( o.args && o.args.length )
-      arg2 = arg2 + ' ' + '"' + o.args.join( '" "' ) + '"';
-
-      if( o.sync && !o.deasync )
-      o.process = ChildProcess.spawnSync( app, [ arg1, arg2 ], optionsForSpawn );
-      else
-      o.process = ChildProcess.spawn( app, [ arg1, arg2 ], optionsForSpawn );
-
-    }
-    else _.assert( 0,'Unknown mode', _.strQuote( o.mode ), 'to shell path', _.strQuote( o.paths ) );
-
-    if( o.timeOut && !( o.sync && !o.deasync ) )
-    _.timeOut( o.timeOut, () =>
-    {
-      if( !done )
-      {
-        killedByTimeout = true;
-        o.process.kill( 'SIGTERM' );
-      }
-
-      return true;
-    });
 
   }
 
@@ -363,57 +462,54 @@ function shell( o )
   function infoGet()
   {
     let result = '';
-    debugger;
-    result += 'Launched as ' + _.strQuote( o.argsStr ) + '\n';
-    result += 'Launched at ' + _.strQuote( currentPath ) + '\n';
+    result += 'Launched as ' + _.strQuote( o.fullPath ) + '\n';
+    result += 'Launched at ' + _.strQuote( o.currentPath ) + '\n';
     if( stderrOutput.length )
-    result += '\n * Stderr' + '\n' + stderrOutput + '\n'; // !!! : implemen error's collectors
+    result += '\n -> Stderr' + '\n' + _.strIndentation( stderrOutput, ' -  ' ) + '\n -< Stderr'; // !!! : implement error's collectors
     return result;
   }
 
   /* */
 
-  function handleClose( exitCode, signal )
+  function handleClose( exitCode, exitSignal )
   {
 
     o.exitCode = exitCode;
-    o.signal = signal;
+    o.exitSignal = exitSignal;
 
     if( o.verbosity >= 5 )
     {
-      o.logger.log( 'Process returned error code', exitCode );
+      log( 'Process returned error code ' + exitCode );
       if( exitCode )
       {
-        o.logger.log( infoGet() );
+        log( infoGet() );
       }
     }
 
-    if( done )
+    if( state === 2 )
     return;
 
-    done = true;
+    state = 2;
 
     appExitCode( exitCode );
 
     if( exitCode !== 0 && o.throwingExitCode )
     {
-      debugger;
-
       let err;
 
       if( _.numberIs( exitCode ) )
-      err = _.err( 'Process returned error code', exitCode, '\n', infoGet() );
+      err = _.err( 'Process returned exit code', exitCode, '\n', infoGet() );
       else if( killedByTimeout )
-      err = _.err( 'Process timed out, killed by signal', signal, '\n', infoGet() );
+      err = _.err( 'Process timed out, killed by exit signal', exitSignal, '\n', infoGet() );
       else
-      err = _.err( 'Process wass killed by signal', signal, '\n', infoGet() );
+      err = _.err( 'Process wass killed by exit signal', exitSignal, '\n', infoGet() );
 
       if( o.sync && !o.deasync )
       throw err;
       else
       o.ready.error( err );
     }
-    else if( !( o.sync && !o.deasync ) )
+    else if( !o.sync || o.deasync )
     {
       o.ready.take( o );
     }
@@ -427,13 +523,13 @@ function shell( o )
 
     appExitCode( -1 );
 
-    if( done )
+    if( state === 2 )
     return;
 
-    done = true;
+    state = 2;
 
     debugger;
-    err = _.err( 'Error shelling command\n', o.path, '\nat', o.currentPath, '\n', err );
+    err = _.err( 'Error shelling command\n', o.execPath, '\nat', o.currentPath, '\n', err );
     if( o.verbosity )
     err = _.errLogOnce( err );
 
@@ -455,19 +551,20 @@ function shell( o )
 
     if( o.outputCollecting )
     o.output += data;
+
     if( !o.outputPiping )
     return;
 
-    if( _.strEnds( data,'\n' ) )
-    data = _.strRemoveEnd( data,'\n' );
+    if( _.strEnds( data, '\n' ) )
+    data = _.strRemoveEnd( data, '\n' );
 
     if( o.outputPrefixing )
-    data = 'stderr :\n' + _.strIndentation( data,'  ' );
+    data = 'stderr :\n' + _.strIndentation( data, '  ' );
 
     if( _.color && !o.outputGray )
-    data = _.color.strFormat( data,'pipe.negative' );
+    data = _.color.strFormat( data, 'pipe.negative' );
 
-    o.logger.error( data );
+    log( data, 1 );
   }
 
   /* */
@@ -483,16 +580,38 @@ function shell( o )
     if( !o.outputPiping )
     return;
 
-    if( _.strEnds( data,'\n' ) )
-    data = _.strRemoveEnd( data,'\n' );
+    if( _.strEnds( data, '\n' ) )
+    data = _.strRemoveEnd( data, '\n' );
 
     if( o.outputPrefixing )
-    data = 'stdout :\n' + _.strIndentation( data,'  ' );
+    data = 'stdout :\n' + _.strIndentation( data, '  ' );
 
     if( _.color && !o.outputGray && !o.outputGrayStdout )
     data = _.color.strFormat( data, 'pipe.neutral' );
 
-    o.logger.log( data );
+    log( data );
+
+  }
+
+  /* */
+
+  function log( msg, isError )
+  {
+
+    if( o.outputAdditive )
+    {
+      if( isError )
+      o.logger.error( msg );
+      else
+      o.logger.log( msg );
+    }
+    else
+    {
+      decoratedOutput += msg + '\n';
+      if( isError )
+      decoratedErrorOutput += msg + '\n';
+    }
+
   }
 
   /* */
@@ -528,7 +647,7 @@ qqq : implement currentPath for all modes
 shell.defaults =
 {
 
-  path : null,
+  execPath : null,
   currentPath : null,
 
   sync : 0,
@@ -545,6 +664,7 @@ shell.defaults =
   ipc : 0,
   detaching : 0,
   passingThrough : 0,
+  concurrent : 0,
   timeOut : null,
 
   throwingExitCode : 1, /* must be on by default */
@@ -556,7 +676,8 @@ shell.defaults =
   outputPrefixing : 0,
   outputPiping : null,
   outputCollecting : 0,
-  outputMirroring : 1,
+  outputAdditive : null,
+  inputMirroring : 1,
 
 }
 
@@ -566,62 +687,54 @@ function sheller( o0 )
 {
   _.assert( arguments.length === 0 || arguments.length === 1 );
   if( _.strIs( o0 ) )
-  o0 = { path : o0 }
+  o0 = { execPath : o0 }
   o0 = _.routineOptions( sheller, o0 );
   o0.ready = o0.ready || new _.Consequence().take( null );
 
   return function er()
   {
-    let o = _.mapExtend( null, o0 );
+    let o = optionsFrom( arguments[ 0 ] );
+    let o00 = _.mapExtend( null, o0 );
+    merge( o00, o );
+    _.mapExtend( o, o00 )
 
-    if( _.arrayIs( o.path  ) )
-    o.path = _.arrayFlatten( o.path );
-
-    for( let a = 0 ; a < arguments.length ; a++ )
+    for( let a = 1 ; a < arguments.length ; a++ )
     {
-      let o1 = arguments[ 0 ];
-      if( _.strIs( o1 ) || _.arrayIs( o1 ) )
-      o1 = { path : o1 }
-      _.assertMapHasOnly( o1, sheller.defaults );
-      if( o1.path && o.path )
-      {
-        _.assert( _.arrayIs( o1.path ) || _.strIs( o1.path ), () => 'Expects string or array, but got ' + _.strType( o1.path ) );
-        // if( _.arrayIs( o1.path ) )
-        // o.path = _.arrayAppendArrayOnce( _.arrayAs( o.path ), o1.path );
-        // else
-        // o.path = o.path + ' ' + o1.path;
-        if( _.arrayIs( o1.path ) )
-        o1.path = _.arrayFlatten( o1.path );
-        o.path = _.eachSample( [ o.path, o1.path ] );
-        delete o1.path;
-      }
-
+      let o1 = optionsFrom( arguments[ a ] );
+      merge( o, o1 );
       _.mapExtend( o, o1 );
-
-    }
-
-    if( _.arrayIs( o.path ) )
-    {
-      // debugger;
-
-      let os = o.path.map( ( path ) =>
-      {
-        let o2 = _.mapExtend( null, o );
-        o2.path = path;
-        if( _.arrayIs( path ) )
-        o2.path = o2.path.join( ' ' );
-        o2.ready = null;
-        return function onPath()
-        {
-          return _.shell( o2 );
-        }
-      })
-
-      // debugger;
-      return o.ready.andKeep( os );
     }
 
     return _.shell( o );
+  }
+
+  function optionsFrom( options )
+  {
+    if( _.strIs( options ) || _.arrayIs( options ) )
+    options = { execPath : options }
+    options = options || Object.create( null );
+    _.assertMapHasOnly( options, sheller.defaults );
+    return options;
+  }
+
+  function merge( dst, src )
+  {
+    if( _.strIs( src ) || _.arrayIs( src ) )
+    src = { execPath : src }
+    _.assertMapHasOnly( src, sheller.defaults );
+
+    if( src.execPath && dst.execPath )
+    {
+      _.assert( _.arrayIs( src.execPath ) || _.strIs( src.execPath ), () => 'Expects string or array, but got ' + _.strType( src.execPath ) );
+      if( _.arrayIs( src.execPath ) )
+      src.execPath = _.arrayFlatten( src.execPath );
+      dst.execPath = _.eachSample( [ dst.execPath, src.execPath ] ).map( ( path ) => path.join( ' ' ) );
+      delete src.execPath;
+    }
+
+    _.mapExtend( dst, src );
+
+    return dst;
   }
 
 }
@@ -640,13 +753,13 @@ function shellNode( o )
   _.include( 'wFiles' );
 
   if( _.strIs( o ) )
-  o = { path : o }
+  o = { execPath : o }
 
-  _.routineOptions( shellNode,o );
-  _.assert( _.strIs( o.path ) );
+  _.routineOptions( shellNode, o );
+  _.assert( _.strIs( o.execPath ) );
   _.assert( !o.code );
-  _.accessor.forbid( o,'child' );
-  _.accessor.forbid( o,'returnCode' );
+  _.accessor.forbid( o, 'child' );
+  _.accessor.forbid( o, 'returnCode' );
   _.assert( arguments.length === 1, 'Expects single argument' );
 
   /*
@@ -668,23 +781,21 @@ function shellNode( o )
     interpreterArgs = '--expose-gc --stack-trace-limit=999 --max_old_space_size=' + totalmem;
   }
 
-  let path = _.fileProvider.path.nativize( o.path );
+  let path = _.fileProvider.path.nativize( o.execPath );
   if( o.mode === 'fork' )
   o.interpreterArgs = interpreterArgs;
   else
   path = _.strConcat([ 'node', interpreterArgs, path ]);
 
   let shellOptions = _.mapOnly( o, _.shell.defaults );
-  shellOptions.path = path;
+  shellOptions.execPath = path;
 
   let result = _.shell( shellOptions )
-  .got( function( err,arg )
+  .got( function( err, arg )
   {
-    // if( shellOptions.exitCode )
-    // _.appExit( -1 );
     o.exitCode = shellOptions.exitCode;
-    o.signal = shellOptions.signal;
-    this.take( err,arg );
+    o.exitSignal = shellOptions.exitSignal;
+    this.take( err, arg );
   });
 
   o.ready = shellOptions.ready;
@@ -706,9 +817,9 @@ function shellNodePassingThrough( o )
 {
 
   if( _.strIs( o ) )
-  o = { path : o }
+  o = { execPath : o }
 
-  _.routineOptions( shellNodePassingThrough,o );
+  _.routineOptions( shellNodePassingThrough, o );
   _.assert( arguments.length === 1, 'Expects single argument' );
   let result = _.shellNode( o );
 
@@ -741,7 +852,7 @@ function _appArgsInSamFormatNodejs( o )
 {
 
   _.assert( arguments.length === 0 || arguments.length === 1 );
-  o = _.routineOptions( _appArgsInSamFormatNodejs,arguments );
+  o = _.routineOptions( _appArgsInSamFormatNodejs, arguments );
 
   if( o.caching )
   if( _appArgsCache && o.keyValDelimeter === _appArgsCache.keyValDelimeter && o.subjectsDelimeter === _appArgsCache.subjectsDelimeter )
@@ -788,11 +899,6 @@ function _appArgsInSamFormatNodejs( o )
 
 _appArgsInSamFormatNodejs.defaults = Object.create( _appArgsInSamFormat.defaults );
 
-/*
-qqq : does not work
-filePath : [ "./a ./b" ]
-*/
-
 //
 
 function _appArgsInSamFormatBrowser( o )
@@ -800,7 +906,7 @@ function _appArgsInSamFormatBrowser( o )
   debugger; /* xxx */
 
   _.assert( arguments.length === 0 || arguments.length === 1 );
-  o = _.routineOptions( _appArgsInSamFormatNodejs,arguments );
+  o = _.routineOptions( _appArgsInSamFormatNodejs, arguments );
 
   if( o.caching )
   if( _appArgsCache && o.keyValDelimeter === _appArgsCache.keyValDelimeter )
@@ -813,8 +919,6 @@ function _appArgsInSamFormatBrowser( o )
   if( o.caching )
   if( o.keyValDelimeter === _appArgsInSamFormatNodejs.defaults.keyValDelimeter )
   _appArgsCache = result;
-
-  /* xxx */
 
   return result;
 }
@@ -869,7 +973,7 @@ function appArgsReadTo( o )
 
   /* */
 
-  function set( k,v )
+  function set( k, v )
   {
     _.assert( o.dst[ k ] !== undefined, () => 'Entry ' + _.strQuote( k ) + ' is not defined' );
     if( _.numberIs( o.dst[ k ] ) )
@@ -906,23 +1010,23 @@ function appAnchor( o )
 {
   o = o || {};
 
-  _.routineOptions( appAnchor,arguments );
+  _.routineOptions( appAnchor, arguments );
 
   let a = _.strToMap
   ({
-    src : _.strRemoveBegin( window.location.hash,'#' ),
+    src : _.strRemoveBegin( window.location.hash, '#' ),
     keyValDelimeter : ':',
     entryDelimeter : ';',
   });
 
   if( o.extend )
   {
-    _.mapExtend( a,o.extend );
+    _.mapExtend( a, o.extend );
   }
 
   if( o.del )
   {
-    _.mapDelete( a,o.del );
+    _.mapDelete( a, o.del );
   }
 
   if( o.extend || o.del )
@@ -976,8 +1080,6 @@ function appExitCode( status )
 function appExit( exitCode )
 {
 
-  // debugger; // xxx
-
   exitCode = exitCode !== undefined ? exitCode : appExitCode();
 
   _.assert( arguments.length === 0 || arguments.length === 1 );
@@ -1027,16 +1129,7 @@ function appRepairExitHandler()
   if( typeof process === 'undefined' )
   return;
 
-  // try
-  // {
-  //   _.errLog( _.err( 'xxx' ) );
-  // }
-  // catch( err2 )
-  // {
-  //   console.log( err2 );
-  // }
-
-  process.on( 'SIGINT',function()
+  process.on( 'SIGINT', function()
   {
     console.log( 'SIGINT' );
     try
@@ -1053,7 +1146,7 @@ function appRepairExitHandler()
     }
   });
 
-  process.on( 'SIGUSR1',function()
+  process.on( 'SIGUSR1', function()
   {
     console.log( 'SIGUSR1' );
     try
@@ -1070,7 +1163,7 @@ function appRepairExitHandler()
     }
   });
 
-  process.on( 'SIGUSR2',function()
+  process.on( 'SIGUSR2', function()
   {
     console.log( 'SIGUSR2' );
     try
@@ -1107,11 +1200,19 @@ function appRegisterExitHandler( routine )
 
   function onExitHandler( arg )
   {
-    routine( arg );
+    try
+    {
+      routine( arg );
+    }
+    catch( err )
+    {
+      _.errLogOnce( err );
+    }
     process.removeListener( 'exit', onExitHandler );
     process.removeListener( 'SIGINT', onExitHandler );
     process.removeListener( 'SIGTERM', onExitHandler );
   }
+
 }
 
 //

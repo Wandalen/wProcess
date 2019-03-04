@@ -14,6 +14,16 @@ if( typeof module !== 'undefined' )
 
 }
 
+/*
+
+qqq :
+
+- reacts on requests ( qqq ) in the module
+- use application code from test rouitne shellConcurrent for all test routines, maybe?
+- make sure tests works in collection, not only in stand-alone mode
+
+*/
+
 var _global = _global_;
 var _ = _global_.wTools;
 var Self = {};
@@ -33,7 +43,7 @@ function testDirMake()
 
 //
 
-function cleanTestDir()
+function testDirClean()
 {
   var context = this;
   if( Config.platform === 'nodejs' )
@@ -254,7 +264,7 @@ function appArgs( test )
 function appRegisterExitHandler( test )
 {
   var context = this;
-  var testRoutineDir = _.path.join( context.testSuitePath, test.name );
+  var routinePath = _.path.join( context.testSuitePath, test.name );
   var commonDefaults =
   {
     outputPiping : 1,
@@ -300,10 +310,10 @@ function appRegisterExitHandler( test )
 
   /* */
 
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp.js' ) );
-  var testApp = testApp.toString() + '\ntestApp();';
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = testApp.toString() + '\ntestApp();';
   var expectedOutput = testAppPath + '\n';
-  _.fileProvider.fileWrite( testAppPath, testApp );
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
 
   var o;
   var con = new _.Consequence().take( null )
@@ -315,7 +325,7 @@ function appRegisterExitHandler( test )
   {
     var o =
     {
-      path : 'node ' + testAppPath,
+      execPath :  'node ' + testAppPath,
       mode : 'spawn',
       stdio : 'pipe',
       sync : 0,
@@ -338,7 +348,7 @@ function appRegisterExitHandler( test )
   {
     var o =
     {
-      path : 'node ' + testAppPath + ' terminate : 1',
+      execPath :  'node ' + testAppPath + ' terminate : 1',
       mode : 'spawn',
       stdio : 'pipe',
       sync : 0,
@@ -365,7 +375,7 @@ function appRegisterExitHandler( test )
 function shell( test )
 {
   var context = this;
-  var testRoutineDir = _.path.join( context.testSuitePath, test.name );
+  var routinePath = _.path.join( context.testSuitePath, test.name );
   var commonDefaults =
   {
     outputPiping : 1,
@@ -412,10 +422,10 @@ function shell( test )
 
   /* */
 
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp.js' ) );
-  var testApp = testApp.toString() + '\ntestApp();';
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = testApp.toString() + '\ntestApp();';
   var expectedOutput = testAppPath + '\n';
-  _.fileProvider.fileWrite( testAppPath, testApp );
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
 
   var o;
   var con = new _.Consequence().take( null );
@@ -426,14 +436,14 @@ function shell( test )
 
     o =
     {
-      path : 'node ' + testAppPath,
+      execPath :  'node ' + testAppPath,
       mode : 'spawn',
       stdio : 'pipe'
     }
 
     return null;
   })
-  .thenKeep( function( arg/*aaa*/ )
+  .thenKeep( function( arg )
   {
     /* mode : spawn, stdio : pipe */
 
@@ -447,7 +457,7 @@ function shell( test )
       return null;
     })
   })
-  .thenKeep( function( arg/*aaa*/ )
+  .thenKeep( function( arg )
   {
     /* mode : spawn, stdio : ignore */
 
@@ -462,7 +472,7 @@ function shell( test )
       return null;
     })
   })
-  // .thenKeep( function( arg/*aaa*/ )
+  // .thenKeep( function( arg )
   // {
   //   /* mode : spawn, stdio : inherit */
 
@@ -477,19 +487,19 @@ function shell( test )
   //     test.identical( options.output.length, 0 );
   //   })
   // })
-  .thenKeep( function( arg/*aaa*/ )
+  .thenKeep( function( arg )
   {
     test.case = 'mode : shell';
 
     o =
     {
-      path : 'node ' + testAppPath,
+      execPath :  'node ' + testAppPath,
       mode : 'shell',
       stdio : 'pipe'
     }
     return null;
   })
-  .thenKeep( function( arg/*aaa*/ )
+  .thenKeep( function( arg )
   {
     /* mode : shell, stdio : pipe */
 
@@ -503,7 +513,7 @@ function shell( test )
       return null;
     })
   })
-  .thenKeep( function( arg/*aaa*/ )
+  .thenKeep( function( arg )
   {
     /* mode : shell, stdio : ignore */
 
@@ -519,7 +529,7 @@ function shell( test )
       return null;
     })
   })
-  // .thenKeep( function( arg/*aaa*/ )
+  // .thenKeep( function( arg )
   // {
   //   /* mode : shell, stdio : inherit */
 
@@ -534,13 +544,13 @@ function shell( test )
   //     test.identical( options.output.length, 0 );
   //   })
   // })
-  .thenKeep( function( arg/*aaa*/ )
+  .thenKeep( function( arg )
   {
     test.case = 'spawn, stop process using kill';
 
     o =
     {
-      path : 'node ' + testAppPath + ' loop : 1',
+      execPath :  'node ' + testAppPath + ' loop : 1',
       mode : 'spawn',
       stdio : 'pipe'
     }
@@ -563,13 +573,13 @@ function shell( test )
 
     return shell;
   })
-  .thenKeep( function( arg/*aaa*/ )
+  .thenKeep( function( arg )
   {
     test.case = 'shell, stop process using kill';
 
     o =
     {
-      path : 'node ' + testAppPath + ' loop : 1',
+      execPath :  'node ' + testAppPath + ' loop : 1',
       mode : 'shell',
       stdio : 'pipe'
     }
@@ -592,13 +602,13 @@ function shell( test )
 
     return shell;
   })
-  .thenKeep( function( arg/*aaa*/ )
+  .thenKeep( function( arg )
   {
     test.case = 'spawn, return good code';
 
     o =
     {
-      path : 'node ' + testAppPath + ' exitWithCode : 0',
+      execPath :  'node ' + testAppPath + ' exitWithCode : 0',
       mode : 'spawn',
       stdio : 'pipe'
     }
@@ -612,13 +622,13 @@ function shell( test )
       return null;
     });
   })
-  .thenKeep( function( arg/*aaa*/ )
+  .thenKeep( function( arg )
   {
     test.case = 'spawn, return bad code';
 
     o =
     {
-      path : 'node ' + testAppPath + ' exitWithCode : 1',
+      execPath :  'node ' + testAppPath + ' exitWithCode : 1',
       mode : 'spawn',
       stdio : 'pipe'
     }
@@ -632,13 +642,13 @@ function shell( test )
       return null;
     });
   })
-  .thenKeep( function( arg/*aaa*/ )
+  .thenKeep( function( arg )
   {
     test.case = 'shell, return good code';
 
     o =
     {
-      path : 'node ' + testAppPath + ' exitWithCode : 0',
+      execPath :  'node ' + testAppPath + ' exitWithCode : 0',
       mode : 'shell',
       stdio : 'pipe'
     }
@@ -652,13 +662,13 @@ function shell( test )
       return null;
     });
   })
-  .thenKeep( function( arg/*aaa*/ )
+  .thenKeep( function( arg )
   {
     test.case = 'shell, return bad code';
 
     o =
     {
-      path : 'node ' + testAppPath + ' exitWithCode : 1',
+      execPath :  'node ' + testAppPath + ' exitWithCode : 1',
       mode : 'shell',
       stdio : 'pipe'
     }
@@ -677,25 +687,25 @@ function shell( test )
   // test.identical( 0, 0 );
 
   // con
-  // .thenKeep( function( arg/*aaa*/ )
+  // .thenKeep( function( arg )
   // {
   //   test.case = 'simple command';
   //   var con = _.shell( 'exit' );
   //   return test.shouldMessageOnlyOnce( con );
   // })
-  // .thenKeep( function( arg/*aaa*/ )
+  // .thenKeep( function( arg )
   // {
   //   test.case = 'bad command, shell';
   //   var con = _.shell({ code : 'xxx', throwingExitCode : 1, mode : 'shell' });
   //   return test.shouldThrowErrorSync( con );
   // })
-  // .thenKeep( function( arg/*aaa*/ )
+  // .thenKeep( function( arg )
   // {
   //   test.case = 'bad command, spawn';
   //   var con = _.shell({ code : 'xxx', throwingExitCode : 1, mode : 'spawn' });
   //   return test.shouldThrowErrorSync( con );
   // })
-  // .thenKeep( function( arg/*aaa*/ )
+  // .thenKeep( function( arg )
   // {
   //   test.case = 'several arguments';
   //   var con = _.shell( 'echo echo something' );
@@ -705,13 +715,13 @@ function shell( test )
 
   // con.thenKeep( () =>  _.fileProvider.fileDelete( testAppPath ) );
 
-  .thenKeep( function( arg/*aaa*/ )
+  .thenKeep( function( arg )
   {
     test.case = 'shell, stop using timeOut';
 
     o =
     {
-      path : 'node ' + testAppPath + ' loop : 1',
+      execPath :  'node ' + testAppPath + ' loop : 1',
       mode : 'shell',
       stdio : 'pipe',
       timeOut : 500
@@ -740,7 +750,7 @@ shell.timeOut = 30000;
 function shellSync( test )
 {
   var context = this;
-  var testRoutineDir = _.path.join( context.testSuitePath, test.name );
+  var routinePath = _.path.join( context.testSuitePath, test.name );
   var commonDefaults =
   {
     outputPiping : 1,
@@ -788,10 +798,10 @@ function shellSync( test )
 
   /* */
 
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp.js' ) );
-  var testApp = testApp.toString() + '\ntestApp();';
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = testApp.toString() + '\ntestApp();';
   var expectedOutput = testAppPath + '\n';
-  _.fileProvider.fileWrite( testAppPath, testApp );
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
 
   var o;
 
@@ -800,7 +810,7 @@ function shellSync( test )
   test.case = 'mode : spawn';
   o =
   {
-    path : 'node ' + testAppPath,
+    execPath :  'node ' + testAppPath,
     mode : 'spawn',
     stdio : 'pipe'
   }
@@ -825,7 +835,7 @@ function shellSync( test )
   test.case = 'mode : shell';
   o =
   {
-    path : 'node ' + testAppPath,
+    execPath :  'node ' + testAppPath,
     mode : 'shell',
     stdio : 'pipe'
   }
@@ -847,7 +857,7 @@ function shellSync( test )
   test.case = 'shell, stop process using timeOut';
   o =
   {
-    path : 'node ' + testAppPath + ' loop : 1',
+    execPath :  'node ' + testAppPath + ' loop : 1',
     mode : 'shell',
     stdio : 'pipe',
     timeOut : 500
@@ -861,7 +871,7 @@ function shellSync( test )
   test.case = 'spawn, return good code';
   o =
   {
-    path : 'node ' + testAppPath + ' exitWithCode : 0',
+    execPath :  'node ' + testAppPath + ' exitWithCode : 0',
     mode : 'spawn',
     stdio : 'pipe'
   }
@@ -874,7 +884,7 @@ function shellSync( test )
   test.case = 'spawn, return bad code';
   o =
   {
-    path : 'node ' + testAppPath + ' exitWithCode : 1',
+    execPath :  'node ' + testAppPath + ' exitWithCode : 1',
     mode : 'spawn',
     stdio : 'pipe'
   }
@@ -887,7 +897,7 @@ function shellSync( test )
   test.case = 'shell, return good code';
   o =
   {
-    path : 'node ' + testAppPath + ' exitWithCode : 0',
+    execPath :  'node ' + testAppPath + ' exitWithCode : 0',
     mode : 'shell',
     stdio : 'pipe'
   }
@@ -901,7 +911,7 @@ function shellSync( test )
   test.case = 'shell, return bad code';
   o =
   {
-    path : 'node ' + testAppPath + ' exitWithCode : 1',
+    execPath :  'node ' + testAppPath + ' exitWithCode : 1',
     mode : 'shell',
     stdio : 'pipe'
   }
@@ -918,7 +928,7 @@ shellSync.timeOut = 30000;
 function shellSyncAsync( test )
 {
   var context = this;
-  var testRoutineDir = _.path.join( context.testSuitePath, test.name );
+  var routinePath = _.path.join( context.testSuitePath, test.name );
   var commonDefaults =
   {
     outputPiping : 1,
@@ -967,10 +977,10 @@ function shellSyncAsync( test )
 
   /* */
 
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp.js' ) );
-  var testApp = testApp.toString() + '\ntestApp();';
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = testApp.toString() + '\ntestApp();';
   var expectedOutput = testAppPath + '\n';
-  _.fileProvider.fileWrite( testAppPath, testApp );
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
 
   var o;
 
@@ -979,7 +989,7 @@ function shellSyncAsync( test )
   test.case = 'mode : fork';
   o =
   {
-    path : testAppPath,
+    execPath : testAppPath,
     mode : 'fork',
     stdio : 'pipe'
   }
@@ -1008,7 +1018,7 @@ function shellSyncAsync( test )
   test.case = 'mode : spawn';
   o =
   {
-    path : 'node ' + testAppPath,
+    execPath :  'node ' + testAppPath,
     mode : 'spawn',
     stdio : 'pipe'
   }
@@ -1037,7 +1047,7 @@ function shellSyncAsync( test )
   test.case = 'mode : shell';
   o =
   {
-    path : 'node ' + testAppPath,
+    execPath :  'node ' + testAppPath,
     mode : 'shell',
     stdio : 'pipe'
   }
@@ -1063,7 +1073,7 @@ function shellSyncAsync( test )
   test.case = 'shell, stop process using timeOut';
   o =
   {
-    path : 'node ' + testAppPath + ' loop : 1',
+    execPath :  'node ' + testAppPath + ' loop : 1',
     mode : 'shell',
     stdio : 'pipe',
     timeOut : 500
@@ -1077,7 +1087,7 @@ function shellSyncAsync( test )
   test.case = 'spawn, return good code';
   o =
   {
-    path : 'node ' + testAppPath + ' exitWithCode : 0',
+    execPath :  'node ' + testAppPath + ' exitWithCode : 0',
     mode : 'spawn',
     stdio : 'pipe'
   }
@@ -1092,7 +1102,7 @@ function shellSyncAsync( test )
   test.case = 'spawn, return bad code';
   o =
   {
-    path : 'node ' + testAppPath + ' exitWithCode : 1',
+    execPath :  'node ' + testAppPath + ' exitWithCode : 1',
     mode : 'spawn',
     stdio : 'pipe'
   }
@@ -1105,7 +1115,7 @@ function shellSyncAsync( test )
   test.case = 'shell, return good code';
   o =
   {
-    path : 'node ' + testAppPath + ' exitWithCode : 0',
+    execPath :  'node ' + testAppPath + ' exitWithCode : 0',
     mode : 'shell',
     stdio : 'pipe'
   }
@@ -1121,7 +1131,7 @@ function shellSyncAsync( test )
   test.case = 'shell, return bad code';
   o =
   {
-    path : 'node ' + testAppPath + ' exitWithCode : 1',
+    execPath :  'node ' + testAppPath + ' exitWithCode : 1',
     mode : 'shell',
     stdio : 'pipe'
   }
@@ -1138,7 +1148,7 @@ shellSyncAsync.timeOut = 30000;
 function shell2( test )
 {
   var context = this;
-  var testRoutineDir = _.path.join( context.testSuitePath, test.name );
+  var routinePath = _.path.join( context.testSuitePath, test.name );
   var commonDefaults =
   {
     outputPiping : 1,
@@ -1185,9 +1195,9 @@ function shell2( test )
 
   /* */
 
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp.js' ) );
-  var testApp = testApp.toString() + '\ntestApp();';
-  _.fileProvider.fileWrite( testAppPath, testApp );
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
 
   var o;
   var con = new _.Consequence().take( null );
@@ -1198,14 +1208,14 @@ function shell2( test )
 
     o =
     {
-      path : 'node ' + testAppPath,
+      execPath :  'node ' + testAppPath,
       args : [ 'staging', 'debug' ],
       mode : 'shell',
       stdio : 'pipe'
     }
     return null;
   })
-  .thenKeep( function( arg/*aaa*/ )
+  .thenKeep( function( arg )
   {
     /* mode : shell, stdio : pipe */
 
@@ -1228,7 +1238,7 @@ function shell2( test )
 
     o =
     {
-      path : 'node ' + testAppPath,
+      execPath :  'node ' + testAppPath,
       mode : 'shell',
       passingThrough : 1,
       stdio : 'pipe'
@@ -1236,7 +1246,7 @@ function shell2( test )
 
     return null;
   })
-  .thenKeep( function( arg/*aaa*/ )
+  .thenKeep( function( arg )
   {
     /* mode : shell, stdio : pipe, passingThrough : true */
 
@@ -1260,7 +1270,7 @@ function shell2( test )
 
     o =
     {
-      path : 'node',
+      execPath :  'node',
       args : [ testAppPath ],
       mode : 'spawn',
       passingThrough : 1,
@@ -1268,7 +1278,7 @@ function shell2( test )
     }
     return null;
   })
-  .thenKeep( function( arg/*aaa*/ )
+  .thenKeep( function( arg )
   {
     /* mode : spawn, stdio : pipe, passingThrough : true */
 
@@ -1292,7 +1302,7 @@ function shell2( test )
 
     o =
     {
-      path : 'node ' + testApp,
+      execPath :  'node ' + testApp,
       args : [ 'staging' ],
       mode : 'spawn',
       passingThrough : 1,
@@ -1300,7 +1310,7 @@ function shell2( test )
     }
     return null;
   })
-  .thenKeep( function( arg/*aaa*/ )
+  .thenKeep( function( arg )
   {
     var options = _.mapSupplement( {}, o, commonDefaults );
     return test.shouldThrowError( _.shell( options ) );
@@ -1314,7 +1324,7 @@ function shell2( test )
 
     o =
     {
-      path : 'node ' + testAppPath,
+      execPath :  'node ' + testAppPath,
       args : [ 'staging', 'debug' ],
       mode : 'shell',
       passingThrough : 1,
@@ -1322,7 +1332,7 @@ function shell2( test )
     }
     return null;
   })
-  .thenKeep( function( arg/*aaa*/ )
+  .thenKeep( function( arg )
   {
     /* mode : shell, stdio : pipe, passingThrough : true */
 
@@ -1348,24 +1358,24 @@ shell2.timeOut = 30000;
 function shellCurrentPath( test )
 {
   var context = this;
-  var testRoutineDir = _.path.join( context.testSuitePath, test.name );
+  var routinePath = _.path.join( context.testSuitePath, test.name );
 
   /* */
 
   function testApp()
   {
     debugger
-    console.log( process.cwd() ); /* qqq : hide it from console if possible */
+    console.log( process.cwd() ); /* qqq : should not be visible if verbosity of tester is low, if possible */
     if( process.send )
     process.send({ currentPath : process.cwd() })
   }
 
   /* */
 
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp.js' ) );
-  var testApp = testApp.toString() + '\ntestApp();';
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = testApp.toString() + '\ntestApp();';
   var expectedOutput = __dirname + '\n'
-  _.fileProvider.fileWrite( testAppPath, testApp );
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
 
   //
 
@@ -1377,7 +1387,7 @@ function shellCurrentPath( test )
 
     let o =
     {
-      path : 'node ' + testAppPath,
+      execPath :  'node ' + testAppPath,
       currentPath : __dirname,
       mode : 'shell',
       stdio : 'pipe',
@@ -1399,7 +1409,7 @@ function shellCurrentPath( test )
 
     let o =
     {
-      path : 'node ' + testAppPath,
+      execPath :  'node ' + testAppPath,
       currentPath : __dirname,
       mode : 'spawn',
       stdio : 'pipe',
@@ -1421,7 +1431,7 @@ function shellCurrentPath( test )
 
     let o =
     {
-      path : 'node ' + testAppPath,
+      execPath :  'node ' + testAppPath,
       currentPath : __dirname,
       mode : 'exec',
       stdio : 'pipe',
@@ -1445,7 +1455,7 @@ function shellCurrentPath( test )
 
     let o =
     {
-      path : testAppPath,
+      execPath : testAppPath,
       currentPath : __dirname,
       mode : 'fork',
     }
@@ -1473,7 +1483,7 @@ shellCurrentPath.timeOut = 30000;
 function shellFork( test )
 {
   var context = this;
-  var testRoutineDir = _.path.join( context.testSuitePath, test.name );
+  var routinePath = _.path.join( context.testSuitePath, test.name );
 
   /* */
 
@@ -1484,10 +1494,10 @@ function shellFork( test )
 
   /* */
 
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp.js' ) );
-  var testApp = testApp.toString() + '\ntestApp();';
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = testApp.toString() + '\ntestApp();';
   var expectedOutput = __dirname + '\n'
-  _.fileProvider.fileWrite( testAppPath, testApp );
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
 
   //
 
@@ -1499,7 +1509,7 @@ function shellFork( test )
 
     let o =
     {
-      path :  testAppPath,
+      execPath :   testAppPath,
       args : null,
       mode : 'fork',
       stdio : 'pipe',
@@ -1523,7 +1533,7 @@ function shellFork( test )
 
     let o =
     {
-      path :  testAppPath,
+      execPath :   testAppPath,
       args : [ 'arg1', 'arg2' ],
       mode : 'fork',
       stdio : 'pipe',
@@ -1547,7 +1557,7 @@ function shellFork( test )
 
   //   let o =
   //   {
-  //     path :  testAppPath,
+  //     execPath :   testAppPath,
   //     args : [ 'arg1', 'arg2' ],
   //     mode : 'fork',
   //     stdio : 'inherit',
@@ -1572,7 +1582,7 @@ function shellFork( test )
 
     let o =
     {
-      path :  testAppPath,
+      execPath :   testAppPath,
       args : [ 'arg1', 'arg2' ],
       mode : 'fork',
       stdio : 'ignore',
@@ -1603,14 +1613,14 @@ function shellFork( test )
       console.log( process.execArgv );
     }
 
-    let testAppPath2 = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp2.js' ) );
+    let testAppPath2 = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp2.js' ) );
     var testApp2 = testApp2.toString() + '\ntestApp2();';
     _.fileProvider.fileWrite( testAppPath2, testApp2 );
 
     let o =
     {
-      path :  testAppPath2,
-      currentPath : testRoutineDir,
+      execPath :   testAppPath2,
+      currentPath : routinePath,
       env : { 'key1' : 'val' },
       args : [ 'arg1', 'arg2' ],
       interpreterArgs : [ '--no-warnings' ],
@@ -1625,7 +1635,7 @@ function shellFork( test )
       test.identical( o.exitCode, 0 );
       test.is( _.strHas( o.output,  "[ 'arg1', 'arg2' ]" ) );
       test.is( _.strHas( o.output,  "key1: 'val'," ) );
-      test.is( _.strHas( o.output,  _.fileProvider.path.nativize( testRoutineDir ) ) );
+      test.is( _.strHas( o.output,  _.fileProvider.path.nativize( routinePath ) ) );
       test.is( _.strHas( o.output,  "[ '--no-warnings' ]" ) );
 
       return null;
@@ -1646,14 +1656,14 @@ function shellFork( test )
       console.log( process.execArgv );
     }
 
-    let testAppPath2 = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp2.js' ) );
+    let testAppPath2 = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp2.js' ) );
     var testApp2 = testApp2.toString() + '\ntestApp2();';
     _.fileProvider.fileWrite( testAppPath2, testApp2 );
 
     let o =
     {
-      path :  testAppPath2,
-      currentPath : testRoutineDir,
+      execPath :   testAppPath2,
+      currentPath : routinePath,
       env : { 'key1' : 'val' },
       args : [ 'arg1', 'arg2' ],
       interpreterArgs : [ '--no-warnings' ],
@@ -1670,7 +1680,7 @@ function shellFork( test )
     test.identical( o.exitCode, 0 );
     test.is( _.strHas( o.output,  "[ 'arg1', 'arg2' ]" ) );
     test.is( _.strHas( o.output,  "key1: 'val'," ) );
-    test.is( _.strHas( o.output,  _.fileProvider.path.nativize( testRoutineDir ) ) );
+    test.is( _.strHas( o.output,  _.fileProvider.path.nativize( routinePath ) ) );
     test.is( _.strHas( o.output,  "[ '--no-warnings' ]" ) );
 
     return null;
@@ -1693,13 +1703,13 @@ function shellFork( test )
       })
     }
 
-    let testAppPath2 = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp2.js' ) );
+    let testAppPath2 = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp2.js' ) );
     var testApp2 = testApp2.toString() + '\ntestApp2();';
     _.fileProvider.fileWrite( testAppPath2, testApp2 );
 
     let o =
     {
-      path :  testAppPath2,
+      execPath :   testAppPath2,
       mode : 'fork',
       stdio : 'pipe',
     }
@@ -1731,7 +1741,7 @@ function shellFork( test )
 
     let o =
     {
-      path :  testAppPath + ' arg0',
+      execPath :   testAppPath + ' arg0',
       mode : 'fork',
       stdio : 'pipe',
       outputCollecting : 1,
@@ -1761,13 +1771,13 @@ function shellFork( test )
       }, 5000 )
     }
 
-    let testAppPath2 = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp2.js' ) );
+    let testAppPath2 = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp2.js' ) );
     var testApp2 = testApp2.toString() + '\ntestApp2();';
     _.fileProvider.fileWrite( testAppPath2, testApp2 );
 
     let o =
     {
-      path :  testAppPath2,
+      execPath :   testAppPath2,
       mode : 'fork',
       stdio : 'pipe',
       outputCollecting : 1,
@@ -1798,13 +1808,13 @@ function shellFork( test )
       }, 5000 )
     }
 
-    let testAppPath2 = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp2.js' ) );
+    let testAppPath2 = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp2.js' ) );
     var testApp2 = testApp2.toString() + '\ntestApp2();';
     _.fileProvider.fileWrite( testAppPath2, testApp2 );
 
     let o =
     {
-      path :  testAppPath2,
+      execPath :   testAppPath2,
       mode : 'fork',
       stdio : 'pipe',
       outputCollecting : 1,
@@ -1832,7 +1842,7 @@ shellFork.timeOut = 30000;
 function shellErrorHadling( test )
 {
   var context = this;
-  var testRoutineDir = _.path.join( context.testSuitePath, test.name );
+  var routinePath = _.path.join( context.testSuitePath, test.name );
 
   /* */
 
@@ -1859,10 +1869,10 @@ function shellErrorHadling( test )
 
   /* */
 
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp.js' ) );
-  var testApp = testApp.toString() + '\ntestApp();';
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = testApp.toString() + '\ntestApp();';
   var expectedOutput = __dirname + '\n'
-  _.fileProvider.fileWrite( testAppPath, testApp );
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
 
   //
 
@@ -1874,7 +1884,7 @@ function shellErrorHadling( test )
 
     let o =
     {
-      path :  'node ' + testAppPath,
+      execPath :   'node ' + testAppPath,
       mode : 'spawn',
       stdio : 'pipe',
       verbosity : 0,
@@ -1903,7 +1913,7 @@ function shellErrorHadling( test )
 
     let o =
     {
-      path :  'node ' + testAppPath,
+      execPath :   'node ' + testAppPath,
       mode : 'shell',
       stdio : 'pipe',
       verbosity : 0,
@@ -1932,7 +1942,7 @@ function shellErrorHadling( test )
 
     let o =
     {
-      path :  testAppPath,
+      execPath :   testAppPath,
       mode : 'fork',
       stdio : 'pipe',
       verbosity : 0,
@@ -1961,7 +1971,7 @@ function shellErrorHadling( test )
 
     let o =
     {
-      path :  'node ' + testAppPath,
+      execPath :   'node ' + testAppPath,
       mode : 'spawn',
       stdio : 'pipe',
       sync : 1,
@@ -1990,7 +2000,7 @@ function shellErrorHadling( test )
 
     let o =
     {
-      path :  'node ' + testAppPath,
+      execPath :   'node ' + testAppPath,
       mode : 'shell',
       stdio : 'pipe',
       sync : 1,
@@ -2019,7 +2029,7 @@ function shellErrorHadling( test )
 
     let o =
     {
-      path :  testAppPath,
+      execPath :   testAppPath,
       mode : 'fork',
       stdio : 'pipe',
       sync : 1,
@@ -2048,7 +2058,7 @@ function shellErrorHadling( test )
 
     let o =
     {
-      path :  testAppPath,
+      execPath :   testAppPath,
       mode : 'fork',
       stdio : 'ignore',
       sync : 1,
@@ -2077,7 +2087,7 @@ function shellErrorHadling( test )
 
   //   let o =
   //   {
-  //     path :  testAppPath,
+  //     execPath :   testAppPath,
   //     mode : 'fork',
   //     stdio : 'inherit',
   //     sync : 1,
@@ -2110,7 +2120,7 @@ function shellErrorHadling( test )
 function shellNode( test )
 {
   var context = this;
-  var testRoutineDir = _.path.join( context.testSuitePath, test.name );
+  var routinePath = _.path.join( context.testSuitePath, test.name );
 
   /* */
 
@@ -2121,9 +2131,9 @@ function shellNode( test )
 
   /* */
 
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp.js' ) );
-  var testApp = testApp.toString() + '\ntestApp();';
-  _.fileProvider.fileWrite( testAppPath, testApp );
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
 
   var con = new _.Consequence().take( null );
 
@@ -2133,7 +2143,7 @@ function shellNode( test )
   {
     con.thenKeep( () =>
     {
-      var o = { path : testAppPath, mode : mode, applyingExitCode : 1, throwingExitCode : 1 };
+      var o = { execPath : testAppPath, mode : mode, applyingExitCode : 1, throwingExitCode : 1 };
       return _.shellNode( o )
       .finally( ( err, got ) =>
       {
@@ -2147,7 +2157,7 @@ function shellNode( test )
 
     con.thenKeep( () =>
     {
-      var o = { path : testAppPath, mode : mode,  applyingExitCode : 1, throwingExitCode : 0 };
+      var o = { execPath : testAppPath, mode : mode,  applyingExitCode : 1, throwingExitCode : 0 };
       return _.shellNode( o )
       .finally( ( err, got ) =>
       {
@@ -2161,7 +2171,7 @@ function shellNode( test )
 
     con.thenKeep( () =>
     {
-      var o = { path : testAppPath,  mode : mode, applyingExitCode : 0, throwingExitCode : 1 };
+      var o = { execPath : testAppPath,  mode : mode, applyingExitCode : 0, throwingExitCode : 1 };
       return _.shellNode( o )
       .finally( ( err, got ) =>
       {
@@ -2174,7 +2184,7 @@ function shellNode( test )
 
     con.thenKeep( () =>
     {
-      var o = { path : testAppPath,  mode : mode, applyingExitCode : 0, throwingExitCode : 0 };
+      var o = { execPath : testAppPath,  mode : mode, applyingExitCode : 0, throwingExitCode : 0 };
       return _.shellNode( o )
       .finally( ( err, got ) =>
       {
@@ -2187,7 +2197,7 @@ function shellNode( test )
 
     con.thenKeep( () =>
     {
-      var o = { path : testAppPath,  mode : mode, maximumMemory : 1, applyingExitCode : 0, throwingExitCode : 0 };
+      var o = { execPath : testAppPath,  mode : mode, maximumMemory : 1, applyingExitCode : 0, throwingExitCode : 0 };
       return _.shellNode( o )
       .finally( ( err, got ) =>
       {
@@ -2204,16 +2214,1067 @@ function shellNode( test )
 
 }
 
-shellNode.timeOut = 10000;
+shellNode.timeOut = 20000;
+
+//
+
+function shellConcurrent( test )
+{
+  let context = this;
+  let counter = 0;
+  let time = 0;
+  let routinePath = _.path.join( context.testSuitePath, test.name );
+  let testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  let filePath = _.fileProvider.path.nativize( _.path.join( routinePath, 'file.txt' ) );
+  let ready = _.Consequence().take( null );
+
+  let testAppCode = `let filePath = '${_.strEscape( filePath )}';\n` + testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+
+  logger.log( 'this is #foreground : bright white#an#foreground : default# experiment' ); /* qqq fix logger, please !!! */
+
+  /* - */
+
+  ready.then( ( arg ) =>
+  {
+    test.case = 'single';
+    time = _.timeNow();
+    return null;
+  })
+
+  let singleOption =
+  {
+    execPath : 'node ' + testAppPath + ' 1000',
+    ready : ready,
+    verbosity : 3,
+    outputCollecting : 1,
+  }
+
+  _.shell( singleOption )
+  .then( ( arg ) =>
+  {
+
+    test.identical( arg.exitCode, 0 );
+    test.is( singleOption === arg );
+    test.is( _.strHas( arg.output, 'begin 1000' ) );
+    test.is( _.strHas( arg.output, 'end 1000' ) );
+    test.identical( _.fileProvider.fileRead( filePath ), 'written by 1000' );
+    _.fileProvider.fileDelete( filePath );
+    counter += 1;
+    return null;
+  });
+
+  /* - */
+
+  ready.then( ( arg ) =>
+  {
+    test.case = 'single, execPath in array';
+    time = _.timeNow();
+    return null;
+  })
+
+  let singleExecPathInArrayOptions =
+  {
+    execPath : [ 'node ' + testAppPath + ' 1000' ],
+    ready : ready,
+    verbosity : 3,
+    outputCollecting : 1,
+  }
+
+  _.shell( singleExecPathInArrayOptions )
+  .then( ( arg ) =>
+  {
+
+    test.identical( arg.length, 2 );
+    test.identical( arg[ 1 ], null );
+    test.identical( arg[ 0 ].exitCode, 0 );
+    test.is( singleExecPathInArrayOptions !== arg[ 0 ] );
+    test.is( _.strHas( arg[ 0 ].output, 'begin 1000' ) );
+    test.is( _.strHas( arg[ 0 ].output, 'end 1000' ) );
+    test.identical( _.fileProvider.fileRead( filePath ), 'written by 1000' );
+    _.fileProvider.fileDelete( filePath );
+
+    counter += 1;
+    return null;
+  });
+
+  /* - */
+
+  ready.then( ( arg ) =>
+  {
+    test.case = 'single, error in ready';
+    time = _.timeNow();
+    throw _.err( 'Error!' );
+  })
+
+  let singleErrorBeforeScalar =
+  {
+    execPath : 'node ' + testAppPath + ' 1000',
+    ready : ready,
+    verbosity : 3,
+    outputCollecting : 1,
+  }
+
+  _.shell( singleErrorBeforeScalar )
+  .finally( ( err, arg ) =>
+  {
+
+    test.is( arg === undefined );
+    test.is( _.errIs( err ) );
+    test.identical( singleErrorBeforeScalar.exitCode, undefined );
+    test.identical( singleErrorBeforeScalar.output, undefined );
+    test.is( !_.fileProvider.fileExists( filePath ) );
+
+    _.errAttend( err );
+    counter += 1;
+    return null;
+  });
+
+  /* - */
+
+  ready.then( ( arg ) =>
+  {
+    test.case = 'single, error in ready';
+    time = _.timeNow();
+    throw _.err( 'Error!' );
+  })
+
+  let singleErrorBefore =
+  {
+    execPath : [ 'node ' + testAppPath + ' 1000' ],
+    ready : ready,
+    verbosity : 3,
+    outputCollecting : 1,
+  }
+
+  _.shell( singleErrorBefore )
+  .finally( ( err, arg ) =>
+  {
+
+    test.is( arg === undefined );
+    test.is( _.errIs( err ) );
+    test.identical( singleErrorBefore.exitCode, undefined );
+    test.identical( singleErrorBefore.output, undefined );
+    test.is( !_.fileProvider.fileExists( filePath ) );
+
+    _.errAttend( err );
+    counter += 1;
+    return null;
+  });
+
+  /* - */
+
+  ready.then( ( arg ) =>
+  {
+    test.case = 'subprocesses, serial';
+    time = _.timeNow();
+    return null;
+  })
+
+  let subprocessesOptionsSerial =
+  {
+    execPath :  [ 'node ' + testAppPath + ' 1000', 'node ' + testAppPath + ' 10' ],
+    ready : ready,
+    outputCollecting : 1,
+    verbosity : 3,
+    concurrent : 0,
+  }
+
+  _.shell( subprocessesOptionsSerial )
+  .then( ( arg ) =>
+  {
+
+    var spent = _.timeNow() - time;
+    logger.log( 'Spent', spent );
+    test.gt( spent, 1000 );
+    test.le( spent, 5000 );
+
+    test.identical( subprocessesOptionsSerial.exitCode, 0 );
+    test.identical( arg.length, 3 );
+    test.identical( arg[ 2 ], null );
+    test.identical( _.fileProvider.fileRead( filePath ), 'written by 10' );
+    _.fileProvider.fileDelete( filePath );
+
+    test.identical( arg[ 0 ].exitCode, 0 );
+    test.is( _.strHas( arg[ 0 ].output, 'begin 1000' ) );
+    test.is( _.strHas( arg[ 0 ].output, 'end 1000' ) );
+
+    test.identical( arg[ 1 ].exitCode, 0 );
+    test.is( _.strHas( arg[ 1 ].output, 'begin 10' ) );
+    test.is( _.strHas( arg[ 1 ].output, 'end 10' ) );
+
+    counter += 1;
+    return null;
+  });
+
+  /* - */
+
+  ready.then( ( arg ) =>
+  {
+    test.case = 'subprocesses, serial, error, throwingExitCode : 1';
+    time = _.timeNow();
+    return null;
+  })
+
+  let subprocessesError =
+  {
+    execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 10' ],
+    ready : ready,
+    outputCollecting : 1,
+    verbosity : 3,
+    concurrent : 0,
+  }
+
+  _.shell( subprocessesError )
+  .finally( ( err, arg ) =>
+  {
+
+    var spent = _.timeNow() - time;
+    logger.log( 'Spent', spent );
+    test.gt( spent, 0 );
+    test.le( spent, 5000 );
+
+    test.identical( subprocessesError.exitCode, 1 );
+    test.is( _.errIs( err ) );
+    test.is( arg === undefined );
+    test.is( !_.fileProvider.fileExists( filePath ) );
+
+    _.errAttend( err );
+    counter += 1;
+    return null;
+  });
+
+  /* - */
+
+  ready.then( ( arg ) =>
+  {
+    test.case = 'subprocesses, serial, error, throwingExitCode : 0';
+    time = _.timeNow();
+    return null;
+  })
+
+  let subprocessesErrorNonThrowing =
+  {
+    execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 10' ],
+    ready : ready,
+    outputCollecting : 1,
+    verbosity : 3,
+    concurrent : 0,
+    throwingExitCode : 0,
+  }
+
+  _.shell( subprocessesErrorNonThrowing )
+  .finally( ( err, arg ) =>
+  {
+
+    var spent = _.timeNow() - time;
+    logger.log( 'Spent', spent );
+    test.gt( spent, 0 );
+    test.le( spent, 5000 );
+
+    test.identical( subprocessesErrorNonThrowing.exitCode, 1 );
+    test.identical( arg.length, 3 );
+    test.identical( arg[ 2 ], null );
+    test.identical( _.fileProvider.fileRead( filePath ), 'written by 10' );
+    _.fileProvider.fileDelete( filePath );
+
+    test.identical( arg[ 0 ].exitCode, 1 );
+    test.is( _.strHas( arg[ 0 ].output, 'begin x' ) );
+    test.is( !_.strHas( arg[ 0 ].output, 'end x' ) );
+    test.is( _.strHas( arg[ 0 ].output, 'Expects number' ) );
+
+    test.identical( arg[ 1 ].exitCode, 0 );
+    test.is( _.strHas( arg[ 1 ].output, 'begin 10' ) );
+    test.is( _.strHas( arg[ 1 ].output, 'end 10' ) );
+
+    counter += 1;
+    return null;
+  });
+
+  /* - */
+
+  ready.then( ( arg ) =>
+  {
+    test.case = 'subprocesses, concurrent : 1, error, throwingExitCode : 1';
+    time = _.timeNow();
+    return null;
+  })
+
+  let subprocessesErrorConcurrent =
+  {
+    execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 10' ],
+    ready : ready,
+    outputCollecting : 1,
+    verbosity : 3,
+    concurrent : 1,
+  }
+
+  _.shell( subprocessesErrorConcurrent )
+  .finally( ( err, arg ) =>
+  {
+
+    var spent = _.timeNow() - time;
+    logger.log( 'Spent', spent );
+    test.gt( spent, 0 );
+    test.le( spent, 5000 );
+
+    test.identical( subprocessesErrorConcurrent.exitCode, 1 );
+    test.is( _.errIs( err ) );
+    test.is( arg === undefined );
+    test.identical( _.fileProvider.fileRead( filePath ), 'written by 10' );
+    _.fileProvider.fileDelete( filePath );
+
+    _.errAttend( err );
+    counter += 1;
+    return null;
+  });
+
+  /* - */
+
+  ready.then( ( arg ) =>
+  {
+    test.case = 'subprocesses, concurrent : 1, error, throwingExitCode : 0';
+    time = _.timeNow();
+    return null;
+  })
+
+  let subprocessesErrorConcurrentNonThrowing =
+  {
+    execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 10' ],
+    ready : ready,
+    outputCollecting : 1,
+    verbosity : 3,
+    concurrent : 1,
+    throwingExitCode : 0,
+  }
+
+  _.shell( subprocessesErrorConcurrentNonThrowing )
+  .finally( ( err, arg ) =>
+  {
+
+    var spent = _.timeNow() - time;
+    logger.log( 'Spent', spent );
+    test.gt( spent, 0 );
+    test.le( spent, 5000 );
+
+    test.identical( subprocessesErrorConcurrentNonThrowing.exitCode, 1 );
+    test.identical( arg.length, 3 );
+    test.identical( arg[ 2 ], null );
+    test.identical( _.fileProvider.fileRead( filePath ), 'written by 10' );
+    _.fileProvider.fileDelete( filePath );
+
+    test.identical( arg[ 0 ].exitCode, 1 );
+    test.is( _.strHas( arg[ 0 ].output, 'begin x' ) );
+    test.is( !_.strHas( arg[ 0 ].output, 'end x' ) );
+    test.is( _.strHas( arg[ 0 ].output, 'Expects number' ) );
+
+    test.identical( arg[ 1 ].exitCode, 0 );
+    test.is( _.strHas( arg[ 1 ].output, 'begin 10' ) );
+    test.is( _.strHas( arg[ 1 ].output, 'end 10' ) );
+
+    counter += 1;
+    return null;
+  });
+
+  /* - */
+
+  ready.then( ( arg ) =>
+  {
+    test.case = 'subprocesses, concurrent : 1';
+    time = _.timeNow();
+    return null;
+  })
+
+  let suprocessesConcurrentOptions =
+  {
+    execPath :  [ 'node ' + testAppPath + ' 1000', 'node ' + testAppPath + ' 100' ],
+    ready : ready,
+    outputCollecting : 1,
+    verbosity : 3,
+    concurrent : 1,
+  }
+
+  _.shell( suprocessesConcurrentOptions )
+  .then( ( arg ) =>
+  {
+
+    var spent = _.timeNow() - time;
+    logger.log( 'Spent', spent )
+    test.gt( spent, 1000 );
+    test.le( spent, 5000 );
+
+    test.identical( suprocessesConcurrentOptions.exitCode, 0 );
+    test.identical( arg.length, 3 );
+    test.identical( arg[ 2 ], null );
+    test.identical( _.fileProvider.fileRead( filePath ), 'written by 1000' );
+    _.fileProvider.fileDelete( filePath );
+
+    test.identical( arg[ 0 ].exitCode, 0 );
+    test.is( _.strHas( arg[ 0 ].output, 'begin 1000' ) );
+    test.is( _.strHas( arg[ 0 ].output, 'end 1000' ) );
+
+    test.identical( arg[ 1 ].exitCode, 0 );
+    test.is( _.strHas( arg[ 1 ].output, 'begin 100' ) );
+    test.is( _.strHas( arg[ 1 ].output, 'end 100' ) );
+
+    counter += 1;
+    return null;
+  });
+
+  /* - */
+
+  ready.then( ( arg ) =>
+  {
+    test.case = 'args';
+    time = _.timeNow();
+    return null;
+  })
+
+  let suprocessesConcurrentArgumentsOptions =
+  {
+    execPath :  [ 'node ' + testAppPath + ' 1000', 'node ' + testAppPath + ' 100' ],
+    args : [ 'second', 'argument' ],
+    ready : ready,
+    outputCollecting : 1,
+    verbosity : 3,
+    concurrent : 1,
+  }
+
+  _.shell( suprocessesConcurrentArgumentsOptions )
+  .then( ( arg ) =>
+  {
+
+    var spent = _.timeNow() - time;
+    logger.log( 'Spent', spent )
+    test.gt( spent, 1000 );
+    test.le( spent, 5000 );
+
+    test.identical( suprocessesConcurrentArgumentsOptions.exitCode, 0 );
+    test.identical( arg.length, 3 );
+    test.identical( arg[ 2 ], null );
+    test.identical( _.fileProvider.fileRead( filePath ), 'written by 1000' );
+    _.fileProvider.fileDelete( filePath );
+
+    test.identical( arg[ 0 ].exitCode, 0 );
+    test.is( _.strHas( arg[ 0 ].output, 'begin 1000, second, argument' ) );
+    test.is( _.strHas( arg[ 0 ].output, 'end 1000, second, argument' ) );
+
+    test.identical( arg[ 1 ].exitCode, 0 );
+    test.is( _.strHas( arg[ 1 ].output, 'begin 100, second, argument' ) );
+    test.is( _.strHas( arg[ 1 ].output, 'end 100, second, argument' ) );
+
+    counter += 1;
+    return null;
+  });
+
+  /* - */
+
+  return ready.finally( ( err, arg ) =>
+  {
+    debugger;
+    test.identical( counter, 11 );
+    if( err )
+    throw err;
+    return arg;
+  });
+
+  /* */
+
+  function testApp()
+  {
+    var ended = 0;
+    var fs = require( 'fs' );
+    console.log( 'begin', process.argv.slice( 2 ).join( ', ' ) );
+    var time = parseInt( process.argv[ 2 ] );
+    if( isNaN( time ) )
+    throw 'Expects number';
+
+    setTimeout( end, time );
+    function end()
+    {
+      ended = 1;
+      fs.writeFileSync( filePath, 'written by ' + process.argv[ 2 ] );
+      console.log( 'end', process.argv.slice( 2 ).join( ', ' ) );
+    }
+
+    setTimeout( periodic, 50 );
+    function periodic()
+    {
+      console.log( 'tick', process.argv.slice( 2 ).join( ', ' ) );
+      if( !ended )
+      setTimeout( periodic, 50 );
+    }
+
+  }
+
+}
+
+shellConcurrent.timeOut = 100000;
+
+//
+
+function shellerConcurrent( test )
+{
+  let context = this;
+  let counter = 0;
+  let time = 0;
+  let routinePath = _.path.join( context.testSuitePath, test.name );
+  let testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  let filePath = _.fileProvider.path.nativize( _.path.join( routinePath, 'file.txt' ) );
+  let ready = _.Consequence().take( null );
+
+  let testAppCode = `let filePath = '${_.strEscape( filePath )}';\n` + testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+
+  /* - */
+
+  ready.then( ( arg ) =>
+  {
+    test.case = 'single';
+    time = _.timeNow();
+    return null;
+  })
+
+  let singleOption2 = {}
+  let singleOption =
+  {
+    execPath : 'node ' + testAppPath + ' 1000',
+    ready : ready,
+    verbosity : 3,
+    outputCollecting : 1,
+  }
+
+  var shell = _.sheller( singleOption );
+  shell( singleOption2 )
+
+  .then( ( arg ) =>
+  {
+    test.identical( arg.exitCode, 0 );
+    test.is( singleOption !== arg );
+    test.is( singleOption2 === arg );
+    test.is( _.strHas( arg.output, 'begin 1000' ) );
+    test.is( _.strHas( arg.output, 'end 1000' ) );
+    test.identical( _.fileProvider.fileRead( filePath ), 'written by 1000' );
+    _.fileProvider.fileDelete( filePath );
+    counter += 1;
+    return null;
+  });
+
+  /* - */
+
+  ready.then( ( arg ) =>
+  {
+    test.case = 'single, no second options';
+    time = _.timeNow();
+    return null;
+  })
+
+  let singleOptionWithoutSecond =
+  {
+    execPath : 'node ' + testAppPath + ' 1000',
+    ready : ready,
+    verbosity : 3,
+    outputCollecting : 1,
+  }
+
+  var shell = _.sheller( singleOptionWithoutSecond );
+  shell()
+
+  .then( ( arg ) =>
+  {
+
+    test.identical( arg.exitCode, 0 );
+    test.is( singleOptionWithoutSecond !== arg );
+    test.is( _.strHas( arg.output, 'begin 1000' ) );
+    test.is( _.strHas( arg.output, 'end 1000' ) );
+    test.identical( _.fileProvider.fileRead( filePath ), 'written by 1000' );
+    _.fileProvider.fileDelete( filePath );
+    counter += 1;
+    return null;
+  });
+
+  /* - */
+
+  ready.then( ( arg ) =>
+  {
+    test.case = 'single, execPath in array';
+    time = _.timeNow();
+    return null;
+  })
+
+  let singleExecPathInArrayOptions2 = {};
+  let singleExecPathInArrayOptions =
+  {
+    execPath : 'node ' + testAppPath + ' 1000',
+    ready : ready,
+    verbosity : 3,
+    outputCollecting : 1,
+  }
+
+  var shell = _.sheller( singleExecPathInArrayOptions );
+  shell( singleExecPathInArrayOptions2 )
+
+  .then( ( arg ) =>
+  {
+    test.identical( arg.exitCode, 0 );
+    test.is( singleExecPathInArrayOptions2 === arg );
+    test.is( _.strHas( arg.output, 'begin 1000' ) );
+    test.is( _.strHas( arg.output, 'end 1000' ) );
+    test.identical( _.fileProvider.fileRead( filePath ), 'written by 1000' );
+    _.fileProvider.fileDelete( filePath );
+    counter += 1;
+    return null;
+  });
+
+  /* - */
+
+  ready.then( ( arg ) =>
+  {
+    test.case = 'single, error in ready, exec is scalar';
+    time = _.timeNow();
+    throw _.err( 'Error!' );
+  })
+
+  let singleErrorBeforeScalar2 = {};
+  let singleErrorBeforeScalar =
+  {
+    execPath : 'node ' + testAppPath + ' 1000',
+    ready : ready,
+    verbosity : 3,
+    outputCollecting : 1,
+  }
+
+  var shell = _.sheller( singleErrorBeforeScalar );
+  shell( singleErrorBeforeScalar2 )
+
+  .finally( ( err, arg ) =>
+  {
+
+    test.is( arg === undefined );
+    test.is( _.errIs( err ) );
+    test.identical( singleErrorBeforeScalar.exitCode, undefined );
+    test.identical( singleErrorBeforeScalar.output, undefined );
+    test.is( !_.fileProvider.fileExists( filePath ) );
+
+    _.errAttend( err );
+    counter += 1;
+    return null;
+  });
+
+  /* - */
+
+  ready.then( ( arg ) =>
+  {
+    test.case = 'single, error in ready, exec is single-element vector';
+    time = _.timeNow();
+    throw _.err( 'Error!' );
+  })
+
+  let singleErrorBefore2 = {};
+  let singleErrorBefore =
+  {
+    execPath : [ 'node ' + testAppPath + ' 1000' ],
+    ready : ready,
+    verbosity : 3,
+    outputCollecting : 1,
+  }
+
+  var shell = _.sheller( singleErrorBefore );
+  shell( singleErrorBefore2 )
+
+  .finally( ( err, arg ) =>
+  {
+
+    test.is( arg === undefined );
+    test.is( _.errIs( err ) );
+    test.identical( singleErrorBefore.exitCode, undefined );
+    test.identical( singleErrorBefore.output, undefined );
+    test.is( !_.fileProvider.fileExists( filePath ) );
+
+    _.errAttend( err );
+    counter += 1;
+    return null;
+  });
+
+  /* - */
+
+  ready.then( ( arg ) =>
+  {
+    test.case = 'subprocesses, serial';
+    time = _.timeNow();
+    return null;
+  })
+
+  let subprocessesOptionsSerial2 = {};
+  let subprocessesOptionsSerial =
+  {
+    execPath :  [ 'node ' + testAppPath + ' 1000', 'node ' + testAppPath + ' 10' ],
+    ready : ready,
+    outputCollecting : 1,
+    verbosity : 3,
+    concurrent : 0,
+  }
+
+  var shell = _.sheller( subprocessesOptionsSerial );
+  shell( subprocessesOptionsSerial2 )
+
+  .then( ( arg ) =>
+  {
+
+    var spent = _.timeNow() - time;
+    logger.log( 'Spent', spent );
+    test.gt( spent, 1000 );
+    test.le( spent, 5000 );
+
+    test.identical( subprocessesOptionsSerial2.exitCode, 0 );
+    test.identical( arg.length, 3 );
+    test.identical( arg[ 2 ], null );
+    test.identical( _.fileProvider.fileRead( filePath ), 'written by 10' );
+    _.fileProvider.fileDelete( filePath );
+
+    test.identical( arg[ 0 ].exitCode, 0 );
+    test.is( _.strHas( arg[ 0 ].output, 'begin 1000' ) );
+    test.is( _.strHas( arg[ 0 ].output, 'end 1000' ) );
+
+    test.identical( arg[ 1 ].exitCode, 0 );
+    test.is( _.strHas( arg[ 1 ].output, 'begin 10' ) );
+    test.is( _.strHas( arg[ 1 ].output, 'end 10' ) );
+
+    counter += 1;
+    return null;
+  });
+
+  /* - */
+
+  ready.then( ( arg ) =>
+  {
+    test.case = 'subprocesses, serial, error, throwingExitCode : 1';
+    time = _.timeNow();
+    return null;
+  })
+
+  let subprocessesError2 = {};
+  let subprocessesError =
+  {
+    execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 10' ],
+    ready : ready,
+    outputCollecting : 1,
+    verbosity : 3,
+    concurrent : 0,
+  }
+
+  var shell = _.sheller( subprocessesError );
+  shell( subprocessesError2 )
+
+  .finally( ( err, arg ) =>
+  {
+
+    var spent = _.timeNow() - time;
+    logger.log( 'Spent', spent );
+    test.gt( spent, 0 );
+    test.le( spent, 5000 );
+
+    test.identical( subprocessesError2.exitCode, 1 );
+    test.is( _.errIs( err ) );
+    test.is( arg === undefined );
+    test.is( !_.fileProvider.fileExists( filePath ) );
+
+    _.errAttend( err );
+    counter += 1;
+    return null;
+  });
+
+  /* - */
+
+  ready.then( ( arg ) =>
+  {
+    test.case = 'subprocesses, serial, error, throwingExitCode : 0';
+    time = _.timeNow();
+    return null;
+  })
+
+  let subprocessesErrorNonThrowing2 = {};
+  let subprocessesErrorNonThrowing =
+  {
+    execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 10' ],
+    ready : ready,
+    outputCollecting : 1,
+    verbosity : 3,
+    concurrent : 0,
+    throwingExitCode : 0,
+  }
+
+  var shell = _.sheller( subprocessesErrorNonThrowing );
+  shell( subprocessesErrorNonThrowing2 )
+
+  .finally( ( err, arg ) =>
+  {
+
+    var spent = _.timeNow() - time;
+    logger.log( 'Spent', spent );
+    test.gt( spent, 0 );
+    test.le( spent, 5000 );
+
+    test.identical( subprocessesErrorNonThrowing2.exitCode, 1 );
+    test.identical( arg.length, 3 );
+    test.identical( arg[ 2 ], null );
+    test.identical( _.fileProvider.fileRead( filePath ), 'written by 10' );
+    _.fileProvider.fileDelete( filePath );
+
+    test.identical( arg[ 0 ].exitCode, 1 );
+    test.is( _.strHas( arg[ 0 ].output, 'begin x' ) );
+    test.is( !_.strHas( arg[ 0 ].output, 'end x' ) );
+    test.is( _.strHas( arg[ 0 ].output, 'Expects number' ) );
+
+    test.identical( arg[ 1 ].exitCode, 0 );
+    test.is( _.strHas( arg[ 1 ].output, 'begin 10' ) );
+    test.is( _.strHas( arg[ 1 ].output, 'end 10' ) );
+
+    counter += 1;
+    return null;
+  });
+
+  /* - */
+
+  ready.then( ( arg ) =>
+  {
+    test.case = 'subprocesses, concurrent : 1, error, throwingExitCode : 1';
+    time = _.timeNow();
+    return null;
+  })
+
+  let subprocessesErrorConcurrent2 = {};
+  let subprocessesErrorConcurrent =
+  {
+    execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 10' ],
+    ready : ready,
+    outputCollecting : 1,
+    verbosity : 3,
+    concurrent : 1,
+  }
+
+  var shell = _.sheller( subprocessesErrorConcurrent );
+  shell( subprocessesErrorConcurrent2 )
+
+  .finally( ( err, arg ) =>
+  {
+
+    var spent = _.timeNow() - time;
+    logger.log( 'Spent', spent );
+    test.gt( spent, 0 );
+    test.le( spent, 5000 );
+
+    test.identical( subprocessesErrorConcurrent2.exitCode, 1 );
+    test.is( _.errIs( err ) );
+    test.is( arg === undefined );
+    test.identical( _.fileProvider.fileRead( filePath ), 'written by 10' );
+    _.fileProvider.fileDelete( filePath );
+
+    _.errAttend( err );
+    counter += 1;
+    return null;
+  });
+
+  /* - */
+
+  ready.then( ( arg ) =>
+  {
+    test.case = 'subprocesses, concurrent : 1, error, throwingExitCode : 0';
+    time = _.timeNow();
+    return null;
+  })
+
+  let subprocessesErrorConcurrentNonThrowing2 = {};
+  let subprocessesErrorConcurrentNonThrowing =
+  {
+    execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 10' ],
+    ready : ready,
+    outputCollecting : 1,
+    verbosity : 3,
+    concurrent : 1,
+    throwingExitCode : 0,
+  }
+
+  var shell = _.sheller( subprocessesErrorConcurrentNonThrowing );
+  shell( subprocessesErrorConcurrentNonThrowing2 )
+
+  .finally( ( err, arg ) =>
+  {
+
+    var spent = _.timeNow() - time;
+    logger.log( 'Spent', spent );
+    test.gt( spent, 0 );
+    test.le( spent, 5000 );
+
+    test.identical( subprocessesErrorConcurrentNonThrowing2.exitCode, 1 );
+    test.identical( arg.length, 3 );
+    test.identical( arg[ 2 ], null );
+    test.identical( _.fileProvider.fileRead( filePath ), 'written by 10' );
+    _.fileProvider.fileDelete( filePath );
+
+    test.identical( arg[ 0 ].exitCode, 1 );
+    test.is( _.strHas( arg[ 0 ].output, 'begin x' ) );
+    test.is( !_.strHas( arg[ 0 ].output, 'end x' ) );
+    test.is( _.strHas( arg[ 0 ].output, 'Expects number' ) );
+
+    test.identical( arg[ 1 ].exitCode, 0 );
+    test.is( _.strHas( arg[ 1 ].output, 'begin 10' ) );
+    test.is( _.strHas( arg[ 1 ].output, 'end 10' ) );
+
+    counter += 1;
+    return null;
+  });
+
+  /* - */
+
+  ready.then( ( arg ) =>
+  {
+    test.case = 'subprocesses, concurrent : 1';
+    time = _.timeNow();
+    return null;
+  })
+
+  let subprocessesConcurrentOptions2 = {};
+  let subprocessesConcurrentOptions =
+  {
+    execPath :  [ 'node ' + testAppPath + ' 1000', 'node ' + testAppPath + ' 100' ],
+    ready : ready,
+    outputCollecting : 1,
+    verbosity : 3,
+    concurrent : 1,
+  }
+
+  var shell = _.sheller( subprocessesConcurrentOptions );
+  shell( subprocessesConcurrentOptions2 )
+
+  .then( ( arg ) =>
+  {
+
+    var spent = _.timeNow() - time;
+    logger.log( 'Spent', spent )
+    test.gt( spent, 1000 );
+    test.le( spent, 5000 );
+
+    test.identical( subprocessesConcurrentOptions2.exitCode, 0 );
+    test.identical( arg.length, 3 );
+    test.identical( arg[ 2 ], null );
+    test.identical( _.fileProvider.fileRead( filePath ), 'written by 1000' );
+    _.fileProvider.fileDelete( filePath );
+
+    test.identical( arg[ 0 ].exitCode, 0 );
+    test.is( _.strHas( arg[ 0 ].output, 'begin 1000' ) );
+    test.is( _.strHas( arg[ 0 ].output, 'end 1000' ) );
+
+    test.identical( arg[ 1 ].exitCode, 0 );
+    test.is( _.strHas( arg[ 1 ].output, 'begin 100' ) );
+    test.is( _.strHas( arg[ 1 ].output, 'end 100' ) );
+
+    counter += 1;
+    return null;
+  });
+
+  /* - */
+
+  ready.then( ( arg ) =>
+  {
+    test.case = 'args';
+    time = _.timeNow();
+    return null;
+  })
+
+  let subprocessesConcurrentArgumentsOptions2 = {}
+  let subprocessesConcurrentArgumentsOptions =
+  {
+    execPath :  [ 'node ' + testAppPath + ' 1000', 'node ' + testAppPath + ' 100' ],
+    args : [ 'second', 'argument' ],
+    ready : ready,
+    outputCollecting : 1,
+    verbosity : 3,
+    concurrent : 1,
+  }
+
+  var shell = _.sheller( subprocessesConcurrentArgumentsOptions );
+  shell( subprocessesConcurrentArgumentsOptions2 )
+
+  .then( ( arg ) =>
+  {
+
+    var spent = _.timeNow() - time;
+    logger.log( 'Spent', spent )
+    test.gt( spent, 1000 );
+    test.le( spent, 5000 );
+
+    test.identical( subprocessesConcurrentArgumentsOptions2.exitCode, 0 );
+    test.identical( arg.length, 3 );
+    test.identical( arg[ 2 ], null );
+    test.identical( _.fileProvider.fileRead( filePath ), 'written by 1000' );
+    _.fileProvider.fileDelete( filePath );
+
+    test.identical( arg[ 0 ].exitCode, 0 );
+    test.is( _.strHas( arg[ 0 ].output, 'begin 1000, second, argument' ) );
+    test.is( _.strHas( arg[ 0 ].output, 'end 1000, second, argument' ) );
+
+    test.identical( arg[ 1 ].exitCode, 0 );
+    test.is( _.strHas( arg[ 1 ].output, 'begin 100, second, argument' ) );
+    test.is( _.strHas( arg[ 1 ].output, 'end 100, second, argument' ) );
+
+    counter += 1;
+    return null;
+  });
+
+  /* - */
+
+  return ready.finally( ( err, arg ) =>
+  {
+    debugger;
+    test.identical( counter, 12 );
+    if( err )
+    throw err;
+    return arg;
+  });
+
+  /* */
+
+  function testApp()
+  {
+    var ended = 0;
+    var fs = require( 'fs' );
+    console.log( 'begin', process.argv.slice( 2 ).join( ', ' ) );
+    var time = parseInt( process.argv[ 2 ] );
+    if( isNaN( time ) )
+    throw 'Expects number';
+
+    setTimeout( end, time );
+    function end()
+    {
+      ended = 1;
+      fs.writeFileSync( filePath, 'written by ' + process.argv[ 2 ] );
+      console.log( 'end', process.argv.slice( 2 ).join( ', ' ) );
+    }
+
+    setTimeout( periodic, 50 );
+    function periodic()
+    {
+      console.log( 'tick', process.argv.slice( 2 ).join( ', ' ) );
+      if( !ended )
+      setTimeout( periodic, 50 );
+    }
+
+  }
+
+}
+
+shellerConcurrent.timeOut = 100000;
 
 //
 
 function sheller( test )
 {
   var context = this;
-  var testRoutineDir = _.path.join( context.testSuitePath, test.name );
-
-  /* */
+  var routinePath = _.path.join( context.testSuitePath, test.name );
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
 
   function testApp()
   {
@@ -2222,33 +3283,30 @@ function sheller( test )
 
   /* */
 
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp.js' ) );
-  var testApp = testApp.toString() + '\ntestApp();';
-  _.fileProvider.fileWrite( testAppPath, testApp );
-
   var con = new _.Consequence().take( null )
-
 
   .thenKeep( () =>
   {
-    let shell = _.sheller
+    var shell = _.sheller
     ({
-      path : 'node ' + testAppPath,
+      execPath :  'node ' + testAppPath,
       outputCollecting : 1,
       outputPiping : 1
     })
 
-    return shell({ path : [ 'arg1', 'arg2' ] })
+    debugger;
+    return shell({ execPath :  [ 'arg1', 'arg2' ] })
     .thenKeep( ( got ) =>
     {
+      debugger;
       test.identical( got.length, 3 );
       test.identical( got[ got.length - 1 ], null );
 
       let o1 = got[ 0 ];
       let o2 = got[ 1 ];
 
-      test.is( _.strHas( o1.path, 'arg1' ) );
-      test.is( _.strHas( o2.path, 'arg2' ) );
+      test.is( _.strHas( o1.execPath, 'arg1' ) );
+      test.is( _.strHas( o2.execPath, 'arg2' ) );
       test.is( _.strHas( o1.output, "[ 'arg1' ]" ) );
       test.is( _.strHas( o2.output, "[ 'arg2' ]" ) );
 
@@ -2258,14 +3316,14 @@ function sheller( test )
 
   .thenKeep( () =>
   {
-    let shell = _.sheller
+    var shell = _.sheller
     ({
-      path : 'node ' + testAppPath + ' arg0',
+      execPath :  'node ' + testAppPath + ' arg0',
       outputCollecting : 1,
       outputPiping : 1
     })
 
-    return shell({ path : [ 'arg1', 'arg2' ] })
+    return shell({ execPath :  [ 'arg1', 'arg2' ] })
     .thenKeep( ( got ) =>
     {
       test.identical( got.length, 3 );
@@ -2274,8 +3332,8 @@ function sheller( test )
       let o1 = got[ 0 ];
       let o2 = got[ 1 ];
 
-      test.is( _.strHas( o1.path, 'arg0 arg1' ) );
-      test.is( _.strHas( o2.path, 'arg0 arg2' ) );
+      test.is( _.strHas( o1.execPath, 'arg0 arg1' ) );
+      test.is( _.strHas( o2.execPath, 'arg0 arg2' ) );
       test.is( _.strHas( o1.output, "[ 'arg0', 'arg1' ]" ) );
       test.is( _.strHas( o2.output, "[ 'arg0', 'arg2' ]" ) );
 
@@ -2286,14 +3344,14 @@ function sheller( test )
 
   .thenKeep( () =>
   {
-    let shell = _.sheller
+    var shell = _.sheller
     ({
-      path : 'node ' + testAppPath,
+      execPath :  'node ' + testAppPath,
       outputCollecting : 1,
       outputPiping : 1
     })
 
-    return shell({ path : [ 'arg1', 'arg2' ], args : [ 'arg3' ] })
+    return shell({ execPath :  [ 'arg1', 'arg2' ], args : [ 'arg3' ] })
     .thenKeep( ( got ) =>
     {
       test.identical( got.length, 3 );
@@ -2302,8 +3360,8 @@ function sheller( test )
       let o1 = got[ 0 ];
       let o2 = got[ 1 ];
 
-      test.is( _.strHas( o1.path, 'arg1' ) );
-      test.is( _.strHas( o2.path, 'arg2' ) );
+      test.is( _.strHas( o1.execPath, 'arg1' ) );
+      test.is( _.strHas( o2.execPath, 'arg2' ) );
       test.identical( o1.args, [ 'arg3' ] );
       test.identical( o2.args, [ 'arg3' ] );
       test.is( _.strHas( o1.output, "[ 'arg1', 'arg3' ]" ) );
@@ -2315,14 +3373,14 @@ function sheller( test )
 
   .thenKeep( () =>
   {
-    let shell = _.sheller
+    var shell = _.sheller
     ({
-      path : 'node ' + testAppPath,
+      execPath :  'node ' + testAppPath,
       outputCollecting : 1,
       outputPiping : 1
     })
 
-    return shell({ path : 'arg1' })
+    return shell({ execPath :  'arg1' })
     .thenKeep( ( got ) =>
     {
       test.identical( got.length, 2 );
@@ -2330,7 +3388,7 @@ function sheller( test )
 
       let o1 = got[ 0 ];
 
-      test.is( _.strHas( o1.path, 'arg1' ) );
+      test.is( _.strHas( o1.execPath, 'arg1' ) );
       test.is( _.strHas( o1.output, "[ 'arg1' ]" ) );
 
       return got;
@@ -2339,9 +3397,9 @@ function sheller( test )
 
   .thenKeep( () =>
   {
-    let shell = _.sheller
+    var shell = _.sheller
     ({
-      path :
+      execPath :
       [
         'node ' + testAppPath,
         'node ' + testAppPath
@@ -2350,7 +3408,7 @@ function sheller( test )
       outputPiping : 1
     })
 
-    return shell({ path : 'arg1' })
+    return shell({ execPath :  'arg1' })
     .thenKeep( ( got ) =>
     {
       test.identical( got.length, 3 );
@@ -2359,8 +3417,8 @@ function sheller( test )
       let o1 = got[ 0 ];
       let o2 = got[ 1 ];
 
-      test.is( _.strHas( o1.path, 'arg1' ) );
-      test.is( _.strHas( o2.path, 'arg1' ) );
+      test.is( _.strHas( o1.execPath, 'arg1' ) );
+      test.is( _.strHas( o2.execPath, 'arg1' ) );
       test.is( _.strHas( o1.output, "[ 'arg1' ]" ) );
       test.is( _.strHas( o2.output, "[ 'arg1' ]" ) );
 
@@ -2370,9 +3428,9 @@ function sheller( test )
 
   .thenKeep( () =>
   {
-    let shell = _.sheller
+    var shell = _.sheller
     ({
-      path :
+      execPath :
       [
         'node ' + testAppPath,
         'node ' + testAppPath
@@ -2381,7 +3439,7 @@ function sheller( test )
       outputPiping : 1
     })
 
-    return shell({ path : [ 'arg1', 'arg2' ]})
+    return shell({ execPath :  [ 'arg1', 'arg2' ]})
     .thenKeep( ( got ) =>
     {
       test.identical( got.length, 5 );
@@ -2392,10 +3450,10 @@ function sheller( test )
       let o3 = got[ 2 ];
       let o4 = got[ 3 ];
 
-      test.is( _.strHas( o1.path, 'arg1' ) );
-      test.is( _.strHas( o2.path, 'arg1' ) );
-      test.is( _.strHas( o3.path, 'arg2' ) );
-      test.is( _.strHas( o4.path, 'arg2' ) );
+      test.is( _.strHas( o1.execPath, 'arg1' ) );
+      test.is( _.strHas( o2.execPath, 'arg1' ) );
+      test.is( _.strHas( o3.execPath, 'arg2' ) );
+      test.is( _.strHas( o4.execPath, 'arg2' ) );
       test.is( _.strHas( o1.output, "[ 'arg1' ]" ) );
       test.is( _.strHas( o2.output, "[ 'arg1' ]" ) );
       test.is( _.strHas( o3.output, "[ 'arg2' ]" ) );
@@ -2408,13 +3466,14 @@ function sheller( test )
   return con;
 }
 
-//
+sheller.timeOut = 60000;
 
+//
 
 function outputHandling( test )
 {
   var context = this;
-  var testRoutineDir = _.path.join( context.testSuitePath, test.name );
+  var routinePath = _.path.join( context.testSuitePath, test.name );
 
   /* */
 
@@ -2425,9 +3484,9 @@ function outputHandling( test )
 
   /* */
 
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( testRoutineDir, 'testApp.js' ) );
-  var testApp = testApp.toString() + '\ntestApp();';
-  _.fileProvider.fileWrite( testAppPath, testApp );
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
 
   var con = new _.Consequence().take( null );
 
@@ -2451,7 +3510,7 @@ function outputHandling( test )
     con.thenKeep( () =>
     {
       loggerOutput = '';
-      var o = { path : path, mode : mode, outputPiping : 0, outputCollecting : 0, logger : logger };
+      var o = { execPath : path, mode : mode, outputPiping : 0, outputCollecting : 0, logger : logger };
       return _.shell( o )
       .thenKeep( () =>
       {
@@ -2465,7 +3524,7 @@ function outputHandling( test )
     con.thenKeep( () =>
     {
       loggerOutput = '';
-      var o = { path : path, mode : mode, outputPiping : 1, outputCollecting : 0, logger : logger };
+      var o = { execPath : path, mode : mode, outputPiping : 1, outputCollecting : 0, logger : logger };
       return _.shell( o )
       .thenKeep( () =>
       {
@@ -2478,7 +3537,7 @@ function outputHandling( test )
     con.thenKeep( () =>
     {
       loggerOutput = '';
-      var o = { path : path, mode : mode, outputPiping : 0, outputCollecting : 1, logger : logger };
+      var o = { execPath : path, mode : mode, outputPiping : 0, outputCollecting : 1, logger : logger };
       return _.shell( o )
       .thenKeep( () =>
       {
@@ -2491,7 +3550,7 @@ function outputHandling( test )
     con.thenKeep( () =>
     {
       loggerOutput = '';
-      var o = { path : path, mode : mode, outputPiping : 1, outputCollecting : 1, logger : logger };
+      var o = { execPath : path, mode : mode, outputPiping : 1, outputCollecting : 1, logger : logger };
       return _.shell( o )
       .thenKeep( () =>
       {
@@ -2516,7 +3575,7 @@ var Proto =
   silencing : 1,
 
   onSuiteBegin : testDirMake,
-  onSuiteEnd : cleanTestDir,
+  onSuiteEnd : testDirClean,
 
   context :
   {
@@ -2527,21 +3586,24 @@ var Proto =
   tests :
   {
 
-    appArgs : appArgs,
-    appRegisterExitHandler : appRegisterExitHandler,
+    appArgs,
+    appRegisterExitHandler,
 
-    shell : shell,
-    shellSync : shellSync,
-    shellSyncAsync : shellSyncAsync,
-    shell2 : shell2,
-    shellCurrentPath : shellCurrentPath,
-    shellFork : shellFork,
-    shellErrorHadling : shellErrorHadling,
-    shellNode : shellNode,
+    shell,
+    shellSync,
+    shellSyncAsync,
+    shell2,
+    shellCurrentPath,
+    shellFork,
+    shellErrorHadling,
+    shellNode,
 
-    sheller : sheller,
+    shellConcurrent,
+    shellerConcurrent,
 
-    outputHandling : outputHandling
+    sheller,
+
+    outputHandling
 
   },
 
