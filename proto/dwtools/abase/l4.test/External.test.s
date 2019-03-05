@@ -1164,16 +1164,7 @@ function shell2( test )
 
     if( typeof module !== 'undefined' )
     {
-      try
-      {
-        require( '../../../../Base.s' );
-      }
-      catch( err )
-      {
-        require( 'wTools' );
-      }
-      var _global = _global_;
-      var _ = _global_.wTools;
+      let _ = require( '../../../Tools.s' );
 
       _.include( 'wConsequence' );
       _.include( 'wStringsExtra' );
@@ -1848,23 +1839,7 @@ function shellErrorHadling( test )
 
   function testApp()
   {
-    if( typeof module !== 'undefined' )
-    {
-      try
-      {
-        require( '../../../../Base.s' );
-      }
-      catch( err )
-      {
-        require( 'wTools' );
-      }
-    }
-
-    var _ = _global_.wTools;
-
-    _.include( 'wExternalFundamentals' );
-
-    throw _.err( 'Error message from child' );
+    throw 'Error message from child'
   }
 
   /* */
