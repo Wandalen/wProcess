@@ -1895,7 +1895,7 @@ function shellErrorHadling( test )
     .thenKeep( function( got )
     {
       test.is( _.errIs( got ) );
-      test.is( _.strHas( got.message, 'Process returned error code' ) )
+      test.is( _.strHas( got.message, 'Process returned exit code' ) )
       test.is( _.strHas( got.message, 'Launched as' ) )
       test.is( _.strHas( got.message, 'Stderr' ) )
       test.is( _.strHas( got.message, 'Error message from child' ) )
@@ -1924,7 +1924,7 @@ function shellErrorHadling( test )
     .thenKeep( function( got )
     {
       test.is( _.errIs( got ) );
-      test.is( _.strHas( got.message, 'Process returned error code' ) )
+      test.is( _.strHas( got.message, 'Process returned exit code' ) )
       test.is( _.strHas( got.message, 'Launched as' ) )
       test.is( _.strHas( got.message, 'Stderr' ) )
       test.is( _.strHas( got.message, 'Error message from child' ) )
@@ -1953,7 +1953,7 @@ function shellErrorHadling( test )
     .thenKeep( function( got )
     {
       test.is( _.errIs( got ) );
-      test.is( _.strHas( got.message, 'Process returned error code' ) )
+      test.is( _.strHas( got.message, 'Process returned exit code' ) )
       test.is( _.strHas( got.message, 'Launched as' ) )
       test.is( _.strHas( got.message, 'Stderr' ) )
       test.is( _.strHas( got.message, 'Error message from child' ) )
@@ -1983,7 +1983,7 @@ function shellErrorHadling( test )
     var got = test.shouldThrowErrorSync( () => _.shell( o ) )
 
     test.is( _.errIs( got ) );
-    test.is( _.strHas( got.message, 'Process returned error code' ) )
+    test.is( _.strHas( got.message, 'Process returned exit code' ) )
     test.is( _.strHas( got.message, 'Launched as' ) )
     test.is( _.strHas( got.message, 'Stderr' ) )
     test.is( _.strHas( got.message, 'Error message from child' ) )
@@ -2012,7 +2012,7 @@ function shellErrorHadling( test )
     var got = test.shouldThrowErrorSync( () => _.shell( o ) )
 
     test.is( _.errIs( got ) );
-    test.is( _.strHas( got.message, 'Process returned error code' ) )
+    test.is( _.strHas( got.message, 'Process returned exit code' ) )
     test.is( _.strHas( got.message, 'Launched as' ) )
     test.is( _.strHas( got.message, 'Stderr' ) )
     test.is( _.strHas( got.message, 'Error message from child' ) )
@@ -2041,7 +2041,7 @@ function shellErrorHadling( test )
     var got = test.shouldThrowErrorSync( () => _.shell( o ) )
 
     test.is( _.errIs( got ) );
-    test.is( _.strHas( got.message, 'Process returned error code' ) )
+    test.is( _.strHas( got.message, 'Process returned exit code' ) )
     test.is( _.strHas( got.message, 'Launched as' ) )
     test.is( _.strHas( got.message, 'Stderr' ) )
     test.is( _.strHas( got.message, 'Error message from child' ) )
@@ -2070,7 +2070,7 @@ function shellErrorHadling( test )
     var got = test.shouldThrowErrorSync( () => _.shell( o ) )
 
     test.is( _.errIs( got ) );
-    test.is( _.strHas( got.message, 'Process returned error code' ) )
+    test.is( _.strHas( got.message, 'Process returned exit code' ) )
     test.is( _.strHas( got.message, 'Launched as' ) )
     test.is( !_.strHas( got.message, 'Stderr' ) )
     test.is( !_.strHas( got.message, 'Error message from child' ) )
@@ -2143,7 +2143,7 @@ function shellNode( test )
   {
     con.thenKeep( () =>
     {
-      var o = { execPath : testAppPath, mode : mode, applyingExitCode : 1, throwingExitCode : 1 };
+      var o = { execPath : testAppPath, mode : mode, applyingExitCode : 1, throwingExitCode : 1, stdio : 'ignore' };
       return _.shellNode( o )
       .finally( ( err, got ) =>
       {
@@ -2157,7 +2157,7 @@ function shellNode( test )
 
     con.thenKeep( () =>
     {
-      var o = { execPath : testAppPath, mode : mode,  applyingExitCode : 1, throwingExitCode : 0 };
+      var o = { execPath : testAppPath, mode : mode,  applyingExitCode : 1, throwingExitCode : 0, stdio : 'ignore' };
       return _.shellNode( o )
       .finally( ( err, got ) =>
       {
@@ -2171,7 +2171,7 @@ function shellNode( test )
 
     con.thenKeep( () =>
     {
-      var o = { execPath : testAppPath,  mode : mode, applyingExitCode : 0, throwingExitCode : 1 };
+      var o = { execPath : testAppPath,  mode : mode, applyingExitCode : 0, throwingExitCode : 1, stdio : 'ignore' };
       return _.shellNode( o )
       .finally( ( err, got ) =>
       {
@@ -2184,7 +2184,7 @@ function shellNode( test )
 
     con.thenKeep( () =>
     {
-      var o = { execPath : testAppPath,  mode : mode, applyingExitCode : 0, throwingExitCode : 0 };
+      var o = { execPath : testAppPath,  mode : mode, applyingExitCode : 0, throwingExitCode : 0, stdio : 'ignore' };
       return _.shellNode( o )
       .finally( ( err, got ) =>
       {
@@ -2197,7 +2197,7 @@ function shellNode( test )
 
     con.thenKeep( () =>
     {
-      var o = { execPath : testAppPath,  mode : mode, maximumMemory : 1, applyingExitCode : 0, throwingExitCode : 0 };
+      var o = { execPath : testAppPath,  mode : mode, maximumMemory : 1, applyingExitCode : 0, throwingExitCode : 0, stdio : 'ignore' };
       return _.shellNode( o )
       .finally( ( err, got ) =>
       {
@@ -2369,7 +2369,7 @@ function shellConcurrent( test )
 
     test.is( arg === undefined );
     test.is( _.errIs( err ) );
-    test.identical( singleErrorBeforeScalar.exitCode, undefined );
+    test.identical( singleErrorBeforeScalar.exitCode, null );
     test.identical( singleErrorBeforeScalar.output, undefined );
     test.is( !_.fileProvider.fileExists( filePath ) );
 
@@ -2401,7 +2401,7 @@ function shellConcurrent( test )
 
     test.is( arg === undefined );
     test.is( _.errIs( err ) );
-    test.identical( singleErrorBefore.exitCode, undefined );
+    test.identical( singleErrorBefore.exitCode, null );
     test.identical( singleErrorBefore.output, undefined );
     test.is( !_.fileProvider.fileExists( filePath ) );
 
