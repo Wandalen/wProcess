@@ -1381,6 +1381,25 @@ shellCurrentPath.timeOut = 30000;
 
 //
 
+/*
+
+Test routine shellFork causes.
+
+ 1: node::DecodeWrite
+ 2: node::Start
+ 3: v8::RetainedObjectInfo::~RetainedObjectInfo
+ 4: uv_loop_size
+ 5: uv_disable_stdio_inheritance
+ 6: uv_dlerror
+ 7: uv_run
+ 8: node::CreatePlatform
+ 9: node::CreatePlatform
+10: node::Start
+11: v8_inspector::protocol::Runtime::API::StackTrace::fromJSONString
+12: BaseThreadInitThunk
+13: RtlUserThreadStart
+*/
+
 function shellFork( test )
 {
   var context = this;
