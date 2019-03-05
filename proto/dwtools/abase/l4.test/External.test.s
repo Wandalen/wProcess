@@ -50,6 +50,55 @@ function testDirClean()
   _.fileProvider.filesDelete( context.testSuitePath );
 }
 
+//
+
+function testApp()
+{
+  var ended = 0;
+  var fs = require( 'fs' );
+  var path = require( 'path' );
+  var filePath = path.join( __dirname, 'file.txt' );
+  console.log( 'begin', process.argv.slice( 2 ).join( ', ' ) );
+  var time = parseInt( process.argv[ 2 ] );
+  if( isNaN( time ) )
+  throw 'Expects number';
+
+  setTimeout( end, time );
+  function end()
+  {
+    ended = 1;
+    fs.writeFileSync( filePath, 'written by ' + process.argv[ 2 ] );
+    console.log( 'end', process.argv.slice( 2 ).join( ', ' ) );
+  }
+
+  setTimeout( periodic, 50 );
+  function periodic()
+  {
+    console.log( 'tick', process.argv.slice( 2 ).join( ', ' ) );
+    if( !ended )
+    setTimeout( periodic, 50 );
+  }
+
+}
+
+//
+
+function testAppShell()
+{
+  let _ = require( '../../../Tools.s' );
+  _.include( 'wExternalFundamentals' );
+
+  var args = _.appArgs();
+
+  if( args.map.exitWithCode )
+  process.exit( args.map.exitWithCode )
+
+  if( args.map.loop )
+  return _.timeOut( 4000 )
+
+  console.log( __filename );
+}
+
 // --
 // test
 // --
@@ -276,20 +325,9 @@ function appRegisterExitHandler( test )
 
   function testApp()
   {
+    let _ = require( '../../../Tools.s' );
+    _.include( 'wExternalFundamentals' );
 
-    if( typeof module !== 'undefined' )
-    {
-      let _ = require( '../../../Tools.s' );
-
-      _.include( 'wConsequence' );
-      _.include( 'wStringsExtra' );
-      _.include( 'wStringer' );
-      _.include( 'wPathFundamentals'/*ttt*/ );
-      _.include( 'wExternalFundamentals' );
-
-    }
-    var _global = _global_;
-    var _ = _global_.wTools;
     var args = _.appArgs();
 
     _.appRegisterExitHandler( ( arg ) =>
@@ -386,44 +424,8 @@ function shell( test )
 
   /* */
 
-  function testApp()
-  {
-
-    if( typeof module !== 'undefined' )
-    {
-      let _ = require( '../../../Tools.s' );
-
-      _.include( 'wConsequence' );
-      _.include( 'wStringsExtra' );
-      _.include( 'wStringer' );
-      _.include( 'wPathFundamentals'/*ttt*/ );
-      _.include( 'wExternalFundamentals' );
-
-    }
-    var _global = _global_;
-    var _ = _global_.wTools;
-
-    var args = _.appArgs();
-    var con = new _.Consequence().take( null );
-    con.timeOut( _.numberRandomInt( [ 300, 2000 ] ), function()
-    {
-      if( args.map.exitWithCode )
-      process.exit( args.map.exitWithCode )
-
-      if( args.map.loop )
-      return _.timeOut( 4000 )
-
-      console.log( __filename );
-
-      return true;
-    });
-
-  }
-
-  /* */
-
   var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = testApp.toString() + '\ntestApp();';
+  var testAppCode = context.testAppShell.toString() + '\ntestAppShell();';
   var expectedOutput = testAppPath + '\n';
   _.fileProvider.fileWrite( testAppPath, testAppCode );
 
@@ -762,44 +764,8 @@ function shellSync( test )
 
   /* */
 
-  function testApp()
-  {
-
-    if( typeof module !== 'undefined' )
-    {
-      let _ = require( '../../../Tools.s' );
-
-      _.include( 'wConsequence' );
-      _.include( 'wStringsExtra' );
-      _.include( 'wStringer' );
-      _.include( 'wPathFundamentals'/*ttt*/ );
-      _.include( 'wExternalFundamentals' );
-
-    }
-    var _global = _global_;
-    var _ = _global_.wTools;
-
-    var args = _.appArgs();
-    var con = new _.Consequence().take( null );
-    con.timeOut( _.numberRandomInt( [ 300, 2000 ] ), function()
-    {
-      if( args.map.exitWithCode )
-      process.exit( args.map.exitWithCode )
-
-      if( args.map.loop )
-      return _.timeOut( 4000 )
-
-      console.log( __filename );
-
-      return true;
-    });
-
-  }
-
-  /* */
-
   var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = testApp.toString() + '\ntestApp();';
+  var testAppCode = context.testAppShell.toString() + '\ntestAppShell();';
   var expectedOutput = testAppPath + '\n';
   _.fileProvider.fileWrite( testAppPath, testAppCode );
 
@@ -941,44 +907,8 @@ function shellSyncAsync( test )
 
   /* */
 
-  function testApp()
-  {
-
-    if( typeof module !== 'undefined' )
-    {
-      let _ = require( '../../../Tools.s' );
-
-      _.include( 'wConsequence' );
-      _.include( 'wStringsExtra' );
-      _.include( 'wStringer' );
-      _.include( 'wPathFundamentals'/*ttt*/ );
-      _.include( 'wExternalFundamentals' );
-
-    }
-    var _global = _global_;
-    var _ = _global_.wTools;
-
-    var args = _.appArgs();
-    var con = new _.Consequence().take( null );
-    con.timeOut( _.numberRandomInt( [ 300, 2000 ] ), function()
-    {
-      if( args.map.exitWithCode )
-      process.exit( args.map.exitWithCode )
-
-      if( args.map.loop )
-      return _.timeOut( 4000 )
-
-      console.log( __filename );
-
-      return true;
-    });
-
-  }
-
-  /* */
-
   var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = testApp.toString() + '\ntestApp();';
+  var testAppCode = context.testAppShell.toString() + '\ntestAppShell();';
   var expectedOutput = testAppPath + '\n';
   _.fileProvider.fileWrite( testAppPath, testAppCode );
 
@@ -1161,27 +1091,7 @@ function shell2( test )
 
   function testApp()
   {
-
-    if( typeof module !== 'undefined' )
-    {
-      let _ = require( '../../../Tools.s' );
-
-      _.include( 'wConsequence' );
-      _.include( 'wStringsExtra' );
-      _.include( 'wStringer' );
-      _.include( 'wPathFundamentals'/*ttt*/ );
-
-    }
-    var _global = _global_;
-    var _ = _global_.wTools;
-
-    var con = new _.Consequence().take( null );
-    con.timeOut( _.numberRandomInt( [ 300, 2000 ] ), function()
-    {
-      console.log( process.argv.slice( 2 ).join( ' ' ) );
-      return true;
-    });
-
+    console.log( process.argv.slice( 2 ).join( ' ' ) );
   }
 
   /* */
@@ -2101,7 +2011,7 @@ function shellNode( test )
 
   function testApp()
   {
-    throw 1;
+    throw 'Error message from child';
   }
 
   /* */
@@ -2251,7 +2161,7 @@ function shellConcurrent( test )
   let filePath = _.fileProvider.path.nativize( _.path.join( routinePath, 'file.txt' ) );
   let ready = _.Consequence().take( null );
 
-  let testAppCode = `let filePath = '${_.strEscape( filePath )}';\n` + testApp.toString() + '\ntestApp();';
+  let testAppCode = `let filePath = '${_.strEscape( filePath )}';\n` + context.testApp.toString() + '\ntestApp();';
   _.fileProvider.fileWrite( testAppPath, testAppCode );
 
   logger.log( 'this is #foreground : bright white#an#foreground : default# experiment' ); /* qqq fix logger, please !!! */
@@ -2700,36 +2610,6 @@ function shellConcurrent( test )
     throw err;
     return arg;
   });
-
-  /* */
-
-  function testApp()
-  {
-    var ended = 0;
-    var fs = require( 'fs' );
-    console.log( 'begin', process.argv.slice( 2 ).join( ', ' ) );
-    var time = parseInt( process.argv[ 2 ] );
-    if( isNaN( time ) )
-    throw 'Expects number';
-
-    setTimeout( end, time );
-    function end()
-    {
-      ended = 1;
-      fs.writeFileSync( filePath, 'written by ' + process.argv[ 2 ] );
-      console.log( 'end', process.argv.slice( 2 ).join( ', ' ) );
-    }
-
-    setTimeout( periodic, 50 );
-    function periodic()
-    {
-      console.log( 'tick', process.argv.slice( 2 ).join( ', ' ) );
-      if( !ended )
-      setTimeout( periodic, 50 );
-    }
-
-  }
-
 }
 
 shellConcurrent.timeOut = 100000;
@@ -2746,7 +2626,7 @@ function shellerConcurrent( test )
   let filePath = _.fileProvider.path.nativize( _.path.join( routinePath, 'file.txt' ) );
   let ready = _.Consequence().take( null );
 
-  let testAppCode = `let filePath = '${_.strEscape( filePath )}';\n` + testApp.toString() + '\ntestApp();';
+  let testAppCode = `let filePath = '${_.strEscape( filePath )}';\n` + context.testApp.toString() + '\ntestApp();';
   _.fileProvider.fileWrite( testAppPath, testAppCode );
 
   /* - */
@@ -3255,36 +3135,6 @@ function shellerConcurrent( test )
     throw err;
     return arg;
   });
-
-  /* */
-
-  function testApp()
-  {
-    var ended = 0;
-    var fs = require( 'fs' );
-    console.log( 'begin', process.argv.slice( 2 ).join( ', ' ) );
-    var time = parseInt( process.argv[ 2 ] );
-    if( isNaN( time ) )
-    throw 'Expects number';
-
-    setTimeout( end, time );
-    function end()
-    {
-      ended = 1;
-      fs.writeFileSync( filePath, 'written by ' + process.argv[ 2 ] );
-      console.log( 'end', process.argv.slice( 2 ).join( ', ' ) );
-    }
-
-    setTimeout( periodic, 50 );
-    function periodic()
-    {
-      console.log( 'tick', process.argv.slice( 2 ).join( ', ' ) );
-      if( !ended )
-      setTimeout( periodic, 50 );
-    }
-
-  }
-
 }
 
 shellerConcurrent.timeOut = 100000;
@@ -3604,6 +3454,8 @@ var Proto =
   {
 
     testSuitePath : null,
+    testApp : testApp,
+    testAppShell : testAppShell
   },
 
   tests :
