@@ -2237,6 +2237,54 @@ shellNode.timeOut = 20000;
 
 //
 
+function shellTerminate( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.testSuitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    setTimeout( () =>
+    {
+      console.log( 'Timeout');
+    },5000 )
+  }
+
+  /* */
+
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+  var ready = new _.Consequence().take( null );
+
+  let terminateChild =
+  {
+    execPath : 'node ' + testAppPath,
+    ready : ready,
+    throwingExitCode : 1,
+  }
+
+  _.shell( terminateChild );
+
+  terminateChild.process.kill();
+
+  ready.finally( ( err, got ) =>
+  {
+    test.is( _.errIs( err ) );
+    test.identical( terminateChild.exitCode, null );
+    return null;
+  })
+
+  return ready;
+}
+
+shellTerminate.timeOut = 10000;
+
+
+//
+
 function shellConcurrent( test )
 {
   let context = this;
@@ -3616,6 +3664,8 @@ var Proto =
     shellFork,
     shellErrorHadling,
     shellNode,
+
+    shellTerminate,
 
     shellConcurrent,
     shellerConcurrent,
