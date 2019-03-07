@@ -77,7 +77,7 @@ function shell( o )
     o.ready.thenGive( single );
     o.ready.finallyKeep( end );
     if( o.sync && o.deasync )
-    return waitForCon( o.ready );
+    return o.ready.finallyDeasyncGive();
     return o.ready;
   }
 
@@ -139,7 +139,7 @@ function shell( o )
     if( o.sync && !o.deasync )
     return o;
     if( o.sync && o.deasync )
-    return waitForCon( o.ready );
+    return o.ready.finallyDeasyncGive();
 
     return o.ready;
   }
@@ -359,7 +359,16 @@ function shell( o )
       let arg2 = o.execPath;
       let o2 = optionsForSpawn();
 
-      o2.windowsVerbatimArguments = true; /* qqq : explain why is it needed please */
+     /*
+      windowsVerbatimArguments allows to have arguments with space(s) in shell on Windows
+      Following calls will not work as expected( argument will be splitted by space ), if windowsVerbatimArguments is disabled:
+
+      _.shell( 'node path/to/script.js "path with space"' );
+      _.shell({ execPath : 'node path/to/script.js', args : [ "path with space" ] });
+
+     */
+
+      o2.windowsVerbatimArguments = true; /* qqq : explain why is it needed please aaa : done */
 
       if( o.args && o.args.length )
       arg2 = arg2 + ' ' + '"' + o.args.join( '" "' ) + '"';
@@ -616,27 +625,27 @@ function shell( o )
 
   /* */
 
-  /* qqq : use Consequence.deasync */
-  function waitForCon( con )
-  {
-    let ready = false;
-    let result = Object.create( null );
+  /* qqq : use Consequence.deasync aaa : done*/
+  // function waitForCon( con )
+  // {
+  //   let ready = false;
+  //   let result = Object.create( null );
 
-    con.got( ( err, data ) =>
-    {
-      result.err = err;
-      result.data = data;
-      ready = true;
-    })
+  //   con.got( ( err, data ) =>
+  //   {
+  //     result.err = err;
+  //     result.data = data;
+  //     ready = true;
+  //   })
 
-    if( !Deasync )
-    Deasync = require( 'deasync' );
-    Deasync.loopWhile( () => !ready )
+  //   if( !Deasync )
+  //   Deasync = require( 'deasync' );
+  //   Deasync.loopWhile( () => !ready )
 
-    if( result.err )
-    throw result.err;
-    return result.data;
-  }
+  //   if( result.err )
+  //   throw result.err;
+  //   return result.data;
+  // }
 
 }
 
