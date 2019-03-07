@@ -118,11 +118,11 @@ function shell( o )
     }
 
     o.ready
-    .andKeep( readies )
+    .then( () => new _.Consequence().take( null ).andKeep( readies ) )
     .finally( ( err, arg ) =>
     {
+      o.exitCode = err ? null : 0;
 
-      o.exitCode = 0;
       for( let a = 0 ; a < options.length-1 ; a++ )
       {
         let o2 = options[ a ];
@@ -152,10 +152,21 @@ function shell( o )
     _.assert( state === 0 );
     state = 1;
 
-    prepare();
-    launch();
-    pipe();
-
+    try
+    {
+      prepare();
+      launch();
+      pipe();
+    }
+    catch( err )
+    {
+      debugger
+      appExitCode( -1 );
+      if( o.sync && !o.deasync )
+      throw _.errLogOnce( err );
+      else
+      o.ready.error( _.errLogOnce( err ) );
+    }
   }
 
   /* */
@@ -175,7 +186,11 @@ function shell( o )
     }
 
     if( err )
-    throw err;
+    {
+      if( state < 2 )
+      o.exitCode = null;
+      throw err;
+    }
     return arg;
   }
 
@@ -274,21 +289,21 @@ function shell( o )
 
     /* launch */
 
-    try
-    {
+    // try
+    // {
 
       launchAct();
 
-    }
-    catch( err )
-    {
-      debugger
-      appExitCode( -1 );
-      if( o.sync && !o.deasync )
-      throw _.errLogOnce( err );
-      else
-      return o.ready.error( _.errLogOnce( err ) );
-    }
+    // }
+    // catch( err )
+    // {
+    //   debugger
+    //   appExitCode( -1 );
+    //   if( o.sync && !o.deasync )
+    //   throw _.errLogOnce( err );
+    //   else
+    //   return o.ready.error( _.errLogOnce( err ) );
+    // }
 
     /* time out */
 
