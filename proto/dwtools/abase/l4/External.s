@@ -375,6 +375,7 @@ function shell( o )
       let o2 = optionsForSpawn();
 
      /*
+
       windowsVerbatimArguments allows to have arguments with space(s) in shell on Windows
       Following calls will not work as expected( argument will be splitted by space ), if windowsVerbatimArguments is disabled:
 
@@ -383,7 +384,7 @@ function shell( o )
 
      */
 
-      o2.windowsVerbatimArguments = true; /* qqq : explain why is it needed please aaa : done */
+      o2.windowsVerbatimArguments = true;
 
       if( o.args && o.args.length )
       arg2 = arg2 + ' ' + '"' + o.args.join( '" "' ) + '"';
@@ -424,10 +425,13 @@ function shell( o )
     {
       silent : false,
       env : o.env,
-      cwd : _.path.nativize( o.currentPath ),
       stdio : o.stdio,
       execArgv : interpreterArgs,
     }
+
+    if( o.currentPath )
+    o2.cwd = _.path.nativize( o.currentPath );
+
     return o2;
   }
 
@@ -638,35 +642,7 @@ function shell( o )
 
   }
 
-  /* */
-
-  /* qqq : use Consequence.deasync aaa : done*/
-  // function waitForCon( con )
-  // {
-  //   let ready = false;
-  //   let result = Object.create( null );
-
-  //   con.got( ( err, data ) =>
-  //   {
-  //     result.err = err;
-  //     result.data = data;
-  //     ready = true;
-  //   })
-
-  //   if( !Deasync )
-  //   Deasync = require( 'deasync' );
-  //   Deasync.loopWhile( () => !ready )
-
-  //   if( result.err )
-  //   throw result.err;
-  //   return result.data;
-  // }
-
 }
-
-/*
-qqq : implement currentPath for all modes
-*/
 
 shell.defaults =
 {
