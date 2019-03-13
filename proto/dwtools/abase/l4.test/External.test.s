@@ -3460,6 +3460,69 @@ outputHandling.timeOut = 10000;
 
 //
 
+function experiment( test )
+{
+  let self = this;
+
+  var context = this;
+  var routinePath = _.path.join( context.testSuitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+  }
+
+  /* */
+
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  var expectedOutput = __dirname + '\n'
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+
+  let ChildProcess = require( 'child_process' );
+
+  let ready = new _.Consequence().take( null )
+  for( var i = 0; i < 1000; i++ )
+  ready.then( () => f() );
+
+  return ready;
+
+  /*  */
+
+  function f()
+  {
+    var con = new _.Consequence().take( null );
+
+    con.thenKeep( function()
+    {
+      test.case = 'no args';
+
+      let r = new _.Consequence();
+      var process = ChildProcess.fork( testAppPath, [], {} );
+      process.on( 'close', () =>
+      {
+        r.take( 1 );
+      });
+
+      return r;
+    })
+
+    con.thenKeep( function()
+    {
+      test.case = 'deasync';
+      _.timeOut( 1 ).finallyDeasyncGive();
+      return null;
+    })
+
+    return con;
+  }
+}
+
+experiment.experimental = 1;
+
+//
+
 var Proto =
 {
 
