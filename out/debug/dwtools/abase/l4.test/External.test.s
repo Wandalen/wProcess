@@ -3488,7 +3488,7 @@ var Proto =
     shellSyncAsync,
     shell2,
     shellCurrentPath,
-    // shellFork,
+    shellFork,
 
 /*
   qqq : investigate please
