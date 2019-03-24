@@ -855,13 +855,15 @@ function _appArgsInSamFormatNodejs( o )
   o = _.routineOptions( _appArgsInSamFormatNodejs, arguments );
 
   if( o.caching )
-  if( _appArgsCache && o.keyValDelimeter === _appArgsCache.keyValDelimeter && o.subjectsDelimeter === _appArgsCache.subjectsDelimeter )
+  if( _appArgsCache )
+  if( o.keyValDelimeter === _appArgsCache.keyValDelimeter && o.subjectsDelimeter === _appArgsCache.subjectsDelimeter )
   return _appArgsCache;
 
   let result = Object.create( null );
 
   if( o.caching )
-  if( o.keyValDelimeter === _appArgsInSamFormatNodejs.defaults.keyValDelimeter )
+  // if( o.keyValDelimeter === _appArgsInSamFormatNodejs.defaults.keyValDelimeter )
+  if( o.keyValDelimeter === _appArgsInSamFormatNodejs.defaults.keyValDelimeter && o.subjectsDelimeter === _appArgsInSamFormatNodejs.defaults.subjectsDelimeter )
   _appArgsCache = result;
 
   if( !_global.process )
@@ -884,6 +886,7 @@ function _appArgsInSamFormatNodejs( o )
   result.scriptString = result.scriptArgs.join( ' ' );
   result.scriptString = result.scriptString.trim();
 
+  // debugger;
   let r = _.strRequestParse
   ({
     src : result.scriptString,
@@ -891,6 +894,7 @@ function _appArgsInSamFormatNodejs( o )
     subjectsDelimeter : o.subjectsDelimeter,
     parsingArrays : o.parsingArrays,
   });
+  // debugger;
 
   _.mapExtend( result, r );
 
