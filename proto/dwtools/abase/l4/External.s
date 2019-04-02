@@ -66,8 +66,8 @@ function shell( o )
   if( o.sync && !o.deasync )
   {
     let arg = o.ready.toResource();
-    if( _.err( arg ) )
-    throw err;
+    if( _.errIs( arg ) )
+    throw _.err( arg );
     single();
     end( undefined, o )
     return o;
@@ -841,7 +841,7 @@ let _appArgsInSamFormat = Object.create( null )
 var defaults = _appArgsInSamFormat.defaults = Object.create( null );
 
 defaults.keyValDelimeter = ':';
-defaults.subjectsDelimeter = ';';
+defaults.cmmandsDelimeter = ';';
 defaults.argv = null;
 defaults.caching = true;
 defaults.parsingArrays = true;
@@ -856,14 +856,14 @@ function _appArgsInSamFormatNodejs( o )
 
   if( o.caching )
   if( _appArgsCache )
-  if( o.keyValDelimeter === _appArgsCache.keyValDelimeter && o.subjectsDelimeter === _appArgsCache.subjectsDelimeter )
+  if( o.keyValDelimeter === _appArgsCache.keyValDelimeter && o.cmmandsDelimeter === _appArgsCache.cmmandsDelimeter )
   return _appArgsCache;
 
   let result = Object.create( null );
 
   if( o.caching )
   // if( o.keyValDelimeter === _appArgsInSamFormatNodejs.defaults.keyValDelimeter )
-  if( o.keyValDelimeter === _appArgsInSamFormatNodejs.defaults.keyValDelimeter && o.subjectsDelimeter === _appArgsInSamFormatNodejs.defaults.subjectsDelimeter )
+  if( o.keyValDelimeter === _appArgsInSamFormatNodejs.defaults.keyValDelimeter && o.cmmandsDelimeter === _appArgsInSamFormatNodejs.defaults.cmmandsDelimeter )
   _appArgsCache = result;
 
   if( !_global.process )
@@ -891,7 +891,7 @@ function _appArgsInSamFormatNodejs( o )
   ({
     src : result.scriptString,
     keyValDelimeter : o.keyValDelimeter,
-    subjectsDelimeter : o.subjectsDelimeter,
+    cmmandsDelimeter : o.cmmandsDelimeter,
     parsingArrays : o.parsingArrays,
   });
   // debugger;
