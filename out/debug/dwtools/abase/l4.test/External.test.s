@@ -276,7 +276,7 @@ function appArgs( test )
     mainPath : 'main.js',
     interpreterArgs : [],
     keyValDelimeter : ':',
-    subjectsDelimeter : ';',
+    cmmandsDelimeter : ';',
     subject : '.set',
     map : { v : 5 },
     scriptArgs : [ '.set v:5 ; .build debug:1 ; .export' ],
@@ -296,7 +296,7 @@ function appArgs( test )
     mainPath : 'main.js',
     interpreterArgs : [],
     keyValDelimeter : ':',
-    subjectsDelimeter : ';',
+    cmmandsDelimeter : ';',
     subject : '.set',
     map : { v : [ 1,2,3 ] },
     scriptArgs : [ '.set v:[1 2  3 ] ; .build debug:1 ; .export' ],
@@ -3488,7 +3488,7 @@ var Proto =
     shellSyncAsync,
     shell2,
     shellCurrentPath,
-    // shellFork,
+    shellFork,
 
 /*
   qqq : investigate please
