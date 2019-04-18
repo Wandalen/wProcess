@@ -11,6 +11,13 @@
  * @file ExternalFundamentals.s.
  */
 
+/**
+ * Collection of routines to execute system commands, run shell, batches, launch external processes from JavaScript application.
+  @namespace ExternalFundamentals
+  @augments wTools
+  @memberof module:Tools/base/ExternalFundamentals
+*/
+
 if( typeof module !== 'undefined' )
 {
 
@@ -31,6 +38,83 @@ _.assert( !!_realGlobal_ );
 // --
 // exec
 // --
+
+/**
+ * @summary Executes command in a controled child process.
+ *
+ * @param {Object} o Options map
+ * @param {String} o.execPath Command to execute, path to application, etc.
+ * @param {String} o.currentPath Current working directory of child process.
+
+ * @param {Boolean} o.sync=0 Execute command in synchronous mode.
+   There are two synchrounous modes: first uses sync method of `ChildProcess` module , second uses async method, but in combination with {@link https://www.npmjs.com/package/deasync deasync} and `wConsequence` to turn async execution into synchrounous.
+   Which sync mode will be selected depends on value of `o.deasync` option.
+   Sync mode returns options map.
+   Async mode returns instance of {@link module:Tools/base/Consequence.Consequence wConsequence} with gives a message( options map ) when execution of child process is finished.
+ * @param {Boolean} o.deasync=1 Controls usage of `deasync` module in synchrounous mode. Allows to run command synchrounously in modes( o.mode ) that don't support synchrounous execution, like `fork`.
+
+ * @param {Array} o.args=null Arguments for command.
+ * @param {Array} o.interpreterArgs=null Arguments for node. Used only in `fork` mode. {@link https://nodejs.org/api/cli.html Command Line Options}
+ * @param {String} o.mode='shell' Execution mode. Possible values: `fork`, `exec`, `spawn`, `shell`. {@link https://nodejs.org/api/child_process.html Details about modes}
+ * @param {Object} o.ready=null `wConsequence` instance that gives a message when execution is finished.
+ * @param {Object} o.logger=null `wLogger` instance that prints output during command execution.
+
+ * @param {Object} o.env=null Environment variables( key-value pairs ).
+ * @param {String/Array} o.stdio='pipe' Controls stdin,stdout configuration. {@link https://nodejs.org/api/child_process.html#child_process_options_stdio Details}
+ * @param {Boolean} o.ipc=0  Creates `ipc` channel between parent and child processes.
+ * @param {Boolean} o.detaching=0 Creates independent process for a child. Allows child process to continue execution when parent process exits. Platform dependent option. {@link https://nodejs.org/api/child_process.html#child_process_options_detached Details}.
+ * @param {Boolean} o.passingThrough=0 Allows to pass arguments of parent process to the child process.
+ * @param {Boolean} o.concurrent=0 Allows paralel execution of several child processes. By default executes commands one by one.
+ * @param {Number} o.timeOut=null Time in milliseconds before execution will be terminated.
+
+ * @param {Boolean} o.throwingExitCode=1 Throws an Error if child process returns non-zero exit code. Child returns non-zero exit code if it was terminated by parent, timeOut or when internal error occurs.
+
+ * @param {Boolean} o.applyingExitCode=0 Applies exit code to parent process.
+
+ * @param {Number} o.verbosity=2 Controls amount of output, `0` disables output at all.
+ * @param {Boolean} o.outputGray=0 Logger prints everything in raw mode, no styles applied.
+ * @param {Boolean} o.outputGrayStdout=0 Logger prints output from `stdout` in raw mode, no styles applied.
+ * @param {Boolean} o.outputPrefixing=0 Add prefix with name of output channel( stderr, stdout ) to each line.
+ * @param {Boolean} o.outputPiping=null Handles output from `stdout` and `stderr` channels. Is enabled by default if `o.verbosity` levels is >= 2 and option is not specified explicitly. This option is required by other "output" options that allows output customization.
+ * @param {Boolean} o.outputCollecting=0 Enables coullection of output into sinle string. Collects output into `o.output` property if enabled.
+ * @param {Boolean} o.outputAdditive=null Prints output during execution. Enabled by default if shell executes only single command and option is not specified explicitly.
+ * @param {Boolean} o.inputMirroring=1 Print complete input line before execution: path to command, arguments.
+ *
+ * @return {Object} Returns `wConsequence` instance in async mode. In sync mode returns options map. Options map contains not only input options, but child process descriptor, collected output, exit code and other useful info.
+ *
+ * @example //short way, command and arguments in one string
+ *
+ * let _ = require('wTools')
+ * _.include( 'wExternalFundamentals' )
+ * _.include( 'wConsequence' )
+ * _.include( 'wLogger' )
+ *
+ * let con = _.shell( 'node -v' );
+ *
+ * con.then( ( got ) =>
+ * {
+ *  console.log( 'ExitCode:', got.exitCode );
+ *  return got;
+ * })
+ *
+ * @example //command and arguments as options
+ *
+ * let _ = require('wTools')
+ * _.include( 'wExternalFundamentals' )
+ * _.include( 'wConsequence' )
+ * _.include( 'wLogger' )
+ *
+ * let con = _.shell({ execPath : 'node', args : [ '-v' ] });
+ *
+ * con.then( ( got ) =>
+ * {
+ *  console.log( 'ExitCode:', got.exitCode );
+ *  return got;
+ * })
+ *
+ * @function shell
+ * @memberof module:Tools/base/ExternalFundamentals.ExternalFundamentals
+ */
 
 function shell( o )
 {
@@ -683,6 +767,81 @@ shell.defaults =
 
 //
 
+
+/**
+ * @summary Generates shell routine that reuses provided option on each call.
+ * @description
+ * Routine vectorize `o.execPath` and `o.args` options. `wConsequence` instance `o.ready` can be reused to run several shells in a row, see examples.
+ * @param {Object} o Options map
+ *
+ * @return {Function} Returns shell routine with options saved as inner state.
+ *
+ * @example //single command execution
+ *
+ * let _ = require('wTools')
+ * _.include( 'wExternalFundamentals' )
+ * _.include( 'wConsequence' )
+ * _.include( 'wLogger' )
+ *
+ * let shell = _.sheller({ execPath : 'node' });
+ *
+ * let con = shell({ args : [ '-v' ] });
+ *
+ * con.then( ( got ) =>
+ * {
+ *  console.log( 'ExitCode:', got.exitCode );
+ *  return got;
+ * })
+ *
+ * @example //multiple commands execution with same args
+ *
+ * let _ = require('wTools')
+ * _.include( 'wExternalFundamentals' )
+ * _.include( 'wConsequence' )
+ * _.include( 'wLogger' )
+ *
+ * let shell = _.sheller({ args : [ '-v' ]});
+ *
+ * let con = shell({ execPath : [ 'node', 'npm' ] });
+ *
+ * con.then( ( got ) =>
+ * {
+ *  console.log( 'ExitCode:', got.exitCode );
+ *  return got;
+ * })
+ *
+ * @example
+ * //multiple commands execution with same args, using sinle consequence
+ * //second command will be executed when first is finished
+ *
+ * let _ = require('wTools')
+ * _.include( 'wExternalFundamentals' )
+ * _.include( 'wConsequence' )
+ * _.include( 'wLogger' )
+ *
+ * let ready = new _.Consequence().take( null );
+ * let shell = _.sheller({ args : [ '-v' ], ready : ready });
+ *
+ * shell({ execPath : 'node' });
+ *
+ * ready.then( ( got ) =>
+ * {
+ *  console.log( 'node ExitCode:', got.exitCode );
+ *  return got;
+ * })
+ *
+ * shell({ execPath : 'npm' });
+ *
+ * ready.then( ( got ) =>
+ * {
+ *  console.log( 'npm ExitCode:', got.exitCode );
+ *  return got;
+ * })
+ *
+ * @function sheller
+ * @memberof module:Tools/base/ExternalFundamentals.ExternalFundamentals
+ */
+
 function sheller( o0 )
 {
   _.assert( arguments.length === 0 || arguments.length === 1 );
@@ -742,6 +901,37 @@ function sheller( o0 )
 sheller.defaults = Object.create( shell.defaults );
 
 //
+
+/**
+ * @summary Short-cut for {@link module:Tools/base/ExternalFundamentals.ExternalFundamentals.shell shell} routine. Executes provided script in with `node` runtime.
+ * @description
+ * Expects path to javascript file in `o.execPath` option. Automatically prepends `node` prefix before script path `o.execPath`.
+ * @param {Object} o Options map, see {@link module:Tools/base/ExternalFundamentals.ExternalFundamentals.shell shell} for detailed info about options.
+ * @param {Boolean} o.passingThrough=0 Allows to pass arguments of parent process to the child process.
+ * @param {Boolean} o.maximumMemory=0 Allows `node` to use all available memory.
+ * @param {Boolean} o.applyingExitCode=1 Applies exit code to parent process.
+ * @param {String|Array} o.stdio='inherit' Prints all output through stdout,stderr channels of parent.
+ *
+ * @return {Object} Returns `wConsequence` instance in async mode. In sync mode returns options map. Options map contains not only input options, but child process descriptor, collected output, exit code and other useful info.
+ *
+ * @example
+ *
+ * let _ = require('wTools')
+ * _.include( 'wExternalFundamentals' )
+ * _.include( 'wConsequence' )
+ * _.include( 'wLogger' )
+ *
+ * let con = _.shellNode({ execPath : 'path/to/script.js' });
+ *
+ * con.then( ( got ) =>
+ * {
+ *  console.log( 'ExitCode:', got.exitCode );
+ *  return got;
+ * })
+ *
+ * @function shellNode
+ * @memberof module:Tools/base/ExternalFundamentals.ExternalFundamentals
+ */
 
 function shellNode( o )
 {
@@ -813,6 +1003,37 @@ defaults.stdio = 'inherit';
 
 //
 
+/**
+ * @summary Short-cut for {@link module:Tools/base/ExternalFundamentals.ExternalFundamentals.shellNode shellNode} routine.
+ * @description
+ * Passes arguments of parent process to the child and allows `node` to use all available memory.
+ * Expects path to javascript file in `o.execPath` option. Automatically prepends `node` prefix before script path `o.execPath`.
+ * @param {Object} o Options map, see {@link module:Tools/base/ExternalFundamentals.ExternalFundamentals.shell shell} for detailed info about options.
+ * @param {Boolean} o.passingThrough=1 Allows to pass arguments of parent process to the child process.
+ * @param {Boolean} o.maximumMemory=1 Allows `node` to use all available memory.
+ * @param {Boolean} o.applyingExitCode=1 Applies exit code to parent process.
+ *
+ * @return {Object} Returns `wConsequence` instance in async mode. In sync mode returns options map. Options map contains not only input options, but child process descriptor, collected output, exit code and other useful info.
+ *
+ * @example
+ *
+ * let _ = require('wTools')
+ * _.include( 'wExternalFundamentals' )
+ * _.include( 'wConsequence' )
+ * _.include( 'wLogger' )
+ *
+ * let con = _.shellNodePassingThrough({ execPath : 'path/to/script.js' });
+ *
+ * con.then( ( got ) =>
+ * {
+ *  console.log( 'ExitCode:', got.exitCode );
+ *  return got;
+ * })
+ *
+ * @function shellNodePassingThrough
+ * @memberof module:Tools/base/ExternalFundamentals.ExternalFundamentals
+ */
+
 function shellNodePassingThrough( o )
 {
 
@@ -835,6 +1056,30 @@ defaults.applyingExitCode = 1;
 // --
 // app
 // --
+
+/**
+ * @summary Parses arguments of current process.
+ * @description
+ * Supports processing of regular arguments, options( key:value pairs), commands and arrays.
+ * @param {Object} o Options map.
+ * @param {Boolean} o.keyValDelimeter=':' Delimeter for key:value pairs.
+ * @param {String} o.cmmandsDelimeter=';' Delimeneter for commands, for example : `.build something ; .exit `
+ * @param {Array} o.argv=null Arguments array. By default takes arguments from `process.argv`.
+ * @param {Boolean} o.caching=true Caches results for speedup next calls.
+ * @param {Boolean} o.parsingArrays=true Enables parsing of array from arguments.
+ *
+ * @return {Object} Returns map with parsed arguments.
+ *
+ * @example
+ *
+ * let _ = require('wTools')
+ * _.include( 'wExternalFundamentals' )
+ * let result = _.appArgs();
+ * console.log( result );
+ *
+ * @function appArgs
+ * @memberof module:Tools/base/ExternalFundamentals.ExternalFundamentals
+ */
 
 let _appArgsCache;
 let _appArgsInSamFormat = Object.create( null )
@@ -930,6 +1175,24 @@ function _appArgsInSamFormatBrowser( o )
 _appArgsInSamFormatBrowser.defaults = Object.create( _appArgsInSamFormat.defaults );
 
 //
+
+/**
+ * @summary Reads options from arguments of current process and copy them on target object `o.dst`.
+ * @description
+ * Checks if found options are expected using map `o.namesMap`. Throws an Error if arguments contain unknown option.
+ *
+ * @param {Object} o Options map.
+ * @param {Object} o.dst=null Target object.
+ * @param {Object} o.propertiesMap=null Map with parsed options. By default routine gets this map using {@link module:Tools/base/ExternalFundamentals.ExternalFundamentals.appArgs appArgs} routine.
+ * @param {Object} o.namesMap=null Map of expected options.
+ * @param {Object} o.removing=1 Removes copied options from result map `o.propertiesMap`.
+ * @param {Object} o.only=1 Check if all option are expected. Throws error if not.
+ *
+ * @return {Object} Returns map with parsed options.
+ *
+ * @function appArgsReadTo
+ * @memberof module:Tools/base/ExternalFundamentals.ExternalFundamentals
+ */
 
 function appArgsReadTo( o )
 {
