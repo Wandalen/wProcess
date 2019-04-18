@@ -13,8 +13,7 @@
 
 /**
  * Collection of routines to execute system commands, run shell, batches, launch external processes from JavaScript application.
-  @namespace ExternalFundamentals
-  @augments wTools
+  @namespace wTools(module:ExternalFundamentals)
   @memberof module:Tools/base/ExternalFundamentals
 */
 
@@ -113,7 +112,7 @@ _.assert( !!_realGlobal_ );
  * })
  *
  * @function shell
- * @memberof module:Tools/base/ExternalFundamentals.ExternalFundamentals
+ * @memberof module:Tools/base/ExternalFundamentals.wTools(module:ExternalFundamentals)
  */
 
 function shell( o )
@@ -839,7 +838,7 @@ shell.defaults =
  * })
  *
  * @function sheller
- * @memberof module:Tools/base/ExternalFundamentals.ExternalFundamentals
+ * @memberof module:Tools/base/ExternalFundamentals.wTools(module:ExternalFundamentals)
  */
 
 function sheller( o0 )
@@ -903,10 +902,10 @@ sheller.defaults = Object.create( shell.defaults );
 //
 
 /**
- * @summary Short-cut for {@link module:Tools/base/ExternalFundamentals.ExternalFundamentals.shell shell} routine. Executes provided script in with `node` runtime.
+ * @summary Short-cut for {@link module:Tools/base/ExternalFundamentals.wTools(module:ExternalFundamentals).shell shell} routine. Executes provided script in with `node` runtime.
  * @description
  * Expects path to javascript file in `o.execPath` option. Automatically prepends `node` prefix before script path `o.execPath`.
- * @param {Object} o Options map, see {@link module:Tools/base/ExternalFundamentals.ExternalFundamentals.shell shell} for detailed info about options.
+ * @param {Object} o Options map, see {@link module:Tools/base/ExternalFundamentals.wTools(module:ExternalFundamentals).shell shell} for detailed info about options.
  * @param {Boolean} o.passingThrough=0 Allows to pass arguments of parent process to the child process.
  * @param {Boolean} o.maximumMemory=0 Allows `node` to use all available memory.
  * @param {Boolean} o.applyingExitCode=1 Applies exit code to parent process.
@@ -930,7 +929,7 @@ sheller.defaults = Object.create( shell.defaults );
  * })
  *
  * @function shellNode
- * @memberof module:Tools/base/ExternalFundamentals.ExternalFundamentals
+ * @memberof module:Tools/base/ExternalFundamentals.wTools(module:ExternalFundamentals)
  */
 
 function shellNode( o )
@@ -1004,11 +1003,11 @@ defaults.stdio = 'inherit';
 //
 
 /**
- * @summary Short-cut for {@link module:Tools/base/ExternalFundamentals.ExternalFundamentals.shellNode shellNode} routine.
+ * @summary Short-cut for {@link module:Tools/base/ExternalFundamentals.wTools(module:ExternalFundamentals).shellNode shellNode} routine.
  * @description
  * Passes arguments of parent process to the child and allows `node` to use all available memory.
  * Expects path to javascript file in `o.execPath` option. Automatically prepends `node` prefix before script path `o.execPath`.
- * @param {Object} o Options map, see {@link module:Tools/base/ExternalFundamentals.ExternalFundamentals.shell shell} for detailed info about options.
+ * @param {Object} o Options map, see {@link module:Tools/base/ExternalFundamentals.wTools(module:ExternalFundamentals).shell shell} for detailed info about options.
  * @param {Boolean} o.passingThrough=1 Allows to pass arguments of parent process to the child process.
  * @param {Boolean} o.maximumMemory=1 Allows `node` to use all available memory.
  * @param {Boolean} o.applyingExitCode=1 Applies exit code to parent process.
@@ -1031,7 +1030,7 @@ defaults.stdio = 'inherit';
  * })
  *
  * @function shellNodePassingThrough
- * @memberof module:Tools/base/ExternalFundamentals.ExternalFundamentals
+ * @memberof module:Tools/base/ExternalFundamentals.wTools(module:ExternalFundamentals)
  */
 
 function shellNodePassingThrough( o )
@@ -1078,7 +1077,7 @@ defaults.applyingExitCode = 1;
  * console.log( result );
  *
  * @function appArgs
- * @memberof module:Tools/base/ExternalFundamentals.ExternalFundamentals
+ * @memberof module:Tools/base/ExternalFundamentals.wTools(module:ExternalFundamentals)
  */
 
 let _appArgsCache;
@@ -1183,7 +1182,7 @@ _appArgsInSamFormatBrowser.defaults = Object.create( _appArgsInSamFormat.default
  *
  * @param {Object} o Options map.
  * @param {Object} o.dst=null Target object.
- * @param {Object} o.propertiesMap=null Map with parsed options. By default routine gets this map using {@link module:Tools/base/ExternalFundamentals.ExternalFundamentals.appArgs appArgs} routine.
+ * @param {Object} o.propertiesMap=null Map with parsed options. By default routine gets this map using {@link module:Tools/base/ExternalFundamentals.wTools(module:ExternalFundamentals).appArgs appArgs} routine.
  * @param {Object} o.namesMap=null Map of expected options.
  * @param {Object} o.removing=1 Removes copied options from result map `o.propertiesMap`.
  * @param {Object} o.only=1 Check if all option are expected. Throws error if not.
@@ -1191,7 +1190,7 @@ _appArgsInSamFormatBrowser.defaults = Object.create( _appArgsInSamFormat.default
  * @return {Object} Returns map with parsed options.
  *
  * @function appArgsReadTo
- * @memberof module:Tools/base/ExternalFundamentals.ExternalFundamentals
+ * @memberof module:Tools/base/ExternalFundamentals.wTools(module:ExternalFundamentals)
  */
 
 function appArgsReadTo( o )
