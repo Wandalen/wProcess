@@ -141,7 +141,7 @@ function shell( o )
 
   /* */
 
-  if( _.arrayIs( o.execPath ) )
+  if( _.arrayIs( o.execPath ) || _.arrayIs( o.currentPath ) )
   return multiple();
 
   /*  */
@@ -171,12 +171,18 @@ function shell( o )
 
     if( o.execPath.length > 1 && o.outputAdditive === null )
     o.outputAdditive = 0;
+    
+    o.currentPath = o.currentPath || _.path.current();
 
     let prevReady = o.ready;
     let readies = [];
     let options = [];
-
-    for( let p = 0 ; p < o.execPath.length ; p++ )
+    
+    let execPath = _.arrayAs( o.execPath );
+    let currentPath = _.arrayAs( o.currentPath );
+    
+    for( let p = 0 ; p < execPath.length ; p++ )
+    for( let c = 0 ; c < currentPath.length ; c++ )
     {
 
       let currentReady = new _.Consequence();
@@ -193,7 +199,8 @@ function shell( o )
       }
 
       let o2 = _.mapExtend( null, o );
-      o2.execPath = o.execPath[ p ];
+      o2.execPath = execPath[ p ];
+      o2.currentPath = currentPath[ c ];
       o2.ready = currentReady;
       options.push( o2 );
       _.shell( o2 );
