@@ -1458,6 +1458,8 @@ function appRepairExitHandler()
 
 //
 
+let _onExitHandlers = [];
+
 function appRegisterExitHandler( routine )
 {
   _.assert( arguments.length === 1 );
@@ -1465,23 +1467,32 @@ function appRegisterExitHandler( routine )
 
   if( typeof process === 'undefined' )
   return;
-
-  process.once( 'exit', onExitHandler );
-  process.once( 'SIGINT', onExitHandler );
-  process.once( 'SIGTERM', onExitHandler );
+  
+  if( !_onExitHandlers.length )
+  {
+    process.once( 'exit', onExitHandler );
+    process.once( 'SIGINT', onExitHandler );
+    process.once( 'SIGTERM', onExitHandler );
+  }
+  
+  _onExitHandlers.push( routine );
 
   /*  */
 
   function onExitHandler( arg )
-  {
-    try
+  { 
+    _.each( _onExitHandlers, ( routine ) => 
     {
-      routine( arg );
-    }
-    catch( err )
-    {
-      _.errLogOnce( err );
-    }
+      try
+      { 
+        routine( arg );
+      }
+      catch( err )
+      {
+        _.errLogOnce( err );
+      }
+    })
+    
     process.removeListener( 'exit', onExitHandler );
     process.removeListener( 'SIGINT', onExitHandler );
     process.removeListener( 'SIGTERM', onExitHandler );
