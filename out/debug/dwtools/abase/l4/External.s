@@ -24,6 +24,7 @@ if( typeof module !== 'undefined' )
 
   _.include( 'wPathFundamentals' );
   _.include( 'wGdfStrategy' );
+  _.include( 'wConsequence' );
 
 }
 
