@@ -1400,116 +1400,116 @@ function shellCurrentPaths( test )
   var testAppCode = testApp.toString() + '\ntestApp();';
   var expectedOutput = __dirname + '\n'
   _.fileProvider.fileWrite( testAppPath, testAppCode );
-  
+
   let ready = new _.Consequence().take( null );
-  
-  let o2 = 
+
+  let o2 =
   {
     execPath : 'node ' + testAppPath,
     ready : ready,
     currentPath : [ routinePath, __dirname ],
-    stdio : 'pipe', 
+    stdio : 'pipe',
     outputCollecting : 1
   }
-  
+
   /* */
-  
+
   _.shell( _.mapSupplement( { mode : 'shell' }, o2 ) );
-  
-  ready.then( ( got ) => 
+
+  ready.then( ( got ) =>
   {
     let o1 = got[ 0 ];
     let o2 = got[ 1 ];
-    
+
     test.is( _.strHas( o1.output, _.path.nativize( routinePath ) ) );
     test.identical( o1.exitCode, 0 );
-    
+
     test.is( _.strHas( o2.output, __dirname ) );
     test.identical( o2.exitCode, 0 );
-    
+
     return got;
   })
-  
+
   /* */
-  
+
   _.shell( _.mapSupplement( { mode : 'spawn' }, o2 ) );
-  
-  ready.then( ( got ) => 
+
+  ready.then( ( got ) =>
   {
     let o1 = got[ 0 ];
     let o2 = got[ 1 ];
-    
+
     test.is( _.strHas( o1.output, _.path.nativize( routinePath ) ) );
     test.identical( o1.exitCode, 0 );
-    
+
     test.is( _.strHas( o2.output, __dirname ) );
     test.identical( o2.exitCode, 0 );
-    
+
     return got;
   })
-  
+
   /* */
-  
+
   _.shell( _.mapSupplement( { mode : 'exec' }, o2 ) );
-  
-  ready.then( ( got ) => 
+
+  ready.then( ( got ) =>
   {
     let o1 = got[ 0 ];
     let o2 = got[ 1 ];
-    
+
     test.is( _.strHas( o1.output, _.path.nativize( routinePath ) ) );
     test.identical( o1.exitCode, 0 );
-    
+
     test.is( _.strHas( o2.output, __dirname ) );
     test.identical( o2.exitCode, 0 );
-    
+
     return got;
   })
-  
+
   /* */
-  
+
   _.shell( _.mapSupplement( { mode : 'fork', execPath : testAppPath }, o2 ) );
-  
-  ready.then( ( got ) => 
+
+  ready.then( ( got ) =>
   {
     let o1 = got[ 0 ];
     let o2 = got[ 1 ];
-    
+
     test.is( _.strHas( o1.output, _.path.nativize( routinePath ) ) );
     test.identical( o1.exitCode, 0 );
-    
+
     test.is( _.strHas( o2.output, __dirname ) );
     test.identical( o2.exitCode, 0 );
-    
+
     return got;
   })
-  
+
   /*  */
-  
+
   _.shell( _.mapSupplement( { mode : 'spawn', execPath : [ 'node ' + testAppPath, 'node ' + testAppPath ] }, o2 ) );
 
-  ready.then( ( got ) => 
+  ready.then( ( got ) =>
   {
     let o1 = got[ 0 ];
     let o2 = got[ 1 ];
     let o3 = got[ 2 ];
     let o4 = got[ 3 ];
-    
+
     test.is( _.strHas( o1.output, _.path.nativize( routinePath ) ) );
     test.identical( o1.exitCode, 0 );
-    
+
     test.is( _.strHas( o2.output, __dirname ) );
     test.identical( o2.exitCode, 0 );
-    
+
     test.is( _.strHas( o3.output, _.path.nativize( routinePath ) ) );
     test.identical( o3.exitCode, 0 );
-    
+
     test.is( _.strHas( o4.output, __dirname ) );
     test.identical( o4.exitCode, 0 );
-    
+
     return got;
   })
- 
+
   return ready;
 }
 
@@ -1517,7 +1517,8 @@ function shellCurrentPaths( test )
 
 /*
 
-Test routine shellFork causes.
+  qqq : investigate please
+  test routine shellFork causes
 
  1: node::DecodeWrite
  2: node::Start
@@ -1532,7 +1533,9 @@ Test routine shellFork causes.
 11: v8_inspector::protocol::Runtime::API::StackTrace::fromJSONString
 12: BaseThreadInitThunk
 13: RtlUserThreadStart
+
 */
+
 
 function shellFork( test )
 {
@@ -1890,6 +1893,54 @@ function shellFork( test )
 }
 
 shellFork.timeOut = 30000;
+
+//
+
+function shellWithoutExecPath( test )
+{
+  let context = this;
+  let counter = 0;
+  let time = 0;
+  let routinePath = _.path.join( context.testSuitePath, test.name );
+  let testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  let filePath = _.fileProvider.path.nativize( _.path.join( routinePath, 'file.txt' ) );
+  let ready = _.Consequence().take( null );
+
+  let testAppCode = `let filePath = '${_.strEscape( filePath )}';\n` + context.testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+
+  /* - */
+
+  ready.then( ( arg ) =>
+  {
+    test.case = 'single';
+    time = _.timeNow();
+    return null;
+  })
+
+  let singleOption =
+  {
+    args : [ 'node', testAppPath, '1000' ],
+    ready : ready,
+    verbosity : 3,
+    outputCollecting : 1,
+  }
+
+  _.shell( singleOption )
+  .then( ( arg ) =>
+  {
+    test.identical( arg.exitCode, 0 );
+    test.is( singleOption === arg );
+    test.is( _.strHas( arg.output, 'begin 1000' ) );
+    test.is( _.strHas( arg.output, 'end 1000' ) );
+    test.identical( _.fileProvider.fileRead( filePath ), 'written by 1000' );
+    _.fileProvider.fileDelete( filePath );
+    counter += 1;
+    return null;
+  });
+
+  return ready;
+}
 
 //
 
@@ -3662,7 +3713,7 @@ var Proto =
 
   name : 'Tools/base/l4/ExternalFundamentals',
   silencing : 1,
-
+  routineTimeOut : 60000,
   onSuiteBegin : testDirMake,
   onSuiteEnd : testDirClean,
 
@@ -3687,26 +3738,7 @@ var Proto =
     shellCurrentPath,
     shellCurrentPaths,
     shellFork,
-
-/*
-  qqq : investigate please
-  test routine shellFort causes
-
- 1: node::DecodeWrite
- 2: node::Start
- 3: v8::RetainedObjectInfo::~RetainedObjectInfo
- 4: uv_loop_size
- 5: uv_disable_stdio_inheritance
- 6: uv_dlerror
- 7: uv_run
- 8: node::CreatePlatform
- 9: node::CreatePlatform
-10: node::Start
-11: v8_inspector::protocol::Runtime::API::StackTrace::fromJSONString
-12: BaseThreadInitThunk
-13: RtlUserThreadStart
-
-*/
+    shellWithoutExecPath,
 
     shellErrorHadling,
     shellNode,

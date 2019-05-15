@@ -124,9 +124,10 @@ function shell( o )
 
   _.routineOptions( shell, o );
   _.assert( arguments.length === 1, 'Expects single argument' );
-  _.assert( o.args === null || _.arrayIs( o.args ) );
   _.assert( _.arrayHas( [ 'fork', 'exec', 'spawn', 'shell' ], o.mode ) );
-  _.assert( _.strIs( o.execPath ) || _.strsAreAll( o.execPath ), 'Expects string or strings {-o.execPath-}, but got', _.strType( o.execPath ) );
+  _.assert( !!o.args || !!o.execPath, 'Expects {-args-} either {-execPath-}' )
+  _.assert( o.args === null || _.arrayIs( o.args ) );
+  _.assert( o.execPath === null || _.strIs( o.execPath ) || _.strsAreAll( o.execPath ), 'Expects string or strings {-o.execPath-}, but got', _.strType( o.execPath ) );
   _.assert( o.timeOut === null || _.numberIs( o.timeOut ), 'Expects null or number {-o.timeOut-}, but got', _.strType( o.timeOut ) );
 
   let state = 0;
@@ -137,8 +138,6 @@ function shell( o )
   let decoratedErrorOutput = '';
 
   o.ready = o.ready || new _.Consequence().take( null );
-  // if( o.execPath.length === 1 )
-  // o.execPath = o.execPath[ 0 ];
 
   /* */
 
@@ -170,18 +169,18 @@ function shell( o )
   function multiple()
   {
 
-    if( o.execPath.length > 1 && o.outputAdditive === null )
+    if( _.arrayIs( o.execPath ) && o.execPath.length > 1 && o.concurrent && o.outputAdditive === null )
     o.outputAdditive = 0;
-    
+
     o.currentPath = o.currentPath || _.path.current();
 
     let prevReady = o.ready;
     let readies = [];
     let options = [];
-    
+
     let execPath = _.arrayAs( o.execPath );
     let currentPath = _.arrayAs( o.currentPath );
-    
+
     for( let p = 0 ; p < execPath.length ; p++ )
     for( let c = 0 ; c < currentPath.length ; c++ )
     {
@@ -258,6 +257,7 @@ function shell( o )
       else
       o.ready.error( _.errLogOnce( err ) );
     }
+
   }
 
   /* */
@@ -289,6 +289,13 @@ function shell( o )
 
   function prepare()
   {
+
+    if( o.execPath === null )
+    {
+      o.args = _.arrayAs( o.args );
+      o.execPath = o.args[ 0 ] + ' ' + argsJoin( o.args.slice( 1 ) );
+      o.args = null;
+    }
 
     if( o.outputAdditive === null )
     o.outputAdditive = true;
@@ -380,21 +387,7 @@ function shell( o )
 
     /* launch */
 
-    // try
-    // {
-
-      launchAct();
-
-    // }
-    // catch( err )
-    // {
-    //   debugger
-    //   appExitCode( -1 );
-    //   if( o.sync && !o.deasync )
-    //   throw _.errLogOnce( err );
-    //   else
-    //   return o.ready.error( _.errLogOnce( err ) );
-    // }
+    launchAct();
 
     /* time out */
 
@@ -477,8 +470,8 @@ function shell( o )
 
       o2.windowsVerbatimArguments = true;
 
-      if( o.args && o.args.length )
-      arg2 = arg2 + ' ' + '"' + o.args.join( '" "' ) + '"';
+      if( o.args )
+      arg2 = arg2 + ' ' + argsJoin( o.args );
 
       if( o.sync && !o.deasync )
       o.process = ChildProcess.spawnSync( appPath, [ arg1, arg2 ], o2 );
@@ -488,6 +481,14 @@ function shell( o )
     }
     else _.assert( 0, 'Unknown mode', _.strQuote( o.mode ), 'to shell path', _.strQuote( o.paths ) );
 
+  }
+
+  /* */
+
+  function argsJoin( args )
+  {
+    args = _.arrayAs( args );
+    return '"' + args.join( '" "' ) + '"';
   }
 
   /* */
@@ -1138,7 +1139,6 @@ function _appArgsInSamFormatNodejs( o )
   result.scriptString = result.scriptArgs.join( ' ' );
   result.scriptString = result.scriptString.trim();
 
-  // debugger;
   let r = _.strRequestParse
   ({
     src : result.scriptString,
@@ -1146,7 +1146,6 @@ function _appArgsInSamFormatNodejs( o )
     cmmandsDelimeter : o.cmmandsDelimeter,
     parsingArrays : o.parsingArrays,
   });
-  // debugger;
 
   _.mapExtend( result, r );
 
@@ -1390,6 +1389,11 @@ function appExitWithBeep( exitCode )
 
 //
 
+/*
+qqq : use maybe appRepairExitHandler instead of appRegisterExitHandler?
+qqq : investigate difference between appRepairExitHandler and appRegisterExitHandler
+*/
+
 let appRepairExitHandlerDone = 0;
 function appRepairExitHandler()
 {
@@ -1467,24 +1471,24 @@ function appRegisterExitHandler( routine )
 
   if( typeof process === 'undefined' )
   return;
-  
+
   if( !_onExitHandlers.length )
   {
     process.once( 'exit', onExitHandler );
     process.once( 'SIGINT', onExitHandler );
     process.once( 'SIGTERM', onExitHandler );
   }
-  
+
   _onExitHandlers.push( routine );
 
   /*  */
 
   function onExitHandler( arg )
-  { 
-    _.each( _onExitHandlers, ( routine ) => 
+  {
+    _.each( _onExitHandlers, ( routine ) =>
     {
       try
-      { 
+      {
         routine( arg );
       }
       catch( err )
@@ -1492,7 +1496,7 @@ function appRegisterExitHandler( routine )
         _.errLogOnce( err );
       }
     })
-    
+
     process.removeListener( 'exit', onExitHandler );
     process.removeListener( 'SIGINT', onExitHandler );
     process.removeListener( 'SIGTERM', onExitHandler );
