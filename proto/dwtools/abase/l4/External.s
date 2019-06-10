@@ -148,7 +148,7 @@ function shell( o )
 
   if( o.sync && !o.deasync )
   {
-    let arg = o.ready.toResource();
+    let arg = o.ready.sync();
     if( _.errIs( arg ) )
     throw _.err( arg );
     single();
