@@ -305,6 +305,84 @@ function appArgs( test )
     maps : [ { v : [ 1,2,3 ] }, { debug : 1 }, {} ],
   }
   test.contains( got, expected );
+  
+  /* */
+  
+  test.case = 'windows native path as option, no quotes'
+  var argv = [];
+  var got = _.appArgs({ argv : [ 'interpreter', 'main.js', 'path:D:\\path\\to\\file' ], caching : 0 });
+  var expected =
+  {
+    interpreterPath : 'interpreter',
+    mainPath : 'main.js',
+    interpreterArgs : [],
+    keyValDelimeter : ':',
+    cmmandsDelimeter : ';',
+    subject : '',
+    map : { path : '', D : '\\path\\to\\file' },
+    scriptArgs : [ 'path:D:\\path\\to\\file' ],
+    scriptString : 'path:D:\\path\\to\\file',
+    subjects : [ '' ],
+    maps : [ { path : '', D : '\\path\\to\\file' } ],
+  }
+  test.contains( got, expected );
+  
+  test.case = 'windows native path as option, with quotes'
+  var argv = [];
+  var got = _.appArgs({ argv : [ 'interpreter', 'main.js', 'path:"D:\\path\\to\\file"' ], caching : 0 });
+  var expected =
+  {
+    interpreterPath : 'interpreter',
+    mainPath : 'main.js',
+    interpreterArgs : [],
+    keyValDelimeter : ':',
+    cmmandsDelimeter : ';',
+    subject : '',
+    map : { path : 'D:\\path\\to\\file' },
+    scriptArgs : [ 'path:"D:\\path\\to\\file"' ],
+    scriptString : 'path:"D:\\path\\to\\file"',
+    subjects : [ '' ],
+    maps : [ { path : 'D:\\path\\to\\file' } ],
+  }
+  test.contains( got, expected );
+  
+  test.case = 'number option with quotes'
+  var argv = [];
+  var got = _.appArgs({ argv : [ 'interpreter', 'main.js', 'v:"10"' ], caching : 0 });
+  var expected =
+  {
+    interpreterPath : 'interpreter',
+    mainPath : 'main.js',
+    interpreterArgs : [],
+    keyValDelimeter : ':',
+    cmmandsDelimeter : ';',
+    subject : '',
+    map : { v : 10 },
+    scriptArgs : [ 'v:"10"' ],
+    scriptString : 'v:"10"',
+    subjects : [ '' ],
+    maps : [ { v : 10 } ],
+  }
+  test.contains( got, expected );
+  
+  test.case = 'string option with quotes'
+  var argv = [];
+  var got = _.appArgs({ argv : [ 'interpreter', 'main.js', 'str:"abc"' ], caching : 0 });
+  var expected =
+  {
+    interpreterPath : 'interpreter',
+    mainPath : 'main.js',
+    interpreterArgs : [],
+    keyValDelimeter : ':',
+    cmmandsDelimeter : ';',
+    subject : '',
+    map : { str : 'abc' },
+    scriptArgs : [ 'str:"abc"' ],
+    scriptString : 'str:"abc"',
+    subjects : [ '' ],
+    maps : [ { str : 'abc' } ],
+  }
+  test.contains( got, expected );
 
 }
 
