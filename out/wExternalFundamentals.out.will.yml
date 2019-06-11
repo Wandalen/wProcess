@@ -37,6 +37,10 @@ path:
   remote:
     criterion:
       predefined: 1
+  module.common:
+    path: out/wExternalFundamentals.out
+    criterion:
+      predefined: 1
   in:
     path: ..
   temp:
