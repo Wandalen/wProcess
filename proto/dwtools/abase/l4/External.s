@@ -126,7 +126,7 @@ function shell( o )
   _.assert( arguments.length === 1, 'Expects single argument' );
   _.assert( _.arrayHas( [ 'fork', 'exec', 'spawn', 'shell' ], o.mode ) );
   _.assert( !!o.args || !!o.execPath, 'Expects {-args-} either {-execPath-}' )
-  _.assert( o.args === null || _.arrayIs( o.args ) );
+  _.assert( o.args === null || _.arrayIs( o.args ) || _.strIs( o.args ) );
   _.assert( o.execPath === null || _.strIs( o.execPath ) || _.strsAreAll( o.execPath ), 'Expects string or strings {-o.execPath-}, but got', _.strType( o.execPath ) );
   _.assert( o.timeOut === null || _.numberIs( o.timeOut ), 'Expects null or number {-o.timeOut-}, but got', _.strType( o.timeOut ) );
 
@@ -290,17 +290,29 @@ function shell( o )
   function prepare()
   {
 
+    if( _.strIs( o.args ) )
+    o.args = [ o.args ];
+
     if( o.execPath === null )
     {
       o.args = _.arrayAs( o.args );
-      o.execPath = o.args[ 0 ] + ' ' + argsJoin( o.args.slice( 1 ) );
+      let l = o.args[ 0 ];
+      let r = o.args.slice( 1 );
+      if( r.length )
+      o.execPath = l + ' ' + argsJoin( r );
+      else
+      {
+        // qqq : cover the case ( args is string ) for both routines shell and sheller
+        o.execPath = l;
+      }
       o.args = null;
     }
 
     if( o.outputAdditive === null )
     o.outputAdditive = true;
     o.outputAdditive = !!o.outputAdditive;
-    o.currentPath = o.currentPath || _.path.current();
+    // o.currentPath = o.currentPath || _.path.current();
+    o.currentPath = _.path.resolve( o.currentPath || '.' );
     o.logger = o.logger || _global_.logger;
 
     /* verbosity */
@@ -335,7 +347,11 @@ function shell( o )
 
     /* out options */
 
-    o.fullPath = _.strConcat( _.arrayAppendArray( [ o.execPath ], o.args || [] ) );
+    if( o.args )
+    o.fullExecPath = _.strConcat( _.arrayAppendArray( [ o.execPath ], o.args || [] ) );
+    else
+    o.fullExecPath = _.strConcat([ o.execPath ]);
+
     o.exitCode = null;
     o.exitSignal = null;
     o.process = null;
@@ -354,7 +370,7 @@ function shell( o )
     }
     catch( err )
     {
-      if( o.verbosity )
+      if( o.verbosity >= 2 )
       _.errLogOnce( err );
     }
 
@@ -375,7 +391,15 @@ function shell( o )
         let prefix = ' > ';
         if( !o.outputGray )
         prefix = _.color.strFormat( prefix, { fg : 'bright white' } );
-        log( prefix + o.fullPath );
+        log( prefix + o.fullExecPath );
+      }
+
+      if( o.verbosity >= 3 )
+      {
+        let prefix = '   at ';
+        if( !o.outputGray )
+        prefix = _.color.strFormat( prefix, { fg : 'bright white' } );
+        log( prefix + o.currentPath );
       }
 
     }
@@ -582,7 +606,7 @@ function shell( o )
   function infoGet()
   {
     let result = '';
-    result += 'Launched as ' + _.strQuote( o.fullPath ) + '\n';
+    result += 'Launched as ' + _.strQuote( o.fullExecPath ) + '\n';
     result += 'Launched at ' + _.strQuote( o.currentPath ) + '\n';
     if( stderrOutput.length )
     result += '\n -> Stderr' + '\n' + _.strIndentation( stderrOutput, ' -  ' ) + '\n -< Stderr'; // !!! : implement error's collectors
@@ -599,7 +623,7 @@ function shell( o )
 
     if( o.verbosity >= 5 )
     {
-      log( 'Process returned error code ' + exitCode );
+      log( ' < Process returned error code ' + exitCode );
       if( exitCode )
       {
         log( infoGet() );
