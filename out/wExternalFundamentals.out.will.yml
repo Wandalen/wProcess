@@ -31,14 +31,14 @@ path:
     path: out
     criterion:
       predefined: 1
+  module.common:
+    path: out/wExternalFundamentals.out
+    criterion:
+      predefined: 1
   local:
     criterion:
       predefined: 1
   remote:
-    criterion:
-      predefined: 1
-  module.common:
-    path: out/wExternalFundamentals.out
     criterion:
       predefined: 1
   in:
