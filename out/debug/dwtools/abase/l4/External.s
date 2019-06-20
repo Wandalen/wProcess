@@ -1084,6 +1084,7 @@ var defaults = shellNodePassingThrough.defaults = Object.create( shellNode.defau
 defaults.passingThrough = 1;
 defaults.maximumMemory = 1;
 defaults.applyingExitCode = 1;
+defaults.throwingExitCode = 0;
 
 // --
 // app
