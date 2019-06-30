@@ -39,6 +39,30 @@ _.assert( !!_realGlobal_ );
 // exec
 // --
 
+function shell_pre( routine, args )
+{
+  let o;
+
+  if( _.strIs( args[ 0 ] ) )
+  o = { execPath : args[ 0 ] };
+  else
+  o = args[ 0 ];
+
+  o = _.routineOptions( routine, o );
+
+  _.assert( arguments.length === 2 );
+  _.assert( args.length === 1, 'Expects single argument' );
+  _.assert( _.arrayHas( [ 'fork', 'exec', 'spawn', 'shell' ], o.mode ) );
+  _.assert( !!o.args || !!o.execPath, 'Expects {-args-} either {-execPath-}' )
+  _.assert( o.args === null || _.arrayIs( o.args ) || _.strIs( o.args ) );
+  _.assert( o.execPath === null || _.strIs( o.execPath ) || _.strsAreAll( o.execPath ), 'Expects string or strings {-o.execPath-}, but got', _.strType( o.execPath ) );
+  _.assert( o.timeOut === null || _.numberIs( o.timeOut ), 'Expects null or number {-o.timeOut-}, but got', _.strType( o.timeOut ) );
+
+  return o;
+}
+
+//
+
 /**
  * @summary Executes command in a controled child process.
  *
@@ -116,13 +140,13 @@ _.assert( !!_realGlobal_ );
  * @memberof module:Tools/base/ExternalFundamentals.Tools( module::ExternalFundamentals )
  */
 
-function shell( o )
+function shell_body( o )
 {
 
-  if( _.strIs( o ) )
-  o = { execPath : o };
+  // if( _.strIs( o ) )
+  // o = { execPath : o };
 
-  _.routineOptions( shell, o );
+  _.assertRoutineOptions( shell, arguments );
   _.assert( arguments.length === 1, 'Expects single argument' );
   _.assert( _.arrayHas( [ 'fork', 'exec', 'spawn', 'shell' ], o.mode ) );
   _.assert( !!o.args || !!o.execPath, 'Expects {-args-} either {-execPath-}' )
@@ -760,7 +784,7 @@ function shell( o )
 
 }
 
-shell.defaults =
+shell_body.defaults =
 {
 
   execPath : null,
@@ -797,8 +821,190 @@ shell.defaults =
 
 }
 
+let shell = _.routineFromPreAndBody( shell_pre, shell_body );
+
 //
 
+// function shellPassingThrough( o )
+// {
+//   if( _.strIs( o ) )
+//   o = { execPath : o }
+//   _.routineOptions( shellPassingThrough, o );
+//   _.assert( arguments.length === 1, 'Expects single argument' );
+//   let result = _.shell( o );
+//   return result;
+// }
+
+let shellPassingThrough = _.routineFromPreAndBody( shell_pre, shell_body );
+
+var defaults = shellPassingThrough.defaults;
+
+defaults.passingThrough = 1;
+defaults.applyingExitCode = 1;
+defaults.throwingExitCode = 0;
+defaults.outputPiping = 1;
+defaults.stdio = 'inherit';
+
+//
+
+/**
+ * @summary Short-cut for {@link module:Tools/base/ExternalFundamentals.Tools( module::ExternalFundamentals ).shell shell} routine. Executes provided script in with `node` runtime.
+ * @description
+ * Expects path to javascript file in `o.execPath` option. Automatically prepends `node` prefix before script path `o.execPath`.
+ * @param {Object} o Options map, see {@link module:Tools/base/ExternalFundamentals.Tools( module::ExternalFundamentals ).shell shell} for detailed info about options.
+ * @param {Boolean} o.passingThrough=0 Allows to pass arguments of parent process to the child process.
+ * @param {Boolean} o.maximumMemory=0 Allows `node` to use all available memory.
+ * @param {Boolean} o.applyingExitCode=1 Applies exit code to parent process.
+ * @param {String|Array} o.stdio='inherit' Prints all output through stdout,stderr channels of parent.
+ *
+ * @return {Object} Returns `wConsequence` instance in async mode. In sync mode returns options map. Options map contains not only input options, but child process descriptor, collected output, exit code and other useful info.
+ *
+ * @example
+ *
+ * let _ = require('wTools')
+ * _.include( 'wExternalFundamentals' )
+ * _.include( 'wConsequence' )
+ * _.include( 'wLogger' )
+ *
+ * let con = _.shellNode({ execPath : 'path/to/script.js' });
+ *
+ * con.then( ( got ) =>
+ * {
+ *  console.log( 'ExitCode:', got.exitCode );
+ *  return got;
+ * })
+ *
+ * @function shellNode
+ * @memberof module:Tools/base/ExternalFundamentals.Tools( module::ExternalFundamentals )
+ */
+
+function shellNode_body( o )
+{
+
+  if( !System )
+  System = require( 'os' );
+
+  _.include( 'wPathFundamentals' );
+  _.include( 'wFiles' );
+
+  // if( _.strIs( o ) )
+  // o = { execPath : o }
+
+  _.assertRoutineOptions( shellNode, o );
+  _.assert( _.strIs( o.execPath ) );
+  _.assert( !o.code );
+  // _.accessor.forbid( o, 'child' );
+  // _.accessor.forbid( o, 'returnCode' );
+  _.assert( arguments.length === 1, 'Expects single argument' );
+
+  /*
+  1024*1024 for megabytes
+  1.4 factor found empirically for windows
+      implementation of nodejs for other OSs could be able to use more memory
+  */
+
+  let interpreterArgs = '';
+  if( o.maximumMemory )
+  {
+    let totalmem = System.totalmem();
+    if( o.verbosity )
+    logger.log( 'System.totalmem()', _.strMetricFormatBytes( totalmem ) );
+    if( totalmem < 1024*1024*1024 )
+    Math.floor( ( totalmem / ( 1024*1024*1.4 ) - 1 ) / 256 ) * 256;
+    else
+    Math.floor( ( totalmem / ( 1024*1024*1.1 ) - 1 ) / 256 ) * 256;
+    interpreterArgs = '--expose-gc --stack-trace-limit=999 --max_old_space_size=' + totalmem;
+  }
+
+  let path = _.fileProvider.path.nativize( o.execPath );
+  if( o.mode === 'fork' )
+  o.interpreterArgs = interpreterArgs;
+  else
+  path = _.strConcat([ 'node', interpreterArgs, path ]);
+
+  let shellOptions = _.mapOnly( o, _.shell.defaults );
+  shellOptions.execPath = path;
+
+  let result = _.shell( shellOptions )
+  .got( function( err, arg )
+  {
+    o.exitCode = shellOptions.exitCode;
+    o.exitSignal = shellOptions.exitSignal;
+    this.take( err, arg );
+  });
+
+  o.ready = shellOptions.ready;
+  o.process = shellOptions.process;
+
+  return result;
+}
+
+var defaults = shellNode_body.defaults = Object.create( shell.defaults );
+
+defaults.passingThrough = 0;
+defaults.maximumMemory = 0;
+defaults.applyingExitCode = 1;
+defaults.stdio = 'inherit';
+
+let shellNode = _.routineFromPreAndBody( shell_pre, shellNode_body );
+
+//
+
+/**
+ * @summary Short-cut for {@link module:Tools/base/ExternalFundamentals.Tools( module::ExternalFundamentals ).shellNode shellNode} routine.
+ * @description
+ * Passes arguments of parent process to the child and allows `node` to use all available memory.
+ * Expects path to javascript file in `o.execPath` option. Automatically prepends `node` prefix before script path `o.execPath`.
+ * @param {Object} o Options map, see {@link module:Tools/base/ExternalFundamentals.Tools( module::ExternalFundamentals ).shell shell} for detailed info about options.
+ * @param {Boolean} o.passingThrough=1 Allows to pass arguments of parent process to the child process.
+ * @param {Boolean} o.maximumMemory=1 Allows `node` to use all available memory.
+ * @param {Boolean} o.applyingExitCode=1 Applies exit code to parent process.
+ *
+ * @return {Object} Returns `wConsequence` instance in async mode. In sync mode returns options map. Options map contains not only input options, but child process descriptor, collected output, exit code and other useful info.
+ *
+ * @example
+ *
+ * let _ = require('wTools')
+ * _.include( 'wExternalFundamentals' )
+ * _.include( 'wConsequence' )
+ * _.include( 'wLogger' )
+ *
+ * let con = _.shellNodePassingThrough({ execPath : 'path/to/script.js' });
+ *
+ * con.then( ( got ) =>
+ * {
+ *  console.log( 'ExitCode:', got.exitCode );
+ *  return got;
+ * })
+ *
+ * @function shellNodePassingThrough
+ * @memberof module:Tools/base/ExternalFundamentals.Tools( module::ExternalFundamentals )
+ */
+
+// function shellNodePassingThrough( o )
+// {
+//
+//   if( _.strIs( o ) )
+//   o = { execPath : o }
+//
+//   _.routineOptions( shellNodePassingThrough, o );
+//   _.assert( arguments.length === 1, 'Expects single argument' );
+//   let result = _.shellNode( o );
+//
+//   return result;
+// }
+
+let shellNodePassingThrough = _.routineFromPreAndBody( shell_pre, shellNode.body );
+
+var defaults = shellNodePassingThrough.defaults;
+
+defaults.passingThrough = 1;
+defaults.maximumMemory = 1;
+defaults.applyingExitCode = 1;
+defaults.throwingExitCode = 0;
+defaults.outputPiping = 1;
+
+//
 
 /**
  * @summary Generates shell routine that reuses provided option on each call.
@@ -852,7 +1058,7 @@ shell.defaults =
  * _.include( 'wLogger' )
  *
  * let ready = new _.Consequence().take( null );
- * let shell = _.sheller({ args : [ '-v' ], ready : ready });
+ * let shell = _.sheller({ args : [ '-v' ], ready });
  *
  * shell({ execPath : 'node' });
  *
@@ -931,160 +1137,6 @@ function sheller( o0 )
 }
 
 sheller.defaults = Object.create( shell.defaults );
-
-//
-
-/**
- * @summary Short-cut for {@link module:Tools/base/ExternalFundamentals.Tools( module::ExternalFundamentals ).shell shell} routine. Executes provided script in with `node` runtime.
- * @description
- * Expects path to javascript file in `o.execPath` option. Automatically prepends `node` prefix before script path `o.execPath`.
- * @param {Object} o Options map, see {@link module:Tools/base/ExternalFundamentals.Tools( module::ExternalFundamentals ).shell shell} for detailed info about options.
- * @param {Boolean} o.passingThrough=0 Allows to pass arguments of parent process to the child process.
- * @param {Boolean} o.maximumMemory=0 Allows `node` to use all available memory.
- * @param {Boolean} o.applyingExitCode=1 Applies exit code to parent process.
- * @param {String|Array} o.stdio='inherit' Prints all output through stdout,stderr channels of parent.
- *
- * @return {Object} Returns `wConsequence` instance in async mode. In sync mode returns options map. Options map contains not only input options, but child process descriptor, collected output, exit code and other useful info.
- *
- * @example
- *
- * let _ = require('wTools')
- * _.include( 'wExternalFundamentals' )
- * _.include( 'wConsequence' )
- * _.include( 'wLogger' )
- *
- * let con = _.shellNode({ execPath : 'path/to/script.js' });
- *
- * con.then( ( got ) =>
- * {
- *  console.log( 'ExitCode:', got.exitCode );
- *  return got;
- * })
- *
- * @function shellNode
- * @memberof module:Tools/base/ExternalFundamentals.Tools( module::ExternalFundamentals )
- */
-
-function shellNode( o )
-{
-
-  if( !System )
-  System = require( 'os' );
-
-  _.include( 'wPathFundamentals' );
-  _.include( 'wFiles' );
-
-  if( _.strIs( o ) )
-  o = { execPath : o }
-
-  _.routineOptions( shellNode, o );
-  _.assert( _.strIs( o.execPath ) );
-  _.assert( !o.code );
-  _.accessor.forbid( o, 'child' );
-  _.accessor.forbid( o, 'returnCode' );
-  _.assert( arguments.length === 1, 'Expects single argument' );
-
-  /*
-  1024*1024 for megabytes
-  1.4 factor found empirically for windows
-      implementation of nodejs for other OSs could be able to use more memory
-  */
-
-  let interpreterArgs = '';
-  if( o.maximumMemory )
-  {
-    let totalmem = System.totalmem();
-    if( o.verbosity )
-    logger.log( 'System.totalmem()', _.strMetricFormatBytes( totalmem ) );
-    if( totalmem < 1024*1024*1024 )
-    Math.floor( ( totalmem / ( 1024*1024*1.4 ) - 1 ) / 256 ) * 256;
-    else
-    Math.floor( ( totalmem / ( 1024*1024*1.1 ) - 1 ) / 256 ) * 256;
-    interpreterArgs = '--expose-gc --stack-trace-limit=999 --max_old_space_size=' + totalmem;
-  }
-
-  let path = _.fileProvider.path.nativize( o.execPath );
-  if( o.mode === 'fork' )
-  o.interpreterArgs = interpreterArgs;
-  else
-  path = _.strConcat([ 'node', interpreterArgs, path ]);
-
-  let shellOptions = _.mapOnly( o, _.shell.defaults );
-  shellOptions.execPath = path;
-
-  let result = _.shell( shellOptions )
-  .got( function( err, arg )
-  {
-    o.exitCode = shellOptions.exitCode;
-    o.exitSignal = shellOptions.exitSignal;
-    this.take( err, arg );
-  });
-
-  o.ready = shellOptions.ready;
-  o.process = shellOptions.process;
-
-  return result;
-}
-
-var defaults = shellNode.defaults = Object.create( shell.defaults );
-
-defaults.passingThrough = 0;
-defaults.maximumMemory = 0;
-defaults.applyingExitCode = 1;
-defaults.stdio = 'inherit';
-
-//
-
-/**
- * @summary Short-cut for {@link module:Tools/base/ExternalFundamentals.Tools( module::ExternalFundamentals ).shellNode shellNode} routine.
- * @description
- * Passes arguments of parent process to the child and allows `node` to use all available memory.
- * Expects path to javascript file in `o.execPath` option. Automatically prepends `node` prefix before script path `o.execPath`.
- * @param {Object} o Options map, see {@link module:Tools/base/ExternalFundamentals.Tools( module::ExternalFundamentals ).shell shell} for detailed info about options.
- * @param {Boolean} o.passingThrough=1 Allows to pass arguments of parent process to the child process.
- * @param {Boolean} o.maximumMemory=1 Allows `node` to use all available memory.
- * @param {Boolean} o.applyingExitCode=1 Applies exit code to parent process.
- *
- * @return {Object} Returns `wConsequence` instance in async mode. In sync mode returns options map. Options map contains not only input options, but child process descriptor, collected output, exit code and other useful info.
- *
- * @example
- *
- * let _ = require('wTools')
- * _.include( 'wExternalFundamentals' )
- * _.include( 'wConsequence' )
- * _.include( 'wLogger' )
- *
- * let con = _.shellNodePassingThrough({ execPath : 'path/to/script.js' });
- *
- * con.then( ( got ) =>
- * {
- *  console.log( 'ExitCode:', got.exitCode );
- *  return got;
- * })
- *
- * @function shellNodePassingThrough
- * @memberof module:Tools/base/ExternalFundamentals.Tools( module::ExternalFundamentals )
- */
-
-function shellNodePassingThrough( o )
-{
-
-  if( _.strIs( o ) )
-  o = { execPath : o }
-
-  _.routineOptions( shellNodePassingThrough, o );
-  _.assert( arguments.length === 1, 'Expects single argument' );
-  let result = _.shellNode( o );
-
-  return result;
-}
-
-var defaults = shellNodePassingThrough.defaults = Object.create( shellNode.defaults );
-
-defaults.passingThrough = 1;
-defaults.maximumMemory = 1;
-defaults.applyingExitCode = 1;
-defaults.throwingExitCode = 0;
 
 // --
 // app
@@ -1545,9 +1597,10 @@ let Proto =
 {
 
   shell,
-  sheller,
+  shellPassingThrough,
   shellNode,
   shellNodePassingThrough,
+  sheller,
 
   //
 
