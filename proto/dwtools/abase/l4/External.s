@@ -313,23 +313,28 @@ function shell_body( o )
 
   function prepare()
   {
-
+    
+    // qqq : cover the case ( args is string ) for both routines shell and sheller
     if( _.strIs( o.args ) )
-    o.args = [ o.args ];
+    o.args = _.strSplitNonPreserving({ src : o.args });
 
     if( o.execPath === null )
     {
       o.args = _.arrayAs( o.args );
       let l = o.args[ 0 ];
       let r = o.args.slice( 1 );
-      if( r.length )
-      o.execPath = l + ' ' + argsJoin( r );
+      o.execPath = l;
+      
+      if( o.mode === 'fork' )
+      {
+        o.args = r;
+      }
       else
       {
-        // qqq : cover the case ( args is string ) for both routines shell and sheller
-        o.execPath = l;
+        if( r.length )
+        o.execPath = l + ' ' + argsJoin( r );
+        o.args = null;
       }
-      o.args = null;
     }
 
     if( o.outputAdditive === null )
@@ -454,8 +459,7 @@ function shell_body( o )
   /* */
 
   function launchAct()
-  {
-
+  { 
     if( _.strIs( o.interpreterArgs ) )
     o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs });
 
