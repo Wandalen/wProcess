@@ -43,7 +43,7 @@ function shell_pre( routine, args )
 {
   let o;
 
-  if( _.strIs( args[ 0 ] ) )
+  if( _.strIs( args[ 0 ] ) || _.arrayIs( args[ 0 ] ) )
   o = { execPath : args[ 0 ] };
   else
   o = args[ 0 ];

@@ -956,6 +956,36 @@ function shell( test )
       return null;
     });
   })
+  
+  /* execPath option as argument */
+  
+  .thenKeep( function( arg )
+  {
+    test.case = 'pass array of commands as single argument';
+    
+    let execPath = 
+    [ 
+      'node ' + testAppPath, 
+      'node ' + testAppPath 
+    ]
+    
+    return test.mustNotThrowError( _.shell( execPath ) )
+    .thenKeep( ( got ) =>
+    { 
+      var o1 = got[ 0 ];
+      var o2 = got[ 1 ];
+      
+      test.identical( got.length, 3 );
+      
+      test.identical( o1.exitCode, 0 )
+      test.identical( o1.fullExecPath, 'node ' + testAppPath )
+      
+      test.identical( o2.exitCode, 0 )
+      test.identical( o2.fullExecPath, 'node ' + testAppPath )
+      
+      return null;
+    });
+  })
 
   return con;
 }
