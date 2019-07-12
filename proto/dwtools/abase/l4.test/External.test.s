@@ -818,7 +818,174 @@ function shell( test )
       return null;
     })
   })
+  
+  /* option args as string */
+  
+  .thenKeep( function( arg )
+  {
+    test.case = 'pass string as args option, only path to script, mode : shell';
+    
+    o =
+    {
+      execPath : 'node',
+      args : testAppPath,
+      mode : 'shell',
+      stdio : 'pipe',
+    }
 
+    var options = _.mapSupplement( {}, o, commonDefaults );
+    return _.shell( options )
+    .thenKeep( function()
+    {
+      test.identical( options.exitCode, 0 );
+      test.identical( options.output, expectedOutput );
+      return null;
+    })
+  })
+  
+  .thenKeep( function( arg )
+  {
+    test.case = 'pass string as args option, only path to script, mode : spawn';
+    
+    o =
+    {
+      execPath : 'node',
+      args : testAppPath,
+      mode : 'spawn',
+      stdio : 'pipe',
+    }
+
+    var options = _.mapSupplement( {}, o, commonDefaults );
+
+    return _.shell( options )
+    .thenKeep( function()
+    {
+      test.identical( options.exitCode, 0 );
+      test.identical( options.output, expectedOutput );
+      return null;
+    })
+  })
+  
+  .thenKeep( function( arg )
+  {
+    test.case = 'pass string as args option, only path to script, mode : fork';
+    
+    o =
+    {
+      args : testAppPath,
+      mode : 'fork',
+      stdio : 'pipe',
+    }
+
+    var options = _.mapSupplement( {}, o, commonDefaults );
+
+    return _.shell( options )
+    .thenKeep( function()
+    {
+      test.identical( options.exitCode, 0 );
+      test.identical( options.output, expectedOutput );
+      return null;
+    })
+  })
+  
+  .thenKeep( function( arg )
+  {
+    test.case = 'pass string as args option, mode : shell';
+    
+    let args = [ testAppPath, 'exitWithCode:0' ];
+
+    o =
+    {
+      execPath : 'node',
+      args : args.join( ' ' ),
+      mode : 'shell',
+      stdio : 'pipe',
+    }
+
+    var options = _.mapSupplement( {}, o, commonDefaults );
+
+    return test.mustNotThrowError( _.shell( options ) )
+    .thenKeep( () =>
+    {
+      test.identical( options.exitCode, 0 );
+      return null;
+    });
+  })
+  .thenKeep( function( arg )
+  {
+    test.case = 'pass string as args option, mode : spawn';
+    
+    let args = [ testAppPath, 'exitWithCode:0' ];
+
+    o =
+    {
+      execPath : 'node',
+      args : args.join( ' ' ),
+      mode : 'spawn',
+      stdio : 'pipe',
+    }
+
+    var options = _.mapSupplement( {}, o, commonDefaults );
+
+    return test.mustNotThrowError( _.shell( options ) )
+    .thenKeep( () =>
+    {
+      test.identical( options.exitCode, 0 );
+      return null;
+    });
+  })
+  .thenKeep( function( arg )
+  {
+    test.case = 'pass string as args option, mode : fork';
+    
+    let args = [ testAppPath, 'exitWithCode:0' ];
+
+    o =
+    {
+      args : args.join( ' ' ),
+      mode : 'fork',
+      stdio : 'pipe',
+    }
+
+    var options = _.mapSupplement( {}, o, commonDefaults );
+
+    return test.mustNotThrowError( _.shell( options ) )
+    .thenKeep( () =>
+    {
+      test.identical( options.exitCode, 0 );
+      return null;
+    });
+  })
+  
+  /* execPath option as argument */
+  
+  .thenKeep( function( arg )
+  {
+    test.case = 'pass array of commands as single argument';
+    
+    let execPath = 
+    [ 
+      'node ' + testAppPath, 
+      'node ' + testAppPath 
+    ]
+    
+    return test.mustNotThrowError( _.shell( execPath ) )
+    .thenKeep( ( got ) =>
+    { 
+      var o1 = got[ 0 ];
+      var o2 = got[ 1 ];
+      
+      test.identical( got.length, 3 );
+      
+      test.identical( o1.exitCode, 0 )
+      test.identical( o1.fullExecPath, 'node ' + testAppPath )
+      
+      test.identical( o2.exitCode, 0 )
+      test.identical( o2.fullExecPath, 'node ' + testAppPath )
+      
+      return null;
+    });
+  })
 
   return con;
 }
@@ -3613,6 +3780,108 @@ function sheller( test )
       test.is( _.strHas( o2.output, "[ 'arg1' ]" ) );
       test.is( _.strHas( o3.output, "[ 'arg2' ]" ) );
       test.is( _.strHas( o4.output, "[ 'arg2' ]" ) );
+
+      return got;
+    })
+  })
+  
+  .thenKeep( () =>
+  {
+    var shell = _.sheller
+    ({
+      execPath : 'node',
+      args : 'arg1',
+      outputCollecting : 1,
+      outputPiping : 1
+    })
+
+    return shell({ execPath : testAppPath })
+    .thenKeep( ( got ) =>
+    {
+      test.identical( got.length, 2 );
+      test.identical( got[ got.length - 1 ], null );
+
+      let o1 = got[ 0 ];
+      
+      test.is( !_.strHas( o1.execPath, 'arg1' ) );
+      test.is( _.strHas( o1.output, "[ 'arg1' ]" ) );
+
+      return got;
+    })
+  })
+  
+  .thenKeep( () =>
+  {
+    var shell = _.sheller
+    ({
+      execPath : 'node',
+      args : 'arg1',
+      outputCollecting : 1,
+      outputPiping : 1
+    })
+
+    return shell({ execPath : testAppPath, args : 'arg2' })
+    .thenKeep( ( got ) =>
+    {
+      test.identical( got.length, 2 );
+      test.identical( got[ got.length - 1 ], null );
+
+      let o1 = got[ 0 ];
+      
+      test.is( !_.strHas( o1.execPath, 'arg1' ) );
+      test.is( _.strHas( o1.output, "[ 'arg2' ]" ) );
+
+      return got;
+    })
+  })
+  
+  .thenKeep( () =>
+  {
+    var shell = _.sheller
+    ({
+      execPath : 'node',
+      args : [ 'arg1', 'arg2' ],
+      outputCollecting : 1,
+      outputPiping : 1
+    })
+
+    return shell({ execPath : testAppPath, args : 'arg3' })
+    .thenKeep( ( got ) =>
+    {
+      test.identical( got.length, 2 );
+      test.identical( got[ got.length - 1 ], null );
+
+      let o1 = got[ 0 ];
+      
+      test.is( !_.strHas( o1.execPath, 'arg1 arg2' ) );
+      test.is( _.strHas( o1.output, "[ 'arg3' ]" ) );
+
+      return got;
+    })
+  })
+  
+  .thenKeep( () =>
+  {
+    var shell = _.sheller
+    ({
+      execPath : 'node',
+      args : 'arg1',
+      outputCollecting : 1,
+      outputPiping : 1
+    })
+
+    return shell({ execPath : testAppPath, args : [ 'arg2', 'arg3' ] })
+    .thenKeep( ( got ) =>
+    {
+      test.identical( got.length, 2 );
+      test.identical( got[ got.length - 1 ], null );
+
+      let o1 = got[ 0 ];
+      
+      test.is( !_.strHas( o1.execPath, 'arg1' ) );
+      test.is( !_.strHas( o1.execPath, 'arg2' ) );
+      test.is( !_.strHas( o1.execPath, 'arg3' ) );
+      test.is( _.strHas( o1.output, "[ 'arg2', 'arg3' ]" ) );
 
       return got;
     })
