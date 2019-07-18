@@ -930,7 +930,7 @@ function shellNode_body( o )
   shellOptions.execPath = path;
 
   let result = _.shell( shellOptions )
-  .got( function( err, arg )
+  .give( function( err, arg )
   {
     o.exitCode = shellOptions.exitCode;
     o.exitSignal = shellOptions.exitSignal;
