@@ -313,7 +313,7 @@ function shell_body( o )
 
   function prepare()
   {
-    
+
     // qqq : cover the case ( args is string ) for both routines shell and sheller
     if( _.strIs( o.args ) )
     o.args = _.strSplitNonPreserving({ src : o.args });
@@ -324,7 +324,7 @@ function shell_body( o )
       let l = o.args[ 0 ];
       let r = o.args.slice( 1 );
       o.execPath = l;
-      
+
       if( o.mode === 'fork' )
       {
         o.args = r;
@@ -459,7 +459,7 @@ function shell_body( o )
   /* */
 
   function launchAct()
-  { 
+  {
     if( _.strIs( o.interpreterArgs ) )
     o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs });
 
@@ -637,7 +637,8 @@ function shell_body( o )
     result += 'Launched as ' + _.strQuote( o.fullExecPath ) + '\n';
     result += 'Launched at ' + _.strQuote( o.currentPath ) + '\n';
     if( stderrOutput.length )
-    result += '\n -> Stderr' + '\n' + _.strIndentation( stderrOutput, ' -  ' ) + '\n -< Stderr'; // !!! : implement error's collectors
+    result += '\n -> Stderr' + '\n' + ' -  ' + _.strIndentation( stderrOutput, ' -  ' ) + '\n -< Stderr';
+    // !!! : implement error's collectors
     return result;
   }
 
@@ -731,7 +732,7 @@ function shell_body( o )
     data = _.strRemoveEnd( data, '\n' );
 
     if( o.outputPrefixing )
-    data = 'stderr :\n' + _.strIndentation( data, '  ' );
+    data = 'stderr :\n' + '  ' + _.strIndentation( data, '  ' );
 
     if( _.color && !o.outputGray )
     data = _.color.strFormat( data, 'pipe.negative' );
@@ -756,7 +757,7 @@ function shell_body( o )
     data = _.strRemoveEnd( data, '\n' );
 
     if( o.outputPrefixing )
-    data = 'stdout :\n' + _.strIndentation( data, '  ' );
+    data = 'stdout :\n' + '  ' + _.strIndentation( data, '  ' );
 
     if( _.color && !o.outputGray && !o.outputGrayStdout )
     data = _.color.strFormat( data, 'pipe.neutral' );
@@ -1633,10 +1634,6 @@ _.mapExtend( Self, Proto );
 // --
 // export
 // --
-
-// if( typeof module !== 'undefined' )
-// if( _global_.WTOOLS_PRIVATE )
-// { /* delete require.cache[ module.id ]; */ }
 
 if( typeof module !== 'undefined' && module !== null )
 module[ 'exports' ] = Self;
