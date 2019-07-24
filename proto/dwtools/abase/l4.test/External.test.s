@@ -1618,7 +1618,109 @@ function shellCurrentPath( test )
 
     return con;
   })
+  
+  /**/
 
+  con.thenKeep( function()
+  {
+    test.case = 'cwd doesn\'t exist, mode : shell';
+
+    let currentPath = _.path.nativize( _.path.join( __dirname, 'dir' ) );
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      currentPath : currentPath,
+      mode : 'shell',
+    }
+    let con = _.shell( o );
+    return test.shouldThrowErrorAsync( con );
+  })
+  
+  /**/
+
+  con.thenKeep( function()
+  {
+    test.case = 'cwd doesn\'t exist, mode : spawn';
+
+    let currentPath = _.path.nativize( _.path.join( __dirname, 'dir' ) );
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      currentPath : currentPath,
+      mode : 'spawn',
+    }
+    let con = _.shell( o );
+    return test.shouldThrowErrorAsync( con );
+  })
+  
+  /**/
+
+  con.thenKeep( function()
+  {
+    test.case = 'cwd doesn\'t exist, mode : fork';
+
+    let currentPath = _.path.nativize( _.path.join( __dirname, 'dir' ) );
+    let o =
+    {
+      execPath : testAppPath,
+      currentPath : currentPath,
+      mode : 'fork',
+    }
+    let con = _.shell( o );
+    return test.shouldThrowErrorAsync( con );
+  })
+  
+  /**/
+
+  con.thenKeep( function()
+  {
+    test.case = 'cwd is a terminal, mode : shell';
+
+    let currentPath = _.path.nativize( __filename );
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      currentPath : currentPath,
+      mode : 'shell',
+    }
+    let con = _.shell( o );
+    return test.shouldThrowErrorAsync( con );
+  })
+  
+  /**/
+
+  con.thenKeep( function()
+  {
+    test.case = 'cwd is a terminal, mode : spawn';
+
+    let currentPath = _.path.nativize( __filename );
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      currentPath : currentPath,
+      mode : 'spawn',
+    }
+    let con = _.shell( o );
+    return test.shouldThrowErrorAsync( con );
+  })
+  
+  /**/
+
+  con.thenKeep( function()
+  {
+    test.case = 'cwd is a terminal, mode : fork';
+
+    let currentPath = _.path.nativize( __filename );
+    let o =
+    {
+      execPath : testAppPath,
+      currentPath : currentPath,
+      mode : 'fork',
+    }
+    let con = _.shell( o );
+    return test.shouldThrowErrorAsync( con );
+  })
+  
   return con;
 }
 
