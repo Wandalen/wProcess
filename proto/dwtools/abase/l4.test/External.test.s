@@ -2038,7 +2038,7 @@ function shellFork( test )
     {
       test.identical( o.exitCode, 0 );
       test.is( _.strHas( o.output,  "[ 'arg1', 'arg2' ]" ) );
-      test.is( _.strHas( o.output,  "key1: 'val'," ) );
+      test.is( _.strHas( o.output,  "key1: 'val'" ) );
       test.is( _.strHas( o.output,  _.fileProvider.path.nativize( routinePath ) ) );
       test.is( _.strHas( o.output,  "[ '--no-warnings' ]" ) );
 
@@ -2083,7 +2083,7 @@ function shellFork( test )
 
     test.identical( o.exitCode, 0 );
     test.is( _.strHas( o.output,  "[ 'arg1', 'arg2' ]" ) );
-    test.is( _.strHas( o.output,  "key1: 'val'," ) );
+    test.is( _.strHas( o.output,  "key1: 'val'" ) );
     test.is( _.strHas( o.output,  _.fileProvider.path.nativize( routinePath ) ) );
     test.is( _.strHas( o.output,  "[ '--no-warnings' ]" ) );
 
