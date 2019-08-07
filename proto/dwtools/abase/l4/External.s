@@ -143,9 +143,6 @@ function shell_pre( routine, args )
 function shell_body( o )
 {
 
-  // if( _.strIs( o ) )
-  // o = { execPath : o };
-
   _.assertRoutineOptions( shell, arguments );
   _.assert( arguments.length === 1, 'Expects single argument' );
   _.assert( _.arrayHas( [ 'fork', 'exec', 'spawn', 'shell' ], o.mode ) );
@@ -231,10 +228,13 @@ function shell_body( o )
 
     }
 
+    debugger;
     o.ready
-    .then( () => new _.Consequence().take( null ).andKeep( readies ) )
+    // .then( () => new _.Consequence().take( null ).andKeep( readies ) )
+    .then( () => _.Consequence.AndKeep( readies ) )
     .finally( ( err, arg ) =>
     {
+      debugger;
       o.exitCode = err ? null : 0;
 
       for( let a = 0 ; a < options.length-1 ; a++ )
@@ -493,7 +493,7 @@ function shell_body( o )
       else
       {
         if( appPath.length )
-        _.assert( _.strSplitNonPreserving({ src : appPath }).length === 1, ' o.execPath must not contain arguments if those were provided through options' )
+        _.assert( _.strSplitNonPreserving({ src : appPath }).length === 1, ' o.execPath must not contain arguments if those were provided through options' );
       }
 
       let o2 = optionsForSpawn();
@@ -536,6 +536,20 @@ function shell_body( o )
     else _.assert( 0, 'Unknown mode', _.strQuote( o.mode ), 'to shell path', _.strQuote( o.paths ) );
 
   }
+
+/*
+qqq
+add coverage
+
+for combination:
+  path to exe file : [ with space, without space ]
+  execPath : [ has arguments, only path to exe file ]
+  args : [ has arguments, empty ]
+  mode : [ 'fork', 'exec', 'spawn', 'shell' ]
+
+example of execPath :
+  execPath : '"/dir with space/app.exe" firstArg secondArg:1 "third arg" \'fourth arg\'  `"fifth" arg`
+*/
 
   /* */
 
@@ -832,25 +846,17 @@ let shell = _.routineFromPreAndBody( shell_pre, shell_body );
 
 //
 
-// function shellPassingThrough( o )
-// {
-//   if( _.strIs( o ) )
-//   o = { execPath : o }
-//   _.routineOptions( shellPassingThrough, o );
-//   _.assert( arguments.length === 1, 'Expects single argument' );
-//   let result = _.shell( o );
-//   return result;
-// }
-
 let shellPassingThrough = _.routineFromPreAndBody( shell_pre, shell_body );
 
 var defaults = shellPassingThrough.defaults;
 
+defaults.verbosity = 0;
 defaults.passingThrough = 1;
 defaults.applyingExitCode = 1;
 defaults.throwingExitCode = 0;
 defaults.outputPiping = 1;
 defaults.stdio = 'inherit';
+// defaults.mode = 'spawn'; // xxx : uncomment after fix of the mode
 
 //
 
@@ -894,14 +900,9 @@ function shellNode_body( o )
   _.include( 'wPathFundamentals' );
   _.include( 'wFiles' );
 
-  // if( _.strIs( o ) )
-  // o = { execPath : o }
-
   _.assertRoutineOptions( shellNode, o );
   _.assert( _.strIs( o.execPath ) );
   _.assert( !o.code );
-  // _.accessor.forbid( o, 'child' );
-  // _.accessor.forbid( o, 'returnCode' );
   _.assert( arguments.length === 1, 'Expects single argument' );
 
   /*
@@ -952,6 +953,7 @@ defaults.passingThrough = 0;
 defaults.maximumMemory = 0;
 defaults.applyingExitCode = 1;
 defaults.stdio = 'inherit';
+defaults.mode = 'fork';
 
 let shellNode = _.routineFromPreAndBody( shell_pre, shellNode_body );
 
@@ -988,28 +990,17 @@ let shellNode = _.routineFromPreAndBody( shell_pre, shellNode_body );
  * @memberof module:Tools/base/ExternalFundamentals.Tools( module::ExternalFundamentals )
  */
 
-// function shellNodePassingThrough( o )
-// {
-//
-//   if( _.strIs( o ) )
-//   o = { execPath : o }
-//
-//   _.routineOptions( shellNodePassingThrough, o );
-//   _.assert( arguments.length === 1, 'Expects single argument' );
-//   let result = _.shellNode( o );
-//
-//   return result;
-// }
-
 let shellNodePassingThrough = _.routineFromPreAndBody( shell_pre, shellNode.body );
 
 var defaults = shellNodePassingThrough.defaults;
 
+defaults.verbosity = 0;
 defaults.passingThrough = 1;
 defaults.maximumMemory = 1;
 defaults.applyingExitCode = 1;
 defaults.throwingExitCode = 0;
 defaults.outputPiping = 1;
+defaults.mode = 'fork';
 
 //
 
@@ -1132,7 +1123,16 @@ function sheller( o0 )
       _.assert( _.arrayIs( src.execPath ) || _.strIs( src.execPath ), () => 'Expects string or array, but got ' + _.strType( src.execPath ) );
       if( _.arrayIs( src.execPath ) )
       src.execPath = _.arrayFlatten( src.execPath );
+
+      /*
+      condition required, otherwise vectorization of results will be done what is not desirable
+      */
+
+      if( _.arrayIs( dst.execPath ) || _.arrayIs( src.execPath ) )
       dst.execPath = _.eachSample( [ dst.execPath, src.execPath ] ).map( ( path ) => path.join( ' ' ) );
+      else
+      dst.execPath = dst.execPath + ' ' + src.execPath;
+
       delete src.execPath;
     }
 
@@ -1424,9 +1424,9 @@ function appExitCode( status )
 
   if( _global.process )
   {
+    result = process.exitCode || 0;
     if( status !== undefined )
     process.exitCode = status;
-    result = process.exitCode;
   }
 
   return result;
@@ -1474,12 +1474,12 @@ function appExitWithBeep( exitCode )
 //
 
 /*
-qqq : use maybe appRepairExitHandler instead of appRegisterExitHandler?
-qqq : investigate difference between appRepairExitHandler and appRegisterExitHandler
+qqq : use maybe appExitHandlerRepair instead of appExitHandlerOnce?
+qqq : investigate difference between appExitHandlerRepair and appExitHandlerOnce
 */
 
 let appRepairExitHandlerDone = 0;
-function appRepairExitHandler()
+function appExitHandlerRepair()
 {
 
   _.assert( arguments.length === 0 );
@@ -1491,9 +1491,64 @@ function appRepairExitHandler()
   if( typeof process === 'undefined' )
   return;
 
+  // process.on( 'SIGHUP', function()
+  // {
+  //   debugger;
+  //   console.log( 'SIGHUP' );
+  //   try
+  //   {
+  //     process.exit();
+  //   }
+  //   catch( err )
+  //   {
+  //     console.log( 'Error!' );
+  //     console.log( err.toString() );
+  //     console.log( err.stack );
+  //     process.removeAllListeners( 'exit' );
+  //     process.exit();
+  //   }
+  // });
+
+  process.on( 'SIGQUIT', function()
+  {
+    debugger;
+    console.log( 'SIGQUIT' );
+    try
+    {
+      process.exit();
+    }
+    catch( err )
+    {
+      console.log( 'Error!' );
+      console.log( err.toString() );
+      console.log( err.stack );
+      process.removeAllListeners( 'exit' );
+      process.exit();
+    }
+  });
+
   process.on( 'SIGINT', function()
   {
+    debugger;
     console.log( 'SIGINT' );
+    try
+    {
+      process.exit();
+    }
+    catch( err )
+    {
+      console.log( 'Error!' );
+      console.log( err.toString() );
+      console.log( err.stack );
+      process.removeAllListeners( 'exit' );
+      process.exit();
+    }
+  });
+
+  process.on( 'SIGTERM', function()
+  {
+    debugger;
+    console.log( 'SIGTERM' );
     try
     {
       process.exit();
@@ -1510,6 +1565,7 @@ function appRepairExitHandler()
 
   process.on( 'SIGUSR1', function()
   {
+    debugger;
     console.log( 'SIGUSR1' );
     try
     {
@@ -1520,13 +1576,14 @@ function appRepairExitHandler()
       console.log( 'Error!' );
       console.log( err.toString() );
       console.log( err.stack );
-      process.removeListener( 'exit' );
+      process.removeAllListeners( 'exit' );
       process.exit();
     }
   });
 
   process.on( 'SIGUSR2', function()
   {
+    debugger;
     console.log( 'SIGUSR2' );
     try
     {
@@ -1537,7 +1594,7 @@ function appRepairExitHandler()
       console.log( 'Error!' );
       console.log( err.toString() );
       console.log( err.stack );
-      process.removeListener( 'exit' );
+      process.removeAllListeners( 'exit' );
       process.exit();
     }
   });
@@ -1548,10 +1605,12 @@ function appRepairExitHandler()
 
 let _onExitHandlers = [];
 
-function appRegisterExitHandler( routine )
+function appExitHandlerOnce( routine )
 {
   _.assert( arguments.length === 1 );
   _.assert( _.routineIs( routine ) );
+
+  _.appExitHandlerRepair();
 
   if( typeof process === 'undefined' )
   return;
@@ -1559,8 +1618,8 @@ function appRegisterExitHandler( routine )
   if( !_onExitHandlers.length )
   {
     process.once( 'exit', onExitHandler );
-    process.once( 'SIGINT', onExitHandler );
-    process.once( 'SIGTERM', onExitHandler );
+    // process.once( 'SIGINT', onExitHandler );
+    // process.once( 'SIGTERM', onExitHandler );
   }
 
   _onExitHandlers.push( routine );
@@ -1580,13 +1639,69 @@ function appRegisterExitHandler( routine )
         _.errLogOnce( err );
       }
     })
-
     process.removeListener( 'exit', onExitHandler );
-    process.removeListener( 'SIGINT', onExitHandler );
-    process.removeListener( 'SIGTERM', onExitHandler );
+    // process.removeListener( 'SIGINT', onExitHandler );
+    // process.removeListener( 'SIGTERM', onExitHandler );
+    _onExitHandlers.splice( 0, _onExitHandlers.length );
   }
 
 }
+
+//
+
+/*
+qqq : cover routine appExitHandlerOff by tests
+*/
+
+function appExitHandlerOff( routine )
+{
+  _.assert( arguments.length === 1 );
+  _.assert( _.routineIs( routine ) );
+
+  debugger;
+
+  return _.arrayRemovedElement( _onExitHandlers, routine );
+}
+
+// function appExitHandlerOnce( routine )
+// {
+//   _.assert( arguments.length === 1 );
+//   _.assert( _.routineIs( routine ) );
+//
+//   if( typeof process === 'undefined' )
+//   return;
+//
+//   if( !_onExitHandlers.length )
+//   {
+//     process.once( 'exit', onExitHandler );
+//     process.once( 'SIGINT', onExitHandler );
+//     process.once( 'SIGTERM', onExitHandler );
+//   }
+//
+//   _onExitHandlers.push( routine );
+//
+//   /*  */
+//
+//   function onExitHandler( arg )
+//   {
+//     _.each( _onExitHandlers, ( routine ) =>
+//     {
+//       try
+//       {
+//         routine( arg );
+//       }
+//       catch( err )
+//       {
+//         _.errLogOnce( err );
+//       }
+//     })
+//
+//     process.removeListener( 'exit', onExitHandler );
+//     process.removeListener( 'SIGINT', onExitHandler );
+//     process.removeListener( 'SIGTERM', onExitHandler );
+//   }
+//
+// }
 
 //
 
@@ -1624,8 +1739,9 @@ let Proto =
   appExit,
   appExitWithBeep,
 
-  appRepairExitHandler,
-  appRegisterExitHandler,
+  appExitHandlerRepair,
+  appExitHandlerOnce,
+  appExitHandlerOff,
 
   appMemoryUsageInfo,
 
