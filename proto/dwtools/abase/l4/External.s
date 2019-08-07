@@ -143,9 +143,6 @@ function shell_pre( routine, args )
 function shell_body( o )
 {
 
-  // if( _.strIs( o ) )
-  // o = { execPath : o };
-
   _.assertRoutineOptions( shell, arguments );
   _.assert( arguments.length === 1, 'Expects single argument' );
   _.assert( _.arrayHas( [ 'fork', 'exec', 'spawn', 'shell' ], o.mode ) );
@@ -231,10 +228,13 @@ function shell_body( o )
 
     }
 
+    debugger;
     o.ready
-    .then( () => new _.Consequence().take( null ).andKeep( readies ) )
+    // .then( () => new _.Consequence().take( null ).andKeep( readies ) )
+    .then( () => _.Consequence.AndKeep( readies ) )
     .finally( ( err, arg ) =>
     {
+      debugger;
       o.exitCode = err ? null : 0;
 
       for( let a = 0 ; a < options.length-1 ; a++ )
@@ -1121,7 +1121,16 @@ function sheller( o0 )
       _.assert( _.arrayIs( src.execPath ) || _.strIs( src.execPath ), () => 'Expects string or array, but got ' + _.strType( src.execPath ) );
       if( _.arrayIs( src.execPath ) )
       src.execPath = _.arrayFlatten( src.execPath );
+
+      /*
+      condition required, otherwise vectorization of results will be done what is not desirable
+      */
+
+      if( _.arrayIs( dst.execPath ) || _.arrayIs( src.execPath ) )
       dst.execPath = _.eachSample( [ dst.execPath, src.execPath ] ).map( ( path ) => path.join( ' ' ) );
+      else
+      dst.execPath = dst.execPath + ' ' + src.execPath;
+
       delete src.execPath;
     }
 
@@ -1480,8 +1489,45 @@ function appExitHandlerRepair()
   if( typeof process === 'undefined' )
   return;
 
+  // process.on( 'SIGHUP', function()
+  // {
+  //   debugger;
+  //   console.log( 'SIGHUP' );
+  //   try
+  //   {
+  //     process.exit();
+  //   }
+  //   catch( err )
+  //   {
+  //     console.log( 'Error!' );
+  //     console.log( err.toString() );
+  //     console.log( err.stack );
+  //     process.removeAllListeners( 'exit' );
+  //     process.exit();
+  //   }
+  // });
+
+  process.on( 'SIGQUIT', function()
+  {
+    debugger;
+    console.log( 'SIGQUIT' );
+    try
+    {
+      process.exit();
+    }
+    catch( err )
+    {
+      console.log( 'Error!' );
+      console.log( err.toString() );
+      console.log( err.stack );
+      process.removeAllListeners( 'exit' );
+      process.exit();
+    }
+  });
+
   process.on( 'SIGINT', function()
   {
+    debugger;
     console.log( 'SIGINT' );
     try
     {
@@ -1499,6 +1545,7 @@ function appExitHandlerRepair()
 
   process.on( 'SIGTERM', function()
   {
+    debugger;
     console.log( 'SIGTERM' );
     try
     {
@@ -1516,6 +1563,7 @@ function appExitHandlerRepair()
 
   process.on( 'SIGUSR1', function()
   {
+    debugger;
     console.log( 'SIGUSR1' );
     try
     {
@@ -1533,6 +1581,7 @@ function appExitHandlerRepair()
 
   process.on( 'SIGUSR2', function()
   {
+    debugger;
     console.log( 'SIGUSR2' );
     try
     {
@@ -1589,9 +1638,9 @@ function appExitHandlerOnce( routine )
       }
     })
     process.removeListener( 'exit', onExitHandler );
-    _onExitHandlers.splice( 0, _onExitHandlers.length );
     // process.removeListener( 'SIGINT', onExitHandler );
     // process.removeListener( 'SIGTERM', onExitHandler );
+    _onExitHandlers.splice( 0, _onExitHandlers.length );
   }
 
 }
