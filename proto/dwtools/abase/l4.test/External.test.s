@@ -3397,6 +3397,218 @@ function shellArgumentsParsing( test )
 
 //
 
+function shellArgumentsNestedQuotes( test )
+{
+  let context = this;
+  let routinePath = _.path.join( context.testSuitePath, test.name );
+  let testAppPathNoSpace = _.fileProvider.path.nativize( _.path.join( routinePath, 'noSpace', 'testApp.js' ) );
+  let testAppPathSpace= _.fileProvider.path.nativize( _.path.join( routinePath, 'with space', 'testApp.js' ) );
+  let ready = _.Consequence().take( null );
+
+  let testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPathNoSpace, testAppCode );
+  _.fileProvider.fileWrite( testAppPathSpace, testAppCode );
+  
+  /* */
+  
+  ready
+  
+  .then( () => 
+  {
+    test.case = 'fork'
+    
+    let con = new _.Consequence().take( null );
+    let args =
+    [
+      ` '\'s-s\''  '\"s-d\"'  '\`s-b\`'  `,
+      ` "\'d-s\'"  "\"d-d\""  "\`d-b\`"  `,
+      ` \`\'b-s\'\`  \`\"b-d\"\`  \`\`b-b\`\` `,
+    ]
+    let o = 
+    {
+      execPath : _.strQuote( testAppPathSpace ),
+      args : args.join( ' ' ),
+      ipc : 1,
+      mode : 'fork',
+      outputPiping : 1,
+      ready : con
+    }
+    _.shell( o );
+    
+    let got;
+    o.process.on( 'message', ( data ) => { got = data } )
+    
+    con.then( () => 
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( got.mainPath, testAppPathSpace )
+      test.identical( got.map, {} )
+      let scriptArgs = 
+      [ 
+        `'s-s'`, `"s-d"`, "`s-b`", 
+        `'d-s'`, `"d-d"`, "`d-b`", 
+        `'b-s'`, `"b-d"`, "`b-b`", 
+      ]
+      test.identical( got.scriptArgs, scriptArgs )
+      
+      return null;
+    })
+    
+    return con;
+  })
+  
+  .then( () => 
+  {
+    test.case = 'spawn'
+    
+    let con = new _.Consequence().take( null );
+    let args =
+    [
+      ` '\'s-s\''  '\"s-d\"'  '\`s-b\`'  `,
+      ` "\'d-s\'"  "\"d-d\""  "\`d-b\`"  `,
+      ` \`\'b-s\'\`  \`\"b-d\"\`  \`\`b-b\`\` `,
+    ]
+    let o = 
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ),
+      args : args.join( ' ' ),
+      ipc : 1,
+      mode : 'spawn',
+      outputPiping : 1,
+      ready : con
+    }
+    _.shell( o );
+    
+    let got;
+    o.process.on( 'message', ( data ) => { got = data } )
+    
+    con.then( () => 
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( got.mainPath, testAppPathSpace )
+      test.identical( got.map, {} )
+      let scriptArgs = 
+      [ 
+        `'s-s'`, `"s-d"`, "`s-b`", 
+        `'d-s'`, `"d-d"`, "`d-b`", 
+        `'b-s'`, `"b-d"`, "`b-b`", 
+      ]
+      test.identical( got.scriptArgs, scriptArgs )
+      
+      return null;
+    })
+    
+    return con;
+    
+  })
+  
+  .then( () => 
+  {
+    test.case = 'shell'
+    
+    let con = new _.Consequence().take( null );
+    let args =
+    [
+      ` '\'s-s\''  '\"s-d\"'  '\`s-b\`'  `,
+      ` "\'d-s\'"  "\"d-d\""  "\`d-b\`"  `,
+      ` \`\'b-s\'\`  \`\"b-d\"\`  \`\`b-b\`\` `,
+    ]
+    let o = 
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ),
+      args : args.join( ' ' ),
+      ipc : 1,
+      mode : 'shell',
+      outputPiping : 1,
+      ready : con
+    }
+    _.shell( o );
+    
+    let got;
+    o.process.on( 'message', ( data ) => { got = data } )
+    
+    con.then( () => 
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( got.mainPath, testAppPathSpace )
+      test.identical( got.map, {} )
+      let scriptArgs = 
+      [ 
+        `'s-s'`, `"s-d"`, "`s-b`", 
+        `'d-s'`, `"d-d"`, "`d-b`", 
+        `'b-s'`, `"b-d"`, "`b-b`", 
+      ]
+      test.identical( got.scriptArgs, scriptArgs )
+      
+      return null;
+    })
+    
+    return con;
+  })
+  
+  .then( () => 
+  {
+    test.case = 'exec'
+    
+    let con = new _.Consequence().take( null );
+    let args =
+    [
+      ` '\'s-s\''  '\"s-d\"'  '\`s-b\`'  `,
+      ` "\'d-s\'"  "\"d-d\""  "\`d-b\`"  `,
+      ` \`\'b-s\'\`  \`\"b-d\"\`  \`\`b-b\`\` `,
+    ]
+    let o = 
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ),
+      args : args.join( ' ' ),
+      mode : 'exec',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+    
+    con.then( () => 
+    {
+      test.identical( o.exitCode, 0 );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, testAppPathSpace )
+      test.identical( got.map, {} )
+      let scriptArgs = 
+      [ 
+        `'s-s'`, `"s-d"`, "`s-b`", 
+        `'d-s'`, `"d-d"`, "`d-b`", 
+        `'b-s'`, `"b-d"`, "`b-b`", 
+      ]
+      test.identical( got.scriptArgs, scriptArgs )
+      
+      return null;
+    })
+    
+    return con;
+    
+  })
+  
+  /* */
+  
+  return ready;
+  
+  /**/
+  
+  function testApp()
+  { 
+    let _ = require( '../../../../Tools.s' );
+    _.include( 'wExternalFundamentals' );
+    var args = _.appArgs();
+    if( process.send )
+    process.send( args );
+    else
+    console.log( JSON.stringify( args ) );
+  }
+}
+
+//
+
 function shellErrorHadling( test )
 {
   var context = this;
@@ -5268,6 +5480,7 @@ var Proto =
     shellFork,
     shellWithoutExecPath,
     shellArgumentsParsing,
+    shellArgumentsNestedQuotes,
 
     shellErrorHadling,
     shellNode,

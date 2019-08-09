@@ -591,9 +591,9 @@ example of execPath :
         args[ i ] = _.strInsideOf( args[ i ], begin, end );
         
         if( o.mode === 'shell' || o.mode === 'exec' )
-        _.each( strOptions.quotingPrefixes, ( prefix ) => 
+        _.each( [ '"', "`" ], ( quote ) => 
         { 
-          args[ i ] = _.strReplaceAll( args[ i ], prefix, '\\' + prefix ) 
+          args[ i ] = _.strReplaceAll( args[ i ], quote, '\\' + quote );
         })
       }
     }
