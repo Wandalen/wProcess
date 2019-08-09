@@ -985,7 +985,7 @@ function shell( test )
   return con;
 }
 
-shell.timeOut = 30000;
+shell.timeOut = 120000;
 
 //
 
