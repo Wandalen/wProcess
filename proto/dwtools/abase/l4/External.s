@@ -150,6 +150,7 @@ function shell_body( o )
   _.assert( o.args === null || _.arrayIs( o.args ) || _.strIs( o.args ) );
   _.assert( o.execPath === null || _.strIs( o.execPath ) || _.strsAreAll( o.execPath ), 'Expects string or strings {-o.execPath-}, but got', _.strType( o.execPath ) );
   _.assert( o.timeOut === null || _.numberIs( o.timeOut ), 'Expects null or number {-o.timeOut-}, but got', _.strType( o.timeOut ) );
+  _.assert( !o.ipc || !_.arrayHas( [ 'exec', 'shell' ], o.mode ), 'IPC is not supported on all platforms with mode:', o.mode );
 
   let state = 0;
   let currentExitCode;
@@ -587,14 +588,21 @@ example of execPath :
       let end = _.strEndOf( args[ i ], strOptions.quotingPostfixes );
       _.sure( begin === end, 'Arguments string:', _.strQuote( src ), 'has not closed quoting, that begins of:', _.strQuote( args[ i ] ) );
       if( begin )
-      {
+      { 
+        //extracts string from nested quoting to equalize behavior and later wrap each args with same quotes( "" )
         args[ i ] = _.strInsideOf( args[ i ], begin, end );
         
+        //escaping of some quotes is needed to equalize behavior of shell and exec modes on all platforms
         if( o.mode === 'shell' || o.mode === 'exec' )
-        _.each( [ '"', "`" ], ( quote ) => 
-        { 
-          args[ i ] = _.strReplaceAll( args[ i ], quote, '\\' + quote );
-        })
+        {
+          let quotes = [ '"' ]
+          if( process.platform !== 'win32' )
+          quotes.push( "`" )
+          _.each( quotes, ( quote ) => 
+          { 
+            args[ i ] = _.strReplaceAll( args[ i ], quote, '\\' + quote );
+          })
+        }
       }
     }
     return args;
