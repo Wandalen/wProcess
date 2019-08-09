@@ -2,14 +2,14 @@
 sudo: false
 language: node_js
 os:
-  # - linux
-  # - osx
+  - linux
+  - osx
   - windows
 node_js:
-  # - '9'
-  # - '10'
+  - '9'
+  - '10'
   - '12'
-  # - 'lts/*'
+  - 'lts/*'
 script:
   - npm test
 cache:
