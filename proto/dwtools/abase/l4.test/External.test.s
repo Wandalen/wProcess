@@ -2590,6 +2590,281 @@ function shellArgumentsParsing( test )
     return con;
   })
   
+  //end of fork
+  
+  .then( () => 
+  {
+    test.case = `'path to exec : with space' 'execPath: has arguments' 'args has arguments' 'exec'`
+    
+    let con = new _.Consequence().take( null );
+    let o = 
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' firstArg secondArg:1 "third arg"',
+      args : '\'fourth arg\'  `"fifth" arg`',
+      mode : 'exec',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+    
+    con.then( () => 
+    {
+      test.identical( o.exitCode, 0 );
+      let expected = 
+      {
+        mainPath : testAppPathSpace,
+        map : { secondArg : 1 },
+        scriptArgs : [ 'firstArg', 'secondArg:1', 'third arg', 'fourth arg', '"fifth" arg' ]
+      }
+      let args = JSON.parse( o.output );
+      test.contains( args, expected )
+      
+      return null;
+    })
+    
+    return con;
+  })
+  
+  .then( () => 
+  {
+    test.case = `'path to exec : without space' 'execPath: has arguments' 'args has arguments' 'exec'`
+    
+    let con = new _.Consequence().take( null );
+    let o = 
+    {
+      execPath : 'node ' + _.strQuote( testAppPathNoSpace ) + ' firstArg secondArg:1 "third arg"',
+      args : '\'fourth arg\'  `"fifth" arg`',
+      mode : 'exec',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+    
+    con.then( () => 
+    {
+      test.identical( o.exitCode, 0 );
+      let expected = 
+      {
+        mainPath : testAppPathNoSpace,
+        map : { secondArg : 1 },
+        scriptArgs : [ 'firstArg', 'secondArg:1', 'third arg', 'fourth arg', '"fifth" arg' ]
+      }
+      let args = JSON.parse( o.output );
+      test.contains( args, expected )
+      
+      return null;
+    })
+    
+    return con;
+  })
+  
+  .then( () => 
+  {
+    test.case = `'path to exec : with space' 'execPath: only path' 'args has arguments' 'exec'`
+    
+    let con = new _.Consequence().take( null );
+    let o = 
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ),
+      args : 'firstArg secondArg:1 "third arg" \'fourth arg\' `"fifth" arg`',
+      mode : 'exec',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+    
+    con.then( () => 
+    {
+      test.identical( o.exitCode, 0 );
+      let expected = 
+      {
+        mainPath : testAppPathSpace,
+        map : { secondArg : 1 },
+        scriptArgs : [ 'firstArg', 'secondArg:1', 'third arg', 'fourth arg', '"fifth" arg' ]
+      }
+      let args = JSON.parse( o.output );
+      test.contains( args, expected )
+      
+      return null;
+    })
+    
+    return con;
+  })
+  
+  .then( () => 
+  {
+    test.case = `'path to exec : without space' 'execPath: only path' 'args has arguments' 'exec'`
+    
+    let con = new _.Consequence().take( null );
+    let o = 
+    {
+      execPath : 'node ' + _.strQuote( testAppPathNoSpace ),
+      args : 'firstArg secondArg:1 "third arg" \'fourth arg\' `"fifth" arg`',
+      mode : 'exec',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+    
+    con.then( () => 
+    {
+      test.identical( o.exitCode, 0 );
+      let expected = 
+      {
+        mainPath : testAppPathNoSpace,
+        map : { secondArg : 1 },
+        scriptArgs : [ 'firstArg', 'secondArg:1', 'third arg', 'fourth arg', '"fifth" arg' ]
+      }
+      let args = JSON.parse( o.output );
+      test.contains( args, expected )
+      
+      return null;
+    })
+    
+    return con;
+  })
+  
+  .then( () => 
+  {
+    test.case = `'path to exec : with space' 'execPath: has arguments' 'args: empty' 'exec'`
+    
+    let con = new _.Consequence().take( null );
+    let o = 
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' firstArg secondArg:1 "third arg" \'fourth arg\' `"fifth" arg`',
+      args : null,
+      mode : 'exec',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+    
+    con.then( () => 
+    {
+      test.identical( o.exitCode, 0 );
+      let expected = 
+      {
+        mainPath : testAppPathSpace,
+        map : { secondArg : 1 },
+        scriptArgs : [ 'firstArg', 'secondArg:1', 'third arg', 'fourth arg', '"fifth" arg' ]
+      }
+      let args = JSON.parse( o.output );
+      test.contains( args, expected )
+      
+      return null;
+    })
+    
+    return con;
+  })
+  
+  .then( () => 
+  {
+    test.case = `'path to exec : without space' 'execPath: has arguments' 'args: empty' 'exec'`
+    
+    let con = new _.Consequence().take( null );
+    let o = 
+    {
+      execPath : 'node ' +_.strQuote( testAppPathNoSpace ) + ' firstArg secondArg:1 "third arg" \'fourth arg\' `"fifth" arg`',
+      args : null,
+      ipc : 1,
+      mode : 'exec',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+    
+    con.then( () => 
+    {
+      test.identical( o.exitCode, 0 );
+      let expected = 
+      {
+        mainPath : testAppPathNoSpace,
+        map : { secondArg : 1 },
+        scriptArgs : [ 'firstArg', 'secondArg:1', 'third arg', 'fourth arg', '"fifth" arg' ]
+      }
+      let args = JSON.parse( o.output );
+      test.contains( args, expected )
+      
+      return null;
+    })
+    
+    return con;
+  })
+  
+  .then( () => 
+  {
+    test.case = `'path to exec : with space' 'execPath: only path' 'args: empty' 'exec'`
+    
+    let con = new _.Consequence().take( null );
+    let o = 
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ),
+      args : null,
+      mode : 'exec',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+    
+    con.then( () => 
+    {
+      test.identical( o.exitCode, 0 );
+      let expected = 
+      {
+        mainPath : testAppPathSpace,
+        map : {},
+        scriptArgs : []
+      }
+      let args = JSON.parse( o.output );
+      test.contains( args, expected )
+      
+      return null;
+    })
+    
+    return con;
+  })
+  
+  .then( () => 
+  {
+    test.case = `'path to exec : without space' 'execPath: only path' 'args: empty' 'exec'`
+    
+    let con = new _.Consequence().take( null );
+    let o = 
+    {
+      execPath : 'node ' + _.strQuote( testAppPathNoSpace ),
+      args : null,
+      mode : 'exec',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+    
+    con.then( () => 
+    {
+      test.identical( o.exitCode, 0 );
+      let expected = 
+      {
+        mainPath : testAppPathNoSpace,
+        map : {},
+        scriptArgs : []
+      }
+      let args = JSON.parse( o.output );
+      test.contains( args, expected )
+      
+      return null;
+    })
+    
+    return con;
+  })
+  
   .then( () => 
   {
     test.case = `'path to exec : with space' 'execPath: has arguments' 'args has arguments' 'spawn'`
@@ -3112,8 +3387,12 @@ function shellArgumentsParsing( test )
     let _ = require( '../../../../Tools.s' );
     _.include( 'wExternalFundamentals' );
     var args = _.appArgs();
+    if( process.send )
     process.send( args );
+    else
+    console.log( JSON.stringify( args ) );
   }
+
 }
 
 //
