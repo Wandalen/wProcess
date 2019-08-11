@@ -1367,7 +1367,7 @@ function appAnchor( o )
 
   _.routineOptions( appAnchor, arguments );
 
-  let a = _.strToMap
+  let a = _.strStructureParse
   ({
     src : _.strRemoveBegin( window.location.hash, '#' ),
     keyValDelimeter : ':',
@@ -1721,8 +1721,6 @@ let Proto =
   shellNode,
   shellNodePassingThrough,
   sheller,
-
-  //
 
   _appArgsInSamFormatNodejs,
   _appArgsInSamFormatBrowser,
