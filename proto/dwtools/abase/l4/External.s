@@ -150,7 +150,6 @@ function shell_body( o )
   _.assert( o.args === null || _.arrayIs( o.args ) || _.strIs( o.args ) );
   _.assert( o.execPath === null || _.strIs( o.execPath ) || _.strsAreAll( o.execPath ), 'Expects string or strings {-o.execPath-}, but got', _.strType( o.execPath ) );
   _.assert( o.timeOut === null || _.numberIs( o.timeOut ), 'Expects null or number {-o.timeOut-}, but got', _.strType( o.timeOut ) );
-  _.assert( !o.ipc || !_.arrayHas( [ 'exec', 'shell' ], o.mode ), 'IPC is not supported on all platforms with mode:', o.mode );
 
   let state = 0;
   let currentExitCode;
@@ -193,7 +192,7 @@ function shell_body( o )
 
     if( _.arrayIs( o.execPath ) && o.execPath.length > 1 && o.concurrent && o.outputAdditive === null )
     o.outputAdditive = 0;
-    
+
     o.currentPath = o.currentPath || _.path.current();
 
     let prevReady = o.ready;
@@ -202,7 +201,7 @@ function shell_body( o )
 
     let execPath = _.arrayAs( o.execPath );
     let currentPath = _.arrayAs( o.currentPath );
-    
+
     for( let p = 0 ; p < execPath.length ; p++ )
     for( let c = 0 ; c < currentPath.length ; c++ )
     {
@@ -219,10 +218,9 @@ function shell_body( o )
         prevReady.finally( currentReady );
         prevReady = currentReady;
       }
-      
+
       let o2 = _.mapExtend( null, o );
       o2.execPath = execPath[ p ];
-      o2.args = o.args ? o.args.slice() : o.args;
       o2.currentPath = currentPath[ c ];
       o2.ready = currentReady;
       options.push( o2 );
@@ -317,17 +315,8 @@ function shell_body( o )
   {
 
     // qqq : cover the case ( args is string ) for both routines shell and sheller
-    // if( _.strIs( o.args ) )
-    // o.args = _.strSplitNonPreserving({ src : o.args });
     if( _.strIs( o.args ) )
-    o.args = argsParse( o.args );
-    
-    if( _.strIs( o.execPath ) )
-    {  
-      let execArgs = argsParse( o.execPath );
-      o.execPath = execArgs.shift();
-      o.args = _.arrayPrependArray( o.args || [], execArgs );
-    }
+    o.args = _.strSplitNonPreserving({ src : o.args });
 
     if( o.execPath === null )
     {
@@ -470,11 +459,9 @@ function shell_body( o )
   /* */
 
   function launchAct()
-  { 
+  {
     if( _.strIs( o.interpreterArgs ) )
     o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs });
-    
-    _.assert( _.fileProvider.isDir( o.currentPath ), 'working directory', o.currentPath, 'doesn\'t exist or it\'s not a directory.' );
 
     if( o.mode === 'fork')
     {
@@ -487,13 +474,10 @@ function shell_body( o )
     {
       let currentPath = _.path.nativize( o.currentPath );
       log( '{ shell.mode } "exec" is deprecated' );
-      
-      let execPath = o.execPath + ' ' + argsJoin( o.args );
-      
       if( o.sync && !o.deasync )
-      o.process = ChildProcess.execSync( execPath, { env : o.env, cwd : currentPath } );
+      o.process = ChildProcess.execSync( o.execPath, { env : o.env, cwd : currentPath } );
       else
-      o.process = ChildProcess.exec( execPath, { env : o.env, cwd : currentPath } );
+      o.process = ChildProcess.exec( o.execPath, { env : o.env, cwd : currentPath } );
     }
     else if( o.mode === 'spawn' )
     {
@@ -540,7 +524,7 @@ function shell_body( o )
 
       if( o.args )
       arg2 = arg2 + ' ' + argsJoin( o.args );
-      
+
       if( o.sync && !o.deasync )
       o.process = ChildProcess.spawnSync( appPath, [ arg1, arg2 ], o2 );
       else
@@ -564,49 +548,6 @@ for combination:
 example of execPath :
   execPath : '"/dir with space/app.exe" firstArg secondArg:1 "third arg" \'fourth arg\'  `"fifth" arg`
 */
-
-  /* */
-  
-  function argsParse( src )
-  { 
-    let strOptions = 
-    { 
-      src : src, 
-      delimeter : [ ' ' ], 
-      quoting : 1, 
-      quotingPrefixes : [ "'", '"', "`" ], 
-      quotingPostfixes : [ "'", '"', "`" ], 
-      preservingEmpty : 0,
-      preservingQuoting : 1,
-      stripping : 1 
-    }
-    let args = _.strSplit( strOptions );
-    
-    for( let i = 0; i < args.length; i++ )
-    { 
-      let begin = _.strBeginOf( args[ i ], strOptions.quotingPrefixes );
-      let end = _.strEndOf( args[ i ], strOptions.quotingPostfixes );
-      _.sure( begin === end, 'Arguments string:', _.strQuote( src ), 'has not closed quoting, that begins of:', _.strQuote( args[ i ] ) );
-      if( begin )
-      { 
-        //extracts string from nested quoting to equalize behavior and later wrap each args with same quotes( "" )
-        args[ i ] = _.strInsideOf( args[ i ], begin, end );
-        
-        //escaping of some quotes is needed to equalize behavior of shell and exec modes on all platforms
-        if( o.mode === 'shell' || o.mode === 'exec' )
-        {
-          let quotes = [ '"' ]
-          if( process.platform !== 'win32' )
-          quotes.push( "`" )
-          _.each( quotes, ( quote ) => 
-          { 
-            args[ i ] = _.strReplaceAll( args[ i ], quote, '\\' + quote );
-          })
-        }
-      }
-    }
-    return args;
-  }
 
   /* */
 
