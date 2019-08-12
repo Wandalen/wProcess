@@ -475,13 +475,17 @@ function shell_body( o )
     o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs });
     
     _.assert( _.fileProvider.isDir( o.currentPath ), 'working directory', o.currentPath, 'doesn\'t exist or it\'s not a directory.' );
+    
+    if( o.args )
+    o.args = argsForm( o.args );
 
     if( o.mode === 'fork')
     {
       _.assert( !o.sync || o.deasync, '{ shell.mode } "fork" is available only in async/deasync version of shell' );
       let args = o.args || [];
       let o2 = optionsForFork();
-      o.process = ChildProcess.fork( o.execPath, args, o2 );
+      let execPath = execPathForFork();
+      o.process = ChildProcess.fork( execPath, args, o2 );
     }
     else if( o.mode === 'exec' )
     {
@@ -586,11 +590,24 @@ example of execPath :
     { 
       let begin = _.strBeginOf( args[ i ], strOptions.quotingPrefixes );
       let end = _.strEndOf( args[ i ], strOptions.quotingPostfixes );
-      _.sure( begin === end, 'Arguments string:', _.strQuote( src ), 'has not closed quoting, that begins of:', _.strQuote( args[ i ] ) );
+      _.sure( begin === end, 'Arguments string:', src, 'has not closed quoting, that begins of:', args[ i ] );
+    }
+    return args;
+  }
+  
+  /* */
+  
+  function argsForm( args )
+  { 
+    let quotes = [ "'", '"', "`" ];
+    
+    for( let i = 0; i < args.length; i++ )
+    { 
+      let begin = _.strBeginOf( args[ i ], quotes );
       if( begin )
       { 
         //extracts string from nested quoting to equalize behavior and later wrap each args with same quotes( "" )
-        args[ i ] = _.strInsideOf( args[ i ], begin, end );
+        args[ i ] = _.strInsideOf( args[ i ], begin, begin );
         
         //escaping of some quotes is needed to equalize behavior of shell and exec modes on all platforms
         if( o.mode === 'shell' || o.mode === 'exec' )
@@ -650,6 +667,16 @@ example of execPath :
     o2.cwd = _.path.nativize( o.currentPath );
 
     return o2;
+  }
+  
+  function execPathForFork()
+  {
+    let quotes = [ "'", '"', "`" ];
+    let execPath = o.execPath;
+    let begin = _.strBeginOf( execPath, quotes );
+    if( begin )
+    execPath = _.strInsideOf( execPath, begin, begin );
+    return execPath;
   }
 
   /* */
@@ -1175,7 +1202,7 @@ function sheller( o0 )
     src = { execPath : src }
     _.assertMapHasOnly( src, sheller.defaults );
 
-    if( src.execPath && dst.execPath )
+    if( _.definedIs( src.execPath ) && _.definedIs( dst.execPath ) )
     {
       _.assert( _.arrayIs( src.execPath ) || _.strIs( src.execPath ), () => 'Expects string or array, but got ' + _.strType( src.execPath ) );
       if( _.arrayIs( src.execPath ) )
