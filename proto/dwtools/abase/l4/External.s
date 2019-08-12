@@ -316,15 +316,7 @@ function shell_body( o )
 
     // qqq : cover the case ( args is string ) for both routines shell and sheller
     if( _.strIs( o.args ) )
-    o.args = argsParse( o.args );
-
-    if( _.strIs( o.execPath ) )
-    {
-      let execArgs = argsParse( o.execPath );
-      o.execPath = execArgs.shift();
-      o.args = _.arrayPrependArray( o.args || [], execArgs );
-    }
-    // o.args = _.strSplitNonPreserving({ src : o.args });
+    o.args = _.strSplitNonPreserving({ src : o.args });
 
     if( o.execPath === null )
     {
@@ -470,10 +462,6 @@ function shell_body( o )
   {
     if( _.strIs( o.interpreterArgs ) )
     o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs });
-// HEAD
-
-    _.assert( _.fileProvider.isDir( o.currentPath ), 'working directory', o.currentPath, 'doesn\'t exist or it\'s not a directory.' );
-// 046ad80c263f0d673257503751541a88ce2eeedc
 
     if( o.mode === 'fork')
     {
@@ -486,10 +474,6 @@ function shell_body( o )
     {
       let currentPath = _.path.nativize( o.currentPath );
       log( '{ shell.mode } "exec" is deprecated' );
-// HEAD
-
-      let execPath = o.execPath + ' ' + argsJoin( o.args );
-
       if( o.sync && !o.deasync )
       o.process = ChildProcess.execSync( o.execPath, { env : o.env, cwd : currentPath } );
       else
@@ -566,52 +550,6 @@ example of execPath :
 */
 
   /* */
-// HEAD
-
-  function argsParse( src )
-  {
-    let strOptions =
-    {
-      src : src,
-      delimeter : [ ' ' ],
-      quoting : 1,
-      quotingPrefixes : [ "'", '"', "`" ],
-      quotingPostfixes : [ "'", '"', "`" ],
-      preservingEmpty : 0,
-      preservingQuoting : 1,
-      stripping : 1
-    }
-    let args = _.strSplit( strOptions );
-
-    for( let i = 0; i < args.length; i++ )
-    {
-      let begin = _.strBeginOf( args[ i ], strOptions.quotingPrefixes );
-      let end = _.strEndOf( args[ i ], strOptions.quotingPostfixes );
-      _.sure( begin === end, 'Arguments string:', _.strQuote( src ), 'has not closed quoting, that begins of:', _.strQuote( args[ i ] ) );
-      if( begin )
-      {
-        //extracts string from nested quoting to equalize behavior and later wrap each args with same quotes( "" )
-        args[ i ] = _.strInsideOf( args[ i ], begin, end );
-
-        //escaping of some quotes is needed to equalize behavior of shell and exec modes on all platforms
-        if( o.mode === 'shell' || o.mode === 'exec' )
-        {
-          let quotes = [ '"' ]
-          if( process.platform !== 'win32' )
-          quotes.push( "`" )
-          _.each( quotes, ( quote ) =>
-          {
-            args[ i ] = _.strReplaceAll( args[ i ], quote, '\\' + quote );
-          })
-        }
-      }
-    }
-    return args;
-  }
-
-  /* */
-
-// xxx 046ad80c263f0d673257503751541a88ce2eeedc
 
   function argsJoin( args )
   {
