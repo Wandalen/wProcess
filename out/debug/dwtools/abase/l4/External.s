@@ -150,7 +150,6 @@ function shell_body( o )
   _.assert( o.args === null || _.arrayIs( o.args ) || _.strIs( o.args ) );
   _.assert( o.execPath === null || _.strIs( o.execPath ) || _.strsAreAll( o.execPath ), 'Expects string or strings {-o.execPath-}, but got', _.strType( o.execPath ) );
   _.assert( o.timeOut === null || _.numberIs( o.timeOut ), 'Expects null or number {-o.timeOut-}, but got', _.strType( o.timeOut ) );
-  _.assert( !o.ipc || !_.arrayHas( [ 'exec', 'shell' ], o.mode ), 'IPC is not supported on all platforms with mode:', o.mode );
 
   let state = 0;
   let currentExitCode;
@@ -222,7 +221,6 @@ function shell_body( o )
 
       let o2 = _.mapExtend( null, o );
       o2.execPath = execPath[ p ];
-      o2.args = o.args ? o.args.slice() : o.args;
       o2.currentPath = currentPath[ c ];
       o2.ready = currentReady;
       options.push( o2 );
@@ -317,8 +315,6 @@ function shell_body( o )
   {
 
     // qqq : cover the case ( args is string ) for both routines shell and sheller
-    // if( _.strIs( o.args ) )
-    // o.args = _.strSplitNonPreserving({ src : o.args });
     if( _.strIs( o.args ) )
     o.args = argsParse( o.args );
 
@@ -328,6 +324,7 @@ function shell_body( o )
       o.execPath = execArgs.shift();
       o.args = _.arrayPrependArray( o.args || [], execArgs );
     }
+    // o.args = _.strSplitNonPreserving({ src : o.args });
 
     if( o.execPath === null )
     {
@@ -473,8 +470,10 @@ function shell_body( o )
   {
     if( _.strIs( o.interpreterArgs ) )
     o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs });
+// HEAD
 
     _.assert( _.fileProvider.isDir( o.currentPath ), 'working directory', o.currentPath, 'doesn\'t exist or it\'s not a directory.' );
+// 046ad80c263f0d673257503751541a88ce2eeedc
 
     if( o.mode === 'fork')
     {
@@ -487,13 +486,14 @@ function shell_body( o )
     {
       let currentPath = _.path.nativize( o.currentPath );
       log( '{ shell.mode } "exec" is deprecated' );
+// HEAD
 
       let execPath = o.execPath + ' ' + argsJoin( o.args );
 
       if( o.sync && !o.deasync )
-      o.process = ChildProcess.execSync( execPath, { env : o.env, cwd : currentPath } );
+      o.process = ChildProcess.execSync( o.execPath, { env : o.env, cwd : currentPath } );
       else
-      o.process = ChildProcess.exec( execPath, { env : o.env, cwd : currentPath } );
+      o.process = ChildProcess.exec( o.execPath, { env : o.env, cwd : currentPath } );
     }
     else if( o.mode === 'spawn' )
     {
@@ -566,6 +566,7 @@ example of execPath :
 */
 
   /* */
+// HEAD
 
   function argsParse( src )
   {
@@ -609,6 +610,8 @@ example of execPath :
   }
 
   /* */
+
+// xxx 046ad80c263f0d673257503751541a88ce2eeedc
 
   function argsJoin( args )
   {
