@@ -221,11 +221,12 @@ function shell_body( o )
 
       let o2 = _.mapExtend( null, o );
       o2.execPath = execPath[ p ];
+      o2.args = o.args ? o.args.slice() : o.args;
       o2.currentPath = currentPath[ c ];
       o2.ready = currentReady;
       options.push( o2 );
       _.shell( o2 );
-
+      
     }
 
     debugger;
@@ -315,8 +316,17 @@ function shell_body( o )
   {
 
     // qqq : cover the case ( args is string ) for both routines shell and sheller
+    // if( _.strIs( o.args ) )
+    // o.args = _.strSplitNonPreserving({ src : o.args });
     if( _.strIs( o.args ) )
-    o.args = _.strSplitNonPreserving({ src : o.args });
+    o.args = argsParse( o.args );
+    
+    if( _.strIs( o.execPath ) )
+    {  
+      let execArgs = argsParse( o.execPath );
+      o.execPath = execArgs.shift();
+      o.args = _.arrayPrependArray( o.args || [], execArgs );
+    }
 
     if( o.execPath === null )
     {
@@ -480,10 +490,11 @@ function shell_body( o )
     {
       let currentPath = _.path.nativize( o.currentPath );
       log( '{ shell.mode } "exec" is deprecated' );
+      let execPath = o.execPath + ' ' + argsJoin( o.args );
       if( o.sync && !o.deasync )
-      o.process = ChildProcess.execSync( o.execPath, { env : o.env, cwd : currentPath } );
+      o.process = ChildProcess.execSync( execPath, { env : o.env, cwd : currentPath } );
       else
-      o.process = ChildProcess.exec( o.execPath, { env : o.env, cwd : currentPath } );
+      o.process = ChildProcess.exec( execPath, { env : o.env, cwd : currentPath } );
     }
     else if( o.mode === 'spawn' )
     {
