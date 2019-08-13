@@ -150,7 +150,6 @@ function shell_body( o )
   _.assert( o.args === null || _.arrayIs( o.args ) || _.strIs( o.args ) );
   _.assert( o.execPath === null || _.strIs( o.execPath ) || _.strsAreAll( o.execPath ), 'Expects string or strings {-o.execPath-}, but got', _.strType( o.execPath ) );
   _.assert( o.timeOut === null || _.numberIs( o.timeOut ), 'Expects null or number {-o.timeOut-}, but got', _.strType( o.timeOut ) );
-  _.assert( !o.ipc || !_.arrayHas( [ 'exec', 'shell' ], o.mode ), 'IPC is not supported on all platforms with mode:', o.mode );
 
   let state = 0;
   let currentExitCode;
@@ -193,7 +192,7 @@ function shell_body( o )
 
     if( _.arrayIs( o.execPath ) && o.execPath.length > 1 && o.concurrent && o.outputAdditive === null )
     o.outputAdditive = 0;
-    
+
     o.currentPath = o.currentPath || _.path.current();
 
     let prevReady = o.ready;
@@ -202,7 +201,7 @@ function shell_body( o )
 
     let execPath = _.arrayAs( o.execPath );
     let currentPath = _.arrayAs( o.currentPath );
-    
+
     for( let p = 0 ; p < execPath.length ; p++ )
     for( let c = 0 ; c < currentPath.length ; c++ )
     {
@@ -219,10 +218,9 @@ function shell_body( o )
         prevReady.finally( currentReady );
         prevReady = currentReady;
       }
-      
+
       let o2 = _.mapExtend( null, o );
       o2.execPath = execPath[ p ];
-      o2.args = o.args ? o.args.slice() : o.args;
       o2.currentPath = currentPath[ c ];
       o2.ready = currentReady;
       options.push( o2 );
@@ -317,17 +315,8 @@ function shell_body( o )
   {
 
     // qqq : cover the case ( args is string ) for both routines shell and sheller
-    // if( _.strIs( o.args ) )
-    // o.args = _.strSplitNonPreserving({ src : o.args });
     if( _.strIs( o.args ) )
-    o.args = argsParse( o.args );
-    
-    if( _.strIs( o.execPath ) )
-    {  
-      let execArgs = argsParse( o.execPath );
-      o.execPath = execArgs.shift();
-      o.args = _.arrayPrependArray( o.args || [], execArgs );
-    }
+    o.args = _.strSplitNonPreserving({ src : o.args });
 
     if( o.execPath === null )
     {
@@ -470,7 +459,7 @@ function shell_body( o )
   /* */
 
   function launchAct()
-  { 
+  {
     if( _.strIs( o.interpreterArgs ) )
     o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs });
     
@@ -491,13 +480,10 @@ function shell_body( o )
     {
       let currentPath = _.path.nativize( o.currentPath );
       log( '{ shell.mode } "exec" is deprecated' );
-      
-      let execPath = o.execPath + ' ' + argsJoin( o.args );
-      
       if( o.sync && !o.deasync )
-      o.process = ChildProcess.execSync( execPath, { env : o.env, cwd : currentPath } );
+      o.process = ChildProcess.execSync( o.execPath, { env : o.env, cwd : currentPath } );
       else
-      o.process = ChildProcess.exec( execPath, { env : o.env, cwd : currentPath } );
+      o.process = ChildProcess.exec( o.execPath, { env : o.env, cwd : currentPath } );
     }
     else if( o.mode === 'spawn' )
     {
@@ -544,7 +530,7 @@ function shell_body( o )
 
       if( o.args )
       arg2 = arg2 + ' ' + argsJoin( o.args );
-      
+
       if( o.sync && !o.deasync )
       o.process = ChildProcess.spawnSync( appPath, [ arg1, arg2 ], o2 );
       else
@@ -1453,7 +1439,7 @@ function appAnchor( o )
 
   _.routineOptions( appAnchor, arguments );
 
-  let a = _.strToMap
+  let a = _.strStructureParse
   ({
     src : _.strRemoveBegin( window.location.hash, '#' ),
     keyValDelimeter : ':',
@@ -1807,8 +1793,6 @@ let Proto =
   shellNode,
   shellNodePassingThrough,
   sheller,
-
-  //
 
   _appArgsInSamFormatNodejs,
   _appArgsInSamFormatBrowser,
