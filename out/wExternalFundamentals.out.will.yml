@@ -1,6 +1,6 @@
 format: willfile-1.0.0
 about:
-  name: wExternalFundamentals
+  name: wAppBasic
   description: >-
     Collection of routines to execute system commands, run shell, batches,
     launch external processes from JavaScript application. ExecTools leverages
@@ -11,18 +11,18 @@ about:
   enabled: 1
   version: 0.3.143
   interpreters: &ref_0
-    - nodejs >= 6.0.0
+    - nodejs >= 8.0.0
     - chrome >= 60.0.0
     - firefox >= 60.0.0
   keywords: &ref_1
     - wTools
 path:
   module.willfiles:
-    path: wExternalFundamentals.out.will.yml
+    path: wAppBasic.out.will.yml
     criterion:
       predefined: 1
   module.common:
-    path: wExternalFundamentals.out
+    path: wAppBasic.out
     criterion:
       predefined: 1
   module.original.willfiles:
@@ -58,9 +58,9 @@ path:
   proto:
     path: ../proto
   repository:
-    path: 'git+https:///github.com/Wandalen/wExternalFundamentals.git'
+    path: 'git+https:///github.com/Wandalen/wAppBasic.git'
   bugs:
-    path: 'https:///github.com/Wandalen/wExternalFundamentals/issues'
+    path: 'https:///github.com/Wandalen/wAppBasic/issues'
   exported.dir.proto.export:
     path: ../proto
     criterion:
@@ -293,7 +293,7 @@ exported:
 module:
   ../:
     about:
-      name: wExternalFundamentals
+      name: wAppBasic
       description: >-
         Collection of routines to execute system commands, run shell, batches,
         launch external processes from JavaScript application. ExecTools
@@ -349,9 +349,9 @@ module:
       proto:
         path: ./proto
       repository:
-        path: 'git+https:///github.com/Wandalen/wExternalFundamentals.git'
+        path: 'git+https:///github.com/Wandalen/wAppBasic.git'
       bugs:
-        path: 'https:///github.com/Wandalen/wExternalFundamentals/issues'
+        path: 'https:///github.com/Wandalen/wAppBasic/issues'
       exported.dir.proto.export:
         path: ./proto
         criterion:
@@ -581,4 +581,4 @@ module:
         exportedFilesReflector: 'reflector::exported.files.proto.export'
         exportedDirPath: 'path::exported.dir.proto.export'
         exportedFilesPath: 'path::exported.files.proto.export'
-  wExternalFundamentals.out: root
+  wAppBasic.out: root

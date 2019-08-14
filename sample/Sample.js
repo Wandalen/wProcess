@@ -1,6 +1,6 @@
 
 if( typeof module !== 'undefined' )
-require( 'wexternalfundamentals' );
+require( 'wappbasic' );
 var _ = wTools;
 
 /**/
