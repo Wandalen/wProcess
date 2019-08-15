@@ -87,6 +87,7 @@ function testAppShell()
 {
   let _ = require( '../../../Tools.s' );
   _.include( 'wAppBasic' );
+  _.include( 'wStringsExtra' )
 
   var args = _.appArgs();
 
@@ -405,6 +406,7 @@ function appExitHandlerOnce( test )
   {
     let _ = require( '../../../Tools.s' );
     _.include( 'wAppBasic' );
+    _.include( 'wStringsExtra' )
 
     var args = _.appArgs();
 
@@ -3111,6 +3113,130 @@ function shellArgumentsParsing( test )
     return con;
   })
   
+  /* special case from willbe */
+  
+  .then( () => 
+  {
+    test.case = `'path to exec : with space' 'execPath: only path' 'args: willbe args' 'fork'`
+    
+    let con = new _.Consequence().take( null );
+    let o = 
+    {
+      execPath : _.strQuote( testAppPathSpace ),
+      args : '".imply v:1 ; .each . .resources.list about::name"',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+    
+    let got;
+    o.process.on( 'message', ( data ) => { got = data } )
+    
+    con.then( () => 
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, { v : 1 } )
+      test.identical( got.scriptArgs, [ '.imply v:1 ; .each . .resources.list about::name' ] )
+      
+      return null;
+    })
+    
+    return con;
+  })
+  
+  .then( () => 
+  {
+    test.case = `'path to exec : with space' 'execPath: only path' 'args: willbe args' 'spawn'`
+    
+    let con = new _.Consequence().take( null );
+    let o = 
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ),
+      args : '".imply v:1 ; .each . .resources.list about::name"',
+      mode : 'spawn',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+    
+    con.then( () => 
+    {
+      test.identical( o.exitCode, 0 );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, { v : 1 } )
+      test.identical( got.scriptArgs, [ '.imply v:1 ; .each . .resources.list about::name' ] )
+      
+      return null;
+    })
+    
+    return con;
+  })
+  
+  .then( () => 
+  {
+    test.case = `'path to exec : with space' 'execPath: only path' 'args: willbe args' 'shell'`
+    
+    let con = new _.Consequence().take( null );
+    let o = 
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ),
+      args : '".imply v:1 ; .each . .resources.list about::name"',
+      mode : 'shell',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+    
+    con.then( () => 
+    {
+      test.identical( o.exitCode, 0 );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, { v : 1 } )
+      test.identical( got.scriptArgs, [ '.imply v:1 ; .each . .resources.list about::name' ] )
+      
+      return null;
+    })
+    
+    return con;
+  })
+    
+  .then( () => 
+  {
+    test.case = `'path to exec : with space' 'execPath: only path' 'args: willbe args' 'exec'`
+    
+    let con = new _.Consequence().take( null );
+    let o = 
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ),
+      args : '".imply v:1 ; .each . .resources.list about::name"',
+      mode : 'exec',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+    
+    con.then( () => 
+    {
+      test.identical( o.exitCode, 0 );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, { v : 1 } )
+      test.identical( got.scriptArgs, [ '.imply v:1 ; .each . .resources.list about::name' ] )
+      
+      return null;
+    })
+    
+    return con;
+  })
+  
   /*  */
   
   return ready;
@@ -3120,7 +3246,8 @@ function shellArgumentsParsing( test )
   function testApp()
   { 
     let _ = require( '../../../../Tools.s' );
-    _.include( 'wExternalFundamentals' );
+    _.include( 'wAppBasic' );
+    _.include( 'wStringsExtra' )
     var args = _.appArgs();
     if( process.send )
     process.send( args );
@@ -3329,7 +3456,8 @@ function shellArgumentsNestedQuotes( test )
   function testApp()
   { 
     let _ = require( '../../../../Tools.s' );
-    _.include( 'wExternalFundamentals' );
+    _.include( 'wAppBasic' );
+    _.include( 'wStringsExtra' )
     var args = _.appArgs();
     console.log( JSON.stringify( args ) );
   }
@@ -4125,9 +4253,8 @@ function shellConcurrent( test )
   _.shell( singleExecPathInArrayOptions )
   .then( ( arg ) =>
   {
-
-    test.identical( arg.length, 2 );
-    test.identical( arg[ 1 ], null );
+    
+    test.identical( arg.length, 1 );
     test.identical( arg[ 0 ].exitCode, 0 );
     test.is( singleExecPathInArrayOptions !== arg[ 0 ] );
     test.is( _.strHas( arg[ 0 ].output, 'begin 1000' ) );
@@ -4231,8 +4358,7 @@ function shellConcurrent( test )
     test.le( spent, 5000 );
 
     test.identical( subprocessesOptionsSerial.exitCode, 0 );
-    test.identical( arg.length, 3 );
-    test.identical( arg[ 2 ], null );
+    test.identical( arg.length, 2 );
     test.identical( _.fileProvider.fileRead( filePath ), 'written by 10' );
     _.fileProvider.fileDelete( filePath );
 
@@ -4314,8 +4440,7 @@ function shellConcurrent( test )
     test.le( spent, 5000 );
 
     test.identical( subprocessesErrorNonThrowing.exitCode, 1 );
-    test.identical( arg.length, 3 );
-    test.identical( arg[ 2 ], null );
+    test.identical( arg.length, 2 );
     test.identical( _.fileProvider.fileRead( filePath ), 'written by 10' );
     _.fileProvider.fileDelete( filePath );
 
@@ -4399,8 +4524,7 @@ function shellConcurrent( test )
     test.le( spent, 5000 );
 
     test.identical( subprocessesErrorConcurrentNonThrowing.exitCode, 1 );
-    test.identical( arg.length, 3 );
-    test.identical( arg[ 2 ], null );
+    test.identical( arg.length, 2 );
     test.identical( _.fileProvider.fileRead( filePath ), 'written by 10' );
     _.fileProvider.fileDelete( filePath );
 
@@ -4445,8 +4569,7 @@ function shellConcurrent( test )
     test.le( spent, 5000 );
 
     test.identical( suprocessesConcurrentOptions.exitCode, 0 );
-    test.identical( arg.length, 3 );
-    test.identical( arg[ 2 ], null );
+    test.identical( arg.length, 2 );
     test.identical( _.fileProvider.fileRead( filePath ), 'written by 1000' );
     _.fileProvider.fileDelete( filePath );
 
@@ -4490,8 +4613,7 @@ function shellConcurrent( test )
     test.le( spent, 5000 );
 
     test.identical( suprocessesConcurrentArgumentsOptions.exitCode, 0 );
-    test.identical( arg.length, 3 );
-    test.identical( arg[ 2 ], null );
+    test.identical( arg.length, 2 );
     test.identical( _.fileProvider.fileRead( filePath ), 'written by 1000' );
     _.fileProvider.fileDelete( filePath );
 
@@ -4737,8 +4859,7 @@ function shellerConcurrent( test )
     test.le( spent, 5000 );
 
     test.identical( subprocessesOptionsSerial2.exitCode, 0 );
-    test.identical( arg.length, 3 );
-    test.identical( arg[ 2 ], null );
+    test.identical( arg.length, 2 );
     test.identical( _.fileProvider.fileRead( filePath ), 'written by 10' );
     _.fileProvider.fileDelete( filePath );
 
@@ -4826,8 +4947,7 @@ function shellerConcurrent( test )
     test.le( spent, 5000 );
 
     test.identical( subprocessesErrorNonThrowing2.exitCode, 1 );
-    test.identical( arg.length, 3 );
-    test.identical( arg[ 2 ], null );
+    test.identical( arg.length, 2 );
     test.identical( _.fileProvider.fileRead( filePath ), 'written by 10' );
     _.fileProvider.fileDelete( filePath );
 
@@ -4917,8 +5037,7 @@ function shellerConcurrent( test )
     test.le( spent, 5000 );
 
     test.identical( subprocessesErrorConcurrentNonThrowing2.exitCode, 1 );
-    test.identical( arg.length, 3 );
-    test.identical( arg[ 2 ], null );
+    test.identical( arg.length, 2 );
     test.identical( _.fileProvider.fileRead( filePath ), 'written by 10' );
     _.fileProvider.fileDelete( filePath );
 
@@ -4966,8 +5085,7 @@ function shellerConcurrent( test )
     test.le( spent, 5000 );
 
     test.identical( subprocessesConcurrentOptions2.exitCode, 0 );
-    test.identical( arg.length, 3 );
-    test.identical( arg[ 2 ], null );
+    test.identical( arg.length, 2 );
     test.identical( _.fileProvider.fileRead( filePath ), 'written by 1000' );
     _.fileProvider.fileDelete( filePath );
 
@@ -5015,8 +5133,7 @@ function shellerConcurrent( test )
     test.le( spent, 5000 );
 
     test.identical( subprocessesConcurrentArgumentsOptions2.exitCode, 0 );
-    test.identical( arg.length, 3 );
-    test.identical( arg[ 2 ], null );
+    test.identical( arg.length, 2 );
     test.identical( _.fileProvider.fileRead( filePath ), 'written by 1000' );
     _.fileProvider.fileDelete( filePath );
 
@@ -5079,8 +5196,7 @@ function sheller( test )
     .thenKeep( ( got ) =>
     {
       debugger;
-      test.identical( got.length, 3 );
-      test.identical( got[ got.length - 1 ], null );
+      test.identical( got.length, 2 );
 
       let o1 = got[ 0 ];
       let o2 = got[ 1 ];
@@ -5106,8 +5222,7 @@ function sheller( test )
     return shell({ execPath :  [ 'arg1', 'arg2' ] })
     .thenKeep( ( got ) =>
     {
-      test.identical( got.length, 3 );
-      test.identical( got[ got.length - 1 ], null );
+      test.identical( got.length, 2 );
 
       let o1 = got[ 0 ];
       let o2 = got[ 1 ];
@@ -5134,8 +5249,7 @@ function sheller( test )
     return shell({ execPath :  [ 'arg1', 'arg2' ], args : [ 'arg3' ] })
     .thenKeep( ( got ) =>
     {
-      test.identical( got.length, 3 );
-      test.identical( got[ got.length - 1 ], null );
+      test.identical( got.length, 2 );
 
       let o1 = got[ 0 ];
       let o2 = got[ 1 ];
@@ -5186,8 +5300,7 @@ function sheller( test )
     return shell({ execPath :  'arg1' })
     .thenKeep( ( got ) =>
     {
-      test.identical( got.length, 3 );
-      test.identical( got[ got.length - 1 ], null );
+      test.identical( got.length, 2 );
 
       let o1 = got[ 0 ];
       let o2 = got[ 1 ];
@@ -5217,8 +5330,7 @@ function sheller( test )
     return shell({ execPath :  [ 'arg1', 'arg2' ]})
     .thenKeep( ( got ) =>
     {
-      test.identical( got.length, 5 );
-      test.identical( got[ got.length - 1 ], null );
+      test.identical( got.length, 4 );
 
       let o1 = got[ 0 ];
       let o2 = got[ 1 ];
