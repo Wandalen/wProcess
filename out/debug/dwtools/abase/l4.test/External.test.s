@@ -10,7 +10,7 @@ if( typeof module !== 'undefined' )
   _.include( 'wTesting' );
   _.include( 'wFiles' );
 
-  require( '../l4/External.s' );
+  require( '../l4/AppBasic.s' );
 
 }
 

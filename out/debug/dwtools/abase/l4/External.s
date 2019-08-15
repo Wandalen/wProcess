@@ -28,10 +28,10 @@ if( typeof module !== 'undefined' )
 
 }
 
-let System, ChildProcess, Deasync;
+let System, ChildProcess;
 let _global = _global_;
 let _ = _global_.wTools;
-let Self = _global_.wTools;
+let Self = _global_.wTools.app || _global_.wTools.app || Object.create( null );
 
 _.assert( !!_realGlobal_ );
 
@@ -623,8 +623,6 @@ args : [ '"', '"', 'first', 'arg', '"' ]
 ->
 execPath : '"'
 args : [ '"', 'first', 'arg', '"' ]
-
-*/
 
 */
 
@@ -1858,7 +1856,7 @@ function appMemoryUsageInfo()
 // declare
 // --
 
-let Proto =
+let Extend =
 {
 
   shell,
@@ -1888,13 +1886,14 @@ let Proto =
 
 }
 
-_.mapExtend( Self, Proto );
+_.mapExtend( _, Extend );
+// _.mapExtend( Self, Extend );
 
 // --
 // export
 // --
 
 if( typeof module !== 'undefined' && module !== null )
-module[ 'exports' ] = Self;
+module[ 'exports' ] = _;
 
 })();
