@@ -1,4 +1,4 @@
-( function _External_s_() {
+( function _AppBasic_s_() {
 
 'use strict';
 
@@ -226,7 +226,7 @@ function shell_body( o )
       o2.ready = currentReady;
       options.push( o2 );
       _.shell( o2 );
-      
+
     }
 
     // debugger;
@@ -320,9 +320,9 @@ function shell_body( o )
     // o.args = _.strSplitNonPreserving({ src : o.args });
     if( _.strIs( o.args ) )
     o.args = argsParse( o.args );
-    
+
     if( _.strIs( o.execPath ) )
-    {  
+    {
       let execArgs = argsParse( o.execPath );
       o.execPath = execArgs.shift();
       o.args = _.arrayPrependArray( o.args || [], execArgs );
@@ -472,9 +472,9 @@ function shell_body( o )
   {
     if( _.strIs( o.interpreterArgs ) )
     o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs });
-    
+
     _.assert( _.fileProvider.isDir( o.currentPath ), 'working directory', o.currentPath, 'doesn\'t exist or it\'s not a directory.' );
-    
+
     if( o.args )
     o.args = argsForm( o.args );
 
@@ -564,56 +564,118 @@ for combination:
 
 example of execPath :
   execPath : '"/dir with space/app.exe" firstArg secondArg:1 "third arg" \'fourth arg\'  `"fifth" arg`
+
+== samples
+
+execPath : '"/dir with space/app.exe" `firstArg secondArg ":" 1` "third arg" \'fourth arg\'  `"fifth" arg`,
+args : '"some arg"'
+mode : 'spawn'
+->
+execPath : '/dir with space/app.exe'
+args : [ 'firstArg secondArg ":" 1', 'third arg', 'fourth arg', '"fifth" arg', '"some arg"' ],
+
+=
+
+execPath : '"/dir with space/app.exe" firstArg secondArg:1',
+args : '"third arg"',
+->
+execPath : '/dir with space/app.exe'
+args : [ 'firstArg', 'secondArg:1', '"third arg"' ]
+
+=
+
+execPath : '"first arg"'
+->
+execPath : 'first arg'
+args : []
+
+=
+
+args : '"first arg"'
+->
+execPath : 'first arg'
+args : []
+
+=
+
+args : [ '"first arg"', 'second arg' ]
+->
+execPath : 'first arg'
+args : [ 'second arg' ]
+
+=
+
+args : [ '"', 'first', 'arg', '"' ]
+->
+execPath : '"'
+args : [ 'first', 'arg', '"' ]
+
+=
+
+args : [ '', 'first', 'arg', '"' ]
+->
+execPath : ''
+args : [ 'first', 'arg', '"' ]
+
+=
+
+args : [ '"', '"', 'first', 'arg', '"' ]
+->
+execPath : '"'
+args : [ '"', 'first', 'arg', '"' ]
+
+*/
+
 */
 
   /* */
-  
+
   function argsParse( src )
-  { 
-    let strOptions = 
-    { 
-      src : src, 
-      delimeter : [ ' ' ], 
-      quoting : 1, 
-      quotingPrefixes : [ "'", '"', "`" ], 
-      quotingPostfixes : [ "'", '"', "`" ], 
+  {
+    let strOptions =
+    {
+      src : src,
+      delimeter : [ ' ' ],
+      quoting : 1,
+      quotingPrefixes : [ "'", '"', "`" ],
+      quotingPostfixes : [ "'", '"', "`" ],
       preservingEmpty : 0,
       preservingQuoting : 1,
-      stripping : 1 
+      stripping : 1
     }
     let args = _.strSplit( strOptions );
-    
+
     for( let i = 0; i < args.length; i++ )
-    { 
+    {
       let begin = _.strBeginOf( args[ i ], strOptions.quotingPrefixes );
       let end = _.strEndOf( args[ i ], strOptions.quotingPostfixes );
       _.sure( begin === end, 'Arguments string:', src, 'has not closed quoting, that begins of:', args[ i ] );
     }
     return args;
   }
-  
+
   /* */
-  
+
   function argsForm( args )
-  { 
+  {
     let quotes = [ "'", '"', "`" ];
-    
+
     for( let i = 0; i < args.length; i++ )
-    { 
+    {
       let begin = _.strBeginOf( args[ i ], quotes );
       if( begin )
-      { 
+      {
         //extracts string from nested quoting to equalize behavior and later wrap each args with same quotes( "" )
         args[ i ] = _.strInsideOf( args[ i ], begin, begin );
-        
+
         //escaping of some quotes is needed to equalize behavior of shell and exec modes on all platforms
         if( o.mode === 'shell' || o.mode === 'exec' )
         {
           let quotes = [ '"' ]
           if( process.platform !== 'win32' )
           quotes.push( "`" )
-          _.each( quotes, ( quote ) => 
-          { 
+          _.each( quotes, ( quote ) =>
+          {
             args[ i ] = _.strReplaceAll( args[ i ], quote, '\\' + quote );
           })
         }
@@ -665,7 +727,7 @@ example of execPath :
 
     return o2;
   }
-  
+
   function execPathForFork()
   {
     let quotes = [ "'", '"', "`" ];
