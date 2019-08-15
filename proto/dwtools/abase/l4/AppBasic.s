@@ -318,33 +318,25 @@ function shell_body( o )
     // qqq : cover the case ( args is string ) for both routines shell and sheller
     // if( _.strIs( o.args ) )
     // o.args = _.strSplitNonPreserving({ src : o.args });
-    if( _.strIs( o.args ) )
-    o.args = argsParse( o.args );
+    o.args = _.arrayAs( o.args );
 
     if( _.strIs( o.execPath ) )
     {
-      let execArgs = argsParse( o.execPath );
+      let execArgs = execPathParse( o.execPath );
       o.execPath = execArgs.shift();
+      if( execArgs.length )
       o.args = _.arrayPrependArray( o.args || [], execArgs );
     }
 
     if( o.execPath === null )
     {
-      o.args = _.arrayAs( o.args );
-      let l = o.args[ 0 ];
-      let r = o.args.slice( 1 );
-      o.execPath = l;
-
-      if( o.mode === 'fork' )
-      {
-        o.args = r;
-      }
-      else
-      {
-        if( r.length )
-        o.execPath = l + ' ' + argsJoin( r );
-        o.args = null;
-      }
+      o.execPath = o.args.shift();
+      
+      let begin = _.strBeginOf( o.execPath, [ '"', "'", '`' ] );
+      let end = _.strEndOf( o.execPath, [ '"', "'", '`' ] );
+      
+      if( begin && begin === end )
+      o.execPath = _.strInsideOf( o.execPath, begin, end );
     }
 
     if( o.outputAdditive === null )
@@ -475,9 +467,6 @@ function shell_body( o )
 
     _.assert( _.fileProvider.isDir( o.currentPath ), 'working directory', o.currentPath, 'doesn\'t exist or it\'s not a directory.' );
 
-    if( o.args )
-    o.args = argsForm( o.args );
-
     if( o.mode === 'fork')
     {
       _.assert( !o.sync || o.deasync, '{ shell.mode } "fork" is available only in async/deasync version of shell' );
@@ -500,16 +489,16 @@ function shell_body( o )
     {
       let appPath = o.execPath;
 
-      if( !o.args )
-      {
-        o.args = _.strSplitNonPreserving({ src : o.execPath });
-        appPath = o.args.shift();
-      }
-      else
-      {
-        if( appPath.length )
-        _.assert( _.strSplitNonPreserving({ src : appPath }).length === 1, ' o.execPath must not contain arguments if those were provided through options' );
-      }
+      // if( !o.args )
+      // {
+      //   o.args = _.strSplitNonPreserving({ src : o.execPath });
+      //   appPath = o.args.shift();
+      // }
+      // else
+      // {
+      //   if( appPath.length )
+      //   _.assert( _.strSplitNonPreserving({ src : appPath }).length === 1, ' o.execPath must not contain arguments if those were provided through options' );
+      // }
 
       let o2 = optionsForSpawn();
 
@@ -628,7 +617,7 @@ args : [ '"', 'first', 'arg', '"' ]
 
   /* */
 
-  function argsParse( src )
+  function execPathParse( src )
   {
     let strOptions =
     {
@@ -647,7 +636,9 @@ args : [ '"', 'first', 'arg', '"' ]
     {
       let begin = _.strBeginOf( args[ i ], strOptions.quotingPrefixes );
       let end = _.strEndOf( args[ i ], strOptions.quotingPostfixes );
-      _.sure( begin === end, 'Arguments string:', src, 'has not closed quoting, that begins of:', args[ i ] );
+      _.sure( begin === end, 'Arguments string in execPath:', src, 'has not closed quoting, that begins of:', args[ i ] );
+      if( begin )
+      args[ i ] = _.strInsideOf( args[ i ], begin, end );
     }
     return args;
   }
@@ -663,9 +654,6 @@ args : [ '"', 'first', 'arg', '"' ]
       let begin = _.strBeginOf( args[ i ], quotes );
       if( begin )
       {
-        //extracts string from nested quoting to equalize behavior and later wrap each args with same quotes( "" )
-        args[ i ] = _.strInsideOf( args[ i ], begin, begin );
-
         //escaping of some quotes is needed to equalize behavior of shell and exec modes on all platforms
         if( o.mode === 'shell' || o.mode === 'exec' )
         {
@@ -686,7 +674,20 @@ args : [ '"', 'first', 'arg', '"' ]
 
   function argsJoin( args )
   {
-    args = _.arrayAs( args );
+    args = args.slice();
+    
+    for( let i = 0; i < args.length; i++ )
+    {
+      //escaping of some quotes is needed to equalize behavior of shell and exec modes on all platforms
+      let quotes = [ '"' ]
+      if( process.platform !== 'win32' )
+      quotes.push( "`" )
+      _.each( quotes, ( quote ) =>
+      {
+        args[ i ] = _.strReplaceAll( args[ i ], quote, '\\' + quote );
+      })
+    }
+    
     return '"' + args.join( '" "' ) + '"';
   }
 
