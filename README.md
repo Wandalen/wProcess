@@ -1,5 +1,5 @@
 
-# wExternalFundamentals [![Build Status](https://travis-ci.org/Wandalen/wExternalFundamentals.svg?branch=master)](https://travis-ci.org/Wandalen/wExternalFundamentals)
+# wAppBasic [![Build Status](https://travis-ci.org/Wandalen/wAppBasic.svg?branch=master)](https://travis-ci.org/Wandalen/wAppBasic)
 
 Collection of routines to execute system commands, run shell, batches, launch external processes from JavaScript application. ExecTools leverages not only outputting data from an application but also inputting, makes application arguments parsing and accounting easier. Use the module to get uniform experience from interaction with an external processes on different platforms and operating systems.
 
@@ -8,6 +8,8 @@ Collection of routines to execute system commands, run shell, batches, launch ex
 npm install
 node sample/Sample.s
 ```
+
+
 
 
 

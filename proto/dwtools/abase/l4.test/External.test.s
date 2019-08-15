@@ -86,7 +86,7 @@ function testApp()
 function testAppShell()
 {
   let _ = require( '../../../Tools.s' );
-  _.include( 'wExternalFundamentals' );
+  _.include( 'wAppBasic' );
 
   var args = _.appArgs();
 
@@ -404,7 +404,7 @@ function appExitHandlerOnce( test )
   function testApp()
   {
     let _ = require( '../../../Tools.s' );
-    _.include( 'wExternalFundamentals' );
+    _.include( 'wAppBasic' );
 
     var args = _.appArgs();
 

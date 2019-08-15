@@ -22,7 +22,7 @@ if( typeof module !== 'undefined' )
 
   let _ = require( '../../Tools.s' );
 
-  _.include( 'wPathFundamentals' );
+  _.include( 'wPathBasic' );
   _.include( 'wGdfStrategy' );
   _.include( 'wConsequence' );
 
@@ -109,7 +109,7 @@ function shell_pre( routine, args )
  * @example //short way, command and arguments in one string
  *
  * let _ = require('wTools')
- * _.include( 'wExternalFundamentals' )
+ * _.include( 'wAppBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
  *
@@ -124,7 +124,7 @@ function shell_pre( routine, args )
  * @example //command and arguments as options
  *
  * let _ = require('wTools')
- * _.include( 'wExternalFundamentals' )
+ * _.include( 'wAppBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
  *
@@ -228,13 +228,13 @@ function shell_body( o )
 
     }
 
-    debugger;
+    // debugger;
     o.ready
     // .then( () => new _.Consequence().take( null ).andKeep( readies ) )
     .then( () => _.Consequence.AndKeep( readies ) )
     .finally( ( err, arg ) =>
     {
-      debugger;
+      // debugger;
       o.exitCode = err ? null : 0;
 
       for( let a = 0 ; a < options.length-1 ; a++ )
@@ -873,7 +873,7 @@ defaults.stdio = 'inherit';
  * @example
  *
  * let _ = require('wTools')
- * _.include( 'wExternalFundamentals' )
+ * _.include( 'wAppBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
  *
@@ -895,7 +895,7 @@ function shellNode_body( o )
   if( !System )
   System = require( 'os' );
 
-  _.include( 'wPathFundamentals' );
+  _.include( 'wPathBasic' );
   _.include( 'wFiles' );
 
   _.assertRoutineOptions( shellNode, o );
@@ -972,7 +972,7 @@ let shellNode = _.routineFromPreAndBody( shell_pre, shellNode_body );
  * @example
  *
  * let _ = require('wTools')
- * _.include( 'wExternalFundamentals' )
+ * _.include( 'wAppBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
  *
@@ -1013,7 +1013,7 @@ defaults.mode = 'fork';
  * @example //single command execution
  *
  * let _ = require('wTools')
- * _.include( 'wExternalFundamentals' )
+ * _.include( 'wAppBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
  *
@@ -1030,7 +1030,7 @@ defaults.mode = 'fork';
  * @example //multiple commands execution with same args
  *
  * let _ = require('wTools')
- * _.include( 'wExternalFundamentals' )
+ * _.include( 'wAppBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
  *
@@ -1049,7 +1049,7 @@ defaults.mode = 'fork';
  * //second command will be executed when first is finished
  *
  * let _ = require('wTools')
- * _.include( 'wExternalFundamentals' )
+ * _.include( 'wAppBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
  *
@@ -1116,7 +1116,7 @@ function sheller( o0 )
     src = { execPath : src }
     _.assertMapHasOnly( src, sheller.defaults );
 
-    if( src.execPath && dst.execPath )
+    if( src.execPath !== null && src.execPath !== undefined && dst.execPath !== null && dst.execPath !== undefined )
     {
       _.assert( _.arrayIs( src.execPath ) || _.strIs( src.execPath ), () => 'Expects string or array, but got ' + _.strType( src.execPath ) );
       if( _.arrayIs( src.execPath ) )
@@ -1163,7 +1163,7 @@ sheller.defaults = Object.create( shell.defaults );
  * @example
  *
  * let _ = require('wTools')
- * _.include( 'wExternalFundamentals' )
+ * _.include( 'wAppBasic' )
  * let result = _.appArgs();
  * console.log( result );
  *
