@@ -487,7 +487,9 @@ function shell_body( o )
     {
       let currentPath = _.path.nativize( o.currentPath );
       log( '{ shell.mode } "exec" is deprecated' );
-      let execPath = o.execPath + ' ' + argsJoin( o.args );
+      let execPath = o.execPath;
+      if( o.args.length )
+      execPath = execPath + ' ' + argsJoin( o.args );
       if( o.sync && !o.deasync )
       o.process = ChildProcess.execSync( execPath, { env : o.env, cwd : currentPath } );
       else
@@ -536,7 +538,7 @@ function shell_body( o )
 
       o2.windowsVerbatimArguments = true;
 
-      if( o.args )
+      if( o.args.length )
       arg2 = arg2 + ' ' + argsJoin( o.args );
 
       if( o.sync && !o.deasync )
