@@ -628,7 +628,7 @@ args : [ '"', 'first', 'arg', '"' ]
   /* */
 
   function execPathParse( src )
-  {
+  { 
     let strOptions =
     {
       src : src,
@@ -641,14 +641,14 @@ args : [ '"', 'first', 'arg', '"' ]
       stripping : 1
     }
     let args = _.strSplit( strOptions );
-
+    
     for( let i = 0; i < args.length; i++ )
     {
       let begin = _.strBeginOf( args[ i ], strOptions.quotingPrefixes );
       let end = _.strEndOf( args[ i ], strOptions.quotingPostfixes );
       if( begin )
       {
-        _.sure( begin === end, 'Arguments string in execPath:', src, 'has not closed quoting, that begins of:', args[ i ] );
+        _.sure( begin === end, 'Arguments string in execPath:', src, 'has not closed quoting in argument:', args[ i ] );
         args[ i ] = _.strInsideOf( args[ i ], begin, end );
       }
     }

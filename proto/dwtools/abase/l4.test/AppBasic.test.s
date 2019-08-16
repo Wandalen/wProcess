@@ -2036,31 +2036,11 @@ function shellArgumentsParsing( test )
   _.fileProvider.fileWrite( testAppPathNoSpace, testAppCode );
   _.fileProvider.fileWrite( testAppPathSpace, testAppCode );
 
-  /*
-    +'path to exec : with space' 'execPath: has arguments' 'args has arguments' 'fork'
-    +'path to exec : without space' 'execPath: has arguments' 'args has arguments' 'fork'
-    +'path to exec : with space' 'execPath: only path' 'args has arguments' 'fork'
-    +'path to exec : without space' 'execPath: only path' 'args has arguments' 'fork'
-    +'path to exec : with space' 'execPath: has arguments' 'args: empty' 'fork'
-    +'path to exec : without space' 'execPath: has arguments' 'args: empty' 'fork'
-    +'path to exec : with space' 'execPath: only path' 'args: empty' 'fork'
-    +'path to exec : without space' 'execPath: only path' 'args: empty' 'fork'
-    +'path to exec : with space' 'execPath: has arguments' 'args has arguments' 'spawn'
-    +'path to exec : without space' 'execPath: has arguments' 'args has arguments' 'spawn'
-    +'path to exec : with space' 'execPath: only path' 'args has arguments' 'spawn'
-    +'path to exec : without space' 'execPath: only path' 'args has arguments' 'spawn'
-    +'path to exec : with space' 'execPath: has arguments' 'args: empty' 'spawn'
-    +'path to exec : without space' 'execPath: has arguments' 'args: empty' 'spawn'
-    +'path to exec : with space' 'execPath: only path' 'args: empty' 'spawn'
-    +'path to exec : without space' 'execPath: only path' 'args: empty' 'spawn'
-    +'path to exec : with space' 'execPath: has arguments' 'args has arguments' 'shell'
-    +'path to exec : without space' 'execPath: has arguments' 'args has arguments' 'shell'
-    +'path to exec : with space' 'execPath: only path' 'args has arguments' 'shell'
-    +'path to exec : without space' 'execPath: only path' 'args has arguments' 'shell'
-    +'path to exec : with space' 'execPath: has arguments' 'args: empty' 'shell'
-    +'path to exec : without space' 'execPath: has arguments' 'args: empty' 'shell'
-    +'path to exec : with space' 'execPath: only path' 'args: empty' 'shell'
-    +'path to exec : without space' 'execPath: only path' 'args: empty' 'shell'"
+  /* for combination:
+      path to exe file : [ with space, without space ]
+      execPath : [ has arguments, only path to exe file ]
+      args : [ has arguments, empty ]
+      mode : [ 'fork', 'exec', 'spawn', 'shell' ] 
   */
 
   /* - */
@@ -4143,6 +4123,741 @@ function shellArgumentsNestedQuotes( test )
 }
 
 shellArgumentsNestedQuotes.timeOut = 60000;
+
+//
+
+function shellExecPathQuotesClosing( test )
+{
+  let context = this;
+  let routinePath = _.path.join( context.testSuitePath, test.name );
+  let testAppPathSpace= _.fileProvider.path.nativize( _.path.join( routinePath, 'with space', 'testApp.js' ) );
+  let ready = _.Consequence().take( null );
+
+  let testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPathSpace, testAppCode );
+
+  /* */
+  
+  ready
+  
+  testcase( 'quoted arg' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' "arg"',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' "arg"' );
+      test.identical( o.args, [ 'arg' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ 'arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+  
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"',
+      mode : 'spawn',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"' );
+      test.identical( o.args, [ testAppPathSpace,'arg' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ 'arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+  
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"',
+      mode : 'shell',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"' );
+      test.identical( o.args, [ testAppPathSpace,'arg' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ 'arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+  
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"',
+      mode : 'exec',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"' );
+      test.identical( o.args, [ testAppPathSpace,'arg' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ 'arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+  
+  testcase( 'unquoted arg' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' arg',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' arg' );
+      test.identical( o.args, [ 'arg' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ 'arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+  
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' arg',
+      mode : 'spawn',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' arg' );
+      test.identical( o.args, [ testAppPathSpace,'arg' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ 'arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+  
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' arg',
+      mode : 'shell',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' arg' );
+      test.identical( o.args, [ testAppPathSpace,'arg' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ 'arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+  
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' arg',
+      mode : 'exec',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' arg' );
+      test.identical( o.args, [ testAppPathSpace, 'arg' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ 'arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+  
+  /*  */
+  
+  testcase( 'single quote' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' " arg',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' " arg' );
+      test.identical( o.args, [ '"', 'arg' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ '"', 'arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+  
+  /*  */
+  
+  testcase( 'single quote' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' " arg',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' " arg' );
+      test.identical( o.args, [ '"', 'arg' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ '"', 'arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+  
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' arg "',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' arg "' );
+      test.identical( o.args, [ 'arg', '"' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ 'arg', '"' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+  
+  testcase( 'arg starts with quote' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' "arg',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    return test.shouldThrowError( _.shell( o ) );
+  })
+  
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' "arg"arg',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    return test.shouldThrowError( _.shell( o ) );
+  })
+  
+  testcase( 'arg ends with quote' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' arg"',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o )
+    
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' arg"' );
+      test.identical( o.args, [ 'arg"' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ 'arg"' ] )
+
+      return null;
+    })
+    
+    return con;
+  })
+  
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' arg"arg"',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o )
+    
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' arg"arg"' );
+      test.identical( o.args, [ 'arg"arg"' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ 'arg"arg"' ] )
+
+      return null;
+    })
+    
+    return con;
+  })
+  
+  testcase( 'quoted with different symbols' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ` "arg'`,
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    return test.shouldThrowError( _.shell( o ) );
+  })
+  
+  testcase( 'quote as part of arg' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' arg"arg',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' arg"arg' );
+      test.identical( o.args, [ 'arg"arg' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ 'arg"arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+  
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' "arg"arg"',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' "arg"arg"' );
+      test.identical( o.args, [ 'arg"arg' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ 'arg"arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+  
+  testcase( 'option arg with quoted value' )
+  
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' option : "value"',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' option : "value"' );
+      test.identical( o.args, [ 'option', ':', 'value' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, { option : 'value' } )
+      test.identical( got.scriptArgs, [ 'option', ':', 'value' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+  
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' option:"value with space"',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' option:"value with space"' );
+      test.identical( o.args, [ 'option:"value with space"' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, { option : 'value with space' } )
+      test.identical( got.scriptArgs, [ 'option:"value with space"' ] )
+
+      return null;
+    })
+    
+    return con;
+  })
+  
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' option : "value with space"',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' option : "value with space"' );
+      test.identical( o.args, [ 'option', ':', 'value with space' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, { option : 'value with space' } )
+      test.identical( got.scriptArgs, [ 'option', ':', 'value with space' ] )
+
+      return null;
+    })
+    
+    return con;
+  })
+  
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' option:"value',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' option:"value' );
+      test.identical( o.args, [ 'option:"value' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, { option : '"value' } )
+      test.identical( got.scriptArgs, [ 'option:"value' ] )
+
+      return null;
+    })
+    
+    return con;
+  })
+  
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' "option: "value""',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' "option: "value""' );
+      test.identical( o.args, [ 'option: "value"' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, { option : 'value' } )
+      test.identical( got.scriptArgs, [ 'option: "value"' ] )
+
+      return null;
+    })
+    
+    return con;
+  })
+  
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' option : "value',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    return test.shouldThrowError( _.shell( o ) );
+  })
+  
+  testcase( 'double quoted with space inside' )
+  
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' "option: "value with space""',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' "option: "value with space""' );
+      test.identical( o.args, [ 'option: "value with space"' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, { option : 'value with space' } )
+      test.identical( got.scriptArgs, [ 'option: "value with space"' ] )
+
+      return null;
+    })
+    
+    return con;
+  })
+  
+  // testcase( 'escaped quotes' )
+  
+  /*  */
+  
+  return ready;
+  
+  /*  */
+  
+  function testcase( src )
+  {
+    ready.then( () => 
+    {
+      test.case = src;
+      return null;
+    })
+    return ready;
+  }
+  
+  function testApp()
+  {
+    let _ = require( '../../../../Tools.s' );
+    _.include( 'wAppBasic' );
+    _.include( 'wStringsExtra' )
+    var args = _.appArgs();
+    console.log( JSON.stringify( args ) );
+  }
+}
+
+shellExecPathQuotesClosing.timeOut = 60000;
 
 //
 
@@ -6313,6 +7028,7 @@ var Proto =
     shellArgumentsParsing,
     shellArgumentsParsingNonTrivial,
     shellArgumentsNestedQuotes,
+    shellExecPathQuotesClosing,
     shellVerbosity,
     shellErrorHadling,
     shellNode,
