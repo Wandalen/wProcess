@@ -319,18 +319,20 @@ function shell_body( o )
     // if( _.strIs( o.args ) )
     // o.args = _.strSplitNonPreserving({ src : o.args });
     o.args = _.arrayAs( o.args );
+    
+    let execArgs;
 
     if( _.strIs( o.execPath ) )
-    {
-      let execArgs = execPathParse( o.execPath );
+    { 
+      o.fullExecPath = o.execPath;
+      execArgs = execPathParse( o.execPath );
       o.execPath = execArgs.shift();
-      if( execArgs.length )
-      o.args = _.arrayPrependArray( o.args || [], execArgs );
     }
-
+    
     if( o.execPath === null )
     {
       o.execPath = o.args.shift();
+      o.fullExecPath = o.execPath;
       
       let begin = _.strBeginOf( o.execPath, [ '"', "'", '`' ] );
       let end = _.strEndOf( o.execPath, [ '"', "'", '`' ] );
@@ -338,7 +340,13 @@ function shell_body( o )
       if( begin && begin === end )
       o.execPath = _.strInsideOf( o.execPath, begin, end );
     }
-
+    
+    if( o.args )
+    o.fullExecPath = _.strConcat( _.arrayAppendArray( [ o.fullExecPath ], o.args ) );
+    
+    if( execArgs && execArgs.length )
+    o.args = _.arrayPrependArray( o.args || [], execArgs );
+    
     if( o.outputAdditive === null )
     o.outputAdditive = true;
     o.outputAdditive = !!o.outputAdditive;
@@ -378,10 +386,10 @@ function shell_body( o )
 
     /* out options */
 
-    if( o.args )
-    o.fullExecPath = _.strConcat( _.arrayAppendArray( [ o.execPath ], o.args || [] ) );
-    else
-    o.fullExecPath = _.strConcat([ o.execPath ]);
+    // if( o.args )
+    // o.fullExecPath = _.strConcat( _.arrayAppendArray( [ o.execPath ], o.args || [] ) );
+    // else
+    // o.fullExecPath = _.strConcat([ o.execPath ]);
 
     o.exitCode = null;
     o.exitSignal = null;
@@ -636,35 +644,10 @@ args : [ '"', 'first', 'arg', '"' ]
     {
       let begin = _.strBeginOf( args[ i ], strOptions.quotingPrefixes );
       let end = _.strEndOf( args[ i ], strOptions.quotingPostfixes );
-      _.sure( begin === end, 'Arguments string in execPath:', src, 'has not closed quoting, that begins of:', args[ i ] );
-      if( begin )
-      args[ i ] = _.strInsideOf( args[ i ], begin, end );
-    }
-    return args;
-  }
-
-  /* */
-
-  function argsForm( args )
-  {
-    let quotes = [ "'", '"', "`" ];
-
-    for( let i = 0; i < args.length; i++ )
-    {
-      let begin = _.strBeginOf( args[ i ], quotes );
       if( begin )
       {
-        //escaping of some quotes is needed to equalize behavior of shell and exec modes on all platforms
-        if( o.mode === 'shell' || o.mode === 'exec' )
-        {
-          let quotes = [ '"' ]
-          if( process.platform !== 'win32' )
-          quotes.push( "`" )
-          _.each( quotes, ( quote ) =>
-          {
-            args[ i ] = _.strReplaceAll( args[ i ], quote, '\\' + quote );
-          })
-        }
+        _.sure( begin === end, 'Arguments string in execPath:', src, 'has not closed quoting, that begins of:', args[ i ] );
+        args[ i ] = _.strInsideOf( args[ i ], begin, end );
       }
     }
     return args;
@@ -684,7 +667,12 @@ args : [ '"', 'first', 'arg', '"' ]
       quotes.push( "`" )
       _.each( quotes, ( quote ) =>
       {
-        args[ i ] = _.strReplaceAll( args[ i ], quote, '\\' + quote );
+        args[ i ] = _.strReplaceAll( args[ i ], quote, ( match, it ) => 
+        { 
+          if( it.input[ it.range[ 0 ] - 1 ] === '\\' )
+          return match;
+          return '\\' + match; 
+        });
       })
     }
     
