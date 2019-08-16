@@ -86,11 +86,12 @@ path:
       - ../proto/dwtools/Tools.s
       - ../proto/dwtools/abase
       - ../proto/dwtools/abase/l4
-      - ../proto/dwtools/abase/l4/External.s
+      - ../proto/dwtools/abase/l4/AppBasic.s
       - ../proto/dwtools/abase/l4.test
-      - ../proto/dwtools/abase/l4.test/External.test.s
+      - ../proto/dwtools/abase/l4.test/AppBasic.test.s
       - ../proto/dwtools/amid
       - ../proto/dwtools/atop
+      - ../proto/dwtools/tmp.tmp
 submodule: {}
 reflector:
   reflect.proto.:
@@ -377,11 +378,12 @@ module:
           - proto/dwtools/Tools.s
           - proto/dwtools/abase
           - proto/dwtools/abase/l4
-          - proto/dwtools/abase/l4/External.s
+          - proto/dwtools/abase/l4/AppBasic.s
           - proto/dwtools/abase/l4.test
-          - proto/dwtools/abase/l4.test/External.test.s
+          - proto/dwtools/abase/l4.test/AppBasic.test.s
           - proto/dwtools/amid
           - proto/dwtools/atop
+          - proto/dwtools/tmp.tmp
     submodule: {}
     reflector:
       reflect.proto.:
