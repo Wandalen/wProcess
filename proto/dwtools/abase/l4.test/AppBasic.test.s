@@ -3756,6 +3756,26 @@ function shellArgumentsParsingNonTrivial( test )
     return con;
   })
   
+  .then( () =>
+  {
+    test.case = 'no execPath, empty args'
+
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      args : [],
+      mode : 'spawn',
+      outputPiping : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0,
+      ready : con
+    }
+    
+    _.shell( o );
+
+    return test.shouldThrowError( con );
+  })
+  
   /*  */
 
   return ready;
