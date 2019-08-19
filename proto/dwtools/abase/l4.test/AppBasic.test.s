@@ -4798,7 +4798,7 @@ function shellExecPathQuotesClosing( test )
     return test.shouldThrowError( _.shell( o ) );
   })
   
-  testcase( 'double quoted with space inside' )
+  testcase( 'double quoted with space inside, same quotes' )
   
   .then( () =>
   {
@@ -4813,10 +4813,28 @@ function shellExecPathQuotesClosing( test )
     }
     _.shell( o );
 
+    return test.shouldThrowError( con );
+  })
+  
+  testcase( 'double quoted with space inside, diff quotes' )
+  
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' `option: "value with space"`',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
     con.then( () =>
     {
       test.identical( o.exitCode, 0 );
-      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' "option: "value with space""' );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' `option: "value with space"`' );
       test.identical( o.args, [ 'option: "value with space"' ] );
       let got = JSON.parse( o.output );
       test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
@@ -4829,7 +4847,36 @@ function shellExecPathQuotesClosing( test )
     return con;
   })
   
-  // testcase( 'escaped quotes' )
+  testcase( 'escaped quotes, mode shell' )
+  
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' option: \\"value with space\\"',
+      mode : 'shell',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' option: \\"value with space\\"' );
+      test.identical( o.args, [ testAppPathSpace, 'option:', '\\"value with space\\"' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, { option : 'value with space' } )
+      test.identical( got.scriptArgs, [ 'option: "value with space"' ] )
+
+      return null;
+    })
+    
+    return con;
+  })
   
   /*  */
   
