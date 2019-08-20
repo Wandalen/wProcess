@@ -331,7 +331,7 @@ function shell_body( o )
     
     if( o.execPath === null )
     { 
-      _.assert( o.args.length, 'Expects {-args-} to have at least one argument if {-execPath-} is not defined' ).
+      _.assert( o.args.length, 'Expects {-args-} to have at least one argument if {-execPath-} is not defined' );
       
       o.execPath = o.args.shift();
       o.fullExecPath = o.execPath;
