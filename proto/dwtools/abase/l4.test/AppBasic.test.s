@@ -7243,6 +7243,77 @@ shellOutputStripping.timeOut = 15000;
 
 //
 
+function shellLoggerOption( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.testSuitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    console.log( '  One tab' );
+  }
+
+  /* */
+
+  var testAppPath = _.path.join( routinePath, 'testApp.js' );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+
+  /* */
+
+  var ready = new _.Consequence().take( null );
+  var modes = [ 'shell', 'spawn', 'exec', 'fork' ];
+
+  test.case = 'custom logger with increased level'
+
+  _.each( modes,( mode ) =>
+  {
+    let execPath = testAppPath;
+    if( mode != 'fork' )
+    execPath = 'node ' + execPath;
+
+    let loggerOutput = '';
+
+    let logger = new _.Logger({ output : null, onTransformEnd });
+    logger.up();
+
+    _.shell
+    ({
+      execPath : execPath,
+      mode : mode,
+      outputCollecting : 1,
+      outputPiping : 1,
+      outputGray : 1,
+      logger : logger,
+      ready : ready
+    })
+    .then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      test.is( _.strHas( got.output, '  One tab' ) )
+      test.is( _.strHas( loggerOutput, '    One tab' ) )
+      return null;
+    })
+
+    /*  */
+
+    function onTransformEnd( o )
+    {
+      loggerOutput += o.outputForPrinter[ 0 ] + '\n';
+    }
+  })
+
+  /* */
+
+  return ready;
+}
+
+shellLoggerOption.timeOut = 30000;
+
+//
+
 function shellNormalizedExecPath( test )
 {
   var context = this;
@@ -7513,6 +7584,7 @@ var Proto =
 
     outputHandling,
     shellOutputStripping,
+    shellLoggerOption,
 
     shellNormalizedExecPath
 
