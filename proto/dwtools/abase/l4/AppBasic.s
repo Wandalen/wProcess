@@ -318,6 +318,10 @@ function shell_body( o )
     // qqq : cover the case ( args is string ) for both routines shell and sheller
     // if( _.strIs( o.args ) )
     // o.args = _.strSplitNonPreserving({ src : o.args });
+
+    if( _.arrayIs( o.args ) )
+    o.args = o.args.slice();
+
     o.args = _.arrayAs( o.args );
 
     let execArgs;
