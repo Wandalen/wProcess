@@ -5566,13 +5566,46 @@ function shellNode( test )
     throw 'Error message from child';
   }
 
+  function testApp2()
+  {
+    console.log( process.argv.slice( 2 ) )
+  }
+
+
   /* */
 
   var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppPath2 = _.path.join( routinePath, 'testApp2.js' );
   var testAppCode = testApp.toString() + '\ntestApp();';
+  var testAppCode2 = testApp2.toString() + '\ntestApp2();';
   _.fileProvider.fileWrite( testAppPath, testAppCode );
+  _.fileProvider.fileWrite( testAppPath2, testAppCode2 );
 
   var con = new _.Consequence().take( null );
+
+  /* */
+
+  con.then( () =>
+  {
+    test.case = 'execPath contains normalized path'
+    return _.shellNode
+    ({
+      execPath : testAppPath2,
+      args : [ 'arg' ],
+      outputCollecting : 1,
+      stdio : 'pipe',
+    })
+    .then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      test.identical( got.args, [ 'arg' ] );
+      console.log( got.output )
+      test.is( _.strHas( got.output, `[ 'arg' ]` ) );
+      return null
+    })
+  })
+
+  /*  */
 
   var modes = [ 'fork', 'exec', 'spawn', 'shell' ];
 
@@ -7210,7 +7243,7 @@ shellOutputStripping.timeOut = 15000;
 
 //
 
-function shellNativeExecPath( test )
+function shellNormalizedExecPath( test )
 {
   var context = this;
   var routinePath = _.path.join( context.testSuitePath, test.name );
@@ -7362,7 +7395,7 @@ function shellNativeExecPath( test )
   return ready;
 }
 
-shellNativeExecPath.timeOut = 60000;
+shellNormalizedExecPath.timeOut = 60000;
 
 //
 
@@ -7481,7 +7514,7 @@ var Proto =
     outputHandling,
     shellOutputStripping,
 
-    shellNativeExecPath
+    shellNormalizedExecPath
 
   },
 
