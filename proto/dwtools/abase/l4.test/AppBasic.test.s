@@ -2024,6 +2024,61 @@ function shellWithoutExecPath( test )
 
 //
 
+function shellArgsOption( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.testSuitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+
+  /* */
+
+  var testAppPath = _.path.join( routinePath, 'testApp.js' );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+
+  /* */
+
+  var ready = new _.Consequence().take( null );
+
+  /* */
+
+  test.case = 'args option as array, source args array should not be changed'
+  var args = [ 'arg1', 'arg2' ];
+  var shellOptions =
+  {
+    execPath : 'node ' + testAppPath,
+    outputCollecting : 1,
+    args : args,
+    mode : 'spawn',
+    ready : ready
+  }
+
+  _.shell( shellOptions )
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( got.args, [ testAppPath, 'arg1', 'arg2' ] );
+    test.identical( _.strCount( got.output, `[ 'arg1', 'arg2' ]` ), 1 );
+    test.identical( shellOptions.args, got.args );
+    test.identical( args, [ 'arg1', 'arg2' ] );
+    return null;
+  })
+
+  /*  */
+
+  return ready;
+}
+
+shellArgsOption.timeOut = 30000;
+
+//
+
 function shellArgumentsParsing( test )
 {
   let context = this;
@@ -6899,6 +6954,90 @@ sheller.timeOut = 60000;
 
 //
 
+function shellerArgs( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.testSuitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+
+  /* */
+
+  var testAppPath = _.path.join( routinePath, 'testApp.js' );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+
+  /* */
+
+  var ready = new _.Consequence().take( null );
+
+  let shellerOptions =
+  {
+    outputCollecting : 1,
+    args : [ 'arg1', 'arg2' ],
+    mode : 'spawn',
+    ready : ready
+  }
+
+  let shell = _.sheller( shellerOptions )
+
+  /* */
+
+  shell
+  ({
+    execPath : 'node ' + testAppPath + ' arg3',
+  })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( got.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
+    test.identical( _.strCount( got.output, `[ 'arg3', 'arg1', 'arg2' ]` ), 1 );
+    test.identical( shellerOptions.args, [ 'arg1', 'arg2' ] );
+    return null;
+  })
+
+  shell
+  ({
+    execPath : 'node ' + testAppPath,
+    args : [ 'arg3' ]
+  })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( got.args, [ testAppPath, 'arg3' ] );
+    test.identical( _.strCount( got.output, `[ 'arg3' ]` ), 1 );
+    test.identical( shellerOptions.args, [ 'arg1', 'arg2' ] );
+    return null;
+  })
+
+  shell
+  ({
+    execPath : 'node',
+    args : [ testAppPath, 'arg3' ]
+  })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( got.args, [ testAppPath, 'arg3' ] );
+    test.identical( _.strCount( got.output, `[ 'arg3' ]` ), 1 );
+    test.identical( shellerOptions.args, [ 'arg1', 'arg2' ] );
+    return null;
+  })
+
+  /* */
+
+  return ready;
+}
+
+shellerArgs.timeOut = 30000;
+
+//
+
 function outputHandling( test )
 {
   var context = this;
@@ -7322,6 +7461,7 @@ var Proto =
     shellFork,
     shellWithoutExecPath,
 
+    shellArgsOption,
     shellArgumentsParsing,
     shellArgumentsParsingNonTrivial,
     shellArgumentsNestedQuotes,
@@ -7336,6 +7476,7 @@ var Proto =
     shellerConcurrent,
 
     sheller,
+    shellerArgs,
 
     outputHandling,
     shellOutputStripping,
