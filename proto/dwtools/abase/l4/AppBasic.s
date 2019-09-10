@@ -481,21 +481,29 @@ function shell_body( o )
 
     _.assert( _.fileProvider.isDir( o.currentPath ), 'working directory', o.currentPath, 'doesn\'t exist or it\'s not a directory.' );
 
+    let execPath = o.execPath;
+    let args = o.args.slice();
+
+    if( process.platform === 'win32' )
+    {
+      execPath = _.path.nativize( execPath );
+      if( args.length )
+      args[ 0 ] = _.path.nativize( args[ 0 ] )
+    }
+
     if( o.mode === 'fork')
     {
       _.assert( !o.sync || o.deasync, '{ shell.mode } "fork" is available only in async/deasync version of shell' );
-      let args = o.args || [];
       let o2 = optionsForFork();
-      let execPath = execPathForFork();
+      execPath = execPathForFork( execPath );
       o.process = ChildProcess.fork( execPath, args, o2 );
     }
     else if( o.mode === 'exec' )
     {
       let currentPath = _.path.nativize( o.currentPath );
       log( '{ shell.mode } "exec" is deprecated' );
-      let execPath = o.execPath;
-      if( o.args.length )
-      execPath = execPath + ' ' + argsJoin( o.args );
+      if( args.length )
+      execPath = execPath + ' ' + argsJoin( args );
       if( o.sync && !o.deasync )
       o.process = ChildProcess.execSync( execPath, { env : o.env, cwd : currentPath } );
       else
@@ -503,7 +511,7 @@ function shell_body( o )
     }
     else if( o.mode === 'spawn' )
     {
-      let appPath = o.execPath;
+      // let appPath = o.execPath;
 
       // if( !o.args )
       // {
@@ -519,9 +527,9 @@ function shell_body( o )
       let o2 = optionsForSpawn();
 
       if( o.sync && !o.deasync )
-      o.process = ChildProcess.spawnSync( appPath, o.args, o2 );
+      o.process = ChildProcess.spawnSync( execPath, args, o2 );
       else
-      o.process = ChildProcess.spawn( appPath, o.args, o2 );
+      o.process = ChildProcess.spawn( execPath, args, o2 );
 
     }
     else if( o.mode === 'shell' )
@@ -529,7 +537,7 @@ function shell_body( o )
 
       let appPath = process.platform === 'win32' ? 'cmd' : 'sh';
       let arg1 = process.platform === 'win32' ? '/c' : '-c';
-      let arg2 = o.execPath;
+      let arg2 = execPath;
       let o2 = optionsForSpawn();
 
      /*
@@ -544,8 +552,8 @@ function shell_body( o )
 
       o2.windowsVerbatimArguments = true;
 
-      if( o.args.length )
-      arg2 = arg2 + ' ' + argsJoin( o.args );
+      if( args.length )
+      arg2 = arg2 + ' ' + argsJoin( args );
 
       if( o.sync && !o.deasync )
       o.process = ChildProcess.spawnSync( appPath, [ arg1, arg2 ], o2 );
@@ -723,10 +731,9 @@ args : [ '"', 'first', 'arg', '"' ]
     return o2;
   }
 
-  function execPathForFork()
+  function execPathForFork( execPath )
   {
     let quotes = [ "'", '"', "`" ];
-    let execPath = o.execPath;
     let begin = _.strBeginOf( execPath, quotes );
     if( begin )
     execPath = _.strInsideOf( execPath, begin, begin );

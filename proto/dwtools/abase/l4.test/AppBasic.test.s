@@ -7067,7 +7067,163 @@ function shellOutputStripping( test )
   return ready;
 }
 
-outputHandling.timeOut = 10000;
+shellOutputStripping.timeOut = 15000;
+
+//
+
+function shellNativeExecPath( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.testSuitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+
+  /* */
+
+  var testAppPath = _.path.join( routinePath, 'testApp.js' );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+
+  /* */
+
+  var ready = new _.Consequence().take( null );
+
+  let shell = _.sheller
+  ({
+    outputCollecting : 1,
+    ready : ready
+  })
+
+  /* */
+
+  shell
+  ({
+    execPath : testAppPath,
+    args : [ 'arg1', 'arg2' ],
+    mode : 'fork'
+  })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, `[ 'arg1', 'arg2' ]` ), 1 );
+    return null;
+  })
+
+  //
+
+  shell
+  ({
+    execPath : 'node ' + testAppPath,
+    args : [ 'arg1', 'arg2' ],
+    mode : 'spawn'
+  })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, `[ 'arg1', 'arg2' ]` ), 1 );
+    return null;
+  })
+
+  //
+
+  shell
+  ({
+    execPath : 'node ' + testAppPath,
+    args : [ 'arg1', 'arg2' ],
+    mode : 'shell'
+  })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, `[ 'arg1', 'arg2' ]` ), 1 );
+    return null;
+  })
+
+  //
+
+  shell
+  ({
+    execPath : 'node ' + testAppPath,
+    args : [ 'arg1', 'arg2' ],
+    mode : 'exec'
+  })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, `[ 'arg1', 'arg2' ]` ), 1 );
+    return null;
+  })
+
+  /* app path in arguments */
+
+  shell
+  ({
+    args : [ testAppPath, 'arg1', 'arg2' ],
+    mode : 'fork'
+  })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, `[ 'arg1', 'arg2' ]` ), 1 );
+    return null;
+  })
+
+  //
+
+  shell
+  ({
+    execPath : 'node',
+    args : [ testAppPath, 'arg1', 'arg2' ],
+    mode : 'spawn'
+  })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, `[ 'arg1', 'arg2' ]` ), 1 );
+    return null;
+  })
+
+  //
+
+  shell
+  ({
+    execPath : 'node',
+    args : [ testAppPath, 'arg1', 'arg2' ],
+    mode : 'shell'
+  })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, `[ 'arg1', 'arg2' ]` ), 1 );
+    return null;
+  })
+
+  //
+
+  shell
+  ({
+    execPath : 'node',
+    args : [ testAppPath, 'arg1', 'arg2' ],
+    mode : 'exec'
+  })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, `[ 'arg1', 'arg2' ]` ), 1 );
+    return null;
+  })
+
+  /* */
+
+  return ready;
+}
+
+shellNativeExecPath.timeOut = 60000;
 
 //
 
@@ -7182,7 +7338,9 @@ var Proto =
     sheller,
 
     outputHandling,
-    shellOutputStripping
+    shellOutputStripping,
+
+    shellNativeExecPath
 
   },
 
