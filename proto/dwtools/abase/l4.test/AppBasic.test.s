@@ -4890,7 +4890,7 @@ function shellExecPathQuotesClosing( test )
       let got = JSON.parse( o.output );
       test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
       test.identical( got.map, { option : 'value with space' } )
-      test.identical( got.scriptArgs, [ 'option: "value with space"' ] )
+      test.identical( got.scriptArgs, [ 'option:', '"value with space"' ] )
 
       return null;
     })
