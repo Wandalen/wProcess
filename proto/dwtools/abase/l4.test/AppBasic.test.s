@@ -35,8 +35,8 @@ var Self = {};
 function testDirMake()
 {
   var context = this;
-  if( Config.platform === 'nodejs' )
-  context.testSuitePath = _.path.dirTempOpen( _.path.join( __dirname, '../..'  ), 'ExternalFundamentals' );
+  if( Config.interpreter === 'njs' )
+  context.testSuitePath = _.path.pathDirTempOpen( _.path.join( __dirname, '../..'  ), 'ExternalFundamentals' );
   else
   context.testSuitePath = _.path.current();
 }
@@ -46,7 +46,7 @@ function testDirMake()
 function testDirClean()
 {
   var context = this;
-  if( Config.platform === 'nodejs' )
+  if( Config.interpreter === 'njs' )
   _.fileProvider.filesDelete( context.testSuitePath );
 }
 
@@ -773,7 +773,7 @@ function shell( test )
   // {
   //   test.case = 'simple command';
   //   var con = _.shell( 'exit' );
-  //   return test.shouldMessageOnlyOnce( con );
+  //   return test.returnsSingleResource( con );
   // })
   // .thenKeep( function( arg )
   // {

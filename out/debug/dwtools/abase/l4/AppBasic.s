@@ -1857,8 +1857,8 @@ let Extend =
   _appArgsInSamFormatNodejs,
   _appArgsInSamFormatBrowser,
 
-  appArgsInSamFormat : Config.platform === 'nodejs' ? _appArgsInSamFormatNodejs : _appArgsInSamFormatBrowser,
-  appArgs : Config.platform === 'nodejs' ? _appArgsInSamFormatNodejs : _appArgsInSamFormatBrowser,
+  appArgsInSamFormat : Config.interpreter === 'njs' ? _appArgsInSamFormatNodejs : _appArgsInSamFormatBrowser,
+  appArgs : Config.interpreter === 'njs' ? _appArgsInSamFormatNodejs : _appArgsInSamFormatBrowser,
   appArgsReadTo,
 
   appAnchor,
