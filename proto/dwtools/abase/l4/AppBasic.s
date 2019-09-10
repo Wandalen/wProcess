@@ -28,7 +28,7 @@ if( typeof module !== 'undefined' )
 
 }
 
-let System, ChildProcess;
+let System, ChildProcess,StripAnsi;
 let _global = _global_;
 let _ = _global_.wTools;
 let Self = _global_.wTools.app || _global_.wTools.app || Object.create( null );
@@ -319,36 +319,36 @@ function shell_body( o )
     // if( _.strIs( o.args ) )
     // o.args = _.strSplitNonPreserving({ src : o.args });
     o.args = _.arrayAs( o.args );
-    
+
     let execArgs;
 
     if( _.strIs( o.execPath ) )
-    { 
+    {
       o.fullExecPath = o.execPath;
       execArgs = execPathParse( o.execPath );
       o.execPath = execArgs.shift();
     }
-    
+
     if( o.execPath === null )
-    { 
+    {
       _.assert( o.args.length, 'Expects {-args-} to have at least one argument if {-execPath-} is not defined' );
-      
+
       o.execPath = o.args.shift();
       o.fullExecPath = o.execPath;
-      
+
       let begin = _.strBeginOf( o.execPath, [ '"', "'", '`' ] );
       let end = _.strEndOf( o.execPath, [ '"', "'", '`' ] );
-      
+
       if( begin && begin === end )
       o.execPath = _.strInsideOf( o.execPath, begin, end );
     }
-    
+
     if( o.args )
     o.fullExecPath = _.strConcat( _.arrayAppendArray( [ o.fullExecPath ], o.args ) );
-    
+
     if( execArgs && execArgs.length )
     o.args = _.arrayPrependArray( o.args || [], execArgs );
-    
+
     if( o.outputAdditive === null )
     o.outputAdditive = true;
     o.outputAdditive = !!o.outputAdditive;
@@ -402,6 +402,10 @@ function shell_body( o )
 
     if( !ChildProcess )
     ChildProcess = require( 'child_process' );
+
+    if( o.outputStripping )
+    if( !StripAnsi )
+    StripAnsi = require( 'strip-ansi' );
 
     if( !o.outputGray && typeof module !== 'undefined' )
     try
@@ -630,7 +634,7 @@ args : [ '"', 'first', 'arg', '"' ]
   /* */
 
   function execPathParse( src )
-  { 
+  {
     let strOptions =
     {
       src : src,
@@ -643,7 +647,7 @@ args : [ '"', 'first', 'arg', '"' ]
       stripping : 1
     }
     let args = _.strSplit( strOptions );
-    
+
     for( let i = 0; i < args.length; i++ )
     {
       let begin = _.strBeginOf( args[ i ], strOptions.quotingPrefixes );
@@ -662,7 +666,7 @@ args : [ '"', 'first', 'arg', '"' ]
   function argsJoin( args )
   {
     args = args.slice();
-    
+
     for( let i = 0; i < args.length; i++ )
     {
       //escaping of some quotes is needed to equalize behavior of shell and exec modes on all platforms
@@ -671,15 +675,15 @@ args : [ '"', 'first', 'arg', '"' ]
       quotes.push( "`" )
       _.each( quotes, ( quote ) =>
       {
-        args[ i ] = _.strReplaceAll( args[ i ], quote, ( match, it ) => 
-        { 
+        args[ i ] = _.strReplaceAll( args[ i ], quote, ( match, it ) =>
+        {
           if( it.input[ it.range[ 0 ] - 1 ] === '\\' )
           return match;
-          return '\\' + match; 
+          return '\\' + match;
         });
       })
     }
-    
+
     return '"' + args.join( '" "' ) + '"';
   }
 
@@ -870,6 +874,9 @@ args : [ '"', 'first', 'arg', '"' ]
     if( _.bufferAnyIs( data ) )
     data = _.bufferToStr( data );
 
+    if( o.outputStripping )
+    data = StripAnsi( data );
+
     stderrOutput += data;
 
     if( o.outputCollecting )
@@ -897,6 +904,9 @@ args : [ '"', 'first', 'arg', '"' ]
 
     if( _.bufferAnyIs( data ) )
     data = _.bufferToStr( data );
+
+    if( o.outputStripping )
+    data = StripAnsi( data );
 
     if( o.outputCollecting )
     o.output += data;
@@ -972,6 +982,7 @@ shell_body.defaults =
   outputPiping : null,
   outputCollecting : 0,
   outputAdditive : null,
+  outputStripping : 0,
   inputMirroring : 1,
 
 }

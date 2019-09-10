@@ -2040,7 +2040,7 @@ function shellArgumentsParsing( test )
       path to exe file : [ with space, without space ]
       execPath : [ has arguments, only path to exe file ]
       args : [ has arguments, empty ]
-      mode : [ 'fork', 'exec', 'spawn', 'shell' ] 
+      mode : [ 'fork', 'exec', 'spawn', 'shell' ]
   */
 
   /* - */
@@ -3252,9 +3252,9 @@ function shellArgumentsParsingNonTrivial( test )
   let testAppCode = testApp.toString() + '\ntestApp();';
   _.fileProvider.fileWrite( testAppPathNoSpace, testAppCode );
   _.fileProvider.fileWrite( testAppPathSpace, testAppCode );
-  
-  /* 
-  
+
+  /*
+
   execPath : '"/dir with space/app.exe" `firstArg secondArg ":" 1` "third arg" \'fourth arg\'  `"fifth" arg`,
   args : '"some arg"'
   mode : 'spawn'
@@ -3311,11 +3311,11 @@ function shellArgumentsParsingNonTrivial( test )
   ->
   execPath : '"'
   args : [ '"', 'first', 'arg', '"' ]
-  
+
   */
- 
+
   ready
- 
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3347,7 +3347,7 @@ function shellArgumentsParsingNonTrivial( test )
 
     return con;
   })
-  
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3379,7 +3379,7 @@ function shellArgumentsParsingNonTrivial( test )
 
     return con;
   })
-  
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3411,7 +3411,7 @@ function shellArgumentsParsingNonTrivial( test )
 
     return con;
   })
-  
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3443,9 +3443,9 @@ function shellArgumentsParsingNonTrivial( test )
 
     return con;
   })
-  
+
   /*  */
-  
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3477,7 +3477,7 @@ function shellArgumentsParsingNonTrivial( test )
 
     return con;
   })
-  
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3509,7 +3509,7 @@ function shellArgumentsParsingNonTrivial( test )
 
     return con;
   })
-  
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3541,7 +3541,7 @@ function shellArgumentsParsingNonTrivial( test )
 
     return con;
   })
-  
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3573,9 +3573,9 @@ function shellArgumentsParsingNonTrivial( test )
 
     return con;
   })
-  
+
   /*  */
-  
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3593,20 +3593,20 @@ function shellArgumentsParsingNonTrivial( test )
     _.shell( o );
 
     con.finally( ( err, got ) =>
-    { 
+    {
       test.is( !!err );
       test.is( _.strHas( err.message, 'first arg' ) )
       test.identical( o.execPath, 'first arg' );
       test.identical( o.args, [] );
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   /* */
-  
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3624,20 +3624,20 @@ function shellArgumentsParsingNonTrivial( test )
     _.shell( o );
 
     con.finally( ( err, got ) =>
-    { 
+    {
       test.is( !!err );
       test.is( _.strHas( err.message, 'first arg' ) )
       test.identical( o.execPath, 'first arg' );
       test.identical( o.args, [] );
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   /* */
-  
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3655,20 +3655,20 @@ function shellArgumentsParsingNonTrivial( test )
     _.shell( o );
 
     con.finally( ( err, got ) =>
-    { 
+    {
       test.is( !!err );
       test.is( _.strHas( err.message, 'first arg' ) )
       test.identical( o.execPath, 'first arg' );
       test.identical( o.args, [ 'second arg' ] );
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   /* */
-  
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3686,18 +3686,18 @@ function shellArgumentsParsingNonTrivial( test )
     _.shell( o );
 
     con.finally( ( err, got ) =>
-    { 
+    {
       test.is( !!err );
       test.is( _.strHas( err.message, '"' ) )
       test.identical( o.execPath, '"' );
       test.identical( o.args, [ 'first', 'arg', '"' ] );
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3715,18 +3715,18 @@ function shellArgumentsParsingNonTrivial( test )
     _.shell( o );
 
     con.finally( ( err, got ) =>
-    { 
+    {
       test.is( !!err );
       test.is( _.strHas( err.message, `Received ''` ) );
       test.identical( o.execPath, '' );
       test.identical( o.args, [ 'first', 'arg', '"' ] );
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3744,18 +3744,18 @@ function shellArgumentsParsingNonTrivial( test )
     _.shell( o );
 
     con.finally( ( err, got ) =>
-    { 
+    {
       test.is( !!err );
       test.is( _.strHas( err.message, `spawn " ENOENT` ) );
       test.identical( o.execPath, '"' );
       test.identical( o.args, [ '"', 'first', 'arg', '"' ] );
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   .then( () =>
   {
     test.case = 'no execPath, empty args'
@@ -3770,16 +3770,16 @@ function shellArgumentsParsingNonTrivial( test )
       throwingExitCode : 0,
       ready : con
     }
-    
+
     _.shell( o );
 
     return test.shouldThrowError( con );
   })
-  
+
   /*  */
 
   return ready;
-  
+
 
   /**/
 
@@ -3854,7 +3854,7 @@ function shellArgumentsNestedQuotes( test )
 
     return con;
   })
-  
+
   .then( () =>
   {
     test.case = 'fork'
@@ -3932,7 +3932,7 @@ function shellArgumentsNestedQuotes( test )
     return con;
 
   })
-  
+
   .then( () =>
   {
     test.case = 'spawn'
@@ -4010,7 +4010,7 @@ function shellArgumentsNestedQuotes( test )
 
     return con;
   })
-  
+
   .then( () =>
   {
     test.case = 'shell'
@@ -4088,7 +4088,7 @@ function shellArgumentsNestedQuotes( test )
     return con;
 
   })
-  
+
   .then( () =>
   {
     test.case = 'exec'
@@ -4157,9 +4157,9 @@ function shellExecPathQuotesClosing( test )
   _.fileProvider.fileWrite( testAppPathSpace, testAppCode );
 
   /* */
-  
+
   ready
-  
+
   testcase( 'quoted arg' )
 
   .then( () =>
@@ -4190,7 +4190,7 @@ function shellExecPathQuotesClosing( test )
 
     return con;
   })
-  
+
   .then( () =>
   {
     let con = new _.Consequence().take( null );
@@ -4219,7 +4219,7 @@ function shellExecPathQuotesClosing( test )
 
     return con;
   })
-  
+
   .then( () =>
   {
     let con = new _.Consequence().take( null );
@@ -4248,7 +4248,7 @@ function shellExecPathQuotesClosing( test )
 
     return con;
   })
-  
+
   .then( () =>
   {
     let con = new _.Consequence().take( null );
@@ -4277,7 +4277,7 @@ function shellExecPathQuotesClosing( test )
 
     return con;
   })
-  
+
   testcase( 'unquoted arg' )
 
   .then( () =>
@@ -4308,7 +4308,7 @@ function shellExecPathQuotesClosing( test )
 
     return con;
   })
-  
+
   .then( () =>
   {
     let con = new _.Consequence().take( null );
@@ -4337,7 +4337,7 @@ function shellExecPathQuotesClosing( test )
 
     return con;
   })
-  
+
   .then( () =>
   {
     let con = new _.Consequence().take( null );
@@ -4366,7 +4366,7 @@ function shellExecPathQuotesClosing( test )
 
     return con;
   })
-  
+
   .then( () =>
   {
     let con = new _.Consequence().take( null );
@@ -4395,9 +4395,9 @@ function shellExecPathQuotesClosing( test )
 
     return con;
   })
-  
+
   /*  */
-  
+
   testcase( 'single quote' )
 
   .then( () =>
@@ -4428,9 +4428,9 @@ function shellExecPathQuotesClosing( test )
 
     return con;
   })
-  
+
   /*  */
-  
+
   testcase( 'single quote' )
 
   .then( () =>
@@ -4461,7 +4461,7 @@ function shellExecPathQuotesClosing( test )
 
     return con;
   })
-  
+
   .then( () =>
   {
     let con = new _.Consequence().take( null );
@@ -4490,7 +4490,7 @@ function shellExecPathQuotesClosing( test )
 
     return con;
   })
-  
+
   testcase( 'arg starts with quote' )
 
   .then( () =>
@@ -4506,7 +4506,7 @@ function shellExecPathQuotesClosing( test )
     }
     return test.shouldThrowError( _.shell( o ) );
   })
-  
+
   .then( () =>
   {
     let con = new _.Consequence().take( null );
@@ -4520,7 +4520,7 @@ function shellExecPathQuotesClosing( test )
     }
     return test.shouldThrowError( _.shell( o ) );
   })
-  
+
   testcase( 'arg ends with quote' )
 
   .then( () =>
@@ -4535,7 +4535,7 @@ function shellExecPathQuotesClosing( test )
       ready : con
     }
     _.shell( o )
-    
+
     con.then( () =>
     {
       test.identical( o.exitCode, 0 );
@@ -4548,10 +4548,10 @@ function shellExecPathQuotesClosing( test )
 
       return null;
     })
-    
+
     return con;
   })
-  
+
   .then( () =>
   {
     let con = new _.Consequence().take( null );
@@ -4564,7 +4564,7 @@ function shellExecPathQuotesClosing( test )
       ready : con
     }
     _.shell( o )
-    
+
     con.then( () =>
     {
       test.identical( o.exitCode, 0 );
@@ -4577,10 +4577,10 @@ function shellExecPathQuotesClosing( test )
 
       return null;
     })
-    
+
     return con;
   })
-  
+
   testcase( 'quoted with different symbols' )
 
   .then( () =>
@@ -4596,7 +4596,7 @@ function shellExecPathQuotesClosing( test )
     }
     return test.shouldThrowError( _.shell( o ) );
   })
-  
+
   testcase( 'quote as part of arg' )
 
   .then( () =>
@@ -4627,7 +4627,7 @@ function shellExecPathQuotesClosing( test )
 
     return con;
   })
-  
+
   .then( () =>
   {
     let con = new _.Consequence().take( null );
@@ -4656,9 +4656,9 @@ function shellExecPathQuotesClosing( test )
 
     return con;
   })
-  
+
   testcase( 'option arg with quoted value' )
-  
+
   .then( () =>
   {
     let con = new _.Consequence().take( null );
@@ -4687,7 +4687,7 @@ function shellExecPathQuotesClosing( test )
 
     return con;
   })
-  
+
   .then( () =>
   {
     let con = new _.Consequence().take( null );
@@ -4713,10 +4713,10 @@ function shellExecPathQuotesClosing( test )
 
       return null;
     })
-    
+
     return con;
   })
-  
+
   .then( () =>
   {
     let con = new _.Consequence().take( null );
@@ -4742,10 +4742,10 @@ function shellExecPathQuotesClosing( test )
 
       return null;
     })
-    
+
     return con;
   })
-  
+
   .then( () =>
   {
     let con = new _.Consequence().take( null );
@@ -4771,10 +4771,10 @@ function shellExecPathQuotesClosing( test )
 
       return null;
     })
-    
+
     return con;
   })
-  
+
   .then( () =>
   {
     let con = new _.Consequence().take( null );
@@ -4800,10 +4800,10 @@ function shellExecPathQuotesClosing( test )
 
       return null;
     })
-    
+
     return con;
   })
-  
+
   .then( () =>
   {
     let con = new _.Consequence().take( null );
@@ -4817,9 +4817,9 @@ function shellExecPathQuotesClosing( test )
     }
     return test.shouldThrowError( _.shell( o ) );
   })
-  
+
   testcase( 'double quoted with space inside, same quotes' )
-  
+
   .then( () =>
   {
     let con = new _.Consequence().take( null );
@@ -4835,9 +4835,9 @@ function shellExecPathQuotesClosing( test )
 
     return test.shouldThrowError( con );
   })
-  
+
   testcase( 'double quoted with space inside, diff quotes' )
-  
+
   .then( () =>
   {
     let con = new _.Consequence().take( null );
@@ -4863,12 +4863,12 @@ function shellExecPathQuotesClosing( test )
 
       return null;
     })
-    
+
     return con;
   })
-  
+
   testcase( 'escaped quotes, mode shell' )
-  
+
   .then( () =>
   {
     let con = new _.Consequence().take( null );
@@ -4894,26 +4894,26 @@ function shellExecPathQuotesClosing( test )
 
       return null;
     })
-    
+
     return con;
   })
-  
+
   /*  */
-  
+
   return ready;
-  
+
   /*  */
-  
+
   function testcase( src )
   {
-    ready.then( () => 
+    ready.then( () =>
     {
       test.case = src;
       return null;
     })
     return ready;
   }
-  
+
   function testApp()
   {
     let _ = require( '../../../../Tools.s' );
@@ -6997,6 +6997,80 @@ outputHandling.timeOut = 10000;
 
 //
 
+function shellOutputStripping( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.testSuitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    console.log( '\u001b[31m\u001b[43mColored message1\u001b[49;0m\u001b[39;0m' )
+    console.log( '\u001b[31m\u001b[43mColored message2\u001b[49;0m\u001b[39;0m' )
+  }
+
+  /* */
+
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+
+  /* */
+
+  var ready = new _.Consequence().take( null );
+  var modes = [ 'shell', 'spawn', 'exec', 'fork' ];
+
+  _.each( modes,( mode ) =>
+  {
+    let execPath = testAppPath;
+    if( mode != 'fork' )
+    execPath = 'node ' + execPath;
+
+    _.shell
+    ({
+      execPath : execPath,
+      mode : mode,
+      outputStripping : 0,
+      outputCollecting : 1,
+      ready : ready
+    })
+    .then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      let output = _.strSplitNonPreserving({ src : got.output, delimeter : '\n' });
+      test.identical( output.length, 2 );
+      test.identical( output[ 0 ], '\u001b[31m\u001b[43mColored message1\u001b[49;0m\u001b[39;0m' );
+      test.identical( output[ 1 ], '\u001b[31m\u001b[43mColored message2\u001b[49;0m\u001b[39;0m' );
+      return null;
+    })
+
+    _.shell
+    ({
+      execPath : execPath,
+      mode : mode,
+      outputStripping : 1,
+      outputCollecting : 1,
+      ready : ready
+    })
+    .then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      let output = _.strSplitNonPreserving({ src : got.output, delimeter : '\n' });
+      test.identical( output.length, 2 );
+      test.identical( output[ 0 ], 'Colored message1' );
+      test.identical( output[ 1 ], 'Colored message2' );
+      return null;
+    })
+  })
+
+  return ready;
+}
+
+outputHandling.timeOut = 10000;
+
+//
+
 function experiment( test )
 {
   let self = this;
@@ -7108,6 +7182,7 @@ var Proto =
     sheller,
 
     outputHandling,
+    shellOutputStripping
 
   },
 
