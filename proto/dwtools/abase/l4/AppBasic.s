@@ -822,6 +822,8 @@ args : [ '"', 'first', 'arg', '"' ]
 
   function handleClose( exitCode, exitSignal )
   {
+    if( exitSignal && exitCode === null )
+    exitCode = -1;
 
     o.exitCode = exitCode;
     o.exitSignal = exitSignal;
