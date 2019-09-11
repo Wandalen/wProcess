@@ -844,7 +844,8 @@ args : [ '"', 'first', 'arg', '"' ]
 
     appExitCode( exitCode );
     
-    if( exitCode !== 0 && o.throwingExitCode )
+    if( exitSignal || exitCode !== 0 )
+    if( o.throwingExitCode )
     {
       let err;
 
