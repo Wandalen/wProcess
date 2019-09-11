@@ -1,7 +1,8 @@
 if( typeof module !== 'undefined' )
-require( 'wappbasic' );
-var _ = wTools;
-
+var _ = require( '..' );
+// _.include( 'wFiles' )
 /**/
 
-console.log( _.appArgs() );
+// _.appExitHandlerRepair();
+
+_.appExitCode( -1 )
