@@ -5941,7 +5941,7 @@ function shellTerminate( test )
     setTimeout( () =>
     {
       console.log( 'Timeout');
-    },5000 )
+    },10000 )
   }
 
   /* */
@@ -5951,28 +5951,102 @@ function shellTerminate( test )
   _.fileProvider.fileWrite( testAppPath, testAppCode );
   var ready = new _.Consequence().take( null );
 
-  let terminateChild =
+  ready
+
+  .then( () =>
   {
-    execPath : 'node ' + testAppPath,
-    ready,
-    throwingExitCode : 1,
-  }
+    let terminateChild =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'spawn',
+      throwingExitCode : 1,
+    }
 
-  _.shell( terminateChild );
+    let con = _.shell( terminateChild );
 
-  terminateChild.process.kill();
+    _.timeOut( 2000, () =>
+    {
+      terminateChild.process.kill( 'SIGKILL' );
+      return null;
+    })
 
-  ready.finally( ( err, got ) =>
-  {
-    test.is( _.errIs( err ) );
-    test.identical( terminateChild.exitCode, null );
-    return null;
+    con.finally( ( err, got ) =>
+    {
+      test.is( _.errIs( err ) );
+      test.identical( terminateChild.exitCode, -1 );
+      test.identical( terminateChild.exitSignal, 'SIGKILL' );
+      return null;
+    })
+
+    return con;
   })
+
+  /*  */
+
+  .then( () =>
+  {
+    let terminateChild =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      throwingExitCode : 1,
+    }
+
+    let con = _.shell( terminateChild );
+
+    _.timeOut( 2000, () =>
+    {
+      terminateChild.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.finally( ( err, got ) =>
+    {
+      test.is( _.errIs( err ) );
+      test.identical( terminateChild.exitCode, -1 );
+      test.identical( terminateChild.exitSignal, 'SIGKILL' );
+      return null;
+    })
+
+    return con;
+  })
+
+  /*  */
+
+  .then( () =>
+  {
+    let terminateChild =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'exec',
+      throwingExitCode : 1,
+    }
+
+    let con = _.shell( terminateChild );
+
+    _.timeOut( 2000, () =>
+    {
+      terminateChild.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.finally( ( err, got ) =>
+    {
+      test.is( _.errIs( err ) );
+      test.identical( terminateChild.exitCode, -1 );
+      test.identical( terminateChild.exitSignal, 'SIGKILL' );
+      return null;
+    })
+
+    return con;
+  })
+
+  /*  */
 
   return ready;
 }
 
-shellTerminate.timeOut = 10000;
+shellTerminate.timeOut = 60000;
 
 
 //
