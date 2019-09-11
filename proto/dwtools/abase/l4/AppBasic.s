@@ -822,8 +822,8 @@ args : [ '"', 'first', 'arg', '"' ]
 
   function handleClose( exitCode, exitSignal )
   {
-    if( exitSignal && exitCode === null )
-    exitCode = -1;
+    // if( exitSignal && exitCode === null )
+    // exitCode = -1;
 
     o.exitCode = exitCode;
     o.exitSignal = exitSignal;
@@ -843,7 +843,7 @@ args : [ '"', 'first', 'arg', '"' ]
     state = 2;
 
     appExitCode( exitCode );
-
+    
     if( exitCode !== 0 && o.throwingExitCode )
     {
       let err;
