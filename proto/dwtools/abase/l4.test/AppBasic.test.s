@@ -6156,6 +6156,18 @@ function shellTerminate( test )
 }
 
 shellTerminate.timeOut = 120000;
+shellTerminate.description =
+`
+  Test app - single timeout with message
+
+  Will test:
+  - Termination of child process using SIGINT signal after small delay
+  - Termination of child process using SIGKILL signal after small delay
+
+  Expected behaviour for all platforms:
+  - Child was terminated with exitCode : null, exitSignal : { kill signal from parent }
+  - Time out was not raised, no message output
+`
 
 //
 
@@ -6403,6 +6415,20 @@ function shellTerminateWithExitHandler( test )
 
 shellTerminateWithExitHandler.timeOut = 120000;
 
+shellTerminateWithExitHandler.description =
+`
+  Test app - single timeout with message and appExitHandlerRepair called at start
+
+  Will test:
+    - Termination of child process using SIGINT signal after small delay
+    - Termination of child process using SIGKILL signal after small delay
+
+  Expected behaviour:
+    - For SIGINT: Child was terminated before timeout with exitCode : 0, exitSignal : null
+    - For SIGKILL: Child was terminated before timeout with exitCode : null, exitSignal : SIGKILL
+    - No time out message in output
+`
+
 //
 
 function shellTerminateHangedWithExitHandler( test )
@@ -6552,6 +6578,20 @@ function shellTerminateHangedWithExitHandler( test )
 }
 
 shellTerminateHangedWithExitHandler.timeOut = 20000;
+
+shellTerminateHangedWithExitHandler.description =
+`
+  Test app - code that blocks event loop and appExitHandlerRepair called at start
+
+  Will test:
+    - Termination of child process using SIGINT signal after small delay
+    - Termination of child process using SIGKILL signal after small delay
+
+  Expected behaviour:
+    - For SIGINT: Child was terminated with exitCode : 0, exitSignal : null
+    - For SIGKILL: Child was terminated with exitCode : null, exitSignal : SIGKILL
+    - No time out message in output
+`
 
 //
 
@@ -6737,6 +6777,261 @@ function shellTerminateAfterLoopRelease( test )
 }
 
 shellTerminateAfterLoopRelease.timeOut = 20000;
+shellTerminateAfterLoopRelease.description =
+`
+  Test app - code that blocks event loop for short period of time and appExitHandlerRepair called at start
+
+  Will test:
+    - Termination of child process using SIGINT signal after small delay
+
+  Expected behaviour:
+    - Child was terminated after event loop release with exitCode : 0, exitSignal : null
+    - Child process message should be printed
+`
+
+//
+
+function shellStartingDelay( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.testSuitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    let _ = require( '../../../../Tools.s' );
+    let data = { t2 : _.timeNow() };
+    console.log( JSON.stringify( data ) );
+  }
+
+  /* */
+
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+  testAppPath = _.strQuote( testAppPath );
+  var ready = new _.Consequence().take( null );
+
+  ready
+
+  .then( () =>
+  {
+    let starting = { delay : 5000 };
+    let o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      starting : starting
+    }
+
+    let t1 = _.timeNow();
+    let con = _.shell( o );
+
+    con.then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      let parsed = JSON.parse( got.output );
+      let diff = parsed.t2 - t1;
+      test.ge( diff, starting.delay );
+      return null;
+    })
+
+    return con;
+  })
+
+  return ready;
+}
+
+//
+
+function shellStartingTime( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.testSuitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    let _ = require( '../../../../Tools.s' );
+    let data = { t2 : _.timeNow() };
+    console.log( JSON.stringify( data ) );
+  }
+
+  /* */
+
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+  testAppPath = _.strQuote( testAppPath );
+  var ready = new _.Consequence().take( null );
+
+  ready
+
+  .then( () =>
+  {
+    let t1 = _.timeNow();
+    let delay = 5000;
+    let starting = { time : _.timeNow() + delay };
+    let o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      starting : starting
+    }
+
+    let con = _.shell( o );
+
+    con.then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      let parsed = JSON.parse( got.output );
+      let diff = parsed.t2 - t1;
+      test.ge( diff, delay );
+      return null;
+    })
+
+    return con;
+  })
+
+  return ready;
+}
+
+//
+
+function shellStartingSuspended( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.testSuitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    let _ = require( '../../../../Tools.s' );
+    let data = { t2 : _.timeNow() };
+    console.log( JSON.stringify( data ) );
+  }
+
+  /* */
+
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+  testAppPath = _.strQuote( testAppPath );
+  var ready = new _.Consequence().take( null );
+
+  ready
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      starting : 'suspended'
+    }
+
+    let t1 = _.timeNow();
+    let delay = 1000;
+    let con = _.shell( o );
+
+    _.timeOut( delay, () =>
+    {
+      o.resume();
+      return null;
+    })
+
+    con.then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      let parsed = JSON.parse( got.output );
+      let diff = parsed.t2 - t1;
+      test.ge( diff, delay );
+      return null;
+    })
+
+    return con;
+  })
+
+  return ready;
+}
+
+//
+
+function shellStartingParentDeath( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.testSuitePath, test.name );
+
+  /* */
+
+  function testAppParent()
+  {
+    let _ = require( '../../../../Tools.s' );
+    _.include( 'wAppBasic' );
+
+    _.shell
+    ({
+      execPath : 'node testAppChild.js',
+      outputCollecting : 1,
+      starting : 'parentdeath'
+    })
+
+    return _.timeOut( 5000, () =>
+    {
+      process.exit();
+      return null;
+    })
+  }
+
+  function testAppChild()
+  {
+    let _ = require( '../../../../Tools.s' );
+    let data = { t2 : _.timeNow() };
+    console.log( JSON.stringify( data ) );
+  }
+
+  /* */
+
+  var testAppParentPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppParent.js' ) );
+  var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
+  var testAppParentCode = testAppParent.toString() + '\testAppParent();';
+  var testAppChildCode = testAppChild.toString() + '\testAppChild();';
+  _.fileProvider.fileWrite( testAppParentPath, testAppParentCode );
+  _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
+  testAppParentPath = _.strQuote( testAppParentPath );
+  var ready = new _.Consequence().take( null );
+
+  ready
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : testAppParentPath,
+      mode : 'fork',
+    }
+    let con = _.shell( o );
+
+    con.then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      return null;
+    })
+
+    return con;
+  })
+
+  return ready;
+}
 
 //
 
@@ -8661,6 +8956,11 @@ var Proto =
     shellTerminateWithExitHandler,
     shellTerminateHangedWithExitHandler,
     shellTerminateAfterLoopRelease,
+
+    shellStartingDelay,
+    shellStartingTime,
+    shellStartingSuspended,
+    shellStartingParentDeath,
 
     shellConcurrent,
     shellerConcurrent,
