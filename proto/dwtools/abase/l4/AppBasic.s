@@ -150,6 +150,9 @@ function shell_body( o )
   _.assert( o.args === null || _.arrayIs( o.args ) || _.strIs( o.args ) );
   _.assert( o.execPath === null || _.strIs( o.execPath ) || _.strsAreAll( o.execPath ), 'Expects string or strings {-o.execPath-}, but got', _.strType( o.execPath ) );
   _.assert( o.timeOut === null || _.numberIs( o.timeOut ), 'Expects null or number {-o.timeOut-}, but got', _.strType( o.timeOut ) );
+  _.assert( _.arrayHas( [ 'instant', 'suspended', 'parentdeath' ],  o.starting ) || _.objectIs( o.starting ), 'Unsupported starting mode:', o.starting );
+
+
 
   let state = 0;
   let currentExitCode;
@@ -157,6 +160,24 @@ function shell_body( o )
   let stderrOutput = '';
   let decoratedOutput = '';
   let decoratedErrorOutput = '';
+  let startingDelay = 0;
+
+  if( _.objectIs( o.starting ) )
+  {
+    if( Config.debug )
+    {
+      let keys = _.mapKeys( o.starting );
+      _.assert( keys.length === 1 && _.arrayHas([ 'time', 'delay' ], keys[ 0 ] ) );
+      _.assert( _.numberIs( o.starting.delay ) || _.numberIs( o.starting.time ) )
+    }
+
+    if( o.starting.delay !== undefined )
+    startingDelay = o.starting.delay;
+    else
+    startingDelay = o.starting.time - _.timeNow();
+
+    _.assert( startingDelay >= 0, 'Wrong value of {-o.starting.delay } or {-o.starting.time-}. Starting delay should be >= 0, current:', startingDelay )
+  }
 
   o.ready = o.ready || new _.Consequence().take( null );
 
@@ -178,6 +199,9 @@ function shell_body( o )
   }
   else
   {
+    if( startingDelay )
+    o.ready.then( () => _.timeOut( startingDelay, () => null ) )
+
     o.ready.thenGive( single );
     o.ready.finallyKeep( end );
     if( o.sync && o.deasync )
@@ -1008,6 +1032,8 @@ shell_body.defaults =
   outputAdditive : null,
   outputStripping : 0,
   inputMirroring : 1,
+
+  starting : 'instant'
 
 }
 
