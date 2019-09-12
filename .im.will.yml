@@ -10,6 +10,9 @@ submodule :
   deasync :
     path : npm:///deasync
     enabled : 0 # submodule
+  strip-ansi :
+    path : npm:///strip-ansi
+    enabled : 0 # submodule
   wGdfStrategy :
     path : npm:///wgdfstrategy
     enabled : 0 # submodule
