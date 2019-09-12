@@ -6050,9 +6050,9 @@ function shellTerminate( test )
 
     return con;
   })
-  
+
   /* */
-  
+
   .then( () =>
   {
     let o =
@@ -6167,7 +6167,7 @@ function shellTerminateWithExitHandler( test )
   /* */
 
   function testApp()
-  { 
+  {
     let _ = require( '../../../../Tools.s' );
     _.include( 'wAppBasic' );
     _.appExitHandlerRepair();
@@ -6201,15 +6201,15 @@ function shellTerminateWithExitHandler( test )
       o.process.kill( 'SIGINT' );
       return null;
     })
-    
+
     _.timeOut( 4000, () =>
-    { 
+    {
       o.process.kill( 'SIGKILL' );
       return null;
     })
 
     con.finally( ( err, got ) =>
-    { 
+    {
       test.is( !_.errIs( err ) );
       test.identical( o.exitCode, 0 );
       test.identical( o.exitSignal, null );
@@ -6220,9 +6220,9 @@ function shellTerminateWithExitHandler( test )
 
     return con;
   })
-  
+
   /*  */
-  
+
   .then( () =>
   {
     let o =
@@ -6240,15 +6240,15 @@ function shellTerminateWithExitHandler( test )
       o.process.kill( 'SIGINT' );
       return null;
     })
-    
+
     _.timeOut( 4000, () =>
-    { 
+    {
       o.process.kill( 'SIGKILL' );
       return null;
     })
 
     con.finally( ( err, got ) =>
-    { 
+    {
       test.is( !_.errIs( err ) );
       test.identical( o.exitCode, 0 );
       test.identical( o.exitSignal, null );
@@ -6259,9 +6259,9 @@ function shellTerminateWithExitHandler( test )
 
     return con;
   })
-  
+
   /*  */
-  
+
   .then( () =>
   {
     let o =
@@ -6279,15 +6279,15 @@ function shellTerminateWithExitHandler( test )
       o.process.kill( 'SIGINT' );
       return null;
     })
-    
+
     _.timeOut( 4000, () =>
-    { 
+    {
       o.process.kill( 'SIGKILL' );
       return null;
     })
 
     con.finally( ( err, got ) =>
-    { 
+    {
       test.is( !_.errIs( err ) );
       test.identical( o.exitCode, 0 );
       test.identical( o.exitSignal, null );
@@ -6298,9 +6298,9 @@ function shellTerminateWithExitHandler( test )
 
     return con;
   })
-  
+
   /* SIGKILL */
-  
+
   .then( () =>
   {
     let o =
@@ -6320,7 +6320,7 @@ function shellTerminateWithExitHandler( test )
     })
 
     con.finally( ( err, got ) =>
-    { 
+    {
       _.errAttend( err );
       test.is( _.errIs( err ) );
       test.identical( o.exitCode, null );
@@ -6331,9 +6331,9 @@ function shellTerminateWithExitHandler( test )
 
     return con;
   })
-  
+
   /*  */
-  
+
   .then( () =>
   {
     let o =
@@ -6353,7 +6353,7 @@ function shellTerminateWithExitHandler( test )
     })
 
     con.finally( ( err, got ) =>
-    { 
+    {
       _.errAttend( err );
       test.is( _.errIs( err ) );
       test.identical( o.exitCode, null );
@@ -6364,7 +6364,7 @@ function shellTerminateWithExitHandler( test )
 
     return con;
   })
-  
+
   .then( () =>
   {
     let o =
@@ -6384,7 +6384,7 @@ function shellTerminateWithExitHandler( test )
     })
 
     con.finally( ( err, got ) =>
-    { 
+    {
       _.errAttend( err );
       test.is( _.errIs( err ) );
       test.identical( o.exitCode, null );
@@ -6413,7 +6413,7 @@ function shellTerminateHangedWithExitHandler( test )
   /* */
 
   function testApp()
-  { 
+  {
     let _ = require( '../../../../Tools.s' );
     _.include( 'wAppBasic' );
     _.appExitHandlerRepair();
@@ -6452,15 +6452,15 @@ function shellTerminateHangedWithExitHandler( test )
       o.process.kill( 'SIGINT' );
       return null;
     })
-    
+
     _.timeOut( 4000, () =>
-    { 
+    {
       o.process.kill( 'SIGKILL' );
       return null;
     })
 
     con.then( ( got ) =>
-    { 
+    {
       test.identical( o.exitCode, 0 );
       test.identical( o.exitSignal, null );
       test.is( _.strHas( o.output, 'SIGINT' ) );
@@ -6469,9 +6469,9 @@ function shellTerminateHangedWithExitHandler( test )
 
     return con;
   })
-  
+
   /*  */
-  
+
   .then( () =>
   {
     let o =
@@ -6490,15 +6490,15 @@ function shellTerminateHangedWithExitHandler( test )
       o.process.kill( 'SIGINT' );
       return null;
     })
-    
+
     _.timeOut( 4000, () =>
-    { 
+    {
       o.process.kill( 'SIGKILL' );
       return null;
     })
 
     con.then( ( got ) =>
-    { 
+    {
       test.identical( o.exitCode, 0 );
       test.identical( o.exitSignal, null );
       test.is( _.strHas( o.output, 'SIGINT' ) );
@@ -6507,9 +6507,9 @@ function shellTerminateHangedWithExitHandler( test )
 
     return con;
   })
-  
+
   /*  */
-  
+
   .then( () =>
   {
     let o =
@@ -6528,15 +6528,15 @@ function shellTerminateHangedWithExitHandler( test )
       o.process.kill( 'SIGINT' );
       return null;
     })
-    
+
     _.timeOut( 4000, () =>
-    { 
+    {
       o.process.kill( 'SIGKILL' );
       return null;
     })
 
     con.then( ( got ) =>
-    { 
+    {
       test.identical( o.exitCode, 0 );
       test.identical( o.exitSignal, null );
       test.is( _.strHas( o.output, 'SIGINT' ) );
@@ -6545,13 +6545,198 @@ function shellTerminateHangedWithExitHandler( test )
 
     return con;
   })
-  
+
   /*  */
-  
+
   return ready;
 }
 
 shellTerminateHangedWithExitHandler.timeOut = 20000;
+
+//
+
+function shellTerminateAfterLoopRelease( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.testSuitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    let _ = require( '../../../../Tools.s' );
+    _.include( 'wAppBasic' );
+    _.appExitHandlerRepair();
+    let loop = true;
+    setTimeout( () =>
+    {
+      loop = false;
+    }, 6000 )
+    while( loop ){}
+
+    console.log( 'Exit after timeout' );
+  }
+
+  /* */
+
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+  testAppPath = _.strQuote( testAppPath );
+  var ready = new _.Consequence().take( null );
+
+  ready
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'spawn',
+      throwingExitCode : 0,
+      outputPiping : 1,
+      outputCollecting : 1,
+    }
+
+    let con = _.shell( o );
+
+    _.timeOut( 3000, () =>
+    {
+      o.process.kill( 'SIGINT' );
+      return null;
+    })
+
+    _.timeOut( 7000, () =>
+    {
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.then( ( got ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( o.exitCode, null );
+        test.identical( o.exitSignal, 'SIGINT' );
+        test.is( !_.strHas( o.output, 'Exit after timeout' ) );
+      }
+      else
+      {
+        test.identical( o.exitCode, 0 );
+        test.identical( o.exitSignal, null );
+        test.is( _.strHas( o.output, 'Exit after timeout' ) );
+      }
+
+      return null;
+    })
+
+    return con;
+  })
+
+  /*  */
+
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'exec',
+      throwingExitCode : 0,
+      outputPiping : 1,
+      outputCollecting : 1,
+    }
+
+    let con = _.shell( o );
+
+    _.timeOut( 3000, () =>
+    {
+      o.process.kill( 'SIGINT' );
+      return null;
+    })
+
+    _.timeOut( 7000, () =>
+    {
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.then( ( got ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( o.exitCode, null );
+        test.identical( o.exitSignal, 'SIGINT' );
+        test.is( !_.strHas( o.output, 'Exit after timeout' ) );
+      }
+      else
+      {
+        test.identical( o.exitCode, 0 );
+        test.identical( o.exitSignal, null );
+        test.is( _.strHas( o.output, 'Exit after timeout' ) );
+      }
+
+      return null;
+    })
+
+    return con;
+  })
+
+  /*  */
+
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      throwingExitCode : 0,
+      outputPiping : 1,
+      outputCollecting : 1,
+    }
+
+    let con = _.shell( o );
+
+    _.timeOut( 3000, () =>
+    {
+      o.process.kill( 'SIGINT' );
+      return null;
+    })
+
+    _.timeOut( 7000, () =>
+    {
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.then( ( got ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( o.exitCode, null );
+        test.identical( o.exitSignal, 'SIGINT' );
+        test.is( !_.strHas( o.output, 'Exit after timeout' ) );
+      }
+      else
+      {
+        test.identical( o.exitCode, 0 );
+        test.identical( o.exitSignal, null );
+        test.is( _.strHas( o.output, 'Exit after timeout' ) );
+      }
+
+      return null;
+    })
+
+    return con;
+  })
+
+  /*  */
+
+  return ready;
+}
+
+shellTerminateAfterLoopRelease.timeOut = 20000;
 
 //
 
@@ -8396,6 +8581,7 @@ var Proto =
     shellTerminate,
     shellTerminateWithExitHandler,
     shellTerminateHangedWithExitHandler,
+    shellTerminateAfterLoopRelease,
 
     shellConcurrent,
     shellerConcurrent,
