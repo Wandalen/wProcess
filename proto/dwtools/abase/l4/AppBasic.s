@@ -843,7 +843,7 @@ args : [ '"', 'first', 'arg', '"' ]
     state = 2;
 
     appExitCode( exitCode );
-    
+
     if( ( exitSignal || exitCode !== 0 ) && o.throwingExitCode )
     {
       let err;
@@ -1880,6 +1880,95 @@ function appMemoryUsageInfo()
   return ( usage.heapUsed >> 20 ) + ' / ' + ( usage.heapTotal >> 20 ) + ' / ' + ( usage.rss >> 20 ) + ' Mb';
 }
 
+//
+
+let _appTempApplicationFiles = [];
+
+function appTempApplicationOpen_pre( routine, args )
+{
+  let o;
+
+  if( _.strIs( args[ 0 ] ) || _.bufferRawIs( args[ 0 ] ) )
+  o = { sourceCode : args[ 0 ] };
+  else
+  o = args[ 0 ];
+
+  o = _.routineOptions( routine, o );
+
+  _.assert( arguments.length === 2 );
+  _.assert( args.length === 1, 'Expects single argument' );
+
+  return o;
+}
+
+function appTempApplicationOpen_body( o )
+{
+  _.assertRoutineOptions( appTempApplicationOpen, arguments );
+  _.assert( arguments.length === 1, 'Expects single argument' );
+  _.assert( _.strIs( o.sourceCode ) || _.bufferRawIs( o.sourceCode ), 'Expects string or buffer raw {-o.sourceCode-}, but got', _.strType( o.sourceCode ) );
+
+  let tempDirPath = _.path.pathDirTempForOpen( _.path.current() );
+  let filePath = _.path.join( tempDirPath, _.idWithDate() + '.ss' );
+  _appTempApplicationFiles.push( filePath );
+  _.fileProvider.fileWrite( filePath, o.sourceCode );
+  return filePath;
+}
+
+var defaults = appTempApplicationOpen_body.defaults = Object.create( null );
+defaults.sourceCode = null;
+
+let appTempApplicationOpen = _.routineFromPreAndBody( appTempApplicationOpen_pre, appTempApplicationOpen_body );
+
+//
+
+function appTempApplicationClose_pre( routine, args )
+{
+  let o;
+
+  if( _.strIs( args[ 0 ] ) )
+  o = { filePath : args[ 0 ] };
+  else
+  o = args[ 0 ];
+
+  if( !o )
+  o = Object.create( null );
+
+  o = _.routineOptions( routine, o );
+
+  _.assert( arguments.length === 2 );
+  _.assert( args.length <= 1, 'Expects single argument or none' );
+
+  return o;
+}
+
+function appTempApplicationClose_body( o )
+{
+  _.assertRoutineOptions( appTempApplicationClose, arguments );
+  _.assert( arguments.length === 1, 'Expects single argument' );
+  _.assert( _.strIs( o.filePath ) || o.filePath === null, 'Expects string or null {-o.filePath-}, but got', _.strType( o.filePath ) );
+
+  if( !o.filePath )
+  {
+    if( !_appTempApplicationFiles.length )
+    return;
+
+    _.fileProvider.filesDelete( _appTempApplicationFiles );
+    _appTempApplicationFiles.splice( 0 );
+  }
+  else
+  {
+    let i = _.arrayLeftIndex( _appTempApplicationFiles, o.filePath );
+    _.assert( i !== -1, 'Requested {-o.filePath-}', o.filePath, 'is not a path of temp application.' )
+    _.fileProvider.fileDelete( o.filePath );
+    _appTempApplicationFiles.splice( i, 1 );
+  }
+}
+
+var defaults = appTempApplicationClose_body.defaults = Object.create( null );
+defaults.filePath = null;
+
+let appTempApplicationClose = _.routineFromPreAndBody( appTempApplicationClose_pre, appTempApplicationClose_body );
+
 // --
 // declare
 // --
@@ -1911,6 +2000,9 @@ let Extend =
   appExitHandlerOff,
 
   appMemoryUsageInfo,
+
+  appTempApplicationOpen,
+  appTempApplicationClose
 
 }
 

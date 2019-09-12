@@ -8524,20 +8524,29 @@ function appTempApplication( test )
   _.appTempApplicationClose();
   test.is( !_.fileProvider.fileExists( got1 ) );
   test.is( !_.fileProvider.fileExists( got2 ) );
+  test.mustNotThrowError( () => _.appTempApplicationClose() )
 
   if( !Config.debug )
   return;
 
-  test.csae = 'unexpected type of sourceCode option';
+  test.case = 'unexpected type of sourceCode option';
   test.shouldThrowErrorSync( () =>
   {
     _.appTempApplicationOpen( [] );
   })
 
-  test.csae = 'unexpected option';
+  test.case = 'unexpected option';
   test.shouldThrowErrorSync( () =>
   {
     _.appTempApplicationOpen({ someOption : true });
+  })
+
+  test.case = 'try to remove file that does not exist in registry';
+  var got = _.appTempApplicationOpen( testAppCode );
+  _.appTempApplicationClose( got );
+  test.shouldThrowErrorSync( () =>
+  {
+    _.appTempApplicationClose( got );
   })
 }
 
