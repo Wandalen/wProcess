@@ -8473,6 +8473,76 @@ shellNormalizedExecPath.timeOut = 60000;
 
 //
 
+function appTempApplication( test )
+{
+  let context = this;
+
+  /* */
+
+  function testApp()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+
+  let testAppCode = testApp.toString() + '\ntestApp();';
+
+  /* */
+
+  test.case = 'string';
+  var got = _.appTempApplicationOpen( testAppCode );
+  var read = _.fileProvider.fileRead( got );
+  test.identical( read, testAppCode );
+  _.appTempApplicationClose( got );
+  test.is( !_.fileProvider.fileExists( got ) );
+
+  test.case = 'string';
+  var got = _.appTempApplicationOpen({ sourceCode : testAppCode });
+  var read = _.fileProvider.fileRead( got );
+  test.identical( read, testAppCode );
+  _.appTempApplicationClose( got );
+  test.is( !_.fileProvider.fileExists( got ) );
+
+  test.case = 'raw buffer';
+  var got = _.appTempApplicationOpen( _.bufferRawFrom( testAppCode ) );
+  var read = _.fileProvider.fileRead( got );
+  test.identical( read, testAppCode );
+  _.appTempApplicationClose( got );
+  test.is( !_.fileProvider.fileExists( got ) );
+
+  test.case = 'raw buffer';
+  var got = _.appTempApplicationOpen({ sourceCode :_.bufferRawFrom( testAppCode ) });
+  var read = _.fileProvider.fileRead( got );
+  test.identical( read, testAppCode );
+  _.appTempApplicationClose( got );
+  test.is( !_.fileProvider.fileExists( got ) );
+
+  test.case = 'remove all';
+  var got1 = _.appTempApplicationOpen( testAppCode );
+  var got2 = _.appTempApplicationOpen( testAppCode );
+  test.is( _.fileProvider.fileExists( got1 ) );
+  test.is( _.fileProvider.fileExists( got2 ) );
+  _.appTempApplicationClose();
+  test.is( !_.fileProvider.fileExists( got1 ) );
+  test.is( !_.fileProvider.fileExists( got2 ) );
+
+  if( !Config.debug )
+  return;
+
+  test.csae = 'unexpected type of sourceCode option';
+  test.shouldThrowErrorSync( () =>
+  {
+    _.appTempApplicationOpen( [] );
+  })
+
+  test.csae = 'unexpected option';
+  test.shouldThrowErrorSync( () =>
+  {
+    _.appTempApplicationOpen({ someOption : true });
+  })
+}
+
+//
+
 function experiment( test )
 {
   let self = this;
@@ -8593,7 +8663,9 @@ var Proto =
     shellOutputStripping,
     shellLoggerOption,
 
-    shellNormalizedExecPath
+    shellNormalizedExecPath,
+
+    appTempApplication
 
   },
 
