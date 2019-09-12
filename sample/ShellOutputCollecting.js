@@ -1,5 +1,5 @@
 if( typeof module !== 'undefined' )
-require( 'wappbasic' );
+require( '..' );
 require( 'wFiles' );
 var _ = wTools;
 
@@ -8,6 +8,7 @@ var _ = wTools;
 _.shell
 ({
   execPath : 'ls',
+  outputPiping : 0,
   outputCollecting : 1
 })
 .finally( ( err, got ) =>
@@ -15,7 +16,7 @@ _.shell
   if( err )
   throw err;
 
-  console.log( got.output )
+  console.log( got.output.split( '\n' ) )
 
   return null;
 })

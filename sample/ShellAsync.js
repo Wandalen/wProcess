@@ -1,5 +1,5 @@
 if( typeof module !== 'undefined' )
-require( 'wappbasic' );
+require( '..' );
 require( 'wFiles' );
 var _ = wTools;
 

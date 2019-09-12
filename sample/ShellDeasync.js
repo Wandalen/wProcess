@@ -1,5 +1,5 @@
 if( typeof module !== 'undefined' )
-require( 'wappbasic' );
+require( '..' );
 require( 'wFiles' );
 var _ = wTools;
 
@@ -7,7 +7,7 @@ var _ = wTools;
 
 var got = _.shell
 ({
-  execPath : 'AppArgs.js',
+  execPath : _.path.join( __dirname, 'AppArgs.js' ),
   mode : 'fork',
   deasync : 1,
   sync : 1
