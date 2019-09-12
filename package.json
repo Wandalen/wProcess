@@ -33,11 +33,12 @@
     "url": "https://github.com/Wandalen/wAppBasic/issues"
   },
   "dependencies": {
-    "deasync": "",
     "wTools": "",
     "wpathbasic": "",
     "wgdfstrategy": "",
-    "wConsequence": ""
+    "wConsequence": "",
+    "deasync": "",
+    "strip-ansi": ""
   },
   "devDependencies": {
     "wTesting": ""

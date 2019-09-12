@@ -28,7 +28,7 @@ if( typeof module !== 'undefined' )
 
 }
 
-let System, ChildProcess;
+let System, ChildProcess,StripAnsi;
 let _global = _global_;
 let _ = _global_.wTools;
 let Self = _global_.wTools.app || _global_.wTools.app || Object.create( null );
@@ -150,6 +150,9 @@ function shell_body( o )
   _.assert( o.args === null || _.arrayIs( o.args ) || _.strIs( o.args ) );
   _.assert( o.execPath === null || _.strIs( o.execPath ) || _.strsAreAll( o.execPath ), 'Expects string or strings {-o.execPath-}, but got', _.strType( o.execPath ) );
   _.assert( o.timeOut === null || _.numberIs( o.timeOut ), 'Expects null or number {-o.timeOut-}, but got', _.strType( o.timeOut ) );
+  _.assert( _.arrayHas( [ 'instant'/* , 'suspended', 'parentdeath' */ ],  o.starting ) || _.objectIs( o.starting ), 'Unsupported starting mode:', o.starting );
+
+
 
   let state = 0;
   let currentExitCode;
@@ -157,6 +160,24 @@ function shell_body( o )
   let stderrOutput = '';
   let decoratedOutput = '';
   let decoratedErrorOutput = '';
+  let startingDelay = 0;
+
+  if( _.objectIs( o.starting ) )
+  {
+    if( Config.debug )
+    {
+      let keys = _.mapKeys( o.starting );
+      _.assert( keys.length === 1 && _.arrayHas([ 'time', 'delay' ], keys[ 0 ] ) );
+      _.assert( _.numberIs( o.starting.delay ) || _.numberIs( o.starting.time ) )
+    }
+
+    if( o.starting.delay !== undefined )
+    startingDelay = o.starting.delay;
+    else
+    startingDelay = o.starting.time - _.timeNow();
+
+    _.assert( startingDelay >= 0, 'Wrong value of {-o.starting.delay } or {-o.starting.time-}. Starting delay should be >= 0, current:', startingDelay )
+  }
 
   o.ready = o.ready || new _.Consequence().take( null );
 
@@ -178,6 +199,9 @@ function shell_body( o )
   }
   else
   {
+    if( startingDelay )
+    o.ready.then( () => _.timeOut( startingDelay, () => null ) )
+
     o.ready.thenGive( single );
     o.ready.finallyKeep( end );
     if( o.sync && o.deasync )
@@ -318,35 +342,41 @@ function shell_body( o )
     // qqq : cover the case ( args is string ) for both routines shell and sheller
     // if( _.strIs( o.args ) )
     // o.args = _.strSplitNonPreserving({ src : o.args });
+
+    if( _.arrayIs( o.args ) )
+    o.args = o.args.slice();
+
     o.args = _.arrayAs( o.args );
-    
+
     let execArgs;
 
     if( _.strIs( o.execPath ) )
-    { 
+    {
       o.fullExecPath = o.execPath;
       execArgs = execPathParse( o.execPath );
       o.execPath = execArgs.shift();
     }
-    
+
     if( o.execPath === null )
     {
+      _.assert( o.args.length, 'Expects {-args-} to have at least one argument if {-execPath-} is not defined' );
+
       o.execPath = o.args.shift();
       o.fullExecPath = o.execPath;
-      
+
       let begin = _.strBeginOf( o.execPath, [ '"', "'", '`' ] );
       let end = _.strEndOf( o.execPath, [ '"', "'", '`' ] );
-      
+
       if( begin && begin === end )
       o.execPath = _.strInsideOf( o.execPath, begin, end );
     }
-    
+
     if( o.args )
     o.fullExecPath = _.strConcat( _.arrayAppendArray( [ o.fullExecPath ], o.args ) );
-    
+
     if( execArgs && execArgs.length )
     o.args = _.arrayPrependArray( o.args || [], execArgs );
-    
+
     if( o.outputAdditive === null )
     o.outputAdditive = true;
     o.outputAdditive = !!o.outputAdditive;
@@ -400,6 +430,10 @@ function shell_body( o )
 
     if( !ChildProcess )
     ChildProcess = require( 'child_process' );
+
+    if( o.outputStripping )
+    if( !StripAnsi )
+    StripAnsi = require( 'strip-ansi' );
 
     if( !o.outputGray && typeof module !== 'undefined' )
     try
@@ -475,19 +509,29 @@ function shell_body( o )
 
     _.assert( _.fileProvider.isDir( o.currentPath ), 'working directory', o.currentPath, 'doesn\'t exist or it\'s not a directory.' );
 
+    let execPath = o.execPath;
+    let args = o.args.slice();
+
+    if( process.platform === 'win32' )
+    {
+      execPath = _.path.nativize( execPath );
+      if( args.length )
+      args[ 0 ] = _.path.nativize( args[ 0 ] )
+    }
+
     if( o.mode === 'fork')
     {
       _.assert( !o.sync || o.deasync, '{ shell.mode } "fork" is available only in async/deasync version of shell' );
-      let args = o.args || [];
       let o2 = optionsForFork();
-      let execPath = execPathForFork();
+      execPath = execPathForFork( execPath );
       o.process = ChildProcess.fork( execPath, args, o2 );
     }
     else if( o.mode === 'exec' )
     {
       let currentPath = _.path.nativize( o.currentPath );
       log( '{ shell.mode } "exec" is deprecated' );
-      let execPath = o.execPath + ' ' + argsJoin( o.args );
+      if( args.length )
+      execPath = execPath + ' ' + argsJoin( args );
       if( o.sync && !o.deasync )
       o.process = ChildProcess.execSync( execPath, { env : o.env, cwd : currentPath } );
       else
@@ -495,7 +539,7 @@ function shell_body( o )
     }
     else if( o.mode === 'spawn' )
     {
-      let appPath = o.execPath;
+      // let appPath = o.execPath;
 
       // if( !o.args )
       // {
@@ -511,9 +555,9 @@ function shell_body( o )
       let o2 = optionsForSpawn();
 
       if( o.sync && !o.deasync )
-      o.process = ChildProcess.spawnSync( appPath, o.args, o2 );
+      o.process = ChildProcess.spawnSync( execPath, args, o2 );
       else
-      o.process = ChildProcess.spawn( appPath, o.args, o2 );
+      o.process = ChildProcess.spawn( execPath, args, o2 );
 
     }
     else if( o.mode === 'shell' )
@@ -521,7 +565,7 @@ function shell_body( o )
 
       let appPath = process.platform === 'win32' ? 'cmd' : 'sh';
       let arg1 = process.platform === 'win32' ? '/c' : '-c';
-      let arg2 = o.execPath;
+      let arg2 = execPath;
       let o2 = optionsForSpawn();
 
      /*
@@ -536,8 +580,8 @@ function shell_body( o )
 
       o2.windowsVerbatimArguments = true;
 
-      if( o.args )
-      arg2 = arg2 + ' ' + argsJoin( o.args );
+      if( args.length )
+      arg2 = arg2 + ' ' + argsJoin( args );
 
       if( o.sync && !o.deasync )
       o.process = ChildProcess.spawnSync( appPath, [ arg1, arg2 ], o2 );
@@ -646,7 +690,7 @@ args : [ '"', 'first', 'arg', '"' ]
       let end = _.strEndOf( args[ i ], strOptions.quotingPostfixes );
       if( begin )
       {
-        _.sure( begin === end, 'Arguments string in execPath:', src, 'has not closed quoting, that begins of:', args[ i ] );
+        _.sure( begin === end, 'Arguments string in execPath:', src, 'has not closed quoting in argument:', args[ i ] );
         args[ i ] = _.strInsideOf( args[ i ], begin, end );
       }
     }
@@ -658,7 +702,7 @@ args : [ '"', 'first', 'arg', '"' ]
   function argsJoin( args )
   {
     args = args.slice();
-    
+
     for( let i = 0; i < args.length; i++ )
     {
       //escaping of some quotes is needed to equalize behavior of shell and exec modes on all platforms
@@ -667,16 +711,27 @@ args : [ '"', 'first', 'arg', '"' ]
       quotes.push( "`" )
       _.each( quotes, ( quote ) =>
       {
-        args[ i ] = _.strReplaceAll( args[ i ], quote, ( match, it ) => 
-        { 
+        args[ i ] = _.strReplaceAll( args[ i ], quote, ( match, it ) =>
+        {
           if( it.input[ it.range[ 0 ] - 1 ] === '\\' )
           return match;
-          return '\\' + match; 
+          return '\\' + match;
         });
       })
     }
-    
-    return '"' + args.join( '" "' ) + '"';
+
+    let result = '';
+
+    _.each( args, ( arg, i ) =>
+    {
+      if( !_.arrayHas( [ '&&', '&', '|', '||' ], arg ) )
+      arg = '"' + arg + '"';
+      if( i )
+      result += ' ';
+      result += arg;
+    })
+
+    return result;
   }
 
   /* */
@@ -715,10 +770,9 @@ args : [ '"', 'first', 'arg', '"' ]
     return o2;
   }
 
-  function execPathForFork()
+  function execPathForFork( execPath )
   {
     let quotes = [ "'", '"', "`" ];
-    let execPath = o.execPath;
     let begin = _.strBeginOf( execPath, quotes );
     if( begin )
     execPath = _.strInsideOf( execPath, begin, begin );
@@ -792,6 +846,8 @@ args : [ '"', 'first', 'arg', '"' ]
 
   function handleClose( exitCode, exitSignal )
   {
+    // if( exitSignal && exitCode === null )
+    // exitCode = -1;
 
     o.exitCode = exitCode;
     o.exitSignal = exitSignal;
@@ -812,7 +868,7 @@ args : [ '"', 'first', 'arg', '"' ]
 
     appExitCode( exitCode );
 
-    if( exitCode !== 0 && o.throwingExitCode )
+    if( ( exitSignal || exitCode !== 0 ) && o.throwingExitCode )
     {
       let err;
 
@@ -866,6 +922,9 @@ args : [ '"', 'first', 'arg', '"' ]
     if( _.bufferAnyIs( data ) )
     data = _.bufferToStr( data );
 
+    if( o.outputStripping )
+    data = StripAnsi( data );
+
     stderrOutput += data;
 
     if( o.outputCollecting )
@@ -893,6 +952,9 @@ args : [ '"', 'first', 'arg', '"' ]
 
     if( _.bufferAnyIs( data ) )
     data = _.bufferToStr( data );
+
+    if( o.outputStripping )
+    data = StripAnsi( data );
 
     if( o.outputCollecting )
     o.output += data;
@@ -968,7 +1030,10 @@ shell_body.defaults =
   outputPiping : null,
   outputCollecting : 0,
   outputAdditive : null,
+  outputStripping : 0,
   inputMirroring : 1,
+
+  starting : 'instant'
 
 }
 
@@ -1841,6 +1906,95 @@ function appMemoryUsageInfo()
   return ( usage.heapUsed >> 20 ) + ' / ' + ( usage.heapTotal >> 20 ) + ' / ' + ( usage.rss >> 20 ) + ' Mb';
 }
 
+//
+
+let _appTempApplicationFiles = [];
+
+function appTempApplicationOpen_pre( routine, args )
+{
+  let o;
+
+  if( _.strIs( args[ 0 ] ) || _.bufferRawIs( args[ 0 ] ) )
+  o = { sourceCode : args[ 0 ] };
+  else
+  o = args[ 0 ];
+
+  o = _.routineOptions( routine, o );
+
+  _.assert( arguments.length === 2 );
+  _.assert( args.length === 1, 'Expects single argument' );
+
+  return o;
+}
+
+function appTempApplicationOpen_body( o )
+{
+  _.assertRoutineOptions( appTempApplicationOpen, arguments );
+  _.assert( arguments.length === 1, 'Expects single argument' );
+  _.assert( _.strIs( o.sourceCode ) || _.bufferRawIs( o.sourceCode ), 'Expects string or buffer raw {-o.sourceCode-}, but got', _.strType( o.sourceCode ) );
+
+  let tempDirPath = _.path.pathDirTempForOpen( _.path.current() );
+  let filePath = _.path.join( tempDirPath, _.idWithDate() + '.ss' );
+  _appTempApplicationFiles.push( filePath );
+  _.fileProvider.fileWrite( filePath, o.sourceCode );
+  return filePath;
+}
+
+var defaults = appTempApplicationOpen_body.defaults = Object.create( null );
+defaults.sourceCode = null;
+
+let appTempApplicationOpen = _.routineFromPreAndBody( appTempApplicationOpen_pre, appTempApplicationOpen_body );
+
+//
+
+function appTempApplicationClose_pre( routine, args )
+{
+  let o;
+
+  if( _.strIs( args[ 0 ] ) )
+  o = { filePath : args[ 0 ] };
+  else
+  o = args[ 0 ];
+
+  if( !o )
+  o = Object.create( null );
+
+  o = _.routineOptions( routine, o );
+
+  _.assert( arguments.length === 2 );
+  _.assert( args.length <= 1, 'Expects single argument or none' );
+
+  return o;
+}
+
+function appTempApplicationClose_body( o )
+{
+  _.assertRoutineOptions( appTempApplicationClose, arguments );
+  _.assert( arguments.length === 1, 'Expects single argument' );
+  _.assert( _.strIs( o.filePath ) || o.filePath === null, 'Expects string or null {-o.filePath-}, but got', _.strType( o.filePath ) );
+
+  if( !o.filePath )
+  {
+    if( !_appTempApplicationFiles.length )
+    return;
+
+    _.fileProvider.filesDelete( _appTempApplicationFiles );
+    _appTempApplicationFiles.splice( 0 );
+  }
+  else
+  {
+    let i = _.arrayLeftIndex( _appTempApplicationFiles, o.filePath );
+    _.assert( i !== -1, 'Requested {-o.filePath-}', o.filePath, 'is not a path of temp application.' )
+    _.fileProvider.fileDelete( o.filePath );
+    _appTempApplicationFiles.splice( i, 1 );
+  }
+}
+
+var defaults = appTempApplicationClose_body.defaults = Object.create( null );
+defaults.filePath = null;
+
+let appTempApplicationClose = _.routineFromPreAndBody( appTempApplicationClose_pre, appTempApplicationClose_body );
+
 // --
 // declare
 // --
@@ -1872,6 +2026,9 @@ let Extend =
   appExitHandlerOff,
 
   appMemoryUsageInfo,
+
+  appTempApplicationOpen,
+  appTempApplicationClose
 
 }
 

@@ -36,7 +36,8 @@ function testDirMake()
 {
   var context = this;
   if( Config.interpreter === 'njs' )
-  context.testSuitePath = _.path.pathDirTempOpen( _.path.join( __dirname, '../..'  ), 'ExternalFundamentals' );
+  // context.testSuitePath = _.path.pathDirTempOpen( _.path.join( __dirname, '../..'  ), 'ExternalFundamentals' );
+  context.testSuitePath = _.path.join( __dirname, '../../tmp.tmp/AppBasic', _.idWithDate() + '.tmp'  );
   else
   context.testSuitePath = _.path.current();
 }
@@ -2024,6 +2025,61 @@ function shellWithoutExecPath( test )
 
 //
 
+function shellArgsOption( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.testSuitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+
+  /* */
+
+  var testAppPath = _.path.join( routinePath, 'testApp.js' );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+
+  /* */
+
+  var ready = new _.Consequence().take( null );
+
+  /* */
+
+  test.case = 'args option as array, source args array should not be changed'
+  var args = [ 'arg1', 'arg2' ];
+  var shellOptions =
+  {
+    execPath : 'node ' + testAppPath,
+    outputCollecting : 1,
+    args : args,
+    mode : 'spawn',
+    ready : ready
+  }
+
+  _.shell( shellOptions )
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( got.args, [ testAppPath, 'arg1', 'arg2' ] );
+    test.identical( _.strCount( got.output, `[ 'arg1', 'arg2' ]` ), 1 );
+    test.identical( shellOptions.args, got.args );
+    test.identical( args, [ 'arg1', 'arg2' ] );
+    return null;
+  })
+
+  /*  */
+
+  return ready;
+}
+
+shellArgsOption.timeOut = 30000;
+
+//
+
 function shellArgumentsParsing( test )
 {
   let context = this;
@@ -2036,31 +2092,11 @@ function shellArgumentsParsing( test )
   _.fileProvider.fileWrite( testAppPathNoSpace, testAppCode );
   _.fileProvider.fileWrite( testAppPathSpace, testAppCode );
 
-  /*
-    +'path to exec : with space' 'execPath: has arguments' 'args has arguments' 'fork'
-    +'path to exec : without space' 'execPath: has arguments' 'args has arguments' 'fork'
-    +'path to exec : with space' 'execPath: only path' 'args has arguments' 'fork'
-    +'path to exec : without space' 'execPath: only path' 'args has arguments' 'fork'
-    +'path to exec : with space' 'execPath: has arguments' 'args: empty' 'fork'
-    +'path to exec : without space' 'execPath: has arguments' 'args: empty' 'fork'
-    +'path to exec : with space' 'execPath: only path' 'args: empty' 'fork'
-    +'path to exec : without space' 'execPath: only path' 'args: empty' 'fork'
-    +'path to exec : with space' 'execPath: has arguments' 'args has arguments' 'spawn'
-    +'path to exec : without space' 'execPath: has arguments' 'args has arguments' 'spawn'
-    +'path to exec : with space' 'execPath: only path' 'args has arguments' 'spawn'
-    +'path to exec : without space' 'execPath: only path' 'args has arguments' 'spawn'
-    +'path to exec : with space' 'execPath: has arguments' 'args: empty' 'spawn'
-    +'path to exec : without space' 'execPath: has arguments' 'args: empty' 'spawn'
-    +'path to exec : with space' 'execPath: only path' 'args: empty' 'spawn'
-    +'path to exec : without space' 'execPath: only path' 'args: empty' 'spawn'
-    +'path to exec : with space' 'execPath: has arguments' 'args has arguments' 'shell'
-    +'path to exec : without space' 'execPath: has arguments' 'args has arguments' 'shell'
-    +'path to exec : with space' 'execPath: only path' 'args has arguments' 'shell'
-    +'path to exec : without space' 'execPath: only path' 'args has arguments' 'shell'
-    +'path to exec : with space' 'execPath: has arguments' 'args: empty' 'shell'
-    +'path to exec : without space' 'execPath: has arguments' 'args: empty' 'shell'
-    +'path to exec : with space' 'execPath: only path' 'args: empty' 'shell'
-    +'path to exec : without space' 'execPath: only path' 'args: empty' 'shell'"
+  /* for combination:
+      path to exe file : [ with space, without space ]
+      execPath : [ has arguments, only path to exe file ]
+      args : [ has arguments, empty ]
+      mode : [ 'fork', 'exec', 'spawn', 'shell' ]
   */
 
   /* - */
@@ -3272,9 +3308,9 @@ function shellArgumentsParsingNonTrivial( test )
   let testAppCode = testApp.toString() + '\ntestApp();';
   _.fileProvider.fileWrite( testAppPathNoSpace, testAppCode );
   _.fileProvider.fileWrite( testAppPathSpace, testAppCode );
-  
-  /* 
-  
+
+  /*
+
   execPath : '"/dir with space/app.exe" `firstArg secondArg ":" 1` "third arg" \'fourth arg\'  `"fifth" arg`,
   args : '"some arg"'
   mode : 'spawn'
@@ -3331,11 +3367,11 @@ function shellArgumentsParsingNonTrivial( test )
   ->
   execPath : '"'
   args : [ '"', 'first', 'arg', '"' ]
-  
+
   */
- 
+
   ready
- 
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3367,7 +3403,7 @@ function shellArgumentsParsingNonTrivial( test )
 
     return con;
   })
-  
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3399,7 +3435,7 @@ function shellArgumentsParsingNonTrivial( test )
 
     return con;
   })
-  
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3431,7 +3467,7 @@ function shellArgumentsParsingNonTrivial( test )
 
     return con;
   })
-  
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3463,9 +3499,9 @@ function shellArgumentsParsingNonTrivial( test )
 
     return con;
   })
-  
+
   /*  */
-  
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3497,7 +3533,7 @@ function shellArgumentsParsingNonTrivial( test )
 
     return con;
   })
-  
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3529,7 +3565,7 @@ function shellArgumentsParsingNonTrivial( test )
 
     return con;
   })
-  
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3561,7 +3597,7 @@ function shellArgumentsParsingNonTrivial( test )
 
     return con;
   })
-  
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3593,9 +3629,9 @@ function shellArgumentsParsingNonTrivial( test )
 
     return con;
   })
-  
+
   /*  */
-  
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3613,20 +3649,20 @@ function shellArgumentsParsingNonTrivial( test )
     _.shell( o );
 
     con.finally( ( err, got ) =>
-    { 
+    {
       test.is( !!err );
       test.is( _.strHas( err.message, 'first arg' ) )
       test.identical( o.execPath, 'first arg' );
       test.identical( o.args, [] );
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   /* */
-  
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3644,20 +3680,20 @@ function shellArgumentsParsingNonTrivial( test )
     _.shell( o );
 
     con.finally( ( err, got ) =>
-    { 
+    {
       test.is( !!err );
       test.is( _.strHas( err.message, 'first arg' ) )
       test.identical( o.execPath, 'first arg' );
       test.identical( o.args, [] );
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   /* */
-  
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3675,20 +3711,20 @@ function shellArgumentsParsingNonTrivial( test )
     _.shell( o );
 
     con.finally( ( err, got ) =>
-    { 
+    {
       test.is( !!err );
       test.is( _.strHas( err.message, 'first arg' ) )
       test.identical( o.execPath, 'first arg' );
       test.identical( o.args, [ 'second arg' ] );
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   /* */
-  
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3706,18 +3742,18 @@ function shellArgumentsParsingNonTrivial( test )
     _.shell( o );
 
     con.finally( ( err, got ) =>
-    { 
+    {
       test.is( !!err );
       test.is( _.strHas( err.message, '"' ) )
       test.identical( o.execPath, '"' );
       test.identical( o.args, [ 'first', 'arg', '"' ] );
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3735,18 +3771,18 @@ function shellArgumentsParsingNonTrivial( test )
     _.shell( o );
 
     con.finally( ( err, got ) =>
-    { 
+    {
       test.is( !!err );
       test.is( _.strHas( err.message, `Received ''` ) );
       test.identical( o.execPath, '' );
       test.identical( o.args, [ 'first', 'arg', '"' ] );
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3764,22 +3800,42 @@ function shellArgumentsParsingNonTrivial( test )
     _.shell( o );
 
     con.finally( ( err, got ) =>
-    { 
+    {
       test.is( !!err );
       test.is( _.strHas( err.message, `spawn " ENOENT` ) );
       test.identical( o.execPath, '"' );
       test.identical( o.args, [ '"', 'first', 'arg', '"' ] );
-      
+
       return null;
     })
 
     return con;
   })
-  
+
+  .then( () =>
+  {
+    test.case = 'no execPath, empty args'
+
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      args : [],
+      mode : 'spawn',
+      outputPiping : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0,
+      ready : con
+    }
+
+    _.shell( o );
+
+    return test.shouldThrowError( con );
+  })
+
   /*  */
 
   return ready;
-  
+
 
   /**/
 
@@ -3854,7 +3910,7 @@ function shellArgumentsNestedQuotes( test )
 
     return con;
   })
-  
+
   .then( () =>
   {
     test.case = 'fork'
@@ -3932,7 +3988,7 @@ function shellArgumentsNestedQuotes( test )
     return con;
 
   })
-  
+
   .then( () =>
   {
     test.case = 'spawn'
@@ -4010,7 +4066,7 @@ function shellArgumentsNestedQuotes( test )
 
     return con;
   })
-  
+
   .then( () =>
   {
     test.case = 'shell'
@@ -4088,7 +4144,7 @@ function shellArgumentsNestedQuotes( test )
     return con;
 
   })
-  
+
   .then( () =>
   {
     test.case = 'exec'
@@ -4143,6 +4199,1028 @@ function shellArgumentsNestedQuotes( test )
 }
 
 shellArgumentsNestedQuotes.timeOut = 60000;
+
+//
+
+function shellExecPathQuotesClosing( test )
+{
+  let context = this;
+  let routinePath = _.path.join( context.testSuitePath, test.name );
+  let testAppPathSpace= _.fileProvider.path.nativize( _.path.join( routinePath, 'with space', 'testApp.js' ) );
+  let ready = _.Consequence().take( null );
+
+  let testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPathSpace, testAppCode );
+
+  /* */
+
+  ready
+
+  testcase( 'quoted arg' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' "arg"',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' "arg"' );
+      test.identical( o.args, [ 'arg' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ 'arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"',
+      mode : 'spawn',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"' );
+      test.identical( o.args, [ testAppPathSpace,'arg' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ 'arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"',
+      mode : 'shell',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"' );
+      test.identical( o.args, [ testAppPathSpace,'arg' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ 'arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"',
+      mode : 'exec',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"' );
+      test.identical( o.args, [ testAppPathSpace,'arg' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ 'arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  testcase( 'unquoted arg' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' arg',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' arg' );
+      test.identical( o.args, [ 'arg' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ 'arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' arg',
+      mode : 'spawn',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' arg' );
+      test.identical( o.args, [ testAppPathSpace,'arg' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ 'arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' arg',
+      mode : 'shell',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' arg' );
+      test.identical( o.args, [ testAppPathSpace,'arg' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ 'arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' arg',
+      mode : 'exec',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' arg' );
+      test.identical( o.args, [ testAppPathSpace, 'arg' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ 'arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  /*  */
+
+  testcase( 'single quote' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' " arg',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' " arg' );
+      test.identical( o.args, [ '"', 'arg' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ '"', 'arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  /*  */
+
+  testcase( 'single quote' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' " arg',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' " arg' );
+      test.identical( o.args, [ '"', 'arg' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ '"', 'arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' arg "',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' arg "' );
+      test.identical( o.args, [ 'arg', '"' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ 'arg', '"' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  testcase( 'arg starts with quote' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' "arg',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    return test.shouldThrowError( _.shell( o ) );
+  })
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' "arg"arg',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    return test.shouldThrowError( _.shell( o ) );
+  })
+
+  testcase( 'arg ends with quote' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' arg"',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o )
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' arg"' );
+      test.identical( o.args, [ 'arg"' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ 'arg"' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' arg"arg"',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o )
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' arg"arg"' );
+      test.identical( o.args, [ 'arg"arg"' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ 'arg"arg"' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  testcase( 'quoted with different symbols' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ` "arg'`,
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    return test.shouldThrowError( _.shell( o ) );
+  })
+
+  testcase( 'quote as part of arg' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' arg"arg',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' arg"arg' );
+      test.identical( o.args, [ 'arg"arg' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ 'arg"arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' "arg"arg"',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' "arg"arg"' );
+      test.identical( o.args, [ 'arg"arg' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ 'arg"arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  testcase( 'option arg with quoted value' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' option : "value"',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' option : "value"' );
+      test.identical( o.args, [ 'option', ':', 'value' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, { option : 'value' } )
+      test.identical( got.scriptArgs, [ 'option', ':', 'value' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' option:"value with space"',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' option:"value with space"' );
+      test.identical( o.args, [ 'option:"value with space"' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, { option : 'value with space' } )
+      test.identical( got.scriptArgs, [ 'option:"value with space"' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' option : "value with space"',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' option : "value with space"' );
+      test.identical( o.args, [ 'option', ':', 'value with space' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, { option : 'value with space' } )
+      test.identical( got.scriptArgs, [ 'option', ':', 'value with space' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' option:"value',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' option:"value' );
+      test.identical( o.args, [ 'option:"value' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, { option : '"value' } )
+      test.identical( got.scriptArgs, [ 'option:"value' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' "option: "value""',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' "option: "value""' );
+      test.identical( o.args, [ 'option: "value"' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, { option : 'value' } )
+      test.identical( got.scriptArgs, [ 'option: "value"' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' option : "value',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    return test.shouldThrowError( _.shell( o ) );
+  })
+
+  testcase( 'double quoted with space inside, same quotes' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' "option: "value with space""',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    return test.shouldThrowError( con );
+  })
+
+  testcase( 'double quoted with space inside, diff quotes' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' `option: "value with space"`',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' `option: "value with space"`' );
+      test.identical( o.args, [ 'option: "value with space"' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, { option : 'value with space' } )
+      test.identical( got.scriptArgs, [ 'option: "value with space"' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  testcase( 'escaped quotes, mode shell' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' option: \\"value with space\\"',
+      mode : 'shell',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' option: \\"value with space\\"' );
+      test.identical( o.args, [ testAppPathSpace, 'option:', '\\"value with space\\"' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, { option : 'value with space' } )
+      test.identical( got.scriptArgs, [ 'option:', '"value with space"' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  /*  */
+
+  return ready;
+
+  /*  */
+
+  function testcase( src )
+  {
+    ready.then( () =>
+    {
+      test.case = src;
+      return null;
+    })
+    return ready;
+  }
+
+  function testApp()
+  {
+    let _ = require( '../../../../Tools.s' );
+    _.include( 'wAppBasic' );
+    _.include( 'wStringsExtra' )
+    var args = _.appArgs();
+    console.log( JSON.stringify( args ) );
+  }
+}
+
+shellExecPathQuotesClosing.timeOut = 60000;
+
+//
+
+function shellExecPathSeveralCommands( test )
+{
+  let context = this;
+  let routinePath = _.path.join( context.testSuitePath, test.name );
+  let testAppPath =  _.path.join( routinePath, 'app.js' );
+
+  function app()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+
+  let testAppCode = app.toString() + '\napp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+
+  let ready = _.Consequence().take( null );
+
+  /* */
+
+  ready
+
+  testcase( 'quoted, mode:shell' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : '"node app.js arg1 && node app.js arg2"',
+      mode : 'shell',
+      currentPath : routinePath,
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( ( got ) =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( _.strCount( got.output, `[ 'arg1' ]` ), 1 );
+      test.identical( _.strCount( got.output, `[ 'arg2' ]` ), 1 );
+      return null;
+    })
+
+    return con;
+  })
+
+  //
+
+  testcase( 'quoted, mode:spawn' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : '"node app.js arg1 && node app.js arg2"',
+      mode : 'spawn',
+      currentPath : routinePath,
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    return test.shouldThrowErrorAsync( _.shell( o ) )
+  })
+
+  //
+
+  testcase( 'quoted, mode:fork' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : '"node app.js arg1 && node app.js arg2"',
+      mode : 'fork',
+      currentPath : routinePath,
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    return test.shouldThrowErrorAsync( _.shell( o ) )
+  })
+
+  //
+
+  testcase( 'quoted, mode:exec' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : '"node app.js arg1 && node app.js arg2"',
+      mode : 'exec',
+      currentPath : routinePath,
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( ( got ) =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( _.strCount( got.output, `[ 'arg1' ]` ), 1 );
+      test.identical( _.strCount( got.output, `[ 'arg2' ]` ), 1 );
+      return null;
+    })
+
+    return con;
+  })
+
+  //
+
+  testcase( 'no quotes, mode:shell' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node app.js arg1 && node app.js arg2',
+      mode : 'shell',
+      currentPath : routinePath,
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( ( got ) =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( _.strCount( got.output, `[ 'arg1' ]` ), 1 );
+      test.identical( _.strCount( got.output, `[ 'arg2' ]` ), 1 );
+      return null;
+    })
+
+    return con;
+  })
+
+  //
+
+  testcase( 'no quotes, mode:spawn' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node app.js arg1 && node app.js arg2',
+      mode : 'spawn',
+      currentPath : routinePath,
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( ( got ) =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( _.strCount( got.output, `[ 'arg1', '&&', 'node', 'app.js', 'arg2' ]` ), 1 );
+      return null;
+    })
+
+    return con;
+  })
+
+  //
+
+  testcase( 'no quotes, mode:fork' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node app.js arg1 && node app.js arg2',
+      mode : 'fork',
+      currentPath : routinePath,
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    return test.shouldThrowErrorAsync( _.shell( o ) );
+  })
+
+  //
+
+  testcase( 'no quotes, mode:exec' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node app.js arg1 && node app.js arg2',
+      mode : 'exec',
+      currentPath : routinePath,
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.shell( o );
+
+    con.then( ( got ) =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( _.strCount( got.output, `[ 'arg1' ]` ), 1 );
+      test.identical( _.strCount( got.output, `[ 'arg2' ]` ), 1 );
+      return null;
+    })
+
+    return con;
+  })
+
+  /*  */
+
+  return ready;
+
+  /*  */
+
+  function testcase( src )
+  {
+    ready.then( () =>
+    {
+      test.case = src;
+      return null;
+    })
+    return ready;
+  }
+}
+
+shellExecPathQuotesClosing.timeOut = 60000;
 
 //
 
@@ -4729,13 +5807,46 @@ function shellNode( test )
     throw 'Error message from child';
   }
 
+  function testApp2()
+  {
+    console.log( process.argv.slice( 2 ) )
+  }
+
+
   /* */
 
   var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppPath2 = _.path.join( routinePath, 'testApp2.js' );
   var testAppCode = testApp.toString() + '\ntestApp();';
+  var testAppCode2 = testApp2.toString() + '\ntestApp2();';
   _.fileProvider.fileWrite( testAppPath, testAppCode );
+  _.fileProvider.fileWrite( testAppPath2, testAppCode2 );
 
   var con = new _.Consequence().take( null );
+
+  /* */
+
+  con.then( () =>
+  {
+    test.case = 'execPath contains normalized path'
+    return _.shellNode
+    ({
+      execPath : testAppPath2,
+      args : [ 'arg' ],
+      outputCollecting : 1,
+      stdio : 'pipe',
+    })
+    .then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      test.identical( got.args, [ 'arg' ] );
+      console.log( got.output )
+      test.is( _.strHas( got.output, `[ 'arg' ]` ) );
+      return null
+    })
+  })
+
+  /*  */
 
   var modes = [ 'fork', 'exec', 'spawn', 'shell' ];
 
@@ -4830,8 +5941,8 @@ function shellTerminate( test )
   {
     setTimeout( () =>
     {
-      console.log( 'Timeout');
-    },5000 )
+      console.log( 'Timeout in child' );
+    },6000 )
   }
 
   /* */
@@ -4841,29 +5952,1086 @@ function shellTerminate( test )
   _.fileProvider.fileWrite( testAppPath, testAppCode );
   var ready = new _.Consequence().take( null );
 
-  let terminateChild =
+  ready
+
+  .then( () =>
   {
-    execPath : 'node ' + testAppPath,
-    ready,
-    throwingExitCode : 1,
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'spawn',
+      throwingExitCode : 1,
+      outputCollecting : 1
+    }
+
+    let con = _.shell( o );
+
+    _.timeOut( 2000, () =>
+    {
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.finally( ( err, got ) =>
+    {
+      test.is( _.errIs( err ) );
+      test.is( _.strHas( err.message, 'killed by exit signal SIGKILL' ) );
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, 'SIGKILL' );
+      test.is( !_.strHas( o.output, 'Timeout in child' ) );
+      return null;
+    })
+
+    return con;
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      throwingExitCode : 1,
+      outputCollecting : 1
+    }
+
+    let con = _.shell( o );
+
+    _.timeOut( 2000, () =>
+    {
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.finally( ( err, got ) =>
+    {
+      test.is( _.errIs( err ) );
+      test.is( _.strHas( err.message, 'killed by exit signal SIGKILL' ) );
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, 'SIGKILL' );
+      test.is( !_.strHas( o.output, 'Timeout in child' ) );
+      return null;
+    })
+
+    return con;
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'exec',
+      throwingExitCode : 1,
+      outputCollecting : 1
+    }
+
+    let con = _.shell( o );
+
+    _.timeOut( 2000, () =>
+    {
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.finally( ( err, got ) =>
+    {
+      test.is( _.errIs( err ) );
+      test.is( _.strHas( err.message, 'killed by exit signal SIGKILL' ) );
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, 'SIGKILL' );
+      test.is( !_.strHas( o.output, 'Timeout in child' ) );
+      return null;
+    })
+
+    return con;
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'spawn',
+      throwingExitCode : 1,
+      outputCollecting : 1
+    }
+
+    let con = _.shell( o );
+
+    _.timeOut( 2000, () =>
+    {
+      o.process.kill( 'SIGINT' );
+      return null;
+    })
+
+    con.finally( ( err, got ) =>
+    {
+      test.is( _.errIs( err ) );
+      test.is( _.strHas( err.message, 'killed by exit signal SIGINT' ) );
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, 'SIGINT' );
+      test.is( !_.strHas( o.output, 'Timeout in child' ) );
+      return null;
+    })
+
+    return con;
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      throwingExitCode : 1,
+      outputCollecting : 1
+    }
+
+    let con = _.shell( o );
+
+    _.timeOut( 2000, () =>
+    {
+      o.process.kill( 'SIGINT' );
+      return null;
+    })
+
+    con.finally( ( err, got ) =>
+    {
+      test.is( _.errIs( err ) );
+      test.is( _.strHas( err.message, 'killed by exit signal SIGINT' ) );
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, 'SIGINT' );
+      test.is( !_.strHas( o.output, 'Timeout in child' ) );
+      return null;
+    })
+
+    return con;
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'exec',
+      throwingExitCode : 1,
+      outputCollecting : 1
+    }
+
+    let con = _.shell( o );
+
+    _.timeOut( 2000, () =>
+    {
+      o.process.kill( 'SIGINT' );
+      return null;
+    })
+
+    con.finally( ( err, got ) =>
+    {
+      test.is( _.errIs( err ) );
+      test.is( _.strHas( err.message, 'killed by exit signal SIGINT' ) );
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, 'SIGINT' );
+      test.is( !_.strHas( o.output, 'Timeout in child' ) );
+      return null;
+    })
+
+    return con;
+  })
+
+  /*  */
+
+  return ready;
+}
+
+shellTerminate.timeOut = 120000;
+shellTerminate.description =
+`
+  Test app - single timeout with message
+
+  Will test:
+  - Termination of child process using SIGINT signal after small delay
+  - Termination of child process using SIGKILL signal after small delay
+
+  Expected behaviour for all platforms:
+  - Child was terminated with exitCode : null, exitSignal : { kill signal from parent }
+  - Time out was not raised, no message output
+`
+
+//
+
+function shellTerminateWithExitHandler( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.testSuitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    let _ = require( '../../../../Tools.s' );
+    _.include( 'wAppBasic' );
+    _.appExitHandlerRepair();
+    _.timeOut( 10000, () => { console.log( 'Timeout in child' ); return null } )
   }
 
-  _.shell( terminateChild );
+  /* */
 
-  terminateChild.process.kill();
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+  testAppPath = _.strQuote( testAppPath );
+  var ready = new _.Consequence().take( null );
 
-  ready.finally( ( err, got ) =>
+  ready
+
+  .then( () =>
   {
-    test.is( _.errIs( err ) );
-    test.identical( terminateChild.exitCode, null );
-    return null;
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'spawn',
+      throwingExitCode : 1,
+      outputCollecting : 1,
+    }
+
+    let con = _.shell( o );
+
+    _.timeOut( 3000, () =>
+    {
+      o.process.kill( 'SIGINT' );
+      return null;
+    })
+
+    _.timeOut( 4000, () =>
+    {
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.finally( ( err, got ) =>
+    {
+      test.is( !_.errIs( err ) );
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.is( _.strHas( o.output, 'SIGINT' ) );
+      test.is( !_.strHas( o.output, 'Timeout in child' ) );
+      return null;
+    })
+
+    return con;
+  })
+
+  /*  */
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'exec',
+      throwingExitCode : 1,
+      outputCollecting : 1,
+    }
+
+    let con = _.shell( o );
+
+    _.timeOut( 3000, () =>
+    {
+      o.process.kill( 'SIGINT' );
+      return null;
+    })
+
+    _.timeOut( 4000, () =>
+    {
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.finally( ( err, got ) =>
+    {
+      test.is( !_.errIs( err ) );
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.is( _.strHas( o.output, 'SIGINT' ) );
+      test.is( !_.strHas( o.output, 'Timeout in child' ) );
+      return null;
+    })
+
+    return con;
+  })
+
+  /*  */
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      throwingExitCode : 1,
+      outputCollecting : 1,
+    }
+
+    let con = _.shell( o );
+
+    _.timeOut( 3000, () =>
+    {
+      o.process.kill( 'SIGINT' );
+      return null;
+    })
+
+    _.timeOut( 4000, () =>
+    {
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.finally( ( err, got ) =>
+    {
+      test.is( !_.errIs( err ) );
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.is( _.strHas( o.output, 'SIGINT' ) );
+      test.is( !_.strHas( o.output, 'Timeout in child' ) );
+      return null;
+    })
+
+    return con;
+  })
+
+  /* SIGKILL */
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'spawn',
+      throwingExitCode : 1,
+      outputCollecting : 1,
+    }
+
+    let con = _.shell( o );
+
+    _.timeOut( 3000, () =>
+    {
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.finally( ( err, got ) =>
+    {
+      _.errAttend( err );
+      test.is( _.errIs( err ) );
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, 'SIGKILL' );
+      test.is( !_.strHas( o.output, 'Timeout in child' ) );
+      return null;
+    })
+
+    return con;
+  })
+
+  /*  */
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'exec',
+      throwingExitCode : 1,
+      outputCollecting : 1,
+    }
+
+    let con = _.shell( o );
+
+    _.timeOut( 3000, () =>
+    {
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.finally( ( err, got ) =>
+    {
+      _.errAttend( err );
+      test.is( _.errIs( err ) );
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, 'SIGKILL' );
+      test.is( !_.strHas( o.output, 'Timeout in child' ) );
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      throwingExitCode : 1,
+      outputCollecting : 1,
+    }
+
+    let con = _.shell( o );
+
+    _.timeOut( 3000, () =>
+    {
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.finally( ( err, got ) =>
+    {
+      _.errAttend( err );
+      test.is( _.errIs( err ) );
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, 'SIGKILL' );
+      test.is( !_.strHas( o.output, 'Timeout in child' ) );
+      return null;
+    })
+
+    return con;
+  })
+
+  /*  */
+
+  return ready;
+}
+
+shellTerminateWithExitHandler.timeOut = 120000;
+
+shellTerminateWithExitHandler.description =
+`
+  Test app - single timeout with message and appExitHandlerRepair called at start
+
+  Will test:
+    - Termination of child process using SIGINT signal after small delay
+    - Termination of child process using SIGKILL signal after small delay
+
+  Expected behaviour:
+    - For SIGINT: Child was terminated before timeout with exitCode : 0, exitSignal : null
+    - For SIGKILL: Child was terminated before timeout with exitCode : null, exitSignal : SIGKILL
+    - No time out message in output
+`
+
+//
+
+function shellTerminateHangedWithExitHandler( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.testSuitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    let _ = require( '../../../../Tools.s' );
+    _.include( 'wAppBasic' );
+    _.appExitHandlerRepair();
+    while( 1 )
+    {
+      console.log( _.timeNow() )
+    }
+    console.log( 'Killed' );
+  }
+
+  /* */
+
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+  testAppPath = _.strQuote( testAppPath );
+  var ready = new _.Consequence().take( null );
+
+  ready
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'spawn',
+      throwingExitCode : 0,
+      outputPiping : 0,
+      outputCollecting : 1,
+    }
+
+    let con = _.shell( o );
+
+    _.timeOut( 3000, () =>
+    {
+      o.process.kill( 'SIGINT' );
+      return null;
+    })
+
+    _.timeOut( 4000, () =>
+    {
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.then( ( got ) =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.is( _.strHas( o.output, 'SIGINT' ) );
+      return null;
+    })
+
+    return con;
+  })
+
+  /*  */
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'exec',
+      throwingExitCode : 0,
+      outputPiping : 0,
+      outputCollecting : 1,
+    }
+
+    let con = _.shell( o );
+
+    _.timeOut( 3000, () =>
+    {
+      o.process.kill( 'SIGINT' );
+      return null;
+    })
+
+    _.timeOut( 4000, () =>
+    {
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.then( ( got ) =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.is( _.strHas( o.output, 'SIGINT' ) );
+      return null;
+    })
+
+    return con;
+  })
+
+  /*  */
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      throwingExitCode : 0,
+      outputPiping : 0,
+      outputCollecting : 1,
+    }
+
+    let con = _.shell( o );
+
+    _.timeOut( 3000, () =>
+    {
+      o.process.kill( 'SIGINT' );
+      return null;
+    })
+
+    _.timeOut( 4000, () =>
+    {
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.then( ( got ) =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.is( _.strHas( o.output, 'SIGINT' ) );
+      return null;
+    })
+
+    return con;
+  })
+
+  /*  */
+
+  return ready;
+}
+
+shellTerminateHangedWithExitHandler.timeOut = 20000;
+
+shellTerminateHangedWithExitHandler.description =
+`
+  Test app - code that blocks event loop and appExitHandlerRepair called at start
+
+  Will test:
+    - Termination of child process using SIGINT signal after small delay
+    - Termination of child process using SIGKILL signal after small delay
+
+  Expected behaviour:
+    - For SIGINT: Child was terminated with exitCode : 0, exitSignal : null
+    - For SIGKILL: Child was terminated with exitCode : null, exitSignal : SIGKILL
+    - No time out message in output
+`
+
+//
+
+function shellTerminateAfterLoopRelease( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.testSuitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    let _ = require( '../../../../Tools.s' );
+    _.include( 'wAppBasic' );
+    _.appExitHandlerRepair();
+    let loop = true;
+    setTimeout( () =>
+    {
+      loop = false;
+    }, 6000 )
+    while( loop ){}
+
+    console.log( 'Exit after timeout' );
+  }
+
+  /* */
+
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+  testAppPath = _.strQuote( testAppPath );
+  var ready = new _.Consequence().take( null );
+
+  ready
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'spawn',
+      throwingExitCode : 0,
+      outputPiping : 1,
+      outputCollecting : 1,
+    }
+
+    let con = _.shell( o );
+
+    _.timeOut( 3000, () =>
+    {
+      o.process.kill( 'SIGINT' );
+      return null;
+    })
+
+    _.timeOut( 7000, () =>
+    {
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.then( ( got ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( o.exitCode, null );
+        test.identical( o.exitSignal, 'SIGINT' );
+        test.is( !_.strHas( o.output, 'Exit after timeout' ) );
+      }
+      else
+      {
+        test.identical( o.exitCode, 0 );
+        test.identical( o.exitSignal, null );
+        test.is( _.strHas( o.output, 'Exit after timeout' ) );
+      }
+
+      return null;
+    })
+
+    return con;
+  })
+
+  /*  */
+
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'exec',
+      throwingExitCode : 0,
+      outputPiping : 1,
+      outputCollecting : 1,
+    }
+
+    let con = _.shell( o );
+
+    _.timeOut( 3000, () =>
+    {
+      o.process.kill( 'SIGINT' );
+      return null;
+    })
+
+    _.timeOut( 7000, () =>
+    {
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.then( ( got ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( o.exitCode, null );
+        test.identical( o.exitSignal, 'SIGINT' );
+        test.is( !_.strHas( o.output, 'Exit after timeout' ) );
+      }
+      else
+      {
+        test.identical( o.exitCode, 0 );
+        test.identical( o.exitSignal, null );
+        test.is( _.strHas( o.output, 'Exit after timeout' ) );
+      }
+
+      return null;
+    })
+
+    return con;
+  })
+
+  /*  */
+
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      throwingExitCode : 0,
+      outputPiping : 1,
+      outputCollecting : 1,
+    }
+
+    let con = _.shell( o );
+
+    _.timeOut( 3000, () =>
+    {
+      o.process.kill( 'SIGINT' );
+      return null;
+    })
+
+    _.timeOut( 7000, () =>
+    {
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.then( ( got ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( o.exitCode, null );
+        test.identical( o.exitSignal, 'SIGINT' );
+        test.is( !_.strHas( o.output, 'Exit after timeout' ) );
+      }
+      else
+      {
+        test.identical( o.exitCode, 0 );
+        test.identical( o.exitSignal, null );
+        test.is( _.strHas( o.output, 'Exit after timeout' ) );
+      }
+
+      return null;
+    })
+
+    return con;
+  })
+
+  /*  */
+
+  return ready;
+}
+
+shellTerminateAfterLoopRelease.timeOut = 20000;
+shellTerminateAfterLoopRelease.description =
+`
+  Test app - code that blocks event loop for short period of time and appExitHandlerRepair called at start
+
+  Will test:
+    - Termination of child process using SIGINT signal after small delay
+
+  Expected behaviour:
+    - Child was terminated after event loop release with exitCode : 0, exitSignal : null
+    - Child process message should be printed
+`
+
+//
+
+function shellStartingDelay( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.testSuitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    let _ = require( '../../../../Tools.s' );
+    let data = { t2 : _.timeNow() };
+    console.log( JSON.stringify( data ) );
+  }
+
+  /* */
+
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+  testAppPath = _.strQuote( testAppPath );
+  var ready = new _.Consequence().take( null );
+
+  ready
+
+  .then( () =>
+  {
+    let starting = { delay : 5000 };
+    let o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      starting : starting
+    }
+
+    let t1 = _.timeNow();
+    let con = _.shell( o );
+
+    con.then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      let parsed = JSON.parse( got.output );
+      let diff = parsed.t2 - t1;
+      test.ge( diff, starting.delay );
+      return null;
+    })
+
+    return con;
   })
 
   return ready;
 }
 
-shellTerminate.timeOut = 10000;
+//
 
+function shellStartingTime( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.testSuitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    let _ = require( '../../../../Tools.s' );
+    let data = { t2 : _.timeNow() };
+    console.log( JSON.stringify( data ) );
+  }
+
+  /* */
+
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+  testAppPath = _.strQuote( testAppPath );
+  var ready = new _.Consequence().take( null );
+
+  ready
+
+  .then( () =>
+  {
+    let t1 = _.timeNow();
+    let delay = 5000;
+    let starting = { time : _.timeNow() + delay };
+    let o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      starting : starting
+    }
+
+    let con = _.shell( o );
+
+    con.then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      let parsed = JSON.parse( got.output );
+      let diff = parsed.t2 - t1;
+      test.ge( diff, delay );
+      return null;
+    })
+
+    return con;
+  })
+
+  return ready;
+}
+
+//
+
+function shellStartingSuspended( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.testSuitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    let _ = require( '../../../../Tools.s' );
+    let data = { t2 : _.timeNow() };
+    console.log( JSON.stringify( data ) );
+  }
+
+  /* */
+
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+  testAppPath = _.strQuote( testAppPath );
+  var ready = new _.Consequence().take( null );
+
+  ready
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      starting : 'suspended'
+    }
+
+    let t1 = _.timeNow();
+    let delay = 1000;
+    let con = _.shell( o );
+
+    _.timeOut( delay, () =>
+    {
+      o.resume();
+      return null;
+    })
+
+    con.then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      let parsed = JSON.parse( got.output );
+      let diff = parsed.t2 - t1;
+      test.ge( diff, delay );
+      return null;
+    })
+
+    return con;
+  })
+
+  return ready;
+}
+
+//
+
+function shellStartingParentDeath( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.testSuitePath, test.name );
+
+  /* */
+
+  function testAppParent()
+  {
+    let _ = require( '../../../../Tools.s' );
+    _.include( 'wAppBasic' );
+
+    _.shell
+    ({
+      execPath : 'node testAppChild.js',
+      outputCollecting : 1,
+      starting : 'parentdeath'
+    })
+
+    return _.timeOut( 5000, () =>
+    {
+      process.exit();
+      return null;
+    })
+  }
+
+  function testAppChild()
+  {
+    let _ = require( '../../../../Tools.s' );
+    let data = { t2 : _.timeNow() };
+    console.log( JSON.stringify( data ) );
+  }
+
+  /* */
+
+  var testAppParentPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppParent.js' ) );
+  var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
+  var testAppParentCode = testAppParent.toString() + '\testAppParent();';
+  var testAppChildCode = testAppChild.toString() + '\testAppChild();';
+  _.fileProvider.fileWrite( testAppParentPath, testAppParentCode );
+  _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
+  testAppParentPath = _.strQuote( testAppParentPath );
+  var ready = new _.Consequence().take( null );
+
+  ready
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : testAppParentPath,
+      mode : 'fork',
+    }
+    let con = _.shell( o );
+
+    con.then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      return null;
+    })
+
+    return con;
+  })
+
+  return ready;
+}
 
 //
 
@@ -6117,6 +8285,90 @@ sheller.timeOut = 60000;
 
 //
 
+function shellerArgs( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.testSuitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+
+  /* */
+
+  var testAppPath = _.path.join( routinePath, 'testApp.js' );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+
+  /* */
+
+  var ready = new _.Consequence().take( null );
+
+  let shellerOptions =
+  {
+    outputCollecting : 1,
+    args : [ 'arg1', 'arg2' ],
+    mode : 'spawn',
+    ready : ready
+  }
+
+  let shell = _.sheller( shellerOptions )
+
+  /* */
+
+  shell
+  ({
+    execPath : 'node ' + testAppPath + ' arg3',
+  })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( got.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
+    test.identical( _.strCount( got.output, `[ 'arg3', 'arg1', 'arg2' ]` ), 1 );
+    test.identical( shellerOptions.args, [ 'arg1', 'arg2' ] );
+    return null;
+  })
+
+  shell
+  ({
+    execPath : 'node ' + testAppPath,
+    args : [ 'arg3' ]
+  })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( got.args, [ testAppPath, 'arg3' ] );
+    test.identical( _.strCount( got.output, `[ 'arg3' ]` ), 1 );
+    test.identical( shellerOptions.args, [ 'arg1', 'arg2' ] );
+    return null;
+  })
+
+  shell
+  ({
+    execPath : 'node',
+    args : [ testAppPath, 'arg3' ]
+  })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( got.args, [ testAppPath, 'arg3' ] );
+    test.identical( _.strCount( got.output, `[ 'arg3' ]` ), 1 );
+    test.identical( shellerOptions.args, [ 'arg1', 'arg2' ] );
+    return null;
+  })
+
+  /* */
+
+  return ready;
+}
+
+shellerArgs.timeOut = 30000;
+
+//
+
 function outputHandling( test )
 {
   var context = this;
@@ -6215,6 +8467,386 @@ outputHandling.timeOut = 10000;
 
 //
 
+function shellOutputStripping( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.testSuitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    console.log( '\u001b[31m\u001b[43mColored message1\u001b[49;0m\u001b[39;0m' )
+    console.log( '\u001b[31m\u001b[43mColored message2\u001b[49;0m\u001b[39;0m' )
+  }
+
+  /* */
+
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+
+  /* */
+
+  var ready = new _.Consequence().take( null );
+  var modes = [ 'shell', 'spawn', 'exec', 'fork' ];
+
+  _.each( modes,( mode ) =>
+  {
+    let execPath = testAppPath;
+    if( mode != 'fork' )
+    execPath = 'node ' + execPath;
+
+    _.shell
+    ({
+      execPath : execPath,
+      mode : mode,
+      outputStripping : 0,
+      outputCollecting : 1,
+      ready : ready
+    })
+    .then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      let output = _.strSplitNonPreserving({ src : got.output, delimeter : '\n' });
+      test.identical( output.length, 2 );
+      test.identical( output[ 0 ], '\u001b[31m\u001b[43mColored message1\u001b[49;0m\u001b[39;0m' );
+      test.identical( output[ 1 ], '\u001b[31m\u001b[43mColored message2\u001b[49;0m\u001b[39;0m' );
+      return null;
+    })
+
+    _.shell
+    ({
+      execPath : execPath,
+      mode : mode,
+      outputStripping : 1,
+      outputCollecting : 1,
+      ready : ready
+    })
+    .then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      let output = _.strSplitNonPreserving({ src : got.output, delimeter : '\n' });
+      test.identical( output.length, 2 );
+      test.identical( output[ 0 ], 'Colored message1' );
+      test.identical( output[ 1 ], 'Colored message2' );
+      return null;
+    })
+  })
+
+  return ready;
+}
+
+shellOutputStripping.timeOut = 15000;
+
+//
+
+function shellLoggerOption( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.testSuitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    console.log( '  One tab' );
+  }
+
+  /* */
+
+  var testAppPath = _.path.join( routinePath, 'testApp.js' );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+
+  /* */
+
+  var ready = new _.Consequence().take( null );
+  var modes = [ 'shell', 'spawn', 'exec', 'fork' ];
+
+  test.case = 'custom logger with increased level'
+
+  _.each( modes,( mode ) =>
+  {
+    let execPath = testAppPath;
+    if( mode != 'fork' )
+    execPath = 'node ' + execPath;
+
+    let loggerOutput = '';
+
+    let logger = new _.Logger({ output : null, onTransformEnd });
+    logger.up();
+
+    _.shell
+    ({
+      execPath : execPath,
+      mode : mode,
+      outputCollecting : 1,
+      outputPiping : 1,
+      outputGray : 1,
+      logger : logger,
+      ready : ready
+    })
+    .then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      test.is( _.strHas( got.output, '  One tab' ) )
+      test.is( _.strHas( loggerOutput, '    One tab' ) )
+      return null;
+    })
+
+    /*  */
+
+    function onTransformEnd( o )
+    {
+      loggerOutput += o.outputForPrinter[ 0 ] + '\n';
+    }
+  })
+
+  /* */
+
+  return ready;
+}
+
+shellLoggerOption.timeOut = 30000;
+
+//
+
+function shellNormalizedExecPath( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.testSuitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+
+  /* */
+
+  var testAppPath = _.path.join( routinePath, 'testApp.js' );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+
+  /* */
+
+  var ready = new _.Consequence().take( null );
+
+  let shell = _.sheller
+  ({
+    outputCollecting : 1,
+    ready : ready
+  })
+
+  /* */
+
+  shell
+  ({
+    execPath : testAppPath,
+    args : [ 'arg1', 'arg2' ],
+    mode : 'fork'
+  })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, `[ 'arg1', 'arg2' ]` ), 1 );
+    return null;
+  })
+
+  //
+
+  shell
+  ({
+    execPath : 'node ' + testAppPath,
+    args : [ 'arg1', 'arg2' ],
+    mode : 'spawn'
+  })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, `[ 'arg1', 'arg2' ]` ), 1 );
+    return null;
+  })
+
+  //
+
+  shell
+  ({
+    execPath : 'node ' + testAppPath,
+    args : [ 'arg1', 'arg2' ],
+    mode : 'shell'
+  })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, `[ 'arg1', 'arg2' ]` ), 1 );
+    return null;
+  })
+
+  //
+
+  shell
+  ({
+    execPath : 'node ' + testAppPath,
+    args : [ 'arg1', 'arg2' ],
+    mode : 'exec'
+  })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, `[ 'arg1', 'arg2' ]` ), 1 );
+    return null;
+  })
+
+  /* app path in arguments */
+
+  shell
+  ({
+    args : [ testAppPath, 'arg1', 'arg2' ],
+    mode : 'fork'
+  })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, `[ 'arg1', 'arg2' ]` ), 1 );
+    return null;
+  })
+
+  //
+
+  shell
+  ({
+    execPath : 'node',
+    args : [ testAppPath, 'arg1', 'arg2' ],
+    mode : 'spawn'
+  })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, `[ 'arg1', 'arg2' ]` ), 1 );
+    return null;
+  })
+
+  //
+
+  shell
+  ({
+    execPath : 'node',
+    args : [ testAppPath, 'arg1', 'arg2' ],
+    mode : 'shell'
+  })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, `[ 'arg1', 'arg2' ]` ), 1 );
+    return null;
+  })
+
+  //
+
+  shell
+  ({
+    execPath : 'node',
+    args : [ testAppPath, 'arg1', 'arg2' ],
+    mode : 'exec'
+  })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, `[ 'arg1', 'arg2' ]` ), 1 );
+    return null;
+  })
+
+  /* */
+
+  return ready;
+}
+
+shellNormalizedExecPath.timeOut = 60000;
+
+//
+
+function appTempApplication( test )
+{
+  let context = this;
+
+  /* */
+
+  function testApp()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+
+  let testAppCode = testApp.toString() + '\ntestApp();';
+
+  /* */
+
+  test.case = 'string';
+  var got = _.appTempApplicationOpen( testAppCode );
+  var read = _.fileProvider.fileRead( got );
+  test.identical( read, testAppCode );
+  _.appTempApplicationClose( got );
+  test.is( !_.fileProvider.fileExists( got ) );
+
+  test.case = 'string';
+  var got = _.appTempApplicationOpen({ sourceCode : testAppCode });
+  var read = _.fileProvider.fileRead( got );
+  test.identical( read, testAppCode );
+  _.appTempApplicationClose( got );
+  test.is( !_.fileProvider.fileExists( got ) );
+
+  test.case = 'raw buffer';
+  var got = _.appTempApplicationOpen( _.bufferRawFrom( testAppCode ) );
+  var read = _.fileProvider.fileRead( got );
+  test.identical( read, testAppCode );
+  _.appTempApplicationClose( got );
+  test.is( !_.fileProvider.fileExists( got ) );
+
+  test.case = 'raw buffer';
+  var got = _.appTempApplicationOpen({ sourceCode :_.bufferRawFrom( testAppCode ) });
+  var read = _.fileProvider.fileRead( got );
+  test.identical( read, testAppCode );
+  _.appTempApplicationClose( got );
+  test.is( !_.fileProvider.fileExists( got ) );
+
+  test.case = 'remove all';
+  var got1 = _.appTempApplicationOpen( testAppCode );
+  var got2 = _.appTempApplicationOpen( testAppCode );
+  test.is( _.fileProvider.fileExists( got1 ) );
+  test.is( _.fileProvider.fileExists( got2 ) );
+  _.appTempApplicationClose();
+  test.is( !_.fileProvider.fileExists( got1 ) );
+  test.is( !_.fileProvider.fileExists( got2 ) );
+  test.mustNotThrowError( () => _.appTempApplicationClose() )
+
+  if( !Config.debug )
+  return;
+
+  test.case = 'unexpected type of sourceCode option';
+  test.shouldThrowErrorSync( () =>
+  {
+    _.appTempApplicationOpen( [] );
+  })
+
+  test.case = 'unexpected option';
+  test.shouldThrowErrorSync( () =>
+  {
+    _.appTempApplicationOpen({ someOption : true });
+  })
+
+  test.case = 'try to remove file that does not exist in registry';
+  var got = _.appTempApplicationOpen( testAppCode );
+  _.appTempApplicationClose( got );
+  test.shouldThrowErrorSync( () =>
+  {
+    _.appTempApplicationClose( got );
+  })
+}
+
+//
+
 function experiment( test )
 {
   let self = this;
@@ -6310,21 +8942,39 @@ var Proto =
     shellFork,
     shellWithoutExecPath,
 
+    shellArgsOption,
     shellArgumentsParsing,
     shellArgumentsParsingNonTrivial,
     shellArgumentsNestedQuotes,
+    shellExecPathQuotesClosing,
+    shellExecPathSeveralCommands,
     shellVerbosity,
     shellErrorHadling,
     shellNode,
 
     shellTerminate,
+    shellTerminateWithExitHandler,
+    shellTerminateHangedWithExitHandler,
+    shellTerminateAfterLoopRelease,
+
+    shellStartingDelay,
+    shellStartingTime,
+    shellStartingSuspended,
+    shellStartingParentDeath,
 
     shellConcurrent,
     shellerConcurrent,
 
     sheller,
+    shellerArgs,
 
     outputHandling,
+    shellOutputStripping,
+    shellLoggerOption,
+
+    shellNormalizedExecPath,
+
+    appTempApplication
 
   },
 
