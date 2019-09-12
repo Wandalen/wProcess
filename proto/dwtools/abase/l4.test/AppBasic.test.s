@@ -36,7 +36,8 @@ function testDirMake()
 {
   var context = this;
   if( Config.interpreter === 'njs' )
-  context.testSuitePath = _.path.pathDirTempOpen( _.path.join( __dirname, '../..'  ), 'ExternalFundamentals' );
+  // context.testSuitePath = _.path.pathDirTempOpen( _.path.join( __dirname, '../..'  ), 'ExternalFundamentals' );
+  context.testSuitePath = _.path.join( __dirname, '../../tmp.tmp/AppBasic', _.idWithDate() + '.tmp'  );
   else
   context.testSuitePath = _.path.current();
 }
@@ -5940,8 +5941,8 @@ function shellTerminate( test )
   {
     setTimeout( () =>
     {
-      console.log( 'Timeout');
-    },10000 )
+      console.log( 'Timeout in child' );
+    },6000 )
   }
 
   /* */
@@ -5955,86 +5956,194 @@ function shellTerminate( test )
 
   .then( () =>
   {
-    let terminateChild =
+    let o =
     {
       execPath : 'node ' + testAppPath,
       mode : 'spawn',
       throwingExitCode : 1,
+      outputCollecting : 1
     }
 
-    let con = _.shell( terminateChild );
+    let con = _.shell( o );
 
     _.timeOut( 2000, () =>
     {
-      terminateChild.process.kill( 'SIGKILL' );
+      o.process.kill( 'SIGKILL' );
       return null;
     })
 
     con.finally( ( err, got ) =>
     {
       test.is( _.errIs( err ) );
-      test.identical( terminateChild.exitCode, -1 );
-      test.identical( terminateChild.exitSignal, 'SIGKILL' );
+      test.is( _.strHas( err.message, 'killed by exit signal SIGKILL' ) );
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, 'SIGKILL' );
+      test.is( !_.strHas( o.output, 'Timeout in child' ) );
       return null;
     })
 
     return con;
   })
 
-  /*  */
+  /* */
 
   .then( () =>
   {
-    let terminateChild =
+    let o =
     {
       execPath : testAppPath,
       mode : 'fork',
       throwingExitCode : 1,
+      outputCollecting : 1
     }
 
-    let con = _.shell( terminateChild );
+    let con = _.shell( o );
 
     _.timeOut( 2000, () =>
     {
-      terminateChild.process.kill( 'SIGKILL' );
+      o.process.kill( 'SIGKILL' );
       return null;
     })
 
     con.finally( ( err, got ) =>
     {
       test.is( _.errIs( err ) );
-      test.identical( terminateChild.exitCode, -1 );
-      test.identical( terminateChild.exitSignal, 'SIGKILL' );
+      test.is( _.strHas( err.message, 'killed by exit signal SIGKILL' ) );
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, 'SIGKILL' );
+      test.is( !_.strHas( o.output, 'Timeout in child' ) );
       return null;
     })
 
     return con;
   })
 
-  /*  */
+  /* */
 
   .then( () =>
   {
-    let terminateChild =
+    let o =
     {
       execPath : 'node ' + testAppPath,
       mode : 'exec',
       throwingExitCode : 1,
+      outputCollecting : 1
     }
 
-    let con = _.shell( terminateChild );
+    let con = _.shell( o );
 
     _.timeOut( 2000, () =>
     {
-      terminateChild.process.kill( 'SIGKILL' );
+      o.process.kill( 'SIGKILL' );
       return null;
     })
 
     con.finally( ( err, got ) =>
     {
       test.is( _.errIs( err ) );
-      test.identical( terminateChild.exitCode, -1 );
-      test.identical( terminateChild.exitSignal, 'SIGKILL' );
+      test.is( _.strHas( err.message, 'killed by exit signal SIGKILL' ) );
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, 'SIGKILL' );
+      test.is( !_.strHas( o.output, 'Timeout in child' ) );
+      return null;
+    })
+
+    return con;
+  })
+  
+  /* */
+  
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'spawn',
+      throwingExitCode : 1,
+      outputCollecting : 1
+    }
+
+    let con = _.shell( o );
+
+    _.timeOut( 2000, () =>
+    {
+      o.process.kill( 'SIGINT' );
+      return null;
+    })
+
+    con.finally( ( err, got ) =>
+    {
+      test.is( _.errIs( err ) );
+      test.is( _.strHas( err.message, 'killed by exit signal SIGINT' ) );
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, 'SIGINT' );
+      test.is( !_.strHas( o.output, 'Timeout in child' ) );
+      return null;
+    })
+
+    return con;
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      throwingExitCode : 1,
+      outputCollecting : 1
+    }
+
+    let con = _.shell( o );
+
+    _.timeOut( 2000, () =>
+    {
+      o.process.kill( 'SIGINT' );
+      return null;
+    })
+
+    con.finally( ( err, got ) =>
+    {
+      test.is( _.errIs( err ) );
+      test.is( _.strHas( err.message, 'killed by exit signal SIGINT' ) );
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, 'SIGINT' );
+      test.is( !_.strHas( o.output, 'Timeout in child' ) );
+      return null;
+    })
+
+    return con;
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'exec',
+      throwingExitCode : 1,
+      outputCollecting : 1
+    }
+
+    let con = _.shell( o );
+
+    _.timeOut( 2000, () =>
+    {
+      o.process.kill( 'SIGINT' );
+      return null;
+    })
+
+    con.finally( ( err, got ) =>
+    {
+      test.is( _.errIs( err ) );
+      test.is( _.strHas( err.message, 'killed by exit signal SIGINT' ) );
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, 'SIGINT' );
+      test.is( !_.strHas( o.output, 'Timeout in child' ) );
       return null;
     })
 
@@ -6046,8 +6155,403 @@ function shellTerminate( test )
   return ready;
 }
 
-shellTerminate.timeOut = 60000;
+shellTerminate.timeOut = 120000;
 
+//
+
+function shellTerminateWithExitHandler( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.testSuitePath, test.name );
+
+  /* */
+
+  function testApp()
+  { 
+    let _ = require( '../../../../Tools.s' );
+    _.include( 'wAppBasic' );
+    _.appExitHandlerRepair();
+    _.timeOut( 10000, () => { console.log( 'Timeout in child' ); return null } )
+  }
+
+  /* */
+
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+  testAppPath = _.strQuote( testAppPath );
+  var ready = new _.Consequence().take( null );
+
+  ready
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'spawn',
+      throwingExitCode : 1,
+      outputCollecting : 1,
+    }
+
+    let con = _.shell( o );
+
+    _.timeOut( 3000, () =>
+    {
+      o.process.kill( 'SIGINT' );
+      return null;
+    })
+    
+    _.timeOut( 4000, () =>
+    { 
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.finally( ( err, got ) =>
+    { 
+      test.is( !_.errIs( err ) );
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.is( _.strHas( o.output, 'SIGINT' ) );
+      test.is( !_.strHas( o.output, 'Timeout in child' ) );
+      return null;
+    })
+
+    return con;
+  })
+  
+  /*  */
+  
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'exec',
+      throwingExitCode : 1,
+      outputCollecting : 1,
+    }
+
+    let con = _.shell( o );
+
+    _.timeOut( 3000, () =>
+    {
+      o.process.kill( 'SIGINT' );
+      return null;
+    })
+    
+    _.timeOut( 4000, () =>
+    { 
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.finally( ( err, got ) =>
+    { 
+      test.is( !_.errIs( err ) );
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.is( _.strHas( o.output, 'SIGINT' ) );
+      test.is( !_.strHas( o.output, 'Timeout in child' ) );
+      return null;
+    })
+
+    return con;
+  })
+  
+  /*  */
+  
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      throwingExitCode : 1,
+      outputCollecting : 1,
+    }
+
+    let con = _.shell( o );
+
+    _.timeOut( 3000, () =>
+    {
+      o.process.kill( 'SIGINT' );
+      return null;
+    })
+    
+    _.timeOut( 4000, () =>
+    { 
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.finally( ( err, got ) =>
+    { 
+      test.is( !_.errIs( err ) );
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.is( _.strHas( o.output, 'SIGINT' ) );
+      test.is( !_.strHas( o.output, 'Timeout in child' ) );
+      return null;
+    })
+
+    return con;
+  })
+  
+  /* SIGKILL */
+  
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'spawn',
+      throwingExitCode : 1,
+      outputCollecting : 1,
+    }
+
+    let con = _.shell( o );
+
+    _.timeOut( 3000, () =>
+    {
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.finally( ( err, got ) =>
+    { 
+      _.errAttend( err );
+      test.is( _.errIs( err ) );
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, 'SIGKILL' );
+      test.is( !_.strHas( o.output, 'Timeout in child' ) );
+      return null;
+    })
+
+    return con;
+  })
+  
+  /*  */
+  
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'exec',
+      throwingExitCode : 1,
+      outputCollecting : 1,
+    }
+
+    let con = _.shell( o );
+
+    _.timeOut( 3000, () =>
+    {
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.finally( ( err, got ) =>
+    { 
+      _.errAttend( err );
+      test.is( _.errIs( err ) );
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, 'SIGKILL' );
+      test.is( !_.strHas( o.output, 'Timeout in child' ) );
+      return null;
+    })
+
+    return con;
+  })
+  
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      throwingExitCode : 1,
+      outputCollecting : 1,
+    }
+
+    let con = _.shell( o );
+
+    _.timeOut( 3000, () =>
+    {
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.finally( ( err, got ) =>
+    { 
+      _.errAttend( err );
+      test.is( _.errIs( err ) );
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, 'SIGKILL' );
+      test.is( !_.strHas( o.output, 'Timeout in child' ) );
+      return null;
+    })
+
+    return con;
+  })
+
+  /*  */
+
+  return ready;
+}
+
+shellTerminateWithExitHandler.timeOut = 120000;
+
+//
+
+function shellTerminateHangedWithExitHandler( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.testSuitePath, test.name );
+
+  /* */
+
+  function testApp()
+  { 
+    let _ = require( '../../../../Tools.s' );
+    _.include( 'wAppBasic' );
+    _.appExitHandlerRepair();
+    while( 1 )
+    {
+      console.log( _.timeNow() )
+    }
+    console.log( 'Killed' );
+  }
+
+  /* */
+
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+  testAppPath = _.strQuote( testAppPath );
+  var ready = new _.Consequence().take( null );
+
+  ready
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'spawn',
+      throwingExitCode : 0,
+      outputPiping : 0,
+      outputCollecting : 1,
+    }
+
+    let con = _.shell( o );
+
+    _.timeOut( 3000, () =>
+    {
+      o.process.kill( 'SIGINT' );
+      return null;
+    })
+    
+    _.timeOut( 4000, () =>
+    { 
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.then( ( got ) =>
+    { 
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.is( _.strHas( o.output, 'SIGINT' ) );
+      return null;
+    })
+
+    return con;
+  })
+  
+  /*  */
+  
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'exec',
+      throwingExitCode : 0,
+      outputPiping : 0,
+      outputCollecting : 1,
+    }
+
+    let con = _.shell( o );
+
+    _.timeOut( 3000, () =>
+    {
+      o.process.kill( 'SIGINT' );
+      return null;
+    })
+    
+    _.timeOut( 4000, () =>
+    { 
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.then( ( got ) =>
+    { 
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.is( _.strHas( o.output, 'SIGINT' ) );
+      return null;
+    })
+
+    return con;
+  })
+  
+  /*  */
+  
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      throwingExitCode : 0,
+      outputPiping : 0,
+      outputCollecting : 1,
+    }
+
+    let con = _.shell( o );
+
+    _.timeOut( 3000, () =>
+    {
+      o.process.kill( 'SIGINT' );
+      return null;
+    })
+    
+    _.timeOut( 4000, () =>
+    { 
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.then( ( got ) =>
+    { 
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.is( _.strHas( o.output, 'SIGINT' ) );
+      return null;
+    })
+
+    return con;
+  })
+  
+  /*  */
+  
+  return ready;
+}
+
+shellTerminateHangedWithExitHandler.timeOut = 20000;
 
 //
 
@@ -7890,6 +8394,8 @@ var Proto =
     shellNode,
 
     shellTerminate,
+    shellTerminateWithExitHandler,
+    shellTerminateHangedWithExitHandler,
 
     shellConcurrent,
     shellerConcurrent,
