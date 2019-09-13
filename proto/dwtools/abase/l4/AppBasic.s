@@ -150,7 +150,7 @@ function shell_body( o )
   _.assert( o.args === null || _.arrayIs( o.args ) || _.strIs( o.args ) );
   _.assert( o.execPath === null || _.strIs( o.execPath ) || _.strsAreAll( o.execPath ), 'Expects string or strings {-o.execPath-}, but got', _.strType( o.execPath ) );
   _.assert( o.timeOut === null || _.numberIs( o.timeOut ), 'Expects null or number {-o.timeOut-}, but got', _.strType( o.timeOut ) );
-  _.assert( _.arrayHas( [ 'instant'/* , 'suspended', 'parentdeath' */ ],  o.starting ) || _.objectIs( o.starting ), 'Unsupported starting mode:', o.starting );
+  _.assert( _.arrayHas( [ 'instant' ],  o.starting ) || _.objectIs( o.starting ), 'Unsupported starting mode:', o.starting );
 
 
 
