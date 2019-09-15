@@ -717,7 +717,7 @@ function shell( test )
 
     var options = _.mapSupplement( {}, o, commonDefaults );
 
-    return test.shouldThrowError( _.shell( options ) )
+    return test.shouldThrowErrorOfAnyKind( _.shell( options ) )
     .thenKeep( () =>
     {
       test.identical( options.exitCode, 1 );
@@ -757,7 +757,7 @@ function shell( test )
 
     var options = _.mapSupplement( {}, o, commonDefaults );
 
-    return test.shouldThrowError( _.shell( options ) )
+    return test.shouldThrowErrorOfAnyKind( _.shell( options ) )
     .thenKeep( () =>
     {
       test.identical( options.exitCode, 1 );
@@ -1294,7 +1294,7 @@ function shell2( test )
   .thenKeep( function( arg )
   {
     var options = _.mapSupplement( {}, o, commonDefaults );
-    return test.shouldThrowError( _.shell( options ) );
+    return test.shouldThrowErrorOfAnyKind( _.shell( options ) );
   })
 
   //
@@ -1923,7 +1923,7 @@ function shellFork( test )
       timeOut : 1000,
     }
 
-    return test.shouldThrowError( _.shell( o ) )
+    return test.shouldThrowErrorOfAnyKind( _.shell( o ) )
     .thenKeep( function( got )
     {
       test.identical( o.exitCode, null );
@@ -4491,7 +4491,7 @@ function shellErrorHadling( test )
       outputCollecting : 0,
       outputPiping : 0
     }
-    return test.shouldThrowError( _.shell( o ) )
+    return test.shouldThrowErrorOfAnyKind( _.shell( o ) )
     .thenKeep( function( got )
     {
       test.is( _.errIs( got ) );
@@ -4520,7 +4520,7 @@ function shellErrorHadling( test )
       outputCollecting : 0,
       outputPiping : 0
     }
-    return test.shouldThrowError( _.shell( o ) )
+    return test.shouldThrowErrorOfAnyKind( _.shell( o ) )
     .thenKeep( function( got )
     {
       test.is( _.errIs( got ) );
@@ -4549,7 +4549,7 @@ function shellErrorHadling( test )
       outputCollecting : 0,
       outputPiping : 0
     }
-    return test.shouldThrowError( _.shell( o ) )
+    return test.shouldThrowErrorOfAnyKind( _.shell( o ) )
     .thenKeep( function( got )
     {
       test.is( _.errIs( got ) );

@@ -319,34 +319,34 @@ function shell_body( o )
     // if( _.strIs( o.args ) )
     // o.args = _.strSplitNonPreserving({ src : o.args });
     o.args = _.arrayAs( o.args );
-    
+
     let execArgs;
 
     if( _.strIs( o.execPath ) )
-    { 
+    {
       o.fullExecPath = o.execPath;
       execArgs = execPathParse( o.execPath );
       o.execPath = execArgs.shift();
     }
-    
+
     if( o.execPath === null )
     {
       o.execPath = o.args.shift();
       o.fullExecPath = o.execPath;
-      
+
       let begin = _.strBeginOf( o.execPath, [ '"', "'", '`' ] );
       let end = _.strEndOf( o.execPath, [ '"', "'", '`' ] );
-      
+
       if( begin && begin === end )
       o.execPath = _.strInsideOf( o.execPath, begin, end );
     }
-    
+
     if( o.args )
     o.fullExecPath = _.strConcat( _.arrayAppendArray( [ o.fullExecPath ], o.args ) );
-    
+
     if( execArgs && execArgs.length )
     o.args = _.arrayPrependArray( o.args || [], execArgs );
-    
+
     if( o.outputAdditive === null )
     o.outputAdditive = true;
     o.outputAdditive = !!o.outputAdditive;
@@ -658,7 +658,7 @@ args : [ '"', 'first', 'arg', '"' ]
   function argsJoin( args )
   {
     args = args.slice();
-    
+
     for( let i = 0; i < args.length; i++ )
     {
       //escaping of some quotes is needed to equalize behavior of shell and exec modes on all platforms
@@ -667,15 +667,15 @@ args : [ '"', 'first', 'arg', '"' ]
       quotes.push( "`" )
       _.each( quotes, ( quote ) =>
       {
-        args[ i ] = _.strReplaceAll( args[ i ], quote, ( match, it ) => 
-        { 
+        args[ i ] = _.strReplaceAll( args[ i ], quote, ( match, it ) =>
+        {
           if( it.input[ it.range[ 0 ] - 1 ] === '\\' )
           return match;
-          return '\\' + match; 
+          return '\\' + match;
         });
       })
     }
-    
+
     return '"' + args.join( '" "' ) + '"';
   }
 
