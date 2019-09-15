@@ -1,21 +1,16 @@
-
 if( typeof module !== 'undefined' )
-require( '../proto/dwtools/abase/l4/External.s' );
-require( 'wConsequence' );
-require( 'wLogger' );
+require( '..' );
+require( 'wFiles' );
 var _ = wTools;
 
-/**/
+/* How to execute command synchronously in mode that doesn't have sync method in `ChildProcess` module */
 
-var o =
-{
-  path : 'node sample/Sample.js',
-  mode : 'spawn',
-  sync : 1,
-  outputPiping : 1,
-  deasync : 1
-};
-var got = _.shell( o );
-console.log( 'done' )
+var got = _.shell
+({
+  execPath : _.path.join( __dirname, 'AppArgs.js' ),
+  mode : 'fork',
+  deasync : 1,
+  sync : 1
+})
 
-
+console.log( 'Child process returned exit code:', got.exitCode );
