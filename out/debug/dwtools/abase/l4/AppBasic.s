@@ -703,6 +703,7 @@ args : [ '"', 'first', 'arg', '"' ]
   {
     args = args.slice();
 
+
     for( let i = 0; i < args.length; i++ )
     {
       // escaping of some quotes is needed to equalize behavior of shell and exec modes on all platforms
