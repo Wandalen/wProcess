@@ -1,4 +1,4 @@
-( function _AppBasic_test_s( ) {
+( function _ProcessBasic_test_s( ) {
 
 'use strict';
 
@@ -10,7 +10,7 @@ if( typeof module !== 'undefined' )
   _.include( 'wTesting' );
   _.include( 'wFiles' );
 
-  require( '../l4/AppBasic.s' );
+  require( '../l4/ProcessBasic.s' );
 
 }
 
@@ -32,22 +32,28 @@ var Self = {};
 // context
 // --
 
-function testDirMake()
+function suiteBegin()
 {
-  var context = this;
-  if( Config.interpreter === 'njs' )
-  context.testSuitePath = _.path.pathDirTempOpen( _.path.join( __dirname, '../..'  ), 'ExternalFundamentals' );
-  else
-  context.testSuitePath = _.path.current();
+  var self = this;
+  self.suitePath = _.path.pathDirTempOpen( _.path.join( __dirname, '../..' ), 'ProcessBasic' );
+  // if( Config.interpreter === 'njs' )
+  // // self.suitePath = _.path.pathDirTempOpen( _.path.join( __dirname, '../..'  ), 'ProcessBasic' );
+  // self.suitePath = _.path.join( __dirname, '../../tmp.tmp/ProcessBasic', _.idWithDate() + '.tmp'  );
+  // else
+  // self.suitePath = _.path.current();
 }
 
 //
 
-function testDirClean()
+function suiteEnd()
 {
-  var context = this;
-  if( Config.interpreter === 'njs' )
-  _.fileProvider.filesDelete( context.testSuitePath );
+  var self = this;
+
+  _.assert( _.strHas( self.suitePath, '/ProcessBasic-' ) )
+  _.path.pathDirTempOpen( self.suitePath );
+
+  // if( Config.interpreter === 'njs' )
+  // _.fileProvider.filesDelete( self.suitePath );
 }
 
 //
@@ -89,7 +95,7 @@ function testAppShell()
   _.include( 'wAppBasic' );
   _.include( 'wStringsExtra' )
 
-  var args = _.appArgs();
+  var args = _.process.args();
 
   if( args.map.exitWithCode )
   process.exit( args.map.exitWithCode )
@@ -113,7 +119,7 @@ function appArgs( test )
 
   var argv = [];
   argv.unshift.apply( argv, _argv );
-  var got = _.appArgs({ argv, caching : 0 });
+  var got = _.process.args({ argv, caching : 0 });
   var expected =
   {
     interpreterPath : _argv[ 0 ],
@@ -133,7 +139,7 @@ function appArgs( test )
 
   var argv = [ '' ];
   argv.unshift.apply( argv, _argv );
-  var got = _.appArgs({ argv, caching : 0 });
+  var got = _.process.args({ argv, caching : 0 });
   var expected =
   {
     interpreterPath : _argv[ 0 ],
@@ -153,7 +159,7 @@ function appArgs( test )
 
   var argv = [ 'x', ':', 'aa', 'bbb :' ];
   argv.unshift.apply( argv, _argv );
-  var got = _.appArgs({ argv, caching : 0 });
+  var got = _.process.args({ argv, caching : 0 });
   var expected =
   {
     interpreterPath : _argv[ 0 ],
@@ -170,7 +176,7 @@ function appArgs( test )
 
   var argv = [ 'x', ' : ', 'y' ];
   argv.unshift.apply( argv, _argv );
-  var got = _.appArgs({ argv, caching : 0 });
+  var got = _.process.args({ argv, caching : 0 });
   var expected =
   {
     interpreterPath : _argv[ 0 ],
@@ -187,7 +193,7 @@ function appArgs( test )
 
   var argv = [ 'x', ' :', 'y', 'x', ' :', '1' ];
   argv.unshift.apply( argv, _argv );
-  var got = _.appArgs({ argv, caching : 0 });
+  var got = _.process.args({ argv, caching : 0 });
   var expected =
   {
     interpreterPath : _argv[ 0 ],
@@ -204,7 +210,7 @@ function appArgs( test )
 
   var argv = [ 'a b c d', 'x', ' :', 'y', 'xyz', 'y', ' :', 1 ];
   argv.unshift.apply( argv, _argv );
-  var got = _.appArgs({ argv, caching : 0 });
+  var got = _.process.args({ argv, caching : 0 });
   var expected =
   {
     interpreterPath : _argv[ 0 ],
@@ -229,7 +235,7 @@ function appArgs( test )
     'e', ' :  ', 5
   ];
   argv.unshift.apply( argv, _argv );
-  var got = _.appArgs({ argv, caching : 0 });
+  var got = _.process.args({ argv, caching : 0 });
   var expected =
   {
     interpreterPath : _argv[ 0 ],
@@ -254,7 +260,7 @@ function appArgs( test )
 
   var argv = [ 'a :b :c :d', 'x', ' :', 0, 'y', ' :', 1 ];
   argv.unshift.apply( argv, _argv );
-  var got = _.appArgs({ argv, caching : 0 });
+  var got = _.process.args({ argv, caching : 0 });
   var expected =
   {
     interpreterPath : _argv[ 0 ],
@@ -270,7 +276,7 @@ function appArgs( test )
   /* */
 
   var argv = [];
-  var got = _.appArgs({ argv : [ 'interpreter', 'main.js', '.set v:5 ; .build debug:1 ; .export' ], caching : 0 });
+  var got = _.process.args({ argv : [ 'interpreter', 'main.js', '.set v:5 ; .build debug:1 ; .export' ], caching : 0 });
   var expected =
   {
     interpreterPath : 'interpreter',
@@ -290,7 +296,7 @@ function appArgs( test )
   /* */
 
   var argv = [];
-  var got = _.appArgs({ argv : [ 'interpreter', 'main.js', '.set v:[1 2  3 ] ; .build debug:1 ; .export' ], caching : 0 });
+  var got = _.process.args({ argv : [ 'interpreter', 'main.js', '.set v:[1 2  3 ] ; .build debug:1 ; .export' ], caching : 0 });
   var expected =
   {
     interpreterPath : 'interpreter',
@@ -311,7 +317,7 @@ function appArgs( test )
 
   test.case = 'windows native path as option, no quotes'
   var argv = [];
-  var got = _.appArgs({ argv : [ 'interpreter', 'main.js', 'path:D:\\path\\to\\file' ], caching : 0 });
+  var got = _.process.args({ argv : [ 'interpreter', 'main.js', 'path:D:\\path\\to\\file' ], caching : 0 });
   var expected =
   {
     interpreterPath : 'interpreter',
@@ -330,7 +336,7 @@ function appArgs( test )
 
   test.case = 'windows native path as option, with quotes'
   var argv = [];
-  var got = _.appArgs({ argv : [ 'interpreter', 'main.js', 'path:"D:\\path\\to\\file"' ], caching : 0 });
+  var got = _.process.args({ argv : [ 'interpreter', 'main.js', 'path:"D:\\path\\to\\file"' ], caching : 0 });
   var expected =
   {
     interpreterPath : 'interpreter',
@@ -349,7 +355,7 @@ function appArgs( test )
 
   test.case = 'number option with quotes'
   var argv = [];
-  var got = _.appArgs({ argv : [ 'interpreter', 'main.js', 'v:"10"' ], caching : 0 });
+  var got = _.process.args({ argv : [ 'interpreter', 'main.js', 'v:"10"' ], caching : 0 });
   var expected =
   {
     interpreterPath : 'interpreter',
@@ -368,7 +374,7 @@ function appArgs( test )
 
   test.case = 'string option with quotes'
   var argv = [];
-  var got = _.appArgs({ argv : [ 'interpreter', 'main.js', 'str:"abc"' ], caching : 0 });
+  var got = _.process.args({ argv : [ 'interpreter', 'main.js', 'str:"abc"' ], caching : 0 });
   var expected =
   {
     interpreterPath : 'interpreter',
@@ -392,7 +398,7 @@ function appArgs( test )
 function appExitHandlerOnce( test )
 {
   var context = this;
-  var routinePath = _.path.join( context.testSuitePath, test.name );
+  var routinePath = _.path.join( context.suitePath, test.name );
   var commonDefaults =
   {
     outputPiping : 1,
@@ -408,9 +414,9 @@ function appExitHandlerOnce( test )
     _.include( 'wAppBasic' );
     _.include( 'wStringsExtra' )
 
-    var args = _.appArgs();
+    var args = _.process.args();
 
-    _.appExitHandlerOnce( ( arg ) =>
+    _.process.exitHandlerOnce( ( arg ) =>
     {
       console.log( 'appExitHandlerOnce:', arg );
     });
@@ -451,7 +457,7 @@ function appExitHandlerOnce( test )
       outputCollecting : 1,
     }
 
-    return _.shell( o )
+    return _.process.start( o )
     .thenKeep( ( got ) =>
     {
       test.is( got.exitCode === 0 );
@@ -474,7 +480,7 @@ function appExitHandlerOnce( test )
       outputCollecting : 1,
     }
 
-    return _.shell( o )
+    return _.process.start( o )
     .thenKeep( ( got ) =>
     {
       test.is( got.exitCode === 0 );
@@ -493,7 +499,7 @@ function appExitHandlerOnce( test )
 function shell( test )
 {
   var context = this;
-  var routinePath = _.path.join( context.testSuitePath, test.name );
+  var routinePath = _.path.join( context.suitePath, test.name );
   var commonDefaults =
   {
     outputPiping : 1,
@@ -531,7 +537,7 @@ function shell( test )
 
     var options = _.mapSupplement( {}, o, commonDefaults );
 
-    return _.shell( options )
+    return _.process.start( options )
     .thenKeep( function()
     {
       test.identical( options.exitCode, 0 );
@@ -546,7 +552,7 @@ function shell( test )
     o.stdio = 'ignore';
     var options = _.mapSupplement( {}, o, commonDefaults );
 
-    return _.shell( options )
+    return _.process.start( options )
     .thenKeep( function()
     {
       test.identical( options.exitCode, 0 );
@@ -562,7 +568,7 @@ function shell( test )
 
   //   var options = _.mapSupplement( {}, o, commonDefaults );
 
-  //   return _.shell( options )
+  //   return _.process.start( options )
   //   .thenKeep( function()
   //   {
   //     test.identical( options.exitCode, 0 );
@@ -587,7 +593,7 @@ function shell( test )
 
     var options = _.mapSupplement( {}, o, commonDefaults );
 
-    return _.shell( options )
+    return _.process.start( options )
     .thenKeep( function()
     {
       test.identical( options.exitCode, 0 );
@@ -603,7 +609,7 @@ function shell( test )
 
     var options = _.mapSupplement( {}, o, commonDefaults );
 
-    return _.shell( options )
+    return _.process.start( options )
     .thenKeep( function()
     {
       test.identical( options.exitCode, 0 );
@@ -611,6 +617,8 @@ function shell( test )
       return null;
     })
   })
+
+  // qqq : ?
   // .thenKeep( function( arg )
   // {
   //   /* mode : shell, stdio : inherit */
@@ -619,7 +627,7 @@ function shell( test )
 
   //   var options = _.mapSupplement( {}, o, commonDefaults );
 
-  //   return _.shell( options )
+  //   return _.process.start( options )
   //   .thenKeep( function()
   //   {
   //     test.identical( options.exitCode, 0 );
@@ -639,7 +647,7 @@ function shell( test )
 
     var options = _.mapSupplement( {}, o, commonDefaults );
 
-    var shell = _.shell( options );
+    var shell = _.process.start( options );
     _.timeOut( 500, () =>
     {
       test.identical( options.process.killed, false );
@@ -668,7 +676,7 @@ function shell( test )
 
     var options = _.mapSupplement( {}, o, commonDefaults );
 
-    var shell = _.shell( options );
+    var shell = _.process.start( options );
     _.timeOut( 500, () =>
     {
       test.identical( options.process.killed, false );
@@ -697,7 +705,7 @@ function shell( test )
 
     var options = _.mapSupplement( {}, o, commonDefaults );
 
-    return test.mustNotThrowError( _.shell( options ) )
+    return test.mustNotThrowError( _.process.start( options ) )
     .thenKeep( () =>
     {
       test.identical( options.exitCode, 0 );
@@ -717,7 +725,7 @@ function shell( test )
 
     var options = _.mapSupplement( {}, o, commonDefaults );
 
-    return test.shouldThrowError( _.shell( options ) )
+    return test.shouldThrowErrorOfAnyKind( _.process.start( options ) )
     .thenKeep( () =>
     {
       test.identical( options.exitCode, 1 );
@@ -737,7 +745,7 @@ function shell( test )
 
     var options = _.mapSupplement( {}, o, commonDefaults );
 
-    return test.mustNotThrowError( _.shell( options ) )
+    return test.mustNotThrowError( _.process.start( options ) )
     .thenKeep( () =>
     {
       test.identical( options.exitCode, 0 );
@@ -757,7 +765,7 @@ function shell( test )
 
     var options = _.mapSupplement( {}, o, commonDefaults );
 
-    return test.shouldThrowError( _.shell( options ) )
+    return test.shouldThrowErrorOfAnyKind( _.process.start( options ) )
     .thenKeep( () =>
     {
       test.identical( options.exitCode, 1 );
@@ -772,25 +780,25 @@ function shell( test )
   // .thenKeep( function( arg )
   // {
   //   test.case = 'simple command';
-  //   var con = _.shell( 'exit' );
+  //   var con = _.process.start( 'exit' );
   //   return test.returnsSingleResource( con );
   // })
   // .thenKeep( function( arg )
   // {
   //   test.case = 'bad command, shell';
-  //   var con = _.shell({ code : 'xxx', throwingExitCode : 1, mode : 'shell' });
+  //   var con = _.process.start({ code : 'xxx', throwingExitCode : 1, mode : 'shell' });
   //   return test.shouldThrowErrorSync( con );
   // })
   // .thenKeep( function( arg )
   // {
   //   test.case = 'bad command, spawn';
-  //   var con = _.shell({ code : 'xxx', throwingExitCode : 1, mode : 'spawn' });
+  //   var con = _.process.start({ code : 'xxx', throwingExitCode : 1, mode : 'spawn' });
   //   return test.shouldThrowErrorSync( con );
   // })
   // .thenKeep( function( arg )
   // {
   //   test.case = 'several arguments';
-  //   var con = _.shell( 'echo echo something' );
+  //   var con = _.process.start( 'echo echo something' );
   //   return test.mustNotThrowError( con );
   // })
   // ;
@@ -811,7 +819,7 @@ function shell( test )
 
     var options = _.mapSupplement( {}, o, commonDefaults );
 
-    var shell = _.shell( options );
+    var shell = _.process.start( options );
     return test.shouldThrowErrorAsync( shell )
     .thenKeep( () =>
     {
@@ -832,7 +840,7 @@ shell.timeOut = 30000;
 function shellSync( test )
 {
   var context = this;
-  var routinePath = _.path.join( context.testSuitePath, test.name );
+  var routinePath = _.path.join( context.suitePath, test.name );
   var commonDefaults =
   {
     outputPiping : 1,
@@ -864,7 +872,7 @@ function shellSync( test )
   /* mode : spawn, stdio : pipe */
 
   var options = _.mapSupplement( {}, o, commonDefaults );
-  _.shell( options )
+  _.process.start( options )
   test.identical( options.exitCode, 0 );
   test.identical( options.output, expectedOutput );
 
@@ -872,7 +880,7 @@ function shellSync( test )
 
   o.stdio = 'ignore';
   var options = _.mapSupplement( {}, o, commonDefaults );
-  _.shell( options )
+  _.process.start( options )
   test.identical( options.exitCode, 0 );
   test.identical( options.output.length, 0 );
 
@@ -886,7 +894,7 @@ function shellSync( test )
     stdio : 'pipe'
   }
   var options = _.mapSupplement( {}, o, commonDefaults );
-  _.shell( options )
+  _.process.start( options )
   test.identical( options.exitCode, 0 );
   test.identical( options.output, expectedOutput );
 
@@ -894,7 +902,7 @@ function shellSync( test )
 
   o.stdio = 'ignore'
   var options = _.mapSupplement( {}, o, commonDefaults );
-  _.shell( options )
+  _.process.start( options )
   test.identical( options.exitCode, 0 );
   test.identical( options.output.length, 0 );
 
@@ -910,7 +918,7 @@ function shellSync( test )
   }
 
   var options = _.mapSupplement( {}, o, commonDefaults );
-  test.shouldThrowErrorSync( () => _.shell( options ) );
+  test.shouldThrowErrorSync( () => _.process.start( options ) );
 
   //
 
@@ -922,7 +930,7 @@ function shellSync( test )
     stdio : 'pipe'
   }
   var options = _.mapSupplement( {}, o, commonDefaults );
-  test.mustNotThrowError( () => _.shell( options ) )
+  test.mustNotThrowError( () => _.process.start( options ) )
   test.identical( options.exitCode, 0 );
 
   //
@@ -935,7 +943,7 @@ function shellSync( test )
     stdio : 'pipe'
   }
   var options = _.mapSupplement( {}, o, commonDefaults );
-  test.shouldThrowErrorSync( () => _.shell( options ) )
+  test.shouldThrowErrorSync( () => _.process.start( options ) )
   test.identical( options.exitCode, 1 );
 
   //
@@ -949,7 +957,7 @@ function shellSync( test )
   }
 
   var options = _.mapSupplement( {}, o, commonDefaults );
-  test.mustNotThrowError( () => _.shell( options ) )
+  test.mustNotThrowError( () => _.process.start( options ) )
   test.identical( options.exitCode, 0 );
 
   //
@@ -962,7 +970,7 @@ function shellSync( test )
     stdio : 'pipe'
   }
   var options = _.mapSupplement( {}, o, commonDefaults );
-  test.shouldThrowErrorSync( () => _.shell( options ) )
+  test.shouldThrowErrorSync( () => _.process.start( options ) )
   test.identical( options.exitCode, 1 );
 
 }
@@ -974,7 +982,7 @@ shellSync.timeOut = 30000;
 function shellSyncAsync( test )
 {
   var context = this;
-  var routinePath = _.path.join( context.testSuitePath, test.name );
+  var routinePath = _.path.join( context.suitePath, test.name );
   var commonDefaults =
   {
     outputPiping : 1,
@@ -1007,7 +1015,7 @@ function shellSyncAsync( test )
   /* mode : spawn, stdio : pipe */
 
   var options = _.mapSupplement( {}, o, commonDefaults );
-  var got = _.shell( options );
+  var got = _.process.start( options );
   test.is( got === options );
   test.identical( got.process.constructor.name, 'ChildProcess' );
   test.identical( options.exitCode, 0 );
@@ -1017,7 +1025,7 @@ function shellSyncAsync( test )
 
   o.stdio = 'ignore';
   var options = _.mapSupplement( {}, o, commonDefaults );
-  var got = _.shell( options );
+  var got = _.process.start( options );
   test.is( got === options );
   test.identical( got.process.constructor.name, 'ChildProcess' );
   test.identical( options.exitCode, 0 );
@@ -1036,7 +1044,7 @@ function shellSyncAsync( test )
   /* mode : spawn, stdio : pipe */
 
   var options = _.mapSupplement( {}, o, commonDefaults );
-  var got = _.shell( options );
+  var got = _.process.start( options );
   test.is( got === options );
   test.identical( got.process.constructor.name, 'ChildProcess' );
   test.identical( options.exitCode, 0 );
@@ -1046,7 +1054,7 @@ function shellSyncAsync( test )
 
   o.stdio = 'ignore';
   var options = _.mapSupplement( {}, o, commonDefaults );
-  var got = _.shell( options );
+  var got = _.process.start( options );
   test.is( got === options );
   test.identical( got.process.constructor.name, 'ChildProcess' );
   test.identical( options.exitCode, 0 );
@@ -1062,7 +1070,7 @@ function shellSyncAsync( test )
     stdio : 'pipe'
   }
   var options = _.mapSupplement( {}, o, commonDefaults );
-  var got = _.shell( options );
+  var got = _.process.start( options );
   test.is( got === options );
   test.identical( got.process.constructor.name, 'ChildProcess' );
   test.identical( options.exitCode, 0 );
@@ -1072,7 +1080,7 @@ function shellSyncAsync( test )
 
   o.stdio = 'ignore'
   var options = _.mapSupplement( {}, o, commonDefaults );
-  var got = _.shell( options );
+  var got = _.process.start( options );
   test.is( got === options );
   test.identical( got.process.constructor.name, 'ChildProcess' );
   test.identical( options.exitCode, 0 );
@@ -1090,7 +1098,7 @@ function shellSyncAsync( test )
   }
 
   var options = _.mapSupplement( {}, o, commonDefaults );
-  test.shouldThrowErrorSync( () => _.shell( options ) );
+  test.shouldThrowErrorSync( () => _.process.start( options ) );
 
   //
 
@@ -1102,7 +1110,7 @@ function shellSyncAsync( test )
     stdio : 'pipe'
   }
   var options = _.mapSupplement( {}, o, commonDefaults );
-  var got = _.shell( options );
+  var got = _.process.start( options );
   test.is( got === options );
   test.identical( got.process.constructor.name, 'ChildProcess' );
   test.identical( options.exitCode, 0 );
@@ -1117,7 +1125,7 @@ function shellSyncAsync( test )
     stdio : 'pipe'
   }
   var options = _.mapSupplement( {}, o, commonDefaults );
-  test.shouldThrowErrorSync( () => _.shell( options ) )
+  test.shouldThrowErrorSync( () => _.process.start( options ) )
   test.identical( options.exitCode, 1 );
 
   //
@@ -1131,7 +1139,7 @@ function shellSyncAsync( test )
   }
 
   var options = _.mapSupplement( {}, o, commonDefaults );
-  var got = _.shell( options );
+  var got = _.process.start( options );
   test.is( got === options );
   test.identical( got.process.constructor.name, 'ChildProcess' );
   test.identical( options.exitCode, 0 );
@@ -1146,7 +1154,7 @@ function shellSyncAsync( test )
     stdio : 'pipe'
   }
   var options = _.mapSupplement( {}, o, commonDefaults );
-  test.shouldThrowErrorSync( () => _.shell( options ) )
+  test.shouldThrowErrorSync( () => _.process.start( options ) )
   test.identical( options.exitCode, 1 );
 
 }
@@ -1158,7 +1166,7 @@ shellSyncAsync.timeOut = 30000;
 function shell2( test )
 {
   var context = this;
-  var routinePath = _.path.join( context.testSuitePath, test.name );
+  var routinePath = _.path.join( context.suitePath, test.name );
   var commonDefaults =
   {
     outputPiping : 1,
@@ -1202,7 +1210,7 @@ function shell2( test )
 
     var options = _.mapSupplement( {}, _.cloneJust( o ), commonDefaults );
 
-    return _.shell( options )
+    return _.process.start( options )
     .thenKeep( function()
     {
       test.identical( options.exitCode, 0 );
@@ -1233,7 +1241,7 @@ function shell2( test )
 
     var options = _.mapSupplement( {}, o, commonDefaults );
 
-    return _.shell( options )
+    return _.process.start( options )
     .thenKeep( function()
     {
       test.identical( options.exitCode, 0 );
@@ -1265,7 +1273,7 @@ function shell2( test )
 
     var options = _.mapSupplement( {}, o, commonDefaults );
 
-    return _.shell( options )
+    return _.process.start( options )
     .thenKeep( function()
     {
       test.identical( options.exitCode, 0 );
@@ -1294,7 +1302,7 @@ function shell2( test )
   .thenKeep( function( arg )
   {
     var options = _.mapSupplement( {}, o, commonDefaults );
-    return test.shouldThrowError( _.shell( options ) );
+    return test.shouldThrowErrorOfAnyKind( _.process.start( options ) );
   })
 
   //
@@ -1319,7 +1327,7 @@ function shell2( test )
 
     var options = _.mapSupplement( {}, o, commonDefaults );
 
-    return _.shell( options )
+    return _.process.start( options )
     .thenKeep( function()
     {
       test.identical( options.exitCode, 0 );
@@ -1339,7 +1347,7 @@ shell2.timeOut = 30000;
 function shellCurrentPath( test )
 {
   var context = this;
-  var routinePath = _.path.join( context.testSuitePath, test.name );
+  var routinePath = _.path.join( context.suitePath, test.name );
 
   /* */
 
@@ -1374,7 +1382,7 @@ function shellCurrentPath( test )
       stdio : 'pipe',
       outputCollecting : 1,
     }
-    return _.shell( o )
+    return _.process.start( o )
     .thenKeep( function( got )
     {
       test.identical( o.output, expectedOutput );
@@ -1396,7 +1404,7 @@ function shellCurrentPath( test )
       stdio : 'pipe',
       outputCollecting : 1,
     }
-    return _.shell( o )
+    return _.process.start( o )
     .thenKeep( function( got )
     {
       test.identical( o.output, expectedOutput );
@@ -1418,7 +1426,7 @@ function shellCurrentPath( test )
       stdio : 'pipe',
       outputCollecting : 1,
     }
-    return _.shell( o )
+    return _.process.start( o )
     .thenKeep( function( got )
     {
       test.identical( o.output, expectedOutput );
@@ -1440,7 +1448,7 @@ function shellCurrentPath( test )
       currentPath : __dirname,
       mode : 'fork',
     }
-    let con = _.shell( o );
+    let con = _.process.start( o );
     o.process.on( 'message', ( m ) =>
     {
       output = m;
@@ -1464,7 +1472,7 @@ shellCurrentPath.timeOut = 30000;
 function shellCurrentPaths( test )
 {
   var context = this;
-  var routinePath = _.path.join( context.testSuitePath, test.name );
+  var routinePath = _.path.join( context.suitePath, test.name );
 
   /* */
 
@@ -1494,7 +1502,7 @@ function shellCurrentPaths( test )
 
   /* */
 
-  _.shell( _.mapSupplement( { mode : 'shell' }, o2 ) );
+  _.process.start( _.mapSupplement( { mode : 'shell' }, o2 ) );
 
   ready.then( ( got ) =>
   {
@@ -1512,7 +1520,7 @@ function shellCurrentPaths( test )
 
   /* */
 
-  _.shell( _.mapSupplement( { mode : 'spawn' }, o2 ) );
+  _.process.start( _.mapSupplement( { mode : 'spawn' }, o2 ) );
 
   ready.then( ( got ) =>
   {
@@ -1530,7 +1538,7 @@ function shellCurrentPaths( test )
 
   /* */
 
-  _.shell( _.mapSupplement( { mode : 'exec' }, o2 ) );
+  _.process.start( _.mapSupplement( { mode : 'exec' }, o2 ) );
 
   ready.then( ( got ) =>
   {
@@ -1548,7 +1556,7 @@ function shellCurrentPaths( test )
 
   /* */
 
-  _.shell( _.mapSupplement( { mode : 'fork', execPath : testAppPath }, o2 ) );
+  _.process.start( _.mapSupplement( { mode : 'fork', execPath : testAppPath }, o2 ) );
 
   ready.then( ( got ) =>
   {
@@ -1566,7 +1574,7 @@ function shellCurrentPaths( test )
 
   /*  */
 
-  _.shell( _.mapSupplement( { mode : 'spawn', execPath : [ 'node ' + testAppPath, 'node ' + testAppPath ] }, o2 ) );
+  _.process.start( _.mapSupplement( { mode : 'spawn', execPath : [ 'node ' + testAppPath, 'node ' + testAppPath ] }, o2 ) );
 
   ready.then( ( got ) =>
   {
@@ -1620,7 +1628,7 @@ function shellCurrentPaths( test )
 function shellFork( test )
 {
   var context = this;
-  var routinePath = _.path.join( context.testSuitePath, test.name );
+  var routinePath = _.path.join( context.suitePath, test.name );
 
   /* */
 
@@ -1653,7 +1661,7 @@ function shellFork( test )
       outputCollecting : 1,
       outputPiping : 1,
     }
-    return _.shell( o )
+    return _.process.start( o )
     .thenKeep( function( got )
     {
       test.identical( o.exitCode, 0 );
@@ -1677,7 +1685,7 @@ function shellFork( test )
       outputCollecting : 1,
       outputPiping : 1,
     }
-    return _.shell( o )
+    return _.process.start( o )
     .thenKeep( function( got )
     {
       test.identical( o.exitCode, 0 );
@@ -1702,7 +1710,7 @@ function shellFork( test )
   //     outputPiping : 1,
   //   }
 
-  //   return _.shell( o )
+  //   return _.process.start( o )
   //   .thenKeep( function( got )
   //   {
   //     test.identical( o.exitCode, 0 );
@@ -1727,7 +1735,7 @@ function shellFork( test )
       outputPiping : 1,
     }
 
-    return _.shell( o )
+    return _.process.start( o )
     .thenKeep( function( got )
     {
       test.identical( o.exitCode, 0 );
@@ -1766,7 +1774,7 @@ function shellFork( test )
       outputCollecting : 1,
       outputPiping : 1,
     }
-    return _.shell( o )
+    return _.process.start( o )
     .thenKeep( function( got )
     {
       test.identical( o.exitCode, 0 );
@@ -1812,7 +1820,7 @@ function shellFork( test )
       deasync : 1
     }
 
-    _.shell( o );
+    _.process.start( o );
 
     test.identical( o.exitCode, 0 );
     test.is( _.strHas( o.output,  "[ 'arg1', 'arg2' ]" ) );
@@ -1852,7 +1860,7 @@ function shellFork( test )
     }
 
     let gotMessage;
-    let con = _.shell( o );
+    let con = _.process.start( o );
 
     o.process.send({ message : 'message from parent' });
     o.process.on( 'message', ( got ) =>
@@ -1885,7 +1893,7 @@ function shellFork( test )
       outputPiping : 1,
     }
 
-    return _.shell( o )
+    return _.process.start( o )
     .thenKeep( function( got )
     {
       test.identical( o.exitCode, 0 );
@@ -1923,7 +1931,7 @@ function shellFork( test )
       timeOut : 1000,
     }
 
-    return test.shouldThrowError( _.shell( o ) )
+    return test.shouldThrowErrorOfAnyKind( _.process.start( o ) )
     .thenKeep( function( got )
     {
       test.identical( o.exitCode, null );
@@ -1960,7 +1968,7 @@ function shellFork( test )
       timeOut : 1000,
     }
 
-    return _.shell( o )
+    return _.process.start( o )
     .thenKeep( function( got )
     {
       test.identical( o.exitCode, null );
@@ -1981,7 +1989,7 @@ function shellWithoutExecPath( test )
   let context = this;
   let counter = 0;
   let time = 0;
-  let routinePath = _.path.join( context.testSuitePath, test.name );
+  let routinePath = _.path.join( context.suitePath, test.name );
   let testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
   let filePath = _.fileProvider.path.nativize( _.path.join( routinePath, 'file.txt' ) );
   let ready = _.Consequence().take( null );
@@ -2006,7 +2014,7 @@ function shellWithoutExecPath( test )
     outputCollecting : 1,
   }
 
-  _.shell( singleOption )
+  _.process.start( singleOption )
   .then( ( arg ) =>
   {
     test.identical( arg.exitCode, 0 );
@@ -2024,10 +2032,65 @@ function shellWithoutExecPath( test )
 
 //
 
+function shellArgsOption( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+
+  /* */
+
+  var testAppPath = _.path.join( routinePath, 'testApp.js' );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+
+  /* */
+
+  var ready = new _.Consequence().take( null );
+
+  /* */
+
+  test.case = 'args option as array, source args array should not be changed'
+  var args = [ 'arg1', 'arg2' ];
+  var shellOptions =
+  {
+    execPath : 'node ' + testAppPath,
+    outputCollecting : 1,
+    args : args,
+    mode : 'spawn',
+    ready : ready
+  }
+
+  _.process.start( shellOptions )
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( got.args, [ testAppPath, 'arg1', 'arg2' ] );
+    test.identical( _.strCount( got.output, `[ 'arg1', 'arg2' ]` ), 1 );
+    test.identical( shellOptions.args, got.args );
+    test.identical( args, [ 'arg1', 'arg2' ] );
+    return null;
+  })
+
+  /*  */
+
+  return ready;
+}
+
+shellArgsOption.timeOut = 30000;
+
+//
+
 function shellArgumentsParsing( test )
 {
   let context = this;
-  let routinePath = _.path.join( context.testSuitePath, test.name );
+  let routinePath = _.path.join( context.suitePath, test.name );
   let testAppPathNoSpace = _.fileProvider.path.nativize( _.path.join( routinePath, 'noSpace', 'testApp.js' ) );
   let testAppPathSpace= _.fileProvider.path.nativize( _.path.join( routinePath, 'with space', 'testApp.js' ) );
   let ready = _.Consequence().take( null );
@@ -2036,31 +2099,11 @@ function shellArgumentsParsing( test )
   _.fileProvider.fileWrite( testAppPathNoSpace, testAppCode );
   _.fileProvider.fileWrite( testAppPathSpace, testAppCode );
 
-  /*
-    +'path to exec : with space' 'execPath: has arguments' 'args has arguments' 'fork'
-    +'path to exec : without space' 'execPath: has arguments' 'args has arguments' 'fork'
-    +'path to exec : with space' 'execPath: only path' 'args has arguments' 'fork'
-    +'path to exec : without space' 'execPath: only path' 'args has arguments' 'fork'
-    +'path to exec : with space' 'execPath: has arguments' 'args: empty' 'fork'
-    +'path to exec : without space' 'execPath: has arguments' 'args: empty' 'fork'
-    +'path to exec : with space' 'execPath: only path' 'args: empty' 'fork'
-    +'path to exec : without space' 'execPath: only path' 'args: empty' 'fork'
-    +'path to exec : with space' 'execPath: has arguments' 'args has arguments' 'spawn'
-    +'path to exec : without space' 'execPath: has arguments' 'args has arguments' 'spawn'
-    +'path to exec : with space' 'execPath: only path' 'args has arguments' 'spawn'
-    +'path to exec : without space' 'execPath: only path' 'args has arguments' 'spawn'
-    +'path to exec : with space' 'execPath: has arguments' 'args: empty' 'spawn'
-    +'path to exec : without space' 'execPath: has arguments' 'args: empty' 'spawn'
-    +'path to exec : with space' 'execPath: only path' 'args: empty' 'spawn'
-    +'path to exec : without space' 'execPath: only path' 'args: empty' 'spawn'
-    +'path to exec : with space' 'execPath: has arguments' 'args has arguments' 'shell'
-    +'path to exec : without space' 'execPath: has arguments' 'args has arguments' 'shell'
-    +'path to exec : with space' 'execPath: only path' 'args has arguments' 'shell'
-    +'path to exec : without space' 'execPath: only path' 'args has arguments' 'shell'
-    +'path to exec : with space' 'execPath: has arguments' 'args: empty' 'shell'
-    +'path to exec : without space' 'execPath: has arguments' 'args: empty' 'shell'
-    +'path to exec : with space' 'execPath: only path' 'args: empty' 'shell'
-    +'path to exec : without space' 'execPath: only path' 'args: empty' 'shell'"
+  /* for combination:
+      path to exe file : [ with space, without space ]
+      execPath : [ has arguments, only path to exe file ]
+      args : [ has arguments, empty ]
+      mode : [ 'fork', 'exec', 'spawn', 'shell' ]
   */
 
   /* - */
@@ -2081,7 +2124,7 @@ function shellArgumentsParsing( test )
       outputPiping : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     let got;
     o.process.on( 'message', ( data ) => { got = data } )
@@ -2113,7 +2156,7 @@ function shellArgumentsParsing( test )
       outputPiping : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     let got;
     o.process.on( 'message', ( data ) => { got = data } )
@@ -2145,7 +2188,7 @@ function shellArgumentsParsing( test )
       outputPiping : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     let got;
     o.process.on( 'message', ( data ) => { got = data } )
@@ -2177,7 +2220,7 @@ function shellArgumentsParsing( test )
       outputPiping : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     let got;
     o.process.on( 'message', ( data ) => { got = data } )
@@ -2209,7 +2252,7 @@ function shellArgumentsParsing( test )
       outputPiping : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     let got;
     o.process.on( 'message', ( data ) => { got = data } )
@@ -2241,7 +2284,7 @@ function shellArgumentsParsing( test )
       outputPiping : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     let got;
     o.process.on( 'message', ( data ) => { got = data } )
@@ -2273,7 +2316,7 @@ function shellArgumentsParsing( test )
       outputPiping : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     let got;
     o.process.on( 'message', ( data ) => { got = data } )
@@ -2305,7 +2348,7 @@ function shellArgumentsParsing( test )
       outputPiping : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     let got;
     o.process.on( 'message', ( data ) => { got = data } )
@@ -2339,7 +2382,7 @@ function shellArgumentsParsing( test )
       outputCollecting : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     con.then( () =>
     {
@@ -2373,7 +2416,7 @@ function shellArgumentsParsing( test )
       outputCollecting : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     con.then( () =>
     {
@@ -2407,7 +2450,7 @@ function shellArgumentsParsing( test )
       outputCollecting : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     con.then( () =>
     {
@@ -2441,7 +2484,7 @@ function shellArgumentsParsing( test )
       outputCollecting : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     con.then( () =>
     {
@@ -2475,7 +2518,7 @@ function shellArgumentsParsing( test )
       outputCollecting : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     con.then( () =>
     {
@@ -2509,7 +2552,7 @@ function shellArgumentsParsing( test )
       outputCollecting : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     con.then( () =>
     {
@@ -2543,7 +2586,7 @@ function shellArgumentsParsing( test )
       outputCollecting : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     con.then( () =>
     {
@@ -2577,7 +2620,7 @@ function shellArgumentsParsing( test )
       outputCollecting : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     con.then( () =>
     {
@@ -2611,7 +2654,7 @@ function shellArgumentsParsing( test )
       outputPiping : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     let got;
     o.process.on( 'message', ( data ) => { got = data } )
@@ -2643,7 +2686,7 @@ function shellArgumentsParsing( test )
       outputPiping : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     let got;
     o.process.on( 'message', ( data ) => { got = data } )
@@ -2675,7 +2718,7 @@ function shellArgumentsParsing( test )
       outputPiping : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     let got;
     o.process.on( 'message', ( data ) => { got = data } )
@@ -2707,7 +2750,7 @@ function shellArgumentsParsing( test )
       outputPiping : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     let got;
     o.process.on( 'message', ( data ) => { got = data } )
@@ -2739,7 +2782,7 @@ function shellArgumentsParsing( test )
       outputPiping : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     let got;
     o.process.on( 'message', ( data ) => { got = data } )
@@ -2771,7 +2814,7 @@ function shellArgumentsParsing( test )
       outputPiping : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     let got;
     o.process.on( 'message', ( data ) => { got = data } )
@@ -2803,7 +2846,7 @@ function shellArgumentsParsing( test )
       outputPiping : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     let got;
     o.process.on( 'message', ( data ) => { got = data } )
@@ -2835,7 +2878,7 @@ function shellArgumentsParsing( test )
       outputPiping : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     let got;
     o.process.on( 'message', ( data ) => { got = data } )
@@ -2867,7 +2910,7 @@ function shellArgumentsParsing( test )
       outputCollecting : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     con.then( () =>
     {
@@ -2896,7 +2939,7 @@ function shellArgumentsParsing( test )
       outputCollecting : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     let got;
     o.process.on( 'message', ( data ) => { got = data } )
@@ -2929,7 +2972,7 @@ function shellArgumentsParsing( test )
       outputCollecting : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     let got;
     o.process.on( 'message', ( data ) => { got = data } )
@@ -2962,7 +3005,7 @@ function shellArgumentsParsing( test )
       outputCollecting : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     let got;
     o.process.on( 'message', ( data ) => { got = data } )
@@ -2995,7 +3038,7 @@ function shellArgumentsParsing( test )
       outputCollecting : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     let got;
     o.process.on( 'message', ( data ) => { got = data } )
@@ -3028,7 +3071,7 @@ function shellArgumentsParsing( test )
       outputCollecting : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     let got;
     o.process.on( 'message', ( data ) => { got = data } )
@@ -3061,7 +3104,7 @@ function shellArgumentsParsing( test )
       outputCollecting : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     let got;
     o.process.on( 'message', ( data ) => { got = data } )
@@ -3094,7 +3137,7 @@ function shellArgumentsParsing( test )
       outputCollecting : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     let got;
     o.process.on( 'message', ( data ) => { got = data } )
@@ -3129,7 +3172,7 @@ function shellArgumentsParsing( test )
       outputCollecting : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     let got;
     o.process.on( 'message', ( data ) => { got = data } )
@@ -3161,7 +3204,7 @@ function shellArgumentsParsing( test )
       outputCollecting : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     con.then( () =>
     {
@@ -3191,7 +3234,7 @@ function shellArgumentsParsing( test )
       outputCollecting : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     con.then( () =>
     {
@@ -3221,7 +3264,7 @@ function shellArgumentsParsing( test )
       outputCollecting : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     con.then( () =>
     {
@@ -3248,7 +3291,7 @@ function shellArgumentsParsing( test )
     let _ = require( '../../../../Tools.s' );
     _.include( 'wAppBasic' );
     _.include( 'wStringsExtra' )
-    var args = _.appArgs();
+    var args = _.process.args();
     if( process.send )
     process.send( args );
     else
@@ -3264,7 +3307,7 @@ shellArgumentsParsing.timeOut = 60000;
 function shellArgumentsParsingNonTrivial( test )
 {
   let context = this;
-  let routinePath = _.path.join( context.testSuitePath, test.name );
+  let routinePath = _.path.join( context.suitePath, test.name );
   let testAppPathNoSpace = _.fileProvider.path.nativize( _.path.join( routinePath, 'noSpace', 'testApp.js' ) );
   let testAppPathSpace= _.fileProvider.path.nativize( _.path.join( routinePath, 'with space', 'testApp.js' ) );
   let ready = _.Consequence().take( null );
@@ -3272,9 +3315,9 @@ function shellArgumentsParsingNonTrivial( test )
   let testAppCode = testApp.toString() + '\ntestApp();';
   _.fileProvider.fileWrite( testAppPathNoSpace, testAppCode );
   _.fileProvider.fileWrite( testAppPathSpace, testAppCode );
-  
-  /* 
-  
+
+  /*
+
   execPath : '"/dir with space/app.exe" `firstArg secondArg ":" 1` "third arg" \'fourth arg\'  `"fifth" arg`,
   args : '"some arg"'
   mode : 'spawn'
@@ -3331,11 +3374,11 @@ function shellArgumentsParsingNonTrivial( test )
   ->
   execPath : '"'
   args : [ '"', 'first', 'arg', '"' ]
-  
+
   */
- 
+
   ready
- 
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3350,7 +3393,7 @@ function shellArgumentsParsingNonTrivial( test )
       outputCollecting : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     con.then( () =>
     {
@@ -3367,7 +3410,7 @@ function shellArgumentsParsingNonTrivial( test )
 
     return con;
   })
-  
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3382,7 +3425,7 @@ function shellArgumentsParsingNonTrivial( test )
       outputCollecting : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     con.then( () =>
     {
@@ -3399,7 +3442,7 @@ function shellArgumentsParsingNonTrivial( test )
 
     return con;
   })
-  
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3414,7 +3457,7 @@ function shellArgumentsParsingNonTrivial( test )
       outputCollecting : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     con.then( () =>
     {
@@ -3431,7 +3474,7 @@ function shellArgumentsParsingNonTrivial( test )
 
     return con;
   })
-  
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3446,7 +3489,7 @@ function shellArgumentsParsingNonTrivial( test )
       outputCollecting : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     con.then( () =>
     {
@@ -3463,9 +3506,9 @@ function shellArgumentsParsingNonTrivial( test )
 
     return con;
   })
-  
+
   /*  */
-  
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3480,7 +3523,7 @@ function shellArgumentsParsingNonTrivial( test )
       outputCollecting : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     con.then( () =>
     {
@@ -3497,7 +3540,7 @@ function shellArgumentsParsingNonTrivial( test )
 
     return con;
   })
-  
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3512,7 +3555,7 @@ function shellArgumentsParsingNonTrivial( test )
       outputCollecting : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     con.then( () =>
     {
@@ -3529,7 +3572,7 @@ function shellArgumentsParsingNonTrivial( test )
 
     return con;
   })
-  
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3544,7 +3587,7 @@ function shellArgumentsParsingNonTrivial( test )
       outputCollecting : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     con.then( () =>
     {
@@ -3561,7 +3604,7 @@ function shellArgumentsParsingNonTrivial( test )
 
     return con;
   })
-  
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3576,7 +3619,7 @@ function shellArgumentsParsingNonTrivial( test )
       outputCollecting : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     con.then( () =>
     {
@@ -3593,9 +3636,9 @@ function shellArgumentsParsingNonTrivial( test )
 
     return con;
   })
-  
+
   /*  */
-  
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3610,23 +3653,23 @@ function shellArgumentsParsingNonTrivial( test )
       throwingExitCode : 0,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     con.finally( ( err, got ) =>
-    { 
+    {
       test.is( !!err );
       test.is( _.strHas( err.message, 'first arg' ) )
       test.identical( o.execPath, 'first arg' );
       test.identical( o.args, [] );
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   /* */
-  
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3641,23 +3684,23 @@ function shellArgumentsParsingNonTrivial( test )
       throwingExitCode : 0,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     con.finally( ( err, got ) =>
-    { 
+    {
       test.is( !!err );
       test.is( _.strHas( err.message, 'first arg' ) )
       test.identical( o.execPath, 'first arg' );
       test.identical( o.args, [] );
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   /* */
-  
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3672,23 +3715,23 @@ function shellArgumentsParsingNonTrivial( test )
       throwingExitCode : 0,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     con.finally( ( err, got ) =>
-    { 
+    {
       test.is( !!err );
       test.is( _.strHas( err.message, 'first arg' ) )
       test.identical( o.execPath, 'first arg' );
       test.identical( o.args, [ 'second arg' ] );
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   /* */
-  
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3703,21 +3746,21 @@ function shellArgumentsParsingNonTrivial( test )
       throwingExitCode : 0,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     con.finally( ( err, got ) =>
-    { 
+    {
       test.is( !!err );
       test.is( _.strHas( err.message, '"' ) )
       test.identical( o.execPath, '"' );
       test.identical( o.args, [ 'first', 'arg', '"' ] );
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3732,21 +3775,21 @@ function shellArgumentsParsingNonTrivial( test )
       throwingExitCode : 0,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     con.finally( ( err, got ) =>
-    { 
+    {
       test.is( !!err );
       test.is( _.strHas( err.message, `Received ''` ) );
       test.identical( o.execPath, '' );
       test.identical( o.args, [ 'first', 'arg', '"' ] );
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -3761,25 +3804,45 @@ function shellArgumentsParsingNonTrivial( test )
       throwingExitCode : 0,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     con.finally( ( err, got ) =>
-    { 
+    {
       test.is( !!err );
       test.is( _.strHas( err.message, `spawn " ENOENT` ) );
       test.identical( o.execPath, '"' );
       test.identical( o.args, [ '"', 'first', 'arg', '"' ] );
-      
+
       return null;
     })
 
     return con;
   })
-  
+
+  .then( () =>
+  {
+    test.case = 'no execPath, empty args'
+
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      args : [],
+      mode : 'spawn',
+      outputPiping : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0,
+      ready : con
+    }
+
+    _.process.start( o );
+
+    return test.shouldThrowError( con );
+  })
+
   /*  */
 
   return ready;
-  
+
 
   /**/
 
@@ -3788,7 +3851,7 @@ function shellArgumentsParsingNonTrivial( test )
     let _ = require( '../../../../Tools.s' );
     _.include( 'wAppBasic' );
     _.include( 'wStringsExtra' )
-    var args = _.appArgs();
+    var args = _.process.args();
     console.log( JSON.stringify( args ) );
   }
 }
@@ -3801,7 +3864,7 @@ shellArgumentsParsingNonTrivial.timeOut = 60000;
 function shellArgumentsNestedQuotes( test )
 {
   let context = this;
-  let routinePath = _.path.join( context.testSuitePath, test.name );
+  let routinePath = _.path.join( context.suitePath, test.name );
   let testAppPathNoSpace = _.fileProvider.path.nativize( _.path.join( routinePath, 'noSpace', 'testApp.js' ) );
   let testAppPathSpace= _.fileProvider.path.nativize( _.path.join( routinePath, 'with space', 'testApp.js' ) );
   let ready = _.Consequence().take( null );
@@ -3833,7 +3896,7 @@ function shellArgumentsNestedQuotes( test )
       outputCollecting : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     con.then( () =>
     {
@@ -3854,7 +3917,7 @@ function shellArgumentsNestedQuotes( test )
 
     return con;
   })
-  
+
   .then( () =>
   {
     test.case = 'fork'
@@ -3875,7 +3938,7 @@ function shellArgumentsNestedQuotes( test )
       outputCollecting : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     con.then( () =>
     {
@@ -3910,7 +3973,7 @@ function shellArgumentsNestedQuotes( test )
       outputCollecting : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     con.then( () =>
     {
@@ -3932,7 +3995,7 @@ function shellArgumentsNestedQuotes( test )
     return con;
 
   })
-  
+
   .then( () =>
   {
     test.case = 'spawn'
@@ -3953,7 +4016,7 @@ function shellArgumentsNestedQuotes( test )
       outputCollecting : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     con.then( () =>
     {
@@ -3989,7 +4052,7 @@ function shellArgumentsNestedQuotes( test )
       outputCollecting : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     con.then( () =>
     {
@@ -4010,7 +4073,7 @@ function shellArgumentsNestedQuotes( test )
 
     return con;
   })
-  
+
   .then( () =>
   {
     test.case = 'shell'
@@ -4031,7 +4094,7 @@ function shellArgumentsNestedQuotes( test )
       outputCollecting : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     con.then( () =>
     {
@@ -4066,7 +4129,7 @@ function shellArgumentsNestedQuotes( test )
       outputCollecting : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     con.then( () =>
     {
@@ -4088,7 +4151,7 @@ function shellArgumentsNestedQuotes( test )
     return con;
 
   })
-  
+
   .then( () =>
   {
     test.case = 'exec'
@@ -4109,7 +4172,7 @@ function shellArgumentsNestedQuotes( test )
       outputCollecting : 1,
       ready : con
     }
-    _.shell( o );
+    _.process.start( o );
 
     con.then( () =>
     {
@@ -4137,7 +4200,7 @@ function shellArgumentsNestedQuotes( test )
     let _ = require( '../../../../Tools.s' );
     _.include( 'wAppBasic' );
     _.include( 'wStringsExtra' )
-    var args = _.appArgs();
+    var args = _.process.args();
     console.log( JSON.stringify( args ) );
   }
 }
@@ -4146,10 +4209,1032 @@ shellArgumentsNestedQuotes.timeOut = 60000;
 
 //
 
+function shellExecPathQuotesClosing( test )
+{
+  let context = this;
+  let routinePath = _.path.join( context.suitePath, test.name );
+  let testAppPathSpace= _.fileProvider.path.nativize( _.path.join( routinePath, 'with space', 'testApp.js' ) );
+  let ready = _.Consequence().take( null );
+
+  let testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPathSpace, testAppCode );
+
+  /* */
+
+  ready
+
+  testcase( 'quoted arg' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' "arg"',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' "arg"' );
+      test.identical( o.args, [ 'arg' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ 'arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"',
+      mode : 'spawn',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"' );
+      test.identical( o.args, [ testAppPathSpace,'arg' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ 'arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"',
+      mode : 'shell',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"' );
+      test.identical( o.args, [ testAppPathSpace,'arg' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ 'arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"',
+      mode : 'exec',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"' );
+      test.identical( o.args, [ testAppPathSpace,'arg' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ 'arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  testcase( 'unquoted arg' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' arg',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' arg' );
+      test.identical( o.args, [ 'arg' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ 'arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' arg',
+      mode : 'spawn',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' arg' );
+      test.identical( o.args, [ testAppPathSpace,'arg' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ 'arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' arg',
+      mode : 'shell',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' arg' );
+      test.identical( o.args, [ testAppPathSpace,'arg' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ 'arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' arg',
+      mode : 'exec',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' arg' );
+      test.identical( o.args, [ testAppPathSpace, 'arg' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ 'arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  /*  */
+
+  testcase( 'single quote' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' " arg',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' " arg' );
+      test.identical( o.args, [ '"', 'arg' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ '"', 'arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  /*  */
+
+  testcase( 'single quote' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' " arg',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' " arg' );
+      test.identical( o.args, [ '"', 'arg' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ '"', 'arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' arg "',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' arg "' );
+      test.identical( o.args, [ 'arg', '"' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ 'arg', '"' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  testcase( 'arg starts with quote' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' "arg',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    return test.shouldThrowError( _.process.start( o ) );
+  })
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' "arg"arg',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    return test.shouldThrowError( _.process.start( o ) );
+  })
+
+  testcase( 'arg ends with quote' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' arg"',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o )
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' arg"' );
+      test.identical( o.args, [ 'arg"' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ 'arg"' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' arg"arg"',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o )
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' arg"arg"' );
+      test.identical( o.args, [ 'arg"arg"' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ 'arg"arg"' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  testcase( 'quoted with different symbols' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ` "arg'`,
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    return test.shouldThrowError( _.process.start( o ) );
+  })
+
+  testcase( 'quote as part of arg' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' arg"arg',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' arg"arg' );
+      test.identical( o.args, [ 'arg"arg' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ 'arg"arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' "arg"arg"',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' "arg"arg"' );
+      test.identical( o.args, [ 'arg"arg' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ 'arg"arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  testcase( 'option arg with quoted value' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' option : "value"',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' option : "value"' );
+      test.identical( o.args, [ 'option', ':', 'value' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, { option : 'value' } )
+      test.identical( got.scriptArgs, [ 'option', ':', 'value' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' option:"value with space"',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' option:"value with space"' );
+      test.identical( o.args, [ 'option:"value with space"' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, { option : 'value with space' } )
+      test.identical( got.scriptArgs, [ 'option:"value with space"' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' option : "value with space"',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' option : "value with space"' );
+      test.identical( o.args, [ 'option', ':', 'value with space' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, { option : 'value with space' } )
+      test.identical( got.scriptArgs, [ 'option', ':', 'value with space' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' option:"value',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' option:"value' );
+      test.identical( o.args, [ 'option:"value' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, { option : '"value' } )
+      test.identical( got.scriptArgs, [ 'option:"value' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' "option: "value""',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' "option: "value""' );
+      test.identical( o.args, [ 'option: "value"' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, { option : 'value' } )
+      test.identical( got.scriptArgs, [ 'option: "value"' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' option : "value',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    return test.shouldThrowError( _.process.start( o ) );
+  })
+
+  testcase( 'double quoted with space inside, same quotes' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' "option: "value with space""',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    return test.shouldThrowError( con );
+  })
+
+  testcase( 'double quoted with space inside, diff quotes' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' `option: "value with space"`',
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' `option: "value with space"`' );
+      test.identical( o.args, [ 'option: "value with space"' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, { option : 'value with space' } )
+      test.identical( got.scriptArgs, [ 'option: "value with space"' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  testcase( 'escaped quotes, mode shell' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' option: \\"value with space\\"',
+      mode : 'shell',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' option: \\"value with space\\"' );
+      test.identical( o.args, [ testAppPathSpace, 'option:', '\\"value with space\\"' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, { option : 'value with space' } )
+      test.identical( got.scriptArgs, [ 'option:', '"value with space"' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  /*  */
+
+  return ready;
+
+  /*  */
+
+  function testcase( src )
+  {
+    ready.then( () =>
+    {
+      test.case = src;
+      return null;
+    })
+    return ready;
+  }
+
+  function testApp()
+  {
+    let _ = require( '../../../../Tools.s' );
+    _.include( 'wAppBasic' );
+    _.include( 'wStringsExtra' )
+    var args = _.process.args();
+    console.log( JSON.stringify( args ) );
+  }
+}
+
+shellExecPathQuotesClosing.timeOut = 60000;
+
+//
+
+function shellExecPathSeveralCommands( test )
+{
+  let context = this;
+  let routinePath = _.path.join( context.suitePath, test.name );
+  let testAppPath =  _.path.join( routinePath, 'app.js' );
+
+  function app()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+
+  let testAppCode = app.toString() + '\napp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+
+  let ready = _.Consequence().take( null );
+
+  /* */
+
+  ready
+
+  testcase( 'quoted, mode:shell' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : '"node app.js arg1 && node app.js arg2"',
+      mode : 'shell',
+      currentPath : routinePath,
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    con.then( ( got ) =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( _.strCount( got.output, `[ 'arg1' ]` ), 1 );
+      test.identical( _.strCount( got.output, `[ 'arg2' ]` ), 1 );
+      return null;
+    })
+
+    return con;
+  })
+
+  //
+
+  testcase( 'quoted, mode:spawn' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : '"node app.js arg1 && node app.js arg2"',
+      mode : 'spawn',
+      currentPath : routinePath,
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    return test.shouldThrowErrorAsync( _.process.start( o ) )
+  })
+
+  //
+
+  testcase( 'quoted, mode:fork' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : '"node app.js arg1 && node app.js arg2"',
+      mode : 'fork',
+      currentPath : routinePath,
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    return test.shouldThrowErrorAsync( _.process.start( o ) )
+  })
+
+  //
+
+  testcase( 'quoted, mode:exec' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : '"node app.js arg1 && node app.js arg2"',
+      mode : 'exec',
+      currentPath : routinePath,
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    con.then( ( got ) =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( _.strCount( got.output, `[ 'arg1' ]` ), 1 );
+      test.identical( _.strCount( got.output, `[ 'arg2' ]` ), 1 );
+      return null;
+    })
+
+    return con;
+  })
+
+  //
+
+  testcase( 'no quotes, mode:shell' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node app.js arg1 && node app.js arg2',
+      mode : 'shell',
+      currentPath : routinePath,
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    con.then( ( got ) =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( _.strCount( got.output, `[ 'arg1' ]` ), 1 );
+      test.identical( _.strCount( got.output, `[ 'arg2' ]` ), 1 );
+      return null;
+    })
+
+    return con;
+  })
+
+  //
+
+  testcase( 'no quotes, mode:spawn' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node app.js arg1 && node app.js arg2',
+      mode : 'spawn',
+      currentPath : routinePath,
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    con.then( ( got ) =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( _.strCount( got.output, `[ 'arg1', '&&', 'node', 'app.js', 'arg2' ]` ), 1 );
+      return null;
+    })
+
+    return con;
+  })
+
+  //
+
+  testcase( 'no quotes, mode:fork' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node app.js arg1 && node app.js arg2',
+      mode : 'fork',
+      currentPath : routinePath,
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    return test.shouldThrowErrorAsync( _.process.start( o ) );
+  })
+
+  //
+
+  testcase( 'no quotes, mode:exec' )
+
+  .then( () =>
+  {
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node app.js arg1 && node app.js arg2',
+      mode : 'exec',
+      currentPath : routinePath,
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    con.then( ( got ) =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( _.strCount( got.output, `[ 'arg1' ]` ), 1 );
+      test.identical( _.strCount( got.output, `[ 'arg2' ]` ), 1 );
+      return null;
+    })
+
+    return con;
+  })
+
+  /*  */
+
+  return ready;
+
+  /*  */
+
+  function testcase( src )
+  {
+    ready.then( () =>
+    {
+      test.case = src;
+      return null;
+    })
+    return ready;
+  }
+}
+
+shellExecPathQuotesClosing.timeOut = 60000;
+
+//
+
 function shellVerbosity( test )
 {
   let context = this;
-  let routinePath = _.path.join( context.testSuitePath, test.name );
+  let routinePath = _.path.join( context.suitePath, test.name );
   let ready = _.Consequence().take( null );
 
   let capturedOutput = '';
@@ -4158,7 +5243,7 @@ function shellVerbosity( test )
   /* */
 
   testCase( 'verbosity : 0' )
-  _.shell
+  _.process.start
   ({
     execPath : `node -e "console.log('message')"`,
     mode : 'spawn',
@@ -4178,7 +5263,7 @@ function shellVerbosity( test )
   /* */
 
   testCase( 'verbosity : 1' )
-  _.shell
+  _.process.start
   ({
     execPath : `node -e "console.log('message')"`,
     mode : 'spawn',
@@ -4201,7 +5286,7 @@ function shellVerbosity( test )
   /* */
 
    testCase( 'verbosity : 2' )
-   _.shell
+   _.process.start
    ({
      execPath : `node -e "console.log('message')"`,
      mode : 'spawn',
@@ -4225,7 +5310,7 @@ function shellVerbosity( test )
   /* */
 
   testCase( 'verbosity : 3' )
-  _.shell
+  _.process.start
   ({
     execPath : `node -e "console.log('message')"`,
     mode : 'spawn',
@@ -4249,7 +5334,7 @@ function shellVerbosity( test )
   /* */
 
   testCase( 'verbosity : 5' )
-  _.shell
+  _.process.start
   ({
     execPath : `node -e "console.log('message')"`,
     mode : 'spawn',
@@ -4273,7 +5358,7 @@ function shellVerbosity( test )
   /* */
 
   testCase( 'error, verbosity : 0' )
-  _.shell
+  _.process.start
   ({
     execPath : `node -e "process.exit(1)"`,
     mode : 'spawn',
@@ -4296,7 +5381,7 @@ function shellVerbosity( test )
   /*  */
 
   testCase( 'error, verbosity : 1' )
-  _.shell
+  _.process.start
   ({
     execPath : `node -e "process.exit(1)"`,
     mode : 'spawn',
@@ -4319,7 +5404,7 @@ function shellVerbosity( test )
   /*  */
 
   testCase( 'error, verbosity : 2' )
-  _.shell
+  _.process.start
   ({
     execPath : `node -e "process.exit(1)"`,
     mode : 'spawn',
@@ -4342,7 +5427,7 @@ function shellVerbosity( test )
   /* */
 
   testCase( 'error, verbosity : 3' )
-  _.shell
+  _.process.start
   ({
     execPath : `node -e "process.exit(1)"`,
     mode : 'spawn',
@@ -4365,7 +5450,7 @@ function shellVerbosity( test )
   /*  */
 
   testCase( 'error, verbosity : 5' )
-  _.shell
+  _.process.start
   ({
     execPath : `node -e "process.exit(1)"`,
     mode : 'spawn',
@@ -4388,7 +5473,7 @@ function shellVerbosity( test )
   /*  */
 
   testCase( 'execPath has quotes, verbosity : 1' )
-  _.shell
+  _.process.start
   ({
     execPath : `node -e "console.log( \"a\", 'b', \`c\` )"`,
     mode : 'spawn',
@@ -4412,7 +5497,7 @@ function shellVerbosity( test )
   /* */
 
   testCase( 'execPath has double quotes, verbosity : 1' )
-  _.shell
+  _.process.start
   ({
     execPath : `node -e "console.log( '"a"', "'b'", \`"c"\` )"`,
     mode : 'spawn',
@@ -4458,7 +5543,7 @@ function shellVerbosity( test )
 function shellErrorHadling( test )
 {
   var context = this;
-  var routinePath = _.path.join( context.testSuitePath, test.name );
+  var routinePath = _.path.join( context.suitePath, test.name );
 
   /* */
 
@@ -4491,7 +5576,7 @@ function shellErrorHadling( test )
       outputCollecting : 0,
       outputPiping : 0
     }
-    return test.shouldThrowError( _.shell( o ) )
+    return test.shouldThrowError( _.process.start( o ) )
     .thenKeep( function( got )
     {
       test.is( _.errIs( got ) );
@@ -4520,7 +5605,7 @@ function shellErrorHadling( test )
       outputCollecting : 0,
       outputPiping : 0
     }
-    return test.shouldThrowError( _.shell( o ) )
+    return test.shouldThrowError( _.process.start( o ) )
     .thenKeep( function( got )
     {
       test.is( _.errIs( got ) );
@@ -4549,7 +5634,7 @@ function shellErrorHadling( test )
       outputCollecting : 0,
       outputPiping : 0
     }
-    return test.shouldThrowError( _.shell( o ) )
+    return test.shouldThrowError( _.process.start( o ) )
     .thenKeep( function( got )
     {
       test.is( _.errIs( got ) );
@@ -4580,7 +5665,7 @@ function shellErrorHadling( test )
       outputCollecting : 0,
       outputPiping : 0
     }
-    var got = test.shouldThrowErrorSync( () => _.shell( o ) )
+    var got = test.shouldThrowErrorSync( () => _.process.start( o ) )
 
     test.is( _.errIs( got ) );
     test.is( _.strHas( got.message, 'Process returned exit code' ) )
@@ -4609,7 +5694,7 @@ function shellErrorHadling( test )
       outputCollecting : 0,
       outputPiping : 0
     }
-    var got = test.shouldThrowErrorSync( () => _.shell( o ) )
+    var got = test.shouldThrowErrorSync( () => _.process.start( o ) )
 
     test.is( _.errIs( got ) );
     test.is( _.strHas( got.message, 'Process returned exit code' ) )
@@ -4638,7 +5723,7 @@ function shellErrorHadling( test )
       outputCollecting : 0,
       outputPiping : 0
     }
-    var got = test.shouldThrowErrorSync( () => _.shell( o ) )
+    var got = test.shouldThrowErrorSync( () => _.process.start( o ) )
 
     test.is( _.errIs( got ) );
     test.is( _.strHas( got.message, 'Process returned exit code' ) )
@@ -4667,7 +5752,7 @@ function shellErrorHadling( test )
       outputCollecting : 0,
       outputPiping : 0
     }
-    var got = test.shouldThrowErrorSync( () => _.shell( o ) )
+    var got = test.shouldThrowErrorSync( () => _.process.start( o ) )
 
     test.is( _.errIs( got ) );
     test.is( _.strHas( got.message, 'Process returned exit code' ) )
@@ -4696,7 +5781,7 @@ function shellErrorHadling( test )
   //     outputCollecting : 0,
   //     outputPiping : 0
   //   }
-  //   var got = test.shouldThrowErrorSync( () => _.shell( o ) )
+  //   var got = test.shouldThrowErrorSync( () => _.process.start( o ) )
 
   //   test.is( _.errIs( got ) );
   //   test.is( _.strHas( got.message, 'Process returned error code' ) )
@@ -4720,7 +5805,7 @@ function shellErrorHadling( test )
 function shellNode( test )
 {
   var context = this;
-  var routinePath = _.path.join( context.testSuitePath, test.name );
+  var routinePath = _.path.join( context.suitePath, test.name );
 
   /* */
 
@@ -4729,13 +5814,46 @@ function shellNode( test )
     throw 'Error message from child';
   }
 
+  function testApp2()
+  {
+    console.log( process.argv.slice( 2 ) )
+  }
+
+
   /* */
 
   var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppPath2 = _.path.join( routinePath, 'testApp2.js' );
   var testAppCode = testApp.toString() + '\ntestApp();';
+  var testAppCode2 = testApp2.toString() + '\ntestApp2();';
   _.fileProvider.fileWrite( testAppPath, testAppCode );
+  _.fileProvider.fileWrite( testAppPath2, testAppCode2 );
 
   var con = new _.Consequence().take( null );
+
+  /* */
+
+  con.then( () =>
+  {
+    test.case = 'execPath contains normalized path'
+    return _.process.startNode
+    ({
+      execPath : testAppPath2,
+      args : [ 'arg' ],
+      outputCollecting : 1,
+      stdio : 'pipe',
+    })
+    .then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      test.identical( got.args, [ 'arg' ] );
+      console.log( got.output )
+      test.is( _.strHas( got.output, `[ 'arg' ]` ) );
+      return null
+    })
+  })
+
+  /*  */
 
   var modes = [ 'fork', 'exec', 'spawn', 'shell' ];
 
@@ -4744,7 +5862,7 @@ function shellNode( test )
     con.thenKeep( () =>
     {
       var o = { execPath : testAppPath, mode : mode, applyingExitCode : 1, throwingExitCode : 1, stdio : 'ignore' };
-      return _.shellNode( o )
+      return _.process.startNode( o )
       .finally( ( err, got ) =>
       {
         test.identical( o.exitCode, 1 );
@@ -4758,7 +5876,7 @@ function shellNode( test )
     con.thenKeep( () =>
     {
       var o = { execPath : testAppPath, mode : mode,  applyingExitCode : 1, throwingExitCode : 0, stdio : 'ignore' };
-      return _.shellNode( o )
+      return _.process.startNode( o )
       .finally( ( err, got ) =>
       {
         test.identical( o.exitCode, 1 );
@@ -4772,7 +5890,7 @@ function shellNode( test )
     con.thenKeep( () =>
     {
       var o = { execPath : testAppPath,  mode : mode, applyingExitCode : 0, throwingExitCode : 1, stdio : 'ignore' };
-      return _.shellNode( o )
+      return _.process.startNode( o )
       .finally( ( err, got ) =>
       {
         test.identical( o.exitCode, 1 );
@@ -4785,7 +5903,7 @@ function shellNode( test )
     con.thenKeep( () =>
     {
       var o = { execPath : testAppPath,  mode : mode, applyingExitCode : 0, throwingExitCode : 0, stdio : 'ignore' };
-      return _.shellNode( o )
+      return _.process.startNode( o )
       .finally( ( err, got ) =>
       {
         test.identical( o.exitCode, 1 );
@@ -4798,7 +5916,7 @@ function shellNode( test )
     con.thenKeep( () =>
     {
       var o = { execPath : testAppPath,  mode : mode, maximumMemory : 1, applyingExitCode : 0, throwingExitCode : 0, stdio : 'ignore' };
-      return _.shellNode( o )
+      return _.process.startNode( o )
       .finally( ( err, got ) =>
       {
         test.identical( o.exitCode, 1 );
@@ -4822,7 +5940,7 @@ shellNode.timeOut = 20000;
 function shellTerminate( test )
 {
   var context = this;
-  var routinePath = _.path.join( context.testSuitePath, test.name );
+  var routinePath = _.path.join( context.suitePath, test.name );
 
   /* */
 
@@ -4830,8 +5948,8 @@ function shellTerminate( test )
   {
     setTimeout( () =>
     {
-      console.log( 'Timeout');
-    },5000 )
+      console.log( 'Timeout in child' );
+    },6000 )
   }
 
   /* */
@@ -4841,29 +5959,1095 @@ function shellTerminate( test )
   _.fileProvider.fileWrite( testAppPath, testAppCode );
   var ready = new _.Consequence().take( null );
 
-  let terminateChild =
+  ready
+
+  .then( () =>
   {
-    execPath : 'node ' + testAppPath,
-    ready,
-    throwingExitCode : 1,
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'spawn',
+      throwingExitCode : 1,
+      outputCollecting : 1
+    }
+
+    let con = _.process.start( o );
+
+    _.timeOut( 2000, () =>
+    {
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.finally( ( err, got ) =>
+    {
+      test.is( _.errIs( err ) );
+      test.is( _.strHas( err.message, 'killed by exit signal SIGKILL' ) );
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, 'SIGKILL' );
+      test.is( !_.strHas( o.output, 'Timeout in child' ) );
+      return null;
+    })
+
+    return con;
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      throwingExitCode : 1,
+      outputCollecting : 1
+    }
+
+    let con = _.process.start( o );
+
+    _.timeOut( 2000, () =>
+    {
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.finally( ( err, got ) =>
+    {
+      test.is( _.errIs( err ) );
+      test.is( _.strHas( err.message, 'killed by exit signal SIGKILL' ) );
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, 'SIGKILL' );
+      test.is( !_.strHas( o.output, 'Timeout in child' ) );
+      return null;
+    })
+
+    return con;
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'exec',
+      throwingExitCode : 1,
+      outputCollecting : 1
+    }
+
+    let con = _.process.start( o );
+
+    _.timeOut( 2000, () =>
+    {
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.finally( ( err, got ) =>
+    {
+      test.is( _.errIs( err ) );
+      test.is( _.strHas( err.message, 'killed by exit signal SIGKILL' ) );
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, 'SIGKILL' );
+      test.is( !_.strHas( o.output, 'Timeout in child' ) );
+      return null;
+    })
+
+    return con;
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'spawn',
+      throwingExitCode : 1,
+      outputCollecting : 1
+    }
+
+    let con = _.process.start( o );
+
+    _.timeOut( 2000, () =>
+    {
+      o.process.kill( 'SIGINT' );
+      return null;
+    })
+
+    con.finally( ( err, got ) =>
+    {
+      test.is( _.errIs( err ) );
+      test.is( _.strHas( err.message, 'killed by exit signal SIGINT' ) );
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, 'SIGINT' );
+      test.is( !_.strHas( o.output, 'Timeout in child' ) );
+      return null;
+    })
+
+    return con;
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      throwingExitCode : 1,
+      outputCollecting : 1
+    }
+
+    let con = _.process.start( o );
+
+    _.timeOut( 2000, () =>
+    {
+      o.process.kill( 'SIGINT' );
+      return null;
+    })
+
+    con.finally( ( err, got ) =>
+    {
+      test.is( _.errIs( err ) );
+      test.is( _.strHas( err.message, 'killed by exit signal SIGINT' ) );
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, 'SIGINT' );
+      test.is( !_.strHas( o.output, 'Timeout in child' ) );
+      return null;
+    })
+
+    return con;
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'exec',
+      throwingExitCode : 1,
+      outputCollecting : 1
+    }
+
+    let con = _.process.start( o );
+
+    _.timeOut( 2000, () =>
+    {
+      o.process.kill( 'SIGINT' );
+      return null;
+    })
+
+    con.finally( ( err, got ) =>
+    {
+      test.is( _.errIs( err ) );
+      test.is( _.strHas( err.message, 'killed by exit signal SIGINT' ) );
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, 'SIGINT' );
+      test.is( !_.strHas( o.output, 'Timeout in child' ) );
+      return null;
+    })
+
+    return con;
+  })
+
+  /*  */
+
+  return ready;
+}
+
+shellTerminate.timeOut = 120000;
+shellTerminate.description =
+`
+  Test app - single timeout with message
+
+  Will test:
+  - Termination of child process using SIGINT signal after small delay
+  - Termination of child process using SIGKILL signal after small delay
+
+  Expected behaviour for all platforms:
+  - Child was terminated with exitCode : null, exitSignal : { kill signal from parent }
+  - Time out was not raised, no message output
+`
+
+//
+
+function shellTerminateWithExitHandler( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    let _ = require( '../../../../Tools.s' );
+    _.include( 'wAppBasic' );
+    _.process.exitHandlerRepair();
+    _.timeOut( 10000, () => { console.log( 'Timeout in child' ); return null } )
   }
 
-  _.shell( terminateChild );
+  /* */
 
-  terminateChild.process.kill();
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+  testAppPath = _.strQuote( testAppPath );
+  var ready = new _.Consequence().take( null );
 
-  ready.finally( ( err, got ) =>
+  ready
+
+  .then( () =>
   {
-    test.is( _.errIs( err ) );
-    test.identical( terminateChild.exitCode, null );
-    return null;
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'spawn',
+      throwingExitCode : 1,
+      outputCollecting : 1,
+    }
+
+    let con = _.process.start( o );
+
+    _.timeOut( 3000, () =>
+    {
+      o.process.kill( 'SIGINT' );
+      return null;
+    })
+
+    _.timeOut( 4000, () =>
+    {
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.finally( ( err, got ) =>
+    {
+      test.is( !_.errIs( err ) );
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.is( _.strHas( o.output, 'SIGINT' ) );
+      test.is( !_.strHas( o.output, 'Timeout in child' ) );
+      return null;
+    })
+
+    return con;
+  })
+
+  /*  */
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'exec',
+      throwingExitCode : 1,
+      outputCollecting : 1,
+    }
+
+    let con = _.process.start( o );
+
+    _.timeOut( 3000, () =>
+    {
+      o.process.kill( 'SIGINT' );
+      return null;
+    })
+
+    _.timeOut( 4000, () =>
+    {
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.finally( ( err, got ) =>
+    {
+      test.is( !_.errIs( err ) );
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.is( _.strHas( o.output, 'SIGINT' ) );
+      test.is( !_.strHas( o.output, 'Timeout in child' ) );
+      return null;
+    })
+
+    return con;
+  })
+
+  /*  */
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      throwingExitCode : 1,
+      outputCollecting : 1,
+    }
+
+    let con = _.process.start( o );
+
+    _.timeOut( 3000, () =>
+    {
+      o.process.kill( 'SIGINT' );
+      return null;
+    })
+
+    _.timeOut( 4000, () =>
+    {
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.finally( ( err, got ) =>
+    {
+      test.is( !_.errIs( err ) );
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.is( _.strHas( o.output, 'SIGINT' ) );
+      test.is( !_.strHas( o.output, 'Timeout in child' ) );
+      return null;
+    })
+
+    return con;
+  })
+
+  /* SIGKILL */
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'spawn',
+      throwingExitCode : 1,
+      outputCollecting : 1,
+    }
+
+    let con = _.process.start( o );
+
+    _.timeOut( 3000, () =>
+    {
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.finally( ( err, got ) =>
+    {
+      _.errAttend( err );
+      test.is( _.errIs( err ) );
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, 'SIGKILL' );
+      test.is( !_.strHas( o.output, 'Timeout in child' ) );
+      return null;
+    })
+
+    return con;
+  })
+
+  /*  */
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'exec',
+      throwingExitCode : 1,
+      outputCollecting : 1,
+    }
+
+    let con = _.process.start( o );
+
+    _.timeOut( 3000, () =>
+    {
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.finally( ( err, got ) =>
+    {
+      _.errAttend( err );
+      test.is( _.errIs( err ) );
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, 'SIGKILL' );
+      test.is( !_.strHas( o.output, 'Timeout in child' ) );
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      throwingExitCode : 1,
+      outputCollecting : 1,
+    }
+
+    let con = _.process.start( o );
+
+    _.timeOut( 3000, () =>
+    {
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.finally( ( err, got ) =>
+    {
+      _.errAttend( err );
+      test.is( _.errIs( err ) );
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, 'SIGKILL' );
+      test.is( !_.strHas( o.output, 'Timeout in child' ) );
+      return null;
+    })
+
+    return con;
+  })
+
+  /*  */
+
+  return ready;
+}
+
+shellTerminateWithExitHandler.timeOut = 120000;
+
+shellTerminateWithExitHandler.description =
+`
+  Test app - single timeout with message and appExitHandlerRepair called at start
+
+  Will test:
+    - Termination of child process using SIGINT signal after small delay
+    - Termination of child process using SIGKILL signal after small delay
+
+  Expected behaviour:
+    - For SIGINT: Child was terminated before timeout with exitCode : 0, exitSignal : null
+    - For SIGKILL: Child was terminated before timeout with exitCode : null, exitSignal : SIGKILL
+    - No time out message in output
+`
+
+//
+
+function shellTerminateHangedWithExitHandler( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    let _ = require( '../../../../Tools.s' );
+    _.include( 'wAppBasic' );
+    _.process.exitHandlerRepair();
+    while( 1 )
+    {
+      console.log( _.timeNow() )
+    }
+    console.log( 'Killed' );
+  }
+
+  /* */
+
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+  testAppPath = _.strQuote( testAppPath );
+  var ready = new _.Consequence().take( null );
+
+  ready
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'spawn',
+      throwingExitCode : 0,
+      outputPiping : 0,
+      outputCollecting : 1,
+    }
+
+    let con = _.process.start( o );
+
+    _.timeOut( 3000, () =>
+    {
+      o.process.kill( 'SIGINT' );
+      return null;
+    })
+
+    _.timeOut( 4000, () =>
+    {
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.then( ( got ) =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.is( _.strHas( o.output, 'SIGINT' ) );
+      return null;
+    })
+
+    return con;
+  })
+
+  /*  */
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'exec',
+      throwingExitCode : 0,
+      outputPiping : 0,
+      outputCollecting : 1,
+    }
+
+    let con = _.process.start( o );
+
+    _.timeOut( 3000, () =>
+    {
+      o.process.kill( 'SIGINT' );
+      return null;
+    })
+
+    _.timeOut( 4000, () =>
+    {
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.then( ( got ) =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.is( _.strHas( o.output, 'SIGINT' ) );
+      return null;
+    })
+
+    return con;
+  })
+
+  /*  */
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      throwingExitCode : 0,
+      outputPiping : 0,
+      outputCollecting : 1,
+    }
+
+    let con = _.process.start( o );
+
+    _.timeOut( 3000, () =>
+    {
+      o.process.kill( 'SIGINT' );
+      return null;
+    })
+
+    _.timeOut( 4000, () =>
+    {
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.then( ( got ) =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.is( _.strHas( o.output, 'SIGINT' ) );
+      return null;
+    })
+
+    return con;
+  })
+
+  /*  */
+
+  return ready;
+}
+
+shellTerminateHangedWithExitHandler.timeOut = 20000;
+
+shellTerminateHangedWithExitHandler.description =
+`
+  Test app - code that blocks event loop and appExitHandlerRepair called at start
+
+  Will test:
+    - Termination of child process using SIGINT signal after small delay
+    - Termination of child process using SIGKILL signal after small delay
+
+  Expected behaviour:
+    - For SIGINT: Child was terminated with exitCode : 0, exitSignal : null
+    - For SIGKILL: Child was terminated with exitCode : null, exitSignal : SIGKILL
+    - No time out message in output
+`
+
+//
+
+function shellTerminateAfterLoopRelease( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    let _ = require( '../../../../Tools.s' );
+    _.include( 'wAppBasic' );
+    _.process.exitHandlerRepair();
+    let loop = true;
+    setTimeout( () =>
+    {
+      loop = false;
+    }, 6000 )
+    while( loop ){}
+
+    console.log( 'Exit after timeout' );
+  }
+
+  /* */
+
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+  testAppPath = _.strQuote( testAppPath );
+  var ready = new _.Consequence().take( null );
+
+  ready
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'spawn',
+      throwingExitCode : 0,
+      outputPiping : 1,
+      outputCollecting : 1,
+    }
+
+    // return test.shouldThrowErrorOfAnyKind( _.process.start( o ) )
+    // .thenKeep( function( got )
+
+    let con = _.process.start( o );
+
+    _.timeOut( 3000, () =>
+    {
+      o.process.kill( 'SIGINT' );
+      return null;
+    })
+
+    _.timeOut( 7000, () =>
+    {
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.then( ( got ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( o.exitCode, null );
+        test.identical( o.exitSignal, 'SIGINT' );
+        test.is( !_.strHas( o.output, 'Exit after timeout' ) );
+      }
+      else
+      {
+        test.identical( o.exitCode, 0 );
+        test.identical( o.exitSignal, null );
+        test.is( _.strHas( o.output, 'Exit after timeout' ) );
+      }
+
+      return null;
+    })
+
+    return con;
+  })
+
+  /*  */
+
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'exec',
+      throwingExitCode : 0,
+      outputPiping : 1,
+      outputCollecting : 1,
+    }
+
+    // return test.shouldThrowErrorOfAnyKind( _.process.start( o ) )
+    // .thenKeep( function( got )
+
+    let con = _.process.start( o );
+
+    _.timeOut( 3000, () =>
+    {
+      o.process.kill( 'SIGINT' );
+      return null;
+    })
+
+    _.timeOut( 7000, () =>
+    {
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.then( ( got ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( o.exitCode, null );
+        test.identical( o.exitSignal, 'SIGINT' );
+        test.is( !_.strHas( o.output, 'Exit after timeout' ) );
+      }
+      else
+      {
+        test.identical( o.exitCode, 0 );
+        test.identical( o.exitSignal, null );
+        test.is( _.strHas( o.output, 'Exit after timeout' ) );
+      }
+
+      return null;
+    })
+
+    return con;
+  })
+
+  /*  */
+
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      throwingExitCode : 0,
+      outputPiping : 1,
+      outputCollecting : 1,
+    }
+
+    // return test.shouldThrowErrorOfAnyKind( _.process.start( o ) )
+    // .thenKeep( function( got )
+
+    let con = _.process.start( o );
+
+    _.timeOut( 3000, () =>
+    {
+      o.process.kill( 'SIGINT' );
+      return null;
+    })
+
+    _.timeOut( 7000, () =>
+    {
+      o.process.kill( 'SIGKILL' );
+      return null;
+    })
+
+    con.then( ( got ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( o.exitCode, null );
+        test.identical( o.exitSignal, 'SIGINT' );
+        test.is( !_.strHas( o.output, 'Exit after timeout' ) );
+      }
+      else
+      {
+        test.identical( o.exitCode, 0 );
+        test.identical( o.exitSignal, null );
+        test.is( _.strHas( o.output, 'Exit after timeout' ) );
+      }
+
+      return null;
+    })
+
+    return con;
+  })
+
+  /*  */
+
+  return ready;
+}
+
+shellTerminateAfterLoopRelease.timeOut = 20000;
+shellTerminateAfterLoopRelease.description =
+`
+  Test app - code that blocks event loop for short period of time and appExitHandlerRepair called at start
+
+  Will test:
+    - Termination of child process using SIGINT signal after small delay
+
+  Expected behaviour:
+    - Child was terminated after event loop release with exitCode : 0, exitSignal : null
+    - Child process message should be printed
+`
+
+//
+
+function shellStartingDelay( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    let _ = require( '../../../../Tools.s' );
+    let data = { t2 : _.timeNow() };
+    console.log( JSON.stringify( data ) );
+  }
+
+  /* */
+
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+  testAppPath = _.strQuote( testAppPath );
+  var ready = new _.Consequence().take( null );
+
+  ready
+
+  .then( () =>
+  {
+    let starting = { delay : 5000 };
+    let o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      starting : starting
+    }
+
+    let t1 = _.timeNow();
+    let con = _.process.start( o );
+
+    con.then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      let parsed = JSON.parse( got.output );
+      let diff = parsed.t2 - t1;
+      test.ge( diff, starting.delay );
+      return null;
+    })
+
+    return con;
   })
 
   return ready;
 }
 
-shellTerminate.timeOut = 10000;
+//
 
+function shellStartingTime( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    let _ = require( '../../../../Tools.s' );
+    let data = { t2 : _.timeNow() };
+    console.log( JSON.stringify( data ) );
+  }
+
+  /* */
+
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+  testAppPath = _.strQuote( testAppPath );
+  var ready = new _.Consequence().take( null );
+
+  ready
+
+  .then( () =>
+  {
+    let t1 = _.timeNow();
+    let delay = 5000;
+    let starting = { time : _.timeNow() + delay };
+    let o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      starting : starting
+    }
+
+    let con = _.process.start( o );
+
+    con.then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      let parsed = JSON.parse( got.output );
+      let diff = parsed.t2 - t1;
+      test.ge( diff, delay );
+      return null;
+    })
+
+    return con;
+  })
+
+  return ready;
+}
+
+//
+
+function shellStartingSuspended( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    let _ = require( '../../../../Tools.s' );
+    let data = { t2 : _.timeNow() };
+    console.log( JSON.stringify( data ) );
+  }
+
+  /* */
+
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+  testAppPath = _.strQuote( testAppPath );
+  var ready = new _.Consequence().take( null );
+
+  ready
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      starting : 'suspended'
+    }
+
+    let t1 = _.timeNow();
+    let delay = 1000;
+    let con = _.process.start( o );
+
+    _.timeOut( delay, () =>
+    {
+      o.resume();
+      return null;
+    })
+
+    con.then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      let parsed = JSON.parse( got.output );
+      let diff = parsed.t2 - t1;
+      test.ge( diff, delay );
+      return null;
+    })
+
+    return con;
+  })
+
+  return ready;
+}
+
+//
+
+function shellStartingParentDeath( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+
+  /* */
+
+  function testAppParent()
+  {
+    let _ = require( '../../../../Tools.s' );
+    _.include( 'wAppBasic' );
+
+    _.process.start
+    ({
+      execPath : 'node testAppChild.js',
+      outputCollecting : 1,
+      starting : 'parentdeath'
+    })
+
+    return _.timeOut( 5000, () =>
+    {
+      process.exit();
+      return null;
+    })
+  }
+
+  function testAppChild()
+  {
+    let _ = require( '../../../../Tools.s' );
+    let data = { t2 : _.timeNow() };
+    console.log( JSON.stringify( data ) );
+  }
+
+  /* */
+
+  var testAppParentPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppParent.js' ) );
+  var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
+  var testAppParentCode = testAppParent.toString() + '\testAppParent();';
+  var testAppChildCode = testAppChild.toString() + '\testAppChild();';
+  _.fileProvider.fileWrite( testAppParentPath, testAppParentCode );
+  _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
+  testAppParentPath = _.strQuote( testAppParentPath );
+  var ready = new _.Consequence().take( null );
+
+  ready
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : testAppParentPath,
+      mode : 'fork',
+    }
+    let con = _.process.start( o );
+
+    con.then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      return null;
+    })
+
+    return con;
+  })
+
+  return ready;
+}
 
 //
 
@@ -4872,7 +7056,7 @@ function shellConcurrent( test )
   let context = this;
   let counter = 0;
   let time = 0;
-  let routinePath = _.path.join( context.testSuitePath, test.name );
+  let routinePath = _.path.join( context.suitePath, test.name );
   let testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
   let filePath = _.fileProvider.path.nativize( _.path.join( routinePath, 'file.txt' ) );
   let ready = _.Consequence().take( null );
@@ -4899,7 +7083,7 @@ function shellConcurrent( test )
     outputCollecting : 1,
   }
 
-  _.shell( singleOption )
+  _.process.start( singleOption )
   .then( ( arg ) =>
   {
 
@@ -4930,7 +7114,7 @@ function shellConcurrent( test )
     outputCollecting : 1,
   }
 
-  _.shell( singleExecPathInArrayOptions )
+  _.process.start( singleExecPathInArrayOptions )
   .then( ( arg ) =>
   {
 
@@ -4963,7 +7147,7 @@ function shellConcurrent( test )
     outputCollecting : 1,
   }
 
-  _.shell( singleErrorBeforeScalar )
+  _.process.start( singleErrorBeforeScalar )
   .finally( ( err, arg ) =>
   {
 
@@ -4995,7 +7179,7 @@ function shellConcurrent( test )
     outputCollecting : 1,
   }
 
-  _.shell( singleErrorBefore )
+  _.process.start( singleErrorBefore )
   .finally( ( err, arg ) =>
   {
 
@@ -5028,7 +7212,7 @@ function shellConcurrent( test )
     concurrent : 0,
   }
 
-  _.shell( subprocessesOptionsSerial )
+  _.process.start( subprocessesOptionsSerial )
   .then( ( arg ) =>
   {
 
@@ -5072,7 +7256,7 @@ function shellConcurrent( test )
     concurrent : 0,
   }
 
-  _.shell( subprocessesError )
+  _.process.start( subprocessesError )
   .finally( ( err, arg ) =>
   {
 
@@ -5110,7 +7294,7 @@ function shellConcurrent( test )
     throwingExitCode : 0,
   }
 
-  _.shell( subprocessesErrorNonThrowing )
+  _.process.start( subprocessesErrorNonThrowing )
   .finally( ( err, arg ) =>
   {
 
@@ -5155,7 +7339,7 @@ function shellConcurrent( test )
     concurrent : 1,
   }
 
-  _.shell( subprocessesErrorConcurrent )
+  _.process.start( subprocessesErrorConcurrent )
   .finally( ( err, arg ) =>
   {
 
@@ -5194,7 +7378,7 @@ function shellConcurrent( test )
     throwingExitCode : 0,
   }
 
-  _.shell( subprocessesErrorConcurrentNonThrowing )
+  _.process.start( subprocessesErrorConcurrentNonThrowing )
   .finally( ( err, arg ) =>
   {
 
@@ -5239,7 +7423,7 @@ function shellConcurrent( test )
     concurrent : 1,
   }
 
-  _.shell( suprocessesConcurrentOptions )
+  _.process.start( suprocessesConcurrentOptions )
   .then( ( arg ) =>
   {
 
@@ -5284,7 +7468,7 @@ function shellConcurrent( test )
     concurrent : 1,
   }
 
-  _.shell( suprocessesConcurrentArgumentsOptions )
+  _.process.start( suprocessesConcurrentArgumentsOptions )
   .then( ( arg ) =>
   {
     var spent = _.timeNow() - time;
@@ -5330,7 +7514,7 @@ function shellerConcurrent( test )
   let context = this;
   let counter = 0;
   let time = 0;
-  let routinePath = _.path.join( context.testSuitePath, test.name );
+  let routinePath = _.path.join( context.suitePath, test.name );
   let testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
   let filePath = _.fileProvider.path.nativize( _.path.join( routinePath, 'file.txt' ) );
   let ready = _.Consequence().take( null );
@@ -5356,7 +7540,7 @@ function shellerConcurrent( test )
     outputCollecting : 1,
   }
 
-  var shell = _.sheller( singleOption );
+  var shell = _.process.starter( singleOption );
   shell( singleOption2 )
 
   .then( ( arg ) =>
@@ -5389,7 +7573,7 @@ function shellerConcurrent( test )
     outputCollecting : 1,
   }
 
-  var shell = _.sheller( singleOptionWithoutSecond );
+  var shell = _.process.starter( singleOptionWithoutSecond );
   shell()
 
   .then( ( arg ) =>
@@ -5423,7 +7607,7 @@ function shellerConcurrent( test )
     outputCollecting : 1,
   }
 
-  var shell = _.sheller( singleExecPathInArrayOptions );
+  var shell = _.process.starter( singleExecPathInArrayOptions );
   shell( singleExecPathInArrayOptions2 )
 
   .then( ( arg ) =>
@@ -5456,7 +7640,7 @@ function shellerConcurrent( test )
     outputCollecting : 1,
   }
 
-  var shell = _.sheller( singleErrorBeforeScalar );
+  var shell = _.process.starter( singleErrorBeforeScalar );
   shell( singleErrorBeforeScalar2 )
 
   .finally( ( err, arg ) =>
@@ -5491,7 +7675,7 @@ function shellerConcurrent( test )
     outputCollecting : 1,
   }
 
-  var shell = _.sheller( singleErrorBefore );
+  var shell = _.process.starter( singleErrorBefore );
   shell( singleErrorBefore2 )
 
   .finally( ( err, arg ) =>
@@ -5527,7 +7711,7 @@ function shellerConcurrent( test )
     concurrent : 0,
   }
 
-  var shell = _.sheller( subprocessesOptionsSerial );
+  var shell = _.process.starter( subprocessesOptionsSerial );
   shell( subprocessesOptionsSerial2 )
 
   .then( ( arg ) =>
@@ -5574,7 +7758,7 @@ function shellerConcurrent( test )
     concurrent : 0,
   }
 
-  var shell = _.sheller( subprocessesError );
+  var shell = _.process.starter( subprocessesError );
   shell( subprocessesError2 )
 
   .finally( ( err, arg ) =>
@@ -5615,7 +7799,7 @@ function shellerConcurrent( test )
     throwingExitCode : 0,
   }
 
-  var shell = _.sheller( subprocessesErrorNonThrowing );
+  var shell = _.process.starter( subprocessesErrorNonThrowing );
   shell( subprocessesErrorNonThrowing2 )
 
   .finally( ( err, arg ) =>
@@ -5663,7 +7847,7 @@ function shellerConcurrent( test )
     concurrent : 1,
   }
 
-  var shell = _.sheller( subprocessesErrorConcurrent );
+  var shell = _.process.starter( subprocessesErrorConcurrent );
   shell( subprocessesErrorConcurrent2 )
 
   .finally( ( err, arg ) =>
@@ -5705,7 +7889,7 @@ function shellerConcurrent( test )
     throwingExitCode : 0,
   }
 
-  var shell = _.sheller( subprocessesErrorConcurrentNonThrowing );
+  var shell = _.process.starter( subprocessesErrorConcurrentNonThrowing );
   shell( subprocessesErrorConcurrentNonThrowing2 )
 
   .finally( ( err, arg ) =>
@@ -5753,7 +7937,7 @@ function shellerConcurrent( test )
     concurrent : 1,
   }
 
-  var shell = _.sheller( subprocessesConcurrentOptions );
+  var shell = _.process.starter( subprocessesConcurrentOptions );
   shell( subprocessesConcurrentOptions2 )
 
   .then( ( arg ) =>
@@ -5801,7 +7985,7 @@ function shellerConcurrent( test )
     concurrent : 1,
   }
 
-  var shell = _.sheller( subprocessesConcurrentArgumentsOptions );
+  var shell = _.process.starter( subprocessesConcurrentArgumentsOptions );
   shell( subprocessesConcurrentArgumentsOptions2 )
 
   .then( ( arg ) =>
@@ -5848,7 +8032,7 @@ shellerConcurrent.timeOut = 100000;
 function sheller( test )
 {
   var context = this;
-  var routinePath = _.path.join( context.testSuitePath, test.name );
+  var routinePath = _.path.join( context.suitePath, test.name );
   var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
   var testAppCode = testApp.toString() + '\ntestApp();';
   _.fileProvider.fileWrite( testAppPath, testAppCode );
@@ -5864,7 +8048,7 @@ function sheller( test )
 
   .thenKeep( () =>
   {
-    var shell = _.sheller
+    var shell = _.process.starter
     ({
       execPath :  'node ' + testAppPath,
       outputCollecting : 1,
@@ -5892,7 +8076,7 @@ function sheller( test )
 
   .thenKeep( () =>
   {
-    var shell = _.sheller
+    var shell = _.process.starter
     ({
       execPath :  'node ' + testAppPath + ' arg0',
       outputCollecting : 1,
@@ -5919,7 +8103,7 @@ function sheller( test )
 
   .thenKeep( () =>
   {
-    var shell = _.sheller
+    var shell = _.process.starter
     ({
       execPath :  'node ' + testAppPath,
       outputCollecting : 1,
@@ -5947,7 +8131,7 @@ function sheller( test )
 
   .thenKeep( () =>
   {
-    var shell = _.sheller
+    var shell = _.process.starter
     ({
       execPath :  'node ' + testAppPath,
       outputCollecting : 1,
@@ -5966,7 +8150,7 @@ function sheller( test )
 
   .thenKeep( () =>
   {
-    var shell = _.sheller
+    var shell = _.process.starter
     ({
       execPath :
       [
@@ -5996,7 +8180,7 @@ function sheller( test )
 
   .thenKeep( () =>
   {
-    var shell = _.sheller
+    var shell = _.process.starter
     ({
       execPath :
       [
@@ -6032,7 +8216,7 @@ function sheller( test )
 
   .thenKeep( () =>
   {
-    var shell = _.sheller
+    var shell = _.process.starter
     ({
       execPath : 'node',
       args : 'arg1',
@@ -6052,7 +8236,7 @@ function sheller( test )
 
   .thenKeep( () =>
   {
-    var shell = _.sheller
+    var shell = _.process.starter
     ({
       execPath : 'node',
       args : 'arg1',
@@ -6072,7 +8256,7 @@ function sheller( test )
 
   .thenKeep( () =>
   {
-    var shell = _.sheller
+    var shell = _.process.starter
     ({
       execPath : 'node',
       args : [ 'arg1', 'arg2' ],
@@ -6092,7 +8276,7 @@ function sheller( test )
 
   .thenKeep( () =>
   {
-    var shell = _.sheller
+    var shell = _.process.starter
     ({
       execPath : 'node',
       args : 'arg1',
@@ -6117,10 +8301,94 @@ sheller.timeOut = 60000;
 
 //
 
+function shellerArgs( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+
+  /* */
+
+  var testAppPath = _.path.join( routinePath, 'testApp.js' );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+
+  /* */
+
+  var ready = new _.Consequence().take( null );
+
+  let shellerOptions =
+  {
+    outputCollecting : 1,
+    args : [ 'arg1', 'arg2' ],
+    mode : 'spawn',
+    ready : ready
+  }
+
+  let shell = _.process.starter( shellerOptions )
+
+  /* */
+
+  shell
+  ({
+    execPath : 'node ' + testAppPath + ' arg3',
+  })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( got.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
+    test.identical( _.strCount( got.output, `[ 'arg3', 'arg1', 'arg2' ]` ), 1 );
+    test.identical( shellerOptions.args, [ 'arg1', 'arg2' ] );
+    return null;
+  })
+
+  shell
+  ({
+    execPath : 'node ' + testAppPath,
+    args : [ 'arg3' ]
+  })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( got.args, [ testAppPath, 'arg3' ] );
+    test.identical( _.strCount( got.output, `[ 'arg3' ]` ), 1 );
+    test.identical( shellerOptions.args, [ 'arg1', 'arg2' ] );
+    return null;
+  })
+
+  shell
+  ({
+    execPath : 'node',
+    args : [ testAppPath, 'arg3' ]
+  })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( got.args, [ testAppPath, 'arg3' ] );
+    test.identical( _.strCount( got.output, `[ 'arg3' ]` ), 1 );
+    test.identical( shellerOptions.args, [ 'arg1', 'arg2' ] );
+    return null;
+  })
+
+  /* */
+
+  return ready;
+}
+
+shellerArgs.timeOut = 30000;
+
+//
+
 function outputHandling( test )
 {
   var context = this;
-  var routinePath = _.path.join( context.testSuitePath, test.name );
+  var routinePath = _.path.join( context.suitePath, test.name );
 
   /* */
 
@@ -6158,7 +8426,7 @@ function outputHandling( test )
     {
       loggerOutput = '';
       var o = { execPath : path, mode, outputPiping : 0, outputCollecting : 0, logger };
-      return _.shell( o )
+      return _.process.start( o )
       .thenKeep( () =>
       {
         test.identical( o.output, undefined );
@@ -6172,7 +8440,7 @@ function outputHandling( test )
     {
       loggerOutput = '';
       var o = { execPath : path, mode, outputPiping : 1, outputCollecting : 0, logger };
-      return _.shell( o )
+      return _.process.start( o )
       .thenKeep( () =>
       {
         test.identical( o.output, undefined );
@@ -6185,7 +8453,7 @@ function outputHandling( test )
     {
       loggerOutput = '';
       var o = { execPath : path, mode, outputPiping : 0, outputCollecting : 1, logger };
-      return _.shell( o )
+      return _.process.start( o )
       .thenKeep( () =>
       {
         test.identical( o.output, 'testApp-output\n\n' );
@@ -6198,7 +8466,7 @@ function outputHandling( test )
     {
       loggerOutput = '';
       var o = { execPath : path, mode, outputPiping : 1, outputCollecting : 1, logger };
-      return _.shell( o )
+      return _.process.start( o )
       .thenKeep( () =>
       {
         test.identical( o.output, 'testApp-output\n\n' );
@@ -6215,12 +8483,392 @@ outputHandling.timeOut = 10000;
 
 //
 
+function shellOutputStripping( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    console.log( '\u001b[31m\u001b[43mColored message1\u001b[49;0m\u001b[39;0m' )
+    console.log( '\u001b[31m\u001b[43mColored message2\u001b[49;0m\u001b[39;0m' )
+  }
+
+  /* */
+
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+
+  /* */
+
+  var ready = new _.Consequence().take( null );
+  var modes = [ 'shell', 'spawn', 'exec', 'fork' ];
+
+  _.each( modes,( mode ) =>
+  {
+    let execPath = testAppPath;
+    if( mode != 'fork' )
+    execPath = 'node ' + execPath;
+
+    _.process.start
+    ({
+      execPath : execPath,
+      mode : mode,
+      outputStripping : 0,
+      outputCollecting : 1,
+      ready : ready
+    })
+    .then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      let output = _.strSplitNonPreserving({ src : got.output, delimeter : '\n' });
+      test.identical( output.length, 2 );
+      test.identical( output[ 0 ], '\u001b[31m\u001b[43mColored message1\u001b[49;0m\u001b[39;0m' );
+      test.identical( output[ 1 ], '\u001b[31m\u001b[43mColored message2\u001b[49;0m\u001b[39;0m' );
+      return null;
+    })
+
+    _.process.start
+    ({
+      execPath : execPath,
+      mode : mode,
+      outputStripping : 1,
+      outputCollecting : 1,
+      ready : ready
+    })
+    .then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      let output = _.strSplitNonPreserving({ src : got.output, delimeter : '\n' });
+      test.identical( output.length, 2 );
+      test.identical( output[ 0 ], 'Colored message1' );
+      test.identical( output[ 1 ], 'Colored message2' );
+      return null;
+    })
+  })
+
+  return ready;
+}
+
+shellOutputStripping.timeOut = 15000;
+
+//
+
+function shellLoggerOption( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    console.log( '  One tab' );
+  }
+
+  /* */
+
+  var testAppPath = _.path.join( routinePath, 'testApp.js' );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+
+  /* */
+
+  var ready = new _.Consequence().take( null );
+  var modes = [ 'shell', 'spawn', 'exec', 'fork' ];
+
+  test.case = 'custom logger with increased level'
+
+  _.each( modes,( mode ) =>
+  {
+    let execPath = testAppPath;
+    if( mode != 'fork' )
+    execPath = 'node ' + execPath;
+
+    let loggerOutput = '';
+
+    let logger = new _.Logger({ output : null, onTransformEnd });
+    logger.up();
+
+    _.process.start
+    ({
+      execPath : execPath,
+      mode : mode,
+      outputCollecting : 1,
+      outputPiping : 1,
+      outputGray : 1,
+      logger : logger,
+      ready : ready
+    })
+    .then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      test.is( _.strHas( got.output, '  One tab' ) )
+      test.is( _.strHas( loggerOutput, '    One tab' ) )
+      return null;
+    })
+
+    /*  */
+
+    function onTransformEnd( o )
+    {
+      loggerOutput += o.outputForPrinter[ 0 ] + '\n';
+    }
+  })
+
+  /* */
+
+  return ready;
+}
+
+shellLoggerOption.timeOut = 30000;
+
+//
+
+function shellNormalizedExecPath( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+
+  /* */
+
+  var testAppPath = _.path.join( routinePath, 'testApp.js' );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+
+  /* */
+
+  var ready = new _.Consequence().take( null );
+
+  let shell = _.process.starter
+  ({
+    outputCollecting : 1,
+    ready : ready
+  })
+
+  /* */
+
+  shell
+  ({
+    execPath : testAppPath,
+    args : [ 'arg1', 'arg2' ],
+    mode : 'fork'
+  })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, `[ 'arg1', 'arg2' ]` ), 1 );
+    return null;
+  })
+
+  //
+
+  shell
+  ({
+    execPath : 'node ' + testAppPath,
+    args : [ 'arg1', 'arg2' ],
+    mode : 'spawn'
+  })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, `[ 'arg1', 'arg2' ]` ), 1 );
+    return null;
+  })
+
+  //
+
+  shell
+  ({
+    execPath : 'node ' + testAppPath,
+    args : [ 'arg1', 'arg2' ],
+    mode : 'shell'
+  })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, `[ 'arg1', 'arg2' ]` ), 1 );
+    return null;
+  })
+
+  //
+
+  shell
+  ({
+    execPath : 'node ' + testAppPath,
+    args : [ 'arg1', 'arg2' ],
+    mode : 'exec'
+  })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, `[ 'arg1', 'arg2' ]` ), 1 );
+    return null;
+  })
+
+  /* app path in arguments */
+
+  shell
+  ({
+    args : [ testAppPath, 'arg1', 'arg2' ],
+    mode : 'fork'
+  })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, `[ 'arg1', 'arg2' ]` ), 1 );
+    return null;
+  })
+
+  //
+
+  shell
+  ({
+    execPath : 'node',
+    args : [ testAppPath, 'arg1', 'arg2' ],
+    mode : 'spawn'
+  })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, `[ 'arg1', 'arg2' ]` ), 1 );
+    return null;
+  })
+
+  //
+
+  shell
+  ({
+    execPath : 'node',
+    args : [ testAppPath, 'arg1', 'arg2' ],
+    mode : 'shell'
+  })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, `[ 'arg1', 'arg2' ]` ), 1 );
+    return null;
+  })
+
+  //
+
+  shell
+  ({
+    execPath : 'node',
+    args : [ testAppPath, 'arg1', 'arg2' ],
+    mode : 'exec'
+  })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, `[ 'arg1', 'arg2' ]` ), 1 );
+    return null;
+  })
+
+  /* */
+
+  return ready;
+}
+
+shellNormalizedExecPath.timeOut = 60000;
+
+//
+
+function appTempApplication( test )
+{
+  let context = this;
+
+  /* */
+
+  function testApp()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+
+  let testAppCode = testApp.toString() + '\ntestApp();';
+
+  /* */
+
+  test.case = 'string';
+  var got = _.process.tempOpen( testAppCode );
+  var read = _.fileProvider.fileRead( got );
+  test.identical( read, testAppCode );
+  _.process.tempClose( got );
+  test.is( !_.fileProvider.fileExists( got ) );
+
+  test.case = 'string';
+  var got = _.process.tempOpen({ sourceCode : testAppCode });
+  var read = _.fileProvider.fileRead( got );
+  test.identical( read, testAppCode );
+  _.process.tempClose( got );
+  test.is( !_.fileProvider.fileExists( got ) );
+
+  test.case = 'raw buffer';
+  var got = _.process.tempOpen( _.bufferRawFrom( testAppCode ) );
+  var read = _.fileProvider.fileRead( got );
+  test.identical( read, testAppCode );
+  _.process.tempClose( got );
+  test.is( !_.fileProvider.fileExists( got ) );
+
+  test.case = 'raw buffer';
+  var got = _.process.tempOpen({ sourceCode :_.bufferRawFrom( testAppCode ) });
+  var read = _.fileProvider.fileRead( got );
+  test.identical( read, testAppCode );
+  _.process.tempClose( got );
+  test.is( !_.fileProvider.fileExists( got ) );
+
+  test.case = 'remove all';
+  var got1 = _.process.tempOpen( testAppCode );
+  var got2 = _.process.tempOpen( testAppCode );
+  test.is( _.fileProvider.fileExists( got1 ) );
+  test.is( _.fileProvider.fileExists( got2 ) );
+  _.process.tempClose();
+  test.is( !_.fileProvider.fileExists( got1 ) );
+  test.is( !_.fileProvider.fileExists( got2 ) );
+  test.mustNotThrowError( () => _.process.tempClose() )
+
+  if( !Config.debug )
+  return;
+
+  test.case = 'unexpected type of sourceCode option';
+  test.shouldThrowErrorSync( () =>
+  {
+    _.process.tempOpen( [] );
+  })
+
+  test.case = 'unexpected option';
+  test.shouldThrowErrorSync( () =>
+  {
+    _.process.tempOpen({ someOption : true });
+  })
+
+  test.case = 'try to remove file that does not exist in registry';
+  var got = _.process.tempOpen( testAppCode );
+  _.process.tempClose( got );
+  test.shouldThrowErrorSync( () =>
+  {
+    _.process.tempClose( got );
+  })
+}
+
+//
+
 function experiment( test )
 {
   let self = this;
 
   var context = this;
-  var routinePath = _.path.join( context.testSuitePath, test.name );
+  var routinePath = _.path.join( context.suitePath, test.name );
 
   /* */
 
@@ -6281,16 +8929,15 @@ experiment.experimental = 1;
 var Proto =
 {
 
-  name : 'Tools/base/l4/ExternalFundamentals',
+  name : 'Tools.base.l4.ProcessBasic',
   silencing : 1,
   routineTimeOut : 60000,
-  onSuiteBegin : testDirMake,
-  onSuiteEnd : testDirClean,
+  onSuiteBegin : suiteBegin,
+  onSuiteEnd : suiteEnd,
 
   context :
   {
-
-    testSuitePath : null,
+    suitePath : null,
     testApp,
     testAppShell
   },
@@ -6310,21 +8957,39 @@ var Proto =
     shellFork,
     shellWithoutExecPath,
 
+    shellArgsOption,
     shellArgumentsParsing,
     shellArgumentsParsingNonTrivial,
     shellArgumentsNestedQuotes,
+    shellExecPathQuotesClosing,
+    shellExecPathSeveralCommands,
     shellVerbosity,
     shellErrorHadling,
     shellNode,
 
     shellTerminate,
+    shellTerminateWithExitHandler,
+    shellTerminateHangedWithExitHandler,
+    shellTerminateAfterLoopRelease,
+
+    shellStartingDelay,
+    shellStartingTime,
+    shellStartingSuspended,
+    shellStartingParentDeath,
 
     shellConcurrent,
     shellerConcurrent,
 
     sheller,
+    shellerArgs,
 
     outputHandling,
+    shellOutputStripping,
+    shellLoggerOption,
+
+    shellNormalizedExecPath,
+
+    appTempApplication
 
   },
 

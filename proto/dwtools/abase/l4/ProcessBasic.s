@@ -1,20 +1,20 @@
-( function _AppBasic_s_() {
+( function _ProcessBasic_s_() {
 
 'use strict';
 
 /**
  * Collection of routines to execute system commands, run shell, batches, launch external processes from JavaScript application. ExecTools leverages not only outputting data from an application but also inputting, makes application arguments parsing and accounting easier. Use the module to get uniform experience from interaction with an external processes on different platforms and operating systems.
-  @module Tools/base/ExternalFundamentals
+  @module Tools/base/ProcessBasic
 */
 
 /**
- * @file ExternalFundamentals.s.
+ * @file ProcessBasic.s.
  */
 
 /**
  * Collection of routines to execute system commands, run shell, batches, launch external processes from JavaScript application.
-  @namespace Tools( module::ExternalFundamentals )
-  @memberof module:Tools/base/ExternalFundamentals
+  @namespace Tools( module::ProcessBasic )
+  @memberof module:Tools/base/ProcessBasic
 */
 
 if( typeof module !== 'undefined' )
@@ -28,10 +28,10 @@ if( typeof module !== 'undefined' )
 
 }
 
-let System, ChildProcess,StripAnsi;
+let System, ChildProcess, StripAnsi;
 let _global = _global_;
 let _ = _global_.wTools;
-let Self = _global_.wTools.app || _global_.wTools.app || Object.create( null );
+let Self = _global_.wTools.process = _global_.wTools.process || Object.create( null );
 
 _.assert( !!_realGlobal_ );
 
@@ -39,7 +39,7 @@ _.assert( !!_realGlobal_ );
 // exec
 // --
 
-function shell_pre( routine, args )
+function start_pre( routine, args )
 {
   let o;
 
@@ -109,11 +109,11 @@ function shell_pre( routine, args )
  * @example //short way, command and arguments in one string
  *
  * let _ = require('wTools')
- * _.include( 'wAppBasic' )
+ * _.include( 'wProcessBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
  *
- * let con = _.shell( 'node -v' );
+ * let con = _.process.start( 'node -v' );
  *
  * con.then( ( got ) =>
  * {
@@ -124,11 +124,11 @@ function shell_pre( routine, args )
  * @example //command and arguments as options
  *
  * let _ = require('wTools')
- * _.include( 'wAppBasic' )
+ * _.include( 'wProcessBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
  *
- * let con = _.shell({ execPath : 'node', args : [ '-v' ] });
+ * let con = _.process.start({ execPath : 'node', args : [ '-v' ] });
  *
  * con.then( ( got ) =>
  * {
@@ -137,13 +137,13 @@ function shell_pre( routine, args )
  * })
  *
  * @function shell
- * @memberof module:Tools/base/ExternalFundamentals.Tools( module::ExternalFundamentals )
+ * @memberof module:Tools/base/ProcessBasic.Tools( module::ProcessBasic )
  */
 
-function shell_body( o )
+function start_body( o )
 {
 
-  _.assertRoutineOptions( shell, arguments );
+  _.assertRoutineOptions( start_body, arguments );
   _.assert( arguments.length === 1, 'Expects single argument' );
   _.assert( _.arrayHas( [ 'fork', 'exec', 'spawn', 'shell' ], o.mode ) );
   _.assert( !!o.args || !!o.execPath, 'Expects {-args-} either {-execPath-}' )
@@ -249,7 +249,7 @@ function shell_body( o )
       o2.currentPath = currentPath[ c ];
       o2.ready = currentReady;
       options.push( o2 );
-      _.shell( o2 );
+      _.process.start( o2 );
 
     }
 
@@ -300,7 +300,7 @@ function shell_body( o )
     catch( err )
     {
       debugger
-      appExitCode( -1 );
+      exitCodeSet( -1 );
       if( o.sync && !o.deasync )
       throw _.errLogOnce( err );
       else
@@ -573,8 +573,8 @@ function shell_body( o )
       windowsVerbatimArguments allows to have arguments with space(s) in shell on Windows
       Following calls will not work as expected( argument will be splitted by space ), if windowsVerbatimArguments is disabled:
 
-      _.shell( 'node path/to/script.js "path with space"' );
-      _.shell({ execPath : 'node path/to/script.js', args : [ "path with space" ] });
+      _.process.start( 'node path/to/script.js "path with space"' );
+      _.process.start({ execPath : 'node path/to/script.js', args : [ "path with space" ] });
 
      */
 
@@ -589,7 +589,7 @@ function shell_body( o )
       o.process = ChildProcess.spawn( appPath, [ arg1, arg2 ], o2 );
 
     }
-    else _.assert( 0, 'Unknown mode', _.strQuote( o.mode ), 'to shell path', _.strQuote( o.paths ) );
+    else _.assert( 0, 'Unknown mode', _.strQuote( o.mode ), 'to start process at path', _.strQuote( o.paths ) );
 
   }
 
@@ -703,11 +703,12 @@ args : [ '"', 'first', 'arg', '"' ]
   {
     args = args.slice();
 
+
     for( let i = 0; i < args.length; i++ )
     {
-      //escaping of some quotes is needed to equalize behavior of shell and exec modes on all platforms
+      // escaping of some quotes is needed to equalize behavior of shell and exec modes on all platforms
       let quotes = [ '"' ]
-      if( process.platform !== 'win32' )
+      if( process.platform !== 'win32' ) /* qqq : ?? */
       quotes.push( "`" )
       _.each( quotes, ( quote ) =>
       {
@@ -720,12 +721,14 @@ args : [ '"', 'first', 'arg', '"' ]
       })
     }
 
+
+    // return '"' + args.join( '" "' ) + '"';
     let result = '';
 
     _.each( args, ( arg, i ) =>
     {
-      if( !_.arrayHas( [ '&&', '&', '|', '||' ], arg ) )
-      arg = '"' + arg + '"';
+      // if( !_.arrayHas( [ '&&', '&', '|', '||' ], arg ) ) /* qqq : ?? */
+      // arg = '"' + arg + '"';
       if( i )
       result += ' ';
       result += arg;
@@ -818,14 +821,14 @@ args : [ '"', 'first', 'arg', '"' ]
 
   /* */
 
-  function appExitCode( exitCode )
+  function exitCodeSet( exitCode )
   {
     if( currentExitCode )
     return;
     if( o.applyingExitCode && exitCode !== 0 )
     {
       currentExitCode = _.numberIs( exitCode ) ? exitCode : -1;
-      _.appExitCode( currentExitCode );
+      _.process.exitCode( currentExitCode );
     }
   }
 
@@ -839,6 +842,7 @@ args : [ '"', 'first', 'arg', '"' ]
     if( stderrOutput.length )
     result += '\n -> Stderr' + '\n' + ' -  ' + _.strIndentation( stderrOutput, ' -  ' ) + '\n -< Stderr';
     // !!! : implement error's collectors
+    debugger;
     return result;
   }
 
@@ -866,7 +870,7 @@ args : [ '"', 'first', 'arg', '"' ]
 
     state = 2;
 
-    appExitCode( exitCode );
+    exitCodeSet( exitCode );
 
     if( ( exitSignal || exitCode !== 0 ) && o.throwingExitCode )
     {
@@ -896,7 +900,7 @@ args : [ '"', 'first', 'arg', '"' ]
   function handleError( err )
   {
 
-    appExitCode( -1 );
+    exitCodeSet( -1 );
 
     if( state === 2 )
     return;
@@ -997,7 +1001,7 @@ args : [ '"', 'first', 'arg', '"' ]
 
 }
 
-shell_body.defaults =
+start_body.defaults =
 {
 
   execPath : null,
@@ -1037,13 +1041,13 @@ shell_body.defaults =
 
 }
 
-let shell = _.routineFromPreAndBody( shell_pre, shell_body );
+let start = _.routineFromPreAndBody( start_pre, start_body );
 
 //
 
-let shellPassingThrough = _.routineFromPreAndBody( shell_pre, shell_body );
+let startPassingThrough = _.routineFromPreAndBody( start_pre, start_body );
 
-var defaults = shellPassingThrough.defaults;
+var defaults = startPassingThrough.defaults;
 
 defaults.verbosity = 0;
 defaults.passingThrough = 1;
@@ -1056,10 +1060,10 @@ defaults.stdio = 'inherit';
 //
 
 /**
- * @summary Short-cut for {@link module:Tools/base/ExternalFundamentals.Tools( module::ExternalFundamentals ).shell shell} routine. Executes provided script in with `node` runtime.
+ * @summary Short-cut for {@link module:Tools/base/ProcessBasic.Tools( module::ProcessBasic ).start start} routine. Executes provided script in with `node` runtime.
  * @description
  * Expects path to javascript file in `o.execPath` option. Automatically prepends `node` prefix before script path `o.execPath`.
- * @param {Object} o Options map, see {@link module:Tools/base/ExternalFundamentals.Tools( module::ExternalFundamentals ).shell shell} for detailed info about options.
+ * @param {Object} o Options map, see {@link module:Tools/base/ProcessBasic.Tools( module::ProcessBasic ).start start} for detailed info about options.
  * @param {Boolean} o.passingThrough=0 Allows to pass arguments of parent process to the child process.
  * @param {Boolean} o.maximumMemory=0 Allows `node` to use all available memory.
  * @param {Boolean} o.applyingExitCode=1 Applies exit code to parent process.
@@ -1070,11 +1074,11 @@ defaults.stdio = 'inherit';
  * @example
  *
  * let _ = require('wTools')
- * _.include( 'wAppBasic' )
+ * _.include( 'wProcessBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
  *
- * let con = _.shellNode({ execPath : 'path/to/script.js' });
+ * let con = _.process.startNode({ execPath : 'path/to/script.js' });
  *
  * con.then( ( got ) =>
  * {
@@ -1082,11 +1086,11 @@ defaults.stdio = 'inherit';
  *  return got;
  * })
  *
- * @function shellNode
- * @memberof module:Tools/base/ExternalFundamentals.Tools( module::ExternalFundamentals )
+ * @function startNode
+ * @memberof module:Tools/base/ProcessBasic.Tools( module::ProcessBasic )
  */
 
-function shellNode_body( o )
+function startNode_body( o )
 {
 
   if( !System )
@@ -1095,7 +1099,7 @@ function shellNode_body( o )
   _.include( 'wPathBasic' );
   _.include( 'wFiles' );
 
-  _.assertRoutineOptions( shellNode, o );
+  _.assertRoutineOptions( startNode_body, o );
   _.assert( _.strIs( o.execPath ) );
   _.assert( !o.code );
   _.assert( arguments.length === 1, 'Expects single argument' );
@@ -1125,24 +1129,24 @@ function shellNode_body( o )
   else
   path = _.strConcat([ 'node', interpreterArgs, path ]);
 
-  let shellOptions = _.mapOnly( o, _.shell.defaults );
-  shellOptions.execPath = path;
+  let startOptions = _.mapOnly( o, _.process.start.defaults );
+  startOptions.execPath = path;
 
-  let result = _.shell( shellOptions )
+  let result = _.process.start( startOptions )
   .give( function( err, arg )
   {
-    o.exitCode = shellOptions.exitCode;
-    o.exitSignal = shellOptions.exitSignal;
+    o.exitCode = startOptions.exitCode;
+    o.exitSignal = startOptions.exitSignal;
     this.take( err, arg );
   });
 
-  o.ready = shellOptions.ready;
-  o.process = shellOptions.process;
+  o.ready = startOptions.ready;
+  o.process = startOptions.process;
 
   return result;
 }
 
-var defaults = shellNode_body.defaults = Object.create( shell.defaults );
+var defaults = startNode_body.defaults = Object.create( start.defaults );
 
 defaults.passingThrough = 0;
 defaults.maximumMemory = 0;
@@ -1150,16 +1154,16 @@ defaults.applyingExitCode = 1;
 defaults.stdio = 'inherit';
 defaults.mode = 'fork';
 
-let shellNode = _.routineFromPreAndBody( shell_pre, shellNode_body );
+let startNode = _.routineFromPreAndBody( start_pre, startNode_body );
 
 //
 
 /**
- * @summary Short-cut for {@link module:Tools/base/ExternalFundamentals.Tools( module::ExternalFundamentals ).shellNode shellNode} routine.
+ * @summary Short-cut for {@link module:Tools/base/ProcessBasic.Tools( module::ProcessBasic ).startNode startNode} routine.
  * @description
  * Passes arguments of parent process to the child and allows `node` to use all available memory.
  * Expects path to javascript file in `o.execPath` option. Automatically prepends `node` prefix before script path `o.execPath`.
- * @param {Object} o Options map, see {@link module:Tools/base/ExternalFundamentals.Tools( module::ExternalFundamentals ).shell shell} for detailed info about options.
+ * @param {Object} o Options map, see {@link module:Tools/base/ProcessBasic.Tools( module::ProcessBasic ).start start} for detailed info about options.
  * @param {Boolean} o.passingThrough=1 Allows to pass arguments of parent process to the child process.
  * @param {Boolean} o.maximumMemory=1 Allows `node` to use all available memory.
  * @param {Boolean} o.applyingExitCode=1 Applies exit code to parent process.
@@ -1169,11 +1173,11 @@ let shellNode = _.routineFromPreAndBody( shell_pre, shellNode_body );
  * @example
  *
  * let _ = require('wTools')
- * _.include( 'wAppBasic' )
+ * _.include( 'wProcessBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
  *
- * let con = _.shellNodePassingThrough({ execPath : 'path/to/script.js' });
+ * let con = _.process.startNodePassingThrough({ execPath : 'path/to/script.js' });
  *
  * con.then( ( got ) =>
  * {
@@ -1181,13 +1185,13 @@ let shellNode = _.routineFromPreAndBody( shell_pre, shellNode_body );
  *  return got;
  * })
  *
- * @function shellNodePassingThrough
- * @memberof module:Tools/base/ExternalFundamentals.Tools( module::ExternalFundamentals )
+ * @function startNodePassingThrough
+ * @memberof module:Tools/base/ProcessBasic.Tools( module::ProcessBasic )
  */
 
-let shellNodePassingThrough = _.routineFromPreAndBody( shell_pre, shellNode.body );
+let startNodePassingThrough = _.routineFromPreAndBody( start_pre, startNode.body );
 
-var defaults = shellNodePassingThrough.defaults;
+var defaults = startNodePassingThrough.defaults;
 
 defaults.verbosity = 0;
 defaults.passingThrough = 1;
@@ -1200,23 +1204,23 @@ defaults.mode = 'fork';
 //
 
 /**
- * @summary Generates shell routine that reuses provided option on each call.
+ * @summary Generates start routine that reuses provided option on each call.
  * @description
- * Routine vectorize `o.execPath` and `o.args` options. `wConsequence` instance `o.ready` can be reused to run several shells in a row, see examples.
+ * Routine vectorize `o.execPath` and `o.args` options. `wConsequence` instance `o.ready` can be reused to run several starts in a row, see examples.
  * @param {Object} o Options map
  *
- * @return {Function} Returns shell routine with options saved as inner state.
+ * @return {Function} Returns start routine with options saved as inner state.
  *
  * @example //single command execution
  *
  * let _ = require('wTools')
- * _.include( 'wAppBasic' )
+ * _.include( 'wProcessBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
  *
- * let shell = _.sheller({ execPath : 'node' });
+ * let start = _.process.starter({ execPath : 'node' });
  *
- * let con = shell({ args : [ '-v' ] });
+ * let con = start({ args : [ '-v' ] });
  *
  * con.then( ( got ) =>
  * {
@@ -1227,13 +1231,13 @@ defaults.mode = 'fork';
  * @example //multiple commands execution with same args
  *
  * let _ = require('wTools')
- * _.include( 'wAppBasic' )
+ * _.include( 'wProcessBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
  *
- * let shell = _.sheller({ args : [ '-v' ]});
+ * let start = _.process.starter({ args : [ '-v' ]});
  *
- * let con = shell({ execPath : [ 'node', 'npm' ] });
+ * let con = start({ execPath : [ 'node', 'npm' ] });
  *
  * con.then( ( got ) =>
  * {
@@ -1246,14 +1250,14 @@ defaults.mode = 'fork';
  * //second command will be executed when first is finished
  *
  * let _ = require('wTools')
- * _.include( 'wAppBasic' )
+ * _.include( 'wProcessBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
  *
  * let ready = new _.Consequence().take( null );
- * let shell = _.sheller({ args : [ '-v' ], ready });
+ * let start = _.process.starter({ args : [ '-v' ], ready });
  *
- * shell({ execPath : 'node' });
+ * start({ execPath : 'node' });
  *
  * ready.then( ( got ) =>
  * {
@@ -1261,7 +1265,7 @@ defaults.mode = 'fork';
  *  return got;
  * })
  *
- * shell({ execPath : 'npm' });
+ * start({ execPath : 'npm' });
  *
  * ready.then( ( got ) =>
  * {
@@ -1269,16 +1273,16 @@ defaults.mode = 'fork';
  *  return got;
  * })
  *
- * @function sheller
- * @memberof module:Tools/base/ExternalFundamentals.Tools( module::ExternalFundamentals )
+ * @function starter
+ * @memberof module:Tools/base/ProcessBasic.Tools( module::ProcessBasic )
  */
 
-function sheller( o0 )
+function starter( o0 )
 {
   _.assert( arguments.length === 0 || arguments.length === 1 );
   if( _.strIs( o0 ) )
   o0 = { execPath : o0 }
-  o0 = _.routineOptions( sheller, o0 );
+  o0 = _.routineOptions( starter, o0 );
   o0.ready = o0.ready || new _.Consequence().take( null );
 
   return function er()
@@ -1295,7 +1299,7 @@ function sheller( o0 )
       _.mapExtend( o, o1 );
     }
 
-    return _.shell( o );
+    return _.process.start( o );
   }
 
   function optionsFrom( options )
@@ -1303,7 +1307,7 @@ function sheller( o0 )
     if( _.strIs( options ) || _.arrayIs( options ) )
     options = { execPath : options }
     options = options || Object.create( null );
-    _.assertMapHasOnly( options, sheller.defaults );
+    _.assertMapHasOnly( options, starter.defaults );
     return options;
   }
 
@@ -1311,7 +1315,7 @@ function sheller( o0 )
   {
     if( _.strIs( src ) || _.arrayIs( src ) )
     src = { execPath : src }
-    _.assertMapHasOnly( src, sheller.defaults );
+    _.assertMapHasOnly( src, starter.defaults );
 
     if( src.execPath !== null && src.execPath !== undefined && dst.execPath !== null && dst.execPath !== undefined )
     {
@@ -1338,7 +1342,7 @@ function sheller( o0 )
 
 }
 
-sheller.defaults = Object.create( shell.defaults );
+starter.defaults = Object.create( start.defaults );
 
 // --
 // app
@@ -1360,17 +1364,17 @@ sheller.defaults = Object.create( shell.defaults );
  * @example
  *
  * let _ = require('wTools')
- * _.include( 'wAppBasic' )
- * let result = _.appArgs();
+ * _.include( 'wProcessBasic' )
+ * let result = _.process.args();
  * console.log( result );
  *
- * @function appArgs
- * @memberof module:Tools/base/ExternalFundamentals.Tools( module::ExternalFundamentals )
+ * @function args
+ * @memberof module:Tools/base/ProcessBasic.Tools( module::ProcessBasic )
  */
 
-let _appArgsCache;
-let _appArgsInSamFormat = Object.create( null )
-var defaults = _appArgsInSamFormat.defaults = Object.create( null );
+let _argsCache;
+let _argsInSamFormat = Object.create( null )
+var defaults = _argsInSamFormat.defaults = Object.create( null );
 
 defaults.keyValDelimeter = ':';
 defaults.cmmandsDelimeter = ';';
@@ -1380,23 +1384,23 @@ defaults.parsingArrays = true;
 
 //
 
-function _appArgsInSamFormatNodejs( o )
+function _argsInSamFormatNodejs( o )
 {
 
   _.assert( arguments.length === 0 || arguments.length === 1 );
-  o = _.routineOptions( _appArgsInSamFormatNodejs, arguments );
+  o = _.routineOptions( _argsInSamFormatNodejs, arguments );
 
   if( o.caching )
-  if( _appArgsCache )
-  if( o.keyValDelimeter === _appArgsCache.keyValDelimeter && o.cmmandsDelimeter === _appArgsCache.cmmandsDelimeter )
-  return _appArgsCache;
+  if( _argsCache )
+  if( o.keyValDelimeter === _argsCache.keyValDelimeter && o.cmmandsDelimeter === _argsCache.cmmandsDelimeter )
+  return _argsCache;
 
   let result = Object.create( null );
 
   if( o.caching )
-  // if( o.keyValDelimeter === _appArgsInSamFormatNodejs.defaults.keyValDelimeter )
-  if( o.keyValDelimeter === _appArgsInSamFormatNodejs.defaults.keyValDelimeter && o.cmmandsDelimeter === _appArgsInSamFormatNodejs.defaults.cmmandsDelimeter )
-  _appArgsCache = result;
+  // if( o.keyValDelimeter === _argsInSamFormatNodejs.defaults.keyValDelimeter )
+  if( o.keyValDelimeter === _argsInSamFormatNodejs.defaults.keyValDelimeter && o.cmmandsDelimeter === _argsInSamFormatNodejs.defaults.cmmandsDelimeter )
+  _argsCache = result;
 
   if( !_global.process )
   {
@@ -1431,33 +1435,33 @@ function _appArgsInSamFormatNodejs( o )
   return result;
 }
 
-_appArgsInSamFormatNodejs.defaults = Object.create( _appArgsInSamFormat.defaults );
+_argsInSamFormatNodejs.defaults = Object.create( _argsInSamFormat.defaults );
 
 //
 
-function _appArgsInSamFormatBrowser( o )
+function _argsInSamFormatBrowser( o )
 {
   debugger; /* xxx */
 
   _.assert( arguments.length === 0 || arguments.length === 1 );
-  o = _.routineOptions( _appArgsInSamFormatNodejs, arguments );
+  o = _.routineOptions( _argsInSamFormatNodejs, arguments );
 
   if( o.caching )
-  if( _appArgsCache && o.keyValDelimeter === _appArgsCache.keyValDelimeter )
-  return _appArgsCache;
+  if( _argsCache && o.keyValDelimeter === _argsCache.keyValDelimeter )
+  return _argsCache;
 
   let result = Object.create( null );
 
   result.map =  Object.create( null );
 
   if( o.caching )
-  if( o.keyValDelimeter === _appArgsInSamFormatNodejs.defaults.keyValDelimeter )
-  _appArgsCache = result;
+  if( o.keyValDelimeter === _argsInSamFormatNodejs.defaults.keyValDelimeter )
+  _argsCache = result;
 
   return result;
 }
 
-_appArgsInSamFormatBrowser.defaults = Object.create( _appArgsInSamFormat.defaults );
+_argsInSamFormatBrowser.defaults = Object.create( _argsInSamFormat.defaults );
 
 //
 
@@ -1468,27 +1472,27 @@ _appArgsInSamFormatBrowser.defaults = Object.create( _appArgsInSamFormat.default
  *
  * @param {Object} o Options map.
  * @param {Object} o.dst=null Target object.
- * @param {Object} o.propertiesMap=null Map with parsed options. By default routine gets this map using {@link module:Tools/base/ExternalFundamentals.Tools( module::ExternalFundamentals ).appArgs appArgs} routine.
+ * @param {Object} o.propertiesMap=null Map with parsed options. By default routine gets this map using {@link module:Tools/base/ProcessBasic.Tools( module::ProcessBasic ).args args} routine.
  * @param {Object} o.namesMap=null Map of expected options.
  * @param {Object} o.removing=1 Removes copied options from result map `o.propertiesMap`.
  * @param {Object} o.only=1 Check if all option are expected. Throws error if not.
  *
  * @return {Object} Returns map with parsed options.
  *
- * @function appArgsReadTo
- * @memberof module:Tools/base/ExternalFundamentals.Tools( module::ExternalFundamentals )
+ * @function argsReadTo
+ * @memberof module:Tools/base/ProcessBasic.Tools( module::ProcessBasic )
  */
 
-function appArgsReadTo( o )
+function argsReadTo( o )
 {
 
   if( arguments[ 1 ] !== undefined )
   o = { dst : arguments[ 0 ], namesMap : arguments[ 1 ] };
 
-  o = _.routineOptions( appArgsReadTo, o );
+  o = _.routineOptions( argsReadTo, o );
 
   if( !o.propertiesMap )
-  o.propertiesMap = _.appArgs().map;
+  o.propertiesMap = _.process.args().map;
 
   if( _.arrayIs( o.namesMap ) )
   {
@@ -1547,7 +1551,7 @@ function appArgsReadTo( o )
 
 }
 
-appArgsReadTo.defaults =
+argsReadTo.defaults =
 {
   dst : null,
   propertiesMap : null,
@@ -1558,11 +1562,11 @@ appArgsReadTo.defaults =
 
 //
 
-function appAnchor( o )
+function anchor( o )
 {
   o = o || {};
 
-  _.routineOptions( appAnchor, arguments );
+  _.routineOptions( anchor, arguments );
 
   let a = _.strStructureParse
   ({
@@ -1601,7 +1605,7 @@ function appAnchor( o )
   return a;
 }
 
-appAnchor.defaults =
+anchor.defaults =
 {
   extend : null,
   del : null,
@@ -1610,7 +1614,7 @@ appAnchor.defaults =
 
 //
 
-function appExitCode( status )
+function exitCode( status )
 {
   let result;
 
@@ -1629,10 +1633,10 @@ function appExitCode( status )
 
 //
 
-function appExit( exitCode )
+function exit( exitCode )
 {
 
-  exitCode = exitCode !== undefined ? exitCode : appExitCode();
+  exitCode = exitCode !== undefined ? exitCode : _.process.exitCode();
 
   _.assert( arguments.length === 0 || arguments.length === 1 );
   _.assert( exitCode === undefined || _.numberIs( exitCode ) );
@@ -1650,10 +1654,10 @@ function appExit( exitCode )
 
 //
 
-function appExitWithBeep( exitCode )
+function exitWithBeep( exitCode )
 {
 
-  exitCode = exitCode !== undefined ? exitCode : appExitCode();
+  exitCode = exitCode !== undefined ? exitCode : _.process.exitCode();
 
   _.assert( arguments.length === 0 || arguments.length === 1 );
   _.assert( exitCode === undefined || _.numberIs( exitCode ) );
@@ -1663,18 +1667,18 @@ function appExitWithBeep( exitCode )
   if( exitCode )
   _.diagnosticBeep();
 
-  _.appExit( exitCode );
+  _.process.exit( exitCode );
 }
 
 //
 
 /*
-qqq : use maybe appExitHandlerRepair instead of appExitHandlerOnce?
-qqq : investigate difference between appExitHandlerRepair and appExitHandlerOnce
+qqq : use maybe exitHandlerRepair instead of exitHandlerOnce?
+qqq : investigate difference between exitHandlerRepair and exitHandlerOnce
 */
 
 let appRepairExitHandlerDone = 0;
-function appExitHandlerRepair()
+function exitHandlerRepair()
 {
 
   _.assert( arguments.length === 0 );
@@ -1800,12 +1804,12 @@ function appExitHandlerRepair()
 
 let _onExitHandlers = [];
 
-function appExitHandlerOnce( routine )
+function exitHandlerOnce( routine )
 {
   _.assert( arguments.length === 1 );
   _.assert( _.routineIs( routine ) );
 
-  _.appExitHandlerRepair();
+  _.process.exitHandlerRepair();
 
   if( typeof process === 'undefined' )
   return;
@@ -1845,10 +1849,10 @@ function appExitHandlerOnce( routine )
 //
 
 /*
-qqq : cover routine appExitHandlerOff by tests
+qqq : cover routine exitHandlerOff by tests
 */
 
-function appExitHandlerOff( routine )
+function exitHandlerOff( routine )
 {
   _.assert( arguments.length === 1 );
   _.assert( _.routineIs( routine ) );
@@ -1858,7 +1862,7 @@ function appExitHandlerOff( routine )
   return _.arrayRemovedElement( _onExitHandlers, routine );
 }
 
-// function appExitHandlerOnce( routine )
+// function exitHandlerOnce( routine )
 // {
 //   _.assert( arguments.length === 1 );
 //   _.assert( _.routineIs( routine ) );
@@ -1900,7 +1904,7 @@ function appExitHandlerOff( routine )
 
 //
 
-function appMemoryUsageInfo()
+function memoryUsageInfo()
 {
   var usage = process.memoryUsage();
   return ( usage.heapUsed >> 20 ) + ' / ' + ( usage.heapTotal >> 20 ) + ' / ' + ( usage.rss >> 20 ) + ' Mb';
@@ -1908,9 +1912,9 @@ function appMemoryUsageInfo()
 
 //
 
-let _appTempApplicationFiles = [];
+let _tempFiles = [];
 
-function appTempApplicationOpen_pre( routine, args )
+function tempOpen_pre( routine, args )
 {
   let o;
 
@@ -1927,27 +1931,27 @@ function appTempApplicationOpen_pre( routine, args )
   return o;
 }
 
-function appTempApplicationOpen_body( o )
+function tempOpen_body( o )
 {
-  _.assertRoutineOptions( appTempApplicationOpen, arguments );
+  _.assertRoutineOptions( tempOpen, arguments );
   _.assert( arguments.length === 1, 'Expects single argument' );
   _.assert( _.strIs( o.sourceCode ) || _.bufferRawIs( o.sourceCode ), 'Expects string or buffer raw {-o.sourceCode-}, but got', _.strType( o.sourceCode ) );
 
   let tempDirPath = _.path.pathDirTempForOpen( _.path.current() );
   let filePath = _.path.join( tempDirPath, _.idWithDate() + '.ss' );
-  _appTempApplicationFiles.push( filePath );
+  _tempFiles.push( filePath );
   _.fileProvider.fileWrite( filePath, o.sourceCode );
   return filePath;
 }
 
-var defaults = appTempApplicationOpen_body.defaults = Object.create( null );
+var defaults = tempOpen_body.defaults = Object.create( null );
 defaults.sourceCode = null;
 
-let appTempApplicationOpen = _.routineFromPreAndBody( appTempApplicationOpen_pre, appTempApplicationOpen_body );
+let tempOpen = _.routineFromPreAndBody( tempOpen_pre, tempOpen_body );
 
 //
 
-function appTempApplicationClose_pre( routine, args )
+function tempClose_pre( routine, args )
 {
   let o;
 
@@ -1967,33 +1971,33 @@ function appTempApplicationClose_pre( routine, args )
   return o;
 }
 
-function appTempApplicationClose_body( o )
+function tempClose_body( o )
 {
-  _.assertRoutineOptions( appTempApplicationClose, arguments );
+  _.assertRoutineOptions( tempClose, arguments );
   _.assert( arguments.length === 1, 'Expects single argument' );
   _.assert( _.strIs( o.filePath ) || o.filePath === null, 'Expects string or null {-o.filePath-}, but got', _.strType( o.filePath ) );
 
   if( !o.filePath )
   {
-    if( !_appTempApplicationFiles.length )
+    if( !_tempFiles.length )
     return;
 
-    _.fileProvider.filesDelete( _appTempApplicationFiles );
-    _appTempApplicationFiles.splice( 0 );
+    _.fileProvider.filesDelete( _tempFiles );
+    _tempFiles.splice( 0 );
   }
   else
   {
-    let i = _.arrayLeftIndex( _appTempApplicationFiles, o.filePath );
+    let i = _.arrayLeftIndex( _tempFiles, o.filePath );
     _.assert( i !== -1, 'Requested {-o.filePath-}', o.filePath, 'is not a path of temp application.' )
     _.fileProvider.fileDelete( o.filePath );
-    _appTempApplicationFiles.splice( i, 1 );
+    _tempFiles.splice( i, 1 );
   }
 }
 
-var defaults = appTempApplicationClose_body.defaults = Object.create( null );
+var defaults = tempClose_body.defaults = Object.create( null );
 defaults.filePath = null;
 
-let appTempApplicationClose = _.routineFromPreAndBody( appTempApplicationClose_pre, appTempApplicationClose_body );
+let tempClose = _.routineFromPreAndBody( tempClose_pre, tempClose_body );
 
 // --
 // declare
@@ -2002,38 +2006,39 @@ let appTempApplicationClose = _.routineFromPreAndBody( appTempApplicationClose_p
 let Extend =
 {
 
-  shell,
-  shellPassingThrough,
-  shellNode,
-  shellNodePassingThrough,
-  sheller,
+  start,
+  startPassingThrough,
+  startNode,
+  startNodePassingThrough,
+  starter,
 
-  _appArgsInSamFormatNodejs,
-  _appArgsInSamFormatBrowser,
+  _argsInSamFormatNodejs,
+  _argsInSamFormatBrowser,
 
-  appArgsInSamFormat : Config.interpreter === 'njs' ? _appArgsInSamFormatNodejs : _appArgsInSamFormatBrowser,
-  appArgs : Config.interpreter === 'njs' ? _appArgsInSamFormatNodejs : _appArgsInSamFormatBrowser,
-  appArgsReadTo,
+  argsInSamFormat : Config.interpreter === 'njs' ? _argsInSamFormatNodejs : _argsInSamFormatBrowser,
+  args : Config.interpreter === 'njs' ? _argsInSamFormatNodejs : _argsInSamFormatBrowser,
+  argsReadTo,
 
-  appAnchor,
+  anchor,
 
-  appExitCode,
-  appExit,
-  appExitWithBeep,
+  exitCode,
+  exit,
+  exitWithBeep,
 
-  appExitHandlerRepair,
-  appExitHandlerOnce,
-  appExitHandlerOff,
+  exitHandlerRepair,
+  exitHandlerOnce,
+  exitHandlerOff,
 
-  appMemoryUsageInfo,
+  memoryUsageInfo,
 
-  appTempApplicationOpen,
-  appTempApplicationClose
+  tempOpen,
+  tempClose
 
 }
 
-_.mapExtend( _, Extend );
-// _.mapExtend( Self, Extend );
+// _.mapExtend( _, Extend );
+_.mapExtend( Self, Extend );
+_.assert( _.routineIs( _.process.start ) );
 
 // --
 // export
