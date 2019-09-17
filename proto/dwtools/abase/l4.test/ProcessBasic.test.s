@@ -4237,7 +4237,7 @@ function shellExecPathQuotesClosing( test )
     con.then( () =>
     {
       test.identical( o.exitCode, 0 );
-      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' "arg"' );
+      test.identical( o.fullExecPath, testAppPathSpace + ' arg' );
       test.identical( o.args, [ 'arg' ] );
       let got = JSON.parse( o.output );
       test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
@@ -4266,7 +4266,7 @@ function shellExecPathQuotesClosing( test )
     con.then( () =>
     {
       test.identical( o.exitCode, 0 );
-      test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"' );
+      test.identical( o.fullExecPath, 'node ' + testAppPathSpace + ' arg' );
       test.identical( o.args, [ testAppPathSpace,'arg' ] );
       let got = JSON.parse( o.output );
       test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
@@ -4295,7 +4295,7 @@ function shellExecPathQuotesClosing( test )
     con.then( () =>
     {
       test.identical( o.exitCode, 0 );
-      test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"' );
+      test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' arg' );
       test.identical( o.args, [ testAppPathSpace,'arg' ] );
       let got = JSON.parse( o.output );
       test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
@@ -4324,7 +4324,7 @@ function shellExecPathQuotesClosing( test )
     con.then( () =>
     {
       test.identical( o.exitCode, 0 );
-      test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"' );
+      test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' arg' );
       test.identical( o.args, [ testAppPathSpace,'arg' ] );
       let got = JSON.parse( o.output );
       test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
@@ -4355,7 +4355,7 @@ function shellExecPathQuotesClosing( test )
     con.then( () =>
     {
       test.identical( o.exitCode, 0 );
-      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' arg' );
+      test.identical( o.fullExecPath, testAppPathSpace + ' arg' );
       test.identical( o.args, [ 'arg' ] );
       let got = JSON.parse( o.output );
       test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
@@ -4384,7 +4384,7 @@ function shellExecPathQuotesClosing( test )
     con.then( () =>
     {
       test.identical( o.exitCode, 0 );
-      test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' arg' );
+      test.identical( o.fullExecPath, 'node ' + testAppPathSpace + ' arg' );
       test.identical( o.args, [ testAppPathSpace,'arg' ] );
       let got = JSON.parse( o.output );
       test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
@@ -4475,7 +4475,7 @@ function shellExecPathQuotesClosing( test )
     con.then( () =>
     {
       test.identical( o.exitCode, 0 );
-      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' " arg' );
+      test.identical( o.fullExecPath, testAppPathSpace + ' " arg' );
       test.identical( o.args, [ '"', 'arg' ] );
       let got = JSON.parse( o.output );
       test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
@@ -4508,7 +4508,7 @@ function shellExecPathQuotesClosing( test )
     con.then( () =>
     {
       test.identical( o.exitCode, 0 );
-      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' " arg' );
+      test.identical( o.fullExecPath, testAppPathSpace+ ' " arg' );
       test.identical( o.args, [ '"', 'arg' ] );
       let got = JSON.parse( o.output );
       test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
@@ -4537,7 +4537,7 @@ function shellExecPathQuotesClosing( test )
     con.then( () =>
     {
       test.identical( o.exitCode, 0 );
-      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' arg "' );
+      test.identical( o.fullExecPath, testAppPathSpace + ' arg "' );
       test.identical( o.args, [ 'arg', '"' ] );
       let got = JSON.parse( o.output );
       test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
@@ -4598,7 +4598,7 @@ function shellExecPathQuotesClosing( test )
     con.then( () =>
     {
       test.identical( o.exitCode, 0 );
-      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' arg"' );
+      test.identical( o.fullExecPath, testAppPathSpace + ' arg"' );
       test.identical( o.args, [ 'arg"' ] );
       let got = JSON.parse( o.output );
       test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
@@ -4627,7 +4627,7 @@ function shellExecPathQuotesClosing( test )
     con.then( () =>
     {
       test.identical( o.exitCode, 0 );
-      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' arg"arg"' );
+      test.identical( o.fullExecPath, testAppPathSpace + ' arg"arg"' );
       test.identical( o.args, [ 'arg"arg"' ] );
       let got = JSON.parse( o.output );
       test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
@@ -4674,7 +4674,7 @@ function shellExecPathQuotesClosing( test )
     con.then( () =>
     {
       test.identical( o.exitCode, 0 );
-      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' arg"arg' );
+      test.identical( o.fullExecPath, testAppPathSpace + ' arg"arg' );
       test.identical( o.args, [ 'arg"arg' ] );
       let got = JSON.parse( o.output );
       test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
@@ -4703,7 +4703,7 @@ function shellExecPathQuotesClosing( test )
     con.then( () =>
     {
       test.identical( o.exitCode, 0 );
-      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' "arg"arg"' );
+      test.identical( o.fullExecPath, testAppPathSpace + ' arg"arg' );
       test.identical( o.args, [ 'arg"arg' ] );
       let got = JSON.parse( o.output );
       test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
@@ -4734,7 +4734,7 @@ function shellExecPathQuotesClosing( test )
     con.then( () =>
     {
       test.identical( o.exitCode, 0 );
-      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' option : "value"' );
+      test.identical( o.fullExecPath, testAppPathSpace + ' option : value' );
       test.identical( o.args, [ 'option', ':', 'value' ] );
       let got = JSON.parse( o.output );
       test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
@@ -4763,7 +4763,7 @@ function shellExecPathQuotesClosing( test )
     con.then( () =>
     {
       test.identical( o.exitCode, 0 );
-      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' option:"value with space"' );
+      test.identical( o.fullExecPath, testAppPathSpace + ' option:"value with space"' );
       test.identical( o.args, [ 'option:"value with space"' ] );
       let got = JSON.parse( o.output );
       test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
@@ -4792,7 +4792,7 @@ function shellExecPathQuotesClosing( test )
     con.then( () =>
     {
       test.identical( o.exitCode, 0 );
-      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' option : "value with space"' );
+      test.identical( o.fullExecPath, testAppPathSpace + ' option : value with space' );
       test.identical( o.args, [ 'option', ':', 'value with space' ] );
       let got = JSON.parse( o.output );
       test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
@@ -4821,7 +4821,7 @@ function shellExecPathQuotesClosing( test )
     con.then( () =>
     {
       test.identical( o.exitCode, 0 );
-      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' option:"value' );
+      test.identical( o.fullExecPath, testAppPathSpace + ' option:"value' );
       test.identical( o.args, [ 'option:"value' ] );
       let got = JSON.parse( o.output );
       test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
@@ -4850,7 +4850,7 @@ function shellExecPathQuotesClosing( test )
     con.then( () =>
     {
       test.identical( o.exitCode, 0 );
-      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' "option: "value""' );
+      test.identical( o.fullExecPath, testAppPathSpace + ' option: "value"' );
       test.identical( o.args, [ 'option: "value"' ] );
       let got = JSON.parse( o.output );
       test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
@@ -4913,7 +4913,7 @@ function shellExecPathQuotesClosing( test )
     con.then( () =>
     {
       test.identical( o.exitCode, 0 );
-      test.identical( o.fullExecPath, _.strQuote( testAppPathSpace ) + ' `option: "value with space"`' );
+      test.identical( o.fullExecPath, testAppPathSpace + ' option: "value with space"' );
       test.identical( o.args, [ 'option: "value with space"' ] );
       let got = JSON.parse( o.output );
       test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
@@ -4944,7 +4944,7 @@ function shellExecPathQuotesClosing( test )
     con.then( () =>
     {
       test.identical( o.exitCode, 0 );
-      test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' option: \\"value with space\\"' );
+      test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' option: "\\"value with space\\""' );
       test.identical( o.args, [ testAppPathSpace, 'option:', '\\"value with space\\"' ] );
       let got = JSON.parse( o.output );
       test.identical( got.mainPath, _.path.normalize( testAppPathSpace ) )
