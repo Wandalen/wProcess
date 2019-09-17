@@ -371,8 +371,8 @@ function start_body( o )
       o.execPath = _.strInsideOf( o.execPath, begin, end );
     }
 
-    if( o.args )
-    o.fullExecPath = _.strConcat( _.arrayAppendArray( [ o.fullExecPath ], o.args ) );
+    // if( o.args )
+    // o.fullExecPath = _.strConcat( _.arrayAppendArray( [ o.fullExecPath ], o.args ) );
 
     if( execArgs && execArgs.length )
     o.args = _.arrayPrependArray( o.args || [], execArgs );
@@ -454,34 +454,6 @@ function start_body( o )
   function launch()
   {
 
-    /* logger */
-
-    try
-    {
-
-      if( o.verbosity && o.inputMirroring )
-      {
-        let prefix = ' > ';
-        if( !o.outputGray )
-        prefix = _.color.strFormat( prefix, { fg : 'bright white' } );
-        log( prefix + o.fullExecPath );
-      }
-
-      if( o.verbosity >= 3 )
-      {
-        let prefix = '   at ';
-        if( !o.outputGray )
-        prefix = _.color.strFormat( prefix, { fg : 'bright white' } );
-        log( prefix + o.currentPath );
-      }
-
-    }
-    catch( err )
-    {
-      debugger;
-      _.errLogOnce( err );
-    }
-
     /* launch */
 
     launchAct();
@@ -524,6 +496,10 @@ function start_body( o )
       _.assert( !o.sync || o.deasync, '{ shell.mode } "fork" is available only in async/deasync version of shell' );
       let o2 = optionsForFork();
       execPath = execPathForFork( execPath );
+
+      o.fullExecPath = _.strConcat( _.arrayAppendArray( [ execPath ], args ) );
+      launchInputLog();
+
       o.process = ChildProcess.fork( execPath, args, o2 );
     }
     else if( o.mode === 'exec' )
@@ -532,6 +508,10 @@ function start_body( o )
       log( '{ shell.mode } "exec" is deprecated' );
       if( args.length )
       execPath = execPath + ' ' + argsJoin( args );
+
+      o.fullExecPath = execPath;
+      launchInputLog();
+
       if( o.sync && !o.deasync )
       o.process = ChildProcess.execSync( execPath, { env : o.env, cwd : currentPath } );
       else
@@ -553,6 +533,9 @@ function start_body( o )
       // }
 
       let o2 = optionsForSpawn();
+
+      o.fullExecPath = _.strConcat( _.arrayAppendArray( [ execPath ], args ) );
+      launchInputLog();
 
       if( o.sync && !o.deasync )
       o.process = ChildProcess.spawnSync( execPath, args, o2 );
@@ -583,6 +566,9 @@ function start_body( o )
       if( args.length )
       arg2 = arg2 + ' ' + argsJoin( args );
 
+      o.fullExecPath = arg2;
+      launchInputLog();
+
       if( o.sync && !o.deasync )
       o.process = ChildProcess.spawnSync( appPath, [ arg1, arg2 ], o2 );
       else
@@ -593,6 +579,37 @@ function start_body( o )
 
   }
 
+  //
+
+  function launchInputLog()
+  {
+    /* logger */
+    try
+    {
+
+      if( o.verbosity && o.inputMirroring )
+      {
+        let prefix = ' > ';
+        if( !o.outputGray )
+        prefix = _.color.strFormat( prefix, { fg : 'bright white' } );
+        log( prefix + o.fullExecPath );
+      }
+
+      if( o.verbosity >= 3 )
+      {
+        let prefix = '   at ';
+        if( !o.outputGray )
+        prefix = _.color.strFormat( prefix, { fg : 'bright white' } );
+        log( prefix + o.currentPath );
+      }
+
+    }
+    catch( err )
+    {
+      debugger;
+      _.errLogOnce( err );
+    }
+  }
 /*
 qqq
 add coverage
@@ -699,18 +716,15 @@ args : [ '"', 'first', 'arg', '"' ]
 
   /* */
 
-  function argsJoin( args )
+  function argsJoin( src )
   {
-    args = args.slice();
-
+    let args = src.slice();
 
     for( let i = 0; i < args.length; i++ )
     {
       // escaping of some quotes is needed to equalize behavior of shell and exec modes on all platforms
-      let quotes = [ '"' ]
-      if( process.platform !== 'win32' ) /* qqq : ?? */
-      quotes.push( "`" )
-      _.each( quotes, ( quote ) =>
+      let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', "`" ]
+      _.each( quotesToEscape, ( quote ) =>
       {
         args[ i ] = _.strReplaceAll( args[ i ], quote, ( match, it ) =>
         {
@@ -721,8 +735,14 @@ args : [ '"', 'first', 'arg', '"' ]
       })
     }
 
+    //quote only arguments
+    _.each( args, ( arg, i ) =>
+    {
+      if( _.strHas( src[ i ], ' ' ) )
+      args[ i ] = _.strQuote( arg );
+    })
 
-    return '"' + args.join( '" "' ) + '"';
+    return args.join( ' ' );
   }
 
   /* */
