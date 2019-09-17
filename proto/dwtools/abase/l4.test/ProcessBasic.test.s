@@ -36,11 +36,8 @@ function suiteBegin()
 {
   var self = this;
   self.suitePath = _.path.pathDirTempOpen( _.path.join( __dirname, '../..' ), 'ProcessBasic' );
-  // if( Config.interpreter === 'njs' )
-  // // self.suitePath = _.path.pathDirTempOpen( _.path.join( __dirname, '../..'  ), 'ProcessBasic' );
-  // self.suitePath = _.path.join( __dirname, '../../tmp.tmp/ProcessBasic', _.idWithDate() + '.tmp'  );
-  // else
-  // self.suitePath = _.path.current();
+  self.toolsPath = _.path.nativize( _.path.resolve( __dirname, '../../Tools.s' ) );
+  self.toolsPathInclude = `var _ = require( '${ _.strEscape( self.toolsPath ) }' )\n`;
 }
 
 //
@@ -50,10 +47,7 @@ function suiteEnd()
   var self = this;
 
   _.assert( _.strHas( self.suitePath, '/ProcessBasic-' ) )
-  _.path.pathDirTempOpen( self.suitePath );
-
-  // if( Config.interpreter === 'njs' )
-  // _.fileProvider.filesDelete( self.suitePath );
+  _.path.pathDirTempClose( self.suitePath );
 }
 
 //
@@ -91,7 +85,6 @@ function testApp()
 
 function testAppShell()
 {
-  let _ = require( '../../../Tools.s' );
   _.include( 'wAppBasic' );
   _.include( 'wStringsExtra' )
 
@@ -410,7 +403,6 @@ function appExitHandlerOnce( test )
 
   function testApp()
   {
-    let _ = require( '../../../Tools.s' );
     _.include( 'wAppBasic' );
     _.include( 'wStringsExtra' )
 
@@ -435,7 +427,7 @@ function appExitHandlerOnce( test )
   /* */
 
   var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = testApp.toString() + '\ntestApp();';
+  var testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
   var expectedOutput = testAppPath + '\n';
   _.fileProvider.fileWrite( testAppPath, testAppCode );
 
@@ -511,7 +503,7 @@ function shell( test )
   /* */
 
   var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = context.testAppShell.toString() + '\ntestAppShell();';
+  var testAppCode = context.toolsPathInclude + testAppShell.toString() + '\ntestAppShell();';
   var expectedOutput = testAppPath + '\n';
   _.fileProvider.fileWrite( testAppPath, testAppCode );
 
@@ -853,7 +845,7 @@ function shellSync( test )
   /* */
 
   var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = context.testAppShell.toString() + '\ntestAppShell();';
+  var testAppCode = context.toolsPathInclude + context.testAppShell.toString() + '\ntestAppShell();';
   var expectedOutput = testAppPath + '\n';
   _.fileProvider.fileWrite( testAppPath, testAppCode );
 
@@ -996,7 +988,7 @@ function shellSyncAsync( test )
   /* */
 
   var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = context.testAppShell.toString() + '\ntestAppShell();';
+  var testAppCode = context.toolsPathInclude + context.testAppShell.toString() + '\ntestAppShell();';
   var expectedOutput = testAppPath + '\n';
   _.fileProvider.fileWrite( testAppPath, testAppCode );
 
@@ -1994,7 +1986,14 @@ function shellWithoutExecPath( test )
   let filePath = _.fileProvider.path.nativize( _.path.join( routinePath, 'file.txt' ) );
   let ready = _.Consequence().take( null );
 
-  let testAppCode = `let filePath = '${_.strEscape( filePath )}';\n` + context.testApp.toString() + '\ntestApp();';
+  let testAppCode =
+  [
+    `let filePath = '${_.strEscape( filePath )}';\n`,
+    context.toolsPathInclude,
+    context.testApp.toString(),
+    '\ntestApp();'
+  ].join( '' );
+
   _.fileProvider.fileWrite( testAppPath, testAppCode );
 
   /* - */
@@ -2095,7 +2094,7 @@ function shellArgumentsParsing( test )
   let testAppPathSpace= _.fileProvider.path.nativize( _.path.join( routinePath, 'with space', 'testApp.js' ) );
   let ready = _.Consequence().take( null );
 
-  let testAppCode = testApp.toString() + '\ntestApp();';
+  let testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
   _.fileProvider.fileWrite( testAppPathNoSpace, testAppCode );
   _.fileProvider.fileWrite( testAppPathSpace, testAppCode );
 
@@ -3288,7 +3287,6 @@ function shellArgumentsParsing( test )
 
   function testApp()
   {
-    let _ = require( '../../../../Tools.s' );
     _.include( 'wAppBasic' );
     _.include( 'wStringsExtra' )
     var args = _.process.args();
@@ -3312,7 +3310,7 @@ function shellArgumentsParsingNonTrivial( test )
   let testAppPathSpace= _.fileProvider.path.nativize( _.path.join( routinePath, 'with space', 'testApp.js' ) );
   let ready = _.Consequence().take( null );
 
-  let testAppCode = testApp.toString() + '\ntestApp();';
+  let testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
   _.fileProvider.fileWrite( testAppPathNoSpace, testAppCode );
   _.fileProvider.fileWrite( testAppPathSpace, testAppCode );
 
@@ -3836,7 +3834,7 @@ function shellArgumentsParsingNonTrivial( test )
 
     _.process.start( o );
 
-    return test.shouldThrowError( con );
+    return test.shouldThrowErrorOfAnyKind( con );
   })
 
   /*  */
@@ -3848,7 +3846,6 @@ function shellArgumentsParsingNonTrivial( test )
 
   function testApp()
   {
-    let _ = require( '../../../../Tools.s' );
     _.include( 'wAppBasic' );
     _.include( 'wStringsExtra' )
     var args = _.process.args();
@@ -3869,7 +3866,7 @@ function shellArgumentsNestedQuotes( test )
   let testAppPathSpace= _.fileProvider.path.nativize( _.path.join( routinePath, 'with space', 'testApp.js' ) );
   let ready = _.Consequence().take( null );
 
-  let testAppCode = testApp.toString() + '\ntestApp();';
+  let testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
   _.fileProvider.fileWrite( testAppPathNoSpace, testAppCode );
   _.fileProvider.fileWrite( testAppPathSpace, testAppCode );
 
@@ -4197,7 +4194,6 @@ function shellArgumentsNestedQuotes( test )
 
   function testApp()
   {
-    let _ = require( '../../../../Tools.s' );
     _.include( 'wAppBasic' );
     _.include( 'wStringsExtra' )
     var args = _.process.args();
@@ -4216,7 +4212,7 @@ function shellExecPathQuotesClosing( test )
   let testAppPathSpace= _.fileProvider.path.nativize( _.path.join( routinePath, 'with space', 'testApp.js' ) );
   let ready = _.Consequence().take( null );
 
-  let testAppCode = testApp.toString() + '\ntestApp();';
+  let testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
   _.fileProvider.fileWrite( testAppPathSpace, testAppCode );
 
   /* */
@@ -4567,7 +4563,7 @@ function shellExecPathQuotesClosing( test )
       outputCollecting : 1,
       ready : con
     }
-    return test.shouldThrowError( _.process.start( o ) );
+    return test.shouldThrowErrorOfAnyKind( _.process.start( o ) );
   })
 
   .then( () =>
@@ -4581,7 +4577,7 @@ function shellExecPathQuotesClosing( test )
       outputCollecting : 1,
       ready : con
     }
-    return test.shouldThrowError( _.process.start( o ) );
+    return test.shouldThrowErrorOfAnyKind( _.process.start( o ) );
   })
 
   testcase( 'arg ends with quote' )
@@ -4657,7 +4653,7 @@ function shellExecPathQuotesClosing( test )
       outputCollecting : 1,
       ready : con
     }
-    return test.shouldThrowError( _.process.start( o ) );
+    return test.shouldThrowErrorOfAnyKind( _.process.start( o ) );
   })
 
   testcase( 'quote as part of arg' )
@@ -4878,7 +4874,7 @@ function shellExecPathQuotesClosing( test )
       outputCollecting : 1,
       ready : con
     }
-    return test.shouldThrowError( _.process.start( o ) );
+    return test.shouldThrowErrorOfAnyKind( _.process.start( o ) );
   })
 
   testcase( 'double quoted with space inside, same quotes' )
@@ -4896,7 +4892,7 @@ function shellExecPathQuotesClosing( test )
     }
     _.process.start( o );
 
-    return test.shouldThrowError( con );
+    return test.shouldThrowErrorOfAnyKind( con );
   })
 
   testcase( 'double quoted with space inside, diff quotes' )
@@ -4979,7 +4975,6 @@ function shellExecPathQuotesClosing( test )
 
   function testApp()
   {
-    let _ = require( '../../../../Tools.s' );
     _.include( 'wAppBasic' );
     _.include( 'wStringsExtra' )
     var args = _.process.args();
@@ -5576,7 +5571,7 @@ function shellErrorHadling( test )
       outputCollecting : 0,
       outputPiping : 0
     }
-    return test.shouldThrowError( _.process.start( o ) )
+    return test.shouldThrowErrorOfAnyKind( _.process.start( o ) )
     .thenKeep( function( got )
     {
       test.is( _.errIs( got ) );
@@ -5605,7 +5600,7 @@ function shellErrorHadling( test )
       outputCollecting : 0,
       outputPiping : 0
     }
-    return test.shouldThrowError( _.process.start( o ) )
+    return test.shouldThrowErrorOfAnyKind( _.process.start( o ) )
     .thenKeep( function( got )
     {
       test.is( _.errIs( got ) );
@@ -5634,7 +5629,7 @@ function shellErrorHadling( test )
       outputCollecting : 0,
       outputPiping : 0
     }
-    return test.shouldThrowError( _.process.start( o ) )
+    return test.shouldThrowErrorOfAnyKind( _.process.start( o ) )
     .thenKeep( function( got )
     {
       test.is( _.errIs( got ) );
@@ -6163,7 +6158,7 @@ function shellTerminate( test )
 }
 
 shellTerminate.timeOut = 120000;
-shellTerminate.description =
+/* shellTerminate.description =
 `
   Test app - single timeout with message
 
@@ -6174,7 +6169,7 @@ shellTerminate.description =
   Expected behaviour for all platforms:
   - Child was terminated with exitCode : null, exitSignal : { kill signal from parent }
   - Time out was not raised, no message output
-`
+` */
 
 //
 
@@ -6187,7 +6182,6 @@ function shellTerminateWithExitHandler( test )
 
   function testApp()
   {
-    let _ = require( '../../../../Tools.s' );
     _.include( 'wAppBasic' );
     _.process.exitHandlerRepair();
     _.timeOut( 10000, () => { console.log( 'Timeout in child' ); return null } )
@@ -6196,7 +6190,7 @@ function shellTerminateWithExitHandler( test )
   /* */
 
   var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = testApp.toString() + '\ntestApp();';
+  var testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
   _.fileProvider.fileWrite( testAppPath, testAppCode );
   testAppPath = _.strQuote( testAppPath );
   var ready = new _.Consequence().take( null );
@@ -6422,7 +6416,7 @@ function shellTerminateWithExitHandler( test )
 
 shellTerminateWithExitHandler.timeOut = 120000;
 
-shellTerminateWithExitHandler.description =
+/* shellTerminateWithExitHandler.description =
 `
   Test app - single timeout with message and appExitHandlerRepair called at start
 
@@ -6434,7 +6428,7 @@ shellTerminateWithExitHandler.description =
     - For SIGINT: Child was terminated before timeout with exitCode : 0, exitSignal : null
     - For SIGKILL: Child was terminated before timeout with exitCode : null, exitSignal : SIGKILL
     - No time out message in output
-`
+` */
 
 //
 
@@ -6447,7 +6441,6 @@ function shellTerminateHangedWithExitHandler( test )
 
   function testApp()
   {
-    let _ = require( '../../../../Tools.s' );
     _.include( 'wAppBasic' );
     _.process.exitHandlerRepair();
     while( 1 )
@@ -6460,7 +6453,7 @@ function shellTerminateHangedWithExitHandler( test )
   /* */
 
   var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = testApp.toString() + '\ntestApp();';
+  var testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
   _.fileProvider.fileWrite( testAppPath, testAppCode );
   testAppPath = _.strQuote( testAppPath );
   var ready = new _.Consequence().take( null );
@@ -6586,7 +6579,7 @@ function shellTerminateHangedWithExitHandler( test )
 
 shellTerminateHangedWithExitHandler.timeOut = 20000;
 
-shellTerminateHangedWithExitHandler.description =
+/* shellTerminateHangedWithExitHandler.description =
 `
   Test app - code that blocks event loop and appExitHandlerRepair called at start
 
@@ -6598,7 +6591,7 @@ shellTerminateHangedWithExitHandler.description =
     - For SIGINT: Child was terminated with exitCode : 0, exitSignal : null
     - For SIGKILL: Child was terminated with exitCode : null, exitSignal : SIGKILL
     - No time out message in output
-`
+` */
 
 //
 
@@ -6611,7 +6604,6 @@ function shellTerminateAfterLoopRelease( test )
 
   function testApp()
   {
-    let _ = require( '../../../../Tools.s' );
     _.include( 'wAppBasic' );
     _.process.exitHandlerRepair();
     let loop = true;
@@ -6627,7 +6619,7 @@ function shellTerminateAfterLoopRelease( test )
   /* */
 
   var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = testApp.toString() + '\ntestApp();';
+  var testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
   _.fileProvider.fileWrite( testAppPath, testAppCode );
   testAppPath = _.strQuote( testAppPath );
   var ready = new _.Consequence().take( null );
@@ -6793,17 +6785,17 @@ function shellTerminateAfterLoopRelease( test )
 }
 
 shellTerminateAfterLoopRelease.timeOut = 20000;
-shellTerminateAfterLoopRelease.description =
-`
-  Test app - code that blocks event loop for short period of time and appExitHandlerRepair called at start
+// shellTerminateAfterLoopRelease.description =
+// `
+//   Test app - code that blocks event loop for short period of time and appExitHandlerRepair called at start
 
-  Will test:
-    - Termination of child process using SIGINT signal after small delay
+//   Will test:
+//     - Termination of child process using SIGINT signal after small delay
 
-  Expected behaviour:
-    - Child was terminated after event loop release with exitCode : 0, exitSignal : null
-    - Child process message should be printed
-`
+//   Expected behaviour:
+//     - Child was terminated after event loop release with exitCode : 0, exitSignal : null
+//     - Child process message should be printed
+// `
 
 //
 
@@ -6816,7 +6808,6 @@ function shellStartingDelay( test )
 
   function testApp()
   {
-    let _ = require( '../../../../Tools.s' );
     let data = { t2 : _.timeNow() };
     console.log( JSON.stringify( data ) );
   }
@@ -6824,7 +6815,7 @@ function shellStartingDelay( test )
   /* */
 
   var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = testApp.toString() + '\ntestApp();';
+  var testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
   _.fileProvider.fileWrite( testAppPath, testAppCode );
   testAppPath = _.strQuote( testAppPath );
   var ready = new _.Consequence().take( null );
@@ -6872,7 +6863,6 @@ function shellStartingTime( test )
 
   function testApp()
   {
-    let _ = require( '../../../../Tools.s' );
     let data = { t2 : _.timeNow() };
     console.log( JSON.stringify( data ) );
   }
@@ -6880,7 +6870,7 @@ function shellStartingTime( test )
   /* */
 
   var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = testApp.toString() + '\ntestApp();';
+  var testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
   _.fileProvider.fileWrite( testAppPath, testAppCode );
   testAppPath = _.strQuote( testAppPath );
   var ready = new _.Consequence().take( null );
@@ -6929,7 +6919,6 @@ function shellStartingSuspended( test )
 
   function testApp()
   {
-    let _ = require( '../../../../Tools.s' );
     let data = { t2 : _.timeNow() };
     console.log( JSON.stringify( data ) );
   }
@@ -6937,7 +6926,7 @@ function shellStartingSuspended( test )
   /* */
 
   var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = testApp.toString() + '\ntestApp();';
+  var testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
   _.fileProvider.fileWrite( testAppPath, testAppCode );
   testAppPath = _.strQuote( testAppPath );
   var ready = new _.Consequence().take( null );
@@ -6991,7 +6980,6 @@ function shellStartingParentDeath( test )
 
   function testAppParent()
   {
-    let _ = require( '../../../../Tools.s' );
     _.include( 'wAppBasic' );
 
     _.process.start
@@ -7010,7 +6998,6 @@ function shellStartingParentDeath( test )
 
   function testAppChild()
   {
-    let _ = require( '../../../../Tools.s' );
     let data = { t2 : _.timeNow() };
     console.log( JSON.stringify( data ) );
   }
@@ -7019,8 +7006,8 @@ function shellStartingParentDeath( test )
 
   var testAppParentPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppParent.js' ) );
   var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
-  var testAppParentCode = testAppParent.toString() + '\testAppParent();';
-  var testAppChildCode = testAppChild.toString() + '\testAppChild();';
+  var testAppParentCode = context.toolsPathInclude + testAppParent.toString() + '\testAppParent();';
+  var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\testAppChild();';
   _.fileProvider.fileWrite( testAppParentPath, testAppParentCode );
   _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
   testAppParentPath = _.strQuote( testAppParentPath );
@@ -7061,7 +7048,14 @@ function shellConcurrent( test )
   let filePath = _.fileProvider.path.nativize( _.path.join( routinePath, 'file.txt' ) );
   let ready = _.Consequence().take( null );
 
-  let testAppCode = `let filePath = '${_.strEscape( filePath )}';\n` + context.testApp.toString() + '\ntestApp();';
+  let testAppCode =
+  [
+    `let filePath = '${_.strEscape( filePath )}';\n`,
+     context.toolsPathInclude,
+     context.testApp.toString(),
+     '\ntestApp();'
+  ].join( '' );
+
   _.fileProvider.fileWrite( testAppPath, testAppCode );
 
   logger.log( 'this is #foreground : bright white#an#foreground : default# experiment' ); /* qqq fix logger, please !!! */
@@ -7519,7 +7513,14 @@ function shellerConcurrent( test )
   let filePath = _.fileProvider.path.nativize( _.path.join( routinePath, 'file.txt' ) );
   let ready = _.Consequence().take( null );
 
-  let testAppCode = `let filePath = '${_.strEscape( filePath )}';\n` + context.testApp.toString() + '\ntestApp();';
+  let testAppCode =
+  [
+    `let filePath = '${_.strEscape( filePath )}';\n`,
+     context.toolsPathInclude,
+     context.testApp.toString(),
+     '\ntestApp();'
+  ].join( '' );
+
   _.fileProvider.fileWrite( testAppPath, testAppCode );
 
   /* - */
@@ -8939,7 +8940,9 @@ var Proto =
   {
     suitePath : null,
     testApp,
-    testAppShell
+    testAppShell,
+    toolsPath : null,
+    toolsPathInclude : null
   },
 
   tests :
@@ -8974,8 +8977,8 @@ var Proto =
 
     shellStartingDelay,
     shellStartingTime,
-    shellStartingSuspended,
-    shellStartingParentDeath,
+    // shellStartingSuspended,
+    // shellStartingParentDeath,
 
     shellConcurrent,
     shellerConcurrent,
