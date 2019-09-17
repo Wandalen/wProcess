@@ -5932,6 +5932,250 @@ shellNode.timeOut = 20000;
 
 //
 
+function shellModeShellNonTrivial( test )
+{
+  let context = this;
+  let routinePath = _.path.join( context.suitePath, test.name );
+  let testAppPath =  _.path.join( routinePath, 'app.js' );
+
+  function app()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+
+  let testAppCode = app.toString() + '\napp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+
+  let ready = _.Consequence().take( null );
+
+  let shell = _.process.starter
+  ({
+    mode : 'shell',
+    currentPath : routinePath,
+    outputPiping : 1,
+    outputCollecting : 1,
+    ready : ready
+  })
+
+  /* */
+
+  ready.then( () =>
+  {
+    test.open( 'two commands' );
+    return null;
+  })
+
+  shell( 'node -v && node -v' )
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, process.version ), 2 );
+    return null;
+  })
+
+  shell( '"node -v && node -v"' )
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, process.version ), 2 );
+    return null;
+  })
+
+  shell({ execPath : 'node -v && "node -v"', throwingExitCode : 0 })
+  .then( ( got ) =>
+  {
+    test.notIdentical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, process.version ), 1 );
+    return null;
+  })
+
+  shell({ args : 'node -v && node -v' })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, process.version ), 2 );
+    return null;
+  })
+
+  shell({ args : '"node -v && node -v"' })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, process.version ), 2 );
+    return null;
+  })
+
+  shell({ args : [ "node -v && node -v" ] })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, process.version ), 2 );
+    return null;
+  })
+
+  shell({ args : [ 'node', '-v', '&&', 'node', '-v' ] })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, process.version ), 2 );
+    return null;
+  })
+
+  shell({ args : [ 'node', '-v', ' && ', 'node', '-v' ] })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, process.version ), 1 );
+    return null;
+  })
+
+  shell({ args : [ 'node -v', '&&', 'node -v' ], throwingExitCode : 0 })
+  .then( ( got ) =>
+  {
+    test.notIdentical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, process.version ), 1 );
+    return null;
+  })
+
+  ready.then( () =>
+  {
+    test.close( 'two commands' );
+    return null;
+  })
+
+  /*  */
+
+  ready.then( () =>
+  {
+    test.open( 'argument with space' );
+    return null;
+  })
+
+  shell( 'node ' + testAppPath + ' arg with space' )
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, "[ 'arg', 'with', 'space' ]" ), 1 );
+    return null;
+  })
+
+  shell( 'node ' + testAppPath + ' "arg with space"' )
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, "[ 'arg with space' ]" ), 1 );
+    return null;
+  })
+
+  shell({ execPath : 'node ' + testAppPath, args : 'arg with space' })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, "[ 'arg with space' ]" ), 1 );
+    return null;
+  })
+
+  shell({ execPath : 'node ' + testAppPath, args : [ 'arg with space' ] })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, "[ 'arg with space' ]" ), 1 );
+    return null;
+  })
+
+  shell( 'node ' + testAppPath + ' `"quoted arg with space"`' )
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, `[ '"quoted arg with space"' ]` ), 1 );
+    return null;
+  })
+
+  shell( 'node ' + testAppPath + ` \`'quoted arg with space'\` ` )
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, `[ "'quoted arg with space'" ]` ), 1 );
+    return null;
+  })
+
+  shell( 'node ' + testAppPath + " '`quoted arg with space`'" )
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, `[ '\`quoted arg with space\`' ]` ), 1 );
+    return null;
+  })
+
+  shell({ execPath : 'node ' + testAppPath, args : '"quoted arg with space"' })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, `[ '"quoted arg with space"' ]` ), 1 );
+    return null;
+  })
+
+  shell({ execPath : 'node ' + testAppPath, args : '`quoted arg with space`' })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, `[ '\`quoted arg with space\`' ]` ), 1 );
+    return null;
+  })
+
+  ready.then( () =>
+  {
+    test.close( 'argument with space' );
+    return null;
+  })
+
+  /*  */
+
+  ready.then( () =>
+  {
+    test.open( 'several arguments' );
+    return null;
+  })
+
+  shell({ execPath : 'node ' + testAppPath + ` arg1 "arg2" "arg 3" "'arg4'"` })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, `[ 'arg1', 'arg2', 'arg 3', "'arg4'" ]` ), 1 );
+    return null;
+  })
+
+  shell({ execPath : 'node ' + testAppPath, args : `arg1 "arg2" "arg 3" "'arg4'"` })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, '[ `arg1 "arg2" "arg 3" "\'arg4\'"` ]' ), 1 );
+    return null;
+  })
+
+  shell({ execPath : 'node ' + testAppPath, args : [ `arg1`, '"arg2"', "arg 3", "'arg4'" ] })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, `[ 'arg1', '"arg2"', 'arg 3', "'arg4'" ]` ), 1 );
+    return null;
+  })
+
+  ready.then( () =>
+  {
+    test.close( 'several arguments' );
+    return null;
+  })
+
+  /*  */
+
+  return ready;
+}
+
+shellModeShellNonTrivial.timeOut = 60000;
+
+//
+
 function shellTerminate( test )
 {
   var context = this;
@@ -8969,6 +9213,7 @@ var Proto =
     shellVerbosity,
     shellErrorHadling,
     shellNode,
+    shellModeShellNonTrivial,
 
     shellTerminate,
     shellTerminateWithExitHandler,
