@@ -6290,7 +6290,7 @@ function shellTerminate( test )
       test.is( _.strHas( err.message, 'killed by exit signal SIGKILL' ) );
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGKILL' );
-      test.is( !_.strHas( o.output, 'Timeout in child' ) );
+      test.is( _.strHas( o.output, 'Timeout in child' ) );
       return null;
     })
 
@@ -6389,7 +6389,7 @@ function shellTerminate( test )
       test.is( _.strHas( err.message, 'killed by exit signal SIGINT' ) );
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGINT' );
-      test.is( !_.strHas( o.output, 'Timeout in child' ) );
+      test.is( _.strHas( o.output, 'Timeout in child' ) );
       return null;
     })
 
