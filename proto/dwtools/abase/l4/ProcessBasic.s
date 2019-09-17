@@ -723,18 +723,6 @@ args : [ '"', 'first', 'arg', '"' ]
 
 
     return '"' + args.join( '" "' ) + '"';
-    // let result = '';
-
-    // _.each( args, ( arg, i ) =>
-    // {
-    //   // if( !_.arrayHas( [ '&&', '&', '|', '||' ], arg ) ) /* qqq : ?? */
-    //   // arg = '"' + arg + '"';
-    //   if( i )
-    //   result += ' ';
-    //   result += arg;
-    // })
-
-    return result;
   }
 
   /* */
