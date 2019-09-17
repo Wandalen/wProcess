@@ -150,7 +150,7 @@ function start_body( o )
   _.assert( o.args === null || _.arrayIs( o.args ) || _.strIs( o.args ) );
   _.assert( o.execPath === null || _.strIs( o.execPath ) || _.strsAreAll( o.execPath ), 'Expects string or strings {-o.execPath-}, but got', _.strType( o.execPath ) );
   _.assert( o.timeOut === null || _.numberIs( o.timeOut ), 'Expects null or number {-o.timeOut-}, but got', _.strType( o.timeOut ) );
-  _.assert( _.arrayHas( [ 'instant'/* , 'suspended', 'parentdeath' */ ],  o.starting ) || _.objectIs( o.starting ), 'Unsupported starting mode:', o.starting );
+  _.assert( _.arrayHas( [ 'instant' ],  o.starting ) || _.objectIs( o.starting ), 'Unsupported starting mode:', o.starting );
 
 
 
@@ -371,9 +371,6 @@ function start_body( o )
       o.execPath = _.strInsideOf( o.execPath, begin, end );
     }
 
-    if( o.args )
-    o.fullExecPath = _.strConcat( _.arrayAppendArray( [ o.fullExecPath ], o.args ) );
-
     if( execArgs && execArgs.length )
     o.args = _.arrayPrependArray( o.args || [], execArgs );
 
@@ -416,11 +413,6 @@ function start_body( o )
 
     /* out options */
 
-    // if( o.args )
-    // o.fullExecPath = _.strConcat( _.arrayAppendArray( [ o.execPath ], o.args || [] ) );
-    // else
-    // o.fullExecPath = _.strConcat([ o.execPath ]);
-
     o.exitCode = null;
     o.exitSignal = null;
     o.process = null;
@@ -453,34 +445,6 @@ function start_body( o )
 
   function launch()
   {
-
-    /* logger */
-
-    try
-    {
-
-      if( o.verbosity && o.inputMirroring )
-      {
-        let prefix = ' > ';
-        if( !o.outputGray )
-        prefix = _.color.strFormat( prefix, { fg : 'bright white' } );
-        log( prefix + o.fullExecPath );
-      }
-
-      if( o.verbosity >= 3 )
-      {
-        let prefix = '   at ';
-        if( !o.outputGray )
-        prefix = _.color.strFormat( prefix, { fg : 'bright white' } );
-        log( prefix + o.currentPath );
-      }
-
-    }
-    catch( err )
-    {
-      debugger;
-      _.errLogOnce( err );
-    }
 
     /* launch */
 
@@ -524,6 +488,10 @@ function start_body( o )
       _.assert( !o.sync || o.deasync, '{ shell.mode } "fork" is available only in async/deasync version of shell' );
       let o2 = optionsForFork();
       execPath = execPathForFork( execPath );
+
+      o.fullExecPath = _.strConcat( _.arrayAppendArray( [ execPath ], args ) );
+      launchInputLog();
+
       o.process = ChildProcess.fork( execPath, args, o2 );
     }
     else if( o.mode === 'exec' )
@@ -532,6 +500,10 @@ function start_body( o )
       log( '{ shell.mode } "exec" is deprecated' );
       if( args.length )
       execPath = execPath + ' ' + argsJoin( args );
+
+      o.fullExecPath = execPath;
+      launchInputLog();
+
       if( o.sync && !o.deasync )
       o.process = ChildProcess.execSync( execPath, { env : o.env, cwd : currentPath } );
       else
@@ -539,20 +511,10 @@ function start_body( o )
     }
     else if( o.mode === 'spawn' )
     {
-      // let appPath = o.execPath;
-
-      // if( !o.args )
-      // {
-      //   o.args = _.strSplitNonPreserving({ src : o.execPath });
-      //   appPath = o.args.shift();
-      // }
-      // else
-      // {
-      //   if( appPath.length )
-      //   _.assert( _.strSplitNonPreserving({ src : appPath }).length === 1, ' o.execPath must not contain arguments if those were provided through options' );
-      // }
-
       let o2 = optionsForSpawn();
+
+      o.fullExecPath = _.strConcat( _.arrayAppendArray( [ execPath ], args ) );
+      launchInputLog();
 
       if( o.sync && !o.deasync )
       o.process = ChildProcess.spawnSync( execPath, args, o2 );
@@ -583,6 +545,9 @@ function start_body( o )
       if( args.length )
       arg2 = arg2 + ' ' + argsJoin( args );
 
+      o.fullExecPath = arg2;
+      launchInputLog();
+
       if( o.sync && !o.deasync )
       o.process = ChildProcess.spawnSync( appPath, [ arg1, arg2 ], o2 );
       else
@@ -593,6 +558,37 @@ function start_body( o )
 
   }
 
+  //
+
+  function launchInputLog()
+  {
+    /* logger */
+    try
+    {
+
+      if( o.verbosity && o.inputMirroring )
+      {
+        let prefix = ' > ';
+        if( !o.outputGray )
+        prefix = _.color.strFormat( prefix, { fg : 'bright white' } );
+        log( prefix + o.fullExecPath );
+      }
+
+      if( o.verbosity >= 3 )
+      {
+        let prefix = '   at ';
+        if( !o.outputGray )
+        prefix = _.color.strFormat( prefix, { fg : 'bright white' } );
+        log( prefix + o.currentPath );
+      }
+
+    }
+    catch( err )
+    {
+      debugger;
+      _.errLogOnce( err );
+    }
+  }
 /*
 qqq
 add coverage
@@ -699,18 +695,15 @@ args : [ '"', 'first', 'arg', '"' ]
 
   /* */
 
-  function argsJoin( args )
+  function argsJoin( src )
   {
-    args = args.slice();
-
+    let args = src.slice();
 
     for( let i = 0; i < args.length; i++ )
     {
-      // escaping of some quotes is needed to equalize behavior of shell and exec modes on all platforms
-      let quotes = [ '"' ]
-      if( process.platform !== 'win32' ) /* qqq : ?? */
-      quotes.push( "`" )
-      _.each( quotes, ( quote ) =>
+      // escape quotes to make shell interpret them as regular symbols
+      let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', "`" ]
+      _.each( quotesToEscape, ( quote ) =>
       {
         args[ i ] = _.strReplaceAll( args[ i ], quote, ( match, it ) =>
         {
@@ -721,20 +714,17 @@ args : [ '"', 'first', 'arg', '"' ]
       })
     }
 
+    if( args.length === 1 )
+    return _.strQuote( args[ 0 ] );
 
-    // return '"' + args.join( '" "' ) + '"';
-    let result = '';
-
+    //quote only arguments with spaces
     _.each( args, ( arg, i ) =>
     {
-      // if( !_.arrayHas( [ '&&', '&', '|', '||' ], arg ) ) /* qqq : ?? */
-      // arg = '"' + arg + '"';
-      if( i )
-      result += ' ';
-      result += arg;
+      if( _.strHas( src[ i ], ' ' ) )
+      args[ i ] = _.strQuote( arg );
     })
 
-    return result;
+    return args.join( ' ' );
   }
 
   /* */
@@ -1937,7 +1927,7 @@ function tempOpen_body( o )
   _.assert( arguments.length === 1, 'Expects single argument' );
   _.assert( _.strIs( o.sourceCode ) || _.bufferRawIs( o.sourceCode ), 'Expects string or buffer raw {-o.sourceCode-}, but got', _.strType( o.sourceCode ) );
 
-  let tempDirPath = _.path.pathDirTempForOpen( _.path.current() );
+  let tempDirPath = _.path.pathDirTempOpen( _.path.current() );
   let filePath = _.path.join( tempDirPath, _.idWithDate() + '.ss' );
   _tempFiles.push( filePath );
   _.fileProvider.fileWrite( filePath, o.sourceCode );
