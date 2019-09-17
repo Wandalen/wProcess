@@ -7295,7 +7295,6 @@ function shellConcurrent( test )
   let testAppCode =
   [
     `let filePath = '${_.strEscape( filePath )}';\n`,
-     context.toolsPathInclude,
      context.testApp.toString(),
      '\ntestApp();'
   ].join( '' );
@@ -7760,7 +7759,6 @@ function shellerConcurrent( test )
   let testAppCode =
   [
     `let filePath = '${_.strEscape( filePath )}';\n`,
-     context.toolsPathInclude,
      context.testApp.toString(),
      '\ntestApp();'
   ].join( '' );
