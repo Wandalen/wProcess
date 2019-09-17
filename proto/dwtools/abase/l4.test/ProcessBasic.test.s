@@ -6732,18 +6732,9 @@ function shellTerminateHangedWithExitHandler( test )
 
     con.then( ( got ) =>
     {
-      if( process.platform === 'win32' )
-      {
-        test.identical( o.exitCode, null );
-        test.identical( o.exitSignal, 'SIGINT' );
-        test.is( !_.strHas( o.output, 'SIGINT' ) );
-      }
-      else
-      {
-        test.identical( o.exitCode, 0 );
-        test.identical( o.exitSignal, null );
-        test.is( _.strHas( o.output, 'SIGINT' ) );
-      }
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.is( _.strHas( o.output, 'SIGINT' ) );
       return null;
     })
 
@@ -6780,18 +6771,9 @@ function shellTerminateHangedWithExitHandler( test )
 
     con.then( ( got ) =>
     {
-      if( process.platform === 'win32' )
-      {
-        test.identical( o.exitCode, null );
-        test.identical( o.exitSignal, 'SIGINT' );
-        test.is( !_.strHas( o.output, 'SIGINT' ) );
-      }
-      else
-      {
-        test.identical( o.exitCode, 0 );
-        test.identical( o.exitSignal, null );
-        test.is( _.strHas( o.output, 'SIGINT' ) );
-      }
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.is( _.strHas( o.output, 'SIGINT' ) );
       return null;
     })
 
@@ -6882,18 +6864,9 @@ function shellTerminateAfterLoopRelease( test )
 
     con.then( ( got ) =>
     {
-      if( process.platform === 'win32' )
-      {
-        test.identical( o.exitCode, null );
-        test.identical( o.exitSignal, 'SIGINT' );
-        test.is( !_.strHas( o.output, 'Exit after timeout' ) );
-      }
-      else
-      {
-        test.identical( o.exitCode, 0 );
-        test.identical( o.exitSignal, null );
-        test.is( _.strHas( o.output, 'Exit after timeout' ) );
-      }
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.is( _.strHas( o.output, 'Exit after timeout' ) );
 
       return null;
     })
@@ -6933,18 +6906,9 @@ function shellTerminateAfterLoopRelease( test )
 
     con.then( ( got ) =>
     {
-      if( process.platform === 'win32' )
-      {
-        test.identical( o.exitCode, null );
-        test.identical( o.exitSignal, 'SIGINT' );
-        test.is( !_.strHas( o.output, 'Exit after timeout' ) );
-      }
-      else
-      {
-        test.identical( o.exitCode, 0 );
-        test.identical( o.exitSignal, null );
-        test.is( _.strHas( o.output, 'Exit after timeout' ) );
-      }
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.is( _.strHas( o.output, 'Exit after timeout' ) );
 
       return null;
     })
