@@ -705,7 +705,12 @@ args : [ '"', 'first', 'arg', '"' ]
       let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', "`" ]
       _.each( quotesToEscape, ( quote ) =>
       {
-        args[ i ] = _.strReplaceAll( args[ i ], quote, ( match ) => _.strPrependOnce( match, '\\' ) )
+        args[ i ] = _.strReplaceAll( args[ i ], quote, ( match, it ) =>
+        {
+          if( it.input[ it.range[ 0 ] - 1 ] === '\\' )
+          return match;
+          return '\\' + match;
+        });
       })
     }
 
