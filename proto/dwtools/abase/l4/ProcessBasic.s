@@ -722,20 +722,18 @@ args : [ '"', 'first', 'arg', '"' ]
 
     for( let i = 0; i < args.length; i++ )
     {
-      // escaping of some quotes is needed to equalize behavior of shell and exec modes on all platforms
+      // escape quotes to make shell interpret them as regular symbols
       let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', "`" ]
       _.each( quotesToEscape, ( quote ) =>
       {
-        args[ i ] = _.strReplaceAll( args[ i ], quote, ( match, it ) =>
-        {
-          if( it.input[ it.range[ 0 ] - 1 ] === '\\' )
-          return match;
-          return '\\' + match;
-        });
+        args[ i ] = _.strReplaceAll( args[ i ], quote, ( match ) => _.strPrependOnce( match, '\\' ) )
       })
     }
 
-    //quote only arguments
+    if( args.length === 1 )
+    return _.strQuote( args[ 0 ] );
+
+    //quote only arguments with spaces
     _.each( args, ( arg, i ) =>
     {
       if( _.strHas( src[ i ], ' ' ) )
