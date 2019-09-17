@@ -371,9 +371,6 @@ function start_body( o )
       o.execPath = _.strInsideOf( o.execPath, begin, end );
     }
 
-    // if( o.args )
-    // o.fullExecPath = _.strConcat( _.arrayAppendArray( [ o.fullExecPath ], o.args ) );
-
     if( execArgs && execArgs.length )
     o.args = _.arrayPrependArray( o.args || [], execArgs );
 
@@ -415,11 +412,6 @@ function start_body( o )
     }
 
     /* out options */
-
-    // if( o.args )
-    // o.fullExecPath = _.strConcat( _.arrayAppendArray( [ o.execPath ], o.args || [] ) );
-    // else
-    // o.fullExecPath = _.strConcat([ o.execPath ]);
 
     o.exitCode = null;
     o.exitSignal = null;
@@ -519,19 +511,6 @@ function start_body( o )
     }
     else if( o.mode === 'spawn' )
     {
-      // let appPath = o.execPath;
-
-      // if( !o.args )
-      // {
-      //   o.args = _.strSplitNonPreserving({ src : o.execPath });
-      //   appPath = o.args.shift();
-      // }
-      // else
-      // {
-      //   if( appPath.length )
-      //   _.assert( _.strSplitNonPreserving({ src : appPath }).length === 1, ' o.execPath must not contain arguments if those were provided through options' );
-      // }
-
       let o2 = optionsForSpawn();
 
       o.fullExecPath = _.strConcat( _.arrayAppendArray( [ execPath ], args ) );
