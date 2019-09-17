@@ -6968,7 +6968,7 @@ function shellStartingDelay( test )
       mode : 'fork',
       outputPiping : 1,
       outputCollecting : 1,
-      starting : starting
+      when : starting
     }
 
     let t1 = _.timeNow();
@@ -7025,7 +7025,7 @@ function shellStartingTime( test )
       mode : 'fork',
       outputPiping : 1,
       outputCollecting : 1,
-      starting : starting
+      when : starting
     }
 
     let con = _.process.start( o );
@@ -7078,7 +7078,7 @@ function shellStartingSuspended( test )
       mode : 'fork',
       outputPiping : 1,
       outputCollecting : 1,
-      starting : 'suspended'
+      when : 'suspended'
     }
 
     let t1 = _.timeNow();
@@ -7123,7 +7123,7 @@ function shellStartingParentDeath( test )
     ({
       execPath : 'node testAppChild.js',
       outputCollecting : 1,
-      starting : 'parentdeath'
+      when : 'parentdeath'
     })
 
     return _.timeOut( 5000, () =>

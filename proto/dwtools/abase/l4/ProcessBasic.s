@@ -150,7 +150,7 @@ function start_body( o )
   _.assert( o.args === null || _.arrayIs( o.args ) || _.strIs( o.args ) );
   _.assert( o.execPath === null || _.strIs( o.execPath ) || _.strsAreAll( o.execPath ), 'Expects string or strings {-o.execPath-}, but got', _.strType( o.execPath ) );
   _.assert( o.timeOut === null || _.numberIs( o.timeOut ), 'Expects null or number {-o.timeOut-}, but got', _.strType( o.timeOut ) );
-  _.assert( _.arrayHas( [ 'instant' ],  o.starting ) || _.objectIs( o.starting ), 'Unsupported starting mode:', o.starting );
+  _.assert( _.arrayHas( [ 'instant' ],  o.when ) || _.objectIs( o.when ), 'Unsupported starting mode:', o.when );
 
 
 
@@ -162,21 +162,21 @@ function start_body( o )
   let decoratedErrorOutput = '';
   let startingDelay = 0;
 
-  if( _.objectIs( o.starting ) )
+  if( _.objectIs( o.when ) )
   {
     if( Config.debug )
     {
-      let keys = _.mapKeys( o.starting );
+      let keys = _.mapKeys( o.when );
       _.assert( keys.length === 1 && _.arrayHas([ 'time', 'delay' ], keys[ 0 ] ) );
-      _.assert( _.numberIs( o.starting.delay ) || _.numberIs( o.starting.time ) )
+      _.assert( _.numberIs( o.when.delay ) || _.numberIs( o.when.time ) )
     }
 
-    if( o.starting.delay !== undefined )
-    startingDelay = o.starting.delay;
+    if( o.when.delay !== undefined )
+    startingDelay = o.when.delay;
     else
-    startingDelay = o.starting.time - _.timeNow();
+    startingDelay = o.when.time - _.timeNow();
 
-    _.assert( startingDelay >= 0, 'Wrong value of {-o.starting.delay } or {-o.starting.time-}. Starting delay should be >= 0, current:', startingDelay )
+    _.assert( startingDelay >= 0, 'Wrong value of {-o.when.delay } or {-o.when.time-}. Starting delay should be >= 0, current:', startingDelay )
   }
 
   o.ready = o.ready || new _.Consequence().take( null );
@@ -1027,7 +1027,7 @@ start_body.defaults =
   outputStripping : 0,
   inputMirroring : 1,
 
-  starting : 'instant'
+  when : 'instant'
 
 }
 
