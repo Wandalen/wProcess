@@ -5272,7 +5272,7 @@ function shellVerbosity( test )
   {
     test.identical( got.exitCode, 0 );
     console.log( capturedOutput )
-    test.identical( _.strCount( capturedOutput, `node -e "console.log('message')"`), 1 );
+    test.identical( _.strCount( capturedOutput, `node -e console.log('message')`), 1 );
     test.identical( _.strCount( capturedOutput, 'message' ), 1 );
     test.identical( _.strCount( capturedOutput, 'at ' + _.path.current() ), 0 );
     return true;
@@ -5296,7 +5296,7 @@ function shellVerbosity( test )
    .then( ( got ) =>
    {
      test.identical( got.exitCode, 0 );
-     test.identical( _.strCount( capturedOutput, `node -e "console.log('message')"` ), 1 );
+     test.identical( _.strCount( capturedOutput, `node -e console.log('message')` ), 1 );
      test.identical( _.strCount( capturedOutput, 'message' ), 2 );
      test.identical( _.strCount( capturedOutput, 'at ' + _.path.current() ), 0 );
      return true;
@@ -5320,7 +5320,7 @@ function shellVerbosity( test )
   .then( ( got ) =>
   {
     test.identical( got.exitCode, 0 );
-    test.identical( _.strCount( capturedOutput, `node -e "console.log('message')"` ), 1 );
+    test.identical( _.strCount( capturedOutput, `node -e console.log('message')` ), 1 );
     test.identical( _.strCount( capturedOutput, 'message' ), 2 );
     test.identical( _.strCount( capturedOutput, 'at ' + _.path.current() ), 1 );
     return true;
@@ -5344,7 +5344,7 @@ function shellVerbosity( test )
   .then( ( got ) =>
   {
     test.identical( got.exitCode, 0 );
-    test.identical( _.strCount( capturedOutput, `node -e "console.log('message')"` ), 1 );
+    test.identical( _.strCount( capturedOutput, `node -e console.log('message')` ), 1 );
     test.identical( _.strCount( capturedOutput, 'message' ), 2 );
     test.identical( _.strCount( capturedOutput, 'at ' + _.path.current() ), 1 );
     return true;
@@ -5484,8 +5484,8 @@ function shellVerbosity( test )
   .then( ( got ) =>
   {
     test.identical( got.exitCode, 0 );
-    test.identical( got.fullExecPath, `node -e "console.log( \"a\", 'b', \`c\` )"` );
-    test.identical( _.strCount( capturedOutput, `node -e "console.log( \"a\", 'b', \`c\` )"` ), 1 );
+    test.identical( got.fullExecPath, `node -e console.log( \"a\", 'b', \`c\` )` );
+    test.identical( _.strCount( capturedOutput, `node -e console.log( \"a\", 'b', \`c\` )` ), 1 );
     return true;
   })
 
@@ -5508,8 +5508,8 @@ function shellVerbosity( test )
   .then( ( got ) =>
   {
     test.identical( got.exitCode, 0 );
-    test.identical( got.fullExecPath, `node -e "console.log( '"a"', "'b'", \`"c"\` )"` );
-    test.identical( _.strCount( capturedOutput, `node -e "console.log( '"a"', "'b'", \`"c"\` )"` ), 1 );
+    test.identical( got.fullExecPath, `node -e console.log( '"a"', "'b'", \`"c"\` )` );
+    test.identical( _.strCount( capturedOutput, `node -e console.log( '"a"', "'b'", \`"c"\` )` ), 1 );
     return true;
   })
 
