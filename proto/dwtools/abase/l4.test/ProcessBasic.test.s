@@ -7118,16 +7118,22 @@ function shellStartingParentDeath( test )
   function testAppParent()
   {
     _.include( 'wAppBasic' );
+    _.include( 'wFiles' );
 
-    _.process.start
-    ({
+    let o =
+    {
       execPath : 'node testAppChild.js',
       outputCollecting : 1,
-      when : 'parentdeath'
-    })
+      mode : 'spawn',
+      when : 'afterdeath'
+    }
 
-    return _.timeOut( 5000, () =>
+    _.process.start( o );
+
+    _.timeOut( 2000, () =>
     {
+      process.send( o.process.pid );
+      console.log( 'Parent process end' )
       process.exit();
       return null;
     })
@@ -7135,20 +7141,31 @@ function shellStartingParentDeath( test )
 
   function testAppChild()
   {
-    let data = { t2 : _.timeNow() };
-    console.log( JSON.stringify( data ) );
+    _.include( 'wAppBasic' );
+    _.include( 'wFiles' );
+
+    console.log( 'Child process start' )
+
+    _.timeOut( 2000, () =>
+    {
+      let filePath = _.path.join( __dirname, 'testFile' );
+      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
+      console.log( 'Child process end' )
+    })
   }
 
   /* */
 
   var testAppParentPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppParent.js' ) );
   var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
-  var testAppParentCode = context.toolsPathInclude + testAppParent.toString() + '\testAppParent();';
-  var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\testAppChild();';
+  var testAppParentCode = context.toolsPathInclude + testAppParent.toString() + '\ntestAppParent();';
+  var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
   _.fileProvider.fileWrite( testAppParentPath, testAppParentCode );
   _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
   testAppParentPath = _.strQuote( testAppParentPath );
   var ready = new _.Consequence().take( null );
+
+  let testFilePath = _.path.join( routinePath, 'testFile' );
 
   ready
 
@@ -7156,19 +7173,55 @@ function shellStartingParentDeath( test )
   {
     let o =
     {
-      execPath : testAppParentPath,
-      mode : 'fork',
+      execPath : 'node testAppParent.js',
+      mode : 'spawn',
+      outputCollecting : 1,
+      currentPath : routinePath,
+      ipc : 1,
     }
     let con = _.process.start( o );
 
+    let secondaryPid;
+
+    o.process.on( 'message', ( pid ) =>
+    {
+      secondaryPid = _.numberFrom( pid );
+    })
+
     con.then( ( got ) =>
     {
+      console.log( 'Parent process end handler' )
       test.identical( got.exitCode, 0 );
-      return null;
+      test.is( processIsRunning( secondaryPid ) );
+      test.is( !_.fileProvider.fileExists( testFilePath ) );
+      return _.timeOut( 5000, () => null ); //waint until child will exit
     })
+
+    con.then( ( got ) =>
+    {
+      test.is( !processIsRunning( secondaryPid ) );
+      test.is( _.fileProvider.fileExists( testFilePath ) );
+      let childPid = _.fileProvider.fileRead( testFilePath );
+      test.is( !processIsRunning( _.numberFrom( childPid ) ) );
+      return null;
+    });
 
     return con;
   })
+
+  /*  */
+
+  function processIsRunning( pid )
+  {
+    try
+    {
+      return process.kill( pid, 0 );
+    }
+    catch (e)
+    {
+      return e.code === 'EPERM'
+    }
+  }
 
   return ready;
 }
@@ -9114,7 +9167,7 @@ var Proto =
     shellStartingDelay,
     shellStartingTime,
     // shellStartingSuspended,
-    // shellStartingParentDeath,
+    shellStartingParentDeath,
 
     shellConcurrent,
     shellerConcurrent,

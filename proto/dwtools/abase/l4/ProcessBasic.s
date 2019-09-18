@@ -150,7 +150,7 @@ function start_body( o )
   _.assert( o.args === null || _.arrayIs( o.args ) || _.strIs( o.args ) );
   _.assert( o.execPath === null || _.strIs( o.execPath ) || _.strsAreAll( o.execPath ), 'Expects string or strings {-o.execPath-}, but got', _.strType( o.execPath ) );
   _.assert( o.timeOut === null || _.numberIs( o.timeOut ), 'Expects null or number {-o.timeOut-}, but got', _.strType( o.timeOut ) );
-  _.assert( _.arrayHas( [ 'instant' ],  o.when ) || _.objectIs( o.when ), 'Unsupported starting mode:', o.when );
+  _.assert( _.arrayHas( [ 'instant', 'afterdeath' ],  o.when ) || _.objectIs( o.when ), 'Unsupported starting mode:', o.when );
 
 
 
@@ -293,6 +293,8 @@ function start_body( o )
 
     try
     {
+      if( o.when === 'afterdeath' )
+      prepareAfterDeath();
       prepare();
       launch();
       pipe();
@@ -332,6 +334,56 @@ function start_body( o )
       throw err;
     }
     return arg;
+  }
+
+  /* */
+
+  function prepareAfterDeath()
+  {
+    let toolsPath = _.path.nativize( _.path.join( __dirname, '../../Tools.s' ) );
+    let toolsPathInclude = `let _ = require( '${_.strEscape( toolsPath )}' );\n`
+
+    function secondaryProcess()
+    {
+      _.include( 'wAppBasic' );
+      _.include( 'wFiles' );
+
+      let shellOptions;
+      try
+      {
+        shellOptions = JSON.parse( process.argv[ 2 ] );
+      }
+      catch ( err )
+      {
+        _.errLogOnce( err );
+      }
+
+      process.on( 'disconnect', () =>
+      {
+        console.log( 'Secondary: starting child process...' )
+        if( shellOptions )
+        _.process.start( shellOptions );
+        else
+        process.exit( -1 );
+      })
+    }
+
+    let secondaryProcessSource = toolsPathInclude + secondaryProcess.toString() + '\nsecondaryProcess();';
+    let secondaryFilePath = _.process.tempOpen({ sourceCode : secondaryProcessSource });
+
+    let childOptions = _.mapExtend( null, o );
+
+    childOptions.ready = null;
+    childOptions.logger = null;
+    childOptions.when = 'instant';
+
+    o.execPath = 'node';
+    o.mode = 'spawn';
+    o.args = [ _.path.nativize( secondaryFilePath ), _.toJson( childOptions ) ]
+    o.stdio = 'ignore';
+    o.ipc = true;
+    o.detaching = true;
+    o.inputMirroring = 0;
   }
 
   /* */
