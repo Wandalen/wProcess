@@ -87,6 +87,7 @@ function start_pre( routine, args )
  * @param {String/Array} o.stdio='pipe' Controls stdin,stdout configuration. {@link https://nodejs.org/api/child_process.html#child_process_options_stdio Details}
  * @param {Boolean} o.ipc=0  Creates `ipc` channel between parent and child processes.
  * @param {Boolean} o.detaching=0 Creates independent process for a child. Allows child process to continue execution when parent process exits. Platform dependent option. {@link https://nodejs.org/api/child_process.html#child_process_options_detached Details}.
+ * @param {Boolean} o.windowHiding=1 Hide the child process console window that would normally be created on Windows. {@link https://nodejs.org/api/child_process.html#child_process_child_process_spawn_command_args_options Details}.
  * @param {Boolean} o.passingThrough=0 Allows to pass arguments of parent process to the child process.
  * @param {Boolean} o.concurrent=0 Allows paralel execution of several child processes. By default executes commands one by one.
  * @param {Number} o.timeOut=null Time in milliseconds before execution will be terminated.
@@ -792,7 +793,7 @@ args : [ '"', 'first', 'arg', '"' ]
     o2.cwd = _.path.nativize( o.currentPath );
     if( o.timeOut && o.sync )
     o2.timeout = o.timeOut;
-    o2.windowsHide = true;
+    o2.windowsHide = !!o.windowHiding;
     return o2;
   }
 
@@ -1062,6 +1063,7 @@ start_body.defaults =
   stdio : 'pipe', /* 'pipe' / 'ignore' / 'inherit' */
   ipc : 0,
   detaching : 0,
+  windowHiding : 1,
   passingThrough : 0,
   concurrent : 0,
   timeOut : null,
@@ -1242,6 +1244,14 @@ defaults.applyingExitCode = 1;
 defaults.throwingExitCode = 0;
 defaults.outputPiping = 1;
 defaults.mode = 'fork';
+
+//
+
+let startAfterDeath = _.routineFromPreAndBody( start_pre, start.body );
+
+var defaults = startAfterDeath.defaults;
+
+defaults.when = 'afterdeath';
 
 //
 
@@ -2052,6 +2062,7 @@ let Extend =
   startPassingThrough,
   startNode,
   startNodePassingThrough,
+  startAfterDeath,
   starter,
 
   _argsInSamFormatNodejs,
