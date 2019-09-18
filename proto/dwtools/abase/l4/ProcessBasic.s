@@ -792,6 +792,7 @@ args : [ '"', 'first', 'arg', '"' ]
     o2.cwd = _.path.nativize( o.currentPath );
     if( o.timeOut && o.sync )
     o2.timeout = o.timeOut;
+    o2.windowsHide = true;
     return o2;
   }
 
