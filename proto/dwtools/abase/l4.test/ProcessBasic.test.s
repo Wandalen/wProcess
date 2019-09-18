@@ -7108,170 +7108,147 @@ function shellStartingSuspended( test )
 
 //
 
-function shellStartingParentDeathParentNoWait( test )
-{
-  var context = this;
-  var routinePath = _.path.join( context.suitePath, test.name );
+// function shellStartingParentDeathParentNoWait( test )
+// {
+//   var context = this;
+//   var routinePath = _.path.join( context.suitePath, test.name );
 
-  /*
-    When using stdio : ignore( or pipe ), secondary process starts child process when parent exits.
+//   function testAppParent()
+//   {
+//     _.include( 'wAppBasic' );
+//     _.include( 'wFiles' );
 
-    Parent doesn't wait when secondary and child will exit.
-    Parent process IS NOT ALIVE when child process starts to work.
+//     let o =
+//     {
+//       execPath : 'node testAppChild.js',
+//       outputCollecting : 1,
+//       stdio : 'ignore',
+//       mode : 'spawn',
+//       when : 'afterdeath'
+//     }
 
-    Restrictions:
-    In this case output of secondary and child will be lost.
-  */
+//     _.process.start( o );
 
-  function testAppParent()
-  {
-    _.include( 'wAppBasic' );
-    _.include( 'wFiles' );
+//     process.send( o.process.pid );
 
-    let o =
-    {
-      execPath : 'node testAppChild.js',
-      outputCollecting : 1,
-      stdio : 'ignore',
-      mode : 'spawn',
-      when : 'afterdeath'
-    }
+//     _.timeOut( 3000, () =>
+//     {
+//       console.log( 'Parent process end' )
+//       process.exit();
+//       return null;
+//     })
+//   }
 
-    _.process.start( o );
+//   function testAppChild()
+//   {
+//     _.include( 'wAppBasic' );
+//     _.include( 'wFiles' );
 
-    process.send( o.process.pid );
+//     console.log( 'Child process start' )
 
-    _.timeOut( 3000, () =>
-    {
-      console.log( 'Parent process end' )
-      process.exit();
-      return null;
-    })
-  }
+//     _.timeOut( 2000, () =>
+//     {
+//       let filePath = _.path.join( __dirname, 'testFile' );
+//       _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
+//       console.log( 'Child process end' )
+//     })
+//   }
 
-  function testAppChild()
-  {
-    _.include( 'wAppBasic' );
-    _.include( 'wFiles' );
+//   /* */
 
-    console.log( 'Child process start' )
+//   var testAppParentPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppParent.js' ) );
+//   var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
+//   var testAppParentCode = context.toolsPathInclude + testAppParent.toString() + '\ntestAppParent();';
+//   var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
+//   _.fileProvider.fileWrite( testAppParentPath, testAppParentCode );
+//   _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
+//   testAppParentPath = _.strQuote( testAppParentPath );
+//   var ready = new _.Consequence().take( null );
 
-    _.timeOut( 2000, () =>
-    {
-      let filePath = _.path.join( __dirname, 'testFile' );
-      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
-      console.log( 'Child process end' )
-    })
-  }
+//   let testFilePath = _.path.join( routinePath, 'testFile' );
 
-  /* */
+//   ready
 
-  var testAppParentPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppParent.js' ) );
-  var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
-  var testAppParentCode = context.toolsPathInclude + testAppParent.toString() + '\ntestAppParent();';
-  var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
-  _.fileProvider.fileWrite( testAppParentPath, testAppParentCode );
-  _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
-  testAppParentPath = _.strQuote( testAppParentPath );
-  var ready = new _.Consequence().take( null );
+//   .then( () =>
+//   {
+//     let o =
+//     {
+//       execPath : 'node testAppParent.js',
+//       mode : 'spawn',
+//       outputCollecting : 1,
+//       currentPath : routinePath,
+//       ipc : 1,
+//     }
+//     let con = _.process.start( o );
 
-  let testFilePath = _.path.join( routinePath, 'testFile' );
+//     let secondaryPid;
 
-  ready
+//     o.process.on( 'message', ( pid ) =>
+//     {
+//       secondaryPid = _.numberFrom( pid );
+//     })
 
-  .then( () =>
-  {
-    let o =
-    {
-      execPath : 'node testAppParent.js',
-      mode : 'spawn',
-      outputCollecting : 1,
-      currentPath : routinePath,
-      ipc : 1,
-    }
-    let con = _.process.start( o );
+//     _.timeOut( 2000, () =>
+//     {
+//       test.will = 'parent is alive, secondary is alive'
+//       test.is( processIsRunning( o.process.pid ) )
+//       test.is( processIsRunning( secondaryPid) )
+//       return null;
+//     })
 
-    let secondaryPid;
+//     _.timeOut( 4000, () =>
+//     {
+//       test.will = 'parent is dead, secondaty is alive'
+//       test.is( !processIsRunning( o.process.pid ) )
+//       test.is( processIsRunning( secondaryPid) )
+//       return null;
+//     })
 
-    o.process.on( 'message', ( pid ) =>
-    {
-      secondaryPid = _.numberFrom( pid );
-    })
+//     con.then( ( got ) =>
+//     {
+//       console.log( 'Parent process end handler' )
+//       test.identical( got.exitCode, 0 );
+//       test.is( !processIsRunning( o.process.pid ) );
+//       test.is( processIsRunning( secondaryPid ) );
+//       test.is( !_.fileProvider.fileExists( testFilePath ) );
+//       return _.timeOut( 7000, () => null ); //waint until child will exit
+//     })
 
-    _.timeOut( 2000, () =>
-    {
-      test.will = 'parent is alive, secondary is alive'
-      test.is( processIsRunning( o.process.pid ) )
-      test.is( processIsRunning( secondaryPid) )
-      return null;
-    })
+//     con.then( ( got ) =>
+//     {
+//       test.is( !processIsRunning( secondaryPid ) );
+//       test.is( _.fileProvider.fileExists( testFilePath ) );
+//       let childPid = _.fileProvider.fileRead( testFilePath );
+//       test.is( !processIsRunning( _.numberFrom( childPid ) ) );
+//       return null;
+//     });
 
-    _.timeOut( 4000, () =>
-    {
-      test.will = 'parent is dead, secondaty is alive'
-      test.is( !processIsRunning( o.process.pid ) )
-      test.is( processIsRunning( secondaryPid) )
-      return null;
-    })
+//     return con;
+//   })
 
-    con.then( ( got ) =>
-    {
-      console.log( 'Parent process end handler' )
-      test.identical( got.exitCode, 0 );
-      test.is( !processIsRunning( o.process.pid ) );
-      test.is( processIsRunning( secondaryPid ) );
-      test.is( !_.fileProvider.fileExists( testFilePath ) );
-      return _.timeOut( 7000, () => null ); //waint until child will exit
-    })
+//   /*  */
 
-    con.then( ( got ) =>
-    {
-      test.is( !processIsRunning( secondaryPid ) );
-      test.is( _.fileProvider.fileExists( testFilePath ) );
-      let childPid = _.fileProvider.fileRead( testFilePath );
-      test.is( !processIsRunning( _.numberFrom( childPid ) ) );
-      return null;
-    });
+//   function processIsRunning( pid )
+//   {
+//     try
+//     {
+//       return process.kill( pid, 0 );
+//     }
+//     catch (e)
+//     {
+//       return e.code === 'EPERM'
+//     }
+//   }
 
-    return con;
-  })
-
-  /*  */
-
-  function processIsRunning( pid )
-  {
-    try
-    {
-      return process.kill( pid, 0 );
-    }
-    catch (e)
-    {
-      return e.code === 'EPERM'
-    }
-  }
-
-  return ready;
-}
+//   return ready;
+// }
 
 //
 
-function shellStartingParentDeathParentWaits( test )
+function shellStartingParentDeathParent( test )
 {
   var context = this;
   var routinePath = _.path.join( context.suitePath, test.name );
-
-  /*
-    When using stdio : inherit, secondary gets control of parents terminal.
-    Parent waits when secondary and child will exit.
-    Parent process IS NOT ALIVE when child process starts to work.
-
-    Restrictions:
-    This behaviour works now only if parent was spawned by other process.
-
-    Secondary can't get control on parent terminal if parent is a node process executed from terminal.
-    In this case parent will not wait for secondary output of secondary will be lost.
-    Output of child will be printed in separate window( on windows ) and probably lost on other platform( not tested )
-  */
 
   function testAppParent()
   {
@@ -7294,7 +7271,7 @@ function shellStartingParentDeathParentWaits( test )
     _.timeOut( 4000, () =>
     {
       console.log( 'Parent process exit' )
-      process.exit();
+      process.disconnect();
       return null;
     })
   }
@@ -9344,8 +9321,7 @@ var Proto =
     shellStartingDelay,
     shellStartingTime,
     // shellStartingSuspended,
-    shellStartingParentDeathParentNoWait,
-    shellStartingParentDeathParentWaits,
+    shellStartingParentDeathParent,
 
     shellConcurrent,
     shellerConcurrent,

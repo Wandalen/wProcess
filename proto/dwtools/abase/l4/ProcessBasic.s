@@ -349,24 +349,56 @@ function start_body( o )
       _.include( 'wAppBasic' );
       _.include( 'wFiles' );
 
-      let shellOptions;
+      let startOptions;
+      let parentPid;
+      let interval;
+      let delay = 100;
+
       try
       {
-        shellOptions = JSON.parse( process.argv[ 2 ] );
+        startOptions = JSON.parse( process.argv[ 2 ] );
       }
       catch ( err )
       {
         _.errLogOnce( err );
       }
 
-      process.on( 'disconnect', () =>
+      if( !startOptions )
+      return;
+
+      parentPid = _.numberFrom( process.argv[ 3 ] )
+      interval = setInterval( onInterval, delay );
+
+      /*  */
+
+      function onInterval()
       {
-        console.log( 'Secondary: starting child process...' )
-        if( shellOptions )
-        _.process.start( shellOptions );
-        else
-        process.exit( -1 );
-      })
+        if( !parentIsRunning() )
+        start();
+      }
+
+      /*  */
+
+      function parentIsRunning()
+      {
+        try
+        {
+          return process.kill( parentPid, 0 );
+        }
+        catch (e)
+        {
+          return e.code === 'EPERM'
+        }
+      }
+
+      /*  */
+
+      function start()
+      {
+        clearInterval( interval );
+        console.log( 'Secondary: starting child process...' );
+        _.process.start( startOptions );
+      }
     }
 
     let secondaryProcessSource = toolsPathInclude + secondaryProcess.toString() + '\nsecondaryProcess();';
@@ -380,8 +412,9 @@ function start_body( o )
 
     o.execPath = 'node';
     o.mode = 'spawn';
-    o.args = [ _.path.nativize( secondaryFilePath ), _.toJson( childOptions ) ]
-    o.ipc = true;
+    o.args = [ _.path.nativize( secondaryFilePath ), _.toJson( childOptions ), process.pid ]
+    o.ipc = false;
+    o.stdio = 'inherit'
     o.detaching = true;
     o.inputMirroring = 0;
   }
@@ -607,6 +640,9 @@ function start_body( o )
 
     }
     else _.assert( 0, 'Unknown mode', _.strQuote( o.mode ), 'to start process at path', _.strQuote( o.paths ) );
+
+    if( o.when === 'afterdeath' )
+    o.process.unref();
 
   }
 
@@ -853,6 +889,10 @@ args : [ '"', 'first', 'arg', '"' ]
       handleError( o.process.error );
       else
       handleClose( o.process.status, o.process.signal );
+    }
+    else if( o.when === 'afterdeath' )
+    {
+      o.ready.take( o );
     }
     else
     {
