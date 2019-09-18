@@ -380,7 +380,6 @@ function start_body( o )
     o.execPath = 'node';
     o.mode = 'spawn';
     o.args = [ _.path.nativize( secondaryFilePath ), _.toJson( childOptions ) ]
-    o.stdio = 'ignore';
     o.ipc = true;
     o.detaching = true;
     o.inputMirroring = 0;
