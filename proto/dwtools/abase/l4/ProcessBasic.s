@@ -641,7 +641,7 @@ function start_body( o )
     }
     else _.assert( 0, 'Unknown mode', _.strQuote( o.mode ), 'to start process at path', _.strQuote( o.paths ) );
 
-    if( o.when === 'afterdeath' )
+    if( o.detaching )
     o.process.unref();
 
   }
@@ -889,10 +889,6 @@ args : [ '"', 'first', 'arg', '"' ]
       handleError( o.process.error );
       else
       handleClose( o.process.status, o.process.signal );
-    }
-    else if( o.when === 'afterdeath' )
-    {
-      o.ready.take( o );
     }
     else
     {
