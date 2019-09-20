@@ -153,8 +153,6 @@ function start_body( o )
   _.assert( o.timeOut === null || _.numberIs( o.timeOut ), 'Expects null or number {-o.timeOut-}, but got', _.strType( o.timeOut ) );
   _.assert( _.arrayHas( [ 'instant', 'afterdeath' ],  o.when ) || _.objectIs( o.when ), 'Unsupported starting mode:', o.when );
 
-
-
   let state = 0;
   let currentExitCode;
   let killedByTimeout = false;
@@ -1086,19 +1084,21 @@ start_body.defaults =
 
   execPath : null,
   currentPath : null,
+  args : null,
+  interpreterArgs : null,
 
   sync : 0,
   deasync : 1,
+  when : 'instant', /* instant / afterdeath / time  / delay */
 
-  args : null,
-  interpreterArgs : null,
-  mode : 'shell', /* 'fork', 'exec', 'spawn', 'shell' */
+  mode : 'shell', /* fork / exec / spawn / shell */
   ready : null,
+
   logger : null,
+  stdio : 'pipe', /* pipe / ignore / inherit */
+  ipc : 0,
 
   env : null,
-  stdio : 'pipe', /* 'pipe' / 'ignore' / 'inherit' */
-  ipc : 0,
   detaching : 0,
   windowHiding : 1,
   passingThrough : 0,
@@ -1109,16 +1109,15 @@ start_body.defaults =
   applyingExitCode : 0,
 
   verbosity : 2,
-  outputGray : 0,
-  outputGrayStdout : 0,
   outputPrefixing : 0,
   outputPiping : null,
   outputCollecting : 0,
   outputAdditive : null,
-  outputPlaining : 0,
   inputMirroring : 1,
 
-  when : 'instant'
+  outputGray : 0,
+  outputGrayStdout : 0,
+  outputPlaining : 0,
 
 }
 
