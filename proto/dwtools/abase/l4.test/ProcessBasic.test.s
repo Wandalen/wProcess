@@ -9516,8 +9516,8 @@ var Proto =
     // shellAfterDeath,
     // shellAfterDeathOutput,
 
-    shellDetachingChildAfterParent,
-    shellDetachingChildBeforeParent,
+    // shellDetachingChildAfterParent,
+    // shellDetachingChildBeforeParent,
 
     shellConcurrent,
     shellerConcurrent,
