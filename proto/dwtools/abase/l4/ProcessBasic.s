@@ -508,7 +508,7 @@ function start_body( o )
     if( !ChildProcess )
     ChildProcess = require( 'child_process' );
 
-    if( o.outputStripping )
+    if( o.outputPlaining )
     if( !StripAnsi )
     StripAnsi = require( 'strip-ansi' );
 
@@ -1006,7 +1006,7 @@ args : [ '"', 'first', 'arg', '"' ]
     if( _.bufferAnyIs( data ) )
     data = _.bufferToStr( data );
 
-    if( o.outputStripping )
+    if( o.outputPlaining )
     data = StripAnsi( data );
 
     stderrOutput += data;
@@ -1037,7 +1037,7 @@ args : [ '"', 'first', 'arg', '"' ]
     if( _.bufferAnyIs( data ) )
     data = _.bufferToStr( data );
 
-    if( o.outputStripping )
+    if( o.outputPlaining )
     data = StripAnsi( data );
 
     if( o.outputCollecting )
@@ -1115,7 +1115,7 @@ start_body.defaults =
   outputPiping : null,
   outputCollecting : 0,
   outputAdditive : null,
-  outputStripping : 0,
+  outputPlaining : 0,
   inputMirroring : 1,
 
   when : 'instant'

@@ -9052,7 +9052,7 @@ function shellOutputStripping( test )
     ({
       execPath : execPath,
       mode : mode,
-      outputStripping : 0,
+      outputPlaining : 0,
       outputCollecting : 1,
       ready : ready
     })
@@ -9070,7 +9070,7 @@ function shellOutputStripping( test )
     ({
       execPath : execPath,
       mode : mode,
-      outputStripping : 1,
+      outputPlaining : 1,
       outputCollecting : 1,
       ready : ready
     })
