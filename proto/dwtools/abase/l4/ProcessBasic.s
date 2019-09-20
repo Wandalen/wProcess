@@ -87,6 +87,7 @@ function start_pre( routine, args )
  * @param {String/Array} o.stdio='pipe' Controls stdin,stdout configuration. {@link https://nodejs.org/api/child_process.html#child_process_options_stdio Details}
  * @param {Boolean} o.ipc=0  Creates `ipc` channel between parent and child processes.
  * @param {Boolean} o.detaching=0 Creates independent process for a child. Allows child process to continue execution when parent process exits. Platform dependent option. {@link https://nodejs.org/api/child_process.html#child_process_options_detached Details}.
+ * @param {Boolean} o.windowHiding=1 Hide the child process console window that would normally be created on Windows. {@link https://nodejs.org/api/child_process.html#child_process_child_process_spawn_command_args_options Details}.
  * @param {Boolean} o.passingThrough=0 Allows to pass arguments of parent process to the child process.
  * @param {Boolean} o.concurrent=0 Allows paralel execution of several child processes. By default executes commands one by one.
  * @param {Number} o.timeOut=null Time in milliseconds before execution will be terminated.
@@ -150,7 +151,7 @@ function start_body( o )
   _.assert( o.args === null || _.arrayIs( o.args ) || _.strIs( o.args ) );
   _.assert( o.execPath === null || _.strIs( o.execPath ) || _.strsAreAll( o.execPath ), 'Expects string or strings {-o.execPath-}, but got', _.strType( o.execPath ) );
   _.assert( o.timeOut === null || _.numberIs( o.timeOut ), 'Expects null or number {-o.timeOut-}, but got', _.strType( o.timeOut ) );
-  _.assert( _.arrayHas( [ 'instant' ],  o.starting ) || _.objectIs( o.starting ), 'Unsupported starting mode:', o.starting );
+  _.assert( _.arrayHas( [ 'instant', 'afterdeath' ],  o.when ) || _.objectIs( o.when ), 'Unsupported starting mode:', o.when );
 
 
 
@@ -162,21 +163,21 @@ function start_body( o )
   let decoratedErrorOutput = '';
   let startingDelay = 0;
 
-  if( _.objectIs( o.starting ) )
+  if( _.objectIs( o.when ) )
   {
     if( Config.debug )
     {
-      let keys = _.mapKeys( o.starting );
+      let keys = _.mapKeys( o.when );
       _.assert( keys.length === 1 && _.arrayHas([ 'time', 'delay' ], keys[ 0 ] ) );
-      _.assert( _.numberIs( o.starting.delay ) || _.numberIs( o.starting.time ) )
+      _.assert( _.numberIs( o.when.delay ) || _.numberIs( o.when.time ) )
     }
 
-    if( o.starting.delay !== undefined )
-    startingDelay = o.starting.delay;
+    if( o.when.delay !== undefined )
+    startingDelay = o.when.delay;
     else
-    startingDelay = o.starting.time - _.timeNow();
+    startingDelay = o.when.time - _.timeNow();
 
-    _.assert( startingDelay >= 0, 'Wrong value of {-o.starting.delay } or {-o.starting.time-}. Starting delay should be >= 0, current:', startingDelay )
+    _.assert( startingDelay >= 0, 'Wrong value of {-o.when.delay } or {-o.when.time-}. Starting delay should be >= 0, current:', startingDelay )
   }
 
   o.ready = o.ready || new _.Consequence().take( null );
@@ -293,6 +294,8 @@ function start_body( o )
 
     try
     {
+      if( o.when === 'afterdeath' )
+      prepareAfterDeath();
       prepare();
       launch();
       pipe();
@@ -332,6 +335,88 @@ function start_body( o )
       throw err;
     }
     return arg;
+  }
+
+  /* */
+
+  function prepareAfterDeath()
+  {
+    let toolsPath = _.path.nativize( _.path.join( __dirname, '../../Tools.s' ) );
+    let toolsPathInclude = `let _ = require( '${_.strEscape( toolsPath )}' );\n`
+
+    function secondaryProcess()
+    {
+      _.include( 'wAppBasic' );
+      _.include( 'wFiles' );
+
+      let startOptions;
+      let parentPid;
+      let interval;
+      let delay = 100;
+
+      try
+      {
+        startOptions = JSON.parse( process.argv[ 2 ] );
+      }
+      catch ( err )
+      {
+        _.errLogOnce( err );
+      }
+
+      if( !startOptions )
+      return;
+
+      parentPid = _.numberFrom( process.argv[ 3 ] )
+      interval = setInterval( onInterval, delay );
+
+      /*  */
+
+      function onInterval()
+      {
+        if( !parentIsRunning() )
+        start();
+      }
+
+      /*  */
+
+      function parentIsRunning()
+      {
+        try
+        {
+          return process.kill( parentPid, 0 );
+        }
+        catch (e)
+        {
+          return e.code === 'EPERM'
+        }
+      }
+
+      /*  */
+
+      function start()
+      {
+        clearInterval( interval );
+        console.log( 'Secondary: starting child process...' );
+        _.process.start( startOptions );
+      }
+    }
+
+    let secondaryProcessSource = toolsPathInclude + secondaryProcess.toString() + '\nsecondaryProcess();';
+    let secondaryFilePath = _.process.tempOpen({ sourceCode : secondaryProcessSource });
+
+    let childOptions = _.mapExtend( null, o );
+
+    childOptions.ready = null;
+    childOptions.logger = null;
+    childOptions.when = 'instant';
+
+    o.execPath = 'node';
+    o.mode = 'spawn';
+    o.args = [ _.path.nativize( secondaryFilePath ), _.toJson( childOptions ), process.pid ]
+    o.ipc = false;
+    o.stdio = 'inherit'
+    o.detaching = true;
+    o.inputMirroring = 0;
   }
 
   /* */
@@ -556,6 +641,9 @@ function start_body( o )
     }
     else _.assert( 0, 'Unknown mode', _.strQuote( o.mode ), 'to start process at path', _.strQuote( o.paths ) );
 
+    if( o.detaching )
+    o.process.unref();
+
   }
 
   //
@@ -741,6 +829,7 @@ args : [ '"', 'first', 'arg', '"' ]
     o2.cwd = _.path.nativize( o.currentPath );
     if( o.timeOut && o.sync )
     o2.timeout = o.timeOut;
+    o2.windowsHide = !!o.windowHiding;
     return o2;
   }
 
@@ -1010,6 +1099,7 @@ start_body.defaults =
   stdio : 'pipe', /* 'pipe' / 'ignore' / 'inherit' */
   ipc : 0,
   detaching : 0,
+  windowHiding : 1,
   passingThrough : 0,
   concurrent : 0,
   timeOut : null,
@@ -1027,7 +1117,7 @@ start_body.defaults =
   outputStripping : 0,
   inputMirroring : 1,
 
-  starting : 'instant'
+  when : 'instant'
 
 }
 
@@ -1190,6 +1280,14 @@ defaults.applyingExitCode = 1;
 defaults.throwingExitCode = 0;
 defaults.outputPiping = 1;
 defaults.mode = 'fork';
+
+//
+
+let startAfterDeath = _.routineFromPreAndBody( start_pre, start.body );
+
+var defaults = startAfterDeath.defaults;
+
+defaults.when = 'afterdeath';
 
 //
 
@@ -2000,6 +2098,7 @@ let Extend =
   startPassingThrough,
   startNode,
   startNodePassingThrough,
+  startAfterDeath,
   starter,
 
   _argsInSamFormatNodejs,
