@@ -15,7 +15,7 @@
       "email": "volodymyr.migdal@gmail.com"
     }
   ],
-  "main": "proto/dwtools/abase/l4/AppBasic.s",
+  "main": "proto/dwtools/abase/l4/ProcessBasic.s",
   "files": [
     "proto/dwtools/abase/l4",
     "proto/dwtools/Tools.s",

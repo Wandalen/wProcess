@@ -87,6 +87,7 @@ function start_pre( routine, args )
  * @param {String/Array} o.stdio='pipe' Controls stdin,stdout configuration. {@link https://nodejs.org/api/child_process.html#child_process_options_stdio Details}
  * @param {Boolean} o.ipc=0  Creates `ipc` channel between parent and child processes.
  * @param {Boolean} o.detaching=0 Creates independent process for a child. Allows child process to continue execution when parent process exits. Platform dependent option. {@link https://nodejs.org/api/child_process.html#child_process_options_detached Details}.
+ * @param {Boolean} o.windowHiding=1 Hide the child process console window that would normally be created on Windows. {@link https://nodejs.org/api/child_process.html#child_process_child_process_spawn_command_args_options Details}.
  * @param {Boolean} o.passingThrough=0 Allows to pass arguments of parent process to the child process.
  * @param {Boolean} o.concurrent=0 Allows paralel execution of several child processes. By default executes commands one by one.
  * @param {Number} o.timeOut=null Time in milliseconds before execution will be terminated.
@@ -150,7 +151,7 @@ function start_body( o )
   _.assert( o.args === null || _.arrayIs( o.args ) || _.strIs( o.args ) );
   _.assert( o.execPath === null || _.strIs( o.execPath ) || _.strsAreAll( o.execPath ), 'Expects string or strings {-o.execPath-}, but got', _.strType( o.execPath ) );
   _.assert( o.timeOut === null || _.numberIs( o.timeOut ), 'Expects null or number {-o.timeOut-}, but got', _.strType( o.timeOut ) );
-  _.assert( _.arrayHas( [ 'instant'/* , 'suspended', 'parentdeath' */ ],  o.starting ) || _.objectIs( o.starting ), 'Unsupported starting mode:', o.starting );
+  _.assert( _.arrayHas( [ 'instant', 'afterdeath' ],  o.when ) || _.objectIs( o.when ), 'Unsupported starting mode:', o.when );
 
 
 
@@ -162,21 +163,21 @@ function start_body( o )
   let decoratedErrorOutput = '';
   let startingDelay = 0;
 
-  if( _.objectIs( o.starting ) )
+  if( _.objectIs( o.when ) )
   {
     if( Config.debug )
     {
-      let keys = _.mapKeys( o.starting );
+      let keys = _.mapKeys( o.when );
       _.assert( keys.length === 1 && _.arrayHas([ 'time', 'delay' ], keys[ 0 ] ) );
-      _.assert( _.numberIs( o.starting.delay ) || _.numberIs( o.starting.time ) )
+      _.assert( _.numberIs( o.when.delay ) || _.numberIs( o.when.time ) )
     }
 
-    if( o.starting.delay !== undefined )
-    startingDelay = o.starting.delay;
+    if( o.when.delay !== undefined )
+    startingDelay = o.when.delay;
     else
-    startingDelay = o.starting.time - _.timeNow();
+    startingDelay = o.when.time - _.timeNow();
 
-    _.assert( startingDelay >= 0, 'Wrong value of {-o.starting.delay } or {-o.starting.time-}. Starting delay should be >= 0, current:', startingDelay )
+    _.assert( startingDelay >= 0, 'Wrong value of {-o.when.delay } or {-o.when.time-}. Starting delay should be >= 0, current:', startingDelay )
   }
 
   o.ready = o.ready || new _.Consequence().take( null );
@@ -293,6 +294,8 @@ function start_body( o )
 
     try
     {
+      if( o.when === 'afterdeath' )
+      prepareAfterDeath();
       prepare();
       launch();
       pipe();
@@ -336,6 +339,88 @@ function start_body( o )
 
   /* */
 
+  function prepareAfterDeath()
+  {
+    let toolsPath = _.path.nativize( _.path.join( __dirname, '../../Tools.s' ) );
+    let toolsPathInclude = `let _ = require( '${_.strEscape( toolsPath )}' );\n`
+
+    function secondaryProcess()
+    {
+      _.include( 'wAppBasic' );
+      _.include( 'wFiles' );
+
+      let startOptions;
+      let parentPid;
+      let interval;
+      let delay = 100;
+
+      try
+      {
+        startOptions = JSON.parse( process.argv[ 2 ] );
+      }
+      catch ( err )
+      {
+        _.errLogOnce( err );
+      }
+
+      if( !startOptions )
+      return;
+
+      parentPid = _.numberFrom( process.argv[ 3 ] )
+      interval = setInterval( onInterval, delay );
+
+      /*  */
+
+      function onInterval()
+      {
+        if( !parentIsRunning() )
+        start();
+      }
+
+      /*  */
+
+      function parentIsRunning()
+      {
+        try
+        {
+          return process.kill( parentPid, 0 );
+        }
+        catch (e)
+        {
+          return e.code === 'EPERM'
+        }
+      }
+
+      /*  */
+
+      function start()
+      {
+        clearInterval( interval );
+        console.log( 'Secondary: starting child process...' );
+        _.process.start( startOptions );
+      }
+    }
+
+    let secondaryProcessSource = toolsPathInclude + secondaryProcess.toString() + '\nsecondaryProcess();';
+    let secondaryFilePath = _.process.tempOpen({ sourceCode : secondaryProcessSource });
+
+    let childOptions = _.mapExtend( null, o );
+
+    childOptions.ready = null;
+    childOptions.logger = null;
+    childOptions.when = 'instant';
+
+    o.execPath = 'node';
+    o.mode = 'spawn';
+    o.args = [ _.path.nativize( secondaryFilePath ), _.toJson( childOptions ), process.pid ]
+    o.ipc = false;
+    o.stdio = 'inherit'
+    o.detaching = true;
+    o.inputMirroring = 0;
+  }
+
+  /* */
+
   function prepare()
   {
 
@@ -370,9 +455,6 @@ function start_body( o )
       if( begin && begin === end )
       o.execPath = _.strInsideOf( o.execPath, begin, end );
     }
-
-    if( o.args )
-    o.fullExecPath = _.strConcat( _.arrayAppendArray( [ o.fullExecPath ], o.args ) );
 
     if( execArgs && execArgs.length )
     o.args = _.arrayPrependArray( o.args || [], execArgs );
@@ -416,11 +498,6 @@ function start_body( o )
 
     /* out options */
 
-    // if( o.args )
-    // o.fullExecPath = _.strConcat( _.arrayAppendArray( [ o.execPath ], o.args || [] ) );
-    // else
-    // o.fullExecPath = _.strConcat([ o.execPath ]);
-
     o.exitCode = null;
     o.exitSignal = null;
     o.process = null;
@@ -453,34 +530,6 @@ function start_body( o )
 
   function launch()
   {
-
-    /* logger */
-
-    try
-    {
-
-      if( o.verbosity && o.inputMirroring )
-      {
-        let prefix = ' > ';
-        if( !o.outputGray )
-        prefix = _.color.strFormat( prefix, { fg : 'bright white' } );
-        log( prefix + o.fullExecPath );
-      }
-
-      if( o.verbosity >= 3 )
-      {
-        let prefix = '   at ';
-        if( !o.outputGray )
-        prefix = _.color.strFormat( prefix, { fg : 'bright white' } );
-        log( prefix + o.currentPath );
-      }
-
-    }
-    catch( err )
-    {
-      debugger;
-      _.errLogOnce( err );
-    }
 
     /* launch */
 
@@ -524,6 +573,10 @@ function start_body( o )
       _.assert( !o.sync || o.deasync, '{ shell.mode } "fork" is available only in async/deasync version of shell' );
       let o2 = optionsForFork();
       execPath = execPathForFork( execPath );
+
+      o.fullExecPath = _.strConcat( _.arrayAppendArray( [ execPath ], args ) );
+      launchInputLog();
+
       o.process = ChildProcess.fork( execPath, args, o2 );
     }
     else if( o.mode === 'exec' )
@@ -532,6 +585,10 @@ function start_body( o )
       log( '{ shell.mode } "exec" is deprecated' );
       if( args.length )
       execPath = execPath + ' ' + argsJoin( args );
+
+      o.fullExecPath = execPath;
+      launchInputLog();
+
       if( o.sync && !o.deasync )
       o.process = ChildProcess.execSync( execPath, { env : o.env, cwd : currentPath } );
       else
@@ -539,20 +596,10 @@ function start_body( o )
     }
     else if( o.mode === 'spawn' )
     {
-      // let appPath = o.execPath;
-
-      // if( !o.args )
-      // {
-      //   o.args = _.strSplitNonPreserving({ src : o.execPath });
-      //   appPath = o.args.shift();
-      // }
-      // else
-      // {
-      //   if( appPath.length )
-      //   _.assert( _.strSplitNonPreserving({ src : appPath }).length === 1, ' o.execPath must not contain arguments if those were provided through options' );
-      // }
-
       let o2 = optionsForSpawn();
+
+      o.fullExecPath = _.strConcat( _.arrayAppendArray( [ execPath ], args ) );
+      launchInputLog();
 
       if( o.sync && !o.deasync )
       o.process = ChildProcess.spawnSync( execPath, args, o2 );
@@ -583,6 +630,9 @@ function start_body( o )
       if( args.length )
       arg2 = arg2 + ' ' + argsJoin( args );
 
+      o.fullExecPath = arg2;
+      launchInputLog();
+
       if( o.sync && !o.deasync )
       o.process = ChildProcess.spawnSync( appPath, [ arg1, arg2 ], o2 );
       else
@@ -591,8 +641,42 @@ function start_body( o )
     }
     else _.assert( 0, 'Unknown mode', _.strQuote( o.mode ), 'to start process at path', _.strQuote( o.paths ) );
 
+    if( o.detaching )
+    o.process.unref();
+
   }
 
+  //
+
+  function launchInputLog()
+  {
+    /* logger */
+    try
+    {
+
+      if( o.verbosity && o.inputMirroring )
+      {
+        let prefix = ' > ';
+        if( !o.outputGray )
+        prefix = _.color.strFormat( prefix, { fg : 'bright white' } );
+        log( prefix + o.fullExecPath );
+      }
+
+      if( o.verbosity >= 3 )
+      {
+        let prefix = '   at ';
+        if( !o.outputGray )
+        prefix = _.color.strFormat( prefix, { fg : 'bright white' } );
+        log( prefix + o.currentPath );
+      }
+
+    }
+    catch( err )
+    {
+      debugger;
+      _.errLogOnce( err );
+    }
+  }
 /*
 qqq
 add coverage
@@ -699,19 +783,16 @@ args : [ '"', 'first', 'arg', '"' ]
 
   /* */
 
-  function argsJoin( args )
+  function argsJoin( src )
   {
-    args = args.slice();
-
+    let args = src.slice();
 
 
     for( let i = 0; i < args.length; i++ )
     {
-      // escaping of some quotes is needed to equalize behavior of shell and exec modes on all platforms
-      let quotes = [ '"' ]
-      if( process.platform !== 'win32' ) /* qqq : ?? */
-      quotes.push( "`" )
-      _.each( quotes, ( quote ) =>
+      // escape quotes to make shell interpret them as regular symbols
+      let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', "`" ]
+      _.each( quotesToEscape, ( quote ) =>
       {
         args[ i ] = _.strReplaceAll( args[ i ], quote, ( match, it ) =>
         {
@@ -722,20 +803,17 @@ args : [ '"', 'first', 'arg', '"' ]
       })
     }
 
+    if( args.length === 1 )
+    return _.strQuote( args[ 0 ] );
 
-    // return '"' + args.join( '" "' ) + '"';
-    let result = '';
-
+    //quote only arguments with spaces
     _.each( args, ( arg, i ) =>
     {
-      // if( !_.arrayHas( [ '&&', '&', '|', '||' ], arg ) ) /* qqq : ?? */
-      // arg = '"' + arg + '"';
-      if( i )
-      result += ' ';
-      result += arg;
+      if( _.strHas( src[ i ], ' ' ) )
+      args[ i ] = _.strQuote( arg );
     })
 
-    return result;
+    return args.join( ' ' );
   }
 
   /* */
@@ -752,6 +830,7 @@ args : [ '"', 'first', 'arg', '"' ]
     o2.cwd = _.path.nativize( o.currentPath );
     if( o.timeOut && o.sync )
     o2.timeout = o.timeOut;
+    o2.windowsHide = !!o.windowHiding;
     return o2;
   }
 
@@ -1021,6 +1100,7 @@ start_body.defaults =
   stdio : 'pipe', /* 'pipe' / 'ignore' / 'inherit' */
   ipc : 0,
   detaching : 0,
+  windowHiding : 1,
   passingThrough : 0,
   concurrent : 0,
   timeOut : null,
@@ -1038,7 +1118,7 @@ start_body.defaults =
   outputStripping : 0,
   inputMirroring : 1,
 
-  starting : 'instant'
+  when : 'instant'
 
 }
 
@@ -1201,6 +1281,14 @@ defaults.applyingExitCode = 1;
 defaults.throwingExitCode = 0;
 defaults.outputPiping = 1;
 defaults.mode = 'fork';
+
+//
+
+let startAfterDeath = _.routineFromPreAndBody( start_pre, start.body );
+
+var defaults = startAfterDeath.defaults;
+
+defaults.when = 'afterdeath';
 
 //
 
@@ -1938,7 +2026,7 @@ function tempOpen_body( o )
   _.assert( arguments.length === 1, 'Expects single argument' );
   _.assert( _.strIs( o.sourceCode ) || _.bufferRawIs( o.sourceCode ), 'Expects string or buffer raw {-o.sourceCode-}, but got', _.strType( o.sourceCode ) );
 
-  let tempDirPath = _.path.pathDirTempForOpen( _.path.current() );
+  let tempDirPath = _.path.pathDirTempOpen( _.path.current() );
   let filePath = _.path.join( tempDirPath, _.idWithDate() + '.ss' );
   _tempFiles.push( filePath );
   _.fileProvider.fileWrite( filePath, o.sourceCode );
@@ -2011,6 +2099,7 @@ let Extend =
   startPassingThrough,
   startNode,
   startNodePassingThrough,
+  startAfterDeath,
   starter,
 
   _argsInSamFormatNodejs,
