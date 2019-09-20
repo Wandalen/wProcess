@@ -9513,8 +9513,8 @@ var Proto =
     shellStartingDelay,
     shellStartingTime,
     // shellStartingSuspended,
-    shellAfterDeath,
-    shellAfterDeathOutput,
+    // shellAfterDeath,
+    // shellAfterDeathOutput,
 
     shellDetachingChildAfterParent,
     shellDetachingChildBeforeParent,
