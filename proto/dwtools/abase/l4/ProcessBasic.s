@@ -675,79 +675,6 @@ function start_body( o )
       _.errLogOnce( err );
     }
   }
-/*
-qqq
-add coverage
-
-for combination:
-  path to exe file : [ with space, without space ]
-  execPath : [ has arguments, only path to exe file ]
-  args : [ has arguments, empty ]
-  mode : [ 'fork', 'exec', 'spawn', 'shell' ]
-
-example of execPath :
-  execPath : '"/dir with space/app.exe" firstArg secondArg:1 "third arg" \'fourth arg\'  `"fifth" arg`
-
-== samples
-
-execPath : '"/dir with space/app.exe" `firstArg secondArg ":" 1` "third arg" \'fourth arg\'  `"fifth" arg`,
-args : '"some arg"'
-mode : 'spawn'
-->
-execPath : '/dir with space/app.exe'
-args : [ 'firstArg secondArg ":" 1', 'third arg', 'fourth arg', '"fifth" arg', '"some arg"' ],
-
-=
-
-execPath : '"/dir with space/app.exe" firstArg secondArg:1',
-args : '"third arg"',
-->
-execPath : '/dir with space/app.exe'
-args : [ 'firstArg', 'secondArg:1', '"third arg"' ]
-
-=
-
-execPath : '"first arg"'
-->
-execPath : 'first arg'
-args : []
-
-=
-
-args : '"first arg"'
-->
-execPath : 'first arg'
-args : []
-
-=
-
-args : [ '"first arg"', 'second arg' ]
-->
-execPath : 'first arg'
-args : [ 'second arg' ]
-
-=
-
-args : [ '"', 'first', 'arg', '"' ]
-->
-execPath : '"'
-args : [ 'first', 'arg', '"' ]
-
-=
-
-args : [ '', 'first', 'arg', '"' ]
-->
-execPath : ''
-args : [ 'first', 'arg', '"' ]
-
-=
-
-args : [ '"', '"', 'first', 'arg', '"' ]
-->
-execPath : '"'
-args : [ '"', 'first', 'arg', '"' ]
-
-*/
 
   /* */
 
@@ -985,7 +912,6 @@ args : [ '"', 'first', 'arg', '"' ]
 
     state = 2;
 
-    debugger;
     err = _.err( 'Error shelling command\n', o.execPath, '\nat', o.currentPath, '\n', err );
     if( o.verbosity )
     err = _.errLogOnce( err );
@@ -1122,6 +1048,79 @@ start_body.defaults =
 }
 
 let start = _.routineFromPreAndBody( start_pre, start_body );
+/*
+qqq
+add coverage
+
+for combination:
+  path to exe file : [ with space, without space ]
+  execPath : [ has arguments, only path to exe file ]
+  args : [ has arguments, empty ]
+  mode : [ 'fork', 'exec', 'spawn', 'shell' ]
+
+example of execPath :
+  execPath : '"/dir with space/app.exe" firstArg secondArg:1 "third arg" \'fourth arg\'  `"fifth" arg`
+
+== samples
+
+execPath : '"/dir with space/app.exe" `firstArg secondArg ":" 1` "third arg" \'fourth arg\'  `"fifth" arg`,
+args : '"some arg"'
+mode : 'spawn'
+->
+execPath : '/dir with space/app.exe'
+args : [ 'firstArg secondArg ":" 1', 'third arg', 'fourth arg', '"fifth" arg', '"some arg"' ],
+
+=
+
+execPath : '"/dir with space/app.exe" firstArg secondArg:1',
+args : '"third arg"',
+->
+execPath : '/dir with space/app.exe'
+args : [ 'firstArg', 'secondArg:1', '"third arg"' ]
+
+=
+
+execPath : '"first arg"'
+->
+execPath : 'first arg'
+args : []
+
+=
+
+args : '"first arg"'
+->
+execPath : 'first arg'
+args : []
+
+=
+
+args : [ '"first arg"', 'second arg' ]
+->
+execPath : 'first arg'
+args : [ 'second arg' ]
+
+=
+
+args : [ '"', 'first', 'arg', '"' ]
+->
+execPath : '"'
+args : [ 'first', 'arg', '"' ]
+
+=
+
+args : [ '', 'first', 'arg', '"' ]
+->
+execPath : ''
+args : [ 'first', 'arg', '"' ]
+
+=
+
+args : [ '"', '"', 'first', 'arg', '"' ]
+->
+execPath : '"'
+args : [ '"', 'first', 'arg', '"' ]
+
+*/
 
 //
 
