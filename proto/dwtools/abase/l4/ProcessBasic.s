@@ -200,11 +200,17 @@ function start_body( o )
   {
     if( startingDelay )
     o.ready.then( () => _.timeOut( startingDelay, () => null ) )
-
     o.ready.thenGive( single );
     o.ready.finallyKeep( end );
+
     if( o.sync && o.deasync )
     return o.ready.finallyDeasyncGive();
+    if( !o.sync && o.deasync ) /* qqq : check, does not work properly! */
+    {
+      o.ready.finallyDeasyncKeep();
+      return o.ready;
+    }
+
     return o.ready;
   }
 
@@ -278,6 +284,11 @@ function start_body( o )
     return o;
     if( o.sync && o.deasync )
     return o.ready.finallyDeasyncGive();
+    if( !o.sync && o.deasync ) /* qqq : check */
+    {
+      o.ready.finallyDeasyncKeep();
+      return o.ready;
+    }
 
     return o.ready;
   }
