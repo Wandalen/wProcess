@@ -1025,7 +1025,7 @@ start_body.defaults =
   interpreterArgs : null,
 
   sync : 0,
-  deasync : 1,
+  deasync : 0,
   when : 'instant', /* instant / afterdeath / time  / delay */
 
   mode : 'shell', /* fork / exec / spawn / shell */
