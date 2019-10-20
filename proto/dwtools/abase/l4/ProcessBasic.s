@@ -1452,7 +1452,7 @@ starter.defaults = Object.create( start.defaults );
  * Supports processing of regular arguments, options( key:value pairs), commands and arrays.
  * @param {Object} o Options map.
  * @param {Boolean} o.keyValDelimeter=':' Delimeter for key:value pairs.
- * @param {String} o.cmmandsDelimeter=';' Delimeneter for commands, for example : `.build something ; .exit `
+ * @param {String} o.commandsDelimeter=';' Delimeneter for commands, for example : `.build something ; .exit `
  * @param {Array} o.argv=null Arguments array. By default takes arguments from `process.argv`.
  * @param {Boolean} o.caching=true Caches results for speedup next calls.
  * @param {Boolean} o.parsingArrays=true Enables parsing of array from arguments.
@@ -1475,7 +1475,7 @@ let _argsInSamFormat = Object.create( null )
 var defaults = _argsInSamFormat.defaults = Object.create( null );
 
 defaults.keyValDelimeter = ':';
-defaults.cmmandsDelimeter = ';';
+defaults.commandsDelimeter = ';';
 defaults.argv = null;
 defaults.caching = true;
 defaults.parsingArrays = true;
@@ -1490,14 +1490,14 @@ function _argsInSamFormatNodejs( o )
 
   if( o.caching )
   if( _argsCache )
-  if( o.keyValDelimeter === _argsCache.keyValDelimeter && o.cmmandsDelimeter === _argsCache.cmmandsDelimeter )
+  if( o.keyValDelimeter === _argsCache.keyValDelimeter && o.commandsDelimeter === _argsCache.commandsDelimeter )
   return _argsCache;
 
   let result = Object.create( null );
 
   if( o.caching )
   // if( o.keyValDelimeter === _argsInSamFormatNodejs.defaults.keyValDelimeter )
-  if( o.keyValDelimeter === _argsInSamFormatNodejs.defaults.keyValDelimeter && o.cmmandsDelimeter === _argsInSamFormatNodejs.defaults.cmmandsDelimeter )
+  if( o.keyValDelimeter === _argsInSamFormatNodejs.defaults.keyValDelimeter && o.commandsDelimeter === _argsInSamFormatNodejs.defaults.commandsDelimeter )
   _argsCache = result;
 
   if( !_global.process )
@@ -1524,7 +1524,7 @@ function _argsInSamFormatNodejs( o )
   ({
     src : result.scriptString,
     keyValDelimeter : o.keyValDelimeter,
-    cmmandsDelimeter : o.cmmandsDelimeter,
+    commandsDelimeter : o.commandsDelimeter,
     parsingArrays : o.parsingArrays,
   });
 
