@@ -24,13 +24,13 @@
   }, 
   "dependencies" : 
   {
-    "wTools" : "", 
-    "wpathbasic" : "", 
-    "wgdfstrategy" : "", 
-    "wConsequence" : "", 
+    "wTools" : "beta", 
+    "wpathbasic" : "beta", 
+    "wgdfstrategy" : "beta", 
+    "wConsequence" : "beta", 
     "deasync" : "", 
     "strip-ansi" : ""
   }, 
-  "devDependencies" : { "wTesting" : "" }, 
+  "devDependencies" : { "wTesting" : "beta" }, 
   "keywords" : [ "wTools", "exec file", "shell script", "run program" ]
 }
