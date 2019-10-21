@@ -27,7 +27,7 @@ about :
 path :
 
   repository : git+https:///github.com/Wandalen/wAppBasic.git
-  remotes :
+  origins :
    - git+https:///github.com/Wandalen/wAppBasic.git
    - npm:///wappbasic
   bugtracker : https:///github.com/Wandalen/wAppBasic/issues
