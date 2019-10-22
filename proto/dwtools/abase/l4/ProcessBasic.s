@@ -899,6 +899,9 @@ function start_body( o )
       else
       err = _.err( 'Process wass killed by exit signal', exitSignal, '\n', infoGet() );
 
+      if( o.briefExitCode )
+      err = _.errBrief( err );
+
       if( o.sync && !o.deasync )
       throw err;
       else
@@ -1026,7 +1029,7 @@ start_body.defaults =
 
   sync : 0,
   deasync : 0,
-  when : 'instant', /* instant / afterdeath / time  / delay */
+  when : 'instant', /* instant / afterdeath / time / delay */
 
   mode : 'shell', /* fork / exec / spawn / shell */
   ready : null,
@@ -1044,6 +1047,7 @@ start_body.defaults =
 
   throwingExitCode : 1, /* must be on by default */
   applyingExitCode : 0,
+  briefExitCode : 0,
 
   verbosity : 2,
   outputPrefixing : 0,
