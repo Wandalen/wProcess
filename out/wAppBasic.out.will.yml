@@ -3,18 +3,19 @@ root:
   - wAppBasic.out
 consistency:
   wAppBasic.out.will.yml: &ref_0
-    hash: cfc3f2c08f157e903e60f03f16854870
-    size: 39764
+    hash: a575964e2ec43d78c0d09ca26ce0712c
+    size: 39793
   ../.ex.will.yml: &ref_1
     hash: dc752b9f2b3623dc29962188de9d2b4b
     size: 2146
   ../.im.will.yml: &ref_2
-    hash: 01eb175c5fd939a4d7a2432846bba84e
-    size: 5224
+    hash: d133cdc63ac84ab722a4410ff9104e05
+    size: 5298
 module:
   wAppBasic.out:
     about:
       name: wAppBasic
+      org: noorg
       description: >-
         Collection of routines to execute system commands, run shell, batches,
         launch external processes from JavaScript application. ExecTools
@@ -70,9 +71,6 @@ module:
       download:
         criterion:
           predefined: 1
-      remote:
-        criterion:
-          predefined: 1
       repository:
         path: 'git+https:///github.com/Wandalen/wAppBasic.git'
       origins:
@@ -82,15 +80,15 @@ module:
       bugtracker:
         path: 'https:///github.com/Wandalen/wAppBasic/issues'
       in:
-        criterion:
-          predefined: 0
         path: .
       out:
-        criterion:
-          predefined: 0
         path: .
       temp:
-        path: 'path::out'
+        path:
+          - 'path::out'
+          - ../package-lock.json
+          - ../package.json
+          - ../node_modules
       proto:
         path: ../proto
       export:
@@ -155,11 +153,13 @@ module:
         path: '{path::out.*=}/source/Index.s'
       exported.dir.proto.export:
         criterion:
+          generated: 1
           content: proto
           export: 1
         path: ../proto
       exported.files.proto.export:
         criterion:
+          generated: 1
           content: proto
           export: 1
         path:
@@ -358,6 +358,7 @@ module:
           prefixPath: ../proto
         mandatory: 1
         criterion:
+          generated: 1
           content: proto
           export: 1
       exported.files.proto.export:
@@ -370,6 +371,7 @@ module:
         recursive: 0
         mandatory: 1
         criterion:
+          generated: 1
           content: proto
           export: 1
     step:
@@ -727,6 +729,7 @@ module:
         opts:
           reflector: 'reflector::exported.proto.export*'
         criterion:
+          generated: 1
           content: proto
           export: 1
         inherit:
@@ -735,6 +738,7 @@ module:
         opts:
           reflector: 'reflector::exported.files.proto.export*'
         criterion:
+          generated: 1
           content: proto
           export: 1
         inherit:
@@ -833,6 +837,7 @@ module:
   ../:
     about:
       name: wAppBasic
+      org: noorg
       description: >-
         Collection of routines to execute system commands, run shell, batches,
         launch external processes from JavaScript application. ExecTools
@@ -888,9 +893,6 @@ module:
       download:
         criterion:
           predefined: 1
-      remote:
-        criterion:
-          predefined: 1
       repository:
         path: 'git+https:///github.com/Wandalen/wAppBasic.git'
       origins:
@@ -900,21 +902,21 @@ module:
       bugtracker:
         path: 'https:///github.com/Wandalen/wAppBasic/issues'
       in:
-        criterion:
-          predefined: 0
         path: .
       out:
-        criterion:
-          predefined: 0
         path: out
       temp:
-        path: 'path::out'
+        path:
+          - 'path::out'
+          - package-lock.json
+          - package.json
+          - node_modules
       proto:
-        path: ./proto
+        path: proto
       export:
         path: '{path::proto}/**'
       doc:
-        path: ./doc
+        path: doc
       out.raw.debug:
         criterion:
           debug: debug
@@ -1552,6 +1554,6 @@ module:
         hash: dc752b9f2b3623dc29962188de9d2b4b
         size: 2146
       ../.im.will.yml:
-        hash: 01eb175c5fd939a4d7a2432846bba84e
-        size: 5224
+        hash: d133cdc63ac84ab722a4410ff9104e05
+        size: 5298
       wAppBasic.out.will.yml: *ref_0

@@ -52,7 +52,7 @@ function start_pre( routine, args )
 
   _.assert( arguments.length === 2 );
   _.assert( args.length === 1, 'Expects single argument' );
-  _.assert( _.arrayHas( [ 'fork', 'exec', 'spawn', 'shell' ], o.mode ) );
+  _.assert( _.longHas( [ 'fork', 'exec', 'spawn', 'shell' ], o.mode ) );
   _.assert( !!o.args || !!o.execPath, 'Expects {-args-} either {-execPath-}' )
   _.assert( o.args === null || _.arrayIs( o.args ) || _.strIs( o.args ) );
   _.assert( o.execPath === null || _.strIs( o.execPath ) || _.strsAreAll( o.execPath ), 'Expects string or strings {-o.execPath-}, but got', _.strType( o.execPath ) );
@@ -146,12 +146,12 @@ function start_body( o )
 
   _.assertRoutineOptions( start_body, arguments );
   _.assert( arguments.length === 1, 'Expects single argument' );
-  _.assert( _.arrayHas( [ 'fork', 'exec', 'spawn', 'shell' ], o.mode ) );
+  _.assert( _.longHas( [ 'fork', 'exec', 'spawn', 'shell' ], o.mode ) );
   _.assert( !!o.args || !!o.execPath, 'Expects {-args-} either {-execPath-}' )
   _.assert( o.args === null || _.arrayIs( o.args ) || _.strIs( o.args ) );
   _.assert( o.execPath === null || _.strIs( o.execPath ) || _.strsAreAll( o.execPath ), 'Expects string or strings {-o.execPath-}, but got', _.strType( o.execPath ) );
   _.assert( o.timeOut === null || _.numberIs( o.timeOut ), 'Expects null or number {-o.timeOut-}, but got', _.strType( o.timeOut ) );
-  _.assert( _.arrayHas( [ 'instant', 'afterdeath' ],  o.when ) || _.objectIs( o.when ), 'Unsupported starting mode:', o.when );
+  _.assert( _.longHas( [ 'instant', 'afterdeath' ],  o.when ) || _.objectIs( o.when ), 'Unsupported starting mode:', o.when );
 
   let state = 0;
   let currentExitCode;
@@ -166,7 +166,7 @@ function start_body( o )
     if( Config.debug )
     {
       let keys = _.mapKeys( o.when );
-      _.assert( keys.length === 1 && _.arrayHas([ 'time', 'delay' ], keys[ 0 ] ) );
+      _.assert( keys.length === 1 && _.longHas([ 'time', 'delay' ], keys[ 0 ] ) );
       _.assert( _.numberIs( o.when.delay ) || _.numberIs( o.when.time ) )
     }
 
@@ -492,7 +492,7 @@ function start_body( o )
     {
       if( _.strIs( o.stdio ) )
       o.stdio = _.dup( o.stdio, 3 );
-      if( !_.arrayHas( o.stdio, 'ipc' ) )
+      if( !_.longHas( o.stdio, 'ipc' ) )
       o.stdio.push( 'ipc' );
     }
 
@@ -565,7 +565,7 @@ function start_body( o )
     if( _.strIs( o.interpreterArgs ) )
     o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs });
 
-    _.assert( _.fileProvider.isDir( o.currentPath ), 'working directory', o.currentPath, 'doesn\'t exist or it\'s not a directory.' );
+    _.assert( _.fileProvider.isDir( o.currentPath ), 'Current path', o.currentPath, 'doesn\'t exist or it\'s not a directory.' );
 
     let execPath = o.execPath;
     let args = o.args.slice();
@@ -2089,7 +2089,7 @@ function tempClose_body( o )
   }
   else
   {
-    let i = _.arrayLeftIndex( _tempFiles, o.filePath );
+    let i = _.longLeftIndex( _tempFiles, o.filePath );
     _.assert( i !== -1, 'Requested {-o.filePath-}', o.filePath, 'is not a path of temp application.' )
     _.fileProvider.fileDelete( o.filePath );
     _tempFiles.splice( i, 1 );
