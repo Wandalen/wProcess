@@ -180,6 +180,9 @@ function start_body( o )
 
   o.ready = o.ready || new _.Consequence().take( null );
 
+  if( _global_.debugger )
+  debugger;
+
   /* */
 
   if( _.arrayIs( o.execPath ) || _.arrayIs( o.currentPath ) )
@@ -204,10 +207,15 @@ function start_body( o )
     o.ready.finallyKeep( end );
 
     if( o.sync && o.deasync )
-    return o.ready.finallyDeasyncGive();
+    {
+      // return o.ready.finallyDeasyncGive();
+      o.ready.deasyncWait();
+      return o.ready.sync();
+    }
     if( !o.sync && o.deasync ) /* qqq : check, does not work properly! */
     {
-      o.ready.finallyDeasyncKeep();
+      // o.ready.finallyDeasyncKeep();
+      o.ready.deasyncWait();
       return o.ready;
     }
 
@@ -283,11 +291,17 @@ function start_body( o )
     if( o.sync && !o.deasync )
     return o;
     if( o.sync && o.deasync )
-    return o.ready.finallyDeasyncGive();
+    {
+      o.ready.deasyncWait();
+      return o.ready.sync();
+      // return o.ready.finallyDeasyncGive();
+    }
     if( !o.sync && o.deasync ) /* qqq : check */
     {
-      o.ready.finallyDeasyncKeep();
+      o.ready.deasyncWait();
       return o.ready;
+      // o.ready.finallyDeasyncKeep();
+      // return o.ready;
     }
 
     return o.ready;
@@ -1387,7 +1401,13 @@ function starter( o0 )
   o0 = _.routineOptions( starter, o0 );
   o0.ready = o0.ready || new _.Consequence().take( null );
 
-  return function er()
+  _.routineExtend( er, _.process.start );
+  er.predefined = o0;
+  /* qqq : cover fields of generated routine */
+
+  return er;
+
+  function er()
   {
     let o = optionsFrom( arguments[ 0 ] );
     let o00 = _.mapExtend( null, o0 );
