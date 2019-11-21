@@ -1495,14 +1495,18 @@ starter.defaults = Object.create( start.defaults );
  */
 
 let _argsCache;
-let _argsInSamFormat = Object.create( null )
-var defaults = _argsInSamFormat.defaults = Object.create( null );
+let _argsInSamFormatDefaults = Object.create( null )
+var defaults = _argsInSamFormatDefaults.defaults = Object.create( null );
 
 defaults.keyValDelimeter = ':';
 defaults.commandsDelimeter = ';';
-defaults.argv = null;
 defaults.caching = true;
 defaults.parsingArrays = true;
+
+defaults.interpreterPath = null;
+defaults.interpreterArgs = null;
+defaults.scriptPath = null;
+defaults.scriptArgs = null;
 
 //
 
@@ -1512,41 +1516,67 @@ function _argsInSamFormatNodejs( o )
   _.assert( arguments.length === 0 || arguments.length === 1 );
   o = _.routineOptions( _argsInSamFormatNodejs, arguments );
 
+  if( _.boolLike( o.keyValDelimeter ) )
+  o.keyValDelimeter = !!o.keyValDelimeter;
+
+  let isStandardOptions =
+       o.keyValDelimeter === _argsInSamFormatNodejs.defaults.keyValDelimeter
+    && o.commandsDelimeter === _argsInSamFormatNodejs.defaults.commandsDelimeter
+    && o.parsingArrays === _argsInSamFormatNodejs.defaults.parsingArrays
+    && o.interpreterPath === _argsInSamFormatNodejs.defaults.interpreterPath
+    && o.interpreterArgs === _argsInSamFormatNodejs.defaults.interpreterArgs
+    && o.scriptPath === _argsInSamFormatNodejs.defaults.scriptPath
+    && o.scriptArgs === _argsInSamFormatNodejs.defaults.scriptArgs;
+
   if( o.caching )
   if( _argsCache )
-  if( o.keyValDelimeter === _argsCache.keyValDelimeter && o.commandsDelimeter === _argsCache.commandsDelimeter )
+  if( isStandardOptions )
   return _argsCache;
 
-  let result = Object.create( null );
+  // let result = Object.create( null );
+  let result = o;
 
   if( o.caching )
   // if( o.keyValDelimeter === _argsInSamFormatNodejs.defaults.keyValDelimeter )
-  if( o.keyValDelimeter === _argsInSamFormatNodejs.defaults.keyValDelimeter && o.commandsDelimeter === _argsInSamFormatNodejs.defaults.commandsDelimeter )
+  if( isStandardOptions )
   _argsCache = result;
 
-  if( !_global.process )
-  {
-    result.subject = '';
-    result.map = Object.create( null );
-    result.subjects = [];
-    result.maps = [];
-    return result;
-  }
+  // if( !_global.process )
+  // {
+  //   result.subject = '';
+  //   result.map = Object.create( null );
+  //   result.subjects = [];
+  //   result.maps = [];
+  //   return result;
+  // }
 
-  o.argv = o.argv || process.argv;
+  // o.argv = o.argv || process.argv;
+  // result.interpreterArgs = o.interpreterArgs;
 
-  _.assert( _.longIs( o.argv ) );
+  // if( result.applicationArgs === null )
+  // result.applicationArgs = process.argv;
 
-  result.interpreterPath = _.path.normalize( o.argv[ 0 ] );
-  result.mainPath = _.path.normalize( o.argv[ 1 ] );
-  result.interpreterArgs = process.execArgv;
-  result.scriptArgs = o.argv.slice( 2 );
-  result.scriptString = result.scriptArgs.join( ' ' );
-  result.scriptString = result.scriptString.trim();
+  if( result.interpreterArgs === null )
+  result.interpreterArgs = _global_.process ? _global_.process.execArgv : [];
+  result.interpreterArgsStrings = argsToString( result.interpreterArgs );
+
+  let argv = _global_.process ? _global_.process.argv : [ '', '' ];
+  _.assert( _.longIs( argv ) );
+  if( result.interpreterPath === null )
+  result.interpreterPath = argv[ 0 ];
+  result.interpreterPath = _.path.normalize( result.interpreterPath );
+  if( result.scriptPath === null )
+  result.scriptPath = argv[ 1 ];
+  result.scriptPath = _.path.normalize( result.scriptPath );
+  if( result.scriptArgs === null )
+  result.scriptArgs = argv.slice( 2 );
+  result.scriptArgsString = argsToString( result.scriptArgs );
+
+  // debugger;
 
   let r = _.strRequestParse
   ({
-    src : result.scriptString,
+    src : result.scriptArgsString,
     keyValDelimeter : o.keyValDelimeter,
     commandsDelimeter : o.commandsDelimeter,
     parsingArrays : o.parsingArrays,
@@ -1555,9 +1585,14 @@ function _argsInSamFormatNodejs( o )
   _.mapExtend( result, r );
 
   return result;
+
+  function argsToString( args )
+  {
+    return args.map( e => _.strHas( e, /\s/ ) ? `"${e}"` : e ).join( ' ' ).trim();
+  }
 }
 
-_argsInSamFormatNodejs.defaults = Object.create( _argsInSamFormat.defaults );
+_argsInSamFormatNodejs.defaults = Object.create( _argsInSamFormatDefaults.defaults );
 
 //
 
@@ -1566,7 +1601,7 @@ function _argsInSamFormatBrowser( o )
   debugger; /* xxx */
 
   _.assert( arguments.length === 0 || arguments.length === 1 );
-  o = _.routineOptions( _argsInSamFormatNodejs, arguments );
+  o = _.routineOptions( _argsInSamFormatBrowser, arguments );
 
   if( o.caching )
   if( _argsCache && o.keyValDelimeter === _argsCache.keyValDelimeter )
@@ -1577,13 +1612,13 @@ function _argsInSamFormatBrowser( o )
   result.map =  Object.create( null );
 
   if( o.caching )
-  if( o.keyValDelimeter === _argsInSamFormatNodejs.defaults.keyValDelimeter )
+  if( o.keyValDelimeter === _argsInSamFormatBrowser.defaults.keyValDelimeter )
   _argsCache = result;
 
   return result;
 }
 
-_argsInSamFormatBrowser.defaults = Object.create( _argsInSamFormat.defaults );
+_argsInSamFormatBrowser.defaults = Object.create( _argsInSamFormatDefaults.defaults );
 
 //
 
