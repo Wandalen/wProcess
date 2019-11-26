@@ -330,11 +330,14 @@ function start_body( o )
 
     try
     {
-      if( o.when === 'afterdeath' )
+      if( o.when === 'afterdeath' && !o.dry )
       prepareAfterDeath();
       prepare();
       launch();
       pipe();
+      
+      if( o.dry )
+      o.ready.take( o );
     }
     catch( err )
     {
@@ -573,7 +576,7 @@ function start_body( o )
 
     /* time out */
 
-    if( o.timeOut )
+    if( o.timeOut && !o.dry )
     if( !o.sync || o.deasync )
     _.timeBegin( o.timeOut, () =>
     {
@@ -612,7 +615,10 @@ function start_body( o )
 
       o.fullExecPath = _.strConcat( _.arrayAppendArray( [ execPath ], args ) );
       launchInputLog();
-
+      
+      if( o.dry )
+      return;
+      
       o.process = ChildProcess.fork( execPath, args, o2 );
     }
     else if( o.mode === 'exec' )
@@ -624,6 +630,9 @@ function start_body( o )
 
       o.fullExecPath = execPath;
       launchInputLog();
+      
+      if( o.dry )
+      return;
       
       if( o.sync && !o.deasync )
       { 
@@ -649,6 +658,9 @@ function start_body( o )
 
       o.fullExecPath = _.strConcat( _.arrayAppendArray( [ execPath ], args ) );
       launchInputLog();
+      
+      if( o.dry )
+      return;
 
       if( o.sync && !o.deasync )
       o.process = ChildProcess.spawnSync( execPath, args, o2 );
@@ -681,6 +693,9 @@ function start_body( o )
 
       o.fullExecPath = arg2;
       launchInputLog();
+      
+      if( o.dry )
+      return;
 
       if( o.sync && !o.deasync )
       o.process = ChildProcess.spawnSync( appPath, [ arg1, arg2 ], o2 );
@@ -841,7 +856,9 @@ function start_body( o )
   /* */
 
   function pipe()
-  {
+  { 
+    if( o.dry )
+    return;
 
     /* piping out channel */
 
@@ -1070,6 +1087,7 @@ start_body.defaults =
   sync : 0,
   deasync : 0,
   when : 'instant', /* instant / afterdeath / time / delay */
+  dry : 0,
 
   mode : 'shell', /* fork / exec / spawn / shell */
   ready : null,

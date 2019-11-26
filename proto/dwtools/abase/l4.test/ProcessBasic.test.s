@@ -2997,6 +2997,81 @@ function shellMultipleSyncDeasync( test )
 
 //
 
+function shellDryRun( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    var fs = require( 'fs' );
+    var path = require( 'path' );
+    var filePath = path.join( __dirname, 'file' );
+    fs.writeFileSync( filePath, filePath );
+  }
+
+  /* */
+
+  var execPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( execPath, testAppCode );
+
+  //
+
+  var ready = new _.Consequence().take( null );
+  
+  /*  */
+    
+  ready.then( () => 
+  { 
+    test.case = 'trivial'
+    let o =
+    {
+      execPath : 'node ' + execPath + ` arg1 "arg 2" "'arg3'"`,
+      mode : 'spawn',
+      args : [ 'arg0' ],
+      sync : 0,
+      dry : 1,
+      deasync : 0,
+      outputPiping : 1,
+      outputCollecting : 1,
+      throwingExitCode : 1,
+      applyingExitCode : 1,
+      timeOut : 100,
+      ipc : 1,
+      when : { delay : 1000 }
+    }
+    var t1 = _.timeNow();
+    var got = _.process.start( o );
+    test.is( _.consequenceIs( got ) );
+    got.thenKeep( function( o )
+    {  
+      var t2 = _.timeNow();
+      test.ge( t2 - t1, 1000 )
+      
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, null );
+      test.identical( o.process, null );
+      test.identical( o.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
+      test.identical( o.fullExecPath, `node ${execPath} arg1 arg 2 'arg3' arg0` );
+      test.identical( o.output, '' );
+      
+      test.is( !_.fileProvider.fileExists( _.path.join( routinePath, 'file' ) ) )
+      
+      return null;
+    })
+    return got;
+  })
+  
+  /*  */
+  
+  return ready;
+}
+
+//
+
 function shellArgsOption( test )
 {
   var context = this;
@@ -10480,6 +10555,8 @@ var Proto =
     shellExecSyncDeasyncThrowing,
     
     shellMultipleSyncDeasync,
+    
+    shellDryRun,
 
     shellArgsOption,
     shellArgumentsParsing,
