@@ -611,11 +611,24 @@ function start_body( o )
 
       o.fullExecPath = execPath;
       launchInputLog();
-
+      
       if( o.sync && !o.deasync )
-      o.process = ChildProcess.execSync( execPath, { env : o.env, cwd : currentPath } );
+      { 
+        try
+        {
+          o.process = ChildProcess.execSync( execPath, { env : o.env, cwd : currentPath } );
+          o.process.status = 0;
+          o.process.signal = null;
+        }
+        catch( _process )
+        { 
+          o.process = _process;
+        }
+      }
       else
-      o.process = ChildProcess.exec( execPath, { env : o.env, cwd : currentPath } );
+      {
+        o.process = ChildProcess.exec( execPath, { env : o.env, cwd : currentPath } );
+      }
     }
     else if( o.mode === 'spawn' )
     {
