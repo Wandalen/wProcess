@@ -238,7 +238,7 @@ function start_body( o )
       o.ready.deasyncWait();
       return o.ready.sync();
     }
-    if( !o.sync && o.deasync ) /* qqq : check, does not work properly! */
+    if( !o.sync && o.deasync ) /* qqq : check, does not work properly! Vova: wrote tests for each mode, works as expected*/
     {
       // o.ready.finallyDeasyncKeep();
       o.ready.deasyncWait();
