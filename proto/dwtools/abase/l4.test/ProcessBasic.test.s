@@ -2310,6 +2310,7 @@ function shellForkSyncDeasync( test )
   
   /*  */
   
+  if( Config.debug )
   ready.then( () => 
   { 
     test.case = 'sync:1,desync:0'
@@ -2320,12 +2321,8 @@ function shellForkSyncDeasync( test )
       sync : 1,
       deasync : 0
     }
-    var got = _.process.start( o );
-    test.is( !_.consequenceIs( got ) );
-    test.identical( got, o );
-    test.identical( o.exitCode, 0 );
-
-    return got;
+    test.shouldThrowErrorSync( () => _.process.start( o ) )
+    return null;
   })
   
   /*  */
@@ -2374,6 +2371,8 @@ function shellForkSyncDeasync( test )
   
   return ready;
 }
+
+//
 
 function shellExecSyncDeasync( test )
 {
