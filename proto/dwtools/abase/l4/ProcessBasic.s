@@ -31,7 +31,7 @@ if( typeof module !== 'undefined' )
 let System, ChildProcess, StripAnsi;
 let _global = _global_;
 let _ = _global_.wTools;
-let Self = _global_.wTools.process = _global_.wTools.process || Object.create( null );
+let Self = _.process = _.process || Object.create( null );
 
 _.assert( !!_realGlobal_ );
 
@@ -487,7 +487,7 @@ function start_body( o )
     o.outputAdditive = !!o.outputAdditive;
     // o.currentPath = o.currentPath || _.path.current();
     o.currentPath = _.path.resolve( o.currentPath || '.' );
-    o.logger = o.logger || _global_.logger;
+    o.logger = o.logger || _global.logger;
 
     /* verbosity */
 
@@ -1218,6 +1218,7 @@ function startNode_body( o )
       implementation of nodejs for other OSs could be able to use more memory
   */
 
+  let logger = o.logger || _global.logger;
   let interpreterArgs = '';
   if( o.maximumMemory )
   {
@@ -1771,6 +1772,22 @@ anchor.defaults =
 
 //
 
+function exitReason( reason )
+{
+  if( !_realGlobal_.wTools )
+  _realGlobal_.wTools = Object.create( null );
+  if( !_realGlobal_.wTools.process )
+  _realGlobal_.wTools.process = Object.create( null );
+  if( _realGlobal_.wTools.process._exitReason === undefined )
+  _realGlobal_.wTools.process._exitReason = null;
+  if( reason === undefined )
+  return _realGlobal_.wTools.process._exitReason;
+  _realGlobal_.wTools.process._exitReason = reason;
+  return _realGlobal_.wTools.process._exitReason;
+}
+
+//
+
 function exitCode( status )
 {
   let result;
@@ -2160,7 +2177,12 @@ let tempClose = _.routineFromPreAndBody( tempClose_pre, tempClose_body );
 // declare
 // --
 
-let Extend =
+let Fields =
+{
+  _exitReason : null,
+}
+
+let Routines =
 {
 
   start,
@@ -2179,7 +2201,8 @@ let Extend =
 
   anchor,
 
-  exitCode,
+  exitReason, /* qqq : cover and document */
+  exitCode, /* qqq : cover and document */
   exit,
   exitWithBeep,
 
@@ -2194,8 +2217,8 @@ let Extend =
 
 }
 
-// _.mapExtend( _, Extend );
-_.mapExtend( Self, Extend );
+_.mapExtend( Self, Fields );
+_.mapExtend( Self, Routines );
 _.assert( _.routineIs( _.process.start ) );
 
 // --
