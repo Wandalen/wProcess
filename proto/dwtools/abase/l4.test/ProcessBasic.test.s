@@ -2934,6 +2934,7 @@ function shellMultipleSyncDeasync( test )
       execPath : [ 'node ' + execPath, 'node ' + execPath ],
       mode : 'spawn',
       sync : 1,
+      optionsArrayReturn : 1,
       deasync : 0
     }
     var got = _.process.start( o );

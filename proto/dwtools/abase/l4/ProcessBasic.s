@@ -296,7 +296,11 @@ function start_body( o )
     });
     
     if( o.sync && !o.deasync )
-    return options;
+    {
+      if( o.optionsArrayReturn )
+      return options;
+      return o;
+    }
 
    /* 
     if( o.sync && o.deasync )
@@ -1080,6 +1084,7 @@ start_body.defaults =
   passingThrough : 0,
   concurrent : 0,
   timeOut : null,
+  optionsArrayReturn : 0,//Vova: returns array of options as result when sync:1,deasync:0
 
   throwingExitCode : 1, /* must be on by default */
   applyingExitCode : 0,
