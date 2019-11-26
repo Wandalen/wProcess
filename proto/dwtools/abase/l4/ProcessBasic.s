@@ -328,7 +328,7 @@ function start_body( o )
       return o.ready.sync();
       // return o.ready.finallyDeasyncGive();
     }
-    if( !o.sync && o.deasync ) // qqq : check
+    if( !o.sync && o.deasync ) // qqq : check Vova:wrote test routine, works as expected
     {
       o.ready.deasyncWait();
       return o.ready;
