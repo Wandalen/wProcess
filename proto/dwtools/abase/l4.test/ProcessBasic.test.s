@@ -6109,7 +6109,7 @@ function shellModeShellNonTrivial( test )
   .then( ( got ) =>
   {
     test.identical( got.exitCode, 0 );
-    test.identical( _.strCount( got.output, `[ "'quoted arg with space'" ]` ), 1 );
+    test.identical( _.strCount( got.output, `[ '\\'quoted arg with space\\'' ]` ), 1 );
     return null;
   })
 
@@ -6155,7 +6155,7 @@ function shellModeShellNonTrivial( test )
   .then( ( got ) =>
   {
     test.identical( got.exitCode, 0 );
-    test.identical( _.strCount( got.output, `[ 'arg1', 'arg2', 'arg 3', "'arg4'" ]` ), 1 );
+    test.identical( _.strCount( got.output, `[ 'arg1', 'arg2', 'arg 3', '\\'arg4\\'' ]` ), 1 );
     return null;
   })
 
@@ -6163,7 +6163,7 @@ function shellModeShellNonTrivial( test )
   .then( ( got ) =>
   {
     test.identical( got.exitCode, 0 );
-    test.identical( _.strCount( got.output, '[ `arg1 "arg2" "arg 3" "\'arg4\'"` ]' ), 1 );
+    test.identical( _.strCount( got.output, `[ 'arg1 "arg2" "arg 3" "\\'arg4\\'"' ]` ), 1 );
     return null;
   })
 
@@ -6171,7 +6171,7 @@ function shellModeShellNonTrivial( test )
   .then( ( got ) =>
   {
     test.identical( got.exitCode, 0 );
-    test.identical( _.strCount( got.output, `[ 'arg1', '"arg2"', 'arg 3', "'arg4'" ]` ), 1 );
+    test.identical( _.strCount( got.output, `[ 'arg1', '"arg2"', 'arg 3', '\\'arg4\\'' ]` ), 1 );
     return null;
   })
 
