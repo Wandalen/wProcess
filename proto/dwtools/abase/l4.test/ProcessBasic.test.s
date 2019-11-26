@@ -507,7 +507,7 @@ function shell( test )
   /* */
 
   var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = context.toolsPathInclude + testAppShell.toString() + '\ntestAppShell();';
+  var testAppCode = context.toolsPathInclude + _testAppShell.toString() + '\ntestAppShell();';
   var expectedOutput = testAppPath + '\n';
   _.fileProvider.fileWrite( testAppPath, testAppCode );
 
