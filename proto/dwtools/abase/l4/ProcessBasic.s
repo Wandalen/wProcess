@@ -483,6 +483,7 @@ function start_body( o )
   {
 
     // qqq : cover the case ( args is string ) for both routines shell and sheller
+    // Vova: added missed test cases
     // if( _.strIs( o.args ) )
     // o.args = _.strSplitNonPreserving({ src : o.args });
 
@@ -1144,6 +1145,14 @@ let start = _.routineFromPreAndBody( start_pre, start_body );
 /*
 qqq
 add coverage
+Vova: tests routines :
+
+  shellArgsOption,
+  shellArgumentsParsing,
+  shellArgumentsParsingNonTrivial,
+  shellArgumentsNestedQuotes,
+  shellExecPathQuotesClosing,
+  shellExecPathSeveralCommands
 
 for combination:
   path to exe file : [ with space, without space ]
@@ -1836,6 +1845,14 @@ anchor.defaults =
 
 //
 
+/**
+ * @summary Allows to set/get exit reason of current process.
+ * @description Saves exit reason if argument `reason` was provided, otherwise returns current exit reason value.
+ * Returns `null` if reason was not defined yet.
+ * @function exitReason
+ * @memberof module:Tools/base/ProcessBasic.Tools( module::ProcessBasic )
+ */
+
 function exitReason( reason )
 {
   if( !_realGlobal_.wTools )
@@ -1851,6 +1868,14 @@ function exitReason( reason )
 }
 
 //
+
+/**
+ * @summary Allows to set/get exit code of current process.
+ * @description Updates exit code if argument `status` was provided and returns previous exit code. Returns current exit code if no argument provided.
+ * Returns `0` if exit code was not defined yet.
+ * @function exitCode
+ * @memberof module:Tools/base/ProcessBasic.Tools( module::ProcessBasic )
+ */
 
 function exitCode( status )
 {
@@ -2265,8 +2290,8 @@ let Routines =
 
   anchor,
 
-  exitReason, /* qqq : cover and document */
-  exitCode, /* qqq : cover and document */
+  exitReason, /* qqq : cover and document Vova:done */
+  exitCode, /* qqq : cover and document Vova:done */
   exit,
   exitWithBeep,
 

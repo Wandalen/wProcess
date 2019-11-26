@@ -492,6 +492,49 @@ function exitHandlerOnce( test )
 
 //
 
+function exitReason( test )
+{
+  test.case = 'initial value'
+  var got = _.process.exitReason();
+  test.identical( got, null );
+  
+  test.case = 'set reason'
+  _.process.exitReason( 'reason' );
+  var got = _.process.exitReason();
+  test.identical( got, 'reason' );
+  
+  test.case = 'update reason'
+  _.process.exitReason( 'reason2' );
+  var got = _.process.exitReason();
+  test.identical( got, 'reason2' );
+}
+
+//
+
+function exitCode( test )
+{
+  test.case = 'initial value'
+  var got = _.process.exitCode();
+  test.identical( got, 0 );
+  
+  test.case = 'set code'
+  _.process.exitCode( 1 );
+  var got = _.process.exitCode();
+  test.identical( got, 1 );
+  
+  test.case = 'update reason'
+  _.process.exitCode( 2 );
+  var got = _.process.exitCode();
+  test.identical( got, 2 );
+  
+  test.case = 'change to zero'
+  _.process.exitCode( 0 );
+  var got = _.process.exitCode();
+  test.identical( got, 0 );
+}
+
+//
+
 function shell( test )
 {
   var context = this;
@@ -3475,31 +3518,65 @@ function shellArgsOption( test )
   /* */
 
   var ready = new _.Consequence().take( null );
-
+  
   /* */
-
-  test.case = 'args option as array, source args array should not be changed'
-  var args = [ 'arg1', 'arg2' ];
-  var shellOptions =
+  
+  ready.then( () => 
   {
-    execPath : 'node ' + testAppPath,
-    outputCollecting : 1,
-    args : args,
-    mode : 'spawn',
-    ready : ready
-  }
+    test.case = 'args option as array, source args array should not be changed'
+    var args = [ 'arg1', 'arg2' ];
+    var shellOptions =
+    {
+      execPath : 'node ' + testAppPath,
+      outputCollecting : 1,
+      args : args,
+      mode : 'spawn',
+    }
 
-  _.process.start( shellOptions )
-  .then( ( got ) =>
-  {
-    test.identical( got.exitCode, 0 );
-    test.identical( got.args, [ testAppPath, 'arg1', 'arg2' ] );
-    test.identical( _.strCount( got.output, `[ 'arg1', 'arg2' ]` ), 1 );
-    test.identical( shellOptions.args, got.args );
-    test.identical( args, [ 'arg1', 'arg2' ] );
-    return null;
+    let con = _.process.start( shellOptions )
+    
+    con.then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      test.identical( got.args, [ testAppPath, 'arg1', 'arg2' ] );
+      test.identical( _.strCount( got.output, `[ 'arg1', 'arg2' ]` ), 1 );
+      test.identical( shellOptions.args, got.args );
+      test.identical( args, [ 'arg1', 'arg2' ] );
+      return null;
+    })
+    
+    return con;
   })
+  
+  /* */
+  
+  ready.then( () => 
+  {
+    test.case = 'args option as string'
+    var args = 'arg1'
+    var shellOptions =
+    {
+      execPath : 'node ' + testAppPath,
+      outputCollecting : 1,
+      args : args,
+      mode : 'spawn',
+    }
 
+    let con = _.process.start( shellOptions )
+    
+    con.then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      test.identical( got.args, [ testAppPath, 'arg1' ] );
+      test.identical( _.strCount( got.output, 'arg1' ), 1 );
+      test.identical( shellOptions.args, got.args );
+      test.identical( args, 'arg1' );
+      return null;
+    })
+    
+    return con;
+  })
+  
   /*  */
 
   return ready;
@@ -10917,6 +10994,8 @@ var Proto =
 
     // processArgs,
     exitHandlerOnce,
+    exitReason,
+    exitCode,
 
     shell,
     shellSync,
