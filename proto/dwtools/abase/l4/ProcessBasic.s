@@ -17,6 +17,25 @@
   @memberof module:Tools/base/ProcessBasic
 */
 
+/* Return values of routine start for each combination of options sync and deasync:
+
+  Single process
+  | Combination      | Options map | Consequence |
+  | ---------------- | ----------- | ----------- |
+  | sync:0 deasync:0 | +           | +           |
+  | sync:1 deasync:1 | +           | -           |
+  | sync:0 deasync:1 | +           | +           |
+  | sync:1 deasync:0 | +           | -           |
+  
+  Multiple processes
+  | Combination      | Array of maps of options | Single options map | Consequence |
+  | ---------------- | ------------------------ | ------------------ | ----------- |
+  | sync:0 deasync:0 | +                        | -                  | +           |
+  | sync:1 deasync:1 | +                        | -                  | -           |
+  | sync:0 deasync:1 | +                        | -                  | +           |
+  | sync:1 deasync:0 | -                        | +                  | -           |
+*/
+
 if( typeof module !== 'undefined' )
 {
 
@@ -1102,7 +1121,7 @@ start_body.defaults =
   passingThrough : 0,
   concurrent : 0,
   timeOut : null,
-  optionsArrayReturn : 0,//Vova: returns array of options as result when sync:1,deasync:0
+  optionsArrayReturn : 1,//Vova: returns array of maps of options for multiprocess launch in sync mode
 
   throwingExitCode : 1, /* must be on by default */
   applyingExitCode : 0,
