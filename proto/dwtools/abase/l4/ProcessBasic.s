@@ -294,9 +294,11 @@ function start_body( o )
 
       return arg;
     });
+    
+    if( o.sync && !o.deasync )
+    return options;
 
-   /*  if( o.sync && !o.deasync )
-    return o;
+   /* 
     if( o.sync && o.deasync )
     {
       o.ready.deasyncWait();
