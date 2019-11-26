@@ -10430,6 +10430,47 @@ shellerArgs.timeOut = 30000;
 
 //
 
+function shellerFields( test )
+{
+  
+  test.case = 'defaults';
+  var start = _.process.starter();
+  
+  test.contains( _.mapKeys( start ), _.mapKeys( _.process.start ) );
+  test.identical( _.mapKeys( start.defaults ), _.mapKeys( _.process.start.body.defaults ) );
+  test.identical( start.pre, _.process.start.pre );
+  test.identical( start.body, _.process.start.body );
+  test.identical( _.mapKeys( start.predefined ), _.mapKeys( _.process.start.body.defaults ) );
+  
+  test.case = 'execPath';
+  var start = _.process.starter( 'node -v' );
+  test.contains( _.mapKeys( start ), _.mapKeys( _.process.start ) );
+  test.identical( _.mapKeys( start.defaults ), _.mapKeys( _.process.start.body.defaults ) );
+  test.identical( start.pre, _.process.start.pre );
+  test.identical( start.body, _.process.start.body );
+  test.identical( _.mapKeys( start.predefined ), _.mapKeys( _.process.start.body.defaults ) );
+  test.identical( start.predefined.execPath, 'node -v' );
+  
+  test.case = 'object';
+  var ready = new _.Consequence().take( null ) 
+  var start = _.process.starter
+  ({ 
+    execPath : 'node -v', 
+    args : [ 'arg1', 'arg2' ], 
+    ready
+  });
+  test.contains( _.mapKeys( start ), _.mapKeys( _.process.start ) );
+  test.identical( _.mapKeys( start.defaults ), _.mapKeys( _.process.start.body.defaults ) );
+  test.identical( start.pre, _.process.start.pre );
+  test.identical( start.body, _.process.start.body );
+  test.is( _.arraySetIdentical( _.mapKeys( start.predefined ), _.mapKeys( _.process.start.body.defaults ) ) );
+  test.identical( start.predefined.execPath, 'node -v' );
+  test.identical( start.predefined.args, [ 'arg1', 'arg2' ] );
+  test.identical( start.predefined.ready, ready  );
+}
+
+//
+
 function outputHandling( test )
 {
   var context = this;
@@ -11049,6 +11090,7 @@ var Proto =
 
     sheller,
     shellerArgs,
+    shellerFields,
 
     outputHandling,
     shellOutputStripping,
