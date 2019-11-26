@@ -2035,6 +2035,120 @@ function shellWithoutExecPath( test )
 
 //
 
+function shellSpawnSyncDeasync( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+
+  /* */
+
+  var execPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( execPath, testAppCode );
+
+  //
+
+  var ready = new _.Consequence().take( null );
+  
+  /*  */
+    
+  ready.then( () => 
+  { 
+    test.case = 'sync:0,desync:0'
+    let o =
+    {
+      execPath : 'node ' + execPath,
+      mode : 'spawn',
+      sync : 0,
+      deasync : 0
+    }
+    var got = _.process.start( o );
+    test.is( _.consequenceIs( got ) );
+    test.identical( got.resourcesCount(), 0 );
+    got.thenKeep( function( o )
+    {
+      test.identical( o.exitCode, 0 );
+      return o;
+    })
+    return got;
+  })
+  
+  /*  */
+  
+  ready.then( () => 
+  { 
+    test.case = 'sync:1,desync:0'
+    let o =
+    {
+      execPath : 'node ' + execPath,
+      mode : 'spawn',
+      sync : 1,
+      deasync : 0
+    }
+    var got = _.process.start( o );
+    test.is( !_.consequenceIs( got ) );
+    test.identical( got, o );
+    test.identical( o.exitCode, 0 );
+
+    return got;
+  })
+  
+  /*  */
+  
+  ready.then( () => 
+  { 
+    test.case = 'sync:0,desync:1'
+    let o =
+    {
+      execPath : 'node ' + execPath,
+      mode : 'spawn',
+      sync : 0,
+      deasync : 1
+    }
+    var got = _.process.start( o );
+    test.is( _.consequenceIs( got ) );
+    test.identical( got.resourcesCount(), 1 );
+    got.thenKeep( function( o )
+    {
+      test.identical( o.exitCode, 0 );
+      return o;
+    })
+    return got;
+  })
+  
+  /*  */
+  
+  ready.then( () => 
+  { 
+    test.case = 'sync:1,desync:1'
+    let o =
+    {
+      execPath : 'node ' + execPath,
+      mode : 'spawn',
+      sync : 1,
+      deasync : 1
+    }
+    var got = _.process.start( o );
+    test.is( !_.consequenceIs( got ) );
+    test.identical( got, o );
+    test.identical( o.exitCode, 0 );
+    return got;
+  })
+  
+  /*  */
+  
+  return ready;
+}
+
+//
+
 function shellArgsOption( test )
 {
   var context = this;
@@ -9507,6 +9621,8 @@ var Proto =
     shellCurrentPaths,
     shellFork,
     shellWithoutExecPath,
+    
+    shellSpawnSyncDeasync,
 
     shellArgsOption,
     shellArgumentsParsing,
