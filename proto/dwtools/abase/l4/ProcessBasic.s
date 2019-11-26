@@ -205,7 +205,14 @@ function start_body( o )
     o.ready.then( () => _.timeOut( startingDelay, () => null ) )
     o.ready.thenGive( single );
     o.ready.finallyKeep( end );
-
+    
+    return endDeasyncMaybe();
+  }
+  
+  /*  */
+  
+  function endDeasyncMaybe()
+  {
     if( o.sync && o.deasync )
     {
       // return o.ready.finallyDeasyncGive();
@@ -288,7 +295,7 @@ function start_body( o )
       return arg;
     });
 
-    if( o.sync && !o.deasync )
+   /*  if( o.sync && !o.deasync )
     return o;
     if( o.sync && o.deasync )
     {
@@ -296,15 +303,15 @@ function start_body( o )
       return o.ready.sync();
       // return o.ready.finallyDeasyncGive();
     }
-    if( !o.sync && o.deasync ) /* qqq : check */
+    if( !o.sync && o.deasync ) // qqq : check
     {
       o.ready.deasyncWait();
       return o.ready;
       // o.ready.finallyDeasyncKeep();
       // return o.ready;
-    }
+    } */
 
-    return o.ready;
+    return endDeasyncMaybe();
   }
 
   /*  */
