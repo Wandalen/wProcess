@@ -2877,6 +2877,125 @@ function shellExecSyncDeasyncThrowing( test )
 
 //
 
+function shellMultipleSyncDeasync( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    console.log( process.argv.slice( 2 ) )
+  }
+  
+  /* */
+
+  var execPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( execPath, testAppCode );
+  
+  //
+
+  var ready = new _.Consequence().take( null );
+  
+  /*  */
+    
+  ready.then( () => 
+  { 
+    test.case = 'sync:0,desync:0'
+    let o =
+    {
+      execPath : [ 'node ' + execPath, 'node ' + execPath ],
+      mode : 'spawn',
+      sync : 0,
+      deasync : 0
+    }
+    var got = _.process.start( o );
+    test.is( _.consequenceIs( got ) );
+    test.identical( got.resourcesCount(), 0 );
+    got.thenKeep( function( result )
+    {
+      test.identical( result.length, 2 );
+      test.identical( result[ 0 ].exitCode, 0 )
+      test.identical( result[ 1 ].exitCode, 0 )
+      return result;
+    })
+    return got;
+  })
+  
+  /*  */
+  
+  ready.then( () => 
+  { 
+    test.case = 'sync:1,desync:0'
+    let o =
+    {
+      execPath : [ 'node ' + execPath, 'node ' + execPath ],
+      mode : 'spawn',
+      sync : 1,
+      deasync : 0
+    }
+    var got = _.process.start( o );
+    test.is( !_.consequenceIs( got ) );
+    test.identical( got.length, 2 );
+    test.identical( got[ 0 ].exitCode, 0 )
+    test.identical( got[ 1 ].exitCode, 0 )
+    return got;
+  })
+  
+  /*  */
+  
+  ready.then( () => 
+  { 
+    test.case = 'sync:0,desync:1'
+    let o =
+    {
+      execPath : [ 'node ' + execPath, 'node ' + execPath ],
+      mode : 'spawn',
+      sync : 0,
+      deasync : 1
+    }
+    var got = _.process.start( o );
+    test.is( _.consequenceIs( got ) );
+    test.identical( got.resourcesCount(), 1 );
+    got.thenKeep( function( result )
+    {
+      test.identical( result.length, 2 );
+      test.identical( result[ 0 ].exitCode, 0 )
+      test.identical( result[ 1 ].exitCode, 0 )
+      return result;
+    })
+    return got;
+  })
+  
+  /*  */
+  
+  ready.then( () => 
+  { 
+    test.case = 'sync:1,desync:1'
+    let o =
+    {
+      execPath : [ 'node ' + execPath, 'node ' + execPath ],
+      mode : 'spawn',
+      sync : 1,
+      deasync : 1
+    }
+    var got = _.process.start( o );
+    test.is( !_.consequenceIs( got ) );
+    test.identical( got.length, 2 );
+    test.identical( got[ 0 ].exitCode, 0 )
+    test.identical( got[ 1 ].exitCode, 0 )
+    return got;
+  })
+  
+  /*  */
+  
+  return ready;
+}
+
+//
+
 function shellArgsOption( test )
 {
   var context = this;
@@ -10358,6 +10477,8 @@ var Proto =
     shellForkSyncDeasyncThrowing,
     shellExecSyncDeasync,
     shellExecSyncDeasyncThrowing,
+    
+    shellMultipleSyncDeasync,
 
     shellArgsOption,
     shellArgumentsParsing,
