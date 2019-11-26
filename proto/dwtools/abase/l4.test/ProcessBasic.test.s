@@ -2149,6 +2149,103 @@ function shellSpawnSyncDeasync( test )
 
 //
 
+function shellSpawnSyncDeasyncThrowing( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    throw 'Test error';
+  }
+
+  /* */
+
+  var execPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( execPath, testAppCode );
+
+  //
+
+  var ready = new _.Consequence().take( null );
+  
+  /*  */
+    
+  ready.then( () => 
+  { 
+    test.case = 'sync:0,desync:0'
+    let o =
+    {
+      execPath : 'node ' + execPath,
+      mode : 'spawn',
+      sync : 0,
+      deasync : 0
+    }
+    var got = _.process.start( o );
+    test.is( _.consequenceIs( got ) );
+    test.identical( got.resourcesCount(), 0 );
+    return test.shouldThrowErrorAsync( got );
+  })
+  
+  /*  */
+  
+  ready.then( () => 
+  { 
+    test.case = 'sync:1,desync:0'
+    let o =
+    {
+      execPath : 'node ' + execPath,
+      mode : 'spawn',
+      sync : 1,
+      deasync : 0
+    }
+    test.shouldThrowErrorSync( () =>  _.process.start( o ) );
+    return null;
+  })
+  
+  /*  */
+  
+  ready.then( () => 
+  { 
+    test.case = 'sync:0,desync:1'
+    let o =
+    {
+      execPath : 'node ' + execPath,
+      mode : 'spawn',
+      sync : 0,
+      deasync : 1
+    }
+    var got = _.process.start( o );
+    test.is( _.consequenceIs( got ) );
+    test.identical( got.resourcesCount(), 1 );
+    return test.shouldThrowErrorAsync( got );
+  })
+  
+  /*  */
+  
+  ready.then( () => 
+  { 
+    test.case = 'sync:1,desync:1'
+    let o =
+    {
+      execPath : 'node ' + execPath,
+      mode : 'spawn',
+      sync : 1,
+      deasync : 1
+    }
+    test.shouldThrowErrorSync( () =>  _.process.start( o ) );
+    return null;
+  })
+  
+  /*  */
+  
+  return ready;
+}
+
+//
+
 function shellShellSyncDeasync( test )
 {
   var context = this;
@@ -2263,6 +2360,104 @@ function shellShellSyncDeasync( test )
 
 //
 
+function shellShellSyncDeasyncThrowing( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    throw 'Test error';
+  }
+
+  /* */
+
+  var execPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( execPath, testAppCode );
+
+  //
+
+  var ready = new _.Consequence().take( null );
+  
+  /*  */
+    
+  ready.then( () => 
+  { 
+    test.case = 'sync:0,desync:0'
+    let o =
+    {
+      execPath : 'node ' + execPath,
+      mode : 'shell',
+      sync : 0,
+      deasync : 0
+    }
+    var got = _.process.start( o );
+    test.is( _.consequenceIs( got ) );
+    test.identical( got.resourcesCount(), 0 );
+    return test.shouldThrowErrorAsync( got );
+  })
+  
+  /*  */
+  
+  ready.then( () => 
+  { 
+    test.case = 'sync:1,desync:0'
+    let o =
+    {
+      execPath : 'node ' + execPath,
+      mode : 'shell',
+      sync : 1,
+      deasync : 0
+    }
+    test.shouldThrowErrorSync( () =>  _.process.start( o ) );
+    return null;
+  })
+  
+  /*  */
+  
+  ready.then( () => 
+  { 
+    test.case = 'sync:0,desync:1'
+    let o =
+    {
+      execPath : 'node ' + execPath,
+      mode : 'shell',
+      sync : 0,
+      deasync : 1
+    }
+    var got = _.process.start( o );
+    test.is( _.consequenceIs( got ) );
+    test.identical( got.resourcesCount(), 1 );
+    return test.shouldThrowErrorAsync( got );
+  })
+  
+  /*  */
+  
+  ready.then( () => 
+  { 
+    test.case = 'sync:1,desync:1'
+    let o =
+    {
+      execPath : 'node ' + execPath,
+      mode : 'shell',
+      sync : 1,
+      deasync : 1
+    }
+    test.shouldThrowErrorSync( () =>  _.process.start( o ) );
+    return null;
+  })
+  
+  /*  */
+  
+  return ready;
+}
+
+
+//
+
 function shellForkSyncDeasync( test )
 {
   var context = this;
@@ -2365,6 +2560,103 @@ function shellForkSyncDeasync( test )
     test.identical( got, o );
     test.identical( o.exitCode, 0 );
     return got;
+  })
+  
+  /*  */
+  
+  return ready;
+}
+
+//
+
+function shellForkSyncDeasyncThrowing( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    throw 'Test error';
+  }
+
+  /* */
+
+  var execPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( execPath, testAppCode );
+
+  //
+
+  var ready = new _.Consequence().take( null );
+  
+  /*  */
+    
+  ready.then( () => 
+  { 
+    test.case = 'sync:0,desync:0'
+    let o =
+    {
+      execPath,
+      mode : 'fork',
+      sync : 0,
+      deasync : 0
+    }
+    var got = _.process.start( o );
+    test.is( _.consequenceIs( got ) );
+    test.identical( got.resourcesCount(), 0 );
+    return test.shouldThrowErrorAsync( got );
+  })
+  
+  /*  */
+  
+  ready.then( () => 
+  { 
+    test.case = 'sync:1,desync:0'
+    let o =
+    {
+      execPath,
+      mode : 'fork',
+      sync : 1,
+      deasync : 0
+    }
+    test.shouldThrowErrorSync( () =>  _.process.start( o ) );
+    return null;
+  })
+  
+  /*  */
+  
+  ready.then( () => 
+  { 
+    test.case = 'sync:0,desync:1'
+    let o =
+    {
+      execPath,
+      mode : 'fork',
+      sync : 0,
+      deasync : 1
+    }
+    var got = _.process.start( o );
+    test.is( _.consequenceIs( got ) );
+    test.identical( got.resourcesCount(), 1 );
+    return test.shouldThrowErrorAsync( got );
+  })
+  
+  /*  */
+  
+  ready.then( () => 
+  { 
+    test.case = 'sync:1,desync:1'
+    let o =
+    {
+      execPath,
+      mode : 'fork',
+      sync : 1,
+      deasync : 1
+    }
+    test.shouldThrowErrorSync( () =>  _.process.start( o ) );
+    return null;
   })
   
   /*  */
@@ -2479,6 +2771,103 @@ function shellExecSyncDeasync( test )
     test.identical( got, o );
     test.identical( o.exitCode, 0 );
     return got;
+  })
+  
+  /*  */
+  
+  return ready;
+}
+
+//
+
+function shellExecSyncDeasyncThrowing( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+
+  /* */
+
+  function testApp()
+  {
+    throw 'Test error';
+  }
+
+  /* */
+
+  var execPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( execPath, testAppCode );
+
+  //
+
+  var ready = new _.Consequence().take( null );
+  
+  /*  */
+    
+  ready.then( () => 
+  { 
+    test.case = 'sync:0,desync:0'
+    let o =
+    {
+      execPath : 'node ' + execPath,
+      mode : 'exec',
+      sync : 0,
+      deasync : 0
+    }
+    var got = _.process.start( o );
+    test.is( _.consequenceIs( got ) );
+    test.identical( got.resourcesCount(), 0 );
+    return test.shouldThrowErrorAsync( got );
+  })
+  
+  /*  */
+  
+  ready.then( () => 
+  { 
+    test.case = 'sync:1,desync:0'
+    let o =
+    {
+      execPath : 'node ' + execPath,
+      mode : 'exec',
+      sync : 1,
+      deasync : 0
+    }
+    test.shouldThrowErrorSync( () =>  _.process.start( o ) );
+    return null;
+  })
+  
+  /*  */
+  
+  ready.then( () => 
+  { 
+    test.case = 'sync:0,desync:1'
+    let o =
+    {
+      execPath : 'node ' + execPath,
+      mode : 'exec',
+      sync : 0,
+      deasync : 1
+    }
+    var got = _.process.start( o );
+    test.is( _.consequenceIs( got ) );
+    test.identical( got.resourcesCount(), 1 );
+    return test.shouldThrowErrorAsync( got );
+  })
+  
+  /*  */
+  
+  ready.then( () => 
+  { 
+    test.case = 'sync:1,desync:1'
+    let o =
+    {
+      execPath : 'node ' + execPath,
+      mode : 'exec',
+      sync : 1,
+      deasync : 1
+    }
+    test.shouldThrowErrorSync( () =>  _.process.start( o ) );
+    return null;
   })
   
   /*  */
@@ -9962,9 +10351,13 @@ var Proto =
     shellWithoutExecPath,
     
     shellSpawnSyncDeasync,
+    shellSpawnSyncDeasyncThrowing,
     shellShellSyncDeasync,
+    shellShellSyncDeasyncThrowing,
     shellForkSyncDeasync,
+    shellForkSyncDeasyncThrowing,
     shellExecSyncDeasync,
+    shellExecSyncDeasyncThrowing,
 
     shellArgsOption,
     shellArgumentsParsing,
