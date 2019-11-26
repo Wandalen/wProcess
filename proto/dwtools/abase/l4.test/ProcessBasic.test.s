@@ -2147,6 +2147,8 @@ function shellSpawnSyncDeasync( test )
   return ready;
 }
 
+shellSpawnSyncDeasync.timeOut = 15000;
+
 //
 
 function shellSpawnSyncDeasyncThrowing( test )
@@ -2243,6 +2245,8 @@ function shellSpawnSyncDeasyncThrowing( test )
   
   return ready;
 }
+
+shellSpawnSyncDeasyncThrowing.timeOut = 15000;
 
 //
 
@@ -2358,6 +2362,8 @@ function shellShellSyncDeasync( test )
   return ready;
 }
 
+shellShellSyncDeasync.timeOut = 15000;
+
 //
 
 function shellShellSyncDeasyncThrowing( test )
@@ -2455,6 +2461,7 @@ function shellShellSyncDeasyncThrowing( test )
   return ready;
 }
 
+shellShellSyncDeasyncThrowing.timeOut = 15000;
 
 //
 
@@ -2567,6 +2574,8 @@ function shellForkSyncDeasync( test )
   return ready;
 }
 
+shellForkSyncDeasync.timeOut = 15000;
+
 //
 
 function shellForkSyncDeasyncThrowing( test )
@@ -2663,6 +2672,8 @@ function shellForkSyncDeasyncThrowing( test )
   
   return ready;
 }
+
+shellForkSyncDeasyncThrowing.timeOut = 15000;
 
 //
 
@@ -2778,6 +2789,8 @@ function shellExecSyncDeasync( test )
   return ready;
 }
 
+shellExecSyncDeasync.timeOut = 15000;
+
 //
 
 function shellExecSyncDeasyncThrowing( test )
@@ -2874,6 +2887,9 @@ function shellExecSyncDeasyncThrowing( test )
   
   return ready;
 }
+
+shellExecSyncDeasyncThrowing.timeOut = 15000;
+
 
 //
 
@@ -3168,6 +3184,9 @@ function shellMultipleSyncDeasync( test )
   
   return ready;
 }
+
+shellMultipleSyncDeasync.timeOut = 30000;
+
 
 //
 
