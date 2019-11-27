@@ -1938,12 +1938,17 @@ function exitWithBeep( exitCode )
 /*
 qqq : use maybe exitHandlerRepair instead of exitHandlerOnce?
 qqq : investigate difference between exitHandlerRepair and exitHandlerOnce
+Vova: exitHandlerRepair allows app to exit safely when one of exit signals will be triggered
+      exitHandlerOnce allows to execute some code when process is about to exit:
+       - process.exit() was called explcitly
+       - no additional work for nodejs event loop
+      Correct work of exitHandlerOnce can't be achieved without exitHandlerRepair. 
 */
 
 let appRepairExitHandlerDone = 0;
 function exitHandlerRepair()
 {
-
+  
   _.assert( arguments.length === 0 );
 
   if( appRepairExitHandlerDone )
