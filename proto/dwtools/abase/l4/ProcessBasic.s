@@ -1942,7 +1942,8 @@ Vova: exitHandlerRepair allows app to exit safely when one of exit signals will 
       exitHandlerOnce allows to execute some code when process is about to exit:
        - process.exit() was called explcitly
        - no additional work for nodejs event loop
-      Correct work of exitHandlerOnce can't be achieved without exitHandlerRepair. 
+      Correct work of exitHandlerOnce can't be achieved without exitHandlerRepair.
+      exitHandlerRepair allows exitHandlerOnce to execute handlers in case when one of termination signals was raised.
 */
 
 let appRepairExitHandlerDone = 0;
