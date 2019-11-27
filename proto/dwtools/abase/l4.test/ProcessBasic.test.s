@@ -492,6 +492,179 @@ function exitHandlerOnce( test )
 
 //
 
+function exitHandlerOff( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+
+  function testApp()
+  {
+    _.include( 'wAppBasic' );
+    _.include( 'wStringsExtra' )
+
+    var handlersMap = {};
+    var args = _.process.args();
+    
+    handlersMap[ 'handler1' ] = handler1;
+    handlersMap[ 'handler2' ] = handler2;
+    handlersMap[ 'handler3' ] = handler3;
+    
+    _.process.exitHandlerOnce( handler1 );
+    _.process.exitHandlerOnce( handler2 );
+    
+    if( args.map.off )
+    {
+      args.map.off = _.arrayAs( args.map.off );
+      _.each( args.map.off, ( name ) => 
+      {
+        _.assert( handlersMap[ name ] );
+        _.process.exitHandlerOff( handlersMap[ name ] );
+      })
+    }
+    
+    _.timeOut( 1000, () =>
+    {
+      console.log( 'timeOut handler executed' );
+      return 1;
+    })
+
+    function handler1( arg )
+    {
+      console.log( 'exitHandlerOnce1:', arg );
+    }
+    function handler2( arg )
+    {
+      console.log( 'exitHandlerOnce2:', arg );
+    }
+    function handler3( arg )
+    {
+      console.log( 'exitHandlerOnce3:', arg );
+    }
+  }
+
+  /* */
+
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+
+  var con = new _.Consequence().take( null )
+
+  /*  */
+
+  .thenKeep( () =>
+  { 
+    test.case = 'nothing to off'
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputPiping : 1,
+      outputCollecting : 1,
+    }
+
+    return _.process.start( o )
+    .then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      test.identical( _.strCount( got.output, 'timeOut handler executed'  ), 1 );
+      test.identical( _.strCount( got.output, 'exitHandlerOnce1: 0' ), 1 );
+      test.identical( _.strCount( got.output, 'exitHandlerOnce2: 0' ), 1 );
+      test.identical( _.strCount( got.output, 'exitHandlerOnce3: 0' ), 0 );
+      return null;
+    })
+
+  })
+  
+  /*  */
+  
+  .thenKeep( () =>
+  { 
+    test.case = 'off single handler'
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      args : 'off:handler1',
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputPiping : 1,
+      outputCollecting : 1,
+    }
+
+    return _.process.start( o )
+    .then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      test.identical( _.strCount( got.output, 'timeOut handler executed'  ), 1 );
+      test.identical( _.strCount( got.output, 'exitHandlerOnce1: 0' ), 0 );
+      test.identical( _.strCount( got.output, 'exitHandlerOnce2: 0' ), 1 );
+      test.identical( _.strCount( got.output, 'exitHandlerOnce3: 0' ), 0 );
+      return null;
+    })
+  })
+  
+  /*  */
+  
+  .thenKeep( () =>
+  { 
+    test.case = 'off all handlers'
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      args : 'off:[handler1,handler2]',
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputPiping : 1,
+      outputCollecting : 1,
+    }
+
+    return _.process.start( o )
+    .then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      test.identical( _.strCount( got.output, 'timeOut handler executed'  ), 1 );
+      test.identical( _.strCount( got.output, 'exitHandlerOnce1: 0' ), 0 );
+      test.identical( _.strCount( got.output, 'exitHandlerOnce2: 0' ), 0 );
+      test.identical( _.strCount( got.output, 'exitHandlerOnce3: 0' ), 0 );
+      return null;
+    })
+  })
+  
+  /*  */
+  
+  .thenKeep( () =>
+  { 
+    test.case = 'off unregistered handler'
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      args : 'off:handler3',
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputPiping : 1,
+      outputCollecting : 1,
+    }
+
+    return _.process.start( o )
+    .then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      test.identical( _.strCount( got.output, 'timeOut handler executed'  ), 1 );
+      test.identical( _.strCount( got.output, 'exitHandlerOnce1: 0' ), 1 );
+      test.identical( _.strCount( got.output, 'exitHandlerOnce2: 0' ), 1 );
+      test.identical( _.strCount( got.output, 'exitHandlerOnce3: 0' ), 0 );
+      return null;
+    })
+  })
+  
+  /*  */
+
+  return con;
+}
+
+//
+
 function exitReason( test )
 {
   test.case = 'initial value'
@@ -11035,6 +11208,7 @@ var Proto =
 
     // processArgs,
     exitHandlerOnce,
+    exitHandlerOff,
     exitReason,
     exitCode,
 

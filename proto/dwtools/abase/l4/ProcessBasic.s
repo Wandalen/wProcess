@@ -483,7 +483,7 @@ function start_body( o )
   {
 
     // qqq : cover the case ( args is string ) for both routines shell and sheller
-    // Vova: added missed test cases
+    // Vova: added required test cases
     // if( _.strIs( o.args ) )
     // o.args = _.strSplitNonPreserving({ src : o.args });
 
@@ -1477,7 +1477,7 @@ function starter( o0 )
 
   _.routineExtend( er, _.process.start );
   er.predefined = o0;
-  /* qqq : cover fields of generated routine */
+  /* qqq : cover fields of generated routine Vova: wrote test routine shellerFields */
 
   return er;
 
@@ -2113,6 +2113,7 @@ function exitHandlerOnce( routine )
 
 /*
 qqq : cover routine exitHandlerOff by tests
+Vova : wrote test routine exitHandlerOff
 */
 
 function exitHandlerOff( routine )
@@ -2290,8 +2291,8 @@ let Routines =
 
   anchor,
 
-  exitReason, /* qqq : cover and document Vova:done */
-  exitCode, /* qqq : cover and document Vova:done */
+  exitReason, /* qqq : cover and document Vova:wrote test routine exitReason */
+  exitCode, /* qqq : cover and document Vova:wrote test routine exitCode */
   exit,
   exitWithBeep,
 
