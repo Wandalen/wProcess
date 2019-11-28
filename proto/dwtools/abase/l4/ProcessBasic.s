@@ -2269,6 +2269,57 @@ defaults.filePath = null;
 
 let tempClose = _.routineFromPreAndBody( tempClose_pre, tempClose_body );
 
+//
+
+function isRunning( pid )
+{ 
+  _.assert( arguments.length === 1 );
+  _.assert( _.numberIs( pid ) );
+  
+  try
+  {
+    return process.kill( pid, 0 );
+  }
+  catch (e)
+  {
+    return e.code === 'EPERM'
+  }
+}
+
+//
+
+function kill( src, signal )
+{ 
+  _.assert( arguments.length === 1 || arguments.length === 2 );
+  
+  let pid = src;
+  
+  if( _.objectIs( src ) )
+  { 
+    if( src instanceof ChildProcess.ChildProcess )
+    pid = src.pid;
+    else if( src.process instanceof ChildProcess.ChildProcess )
+    pid = src.process.pid;
+    else
+    _.assert( 0, 'Unexpected argument:', src );
+  }
+  
+  _.assert( _.numberIs( pid ) );
+  _.assert( _.strDefined( signal ) || signal === undefined || _.numberIs( signal ) );
+  
+  let isRunning = _.process.isRunning( pid );
+  
+  if( signal === 0 )
+  return isRunning;
+  
+  if( !isRunning )
+  throw _.err( 'Process with pid:', _.strQuote( pid ), 'is not running.' )
+  
+  process.kill( pid, signal );
+  
+  return true;
+}
+
 // --
 // declare
 // --
@@ -2309,7 +2360,10 @@ let Routines =
   memoryUsageInfo,
 
   tempOpen,
-  tempClose
+  tempClose,
+  
+  isRunning,
+  kill
 
 }
 
