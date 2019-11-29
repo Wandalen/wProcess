@@ -2280,45 +2280,60 @@ function isRunning( pid )
   {
     return process.kill( pid, 0 );
   }
-  catch (e)
+  catch ( err )
   {
-    return e.code === 'EPERM'
+    return err.code === 'EPERM'
   }
 }
 
 //
 
-function kill( src, signal )
+function kill( o )
 { 
-  _.assert( arguments.length === 1 || arguments.length === 2 );
+  if( _.numberIs( o ) )
+  o = { pid : o };
   
-  let pid = src;
+  _.routineOptions( kill, arguments );
+  _.assert( arguments.length === 1 ); 
+  _.assert( _.numberIs( o.pid ) );
+  _.assert( _.strDefined( o.signal ) || _.numberIs( o.signal ) );
   
-  if( _.objectIs( src ) )
-  { 
-    if( src instanceof ChildProcess.ChildProcess )
-    pid = src.pid;
-    else if( src.process instanceof ChildProcess.ChildProcess )
-    pid = src.process.pid;
-    else
-    _.assert( 0, 'Unexpected argument:', src );
-  }
+  let isRunning = _.process.isRunning( o.pid );
   
-  _.assert( _.numberIs( pid ) );
-  _.assert( _.strDefined( signal ) || signal === undefined || _.numberIs( signal ) );
-  
-  let isRunning = _.process.isRunning( pid );
-  
-  if( signal === 0 )
+  if( o.signal === 0 )
   return isRunning;
   
   if( !isRunning )
-  throw _.err( 'Process with pid:', _.strQuote( pid ), 'is not running.' )
+  if( o.throwing )
+  throw _.err( 'Target process:', _.strQuote( o.pid ), 'does not exist.' )
+  else
+  return false;
   
-  process.kill( pid, signal );
+  try
+  {
+    process.kill( o.pid, o.signal );
+  }
+  catch( err )
+  { 
+    if( !o.throwing )
+    return false;
+    
+    if( err.code === 'EINVAL' )
+    throw _.err( err, '\nAn invalid signal was specified:', _.strQuote( o.signal ) )
+    if( err.code === 'EPERM' )
+    throw _.err( err, '\nCurrent process does not have permission to kill target process' );
+    if( err.code === 'ESRCH' )
+    throw _.err( err, '\nTarget process:', _.strQuote( o.pid ), 'does not exist.' );
+    throw _.err( err );
+  }
   
   return true;
 }
+
+var defaults = kill.defaults = Object.create( null );
+defaults.pid = null;
+defaults.signal = 'SIGTERM'
+defaults.throwing = 1;
 
 // --
 // declare
