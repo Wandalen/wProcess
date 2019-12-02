@@ -7780,7 +7780,7 @@ function shellModeShellNonTrivial( test )
   .then( ( got ) =>
   {
     test.identical( got.exitCode, 0 );
-    test.identical( _.strCount( got.output, `[ '\\'quoted arg with space\\'' ]` ), 1 );
+    test.identical( _.strCount( got.output, `[ "'quoted arg with space'" ]` ), 1 );
     return null;
   })
 
@@ -7826,7 +7826,7 @@ function shellModeShellNonTrivial( test )
   .then( ( got ) =>
   {
     test.identical( got.exitCode, 0 );
-    test.identical( _.strCount( got.output, `[ 'arg1', 'arg2', 'arg 3', '\\'arg4\\'' ]` ), 1 );
+    test.identical( _.strCount( got.output, `[ 'arg1', 'arg2', 'arg 3', "'arg4'" ]` ), 1 );
     return null;
   })
 
@@ -7834,7 +7834,7 @@ function shellModeShellNonTrivial( test )
   .then( ( got ) =>
   {
     test.identical( got.exitCode, 0 );
-    test.identical( _.strCount( got.output, `[ 'arg1 "arg2" "arg 3" "\\'arg4\\'"' ]` ), 1 );
+    test.identical( _.strCount( got.output, '[ `arg1 "arg2" "arg 3" "\'arg4\'"` ]' ), 1 );
     return null;
   })
 
@@ -7842,7 +7842,7 @@ function shellModeShellNonTrivial( test )
   .then( ( got ) =>
   {
     test.identical( got.exitCode, 0 );
-    test.identical( _.strCount( got.output, `[ 'arg1', '"arg2"', 'arg 3', '\\'arg4\\'' ]` ), 1 );
+    test.identical( _.strCount( got.output, `[ 'arg1', '"arg2"', 'arg 3', "'arg4'" ]` ), 1 );
     return null;
   })
 
@@ -7902,18 +7902,16 @@ function shellTerminate( test )
       o.process.kill( 'SIGKILL' );
       return null;
     })
-
-    con.finally( ( err, got ) =>
+    
+    return test.shouldThrowErrorAsync( con )
+    .finally( ( err, got ) =>
     {
-      test.is( _.errIs( err ) );
-      test.is( _.strHas( err.message, 'killed by exit signal SIGKILL' ) );
+      test.is( !_.errIs( err ) );
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGKILL' );
       test.is( !_.strHas( o.output, 'Timeout in child' ) );
       return null;
     })
-
-    return con;
   })
 
   /* */
@@ -7935,18 +7933,16 @@ function shellTerminate( test )
       o.process.kill( 'SIGKILL' );
       return null;
     })
-
-    con.finally( ( err, got ) =>
+    
+    return test.shouldThrowErrorAsync( con )
+    .finally( ( err, got ) =>
     {
-      test.is( _.errIs( err ) );
-      test.is( _.strHas( err.message, 'killed by exit signal SIGKILL' ) );
+      test.is( !_.errIs( err ) );
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGKILL' );
       test.is( !_.strHas( o.output, 'Timeout in child' ) );
       return null;
     })
-
-    return con;
   })
 
   /* */
@@ -7968,18 +7964,16 @@ function shellTerminate( test )
       o.process.kill( 'SIGKILL' );
       return null;
     })
-
-    con.finally( ( err, got ) =>
+    
+    return test.shouldThrowErrorAsync( con )
+    .finally( ( err, got ) =>
     {
-      test.is( _.errIs( err ) );
-      test.is( _.strHas( err.message, 'killed by exit signal SIGKILL' ) );
+      test.is( !_.errIs( err ) );
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGKILL' );
       test.is( _.strHas( o.output, 'Timeout in child' ) );
       return null;
     })
-
-    return con;
   })
 
   /* */
@@ -8001,18 +7995,16 @@ function shellTerminate( test )
       o.process.kill( 'SIGINT' );
       return null;
     })
-
-    con.finally( ( err, got ) =>
+    
+    return test.shouldThrowErrorAsync( con )
+    .finally( ( err, got ) =>
     {
-      test.is( _.errIs( err ) );
-      test.is( _.strHas( err.message, 'killed by exit signal SIGINT' ) );
+      test.is( !_.errIs( err ) );
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGINT' );
       test.is( !_.strHas( o.output, 'Timeout in child' ) );
       return null;
     })
-
-    return con;
   })
 
   /* */
@@ -8034,18 +8026,16 @@ function shellTerminate( test )
       o.process.kill( 'SIGINT' );
       return null;
     })
-
-    con.finally( ( err, got ) =>
+    
+    return test.shouldThrowErrorAsync( con )
+    .finally( ( err, got ) =>
     {
-      test.is( _.errIs( err ) );
-      test.is( _.strHas( err.message, 'killed by exit signal SIGINT' ) );
+      test.is( !_.errIs( err ) );
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGINT' );
       test.is( !_.strHas( o.output, 'Timeout in child' ) );
       return null;
     })
-
-    return con;
   })
 
   /* */
@@ -8067,11 +8057,11 @@ function shellTerminate( test )
       o.process.kill( 'SIGINT' );
       return null;
     })
-
-    con.finally( ( err, got ) =>
+    
+    return test.shouldThrowErrorAsync( con )
+    .finally( ( err, got ) =>
     {
-      test.is( _.errIs( err ) );
-      test.is( _.strHas( err.message, 'killed by exit signal SIGINT' ) );
+      test.is( !_.errIs( err ) );
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGINT' );
       test.is( _.strHas( o.output, 'Timeout in child' ) );
