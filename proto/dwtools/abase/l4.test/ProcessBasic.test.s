@@ -7542,13 +7542,13 @@ function shellNode( test )
     con.thenKeep( () =>
     {
       var o = { execPath : testAppPath, mode : mode, applyingExitCode : 1, throwingExitCode : 1, stdio : 'ignore' };
-      return _.process.startNode( o )
+      var con = _.process.startNode( o );
+      return test.shouldThrowErrorAsync( con )
       .finally( ( err, got ) =>
-      {
+      { 
         test.identical( o.exitCode, 1 );
         test.identical( process.exitCode, 1 );
         process.exitCode = 0;
-        test.is( _.errIs( err ) );
         return true;
       })
     })
@@ -7570,12 +7570,12 @@ function shellNode( test )
     con.thenKeep( () =>
     {
       var o = { execPath : testAppPath,  mode : mode, applyingExitCode : 0, throwingExitCode : 1, stdio : 'ignore' };
-      return _.process.startNode( o )
+      var con = _.process.startNode( o )
+      return test.shouldThrowErrorAsync( con )
       .finally( ( err, got ) =>
       {
         test.identical( o.exitCode, 1 );
         test.identical( process.exitCode, 0 );
-        test.is( _.errIs( err ) );
         return true;
       })
     })
