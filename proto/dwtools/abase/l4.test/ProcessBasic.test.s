@@ -522,7 +522,7 @@ function exitHandlerOff( test )
       })
     }
     
-    _.timeOut( 1000, () =>
+    _.time.out( 1000, () =>
     {
       console.log( 'timeOut handler executed' );
       return 1;
@@ -854,7 +854,8 @@ function shell( test )
     {
       execPath :  'node ' + testAppPath + ' loop : 1',
       mode : 'spawn',
-      stdio : 'pipe'
+      stdio : 'pipe',
+      throwingExitCode : 0
     }
 
     var options = _.mapSupplement( {}, o, commonDefaults );
@@ -883,7 +884,8 @@ function shell( test )
     {
       execPath :  'node ' + testAppPath + ' loop : 1',
       mode : 'shell',
-      stdio : 'pipe'
+      stdio : 'pipe',
+      throwingExitCode : 0
     }
 
     var options = _.mapSupplement( {}, o, commonDefaults );
