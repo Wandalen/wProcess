@@ -94,7 +94,7 @@ let _testAppShell = function testAppShell()
   process.exit( args.map.exitWithCode )
 
   if( args.map.loop )
-  return _.timeOut( 4000 )
+  return _.time.out( 4000 )
 
   console.log( __filename );
 }
@@ -417,7 +417,7 @@ function exitHandlerOnce( test )
       console.log( 'exitHandlerOnce:', arg );
     });
 
-    _.timeOut( 1000, () =>
+    _.time.out( 1000, () =>
     {
       console.log( 'timeOut handler executed' );
       return 1;
@@ -522,7 +522,7 @@ function exitHandlerOff( test )
       })
     }
     
-    _.timeOut( 1000, () =>
+    _.time.out( 1000, () =>
     {
       console.log( 'timeOut handler executed' );
       return 1;
@@ -854,13 +854,14 @@ function shell( test )
     {
       execPath :  'node ' + testAppPath + ' loop : 1',
       mode : 'spawn',
-      stdio : 'pipe'
+      stdio : 'pipe',
+      throwingExitCode : 0
     }
 
     var options = _.mapSupplement( {}, o, commonDefaults );
 
     var shell = _.process.start( options );
-    _.timeOut( 500, () =>
+    _.time.out( 500, () =>
     {
       test.identical( options.process.killed, false );
       options.process.kill( 'SIGINT' );
@@ -883,13 +884,14 @@ function shell( test )
     {
       execPath :  'node ' + testAppPath + ' loop : 1',
       mode : 'shell',
-      stdio : 'pipe'
+      stdio : 'pipe',
+      throwingExitCode : 0
     }
 
     var options = _.mapSupplement( {}, o, commonDefaults );
 
     var shell = _.process.start( options );
-    _.timeOut( 500, () =>
+    _.time.out( 500, () =>
     {
       test.identical( options.process.killed, false );
       options.process.kill( 'SIGINT' );
@@ -2221,7 +2223,7 @@ function shellWithoutExecPath( test )
   ready.then( ( arg ) =>
   {
     test.case = 'single';
-    time = _.timeNow();
+    time = _.time.now();
     return null;
   })
 
@@ -3641,12 +3643,12 @@ function shellDryRun( test )
       ipc : 1,
       when : { delay : 1000 }
     }
-    var t1 = _.timeNow();
+    var t1 = _.time.now();
     var got = _.process.start( o );
     test.is( _.consequenceIs( got ) );
     got.thenKeep( function( o )
     {  
-      var t2 = _.timeNow();
+      var t2 = _.time.now();
       test.ge( t2 - t1, 1000 )
       
       test.identical( o.exitCode, null );
@@ -7540,13 +7542,13 @@ function shellNode( test )
     con.thenKeep( () =>
     {
       var o = { execPath : testAppPath, mode : mode, applyingExitCode : 1, throwingExitCode : 1, stdio : 'ignore' };
-      return _.process.startNode( o )
+      var con = _.process.startNode( o );
+      return test.shouldThrowErrorAsync( con )
       .finally( ( err, got ) =>
-      {
+      { 
         test.identical( o.exitCode, 1 );
         test.identical( process.exitCode, 1 );
         process.exitCode = 0;
-        test.is( _.errIs( err ) );
         return true;
       })
     })
@@ -7568,12 +7570,12 @@ function shellNode( test )
     con.thenKeep( () =>
     {
       var o = { execPath : testAppPath,  mode : mode, applyingExitCode : 0, throwingExitCode : 1, stdio : 'ignore' };
-      return _.process.startNode( o )
+      var con = _.process.startNode( o )
+      return test.shouldThrowErrorAsync( con )
       .finally( ( err, got ) =>
       {
         test.identical( o.exitCode, 1 );
         test.identical( process.exitCode, 0 );
-        test.is( _.errIs( err ) );
         return true;
       })
     })
@@ -7778,7 +7780,7 @@ function shellModeShellNonTrivial( test )
   .then( ( got ) =>
   {
     test.identical( got.exitCode, 0 );
-    test.identical( _.strCount( got.output, `[ '\\'quoted arg with space\\'' ]` ), 1 );
+    test.identical( _.strCount( got.output, `[ "'quoted arg with space'" ]` ), 1 );
     return null;
   })
 
@@ -7824,7 +7826,7 @@ function shellModeShellNonTrivial( test )
   .then( ( got ) =>
   {
     test.identical( got.exitCode, 0 );
-    test.identical( _.strCount( got.output, `[ 'arg1', 'arg2', 'arg 3', '\\'arg4\\'' ]` ), 1 );
+    test.identical( _.strCount( got.output, `[ 'arg1', 'arg2', 'arg 3', "'arg4'" ]` ), 1 );
     return null;
   })
 
@@ -7832,7 +7834,7 @@ function shellModeShellNonTrivial( test )
   .then( ( got ) =>
   {
     test.identical( got.exitCode, 0 );
-    test.identical( _.strCount( got.output, `[ 'arg1 "arg2" "arg 3" "\\'arg4\\'"' ]` ), 1 );
+    test.identical( _.strCount( got.output, '[ `arg1 "arg2" "arg 3" "\'arg4\'"` ]' ), 1 );
     return null;
   })
 
@@ -7840,7 +7842,7 @@ function shellModeShellNonTrivial( test )
   .then( ( got ) =>
   {
     test.identical( got.exitCode, 0 );
-    test.identical( _.strCount( got.output, `[ 'arg1', '"arg2"', 'arg 3', '\\'arg4\\'' ]` ), 1 );
+    test.identical( _.strCount( got.output, `[ 'arg1', '"arg2"', 'arg 3', "'arg4'" ]` ), 1 );
     return null;
   })
 
@@ -7895,23 +7897,21 @@ function shellTerminate( test )
 
     let con = _.process.start( o );
 
-    _.timeOut( 2000, () =>
+    _.time.out( 2000, () =>
     {
       o.process.kill( 'SIGKILL' );
       return null;
     })
-
-    con.finally( ( err, got ) =>
+    
+    return test.shouldThrowErrorAsync( con )
+    .finally( ( err, got ) =>
     {
-      test.is( _.errIs( err ) );
-      test.is( _.strHas( err.message, 'killed by exit signal SIGKILL' ) );
+      test.is( !_.errIs( err ) );
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGKILL' );
       test.is( !_.strHas( o.output, 'Timeout in child' ) );
       return null;
     })
-
-    return con;
   })
 
   /* */
@@ -7928,23 +7928,21 @@ function shellTerminate( test )
 
     let con = _.process.start( o );
 
-    _.timeOut( 2000, () =>
+    _.time.out( 2000, () =>
     {
       o.process.kill( 'SIGKILL' );
       return null;
     })
-
-    con.finally( ( err, got ) =>
+    
+    return test.shouldThrowErrorAsync( con )
+    .finally( ( err, got ) =>
     {
-      test.is( _.errIs( err ) );
-      test.is( _.strHas( err.message, 'killed by exit signal SIGKILL' ) );
+      test.is( !_.errIs( err ) );
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGKILL' );
       test.is( !_.strHas( o.output, 'Timeout in child' ) );
       return null;
     })
-
-    return con;
   })
 
   /* */
@@ -7961,23 +7959,21 @@ function shellTerminate( test )
 
     let con = _.process.start( o );
 
-    _.timeOut( 2000, () =>
+    _.time.out( 2000, () =>
     {
       o.process.kill( 'SIGKILL' );
       return null;
     })
-
-    con.finally( ( err, got ) =>
+    
+    return test.shouldThrowErrorAsync( con )
+    .finally( ( err, got ) =>
     {
-      test.is( _.errIs( err ) );
-      test.is( _.strHas( err.message, 'killed by exit signal SIGKILL' ) );
+      test.is( !_.errIs( err ) );
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGKILL' );
       test.is( _.strHas( o.output, 'Timeout in child' ) );
       return null;
     })
-
-    return con;
   })
 
   /* */
@@ -7994,23 +7990,21 @@ function shellTerminate( test )
 
     let con = _.process.start( o );
 
-    _.timeOut( 2000, () =>
+    _.time.out( 2000, () =>
     {
       o.process.kill( 'SIGINT' );
       return null;
     })
-
-    con.finally( ( err, got ) =>
+    
+    return test.shouldThrowErrorAsync( con )
+    .finally( ( err, got ) =>
     {
-      test.is( _.errIs( err ) );
-      test.is( _.strHas( err.message, 'killed by exit signal SIGINT' ) );
+      test.is( !_.errIs( err ) );
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGINT' );
       test.is( !_.strHas( o.output, 'Timeout in child' ) );
       return null;
     })
-
-    return con;
   })
 
   /* */
@@ -8027,23 +8021,21 @@ function shellTerminate( test )
 
     let con = _.process.start( o );
 
-    _.timeOut( 2000, () =>
+    _.time.out( 2000, () =>
     {
       o.process.kill( 'SIGINT' );
       return null;
     })
-
-    con.finally( ( err, got ) =>
+    
+    return test.shouldThrowErrorAsync( con )
+    .finally( ( err, got ) =>
     {
-      test.is( _.errIs( err ) );
-      test.is( _.strHas( err.message, 'killed by exit signal SIGINT' ) );
+      test.is( !_.errIs( err ) );
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGINT' );
       test.is( !_.strHas( o.output, 'Timeout in child' ) );
       return null;
     })
-
-    return con;
   })
 
   /* */
@@ -8060,16 +8052,16 @@ function shellTerminate( test )
 
     let con = _.process.start( o );
 
-    _.timeOut( 2000, () =>
+    _.time.out( 2000, () =>
     {
       o.process.kill( 'SIGINT' );
       return null;
     })
-
-    con.finally( ( err, got ) =>
+    
+    return test.shouldThrowErrorAsync( con )
+    .finally( ( err, got ) =>
     {
-      test.is( _.errIs( err ) );
-      test.is( _.strHas( err.message, 'killed by exit signal SIGINT' ) );
+      test.is( !_.errIs( err ) );
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGINT' );
       test.is( _.strHas( o.output, 'Timeout in child' ) );
@@ -8111,7 +8103,7 @@ function shellTerminateWithExitHandler( test )
   {
     _.include( 'wAppBasic' );
     _.process.exitHandlerRepair();
-    _.timeOut( 10000, () => { console.log( 'Timeout in child' ); return null } )
+    _.time.out( 10000, () => { console.log( 'Timeout in child' ); return null } )
   }
 
   /* */
@@ -8136,19 +8128,20 @@ function shellTerminateWithExitHandler( test )
 
     let con = _.process.start( o );
 
-    _.timeOut( 3000, () =>
+    _.time.out( 3000, () =>
     {
       o.process.kill( 'SIGINT' );
       return null;
     })
 
-    _.timeOut( 4000, () =>
+    _.time.out( 4000, () =>
     {
       o.process.kill( 'SIGKILL' );
       return null;
     })
-
-    con.finally( ( err, got ) =>
+    
+    return test.mustNotThrowError( con )
+    .finally( ( err, got ) =>
     {
       test.is( !_.errIs( err ) );
       test.identical( o.exitCode, 0 );
@@ -8157,8 +8150,6 @@ function shellTerminateWithExitHandler( test )
       test.is( !_.strHas( o.output, 'Timeout in child' ) );
       return null;
     })
-
-    return con;
   })
 
   /*  */
@@ -8175,19 +8166,20 @@ function shellTerminateWithExitHandler( test )
 
     let con = _.process.start( o );
 
-    _.timeOut( 3000, () =>
+    _.time.out( 3000, () =>
     {
       o.process.kill( 'SIGINT' );
       return null;
     })
 
-    _.timeOut( 4000, () =>
+    _.time.out( 4000, () =>
     {
       o.process.kill( 'SIGKILL' );
       return null;
     })
-
-    con.finally( ( err, got ) =>
+    
+    return test.mustNotThrowError( con )
+    .finally( ( err, got ) =>
     {
       test.is( !_.errIs( err ) );
       test.identical( o.exitCode, 0 );
@@ -8196,8 +8188,6 @@ function shellTerminateWithExitHandler( test )
       test.is( _.strHas( o.output, 'Timeout in child' ) );
       return null;
     })
-
-    return con;
   })
 
   /*  */
@@ -8214,19 +8204,20 @@ function shellTerminateWithExitHandler( test )
 
     let con = _.process.start( o );
 
-    _.timeOut( 3000, () =>
+    _.time.out( 3000, () =>
     {
       o.process.kill( 'SIGINT' );
       return null;
     })
 
-    _.timeOut( 4000, () =>
+    _.time.out( 4000, () =>
     {
       o.process.kill( 'SIGKILL' );
       return null;
     })
-
-    con.finally( ( err, got ) =>
+    
+    return test.mustNotThrowError( con )
+    .finally( ( err, got ) =>
     {
       test.is( !_.errIs( err ) );
       test.identical( o.exitCode, 0 );
@@ -8235,8 +8226,6 @@ function shellTerminateWithExitHandler( test )
       test.is( !_.strHas( o.output, 'Timeout in child' ) );
       return null;
     })
-
-    return con;
   })
 
   /* SIGKILL */
@@ -8253,23 +8242,20 @@ function shellTerminateWithExitHandler( test )
 
     let con = _.process.start( o );
 
-    _.timeOut( 3000, () =>
+    _.time.out( 3000, () =>
     {
       o.process.kill( 'SIGKILL' );
       return null;
     })
-
-    con.finally( ( err, got ) =>
+    
+    return test.shouldThrowErrorAsync( con )
+    .finally( ( err, got ) =>
     {
-      _.errAttend( err );
-      test.is( _.errIs( err ) );
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGKILL' );
       test.is( !_.strHas( o.output, 'Timeout in child' ) );
       return null;
     })
-
-    return con;
   })
 
   /*  */
@@ -8286,23 +8272,20 @@ function shellTerminateWithExitHandler( test )
 
     let con = _.process.start( o );
 
-    _.timeOut( 3000, () =>
+    _.time.out( 3000, () =>
     {
       o.process.kill( 'SIGKILL' );
       return null;
     })
-
-    con.finally( ( err, got ) =>
+    
+    return test.shouldThrowErrorAsync( con )
+    .finally( ( err, got ) =>
     {
-      _.errAttend( err );
-      test.is( _.errIs( err ) );
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGKILL' );
       test.is( _.strHas( o.output, 'Timeout in child' ) );
       return null;
     })
-
-    return con;
   })
 
   .then( () =>
@@ -8317,23 +8300,20 @@ function shellTerminateWithExitHandler( test )
 
     let con = _.process.start( o );
 
-    _.timeOut( 3000, () =>
+    _.time.out( 3000, () =>
     {
       o.process.kill( 'SIGKILL' );
       return null;
     })
 
-    con.finally( ( err, got ) =>
+    return test.shouldThrowErrorAsync( con )
+    .finally( ( err, got ) =>
     {
-      _.errAttend( err );
-      test.is( _.errIs( err ) );
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGKILL' );
       test.is( !_.strHas( o.output, 'Timeout in child' ) );
       return null;
     })
-
-    return con;
   })
 
   /*  */
@@ -8372,7 +8352,7 @@ function shellTerminateHangedWithExitHandler( test )
     _.process.exitHandlerRepair();
     while( 1 )
     {
-      console.log( _.timeNow() )
+      console.log( _.time.now() )
     }
     console.log( 'Killed' );
   }
@@ -8401,13 +8381,13 @@ function shellTerminateHangedWithExitHandler( test )
 
     let con = _.process.start( o );
 
-    _.timeOut( 3000, () =>
+    _.time.out( 3000, () =>
     {
       o.process.kill( 'SIGINT' );
       return null;
     })
 
-    _.timeOut( 4000, () =>
+    _.time.out( 4000, () =>
     {
       o.process.kill( 'SIGKILL' );
       return null;
@@ -8440,13 +8420,13 @@ function shellTerminateHangedWithExitHandler( test )
 
     let con = _.process.start( o );
 
-    _.timeOut( 3000, () =>
+    _.time.out( 3000, () =>
     {
       o.process.kill( 'SIGINT' );
       return null;
     })
 
-    _.timeOut( 4000, () =>
+    _.time.out( 4000, () =>
     {
       o.process.kill( 'SIGKILL' );
       return null;
@@ -8533,13 +8513,13 @@ function shellTerminateAfterLoopRelease( test )
 
     let con = _.process.start( o );
 
-    _.timeOut( 3000, () =>
+    _.time.out( 3000, () =>
     {
       o.process.kill( 'SIGINT' );
       return null;
     })
 
-    _.timeOut( 7000, () =>
+    _.time.out( 7000, () =>
     {
       o.process.kill( 'SIGKILL' );
       return null;
@@ -8575,13 +8555,13 @@ function shellTerminateAfterLoopRelease( test )
 
     let con = _.process.start( o );
 
-    _.timeOut( 3000, () =>
+    _.time.out( 3000, () =>
     {
       o.process.kill( 'SIGINT' );
       return null;
     })
 
-    _.timeOut( 7000, () =>
+    _.time.out( 7000, () =>
     {
       o.process.kill( 'SIGKILL' );
       return null;
@@ -8628,7 +8608,7 @@ function shellStartingDelay( test )
 
   function testApp()
   {
-    let data = { t2 : _.timeNow() };
+    let data = { t2 : _.time.now() };
     console.log( JSON.stringify( data ) );
   }
 
@@ -8654,7 +8634,7 @@ function shellStartingDelay( test )
       when : starting
     }
 
-    let t1 = _.timeNow();
+    let t1 = _.time.now();
     let con = _.process.start( o );
 
     con.then( ( got ) =>
@@ -8683,7 +8663,7 @@ function shellStartingTime( test )
 
   function testApp()
   {
-    let data = { t2 : _.timeNow() };
+    let data = { t2 : _.time.now() };
     console.log( JSON.stringify( data ) );
   }
 
@@ -8699,9 +8679,9 @@ function shellStartingTime( test )
 
   .then( () =>
   {
-    let t1 = _.timeNow();
+    let t1 = _.time.now();
     let delay = 5000;
-    let starting = { time : _.timeNow() + delay };
+    let starting = { time : _.time.now() + delay };
     let o =
     {
       execPath : testAppPath,
@@ -8739,7 +8719,7 @@ function shellStartingSuspended( test )
 
   function testApp()
   {
-    let data = { t2 : _.timeNow() };
+    let data = { t2 : _.time.now() };
     console.log( JSON.stringify( data ) );
   }
 
@@ -8764,11 +8744,11 @@ function shellStartingSuspended( test )
       when : 'suspended'
     }
 
-    let t1 = _.timeNow();
+    let t1 = _.time.now();
     let delay = 1000;
     let con = _.process.start( o );
 
-    _.timeOut( delay, () =>
+    _.time.out( delay, () =>
     {
       o.resume();
       return null;
@@ -8814,7 +8794,7 @@ function shellStartingSuspended( test )
 
 //     process.send( o.process.pid );
 
-//     _.timeOut( 4000, () =>
+//     _.time.out( 4000, () =>
 //     {
 //       process.disconnect();
 //       return null;
@@ -8826,7 +8806,7 @@ function shellStartingSuspended( test )
 //     _.include( 'wAppBasic' );
 //     _.include( 'wFiles' );
 
-//     _.timeOut( 5000, () =>
+//     _.time.out( 5000, () =>
 //     {
 //       let filePath = _.path.join( __dirname, 'testFile' );
 //       _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
@@ -8867,7 +8847,7 @@ function shellStartingSuspended( test )
 //       secondaryPid = _.numberFrom( got );
 //     })
 
-//     _.timeOut( 2500, () =>
+//     _.time.out( 2500, () =>
 //     {
 //       test.will = 'parent is alive, secondary is alive'
 //       test.is( processIsRunning( o.process.pid ) )
@@ -8875,7 +8855,7 @@ function shellStartingSuspended( test )
 //       return null;
 //     })
 
-//     _.timeOut( 5000, () =>
+//     _.time.out( 5000, () =>
 //     {
 //       test.will = 'parent is dead, but waits for secondary and child'
 //       test.is( !processIsRunning( o.process.pid ) )
@@ -8940,7 +8920,7 @@ function shellStartingSuspended( test )
 
 //     _.process.start( o );
 
-//     _.timeOut( 4000, () =>
+//     _.time.out( 4000, () =>
 //     {
 //       console.log( 'Parent process exit' )
 //       process.disconnect();
@@ -8955,7 +8935,7 @@ function shellStartingSuspended( test )
 
 //     console.log( 'Child process start' )
 
-//     _.timeOut( 5000, () =>
+//     _.time.out( 5000, () =>
 //     {
 //       console.log( 'Child process end' )
 //     })
@@ -9040,7 +9020,7 @@ function shellDetachingChildAfterParent( test )
 
     console.log( 'Child process start' )
 
-    _.timeOut( 5000, () =>
+    _.time.out( 5000, () =>
     {
       let filePath = _.path.join( __dirname, 'testFile' );
       _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
@@ -9097,7 +9077,7 @@ function shellDetachingChildAfterParent( test )
 
       test.is( !_.fileProvider.fileExists( testFilePath ) );
 
-      return _.timeOut( 5000, () => null );
+      return _.time.out( 5000, () => null );
     })
 
     con.then( () =>
@@ -9156,7 +9136,7 @@ function shellDetachingChildBeforeParent( test )
       return null;
     })
 
-    _.timeOut( 5000, () =>
+    _.time.out( 5000, () =>
     {
       console.log( 'Parent process exit' )
       return null;
@@ -9170,7 +9150,7 @@ function shellDetachingChildBeforeParent( test )
 
     console.log( 'Child process start' )
 
-    _.timeOut( 1000, () =>
+    _.time.out( 1000, () =>
     {
       let filePath = _.path.join( __dirname, 'testFile' );
       _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
@@ -9283,7 +9263,7 @@ function shellConcurrent( test )
   ready.then( ( arg ) =>
   {
     test.case = 'single';
-    time = _.timeNow();
+    time = _.time.now();
     return null;
   })
 
@@ -9314,7 +9294,7 @@ function shellConcurrent( test )
   ready.then( ( arg ) =>
   {
     test.case = 'single, execPath in array';
-    time = _.timeNow();
+    time = _.time.now();
     return null;
   })
 
@@ -9347,7 +9327,7 @@ function shellConcurrent( test )
   ready.then( ( arg ) =>
   {
     test.case = 'single, error in ready';
-    time = _.timeNow();
+    time = _.time.now();
     throw _.err( 'Error!' );
   })
 
@@ -9379,7 +9359,7 @@ function shellConcurrent( test )
   ready.then( ( arg ) =>
   {
     test.case = 'single, error in ready';
-    time = _.timeNow();
+    time = _.time.now();
     throw _.err( 'Error!' );
   })
 
@@ -9411,7 +9391,7 @@ function shellConcurrent( test )
   ready.then( ( arg ) =>
   {
     test.case = 'subprocesses, serial';
-    time = _.timeNow();
+    time = _.time.now();
     return null;
   })
 
@@ -9428,7 +9408,7 @@ function shellConcurrent( test )
   .then( ( arg ) =>
   {
 
-    var spent = _.timeNow() - time;
+    var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 1000 );
     test.le( spent, 5000 );
@@ -9455,7 +9435,7 @@ function shellConcurrent( test )
   ready.then( ( arg ) =>
   {
     test.case = 'subprocesses, serial, error, throwingExitCode : 1';
-    time = _.timeNow();
+    time = _.time.now();
     return null;
   })
 
@@ -9472,7 +9452,7 @@ function shellConcurrent( test )
   .finally( ( err, arg ) =>
   {
 
-    var spent = _.timeNow() - time;
+    var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 0 );
     test.le( spent, 5000 );
@@ -9492,7 +9472,7 @@ function shellConcurrent( test )
   ready.then( ( arg ) =>
   {
     test.case = 'subprocesses, serial, error, throwingExitCode : 0';
-    time = _.timeNow();
+    time = _.time.now();
     return null;
   })
 
@@ -9510,7 +9490,7 @@ function shellConcurrent( test )
   .finally( ( err, arg ) =>
   {
 
-    var spent = _.timeNow() - time;
+    var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 0 );
     test.le( spent, 5000 );
@@ -9538,7 +9518,7 @@ function shellConcurrent( test )
   ready.then( ( arg ) =>
   {
     test.case = 'subprocesses, concurrent : 1, error, throwingExitCode : 1';
-    time = _.timeNow();
+    time = _.time.now();
     return null;
   })
 
@@ -9555,7 +9535,7 @@ function shellConcurrent( test )
   .finally( ( err, arg ) =>
   {
 
-    var spent = _.timeNow() - time;
+    var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 0 );
     test.le( spent, 5000 );
@@ -9576,7 +9556,7 @@ function shellConcurrent( test )
   ready.then( ( arg ) =>
   {
     test.case = 'subprocesses, concurrent : 1, error, throwingExitCode : 0';
-    time = _.timeNow();
+    time = _.time.now();
     return null;
   })
 
@@ -9594,7 +9574,7 @@ function shellConcurrent( test )
   .finally( ( err, arg ) =>
   {
 
-    var spent = _.timeNow() - time;
+    var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 0 );
     test.le( spent, 5000 );
@@ -9622,7 +9602,7 @@ function shellConcurrent( test )
   ready.then( ( arg ) =>
   {
     test.case = 'subprocesses, concurrent : 1';
-    time = _.timeNow();
+    time = _.time.now();
     return null;
   })
 
@@ -9639,7 +9619,7 @@ function shellConcurrent( test )
   .then( ( arg ) =>
   {
 
-    var spent = _.timeNow() - time;
+    var spent = _.time.now() - time;
     logger.log( 'Spent', spent )
     test.gt( spent, 1000 );
     test.le( spent, 5000 );
@@ -9666,7 +9646,7 @@ function shellConcurrent( test )
   ready.then( ( arg ) =>
   {
     test.case = 'args';
-    time = _.timeNow();
+    time = _.time.now();
     return null;
   })
 
@@ -9683,7 +9663,7 @@ function shellConcurrent( test )
   _.process.start( suprocessesConcurrentArgumentsOptions )
   .then( ( arg ) =>
   {
-    var spent = _.timeNow() - time;
+    var spent = _.time.now() - time;
     logger.log( 'Spent', spent )
     test.gt( spent, 1000 );
     test.le( spent, 5000 );
@@ -9745,7 +9725,7 @@ function shellerConcurrent( test )
   ready.then( ( arg ) =>
   {
     test.case = 'single';
-    time = _.timeNow();
+    time = _.time.now();
     return null;
   })
 
@@ -9779,7 +9759,7 @@ function shellerConcurrent( test )
   ready.then( ( arg ) =>
   {
     test.case = 'single, no second options';
-    time = _.timeNow();
+    time = _.time.now();
     return null;
   })
 
@@ -9812,7 +9792,7 @@ function shellerConcurrent( test )
   ready.then( ( arg ) =>
   {
     test.case = 'single, execPath in array';
-    time = _.timeNow();
+    time = _.time.now();
     return null;
   })
 
@@ -9845,7 +9825,7 @@ function shellerConcurrent( test )
   ready.then( ( arg ) =>
   {
     test.case = 'single, error in ready, exec is scalar';
-    time = _.timeNow();
+    time = _.time.now();
     throw _.err( 'Error!' );
   })
 
@@ -9880,7 +9860,7 @@ function shellerConcurrent( test )
   ready.then( ( arg ) =>
   {
     test.case = 'single, error in ready, exec is single-element vector';
-    time = _.timeNow();
+    time = _.time.now();
     throw _.err( 'Error!' );
   })
 
@@ -9915,7 +9895,7 @@ function shellerConcurrent( test )
   ready.then( ( arg ) =>
   {
     test.case = 'subprocesses, serial';
-    time = _.timeNow();
+    time = _.time.now();
     return null;
   })
 
@@ -9935,7 +9915,7 @@ function shellerConcurrent( test )
   .then( ( arg ) =>
   {
 
-    var spent = _.timeNow() - time;
+    var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 1000 );
     test.le( spent, 5000 );
@@ -9962,7 +9942,7 @@ function shellerConcurrent( test )
   ready.then( ( arg ) =>
   {
     test.case = 'subprocesses, serial, error, throwingExitCode : 1';
-    time = _.timeNow();
+    time = _.time.now();
     return null;
   })
 
@@ -9982,7 +9962,7 @@ function shellerConcurrent( test )
   .finally( ( err, arg ) =>
   {
 
-    var spent = _.timeNow() - time;
+    var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 0 );
     test.le( spent, 5000 );
@@ -10002,7 +9982,7 @@ function shellerConcurrent( test )
   ready.then( ( arg ) =>
   {
     test.case = 'subprocesses, serial, error, throwingExitCode : 0';
-    time = _.timeNow();
+    time = _.time.now();
     return null;
   })
 
@@ -10023,7 +10003,7 @@ function shellerConcurrent( test )
   .finally( ( err, arg ) =>
   {
 
-    var spent = _.timeNow() - time;
+    var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 0 );
     test.le( spent, 5000 );
@@ -10051,7 +10031,7 @@ function shellerConcurrent( test )
   ready.then( ( arg ) =>
   {
     test.case = 'subprocesses, concurrent : 1, error, throwingExitCode : 1';
-    time = _.timeNow();
+    time = _.time.now();
     return null;
   })
 
@@ -10071,7 +10051,7 @@ function shellerConcurrent( test )
   .finally( ( err, arg ) =>
   {
 
-    var spent = _.timeNow() - time;
+    var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 0 );
     test.le( spent, 5000 );
@@ -10092,7 +10072,7 @@ function shellerConcurrent( test )
   ready.then( ( arg ) =>
   {
     test.case = 'subprocesses, concurrent : 1, error, throwingExitCode : 0';
-    time = _.timeNow();
+    time = _.time.now();
     return null;
   })
 
@@ -10113,7 +10093,7 @@ function shellerConcurrent( test )
   .finally( ( err, arg ) =>
   {
 
-    var spent = _.timeNow() - time;
+    var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 0 );
     test.le( spent, 5000 );
@@ -10141,7 +10121,7 @@ function shellerConcurrent( test )
   ready.then( ( arg ) =>
   {
     test.case = 'subprocesses, concurrent : 1';
-    time = _.timeNow();
+    time = _.time.now();
     return null;
   })
 
@@ -10161,7 +10141,7 @@ function shellerConcurrent( test )
   .then( ( arg ) =>
   {
 
-    var spent = _.timeNow() - time;
+    var spent = _.time.now() - time;
     logger.log( 'Spent', spent )
     test.gt( spent, 1000 );
     test.le( spent, 5000 );
@@ -10188,7 +10168,7 @@ function shellerConcurrent( test )
   ready.then( ( arg ) =>
   {
     test.case = 'args';
-    time = _.timeNow();
+    time = _.time.now();
     return null;
   })
 
@@ -10209,7 +10189,7 @@ function shellerConcurrent( test )
   .then( ( arg ) =>
   {
 
-    var spent = _.timeNow() - time;
+    var spent = _.time.now() - time;
     logger.log( 'Spent', spent )
     test.gt( spent, 1000 );
     test.le( spent, 5000 );
@@ -11173,7 +11153,7 @@ function experiment( test )
     con.thenKeep( function()
     {
       test.case = 'deasync';
-      _.timeOut( 1 ).finallyDeasyncGive();
+      _.time.out( 1 ).finallyDeasyncGive();
       return null;
     })
 

@@ -192,7 +192,7 @@ function start_body( o )
     if( o.when.delay !== undefined )
     startingDelay = o.when.delay;
     else
-    startingDelay = o.when.time - _.timeNow();
+    startingDelay = o.when.time - _.time.now();
 
     _.assert( startingDelay >= 0, 'Wrong value of {-o.when.delay } or {-o.when.time-}. Starting delay should be >= 0, current:', startingDelay )
   }
@@ -221,7 +221,7 @@ function start_body( o )
   else
   {
     if( startingDelay )
-    o.ready.then( () => _.timeOut( startingDelay, () => null ) )
+    o.ready.then( () => _.time.out( startingDelay, () => null ) )
     o.ready.thenGive( single );
     o.ready.finallyKeep( end );
     
@@ -598,7 +598,7 @@ function start_body( o )
 
     if( o.timeOut && !o.dry )
     if( !o.sync || o.deasync )
-    _.timeBegin( o.timeOut, () =>
+    _.time.begin( o.timeOut, () =>
     {
       if( state === 2 )
       return;
