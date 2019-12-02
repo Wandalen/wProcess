@@ -8139,8 +8139,9 @@ function shellTerminateWithExitHandler( test )
       o.process.kill( 'SIGKILL' );
       return null;
     })
-
-    con.finally( ( err, got ) =>
+    
+    return test.mustNotThrowError( con )
+    .finally( ( err, got ) =>
     {
       test.is( !_.errIs( err ) );
       test.identical( o.exitCode, 0 );
@@ -8149,8 +8150,6 @@ function shellTerminateWithExitHandler( test )
       test.is( !_.strHas( o.output, 'Timeout in child' ) );
       return null;
     })
-
-    return con;
   })
 
   /*  */
@@ -8178,8 +8177,9 @@ function shellTerminateWithExitHandler( test )
       o.process.kill( 'SIGKILL' );
       return null;
     })
-
-    con.finally( ( err, got ) =>
+    
+    return test.mustNotThrowError( con )
+    .finally( ( err, got ) =>
     {
       test.is( !_.errIs( err ) );
       test.identical( o.exitCode, 0 );
@@ -8188,8 +8188,6 @@ function shellTerminateWithExitHandler( test )
       test.is( _.strHas( o.output, 'Timeout in child' ) );
       return null;
     })
-
-    return con;
   })
 
   /*  */
@@ -8217,8 +8215,9 @@ function shellTerminateWithExitHandler( test )
       o.process.kill( 'SIGKILL' );
       return null;
     })
-
-    con.finally( ( err, got ) =>
+    
+    return test.mustNotThrowError( con )
+    .finally( ( err, got ) =>
     {
       test.is( !_.errIs( err ) );
       test.identical( o.exitCode, 0 );
@@ -8227,8 +8226,6 @@ function shellTerminateWithExitHandler( test )
       test.is( !_.strHas( o.output, 'Timeout in child' ) );
       return null;
     })
-
-    return con;
   })
 
   /* SIGKILL */
@@ -8250,18 +8247,15 @@ function shellTerminateWithExitHandler( test )
       o.process.kill( 'SIGKILL' );
       return null;
     })
-
-    con.finally( ( err, got ) =>
+    
+    return test.shouldThrowErrorAsync( con )
+    .finally( ( err, got ) =>
     {
-      _.errAttend( err );
-      test.is( _.errIs( err ) );
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGKILL' );
       test.is( !_.strHas( o.output, 'Timeout in child' ) );
       return null;
     })
-
-    return con;
   })
 
   /*  */
@@ -8283,18 +8277,15 @@ function shellTerminateWithExitHandler( test )
       o.process.kill( 'SIGKILL' );
       return null;
     })
-
-    con.finally( ( err, got ) =>
+    
+    return test.shouldThrowErrorAsync( con )
+    .finally( ( err, got ) =>
     {
-      _.errAttend( err );
-      test.is( _.errIs( err ) );
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGKILL' );
       test.is( _.strHas( o.output, 'Timeout in child' ) );
       return null;
     })
-
-    return con;
   })
 
   .then( () =>
@@ -8315,17 +8306,14 @@ function shellTerminateWithExitHandler( test )
       return null;
     })
 
-    con.finally( ( err, got ) =>
+    return test.shouldThrowErrorAsync( con )
+    .finally( ( err, got ) =>
     {
-      _.errAttend( err );
-      test.is( _.errIs( err ) );
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGKILL' );
       test.is( !_.strHas( o.output, 'Timeout in child' ) );
       return null;
     })
-
-    return con;
   })
 
   /*  */
