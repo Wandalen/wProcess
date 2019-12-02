@@ -2293,21 +2293,13 @@ function kill( o )
   if( _.numberIs( o ) )
   o = { pid : o };
   
-  _.routineOptions( kill, arguments );
+  _.routineOptions( kill, o );
   _.assert( arguments.length === 1 ); 
   _.assert( _.numberIs( o.pid ) );
   _.assert( _.strDefined( o.signal ) || _.numberIs( o.signal ) );
   
-  let isRunning = _.process.isRunning( o.pid );
-  
   if( o.signal === 0 )
-  return isRunning;
-  
-  if( !isRunning )
-  if( o.throwing )
-  throw _.err( 'Target process:', _.strQuote( o.pid ), 'does not exist.' )
-  else
-  return false;
+  return _.process.isRunning( o.pid );
   
   try
   {
