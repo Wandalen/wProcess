@@ -3643,12 +3643,12 @@ function shellDryRun( test )
       ipc : 1,
       when : { delay : 1000 }
     }
-    var t1 = _.timeNow();
+    var t1 = _.time.now();
     var got = _.process.start( o );
     test.is( _.consequenceIs( got ) );
     got.thenKeep( function( o )
     {  
-      var t2 = _.timeNow();
+      var t2 = _.time.now();
       test.ge( t2 - t1, 1000 )
       
       test.identical( o.exitCode, null );
