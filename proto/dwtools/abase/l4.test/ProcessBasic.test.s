@@ -1696,8 +1696,11 @@ function shellCurrentPath( test )
     
     return _.process.start( o )
     .thenKeep( function( got )
-    {
+    { 
+      if( process.platform === 'win32' )
       test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) + '\\' );
+      else
+      test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) );
       return null;
     })
   })
@@ -1724,7 +1727,10 @@ function shellCurrentPath( test )
     return _.process.start( o )
     .thenKeep( function( got )
     {
+      if( process.platform === 'win32' )
       test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) );
+      else
+      test.identical( _.strStrip( got.output ), trace[ 0 ] );
       return null;
     })
   })
@@ -1750,7 +1756,10 @@ function shellCurrentPath( test )
     return _.process.start( o )
     .thenKeep( function( got )
     {
+      if( process.platform === 'win32' )
       test.identical( _.strStrip( got.output ), currentPath );
+      else
+      test.identical( _.strStrip( got.output ), trace[ 0 ] );
       return null;
     })
   })
@@ -1776,7 +1785,10 @@ function shellCurrentPath( test )
     return _.process.start( o )
     .thenKeep( function( got )
     {
+      if( process.platform === 'win32' )
       test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) + '\\' );
+      else
+      test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) );
       return null;
     })
   })
@@ -1803,7 +1815,10 @@ function shellCurrentPath( test )
     return _.process.start( o )
     .thenKeep( function( got )
     {
+      if( process.platform === 'win32' )
       test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) );
+      else
+      test.identical( _.strStrip( got.output ), trace[ 0 ] );
       return null;
     })
   })
@@ -1829,7 +1844,10 @@ function shellCurrentPath( test )
     return _.process.start( o )
     .thenKeep( function( got )
     {
+      if( process.platform === 'win32' )
       test.identical( _.strStrip( got.output ), currentPath );
+      else
+      test.identical( _.strStrip( got.output ), trace[ 0 ] );
       return null;
     })
   })
@@ -1855,7 +1873,10 @@ function shellCurrentPath( test )
     return _.process.start( o )
     .thenKeep( function( got )
     {
+      if( process.platform === 'win32' )
       test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) + '\\' );
+      else
+      test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) );
       return null;
     })
   })
@@ -1882,7 +1903,10 @@ function shellCurrentPath( test )
     return _.process.start( o )
     .thenKeep( function( got )
     {
+      if( process.platform === 'win32' )
       test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) );
+      else
+      test.identical( _.strStrip( got.output ), trace[ 0 ] );
       return null;
     })
   })
@@ -1908,7 +1932,10 @@ function shellCurrentPath( test )
     return _.process.start( o )
     .thenKeep( function( got )
     {
+      if( process.platform === 'win32' )
       test.identical( _.strStrip( got.output ), currentPath );
+      else
+      test.identical( _.strStrip( got.output ), trace[ 0 ] );
       return null;
     })
   })
@@ -1934,7 +1961,10 @@ function shellCurrentPath( test )
     return _.process.start( o )
     .thenKeep( function( got )
     {
+      if( process.platform === 'win32' )
       test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) + '\\' );
+      else
+      test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) );
       return null;
     })
   })
@@ -1961,7 +1991,10 @@ function shellCurrentPath( test )
     return _.process.start( o )
     .thenKeep( function( got )
     {
+      if( process.platform === 'win32' )
       test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) );
+      else
+      test.identical( _.strStrip( got.output ), trace[ 0 ] );
       return null;
     })
   })
@@ -1986,8 +2019,11 @@ function shellCurrentPath( test )
     
     return _.process.start( o )
     .thenKeep( function( got )
-    {
+    { 
+      if( process.platform === 'win32' )
       test.identical( _.strStrip( got.output ), currentPath );
+      else
+      test.identical( _.strStrip( got.output ), trace[ 0 ] );
       return null;
     })
   })
