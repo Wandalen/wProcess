@@ -728,10 +728,7 @@ function start_body( o )
     if( o.detaching )
     {
       o.process.unref();
-      _.Procedure.On( 'terminationBegin', () => 
-      { 
-        o.ready.error( _.err( 'Detached child with pid:', o.process.pid, 'is continuing execution after parent death.' ) ) 
-      });
+      _.Procedure.On( 'terminationBegin', onProcedureTerminationBegin );
     }
 
   }
@@ -877,6 +874,12 @@ function start_body( o )
     if( begin )
     execPath = _.strInsideOf( execPath, begin, begin );
     return execPath;
+  }
+  
+  function onProcedureTerminationBegin()
+  {
+    o.ready.error( _.err( 'Detached child with pid:', o.process.pid, 'is continuing execution after parent death.' ) );
+    _.Procedure.Off( 'terminationBegin', onProcedureTerminationBegin );
   }
   
   /* */
