@@ -611,7 +611,7 @@ function start_body( o )
   /* */
 
   function launchAct()
-  {
+  { 
     if( _.strIs( o.interpreterArgs ) )
     o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs });
 
@@ -643,7 +643,7 @@ function start_body( o )
     }
     else if( o.mode === 'exec' )
     {
-      let currentPath = _.path.nativize( o.currentPath );
+      let currentPath = currentPathForm();
       log( '{ shell.mode } "exec" is deprecated' );
       if( args.length )
       execPath = execPath + ' ' + argsJoin( args );
@@ -838,7 +838,7 @@ function start_body( o )
     if( o.env )
     o2.env = o.env;
     if( o.currentPath )
-    o2.cwd = _.path.nativize( o.currentPath );
+    o2.cwd = currentPathForm();
     if( o.timeOut && o.sync )
     o2.timeout = o.timeOut;
     o2.windowsHide = !!o.windowHiding;
@@ -859,7 +859,7 @@ function start_body( o )
     }
 
     if( o.currentPath )
-    o2.cwd = _.path.nativize( o.currentPath );
+    o2.cwd = currentPathForm();
 
     return o2;
   }
@@ -871,6 +871,14 @@ function start_body( o )
     if( begin )
     execPath = _.strInsideOf( execPath, begin, begin );
     return execPath;
+  }
+  
+  function currentPathForm()
+  {
+    let currentPath = _.path.normalize( o.currentPath );
+    currentPath = _.path.trail( currentPath );
+    currentPath = _.path.nativize( currentPath );
+    return currentPath;
   }
 
   /* */
