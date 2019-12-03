@@ -9342,6 +9342,93 @@ function shellStartingSuspended( test )
 
 //
 
+function shellDetachingThrowing( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+
+  function testAppParent()
+  {
+    _.include( 'wAppBasic' );
+    _.include( 'wFiles' );
+
+    let o =
+    {
+      execPath : 'node testAppChild.js',
+      stdio : 'ignore',
+      detaching : true,
+      mode : 'spawn',
+    }
+    _.process.start( o );
+    // _.procedure.terminationBegin();
+  }
+
+  function testAppChild()
+  {
+    _.include( 'wAppBasic' );
+    _.include( 'wFiles' );
+
+    _.time.out( 2000, () =>
+    {
+      let filePath = _.path.join( __dirname, 'testFile' );
+      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
+    })
+  }
+
+  /* */
+
+  var testAppParentPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppParent.js' ) );
+  var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
+  var testAppParentCode = context.toolsPathInclude + testAppParent.toString() + '\ntestAppParent();';
+  var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
+  _.fileProvider.fileWrite( testAppParentPath, testAppParentCode );
+  _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
+  testAppParentPath = _.strQuote( testAppParentPath );
+  var ready = new _.Consequence().take( null );
+
+  let testFilePath = _.path.join( routinePath, 'testFile' );
+
+  ready
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : 'node testAppParent.js',
+      mode : 'spawn',
+      outputCollecting : 1,
+      currentPath : routinePath,
+    }
+    let con = _.process.start( o );
+    
+    return test.shouldThrowErrorAsync( con )
+    .then( () => 
+    {
+      test.is( _.strHas( o.output, /Detached child with pid: .* is continuing execution after parent death/ ) );
+      return _.time.out( 3000, () => null );
+    })
+    .then( () =>
+    {
+      test.is( _.fileProvider.fileExists( testFilePath ) );
+      let childPid = _.fileProvider.fileRead( testFilePath );
+      test.is( !_.process.isRunning( _.numberFrom( childPid ) ) );
+      return null;
+    })
+  })
+
+  /*  */
+
+  return ready;
+}
+
+shellDetachingThrowing.description = 
+`
+Parent created child process in detached. mode.
+Unhandled asynchronous error should be thrown when parent exits.
+`
+
+//
+
 function shellDetachingChildAfterParent( test )
 {
   var context = this;
@@ -9361,8 +9448,15 @@ function shellDetachingChildAfterParent( test )
     }
 
     _.process.start( o );
+    
+    o.ready.catch( ( err ) => 
+    {
+      _.errLog( err );
+      return null;
+    })
 
     process.send( o.process.pid );
+    // _.procedure.terminationBegin();
     console.log( 'Parent process exit' )
   }
 
@@ -9424,6 +9518,7 @@ function shellDetachingChildAfterParent( test )
       test.is( _.strHas( got.output, 'Parent process exit' ) )
       test.is( !_.strHas( got.output, 'Child process start' ) )
       test.is( !_.strHas( got.output, 'Child process end' ) )
+      test.is( _.strHas( got.output, /Detached child with pid: .* is continuing execution after parent death/ ) );
 
       test.is( !_.process.isRunning( o.process.pid ) );
       test.is( _.process.isRunning( secondaryPid ) );
@@ -11820,6 +11915,7 @@ var Proto =
     // shellAfterDeath,
     // shellAfterDeathOutput,
 
+    shellDetachingThrowing,
     shellDetachingChildAfterParent,
     shellDetachingChildBeforeParent,
 
