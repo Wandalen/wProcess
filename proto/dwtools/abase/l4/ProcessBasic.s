@@ -643,7 +643,7 @@ function start_body( o )
     }
     else if( o.mode === 'exec' )
     {
-      let currentPath = currentPathForm();
+      let currentPath = _.path.nativize( o.currentPath );
       log( '{ shell.mode } "exec" is deprecated' );
       if( args.length )
       execPath = execPath + ' ' + argsJoin( args );
@@ -844,7 +844,7 @@ function start_body( o )
     if( o.env )
     o2.env = o.env;
     if( o.currentPath )
-    o2.cwd = currentPathForm();
+    o2.cwd = _.path.nativize( o.currentPath );
     if( o.timeOut && o.sync )
     o2.timeout = o.timeOut;
     o2.windowsHide = !!o.windowHiding;
@@ -865,7 +865,7 @@ function start_body( o )
     }
 
     if( o.currentPath )
-    o2.cwd = currentPathForm();
+    o2.cwd = _.path.nativize( o.currentPath );
 
     return o2;
   }
@@ -879,14 +879,6 @@ function start_body( o )
     return execPath;
   }
   
-  function currentPathForm()
-  {
-    let currentPath = _.path.normalize( o.currentPath );
-    currentPath = _.path.trail( currentPath );
-    currentPath = _.path.nativize( currentPath );
-    return currentPath;
-  }
-
   /* */
 
   function pipe()
