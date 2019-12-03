@@ -9355,7 +9355,7 @@ function shellDetachingChildAfterParent( test )
     let o =
     {
       execPath : 'node testAppChild.js',
-      outputCollecting : 1,
+      stdio : 'ignore',
       detaching : true,
       mode : 'spawn',
     }
@@ -9363,7 +9363,6 @@ function shellDetachingChildAfterParent( test )
     _.process.start( o );
 
     process.send( o.process.pid );
-
     console.log( 'Parent process exit' )
   }
 
@@ -9423,22 +9422,22 @@ function shellDetachingChildAfterParent( test )
       test.will = 'parent is dead, detached child is still running'
 
       test.is( _.strHas( got.output, 'Parent process exit' ) )
-      test.is( _.strHas( got.output, 'Child process start' ) )
+      test.is( !_.strHas( got.output, 'Child process start' ) )
       test.is( !_.strHas( got.output, 'Child process end' ) )
 
-      test.is( !processIsRunning( o.process.pid ) );
-      test.is( processIsRunning( secondaryPid ) );
+      test.is( !_.process.isRunning( o.process.pid ) );
+      test.is( _.process.isRunning( secondaryPid ) );
 
       test.is( !_.fileProvider.fileExists( testFilePath ) );
 
-      return _.time.out( 5000, () => null );
+      return _.time.out( 6000, () => null );
     })
 
     con.then( () =>
     {
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
-      test.is( !processIsRunning( _.numberFrom( childPid ) ) );
+      test.is( !_.process.isRunning( _.numberFrom( childPid ) ) );
       return null;
     })
 
@@ -9447,20 +9446,15 @@ function shellDetachingChildAfterParent( test )
 
   /*  */
 
-  function processIsRunning( pid )
-  {
-    try
-    {
-      return process.kill( pid, 0 );
-    }
-    catch (e)
-    {
-      return e.code === 'EPERM'
-    }
-  }
-
   return ready;
 }
+
+shellDetachingChildAfterParent.description = 
+`
+Parent starts child process in detached mode and exits.
+Child process continues to work for at least 5 seconds after parent exits.
+After 5 seconds child process creates test file in working directory and exits.
+`
 
 //
 
@@ -11831,7 +11825,7 @@ var Proto =
     // shellAfterDeath,
     // shellAfterDeathOutput,
 
-    // shellDetachingChildAfterParent,
+    shellDetachingChildAfterParent,
     // shellDetachingChildBeforeParent,
 
     shellConcurrent,
