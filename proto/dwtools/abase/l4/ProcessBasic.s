@@ -730,7 +730,6 @@ function start_body( o )
       o.process.unref();
       _.Procedure.On( 'terminationBegin', () => 
       { 
-        if( o.ready.competitorsCount() )
         o.ready.error( _.err( 'Detached child with pid:', o.process.pid, 'is continuing execution after parent death.' ) ) 
       });
     }
