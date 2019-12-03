@@ -9471,7 +9471,7 @@ function shellDetachingChildBeforeParent( test )
     let o =
     {
       execPath : 'node testAppChild.js',
-      outputCollecting : 1,
+      stdio : 'ignore',
       detaching : true,
       mode : 'spawn',
     }
@@ -9479,7 +9479,8 @@ function shellDetachingChildBeforeParent( test )
     let ready = _.process.start( o );
 
     ready.finally( ( err, got ) =>
-    {
+    { 
+      console.log( 'Child process exit' );
       process.send({ exitCode : got.exitCode, err : err, pid : o.process.pid });
       return null;
     })
@@ -9550,16 +9551,15 @@ function shellDetachingChildBeforeParent( test )
       test.identical( child.err, undefined );
       test.identical( child.exitCode, 0 );
 
+      test.is( _.strHas( got.output, 'Child process exit' ) )
       test.is( _.strHas( got.output, 'Parent process exit' ) )
-      test.is( _.strHas( got.output, 'Child process start' ) )
-      test.is( _.strHas( got.output, 'Child process end' ) )
 
-      test.is( !processIsRunning( o.process.pid ) );
-      test.is( !processIsRunning( child.pid ) );
+      test.is( !_.process.isRunning( o.process.pid ) );
+      test.is( !_.process.isRunning( child.pid ) );
 
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
-      test.is( !processIsRunning( _.numberFrom( childPid ) ) );
+      test.is( !_.process.isRunning( _.numberFrom( childPid ) ) );
       return null;
     })
 
@@ -9568,20 +9568,15 @@ function shellDetachingChildBeforeParent( test )
 
   /*  */
 
-  function processIsRunning( pid )
-  {
-    try
-    {
-      return process.kill( pid, 0 );
-    }
-    catch (e)
-    {
-      return e.code === 'EPERM'
-    }
-  }
-
   return ready;
 }
+
+shellDetachingChildBeforeParent.description = 
+`
+Parent starts child process in detached mode and registers callback to wait for child process.
+Child process creates test file after 1 second and exits.
+Callback in parent recevies message. Parent exits.
+`
 
 //
 
@@ -11826,7 +11821,7 @@ var Proto =
     // shellAfterDeathOutput,
 
     shellDetachingChildAfterParent,
-    // shellDetachingChildBeforeParent,
+    shellDetachingChildBeforeParent,
 
     shellConcurrent,
     shellerConcurrent,
