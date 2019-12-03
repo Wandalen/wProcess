@@ -1697,9 +1697,6 @@ function shellCurrentPath( test )
     return _.process.start( o )
     .thenKeep( function( got )
     { 
-      if( process.platform === 'win32' )
-      test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) + '\\' );
-      else
       test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) );
       return null;
     })
@@ -1727,10 +1724,7 @@ function shellCurrentPath( test )
     return _.process.start( o )
     .thenKeep( function( got )
     {
-      if( process.platform === 'win32' )
       test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) );
-      else
-      test.identical( _.strStrip( got.output ), trace[ 0 ] );
       return null;
     })
   })
@@ -1742,7 +1736,7 @@ function shellCurrentPath( test )
     test.case = 'nativized, currentPath leads to root of current drive, mode : spawn';
     
     let trace = _.path.traceToRoot( __dirname );
-    let currentPath = _.path.nativize( trace[ 0 ] ) + '\\'
+    let currentPath = _.path.nativize( trace[ 0 ] );
     
     let o =
     {
@@ -1756,10 +1750,7 @@ function shellCurrentPath( test )
     return _.process.start( o )
     .thenKeep( function( got )
     {
-      if( process.platform === 'win32' )
       test.identical( _.strStrip( got.output ), currentPath );
-      else
-      test.identical( _.strStrip( got.output ), trace[ 0 ] );
       return null;
     })
   })
@@ -1785,9 +1776,6 @@ function shellCurrentPath( test )
     return _.process.start( o )
     .thenKeep( function( got )
     {
-      if( process.platform === 'win32' )
-      test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) + '\\' );
-      else
       test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) );
       return null;
     })
@@ -1815,10 +1803,7 @@ function shellCurrentPath( test )
     return _.process.start( o )
     .thenKeep( function( got )
     {
-      if( process.platform === 'win32' )
       test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) );
-      else
-      test.identical( _.strStrip( got.output ), trace[ 0 ] );
       return null;
     })
   })
@@ -1830,7 +1815,7 @@ function shellCurrentPath( test )
     test.case = 'nativized, currentPath leads to root of current drive, mode : fork';
     
     let trace = _.path.traceToRoot( __dirname );
-    let currentPath = _.path.nativize( trace[ 0 ] ) + '\\'
+    let currentPath = _.path.nativize( trace[ 0 ] );
     
     let o =
     {
@@ -1844,10 +1829,7 @@ function shellCurrentPath( test )
     return _.process.start( o )
     .thenKeep( function( got )
     {
-      if( process.platform === 'win32' )
       test.identical( _.strStrip( got.output ), currentPath );
-      else
-      test.identical( _.strStrip( got.output ), trace[ 0 ] );
       return null;
     })
   })
@@ -1873,9 +1855,6 @@ function shellCurrentPath( test )
     return _.process.start( o )
     .thenKeep( function( got )
     {
-      if( process.platform === 'win32' )
-      test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) + '\\' );
-      else
       test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) );
       return null;
     })
@@ -1903,10 +1882,7 @@ function shellCurrentPath( test )
     return _.process.start( o )
     .thenKeep( function( got )
     {
-      if( process.platform === 'win32' )
       test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) );
-      else
-      test.identical( _.strStrip( got.output ), trace[ 0 ] );
       return null;
     })
   })
@@ -1918,7 +1894,7 @@ function shellCurrentPath( test )
     test.case = 'nativized, currentPath leads to root of current drive, mode : shell';
     
     let trace = _.path.traceToRoot( __dirname );
-    let currentPath = _.path.nativize( trace[ 0 ] ) + '\\'
+    let currentPath = _.path.nativize( trace[ 0 ] )
     
     let o =
     {
@@ -1932,10 +1908,7 @@ function shellCurrentPath( test )
     return _.process.start( o )
     .thenKeep( function( got )
     {
-      if( process.platform === 'win32' )
       test.identical( _.strStrip( got.output ), currentPath );
-      else
-      test.identical( _.strStrip( got.output ), trace[ 0 ] );
       return null;
     })
   })
@@ -1961,9 +1934,6 @@ function shellCurrentPath( test )
     return _.process.start( o )
     .thenKeep( function( got )
     {
-      if( process.platform === 'win32' )
-      test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) + '\\' );
-      else
       test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) );
       return null;
     })
@@ -1991,10 +1961,7 @@ function shellCurrentPath( test )
     return _.process.start( o )
     .thenKeep( function( got )
     {
-      if( process.platform === 'win32' )
       test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) );
-      else
-      test.identical( _.strStrip( got.output ), trace[ 0 ] );
       return null;
     })
   })
@@ -2006,7 +1973,7 @@ function shellCurrentPath( test )
     test.case = 'nativized, currentPath leads to root of current drive, mode : exec';
     
     let trace = _.path.traceToRoot( __dirname );
-    let currentPath = _.path.nativize( trace[ 0 ] ) + '\\'
+    let currentPath = _.path.nativize( trace[ 0 ] );
     
     let o =
     {
@@ -2020,10 +1987,7 @@ function shellCurrentPath( test )
     return _.process.start( o )
     .thenKeep( function( got )
     { 
-      if( process.platform === 'win32' )
       test.identical( _.strStrip( got.output ), currentPath );
-      else
-      test.identical( _.strStrip( got.output ), trace[ 0 ] );
       return null;
     })
   })
