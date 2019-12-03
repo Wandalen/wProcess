@@ -726,7 +726,14 @@ function start_body( o )
     else _.assert( 0, 'Unknown mode', _.strQuote( o.mode ), 'to start process at path', _.strQuote( o.paths ) );
 
     if( o.detaching )
-    o.process.unref();
+    {
+      o.process.unref();
+      _.Procedure.On( 'terminationBegin', () => 
+      { 
+        if( o.ready.competitorsCount() )
+        o.ready.error( _.err( 'Detached child with pid:', o.process.pid, 'is continuing execution after parent death.' ) ) 
+      });
+    }
 
   }
 
