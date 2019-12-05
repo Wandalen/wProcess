@@ -11891,9 +11891,9 @@ var Proto =
     // shellAfterDeath,
     // shellAfterDeathOutput,
 
-    shellDetachingThrowing,
-    shellDetachingChildAfterParent,
-    shellDetachingChildBeforeParent,
+    // shellDetachingThrowing,
+    // shellDetachingChildAfterParent,
+    // shellDetachingChildBeforeParent,
 
     shellConcurrent,
     shellerConcurrent,
