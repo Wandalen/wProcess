@@ -51,7 +51,7 @@ Process with blocked event loop can't be terminated from command line with combi
 
 **Legend**
 
-E - Signal will be handled, process will exit gracefully
+E - Signal will be handled, process will exit gracefully<br>
 T - Signal will be not handled, process will be terminated
 
 ### Summary
