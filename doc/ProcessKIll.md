@@ -2,8 +2,8 @@
 
 |           Method            |             Windows             |              Unix               |            Gracefull exit            |
 | --------------------------- | ------------------------------- | ------------------------------- | ------------------------------------ |
-| process.kill( pid, signal ) | exitCode : 1, exitSignal : null      | exitCode : null, exitSignal : signal | Only on Unix, Win - process will die |
-| childprocess.kill( signal ) | exitCode : null, exitSignal : signal | exitCode : null, exitSignal : signal | Only on Unix, Win - process will die |
+| process.kill( pid, signal ) | exitCode : 1<br>exitSignal : null      | exitCode : null<br>exitSignal : signal | Only on Unix<br>Win - process will die |
+| childprocess.kill( signal ) | exitCode : null<br>exitSignal : signal | exitCode : null<br>exitSignal : signal | Only on Unix<br>Win - process will die |
 
 
 **Notes**:
