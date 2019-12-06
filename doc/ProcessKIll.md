@@ -8,6 +8,8 @@
 
 **Notes**:
 
+Gracefull exit - possibility to catch termination signal to do some work before exit and then use process.exit( 0 ) to exit with zero code.
+
 [Node.Js Signal Events](https://nodejs.org/api/process.html#process_signal_events)<br>
 
 Windows does not support sending signals, but Node.js offers some emulation with process.kill(), and childprocess.kill().<br>
