@@ -17,6 +17,25 @@
   @memberof module:Tools/base/ProcessBasic
 */
 
+/* Return values of routine start for each combination of options sync and deasync:
+
+  Single process
+  | Combination      | Options map | Consequence |
+  | ---------------- | ----------- | ----------- |
+  | sync:0 deasync:0 | +           | +           |
+  | sync:1 deasync:1 | +           | -           |
+  | sync:0 deasync:1 | +           | +           |
+  | sync:1 deasync:0 | +           | -           |
+  
+  Multiple processes
+  | Combination      | Array of maps of options | Single options map | Consequence |
+  | ---------------- | ------------------------ | ------------------ | ----------- |
+  | sync:0 deasync:0 | +                        | -                  | +           |
+  | sync:1 deasync:1 | +                        | -                  | -           |
+  | sync:0 deasync:1 | +                        | -                  | +           |
+  | sync:1 deasync:0 | -                        | +                  | -           |
+*/
+
 if( typeof module !== 'undefined' )
 {
 
@@ -205,14 +224,21 @@ function start_body( o )
     o.ready.then( () => _.time.out( startingDelay, () => null ) )
     o.ready.thenGive( single );
     o.ready.finallyKeep( end );
-
+    
+    return endDeasyncMaybe();
+  }
+  
+  /*  */
+  
+  function endDeasyncMaybe()
+  {
     if( o.sync && o.deasync )
     {
       // return o.ready.finallyDeasyncGive();
       o.ready.deasyncWait();
       return o.ready.sync();
     }
-    if( !o.sync && o.deasync ) /* qqq : check, does not work properly! */
+    if( !o.sync && o.deasync ) /* qqq : check, does not work properly! Vova: wrote tests for each mode, works as expected*/
     {
       // o.ready.finallyDeasyncKeep();
       o.ready.deasyncWait();
@@ -287,24 +313,30 @@ function start_body( o )
 
       return arg;
     });
-
+    
     if( o.sync && !o.deasync )
-    return o;
+    {
+      if( o.optionsArrayReturn )
+      return options;
+      return o;
+    }
+
+   /* 
     if( o.sync && o.deasync )
     {
       o.ready.deasyncWait();
       return o.ready.sync();
       // return o.ready.finallyDeasyncGive();
     }
-    if( !o.sync && o.deasync ) /* qqq : check */
+    if( !o.sync && o.deasync ) // qqq : check Vova:wrote test routine, works as expected
     {
       o.ready.deasyncWait();
       return o.ready;
       // o.ready.finallyDeasyncKeep();
       // return o.ready;
-    }
+    } */
 
-    return o.ready;
+    return endDeasyncMaybe();
   }
 
   /*  */
@@ -317,11 +349,14 @@ function start_body( o )
 
     try
     {
-      if( o.when === 'afterdeath' )
+      if( o.when === 'afterdeath' && !o.dry )
       prepareAfterDeath();
       prepare();
       launch();
       pipe();
+      
+      if( o.dry )
+      o.ready.take( o );
     }
     catch( err )
     {
@@ -448,6 +483,7 @@ function start_body( o )
   {
 
     // qqq : cover the case ( args is string ) for both routines shell and sheller
+    // Vova: added required test cases
     // if( _.strIs( o.args ) )
     // o.args = _.strSplitNonPreserving({ src : o.args });
 
@@ -560,7 +596,7 @@ function start_body( o )
 
     /* time out */
 
-    if( o.timeOut )
+    if( o.timeOut && !o.dry )
     if( !o.sync || o.deasync )
     _.time.begin( o.timeOut, () =>
     {
@@ -575,7 +611,7 @@ function start_body( o )
   /* */
 
   function launchAct()
-  {
+  { 
     if( _.strIs( o.interpreterArgs ) )
     o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs });
 
@@ -599,7 +635,10 @@ function start_body( o )
 
       o.fullExecPath = _.strConcat( _.arrayAppendArray( [ execPath ], args ) );
       launchInputLog();
-
+      
+      if( o.dry )
+      return;
+      
       o.process = ChildProcess.fork( execPath, args, o2 );
     }
     else if( o.mode === 'exec' )
@@ -611,11 +650,27 @@ function start_body( o )
 
       o.fullExecPath = execPath;
       launchInputLog();
-
+      
+      if( o.dry )
+      return;
+      
       if( o.sync && !o.deasync )
-      o.process = ChildProcess.execSync( execPath, { env : o.env, cwd : currentPath } );
+      { 
+        try
+        {
+          o.process = ChildProcess.execSync( execPath, { env : o.env, cwd : currentPath } );
+          o.process.status = 0;
+          o.process.signal = null;
+        }
+        catch( _process )
+        { 
+          o.process = _process;
+        }
+      }
       else
-      o.process = ChildProcess.exec( execPath, { env : o.env, cwd : currentPath } );
+      {
+        o.process = ChildProcess.exec( execPath, { env : o.env, cwd : currentPath } );
+      }
     }
     else if( o.mode === 'spawn' )
     {
@@ -623,6 +678,9 @@ function start_body( o )
 
       o.fullExecPath = _.strConcat( _.arrayAppendArray( [ execPath ], args ) );
       launchInputLog();
+      
+      if( o.dry )
+      return;
 
       if( o.sync && !o.deasync )
       o.process = ChildProcess.spawnSync( execPath, args, o2 );
@@ -655,6 +713,9 @@ function start_body( o )
 
       o.fullExecPath = arg2;
       launchInputLog();
+      
+      if( o.dry )
+      return;
 
       if( o.sync && !o.deasync )
       o.process = ChildProcess.spawnSync( appPath, [ arg1, arg2 ], o2 );
@@ -665,7 +726,10 @@ function start_body( o )
     else _.assert( 0, 'Unknown mode', _.strQuote( o.mode ), 'to start process at path', _.strQuote( o.paths ) );
 
     if( o.detaching )
-    o.process.unref();
+    {
+      o.process.unref();
+      // _.Procedure.On( 'terminationBegin', onProcedureTerminationBegin );
+    }
 
   }
 
@@ -811,11 +875,19 @@ function start_body( o )
     execPath = _.strInsideOf( execPath, begin, begin );
     return execPath;
   }
-
+  
+  // function onProcedureTerminationBegin()
+  // {
+  //   o.ready.error( _.err( 'Detached child with pid:', o.process.pid, 'is continuing execution after parent death.' ) );
+  //   _.Procedure.Off( 'terminationBegin', onProcedureTerminationBegin );
+  // }
+  
   /* */
 
   function pipe()
-  {
+  { 
+    if( o.dry )
+    return;
 
     /* piping out channel */
 
@@ -1044,6 +1116,7 @@ start_body.defaults =
   sync : 0,
   deasync : 0,
   when : 'instant', /* instant / afterdeath / time / delay */
+  dry : 0,
 
   mode : 'shell', /* fork / exec / spawn / shell */
   ready : null,
@@ -1058,6 +1131,7 @@ start_body.defaults =
   passingThrough : 0,
   concurrent : 0,
   timeOut : null,
+  optionsArrayReturn : 1,//Vova: returns array of maps of options for multiprocess launch in sync mode
 
   throwingExitCode : 1, /* must be on by default */
   applyingExitCode : 0,
@@ -1080,6 +1154,14 @@ let start = _.routineFromPreAndBody( start_pre, start_body );
 /*
 qqq
 add coverage
+Vova: tests routines :
+
+  shellArgsOption,
+  shellArgumentsParsing,
+  shellArgumentsParsingNonTrivial,
+  shellArgumentsNestedQuotes,
+  shellExecPathQuotesClosing,
+  shellExecPathSeveralCommands
 
 for combination:
   path to exe file : [ with space, without space ]
@@ -1404,7 +1486,7 @@ function starter( o0 )
 
   _.routineExtend( er, _.process.start );
   er.predefined = o0;
-  /* qqq : cover fields of generated routine */
+  /* qqq : cover fields of generated routine Vova: wrote test routine shellerFields */
 
   return er;
 
@@ -1772,6 +1854,14 @@ anchor.defaults =
 
 //
 
+/**
+ * @summary Allows to set/get exit reason of current process.
+ * @description Saves exit reason if argument `reason` was provided, otherwise returns current exit reason value.
+ * Returns `null` if reason was not defined yet.
+ * @function exitReason
+ * @memberof module:Tools/base/ProcessBasic.Tools( module::ProcessBasic )
+ */
+
 function exitReason( reason )
 {
   if( !_realGlobal_.wTools )
@@ -1787,6 +1877,14 @@ function exitReason( reason )
 }
 
 //
+
+/**
+ * @summary Allows to set/get exit code of current process.
+ * @description Updates exit code if argument `status` was provided and returns previous exit code. Returns current exit code if no argument provided.
+ * Returns `0` if exit code was not defined yet.
+ * @function exitCode
+ * @memberof module:Tools/base/ProcessBasic.Tools( module::ProcessBasic )
+ */
 
 function exitCode( status )
 {
@@ -1849,12 +1947,18 @@ function exitWithBeep( exitCode )
 /*
 qqq : use maybe exitHandlerRepair instead of exitHandlerOnce?
 qqq : investigate difference between exitHandlerRepair and exitHandlerOnce
+Vova: exitHandlerRepair allows app to exit safely when one of exit signals will be triggered
+      exitHandlerOnce allows to execute some code when process is about to exit:
+       - process.exit() was called explcitly
+       - no additional work for nodejs event loop
+      Correct work of exitHandlerOnce can't be achieved without exitHandlerRepair.
+      exitHandlerRepair allows exitHandlerOnce to execute handlers in case when one of termination signals was raised.
 */
 
 let appRepairExitHandlerDone = 0;
 function exitHandlerRepair()
 {
-
+  
   _.assert( arguments.length === 0 );
 
   if( appRepairExitHandlerDone )
@@ -2024,6 +2128,7 @@ function exitHandlerOnce( routine )
 
 /*
 qqq : cover routine exitHandlerOff by tests
+Vova : wrote test routine exitHandlerOff
 */
 
 function exitHandlerOff( routine )
@@ -2173,6 +2278,64 @@ defaults.filePath = null;
 
 let tempClose = _.routineFromPreAndBody( tempClose_pre, tempClose_body );
 
+//
+
+function isRunning( pid )
+{ 
+  _.assert( arguments.length === 1 );
+  _.assert( _.numberIs( pid ) );
+  
+  try
+  {
+    return process.kill( pid, 0 );
+  }
+  catch ( err )
+  {
+    return err.code === 'EPERM'
+  }
+}
+
+//
+
+function kill( o )
+{ 
+  if( _.numberIs( o ) )
+  o = { pid : o };
+  
+  _.routineOptions( kill, o );
+  _.assert( arguments.length === 1 ); 
+  _.assert( _.numberIs( o.pid ) );
+  _.assert( _.strDefined( o.signal ) || _.numberIs( o.signal ) );
+  
+  if( o.signal === 0 )
+  return _.process.isRunning( o.pid );
+  
+  try
+  {
+    process.kill( o.pid, o.signal );
+  }
+  catch( err )
+  { 
+    if( !o.throwing )
+    return false;
+    
+    if( err.code === 'EINVAL' )
+    throw _.err( err, '\nAn invalid signal was specified:', _.strQuote( o.signal ) )
+    if( err.code === 'EPERM' )
+    throw _.err( err, '\nCurrent process does not have permission to kill target process' );
+    if( err.code === 'ESRCH' )
+    throw _.err( err, '\nTarget process:', _.strQuote( o.pid ), 'does not exist.' );
+    throw _.err( err );
+  }
+  
+  return true;
+}
+
+var defaults = kill.defaults = Object.create( null );
+defaults.pid = null;
+defaults.signal = 'SIGTERM'
+defaults.throwing = 1;
+
 // --
 // declare
 // --
@@ -2201,8 +2364,8 @@ let Routines =
 
   anchor,
 
-  exitReason, /* qqq : cover and document */
-  exitCode, /* qqq : cover and document */
+  exitReason, /* qqq : cover and document Vova:wrote test routine exitReason */
+  exitCode, /* qqq : cover and document Vova:wrote test routine exitCode */
   exit,
   exitWithBeep,
 
@@ -2213,7 +2376,10 @@ let Routines =
   memoryUsageInfo,
 
   tempOpen,
-  tempClose
+  tempClose,
+  
+  isRunning,
+  kill
 
 }
 
