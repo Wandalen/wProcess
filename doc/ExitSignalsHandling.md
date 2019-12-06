@@ -43,18 +43,16 @@
 Process with blocked event loop can't be terminated from command line with combination `CTRL+C`, only by kill command.
 
 
-### appExitHandlerRepair
+### How appExitHandlerRepair affects the procces
 
-|   Called in   | Windows | Unix |
-| ------------- | ------- | ---- |
-| Main process  | 1       | 1    |
-| Child process | 0       | 1    |
+| Signal | Windows Main | Windows Child | Unix Main | Unix Child |
+| ------ | ------------ | ------------- | --------- | ---------- |
+| SIGINT | E            | T             | E         | E          |
 
 **Legend**
 
-0 - process will be terminated<br>
-1 - process will exit gracefully
-
+E - Signal will be handled, process will exit gracefully
+T - Signal will be not handled, process will be terminated
 
 ### Summary
 
