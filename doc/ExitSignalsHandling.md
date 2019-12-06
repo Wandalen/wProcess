@@ -52,7 +52,7 @@ Process with blocked event loop can't be terminated from command line with combi
 
 **Legend**
 
-0 - process will be terminated
+0 - process will be terminated<br>
 1 - process will exit gracefully
 
 
