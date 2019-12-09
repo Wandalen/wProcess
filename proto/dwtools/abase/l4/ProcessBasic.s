@@ -2297,30 +2297,25 @@ function isRunning( pid )
 
 //
 
-function kill( o )
+function killHard( o )
 { 
   if( _.numberIs( o ) )
   o = { pid : o };
   
-  _.routineOptions( kill, o );
   _.assert( arguments.length === 1 ); 
   _.assert( _.numberIs( o.pid ) );
-  _.assert( _.strDefined( o.signal ) || _.numberIs( o.signal ) );
-  
-  if( o.signal === 0 )
-  return _.process.isRunning( o.pid );
   
   try
-  {
-    process.kill( o.pid, o.signal );
+  { 
+    if( o instanceof ChildProcess.ChildProcess )
+    o.kill( 'SIGKILL' );
+    else 
+    process.kill( o.pid, 'SIGKILL' );
   }
   catch( err )
   { 
-    if( !o.throwing )
-    return false;
-    
-    if( err.code === 'EINVAL' )
-    throw _.err( err, '\nAn invalid signal was specified:', _.strQuote( o.signal ) )
+    // if( err.code === 'EINVAL' )
+    // throw _.err( err, '\nAn invalid signal was specified:', _.strQuote( o.signal ) )
     if( err.code === 'EPERM' )
     throw _.err( err, '\nCurrent process does not have permission to kill target process' );
     if( err.code === 'ESRCH' )
@@ -2331,10 +2326,34 @@ function kill( o )
   return true;
 }
 
-var defaults = kill.defaults = Object.create( null );
-defaults.pid = null;
-defaults.signal = 'SIGTERM'
-defaults.throwing = 1;
+//
+
+function killSoft( o )
+{ 
+  if( _.numberIs( o ) )
+  o = { pid : o };
+  
+  _.assert( arguments.length === 1 ); 
+  _.assert( _.numberIs( o.pid ) );
+  
+  try
+  { 
+    if( o instanceof ChildProcess.ChildProcess )
+    o.kill( 'SIGINT' );
+    else 
+    process.kill( o.pid, 'SIGINT' );
+  }
+  catch( err )
+  { 
+    if( err.code === 'EPERM' )
+    throw _.err( err, '\nCurrent process does not have permission to kill target process' );
+    if( err.code === 'ESRCH' )
+    throw _.err( err, '\nTarget process:', _.strQuote( o.pid ), 'does not exist.' );
+    throw _.err( err );
+  }
+  
+  return true;
+}
 
 // --
 // declare
@@ -2379,7 +2398,8 @@ let Routines =
   tempClose,
   
   isRunning,
-  kill
+  killHard,
+  killSoft
 
 }
 
