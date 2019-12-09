@@ -8301,7 +8301,7 @@ function shellTerminate( test )
       test.is( !_.errIs( err ) );
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGKILL' );
-      test.is( _.strHas( o.output, 'Timeout in child' ) );
+      test.is( !_.strHas( o.output, 'Timeout in child' ) );
       return null;
     })
   })
@@ -8394,7 +8394,7 @@ function shellTerminate( test )
       test.is( !_.errIs( err ) );
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGINT' );
-      test.is( _.strHas( o.output, 'Timeout in child' ) );
+      test.is( !_.strHas( o.output, 'Timeout in child' ) );
       return null;
     })
 
@@ -8872,9 +8872,9 @@ function shellTerminateAfterLoopRelease( test )
 
     con.then( ( got ) =>
     {
-      test.identical( o.exitCode, 0 );
-      test.identical( o.exitSignal, null );
-      test.is( _.strHas( o.output, 'Exit after timeout' ) );
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, 'SIGKILL' );
+      test.is( !_.strHas( o.output, 'Exit after timeout' ) );
 
       return null;
     })
@@ -8914,9 +8914,9 @@ function shellTerminateAfterLoopRelease( test )
 
     con.then( ( got ) =>
     {
-      test.identical( o.exitCode, 0 );
-      test.identical( o.exitSignal, null );
-      test.is( _.strHas( o.output, 'Exit after timeout' ) );
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, 'SIGKILL' );
+      test.is( !_.strHas( o.output, 'Exit after timeout' ) );
 
       return null;
     })
