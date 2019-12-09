@@ -11849,12 +11849,12 @@ function killSoft( test )
       execPath :  'node ' + testAppPath,
       mode : 'spawn',
       outputCollecting : 1,
-      throwingExitCode : 0
+      throwingExitCode : 1
     }
 
     let ready = _.process.start( o )
     
-    _.process.killSoft( o.process )
+    _.time.out( 1000, () => _.process.killSoft( o.process ) )
     
     ready.thenKeep( ( got ) =>
     { 
@@ -11892,7 +11892,7 @@ function killSoft( test )
 
     let ready = _.process.start( o )
     
-    _.process.killSoft( o.process.pid )
+    _.time.out( 1000, () => _.process.killSoft( o.process.pid ) )
     
     ready.thenKeep( ( got ) =>
     { 
@@ -11928,7 +11928,7 @@ function killSoft( test )
 
     let ready = _.process.start( o )
     
-    _.process.killSoft( o.process )
+    _.time.out( 1000, () => _.process.killSoft( o.process ) )
     
     ready.thenKeep( ( got ) =>
     {
@@ -11951,7 +11951,6 @@ function killSoft( test )
   
   /* */
   
-  
   .thenKeep( () =>
   {
     var o =
@@ -11964,7 +11963,7 @@ function killSoft( test )
 
     let ready = _.process.start( o )
     
-    _.process.killSoft( o.process.pid )
+    _.time.out( 1000, () => _.process.killSoft( o.process.pid ) )
     
     ready.thenKeep( ( got ) =>
     { 
@@ -12000,12 +11999,20 @@ function killSoft( test )
 
     let ready = _.process.start( o )
     
-    _.process.killSoft( o.process )
+    _.time.out( 1000, () => _.process.killSoft( o.process ) )
     
     ready.thenKeep( ( got ) =>
     { 
-      test.identical( got.exitCode , null );
-      test.identical( got.exitSignal , 'SIGINT' );
+      if( process.platform === 'win32' )
+      {
+        test.identical( got.exitCode , 1 );
+        test.identical( got.exitSignal , null );
+      }
+      else
+      {
+        test.identical( got.exitCode , 0 );
+        test.identical( got.exitSignal , null );
+      }
       test.is( !_.strHas( got.output, 'Application timeout!' ) );
       return null;
     })
@@ -12014,7 +12021,6 @@ function killSoft( test )
   })
   
   /* */
-  
   
   .thenKeep( () =>
   {
@@ -12028,7 +12034,7 @@ function killSoft( test )
 
     let ready = _.process.start( o )
     
-    _.process.killSoft( o.process.pid )
+    _.time.out( 1000, () => _.process.killSoft( o.process.pid ) )
     
     ready.thenKeep( ( got ) =>
     { 
@@ -12039,8 +12045,8 @@ function killSoft( test )
       }
       else
       {
-        test.identical( got.exitCode , null );
-        test.identical( got.exitSignal , 'SIGINT' );
+        test.identical( got.exitCode , 0 );
+        test.identical( got.exitSignal , null );
       }
       
       test.is( !_.strHas( got.output, 'Application timeout!' ) );
@@ -12064,7 +12070,7 @@ function killSoft( test )
 
     let ready = _.process.start( o )
     
-    _.process.killSoft( o.process )
+    _.time.out( 1000, () => _.process.killSoft( o.process ) )
     
     ready.thenKeep( ( got ) =>
     { 
@@ -12087,7 +12093,6 @@ function killSoft( test )
   
   /* */
   
-  
   .thenKeep( () =>
   {
     var o =
@@ -12100,7 +12105,7 @@ function killSoft( test )
 
     let ready = _.process.start( o )
     
-    _.process.killSoft( o.process.pid )
+    _.time.out( 1000, () => _.process.killSoft( o.process.pid ) )
     
     ready.thenKeep( ( got ) =>
     { 
