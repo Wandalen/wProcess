@@ -1511,6 +1511,8 @@ defaults.scriptArgs = null;
 
 //
 
+/* xxx : redo caching using _Setup1 */
+
 function _argsInSamFormatNodejs( o )
 {
 
@@ -1861,7 +1863,7 @@ function exitHandlerRepair()
   return;
   appRepairExitHandlerDone = 1;
 
-  if( typeof process === 'undefined' )
+  if( !_global.process )
   return;
 
   // process.on( 'SIGHUP', function()
@@ -1976,47 +1978,54 @@ function exitHandlerRepair()
 
 //
 
-let _onExitHandlers = [];
+// let _onExitHandlers = [];
 
+/* xxx : deprecate */
 function exitHandlerOnce( routine )
 {
   _.assert( arguments.length === 1 );
   _.assert( _.routineIs( routine ) );
 
-  _.process.exitHandlerRepair();
+  console.warn( `WARNING : Routine _.process.exitHandlerOnce is deprecated. Please, use _.process.on( 'exit', callback ) instead.` ); debugger;
 
-  if( typeof process === 'undefined' )
-  return;
+  _.process.on( 'exit', routine );
 
-  if( !_onExitHandlers.length )
-  {
-    process.once( 'exit', onExitHandler );
-    // process.once( 'SIGINT', onExitHandler );
-    // process.once( 'SIGTERM', onExitHandler );
-  }
-
-  _onExitHandlers.push( routine );
-
-  /*  */
-
-  function onExitHandler( arg )
-  {
-    _.each( _onExitHandlers, ( routine ) =>
-    {
-      try
-      {
-        routine( arg );
-      }
-      catch( err )
-      {
-        _.errLogOnce( err );
-      }
-    })
-    process.removeListener( 'exit', onExitHandler );
-    // process.removeListener( 'SIGINT', onExitHandler );
-    // process.removeListener( 'SIGTERM', onExitHandler );
-    _onExitHandlers.splice( 0, _onExitHandlers.length );
-  }
+  // _.process.exitHandlerRepair();
+  //
+  // if( !_global.process )
+  // return;
+  //
+  // if( !_.process._registeredExitHandler )
+  // {
+  //   _global.process.once( 'exit', onExitHandler );
+  //   _.process._registeredExitHandler = onExitHandler;
+  //   // process.once( 'SIGINT', onExitHandler );
+  //   // process.once( 'SIGTERM', onExitHandler );
+  // }
+  //
+  // _.arrayAppendOnce( _.process._eventCallbackMap.exit, routine );
+  //
+  // /*  */
+  //
+  // function onExitHandler( arg )
+  // {
+  //   _.each( _.process._eventCallbackMap.exit, ( routine ) =>
+  //   {
+  //     try
+  //     {
+  //       routine( arg );
+  //     }
+  //     catch( err )
+  //     {
+  //       _.setup._errUnhandledHandler2( err, 'unhandled error on termination' );
+  //       // _.errLogOnce( err );
+  //     }
+  //   })
+  //   process.removeListener( 'exit', _.process._registeredExitHandler );
+  //   // process.removeListener( 'SIGINT', _.process._registeredExitHandler );
+  //   // process.removeListener( 'SIGTERM', _.process._registeredExitHandler );
+  //   _.process._eventCallbackMap.exit.splice( 0, _.process._eventCallbackMap.exit.length );
+  // }
 
 }
 
@@ -2030,10 +2039,10 @@ function exitHandlerOff( routine )
 {
   _.assert( arguments.length === 1 );
   _.assert( _.routineIs( routine ) );
-
   debugger;
-
-  return _.arrayRemovedElement( _onExitHandlers, routine );
+  console.warn( `WARNING : Routine _.process.exitHandlerOff is deprecated. Please, use _.process.off( 'exit', callback ) instead.` ); debugger;
+  _.process.off( 'exit', routine );
+  // return _.arrayRemovedElement( _.process._eventCallbackMap.exit, routine );
 }
 
 // function exitHandlerOnce( routine )
@@ -2174,12 +2183,141 @@ defaults.filePath = null;
 let tempClose = _.routineFromPreAndBody( tempClose_pre, tempClose_body );
 
 // --
+// eventer
+// --
+
+let _on = _.process.on;
+function on()
+{
+  let o2 = _on.apply( this, arguments );
+
+  if( o2.callbackMap.available )
+  _.process._eventAvailableHandle();
+
+  return o2;
+}
+
+on.defaults =
+{
+  callbackMap : null,
+}
+
+//
+
+// function x()
+// {
+//   _.assert( arguments.length === 1 );
+//   _.assert( _.routineIs( routine ) );
+//
+//   // _.process.exitHandlerRepair();
+//
+//   if( !_global.process )
+//   return;
+//
+//   if( !_.process._registeredExitHandler )
+//   {
+//     _global.process.once( 'exit', _.process._eventExitHandle );
+//     _.process._registeredExitHandler = _.process._eventExitHandle;
+//     // process.once( 'SIGINT', onExitHandler );
+//     // process.once( 'SIGTERM', onExitHandler );
+//   }
+//
+//   _.arrayAppendOnce( _.process._eventCallbackMap.exit, routine );
+//
+// }
+
+//
+
+function _eventExitSetup()
+{
+
+  _.assert( arguments.length === 0 );
+
+  if( !_global.process )
+  return;
+
+  if( !_.process._registeredExitHandler )
+  {
+    _global.process.once( 'exit', _.process._eventExitHandle );
+    _.process._registeredExitHandler = _.process._eventExitHandle;
+    // process.once( 'SIGINT', onExitHandler );
+    // process.once( 'SIGTERM', onExitHandler );
+  }
+
+}
+
+//
+
+function _eventExitHandle()
+{
+  let args = arguments;
+  _.each( _.process._eventCallbackMap.exit, ( callback ) =>
+  {
+    try
+    {
+      callback.apply( _.process, args );
+    }
+    catch( err )
+    {
+      _.setup._errUnhandledHandler2( err, 'unhandled error on termination' );
+    }
+  })
+  process.removeListener( 'exit', _.process._registeredExitHandler );
+  // process.removeListener( 'SIGINT', _.process._registeredExitHandler );
+  // process.removeListener( 'SIGTERM', _.process._registeredExitHandler );
+  _.process._eventCallbackMap.exit.splice( 0, _.process._eventCallbackMap.exit.length );
+}
+
+//
+
+function _eventAvailableHandle()
+{
+  if( !_.process._eventCallbackMap.available.length )
+  return;
+
+  let callbacks = _.process._eventCallbackMap.available.slice();
+  callbacks.forEach( ( callback ) =>
+  {
+    try
+    {
+      _.arrayRemoveOnceStrictly( _.process._eventCallbackMap.available, callback );
+      callback.call( _.process );
+    }
+    catch( err )
+    {
+      throw _.err( `Error in handler::${callback.name} of an event::available of module::Process\n`, err );
+    }
+  });
+
+}
+
+// --
+// meta
+// --
+
+function _Setup1()
+{
+
+  _.process._eventAvailableHandle();
+  _.process.exitHandlerRepair();
+  _.process._eventExitSetup();
+
+}
+
+// --
 // declare
 // --
+
+let _eventCallbackMap =
+{
+  available : [],
+  exit : [],
+}
 
 let Fields =
 {
   _exitReason : null,
+  _registeredExitHandler : null,
 }
 
 let Routines =
@@ -2213,13 +2351,26 @@ let Routines =
   memoryUsageInfo,
 
   tempOpen,
-  tempClose
+  tempClose,
+
+  // eventer
+
+  on,
+  _eventExitSetup,
+  _eventExitHandle,
+  _eventAvailableHandle,
+
+  // meta
+
+  _Setup1,
 
 }
 
 _.mapExtend( Self, Fields );
 _.mapExtend( Self, Routines );
+_.mapSupplement( Self._eventCallbackMap, _eventCallbackMap );
 _.assert( _.routineIs( _.process.start ) );
+_.process._Setup1();
 
 // --
 // export
