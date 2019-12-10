@@ -87,10 +87,10 @@ let _testAppShell = function testAppShell()
 { 
   let process = _global_.process;
   
-  _global_.process = null;
   _.include( 'wAppBasic' );
   _.include( 'wStringsExtra' )
-  _global_.process = process;
+  
+  process.removeAllListeners( 'exit' );
 
   var args = _.process.args();
 
@@ -5798,7 +5798,6 @@ function shellArgumentsParsingNonTrivial( test )
     con.finally( ( err, got ) =>
     {
       test.is( !!err );
-      test.is( _.strHas( err.message, `Received ''` ) );
       test.identical( o.execPath, '' );
       test.identical( o.args, [ 'first', 'arg', '"' ] );
 
@@ -7959,8 +7958,10 @@ function shellModeShellNonTrivial( test )
   let testAppPath =  _.path.join( routinePath, 'app.js' );
 
   function app()
-  {
-    console.log( process.argv.slice( 2 ) );
+  { 
+    var fs = require( 'fs' );
+    fs.writeFileSync( 'args', JSON.stringify( process.argv.slice( 2 ) ) )
+    console.log( process.argv.slice( 2 ) )
   }
 
   let testAppCode = app.toString() + '\napp();';
@@ -8063,7 +8064,7 @@ function shellModeShellNonTrivial( test )
     return null;
   })
 
-  /*  */
+  // /*  */
 
   ready.then( () =>
   {
@@ -8115,7 +8116,9 @@ function shellModeShellNonTrivial( test )
   .then( ( got ) =>
   {
     test.identical( got.exitCode, 0 );
-    test.identical( _.strCount( got.output, `[ "'quoted arg with space'" ]` ), 1 );
+    // test.identical( _.strCount( got.output, `[ "'quoted arg with space'" ]` ), 1 );
+    let args = _.fileProvider.fileRead({ filePath : _.path.join( routinePath, 'args' ), encoding : 'json' });
+    test.identical( args, [ "'quoted arg with space'" ] );
     return null;
   })
 
@@ -8149,7 +8152,7 @@ function shellModeShellNonTrivial( test )
     return null;
   })
 
-  /*  */
+  // /*  */
 
   ready.then( () =>
   {
@@ -8161,7 +8164,9 @@ function shellModeShellNonTrivial( test )
   .then( ( got ) =>
   {
     test.identical( got.exitCode, 0 );
-    test.identical( _.strCount( got.output, `[ 'arg1', 'arg2', 'arg 3', "'arg4'" ]` ), 1 );
+    // test.identical( _.strCount( got.output, `[ 'arg1', 'arg2', 'arg 3', "'arg4'" ]` ), 1 );
+    let args = _.fileProvider.fileRead({ filePath : _.path.join( routinePath, 'args' ), encoding : 'json' });
+    test.identical( args, [ 'arg1', 'arg2', 'arg 3', "'arg4'" ] );
     return null;
   })
 
@@ -8169,15 +8174,19 @@ function shellModeShellNonTrivial( test )
   .then( ( got ) =>
   {
     test.identical( got.exitCode, 0 );
-    test.identical( _.strCount( got.output, '[ `arg1 "arg2" "arg 3" "\'arg4\'"` ]' ), 1 );
+    // test.identical( _.strCount( got.output, '[ `arg1 "arg2" "arg 3" "\'arg4\'"` ]' ), 1 );
+    let args = _.fileProvider.fileRead({ filePath : _.path.join( routinePath, 'args' ), encoding : 'json' });
+    test.identical( args, [ `arg1 "arg2" "arg 3" "\'arg4\'"` ] );
     return null;
   })
 
   shell({ execPath : 'node ' + testAppPath, args : [ `arg1`, '"arg2"', "arg 3", "'arg4'" ] })
   .then( ( got ) =>
-  {
+  { 
     test.identical( got.exitCode, 0 );
-    test.identical( _.strCount( got.output, `[ 'arg1', '"arg2"', 'arg 3', "'arg4'" ]` ), 1 );
+    // test.identical( _.strCount( got.output, `[ 'arg1', '"arg2"', 'arg 3', "'arg4'" ]` ), 1 );
+    let args = _.fileProvider.fileRead({ filePath : _.path.join( routinePath, 'args' ), encoding : 'json' });
+    test.identical( args, [ 'arg1', '"arg2"', 'arg 3', "'arg4'" ] );
     return null;
   })
 
@@ -8306,6 +8315,9 @@ function shellTerminate( test )
       test.is( !_.errIs( err ) );
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGKILL' );
+      if( process.platform === 'win32' )
+      test.is( _.strHas( o.output, 'Timeout in child' ) );
+      else
       test.is( !_.strHas( o.output, 'Timeout in child' ) );
       return null;
     })
@@ -8399,11 +8411,13 @@ function shellTerminate( test )
       test.is( !_.errIs( err ) );
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGINT' );
+      if( process.platform === 'win32' )
+      test.is( _.strHas( o.output, 'Timeout in child' ) );
+      else
       test.is( !_.strHas( o.output, 'Timeout in child' ) );
       return null;
     })
 
-    return con;
   })
 
   /*  */
@@ -11854,7 +11868,7 @@ function killSoft( test )
       execPath :  'node ' + testAppPath,
       mode : 'spawn',
       outputCollecting : 1,
-      throwingExitCode : 1
+      throwingExitCode : 0
     }
 
     let ready = _.process.start( o )
@@ -12010,15 +12024,16 @@ function killSoft( test )
     { 
       if( process.platform === 'win32' )
       {
-        test.identical( got.exitCode , 1 );
-        test.identical( got.exitSignal , null );
+        test.identical( got.exitCode , null );
+        test.identical( got.exitSignal , 'SIGINT' );
+        test.is( _.strHas( got.output, 'Application timeout!' ) );
       }
       else
       {
         test.identical( got.exitCode , 0 );
         test.identical( got.exitSignal , null );
+        test.is( !_.strHas( got.output, 'Application timeout!' ) );
       }
-      test.is( !_.strHas( got.output, 'Application timeout!' ) );
       return null;
     })
     
@@ -12047,14 +12062,14 @@ function killSoft( test )
       {
         test.identical( got.exitCode , 1 );
         test.identical( got.exitSignal , null );
+        test.is( _.strHas( got.output, 'Application timeout!' ) );
       }
       else
       {
         test.identical( got.exitCode , 0 );
         test.identical( got.exitSignal , null );
+        test.is( !_.strHas( got.output, 'Application timeout!' ) );
       }
-      
-      test.is( !_.strHas( got.output, 'Application timeout!' ) );
       return null;
     })
     
@@ -12083,13 +12098,14 @@ function killSoft( test )
       {
         test.identical( got.exitCode , null );
         test.identical( got.exitSignal , 'SIGINT' );
+        test.is( _.strHas( got.output, 'Application timeout!' ) );
       }
       else
       {
         test.identical( got.exitCode , 0 );
         test.identical( got.exitSignal , null );
+        test.is( !_.strHas( got.output, 'Application timeout!' ) );
       }
-      test.is( !_.strHas( got.output, 'Application timeout!' ) );
       return null;
     })
     
@@ -12118,14 +12134,14 @@ function killSoft( test )
       {
         test.identical( got.exitCode , 1 );
         test.identical( got.exitSignal , null );
+        test.is( _.strHas( got.output, 'Application timeout!' ) );
       }
       else
       {
         test.identical( got.exitCode , 0 );
         test.identical( got.exitSignal , null );
+        test.is( !_.strHas( got.output, 'Application timeout!' ) );
       }
-      
-      test.is( !_.strHas( got.output, 'Application timeout!' ) );
       return null;
     })
     
@@ -12479,16 +12495,16 @@ var Proto =
     shellFork,
     shellWithoutExecPath,
     
-    shellSpawnSyncDeasync,
-    shellSpawnSyncDeasyncThrowing,
-    shellShellSyncDeasync,
-    shellShellSyncDeasyncThrowing,
-    shellForkSyncDeasync,
-    shellForkSyncDeasyncThrowing,
-    shellExecSyncDeasync,
-    shellExecSyncDeasyncThrowing,
+    // shellSpawnSyncDeasync,
+    // shellSpawnSyncDeasyncThrowing,
+    // shellShellSyncDeasync,
+    // shellShellSyncDeasyncThrowing,
+    // shellForkSyncDeasync,
+    // shellForkSyncDeasyncThrowing,
+    // shellExecSyncDeasync,
+    // shellExecSyncDeasyncThrowing,
     
-    shellMultipleSyncDeasync,
+    // shellMultipleSyncDeasync,
     
     shellDryRun,
 
@@ -12504,9 +12520,9 @@ var Proto =
     shellModeShellNonTrivial,
 
     shellTerminate,
-    shellTerminateWithExitHandler,
-    shellTerminateHangedWithExitHandler,
-    shellTerminateAfterLoopRelease,
+    // shellTerminateWithExitHandler,
+    // shellTerminateHangedWithExitHandler,
+    // shellTerminateAfterLoopRelease,
 
     shellStartingDelay,
     shellStartingTime,
