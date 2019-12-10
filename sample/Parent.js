@@ -5,6 +5,8 @@ var _ = wTools;
 
 /* How to execute command asynchronously */
 
+console.log( 'ENV:\n',_.toStr( process.env, { levels : 99 } ) )
+
 let signal = process.argv[ 2 ];
 
 console.log( 'SIGNAL:', signal )
