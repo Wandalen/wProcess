@@ -716,8 +716,6 @@ function start_body( o )
 
       if( o.dry )
       return;
-      
-      console.log( o2 );
 
       if( o.sync && !o.deasync )
       o.process = ChildProcess.spawnSync( appPath, [ arg1, arg2 ], o2 );
