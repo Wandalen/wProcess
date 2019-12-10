@@ -90,6 +90,8 @@ let _testAppShell = function testAppShell()
   _.include( 'wAppBasic' );
   _.include( 'wStringsExtra' )
   
+  process.removeAllListeners( 'SIGINT' );
+  process.removeAllListeners( 'SIGTERM' );
   process.removeAllListeners( 'exit' );
 
   var args = _.process.args();

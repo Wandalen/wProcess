@@ -809,7 +809,7 @@ function start_body( o )
       { 
         args[ i ] = escapeArg( args[ i ], quote );
       })
-      if( process.platform === 'darwin' )
+      if( process.platform !== 'win32' )
       { 
         if( _.strHas( src[ i ], ' ' ) )
         continue;
