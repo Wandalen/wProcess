@@ -84,9 +84,13 @@ let _testApp = function testApp()
 //
 
 let _testAppShell = function testAppShell()
-{
+{ 
+  let process = _global_.process;
+  
+  _global_.process = null;
   _.include( 'wAppBasic' );
   _.include( 'wStringsExtra' )
+  _global_.process = process;
 
   var args = _.process.args();
 
@@ -644,16 +648,17 @@ function exitHandlerOff( test )
       stdio : 'pipe',
       outputPiping : 1,
       outputCollecting : 1,
+      throwingExitCode : 0
     }
 
     return _.process.start( o )
     .then( ( got ) =>
     {
-      test.identical( got.exitCode, 0 );
-      test.identical( _.strCount( got.output, 'timeOut handler executed'  ), 1 );
-      test.identical( _.strCount( got.output, 'exitHandlerOnce1: 0' ), 1 );
-      test.identical( _.strCount( got.output, 'exitHandlerOnce2: 0' ), 1 );
-      test.identical( _.strCount( got.output, 'exitHandlerOnce3: 0' ), 0 );
+      test.notIdentical( got.exitCode, 0 );
+      test.identical( _.strCount( got.output, 'unhandled error' ), 2 );
+      test.identical( _.strCount( got.output, 'exitHandlerOnce1: -1' ), 1 );
+      test.identical( _.strCount( got.output, 'exitHandlerOnce2: -1' ), 1 );
+      test.identical( _.strCount( got.output, 'exitHandlerOnce3: -1' ), 0 );
       return null;
     })
   })
@@ -3814,7 +3819,7 @@ function shellMultipleSyncDeasync( test )
     test.case = 'sync:0,desync:0'
     let o =
     {
-      execPath : [ execPath, execPath ],
+      execPath : [ 'node ' + execPath, 'node ' + execPath ],
       mode : 'exec',
       sync : 0,
       deasync : 0
@@ -3839,7 +3844,7 @@ function shellMultipleSyncDeasync( test )
     test.case = 'sync:1,desync:0'
     let o =
     {
-      execPath : [ execPath, execPath ],
+      execPath : [ 'node ' + execPath, 'node ' + execPath ],
       mode : 'exec',
       sync : 1,
       optionsArrayReturn : 1,
@@ -3860,7 +3865,7 @@ function shellMultipleSyncDeasync( test )
     test.case = 'sync:1,desync:0'
     let o =
     {
-      execPath : [ execPath, execPath ],
+      execPath : [ 'node ' + execPath, 'node ' + execPath ],
       mode : 'exec',
       sync : 1,
       optionsArrayReturn : 0,
@@ -3879,7 +3884,7 @@ function shellMultipleSyncDeasync( test )
     test.case = 'sync:0,desync:1'
     let o =
     {
-      execPath : [ execPath, execPath ],
+      execPath : [ 'node ' + execPath, 'node ' + execPath ],
       mode : 'exec',
       sync : 0,
       deasync : 1
@@ -3904,7 +3909,7 @@ function shellMultipleSyncDeasync( test )
     test.case = 'sync:1,desync:1'
     let o =
     {
-      execPath : [ execPath, execPath ],
+      execPath : [ 'node ' + execPath, 'node ' + execPath ],
       mode : 'exec',
       sync : 1,
       deasync : 1
@@ -8515,7 +8520,7 @@ function shellTerminateWithExitHandler( test )
       test.identical( o.exitCode, 0 );
       test.identical( o.exitSignal, null );
       test.is( _.strHas( o.output, 'SIGINT' ) );
-      test.is( _.strHas( o.output, 'Timeout in child' ) );
+      test.is( !_.strHas( o.output, 'Timeout in child' ) );
       return null;
     })
   })
@@ -8613,7 +8618,7 @@ function shellTerminateWithExitHandler( test )
     {
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGKILL' );
-      test.is( _.strHas( o.output, 'Timeout in child' ) );
+      test.is( !_.strHas( o.output, 'Timeout in child' ) );
       return null;
     })
   })

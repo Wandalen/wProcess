@@ -707,7 +707,7 @@ function start_body( o )
      */
 
       o2.windowsVerbatimArguments = true;
-
+      
       if( args.length )
       arg2 = arg2 + ' ' + argsJoin( args );
 
@@ -801,22 +801,28 @@ function start_body( o )
   {
     let args = src.slice();
 
-
     for( let i = 0; i < args.length; i++ )
     {
       // escape quotes to make shell interpret them as regular symbols
       let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', "`" ]
       _.each( quotesToEscape, ( quote ) =>
-      {
-        args[ i ] = _.strReplaceAll( args[ i ], quote, ( match, it ) =>
-        {
-          if( it.input[ it.range[ 0 ] - 1 ] === '\\' )
-          return match;
-          return '\\' + match;
-        });
+      { 
+        args[ i ] = escapeArg( args[ i ], quote );
       })
+      if( process.platform === 'darwin' )
+      { 
+        if( _.strHas( src[ i ], ' ' ) )
+        continue;
+        
+        let begin = _.strBeginOf( src[ i ], quotesToEscape );
+        let end = _.strEndOf( src[ i ], quotesToEscape );
+        if( begin && begin === end )
+        continue;
+        
+        args[ i ] = escapeArg( args[ i ], "'" );
+      }
     }
-
+    
     if( args.length === 1 )
     return _.strQuote( args[ 0 ] );
 
@@ -828,6 +834,16 @@ function start_body( o )
     })
 
     return args.join( ' ' );
+  }
+  
+  function escapeArg( arg, quote )
+  {
+    return _.strReplaceAll( arg, quote, ( match, it ) =>
+    {
+      if( it.input[ it.range[ 0 ] - 1 ] === '\\' )
+      return match;
+      return '\\' + match;
+    });
   }
 
   /* */
