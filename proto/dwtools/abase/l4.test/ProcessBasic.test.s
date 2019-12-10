@@ -8317,10 +8317,10 @@ function shellTerminate( test )
       test.is( !_.errIs( err ) );
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGKILL' );
-      if( process.platform === 'win32' )
-      test.is( _.strHas( o.output, 'Timeout in child' ) );
-      else
+      if( process.platform === 'darwin' )
       test.is( !_.strHas( o.output, 'Timeout in child' ) );
+      else
+      test.is( _.strHas( o.output, 'Timeout in child' ) );
       return null;
     })
   })
@@ -8413,10 +8413,10 @@ function shellTerminate( test )
       test.is( !_.errIs( err ) );
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGINT' );
-      if( process.platform === 'win32' )
-      test.is( _.strHas( o.output, 'Timeout in child' ) );
-      else
+      if( process.platform === 'darwin' )
       test.is( !_.strHas( o.output, 'Timeout in child' ) );
+      else
+      test.is( _.strHas( o.output, 'Timeout in child' ) );
       return null;
     })
 
@@ -11722,6 +11722,9 @@ function killHard( test )
     { 
       test.identical( got.exitCode , null );
       test.identical( got.exitSignal , 'SIGKILL' );
+      if( process.platform === 'linux' )
+      test.is( _.strHas( got.output, 'Application timeout!' ) );
+      else
       test.is( !_.strHas( got.output, 'Application timeout!' ) );
       return null;
     })
@@ -11759,6 +11762,9 @@ function killHard( test )
         test.identical( got.exitSignal , 'SIGKILL' );
       }
       
+      if( process.platform === 'linux' )
+      test.is( _.strHas( got.output, 'Application timeout!' ) );
+      else
       test.is( !_.strHas( got.output, 'Application timeout!' ) );
       return null;
     })
@@ -11786,6 +11792,9 @@ function killHard( test )
     { 
       test.identical( got.exitCode , null );
       test.identical( got.exitSignal , 'SIGKILL' );
+      if( process.platform === 'linux' )
+      test.is( _.strHas( got.output, 'Application timeout!' ) );
+      else
       test.is( !_.strHas( got.output, 'Application timeout!' ) );
       return null;
     })
@@ -11823,6 +11832,9 @@ function killHard( test )
         test.identical( got.exitSignal , 'SIGKILL' );
       }
       
+      if( process.platform === 'linux' )
+      test.is( _.strHas( got.output, 'Application timeout!' ) );
+      else
       test.is( !_.strHas( got.output, 'Application timeout!' ) );
       return null;
     })
