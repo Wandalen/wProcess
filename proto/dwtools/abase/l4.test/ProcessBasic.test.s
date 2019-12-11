@@ -12002,8 +12002,8 @@ function terminate( test )
     { 
       if( process.platform === 'linux' )
       { 
-        test.identical( got.exitCode , 0 );
-        test.identical( got.exitSignal , null );
+        test.identical( got.exitCode , null );
+        test.identical( got.exitSignal , 'SIGINT' );
         test.is( _.strHas( got.output, 'Application timeout!' ) );
       }
       else
@@ -12038,8 +12038,8 @@ function terminate( test )
     { 
       if( process.platform === 'linux' )
       { 
-        test.identical( got.exitCode , 0 );
-        test.identical( got.exitSignal , null );
+        test.identical( got.exitCode , null );
+        test.identical( got.exitSignal , 'SIGINT' );
         test.is( _.strHas( got.output, 'Application timeout!' ) );
         
       }
@@ -12075,8 +12075,8 @@ function terminate( test )
     { 
       if( process.platform === 'linux' )
       { 
-        test.identical( got.exitCode , 0 );
-        test.identical( got.exitSignal , null );
+        test.identical( got.exitCode , null );
+        test.identical( got.exitSignal , 'SIGINT' );
         test.is( _.strHas( got.output, 'Application timeout!' ) );
         
       }
@@ -12112,8 +12112,8 @@ function terminate( test )
     { 
       if( process.platform === 'linux' )
       { 
-        test.identical( got.exitCode , 0 );
-        test.identical( got.exitSignal , null );
+        test.identical( got.exitCode , null );
+        test.identical( got.exitSignal , 'SIGINT' );
         test.is( _.strHas( got.output, 'Application timeout!' ) );
       }
       else
