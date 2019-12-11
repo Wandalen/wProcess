@@ -1,7 +1,9 @@
 # Test against the latest version of this Node.js version
 image: 
+  - macos-mojave
   - Ubuntu
   - Visual Studio 2017
+  
 
 environment:
   matrix:
