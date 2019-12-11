@@ -1,8 +1,8 @@
 ## Node.js signals
 
-|  Signal  |                                          Description                                          | Windows | Unix | Can be listened | Can be sent | Can terminate process |
+<!-- |  Signal  |                                          Description                                          | Windows | Unix | Can be listened | Can be sent | Can terminate process |
 | -------- | --------------------------------------------------------------------------------------------- | ------- | ---- | --------------- | ----------- | --------------------- |
-| SIGINT   | Sent to a process by its controlling terminal<br> when a user wishes to interrupt the process | +       | +    | +               | Win,Unix    | +                     |
+| SIGINT   | Sent to a process by its controlling terminal<br> when a user wishes to interrupt the process | 1       | +    | +               | Win,Unix    | +                     |
 | SIGTERM  | Sent to a process to request its termination                                                  | -       | +    | +               | Win,Unix    | +                     |
 | SIGKILL  | Sent to a process to cause it to terminate immediately                                        | +       | +    | -               | Win,Unix    | +                     |
 | SIGSTOP  | Instructs the operating system to stop a process for later resumption                         | -       | +    | -               | Unix        | -                     |
@@ -14,7 +14,24 @@
 | SIGBUS   | Access to an undefined portion of a memory object                                             | ?       | +    | +               | Unix        | +                     |
 | SIGFPE   | Floating-point error                                                                          | ?       | +    | +               | Unix        | +                     |
 | SIGSEGV  | Illegal storage access                                                                        | ?       | +    | +               | Unix        | +                     |
-| SIGILL   | Illegal instruction                                                                           | ?       | +    | +               | Unix        | +                     |
+| SIGILL   | Illegal instruction                                                                           | ?       | +    | +               | Unix        | +                     | -->
+
+
+|  Signal  |                                          Description                                          | Can be sent on Windows | Can be handled on Windows | Can be sent on Unix | Can be handled on Unix | Can terminate process |
+| -------- | --------------------------------------------------------------------------------------------- | ---------------------- | ------------------------- | ------------------- | ---------------------- | --------------------- |
+| SIGINT   | Sent to a process by its controlling terminal<br> when a user wishes to interrupt the process | +                      | Main                      | +                   | Main,Child             | +                     |
+| SIGTERM  | Sent to a process to request its termination                                                  | +                      | -                         | +                   | Main,Child             | +                     |
+| SIGKILL  | Sent to a process to cause it to terminate immediately                                        | +                      | -                         | +                   | -                      | +                     |
+| SIGSTOP  | Instructs the operating system to stop a process for later resumption                         | -                      | -                         | +                   | -                      | -                     |
+| SIGUSR1  | Is reserved by Node.js to start the debugger                                                  | -                      | Main                      | +                   | Main,Child             | -                     |
+| SIGPIPE  | Write on a pipe with no one to read it. Is ignored in Node.js by default                      | -                      | -                         | +                   | Main,Child             | -                     |
+| SIGHUP   | Sent to a process when its controlling terminal is closed. See notes for details              | -                      | Main,Child?               | +                   | Main,Child             | +                     |
+| SIGBREAK | Is delivered on Windows when `Ctrl`+`Break` is pressed.                                       | -                      | Main,Child?               | -                   | -                      | -                     |
+| SIGWINCH | Is delivered when the console has been resized                                                | -                      | Main,Child?               | +                   | Main,Child             | -                     |
+| SIGBUS   | Access to an undefined portion of a memory object                                             | -                      | ?                         | +                   | Main,Child             | +                     |
+| SIGFPE   | Floating-point error                                                                          | -                      | ?                         | +                   | Main,Child             | +                     |
+| SIGSEGV  | Illegal storage access                                                                        | -                      | ?                         | +                   | Main,Child             | +                     |
+| SIGILL   | Illegal instruction                                                                           | -                      | ?                         | +                   | Main,Child             | +                     |
 
 [Node.Js Signal Events](https://nodejs.org/api/process.html#process_signal_events)<br>
 [List of Linux signals](http://man7.org/linux/man-pages/man7/signal.7.html)
