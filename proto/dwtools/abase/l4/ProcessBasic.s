@@ -707,7 +707,7 @@ function start_body( o )
      */
 
       o2.windowsVerbatimArguments = true;
-      
+
       if( args.length )
       arg2 = arg2 + ' ' + argsJoin( args );
 
@@ -806,23 +806,23 @@ function start_body( o )
       // escape quotes to make shell interpret them as regular symbols
       let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', "`" ]
       _.each( quotesToEscape, ( quote ) =>
-      { 
+      {
         args[ i ] = escapeArg( args[ i ], quote );
       })
       if( process.platform !== 'win32' )
-      { 
+      {
         if( _.strHas( src[ i ], ' ' ) )
         continue;
-        
+
         let begin = _.strBeginOf( src[ i ], quotesToEscape );
         let end = _.strEndOf( src[ i ], quotesToEscape );
         if( begin && begin === end )
         continue;
-        
+
         args[ i ] = escapeArg( args[ i ], "'" );
       }
     }
-    
+
     if( args.length === 1 )
     return _.strQuote( args[ 0 ] );
 
@@ -835,7 +835,7 @@ function start_body( o )
 
     return args.join( ' ' );
   }
-  
+
   function escapeArg( arg, quote )
   {
     return _.strReplaceAll( arg, quote, ( match, it ) =>
@@ -1147,7 +1147,7 @@ start_body.defaults =
   passingThrough : 0,
   concurrent : 0,
   timeOut : null,
-  optionsArrayReturn : 1,//Vova: returns array of maps of options for multiprocess launch in sync mode
+  optionsArrayReturn : 1, /* Vova: returns array of maps of options for multiprocess launch in sync mode */
 
   throwingExitCode : 1, /* must be on by default */
   applyingExitCode : 0,
@@ -2323,22 +2323,22 @@ function isRunning( pid )
 //
 
 function killHard( o )
-{ 
+{
   if( _.numberIs( o ) )
   o = { pid : o };
-  
-  _.assert( arguments.length === 1 ); 
+
+  _.assert( arguments.length === 1 );
   _.assert( _.numberIs( o.pid ) );
-  
+
   try
-  { 
+  {
     if( o instanceof ChildProcess.ChildProcess )
     o.kill( 'SIGKILL' );
-    else 
+    else
     process.kill( o.pid, 'SIGKILL' );
   }
   catch( err )
-  { 
+  {
     // if( err.code === 'EINVAL' )
     // throw _.err( err, '\nAn invalid signal was specified:', _.strQuote( o.signal ) )
     if( err.code === 'EPERM' )
@@ -2354,29 +2354,29 @@ function killHard( o )
 //
 
 function killSoft( o )
-{ 
+{
   if( _.numberIs( o ) )
   o = { pid : o };
-  
-  _.assert( arguments.length === 1 ); 
+
+  _.assert( arguments.length === 1 );
   _.assert( _.numberIs( o.pid ) );
-  
+
   try
-  { 
+  {
     if( o instanceof ChildProcess.ChildProcess )
     o.kill( 'SIGINT' );
-    else 
+    else
     process.kill( o.pid, 'SIGINT' );
   }
   catch( err )
-  { 
+  {
     if( err.code === 'EPERM' )
     throw _.err( err, '\nCurrent process does not have permission to kill target process' );
     if( err.code === 'ESRCH' )
     throw _.err( err, '\nTarget process:', _.strQuote( o.pid ), 'does not exist.' );
     throw _.err( err );
   }
-  
+
   return true;
 }
 
