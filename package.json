@@ -38,12 +38,11 @@
     "wConsequence": "alpha",
     "wTools": "alpha",
     "wgdfstrategy": "alpha",
-    "windows-kill": "^0.3.3",
+    "wwindowskill": "",
     "wpathbasic": "alpha"
   },
   "devDependencies": {
-    "wTesting": "alpha",
-    "windows-kill": ""
+    "wTesting": "alpha"
   },
   "keywords": [
     "wTools",

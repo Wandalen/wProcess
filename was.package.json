@@ -27,7 +27,8 @@
     "wTools" : "", 
     "wpathbasic" : "", 
     "wgdfstrategy" : "", 
-    "wConsequence" : "", 
+    "wConsequence" : "",
+    "wwindowskill" : "", 
     "deasync" : "", 
     "strip-ansi" : ""
   }, 

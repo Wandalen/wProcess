@@ -19,6 +19,9 @@ submodule :
   wConsequence :
     path : npm:///wConsequence
     enabled : 0 # submodule
+  wwindowskill :
+    path : npm:///wwindowskill
+    enabled : 0 # submodule
   wappbasic :
     path : hd://.
     enabled : 0 # submodule
