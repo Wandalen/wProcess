@@ -1,6 +1,6 @@
 if( typeof module !== 'undefined' )
 
-var windowsKill = require( 'windows-kill' )();
+var windowsKill = require( 'wwindowskill' )();
 
 require( '../..' );
 require( 'wFiles' );

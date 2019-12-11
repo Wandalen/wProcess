@@ -47,7 +47,7 @@ if( typeof module !== 'undefined' )
 
 }
 
-let System, ChildProcess, StripAnsi;
+let System, ChildProcess, StripAnsi, WindowsKill;
 let _global = _global_;
 let _ = _global_.wTools;
 let Self = _.process = _.process || Object.create( null );
@@ -2353,7 +2353,8 @@ function killHard( o )
 
 //
 
-function killSoft( o )
+
+function terminate( o )
 { 
   if( _.numberIs( o ) )
   o = { pid : o };
@@ -2363,9 +2364,9 @@ function killSoft( o )
   
   try
   { 
-    if( o instanceof ChildProcess.ChildProcess )
-    o.kill( 'SIGINT' );
-    else 
+    if( process.platform === 'win32' )
+    windowsKill( o.pid, 'SIGINT' );
+    else
     process.kill( o.pid, 'SIGINT' );
   }
   catch( err )
@@ -2378,6 +2379,15 @@ function killSoft( o )
   }
   
   return true;
+  
+  /*  */
+  
+  function windowsKill( pid, signal )
+  {
+    if( !WindowsKill )
+    WindowsKill = require( 'wwindowskill' )({ replaceNodeKill: false });
+    WindowsKill( pid, signal );
+  }
 }
 
 // --
@@ -2567,7 +2577,7 @@ let Routines =
 
   isRunning,
   killHard,
-  killSoft
+  terminate
 
 }
 
