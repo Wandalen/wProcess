@@ -23,7 +23,7 @@ test_script:
   - node --version
   - npm --version
   # run tests
-  - npm test
+  - "node proto/dwtools/abase/l4.test/ProcessBasic.test.s r : terminate  v:10"
 
 # Don't actually build.
 build: off
