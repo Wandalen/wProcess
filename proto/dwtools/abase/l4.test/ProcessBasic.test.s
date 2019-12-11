@@ -11562,7 +11562,7 @@ function killHard( test )
     setTimeout( () => 
     {
       console.log( 'Application timeout!' )
-    }, 2500 )
+    }, 5000 )
   }
 
   /* */
@@ -11588,7 +11588,7 @@ function killHard( test )
 
     let ready = _.process.start( o )
     
-    _.process.killHard( o.process )
+    _.time.out( 1000, () => _.process.killHard( o.process ) )
     
     ready.thenKeep( ( got ) =>
     {
@@ -11616,7 +11616,7 @@ function killHard( test )
 
     let ready = _.process.start( o )
     
-    _.process.killHard( o.process.pid )
+    _.time.out( 1000, () => _.process.killHard( o.process.pid ) )
     
     ready.thenKeep( ( got ) =>
     { 
@@ -11652,7 +11652,7 @@ function killHard( test )
 
     let ready = _.process.start( o )
     
-    _.process.killHard( o.process )
+    _.time.out( 1000, () => _.process.killHard( o.process ) )
     
     ready.thenKeep( ( got ) =>
     {
@@ -11680,7 +11680,7 @@ function killHard( test )
 
     let ready = _.process.start( o )
     
-    _.process.killHard( o.process.pid )
+    _.time.out( 1000, () => _.process.killHard( o.process.pid ) )
     
     ready.thenKeep( ( got ) =>
     { 
@@ -11716,7 +11716,7 @@ function killHard( test )
 
     let ready = _.process.start( o )
     
-    _.process.killHard( o.process )
+    _.time.out( 1000, () => _.process.killHard( o.process ) )
     
     ready.thenKeep( ( got ) =>
     { 
@@ -11747,7 +11747,7 @@ function killHard( test )
 
     let ready = _.process.start( o )
     
-    _.process.killHard( o.process.pid )
+    _.time.out( 1000, () => _.process.killHard( o.process.pid ) )
     
     ready.thenKeep( ( got ) =>
     { 
@@ -11786,7 +11786,7 @@ function killHard( test )
 
     let ready = _.process.start( o )
     
-    _.process.killHard( o.process )
+    _.time.out( 1000, () => _.process.killHard( o.process ) )
     
     ready.thenKeep( ( got ) =>
     { 
@@ -11817,7 +11817,7 @@ function killHard( test )
 
     let ready = _.process.start( o )
     
-    _.process.killHard( o.process.pid )
+    _.time.out( 1000, () => _.process.killHard( o.process.pid ) )
     
     ready.thenKeep( ( got ) =>
     { 
