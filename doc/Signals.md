@@ -1,22 +1,5 @@
 ## Node.js signals
 
-<!-- |  Signal  |                                          Description                                          | Windows | Unix | Can be listened | Can be sent | Can terminate process |
-| -------- | --------------------------------------------------------------------------------------------- | ------- | ---- | --------------- | ----------- | --------------------- |
-| SIGINT   | Sent to a process by its controlling terminal<br> when a user wishes to interrupt the process | 1       | +    | +               | Win,Unix    | +                     |
-| SIGTERM  | Sent to a process to request its termination                                                  | -       | +    | +               | Win,Unix    | +                     |
-| SIGKILL  | Sent to a process to cause it to terminate immediately                                        | +       | +    | -               | Win,Unix    | +                     |
-| SIGSTOP  | Instructs the operating system to stop a process for later resumption                         | -       | +    | -               | Unix        | -                     |
-| SIGUSR1  | Is reserved by Node.js to start the debugger                                                  | +       | +    | +               | Unix        | -                     |
-| SIGPIPE  | Write on a pipe with no one to read it. Is ignored in Node.js by default                      | -       | +    | +               | Unix        | -                     |
-| SIGHUP   | Sent to a process when its controlling terminal is closed. See notes for details              | +       | +    | +               | Unix        | +                     |
-| SIGBREAK | Is delivered on Windows when `Ctrl`+`Break` is pressed.                                       | ?       | -    | -               | -           | -                     |
-| SIGWINCH | Is delivered when the console has been resized                                                | ?       | +    | +               | Unix        | -                     |
-| SIGBUS   | Access to an undefined portion of a memory object                                             | ?       | +    | +               | Unix        | +                     |
-| SIGFPE   | Floating-point error                                                                          | ?       | +    | +               | Unix        | +                     |
-| SIGSEGV  | Illegal storage access                                                                        | ?       | +    | +               | Unix        | +                     |
-| SIGILL   | Illegal instruction                                                                           | ?       | +    | +               | Unix        | +                     | -->
-
-
 |  Signal  |                                          Description                                          | Can be sent on Windows | Can be handled on Windows | Can be sent on Unix | Can be handled on Unix | Can terminate process |
 | -------- | --------------------------------------------------------------------------------------------- | ---------------------- | ------------------------- | ------------------- | ---------------------- | --------------------- |
 | SIGINT   | Sent to a process by its controlling terminal<br> when a user wishes to interrupt the process | +                      | Main                      | +                   | Main,Child             | +                     |
