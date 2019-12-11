@@ -707,7 +707,7 @@ function start_body( o )
      */
 
       o2.windowsVerbatimArguments = true;
-
+      
       if( args.length )
       arg2 = arg2 + ' ' + argsJoin( args );
 
@@ -801,22 +801,28 @@ function start_body( o )
   {
     let args = src.slice();
 
-
     for( let i = 0; i < args.length; i++ )
     {
       // escape quotes to make shell interpret them as regular symbols
       let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', "`" ]
       _.each( quotesToEscape, ( quote ) =>
-      {
-        args[ i ] = _.strReplaceAll( args[ i ], quote, ( match, it ) =>
-        {
-          if( it.input[ it.range[ 0 ] - 1 ] === '\\' )
-          return match;
-          return '\\' + match;
-        });
+      { 
+        args[ i ] = escapeArg( args[ i ], quote );
       })
+      if( process.platform !== 'win32' )
+      { 
+        if( _.strHas( src[ i ], ' ' ) )
+        continue;
+        
+        let begin = _.strBeginOf( src[ i ], quotesToEscape );
+        let end = _.strEndOf( src[ i ], quotesToEscape );
+        if( begin && begin === end )
+        continue;
+        
+        args[ i ] = escapeArg( args[ i ], "'" );
+      }
     }
-
+    
     if( args.length === 1 )
     return _.strQuote( args[ 0 ] );
 
@@ -828,6 +834,16 @@ function start_body( o )
     })
 
     return args.join( ' ' );
+  }
+  
+  function escapeArg( arg, quote )
+  {
+    return _.strReplaceAll( arg, quote, ( match, it ) =>
+    {
+      if( it.input[ it.range[ 0 ] - 1 ] === '\\' )
+      return match;
+      return '\\' + match;
+    });
   }
 
   /* */
@@ -2306,30 +2322,25 @@ function isRunning( pid )
 
 //
 
-function kill( o )
-{
+function killHard( o )
+{ 
   if( _.numberIs( o ) )
   o = { pid : o };
-
-  _.routineOptions( kill, o );
-  _.assert( arguments.length === 1 );
+  
+  _.assert( arguments.length === 1 ); 
   _.assert( _.numberIs( o.pid ) );
-  _.assert( _.strDefined( o.signal ) || _.numberIs( o.signal ) );
-
-  if( o.signal === 0 )
-  return _.process.isRunning( o.pid );
-
+  
   try
-  {
-    process.kill( o.pid, o.signal );
+  { 
+    if( o instanceof ChildProcess.ChildProcess )
+    o.kill( 'SIGKILL' );
+    else 
+    process.kill( o.pid, 'SIGKILL' );
   }
   catch( err )
-  {
-    if( !o.throwing )
-    return false;
-
-    if( err.code === 'EINVAL' )
-    throw _.err( err, '\nAn invalid signal was specified:', _.strQuote( o.signal ) )
+  { 
+    // if( err.code === 'EINVAL' )
+    // throw _.err( err, '\nAn invalid signal was specified:', _.strQuote( o.signal ) )
     if( err.code === 'EPERM' )
     throw _.err( err, '\nCurrent process does not have permission to kill target process' );
     if( err.code === 'ESRCH' )
@@ -2340,10 +2351,34 @@ function kill( o )
   return true;
 }
 
-var defaults = kill.defaults = Object.create( null );
-defaults.pid = null;
-defaults.signal = 'SIGTERM'
-defaults.throwing = 1;
+//
+
+function killSoft( o )
+{ 
+  if( _.numberIs( o ) )
+  o = { pid : o };
+  
+  _.assert( arguments.length === 1 ); 
+  _.assert( _.numberIs( o.pid ) );
+  
+  try
+  { 
+    if( o instanceof ChildProcess.ChildProcess )
+    o.kill( 'SIGINT' );
+    else 
+    process.kill( o.pid, 'SIGINT' );
+  }
+  catch( err )
+  { 
+    if( err.code === 'EPERM' )
+    throw _.err( err, '\nCurrent process does not have permission to kill target process' );
+    if( err.code === 'ESRCH' )
+    throw _.err( err, '\nTarget process:', _.strQuote( o.pid ), 'does not exist.' );
+    throw _.err( err );
+  }
+  
+  return true;
+}
 
 // --
 // eventer
@@ -2531,8 +2566,8 @@ let Routines =
 // =======
 
   isRunning,
-  kill
-// >>>>>>> 25c8013b6cd3b9370ca3a22e74bcf0226c23af38
+  killHard,
+  killSoft
 
 }
 
