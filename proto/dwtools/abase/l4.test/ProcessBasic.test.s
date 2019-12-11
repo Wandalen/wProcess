@@ -12000,17 +12000,17 @@ function terminate( test )
     
     ready.thenKeep( ( got ) =>
     { 
-      if( process.platform === 'darwin' )
-      {
+      if( process.platform === 'linux' )
+      { 
         test.identical( got.exitCode , 0 );
         test.identical( got.exitSignal , null );
-        test.is( !_.strHas( got.output, 'Application timeout!' ) );
+        test.is( _.strHas( got.output, 'Application timeout!' ) );
       }
       else
       {
         test.identical( got.exitCode , 0 );
         test.identical( got.exitSignal , null );
-        test.is( _.strHas( got.output, 'Application timeout!' ) );
+        test.is( !_.strHas( got.output, 'Application timeout!' ) );
       }
       return null;
     })
@@ -12036,17 +12036,18 @@ function terminate( test )
     
     ready.thenKeep( ( got ) =>
     { 
-      if( process.platform === 'darwin' )
-      {
+      if( process.platform === 'linux' )
+      { 
         test.identical( got.exitCode , 0 );
         test.identical( got.exitSignal , null );
-        test.is( !_.strHas( got.output, 'Application timeout!' ) );
+        test.is( _.strHas( got.output, 'Application timeout!' ) );
+        
       }
       else
       {
         test.identical( got.exitCode , 0 );
         test.identical( got.exitSignal , null );
-        test.is( _.strHas( got.output, 'Application timeout!' ) );
+        test.is( !_.strHas( got.output, 'Application timeout!' ) );
       }
       return null;
     })
@@ -12072,17 +12073,18 @@ function terminate( test )
     
     ready.thenKeep( ( got ) =>
     { 
-      if( process.platform === 'darwin' )
-      {
+      if( process.platform === 'linux' )
+      { 
         test.identical( got.exitCode , 0 );
         test.identical( got.exitSignal , null );
-        test.is( !_.strHas( got.output, 'Application timeout!' ) );
+        test.is( _.strHas( got.output, 'Application timeout!' ) );
+        
       }
       else
       {
         test.identical( got.exitCode , 0 );
         test.identical( got.exitSignal , null );
-        test.is( _.strHas( got.output, 'Application timeout!' ) );
+        test.is( !_.strHas( got.output, 'Application timeout!' ) );
       }
       return null;
     })
@@ -12108,17 +12110,17 @@ function terminate( test )
     
     ready.thenKeep( ( got ) =>
     { 
-      if( process.platform === 'darwin' )
-      {
+      if( process.platform === 'linux' )
+      { 
         test.identical( got.exitCode , 0 );
         test.identical( got.exitSignal , null );
-        test.is( !_.strHas( got.output, 'Application timeout!' ) );
+        test.is( _.strHas( got.output, 'Application timeout!' ) );
       }
       else
       {
         test.identical( got.exitCode , 0 );
         test.identical( got.exitSignal , null );
-        test.is( _.strHas( got.output, 'Application timeout!' ) );
+        test.is( !_.strHas( got.output, 'Application timeout!' ) );
       }
       return null;
     })
