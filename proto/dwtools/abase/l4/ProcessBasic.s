@@ -374,7 +374,8 @@ function start_body( o )
 
   function end( err, arg )
   {
-
+    _.errAttend( err );
+    
     if( state > 0 )
     {
       if( !o.outputAdditive )
@@ -390,7 +391,7 @@ function start_body( o )
     {
       if( state < 2 )
       o.exitCode = null;
-      throw err;
+      throw _.err( err );
     }
     return arg;
   }
