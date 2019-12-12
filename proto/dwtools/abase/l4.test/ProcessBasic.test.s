@@ -11722,10 +11722,10 @@ function killHard( test )
     { 
       test.identical( got.exitCode , null );
       test.identical( got.exitSignal , 'SIGKILL' );
-      if( process.platform === 'linux' )
-      test.is( _.strHas( got.output, 'Application timeout!' ) );
-      else
+      if( process.platform === 'darwin' )
       test.is( !_.strHas( got.output, 'Application timeout!' ) );
+      else
+      test.is( _.strHas( got.output, 'Application timeout!' ) );
       return null;
     })
     
@@ -11762,10 +11762,10 @@ function killHard( test )
         test.identical( got.exitSignal , 'SIGKILL' );
       }
       
-      if( process.platform === 'linux' )
-      test.is( _.strHas( got.output, 'Application timeout!' ) );
-      else
+      if( process.platform === 'darwin' )
       test.is( !_.strHas( got.output, 'Application timeout!' ) );
+      else
+      test.is( _.strHas( got.output, 'Application timeout!' ) );
       return null;
     })
     
