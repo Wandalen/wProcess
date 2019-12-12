@@ -11861,7 +11861,7 @@ function terminate( test )
     setTimeout( () => 
     {
       console.log( 'Application timeout!' )
-    }, 2500 )
+    }, 5000 )
   }
 
   /* */
@@ -11887,7 +11887,7 @@ function terminate( test )
 
     let ready = _.process.start( o )
     
-    _.time.out( 1000, () => _.process.terminate( o.process ) )
+    _.time.out( 1500, () => _.process.terminate( o.process ) )
     
     ready.thenKeep( ( got ) =>
     { 
@@ -11915,7 +11915,7 @@ function terminate( test )
 
     let ready = _.process.start( o )
     
-    _.time.out( 1000, () => _.process.terminate( o.process.pid ) )
+    _.time.out( 1500, () => _.process.terminate( o.process.pid ) )
     
     ready.thenKeep( ( got ) =>
     { 
@@ -11942,7 +11942,7 @@ function terminate( test )
 
     let ready = _.process.start( o )
     
-    _.time.out( 1000, () => _.process.terminate( o.process ) )
+    _.time.out( 1500, () => _.process.terminate( o.process ) )
     
     ready.thenKeep( ( got ) =>
     {
@@ -11969,7 +11969,7 @@ function terminate( test )
 
     let ready = _.process.start( o )
     
-    _.time.out( 1000, () => _.process.terminate( o.process.pid ) )
+    _.time.out( 1500, () => _.process.terminate( o.process.pid ) )
     
     ready.thenKeep( ( got ) =>
     { 
@@ -11996,7 +11996,7 @@ function terminate( test )
 
     let ready = _.process.start( o )
     
-    _.time.out( 1000, () => _.process.terminate( o.process ) )
+    _.time.out( 1500, () => _.process.terminate( o.process ) )
     
     ready.thenKeep( ( got ) =>
     { 
@@ -12032,7 +12032,7 @@ function terminate( test )
 
     let ready = _.process.start( o )
     
-    _.time.out( 1000, () => _.process.terminate( o.process.pid ) )
+    _.time.out( 1500, () => _.process.terminate( o.process.pid ) )
     
     ready.thenKeep( ( got ) =>
     { 
@@ -12069,7 +12069,7 @@ function terminate( test )
 
     let ready = _.process.start( o )
     
-    _.time.out( 1000, () => _.process.terminate( o.process ) )
+    _.time.out( 1500, () => _.process.terminate( o.process ) )
     
     ready.thenKeep( ( got ) =>
     { 
@@ -12106,7 +12106,7 @@ function terminate( test )
 
     let ready = _.process.start( o )
     
-    _.time.out( 1000, () => _.process.terminate( o.process.pid ) )
+    _.time.out( 1500, () => _.process.terminate( o.process.pid ) )
     
     ready.thenKeep( ( got ) =>
     { 
