@@ -54,6 +54,8 @@ let Self = _.process = _.process || Object.create( null );
 
 _.assert( !!_realGlobal_ );
 
+_.Consequence.UnhandledTimeOut = 1;
+
 // --
 // exec
 // --
@@ -374,7 +376,6 @@ function start_body( o )
 
   function end( err, arg )
   {
-    _.errAttend( err );
     
     if( state > 0 )
     {
