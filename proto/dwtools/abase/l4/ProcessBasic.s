@@ -54,8 +54,6 @@ let Self = _.process = _.process || Object.create( null );
 
 _.assert( !!_realGlobal_ );
 
-_.Consequence.UnhandledTimeOut = 1;
-
 // --
 // exec
 // --
