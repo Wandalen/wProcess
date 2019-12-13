@@ -2334,7 +2334,7 @@ function killHard( o )
   
   try
   { 
-    if( o instanceof ChildProcess.ChildProcess )
+    if( _.routineIs( o.kill ) )
     o.kill( 'SIGKILL' );
     else 
     process.kill( o.pid, 'SIGKILL' );
