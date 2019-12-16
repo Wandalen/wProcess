@@ -11552,7 +11552,7 @@ function appTempApplication( test )
 
 //
 
-function killHard( test )
+function kill( test )
 {
   var context = this;
   var routinePath = _.path.join( context.suitePath, test.name );
@@ -11588,7 +11588,7 @@ function killHard( test )
 
     let ready = _.process.start( o )
     
-    _.time.out( 1000, () => _.process.killHard( o.process ) )
+    _.time.out( 1000, () => _.process.kill( o.process ) )
     
     ready.thenKeep( ( got ) =>
     {
@@ -11616,7 +11616,7 @@ function killHard( test )
 
     let ready = _.process.start( o )
     
-    _.time.out( 1000, () => _.process.killHard( o.process.pid ) )
+    _.time.out( 1000, () => _.process.kill( o.process.pid ) )
     
     ready.thenKeep( ( got ) =>
     { 
@@ -11652,7 +11652,7 @@ function killHard( test )
 
     let ready = _.process.start( o )
     
-    _.time.out( 1000, () => _.process.killHard( o.process ) )
+    _.time.out( 1000, () => _.process.kill( o.process ) )
     
     ready.thenKeep( ( got ) =>
     {
@@ -11680,7 +11680,7 @@ function killHard( test )
 
     let ready = _.process.start( o )
     
-    _.time.out( 1000, () => _.process.killHard( o.process.pid ) )
+    _.time.out( 1000, () => _.process.kill( o.process.pid ) )
     
     ready.thenKeep( ( got ) =>
     { 
@@ -11716,7 +11716,7 @@ function killHard( test )
 
     let ready = _.process.start( o )
     
-    _.time.out( 1000, () => _.process.killHard( o.process ) )
+    _.time.out( 1000, () => _.process.kill( o.process ) )
     
     ready.thenKeep( ( got ) =>
     { 
@@ -11747,7 +11747,7 @@ function killHard( test )
 
     let ready = _.process.start( o )
     
-    _.time.out( 1000, () => _.process.killHard( o.process.pid ) )
+    _.time.out( 1000, () => _.process.kill( o.process.pid ) )
     
     ready.thenKeep( ( got ) =>
     { 
@@ -11786,7 +11786,7 @@ function killHard( test )
 
     let ready = _.process.start( o )
     
-    _.time.out( 1000, () => _.process.killHard( o.process ) )
+    _.time.out( 1000, () => _.process.kill( o.process ) )
     
     ready.thenKeep( ( got ) =>
     { 
@@ -11817,7 +11817,7 @@ function killHard( test )
 
     let ready = _.process.start( o )
     
-    _.time.out( 1000, () => _.process.killHard( o.process.pid ) )
+    _.time.out( 1000, () => _.process.kill( o.process.pid ) )
     
     ready.thenKeep( ( got ) =>
     { 
@@ -12529,7 +12529,7 @@ var Proto =
 
     appTempApplication,
     
-    killHard,
+    kill,
     terminate
     
     // kill,

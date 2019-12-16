@@ -2322,7 +2322,7 @@ function isRunning( pid )
 
 //
 
-function killHard( o )
+function kill( o )
 {
   if( _.numberIs( o ) )
   o = { pid : o };
@@ -2576,7 +2576,7 @@ let Routines =
 // =======
 
   isRunning,
-  killHard,
+  kill,
   terminate
 
 }
