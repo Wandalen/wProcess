@@ -2400,7 +2400,13 @@ function children( o )
   _.assert( arguments.length === 1 );
   _.assert( _.numberIs( o.pid ) );
   
-  let tree = Object.create( null );;
+  let tree = Object.create( null );
+  
+  if( !_.process.isRunning( o.pid ) )
+  {
+    let err = _.err( '\nTarget process:', _.strQuote( o.pid ), 'does not exist.' );
+    return new _.Consequence().error( err );
+  }
   
   if( process.platform === 'win32' )
   {

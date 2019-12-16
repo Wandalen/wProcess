@@ -12135,6 +12135,271 @@ function terminate( test )
 
 //
 
+function children( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+
+  function testApp()
+  { 
+    _.include( 'wAppBasic' );
+    _.include( 'wFiles' );
+    var o = 
+    {
+      execPath : 'node testApp2.js',
+      currentPath : __dirname,
+      mode : 'spawn',
+      inputMirroring : 0
+    }
+    _.process.start( o );
+    process.send( o.process.pid )
+  }
+  
+  function testApp2()
+  { 
+    if( process.send )
+    process.send( process.pid );
+    setTimeout( () => {}, 1500 )
+  }
+
+  /* */
+
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
+  var testAppPath2 = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp2.js' ) );
+  var testAppCode2 = context.toolsPathInclude + testApp2.toString() + '\ntestApp2();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+  _.fileProvider.fileWrite( testAppPath2, testAppCode2 );
+
+  var con = new _.Consequence().take( null )
+
+  /* */
+
+  .thenKeep( () =>
+  { 
+    test.case = 'parent -> child -> child'
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'spawn',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o );
+    let children;
+    let lastChildPid;
+    
+    o.process.on( 'message', ( data ) => 
+    { 
+      lastChildPid = _.numberFrom( data );
+      children = _.process.children( process.pid )
+    })
+    
+    ready.thenKeep( ( got ) =>
+    { 
+      test.identical( got.exitCode, 0 );
+      var expected = 
+      {
+        [ process.pid ] : 
+        { 
+          [ o.process.pid ] : 
+          { 
+            [ lastChildPid ] : {} 
+          } 
+        }
+      }
+      return children.then( ( got ) => 
+      {
+        test.identical( got, expected );
+        return null;
+      })
+    })
+    
+    return ready;
+  })
+  
+  //
+  
+  .thenKeep( () =>
+  { 
+    test.case = 'parent -> child -> child, search from fist child'
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'spawn',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o );
+    let children;
+    let lastChildPid;
+    
+    o.process.on( 'message', data => 
+    { 
+      lastChildPid = _.numberFrom( data )
+      children = _.process.children( o.process.pid )
+    })
+    
+    ready.thenKeep( ( got ) =>
+    { 
+      test.identical( got.exitCode, 0 );
+      var expected = 
+      {
+        [ o.process.pid ] : 
+        { 
+          [ lastChildPid ] : {} 
+        } 
+      }
+      return children.then( ( got ) => 
+      {
+        test.identical( got, expected );
+        return null;
+      })
+    })
+    
+    return ready;
+  })
+  
+  //
+  
+  .thenKeep( () =>
+  { 
+    test.case = 'parent -> child -> child, start from last child'
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'spawn',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o );
+    let children;
+    let lastChildPid;
+    
+    o.process.on( 'message', data => 
+    { 
+      lastChildPid = _.numberFrom( data )
+      children = _.process.children( lastChildPid )
+    })
+    
+    ready.thenKeep( ( got ) =>
+    { 
+      test.identical( got.exitCode, 0 );
+      var expected = 
+      {
+        [ lastChildPid ] : {} 
+      }
+      return children.then( ( got ) => 
+      {
+        test.identical( got, expected );
+        return null;
+      })
+      
+    })
+    
+    return ready;
+  })
+  
+  //
+  
+  .thenKeep( () =>
+  { 
+    test.case = 'parent -> child*'
+    var o =
+    {
+      execPath : 'node ' + testAppPath2,
+      mode : 'spawn',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+    
+    let o1 = _.mapExtend( null, o );
+    let o2 = _.mapExtend( null, o );
+
+    let r1 = _.process.start( o1 );
+    let r2 = _.process.start( o2 );
+    let children;
+    
+    let ready = _.Consequence.And( [ r1,r2 ] );
+    
+    o1.process.on( 'message', () =>
+    {
+      children = _.process.children( process.pid )
+    })
+    
+    ready.thenKeep( ( got ) =>
+    { 
+      test.identical( got[ 0 ].exitCode, 0 );
+      test.identical( got[ 1 ].exitCode, 0 );
+      var expected = 
+      {
+        [ process.pid ] : 
+        { 
+          [ got[ 0 ].process.pid ] : {},
+          [ got[ 1 ].process.pid ] : {},
+        }
+      }
+      return children.then( ( got ) => 
+      {
+        test.identical( got, expected );
+        return null;
+      })
+    })
+    
+    return ready;
+  })
+  
+  //
+  
+  .thenKeep( () =>
+  { 
+    test.case = 'only parent'
+    return _.process.children( process.pid )
+    .then( got => 
+    {
+      test.identical( got,{ [ process.pid ] : {} })
+      return null;
+    })
+  })
+  
+  //
+  
+  .thenKeep( () =>
+  { 
+    test.case = 'process is not running';
+    var o =
+    {
+      execPath : 'node ' + testAppPath2,
+      mode : 'spawn',
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+    
+    _.process.start( o );
+    o.process.kill('SIGKILL');
+    
+    return o.ready.then( () => 
+    { 
+      let ready = _.process.children( o.process.pid );
+      return test.shouldThrowErrorAsync( ready );
+    })
+    
+  })
+  
+  /* */
+  
+  return con;
+}
+
+//
+
 function experiment( test )
 {
   let self = this;
@@ -12530,11 +12795,12 @@ var Proto =
     appTempApplication,
     
     kill,
-    terminate
+    terminate,
+    children,
     
     // kill,
     // killComplex
-
+    
   },
 
 }
