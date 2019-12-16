@@ -2324,20 +2324,52 @@ function isRunning( pid )
 
 function kill( o )
 {
-  if( _.numberIs( o ) )
+  if( _.numberIs( o ) || _.routineIs( o.kill ) )
   o = { pid : o };
-
+  
+  _.routineOptions( kill, o );
   _.assert( arguments.length === 1 );
-  _.assert( _.numberIs( o.pid ) );
+  _.assert( _.numberIs( o.pid ) || _.routineIs( o.pid.kill) );
 
   try
   { 
-    if( _.routineIs( o.kill ) )
-    o.kill( 'SIGKILL' );
+    if( o.withChildren )
+    {
+      return _.process.children( o.pid )
+      .then( ( tree ) => 
+      { 
+        killChildren( tree );
+        return null;
+      })
+      .catch( handleError );
+    }
     else
-    process.kill( o.pid, 'SIGKILL' );
+    {
+      if( _.routineIs( o.pid.kill ) )
+      o.pid.kill( 'SIGKILL' );
+      else
+      process.kill( o.pid, 'SIGKILL' );
+    }
   }
   catch( err )
+  {
+    handleError( err )
+  }
+  
+  //
+  
+  function killChildren( tree )
+  {
+    for( let pid in tree )
+    { 
+      pid = _.numberFrom( pid );
+      if( _.process.isRunning( pid ) )
+      process.kill( pid, 'SIGKILL' );
+      killChildren( tree[ pid ] );
+    }
+  }
+  
+  function handleError( err )
   {
     // if( err.code === 'EINVAL' )
     // throw _.err( err, '\nAn invalid signal was specified:', _.strQuote( o.signal ) )
@@ -2351,31 +2383,48 @@ function kill( o )
   return true;
 }
 
+kill.defaults = 
+{
+  pid : null,
+  withChildren : 0
+}
+
 //
 
 
 function terminate( o )
 { 
-  if( _.numberIs( o ) )
+  if( _.numberIs( o ) || _.routineIs( o.kill ) )
   o = { pid : o };
-
+  
+  _.routineOptions( terminate, o );
   _.assert( arguments.length === 1 );
-  _.assert( _.numberIs( o.pid ) );
+  _.assert( _.numberIs( o.pid ) || _.routineIs( o.pid.kill) );
 
   try
-  { 
-    if( process.platform === 'win32' )
-    windowsKill( o.pid, 'SIGINT' );
+  {  
+    if( o.withChildren )
+    {
+      return _.process.children( o.pid )
+      .then( ( tree ) => 
+      { 
+        terminateChildren( tree );
+        return null;
+      })
+      .catch( handleError );
+    }
     else
-    process.kill( o.pid, 'SIGINT' );
+    {
+      if( process.platform === 'win32' )
+      windowsKill( o.pid, 'SIGINT' );
+      else
+      process.kill( o.pid, 'SIGINT' );
+    }
+    
   }
   catch( err )
   {
-    if( err.code === 'EPERM' )
-    throw _.err( err, '\nCurrent process does not have permission to kill target process' );
-    if( err.code === 'ESRCH' )
-    throw _.err( err, '\nTarget process:', _.strQuote( o.pid ), 'does not exist.' );
-    throw _.err( err );
+    handleError( err );
   }
 
   return true;
@@ -2388,6 +2437,35 @@ function terminate( o )
     WindowsKill = require( 'wwindowskill' )({ replaceNodeKill: false });
     WindowsKill( pid, signal );
   }
+  
+  function handleError( err )
+  {
+    if( err.code === 'EPERM' )
+    throw _.err( err, '\nCurrent process does not have permission to kill target process' );
+    if( err.code === 'ESRCH' )
+    throw _.err( err, '\nTarget process:', _.strQuote( o.pid ), 'does not exist.' );
+    throw _.err( err );
+  }
+  
+  function terminateChildren( tree )
+  {
+    for( let pid in tree )
+    { 
+      pid = _.numberFrom( pid );
+      if( _.process.isRunning( pid ) )
+      if( process.platform === 'win32' )
+      windowsKill( pid, 'SIGINT' );
+      else
+      process.kill( pid, 'SIGINT' );
+      terminateChildren( tree[ pid ] );
+    }
+  }
+}
+
+terminate.defaults = 
+{
+  pid : null,
+  withChildren : 0
 }
 
 //
