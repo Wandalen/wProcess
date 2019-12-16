@@ -22,6 +22,9 @@ submodule :
   wwindowskill :
     path : npm:///wwindowskill
     enabled : 0 # submodule
+  windows-process-tree :
+    path : npm:///windows-process-tree
+    enabled : 0 # submodule
   wappbasic :
     path : hd://.
     enabled : 0 # submodule

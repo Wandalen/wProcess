@@ -30,7 +30,8 @@
     "wConsequence" : "",
     "wwindowskill" : "", 
     "deasync" : "", 
-    "strip-ansi" : ""
+    "strip-ansi" : "",
+    "windows-process-tree" : ""
   }, 
   "devDependencies" : { "wTesting" : "" }, 
   "keywords" : [ "wTools", "exec file", "shell script", "run program" ]

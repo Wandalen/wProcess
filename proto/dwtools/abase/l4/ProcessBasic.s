@@ -47,7 +47,7 @@ if( typeof module !== 'undefined' )
 
 }
 
-let System, ChildProcess, StripAnsi, WindowsKill;
+let System, ChildProcess, StripAnsi, WindowsKill,WindowsProcessTree;
 let _global = _global_;
 let _ = _global_.wTools;
 let Self = _.process = _.process || Object.create( null );
@@ -2390,6 +2390,63 @@ function terminate( o )
   }
 }
 
+//
+
+function children( o )
+{
+  if( _.numberIs( o ) )
+  o = { pid : o };
+  
+  _.assert( arguments.length === 1 );
+  _.assert( _.numberIs( o.pid ) );
+  
+  let con = new _.Consequence();
+  
+  
+  if( process.platform === 'win32' )
+  {
+    if( !WindowsProcessTree )
+    WindowsProcessTree = require( 'windows-process-tree' );
+    WindowsProcessTree.getProcessList( o.pid, ( list ) => con.take( list ) )
+  }
+  else if( process.platform === 'darwin' )
+  {
+    _.process.start
+    ({ 
+      execPath : 'pgrep', 
+      args : [ '-P', o.pid ], 
+      ready : con, 
+      outputCollecting : 0, 
+      inputMirroring : 0 
+    })
+    .ready( ( got ) => 
+    {
+      debugger
+      let list = [];
+      return list;
+    })
+  }
+  else
+  {
+    _.process.start
+    ({ 
+      execPath : 'ps', 
+      args : [ '-o', 'pid', '--no-headers', '--ppid', o.pid ], 
+      ready : con, 
+      outputCollecting : 0, 
+      inputMirroring : 0 
+    })
+    .ready( ( got ) => 
+    {
+      debugger
+      let list = [];
+      return list;
+    })
+  } 
+   
+  return con;
+}
+
 // --
 // eventer
 // --
@@ -2577,7 +2634,9 @@ let Routines =
 
   isRunning,
   kill,
-  terminate
+  terminate,
+  
+  children
 
 }
 
