@@ -2400,51 +2400,47 @@ function children( o )
   _.assert( arguments.length === 1 );
   _.assert( _.numberIs( o.pid ) );
   
-  let con = new _.Consequence();
-  
+  let tree;
   
   if( process.platform === 'win32' )
   {
     if( !WindowsProcessTree )
     WindowsProcessTree = require( 'windows-process-tree' );
-    WindowsProcessTree.getProcessList( o.pid, ( list ) => con.take( list ) )
+    let con = new _.Consequence();
+    WindowsProcessTree.getProcessList( o.pid, ( tree ) => con.take( tree ) )
+    return con;
   }
-  else if( process.platform === 'darwin' )
+  else 
   {
-    _.process.start
+    tree = Object.create( null );
+    if( process.platform === 'darwin' )
+    return getChildrenOf( 'pgrep -P', o.pid, tree )
+    else
+    return getChildrenOf( 'ps -o pid --no-headers --ppid', o.pid, tree )
+  }
+  
+  /* */
+  
+  function getChildrenOf( command, pid, _tree )
+  { 
+    return _.process.start
     ({ 
-      execPath : 'pgrep', 
-      args : [ '-P', o.pid ], 
-      ready : con, 
-      outputCollecting : 0, 
+      execPath : command + ' ' + pid,
+      outputCollecting : 1, 
+      throwingExitCode : 0,
       inputMirroring : 0 
     })
-    .ready( ( got ) => 
-    {
-      debugger
-      let list = [];
-      return list;
+    .then( ( got ) => 
+    {  
+      _tree[ pid ] = Object.create( null );
+      if( got.exitCode != 0 )
+      return tree;
+      let ready = new _.Consequence().take( null );
+      let pids = _.strSplitNonPreserving({ src: got.output, delimeter : '\n' });
+      _.each( pids, ( cpid ) => ready.then( () => getChildrenOf( command, cpid, _tree[ pid ] ) ) )
+      return ready;
     })
   }
-  else
-  {
-    _.process.start
-    ({ 
-      execPath : 'ps', 
-      args : [ '-o', 'pid', '--no-headers', '--ppid', o.pid ], 
-      ready : con, 
-      outputCollecting : 0, 
-      inputMirroring : 0 
-    })
-    .ready( ( got ) => 
-    {
-      debugger
-      let list = [];
-      return list;
-    })
-  } 
-   
-  return con;
 }
 
 // --
