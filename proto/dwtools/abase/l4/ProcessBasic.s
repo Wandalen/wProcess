@@ -2400,19 +2400,22 @@ function children( o )
   _.assert( arguments.length === 1 );
   _.assert( _.numberIs( o.pid ) );
   
-  let tree;
+  let tree = Object.create( null );;
   
   if( process.platform === 'win32' )
   {
     if( !WindowsProcessTree )
     WindowsProcessTree = require( 'windows-process-tree' );
     let con = new _.Consequence();
-    WindowsProcessTree.getProcessList( o.pid, ( tree ) => con.take( tree ) )
+    WindowsProcessTree.getProcessTree( o.pid, ( result ) => 
+    { 
+      handleWindowsResult( tree, result );
+      con.take( tree );
+    })
     return con;
   }
   else 
   {
-    tree = Object.create( null );
     if( process.platform === 'darwin' )
     return getChildrenOf( 'pgrep -P', o.pid, tree )
     else
@@ -2440,6 +2443,14 @@ function children( o )
       _.each( pids, ( cpid ) => ready.then( () => getChildrenOf( command, cpid, _tree[ pid ] ) ) )
       return ready;
     })
+  }
+  
+  function handleWindowsResult( tree, result )
+  {
+    tree[ result.pid ] = Object.create( null );
+    if( result.children && result.children.length )
+    _.each( result.children, ( child ) => handleWindowsResult( tree[ result.pid ], child ) )
+    return tree;
   }
 }
 
