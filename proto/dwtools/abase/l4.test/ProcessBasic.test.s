@@ -12212,7 +12212,7 @@ function children( test )
       }
       return children.then( ( got ) => 
       {
-        test.identical( got, expected );
+        test.contains( got, expected );
         return null;
       })
     })
@@ -12256,7 +12256,7 @@ function children( test )
       }
       return children.then( ( got ) => 
       {
-        test.identical( got, expected );
+        test.contains( got, expected );
         return null;
       })
     })
@@ -12297,7 +12297,7 @@ function children( test )
       }
       return children.then( ( got ) => 
       {
-        test.identical( got, expected );
+        test.contains( got, expected );
         return null;
       })
       
@@ -12348,7 +12348,7 @@ function children( test )
       }
       return children.then( ( got ) => 
       {
-        test.identical( got, expected );
+        test.contains( got, expected );
         return null;
       })
     })
@@ -12364,7 +12364,7 @@ function children( test )
     return _.process.children( process.pid )
     .then( got => 
     {
-      test.identical( got,{ [ process.pid ] : {} })
+      test.contains( got,{ [ process.pid ] : {} })
       return null;
     })
   })
