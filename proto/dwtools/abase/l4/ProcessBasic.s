@@ -2326,9 +2326,20 @@ function kill( o )
 {
   if( _.numberIs( o ) )
   o = { pid : o };
+  else if( _.routineIs( o.kill ) )
+  o = { process : o };
   
   _.assert( arguments.length === 1 );
-  _.assert( _.numberIs( o.pid ) || _.routineIs( o.kill) );
+  _.routineOptions( kill, o );
+  
+  if( o.process )
+  {
+    _.assert( o.pid === null );
+    o.pid = o.process.pid;
+  }
+  
+  _.assert( _.numberIs( o.pid ) );
+  _.assert( o.timeOut === null || _.numberIs( o.timeOut ) )
   
   let isWindows = process.platform === 'win32';
 
@@ -2336,38 +2347,47 @@ function kill( o )
   { 
     if( o.withChildren )
     {
-      return _.process.children({ pid : o.pid, asList : isWindows })
-      .then( ( tree ) => 
-      {  
-        if( isWindows )
+      let con = _.process.children({ pid : o.pid, asList : isWindows });
+      con.then( ( children ) => 
+      {
+        if( !isWindows )
         {
-          for( var l = tree.length - 1; l >= 0; l-- )
-          {
-            if( l && tree[ l ].name === 'conhost.exe' )
-            continue;
-            if( _.process.isRunning( tree[ l ].pid ) )
-            process.kill( tree[ l ].pid, 'SIGKILL' );
-          }
+          killChildren( children );
+          return true;
         }
-        else
+        for( var l = children.length - 1; l >= 0; l-- )
         {
-          killChildren( tree );
+          if( l && children[ l ].name === 'conhost.exe' )
+          continue;
+          if( _.process.isRunning( children[ l ].pid ) )
+          process.kill( children[ l ].pid, 'SIGKILL' );
         }
-        return null;
+        return true;
       })
-      .catch( handleError );
+      con.catch( handleError );
+      return con;
     }
     else
-    {
-      if( _.routineIs( o.kill ) )
-      o.kill( 'SIGKILL' );
-      else
-      process.kill( o.pid, 'SIGKILL' );
+    { 
+      if( o.timeOut === null )
+      return killProcess();
+      return _.time.out( o.timeOut, killProcess );
     }
   }
   catch( err )
   {
     handleError( err )
+  }
+  
+  //
+  
+  function killProcess()
+  {
+    if( o.process )
+    o.process.kill( 'SIGKILL' );
+    else
+    process.kill( o.pid, 'SIGKILL' );
+    return true;
   }
   
   //
@@ -2400,7 +2420,9 @@ function kill( o )
 kill.defaults = 
 {
   pid : null,
-  withChildren : 0
+  process : null,
+  withChildren : 0,
+  timeOut : null
 }
 
 //
@@ -2410,8 +2432,19 @@ function terminate( o )
 { 
   if( _.numberIs( o ) )
   o = { pid : o };
+  else if( _.routineIs( o.kill ) )
+  o = { process : o };
   
   _.assert( arguments.length === 1 );
+  _.routineOptions( terminate, o );
+  _.assert( o.timeOut === null || _.numberIs( o.timeOut ) );
+  
+  if( o.process )
+  {
+    _.assert( o.pid === null );
+    o.pid = o.process.pid;
+  }
+  
   _.assert( _.numberIs( o.pid ) );
   
   let isWindows = process.platform === 'win32';
@@ -2442,11 +2475,10 @@ function terminate( o )
       .catch( handleError );
     }
     else
-    {
-      if( isWindows )
-      windowsKill( o.pid, 'SIGINT' );
-      else
-      process.kill( o.pid, 'SIGINT' );
+    { 
+      if( o.timeOut === null )
+      return terminateProcess();
+      return _.time.out( o.timeOut, terminateProcess )
     }
     
   }
@@ -2458,6 +2490,15 @@ function terminate( o )
   return true;
   
   /*  */
+  
+  function terminateProcess()
+  {
+    if( isWindows )
+    windowsKill( o.pid, 'SIGINT' );
+    else
+    process.kill( o.pid, 'SIGINT' );
+    return true;
+  }
   
   function windowsKill( pid, signal )
   {
@@ -2488,10 +2529,11 @@ function terminate( o )
 }
 
 terminate.defaults = 
-{
+{ 
+  process : null,
   pid : null,
   withChildren : 0,
-  timeOut : 100
+  timeOut : null
 }
 
 //
@@ -2500,7 +2542,7 @@ function children( o )
 {
   if( _.numberIs( o ) )
   o = { pid : o };
-  if( _.routineIs( o.kill ) )
+  else if( _.routineIs( o.kill ) )
   o = { process : o }
   
   _.routineOptions( children, o )
