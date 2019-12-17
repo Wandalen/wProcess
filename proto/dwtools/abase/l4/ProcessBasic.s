@@ -2329,15 +2329,30 @@ function kill( o )
   
   _.assert( arguments.length === 1 );
   _.assert( _.numberIs( o.pid ) || _.routineIs( o.kill) );
+  
+  let isWindows = process.platform === 'win32';
 
   try
   { 
     if( o.withChildren )
     {
-      return _.process.children( o.pid )
+      return _.process.children({ pid : o.pid, asList : isWindows })
       .then( ( tree ) => 
-      { 
-        killChildren( tree );
+      {  
+        if( isWindows )
+        {
+          for( var l = tree.length - 1; l >= 0; l-- )
+          {
+            if( l && tree[ l ].name === 'conhost.exe' )
+            continue;
+            if( _.process.isRunning( tree[ l ].pid ) )
+            process.kill( tree[ l ].pid, 'SIGKILL' );
+          }
+        }
+        else
+        {
+          killChildren( tree );
+        }
         return null;
       })
       .catch( handleError );
@@ -2398,22 +2413,37 @@ function terminate( o )
   
   _.assert( arguments.length === 1 );
   _.assert( _.numberIs( o.pid ) );
+  
+  let isWindows = process.platform === 'win32';
 
   try
   {  
     if( o.withChildren )
     {
-      return _.process.children( o.pid )
+      return _.process.children({ pid : o.pid, asList : isWindows })
       .then( ( tree ) => 
-      { 
-        terminateChildren( tree );
+      {  
+        if( isWindows )
+        {
+          for( var l = tree.length - 1; l >= 0; l-- )
+          {
+            if( l && tree[ l ].name === 'conhost.exe' )
+            continue;
+            if( _.process.isRunning( tree[ l ].pid ) )
+            windowsKill( tree[ l ].pid, 'SIGINT' );
+          }
+        }
+        else
+        {
+          terminateChildren( tree );
+        }
         return null;
       })
       .catch( handleError );
     }
     else
     {
-      if( process.platform === 'win32' )
+      if( isWindows )
       windowsKill( o.pid, 'SIGINT' );
       else
       process.kill( o.pid, 'SIGINT' );
@@ -2451,12 +2481,7 @@ function terminate( o )
     { 
       pid = _.numberFrom( pid );
       if( _.process.isRunning( pid ) )
-      {
-        if( process.platform === 'win32' )
-        windowsKill( pid, 'SIGINT' );
-        else
-        process.kill( pid, 'SIGINT' );
-      }
+      process.kill( pid, 'SIGINT' );
       terminateChildren( tree[ pid ] );
     }
   }
@@ -2465,7 +2490,8 @@ function terminate( o )
 terminate.defaults = 
 {
   pid : null,
-  withChildren : 0
+  withChildren : 0,
+  timeOut : 100
 }
 
 //
@@ -2490,12 +2516,20 @@ function children( o )
   {
     if( !WindowsProcessTree )
     WindowsProcessTree = require( 'windows-process-tree' );
+    
     let con = new _.Consequence();
-    WindowsProcessTree.getProcessTree( o.pid, ( result ) => 
+    if( o.asList )
+    {
+      WindowsProcessTree.getProcessList( o.pid, ( result ) => con.take( result ) )
+    }
+    else
     { 
-      handleWindowsResult( tree, result );
-      con.take( tree );
-    })
+      WindowsProcessTree.getProcessTree( o.pid, ( result ) => 
+      {
+        handleWindowsResult( tree, result );
+        con.take( tree );
+      })
+    }
     return con;
   }
   else 
@@ -2530,7 +2564,7 @@ function children( o )
   }
   
   function handleWindowsResult( tree, result )
-  { 
+  {  
     tree[ result.pid ] = Object.create( null );
     if( result.children && result.children.length )
     _.each( result.children, ( child ) => handleWindowsResult( tree[ result.pid ], child ) )

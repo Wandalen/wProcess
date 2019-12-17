@@ -12452,6 +12452,9 @@ function terminateWithChildren( test )
     process.on( 'SIGINT', () => 
     {
       console.log( 'SIGINT' )
+      var fs = require( 'fs' );
+      var path = require( 'path' )
+      fs.writeFileSync( path.join( __dirname, process.pid.toString() ), process.pid )
       process.exit( 0 );
     })
     if( process.send )
@@ -12656,7 +12659,10 @@ function terminateWithChildren( test )
       { 
         test.identical( got.exitCode, 0 );
         test.identical( got.exitSignal, null );
-        test.identical( _.strCount( got.output, 'SIGINT' ), 3 );
+        test.is( _.strHas( got.output, 'SIGINT' ) );
+        /* xxx Vova : problem with termination of detached proces on Windows, child process does't receive SIGINT */
+        test.is( _.fileProvider.fileExists( _.path.join( routinePath, children[ 0 ].toString() ) ) )
+        test.is( _.fileProvider.fileExists( _.path.join( routinePath, children[ 1 ].toString() ) ) )
         test.is( !_.process.isRunning( o.process.pid ) )
         test.is( !_.process.isRunning( children[ 0 ] ) );
         test.is( !_.process.isRunning( children[ 1 ] ) );
