@@ -2500,9 +2500,18 @@ function children( o )
 {
   if( _.numberIs( o ) )
   o = { pid : o };
+  if( _.routineIs( o.kill ) )
+  o = { process : o }
   
+  _.routineOptions( children, o )
   _.assert( arguments.length === 1 );
   _.assert( _.numberIs( o.pid ) );
+  
+  if( o.process )
+  {
+    _.assert( o.pid === null );
+    o.pid = o.process.pid;
+  }
   
   let tree = Object.create( null );
   
@@ -2570,6 +2579,13 @@ function children( o )
     _.each( result.children, ( child ) => handleWindowsResult( tree[ result.pid ], child ) )
     return tree;
   }
+}
+
+children.defaults = 
+{
+  process : null,
+  pid : null,
+  asList : 0
 }
 
 // --
