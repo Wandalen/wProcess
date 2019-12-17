@@ -11947,9 +11947,17 @@ function killWithChildren( test )
     ready.thenKeep( ( got ) =>
     { 
       return killed.then( () => 
-      {
-        test.identical( got.exitCode, null );
-        test.identical( got.exitSignal, 'SIGKILL' );
+      { 
+        if( process.platform === 'win32' )
+        {
+          test.identical( got.exitCode, 1 );
+          test.identical( got.exitSignal, null );
+        }
+        else
+        {
+          test.identical( got.exitCode, null );
+          test.identical( got.exitSignal, 'SIGKILL' );
+        }
         test.identical( _.strCount( got.output, 'Application timeout' ), 0 );
         test.is( !_.process.isRunning( o.process.pid ) );
         test.is( !_.process.isRunning( lastChildPid ) );
@@ -12028,8 +12036,16 @@ function killWithChildren( test )
     {  
       return killed.then( () => 
       {
-        test.identical( got.exitCode, null );
-        test.identical( got.exitSignal, 'SIGKILL' );
+        if( process.platform === 'win32' )
+        {
+          test.identical( got.exitCode, 1 );
+          test.identical( got.exitSignal, null );
+        }
+        else
+        {
+          test.identical( got.exitCode, null );
+          test.identical( got.exitSignal, 'SIGKILL' );
+        }
         test.identical( _.strCount( got.output, 'Application timeout' ), 0 );
         test.is( !_.process.isRunning( o.process.pid ) );
         test.is( !_.process.isRunning( children[ 0 ] ) )
@@ -12068,8 +12084,16 @@ function killWithChildren( test )
     { 
       return killed.then( () => 
       {
-        test.identical( got.exitCode, null );
-        test.identical( got.exitSignal, 'SIGKILL' );
+        if( process.platform === 'win32' )
+        {
+          test.identical( got.exitCode, 1 );
+          test.identical( got.exitSignal, null );
+        }
+        else
+        {
+          test.identical( got.exitCode, null );
+          test.identical( got.exitSignal, 'SIGKILL' );
+        }
         test.identical( _.strCount( got.output, 'Application timeout' ), 0 );
         test.is( !_.process.isRunning( o.process.pid ) );
         test.is( !_.process.isRunning( children[ 0 ] ) )
