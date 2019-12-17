@@ -2555,7 +2555,7 @@ function children( o )
     o.pid = o.process.pid;
   }
   
-  let tree = Object.create( null );
+  let result;
   
   if( !_.process.isRunning( o.pid ) )
   {
@@ -2575,25 +2575,31 @@ function children( o )
     }
     else
     { 
-      WindowsProcessTree.getProcessTree( o.pid, ( result ) => 
-      {
-        handleWindowsResult( tree, result );
-        con.take( tree );
+      WindowsProcessTree.getProcessTree( o.pid, ( got ) => 
+      { 
+        result = Object.create( null );
+        handleWindowsResult( result, got );
+        con.take( result );
       })
     }
     return con;
   }
   else 
-  {
-    if( process.platform === 'darwin' )
-    return getChildrenOf( 'pgrep -P', o.pid, tree )
+  { 
+    if( o.asList )
+    result = [];
     else
-    return getChildrenOf( 'ps -o pid --no-headers --ppid', o.pid, tree )
+    result = Object.create( null );
+    
+    if( process.platform === 'darwin' )
+    return getChildrenOf( 'pgrep -P', o.pid, result )
+    else
+    return getChildrenOf( 'ps -o pid --no-headers --ppid', o.pid, result )
   }
   
   /* */
   
-  function getChildrenOf( command, pid, _tree )
+  function getChildrenOf( command, pid, _result )
   { 
     return _.process.start
     ({ 
@@ -2604,12 +2610,15 @@ function children( o )
     })
     .then( ( got ) => 
     {  
-      _tree[ pid ] = Object.create( null );
+      if( o.asList )
+      _result.push( pid );
+      else
+      _result[ pid ] = Object.create( null );
       if( got.exitCode != 0 )
-      return tree;
+      return result;
       let ready = new _.Consequence().take( null );
       let pids = _.strSplitNonPreserving({ src: got.output, delimeter : '\n' });
-      _.each( pids, ( cpid ) => ready.then( () => getChildrenOf( command, cpid, _tree[ pid ] ) ) )
+      _.each( pids, ( cpid ) => ready.then( () => getChildrenOf( command, cpid, _result[ pid ] ) ) )
       return ready;
     })
   }

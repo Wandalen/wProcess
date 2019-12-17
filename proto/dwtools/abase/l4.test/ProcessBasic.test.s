@@ -13090,6 +13090,113 @@ function children( test )
 
 //
 
+function childrenAsList( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+
+  function testApp()
+  { 
+    _.include( 'wAppBasic' );
+    _.include( 'wFiles' );
+    var o = 
+    {
+      execPath : 'node testApp2.js',
+      currentPath : __dirname,
+      mode : 'spawn',
+      inputMirroring : 0
+    }
+    _.process.start( o );
+    process.send( o.process.pid )
+  }
+  
+  function testApp2()
+  { 
+    if( process.send )
+    process.send( process.pid );
+    setTimeout( () => {}, 1500 )
+  }
+
+  /* */
+
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
+  var testAppPath2 = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp2.js' ) );
+  var testAppCode2 = context.toolsPathInclude + testApp2.toString() + '\ntestApp2();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+  _.fileProvider.fileWrite( testAppPath2, testAppCode2 );
+
+  var con = new _.Consequence().take( null )
+
+  /* */
+
+  .thenKeep( () =>
+  { 
+    test.case = 'parent -> child -> child'
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'spawn',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o );
+    let children;
+    let lastChildPid;
+    
+    o.process.on( 'message', ( data ) => 
+    { 
+      lastChildPid = _.numberFrom( data );
+      children = _.process.children({ pid : process.pid, asList : 1 })
+    })
+    
+    ready.thenKeep( ( got ) =>
+    { 
+      test.identical( got.exitCode, 0 );
+      return children.then( ( got ) => 
+      { 
+        if( process.platform === 'win32' )
+        { 
+          test.identical( got.length, 5 );
+          
+          test.identical( got[ 0 ].pid, process.pid );
+          test.identical( got[ 1 ].pid, o.process.pid );
+          
+          test.is( _.numberIs( got[ 2 ].pid ) );
+          test.identical( got[ 2 ].name, 'conhost.exe' );
+          
+          test.identical( got[ 3 ].pid, lastChildPid );
+          
+          test.is( _.numberIs( got[ 4 ].pid ) );
+          test.identical( got[ 4 ].name, 'conhost.exe' );
+          
+        }
+        else
+        {
+          var expected = 
+          [  
+            process.pid,
+            o.process.pid,
+            lastChildPid
+          ]
+          test.contains( got, expected );
+        }
+        return null;
+      })
+    })
+    
+    return ready;
+  })
+ 
+  /*  */
+  
+  return con;
+}
+
+//
+
 function experiment( test )
 {
   let self = this;
@@ -13491,6 +13598,7 @@ var Proto =
     terminateWithChildren,
     terminateTimeOut,
     children,
+    childrenAsList,
     
     // kill,
     // killComplex
