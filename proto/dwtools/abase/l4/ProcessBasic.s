@@ -2324,12 +2324,11 @@ function isRunning( pid )
 
 function kill( o )
 {
-  if( _.numberIs( o ) || _.routineIs( o.kill ) )
+  if( _.numberIs( o ) )
   o = { pid : o };
   
-  _.routineOptions( kill, o );
   _.assert( arguments.length === 1 );
-  _.assert( _.numberIs( o.pid ) || _.routineIs( o.pid.kill) );
+  _.assert( _.numberIs( o.pid ) || _.routineIs( o.kill) );
 
   try
   { 
@@ -2345,8 +2344,8 @@ function kill( o )
     }
     else
     {
-      if( _.routineIs( o.pid.kill ) )
-      o.pid.kill( 'SIGKILL' );
+      if( _.routineIs( o.kill ) )
+      o.kill( 'SIGKILL' );
       else
       process.kill( o.pid, 'SIGKILL' );
     }
@@ -2394,12 +2393,11 @@ kill.defaults =
 
 function terminate( o )
 { 
-  if( _.numberIs( o ) || _.routineIs( o.kill ) )
+  if( _.numberIs( o ) )
   o = { pid : o };
   
-  _.routineOptions( terminate, o );
   _.assert( arguments.length === 1 );
-  _.assert( _.numberIs( o.pid ) || _.routineIs( o.pid.kill) );
+  _.assert( _.numberIs( o.pid ) );
 
   try
   {  
@@ -2453,10 +2451,12 @@ function terminate( o )
     { 
       pid = _.numberFrom( pid );
       if( _.process.isRunning( pid ) )
-      if( process.platform === 'win32' )
-      windowsKill( pid, 'SIGINT' );
-      else
-      process.kill( pid, 'SIGINT' );
+      {
+        if( process.platform === 'win32' )
+        windowsKill( pid, 'SIGINT' );
+        else
+        process.kill( pid, 'SIGINT' );
+      }
       terminateChildren( tree[ pid ] );
     }
   }
@@ -2530,7 +2530,7 @@ function children( o )
   }
   
   function handleWindowsResult( tree, result )
-  {
+  { 
     tree[ result.pid ] = Object.create( null );
     if( result.children && result.children.length )
     _.each( result.children, ( child ) => handleWindowsResult( tree[ result.pid ], child ) )
