@@ -12380,18 +12380,27 @@ function terminateWithChildren( test )
       execPath : 'node testApp2.js',
       currentPath : __dirname,
       mode : 'spawn',
+      stdio : 'inherit',
       inputMirroring : 0,
       throwingExitCode : 0
     }
     _.process.start( o );
-    process.send( o.process.pid )
+    _.time.out( 1000, () => 
+    {
+      process.send( o.process.pid )
+    })
   }
   
   function testApp2()
   { 
+    process.on( 'SIGINT', () => 
+    {
+      console.log( 'SIGINT' )
+      process.exit( 0 );
+    })
     if( process.send )
     process.send( process.pid );
-    setTimeout( () => {}, 30000000 )
+    setTimeout( () => {}, 5000 )
   }
   
   function testApp3()
@@ -12404,6 +12413,8 @@ function terminateWithChildren( test )
       execPath : 'node testApp2.js',
       currentPath : __dirname,
       mode : 'spawn',
+      detaching,
+      stdio : 'inherit',
       inputMirroring : 0,
       throwingExitCode : 0
     }
@@ -12413,13 +12424,16 @@ function terminateWithChildren( test )
       execPath : 'node testApp2.js',
       currentPath : __dirname,
       mode : 'spawn',
+      detaching,
+      stdio : 'inherit',
       inputMirroring : 0,
       throwingExitCode : 0
     }
     _.process.start( o2 );
-    process.send( [ o1.process.pid, o2.process.pid ] )
-    
-    _.Consequence.And([ o1.ready, o2.ready ]).deasyncWait();
+    _.time.out( 1000, () => 
+    {
+      process.send( [ o1.process.pid, o2.process.pid ] )
+    })
   }
 
   /* */
@@ -12463,7 +12477,10 @@ function terminateWithChildren( test )
     ready.thenKeep( ( got ) =>
     {  
       return terminated.then( () => 
-      {
+      { 
+        test.identical( got.exitCode, 0 );
+        test.identical( got.exitSignal, null );
+        test.identical( _.strCount( got.output, 'SIGINT' ), 2 );
         test.is( !_.process.isRunning( o.process.pid ) )
         test.is( !_.process.isRunning( lastChildPid ) );
         return null;
@@ -12473,7 +12490,7 @@ function terminateWithChildren( test )
     return ready;
   })
   
-  
+  //
   
   .thenKeep( () =>
   { 
@@ -12500,7 +12517,10 @@ function terminateWithChildren( test )
     ready.thenKeep( ( got ) =>
     {  
       return terminated.then( () => 
-      {
+      { 
+        test.identical( got.exitCode, 0 );
+        test.identical( got.exitSignal, null );
+        test.identical( _.strCount( got.output, 'SIGINT' ), 1 );
         test.is( !_.process.isRunning( o.process.pid ) )
         test.is( !_.process.isRunning( lastChildPid ) );
         return null;
@@ -12536,8 +12556,12 @@ function terminateWithChildren( test )
     ready.thenKeep( ( got ) =>
     { 
       return terminated.then( () => 
-      {
-        test.is( !_.process.isRunning( children[ 0 ] ) )
+      { 
+        test.identical( got.exitCode, 0 );
+        test.identical( got.exitSignal, null );
+        test.identical( _.strCount( got.output, 'SIGINT' ), 3 );
+        test.is( !_.process.isRunning( o.process.pid ) )
+        test.is( !_.process.isRunning( children[ 0 ] ) );
         test.is( !_.process.isRunning( children[ 1 ] ) );
         return null;
       })
@@ -12547,7 +12571,7 @@ function terminateWithChildren( test )
     return ready;
   })
   
-  
+  //
   
   .thenKeep( () =>
   { 
@@ -12567,14 +12591,18 @@ function terminateWithChildren( test )
     o.process.on( 'message', ( data ) =>
     { 
       children = data.map( ( src ) => _.numberFrom( src ) )
-      _.process.terminate({ pid : o.process.pid, withChildren : 1 });
+      terminated = _.process.terminate({ pid : o.process.pid, withChildren : 1 });
     })
     
     ready.thenKeep( ( got ) =>
     { 
       return terminated.then( () => 
-      {
-        test.is( !_.process.isRunning( children[ 0 ] ) )
+      { 
+        test.identical( got.exitCode, 0 );
+        test.identical( got.exitSignal, null );
+        test.identical( _.strCount( got.output, 'SIGINT' ), 3 );
+        test.is( !_.process.isRunning( o.process.pid ) )
+        test.is( !_.process.isRunning( children[ 0 ] ) );
         test.is( !_.process.isRunning( children[ 1 ] ) );
         return null;
       })
