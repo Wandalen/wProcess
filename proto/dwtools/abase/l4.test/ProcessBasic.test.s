@@ -11863,6 +11863,7 @@ function killWithChildren( test )
       execPath : 'node testApp2.js',
       currentPath : __dirname,
       mode : 'spawn',
+      stdio : 'inherit',
       inputMirroring : 0,
       throwingExitCode : 0
     }
@@ -11874,7 +11875,7 @@ function killWithChildren( test )
   { 
     if( process.send )
     process.send( process.pid );
-    setTimeout( () => {}, 1500 )
+    setTimeout( () => { console.log( 'Application timeout' ) }, 5000 )
   }
   
   function testApp3()
@@ -11935,18 +11936,25 @@ function killWithChildren( test )
 
     let ready = _.process.start( o );
     let lastChildPid;
+    let killed;
     
     o.process.on( 'message', ( data ) => 
     { 
       lastChildPid = _.numberFrom( data );
-      _.process.kill({ pid : o.process.pid, withChildren : 1 });
+      killed = _.process.kill({ pid : o.process.pid, withChildren : 1 });
     })
     
     ready.thenKeep( ( got ) =>
     { 
-      test.is( !_.process.isRunning( o.process.pid ) )
-      test.is( !_.process.isRunning( lastChildPid ) );
-      return null;
+      return killed.then( () => 
+      {
+        test.identical( got.exitCode, null );
+        test.identical( got.exitSignal, 'SIGKILL' );
+        test.identical( _.strCount( got.output, 'Application timeout' ), 0 );
+        test.is( !_.process.isRunning( o.process.pid ) );
+        test.is( !_.process.isRunning( lastChildPid ) );
+        return null;
+      })
     })
     
     return ready;
@@ -11968,18 +11976,25 @@ function killWithChildren( test )
 
     let ready = _.process.start( o );
     let lastChildPid;
+    let killed;
     
     o.process.on( 'message', ( data ) => 
     { 
       lastChildPid = _.numberFrom( data );
-      _.process.kill({ pid : lastChildPid, withChildren : 1 });
+      killed = _.process.kill({ pid : lastChildPid, withChildren : 1 });
     })
     
     ready.thenKeep( ( got ) =>
     {  
-      test.is( !_.process.isRunning( o.process.pid ) )
-      test.is( !_.process.isRunning( lastChildPid ) );
-      return null;
+      return killed.then( () => 
+      {
+        test.identical( got.exitCode, 0 );
+        test.identical( got.exitSignal, null );
+        test.identical( _.strCount( got.output, 'Application timeout' ), 0 );
+        test.is( !_.process.isRunning( o.process.pid ) );
+        test.is( !_.process.isRunning( lastChildPid ) );
+        return null;
+      })
     })
     
     return ready;
@@ -12001,17 +12016,26 @@ function killWithChildren( test )
     
     let ready = _.process.start( o );
     let children;
+    let killed;
+    
     o.process.on( 'message', ( data ) =>
     { 
       children = data.map( ( src ) => _.numberFrom( src ) )
-      _.process.kill({ pid : o.process.pid, withChildren : 1 });
+      killed = _.process.kill({ pid : o.process.pid, withChildren : 1 });
     })
     
     ready.thenKeep( ( got ) =>
-    { 
-      test.is( !_.process.isRunning( children[ 0 ] ) )
-      test.is( !_.process.isRunning( children[ 0 ] ) );
-      return null;
+    {  
+      return killed.then( () => 
+      {
+        test.identical( got.exitCode, null );
+        test.identical( got.exitSignal, 'SIGKILL' );
+        test.identical( _.strCount( got.output, 'Application timeout' ), 0 );
+        test.is( !_.process.isRunning( o.process.pid ) );
+        test.is( !_.process.isRunning( children[ 0 ] ) )
+        test.is( !_.process.isRunning( children[ 1 ] ) );
+        return null;
+      })
     })
     
     return ready;
@@ -12033,17 +12057,25 @@ function killWithChildren( test )
     
     let ready = _.process.start( o );
     let children;
+    let killed;
     o.process.on( 'message', ( data ) =>
     { 
       children = data.map( ( src ) => _.numberFrom( src ) )
-      _.process.kill({ pid : o.process.pid, withChildren : 1 });
+      killed = _.process.kill({ pid : o.process.pid, withChildren : 1 });
     })
     
     ready.thenKeep( ( got ) =>
     { 
-      test.is( !_.process.isRunning( children[ 0 ] ) )
-      test.is( !_.process.isRunning( children[ 0 ] ) );
-      return null;
+      return killed.then( () => 
+      {
+        test.identical( got.exitCode, null );
+        test.identical( got.exitSignal, 'SIGKILL' );
+        test.identical( _.strCount( got.output, 'Application timeout' ), 0 );
+        test.is( !_.process.isRunning( o.process.pid ) );
+        test.is( !_.process.isRunning( children[ 0 ] ) )
+        test.is( !_.process.isRunning( children[ 1 ] ) );
+        return null;
+      })
     })
     
     return ready;
