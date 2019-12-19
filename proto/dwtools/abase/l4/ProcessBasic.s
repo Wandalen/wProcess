@@ -374,7 +374,7 @@ function start_body( o )
 
   function end( err, arg )
   {
-    
+
     if( state > 0 )
     {
       if( !o.outputAdditive )
@@ -2328,27 +2328,27 @@ function kill( o )
   o = { pid : o };
   else if( _.routineIs( o.kill ) )
   o = { process : o };
-  
+
   _.assert( arguments.length === 1 );
   _.routineOptions( kill, o );
-  
+
   if( o.process )
   {
     _.assert( o.pid === null );
     o.pid = o.process.pid;
   }
-  
+
   _.assert( _.numberIs( o.pid ) );
   _.assert( o.timeOut === null || _.numberIs( o.timeOut ) )
-  
+
   let isWindows = process.platform === 'win32';
 
   try
-  { 
+  {
     if( o.withChildren )
     {
       let con = _.process.children({ pid : o.pid, asList : isWindows });
-      con.then( ( children ) => 
+      con.then( ( children ) =>
       {
         if( !isWindows )
         {
@@ -2368,7 +2368,7 @@ function kill( o )
       return con;
     }
     else
-    { 
+    {
       if( o.timeOut === null )
       return killProcess();
       return _.time.out( o.timeOut, killProcess );
@@ -2378,9 +2378,9 @@ function kill( o )
   {
     handleError( err )
   }
-  
+
   //
-  
+
   function killProcess()
   {
     if( o.process )
@@ -2389,20 +2389,20 @@ function kill( o )
     process.kill( o.pid, 'SIGKILL' );
     return true;
   }
-  
+
   //
-  
+
   function killChildren( tree )
   {
     for( let pid in tree )
-    { 
+    {
       pid = _.numberFrom( pid );
       if( _.process.isRunning( pid ) )
       process.kill( pid, 'SIGKILL' );
       killChildren( tree[ pid ] );
     }
   }
-  
+
   function handleError( err )
   {
     // if( err.code === 'EINVAL' )
@@ -2417,7 +2417,7 @@ function kill( o )
   return true;
 }
 
-kill.defaults = 
+kill.defaults =
 {
   pid : null,
   process : null,
@@ -2427,35 +2427,34 @@ kill.defaults =
 
 //
 
-
 function terminate( o )
-{ 
+{
   if( _.numberIs( o ) )
   o = { pid : o };
   else if( _.routineIs( o.kill ) )
   o = { process : o };
-  
+
   _.assert( arguments.length === 1 );
   _.routineOptions( terminate, o );
   _.assert( o.timeOut === null || _.numberIs( o.timeOut ) );
-  
+
   if( o.process )
   {
     _.assert( o.pid === null );
     o.pid = o.process.pid;
   }
-  
+
   _.assert( _.numberIs( o.pid ) );
-  
+
   let isWindows = process.platform === 'win32';
 
   try
-  {  
+  {
     if( o.withChildren )
     {
       return _.process.children({ pid : o.pid, asList : isWindows })
-      .then( ( tree ) => 
-      {  
+      .then( ( tree ) =>
+      {
         if( isWindows )
         {
           for( var l = tree.length - 1; l >= 0; l-- )
@@ -2475,12 +2474,12 @@ function terminate( o )
       .catch( handleError );
     }
     else
-    { 
+    {
       if( o.timeOut === null )
       return terminateProcess();
       return _.time.out( o.timeOut, terminateProcess )
     }
-    
+
   }
   catch( err )
   {
@@ -2488,9 +2487,9 @@ function terminate( o )
   }
 
   return true;
-  
+
   /*  */
-  
+
   function terminateProcess()
   {
     if( isWindows )
@@ -2499,14 +2498,14 @@ function terminate( o )
     process.kill( o.pid, 'SIGINT' );
     return true;
   }
-  
+
   function windowsKill( pid, signal )
   {
     if( !WindowsKill )
     WindowsKill = require( 'wwindowskill' )({ replaceNodeKill: false });
     WindowsKill( pid, signal );
   }
-  
+
   function handleError( err )
   {
     if( err.code === 'EPERM' )
@@ -2515,11 +2514,11 @@ function terminate( o )
     throw _.err( err, '\nTarget process:', _.strQuote( o.pid ), 'does not exist.' );
     throw _.err( err );
   }
-  
+
   function terminateChildren( tree )
   {
     for( let pid in tree )
-    { 
+    {
       pid = _.numberFrom( pid );
       if( _.process.isRunning( pid ) )
       process.kill( pid, 'SIGINT' );
@@ -2528,8 +2527,8 @@ function terminate( o )
   }
 }
 
-terminate.defaults = 
-{ 
+terminate.defaults =
+{
   process : null,
   pid : null,
   withChildren : 0,
@@ -2544,39 +2543,39 @@ function children( o )
   o = { pid : o };
   else if( _.routineIs( o.kill ) )
   o = { process : o }
-  
+
   _.routineOptions( children, o )
   _.assert( arguments.length === 1 );
   _.assert( _.numberIs( o.pid ) );
-  
+
   if( o.process )
   {
     _.assert( o.pid === null );
     o.pid = o.process.pid;
   }
-  
+
   let result;
-  
+
   if( !_.process.isRunning( o.pid ) )
   {
     let err = _.err( '\nTarget process:', _.strQuote( o.pid ), 'does not exist.' );
     return new _.Consequence().error( err );
   }
-  
+
   if( process.platform === 'win32' )
   {
     if( !WindowsProcessTree )
     WindowsProcessTree = require( 'windows-process-tree' );
-    
+
     let con = new _.Consequence();
     if( o.asList )
     {
       WindowsProcessTree.getProcessList( o.pid, ( result ) => con.take( result ) )
     }
     else
-    { 
-      WindowsProcessTree.getProcessTree( o.pid, ( got ) => 
-      { 
+    {
+      WindowsProcessTree.getProcessTree( o.pid, ( got ) =>
+      {
         result = Object.create( null );
         handleWindowsResult( result, got );
         con.take( result );
@@ -2584,32 +2583,32 @@ function children( o )
     }
     return con;
   }
-  else 
-  { 
+  else
+  {
     if( o.asList )
     result = [];
     else
     result = Object.create( null );
-    
+
     if( process.platform === 'darwin' )
     return getChildrenOf( 'pgrep -P', o.pid, result )
     else
     return getChildrenOf( 'ps -o pid --no-headers --ppid', o.pid, result )
   }
-  
+
   /* */
-  
+
   function getChildrenOf( command, pid, _result )
-  { 
+  {
     return _.process.start
-    ({ 
+    ({
       execPath : command + ' ' + pid,
-      outputCollecting : 1, 
+      outputCollecting : 1,
       throwingExitCode : 0,
-      inputMirroring : 0 
+      inputMirroring : 0
     })
-    .then( ( got ) => 
-    {  
+    .then( ( got ) =>
+    {
       if( o.asList )
       _result.push( pid );
       else
@@ -2622,9 +2621,9 @@ function children( o )
       return ready;
     })
   }
-  
+
   function handleWindowsResult( tree, result )
-  {  
+  {
     tree[ result.pid ] = Object.create( null );
     if( result.children && result.children.length )
     _.each( result.children, ( child ) => handleWindowsResult( tree[ result.pid ], child ) )
@@ -2632,7 +2631,7 @@ function children( o )
   }
 }
 
-children.defaults = 
+children.defaults =
 {
   process : null,
   pid : null,
@@ -2658,30 +2657,6 @@ on.defaults =
 {
   callbackMap : null,
 }
-
-//
-
-// function x()
-// {
-//   _.assert( arguments.length === 1 );
-//   _.assert( _.routineIs( routine ) );
-//
-//   // _.process.exitHandlerRepair();
-//
-//   if( !_global.process )
-//   return;
-//
-//   if( !_.process._registeredExitHandler )
-//   {
-//     _global.process.once( 'exit', _.process._eventExitHandle );
-//     _.process._registeredExitHandler = _.process._eventExitHandle;
-//     // process.once( 'SIGINT', onExitHandler );
-//     // process.once( 'SIGTERM', onExitHandler );
-//   }
-//
-//   _.arrayAppendOnce( _.process._eventCallbackMap.exit, routine );
-//
-// }
 
 //
 
@@ -2812,7 +2787,10 @@ let Routines =
   tempOpen,
   tempClose,
 
-// <<<<<<< HEAD
+  isRunning,
+  kill,
+  terminate,
+  children,
 
   // eventer
 
@@ -2824,13 +2802,6 @@ let Routines =
   // meta
 
   _Setup1,
-// =======
-
-  isRunning,
-  kill,
-  terminate,
-  
-  children
 
 }
 
