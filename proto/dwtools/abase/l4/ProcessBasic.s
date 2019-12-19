@@ -47,7 +47,7 @@ if( typeof module !== 'undefined' )
 
 }
 
-let System, ChildProcess, StripAnsi;
+let System, ChildProcess, StripAnsi, WindowsKill,WindowsProcessTree;
 let _global = _global_;
 let _ = _global_.wTools;
 let Self = _.process = _.process || Object.create( null );
@@ -374,7 +374,7 @@ function start_body( o )
 
   function end( err, arg )
   {
-
+    
     if( state > 0 )
     {
       if( !o.outputAdditive )
@@ -390,7 +390,7 @@ function start_body( o )
     {
       if( state < 2 )
       o.exitCode = null;
-      throw err;
+      throw _.err( err );
     }
     return arg;
   }
@@ -2322,22 +2322,88 @@ function isRunning( pid )
 
 //
 
-function killHard( o )
+function kill( o )
 {
   if( _.numberIs( o ) )
   o = { pid : o };
-
+  else if( _.routineIs( o.kill ) )
+  o = { process : o };
+  
   _.assert( arguments.length === 1 );
+  _.routineOptions( kill, o );
+  
+  if( o.process )
+  {
+    _.assert( o.pid === null );
+    o.pid = o.process.pid;
+  }
+  
   _.assert( _.numberIs( o.pid ) );
+  _.assert( o.timeOut === null || _.numberIs( o.timeOut ) )
+  
+  let isWindows = process.platform === 'win32';
 
   try
-  {
-    if( o instanceof ChildProcess.ChildProcess )
-    o.kill( 'SIGKILL' );
+  { 
+    if( o.withChildren )
+    {
+      let con = _.process.children({ pid : o.pid, asList : isWindows });
+      con.then( ( children ) => 
+      {
+        if( !isWindows )
+        {
+          killChildren( children );
+          return true;
+        }
+        for( var l = children.length - 1; l >= 0; l-- )
+        {
+          if( l && children[ l ].name === 'conhost.exe' )
+          continue;
+          if( _.process.isRunning( children[ l ].pid ) )
+          process.kill( children[ l ].pid, 'SIGKILL' );
+        }
+        return true;
+      })
+      con.catch( handleError );
+      return con;
+    }
     else
-    process.kill( o.pid, 'SIGKILL' );
+    { 
+      if( o.timeOut === null )
+      return killProcess();
+      return _.time.out( o.timeOut, killProcess );
+    }
   }
   catch( err )
+  {
+    handleError( err )
+  }
+  
+  //
+  
+  function killProcess()
+  {
+    if( o.process )
+    o.process.kill( 'SIGKILL' );
+    else
+    process.kill( o.pid, 'SIGKILL' );
+    return true;
+  }
+  
+  //
+  
+  function killChildren( tree )
+  {
+    for( let pid in tree )
+    { 
+      pid = _.numberFrom( pid );
+      if( _.process.isRunning( pid ) )
+      process.kill( pid, 'SIGKILL' );
+      killChildren( tree[ pid ] );
+    }
+  }
+  
+  function handleError( err )
   {
     // if( err.code === 'EINVAL' )
     // throw _.err( err, '\nAn invalid signal was specified:', _.strQuote( o.signal ) )
@@ -2351,24 +2417,97 @@ function killHard( o )
   return true;
 }
 
+kill.defaults = 
+{
+  pid : null,
+  process : null,
+  withChildren : 0,
+  timeOut : null
+}
+
 //
 
-function killSoft( o )
-{
+
+function terminate( o )
+{ 
   if( _.numberIs( o ) )
   o = { pid : o };
-
+  else if( _.routineIs( o.kill ) )
+  o = { process : o };
+  
   _.assert( arguments.length === 1 );
+  _.routineOptions( terminate, o );
+  _.assert( o.timeOut === null || _.numberIs( o.timeOut ) );
+  
+  if( o.process )
+  {
+    _.assert( o.pid === null );
+    o.pid = o.process.pid;
+  }
+  
   _.assert( _.numberIs( o.pid ) );
+  
+  let isWindows = process.platform === 'win32';
 
   try
-  {
-    if( o instanceof ChildProcess.ChildProcess )
-    o.kill( 'SIGINT' );
+  {  
+    if( o.withChildren )
+    {
+      return _.process.children({ pid : o.pid, asList : isWindows })
+      .then( ( tree ) => 
+      {  
+        if( isWindows )
+        {
+          for( var l = tree.length - 1; l >= 0; l-- )
+          {
+            if( l && tree[ l ].name === 'conhost.exe' )
+            continue;
+            if( _.process.isRunning( tree[ l ].pid ) )
+            windowsKill( tree[ l ].pid, 'SIGINT' );
+          }
+        }
+        else
+        {
+          terminateChildren( tree );
+        }
+        return null;
+      })
+      .catch( handleError );
+    }
     else
-    process.kill( o.pid, 'SIGINT' );
+    { 
+      if( o.timeOut === null )
+      return terminateProcess();
+      return _.time.out( o.timeOut, terminateProcess )
+    }
+    
   }
   catch( err )
+  {
+    handleError( err );
+  }
+
+  return true;
+  
+  /*  */
+  
+  function terminateProcess()
+  {
+    if( isWindows )
+    windowsKill( o.pid, 'SIGINT' );
+    else
+    process.kill( o.pid, 'SIGINT' );
+    return true;
+  }
+  
+  function windowsKill( pid, signal )
+  {
+    if( !WindowsKill )
+    WindowsKill = require( 'wwindowskill' )({ replaceNodeKill: false });
+    WindowsKill( pid, signal );
+  }
+  
+  function handleError( err )
   {
     if( err.code === 'EPERM' )
     throw _.err( err, '\nCurrent process does not have permission to kill target process' );
@@ -2376,8 +2515,128 @@ function killSoft( o )
     throw _.err( err, '\nTarget process:', _.strQuote( o.pid ), 'does not exist.' );
     throw _.err( err );
   }
+  
+  function terminateChildren( tree )
+  {
+    for( let pid in tree )
+    { 
+      pid = _.numberFrom( pid );
+      if( _.process.isRunning( pid ) )
+      process.kill( pid, 'SIGINT' );
+      terminateChildren( tree[ pid ] );
+    }
+  }
+}
 
-  return true;
+terminate.defaults = 
+{ 
+  process : null,
+  pid : null,
+  withChildren : 0,
+  timeOut : null
+}
+
+//
+
+function children( o )
+{
+  if( _.numberIs( o ) )
+  o = { pid : o };
+  else if( _.routineIs( o.kill ) )
+  o = { process : o }
+  
+  _.routineOptions( children, o )
+  _.assert( arguments.length === 1 );
+  _.assert( _.numberIs( o.pid ) );
+  
+  if( o.process )
+  {
+    _.assert( o.pid === null );
+    o.pid = o.process.pid;
+  }
+  
+  let result;
+  
+  if( !_.process.isRunning( o.pid ) )
+  {
+    let err = _.err( '\nTarget process:', _.strQuote( o.pid ), 'does not exist.' );
+    return new _.Consequence().error( err );
+  }
+  
+  if( process.platform === 'win32' )
+  {
+    if( !WindowsProcessTree )
+    WindowsProcessTree = require( 'windows-process-tree' );
+    
+    let con = new _.Consequence();
+    if( o.asList )
+    {
+      WindowsProcessTree.getProcessList( o.pid, ( result ) => con.take( result ) )
+    }
+    else
+    { 
+      WindowsProcessTree.getProcessTree( o.pid, ( got ) => 
+      { 
+        result = Object.create( null );
+        handleWindowsResult( result, got );
+        con.take( result );
+      })
+    }
+    return con;
+  }
+  else 
+  { 
+    if( o.asList )
+    result = [];
+    else
+    result = Object.create( null );
+    
+    if( process.platform === 'darwin' )
+    return getChildrenOf( 'pgrep -P', o.pid, result )
+    else
+    return getChildrenOf( 'ps -o pid --no-headers --ppid', o.pid, result )
+  }
+  
+  /* */
+  
+  function getChildrenOf( command, pid, _result )
+  { 
+    return _.process.start
+    ({ 
+      execPath : command + ' ' + pid,
+      outputCollecting : 1, 
+      throwingExitCode : 0,
+      inputMirroring : 0 
+    })
+    .then( ( got ) => 
+    {  
+      if( o.asList )
+      _result.push( pid );
+      else
+      _result[ pid ] = Object.create( null );
+      if( got.exitCode != 0 )
+      return result;
+      let ready = new _.Consequence().take( null );
+      let pids = _.strSplitNonPreserving({ src: got.output, delimeter : '\n' });
+      _.each( pids, ( cpid ) => ready.then( () => getChildrenOf( command, cpid, _result[ pid ] ) ) )
+      return ready;
+    })
+  }
+  
+  function handleWindowsResult( tree, result )
+  {  
+    tree[ result.pid ] = Object.create( null );
+    if( result.children && result.children.length )
+    _.each( result.children, ( child ) => handleWindowsResult( tree[ result.pid ], child ) )
+    return tree;
+  }
+}
+
+children.defaults = 
+{
+  process : null,
+  pid : null,
+  asList : 0
 }
 
 // --
@@ -2568,8 +2827,10 @@ let Routines =
 // =======
 
   isRunning,
-  killHard,
-  killSoft
+  kill,
+  terminate,
+  
+  children
 
 }
 
