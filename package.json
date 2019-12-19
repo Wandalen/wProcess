@@ -28,6 +28,7 @@
     "wpathbasic" : "alpha", 
     "wgdfstrategy" : "alpha", 
     "wConsequence" : "alpha", 
+    "wwindowskill": "",
     "deasync" : "0.1.16", 
     "strip-ansi" : "6.0.0"
   }, 
