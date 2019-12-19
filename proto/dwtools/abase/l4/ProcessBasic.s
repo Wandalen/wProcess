@@ -2137,7 +2137,7 @@ function exitHandlerOnce( routine )
   //     }
   //     catch( err )
   //     {
-  //       _.setup._errUnhandledHandler2( err, 'unhandled error on termination' );
+  //       _.setup._errUncaughtHandler2( err, 'uncaught error on termination' );
   //       // _.errLogOnce( err );
   //     }
   //   })
@@ -2448,6 +2448,7 @@ function _eventExitSetup()
 
 function _eventExitHandle()
 {
+  // console.log( '_eventExitHandle:begin' );
   let args = arguments;
   _.each( _.process._eventCallbackMap.exit, ( callback ) =>
   {
@@ -2457,13 +2458,14 @@ function _eventExitHandle()
     }
     catch( err )
     {
-      _.setup._errUnhandledHandler2( err, 'unhandled error on termination' );
+      _.setup._errUncaughtHandler2( err, 'uncaught error on termination' );
     }
   })
   process.removeListener( 'exit', _.process._registeredExitHandler );
   // process.removeListener( 'SIGINT', _.process._registeredExitHandler );
   // process.removeListener( 'SIGTERM', _.process._registeredExitHandler );
   _.process._eventCallbackMap.exit.splice( 0, _.process._eventCallbackMap.exit.length );
+  // console.log( '_eventExitHandle:end' );
 }
 
 //
