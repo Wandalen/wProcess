@@ -32,7 +32,8 @@
     "deasync" : "", 
     "strip-ansi" : "", 
     "windows-process-tree" : ""
-  }, 
-  "devDependencies" : { "wTesting" : "" }, 
+  },
+  "optionalDependencies": { "windows-process-tree": "" },
+  "devDependencies" : { "wTesting" : "" },
   "keywords" : [ "wTools", "exec file", "shell script", "run program" ]
 }
