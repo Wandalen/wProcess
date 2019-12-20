@@ -12356,8 +12356,12 @@ function terminate( test )
       {
         test.identical( got.exitCode , 0 );
         test.identical( got.exitSignal , null );
+        if( process.platform === 'win32' )
+        test.is( _.strHas( got.output, 'Application timeout!' ) );
+        else
         test.is( !_.strHas( got.output, 'Application timeout!' ) );
       }
+     
       return null;
     })
 
@@ -12393,6 +12397,9 @@ function terminate( test )
       {
         test.identical( got.exitCode , 0 );
         test.identical( got.exitSignal , null );
+        if( process.platform === 'win32' )
+        test.is( _.strHas( got.output, 'Application timeout!' ) );
+        else
         test.is( !_.strHas( got.output, 'Application timeout!' ) );
       }
       return null;
@@ -12430,6 +12437,9 @@ function terminate( test )
       {
         test.identical( got.exitCode , 0 );
         test.identical( got.exitSignal , null );
+        if( process.platform === 'win32' )
+        test.is( _.strHas( got.output, 'Application timeout!' ) );
+        else
         test.is( !_.strHas( got.output, 'Application timeout!' ) );
       }
       return null;
@@ -12466,6 +12476,9 @@ function terminate( test )
       {
         test.identical( got.exitCode , 0 );
         test.identical( got.exitSignal , null );
+        if( process.platform === 'win32' )
+        test.is( _.strHas( got.output, 'Application timeout!' ) );
+        else
         test.is( !_.strHas( got.output, 'Application timeout!' ) );
       }
       return null;
