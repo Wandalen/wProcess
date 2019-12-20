@@ -25,6 +25,8 @@ submodule :
   windows-process-tree :
     path : npm:///windows-process-tree
     enabled : 0 # submodule
+    criterion :
+      optional : 1
   wappbasic :
     path : hd://.
     enabled : 0 # submodule
