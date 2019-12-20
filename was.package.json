@@ -30,8 +30,7 @@
     "wConsequence" : "", 
     "wwindowskill" : "", 
     "deasync" : "", 
-    "strip-ansi" : "", 
-    "windows-process-tree" : ""
+    "strip-ansi" : ""
   },
   "optionalDependencies": { "windows-process-tree": "" },
   "devDependencies" : { "wTesting" : "" },
