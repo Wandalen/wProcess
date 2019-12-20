@@ -2427,6 +2427,11 @@ kill.defaults =
 
 //
 
+/* 
+  zzz Vova: shell,exec modes have different behaviour on Windows,OSX and Linux
+  look for solution that allow to have same behaviour on each mode 
+*/
+
 function terminate( o )
 {
   if( _.numberIs( o ) )

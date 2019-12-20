@@ -12329,6 +12329,11 @@ function terminate( test )
   })
 
   /* shell */
+  
+  /* 
+    zzz Vova: shell,exec modes have different behaviour on Windows,OSX and Linux
+    look for solution that allow to have same behaviour on each mode 
+  */
 
   .thenKeep( () =>
   {
@@ -12409,6 +12414,11 @@ function terminate( test )
   })
 
   /* exec */
+  
+  /* 
+    zzz Vova: shell,exec modes have different behaviour on Windows,OSX and Linux
+    look for solution that allow to have same behaviour on each mode 
+  */
 
   .thenKeep( () =>
   {
