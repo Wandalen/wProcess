@@ -2427,6 +2427,11 @@ kill.defaults =
 
 //
 
+/* 
+  zzz Vova: shell,exec modes have different behaviour on Windows,OSX and Linux
+  look for solution that allow to have same behaviour on each mode 
+*/
+
 function terminate( o )
 {
   if( _.numberIs( o ) )
@@ -2565,7 +2570,16 @@ function children( o )
   if( process.platform === 'win32' )
   {
     if( !WindowsProcessTree )
-    WindowsProcessTree = require( 'windows-process-tree' );
+    {
+      try
+      {
+        WindowsProcessTree = require( 'windows-process-tree' );
+      }
+      catch( err )
+      {
+        throw _.err( 'Failed to get child process list.\n', err );
+      }
+    }
 
     let con = new _.Consequence();
     if( o.asList )
