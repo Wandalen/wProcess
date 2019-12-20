@@ -2565,7 +2565,16 @@ function children( o )
   if( process.platform === 'win32' )
   {
     if( !WindowsProcessTree )
-    WindowsProcessTree = require( 'windows-process-tree' );
+    {
+      try
+      {
+        WindowsProcessTree = require( 'windows-process-tree' );
+      }
+      catch( err )
+      {
+        throw _.err( 'Failed to get child process list.\n', err );
+      }
+    }
 
     let con = new _.Consequence();
     if( o.asList )
