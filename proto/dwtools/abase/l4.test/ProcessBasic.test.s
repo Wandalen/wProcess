@@ -13013,11 +13013,133 @@ function terminateTimeOut( test )
 
     return ready;
   })
+  
+  /*  */
+  
+  .thenKeep( () =>
+  {
+    var o =
+    {
+      execPath :  testAppPath,
+      mode : 'fork',
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    let terminated = _.process.terminate({ process : o.process, timeOut : 1000 })
+
+    ready.thenKeep( ( got ) =>
+    {
+      terminated.then( () =>
+      {
+        test.identical( got.exitCode , 0 );
+        test.identical( got.exitSignal , null );
+        test.is( !_.strHas( got.output, 'Application timeout!' ) );
+        return null;
+      })
+
+      return terminated;
+    })
+
+    return ready;
+  })
+  
+  /*  */
+  
+  .thenKeep( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'shell',
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    let terminated = _.process.terminate({ process : o.process, timeOut : 1000 })
+
+    ready.thenKeep( ( got ) =>
+    {
+      terminated.then( () =>
+      {
+        if( process.platform === 'linux' )
+        {
+          test.identical( got.exitCode , null );
+          test.identical( got.exitSignal , 'SIGINT' );
+          test.is( _.strHas( got.output, 'Application timeout!' ) );
+  
+        }
+        else
+        {
+          test.identical( got.exitCode , 0 );
+          test.identical( got.exitSignal , null );
+          if( process.platform === 'win32' )
+          test.is( _.strHas( got.output, 'Application timeout!' ) );
+          else
+          test.is( !_.strHas( got.output, 'Application timeout!' ) );
+        }
+        return null;
+      })
+
+      return terminated;
+    })
+
+    return ready;
+  })
+  
+  /*  */
+  
+  .thenKeep( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'exec',
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    let terminated = _.process.terminate({ process : o.process, timeOut : 1000 })
+
+    ready.thenKeep( ( got ) =>
+    {
+      terminated.then( () =>
+      {
+        if( process.platform === 'linux' )
+        {
+          test.identical( got.exitCode , null );
+          test.identical( got.exitSignal , 'SIGINT' );
+          test.is( _.strHas( got.output, 'Application timeout!' ) );
+  
+        }
+        else
+        {
+          test.identical( got.exitCode , 0 );
+          test.identical( got.exitSignal , null );
+          if( process.platform === 'win32' )
+          test.is( _.strHas( got.output, 'Application timeout!' ) );
+          else
+          test.is( !_.strHas( got.output, 'Application timeout!' ) );
+        }
+        return null;
+      })
+      return terminated;
+    })
+
+    return ready;
+  })
 
   /*  */
 
   return con;
 }
+
 //
 
 function children( test )
