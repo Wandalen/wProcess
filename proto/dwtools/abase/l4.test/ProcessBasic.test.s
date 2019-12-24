@@ -12526,7 +12526,9 @@ function terminateComplex( test )
     }
     _.process.start( o );
     _.time.out( 1000, () =>
-    {
+    { 
+      console.log( o.process.pid )
+      if( process.send )
       process.send( o.process.pid )
     })
   }
@@ -12629,6 +12631,126 @@ function terminateComplex( test )
 
     return ready;
   })
+  
+  //
+
+  .thenKeep( () =>
+  {
+    test.case = 'Sending signal to child process has regular child process that should exit with parent'
+    var o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o );
+    let lastChildPid;
+
+    o.process.on( 'message', ( data ) =>
+    {
+      lastChildPid = _.numberFrom( data );
+      _.process.terminate({ pid : o.process.pid });
+    })
+
+    ready.thenKeep( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      test.identical( got.exitSignal, null );
+      test.identical( _.strCount( got.output, 'SIGINT' ), 1 );
+      test.is( !_.process.isRunning( o.process.pid ) )
+      test.is( !_.process.isRunning( lastChildPid ) );
+      return null;
+    })
+
+    return ready;
+  })
+  
+  //
+  
+  .thenKeep( () =>
+  {
+    test.case = 'Sending signal to child process has regular child process that should exit with parent'
+    var o =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'shell',
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o );
+    let lastChildPid;
+    
+    _.time.out( 1500, () => 
+    {
+      lastChildPid = _.numberFrom( o.output );
+      _.process.terminate({ pid : o.process.pid });
+    })
+
+    ready.thenKeep( ( got ) =>
+    {
+      if( process.platform === 'linux' )
+      {
+        test.identical( got.exitCode , null );
+        test.identical( got.exitSignal , 'SIGINT' );
+      }
+      else
+      {
+        test.identical( got.exitCode , 0 );
+        test.identical( got.exitSignal, null );
+      }
+      test.is( !_.process.isRunning( o.process.pid ) )
+      test.is( !_.process.isRunning( lastChildPid ) );
+      return null;
+    })
+
+    return ready;
+  })
+  
+  //
+  
+  .thenKeep( () =>
+  {
+    test.case = 'Sending signal to child process has regular child process that should exit with parent'
+    var o =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'exec',
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o );
+    let lastChildPid;
+    
+    _.time.out( 1500, () => 
+    {
+      lastChildPid = _.numberFrom( o.output );
+      _.process.terminate({ pid : o.process.pid });
+    })
+
+    ready.thenKeep( ( got ) =>
+    {
+      if( process.platform === 'linux' )
+      {
+        test.identical( got.exitCode , null );
+        test.identical( got.exitSignal , 'SIGINT' );
+      }
+      else
+      {
+        test.identical( got.exitCode , 0 );
+        test.identical( got.exitSignal, null );
+      }
+      test.is( !_.process.isRunning( o.process.pid ) )
+      test.is( !_.process.isRunning( lastChildPid ) );
+      return null;
+    })
+
+    return ready;
+  })
 
   //
 
@@ -12668,11 +12790,142 @@ function terminateComplex( test )
 
     return ready;
   })
+  
+  //
+  
+  .thenKeep( () =>
+  {
+    test.case = 'Sending signal to child process that has detached child, detached child should continue to work'
+    var o =
+    {
+      execPath : testAppPath + ' detached',
+      mode : 'fork',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o );
+    let childPid;
+    o.process.on( 'message', ( data ) =>
+    {
+      childPid = _.numberFrom( data )
+      _.process.terminate({ pid : o.process.pid });
+    })
+
+    ready.thenKeep( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      test.identical( got.exitSignal, null );
+      test.is( _.strHas( got.output, 'SIGINT' ) );
+      test.is( !_.process.isRunning( o.process.pid ) )
+      test.is( _.process.isRunning( childPid ) );
+      return _.time.out( 5000, () => 
+      {
+        test.is( !_.process.isRunning( childPid ) );
+        return null;
+      });
+    })
+
+    return ready;
+  })
+  
+  //
+  
+  .thenKeep( () =>
+  {
+    test.case = 'Sending signal to child process that has detached child, detached child should continue to work'
+    var o =
+    {
+      execPath : 'node ' + testAppPath + ' detached',
+      mode : 'shell',
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o );
+    let childPid;
+    _.time.out( 1500, () => 
+    {
+      childPid = _.numberFrom( o.output )
+      _.process.terminate({ pid : o.process.pid });
+    })
+
+    ready.thenKeep( ( got ) =>
+    {
+      if( process.platform === 'linux' )
+      {
+        test.identical( got.exitCode , null );
+        test.identical( got.exitSignal , 'SIGINT' );
+      }
+      else
+      {
+        test.identical( got.exitCode , 0 );
+        test.identical( got.exitSignal, null );
+      }
+      test.is( !_.process.isRunning( o.process.pid ) )
+      test.is( _.process.isRunning( childPid ) );
+      return _.time.out( 5000, () => 
+      {
+        test.is( !_.process.isRunning( childPid ) );
+        return null;
+      });
+    })
+
+    return ready;
+  })
+  
+  //
+  
+  .thenKeep( () =>
+  {
+    test.case = 'Sending signal to child process that has detached child, detached child should continue to work'
+    var o =
+    {
+      execPath : 'node ' + testAppPath + ' detached',
+      mode : 'exec',
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o );
+    let childPid;
+    _.time.out( 1500, () => 
+    {
+      childPid = _.numberFrom( o.output )
+      _.process.terminate({ pid : o.process.pid });
+    })
+
+    ready.thenKeep( ( got ) =>
+    {
+      if( process.platform === 'linux' )
+      {
+        test.identical( got.exitCode , null );
+        test.identical( got.exitSignal , 'SIGINT' );
+      }
+      else
+      {
+        test.identical( got.exitCode , 0 );
+        test.identical( got.exitSignal, null );
+      }
+      test.is( !_.process.isRunning( o.process.pid ) )
+      test.is( _.process.isRunning( childPid ) );
+      return _.time.out( 5000, () => 
+      {
+        test.is( !_.process.isRunning( childPid ) );
+        return null;
+      });
+    })
+
+    return ready;
+  })
 
   //
 
   return con;
 }
+
+terminateComplex.timeOut = 150000;
 
 //
 
