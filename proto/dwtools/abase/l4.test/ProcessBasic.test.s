@@ -12504,6 +12504,178 @@ function terminate( test )
 
 //
 
+function terminateComplex( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+
+  function testApp()
+  {
+    _.include( 'wAppBasic' );
+    _.include( 'wFiles' );
+    let detaching = process.argv[ 2 ] === 'detached';
+    var o =
+    {
+      execPath : 'node testApp2.js',
+      currentPath : __dirname,
+      mode : 'spawn',
+      stdio : 'inherit',
+      detaching,
+      inputMirroring : 0,
+      throwingExitCode : 0
+    }
+    _.process.start( o );
+    _.time.out( 1000, () =>
+    {
+      process.send( o.process.pid )
+    })
+  }
+
+  function testApp2()
+  {
+    process.on( 'SIGINT', () =>
+    {
+      console.log( 'second child SIGINT' )
+      var fs = require( 'fs' );
+      var path = require( 'path' )
+      fs.writeFileSync( path.join( __dirname, process.pid.toString() ), process.pid )
+      process.exit( 0 );
+    })
+    if( process.send )
+    process.send( process.pid );
+    setTimeout( () => {}, 5000 )
+  }
+
+  /* */
+
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
+  var testAppPath2 = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp2.js' ) );
+  var testAppCode2 = context.toolsPathInclude + testApp2.toString() + '\ntestApp2();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+  _.fileProvider.fileWrite( testAppPath2, testAppCode2 );
+
+  var con = new _.Consequence().take( null )
+
+  /* */
+  
+  .thenKeep( () =>
+  {
+    test.case = 'Sending signal to other process'
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'spawn',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o );
+    let lastChildPid;
+
+    o.process.on( 'message', ( data ) =>
+    { 
+      lastChildPid = _.numberFrom( data );
+      _.process.terminate({ pid : lastChildPid });
+    })
+
+    ready.thenKeep( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      test.identical( got.exitSignal, null );
+      test.identical( _.strCount( got.output, 'SIGINT' ), 1 );
+      test.identical( _.strCount( got.output, 'second child SIGINT' ), 1 );
+      test.is( !_.process.isRunning( o.process.pid ) )
+      test.is( !_.process.isRunning( lastChildPid ) );
+      return null;
+    })
+
+    return ready;
+  })
+  
+  /*  */
+
+  .thenKeep( () =>
+  {
+    test.case = 'Sending signal to child process has regular child process that should exit with parent'
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'spawn',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o );
+    let lastChildPid;
+
+    o.process.on( 'message', ( data ) =>
+    {
+      lastChildPid = _.numberFrom( data );
+      _.process.terminate({ pid : o.process.pid });
+    })
+
+    ready.thenKeep( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      test.identical( got.exitSignal, null );
+      test.identical( _.strCount( got.output, 'SIGINT' ), 1 );
+      test.is( !_.process.isRunning( o.process.pid ) )
+      test.is( !_.process.isRunning( lastChildPid ) );
+      return null;
+    })
+
+    return ready;
+  })
+
+  //
+
+  .thenKeep( () =>
+  {
+    test.case = 'Sending signal to child process that has detached child, detached child should continue to work'
+    var o =
+    {
+      execPath : 'node ' + testAppPath + ' detached',
+      mode : 'spawn',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o );
+    let childPid;
+    o.process.on( 'message', ( data ) =>
+    {
+      childPid = _.numberFrom( data )
+      _.process.terminate({ pid : o.process.pid });
+    })
+
+    ready.thenKeep( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      test.identical( got.exitSignal, null );
+      test.is( _.strHas( got.output, 'SIGINT' ) );
+      test.is( !_.process.isRunning( o.process.pid ) )
+      test.is( _.process.isRunning( childPid ) );
+      return _.time.out( 5000, () => 
+      {
+        test.is( !_.process.isRunning( childPid ) );
+        return null;
+      });
+    })
+
+    return ready;
+  })
+
+  //
+
+  return con;
+}
+
+//
+
 function terminateWithChildren( test )
 {
   var context = this;
@@ -13618,6 +13790,7 @@ var Proto =
     killWithChildren,
     killTimeOut,
     terminate,
+    terminateComplex,
     terminateWithChildren,
     terminateTimeOut,
     children,
