@@ -9459,17 +9459,21 @@ function shellDetachingChildAfterParent( test )
       mode : 'spawn',
     }
 
-    _.process.start( o );
+    var ready = _.process.start( o );
 
-    o.ready.catch( ( err ) =>
-    {
+    ready.finally( ( err, got ) =>
+    { 
       _.errLog( err );
       return null;
     })
 
     process.send( o.process.pid );
-    // _.procedure.terminationBegin();
-    console.log( 'Parent process exit' )
+    
+    _.time.out( 1000, () => 
+    {
+      console.log( 'Parent process exit' );
+      _.Procedure.TerminationBegin();
+    })
   }
 
   function testAppChild()
@@ -9477,13 +9481,13 @@ function shellDetachingChildAfterParent( test )
     _.include( 'wAppBasic' );
     _.include( 'wFiles' );
 
-    console.log( 'Child process start' )
+    console.log( 'Child process start' );
 
     _.time.out( 5000, () =>
     {
       let filePath = _.path.join( __dirname, 'testFile' );
       _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
-      console.log( 'Child process end' )
+      console.log( 'Child process end' );
     })
   }
 
@@ -9508,6 +9512,8 @@ function shellDetachingChildAfterParent( test )
     {
       execPath : 'node testAppParent.js',
       mode : 'spawn',
+      stdio : 'pipe',
+      outputPiping : 1,
       outputCollecting : 1,
       currentPath : routinePath,
       ipc : 1,
@@ -9537,7 +9543,7 @@ function shellDetachingChildAfterParent( test )
 
       test.is( !_.fileProvider.fileExists( testFilePath ) );
 
-      return _.time.out( 6000, () => null );
+      return _.time.out( 6000 );
     })
 
     con.then( () =>
@@ -14362,7 +14368,7 @@ var Proto =
     // shellAfterDeathOutput,
 
     // shellDetachingThrowing,
-    // shellDetachingChildAfterParent,
+    shellDetachingChildAfterParent,
     // shellDetachingChildBeforeParent,
 
     shellConcurrent,
