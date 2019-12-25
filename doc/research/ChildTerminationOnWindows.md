@@ -23,9 +23,9 @@ But, module doesn't work in case when child process was created in detached mode
 
 ![](./img/ProcessTree.png)
 
-Regular child process creates additional `conhost.exe` process, which implements `Console API` and allows Node.js to handle the signal from `windows-kill` like it was sent by controlling terminat.<br>
-Detached child process is created without `conhost.exe` subprocess.
-
+Regular child process creates additional `conhost.exe` process.<br>
+Conhost implements `Console API` and allows Node.js to handle the signal from `windows-kill` like it was sent by controlling terminal.<br>
+Detached child process is created without `conhost.exe` subprocess.<br>
 Information about `conhost` can be found [here](https://devblogs.microsoft.com/commandline/windows-command-line-inside-the-windows-console).
 
 ### Further research
