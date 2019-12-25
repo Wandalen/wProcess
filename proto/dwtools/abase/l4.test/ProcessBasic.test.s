@@ -14369,7 +14369,7 @@ var Proto =
 
     // shellDetachingThrowing,
     shellDetachingChildAfterParent,
-    // shellDetachingChildBeforeParent,
+    shellDetachingChildBeforeParent,
 
     shellConcurrent,
     shellerConcurrent,
