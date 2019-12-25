@@ -9372,7 +9372,6 @@ function shellDetachingThrowing( test )
       mode : 'spawn',
     }
     _.process.start( o );
-    // _.procedure.terminationBegin();
   }
 
   function testAppChild()
@@ -14367,7 +14366,7 @@ var Proto =
     // shellAfterDeath,
     // shellAfterDeathOutput,
 
-    // shellDetachingThrowing,
+    shellDetachingThrowing,
     shellDetachingChildAfterParent,
     shellDetachingChildBeforeParent,
 
