@@ -47,7 +47,7 @@ if( typeof module !== 'undefined' )
 
 }
 
-let System, ChildProcess, StripAnsi, WindowsKill,WindowsProcessTree;
+let System, ChildProcess, StripAnsi, WindowsKill, WindowsProcessTree;
 let _global = _global_;
 let _ = _global_.wTools;
 let Self = _.process = _.process || Object.create( null );
@@ -2427,9 +2427,9 @@ kill.defaults =
 
 //
 
-/* 
+/*
   zzz Vova: shell,exec modes have different behaviour on Windows,OSX and Linux
-  look for solution that allow to have same behaviour on each mode 
+  look for solution that allow to have same behaviour on each mode
 */
 
 function terminate( o )
