@@ -968,7 +968,11 @@ function start_body( o )
   /* */
 
   function handleClose( exitCode, exitSignal )
-  {
+  { 
+    
+    if( o.detaching )
+    _.Procedure.Off( 'terminationBegin', onProcedureTerminationBegin );
+    
     // if( exitSignal && exitCode === null )
     // exitCode = -1;
 
