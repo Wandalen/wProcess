@@ -16,7 +16,10 @@ Sending `SIGINT`, `SIGTERM`, and `SIGKILL` cause the unconditional termination o
 There is a [windows-kill](https://github.com/alirdn/node-windows-kill) module that allows sending of
 `SIGINT` and `SIGBREAK` signals that can be handled by Node.js child process.
 
-Solution works well with normal child process, created using `spawn` or `fork` modes or other Node.js processes started from console.<br> 
+Solution works well for: 
+ - Normal child process, which was created using `spawn` or `fork` modes.
+ - Node.js processes started manually from console.
+ 
 But, module doesn't work in case when child process was created in detached mode.
 
 ### Difference between normal and detached child process 
