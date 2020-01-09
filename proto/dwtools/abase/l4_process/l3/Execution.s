@@ -1,21 +1,17 @@
-( function _ProcessBasic_s_() {
+( function _Execution_s_() {
 
 'use strict';
 
-/**
- * Collection of routines to execute system commands, run shell, batches, launch external processes from JavaScript application. ExecTools leverages not only outputting data from an application but also inputting, makes application arguments parsing and accounting easier. Use the module to get uniform experience from interaction with an external processes on different platforms and operating systems.
-  @module Tools/base/ProcessBasic
-*/
+let System, ChildProcess, StripAnsi, WindowsKill, WindowsProcessTree;
+let _global = _global_;
+let _ = _global_.wTools;
+let Self = _.process = _.process || Object.create( null );
 
-/**
- * @file ProcessBasic.s.
- */
+_.assert( !!_realGlobal_ );
 
-/**
- * Collection of routines to execute system commands, run shell, batches, launch external processes from JavaScript application.
-  @namespace Tools( module::ProcessBasic )
-  @memberof module:Tools/base/ProcessBasic
-*/
+// --
+// starter
+// --
 
 /* Return values of routine start for each combination of options sync and deasync:
 
@@ -35,28 +31,6 @@
   | sync:0 deasync:1 | +                        | -                  | +           |
   | sync:1 deasync:0 | -                        | +                  | -           |
 */
-
-if( typeof module !== 'undefined' )
-{
-
-  let _ = require( '../../Tools.s' );
-
-  _.include( 'wPathBasic' );
-  _.include( 'wGdfStrategy' );
-  _.include( 'wConsequence' );
-
-}
-
-let System, ChildProcess, StripAnsi, WindowsKill,WindowsProcessTree;
-let _global = _global_;
-let _ = _global_.wTools;
-let Self = _.process = _.process || Object.create( null );
-
-_.assert( !!_realGlobal_ );
-
-// --
-// exec
-// --
 
 function start_pre( routine, args )
 {
@@ -398,7 +372,7 @@ function start_body( o )
 
   /* */
 
-  function prepareAfterDeath()
+  function prepareAfterDeath() /* xxx qqq : ask how to refactor */
   {
     let toolsPath = _.path.nativize( _.path.join( __dirname, '../../Tools.s' ) );
     let toolsPathInclude = `let _ = require( '${_.strEscape( toolsPath )}' );\n`
@@ -894,7 +868,7 @@ function start_body( o )
   }
 
   function onProcedureTerminationBegin()
-  { 
+  {
     o.ready.error( _.err( 'Detached child with pid:', o.process.pid, 'is continuing execution after parent death.' ) );
     _.Procedure.Off( 'terminationBegin', onProcedureTerminationBegin );
   }
@@ -968,11 +942,11 @@ function start_body( o )
   /* */
 
   function handleClose( exitCode, exitSignal )
-  { 
-    
+  {
+
     if( o.detaching )
     _.Procedure.Off( 'terminationBegin', onProcedureTerminationBegin );
-    
+
     // if( exitSignal && exitCode === null )
     // exitCode = -1;
 
@@ -1571,311 +1545,8 @@ function starter( o0 )
 starter.defaults = Object.create( start.defaults );
 
 // --
-// app
+// exit
 // --
-
-/**
- * @summary Parses arguments of current process.
- * @description
- * Supports processing of regular arguments, options( key:value pairs), commands and arrays.
- * @param {Object} o Options map.
- * @param {Boolean} o.keyValDelimeter=':' Delimeter for key:value pairs.
- * @param {String} o.commandsDelimeter=';' Delimeneter for commands, for example : `.build something ; .exit `
- * @param {Array} o.argv=null Arguments array. By default takes arguments from `process.argv`.
- * @param {Boolean} o.caching=true Caches results for speedup next calls.
- * @param {Boolean} o.parsingArrays=true Enables parsing of array from arguments.
- *
- * @return {Object} Returns map with parsed arguments.
- *
- * @example
- *
- * let _ = require('wTools')
- * _.include( 'wProcessBasic' )
- * let result = _.process.args();
- * console.log( result );
- *
- * @function args
- * @memberof module:Tools/base/ProcessBasic.Tools( module::ProcessBasic )
- */
-
-let _argsCache;
-let _argsInSamFormatDefaults = Object.create( null )
-var defaults = _argsInSamFormatDefaults.defaults = Object.create( null );
-
-defaults.keyValDelimeter = ':';
-defaults.commandsDelimeter = ';';
-defaults.caching = true;
-defaults.parsingArrays = true;
-
-defaults.interpreterPath = null;
-defaults.interpreterArgs = null;
-defaults.scriptPath = null;
-defaults.scriptArgs = null;
-
-//
-
-/* xxx : redo caching using _Setup1 */
-
-function _argsInSamFormatNodejs( o )
-{
-
-  _.assert( arguments.length === 0 || arguments.length === 1 );
-  o = _.routineOptions( _argsInSamFormatNodejs, arguments );
-
-  if( _.boolLike( o.keyValDelimeter ) )
-  o.keyValDelimeter = !!o.keyValDelimeter;
-
-  let isStandardOptions =
-       o.keyValDelimeter === _argsInSamFormatNodejs.defaults.keyValDelimeter
-    && o.commandsDelimeter === _argsInSamFormatNodejs.defaults.commandsDelimeter
-    && o.parsingArrays === _argsInSamFormatNodejs.defaults.parsingArrays
-    && o.interpreterPath === _argsInSamFormatNodejs.defaults.interpreterPath
-    && o.interpreterArgs === _argsInSamFormatNodejs.defaults.interpreterArgs
-    && o.scriptPath === _argsInSamFormatNodejs.defaults.scriptPath
-    && o.scriptArgs === _argsInSamFormatNodejs.defaults.scriptArgs;
-
-  if( o.caching )
-  if( _argsCache )
-  if( isStandardOptions )
-  return _argsCache;
-
-  // let result = Object.create( null );
-  let result = o;
-
-  if( o.caching )
-  // if( o.keyValDelimeter === _argsInSamFormatNodejs.defaults.keyValDelimeter )
-  if( isStandardOptions )
-  _argsCache = result;
-
-  // if( !_global.process )
-  // {
-  //   result.subject = '';
-  //   result.map = Object.create( null );
-  //   result.subjects = [];
-  //   result.maps = [];
-  //   return result;
-  // }
-
-  // o.argv = o.argv || process.argv;
-  // result.interpreterArgs = o.interpreterArgs;
-
-  // if( result.applicationArgs === null )
-  // result.applicationArgs = process.argv;
-
-  if( result.interpreterArgs === null )
-  result.interpreterArgs = _global_.process ? _global_.process.execArgv : [];
-  result.interpreterArgsStrings = argsToString( result.interpreterArgs );
-
-  let argv = _global_.process ? _global_.process.argv : [ '', '' ];
-  _.assert( _.longIs( argv ) );
-  if( result.interpreterPath === null )
-  result.interpreterPath = argv[ 0 ];
-  result.interpreterPath = _.path.normalize( result.interpreterPath );
-  if( result.scriptPath === null )
-  result.scriptPath = argv[ 1 ];
-  result.scriptPath = _.path.normalize( result.scriptPath );
-  if( result.scriptArgs === null )
-  result.scriptArgs = argv.slice( 2 );
-  result.scriptArgsString = argsToString( result.scriptArgs );
-
-  // debugger;
-
-  let r = _.strRequestParse
-  ({
-    src : result.scriptArgsString,
-    keyValDelimeter : o.keyValDelimeter,
-    commandsDelimeter : o.commandsDelimeter,
-    parsingArrays : o.parsingArrays,
-  });
-
-  _.mapExtend( result, r );
-
-  return result;
-
-  function argsToString( args )
-  {
-    return args.map( e => _.strHas( e, /\s/ ) ? `"${e}"` : e ).join( ' ' ).trim();
-  }
-}
-
-_argsInSamFormatNodejs.defaults = Object.create( _argsInSamFormatDefaults.defaults );
-
-//
-
-function _argsInSamFormatBrowser( o )
-{
-  debugger; /* xxx */
-
-  _.assert( arguments.length === 0 || arguments.length === 1 );
-  o = _.routineOptions( _argsInSamFormatBrowser, arguments );
-
-  if( o.caching )
-  if( _argsCache && o.keyValDelimeter === _argsCache.keyValDelimeter )
-  return _argsCache;
-
-  let result = Object.create( null );
-
-  result.map =  Object.create( null );
-
-  if( o.caching )
-  if( o.keyValDelimeter === _argsInSamFormatBrowser.defaults.keyValDelimeter )
-  _argsCache = result;
-
-  return result;
-}
-
-_argsInSamFormatBrowser.defaults = Object.create( _argsInSamFormatDefaults.defaults );
-
-//
-
-/**
- * @summary Reads options from arguments of current process and copy them on target object `o.dst`.
- * @description
- * Checks if found options are expected using map `o.namesMap`. Throws an Error if arguments contain unknown option.
- *
- * @param {Object} o Options map.
- * @param {Object} o.dst=null Target object.
- * @param {Object} o.propertiesMap=null Map with parsed options. By default routine gets this map using {@link module:Tools/base/ProcessBasic.Tools( module::ProcessBasic ).args args} routine.
- * @param {Object} o.namesMap=null Map of expected options.
- * @param {Object} o.removing=1 Removes copied options from result map `o.propertiesMap`.
- * @param {Object} o.only=1 Check if all option are expected. Throws error if not.
- *
- * @return {Object} Returns map with parsed options.
- *
- * @function argsReadTo
- * @memberof module:Tools/base/ProcessBasic.Tools( module::ProcessBasic )
- */
-
-function argsReadTo( o )
-{
-
-  if( arguments[ 1 ] !== undefined )
-  o = { dst : arguments[ 0 ], namesMap : arguments[ 1 ] };
-
-  o = _.routineOptions( argsReadTo, o );
-
-  if( !o.propertiesMap )
-  o.propertiesMap = _.process.args().map;
-
-  if( _.arrayIs( o.namesMap ) )
-  {
-    let namesMap = Object.create( null );
-    for( let n = 0 ; n < o.namesMap.length ; n++ )
-    namesMap[ o.namesMap[ n ] ] = o.namesMap[ n ];
-    o.namesMap = namesMap;
-  }
-
-  _.assert( arguments.length === 1 || arguments.length === 2 )
-  _.assert( _.objectIs( o.dst ), 'Expects map {-o.dst-}' );
-  _.assert( _.objectIs( o.namesMap ), 'Expects map {-o.namesMap-}' );
-
-  for( let n in o.namesMap )
-  {
-    if( o.propertiesMap[ n ] !== undefined )
-    {
-      set( o.namesMap[ n ], o.propertiesMap[ n ] );
-      if( o.removing )
-      delete o.propertiesMap[ n ];
-    }
-  }
-
-  if( o.only )
-  {
-    let but = Object.keys( _.mapBut( o.propertiesMap, o.namesMap ) );
-    if( but.length )
-    {
-      throw _.err( 'Unknown application arguments : ' + _.strQuote( but ).join( ', ' ) );
-    }
-  }
-
-  return o.propertiesMap;
-
-  /* */
-
-  function set( k, v )
-  {
-    _.assert( o.dst[ k ] !== undefined, () => 'Entry ' + _.strQuote( k ) + ' is not defined' );
-    if( _.numberIs( o.dst[ k ] ) )
-    {
-      v = Number( v );
-      _.assert( !isNaN( v ) );
-      o.dst[ k ] = v;
-    }
-    else if( _.boolIs( o.dst[ k ] ) )
-    {
-      v = !!v;
-      o.dst[ k ] = v;
-    }
-    else
-    {
-      o.dst[ k ] = v;
-    }
-  }
-
-}
-
-argsReadTo.defaults =
-{
-  dst : null,
-  propertiesMap : null,
-  namesMap : null,
-  removing : 1,
-  only : 1,
-}
-
-//
-
-function anchor( o )
-{
-  o = o || {};
-
-  _.routineOptions( anchor, arguments );
-
-  let a = _.strStructureParse
-  ({
-    src : _.strRemoveBegin( window.location.hash, '#' ),
-    keyValDelimeter : ':',
-    entryDelimeter : ';',
-  });
-
-  if( o.extend )
-  {
-    _.mapExtend( a, o.extend );
-  }
-
-  if( o.del )
-  {
-    _.mapDelete( a, o.del );
-  }
-
-  if( o.extend || o.del )
-  {
-
-    let newHash = '#' + _.mapToStr
-    ({
-      src : a,
-      keyValDelimeter : ':',
-      entryDelimeter : ';',
-    });
-
-    if( o.replacing )
-    history.replaceState( undefined, undefined, newHash )
-    else
-    window.location.hash = newHash;
-
-  }
-
-  return a;
-}
-
-anchor.defaults =
-{
-  extend : null,
-  del : null,
-  replacing : 0,
-}
-
-//
 
 /**
  * @summary Allows to set/get exit reason of current process.
@@ -1949,12 +1620,14 @@ function exit( exitCode )
 
 //
 
-function exitWithBeep( exitCode )
+// function exitWithBeep( exitCode )
+function exitWithBeep()
 {
+  let exitCode = _.process.exitCode();
 
-  exitCode = exitCode !== undefined ? exitCode : _.process.exitCode();
-
-  _.assert( arguments.length === 0 || arguments.length === 1 );
+  // exitCode = exitCode !== undefined ? exitCode : _.process.exitCode();
+  // _.assert( arguments.length === 0 || arguments.length === 1 );
+  _.assert( arguments.length === 0 );
   _.assert( exitCode === undefined || _.numberIs( exitCode ) );
 
   _.diagnosticBeep();
@@ -1963,23 +1636,25 @@ function exitWithBeep( exitCode )
   _.diagnosticBeep();
 
   _.process.exit( exitCode );
+
+  return exitCode;
 }
 
 //
 
 /*
-qqq : use maybe exitHandlerRepair instead of exitHandlerOnce?
-qqq : investigate difference between exitHandlerRepair and exitHandlerOnce
-Vova: exitHandlerRepair allows app to exit safely when one of exit signals will be triggered
-      exitHandlerOnce allows to execute some code when process is about to exit:
+qqq : use maybe _exitHandlerRepair instead of _exitHandlerOnce?
+qqq : investigate difference between _exitHandlerRepair and _exitHandlerOnce
+Vova: _exitHandlerRepair allows app to exit safely when one of exit signals will be triggered
+      _exitHandlerOnce allows to execute some code when process is about to exit:
        - process.exit() was called explcitly
        - no additional work for nodejs event loop
-      Correct work of exitHandlerOnce can't be achieved without exitHandlerRepair.
-      exitHandlerRepair allows exitHandlerOnce to execute handlers in case when one of termination signals was raised.
+      Correct work of _exitHandlerOnce can't be achieved without _exitHandlerRepair.
+      _exitHandlerRepair allows _exitHandlerOnce to execute handlers in case when one of termination signals was raised.
 */
 
 let appRepairExitHandlerDone = 0;
-function exitHandlerRepair()
+function _exitHandlerRepair()
 {
 
   _.assert( arguments.length === 0 );
@@ -2103,212 +1778,78 @@ function exitHandlerRepair()
 
 //
 
-// let _onExitHandlers = [];
-
 /* xxx : deprecate */
-function exitHandlerOnce( routine )
+function _exitHandlerOnce( routine )
 {
   _.assert( arguments.length === 1 );
   _.assert( _.routineIs( routine ) );
 
-  console.warn( `WARNING : Routine _.process.exitHandlerOnce is deprecated. Please, use _.process.on( 'exit', callback ) instead.` ); debugger;
+  console.warn( `WARNING : Routine _.process._exitHandlerOnce is deprecated. Please, use _.process.on( 'exit', callback ) instead.` ); debugger;
 
   _.process.on( 'exit', routine );
-
-  // _.process.exitHandlerRepair();
-  //
-  // if( !_global.process )
-  // return;
-  //
-  // if( !_.process._registeredExitHandler )
-  // {
-  //   _global.process.once( 'exit', onExitHandler );
-  //   _.process._registeredExitHandler = onExitHandler;
-  //   // process.once( 'SIGINT', onExitHandler );
-  //   // process.once( 'SIGTERM', onExitHandler );
-  // }
-  //
-  // _.arrayAppendOnce( _.process._eventCallbackMap.exit, routine );
-  //
-  // /*  */
-  //
-  // function onExitHandler( arg )
-  // {
-  //   _.each( _.process._eventCallbackMap.exit, ( routine ) =>
-  //   {
-  //     try
-  //     {
-  //       routine( arg );
-  //     }
-  //     catch( err )
-  //     {
-  //       _.setup._errUncaughtHandler2( err, 'uncaught error on termination' );
-  //       // _.errLogOnce( err );
-  //     }
-  //   })
-  //   process.removeListener( 'exit', _.process._registeredExitHandler );
-  //   // process.removeListener( 'SIGINT', _.process._registeredExitHandler );
-  //   // process.removeListener( 'SIGTERM', _.process._registeredExitHandler );
-  //   _.process._eventCallbackMap.exit.splice( 0, _.process._eventCallbackMap.exit.length );
-  // }
-
 }
 
 //
 
 /*
-qqq : cover routine exitHandlerOff by tests
-Vova : wrote test routine exitHandlerOff
+qqq : cover routine _exitHandlerOff by tests
+Vova : wrote test routine _exitHandlerOff
 */
 
-function exitHandlerOff( routine )
+function _exitHandlerOff( routine )
 {
   _.assert( arguments.length === 1 );
   _.assert( _.routineIs( routine ) );
   debugger;
-  console.warn( `WARNING : Routine _.process.exitHandlerOff is deprecated. Please, use _.process.off( 'exit', callback ) instead.` ); debugger;
+  console.warn( `WARNING : Routine _.process._exitHandlerOff is deprecated. Please, use _.process.off( 'exit', callback ) instead.` ); debugger;
   _.process.off( 'exit', routine );
-  // return _.arrayRemovedElement( _.process._eventCallbackMap.exit, routine );
-}
-
-// function exitHandlerOnce( routine )
-// {
-//   _.assert( arguments.length === 1 );
-//   _.assert( _.routineIs( routine ) );
-//
-//   if( typeof process === 'undefined' )
-//   return;
-//
-//   if( !_onExitHandlers.length )
-//   {
-//     process.once( 'exit', onExitHandler );
-//     process.once( 'SIGINT', onExitHandler );
-//     process.once( 'SIGTERM', onExitHandler );
-//   }
-//
-//   _onExitHandlers.push( routine );
-//
-//   /*  */
-//
-//   function onExitHandler( arg )
-//   {
-//     _.each( _onExitHandlers, ( routine ) =>
-//     {
-//       try
-//       {
-//         routine( arg );
-//       }
-//       catch( err )
-//       {
-//         _.errLogOnce( err );
-//       }
-//     })
-//
-//     process.removeListener( 'exit', onExitHandler );
-//     process.removeListener( 'SIGINT', onExitHandler );
-//     process.removeListener( 'SIGTERM', onExitHandler );
-//   }
-//
-// }
-
-//
-
-function memoryUsageInfo()
-{
-  var usage = process.memoryUsage();
-  return ( usage.heapUsed >> 20 ) + ' / ' + ( usage.heapTotal >> 20 ) + ' / ' + ( usage.rss >> 20 ) + ' Mb';
 }
 
 //
 
-let _tempFiles = [];
-
-function tempOpen_pre( routine, args )
+function _eventExitSetup()
 {
-  let o;
 
-  if( _.strIs( args[ 0 ] ) || _.bufferRawIs( args[ 0 ] ) )
-  o = { sourceCode : args[ 0 ] };
-  else
-  o = args[ 0 ];
+  _.assert( arguments.length === 0 );
 
-  o = _.routineOptions( routine, o );
+  if( !_global.process )
+  return;
 
-  _.assert( arguments.length === 2 );
-  _.assert( args.length === 1, 'Expects single argument' );
-
-  return o;
-}
-
-function tempOpen_body( o )
-{
-  _.assertRoutineOptions( tempOpen, arguments );
-  _.assert( arguments.length === 1, 'Expects single argument' );
-  _.assert( _.strIs( o.sourceCode ) || _.bufferRawIs( o.sourceCode ), 'Expects string or buffer raw {-o.sourceCode-}, but got', _.strType( o.sourceCode ) );
-
-  let tempDirPath = _.path.pathDirTempOpen( _.path.current() );
-  let filePath = _.path.join( tempDirPath, _.idWithDate() + '.ss' );
-  _tempFiles.push( filePath );
-  _.fileProvider.fileWrite( filePath, o.sourceCode );
-  return filePath;
-}
-
-var defaults = tempOpen_body.defaults = Object.create( null );
-defaults.sourceCode = null;
-
-let tempOpen = _.routineFromPreAndBody( tempOpen_pre, tempOpen_body );
-
-//
-
-function tempClose_pre( routine, args )
-{
-  let o;
-
-  if( _.strIs( args[ 0 ] ) )
-  o = { filePath : args[ 0 ] };
-  else
-  o = args[ 0 ];
-
-  if( !o )
-  o = Object.create( null );
-
-  o = _.routineOptions( routine, o );
-
-  _.assert( arguments.length === 2 );
-  _.assert( args.length <= 1, 'Expects single argument or none' );
-
-  return o;
-}
-
-function tempClose_body( o )
-{
-  _.assertRoutineOptions( tempClose, arguments );
-  _.assert( arguments.length === 1, 'Expects single argument' );
-  _.assert( _.strIs( o.filePath ) || o.filePath === null, 'Expects string or null {-o.filePath-}, but got', _.strType( o.filePath ) );
-
-  if( !o.filePath )
+  if( !_.process._registeredExitHandler )
   {
-    if( !_tempFiles.length )
-    return;
+    _global.process.once( 'exit', _.process._eventExitHandle );
+    _.process._registeredExitHandler = _.process._eventExitHandle;
+    // process.once( 'SIGINT', onExitHandler );
+    // process.once( 'SIGTERM', onExitHandler );
+  }
 
-    _.fileProvider.filesDelete( _tempFiles );
-    _tempFiles.splice( 0 );
-  }
-  else
-  {
-    let i = _.longLeftIndex( _tempFiles, o.filePath );
-    _.assert( i !== -1, 'Requested {-o.filePath-}', o.filePath, 'is not a path of temp application.' )
-    _.fileProvider.fileDelete( o.filePath );
-    _tempFiles.splice( i, 1 );
-  }
 }
 
-var defaults = tempClose_body.defaults = Object.create( null );
-defaults.filePath = null;
-
-let tempClose = _.routineFromPreAndBody( tempClose_pre, tempClose_body );
-
 //
+
+function _eventExitHandle()
+{
+  let args = arguments;
+  _.each( _.process._eventCallbackMap.exit, ( callback ) =>
+  {
+    try
+    {
+      callback.apply( _.process, args );
+    }
+    catch( err )
+    {
+      _.setup._errUncaughtHandler2( err, 'uncaught error on termination' );
+    }
+  })
+  process.removeListener( 'exit', _.process._registeredExitHandler );
+  // process.removeListener( 'SIGINT', _.process._registeredExitHandler );
+  // process.removeListener( 'SIGTERM', _.process._registeredExitHandler );
+  _.process._eventCallbackMap.exit.splice( 0, _.process._eventCallbackMap.exit.length );
+}
+
+// --
+// children
+// --
 
 function isRunning( pid )
 {
@@ -2323,6 +1864,7 @@ function isRunning( pid )
   {
     return err.code === 'EPERM'
   }
+
 }
 
 //
@@ -2432,9 +1974,9 @@ kill.defaults =
 
 //
 
-/* 
+/*
   zzz Vova: shell,exec modes have different behaviour on Windows,OSX and Linux
-  look for solution that allow to have same behaviour on each mode 
+  look for solution that allow to have same behaviour on each mode
 */
 
 function terminate( o )
@@ -2610,14 +2152,14 @@ function children( o )
     result = Object.create( null );
 
     if( process.platform === 'darwin' )
-    return getChildrenOf( 'pgrep -P', o.pid, result )
+    return childrenOf( 'pgrep -P', o.pid, result )
     else
-    return getChildrenOf( 'ps -o pid --no-headers --ppid', o.pid, result )
+    return childrenOf( 'ps -o pid --no-headers --ppid', o.pid, result )
   }
 
   /* */
 
-  function getChildrenOf( command, pid, _result )
+  function childrenOf( command, pid, _result )
   {
     return _.process.start
     ({
@@ -2636,7 +2178,7 @@ function children( o )
       return result;
       let ready = new _.Consequence().take( null );
       let pids = _.strSplitNonPreserving({ src: got.output, delimeter : '\n' });
-      _.each( pids, ( cpid ) => ready.then( () => getChildrenOf( command, cpid, _result[ pid ] ) ) )
+      _.each( pids, ( cpid ) => ready.then( () => childrenOf( command, cpid, _result[ pid ] ) ) )
       return ready;
     })
   }
@@ -2658,123 +2200,13 @@ children.defaults =
 }
 
 // --
-// eventer
-// --
-
-let _on = _.process.on;
-function on()
-{
-  let o2 = _on.apply( this, arguments );
-
-  if( o2.callbackMap.available )
-  _.process._eventAvailableHandle();
-
-  return o2;
-}
-
-on.defaults =
-{
-  callbackMap : null,
-}
-
-//
-
-function _eventExitSetup()
-{
-
-  _.assert( arguments.length === 0 );
-
-  if( !_global.process )
-  return;
-
-  if( !_.process._registeredExitHandler )
-  {
-    _global.process.once( 'exit', _.process._eventExitHandle );
-    _.process._registeredExitHandler = _.process._eventExitHandle;
-    // process.once( 'SIGINT', onExitHandler );
-    // process.once( 'SIGTERM', onExitHandler );
-  }
-
-}
-
-//
-
-function _eventExitHandle()
-{
-  // console.log( '_eventExitHandle:begin' );
-  let args = arguments;
-  _.each( _.process._eventCallbackMap.exit, ( callback ) =>
-  {
-    try
-    {
-      callback.apply( _.process, args );
-    }
-    catch( err )
-    {
-      _.setup._errUncaughtHandler2( err, 'uncaught error on termination' );
-    }
-  })
-  process.removeListener( 'exit', _.process._registeredExitHandler );
-  // process.removeListener( 'SIGINT', _.process._registeredExitHandler );
-  // process.removeListener( 'SIGTERM', _.process._registeredExitHandler );
-  _.process._eventCallbackMap.exit.splice( 0, _.process._eventCallbackMap.exit.length );
-  // console.log( '_eventExitHandle:end' );
-}
-
-//
-
-function _eventAvailableHandle()
-{
-  if( !_.process._eventCallbackMap.available.length )
-  return;
-
-  let callbacks = _.process._eventCallbackMap.available.slice();
-  callbacks.forEach( ( callback ) =>
-  {
-    try
-    {
-      _.arrayRemoveOnceStrictly( _.process._eventCallbackMap.available, callback );
-      callback.call( _.process );
-    }
-    catch( err )
-    {
-      throw _.err( `Error in handler::${callback.name} of an event::available of module::Process\n`, err );
-    }
-  });
-
-}
-
-// --
-// meta
-// --
-
-function _Setup1()
-{
-
-  _.process._eventAvailableHandle();
-  _.process.exitHandlerRepair();
-  _.process._eventExitSetup();
-
-}
-
-// --
 // declare
 // --
 
-let _eventCallbackMap =
+let Extension =
 {
-  available : [],
-  exit : [],
-}
 
-let Fields =
-{
-  _exitReason : null,
-  _registeredExitHandler : null,
-}
-
-let Routines =
-{
+  // starter
 
   start,
   startPassingThrough,
@@ -2783,52 +2215,35 @@ let Routines =
   startAfterDeath,
   starter,
 
-  _argsInSamFormatNodejs,
-  _argsInSamFormatBrowser,
-
-  argsInSamFormat : Config.interpreter === 'njs' ? _argsInSamFormatNodejs : _argsInSamFormatBrowser,
-  args : Config.interpreter === 'njs' ? _argsInSamFormatNodejs : _argsInSamFormatBrowser,
-  argsReadTo,
-
-  anchor,
+  // exit
 
   exitReason, /* qqq : cover and document Vova:wrote test routine exitReason */
   exitCode, /* qqq : cover and document Vova:wrote test routine exitCode */
   exit,
   exitWithBeep,
 
-  exitHandlerRepair,
-  exitHandlerOnce,
-  exitHandlerOff,
+  _exitHandlerRepair, /* xxx */
+  _exitHandlerOnce, /* xxx */
+  _exitHandlerOff, /* xxx */
 
-  memoryUsageInfo,
+  _eventExitSetup,
+  _eventExitHandle,
 
-  tempOpen,
-  tempClose,
+  // children
 
   isRunning,
   kill,
   terminate,
   children,
 
-  // eventer
+  // fields
 
-  on,
-  _eventExitSetup,
-  _eventExitHandle,
-  _eventAvailableHandle,
-
-  // meta
-
-  _Setup1,
+  _exitReason : null,
 
 }
 
-_.mapExtend( Self, Fields );
-_.mapExtend( Self, Routines );
-_.mapSupplement( Self._eventCallbackMap, _eventCallbackMap );
+_.mapExtend( Self, Extension );
 _.assert( _.routineIs( _.process.start ) );
-_.process._Setup1();
 
 // --
 // export

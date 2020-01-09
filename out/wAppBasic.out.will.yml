@@ -2,15 +2,12 @@ format: outwillfile-2.0
 root:
   - wAppBasic.out
 consistency:
-  wAppBasic.out.will.yml: &ref_0
-    hash: 667020b5f9015682223ac34bb0d0ee36
-    size: 40307
-  ../.ex.will.yml: &ref_1
+  ../.ex.will.yml: &ref_0
     hash: dc752b9f2b3623dc29962188de9d2b4b
     size: 2146
-  ../.im.will.yml: &ref_2
-    hash: 2a3bab91f5ca38632036babb07e5b2bb
-    size: 5501
+  ../.im.will.yml: &ref_1
+    hash: 643e04cd5f16764beaa21effdbb45f31
+    size: 5511
 module:
   wAppBasic.out:
     about:
@@ -25,22 +22,22 @@ module:
         external processes on different platforms and operating systems.
       enabled: 1
       version: 0.4.0
-      interpreters:
+      interpreters: &ref_2
         - njs >= 8.0.0
         - chrome >= 60.0.0
         - firefox >= 60.0.0
-      keywords:
+      keywords: &ref_3
         - wTools
         - exec file
         - shell script
         - run program
       license: MIT
       author: Kostiantyn Wandalen <wanalen@willbe.so>
-      contributors:
+      contributors: &ref_4
         - Kostiantyn Wandalen <wanalen@willbe.so>
         - Volodymyr M. <volodymyr.migdal@gmail.com>
       npm.name: wappbasic
-      npm.scripts:
+      npm.scripts: &ref_5
         test: wtest .run proto/**
         docgen: wdocgen .build proto
     path:
@@ -122,7 +119,7 @@ module:
       entry.proto.no.tests:
         criterion:
           tests: no.tests
-        path: ../proto/dwtools/abase/l4/AppBasic.s
+        path: ../proto/dwtools/abase/l4_process/Basic.s
       entry.proto.only.tests:
         criterion:
           tests: only.tests
@@ -132,13 +129,13 @@ module:
           debug: debug
           raw: raw
           content: prime
-        path: '{path::out.*=1}/source/dwtools/abase/l4/AppBasic.s'
+        path: '{path::out.*=1}/source/dwtools/abase/l4_process/Basic.s'
       entry.out.raw.debug.release:
         criterion:
           debug: release
           raw: raw
           content: prime
-        path: '{path::out.*=1}/source/dwtools/abase/l4/AppBasic.s'
+        path: '{path::out.*=1}/source/dwtools/abase/l4_process/Basic.s'
       entry.out.compiled.debug.debug:
         criterion:
           debug: debug
@@ -167,10 +164,13 @@ module:
           - ../proto/dwtools
           - ../proto/dwtools/Tools.s
           - ../proto/dwtools/abase
-          - ../proto/dwtools/abase/l4
-          - ../proto/dwtools/abase/l4/ProcessBasic.s
           - ../proto/dwtools/abase/l4.test
           - ../proto/dwtools/abase/l4.test/ProcessBasic.test.s
+          - ../proto/dwtools/abase/l4_process
+          - ../proto/dwtools/abase/l4_process/Basic.s
+          - ../proto/dwtools/abase/l4_process/l3
+          - ../proto/dwtools/abase/l4_process/l3/Execution.s
+          - ../proto/dwtools/abase/l4_process/l3/Io.s
           - ../proto/dwtools/amid
           - ../proto/dwtools/atop
     submodule:
@@ -735,24 +735,6 @@ module:
           content: prime
         inherit:
           - files.transpile
-      exported.proto.export:
-        opts:
-          reflector: 'reflector::exported.proto.export*'
-        criterion:
-          generated: 1
-          content: proto
-          export: 1
-        inherit:
-          - files.reflect
-      exported.files.proto.export:
-        opts:
-          reflector: 'reflector::exported.files.proto.export*'
-        criterion:
-          generated: 1
-          content: proto
-          export: 1
-        inherit:
-          - files.reflect
     build:
       proto.export:
         steps:
@@ -841,9 +823,8 @@ module:
           content: proto
           export: 1
     consistency:
-      wAppBasic.out.will.yml: *ref_0
-      ../.ex.will.yml: *ref_1
-      ../.im.will.yml: *ref_2
+      ../.ex.will.yml: *ref_0
+      ../.im.will.yml: *ref_1
   ../:
     about:
       name: wAppBasic
@@ -857,24 +838,13 @@ module:
         external processes on different platforms and operating systems.
       enabled: 1
       version: 0.4.0
-      interpreters:
-        - njs >= 8.0.0
-        - chrome >= 60.0.0
-        - firefox >= 60.0.0
-      keywords:
-        - wTools
-        - exec file
-        - shell script
-        - run program
+      interpreters: *ref_2
+      keywords: *ref_3
       license: MIT
       author: Kostiantyn Wandalen <wanalen@willbe.so>
-      contributors:
-        - Kostiantyn Wandalen <wanalen@willbe.so>
-        - Volodymyr M. <volodymyr.migdal@gmail.com>
+      contributors: *ref_4
       npm.name: wappbasic
-      npm.scripts:
-        test: wtest .run proto/**
-        docgen: wdocgen .build proto
+      npm.scripts: *ref_5
     path:
       module.willfiles:
         criterion:
@@ -954,7 +924,7 @@ module:
       entry.proto.no.tests:
         criterion:
           tests: no.tests
-        path: proto/dwtools/abase/l4/AppBasic.s
+        path: proto/dwtools/abase/l4_process/Basic.s
       entry.proto.only.tests:
         criterion:
           tests: only.tests
@@ -964,13 +934,13 @@ module:
           debug: debug
           raw: raw
           content: prime
-        path: '{path::out.*=1}/source/dwtools/abase/l4/AppBasic.s'
+        path: '{path::out.*=1}/source/dwtools/abase/l4_process/Basic.s'
       entry.out.raw.debug.release:
         criterion:
           debug: release
           raw: raw
           content: prime
-        path: '{path::out.*=1}/source/dwtools/abase/l4/AppBasic.s'
+        path: '{path::out.*=1}/source/dwtools/abase/l4_process/Basic.s'
       entry.out.compiled.debug.debug:
         criterion:
           debug: debug
@@ -1574,6 +1544,5 @@ module:
         hash: dc752b9f2b3623dc29962188de9d2b4b
         size: 2146
       ../.im.will.yml:
-        hash: 2a3bab91f5ca38632036babb07e5b2bb
-        size: 5501
-      wAppBasic.out.will.yml: *ref_0
+        hash: 643e04cd5f16764beaa21effdbb45f31
+        size: 5511

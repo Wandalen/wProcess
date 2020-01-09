@@ -10,7 +10,7 @@ if( typeof module !== 'undefined' )
   _.include( 'wTesting' );
   _.include( 'wFiles' );
 
-  require( '../l4/ProcessBasic.s' );
+  require( '../l4_process/Basic.s' );
 
 }
 
@@ -398,7 +398,7 @@ function processArgs( test )
 
 //
 
-function exitHandlerOnce( test )
+function _exitHandlerOnce( test )
 {
   var context = this;
   var routinePath = _.path.join( context.suitePath, test.name );
@@ -418,9 +418,9 @@ function exitHandlerOnce( test )
 
     var args = _.process.args();
 
-    _.process.exitHandlerOnce( ( arg ) =>
+    _.process._exitHandlerOnce( ( arg ) =>
     {
-      console.log( 'exitHandlerOnce:', arg );
+      console.log( '_exitHandlerOnce:', arg );
     });
 
     _.time.out( 1000, () =>
@@ -464,7 +464,7 @@ function exitHandlerOnce( test )
     {
       test.is( got.exitCode === 0 );
       test.is( _.strHas( got.output, 'timeOut handler executed' ) )
-      test.is( _.strHas( got.output, 'exitHandlerOnce: 0' ) );
+      test.is( _.strHas( got.output, '_exitHandlerOnce: 0' ) );
       return null;
     })
 
@@ -487,8 +487,8 @@ function exitHandlerOnce( test )
     {
       test.is( got.exitCode === 0 );
       test.is( !_.strHas( got.output, 'timeOut handler executed' ) )
-      test.is( !_.strHas( got.output, 'exitHandlerOnce: 0' ) );
-      test.is( _.strHas( got.output, 'exitHandlerOnce: SIGINT' ) );
+      test.is( !_.strHas( got.output, '_exitHandlerOnce: 0' ) );
+      test.is( _.strHas( got.output, '_exitHandlerOnce: SIGINT' ) );
       return null;
     });
   })
@@ -498,7 +498,7 @@ function exitHandlerOnce( test )
 
 //
 
-function exitHandlerOff( test )
+function _exitHandlerOff( test )
 {
   var context = this;
   var routinePath = _.path.join( context.suitePath, test.name );
@@ -515,8 +515,8 @@ function exitHandlerOff( test )
     handlersMap[ 'handler2' ] = handler2;
     handlersMap[ 'handler3' ] = handler3;
 
-    _.process.exitHandlerOnce( handler1 );
-    _.process.exitHandlerOnce( handler2 );
+    _.process._exitHandlerOnce( handler1 );
+    _.process._exitHandlerOnce( handler2 );
 
     if( args.map.off )
     {
@@ -524,7 +524,7 @@ function exitHandlerOff( test )
       _.each( args.map.off, ( name ) =>
       {
         _.assert( handlersMap[ name ] );
-        _.process.exitHandlerOff( handlersMap[ name ] );
+        _.process._exitHandlerOff( handlersMap[ name ] );
       })
     }
 
@@ -536,15 +536,15 @@ function exitHandlerOff( test )
 
     function handler1( arg )
     {
-      console.log( 'exitHandlerOnce1:', arg );
+      console.log( '_exitHandlerOnce1:', arg );
     }
     function handler2( arg )
     {
-      console.log( 'exitHandlerOnce2:', arg );
+      console.log( '_exitHandlerOnce2:', arg );
     }
     function handler3( arg )
     {
-      console.log( 'exitHandlerOnce3:', arg );
+      console.log( '_exitHandlerOnce3:', arg );
     }
   }
 
@@ -575,9 +575,9 @@ function exitHandlerOff( test )
     {
       test.identical( got.exitCode, 0 );
       test.identical( _.strCount( got.output, 'timeOut handler executed'  ), 1 );
-      test.identical( _.strCount( got.output, 'exitHandlerOnce1: 0' ), 1 );
-      test.identical( _.strCount( got.output, 'exitHandlerOnce2: 0' ), 1 );
-      test.identical( _.strCount( got.output, 'exitHandlerOnce3: 0' ), 0 );
+      test.identical( _.strCount( got.output, '_exitHandlerOnce1: 0' ), 1 );
+      test.identical( _.strCount( got.output, '_exitHandlerOnce2: 0' ), 1 );
+      test.identical( _.strCount( got.output, '_exitHandlerOnce3: 0' ), 0 );
       return null;
     })
 
@@ -603,9 +603,9 @@ function exitHandlerOff( test )
     {
       test.identical( got.exitCode, 0 );
       test.identical( _.strCount( got.output, 'timeOut handler executed'  ), 1 );
-      test.identical( _.strCount( got.output, 'exitHandlerOnce1: 0' ), 0 );
-      test.identical( _.strCount( got.output, 'exitHandlerOnce2: 0' ), 1 );
-      test.identical( _.strCount( got.output, 'exitHandlerOnce3: 0' ), 0 );
+      test.identical( _.strCount( got.output, '_exitHandlerOnce1: 0' ), 0 );
+      test.identical( _.strCount( got.output, '_exitHandlerOnce2: 0' ), 1 );
+      test.identical( _.strCount( got.output, '_exitHandlerOnce3: 0' ), 0 );
       return null;
     })
   })
@@ -630,9 +630,9 @@ function exitHandlerOff( test )
     {
       test.identical( got.exitCode, 0 );
       test.identical( _.strCount( got.output, 'timeOut handler executed'  ), 1 );
-      test.identical( _.strCount( got.output, 'exitHandlerOnce1: 0' ), 0 );
-      test.identical( _.strCount( got.output, 'exitHandlerOnce2: 0' ), 0 );
-      test.identical( _.strCount( got.output, 'exitHandlerOnce3: 0' ), 0 );
+      test.identical( _.strCount( got.output, '_exitHandlerOnce1: 0' ), 0 );
+      test.identical( _.strCount( got.output, '_exitHandlerOnce2: 0' ), 0 );
+      test.identical( _.strCount( got.output, '_exitHandlerOnce3: 0' ), 0 );
       return null;
     })
   })
@@ -658,9 +658,9 @@ function exitHandlerOff( test )
     {
       test.notIdentical( got.exitCode, 0 );
       test.identical( _.strCount( got.output, 'uncaught error' ), 2 );
-      test.identical( _.strCount( got.output, 'exitHandlerOnce1: -1' ), 1 );
-      test.identical( _.strCount( got.output, 'exitHandlerOnce2: -1' ), 1 );
-      test.identical( _.strCount( got.output, 'exitHandlerOnce3: -1' ), 0 );
+      test.identical( _.strCount( got.output, '_exitHandlerOnce1: -1' ), 1 );
+      test.identical( _.strCount( got.output, '_exitHandlerOnce2: -1' ), 1 );
+      test.identical( _.strCount( got.output, '_exitHandlerOnce3: -1' ), 0 );
       return null;
     })
   })
@@ -8453,7 +8453,7 @@ function shellTerminateWithExitHandler( test )
   function testApp()
   {
     _.include( 'wAppBasic' );
-    _.process.exitHandlerRepair();
+    _.process._exitHandlerRepair();
     _.time.out( 10000, () => { console.log( 'Timeout in child' ); return null } )
   }
 
@@ -8700,7 +8700,7 @@ function shellTerminateHangedWithExitHandler( test )
   function testApp()
   {
     _.include( 'wAppBasic' );
-    _.process.exitHandlerRepair();
+    _.process._exitHandlerRepair();
     while( 1 )
     {
       console.log( _.time.now() )
@@ -8842,7 +8842,7 @@ function shellTerminateAfterLoopRelease( test )
   function testApp()
   {
     _.include( 'wAppBasic' );
-    _.process.exitHandlerRepair();
+    _.process._exitHandlerRepair();
     let loop = true;
     setTimeout( () =>
     {
@@ -9461,14 +9461,14 @@ function shellDetachingChildAfterParent( test )
     var ready = _.process.start( o );
 
     ready.finally( ( err, got ) =>
-    { 
+    {
       _.errLog( err );
       return null;
     })
 
     process.send( o.process.pid );
-    
-    _.time.out( 1000, () => 
+
+    _.time.out( 1000, () =>
     {
       console.log( 'Parent process exit' );
       _.Procedure.TerminationBegin();
@@ -12208,7 +12208,7 @@ function terminate( test )
   function testApp()
   {
     _.include( 'wAppBasic' );
-    _.process.exitHandlerRepair();
+    _.process._exitHandlerRepair();
     setTimeout( () =>
     {
       console.log( 'Application timeout!' )
@@ -12334,10 +12334,10 @@ function terminate( test )
   })
 
   /* shell */
-  
-  /* 
+
+  /*
     zzz Vova: shell,exec modes have different behaviour on Windows,OSX and Linux
-    look for solution that allow to have same behaviour on each mode 
+    look for solution that allow to have same behaviour on each mode
   */
 
   .thenKeep( () =>
@@ -12371,7 +12371,7 @@ function terminate( test )
         else
         test.is( !_.strHas( got.output, 'Application timeout!' ) );
       }
-     
+
       return null;
     })
 
@@ -12419,10 +12419,10 @@ function terminate( test )
   })
 
   /* exec */
-  
-  /* 
+
+  /*
     zzz Vova: shell,exec modes have different behaviour on Windows,OSX and Linux
-    look for solution that allow to have same behaviour on each mode 
+    look for solution that allow to have same behaviour on each mode
   */
 
   .thenKeep( () =>
@@ -12531,7 +12531,7 @@ function terminateComplex( test )
     }
     _.process.start( o );
     _.time.out( 1000, () =>
-    { 
+    {
       console.log( o.process.pid )
       if( process.send )
       process.send( o.process.pid )
@@ -12565,7 +12565,7 @@ function terminateComplex( test )
   var con = new _.Consequence().take( null )
 
   /* */
-  
+
   .thenKeep( () =>
   {
     test.case = 'Sending signal to other process'
@@ -12582,7 +12582,7 @@ function terminateComplex( test )
     let lastChildPid;
 
     o.process.on( 'message', ( data ) =>
-    { 
+    {
       lastChildPid = _.numberFrom( data );
       _.process.terminate({ pid : lastChildPid });
     })
@@ -12600,7 +12600,7 @@ function terminateComplex( test )
 
     return ready;
   })
-  
+
   /*  */
 
   .thenKeep( () =>
@@ -12636,7 +12636,7 @@ function terminateComplex( test )
 
     return ready;
   })
-  
+
   //
 
   .thenKeep( () =>
@@ -12672,9 +12672,9 @@ function terminateComplex( test )
 
     return ready;
   })
-  
+
   //
-  
+
   .thenKeep( () =>
   {
     test.case = 'Sending signal to child process has regular child process that should exit with parent'
@@ -12688,8 +12688,8 @@ function terminateComplex( test )
 
     let ready = _.process.start( o );
     let lastChildPid;
-    
-    _.time.out( 1500, () => 
+
+    _.time.out( 1500, () =>
     {
       lastChildPid = _.numberFrom( o.output );
       _.process.terminate({ pid : o.process.pid });
@@ -12714,9 +12714,9 @@ function terminateComplex( test )
 
     return ready;
   })
-  
+
   //
-  
+
   .thenKeep( () =>
   {
     test.case = 'Sending signal to child process has regular child process that should exit with parent'
@@ -12730,8 +12730,8 @@ function terminateComplex( test )
 
     let ready = _.process.start( o );
     let lastChildPid;
-    
-    _.time.out( 1500, () => 
+
+    _.time.out( 1500, () =>
     {
       lastChildPid = _.numberFrom( o.output );
       _.process.terminate({ pid : o.process.pid });
@@ -12786,7 +12786,7 @@ function terminateComplex( test )
       test.is( _.strHas( got.output, 'SIGINT' ) );
       test.is( !_.process.isRunning( o.process.pid ) )
       test.is( _.process.isRunning( childPid ) );
-      return _.time.out( 5000, () => 
+      return _.time.out( 5000, () =>
       {
         test.is( !_.process.isRunning( childPid ) );
         return null;
@@ -12795,9 +12795,9 @@ function terminateComplex( test )
 
     return ready;
   })
-  
+
   //
-  
+
   .thenKeep( () =>
   {
     test.case = 'Sending signal to child process that has detached child, detached child should continue to work'
@@ -12825,7 +12825,7 @@ function terminateComplex( test )
       test.is( _.strHas( got.output, 'SIGINT' ) );
       test.is( !_.process.isRunning( o.process.pid ) )
       test.is( _.process.isRunning( childPid ) );
-      return _.time.out( 5000, () => 
+      return _.time.out( 5000, () =>
       {
         test.is( !_.process.isRunning( childPid ) );
         return null;
@@ -12834,9 +12834,9 @@ function terminateComplex( test )
 
     return ready;
   })
-  
+
   //
-  
+
   .thenKeep( () =>
   {
     test.case = 'Sending signal to child process that has detached child, detached child should continue to work'
@@ -12850,7 +12850,7 @@ function terminateComplex( test )
 
     let ready = _.process.start( o );
     let childPid;
-    _.time.out( 1500, () => 
+    _.time.out( 1500, () =>
     {
       childPid = _.numberFrom( o.output )
       _.process.terminate({ pid : o.process.pid });
@@ -12870,7 +12870,7 @@ function terminateComplex( test )
       }
       test.is( !_.process.isRunning( o.process.pid ) )
       test.is( _.process.isRunning( childPid ) );
-      return _.time.out( 5000, () => 
+      return _.time.out( 5000, () =>
       {
         test.is( !_.process.isRunning( childPid ) );
         return null;
@@ -12879,9 +12879,9 @@ function terminateComplex( test )
 
     return ready;
   })
-  
+
   //
-  
+
   .thenKeep( () =>
   {
     test.case = 'Sending signal to child process that has detached child, detached child should continue to work'
@@ -12895,7 +12895,7 @@ function terminateComplex( test )
 
     let ready = _.process.start( o );
     let childPid;
-    _.time.out( 1500, () => 
+    _.time.out( 1500, () =>
     {
       childPid = _.numberFrom( o.output )
       _.process.terminate({ pid : o.process.pid });
@@ -12915,7 +12915,7 @@ function terminateComplex( test )
       }
       test.is( !_.process.isRunning( o.process.pid ) )
       test.is( _.process.isRunning( childPid ) );
-      return _.time.out( 5000, () => 
+      return _.time.out( 5000, () =>
       {
         test.is( !_.process.isRunning( childPid ) );
         return null;
@@ -13224,7 +13224,7 @@ function terminateTimeOut( test )
   function testApp()
   {
     _.include( 'wAppBasic' );
-    _.process.exitHandlerRepair();
+    _.process._exitHandlerRepair();
     setTimeout( () =>
     {
       console.log( 'Application timeout!' )
@@ -13271,9 +13271,9 @@ function terminateTimeOut( test )
 
     return ready;
   })
-  
+
   /*  */
-  
+
   .thenKeep( () =>
   {
     var o =
@@ -13303,9 +13303,9 @@ function terminateTimeOut( test )
 
     return ready;
   })
-  
+
   /*  */
-  
+
   .thenKeep( () =>
   {
     var o =
@@ -13329,7 +13329,7 @@ function terminateTimeOut( test )
           test.identical( got.exitCode , null );
           test.identical( got.exitSignal , 'SIGINT' );
           test.is( _.strHas( got.output, 'Application timeout!' ) );
-  
+
         }
         else
         {
@@ -13348,9 +13348,9 @@ function terminateTimeOut( test )
 
     return ready;
   })
-  
+
   /*  */
-  
+
   .thenKeep( () =>
   {
     var o =
@@ -13374,7 +13374,7 @@ function terminateTimeOut( test )
           test.identical( got.exitCode , null );
           test.identical( got.exitSignal , 'SIGINT' );
           test.is( _.strHas( got.output, 'Application timeout!' ) );
-  
+
         }
         else
         {
@@ -13407,7 +13407,7 @@ function terminateDifferentStdio( test )
 
   function testApp()
   {
-    process.on( 'SIGINT', () => 
+    process.on( 'SIGINT', () =>
     {
       var fs = require( 'fs' );
       var path = require( 'path' )
@@ -13443,9 +13443,9 @@ function terminateDifferentStdio( test )
 
     let ready = _.process.start( o )
 
-    _.time.out( 1500, () => 
+    _.time.out( 1500, () =>
     {
-      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) ) 
+      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
     })
 
     ready.thenKeep( ( got ) =>
@@ -13458,9 +13458,9 @@ function terminateDifferentStdio( test )
 
     return ready;
   })
-  
+
   //
-  
+
   .thenKeep( () =>
   {
     var o =
@@ -13473,9 +13473,9 @@ function terminateDifferentStdio( test )
 
     let ready = _.process.start( o )
 
-    _.time.out( 1500, () => 
+    _.time.out( 1500, () =>
     {
-      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) ) 
+      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
     })
 
     ready.thenKeep( ( got ) =>
@@ -13488,9 +13488,9 @@ function terminateDifferentStdio( test )
 
     return ready;
   })
-  
+
   //
-  
+
   .thenKeep( () =>
   {
     var o =
@@ -13503,9 +13503,9 @@ function terminateDifferentStdio( test )
 
     let ready = _.process.start( o )
 
-    _.time.out( 1500, () => 
+    _.time.out( 1500, () =>
     {
-      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) ) 
+      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
     })
 
     ready.thenKeep( ( got ) =>
@@ -13518,9 +13518,9 @@ function terminateDifferentStdio( test )
 
     return ready;
   })
-  
+
   //
-  
+
   .thenKeep( () =>
   {
     var o =
@@ -13534,9 +13534,9 @@ function terminateDifferentStdio( test )
 
     let ready = _.process.start( o )
 
-    _.time.out( 1500, () => 
+    _.time.out( 1500, () =>
     {
-      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) ) 
+      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
     })
 
     ready.thenKeep( ( got ) =>
@@ -13549,9 +13549,9 @@ function terminateDifferentStdio( test )
 
     return ready;
   })
-  
+
   //
-  
+
   .thenKeep( () =>
   {
     var o =
@@ -13565,9 +13565,9 @@ function terminateDifferentStdio( test )
 
     let ready = _.process.start( o )
 
-    _.time.out( 1500, () => 
+    _.time.out( 1500, () =>
     {
-      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) ) 
+      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
     })
 
     ready.thenKeep( ( got ) =>
@@ -13580,9 +13580,9 @@ function terminateDifferentStdio( test )
 
     return ready;
   })
-  
+
   //
-  
+
   .thenKeep( () =>
   {
     var o =
@@ -13596,9 +13596,9 @@ function terminateDifferentStdio( test )
 
     let ready = _.process.start( o )
 
-    _.time.out( 1500, () => 
+    _.time.out( 1500, () =>
     {
-      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) ) 
+      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
     })
 
     ready.thenKeep( ( got ) =>
@@ -14317,8 +14317,8 @@ var Proto =
   {
 
     // processArgs,
-    exitHandlerOnce,
-    exitHandlerOff,
+    _exitHandlerOnce,
+    _exitHandlerOff,
     exitReason,
     exitCode,
 
