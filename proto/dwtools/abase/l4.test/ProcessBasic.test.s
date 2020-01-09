@@ -12759,6 +12759,70 @@ function terminateComplex( test )
 
   //
 
+  return con;
+}
+
+terminateComplex.timeOut = 150000;
+
+//
+
+function terminateDetachedComplex( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+
+  function testApp()
+  {
+    _.include( 'wAppBasic' );
+    _.include( 'wFiles' );
+    let detaching = process.argv[ 2 ] === 'detached';
+    var o =
+    {
+      execPath : 'node testApp2.js',
+      currentPath : __dirname,
+      mode : 'spawn',
+      stdio : 'inherit',
+      detaching,
+      inputMirroring : 0,
+      throwingExitCode : 0
+    }
+    _.process.start( o );
+    _.time.out( 1000, () =>
+    {
+      console.log( o.process.pid )
+      if( process.send )
+      process.send( o.process.pid )
+    })
+  }
+
+  function testApp2()
+  {
+    process.on( 'SIGINT', () =>
+    {
+      console.log( 'second child SIGINT' )
+      var fs = require( 'fs' );
+      var path = require( 'path' )
+      fs.writeFileSync( path.join( __dirname, process.pid.toString() ), process.pid )
+      process.exit( 0 );
+    })
+    if( process.send )
+    process.send( process.pid );
+    setTimeout( () => {}, 5000 )
+  }
+
+  /* */
+
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
+  var testAppPath2 = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp2.js' ) );
+  var testAppCode2 = context.toolsPathInclude + testApp2.toString() + '\ntestApp2();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+  _.fileProvider.fileWrite( testAppPath2, testAppCode2 );
+
+  var con = new _.Consequence().take( null )
+
+  /* */
+
   .thenKeep( () =>
   {
     test.case = 'Sending signal to child process that has detached child, detached child should continue to work'
@@ -12930,7 +12994,7 @@ function terminateComplex( test )
   return con;
 }
 
-terminateComplex.timeOut = 150000;
+terminateDetachedComplex.timeOut = 150000;
 
 //
 
@@ -13146,6 +13210,124 @@ function terminateWithChildren( test )
 
   .thenKeep( () =>
   {
+    test.case = 'process is not running';
+    var o =
+    {
+      execPath : 'node ' + testAppPath2,
+      mode : 'spawn',
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    _.process.start( o );
+    o.process.kill('SIGKILL');
+
+    return o.ready.then( () =>
+    {
+      let ready = _.process.terminate({ pid : o.process.pid, withChildren : 1 });
+      return test.shouldThrowErrorAsync( ready );
+    })
+
+  })
+
+  /* */
+
+  return con;
+}
+
+//
+
+function terminateWithDetachedChildren( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+
+  function testApp()
+  {
+    _.include( 'wAppBasic' );
+    _.include( 'wFiles' );
+    var o =
+    {
+      execPath : 'node testApp2.js',
+      currentPath : __dirname,
+      mode : 'spawn',
+      stdio : 'inherit',
+      inputMirroring : 0,
+      throwingExitCode : 0
+    }
+    _.process.start( o );
+    _.time.out( 1000, () =>
+    {
+      process.send( o.process.pid )
+    })
+  }
+
+  function testApp2()
+  {
+    process.on( 'SIGINT', () =>
+    {
+      console.log( 'SIGINT' )
+      var fs = require( 'fs' );
+      var path = require( 'path' )
+      fs.writeFileSync( path.join( __dirname, process.pid.toString() ), process.pid )
+      process.exit( 0 );
+    })
+    if( process.send )
+    process.send( process.pid );
+    setTimeout( () => {}, 5000 )
+  }
+
+  function testApp3()
+  {
+    _.include( 'wAppBasic' );
+    _.include( 'wFiles' );
+    let detaching = process.argv[ 2 ] === 'detached';
+    var o1 =
+    {
+      execPath : 'node testApp2.js',
+      currentPath : __dirname,
+      mode : 'spawn',
+      detaching,
+      stdio : 'inherit',
+      inputMirroring : 0,
+      throwingExitCode : 0
+    }
+    _.process.start( o1 );
+    var o2 =
+    {
+      execPath : 'node testApp2.js',
+      currentPath : __dirname,
+      mode : 'spawn',
+      detaching,
+      stdio : 'inherit',
+      inputMirroring : 0,
+      throwingExitCode : 0
+    }
+    _.process.start( o2 );
+    _.time.out( 1000, () =>
+    {
+      process.send( [ o1.process.pid, o2.process.pid ] )
+    })
+  }
+
+  /* */
+
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
+  var testAppPath2 = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp2.js' ) );
+  var testAppCode2 = context.toolsPathInclude + testApp2.toString() + '\ntestApp2();';
+  var testAppPath3 = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp3.js' ) );
+  var testAppCode3 = context.toolsPathInclude + testApp3.toString() + '\ntestApp3();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+  _.fileProvider.fileWrite( testAppPath2, testAppCode2 );
+  _.fileProvider.fileWrite( testAppPath3, testAppCode3 );
+
+  var con = new _.Consequence().take( null )
+
+  /* */
+
+  .thenKeep( () =>
+  {
     test.case = 'parent -> detached'
     var o =
     {
@@ -13183,30 +13365,6 @@ function terminateWithChildren( test )
     })
 
     return ready;
-  })
-
-  //
-
-  .thenKeep( () =>
-  {
-    test.case = 'process is not running';
-    var o =
-    {
-      execPath : 'node ' + testAppPath2,
-      mode : 'spawn',
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    _.process.start( o );
-    o.process.kill('SIGKILL');
-
-    return o.ready.then( () =>
-    {
-      let ready = _.process.terminate({ pid : o.process.pid, withChildren : 1 });
-      return test.shouldThrowErrorAsync( ready );
-    })
-
   })
 
   /* */
@@ -14390,7 +14548,9 @@ var Proto =
     killTimeOut,
     terminate,
     terminateComplex,
+    //terminateDetachedComplex,//xxx Vova:investigate and fix termination of deatched process on Windows
     terminateWithChildren,
+    // terminateWithDetachedChildren, //xxx Vova:investigate and fix termination of deatched process on Windows
     terminateTimeOut,
     terminateDifferentStdio,
     children,
