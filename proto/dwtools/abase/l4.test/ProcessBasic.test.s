@@ -9542,7 +9542,7 @@ function shellDetachingChildAfterParent( test )
 
       test.is( !_.fileProvider.fileExists( testFilePath ) );
 
-      return _.time.out( 6000 );
+      return _.time.out( 10000 );
     })
 
     con.then( () =>
