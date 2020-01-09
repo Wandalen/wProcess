@@ -1579,6 +1579,4 @@ module:
       ../.im.will.yml:
         hash: 643e04cd5f16764beaa21effdbb45f31
         size: 5511
-      wAppBasic.out.will.yml:
-        hash: 7b76208cdbf743408087a2660da182ba
-        size: 40510
+      wAppBasic.out.will.yml: *ref_0
