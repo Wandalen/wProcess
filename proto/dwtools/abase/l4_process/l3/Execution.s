@@ -2169,16 +2169,16 @@ function children( o )
       inputMirroring : 0
     })
     .then( ( got ) =>
-    {
+    { 
       if( o.asList )
-      _result.push( pid );
+      _result.push( _.numberFrom( pid ) );
       else
       _result[ pid ] = Object.create( null );
       if( got.exitCode != 0 )
       return result;
       let ready = new _.Consequence().take( null );
       let pids = _.strSplitNonPreserving({ src: got.output, delimeter : '\n' });
-      _.each( pids, ( cpid ) => ready.then( () => childrenOf( command, cpid, _result[ pid ] ) ) )
+      _.each( pids, ( cpid ) => ready.then( () => childrenOf( command, cpid, o.asList ? _result : _result[ pid ] ) ) )
       return ready;
     })
   }
