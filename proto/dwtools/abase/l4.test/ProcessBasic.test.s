@@ -9416,7 +9416,7 @@ function shellDetachingThrowing( test )
     .then( () =>
     {
       test.is( _.strHas( o.output, /Detached child with pid: .* is continuing execution after parent death/ ) );
-      return _.time.out( 3000, () => null );
+      return _.time.out( 6000, () => null );
     })
     .then( () =>
     {
