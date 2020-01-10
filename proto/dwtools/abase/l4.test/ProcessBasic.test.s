@@ -14267,92 +14267,102 @@ experiment.experimental = 1;
 
 /* qqq Vova : extend, cover kill of group of processes */
 
-// function killComplex( test )
-// {
-//   var context = this;
-//   var routinePath = _.path.join( context.suitePath, test.name );
+function killComplex( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
 
-//   function testApp()
-//   {
-//     setTimeout( () =>
-//     {
-//       console.log( 'Application timeout!' )
-//     }, 2500 )
-//   }
+  function testApp()
+  {
+    setTimeout( () =>
+    {
+      console.log( 'Application timeout!' )
+    }, 2500 )
+  }
 
-//   function testApp2()
-//   {
-//     _.include( 'wAppBasic' );
-//     _.include( 'wFiles' );
-//     var testAppPath = _.path.join( __dirname, 'testApp.js' );
-//     var o = { execPath : 'node ' + testAppPath, throwingExitCode : 0  }
-//     var ready = _.process.start( o )
-//     process.send( o.process.pid );
-//     ready.then( ( got ) =>
-//     {
-//       process.send({ exitCode : o.exitCode, exitSignal : o.exitSignal })
-//       return null;
-//     })
-//     return ready;
-//   }
+  function testApp2()
+  {
+    _.include( 'wAppBasic' );
+    _.include( 'wFiles' );
+    var testAppPath = _.path.join( __dirname, 'testApp.js' );
+    var o = { execPath : 'node ' + testAppPath, throwingExitCode : 0  }
+    var ready = _.process.start( o )
+    process.send( o.process.pid );
+    ready.then( ( got ) =>
+    {
+      process.send({ exitCode : o.exitCode, pid : o.process.pid, exitSignal : o.exitSignal })
+      return null;
+    })
+    return ready;
+  }
 
-//   /* */
+  /* */
 
-//   var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-//   var testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
-//   _.fileProvider.fileWrite( testAppPath, testAppCode );
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
 
-//   var testAppPath2 = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp2.js' ) );
-//   var testAppCode2 = context.toolsPathInclude + testApp2.toString() + '\ntestApp2();';
-//   _.fileProvider.fileWrite( testAppPath2, testAppCode2 );
+  var testAppPath2 = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp2.js' ) );
+  var testAppCode2 = context.toolsPathInclude + testApp2.toString() + '\ntestApp2();';
+  _.fileProvider.fileWrite( testAppPath2, testAppCode2 );
 
-//   var con = new _.Consequence().take( null )
+  var con = new _.Consequence().take( null )
 
-//   .thenKeep( () =>
-//   {
-//     test.case = 'Kill child of child process'
-//     var o =
-//     {
-//       execPath :  'node ' + testAppPath2,
-//       mode : 'spawn',
-//       ipc : 1,
-//       outputCollecting : 1,
-//       throwingExitCode : 0
-//     }
+  .thenKeep( () =>
+  {
+    test.case = 'Kill child of child process'
+    var o =
+    {
+      execPath :  'node ' + testAppPath2,
+      mode : 'spawn',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
 
-//     let ready = _.process.start( o );
+    let ready = _.process.start( o );
 
-//     let pid = null;
-//     let childOfChild = null;
-//     o.process.on( 'message', ( data ) =>
-//     {
-//       if( !pid )
-//       {
-//         pid = _.numberFrom( data )
-//         _.process.kill( pid );
-//       }
-//       else
-//       {
-//         childOfChild = data;
-//       }
-//     })
+    let pid = null;
+    let childOfChild = null;
+    o.process.on( 'message', ( data ) =>
+    {
+      if( !pid )
+      {
+        pid = _.numberFrom( data )
+        _.process.kill( pid );
+      }
+      else
+      {
+        childOfChild = data;
+      }
+    })
 
-//     ready.thenKeep( ( got ) =>
-//     {
-//       test.identical( got.exitCode , 0 );
-//       test.identical( got.exitSignal , null );
-//       test.identical( childOfChild.exitCode , null );
-//       test.identical( childOfChild.exitSignal , 'SIGTERM' );
-//       return null;
-//     })
+    ready.thenKeep( ( got ) =>
+    {
+      test.identical( got.exitCode , 0 );
+      test.identical( got.exitSignal , null );
+      test.identical( childOfChild.pid , pid );
+      if( process.platform === 'win32' )
+      {
+        test.identical( childOfChild.exitCode , 1 );
+        test.identical( childOfChild.exitSignal , null );
+      }
+      else
+      {
+        test.identical( childOfChild.exitCode , null );
+        test.identical( childOfChild.exitSignal , 'SIGTERM' );
+      }
+      
+      return null;
+    })
 
-//     return ready;
-//   })
+    return ready;
+  })
 
-//   /* */
+  /* */
 
-//   return con;
-// }
+  return con;
+}
 
 //
 
@@ -14459,8 +14469,7 @@ var Proto =
     children,
     childrenAsList,
 
-    // kill,
-    // killComplex
+    killComplex
 
   },
 
