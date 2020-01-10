@@ -396,6 +396,62 @@ function processArgs( test )
 
 }
 
+function processArgs( test )
+{ 
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+  
+  function testApp()
+  {
+    _.include( 'wAppBasic' );
+    _.include( 'wStringsExtra' )
+    _.include( 'wFiles' )
+
+    var got = _.process.args({ caching : 0 });
+    _.fileProvider.fileWrite( _.path.join( __dirname, 'got' ), JSON.stringify( got ) )
+  }
+  
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
+  var expectedOutput = testAppPath + '\n';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+  
+  var _argv =  process.argv.slice( 0, 2 );
+  _argv = _.path.s.normalize( _argv );
+
+  var ready = new _.Consequence().take( null )
+  let shell = _.process.starter
+  ({ 
+    execPath : 'node ' + testAppPath,
+    mode : 'spawn',
+    throwingExitCode : 0,
+  })
+  let filePath = _.path.join( routinePath, 'got' );
+  
+  ready
+  
+  .then( () => 
+  { 
+    var argv = [];
+    argv.unshift.apply( argv, _argv );
+    return shell({ args : argv })
+    .then( o => 
+    {
+      test.identical( o.exitCode, 0 );
+      var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+      var expected =
+      {
+      }
+      test.contains( got, expected );
+      return null;
+    })
+  })
+  
+  /*  */
+  
+  return ready;
+}
+
 //
 
 function _exitHandlerOnce( test )
