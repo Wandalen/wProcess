@@ -11846,7 +11846,9 @@ function kill( test )
 
     return ready;
   })
-
+  
+  // qqq Vova : find how to simulate EPERM error using process.kill and write test case
+  
   /* */
 
   return con;
@@ -14260,156 +14262,6 @@ function experiment( test )
 }
 
 experiment.experimental = 1;
-
-//
-
-// function kill( test )
-// {
-//   var context = this;
-//   var routinePath = _.path.join( context.suitePath, test.name );
-
-//   function testApp()
-//   {
-//     setTimeout( () =>
-//     {
-//       console.log( 'Application timeout!' )
-//     }, 2500 )
-//   }
-
-//   /* */
-
-//   var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-//   var testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
-//   var expectedOutput = testAppPath + '\n';
-//   _.fileProvider.fileWrite( testAppPath, testAppCode );
-
-//   var con = new _.Consequence().take( null )
-
-//   /* */
-
-//   .thenKeep( () =>
-//   {
-//     var o =
-//     {
-//       execPath :  'node ' + testAppPath,
-//       mode : 'spawn',
-//       outputCollecting : 1,
-//       throwingExitCode : 0
-//     }
-
-//     let ready = _.process.start( o )
-
-//     _.process.kill( o.process.pid );
-
-//     ready.thenKeep( ( got ) =>
-//     {
-//       test.identical( got.exitCode , null );
-//       test.identical( got.exitSignal , 'SIGTERM' );
-//       test.is( !_.strHas( got.output, 'Application timeout!' ) );
-//       return null;
-//     })
-
-//     return ready;
-//   })
-
-//   /*  */
-
-//   .thenKeep( () =>
-//   {
-//     var o =
-//     {
-//       execPath :  'node ' + testAppPath,
-//       mode : 'spawn',
-//       outputCollecting : 1,
-//       throwingExitCode : 0
-//     }
-
-//     let ready = _.process.start( o )
-
-//     _.process.kill({ pid : o.process.pid, signal : 'SIGINT' });
-
-//     ready.thenKeep( ( got ) =>
-//     {
-//       test.identical( got.exitCode , null );
-//       test.identical( got.exitSignal , 'SIGINT' );
-//       test.is( !_.strHas( got.output, 'Application timeout!' ) );
-//       return null;
-//     })
-
-//     return ready;
-//   })
-
-//   /*  */
-
-//   .thenKeep( () =>
-//   {
-//     var o =
-//     {
-//       execPath :  'node ' + testAppPath,
-//       mode : 'spawn',
-//       outputCollecting : 1,
-//       throwingExitCode : 0
-//     }
-
-//     let ready = _.process.start( o )
-
-//     var got = _.process.kill({ pid : o.process.pid, signal : 0 });
-//     test.identical( got, true );
-//     var got = _.process.isRunning( o.process.pid );
-//     test.identical( got, true );
-
-//     ready.thenKeep( ( got ) =>
-//     {
-//       test.identical( got.exitCode , 0 );
-//       test.identical( got.exitSignal , null );
-//       test.is( _.strHas( got.output, 'Application timeout!' ) );
-
-//       var got = _.process.kill({ pid : o.process.pid, signal : 0 });
-//       test.identical( got, false );
-//       var got = _.process.isRunning( o.process.pid );
-//       test.identical( got, false );
-
-//       test.shouldThrowErrorSync( () => _.process.kill( o.process.pid ) );
-
-//       return null;
-//     })
-
-//     return ready;
-//   })
-
-//   //
-
-//   .thenKeep( () =>
-//   {
-//     var o =
-//     {
-//       execPath :  'node ' + testAppPath,
-//       mode : 'spawn',
-//       outputCollecting : 1,
-//       throwingExitCode : 0
-//     }
-
-//     let ready = _.process.start( o )
-
-//     test.shouldThrowErrorSync( () => _.process.kill({ pid : o.process.pid, signal : 'UNKNOWN' }) )
-//     var got = _.process.isRunning( o.process.pid );
-//     test.identical( got, true );
-
-//     ready.thenKeep( ( got ) =>
-//     {
-//       test.identical( got.exitCode , 0 );
-//       test.identical( got.exitSignal , null );
-//       test.is( _.strHas( got.output, 'Application timeout!' ) );
-//       return null;
-//     })
-
-//     return ready;
-//   })
-
-//   /* qqq Vova : find how to simulate EPERM error using process.kill and write test case */
-
-//   return con;
-// }
 
 //
 
