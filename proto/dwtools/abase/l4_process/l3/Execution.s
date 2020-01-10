@@ -2058,10 +2058,20 @@ function terminate( o )
   }
 
   function windowsKill( pid, signal )
-  {
-    if( !WindowsKill )
-    WindowsKill = require( 'wwindowskill' )({ replaceNodeKill: false });
-    WindowsKill( pid, signal );
+  { 
+    _.process.start
+    ({ 
+      execPath : 'node', 
+      args : [ '-e', `var kill = require( 'wwindowskill' )();kill( ${pid},'${signal}' )`],
+      currentPath : __dirname, 
+      inputMirroring : 0,
+      outputPiping : 0,
+      mode : 'spawn', 
+      sync : 1 
+    })
+    // if( !WindowsKill )
+    // WindowsKill = require( 'wwindowskill' )();
+    // WindowsKill( pid, signal );
   }
 
   function handleError( err )
