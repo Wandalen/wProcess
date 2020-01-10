@@ -256,7 +256,7 @@ function start_body( o )
         prevReady.finally( currentReady );
         prevReady = currentReady;
       }
-
+      
       let o2 = _.mapExtend( null, o );
       o2.execPath = execPath[ p ];
       o2.args = o.args ? o.args.slice() : o.args;
@@ -264,7 +264,13 @@ function start_body( o )
       o2.ready = currentReady;
       options.push( o2 );
       _.process.start( o2 );
-
+         
+      if( o.concurrent )
+      currentReady.catch( ( err ) => 
+      {
+        _.errAttend( err )
+        throw err; 
+      })
     }
 
     // debugger;
