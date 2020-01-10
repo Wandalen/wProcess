@@ -13315,28 +13315,47 @@ function terminateWithDetachedChildren( test )
     {
       execPath : 'node testApp2.js',
       currentPath : __dirname,
-      mode : 'spawn',
-      detaching,
-      stdio : 'inherit',
+      mode : 'spawn', 
+      detaching : 1,
+      stdio : 'ignore',
+      outputPiping : 0,
       inputMirroring : 0,
+      outputCollecting : 0,
       throwingExitCode : 0
     }
     _.process.start( o1 );
+    o1.ready.catch( err => 
+    {
+      _.errAttend( err )
+      return null;
+    })
     var o2 =
     {
       execPath : 'node testApp2.js',
       currentPath : __dirname,
-      mode : 'spawn',
-      detaching,
-      stdio : 'inherit',
+      mode : 'spawn', 
+      detaching : 1,
+      stdio : 'ignore',
+      outputPiping : 0,
       inputMirroring : 0,
+      outputCollecting : 0,
       throwingExitCode : 0
     }
     _.process.start( o2 );
+    o2.ready.catch( err => 
+    {
+      _.errAttend( err )
+      return null;
+    })
     _.time.out( 1000, () =>
     {
       process.send( [ o1.process.pid, o2.process.pid ] )
     })
+    _.time.out( 4000, () =>
+    {
+      _.Procedure.TerminationBegin();
+    })
+    
   }
 
   /* */
@@ -13383,13 +13402,16 @@ function terminateWithDetachedChildren( test )
         test.identical( got.exitCode, 0 );
         test.identical( got.exitSignal, null );
         test.is( _.strHas( got.output, 'SIGINT' ) );
-        /* xxx Vova : problem with termination of detached proces on Windows, child process does't receive SIGINT */
-        test.is( _.fileProvider.fileExists( _.path.join( routinePath, children[ 0 ].toString() ) ) )
-        test.is( _.fileProvider.fileExists( _.path.join( routinePath, children[ 1 ].toString() ) ) )
-        test.is( !_.process.isRunning( o.process.pid ) )
-        test.is( !_.process.isRunning( children[ 0 ] ) );
-        test.is( !_.process.isRunning( children[ 1 ] ) );
-        return null;
+        return _.time.out( 5000, () => 
+        {
+          /* xxx Vova : problem with termination of detached proces on Windows, child process does't receive SIGINT */
+          test.is( _.fileProvider.fileExists( _.path.join( routinePath, children[ 0 ].toString() ) ) )
+          test.is( _.fileProvider.fileExists( _.path.join( routinePath, children[ 1 ].toString() ) ) )
+          test.is( !_.process.isRunning( o.process.pid ) )
+          test.is( !_.process.isRunning( children[ 0 ] ) );
+          test.is( !_.process.isRunning( children[ 1 ] ) );
+          return null;
+        })
       })
     })
 
@@ -14579,7 +14601,7 @@ var Proto =
     terminateComplex,
     terminateDetachedComplex,
     terminateWithChildren,
-    // terminateWithDetachedChildren, //xxx Vova:investigate and fix termination of deatched process on Windows
+    terminateWithDetachedChildren, //xxx Vova:investigate and fix termination of deatched process on Windows
     terminateTimeOut,
     terminateDifferentStdio,
     children,
