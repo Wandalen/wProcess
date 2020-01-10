@@ -12781,33 +12781,48 @@ function terminateDetachedComplex( test )
       execPath : 'node testApp2.js',
       currentPath : __dirname,
       mode : 'spawn',
-      stdio : 'inherit',
+      stdio : 'ignore',
       detaching,
       inputMirroring : 0,
+      outputPiping : 0,
       throwingExitCode : 0
     }
-    _.process.start( o );
-    _.time.out( 1000, () =>
-    {
-      console.log( o.process.pid )
+    let ready = _.process.start( o );
+    ready.catch( ( err ) => 
+    { 
+      _.errAttend( err );
+      return null;
+    })
+    _.time.out( 2000, () => 
+    { 
       if( process.send )
       process.send( o.process.pid )
+      else
+      _.fileProvider.fileWrite( _.path.join( __dirname, 'pid' ), o.process.pid.toString() )
+      return null;
+    })
+    _.time.out( 4000, () => 
+    { 
+      _.Procedure.TerminationBegin()
+      return null;
     })
   }
 
   function testApp2()
-  {
+  { 
     process.on( 'SIGINT', () =>
     {
       console.log( 'second child SIGINT' )
-      var fs = require( 'fs' );
-      var path = require( 'path' )
-      fs.writeFileSync( path.join( __dirname, process.pid.toString() ), process.pid )
       process.exit( 0 );
     })
     if( process.send )
     process.send( process.pid );
-    setTimeout( () => {}, 5000 )
+    setTimeout( () => 
+    {
+      var fs = require( 'fs' );
+      var path = require( 'path' )
+      fs.writeFileSync( path.join( __dirname, process.pid.toString() ), process.pid )
+    }, 5000 )
   }
 
   /* */
@@ -12839,8 +12854,8 @@ function terminateDetachedComplex( test )
     let childPid;
     o.process.on( 'message', ( data ) =>
     {
-      childPid = _.numberFrom( data )
-      _.process.terminate({ pid : o.process.pid });
+      childPid = data;
+      _.process.terminate( o.process );
     })
 
     ready.thenKeep( ( got ) =>
@@ -12849,10 +12864,13 @@ function terminateDetachedComplex( test )
       test.identical( got.exitSignal, null );
       test.is( _.strHas( got.output, 'SIGINT' ) );
       test.is( !_.process.isRunning( o.process.pid ) )
-      test.is( _.process.isRunning( childPid ) );
+      test.is( _.process.isRunning( _.numberFrom( childPid ) ) )
       return _.time.out( 5000, () =>
       {
-        test.is( !_.process.isRunning( childPid ) );
+        var files = _.fileProvider.dirRead( routinePath );
+        test.is( !_.process.isRunning( _.numberFrom( childPid ) ) )
+        test.identical( _.numberFrom( files[ 0 ] ),_.numberFrom( childPid ) );
+        _.fileProvider.fileDelete( _.path.join( routinePath, files[ 0 ] ) );
         return null;
       });
     })
@@ -12878,8 +12896,8 @@ function terminateDetachedComplex( test )
     let childPid;
     o.process.on( 'message', ( data ) =>
     {
-      childPid = _.numberFrom( data )
-      _.process.terminate({ pid : o.process.pid });
+      childPid = data;
+      _.process.terminate( o.process );
     })
 
     ready.thenKeep( ( got ) =>
@@ -12888,10 +12906,13 @@ function terminateDetachedComplex( test )
       test.identical( got.exitSignal, null );
       test.is( _.strHas( got.output, 'SIGINT' ) );
       test.is( !_.process.isRunning( o.process.pid ) )
-      test.is( _.process.isRunning( childPid ) );
+      test.is( _.process.isRunning( _.numberFrom( childPid ) ) )
       return _.time.out( 5000, () =>
       {
-        test.is( !_.process.isRunning( childPid ) );
+        var files = _.fileProvider.dirRead( routinePath );
+        test.is( !_.process.isRunning( _.numberFrom( childPid ) ) )
+        test.identical( _.numberFrom( files[ 0 ] ),_.numberFrom( childPid ) );
+        _.fileProvider.fileDelete( _.path.join( routinePath, files[ 0 ] ) );
         return null;
       });
     })
@@ -12900,7 +12921,7 @@ function terminateDetachedComplex( test )
   })
 
   //
-
+  
   .thenKeep( () =>
   {
     test.case = 'Sending signal to child process that has detached child, detached child should continue to work'
@@ -12908,20 +12929,21 @@ function terminateDetachedComplex( test )
     {
       execPath : 'node ' + testAppPath + ' detached',
       mode : 'shell',
+      outputPiping : 1,
       outputCollecting : 1,
       throwingExitCode : 0
     }
-
+    
     let ready = _.process.start( o );
     let childPid;
-    _.time.out( 1500, () =>
+    _.time.out( 3000, () =>
     {
-      childPid = _.numberFrom( o.output )
+      childPid = _.numberFrom( _.fileProvider.fileRead( _.path.join( routinePath, 'pid' ) ) );
       _.process.terminate({ pid : o.process.pid });
     })
 
     ready.thenKeep( ( got ) =>
-    {
+    { 
       if( process.platform === 'linux' )
       {
         test.identical( got.exitCode , null );
@@ -12933,19 +12955,22 @@ function terminateDetachedComplex( test )
         test.identical( got.exitSignal, null );
       }
       test.is( !_.process.isRunning( o.process.pid ) )
-      test.is( _.process.isRunning( childPid ) );
+      test.is( _.process.isRunning( _.numberFrom( childPid ) ) )
       return _.time.out( 5000, () =>
       {
-        test.is( !_.process.isRunning( childPid ) );
+        var files = _.fileProvider.dirRead( routinePath );
+        test.is( !_.process.isRunning( _.numberFrom( childPid ) ) )
+        test.identical( _.numberFrom( files[ 0 ] ),_.numberFrom( childPid ) );
+        _.fileProvider.fileDelete( _.path.join( routinePath, files[ 0 ] ) );
         return null;
       });
     })
 
     return ready;
   })
-
+  
   //
-
+  
   .thenKeep( () =>
   {
     test.case = 'Sending signal to child process that has detached child, detached child should continue to work'
@@ -12953,20 +12978,21 @@ function terminateDetachedComplex( test )
     {
       execPath : 'node ' + testAppPath + ' detached',
       mode : 'exec',
+      outputPiping : 1,
       outputCollecting : 1,
       throwingExitCode : 0
     }
-
+    
     let ready = _.process.start( o );
     let childPid;
-    _.time.out( 1500, () =>
+    _.time.out( 3000, () =>
     {
-      childPid = _.numberFrom( o.output )
+      childPid = _.numberFrom( _.fileProvider.fileRead( _.path.join( routinePath, 'pid' ) ) );
       _.process.terminate({ pid : o.process.pid });
     })
 
     ready.thenKeep( ( got ) =>
-    {
+    { 
       if( process.platform === 'linux' )
       {
         test.identical( got.exitCode , null );
@@ -12978,10 +13004,13 @@ function terminateDetachedComplex( test )
         test.identical( got.exitSignal, null );
       }
       test.is( !_.process.isRunning( o.process.pid ) )
-      test.is( _.process.isRunning( childPid ) );
+      test.is( _.process.isRunning( _.numberFrom( childPid ) ) )
       return _.time.out( 5000, () =>
       {
-        test.is( !_.process.isRunning( childPid ) );
+        var files = _.fileProvider.dirRead( routinePath );
+        test.is( !_.process.isRunning( _.numberFrom( childPid ) ) )
+        test.identical( _.numberFrom( files[ 0 ] ),_.numberFrom( childPid ) );
+        _.fileProvider.fileDelete( _.path.join( routinePath, files[ 0 ] ) );
         return null;
       });
     })
@@ -14548,7 +14577,7 @@ var Proto =
     killTimeOut,
     terminate,
     terminateComplex,
-    //terminateDetachedComplex,//xxx Vova:investigate and fix termination of deatched process on Windows
+    terminateDetachedComplex,
     terminateWithChildren,
     // terminateWithDetachedChildren, //xxx Vova:investigate and fix termination of deatched process on Windows
     terminateTimeOut,
