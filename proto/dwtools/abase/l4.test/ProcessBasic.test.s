@@ -560,7 +560,7 @@ function processArgs( test )
       keyValDelimeter : ':',
       map : { x : 'y xyz', y : 1 },
       subject : 'a b c d',
-      scriptArgs : [ 'a b c d', 'x', ' :', 'y', 'xyz', 'y', ' :', 1 ]
+      scriptArgs : [ 'a b c d', 'x', ' :', 'y', 'xyz', 'y', ' :', '1' ]
     }
     test.contains( got, expected );
     return null;
@@ -595,11 +595,11 @@ function processArgs( test )
       scriptArgs :
       [
         'filePath',
-        'a :', 1,
+        'a :', '1',
         'b', ' :2',
-        'c :  ', 3,
+        'c :  ', '3',
         'd', ' :  4',
-        'e', ' :  ', 5
+        'e', ' :  ', '5'
       ]
     }
     test.contains( got, expected );
@@ -621,7 +621,7 @@ function processArgs( test )
       keyValDelimeter : ':',
       map : { a : '', b : '', c : 'd', x : 0, y : 1 },
       subject : '',
-      scriptArgs : [ 'a :b :c :d', 'x', ' :', 0, 'y', ' :', 1 ]
+      scriptArgs : [ 'a :b :c :d', 'x', ' :', '0', 'y', ' :', '1' ]
     }
     test.contains( got, expected );
     return null;
@@ -704,11 +704,11 @@ function processArgs( test )
       keyValDelimeter : ':',
       commandsDelimeter : ';',
       subject : '',
-      map : { path : '', D : '\\path\\to\\file' },
+      map : { path : 'D:\\path\\to\\file' },
       scriptArgs : [ 'path:D:\\path\\to\\file' ],
       scriptArgsString : 'path:D:\\path\\to\\file',
       subjects : [ '' ],
-      maps : [ { path : '', D : '\\path\\to\\file' } ],
+      maps : [ { path : 'D:\\path\\to\\file' } ],
     }
     test.contains( got, expected );
     return null;
