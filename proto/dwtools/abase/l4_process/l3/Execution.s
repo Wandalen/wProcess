@@ -264,14 +264,7 @@ function start_body( o )
       o2.ready = currentReady;
       options.push( o2 );
       _.process.start( o2 );
-       
-      //qqq:possible workaround for problem with uncaught async error and AndKepp
-      // if( o.concurrent )
-      // currentReady.catch( ( err ) => 
-      // {
-      //   _.errAttend( err )
-      //   throw err; 
-      // })
+      
     }
 
     // debugger;
