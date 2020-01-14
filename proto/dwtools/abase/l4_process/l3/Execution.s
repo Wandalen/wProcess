@@ -256,7 +256,7 @@ function start_body( o )
         prevReady.finally( currentReady );
         prevReady = currentReady;
       }
-
+      
       let o2 = _.mapExtend( null, o );
       o2.execPath = execPath[ p ];
       o2.args = o.args ? o.args.slice() : o.args;
@@ -264,7 +264,14 @@ function start_body( o )
       o2.ready = currentReady;
       options.push( o2 );
       _.process.start( o2 );
-
+       
+      //qqq:possible workaround for problem with uncaught async error and AndKepp
+      // if( o.concurrent )
+      // currentReady.catch( ( err ) => 
+      // {
+      //   _.errAttend( err )
+      //   throw err; 
+      // })
     }
 
     // debugger;
@@ -2052,10 +2059,20 @@ function terminate( o )
   }
 
   function windowsKill( pid, signal )
-  {
-    if( !WindowsKill )
-    WindowsKill = require( 'wwindowskill' )({ replaceNodeKill: false });
-    WindowsKill( pid, signal );
+  { 
+    _.process.start
+    ({ 
+      execPath : 'node', 
+      args : [ '-e', `var kill = require( 'wwindowskill' )();kill( ${pid},'${signal}' )`],
+      currentPath : __dirname, 
+      inputMirroring : 0,
+      outputPiping : 0,
+      mode : 'spawn', 
+      sync : 1 
+    })
+    // if( !WindowsKill )
+    // WindowsKill = require( 'wwindowskill' )();
+    // WindowsKill( pid, signal );
   }
 
   function handleError( err )
@@ -2169,16 +2186,16 @@ function children( o )
       inputMirroring : 0
     })
     .then( ( got ) =>
-    {
+    { 
       if( o.asList )
-      _result.push( pid );
+      _result.push( _.numberFrom( pid ) );
       else
       _result[ pid ] = Object.create( null );
       if( got.exitCode != 0 )
       return result;
       let ready = new _.Consequence().take( null );
       let pids = _.strSplitNonPreserving({ src: got.output, delimeter : '\n' });
-      _.each( pids, ( cpid ) => ready.then( () => childrenOf( command, cpid, _result[ pid ] ) ) )
+      _.each( pids, ( cpid ) => ready.then( () => childrenOf( command, cpid, o.asList ? _result : _result[ pid ] ) ) )
       return ready;
     })
   }

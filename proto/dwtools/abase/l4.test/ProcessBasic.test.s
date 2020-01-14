@@ -111,143 +111,466 @@ let _testAppShell = function testAppShell()
 
 /* qqq : rewrite this test properly
 should start separate appication
+aaa : done
 */
 
+// function processArgs( test )
+// {
+//   var _argv =  process.argv.slice( 0, 2 );
+//   _argv = _.path.s.normalize( _argv );
+
+//   /* */
+
+//   var argv = [];
+//   argv.unshift.apply( argv, _argv );
+//   var got = _.process.args({ argv, caching : 0 });
+//   var expected =
+//   {
+//     interpreterPath : _argv[ 0 ],
+//     scriptPath : _argv[ 1 ],
+//     interpreterArgs : [],
+//     keyValDelimeter : ':',
+//     subject : '',
+//     map : Object.create( null ),
+//     scriptArgs : [],
+//     scriptArgsString : '',
+//     subjects : [],
+//     maps : [],
+//   }
+//   test.contains( got, expected );
+
+//   /* */
+
+//   var argv = [ '' ];
+//   argv.unshift.apply( argv, _argv );
+//   var got = _.process.args({ argv, caching : 0 });
+//   var expected =
+//   {
+//     interpreterPath : _argv[ 0 ],
+//     scriptPath : _argv[ 1 ],
+//     interpreterArgs : [],
+//     keyValDelimeter : ':',
+//     subject : '',
+//     map : Object.create( null ),
+//     scriptArgs : [ '' ],
+//     scriptArgsString : '',
+//     subjects : [],
+//     maps : [],
+//   }
+//   test.contains( got, expected );
+
+//   /* */
+
+//   var argv = [ 'x', ':', 'aa', 'bbb :' ];
+//   argv.unshift.apply( argv, _argv );
+//   var got = _.process.args({ argv, caching : 0 });
+//   var expected =
+//   {
+//     interpreterPath : _argv[ 0 ],
+//     scriptPath : _argv[ 1 ],
+//     interpreterArgs : [],
+//     keyValDelimeter : ':',
+//     map : { x : 'aa', bbb : '' },
+//     subject : '',
+//     scriptArgs : [ 'x', ':', 'aa', 'bbb :' ]
+//   }
+//   test.contains( got, expected );
+
+//   /* */
+
+//   var argv = [ 'x', ' : ', 'y' ];
+//   argv.unshift.apply( argv, _argv );
+//   var got = _.process.args({ argv, caching : 0 });
+//   var expected =
+//   {
+//     interpreterPath : _argv[ 0 ],
+//     scriptPath : _argv[ 1 ],
+//     interpreterArgs : [],
+//     keyValDelimeter : ':',
+//     map : { x : 'y' },
+//     subject : '',
+//     scriptArgs :[ 'x', ' : ', 'y' ]
+//   }
+//   test.contains( got, expected );
+
+//   /* */
+
+//   var argv = [ 'x', ' :', 'y', 'x', ' :', '1' ];
+//   argv.unshift.apply( argv, _argv );
+//   var got = _.process.args({ argv, caching : 0 });
+//   var expected =
+//   {
+//     interpreterPath : _argv[ 0 ],
+//     scriptPath : _argv[ 1 ],
+//     interpreterArgs : [],
+//     keyValDelimeter : ':',
+//     map : { x : 1 },
+//     subject : '',
+//     scriptArgs : [ 'x', ' :', 'y', 'x', ' :', '1']
+//   }
+//   test.contains( got, expected );
+
+//   /* */
+
+//   var argv = [ 'a b c d', 'x', ' :', 'y', 'xyz', 'y', ' :', 1 ];
+//   argv.unshift.apply( argv, _argv );
+//   var got = _.process.args({ argv, caching : 0 });
+//   var expected =
+//   {
+//     interpreterPath : _argv[ 0 ],
+//     scriptPath : _argv[ 1 ],
+//     interpreterArgs : [],
+//     keyValDelimeter : ':',
+//     map : { x : 'y xyz', y : 1 },
+//     subject : 'a b c d',
+//     scriptArgs : [ 'a b c d', 'x', ' :', 'y', 'xyz', 'y', ' :', 1 ]
+//   }
+//   test.contains( got, expected );
+
+//   /* */
+
+//   var argv =
+//   [
+//     'filePath',
+//     'a :', 1,
+//     'b', ' :2',
+//     'c :  ', 3,
+//     'd', ' :  4',
+//     'e', ' :  ', 5
+//   ];
+//   argv.unshift.apply( argv, _argv );
+//   var got = _.process.args({ argv, caching : 0 });
+//   var expected =
+//   {
+//     interpreterPath : _argv[ 0 ],
+//     scriptPath : _argv[ 1 ],
+//     interpreterArgs : [],
+//     keyValDelimeter : ':',
+//     map : { a : 1, b : 2, c : 3, d : 4, e : 5 },
+//     subject : 'filePath',
+//     scriptArgs :
+//     [
+//       'filePath',
+//       'a :', 1,
+//       'b', ' :2',
+//       'c :  ', 3,
+//       'd', ' :  4',
+//       'e', ' :  ', 5
+//     ]
+//   }
+//   test.contains( got, expected );
+
+//   /* */
+
+//   var argv = [ 'a :b :c :d', 'x', ' :', 0, 'y', ' :', 1 ];
+//   argv.unshift.apply( argv, _argv );
+//   var got = _.process.args({ argv, caching : 0 });
+//   var expected =
+//   {
+//     interpreterPath : _argv[ 0 ],
+//     scriptPath : _argv[ 1 ],
+//     interpreterArgs : [],
+//     keyValDelimeter : ':',
+//     map : { a : '', b : '', c : 'd', x : 0, y : 1 },
+//     subject : '',
+//     scriptArgs : [ 'a :b :c :d', 'x', ' :', 0, 'y', ' :', 1 ]
+//   }
+//   test.contains( got, expected );
+
+//   /* */
+
+//   var argv = [];
+//   var got = _.process.args({ argv : [ 'interpreter', 'main.js', '.set v:5 ; .build debug:1 ; .export' ], caching : 0 });
+//   var expected =
+//   {
+//     interpreterPath : 'interpreter',
+//     scriptPath : 'main.js',
+//     interpreterArgs : [],
+//     keyValDelimeter : ':',
+//     commandsDelimeter : ';',
+//     subject : '.set',
+//     map : { v : 5 },
+//     scriptArgs : [ '.set v:5 ; .build debug:1 ; .export' ],
+//     scriptArgsString : '.set v:5 ; .build debug:1 ; .export',
+//     subjects : [ '.set', '.build', '.export' ],
+//     maps : [ { v : 5 }, { debug : 1 }, {} ],
+//   }
+//   test.contains( got, expected );
+
+//   /* */
+
+//   var argv = [];
+//   var got = _.process.args({ argv : [ 'interpreter', 'main.js', '.set v:[1 2  3 ] ; .build debug:1 ; .export' ], caching : 0 });
+//   var expected =
+//   {
+//     interpreterPath : 'interpreter',
+//     scriptPath : 'main.js',
+//     interpreterArgs : [],
+//     keyValDelimeter : ':',
+//     commandsDelimeter : ';',
+//     subject : '.set',
+//     map : { v : [ 1,2,3 ] },
+//     scriptArgs : [ '.set v:[1 2  3 ] ; .build debug:1 ; .export' ],
+//     scriptArgsString : '.set v:[1 2  3 ] ; .build debug:1 ; .export',
+//     subjects : [ '.set', '.build', '.export' ],
+//     maps : [ { v : [ 1,2,3 ] }, { debug : 1 }, {} ],
+//   }
+//   test.contains( got, expected );
+
+//   /* */
+
+//   test.case = 'windows native path as option, no quotes'
+//   var argv = [];
+//   var got = _.process.args({ argv : [ 'interpreter', 'main.js', 'path:D:\\path\\to\\file' ], caching : 0 });
+//   var expected =
+//   {
+//     interpreterPath : 'interpreter',
+//     scriptPath : 'main.js',
+//     interpreterArgs : [],
+//     keyValDelimeter : ':',
+//     commandsDelimeter : ';',
+//     subject : '',
+//     map : { path : '', D : '\\path\\to\\file' },
+//     scriptArgs : [ 'path:D:\\path\\to\\file' ],
+//     scriptArgsString : 'path:D:\\path\\to\\file',
+//     subjects : [ '' ],
+//     maps : [ { path : '', D : '\\path\\to\\file' } ],
+//   }
+//   test.contains( got, expected );
+
+//   test.case = 'windows native path as option, with quotes'
+//   var argv = [];
+//   var got = _.process.args({ argv : [ 'interpreter', 'main.js', 'path:"D:\\path\\to\\file"' ], caching : 0 });
+//   var expected =
+//   {
+//     interpreterPath : 'interpreter',
+//     scriptPath : 'main.js',
+//     interpreterArgs : [],
+//     keyValDelimeter : ':',
+//     commandsDelimeter : ';',
+//     subject : '',
+//     map : { path : 'D:\\path\\to\\file' },
+//     scriptArgs : [ 'path:"D:\\path\\to\\file"' ],
+//     scriptArgsString : 'path:"D:\\path\\to\\file"',
+//     subjects : [ '' ],
+//     maps : [ { path : 'D:\\path\\to\\file' } ],
+//   }
+//   test.contains( got, expected );
+
+//   test.case = 'number option with quotes'
+//   var argv = [];
+//   var got = _.process.args({ argv : [ 'interpreter', 'main.js', 'v:"10"' ], caching : 0 });
+//   var expected =
+//   {
+//     interpreterPath : 'interpreter',
+//     scriptPath : 'main.js',
+//     interpreterArgs : [],
+//     keyValDelimeter : ':',
+//     commandsDelimeter : ';',
+//     subject : '',
+//     map : { v : 10 },
+//     scriptArgs : [ 'v:"10"' ],
+//     scriptArgsString : 'v:"10"',
+//     subjects : [ '' ],
+//     maps : [ { v : 10 } ],
+//   }
+//   test.contains( got, expected );
+
+//   test.case = 'string option with quotes'
+//   var argv = [];
+//   var got = _.process.args({ argv : [ 'interpreter', 'main.js', 'str:"abc"' ], caching : 0 });
+//   var expected =
+//   {
+//     interpreterPath : 'interpreter',
+//     scriptPath : 'main.js',
+//     interpreterArgs : [],
+//     keyValDelimeter : ':',
+//     commandsDelimeter : ';',
+//     subject : '',
+//     map : { str : 'abc' },
+//     scriptArgs : [ 'str:"abc"' ],
+//     scriptArgsString : 'str:"abc"',
+//     subjects : [ '' ],
+//     maps : [ { str : 'abc' } ],
+//   }
+//   test.contains( got, expected );
+
+// }
+
+//
+
 function processArgs( test )
-{
-  var _argv =  process.argv.slice( 0, 2 );
-  _argv = _.path.s.normalize( _argv );
-
-  /* */
-
-  var argv = [];
-  argv.unshift.apply( argv, _argv );
-  var got = _.process.args({ argv, caching : 0 });
-  var expected =
+{ 
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+  
+  function testApp()
   {
-    interpreterPath : _argv[ 0 ],
-    scriptPath : _argv[ 1 ],
-    interpreterArgs : [],
-    keyValDelimeter : ':',
-    subject : '',
-    map : Object.create( null ),
-    scriptArgs : [],
-    scriptArgsString : '',
-    subjects : [],
-    maps : [],
+    _.include( 'wAppBasic' );
+    _.include( 'wStringsExtra' )
+    _.include( 'wFiles' )
+    
+    if( process.env.ignoreFirstTwoArgv )
+    process.argv = process.argv.slice( 2 );
+    
+    var got = _.process.args({ caching : 0 });
+    _.fileProvider.fileWrite( _.path.join( __dirname, 'got' ), JSON.stringify( got ) )
   }
-  test.contains( got, expected );
+  
+  let testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  let testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+  
 
+  let ready = new _.Consequence().take( null )
+  let shell = _.process.starter
+  ({ 
+    execPath : 'node ' + testAppPath,
+    mode : 'spawn',
+    throwingExitCode : 0,
+    ready
+  })
+  let filePath = _.path.join( routinePath, 'got' );
+  let interpreterPath = _.path.normalize( process.argv[ 0 ] );
+  let scriptPath = _.path.normalize( testAppPath );
+  
   /* */
-
-  var argv = [ '' ];
-  argv.unshift.apply( argv, _argv );
-  var got = _.process.args({ argv, caching : 0 });
-  var expected =
+  
+  shell({ args : [] })
+  .then( o => 
   {
-    interpreterPath : _argv[ 0 ],
-    scriptPath : _argv[ 1 ],
-    interpreterArgs : [],
-    keyValDelimeter : ':',
-    subject : '',
-    map : Object.create( null ),
-    scriptArgs : [ '' ],
-    scriptArgsString : '',
-    subjects : [],
-    maps : [],
-  }
-  test.contains( got, expected );
-
+    test.identical( o.exitCode, 0 );
+    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var expected =
+    {
+      interpreterPath,
+      scriptPath,
+      interpreterArgs : [],
+      keyValDelimeter : ':',
+      subject : '',
+      map : Object.create( null ),
+      scriptArgs : [],
+      scriptArgsString : '',
+      subjects : [],
+      maps : [],
+    }
+    test.contains( got, expected );
+    return null;
+  })
+  
   /* */
-
-  var argv = [ 'x', ':', 'aa', 'bbb :' ];
-  argv.unshift.apply( argv, _argv );
-  var got = _.process.args({ argv, caching : 0 });
-  var expected =
+  
+  shell({ args : [ '' ] })
+  .then( o => 
   {
-    interpreterPath : _argv[ 0 ],
-    scriptPath : _argv[ 1 ],
-    interpreterArgs : [],
-    keyValDelimeter : ':',
-    map : { x : 'aa', bbb : '' },
-    subject : '',
-    scriptArgs : [ 'x', ':', 'aa', 'bbb :' ]
-  }
-  test.contains( got, expected );
-
+    test.identical( o.exitCode, 0 );
+    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var expected =
+    {
+      interpreterPath,
+      scriptPath,
+      interpreterArgs : [],
+      keyValDelimeter : ':',
+      subject : '',
+      map : Object.create( null ),
+      scriptArgs : [ '' ],
+      scriptArgsString : '',
+      subjects : [],
+      maps : [],
+    }
+    test.contains( got, expected );
+    return null;
+  })
+  
   /* */
-
-  var argv = [ 'x', ' : ', 'y' ];
-  argv.unshift.apply( argv, _argv );
-  var got = _.process.args({ argv, caching : 0 });
-  var expected =
+  
+  shell({ args : [ 'x', ':', 'aa', 'bbb :' ] })
+  .then( o => 
   {
-    interpreterPath : _argv[ 0 ],
-    scriptPath : _argv[ 1 ],
-    interpreterArgs : [],
-    keyValDelimeter : ':',
-    map : { x : 'y' },
-    subject : '',
-    scriptArgs :[ 'x', ' : ', 'y' ]
-  }
-  test.contains( got, expected );
-
+    test.identical( o.exitCode, 0 );
+    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var expected =
+    {
+      interpreterPath,
+      scriptPath,
+      interpreterArgs : [],
+      keyValDelimeter : ':',
+      map : { x : 'aa', bbb : '' },
+      subject : '',
+      scriptArgs : [ 'x', ':', 'aa', 'bbb :' ]
+    }
+    test.contains( got, expected );
+    return null;
+  })
+  
   /* */
-
-  var argv = [ 'x', ' :', 'y', 'x', ' :', '1' ];
-  argv.unshift.apply( argv, _argv );
-  var got = _.process.args({ argv, caching : 0 });
-  var expected =
+  
+  shell({ args : [ 'x', ' : ', 'y' ] })
+  .then( o => 
   {
-    interpreterPath : _argv[ 0 ],
-    scriptPath : _argv[ 1 ],
-    interpreterArgs : [],
-    keyValDelimeter : ':',
-    map : { x : 1 },
-    subject : '',
-    scriptArgs : [ 'x', ' :', 'y', 'x', ' :', '1']
-  }
-  test.contains( got, expected );
-
+    test.identical( o.exitCode, 0 );
+    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var expected =
+    {
+      interpreterPath,
+      scriptPath,
+      interpreterArgs : [],
+      keyValDelimeter : ':',
+      map : { x : 'y' },
+      subject : '',
+      scriptArgs :[ 'x', ' : ', 'y' ]
+    }
+    test.contains( got, expected );
+    return null;
+  })
+  
   /* */
-
-  var argv = [ 'a b c d', 'x', ' :', 'y', 'xyz', 'y', ' :', 1 ];
-  argv.unshift.apply( argv, _argv );
-  var got = _.process.args({ argv, caching : 0 });
-  var expected =
+  
+  shell({ args : [ 'x', ' :', 'y', 'x', ' :', '1' ] })
+  .then( o => 
   {
-    interpreterPath : _argv[ 0 ],
-    scriptPath : _argv[ 1 ],
-    interpreterArgs : [],
-    keyValDelimeter : ':',
-    map : { x : 'y xyz', y : 1 },
-    subject : 'a b c d',
-    scriptArgs : [ 'a b c d', 'x', ' :', 'y', 'xyz', 'y', ' :', 1 ]
-  }
-  test.contains( got, expected );
-
+    test.identical( o.exitCode, 0 );
+    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var expected =
+    {
+      interpreterPath,
+      scriptPath,
+      interpreterArgs : [],
+      keyValDelimeter : ':',
+      map : { x : 1 },
+      subject : '',
+      scriptArgs : [ 'x', ' :', 'y', 'x', ' :', '1']
+    }
+    test.contains( got, expected );
+    return null;
+  })
+  
   /* */
-
-  var argv =
-  [
-    'filePath',
-    'a :', 1,
-    'b', ' :2',
-    'c :  ', 3,
-    'd', ' :  4',
-    'e', ' :  ', 5
-  ];
-  argv.unshift.apply( argv, _argv );
-  var got = _.process.args({ argv, caching : 0 });
-  var expected =
+  
+  shell({ args : [ 'a b c d', 'x', ' :', 'y', 'xyz', 'y', ' :', 1  ] })
+  .then( o => 
   {
-    interpreterPath : _argv[ 0 ],
-    scriptPath : _argv[ 1 ],
-    interpreterArgs : [],
-    keyValDelimeter : ':',
-    map : { a : 1, b : 2, c : 3, d : 4, e : 5 },
-    subject : 'filePath',
-    scriptArgs :
+    test.identical( o.exitCode, 0 );
+    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var expected =
+    {
+      interpreterPath,
+      scriptPath,
+      interpreterArgs : [],
+      keyValDelimeter : ':',
+      map : { x : 'y xyz', y : 1 },
+      subject : 'a b c d',
+      scriptArgs : [ 'a b c d', 'x', ' :', 'y', 'xyz', 'y', ' :', '1' ]
+    }
+    test.contains( got, expected );
+    return null;
+  })
+  
+  /* */
+  
+  shell
+  ({ 
+    args : 
     [
       'filePath',
       'a :', 1,
@@ -255,145 +578,230 @@ function processArgs( test )
       'c :  ', 3,
       'd', ' :  4',
       'e', ' :  ', 5
-    ]
-  }
-  test.contains( got, expected );
-
+    ] 
+  })
+  .then( o => 
+  {
+    test.identical( o.exitCode, 0 );
+    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var expected =
+    {
+      interpreterPath,
+      scriptPath,
+      interpreterArgs : [],
+      keyValDelimeter : ':',
+      map : { a : 1, b : 2, c : 3, d : 4, e : 5 },
+      subject : 'filePath',
+      scriptArgs :
+      [
+        'filePath',
+        'a :', '1',
+        'b', ' :2',
+        'c :  ', '3',
+        'd', ' :  4',
+        'e', ' :  ', '5'
+      ]
+    }
+    test.contains( got, expected );
+    return null;
+  })
+  
   /* */
-
-  var argv = [ 'a :b :c :d', 'x', ' :', 0, 'y', ' :', 1 ];
-  argv.unshift.apply( argv, _argv );
-  var got = _.process.args({ argv, caching : 0 });
-  var expected =
+  
+  shell({ args : [ 'a :b :c :d', 'x', ' :', 0, 'y', ' :', 1  ] })
+  .then( o => 
   {
-    interpreterPath : _argv[ 0 ],
-    scriptPath : _argv[ 1 ],
-    interpreterArgs : [],
-    keyValDelimeter : ':',
-    map : { a : '', b : '', c : 'd', x : 0, y : 1 },
-    subject : '',
-    scriptArgs : [ 'a :b :c :d', 'x', ' :', 0, 'y', ' :', 1 ]
-  }
-  test.contains( got, expected );
-
+    test.identical( o.exitCode, 0 );
+    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var expected =
+    {
+      interpreterPath,
+      scriptPath,
+      interpreterArgs : [],
+      keyValDelimeter : ':',
+      map : { a : '', b : '', c : 'd', x : 0, y : 1 },
+      subject : '',
+      scriptArgs : [ 'a :b :c :d', 'x', ' :', '0', 'y', ' :', '1' ]
+    }
+    test.contains( got, expected );
+    return null;
+  })
+  
   /* */
-
-  var argv = [];
-  var got = _.process.args({ argv : [ 'interpreter', 'main.js', '.set v:5 ; .build debug:1 ; .export' ], caching : 0 });
-  var expected =
+  
+  shell
+  ({ 
+    args : [ 'interpreter', 'main.js', '.set v:5 ; .build debug:1 ; .export' ],
+    env : { ignoreFirstTwoArgv : true } 
+  })
+  .then( o => 
   {
-    interpreterPath : 'interpreter',
-    scriptPath : 'main.js',
-    interpreterArgs : [],
-    keyValDelimeter : ':',
-    commandsDelimeter : ';',
-    subject : '.set',
-    map : { v : 5 },
-    scriptArgs : [ '.set v:5 ; .build debug:1 ; .export' ],
-    scriptArgsString : '.set v:5 ; .build debug:1 ; .export',
-    subjects : [ '.set', '.build', '.export' ],
-    maps : [ { v : 5 }, { debug : 1 }, {} ],
-  }
-  test.contains( got, expected );
-
+    test.identical( o.exitCode, 0 );
+    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var expected =
+    {
+      interpreterPath : 'interpreter',
+      scriptPath : 'main.js',
+      interpreterArgs : [],
+      keyValDelimeter : ':',
+      commandsDelimeter : ';',
+      subject : '.set',
+      map : { v : 5 },
+      scriptArgs : [ '.set v:5 ; .build debug:1 ; .export' ],
+      scriptArgsString : '.set v:5 ; .build debug:1 ; .export',
+      subjects : [ '.set', '.build', '.export' ],
+      maps : [ { v : 5 }, { debug : 1 }, {} ],
+    }
+    test.contains( got, expected );
+    return null;
+  })
+  
   /* */
-
-  var argv = [];
-  var got = _.process.args({ argv : [ 'interpreter', 'main.js', '.set v:[1 2  3 ] ; .build debug:1 ; .export' ], caching : 0 });
-  var expected =
+  
+  shell
+  ({ 
+    args : [ 'interpreter', 'main.js', '.set v:[1 2  3 ] ; .build debug:1 ; .export' ],
+    env : { ignoreFirstTwoArgv : true } 
+  })
+  .then( o => 
   {
-    interpreterPath : 'interpreter',
-    scriptPath : 'main.js',
-    interpreterArgs : [],
-    keyValDelimeter : ':',
-    commandsDelimeter : ';',
-    subject : '.set',
-    map : { v : [ 1,2,3 ] },
-    scriptArgs : [ '.set v:[1 2  3 ] ; .build debug:1 ; .export' ],
-    scriptArgsString : '.set v:[1 2  3 ] ; .build debug:1 ; .export',
-    subjects : [ '.set', '.build', '.export' ],
-    maps : [ { v : [ 1,2,3 ] }, { debug : 1 }, {} ],
-  }
-  test.contains( got, expected );
-
+    test.identical( o.exitCode, 0 );
+    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var expected =
+    {
+      interpreterPath : 'interpreter',
+      scriptPath : 'main.js',
+      interpreterArgs : [],
+      keyValDelimeter : ':',
+      commandsDelimeter : ';',
+      subject : '.set',
+      map : { v : [ 1,2,3 ] },
+      scriptArgs : [ '.set v:[1 2  3 ] ; .build debug:1 ; .export' ],
+      scriptArgsString : '.set v:[1 2  3 ] ; .build debug:1 ; .export',
+      subjects : [ '.set', '.build', '.export' ],
+      maps : [ { v : [ 1,2,3 ] }, { debug : 1 }, {} ],
+    }
+    test.contains( got, expected );
+    return null;
+  })
+  
   /* */
-
-  test.case = 'windows native path as option, no quotes'
-  var argv = [];
-  var got = _.process.args({ argv : [ 'interpreter', 'main.js', 'path:D:\\path\\to\\file' ], caching : 0 });
-  var expected =
+  
+  shell
+  ({ 
+    args : [ 'interpreter', 'main.js', 'path:D:\\path\\to\\file' ],
+    env : { ignoreFirstTwoArgv : true } 
+  })
+  .then( o => 
   {
-    interpreterPath : 'interpreter',
-    scriptPath : 'main.js',
-    interpreterArgs : [],
-    keyValDelimeter : ':',
-    commandsDelimeter : ';',
-    subject : '',
-    map : { path : '', D : '\\path\\to\\file' },
-    scriptArgs : [ 'path:D:\\path\\to\\file' ],
-    scriptArgsString : 'path:D:\\path\\to\\file',
-    subjects : [ '' ],
-    maps : [ { path : '', D : '\\path\\to\\file' } ],
-  }
-  test.contains( got, expected );
-
-  test.case = 'windows native path as option, with quotes'
-  var argv = [];
-  var got = _.process.args({ argv : [ 'interpreter', 'main.js', 'path:"D:\\path\\to\\file"' ], caching : 0 });
-  var expected =
+    test.identical( o.exitCode, 0 );
+    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var expected =
+    {
+      interpreterPath : 'interpreter',
+      scriptPath : 'main.js',
+      interpreterArgs : [],
+      keyValDelimeter : ':',
+      commandsDelimeter : ';',
+      subject : '',
+      map : { path : 'D:\\path\\to\\file' },
+      scriptArgs : [ 'path:D:\\path\\to\\file' ],
+      scriptArgsString : 'path:D:\\path\\to\\file',
+      subjects : [ '' ],
+      maps : [ { path : 'D:\\path\\to\\file' } ],
+    }
+    test.contains( got, expected );
+    return null;
+  })
+  
+  /* */
+  
+  shell
+  ({ 
+    args : [ 'interpreter', 'main.js', 'path:"D:\\path\\to\\file"' ],
+    env : { ignoreFirstTwoArgv : true } 
+  })
+  .then( o => 
   {
-    interpreterPath : 'interpreter',
-    scriptPath : 'main.js',
-    interpreterArgs : [],
-    keyValDelimeter : ':',
-    commandsDelimeter : ';',
-    subject : '',
-    map : { path : 'D:\\path\\to\\file' },
-    scriptArgs : [ 'path:"D:\\path\\to\\file"' ],
-    scriptArgsString : 'path:"D:\\path\\to\\file"',
-    subjects : [ '' ],
-    maps : [ { path : 'D:\\path\\to\\file' } ],
-  }
-  test.contains( got, expected );
-
-  test.case = 'number option with quotes'
-  var argv = [];
-  var got = _.process.args({ argv : [ 'interpreter', 'main.js', 'v:"10"' ], caching : 0 });
-  var expected =
+    test.identical( o.exitCode, 0 );
+    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var expected =
+    {
+      interpreterPath : 'interpreter',
+      scriptPath : 'main.js',
+      interpreterArgs : [],
+      keyValDelimeter : ':',
+      commandsDelimeter : ';',
+      subject : '',
+      map : { path : 'D:\\path\\to\\file' },
+      scriptArgs : [ 'path:"D:\\path\\to\\file"' ],
+      scriptArgsString : 'path:"D:\\path\\to\\file"',
+      subjects : [ '' ],
+      maps : [ { path : 'D:\\path\\to\\file' } ],
+    }
+    test.contains( got, expected );
+    return null;
+  })
+  
+  /* */
+  
+  shell
+  ({ 
+    args : [ 'interpreter', 'main.js', 'v:"10"' ],
+    env : { ignoreFirstTwoArgv : true } 
+  })
+  .then( o => 
   {
-    interpreterPath : 'interpreter',
-    scriptPath : 'main.js',
-    interpreterArgs : [],
-    keyValDelimeter : ':',
-    commandsDelimeter : ';',
-    subject : '',
-    map : { v : 10 },
-    scriptArgs : [ 'v:"10"' ],
-    scriptArgsString : 'v:"10"',
-    subjects : [ '' ],
-    maps : [ { v : 10 } ],
-  }
-  test.contains( got, expected );
-
-  test.case = 'string option with quotes'
-  var argv = [];
-  var got = _.process.args({ argv : [ 'interpreter', 'main.js', 'str:"abc"' ], caching : 0 });
-  var expected =
+    test.identical( o.exitCode, 0 );
+    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var expected =
+    {
+      interpreterPath : 'interpreter',
+      scriptPath : 'main.js',
+      interpreterArgs : [],
+      keyValDelimeter : ':',
+      commandsDelimeter : ';',
+      subject : '',
+      map : { v : 10 },
+      scriptArgs : [ 'v:"10"' ],
+      scriptArgsString : 'v:"10"',
+      subjects : [ '' ],
+      maps : [ { v : 10 } ],
+    }
+    test.contains( got, expected );
+    return null;
+  })
+  
+  /* */
+  
+  shell
+  ({ 
+    args : [ 'interpreter', 'main.js', 'str:"abc"' ],
+    env : { ignoreFirstTwoArgv : true } 
+  })
+  .then( o => 
   {
-    interpreterPath : 'interpreter',
-    scriptPath : 'main.js',
-    interpreterArgs : [],
-    keyValDelimeter : ':',
-    commandsDelimeter : ';',
-    subject : '',
-    map : { str : 'abc' },
-    scriptArgs : [ 'str:"abc"' ],
-    scriptArgsString : 'str:"abc"',
-    subjects : [ '' ],
-    maps : [ { str : 'abc' } ],
-  }
-  test.contains( got, expected );
-
+    test.identical( o.exitCode, 0 );
+    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var expected =
+    {
+      interpreterPath : 'interpreter',
+      scriptPath : 'main.js',
+      interpreterArgs : [],
+      keyValDelimeter : ':',
+      commandsDelimeter : ';',
+      subject : '',
+      map : { str : 'abc' },
+      scriptArgs : [ 'str:"abc"' ],
+      scriptArgsString : 'str:"abc"',
+      subjects : [ '' ],
+      maps : [ { str : 'abc' } ],
+    }
+    test.contains( got, expected );
+    return null;
+  })
+  
+  return ready;
 }
 
 //
@@ -9416,7 +9824,7 @@ function shellDetachingThrowing( test )
     .then( () =>
     {
       test.is( _.strHas( o.output, /Detached child with pid: .* is continuing execution after parent death/ ) );
-      return _.time.out( 3000, () => null );
+      return _.time.out( 6000, () => null );
     })
     .then( () =>
     {
@@ -9542,7 +9950,7 @@ function shellDetachingChildAfterParent( test )
 
       test.is( !_.fileProvider.fileExists( testFilePath ) );
 
-      return _.time.out( 6000 );
+      return _.time.out( 10000 );
     })
 
     con.then( () =>
@@ -11846,7 +12254,9 @@ function kill( test )
 
     return ready;
   })
-
+  
+  // qqq Vova : find how to simulate EPERM error using process.kill and write test case
+  
   /* */
 
   return con;
@@ -12781,33 +13191,48 @@ function terminateDetachedComplex( test )
       execPath : 'node testApp2.js',
       currentPath : __dirname,
       mode : 'spawn',
-      stdio : 'inherit',
+      stdio : 'ignore',
       detaching,
       inputMirroring : 0,
+      outputPiping : 0,
       throwingExitCode : 0
     }
-    _.process.start( o );
-    _.time.out( 1000, () =>
-    {
-      console.log( o.process.pid )
+    let ready = _.process.start( o );
+    ready.catch( ( err ) => 
+    { 
+      _.errAttend( err );
+      return null;
+    })
+    _.time.out( 2000, () => 
+    { 
       if( process.send )
       process.send( o.process.pid )
+      else
+      _.fileProvider.fileWrite( _.path.join( __dirname, 'pid' ), o.process.pid.toString() )
+      return null;
+    })
+    _.time.out( 4000, () => 
+    { 
+      _.Procedure.TerminationBegin()
+      return null;
     })
   }
 
   function testApp2()
-  {
+  { 
     process.on( 'SIGINT', () =>
     {
       console.log( 'second child SIGINT' )
-      var fs = require( 'fs' );
-      var path = require( 'path' )
-      fs.writeFileSync( path.join( __dirname, process.pid.toString() ), process.pid )
       process.exit( 0 );
     })
     if( process.send )
     process.send( process.pid );
-    setTimeout( () => {}, 5000 )
+    setTimeout( () => 
+    {
+      var fs = require( 'fs' );
+      var path = require( 'path' )
+      fs.writeFileSync( path.join( __dirname, process.pid.toString() ), process.pid )
+    }, 5000 )
   }
 
   /* */
@@ -12839,8 +13264,8 @@ function terminateDetachedComplex( test )
     let childPid;
     o.process.on( 'message', ( data ) =>
     {
-      childPid = _.numberFrom( data )
-      _.process.terminate({ pid : o.process.pid });
+      childPid = data;
+      _.process.terminate( o.process );
     })
 
     ready.thenKeep( ( got ) =>
@@ -12849,10 +13274,13 @@ function terminateDetachedComplex( test )
       test.identical( got.exitSignal, null );
       test.is( _.strHas( got.output, 'SIGINT' ) );
       test.is( !_.process.isRunning( o.process.pid ) )
-      test.is( _.process.isRunning( childPid ) );
+      test.is( _.process.isRunning( _.numberFrom( childPid ) ) )
       return _.time.out( 5000, () =>
       {
-        test.is( !_.process.isRunning( childPid ) );
+        var files = _.fileProvider.dirRead( routinePath );
+        test.is( !_.process.isRunning( _.numberFrom( childPid ) ) )
+        test.identical( _.numberFrom( files[ 0 ] ),_.numberFrom( childPid ) );
+        _.fileProvider.fileDelete( _.path.join( routinePath, files[ 0 ] ) );
         return null;
       });
     })
@@ -12878,8 +13306,8 @@ function terminateDetachedComplex( test )
     let childPid;
     o.process.on( 'message', ( data ) =>
     {
-      childPid = _.numberFrom( data )
-      _.process.terminate({ pid : o.process.pid });
+      childPid = data;
+      _.process.terminate( o.process );
     })
 
     ready.thenKeep( ( got ) =>
@@ -12888,10 +13316,13 @@ function terminateDetachedComplex( test )
       test.identical( got.exitSignal, null );
       test.is( _.strHas( got.output, 'SIGINT' ) );
       test.is( !_.process.isRunning( o.process.pid ) )
-      test.is( _.process.isRunning( childPid ) );
+      test.is( _.process.isRunning( _.numberFrom( childPid ) ) )
       return _.time.out( 5000, () =>
       {
-        test.is( !_.process.isRunning( childPid ) );
+        var files = _.fileProvider.dirRead( routinePath );
+        test.is( !_.process.isRunning( _.numberFrom( childPid ) ) )
+        test.identical( _.numberFrom( files[ 0 ] ),_.numberFrom( childPid ) );
+        _.fileProvider.fileDelete( _.path.join( routinePath, files[ 0 ] ) );
         return null;
       });
     })
@@ -12900,7 +13331,7 @@ function terminateDetachedComplex( test )
   })
 
   //
-
+  
   .thenKeep( () =>
   {
     test.case = 'Sending signal to child process that has detached child, detached child should continue to work'
@@ -12908,20 +13339,21 @@ function terminateDetachedComplex( test )
     {
       execPath : 'node ' + testAppPath + ' detached',
       mode : 'shell',
+      outputPiping : 1,
       outputCollecting : 1,
       throwingExitCode : 0
     }
-
+    
     let ready = _.process.start( o );
     let childPid;
-    _.time.out( 1500, () =>
+    _.time.out( 3000, () =>
     {
-      childPid = _.numberFrom( o.output )
+      childPid = _.numberFrom( _.fileProvider.fileRead( _.path.join( routinePath, 'pid' ) ) );
       _.process.terminate({ pid : o.process.pid });
     })
 
     ready.thenKeep( ( got ) =>
-    {
+    { 
       if( process.platform === 'linux' )
       {
         test.identical( got.exitCode , null );
@@ -12933,19 +13365,22 @@ function terminateDetachedComplex( test )
         test.identical( got.exitSignal, null );
       }
       test.is( !_.process.isRunning( o.process.pid ) )
-      test.is( _.process.isRunning( childPid ) );
+      test.is( _.process.isRunning( _.numberFrom( childPid ) ) )
       return _.time.out( 5000, () =>
       {
-        test.is( !_.process.isRunning( childPid ) );
+        var files = _.fileProvider.dirRead( routinePath );
+        test.is( !_.process.isRunning( _.numberFrom( childPid ) ) )
+        test.identical( _.numberFrom( files[ 0 ] ),_.numberFrom( childPid ) );
+        _.fileProvider.fileDelete( _.path.join( routinePath, files[ 0 ] ) );
         return null;
       });
     })
 
     return ready;
   })
-
+  
   //
-
+  
   .thenKeep( () =>
   {
     test.case = 'Sending signal to child process that has detached child, detached child should continue to work'
@@ -12953,20 +13388,21 @@ function terminateDetachedComplex( test )
     {
       execPath : 'node ' + testAppPath + ' detached',
       mode : 'exec',
+      outputPiping : 1,
       outputCollecting : 1,
       throwingExitCode : 0
     }
-
+    
     let ready = _.process.start( o );
     let childPid;
-    _.time.out( 1500, () =>
+    _.time.out( 3000, () =>
     {
-      childPid = _.numberFrom( o.output )
+      childPid = _.numberFrom( _.fileProvider.fileRead( _.path.join( routinePath, 'pid' ) ) );
       _.process.terminate({ pid : o.process.pid });
     })
 
     ready.thenKeep( ( got ) =>
-    {
+    { 
       if( process.platform === 'linux' )
       {
         test.identical( got.exitCode , null );
@@ -12978,10 +13414,13 @@ function terminateDetachedComplex( test )
         test.identical( got.exitSignal, null );
       }
       test.is( !_.process.isRunning( o.process.pid ) )
-      test.is( _.process.isRunning( childPid ) );
+      test.is( _.process.isRunning( _.numberFrom( childPid ) ) )
       return _.time.out( 5000, () =>
       {
-        test.is( !_.process.isRunning( childPid ) );
+        var files = _.fileProvider.dirRead( routinePath );
+        test.is( !_.process.isRunning( _.numberFrom( childPid ) ) )
+        test.identical( _.numberFrom( files[ 0 ] ),_.numberFrom( childPid ) );
+        _.fileProvider.fileDelete( _.path.join( routinePath, files[ 0 ] ) );
         return null;
       });
     })
@@ -13286,28 +13725,47 @@ function terminateWithDetachedChildren( test )
     {
       execPath : 'node testApp2.js',
       currentPath : __dirname,
-      mode : 'spawn',
-      detaching,
-      stdio : 'inherit',
+      mode : 'spawn', 
+      detaching : 1,
+      stdio : 'ignore',
+      outputPiping : 0,
       inputMirroring : 0,
+      outputCollecting : 0,
       throwingExitCode : 0
     }
     _.process.start( o1 );
+    o1.ready.catch( err => 
+    {
+      _.errAttend( err )
+      return null;
+    })
     var o2 =
     {
       execPath : 'node testApp2.js',
       currentPath : __dirname,
-      mode : 'spawn',
-      detaching,
-      stdio : 'inherit',
+      mode : 'spawn', 
+      detaching : 1,
+      stdio : 'ignore',
+      outputPiping : 0,
       inputMirroring : 0,
+      outputCollecting : 0,
       throwingExitCode : 0
     }
     _.process.start( o2 );
+    o2.ready.catch( err => 
+    {
+      _.errAttend( err )
+      return null;
+    })
     _.time.out( 1000, () =>
     {
       process.send( [ o1.process.pid, o2.process.pid ] )
     })
+    _.time.out( 4000, () =>
+    {
+      _.Procedure.TerminationBegin();
+    })
+    
   }
 
   /* */
@@ -13354,13 +13812,16 @@ function terminateWithDetachedChildren( test )
         test.identical( got.exitCode, 0 );
         test.identical( got.exitSignal, null );
         test.is( _.strHas( got.output, 'SIGINT' ) );
-        /* xxx Vova : problem with termination of detached proces on Windows, child process does't receive SIGINT */
-        test.is( _.fileProvider.fileExists( _.path.join( routinePath, children[ 0 ].toString() ) ) )
-        test.is( _.fileProvider.fileExists( _.path.join( routinePath, children[ 1 ].toString() ) ) )
-        test.is( !_.process.isRunning( o.process.pid ) )
-        test.is( !_.process.isRunning( children[ 0 ] ) );
-        test.is( !_.process.isRunning( children[ 1 ] ) );
-        return null;
+        return _.time.out( 5000, () => 
+        {
+          /* xxx Vova : problem with termination of detached proces on Windows, child process does't receive SIGINT */
+          test.is( _.fileProvider.fileExists( _.path.join( routinePath, children[ 0 ].toString() ) ) )
+          test.is( _.fileProvider.fileExists( _.path.join( routinePath, children[ 1 ].toString() ) ) )
+          test.is( !_.process.isRunning( o.process.pid ) )
+          test.is( !_.process.isRunning( children[ 0 ] ) );
+          test.is( !_.process.isRunning( children[ 1 ] ) );
+          return null;
+        })
       })
     })
 
@@ -14212,244 +14673,104 @@ experiment.experimental = 1;
 
 //
 
-// function kill( test )
-// {
-//   var context = this;
-//   var routinePath = _.path.join( context.suitePath, test.name );
-
-//   function testApp()
-//   {
-//     setTimeout( () =>
-//     {
-//       console.log( 'Application timeout!' )
-//     }, 2500 )
-//   }
-
-//   /* */
-
-//   var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-//   var testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
-//   var expectedOutput = testAppPath + '\n';
-//   _.fileProvider.fileWrite( testAppPath, testAppCode );
-
-//   var con = new _.Consequence().take( null )
-
-//   /* */
-
-//   .thenKeep( () =>
-//   {
-//     var o =
-//     {
-//       execPath :  'node ' + testAppPath,
-//       mode : 'spawn',
-//       outputCollecting : 1,
-//       throwingExitCode : 0
-//     }
-
-//     let ready = _.process.start( o )
-
-//     _.process.kill( o.process.pid );
-
-//     ready.thenKeep( ( got ) =>
-//     {
-//       test.identical( got.exitCode , null );
-//       test.identical( got.exitSignal , 'SIGTERM' );
-//       test.is( !_.strHas( got.output, 'Application timeout!' ) );
-//       return null;
-//     })
-
-//     return ready;
-//   })
-
-//   /*  */
-
-//   .thenKeep( () =>
-//   {
-//     var o =
-//     {
-//       execPath :  'node ' + testAppPath,
-//       mode : 'spawn',
-//       outputCollecting : 1,
-//       throwingExitCode : 0
-//     }
-
-//     let ready = _.process.start( o )
-
-//     _.process.kill({ pid : o.process.pid, signal : 'SIGINT' });
-
-//     ready.thenKeep( ( got ) =>
-//     {
-//       test.identical( got.exitCode , null );
-//       test.identical( got.exitSignal , 'SIGINT' );
-//       test.is( !_.strHas( got.output, 'Application timeout!' ) );
-//       return null;
-//     })
-
-//     return ready;
-//   })
-
-//   /*  */
-
-//   .thenKeep( () =>
-//   {
-//     var o =
-//     {
-//       execPath :  'node ' + testAppPath,
-//       mode : 'spawn',
-//       outputCollecting : 1,
-//       throwingExitCode : 0
-//     }
-
-//     let ready = _.process.start( o )
-
-//     var got = _.process.kill({ pid : o.process.pid, signal : 0 });
-//     test.identical( got, true );
-//     var got = _.process.isRunning( o.process.pid );
-//     test.identical( got, true );
-
-//     ready.thenKeep( ( got ) =>
-//     {
-//       test.identical( got.exitCode , 0 );
-//       test.identical( got.exitSignal , null );
-//       test.is( _.strHas( got.output, 'Application timeout!' ) );
-
-//       var got = _.process.kill({ pid : o.process.pid, signal : 0 });
-//       test.identical( got, false );
-//       var got = _.process.isRunning( o.process.pid );
-//       test.identical( got, false );
-
-//       test.shouldThrowErrorSync( () => _.process.kill( o.process.pid ) );
-
-//       return null;
-//     })
-
-//     return ready;
-//   })
-
-//   //
-
-//   .thenKeep( () =>
-//   {
-//     var o =
-//     {
-//       execPath :  'node ' + testAppPath,
-//       mode : 'spawn',
-//       outputCollecting : 1,
-//       throwingExitCode : 0
-//     }
-
-//     let ready = _.process.start( o )
-
-//     test.shouldThrowErrorSync( () => _.process.kill({ pid : o.process.pid, signal : 'UNKNOWN' }) )
-//     var got = _.process.isRunning( o.process.pid );
-//     test.identical( got, true );
-
-//     ready.thenKeep( ( got ) =>
-//     {
-//       test.identical( got.exitCode , 0 );
-//       test.identical( got.exitSignal , null );
-//       test.is( _.strHas( got.output, 'Application timeout!' ) );
-//       return null;
-//     })
-
-//     return ready;
-//   })
-
-//   /* qqq Vova : find how to simulate EPERM error using process.kill and write test case */
-
-//   return con;
-// }
-
-//
-
 /* qqq Vova : extend, cover kill of group of processes */
 
-// function killComplex( test )
-// {
-//   var context = this;
-//   var routinePath = _.path.join( context.suitePath, test.name );
+function killComplex( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
 
-//   function testApp()
-//   {
-//     setTimeout( () =>
-//     {
-//       console.log( 'Application timeout!' )
-//     }, 2500 )
-//   }
+  function testApp()
+  {
+    setTimeout( () =>
+    {
+      console.log( 'Application timeout!' )
+    }, 2500 )
+  }
 
-//   function testApp2()
-//   {
-//     _.include( 'wAppBasic' );
-//     _.include( 'wFiles' );
-//     var testAppPath = _.path.join( __dirname, 'testApp.js' );
-//     var o = { execPath : 'node ' + testAppPath, throwingExitCode : 0  }
-//     var ready = _.process.start( o )
-//     process.send( o.process.pid );
-//     ready.then( ( got ) =>
-//     {
-//       process.send({ exitCode : o.exitCode, exitSignal : o.exitSignal })
-//       return null;
-//     })
-//     return ready;
-//   }
+  function testApp2()
+  {
+    _.include( 'wAppBasic' );
+    _.include( 'wFiles' );
+    var testAppPath = _.path.join( __dirname, 'testApp.js' );
+    var o = { execPath : 'node ' + testAppPath, throwingExitCode : 0  }
+    var ready = _.process.start( o )
+    process.send( o.process.pid );
+    ready.then( ( got ) =>
+    {
+      process.send({ exitCode : o.exitCode, pid : o.process.pid, exitSignal : o.exitSignal })
+      return null;
+    })
+    return ready;
+  }
 
-//   /* */
+  /* */
 
-//   var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-//   var testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
-//   _.fileProvider.fileWrite( testAppPath, testAppCode );
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
 
-//   var testAppPath2 = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp2.js' ) );
-//   var testAppCode2 = context.toolsPathInclude + testApp2.toString() + '\ntestApp2();';
-//   _.fileProvider.fileWrite( testAppPath2, testAppCode2 );
+  var testAppPath2 = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp2.js' ) );
+  var testAppCode2 = context.toolsPathInclude + testApp2.toString() + '\ntestApp2();';
+  _.fileProvider.fileWrite( testAppPath2, testAppCode2 );
 
-//   var con = new _.Consequence().take( null )
+  var con = new _.Consequence().take( null )
 
-//   .thenKeep( () =>
-//   {
-//     test.case = 'Kill child of child process'
-//     var o =
-//     {
-//       execPath :  'node ' + testAppPath2,
-//       mode : 'spawn',
-//       ipc : 1,
-//       outputCollecting : 1,
-//       throwingExitCode : 0
-//     }
+  .thenKeep( () =>
+  {
+    test.case = 'Kill child of child process'
+    var o =
+    {
+      execPath :  'node ' + testAppPath2,
+      mode : 'spawn',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
 
-//     let ready = _.process.start( o );
+    let ready = _.process.start( o );
 
-//     let pid = null;
-//     let childOfChild = null;
-//     o.process.on( 'message', ( data ) =>
-//     {
-//       if( !pid )
-//       {
-//         pid = _.numberFrom( data )
-//         _.process.kill( pid );
-//       }
-//       else
-//       {
-//         childOfChild = data;
-//       }
-//     })
+    let pid = null;
+    let childOfChild = null;
+    o.process.on( 'message', ( data ) =>
+    {
+      if( !pid )
+      {
+        pid = _.numberFrom( data )
+        _.process.kill( pid );
+      }
+      else
+      {
+        childOfChild = data;
+      }
+    })
 
-//     ready.thenKeep( ( got ) =>
-//     {
-//       test.identical( got.exitCode , 0 );
-//       test.identical( got.exitSignal , null );
-//       test.identical( childOfChild.exitCode , null );
-//       test.identical( childOfChild.exitSignal , 'SIGTERM' );
-//       return null;
-//     })
+    ready.thenKeep( ( got ) =>
+    {
+      test.identical( got.exitCode , 0 );
+      test.identical( got.exitSignal , null );
+      test.identical( childOfChild.pid , pid );
+      if( process.platform === 'win32' )
+      {
+        test.identical( childOfChild.exitCode , 1 );
+        test.identical( childOfChild.exitSignal , null );
+      }
+      else
+      {
+        test.identical( childOfChild.exitCode , null );
+        test.identical( childOfChild.exitSignal , 'SIGTERM' );
+      }
+      
+      return null;
+    })
 
-//     return ready;
-//   })
+    return ready;
+  })
 
-//   /* */
+  /* */
 
-//   return con;
-// }
+  return con;
+}
 
 //
 
@@ -14474,7 +14795,7 @@ var Proto =
   tests :
   {
 
-    // processArgs,
+    processArgs,
     _exitHandlerOnce,
     _exitHandlerOff,
     exitReason,
@@ -14548,16 +14869,15 @@ var Proto =
     killTimeOut,
     terminate,
     terminateComplex,
-    //terminateDetachedComplex,//xxx Vova:investigate and fix termination of deatched process on Windows
+    terminateDetachedComplex,
     terminateWithChildren,
-    // terminateWithDetachedChildren, //xxx Vova:investigate and fix termination of deatched process on Windows
+    terminateWithDetachedChildren, //xxx Vova:investigate and fix termination of deatched process on Windows
     terminateTimeOut,
     terminateDifferentStdio,
     children,
     childrenAsList,
 
-    // kill,
-    // killComplex
+    killComplex
 
   },
 
