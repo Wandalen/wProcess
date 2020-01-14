@@ -2027,9 +2027,7 @@ function terminate( o )
     }
     else
     {
-      if( o.timeOut === null )
       return terminateProcess();
-      return _.time.out( o.timeOut, terminateProcess )
     }
 
   }
@@ -2048,6 +2046,14 @@ function terminate( o )
     windowsKill( o.pid, 'SIGINT' );
     else
     process.kill( o.pid, 'SIGINT' );
+    
+    if( o.timeOut )
+    _.time.out( o.timeOut, () => 
+    {
+      if( _.process.isRunning( o.pid ) )
+      process.kill( o.pid );
+    })
+    
     return true;
   }
 
@@ -2059,9 +2065,12 @@ function terminate( o )
       args : [ '-e', `var kill = require( 'wwindowskill' )();kill( ${pid},'${signal}' )`],
       currentPath : __dirname, 
       inputMirroring : 0,
-      outputPiping : 0,
-      mode : 'spawn', 
-      sync : 1 
+      outputPiping : 1,
+      mode : 'spawn',
+      windowHiding : 1,
+      timeOut : o.timeOut,
+      throwingExitCode : 0,
+      sync : 0
     })
     // if( !WindowsKill )
     // WindowsKill = require( 'wwindowskill' )();
@@ -2094,7 +2103,7 @@ terminate.defaults =
   process : null,
   pid : null,
   withChildren : 0,
-  timeOut : null
+  timeOut : 5000
 }
 
 //
