@@ -484,7 +484,7 @@ function processArgs( test )
   
   /* */
   
-  shell({ args : [ 'x', ':', 'aa', 'bbb :' ] })
+  shell({ args : [ 'x', ':', 'aa', 'bbb', ':', 'x' ] })
   .then( o => 
   {
     test.identical( o.exitCode, 0 );
@@ -495,9 +495,9 @@ function processArgs( test )
       scriptPath,
       interpreterArgs : [],
       keyValDelimeter : ':',
-      map : { x : 'aa', bbb : '' },
+      map : { x : 'aa', bbb : 'x' },
       subject : '',
-      scriptArgs : [ 'x', ':', 'aa', 'bbb :' ]
+      scriptArgs : [ 'x', ':', 'aa', 'bbb', ':', 'x' ]
     }
     test.contains( got, expected );
     return null;
@@ -505,7 +505,7 @@ function processArgs( test )
   
   /* */
   
-  shell({ args : [ 'x', ' : ', 'y' ] })
+  shell({ args : [ 'x', ':', 'y' ] })
   .then( o => 
   {
     test.identical( o.exitCode, 0 );
@@ -518,7 +518,7 @@ function processArgs( test )
       keyValDelimeter : ':',
       map : { x : 'y' },
       subject : '',
-      scriptArgs :[ 'x', ' : ', 'y' ]
+      scriptArgs :[ 'x', ':', 'y' ]
     }
     test.contains( got, expected );
     return null;
@@ -526,7 +526,7 @@ function processArgs( test )
   
   /* */
   
-  shell({ args : [ 'x', ' :', 'y', 'x', ' :', '1' ] })
+  shell({ args : [ 'x', ':', 'y', 'x', ':', '1' ] })
   .then( o => 
   {
     test.identical( o.exitCode, 0 );
@@ -539,7 +539,7 @@ function processArgs( test )
       keyValDelimeter : ':',
       map : { x : 1 },
       subject : '',
-      scriptArgs : [ 'x', ' :', 'y', 'x', ' :', '1']
+      scriptArgs : [ 'x', ':', 'y', 'x', ':', '1' ]
     }
     test.contains( got, expected );
     return null;
@@ -547,7 +547,7 @@ function processArgs( test )
   
   /* */
   
-  shell({ args : [ 'a b c d', 'x', ' :', 'y', 'xyz', 'y', ' :', 1  ] })
+  shell({ args : [ 'a b c d', 'x', ':', 'y', 'xyz', 'y', ':', 1  ] })
   .then( o => 
   {
     test.identical( o.exitCode, 0 );
@@ -560,7 +560,7 @@ function processArgs( test )
       keyValDelimeter : ':',
       map : { x : 'y xyz', y : 1 },
       subject : 'a b c d',
-      scriptArgs : [ 'a b c d', 'x', ' :', 'y', 'xyz', 'y', ' :', '1' ]
+      scriptArgs : [ 'a b c d', 'x', ':', 'y', 'xyz', 'y', ':', '1' ]
     }
     test.contains( got, expected );
     return null;
@@ -573,11 +573,11 @@ function processArgs( test )
     args : 
     [
       'filePath',
-      'a :', 1,
-      'b', ' :2',
-      'c :  ', 3,
-      'd', ' :  4',
-      'e', ' :  ', 5
+      'a:', 1,
+      'b', ':2',
+      'c:', 3,
+      'd', ':4',
+      'e', ':', 5
     ] 
   })
   .then( o => 
@@ -595,12 +595,12 @@ function processArgs( test )
       scriptArgs :
       [
         'filePath',
-        'a :', '1',
-        'b', ' :2',
-        'c :  ', '3',
-        'd', ' :  4',
-        'e', ' :  ', '5'
-      ]
+        'a:', '1',
+        'b', ':2',
+        'c:', '3',
+        'd', ':4',
+        'e', ':', '5'
+      ] 
     }
     test.contains( got, expected );
     return null;
@@ -608,7 +608,7 @@ function processArgs( test )
   
   /* */
   
-  shell({ args : [ 'a :b :c :d', 'x', ' :', 0, 'y', ' :', 1  ] })
+  shell({ args : [ 'a :b :c :d', 'x', ':', 0, 'y', ':', 1  ] })
   .then( o => 
   {
     test.identical( o.exitCode, 0 );
@@ -627,12 +627,12 @@ function processArgs( test )
     return null;
   })
   
-  /* */
+  // /* */
   
   shell
   ({ 
     args : [ 'interpreter', 'main.js', '.set v:5 ; .build debug:1 ; .export' ],
-    env : { ignoreFirstTwoArgv : true } 
+    env : { ignoreFirstTwoArgv : true, PATH: process.env.PATH },
   })
   .then( o => 
   {
@@ -661,7 +661,7 @@ function processArgs( test )
   shell
   ({ 
     args : [ 'interpreter', 'main.js', '.set v:[1 2  3 ] ; .build debug:1 ; .export' ],
-    env : { ignoreFirstTwoArgv : true } 
+    env : { ignoreFirstTwoArgv : true, PATH: process.env.PATH } 
   })
   .then( o => 
   {
@@ -690,7 +690,7 @@ function processArgs( test )
   shell
   ({ 
     args : [ 'interpreter', 'main.js', 'path:D:\\path\\to\\file' ],
-    env : { ignoreFirstTwoArgv : true } 
+    env : { ignoreFirstTwoArgv : true, PATH: process.env.PATH } 
   })
   .then( o => 
   {
@@ -719,7 +719,7 @@ function processArgs( test )
   shell
   ({ 
     args : [ 'interpreter', 'main.js', 'path:"D:\\path\\to\\file"' ],
-    env : { ignoreFirstTwoArgv : true } 
+    env : { ignoreFirstTwoArgv : true, PATH: process.env.PATH } 
   })
   .then( o => 
   {
@@ -748,7 +748,7 @@ function processArgs( test )
   shell
   ({ 
     args : [ 'interpreter', 'main.js', 'v:"10"' ],
-    env : { ignoreFirstTwoArgv : true } 
+    env : { ignoreFirstTwoArgv : true, PATH: process.env.PATH } 
   })
   .then( o => 
   {
@@ -777,7 +777,7 @@ function processArgs( test )
   shell
   ({ 
     args : [ 'interpreter', 'main.js', 'str:"abc"' ],
-    env : { ignoreFirstTwoArgv : true } 
+    env : { ignoreFirstTwoArgv : true, PATH: process.env.PATH } 
   })
   .then( o => 
   {
