@@ -2002,67 +2002,48 @@ function terminate( o )
 
   try
   {
-    if( o.withChildren )
+    if( !o.withChildren )
+    return terminateProcess( o.pid );
+    
+    let ready = _.process.children({ pid : o.pid, asList : isWindows })
+    .then( ( tree ) =>
     {
-      return _.process.children({ pid : o.pid, asList : isWindows })
-      .then( ( tree ) =>
-      {
-        if( isWindows )
-        {
-          for( var l = tree.length - 1; l >= 0; l-- )
-          {
-            if( l && tree[ l ].name === 'conhost.exe' )
-            continue;
-            if( _.process.isRunning( tree[ l ].pid ) )
-            windowsKill( tree[ l ].pid, 'SIGINT' );
-          }
-        }
-        else
-        {
-          terminateChildren( tree );
-        }
-        return null;
-      })
-      .catch( handleError );
-    }
-    else
-    {
-      return terminateProcess();
-    }
-
+      if( isWindows )
+      return terminateChildrenWin( tree )
+      else
+      return terminateChildren( tree );
+    })
+    .catch( handleError );
+    
+    return ready;
   }
   catch( err )
   {
     handleError( err );
   }
 
-  return true;
-
   /*  */
 
-  function terminateProcess()
-  {
+  function terminateProcess( pid )
+  { 
+    let result;
+    
     if( isWindows )
-    windowsKill( o.pid, 'SIGINT' );
+    result = windowsKill( pid );
     else
-    process.kill( o.pid, 'SIGINT' );
+    result = process.kill( pid, 'SIGINT' );
     
-    if( o.timeOut )
-    _.time.out( o.timeOut, () => 
-    {
-      if( _.process.isRunning( o.pid ) )
-      process.kill( o.pid );
-    })
+    timeOutMaybe( pid );
     
-    return true;
+    return result;
   }
 
-  function windowsKill( pid, signal )
+  function windowsKill( pid )
   { 
-    _.process.start
+    return _.process.start
     ({ 
       execPath : 'node', 
-      args : [ '-e', `var kill = require( 'wwindowskill' )();kill( ${pid},'${signal}' )`],
+      args : [ '-e', `var kill = require( 'wwindowskill' )();kill( ${pid},'SIGINT' )`],
       currentPath : __dirname, 
       inputMirroring : 0,
       outputPiping : 1,
@@ -2072,9 +2053,16 @@ function terminate( o )
       throwingExitCode : 0,
       sync : 0
     })
-    // if( !WindowsKill )
-    // WindowsKill = require( 'wwindowskill' )();
-    // WindowsKill( pid, signal );
+  }
+  
+  function timeOutMaybe( pid )
+  {
+    if( o.timeOut )
+    _.time.out( o.timeOut, () => 
+    {
+      if( _.process.isRunning( pid ) )
+      process.kill( pid );
+    })
   }
 
   function handleError( err )
@@ -2092,9 +2080,26 @@ function terminate( o )
     {
       pid = _.numberFrom( pid );
       if( _.process.isRunning( pid ) )
-      process.kill( pid, 'SIGINT' );
+      terminateProcess( pid );
       terminateChildren( tree[ pid ] );
     }
+    return null;
+  }
+  
+  function terminateChildrenWin( tree )
+  { 
+    let cons = [];
+    for( var l = tree.length - 1; l >= 0; l-- )
+    {
+      if( l && tree[ l ].name === 'conhost.exe' )
+      continue;
+      if( !_.process.isRunning( tree[ l ].pid ) )
+      continue;
+      cons.push( terminateProcess( tree[ l ].pid ) );
+    }
+    if( cons.length )
+    return _.Consequence.AndKeep( cons );
+    return true;
   }
 }
 
