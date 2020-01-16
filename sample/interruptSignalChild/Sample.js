@@ -7,7 +7,7 @@ let o =
 {
   execPath : 'node Child.js',
   currentPath : __dirname,
-  mode : 'spawn',
+  mode : 'shell',
   throwingExitCode : 0,
   outputPiping : 1,
 };
@@ -27,10 +27,7 @@ var ready = _.process.start( o )
 
 _.time.out( 1000, () =>
 {
-  o.process.kill( 'SIGINT' );
-  // o.process.stdin.write( '\x03' );
-  // o.process.stdin.write( '\cc\n' );
-  // o.process.stdin.end();
+  _.process.terminate({ process : o.process });
 })
 
 ready.then( ( got ) =>
