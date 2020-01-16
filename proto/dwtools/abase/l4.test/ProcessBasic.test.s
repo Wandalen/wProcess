@@ -13452,21 +13452,20 @@ function terminateWithChildren( test )
       currentPath : __dirname,
       mode : 'spawn',
       stdio : 'inherit',
+      ipc : 1,
       inputMirroring : 0,
       throwingExitCode : 0
     }
     _.process.start( o );
-    _.time.out( 1000, () =>
-    {
-      process.send( o.process.pid )
-    })
+    o.process.on( 'message', () => process.send( o.process.pid ) )
+    setTimeout( () => {}, 5000 )
   }
 
   function testApp2()
   {
     process.on( 'SIGINT', () =>
     {
-      console.log( 'SIGINT' )
+      console.log( 'SIGINT CHILD' )
       var fs = require( 'fs' );
       var path = require( 'path' )
       fs.writeFileSync( path.join( __dirname, process.pid.toString() ), process.pid )
@@ -13482,32 +13481,44 @@ function terminateWithChildren( test )
     _.include( 'wAppBasic' );
     _.include( 'wFiles' );
     let detaching = process.argv[ 2 ] === 'detached';
+    let c1 = new _.Consequence();
+    let c2 = new _.Consequence();
+  
     var o1 =
     {
       execPath : 'node testApp2.js',
       currentPath : __dirname,
       mode : 'spawn',
       detaching,
+      ipc : 1,
       stdio : 'inherit',
       inputMirroring : 0,
       throwingExitCode : 0
     }
     _.process.start( o1 );
+    o1.process.on( 'message', () => c1.take( o1.process.pid ) )
+    
     var o2 =
     {
       execPath : 'node testApp2.js',
       currentPath : __dirname,
       mode : 'spawn',
       detaching,
+      ipc : 1,
       stdio : 'inherit',
       inputMirroring : 0,
       throwingExitCode : 0
     }
     _.process.start( o2 );
-    _.time.out( 1000, () =>
+    o2.process.on( 'message', () => c2.take( o2.process.pid ) )
+    
+    _.Consequence.AndKeep( [ c1,c2 ] )
+    .then( () => 
     {
-      process.send( [ o1.process.pid, o2.process.pid ] )
+      process.send([ o1.process.pid, o2.process.pid ]);
+      return null;
     })
+    setTimeout( () => {}, 5000 )
   }
 
   /* */
@@ -13555,8 +13566,11 @@ function terminateWithChildren( test )
         test.identical( got.exitCode, 0 );
         test.identical( got.exitSignal, null );
         test.identical( _.strCount( got.output, 'SIGINT' ), 2 );
+        test.identical( _.strCount( got.output, 'SIGINT CHILD' ), 1 );
         test.is( !_.process.isRunning( o.process.pid ) )
         test.is( !_.process.isRunning( lastChildPid ) );
+        var file = _.fileProvider.fileRead( _.path.join( routinePath, lastChildPid.toString() ) );
+        test.identical( file, lastChildPid.toString() )
         return null;
       })
     })
@@ -13595,8 +13609,11 @@ function terminateWithChildren( test )
         test.identical( got.exitCode, 0 );
         test.identical( got.exitSignal, null );
         test.identical( _.strCount( got.output, 'SIGINT' ), 1 );
+        test.identical( _.strCount( got.output, 'SIGINT CHILD' ), 1 );
         test.is( !_.process.isRunning( o.process.pid ) )
         test.is( !_.process.isRunning( lastChildPid ) );
+        var file = _.fileProvider.fileRead( _.path.join( routinePath, lastChildPid.toString() ) );
+        test.identical( file, lastChildPid.toString() )
         return null;
       })
     })
@@ -13604,7 +13621,7 @@ function terminateWithChildren( test )
     return ready;
   })
 
-  //
+  //  
 
   .thenKeep( () =>
   {
@@ -13634,9 +13651,14 @@ function terminateWithChildren( test )
         test.identical( got.exitCode, 0 );
         test.identical( got.exitSignal, null );
         test.identical( _.strCount( got.output, 'SIGINT' ), 3 );
+        test.identical( _.strCount( got.output, 'SIGINT CHILD' ), 2 );
         test.is( !_.process.isRunning( o.process.pid ) )
         test.is( !_.process.isRunning( children[ 0 ] ) );
         test.is( !_.process.isRunning( children[ 1 ] ) );
+        var file = _.fileProvider.fileRead( _.path.join( routinePath, children[ 0 ].toString() ) );
+        test.identical( file, children[ 0 ].toString() )
+        var file = _.fileProvider.fileRead( _.path.join( routinePath, children[ 1 ].toString() ) );
+        test.identical( file, children[ 1 ].toString() )
         return null;
       })
 
