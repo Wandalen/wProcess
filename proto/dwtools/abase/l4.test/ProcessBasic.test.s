@@ -547,7 +547,7 @@ function processArgs( test )
   
   /* */
   
-  shell({ args : [ 'a b c d', 'x', ':', 'y', 'xyz', 'y', ':', 1  ] })
+  shell({ args : [ 'abcd', 'x', ':', 'y', 'xyz', 'y', ':', 1  ] })
   .then( o => 
   {
     test.identical( o.exitCode, 0 );
@@ -559,8 +559,8 @@ function processArgs( test )
       interpreterArgs : [],
       keyValDelimeter : ':',
       map : { x : 'y xyz', y : 1 },
-      subject : 'a b c d',
-      scriptArgs : [ 'a b c d', 'x', ':', 'y', 'xyz', 'y', ':', '1' ]
+      subject : 'abcd',
+      scriptArgs : [ 'abcd', 'x', ':', 'y', 'xyz', 'y', ':', '1' ]
     }
     test.contains( got, expected );
     return null;
@@ -608,7 +608,7 @@ function processArgs( test )
   
   /* */
   
-  shell({ args : [ 'a :b :c :d', 'x', ':', 0, 'y', ':', 1  ] })
+  shell({ args : [ 'a:b:c:d', 'x', ':', 0, 'y', ':', 1  ] })
   .then( o => 
   {
     test.identical( o.exitCode, 0 );
@@ -621,17 +621,17 @@ function processArgs( test )
       keyValDelimeter : ':',
       map : { a : '', b : '', c : 'd', x : 0, y : 1 },
       subject : '',
-      scriptArgs : [ 'a :b :c :d', 'x', ' :', '0', 'y', ' :', '1' ]
+      scriptArgs : [ 'a:b:c:d', 'x', ' :', '0', 'y', ' :', '1' ]
     }
     test.contains( got, expected );
     return null;
   })
   
-  // /* */
+  /* */
   
   shell
   ({ 
-    args : [ 'interpreter', 'main.js', '.set v:5 ; .build debug:1 ; .export' ],
+    args : [ 'interpreter', 'main.js', '.set', 'v:5', ';', '.build', 'debug:1', ';', '.export' ],
     env : { ignoreFirstTwoArgv : true, PATH: process.env.PATH },
   })
   .then( o => 
@@ -647,7 +647,7 @@ function processArgs( test )
       commandsDelimeter : ';',
       subject : '.set',
       map : { v : 5 },
-      scriptArgs : [ '.set v:5 ; .build debug:1 ; .export' ],
+      scriptArgs : [ '.set', 'v:5', ';', '.build', 'debug:1', ';', '.export' ],
       scriptArgsString : '.set v:5 ; .build debug:1 ; .export',
       subjects : [ '.set', '.build', '.export' ],
       maps : [ { v : 5 }, { debug : 1 }, {} ],
@@ -660,7 +660,7 @@ function processArgs( test )
   
   shell
   ({ 
-    args : [ 'interpreter', 'main.js', '.set v:[1 2  3 ] ; .build debug:1 ; .export' ],
+    args : [ 'interpreter', 'main.js', '.set', 'v', ':', '[', 1, 2, 3, ']', ';', '.build', 'debug:1', ';', '.export' ],
     env : { ignoreFirstTwoArgv : true, PATH: process.env.PATH } 
   })
   .then( o => 
@@ -676,8 +676,8 @@ function processArgs( test )
       commandsDelimeter : ';',
       subject : '.set',
       map : { v : [ 1,2,3 ] },
-      scriptArgs : [ '.set v:[1 2  3 ] ; .build debug:1 ; .export' ],
-      scriptArgsString : '.set v:[1 2  3 ] ; .build debug:1 ; .export',
+      scriptArgs : [ '.set', 'v', ':', '[', '1', '2', '3', ']', ';', '.build', 'debug:1', ';', '.export' ],
+      scriptArgsString : '.set v : [ 1 2 3 ] ; .build debug:1 ; .export',
       subjects : [ '.set', '.build', '.export' ],
       maps : [ { v : [ 1,2,3 ] }, { debug : 1 }, {} ],
     }
