@@ -2060,8 +2060,13 @@ function terminate( o )
     if( o.timeOut )
     _.time.out( o.timeOut, () => 
     {
-      if( _.process.isRunning( pid ) )
-      process.kill( pid );
+      if( !_.process.isRunning( pid ) )
+      return null;
+      
+      if( o.process )
+      o.process.kill( 'SIGKILL' )
+      else
+      process.kill( pid, 'SIGKILL' );
     })
   }
 

@@ -12619,6 +12619,10 @@ function terminate( test )
   {
     _.include( 'wAppBasic' );
     _.process._exitHandlerRepair();
+    if( process.send )
+    process.send( process.pid );
+    else
+    console.log( 'ready' );
     setTimeout( () =>
     {
       console.log( 'Application timeout!' )
@@ -12642,18 +12646,23 @@ function terminate( test )
     {
       execPath :  'node ' + testAppPath,
       mode : 'spawn',
+      ipc : 1,
       outputCollecting : 1,
       throwingExitCode : 0
     }
 
     let ready = _.process.start( o )
 
-    _.time.out( 1500, () => _.process.terminate( o.process ) )
+    o.process.on( 'message', () => 
+    {
+      _.process.terminate({ process : o.process });
+    })
 
     ready.thenKeep( ( got ) =>
     {
       test.identical( got.exitCode , 0 );
       test.identical( got.exitSignal , null );
+      test.is( _.strHas( got.output, 'SIGINT' ) );
       test.is( !_.strHas( got.output, 'Application timeout!' ) );
       return null;
     })
@@ -12663,25 +12672,29 @@ function terminate( test )
 
   /* */
 
-
   .thenKeep( () =>
   {
     var o =
     {
       execPath :  'node ' + testAppPath,
       mode : 'spawn',
+      ipc : 1,
       outputCollecting : 1,
       throwingExitCode : 0
     }
 
     let ready = _.process.start( o )
 
-    _.time.out( 1500, () => _.process.terminate( o.process.pid ) )
+    o.process.on( 'message', () => 
+    {
+      _.process.terminate( o.process.pid );
+    })
 
     ready.thenKeep( ( got ) =>
     {
       test.identical( got.exitCode , 0 );
       test.identical( got.exitSignal , null );
+      test.is( _.strHas( got.output, 'SIGINT' ) );
       test.is( !_.strHas( got.output, 'Application timeout!' ) );
       return null;
     })
@@ -12697,18 +12710,23 @@ function terminate( test )
     {
       execPath : testAppPath,
       mode : 'fork',
+      ipc : 1,
       outputCollecting : 1,
       throwingExitCode : 0
     }
-
+    
     let ready = _.process.start( o )
 
-    _.time.out( 1500, () => _.process.terminate( o.process ) )
+    o.process.on( 'message', () => 
+    {
+      _.process.terminate( o.process.pid );
+    })
 
     ready.thenKeep( ( got ) =>
     {
       test.identical( got.exitCode , 0 );
       test.identical( got.exitSignal , null );
+      test.is( _.strHas( got.output, 'SIGINT' ) );
       test.is( !_.strHas( got.output, 'Application timeout!' ) );
       return null;
     })
@@ -12730,12 +12748,16 @@ function terminate( test )
 
     let ready = _.process.start( o )
 
-    _.time.out( 1500, () => _.process.terminate( o.process.pid ) )
+    o.process.on( 'message', () => 
+    {
+      _.process.terminate({ process : o.process });
+    })
 
     ready.thenKeep( ( got ) =>
     {
       test.identical( got.exitCode , 0 );
       test.identical( got.exitSignal , null );
+      test.is( _.strHas( got.output, 'SIGINT' ) );
       test.is( !_.strHas( got.output, 'Application timeout!' ) );
       return null;
     })
@@ -12762,7 +12784,12 @@ function terminate( test )
 
     let ready = _.process.start( o )
 
-    _.time.out( 1500, () => _.process.terminate( o.process ) )
+    o.process.stdout.on( 'data', ( data ) => 
+    { 
+      data = data.toString();
+      if( _.strHas( data, 'ready' ))
+      _.process.terminate({ process : o.process });
+    })
 
     ready.thenKeep( ( got ) =>
     {
@@ -12802,7 +12829,12 @@ function terminate( test )
 
     let ready = _.process.start( o )
 
-    _.time.out( 1500, () => _.process.terminate( o.process.pid ) )
+    o.process.stdout.on( 'data', ( data ) => 
+    { 
+      data = data.toString();
+      if( _.strHas( data, 'ready' ))
+      _.process.terminate( o.process.pid );
+    })
 
     ready.thenKeep( ( got ) =>
     {
@@ -12847,7 +12879,12 @@ function terminate( test )
 
     let ready = _.process.start( o )
 
-    _.time.out( 1500, () => _.process.terminate( o.process ) )
+    o.process.stdout.on( 'data', ( data ) => 
+    { 
+      data = data.toString();
+      if( _.strHas( data, 'ready' ))
+      _.process.terminate({ process : o.process });
+    })
 
     ready.thenKeep( ( got ) =>
     {
@@ -12887,7 +12924,12 @@ function terminate( test )
 
     let ready = _.process.start( o )
 
-    _.time.out( 1500, () => _.process.terminate( o.process.pid ) )
+    o.process.stdout.on( 'data', ( data ) => 
+    { 
+      data = data.toString();
+      if( _.strHas( data, 'ready' ))
+      _.process.terminate( o.process.pid );
+    })
 
     ready.thenKeep( ( got ) =>
     {
@@ -13864,12 +13906,18 @@ function terminateTimeOut( test )
 
   function testApp()
   {
-    _.include( 'wAppBasic' );
-    _.process._exitHandlerRepair();
+    process.on( 'SIGINT', () => 
+    {
+      console.log( 'SIGINT' )
+    })
+    if( process.send )
+    process.send( process.pid );
+    else
+    console.log( 'ready' );
     setTimeout( () =>
     {
       console.log( 'Application timeout!' )
-    }, 5000 )
+    }, 10000 )
   }
 
   /* */
@@ -13889,25 +13937,25 @@ function terminateTimeOut( test )
     {
       execPath :  'node ' + testAppPath,
       mode : 'spawn',
+      ipc : 1,
       outputCollecting : 1,
       throwingExitCode : 0
     }
 
     let ready = _.process.start( o )
-
-    let terminated = _.process.terminate({ process : o.process, timeOut : 1000 })
+    
+    o.process.on( 'message', () => 
+    {
+      _.process.terminate({ process : o.process, timeOut : 1000 });
+    })
 
     ready.thenKeep( ( got ) =>
     {
-      terminated.then( () =>
-      {
-        test.identical( got.exitCode , 0 );
-        test.identical( got.exitSignal , null );
-        test.is( !_.strHas( got.output, 'Application timeout!' ) );
-        return null;
-      })
-
-      return terminated;
+      test.identical( got.exitCode , null );
+      test.identical( got.exitSignal , 'SIGKILL' );
+      test.is( _.strHas( got.output, 'SIGINT' ) );
+      test.is( !_.strHas( got.output, 'Application timeout!' ) );
+      return null;
     })
 
     return ready;
@@ -13921,25 +13969,25 @@ function terminateTimeOut( test )
     {
       execPath :  testAppPath,
       mode : 'fork',
+      ipc : 1,
       outputCollecting : 1,
       throwingExitCode : 0
     }
 
     let ready = _.process.start( o )
-
-    let terminated = _.process.terminate({ process : o.process, timeOut : 1000 })
+    
+    o.process.on( 'message', () => 
+    {
+      _.process.terminate({ process : o.process, timeOut : 1000 });
+    })
 
     ready.thenKeep( ( got ) =>
     {
-      terminated.then( () =>
-      {
-        test.identical( got.exitCode , 0 );
-        test.identical( got.exitSignal , null );
-        test.is( !_.strHas( got.output, 'Application timeout!' ) );
-        return null;
-      })
-
-      return terminated;
+      test.identical( got.exitCode , null );
+      test.identical( got.exitSignal , 'SIGKILL' );
+      test.is( _.strHas( got.output, 'SIGINT' ) );
+      test.is( !_.strHas( got.output, 'Application timeout!' ) );
+      return null;
     })
 
     return ready;
@@ -13958,39 +14006,27 @@ function terminateTimeOut( test )
     }
 
     let ready = _.process.start( o )
-
-    let terminated = _.process.terminate({ process : o.process, timeOut : 1000 })
+    
+    o.process.stdout.on( 'data', ( data ) => 
+    { 
+      data = data.toString();
+      if( _.strHas( data, 'ready' ))
+      _.process.terminate({ process : o.process });
+    })
 
     ready.thenKeep( ( got ) =>
     {
-      terminated.then( () =>
-      {
-        if( process.platform === 'linux' )
-        {
-          test.identical( got.exitCode , null );
-          test.identical( got.exitSignal , 'SIGINT' );
-          test.is( _.strHas( got.output, 'Application timeout!' ) );
-
-        }
-        else
-        {
-          test.identical( got.exitCode , 0 );
-          test.identical( got.exitSignal , null );
-          if( process.platform === 'win32' )
-          test.is( _.strHas( got.output, 'Application timeout!' ) );
-          else
-          test.is( !_.strHas( got.output, 'Application timeout!' ) );
-        }
-        return null;
-      })
-
-      return terminated;
+      test.identical( got.exitCode , null );
+      test.identical( got.exitSignal , 'SIGKILL' );
+      test.is( _.strHas( got.output, 'SIGINT' ) );
+      test.is( !_.strHas( got.output, 'Application timeout!' ) );
+      return null;
     })
 
     return ready;
   })
-
-  /*  */
+  
+  //
 
   .thenKeep( () =>
   {
@@ -14003,32 +14039,21 @@ function terminateTimeOut( test )
     }
 
     let ready = _.process.start( o )
-
-    let terminated = _.process.terminate({ process : o.process, timeOut : 1000 })
+    
+    o.process.stdout.on( 'data', ( data ) => 
+    { 
+      data = data.toString();
+      if( _.strHas( data, 'ready' ))
+      _.process.terminate({ process : o.process });
+    })
 
     ready.thenKeep( ( got ) =>
     {
-      terminated.then( () =>
-      {
-        if( process.platform === 'linux' )
-        {
-          test.identical( got.exitCode , null );
-          test.identical( got.exitSignal , 'SIGINT' );
-          test.is( _.strHas( got.output, 'Application timeout!' ) );
-
-        }
-        else
-        {
-          test.identical( got.exitCode , 0 );
-          test.identical( got.exitSignal , null );
-          if( process.platform === 'win32' )
-          test.is( _.strHas( got.output, 'Application timeout!' ) );
-          else
-          test.is( !_.strHas( got.output, 'Application timeout!' ) );
-        }
-        return null;
-      })
-      return terminated;
+      test.identical( got.exitCode , null );
+      test.identical( got.exitSignal , 'SIGKILL' );
+      test.is( _.strHas( got.output, 'SIGINT' ) );
+      test.is( !_.strHas( got.output, 'Application timeout!' ) );
+      return null;
     })
 
     return ready;
