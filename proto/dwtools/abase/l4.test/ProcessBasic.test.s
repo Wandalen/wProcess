@@ -608,7 +608,7 @@ function processArgs( test )
   
   /* */
   
-  shell({ args : [ 'a:b:c:d', 'x', ':', 0, 'y', ':', 1  ] })
+  shell({ args : [ 'path:c:\\some', 'x', ':', 0, 'y', ':', 1  ] })
   .then( o => 
   {
     test.identical( o.exitCode, 0 );
@@ -619,9 +619,9 @@ function processArgs( test )
       scriptPath,
       interpreterArgs : [],
       keyValDelimeter : ':',
-      map : { a : '', b : '', c : 'd', x : 0, y : 1 },
+      map : { path : 'c:\\some', x : 0, y : 1 },
       subject : '',
-      scriptArgs : [ 'a:b:c:d', 'x', ' :', '0', 'y', ' :', '1' ]
+      scriptArgs : [ 'path:c:\\some', 'x', ':', '0', 'y', ':', '1' ]
     }
     test.contains( got, expected );
     return null;
