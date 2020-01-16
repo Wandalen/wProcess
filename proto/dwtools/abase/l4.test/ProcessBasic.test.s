@@ -12788,24 +12788,23 @@ function terminate( test )
     { 
       data = data.toString();
       if( _.strHas( data, 'ready' ))
-      _.process.terminate({ process : o.process });
+      _.process.terminate({ process : o.process, timeOut : 0 });
     })
 
     ready.thenKeep( ( got ) =>
-    {
-      if( process.platform === 'linux' )
+    { 
+      if( process.platform === 'linux' || process.platform === 'win32' )
       {
-        test.identical( got.exitCode , null );
-        test.identical( got.exitSignal , 'SIGINT' );
+        test.identical( got.exitCode , 0 );
+        test.identical( got.exitSignal , null );
+        test.is( !_.strHas( got.output, 'SIGINT' ) );
         test.is( _.strHas( got.output, 'Application timeout!' ) );
       }
       else
       {
         test.identical( got.exitCode , 0 );
         test.identical( got.exitSignal , null );
-        if( process.platform === 'win32' )
-        test.is( _.strHas( got.output, 'Application timeout!' ) );
-        else
+        test.is( _.strHas( got.output, 'SIGINT' ) );
         test.is( !_.strHas( got.output, 'Application timeout!' ) );
       }
 
@@ -12833,25 +12832,23 @@ function terminate( test )
     { 
       data = data.toString();
       if( _.strHas( data, 'ready' ))
-      _.process.terminate( o.process.pid );
+      _.process.terminate({ pid : o.process.pid, timeOut : 0 });
     })
 
     ready.thenKeep( ( got ) =>
     {
-      if( process.platform === 'linux' )
+      if( process.platform === 'linux' || process.platform === 'win32' )
       {
-        test.identical( got.exitCode , null );
-        test.identical( got.exitSignal , 'SIGINT' );
+        test.identical( got.exitCode , 0 );
+        test.identical( got.exitSignal , null );
+        test.is( !_.strHas( got.output, 'SIGINT' ) );
         test.is( _.strHas( got.output, 'Application timeout!' ) );
-
       }
       else
       {
         test.identical( got.exitCode , 0 );
         test.identical( got.exitSignal , null );
-        if( process.platform === 'win32' )
-        test.is( _.strHas( got.output, 'Application timeout!' ) );
-        else
+        test.is( _.strHas( got.output, 'SIGINT' ) );
         test.is( !_.strHas( got.output, 'Application timeout!' ) );
       }
       return null;
@@ -12883,25 +12880,23 @@ function terminate( test )
     { 
       data = data.toString();
       if( _.strHas( data, 'ready' ))
-      _.process.terminate({ process : o.process });
+      _.process.terminate({ process : o.process, timeOut : 0 });
     })
 
     ready.thenKeep( ( got ) =>
     {
-      if( process.platform === 'linux' )
+      if( process.platform === 'linux' || process.platform === 'win32' )
       {
-        test.identical( got.exitCode , null );
-        test.identical( got.exitSignal , 'SIGINT' );
+        test.identical( got.exitCode , 0 );
+        test.identical( got.exitSignal , null );
+        test.is( !_.strHas( got.output, 'SIGINT' ) );
         test.is( _.strHas( got.output, 'Application timeout!' ) );
-
       }
       else
       {
         test.identical( got.exitCode , 0 );
         test.identical( got.exitSignal , null );
-        if( process.platform === 'win32' )
-        test.is( _.strHas( got.output, 'Application timeout!' ) );
-        else
+        test.is( _.strHas( got.output, 'SIGINT' ) );
         test.is( !_.strHas( got.output, 'Application timeout!' ) );
       }
       return null;
@@ -12928,24 +12923,23 @@ function terminate( test )
     { 
       data = data.toString();
       if( _.strHas( data, 'ready' ))
-      _.process.terminate( o.process.pid );
+      _.process.terminate({ pid : o.process.pid, timeOut : 0 });
     })
 
     ready.thenKeep( ( got ) =>
     {
-      if( process.platform === 'linux' )
+      if( process.platform === 'linux' || process.platform === 'win32' )
       {
-        test.identical( got.exitCode , null );
-        test.identical( got.exitSignal , 'SIGINT' );
+        test.identical( got.exitCode , 0 );
+        test.identical( got.exitSignal , null );
+        test.is( !_.strHas( got.output, 'SIGINT' ) );
         test.is( _.strHas( got.output, 'Application timeout!' ) );
       }
       else
       {
         test.identical( got.exitCode , 0 );
         test.identical( got.exitSignal , null );
-        if( process.platform === 'win32' )
-        test.is( _.strHas( got.output, 'Application timeout!' ) );
-        else
+        test.is( _.strHas( got.output, 'SIGINT' ) );
         test.is( !_.strHas( got.output, 'Application timeout!' ) );
       }
       return null;
@@ -14016,10 +14010,22 @@ function terminateTimeOut( test )
 
     ready.thenKeep( ( got ) =>
     {
-      test.identical( got.exitCode , null );
-      test.identical( got.exitSignal , 'SIGKILL' );
-      test.is( _.strHas( got.output, 'SIGINT' ) );
-      test.is( !_.strHas( got.output, 'Application timeout!' ) );
+      
+      if( process.platform === 'darwin' )
+      { 
+        test.identical( got.exitCode , 0 );
+        test.identical( got.exitSignal , null );
+        test.is( _.strHas( got.output, 'SIGINT' ) );
+        test.is( !_.strHas( got.output, 'Application timeout!' ) );
+      }
+      else
+      { 
+        test.identical( got.exitCode , null );
+        test.identical( got.exitSignal , 'SIGKILL' );
+        test.is( !_.strHas( got.output, 'SIGINT' ) );
+        test.is( _.strHas( got.output, 'Application timeout!' ) );
+      }
+    
       return null;
     })
 
@@ -14049,10 +14055,20 @@ function terminateTimeOut( test )
 
     ready.thenKeep( ( got ) =>
     {
-      test.identical( got.exitCode , null );
-      test.identical( got.exitSignal , 'SIGKILL' );
-      test.is( _.strHas( got.output, 'SIGINT' ) );
-      test.is( !_.strHas( got.output, 'Application timeout!' ) );
+      if( process.platform === 'darwin' )
+      { 
+        test.identical( got.exitCode , 0 );
+        test.identical( got.exitSignal , null );
+        test.is( _.strHas( got.output, 'SIGINT' ) );
+        test.is( !_.strHas( got.output, 'Application timeout!' ) );
+      }
+      else
+      { 
+        test.identical( got.exitCode , null );
+        test.identical( got.exitSignal , 'SIGKILL' );
+        test.is( !_.strHas( got.output, 'SIGINT' ) );
+        test.is( _.strHas( got.output, 'Application timeout!' ) );
+      }
       return null;
     })
 
