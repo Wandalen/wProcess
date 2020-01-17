@@ -13417,23 +13417,24 @@ function terminateDetachedComplex( test )
     {
       data = data.toString();
       if( _.strHas( data, 'ready' ) )
-      _.process.terminate({ pid : o.process.pid });
+      _.process.terminate({ process : o.process, timeOut : 0 });
     })
 
     ready.thenKeep( ( got ) =>
     { 
       childPid = _.numberFrom( _.fileProvider.fileRead( _.path.join( routinePath, 'pid' ) ) );
-      test.is( _.process.isRunning( _.numberFrom( childPid ) ) )
       
       if( process.platform === 'linux' )
-      {
+      { 
+        test.is( !_.process.isRunning( _.numberFrom( childPid ) ) )
         test.identical( got.exitCode , null );
         test.identical( got.exitSignal , 'SIGINT' );
         test.is( !_.strHas( got.output, 'SIGINT' ) );
         test.is( _.strHas( got.output, 'TerminationBegin' ) );
       }
       else if( process.platform === 'win32' )
-      {
+      { 
+        test.is( !_.process.isRunning( _.numberFrom( childPid ) ) )
         test.identical( got.exitCode , 0 );
         test.identical( got.exitSignal , null );
         test.is( !_.strHas( got.output, 'SIGINT' ) );
@@ -13441,6 +13442,7 @@ function terminateDetachedComplex( test )
       }
       else
       {
+        test.is( _.process.isRunning( _.numberFrom( childPid ) ) )
         test.identical( got.exitCode , 0 );
         test.identical( got.exitSignal , null );
         test.is( _.strHas( got.output, 'SIGINT' ) );
