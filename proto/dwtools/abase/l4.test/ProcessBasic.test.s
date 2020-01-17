@@ -14362,16 +14362,16 @@ var Proto =
     shellFork,
     shellWithoutExecPath,
 
-    // shellSpawnSyncDeasync,
-    // shellSpawnSyncDeasyncThrowing,
-    // shellShellSyncDeasync,
-    // shellShellSyncDeasyncThrowing,
-    // shellForkSyncDeasync,
-    // shellForkSyncDeasyncThrowing,
-    // shellExecSyncDeasync,
-    // shellExecSyncDeasyncThrowing,
+    shellSpawnSyncDeasync,
+    shellSpawnSyncDeasyncThrowing,
+    shellShellSyncDeasync,
+    shellShellSyncDeasyncThrowing,
+    shellForkSyncDeasync,
+    shellForkSyncDeasyncThrowing,
+    shellExecSyncDeasync,
+    shellExecSyncDeasyncThrowing,
 
-    // shellMultipleSyncDeasync,
+    shellMultipleSyncDeasync,
 
     shellDryRun,
 
