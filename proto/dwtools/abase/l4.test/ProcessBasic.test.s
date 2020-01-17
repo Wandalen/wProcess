@@ -8615,489 +8615,6 @@ shellModeShellNonTrivial.timeOut = 60000;
 
 //
 
-function shellTerminate( test )
-{
-  var context = this;
-  var routinePath = _.path.join( context.suitePath, test.name );
-
-  /* */
-
-  function testApp()
-  {
-    setTimeout( () =>
-    {
-      console.log( 'Timeout in child' );
-    },6000 )
-  }
-
-  /* */
-
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = testApp.toString() + '\ntestApp();';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-  var ready = new _.Consequence().take( null );
-
-  ready
-
-  .then( () =>
-  {
-    let o =
-    {
-      execPath : 'node ' + testAppPath,
-      mode : 'spawn',
-      throwingExitCode : 1,
-      outputCollecting : 1
-    }
-
-    let con = _.process.start( o );
-
-    _.time.out( 2000, () =>
-    {
-      o.process.kill( 'SIGKILL' );
-      return null;
-    })
-
-    return test.shouldThrowErrorAsync( con )
-    .finally( ( err, got ) =>
-    {
-      test.is( !_.errIs( err ) );
-      test.identical( o.exitCode, null );
-      test.identical( o.exitSignal, 'SIGKILL' );
-      test.is( !_.strHas( o.output, 'Timeout in child' ) );
-      return null;
-    })
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    let o =
-    {
-      execPath : testAppPath,
-      mode : 'fork',
-      throwingExitCode : 1,
-      outputCollecting : 1
-    }
-
-    let con = _.process.start( o );
-
-    _.time.out( 2000, () =>
-    {
-      o.process.kill( 'SIGKILL' );
-      return null;
-    })
-
-    return test.shouldThrowErrorAsync( con )
-    .finally( ( err, got ) =>
-    {
-      test.is( !_.errIs( err ) );
-      test.identical( o.exitCode, null );
-      test.identical( o.exitSignal, 'SIGKILL' );
-      test.is( !_.strHas( o.output, 'Timeout in child' ) );
-      return null;
-    })
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    let o =
-    {
-      execPath : 'node ' + testAppPath,
-      mode : 'exec',
-      throwingExitCode : 1,
-      outputCollecting : 1
-    }
-
-    let con = _.process.start( o );
-
-    _.time.out( 2000, () =>
-    {
-      o.process.kill( 'SIGKILL' );
-      return null;
-    })
-
-    return test.shouldThrowErrorAsync( con )
-    .finally( ( err, got ) =>
-    {
-      test.is( !_.errIs( err ) );
-      test.identical( o.exitCode, null );
-      test.identical( o.exitSignal, 'SIGKILL' );
-      if( process.platform === 'darwin' )
-      test.is( !_.strHas( o.output, 'Timeout in child' ) );
-      else
-      test.is( _.strHas( o.output, 'Timeout in child' ) );
-      return null;
-    })
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    let o =
-    {
-      execPath : 'node ' + testAppPath,
-      mode : 'spawn',
-      throwingExitCode : 1,
-      outputCollecting : 1
-    }
-
-    let con = _.process.start( o );
-
-    _.time.out( 2000, () =>
-    {
-      o.process.kill( 'SIGINT' );
-      return null;
-    })
-
-    return test.shouldThrowErrorAsync( con )
-    .finally( ( err, got ) =>
-    {
-      test.is( !_.errIs( err ) );
-      test.identical( o.exitCode, null );
-      test.identical( o.exitSignal, 'SIGINT' );
-      test.is( !_.strHas( o.output, 'Timeout in child' ) );
-      return null;
-    })
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    let o =
-    {
-      execPath : testAppPath,
-      mode : 'fork',
-      throwingExitCode : 1,
-      outputCollecting : 1
-    }
-
-    let con = _.process.start( o );
-
-    _.time.out( 2000, () =>
-    {
-      o.process.kill( 'SIGINT' );
-      return null;
-    })
-
-    return test.shouldThrowErrorAsync( con )
-    .finally( ( err, got ) =>
-    {
-      test.is( !_.errIs( err ) );
-      test.identical( o.exitCode, null );
-      test.identical( o.exitSignal, 'SIGINT' );
-      test.is( !_.strHas( o.output, 'Timeout in child' ) );
-      return null;
-    })
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    let o =
-    {
-      execPath : 'node ' + testAppPath,
-      mode : 'exec',
-      throwingExitCode : 1,
-      outputCollecting : 1
-    }
-
-    let con = _.process.start( o );
-
-    _.time.out( 2000, () =>
-    {
-      o.process.kill( 'SIGINT' );
-      return null;
-    })
-
-    return test.shouldThrowErrorAsync( con )
-    .finally( ( err, got ) =>
-    {
-      test.is( !_.errIs( err ) );
-      test.identical( o.exitCode, null );
-      test.identical( o.exitSignal, 'SIGINT' );
-      if( process.platform === 'darwin' )
-      test.is( !_.strHas( o.output, 'Timeout in child' ) );
-      else
-      test.is( _.strHas( o.output, 'Timeout in child' ) );
-      return null;
-    })
-
-  })
-
-  /*  */
-
-  return ready;
-}
-
-shellTerminate.timeOut = 120000;
-/* shellTerminate.description =
-`
-  Test app - single timeout with message
-
-  Will test:
-  - Termination of child process using SIGINT signal after small delay
-  - Termination of child process using SIGKILL signal after small delay
-
-  Expected behaviour for all platforms:
-  - Child was terminated with exitCode : null, exitSignal : { kill signal from parent }
-  - Time out was not raised, no message output
-` */
-
-//
-
-function shellTerminateWithExitHandler( test )
-{
-  var context = this;
-  var routinePath = _.path.join( context.suitePath, test.name );
-
-  /* */
-
-  function testApp()
-  {
-    _.include( 'wAppBasic' );
-    _.process._exitHandlerRepair();
-    _.time.out( 10000, () => { console.log( 'Timeout in child' ); return null } )
-  }
-
-  /* */
-
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-  testAppPath = _.strQuote( testAppPath );
-  var ready = new _.Consequence().take( null );
-
-  ready
-
-  .then( () =>
-  {
-    let o =
-    {
-      execPath : 'node ' + testAppPath,
-      mode : 'spawn',
-      throwingExitCode : 1,
-      outputCollecting : 1,
-    }
-
-    let con = _.process.start( o );
-
-    _.time.out( 3000, () =>
-    {
-      o.process.kill( 'SIGINT' );
-      return null;
-    })
-
-    _.time.out( 4000, () =>
-    {
-      o.process.kill( 'SIGKILL' );
-      return null;
-    })
-
-    return test.mustNotThrowError( con )
-    .finally( ( err, got ) =>
-    {
-      test.is( !_.errIs( err ) );
-      test.identical( o.exitCode, 0 );
-      test.identical( o.exitSignal, null );
-      test.is( _.strHas( o.output, 'SIGINT' ) );
-      test.is( !_.strHas( o.output, 'Timeout in child' ) );
-      return null;
-    })
-  })
-
-  /*  */
-
-  .then( () =>
-  {
-    let o =
-    {
-      execPath : 'node ' + testAppPath,
-      mode : 'exec',
-      throwingExitCode : 1,
-      outputCollecting : 1,
-    }
-
-    let con = _.process.start( o );
-
-    _.time.out( 3000, () =>
-    {
-      o.process.kill( 'SIGINT' );
-      return null;
-    })
-
-    _.time.out( 4000, () =>
-    {
-      o.process.kill( 'SIGKILL' );
-      return null;
-    })
-
-    return test.mustNotThrowError( con )
-    .finally( ( err, got ) =>
-    {
-      test.is( !_.errIs( err ) );
-      test.identical( o.exitCode, 0 );
-      test.identical( o.exitSignal, null );
-      test.is( _.strHas( o.output, 'SIGINT' ) );
-      test.is( !_.strHas( o.output, 'Timeout in child' ) );
-      return null;
-    })
-  })
-
-  /*  */
-
-  .then( () =>
-  {
-    let o =
-    {
-      execPath : testAppPath,
-      mode : 'fork',
-      throwingExitCode : 1,
-      outputCollecting : 1,
-    }
-
-    let con = _.process.start( o );
-
-    _.time.out( 3000, () =>
-    {
-      o.process.kill( 'SIGINT' );
-      return null;
-    })
-
-    _.time.out( 4000, () =>
-    {
-      o.process.kill( 'SIGKILL' );
-      return null;
-    })
-
-    return test.mustNotThrowError( con )
-    .finally( ( err, got ) =>
-    {
-      test.is( !_.errIs( err ) );
-      test.identical( o.exitCode, 0 );
-      test.identical( o.exitSignal, null );
-      test.is( _.strHas( o.output, 'SIGINT' ) );
-      test.is( !_.strHas( o.output, 'Timeout in child' ) );
-      return null;
-    })
-  })
-
-  /* SIGKILL */
-
-  .then( () =>
-  {
-    let o =
-    {
-      execPath : 'node ' + testAppPath,
-      mode : 'spawn',
-      throwingExitCode : 1,
-      outputCollecting : 1,
-    }
-
-    let con = _.process.start( o );
-
-    _.time.out( 3000, () =>
-    {
-      o.process.kill( 'SIGKILL' );
-      return null;
-    })
-
-    return test.shouldThrowErrorAsync( con )
-    .finally( ( err, got ) =>
-    {
-      test.identical( o.exitCode, null );
-      test.identical( o.exitSignal, 'SIGKILL' );
-      test.is( !_.strHas( o.output, 'Timeout in child' ) );
-      return null;
-    })
-  })
-
-  /*  */
-
-  .then( () =>
-  {
-    let o =
-    {
-      execPath : 'node ' + testAppPath,
-      mode : 'exec',
-      throwingExitCode : 1,
-      outputCollecting : 1,
-    }
-
-    let con = _.process.start( o );
-
-    _.time.out( 3000, () =>
-    {
-      o.process.kill( 'SIGKILL' );
-      return null;
-    })
-
-    return test.shouldThrowErrorAsync( con )
-    .finally( ( err, got ) =>
-    {
-      test.identical( o.exitCode, null );
-      test.identical( o.exitSignal, 'SIGKILL' );
-      test.is( !_.strHas( o.output, 'Timeout in child' ) );
-      return null;
-    })
-  })
-
-  .then( () =>
-  {
-    let o =
-    {
-      execPath : testAppPath,
-      mode : 'fork',
-      throwingExitCode : 1,
-      outputCollecting : 1,
-    }
-
-    let con = _.process.start( o );
-
-    _.time.out( 3000, () =>
-    {
-      o.process.kill( 'SIGKILL' );
-      return null;
-    })
-
-    return test.shouldThrowErrorAsync( con )
-    .finally( ( err, got ) =>
-    {
-      test.identical( o.exitCode, null );
-      test.identical( o.exitSignal, 'SIGKILL' );
-      test.is( !_.strHas( o.output, 'Timeout in child' ) );
-      return null;
-    })
-  })
-
-  /*  */
-
-  return ready;
-}
-
-shellTerminateWithExitHandler.timeOut = 120000;
-
-/* shellTerminateWithExitHandler.description =
-`
-  Test app - single timeout with message and appExitHandlerRepair called at start
-
-  Will test:
-    - Termination of child process using SIGINT signal after small delay
-    - Termination of child process using SIGKILL signal after small delay
-
-  Expected behaviour:
-    - For SIGINT: Child was terminated before timeout with exitCode : 0, exitSignal : null
-    - For SIGKILL: Child was terminated before timeout with exitCode : null, exitSignal : SIGKILL
-    - No time out message in output
-` */
-
-//
-
 function shellTerminateHangedWithExitHandler( test )
 {
   var context = this;
@@ -9109,11 +8626,11 @@ function shellTerminateHangedWithExitHandler( test )
   {
     _.include( 'wAppBasic' );
     _.process._exitHandlerRepair();
+    process.send( process.pid )
     while( 1 )
     {
       console.log( _.time.now() )
     }
-    console.log( 'Killed' );
   }
 
   /* */
@@ -9134,36 +8651,22 @@ function shellTerminateHangedWithExitHandler( test )
       mode : 'spawn',
       throwingExitCode : 0,
       outputPiping : 0,
-      timeOut : 10000,
+      ipc : 1,
       outputCollecting : 1,
     }
 
     let con = _.process.start( o );
-
-    _.time.out( 3000, () =>
+    
+    o.process.on( 'message', () => 
     {
-      o.process.kill( 'SIGINT' );
-      return null;
+      _.process.terminate({ process : o.process, timeOut : 5000 });
     })
 
-    _.time.out( 4000, () =>
+    con.then( () =>
     {
-      o.process.kill( 'SIGKILL' );
-      return null;
-    })
-
-    con.then( ( got ) =>
-    {
-      if( process.platform === 'win32' )
-      {
-        test.identical( o.exitCode, null );
-        test.identical( o.exitSignal, 'SIGINT' );
-      }
-      else
-      {
-        test.identical( o.exitCode, null );
-        test.identical( o.exitSignal, 'SIGKILL' );
-      }
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, 'SIGKILL' );
+      test.is( !_.strHas( o.output, 'SIGINT' ) );
 
       return null;
     })
@@ -9172,7 +8675,7 @@ function shellTerminateHangedWithExitHandler( test )
   })
 
   /*  */
-
+  
   .then( () =>
   {
     let o =
@@ -9180,37 +8683,24 @@ function shellTerminateHangedWithExitHandler( test )
       execPath : testAppPath,
       mode : 'fork',
       throwingExitCode : 0,
-      timeOut : 10000,
       outputPiping : 0,
+      ipc : 1,
       outputCollecting : 1,
     }
 
     let con = _.process.start( o );
-
-    _.time.out( 3000, () =>
+    
+    o.process.on( 'message', () => 
     {
-      o.process.kill( 'SIGINT' );
-      return null;
+      _.process.terminate({ process : o.process, timeOut : 5000 });
     })
 
-    _.time.out( 4000, () =>
+    con.then( () =>
     {
-      o.process.kill( 'SIGKILL' );
-      return null;
-    })
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, 'SIGKILL' );
+      test.is( !_.strHas( o.output, 'SIGINT' ) );
 
-    con.then( ( got ) =>
-    {
-      if( process.platform === 'win32' )
-      {
-        test.identical( o.exitCode, null );
-        test.identical( o.exitSignal, 'SIGINT' );
-      }
-      else
-      {
-        test.identical( o.exitCode, null );
-        test.identical( o.exitSignal, 'SIGKILL' );
-      }
       return null;
     })
 
@@ -14912,9 +14402,7 @@ var Proto =
     shellNode,
     shellModeShellNonTrivial,
 
-    shellTerminate,
-    // shellTerminateWithExitHandler,
-    // shellTerminateHangedWithExitHandler,
+    shellTerminateHangedWithExitHandler,
     // shellTerminateAfterLoopRelease,
 
     shellStartingDelay,
