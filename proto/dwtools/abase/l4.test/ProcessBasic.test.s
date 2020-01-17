@@ -8745,10 +8745,10 @@ function shellTerminateAfterLoopRelease( test )
     setTimeout( () =>
     {
       loop = false;
-    }, 6000 )
+    }, 5000 )
+    process.send( process.pid );
     while( loop ){}
-
-    console.log( 'Exit after timeout' );
+    console.log( 'Exit after release' );
   }
 
   /* */
@@ -8768,41 +8768,33 @@ function shellTerminateAfterLoopRelease( test )
       execPath : 'node ' + testAppPath,
       mode : 'spawn',
       throwingExitCode : 0,
-      outputPiping : 1,
+      outputPiping : 0,
+      ipc : 1,
       outputCollecting : 1,
     }
 
-    // return test.shouldThrowErrorOfAnyKind( _.process.start( o ) )
-    // .thenKeep( function( got )
-
     let con = _.process.start( o );
-
-    _.time.out( 3000, () =>
+    
+    o.process.on( 'message', () => 
     {
-      o.process.kill( 'SIGINT' );
-      return null;
+      _.process.terminate({ process : o.process, timeOut : 10000 });
     })
 
-    _.time.out( 7000, () =>
-    {
-      o.process.kill( 'SIGKILL' );
-      return null;
-    })
-
-    con.then( ( got ) =>
-    {
+    con.then( () =>
+    { 
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGKILL' );
-      test.is( !_.strHas( o.output, 'Exit after timeout' ) );
+      test.is( !_.strHas( o.output, 'SIGINT' ) );
+      test.is( !_.strHas( o.output, 'Exit after release' ) );
 
       return null;
     })
 
     return con;
   })
-
+  
   /*  */
-
+  
   .then( () =>
   {
     let o =
@@ -8810,32 +8802,24 @@ function shellTerminateAfterLoopRelease( test )
       execPath : testAppPath,
       mode : 'fork',
       throwingExitCode : 0,
-      outputPiping : 1,
+      outputPiping : 0,
+      ipc : 1,
       outputCollecting : 1,
     }
 
-    // return test.shouldThrowErrorOfAnyKind( _.process.start( o ) )
-    // .thenKeep( function( got )
-
     let con = _.process.start( o );
-
-    _.time.out( 3000, () =>
+    
+    o.process.on( 'message', () => 
     {
-      o.process.kill( 'SIGINT' );
-      return null;
+      _.process.terminate({ process : o.process, timeOut : 10000 });
     })
 
-    _.time.out( 7000, () =>
-    {
-      o.process.kill( 'SIGKILL' );
-      return null;
-    })
-
-    con.then( ( got ) =>
-    {
+    con.then( () =>
+    { 
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGKILL' );
-      test.is( !_.strHas( o.output, 'Exit after timeout' ) );
+      test.is( !_.strHas( o.output, 'SIGINT' ) );
+      test.is( !_.strHas( o.output, 'Exit after release' ) );
 
       return null;
     })
@@ -8848,7 +8832,7 @@ function shellTerminateAfterLoopRelease( test )
   return ready;
 }
 
-shellTerminateAfterLoopRelease.timeOut = 20000;
+shellTerminateAfterLoopRelease.timeOut = 30000;
 // shellTerminateAfterLoopRelease.description =
 // `
 //   Test app - code that blocks event loop for short period of time and appExitHandlerRepair called at start
@@ -14403,7 +14387,7 @@ var Proto =
     shellModeShellNonTrivial,
 
     shellTerminateHangedWithExitHandler,
-    // shellTerminateAfterLoopRelease,
+    shellTerminateAfterLoopRelease,
 
     shellStartingDelay,
     shellStartingTime,
