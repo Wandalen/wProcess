@@ -12551,65 +12551,6 @@ function killWithChildren( test )
 
 //
 
-function killTimeOut( test )
-{
-  var context = this;
-  var routinePath = _.path.join( context.suitePath, test.name );
-
-  function testApp()
-  {
-    setTimeout( () =>
-    {
-      console.log( 'Application timeout!' )
-    }, 5000 )
-  }
-
-  /* */
-
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
-  var expectedOutput = testAppPath + '\n';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-
-  var con = new _.Consequence().take( null )
-
-  /* */
-
-  .thenKeep( () =>
-  {
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'spawn',
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-    let killed = _.process.kill({ process : o.process, timeOut : 1000 })
-
-    ready.then( ( got ) =>
-    {
-      killed.then( () =>
-      {
-        test.identical( got.exitCode , null );
-        test.identical( got.exitSignal , 'SIGKILL' );
-        test.is( !_.strHas( got.output, 'Application timeout!' ) );
-        return null;
-      })
-      return killed;
-    })
-
-    return ready;
-  })
-
-  /*  */
-
-  return con;
-}
-
-//
-
 function terminate( test )
 {
   var context = this;
@@ -15003,7 +14944,6 @@ var Proto =
 
     kill,
     killWithChildren,
-    killTimeOut,
     terminate,
     terminateComplex,
     terminateDetachedComplex,

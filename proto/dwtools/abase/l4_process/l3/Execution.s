@@ -1886,40 +1886,33 @@ function kill( o )
   }
 
   _.assert( _.numberIs( o.pid ) );
-  _.assert( o.timeOut === null || _.numberIs( o.timeOut ) )
 
   let isWindows = process.platform === 'win32';
 
   try
   {
-    if( o.withChildren )
+    if( !o.withChildren )
+    return killProcess();
+    
+    let con = _.process.children({ pid : o.pid, asList : isWindows });
+    con.then( ( children ) =>
     {
-      let con = _.process.children({ pid : o.pid, asList : isWindows });
-      con.then( ( children ) =>
+      if( !isWindows )
+      return killChildren( children );
+      
+      for( var l = children.length - 1; l >= 0; l-- )
       {
-        if( !isWindows )
-        {
-          killChildren( children );
-          return true;
-        }
-        for( var l = children.length - 1; l >= 0; l-- )
-        {
-          if( l && children[ l ].name === 'conhost.exe' )
-          continue;
-          if( _.process.isRunning( children[ l ].pid ) )
-          process.kill( children[ l ].pid, 'SIGKILL' );
-        }
-        return true;
-      })
-      con.catch( handleError );
-      return con;
-    }
-    else
-    {
-      if( o.timeOut === null )
-      return killProcess();
-      return _.time.out( o.timeOut, killProcess );
-    }
+        if( l && children[ l ].name === 'conhost.exe' )
+        continue;
+        if( _.process.isRunning( children[ l ].pid ) )
+        process.kill( children[ l ].pid, 'SIGKILL' );
+      }
+      
+      return true;
+    })
+    con.catch( handleError );
+    
+    return con;
   }
   catch( err )
   {
@@ -1948,6 +1941,7 @@ function kill( o )
       process.kill( pid, 'SIGKILL' );
       killChildren( tree[ pid ] );
     }
+    return true;
   }
 
   function handleError( err )
@@ -1968,8 +1962,7 @@ kill.defaults =
 {
   pid : null,
   process : null,
-  withChildren : 0,
-  timeOut : null
+  withChildren : 0
 }
 
 //
