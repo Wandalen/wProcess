@@ -14895,7 +14895,7 @@ function killComplex( test )
       else
       {
         test.identical( childOfChild.exitCode , null );
-        test.identical( childOfChild.exitSignal , 'SIGTERM' );
+        test.identical( childOfChild.exitSignal , 'SIGKILL' );
       }
       
       return null;
