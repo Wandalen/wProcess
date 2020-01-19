@@ -12,8 +12,7 @@ process.on( 'exit', () =>
   console.log( 'Child process received exit' );
 })
 
-process.stdin.resume();
-
 setTimeout( () =>
 {
-}, 5000 )
+  console.log( 'timeout' )
+}, 10000 )
