@@ -373,8 +373,8 @@ function start_body( o )
   /* */
 
   function prepareAfterDeath() /* xxx qqq : ask how to refactor */
-  {
-    let toolsPath = _.path.nativize( _.path.join( __dirname, '../../Tools.s' ) );
+  { 
+    let toolsPath = _.path.nativize( _.path.join( __dirname, '../../../Tools.s' ) );
     let toolsPathInclude = `let _ = require( '${_.strEscape( toolsPath )}' );\n`
 
     function secondaryProcess()
@@ -400,38 +400,15 @@ function start_body( o )
       return;
 
       parentPid = _.numberFrom( process.argv[ 3 ] )
-      interval = setInterval( onInterval, delay );
-
-      /*  */
-
-      function onInterval()
+      interval = setInterval( () => 
       {
-        if( !parentIsRunning() )
-        start();
-      }
-
-      /*  */
-
-      function parentIsRunning()
-      {
-        try
-        {
-          return process.kill( parentPid, 0 );
-        }
-        catch (e)
-        {
-          return e.code === 'EPERM'
-        }
-      }
-
-      /*  */
-
-      function start()
-      {
+        if( _.process.isRunning( parentPid ) )
+        return;
         clearInterval( interval );
         console.log( 'Secondary: starting child process...' );
         _.process.start( startOptions );
-      }
+        
+      }, delay );
     }
 
     let secondaryProcessSource = toolsPathInclude + secondaryProcess.toString() + '\nsecondaryProcess();';
@@ -447,7 +424,7 @@ function start_body( o )
     o.mode = 'spawn';
     o.args = [ _.path.nativize( secondaryFilePath ), _.toJson( childOptions ), process.pid ]
     o.ipc = false;
-    o.stdio = 'inherit'
+    o.stdio = 'ignore'
     o.detaching = true;
     o.inputMirroring = 0;
   }
@@ -868,7 +845,8 @@ function start_body( o )
   }
 
   function onProcedureTerminationBegin()
-  {
+  { 
+    if( o.when === 'instant' )
     o.ready.error( _.err( 'Detached child with pid:', o.process.pid, 'is continuing execution after parent death.' ) );
     _.Procedure.Off( 'terminationBegin', onProcedureTerminationBegin );
   }

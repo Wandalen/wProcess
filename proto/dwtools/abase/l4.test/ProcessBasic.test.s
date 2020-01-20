@@ -9019,131 +9019,115 @@ function shellStartingSuspended( test )
 
 //
 
-// function shellAfterDeath( test )
-// {
-//   var context = this;
-//   var routinePath = _.path.join( context.suitePath, test.name );
+function shellAfterDeath( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
 
-//   function testAppParent()
-//   {
-//     _.include( 'wAppBasic' );
-//     _.include( 'wFiles' );
+  function testAppParent()
+  {
+    _.include( 'wAppBasic' );
+    _.include( 'wFiles' );
 
-//     let o =
-//     {
-//       execPath : 'node testAppChild.js',
-//       outputCollecting : 1,
-//       stdio : 'inherit',
-//       mode : 'spawn',
-//       when : 'afterdeath'
-//     }
+    let o =
+    {
+      execPath : 'node testAppChild.js',
+      outputCollecting : 1,
+      mode : 'spawn',
+      when : 'afterdeath'
+    }
 
-//     _.process.start( o );
+    _.process.start( o );
 
-//     process.send( o.process.pid );
+    process.send( o.process.pid );
 
-//     _.time.out( 4000, () =>
-//     {
-//       process.disconnect();
-//       return null;
-//     })
-//   }
+    _.time.out( 5000, () =>
+    {
+      _.Procedure.TerminationBegin();
+      return null;
+    })
+  }
 
-//   function testAppChild()
-//   {
-//     _.include( 'wAppBasic' );
-//     _.include( 'wFiles' );
+  function testAppChild()
+  {
+    _.include( 'wAppBasic' );
+    _.include( 'wFiles' );
 
-//     _.time.out( 5000, () =>
-//     {
-//       let filePath = _.path.join( __dirname, 'testFile' );
-//       _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
-//     })
-//   }
+    _.time.out( 10000, () =>
+    {
+      let filePath = _.path.join( __dirname, 'testFile' );
+      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
+    })
+  }
 
-//   /* */
+  /* */
 
-//   var testAppParentPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppParent.js' ) );
-//   var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
-//   var testAppParentCode = context.toolsPathInclude + testAppParent.toString() + '\ntestAppParent();';
-//   var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
-//   _.fileProvider.fileWrite( testAppParentPath, testAppParentCode );
-//   _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
-//   testAppParentPath = _.strQuote( testAppParentPath );
-//   var ready = new _.Consequence().take( null );
+  var testAppParentPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppParent.js' ) );
+  var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
+  var testAppParentCode = context.toolsPathInclude + testAppParent.toString() + '\ntestAppParent();';
+  var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
+  _.fileProvider.fileWrite( testAppParentPath, testAppParentCode );
+  _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
+  testAppParentPath = _.strQuote( testAppParentPath );
+  var ready = new _.Consequence().take( null );
 
-//   let testFilePath = _.path.join( routinePath, 'testFile' );
+  let testFilePath = _.path.join( routinePath, 'testFile' );
 
-//   ready
+  ready
 
-//   .then( () =>
-//   {
-//     let o =
-//     {
-//       execPath : 'node testAppParent.js',
-//       mode : 'spawn',
-//       outputCollecting : 1,
-//       currentPath : routinePath,
-//       ipc : 1,
-//     }
-//     let con = _.process.start( o );
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : 'node testAppParent.js',
+      mode : 'spawn',
+      outputCollecting : 1,
+      currentPath : routinePath,
+      ipc : 1,
+    }
+    let con = _.process.start( o );
 
-//     let secondaryPid;
+    let secondaryPid;
 
-//     o.process.on( 'message', ( got ) =>
-//     {
-//       secondaryPid = _.numberFrom( got );
-//     })
+    o.process.on( 'message', ( got ) =>
+    {
+      secondaryPid = _.numberFrom( got );
+    })
 
-//     _.time.out( 2500, () =>
-//     {
-//       test.will = 'parent is alive, secondary is alive'
-//       test.is( processIsRunning( o.process.pid ) )
-//       test.is( processIsRunning( secondaryPid) )
-//       return null;
-//     })
+    _.time.out( 2500, () =>
+    {
+      test.will = 'parent is alive, secondary is alive'
+      test.is( _.process.isRunning( o.process.pid ) )
+      test.is( _.process.isRunning( secondaryPid) )
+      return null;
+    })
 
-//     _.time.out( 5000, () =>
-//     {
-//       test.will = 'parent is dead, but waits for secondary and child'
-//       test.is( !processIsRunning( o.process.pid ) )
-//       test.is( processIsRunning( secondaryPid) )
-//       return null;
-//     })
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
 
-//     con.then( ( got ) =>
-//     {
-//       test.identical( got.exitCode, 0 );
+      test.is( !_.process.isRunning( o.process.pid ) );
+      test.is( _.process.isRunning( secondaryPid ) );
+      test.is( !_.fileProvider.fileExists( testFilePath ) );
+      return _.time.out( 15000 );
+    })
+    
+    con.then( () =>
+    {
+      test.is( !_.process.isRunning( secondaryPid ) );
+      test.is( _.fileProvider.fileExists( testFilePath ) );
+      let childPid = _.fileProvider.fileRead( testFilePath );
+      test.is( !_.process.isRunning( _.numberFrom( childPid ) ) );
+      return null;
+    })
 
-//       test.is( !processIsRunning( o.process.pid ) );
-//       test.is( !processIsRunning( secondaryPid ) );
+    return con;
+  })
+  
+  /*  */
 
-//       test.is( _.fileProvider.fileExists( testFilePath ) );
-//       let childPid = _.fileProvider.fileRead( testFilePath );
-//       test.is( !processIsRunning( _.numberFrom( childPid ) ) );
-
-//       return null;
-//     })
-
-//     return con;
-//   })
-
-//   /*  */
-
-//   function processIsRunning( pid )
-//   {
-//     try
-//     {
-//       return process.kill( pid, 0 );
-//     }
-//     catch (e)
-//     {
-//       return e.code === 'EPERM'
-//     }
-//   }
-
-//   return ready;
-// }
+  return ready;
+}
 
 //
 
@@ -14392,7 +14376,7 @@ var Proto =
     shellStartingDelay,
     shellStartingTime,
     // shellStartingSuspended,
-    // shellAfterDeath,
+    shellAfterDeath,
     // shellAfterDeathOutput,
 
     shellDetachingThrowing,
