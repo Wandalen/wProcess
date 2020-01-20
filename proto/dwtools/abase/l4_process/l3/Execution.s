@@ -376,42 +376,7 @@ function start_body( o )
   { 
     let toolsPath = _.path.nativize( _.path.join( __dirname, '../../../Tools.s' ) );
     let toolsPathInclude = `let _ = require( '${_.strEscape( toolsPath )}' );\n`
-
-    function secondaryProcess()
-    {
-      _.include( 'wAppBasic' );
-      _.include( 'wFiles' );
-
-      let startOptions;
-      let parentPid;
-      let interval;
-      let delay = 100;
-
-      try
-      {
-        startOptions = JSON.parse( process.argv[ 2 ] );
-      }
-      catch ( err )
-      {
-        _.errLogOnce( err );
-      }
-
-      if( !startOptions )
-      return;
-
-      parentPid = _.numberFrom( process.argv[ 3 ] )
-      interval = setInterval( () => 
-      {
-        if( _.process.isRunning( parentPid ) )
-        return;
-        clearInterval( interval );
-        console.log( 'Secondary: starting child process...' );
-        _.process.start( startOptions );
-        
-      }, delay );
-    }
-
-    let secondaryProcessSource = toolsPathInclude + secondaryProcess.toString() + '\nsecondaryProcess();';
+    let secondaryProcessSource = toolsPathInclude + afterDeathSecondaryProcess.toString() + '\afterDeathSecondaryProcess();';
     let secondaryFilePath = _.process.tempOpen({ sourceCode : secondaryProcessSource });
 
     let childOptions = _.mapExtend( null, o );
@@ -427,6 +392,40 @@ function start_body( o )
     o.stdio = 'ignore'
     o.detaching = true;
     o.inputMirroring = 0;
+  }
+  
+  function afterDeathSecondaryProcess()
+  {
+    _.include( 'wAppBasic' );
+    _.include( 'wFiles' );
+
+    let startOptions;
+    let parentPid;
+    let interval;
+    let delay = 100;
+
+    try
+    {
+      startOptions = JSON.parse( process.argv[ 2 ] );
+    }
+    catch ( err )
+    {
+      _.errLogOnce( err );
+    }
+
+    if( !startOptions )
+    return;
+
+    parentPid = _.numberFrom( process.argv[ 3 ] )
+    interval = setInterval( () => 
+    {
+      if( _.process.isRunning( parentPid ) )
+      return;
+      clearInterval( interval );
+      console.log( 'Secondary: starting child process...' );
+      _.process.start( startOptions );
+      
+    }, delay );
   }
 
   /* */
