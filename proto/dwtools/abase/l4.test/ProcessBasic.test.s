@@ -9,6 +9,7 @@ if( typeof module !== 'undefined' )
 
   _.include( 'wTesting' );
   _.include( 'wFiles' );
+  _.include( 'wProcessWatcher' );
 
   require( '../l4_process/Basic.s' );
 
@@ -8651,12 +8652,15 @@ function shellProcedureTrivial( test )
     var procedure = _.procedure.find( 'PID:'+ o.process.pid );
     test.identical( procedure.length, 1 );
     test.identical( procedure[ 0 ].isAlive(), true );
+    test.identical( o.procedure, procedure[ 0 ] );
     test.identical( procedure[ 0 ].object(), o.process );
     return con.then( ( got ) =>
     {
       test.identical( got.exitCode, 0 );
       test.identical( procedure[ 0 ].isAlive(), false );
+      test.identical( o.procedure, procedure[ 0 ] );
       test.identical( procedure[ 0 ].object(), o.process );
+      test.is( _.strHas( o.procedure._sourcePath, 'Execution.s' ) );
       return null;
     })
   })
@@ -8671,12 +8675,15 @@ function shellProcedureTrivial( test )
     var procedure = _.procedure.find( 'PID:'+ o.process.pid );
     test.identical( procedure.length, 1 );
     test.identical( procedure[ 0 ].isAlive(), true );
+    test.identical( o.procedure, procedure[ 0 ] );
     test.identical( procedure[ 0 ].object(), o.process );
     return con.then( ( got ) =>
     {
       test.identical( got.exitCode, 0 );
       test.identical( procedure[ 0 ].isAlive(), false );
+      test.identical( o.procedure, procedure[ 0 ] );
       test.identical( procedure[ 0 ].object(), o.process );
+      test.is( _.strHas( o.procedure._sourcePath, 'Execution.s' ) );
       return null;
     })
   })
@@ -8691,12 +8698,15 @@ function shellProcedureTrivial( test )
     var procedure = _.procedure.find( 'PID:'+ o.process.pid );
     test.identical( procedure.length, 1 );
     test.identical( procedure[ 0 ].isAlive(), true );
+    test.identical( o.procedure, procedure[ 0 ] );
     test.identical( procedure[ 0 ].object(), o.process );
     return con.then( ( got ) =>
     {
       test.identical( got.exitCode, 0 );
       test.identical( procedure[ 0 ].isAlive(), false );
+      test.identical( o.procedure, procedure[ 0 ] );
       test.identical( procedure[ 0 ].object(), o.process );
+      test.is( _.strHas( o.procedure._sourcePath, 'Execution.s' ) );
       return null;
     })
   })
@@ -8711,12 +8721,15 @@ function shellProcedureTrivial( test )
     var procedure = _.procedure.find( 'PID:'+ o.process.pid );
     test.identical( procedure.length, 1 );
     test.identical( procedure[ 0 ].isAlive(), true );
+    test.identical( o.procedure, procedure[ 0 ] );
     test.identical( procedure[ 0 ].object(), o.process );
     return con.then( ( got ) =>
     {
       test.identical( got.exitCode, 0 );
       test.identical( procedure[ 0 ].isAlive(), false );
+      test.identical( o.procedure, procedure[ 0 ] );
       test.identical( procedure[ 0 ].object(), o.process );
+      test.is( _.strHas( o.procedure._sourcePath, 'Execution.s' ) );
       return null;
     })
   })
@@ -8730,6 +8743,150 @@ shellProcedureTrivial.timeOut = 60000;
 shellProcedureTrivial.description = 
 `
   Start routine creates procedure for new child process, start it and terminates when process closes
+`
+
+//
+
+function shellProcedureExists( test )
+{
+  let context = this;
+  let routinePath = _.path.join( context.suitePath, test.name );
+  let testAppPath =  _.path.join( routinePath, 'testApp.js' );
+
+  function testApp()
+  {
+    console.log( process.pid )
+    setTimeout( () => {}, 2000 )
+  }
+
+  let testAppCode = testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+
+  let ready = _.Consequence().take( null );
+
+  let start = _.process.starter
+  ({
+    currentPath : routinePath,
+    outputPiping : 1,
+    outputCollecting : 1,
+  });
+  
+  _.process.watcherEnable();
+  
+  ready
+
+  /* */
+  
+  .then( () => 
+  {
+    
+    var o = { execPath : 'node ' + testAppPath, mode : 'shell' }
+    var con = start( o );
+    var procedure = _.procedure.find( 'PID:'+ o.process.pid );
+    test.identical( procedure.length, 1 );
+    test.identical( procedure[ 0 ].isAlive(), true );
+    test.identical( o.procedure, procedure[ 0 ] );
+    test.identical( procedure[ 0 ].object(), o.process );
+    test.identical( o.procedure, procedure[ 0 ] );
+    return con.then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      test.identical( procedure[ 0 ].isAlive(), false );
+      test.identical( o.procedure, procedure[ 0 ] );
+      test.identical( procedure[ 0 ].object(), o.process );
+      test.identical( o.procedure, procedure[ 0 ] );
+      debugger
+      test.is( _.strHas( o.procedure._sourcePath, 'ProcessWatcher.s' ) );
+      return null;
+    })
+  })
+  
+  /* */
+  
+  .then( () => 
+  {
+    
+    var o = { execPath : testAppPath, mode : 'fork' }
+    var con = start( o );
+    var procedure = _.procedure.find( 'PID:'+ o.process.pid );
+    test.identical( procedure.length, 1 );
+    test.identical( procedure[ 0 ].isAlive(), true );
+    test.identical( o.procedure, procedure[ 0 ] );
+    test.identical( procedure[ 0 ].object(), o.process );
+    test.identical( o.procedure, procedure[ 0 ] );
+    return con.then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      test.identical( procedure[ 0 ].isAlive(), false );
+      test.identical( o.procedure, procedure[ 0 ] );
+      test.identical( procedure[ 0 ].object(), o.process );
+      test.identical( o.procedure, procedure[ 0 ] );
+      test.is( _.strHas( o.procedure._sourcePath, 'ProcessWatcher.s' ) );
+      return null;
+    })
+  })
+  
+  /* */
+  
+  .then( () => 
+  {
+    
+    var o = { execPath : 'node ' + testAppPath, mode : 'spawn' }
+    var con = start( o );
+    var procedure = _.procedure.find( 'PID:'+ o.process.pid );
+    test.identical( procedure.length, 1 );
+    test.identical( procedure[ 0 ].isAlive(), true );
+    test.identical( o.procedure, procedure[ 0 ] );
+    test.identical( procedure[ 0 ].object(), o.process );
+    test.identical( o.procedure, procedure[ 0 ] );
+    return con.then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      test.identical( procedure[ 0 ].isAlive(), false );
+      test.identical( o.procedure, procedure[ 0 ] );
+      test.identical( procedure[ 0 ].object(), o.process );
+      test.identical( o.procedure, procedure[ 0 ] );
+      test.is( _.strHas( o.procedure._sourcePath, 'ProcessWatcher.s' ) );
+      return null;
+    })
+  })
+  
+  /* */
+  
+  .then( () => 
+  {
+    
+    var o = { execPath : 'node ' + testAppPath, mode : 'exec' }
+    var con = start( o );
+    var procedure = _.procedure.find( 'PID:'+ o.process.pid );
+    test.identical( procedure.length, 1 );
+    test.identical( procedure[ 0 ].isAlive(), true );
+    test.identical( o.procedure, procedure[ 0 ] );
+    test.identical( procedure[ 0 ].object(), o.process );
+    test.identical( o.procedure, procedure[ 0 ] );
+    return con.then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      test.identical( procedure[ 0 ].isAlive(), false );
+      test.identical( o.procedure, procedure[ 0 ] );
+      test.identical( procedure[ 0 ].object(), o.process );
+      test.identical( o.procedure, procedure[ 0 ] );
+      test.is( _.strHas( o.procedure._sourcePath, 'ProcessWatcher.s' ) );
+      return null;
+    })
+  })
+  
+  /* */
+  
+  ready.then( () => _.process.watcherDisable() )
+
+  return ready;
+}
+
+shellProcedureExists.timeOut = 60000;
+shellProcedureExists.description = 
+`
+  Start routine does not create procedure for new child process if it was already created by process watcher
 `
 
 //
@@ -14490,6 +14647,7 @@ var Proto =
     shellModeShellNonTrivial,
     
     shellProcedureTrivial,
+    shellProcedureExists,
 
     shellTerminateHangedWithExitHandler,
     shellTerminateAfterLoopRelease,
