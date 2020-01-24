@@ -153,6 +153,7 @@ function start_body( o )
   let decoratedOutput = '';
   let decoratedErrorOutput = '';
   let startingDelay = 0;
+  let procedure;
 
   if( _.objectIs( o.when ) )
   {
@@ -681,6 +682,13 @@ function start_body( o )
       o.process.unref();
       _.Procedure.On( 'terminationBegin', onProcedureTerminationBegin );
     }
+    else if( !o.sync )
+    { 
+      let result = _.procedure.find( 'PID:' + o.process.pid );
+      _.assert( result.length === 0 || result.length === 1, 'Only one procedure expected for child process with pid:', o.pid );
+      if( !result.length )
+      procedure = _.procedure.begin({ _name : 'PID:' + o.process.pid, _object : o.process });
+    }
 
   }
 
@@ -919,7 +927,9 @@ function start_body( o )
   /* */
 
   function handleClose( exitCode, exitSignal )
-  {
+  { 
+    if( procedure )
+    procedure.end();
 
     if( o.detaching )
     _.Procedure.Off( 'terminationBegin', onProcedureTerminationBegin );
