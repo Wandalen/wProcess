@@ -512,6 +512,7 @@ function start_body( o )
     o.exitCode = null;
     o.exitSignal = null;
     o.process = null;
+    o.procedure = null;
     Object.preventExtensions( o );
 
     /* dependencies */
@@ -668,7 +669,7 @@ function start_body( o )
 
       if( o.dry )
       return;
-
+      
       if( o.sync && !o.deasync )
       o.process = ChildProcess.spawnSync( appPath, [ arg1, arg2 ], o2 );
       else
@@ -687,7 +688,9 @@ function start_body( o )
       let result = _.procedure.find( 'PID:' + o.process.pid );
       _.assert( result.length === 0 || result.length === 1, 'Only one procedure expected for child process with pid:', o.pid );
       if( !result.length )
-      procedure = _.procedure.begin({ _name : 'PID:' + o.process.pid, _object : o.process });
+      procedure = o.procedure = _.procedure.begin({ _name : 'PID:' + o.process.pid, _object : o.process });
+      else
+      o.procedure = result[ 0 ];
     }
 
   }
