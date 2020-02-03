@@ -153,6 +153,7 @@ function start_body( o )
   let decoratedOutput = '';
   let decoratedErrorOutput = '';
   let startingDelay = 0;
+  let procedure;
 
   if( _.objectIs( o.when ) )
   {
@@ -373,68 +374,10 @@ function start_body( o )
   /* */
 
   function prepareAfterDeath() /* xxx qqq : ask how to refactor */
-  {
-    let toolsPath = _.path.nativize( _.path.join( __dirname, '../../Tools.s' ) );
+  { 
+    let toolsPath = _.path.nativize( _.path.join( __dirname, '../../../Tools.s' ) );
     let toolsPathInclude = `let _ = require( '${_.strEscape( toolsPath )}' );\n`
-
-    function secondaryProcess()
-    {
-      _.include( 'wAppBasic' );
-      _.include( 'wFiles' );
-
-      let startOptions;
-      let parentPid;
-      let interval;
-      let delay = 100;
-
-      try
-      {
-        startOptions = JSON.parse( process.argv[ 2 ] );
-      }
-      catch ( err )
-      {
-        _.errLogOnce( err );
-      }
-
-      if( !startOptions )
-      return;
-
-      parentPid = _.numberFrom( process.argv[ 3 ] )
-      interval = setInterval( onInterval, delay );
-
-      /*  */
-
-      function onInterval()
-      {
-        if( !parentIsRunning() )
-        start();
-      }
-
-      /*  */
-
-      function parentIsRunning()
-      {
-        try
-        {
-          return process.kill( parentPid, 0 );
-        }
-        catch (e)
-        {
-          return e.code === 'EPERM'
-        }
-      }
-
-      /*  */
-
-      function start()
-      {
-        clearInterval( interval );
-        console.log( 'Secondary: starting child process...' );
-        _.process.start( startOptions );
-      }
-    }
-
-    let secondaryProcessSource = toolsPathInclude + secondaryProcess.toString() + '\nsecondaryProcess();';
+    let secondaryProcessSource = toolsPathInclude + afterDeathSecondaryProcess.toString() + '\afterDeathSecondaryProcess();';
     let secondaryFilePath = _.process.tempOpen({ sourceCode : secondaryProcessSource });
 
     let childOptions = _.mapExtend( null, o );
@@ -447,9 +390,43 @@ function start_body( o )
     o.mode = 'spawn';
     o.args = [ _.path.nativize( secondaryFilePath ), _.toJson( childOptions ), process.pid ]
     o.ipc = false;
-    o.stdio = 'inherit'
+    o.stdio = 'ignore'
     o.detaching = true;
     o.inputMirroring = 0;
+  }
+  
+  function afterDeathSecondaryProcess()
+  {
+    _.include( 'wAppBasic' );
+    _.include( 'wFiles' );
+
+    let startOptions;
+    let parentPid;
+    let interval;
+    let delay = 100;
+
+    try
+    {
+      startOptions = JSON.parse( process.argv[ 2 ] );
+    }
+    catch ( err )
+    {
+      _.errLogOnce( err );
+    }
+
+    if( !startOptions )
+    return;
+
+    parentPid = _.numberFrom( process.argv[ 3 ] )
+    interval = setInterval( () => 
+    {
+      if( _.process.isRunning( parentPid ) )
+      return;
+      clearInterval( interval );
+      console.log( 'Secondary: starting child process...' );
+      _.process.start( startOptions );
+      
+    }, delay );
   }
 
   /* */
@@ -535,6 +512,7 @@ function start_body( o )
     o.exitCode = null;
     o.exitSignal = null;
     o.process = null;
+    o.procedure = null;
     Object.preventExtensions( o );
 
     /* dependencies */
@@ -691,7 +669,7 @@ function start_body( o )
 
       if( o.dry )
       return;
-
+      
       if( o.sync && !o.deasync )
       o.process = ChildProcess.spawnSync( appPath, [ arg1, arg2 ], o2 );
       else
@@ -704,6 +682,15 @@ function start_body( o )
     {
       o.process.unref();
       _.Procedure.On( 'terminationBegin', onProcedureTerminationBegin );
+    }
+    else if( !o.sync )
+    { 
+      let result = _.procedure.find( 'PID:' + o.process.pid );
+      _.assert( result.length === 0 || result.length === 1, 'Only one procedure expected for child process with pid:', o.pid );
+      if( !result.length )
+      procedure = o.procedure = _.procedure.begin({ _name : 'PID:' + o.process.pid, _object : o.process });
+      else
+      o.procedure = result[ 0 ];
     }
 
   }
@@ -868,7 +855,8 @@ function start_body( o )
   }
 
   function onProcedureTerminationBegin()
-  {
+  { 
+    if( o.when === 'instant' )
     o.ready.error( _.err( 'Detached child with pid:', o.process.pid, 'is continuing execution after parent death.' ) );
     _.Procedure.Off( 'terminationBegin', onProcedureTerminationBegin );
   }
@@ -942,7 +930,9 @@ function start_body( o )
   /* */
 
   function handleClose( exitCode, exitSignal )
-  {
+  { 
+    if( procedure )
+    procedure.end();
 
     if( o.detaching )
     _.Procedure.Off( 'terminationBegin', onProcedureTerminationBegin );
