@@ -154,7 +154,7 @@ on.defaults =
 // function _eventExitSetup()
 // {
 //
-//   _.assert( arguments.length === 0 );
+//   _.assert( arguments.length === 0, 'Expects no arguments' );
 //
 //   if( !_global.process )
 //   return;

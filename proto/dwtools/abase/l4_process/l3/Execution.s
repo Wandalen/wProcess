@@ -256,7 +256,7 @@ function start_body( o )
         prevReady.finally( currentReady );
         prevReady = currentReady;
       }
-      
+
       let o2 = _.mapExtend( null, o );
       o2.execPath = execPath[ p ];
       o2.args = o.args ? o.args.slice() : o.args;
@@ -264,7 +264,7 @@ function start_body( o )
       o2.ready = currentReady;
       options.push( o2 );
       _.process.start( o2 );
-      
+
     }
 
     // debugger;
@@ -933,7 +933,7 @@ function start_body( o )
     result += 'Launched as ' + _.strQuote( o.fullExecPath ) + '\n';
     result += 'Launched at ' + _.strQuote( o.currentPath ) + '\n';
     if( stderrOutput.length )
-    result += '\n -> Stderr' + '\n' + ' -  ' + _.strIndentation( stderrOutput, ' -  ' ) + '\n -< Stderr';
+    result += '\n -> Stderr' + '\n' + ' -  ' + _.strLinesIndentation( stderrOutput, ' -  ' ) + '\n -< Stderr';
     // !!! : implement error's collectors
     debugger;
     return result;
@@ -1040,7 +1040,7 @@ function start_body( o )
     data = _.strRemoveEnd( data, '\n' );
 
     if( o.outputPrefixing )
-    data = 'stderr :\n' + '  ' + _.strIndentation( data, '  ' );
+    data = 'stderr :\n' + '  ' + _.strLinesIndentation( data, '  ' );
 
     if( _.color && !o.outputGray )
     data = _.color.strFormat( data, 'pipe.negative' );
@@ -1068,7 +1068,7 @@ function start_body( o )
     data = _.strRemoveEnd( data, '\n' );
 
     if( o.outputPrefixing )
-    data = 'stdout :\n' + '  ' + _.strIndentation( data, '  ' );
+    data = 'stdout :\n' + '  ' + _.strLinesIndentation( data, '  ' );
 
     if( _.color && !o.outputGray && !o.outputGrayStdout )
     data = _.color.strFormat( data, 'pipe.neutral' );
@@ -1627,7 +1627,7 @@ function exitWithBeep()
 
   // exitCode = exitCode !== undefined ? exitCode : _.process.exitCode();
   // _.assert( arguments.length === 0 || arguments.length === 1 );
-  _.assert( arguments.length === 0 );
+  _.assert( arguments.length === 0, 'Expects no arguments' );
   _.assert( exitCode === undefined || _.numberIs( exitCode ) );
 
   _.diagnosticBeep();
@@ -1657,7 +1657,7 @@ let appRepairExitHandlerDone = 0;
 function _exitHandlerRepair()
 {
 
-  _.assert( arguments.length === 0 );
+  _.assert( arguments.length === 0, 'Expects no arguments' );
 
   if( appRepairExitHandlerDone )
   return;
@@ -1810,7 +1810,7 @@ function _exitHandlerOff( routine )
 function _eventExitSetup()
 {
 
-  _.assert( arguments.length === 0 );
+  _.assert( arguments.length === 0, 'Expects no arguments' );
 
   if( !_global.process )
   return;
@@ -1893,13 +1893,13 @@ function kill( o )
   {
     if( !o.withChildren )
     return killProcess();
-    
+
     let con = _.process.children({ pid : o.pid, asList : isWindows });
     con.then( ( children ) =>
     {
       if( !isWindows )
       return killChildren( children );
-      
+
       for( var l = children.length - 1; l >= 0; l-- )
       {
         if( l && children[ l ].name === 'conhost.exe' )
@@ -1907,11 +1907,11 @@ function kill( o )
         if( _.process.isRunning( children[ l ].pid ) )
         process.kill( children[ l ].pid, 'SIGKILL' );
       }
-      
+
       return true;
     })
     con.catch( handleError );
-    
+
     return con;
   }
   catch( err )
@@ -1997,7 +1997,7 @@ function terminate( o )
   {
     if( !o.withChildren )
     return terminateProcess( o.pid );
-    
+
     let ready = _.process.children({ pid : o.pid, asList : isWindows })
     .then( ( tree ) =>
     {
@@ -2007,7 +2007,7 @@ function terminate( o )
       return terminateChildren( tree );
     })
     .catch( handleError );
-    
+
     return ready;
   }
   catch( err )
@@ -2018,26 +2018,26 @@ function terminate( o )
   /*  */
 
   function terminateProcess( pid )
-  { 
+  {
     let result;
-    
+
     if( isWindows )
     result = windowsKill( pid );
     else
     result = process.kill( pid, 'SIGINT' );
-    
+
     timeOutMaybe( pid );
-    
+
     return result;
   }
 
   function windowsKill( pid )
-  { 
+  {
     return _.process.start
-    ({ 
-      execPath : 'node', 
+    ({
+      execPath : 'node',
       args : [ '-e', `var kill = require( 'wwindowskill' )();kill( ${pid},'SIGINT' )`],
-      currentPath : __dirname, 
+      currentPath : __dirname,
       inputMirroring : 0,
       outputPiping : 1,
       mode : 'spawn',
@@ -2047,15 +2047,15 @@ function terminate( o )
       sync : 0
     })
   }
-  
+
   function timeOutMaybe( pid )
   {
     if( o.timeOut )
-    _.time.out( o.timeOut, () => 
+    _.time.out( o.timeOut, () =>
     {
       if( !_.process.isRunning( pid ) )
       return null;
-      
+
       if( o.process )
       o.process.kill( 'SIGKILL' )
       else
@@ -2083,9 +2083,9 @@ function terminate( o )
     }
     return null;
   }
-  
+
   function terminateChildrenWin( tree )
-  { 
+  {
     let cons = [];
     for( var l = tree.length - 1; l >= 0; l-- )
     {
@@ -2191,7 +2191,7 @@ function children( o )
       inputMirroring : 0
     })
     .then( ( got ) =>
-    { 
+    {
       if( o.asList )
       _result.push( _.numberFrom( pid ) );
       else
