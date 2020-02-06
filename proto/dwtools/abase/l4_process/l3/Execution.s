@@ -374,7 +374,7 @@ function start_body( o )
   /* */
 
   function prepareAfterDeath() /* xxx qqq : ask how to refactor */
-  { 
+  {
     let toolsPath = _.path.nativize( _.path.join( __dirname, '../../../Tools.s' ) );
     let toolsPathInclude = `let _ = require( '${_.strEscape( toolsPath )}' );\n`
     let secondaryProcessSource = toolsPathInclude + afterDeathSecondaryProcess.toString() + '\afterDeathSecondaryProcess();';
@@ -394,7 +394,7 @@ function start_body( o )
     o.detaching = true;
     o.inputMirroring = 0;
   }
-  
+
   function afterDeathSecondaryProcess()
   {
     _.include( 'wAppBasic' );
@@ -418,14 +418,14 @@ function start_body( o )
     return;
 
     parentPid = _.numberFrom( process.argv[ 3 ] )
-    interval = setInterval( () => 
+    interval = setInterval( () =>
     {
       if( _.process.isRunning( parentPid ) )
       return;
       clearInterval( interval );
       console.log( 'Secondary: starting child process...' );
       _.process.start( startOptions );
-      
+
     }, delay );
   }
 
@@ -669,7 +669,7 @@ function start_body( o )
 
       if( o.dry )
       return;
-      
+
       if( o.sync && !o.deasync )
       o.process = ChildProcess.spawnSync( appPath, [ arg1, arg2 ], o2 );
       else
@@ -684,7 +684,7 @@ function start_body( o )
       _.Procedure.On( 'terminationBegin', onProcedureTerminationBegin );
     }
     else if( !o.sync )
-    { 
+    {
       let result = _.procedure.find( 'PID:' + o.process.pid );
       _.assert( result.length === 0 || result.length === 1, 'Only one procedure expected for child process with pid:', o.pid );
       if( !result.length )
@@ -855,7 +855,7 @@ function start_body( o )
   }
 
   function onProcedureTerminationBegin()
-  { 
+  {
     if( o.when === 'instant' )
     o.ready.error( _.err( 'Detached child with pid:', o.process.pid, 'is continuing execution after parent death.' ) );
     _.Procedure.Off( 'terminationBegin', onProcedureTerminationBegin );
@@ -930,7 +930,7 @@ function start_body( o )
   /* */
 
   function handleClose( exitCode, exitSignal )
-  { 
+  {
     if( procedure )
     procedure.end();
 
@@ -2202,6 +2202,7 @@ function children( o )
     _.each( result.children, ( child ) => handleWindowsResult( tree[ result.pid ], child ) )
     return tree;
   }
+
 }
 
 children.defaults =
