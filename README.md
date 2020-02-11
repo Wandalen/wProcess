@@ -6,7 +6,7 @@ Collection of routines to execute system commands, run shell, batches, launch ex
 ### Try out
 ```
 npm install
-node sample/Sample.s
+node sample/Sample.js
 ```
 
 
