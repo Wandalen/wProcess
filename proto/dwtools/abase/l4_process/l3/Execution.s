@@ -568,7 +568,11 @@ function start_body( o )
     if( _.strIs( o.interpreterArgs ) )
     o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs });
 
-    _.assert( _.fileProvider.isDir( o.currentPath ), 'Current path', o.currentPath, 'doesn\'t exist or it\'s not a directory.' );
+    _.assert
+    (
+      _.fileProvider.isDir( o.currentPath ),
+      () => `Current path ( ${o.currentPath} ) doesn\'t exist or it\'s not a directory.\n> ${o.fullExecPath}`
+    );
 
     let execPath = o.execPath;
     let args = o.args.slice();
