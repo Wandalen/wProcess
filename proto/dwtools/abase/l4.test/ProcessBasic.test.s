@@ -401,31 +401,31 @@ aaa : done
 //
 
 function processArgs( test )
-{ 
+{
   var context = this;
   var routinePath = _.path.join( context.suitePath, test.name );
-  
+
   function testApp()
   {
     _.include( 'wAppBasic' );
     _.include( 'wStringsExtra' )
     _.include( 'wFiles' )
-    
+
     if( process.env.ignoreFirstTwoArgv )
     process.argv = process.argv.slice( 2 );
-    
+
     var got = _.process.args({ caching : 0 });
     _.fileProvider.fileWrite( _.path.join( __dirname, 'got' ), JSON.stringify( got ) )
   }
-  
+
   let testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
   let testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
   _.fileProvider.fileWrite( testAppPath, testAppCode );
-  
+
 
   let ready = new _.Consequence().take( null )
   let shell = _.process.starter
-  ({ 
+  ({
     execPath : 'node ' + testAppPath,
     mode : 'spawn',
     throwingExitCode : 0,
@@ -434,11 +434,11 @@ function processArgs( test )
   let filePath = _.path.join( routinePath, 'got' );
   let interpreterPath = _.path.normalize( process.argv[ 0 ] );
   let scriptPath = _.path.normalize( testAppPath );
-  
+
   /* */
-  
+
   shell({ args : [] })
-  .then( o => 
+  .then( o =>
   {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
@@ -458,11 +458,11 @@ function processArgs( test )
     test.contains( got, expected );
     return null;
   })
-  
+
   /* */
-  
+
   shell({ args : [ '' ] })
-  .then( o => 
+  .then( o =>
   {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
@@ -482,11 +482,11 @@ function processArgs( test )
     test.contains( got, expected );
     return null;
   })
-  
+
   /* */
-  
+
   shell({ args : [ 'x', ':', 'aa', 'bbb', ':', 'x' ] })
-  .then( o => 
+  .then( o =>
   {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
@@ -503,11 +503,11 @@ function processArgs( test )
     test.contains( got, expected );
     return null;
   })
-  
+
   /* */
-  
+
   shell({ args : [ 'x', ':', 'y' ] })
-  .then( o => 
+  .then( o =>
   {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
@@ -524,11 +524,11 @@ function processArgs( test )
     test.contains( got, expected );
     return null;
   })
-  
+
   /* */
-  
+
   shell({ args : [ 'x', ':', 'y', 'x', ':', '1' ] })
-  .then( o => 
+  .then( o =>
   {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
@@ -545,11 +545,11 @@ function processArgs( test )
     test.contains( got, expected );
     return null;
   })
-  
+
   /* */
-  
+
   shell({ args : [ 'abcd', 'x', ':', 'y', 'xyz', 'y', ':', 1  ] })
-  .then( o => 
+  .then( o =>
   {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
@@ -566,12 +566,12 @@ function processArgs( test )
     test.contains( got, expected );
     return null;
   })
-  
+
   /* */
-  
+
   shell
-  ({ 
-    args : 
+  ({
+    args :
     [
       'filePath',
       'a:', 1,
@@ -579,9 +579,9 @@ function processArgs( test )
       'c:', 3,
       'd', ':4',
       'e', ':', 5
-    ] 
+    ]
   })
-  .then( o => 
+  .then( o =>
   {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
@@ -601,16 +601,16 @@ function processArgs( test )
         'c:', '3',
         'd', ':4',
         'e', ':', '5'
-      ] 
+      ]
     }
     test.contains( got, expected );
     return null;
   })
-  
+
   /* */
-  
+
   shell({ args : [ 'path:c:\\some', 'x', ':', 0, 'y', ':', 1  ] })
-  .then( o => 
+  .then( o =>
   {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
@@ -627,15 +627,15 @@ function processArgs( test )
     test.contains( got, expected );
     return null;
   })
-  
+
   /* */
-  
+
   shell
-  ({ 
+  ({
     args : [ 'interpreter', 'main.js', '.set', 'v:5', ';', '.build', 'debug:1', ';', '.export' ],
     env : { ignoreFirstTwoArgv : true, PATH: process.env.PATH },
   })
-  .then( o => 
+  .then( o =>
   {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
@@ -656,15 +656,15 @@ function processArgs( test )
     test.contains( got, expected );
     return null;
   })
-  
+
   /* */
-  
+
   shell
-  ({ 
+  ({
     args : [ 'interpreter', 'main.js', '.set', 'v', ':', '[', 1, 2, 3, ']', ';', '.build', 'debug:1', ';', '.export' ],
-    env : { ignoreFirstTwoArgv : true, PATH: process.env.PATH } 
+    env : { ignoreFirstTwoArgv : true, PATH: process.env.PATH }
   })
-  .then( o => 
+  .then( o =>
   {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
@@ -685,15 +685,15 @@ function processArgs( test )
     test.contains( got, expected );
     return null;
   })
-  
+
   /* */
-  
+
   shell
-  ({ 
+  ({
     args : [ 'interpreter', 'main.js', 'path:D:\\path\\to\\file' ],
-    env : { ignoreFirstTwoArgv : true, PATH: process.env.PATH } 
+    env : { ignoreFirstTwoArgv : true, PATH: process.env.PATH }
   })
-  .then( o => 
+  .then( o =>
   {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
@@ -714,15 +714,15 @@ function processArgs( test )
     test.contains( got, expected );
     return null;
   })
-  
+
   /* */
-  
+
   shell
-  ({ 
+  ({
     args : [ 'interpreter', 'main.js', 'path:"D:\\path\\to\\file"' ],
-    env : { ignoreFirstTwoArgv : true, PATH: process.env.PATH } 
+    env : { ignoreFirstTwoArgv : true, PATH: process.env.PATH }
   })
-  .then( o => 
+  .then( o =>
   {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
@@ -743,15 +743,15 @@ function processArgs( test )
     test.contains( got, expected );
     return null;
   })
-  
+
   /* */
-  
+
   shell
-  ({ 
+  ({
     args : [ 'interpreter', 'main.js', 'v:"10"' ],
-    env : { ignoreFirstTwoArgv : true, PATH: process.env.PATH } 
+    env : { ignoreFirstTwoArgv : true, PATH: process.env.PATH }
   })
-  .then( o => 
+  .then( o =>
   {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
@@ -772,15 +772,15 @@ function processArgs( test )
     test.contains( got, expected );
     return null;
   })
-  
+
   /* */
-  
+
   shell
-  ({ 
+  ({
     args : [ 'interpreter', 'main.js', 'str:"abc"' ],
-    env : { ignoreFirstTwoArgv : true, PATH: process.env.PATH } 
+    env : { ignoreFirstTwoArgv : true, PATH: process.env.PATH }
   })
-  .then( o => 
+  .then( o =>
   {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
@@ -801,7 +801,7 @@ function processArgs( test )
     test.contains( got, expected );
     return null;
   })
-  
+
   return ready;
 }
 
@@ -8639,14 +8639,14 @@ function shellProcedureTrivial( test )
     outputPiping : 1,
     outputCollecting : 1,
   });
-  
+
   ready
 
   /* */
-  
-  .then( () => 
+
+  .then( () =>
   {
-    
+
     var o = { execPath : 'node ' + testAppPath, mode : 'shell' }
     var con = start( o );
     var procedure = _.procedure.find( 'PID:'+ o.process.pid );
@@ -8664,12 +8664,12 @@ function shellProcedureTrivial( test )
       return null;
     })
   })
-  
+
   /* */
-  
-  .then( () => 
+
+  .then( () =>
   {
-    
+
     var o = { execPath : testAppPath, mode : 'fork' }
     var con = start( o );
     var procedure = _.procedure.find( 'PID:'+ o.process.pid );
@@ -8687,12 +8687,12 @@ function shellProcedureTrivial( test )
       return null;
     })
   })
-  
+
   /* */
-  
-  .then( () => 
+
+  .then( () =>
   {
-    
+
     var o = { execPath : 'node ' + testAppPath, mode : 'spawn' }
     var con = start( o );
     var procedure = _.procedure.find( 'PID:'+ o.process.pid );
@@ -8710,12 +8710,12 @@ function shellProcedureTrivial( test )
       return null;
     })
   })
-  
+
   /* */
-  
-  .then( () => 
+
+  .then( () =>
   {
-    
+
     var o = { execPath : 'node ' + testAppPath, mode : 'exec' }
     var con = start( o );
     var procedure = _.procedure.find( 'PID:'+ o.process.pid );
@@ -8733,14 +8733,14 @@ function shellProcedureTrivial( test )
       return null;
     })
   })
-  
+
   /* */
 
   return ready;
 }
 
 shellProcedureTrivial.timeOut = 60000;
-shellProcedureTrivial.description = 
+shellProcedureTrivial.description =
 `
   Start routine creates procedure for new child process, start it and terminates when process closes
 `
@@ -8770,16 +8770,16 @@ function shellProcedureExists( test )
     outputPiping : 1,
     outputCollecting : 1,
   });
-  
+
   _.process.watcherEnable();
-  
+
   ready
 
   /* */
-  
-  .then( () => 
+
+  .then( () =>
   {
-    
+
     var o = { execPath : 'node ' + testAppPath, mode : 'shell' }
     var con = start( o );
     var procedure = _.procedure.find( 'PID:'+ o.process.pid );
@@ -8800,12 +8800,12 @@ function shellProcedureExists( test )
       return null;
     })
   })
-  
+
   /* */
-  
-  .then( () => 
+
+  .then( () =>
   {
-    
+
     var o = { execPath : testAppPath, mode : 'fork' }
     var con = start( o );
     var procedure = _.procedure.find( 'PID:'+ o.process.pid );
@@ -8825,12 +8825,12 @@ function shellProcedureExists( test )
       return null;
     })
   })
-  
+
   /* */
-  
-  .then( () => 
+
+  .then( () =>
   {
-    
+
     var o = { execPath : 'node ' + testAppPath, mode : 'spawn' }
     var con = start( o );
     var procedure = _.procedure.find( 'PID:'+ o.process.pid );
@@ -8850,12 +8850,12 @@ function shellProcedureExists( test )
       return null;
     })
   })
-  
+
   /* */
-  
-  .then( () => 
+
+  .then( () =>
   {
-    
+
     var o = { execPath : 'node ' + testAppPath, mode : 'exec' }
     var con = start( o );
     var procedure = _.procedure.find( 'PID:'+ o.process.pid );
@@ -8875,16 +8875,16 @@ function shellProcedureExists( test )
       return null;
     })
   })
-  
+
   /* */
-  
+
   ready.then( () => _.process.watcherDisable() )
 
   return ready;
 }
 
 shellProcedureExists.timeOut = 60000;
-shellProcedureExists.description = 
+shellProcedureExists.description =
 `
   Start routine does not create procedure for new child process if it was already created by process watcher
 `
@@ -8932,8 +8932,8 @@ function shellTerminateHangedWithExitHandler( test )
     }
 
     let con = _.process.start( o );
-    
-    o.process.on( 'message', () => 
+
+    o.process.on( 'message', () =>
     {
       _.process.terminate({ process : o.process, timeOut : 5000 });
     })
@@ -8951,7 +8951,7 @@ function shellTerminateHangedWithExitHandler( test )
   })
 
   /*  */
-  
+
   .then( () =>
   {
     let o =
@@ -8965,8 +8965,8 @@ function shellTerminateHangedWithExitHandler( test )
     }
 
     let con = _.process.start( o );
-    
-    o.process.on( 'message', () => 
+
+    o.process.on( 'message', () =>
     {
       _.process.terminate({ process : o.process, timeOut : 5000 });
     })
@@ -9050,14 +9050,14 @@ function shellTerminateAfterLoopRelease( test )
     }
 
     let con = _.process.start( o );
-    
-    o.process.on( 'message', () => 
+
+    o.process.on( 'message', () =>
     {
       _.process.terminate({ process : o.process, timeOut : 10000 });
     })
 
     con.then( () =>
-    { 
+    {
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGKILL' );
       test.is( !_.strHas( o.output, 'SIGINT' ) );
@@ -9068,9 +9068,9 @@ function shellTerminateAfterLoopRelease( test )
 
     return con;
   })
-  
+
   /*  */
-  
+
   .then( () =>
   {
     let o =
@@ -9084,14 +9084,14 @@ function shellTerminateAfterLoopRelease( test )
     }
 
     let con = _.process.start( o );
-    
-    o.process.on( 'message', () => 
+
+    o.process.on( 'message', () =>
     {
       _.process.terminate({ process : o.process, timeOut : 10000 });
     })
 
     con.then( () =>
-    { 
+    {
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGKILL' );
       test.is( !_.strHas( o.output, 'SIGINT' ) );
@@ -9387,7 +9387,7 @@ function shellAfterDeath( test )
       test.is( !_.fileProvider.fileExists( testFilePath ) );
       return _.time.out( 15000 );
     })
-    
+
     con.then( () =>
     {
       test.is( !_.process.isRunning( secondaryPid ) );
@@ -9399,7 +9399,7 @@ function shellAfterDeath( test )
 
     return con;
   })
-  
+
   /*  */
 
   return ready;
@@ -11988,9 +11988,9 @@ function kill( test )
 
     return ready;
   })
-  
+
   // qqq Vova : find how to simulate EPERM error using process.kill and write test case
-  
+
   /* */
 
   return con;
@@ -12328,7 +12328,7 @@ function terminate( test )
 
     let ready = _.process.start( o )
 
-    o.process.on( 'message', () => 
+    o.process.on( 'message', () =>
     {
       _.process.terminate({ process : o.process });
     })
@@ -12360,7 +12360,7 @@ function terminate( test )
 
     let ready = _.process.start( o )
 
-    o.process.on( 'message', () => 
+    o.process.on( 'message', () =>
     {
       _.process.terminate( o.process.pid );
     })
@@ -12389,10 +12389,10 @@ function terminate( test )
       outputCollecting : 1,
       throwingExitCode : 0
     }
-    
+
     let ready = _.process.start( o )
 
-    o.process.on( 'message', () => 
+    o.process.on( 'message', () =>
     {
       _.process.terminate( o.process.pid );
     })
@@ -12423,7 +12423,7 @@ function terminate( test )
 
     let ready = _.process.start( o )
 
-    o.process.on( 'message', () => 
+    o.process.on( 'message', () =>
     {
       _.process.terminate({ process : o.process });
     })
@@ -12459,15 +12459,15 @@ function terminate( test )
 
     let ready = _.process.start( o )
 
-    o.process.stdout.on( 'data', ( data ) => 
-    { 
+    o.process.stdout.on( 'data', ( data ) =>
+    {
       data = data.toString();
       if( _.strHas( data, 'ready' ))
       _.process.terminate({ process : o.process, timeOut : 0 });
     })
 
     ready.thenKeep( ( got ) =>
-    { 
+    {
       if( process.platform === 'linux' )
       {
         test.identical( got.exitCode , null );
@@ -12510,8 +12510,8 @@ function terminate( test )
 
     let ready = _.process.start( o )
 
-    o.process.stdout.on( 'data', ( data ) => 
-    { 
+    o.process.stdout.on( 'data', ( data ) =>
+    {
       data = data.toString();
       if( _.strHas( data, 'ready' ))
       _.process.terminate({ pid : o.process.pid, timeOut : 0 });
@@ -12565,8 +12565,8 @@ function terminate( test )
 
     let ready = _.process.start( o )
 
-    o.process.stdout.on( 'data', ( data ) => 
-    { 
+    o.process.stdout.on( 'data', ( data ) =>
+    {
       data = data.toString();
       if( _.strHas( data, 'ready' ))
       _.process.terminate({ process : o.process, timeOut : 0 });
@@ -12615,8 +12615,8 @@ function terminate( test )
 
     let ready = _.process.start( o )
 
-    o.process.stdout.on( 'data', ( data ) => 
-    { 
+    o.process.stdout.on( 'data', ( data ) =>
+    {
       data = data.toString();
       if( _.strHas( data, 'ready' ))
       _.process.terminate({ pid : o.process.pid, timeOut : 0 });
@@ -12937,8 +12937,8 @@ function terminateDetachedComplex( test )
       throwingExitCode : 0
     }
     let ready = _.process.start( o );
-    ready.catch( ( err ) => 
-    { 
+    ready.catch( ( err ) =>
+    {
       _.errAttend( err );
       return null;
     })
@@ -12949,8 +12949,8 @@ function terminateDetachedComplex( test )
       console.log( 'ready' )
       _.fileProvider.fileWrite( _.path.join( __dirname, 'pid' ), o.process.pid.toString() )
     }
-    _.time.out( 10000, () => 
-    { 
+    _.time.out( 10000, () =>
+    {
       console.log( 'TerminationBegin' )
       _.Procedure.TerminationBegin()
       return null;
@@ -12958,7 +12958,7 @@ function terminateDetachedComplex( test )
   }
 
   function testApp2()
-  { 
+  {
     process.on( 'SIGINT', () =>
     {
       console.log( 'second child SIGINT' )
@@ -12966,8 +12966,8 @@ function terminateDetachedComplex( test )
     })
     if( process.send )
     process.send( process.pid );
-    setTimeout( () => 
-    { 
+    setTimeout( () =>
+    {
       console.log( 'second child timeout' )
       var fs = require( 'fs' );
       var path = require( 'path' )
@@ -13073,7 +13073,7 @@ function terminateDetachedComplex( test )
   })
 
   //
-  
+
   .thenKeep( () =>
   {
     test.case = 'Sending signal to child process that has detached child, detached child should continue to work'
@@ -13085,10 +13085,10 @@ function terminateDetachedComplex( test )
       outputCollecting : 1,
       throwingExitCode : 0
     }
-    
+
     let ready = _.process.start( o );
     let childPid;
-    o.process.stdout.on( 'data', data => 
+    o.process.stdout.on( 'data', data =>
     {
       data = data.toString();
       if( _.strHas( data, 'ready' ) )
@@ -13096,11 +13096,11 @@ function terminateDetachedComplex( test )
     })
 
     ready.thenKeep( ( got ) =>
-    { 
+    {
       childPid = _.numberFrom( _.fileProvider.fileRead( _.path.join( routinePath, 'pid' ) ) );
-      
+
       if( process.platform === 'linux' )
-      { 
+      {
         test.is( !_.process.isRunning( _.numberFrom( childPid ) ) )
         test.identical( got.exitCode , null );
         test.identical( got.exitSignal , 'SIGINT' );
@@ -13108,7 +13108,7 @@ function terminateDetachedComplex( test )
         test.is( _.strHas( got.output, 'TerminationBegin' ) );
       }
       else if( process.platform === 'win32' )
-      { 
+      {
         test.is( !_.process.isRunning( _.numberFrom( childPid ) ) )
         test.identical( got.exitCode , 0 );
         test.identical( got.exitSignal , null );
@@ -13135,9 +13135,9 @@ function terminateDetachedComplex( test )
 
     return ready;
   })
-  
+
   //
-  
+
   .thenKeep( () =>
   {
     test.case = 'Sending signal to child process that has detached child, detached child should continue to work'
@@ -13149,10 +13149,10 @@ function terminateDetachedComplex( test )
       outputCollecting : 1,
       throwingExitCode : 0
     }
-    
+
     let ready = _.process.start( o );
     let childPid;
-    o.process.stdout.on( 'data', data => 
+    o.process.stdout.on( 'data', data =>
     {
       data = data.toString();
       if( _.strHas( data, 'ready' ) )
@@ -13160,11 +13160,11 @@ function terminateDetachedComplex( test )
     })
 
     ready.thenKeep( ( got ) =>
-    { 
+    {
       childPid = _.numberFrom( _.fileProvider.fileRead( _.path.join( routinePath, 'pid' ) ) );
-      
+
       if( process.platform === 'linux' )
-      { 
+      {
         test.is( !_.process.isRunning( _.numberFrom( childPid ) ) )
         test.identical( got.exitCode , null );
         test.identical( got.exitSignal , 'SIGINT' );
@@ -13172,7 +13172,7 @@ function terminateDetachedComplex( test )
         test.is( _.strHas( got.output, 'TerminationBegin' ) );
       }
       else if( process.platform === 'win32' )
-      { 
+      {
         test.is( !_.process.isRunning( _.numberFrom( childPid ) ) )
         test.identical( got.exitCode , 0 );
         test.identical( got.exitSignal , null );
@@ -13199,7 +13199,7 @@ function terminateDetachedComplex( test )
 
     return ready;
   })
-  
+
   //
 
   return con;
@@ -13255,7 +13255,7 @@ function terminateWithChildren( test )
     let detaching = process.argv[ 2 ] === 'detached';
     let c1 = new _.Consequence();
     let c2 = new _.Consequence();
-  
+
     var o1 =
     {
       execPath : 'node testApp2.js',
@@ -13269,7 +13269,7 @@ function terminateWithChildren( test )
     }
     _.process.start( o1 );
     o1.process.on( 'message', () => c1.take( o1.process.pid ) )
-    
+
     var o2 =
     {
       execPath : 'node testApp2.js',
@@ -13283,9 +13283,9 @@ function terminateWithChildren( test )
     }
     _.process.start( o2 );
     o2.process.on( 'message', () => c2.take( o2.process.pid ) )
-    
+
     _.Consequence.AndKeep( [ c1,c2 ] )
-    .then( () => 
+    .then( () =>
     {
       process.send([ o1.process.pid, o2.process.pid ]);
       return null;
@@ -13393,7 +13393,7 @@ function terminateWithChildren( test )
     return ready;
   })
 
-  //  
+  //
 
   .thenKeep( () =>
   {
@@ -13519,7 +13519,7 @@ function terminateWithDetachedChildren( test )
     {
       execPath : 'node testApp2.js',
       currentPath : __dirname,
-      mode : 'spawn', 
+      mode : 'spawn',
       detaching : 1,
       stdio : 'ignore',
       outputPiping : 0,
@@ -13528,7 +13528,7 @@ function terminateWithDetachedChildren( test )
       throwingExitCode : 0
     }
     _.process.start( o1 );
-    o1.ready.catch( err => 
+    o1.ready.catch( err =>
     {
       _.errAttend( err )
       return null;
@@ -13537,7 +13537,7 @@ function terminateWithDetachedChildren( test )
     {
       execPath : 'node testApp2.js',
       currentPath : __dirname,
-      mode : 'spawn', 
+      mode : 'spawn',
       detaching : 1,
       stdio : 'ignore',
       outputPiping : 0,
@@ -13546,7 +13546,7 @@ function terminateWithDetachedChildren( test )
       throwingExitCode : 0
     }
     _.process.start( o2 );
-    o2.ready.catch( err => 
+    o2.ready.catch( err =>
     {
       _.errAttend( err )
       return null;
@@ -13559,7 +13559,7 @@ function terminateWithDetachedChildren( test )
     {
       _.Procedure.TerminationBegin();
     })
-    
+
   }
 
   /* */
@@ -13606,7 +13606,7 @@ function terminateWithDetachedChildren( test )
         test.identical( got.exitCode, 0 );
         test.identical( got.exitSignal, null );
         test.is( _.strHas( got.output, 'SIGINT' ) );
-        return _.time.out( 5000, () => 
+        return _.time.out( 5000, () =>
         {
           /* xxx Vova : problem with termination of detached proces on Windows, child process does't receive SIGINT */
           test.is( _.fileProvider.fileExists( _.path.join( routinePath, children[ 0 ].toString() ) ) )
@@ -13636,7 +13636,7 @@ function terminateTimeOut( test )
 
   function testApp()
   {
-    process.on( 'SIGINT', () => 
+    process.on( 'SIGINT', () =>
     {
       console.log( 'SIGINT' )
     })
@@ -13673,8 +13673,8 @@ function terminateTimeOut( test )
     }
 
     let ready = _.process.start( o )
-    
-    o.process.on( 'message', () => 
+
+    o.process.on( 'message', () =>
     {
       _.process.terminate({ process : o.process, timeOut : 1000 });
     })
@@ -13705,8 +13705,8 @@ function terminateTimeOut( test )
     }
 
     let ready = _.process.start( o )
-    
-    o.process.on( 'message', () => 
+
+    o.process.on( 'message', () =>
     {
       _.process.terminate({ process : o.process, timeOut : 1000 });
     })
@@ -13736,16 +13736,16 @@ function terminateTimeOut( test )
     }
 
     let ready = _.process.start( o )
-    
-    o.process.stdout.on( 'data', ( data ) => 
-    { 
+
+    o.process.stdout.on( 'data', ( data ) =>
+    {
       data = data.toString();
       if( _.strHas( data, 'ready' ))
       _.process.terminate({ process : o.process });
     })
 
     ready.thenKeep( ( got ) =>
-    { 
+    {
       if( process.platform === 'linux' )
       {
         test.identical( got.exitCode , null );
@@ -13754,26 +13754,26 @@ function terminateTimeOut( test )
         test.is( _.strHas( got.output, 'Application timeout!' ) );
       }
       else if( process.platform === 'darwin' )
-      { 
+      {
         test.identical( got.exitCode , null );
         test.identical( got.exitSignal , 'SIGKILL' );
         test.is( _.strHas( got.output, 'SIGINT' ) );
         test.is( !_.strHas( got.output, 'Application timeout!' ) );
       }
       else
-      { 
+      {
         test.identical( got.exitCode , null );
         test.identical( got.exitSignal , 'SIGKILL' );
         test.is( !_.strHas( got.output, 'SIGINT' ) );
         test.is( _.strHas( got.output, 'Application timeout!' ) );
       }
-    
+
       return null;
     })
 
     return ready;
   })
-  
+
   //
 
   .thenKeep( () =>
@@ -13787,9 +13787,9 @@ function terminateTimeOut( test )
     }
 
     let ready = _.process.start( o )
-    
-    o.process.stdout.on( 'data', ( data ) => 
-    { 
+
+    o.process.stdout.on( 'data', ( data ) =>
+    {
       data = data.toString();
       if( _.strHas( data, 'ready' ))
       _.process.terminate({ process : o.process });
@@ -13805,14 +13805,14 @@ function terminateTimeOut( test )
         test.is( _.strHas( got.output, 'Application timeout!' ) );
       }
       else if( process.platform === 'darwin' )
-      { 
+      {
         test.identical( got.exitCode , null );
         test.identical( got.exitSignal , 'SIGKILL' );
         test.is( _.strHas( got.output, 'SIGINT' ) );
         test.is( !_.strHas( got.output, 'Application timeout!' ) );
       }
       else
-      { 
+      {
         test.identical( got.exitCode , null );
         test.identical( got.exitSignal , 'SIGKILL' );
         test.is( !_.strHas( got.output, 'SIGINT' ) );
@@ -14450,7 +14450,7 @@ function experiment( test )
 
   return ready;
 
-  /*  */
+  /* */
 
   function f()
   {
@@ -14572,7 +14572,7 @@ function killComplex( test )
         test.identical( childOfChild.exitCode , null );
         test.identical( childOfChild.exitSignal , 'SIGKILL' );
       }
-      
+
       return null;
     })
 
@@ -14645,7 +14645,7 @@ var Proto =
     shellErrorHadling,
     shellNode,
     shellModeShellNonTrivial,
-    
+
     shellProcedureTrivial,
     shellProcedureExists,
 
