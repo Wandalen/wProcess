@@ -117,7 +117,6 @@ function _argsInSamFormatNodejs( o )
   result.scriptArgsString = argsToString( result.scriptArgs );
 
   // debugger;
-
   let r = _.strRequestParse
   ({
     src : result.scriptArgsString,
@@ -125,6 +124,7 @@ function _argsInSamFormatNodejs( o )
     commandsDelimeter : o.commandsDelimeter,
     parsingArrays : o.parsingArrays,
   });
+  // debugger;
 
   _.mapExtend( result, r );
 
