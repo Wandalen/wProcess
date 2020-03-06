@@ -236,7 +236,7 @@ function start_body( o )
 
     let prevReady = o.ready;
     let readies = [];
-    let options = [];
+    let optionsArray = [];
 
     let execPath = _.arrayAs( o.execPath );
     let currentPath = _.arrayAs( o.currentPath );
@@ -263,7 +263,7 @@ function start_body( o )
       o2.args = o.args ? o.args.slice() : o.args;
       o2.currentPath = currentPath[ c ];
       o2.ready = currentReady;
-      options.push( o2 );
+      optionsArray.push( o2 );
       _.process.start( o2 );
 
     }
@@ -277,9 +277,9 @@ function start_body( o )
       // debugger;
       o.exitCode = err ? null : 0;
 
-      for( let a = 0 ; a < options.length-1 ; a++ )
+      for( let a = 0 ; a < optionsArray.length-1 ; a++ )
       {
-        let o2 = options[ a ];
+        let o2 = optionsArray[ a ];
         if( !o.exitCode && o2.exitCode )
         o.exitCode = o2.exitCode;
       }
@@ -292,8 +292,8 @@ function start_body( o )
 
     if( o.sync && !o.deasync )
     {
-      if( o.optionsArrayReturn )
-      return options;
+      if( o.returningOptionsArray )
+      return optionsArray;
       return o;
     }
 
@@ -390,7 +390,7 @@ function start_body( o )
     o.mode = 'spawn';
     o.args = [ _.path.nativize( secondaryFilePath ), _.toJson( childOptions ), process.pid ]
     o.ipc = false;
-    o.stdio = 'ignore'
+    o.stdio = 'ignore';
     o.detaching = true;
     o.inputMirroring = 0;
   }
@@ -434,11 +434,6 @@ function start_body( o )
   function prepare()
   {
 
-    // qqq : cover the case ( args is string ) for both routines shell and sheller
-    // Vova: added required test cases
-    // if( _.strIs( o.args ) )
-    // o.args = _.strSplitNonPreserving({ src : o.args });
-
     if( _.arrayIs( o.args ) )
     o.args = o.args.slice();
 
@@ -473,7 +468,6 @@ function start_body( o )
     if( o.outputAdditive === null )
     o.outputAdditive = true;
     o.outputAdditive = !!o.outputAdditive;
-    // o.currentPath = o.currentPath || _.path.current();
     o.currentPath = _.path.resolve( o.currentPath || '.' );
     o.logger = o.logger || _global.logger;
 
@@ -596,7 +590,9 @@ function start_body( o )
       if( o.dry )
       return;
 
+      debugger;
       o.process = ChildProcess.fork( execPath, args, o2 );
+      debugger;
     }
     else if( o.mode === 'exec' )
     {
@@ -699,7 +695,7 @@ function start_body( o )
 
   }
 
-  //
+  /* */
 
   function launchInputLog()
   {
@@ -769,7 +765,7 @@ function start_body( o )
 
     for( let i = 0; i < args.length; i++ )
     {
-      // escape quotes to make shell interpret them as regular symbols
+      /* escape quotes to make shell interpret them as regular symbols */
       let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', "`" ]
       _.each( quotesToEscape, ( quote ) =>
       {
@@ -792,7 +788,7 @@ function start_body( o )
     if( args.length === 1 )
     return _.strQuote( args[ 0 ] );
 
-    //quote only arguments with spaces
+    /* quote only arguments with spaces */
     _.each( args, ( arg, i ) =>
     {
       if( _.strHas( src[ i ], ' ' ) )
@@ -837,15 +833,13 @@ function start_body( o )
     let interpreterArgs = o.interpreterArgs || process.execArgv;
     let o2 =
     {
-      silent : false,
+      // silent : false,
       env : o.env,
       stdio : o.stdio,
       execArgv : interpreterArgs,
     }
-
     if( o.currentPath )
     o2.cwd = _.path.nativize( o.currentPath );
-
     return o2;
   }
 
@@ -926,7 +920,6 @@ function start_body( o )
     result += 'Launched at ' + _.strQuote( o.currentPath ) + '\n';
     if( stderrOutput.length )
     result += '\n -> Stderr' + '\n' + ' -  ' + _.strLinesIndentation( stderrOutput, ' -  ' ) + '\n -< Stderr';
-    // !!! : implement error's collectors
     debugger;
     return result;
   }
@@ -1092,6 +1085,8 @@ function start_body( o )
 
   }
 
+  /* */
+
 }
 
 start_body.defaults =
@@ -1120,7 +1115,7 @@ start_body.defaults =
   passingThrough : 0,
   concurrent : 0,
   timeOut : null,
-  optionsArrayReturn : 1, /* Vova: returns array of maps of options for multiprocess launch in sync mode */
+  returningOptionsArray : 1, /* Vova: returns array of maps of options for multiprocess launch in sync mode */
 
   throwingExitCode : 1, /* must be on by default */
   applyingExitCode : 0,
@@ -1140,7 +1135,9 @@ start_body.defaults =
 }
 
 let start = _.routineFromPreAndBody( start_pre, start_body );
+
 /*
+
 qqq
 add coverage
 Vova: tests routines :
@@ -2227,7 +2224,7 @@ let Extension =
 
   start,
   startPassingThrough,
-  startNode,
+  startNode, /* xxx : rename */
   startNodePassingThrough,
   startAfterDeath,
   starter,
