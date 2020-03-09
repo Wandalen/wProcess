@@ -858,7 +858,8 @@ function start_body( o )
   function onProcedureTerminationBegin()
   {
     if( o.when === 'instant' )
-    o.ready.error( _.err( 'Detached child with pid:', o.process.pid, 'is continuing execution after parent death.' ) );
+    o.ready.take( o );
+    // o.ready.error( _.err( 'Detached child with pid:', o.process.pid, 'is continuing execution after parent death.' ) );
     _.Procedure.Off( 'terminationBegin', onProcedureTerminationBegin );
   }
 
