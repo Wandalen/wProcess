@@ -400,7 +400,7 @@ aaa : done
 
 //
 
-function processArgs( test )
+function processArgsBase( test )
 {
   var context = this;
   var routinePath = _.path.join( context.suitePath, test.name );
@@ -482,6 +482,46 @@ function processArgs( test )
     test.contains( got, expected );
     return null;
   })
+
+  return ready;
+}
+
+//
+
+function processArgsPropertiesBase( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+
+  function testApp()
+  {
+    _.include( 'wAppBasic' );
+    _.include( 'wStringsExtra' )
+    _.include( 'wFiles' )
+
+    if( process.env.ignoreFirstTwoArgv )
+    process.argv = process.argv.slice( 2 );
+
+    var got = _.process.args({ caching : 0 });
+    _.fileProvider.fileWrite( _.path.join( __dirname, 'got' ), JSON.stringify( got ) )
+  }
+
+  let testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  let testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+
+
+  let ready = new _.Consequence().take( null )
+  let shell = _.process.starter
+  ({
+    execPath : 'node ' + testAppPath,
+    mode : 'spawn',
+    throwingExitCode : 0,
+    ready
+  })
+  let filePath = _.path.join( routinePath, 'got' );
+  let interpreterPath = _.path.normalize( process.argv[ 0 ] );
+  let scriptPath = _.path.normalize( testAppPath );
 
   /* */
 
@@ -606,9 +646,7 @@ function processArgs( test )
     test.contains( got, expected );
     return null;
   })
-
-  /* */
-
+  
   shell({ args : [ 'path:c:\\some', 'x', ':', 0, 'y', ':', 1  ] })
   .then( o =>
   {
@@ -627,6 +665,112 @@ function processArgs( test )
     test.contains( got, expected );
     return null;
   })
+  
+  /* */
+  
+  ready.then( () => 
+  {
+    return null;
+  })
+  shell
+  ({
+    args : [ 'interpreter', 'main.js', 'v:"10"' ],
+    env : { ignoreFirstTwoArgv : true, PATH: process.env.PATH }
+  })
+  .then( o =>
+  {
+    test.identical( o.exitCode, 0 );
+    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var expected =
+    {
+      interpreterPath : 'interpreter',
+      scriptPath : 'main.js',
+      interpreterArgs : [],
+      keyValDelimeter : ':',
+      commandsDelimeter : ';',
+      subject : '',
+      map : { v : 10 },
+      scriptArgs : [ 'v:"10"' ],
+      scriptArgsString : 'v:"10"',
+      subjects : [ '' ],
+      maps : [ { v : 10 } ],
+    }
+    test.contains( got, expected );
+    return null;
+  })
+
+  /* */
+  
+  ready.then( () => 
+  {
+    return null;
+  })
+  shell
+  ({
+    args : [ 'interpreter', 'main.js', 'str:"abc"' ],
+    env : { ignoreFirstTwoArgv : true, PATH: process.env.PATH }
+  })
+  .then( o =>
+  {
+    test.identical( o.exitCode, 0 );
+    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var expected =
+    {
+      interpreterPath : 'interpreter',
+      scriptPath : 'main.js',
+      interpreterArgs : [],
+      keyValDelimeter : ':',
+      commandsDelimeter : ';',
+      subject : '',
+      map : { str : 'abc' },
+      scriptArgs : [ 'str:"abc"' ],
+      scriptArgsString : 'str:"abc"',
+      subjects : [ '' ],
+      maps : [ { str : 'abc' } ],
+    }
+    test.contains( got, expected );
+    return null;
+  })
+  
+  return ready;
+}
+
+//
+
+function processArgsMultipleCommands( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+
+  function testApp()
+  {
+    _.include( 'wAppBasic' );
+    _.include( 'wStringsExtra' )
+    _.include( 'wFiles' )
+
+    if( process.env.ignoreFirstTwoArgv )
+    process.argv = process.argv.slice( 2 );
+
+    var got = _.process.args({ caching : 0 });
+    _.fileProvider.fileWrite( _.path.join( __dirname, 'got' ), JSON.stringify( got ) )
+  }
+
+  let testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  let testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+
+
+  let ready = new _.Consequence().take( null )
+  let shell = _.process.starter
+  ({
+    execPath : 'node ' + testAppPath,
+    mode : 'spawn',
+    throwingExitCode : 0,
+    ready
+  })
+  let filePath = _.path.join( routinePath, 'got' );
+  let interpreterPath = _.path.normalize( process.argv[ 0 ] );
+  let scriptPath = _.path.normalize( testAppPath );
 
   /* */
 
@@ -685,6 +829,46 @@ function processArgs( test )
     test.contains( got, expected );
     return null;
   })
+
+  return ready;
+}
+
+//
+
+function processArgsPaths( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+
+  function testApp()
+  {
+    _.include( 'wAppBasic' );
+    _.include( 'wStringsExtra' )
+    _.include( 'wFiles' )
+
+    if( process.env.ignoreFirstTwoArgv )
+    process.argv = process.argv.slice( 2 );
+
+    var got = _.process.args({ caching : 0 });
+    _.fileProvider.fileWrite( _.path.join( __dirname, 'got' ), JSON.stringify( got ) )
+  }
+
+  let testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  let testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+
+
+  let ready = new _.Consequence().take( null )
+  let shell = _.process.starter
+  ({
+    execPath : 'node ' + testAppPath,
+    mode : 'spawn',
+    throwingExitCode : 0,
+    ready
+  })
+  let filePath = _.path.join( routinePath, 'got' );
+  let interpreterPath = _.path.normalize( process.argv[ 0 ] );
+  let scriptPath = _.path.normalize( testAppPath );
 
   /* */
 
@@ -746,68 +930,12 @@ function processArgs( test )
 
   /* */
 
-  shell
-  ({
-    args : [ 'interpreter', 'main.js', 'v:"10"' ],
-    env : { ignoreFirstTwoArgv : true, PATH: process.env.PATH }
-  })
-  .then( o =>
-  {
-    test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
-    var expected =
-    {
-      interpreterPath : 'interpreter',
-      scriptPath : 'main.js',
-      interpreterArgs : [],
-      keyValDelimeter : ':',
-      commandsDelimeter : ';',
-      subject : '',
-      map : { v : 10 },
-      scriptArgs : [ 'v:"10"' ],
-      scriptArgsString : 'v:"10"',
-      subjects : [ '' ],
-      maps : [ { v : 10 } ],
-    }
-    test.contains( got, expected );
-    return null;
-  })
-
-  /* */
-
-  shell
-  ({
-    args : [ 'interpreter', 'main.js', 'str:"abc"' ],
-    env : { ignoreFirstTwoArgv : true, PATH: process.env.PATH }
-  })
-  .then( o =>
-  {
-    test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
-    var expected =
-    {
-      interpreterPath : 'interpreter',
-      scriptPath : 'main.js',
-      interpreterArgs : [],
-      keyValDelimeter : ':',
-      commandsDelimeter : ';',
-      subject : '',
-      map : { str : 'abc' },
-      scriptArgs : [ 'str:"abc"' ],
-      scriptArgsString : 'str:"abc"',
-      subjects : [ '' ],
-      maps : [ { str : 'abc' } ],
-    }
-    test.contains( got, expected );
-    return null;
-  })
-
   return ready;
 }
 
 //
 
-function processArgs2( test )
+function processArgsWithSpace( test )
 {
   var context = this;
   var routinePath = _.path.join( context.suitePath, test.name );
@@ -841,7 +969,7 @@ function processArgs2( test )
   let filePath = _.path.join( routinePath, 'got' );
   let interpreterPath = _.path.normalize( process.argv[ 0 ] );
   let scriptPath = _.path.normalize( testAppPath );
-
+  
   /* */
   
   ready.then( () => 
@@ -15039,8 +15167,11 @@ var Proto =
   tests :
   {
 
-    processArgs,
-    processArgs2,
+    processArgsBase,
+    processArgsPropertiesBase,
+    processArgsMultipleCommands,
+    processArgsPaths,
+    processArgsWithSpace,
     _exitHandlerOnce,
     _exitHandlerOff,
     exitReason,

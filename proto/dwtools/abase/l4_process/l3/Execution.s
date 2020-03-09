@@ -677,9 +677,11 @@ function start_body( o )
 
     }
     else _.assert( 0, 'Unknown mode', _.strQuote( o.mode ), 'to start process at path', _.strQuote( o.paths ) );
-
+    
     if( o.detaching )
-    {
+    { 
+      if( o.process.disconnect )
+      o.process.disconnect();
       o.process.unref();
       _.Procedure.On( 'terminationBegin', onProcedureTerminationBegin );
     }
@@ -834,6 +836,7 @@ function start_body( o )
     let o2 =
     {
       // silent : false,
+      detached : !!o.detaching,
       env : o.env,
       stdio : o.stdio,
       execArgv : interpreterArgs,
@@ -855,7 +858,8 @@ function start_body( o )
   function onProcedureTerminationBegin()
   {
     if( o.when === 'instant' )
-    o.ready.error( _.err( 'Detached child with pid:', o.process.pid, 'is continuing execution after parent death.' ) );
+    o.ready.take( o );
+    // o.ready.error( _.err( 'Detached child with pid:', o.process.pid, 'is continuing execution after parent death.' ) );
     _.Procedure.Off( 'terminationBegin', onProcedureTerminationBegin );
   }
 
