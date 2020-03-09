@@ -947,6 +947,240 @@ function processArgs2( test )
     test.contains( got, expected );
     return null;
   })
+  
+  ready.then( () => 
+  { 
+    /* process.args should quote arguments that contain spaces and are not quoted already */
+    test.description = 'subject + option, option value is not quoted and contains space'
+    return null;
+  })
+  shell( `subject option:value with space` )
+  .then( o =>
+  { 
+    test.identical( o.exitCode, 0 );
+    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var expected =
+    {
+      'scriptArgs' : [ 'subject', 'option:value', 'with', 'space' ],
+      'interpreterArgsStrings' : '',
+      'scriptArgsString' : 'subject option:value with space',
+      'subject' : 'subject',
+      'map' : { 'option' : 'value with space' },
+      'subjects' : [ 'subject' ],
+      'maps' : [ { 'option' : 'value with space' } ],
+      'original' : 'subject option:value with space'
+    }
+    test.contains( got, expected );
+    return null;
+  })
+  
+  ready.then( () => 
+  { 
+    /* process.args should quote arguments that contain spaces and are not quoted already */
+    test.description = 'subject + option, option value is not quoted and contains space'
+    return null;
+  })
+  shell({ args : [ 'subject', 'option:value', 'with', 'space' ] })
+  .then( o =>
+  { 
+    test.identical( o.exitCode, 0 );
+    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var expected =
+    {
+      'scriptArgs' : [ 'subject', 'option:value', 'with', 'space' ],
+      'interpreterArgsStrings' : '',
+      'scriptArgsString' : 'subject option:value with space',
+      'subject' : 'subject',
+      'map' : { 'option' : 'value with space' },
+      'subjects' : [ 'subject' ],
+      'maps' : [ { 'option' : 'value with space' } ],
+      'original' : 'subject option:value with space'
+    }
+    test.contains( got, expected );
+    return null;
+  })
+  
+  ready.then( () => 
+  { 
+    /* process.args should quote arguments that contain spaces and are not quoted already */
+    test.description = 'subject + option, option value is not quoted and contains space'
+    return null;
+  })
+  shell({ args : [ 'subject', 'option', ':', 'value', 'with', 'space' ] })
+  .then( o =>
+  { 
+    test.identical( o.exitCode, 0 );
+    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var expected =
+    {
+      'scriptArgs' : [ 'subject', 'option', ':', 'value', 'with', 'space' ],
+      'interpreterArgsStrings' : '',
+      'scriptArgsString' : 'subject option : value with space',
+      'subject' : 'subject',
+      'map' : { 'option' : 'value with space' },
+      'subjects' : [ 'subject' ],
+      'maps' : [ { 'option' : 'value with space' } ],
+      'original' : 'subject option : value with space'
+    }
+    test.contains( got, expected );
+    return null;
+  })
+  
+  ready.then( () => 
+  { 
+    /* process.args should quote arguments that contain spaces and are not quoted already */
+    test.description = 'options only, option value is quoted and contains space'
+    return null;
+  })
+  shell( 'option:"value with space"' )
+  .then( o =>
+  { 
+    test.identical( o.exitCode, 0 );
+    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var expected =
+    {
+      'scriptArgs' : [ 'option:"value with space"' ],
+      'interpreterArgsStrings' : '',
+      'scriptArgsString' : 'option:"value with space"',
+      'subject' : '',
+      'map' : { 'option' : 'value with space' },
+      'subjects' : [ '' ],
+      'maps' : [ { 'option' : 'value with space' } ],
+      'original' : 'option:"value with space"'
+    }
+    test.contains( got, expected );
+    return null;
+  })
+  
+  ready.then( () => 
+  { 
+    /* process.args should quote arguments that contain spaces and are not quoted already */
+    test.description = 'options only, option value is quoted and contains space'
+    return null;
+  })
+  shell({ args : [ 'option', ':', '"value with space"' ] })
+  .then( o =>
+  { 
+    test.identical( o.exitCode, 0 );
+    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var expected =
+    {
+      'scriptArgs' : [ 'option', ':', '"value with space"' ],
+      'interpreterArgsStrings' : '',
+      'scriptArgsString' : 'option : "value with space"',
+      'subject' : '',
+      'map' : { 'option' : 'value with space' },
+      'subjects' : [ '' ],
+      'maps' : [ { 'option' : 'value with space' } ],
+      'original' : 'option : "value with space"'
+    }
+    test.contains( got, expected );
+    return null;
+  })
+  
+  ready.then( () => 
+  { 
+    /* process.args should quote arguments that contain spaces and are not quoted already */
+    test.description = 'options only, option value is quoted and contains space'
+    return null;
+  })
+  shell({ args : [ 'option', ':', 'value with space' ] })
+  .then( o =>
+  { 
+    test.identical( o.exitCode, 0 );
+    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var expected =
+    {
+      'scriptArgs' : [ 'option', ':', 'value with space' ],
+      'interpreterArgsStrings' : '',
+      'scriptArgsString' : 'option : "value with space"',
+      'subject' : '',
+      'map' : { 'option' : 'value with space' },
+      'subjects' : [ '' ],
+      'maps' : [ { 'option' : 'value with space' } ],
+      'original' : 'option : "value with space"'
+    }
+    test.contains( got, expected );
+    return null;
+  })
+  
+  ready.then( () => 
+  { 
+    /* process.args should quote arguments that contain spaces and are not quoted already */
+    test.description = 'options only, option value is not quoted and contains space'
+    return null;
+  })
+  shell( 'option:value with space' )
+  .then( o =>
+  { 
+    test.identical( o.exitCode, 0 );
+    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var expected =
+    {
+      'scriptArgs' : [ 'option:value', 'with', 'space' ],
+      'interpreterArgsStrings' : '',
+      'scriptArgsString' : 'option:value with space',
+      'subject' : '',
+      'map' : { 'option' : 'value with space' },
+      'subjects' : [ '' ],
+      'maps' : [ { 'option' : 'value with space' } ],
+      'original' : 'option:value with space'
+    }
+    test.contains( got, expected );
+    return null;
+  })
+  
+  ready.then( () => 
+  { 
+    /* process.args should quote arguments that contain spaces and are not quoted already */
+    test.description = 'options only, option value is not quoted and contains space'
+    return null;
+  })
+  shell( 'option : value with space' )
+  .then( o =>
+  { 
+    test.identical( o.exitCode, 0 );
+    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var expected =
+    {
+      'scriptArgs' : [ 'option', ':', 'value', 'with', 'space' ],
+      'interpreterArgsStrings' : '',
+      'scriptArgsString' : 'option : value with space',
+      'subject' : '',
+      'map' : { 'option' : 'value with space' },
+      'subjects' : [ '' ],
+      'maps' : [ { 'option' : 'value with space' } ],
+      'original' : 'option : value with space'
+    }
+    test.contains( got, expected );
+    return null;
+  })
+  
+  ready.then( () => 
+  { 
+    /* process.args should quote arguments that contain spaces and are not quoted already */
+    test.description = 'options only, option value is not quoted and contains space'
+    return null;
+  })
+  shell( 'option:value with" space' )
+  .then( o =>
+  { 
+    test.identical( o.exitCode, 0 );
+    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var expected =
+    {
+      'scriptArgs' : [ 'option:value', 'with"', 'space' ],
+      'interpreterArgsStrings' : '',
+      'scriptArgsString' : 'option:value with" space',
+      'subject' : '',
+      'map' : { 'option' : 'value with" space' },
+      'subjects' : [ '' ],
+      'maps' : [ { 'option' : 'value with" space' } ],
+      'original' : 'option:value with" space'
+    }
+    test.contains( got, expected );
+    return null;
+  })
 
   return ready;
 }
