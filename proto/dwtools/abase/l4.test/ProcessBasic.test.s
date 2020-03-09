@@ -4060,7 +4060,7 @@ function shellMultipleSyncDeasync( test )
       execPath : [ 'node ' + execPath, 'node ' + execPath ],
       mode : 'spawn',
       sync : 1,
-      optionsArrayReturn : 1,
+      returningOptionsArray : 1,
       deasync : 0
     }
     var got = _.process.start( o );
@@ -4081,7 +4081,7 @@ function shellMultipleSyncDeasync( test )
       execPath : [ 'node ' + execPath, 'node ' + execPath ],
       mode : 'spawn',
       sync : 1,
-      optionsArrayReturn : 0,
+      returningOptionsArray : 0,
       deasync : 0
     }
     var got = _.process.start( o );
@@ -4170,7 +4170,7 @@ function shellMultipleSyncDeasync( test )
       execPath : [ 'node ' + execPath, 'node ' + execPath ],
       mode : 'shell',
       sync : 1,
-      optionsArrayReturn : 1,
+      returningOptionsArray : 1,
       deasync : 0
     }
     var got = _.process.start( o );
@@ -4191,7 +4191,7 @@ function shellMultipleSyncDeasync( test )
       execPath : [ 'node ' + execPath, 'node ' + execPath ],
       mode : 'shell',
       sync : 1,
-      optionsArrayReturn : 0,
+      returningOptionsArray : 0,
       deasync : 0
     }
     var got = _.process.start( o );
@@ -4280,7 +4280,7 @@ function shellMultipleSyncDeasync( test )
       execPath : [ execPath, execPath ],
       mode : 'fork',
       sync : 1,
-      optionsArrayReturn : 1,
+      returningOptionsArray : 1,
       deasync : 0
     }
     test.shouldThrowErrorSync( () => _.process.start( o ) );
@@ -4297,7 +4297,7 @@ function shellMultipleSyncDeasync( test )
       execPath : [ execPath, execPath ],
       mode : 'fork',
       sync : 1,
-      optionsArrayReturn : 0,
+      returningOptionsArray : 0,
       deasync : 0
     }
     test.shouldThrowErrorSync( () => _.process.start( o ) );
@@ -4404,7 +4404,7 @@ function shellMultipleSyncDeasync( test )
       execPath : [ 'node ' + execPath, 'node ' + execPath ],
       mode : 'exec',
       sync : 1,
-      optionsArrayReturn : 1,
+      returningOptionsArray : 1,
       deasync : 0
     }
     var got = _.process.start( o );
@@ -4425,7 +4425,7 @@ function shellMultipleSyncDeasync( test )
       execPath : [ 'node ' + execPath, 'node ' + execPath ],
       mode : 'exec',
       sync : 1,
-      optionsArrayReturn : 0,
+      returningOptionsArray : 0,
       deasync : 0
     }
     var got = _.process.start( o );
