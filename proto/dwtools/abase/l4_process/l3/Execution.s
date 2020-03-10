@@ -145,6 +145,7 @@ function start_body( o )
   _.assert( o.execPath === null || _.strIs( o.execPath ) || _.strsAreAll( o.execPath ), 'Expects string or strings {-o.execPath-}, but got', _.strType( o.execPath ) );
   _.assert( o.timeOut === null || _.numberIs( o.timeOut ), 'Expects null or number {-o.timeOut-}, but got', _.strType( o.timeOut ) );
   _.assert( _.longHas( [ 'instant', 'afterdeath' ],  o.when ) || _.objectIs( o.when ), 'Unsupported starting mode:', o.when );
+  _.assert( !o.detaching || _.longHas( [ 'inherit', 'ignore' ],  o.stdio ), `Unsupported stdio mode: ${o.when} for process detaching` );
 
   let state = 0;
   let currentExitCode;
