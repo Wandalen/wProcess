@@ -10793,6 +10793,243 @@ function startNodeDetaching( test )
 
 //
 
+function startDetaching( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+
+  function testAppParent()
+  {
+    _.include( 'wAppBasic' );
+    _.include( 'wFiles' );
+    
+    let args = _.process.args();
+
+    let o =
+    { 
+      execPath : 'testAppChild.js',
+      detaching : true,
+      ipc : false
+    }
+    
+    _.mapExtend( o, args.map );
+    
+    if( o.mode != 'fork' )
+    o.execPath = 'node ' + o.execPath;
+    
+    let ready = _.process.start( o );
+
+    ready.then( ( got ) =>
+    { 
+      let optionsMapReceived = _.objectIs( got );
+      process.send({ optionsMapReceived, childPid : o.process.pid });
+      return null;
+    })
+  }
+
+  function testAppChild()
+  {
+    _.include( 'wAppBasic' );
+    _.include( 'wFiles' );
+
+    console.log( 'Child process start' )
+
+    _.time.out( 5000, () =>
+    {
+      let filePath = _.path.join( __dirname, 'testFile' );
+      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
+      console.log( 'Child process end' )
+      return null;
+    })
+  }
+
+  /* */
+
+  var testAppParentPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppParent.js' ) );
+  var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
+  var testAppParentCode = context.toolsPathInclude + testAppParent.toString() + '\ntestAppParent();';
+  var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
+  _.fileProvider.fileWrite( testAppParentPath, testAppParentCode );
+  _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
+  testAppParentPath = _.strQuote( testAppParentPath );
+  var ready = new _.Consequence().take( null );
+
+  let testFilePath = _.path.join( routinePath, 'testFile' );
+
+  ready
+
+  .then( () =>
+  { 
+    test.case = 'mode : spawn, stdio : ignore';
+    
+    let o =
+    {
+      execPath : 'node testAppParent.js mode : spawn stdio : ignore',
+      mode : 'spawn',
+      outputCollecting : 1,
+      currentPath : routinePath,
+      ipc : 1,
+    }
+    let con = _.process.start( o );
+
+    let data;
+
+    o.process.on( 'message', ( got ) =>
+    {
+      data = got;
+      data.childPid = _.numberFrom( data.childPid );
+    })
+
+    con.then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      test.identical( data.optionsMapReceived, true )
+      test.will = 'parent is dead, child is still alive';
+      test.is( !_.process.isRunning( o.process.pid ) );
+      test.is( _.process.isRunning( data.childPid ) );
+      return _.time.out( 6000 );
+    })
+    
+    con.then( () =>
+    {
+      test.will = 'both dead';
+      
+      test.is( !_.process.isRunning( o.process.pid ) );
+      test.is( !_.process.isRunning( data.childPid ) );
+      
+      test.is( !_.strHas( o.output, 'Child process start' ) )
+      test.is( !_.strHas( o.output, 'Child process end' ) )
+      
+      test.is( _.fileProvider.fileExists( testFilePath ) );
+      let childPid = _.fileProvider.fileRead( testFilePath );
+      childPid = _.numberFrom( childPid );
+      test.identical( data.childPid, childPid )
+      
+      return null;
+    })
+
+    return con;
+  })
+  
+  /*  */
+  
+  .then( () =>
+  { 
+    test.case = 'mode : shell, stdio : ignore';
+    
+    let o =
+    {
+      execPath : 'node testAppParent.js mode : shell stdio : ignore',
+      mode : 'spawn',
+      outputCollecting : 1,
+      currentPath : routinePath,
+      ipc : 1,
+    }
+    let con = _.process.start( o );
+
+    let data;
+
+    o.process.on( 'message', ( got ) =>
+    {
+      data = got;
+      data.childPid = _.numberFrom( data.childPid );
+    })
+
+    con.then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      test.identical( data.optionsMapReceived, true )
+      test.will = 'parent is dead, child is still alive';
+      test.is( !_.process.isRunning( o.process.pid ) );
+      test.is( _.process.isRunning( data.childPid ) );
+      return _.time.out( 6000 );
+    })
+    
+    con.then( () =>
+    {
+      test.will = 'both dead';
+      
+      test.is( !_.process.isRunning( o.process.pid ) );
+      test.is( !_.process.isRunning( data.childPid ) );
+      
+      test.is( !_.strHas( o.output, 'Child process start' ) )
+      test.is( !_.strHas( o.output, 'Child process end' ) )
+      
+      test.is( _.fileProvider.fileExists( testFilePath ) );
+      let childPid = _.fileProvider.fileRead( testFilePath );
+      childPid = _.numberFrom( childPid );
+      
+      test.is( !_.process.isRunning( childPid ) );
+      test.notIdentical( data.childPid, childPid )
+      
+      return null;
+    })
+
+    return con;
+  })
+  
+  /*  */
+  
+  .then( () =>
+  { 
+    test.case = 'mode : fork, stdio : ignore';
+    
+    let o =
+    {
+      execPath : 'node testAppParent.js mode : fork stdio : ignore',
+      mode : 'spawn',
+      outputCollecting : 1,
+      currentPath : routinePath,
+      ipc : 1,
+    }
+    let con = _.process.start( o );
+
+    let data;
+
+    o.process.on( 'message', ( got ) =>
+    {
+      data = got;
+      data.childPid = _.numberFrom( data.childPid );
+    })
+
+    con.then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      test.identical( data.optionsMapReceived, true )
+      test.will = 'parent is dead, child is still alive';
+      test.is( !_.process.isRunning( o.process.pid ) );
+      test.is( _.process.isRunning( data.childPid ) );
+      return _.time.out( 6000 );
+    })
+    
+    con.then( () =>
+    {
+      test.will = 'both dead';
+      
+      test.is( !_.process.isRunning( o.process.pid ) );
+      test.is( !_.process.isRunning( data.childPid ) );
+      
+      test.is( !_.strHas( o.output, 'Child process start' ) )
+      test.is( !_.strHas( o.output, 'Child process end' ) )
+      
+      test.is( _.fileProvider.fileExists( testFilePath ) );
+      let childPid = _.fileProvider.fileRead( testFilePath );
+      childPid = _.numberFrom( childPid );
+      test.identical( data.childPid, childPid )
+      
+      return null;
+    })
+
+    return con;
+  })
+  
+  /*  */
+  
+  return ready;
+}
+
+//
+
 function shellConcurrent( test )
 {
   let context = this;
@@ -15626,6 +15863,7 @@ var Proto =
     shellDetachingChildBeforeParent,
     
     startNodeDetaching,
+    startDetaching,
 
     shellConcurrent,
     shellerConcurrent,
