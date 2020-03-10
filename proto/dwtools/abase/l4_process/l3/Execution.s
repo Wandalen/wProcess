@@ -145,6 +145,8 @@ function start_body( o )
   _.assert( o.execPath === null || _.strIs( o.execPath ) || _.strsAreAll( o.execPath ), 'Expects string or strings {-o.execPath-}, but got', _.strType( o.execPath ) );
   _.assert( o.timeOut === null || _.numberIs( o.timeOut ), 'Expects null or number {-o.timeOut-}, but got', _.strType( o.timeOut ) );
   _.assert( _.longHas( [ 'instant', 'afterdeath' ],  o.when ) || _.objectIs( o.when ), 'Unsupported starting mode:', o.when );
+  _.assert( !o.detaching || _.longHas( [ 'inherit', 'ignore' ],  o.stdio ), `Unsupported stdio: ${o.stdio} for process detaching` );
+  _.assert( !o.detaching || _.longHas( [ 'fork', 'spawn', 'shell' ],  o.mode ), `Unsupported mode: ${o.mode} for process detaching` );
 
   let state = 0;
   let currentExitCode;
@@ -683,6 +685,7 @@ function start_body( o )
       if( o.process.disconnect )
       o.process.disconnect();
       o.process.unref();
+      o.ready.take( o );
       _.Procedure.On( 'terminationBegin', onProcedureTerminationBegin );
     }
     else if( !o.sync )
@@ -857,8 +860,7 @@ function start_body( o )
 
   function onProcedureTerminationBegin()
   {
-    if( o.when === 'instant' )
-    o.ready.take( o );
+    // if( o.when === 'instant' )
     // o.ready.error( _.err( 'Detached child with pid:', o.process.pid, 'is continuing execution after parent death.' ) );
     _.Procedure.Off( 'terminationBegin', onProcedureTerminationBegin );
   }
