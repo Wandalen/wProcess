@@ -683,6 +683,7 @@ function start_body( o )
       if( o.process.disconnect )
       o.process.disconnect();
       o.process.unref();
+      o.ready.take( o );
       _.Procedure.On( 'terminationBegin', onProcedureTerminationBegin );
     }
     else if( !o.sync )
@@ -857,8 +858,7 @@ function start_body( o )
 
   function onProcedureTerminationBegin()
   {
-    if( o.when === 'instant' )
-    o.ready.take( o );
+    // if( o.when === 'instant' )
     // o.ready.error( _.err( 'Detached child with pid:', o.process.pid, 'is continuing execution after parent death.' ) );
     _.Procedure.Off( 'terminationBegin', onProcedureTerminationBegin );
   }
