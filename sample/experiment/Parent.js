@@ -5,19 +5,17 @@ var _ = wTools;
 
 let o =
 {
-  mode : 'spawn',
-  execPath : 'node ' + _.strQuote( _.path.join( __dirname, 'Detached.js' ) ),
-  ipc : 1,
+  execPath : _.path.join( __dirname, 'Detached.js' ),
+  stdio : 'ignore',
+  mode : 'fork',
   detaching : 1,
-  stdio : 'inherit',
 }
 
-var ready = _.shell( o )
+var ready = _.process.start( o );
 
-_.timeOut( 3000, () =>
+ready.then( ( got ) => 
 {
-  console.log( 'Parent exits' )
-  process.exit();
+  console.log( got.process.pid )
   return null;
 })
 
