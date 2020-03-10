@@ -18,6 +18,8 @@
 | fork       | 1       | 2    | 1      |
 | shell      | 1       | 2    | 1      |
 
+This behaviour is same on Windows,Linux and MacOS
+
 **Legend**
 
 1 - Parent doesn't wait until detached child exits.<br>
@@ -27,29 +29,44 @@
 
 ##### stdio:inherit
 
-| Mode  |                         Description                         |
-| ----- | ----------------------------------------------------------- |
-| spawn | No output from detached child in console of parent process. |
-| fork  | No output from detached child in console of parent process. |
-| shell | No output from detached child in console of parent process. |
+| Mode  | Windows | Linux | MacOS |
+| ----- | ------- | ----- | ----- |
+| spawn | 1       | 2     | 2     |
+| fork  | 1       | 2     | 2     |
+| shell | 1       | 2     | 2     |
+
+**Legend**
+
+1 - No output from detached child in console of parent process.<br>
+2 - Detached child process prints output to console of parent process.
 
 ##### stdio:pipe
 
-| Mode  |                                 Description                                 |
-| ----- | --------------------------------------------------------------------------- |
-| spawn | Parent process can obtain output from stdout stream of detached child       |
-| fork  | Parent process can obtain output from stdout stream of detached child       |
-| shell | Output of detached process is printed in console window of detached process |
+
+| Mode  | Windows | Linux | MacOS |
+| ----- | ------- | ----- | ----- |
+| spawn | 1       | 1     | 1     |
+| fork  | 1       | 1     | 1     |
+| shell | 2       | 1     | 1     |
+
+**Legend**
+
+1 - Parent process can obtain output from stdout stream of detached child
+2 - Output of detached process is printed in console window of detached process
 
 
 ##### stdio:ignore
 
-| Mode  |                                 Description                                 |
-| ----- | --------------------------------------------------------------------------- |
-| spawn | Output of detached child is redirected to /dev/null                         |
-| fork  | Output of detached child is redirected to /dev/null                         |
-| shell | Output of detached process is printed in console window of detached process |
+| Mode  | Windows | Linux | MacOS |
+| ----- | ------- | ----- | ----- |
+| spawn | 1       | 1     | 1     |
+| fork  | 1       | 1     | 1     |
+| shell | 2       | 1     | 1     |
 
+**Legend**
+
+1 - Output of detached child is redirected to /dev/null 
+2 - Output of detached process is printed in console window of detached process
 
 ### Summary
 - Mode `exec` doesn't support detaching in current version of node - 13.10.1.
