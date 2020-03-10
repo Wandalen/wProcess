@@ -10793,7 +10793,7 @@ function startNodeDetaching( test )
 
 //
 
-function startDetaching( test )
+function startDetachingStdioIgnore( test )
 {
   var context = this;
   var routinePath = _.path.join( context.suitePath, test.name );
@@ -15863,7 +15863,7 @@ var Proto =
     shellDetachingChildBeforeParent,
     
     startNodeDetaching,
-    startDetaching,
+    startDetachingStdioIgnore,
 
     shellConcurrent,
     shellerConcurrent,
