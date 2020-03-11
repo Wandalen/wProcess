@@ -680,6 +680,10 @@ function start_body( o )
 
     }
     else _.assert( 0, 'Unknown mode', _.strQuote( o.mode ), 'to start process at path', _.strQuote( o.paths ) );
+    
+    /* extend with close */
+    
+    o.close = close;
 
     if( o.detaching )
     {  
@@ -701,10 +705,6 @@ function start_body( o )
       else
       o.procedure = result[ 0 ];
     }
-    
-    /* extend with close */
-    
-    o.close = close;
   }
   
   /* */
@@ -719,6 +719,7 @@ function start_body( o )
     this.process.stdin.end();
     
     if( this.process.disconnect )
+    if( this.process.connected )
     this.process.disconnect();
     
     o.process.unref();
