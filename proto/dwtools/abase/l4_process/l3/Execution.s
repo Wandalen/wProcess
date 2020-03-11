@@ -543,7 +543,7 @@ function start_body( o )
     /* launch */
 
     launchAct();
-    
+
     /* time out */
 
     if( o.timeOut && !o.dry )
@@ -687,7 +687,7 @@ function start_body( o )
       //if( o.process.disconnect )
       //o.process.disconnect();
       //o.process.unref();
-      //o.ready.take( o );
+      o.ready.take( o );
       _.Procedure.On( 'terminationBegin', onProcedureTerminationBegin );
     }
     else if( !o.sync )
@@ -699,28 +699,28 @@ function start_body( o )
       else
       o.procedure = result[ 0 ];
     }
-    
+
     /* extend with close */
-    
+
     o.close = close;
   }
-  
+
   /* */
-  
+
   function close()
-  { 
+  {
     if( this.process.stdout )
     this.process.stdout.end();
     if( this.process.stderr )
     this.process.stderr.end();
     if( this.process.stdin )
     this.process.stdin.end();
-    
+
     if( this.process.disconnect )
     this.process.disconnect();
-    
+
     this.process.unref();
-    
+
     this.ready.take( this );
   }
 
