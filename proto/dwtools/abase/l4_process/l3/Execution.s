@@ -687,13 +687,8 @@ function start_body( o )
 
     if( o.detaching )
     {  
-      // o.process.unref();
+      o.process.unref();
       o.ready.take( o );
-      /* qqq xxx : suspicious */
-      //if( o.process.disconnect )
-      //o.process.disconnect();
-      //o.process.unref();
-      // o.ready.take( o );
       _.Procedure.On( 'terminationBegin', onProcedureTerminationBegin );
     }
     else if( !o.sync )
@@ -1341,9 +1336,11 @@ function startNode_body( o )
   let startOptions = _.mapOnly( o, _.process.start.defaults );
   startOptions.execPath = path;
 
-  let result = _.process.start( startOptions )
-  .give( function( err, arg )
-  {
+  let result = _.process.start( startOptions );
+  
+  if( !o.detaching )
+  result.give( function( err, arg )
+  { 
     o.exitCode = startOptions.exitCode;
     o.exitSignal = startOptions.exitSignal;
     this.take( err, arg );
