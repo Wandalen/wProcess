@@ -679,9 +679,10 @@ function start_body( o )
 
     }
     else _.assert( 0, 'Unknown mode', _.strQuote( o.mode ), 'to start process at path', _.strQuote( o.paths ) );
-    
+
     if( o.detaching )
-    { 
+    {
+      /* qqq xxx : suspicious */
       if( o.process.disconnect )
       o.process.disconnect();
       o.process.unref();
