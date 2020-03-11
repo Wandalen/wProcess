@@ -12231,6 +12231,213 @@ function startDetachingIpc( test )
 
 //
 
+function startDetachingModeSpawnResourceReady( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+
+  function testAppChild()
+  {
+    _.include( 'wAppBasic' );
+    _.include( 'wFiles' );
+
+    console.log( 'Child process start' )
+
+    _.time.out( 5000, () =>
+    {
+      let filePath = _.path.join( __dirname, 'testFile' );
+      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
+      console.log( 'Child process end' )
+      return null;
+    })
+  }
+
+  /* */
+
+  var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
+  var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
+  _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
+  var ready = new _.Consequence().take( null );
+
+  let testFilePath = _.path.join( routinePath, 'testFile' );
+
+  ready
+
+  .then( () =>
+  { 
+    test.case = 'consequence receives resources after child spawn';
+    
+    let o =
+    {
+      execPath : 'node testAppChild.js',
+      mode : 'spawn',
+      detaching : 1,
+      currentPath : routinePath,
+      throwingExitCode : 0
+    }
+    let con = _.process.start( o );
+
+    con.thenGive( ( got ) =>
+    { 
+      test.is( _.mapIs( got ) );
+      test.identical( got, o );
+      test.is( _.process.isRunning( o.process.pid ) );
+      o.process.kill();
+    })
+    
+    con.then( ( got ) => 
+    {
+      test.notIdentical( got.exitCode, 0 );
+      test.identical( got.exitSignal, 'SIGTERM' );
+      return null;
+    })
+    
+    return con;
+  })
+  
+  return ready;
+}
+
+//
+
+function startDetachingModeForkResourceReady( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+
+  function testAppChild()
+  {
+    _.include( 'wAppBasic' );
+    _.include( 'wFiles' );
+
+    console.log( 'Child process start' )
+
+    _.time.out( 5000, () =>
+    {
+      let filePath = _.path.join( __dirname, 'testFile' );
+      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
+      console.log( 'Child process end' )
+      return null;
+    })
+  }
+
+  /* */
+
+  var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
+  var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
+  _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
+  var ready = new _.Consequence().take( null );
+
+  let testFilePath = _.path.join( routinePath, 'testFile' );
+
+  ready
+
+  .then( () =>
+  { 
+    test.case = 'consequence receives resources after child spawn';
+    
+    let o =
+    {
+      execPath : 'testAppChild.js',
+      mode : 'fork',
+      detaching : 1,
+      currentPath : routinePath,
+      throwingExitCode : 0
+    }
+    let con = _.process.start( o );
+
+    con.thenGive( ( got ) =>
+    { 
+      test.is( _.mapIs( got ) );
+      test.identical( got, o );
+      test.is( _.process.isRunning( o.process.pid ) );
+      o.process.kill();
+    })
+    
+    con.then( ( got ) => 
+    {
+      test.notIdentical( got.exitCode, 0 );
+      test.identical( got.exitSignal, 'SIGTERM' );
+      return null;
+    })
+    
+    return con;
+  })
+  
+  return ready;
+}
+
+//
+
+function startDetachingModeShellResourceReady( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+
+  function testAppChild()
+  {
+    _.include( 'wAppBasic' );
+    _.include( 'wFiles' );
+
+    console.log( 'Child process start' )
+
+    _.time.out( 5000, () =>
+    {
+      let filePath = _.path.join( __dirname, 'testFile' );
+      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
+      console.log( 'Child process end' )
+      return null;
+    })
+  }
+
+  /* */
+
+  var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
+  var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
+  _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
+  var ready = new _.Consequence().take( null );
+
+  let testFilePath = _.path.join( routinePath, 'testFile' );
+
+  ready
+
+  .then( () =>
+  { 
+    test.case = 'consequence receives resources after child spawn';
+    
+    let o =
+    {
+      execPath : 'node testAppChild.js',
+      mode : 'shell',
+      detaching : 1,
+      currentPath : routinePath,
+      throwingExitCode : 0
+    }
+    let con = _.process.start( o );
+
+    con.thenGive( ( got ) =>
+    { 
+      test.is( _.mapIs( got ) );
+      test.identical( got, o );
+      test.is( _.process.isRunning( o.process.pid ) );
+      o.process.kill();
+    })
+    
+    con.then( ( got ) => 
+    {
+      test.notIdentical( got.exitCode, 0 );
+      test.identical( got.exitSignal, 'SIGTERM' );
+      return null;
+    })
+    
+    return con;
+  })
+  
+  return ready;
+}
+
+//
+
 function shellConcurrent( test )
 {
   let context = this;
@@ -17068,6 +17275,10 @@ var Proto =
     // startDetachingStdioInherit,//zzz Vova: fix problem with stdio : pipe later
     // startDetachingStdioPipe,//zzz Vova: fix problem with stdio : pipe later
     startDetachingIpc,
+    
+    startDetachingModeSpawnResourceReady,
+    startDetachingModeForkResourceReady,
+    startDetachingModeShellResourceReady,
 
     shellConcurrent,
     shellerConcurrent,
