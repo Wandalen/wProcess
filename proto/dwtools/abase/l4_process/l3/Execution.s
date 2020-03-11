@@ -509,7 +509,7 @@ function start_body( o )
     o.exitSignal = null;
     o.process = null;
     o.procedure = null;
-    o.close = null;
+    o.disconnect = null;
     Object.preventExtensions( o );
 
     /* dependencies */
@@ -543,7 +543,7 @@ function start_body( o )
     /* launch */
 
     launchAct();
-    
+
     /* time out */
 
     if( o.timeOut && !o.dry )
@@ -593,9 +593,9 @@ function start_body( o )
       if( o.dry )
       return;
 
-      debugger;
+      // debugger;
       o.process = ChildProcess.fork( execPath, args, o2 );
-      debugger;
+      // debugger;
     }
     else if( o.mode === 'exec' )
     {
@@ -683,17 +683,17 @@ function start_body( o )
     
     /* extend with close */
     
-    o.close = close;
+    o.disconnect = disconnect;
 
     if( o.detaching )
     {  
-      o.process.unref();
+      // o.process.unref();
       o.ready.take( o );
       /* qqq xxx : suspicious */
       //if( o.process.disconnect )
       //o.process.disconnect();
       //o.process.unref();
-      //o.ready.take( o );
+      // o.ready.take( o );
       _.Procedure.On( 'terminationBegin', onProcedureTerminationBegin );
     }
     else if( !o.sync )
@@ -706,18 +706,18 @@ function start_body( o )
       o.procedure = result[ 0 ];
     }
   }
-  
+
   /* */
-  
-  function close()
-  { 
+
+  function disconnect()
+  {
     if( this.process.stdout )
     this.process.stdout.end();
     if( this.process.stderr )
     this.process.stderr.end();
     if( this.process.stdin )
     this.process.stdin.end();
-    
+
     if( this.process.disconnect )
     if( this.process.connected )
     this.process.disconnect();
@@ -887,7 +887,7 @@ function start_body( o )
   {
     // if( o.when === 'instant' )
     // o.ready.error( _.err( 'Detached child with pid:', o.process.pid, 'is continuing execution after parent death.' ) );
-    o.close();
+    o.disconnect();
     _.Procedure.Off( 'terminationBegin', onProcedureTerminationBegin );
   }
 
@@ -1351,7 +1351,7 @@ function startNode_body( o )
 
   o.ready = startOptions.ready;
   o.process = startOptions.process;
-  o.close = startOptions.close;
+  o.disconnect = startOptions.disconnect;
 
   return result;
 }
