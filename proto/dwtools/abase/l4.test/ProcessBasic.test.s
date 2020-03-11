@@ -10791,6 +10791,47 @@ function startNodeDetaching( test )
 
 //
 
+function startNodeDetachingChildThrowing( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+
+  function testAppChild()
+  { 
+    setTimeout( () => 
+    {
+      throw 'Child process error';
+    }, 1000)
+  }
+
+  /* */
+
+  var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
+  var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
+  _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
+  
+  test.case = 'detached child throws error';
+  let o =
+  {
+    execPath : 'testAppChild.js',
+    outputCollecting : 1,
+    stdio : 'ignore',
+    detaching : 1,
+    applyingExitCode : 0,
+    currentPath : routinePath,
+  }
+  let con = _.process.startNode( o );
+  
+  con.thenGive( ( got ) => 
+  {
+    test.is( _.objectIs( got ) );
+    test.is( _.process.isRunning( got.process.pid ) );
+  })
+  return test.shouldThrowErrorAsync( con );
+}
+
+//
+
 function startDetachingStdioIgnore( test )
 {
   var context = this;
@@ -18629,6 +18670,7 @@ var Proto =
     shellDetachingChildBeforeParent,
     
     startNodeDetaching,
+    startNodeDetachingChildThrowing,
     startDetachingStdioIgnore,
     // startDetachingStdioInherit,//zzz Vova: fix problem with stdio : pipe later
     // startDetachingStdioPipe,//zzz Vova: fix problem with stdio : pipe later
