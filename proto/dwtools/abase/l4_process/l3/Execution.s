@@ -509,7 +509,7 @@ function start_body( o )
     o.exitSignal = null;
     o.process = null;
     o.procedure = null;
-    o.close = null;
+    o.disconnect = null;
     Object.preventExtensions( o );
 
     /* dependencies */
@@ -593,9 +593,9 @@ function start_body( o )
       if( o.dry )
       return;
 
-      debugger;
+      // debugger;
       o.process = ChildProcess.fork( execPath, args, o2 );
-      debugger;
+      // debugger;
     }
     else if( o.mode === 'exec' )
     {
@@ -700,14 +700,14 @@ function start_body( o )
       o.procedure = result[ 0 ];
     }
 
-    /* extend with close */
+    /* extend with disconnect */
 
-    o.close = close;
+    o.disconnect = disconnect;
   }
 
   /* */
 
-  function close()
+  function disconnect()
   {
     if( this.process.stdout )
     this.process.stdout.end();
@@ -721,7 +721,7 @@ function start_body( o )
 
     this.process.unref();
 
-    this.ready.take( this );
+    // this.ready.take( this );
   }
 
   /* */
@@ -1349,7 +1349,7 @@ function startNode_body( o )
 
   o.ready = startOptions.ready;
   o.process = startOptions.process;
-  o.close = startOptions.close;
+  o.disconnect = startOptions.disconnect;
 
   return result;
 }
