@@ -12594,6 +12594,136 @@ function startNodeDetachingChildThrowing( test )
 
 //
 
+function startNodeDetachingTrivial( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+  
+  function testAppParent()
+  {
+    _.include( 'wAppBasic' );
+    _.include( 'wFiles' );
+    
+    let o =
+    {
+      execPath : 'testAppChild.js',
+      outputCollecting : 1,
+      stdio : 'pipe',
+      detaching : 1,
+      applyingExitCode : 0,
+      throwingExitCode : 0,
+      outputCollecting : 1,
+      outputPiping : 1,
+    }
+    _.process.startNode( o );
+    
+    o.onStart.thenGive( () => 
+    { 
+      process.send( o.process.pid )
+      o.process.send( 'data' );
+      _.time.out( 1000, () => o.disconnect() );
+    })
+  
+    o.onTerminate.finally( ( err, got ) => 
+    {  
+      if( err )
+      {
+        _.errAttend( err );
+        _.errLogOnce( err );
+      }
+      else
+      {
+        throw _.err( 'Detached child process terminated before parent' );
+      }
+      return null;
+    })
+  }
+  
+  function testAppChild()
+  { 
+    _.include( 'wAppBasic' );
+    _.include( 'wFiles' );
+
+    console.log( 'Child process start' )
+
+    process.on( 'message', data => 
+    {
+      console.log( 'from parent:', data ); 
+    })
+    
+    _.time.out( 5000, () => 
+    {
+      console.log( 'Child process end' );
+      let filePath = _.path.join( __dirname, 'testFile' );
+      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
+      return null;
+    })
+    
+  }
+
+  /* */
+
+  var testAppParentPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppParent.js' ) );
+  var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
+  var testAppParentCode = context.toolsPathInclude + testAppParent.toString() + '\ntestAppParent();';
+  var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
+  _.fileProvider.fileWrite( testAppParentPath, testAppParentCode );
+  _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
+  testAppParentPath = _.strQuote( testAppParentPath );
+  
+  let testFilePath = _.path.join( routinePath, 'testFile' );
+  
+  test.case = 'trivial use case';
+  
+  let o =
+  {
+    execPath : 'testAppParent.js',
+    outputCollecting : 1,
+    mode : 'fork',
+    stdio : 'pipe',
+    detaching : 0,
+    throwingExitCode : 0,
+    outputCollecting : 1,
+    currentPath : routinePath,
+  }
+  
+  _.process.start( o );
+  
+  let childPid;
+  o.process.on( 'message', ( data ) => 
+  {
+    childPid = _.numberFrom( data );
+  })
+  
+  o.onTerminate.then( ( got ) => 
+  {  
+    test.is( _.process.isRunning( childPid ) );
+    
+    test.identical( got.exitCode, 0 );
+    test.is( _.strHas( got.output, 'Child process start' ) );
+    test.is( _.strHas( got.output, 'from parent: data' ) );
+    test.is( !_.strHas( got.output, 'Child process end' ) );
+    test.identical( o.exitCode, got.exitCode );
+    test.identical( o.output, got.output );
+    return _.time.out( 5000 );
+  })
+  
+  o.onTerminate.then( () => 
+  {  
+    test.is( !_.process.isRunning( childPid ) );
+    
+    let childPidFromFile = _.fileProvider.fileRead( testFilePath );
+    childPidFromFile = _.numberFrom( childPidFromFile )
+    test.is( !_.process.isRunning( childPidFromFile ) );
+    test.identical( childPid, childPidFromFile )
+    return null;
+  })
+  
+  return o.onTerminate;
+}
+
+//
+
 //
 
 function startOnStart( test )
@@ -17999,6 +18129,8 @@ var Proto =
     
     startDetachingThrowing,
     startNodeDetachingChildThrowing,
+    
+    startNodeDetachingTrivial,
     
     startOnStart,
     startOnTerminate,
