@@ -12544,6 +12544,58 @@ function startDetachingThrowing( test )
 
 //
 
+function startNodeDetachingChildThrowing( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+
+  function testAppChild()
+  { 
+    setTimeout( () => 
+    {
+      throw 'Child process error';
+    }, 1000)
+  }
+
+  /* */
+
+  var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
+  var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
+  _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
+  
+  test.case = 'detached child throws error, onTerminate receives resource with error';
+  
+  let o =
+  {
+    execPath : 'testAppChild.js',
+    outputCollecting : 1,
+    stdio : 'pipe',
+    detaching : 1,
+    applyingExitCode : 0,
+    throwingExitCode : 0,
+    outputCollecting : 1,
+    outputPiping : 0,
+    currentPath : routinePath,
+  }
+  
+  _.process.startNode( o );
+  
+  o.onTerminate.then( ( got ) => 
+  { 
+    test.notIdentical( got.exitCode, 0 );
+    test.is( _.strHas( got.output, 'Child process error' ) );
+    test.identical( o.exitCode, got.exitCode );
+    test.identical( o.output, got.output );
+    return null;
+  })
+  
+  return o.onTerminate;
+}
+
+//
+
+//
+
 function startOnStart( test )
 {
   var context = this;
@@ -17946,6 +17998,7 @@ var Proto =
     startDetachingModeShellIpc,
     
     startDetachingThrowing,
+    startNodeDetachingChildThrowing,
     
     startOnStart,
     startOnTerminate,
