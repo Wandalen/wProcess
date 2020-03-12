@@ -13837,6 +13837,554 @@ function startDetachingThrowing( test )
 
 //
 
+function startOnStart( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+
+  function testAppChild()
+  {
+    _.include( 'wAppBasic' );
+    _.include( 'wFiles' );
+    
+    var args = _.process.args();
+    
+    _.time.out( 2000, () => 
+    { 
+      console.log( 'Child process end' )
+      return null;
+    })
+  }
+
+  /* */
+
+  var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
+  var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
+  _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
+  
+  let ready = new _.Consequence().take( null );
+  
+  ready
+  
+  /* */
+  
+  .then( () => 
+  { 
+    test.case = 'detaching off, no errors'
+    let o =
+    {
+      execPath : 'node testAppChild.js',
+      mode : 'spawn',
+      stdio : 'ignore',
+      currentPath : routinePath,
+      detaching : 0
+    }
+    
+    let result = _.process.start( o );
+    
+    test.notIdentical( o.onStart, result );
+    test.is( _.consequenceIs( o.onStart ) )
+    
+    o.onStart.finally( ( err, got ) => 
+    {
+      test.identical( err, undefined );
+      test.identical( got, o );
+      test.is( _.process.isRunning( o.process.pid ) );
+      return null;
+    })
+    
+    result.then( ( got ) => 
+    {
+      test.identical( o, got );
+      test.identical( got.exitCode, 0 );
+      test.identical( got.exitSignal, null );
+      return null;
+    })
+    
+    return _.Consequence.AndTake([ o.onStart, result ]);
+  })
+  
+  /* */
+  
+  .then( () => 
+  { 
+    test.case = 'detaching off, error on spawn'
+    let o =
+    {
+      execPath : 'node -v',
+      mode : 'spawn',
+      stdio : [ null, 'something', null ],
+      currentPath : routinePath,
+      detaching : 0
+    }
+    
+    let result = _.process.start( o );
+    
+    test.notIdentical( o.onStart, result );
+    test.is( _.consequenceIs( o.onStart ) )
+    
+    o.onStart.finally( ( err, got ) => 
+    {
+      test.is( _.errIs( err ) );
+      test.identical( got, undefined );
+      test.identical( o.process, null);
+      return null;
+    })
+    
+    result = test.shouldThrowErrorAsync( result )
+    
+    return _.Consequence.AndTake([ o.onStart, result ]);
+  })
+  
+  /* */
+  
+  .then( () => 
+  { 
+    test.case = 'detaching off, error on spawn, no callback for onStart'
+    let o =
+    {
+      execPath : 'node -v',
+      mode : 'spawn',
+      stdio : [ null, 'something', null ],
+      currentPath : routinePath,
+      detaching : 0
+    }
+    
+    let result = _.process.start( o );
+    
+    test.notIdentical( o.onStart, result );
+    test.is( _.consequenceIs( o.onStart ) )
+    
+    result = test.shouldThrowErrorAsync( result )
+    
+    let con = _.Consequence.AndTake([ o.onStart, result ]);
+    
+    return test.shouldThrowErrorAsync( con ) ;
+  })
+  
+  /* */
+
+  .then( () => 
+  { 
+    test.case = 'detaching on, onStart and result are same and give resource on start'
+    let o =
+    {
+      execPath : 'node testAppChild.js',
+      mode : 'spawn',
+      stdio : 'ignore',
+      currentPath : routinePath,
+      detaching : 1
+    }
+    
+    let result = _.process.start( o );
+    
+    test.identical( o.onStart, result );
+    test.is( _.consequenceIs( o.onStart ) )
+    
+    o.onStart.then( ( got ) => 
+    {
+      test.identical( o, got );
+      test.identical( got.exitCode, null );
+      test.identical( got.exitSignal, null );
+      return null;
+    })
+    
+    return _.Consequence.AndTake([ o.onStart, o.onTerminate ]);
+  })
+  
+  /* */
+  
+  .then( () => 
+  { 
+    test.case = 'detaching on, error on spawn'
+    let o =
+    {
+      execPath : 'testAppChild.js',
+      mode : 'fork',
+      stdio : [ 'ignore', 'ignore','ignore', null ],
+      currentPath : routinePath,
+      detaching : 1
+    }
+    
+    let result = _.process.start( o );
+    
+    test.identical( o.onStart, result );
+    test.is( _.consequenceIs( o.onStart ) )
+    
+    result = test.shouldThrowErrorAsync( o.onStart );
+    
+    result.then( () => _.time.out( 2000 ) )
+    
+    result.then( () => 
+    {
+      test.identical( o.onTerminate.resourcesCount(), 0 );
+      return null;
+    })
+    
+    return result;
+  })
+  
+  /* */
+  
+  .then( () => 
+  { 
+    test.case = 'detaching on, disconnected child'
+    let o =
+    {
+      execPath : 'node testAppChild.js',
+      mode : 'spawn',
+      stdio : 'ignore',
+      currentPath : routinePath,
+      detaching : 1
+    }
+    
+    let result = _.process.start( o );
+    
+    o.disconnect();
+    
+    test.identical( o.onStart, result );
+    test.is( _.consequenceIs( o.onStart ) )
+    
+    o.onStart.finally( ( err, got ) => 
+    {
+      test.identical( err ,undefined );
+      test.identical( got, o );
+      test.is( _.process.isRunning( o.process.pid ) )
+      return null;
+    })
+    
+    o.onTerminate.finallyGive( ( err, got ) => 
+    { 
+      _.errAttend( err );
+      test.is( _.errIs( err ) );
+      test.identical( got, undefined );
+      test.is( _.process.isRunning( o.process.pid ) )
+    })
+    
+    o.onTerminate.finally( ( err, got ) => 
+    {
+      test.identical( err ,undefined );
+      test.identical( got, o );
+      test.is( !_.process.isRunning( o.process.pid ) )
+      test.identical( got.exitCode, 0 );
+      test.identical( got.exitSignal, null );
+      return null;
+    })
+    
+    return _.Consequence.AndTake([ o.onStart, o.onTerminate ]);
+  })
+  
+  /* */
+  
+  .then( () => 
+  { 
+    test.case = 'detaching on, disconnected forked child'
+    let o =
+    {
+      execPath : 'testAppChild.js',
+      mode : 'fork',
+      stdio : 'ignore',
+      currentPath : routinePath,
+      detaching : 1
+    }
+    
+    let result = _.process.start( o );
+    
+    o.disconnect();
+    
+    test.identical( o.onStart, result );
+    test.is( _.consequenceIs( o.onStart ) )
+    
+    o.onStart.finally( ( err, got ) => 
+    {
+      test.identical( err ,undefined );
+      test.identical( got, o );
+      test.is( _.process.isRunning( o.process.pid ) )
+      return null;
+    })
+    
+    o.onTerminate.finallyGive( ( err, got ) => 
+    { 
+      _.errAttend( err );
+      test.is( _.errIs( err ) );
+      test.identical( got, undefined );
+      test.is( _.process.isRunning( o.process.pid ) )
+    })
+    
+    result = _.time.out( 3000, () => 
+    { 
+      test.identical( o.onTerminate.resourcesCount(), 0 );
+      test.is( !_.process.isRunning( o.process.pid ) )
+      return null;
+    })
+    
+    return _.Consequence.AndTake([ o.onStart, result ]);
+  })
+  
+  /* */
+  
+  return ready;
+}
+
+//
+
+function startOnTerminate( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+
+  function testAppChild()
+  {
+    _.include( 'wAppBasic' );
+    _.include( 'wFiles' );
+    
+    var args = _.process.args();
+    
+    _.time.out( 5000, () => 
+    { 
+      if( args.map.throwing )
+      throw _.err( 'Child process error' );
+      console.log( 'Child process end' )
+      return null;
+    })
+  }
+
+  /* */
+
+  var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
+  var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
+  _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
+  
+  let ready = new _.Consequence().take( null );
+  
+  ready
+  
+  /* */
+  
+  .then( () => 
+  { 
+    test.case = 'detaching off'
+    let o =
+    {
+      execPath : 'node testAppChild.js',
+      mode : 'spawn',
+      stdio : 'ignore',
+      currentPath : routinePath,
+      detaching : 0
+    }
+    
+    let result = _.process.start( o );
+    
+    test.identical( o.onTerminate, result );
+    
+    result.then( ( got ) => 
+    {
+      test.identical( o, got );
+      test.identical( got.exitCode, 0 );
+      test.identical( got.exitSignal, null );
+      return null;
+    })
+    
+    return result;
+  })
+  
+  /* */
+
+  .then( () => 
+  { 
+    test.case = 'detaching off, disconnect'
+    let o =
+    {
+      execPath : 'node testAppChild.js',
+      mode : 'spawn',
+      stdio : 'ignore',
+      currentPath : routinePath,
+      detaching : 0
+    }
+    
+    let result = _.process.start( o );
+    
+    o.disconnect();
+    
+    test.identical( o.onTerminate, result );
+    
+    result.then( ( got ) => 
+    {
+      test.identical( o, got );
+      test.identical( got.exitCode, 0 );
+      test.identical( got.exitSignal, null );
+      return null;
+    })
+    
+    return result;
+  })
+  
+  /* */
+  
+  .then( () => 
+  {
+    test.case = 'detaching, child not disconnected, parent waits for child to exit'
+    let onTerminate = new _.Consequence();
+    let o =
+    {
+      execPath : 'node testAppChild.js',
+      mode : 'spawn',
+      stdio : 'ignore',
+      currentPath : routinePath,
+      onTerminate,
+      detaching : 1
+    }
+    
+    _.process.start( o );
+    
+    onTerminate.then( ( got ) => 
+    {
+      test.identical( o, got );
+      test.identical( got.exitCode, 0 );
+      test.identical( got.exitSignal, null );
+      return null;
+    })
+    
+    return onTerminate;
+  })
+  
+  /* */
+  
+  .then( () => 
+  {
+    test.case = 'detached, child disconnected before it termination'
+    let onTerminate = new _.Consequence();
+    let o =
+    {
+      execPath : 'node testAppChild.js',
+      mode : 'spawn',
+      stdio : 'pipe',
+      currentPath : routinePath,
+      onTerminate,
+      detaching : 1
+    }
+    
+    _.process.start( o );
+    _.time.out( 1000, () => o.disconnect() );
+    
+    onTerminate.finallyGive( ( err, got ) => 
+    {
+      _.errAttend( err );
+      test.is( _.errIs( err ) );
+      test.identical( got, undefined )
+    })
+    
+    onTerminate.then( got => 
+    {
+      test.identical( o, got );
+      test.identical( got.exitCode, 0 );
+      test.identical( got.exitSignal, null );
+      return null;
+    })
+    
+    return onTerminate;
+  })
+  
+  /* */
+  
+  .then( () => 
+  {
+    test.case = 'detached, child disconnected after it termination'
+    let onTerminate = new _.Consequence();
+    let o =
+    {
+      execPath : 'node testAppChild.js',
+      mode : 'spawn',
+      stdio : 'ignore',
+      currentPath : routinePath,
+      onTerminate,
+      detaching : 1
+    }
+    
+    _.process.start( o );
+    _.time.out( 6000, () => o.disconnect() );
+    
+    return test.mustNotThrowError( onTerminate )
+    .then( ( got ) => 
+    {
+      test.identical( o, got );
+      test.identical( got.exitCode, 0 );
+      test.identical( got.exitSignal, null );
+      return null;
+    })
+  })
+  
+  /* */
+  
+  .then( () => 
+  {
+    test.case = 'detached, not disconnected child throws error during execution'
+    let onTerminate = new _.Consequence();
+    let o =
+    {
+      execPath : 'node testAppChild.js throwing:1',
+      mode : 'spawn',
+      stdio : 'ignore',
+      currentPath : routinePath,
+      onTerminate,
+      throwingExitCode : 0,
+      detaching : 1
+    }
+    
+    _.process.start( o );
+    
+    onTerminate.then( ( got ) => 
+    {
+      test.notIdentical( got.exitCode, 0 );
+      test.identical( got.exitSignal, null );
+      return null;
+    })
+    
+    return onTerminate;
+  })
+  
+  /* */
+  
+  .then( () => 
+  {
+    test.case = 'detached, disconnected child throws error during execution'
+    let onTerminate = new _.Consequence();
+    let o =
+    {
+      execPath : 'node testAppChild.js throwing:1',
+      mode : 'spawn',
+      stdio : 'ignore',
+      currentPath : routinePath,
+      onTerminate,
+      throwingExitCode : 0,
+      detaching : 1
+    }
+    
+    _.process.start( o );
+    o.disconnect();
+    
+    onTerminate.finallyGive( ( err, got ) => 
+    {
+      _.errAttend( err );
+      test.is( _.errIs( err ) );
+      test.identical( got, undefined )
+    })
+    
+    onTerminate.then( ( got ) => 
+    {
+      test.notIdentical( got.exitCode, 0 );
+      test.identical( got.exitSignal, null );
+      return null;
+    })
+    
+    return onTerminate;
+  })
+  
+  return ready;
+}
+
+//
+
 function shellConcurrent( test )
 {
   let context = this;
@@ -18689,6 +19237,9 @@ var Proto =
     startDetachingModeShellTerminationBegin,
     
     startDetachingThrowing,
+    
+    startOnStart,
+    startOnTerminate,
 
     shellConcurrent,
     shellerConcurrent,
