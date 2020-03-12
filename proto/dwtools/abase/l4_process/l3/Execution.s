@@ -148,7 +148,9 @@ function start_body( o )
   _.assert( !o.detaching || !_.longHas( _.arrayAs( o.stdio ), 'inherit' ), `Unsupported stdio: ${o.stdio} for process detaching` );
   _.assert( !o.detaching || _.longHas( [ 'fork', 'spawn', 'shell' ],  o.mode ), `Unsupported mode: ${o.mode} for process detaching` );
   _.assert( o.onStart === null || _.consequenceIs( o.onStart ) );
-  _.assert( o.onTerminate === null || _.consequenceIs( o.onTerminate ) )
+  _.assert( o.onTerminate === null || _.consequenceIs( o.onTerminate ) );
+  _.assert( !o.ipc || _.longHas( [ 'fork', 'spawn' ], o.mode ), `Mode: ${o.mode} doesn't support inter process communication.` );
+  
   
   let state = 0;
   let currentExitCode;
