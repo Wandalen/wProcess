@@ -145,7 +145,7 @@ function start_body( o )
   _.assert( o.execPath === null || _.strIs( o.execPath ) || _.strsAreAll( o.execPath ), 'Expects string or strings {-o.execPath-}, but got', _.strType( o.execPath ) );
   _.assert( o.timeOut === null || _.numberIs( o.timeOut ), 'Expects null or number {-o.timeOut-}, but got', _.strType( o.timeOut ) );
   _.assert( _.longHas( [ 'instant', 'afterdeath' ],  o.when ) || _.objectIs( o.when ), 'Unsupported starting mode:', o.when );
-  _.assert( !o.detaching || _.longHas( [ 'pipe', 'ignore' ],  o.stdio ), `Unsupported stdio: ${o.stdio} for process detaching` );
+  _.assert( !o.detaching || !_.longHas( _.arrayAs( o.stdio ), 'inherit' ), `Unsupported stdio: ${o.stdio} for process detaching` );
   _.assert( !o.detaching || _.longHas( [ 'fork', 'spawn', 'shell' ],  o.mode ), `Unsupported mode: ${o.mode} for process detaching` );
   _.assert( o.onStart === null || _.consequenceIs( o.onStart ) );
   _.assert( o.onTerminate === null || _.consequenceIs( o.onTerminate ) )
@@ -744,11 +744,13 @@ function start_body( o )
     
     this.process.unref();
     
-    if( this.process._disconnected )
-    return;
+    if( !this.detaching || this.process._disconnected )
+    return true;
     this.process._disconnected = true;
     if( _.process.isRunning( this.process.pid ) )
     this.onTerminate.error( _.err( 'This process was disconnected' ) );
+    
+    return true;
   }
 
   /* */
