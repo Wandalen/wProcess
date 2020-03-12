@@ -9952,8 +9952,8 @@ function shellAfterDeath( test )
     {
       test.is( !_.process.isRunning( childPid ) );
       test.is( _.fileProvider.fileExists( testFilePath ) );
-      let childPid = _.fileProvider.fileRead( testFilePath );
-      test.is( !_.process.isRunning( _.numberFrom( childPid ) ) );
+      let childPid2 = _.fileProvider.fileRead( testFilePath );
+      test.is( !_.process.isRunning( _.numberFrom( childPid2 ) ) );
       return null;
     })
 
