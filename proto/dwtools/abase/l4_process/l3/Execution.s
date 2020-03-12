@@ -148,7 +148,7 @@ function start_body( o )
   _.assert( !o.detaching || _.longHas( [ 'pipe', 'ignore' ],  o.stdio ), `Unsupported stdio: ${o.stdio} for process detaching` );
   _.assert( !o.detaching || _.longHas( [ 'fork', 'spawn', 'shell' ],  o.mode ), `Unsupported mode: ${o.mode} for process detaching` );
   _.assert( o.onStart === null || _.consequenceIs( o.onStart ) );
-  _.assert( o.onTerminate === null || _.onTerminate( o.onStart ) )
+  _.assert( o.onTerminate === null || _.consequenceIs( o.onTerminate ) )
   
   let state = 0;
   let currentExitCode;
