@@ -11428,8 +11428,6 @@ function startDetachingModeShellResourceReady( test )
   _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
   var ready = new _.Consequence().take( null );
 
-  let testFilePath = _.path.join( routinePath, 'testFile' );
-
   ready
 
   .then( () =>
@@ -11444,9 +11442,12 @@ function startDetachingModeShellResourceReady( test )
       currentPath : routinePath,
       throwingExitCode : 0
     }
-    let con = _.process.start( o );
+    let result = _.process.start( o );
+    
+    test.identical( result, o.onStart );
+    test.notIdentical( result, o.onTerminate );
 
-    con.thenGive( ( got ) =>
+    o.onStart .thenGive( ( got ) =>
     { 
       test.is( _.mapIs( got ) );
       test.identical( got, o );
@@ -11454,14 +11455,14 @@ function startDetachingModeShellResourceReady( test )
       o.process.kill();
     })
     
-    con.then( ( got ) => 
+    o.onTerminate.then( ( got ) => 
     {
       test.notIdentical( got.exitCode, 0 );
       test.identical( got.exitSignal, 'SIGTERM' );
       return null;
     })
     
-    return con;
+    return o.onTerminate;
   })
   
   return ready;
