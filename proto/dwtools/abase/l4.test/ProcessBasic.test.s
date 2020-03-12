@@ -9923,18 +9923,18 @@ function shellAfterDeath( test )
     }
     let con = _.process.start( o );
 
-    let secondaryPid;
+    let childPid;
 
     o.process.on( 'message', ( got ) =>
     {
-      secondaryPid = _.numberFrom( got );
+      childPid = _.numberFrom( got );
     })
 
     _.time.out( 2500, () =>
     {
       test.will = 'parent is alive, secondary is alive'
       test.is( _.process.isRunning( o.process.pid ) )
-      test.is( _.process.isRunning( secondaryPid) )
+      test.is( _.process.isRunning( childPid) )
       return null;
     })
 
@@ -9943,14 +9943,14 @@ function shellAfterDeath( test )
       test.identical( o.exitCode, 0 );
 
       test.is( !_.process.isRunning( o.process.pid ) );
-      test.is( _.process.isRunning( secondaryPid ) );
+      test.is( _.process.isRunning( childPid ) );
       test.is( !_.fileProvider.fileExists( testFilePath ) );
       return _.time.out( 15000 );
     })
 
     con.then( () =>
     {
-      test.is( !_.process.isRunning( secondaryPid ) );
+      test.is( !_.process.isRunning( childPid ) );
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
       test.is( !_.process.isRunning( _.numberFrom( childPid ) ) );
@@ -10053,344 +10053,6 @@ function shellAfterDeath( test )
 
 //   return ready;
 // }
-
-//
-
-function shellDetachingThrowing( test )
-{
-  var context = this;
-  var routinePath = _.path.join( context.suitePath, test.name );
-
-  function testAppParent()
-  {
-    _.include( 'wAppBasic' );
-    _.include( 'wFiles' );
-
-    let o =
-    {
-      execPath : 'node testAppChild.js',
-      stdio : 'ignore',
-      detaching : true,
-      mode : 'spawn',
-    }
-    _.process.start( o );
-  }
-
-  function testAppChild()
-  {
-    _.include( 'wAppBasic' );
-    _.include( 'wFiles' );
-
-    _.time.out( 2000, () =>
-    {
-      let filePath = _.path.join( __dirname, 'testFile' );
-      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
-    })
-  }
-
-  /* */
-
-  var testAppParentPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppParent.js' ) );
-  var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
-  var testAppParentCode = context.toolsPathInclude + testAppParent.toString() + '\ntestAppParent();';
-  var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
-  _.fileProvider.fileWrite( testAppParentPath, testAppParentCode );
-  _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
-  testAppParentPath = _.strQuote( testAppParentPath );
-  var ready = new _.Consequence().take( null );
-
-  let testFilePath = _.path.join( routinePath, 'testFile' );
-
-  ready
-
-  .then( () =>
-  {
-    let o =
-    {
-      execPath : 'node testAppParent.js',
-      mode : 'spawn',
-      outputCollecting : 1,
-      currentPath : routinePath,
-    }
-    let con = _.process.start( o );
-
-    return test.shouldThrowErrorAsync( con )
-    .then( () =>
-    {
-      test.is( _.strHas( o.output, /Detached child with pid: .* is continuing execution after parent death/ ) );
-      return _.time.out( 6000, () => null );
-    })
-    .then( () =>
-    {
-      test.is( _.fileProvider.fileExists( testFilePath ) );
-      let childPid = _.fileProvider.fileRead( testFilePath );
-      test.is( !_.process.isRunning( _.numberFrom( childPid ) ) );
-      return null;
-    })
-  })
-
-  /*  */
-
-  return ready;
-}
-
-shellDetachingThrowing.description =
-`
-Parent created child process in detached. mode.
-Uncaught asynchronous error should be thrown when parent exits.
-`
-
-//
-
-function shellDetachingChildAfterParent( test )
-{
-  var context = this;
-  var routinePath = _.path.join( context.suitePath, test.name );
-
-  function testAppParent()
-  {
-    _.include( 'wAppBasic' );
-    _.include( 'wFiles' );
-
-    let o =
-    {
-      execPath : 'node testAppChild.js',
-      stdio : 'ignore',
-      detaching : true,
-      mode : 'spawn',
-    }
-
-    var ready = _.process.start( o );
-
-    ready.finally( ( err, got ) =>
-    {
-      _.errLog( err );
-      return null;
-    })
-
-    process.send( o.process.pid );
-
-    _.time.out( 1000, () =>
-    {
-      console.log( 'Parent process exit' );
-      _.Procedure.TerminationBegin();
-    })
-  }
-
-  function testAppChild()
-  {
-    _.include( 'wAppBasic' );
-    _.include( 'wFiles' );
-
-    console.log( 'Child process start' );
-
-    _.time.out( 5000, () =>
-    {
-      let filePath = _.path.join( __dirname, 'testFile' );
-      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
-      console.log( 'Child process end' );
-    })
-  }
-
-  /* */
-
-  var testAppParentPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppParent.js' ) );
-  var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
-  var testAppParentCode = context.toolsPathInclude + testAppParent.toString() + '\ntestAppParent();';
-  var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
-  _.fileProvider.fileWrite( testAppParentPath, testAppParentCode );
-  _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
-  testAppParentPath = _.strQuote( testAppParentPath );
-  var ready = new _.Consequence().take( null );
-
-  let testFilePath = _.path.join( routinePath, 'testFile' );
-
-  ready
-
-  .then( () =>
-  {
-    let o =
-    {
-      execPath : 'node testAppParent.js',
-      mode : 'spawn',
-      stdio : 'pipe',
-      outputPiping : 1,
-      outputCollecting : 1,
-      currentPath : routinePath,
-      ipc : 1,
-    }
-    let con = _.process.start( o );
-
-    let secondaryPid;
-
-    o.process.on( 'message', ( got ) =>
-    {
-      secondaryPid = _.numberFrom( got );
-    })
-
-    con.then( ( got ) =>
-    {
-      test.identical( got.exitCode, 0 );
-
-      test.will = 'parent is dead, detached child is still running'
-
-      test.is( _.strHas( got.output, 'Parent process exit' ) )
-      test.is( !_.strHas( got.output, 'Child process start' ) )
-      test.is( !_.strHas( got.output, 'Child process end' ) )
-      test.is( _.strHas( got.output, /Detached child with pid: .* is continuing execution after parent death/ ) );
-
-      test.is( !_.process.isRunning( o.process.pid ) );
-      test.is( _.process.isRunning( secondaryPid ) );
-
-      test.is( !_.fileProvider.fileExists( testFilePath ) );
-
-      return _.time.out( 10000 );
-    })
-
-    con.then( () =>
-    {
-      test.is( _.fileProvider.fileExists( testFilePath ) );
-      let childPid = _.fileProvider.fileRead( testFilePath );
-      test.is( !_.process.isRunning( _.numberFrom( childPid ) ) );
-      return null;
-    })
-
-    return con;
-  })
-
-  /*  */
-
-  return ready;
-}
-
-shellDetachingChildAfterParent.description =
-`
-Parent starts child process in detached mode and exits.
-Child process continues to work for at least 5 seconds after parent exits.
-After 5 seconds child process creates test file in working directory and exits.
-`
-
-//
-
-function shellDetachingChildBeforeParent( test )
-{
-  var context = this;
-  var routinePath = _.path.join( context.suitePath, test.name );
-
-  function testAppParent()
-  {
-    _.include( 'wAppBasic' );
-    _.include( 'wFiles' );
-
-    let o =
-    {
-      execPath : 'node testAppChild.js',
-      stdio : 'ignore',
-      detaching : true,
-      mode : 'spawn',
-    }
-
-    let ready = _.process.start( o );
-
-    ready.finally( ( err, got ) =>
-    {
-      console.log( 'Child process exit' );
-      process.send({ exitCode : got.exitCode, err : err, pid : o.process.pid });
-      return null;
-    })
-
-    _.time.out( 5000, () =>
-    {
-      console.log( 'Parent process exit' )
-      return null;
-    })
-  }
-
-  function testAppChild()
-  {
-    _.include( 'wAppBasic' );
-    _.include( 'wFiles' );
-
-    console.log( 'Child process start' )
-
-    _.time.out( 1000, () =>
-    {
-      let filePath = _.path.join( __dirname, 'testFile' );
-      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
-      console.log( 'Child process end' )
-      return null;
-    })
-  }
-
-  /* */
-
-  var testAppParentPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppParent.js' ) );
-  var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
-  var testAppParentCode = context.toolsPathInclude + testAppParent.toString() + '\ntestAppParent();';
-  var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
-  _.fileProvider.fileWrite( testAppParentPath, testAppParentCode );
-  _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
-  testAppParentPath = _.strQuote( testAppParentPath );
-  var ready = new _.Consequence().take( null );
-
-  let testFilePath = _.path.join( routinePath, 'testFile' );
-
-  ready
-
-  .then( () =>
-  {
-    let o =
-    {
-      execPath : 'node testAppParent.js',
-      mode : 'spawn',
-      outputCollecting : 1,
-      currentPath : routinePath,
-      ipc : 1,
-    }
-    let con = _.process.start( o );
-
-    let child;
-
-    o.process.on( 'message', ( got ) =>
-    {
-      child = got;
-    })
-
-    con.then( ( got ) =>
-    {
-      test.identical( got.exitCode, 0 );
-
-      test.will = 'parent and chid are dead';
-
-      test.identical( child.err, undefined );
-      test.identical( child.exitCode, 0 );
-
-      test.is( _.strHas( got.output, 'Child process exit' ) )
-      test.is( _.strHas( got.output, 'Parent process exit' ) )
-
-      test.is( !_.process.isRunning( o.process.pid ) );
-      test.is( !_.process.isRunning( child.pid ) );
-
-      test.is( _.fileProvider.fileExists( testFilePath ) );
-      let childPid = _.fileProvider.fileRead( testFilePath );
-      test.is( !_.process.isRunning( _.numberFrom( childPid ) ) );
-      return null;
-    })
-
-    return con;
-  })
-
-  /*  */
-
-  return ready;
-}
-
-shellDetachingChildBeforeParent.description =
-`
-Parent starts child process in detached mode and registers callback to wait for child process.
-Child process creates test file after 1 second and exits.
-Callback in parent recevies message. Parent exits.
-`
 
 //
 
@@ -13739,6 +13401,258 @@ function startDetachingModeShellTerminationBegin( test )
   
   return ready;
 }
+
+//
+
+function startDetachingChildExistsAfterParent( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+
+  function testAppParent()
+  {
+    _.include( 'wAppBasic' );
+    _.include( 'wFiles' );
+
+    let o =
+    {
+      execPath : 'node testAppChild.js',
+      stdio : 'ignore',
+      detaching : true,
+      mode : 'spawn',
+    }
+
+    _.process.start( o );
+    
+    o.onTerminate.finallyGive( ( err, got ) => 
+    {
+      if( !err )
+      throw _.err( 'Parent did not receive error from disconnect routine' );
+      _.errAttend( err );
+    })
+
+    process.send( o.process.pid );
+
+    _.time.out( 1000, () => o.disconnect() );
+  }
+
+  function testAppChild()
+  {
+    _.include( 'wAppBasic' );
+    _.include( 'wFiles' );
+
+    console.log( 'Child process start' );
+
+    _.time.out( 5000, () =>
+    {
+      let filePath = _.path.join( __dirname, 'testFile' );
+      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
+      console.log( 'Child process end' );
+    })
+  }
+
+  /* */
+
+  var testAppParentPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppParent.js' ) );
+  var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
+  var testAppParentCode = context.toolsPathInclude + testAppParent.toString() + '\ntestAppParent();';
+  var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
+  _.fileProvider.fileWrite( testAppParentPath, testAppParentCode );
+  _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
+  testAppParentPath = _.strQuote( testAppParentPath );
+  var ready = new _.Consequence().take( null );
+
+  let testFilePath = _.path.join( routinePath, 'testFile' );
+
+  ready
+
+  .then( () =>
+  { 
+    test.case = 'parent disconnects detached child process and exits, child contiues to work'
+    let o =
+    {
+      execPath : 'node testAppParent.js',
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputPiping : 1,
+      outputCollecting : 1,
+      currentPath : routinePath,
+      detaching : 0,
+      ipc : 1,
+    }
+    let con = _.process.start( o );
+
+    let childPid;
+
+    o.process.on( 'message', ( got ) =>
+    {
+      childPid = _.numberFrom( got );
+    })
+
+    o.onTerminate.then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+
+      test.will = 'parent is dead, detached child is still running'
+
+      test.is( !_.process.isRunning( o.process.pid ) );
+      test.is( _.process.isRunning( childPid ) );
+
+      return _.time.out( 6000 );
+    })
+
+    o.onTerminate.then( () =>
+    { 
+      let childPid2 = _.fileProvider.fileRead( testFilePath );
+      childPid2 = _.numberFrom( childPid2 )
+      test.is( !_.process.isRunning( childPid2 ) );
+      test.identical( childPid, childPid2 )
+      return null;
+    })
+
+    return con;
+  })
+
+  /*  */
+
+  return ready;
+}
+
+startDetachingChildExistsAfterParent.description =
+`
+Parent starts child process in detached mode and disconnects it.
+Child process continues to work for at least 5 seconds after parent exits.
+After 5 seconds child process creates test file in working directory and exits.
+`
+
+//
+
+function startDetachingChildExistsBeforeParent( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suitePath, test.name );
+
+  function testAppParent()
+  {
+    _.include( 'wAppBasic' );
+    _.include( 'wFiles' );
+
+    let o =
+    {
+      execPath : 'node testAppChild.js',
+      stdio : 'ignore',
+      detaching : true,
+      mode : 'spawn',
+    }
+
+    _.process.start( o );
+
+    o.onTerminate.finally( ( err, got ) =>
+    {
+      process.send({ exitCode : got.exitCode, err : err, pid : o.process.pid });
+      return null;
+    })
+    
+    _.time.out( 5000, () => 
+    {
+      console.log( 'Parent process end' )
+    });
+  }
+
+  function testAppChild()
+  {
+    _.include( 'wAppBasic' );
+    _.include( 'wFiles' );
+
+    console.log( 'Child process start' )
+
+    _.time.out( 1000, () =>
+    {
+      let filePath = _.path.join( __dirname, 'testFile' );
+      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
+      console.log( 'Child process end' )
+      return null;
+    })
+  }
+
+  /* */
+
+  var testAppParentPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppParent.js' ) );
+  var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
+  var testAppParentCode = context.toolsPathInclude + testAppParent.toString() + '\ntestAppParent();';
+  var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
+  _.fileProvider.fileWrite( testAppParentPath, testAppParentCode );
+  _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
+  testAppParentPath = _.strQuote( testAppParentPath );
+  var ready = new _.Consequence().take( null );
+
+  let testFilePath = _.path.join( routinePath, 'testFile' );
+
+  ready
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : 'node testAppParent.js',
+      mode : 'spawn',
+      outputCollecting : 1,
+      currentPath : routinePath,
+      ipc : 1,
+    }
+    _.process.start( o );
+
+    let child;
+
+    o.process.on( 'message', ( got ) =>
+    {
+      child = got;
+    })
+    
+    let onChildTerminate = _.time.out( 3000, () => 
+    {
+      let childPid = _.fileProvider.fileRead( testFilePath );
+      test.is( _.process.isRunning( o.process.pid ) );
+      test.is( !_.process.isRunning( _.numberFrom( childPid ) ) );
+      return null;
+    })
+
+    o.onTerminate.then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+
+      test.will = 'parent and chid are dead';
+
+      test.identical( child.err, undefined );
+      test.identical( child.exitCode, 0 );
+
+      test.is( !_.process.isRunning( o.process.pid ) );
+      test.is( !_.process.isRunning( child.pid ) );
+
+      test.is( _.fileProvider.fileExists( testFilePath ) );
+      let childPid = _.fileProvider.fileRead( testFilePath );
+      childPid = _.numberFrom( childPid )
+      test.is( !_.process.isRunning( childPid ) );
+      
+      test.identical( child.pid, childPid );
+      
+      return null;
+    })
+
+    return _.Consequence.AndKeep([ onChildTerminate,o.onTerminate ]);
+  })
+
+  /*  */
+
+  return ready;
+}
+
+startDetachingChildExistsBeforeParent.description =
+`
+Parent starts child process in detached mode and registers callback to wait for child process.
+Child process creates test file after 1 second and exits.
+Callback in parent recevies message. Parent exits.
+`
 
 //
 
@@ -19213,10 +19127,6 @@ var Proto =
     shellAfterDeath,
     // shellAfterDeathOutput,
 
-    shellDetachingThrowing,
-    shellDetachingChildAfterParent,
-    shellDetachingChildBeforeParent,
-    
     startNodeDetaching,
     startNodeDetachingChildThrowing,
     startDetachingStdioIgnore,
@@ -19235,6 +19145,9 @@ var Proto =
     startDetachingModeSpawnTerminationBegin,
     startDetachingModeForkTerminationBegin,
     startDetachingModeShellTerminationBegin,
+    
+    startDetachingChildExistsAfterParent,
+    startDetachingChildExistsBeforeParent,
     
     startDetachingThrowing,
     
