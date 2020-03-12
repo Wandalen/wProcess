@@ -11530,11 +11530,11 @@ function startDetachingModeSpawnNoTerminationBegin( test )
 
   .then( () =>
   { 
-    test.case = 'stdio:ignore, parent should terminate and not wait for detached child';
+    test.case = 'stdio:ignore ipc:false, parent should wait for child to exit';
     
     let o =
     {
-      execPath : 'node testAppParent.js stdio : ignore',
+      execPath : 'node testAppParent.js stdio : ignore ipc : false',
       mode : 'spawn',
       outputCollecting : 1,
       currentPath : routinePath,
@@ -11553,16 +11553,7 @@ function startDetachingModeSpawnNoTerminationBegin( test )
     con.then( ( got ) =>
     {
       test.identical( got.exitCode, 0 );
-      test.will = 'parent is dead, child is still alive';
-      test.is( !_.process.isRunning( o.process.pid ) );
-      test.is( _.process.isRunning( data.childPid ) );
-      return _.time.out( 6000 );
-    })
-    
-    con.then( () =>
-    {
-      test.will = 'both dead';
-      
+      test.will = 'parent and child are dead';
       test.is( !_.process.isRunning( o.process.pid ) );
       test.is( !_.process.isRunning( data.childPid ) );
       
@@ -11573,7 +11564,7 @@ function startDetachingModeSpawnNoTerminationBegin( test )
       
       return null;
     })
-
+    
     return con;
   })
   
