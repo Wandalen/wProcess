@@ -147,7 +147,9 @@ function start_body( o )
   _.assert( _.longHas( [ 'instant', 'afterdeath' ],  o.when ) || _.objectIs( o.when ), 'Unsupported starting mode:', o.when );
   _.assert( !o.detaching || _.longHas( [ 'pipe', 'ignore' ],  o.stdio ), `Unsupported stdio: ${o.stdio} for process detaching` );
   _.assert( !o.detaching || _.longHas( [ 'fork', 'spawn', 'shell' ],  o.mode ), `Unsupported mode: ${o.mode} for process detaching` );
-
+  _.assert( o.onStart === null || _.consequenceIs( o.onStart ) );
+  _.assert( o.onTerminate === null || _.onTerminate( o.onStart ) )
+  
   let state = 0;
   let currentExitCode;
   let killedByTimeout = false;
@@ -175,6 +177,25 @@ function start_body( o )
   }
 
   o.ready = o.ready || new _.Consequence().take( null );
+  
+  if( o.onStart === null )
+  {  
+    o.onStart = o.ready;
+    if( !o.detaching )
+    o.onStart = new _.Consequence();
+  }
+  if( o.onTerminate === null )
+  {  
+    o.onTerminate = o.ready;
+    if( o.detaching )
+    o.onTerminate = new _.Consequence();
+  }
+  
+  if( !o.detaching )
+  _.assert( o.ready === o.onTerminate && o.ready !== o.onStart );
+  else
+  _.assert( o.ready === o.onStart && o.ready !== o.onTerminate );
+  
 
   if( _global_.debugger )
   debugger;
@@ -343,7 +364,11 @@ function start_body( o )
       if( o.sync && !o.deasync )
       throw _.errLogOnce( err );
       else
-      o.ready.error( _.errLogOnce( err ) );
+      { 
+        if( !o.detaching )
+        o.onStart.error( err );
+        o.ready.error( _.errLogOnce( err ) );
+      }
     }
 
   }
@@ -684,11 +709,11 @@ function start_body( o )
     /* extend with close */
     
     o.disconnect = disconnect;
+    
+    o.onStart.take( o );
 
     if( o.detaching )
     {  
-      o.process.unref();
-      o.ready.take( o );
       _.Procedure.On( 'terminationBegin', onProcedureTerminationBegin );
     }
     else if( !o.sync )
@@ -705,7 +730,7 @@ function start_body( o )
   /* */
 
   function disconnect()
-  {
+  { 
     if( this.process.stdout )
     this.process.stdout.end();
     if( this.process.stderr )
@@ -717,7 +742,13 @@ function start_body( o )
     if( this.process.connected )
     this.process.disconnect();
     
-    o.process.unref();
+    this.process.unref();
+    
+    if( this.process._disconnected )
+    return;
+    this.process._disconnected = true;
+    if( _.process.isRunning( this.process.pid ) )
+    this.onTerminate.error( _.err( 'This process was disconnected' ) );
   }
 
   /* */
@@ -1000,11 +1031,15 @@ function start_body( o )
       if( o.sync && !o.deasync )
       throw err;
       else
-      o.ready.error( err );
+      { 
+        o.onTerminate.error( err );
+        // o.ready.error( err );
+      }
     }
     else if( !o.sync || o.deasync )
-    {
-      o.ready.take( o );
+    { 
+      o.onTerminate.take( o );
+      // o.ready.take( o );
     }
 
   }
@@ -1028,7 +1063,10 @@ function start_body( o )
     if( o.sync && !o.deasync )
     throw err;
     else
-    o.ready.error( err );
+    { 
+      o.onTerminate.error( err );
+      // o.ready.error( err );
+    }
   }
 
   /* */
@@ -1158,6 +1196,9 @@ start_body.defaults =
   outputGray : 0,
   outputGrayStdout : 0,
   outputGraying : 0,
+  
+  onStart : null,
+  onTerminate : null,
 
 }
 
@@ -1337,16 +1378,18 @@ function startNode_body( o )
   startOptions.execPath = path;
 
   let result = _.process.start( startOptions );
+  let onTerminate = startOptions.onTerminate;
   
-  if( !o.detaching )
-  result.give( function( err, arg )
-  { 
+  onTerminate.give( function ( err, arg )
+  {
     o.exitCode = startOptions.exitCode;
     o.exitSignal = startOptions.exitSignal;
     this.take( err, arg );
-  });
+  })
 
   o.ready = startOptions.ready;
+  o.onStart = startOptions.onStart;
+  o.onTerminate = startOptions.onTerminate;
   o.process = startOptions.process;
   o.disconnect = startOptions.disconnect;
 
