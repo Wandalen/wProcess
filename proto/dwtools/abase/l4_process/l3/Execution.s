@@ -406,56 +406,56 @@ function start_body( o )
   {
     let toolsPath = _.path.nativize( _.path.join( __dirname, '../../../Tools.s' ) );
     let toolsPathInclude = `let _ = require( '${_.strEscape( toolsPath )}' );\n`
-    let secondaryProcessSource = toolsPathInclude + afterDeathSecondaryProcess.toString() + '\afterDeathSecondaryProcess();';
+    let secondaryProcessSource = toolsPathInclude + afterDeathSecondaryProcess.toString() + '\nafterDeathSecondaryProcess();';
     let secondaryFilePath = _.process.tempOpen({ sourceCode : secondaryProcessSource });
 
     let childOptions = _.mapExtend( null, o );
-
+   
     childOptions.ready = null;
     childOptions.logger = null;
     childOptions.when = 'instant';
 
-    o.execPath = 'node';
-    o.mode = 'spawn';
-    o.args = [ _.path.nativize( secondaryFilePath ), _.toJson( childOptions ), process.pid ]
-    o.ipc = false;
+    o.execPath = _.path.nativize( secondaryFilePath );
+    o.mode = 'fork';
+    o.args = [];
     o.stdio = 'ignore';
     o.detaching = true;
     o.inputMirroring = 0;
+    
+    o.onStart = o.ready;
+    o.onTerminate = new _.Consequence();
+    
+    o.onStart.give( function( err, got )
+    { 
+      if( !err )
+      o.process.send( childOptions );
+      this.take( err, got )
+    })
+    
+    o.onTerminate.catchGive( function ( err )
+    {
+      _.errAttend( err );
+      if( err.reason != 'disconnected' )
+      this.take( err );
+    })
   }
 
   function afterDeathSecondaryProcess()
   {
     _.include( 'wAppBasic' );
     _.include( 'wFiles' );
+    
+    let ready = new _.Consequence();
 
-    let startOptions;
-    let parentPid;
-    let interval;
-    let delay = 100;
-
-    try
+    process.on( 'message', ( data ) => ready.take( data ) )
+    ready.thenGive( ( startOptions ) => 
     {
-      startOptions = JSON.parse( process.argv[ 2 ] );
-    }
-    catch ( err )
-    {
-      _.errLogOnce( err );
-    }
-
-    if( !startOptions )
-    return;
-
-    parentPid = _.numberFrom( process.argv[ 3 ] )
-    interval = setInterval( () =>
-    {
-      if( _.process.isRunning( parentPid ) )
-      return;
-      clearInterval( interval );
-      console.log( 'Secondary: starting child process...' );
-      _.process.start( startOptions );
-
-    }, delay );
+      process.on( 'disconnect', () => 
+      {
+        console.log( 'Secondary: starting child process...' );
+        _.process.start( startOptions );
+      })
+    })
   }
 
   /* */
@@ -750,7 +750,7 @@ function start_body( o )
     return true;
     this.process._disconnected = true;
     if( _.process.isRunning( this.process.pid ) )
-    this.onTerminate.error( _.err( 'This process was disconnected' ) );
+    this.onTerminate.error( _._err({ args : [ 'This process was disconnected' ], reason : 'disconnected' }) );
     
     return true;
   }
