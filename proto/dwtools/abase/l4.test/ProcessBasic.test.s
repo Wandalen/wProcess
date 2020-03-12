@@ -12019,6 +12019,13 @@ function startDetachingModeSpawnTerminationBegin( test )
     _.mapExtend( o, args.map );
     
     _.process.start( o );
+    
+    o.onTerminate.catch( err => 
+    { 
+      _.errAttend( err );
+      _.errLogOnce( err );
+      return null; 
+    })
 
     process.send({ childPid : o.process.pid });
     
@@ -12073,7 +12080,7 @@ function startDetachingModeSpawnTerminationBegin( test )
       ipc : 1,
     }
     let con = _.process.start( o );
-
+    
     let data;
 
     o.process.on( 'message', ( got ) =>
@@ -12292,6 +12299,13 @@ function startDetachingModeForkTerminationBegin( test )
     _.mapExtend( o, args.map );
     
     _.process.start( o );
+    
+    o.onTerminate.catch( err => 
+    { 
+      _.errAttend( err );
+      _.errLogOnce( err );
+      return null; 
+    })
 
     process.send({ childPid : o.process.pid });
     
@@ -12565,6 +12579,13 @@ function startDetachingModeShellTerminationBegin( test )
     _.mapExtend( o, args.map );
     
     _.process.start( o );
+    
+    o.onTerminate.catch( err => 
+    { 
+      _.errAttend( err );
+      _.errLogOnce( err );
+      return null; 
+    })
 
     process.send({ childPid : o.process.pid });
     
