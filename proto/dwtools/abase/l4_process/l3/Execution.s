@@ -1385,7 +1385,8 @@ function startNode_body( o )
   let onTerminate = startOptions.onTerminate;
   
   onTerminate.give( function ( err, arg )
-  {
+  { 
+    o.output = startOptions.output;
     o.exitCode = startOptions.exitCode;
     o.exitSignal = startOptions.exitSignal;
     this.take( err, arg );
