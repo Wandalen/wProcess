@@ -12736,7 +12736,7 @@ function startDetachingModeShellTerminationBegin( test )
 
 //
 
-function startDetachingChildExistsAfterParent( test )
+function startDetachingChildExitsAfterParent( test )
 {
   var context = this;
   var routinePath = _.path.join( context.suitePath, test.name );
@@ -12850,7 +12850,7 @@ function startDetachingChildExistsAfterParent( test )
   return ready;
 }
 
-startDetachingChildExistsAfterParent.description =
+startDetachingChildExitsAfterParent.description =
 `
 Parent starts child process in detached mode and disconnects it.
 Child process continues to work for at least 5 seconds after parent exits.
@@ -12859,7 +12859,7 @@ After 5 seconds child process creates test file in working directory and exits.
 
 //
 
-function startDetachingChildExistsBeforeParent( test )
+function startDetachingChildExitsBeforeParent( test )
 {
   var context = this;
   var routinePath = _.path.join( context.suitePath, test.name );
@@ -12979,7 +12979,7 @@ function startDetachingChildExistsBeforeParent( test )
   return ready;
 }
 
-startDetachingChildExistsBeforeParent.description =
+startDetachingChildExitsBeforeParent.description =
 `
 Parent starts child process in detached mode and registers callback to wait for child process.
 Child process creates test file after 1 second and exits.
@@ -18475,8 +18475,8 @@ var Proto =
     startDetachingModeForkTerminationBegin,
     startDetachingModeShellTerminationBegin,
     
-    startDetachingChildExistsAfterParent,
-    startDetachingChildExistsBeforeParent,
+    startDetachingChildExitsAfterParent,
+    startDetachingChildExitsBeforeParent,
     
     startDetachingThrowing,
     
