@@ -1961,6 +1961,15 @@ function pidFrom( src )
 
 //
 
+function statusOf( src )
+{
+  _.assert( arguments.length === 1 );
+  let isAlive = _.process.isAlive( src );
+  return isAlive ? 'alive' : 'dead';
+}
+
+//
+
 function kill( o )
 {
   if( _.numberIs( o ) )
@@ -2348,6 +2357,7 @@ let Extension =
 
   isAlive,
   pidFrom,
+  statusOf,
   kill,
   terminate,
   children,
