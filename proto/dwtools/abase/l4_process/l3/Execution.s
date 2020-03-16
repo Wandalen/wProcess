@@ -1939,6 +1939,28 @@ function isAlive( src )
 
 //
 
+function pidFrom( src )
+{
+  _.assert( arguments.length === 1 );
+
+  if( !ChildProcess )
+  ChildProcess = require( 'child_process' );
+
+  if( _.numberIs( src ) )
+  return src;
+  if( _.objectIs( src ) )
+  {
+    if( src.process )
+    src = src.process;
+    _.assert( src instanceof ChildProcess.ChildProcess );
+    return src.pid;
+  }
+
+  _.assert( 0, `Unexpected source:${src}` );
+}
+
+//
+
 function kill( o )
 {
   if( _.numberIs( o ) )
@@ -2325,6 +2347,7 @@ let Extension =
   // children
 
   isAlive,
+  pidFrom,
   kill,
   terminate,
   children,
