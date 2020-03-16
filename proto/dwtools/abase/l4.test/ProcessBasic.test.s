@@ -646,7 +646,7 @@ function processArgsPropertiesBase( test )
     test.contains( got, expected );
     return null;
   })
-  
+
   shell({ args : [ 'path:c:\\some', 'x', ':', 0, 'y', ':', 1  ] })
   .then( o =>
   {
@@ -665,10 +665,10 @@ function processArgsPropertiesBase( test )
     test.contains( got, expected );
     return null;
   })
-  
+
   /* */
-  
-  ready.then( () => 
+
+  ready.then( () =>
   {
     return null;
   })
@@ -700,8 +700,8 @@ function processArgsPropertiesBase( test )
   })
 
   /* */
-  
-  ready.then( () => 
+
+  ready.then( () =>
   {
     return null;
   })
@@ -731,7 +731,7 @@ function processArgsPropertiesBase( test )
     test.contains( got, expected );
     return null;
   })
-  
+
   return ready;
 }
 
@@ -969,10 +969,10 @@ function processArgsWithSpace( test )
   let filePath = _.path.join( routinePath, 'got' );
   let interpreterPath = _.path.normalize( process.argv[ 0 ] );
   let scriptPath = _.path.normalize( testAppPath );
-  
+
   /* */
-  
-  ready.then( () => 
+
+  ready.then( () =>
   {
     /* process.args should quote arguments that contain spaces and are not quoted already */
     test.description = 'subject + option, option value is quoted and contains space'
@@ -980,7 +980,7 @@ function processArgsWithSpace( test )
   })
   shell( `subject option:"value with space"` )
   .then( o =>
-  { 
+  {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
@@ -997,8 +997,8 @@ function processArgsWithSpace( test )
     test.contains( got, expected );
     return null;
   })
-  
-  ready.then( () => 
+
+  ready.then( () =>
   {
     /* process.args should quote arguments that contain spaces and are not quoted already */
     test.description = 'subject + option, option value is quoted and contains space'
@@ -1006,7 +1006,7 @@ function processArgsWithSpace( test )
   })
   shell( `subject option:'value with space'` )
   .then( o =>
-  { 
+  {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
@@ -1023,8 +1023,8 @@ function processArgsWithSpace( test )
     test.contains( got, expected );
     return null;
   })
-  
-  ready.then( () => 
+
+  ready.then( () =>
   {
     /* process.args should quote arguments that contain spaces and are not quoted already */
     test.description = 'subject + option, option value is quoted and contains space'
@@ -1032,7 +1032,7 @@ function processArgsWithSpace( test )
   })
   shell( 'subject option:`value with space`' )
   .then( o =>
-  { 
+  {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
@@ -1049,16 +1049,16 @@ function processArgsWithSpace( test )
     test.contains( got, expected );
     return null;
   })
-  
-  ready.then( () => 
-  { 
+
+  ready.then( () =>
+  {
     test.description = 'subject + option, option value is quoted and contains space'
     test.will = 'process.args should quote arguments with space'
     return null;
   })
   shell( `subject option : "value with space"` )
   .then( o =>
-  { 
+  {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
@@ -1075,8 +1075,8 @@ function processArgsWithSpace( test )
     test.contains( got, expected );
     return null;
   })
-  
-  ready.then( () => 
+
+  ready.then( () =>
   {
     /* process.args should quote arguments that contain spaces and are not quoted already */
     test.description = 'subject + option, option value contains space'
@@ -1084,7 +1084,7 @@ function processArgsWithSpace( test )
   })
   shell({ args : [ 'subject', 'option', ':', 'value with space' ] })
   .then( o =>
-  { 
+  {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
@@ -1101,8 +1101,8 @@ function processArgsWithSpace( test )
     test.contains( got, expected );
     return null;
   })
-  
-  ready.then( () => 
+
+  ready.then( () =>
   {
     /* process.args should quote arguments that contain spaces and are not quoted already */
     test.description = 'subject + option, option value is quoted and contains space'
@@ -1110,7 +1110,7 @@ function processArgsWithSpace( test )
   })
   shell({ args : [ 'subject', 'option', ':', '"value with space"' ] })
   .then( o =>
-  { 
+  {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
@@ -1127,16 +1127,16 @@ function processArgsWithSpace( test )
     test.contains( got, expected );
     return null;
   })
-  
-  ready.then( () => 
-  { 
+
+  ready.then( () =>
+  {
     /* process.args should quote arguments that contain spaces and are not quoted already */
     test.description = 'subject + option, option value is not quoted and contains space'
     return null;
   })
   shell( `subject option:value with space` )
   .then( o =>
-  { 
+  {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
@@ -1153,16 +1153,16 @@ function processArgsWithSpace( test )
     test.contains( got, expected );
     return null;
   })
-  
-  ready.then( () => 
-  { 
+
+  ready.then( () =>
+  {
     /* process.args should quote arguments that contain spaces and are not quoted already */
     test.description = 'subject + option, option value is not quoted and contains space'
     return null;
   })
   shell({ args : [ 'subject', 'option:value', 'with', 'space' ] })
   .then( o =>
-  { 
+  {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
@@ -1179,16 +1179,16 @@ function processArgsWithSpace( test )
     test.contains( got, expected );
     return null;
   })
-  
-  ready.then( () => 
-  { 
+
+  ready.then( () =>
+  {
     /* process.args should quote arguments that contain spaces and are not quoted already */
     test.description = 'subject + option, option value is not quoted and contains space'
     return null;
   })
   shell({ args : [ 'subject', 'option', ':', 'value', 'with', 'space' ] })
   .then( o =>
-  { 
+  {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
@@ -1205,16 +1205,16 @@ function processArgsWithSpace( test )
     test.contains( got, expected );
     return null;
   })
-  
-  ready.then( () => 
-  { 
+
+  ready.then( () =>
+  {
     /* process.args should quote arguments that contain spaces and are not quoted already */
     test.description = 'options only, option value is quoted and contains space'
     return null;
   })
   shell( 'option:"value with space"' )
   .then( o =>
-  { 
+  {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
@@ -1231,16 +1231,16 @@ function processArgsWithSpace( test )
     test.contains( got, expected );
     return null;
   })
-  
-  ready.then( () => 
-  { 
+
+  ready.then( () =>
+  {
     /* process.args should quote arguments that contain spaces and are not quoted already */
     test.description = 'options only, option value is quoted and contains space'
     return null;
   })
   shell({ args : [ 'option', ':', '"value with space"' ] })
   .then( o =>
-  { 
+  {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
@@ -1257,16 +1257,16 @@ function processArgsWithSpace( test )
     test.contains( got, expected );
     return null;
   })
-  
-  ready.then( () => 
-  { 
+
+  ready.then( () =>
+  {
     /* process.args should quote arguments that contain spaces and are not quoted already */
     test.description = 'options only, option value is quoted and contains space'
     return null;
   })
   shell({ args : [ 'option', ':', 'value with space' ] })
   .then( o =>
-  { 
+  {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
@@ -1283,16 +1283,16 @@ function processArgsWithSpace( test )
     test.contains( got, expected );
     return null;
   })
-  
-  ready.then( () => 
-  { 
+
+  ready.then( () =>
+  {
     /* process.args should quote arguments that contain spaces and are not quoted already */
     test.description = 'options only, option value is not quoted and contains space'
     return null;
   })
   shell( 'option:value with space' )
   .then( o =>
-  { 
+  {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
@@ -1309,16 +1309,16 @@ function processArgsWithSpace( test )
     test.contains( got, expected );
     return null;
   })
-  
-  ready.then( () => 
-  { 
+
+  ready.then( () =>
+  {
     /* process.args should quote arguments that contain spaces and are not quoted already */
     test.description = 'options only, option value is not quoted and contains space'
     return null;
   })
   shell( 'option : value with space' )
   .then( o =>
-  { 
+  {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
@@ -1335,16 +1335,16 @@ function processArgsWithSpace( test )
     test.contains( got, expected );
     return null;
   })
-  
-  ready.then( () => 
-  { 
+
+  ready.then( () =>
+  {
     /* process.args should quote arguments that contain spaces and are not quoted already */
     test.description = 'options only, option value is not quoted and contains space'
     return null;
   })
   shell( 'option:value with" space' )
   .then( o =>
-  { 
+  {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
@@ -10089,9 +10089,9 @@ function startDetachingModeSpawnResourceReady( test )
   ready
 
   .then( () =>
-  { 
+  {
     test.case = 'consequence receives resources after child spawn';
-    
+
     let o =
     {
       execPath : 'node testAppChild.js',
@@ -10101,28 +10101,28 @@ function startDetachingModeSpawnResourceReady( test )
       throwingExitCode : 0
     }
     let result = _.process.start( o );
-    
+
     test.identical( result, o.onStart );
     test.notIdentical( result, o.onTerminate );
 
     o.onStart.thenGive( ( got ) =>
-    { 
+    {
       test.is( _.mapIs( got ) );
       test.identical( got, o );
       test.is( _.process.isAlive( o.process.pid ) );
       o.process.kill();
     })
-    
-    o.onTerminate.then( ( got ) => 
+
+    o.onTerminate.then( ( got ) =>
     {
       test.notIdentical( got.exitCode, 0 );
       test.identical( got.exitSignal, 'SIGTERM' );
       return null;
     })
-    
+
     return o.onTerminate;
   })
-  
+
   return ready;
 }
 
@@ -10159,9 +10159,9 @@ function startDetachingModeForkResourceReady( test )
   ready
 
   .then( () =>
-  { 
+  {
     test.case = 'consequence receives resources after child spawn';
-    
+
     let o =
     {
       execPath : 'testAppChild.js',
@@ -10171,28 +10171,28 @@ function startDetachingModeForkResourceReady( test )
       throwingExitCode : 0
     }
     let result = _.process.start( o );
-    
+
     test.identical( result, o.onStart );
     test.notIdentical( result, o.onTerminate );
 
     o.onStart.thenGive( ( got ) =>
-    { 
+    {
       test.is( _.mapIs( got ) );
       test.identical( got, o );
       test.is( _.process.isAlive( o.process.pid ) );
       o.process.kill();
     })
-    
-    o.onTerminate.then( ( got ) => 
+
+    o.onTerminate.then( ( got ) =>
     {
       test.notIdentical( got.exitCode, 0 );
       test.identical( got.exitSignal, 'SIGTERM' );
       return null;
     })
-    
+
     return o.onTerminate;
   })
-  
+
   return ready;
 }
 
@@ -10229,9 +10229,9 @@ function startDetachingModeShellResourceReady( test )
   ready
 
   .then( () =>
-  { 
+  {
     test.case = 'consequence receives resources after child spawn';
-    
+
     let o =
     {
       execPath : 'node testAppChild.js',
@@ -10241,28 +10241,28 @@ function startDetachingModeShellResourceReady( test )
       throwingExitCode : 0
     }
     let result = _.process.start( o );
-    
+
     test.identical( result, o.onStart );
     test.notIdentical( result, o.onTerminate );
 
     o.onStart .thenGive( ( got ) =>
-    { 
+    {
       test.is( _.mapIs( got ) );
       test.identical( got, o );
       test.is( _.process.isAlive( o.process.pid ) );
       o.process.kill();
     })
-    
-    o.onTerminate.then( ( got ) => 
+
+    o.onTerminate.then( ( got ) =>
     {
       test.notIdentical( got.exitCode, 0 );
       test.identical( got.exitSignal, 'SIGTERM' );
       return null;
     })
-    
+
     return o.onTerminate;
   })
-  
+
   return ready;
 }
 
@@ -10277,19 +10277,19 @@ function startDetachingModeSpawnNoTerminationBegin( test )
   {
     _.include( 'wAppBasic' );
     _.include( 'wFiles' );
-    
+
     let args = _.process.args();
 
     let o =
-    { 
+    {
       execPath : 'node testAppChild.js',
       mode : 'spawn',
       ipc : 0,
       detaching : true,
     }
-    
+
     _.mapExtend( o, args.map );
-    
+
     _.process.start( o );
 
     process.send({ childPid : o.process.pid });
@@ -10327,9 +10327,9 @@ function startDetachingModeSpawnNoTerminationBegin( test )
   ready
 
   .then( () =>
-  { 
+  {
     test.case = 'stdio:ignore ipc:false, parent should wait for child to exit';
-    
+
     let o =
     {
       execPath : 'node testAppParent.js stdio : ignore ipc : false',
@@ -10354,24 +10354,24 @@ function startDetachingModeSpawnNoTerminationBegin( test )
       test.will = 'parent and child are dead';
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( !_.process.isAlive( data.childPid ) );
-      
+
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
       test.identical( data.childPid, childPid )
-      
+
       return null;
     })
-    
+
     return con;
   })
-  
+
   /*  */
-  
+
   .then( () =>
-  { 
+  {
     test.case = 'stdio:ignore ipc:true, parent should wait for child to exit';
-    
+
     let o =
     {
       execPath : 'node testAppParent.js stdio : ignore ipc : true',
@@ -10396,24 +10396,24 @@ function startDetachingModeSpawnNoTerminationBegin( test )
       test.will = 'parent and child are dead';
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( !_.process.isAlive( data.childPid ) );
-      
+
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
       test.identical( data.childPid, childPid )
-      
+
       return null;
     })
-    
+
     return con;
   })
-  
+
   /*  */
-  
+
   .then( () =>
-  { 
+  {
     test.case = 'stdio:pipe, parent should wait for child to exit';
-    
+
     let o =
     {
       execPath : 'node testAppParent.js stdio : pipe',
@@ -10438,24 +10438,24 @@ function startDetachingModeSpawnNoTerminationBegin( test )
       test.will = 'parent and child are dead';
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( !_.process.isAlive( data.childPid ) );
-      
+
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
       test.identical( data.childPid, childPid )
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   /*  */
-  
+
   .then( () =>
-  { 
+  {
     test.case = 'stdio:pipe ipc:true, parent should wait for child to exit';
-    
+
     let o =
     {
       execPath : 'node testAppParent.js stdio : pipe ipc : true',
@@ -10480,20 +10480,20 @@ function startDetachingModeSpawnNoTerminationBegin( test )
       test.will = 'parent and child are dead';
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( !_.process.isAlive( data.childPid ) );
-      
+
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
       test.identical( data.childPid, childPid )
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   /*  */
-  
+
   return ready;
 }
 
@@ -10508,18 +10508,18 @@ function startDetachingModeForkNoTerminationBegin( test )
   {
     _.include( 'wAppBasic' );
     _.include( 'wFiles' );
-    
+
     let args = _.process.args();
 
     let o =
-    { 
+    {
       execPath : 'testAppChild.js',
       mode : 'fork',
       detaching : true,
     }
-    
+
     _.mapExtend( o, args.map );
-    
+
     _.process.start( o );
 
     process.send({ childPid : o.process.pid });
@@ -10557,11 +10557,11 @@ function startDetachingModeForkNoTerminationBegin( test )
   ready
 
   /*  */
-  
+
   .then( () =>
-  { 
+  {
     test.case = 'stdio:ignore, parent should wait for child to exit';
-    
+
     let o =
     {
       execPath : 'node testAppParent.js stdio : ignore',
@@ -10586,24 +10586,24 @@ function startDetachingModeForkNoTerminationBegin( test )
       test.will = 'parent and child are dead';
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( !_.process.isAlive( data.childPid ) );
-      
+
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
       test.identical( data.childPid, childPid )
-      
+
       return null;
     })
-    
+
     return con;
   })
-  
+
   /*  */
-  
+
   .then( () =>
-  { 
+  {
     test.case = 'stdio:pipe, parent should wait for child to exit';
-    
+
     let o =
     {
       execPath : 'node testAppParent.js stdio : pipe',
@@ -10628,20 +10628,20 @@ function startDetachingModeForkNoTerminationBegin( test )
       test.will = 'parent and child are dead';
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( !_.process.isAlive( data.childPid ) );
-      
+
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
       test.identical( data.childPid, childPid )
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   /*  */
-  
+
   return ready;
 }
 
@@ -10656,19 +10656,19 @@ function startDetachingModeShellNoTerminationBegin( test )
   {
     _.include( 'wAppBasic' );
     _.include( 'wFiles' );
-    
+
     let args = _.process.args();
 
     let o =
-    { 
+    {
       execPath : 'node testAppChild.js',
       mode : 'shell',
       ipc : 0,
       detaching : true,
     }
-    
+
     _.mapExtend( o, args.map );
-    
+
     _.process.start( o );
 
     process.send({ childPid : o.process.pid });
@@ -10706,9 +10706,9 @@ function startDetachingModeShellNoTerminationBegin( test )
   ready
 
   .then( () =>
-  { 
+  {
     test.case = 'stdio:ignore, parent should wait for child to exit';
-    
+
     let o =
     {
       execPath : 'node testAppParent.js stdio : pipe',
@@ -10733,24 +10733,24 @@ function startDetachingModeShellNoTerminationBegin( test )
       test.will = 'parent and child are dead';
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( !_.process.isAlive( data.childPid ) );
-      
+
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
       test.is( !_.process.isAlive( childPid ) );
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   /*  */
-  
+
   .then( () =>
-  { 
+  {
     test.case = 'stdio:pipe, parent should wait for child to exit';
-    
+
     let o =
     {
       execPath : 'node testAppParent.js stdio : pipe',
@@ -10775,20 +10775,20 @@ function startDetachingModeShellNoTerminationBegin( test )
       test.will = 'parent and child are dead';
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( !_.process.isAlive( data.childPid ) );
-      
+
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
       test.is( !_.process.isAlive( childPid ) );
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   /*  */
-  
+
   return ready;
 }
 
@@ -10803,34 +10803,34 @@ function startDetachingModeSpawnTerminationBegin( test )
   {
     _.include( 'wAppBasic' );
     _.include( 'wFiles' );
-    
+
     let args = _.process.args();
 
     let o =
-    { 
+    {
       execPath : 'node testAppChild.js',
       mode : 'spawn',
       ipc : 0,
       detaching : true,
     }
-    
+
     _.mapExtend( o, args.map );
-    
+
     _.process.start( o );
-    
-    o.onTerminate.catch( err => 
-    { 
+
+    o.onTerminate.catch( err =>
+    {
       _.errAttend( err );
       _.errLogOnce( err );
-      return null; 
+      return null;
     })
 
     process.send({ childPid : o.process.pid });
-    
-    _.time.out( 1000, () => 
-    { 
+
+    _.time.out( 1000, () =>
+    {
       _.Procedure.TerminationBegin();
-      return null; 
+      return null;
     })
   }
 
@@ -10866,9 +10866,9 @@ function startDetachingModeSpawnTerminationBegin( test )
   ready
 
   .then( () =>
-  { 
+  {
     test.case = 'process termination begins after short delay, detached process should continue to work after parent death';
-    
+
     let o =
     {
       execPath : 'node testAppParent.js stdio : ignore',
@@ -10878,7 +10878,7 @@ function startDetachingModeSpawnTerminationBegin( test )
       ipc : 1,
     }
     let con = _.process.start( o );
-    
+
     let data;
 
     o.process.on( 'message', ( got ) =>
@@ -10895,31 +10895,31 @@ function startDetachingModeSpawnTerminationBegin( test )
       test.is( _.process.isAlive( data.childPid ) );
       return _.time.out( 6000 );
     })
-    
+
     con.then( () =>
     {
       test.will = 'both dead';
-      
+
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( !_.process.isAlive( data.childPid ) );
-      
+
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
       test.identical( data.childPid, childPid )
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   /*  */
-  
+
   .then( () =>
-  { 
+  {
     test.case = 'process termination begins after short delay, detached process should continue to work after parent death';
-    
+
     let o =
     {
       execPath : 'node testAppParent.js stdio : ignore ipc : true',
@@ -10946,31 +10946,31 @@ function startDetachingModeSpawnTerminationBegin( test )
       test.is( _.process.isAlive( data.childPid ) );
       return _.time.out( 6000 );
     })
-    
+
     con.then( () =>
     {
       test.will = 'both dead';
-      
+
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( !_.process.isAlive( data.childPid ) );
-      
+
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
       test.identical( data.childPid, childPid )
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   /*  */
-  
+
   .then( () =>
-  { 
+  {
     test.case = 'process termination begins after short delay, detached process should continue to work after parent death';
-    
+
     let o =
     {
       execPath : 'node testAppParent.js stdio : pipe',
@@ -10997,31 +10997,31 @@ function startDetachingModeSpawnTerminationBegin( test )
       test.is( _.process.isAlive( data.childPid ) );
       return _.time.out( 6000 );
     })
-    
+
     con.then( () =>
     {
       test.will = 'both dead';
-      
+
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( !_.process.isAlive( data.childPid ) );
-      
+
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
       test.identical( data.childPid, childPid )
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   /*  */
-  
+
   .then( () =>
-  { 
+  {
     test.case = 'process termination begins after short delay, detached process should continue to work after parent death';
-    
+
     let o =
     {
       execPath : 'node testAppParent.js stdio : pipe ipc : true',
@@ -11048,27 +11048,27 @@ function startDetachingModeSpawnTerminationBegin( test )
       test.is( _.process.isAlive( data.childPid ) );
       return _.time.out( 6000 );
     })
-    
+
     con.then( () =>
     {
       test.will = 'both dead';
-      
+
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( !_.process.isAlive( data.childPid ) );
-      
+
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
       test.identical( data.childPid, childPid )
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   /*  */
-  
+
   return ready;
 }
 
@@ -11083,34 +11083,34 @@ function startDetachingModeForkTerminationBegin( test )
   {
     _.include( 'wAppBasic' );
     _.include( 'wFiles' );
-    
+
     let args = _.process.args();
 
     let o =
-    { 
+    {
       execPath : 'testAppChild.js',
       mode : 'fork',
       ipc : 0,
       detaching : true,
     }
-    
+
     _.mapExtend( o, args.map );
-    
+
     _.process.start( o );
-    
-    o.onTerminate.catch( err => 
-    { 
+
+    o.onTerminate.catch( err =>
+    {
       _.errAttend( err );
       _.errLogOnce( err );
-      return null; 
+      return null;
     })
 
     process.send({ childPid : o.process.pid });
-    
-    _.time.out( 1000, () => 
-    { 
+
+    _.time.out( 1000, () =>
+    {
       _.Procedure.TerminationBegin();
-      return null; 
+      return null;
     })
   }
 
@@ -11146,9 +11146,9 @@ function startDetachingModeForkTerminationBegin( test )
   ready
 
   .then( () =>
-  { 
+  {
     test.case = 'process termination begins after short delay, detached process should continue to work after parent death';
-    
+
     let o =
     {
       execPath : 'node testAppParent.js stdio : ignore',
@@ -11175,31 +11175,31 @@ function startDetachingModeForkTerminationBegin( test )
       test.is( _.process.isAlive( data.childPid ) );
       return _.time.out( 6000 );
     })
-    
+
     con.then( () =>
     {
       test.will = 'both dead';
-      
+
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( !_.process.isAlive( data.childPid ) );
-      
+
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
       test.identical( data.childPid, childPid )
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   /*  */
-  
+
   .then( () =>
-  { 
+  {
     test.case = 'process termination begins after short delay, detached process should continue to work after parent death';
-    
+
     let o =
     {
       execPath : 'node testAppParent.js stdio : ignore ipc : true',
@@ -11226,31 +11226,31 @@ function startDetachingModeForkTerminationBegin( test )
       test.is( _.process.isAlive( data.childPid ) );
       return _.time.out( 6000 );
     })
-    
+
     con.then( () =>
     {
       test.will = 'both dead';
-      
+
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( !_.process.isAlive( data.childPid ) );
-      
+
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
       test.identical( data.childPid, childPid )
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   /*  */
-  
+
   .then( () =>
-  { 
+  {
     test.case = 'process termination begins after short delay, detached process should continue to work after parent death';
-    
+
     let o =
     {
       execPath : 'node testAppParent.js stdio : pipe',
@@ -11277,31 +11277,31 @@ function startDetachingModeForkTerminationBegin( test )
       test.is( _.process.isAlive( data.childPid ) );
       return _.time.out( 6000 );
     })
-    
+
     con.then( () =>
     {
       test.will = 'both dead';
-      
+
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( !_.process.isAlive( data.childPid ) );
-      
+
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
       test.identical( data.childPid, childPid )
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   /*  */
-  
+
   .then( () =>
-  { 
+  {
     test.case = 'process termination begins after short delay, detached process should continue to work after parent death';
-    
+
     let o =
     {
       execPath : 'node testAppParent.js stdio : pipe ipc : true',
@@ -11328,27 +11328,27 @@ function startDetachingModeForkTerminationBegin( test )
       test.is( _.process.isAlive( data.childPid ) );
       return _.time.out( 6000 );
     })
-    
+
     con.then( () =>
     {
       test.will = 'both dead';
-      
+
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( !_.process.isAlive( data.childPid ) );
-      
+
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
       test.identical( data.childPid, childPid )
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   /*  */
-  
+
   return ready;
 }
 
@@ -11363,34 +11363,34 @@ function startDetachingModeShellTerminationBegin( test )
   {
     _.include( 'wAppBasic' );
     _.include( 'wFiles' );
-    
+
     let args = _.process.args();
 
     let o =
-    { 
+    {
       execPath : 'node testAppChild.js',
       mode : 'shell',
       ipc : 0,
       detaching : true,
     }
-    
+
     _.mapExtend( o, args.map );
-    
+
     _.process.start( o );
-    
-    o.onTerminate.catch( err => 
-    { 
+
+    o.onTerminate.catch( err =>
+    {
       _.errAttend( err );
       _.errLogOnce( err );
-      return null; 
+      return null;
     })
 
     process.send({ childPid : o.process.pid });
-    
-    _.time.out( 1000, () => 
-    { 
+
+    _.time.out( 1000, () =>
+    {
       _.Procedure.TerminationBegin();
-      return null; 
+      return null;
     })
   }
 
@@ -11426,9 +11426,9 @@ function startDetachingModeShellTerminationBegin( test )
   ready
 
   .then( () =>
-  { 
+  {
     test.case = 'process termination begins after short delay, detached process should continue to work after parent death';
-    
+
     let o =
     {
       execPath : 'node testAppParent.js stdio : ignore',
@@ -11455,32 +11455,32 @@ function startDetachingModeShellTerminationBegin( test )
       test.is( _.process.isAlive( data.childPid ) );
       return _.time.out( 6000 );
     })
-    
+
     con.then( () =>
     {
       test.will = 'both dead';
-      
+
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( !_.process.isAlive( data.childPid ) );
-      
+
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
-      
+
       test.is( !_.process.isAlive( childPid ) );
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   /*  */
-  
+
   .then( () =>
-  { 
+  {
     test.case = 'process termination begins after short delay, detached process should continue to work after parent death';
-    
+
     let o =
     {
       execPath : 'node testAppParent.js stdio : pipe',
@@ -11507,28 +11507,28 @@ function startDetachingModeShellTerminationBegin( test )
       test.is( _.process.isAlive( data.childPid ) );
       return _.time.out( 6000 );
     })
-    
+
     con.then( () =>
     {
       test.will = 'both dead';
-      
+
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( !_.process.isAlive( data.childPid ) );
-      
+
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
-      
+
       test.is( !_.process.isAlive( childPid ) );
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   /*  */
-  
+
   return ready;
 }
 
@@ -11553,8 +11553,8 @@ function startDetachingChildExitsAfterParent( test )
     }
 
     _.process.start( o );
-    
-    o.onTerminate.finallyGive( ( err, got ) => 
+
+    o.onTerminate.finallyGive( ( err, got ) =>
     {
       if( !err )
       throw _.err( 'Parent did not receive error from disconnect routine' );
@@ -11597,7 +11597,7 @@ function startDetachingChildExitsAfterParent( test )
   ready
 
   .then( () =>
-  { 
+  {
     test.case = 'parent disconnects detached child process and exits, child contiues to work'
     let o =
     {
@@ -11632,7 +11632,7 @@ function startDetachingChildExitsAfterParent( test )
     })
 
     o.onTerminate.then( () =>
-    { 
+    {
       let childPid2 = _.fileProvider.fileRead( testFilePath );
       childPid2 = _.numberFrom( childPid2 )
       test.is( !_.process.isAlive( childPid2 ) );
@@ -11682,8 +11682,8 @@ function startDetachingChildExitsBeforeParent( test )
       process.send({ exitCode : got.exitCode, err : err, pid : o.process.pid });
       return null;
     })
-    
-    _.time.out( 5000, () => 
+
+    _.time.out( 5000, () =>
     {
       console.log( 'Parent process end' )
     });
@@ -11738,8 +11738,8 @@ function startDetachingChildExitsBeforeParent( test )
     {
       child = got;
     })
-    
-    let onChildTerminate = _.time.out( 3000, () => 
+
+    let onChildTerminate = _.time.out( 3000, () =>
     {
       let childPid = _.fileProvider.fileRead( testFilePath );
       test.is( _.process.isAlive( o.process.pid ) );
@@ -11763,9 +11763,9 @@ function startDetachingChildExitsBeforeParent( test )
       let childPid = _.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid )
       test.is( !_.process.isAlive( childPid ) );
-      
+
       test.identical( child.pid, childPid );
-      
+
       return null;
     })
 
@@ -11796,21 +11796,21 @@ function startDetachedOutputStdioIgnore( test )
   {
     _.include( 'wAppBasic' );
     _.include( 'wFiles' );
-    
+
     let args = _.process.args();
 
     let o =
-    { 
+    {
       execPath : 'testAppChild.js',
       detaching : true,
       ipc : false
     }
-    
+
     _.mapExtend( o, args.map );
-    
+
     if( o.mode != 'fork' )
     o.execPath = 'node ' + o.execPath;
-    
+
     _.process.start( o );
   }
 
@@ -11842,9 +11842,9 @@ function startDetachedOutputStdioIgnore( test )
   ready
 
   .then( () =>
-  { 
+  {
     test.case = 'mode : spawn, stdio : ignore, no output from detached child';
-    
+
     let o =
     {
       execPath : 'node testAppParent.js mode : spawn stdio : ignore',
@@ -11864,13 +11864,13 @@ function startDetachedOutputStdioIgnore( test )
 
     return con;
   })
-  
+
   /*  */
-  
+
   .then( () =>
-  { 
+  {
     test.case = 'mode : fork, stdio : ignore, no output from detached child';
-    
+
     let o =
     {
       execPath : 'node testAppParent.js mode : fork stdio : ignore',
@@ -11890,13 +11890,13 @@ function startDetachedOutputStdioIgnore( test )
 
     return con;
   })
-  
+
   /*  */
-  
+
   .then( () =>
-  { 
+  {
     test.case = 'mode : shell, stdio : ignore, no output from detached child';
-    
+
     let o =
     {
       execPath : 'node testAppParent.js mode : shell stdio : ignore',
@@ -11916,9 +11916,9 @@ function startDetachedOutputStdioIgnore( test )
 
     return con;
   })
-  
+
   /*  */
-  
+
   return ready;
 }
 
@@ -11933,21 +11933,21 @@ function startDetachedOutputStdioPipe( test )
   {
     _.include( 'wAppBasic' );
     _.include( 'wFiles' );
-    
+
     let args = _.process.args();
 
     let o =
-    { 
+    {
       execPath : 'testAppChild.js',
       detaching : true,
       ipc : false
     }
-    
+
     _.mapExtend( o, args.map );
-    
+
     if( o.mode != 'fork' )
     o.execPath = 'node ' + o.execPath;
-    
+
     _.process.start( o );
   }
 
@@ -11979,9 +11979,9 @@ function startDetachedOutputStdioPipe( test )
   ready
 
   .then( () =>
-  { 
+  {
     test.case = 'mode : spawn, stdio : pipe';
-    
+
     let o =
     {
       execPath : 'node testAppParent.js mode : spawn stdio : pipe',
@@ -12001,13 +12001,13 @@ function startDetachedOutputStdioPipe( test )
 
     return con;
   })
-  
+
   /*  */
-  
+
   .then( () =>
-  { 
+  {
     test.case = 'mode : fork, stdio : pipe';
-    
+
     let o =
     {
       execPath : 'node testAppParent.js mode : fork stdio : pipe',
@@ -12027,13 +12027,13 @@ function startDetachedOutputStdioPipe( test )
 
     return con;
   })
-  
+
   /*  */
-  
+
   .then( () =>
-  { 
+  {
     test.case = 'mode : shell, stdio : pipe';
-    
+
     let o =
     {
       execPath : 'node testAppParent.js mode : shell stdio : pipe',
@@ -12053,9 +12053,9 @@ function startDetachedOutputStdioPipe( test )
 
     return con;
   })
-  
+
   /*  */
-  
+
   return ready;
 }
 
@@ -12088,16 +12088,16 @@ function startDetachedOutputStdioInherit( test )
   var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
   _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
   var ready = new _.Consequence().take( null );
-  
+
   test.is( true );
-  
+
   if( !Config.debug )
   return ready;
 
   ready
 
   .then( () =>
-  { 
+  {
     test.case = 'mode : spawn, stdio : inherit';
     let o =
     {
@@ -12109,11 +12109,11 @@ function startDetachedOutputStdioInherit( test )
     }
     return test.shouldThrowErrorSync( () => _.process.start( o ) );
   })
-  
+
   /*  */
-  
+
   .then( () =>
-  { 
+  {
     test.case = 'mode : fork, stdio : inherit';
     let o =
     {
@@ -12125,11 +12125,11 @@ function startDetachedOutputStdioInherit( test )
     }
     return test.shouldThrowErrorSync( () => _.process.start( o ) );
   })
-  
+
   /*  */
-  
+
   .then( () =>
-  { 
+  {
     test.case = 'mode : shell, stdio : inherit';
     let o =
     {
@@ -12141,9 +12141,9 @@ function startDetachedOutputStdioInherit( test )
     }
     return test.shouldThrowErrorSync( () => _.process.start( o ) );
   })
-  
+
   /*  */
-  
+
   return ready;
 }
 
@@ -12158,13 +12158,13 @@ function startDetachingModeSpawnIpc( test )
   {
     _.include( 'wAppBasic' );
     _.include( 'wFiles' );
-    
-    process.on( 'message', ( data ) => 
+
+    process.on( 'message', ( data ) =>
     {
       process.send( data );
       process.exit();
     })
-    
+
   }
 
   /* */
@@ -12177,9 +12177,9 @@ function startDetachingModeSpawnIpc( test )
   ready
 
   .then( () =>
-  { 
+  {
     test.case = 'mode : spawn, stdio : ignore';
-    
+
     let o =
     {
       execPath : 'node testAppChild.js',
@@ -12191,35 +12191,35 @@ function startDetachingModeSpawnIpc( test )
       ipc : 1,
     }
     _.process.start( o );
-    
+
     let message;
-    
-    o.process.on( 'message', ( data ) => 
+
+    o.process.on( 'message', ( data ) =>
     {
       message = data;
     })
-    
-    o.onStart.thenGive( () => 
+
+    o.onStart.thenGive( () =>
     {
       o.process.send( 'child' );
     })
-    
-    o.onTerminate.then( got => 
-    { 
+
+    o.onTerminate.then( got =>
+    {
       test.identical( got.exitCode, 0 );
       test.identical( message, 'child' );
-      return null;   
+      return null;
     })
-    
+
     return o.onTerminate;
   })
-  
+
   /*  */
-  
+
   .then( () =>
-  { 
+  {
     test.case = 'mode : spawn, stdio : pipe';
-    
+
     let o =
     {
       execPath : 'node testAppChild.js',
@@ -12231,31 +12231,31 @@ function startDetachingModeSpawnIpc( test )
       ipc : 1,
     }
     _.process.start( o );
-    
+
     let message;
-    
-    o.process.on( 'message', ( data ) => 
+
+    o.process.on( 'message', ( data ) =>
     {
       message = data;
     })
-    
-    o.onStart.thenGive( () => 
+
+    o.onStart.thenGive( () =>
     {
       o.process.send( 'child' );
     })
-    
-    o.onTerminate.then( got => 
-    { 
+
+    o.onTerminate.then( got =>
+    {
       test.identical( got.exitCode, 0 );
       test.identical( message, 'child' );
-      return null;   
+      return null;
     })
-    
+
     return o.onTerminate;
   })
-  
+
   /*  */
-  
+
   return ready;
 }
 
@@ -12270,13 +12270,13 @@ function startDetachingModeForkIpc( test )
   {
     _.include( 'wAppBasic' );
     _.include( 'wFiles' );
-    
-    process.on( 'message', ( data ) => 
-    { 
+
+    process.on( 'message', ( data ) =>
+    {
       process.send( data );
       process.exit();
     })
-    
+
   }
 
   /* */
@@ -12289,9 +12289,9 @@ function startDetachingModeForkIpc( test )
   ready
 
   .then( () =>
-  { 
+  {
     test.case = 'mode : fork, stdio : ignore';
-    
+
     let o =
     {
       execPath : 'testAppChild.js',
@@ -12303,36 +12303,36 @@ function startDetachingModeForkIpc( test )
       ipc : 1,
     }
     _.process.start( o );
-    
+
     let message;
-    
-    o.process.on( 'message', ( data ) => 
+
+    o.process.on( 'message', ( data ) =>
     {
       message = data;
     })
-    
-    o.onStart.thenGive( () => 
-    { 
+
+    o.onStart.thenGive( () =>
+    {
       o.process.send( 'child' );
     })
-    
-    o.onTerminate.then( got => 
-    { 
+
+    o.onTerminate.then( got =>
+    {
       debugger
       test.identical( got.exitCode, 0 );
       test.identical( message, 'child' );
-      return null;   
+      return null;
     })
-    
+
     return o.onTerminate;
   })
-  
+
   /*  */
-  
+
   .then( () =>
-  { 
+  {
     test.case = 'mode : fork, stdio : pipe';
-    
+
     let o =
     {
       execPath : 'testAppChild.js',
@@ -12344,31 +12344,31 @@ function startDetachingModeForkIpc( test )
       ipc : 1,
     }
     _.process.start( o );
-    
+
     let message;
-    
-    o.process.on( 'message', ( data ) => 
+
+    o.process.on( 'message', ( data ) =>
     {
       message = data;
     })
-    
-    o.onStart.thenGive( () => 
+
+    o.onStart.thenGive( () =>
     {
       o.process.send( 'child' );
     })
-    
-    o.onTerminate.then( got => 
-    { 
+
+    o.onTerminate.then( got =>
+    {
       test.identical( got.exitCode, 0 );
       test.identical( message, 'child' );
-      return null;   
+      return null;
     })
-    
+
     return o.onTerminate;
   })
-  
+
   /*  */
-  
+
   return ready;
 }
 
@@ -12383,13 +12383,13 @@ function startDetachingModeShellIpc( test )
   {
     _.include( 'wAppBasic' );
     _.include( 'wFiles' );
-    
-    process.on( 'message', ( data ) => 
-    { 
+
+    process.on( 'message', ( data ) =>
+    {
       process.send( data );
       process.exit();
     })
-    
+
   }
 
   /* */
@@ -12400,16 +12400,16 @@ function startDetachingModeShellIpc( test )
   var ready = new _.Consequence().take( null );
 
   test.is( true );
-  
+
   if( !Config.debug )
   return ready;
-  
+
   ready
-  
+
   .then( () =>
-  { 
+  {
     test.case = 'mode : shell, stdio : ignore';
-    
+
     let o =
     {
       execPath : 'node testAppChild.js',
@@ -12422,13 +12422,13 @@ function startDetachingModeShellIpc( test )
     }
     return test.shouldThrowErrorSync( () => _.process.start( o ) );
   })
-  
+
   /*  */
-  
+
   .then( () =>
-  { 
+  {
     test.case = 'mode : shell, stdio : pipe';
-    
+
     let o =
     {
       execPath : 'node testAppChild.js',
@@ -12441,9 +12441,9 @@ function startDetachingModeShellIpc( test )
     }
     return test.shouldThrowErrorSync( () => _.process.start( o ) );
   })
-  
+
   /*  */
-  
+
   return ready;
 }
 
@@ -12477,10 +12477,10 @@ function startDetachingThrowing( test )
   _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
 
   test.is( true );
-  
+
   if( !Config.debug )
   return;
-  
+
   var o =
   {
     execPath : 'node testAppChild.js',
@@ -12490,7 +12490,7 @@ function startDetachingThrowing( test )
     detaching : 1
   }
   test.shouldThrowErrorSync( () => _.process.start( o ) )
-  
+
   var o =
   {
     execPath : 'node testAppChild.js',
@@ -12500,7 +12500,7 @@ function startDetachingThrowing( test )
     detaching : 1
   }
   test.shouldThrowErrorSync( () => _.process.start( o ) )
-  
+
   var o =
   {
     execPath : 'testAppChild.js',
@@ -12510,7 +12510,7 @@ function startDetachingThrowing( test )
     detaching : 1
   }
   test.shouldThrowErrorSync( () => _.process.start( o ) )
-  
+
   var o =
   {
     execPath : 'node testAppChild.js',
@@ -12520,7 +12520,7 @@ function startDetachingThrowing( test )
     detaching : 1
   }
   test.shouldThrowErrorSync( () => _.process.start( o ) )
-  
+
   var o =
   {
     execPath : 'node testAppChild.js',
@@ -12530,7 +12530,7 @@ function startDetachingThrowing( test )
     detaching : 1
   }
   test.shouldThrowErrorSync( () => _.process.start( o ) )
-  
+
   var o =
   {
     execPath : 'node testAppChild.js',
@@ -12550,8 +12550,8 @@ function startNodeDetachingChildThrowing( test )
   var routinePath = _.path.join( context.suitePath, test.name );
 
   function testAppChild()
-  { 
-    setTimeout( () => 
+  {
+    setTimeout( () =>
     {
       throw 'Child process error';
     }, 1000)
@@ -12562,9 +12562,9 @@ function startNodeDetachingChildThrowing( test )
   var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
   var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
   _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
-  
+
   test.case = 'detached child throws error, onTerminate receives resource with error';
-  
+
   let o =
   {
     execPath : 'testAppChild.js',
@@ -12577,18 +12577,18 @@ function startNodeDetachingChildThrowing( test )
     outputPiping : 0,
     currentPath : routinePath,
   }
-  
+
   _.process.startNode( o );
-  
-  o.onTerminate.then( ( got ) => 
-  { 
+
+  o.onTerminate.then( ( got ) =>
+  {
     test.notIdentical( got.exitCode, 0 );
     test.is( _.strHas( got.output, 'Child process error' ) );
     test.identical( o.exitCode, got.exitCode );
     test.identical( o.output, got.output );
     return null;
   })
-  
+
   return o.onTerminate;
 }
 
@@ -12598,12 +12598,12 @@ function startNodeDetachingTrivial( test )
 {
   var context = this;
   var routinePath = _.path.join( context.suitePath, test.name );
-  
+
   function testAppParent()
   {
     _.include( 'wAppBasic' );
     _.include( 'wFiles' );
-    
+
     let o =
     {
       execPath : 'testAppChild.js',
@@ -12616,16 +12616,16 @@ function startNodeDetachingTrivial( test )
       outputPiping : 1,
     }
     _.process.startNode( o );
-    
-    o.onStart.thenGive( () => 
-    { 
+
+    o.onStart.thenGive( () =>
+    {
       process.send( o.process.pid )
       o.process.send( 'data' );
       _.time.out( 1000, () => o.disconnect() );
     })
-  
-    o.onTerminate.finally( ( err, got ) => 
-    {  
+
+    o.onTerminate.finally( ( err, got ) =>
+    {
       if( err )
       {
         _.errAttend( err );
@@ -12638,27 +12638,27 @@ function startNodeDetachingTrivial( test )
       return null;
     })
   }
-  
+
   function testAppChild()
-  { 
+  {
     _.include( 'wAppBasic' );
     _.include( 'wFiles' );
 
     console.log( 'Child process start' )
 
-    process.on( 'message', data => 
+    process.on( 'message', data =>
     {
-      console.log( 'from parent:', data ); 
+      console.log( 'from parent:', data );
     })
-    
-    _.time.out( 5000, () => 
+
+    _.time.out( 5000, () =>
     {
       console.log( 'Child process end' );
       let filePath = _.path.join( __dirname, 'testFile' );
       _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
       return null;
     })
-    
+
   }
 
   /* */
@@ -12670,11 +12670,11 @@ function startNodeDetachingTrivial( test )
   _.fileProvider.fileWrite( testAppParentPath, testAppParentCode );
   _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
   testAppParentPath = _.strQuote( testAppParentPath );
-  
+
   let testFilePath = _.path.join( routinePath, 'testFile' );
-  
+
   test.case = 'trivial use case';
-  
+
   let o =
   {
     execPath : 'testAppParent.js',
@@ -12686,19 +12686,19 @@ function startNodeDetachingTrivial( test )
     outputCollecting : 1,
     currentPath : routinePath,
   }
-  
+
   _.process.start( o );
-  
+
   let childPid;
-  o.process.on( 'message', ( data ) => 
+  o.process.on( 'message', ( data ) =>
   {
     childPid = _.numberFrom( data );
   })
-  
-  o.onTerminate.then( ( got ) => 
-  {  
+
+  o.onTerminate.then( ( got ) =>
+  {
     test.is( _.process.isAlive( childPid ) );
-    
+
     test.identical( got.exitCode, 0 );
     test.is( _.strHas( got.output, 'Child process start' ) );
     test.is( _.strHas( got.output, 'from parent: data' ) );
@@ -12707,18 +12707,18 @@ function startNodeDetachingTrivial( test )
     test.identical( o.output, got.output );
     return _.time.out( 5000 );
   })
-  
-  o.onTerminate.then( () => 
-  {  
+
+  o.onTerminate.then( () =>
+  {
     test.is( !_.process.isAlive( childPid ) );
-    
+
     let childPidFromFile = _.fileProvider.fileRead( testFilePath );
     childPidFromFile = _.numberFrom( childPidFromFile )
     test.is( !_.process.isAlive( childPidFromFile ) );
     test.identical( childPid, childPidFromFile )
     return null;
   })
-  
+
   return o.onTerminate;
 }
 
@@ -12735,11 +12735,11 @@ function startOnStart( test )
   {
     _.include( 'wAppBasic' );
     _.include( 'wFiles' );
-    
+
     var args = _.process.args();
-    
-    _.time.out( 2000, () => 
-    { 
+
+    _.time.out( 2000, () =>
+    {
       console.log( 'Child process end' )
       return null;
     })
@@ -12750,15 +12750,15 @@ function startOnStart( test )
   var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
   var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
   _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
-  
+
   let ready = new _.Consequence().take( null );
-  
+
   ready
-  
+
   /* */
-  
-  .then( () => 
-  { 
+
+  .then( () =>
+  {
     test.case = 'detaching off, no errors'
     let o =
     {
@@ -12768,35 +12768,35 @@ function startOnStart( test )
       currentPath : routinePath,
       detaching : 0
     }
-    
+
     let result = _.process.start( o );
-    
+
     test.notIdentical( o.onStart, result );
     test.is( _.consequenceIs( o.onStart ) )
-    
-    o.onStart.finally( ( err, got ) => 
+
+    o.onStart.finally( ( err, got ) =>
     {
       test.identical( err, undefined );
       test.identical( got, o );
       test.is( _.process.isAlive( o.process.pid ) );
       return null;
     })
-    
-    result.then( ( got ) => 
+
+    result.then( ( got ) =>
     {
       test.identical( o, got );
       test.identical( got.exitCode, 0 );
       test.identical( got.exitSignal, null );
       return null;
     })
-    
+
     return _.Consequence.AndTake([ o.onStart, result ]);
   })
-  
+
   /* */
-  
-  .then( () => 
-  { 
+
+  .then( () =>
+  {
     test.case = 'detaching off, error on spawn'
     let o =
     {
@@ -12806,29 +12806,29 @@ function startOnStart( test )
       currentPath : routinePath,
       detaching : 0
     }
-    
+
     let result = _.process.start( o );
-    
+
     test.notIdentical( o.onStart, result );
     test.is( _.consequenceIs( o.onStart ) )
-    
-    o.onStart.finally( ( err, got ) => 
+
+    o.onStart.finally( ( err, got ) =>
     {
       test.is( _.errIs( err ) );
       test.identical( got, undefined );
       test.identical( o.process, null);
       return null;
     })
-    
+
     result = test.shouldThrowErrorAsync( result )
-    
+
     return _.Consequence.AndTake([ o.onStart, result ]);
   })
-  
+
   /* */
-  
-  .then( () => 
-  { 
+
+  .then( () =>
+  {
     test.case = 'detaching off, error on spawn, no callback for onStart'
     let o =
     {
@@ -12838,23 +12838,23 @@ function startOnStart( test )
       currentPath : routinePath,
       detaching : 0
     }
-    
+
     let result = _.process.start( o );
-    
+
     test.notIdentical( o.onStart, result );
     test.is( _.consequenceIs( o.onStart ) )
-    
+
     result = test.shouldThrowErrorAsync( result )
-    
+
     let con = _.Consequence.AndTake([ o.onStart, result ]);
-    
+
     return test.shouldThrowErrorAsync( con ) ;
   })
-  
+
   /* */
 
-  .then( () => 
-  { 
+  .then( () =>
+  {
     test.case = 'detaching on, onStart and result are same and give resource on start'
     let o =
     {
@@ -12864,27 +12864,27 @@ function startOnStart( test )
       currentPath : routinePath,
       detaching : 1
     }
-    
+
     let result = _.process.start( o );
-    
+
     test.identical( o.onStart, result );
     test.is( _.consequenceIs( o.onStart ) )
-    
-    o.onStart.then( ( got ) => 
+
+    o.onStart.then( ( got ) =>
     {
       test.identical( o, got );
       test.identical( got.exitCode, null );
       test.identical( got.exitSignal, null );
       return null;
     })
-    
+
     return _.Consequence.AndTake([ o.onStart, o.onTerminate ]);
   })
-  
+
   /* */
-  
-  .then( () => 
-  { 
+
+  .then( () =>
+  {
     test.case = 'detaching on, error on spawn'
     let o =
     {
@@ -12894,29 +12894,29 @@ function startOnStart( test )
       currentPath : routinePath,
       detaching : 1
     }
-    
+
     let result = _.process.start( o );
-    
+
     test.identical( o.onStart, result );
     test.is( _.consequenceIs( o.onStart ) )
-    
+
     result = test.shouldThrowErrorAsync( o.onStart );
-    
+
     result.then( () => _.time.out( 2000 ) )
-    
-    result.then( () => 
+
+    result.then( () =>
     {
       test.identical( o.onTerminate.resourcesCount(), 0 );
       return null;
     })
-    
+
     return result;
   })
-  
+
   /* */
-  
-  .then( () => 
-  { 
+
+  .then( () =>
+  {
     test.case = 'detaching on, disconnected child'
     let o =
     {
@@ -12926,31 +12926,31 @@ function startOnStart( test )
       currentPath : routinePath,
       detaching : 1
     }
-    
+
     let result = _.process.start( o );
-    
+
     o.disconnect();
-    
+
     test.identical( o.onStart, result );
     test.is( _.consequenceIs( o.onStart ) )
-    
-    o.onStart.finally( ( err, got ) => 
+
+    o.onStart.finally( ( err, got ) =>
     {
       test.identical( err ,undefined );
       test.identical( got, o );
       test.is( _.process.isAlive( o.process.pid ) )
       return null;
     })
-    
-    o.onTerminate.finallyGive( ( err, got ) => 
-    { 
+
+    o.onTerminate.finallyGive( ( err, got ) =>
+    {
       _.errAttend( err );
       test.is( _.errIs( err ) );
       test.identical( got, undefined );
       test.is( _.process.isAlive( o.process.pid ) )
     })
-    
-    o.onTerminate.finally( ( err, got ) => 
+
+    o.onTerminate.finally( ( err, got ) =>
     {
       test.identical( err ,undefined );
       test.identical( got, o );
@@ -12959,14 +12959,14 @@ function startOnStart( test )
       test.identical( got.exitSignal, null );
       return null;
     })
-    
+
     return _.Consequence.AndTake([ o.onStart, o.onTerminate ]);
   })
-  
+
   /* Vova xxx: close event is not emitted for disconnected detached child in fork mode*/
-  
-  // .then( () => 
-  // { 
+
+  // .then( () =>
+  // {
   //   test.case = 'detaching on, disconnected forked child'
   //   let o =
   //   {
@@ -12976,42 +12976,42 @@ function startOnStart( test )
   //     currentPath : routinePath,
   //     detaching : 1
   //   }
-    
+
   //   let result = _.process.start( o );
-    
+
   //   o.disconnect();
-    
+
   //   test.identical( o.onStart, result );
   //   test.is( _.consequenceIs( o.onStart ) )
-    
-  //   o.onStart.finally( ( err, got ) => 
+
+  //   o.onStart.finally( ( err, got ) =>
   //   {
   //     test.identical( err ,undefined );
   //     test.identical( got, o );
   //     test.is( _.process.isAlive( o.process.pid ) )
   //     return null;
   //   })
-    
-  //   o.onTerminate.finallyGive( ( err, got ) => 
-  //   { 
+
+  //   o.onTerminate.finallyGive( ( err, got ) =>
+  //   {
   //     _.errAttend( err );
   //     test.is( _.errIs( err ) );
   //     test.identical( got, undefined );
   //     test.is( _.process.isAlive( o.process.pid ) )
   //   })
-    
-  //   result = _.time.out( 3000, () => 
-  //   { 
+
+  //   result = _.time.out( 3000, () =>
+  //   {
   //     test.identical( o.onTerminate.resourcesCount(), 0 );
   //     test.is( !_.process.isAlive( o.process.pid ) )
   //     return null;
   //   })
-    
+
   //   return _.Consequence.AndTake([ o.onStart, result ]);
   // })
-  
+
   /* */
-  
+
   return ready;
 }
 
@@ -13026,11 +13026,11 @@ function startOnTerminate( test )
   {
     _.include( 'wAppBasic' );
     _.include( 'wFiles' );
-    
+
     var args = _.process.args();
-    
-    _.time.out( 5000, () => 
-    { 
+
+    _.time.out( 5000, () =>
+    {
       if( args.map.throwing )
       throw _.err( 'Child process error' );
       console.log( 'Child process end' )
@@ -13043,15 +13043,15 @@ function startOnTerminate( test )
   var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
   var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
   _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
-  
+
   let ready = new _.Consequence().take( null );
-  
+
   ready
-  
+
   /* */
-  
-  .then( () => 
-  { 
+
+  .then( () =>
+  {
     test.case = 'detaching off'
     let o =
     {
@@ -13061,26 +13061,26 @@ function startOnTerminate( test )
       currentPath : routinePath,
       detaching : 0
     }
-    
+
     let result = _.process.start( o );
-    
+
     test.identical( o.onTerminate, result );
-    
-    result.then( ( got ) => 
+
+    result.then( ( got ) =>
     {
       test.identical( o, got );
       test.identical( got.exitCode, 0 );
       test.identical( got.exitSignal, null );
       return null;
     })
-    
+
     return result;
   })
-  
+
   /* */
 
-  .then( () => 
-  { 
+  .then( () =>
+  {
     test.case = 'detaching off, disconnect'
     let o =
     {
@@ -13090,27 +13090,27 @@ function startOnTerminate( test )
       currentPath : routinePath,
       detaching : 0
     }
-    
+
     let result = _.process.start( o );
-    
+
     o.disconnect();
-    
+
     test.identical( o.onTerminate, result );
-    
-    result.then( ( got ) => 
+
+    result.then( ( got ) =>
     {
       test.identical( o, got );
       test.identical( got.exitCode, 0 );
       test.identical( got.exitSignal, null );
       return null;
     })
-    
+
     return result;
   })
-  
+
   /* */
-  
-  .then( () => 
+
+  .then( () =>
   {
     test.case = 'detaching, child not disconnected, parent waits for child to exit'
     let onTerminate = new _.Consequence();
@@ -13123,23 +13123,23 @@ function startOnTerminate( test )
       onTerminate,
       detaching : 1
     }
-    
+
     _.process.start( o );
-    
-    onTerminate.then( ( got ) => 
+
+    onTerminate.then( ( got ) =>
     {
       test.identical( o, got );
       test.identical( got.exitCode, 0 );
       test.identical( got.exitSignal, null );
       return null;
     })
-    
+
     return onTerminate;
   })
-  
+
   /* */
-  
-  .then( () => 
+
+  .then( () =>
   {
     test.case = 'detached, child disconnected before it termination'
     let onTerminate = new _.Consequence();
@@ -13152,31 +13152,31 @@ function startOnTerminate( test )
       onTerminate,
       detaching : 1
     }
-    
+
     _.process.start( o );
     _.time.out( 1000, () => o.disconnect() );
-    
-    onTerminate.finallyGive( ( err, got ) => 
+
+    onTerminate.finallyGive( ( err, got ) =>
     {
       _.errAttend( err );
       test.is( _.errIs( err ) );
       test.identical( got, undefined )
     })
-    
-    onTerminate.then( got => 
+
+    onTerminate.then( got =>
     {
       test.identical( o, got );
       test.identical( got.exitCode, 0 );
       test.identical( got.exitSignal, null );
       return null;
     })
-    
+
     return onTerminate;
   })
-  
+
   /* */
-  
-  .then( () => 
+
+  .then( () =>
   {
     test.case = 'detached, child disconnected after it termination'
     let onTerminate = new _.Consequence();
@@ -13189,12 +13189,12 @@ function startOnTerminate( test )
       onTerminate,
       detaching : 1
     }
-    
+
     _.process.start( o );
     _.time.out( 6000, () => o.disconnect() );
-    
+
     return test.mustNotThrowError( onTerminate )
-    .then( ( got ) => 
+    .then( ( got ) =>
     {
       test.identical( o, got );
       test.identical( got.exitCode, 0 );
@@ -13202,10 +13202,10 @@ function startOnTerminate( test )
       return null;
     })
   })
-  
+
   /* */
-  
-  .then( () => 
+
+  .then( () =>
   {
     test.case = 'detached, not disconnected child throws error during execution'
     let onTerminate = new _.Consequence();
@@ -13219,22 +13219,22 @@ function startOnTerminate( test )
       throwingExitCode : 0,
       detaching : 1
     }
-    
+
     _.process.start( o );
-    
-    onTerminate.then( ( got ) => 
+
+    onTerminate.then( ( got ) =>
     {
       test.notIdentical( got.exitCode, 0 );
       test.identical( got.exitSignal, null );
       return null;
     })
-    
+
     return onTerminate;
   })
-  
+
   /* */
-  
-  .then( () => 
+
+  .then( () =>
   {
     test.case = 'detached, disconnected child throws error during execution'
     let onTerminate = new _.Consequence();
@@ -13248,27 +13248,27 @@ function startOnTerminate( test )
       throwingExitCode : 0,
       detaching : 1
     }
-    
+
     _.process.start( o );
     o.disconnect();
-    
-    onTerminate.finallyGive( ( err, got ) => 
+
+    onTerminate.finallyGive( ( err, got ) =>
     {
       _.errAttend( err );
       test.is( _.errIs( err ) );
       test.identical( got, undefined )
     })
-    
-    onTerminate.then( ( got ) => 
+
+    onTerminate.then( ( got ) =>
     {
       test.notIdentical( got.exitCode, 0 );
       test.identical( got.exitSignal, null );
       return null;
     })
-    
+
     return onTerminate;
   })
-  
+
   return ready;
 }
 
@@ -15135,6 +15135,123 @@ function appTempApplication( test )
   {
     _.process.tempClose( got );
   })
+}
+
+//
+
+function pidFrom( test )
+{
+  let o =
+  {
+    execPath : 'node -v',
+  }
+  let ready = _.process.start( o );
+  let expected = o.process.pid;
+
+  test.identical( _.process.pidFrom( o ), expected )
+  test.identical( _.process.pidFrom( o.process ), expected )
+  test.identical( _.process.pidFrom( o.process.pid ), expected )
+
+  if( !Config.debug )
+  return ready;
+
+  test.shouldThrowErrorSync( () => _.process.pidFrom() );
+  test.shouldThrowErrorSync( () => _.process.pidFrom( [] ) );
+  test.shouldThrowErrorSync( () => _.process.pidFrom( {} ) );
+  test.shouldThrowErrorSync( () => _.process.pidFrom( { process : {} } ) );
+  test.shouldThrowErrorSync( () => _.process.pidFrom( '123' ) );
+
+  return ready;
+}
+
+//
+
+function isAlive( test )
+{
+  let o =
+  {
+    execPath : `node -e "setTimeout( () => { console.log( 'child terminate' ) }, 3000 )"`,
+  }
+  _.process.start( o );
+
+  o.onStart.then( () =>
+  {
+    test.identical( _.process.isAlive( o ), true );
+    test.identical( _.process.isAlive( o.process ), true );
+    test.identical( _.process.isAlive( o.process.pid ), true );
+    return null;
+  })
+
+  o.onTerminate.then( () =>
+  {
+    test.identical( _.process.isAlive( o ), false );
+    test.identical( _.process.isAlive( o.process ), false );
+    test.identical( _.process.isAlive( o.process.pid ), false );
+    return null;
+  })
+
+  let ready = _.Consequence.AndKeep([ o.onStart, o.onTerminate ]);
+
+  if( !Config.debug )
+  return ready;
+
+  ready.then( () =>
+  {
+    test.shouldThrowErrorSync( () => _.process.isAlive() );
+    test.shouldThrowErrorSync( () => _.process.isAlive( [] ) );
+    test.shouldThrowErrorSync( () => _.process.isAlive( {} ) );
+    test.shouldThrowErrorSync( () => _.process.isAlive( { process : {} } ) );
+    test.shouldThrowErrorSync( () => _.process.isAlive( '123' ) );
+
+    return null;
+  })
+
+  return ready;
+}
+
+//
+
+function statusOf( test )
+{
+  let o =
+  {
+    execPath : `node -e "setTimeout( () => { console.log( 'child terminate' ) }, 3000 )"`,
+  }
+  _.process.start( o );
+
+  o.onStart.then( () =>
+  {
+    test.identical( _.process.statusOf( o ), 'alive' );
+    test.identical( _.process.statusOf( o.process ), 'alive' );
+    test.identical( _.process.statusOf( o.process.pid ), 'alive' );
+    return null;
+  })
+
+  o.onTerminate.then( () =>
+  {
+    test.identical( _.process.statusOf( o ), 'dead' );
+    test.identical( _.process.statusOf( o.process ), 'dead' );
+    test.identical( _.process.statusOf( o.process.pid ), 'dead' );
+    return null;
+  })
+
+  let ready = _.Consequence.AndKeep([ o.onStart, o.onTerminate ]);
+
+  if( !Config.debug )
+  return ready;
+
+  ready.then( () =>
+  {
+    test.shouldThrowErrorSync( () => _.process.statusOf() );
+    test.shouldThrowErrorSync( () => _.process.statusOf( [] ) );
+    test.shouldThrowErrorSync( () => _.process.statusOf( {} ) );
+    test.shouldThrowErrorSync( () => _.process.statusOf( { process : {} } ) );
+    test.shouldThrowErrorSync( () => _.process.statusOf( '123' ) );
+
+    return null;
+  })
+
+  return ready;
 }
 
 //
@@ -18101,40 +18218,40 @@ var Proto =
     // shellStartingSuspended,
     shellAfterDeath,
     // shellAfterDeathOutput,
-    
+
     /*  */
 
     startDetachingModeSpawnResourceReady,
     startDetachingModeForkResourceReady,
     startDetachingModeShellResourceReady,
-    
+
     startDetachingModeSpawnNoTerminationBegin,
     startDetachingModeForkNoTerminationBegin,
     startDetachingModeShellNoTerminationBegin,
-    
+
     startDetachingModeSpawnTerminationBegin,
     startDetachingModeForkTerminationBegin,
     startDetachingModeShellTerminationBegin,
-    
+
     startDetachingChildExitsAfterParent,
     startDetachingChildExitsBeforeParent,
-    
+
     startDetachedOutputStdioIgnore,
     startDetachedOutputStdioPipe,
     startDetachedOutputStdioInherit,
-    
+
     startDetachingModeSpawnIpc,
     startDetachingModeForkIpc,
     startDetachingModeShellIpc,
-    
+
     startDetachingThrowing,
     startNodeDetachingChildThrowing,
-    
+
     startNodeDetachingTrivial,
-    
+
     startOnStart,
     startOnTerminate,
-    
+
     /*  */
 
     shellConcurrent,
@@ -18151,6 +18268,10 @@ var Proto =
     shellNormalizedExecPath,
 
     appTempApplication,
+
+    pidFrom,
+    isAlive,
+    statusOf,
 
     kill,
     killWithChildren,
