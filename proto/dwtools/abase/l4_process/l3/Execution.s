@@ -150,8 +150,8 @@ function start_body( o )
   _.assert( o.onStart === null || _.consequenceIs( o.onStart ) );
   _.assert( o.onTerminate === null || _.consequenceIs( o.onTerminate ) );
   _.assert( !o.ipc || _.longHas( [ 'fork', 'spawn' ], o.mode ), `Mode: ${o.mode} doesn't support inter process communication.` );
-  
-  
+
+
   let state = 0;
   let currentExitCode;
   let killedByTimeout = false;
@@ -179,25 +179,25 @@ function start_body( o )
   }
 
   o.ready = o.ready || new _.Consequence().take( null );
-  
+
   if( o.onStart === null )
-  {  
+  {
     o.onStart = o.ready;
     if( !o.detaching )
     o.onStart = new _.Consequence();
   }
   if( o.onTerminate === null )
-  {  
+  {
     o.onTerminate = o.ready;
     if( o.detaching )
     o.onTerminate = new _.Consequence();
   }
-  
+
   if( !o.detaching )
   _.assert( o.ready === o.onTerminate && o.ready !== o.onStart );
   else
   _.assert( o.ready === o.onStart && o.ready !== o.onTerminate );
-  
+
 
   if( _global_.debugger )
   debugger;
@@ -366,7 +366,7 @@ function start_body( o )
       if( o.sync && !o.deasync )
       throw _.errLogOnce( err );
       else
-      { 
+      {
         if( !o.detaching )
         o.onStart.error( err );
         o.ready.error( _.errLogOnce( err ) );
@@ -410,7 +410,7 @@ function start_body( o )
     let secondaryFilePath = _.process.tempOpen({ sourceCode : secondaryProcessSource });
 
     let childOptions = _.mapExtend( null, o );
-   
+
     childOptions.ready = null;
     childOptions.logger = null;
     childOptions.when = 'instant';
@@ -421,17 +421,17 @@ function start_body( o )
     o.stdio = 'ignore';
     o.detaching = true;
     o.inputMirroring = 0;
-    
+
     o.onStart = o.ready;
     o.onTerminate = new _.Consequence();
-    
+
     o.onStart.give( function( err, got )
-    { 
+    {
       if( !err )
       o.process.send( childOptions );
       this.take( err, got )
     })
-    
+
     o.onTerminate.catchGive( function ( err )
     {
       _.errAttend( err );
@@ -444,13 +444,13 @@ function start_body( o )
   {
     _.include( 'wAppBasic' );
     _.include( 'wFiles' );
-    
+
     let ready = new _.Consequence();
 
     process.on( 'message', ( data ) => ready.take( data ) )
-    ready.thenGive( ( startOptions ) => 
+    ready.thenGive( ( startOptions ) =>
     {
-      process.on( 'disconnect', () => 
+      process.on( 'disconnect', () =>
       {
         console.log( 'Secondary: starting child process...' );
         _.process.start( startOptions );
@@ -707,15 +707,15 @@ function start_body( o )
 
     }
     else _.assert( 0, 'Unknown mode', _.strQuote( o.mode ), 'to start process at path', _.strQuote( o.paths ) );
-    
+
     /* extend with close */
-    
+
     o.disconnect = disconnect;
-    
+
     o.onStart.take( o );
 
     if( o.detaching )
-    {  
+    {
       _.Procedure.On( 'terminationBegin', onProcedureTerminationBegin );
     }
     else if( !o.sync )
@@ -732,7 +732,7 @@ function start_body( o )
   /* */
 
   function disconnect()
-  { 
+  {
     if( this.process.stdout )
     this.process.stdout.end();
     if( this.process.stderr )
@@ -743,15 +743,15 @@ function start_body( o )
     if( this.process.disconnect )
     if( this.process.connected )
     this.process.disconnect();
-    
+
     this.process.unref();
-    
+
     if( !this.detaching || this.process._disconnected )
     return true;
     this.process._disconnected = true;
-    if( _.process.isRunning( this.process.pid ) )
+    if( _.process.isAlive( this.process.pid ) )
     this.onTerminate.error( _._err({ args : [ 'This process was disconnected' ], reason : 'disconnected' }) );
-    
+
     return true;
   }
 
@@ -1035,13 +1035,13 @@ function start_body( o )
       if( o.sync && !o.deasync )
       throw err;
       else
-      { 
+      {
         o.onTerminate.error( err );
         // o.ready.error( err );
       }
     }
     else if( !o.sync || o.deasync )
-    { 
+    {
       o.onTerminate.take( o );
       // o.ready.take( o );
     }
@@ -1067,7 +1067,7 @@ function start_body( o )
     if( o.sync && !o.deasync )
     throw err;
     else
-    { 
+    {
       o.onTerminate.error( err );
       // o.ready.error( err );
     }
@@ -1200,7 +1200,7 @@ start_body.defaults =
   outputGray : 0,
   outputGrayStdout : 0,
   outputGraying : 0,
-  
+
   onStart : null,
   onTerminate : null,
 
@@ -1383,9 +1383,9 @@ function startNode_body( o )
 
   let result = _.process.start( startOptions );
   let onTerminate = startOptions.onTerminate;
-  
+
   onTerminate.give( function ( err, arg )
-  { 
+  {
     o.output = startOptions.output;
     o.exitCode = startOptions.exitCode;
     o.exitSignal = startOptions.exitSignal;
@@ -1920,10 +1920,11 @@ function _eventExitHandle()
 // children
 // --
 
-function isRunning( pid )
+function isAlive( src )
 {
+  let pid = _.process.pidFrom( src );
   _.assert( arguments.length === 1 );
-  _.assert( _.numberIs( pid ) );
+  _.assert( _.numberIs( pid ), `Expects process id as number, but got:${pid}` );
 
   try
   {
@@ -1973,7 +1974,7 @@ function kill( o )
       {
         if( l && children[ l ].name === 'conhost.exe' )
         continue;
-        if( _.process.isRunning( children[ l ].pid ) )
+        if( _.process.isAlive( children[ l ].pid ) )
         process.kill( children[ l ].pid, 'SIGKILL' );
       }
 
@@ -2006,7 +2007,7 @@ function kill( o )
     for( let pid in tree )
     {
       pid = _.numberFrom( pid );
-      if( _.process.isRunning( pid ) )
+      if( _.process.isAlive( pid ) )
       process.kill( pid, 'SIGKILL' );
       killChildren( tree[ pid ] );
     }
@@ -2122,7 +2123,7 @@ function terminate( o )
     if( o.timeOut )
     _.time.out( o.timeOut, () =>
     {
-      if( !_.process.isRunning( pid ) )
+      if( !_.process.isAlive( pid ) )
       return null;
 
       if( o.process )
@@ -2146,7 +2147,7 @@ function terminate( o )
     for( let pid in tree )
     {
       pid = _.numberFrom( pid );
-      if( _.process.isRunning( pid ) )
+      if( _.process.isAlive( pid ) )
       terminateProcess( pid );
       terminateChildren( tree[ pid ] );
     }
@@ -2160,7 +2161,7 @@ function terminate( o )
     {
       if( l && tree[ l ].name === 'conhost.exe' )
       continue;
-      if( !_.process.isRunning( tree[ l ].pid ) )
+      if( !_.process.isAlive( tree[ l ].pid ) )
       continue;
       cons.push( terminateProcess( tree[ l ].pid ) );
     }
@@ -2199,7 +2200,7 @@ function children( o )
 
   let result;
 
-  if( !_.process.isRunning( o.pid ) )
+  if( !_.process.isAlive( o.pid ) )
   {
     let err = _.err( '\nTarget process:', _.strQuote( o.pid ), 'does not exist.' );
     return new _.Consequence().error( err );
@@ -2323,7 +2324,7 @@ let Extension =
 
   // children
 
-  isRunning,
+  isAlive,
   kill,
   terminate,
   children,

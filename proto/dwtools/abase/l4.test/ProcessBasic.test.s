@@ -9933,8 +9933,8 @@ function shellAfterDeath( test )
     _.time.out( 2500, () =>
     {
       test.will = 'parent is alive, secondary is alive'
-      test.is( _.process.isRunning( o.process.pid ) )
-      test.is( _.process.isRunning( childPid) )
+      test.is( _.process.isAlive( o.process.pid ) )
+      test.is( _.process.isAlive( childPid) )
       return null;
     })
 
@@ -9942,18 +9942,18 @@ function shellAfterDeath( test )
     {
       test.identical( o.exitCode, 0 );
 
-      test.is( !_.process.isRunning( o.process.pid ) );
-      test.is( _.process.isRunning( childPid ) );
+      test.is( !_.process.isAlive( o.process.pid ) );
+      test.is( _.process.isAlive( childPid ) );
       test.is( !_.fileProvider.fileExists( testFilePath ) );
       return _.time.out( 15000 );
     })
 
     con.then( () =>
     {
-      test.is( !_.process.isRunning( childPid ) );
+      test.is( !_.process.isAlive( childPid ) );
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid2 = _.fileProvider.fileRead( testFilePath );
-      test.is( !_.process.isRunning( _.numberFrom( childPid2 ) ) );
+      test.is( !_.process.isAlive( _.numberFrom( childPid2 ) ) );
       return null;
     })
 
@@ -10109,7 +10109,7 @@ function startDetachingModeSpawnResourceReady( test )
     { 
       test.is( _.mapIs( got ) );
       test.identical( got, o );
-      test.is( _.process.isRunning( o.process.pid ) );
+      test.is( _.process.isAlive( o.process.pid ) );
       o.process.kill();
     })
     
@@ -10179,7 +10179,7 @@ function startDetachingModeForkResourceReady( test )
     { 
       test.is( _.mapIs( got ) );
       test.identical( got, o );
-      test.is( _.process.isRunning( o.process.pid ) );
+      test.is( _.process.isAlive( o.process.pid ) );
       o.process.kill();
     })
     
@@ -10249,7 +10249,7 @@ function startDetachingModeShellResourceReady( test )
     { 
       test.is( _.mapIs( got ) );
       test.identical( got, o );
-      test.is( _.process.isRunning( o.process.pid ) );
+      test.is( _.process.isAlive( o.process.pid ) );
       o.process.kill();
     })
     
@@ -10352,8 +10352,8 @@ function startDetachingModeSpawnNoTerminationBegin( test )
     {
       test.identical( got.exitCode, 0 );
       test.will = 'parent and child are dead';
-      test.is( !_.process.isRunning( o.process.pid ) );
-      test.is( !_.process.isRunning( data.childPid ) );
+      test.is( !_.process.isAlive( o.process.pid ) );
+      test.is( !_.process.isAlive( data.childPid ) );
       
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
@@ -10394,8 +10394,8 @@ function startDetachingModeSpawnNoTerminationBegin( test )
     {
       test.identical( got.exitCode, 0 );
       test.will = 'parent and child are dead';
-      test.is( !_.process.isRunning( o.process.pid ) );
-      test.is( !_.process.isRunning( data.childPid ) );
+      test.is( !_.process.isAlive( o.process.pid ) );
+      test.is( !_.process.isAlive( data.childPid ) );
       
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
@@ -10436,8 +10436,8 @@ function startDetachingModeSpawnNoTerminationBegin( test )
     {
       test.identical( got.exitCode, 0 );
       test.will = 'parent and child are dead';
-      test.is( !_.process.isRunning( o.process.pid ) );
-      test.is( !_.process.isRunning( data.childPid ) );
+      test.is( !_.process.isAlive( o.process.pid ) );
+      test.is( !_.process.isAlive( data.childPid ) );
       
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
@@ -10478,8 +10478,8 @@ function startDetachingModeSpawnNoTerminationBegin( test )
     {
       test.identical( got.exitCode, 0 );
       test.will = 'parent and child are dead';
-      test.is( !_.process.isRunning( o.process.pid ) );
-      test.is( !_.process.isRunning( data.childPid ) );
+      test.is( !_.process.isAlive( o.process.pid ) );
+      test.is( !_.process.isAlive( data.childPid ) );
       
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
@@ -10584,8 +10584,8 @@ function startDetachingModeForkNoTerminationBegin( test )
     {
       test.identical( got.exitCode, 0 );
       test.will = 'parent and child are dead';
-      test.is( !_.process.isRunning( o.process.pid ) );
-      test.is( !_.process.isRunning( data.childPid ) );
+      test.is( !_.process.isAlive( o.process.pid ) );
+      test.is( !_.process.isAlive( data.childPid ) );
       
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
@@ -10626,8 +10626,8 @@ function startDetachingModeForkNoTerminationBegin( test )
     {
       test.identical( got.exitCode, 0 );
       test.will = 'parent and child are dead';
-      test.is( !_.process.isRunning( o.process.pid ) );
-      test.is( !_.process.isRunning( data.childPid ) );
+      test.is( !_.process.isAlive( o.process.pid ) );
+      test.is( !_.process.isAlive( data.childPid ) );
       
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
@@ -10731,13 +10731,13 @@ function startDetachingModeShellNoTerminationBegin( test )
     {
       test.identical( got.exitCode, 0 );
       test.will = 'parent and child are dead';
-      test.is( !_.process.isRunning( o.process.pid ) );
-      test.is( !_.process.isRunning( data.childPid ) );
+      test.is( !_.process.isAlive( o.process.pid ) );
+      test.is( !_.process.isAlive( data.childPid ) );
       
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
-      test.is( !_.process.isRunning( childPid ) );
+      test.is( !_.process.isAlive( childPid ) );
       
       return null;
     })
@@ -10773,13 +10773,13 @@ function startDetachingModeShellNoTerminationBegin( test )
     {
       test.identical( got.exitCode, 0 );
       test.will = 'parent and child are dead';
-      test.is( !_.process.isRunning( o.process.pid ) );
-      test.is( !_.process.isRunning( data.childPid ) );
+      test.is( !_.process.isAlive( o.process.pid ) );
+      test.is( !_.process.isAlive( data.childPid ) );
       
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
-      test.is( !_.process.isRunning( childPid ) );
+      test.is( !_.process.isAlive( childPid ) );
       
       return null;
     })
@@ -10891,8 +10891,8 @@ function startDetachingModeSpawnTerminationBegin( test )
     {
       test.identical( got.exitCode, 0 );
       test.will = 'parent is dead, child is still alive';
-      test.is( !_.process.isRunning( o.process.pid ) );
-      test.is( _.process.isRunning( data.childPid ) );
+      test.is( !_.process.isAlive( o.process.pid ) );
+      test.is( _.process.isAlive( data.childPid ) );
       return _.time.out( 6000 );
     })
     
@@ -10900,8 +10900,8 @@ function startDetachingModeSpawnTerminationBegin( test )
     {
       test.will = 'both dead';
       
-      test.is( !_.process.isRunning( o.process.pid ) );
-      test.is( !_.process.isRunning( data.childPid ) );
+      test.is( !_.process.isAlive( o.process.pid ) );
+      test.is( !_.process.isAlive( data.childPid ) );
       
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
@@ -10942,8 +10942,8 @@ function startDetachingModeSpawnTerminationBegin( test )
     {
       test.identical( got.exitCode, 0 );
       test.will = 'parent is dead, child is still alive';
-      test.is( !_.process.isRunning( o.process.pid ) );
-      test.is( _.process.isRunning( data.childPid ) );
+      test.is( !_.process.isAlive( o.process.pid ) );
+      test.is( _.process.isAlive( data.childPid ) );
       return _.time.out( 6000 );
     })
     
@@ -10951,8 +10951,8 @@ function startDetachingModeSpawnTerminationBegin( test )
     {
       test.will = 'both dead';
       
-      test.is( !_.process.isRunning( o.process.pid ) );
-      test.is( !_.process.isRunning( data.childPid ) );
+      test.is( !_.process.isAlive( o.process.pid ) );
+      test.is( !_.process.isAlive( data.childPid ) );
       
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
@@ -10993,8 +10993,8 @@ function startDetachingModeSpawnTerminationBegin( test )
     {
       test.identical( got.exitCode, 0 );
       test.will = 'parent is dead, child is still alive';
-      test.is( !_.process.isRunning( o.process.pid ) );
-      test.is( _.process.isRunning( data.childPid ) );
+      test.is( !_.process.isAlive( o.process.pid ) );
+      test.is( _.process.isAlive( data.childPid ) );
       return _.time.out( 6000 );
     })
     
@@ -11002,8 +11002,8 @@ function startDetachingModeSpawnTerminationBegin( test )
     {
       test.will = 'both dead';
       
-      test.is( !_.process.isRunning( o.process.pid ) );
-      test.is( !_.process.isRunning( data.childPid ) );
+      test.is( !_.process.isAlive( o.process.pid ) );
+      test.is( !_.process.isAlive( data.childPid ) );
       
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
@@ -11044,8 +11044,8 @@ function startDetachingModeSpawnTerminationBegin( test )
     {
       test.identical( got.exitCode, 0 );
       test.will = 'parent is dead, child is still alive';
-      test.is( !_.process.isRunning( o.process.pid ) );
-      test.is( _.process.isRunning( data.childPid ) );
+      test.is( !_.process.isAlive( o.process.pid ) );
+      test.is( _.process.isAlive( data.childPid ) );
       return _.time.out( 6000 );
     })
     
@@ -11053,8 +11053,8 @@ function startDetachingModeSpawnTerminationBegin( test )
     {
       test.will = 'both dead';
       
-      test.is( !_.process.isRunning( o.process.pid ) );
-      test.is( !_.process.isRunning( data.childPid ) );
+      test.is( !_.process.isAlive( o.process.pid ) );
+      test.is( !_.process.isAlive( data.childPid ) );
       
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
@@ -11171,8 +11171,8 @@ function startDetachingModeForkTerminationBegin( test )
     {
       test.identical( got.exitCode, 0 );
       test.will = 'parent is dead, child is still alive';
-      test.is( !_.process.isRunning( o.process.pid ) );
-      test.is( _.process.isRunning( data.childPid ) );
+      test.is( !_.process.isAlive( o.process.pid ) );
+      test.is( _.process.isAlive( data.childPid ) );
       return _.time.out( 6000 );
     })
     
@@ -11180,8 +11180,8 @@ function startDetachingModeForkTerminationBegin( test )
     {
       test.will = 'both dead';
       
-      test.is( !_.process.isRunning( o.process.pid ) );
-      test.is( !_.process.isRunning( data.childPid ) );
+      test.is( !_.process.isAlive( o.process.pid ) );
+      test.is( !_.process.isAlive( data.childPid ) );
       
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
@@ -11222,8 +11222,8 @@ function startDetachingModeForkTerminationBegin( test )
     {
       test.identical( got.exitCode, 0 );
       test.will = 'parent is dead, child is still alive';
-      test.is( !_.process.isRunning( o.process.pid ) );
-      test.is( _.process.isRunning( data.childPid ) );
+      test.is( !_.process.isAlive( o.process.pid ) );
+      test.is( _.process.isAlive( data.childPid ) );
       return _.time.out( 6000 );
     })
     
@@ -11231,8 +11231,8 @@ function startDetachingModeForkTerminationBegin( test )
     {
       test.will = 'both dead';
       
-      test.is( !_.process.isRunning( o.process.pid ) );
-      test.is( !_.process.isRunning( data.childPid ) );
+      test.is( !_.process.isAlive( o.process.pid ) );
+      test.is( !_.process.isAlive( data.childPid ) );
       
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
@@ -11273,8 +11273,8 @@ function startDetachingModeForkTerminationBegin( test )
     {
       test.identical( got.exitCode, 0 );
       test.will = 'parent is dead, child is still alive';
-      test.is( !_.process.isRunning( o.process.pid ) );
-      test.is( _.process.isRunning( data.childPid ) );
+      test.is( !_.process.isAlive( o.process.pid ) );
+      test.is( _.process.isAlive( data.childPid ) );
       return _.time.out( 6000 );
     })
     
@@ -11282,8 +11282,8 @@ function startDetachingModeForkTerminationBegin( test )
     {
       test.will = 'both dead';
       
-      test.is( !_.process.isRunning( o.process.pid ) );
-      test.is( !_.process.isRunning( data.childPid ) );
+      test.is( !_.process.isAlive( o.process.pid ) );
+      test.is( !_.process.isAlive( data.childPid ) );
       
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
@@ -11324,8 +11324,8 @@ function startDetachingModeForkTerminationBegin( test )
     {
       test.identical( got.exitCode, 0 );
       test.will = 'parent is dead, child is still alive';
-      test.is( !_.process.isRunning( o.process.pid ) );
-      test.is( _.process.isRunning( data.childPid ) );
+      test.is( !_.process.isAlive( o.process.pid ) );
+      test.is( _.process.isAlive( data.childPid ) );
       return _.time.out( 6000 );
     })
     
@@ -11333,8 +11333,8 @@ function startDetachingModeForkTerminationBegin( test )
     {
       test.will = 'both dead';
       
-      test.is( !_.process.isRunning( o.process.pid ) );
-      test.is( !_.process.isRunning( data.childPid ) );
+      test.is( !_.process.isAlive( o.process.pid ) );
+      test.is( !_.process.isAlive( data.childPid ) );
       
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
@@ -11451,8 +11451,8 @@ function startDetachingModeShellTerminationBegin( test )
     {
       test.identical( got.exitCode, 0 );
       test.will = 'parent is dead, child is still alive';
-      test.is( !_.process.isRunning( o.process.pid ) );
-      test.is( _.process.isRunning( data.childPid ) );
+      test.is( !_.process.isAlive( o.process.pid ) );
+      test.is( _.process.isAlive( data.childPid ) );
       return _.time.out( 6000 );
     })
     
@@ -11460,14 +11460,14 @@ function startDetachingModeShellTerminationBegin( test )
     {
       test.will = 'both dead';
       
-      test.is( !_.process.isRunning( o.process.pid ) );
-      test.is( !_.process.isRunning( data.childPid ) );
+      test.is( !_.process.isAlive( o.process.pid ) );
+      test.is( !_.process.isAlive( data.childPid ) );
       
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
       
-      test.is( !_.process.isRunning( childPid ) );
+      test.is( !_.process.isAlive( childPid ) );
       
       return null;
     })
@@ -11503,8 +11503,8 @@ function startDetachingModeShellTerminationBegin( test )
     {
       test.identical( got.exitCode, 0 );
       test.will = 'parent is dead, child is still alive';
-      test.is( !_.process.isRunning( o.process.pid ) );
-      test.is( _.process.isRunning( data.childPid ) );
+      test.is( !_.process.isAlive( o.process.pid ) );
+      test.is( _.process.isAlive( data.childPid ) );
       return _.time.out( 6000 );
     })
     
@@ -11512,14 +11512,14 @@ function startDetachingModeShellTerminationBegin( test )
     {
       test.will = 'both dead';
       
-      test.is( !_.process.isRunning( o.process.pid ) );
-      test.is( !_.process.isRunning( data.childPid ) );
+      test.is( !_.process.isAlive( o.process.pid ) );
+      test.is( !_.process.isAlive( data.childPid ) );
       
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
       
-      test.is( !_.process.isRunning( childPid ) );
+      test.is( !_.process.isAlive( childPid ) );
       
       return null;
     })
@@ -11625,8 +11625,8 @@ function startDetachingChildExitsAfterParent( test )
 
       test.will = 'parent is dead, detached child is still running'
 
-      test.is( !_.process.isRunning( o.process.pid ) );
-      test.is( _.process.isRunning( childPid ) );
+      test.is( !_.process.isAlive( o.process.pid ) );
+      test.is( _.process.isAlive( childPid ) );
 
       return _.time.out( 6000 );
     })
@@ -11635,7 +11635,7 @@ function startDetachingChildExitsAfterParent( test )
     { 
       let childPid2 = _.fileProvider.fileRead( testFilePath );
       childPid2 = _.numberFrom( childPid2 )
-      test.is( !_.process.isRunning( childPid2 ) );
+      test.is( !_.process.isAlive( childPid2 ) );
       test.identical( childPid, childPid2 )
       return null;
     })
@@ -11742,8 +11742,8 @@ function startDetachingChildExitsBeforeParent( test )
     let onChildTerminate = _.time.out( 3000, () => 
     {
       let childPid = _.fileProvider.fileRead( testFilePath );
-      test.is( _.process.isRunning( o.process.pid ) );
-      test.is( !_.process.isRunning( _.numberFrom( childPid ) ) );
+      test.is( _.process.isAlive( o.process.pid ) );
+      test.is( !_.process.isAlive( _.numberFrom( childPid ) ) );
       return null;
     })
 
@@ -11756,13 +11756,13 @@ function startDetachingChildExitsBeforeParent( test )
       test.identical( child.err, undefined );
       test.identical( child.exitCode, 0 );
 
-      test.is( !_.process.isRunning( o.process.pid ) );
-      test.is( !_.process.isRunning( child.pid ) );
+      test.is( !_.process.isAlive( o.process.pid ) );
+      test.is( !_.process.isAlive( child.pid ) );
 
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid )
-      test.is( !_.process.isRunning( childPid ) );
+      test.is( !_.process.isAlive( childPid ) );
       
       test.identical( child.pid, childPid );
       
@@ -12697,7 +12697,7 @@ function startNodeDetachingTrivial( test )
   
   o.onTerminate.then( ( got ) => 
   {  
-    test.is( _.process.isRunning( childPid ) );
+    test.is( _.process.isAlive( childPid ) );
     
     test.identical( got.exitCode, 0 );
     test.is( _.strHas( got.output, 'Child process start' ) );
@@ -12710,11 +12710,11 @@ function startNodeDetachingTrivial( test )
   
   o.onTerminate.then( () => 
   {  
-    test.is( !_.process.isRunning( childPid ) );
+    test.is( !_.process.isAlive( childPid ) );
     
     let childPidFromFile = _.fileProvider.fileRead( testFilePath );
     childPidFromFile = _.numberFrom( childPidFromFile )
-    test.is( !_.process.isRunning( childPidFromFile ) );
+    test.is( !_.process.isAlive( childPidFromFile ) );
     test.identical( childPid, childPidFromFile )
     return null;
   })
@@ -12778,7 +12778,7 @@ function startOnStart( test )
     {
       test.identical( err, undefined );
       test.identical( got, o );
-      test.is( _.process.isRunning( o.process.pid ) );
+      test.is( _.process.isAlive( o.process.pid ) );
       return null;
     })
     
@@ -12938,7 +12938,7 @@ function startOnStart( test )
     {
       test.identical( err ,undefined );
       test.identical( got, o );
-      test.is( _.process.isRunning( o.process.pid ) )
+      test.is( _.process.isAlive( o.process.pid ) )
       return null;
     })
     
@@ -12947,14 +12947,14 @@ function startOnStart( test )
       _.errAttend( err );
       test.is( _.errIs( err ) );
       test.identical( got, undefined );
-      test.is( _.process.isRunning( o.process.pid ) )
+      test.is( _.process.isAlive( o.process.pid ) )
     })
     
     o.onTerminate.finally( ( err, got ) => 
     {
       test.identical( err ,undefined );
       test.identical( got, o );
-      test.is( !_.process.isRunning( o.process.pid ) )
+      test.is( !_.process.isAlive( o.process.pid ) )
       test.identical( got.exitCode, 0 );
       test.identical( got.exitSignal, null );
       return null;
@@ -12988,7 +12988,7 @@ function startOnStart( test )
   //   {
   //     test.identical( err ,undefined );
   //     test.identical( got, o );
-  //     test.is( _.process.isRunning( o.process.pid ) )
+  //     test.is( _.process.isAlive( o.process.pid ) )
   //     return null;
   //   })
     
@@ -12997,13 +12997,13 @@ function startOnStart( test )
   //     _.errAttend( err );
   //     test.is( _.errIs( err ) );
   //     test.identical( got, undefined );
-  //     test.is( _.process.isRunning( o.process.pid ) )
+  //     test.is( _.process.isAlive( o.process.pid ) )
   //   })
     
   //   result = _.time.out( 3000, () => 
   //   { 
   //     test.identical( o.onTerminate.resourcesCount(), 0 );
-  //     test.is( !_.process.isRunning( o.process.pid ) )
+  //     test.is( !_.process.isAlive( o.process.pid ) )
   //     return null;
   //   })
     
@@ -15548,8 +15548,8 @@ function killWithChildren( test )
           test.identical( got.exitSignal, 'SIGKILL' );
         }
         test.identical( _.strCount( got.output, 'Application timeout' ), 0 );
-        test.is( !_.process.isRunning( o.process.pid ) );
-        test.is( !_.process.isRunning( lastChildPid ) );
+        test.is( !_.process.isAlive( o.process.pid ) );
+        test.is( !_.process.isAlive( lastChildPid ) );
         return null;
       })
     })
@@ -15588,8 +15588,8 @@ function killWithChildren( test )
         test.identical( got.exitCode, 0 );
         test.identical( got.exitSignal, null );
         test.identical( _.strCount( got.output, 'Application timeout' ), 0 );
-        test.is( !_.process.isRunning( o.process.pid ) );
-        test.is( !_.process.isRunning( lastChildPid ) );
+        test.is( !_.process.isAlive( o.process.pid ) );
+        test.is( !_.process.isAlive( lastChildPid ) );
         return null;
       })
     })
@@ -15636,9 +15636,9 @@ function killWithChildren( test )
           test.identical( got.exitSignal, 'SIGKILL' );
         }
         test.identical( _.strCount( got.output, 'Application timeout' ), 0 );
-        test.is( !_.process.isRunning( o.process.pid ) );
-        test.is( !_.process.isRunning( children[ 0 ] ) )
-        test.is( !_.process.isRunning( children[ 1 ] ) );
+        test.is( !_.process.isAlive( o.process.pid ) );
+        test.is( !_.process.isAlive( children[ 0 ] ) )
+        test.is( !_.process.isAlive( children[ 1 ] ) );
         return null;
       })
     })
@@ -15684,9 +15684,9 @@ function killWithChildren( test )
           test.identical( got.exitSignal, 'SIGKILL' );
         }
         test.identical( _.strCount( got.output, 'Application timeout' ), 0 );
-        test.is( !_.process.isRunning( o.process.pid ) );
-        test.is( !_.process.isRunning( children[ 0 ] ) )
-        test.is( !_.process.isRunning( children[ 1 ] ) );
+        test.is( !_.process.isAlive( o.process.pid ) );
+        test.is( !_.process.isAlive( children[ 0 ] ) )
+        test.is( !_.process.isAlive( children[ 1 ] ) );
         return null;
       })
     })
@@ -16182,8 +16182,8 @@ function terminateComplex( test )
       test.identical( got.exitSignal, null );
       test.identical( _.strCount( got.output, 'SIGINT' ), 1 );
       test.identical( _.strCount( got.output, 'second child SIGINT' ), 1 );
-      test.is( !_.process.isRunning( o.process.pid ) )
-      test.is( !_.process.isRunning( lastChildPid ) );
+      test.is( !_.process.isAlive( o.process.pid ) )
+      test.is( !_.process.isAlive( lastChildPid ) );
       return null;
     })
 
@@ -16218,8 +16218,8 @@ function terminateComplex( test )
       test.identical( got.exitCode, 0 );
       test.identical( got.exitSignal, null );
       test.identical( _.strCount( got.output, 'SIGINT' ), 1 );
-      test.is( !_.process.isRunning( o.process.pid ) )
-      test.is( !_.process.isRunning( lastChildPid ) );
+      test.is( !_.process.isAlive( o.process.pid ) )
+      test.is( !_.process.isAlive( lastChildPid ) );
       return null;
     })
 
@@ -16254,8 +16254,8 @@ function terminateComplex( test )
       test.identical( got.exitCode, 0 );
       test.identical( got.exitSignal, null );
       test.identical( _.strCount( got.output, 'SIGINT' ), 1 );
-      test.is( !_.process.isRunning( o.process.pid ) )
-      test.is( !_.process.isRunning( lastChildPid ) );
+      test.is( !_.process.isAlive( o.process.pid ) )
+      test.is( !_.process.isAlive( lastChildPid ) );
       return null;
     })
 
@@ -16296,8 +16296,8 @@ function terminateComplex( test )
         test.identical( got.exitCode , 0 );
         test.identical( got.exitSignal, null );
       }
-      test.is( !_.process.isRunning( o.process.pid ) )
-      test.is( !_.process.isRunning( lastChildPid ) );
+      test.is( !_.process.isAlive( o.process.pid ) )
+      test.is( !_.process.isAlive( lastChildPid ) );
       return null;
     })
 
@@ -16338,8 +16338,8 @@ function terminateComplex( test )
         test.identical( got.exitCode , 0 );
         test.identical( got.exitSignal, null );
       }
-      test.is( !_.process.isRunning( o.process.pid ) )
-      test.is( !_.process.isRunning( lastChildPid ) );
+      test.is( !_.process.isAlive( o.process.pid ) )
+      test.is( !_.process.isAlive( lastChildPid ) );
       return null;
     })
 
@@ -16454,12 +16454,12 @@ function terminateDetachedComplex( test )
       test.identical( got.exitSignal, null );
       test.is( _.strHas( got.output, 'SIGINT' ) );
       test.is( !_.strHas( got.output, 'TerminationBegin' ) );
-      test.is( !_.process.isRunning( o.process.pid ) )
-      test.is( _.process.isRunning( _.numberFrom( childPid ) ) )
+      test.is( !_.process.isAlive( o.process.pid ) )
+      test.is( _.process.isAlive( _.numberFrom( childPid ) ) )
       return _.time.out( 6000, () =>
       {
         var files = _.fileProvider.dirRead( routinePath );
-        test.is( !_.process.isRunning( _.numberFrom( childPid ) ) )
+        test.is( !_.process.isAlive( _.numberFrom( childPid ) ) )
         test.identical( _.numberFrom( files[ 0 ] ),_.numberFrom( childPid ) );
         _.fileProvider.fileDelete( _.path.join( routinePath, files[ 0 ] ) );
         return null;
@@ -16497,12 +16497,12 @@ function terminateDetachedComplex( test )
       test.identical( got.exitSignal, null );
       test.is( _.strHas( got.output, 'SIGINT' ) );
       test.is( !_.strHas( got.output, 'TerminationBegin' ) );
-      test.is( !_.process.isRunning( o.process.pid ) )
-      test.is( _.process.isRunning( _.numberFrom( childPid ) ) )
+      test.is( !_.process.isAlive( o.process.pid ) )
+      test.is( _.process.isAlive( _.numberFrom( childPid ) ) )
       return _.time.out( 6000, () =>
       {
         var files = _.fileProvider.dirRead( routinePath );
-        test.is( !_.process.isRunning( _.numberFrom( childPid ) ) )
+        test.is( !_.process.isAlive( _.numberFrom( childPid ) ) )
         test.identical( _.numberFrom( files[ 0 ] ),_.numberFrom( childPid ) );
         _.fileProvider.fileDelete( _.path.join( routinePath, files[ 0 ] ) );
         return null;
@@ -16541,7 +16541,7 @@ function terminateDetachedComplex( test )
 
       if( process.platform === 'linux' )
       {
-        test.is( !_.process.isRunning( _.numberFrom( childPid ) ) )
+        test.is( !_.process.isAlive( _.numberFrom( childPid ) ) )
         test.identical( got.exitCode , null );
         test.identical( got.exitSignal , 'SIGINT' );
         test.is( !_.strHas( got.output, 'SIGINT' ) );
@@ -16549,7 +16549,7 @@ function terminateDetachedComplex( test )
       }
       else if( process.platform === 'win32' )
       {
-        test.is( !_.process.isRunning( _.numberFrom( childPid ) ) )
+        test.is( !_.process.isAlive( _.numberFrom( childPid ) ) )
         test.identical( got.exitCode , 0 );
         test.identical( got.exitSignal , null );
         test.is( !_.strHas( got.output, 'SIGINT' ) );
@@ -16557,7 +16557,7 @@ function terminateDetachedComplex( test )
       }
       else
       {
-        test.is( _.process.isRunning( _.numberFrom( childPid ) ) )
+        test.is( _.process.isAlive( _.numberFrom( childPid ) ) )
         test.identical( got.exitCode , 0 );
         test.identical( got.exitSignal , null );
         test.is( _.strHas( got.output, 'SIGINT' ) );
@@ -16566,7 +16566,7 @@ function terminateDetachedComplex( test )
       return _.time.out( 6000, () =>
       {
         var files = _.fileProvider.dirRead( routinePath );
-        test.is( !_.process.isRunning( _.numberFrom( childPid ) ) )
+        test.is( !_.process.isAlive( _.numberFrom( childPid ) ) )
         test.identical( _.numberFrom( files[ 0 ] ),_.numberFrom( childPid ) );
         _.fileProvider.fileDelete( _.path.join( routinePath, files[ 0 ] ) );
         return null;
@@ -16605,7 +16605,7 @@ function terminateDetachedComplex( test )
 
       if( process.platform === 'linux' )
       {
-        test.is( !_.process.isRunning( _.numberFrom( childPid ) ) )
+        test.is( !_.process.isAlive( _.numberFrom( childPid ) ) )
         test.identical( got.exitCode , null );
         test.identical( got.exitSignal , 'SIGINT' );
         test.is( !_.strHas( got.output, 'SIGINT' ) );
@@ -16613,7 +16613,7 @@ function terminateDetachedComplex( test )
       }
       else if( process.platform === 'win32' )
       {
-        test.is( !_.process.isRunning( _.numberFrom( childPid ) ) )
+        test.is( !_.process.isAlive( _.numberFrom( childPid ) ) )
         test.identical( got.exitCode , 0 );
         test.identical( got.exitSignal , null );
         test.is( !_.strHas( got.output, 'SIGINT' ) );
@@ -16621,7 +16621,7 @@ function terminateDetachedComplex( test )
       }
       else
       {
-        test.is( _.process.isRunning( _.numberFrom( childPid ) ) )
+        test.is( _.process.isAlive( _.numberFrom( childPid ) ) )
         test.identical( got.exitCode , 0 );
         test.identical( got.exitSignal , null );
         test.is( _.strHas( got.output, 'SIGINT' ) );
@@ -16630,7 +16630,7 @@ function terminateDetachedComplex( test )
       return _.time.out( 6000, () =>
       {
         var files = _.fileProvider.dirRead( routinePath );
-        test.is( !_.process.isRunning( _.numberFrom( childPid ) ) )
+        test.is( !_.process.isAlive( _.numberFrom( childPid ) ) )
         test.identical( _.numberFrom( files[ 0 ] ),_.numberFrom( childPid ) );
         _.fileProvider.fileDelete( _.path.join( routinePath, files[ 0 ] ) );
         return null;
@@ -16779,8 +16779,8 @@ function terminateWithChildren( test )
         test.identical( got.exitSignal, null );
         test.identical( _.strCount( got.output, 'SIGINT' ), 2 );
         test.identical( _.strCount( got.output, 'SIGINT CHILD' ), 1 );
-        test.is( !_.process.isRunning( o.process.pid ) )
-        test.is( !_.process.isRunning( lastChildPid ) );
+        test.is( !_.process.isAlive( o.process.pid ) )
+        test.is( !_.process.isAlive( lastChildPid ) );
         var file = _.fileProvider.fileRead( _.path.join( routinePath, lastChildPid.toString() ) );
         test.identical( file, lastChildPid.toString() )
         return null;
@@ -16822,8 +16822,8 @@ function terminateWithChildren( test )
         test.identical( got.exitSignal, null );
         test.identical( _.strCount( got.output, 'SIGINT' ), 1 );
         test.identical( _.strCount( got.output, 'SIGINT CHILD' ), 1 );
-        test.is( !_.process.isRunning( o.process.pid ) )
-        test.is( !_.process.isRunning( lastChildPid ) );
+        test.is( !_.process.isAlive( o.process.pid ) )
+        test.is( !_.process.isAlive( lastChildPid ) );
         var file = _.fileProvider.fileRead( _.path.join( routinePath, lastChildPid.toString() ) );
         test.identical( file, lastChildPid.toString() )
         return null;
@@ -16864,9 +16864,9 @@ function terminateWithChildren( test )
         test.identical( got.exitSignal, null );
         test.identical( _.strCount( got.output, 'SIGINT' ), 3 );
         test.identical( _.strCount( got.output, 'SIGINT CHILD' ), 2 );
-        test.is( !_.process.isRunning( o.process.pid ) )
-        test.is( !_.process.isRunning( children[ 0 ] ) );
-        test.is( !_.process.isRunning( children[ 1 ] ) );
+        test.is( !_.process.isAlive( o.process.pid ) )
+        test.is( !_.process.isAlive( children[ 0 ] ) );
+        test.is( !_.process.isAlive( children[ 1 ] ) );
         var file = _.fileProvider.fileRead( _.path.join( routinePath, children[ 0 ].toString() ) );
         test.identical( file, children[ 0 ].toString() )
         var file = _.fileProvider.fileRead( _.path.join( routinePath, children[ 1 ].toString() ) );
@@ -17051,9 +17051,9 @@ function terminateWithDetachedChildren( test )
           /* xxx Vova : problem with termination of detached proces on Windows, child process does't receive SIGINT */
           test.is( _.fileProvider.fileExists( _.path.join( routinePath, children[ 0 ].toString() ) ) )
           test.is( _.fileProvider.fileExists( _.path.join( routinePath, children[ 1 ].toString() ) ) )
-          test.is( !_.process.isRunning( o.process.pid ) )
-          test.is( !_.process.isRunning( children[ 0 ] ) );
-          test.is( !_.process.isRunning( children[ 1 ] ) );
+          test.is( !_.process.isAlive( o.process.pid ) )
+          test.is( !_.process.isAlive( children[ 0 ] ) );
+          test.is( !_.process.isAlive( children[ 1 ] ) );
           return null;
         })
       })
