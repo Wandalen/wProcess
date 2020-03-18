@@ -9874,10 +9874,9 @@ function shellAfterDeath( test )
       execPath : 'node testAppChild.js',
       outputCollecting : 1,
       mode : 'spawn',
-      when : 'afterdeath'
     }
 
-    _.process.start( o );
+    _.process.startAfterDeath( o );
 
     o.onStart.thenGive( () =>
     {

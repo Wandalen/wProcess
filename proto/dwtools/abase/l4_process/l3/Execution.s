@@ -144,7 +144,8 @@ function start_body( o )
   _.assert( o.args === null || _.arrayIs( o.args ) || _.strIs( o.args ) );
   _.assert( o.execPath === null || _.strIs( o.execPath ) || _.strsAreAll( o.execPath ), 'Expects string or strings {-o.execPath-}, but got', _.strType( o.execPath ) );
   _.assert( o.timeOut === null || _.numberIs( o.timeOut ), 'Expects null or number {-o.timeOut-}, but got', _.strType( o.timeOut ) );
-  _.assert( _.longHas( [ 'instant', 'afterdeath' ],  o.when ) || _.objectIs( o.when ), 'Unsupported starting mode:', o.when );
+  _.assert( _.longHas( [ 'instant' ],  o.when ) || _.objectIs( o.when ), 'Unsupported starting mode:', o.when );
+  _.assert( o.when !== 'afterdeath', `Starting mode:'afterdeath' is moved to separate routine _.process.startAfterDeath` );
   _.assert( !o.detaching || !_.longHas( _.arrayAs( o.stdio ), 'inherit' ), `Unsupported stdio: ${o.stdio} for process detaching` );
   _.assert( !o.detaching || _.longHas( [ 'fork', 'spawn', 'shell' ],  o.mode ), `Unsupported mode: ${o.mode} for process detaching` );
   _.assert( o.onStart === null || _.consequenceIs( o.onStart ) );
@@ -352,8 +353,6 @@ function start_body( o )
 
     try
     {
-      if( o.when === 'afterdeath' && !o.dry )
-      prepareAfterDeath();
       prepare();
       launch();
       pipe();
@@ -404,61 +403,7 @@ function start_body( o )
 
   /* */
 
-  function prepareAfterDeath() /* xxx qqq : ask how to refactor */
-  {
-    let toolsPath = _.path.nativize( _.path.join( __dirname, '../../../Tools.s' ) );
-    let toolsPathInclude = `let _ = require( '${_.strEscape( toolsPath )}' );\n`
-    let secondaryProcessSource = toolsPathInclude + afterDeathSecondaryProcess.toString() + '\nafterDeathSecondaryProcess();';
-    let secondaryFilePath = _.process.tempOpen({ sourceCode : secondaryProcessSource });
 
-    let childOptions = _.mapExtend( null, o );
-
-    childOptions.ready = null;
-    childOptions.logger = null;
-    childOptions.when = 'instant';
-
-    o.execPath = _.path.nativize( secondaryFilePath );
-    o.mode = 'fork';
-    o.args = [];
-    o.stdio = 'ignore';
-    o.detaching = true;
-    o.inputMirroring = 0;
-
-    o.onStart = o.ready;
-    o.onTerminate = new _.Consequence();
-
-    o.onStart.give( function( err, got )
-    {
-      if( !err )
-      o.process.send( childOptions );
-      this.take( err, got )
-    })
-
-    o.onTerminate.catchGive( function ( err )
-    {
-      _.errAttend( err );
-      if( err.reason != 'disconnected' )
-      this.take( err );
-    })
-  }
-
-  function afterDeathSecondaryProcess()
-  {
-    _.include( 'wAppBasic' );
-    _.include( 'wFiles' );
-
-    let ready = new _.Consequence();
-
-    process.on( 'message', ( data ) => ready.take( data ) )
-    ready.thenGive( ( startOptions ) =>
-    {
-      process.on( 'disconnect', () =>
-      {
-        console.log( 'Secondary: starting child process...' );
-        _.process.start( startOptions );
-      })
-    })
-  }
 
   /* */
 
@@ -1460,11 +1405,79 @@ defaults.mode = 'fork';
 
 //
 
-let startAfterDeath = _.routineFromPreAndBody( start_pre, start.body );
+function startAfterDeath_body( o )
+{
+  _.assertRoutineOptions( startAfterDeath_body, o );
+  _.assert( _.strIs( o.execPath ) );
+  _.assert( arguments.length === 1, 'Expects single argument' );
 
-var defaults = startAfterDeath.defaults;
+  let toolsPath = _.path.nativize( _.path.join( __dirname, '../../../Tools.s' ) );
+  let toolsPathInclude = `let _ = require( '${_.strEscape( toolsPath )}' );\n`
+  let secondaryProcessSource = toolsPathInclude + afterDeathSecondaryProcess.toString() + '\nafterDeathSecondaryProcess();';
+  let secondaryFilePath = _.process.tempOpen({ sourceCode : secondaryProcessSource });
 
-defaults.when = 'afterdeath';
+  let o2 = _.mapExtend( null, o );
+
+  o2.execPath = _.path.nativize( secondaryFilePath );
+  o2.mode = 'fork';
+  o2.args = [];
+  o2.stdio = 'ignore';
+  o2.detaching = true;
+  o2.inputMirroring = 0;
+
+  let result = _.process.start( o2 );
+
+  o2.onStart.give( function( err, got )
+  {
+    if( err )
+    return this.error( err );
+
+    o2.process.send( o );
+    this.take( err, got );
+
+    o.onStart = o2.onStart;
+    o.onTerminate = o2.onTerminate;
+    o.ready = o2.ready;
+    o.process = o2.process;
+    o.disconnect = o2.disconnect;
+  })
+
+  o2.onTerminate.catchGive( function ( err )
+  {
+    _.errAttend( err );
+    if( err.reason != 'disconnected' )
+    this.error( err );
+  })
+
+  return result;
+
+  //
+
+  function afterDeathSecondaryProcess()
+  {
+    _.include( 'wAppBasic' );
+    _.include( 'wFiles' );
+
+    let ready = new _.Consequence();
+
+    process.on( 'message', ( data ) => ready.take( data ) )
+    ready.thenGive( ( o ) =>
+    {
+      process.on( 'disconnect', () =>
+      {
+        console.log( 'Secondary: starting child process...' );
+        _.process.start( o );
+      })
+    })
+  }
+
+}
+
+var defaults = startAfterDeath_body.defaults = Object.create( start.defaults );
+
+let startAfterDeath = _.routineFromPreAndBody( start_pre, startAfterDeath_body );
+
+
 
 //
 
