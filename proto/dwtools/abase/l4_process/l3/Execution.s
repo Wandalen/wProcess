@@ -736,11 +736,11 @@ function start_body( o )
   function disconnect()
   {
     if( this.process.stdout )
-    this.process.stdout.end();
+    this.process.stdout.destroy();
     if( this.process.stderr )
-    this.process.stderr.end();
+    this.process.stderr.destroy();
     if( this.process.stdin )
-    this.process.stdin.end();
+    this.process.stdin.destroy();
 
     if( this.process.disconnect )
     if( this.process.connected )
