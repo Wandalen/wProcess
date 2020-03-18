@@ -16500,8 +16500,8 @@ function terminateDetachedComplex( test )
       outputPiping : 0,
       throwingExitCode : 0
     }
-    let ready = _.process.start( o );
-    ready.catch( ( err ) =>
+    _.process.start( o );
+    o.onTerminate.catch( ( err ) =>
     {
       _.errAttend( err );
       return null;
