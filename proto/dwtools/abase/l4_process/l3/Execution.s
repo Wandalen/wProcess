@@ -284,6 +284,8 @@ function start_body( o )
       }
 
       let o2 = _.mapExtend( null, o );
+      o2.onStart = null;
+      o2.onTerminate = null;
       o2.execPath = execPath[ p ];
       o2.args = o.args ? o.args.slice() : o.args;
       o2.currentPath = currentPath[ c ];
