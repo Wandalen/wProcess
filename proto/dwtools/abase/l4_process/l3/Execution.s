@@ -1027,7 +1027,7 @@ function start_body( o )
       else if( killedByTimeout )
       err = _.err( 'Process timed out, killed by exit signal', exitSignal, '\n', infoGet() );
       else
-      err = _.err( 'Process wass killed by exit signal', exitSignal, '\n', infoGet() );
+      err = _.err( 'Process was killed by exit signal', exitSignal, '\n', infoGet() );
 
       if( o.briefExitCode )
       err = _.errBrief( err );
