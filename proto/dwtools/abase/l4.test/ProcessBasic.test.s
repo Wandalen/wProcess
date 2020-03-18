@@ -9875,10 +9875,14 @@ function shellAfterDeath( test )
 
     _.process.start( o );
 
-    process.send( o.process.pid );
+    o.onStart.thenGive( () =>
+    {
+      process.send( o.process.pid );
+    })
 
     _.time.out( 5000, () =>
     {
+      console.log( 'parent termination begin' )
       _.Procedure.TerminationBegin();
       return null;
     })
@@ -9889,7 +9893,7 @@ function shellAfterDeath( test )
     _.include( 'wAppBasic' );
     _.include( 'wFiles' );
 
-    _.time.out( 10000, () =>
+    _.time.out( 5000, () =>
     {
       let filePath = _.path.join( __dirname, 'testFile' );
       _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
@@ -9930,30 +9934,29 @@ function shellAfterDeath( test )
       childPid = _.numberFrom( got );
     })
 
-    _.time.out( 2500, () =>
-    {
-      test.will = 'parent is alive, secondary is alive'
-      test.is( _.process.isAlive( o.process.pid ) )
-      test.is( _.process.isAlive( childPid) )
-      return null;
-    })
-
-    con.then( () =>
+    o.onTerminate.then( () =>
     {
       test.identical( o.exitCode, 0 );
-
-      test.is( !_.process.isAlive( o.process.pid ) );
+      test.case = 'secondary process is alive'
       test.is( _.process.isAlive( childPid ) );
+      test.case = 'child of secondary process does not exit yet'
       test.is( !_.fileProvider.fileExists( testFilePath ) );
-      return _.time.out( 15000 );
+      return _.time.out( 6000 );
     })
 
-    con.then( () =>
+    o.onTerminate.then( () =>
     {
+      test.case = 'secondary process is dead'
       test.is( !_.process.isAlive( childPid ) );
+
+      test.case = 'child of secondary process is executed'
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid2 = _.fileProvider.fileRead( testFilePath );
-      test.is( !_.process.isAlive( _.numberFrom( childPid2 ) ) );
+      childPid2 = _.numberFrom( childPid2 );
+
+      test.case = 'secondary process and child are not same'
+      test.is( !_.process.isAlive( childPid2 ) );
+      test.notIdentical( childPid, childPid2 );
       return null;
     })
 
