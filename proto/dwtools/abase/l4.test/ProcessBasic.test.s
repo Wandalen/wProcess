@@ -6521,7 +6521,8 @@ function shellArgumentsParsingNonTrivial( test )
       test.identical( o.args, [ testAppPathSpace, 'firstArg', 'secondArg:1', '"third arg"' ] );
       let got = JSON.parse( o.output );
       test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-      test.identical( got.map, { secondArg : 1 } )
+      test.identical( got.map, { secondArg : '1 third arg' } )
+      test.identical( got.subject, 'firstArg' )
       test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', '"third arg"' ] )
 
       return null;
@@ -6553,7 +6554,8 @@ function shellArgumentsParsingNonTrivial( test )
       test.identical( o.args, [ testAppPathSpace, 'firstArg', 'secondArg:1', '"third arg"' ] );
       let got = JSON.parse( o.output );
       test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-      test.identical( got.map, { secondArg : 1 } )
+      test.identical( got.map, { secondArg : '1 third arg' } )
+      test.identical( got.subject, 'firstArg' )
       test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', '"third arg"' ] )
 
       return null;
@@ -6585,7 +6587,8 @@ function shellArgumentsParsingNonTrivial( test )
       test.identical( o.args, [ testAppPathSpace, 'firstArg', 'secondArg:1', '"third arg"' ] );
       let got = JSON.parse( o.output );
       test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-      test.identical( got.map, { secondArg : 1 } )
+      test.identical( got.map, { secondArg : '1 third arg' } )
+      test.identical( got.subject, 'firstArg' )
       test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', '"third arg"' ] )
 
       return null;
@@ -6617,7 +6620,8 @@ function shellArgumentsParsingNonTrivial( test )
       test.identical( o.args, [ 'firstArg', 'secondArg:1', '"third arg"' ] );
       let got = JSON.parse( o.output );
       test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-      test.identical( got.map, { secondArg : 1 } )
+      test.identical( got.map, { secondArg : '1 third arg' } )
+      test.identical( got.subject, 'firstArg' )
       test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', '"third arg"' ] )
 
       return null;
