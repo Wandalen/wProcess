@@ -17092,7 +17092,7 @@ function terminateWithDetachedChildren( test )
       throwingExitCode : 0
     }
     _.process.start( o1 );
-    o1.ready.catch( err =>
+    o1.onTerminate.catch( err =>
     {
       _.errAttend( err )
       return null;
@@ -17110,7 +17110,7 @@ function terminateWithDetachedChildren( test )
       throwingExitCode : 0
     }
     _.process.start( o2 );
-    o2.ready.catch( err =>
+    o2.onTerminate.catch( err =>
     {
       _.errAttend( err )
       return null;
