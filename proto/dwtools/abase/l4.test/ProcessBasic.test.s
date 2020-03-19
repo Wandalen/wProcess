@@ -16411,7 +16411,7 @@ function terminateComplex( test )
     let ready = _.process.start( o );
     let lastChildPid;
 
-    _.time.out( 1500, () =>
+    _.time.out( 6000, () =>
     {
       lastChildPid = _.numberFrom( o.output );
       _.process.terminate({ pid : o.process.pid });
@@ -16453,7 +16453,7 @@ function terminateComplex( test )
     let ready = _.process.start( o );
     let lastChildPid;
 
-    _.time.out( 1500, () =>
+    _.time.out( 6000, () =>
     {
       lastChildPid = _.numberFrom( o.output );
       _.process.terminate({ pid : o.process.pid });
