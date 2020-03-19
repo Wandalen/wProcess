@@ -148,62 +148,32 @@ on.defaults =
 {
   callbackMap : null,
 }
+
 //
-// //
-//
-// function _eventExitSetup()
-// {
-//
-//   _.assert( arguments.length === 0, 'Expects no arguments' );
-//
-//   if( !_global.process )
-//   return;
-//
-//   if( !_.process._registeredExitHandler )
-//   {
-//     _global.process.once( 'exit', _.process._eventExitHandle );
-//     _.process._registeredExitHandler = _.process._eventExitHandle;
-//     // process.once( 'SIGINT', onExitHandler );
-//     // process.once( 'SIGTERM', onExitHandler );
-//   }
-//
-// }
-//
-// //
-//
-// function _eventExitHandle()
-// {
-//   let args = arguments;
-//   _.each( _.process._eventCallbackMap.exit, ( callback ) =>
-//   {
-//     try
-//     {
-//       callback.apply( _.process, args );
-//     }
-//     catch( err )
-//     {
-//       _.setup._errUncaughtHandler2( err, 'uncaught error on termination' );
-//     }
-//   })
-//   process.removeListener( 'exit', _.process._registeredExitHandler );
-//   // process.removeListener( 'SIGINT', _.process._registeredExitHandler );
-//   // process.removeListener( 'SIGTERM', _.process._registeredExitHandler );
-//   _.process._eventCallbackMap.exit.splice( 0, _.process._eventCallbackMap.exit.length );
-// }
+
+function eventGive()
+{
+  return _.event.eventGive( _.process._ehandler, ... arguments );
+}
+
+eventGive.defaults =
+{
+  ... _.event.eventGive.defaults,
+}
 
 //
 
 function _eventAvailableHandle()
 {
-  if( !_.process._eventCallbackMap.available.length )
+  if( !_.process._ehandler.events.available.length )
   return;
 
-  let callbacks = _.process._eventCallbackMap.available.slice();
+  let callbacks = _.process._ehandler.events.available.slice();
   callbacks.forEach( ( callback ) =>
   {
     try
     {
-      _.arrayRemoveOnceStrictly( _.process._eventCallbackMap.available, callback );
+      _.arrayRemoveOnceStrictly( _.process._ehandler.events.available, callback );
       callback.call( _.process );
     }
     catch( err )
@@ -231,17 +201,11 @@ function _Setup1()
 // declare
 // --
 
-let _eventCallbackMap =
+let Events =
 {
   available : [],
   exit : [],
 }
-
-// let Fields =
-// {
-//   _exitReason : null,
-//   _registeredExitHandler : null,
-// }
 
 let Extension =
 {
@@ -254,8 +218,7 @@ let Extension =
   // eventer
 
   on,
-  // _eventExitSetup,
-  // _eventExitHandle,
+  eventGive,
   _eventAvailableHandle,
 
   // meta
@@ -270,7 +233,7 @@ let Extension =
 }
 
 _.mapExtend( Self, Extension );
-_.mapSupplement( Self._eventCallbackMap, _eventCallbackMap );
+_.mapSupplement( Self._ehandler.events, Events );
 _.assert( _.routineIs( _.process.start ) );
 _.process._Setup1();
 

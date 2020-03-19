@@ -1367,7 +1367,7 @@ function processArgsWithSpace( test )
 
 //
 
-function _exitHandlerOnce( test )
+function _exitHandlerOnce( test ) /* qqq : adjust */
 {
   var context = this;
   var routinePath = _.path.join( context.suitePath, test.name );
@@ -1467,7 +1467,7 @@ function _exitHandlerOnce( test )
 
 //
 
-function _exitHandlerOff( test )
+function _exitHandlerOff( test ) /* qqq : adjust */
 {
   var context = this;
   var routinePath = _.path.join( context.suitePath, test.name );
@@ -10647,7 +10647,6 @@ function startDetachingModeForkNoTerminationBegin( test )
   })
 
   /*  */
-
   return ready;
 }
 
