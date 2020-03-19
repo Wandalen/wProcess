@@ -1800,32 +1800,32 @@ function _exitHandlerRepair()
 
 //
 
-/* xxx : deprecate */
-function _exitHandlerOnce( routine )
-{
-  _.assert( arguments.length === 1 );
-  _.assert( _.routineIs( routine ) );
-
-  console.warn( `WARNING : Routine _.process._exitHandlerOnce is deprecated. Please, use _.process.on( 'exit', callback ) instead.` ); debugger;
-
-  _.process.on( 'exit', routine );
-}
-
+// /* xxx : deprecate */
+// function _exitHandlerOnce( routine )
+// {
+//   _.assert( arguments.length === 1 );
+//   _.assert( _.routineIs( routine ) );
 //
-
-/*
-qqq : cover routine _exitHandlerOff by tests
-Vova : wrote test routine _exitHandlerOff
-*/
-
-function _exitHandlerOff( routine )
-{
-  _.assert( arguments.length === 1 );
-  _.assert( _.routineIs( routine ) );
-  debugger;
-  console.warn( `WARNING : Routine _.process._exitHandlerOff is deprecated. Please, use _.process.off( 'exit', callback ) instead.` ); debugger;
-  _.process.off( 'exit', routine );
-}
+//   console.warn( `WARNING : Routine _.process._exitHandlerOnce is deprecated. Please, use _.process.on( 'exit', callback ) instead.` ); debugger;
+//
+//   _.process.on( 'exit', routine );
+// }
+//
+// //
+//
+// /*
+// qqq : cover routine _exitHandlerOff by tests
+// Vova : wrote test routine _exitHandlerOff
+// */
+//
+// function _exitHandlerOff( routine )
+// {
+//   _.assert( arguments.length === 1 );
+//   _.assert( _.routineIs( routine ) );
+//   debugger;
+//   console.warn( `WARNING : Routine _.process._exitHandlerOff is deprecated. Please, use _.process.off( 'exit', callback ) instead.` ); debugger;
+//   _.process.off( 'exit', routine );
+// }
 
 //
 
@@ -1852,21 +1852,24 @@ function _eventExitSetup()
 function _eventExitHandle()
 {
   let args = arguments;
-  _.each( _.process._eventCallbackMap.exit, ( callback ) =>
-  {
-    try
-    {
-      callback.apply( _.process, args );
-    }
-    catch( err )
-    {
-      _.setup._errUncaughtHandler2( err, 'uncaught error on termination' );
-    }
-  })
+  // debugger;
+  _.process.eventGive({ event : 'exit', args : [] });
+  // debugger;
+  // _.each( _.process._ehandler.events.exit, ( callback ) =>
+  // {
+  //   try
+  //   {
+  //     callback.apply( _.process, args );
+  //   }
+  //   catch( err )
+  //   {
+  //     _.setup._errUncaughtHandler2( err, 'uncaught error on termination' );
+  //   }
+  // })
   process.removeListener( 'exit', _.process._registeredExitHandler );
   // process.removeListener( 'SIGINT', _.process._registeredExitHandler );
   // process.removeListener( 'SIGTERM', _.process._registeredExitHandler );
-  _.process._eventCallbackMap.exit.splice( 0, _.process._eventCallbackMap.exit.length );
+  _.process._ehandler.events.exit.splice( 0, _.process._ehandler.events.exit.length );
 }
 
 // --
@@ -2268,8 +2271,8 @@ let Extension =
   exitWithBeep,
 
   _exitHandlerRepair, /* xxx */
-  _exitHandlerOnce, /* xxx */
-  _exitHandlerOff, /* xxx */
+  // _exitHandlerOnce, /* xxx */
+  // _exitHandlerOff, /* xxx */
 
   _eventExitSetup,
   _eventExitHandle,

@@ -646,7 +646,7 @@ function processArgsPropertiesBase( test )
     test.contains( got, expected );
     return null;
   })
-  
+
   shell({ args : [ 'path:c:\\some', 'x', ':', 0, 'y', ':', 1  ] })
   .then( o =>
   {
@@ -665,10 +665,10 @@ function processArgsPropertiesBase( test )
     test.contains( got, expected );
     return null;
   })
-  
+
   /* */
-  
-  ready.then( () => 
+
+  ready.then( () =>
   {
     return null;
   })
@@ -700,8 +700,8 @@ function processArgsPropertiesBase( test )
   })
 
   /* */
-  
-  ready.then( () => 
+
+  ready.then( () =>
   {
     return null;
   })
@@ -731,7 +731,7 @@ function processArgsPropertiesBase( test )
     test.contains( got, expected );
     return null;
   })
-  
+
   return ready;
 }
 
@@ -969,10 +969,10 @@ function processArgsWithSpace( test )
   let filePath = _.path.join( routinePath, 'got' );
   let interpreterPath = _.path.normalize( process.argv[ 0 ] );
   let scriptPath = _.path.normalize( testAppPath );
-  
+
   /* */
-  
-  ready.then( () => 
+
+  ready.then( () =>
   {
     /* process.args should quote arguments that contain spaces and are not quoted already */
     test.description = 'subject + option, option value is quoted and contains space'
@@ -980,7 +980,7 @@ function processArgsWithSpace( test )
   })
   shell( `subject option:"value with space"` )
   .then( o =>
-  { 
+  {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
@@ -997,8 +997,8 @@ function processArgsWithSpace( test )
     test.contains( got, expected );
     return null;
   })
-  
-  ready.then( () => 
+
+  ready.then( () =>
   {
     /* process.args should quote arguments that contain spaces and are not quoted already */
     test.description = 'subject + option, option value is quoted and contains space'
@@ -1006,7 +1006,7 @@ function processArgsWithSpace( test )
   })
   shell( `subject option:'value with space'` )
   .then( o =>
-  { 
+  {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
@@ -1023,8 +1023,8 @@ function processArgsWithSpace( test )
     test.contains( got, expected );
     return null;
   })
-  
-  ready.then( () => 
+
+  ready.then( () =>
   {
     /* process.args should quote arguments that contain spaces and are not quoted already */
     test.description = 'subject + option, option value is quoted and contains space'
@@ -1032,7 +1032,7 @@ function processArgsWithSpace( test )
   })
   shell( 'subject option:`value with space`' )
   .then( o =>
-  { 
+  {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
@@ -1049,16 +1049,16 @@ function processArgsWithSpace( test )
     test.contains( got, expected );
     return null;
   })
-  
-  ready.then( () => 
-  { 
+
+  ready.then( () =>
+  {
     test.description = 'subject + option, option value is quoted and contains space'
     test.will = 'process.args should quote arguments with space'
     return null;
   })
   shell( `subject option : "value with space"` )
   .then( o =>
-  { 
+  {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
@@ -1075,8 +1075,8 @@ function processArgsWithSpace( test )
     test.contains( got, expected );
     return null;
   })
-  
-  ready.then( () => 
+
+  ready.then( () =>
   {
     /* process.args should quote arguments that contain spaces and are not quoted already */
     test.description = 'subject + option, option value contains space'
@@ -1084,7 +1084,7 @@ function processArgsWithSpace( test )
   })
   shell({ args : [ 'subject', 'option', ':', 'value with space' ] })
   .then( o =>
-  { 
+  {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
@@ -1101,8 +1101,8 @@ function processArgsWithSpace( test )
     test.contains( got, expected );
     return null;
   })
-  
-  ready.then( () => 
+
+  ready.then( () =>
   {
     /* process.args should quote arguments that contain spaces and are not quoted already */
     test.description = 'subject + option, option value is quoted and contains space'
@@ -1110,7 +1110,7 @@ function processArgsWithSpace( test )
   })
   shell({ args : [ 'subject', 'option', ':', '"value with space"' ] })
   .then( o =>
-  { 
+  {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
@@ -1127,16 +1127,16 @@ function processArgsWithSpace( test )
     test.contains( got, expected );
     return null;
   })
-  
-  ready.then( () => 
-  { 
+
+  ready.then( () =>
+  {
     /* process.args should quote arguments that contain spaces and are not quoted already */
     test.description = 'subject + option, option value is not quoted and contains space'
     return null;
   })
   shell( `subject option:value with space` )
   .then( o =>
-  { 
+  {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
@@ -1153,16 +1153,16 @@ function processArgsWithSpace( test )
     test.contains( got, expected );
     return null;
   })
-  
-  ready.then( () => 
-  { 
+
+  ready.then( () =>
+  {
     /* process.args should quote arguments that contain spaces and are not quoted already */
     test.description = 'subject + option, option value is not quoted and contains space'
     return null;
   })
   shell({ args : [ 'subject', 'option:value', 'with', 'space' ] })
   .then( o =>
-  { 
+  {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
@@ -1179,16 +1179,16 @@ function processArgsWithSpace( test )
     test.contains( got, expected );
     return null;
   })
-  
-  ready.then( () => 
-  { 
+
+  ready.then( () =>
+  {
     /* process.args should quote arguments that contain spaces and are not quoted already */
     test.description = 'subject + option, option value is not quoted and contains space'
     return null;
   })
   shell({ args : [ 'subject', 'option', ':', 'value', 'with', 'space' ] })
   .then( o =>
-  { 
+  {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
@@ -1205,16 +1205,16 @@ function processArgsWithSpace( test )
     test.contains( got, expected );
     return null;
   })
-  
-  ready.then( () => 
-  { 
+
+  ready.then( () =>
+  {
     /* process.args should quote arguments that contain spaces and are not quoted already */
     test.description = 'options only, option value is quoted and contains space'
     return null;
   })
   shell( 'option:"value with space"' )
   .then( o =>
-  { 
+  {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
@@ -1231,16 +1231,16 @@ function processArgsWithSpace( test )
     test.contains( got, expected );
     return null;
   })
-  
-  ready.then( () => 
-  { 
+
+  ready.then( () =>
+  {
     /* process.args should quote arguments that contain spaces and are not quoted already */
     test.description = 'options only, option value is quoted and contains space'
     return null;
   })
   shell({ args : [ 'option', ':', '"value with space"' ] })
   .then( o =>
-  { 
+  {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
@@ -1257,16 +1257,16 @@ function processArgsWithSpace( test )
     test.contains( got, expected );
     return null;
   })
-  
-  ready.then( () => 
-  { 
+
+  ready.then( () =>
+  {
     /* process.args should quote arguments that contain spaces and are not quoted already */
     test.description = 'options only, option value is quoted and contains space'
     return null;
   })
   shell({ args : [ 'option', ':', 'value with space' ] })
   .then( o =>
-  { 
+  {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
@@ -1283,16 +1283,16 @@ function processArgsWithSpace( test )
     test.contains( got, expected );
     return null;
   })
-  
-  ready.then( () => 
-  { 
+
+  ready.then( () =>
+  {
     /* process.args should quote arguments that contain spaces and are not quoted already */
     test.description = 'options only, option value is not quoted and contains space'
     return null;
   })
   shell( 'option:value with space' )
   .then( o =>
-  { 
+  {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
@@ -1309,16 +1309,16 @@ function processArgsWithSpace( test )
     test.contains( got, expected );
     return null;
   })
-  
-  ready.then( () => 
-  { 
+
+  ready.then( () =>
+  {
     /* process.args should quote arguments that contain spaces and are not quoted already */
     test.description = 'options only, option value is not quoted and contains space'
     return null;
   })
   shell( 'option : value with space' )
   .then( o =>
-  { 
+  {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
@@ -1335,16 +1335,16 @@ function processArgsWithSpace( test )
     test.contains( got, expected );
     return null;
   })
-  
-  ready.then( () => 
-  { 
+
+  ready.then( () =>
+  {
     /* process.args should quote arguments that contain spaces and are not quoted already */
     test.description = 'options only, option value is not quoted and contains space'
     return null;
   })
   shell( 'option:value with" space' )
   .then( o =>
-  { 
+  {
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
@@ -1367,7 +1367,7 @@ function processArgsWithSpace( test )
 
 //
 
-function _exitHandlerOnce( test )
+function _exitHandlerOnce( test ) /* qqq : adjust */
 {
   var context = this;
   var routinePath = _.path.join( context.suitePath, test.name );
@@ -1467,7 +1467,7 @@ function _exitHandlerOnce( test )
 
 //
 
-function _exitHandlerOff( test )
+function _exitHandlerOff( test ) /* qqq : adjust */
 {
   var context = this;
   var routinePath = _.path.join( context.suitePath, test.name );
@@ -10403,7 +10403,7 @@ function startNodeDetaching( test )
   {
     _.include( 'wAppBasic' );
     _.include( 'wFiles' );
-    
+
     let args = _.process.args();
 
     let o =
@@ -10412,13 +10412,13 @@ function startNodeDetaching( test )
       detaching : true,
       ipc : false
     }
-    
+
     _.mapExtend( o, args.map );
-    
+
     let ready = _.process.startNode( o );
 
     ready.then( ( got ) =>
-    { 
+    {
       let optionsMapReceived = _.objectIs( got );
       process.send({ optionsMapReceived, childPid : o.process.pid });
       return null;
@@ -10457,9 +10457,9 @@ function startNodeDetaching( test )
   ready
 
   .then( () =>
-  { 
+  {
     test.case = 'stdio : ignore ipc : false';
-    
+
     let o =
     {
       execPath : 'node testAppParent.js stdio : ignore',
@@ -10487,34 +10487,34 @@ function startNodeDetaching( test )
       test.is( _.process.isRunning( data.childPid ) );
       return _.time.out( 6000 );
     })
-    
+
     con.then( () =>
     {
       test.will = 'both dead';
-      
+
       test.is( !_.process.isRunning( o.process.pid ) );
       test.is( !_.process.isRunning( data.childPid ) );
-      
+
       test.is( !_.strHas( o.output, 'Child process start' ) )
       test.is( !_.strHas( o.output, 'Child process end' ) )
-      
+
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
       test.identical( data.childPid, childPid )
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   /*  */
-  
+
   .then( () =>
-  { 
+  {
     test.case = 'stdio : ignore, ipc : true';
-    
+
     let o =
     {
       execPath : 'node testAppParent.js stdio : ignore ipc : true',
@@ -10542,34 +10542,34 @@ function startNodeDetaching( test )
       test.is( _.process.isRunning( data.childPid ) );
       return _.time.out( 6000 );
     })
-    
+
     con.then( () =>
     {
       test.will = 'both dead';
-      
+
       test.is( !_.process.isRunning( o.process.pid ) );
       test.is( !_.process.isRunning( data.childPid ) );
-      
+
       test.is( !_.strHas( o.output, 'Child process start' ) )
       test.is( !_.strHas( o.output, 'Child process end' ) )
-      
+
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
       test.identical( data.childPid, childPid )
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   /* Vova zzz: fix problem with stdio:pipe */
-  
+
   // .then( () =>
-  // { 
+  // {
   //   test.case = 'stdio : inherit ipc : false';
-    
+
   //   let o =
   //   {
   //     execPath : 'node testAppParent.js stdio : inherit',
@@ -10597,34 +10597,34 @@ function startNodeDetaching( test )
   //     test.is( _.process.isRunning( data.childPid ) );
   //     return _.time.out( 6000 );
   //   })
-    
+
   //   con.then( () =>
   //   {
   //     test.will = 'both dead';
-      
+
   //     test.is( !_.process.isRunning( o.process.pid ) );
   //     test.is( !_.process.isRunning( data.childPid ) );
-      
+
   //     test.is( _.strHas( o.output, 'Child process start' ) )
   //     test.is( !_.strHas( o.output, 'Child process end' ) )
-      
+
   //     test.is( _.fileProvider.fileExists( testFilePath ) );
   //     let childPid = _.fileProvider.fileRead( testFilePath );
   //     childPid = _.numberFrom( childPid );
   //     test.identical( data.childPid, childPid )
-      
+
   //     return null;
   //   })
 
   //   return con;
   // })
-  
+
   /* Vova zzz: fix problem with stdio:pipe */
-  
+
   // .then( () =>
-  // { 
+  // {
   //   test.case = 'stdio : inherit, ipc : true';
-    
+
   //   let o =
   //   {
   //     execPath : 'node testAppParent.js stdio : inherit ipc : true',
@@ -10652,34 +10652,34 @@ function startNodeDetaching( test )
   //     test.is( _.process.isRunning( data.childPid ) );
   //     return _.time.out( 6000 );
   //   })
-    
+
   //   con.then( () =>
   //   {
   //     test.will = 'both dead';
-      
+
   //     test.is( !_.process.isRunning( o.process.pid ) );
   //     test.is( !_.process.isRunning( data.childPid ) );
-      
+
   //     test.is( _.strHas( o.output, 'Child process start' ) )
   //     test.is( !_.strHas( o.output, 'Child process end' ) )
-      
+
   //     test.is( _.fileProvider.fileExists( testFilePath ) );
   //     let childPid = _.fileProvider.fileRead( testFilePath );
   //     childPid = _.numberFrom( childPid );
   //     test.identical( data.childPid, childPid )
-      
+
   //     return null;
   //   })
 
   //   return con;
   // })
-  
+
   /* Vova zzz: fix problem with stdio:pipe */
-  
+
   // .then( () =>
-  // { 
+  // {
   //   test.case = 'stdio : pipe, outputPiping : true ipc : false';
-    
+
   //   let o =
   //   {
   //     execPath : 'node testAppParent.js stdio : pipe outputPiping : true ',
@@ -10707,34 +10707,34 @@ function startNodeDetaching( test )
   //     test.is( _.process.isRunning( data.childPid ) );
   //     return _.time.out( 6000 );
   //   })
-    
+
   //   con.then( () =>
   //   {
   //     test.will = 'both dead';
-      
+
   //     test.is( !_.process.isRunning( o.process.pid ) );
   //     test.is( !_.process.isRunning( data.childPid ) );
-      
+
   //     test.is( _.strHas( o.output, 'Child process start' ) )
   //     test.is( !_.strHas( o.output, 'Child process end' ) )
-      
+
   //     test.is( _.fileProvider.fileExists( testFilePath ) );
   //     let childPid = _.fileProvider.fileRead( testFilePath );
   //     childPid = _.numberFrom( childPid );
   //     test.identical( data.childPid, childPid )
-      
+
   //     return null;
   //   })
 
   //   return con;
   // })
-  
+
   /* Vova zzz: fix problem with stdio:pipe */
-  
+
   // .then( () =>
-  // { 
+  // {
   //   test.case = 'stdio : pipe, outputPiping : true, ipc : true';
-    
+
   //   let o =
   //   {
   //     execPath : 'node testAppParent.js stdio : pipe outputPiping : true ipc : true ',
@@ -10762,22 +10762,22 @@ function startNodeDetaching( test )
   //     test.is( _.process.isRunning( data.childPid ) );
   //     return _.time.out( 6000 );
   //   })
-    
+
   //   con.then( () =>
   //   {
   //     test.will = 'both dead';
-      
+
   //     test.is( !_.process.isRunning( o.process.pid ) );
   //     test.is( !_.process.isRunning( data.childPid ) );
-      
+
   //     test.is( _.strHas( o.output, 'Child process start' ) )
   //     test.is( !_.strHas( o.output, 'Child process end' ) )
-      
+
   //     test.is( _.fileProvider.fileExists( testFilePath ) );
   //     let childPid = _.fileProvider.fileRead( testFilePath );
   //     childPid = _.numberFrom( childPid );
   //     test.identical( data.childPid, childPid )
-      
+
   //     return null;
   //   })
 
@@ -10800,25 +10800,25 @@ function startDetachingStdioIgnore( test )
   {
     _.include( 'wAppBasic' );
     _.include( 'wFiles' );
-    
+
     let args = _.process.args();
 
     let o =
-    { 
+    {
       execPath : 'testAppChild.js',
       detaching : true,
       ipc : false
     }
-    
+
     _.mapExtend( o, args.map );
-    
+
     if( o.mode != 'fork' )
     o.execPath = 'node ' + o.execPath;
-    
+
     let ready = _.process.start( o );
 
     ready.then( ( got ) =>
-    { 
+    {
       let optionsMapReceived = _.objectIs( got );
       process.send({ optionsMapReceived, childPid : o.process.pid });
       return null;
@@ -10857,9 +10857,9 @@ function startDetachingStdioIgnore( test )
   ready
 
   .then( () =>
-  { 
+  {
     test.case = 'mode : spawn, stdio : ignore';
-    
+
     let o =
     {
       execPath : 'node testAppParent.js mode : spawn stdio : ignore',
@@ -10887,34 +10887,34 @@ function startDetachingStdioIgnore( test )
       test.is( _.process.isRunning( data.childPid ) );
       return _.time.out( 6000 );
     })
-    
+
     con.then( () =>
     {
       test.will = 'both dead';
-      
+
       test.is( !_.process.isRunning( o.process.pid ) );
       test.is( !_.process.isRunning( data.childPid ) );
-      
+
       test.is( !_.strHas( o.output, 'Child process start' ) )
       test.is( !_.strHas( o.output, 'Child process end' ) )
-      
+
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
       test.identical( data.childPid, childPid )
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   /*  */
-  
+
   .then( () =>
-  { 
+  {
     test.case = 'mode : shell, stdio : ignore';
-    
+
     let o =
     {
       execPath : 'node testAppParent.js mode : shell stdio : ignore',
@@ -10942,36 +10942,36 @@ function startDetachingStdioIgnore( test )
       test.is( _.process.isRunning( data.childPid ) );
       return _.time.out( 6000 );
     })
-    
+
     con.then( () =>
     {
       test.will = 'both dead';
-      
+
       test.is( !_.process.isRunning( o.process.pid ) );
       test.is( !_.process.isRunning( data.childPid ) );
-      
+
       test.is( !_.strHas( o.output, 'Child process start' ) )
       test.is( !_.strHas( o.output, 'Child process end' ) )
-      
+
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
-      
+
       test.is( !_.process.isRunning( childPid ) );
       test.notIdentical( data.childPid, childPid )
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   /*  */
-  
+
   .then( () =>
-  { 
+  {
     test.case = 'mode : fork, stdio : ignore';
-    
+
     let o =
     {
       execPath : 'node testAppParent.js mode : fork stdio : ignore',
@@ -10999,30 +10999,30 @@ function startDetachingStdioIgnore( test )
       test.is( _.process.isRunning( data.childPid ) );
       return _.time.out( 6000 );
     })
-    
+
     con.then( () =>
     {
       test.will = 'both dead';
-      
+
       test.is( !_.process.isRunning( o.process.pid ) );
       test.is( !_.process.isRunning( data.childPid ) );
-      
+
       test.is( !_.strHas( o.output, 'Child process start' ) )
       test.is( !_.strHas( o.output, 'Child process end' ) )
-      
+
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
       test.identical( data.childPid, childPid )
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   /*  */
-  
+
   return ready;
 }
 
@@ -11037,26 +11037,26 @@ function startDetachingStdioInherit( test )
   {
     _.include( 'wAppBasic' );
     _.include( 'wFiles' );
-    
+
     let args = _.process.args();
 
     let o =
-    { 
+    {
       execPath : 'testAppChild.js',
       detaching : true,
       stdio : 'inherit',
       ipc : false
     }
-    
+
     _.mapExtend( o, args.map );
-    
+
     if( o.mode != 'fork' )
     o.execPath = 'node ' + o.execPath;
-    
+
     let ready = _.process.start( o );
 
     ready.then( ( got ) =>
-    { 
+    {
       let optionsMapReceived = _.objectIs( got );
       process.send({ optionsMapReceived, childPid : o.process.pid });
       return null;
@@ -11095,9 +11095,9 @@ function startDetachingStdioInherit( test )
   ready
 
   .then( () =>
-  { 
+  {
     test.case = 'mode : spawn';
-    
+
     let o =
     {
       execPath : 'node testAppParent.js mode : spawn',
@@ -11125,34 +11125,34 @@ function startDetachingStdioInherit( test )
       test.is( _.process.isRunning( data.childPid ) );
       return _.time.out( 6000 );
     })
-    
+
     con.then( () =>
     {
       test.will = 'both dead';
-      
+
       test.is( !_.process.isRunning( o.process.pid ) );
       test.is( !_.process.isRunning( data.childPid ) );
-      
+
       test.is( _.strHas( o.output, 'Child process start' ) )
       test.is( !_.strHas( o.output, 'Child process end' ) )
-      
+
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
       test.identical( data.childPid, childPid )
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   /*  */
-  
+
   .then( () =>
-  { 
+  {
     test.case = 'mode : shell';
-    
+
     let o =
     {
       execPath : 'node testAppParent.js mode : shell',
@@ -11180,36 +11180,36 @@ function startDetachingStdioInherit( test )
       test.is( _.process.isRunning( data.childPid ) );
       return _.time.out( 6000 );
     })
-    
+
     con.then( () =>
     {
       test.will = 'both dead';
-      
+
       test.is( !_.process.isRunning( o.process.pid ) );
       test.is( !_.process.isRunning( data.childPid ) );
-      
+
       test.is( _.strHas( o.output, 'Child process start' ) )
       test.is( !_.strHas( o.output, 'Child process end' ) )
-      
+
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
-      
+
       test.is( !_.process.isRunning( childPid ) );
       test.notIdentical( data.childPid, childPid )
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   /*  */
-  
+
   .then( () =>
-  { 
+  {
     test.case = 'mode : fork';
-    
+
     let o =
     {
       execPath : 'node testAppParent.js mode : fork',
@@ -11237,30 +11237,30 @@ function startDetachingStdioInherit( test )
       test.is( _.process.isRunning( data.childPid ) );
       return _.time.out( 6000 );
     })
-    
+
     con.then( () =>
     {
       test.will = 'both dead';
-      
+
       test.is( !_.process.isRunning( o.process.pid ) );
       test.is( !_.process.isRunning( data.childPid ) );
-      
+
       test.is( !_.strHas( o.output, 'Child process start' ) )
       test.is( !_.strHas( o.output, 'Child process end' ) )
-      
+
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
       test.identical( data.childPid, childPid )
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   /*  */
-  
+
   return ready;
 }
 
@@ -11275,26 +11275,26 @@ function startDetachingStdioPipe( test )
   {
     _.include( 'wAppBasic' );
     _.include( 'wFiles' );
-    
+
     let args = _.process.args();
 
     let o =
-    { 
+    {
       execPath : 'testAppChild.js',
       detaching : true,
       stdio : 'pipe',
       ipc : false
     }
-    
+
     _.mapExtend( o, args.map );
-    
+
     if( o.mode != 'fork' )
     o.execPath = 'node ' + o.execPath;
-    
+
     let ready = _.process.start( o );
 
     ready.then( ( got ) =>
-    { 
+    {
       let optionsMapReceived = _.objectIs( got );
       process.send({ optionsMapReceived, childPid : o.process.pid });
       return null;
@@ -11333,9 +11333,9 @@ function startDetachingStdioPipe( test )
   ready
 
   .then( () =>
-  { 
+  {
     test.case = 'mode : spawn';
-    
+
     let o =
     {
       execPath : 'node testAppParent.js mode : spawn',
@@ -11363,34 +11363,34 @@ function startDetachingStdioPipe( test )
       test.is( _.process.isRunning( data.childPid ) );
       return _.time.out( 6000 );
     })
-    
+
     con.then( () =>
     {
       test.will = 'both dead';
-      
+
       test.is( !_.process.isRunning( o.process.pid ) );
       test.is( !_.process.isRunning( data.childPid ) );
-      
+
       test.is( _.strHas( o.output, 'Child process start' ) )
       test.is( !_.strHas( o.output, 'Child process end' ) )
-      
+
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
       test.identical( data.childPid, childPid )
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   /*  */
-  
+
   .then( () =>
-  { 
+  {
     test.case = 'mode : shell';
-    
+
     let o =
     {
       execPath : 'node testAppParent.js mode : shell',
@@ -11418,36 +11418,36 @@ function startDetachingStdioPipe( test )
       test.is( _.process.isRunning( data.childPid ) );
       return _.time.out( 6000 );
     })
-    
+
     con.then( () =>
     {
       test.will = 'both dead';
-      
+
       test.is( !_.process.isRunning( o.process.pid ) );
       test.is( !_.process.isRunning( data.childPid ) );
-      
+
       test.is( _.strHas( o.output, 'Child process start' ) )
       test.is( !_.strHas( o.output, 'Child process end' ) )
-      
+
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
-      
+
       test.is( !_.process.isRunning( childPid ) );
       test.notIdentical( data.childPid, childPid )
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   /*  */
-  
+
   .then( () =>
-  { 
+  {
     test.case = 'mode : fork';
-    
+
     let o =
     {
       execPath : 'node testAppParent.js mode : fork',
@@ -11475,30 +11475,30 @@ function startDetachingStdioPipe( test )
       test.is( _.process.isRunning( data.childPid ) );
       return _.time.out( 6000 );
     })
-    
+
     con.then( () =>
     {
       test.will = 'both dead';
-      
+
       test.is( !_.process.isRunning( o.process.pid ) );
       test.is( !_.process.isRunning( data.childPid ) );
-      
+
       test.is( !_.strHas( o.output, 'Child process start' ) )
       test.is( !_.strHas( o.output, 'Child process end' ) )
-      
+
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
       test.identical( data.childPid, childPid )
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   /*  */
-  
+
   return ready;
 }
 
@@ -11513,24 +11513,24 @@ function startDetachingIpc( test )
   {
     _.include( 'wAppBasic' );
     _.include( 'wFiles' );
-    
+
     let args = _.process.args();
 
     let o =
-    { 
+    {
       execPath : 'testAppChild.js',
       detaching : true,
     }
-    
+
     _.mapExtend( o, args.map );
-    
+
     if( o.mode != 'fork' )
     o.execPath = 'node ' + o.execPath;
-    
+
     let ready = _.process.start( o );
 
     ready.then( ( got ) =>
-    { 
+    {
       let optionsMapReceived = _.objectIs( got );
       process.send({ optionsMapReceived, childPid : o.process.pid });
       return null;
@@ -11569,9 +11569,9 @@ function startDetachingIpc( test )
   ready
 
   .then( () =>
-  { 
+  {
     test.case = 'mode : spawn, stdio : ignore, ipc : false';
-    
+
     let o =
     {
       execPath : 'node testAppParent.js mode : spawn stdio : ignore ipc : false',
@@ -11599,34 +11599,34 @@ function startDetachingIpc( test )
       test.is( _.process.isRunning( data.childPid ) );
       return _.time.out( 6000 );
     })
-    
+
     con.then( () =>
     {
       test.will = 'both dead';
-      
+
       test.is( !_.process.isRunning( o.process.pid ) );
       test.is( !_.process.isRunning( data.childPid ) );
-      
+
       test.is( !_.strHas( o.output, 'Child process start' ) )
       test.is( !_.strHas( o.output, 'Child process end' ) )
-      
+
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
       test.identical( data.childPid, childPid )
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   /*  */
-  
+
   .then( () =>
-  { 
+  {
     test.case = 'mode : spawn, stdio : ignore, ipc : true';
-    
+
     let o =
     {
       execPath : 'node testAppParent.js mode : spawn stdio : ignore ipc : true',
@@ -11654,34 +11654,34 @@ function startDetachingIpc( test )
       test.is( _.process.isRunning( data.childPid ) );
       return _.time.out( 6000 );
     })
-    
+
     con.then( () =>
     {
       test.will = 'both dead';
-      
+
       test.is( !_.process.isRunning( o.process.pid ) );
       test.is( !_.process.isRunning( data.childPid ) );
-      
+
       test.is( !_.strHas( o.output, 'Child process start' ) )
       test.is( !_.strHas( o.output, 'Child process end' ) )
-      
+
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
       test.identical( data.childPid, childPid )
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   /* Vova zzz : fix stdio : pipe problem */
-  
+
   // .then( () =>
-  // { 
+  // {
   //   test.case = 'mode : spawn, stdio : inherit ipc : false';
-    
+
   //   let o =
   //   {
   //     execPath : 'node testAppParent.js mode : spawn stdio : inherit ipc : false',
@@ -11709,32 +11709,32 @@ function startDetachingIpc( test )
   //     test.is( _.process.isRunning( data.childPid ) );
   //     return _.time.out( 6000 );
   //   })
-    
+
   //   con.then( () =>
   //   {
   //     test.will = 'both dead';
-      
+
   //     test.is( !_.process.isRunning( o.process.pid ) );
   //     test.is( !_.process.isRunning( data.childPid ) );
-      
+
   //     test.is( !_.strHas( o.output, 'Child process start' ) )
   //     test.is( !_.strHas( o.output, 'Child process end' ) )
-      
+
   //     test.is( _.fileProvider.fileExists( testFilePath ) );
   //     let childPid = _.fileProvider.fileRead( testFilePath );
   //     childPid = _.numberFrom( childPid );
   //     test.identical( data.childPid, childPid )
-      
+
   //     return null;
   //   })
 
   //   return con;
   // })
-  
+
   // .then( () =>
-  // { 
+  // {
   //   test.case = 'mode : spawn, stdio : inherit ipc : true';
-    
+
   //   let o =
   //   {
   //     execPath : 'node testAppParent.js mode : spawn stdio : inherit ipc : true',
@@ -11762,34 +11762,34 @@ function startDetachingIpc( test )
   //     test.is( _.process.isRunning( data.childPid ) );
   //     return _.time.out( 6000 );
   //   })
-    
+
   //   con.then( () =>
   //   {
   //     test.will = 'both dead';
-      
+
   //     test.is( !_.process.isRunning( o.process.pid ) );
   //     test.is( !_.process.isRunning( data.childPid ) );
-      
+
   //     test.is( !_.strHas( o.output, 'Child process start' ) )
   //     test.is( !_.strHas( o.output, 'Child process end' ) )
-      
+
   //     test.is( _.fileProvider.fileExists( testFilePath ) );
   //     let childPid = _.fileProvider.fileRead( testFilePath );
   //     childPid = _.numberFrom( childPid );
   //     test.identical( data.childPid, childPid )
-      
+
   //     return null;
   //   })
 
   //   return con;
   // })
-  
+
   /* Vova zzz : fix stdio : pipe problem */
-  
+
   // .then( () =>
-  // { 
+  // {
   //   test.case = 'mode : spawn, stdio : pipe ipc : false';
-    
+
   //   let o =
   //   {
   //     execPath : 'node testAppParent.js mode : spawn stdio : pipe ipc : false',
@@ -11817,34 +11817,34 @@ function startDetachingIpc( test )
   //     test.is( _.process.isRunning( data.childPid ) );
   //     return _.time.out( 6000 );
   //   })
-    
+
   //   con.then( () =>
   //   {
   //     test.will = 'both dead';
-      
+
   //     test.is( !_.process.isRunning( o.process.pid ) );
   //     test.is( !_.process.isRunning( data.childPid ) );
-      
+
   //     test.is( !_.strHas( o.output, 'Child process start' ) )
   //     test.is( !_.strHas( o.output, 'Child process end' ) )
-      
+
   //     test.is( _.fileProvider.fileExists( testFilePath ) );
   //     let childPid = _.fileProvider.fileRead( testFilePath );
   //     childPid = _.numberFrom( childPid );
   //     test.identical( data.childPid, childPid )
-      
+
   //     return null;
   //   })
 
   //   return con;
   // })
-  
+
   /* Vova zzz : fix stdio : pipe problem */
-  
+
   // .then( () =>
-  // { 
+  // {
   //   test.case = 'mode : spawn, stdio : pipe ipc : true';
-    
+
   //   let o =
   //   {
   //     execPath : 'node testAppParent.js mode : spawn stdio : pipe ipc : true',
@@ -11872,34 +11872,34 @@ function startDetachingIpc( test )
   //     test.is( _.process.isRunning( data.childPid ) );
   //     return _.time.out( 6000 );
   //   })
-    
+
   //   con.then( () =>
   //   {
   //     test.will = 'both dead';
-      
+
   //     test.is( !_.process.isRunning( o.process.pid ) );
   //     test.is( !_.process.isRunning( data.childPid ) );
-      
+
   //     test.is( !_.strHas( o.output, 'Child process start' ) )
   //     test.is( !_.strHas( o.output, 'Child process end' ) )
-      
+
   //     test.is( _.fileProvider.fileExists( testFilePath ) );
   //     let childPid = _.fileProvider.fileRead( testFilePath );
   //     childPid = _.numberFrom( childPid );
   //     test.identical( data.childPid, childPid )
-      
+
   //     return null;
   //   })
 
   //   return con;
   // })
-  
+
   /*  */
-  
+
   .then( () =>
-  { 
+  {
     test.case = 'mode : fork stdio : ignore ipc : false';
-    
+
     let o =
     {
       execPath : 'node testAppParent.js mode : fork stdio : ignore ipc : false',
@@ -11927,34 +11927,34 @@ function startDetachingIpc( test )
       test.is( _.process.isRunning( data.childPid ) );
       return _.time.out( 6000 );
     })
-    
+
     con.then( () =>
     {
       test.will = 'both dead';
-      
+
       test.is( !_.process.isRunning( o.process.pid ) );
       test.is( !_.process.isRunning( data.childPid ) );
-      
+
       test.is( !_.strHas( o.output, 'Child process start' ) )
       test.is( !_.strHas( o.output, 'Child process end' ) )
-      
+
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
       test.identical( data.childPid, childPid )
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   /*  */
-  
+
   .then( () =>
-  { 
+  {
     test.case = 'mode : fork stdio : ignore ipc : true';
-    
+
     let o =
     {
       execPath : 'node testAppParent.js mode : fork stdio : ignore ipc : true',
@@ -11982,36 +11982,36 @@ function startDetachingIpc( test )
       test.is( _.process.isRunning( data.childPid ) );
       return _.time.out( 6000 );
     })
-    
+
     con.then( () =>
     {
       test.will = 'both dead';
-      
+
       test.is( !_.process.isRunning( o.process.pid ) );
       test.is( !_.process.isRunning( data.childPid ) );
-      
+
       test.is( !_.strHas( o.output, 'Child process start' ) )
       test.is( !_.strHas( o.output, 'Child process end' ) )
-      
+
       test.is( _.fileProvider.fileExists( testFilePath ) );
       let childPid = _.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
       test.identical( data.childPid, childPid )
-      
+
       return null;
     })
 
     return con;
   })
-  
+
   /*  */
-  
+
   /* Vova zzz : fix stdio : pipe problem */
-  
+
   // .then( () =>
-  // { 
+  // {
   //   test.case = 'mode : fork, stdio : inherit ipc : false';
-    
+
   //   let o =
   //   {
   //     execPath : 'node testAppParent.js mode : fork stdio : inherit ipc : false',
@@ -12039,34 +12039,34 @@ function startDetachingIpc( test )
   //     test.is( _.process.isRunning( data.childPid ) );
   //     return _.time.out( 6000 );
   //   })
-    
+
   //   con.then( () =>
   //   {
   //     test.will = 'both dead';
-      
+
   //     test.is( !_.process.isRunning( o.process.pid ) );
   //     test.is( !_.process.isRunning( data.childPid ) );
-      
+
   //     test.is( !_.strHas( o.output, 'Child process start' ) )
   //     test.is( !_.strHas( o.output, 'Child process end' ) )
-      
+
   //     test.is( _.fileProvider.fileExists( testFilePath ) );
   //     let childPid = _.fileProvider.fileRead( testFilePath );
   //     childPid = _.numberFrom( childPid );
   //     test.identical( data.childPid, childPid )
-      
+
   //     return null;
   //   })
 
   //   return con;
   // })
-  
+
   /* Vova zzz : fix stdio : pipe problem */
-  
+
   // .then( () =>
-  // { 
+  // {
   //   test.case = 'mode : fork, stdio : inherit ipc : true';
-    
+
   //   let o =
   //   {
   //     execPath : 'node testAppParent.js mode : fork stdio : inherit ipc : true',
@@ -12094,34 +12094,34 @@ function startDetachingIpc( test )
   //     test.is( _.process.isRunning( data.childPid ) );
   //     return _.time.out( 6000 );
   //   })
-    
+
   //   con.then( () =>
   //   {
   //     test.will = 'both dead';
-      
+
   //     test.is( !_.process.isRunning( o.process.pid ) );
   //     test.is( !_.process.isRunning( data.childPid ) );
-      
+
   //     test.is( !_.strHas( o.output, 'Child process start' ) )
   //     test.is( !_.strHas( o.output, 'Child process end' ) )
-      
+
   //     test.is( _.fileProvider.fileExists( testFilePath ) );
   //     let childPid = _.fileProvider.fileRead( testFilePath );
   //     childPid = _.numberFrom( childPid );
   //     test.identical( data.childPid, childPid )
-      
+
   //     return null;
   //   })
 
   //   return con;
   // })
-  
+
   /* Vova zzz : fix stdio : pipe problem */
-  
+
   // .then( () =>
-  // { 
+  // {
   //   test.case = 'mode : fork, stdio : pipe ipc : false';
-    
+
   //   let o =
   //   {
   //     execPath : 'node testAppParent.js mode : fork stdio : pipe ipc : false',
@@ -12149,34 +12149,34 @@ function startDetachingIpc( test )
   //     test.is( _.process.isRunning( data.childPid ) );
   //     return _.time.out( 6000 );
   //   })
-    
+
   //   con.then( () =>
   //   {
   //     test.will = 'both dead';
-      
+
   //     test.is( !_.process.isRunning( o.process.pid ) );
   //     test.is( !_.process.isRunning( data.childPid ) );
-      
+
   //     test.is( !_.strHas( o.output, 'Child process start' ) )
   //     test.is( !_.strHas( o.output, 'Child process end' ) )
-      
+
   //     test.is( _.fileProvider.fileExists( testFilePath ) );
   //     let childPid = _.fileProvider.fileRead( testFilePath );
   //     childPid = _.numberFrom( childPid );
   //     test.identical( data.childPid, childPid )
-      
+
   //     return null;
   //   })
 
   //   return con;
   // })
-  
+
   /* Vova zzz : fix stdio : pipe problem */
-  
+
   // .then( () =>
-  // { 
+  // {
   //   test.case = 'mode : fork, stdio : pipe ipc : true';
-    
+
   //   let o =
   //   {
   //     execPath : 'node testAppParent.js mode : fork stdio : pipe ipc : true',
@@ -12204,28 +12204,28 @@ function startDetachingIpc( test )
   //     test.is( _.process.isRunning( data.childPid ) );
   //     return _.time.out( 6000 );
   //   })
-    
+
   //   con.then( () =>
   //   {
   //     test.will = 'both dead';
-      
+
   //     test.is( !_.process.isRunning( o.process.pid ) );
   //     test.is( !_.process.isRunning( data.childPid ) );
-      
+
   //     test.is( !_.strHas( o.output, 'Child process start' ) )
   //     test.is( !_.strHas( o.output, 'Child process end' ) )
-      
+
   //     test.is( _.fileProvider.fileExists( testFilePath ) );
   //     let childPid = _.fileProvider.fileRead( testFilePath );
   //     childPid = _.numberFrom( childPid );
   //     test.identical( data.childPid, childPid )
-      
+
   //     return null;
   //   })
 
   //   return con;
   // })
-  
+
   return ready;
 }
 
@@ -17062,7 +17062,7 @@ var Proto =
     shellDetachingThrowing,
     shellDetachingChildAfterParent,
     shellDetachingChildBeforeParent,
-    
+
     startNodeDetaching,
     startDetachingStdioIgnore,
     // startDetachingStdioInherit,//zzz Vova: fix problem with stdio : pipe later
