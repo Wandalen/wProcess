@@ -136,7 +136,32 @@ function start_pre( routine, args )
 
 function start_body( o )
 {
-
+  /* Subroutine index:
+  endDeasyncMaybe
+  multiple
+  single
+  end
+  prepare
+  launch
+  launchAct
+  disconnect
+  launchInputLog
+  execPathParse
+  argsJoin
+  escapeArg
+  optionsForSpawn
+  optionsForFork
+  execPathForFork
+  onProcedureTerminationBegin
+  pipe
+  exitCodeSet
+  infoGet
+  handleClose
+  handleError
+  handleStderr
+  handleStdout
+  log
+  */
   _.assertRoutineOptions( start_body, arguments );
   _.assert( arguments.length === 1, 'Expects single argument' );
   _.assert( _.longHas( [ 'fork', 'exec', 'spawn', 'shell' ], o.mode ) );
