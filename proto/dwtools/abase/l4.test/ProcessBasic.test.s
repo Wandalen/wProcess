@@ -11689,7 +11689,7 @@ function startDetachingChildExitsBeforeParent( test )
       return null;
     })
 
-    _.time.out( 10000, () =>
+    _.time.out( 5000, () =>
     {
       console.log( 'Parent process end' )
     });
