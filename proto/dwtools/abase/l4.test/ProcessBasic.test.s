@@ -13203,7 +13203,12 @@ function startOnTerminate( test )
     }
 
     _.process.start( o );
-    _.time.out( 6000, () => o.disconnect() );
+
+    o.onTerminate.then( ( got ) =>
+    {
+      o.disconnect();
+      return got;
+    })
 
     return test.mustNotThrowError( onTerminate )
     .then( ( got ) =>
