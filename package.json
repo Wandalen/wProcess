@@ -33,6 +33,6 @@
     "strip-ansi" : "6.0.0"
   },
   "optionalDependencies" : { "windows-process-tree" : "0.2.4" },
-  "devDependencies" : { "wTesting" : "alpha" },
+  "devDependencies" : { "wTesting" : "alpha", "wappbasic": "file:." },
   "keywords" : [ "wTools", "exec file", "shell script", "run program" ]
 }
