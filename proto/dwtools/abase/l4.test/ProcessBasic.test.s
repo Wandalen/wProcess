@@ -11689,7 +11689,7 @@ function startDetachingChildExitsBeforeParent( test )
       return null;
     })
 
-    _.time.out( 5000, () =>
+    _.time.out( 10000, () =>
     {
       console.log( 'Parent process end' )
     });
@@ -11739,13 +11739,15 @@ function startDetachingChildExitsBeforeParent( test )
     _.process.start( o );
 
     let child;
+    let onChildTerminate = new _.Consequence();
 
     o.process.on( 'message', ( got ) =>
     {
       child = got;
+      onChildTerminate.take( got );
     })
 
-    let onChildTerminate = _.time.out( 3000, () =>
+    onChildTerminate.then( () =>
     {
       let childPid = _.fileProvider.fileRead( testFilePath );
       test.is( _.process.isAlive( o.process.pid ) );
