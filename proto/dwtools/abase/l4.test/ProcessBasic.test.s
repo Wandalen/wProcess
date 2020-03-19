@@ -12629,7 +12629,10 @@ function startNodeDetachingTrivial( test )
     {
       process.send( o.process.pid )
       o.process.send( 'data' );
-      _.time.out( 1000, () => o.disconnect() );
+      o.process.on( 'message', () =>
+      {
+        o.disconnect();
+      })
     })
 
     o.onTerminate.finally( ( err, got ) =>
@@ -12657,6 +12660,7 @@ function startNodeDetachingTrivial( test )
     process.on( 'message', data =>
     {
       console.log( 'from parent:', data );
+      process.send( 'ready to disconnect' )
     })
 
     _.time.out( 5000, () =>
@@ -12713,7 +12717,7 @@ function startNodeDetachingTrivial( test )
     test.is( !_.strHas( got.output, 'Child process end' ) );
     test.identical( o.exitCode, got.exitCode );
     test.identical( o.output, got.output );
-    return _.time.out( 5000 );
+    return _.time.out( 10000 );
   })
 
   o.onTerminate.then( () =>
