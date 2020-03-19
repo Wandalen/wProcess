@@ -1932,7 +1932,7 @@ function _eventExitHandle()
 {
   let args = arguments;
   // debugger;
-  _.process.eventGive({ event : 'exit', args : [] });
+  _.process.eventGive({ event : 'exit', args });
   // debugger;
   // _.each( _.process._ehandler.events.exit, ( callback ) =>
   // {

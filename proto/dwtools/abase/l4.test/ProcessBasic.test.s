@@ -1367,7 +1367,7 @@ function processArgsWithSpace( test )
 
 //
 
-function _exitHandlerOnce( test ) /* qqq : adjust */
+function processOnExit( test ) /* qqq : adjust vova: done */
 {
   var context = this;
   var routinePath = _.path.join( context.suitePath, test.name );
@@ -1387,9 +1387,9 @@ function _exitHandlerOnce( test ) /* qqq : adjust */
 
     var args = _.process.args();
 
-    _.process._exitHandlerOnce( ( arg ) =>
+    _.process.on( 'exit', ( arg ) =>
     {
-      console.log( '_exitHandlerOnce:', arg );
+      console.log( 'processOnExit:', arg );
     });
 
     _.time.out( 1000, () =>
@@ -1433,7 +1433,7 @@ function _exitHandlerOnce( test ) /* qqq : adjust */
     {
       test.is( got.exitCode === 0 );
       test.is( _.strHas( got.output, 'timeOut handler executed' ) )
-      test.is( _.strHas( got.output, '_exitHandlerOnce: 0' ) );
+      test.is( _.strHas( got.output, 'processOnExit: 0' ) );
       return null;
     })
 
@@ -1456,8 +1456,8 @@ function _exitHandlerOnce( test ) /* qqq : adjust */
     {
       test.is( got.exitCode === 0 );
       test.is( !_.strHas( got.output, 'timeOut handler executed' ) )
-      test.is( !_.strHas( got.output, '_exitHandlerOnce: 0' ) );
-      test.is( _.strHas( got.output, '_exitHandlerOnce: SIGINT' ) );
+      test.is( !_.strHas( got.output, 'processOnExit: 0' ) );
+      test.is( _.strHas( got.output, 'processOnExit: SIGINT' ) );
       return null;
     });
   })
@@ -1484,8 +1484,8 @@ function _exitHandlerOff( test ) /* qqq : adjust */
     handlersMap[ 'handler2' ] = handler2;
     handlersMap[ 'handler3' ] = handler3;
 
-    _.process._exitHandlerOnce( handler1 );
-    _.process._exitHandlerOnce( handler2 );
+    _.process.processOnExit( handler1 );
+    _.process.processOnExit( handler2 );
 
     if( args.map.off )
     {
@@ -1505,15 +1505,15 @@ function _exitHandlerOff( test ) /* qqq : adjust */
 
     function handler1( arg )
     {
-      console.log( '_exitHandlerOnce1:', arg );
+      console.log( 'processOnExit1:', arg );
     }
     function handler2( arg )
     {
-      console.log( '_exitHandlerOnce2:', arg );
+      console.log( 'processOnExit2:', arg );
     }
     function handler3( arg )
     {
-      console.log( '_exitHandlerOnce3:', arg );
+      console.log( 'processOnExit3:', arg );
     }
   }
 
@@ -1544,9 +1544,9 @@ function _exitHandlerOff( test ) /* qqq : adjust */
     {
       test.identical( got.exitCode, 0 );
       test.identical( _.strCount( got.output, 'timeOut handler executed'  ), 1 );
-      test.identical( _.strCount( got.output, '_exitHandlerOnce1: 0' ), 1 );
-      test.identical( _.strCount( got.output, '_exitHandlerOnce2: 0' ), 1 );
-      test.identical( _.strCount( got.output, '_exitHandlerOnce3: 0' ), 0 );
+      test.identical( _.strCount( got.output, 'processOnExit1: 0' ), 1 );
+      test.identical( _.strCount( got.output, 'processOnExit2: 0' ), 1 );
+      test.identical( _.strCount( got.output, 'processOnExit3: 0' ), 0 );
       return null;
     })
 
@@ -1572,9 +1572,9 @@ function _exitHandlerOff( test ) /* qqq : adjust */
     {
       test.identical( got.exitCode, 0 );
       test.identical( _.strCount( got.output, 'timeOut handler executed'  ), 1 );
-      test.identical( _.strCount( got.output, '_exitHandlerOnce1: 0' ), 0 );
-      test.identical( _.strCount( got.output, '_exitHandlerOnce2: 0' ), 1 );
-      test.identical( _.strCount( got.output, '_exitHandlerOnce3: 0' ), 0 );
+      test.identical( _.strCount( got.output, 'processOnExit1: 0' ), 0 );
+      test.identical( _.strCount( got.output, 'processOnExit2: 0' ), 1 );
+      test.identical( _.strCount( got.output, 'processOnExit3: 0' ), 0 );
       return null;
     })
   })
@@ -1599,9 +1599,9 @@ function _exitHandlerOff( test ) /* qqq : adjust */
     {
       test.identical( got.exitCode, 0 );
       test.identical( _.strCount( got.output, 'timeOut handler executed'  ), 1 );
-      test.identical( _.strCount( got.output, '_exitHandlerOnce1: 0' ), 0 );
-      test.identical( _.strCount( got.output, '_exitHandlerOnce2: 0' ), 0 );
-      test.identical( _.strCount( got.output, '_exitHandlerOnce3: 0' ), 0 );
+      test.identical( _.strCount( got.output, 'processOnExit1: 0' ), 0 );
+      test.identical( _.strCount( got.output, 'processOnExit2: 0' ), 0 );
+      test.identical( _.strCount( got.output, 'processOnExit3: 0' ), 0 );
       return null;
     })
   })
@@ -1627,9 +1627,9 @@ function _exitHandlerOff( test ) /* qqq : adjust */
     {
       test.notIdentical( got.exitCode, 0 );
       test.identical( _.strCount( got.output, 'uncaught error' ), 2 );
-      test.identical( _.strCount( got.output, '_exitHandlerOnce1: -1' ), 1 );
-      test.identical( _.strCount( got.output, '_exitHandlerOnce2: -1' ), 1 );
-      test.identical( _.strCount( got.output, '_exitHandlerOnce3: -1' ), 0 );
+      test.identical( _.strCount( got.output, 'processOnExit1: -1' ), 1 );
+      test.identical( _.strCount( got.output, 'processOnExit2: -1' ), 1 );
+      test.identical( _.strCount( got.output, 'processOnExit3: -1' ), 0 );
       return null;
     })
   })
@@ -18185,7 +18185,7 @@ var Proto =
     processArgsMultipleCommands,
     processArgsPaths,
     processArgsWithSpace,
-    _exitHandlerOnce,
+    processOnExit,
     _exitHandlerOff,
     exitReason,
     exitCode,
