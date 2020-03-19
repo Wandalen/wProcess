@@ -1440,31 +1440,30 @@ function startAfterDeath_body( o )
   let toolsPathInclude = `let _ = require( '${_.strEscape( toolsPath )}' );\n`
   let secondaryProcessSource = toolsPathInclude + afterDeathSecondaryProcess.toString() + '\nafterDeathSecondaryProcess();';
   let secondaryFilePath = _.process.tempOpen({ sourceCode : secondaryProcessSource });
+  let srcOptions = _.mapExtend( null, o );
 
   let o2 = _.mapExtend( null, o );
-
   o2.execPath = _.path.nativize( secondaryFilePath );
   o2.mode = 'fork';
   o2.args = [];
   o2.stdio = 'ignore';
+  o2.outputPiping = 0;
   o2.detaching = true;
   o2.inputMirroring = 0;
 
   let result = _.process.start( o2 );
 
+  o.onStart = o2.onStart;
+  o.onTerminate = o2.onTerminate;
+  o.ready = o2.ready;
+  o.process = o2.process;
+  o.disconnect = _.routineJoin( o2, o2.disconnect );
+
   o2.onStart.give( function( err, got )
   {
-    if( err )
-    return this.error( err );
-
-    o2.process.send( o );
+    if( !err )
+    o2.process.send( srcOptions );
     this.take( err, got );
-
-    o.onStart = o2.onStart;
-    o.onTerminate = o2.onTerminate;
-    o.ready = o2.ready;
-    o.process = o2.process;
-    o.disconnect = o2.disconnect;
   })
 
   o2.onTerminate.catchGive( function ( err )
@@ -1476,23 +1475,16 @@ function startAfterDeath_body( o )
 
   return result;
 
-  //
+  /* */
 
   function afterDeathSecondaryProcess()
   {
     _.include( 'wAppBasic' );
     _.include( 'wFiles' );
 
-    let ready = new _.Consequence();
-
-    process.on( 'message', ( data ) => ready.take( data ) )
-    ready.thenGive( ( o ) =>
+    process.on( 'message', ( o ) =>
     {
-      process.on( 'disconnect', () =>
-      {
-        console.log( 'Secondary: starting child process...' );
-        _.process.start( o );
-      })
+      process.on( 'disconnect', () => _.process.start( o ) )
     })
   }
 
