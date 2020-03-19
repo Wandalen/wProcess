@@ -11178,7 +11178,7 @@ function startDetachingModeForkTerminationBegin( test )
       test.will = 'parent is dead, child is still alive';
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( _.process.isAlive( data.childPid ) );
-      return _.time.out( 6000 );
+      return _.time.out( 10000 );
     })
 
     con.then( () =>
@@ -11229,7 +11229,7 @@ function startDetachingModeForkTerminationBegin( test )
       test.will = 'parent is dead, child is still alive';
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( _.process.isAlive( data.childPid ) );
-      return _.time.out( 6000 );
+      return _.time.out( 10000 );
     })
 
     con.then( () =>
@@ -11280,7 +11280,7 @@ function startDetachingModeForkTerminationBegin( test )
       test.will = 'parent is dead, child is still alive';
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( _.process.isAlive( data.childPid ) );
-      return _.time.out( 6000 );
+      return _.time.out( 10000 );
     })
 
     con.then( () =>
@@ -11331,7 +11331,7 @@ function startDetachingModeForkTerminationBegin( test )
       test.will = 'parent is dead, child is still alive';
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( _.process.isAlive( data.childPid ) );
-      return _.time.out( 6000 );
+      return _.time.out( 10000 );
     })
 
     con.then( () =>
