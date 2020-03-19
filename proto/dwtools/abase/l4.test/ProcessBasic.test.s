@@ -11458,7 +11458,7 @@ function startDetachingModeShellTerminationBegin( test )
       test.will = 'parent is dead, child is still alive';
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( _.process.isAlive( data.childPid ) );
-      return _.time.out( 6000 );
+      return _.time.out( 10000 );
     })
 
     con.then( () =>
@@ -11510,7 +11510,7 @@ function startDetachingModeShellTerminationBegin( test )
       test.will = 'parent is dead, child is still alive';
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( _.process.isAlive( data.childPid ) );
-      return _.time.out( 6000 );
+      return _.time.out( 10000 );
     })
 
     con.then( () =>
@@ -11633,7 +11633,7 @@ function startDetachingChildExitsAfterParent( test )
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( _.process.isAlive( childPid ) );
 
-      return _.time.out( 6000 );
+      return _.time.out( 10000 );
     })
 
     o.onTerminate.then( () =>
