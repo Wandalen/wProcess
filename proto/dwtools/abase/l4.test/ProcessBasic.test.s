@@ -9944,7 +9944,7 @@ function shellAfterDeath( test )
       test.is( _.process.isAlive( childPid ) );
       test.case = 'child of secondary process does not exit yet'
       test.is( !_.fileProvider.fileExists( testFilePath ) );
-      return _.time.out( 6000 );
+      return _.time.out( 10000 );
     })
 
     o.onTerminate.then( () =>
