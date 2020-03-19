@@ -1367,7 +1367,7 @@ function processArgsWithSpace( test )
 
 //
 
-function processOnExit( test ) /* qqq : adjust vova: done */
+function processOnExitEvent( test ) /* qqq : adjust vova: done */
 {
   var context = this;
   var routinePath = _.path.join( context.suitePath, test.name );
@@ -1467,7 +1467,7 @@ function processOnExit( test ) /* qqq : adjust vova: done */
 
 //
 
-function _exitHandlerOff( test ) /* qqq : adjust */
+function processOffExitEvent( test ) /* qqq : adjust vova: done */
 {
   var context = this;
   var routinePath = _.path.join( context.suitePath, test.name );
@@ -1484,8 +1484,8 @@ function _exitHandlerOff( test ) /* qqq : adjust */
     handlersMap[ 'handler2' ] = handler2;
     handlersMap[ 'handler3' ] = handler3;
 
-    _.process.processOnExit( handler1 );
-    _.process.processOnExit( handler2 );
+    _.process.on( 'exit', handler1 );
+    _.process.on( 'exit', handler2 );
 
     if( args.map.off )
     {
@@ -1493,7 +1493,7 @@ function _exitHandlerOff( test ) /* qqq : adjust */
       _.each( args.map.off, ( name ) =>
       {
         _.assert( handlersMap[ name ] );
-        _.process._exitHandlerOff( handlersMap[ name ] );
+        _.process.off( 'exit', handlersMap[ name ] );
       })
     }
 
@@ -18185,8 +18185,8 @@ var Proto =
     processArgsMultipleCommands,
     processArgsPaths,
     processArgsWithSpace,
-    processOnExit,
-    _exitHandlerOff,
+    processOnExitEvent,
+    processOffExitEvent,
     exitReason,
     exitCode,
 
