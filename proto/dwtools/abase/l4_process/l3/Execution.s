@@ -136,7 +136,32 @@ function start_pre( routine, args )
 
 function start_body( o )
 {
-
+  /* Subroutine index:
+  endDeasyncMaybe
+  multiple
+  single
+  end
+  prepare
+  launch
+  launchAct
+  disconnect
+  launchInputLog
+  execPathParse
+  argsJoin
+  escapeArg
+  optionsForSpawn
+  optionsForFork
+  execPathForFork
+  onProcedureTerminationBegin
+  pipe
+  exitCodeSet
+  infoGet
+  handleClose
+  handleError
+  handleStderr
+  handleStdout
+  log
+  */
   _.assertRoutineOptions( start_body, arguments );
   _.assert( arguments.length === 1, 'Expects single argument' );
   _.assert( _.longHas( [ 'fork', 'exec', 'spawn', 'shell' ], o.mode ) );
@@ -144,9 +169,14 @@ function start_body( o )
   _.assert( o.args === null || _.arrayIs( o.args ) || _.strIs( o.args ) );
   _.assert( o.execPath === null || _.strIs( o.execPath ) || _.strsAreAll( o.execPath ), 'Expects string or strings {-o.execPath-}, but got', _.strType( o.execPath ) );
   _.assert( o.timeOut === null || _.numberIs( o.timeOut ), 'Expects null or number {-o.timeOut-}, but got', _.strType( o.timeOut ) );
-  _.assert( _.longHas( [ 'instant', 'afterdeath' ],  o.when ) || _.objectIs( o.when ), 'Unsupported starting mode:', o.when );
-  _.assert( !o.detaching || _.longHas( [ 'pipe', 'ignore' ],  o.stdio ), `Unsupported stdio: ${o.stdio} for process detaching` );
+  _.assert( _.longHas( [ 'instant' ],  o.when ) || _.objectIs( o.when ), 'Unsupported starting mode:', o.when );
+  _.assert( o.when !== 'afterdeath', `Starting mode:'afterdeath' is moved to separate routine _.process.startAfterDeath` );
+  _.assert( !o.detaching || !_.longHas( _.arrayAs( o.stdio ), 'inherit' ), `Unsupported stdio: ${o.stdio} for process detaching` );
   _.assert( !o.detaching || _.longHas( [ 'fork', 'spawn', 'shell' ],  o.mode ), `Unsupported mode: ${o.mode} for process detaching` );
+  _.assert( o.onStart === null || _.consequenceIs( o.onStart ) );
+  _.assert( o.onTerminate === null || _.consequenceIs( o.onTerminate ) );
+  _.assert( !o.ipc || _.longHas( [ 'fork', 'spawn' ], o.mode ), `Mode: ${o.mode} doesn't support inter process communication.` );
+
 
   let state = 0;
   let currentExitCode;
@@ -175,6 +205,25 @@ function start_body( o )
   }
 
   o.ready = o.ready || new _.Consequence().take( null );
+
+  if( o.onStart === null )
+  {
+    o.onStart = o.ready;
+    if( !o.detaching )
+    o.onStart = new _.Consequence();
+  }
+  if( o.onTerminate === null )
+  {
+    o.onTerminate = o.ready;
+    if( o.detaching )
+    o.onTerminate = new _.Consequence();
+  }
+
+  if( !o.detaching )
+  _.assert( o.ready === o.onTerminate && o.ready !== o.onStart );
+  else
+  _.assert( o.ready === o.onStart && o.ready !== o.onTerminate );
+
 
   if( _global_.debugger )
   debugger;
@@ -261,6 +310,8 @@ function start_body( o )
       }
 
       let o2 = _.mapExtend( null, o );
+      o2.onStart = null;
+      o2.onTerminate = null;
       o2.execPath = execPath[ p ];
       o2.args = o.args ? o.args.slice() : o.args;
       o2.currentPath = currentPath[ c ];
@@ -327,8 +378,6 @@ function start_body( o )
 
     try
     {
-      if( o.when === 'afterdeath' && !o.dry )
-      prepareAfterDeath();
       prepare();
       launch();
       pipe();
@@ -343,7 +392,11 @@ function start_body( o )
       if( o.sync && !o.deasync )
       throw _.errLogOnce( err );
       else
-      o.ready.error( _.errLogOnce( err ) );
+      {
+        if( !o.detaching )
+        o.onStart.error( err );
+        o.ready.error( _.errLogOnce( err ) );
+      }
     }
 
   }
@@ -375,61 +428,7 @@ function start_body( o )
 
   /* */
 
-  function prepareAfterDeath() /* xxx qqq : ask how to refactor */
-  {
-    let toolsPath = _.path.nativize( _.path.join( __dirname, '../../../Tools.s' ) );
-    let toolsPathInclude = `let _ = require( '${_.strEscape( toolsPath )}' );\n`
-    let secondaryProcessSource = toolsPathInclude + afterDeathSecondaryProcess.toString() + '\afterDeathSecondaryProcess();';
-    let secondaryFilePath = _.process.tempOpen({ sourceCode : secondaryProcessSource });
 
-    let childOptions = _.mapExtend( null, o );
-
-    childOptions.ready = null;
-    childOptions.logger = null;
-    childOptions.when = 'instant';
-
-    o.execPath = 'node';
-    o.mode = 'spawn';
-    o.args = [ _.path.nativize( secondaryFilePath ), _.toJson( childOptions ), process.pid ]
-    o.ipc = false;
-    o.stdio = 'ignore';
-    o.detaching = true;
-    o.inputMirroring = 0;
-  }
-
-  function afterDeathSecondaryProcess()
-  {
-    _.include( 'wAppBasic' );
-    _.include( 'wFiles' );
-
-    let startOptions;
-    let parentPid;
-    let interval;
-    let delay = 100;
-
-    try
-    {
-      startOptions = JSON.parse( process.argv[ 2 ] );
-    }
-    catch ( err )
-    {
-      _.errLogOnce( err );
-    }
-
-    if( !startOptions )
-    return;
-
-    parentPid = _.numberFrom( process.argv[ 3 ] )
-    interval = setInterval( () =>
-    {
-      if( _.process.isRunning( parentPid ) )
-      return;
-      clearInterval( interval );
-      console.log( 'Secondary: starting child process...' );
-      _.process.start( startOptions );
-
-    }, delay );
-  }
 
   /* */
 
@@ -681,13 +680,14 @@ function start_body( o )
     }
     else _.assert( 0, 'Unknown mode', _.strQuote( o.mode ), 'to start process at path', _.strQuote( o.paths ) );
 
+    /* extend with close */
+
+    o.disconnect = disconnect;
+
+    o.onStart.take( o );
+
     if( o.detaching )
     {
-      /* qqq xxx : suspicious */
-      //if( o.process.disconnect )
-      //o.process.disconnect();
-      //o.process.unref();
-      o.ready.take( o );
       _.Procedure.On( 'terminationBegin', onProcedureTerminationBegin );
     }
     else if( !o.sync )
@@ -699,10 +699,6 @@ function start_body( o )
       else
       o.procedure = result[ 0 ];
     }
-
-    /* extend with disconnect */
-
-    o.disconnect = disconnect;
   }
 
   /* */
@@ -710,18 +706,25 @@ function start_body( o )
   function disconnect()
   {
     if( this.process.stdout )
-    this.process.stdout.end();
+    this.process.stdout.destroy();
     if( this.process.stderr )
-    this.process.stderr.end();
+    this.process.stderr.destroy();
     if( this.process.stdin )
-    this.process.stdin.end();
+    this.process.stdin.destroy();
 
     if( this.process.disconnect )
+    if( this.process.connected )
     this.process.disconnect();
 
     this.process.unref();
 
-    // this.ready.take( this );
+    if( !this.detaching || this.process._disconnected )
+    return true;
+    this.process._disconnected = true;
+    if( _.process.isAlive( this.process.pid ) )
+    this.onTerminate.error( _._err({ args : [ 'This process was disconnected' ], reason : 'disconnected' }) );
+
+    return true;
   }
 
   /* */
@@ -886,6 +889,7 @@ function start_body( o )
   {
     // if( o.when === 'instant' )
     // o.ready.error( _.err( 'Detached child with pid:', o.process.pid, 'is continuing execution after parent death.' ) );
+    o.disconnect();
     _.Procedure.Off( 'terminationBegin', onProcedureTerminationBegin );
   }
 
@@ -995,7 +999,7 @@ function start_body( o )
       else if( killedByTimeout )
       err = _.err( 'Process timed out, killed by exit signal', exitSignal, '\n', infoGet() );
       else
-      err = _.err( 'Process wass killed by exit signal', exitSignal, '\n', infoGet() );
+      err = _.err( 'Process was killed by exit signal', exitSignal, '\n', infoGet() );
 
       if( o.briefExitCode )
       err = _.errBrief( err );
@@ -1003,11 +1007,15 @@ function start_body( o )
       if( o.sync && !o.deasync )
       throw err;
       else
-      o.ready.error( err );
+      {
+        o.onTerminate.error( err );
+        // o.ready.error( err );
+      }
     }
     else if( !o.sync || o.deasync )
     {
-      o.ready.take( o );
+      o.onTerminate.take( o );
+      // o.ready.take( o );
     }
 
   }
@@ -1031,7 +1039,10 @@ function start_body( o )
     if( o.sync && !o.deasync )
     throw err;
     else
-    o.ready.error( err );
+    {
+      o.onTerminate.error( err );
+      // o.ready.error( err );
+    }
   }
 
   /* */
@@ -1161,6 +1172,9 @@ start_body.defaults =
   outputGray : 0,
   outputGrayStdout : 0,
   outputGraying : 0,
+
+  onStart : null,
+  onTerminate : null,
 
 }
 
@@ -1339,15 +1353,20 @@ function startNode_body( o )
   let startOptions = _.mapOnly( o, _.process.start.defaults );
   startOptions.execPath = path;
 
-  let result = _.process.start( startOptions )
-  .give( function( err, arg )
+  let result = _.process.start( startOptions );
+  let onTerminate = startOptions.onTerminate;
+
+  onTerminate.give( function ( err, arg )
   {
+    o.output = startOptions.output;
     o.exitCode = startOptions.exitCode;
     o.exitSignal = startOptions.exitSignal;
     this.take( err, arg );
-  });
+  })
 
   o.ready = startOptions.ready;
+  o.onStart = startOptions.onStart;
+  o.onTerminate = startOptions.onTerminate;
   o.process = startOptions.process;
   o.disconnect = startOptions.disconnect;
 
@@ -1411,11 +1430,71 @@ defaults.mode = 'fork';
 
 //
 
-let startAfterDeath = _.routineFromPreAndBody( start_pre, start.body );
+function startAfterDeath_body( o )
+{
+  _.assertRoutineOptions( startAfterDeath_body, o );
+  _.assert( _.strIs( o.execPath ) );
+  _.assert( arguments.length === 1, 'Expects single argument' );
 
-var defaults = startAfterDeath.defaults;
+  let toolsPath = _.path.nativize( _.path.join( __dirname, '../../../Tools.s' ) );
+  let toolsPathInclude = `let _ = require( '${_.strEscape( toolsPath )}' );\n`
+  let secondaryProcessSource = toolsPathInclude + afterDeathSecondaryProcess.toString() + '\nafterDeathSecondaryProcess();';
+  let secondaryFilePath = _.process.tempOpen({ sourceCode : secondaryProcessSource });
+  let srcOptions = _.mapExtend( null, o );
 
-defaults.when = 'afterdeath';
+  let o2 = _.mapExtend( null, o );
+  o2.execPath = _.path.nativize( secondaryFilePath );
+  o2.mode = 'fork';
+  o2.args = [];
+  o2.stdio = 'ignore';
+  o2.outputPiping = 0;
+  o2.detaching = true;
+  o2.inputMirroring = 0;
+
+  let result = _.process.start( o2 );
+
+  o.onStart = o2.onStart;
+  o.onTerminate = o2.onTerminate;
+  o.ready = o2.ready;
+  o.process = o2.process;
+  o.disconnect = _.routineJoin( o2, o2.disconnect );
+
+  o2.onStart.give( function( err, got )
+  {
+    if( !err )
+    o2.process.send( srcOptions );
+    this.take( err, got );
+  })
+
+  o2.onTerminate.catchGive( function ( err )
+  {
+    _.errAttend( err );
+    if( err.reason != 'disconnected' )
+    this.error( err );
+  })
+
+  return result;
+
+  /* */
+
+  function afterDeathSecondaryProcess()
+  {
+    _.include( 'wAppBasic' );
+    _.include( 'wFiles' );
+
+    process.on( 'message', ( o ) =>
+    {
+      process.on( 'disconnect', () => _.process.start( o ) )
+    })
+  }
+
+}
+
+var defaults = startAfterDeath_body.defaults = Object.create( start.defaults );
+
+let startAfterDeath = _.routineFromPreAndBody( start_pre, startAfterDeath_body );
+
+
 
 //
 
@@ -1853,7 +1932,7 @@ function _eventExitHandle()
 {
   let args = arguments;
   // debugger;
-  _.process.eventGive({ event : 'exit', args : [] });
+  _.process.eventGive({ event : 'exit', args });
   // debugger;
   // _.each( _.process._ehandler.events.exit, ( callback ) =>
   // {
@@ -1876,10 +1955,11 @@ function _eventExitHandle()
 // children
 // --
 
-function isRunning( pid )
+function isAlive( src )
 {
+  let pid = _.process.pidFrom( src );
   _.assert( arguments.length === 1 );
-  _.assert( _.numberIs( pid ) );
+  _.assert( _.numberIs( pid ), `Expects process id as number, but got:${pid}` );
 
   try
   {
@@ -1890,6 +1970,37 @@ function isRunning( pid )
     return err.code === 'EPERM'
   }
 
+}
+
+//
+
+function pidFrom( src )
+{
+  _.assert( arguments.length === 1 );
+
+  if( !ChildProcess )
+  ChildProcess = require( 'child_process' );
+
+  if( _.numberIs( src ) )
+  return src;
+  if( _.objectIs( src ) )
+  {
+    if( src.process )
+    src = src.process;
+    _.assert( src instanceof ChildProcess.ChildProcess );
+    return src.pid;
+  }
+
+  _.assert( 0, `Unexpected source:${src}` );
+}
+
+//
+
+function statusOf( src )
+{
+  _.assert( arguments.length === 1 );
+  let isAlive = _.process.isAlive( src );
+  return isAlive ? 'alive' : 'dead';
 }
 
 //
@@ -1929,7 +2040,7 @@ function kill( o )
       {
         if( l && children[ l ].name === 'conhost.exe' )
         continue;
-        if( _.process.isRunning( children[ l ].pid ) )
+        if( _.process.isAlive( children[ l ].pid ) )
         process.kill( children[ l ].pid, 'SIGKILL' );
       }
 
@@ -1962,7 +2073,7 @@ function kill( o )
     for( let pid in tree )
     {
       pid = _.numberFrom( pid );
-      if( _.process.isRunning( pid ) )
+      if( _.process.isAlive( pid ) )
       process.kill( pid, 'SIGKILL' );
       killChildren( tree[ pid ] );
     }
@@ -2078,7 +2189,7 @@ function terminate( o )
     if( o.timeOut )
     _.time.out( o.timeOut, () =>
     {
-      if( !_.process.isRunning( pid ) )
+      if( !_.process.isAlive( pid ) )
       return null;
 
       if( o.process )
@@ -2102,7 +2213,7 @@ function terminate( o )
     for( let pid in tree )
     {
       pid = _.numberFrom( pid );
-      if( _.process.isRunning( pid ) )
+      if( _.process.isAlive( pid ) )
       terminateProcess( pid );
       terminateChildren( tree[ pid ] );
     }
@@ -2116,7 +2227,7 @@ function terminate( o )
     {
       if( l && tree[ l ].name === 'conhost.exe' )
       continue;
-      if( !_.process.isRunning( tree[ l ].pid ) )
+      if( !_.process.isAlive( tree[ l ].pid ) )
       continue;
       cons.push( terminateProcess( tree[ l ].pid ) );
     }
@@ -2155,7 +2266,7 @@ function children( o )
 
   let result;
 
-  if( !_.process.isRunning( o.pid ) )
+  if( !_.process.isAlive( o.pid ) )
   {
     let err = _.err( '\nTarget process:', _.strQuote( o.pid ), 'does not exist.' );
     return new _.Consequence().error( err );
@@ -2279,7 +2390,9 @@ let Extension =
 
   // children
 
-  isRunning,
+  isAlive,
+  pidFrom,
+  statusOf,
   kill,
   terminate,
   children,
