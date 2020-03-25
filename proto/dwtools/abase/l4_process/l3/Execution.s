@@ -136,7 +136,9 @@ function start_pre( routine, args )
 
 function start_body( o )
 {
-  /* Subroutine index:
+
+/* Subroutine index :
+
   endDeasyncMaybe
   multiple
   single
@@ -161,7 +163,9 @@ function start_body( o )
   handleStderr
   handleStdout
   log
-  */
+
+*/
+
   _.assertRoutineOptions( start_body, arguments );
   _.assert( arguments.length === 1, 'Expects single argument' );
   _.assert( _.longHas( [ 'fork', 'exec', 'spawn', 'shell' ], o.mode ) );
@@ -223,7 +227,6 @@ function start_body( o )
   _.assert( o.ready === o.onTerminate && o.ready !== o.onStart );
   else
   _.assert( o.ready === o.onStart && o.ready !== o.onTerminate );
-
 
   if( _global_.debugger )
   debugger;
@@ -552,7 +555,7 @@ function start_body( o )
       if( state === 2 )
       return;
       killedByTimeout = true;
-      o.process.kill( 'SIGTERM' );
+      o.process.kill( 'SIGTERM' ); /* qqq : ask */
     });
 
   }

@@ -131,19 +131,19 @@ function _argsInSamFormatNodejs( o )
   return result;
 
   function argsToString( args )
-  { 
-    return args.map( e => 
-    {  
+  {
+    return args.map( e =>
+    {
       if( !_.strHas( e, /\s/ ) )
       return e;
-      
+
       let quotes = _.strQuoteAnalyze( e );
       if( quotes.ranges.length )
       return e;
-      
+
       return `"${e}"`;
     }).join( ' ' ).trim();
-    
+
     // return args.map( e => _.strHas( e, /\s/ ) ? `"${e}"` : e ).join( ' ' ).trim();
   }
 }
