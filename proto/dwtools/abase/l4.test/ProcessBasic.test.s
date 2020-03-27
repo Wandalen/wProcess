@@ -5,7 +5,7 @@
 if( typeof module !== 'undefined' )
 {
 
-  let _ = require( '../../Tools.s' );
+  let _ = require( '../../../dwtools/Tools.s' );
 
   _.include( 'wTesting' );
   _.include( 'wFiles' );
@@ -37,7 +37,7 @@ function suiteBegin()
 {
   var self = this;
   self.suitePath = _.path.pathDirTempOpen( _.path.join( __dirname, '../..' ), 'ProcessBasic' );
-  self.toolsPath = _.path.nativize( _.path.resolve( __dirname, '../../Tools.s' ) );
+  self.toolsPath = _.path.nativize( _.path.resolve( __dirname, '../../../dwtools/Tools.s' ) );
   self.toolsPathInclude = `var _ = require( '${ _.strEscape( self.toolsPath ) }' )\n`;
 }
 

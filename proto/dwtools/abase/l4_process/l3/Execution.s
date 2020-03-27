@@ -1439,7 +1439,7 @@ function startAfterDeath_body( o )
   _.assert( _.strIs( o.execPath ) );
   _.assert( arguments.length === 1, 'Expects single argument' );
 
-  let toolsPath = _.path.nativize( _.path.join( __dirname, '../../../Tools.s' ) );
+  let toolsPath = _.path.nativize( _.path.join( __dirname, '../../../../dwtools/Tools.s' ) );
   let toolsPathInclude = `let _ = require( '${_.strEscape( toolsPath )}' );\n`
   let secondaryProcessSource = toolsPathInclude + afterDeathSecondaryProcess.toString() + '\nafterDeathSecondaryProcess();';
   let secondaryFilePath = _.process.tempOpen({ sourceCode : secondaryProcessSource });
