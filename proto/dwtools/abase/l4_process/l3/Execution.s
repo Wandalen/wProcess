@@ -721,9 +721,13 @@ function start_body( o )
 
     this.process.unref();
 
+    // xxx qqq : strange?
     if( !this.detaching || this.process._disconnected )
     return true;
-    this.process._disconnected = true;
+    this.process._disconnected = true; /* qqq : explain */
+
+    debugger;
+    // xxx qqq : strange?
     if( _.process.isAlive( this.process.pid ) )
     this.onTerminate.error( _._err({ args : [ 'This process was disconnected' ], reason : 'disconnected' }) );
 
@@ -2163,7 +2167,7 @@ function terminate( o )
     if( isWindows )
     result = windowsKill( pid );
     else
-    result = process.kill( pid, 'SIGINT' );
+    result = process.kill( pid, 'SIGINT' ); /* xxx qqq : ? */
 
     timeOutMaybe( pid );
 
