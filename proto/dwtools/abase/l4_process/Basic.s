@@ -13,7 +13,7 @@
 
 /**
  * Collection of routines to execute system commands, run shell, batches, launch external processes from JavaScript application.
-  @namespace Tools( module::ProcessBasic )
+  @namespace Tools.ProcessBasic 
   @memberof module:Tools/base/ProcessBasic
 */
 
