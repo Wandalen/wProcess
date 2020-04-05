@@ -116,15 +116,14 @@ function _argsInSamFormatNodejs( o )
   result.scriptArgs = argv.slice( 2 );
   result.scriptArgsString = argsToString( result.scriptArgs );
 
-  // debugger;
   let r = _.strRequestParse
   ({
     src : result.scriptArgsString,
     keyValDelimeter : o.keyValDelimeter,
     commandsDelimeter : o.commandsDelimeter,
     parsingArrays : o.parsingArrays,
+    severalValues : 1,
   });
-  // debugger;
 
   _.mapExtend( result, r );
 

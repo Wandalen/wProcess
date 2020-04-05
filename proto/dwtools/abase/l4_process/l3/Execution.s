@@ -691,7 +691,7 @@ function start_body( o )
 
     if( o.detaching )
     {
-      _.Procedure.On( 'terminationBegin', onProcedureTerminationBegin );
+      _.procedure.on( 'terminationBegin', onProcedureTerminationBegin );
     }
     else if( !o.sync )
     {
@@ -897,7 +897,7 @@ function start_body( o )
     // if( o.when === 'instant' )
     // o.ready.error( _.err( 'Detached child with pid:', o.process.pid, 'is continuing execution after parent death.' ) );
     o.disconnect();
-    _.Procedure.Off( 'terminationBegin', onProcedureTerminationBegin );
+    _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
   }
 
   /* */
@@ -973,7 +973,7 @@ function start_body( o )
     procedure.end();
 
     if( o.detaching )
-    _.Procedure.Off( 'terminationBegin', onProcedureTerminationBegin );
+    _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
 
     // if( exitSignal && exitCode === null )
     // exitCode = -1;
