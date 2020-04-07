@@ -9886,7 +9886,7 @@ function shellAfterDeath( test )
     _.time.out( 5000, () =>
     {
       console.log( 'parent termination begin' )
-      _.Procedure.TerminationBegin();
+      _.procedure.terminationBegin();
       return null;
     })
   }
@@ -10834,7 +10834,7 @@ function startDetachingModeSpawnTerminationBegin( test )
 
     _.time.out( 1000, () =>
     {
-      _.Procedure.TerminationBegin();
+      _.procedure.terminationBegin();
       return null;
     })
   }
@@ -11114,7 +11114,7 @@ function startDetachingModeForkTerminationBegin( test )
 
     _.time.out( 1000, () =>
     {
-      _.Procedure.TerminationBegin();
+      _.procedure.terminationBegin();
       return null;
     })
   }
@@ -11394,7 +11394,7 @@ function startDetachingModeShellTerminationBegin( test )
 
     _.time.out( 1000, () =>
     {
-      _.Procedure.TerminationBegin();
+      _.procedure.terminationBegin();
       return null;
     })
   }
@@ -16527,7 +16527,7 @@ function terminateDetachedComplex( test )
     _.time.out( 10000, () =>
     {
       console.log( 'TerminationBegin' )
-      _.Procedure.TerminationBegin()
+      _.procedure.terminationBegin()
       return null;
     })
   }
@@ -17132,7 +17132,7 @@ function terminateWithDetachedChildren( test )
     })
     _.time.out( 4000, () =>
     {
-      _.Procedure.TerminationBegin();
+      _.procedure.terminationBegin();
     })
 
   }
