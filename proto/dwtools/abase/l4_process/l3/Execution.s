@@ -131,7 +131,8 @@ function start_pre( routine, args )
  * })
  *
  * @function shell
- * @memberof module:Tools/base/ProcessBasic.Tools.process
+ * @module Tools/base/ProcessBasic
+ * @namespace Tools.process
  */
 
 function start_body( o )
@@ -1314,7 +1315,8 @@ defaults.stdio = 'inherit';
  * })
  *
  * @function startNode
- * @memberof module:Tools/base/ProcessBasic.Tools.process
+ * @module Tools/base/ProcessBasic
+ * @namespace Tools.process
  */
 
 function startNode_body( o )
@@ -1420,7 +1422,8 @@ let startNode = _.routineFromPreAndBody( start_pre, startNode_body );
  * })
  *
  * @function startNodePassingThrough
- * @memberof module:Tools/base/ProcessBasic.Tools.process
+ * @module Tools/base/ProcessBasic
+ * @namespace Tools.process
  */
 
 let startNodePassingThrough = _.routineFromPreAndBody( start_pre, startNode.body );
@@ -1576,7 +1579,8 @@ let startAfterDeath = _.routineFromPreAndBody( start_pre, startAfterDeath_body )
  * })
  *
  * @function starter
- * @memberof module:Tools/base/ProcessBasic.Tools.process
+ * @module Tools/base/ProcessBasic
+ * @namespace Tools.process
  */
 
 function starter( o0 )
@@ -1661,7 +1665,8 @@ starter.defaults = Object.create( start.defaults );
  * @description Saves exit reason if argument `reason` was provided, otherwise returns current exit reason value.
  * Returns `null` if reason was not defined yet.
  * @function exitReason
- * @memberof module:Tools/base/ProcessBasic.Tools.process
+ * @module Tools/base/ProcessBasic
+ * @namespace Tools.process
  */
 
 function exitReason( reason )
@@ -1685,7 +1690,8 @@ function exitReason( reason )
  * @description Updates exit code if argument `status` was provided and returns previous exit code. Returns current exit code if no argument provided.
  * Returns `0` if exit code was not defined yet.
  * @function exitCode
- * @memberof module:Tools/base/ProcessBasic.Tools.process
+ * @module Tools/base/ProcessBasic
+ * @namespace Tools.process
  */
 
 function exitCode( status )

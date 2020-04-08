@@ -15,7 +15,7 @@
  * Collection of routines to execute system commands, run shell, batches, launch external processes from JavaScript application.
   @namespace "Tools.process"
   @extends Tools
-  @memberof module:Tools/base/ProcessBasic
+  @module Tools/base/ProcessBasic
 */
 
 if( typeof module !== 'undefined' )

@@ -33,7 +33,8 @@ _.assert( !!_realGlobal_ );
  * console.log( result );
  *
  * @function args
- * @memberof module:Tools/base/ProcessBasic.Tools.process
+ * @module Tools/base/ProcessBasic
+ * @namespace Tools.process
  */
 
 let _argsCache;
@@ -192,7 +193,8 @@ _argsInSamFormatBrowser.defaults = Object.create( _argsInSamFormatDefaults.defau
  * @return {Object} Returns map with parsed options.
  *
  * @function argsReadTo
- * @memberof module:Tools/base/ProcessBasic.Tools.process
+ * @module Tools/base/ProcessBasic
+ * @namespace Tools.process
  */
 
 function argsReadTo( o )
