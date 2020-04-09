@@ -33,7 +33,8 @@ _.assert( !!_realGlobal_ );
  * console.log( result );
  *
  * @function args
- * @memberof module:Tools/base/ProcessBasic.Tools( module::ProcessBasic )
+ * @module Tools/base/ProcessBasic
+ * @namespace Tools.process
  */
 
 let _argsCache;
@@ -184,7 +185,7 @@ _argsInSamFormatBrowser.defaults = Object.create( _argsInSamFormatDefaults.defau
  *
  * @param {Object} o Options map.
  * @param {Object} o.dst=null Target object.
- * @param {Object} o.propertiesMap=null Map with parsed options. By default routine gets this map using {@link module:Tools/base/ProcessBasic.Tools( module::ProcessBasic ).args args} routine.
+ * @param {Object} o.propertiesMap=null Map with parsed options. By default routine gets this map using {@link module:Tools/base/ProcessBasic.Tools.process.args args} routine.
  * @param {Object} o.namesMap=null Map of expected options.
  * @param {Object} o.removing=1 Removes copied options from result map `o.propertiesMap`.
  * @param {Object} o.only=1 Check if all option are expected. Throws error if not.
@@ -192,7 +193,8 @@ _argsInSamFormatBrowser.defaults = Object.create( _argsInSamFormatDefaults.defau
  * @return {Object} Returns map with parsed options.
  *
  * @function argsReadTo
- * @memberof module:Tools/base/ProcessBasic.Tools( module::ProcessBasic )
+ * @module Tools/base/ProcessBasic
+ * @namespace Tools.process
  */
 
 function argsReadTo( o )
