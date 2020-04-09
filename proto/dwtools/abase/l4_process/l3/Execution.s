@@ -131,7 +131,8 @@ function start_pre( routine, args )
  * })
  *
  * @function shell
- * @memberof module:Tools/base/ProcessBasic.Tools( module::ProcessBasic )
+ * @module Tools/base/ProcessBasic
+ * @namespace Tools.process
  */
 
 function start_body( o )
@@ -1287,10 +1288,10 @@ defaults.stdio = 'inherit';
 //
 
 /**
- * @summary Short-cut for {@link module:Tools/base/ProcessBasic.Tools( module::ProcessBasic ).start start} routine. Executes provided script in with `node` runtime.
+ * @summary Short-cut for {@link module:Tools/base/ProcessBasic.Tools.process.start start} routine. Executes provided script in with `node` runtime.
  * @description
  * Expects path to javascript file in `o.execPath` option. Automatically prepends `node` prefix before script path `o.execPath`.
- * @param {Object} o Options map, see {@link module:Tools/base/ProcessBasic.Tools( module::ProcessBasic ).start start} for detailed info about options.
+ * @param {Object} o Options map, see {@link module:Tools/base/ProcessBasic.Tools.process.start start} for detailed info about options.
  * @param {Boolean} o.passingThrough=0 Allows to pass arguments of parent process to the child process.
  * @param {Boolean} o.maximumMemory=0 Allows `node` to use all available memory.
  * @param {Boolean} o.applyingExitCode=1 Applies exit code to parent process.
@@ -1314,7 +1315,8 @@ defaults.stdio = 'inherit';
  * })
  *
  * @function startNode
- * @memberof module:Tools/base/ProcessBasic.Tools( module::ProcessBasic )
+ * @module Tools/base/ProcessBasic
+ * @namespace Tools.process
  */
 
 function startNode_body( o )
@@ -1393,11 +1395,11 @@ let startNode = _.routineFromPreAndBody( start_pre, startNode_body );
 //
 
 /**
- * @summary Short-cut for {@link module:Tools/base/ProcessBasic.Tools( module::ProcessBasic ).startNode startNode} routine.
+ * @summary Short-cut for {@link module:Tools/base/ProcessBasic.Tools.process.startNode startNode} routine.
  * @description
  * Passes arguments of parent process to the child and allows `node` to use all available memory.
  * Expects path to javascript file in `o.execPath` option. Automatically prepends `node` prefix before script path `o.execPath`.
- * @param {Object} o Options map, see {@link module:Tools/base/ProcessBasic.Tools( module::ProcessBasic ).start start} for detailed info about options.
+ * @param {Object} o Options map, see {@link module:Tools/base/ProcessBasic.Tools.process.start start} for detailed info about options.
  * @param {Boolean} o.passingThrough=1 Allows to pass arguments of parent process to the child process.
  * @param {Boolean} o.maximumMemory=1 Allows `node` to use all available memory.
  * @param {Boolean} o.applyingExitCode=1 Applies exit code to parent process.
@@ -1420,7 +1422,8 @@ let startNode = _.routineFromPreAndBody( start_pre, startNode_body );
  * })
  *
  * @function startNodePassingThrough
- * @memberof module:Tools/base/ProcessBasic.Tools( module::ProcessBasic )
+ * @module Tools/base/ProcessBasic
+ * @namespace Tools.process
  */
 
 let startNodePassingThrough = _.routineFromPreAndBody( start_pre, startNode.body );
@@ -1576,7 +1579,8 @@ let startAfterDeath = _.routineFromPreAndBody( start_pre, startAfterDeath_body )
  * })
  *
  * @function starter
- * @memberof module:Tools/base/ProcessBasic.Tools( module::ProcessBasic )
+ * @module Tools/base/ProcessBasic
+ * @namespace Tools.process
  */
 
 function starter( o0 )
@@ -1661,7 +1665,8 @@ starter.defaults = Object.create( start.defaults );
  * @description Saves exit reason if argument `reason` was provided, otherwise returns current exit reason value.
  * Returns `null` if reason was not defined yet.
  * @function exitReason
- * @memberof module:Tools/base/ProcessBasic.Tools( module::ProcessBasic )
+ * @module Tools/base/ProcessBasic
+ * @namespace Tools.process
  */
 
 function exitReason( reason )
@@ -1685,7 +1690,8 @@ function exitReason( reason )
  * @description Updates exit code if argument `status` was provided and returns previous exit code. Returns current exit code if no argument provided.
  * Returns `0` if exit code was not defined yet.
  * @function exitCode
- * @memberof module:Tools/base/ProcessBasic.Tools( module::ProcessBasic )
+ * @module Tools/base/ProcessBasic
+ * @namespace Tools.process
  */
 
 function exitCode( status )
