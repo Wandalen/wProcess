@@ -962,7 +962,6 @@ function start_body( o )
     result += 'Launched at ' + _.strQuote( o.currentPath ) + '\n';
     if( stderrOutput.length )
     result += '\n -> Stderr' + '\n' + ' -  ' + _.strLinesIndentation( stderrOutput, ' -  ' ) + '\n -< Stderr';
-    debugger;
     return result;
   }
 
