@@ -1,6 +1,6 @@
 {
   "name" : "wappbasic", 
-  "version" : "0.3.302", 
+  "version" : "0.3.303", 
   "description" : "Collection of routines to execute system commands, run shell, batches, launch external processes from JavaScript application. ExecTools leverages not only outputting data from an application but also inputting, makes application arguments parsing and accounting easier. Use the module to get uniform experience from interaction with an external processes on different platforms and operating systems.", 
   "license" : "MIT", 
   "author" : "Kostiantyn Wandalen <wanalen@willbe.so>", 
@@ -24,15 +24,15 @@
   }, 
   "dependencies" : 
   {
-    "wTools" : "gamma", 
-    "wpathbasic" : "gamma", 
-    "wgdfstrategy" : "gamma", 
-    "wConsequence" : "gamma", 
+    "wTools" : "alpha", 
+    "wpathbasic" : "alpha", 
+    "wgdfstrategy" : "alpha", 
+    "wConsequence" : "alpha", 
     "wwindowskill" : "0.3.4", 
     "deasync" : "0.1.19", 
     "strip-ansi" : "6.0.0"
   }, 
   "optionalDependencies" : { "windows-process-tree" : "0.2.4" }, 
-  "devDependencies" : { "wappbasic" : "file:.", "wTesting" : "gamma" }, 
+  "devDependencies" : { "wappbasic" : "file:.", "wTesting" : "alpha" }, 
   "keywords" : [ "wTools", "exec file", "shell script", "run program" ]
 }
