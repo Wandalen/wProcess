@@ -245,14 +245,15 @@ function argsReadTo( o )
 
   function set( k, v )
   {
-    _.assert( o.dst[ k ] !== undefined, () => 'Entry ' + _.strQuote( k ) + ' is not defined' );
-    if( _.numberIs( o.dst[ k ] ) )
+    let dstValue = o.dst[ k ]
+    _.assert( dstValue !== undefined, () => 'Entry ' + _.strQuote( k ) + ' is not defined' );
+    if( _.numberIs( dstValue ) )
     {
       v = Number( v );
       _.assert( !isNaN( v ) );
       o.dst[ k ] = v;
     }
-    else if( _.boolIs( o.dst[ k ] ) )
+    else if( _.boolIs( dstValue ) )
     {
       v = !!v;
       o.dst[ k ] = v;

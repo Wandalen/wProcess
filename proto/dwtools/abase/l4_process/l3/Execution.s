@@ -266,13 +266,13 @@ function start_body( o )
     if( o.sync && o.deasync )
     {
       // return o.ready.finallyDeasyncGive();
-      o.ready.deasyncWait();
+      o.ready.deasync();
       return o.ready.sync();
     }
     if( !o.sync && o.deasync ) /* qqq : check, does not work properly! Vova: wrote tests for each mode, works as expected*/
     {
       // o.ready.finallyDeasyncKeep();
-      o.ready.deasyncWait();
+      o.ready.deasync();
       return o.ready;
     }
 
@@ -357,13 +357,13 @@ function start_body( o )
    /*
     if( o.sync && o.deasync )
     {
-      o.ready.deasyncWait();
+      o.ready.deasync();
       return o.ready.sync();
       // return o.ready.finallyDeasyncGive();
     }
     if( !o.sync && o.deasync ) // qqq : check Vova:wrote test routine, works as expected
     {
-      o.ready.deasyncWait();
+      o.ready.deasync();
       return o.ready;
       // o.ready.finallyDeasyncKeep();
       // return o.ready;
