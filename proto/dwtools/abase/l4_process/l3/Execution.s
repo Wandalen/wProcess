@@ -501,6 +501,7 @@ function start_body( o )
 
     if( o.passingThrough )
     {
+      // console.log( 'argv', process.argv.length, process.argv ); debugger
       let argumentsManual = process.argv.slice( 2 );
       if( argumentsManual.length )
       o.args = _.arrayAppendArray( o.args || [], argumentsManual );
