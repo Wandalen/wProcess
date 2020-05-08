@@ -2,13 +2,10 @@ format: outwillfile-2.0
 root:
   - wAppBasic.out
 consistency:
-  wAppBasic.out.will.yml: &ref_0
-    hash: 7b76208cdbf743408087a2660da182ba
-    size: 40510
-  ../.ex.will.yml: &ref_1
-    hash: dc752b9f2b3623dc29962188de9d2b4b
+  ../.ex.will.yml: &ref_0
+    hash: d4fba7bf68972e0255c8002a07b89dda
     size: 2146
-  ../.im.will.yml: &ref_2
+  ../.im.will.yml: &ref_1
     hash: 643e04cd5f16764beaa21effdbb45f31
     size: 5511
 module:
@@ -25,22 +22,22 @@ module:
         external processes on different platforms and operating systems.
       enabled: 1
       version: 0.4.0
-      interpreters:
+      interpreters: &ref_2
         - njs >= 8.0.0
         - chrome >= 60.0.0
         - firefox >= 60.0.0
-      keywords:
+      keywords: &ref_3
         - wTools
         - exec file
         - shell script
         - run program
       license: MIT
       author: Kostiantyn Wandalen <wanalen@01.school>
-      contributors:
+      contributors: &ref_4
         - Kostiantyn Wandalen <wanalen@01.school>
         - Volodymyr M. <volodymyr.migdal@gmail.com>
       npm.name: wappbasic
-      npm.scripts:
+      npm.scripts: &ref_5
         test: wtest .run proto/**
         docgen: wdocgen .build proto
     path:
@@ -749,24 +746,6 @@ module:
           content: prime
         inherit:
           - files.transpile
-      exported.proto.export:
-        opts:
-          reflector: 'reflector::exported.proto.export*'
-        criterion:
-          generated: 1
-          content: proto
-          export: 1
-        inherit:
-          - files.reflect
-      exported.files.proto.export:
-        opts:
-          reflector: 'reflector::exported.files.proto.export*'
-        criterion:
-          generated: 1
-          content: proto
-          export: 1
-        inherit:
-          - files.reflect
     build:
       proto.export:
         steps:
@@ -855,9 +834,8 @@ module:
           content: proto
           export: 1
     consistency:
-      wAppBasic.out.will.yml: *ref_0
-      ../.ex.will.yml: *ref_1
-      ../.im.will.yml: *ref_2
+      ../.ex.will.yml: *ref_0
+      ../.im.will.yml: *ref_1
   ../:
     about:
       name: wAppBasic
@@ -871,24 +849,13 @@ module:
         external processes on different platforms and operating systems.
       enabled: 1
       version: 0.4.0
-      interpreters:
-        - njs >= 8.0.0
-        - chrome >= 60.0.0
-        - firefox >= 60.0.0
-      keywords:
-        - wTools
-        - exec file
-        - shell script
-        - run program
+      interpreters: *ref_2
+      keywords: *ref_3
       license: MIT
       author: Kostiantyn Wandalen <wanalen@01.school>
-      contributors:
-        - Kostiantyn Wandalen <wanalen@01.school>
-        - Volodymyr M. <volodymyr.migdal@gmail.com>
+      contributors: *ref_4
       npm.name: wappbasic
-      npm.scripts:
-        test: wtest .run proto/**
-        docgen: wdocgen .build proto
+      npm.scripts: *ref_5
     path:
       module.willfiles:
         criterion:
@@ -1594,9 +1561,8 @@ module:
           - 'build::npm'
     consistency:
       ../.ex.will.yml:
-        hash: dc752b9f2b3623dc29962188de9d2b4b
+        hash: d4fba7bf68972e0255c8002a07b89dda
         size: 2146
       ../.im.will.yml:
         hash: 643e04cd5f16764beaa21effdbb45f31
         size: 5511
-      wAppBasic.out.will.yml: *ref_0
