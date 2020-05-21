@@ -2423,7 +2423,7 @@ _.assert( _.routineIs( _.process.start ) );
 // export
 // --
 
-if( typeof module !== 'undefined' && module !== null )
+if( typeof module !== 'undefined' )
 module[ 'exports' ] = _;
 
 })();
