@@ -26,7 +26,7 @@
   {
     "wTools" : "alpha",
     "wpathbasic" : "alpha",
-    "wgdfstrategy" : "alpha",
+    "wgdf" : "alpha",
     "wConsequence" : "alpha",
     "wwindowskill" : "0.3.4",
     "deasync" : "0.1.20",

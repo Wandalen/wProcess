@@ -24,7 +24,7 @@ if( typeof module !== 'undefined' )
   let _ = require( '../../../dwtools/Tools.s' );
 
   _.include( 'wPathBasic' );
-  _.include( 'wGdfStrategy' );
+  _.include( 'wGdf' );
   _.include( 'wConsequence' );
 
   require( './l3/Execution.s' );

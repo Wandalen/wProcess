@@ -194,7 +194,7 @@ module:
         autoExporting: 0
         enabled: 0
       wGdfStrategy:
-        path: 'npm:///wgdfstrategy'
+        path: 'npm:///wgdf'
         autoExporting: 0
         enabled: 0
       wConsequence:
@@ -1026,7 +1026,7 @@ module:
         autoExporting: 0
         enabled: 0
       wGdfStrategy:
-        path: 'npm:///wgdfstrategy'
+        path: 'npm:///wgdf'
         autoExporting: 0
         enabled: 0
       wConsequence:

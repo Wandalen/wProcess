@@ -14,7 +14,7 @@ submodule :
     path : npm:///strip-ansi
     enabled : 0 # submodule
   wGdfStrategy :
-    path : npm:///wgdfstrategy
+    path : npm:///wgdf
     enabled : 0 # submodule
   wConsequence :
     path : npm:///wConsequence
