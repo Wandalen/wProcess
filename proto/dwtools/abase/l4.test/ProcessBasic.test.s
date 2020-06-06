@@ -11776,7 +11776,7 @@ function startDetachingChildExitsBeforeParent( test )
       return null;
     })
 
-    return _.Consequence.AndKeep([ onChildTerminate,o.onTerminate ]);
+    return _.Consequence.AndKeep_( onChildTerminate, o.onTerminate );
   })
 
   /*  */
@@ -12801,7 +12801,7 @@ function startOnStart( test )
       return null;
     })
 
-    return _.Consequence.AndTake([ o.onStart, result ]);
+    return _.Consequence.AndTake_( o.onStart, result );
   })
 
   /* */
@@ -12833,7 +12833,7 @@ function startOnStart( test )
 
     result = test.shouldThrowErrorAsync( result )
 
-    return _.Consequence.AndTake([ o.onStart, result ]);
+    return _.Consequence.AndTake_( o.onStart, result );
   })
 
   /* */
@@ -12857,7 +12857,7 @@ function startOnStart( test )
 
     result = test.shouldThrowErrorAsync( result )
 
-    let con = _.Consequence.AndTake([ o.onStart, result ]);
+    let con = _.Consequence.AndTake_( o.onStart, result );
 
     return test.shouldThrowErrorAsync( con ) ;
   })
@@ -12889,7 +12889,7 @@ function startOnStart( test )
       return null;
     })
 
-    return _.Consequence.AndTake([ o.onStart, o.onTerminate ]);
+    return _.Consequence.AndTake_( o.onStart, o.onTerminate );
   })
 
   /* */
@@ -12971,7 +12971,7 @@ function startOnStart( test )
       return null;
     })
 
-    return _.Consequence.AndTake([ o.onStart, o.onTerminate ]);
+    return _.Consequence.AndTake_([ o.onStart, o.onTerminate ]);
   })
 
   /* Vova xxx: close event is not emitted for disconnected detached child in fork mode*/
@@ -13018,7 +13018,7 @@ function startOnStart( test )
   //     return null;
   //   })
 
-  //   return _.Consequence.AndTake([ o.onStart, result ]);
+  //   return _.Consequence.AndTake_([ o.onStart, result ]);
   // })
 
   /* */
@@ -15206,7 +15206,7 @@ function isAlive( test )
     return null;
   })
 
-  let ready = _.Consequence.AndKeep([ o.onStart, o.onTerminate ]);
+  let ready = _.Consequence.AndKeep_( o.onStart, o.onTerminate );
 
   if( !Config.debug )
   return ready;
@@ -15251,7 +15251,7 @@ function statusOf( test )
     return null;
   })
 
-  let ready = _.Consequence.AndKeep([ o.onStart, o.onTerminate ]);
+  let ready = _.Consequence.AndKeep_( o.onStart, o.onTerminate );
 
   if( !Config.debug )
   return ready;
@@ -16859,7 +16859,7 @@ function terminateWithChildren( test )
     _.process.start( o2 );
     o2.process.on( 'message', () => c2.take( o2.process.pid ) )
 
-    _.Consequence.AndKeep( [ c1,c2 ] )
+    _.Consequence.AndKeep_( c1,c2 )
     .then( () =>
     {
       process.send([ o1.process.pid, o2.process.pid ]);

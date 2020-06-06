@@ -328,7 +328,7 @@ function start_body( o )
     // debugger;
     o.ready
     // .then( () => new _.Consequence().take( null ).andKeep( readies ) )
-    .then( () => _.Consequence.AndKeep( readies ) )
+    .then( () => _.Consequence.AndKeep_( ... readies ) )
     .finally( ( err, arg ) =>
     {
       // debugger;
@@ -2245,7 +2245,7 @@ function terminate( o )
       cons.push( terminateProcess( tree[ l ].pid ) );
     }
     if( cons.length )
-    return _.Consequence.AndKeep( cons );
+    return _.Consequence.AndKeep_( ... cons );
     return true;
   }
 }
