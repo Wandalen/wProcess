@@ -132,7 +132,7 @@ let tempClose = _.routineFromPreAndBody( tempClose_pre, tempClose_body );
 
 //
 
-function insideContainer()
+function insideTestContainer()
 {
   return 'CI' in process.env && 'GITHUB_ACTIONS' in process.env;
 }
@@ -225,7 +225,7 @@ let Extension =
 
   // checker
 
-  insideContainer,
+  insideTestContainer,
 
   // eventer
 
