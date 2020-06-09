@@ -130,6 +130,13 @@ defaults.filePath = null;
 
 let tempClose = _.routineFromPreAndBody( tempClose_pre, tempClose_body );
 
+//
+
+function insideTestContainer()
+{
+  return 'CI' in process.env && 'GITHUB_ACTIONS' in process.env;
+}
+
 // --
 // eventer
 // --
@@ -215,6 +222,10 @@ let Extension =
 
   tempOpen,
   tempClose,
+
+  // checker
+
+  insideTestContainer,
 
   // eventer
 

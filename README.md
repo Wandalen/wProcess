@@ -1,5 +1,5 @@
 
-# wAppBasic [![Build Status](https://travis-ci.org/Wandalen/wAppBasic.svg?branch=master)](https://travis-ci.org/Wandalen/wAppBasic)
+# wAppBasic [![Status](https://github.com/Wandalen/wAppBasic/workflows/Test/badge.svg)](https://github.com/Wandalen/wAppBasic/actions?query=workflow%3ATest)
 
 Collection of routines to execute system commands, run shell, batches, launch external processes from JavaScript application. ExecTools leverages not only outputting data from an application but also inputting, makes application arguments parsing and accounting easier. Use the module to get uniform experience from interaction with an external processes on different platforms and operating systems.
 
