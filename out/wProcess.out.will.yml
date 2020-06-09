@@ -2,15 +2,12 @@ format: outwillfile-2.0
 root:
   - wProcess.out
 consistency:
-  wProcess.out.will.yml: &ref_0
-    hash: 9f65269f3ed82ece35270a7a7e66bf64
-    size: 41856
-  ../.ex.will.yml: &ref_1
-    hash: d4fba7bf68972e0255c8002a07b89dda
-    size: 2146
-  ../.im.will.yml: &ref_2
-    hash: 0151585375d92052ddfbd46580d3c92e
-    size: 5503
+  ../.ex.will.yml: &ref_0
+    hash: f10e2a51e865f5eab07191e3e5fc78c9
+    size: 2140
+  ../.im.will.yml: &ref_1
+    hash: e330feb922d16ed5359d2e8533fee958
+    size: 5502
 module:
   wProcess.out:
     about:
@@ -25,22 +22,22 @@ module:
         external processes on different platforms and operating systems.
       enabled: 1
       version: 0.4.0
-      interpreters:
+      interpreters: &ref_2
         - njs >= 8.0.0
         - chrome >= 60.0.0
         - firefox >= 60.0.0
-      keywords:
+      keywords: &ref_3
         - wTools
         - exec file
         - shell script
         - run program
       license: MIT
       author: Kostiantyn Wandalen <wanalen@01.school>
-      contributors:
+      contributors: &ref_4
         - Kostiantyn Wandalen <wanalen@01.school>
         - Volodymyr M. <volodymyr.migdal@gmail.com>
       npm.name: wprocess
-      npm.scripts:
+      npm.scripts: &ref_5
         test: wtest .run proto/**
         docgen: wdocgen .build proto
     path:
@@ -231,9 +228,6 @@ module:
           prefixPath: ''
         dst:
           prefixPath: ''
-        mandatory: 1
-        dstRewritingOnlyPreserving: 1
-        linking: hardLinkMaybe
         criterion:
           tests: no.tests
           debug: debug
@@ -248,9 +242,6 @@ module:
           prefixPath: ''
         dst:
           prefixPath: ''
-        mandatory: 1
-        dstRewritingOnlyPreserving: 1
-        linking: hardLinkMaybe
         criterion:
           tests: no.tests
           debug: release
@@ -265,9 +256,6 @@ module:
           prefixPath: ''
         dst:
           prefixPath: ''
-        mandatory: 1
-        dstRewritingOnlyPreserving: 1
-        linking: hardLinkMaybe
         criterion:
           tests: no.tests
           debug: debug
@@ -282,9 +270,6 @@ module:
           prefixPath: ''
         dst:
           prefixPath: ''
-        mandatory: 1
-        dstRewritingOnlyPreserving: 1
-        linking: hardLinkMaybe
         criterion:
           tests: no.tests
           debug: release
@@ -299,9 +284,6 @@ module:
           prefixPath: ''
         dst:
           prefixPath: ''
-        mandatory: 1
-        dstRewritingOnlyPreserving: 1
-        linking: hardLinkMaybe
         criterion:
           raw: raw
           debug: release
@@ -317,9 +299,6 @@ module:
           prefixPath: ''
         dst:
           prefixPath: ''
-        mandatory: 1
-        dstRewritingOnlyPreserving: 1
-        linking: hardLinkMaybe
         criterion:
           tests: no.tests
           raw: compiled
@@ -336,9 +315,6 @@ module:
           prefixPath: ''
         dst:
           prefixPath: ''
-        mandatory: 1
-        dstRewritingOnlyPreserving: 1
-        linking: hardLinkMaybe
         criterion:
           tests: no.tests
           raw: compiled
@@ -354,9 +330,6 @@ module:
           prefixPath: ''
         dst:
           prefixPath: ''
-        mandatory: 1
-        dstRewritingOnlyPreserving: 1
-        linking: hardLinkMaybe
         criterion:
           tests: only.tests
           raw: compiled
@@ -372,9 +345,6 @@ module:
           prefixPath: ''
         dst:
           prefixPath: ''
-        mandatory: 1
-        dstRewritingOnlyPreserving: 1
-        linking: hardLinkMaybe
         criterion:
           tests: only.tests
           raw: compiled
@@ -757,24 +727,6 @@ module:
           content: prime
         inherit:
           - files.transpile
-      exported.proto.export:
-        opts:
-          filePath: 'reflector::exported.proto.export*'
-        criterion:
-          generated: 1
-          content: proto
-          export: 1
-        inherit:
-          - files.reflect
-      exported.files.proto.export:
-        opts:
-          filePath: 'reflector::exported.files.proto.export*'
-        criterion:
-          generated: 1
-          content: proto
-          export: 1
-        inherit:
-          - files.reflect
     build:
       proto.export:
         steps:
@@ -863,9 +815,8 @@ module:
           content: proto
           export: 1
     consistency:
-      wProcess.out.will.yml: *ref_0
-      ../.ex.will.yml: *ref_1
-      ../.im.will.yml: *ref_2
+      ../.ex.will.yml: *ref_0
+      ../.im.will.yml: *ref_1
   ../:
     about:
       name: wProcess
@@ -879,24 +830,13 @@ module:
         external processes on different platforms and operating systems.
       enabled: 1
       version: 0.4.0
-      interpreters:
-        - njs >= 8.0.0
-        - chrome >= 60.0.0
-        - firefox >= 60.0.0
-      keywords:
-        - wTools
-        - exec file
-        - shell script
-        - run program
+      interpreters: *ref_2
+      keywords: *ref_3
       license: MIT
       author: Kostiantyn Wandalen <wanalen@01.school>
-      contributors:
-        - Kostiantyn Wandalen <wanalen@01.school>
-        - Volodymyr M. <volodymyr.migdal@gmail.com>
+      contributors: *ref_4
       npm.name: wprocess
-      npm.scripts:
-        test: wtest .run proto/**
-        docgen: wdocgen .build proto
+      npm.scripts: *ref_5
     path:
       module.willfiles:
         criterion:
@@ -1584,9 +1524,8 @@ module:
           - 'build::npm'
     consistency:
       ../.ex.will.yml:
-        hash: d4fba7bf68972e0255c8002a07b89dda
-        size: 2146
+        hash: f10e2a51e865f5eab07191e3e5fc78c9
+        size: 2140
       ../.im.will.yml:
-        hash: 0151585375d92052ddfbd46580d3c92e
-        size: 5503
-      wProcess.out.will.yml: *ref_0
+        hash: e330feb922d16ed5359d2e8533fee958
+        size: 5502
