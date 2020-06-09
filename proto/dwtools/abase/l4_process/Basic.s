@@ -24,7 +24,7 @@ if( typeof module !== 'undefined' )
   let _ = require( '../../../dwtools/Tools.s' );
 
   _.include( 'wPathBasic' );
-  _.include( 'wGdfStrategy' );
+  _.include( 'wGdf' );
   _.include( 'wConsequence' );
 
   require( './l3/Execution.s' );
@@ -242,7 +242,7 @@ _.process._Setup1();
 // export
 // --
 
-if( typeof module !== 'undefined' && module !== null )
+if( typeof module !== 'undefined' )
 module[ 'exports' ] = _;
 
 })();
