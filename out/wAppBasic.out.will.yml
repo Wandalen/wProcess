@@ -1,8 +1,8 @@
 format: outwillfile-2.0
 root:
-  - wAppBasic.out
+  - wProcess.out
 consistency:
-  wAppBasic.out.will.yml: &ref_0
+  wProcess.out.will.yml: &ref_0
     hash: 9f65269f3ed82ece35270a7a7e66bf64
     size: 41856
   ../.ex.will.yml: &ref_1
@@ -12,9 +12,9 @@ consistency:
     hash: 0151585375d92052ddfbd46580d3c92e
     size: 5503
 module:
-  wAppBasic.out:
+  wProcess.out:
     about:
-      name: wAppBasic
+      name: wProcess
       org: noorg
       description: >-
         Collection of routines to execute system commands, run shell, batches,
@@ -39,7 +39,7 @@ module:
       contributors:
         - Kostiantyn Wandalen <wanalen@01.school>
         - Volodymyr M. <volodymyr.migdal@gmail.com>
-      npm.name: wappbasic
+      npm.name: wprocess
       npm.scripts:
         test: wtest .run proto/**
         docgen: wdocgen .build proto
@@ -47,11 +47,11 @@ module:
       module.willfiles:
         criterion:
           predefined: 1
-        path: wAppBasic.out.will.yml
+        path: wProcess.out.will.yml
       module.common:
         criterion:
           predefined: 1
-        path: wAppBasic.out
+        path: wProcess.out
       module.original.willfiles:
         criterion:
           predefined: 1
@@ -72,13 +72,13 @@ module:
         criterion:
           predefined: 1
       repository:
-        path: 'git+https:///github.com/Wandalen/wAppBasic.git'
+        path: 'git+https:///github.com/Wandalen/wProcess.git'
       origins:
         path:
-          - 'git+https:///github.com/Wandalen/wAppBasic.git'
-          - 'npm:///wappbasic'
+          - 'git+https:///github.com/Wandalen/wProcess.git'
+          - 'npm:///wprocess'
       bugtracker:
-        path: 'https:///github.com/Wandalen/wAppBasic/issues'
+        path: 'https:///github.com/Wandalen/wProcess/issues'
       in:
         path: .
       out:
@@ -211,7 +211,7 @@ module:
         enabled: 0
         criterion:
           optional: 1
-      wappbasic:
+      wprocess:
         path: 'hd://..'
         autoExporting: 0
         enabled: 0
@@ -863,12 +863,12 @@ module:
           content: proto
           export: 1
     consistency:
-      wAppBasic.out.will.yml: *ref_0
+      wProcess.out.will.yml: *ref_0
       ../.ex.will.yml: *ref_1
       ../.im.will.yml: *ref_2
   ../:
     about:
-      name: wAppBasic
+      name: wProcess
       org: noorg
       description: >-
         Collection of routines to execute system commands, run shell, batches,
@@ -893,7 +893,7 @@ module:
       contributors:
         - Kostiantyn Wandalen <wanalen@01.school>
         - Volodymyr M. <volodymyr.migdal@gmail.com>
-      npm.name: wappbasic
+      npm.name: wprocess
       npm.scripts:
         test: wtest .run proto/**
         docgen: wdocgen .build proto
@@ -913,7 +913,7 @@ module:
       module.peer.willfiles:
         criterion:
           predefined: 1
-        path: out/wAppBasic.out.will.yml
+        path: out/wProcess.out.will.yml
       module.peer.in:
         criterion:
           predefined: 1
@@ -926,13 +926,13 @@ module:
         criterion:
           predefined: 1
       repository:
-        path: 'git+https:///github.com/Wandalen/wAppBasic.git'
+        path: 'git+https:///github.com/Wandalen/wProcess.git'
       origins:
         path:
-          - 'git+https:///github.com/Wandalen/wAppBasic.git'
-          - 'npm:///wappbasic'
+          - 'git+https:///github.com/Wandalen/wProcess.git'
+          - 'npm:///wprocess'
       bugtracker:
-        path: 'https:///github.com/Wandalen/wAppBasic/issues'
+        path: 'https:///github.com/Wandalen/wProcess/issues'
       in:
         path: .
       out:
@@ -1040,7 +1040,7 @@ module:
         enabled: 0
         criterion:
           optional: 1
-      wappbasic:
+      wprocess:
         path: 'hd://.'
         autoExporting: 0
         enabled: 0
@@ -1589,4 +1589,4 @@ module:
       ../.im.will.yml:
         hash: 0151585375d92052ddfbd46580d3c92e
         size: 5503
-      wAppBasic.out.will.yml: *ref_0
+      wProcess.out.will.yml: *ref_0

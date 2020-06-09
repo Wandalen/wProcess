@@ -1,5 +1,5 @@
 {
-  "name" : "wappbasic",
+  "name" : "wprocess",
   "version" : "0.3.324",
   "description" : "Collection of routines to execute system commands, run shell, batches, launch external processes from JavaScript application. ExecTools leverages not only outputting data from an application but also inputting, makes application arguments parsing and accounting easier. Use the module to get uniform experience from interaction with an external processes on different platforms and operating systems.",
   "license" : "MIT",
@@ -16,11 +16,11 @@
   "repository" :
   {
     "type" : "git",
-    "url" : "https://github.com/Wandalen/wAppBasic.git"
+    "url" : "https://github.com/Wandalen/wProcess.git"
   },
   "bugs" :
   {
-    "url" : "https://github.com/Wandalen/wAppBasic/issues"
+    "url" : "https://github.com/Wandalen/wProcess/issues"
   },
   "dependencies" :
   {
@@ -33,6 +33,6 @@
     "strip-ansi" : ""
   },
   "optionalDependencies" : { "windows-process-tree" : "" },
-  "devDependencies" : { "wTesting" : "", "wappbasic" : "file:." },
+  "devDependencies" : { "wTesting" : "", "wprocess" : "file:." },
   "keywords" : [ "wTools", "exec file", "shell script", "run program" ]
 }

@@ -88,7 +88,7 @@ let _testAppShell = function testAppShell()
 {
   let process = _global_.process;
 
-  _.include( 'wAppBasic' );
+  _.include( 'wProcess' );
   _.include( 'wStringsExtra' )
 
   process.removeAllListeners( 'SIGINT' );
@@ -407,7 +407,7 @@ function processArgsBase( test )
 
   function testApp()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
     _.include( 'wFiles' )
 
@@ -495,7 +495,7 @@ function processArgsPropertiesBase( test )
 
   function testApp()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
     _.include( 'wFiles' )
 
@@ -744,7 +744,7 @@ function processArgsMultipleCommands( test )
 
   function testApp()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
     _.include( 'wFiles' )
 
@@ -842,7 +842,7 @@ function processArgsPaths( test )
 
   function testApp()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
     _.include( 'wFiles' )
 
@@ -942,7 +942,7 @@ function processArgsWithSpace( test )
 
   function testApp()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
     _.include( 'wFiles' )
 
@@ -1382,7 +1382,7 @@ function processOnExitEvent( test ) /* qqq : adjust vova: done */
 
   function testApp()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
 
     var args = _.process.args();
@@ -1474,7 +1474,7 @@ function processOffExitEvent( test ) /* qqq : adjust vova: done */
 
   function testApp()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
 
     var handlersMap = {};
@@ -6277,7 +6277,7 @@ function shellArgumentsParsing( test )
 
   function testApp()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
     debugger;
     var args = _.process.args();
@@ -6840,7 +6840,7 @@ function shellArgumentsParsingNonTrivial( test )
 
   function testApp()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
     var args = _.process.args();
     console.log( JSON.stringify( args ) );
@@ -7188,7 +7188,7 @@ function shellArgumentsNestedQuotes( test )
 
   function testApp()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
     var args = _.process.args();
     console.log( JSON.stringify( args ) );
@@ -7969,7 +7969,7 @@ function shellExecPathQuotesClosing( test )
 
   function testApp()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
     var args = _.process.args();
     console.log( JSON.stringify( args ) );
@@ -9968,7 +9968,7 @@ function shellTerminateHangedWithExitHandler( test )
 
   function testApp()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.process._exitHandlerRepair();
     process.send( process.pid )
     while( 1 )
@@ -10083,7 +10083,7 @@ function shellTerminateAfterLoopRelease( test )
 
   function testApp()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.process._exitHandlerRepair();
     let loop = true;
     setTimeout( () =>
@@ -10370,7 +10370,7 @@ function shellAfterDeath( test )
 
   function testAppParent()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
 
     let o =
@@ -10397,7 +10397,7 @@ function shellAfterDeath( test )
 
   function testAppChild()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
 
     _.time.out( 5000, () =>
@@ -10484,7 +10484,7 @@ function shellAfterDeath( test )
 
 //   function testAppParent()
 //   {
-//     _.include( 'wAppBasic' );
+//     _.include( 'wProcess' );
 //     _.include( 'wFiles' );
 
 //     let o =
@@ -10508,7 +10508,7 @@ function shellAfterDeath( test )
 
 //   function testAppChild()
 //   {
-//     _.include( 'wAppBasic' );
+//     _.include( 'wProcess' );
 //     _.include( 'wFiles' );
 
 //     console.log( 'Child process start' )
@@ -10573,7 +10573,7 @@ function startDetachingModeSpawnResourceReady( test )
 
   function testAppChild()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
 
     console.log( 'Child process start' )
@@ -10645,7 +10645,7 @@ function startDetachingModeForkResourceReady( test )
 
   function testAppChild()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
 
     console.log( 'Child process start' )
@@ -10715,7 +10715,7 @@ function startDetachingModeShellResourceReady( test )
 
   function testAppChild()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
 
     console.log( 'Child process start' )
@@ -10785,7 +10785,7 @@ function startDetachingModeSpawnNoTerminationBegin( test )
 
   function testAppParent()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
 
     let args = _.process.args();
@@ -10807,7 +10807,7 @@ function startDetachingModeSpawnNoTerminationBegin( test )
 
   function testAppChild()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
 
     console.log( 'Child process start' )
@@ -11016,7 +11016,7 @@ function startDetachingModeForkNoTerminationBegin( test )
 
   function testAppParent()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
 
     let args = _.process.args();
@@ -11037,7 +11037,7 @@ function startDetachingModeForkNoTerminationBegin( test )
 
   function testAppChild()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
 
     console.log( 'Child process start' )
@@ -11163,7 +11163,7 @@ function startDetachingModeShellNoTerminationBegin( test )
 
   function testAppParent()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
 
     let args = _.process.args();
@@ -11185,7 +11185,7 @@ function startDetachingModeShellNoTerminationBegin( test )
 
   function testAppChild()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
 
     console.log( 'Child process start' )
@@ -11310,7 +11310,7 @@ function startDetachingModeSpawnTerminationBegin( test )
 
   function testAppParent()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
 
     let args = _.process.args();
@@ -11345,7 +11345,7 @@ function startDetachingModeSpawnTerminationBegin( test )
 
   function testAppChild()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
 
     console.log( 'Child process start' )
@@ -11590,7 +11590,7 @@ function startDetachingModeForkTerminationBegin( test )
 
   function testAppParent()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
 
     let args = _.process.args();
@@ -11625,7 +11625,7 @@ function startDetachingModeForkTerminationBegin( test )
 
   function testAppChild()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
 
     console.log( 'Child process start' )
@@ -11870,7 +11870,7 @@ function startDetachingModeShellTerminationBegin( test )
 
   function testAppParent()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
 
     let args = _.process.args();
@@ -11905,7 +11905,7 @@ function startDetachingModeShellTerminationBegin( test )
 
   function testAppChild()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
 
     console.log( 'Child process start' )
@@ -12050,7 +12050,7 @@ function startDetachingChildExitsAfterParent( test )
 
   function testAppParent()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
 
     let o =
@@ -12077,7 +12077,7 @@ function startDetachingChildExitsAfterParent( test )
 
   function testAppChild()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
 
     console.log( 'Child process start' );
@@ -12173,7 +12173,7 @@ function startDetachingChildExitsBeforeParent( test )
 
   function testAppParent()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
 
     let o =
@@ -12200,7 +12200,7 @@ function startDetachingChildExitsBeforeParent( test )
 
   function testAppChild()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
 
     console.log( 'Child process start' )
@@ -12305,7 +12305,7 @@ function startDetachedOutputStdioIgnore( test )
 
   function testAppParent()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
 
     let args = _.process.args();
@@ -12327,7 +12327,7 @@ function startDetachedOutputStdioIgnore( test )
 
   function testAppChild()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
 
     console.log( 'Child process start' )
@@ -12442,7 +12442,7 @@ function startDetachedOutputStdioPipe( test )
 
   function testAppParent()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
 
     let args = _.process.args();
@@ -12464,7 +12464,7 @@ function startDetachedOutputStdioPipe( test )
 
   function testAppChild()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
 
     console.log( 'Child process start' )
@@ -12579,7 +12579,7 @@ function startDetachedOutputStdioInherit( test )
 
   function testAppChild()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
 
     console.log( 'Child process start' )
@@ -12667,7 +12667,7 @@ function startDetachingModeSpawnIpc( test )
 
   function testAppChild()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
 
     process.on( 'message', ( data ) =>
@@ -12779,7 +12779,7 @@ function startDetachingModeForkIpc( test )
 
   function testAppChild()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
 
     process.on( 'message', ( data ) =>
@@ -12892,7 +12892,7 @@ function startDetachingModeShellIpc( test )
 
   function testAppChild()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
 
     process.on( 'message', ( data ) =>
@@ -12967,7 +12967,7 @@ function startDetachingThrowing( test )
 
   function testAppChild()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
 
     console.log( 'Child process start' )
@@ -13112,7 +13112,7 @@ function startNodeDetachingTrivial( test )
 
   function testAppParent()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
 
     let o =
@@ -13155,7 +13155,7 @@ function startNodeDetachingTrivial( test )
 
   function testAppChild()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
 
     console.log( 'Child process start' )
@@ -13248,7 +13248,7 @@ function startOnStart( test )
 
   function testAppChild()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
 
     var args = _.process.args();
@@ -13539,7 +13539,7 @@ function startOnTerminate( test )
 
   function testAppChild()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
 
     var args = _.process.args();
@@ -16082,7 +16082,7 @@ function killWithChildren( test )
 
   function testApp()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
     var o =
     {
@@ -16106,7 +16106,7 @@ function killWithChildren( test )
 
   function testApp3()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
     let detaching = process.argv[ 2 ] === 'detached';
     var o1 =
@@ -16369,7 +16369,7 @@ function terminate( test )
 
   function testApp()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.process._exitHandlerRepair();
     if( process.send )
     process.send( process.pid );
@@ -16742,7 +16742,7 @@ function terminateComplex( test )
 
   function testApp()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
     let detaching = process.argv[ 2 ] === 'detached';
     var o =
@@ -17001,7 +17001,7 @@ function terminateDetachedComplex( test )
 
   function testApp()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
     let detaching = process.argv[ 2 ] === 'detached';
     var o =
@@ -17295,7 +17295,7 @@ function terminateWithChildren( test )
 
   function testApp()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
     var o =
     {
@@ -17329,7 +17329,7 @@ function terminateWithChildren( test )
 
   function testApp3()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
     let detaching = process.argv[ 2 ] === 'detached';
     let c1 = new _.Consequence();
@@ -17556,7 +17556,7 @@ function terminateWithDetachedChildren( test )
 
   function testApp()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
     var o =
     {
@@ -17591,7 +17591,7 @@ function terminateWithDetachedChildren( test )
 
   function testApp3()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
     let detaching = process.argv[ 2 ] === 'detached';
     var o1 =
@@ -18136,7 +18136,7 @@ function children( test )
 
   function testApp()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
     var o =
     {
@@ -18401,7 +18401,7 @@ function childrenAsList( test )
 
   function testApp()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
     var o =
     {
@@ -18581,7 +18581,7 @@ function killComplex( test )
 
   function testApp2()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
     var testAppPath = _.path.join( __dirname, 'testApp.js' );
     var o = { execPath : 'node ' + testAppPath, throwingExitCode : 0  }

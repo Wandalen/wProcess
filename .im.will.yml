@@ -27,7 +27,7 @@ submodule :
     enabled : 0 # submodule
     criterion :
       optional : 1
-  wappbasic :
+  wprocess :
     path : hd://.
     enabled : 0 # submodule
     criterion :

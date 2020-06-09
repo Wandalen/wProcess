@@ -1,7 +1,7 @@
 
 about :
 
-  name : 'wAppBasic'
+  name : 'wProcess'
   description : 'Collection of routines to execute system commands, run shell, batches, launch external processes from JavaScript application. ExecTools leverages not only outputting data from an application but also inputting, makes application arguments parsing and accounting easier. Use the module to get uniform experience from interaction with an external processes on different platforms and operating systems.'
   version : '0.4.0'
   enabled : 1
@@ -19,18 +19,18 @@ about :
   contributors :
   - 'Kostiantyn Wandalen <wanalen@01.school>'
   - 'Volodymyr M. <volodymyr.migdal@gmail.com>'
-  npm.name : 'wappbasic'
+  npm.name : 'wprocess'
   npm.scripts :
     test : 'wtest .run proto/**'
     docgen : 'wdocgen .build proto'
 
 path :
 
-  repository : git+https:///github.com/Wandalen/wAppBasic.git
+  repository : git+https:///github.com/Wandalen/wProcess.git
   origins :
-   - git+https:///github.com/Wandalen/wAppBasic.git
-   - npm:///wappbasic
-  bugtracker : https:///github.com/Wandalen/wAppBasic/issues
+   - git+https:///github.com/Wandalen/wProcess.git
+   - npm:///wprocess
+  bugtracker : https:///github.com/Wandalen/wProcess/issues
 
 step :
 

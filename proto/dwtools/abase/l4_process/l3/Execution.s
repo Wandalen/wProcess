@@ -1489,7 +1489,7 @@ function startAfterDeath_body( o )
 
   function afterDeathSecondaryProcess()
   {
-    _.include( 'wAppBasic' );
+    _.include( 'wProcess' );
     _.include( 'wFiles' );
 
     process.on( 'message', ( o ) =>
