@@ -3,8 +3,8 @@ root:
   - wProcess.out
 consistency:
   ../.ex.will.yml: &ref_0
-    hash: 24694fba67f7d135397c818135267b17
-    size: 2145
+    hash: 6643e08d0b3c09445e54e71704696a7b
+    size: 2146
   ../.im.will.yml: &ref_1
     hash: e330feb922d16ed5359d2e8533fee958
     size: 5502
@@ -1524,8 +1524,8 @@ module:
           - 'build::npm'
     consistency:
       ../.ex.will.yml:
-        hash: 24694fba67f7d135397c818135267b17
-        size: 2145
+        hash: 6643e08d0b3c09445e54e71704696a7b
+        size: 2146
       ../.im.will.yml:
         hash: e330feb922d16ed5359d2e8533fee958
         size: 5502
