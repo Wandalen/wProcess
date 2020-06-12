@@ -597,9 +597,7 @@ function start_body( o )
       if( o.dry )
       return;
 
-      // debugger;
       o.process = ChildProcess.fork( execPath, args, o2 );
-      // debugger;
     }
     else if( o.mode === 'exec' )
     {
@@ -613,6 +611,8 @@ function start_body( o )
 
       if( o.dry )
       return;
+
+      // console.log( ' !! ChildProcess.exec', execPath ); /* yyy */
 
       if( o.sync && !o.deasync )
       {
@@ -641,6 +641,8 @@ function start_body( o )
 
       if( o.dry )
       return;
+
+      // console.log( ' !! ChildProcess.spawn', execPath, args ); /* yyy */
 
       if( o.sync && !o.deasync )
       o.process = ChildProcess.spawnSync( execPath, args, o2 );
@@ -676,6 +678,15 @@ function start_body( o )
 
       if( o.dry )
       return;
+
+      // console.log( ' !! ChildProcess.spawn', execPath, [ arg1, arg2 ] ); /* yyy */
+
+/* xxx yyy qqq2 : problem!
+      it.start( `git add --force '*.will.*'` );
+      > git add --force *.will.*
+      !! argsJoin [ 'add', '--force', '*.will.*' ]
+      !! ChildProcess.spawn git [ '-c', 'git add --force *.will.*' ]
+*/
 
       if( o.sync && !o.deasync )
       o.process = ChildProcess.spawnSync( appPath, [ arg1, arg2 ], o2 );
@@ -792,7 +803,7 @@ function start_body( o )
       if( begin )
       {
         _.sure( begin === end, 'Arguments string in execPath:', src, 'has not closed quoting in argument:', args[ i ] );
-        args[ i ] = _.strInsideOf( args[ i ], begin, end );
+        // args[ i ] = _.strInsideOf( args[ i ], begin, end ); /* yyy qqq2 : should not uncover arguments here! */
       }
     }
     return args;
@@ -804,14 +815,16 @@ function start_body( o )
   {
     let args = src.slice();
 
+    // console.log( ' !!', 'argsJoin:before', src ) /* yyy */
+
     for( let i = 0; i < args.length; i++ )
     {
       /* escape quotes to make shell interpret them as regular symbols */
       let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', "`" ]
-      _.each( quotesToEscape, ( quote ) =>
-      {
-        args[ i ] = escapeArg( args[ i ], quote );
-      })
+      // _.each( quotesToEscape, ( quote ) => /* yyy qqq2 : fix? */
+      // {
+      //   args[ i ] = escapeArg( args[ i ], quote );
+      // })
       if( process.platform !== 'win32' )
       {
         if( _.strHas( src[ i ], ' ' ) )
@@ -822,21 +835,32 @@ function start_body( o )
         if( begin && begin === end )
         continue;
 
-        args[ i ] = escapeArg( args[ i ], "'" );
+        // args[ i ] = escapeArg( args[ i ], "'" ); /* yyy qqq2 : fix? */
       }
     }
 
+    let result;
+
     if( args.length === 1 )
-    return _.strQuote( args[ 0 ] );
-
-    /* quote only arguments with spaces */
-    _.each( args, ( arg, i ) =>
     {
-      if( _.strHas( src[ i ], ' ' ) )
-      args[ i ] = _.strQuote( arg );
-    })
+      result = _.strQuote( args[ 0 ] ); /* xxx qqq : ? */
+    }
+    else
+    {
+      /* quote only arguments with spaces */
+      _.each( args, ( arg, i ) =>
+      {
+        if( _.strHas( arg, ' ' ) )
+        if( arg[ 0 ] !== '\"' )
+        args[ i ] = _.strQuote( arg );
+      })
 
-    return args.join( ' ' );
+      result = args.join( ' ' );
+    }
+
+    // console.log( ' !!', 'argsJoin:after', result ); /* yyy */
+
+    return result;
   }
 
   function escapeArg( arg, quote )
