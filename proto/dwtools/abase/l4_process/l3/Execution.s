@@ -803,7 +803,7 @@ function start_body( o )
       if( begin )
       {
         _.sure( begin === end, 'Arguments string in execPath:', src, 'has not closed quoting in argument:', args[ i ] );
-        // args[ i ] = _.strInsideOf( args[ i ], begin, end ); /* yyy qqq2 : should not uncover arguments here! */
+        args[ i ] = _.strInsideOf( args[ i ], begin, end ); /* yyy qqq2 : should not uncover arguments here! */
       }
     }
     return args;
@@ -821,10 +821,10 @@ function start_body( o )
     {
       /* escape quotes to make shell interpret them as regular symbols */
       let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', "`" ]
-      // _.each( quotesToEscape, ( quote ) => /* yyy qqq2 : fix? */
-      // {
-      //   args[ i ] = escapeArg( args[ i ], quote );
-      // })
+      _.each( quotesToEscape, ( quote ) => /* yyy qqq2 : fix? */
+      {
+        args[ i ] = escapeArg( args[ i ], quote );
+      })
       if( process.platform !== 'win32' )
       {
         if( _.strHas( src[ i ], ' ' ) )
@@ -835,7 +835,7 @@ function start_body( o )
         if( begin && begin === end )
         continue;
 
-        // args[ i ] = escapeArg( args[ i ], "'" ); /* yyy qqq2 : fix? */
+        args[ i ] = escapeArg( args[ i ], "'" ); /* yyy qqq2 : fix? */
       }
     }
 
