@@ -32,7 +32,7 @@
     "deasync" : "",
     "strip-ansi" : ""
   },
-  "optionalDependencies" : { "windows-process-tree" : "" },
+  "optionalDependencies" : { "wwindows-process-tree" : "0.2.6" },
   "devDependencies" : { "wTesting" : "", "wappbasic" : "file:." },
   "keywords" : [ "wTools", "exec file", "shell script", "run program" ]
 }
