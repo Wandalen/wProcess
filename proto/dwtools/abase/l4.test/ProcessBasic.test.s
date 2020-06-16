@@ -18321,7 +18321,7 @@ function children( test )
     let r2 = _.process.start( o2 );
     let children;
 
-    let ready = _.Consequence.And( [ r1,r2 ] );
+    let ready = _.Consequence.AndTake_( r1,r2 );
 
     o1.process.on( 'message', () =>
     {
