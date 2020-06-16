@@ -1,24 +1,24 @@
 format: outwillfile-2.0
 root:
-  - wAppBasic.out
+  - wProcess.out
 consistency:
-  wAppBasic.out.will.yml: &ref_0
-    hash: 9f65269f3ed82ece35270a7a7e66bf64
-    size: 41856
+  wProcess.out.will.yml: &ref_0
+    hash: 85ef0b7f9f06c37d4eab5c8dabd03bb3
+    size: 40138
   ../.ex.will.yml: &ref_1
-    hash: d4fba7bf68972e0255c8002a07b89dda
+    hash: 6643e08d0b3c09445e54e71704696a7b
     size: 2146
   ../.im.will.yml: &ref_2
-    hash: 0151585375d92052ddfbd46580d3c92e
-    size: 5503
+    hash: e330feb922d16ed5359d2e8533fee958
+    size: 5502
 module:
-  wAppBasic.out:
+  wProcess.out:
     about:
-      name: wAppBasic
+      name: wProcess
       org: noorg
       description: >-
         Collection of routines to execute system commands, run shell, batches,
-        launch external processes from JavaScript application. ExecTools
+        launch external processes from JavaScript application. Module Process
         leverages not only outputting data from an application but also
         inputting, makes application arguments parsing and accounting easier.
         Use the module to get uniform experience from interaction with an
@@ -26,7 +26,7 @@ module:
       enabled: 1
       version: 0.4.0
       interpreters:
-        - njs >= 8.0.0
+        - njs >= 10.0.0
         - chrome >= 60.0.0
         - firefox >= 60.0.0
       keywords:
@@ -39,7 +39,7 @@ module:
       contributors:
         - Kostiantyn Wandalen <wanalen@01.school>
         - Volodymyr M. <volodymyr.migdal@gmail.com>
-      npm.name: wappbasic
+      npm.name: wprocess
       npm.scripts:
         test: wtest .run proto/**
         docgen: wdocgen .build proto
@@ -47,11 +47,11 @@ module:
       module.willfiles:
         criterion:
           predefined: 1
-        path: wAppBasic.out.will.yml
+        path: wProcess.out.will.yml
       module.common:
         criterion:
           predefined: 1
-        path: wAppBasic.out
+        path: wProcess.out
       module.original.willfiles:
         criterion:
           predefined: 1
@@ -72,13 +72,13 @@ module:
         criterion:
           predefined: 1
       repository:
-        path: 'git+https:///github.com/Wandalen/wAppBasic.git'
+        path: 'git+https:///github.com/Wandalen/wProcess.git'
       origins:
         path:
-          - 'git+https:///github.com/Wandalen/wAppBasic.git'
-          - 'npm:///wappbasic'
+          - 'git+https:///github.com/Wandalen/wProcess.git'
+          - 'npm:///wprocess'
       bugtracker:
-        path: 'https:///github.com/Wandalen/wAppBasic/issues'
+        path: 'https:///github.com/Wandalen/wProcess/issues'
       in:
         path: .
       out:
@@ -211,7 +211,7 @@ module:
         enabled: 0
         criterion:
           optional: 1
-      wappbasic:
+      wprocess:
         path: 'hd://..'
         autoExporting: 0
         enabled: 0
@@ -231,9 +231,6 @@ module:
           prefixPath: ''
         dst:
           prefixPath: ''
-        mandatory: 1
-        dstRewritingOnlyPreserving: 1
-        linking: hardLinkMaybe
         criterion:
           tests: no.tests
           debug: debug
@@ -248,9 +245,6 @@ module:
           prefixPath: ''
         dst:
           prefixPath: ''
-        mandatory: 1
-        dstRewritingOnlyPreserving: 1
-        linking: hardLinkMaybe
         criterion:
           tests: no.tests
           debug: release
@@ -265,9 +259,6 @@ module:
           prefixPath: ''
         dst:
           prefixPath: ''
-        mandatory: 1
-        dstRewritingOnlyPreserving: 1
-        linking: hardLinkMaybe
         criterion:
           tests: no.tests
           debug: debug
@@ -282,9 +273,6 @@ module:
           prefixPath: ''
         dst:
           prefixPath: ''
-        mandatory: 1
-        dstRewritingOnlyPreserving: 1
-        linking: hardLinkMaybe
         criterion:
           tests: no.tests
           debug: release
@@ -299,9 +287,6 @@ module:
           prefixPath: ''
         dst:
           prefixPath: ''
-        mandatory: 1
-        dstRewritingOnlyPreserving: 1
-        linking: hardLinkMaybe
         criterion:
           raw: raw
           debug: release
@@ -317,9 +302,6 @@ module:
           prefixPath: ''
         dst:
           prefixPath: ''
-        mandatory: 1
-        dstRewritingOnlyPreserving: 1
-        linking: hardLinkMaybe
         criterion:
           tests: no.tests
           raw: compiled
@@ -336,9 +318,6 @@ module:
           prefixPath: ''
         dst:
           prefixPath: ''
-        mandatory: 1
-        dstRewritingOnlyPreserving: 1
-        linking: hardLinkMaybe
         criterion:
           tests: no.tests
           raw: compiled
@@ -354,9 +333,6 @@ module:
           prefixPath: ''
         dst:
           prefixPath: ''
-        mandatory: 1
-        dstRewritingOnlyPreserving: 1
-        linking: hardLinkMaybe
         criterion:
           tests: only.tests
           raw: compiled
@@ -372,9 +348,6 @@ module:
           prefixPath: ''
         dst:
           prefixPath: ''
-        mandatory: 1
-        dstRewritingOnlyPreserving: 1
-        linking: hardLinkMaybe
         criterion:
           tests: only.tests
           raw: compiled
@@ -402,9 +375,6 @@ module:
           prefixPath: 'path::exported.dir.proto.export'
           recursive: 0
         recursive: 0
-        mandatory: 1
-        dstRewritingOnlyPreserving: 1
-        linking: hardLinkMaybe
         criterion:
           generated: 1
           content: proto
@@ -866,16 +836,16 @@ module:
           content: proto
           export: 1
     consistency:
-      wAppBasic.out.will.yml: *ref_0
+      wProcess.out.will.yml: *ref_0
       ../.ex.will.yml: *ref_1
       ../.im.will.yml: *ref_2
   ../:
     about:
-      name: wAppBasic
+      name: wProcess
       org: noorg
       description: >-
         Collection of routines to execute system commands, run shell, batches,
-        launch external processes from JavaScript application. ExecTools
+        launch external processes from JavaScript application. Module Process
         leverages not only outputting data from an application but also
         inputting, makes application arguments parsing and accounting easier.
         Use the module to get uniform experience from interaction with an
@@ -883,7 +853,7 @@ module:
       enabled: 1
       version: 0.4.0
       interpreters:
-        - njs >= 8.0.0
+        - njs >= 10.0.0
         - chrome >= 60.0.0
         - firefox >= 60.0.0
       keywords:
@@ -896,7 +866,7 @@ module:
       contributors:
         - Kostiantyn Wandalen <wanalen@01.school>
         - Volodymyr M. <volodymyr.migdal@gmail.com>
-      npm.name: wappbasic
+      npm.name: wprocess
       npm.scripts:
         test: wtest .run proto/**
         docgen: wdocgen .build proto
@@ -916,7 +886,7 @@ module:
       module.peer.willfiles:
         criterion:
           predefined: 1
-        path: out/wAppBasic.out.will.yml
+        path: out/wProcess.out.will.yml
       module.peer.in:
         criterion:
           predefined: 1
@@ -929,13 +899,13 @@ module:
         criterion:
           predefined: 1
       repository:
-        path: 'git+https:///github.com/Wandalen/wAppBasic.git'
+        path: 'git+https:///github.com/Wandalen/wProcess.git'
       origins:
         path:
-          - 'git+https:///github.com/Wandalen/wAppBasic.git'
-          - 'npm:///wappbasic'
+          - 'git+https:///github.com/Wandalen/wProcess.git'
+          - 'npm:///wprocess'
       bugtracker:
-        path: 'https:///github.com/Wandalen/wAppBasic/issues'
+        path: 'https:///github.com/Wandalen/wProcess/issues'
       in:
         path: .
       out:
@@ -1043,7 +1013,7 @@ module:
         enabled: 0
         criterion:
           optional: 1
-      wappbasic:
+      wprocess:
         path: 'hd://.'
         autoExporting: 0
         enabled: 0
@@ -1060,9 +1030,6 @@ module:
         src:
           filePath:
             'path::proto': '{path::out.*=1}/source'
-        mandatory: 1
-        dstRewritingOnlyPreserving: 1
-        linking: hardLinkMaybe
         criterion:
           tests: no.tests
           debug: debug
@@ -1074,9 +1041,6 @@ module:
         src:
           filePath:
             'path::proto': '{path::out.*=1}/source'
-        mandatory: 1
-        dstRewritingOnlyPreserving: 1
-        linking: hardLinkMaybe
         criterion:
           tests: no.tests
           debug: release
@@ -1088,9 +1052,6 @@ module:
         src:
           filePath:
             'path::proto': '{path::out.*=1}/source'
-        mandatory: 1
-        dstRewritingOnlyPreserving: 1
-        linking: hardLinkMaybe
         criterion:
           tests: no.tests
           debug: debug
@@ -1102,9 +1063,6 @@ module:
         src:
           filePath:
             'path::proto': '{path::out.*=1}/source'
-        mandatory: 1
-        dstRewritingOnlyPreserving: 1
-        linking: hardLinkMaybe
         criterion:
           tests: no.tests
           debug: release
@@ -1116,9 +1074,6 @@ module:
         src:
           filePath:
             'path::proto': '{path::out.raw.release}'
-        mandatory: 1
-        dstRewritingOnlyPreserving: 1
-        linking: hardLinkMaybe
         criterion:
           raw: raw
           debug: release
@@ -1131,9 +1086,6 @@ module:
             '**.test*': 0
             '**.test/**': 0
             'path::proto': '{path::out.*=1}/Main.s'
-        mandatory: 1
-        dstRewritingOnlyPreserving: 1
-        linking: hardLinkMaybe
         criterion:
           tests: no.tests
           raw: compiled
@@ -1147,9 +1099,6 @@ module:
             '**.test*': 0
             '**.test/**': 0
             'path::proto': '{path::out.*=1}/Main.s'
-        mandatory: 1
-        dstRewritingOnlyPreserving: 1
-        linking: hardLinkMaybe
         criterion:
           tests: no.tests
           raw: compiled
@@ -1162,9 +1111,6 @@ module:
           filePath:
             '**.test*': 1
             'path::proto': '{path::out.*=1}/Tests.test.s'
-        mandatory: 1
-        dstRewritingOnlyPreserving: 1
-        linking: hardLinkMaybe
         criterion:
           tests: only.tests
           raw: compiled
@@ -1177,9 +1123,6 @@ module:
           filePath:
             '**.test*': 1
             'path::proto': '{path::out.*=1}/Tests.test.s'
-        mandatory: 1
-        dstRewritingOnlyPreserving: 1
-        linking: hardLinkMaybe
         criterion:
           tests: only.tests
           raw: compiled
@@ -1614,11 +1557,11 @@ module:
           - 'build::npm'
     consistency:
       ../.ex.will.yml:
-        hash: d4fba7bf68972e0255c8002a07b89dda
+        hash: 6643e08d0b3c09445e54e71704696a7b
         size: 2146
       ../.im.will.yml:
-        hash: 0151585375d92052ddfbd46580d3c92e
-        size: 5503
-      wAppBasic.out.will.yml:
-        hash: 9f65269f3ed82ece35270a7a7e66bf64
-        size: 41856
+        hash: e330feb922d16ed5359d2e8533fee958
+        size: 5502
+      wProcess.out.will.yml:
+        hash: 85ef0b7f9f06c37d4eab5c8dabd03bb3
+        size: 40138
