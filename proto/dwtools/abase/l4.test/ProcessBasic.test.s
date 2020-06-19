@@ -9196,190 +9196,190 @@ function startExecPathWithSpace( test )
   _.fileProvider.fileWrite( testAppPath, testAppCode );
 
   let ready = _.Consequence().take( null );
-  
+
   let execPathWithSpace = 'node ' + _.path.nativize( testAppPath );
-  
+
   //
-  
+
   ready.then( () =>
-  { 
+  {
     test.case = 'execPath contains unquoted path with space, spawn'
     return null;
   })
-  
+
   _.process.start
-  ({ 
-    execPath : execPathWithSpace, 
-    ready, 
+  ({
+    execPath : execPathWithSpace,
+    ready,
     outputCollecting : 1,
     outputPiping : 1,
     mode : 'spawn',
-    throwingExitCode : 0 
+    throwingExitCode : 0
   });
-  
-  ready.then( ( got ) => 
-  { 
+
+  ready.then( ( got ) =>
+  {
     test.notIdentical( got.exitCode, 0 );
     test.is( _.fileProvider.fileExists( testAppPath ) );
     test.is( _.strHas( got.output, `Error: Cannot find module` ) );
     return null;
   })
-  
+
   //
-  
+
   ready.then( () =>
-  { 
+  {
     test.case = 'execPath contains unquoted path with space, shell'
     return null;
   })
-  
+
   _.process.start
-  ({ 
-    execPath : execPathWithSpace, 
-    ready, 
+  ({
+    execPath : execPathWithSpace,
+    ready,
     outputCollecting : 1,
     outputPiping : 1,
     mode : 'shell',
-    throwingExitCode : 0 
+    throwingExitCode : 0
   });
-  
-  ready.then( ( got ) => 
+
+  ready.then( ( got ) =>
   {
     test.notIdentical( got.exitCode, 0 );
     test.is( _.fileProvider.fileExists( testAppPath ) );
     test.is( _.strHas( got.output, `Error: Cannot find module` ) );
     return null;
   })
-  
+
   //
-  
+
   ready.then( () =>
-  { 
+  {
     test.case = 'execPath contains unquoted path with space, fork'
     return null;
   })
-  
+
   _.process.start
-  ({ 
-    execPath : _.path.nativize( testAppPath ), 
-    ready, 
+  ({
+    execPath : _.path.nativize( testAppPath ),
+    ready,
     outputCollecting : 1,
     outputPiping : 1,
     mode : 'fork',
-    throwingExitCode : 0 
+    throwingExitCode : 0
   });
-  
-  ready.then( ( got ) => 
+
+  ready.then( ( got ) =>
   {
     test.notIdentical( got.exitCode, 0 );
     test.is( _.fileProvider.fileExists( testAppPath ) );
     test.is( _.strHas( got.output, `Error: Cannot find module` ) );
     return null;
   })
-  
+
   //
-  
+
   ready.then( () =>
-  { 
+  {
     test.case = 'args is a string with unquoted path with space, spawn'
     return null;
   })
-  
+
   _.process.start
-  ({ 
-    args : execPathWithSpace, 
-    ready, 
+  ({
+    args : execPathWithSpace,
+    ready,
     outputCollecting : 1,
     outputPiping : 1,
     mode : 'spawn',
-    throwingExitCode : 0 
+    throwingExitCode : 0
   });
-  
-  ready.finally( ( err, got ) => 
-  { 
+
+  ready.finally( ( err, got ) =>
+  {
     _.errAttend( err );
     test.is( !!err );
     test.is( _.fileProvider.fileExists( testAppPath ) );
     test.is( _.strHas( err.message, `ENOENT` ) );
     return null;
   })
-  
+
   //
-  
+
   ready.then( () =>
-  { 
+  {
     test.case = 'args is a string with unquoted path with space, shell'
     return null;
   })
-  
+
   _.process.start
-  ({ 
-    args : execPathWithSpace, 
+  ({
+    args : execPathWithSpace,
     outputCollecting : 1,
     outputPiping : 1,
     mode : 'shell',
     ready,
-    throwingExitCode : 0 
+    throwingExitCode : 0
   });
 
-  ready.then( ( got ) => 
-  { 
+  ready.then( ( got ) =>
+  {
     test.notIdentical( got.exitCode, 0 );
     test.is( _.fileProvider.fileExists( testAppPath ) );
     test.is( _.strHas( got.output, `Cannot find module` ) );
     return null;
   })
-  
+
   //
-  
+
   ready.then( () =>
-  { 
+  {
     test.case = 'args is a string with unquoted path with space, fork'
     return null;
   })
-  
+
   _.process.start
-  ({ 
-    args : _.path.nativize( testAppPath ), 
-    ready, 
+  ({
+    args : _.path.nativize( testAppPath ),
+    ready,
     outputCollecting : 1,
     outputPiping : 1,
     mode : 'fork',
-    throwingExitCode : 0 
+    throwingExitCode : 0
   });
-  
-  ready.then( ( got ) => 
+
+  ready.then( ( got ) =>
   {
     test.identical( got.exitCode, 0 );
     return null;
   })
-  
+
   //
-  
+
   ready.then( () =>
-  { 
+  {
     test.case = 'args is a string with unquoted path with space and argument, fork'
     return null;
   })
-  
+
   _.process.start
-  ({ 
-    args : _.path.nativize( testAppPath ) + ' arg', 
-    ready, 
+  ({
+    args : _.path.nativize( testAppPath ) + ' arg',
+    ready,
     outputCollecting : 1,
     outputPiping : 1,
     mode : 'fork',
-    throwingExitCode : 0 
+    throwingExitCode : 0
   });
-  
-  ready.then( ( got ) => 
-  { 
+
+  ready.then( ( got ) =>
+  {
     test.notIdentical( got.exitCode, 0 );
     test.is( _.fileProvider.fileExists( testAppPath ) );
     test.is( _.strHas( got.output, `Cannot find module` ) );
     return null;
   })
-  
+
   return ready;
 }
 
@@ -9403,49 +9403,49 @@ function startNodePassingThroughExecPathWithSpace( test )
   _.fileProvider.fileWrite( testAppPath, testAppCode );
 
   let ready = _.Consequence().take( null );
-  
+
   let execPathWithSpace = _.path.nativize( testAppPath );
-  
+
   //
-  
+
   ready.then( () =>
-  { 
+  {
     test.case = 'execPath contains unquoted path with space'
     return null;
   })
-  
+
   _.process.startNodePassingThrough
-  ({ 
-    execPath : execPathWithSpace, 
-    ready, 
+  ({
+    execPath : execPathWithSpace,
+    ready,
     stdio : 'pipe',
     outputCollecting : 1,
     outputPiping : 1,
     throwingExitCode : 0,
     applyingExitCode : 0,
   });
-  
-  ready.then( ( got ) => 
-  { 
+
+  ready.then( ( got ) =>
+  {
     test.notIdentical( got.exitCode, 0 );
     test.is( _.fileProvider.fileExists( testAppPath ) );
     test.is( _.strHas( got.output, `Error: Cannot find module` ) );
     return null;
   })
-  
+
   //
-  
+
   ready.then( () =>
-  { 
+  {
     test.case = 'args: string that contains unquoted path with space'
     return null;
   })
-  
-  test.shouldThrowErrorOfAnyKind( () => 
+
+  test.shouldThrowErrorOfAnyKind( () =>
   {
     return _.process.startNodePassingThrough
-    ({ 
-      args : execPathWithSpace, 
+    ({
+      args : execPathWithSpace,
       stdio : 'pipe',
       outputCollecting : 1,
       outputPiping : 1,
@@ -9453,9 +9453,9 @@ function startNodePassingThroughExecPathWithSpace( test )
       applyingExitCode : 0,
     });
   })
-  
+
   //
-  
+
   return ready;
 }
 
@@ -9479,21 +9479,21 @@ function startPassingThroughExecPathWithSpace( test )
   _.fileProvider.fileWrite( testAppPath, testAppCode );
 
   let ready = _.Consequence().take( null );
-  
+
   let execPathWithSpace = 'node ' + _.path.nativize( testAppPath );
-  
+
   //
-  
+
   ready.then( () =>
-  { 
+  {
     test.case = 'execPath contains unquoted path with space, spawn'
     return null;
   })
-  
+
   _.process.startPassingThrough
-  ({ 
-    execPath : execPathWithSpace, 
-    ready, 
+  ({
+    execPath : execPathWithSpace,
+    ready,
     outputCollecting : 1,
     outputPiping : 1,
     mode : 'spawn',
@@ -9501,112 +9501,27 @@ function startPassingThroughExecPathWithSpace( test )
     applyingExitCode : 0,
     stdio : 'pipe'
   });
-  
-  ready.then( ( got ) => 
-  { 
+
+  ready.then( ( got ) =>
+  {
     test.notIdentical( got.exitCode, 0 );
     test.is( _.fileProvider.fileExists( testAppPath ) );
     test.is( _.strHas( got.output, `Error: Cannot find module` ) );
     return null;
   })
-  
+
   //
-  
+
   ready.then( () =>
-  { 
+  {
     test.case = 'execPath contains unquoted path with space, shell'
     return null;
   })
-  
+
   _.process.startPassingThrough
-  ({ 
-    execPath : execPathWithSpace, 
-    ready, 
-    outputCollecting : 1,
-    outputPiping : 1,
-    mode : 'shell',
-    throwingExitCode : 0,
-    applyingExitCode : 0,
-    stdio : 'pipe'
-  });
-  
-  ready.then( ( got ) => 
-  {
-    test.notIdentical( got.exitCode, 0 );
-    test.is( _.fileProvider.fileExists( testAppPath ) );
-    test.is( _.strHas( got.output, `Error: Cannot find module` ) );
-    return null;
-  })
-  
-  //
-  
-  ready.then( () =>
-  { 
-    test.case = 'execPath contains unquoted path with space, fork'
-    return null;
-  })
-  
-  _.process.startPassingThrough
-  ({ 
-    execPath : _.path.nativize( testAppPath ), 
-    ready, 
-    outputCollecting : 1,
-    outputPiping : 1,
-    mode : 'spawn',
-    throwingExitCode : 0,
-    applyingExitCode : 0,
-    stdio : 'pipe'
-  });
-  
-  ready.then( ( got ) => 
-  {
-    test.notIdentical( got.exitCode, 0 );
-    test.is( _.fileProvider.fileExists( testAppPath ) );
-    test.is( _.strHas( got.output, `Error: Cannot find module` ) );
-    return null;
-  })
-  
-  //
-  
-  ready.then( () =>
-  { 
-    test.case = 'args is a string with unquoted path with space, spawn'
-    return null;
-  })
-  
-  _.process.startPassingThrough
-  ({ 
-    args : execPathWithSpace, 
-    ready, 
-    outputCollecting : 1,
-    outputPiping : 1,
-    mode : 'spawn',
-    throwingExitCode : 0,
-    applyingExitCode : 0,
-    stdio : 'pipe'
-  });
-  
-  ready.finally( ( err, got ) => 
-  { 
-    _.errAttend( err );
-    test.is( !!err );
-    test.is( _.fileProvider.fileExists( testAppPath ) );
-    test.is( _.strHas( err.message, `ENOENT` ) );
-    return null;
-  })
-  
-  //
-  
-  ready.then( () =>
-  { 
-    test.case = 'args is a string with unquoted path with space, shell'
-    return null;
-  })
-  
-  _.process.startPassingThrough
-  ({ 
-    args : execPathWithSpace, 
-    ready, 
+  ({
+    execPath : execPathWithSpace,
+    ready,
     outputCollecting : 1,
     outputPiping : 1,
     mode : 'shell',
@@ -9615,26 +9530,111 @@ function startPassingThroughExecPathWithSpace( test )
     stdio : 'pipe'
   });
 
-  ready.then( ( got ) => 
-  { 
+  ready.then( ( got ) =>
+  {
+    test.notIdentical( got.exitCode, 0 );
+    test.is( _.fileProvider.fileExists( testAppPath ) );
+    test.is( _.strHas( got.output, `Error: Cannot find module` ) );
+    return null;
+  })
+
+  //
+
+  ready.then( () =>
+  {
+    test.case = 'execPath contains unquoted path with space, fork'
+    return null;
+  })
+
+  _.process.startPassingThrough
+  ({
+    execPath : _.path.nativize( testAppPath ),
+    ready,
+    outputCollecting : 1,
+    outputPiping : 1,
+    mode : 'spawn',
+    throwingExitCode : 0,
+    applyingExitCode : 0,
+    stdio : 'pipe'
+  });
+
+  ready.then( ( got ) =>
+  {
+    test.notIdentical( got.exitCode, 0 );
+    test.is( _.fileProvider.fileExists( testAppPath ) );
+    test.is( _.strHas( got.output, `Error: Cannot find module` ) );
+    return null;
+  })
+
+  //
+
+  ready.then( () =>
+  {
+    test.case = 'args is a string with unquoted path with space, spawn'
+    return null;
+  })
+
+  _.process.startPassingThrough
+  ({
+    args : execPathWithSpace,
+    ready,
+    outputCollecting : 1,
+    outputPiping : 1,
+    mode : 'spawn',
+    throwingExitCode : 0,
+    applyingExitCode : 0,
+    stdio : 'pipe'
+  });
+
+  ready.finally( ( err, got ) =>
+  {
+    _.errAttend( err );
+    test.is( !!err );
+    test.is( _.fileProvider.fileExists( testAppPath ) );
+    test.is( _.strHas( err.message, `ENOENT` ) );
+    return null;
+  })
+
+  //
+
+  ready.then( () =>
+  {
+    test.case = 'args is a string with unquoted path with space, shell'
+    return null;
+  })
+
+  _.process.startPassingThrough
+  ({
+    args : execPathWithSpace,
+    ready,
+    outputCollecting : 1,
+    outputPiping : 1,
+    mode : 'shell',
+    throwingExitCode : 0,
+    applyingExitCode : 0,
+    stdio : 'pipe'
+  });
+
+  ready.then( ( got ) =>
+  {
     test.notIdentical( got.exitCode, 0 );
     test.is( _.fileProvider.fileExists( testAppPath ) );
     test.is( _.strHas( got.output, `Cannot find module` ) );
     return null;
   })
-  
+
   //
-  
+
   ready.then( () =>
-  { 
+  {
     test.case = 'args is a string with unquoted path with space, fork'
     return null;
   })
-  
+
   _.process.startPassingThrough
-  ({ 
-    args : _.path.nativize( testAppPath ), 
-    ready, 
+  ({
+    args : _.path.nativize( testAppPath ),
+    ready,
     outputCollecting : 1,
     outputPiping : 1,
     mode : 'fork',
@@ -9642,25 +9642,25 @@ function startPassingThroughExecPathWithSpace( test )
     applyingExitCode : 0,
     stdio : 'pipe'
   });
-  
-  ready.then( ( got ) => 
+
+  ready.then( ( got ) =>
   {
     test.identical( got.exitCode, 0 );
     return null;
   })
-  
+
   //
-  
+
   ready.then( () =>
-  { 
+  {
     test.case = 'args is a string with unquoted path with space and argument, fork'
     return null;
   })
-  
+
   _.process.startPassingThrough
-  ({ 
-    args : _.path.nativize( testAppPath ) + ' arg', 
-    ready, 
+  ({
+    args : _.path.nativize( testAppPath ) + ' arg',
+    ready,
     outputCollecting : 1,
     outputPiping : 1,
     mode : 'fork',
@@ -9668,15 +9668,15 @@ function startPassingThroughExecPathWithSpace( test )
     applyingExitCode : 0,
     stdio : 'pipe'
   });
-  
-  ready.then( ( got ) => 
-  { 
+
+  ready.then( ( got ) =>
+  {
     test.notIdentical( got.exitCode, 0 );
     test.is( _.fileProvider.fileExists( testAppPath ) );
     test.is( _.strHas( got.output, `Cannot find module` ) );
     return null;
   })
-  
+
   return ready;
 }
 
@@ -18801,11 +18801,11 @@ var Proto =
     shellErrorHadling,
     shellNode,
     shellModeShellNonTrivial,
-    
+
     startExecPathWithSpace,
     startNodePassingThroughExecPathWithSpace,
     startPassingThroughExecPathWithSpace,
-    
+
     shellProcedureTrivial,
     shellProcedureExists,
 
@@ -18885,7 +18885,7 @@ var Proto =
     childrenAsList,
 
     killComplex,
-    
+
     realMainFile,
     realMainDir,
     effectiveMainFile
