@@ -578,7 +578,7 @@ function processArgsPropertiesBase( test )
       scriptPath,
       interpreterArgs : [],
       keyValDelimeter : ':',
-      map : { x : 1 },
+      map : { x : [ 'y', 1 ] },
       subject : '',
       scriptArgs : [ 'x', ':', 'y', 'x', ':', '1' ]
     }
@@ -2659,7 +2659,7 @@ function shellCurrentPath( test )
     test.case = 'normalized, currentPath leads to root of current drive, mode : spawn';
 
     let trace = _.path.traceToRoot( _.path.normalize( __dirname ) );
-    let currentPath = trace[ 0 ];
+    let currentPath = trace[ 1 ];
 
     let o =
     {
@@ -2686,7 +2686,7 @@ function shellCurrentPath( test )
     test.case = 'normalized with slash, currentPath leads to root of current drive, mode : spawn';
 
     let trace = _.path.traceToRoot( _.path.normalize( __dirname ) );
-    let currentPath = trace[ 0 ] + '/';
+    let currentPath = trace[ 1 ] + '/';
 
     let o =
     {
@@ -2703,7 +2703,7 @@ function shellCurrentPath( test )
       if( process.platform === 'win32')
       test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) );
       else
-      test.identical( _.strStrip( got.output ), trace[ 0 ] );
+      test.identical( _.strStrip( got.output ), trace[ 1 ] );
       return null;
     })
   })
@@ -2715,7 +2715,7 @@ function shellCurrentPath( test )
     test.case = 'nativized, currentPath leads to root of current drive, mode : spawn';
 
     let trace = _.path.traceToRoot( __dirname );
-    let currentPath = _.path.nativize( trace[ 0 ] );
+    let currentPath = _.path.nativize( trace[ 1 ] );
 
     let o =
     {
@@ -2741,7 +2741,7 @@ function shellCurrentPath( test )
     test.case = 'normalized, currentPath leads to root of current drive, mode : fork';
 
     let trace = _.path.traceToRoot( _.path.normalize( __dirname ) );
-    let currentPath = trace[ 0 ];
+    let currentPath = trace[ 1 ];
 
     let o =
     {
@@ -2768,7 +2768,7 @@ function shellCurrentPath( test )
     test.case = 'normalized with slash, currentPath leads to root of current drive, mode : fork';
 
     let trace = _.path.traceToRoot( _.path.normalize( __dirname ) );
-    let currentPath = trace[ 0 ] + '/';
+    let currentPath = trace[ 1 ] + '/';
 
     let o =
     {
@@ -2785,7 +2785,7 @@ function shellCurrentPath( test )
       if( process.platform === 'win32')
       test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) );
       else
-      test.identical( _.strStrip( got.output ), trace[ 0 ] );
+      test.identical( _.strStrip( got.output ), trace[ 1 ] );
       return null;
     })
   })
@@ -2797,7 +2797,7 @@ function shellCurrentPath( test )
     test.case = 'nativized, currentPath leads to root of current drive, mode : fork';
 
     let trace = _.path.traceToRoot( __dirname );
-    let currentPath = _.path.nativize( trace[ 0 ] );
+    let currentPath = _.path.nativize( trace[ 1 ] );
 
     let o =
     {
@@ -2823,7 +2823,7 @@ function shellCurrentPath( test )
     test.case = 'normalized, currentPath leads to root of current drive, mode : shell';
 
     let trace = _.path.traceToRoot( _.path.normalize( __dirname ) );
-    let currentPath = trace[ 0 ];
+    let currentPath = trace[ 1 ];
 
     let o =
     {
@@ -2850,7 +2850,7 @@ function shellCurrentPath( test )
     test.case = 'normalized with slash, currentPath leads to root of current drive, mode : shell';
 
     let trace = _.path.traceToRoot( _.path.normalize( __dirname ) );
-    let currentPath = trace[ 0 ] + '/';
+    let currentPath = trace[ 1 ] + '/';
 
     let o =
     {
@@ -2867,7 +2867,7 @@ function shellCurrentPath( test )
       if( process.platform === 'win32')
       test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) );
       else
-      test.identical( _.strStrip( got.output ), trace[ 0 ] );
+      test.identical( _.strStrip( got.output ), trace[ 1 ] );
       return null;
     })
   })
@@ -2879,7 +2879,7 @@ function shellCurrentPath( test )
     test.case = 'nativized, currentPath leads to root of current drive, mode : shell';
 
     let trace = _.path.traceToRoot( __dirname );
-    let currentPath = _.path.nativize( trace[ 0 ] )
+    let currentPath = _.path.nativize( trace[ 1 ] )
 
     let o =
     {
@@ -2905,7 +2905,7 @@ function shellCurrentPath( test )
     test.case = 'normalized, currentPath leads to root of current drive, mode : exec';
 
     let trace = _.path.traceToRoot( _.path.normalize( __dirname ) );
-    let currentPath = trace[ 0 ];
+    let currentPath = trace[ 1 ];
 
     let o =
     {
@@ -2932,7 +2932,7 @@ function shellCurrentPath( test )
     test.case = 'normalized with slash, currentPath leads to root of current drive, mode : exec';
 
     let trace = _.path.traceToRoot( _.path.normalize( __dirname ) );
-    let currentPath = trace[ 0 ] + '/';
+    let currentPath = trace[ 1 ] + '/';
 
     let o =
     {
@@ -2949,7 +2949,7 @@ function shellCurrentPath( test )
       if( process.platform === 'win32')
       test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) );
       else
-      test.identical( _.strStrip( got.output ), trace[ 0 ] );
+      test.identical( _.strStrip( got.output ), trace[ 1 ] );
       return null;
     })
   })
@@ -2961,7 +2961,7 @@ function shellCurrentPath( test )
     test.case = 'nativized, currentPath leads to root of current drive, mode : exec';
 
     let trace = _.path.traceToRoot( __dirname );
-    let currentPath = _.path.nativize( trace[ 0 ] );
+    let currentPath = _.path.nativize( trace[ 1 ] );
 
     let o =
     {
@@ -13475,7 +13475,7 @@ function startOnStart( test )
       return null;
     })
 
-    return _.Consequence.AndTake_([ o.onStart, o.onTerminate ]);
+    return _.Consequence.AndTake_( o.onStart, o.onTerminate );
   })
 
   /* Vova xxx: close event is not emitted for disconnected detached child in fork mode*/
