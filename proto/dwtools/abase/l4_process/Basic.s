@@ -203,6 +203,7 @@ let effectiveMainFile = ( function effectiveMainFile()
 
     if( !_.fileProvider.fileExists( result ) )
     {
+      //xxx : review
       debugger;
       console.error( 'process.argv :', process.argv.join( ', ' ) );
       console.error( 'currentAtBegin :', this._currentAtBegin );
