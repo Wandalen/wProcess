@@ -18852,6 +18852,89 @@ function effectiveMainFile( test )
 
 //
 
+function shellExperiment( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suiteTempPath, test.name );
+  var commonDefaults =
+  {
+    outputPiping : 1,
+    outputCollecting : 1,
+    applyingExitCode : 0,
+    throwingExitCode : 1
+  }
+
+  /* */
+
+  function testApp()
+  {
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    _.process.start
+    ({
+      execPath : 'node testApp2.js',
+      mode : 'shell',
+      passingThrough : 1,
+      stdio : 'inherit',
+      inputMirroring : 0
+    })
+  }
+
+  function testApp2()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+
+  /* */
+
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+  var testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+
+  var testAppPath2 = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp2.js' ) );
+  var testAppCode2 = testApp2.toString() + '\ntestApp2();';
+  _.fileProvider.fileWrite( testAppPath2, testAppCode2 );
+
+  var o;
+  var con = new _.Consequence().take( null );
+
+  //
+
+  con.thenKeep( function()
+  {
+    test.case = 'mode : shell, passingThrough : true, no args';
+
+    o =
+    {
+      execPath :  'node testApp.js *',
+      currentPath : routinePath,
+      mode : 'spawn',
+      stdio : 'pipe'
+    }
+
+    return null;
+  })
+  .thenKeep( function( arg )
+  {
+    var options = _.mapSupplement( {}, o, commonDefaults );
+
+    return _.process.start( options )
+    .thenKeep( function()
+    {
+      test.identical( options.exitCode, 0 );
+      test.identical( options.output, [ '*' ] );
+      return null;
+    })
+  })
+
+  return con;
+}
+
+shellExperiment.timeOut = 30000;
+
+//
+
 var Proto =
 {
 
@@ -19003,7 +19086,9 @@ var Proto =
 
     realMainFile,
     realMainDir,
-    effectiveMainFile
+    effectiveMainFile,
+
+    shellExperiment
 
   },
 

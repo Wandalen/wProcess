@@ -191,7 +191,6 @@ function start_body( o )
   let decoratedErrorOutput = '';
   let startingDelay = 0;
   let procedure;
-  let argsMap;
 
   if( _.objectIs( o.when ) )
   {
@@ -451,6 +450,8 @@ function start_body( o )
     {
       o.fullExecPath = o.execPath;
       execArgs = execPathParse( o.execPath );
+      if( o.mode !== 'shell' && o.mode !== 'exec' )
+      execArgs = argsUnqoute( execArgs );
       o.execPath = execArgs.shift();
     }
 
@@ -504,6 +505,7 @@ function start_body( o )
     {
       // console.log( 'argv', process.argv.length, process.argv ); debugger
       let argumentsManual = process.argv.slice( 2 );
+
       if( argumentsManual.length )
       o.args = _.arrayAppendArray( o.args || [], argumentsManual );
     }
@@ -797,29 +799,37 @@ function start_body( o )
     }
     let args = _.strSplit( strOptions );
 
-    argsMap = Object.create( null );
-
     for( let i = 0; i < args.length; i++ )
     {
-      argsMap[ i ] = { raw : args[ i ], unqoted : null, quotes : null }
-
       let begin = _.strBeginOf( args[ i ], strOptions.quotingPrefixes );
       let end = _.strEndOf( args[ i ], strOptions.quotingPostfixes );
       if( begin )
-      {
-        _.sure( begin === end, 'Arguments string in execPath:', src, 'has not closed quoting in argument:', args[ i ] );
-        args[ i ] = _.strInsideOf( args[ i ], begin, end ); /* yyy qqq2 : should not uncover arguments here! */
-        argsMap[ i ].unqoted = args[ i ];
-        argsMap[ i ].quotes = begin;
-      }
+      _.sure( begin === end, 'Arguments string in execPath:', src, 'has not closed quoting in argument:', args[ i ] );
     }
-    argsMap.length = args.length;
+
+    return args;
+  }
+
+  //
+
+  function argsUnqoute( args )
+  {
+    let quotes = [ "'", '"', "`" ];
+
+    for( let i = 0; i < args.length; i++ )
+    {
+      let begin = _.strBeginOf( args[ i ], quotes );
+      let end = _.strEndOf( args[ i ], quotes );
+      if( begin )
+      args[ i ] = _.strInsideOf( args[ i ], begin, end ); /* yyy qqq2 : should not uncover arguments here! */
+    }
+
     return args;
   }
 
   /* */
 
-  function argsJoin( src )
+  function _argsJoin( src )
   {
     let args = src.slice();
 
@@ -873,30 +883,6 @@ function start_body( o )
 
   function argsJoin( args )
   {
-    args = args.slice();
-
-    let quotesToEscape = [ '"' ];
-    let j = 0;
-
-    if( argsMap && argsMap.length > 1 )
-    for( let i = 1; i < argsMap.length; i++, j++ )
-    {
-      let argDescriptor = argsMap[ i ];
-      if( argDescriptor.unqoted )
-      args[ j ] = argDescriptor.raw;
-    }
-
-    for( ; j < args.length; j++ )
-    {
-      _.each( quotesToEscape, ( quote ) =>
-      {
-        args[ j ] = escapeArg( args[ j ], quote );
-      })
-
-      if( _.strHas( args[ j ], ' ' ) )
-      args[ j ] = _.strQuote( args[ j ] )
-    }
-
     return args.join( ' ' );
   }
 
