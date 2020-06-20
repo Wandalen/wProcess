@@ -591,7 +591,7 @@ function start_body( o )
       let o2 = optionsForFork();
       execPath = execPathForFork( execPath );
 
-      o.fullExecPath = _.strConcat( _.arrayAppendArray( [ execPath ], args ) );
+      o.fullExecPath = _.strConcat( _.arrayAppendArray( [ execPath ], args ) ); /* xxx : rename fullExecPath */
       launchInputLog();
 
       if( o.dry )
