@@ -9180,7 +9180,7 @@ shellModeShellNonTrivial.timeOut = 60000;
 
 //
 
-function shellModeGlobInArguments( test )
+function shellModeArgumentsHandling( test )
 {
   let context = this;
   let routinePath = _.path.join( context.suiteTempPath, test.name );
@@ -9209,10 +9209,79 @@ function shellModeGlobInArguments( test )
 
   /* */
 
-  shell( `node '*'` )
+  shell( `echo '*' '*'` )
   .then( ( got ) =>
   {
     test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, 'app.js' ), 0 );
+    test.identical( _.strCount( got.output, '*' ), 2 );
+    return null;
+  })
+
+  shell( `echo '"*"' '"*"'` )
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, 'app.js' ), 0 );
+    test.identical( _.strCount( got.output, '"*"' ), 2 );
+    return null;
+  })
+
+  shell( `echo "*" "*"` )
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, 'app.js' ), 0 );
+    test.identical( _.strCount( got.output, '*' ), 2 );
+    return null;
+  })
+
+  shell( `echo "'*'" "'*'"` )
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, 'app.js' ), 0 );
+    test.identical( _.strCount( got.output, `'*'` ), 2 );
+    return null;
+  })
+
+  shell( 'echo `*`' )
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, 'command not found' ), 1 );
+    return null;
+  })
+
+  shell({ execPath : 'echo', args : [ "`*`" ] })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, 'command not found' ), 1 );
+    return null;
+  })
+
+  shell( 'echo "`*`" "`*`"' )
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, 'command not found' ), 2 );
+    return null;
+  })
+
+  shell({ execPath : 'echo', args : [ "`*`", "`*`" ] })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, 'command not found' ), 2 );
+    return null;
+  })
+
+  shell({ execPath : `node -e "console.log( process.argv )"`, args : [ 'a b c' ] })
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    test.is( _.strHas( got.output, `'a b c'` ) );
     return null;
   })
 
@@ -9221,7 +9290,7 @@ function shellModeGlobInArguments( test )
   return ready;
 }
 
-shellModeGlobInArguments.timeOut = 60000;
+shellModeArgumentsHandling.timeOut = 60000;
 
 //
 
@@ -18846,7 +18915,7 @@ var Proto =
     shellErrorHadling,
     shellNode,
     shellModeShellNonTrivial,
-    shellModeGlobInArguments,
+    shellModeArgumentsHandling,
 
     startExecPathWithSpace,
     startNodePassingThroughExecPathWithSpace,
