@@ -8,10 +8,6 @@
 */
 
 /**
- * @file ProcessBasic.s.
- */
-
-/**
  * Collection of routines to execute system commands, run shell, batches, launch external processes from JavaScript application.
   @namespace Tools.process
   @extends Tools
@@ -279,7 +275,7 @@ function _eventAvailableHandle()
 function _Setup1()
 {
   this._currentAtBegin = _.path.current();
-  
+
   _.process._eventAvailableHandle();
   _.process._exitHandlerRepair();
   _.process._eventExitSetup();
@@ -307,7 +303,7 @@ let Extension =
   // // checker
   //
   // insideTestContainer,
-  
+
   realMainFile,
   realMainDir,
   effectiveMainFile,
