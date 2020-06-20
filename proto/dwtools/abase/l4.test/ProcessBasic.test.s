@@ -18923,7 +18923,7 @@ function shellExperiment( test )
     .thenKeep( function()
     {
       test.identical( options.exitCode, 0 );
-      test.identical( options.output, [ '*' ] );
+      test.identical( options.output, `[ '*' ]` );
       return null;
     })
   })
