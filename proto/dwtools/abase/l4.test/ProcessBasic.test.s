@@ -9180,6 +9180,51 @@ shellModeShellNonTrivial.timeOut = 60000;
 
 //
 
+function shellModeGlobInArguments( test )
+{
+  let context = this;
+  let routinePath = _.path.join( context.suiteTempPath, test.name );
+  let testAppPath =  _.path.join( routinePath, 'app.js' );
+
+  function app()
+  {
+    var fs = require( 'fs' );
+    fs.writeFileSync( 'args', JSON.stringify( process.argv.slice( 2 ) ) )
+    console.log( process.argv.slice( 2 ) )
+  }
+
+  let testAppCode = app.toString() + '\napp();';
+  _.fileProvider.fileWrite( testAppPath, testAppCode );
+
+  let ready = _.Consequence().take( null );
+
+  let shell = _.process.starter
+  ({
+    mode : 'shell',
+    currentPath : routinePath,
+    outputPiping : 1,
+    outputCollecting : 1,
+    ready : ready
+  })
+
+  /* */
+
+  shell( `node '*'` )
+  .then( ( got ) =>
+  {
+    test.identical( got.exitCode, 0 );
+    return null;
+  })
+
+  /*  */
+
+  return ready;
+}
+
+shellModeGlobInArguments.timeOut = 60000;
+
+//
+
 function startExecPathWithSpace( test )
 {
   let context = this;
@@ -18801,6 +18846,7 @@ var Proto =
     shellErrorHadling,
     shellNode,
     shellModeShellNonTrivial,
+    shellModeGlobInArguments,
 
     startExecPathWithSpace,
     startNodePassingThroughExecPathWithSpace,
