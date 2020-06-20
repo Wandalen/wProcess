@@ -9173,6 +9173,17 @@ function shellModeShellNonTrivial( test )
 
   /*  */
 
+  shell({ execPath : 'echo', args : [ 'a b', '*', 'c' ] })
+  .thenKeep( function( op )
+  {
+    test.identical( op.exitCode, 0 );
+    test.is( _.strHas( op.output, `a b * c` ) );
+    test.identical( op.execPath, 'echo' )
+    test.identical( op.args, [ 'a b', '*', 'c' ] )
+    test.identical( op.fullExecPath, 'echo "a b" "*" "c"' )
+    return null;
+  })
+
   return ready;
 }
 
@@ -9180,117 +9191,241 @@ shellModeShellNonTrivial.timeOut = 60000;
 
 //
 
-function shellModeArgumentsHandling( test )
+function shellArgumentsHandlingTrivial( test )
 {
-  let context = this;
-  let routinePath = _.path.join( context.suiteTempPath, test.name );
-  let testAppPath =  _.path.join( routinePath, 'app.js' );
+  var context = this;
+  var routinePath = _.path.join( context.suiteTempPath, test.name );
 
-  function app()
-  {
-    var fs = require( 'fs' );
-    fs.writeFileSync( 'args', JSON.stringify( process.argv.slice( 2 ) ) )
-    console.log( process.argv.slice( 2 ) )
-  }
+  _.fileProvider.fileWrite( _.path.join( routinePath, 'file' ), 'file' );
 
-  let testAppCode = app.toString() + '\napp();';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
+  /* */
 
-  let ready = _.Consequence().take( null );
+  var con = new _.Consequence().take( null );
 
   let shell = _.process.starter
   ({
-    mode : 'shell',
     currentPath : routinePath,
+    mode : 'shell',
+    stdio : 'pipe',
     outputPiping : 1,
     outputCollecting : 1,
-    ready : ready
+    ready : con
   })
 
   /* */
 
-  shell( `echo '*' '*'` )
-  .then( ( got ) =>
+  shell({ execPath : 'echo *' })
+  .thenKeep( function( op )
   {
-    test.identical( got.exitCode, 0 );
-    test.identical( _.strCount( got.output, 'app.js' ), 0 );
-    test.identical( _.strCount( got.output, '*' ), 2 );
+    test.identical( op.exitCode, 0 );
+    test.is( _.strHas( op.output, `file` ) );
+    test.identical( op.execPath, 'echo' )
+    test.identical( op.args, [ '*' ] )
+    test.identical( op.fullExecPath, 'echo *' )
     return null;
   })
 
-  shell( `echo '"*"' '"*"'` )
-  .then( ( got ) =>
-  {
-    test.identical( got.exitCode, 0 );
-    test.identical( _.strCount( got.output, 'app.js' ), 0 );
-    test.identical( _.strCount( got.output, '"*"' ), 2 );
-    return null;
-  })
+  /* */
 
-  shell( `echo "*" "*"` )
-  .then( ( got ) =>
-  {
-    test.identical( got.exitCode, 0 );
-    test.identical( _.strCount( got.output, 'app.js' ), 0 );
-    test.identical( _.strCount( got.output, '*' ), 2 );
-    return null;
-  })
-
-  shell( `echo "'*'" "'*'"` )
-  .then( ( got ) =>
-  {
-    test.identical( got.exitCode, 0 );
-    test.identical( _.strCount( got.output, 'app.js' ), 0 );
-    test.identical( _.strCount( got.output, `'*'` ), 2 );
-    return null;
-  })
-
-  shell( 'echo `*`' )
-  .then( ( got ) =>
-  {
-    test.identical( got.exitCode, 0 );
-    test.identical( _.strCount( got.output, 'command not found' ), 1 );
-    return null;
-  })
-
-  shell({ execPath : 'echo', args : [ "`*`" ] })
-  .then( ( got ) =>
-  {
-    test.identical( got.exitCode, 0 );
-    test.identical( _.strCount( got.output, 'command not found' ), 1 );
-    return null;
-  })
-
-  shell( 'echo "`*`" "`*`"' )
-  .then( ( got ) =>
-  {
-    test.identical( got.exitCode, 0 );
-    test.identical( _.strCount( got.output, 'command not found' ), 2 );
-    return null;
-  })
-
-  shell({ execPath : 'echo', args : [ "`*`", "`*`" ] })
-  .then( ( got ) =>
-  {
-    test.identical( got.exitCode, 0 );
-    test.identical( _.strCount( got.output, 'command not found' ), 2 );
-    return null;
-  })
-
-  shell({ execPath : `node -e "console.log( process.argv )"`, args : [ 'a b c' ] })
-  .then( ( got ) =>
-  {
-    test.identical( got.exitCode, 0 );
-    test.is( _.strHas( got.output, `'a b c'` ) );
-    return null;
-  })
-
-  /*  */
-
-  return ready;
+  return con;
 }
 
-shellModeArgumentsHandling.timeOut = 60000;
+//
+
+function shellArgumentsHandling( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suiteTempPath, test.name );
+
+  _.fileProvider.fileWrite( _.path.join( routinePath, 'file' ), 'file' );
+
+  /* */
+
+  var con = new _.Consequence().take( null );
+
+  let shell = _.process.starter
+  ({
+    currentPath : routinePath,
+    mode : 'shell',
+    stdio : 'pipe',
+    outputPiping : 1,
+    outputCollecting : 1,
+    ready : con
+  })
+
+  /* */
+
+  shell({ execPath : 'echo *' })
+  .thenKeep( function( op )
+  {
+    test.identical( op.exitCode, 0 );
+    test.is( _.strHas( op.output, `file` ) );
+    test.identical( op.execPath, 'echo' )
+    test.identical( op.args, [ '*' ] )
+    test.identical( op.fullExecPath, 'echo *' )
+    return null;
+  })
+
+  /* */
+
+  shell({ execPath : 'echo', args : '*' })
+  .thenKeep( function( op )
+  {
+    test.identical( op.exitCode, 0 );
+    test.is( _.strHas( op.output, `*` ) );
+    test.identical( op.execPath, 'echo' )
+    test.identical( op.args, [ '*' ] )
+    test.identical( op.fullExecPath, 'echo "*"' )
+    return null;
+  })
+
+  /* */
+
+  shell( `echo "*"` )
+  .then( ( op ) =>
+  {
+    test.identical( op.exitCode, 0 );
+    test.is( _.strHas( op.output, `*` ) );
+    test.identical( op.execPath, 'echo' )
+    test.identical( op.args, [ '"*"' ] )
+    test.identical( op.fullExecPath, 'echo "*"' )
+
+    return null;
+  })
+
+  /* */
+
+  shell({ execPath : 'echo "a b" "*" c' })
+  .thenKeep( function( op )
+  {
+    test.identical( op.exitCode, 0 );
+    test.is( _.strHas( op.output, `a b * c` ) );
+    test.identical( op.execPath, 'echo' )
+    test.identical( op.args, [ '"a b"', '"*"', 'c' ] )
+    test.identical( op.fullExecPath, 'echo "a b" "*" c' )
+    return null;
+  })
+
+  /* */
+
+  shell({ execPath : 'echo', args : [ 'a b', '*', 'c' ] })
+  .thenKeep( function( op )
+  {
+    test.identical( op.exitCode, 0 );
+    test.is( _.strHas( op.output, `a b * c` ) );
+    test.identical( op.execPath, 'echo' )
+    test.identical( op.args, [ 'a b', '*', 'c' ] )
+    test.identical( op.fullExecPath, 'echo "a b" "*" "c"' )
+    return null;
+  })
+
+  /* */
+
+  shell( `echo '"*"'` )
+  .then( ( op ) =>
+  {
+    test.identical( op.exitCode, 0 );
+    test.identical( _.strCount( op.output, '"*"' ), 1 );
+    test.identical( op.execPath, 'echo' )
+    test.identical( op.args, [ `'"*"'` ] )
+    test.identical( op.fullExecPath, `echo '"*"'` )
+    return null;
+  })
+
+  /* */
+
+  shell({ execPath : `echo`, args : [ `'"*"'` ] })
+  .then( ( op ) =>
+  {
+    test.identical( op.exitCode, 0 );
+    test.identical( _.strCount( op.output, '"*"' ), 1 );
+    test.identical( op.execPath, 'echo' )
+    test.identical( op.args, [ `'"*"'` ] )
+    test.identical( op.fullExecPath, `echo "'\\"*\\"'"` )
+    return null;
+  })
+
+  /* */
+
+  shell( `echo "'*'"` )
+  .then( ( op ) =>
+  {
+    test.identical( op.exitCode, 0 );
+    test.identical( _.strCount( op.output, `'*'` ), 1 );
+    test.identical( op.execPath, 'echo' )
+    test.identical( op.args, [ `"'*'"` ] )
+    test.identical( op.fullExecPath, `echo "'*'"` )
+    return null;
+  })
+
+  /* */
+
+  shell({ execPath : `echo`, args : [ `"'*'"` ] })
+  .then( ( op ) =>
+  {
+    test.identical( op.exitCode, 0 );
+    test.identical( _.strCount( op.output, `'*'` ), 1 );
+    test.identical( op.execPath, 'echo' )
+    test.identical( op.args, [ `"'*'"` ] )
+    test.identical( op.fullExecPath, `echo "\\"'*'\\""` )
+    return null;
+  })
+
+  /* */
+
+  shell( 'echo `*`' )
+  .then( ( op ) =>
+  {
+    test.identical( op.exitCode, 0 );
+    test.identical( _.strCount( op.output, 'Usage:' ), 1 );
+    test.identical( op.execPath, 'echo' )
+    test.identical( op.args, [ '`*`' ] )
+    test.identical( op.fullExecPath, 'echo `*`' )
+    return null;
+  })
+
+  /* */
+
+  shell({ execPath : 'echo', args : [ '`*`' ] })
+  .then( ( op ) =>
+  {
+    test.identical( op.exitCode, 0 );
+    test.identical( _.strCount( op.output, '`*`' ), 1 );
+    test.identical( op.execPath, 'echo' )
+    test.identical( op.args, [ '`*`' ] )
+    test.identical( op.fullExecPath, 'echo "\\`*\\`"' )
+    return null;
+  })
+
+  /* */
+
+  shell({ execPath : `node -e "console.log( process.argv.slice( 1 ) )"`, args : [ 'a b c' ] })
+  .then( ( op ) =>
+  {
+    test.identical( op.exitCode, 0 );
+    test.is( _.strHas( op.output, `a b c` ) );
+    return null;
+  })
+
+  /* */
+
+  shell({ execPath : `node -e "console.log( process.argv.slice( 1 ) )"`, args : [ '"a b c"' ] })
+  .then( ( op ) =>
+  {
+    test.identical( op.exitCode, 0 );
+    test.is( _.strHas( op.output, `"a b c"` ) );
+    test.identical( op.execPath, 'node' )
+    test.identical( op.args, [ '-e', '"console.log( process.argv.slice( 1 ) )"', '"a b c"' ] )
+    test.identical( op.fullExecPath, 'node "-e" "console.log( process.argv.slice( 1 ) )" "\\"a b c\\""' )
+    return null;
+  })
+
+  /* */
+
+  return con;
+}
+
+shellArgumentsHandling.timeOut = 30000;
 
 //
 
@@ -18998,7 +19133,8 @@ var Proto =
     shellErrorHadling,
     shellNode,
     shellModeShellNonTrivial,
-    shellModeArgumentsHandling,
+    shellArgumentsHandlingTrivial,
+    shellArgumentsHandling,
 
     startExecPathWithSpace,
     startNodePassingThroughExecPathWithSpace,

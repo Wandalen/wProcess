@@ -191,6 +191,8 @@ function start_body( o )
   let decoratedErrorOutput = '';
   let startingDelay = 0;
   let procedure;
+  let execArgs;
+  let execArgsStartIndex = null;
 
   if( _.objectIs( o.when ) )
   {
@@ -444,7 +446,6 @@ function start_body( o )
 
     o.args = _.arrayAs( o.args );
 
-    let execArgs;
 
     if( _.strIs( o.execPath ) )
     {
@@ -470,7 +471,11 @@ function start_body( o )
     }
 
     if( execArgs && execArgs.length )
-    o.args = _.arrayPrependArray( o.args || [], execArgs );
+    {
+      o.args = o.args || [];
+      execArgsStartIndex = o.args.length;
+      o.args = _.arrayPrependArray( o.args, execArgs );
+    }
 
     if( o.outputAdditive === null )
     o.outputAdditive = true;
@@ -829,60 +834,75 @@ function start_body( o )
 
   /* */
 
-  function _argsJoin( src )
-  {
-    let args = src.slice();
+  // function _argsJoin( src )
+  // {
+  //   let args = src.slice();
 
-    // console.log( ' !!', 'argsJoin:before', src ) /* yyy */
+  //   // console.log( ' !!', 'argsJoin:before', src ) /* yyy */
 
-    for( let i = 0; i < args.length; i++ )
-    {
-      /* escape quotes to make shell interpret them as regular symbols */
-      let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', "`" ]
-      // _.each( quotesToEscape, ( quote ) => /* yyy qqq2 : fix? */
-      // {
-      //   args[ i ] = escapeArg( args[ i ], quote );
-      // })
-      if( process.platform !== 'win32' )
-      {
-        if( _.strHas( src[ i ], ' ' ) )
-        continue;
+  //   for( let i = 0; i < args.length; i++ )
+  //   {
+  //     /* escape quotes to make shell interpret them as regular symbols */
+  //     let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', "`" ]
+  //     // _.each( quotesToEscape, ( quote ) => /* yyy qqq2 : fix? */
+  //     // {
+  //     //   args[ i ] = escapeArg( args[ i ], quote );
+  //     // })
+  //     if( process.platform !== 'win32' )
+  //     {
+  //       if( _.strHas( src[ i ], ' ' ) )
+  //       continue;
 
-        let begin = _.strBeginOf( src[ i ], quotesToEscape );
-        let end = _.strEndOf( src[ i ], quotesToEscape );
-        if( begin && begin === end )
-        continue;
+  //       let begin = _.strBeginOf( src[ i ], quotesToEscape );
+  //       let end = _.strEndOf( src[ i ], quotesToEscape );
+  //       if( begin && begin === end )
+  //       continue;
 
-        // args[ i ] = escapeArg( args[ i ], "'" ); /* yyy qqq2 : fix? */
-      }
-    }
+  //       // args[ i ] = escapeArg( args[ i ], "'" ); /* yyy qqq2 : fix? */
+  //     }
+  //   }
 
-    let result;
+  //   let result;
 
-    if( args.length === 1 )
-    {
-      result = _.strQuote( args[ 0 ] ); /* xxx qqq : ? */
-    }
-    else
-    {
-      /* quote only arguments with spaces */
-      _.each( args, ( arg, i ) =>
-      {
-        if( _.strHas( arg, ' ' ) )
-        if( arg[ 0 ] !== '\"' )
-        args[ i ] = _.strQuote( arg );
-      })
+  //   if( args.length === 1 )
+  //   {
+  //     result = _.strQuote( args[ 0 ] ); /* xxx qqq : ? */
+  //   }
+  //   else
+  //   {
+  //     /* quote only arguments with spaces */
+  //     _.each( args, ( arg, i ) =>
+  //     {
+  //       if( _.strHas( arg, ' ' ) )
+  //       if( arg[ 0 ] !== '\"' )
+  //       args[ i ] = _.strQuote( arg );
+  //     })
 
-      result = args.join( ' ' );
-    }
+  //     result = args.join( ' ' );
+  //   }
 
-    // console.log( ' !!', 'argsJoin:after', result ); /* yyy */
+  //   // console.log( ' !!', 'argsJoin:after', result ); /* yyy */
 
-    return result;
-  }
+  //   return result;
+  // }
 
   function argsJoin( args )
   {
+    for( var i = 0; i < args.length; i++ )
+    {
+      if( execArgs )
+      if( i >= execArgsStartIndex && i < execArgs.length )
+      continue;
+
+      let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', "`" ]
+      _.each( quotesToEscape, ( quote ) =>
+      {
+        args[ i ] = escapeArg( args[ i ], quote );
+      })
+
+      args[ i ] = _.strQuote( args[ i ] );
+    }
+
     return args.join( ' ' );
   }
 
