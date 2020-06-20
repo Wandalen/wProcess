@@ -9416,7 +9416,7 @@ function shellArgumentsHandling( test )
     test.is( _.strHas( op.output, `"a b c"` ) );
     test.identical( op.execPath, 'node' )
     test.identical( op.args, [ '-e', '"console.log( process.argv.slice( 1 ) )"', '"a b c"' ] )
-    test.identical( op.fullExecPath, 'node "-e" "console.log( process.argv.slice( 1 ) )" "\\"a b c\\""' )
+    test.identical( op.fullExecPath, 'node -e "console.log( process.argv.slice( 1 ) )" "\\"a b c\\""' )
     return null;
   })
 
