@@ -6368,6 +6368,38 @@ function shellArgumentsParsingNonTrivial( test )
 
   ready
 
+  // .then( () =>
+  // {
+  //   test.case = 'args in execPath and args options'
+
+  //   let con = new _.Consequence().take( null );
+  //   let o =
+  //   {
+  //     execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' `firstArg secondArg ":" 1` "third arg" \'fourth arg\'  `"fifth" arg`',
+  //     args : '"some arg"',
+  //     mode : 'spawn',
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   _.process.start( o );
+
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( o.execPath, 'node' );
+  //     test.identical( o.args, [ testAppPathSpace, 'firstArg secondArg ":" 1', 'third arg', 'fourth arg', '"fifth" arg', '"some arg"' ] );
+  //     let got = JSON.parse( o.output );
+  //     test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
+  //     test.identical( got.map, {} )
+  //     test.identical( got.scriptArgs, [ 'firstArg secondArg ":" 1', 'third arg', 'fourth arg', '"fifth" arg', '"some arg"' ] )
+
+  //     return null;
+  //   })
+
+  //   return con;
+  // })
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -6375,39 +6407,7 @@ function shellArgumentsParsingNonTrivial( test )
     let con = new _.Consequence().take( null );
     let o =
     {
-      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' `firstArg secondArg ":" 1` "third arg" \'fourth arg\'  `"fifth" arg`',
-      args : '"some arg"',
-      mode : 'spawn',
-      outputPiping : 1,
-      outputCollecting : 1,
-      ready : con
-    }
-    _.process.start( o );
-
-    con.then( () =>
-    {
-      test.identical( o.exitCode, 0 );
-      test.identical( o.execPath, 'node' );
-      test.identical( o.args, [ testAppPathSpace, 'firstArg secondArg ":" 1', 'third arg', 'fourth arg', '"fifth" arg', '"some arg"' ] );
-      let got = JSON.parse( o.output );
-      test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-      test.identical( got.map, {} )
-      test.identical( got.scriptArgs, [ 'firstArg secondArg ":" 1', 'third arg', 'fourth arg', '"fifth" arg', '"some arg"' ] )
-
-      return null;
-    })
-
-    return con;
-  })
-
-  .then( () =>
-  {
-    test.case = 'args in execPath and args options'
-
-    let con = new _.Consequence().take( null );
-    let o =
-    {
-      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' `firstArg secondArg ":" 1` "third arg" \'fourth arg\'  `"fifth" arg`',
+      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ` 'firstArg secondArg \":\" 1' "third arg" 'fourth arg'  '\"fifth\" arg'`,
       args : '"some arg"',
       mode : 'shell',
       outputPiping : 1,
@@ -6420,7 +6420,7 @@ function shellArgumentsParsingNonTrivial( test )
     {
       test.identical( o.exitCode, 0 );
       test.identical( o.execPath, 'node' );
-      test.identical( o.args, [ testAppPathSpace, 'firstArg secondArg ":" 1', 'third arg', 'fourth arg', '"fifth" arg', '"some arg"' ] );
+      test.identical( o.args, [ _.strQuote( testAppPathSpace ), `'firstArg secondArg \":\" 1'`, `"third arg"`, `'fourth arg'`, `'\"fifth\" arg'`, '"some arg"' ] );
       let got = JSON.parse( o.output );
       test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
       test.identical( got.map, {} )
@@ -6439,7 +6439,7 @@ function shellArgumentsParsingNonTrivial( test )
     let con = new _.Consequence().take( null );
     let o =
     {
-      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' `firstArg secondArg ":" 1` "third arg" \'fourth arg\'  `"fifth" arg`',
+      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ` 'firstArg secondArg \":\" 1' "third arg" 'fourth arg'  '\"fifth\" arg'`,
       args : '"some arg"',
       mode : 'exec',
       outputPiping : 1,
@@ -6452,7 +6452,7 @@ function shellArgumentsParsingNonTrivial( test )
     {
       test.identical( o.exitCode, 0 );
       test.identical( o.execPath, 'node' );
-      test.identical( o.args, [ testAppPathSpace, 'firstArg secondArg ":" 1', 'third arg', 'fourth arg', '"fifth" arg', '"some arg"' ] );
+      test.identical( o.args, [ _.strQuote( testAppPathSpace ), `'firstArg secondArg \":\" 1'`, `"third arg"`, `'fourth arg'`, `'\"fifth\" arg'`, '"some arg"' ] );
       let got = JSON.parse( o.output );
       test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
       test.identical( got.map, {} )
@@ -6551,7 +6551,7 @@ function shellArgumentsParsingNonTrivial( test )
     {
       test.identical( o.exitCode, 0 );
       test.identical( o.execPath, 'node' );
-      test.identical( o.args, [ testAppPathSpace, 'firstArg', 'secondArg:1', '"third arg"' ] );
+      test.identical( o.args, [ _.strQuote( testAppPathSpace ), 'firstArg', 'secondArg:1', '"third arg"' ] );
       let got = JSON.parse( o.output );
       test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
       test.identical( got.map, { secondArg : '1 third arg' } )
@@ -6584,7 +6584,7 @@ function shellArgumentsParsingNonTrivial( test )
     {
       test.identical( o.exitCode, 0 );
       test.identical( o.execPath, 'node' );
-      test.identical( o.args, [ testAppPathSpace, 'firstArg', 'secondArg:1', '"third arg"' ] );
+      test.identical( o.args, [ _.strQuote( testAppPathSpace ), 'firstArg', 'secondArg:1', '"third arg"' ] );
       let got = JSON.parse( o.output );
       test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
       test.identical( got.map, { secondArg : '1 third arg' } )

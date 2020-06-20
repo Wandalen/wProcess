@@ -1,3 +1,5 @@
+const { exec } = require('child_process');
+
 ( function _Execution_s_() {
 
 'use strict';
@@ -192,7 +194,6 @@ function start_body( o )
   let startingDelay = 0;
   let procedure;
   let execArgs;
-  let execArgsStartIndex = null;
 
   if( _.objectIs( o.when ) )
   {
@@ -471,11 +472,7 @@ function start_body( o )
     }
 
     if( execArgs && execArgs.length )
-    {
-      o.args = o.args || [];
-      execArgsStartIndex = o.args.length;
-      o.args = _.arrayPrependArray( o.args, execArgs );
-    }
+    o.args = _.arrayPrependArray( o.args || [], execArgs );
 
     if( o.outputAdditive === null )
     o.outputAdditive = true;
@@ -888,12 +885,8 @@ function start_body( o )
 
   function argsJoin( args )
   {
-    for( var i = 0; i < args.length; i++ )
+    for( var i = execArgs ? execArgs.length : 0; i < args.length; i++ )
     {
-      if( execArgs )
-      if( i >= execArgsStartIndex && i < execArgs.length )
-      continue;
-
       let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', "`" ]
       _.each( quotesToEscape, ( quote ) =>
       {
