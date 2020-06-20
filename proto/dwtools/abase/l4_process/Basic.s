@@ -8,10 +8,6 @@
 */
 
 /**
- * @file ProcessBasic.s.
- */
-
-/**
  * Collection of routines to execute system commands, run shell, batches, launch external processes from JavaScript application.
   @namespace Tools.process
   @extends Tools
