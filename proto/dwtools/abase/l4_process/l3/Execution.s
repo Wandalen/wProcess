@@ -194,6 +194,7 @@ function start_body( o )
   let startingDelay = 0;
   let procedure;
   let execArgs;
+  let argumentsManual;
 
   if( _.objectIs( o.when ) )
   {
@@ -506,7 +507,7 @@ function start_body( o )
     if( o.passingThrough )
     {
       // console.log( 'argv', process.argv.length, process.argv ); debugger
-      let argumentsManual = process.argv.slice( 2 );
+      argumentsManual = process.argv.slice( 2 );
 
       if( argumentsManual.length )
       o.args = _.arrayAppendArray( o.args || [], argumentsManual );
@@ -885,7 +886,11 @@ function start_body( o )
 
   function argsJoin( args )
   {
-    for( var i = execArgs ? execArgs.length : 0; i < args.length; i++ )
+    if( !execArgs && !argumentsManual )
+    return args.join( ' ' );
+
+    let i = execArgs ? execArgs.length : args.length - argumentsManual.length;
+    for( ; i < args.length; i++ )
     {
       let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', "`" ]
       _.each( quotesToEscape, ( quote ) =>
