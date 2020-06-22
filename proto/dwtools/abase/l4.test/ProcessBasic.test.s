@@ -19493,14 +19493,6 @@ var Proto =
 
     shellExperiment
 
-  },
-
-  tests :
-  {
-    terminateDetachedComplex,
-    terminateWithChildren,
-    terminateWithDetachedChildren,
-    terminateDifferentStdio
   }
 
 }
