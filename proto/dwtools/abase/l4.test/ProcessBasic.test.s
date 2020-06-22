@@ -17610,7 +17610,7 @@ function terminateDetachedComplex( test )
       test.is( !_.strHas( got.output, 'TerminationBegin' ) );
       test.is( !_.process.isAlive( o.process.pid ) )
       test.is( _.process.isAlive( _.numberFrom( childPid ) ) )
-      return _.time.out( 6000, () =>
+      return _.time.out( 9000, () =>
       {
         var files = _.fileProvider.dirRead( routinePath );
         test.is( !_.process.isAlive( _.numberFrom( childPid ) ) )
@@ -17653,7 +17653,7 @@ function terminateDetachedComplex( test )
       test.is( !_.strHas( got.output, 'TerminationBegin' ) );
       test.is( !_.process.isAlive( o.process.pid ) )
       test.is( _.process.isAlive( _.numberFrom( childPid ) ) )
-      return _.time.out( 6000, () =>
+      return _.time.out( 9000, () =>
       {
         var files = _.fileProvider.dirRead( routinePath );
         test.is( !_.process.isAlive( _.numberFrom( childPid ) ) )
@@ -17781,7 +17781,7 @@ function terminateDetachedComplex( test )
         test.is( _.strHas( got.output, 'SIGINT' ) );
         test.is( !_.strHas( got.output, 'TerminationBegin' ) );
       }
-      return _.time.out( 6000, () =>
+      return _.time.out( 9000, () =>
       {
         var files = _.fileProvider.dirRead( routinePath );
         test.is( !_.process.isAlive( _.numberFrom( childPid ) ) )
@@ -18200,7 +18200,7 @@ function terminateWithDetachedChildren( test )
         test.identical( got.exitCode, 0 );
         test.identical( got.exitSignal, null );
         test.is( _.strHas( got.output, 'SIGINT' ) );
-        return _.time.out( 5000, () =>
+        return _.time.out( 9000, () =>
         {
           /* xxx Vova : problem with termination of detached proces on Windows, child process does't receive SIGINT */
           test.is( _.fileProvider.fileExists( _.path.join( routinePath, children[ 0 ].toString() ) ) )
@@ -18436,7 +18436,7 @@ function terminateDifferentStdio( test )
     {
       var fs = require( 'fs' );
       var path = require( 'path' )
-      fs.writeFileSync( path.join( __dirname, process.pid.toString() ), process.pid );
+      fs.writeFileSync( path.join( __dirname, process.pid.toString() ), process.pid.toString() );
       process.exit( 0 );
     })
     setTimeout( () =>
@@ -19494,6 +19494,14 @@ var Proto =
     shellExperiment
 
   },
+
+  tests :
+  {
+    terminateDetachedComplex,
+    terminateWithChildren,
+    terminateWithDetachedChildren,
+    terminateDifferentStdio
+  }
 
 }
 
