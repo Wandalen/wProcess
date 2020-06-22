@@ -6424,6 +6424,9 @@ function shellArgumentsParsingNonTrivial( test )
       let got = JSON.parse( o.output );
       test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
       test.identical( got.map, {} )
+      if( process.platform === 'win32' )
+      test.identical( got.scriptArgs, [ `'firstArg`,`secondArg`,':',`1'`,'third arg',`'fourth`,`arg'`,`'fifth`,`arg'`,'"some arg"'] )
+      else 
       test.identical( got.scriptArgs, [ 'firstArg secondArg ":" 1', 'third arg', 'fourth arg', '"fifth" arg', '"some arg"' ] )
 
       return null;
@@ -6431,7 +6434,7 @@ function shellArgumentsParsingNonTrivial( test )
 
     return con;
   })
-
+  
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -6456,6 +6459,9 @@ function shellArgumentsParsingNonTrivial( test )
       let got = JSON.parse( o.output );
       test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
       test.identical( got.map, {} )
+      if( process.platform === 'win32' )
+      test.identical( got.scriptArgs, [ `'firstArg`,`secondArg`,':',`1'`,'third arg',`'fourth`,`arg'`,`'fifth`,`arg'`,'"some arg"'] )
+      else 
       test.identical( got.scriptArgs, [ 'firstArg secondArg ":" 1', 'third arg', 'fourth arg', '"fifth" arg', '"some arg"' ] )
 
       return null;
@@ -7027,7 +7033,7 @@ function shellArgumentsNestedQuotes( test )
   .then( () =>
   {
     test.case = 'shell'
-    //qqq:review thia case
+    //qqq:review this case
     let con = new _.Consequence().take( null );
     let args =
     [
@@ -7048,17 +7054,29 @@ function shellArgumentsNestedQuotes( test )
     con.then( () =>
     {
       test.identical( o.exitCode, 0 );
-      test.identical( _.strCount( o.output, 'command not found' ), 3 );
-      // let got = JSON.parse( o.output );
-      // test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-      // test.identical( got.map, {} )
-      // let scriptArgs =
-      // [
-      //   `'s-s'`, `"s-d"`, "`s-b`",
-      //   `'d-s'`, `"d-d"`, "`d-b`",
-      //   `'b-s'`, `"b-d"`, "`b-b`",
-      // ]
-      // test.identical( got.scriptArgs, scriptArgs )
+      if( process.platform === 'win32' )
+      {
+        let got = JSON.parse( o.output );
+        test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
+        test.identical( got.map, {} )
+        let scriptArgs =
+        [
+          '\'\'s-s\'\'',
+          '\'s-d\'',
+          '\'`s-b`\'',
+          '\'d-s\'',
+          'd-d',
+          '`d-b`',
+          '`\'b-s\'`',
+          '\`b-d`',
+          '``b-b``'
+        ]
+        test.identical( got.scriptArgs, scriptArgs )
+      }
+      else
+      {
+        test.identical( _.strCount( o.output, 'command not found' ), 3 );
+      }
 
       return null;
     })
@@ -7128,17 +7146,29 @@ function shellArgumentsNestedQuotes( test )
     con.then( () =>
     {
       test.identical( o.exitCode, 0 );
-      test.identical( _.strCount( o.output, 'command not found' ), 3 );
-      // let got = JSON.parse( o.output );
-      // test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-      // test.identical( got.map, {} )
-      // let scriptArgs =
-      // [
-      //   `'s-s'`, `"s-d"`, "`s-b`",
-      //   `'d-s'`, `"d-d"`, "`d-b`",
-      //   `'b-s'`, `"b-d"`, "`b-b`",
-      // ]
-      // test.identical( got.scriptArgs, scriptArgs )
+      if( process.platform === 'win32' )
+      {
+        let got = JSON.parse( o.output );
+        test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
+        test.identical( got.map, {} )
+        let scriptArgs =
+        [
+          '\'\'s-s\'\'',
+          '\'s-d\'',
+          '\'`s-b`\'',
+          '\'d-s\'',
+          'd-d',
+          '`d-b`',
+          '`\'b-s\'`',
+          '\`b-d`',
+          '``b-b``'
+        ]
+        test.identical( got.scriptArgs, scriptArgs )
+      }
+      else
+      {
+        test.identical( _.strCount( o.output, 'command not found' ), 3 );
+      }
 
       return null;
     })
@@ -8976,8 +9006,17 @@ function shellModeShellNonTrivial( test )
   shell({ execPath : '"node -v && node -v"', throwingExitCode : 0 })
   .then( ( got ) =>
   {
-    test.notIdentical( got.exitCode, 0 );
-    test.identical( _.strCount( got.output, process.version ), 0 );
+    if( process.platform ==='win32' )
+    {
+      test.identical( got.exitCode, 0 );
+      test.identical( _.strCount( got.output, process.version ), 2 );
+    }
+    else
+    {
+      test.notIdentical( got.exitCode, 0 );
+      test.identical( _.strCount( got.output, process.version ), 0 );
+    }
+ 
     return null;
   })
 
@@ -9087,6 +9126,9 @@ function shellModeShellNonTrivial( test )
   .then( ( got ) =>
   {
     test.identical( got.exitCode, 0 );
+    if( process.platform === 'win32' )
+    test.identical( _.strCount( got.output, `[ '\`quoted arg with space\`' ]` ), 1 );
+    else 
     test.identical( _.strCount( got.output, `command not found` ), 1 );
     return null;
   })
@@ -9097,6 +9139,9 @@ function shellModeShellNonTrivial( test )
     test.identical( got.exitCode, 0 );
     // test.identical( _.strCount( got.output, `[ "'quoted arg with space'" ]` ), 1 );
     let args = _.fileProvider.fileRead({ filePath : _.path.join( routinePath, 'args' ), encoding : 'json' });
+    if( process.platform === 'win32' )
+    test.identical( args, [ '\\`\'quoted', 'arg', 'with', 'space\'\\`' ] );
+    else
     test.identical( args, [ "`quoted arg with space`" ] );
     return null;
   })
@@ -9105,6 +9150,9 @@ function shellModeShellNonTrivial( test )
   .then( ( got ) =>
   {
     test.identical( got.exitCode, 0 );
+    if( process.platform === 'win32' )
+    test.identical( _.strCount( got.output, `[ "\'\`quoted", 'arg', 'with', "space\`\'" ]` ), 1 );
+    else 
     test.identical( _.strCount( got.output, `[ '\`quoted arg with space\`' ]` ), 1 );
     return null;
   })
@@ -9181,6 +9229,9 @@ function shellModeShellNonTrivial( test )
   .thenKeep( function( op )
   {
     test.identical( op.exitCode, 0 );
+    if( process.platform === 'win32' )
+    test.is( _.strHas( op.output, `"a b" "*" "c"` ) );
+    else
     test.is( _.strHas( op.output, `a b * c` ) );
     test.identical( op.execPath, 'echo' )
     test.identical( op.args, [ 'a b', '*', 'c' ] )
@@ -9263,6 +9314,9 @@ function shellArgumentsHandling( test )
   .thenKeep( function( op )
   {
     test.identical( op.exitCode, 0 );
+    if( process.platform === 'win32' )
+    test.is( _.strHas( op.output, `*` ) );
+    else
     test.is( _.strHas( op.output, `file` ) );
     test.identical( op.execPath, 'echo' )
     test.identical( op.args, [ '*' ] )
@@ -9303,6 +9357,9 @@ function shellArgumentsHandling( test )
   .thenKeep( function( op )
   {
     test.identical( op.exitCode, 0 );
+    if( process.platform === 'win32' )
+    test.is( _.strHas( op.output, `"a b" "*" c` ) );
+    else
     test.is( _.strHas( op.output, `a b * c` ) );
     test.identical( op.execPath, 'echo' )
     test.identical( op.args, [ '"a b"', '"*"', 'c' ] )
@@ -9316,6 +9373,9 @@ function shellArgumentsHandling( test )
   .thenKeep( function( op )
   {
     test.identical( op.exitCode, 0 );
+    if( process.platform === 'win32' )
+    test.is( _.strHas( op.output, `"a b" "*" "c"` ) );
+    else 
     test.is( _.strHas( op.output, `a b * c` ) );
     test.identical( op.execPath, 'echo' )
     test.identical( op.args, [ 'a b', '*', 'c' ] )
@@ -9342,6 +9402,9 @@ function shellArgumentsHandling( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    if( process.platform === 'win32' )
+    test.identical( _.strCount( op.output, `"'\\"*\\"'"` ), 1 );
+    else
     test.identical( _.strCount( op.output, '"*"' ), 1 );
     test.identical( op.execPath, 'echo' )
     test.identical( op.args, [ `'"*"'` ] )
@@ -9381,6 +9444,9 @@ function shellArgumentsHandling( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    if( process.platform === 'win32' )
+    test.identical( _.strCount( op.output, '`*`' ), 1 );
+    else
     test.identical( _.strCount( op.output, 'Usage:' ), 1 );
     test.identical( op.execPath, 'echo' )
     test.identical( op.args, [ '`*`' ] )
@@ -9397,6 +9463,9 @@ function shellArgumentsHandling( test )
     test.identical( _.strCount( op.output, '`*`' ), 1 );
     test.identical( op.execPath, 'echo' )
     test.identical( op.args, [ '`*`' ] )
+    if( process.platform === 'win32' )
+    test.identical( op.fullExecPath, 'echo "`*`"' )
+    else
     test.identical( op.fullExecPath, 'echo "\\`*\\`"' )
     return null;
   })
