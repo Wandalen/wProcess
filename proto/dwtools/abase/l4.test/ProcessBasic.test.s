@@ -9690,6 +9690,7 @@ function importantModeShell( test )
 
 }
 
+importantModeShell.description = 'core cases for mode "shell"'
 importantModeShell.timeOut = 30000;
 
 //
