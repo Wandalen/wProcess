@@ -9433,6 +9433,184 @@ shellArgumentsHandling.timeOut = 30000;
 
 //
 
+function importantModeShell( test )
+{
+  var context = this;
+  var routinePath = _.path.join( context.suiteTempPath, test.name );
+  var printArguments = 'node -e "console.log( process.argv.slice( 1 ) )"'
+
+  _.fileProvider.fileWrite( _.path.join( routinePath, 'file' ), 'file' );
+
+  /* */
+
+  var con = new _.Consequence().take( null );
+
+  let shell = _.process.starter
+  ({
+    currentPath : routinePath,
+    mode : 'shell',
+    stdio : 'pipe',
+    outputPiping : 1,
+    outputCollecting : 1,
+    ready : con
+  })
+
+  /* */
+
+  shell({ execPath : null, args : [ 'node', '-v', '&&', 'node', '-v' ] })
+  .thenKeep( function( op )
+  {
+    test.identical( op.exitCode, 0 );
+    test.identical( _.strCount( op.output, process.version ), 2 );
+    return null;
+  })
+
+  /* */
+
+  shell({ execPath : printArguments, args : [ '-v', '&&', 'node', '-v' ] })
+  .thenKeep( function( op )
+  {
+    test.identical( op.exitCode, 0 );
+    test.is( _.strHas( op.output, _.toStr([ '-v', '&&', 'node', '-v' ]) ) )
+    return null;
+  })
+
+  /* */
+
+  shell({ execPath : 'node -v && node -v', args : [] })
+  .thenKeep( function( op )
+  {
+    test.identical( op.exitCode, 0 );
+    test.identical( _.strCount( op.output, process.version ), 2 );
+    return null;
+  })
+
+  /* */
+
+  shell({ execPath : `${printArguments} -v "&&" node -v`, args : [] })
+  .thenKeep( function( op )
+  {
+    test.identical( op.exitCode, 0 );
+    test.is( _.strHas( op.output, _.toStr([ '-v', '&&', 'node', '-v' ])  ) );
+    return null;
+  })
+
+  /* */
+
+  shell({ execPath : null, args : [ 'echo', '*' ] })
+  .thenKeep( function( op )
+  {
+    test.identical( op.exitCode, 0 );
+    test.identical( _.strCount( op.output, 'file' ), 1 );
+    return null;
+  })
+
+  /* */
+
+  shell({ execPath : 'echo', args : [ '*' ] })
+  .thenKeep( function( op )
+  {
+    test.identical( op.exitCode, 0 );
+    test.identical( _.strCount( op.output, '*' ), 1 );
+    return null;
+  })
+
+  /* */
+
+  shell({ execPath : 'echo *' })
+  .thenKeep( function( op )
+  {
+    test.identical( op.exitCode, 0 );
+    test.identical( _.strCount( op.output, 'file' ), 1 );
+    return null;
+  })
+
+  /* */
+
+  shell({ execPath : 'echo "*"' })
+  .thenKeep( function( op )
+  {
+    test.identical( op.exitCode, 0 );
+    test.identical( _.strCount( op.output, '*' ), 1 );
+    return null;
+  })
+
+  /* */
+
+  shell({ execPath : null, args : [ printArguments, 'a b' ] })
+  .thenKeep( function( op )
+  {
+    test.identical( op.exitCode, 0 );
+    test.is( _.strHas( op.output, _.toStr( [ 'a','b' ] ) ) );
+    return null;
+  })
+
+  /* */
+
+  shell({ execPath : printArguments, args : [ 'a b' ] })
+  .thenKeep( function( op )
+  {
+    test.identical( op.exitCode, 0 );
+    test.is( _.strHas( op.output, _.toStr( [ 'a b' ] ) ) );
+    return null;
+  })
+
+  /* */
+
+  shell({ execPath : `${printArguments} a b` })
+  .thenKeep( function( op )
+  {
+    test.identical( op.exitCode, 0 );
+    test.is( _.strHas( op.output, _.toStr( [ 'a','b' ] ) ) );
+    return null;
+  })
+
+  /* */
+
+  shell({ execPath : `${printArguments} "a b"` })
+  .thenKeep( function( op )
+  {
+    test.identical( op.exitCode, 0 );
+    test.is( _.strHas( op.output, _.toStr( [ 'a b' ] ) ) );
+    return null;
+  })
+
+  /* */
+
+  shell({ execPath : null, args : [ 'echo', '"*"' ] })
+  .thenKeep( function( op )
+  {
+    test.identical( op.exitCode, 0 );
+    test.is( _.strHas( op.output, '"*"' ) );
+    return null;
+  })
+
+  /* */
+
+  shell({ execPath : 'echo', args : [ '"*"' ] })
+  .thenKeep( function( op )
+  {
+    test.identical( op.exitCode, 0 );
+    test.is( _.strHas( op.output, '"*"' ) );
+    return null;
+  })
+
+  /* */
+
+  shell({ execPath : 'echo "\\"*\\""', args : [] })
+  .thenKeep( function( op )
+  {
+    test.identical( op.exitCode, 0 );
+    test.is( _.strHas( op.output, '"*"' ) );
+    return null;
+  })
+
+  return con;
+
+}
+
+//
+
 function startExecPathWithSpace( test )
 {
   let context = this;
@@ -19139,6 +19317,7 @@ var Proto =
     shellModeShellNonTrivial,
     shellArgumentsHandlingTrivial,
     shellArgumentsHandling,
+    importantModeShell,
 
     startExecPathWithSpace,
     startNodePassingThroughExecPathWithSpace,
