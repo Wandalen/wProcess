@@ -9467,11 +9467,31 @@ function importantModeShell( test )
 
   /* */
 
-  shell({ execPath : printArguments, args : [ '-v', '&&', 'node', '-v' ] })
+  shell({ execPath : 'node', args : [ '-v', '&&', 'node', '-v' ] })
   .thenKeep( function( op )
   {
     test.identical( op.exitCode, 0 );
-    test.is( _.strHas( op.output, _.toStr([ '-v', '&&', 'node', '-v' ]) ) )
+    test.identical( _.strCount( op.output, process.version ), 1 );
+    return null;
+  })
+
+  /* */
+
+  shell({ execPath : printArguments, args : [ 'a', '&&', 'node', 'b' ] })
+  .thenKeep( function( op )
+  {
+    test.identical( op.exitCode, 0 );
+    test.is( _.strHas( op.output, _.toStr([ 'a', '&&', 'node', 'b' ]) ) )
+    return null;
+  })
+
+  /* */
+
+  shell({ execPath : 'echo', args : [ '-v', '&&', 'echo', '-v' ] })
+  .thenKeep( function( op )
+  {
+    test.identical( op.exitCode, 0 );
+    test.is( _.strHas( op.output, '-v && echo -v' ) )
     return null;
   })
 
@@ -9487,11 +9507,19 @@ function importantModeShell( test )
 
   /* */
 
-  shell({ execPath : `${printArguments} -v "&&" node -v`, args : [] })
+  shell({ execPath : `node -v "&&" node -v`, args : [] })
   .thenKeep( function( op )
   {
     test.identical( op.exitCode, 0 );
-    test.is( _.strHas( op.output, _.toStr([ '-v', '&&', 'node', '-v' ])  ) );
+    test.identical( _.strCount( op.output, process.version ), 1 );
+    return null;
+  })
+
+  shell({ execPath : `echo -v "&&" node -v`, args : [] })
+  .thenKeep( function( op )
+  {
+    test.identical( op.exitCode, 0 );
+    test.is( _.strHas( op.output, '-v && node -v'  ) );
     return null;
   })
 
@@ -9581,13 +9609,23 @@ function importantModeShell( test )
   .thenKeep( function( op )
   {
     test.identical( op.exitCode, 0 );
-    test.is( _.strHas( op.output, '"*"' ) );
+    test.is( _.strHas( op.output, '*' ) );
     return null;
   })
 
   /* */
 
   shell({ execPath : 'echo', args : [ '"*"' ] })
+  .thenKeep( function( op )
+  {
+    test.identical( op.exitCode, 0 );
+    test.is( _.strHas( op.output, '"*"' ) );
+    return null;
+  })
+
+  /* */
+
+  shell({ execPath : null, args : [ 'echo', '\\"*\\"' ] })
   .thenKeep( function( op )
   {
     test.identical( op.exitCode, 0 );
@@ -9605,9 +9643,54 @@ function importantModeShell( test )
     return null;
   })
 
+  /* */
+
+  shell({ execPath : 'echo *', args : [ '*' ] })
+  .thenKeep( function( op )
+  {
+    test.identical( op.exitCode, 0 );
+    test.is( _.strHas( op.output, 'file' ) );
+    test.is( _.strHas( op.output, '*' ) );
+    return null;
+  })
+
+  /* */
+
+  shell({ execPath : 'echo', args : null, passingThrough : 1 })
+  .thenKeep( function( op )
+  {
+    test.identical( op.exitCode, 0 );
+    test.is( _.strHas( op.output, process.argv.slice( 2 ).join( ' ') ) );
+    return null;
+  })
+
+  /* */
+
+  shell({ execPath : null, args : [ 'echo' ], passingThrough : 1 })
+  .thenKeep( function( op )
+  {
+    test.identical( op.exitCode, 0 );
+    test.is( _.strHas( op.output, process.argv.slice( 2 ).join( ' ') ) );
+    return null;
+  })
+
+  /* */
+
+  shell({ execPath : 'echo *', args : [ '*' ], passingThrough : 1 })
+  .thenKeep( function( op )
+  {
+    test.identical( op.exitCode, 0 );
+    test.is( _.strHas( op.output, 'file' ) );
+    test.is( _.strHas( op.output, '*' ) );
+    test.is( _.strHas( op.output, process.argv.slice( 2 ).join( ' ') ) );
+    return null;
+  })
+
   return con;
 
 }
+
+importantModeShell.timeOut = 30000;
 
 //
 
