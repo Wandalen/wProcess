@@ -9273,6 +9273,9 @@ function shellArgumentsHandlingTrivial( test )
   .thenKeep( function( op )
   {
     test.identical( op.exitCode, 0 );
+    if( process.platform === 'win32' )
+    test.is( _.strHas( op.output, `*` ) );
+    else 
     test.is( _.strHas( op.output, `file` ) );
     test.identical( op.execPath, 'echo' )
     test.identical( op.args, [ '*' ] )
@@ -9790,7 +9793,8 @@ function importantModeShell( test )
    
     if( process.platform === 'win32' )
     {
-      test.identical( _.strCount( op.output, '*' ), 2 );
+      test.is( _.strHas( op.output, '*' ) );
+      test.is( _.strHas( op.output, '"*"' ) );
       test.is( _.strHas( op.output, '"' + process.argv.slice( 2 ).join( '" "' ) + '"' ) );
     }
     else
