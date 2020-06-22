@@ -9491,9 +9491,13 @@ function importantModeShell( test )
   .thenKeep( function( op )
   {
     test.identical( op.exitCode, 0 );
+    if( process.platform === 'win32' )
+    test.is( _.strHas( op.output, '"-v" "&&" "echo" "-v"' ) )
+    else    
     test.is( _.strHas( op.output, '-v && echo -v' ) )
     return null;
   })
+  
 
   /* */
 
@@ -9519,9 +9523,13 @@ function importantModeShell( test )
   .thenKeep( function( op )
   {
     test.identical( op.exitCode, 0 );
+    if( process.platform === 'win32' )
+    test.is( _.strHas( op.output, '-v "&&" node -v'  ) );
+    else
     test.is( _.strHas( op.output, '-v && node -v'  ) );
     return null;
   })
+  
 
   /* */
 
@@ -9529,6 +9537,9 @@ function importantModeShell( test )
   .thenKeep( function( op )
   {
     test.identical( op.exitCode, 0 );
+    if( process.platform === 'win32' )
+    test.identical( _.strCount( op.output, '*' ), 1 );
+    else
     test.identical( _.strCount( op.output, 'file' ), 1 );
     return null;
   })
@@ -9549,10 +9560,13 @@ function importantModeShell( test )
   .thenKeep( function( op )
   {
     test.identical( op.exitCode, 0 );
+    if( process.platform === 'win32' )
+    test.identical( _.strCount( op.output, '*' ), 1 );
+    else
     test.identical( _.strCount( op.output, 'file' ), 1 );
     return null;
   })
-
+  
   /* */
 
   shell({ execPath : 'echo "*"' })
@@ -9619,6 +9633,9 @@ function importantModeShell( test )
   .thenKeep( function( op )
   {
     test.identical( op.exitCode, 0 );
+    if( process.platform === 'win32' )
+    test.is( _.strHas( op.output, '\\"*\\"' ) );
+    else
     test.is( _.strHas( op.output, '"*"' ) );
     return null;
   })
@@ -9629,16 +9646,22 @@ function importantModeShell( test )
   .thenKeep( function( op )
   {
     test.identical( op.exitCode, 0 );
+    if( process.platform === 'win32' )
+    test.is( _.strHas( op.output, '\\"*\\"' ) );
+    else
     test.is( _.strHas( op.output, '"*"' ) );
     return null;
   })
-
+  
   /* */
 
   shell({ execPath : 'echo "\\"*\\""', args : [] })
   .thenKeep( function( op )
   {
     test.identical( op.exitCode, 0 );
+    if( process.platform === 'win32' )
+    test.is( _.strHas( op.output, '"\\"*\\"' ) );
+    else    
     test.is( _.strHas( op.output, '"*"' ) );
     return null;
   })
@@ -9649,8 +9672,17 @@ function importantModeShell( test )
   .thenKeep( function( op )
   {
     test.identical( op.exitCode, 0 );
-    test.is( _.strHas( op.output, 'file' ) );
-    test.is( _.strHas( op.output, '*' ) );
+    if( process.platform === 'win32' )
+    {
+      test.is( _.strHas( op.output, '*' ) );
+      test.is( _.strHas( op.output, '"*"' ) );
+    }
+    else
+    {
+      test.is( _.strHas( op.output, 'file' ) );
+      test.is( _.strHas( op.output, '*' ) );
+    }
+    
     return null;
   })
 
@@ -9660,6 +9692,9 @@ function importantModeShell( test )
   .thenKeep( function( op )
   {
     test.identical( op.exitCode, 0 );
+    if( process.platform === 'win32' )
+    test.is( _.strHas( op.output, '"' + process.argv.slice( 2 ).join( '" "' ) + '"' ) );
+    else
     test.is( _.strHas( op.output, process.argv.slice( 2 ).join( ' ') ) );
     return null;
   })
@@ -9670,6 +9705,9 @@ function importantModeShell( test )
   .thenKeep( function( op )
   {
     test.identical( op.exitCode, 0 );
+    if( process.platform === 'win32' )
+    test.is( _.strHas( op.output, '"' + process.argv.slice( 2 ).join( '" "' ) + '"' ) );
+    else
     test.is( _.strHas( op.output, process.argv.slice( 2 ).join( ' ') ) );
     return null;
   })
@@ -9680,9 +9718,18 @@ function importantModeShell( test )
   .thenKeep( function( op )
   {
     test.identical( op.exitCode, 0 );
-    test.is( _.strHas( op.output, 'file' ) );
-    test.is( _.strHas( op.output, '*' ) );
-    test.is( _.strHas( op.output, process.argv.slice( 2 ).join( ' ') ) );
+   
+    if( process.platform === 'win32' )
+    {
+      test.identical( _.strCount( op.output, '*' ), 2 );
+      test.is( _.strHas( op.output, '"' + process.argv.slice( 2 ).join( '" "' ) + '"' ) );
+    }
+    else
+    {
+      test.is( _.strHas( op.output, 'file' ) );
+      test.is( _.strHas( op.output, '*' ) );
+      test.is( _.strHas( op.output, process.argv.slice( 2 ).join( ' ') ) );
+    }
     return null;
   })
 
