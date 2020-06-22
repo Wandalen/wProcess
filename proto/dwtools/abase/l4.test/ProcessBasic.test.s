@@ -8973,11 +8973,11 @@ function shellModeShellNonTrivial( test )
     return null;
   })
 
-  shell( '"node -v && node -v"' )
+  shell({ execPath : '"node -v && node -v"', throwingExitCode : 0 })
   .then( ( got ) =>
   {
-    test.identical( got.exitCode, 0 );
-    test.identical( _.strCount( got.output, process.version ), 2 );
+    test.notIdentical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, process.version ), 0 );
     return null;
   })
 
@@ -9025,15 +9025,15 @@ function shellModeShellNonTrivial( test )
   .then( ( got ) =>
   {
     test.identical( got.exitCode, 0 );
-    test.identical( _.strCount( got.output, process.version ), 1 );
+    test.identical( _.strCount( got.output, process.version ), 2 );
     return null;
   })
 
-  shell({ args : [ 'node -v', '&&', 'node -v' ], throwingExitCode : 0 })
+  shell({ args : [ 'node -v', '&&', 'node -v' ] })
   .then( ( got ) =>
   {
-    test.notIdentical( got.exitCode, 0 );
-    test.identical( _.strCount( got.output, process.version ), 1 );
+    test.identical( got.exitCode, 0 );
+    test.identical( _.strCount( got.output, process.version ), 2 );
     return null;
   })
 
@@ -9087,17 +9087,17 @@ function shellModeShellNonTrivial( test )
   .then( ( got ) =>
   {
     test.identical( got.exitCode, 0 );
-    test.identical( _.strCount( got.output, `[ '"quoted arg with space"' ]` ), 1 );
+    test.identical( _.strCount( got.output, `command not found` ), 1 );
     return null;
   })
 
-  shell( 'node ' + testAppPath + ` \`'quoted arg with space'\` ` )
+  shell( 'node ' + testAppPath + " \\`'quoted arg with space'\\`" )
   .then( ( got ) =>
   {
     test.identical( got.exitCode, 0 );
     // test.identical( _.strCount( got.output, `[ "'quoted arg with space'" ]` ), 1 );
     let args = _.fileProvider.fileRead({ filePath : _.path.join( routinePath, 'args' ), encoding : 'json' });
-    test.identical( args, [ "'quoted arg with space'" ] );
+    test.identical( args, [ "`quoted arg with space`" ] );
     return null;
   })
 
