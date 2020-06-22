@@ -17286,7 +17286,7 @@ function terminateComplex( test )
       console.log( 'second child SIGINT' )
       var fs = require( 'fs' );
       var path = require( 'path' )
-      fs.writeFileSync( path.join( __dirname, process.pid.toString() ), process.pid )
+      fs.writeFileSync( path.join( __dirname, process.pid.toString() ), process.pid.toString() )
       process.exit( 0 );
     })
     if( process.send )
@@ -17565,7 +17565,7 @@ function terminateDetachedComplex( test )
       console.log( 'second child timeout' )
       var fs = require( 'fs' );
       var path = require( 'path' )
-      fs.writeFileSync( path.join( __dirname, process.pid.toString() ), process.pid )
+      fs.writeFileSync( path.join( __dirname, process.pid.toString() ), process.pid.toString() )
     }, 5000 )
   }
 
@@ -17623,7 +17623,7 @@ function terminateDetachedComplex( test )
     return ready;
   })
 
-  // //
+  //
 
   .thenKeep( () =>
   {
@@ -17717,7 +17717,7 @@ function terminateDetachedComplex( test )
         test.is( _.strHas( got.output, 'SIGINT' ) );
         test.is( !_.strHas( got.output, 'TerminationBegin' ) );
       }
-      return _.time.out( 6000, () =>
+      return _.time.out( 9000, () =>
       {
         var files = _.fileProvider.dirRead( routinePath );
         test.is( !_.process.isAlive( _.numberFrom( childPid ) ) )
@@ -17834,7 +17834,7 @@ function terminateWithChildren( test )
       console.log( 'SIGINT CHILD' )
       var fs = require( 'fs' );
       var path = require( 'path' )
-      fs.writeFileSync( path.join( __dirname, process.pid.toString() ), process.pid )
+      fs.writeFileSync( path.join( __dirname, process.pid.toString() ), process.pid.toString() )
       process.exit( 0 );
     })
     if( process.send )
@@ -18096,7 +18096,7 @@ function terminateWithDetachedChildren( test )
       console.log( 'SIGINT' )
       var fs = require( 'fs' );
       var path = require( 'path' )
-      fs.writeFileSync( path.join( __dirname, process.pid.toString() ), process.pid )
+      fs.writeFileSync( path.join( __dirname, process.pid.toString() ), process.pid.toString() )
       process.exit( 0 );
     })
     if( process.send )
