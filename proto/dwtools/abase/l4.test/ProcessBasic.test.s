@@ -7075,7 +7075,7 @@ function shellArgumentsNestedQuotes( test )
       }
       else
       {
-        test.identical( _.strCount( o.output, 'command not found' ), 3 );
+        test.identical( _.strCount( o.output, 'not found' ), 3 );
       }
 
       return null;
@@ -7167,7 +7167,7 @@ function shellArgumentsNestedQuotes( test )
       }
       else
       {
-        test.identical( _.strCount( o.output, 'command not found' ), 3 );
+        test.identical( _.strCount( o.output, 'not found' ), 3 );
       }
 
       return null;
