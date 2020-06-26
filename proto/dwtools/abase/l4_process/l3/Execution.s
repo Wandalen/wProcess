@@ -688,6 +688,7 @@ function start_body( o )
       !! ChildProcess.spawn git [ '-c', 'git add --force *.will.*' ]
 */
 
+      // debugger;
       if( o.sync && !o.deasync )
       o.process = ChildProcess.spawnSync( appPath, [ arg1, arg2 ], o2 );
       else
