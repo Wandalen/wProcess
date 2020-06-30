@@ -6426,7 +6426,7 @@ function shellArgumentsParsingNonTrivial( test )
       test.identical( got.map, {} )
       if( process.platform === 'win32' )
       test.identical( got.scriptArgs, [ `'firstArg`,`secondArg`,':',`1'`,'third arg',`'fourth`,`arg'`,`'fifth`,`arg'`,'"some arg"'] )
-      else 
+      else
       test.identical( got.scriptArgs, [ 'firstArg secondArg ":" 1', 'third arg', 'fourth arg', '"fifth" arg', '"some arg"' ] )
 
       return null;
@@ -6434,7 +6434,7 @@ function shellArgumentsParsingNonTrivial( test )
 
     return con;
   })
-  
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -6461,7 +6461,7 @@ function shellArgumentsParsingNonTrivial( test )
       test.identical( got.map, {} )
       if( process.platform === 'win32' )
       test.identical( got.scriptArgs, [ `'firstArg`,`secondArg`,':',`1'`,'third arg',`'fourth`,`arg'`,`'fifth`,`arg'`,'"some arg"'] )
-      else 
+      else
       test.identical( got.scriptArgs, [ 'firstArg secondArg ":" 1', 'third arg', 'fourth arg', '"fifth" arg', '"some arg"' ] )
 
       return null;
@@ -7075,7 +7075,7 @@ function shellArgumentsNestedQuotes( test )
       }
       else
       {
-        test.identical( _.strCount( o.output, 'command not found' ), 3 );
+        test.identical( _.strCount( o.output, 'not found' ), 3 );
       }
 
       return null;
@@ -7167,7 +7167,7 @@ function shellArgumentsNestedQuotes( test )
       }
       else
       {
-        test.identical( _.strCount( o.output, 'command not found' ), 3 );
+        test.identical( _.strCount( o.output, 'not found' ), 3 );
       }
 
       return null;
@@ -9016,7 +9016,7 @@ function shellModeShellNonTrivial( test )
       test.notIdentical( got.exitCode, 0 );
       test.identical( _.strCount( got.output, process.version ), 0 );
     }
- 
+
     return null;
   })
 
@@ -9128,8 +9128,8 @@ function shellModeShellNonTrivial( test )
     test.identical( got.exitCode, 0 );
     if( process.platform === 'win32' )
     test.identical( _.strCount( got.output, `[ '\`quoted arg with space\`' ]` ), 1 );
-    else 
-    test.identical( _.strCount( got.output, `command not found` ), 1 );
+    else
+    test.identical( _.strCount( got.output, `not found` ), 1 );
     return null;
   })
 
@@ -9152,7 +9152,7 @@ function shellModeShellNonTrivial( test )
     test.identical( got.exitCode, 0 );
     if( process.platform === 'win32' )
     test.identical( _.strCount( got.output, `[ "\'\`quoted", 'arg', 'with', "space\`\'" ]` ), 1 );
-    else 
+    else
     test.identical( _.strCount( got.output, `[ '\`quoted arg with space\`' ]` ), 1 );
     return null;
   })
@@ -9275,7 +9275,7 @@ function shellArgumentsHandlingTrivial( test )
     test.identical( op.exitCode, 0 );
     if( process.platform === 'win32' )
     test.is( _.strHas( op.output, `*` ) );
-    else 
+    else
     test.is( _.strHas( op.output, `file` ) );
     test.identical( op.execPath, 'echo' )
     test.identical( op.args, [ '*' ] )
@@ -9378,7 +9378,7 @@ function shellArgumentsHandling( test )
     test.identical( op.exitCode, 0 );
     if( process.platform === 'win32' )
     test.is( _.strHas( op.output, `"a b" "*" "c"` ) );
-    else 
+    else
     test.is( _.strHas( op.output, `a b * c` ) );
     test.identical( op.execPath, 'echo' )
     test.identical( op.args, [ 'a b', '*', 'c' ] )
@@ -9565,11 +9565,11 @@ function importantModeShell( test )
     test.identical( op.exitCode, 0 );
     if( process.platform === 'win32' )
     test.is( _.strHas( op.output, '"-v" "&&" "echo" "-v"' ) )
-    else    
+    else
     test.is( _.strHas( op.output, '-v && echo -v' ) )
     return null;
   })
-  
+
 
   /* */
 
@@ -9601,7 +9601,7 @@ function importantModeShell( test )
     test.is( _.strHas( op.output, '-v && node -v'  ) );
     return null;
   })
-  
+
 
   /* */
 
@@ -9638,7 +9638,7 @@ function importantModeShell( test )
     test.identical( _.strCount( op.output, 'file' ), 1 );
     return null;
   })
-  
+
   /* */
 
   shell({ execPath : 'echo "*"' })
@@ -9724,7 +9724,7 @@ function importantModeShell( test )
     test.is( _.strHas( op.output, '"*"' ) );
     return null;
   })
-  
+
   /* */
 
   shell({ execPath : 'echo "\\"*\\""', args : [] })
@@ -9733,7 +9733,7 @@ function importantModeShell( test )
     test.identical( op.exitCode, 0 );
     if( process.platform === 'win32' )
     test.is( _.strHas( op.output, '"\\"*\\"' ) );
-    else    
+    else
     test.is( _.strHas( op.output, '"*"' ) );
     return null;
   })
@@ -9754,7 +9754,7 @@ function importantModeShell( test )
       test.is( _.strHas( op.output, 'file' ) );
       test.is( _.strHas( op.output, '*' ) );
     }
-    
+
     return null;
   })
 
@@ -9790,7 +9790,7 @@ function importantModeShell( test )
   .thenKeep( function( op )
   {
     test.identical( op.exitCode, 0 );
-   
+
     if( process.platform === 'win32' )
     {
       test.is( _.strHas( op.output, '*' ) );
