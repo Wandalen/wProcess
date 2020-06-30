@@ -1,3 +1,5 @@
+const { exec } = require('child_process');
+
 ( function _Execution_s_() {
 
 'use strict';
@@ -191,6 +193,8 @@ function start_body( o )
   let decoratedErrorOutput = '';
   let startingDelay = 0;
   let procedure;
+  let execArgs;
+  let argumentsManual;
 
   if( _.objectIs( o.when ) )
   {
@@ -444,12 +448,13 @@ function start_body( o )
 
     o.args = _.arrayAs( o.args );
 
-    let execArgs;
 
     if( _.strIs( o.execPath ) )
     {
       o.fullExecPath = o.execPath;
       execArgs = execPathParse( o.execPath );
+      if( o.mode !== 'shell' && o.mode !== 'exec' )
+      execArgs = argsUnqoute( execArgs );
       o.execPath = execArgs.shift();
     }
 
@@ -502,7 +507,8 @@ function start_body( o )
     if( o.passingThrough )
     {
       // console.log( 'argv', process.argv.length, process.argv ); debugger
-      let argumentsManual = process.argv.slice( 2 );
+      argumentsManual = process.argv.slice( 2 );
+
       if( argumentsManual.length )
       o.args = _.arrayAppendArray( o.args || [], argumentsManual );
     }
@@ -802,73 +808,108 @@ function start_body( o )
       let begin = _.strBeginOf( args[ i ], strOptions.quotingPrefixes );
       let end = _.strEndOf( args[ i ], strOptions.quotingPostfixes );
       if( begin )
-      {
-        _.sure( begin === end, 'Arguments string in execPath:', src, 'has not closed quoting in argument:', args[ i ] );
-        args[ i ] = _.strInsideOf( args[ i ], begin, end ); /* yyy qqq2 : should not uncover arguments here! */
-      }
+      _.sure( begin === end, 'Arguments string in execPath:', src, 'has not closed quoting in argument:', args[ i ] );
     }
+
+    return args;
+  }
+
+  //
+
+  function argsUnqoute( args )
+  {
+    let quotes = [ "'", '"', "`" ];
+
+    for( let i = 0; i < args.length; i++ )
+    {
+      let begin = _.strBeginOf( args[ i ], quotes );
+      let end = _.strEndOf( args[ i ], quotes );
+      if( begin )
+      args[ i ] = _.strInsideOf( args[ i ], begin, end ); /* yyy qqq2 : should not uncover arguments here! */
+    }
+
     return args;
   }
 
   /* */
 
-  function argsJoin( src )
+  // function _argsJoin( src )
+  // {
+  //   let args = src.slice();
+
+  //   // console.log( ' !!', 'argsJoin:before', src ) /* yyy */
+
+  //   for( let i = 0; i < args.length; i++ )
+  //   {
+  //     /* escape quotes to make shell interpret them as regular symbols */
+  //     let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', "`" ]
+  //     // _.each( quotesToEscape, ( quote ) => /* yyy qqq2 : fix? */
+  //     // {
+  //     //   args[ i ] = escapeArg( args[ i ], quote );
+  //     // })
+  //     if( process.platform !== 'win32' )
+  //     {
+  //       if( _.strHas( src[ i ], ' ' ) )
+  //       continue;
+
+  //       let begin = _.strBeginOf( src[ i ], quotesToEscape );
+  //       let end = _.strEndOf( src[ i ], quotesToEscape );
+  //       if( begin && begin === end )
+  //       continue;
+
+  //       // args[ i ] = escapeArg( args[ i ], "'" ); /* yyy qqq2 : fix? */
+  //     }
+  //   }
+
+  //   let result;
+
+  //   if( args.length === 1 )
+  //   {
+  //     result = _.strQuote( args[ 0 ] ); /* xxx qqq : ? */
+  //   }
+  //   else
+  //   {
+  //     /* quote only arguments with spaces */
+  //     _.each( args, ( arg, i ) =>
+  //     {
+  //       if( _.strHas( arg, ' ' ) )
+  //       if( arg[ 0 ] !== '\"' )
+  //       args[ i ] = _.strQuote( arg );
+  //     })
+
+  //     result = args.join( ' ' );
+  //   }
+
+  //   // console.log( ' !!', 'argsJoin:after', result ); /* yyy */
+
+  //   return result;
+  // }
+
+  function argsJoin( args )
   {
-    let args = src.slice();
+    if( !execArgs && !argumentsManual )
+    return args.join( ' ' );
 
-    // console.log( ' !!', 'argsJoin:before', src ) /* yyy */
-
-    for( let i = 0; i < args.length; i++ )
+    let i = execArgs ? execArgs.length : args.length - argumentsManual.length;
+    for( ; i < args.length; i++ )
     {
-      /* escape quotes to make shell interpret them as regular symbols */
       let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', "`" ]
-      _.each( quotesToEscape, ( quote ) => /* yyy qqq2 : fix? */
+      _.each( quotesToEscape, ( quote ) =>
       {
         args[ i ] = escapeArg( args[ i ], quote );
       })
-      if( process.platform !== 'win32' )
-      {
-        if( _.strHas( src[ i ], ' ' ) )
-        continue;
 
-        let begin = _.strBeginOf( src[ i ], quotesToEscape );
-        let end = _.strEndOf( src[ i ], quotesToEscape );
-        if( begin && begin === end )
-        continue;
-
-        args[ i ] = escapeArg( args[ i ], "'" ); /* yyy qqq2 : fix? */
-      }
+      args[ i ] = _.strQuote( args[ i ] );
     }
 
-    let result;
-
-    if( args.length === 1 )
-    {
-      result = _.strQuote( args[ 0 ] ); /* xxx qqq : ? */
-    }
-    else
-    {
-      /* quote only arguments with spaces */
-      _.each( args, ( arg, i ) =>
-      {
-        if( _.strHas( arg, ' ' ) )
-        if( arg[ 0 ] !== '\"' )
-        args[ i ] = _.strQuote( arg );
-      })
-
-      result = args.join( ' ' );
-    }
-
-    // console.log( ' !!', 'argsJoin:after', result ); /* yyy */
-
-    return result;
+    return args.join( ' ' );
   }
 
   function escapeArg( arg, quote )
   {
     return _.strReplaceAll( arg, quote, ( match, it ) =>
     {
-      if( it.input[ it.range[ 0 ] - 1 ] === '\\' )
+      if( it.input[ it.charsRangeLeft[ 0 ] - 1 ] === '\\' )
       return match;
       return '\\' + match;
     });
