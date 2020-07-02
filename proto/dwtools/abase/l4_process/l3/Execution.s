@@ -586,9 +586,9 @@ function start_body( o )
 
     if( process.platform === 'win32' )
     {
-      execPath = _.path.nativize( execPath );
+      execPath = _.path.nativizeTolerant( execPath );
       if( args.length )
-      args[ 0 ] = _.path.nativize( args[ 0 ] )
+      args[ 0 ] = _.path.nativizeTolerant( args[ 0 ] )
     }
 
     if( o.mode === 'fork')
@@ -1419,7 +1419,7 @@ function startNode_body( o )
     interpreterArgs = '--expose-gc --stack-trace-limit=999 --max_old_space_size=' + totalmem;
   }
 
-  let path = _.fileProvider.path.nativize( o.execPath );
+  let path = _.fileProvider.path.nativizeTolerant( o.execPath );
   if( o.mode === 'fork' )
   o.interpreterArgs = interpreterArgs;
   else
