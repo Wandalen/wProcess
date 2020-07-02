@@ -9150,8 +9150,9 @@ function shellModeShellNonTrivial( test )
   .then( ( got ) =>
   {
     test.identical( got.exitCode, 0 );
+    let args = _.fileProvider.fileRead({ filePath : _.path.join( routinePath, 'args' ), encoding : 'json' });
     if( process.platform === 'win32' )
-    test.identical( _.strCount( got.output, `[ "\'\`quoted", 'arg', 'with', "space\`\'" ]` ), 1 );
+    test.identical( args, [ "\'\`quoted", 'arg', 'with', "space\`\'" ] );
     else
     test.identical( _.strCount( got.output, `[ '\`quoted arg with space\`' ]` ), 1 );
     return null;
