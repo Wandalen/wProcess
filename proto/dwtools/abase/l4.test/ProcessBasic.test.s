@@ -36,7 +36,7 @@ var Self = {};
 function suiteBegin()
 {
   var self = this;
-  self.suiteTempPath = _.path.pathDirTempOpen( _.path.join( __dirname, '../..' ), 'ProcessBasic' );
+  self.suiteTempPath = _.path.tempOpen( _.path.join( __dirname, '../..' ), 'ProcessBasic' );
   self.toolsPath = _.path.nativize( _.path.resolve( __dirname, '../../../dwtools/Tools.s' ) );
   self.toolsPathInclude = `var _ = require( '${ _.strEscape( self.toolsPath ) }' )\n`;
 }
@@ -48,7 +48,7 @@ function suiteEnd()
   var self = this;
 
   _.assert( _.strHas( self.suiteTempPath, '/ProcessBasic-' ) )
-  _.path.pathDirTempClose( self.suiteTempPath );
+  _.path.tempClose( self.suiteTempPath );
 }
 
 //
