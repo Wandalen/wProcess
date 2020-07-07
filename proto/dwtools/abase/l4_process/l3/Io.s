@@ -135,10 +135,13 @@ function _argsInSamFormatNodejs( o )
 
     return args.map( e =>
     {
+      debugger;
       if( !_.strHas( e, /\s/ ) )
       {
-        if( _.path.isGlob( e ) || _.strEnds( e, [ '/', '\\' ] ) )
+        if( !_.strHas( e, ':' ) )
+        if( _.path.isGlob( e ) || _.strHas( e,  '/' ) || _.strHas( e, '\\' ) )
         return `"${e}"`;
+
         return e;
       }
 
