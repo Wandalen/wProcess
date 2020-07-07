@@ -807,8 +807,10 @@ function start_body( o )
     {
       let begin = _.strBeginOf( args[ i ], strOptions.quotingPrefixes );
       let end = _.strEndOf( args[ i ], strOptions.quotingPostfixes );
-      if( begin )
-      _.sure( begin === end, 'Arguments string in execPath:', src, 'has not closed quoting in argument:', args[ i ] );
+      // if( begin )
+      // if( begin && end ) /* qqq3 : add test routine to cover that */
+      // _.sure( begin === end, 'Arguments string in execPath:', src, 'has not closed quoting in argument:', args[ i ] );
+      /* qqq3 : could be `"path/key3":'val3'` */
     }
 
     return args;
@@ -824,8 +826,10 @@ function start_body( o )
     {
       let begin = _.strBeginOf( args[ i ], quotes );
       let end = _.strEndOf( args[ i ], quotes );
-      if( begin )
+      // if( begin )
+      if( begin && begin === end ) /* qqq3 : add test routine to cover that */
       args[ i ] = _.strInsideOf( args[ i ], begin, end ); /* yyy qqq2 : should not uncover arguments here! */
+      /* qqq3 : could be `"path/key3":'val3'` */
     }
 
     return args;
