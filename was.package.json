@@ -10,8 +10,8 @@
     { "name" : "Kostiantyn Wandalen", "email" : "wanalen@01.school" },
     { "name" : "Volodymyr M.", "email" : "volodymyr.migdal@gmail.com" }
   ],
-  "main" : "proto/dwtools/abase/l4_process/Basic.s",
-  "files" : [ "proto/dwtools/abase/l4_process", "proto/dwtools/Tools.s", "out" ],
+  "main" : "proto/wtools/abase/l4_process/Basic.s",
+  "files" : [ "proto/wtools/abase/l4_process", "proto/wtools/Tools.s", "out" ],
   "scripts" : { "test" : "wtest .run 'proto/**' rapidity:-3", "docgen" : "wdocgen proto" },
   "repository" : { "type" : "git", "url" : "https://github.com/Wandalen/wProcess.git" },
   "bugs" :
