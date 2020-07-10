@@ -327,6 +327,153 @@ anchor.defaults =
   replacing : 0,
 }
 
+//
+
+function pathsRead()
+{
+  if( !_global_.process )
+  return [];
+
+  let paths = _global_.process.env.PATH;
+
+  if( _global_.process.platform === 'win32' )
+  paths = paths.split( ';' );
+  else
+  paths = paths.split( ':' );
+
+  return _.path.s.normalize( paths );
+}
+
+//
+
+function systemEntryAdd( o )
+{
+
+  if( !_.mapIs( o ) )
+  o = { appPath : arguments[ 0 ] }
+
+  _.routineOptions( systemEntryAdd, o );
+
+  if( _.boolLikeTrue( o.logger ) )
+  o.logger = _.LoggerPrime();
+
+  if( o.platform === 'multiple' )
+  o.platform = [ 'windows', 'posix' ];
+
+  if( o.platform === null )
+  o.platform = process.platform === 'win32' ? 'windows' : 'posix';
+
+  o.platform = _.arrayAs( o.platform );
+
+  if( o.allowingMissed === null )
+  o.allowingMissed = !!o.forcing;
+  if( o.allowingNotInPath === null )
+  o.allowingNotInPath = !!o.forcing;
+
+  _.assert( _.path.isAbsolute( o.appPath ), () => `Epects absolute path o.appPath, but got ${o.appPath}` );
+
+  o.appPath = _.path.normalize( o.appPath );
+  if( o.name === null )
+  o.name = _.path.name( o.appPath );
+
+  _.assert( _.longHasAll( [ 'windows', 'posix' ], o.platform, ), `Unknown platforms : ${o.platform.join( ' ' )}` );
+  _.assert( _.path.isAbsolute( o.entryDirPath ), () => `Epects absolute path o.appPath, but got ${o.appPath}` );
+  _.assert( _.strIs( o.prefix ) );
+  _.sure( _.strDefined( o.entryDirPath ), `Neither {-o.entryDirPath-} is defined nor config has defined path::entry` );
+  _.sure( _.fileProvider.isDir( o.entryDirPath ), `Not a dir : ${o.entryDirPath}` );
+  _.sure
+  (
+      o.allowingMissed || ( _.fileProvider.fileExists( o.appPath ) && !_.fileProvider.isDir( o.appPath ) )
+    , () => `Does not exist file : ${o.appPath}`,
+  );
+  _.sure
+  (
+      o.allowingNotInPath || _.longHas( _.process.pathsRead(), o.entryDirPath )
+    , () => `entryDirPath is not in the environment variable $PATH`
+    + `\nentryDirPath : ${o.entryDirPath}`
+    + `\n$PATH :\n  ${_.process.pathsRead().join( '\n  ' )}`
+  );
+
+  let appPath = o.appPath;
+  debugger;
+  if( o.relative )
+  appPath = _.path.relative( o.entryDirPath, o.appPath );
+  debugger;
+
+  appPath = _.path.nativize( appPath );
+
+  let counter = 0;
+
+  o.platform.forEach( ( platform ) => installFor( platform ) );
+
+  if( o.logger && o.verbosity === 1 )
+  o.logger.log( ` + Added ${counter} entrie(s) ${_.path.moveTextualReport( o.entryDirPath, o.appPath )}` );
+
+  return counter;
+
+  function shellRelativePosix()
+  {
+    return `
+#!/bin/bash
+dirPath=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+# dirPath=$0;
+# dirPath=$( cd -P -- "$(dirname -- "$(command -v -- "$0")")" && pwd -P )
+# dirPath=$( cd "$(dirname "\${BASH_SOURCE[0]}")" ; pwd -P )
+# echo BASH_SOURCE[0]:\${BASH_SOURCE[0]}
+# echo dirPath:\${dirPath}
+# echo appPath:${appPath}
+# ${o.prefix}\${dirPath}/${appPath} "$@"
+${o.prefix}\${dirPath}/${appPath} "$@"
+
+`
+  }
+
+  function shellRelativeWindows()
+  {
+    return `
+@echo off
+${o.prefix}%~dp0${appPath} %*
+`
+  }
+
+  function installFor( platform )
+  {
+    let entryTerminalPath = _.path.join( o.entryDirPath, o.name );
+    if( platform === 'windows' )
+    entryTerminalPath += '.bat';
+    let shellFile = shellRelativePosix();
+    if( platform === 'windows' )
+    shellFile = shellRelativeWindows();
+
+    if( o.logger && o.verbosity >= 2 )
+    o.logger.log( ` + Add entry ${_.path.moveTextualReport( entryTerminalPath, o.appPath )}` );
+
+    _.fileProvider.fileWrite( entryTerminalPath, shellFile );
+
+    if( o.addingRights !== null )
+    _.fileProvider.rightsAdd( entryTerminalPath, o.addingRights );
+
+    counter += 1;
+  }
+
+}
+
+systemEntryAdd.defaults =
+{
+  logger : 0,
+  verbosity : 0,
+  entryDirPath : null,
+  appPath : null,
+  prefix : 'node ',
+  name : null,
+  platform : null,
+  relative : 1,
+  addingRights : 0o777,
+  allowingMissed : null,
+  allowingNotInPath : null,
+  forcing : 0,
+}
+
 // --
 // declare
 // --
@@ -341,6 +488,11 @@ let Extension =
   args : Config.interpreter === 'njs' ? _argsInSamFormatNodejs : _argsInSamFormatBrowser,
   argsReadTo,
   anchor,
+
+  pathsRead, /* qqq : cover */
+
+  systemEntryAdd, /* qqq : cover */
+  /* xxx qqq : implement entryRemove */
 
 }
 

@@ -2450,7 +2450,7 @@ children.defaults =
 let Extension =
 {
 
-  // starter
+  // start
 
   start,
   startPassingThrough,
