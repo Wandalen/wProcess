@@ -424,7 +424,6 @@ dirPath=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 # echo appPath:${appPath}
 # ${o.prefix}\${dirPath}/${appPath} "$@"
 ${o.prefix}\${dirPath}/${appPath} "$@"
-
 `
   }
 
