@@ -1563,6 +1563,4 @@ module:
       ../.im.will.yml:
         hash: 14af425a881184f430d4dc15c1f518d2
         size: 5507
-      wProcess.out.will.yml:
-        hash: 6c2a0ff7eef524e71a49b9f11cd38f3e
-        size: 40322
+      wProcess.out.will.yml: *ref_0
