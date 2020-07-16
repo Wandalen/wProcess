@@ -4,7 +4,7 @@ var windowsKill = require( 'wwindowskill' )();
 
 require( '../..' );
 require( 'wFiles' );
-var _ = wTools;
+let _ = wTools;
 
 let o = 
 { 
