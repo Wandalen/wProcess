@@ -19540,7 +19540,7 @@ shellExperiment.timeOut = 30000;
 var Proto =
 {
 
-  name : 'Tools.base.l4.ProcessBasic',
+  name : 'Tools.l4.ProcessBasic',
   silencing : 1,
   routineTimeOut : 60000,
   onSuiteBegin : suiteBegin,
