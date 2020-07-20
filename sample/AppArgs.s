@@ -1,4 +1,4 @@
 if( typeof module !== 'undefined' )
-var _ = require( '..' );
+let _ = require( '..' );
 
 console.log( _.appArgs() )

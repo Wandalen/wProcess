@@ -5,7 +5,7 @@
 if( typeof module !== 'undefined' )
 {
 
-  let _ = require( '../../../dwtools/Tools.s' );
+  let _ = require( '../../../wtools/Tools.s' );
 
   _.include( 'wTesting' );
   _.include( 'wFiles' );
@@ -25,9 +25,9 @@ qqq :
 
 */
 
-var _global = _global_;
-var _ = _global_.wTools;
-var Self = {};
+let _global = _global_;
+let _ = _global_.wTools;
+let Self = {};
 
 // --
 // context
@@ -36,9 +36,9 @@ var Self = {};
 function suiteBegin()
 {
   var self = this;
-  self.suiteTempPath = _.path.pathDirTempOpen( _.path.join( __dirname, '../..' ), 'ProcessBasic' );
-  self.toolsPath = _.path.nativize( _.path.resolve( __dirname, '../../../dwtools/Tools.s' ) );
-  self.toolsPathInclude = `var _ = require( '${ _.strEscape( self.toolsPath ) }' )\n`;
+  self.suiteTempPath = _.path.tempOpen( _.path.join( __dirname, '../..' ), 'ProcessBasic' );
+  self.toolsPath = _.path.nativize( _.path.resolve( __dirname, '../../../wtools/Tools.s' ) );
+  self.toolsPathInclude = `let _ = require( '${ _.strEscape( self.toolsPath ) }' )\n`;
 }
 
 //
@@ -48,7 +48,7 @@ function suiteEnd()
   var self = this;
 
   _.assert( _.strHas( self.suiteTempPath, '/ProcessBasic-' ) )
-  _.path.pathDirTempClose( self.suiteTempPath );
+  _.path.tempClose( self.suiteTempPath );
 }
 
 //
@@ -9150,8 +9150,9 @@ function shellModeShellNonTrivial( test )
   .then( ( got ) =>
   {
     test.identical( got.exitCode, 0 );
+    let args = _.fileProvider.fileRead({ filePath : _.path.join( routinePath, 'args' ), encoding : 'json' });
     if( process.platform === 'win32' )
-    test.identical( _.strCount( got.output, `[ "\'\`quoted", 'arg', 'with', "space\`\'" ]` ), 1 );
+    test.identical( args, [ "\'\`quoted", 'arg', 'with', "space\`\'" ] );
     else
     test.identical( _.strCount( got.output, `[ '\`quoted arg with space\`' ]` ), 1 );
     return null;
@@ -19539,7 +19540,7 @@ shellExperiment.timeOut = 30000;
 var Proto =
 {
 
-  name : 'Tools.base.l4.ProcessBasic',
+  name : 'Tools.l4.ProcessBasic',
   silencing : 1,
   routineTimeOut : 60000,
   onSuiteBegin : suiteBegin,

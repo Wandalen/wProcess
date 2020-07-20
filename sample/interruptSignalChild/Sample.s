@@ -1,7 +1,7 @@
 if( typeof module !== 'undefined' )
 require( '../..' );
 require( 'wFiles' );
-var _ = wTools;
+let _ = wTools;
 
 let o =
 {

@@ -1,7 +1,7 @@
 if( typeof module !== 'undefined' )
 require( '..' );
 require( 'wFiles' );
-var _ = wTools;
+let _ = wTools;
 
 /* How to execute command synchronously in mode that doesn't have sync method in `ChildProcess` module */
 

@@ -184,7 +184,6 @@ function start_body( o )
   _.assert( o.onTerminate === null || _.consequenceIs( o.onTerminate ) );
   _.assert( !o.ipc || _.longHas( [ 'fork', 'spawn' ], o.mode ), `Mode: ${o.mode} doesn't support inter process communication.` );
 
-
   let state = 0;
   let currentExitCode;
   let killedByTimeout = false;
@@ -807,8 +806,10 @@ function start_body( o )
     {
       let begin = _.strBeginOf( args[ i ], strOptions.quotingPrefixes );
       let end = _.strEndOf( args[ i ], strOptions.quotingPostfixes );
-      if( begin )
-      _.sure( begin === end, 'Arguments string in execPath:', src, 'has not closed quoting in argument:', args[ i ] );
+      // if( begin )
+      // if( begin && end ) /* qqq3 : add test routine to cover that */
+      // _.sure( begin === end, 'Arguments string in execPath:', src, 'has not closed quoting in argument:', args[ i ] );
+      /* qqq3 : could be `"path/key3":'val3'` */
     }
 
     return args;
@@ -824,8 +825,10 @@ function start_body( o )
     {
       let begin = _.strBeginOf( args[ i ], quotes );
       let end = _.strEndOf( args[ i ], quotes );
-      if( begin )
+      // if( begin )
+      if( begin && begin === end ) /* qqq3 : add test routine to cover that */
       args[ i ] = _.strInsideOf( args[ i ], begin, end ); /* yyy qqq2 : should not uncover arguments here! */
+      /* qqq3 : could be `"path/key3":'val3'` */
     }
 
     return args;
@@ -1027,6 +1030,7 @@ function start_body( o )
     let result = '';
     result += 'Launched as ' + _.strQuote( o.fullExecPath ) + '\n';
     result += 'Launched at ' + _.strQuote( o.currentPath ) + '\n';
+    debugger;
     if( stderrOutput.length )
     result += '\n -> Stderr' + '\n' + ' -  ' + _.strLinesIndentation( stderrOutput, ' -  ' ) + '\n -< Stderr';
     return result;
@@ -1079,7 +1083,9 @@ function start_body( o )
       err = _.errBrief( err );
 
       if( o.sync && !o.deasync )
-      throw err;
+      {
+        throw err;
+      }
       else
       {
         o.onTerminate.error( err );
@@ -1204,7 +1210,7 @@ function start_body( o )
 
 }
 
-start_body.defaults =
+start_body.defaults = /* qqq : split on _.process.start(), _.process.startBasic() */
 {
 
   execPath : null,
@@ -1512,7 +1518,7 @@ function startAfterDeath_body( o )
   _.assert( _.strIs( o.execPath ) );
   _.assert( arguments.length === 1, 'Expects single argument' );
 
-  let toolsPath = _.path.nativize( _.path.join( __dirname, '../../../../dwtools/Tools.s' ) );
+  let toolsPath = _.path.nativize( _.path.join( __dirname, '../../../../wtools/Tools.s' ) );
   let toolsPathInclude = `let _ = require( '${_.strEscape( toolsPath )}' );\n`
   let secondaryProcessSource = toolsPathInclude + afterDeathSecondaryProcess.toString() + '\nafterDeathSecondaryProcess();';
   let secondaryFilePath = _.process.tempOpen({ sourceCode : secondaryProcessSource });
@@ -2166,7 +2172,7 @@ function kill( o )
     if( err.code === 'EPERM' )
     throw _.err( err, '\nCurrent process does not have permission to kill target process' );
     if( err.code === 'ESRCH' )
-    throw _.err( err, '\nTarget process:', _.strQuote( o.pid ), 'does not exist.' );
+    throw _.err( err, '\nTarget process:', _.strQuote( o.pid ), 'does not exist.' ); /* qqq : rewrite all strings as template-strings */
     throw _.err( err );
   }
 
@@ -2444,7 +2450,7 @@ children.defaults =
 let Extension =
 {
 
-  // starter
+  // start
 
   start,
   startPassingThrough,

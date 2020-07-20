@@ -3,14 +3,14 @@ root:
   - wProcess.out
 consistency:
   wProcess.out.will.yml: &ref_0
-    hash: 5743a85fc6f2565df5548d021048e721
-    size: 40300
+    hash: 6c2a0ff7eef524e71a49b9f11cd38f3e
+    size: 40322
   ../.ex.will.yml: &ref_1
     hash: 6643e08d0b3c09445e54e71704696a7b
     size: 2146
   ../.im.will.yml: &ref_2
-    hash: 8c804dde569e23e2bf916faf0abd9eba
-    size: 5510
+    hash: 14af425a881184f430d4dc15c1f518d2
+    size: 5507
 module:
   wProcess.out:
     about:
@@ -122,7 +122,7 @@ module:
       entry.proto.no.tests:
         criterion:
           tests: no.tests
-        path: ../proto/dwtools/abase/l4_process/Basic.s
+        path: ../proto/wtools/abase/l4_process/Basic.s
       entry.proto.only.tests:
         criterion:
           tests: only.tests
@@ -132,13 +132,13 @@ module:
           debug: debug
           raw: raw
           content: prime
-        path: '{path::out.*=1}/source/dwtools/abase/l4_process/Basic.s'
+        path: '{path::out.*=1}/source/wtools/abase/l4_process/Basic.s'
       entry.out.raw.debug.release:
         criterion:
           debug: release
           raw: raw
           content: prime
-        path: '{path::out.*=1}/source/dwtools/abase/l4_process/Basic.s'
+        path: '{path::out.*=1}/source/wtools/abase/l4_process/Basic.s'
       entry.out.compiled.debug.debug:
         criterion:
           debug: debug
@@ -164,18 +164,19 @@ module:
           export: 1
         path:
           - ../proto
-          - ../proto/dwtools
-          - ../proto/dwtools/Tools.s
-          - ../proto/dwtools/abase
-          - ../proto/dwtools/abase/l4.test
-          - ../proto/dwtools/abase/l4.test/ProcessBasic.test.s
-          - ../proto/dwtools/abase/l4_process
-          - ../proto/dwtools/abase/l4_process/Basic.s
-          - ../proto/dwtools/abase/l4_process/l3
-          - ../proto/dwtools/abase/l4_process/l3/Execution.s
-          - ../proto/dwtools/abase/l4_process/l3/Io.s
-          - ../proto/dwtools/amid
-          - ../proto/dwtools/atop
+          - ../proto/Integration.test.s
+          - ../proto/wtools
+          - ../proto/wtools/Tools.s
+          - ../proto/wtools/abase
+          - ../proto/wtools/abase/l4.test
+          - ../proto/wtools/abase/l4.test/ProcessBasic.test.s
+          - ../proto/wtools/abase/l4_process
+          - ../proto/wtools/abase/l4_process/Basic.s
+          - ../proto/wtools/abase/l4_process/l3
+          - ../proto/wtools/abase/l4_process/l3/Execution.s
+          - ../proto/wtools/abase/l4_process/l3/Io.s
+          - ../proto/wtools/amid
+          - ../proto/wtools/atop
     submodule:
       wTools:
         path: 'npm:///wTools'
@@ -949,7 +950,7 @@ module:
       entry.proto.no.tests:
         criterion:
           tests: no.tests
-        path: proto/dwtools/abase/l4_process/Basic.s
+        path: proto/wtools/abase/l4_process/Basic.s
       entry.proto.only.tests:
         criterion:
           tests: only.tests
@@ -959,13 +960,13 @@ module:
           debug: debug
           raw: raw
           content: prime
-        path: '{path::out.*=1}/source/dwtools/abase/l4_process/Basic.s'
+        path: '{path::out.*=1}/source/wtools/abase/l4_process/Basic.s'
       entry.out.raw.debug.release:
         criterion:
           debug: release
           raw: raw
           content: prime
-        path: '{path::out.*=1}/source/dwtools/abase/l4_process/Basic.s'
+        path: '{path::out.*=1}/source/wtools/abase/l4_process/Basic.s'
       entry.out.compiled.debug.debug:
         criterion:
           debug: debug
@@ -1560,6 +1561,6 @@ module:
         hash: 6643e08d0b3c09445e54e71704696a7b
         size: 2146
       ../.im.will.yml:
-        hash: 8c804dde569e23e2bf916faf0abd9eba
-        size: 5510
+        hash: 14af425a881184f430d4dc15c1f518d2
+        size: 5507
       wProcess.out.will.yml: *ref_0
