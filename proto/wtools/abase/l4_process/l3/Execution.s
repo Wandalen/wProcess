@@ -2115,16 +2115,15 @@ function kill( o )
 
   ready.then( () =>
   {
-    if( o.process )
-    o.process.kill( 'SIGKILL' );
-    else
-    process.kill( o.pid, 'SIGKILL' )
-    return true;
-  })
+    if( !o.withChildren )
+    {
+      if( o.process )
+      o.process.kill( 'SIGKILL' );
+      else
+      process.kill( o.pid, 'SIGKILL' )
+      return true;
+    }
 
-  if( o.withChildren )
-  ready.then( () =>
-  {
     return _.process.children({ pid : o.pid, asList : isWindows })
     .then( ( children ) =>
     {
