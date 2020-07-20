@@ -1340,27 +1340,29 @@ function processArgsWithSpace( test )
   {
     /* process.args should quote arguments that contain spaces and are not quoted already */
     test.description = 'options only, option value is not quoted and contains space'
-    return null;
-  })
-  shell( 'option:value with" space' )
-  .then( o =>
-  {
-    test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
-    var expected =
+    return test.shouldThrowErrorOfAnyKind( () =>
     {
-      'scriptArgs' : [ 'option:value', 'with"', 'space' ],
-      'interpreterArgsStrings' : '',
-      'scriptArgsString' : 'option:value with" space',
-      'subject' : '',
-      'map' : { 'option' : 'value with" space' },
-      'subjects' : [ '' ],
-      'maps' : [ { 'option' : 'value with" space' } ],
-      'original' : 'option:value with" space'
-    }
-    test.contains( got, expected );
-    return null;
+      return shell({ execPath : 'option:value with" space', ready : null })
+    });
   })
+  // .then( o =>
+  // {
+  //   test.identical( o.exitCode, 0 );
+  //   var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+  //   var expected =
+  //   {
+  //     'scriptArgs' : [ 'option:value', 'with"', 'space' ],
+  //     'interpreterArgsStrings' : '',
+  //     'scriptArgsString' : 'option:value with" space',
+  //     'subject' : '',
+  //     'map' : { 'option' : 'value with" space' },
+  //     'subjects' : [ '' ],
+  //     'maps' : [ { 'option' : 'value with" space' } ],
+  //     'original' : 'option:value with" space'
+  //   }
+  //   test.contains( got, expected );
+  //   return null;
+  // })
 
   return ready;
 }
@@ -7640,7 +7642,7 @@ function shellExecPathQuotesClosing( test )
       outputCollecting : 1,
       ready : con
     }
-    return test.shouldThrowErrorOfAnyKind( _.process.start( o ) );
+    return test.mustNotThrowError( _.process.start( o ) );
   })
 
   testcase( 'arg ends with quote' )
@@ -7656,22 +7658,22 @@ function shellExecPathQuotesClosing( test )
       outputCollecting : 1,
       ready : con
     }
-    _.process.start( o )
+    // _.process.start( o )
 
-    con.then( () =>
-    {
-      test.identical( o.exitCode, 0 );
-      test.identical( o.fullExecPath, testAppPathSpace + ' arg"' );
-      test.identical( o.args, [ 'arg"' ] );
-      let got = JSON.parse( o.output );
-      test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-      test.identical( got.map, {} )
-      test.identical( got.scriptArgs, [ 'arg"' ] )
+    // con.then( () =>
+    // {
+    //   test.identical( o.exitCode, 0 );
+    //   test.identical( o.fullExecPath, testAppPathSpace + ' arg"' );
+    //   test.identical( o.args, [ 'arg"' ] );
+    //   let got = JSON.parse( o.output );
+    //   test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
+    //   test.identical( got.map, {} )
+    //   test.identical( got.scriptArgs, [ 'arg"' ] )
 
-      return null;
-    })
+    //   return null;
+    // })
 
-    return con;
+    return test.shouldThrowErrorOfAnyKind( _.process.start( o ) );
   })
 
   .then( () =>
@@ -7732,22 +7734,22 @@ function shellExecPathQuotesClosing( test )
       outputCollecting : 1,
       ready : con
     }
-    _.process.start( o );
+    // _.process.start( o );
 
-    con.then( () =>
-    {
-      test.identical( o.exitCode, 0 );
-      test.identical( o.fullExecPath, testAppPathSpace + ' arg"arg' );
-      test.identical( o.args, [ 'arg"arg' ] );
-      let got = JSON.parse( o.output );
-      test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-      test.identical( got.map, {} )
-      test.identical( got.scriptArgs, [ 'arg"arg' ] )
+    // con.then( () =>
+    // {
+    //   test.identical( o.exitCode, 0 );
+    //   test.identical( o.fullExecPath, testAppPathSpace + ' arg"arg' );
+    //   test.identical( o.args, [ 'arg"arg' ] );
+    //   let got = JSON.parse( o.output );
+    //   test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
+    //   test.identical( got.map, {} )
+    //   test.identical( got.scriptArgs, [ 'arg"arg' ] )
 
-      return null;
-    })
+    //   return null;
+    // })
 
-    return con;
+    return test.shouldThrowErrorOfAnyKind( _.process.start( o ) );
   })
 
   .then( () =>
@@ -7879,22 +7881,22 @@ function shellExecPathQuotesClosing( test )
       outputCollecting : 1,
       ready : con
     }
-    _.process.start( o );
+    // _.process.start( o );
 
-    con.then( () =>
-    {
-      test.identical( o.exitCode, 0 );
-      test.identical( o.fullExecPath, testAppPathSpace + ' option:"value' );
-      test.identical( o.args, [ 'option:"value' ] );
-      let got = JSON.parse( o.output );
-      test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-      test.identical( got.map, { option : '"value' } )
-      test.identical( got.scriptArgs, [ 'option:"value' ] )
+    // con.then( () =>
+    // {
+    //   test.identical( o.exitCode, 0 );
+    //   test.identical( o.fullExecPath, testAppPathSpace + ' option:"value' );
+    //   test.identical( o.args, [ 'option:"value' ] );
+    //   let got = JSON.parse( o.output );
+    //   test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
+    //   test.identical( got.map, { option : '"value' } )
+    //   test.identical( got.scriptArgs, [ 'option:"value' ] )
 
-      return null;
-    })
+    //   return null;
+    // })
 
-    return con;
+    return test.shouldThrowErrorOfAnyKind( _.process.start( o ) );
   })
 
   .then( () =>
@@ -7955,7 +7957,20 @@ function shellExecPathQuotesClosing( test )
     }
     _.process.start( o );
 
-    return test.shouldThrowErrorOfAnyKind( con );
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.fullExecPath, testAppPathSpace + ' "option: "value with space""' );
+      test.identical( o.args, [ '"option: "value', 'with', 'space""' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, { option : 'value with space' } )
+      test.identical( got.scriptArgs,  [ '"option: "value', 'with', 'space""' ] )
+
+      return null;
+    })
+
+    return con
   })
 
   testcase( 'double quoted with space inside, diff quotes' )
