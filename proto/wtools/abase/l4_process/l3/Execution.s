@@ -804,8 +804,29 @@ function start_body( o )
 
     for( let i = 0; i < args.length; i++ )
     {
-      let begin = _.strBeginOf( args[ i ], strOptions.quotingPrefixes );
-      let end = _.strEndOf( args[ i ], strOptions.quotingPostfixes );
+      let r = _.strQuoteAnalyze
+      ({
+        src : args[ i ],
+        quote : strOptions.quotingPrefixes
+      });
+      strOptions.quotingPrefixes.forEach( ( quote ) =>
+      {
+        let found = _.strFindAll( args[ i ], quote );
+        if( found.length % 2 === 0 )
+        return;
+
+        for( let i = 0; j < found.length; i += 1 )
+        {
+          let pos = found[ i ].charsRangeLeft[ 0 ];
+          for( let j = 0; j < r.ranges.length; j += 2 )
+          if( pos >= r.ranges[ j ] && pos <= r.ranges[ j + 1 ] )
+          break;
+          throw _.err( 'Arguments string in execPath:', src, 'has not closed quoting in argument:', args[ i ] );
+        }
+      })
+
+      // let begin = _.strBeginOf( args[ i ], strOptions.quotingPrefixes );
+      // let end = _.strEndOf( args[ i ], strOptions.quotingPostfixes );
       // if( begin )
       // if( begin && end ) /* qqq3 : add test routine to cover that */
       // _.sure( begin === end, 'Arguments string in execPath:', src, 'has not closed quoting in argument:', args[ i ] );
@@ -825,7 +846,7 @@ function start_body( o )
     {
       let begin = _.strBeginOf( args[ i ], quotes );
       let end = _.strEndOf( args[ i ], quotes );
-      // if( begin )
+      if( begin )
       if( begin && begin === end ) /* qqq3 : add test routine to cover that */
       args[ i ] = _.strInsideOf( args[ i ], begin, end ); /* yyy qqq2 : should not uncover arguments here! */
       /* qqq3 : could be `"path/key3":'val3'` */
