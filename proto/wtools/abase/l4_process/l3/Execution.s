@@ -802,22 +802,36 @@ function start_body( o )
     }
     let args = _.strSplit( strOptions );
 
+    let quotes = [ "'", '"', "`" ];
     for( let i = 0; i < args.length; i++ )
     {
+      let begin = _.strBeginOf( args[ i ], quotes );
+      let end = _.strEndOf( args[ i ], quotes );
+
+      if( begin && end )
+      if( begin === end )
+      continue;
+
+      if( _.longHas( quotes, args[ i ] ) )
+      continue;
+
       let r = _.strQuoteAnalyze
       ({
         src : args[ i ],
         quote : strOptions.quotingPrefixes
       });
-      strOptions.quotingPrefixes.forEach( ( quote ) =>
+
+      quotes.forEach( ( quote ) =>
       {
         let found = _.strFindAll( args[ i ], quote );
+
         if( found.length % 2 === 0 )
         return;
 
-        for( let i = 0; j < found.length; i += 1 )
+        for( let k = 0; k < found.length; k += 1 )
         {
-          let pos = found[ i ].charsRangeLeft[ 0 ];
+          let pos = found[ k ].charsRangeLeft[ 0 ];
+
           for( let j = 0; j < r.ranges.length; j += 2 )
           if( pos >= r.ranges[ j ] && pos <= r.ranges[ j + 1 ] )
           break;
