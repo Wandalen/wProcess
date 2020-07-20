@@ -2107,16 +2107,26 @@ function kill( o )
   }
 
   _.assert( _.numberIs( o.pid ) );
+  _.assert( _.numberIs( o.waitTimeOut ) );
 
   let isWindows = process.platform === 'win32';
 
-  try
-  {
-    if( !o.withChildren )
-    return killProcess();
+  let ready = _.Consequence().take( null );
 
-    let con = _.process.children({ pid : o.pid, asList : isWindows });
-    con.then( ( children ) =>
+  ready.then( () =>
+  {
+    if( o.process )
+    o.process.kill( 'SIGKILL' );
+    else
+    process.kill( o.pid, 'SIGKILL' )
+    return true;
+  })
+
+  if( o.withChildren )
+  ready.then( () =>
+  {
+    return _.process.children({ pid : o.pid, asList : isWindows })
+    .then( ( children ) =>
     {
       if( !isWindows )
       return killChildren( children );
@@ -2128,28 +2138,14 @@ function kill( o )
         if( _.process.isAlive( children[ l ].pid ) )
         process.kill( children[ l ].pid, 'SIGKILL' );
       }
-
       return true;
     })
-    con.catch( handleError );
+  })
 
-    return con;
-  }
-  catch( err )
-  {
-    handleError( err )
-  }
+  ready.then( waitForTermination )
+  ready.catch( handleError );
 
-  //
-
-  function killProcess()
-  {
-    if( o.process )
-    o.process.kill( 'SIGKILL' );
-    else
-    process.kill( o.pid, 'SIGKILL' );
-    return true;
-  }
+  return ready;
 
   //
 
@@ -2165,6 +2161,8 @@ function kill( o )
     return true;
   }
 
+  //
+
   function handleError( err )
   {
     // if( err.code === 'EINVAL' )
@@ -2176,14 +2174,49 @@ function kill( o )
     throw _.err( err );
   }
 
-  return true;
+  //
+
+  function waitForTermination()
+  {
+    var ready = _.Consequence();
+    var timer;
+    timer = _.time._periodic( 100, () =>
+    {
+      if( _.process.isAlive( o.pid ) )
+      return false;
+      timer._cancel();
+      ready.take( true );
+    });
+
+    let timeOutError = _.time.outError( o.waitTimeOut )
+
+    ready.orKeepingSplit( [ timeOutError ] );
+
+    ready.finally( ( err, got ) =>
+    {
+      if( !timeOutError.resourcesCount() )
+      timeOutError.take( _.dont );
+
+      if( err )
+      {
+        _.errAttend( err );
+        if( err.reason === 'time out' )
+        err = _.err( err, `\nTarget process: ${_.strQuote( o.pid )} is still alive. Waited for ${o.waitTimeOut} ms.` );
+        throw err;
+      }
+      return got;
+    })
+
+    return ready;
+  }
 }
 
 kill.defaults =
 {
   pid : null,
   process : null,
-  withChildren : 0
+  withChildren : 0,
+  waitTimeOut : 5000
 }
 
 //
