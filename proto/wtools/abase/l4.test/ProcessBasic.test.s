@@ -6527,7 +6527,7 @@ function shellArgumentsParsingNonTrivial( test )
       test.identical( o.args, [ testAppPathSpace, 'firstArg', 'secondArg:1', '"third arg"' ] );
       let got = JSON.parse( o.output );
       test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-      test.identical( got.map, { secondArg : '1 third arg' } )
+      test.identical( got.map, { secondArg : '1 "third arg"' } )
       test.identical( got.subject, 'firstArg' )
       test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', '"third arg"' ] )
 
@@ -6560,7 +6560,7 @@ function shellArgumentsParsingNonTrivial( test )
       test.identical( o.args, [ _.strQuote( testAppPathSpace ), 'firstArg', 'secondArg:1', '"third arg"' ] );
       let got = JSON.parse( o.output );
       test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-      test.identical( got.map, { secondArg : '1 third arg' } )
+      test.identical( got.map, { secondArg : '1 "third arg"' } )
       test.identical( got.subject, 'firstArg' )
       test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', '"third arg"' ] )
 
@@ -6593,7 +6593,7 @@ function shellArgumentsParsingNonTrivial( test )
       test.identical( o.args, [ _.strQuote( testAppPathSpace ), 'firstArg', 'secondArg:1', '"third arg"' ] );
       let got = JSON.parse( o.output );
       test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-      test.identical( got.map, { secondArg : '1 third arg' } )
+      test.identical( got.map, { secondArg : '1 "third arg"' } )
       test.identical( got.subject, 'firstArg' )
       test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', '"third arg"' ] )
 
@@ -6626,7 +6626,7 @@ function shellArgumentsParsingNonTrivial( test )
       test.identical( o.args, [ 'firstArg', 'secondArg:1', '"third arg"' ] );
       let got = JSON.parse( o.output );
       test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-      test.identical( got.map, { secondArg : '1 third arg' } )
+      test.identical( got.map, { secondArg : '1 "third arg"' } )
       test.identical( got.subject, 'firstArg' )
       test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', '"third arg"' ] )
 
@@ -6835,6 +6835,41 @@ function shellArgumentsParsingNonTrivial( test )
     _.process.start( o );
 
     return test.shouldThrowErrorOfAnyKind( con );
+  })
+
+  /*  */
+
+  .then( () =>
+  {
+    test.case = 'args in execPath and args options'
+
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ` "path/key3":'val3'`,
+      args : [],
+      mode : 'fork',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.execPath, testAppPathSpace );
+      test.identical( o.args, [ `"path/key3":'val3'` ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, { "path/key3" : 'val3' } )
+      test.identical( got.subject, '' )
+      test.identical( got.scriptArgs, [ `"path/key3":'val3'` ] )
+
+      return null;
+    })
+
+    return con;
   })
 
   /*  */
@@ -10599,7 +10634,7 @@ function shellTerminateHangedWithExitHandler( test )
 {
   var context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
-  
+
   if( process.platform === 'win32' )
   {
     //xxx: windows-kill doesn't work correctrly on node 14
@@ -10722,7 +10757,7 @@ function shellTerminateAfterLoopRelease( test )
 {
   var context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
-  
+
   if( process.platform === 'win32' )
   {
     //xxx: windows-kill doesn't work correctrly on node 14
@@ -13091,7 +13126,7 @@ function startDetachedOutputStdioPipe( test )
 {
   var context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
-  
+
   function testAppParent()
   {
     _.include( 'wProcess' );
@@ -13209,13 +13244,13 @@ function startDetachedOutputStdioPipe( test )
     con.then( () =>
     {
       test.identical( o.exitCode, 0 )
-      
+
       //xxx: output piping doesn't work as expected in mode "shell" on windows
       //qqq: investigate if its fixed in never verions of node or implement alternative solution
-      
+
       if( process.platform === 'win32' )
       return null;
-      
+
       test.is( _.strHas( o.output, 'Child process start' ) )
       test.is( _.strHas( o.output, 'Child process end' ) )
       return null;
@@ -17025,7 +17060,7 @@ function terminate( test )
 {
   var context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
-  
+
   if( process.platform === 'win32' )
   {
     //xxx: windows-kill doesn't work correctrly on node 14
@@ -17406,7 +17441,7 @@ function terminateComplex( test )
 {
   var context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
-  
+
   if( process.platform === 'win32' )
   {
     //xxx: windows-kill doesn't work correctly in all scenarios
@@ -17673,8 +17708,8 @@ function terminateDetachedComplex( test )
 {
   var context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
-  
-  
+
+
   if( process.platform === 'win32' )
   {
     //xxx: windows-kill doesn't work correctly with detached processes
@@ -17976,7 +18011,7 @@ function terminateWithChildren( test )
 {
   var context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
-  
+
   if( process.platform === 'win32' )
   {
     //xxx: windows-kill doesn't work correctly with detached processes
@@ -18245,7 +18280,7 @@ function terminateWithDetachedChildren( test )
 {
   var context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
-  
+
   if( process.platform === 'win32' )
   {
     //xxx: windows-kill doesn't work correctly with detached processes
@@ -18412,7 +18447,7 @@ function terminateTimeOut( test )
 {
   var context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
-  
+
   if( process.platform === 'win32' )
   {
     //xxx: windows-kill doesn't work correctly on node14
@@ -18622,7 +18657,7 @@ function terminateDifferentStdio( test )
 {
   var context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
-  
+
   if( process.platform === 'win32' )
   {
     //xxx: windows-kill doesn't work correctly on node14
