@@ -1,6 +1,5 @@
-const { exec } = require('child_process');
-
-( function _Execution_s_() {
+( function _Execution_s_()
+{
 
 'use strict';
 
@@ -140,7 +139,7 @@ function start_pre( routine, args )
 function start_body( o )
 {
 
-/* Subroutine index :
+  /* Subroutine index :
 
   endDeasyncMaybe
   multiple
@@ -191,9 +190,7 @@ function start_body( o )
   let decoratedOutput = '';
   let decoratedErrorOutput = '';
   let startingDelay = 0;
-  let procedure;
-  let execArgs;
-  let argumentsManual;
+  let procedure, execArgs, argumentsManual;
 
   if( _.objectIs( o.when ) )
   {
@@ -357,7 +354,7 @@ function start_body( o )
       return o;
     }
 
-   /*
+    /*
     if( o.sync && o.deasync )
     {
       o.ready.deasync();
@@ -432,10 +429,6 @@ function start_body( o )
     }
     return arg;
   }
-
-  /* */
-
-
 
   /* */
 
@@ -663,7 +656,7 @@ function start_body( o )
       let arg2 = execPath;
       let o2 = optionsForSpawn();
 
-     /*
+      /*
 
       windowsVerbatimArguments allows to have arguments with space(s) in shell on Windows
       Following calls will not work as expected( argument will be splitted by space ), if windowsVerbatimArguments is disabled:
@@ -686,7 +679,8 @@ function start_body( o )
 
       // console.log( ' !! ChildProcess.spawn', execPath, [ arg1, arg2 ] ); /* yyy */
 
-/* xxx yyy qqq2 : problem!
+      /*
+      xxx yyy qqq2 : problem!
       it.start( `git add --force '*.will.*'` );
       > git add --force *.will.*
       !! argsJoin [ 'add', '--force', '*.will.*' ]
@@ -791,7 +785,7 @@ function start_body( o )
   {
     let strOptions =
     {
-      src : src,
+      src,
       delimeter : [ ' ' ],
       quoting : 1,
       quotingPrefixes : [ "'", '"', "`" ],
@@ -1586,7 +1580,7 @@ function startAfterDeath_body( o )
   o2.onTerminate.catchGive( function ( err )
   {
     _.errAttend( err );
-    if( err.reason != 'disconnected' )
+    if( err.reason !== 'disconnected' )
     this.error( err );
   })
 
@@ -1610,8 +1604,6 @@ function startAfterDeath_body( o )
 var defaults = startAfterDeath_body.defaults = Object.create( start.defaults );
 
 let startAfterDeath = _.routineFromPreAndBody( start_pre, startAfterDeath_body );
-
-
 
 //
 
@@ -2085,7 +2077,7 @@ function isAlive( src )
   {
     return process.kill( pid, 0 );
   }
-  catch ( err )
+  catch( err )
   {
     return err.code === 'EPERM'
   }
@@ -2324,7 +2316,7 @@ function terminate( o )
     return _.process.start
     ({
       execPath : 'node',
-      args : [ '-e', `var kill = require( 'wwindowskill' )();kill( ${pid},'SIGINT' )`],
+      args : [ '-e', `var kill = require( 'wwindowskill' )();kill( ${pid},'SIGINT' )` ],
       currentPath : __dirname,
       inputMirroring : 0,
       outputPiping : 1,
@@ -2484,10 +2476,10 @@ function children( o )
       _result.push( _.numberFrom( pid ) );
       else
       _result[ pid ] = Object.create( null );
-      if( got.exitCode != 0 )
+      if( got.exitCode !== 0 )
       return result;
       let ready = new _.Consequence().take( null );
-      let pids = _.strSplitNonPreserving({ src: got.output, delimeter : '\n' });
+      let pids = _.strSplitNonPreserving({ src : got.output, delimeter : '\n' });
       _.each( pids, ( cpid ) => ready.then( () => childrenOf( command, cpid, o.asList ? _result : _result[ pid ] ) ) )
       return ready;
     })
