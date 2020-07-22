@@ -29,6 +29,6 @@
     "strip-ansi" : "6.0.0"
   },
   "optionalDependencies" : { "wwindows-process-tree" : "0.2.6" },
-  "devDependencies" : { "wTesting" : "", "wprocess" : "file:." },
+  "devDependencies" : { "wTesting" : "", "wprocess" : "file:.", "eslint" : "7.1.0" },
   "keywords" : [ "wTools", "exec file", "shell script", "run program" ]
 }
