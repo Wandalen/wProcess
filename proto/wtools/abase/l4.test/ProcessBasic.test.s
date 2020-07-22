@@ -54,7 +54,7 @@ function suiteEnd()
 
 //
 
-function _testApp()
+function testApp()
 {
   var ended = 0;
   var fs = require( 'fs' );
@@ -85,7 +85,7 @@ function _testApp()
 
 //
 
-function _testAppShell()
+function testAppShell()
 {
   let process = _global_.process;
 
@@ -323,7 +323,7 @@ aaa : done
 
 //   test.case = 'windows native path as option, no quotes'
 //   var argv = [];
-//   var got = _.process.args({ argv : [ 'interpreter', 'main.js', 'PATH :D:\\path\\to\\file' ], caching : 0 });
+//   var got = _.process.args({ argv : [ 'interpreter', 'main.js', 'path:D:\\path\\to\\file' ], caching : 0 });
 //   var expected =
 //   {
 //     interpreterPath : 'interpreter',
@@ -333,8 +333,8 @@ aaa : done
 //     commandsDelimeter : ';',
 //     subject : '',
 //     map : { path : '', D : '\\path\\to\\file' },
-//     scriptArgs : [ 'PATH :D:\\path\\to\\file' ],
-//     scriptArgsString : 'PATH :D:\\path\\to\\file',
+//     scriptArgs : [ 'path:D:\\path\\to\\file' ],
+//     scriptArgsString : 'path:D:\\path\\to\\file',
 //     subjects : [ '' ],
 //     maps : [ { path : '', D : '\\path\\to\\file' } ],
 //   }
@@ -342,7 +342,7 @@ aaa : done
 
 //   test.case = 'windows native path as option, with quotes'
 //   var argv = [];
-//   var got = _.process.args({ argv : [ 'interpreter', 'main.js', 'PATH :"D:\\path\\to\\file"' ], caching : 0 });
+//   var got = _.process.args({ argv : [ 'interpreter', 'main.js', 'path:"D:\\path\\to\\file"' ], caching : 0 });
 //   var expected =
 //   {
 //     interpreterPath : 'interpreter',
@@ -352,8 +352,8 @@ aaa : done
 //     commandsDelimeter : ';',
 //     subject : '',
 //     map : { path : 'D:\\path\\to\\file' },
-//     scriptArgs : [ 'PATH :"D:\\path\\to\\file"' ],
-//     scriptArgsString : 'PATH :"D:\\path\\to\\file"',
+//     scriptArgs : [ 'path:"D:\\path\\to\\file"' ],
+//     scriptArgsString : 'path:"D:\\path\\to\\file"',
 //     subjects : [ '' ],
 //     maps : [ { path : 'D:\\path\\to\\file' } ],
 //   }
@@ -648,7 +648,7 @@ function processArgsPropertiesBase( test )
     return null;
   })
 
-  shell({ args : [ 'PATH :c:\\some', 'x', ':', 0, 'y', ':', 1  ] })
+  shell({ args : [ 'path:c:\\some', 'x', ':', 0, 'y', ':', 1  ] })
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
@@ -661,7 +661,7 @@ function processArgsPropertiesBase( test )
       keyValDelimeter : ':',
       map : { path : 'c:\\some', x : 0, y : 1 },
       subject : '',
-      scriptArgs : [ 'PATH :c:\\some', 'x', ':', '0', 'y', ':', '1' ]
+      scriptArgs : [ 'path:c:\\some', 'x', ':', '0', 'y', ':', '1' ]
     }
     test.contains( got, expected );
     return null;
@@ -875,7 +875,7 @@ function processArgsPaths( test )
 
   shell
   ({
-    args : [ 'interpreter', 'main.js', 'PATH :D:\\path\\to\\file' ],
+    args : [ 'interpreter', 'main.js', 'path:D:\\path\\to\\file' ],
     env : { ignoreFirstTwoArgv : true, PATH : process.env.PATH }
   })
   .then( ( o ) =>
@@ -891,8 +891,8 @@ function processArgsPaths( test )
       commandsDelimeter : ';',
       subject : '',
       map : { path : 'D:\\path\\to\\file' },
-      scriptArgs : [ 'PATH :D:\\path\\to\\file' ],
-      scriptArgsString : 'PATH :D:\\path\\to\\file',
+      scriptArgs : [ 'path:D:\\path\\to\\file' ],
+      scriptArgsString : 'path:D:\\path\\to\\file',
       subjects : [ '' ],
       maps : [ { path : 'D:\\path\\to\\file' } ],
     }
@@ -904,7 +904,7 @@ function processArgsPaths( test )
 
   shell
   ({
-    args : [ 'interpreter', 'main.js', 'PATH :"D:\\path\\to\\file"' ],
+    args : [ 'interpreter', 'main.js', 'path:"D:\\path\\to\\file"' ],
     env : { ignoreFirstTwoArgv : true, PATH : process.env.PATH }
   })
   .then( ( o ) =>
@@ -920,8 +920,8 @@ function processArgsPaths( test )
       commandsDelimeter : ';',
       subject : '',
       map : { path : 'D:\\path\\to\\file' },
-      scriptArgs : [ 'PATH :"D:\\path\\to\\file"' ],
-      scriptArgsString : 'PATH :"D:\\path\\to\\file"',
+      scriptArgs : [ 'path:"D:\\path\\to\\file"' ],
+      scriptArgsString : 'path:"D:\\path\\to\\file"',
       subjects : [ '' ],
       maps : [ { path : 'D:\\path\\to\\file' } ],
     }
@@ -1702,7 +1702,7 @@ function shell( test )
   /* */
 
   var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = context.toolsPathInclude + _testAppShell.toString() + '\ntestAppShell();';
+  var testAppCode = context.toolsPathInclude + testAppShell.toString() + '\ntestAppShell();';
   var expectedOutput = testAppPath + '\n';
   _.fileProvider.fileWrite( testAppPath, testAppCode );
 
@@ -6942,7 +6942,7 @@ function shellArgumentsNestedQuotes( test )
       let scriptArgs =
       [
         `'s-s'`, `"s-d"`, `\`s-b\``,
-        `'d-s'`, `"d-d"`, `\d-b\``,
+        `'d-s'`, `"d-d"`, `\`d-b\``,
         `'b-s'`, `"b-d"`, `\`b-b\``,
       ]
       test.identical( got.scriptArgs, scriptArgs )
@@ -14756,7 +14756,7 @@ function shellConcurrent( test )
   _.process.start( subprocessesErrorNonThrowing )
   .finally( ( err, arg ) =>
   {
-    test.identical( err, null );
+    test.is( !err );
 
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
@@ -14841,7 +14841,7 @@ function shellConcurrent( test )
   _.process.start( subprocessesErrorConcurrentNonThrowing )
   .finally( ( err, arg ) =>
   {
-    test.identical( err, null );
+    test.is( !err );
 
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
@@ -19590,8 +19590,8 @@ var Proto =
   context :
   {
     suiteTempPath : null,
-    testApp : _testApp,
-    testAppShell : _testAppShell,
+    testApp,
+    testAppShell,
     toolsPath : null,
     toolsPathInclude : null,
   },
