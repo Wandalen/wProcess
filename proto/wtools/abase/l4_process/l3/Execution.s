@@ -457,8 +457,8 @@ function start_body( o )
       o.execPath = o.args.shift();
       o.fullExecPath = o.execPath;
 
-      let begin = _.strBeginOf( o.execPath, [ '"', "'", '`' ] );
-      let end = _.strEndOf( o.execPath, [ '"', "'", '`' ] );
+      let begin = _.strBeginOf( o.execPath, [ '"', `'`, '`' ] );
+      let end = _.strEndOf( o.execPath, [ '"', `'`, '`' ] );
 
       if( begin && begin === end )
       o.execPath = _.strInsideOf( o.execPath, begin, end );
@@ -788,15 +788,15 @@ function start_body( o )
       src,
       delimeter : [ ' ' ],
       quoting : 1,
-      quotingPrefixes : [ "'", '"', "`" ],
-      quotingPostfixes : [ "'", '"', "`" ],
+      quotingPrefixes : [ '"', `'`, '`' ],
+      quotingPostfixes : [ '"', `'`, '`' ],
       preservingEmpty : 0,
       preservingQuoting : 1,
       stripping : 1
     }
     let args = _.strSplit( strOptions );
 
-    let quotes = [ "'", '"', "`" ];
+    let quotes = [ '"', `'`, '`' ];
     for( let i = 0; i < args.length; i++ )
     {
       let begin = _.strBeginOf( args[ i ], quotes );
@@ -848,7 +848,7 @@ function start_body( o )
 
   function argsUnqoute( args )
   {
-    let quotes = [ "'", '"', "`" ];
+    let quotes = [ '"', `'`, '`' ];
 
     for( let i = 0; i < args.length; i++ )
     {
@@ -925,7 +925,7 @@ function start_body( o )
     let i = execArgs ? execArgs.length : args.length - argumentsManual.length;
     for( ; i < args.length; i++ )
     {
-      let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', "`" ]
+      let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', '`' ]
       _.each( quotesToEscape, ( quote ) =>
       {
         args[ i ] = escapeArg( args[ i ], quote );
@@ -985,7 +985,7 @@ function start_body( o )
 
   function execPathForFork( execPath )
   {
-    let quotes = [ "'", '"', "`" ];
+    let quotes = [ '"', `'`, '`' ];
     let begin = _.strBeginOf( execPath, quotes );
     if( begin )
     execPath = _.strInsideOf( execPath, begin, begin );

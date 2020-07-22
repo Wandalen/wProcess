@@ -6941,9 +6941,9 @@ function shellArgumentsNestedQuotes( test )
       test.identical( got.map, {} )
       let scriptArgs =
       [
-        `'s-s'`, `"s-d"`, "`s-b`",
-        `'d-s'`, `"d-d"`, "`d-b`",
-        `'b-s'`, `"b-d"`, "`b-b`",
+        `'s-s'`, `"s-d"`, `\`s-b\``,
+        `'d-s'`, `"d-d"`, `\d-b\``,
+        `'b-s'`, `"b-d"`, `\`b-b\``,
       ]
       test.identical( got.scriptArgs, scriptArgs )
 
@@ -7018,9 +7018,9 @@ function shellArgumentsNestedQuotes( test )
       test.identical( got.map, {} )
       let scriptArgs =
       [
-        `'s-s'`, `"s-d"`, "`s-b`",
-        `'d-s'`, `"d-d"`, "`d-b`",
-        `'b-s'`, `"b-d"`, "`b-b`",
+        `'s-s'`, `"s-d"`, `\`s-b\``,
+        `'d-s'`, `"d-d"`, `\`d-b\``,
+        `'b-s'`, `"b-d"`, `\`b-b\``,
       ]
       test.identical( got.scriptArgs, scriptArgs )
 
@@ -9184,7 +9184,7 @@ function shellModeShellNonTrivial( test )
     return null;
   })
 
-  shell( 'node ' + testAppPath + " \\`'quoted arg with space'\\`" )
+  shell( 'node ' + testAppPath + ` \\\`'quoted arg with space'\\\`` )
   .then( ( got ) =>
   {
     test.identical( got.exitCode, 0 );
@@ -9193,17 +9193,17 @@ function shellModeShellNonTrivial( test )
     if( process.platform === 'win32' )
     test.identical( args, [ '\\`\'quoted', 'arg', 'with', 'space\'\\`' ] );
     else
-    test.identical( args, [ "`quoted arg with space`" ] );
+    test.identical( args, [ '`quoted arg with space`' ] );
     return null;
   })
 
-  shell( 'node ' + testAppPath + " '`quoted arg with space`'" )
+  shell( 'node ' + testAppPath + ` '\`quoted arg with space\`'` )
   .then( ( got ) =>
   {
     test.identical( got.exitCode, 0 );
     let args = _.fileProvider.fileRead({ filePath : _.path.join( routinePath, 'args' ), encoding : 'json' });
     if( process.platform === 'win32' )
-    test.identical( args, [ "\'\`quoted", 'arg', 'with', "space\`\'" ] );
+    test.identical( args, [ `\'\`quoted", 'arg', 'with', "space\`\'` ] );
     else
     test.identical( _.strCount( got.output, `[ '\`quoted arg with space\`' ]` ), 1 );
     return null;
@@ -9245,7 +9245,7 @@ function shellModeShellNonTrivial( test )
     test.identical( got.exitCode, 0 );
     // test.identical( _.strCount( got.output, `[ 'arg1', 'arg2', 'arg 3', "'arg4'" ]` ), 1 );
     let args = _.fileProvider.fileRead({ filePath : _.path.join( routinePath, 'args' ), encoding : 'json' });
-    test.identical( args, [ 'arg1', 'arg2', 'arg 3', "'arg4'" ] );
+    test.identical( args, [ 'arg1', 'arg2', 'arg 3', `'arg4'` ] );
     return null;
   })
 
@@ -9259,13 +9259,13 @@ function shellModeShellNonTrivial( test )
     return null;
   })
 
-  shell({ execPath : 'node ' + testAppPath, args : [ `arg1`, '"arg2"', "arg 3", "'arg4'" ] })
+  shell({ execPath : 'node ' + testAppPath, args : [ `arg1`, '"arg2"', `arg 3`, `'arg4'` ] })
   .then( ( got ) =>
   {
     test.identical( got.exitCode, 0 );
     // test.identical( _.strCount( got.output, `[ 'arg1', '"arg2"', 'arg 3', "'arg4'" ]` ), 1 );
     let args = _.fileProvider.fileRead({ filePath : _.path.join( routinePath, 'args' ), encoding : 'json' });
-    test.identical( args, [ 'arg1', '"arg2"', 'arg 3', "'arg4'" ] );
+    test.identical( args, [ 'arg1', '"arg2"', 'arg 3', `'arg4'` ] );
     return null;
   })
 
@@ -15534,8 +15534,8 @@ function sheller( test )
 
       test.identical( o1.execPath, 'node' );
       test.identical( o2.execPath, 'node' );
-      test.is( _.strHas( o1.output, "[ 'arg1' ]" ) );
-      test.is( _.strHas( o2.output, "[ 'arg2' ]" ) );
+      test.is( _.strHas( o1.output, `[ 'arg1' ]` ) );
+      test.is( _.strHas( o2.output, `[ 'arg2' ]` ) );
 
       return got;
     })
@@ -15560,8 +15560,8 @@ function sheller( test )
 
       test.identical( o1.execPath, 'node' );
       test.identical( o2.execPath, 'node' );
-      test.is( _.strHas( o1.output, "[ 'arg0', 'arg1' ]" ) );
-      test.is( _.strHas( o2.output, "[ 'arg0', 'arg2' ]" ) );
+      test.is( _.strHas( o1.output, `[ 'arg0', 'arg1' ]` ) );
+      test.is( _.strHas( o2.output, `[ 'arg0', 'arg2' ]` ) );
 
       return got;
     })
@@ -15589,8 +15589,8 @@ function sheller( test )
       test.identical( o2.execPath, 'node' );
       test.identical( o1.args, [ testAppPath, 'arg1', 'arg3' ] );
       test.identical( o2.args, [ testAppPath, 'arg2', 'arg3' ] );
-      test.is( _.strHas( o1.output, "[ 'arg1', 'arg3' ]" ) );
-      test.is( _.strHas( o2.output, "[ 'arg2', 'arg3' ]" ) );
+      test.is( _.strHas( o1.output, `[ 'arg1', 'arg3' ]` ) );
+      test.is( _.strHas( o2.output, `[ 'arg2', 'arg3' ]` ) );
 
       return got;
     })
@@ -15609,7 +15609,7 @@ function sheller( test )
     .thenKeep( ( got ) =>
     {
       test.identical( got.execPath, 'node' );
-      test.is( _.strHas( got.output, "[ 'arg1' ]" ) );
+      test.is( _.strHas( got.output, `[ 'arg1' ]` ) );
 
       return got;
     })
@@ -15638,8 +15638,8 @@ function sheller( test )
 
       test.identical( o1.execPath, 'node' );
       test.identical( o2.execPath, 'node' );
-      test.is( _.strHas( o1.output, "[ 'arg1' ]" ) );
-      test.is( _.strHas( o2.output, "[ 'arg1' ]" ) );
+      test.is( _.strHas( o1.output, `[ 'arg1' ]` ) );
+      test.is( _.strHas( o2.output, `[ 'arg1' ]` ) );
 
       return got;
     })
@@ -15672,10 +15672,10 @@ function sheller( test )
       test.identical( o2.execPath, 'node' );
       test.identical( o3.execPath, 'node' );
       test.identical( o4.execPath, 'node' );
-      test.is( _.strHas( o1.output, "[ 'arg1' ]" ) );
-      test.is( _.strHas( o2.output, "[ 'arg1' ]" ) );
-      test.is( _.strHas( o3.output, "[ 'arg2' ]" ) );
-      test.is( _.strHas( o4.output, "[ 'arg2' ]" ) );
+      test.is( _.strHas( o1.output, `[ 'arg1' ]` ) );
+      test.is( _.strHas( o2.output, `[ 'arg1' ]` ) );
+      test.is( _.strHas( o3.output, `[ 'arg2' ]` ) );
+      test.is( _.strHas( o4.output, `[ 'arg2' ]` ) );
 
       return got;
     })
@@ -15695,7 +15695,7 @@ function sheller( test )
     .thenKeep( ( got ) =>
     {
       test.identical( got.execPath, 'node' );
-      test.is( _.strHas( got.output, "[ 'arg1' ]" ) );
+      test.is( _.strHas( got.output, `[ 'arg1' ]` ) );
 
       return got;
     })
@@ -15715,7 +15715,7 @@ function sheller( test )
     .thenKeep( ( got ) =>
     {
       test.identical( got.execPath, 'node' );
-      test.is( _.strHas( got.output, "[ 'arg2' ]" ) );
+      test.is( _.strHas( got.output, `[ 'arg2' ]` ) );
 
       return got;
     })
@@ -15735,7 +15735,7 @@ function sheller( test )
     .thenKeep( ( got ) =>
     {
       test.identical( got.execPath, 'node' );
-      test.is( _.strHas( got.output, "[ 'arg3' ]" ) );
+      test.is( _.strHas( got.output, `[ 'arg3' ]` ) );
 
       return got;
     })
@@ -15755,7 +15755,7 @@ function sheller( test )
     .thenKeep( ( got ) =>
     {
       test.identical( got.execPath, 'node' );
-      test.is( _.strHas( got.output, "[ 'arg2', 'arg3' ]" ) );
+      test.is( _.strHas( got.output, `[ 'arg2', 'arg3' ]` ) );
 
       return got;
     })
