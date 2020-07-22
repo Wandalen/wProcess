@@ -1,6 +1,6 @@
 
 
-process.on( 'SIGINT', () => 
+process.on( 'SIGINT', () =>
 {
   console.log( 'Parent received SIGINT from controlling terminal' )
   process.exit( 0 );
