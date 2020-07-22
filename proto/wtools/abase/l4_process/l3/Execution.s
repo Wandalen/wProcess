@@ -586,8 +586,8 @@ function start_body( o )
     if( process.platform === 'win32' )
     {
       execPath = _.path.nativizeTolerant( execPath );
-      if( args.length )
-      args[ 0 ] = _.path.nativizeTolerant( args[ 0 ] )
+      // if( args.length )
+      // args[ 0 ] = _.path.nativizeTolerant( args[ 0 ] )
     }
 
     if( o.mode === 'fork')
