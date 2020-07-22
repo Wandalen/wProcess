@@ -1,4 +1,5 @@
-( function _Io_s_() {
+( function _Io_s_()
+{
 
 'use strict';
 
@@ -132,7 +133,7 @@ function _argsInSamFormatNodejs( o )
 
   function argsToString( args )
   {
-    return args.map( e =>
+    return args.map( ( e ) =>
     {
       if( !_.strHas( e, /\s/ ) )
       return e;
@@ -142,7 +143,9 @@ function _argsInSamFormatNodejs( o )
       return e;
 
       return `"${e}"`;
-    }).join( ' ' ).trim();
+    })
+    .join( ' ' )
+    .trim();
 
     // return args.map( e => _.strHas( e, /\s/ ) ? `"${e}"` : e ).join( ' ' ).trim();
   }
@@ -376,19 +379,19 @@ function systemEntryAdd( o )
   if( o.name === null )
   o.name = _.path.name( o.appPath );
 
-  _.assert( _.longHasAll( [ 'windows', 'posix' ], o.platform, ), `Unknown platforms : ${o.platform.join( ' ' )}` );
+  _.assert( _.longHasAll( [ 'windows', 'posix' ], o.platform ), `Unknown platforms : ${o.platform.join( ' ' )}` );
   _.assert( _.path.isAbsolute( o.entryDirPath ), () => `Epects absolute path o.appPath, but got ${o.appPath}` );
   _.assert( _.strIs( o.prefix ) );
   _.sure( _.strDefined( o.entryDirPath ), `Neither {-o.entryDirPath-} is defined nor config has defined path::entry` );
   _.sure( _.fileProvider.isDir( o.entryDirPath ), `Not a dir : ${o.entryDirPath}` );
   _.sure
   (
-      o.allowingMissed || ( _.fileProvider.fileExists( o.appPath ) && !_.fileProvider.isDir( o.appPath ) )
-    , () => `Does not exist file : ${o.appPath}`,
+    o.allowingMissed || ( _.fileProvider.fileExists( o.appPath ) && !_.fileProvider.isDir( o.appPath ) ),
+    () => `Does not exist file : ${o.appPath}`
   );
   _.sure
   (
-      o.allowingNotInPath || _.longHas( _.process.pathsRead(), o.entryDirPath )
+    o.allowingNotInPath || _.longHas( _.process.pathsRead(), o.entryDirPath )
     , () => `entryDirPath is not in the environment variable $PATH`
     + `\nentryDirPath : ${o.entryDirPath}`
     + `\n$PATH :\n  ${_.process.pathsRead().join( '\n  ' )}`

@@ -8,10 +8,10 @@ submodule :
     path : npm:///wpathbasic
     enabled : 0 # submodule
   deasync :
-    path : npm:///deasync
+    path : npm:///deasync#0.1.20
     enabled : 0 # submodule
   strip-ansi :
-    path : npm:///strip-ansi
+    path : npm:///strip-ansi#6.0.0
     enabled : 0 # submodule
   wGdfStrategy :
     path : npm:///wgdf
@@ -20,7 +20,7 @@ submodule :
     path : npm:///wConsequence
     enabled : 0 # submodule
   wwindowskill :
-    path : npm:///wwindowskill
+    path : npm:///wwindowskill#0.3.4
     enabled : 0 # submodule
   wwindows-process-tree :
     path : npm:///wwindows-process-tree#0.2.6
@@ -34,6 +34,11 @@ submodule :
       development : 1
   wTesting :
     path : npm:///wTesting
+    enabled : 0 # submodule
+    criterion :
+      development : 1
+  eslint :
+    path : npm:///eslint#7.1.0
     enabled : 0 # submodule
     criterion :
       development : 1

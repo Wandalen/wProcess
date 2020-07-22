@@ -5,7 +5,7 @@ let _ = wTools;
 
 let o =
 {
-  execPath : 'node Child.js',
+  execPath : 'node Child.s',
   currentPath : __dirname,
   mode : 'shell',
   throwingExitCode : 0,
