@@ -4994,7 +4994,7 @@ function shellArgsOption( test )
 
   /* */
 
-  var testAppPath = _.path.join( routinePath, 'testApp.js' );
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
   var testAppCode = testApp.toString() + '\ntestApp();';
   _.fileProvider.fileWrite( testAppPath, testAppCode );
 
@@ -8068,7 +8068,7 @@ function shellExecPathSeveralCommands( test )
 {
   let context = this;
   let routinePath = _.path.join( context.suiteTempPath, test.name );
-  let testAppPath =  _.path.join( routinePath, 'app.js' );
+  let testAppPath =  _.fileProvider.path.nativize( _.path.join( routinePath, 'app.js' ) );
 
   function app()
   {
@@ -8896,7 +8896,7 @@ function shellNode( test )
   /* */
 
   var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppPath2 = _.path.join( routinePath, 'testApp2.js' );
+  var testAppPath2 = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp2.js' ) );
   var testAppCode = testApp.toString() + '\ntestApp();';
   var testAppCode2 = testApp2.toString() + '\ntestApp2();';
   _.fileProvider.fileWrite( testAppPath, testAppCode );
@@ -9014,7 +9014,7 @@ function shellModeShellNonTrivial( test )
 {
   let context = this;
   let routinePath = _.path.join( context.suiteTempPath, test.name );
-  let testAppPath =  _.path.join( routinePath, 'app.js' );
+  let testAppPath =  _.fileProvider.path.nativize( _.path.join( routinePath, 'app.js' ) );
 
   function app()
   {
@@ -9870,7 +9870,7 @@ function startExecPathWithSpace( test )
 {
   let context = this;
   let routinePath = _.path.join( context.suiteTempPath, test.name );
-  let testAppPath =  _.path.join( routinePath, 'path with space/testApp.js' );
+  let testAppPath =  _.fileProvider.path.nativize( _.path.join( routinePath, 'path with space/testApp.js' ) );
 
   function testApp()
   {
@@ -10077,7 +10077,7 @@ function startNodePassingThroughExecPathWithSpace( test )
 {
   let context = this;
   let routinePath = _.path.join( context.suiteTempPath, test.name );
-  let testAppPath =  _.path.join( routinePath, 'path with space/testApp.js' );
+  let testAppPath =  _.fileProvider.path.nativize( _.path.join( routinePath, 'path with space/testApp.js' ) );
 
   function testApp()
   {
@@ -10153,7 +10153,7 @@ function startPassingThroughExecPathWithSpace( test )
 {
   let context = this;
   let routinePath = _.path.join( context.suiteTempPath, test.name );
-  let testAppPath =  _.path.join( routinePath, 'path with space/testApp.js' );
+  let testAppPath =  _.fileProvider.path.nativize( _.path.join( routinePath, 'path with space/testApp.js' ) );
 
   function testApp()
   {
@@ -10374,7 +10374,7 @@ function shellProcedureTrivial( test )
 {
   let context = this;
   let routinePath = _.path.join( context.suiteTempPath, test.name );
-  let testAppPath =  _.path.join( routinePath, 'testApp.js' );
+  let testAppPath =  _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
 
   function testApp()
   {
@@ -10505,7 +10505,7 @@ function shellProcedureExists( test )
 {
   let context = this;
   let routinePath = _.path.join( context.suiteTempPath, test.name );
-  let testAppPath =  _.path.join( routinePath, 'testApp.js' );
+  let testAppPath =  _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
 
   function testApp()
   {
@@ -15779,7 +15779,7 @@ function shellerArgs( test )
 
   /* */
 
-  var testAppPath = _.path.join( routinePath, 'testApp.js' );
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
   var testAppCode = testApp.toString() + '\ntestApp();';
   _.fileProvider.fileWrite( testAppPath, testAppCode );
 
@@ -16076,7 +16076,7 @@ function shellLoggerOption( test )
 
   /* */
 
-  var testAppPath = _.path.join( routinePath, 'testApp.js' );
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
   var testAppCode = testApp.toString() + '\ntestApp();';
   _.fileProvider.fileWrite( testAppPath, testAppCode );
 
@@ -16147,7 +16147,7 @@ function shellNormalizedExecPath( test )
 
   /* */
 
-  var testAppPath = _.path.join( routinePath, 'testApp.js' );
+  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
   var testAppCode = testApp.toString() + '\ntestApp();';
   _.fileProvider.fileWrite( testAppPath, testAppCode );
 
@@ -19349,7 +19349,7 @@ function killComplex( test )
   {
     _.include( 'wProcess' );
     _.include( 'wFiles' );
-    var testAppPath = _.path.join( __dirname, 'testApp.js' );
+    var testAppPath = _.fileProvider.path.nativize( _.path.join( __dirname, 'testApp.js' ) );
     var o = { execPath : 'node ' + testAppPath, throwingExitCode : 0  }
     var ready = _.process.start( o )
     process.send( o.process.pid );
