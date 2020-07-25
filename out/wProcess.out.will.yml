@@ -164,7 +164,7 @@ module:
           export: 1
         path:
           - ../proto
-          - ../proto/Integration.test.s
+          - ../proto/Integration.test.ss
           - ../proto/wtools
           - ../proto/wtools/Tools.s
           - ../proto/wtools/abase
@@ -1575,6 +1575,4 @@ module:
       ../.im.will.yml:
         hash: f4fc5eb21bc0109dd8b03736e3d9183c
         size: 5634
-      wProcess.out.will.yml:
-        hash: 156e9b139976d4d928d55db8ecb70fe3
-        size: 40636
+      wProcess.out.will.yml: *ref_0
