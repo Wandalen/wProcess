@@ -9605,7 +9605,7 @@ function importantModeShell( test )
   .thenKeep( function( op )
   {
     test.identical( op.exitCode, 0 );
-    test.is( _.strHas( op.output, _.toStr([ 'a', '&&', 'node', 'b' ]) ) )
+    test.is( _.strHas( op.output, `[ 'a', '&&', 'node', 'b' ]` ) )
     return null;
   })
 
@@ -9707,7 +9707,7 @@ function importantModeShell( test )
   .thenKeep( function( op )
   {
     test.identical( op.exitCode, 0 );
-    test.is( _.strHas( op.output, _.toStr( [ 'a', 'b' ] ) ) );
+    test.is( _.strHas( op.output, `[ 'a', 'b' ]` ) );
     return null;
   })
 
@@ -9717,7 +9717,7 @@ function importantModeShell( test )
   .thenKeep( function( op )
   {
     test.identical( op.exitCode, 0 );
-    test.is( _.strHas( op.output, _.toStr( [ 'a b' ] ) ) );
+    test.is( _.strHas( op.output, `[ 'a b' ]` ) );
     return null;
   })
 
@@ -9727,7 +9727,7 @@ function importantModeShell( test )
   .thenKeep( function( op )
   {
     test.identical( op.exitCode, 0 );
-    test.is( _.strHas( op.output, _.toStr( [ 'a', 'b' ] ) ) );
+    test.is( _.strHas( op.output, `[ 'a', 'b' ]` ) );
     return null;
   })
 
@@ -9737,7 +9737,7 @@ function importantModeShell( test )
   .thenKeep( function( op )
   {
     test.identical( op.exitCode, 0 );
-    test.is( _.strHas( op.output, _.toStr( [ 'a b' ] ) ) );
+    test.is( _.strHas( op.output, `[ 'a b' ]` ) );
     return null;
   })
 
