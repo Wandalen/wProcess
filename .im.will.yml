@@ -8,10 +8,10 @@ submodule :
     path : npm:///wpathbasic
     enabled : 0 # submodule
   deasync :
-    path : npm:///deasync
+    path : npm:///deasync#0.1.20
     enabled : 0 # submodule
   strip-ansi :
-    path : npm:///strip-ansi
+    path : npm:///strip-ansi#6.0.0
     enabled : 0 # submodule
   wGdfStrategy :
     path : npm:///wgdf
@@ -20,7 +20,7 @@ submodule :
     path : npm:///wConsequence
     enabled : 0 # submodule
   wwindowskill :
-    path : npm:///wwindowskill
+    path : npm:///wwindowskill#0.3.4
     enabled : 0 # submodule
   wwindows-process-tree :
     path : npm:///wwindows-process-tree#0.2.6
@@ -34,6 +34,11 @@ submodule :
       development : 1
   wTesting :
     path : npm:///wTesting
+    enabled : 0 # submodule
+    criterion :
+      development : 1
+  eslint :
+    path : npm:///eslint#7.1.0
     enabled : 0 # submodule
     criterion :
       development : 1
@@ -77,7 +82,7 @@ path :
       content : prime
 
   entry.proto.no.tests :
-    path : proto/dwtools/abase/l4_process/Basic.s
+    path : proto/wtools/abase/l4_process/Basic.s
     criterion :
       tests : 'no.tests'
   entry.proto.only.tests :
@@ -85,11 +90,11 @@ path :
     criterion :
       tests : 'only.tests'
 
-  # npm.entry : proto/dwtools/abase/Layer2.s
+  # npm.entry : proto/wtools/abase/Layer2.s
   # npm.files : proto
 
   entry.out.raw.debug :
-    path : '{path::out.*=1}/source/dwtools/abase/l4_process/Basic.s'
+    path : '{path::out.*=1}/source/wtools/abase/l4_process/Basic.s'
     criterion :
       debug : [ debug, release ]
       raw : raw

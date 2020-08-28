@@ -1,4 +1,5 @@
-( function _Basic_s_() {
+( function _Basic_s_()
+{
 
 'use strict';
 
@@ -17,7 +18,7 @@
 if( typeof module !== 'undefined' )
 {
 
-  let _ = require( '../../../dwtools/Tools.s' );
+  let _ = require( '../../../wtools/Tools.s' );
 
   _.include( 'wPathBasic' );
   _.include( 'wGdf' );
@@ -144,7 +145,8 @@ let tempClose = _.routineFromPreAndBody( tempClose_pre, tempClose_body );
 let _pathRealMainFile;
 function realMainFile()
 {
-  if( _pathRealMainFile ) return _pathRealMainFile;
+  if( _pathRealMainFile )
+  return _pathRealMainFile;
   _pathRealMainFile = _.path.normalize( require.main.filename );
   return _pathRealMainFile;
 }

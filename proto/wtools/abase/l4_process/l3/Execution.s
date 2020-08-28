@@ -1,6 +1,5 @@
-const { exec } = require('child_process');
-
-( function _Execution_s_() {
+( function _Execution_s_()
+{
 
 'use strict';
 
@@ -140,7 +139,7 @@ function start_pre( routine, args )
 function start_body( o )
 {
 
-/* Subroutine index :
+  /* Subroutine index :
 
   endDeasyncMaybe
   multiple
@@ -184,7 +183,6 @@ function start_body( o )
   _.assert( o.onTerminate === null || _.consequenceIs( o.onTerminate ) );
   _.assert( !o.ipc || _.longHas( [ 'fork', 'spawn' ], o.mode ), `Mode: ${o.mode} doesn't support inter process communication.` );
 
-
   let state = 0;
   let currentExitCode;
   let killedByTimeout = false;
@@ -192,9 +190,7 @@ function start_body( o )
   let decoratedOutput = '';
   let decoratedErrorOutput = '';
   let startingDelay = 0;
-  let procedure;
-  let execArgs;
-  let argumentsManual;
+  let procedure, execArgs, argumentsManual;
 
   if( _.objectIs( o.when ) )
   {
@@ -358,7 +354,7 @@ function start_body( o )
       return o;
     }
 
-   /*
+    /*
     if( o.sync && o.deasync )
     {
       o.ready.deasync();
@@ -436,10 +432,6 @@ function start_body( o )
 
   /* */
 
-
-
-  /* */
-
   function prepare()
   {
 
@@ -465,8 +457,8 @@ function start_body( o )
       o.execPath = o.args.shift();
       o.fullExecPath = o.execPath;
 
-      let begin = _.strBeginOf( o.execPath, [ '"', "'", '`' ] );
-      let end = _.strEndOf( o.execPath, [ '"', "'", '`' ] );
+      let begin = _.strBeginOf( o.execPath, [ '"', `'`, '`' ] );
+      let end = _.strEndOf( o.execPath, [ '"', `'`, '`' ] );
 
       if( begin && begin === end )
       o.execPath = _.strInsideOf( o.execPath, begin, end );
@@ -587,8 +579,8 @@ function start_body( o )
     if( process.platform === 'win32' )
     {
       execPath = _.path.nativizeTolerant( execPath );
-      if( args.length )
-      args[ 0 ] = _.path.nativizeTolerant( args[ 0 ] )
+      // if( args.length )
+      // args[ 0 ] = _.path.nativizeTolerant( args[ 0 ] )
     }
 
     if( o.mode === 'fork')
@@ -664,7 +656,7 @@ function start_body( o )
       let arg2 = execPath;
       let o2 = optionsForSpawn();
 
-     /*
+      /*
 
       windowsVerbatimArguments allows to have arguments with space(s) in shell on Windows
       Following calls will not work as expected( argument will be splitted by space ), if windowsVerbatimArguments is disabled:
@@ -687,7 +679,8 @@ function start_body( o )
 
       // console.log( ' !! ChildProcess.spawn', execPath, [ arg1, arg2 ] ); /* yyy */
 
-/* xxx yyy qqq2 : problem!
+      /*
+      xxx yyy qqq2 : problem!
       it.start( `git add --force '*.will.*'` );
       > git add --force *.will.*
       !! argsJoin [ 'add', '--force', '*.will.*' ]
@@ -792,23 +785,60 @@ function start_body( o )
   {
     let strOptions =
     {
-      src : src,
+      src,
       delimeter : [ ' ' ],
       quoting : 1,
-      quotingPrefixes : [ "'", '"', "`" ],
-      quotingPostfixes : [ "'", '"', "`" ],
+      quotingPrefixes : [ '"', `'`, '`' ],
+      quotingPostfixes : [ '"', `'`, '`' ],
       preservingEmpty : 0,
       preservingQuoting : 1,
       stripping : 1
     }
     let args = _.strSplit( strOptions );
 
+    let quotes = [ '"', `'`, '`' ];
     for( let i = 0; i < args.length; i++ )
     {
-      let begin = _.strBeginOf( args[ i ], strOptions.quotingPrefixes );
-      let end = _.strEndOf( args[ i ], strOptions.quotingPostfixes );
-      if( begin )
-      _.sure( begin === end, 'Arguments string in execPath:', src, 'has not closed quoting in argument:', args[ i ] );
+      let begin = _.strBeginOf( args[ i ], quotes );
+      let end = _.strEndOf( args[ i ], quotes );
+
+      if( begin && end )
+      if( begin === end )
+      continue;
+
+      if( _.longHas( quotes, args[ i ] ) )
+      continue;
+
+      let r = _.strQuoteAnalyze
+      ({
+        src : args[ i ],
+        quote : strOptions.quotingPrefixes
+      });
+
+      quotes.forEach( ( quote ) =>
+      {
+        let found = _.strFindAll( args[ i ], quote );
+
+        if( found.length % 2 === 0 )
+        return;
+
+        for( let k = 0; k < found.length; k += 1 )
+        {
+          let pos = found[ k ].charsRangeLeft[ 0 ];
+
+          for( let j = 0; j < r.ranges.length; j += 2 )
+          if( pos >= r.ranges[ j ] && pos <= r.ranges[ j + 1 ] )
+          break;
+          throw _.err( 'Arguments string in execPath:', src, 'has not closed quoting in argument:', args[ i ] );
+        }
+      })
+
+      // let begin = _.strBeginOf( args[ i ], strOptions.quotingPrefixes );
+      // let end = _.strEndOf( args[ i ], strOptions.quotingPostfixes );
+      // if( begin )
+      // if( begin && end ) /* qqq3 : add test routine to cover that */
+      // _.sure( begin === end, 'Arguments string in execPath:', src, 'has not closed quoting in argument:', args[ i ] );
+      /* qqq3 : could be `"path/key3":'val3'` */
     }
 
     return args;
@@ -818,14 +848,16 @@ function start_body( o )
 
   function argsUnqoute( args )
   {
-    let quotes = [ "'", '"', "`" ];
+    let quotes = [ '"', `'`, '`' ];
 
     for( let i = 0; i < args.length; i++ )
     {
       let begin = _.strBeginOf( args[ i ], quotes );
       let end = _.strEndOf( args[ i ], quotes );
       if( begin )
+      if( begin && begin === end ) /* qqq3 : add test routine to cover that */
       args[ i ] = _.strInsideOf( args[ i ], begin, end ); /* yyy qqq2 : should not uncover arguments here! */
+      /* qqq3 : could be `"path/key3":'val3'` */
     }
 
     return args;
@@ -893,7 +925,7 @@ function start_body( o )
     let i = execArgs ? execArgs.length : args.length - argumentsManual.length;
     for( ; i < args.length; i++ )
     {
-      let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', "`" ]
+      let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', '`' ]
       _.each( quotesToEscape, ( quote ) =>
       {
         args[ i ] = escapeArg( args[ i ], quote );
@@ -953,7 +985,7 @@ function start_body( o )
 
   function execPathForFork( execPath )
   {
-    let quotes = [ "'", '"', "`" ];
+    let quotes = [ '"', `'`, '`' ];
     let begin = _.strBeginOf( execPath, quotes );
     if( begin )
     execPath = _.strInsideOf( execPath, begin, begin );
@@ -1027,6 +1059,7 @@ function start_body( o )
     let result = '';
     result += 'Launched as ' + _.strQuote( o.fullExecPath ) + '\n';
     result += 'Launched at ' + _.strQuote( o.currentPath ) + '\n';
+    debugger;
     if( stderrOutput.length )
     result += '\n -> Stderr' + '\n' + ' -  ' + _.strLinesIndentation( stderrOutput, ' -  ' ) + '\n -< Stderr';
     return result;
@@ -1079,7 +1112,9 @@ function start_body( o )
       err = _.errBrief( err );
 
       if( o.sync && !o.deasync )
-      throw err;
+      {
+        throw err;
+      }
       else
       {
         o.onTerminate.error( err );
@@ -1204,7 +1239,7 @@ function start_body( o )
 
 }
 
-start_body.defaults =
+start_body.defaults = /* qqq : split on _.process.start(), _.process.startBasic() */
 {
 
   execPath : null,
@@ -1512,7 +1547,7 @@ function startAfterDeath_body( o )
   _.assert( _.strIs( o.execPath ) );
   _.assert( arguments.length === 1, 'Expects single argument' );
 
-  let toolsPath = _.path.nativize( _.path.join( __dirname, '../../../../dwtools/Tools.s' ) );
+  let toolsPath = _.path.nativize( _.path.join( __dirname, '../../../../wtools/Tools.s' ) );
   let toolsPathInclude = `let _ = require( '${_.strEscape( toolsPath )}' );\n`
   let secondaryProcessSource = toolsPathInclude + afterDeathSecondaryProcess.toString() + '\nafterDeathSecondaryProcess();';
   let secondaryFilePath = _.process.tempOpen({ sourceCode : secondaryProcessSource });
@@ -1545,7 +1580,7 @@ function startAfterDeath_body( o )
   o2.onTerminate.catchGive( function ( err )
   {
     _.errAttend( err );
-    if( err.reason != 'disconnected' )
+    if( err.reason !== 'disconnected' )
     this.error( err );
   })
 
@@ -1569,8 +1604,6 @@ function startAfterDeath_body( o )
 var defaults = startAfterDeath_body.defaults = Object.create( start.defaults );
 
 let startAfterDeath = _.routineFromPreAndBody( start_pre, startAfterDeath_body );
-
-
 
 //
 
@@ -2044,7 +2077,7 @@ function isAlive( src )
   {
     return process.kill( pid, 0 );
   }
-  catch ( err )
+  catch( err )
   {
     return err.code === 'EPERM'
   }
@@ -2101,16 +2134,25 @@ function kill( o )
   }
 
   _.assert( _.numberIs( o.pid ) );
+  _.assert( _.numberIs( o.waitTimeOut ) );
 
   let isWindows = process.platform === 'win32';
 
-  try
+  let ready = _.Consequence().take( null );
+
+  ready.then( () =>
   {
     if( !o.withChildren )
-    return killProcess();
+    {
+      if( o.process )
+      o.process.kill( 'SIGKILL' );
+      else
+      process.kill( o.pid, 'SIGKILL' )
+      return true;
+    }
 
-    let con = _.process.children({ pid : o.pid, asList : isWindows });
-    con.then( ( children ) =>
+    return _.process.children({ pid : o.pid, asList : isWindows })
+    .then( ( children ) =>
     {
       if( !isWindows )
       return killChildren( children );
@@ -2122,28 +2164,14 @@ function kill( o )
         if( _.process.isAlive( children[ l ].pid ) )
         process.kill( children[ l ].pid, 'SIGKILL' );
       }
-
       return true;
     })
-    con.catch( handleError );
+  })
 
-    return con;
-  }
-  catch( err )
-  {
-    handleError( err )
-  }
+  ready.then( waitForTermination )
+  ready.catch( handleError );
 
-  //
-
-  function killProcess()
-  {
-    if( o.process )
-    o.process.kill( 'SIGKILL' );
-    else
-    process.kill( o.pid, 'SIGKILL' );
-    return true;
-  }
+  return ready;
 
   //
 
@@ -2159,6 +2187,8 @@ function kill( o )
     return true;
   }
 
+  //
+
   function handleError( err )
   {
     // if( err.code === 'EINVAL' )
@@ -2166,18 +2196,53 @@ function kill( o )
     if( err.code === 'EPERM' )
     throw _.err( err, '\nCurrent process does not have permission to kill target process' );
     if( err.code === 'ESRCH' )
-    throw _.err( err, '\nTarget process:', _.strQuote( o.pid ), 'does not exist.' );
+    throw _.err( err, '\nTarget process:', _.strQuote( o.pid ), 'does not exist.' ); /* qqq : rewrite all strings as template-strings */
     throw _.err( err );
   }
 
-  return true;
+  //
+
+  function waitForTermination()
+  {
+    var ready = _.Consequence();
+    var timer;
+    timer = _.time._periodic( 100, () =>
+    {
+      if( _.process.isAlive( o.pid ) )
+      return false;
+      timer._cancel();
+      ready.take( true );
+    });
+
+    let timeOutError = _.time.outError( o.waitTimeOut )
+
+    ready.orKeepingSplit( [ timeOutError ] );
+
+    ready.finally( ( err, got ) =>
+    {
+      if( !timeOutError.resourcesCount() )
+      timeOutError.take( _.dont );
+
+      if( err )
+      {
+        _.errAttend( err );
+        if( err.reason === 'time out' )
+        err = _.err( err, `\nTarget process: ${_.strQuote( o.pid )} is still alive. Waited for ${o.waitTimeOut} ms.` );
+        throw err;
+      }
+      return got;
+    })
+
+    return ready;
+  }
 }
 
 kill.defaults =
 {
   pid : null,
   process : null,
-  withChildren : 0
+  withChildren : 0,
+  waitTimeOut : 5000
 }
 
 //
@@ -2251,7 +2316,7 @@ function terminate( o )
     return _.process.start
     ({
       execPath : 'node',
-      args : [ '-e', `var kill = require( 'wwindowskill' )();kill( ${pid},'SIGINT' )`],
+      args : [ '-e', `var kill = require( 'wwindowskill' )();kill( ${pid},'SIGINT' )` ],
       currentPath : __dirname,
       inputMirroring : 0,
       outputPiping : 1,
@@ -2411,10 +2476,10 @@ function children( o )
       _result.push( _.numberFrom( pid ) );
       else
       _result[ pid ] = Object.create( null );
-      if( got.exitCode != 0 )
+      if( got.exitCode !== 0 )
       return result;
       let ready = new _.Consequence().take( null );
-      let pids = _.strSplitNonPreserving({ src: got.output, delimeter : '\n' });
+      let pids = _.strSplitNonPreserving({ src : got.output, delimeter : '\n' });
       _.each( pids, ( cpid ) => ready.then( () => childrenOf( command, cpid, o.asList ? _result : _result[ pid ] ) ) )
       return ready;
     })
@@ -2444,7 +2509,7 @@ children.defaults =
 let Extension =
 {
 
-  // starter
+  // start
 
   start,
   startPassingThrough,
