@@ -2212,6 +2212,17 @@ function kill( o )
       return false;
       timer._cancel();
       ready.take( true );
+      return true;
+      /* Dmytro ; new implementation of periodic timer require to return something different to undefined or _.dont.
+         Otherwise, timer will be canceled. This code does not affect current behavior of routines and will work with
+         new behavior.
+
+         When module Tools will be updated, we can use next code instead of current :
+
+        if( _.process.isAlive( o.pid ) )
+        return false;
+        ready.take( true );
+       */
     });
 
     let timeOutError = _.time.outError( o.waitTimeOut )

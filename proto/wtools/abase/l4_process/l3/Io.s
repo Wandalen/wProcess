@@ -133,14 +133,24 @@ function _argsInSamFormatNodejs( o )
 
   function argsToString( args )
   {
+
     return args.map( ( e ) =>
     {
+      debugger;
       if( !_.strHas( e, /\s/ ) )
-      return e;
+      {
+        if( !_.strHas( e, ':' ) )
+        if( _.path.isGlob( e ) || _.strHas( e,  '/' ) || _.strHas( e, '\\' ) )
+        return `"${e}"`;
+
+        return e;
+      }
 
       let quotes = _.strQuoteAnalyze( e );
       if( quotes.ranges.length )
-      return e;
+      {
+        return e;
+      }
 
       return `"${e}"`;
     })
