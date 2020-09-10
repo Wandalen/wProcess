@@ -12287,6 +12287,8 @@ function startDetachingModeSpawnTerminationBegin( test )
   return ready;
 }
 
+startDetachingModeSpawnTerminationBegin.timeOut = 120000;
+
 //
 
 function startDetachingModeForkTerminationBegin( test )
