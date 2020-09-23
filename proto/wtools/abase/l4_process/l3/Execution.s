@@ -141,7 +141,7 @@ function start_body( o )
 
   /* Subroutine index :
 
-  endDeasyncMaybe
+  endDeasyncing
   multiple
   single
   end
@@ -237,7 +237,7 @@ function start_body( o )
   if( _.arrayIs( o.execPath ) || _.arrayIs( o.currentPath ) )
   return multiple();
 
-  /*  */
+  /* */
 
   if( o.sync && !o.deasync )
   {
@@ -251,35 +251,54 @@ function start_body( o )
   else
   {
     if( startingDelay )
-    o.ready.then( () => _.time.out( startingDelay, () => null ) )
+    o.ready.then( () => _.time.out( startingDelay, () => null ) );
     o.ready.thenGive( single );
     if( !o.detaching )
     o.ready.finallyKeep( end );
-
-    return endDeasyncMaybe();
+    return endDeasyncing();
   }
 
-  /*  */
+  /* */
 
-  function endDeasyncMaybe()
+  function endDeasyncing()
   {
     if( o.sync && o.deasync )
     {
-      // return o.ready.finallyDeasyncGive();
       o.ready.deasync();
       return o.ready.sync();
     }
-    if( !o.sync && o.deasync ) /* qqq : check, does not work properly! Vova: wrote tests for each mode, works as expected*/
+    if( !o.sync && o.deasync )
     {
-      // o.ready.finallyDeasyncKeep();
       o.ready.deasync();
       return o.ready;
     }
-
     return o.ready;
   }
 
-  /*  */
+  /* */
+
+  function end( err, arg )
+  {
+    if( state > 0 )
+    {
+      if( !o.outputAdditive )
+      {
+        if( decoratedOutput )
+        o.logger.log( decoratedOutput );
+        if( decoratedErrorOutput )
+        o.logger.error( decoratedErrorOutput );
+      }
+    }
+    if( err )
+    {
+      if( state < 2 )
+      o.exitCode = null;
+      throw _.err( err );
+    }
+    return arg;
+  }
+
+  /* */
 
   function multiple()
   {
@@ -325,13 +344,10 @@ function start_body( o )
 
     }
 
-    // debugger;
     o.ready
-    // .then( () => new _.Consequence().take( null ).andKeep( readies ) )
     .then( () => _.Consequence.AndKeep_( ... readies ) )
     .finally( ( err, arg ) =>
     {
-      // debugger;
       o.exitCode = err ? null : 0;
 
       for( let a = 0 ; a < optionsArray.length-1 ; a++ )
@@ -354,25 +370,10 @@ function start_body( o )
       return o;
     }
 
-    /*
-    if( o.sync && o.deasync )
-    {
-      o.ready.deasync();
-      return o.ready.sync();
-      // return o.ready.finallyDeasyncGive();
-    }
-    if( !o.sync && o.deasync ) // qqq : check Vova:wrote test routine, works as expected
-    {
-      o.ready.deasync();
-      return o.ready;
-      // o.ready.finallyDeasyncKeep();
-      // return o.ready;
-    } */
-
-    return endDeasyncMaybe();
+    return endDeasyncing();
   }
 
-  /*  */
+  /* */
 
   function single()
   {
@@ -403,31 +404,6 @@ function start_body( o )
       }
     }
 
-  }
-
-  /* */
-
-  function end( err, arg )
-  {
-
-    if( state > 0 )
-    {
-      if( !o.outputAdditive )
-      {
-        if( decoratedOutput )
-        o.logger.log( decoratedOutput );
-        if( decoratedErrorOutput )
-        o.logger.error( decoratedErrorOutput );
-      }
-    }
-
-    if( err )
-    {
-      if( state < 2 )
-      o.exitCode = null;
-      throw _.err( err );
-    }
-    return arg;
   }
 
   /* */
@@ -1463,7 +1439,9 @@ function startNode_body( o )
   let startOptions = _.mapOnly( o, _.process.start.defaults );
   startOptions.execPath = path;
 
+  // debugger;
   let result = _.process.start( startOptions );
+  // debugger;
   let onTerminate = startOptions.onTerminate;
 
   onTerminate.give( function ( err, arg )
@@ -2306,7 +2284,7 @@ function terminate( o )
     handleError( err );
   }
 
-  /*  */
+  /* */
 
   function terminateProcess( pid )
   {

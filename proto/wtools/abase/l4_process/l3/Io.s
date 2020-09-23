@@ -158,7 +158,7 @@ _argsInSamFormatNodejs.defaults = Object.create( _argsInSamFormatDefaults.defaul
 
 function _argsInSamFormatBrowser( o )
 {
-  debugger; /* xxx */
+  // debugger; /* xxx */
 
   _.assert( arguments.length === 0 || arguments.length === 1 );
   o = _.routineOptions( _argsInSamFormatBrowser, arguments );
