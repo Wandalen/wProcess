@@ -142,9 +142,9 @@ function start_body( o )
   /* Subroutine index :
 
   endDeasyncing
+  end
   multiple
   single
-  end
   prepare
   launch
   launchAct
@@ -413,9 +413,7 @@ function start_body( o )
 
     if( _.arrayIs( o.args ) )
     o.args = o.args.slice();
-
     o.args = _.arrayAs( o.args );
-
 
     if( _.strIs( o.execPath ) )
     {
@@ -571,7 +569,9 @@ function start_body( o )
       if( o.dry )
       return;
 
+      // debugger;
       o.process = ChildProcess.fork( execPath, args, o2 );
+      // debugger;
     }
     else if( o.mode === 'exec' )
     {
@@ -980,8 +980,13 @@ function start_body( o )
 
   function pipe()
   {
+
     if( o.dry )
     return;
+
+    // qqq xxx : uncomment
+    // if( o.outputPiping || o.outputCollecting )
+    // _.assert( !!o.process.stdout, 'stdout is not available to collect output or pipe it. Set option::stdio to "pipe"' );
 
     /* piping out channel */
 
@@ -1229,11 +1234,13 @@ start_body.defaults = /* qqq : split on _.process.start(), _.process.startBasic(
   dry : 0,
 
   mode : 'shell', /* fork / exec / spawn / shell */
-  ready : null,
-
   logger : null,
   stdio : 'pipe', /* pipe / ignore / inherit */
   ipc : 0,
+
+  ready : null,
+  onStart : null,
+  onTerminate : null,
 
   env : null,
   detaching : 0,
@@ -1257,9 +1264,6 @@ start_body.defaults = /* qqq : split on _.process.start(), _.process.startBasic(
   outputGray : 0,
   outputGrayStdout : 0,
   outputGraying : 0,
-
-  onStart : null,
-  onTerminate : null,
 
 }
 
@@ -1439,24 +1443,34 @@ function startNode_body( o )
   let startOptions = _.mapOnly( o, _.process.start.defaults );
   startOptions.execPath = path;
 
-  // debugger;
   let result = _.process.start( startOptions );
-  // debugger;
-  let onTerminate = startOptions.onTerminate;
-
-  onTerminate.give( function ( err, arg )
-  {
-    o.output = startOptions.output;
-    o.exitCode = startOptions.exitCode;
-    o.exitSignal = startOptions.exitSignal;
-    this.take( err, arg );
-  })
 
   o.ready = startOptions.ready;
   o.onStart = startOptions.onStart;
   o.onTerminate = startOptions.onTerminate;
   o.process = startOptions.process;
   o.disconnect = startOptions.disconnect;
+
+  _.assert( !!startOptions.ready );
+  _.assert( !!startOptions.onStart );
+  _.assert( !!startOptions.onTerminate );
+
+  startOptions.onStart.give( function( err, arg )
+  {
+    _.assert( !!startOptions.process );
+    _.assert( !!startOptions.disconnect );
+    o.process = startOptions.process;
+    o.disconnect = startOptions.disconnect;
+    this.take( err, arg );
+  })
+
+  startOptions.onTerminate.give( function( err, arg )
+  {
+    o.output = startOptions.output;
+    o.exitCode = startOptions.exitCode;
+    o.exitSignal = startOptions.exitSignal;
+    this.take( err, arg );
+  })
 
   return result;
 }
@@ -1555,7 +1569,7 @@ function startAfterDeath_body( o )
     this.take( err, got );
   })
 
-  o2.onTerminate.catchGive( function ( err )
+  o2.onTerminate.catchGive( function( err )
   {
     _.errAttend( err );
     if( err.reason !== 'disconnected' )

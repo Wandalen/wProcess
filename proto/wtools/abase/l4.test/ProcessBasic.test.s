@@ -403,7 +403,7 @@ aaa : done
 
 function processArgsBase( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testApp()
@@ -491,7 +491,7 @@ function processArgsBase( test )
 
 function processArgsPropertiesBase( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testApp()
@@ -740,7 +740,7 @@ function processArgsPropertiesBase( test )
 
 function processArgsMultipleCommands( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testApp()
@@ -838,7 +838,7 @@ function processArgsMultipleCommands( test )
 
 function processArgsPaths( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testApp()
@@ -938,7 +938,7 @@ function processArgsPaths( test )
 
 function processArgsWithSpace( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testApp()
@@ -1372,7 +1372,7 @@ function processArgsWithSpace( test )
 
 function processOnExitEvent( test ) /* qqq : adjust vova: done */
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
   var commonDefaults =
   {
@@ -1472,7 +1472,7 @@ function processOnExitEvent( test ) /* qqq : adjust vova: done */
 
 function processOffExitEvent( test ) /* qqq : adjust vova: done */
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testApp()
@@ -1689,7 +1689,7 @@ function exitCode( test )
 
 function shell( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
   var commonDefaults =
   {
@@ -2032,7 +2032,7 @@ shell.timeOut = 30000;
 
 function shellSync( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
   var commonDefaults =
   {
@@ -2174,7 +2174,7 @@ shellSync.timeOut = 30000;
 
 function shellSyncAsync( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
   var commonDefaults =
   {
@@ -2358,7 +2358,7 @@ shellSyncAsync.timeOut = 30000;
 
 function shell2( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
   var commonDefaults =
   {
@@ -2539,7 +2539,7 @@ shell2.timeOut = 30000;
 
 function shellCurrentPath( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -2994,7 +2994,7 @@ shellCurrentPath.timeOut = 30000;
 
 function shellCurrentPaths( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -3150,7 +3150,7 @@ function shellCurrentPaths( test )
 
 function shellFork( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -3564,7 +3564,7 @@ function shellWithoutExecPath( test )
 
 function shellSpawnSyncDeasync( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -3680,7 +3680,7 @@ shellSpawnSyncDeasync.timeOut = 15000;
 
 function shellSpawnSyncDeasyncThrowing( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -3779,7 +3779,7 @@ shellSpawnSyncDeasyncThrowing.timeOut = 15000;
 
 function shellShellSyncDeasync( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -3895,7 +3895,7 @@ shellShellSyncDeasync.timeOut = 15000;
 
 function shellShellSyncDeasyncThrowing( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -3994,7 +3994,7 @@ shellShellSyncDeasyncThrowing.timeOut = 15000;
 
 function shellForkSyncDeasync( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -4107,7 +4107,7 @@ shellForkSyncDeasync.timeOut = 15000;
 
 function shellForkSyncDeasyncThrowing( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -4206,7 +4206,7 @@ shellForkSyncDeasyncThrowing.timeOut = 15000;
 
 function shellExecSyncDeasync( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -4322,7 +4322,7 @@ shellExecSyncDeasync.timeOut = 15000;
 
 function shellExecSyncDeasyncThrowing( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -4422,7 +4422,7 @@ shellExecSyncDeasyncThrowing.timeOut = 15000;
 
 function shellMultipleSyncDeasync( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -4908,7 +4908,7 @@ shellMultipleSyncDeasync.timeOut = 30000;
 
 function shellDryRun( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -4983,7 +4983,7 @@ function shellDryRun( test )
 
 function shellArgsOption( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -8616,7 +8616,7 @@ function shellVerbosity( test )
 
 function shellErrorHadling( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -8878,7 +8878,7 @@ function shellErrorHadling( test )
 
 function shellNode( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -9300,7 +9300,7 @@ shellModeShellNonTrivial.timeOut = 60000;
 
 function shellArgumentsHandlingTrivial( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   _.fileProvider.fileWrite( _.path.join( routinePath, 'file' ), 'file' );
@@ -9344,7 +9344,7 @@ function shellArgumentsHandlingTrivial( test )
 
 function shellArgumentsHandling( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   _.fileProvider.fileWrite( _.path.join( routinePath, 'file' ), 'file' );
@@ -9559,7 +9559,7 @@ shellArgumentsHandling.timeOut = 30000;
 
 function importantModeShell( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
   var printArguments = 'node -e "console.log( process.argv.slice( 1 ) )"'
 
@@ -10648,7 +10648,7 @@ shellProcedureExists.description =
 
 function shellTerminateHangedWithExitHandler( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   if( process.platform === 'win32' )
@@ -10771,7 +10771,7 @@ shellTerminateHangedWithExitHandler.timeOut = 20000;
 
 function shellTerminateAfterLoopRelease( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   if( process.platform === 'win32' )
@@ -10899,7 +10899,7 @@ shellTerminateAfterLoopRelease.timeOut = 30000;
 
 function shellStartingDelay( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -10954,7 +10954,7 @@ function shellStartingDelay( test )
 
 function shellStartingTime( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -11010,7 +11010,7 @@ function shellStartingTime( test )
 
 function shellStartingSuspended( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -11071,7 +11071,7 @@ function shellStartingSuspended( test )
 
 function shellAfterDeath( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppParent()
@@ -11185,7 +11185,7 @@ function shellAfterDeath( test )
 
 // function shellAfterDeathOutput( test )
 // {
-//   var context = this;
+//   let context = this;
 //   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
 //   function testAppParent()
@@ -11274,7 +11274,7 @@ function shellAfterDeath( test )
 
 function startDetachingModeSpawnResourceReady( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppChild()
@@ -11346,7 +11346,7 @@ function startDetachingModeSpawnResourceReady( test )
 
 function startDetachingModeForkResourceReady( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppChild()
@@ -11416,7 +11416,7 @@ function startDetachingModeForkResourceReady( test )
 
 function startDetachingModeShellResourceReady( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppChild()
@@ -11486,7 +11486,7 @@ function startDetachingModeShellResourceReady( test )
 
 function startDetachingModeSpawnNoTerminationBegin( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppParent()
@@ -11717,7 +11717,7 @@ function startDetachingModeSpawnNoTerminationBegin( test )
 
 function startDetachingModeForkNoTerminationBegin( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppParent()
@@ -11864,7 +11864,7 @@ function startDetachingModeForkNoTerminationBegin( test )
 
 function startDetachingModeShellNoTerminationBegin( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppParent()
@@ -12011,7 +12011,7 @@ function startDetachingModeShellNoTerminationBegin( test )
 
 function startDetachingModeSpawnTerminationBegin( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppParent()
@@ -12293,7 +12293,7 @@ startDetachingModeSpawnTerminationBegin.timeOut = 120000;
 
 function startDetachingModeForkTerminationBegin( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppParent()
@@ -12573,7 +12573,7 @@ function startDetachingModeForkTerminationBegin( test )
 
 function startDetachingModeShellTerminationBegin( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppParent()
@@ -12753,7 +12753,7 @@ function startDetachingModeShellTerminationBegin( test )
 
 function startDetachingChildExitsAfterParent( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppParent()
@@ -12876,7 +12876,7 @@ After 5 seconds child process creates test file in working directory and exits.
 
 function startDetachingChildExitsBeforeParent( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppParent()
@@ -13008,7 +13008,7 @@ Callback in parent recevies message. Parent exits.
 
 function startDetachedOutputStdioIgnore( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppParent()
@@ -13145,7 +13145,7 @@ function startDetachedOutputStdioIgnore( test )
 
 function startDetachedOutputStdioPipe( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppParent()
@@ -13289,7 +13289,7 @@ function startDetachedOutputStdioPipe( test )
 
 function startDetachedOutputStdioInherit( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppChild()
@@ -13377,7 +13377,7 @@ function startDetachedOutputStdioInherit( test )
 
 function startDetachingModeSpawnIpc( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppChild()
@@ -13489,7 +13489,7 @@ function startDetachingModeSpawnIpc( test )
 
 function startDetachingModeForkIpc( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppChild()
@@ -13602,7 +13602,7 @@ function startDetachingModeForkIpc( test )
 
 function startDetachingModeShellIpc( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppChild()
@@ -13677,7 +13677,7 @@ function startDetachingModeShellIpc( test )
 
 function startDetachingThrowing( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppChild()
@@ -13772,7 +13772,7 @@ function startDetachingThrowing( test )
 
 function startNodeDetachingChildThrowing( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppChild()
@@ -13821,7 +13821,7 @@ function startNodeDetachingChildThrowing( test )
 
 function startNodeDetachingTrivial( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppParent()
@@ -13951,11 +13951,121 @@ function startNodeDetachingTrivial( test )
 
 //
 
+function startNodeStructure( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let programPath = a.program( program1 );
+
+  a.ready.timeOut( 1000 );
+
+  /* */
+
+  let options =
+  {
+    execPath : programPath,
+    currentPath : a.currentPath,
+    throwingExitCode : 1,
+    inputMirroring : 1,
+    outputCollecting : 1,
+    stdio : 'pipe',
+    sync : 0,
+    deasync : 0,
+    ready : a.ready,
+  }
+
+  _.process.startNode( options )
+  .then( ( op ) =>
+  {
+    test.identical( op.exitCode, 0 );
+    test.identical( op.output, 'program1\n' );
+
+    let exp2 = _.mapExtend( null, exp );
+    exp2.output = 'program1\n';
+    exp2.exitCode = 0;
+    exp2.exitSignal = null;
+    exp2.disconnect = options.disconnect;
+    exp2.process = options.process;
+
+    test.identical( options, exp2 );
+    test.identical( !!options.process, true );
+    test.identical( !!options.disconnect, true );
+    test.is( options.onTerminate === options.ready );
+    test.identical( options.ready.exportString(), 'Consequence::startNodeStructure 0 / 2' );
+    test.identical( options.onTerminate.exportString(), 'Consequence::startNodeStructure 0 / 2' );
+    test.identical( options.onStart.exportString(), 'Consequence:: 1 / 0' );
+
+    return null;
+  });
+
+  var exp =
+  {
+    'execPath' : a.abs( 'program1.js' ),
+    'currentPath' : null,
+    'throwingExitCode' : 1,
+    'inputMirroring' : 1,
+    'outputCollecting' : 1,
+    'sync' : 0,
+    'deasync' : 0,
+    'passingThrough' : 0,
+    'maximumMemory' : 0,
+    'applyingExitCode' : 1,
+    'stdio' : 'pipe',
+    'mode' : 'fork',
+    'args' : null,
+    'interpreterArgs' : '',
+    'when' : 'instant',
+    'dry' : 0,
+    'logger' : null,
+    'ipc' : 0,
+    'env' : null,
+    'detaching' : 0,
+    'windowHiding' : 1,
+    'concurrent' : 0,
+    'timeOut' : null,
+    'returningOptionsArray' : 1,
+    'briefExitCode' : 0,
+    'verbosity' : 2,
+    'outputPrefixing' : 0,
+    'outputPiping' : null,
+    'outputAdditive' : null,
+    'outputGray' : 0,
+    'outputGrayStdout' : 0,
+    'outputGraying' : 0,
+    'onStart' : options.onStart,
+    'onTerminate' : options.onTerminate,
+    'ready' : options.ready,
+    'disconnect' : options.disconnect,
+    'process' : options.process,
+  }
+  test.identical( options, exp );
+
+  test.identical( options.process, undefined );
+  test.identical( options.disconnect, undefined );
+  test.is( options.onTerminate === options.ready );
+  test.identical( options.ready.exportString(), 'Consequence:: 0 / 4' );
+  test.identical( options.onTerminate.exportString(), 'Consequence:: 0 / 4' );
+  test.identical( options.onStart.exportString(), 'Consequence:: 0 / 1' );
+
+  /* */
+
+  return a.ready;
+
+  /* */
+
+  function program1()
+  {
+    let _ = require( toolsPath );
+    console.log( 'program1' );
+  }
+
+}
+
 //
 
 function startOnStart( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppChild()
@@ -14246,7 +14356,7 @@ function startOnStart( test )
 
 function startOnTerminate( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppChild()
@@ -14511,7 +14621,7 @@ function shellConcurrent( test )
   let context = this;
   let counter = 0;
   let time = 0;
-  let routinePath = _.path.join( context.suiteTempPath, test.name );
+  let routinePath = _.path.join( context.suiteTempPath, test.name ); /* qqq2 : rewrote all that using assetFor and _.program.* */
   let testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
   let filePath = _.fileProvider.path.nativize( _.path.join( routinePath, 'file.txt' ) );
   let ready = _.Consequence().take( null );
@@ -15500,7 +15610,7 @@ shellerConcurrent.timeOut = 100000;
 
 function sheller( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
   var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
   var testAppCode = testApp.toString() + '\ntestApp();';
@@ -15772,7 +15882,7 @@ sheller.timeOut = 60000;
 
 function shellerArgs( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -15897,7 +16007,7 @@ function shellerFields( test )
 
 function outputHandling( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -15995,7 +16105,7 @@ outputHandling.timeOut = 10000;
 
 function shellOutputStripping( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -16069,7 +16179,7 @@ shellOutputStripping.timeOut = 15000;
 
 function shellLoggerOption( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -16140,7 +16250,7 @@ shellLoggerOption.timeOut = 30000;
 
 function shellNormalizedExecPath( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -16492,7 +16602,7 @@ function statusOf( test )
 
 function kill( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testApp()
@@ -16791,7 +16901,7 @@ function kill( test )
 
 function killWithChildren( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testApp()
@@ -17074,7 +17184,7 @@ function killWithChildren( test )
 
 function terminate( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   if( process.platform === 'win32' )
@@ -17455,7 +17565,7 @@ function terminate( test )
 
 function terminateComplex( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   if( process.platform === 'win32' )
@@ -17722,7 +17832,7 @@ terminateComplex.timeOut = 150000;
 
 function terminateDetachedComplex( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
 
@@ -18025,7 +18135,7 @@ terminateDetachedComplex.timeOut = 150000;
 
 function terminateWithChildren( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   if( process.platform === 'win32' )
@@ -18291,7 +18401,7 @@ function terminateWithChildren( test )
 
 function terminateWithDetachedChildren( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   if( process.platform === 'win32' )
@@ -18457,7 +18567,7 @@ function terminateWithDetachedChildren( test )
 
 function terminateTimeOut( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   if( process.platform === 'win32' )
@@ -18667,7 +18777,7 @@ function terminateTimeOut( test )
 
 function terminateDifferentStdio( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   if( process.platform === 'win32' )
@@ -18894,7 +19004,7 @@ function terminateDifferentStdio( test )
 
 function children( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testApp()
@@ -19156,7 +19266,7 @@ function children( test )
 
 function childrenAsList( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testApp()
@@ -19264,7 +19374,7 @@ function experiment( test )
 {
   let self = this;
 
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -19327,7 +19437,7 @@ experiment.experimental = 1;
 
 function killComplex( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testApp()
@@ -19499,7 +19609,7 @@ function effectiveMainFile( test )
 
 function shellExperiment( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
   var commonDefaults =
   {
@@ -19690,8 +19800,9 @@ var Proto =
 
     startDetachingThrowing,
     startNodeDetachingChildThrowing,
-
     startNodeDetachingTrivial,
+
+    startNodeStructure,
 
     startOnStart,
     startOnTerminate,
