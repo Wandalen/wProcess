@@ -291,6 +291,7 @@ function start_body( o )
     o.process = null;
     o.procedure = null;
     o.procedureIsNew = null;
+    o.ended = false;
     Object.preventExtensions( o );
 
   }
@@ -326,6 +327,8 @@ function start_body( o )
     // o.procedure.end();
     // if( o.detaching )
     // _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
+
+    o.ended = true;
 
     if( o.state !== 'initial' ) /* xxx qqq : why if? is it covered? */
     {
@@ -999,6 +1002,7 @@ function start_body( o )
     // if( o.when === 'instant' ) /* qqq : ? */
     // o.ready.error( _.err( 'Detached child with pid:', o.process.pid, 'is continuing execution after parent death.' ) );
     _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
+
     o.disconnect();
   }
 
