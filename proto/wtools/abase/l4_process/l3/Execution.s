@@ -1003,7 +1003,6 @@ function start_body( o )
     // o.ready.error( _.err( 'Detached child with pid:', o.process.pid, 'is continuing execution after parent death.' ) );
     _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
 
-    if( o.process )
     o.disconnect();
   }
 
