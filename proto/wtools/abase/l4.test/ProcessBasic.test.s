@@ -5018,6 +5018,7 @@ function startNjsStructure( test )
     exp2.disconnect = options.disconnect;
     exp2.process = options.process;
     exp2.procedure = options.procedure;
+    exp2.procedureIsNew = true;
     exp2.currentPath = _.path.current();
     exp2.args = [];
     exp2.interpreterArgs = [];
@@ -5085,8 +5086,8 @@ function startNjsStructure( test )
     'output' : null,
     'exitCode' : null,
     'exitSignal' : null,
-    'procedure' : null
-
+    'procedure' : null,
+    'procedureIsNew' : null,
   }
   test.identical( options, exp );
 
@@ -10362,12 +10363,6 @@ function shellProcedureExists( test )
   let routinePath = _.path.join( context.suiteTempPath, test.name );
   let testAppPath =  _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
 
-  function testApp()
-  {
-    console.log( process.pid )
-    setTimeout( () => {}, 2000 )
-  }
-
   let testAppCode = testApp.toString() + '\ntestApp();';
   _.fileProvider.fileWrite( testAppPath, testAppCode );
 
@@ -10388,7 +10383,6 @@ function shellProcedureExists( test )
 
   .then( () =>
   {
-
     var o = { execPath : 'node ' + testAppPath, mode : 'shell' }
     var con = start( o );
     var procedure = _.procedure.find( 'PID:'+ o.process.pid );
@@ -10412,59 +10406,69 @@ function shellProcedureExists( test )
 
   /* */
 
-  .then( () =>
-  {
-
-    var o = { execPath : testAppPath, mode : 'fork' }
-    var con = start( o );
-    var procedure = _.procedure.find( 'PID:'+ o.process.pid );
-    test.identical( procedure.length, 1 );
-    test.identical( procedure[ 0 ].isAlive(), true );
-    test.identical( o.procedure, procedure[ 0 ] );
-    test.identical( procedure[ 0 ].object(), o.process );
-    test.identical( o.procedure, procedure[ 0 ] );
-    return con.then( ( got ) =>
-    {
-      test.identical( got.exitCode, 0 );
-      test.identical( procedure[ 0 ].isAlive(), false );
-      test.identical( o.procedure, procedure[ 0 ] );
-      test.identical( procedure[ 0 ].object(), o.process );
-      test.identical( o.procedure, procedure[ 0 ] );
-      test.is( _.strHas( o.procedure._sourcePath, 'ProcessWatcher.s' ) );
-      return null;
-    })
-  })
+  // xxx
+  // .then( () =>
+  // {
+  //
+  //   var o = { execPath : testAppPath, mode : 'fork' }
+  //   var con = start( o );
+  //   var procedure = _.procedure.find( 'PID:'+ o.process.pid );
+  //   test.identical( procedure.length, 1 );
+  //   test.identical( procedure[ 0 ].isAlive(), true );
+  //   test.identical( o.procedure, procedure[ 0 ] );
+  //   test.identical( procedure[ 0 ].object(), o.process );
+  //   test.identical( o.procedure, procedure[ 0 ] );
+  //   return con.then( ( got ) =>
+  //   {
+  //     test.identical( got.exitCode, 0 );
+  //     test.identical( procedure[ 0 ].isAlive(), false );
+  //     test.identical( o.procedure, procedure[ 0 ] );
+  //     test.identical( procedure[ 0 ].object(), o.process );
+  //     test.identical( o.procedure, procedure[ 0 ] );
+  //     test.is( _.strHas( o.procedure._sourcePath, 'ProcessWatcher.s' ) );
+  //     return null;
+  //   })
+  // })
+  //
+  // /* */
+  //
+  // .then( () =>
+  // {
+  //
+  //   var o = { execPath : 'node ' + testAppPath, mode : 'spawn' }
+  //   var con = start( o );
+  //   var procedure = _.procedure.find( 'PID:'+ o.process.pid );
+  //   test.identical( procedure.length, 1 );
+  //   test.identical( procedure[ 0 ].isAlive(), true );
+  //   test.identical( o.procedure, procedure[ 0 ] );
+  //   test.identical( procedure[ 0 ].object(), o.process );
+  //   test.identical( o.procedure, procedure[ 0 ] );
+  //   return con.then( ( got ) =>
+  //   {
+  //     test.identical( got.exitCode, 0 );
+  //     test.identical( procedure[ 0 ].isAlive(), false );
+  //     test.identical( o.procedure, procedure[ 0 ] );
+  //     test.identical( procedure[ 0 ].object(), o.process );
+  //     test.identical( o.procedure, procedure[ 0 ] );
+  //     test.is( _.strHas( o.procedure._sourcePath, 'ProcessWatcher.s' ) );
+  //     return null;
+  //   })
+  // })
 
   /* */
 
-  .then( () =>
-  {
-
-    var o = { execPath : 'node ' + testAppPath, mode : 'spawn' }
-    var con = start( o );
-    var procedure = _.procedure.find( 'PID:'+ o.process.pid );
-    test.identical( procedure.length, 1 );
-    test.identical( procedure[ 0 ].isAlive(), true );
-    test.identical( o.procedure, procedure[ 0 ] );
-    test.identical( procedure[ 0 ].object(), o.process );
-    test.identical( o.procedure, procedure[ 0 ] );
-    return con.then( ( got ) =>
-    {
-      test.identical( got.exitCode, 0 );
-      test.identical( procedure[ 0 ].isAlive(), false );
-      test.identical( o.procedure, procedure[ 0 ] );
-      test.identical( procedure[ 0 ].object(), o.process );
-      test.identical( o.procedure, procedure[ 0 ] );
-      test.is( _.strHas( o.procedure._sourcePath, 'ProcessWatcher.s' ) );
-      return null;
-    })
-  })
-
-  /* */
-
-  ready.then( () => _.process.watcherDisable() )
+  ready.then( () => _.process.watcherDisable() ) /* qqq : ? */
 
   return ready;
+
+  /* */
+
+  function testApp()
+  {
+    console.log( process.pid )
+    setTimeout( () => {}, 2000 )
+  }
+
 }
 
 shellProcedureExists.timeOut = 60000;
@@ -12398,6 +12402,8 @@ function startDetachingModeForkTerminationBegin( test )
   return ready;
 }
 
+startDetachingModeForkTerminationBegin.timeOut = 300000;
+
 //
 
 function startDetachingModeShellTerminationBegin( test )
@@ -14016,9 +14022,6 @@ function startOnStart( test )
 {
   let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
-
-  /* */
-
   var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
   var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
   _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
@@ -14124,7 +14127,7 @@ function startOnStart( test )
   })
 
   /* */
-  //
+
   .then( () =>
   {
     test.case = 'detaching on, onStart and result are same and give resource on start'
@@ -14563,6 +14566,70 @@ function startOnTerminate( test )
   })
 
   return ready;
+}
+
+//
+
+function noEndBug1( test )
+{
+  let context = this;
+  var routinePath = _.path.join( context.suiteTempPath, test.name );
+  var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
+  var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
+  _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
+
+  let ready = new _.Consequence().take( null );
+
+  ready
+
+  /* */
+
+  .then( () =>
+  {
+    test.case = 'detaching on, error on spawn'
+    let o =
+    {
+      execPath : 'testAppChild.js',
+      mode : 'fork',
+      stdio : [ 'ignore', 'ignore', 'ignore', null ],
+      currentPath : routinePath,
+      detaching : 1
+    }
+
+    let result = _.process.start( o );
+
+    test.is( o.onStart === result );
+    test.is( _.consequenceIs( o.onStart ) )
+
+    result = test.shouldThrowErrorAsync( o.onStart );
+
+    result.then( () => _.time.out( 2000 ) )
+    result.then( () =>
+    {
+      test.identical( o.onTerminate.resourcesCount(), 0 );
+      return null;
+    })
+
+    return result;
+  })
+
+  /* */
+
+  return ready;
+
+  /* */
+
+  function testAppChild()
+  {
+    _.include( 'wProcess' );
+    var args = _.process.args();
+    _.time.out( 2000, () =>
+    {
+      console.log( 'Child process end' )
+      return null;
+    })
+  }
+
 }
 
 //
@@ -19760,6 +19827,7 @@ var Proto =
 
     startOnStart,
     startOnTerminate,
+    noEndBug1,
 
     /*  */
 

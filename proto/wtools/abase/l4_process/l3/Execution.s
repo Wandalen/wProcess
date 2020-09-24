@@ -172,9 +172,7 @@ function start_body( o )
 
 */
 
-  // _.assertRoutineOptions( start_body, arguments );
   _.assert( arguments.length === 1, 'Expects single argument' );
-  // _.assert( _.longHas( [ 'fork', 'exec', 'spawn', 'shell' ], o.mode ) );
   _.assert( _.longHas( [ 'fork', 'spawn', 'shell' ], o.mode ) );
   _.assert( !!o.args || !!o.execPath, 'Expects {-args-} either {-execPath-}' )
   _.assert( o.args === null || _.arrayIs( o.args ) || _.strIs( o.args ) );
@@ -188,58 +186,40 @@ function start_body( o )
   _.assert( o.onTerminate === null || _.consequenceIs( o.onTerminate ) );
   _.assert( !o.ipc || _.longHas( [ 'fork', 'spawn' ], o.mode ), `Mode: ${o.mode} doesn't support inter process communication.` );
 
-  // let state = 0;
-  // let currentExitCode;
-  // let terminatedWithTimeOut = false;
   let stderrOutput = '';
   let decoratedOutput = '';
   let decoratedErrorOutput = '';
-  let startingDelay = 0;
-  // let procedure, execArgs, argumentsManual;
   let execArgs, argumentsManual;
-
-  if( _.objectIs( o.when ) )
-  {
-    if( Config.debug )
-    {
-      let keys = _.mapKeys( o.when );
-      _.assert( keys.length === 1 && _.longHas([ 'time', 'delay' ], keys[ 0 ] ) );
-      _.assert( _.numberIs( o.when.delay ) || _.numberIs( o.when.time ) )
-    }
-
-    if( o.when.delay !== undefined )
-    startingDelay = o.when.delay;
-    else
-    startingDelay = o.when.time - _.time.now();
-
-    _.assert( startingDelay >= 0, 'Wrong value of {-o.when.delay } or {-o.when.time-}. Starting delay should be >= 0, current:', startingDelay )
-  }
 
   preform1();
 
   if( _global_.debugger )
   debugger;
 
-  /* */
-
   if( _.arrayIs( o.execPath ) || _.arrayIs( o.currentPath ) )
   return multiple();
 
   preform2();
 
-  /* */
-
   if( o.sync && !o.deasync )
   {
+    /* qqq2 : use routine _.time.sleep here */
     let arg = o.ready.sync();
-    single();
-    end( undefined, o )
+    try
+    {
+      single();
+    }
+    catch( err )
+    {
+      end( err, undefined );
+    }
+    end( undefined, o );
     return o;
   }
   else
   {
-    if( startingDelay )
-    o.ready.then( () => _.time.out( startingDelay, () => null ) );
+    if( o.when.delay )
+    o.ready.then( () => _.time.out( o.when.delay, () => null ) );
     o.ready.thenGive( single );
     // if( !o.detaching )
     o.ready.finallyKeep( end );
@@ -287,6 +267,20 @@ function start_body( o )
   function preform2()
   {
 
+    if( !_.strIs( o.when ) )
+    {
+      if( Config.debug )
+      {
+        let keys = _.mapKeys( o.when );
+        _.assert( _.mapIs( o.when ) );
+        _.assert( keys.length === 1 && _.longHas( [ 'time', 'delay' ], keys[ 0 ] ) );
+        _.assert( _.numberIs( o.when.delay ) || _.numberIs( o.when.time ) )
+      }
+      if( o.when.time !== undefined )
+      o.when.delay = Math.max( 0, o.when.time - _.time.now() );
+      _.assert( o.when.delay >= 0, `Wrong value of {-o.when.delay } or {-o.when.time-}. Starting delay should be >= 0, current : ${o.when.delay}` );
+    }
+
     o.disconnect = disconnect;
     o.state = 'initial'; /* `initial`, `starting`, `started`, `terminating`, `terminated`, `error`, */
     o.terminationReason = null;
@@ -306,15 +300,18 @@ function start_body( o )
 
   function endDeasyncing()
   {
-    if( o.sync && o.deasync )
+    if( o.deasync )
     {
-      o.ready.deasync();
-      return o.ready.sync();
-    }
-    if( !o.sync && o.deasync )
-    {
-      o.ready.deasync();
-      return o.ready;
+      if( o.sync )
+      {
+        o.ready.deasync();
+        return o.ready.sync();
+      }
+      else
+      {
+        o.ready.deasync();
+        return o.ready;
+      }
     }
     return o.ready;
   }
@@ -326,15 +323,14 @@ function start_body( o )
 
     debugger;
     // yyy qqq
-    // if( o.procedure )
+    // if( o.procedure && o.procedureIsNew )
     // o.procedure.end();
     // if( o.detaching )
     // _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
 
     o.ended = true;
 
-    // if( state > 0 )
-    if( o.state !== 'initial' ) /* xxx qqq : why if? */
+    if( o.state !== 'initial' ) /* xxx qqq : why if? is it covered? */
     {
       if( !o.outputAdditive )
       {
@@ -347,10 +343,10 @@ function start_body( o )
     if( err )
     {
       debugger;
-      // if( state < 2 )
+      o.state = 'error';
       if( o.state !== 'terminated' && o.state !== 'error' )
       if( !o.exitCode ) /* yyy qqq : cover */
-      o.exitCode = null; /* qqq : why? */
+      o.exitCode = null; /* xxx qqq : why? */
       throw _.err( err );
     }
     return arg;
@@ -436,9 +432,7 @@ function start_body( o )
   function single()
   {
 
-    // _.assert( state === 0 );
     _.assert( o.state === 'initial' );
-    // state = 1;
 
     try
     {
@@ -522,7 +516,7 @@ function start_body( o )
     if( o.outputPiping === null )
     o.outputPiping = o.verbosity >= 2;
     if( o.outputCollecting && !o.output )
-    o.output = '';
+    o.output = ''; /* qqq : test for multiple run? where does it collect output? */
 
     /* ipc */
 
@@ -543,14 +537,6 @@ function start_body( o )
       o.args = _.arrayAppendArray( o.args || [], argumentsManual );
     }
 
-    // /* out options */
-    //
-    // o.exitCode = null;
-    // o.exitSignal = null;
-    // o.process = null;
-    // o.procedure = null;
-    // Object.preventExtensions( o );
-
     /* dependencies */
 
     if( !ChildProcess )
@@ -570,7 +556,6 @@ function start_body( o )
     {
       if( o.verbosity >= 2 )
       log( _.errOnce( err ), 1 );
-      // _.errLogOnce( err );
     }
 
     if( o.detaching )
@@ -713,15 +698,15 @@ function start_body( o )
     {
       let result = _.procedure.find( 'PID:' + o.process.pid );
       _.assert( result.length === 0 || result.length === 1, 'Only one procedure expected for child process with pid:', o.pid );
-      if( !result.length )
-      {
-        o.procedure = _.procedure.begin({ _name : 'PID:' + o.process.pid, _object : o.process });
-        o.procedureIsNew = true;
-      }
-      else
+      if( result.length )
       {
         o.procedure = result[ 0 ];
         o.procedureIsNew = false;
+      }
+      else
+      {
+        o.procedure = _.procedure.begin({ _name : 'PID:' + o.process.pid, _object : o.process });
+        o.procedureIsNew = true;
       }
     }
 
@@ -736,7 +721,6 @@ function start_body( o )
     if( !o.sync || o.deasync )
     _.time.begin( o.timeOut, () =>
     {
-      // if( state === 2 )
       if( o.state === 'terminated' || o.state === 'error' )
       return;
       o.terminationReason = 'time';
@@ -1062,17 +1046,14 @@ function start_body( o )
   function handleClose( exitCode, exitSignal )
   {
 
-    if( o.procedure && o.procedureIsNew ) // yyy qqq
+    // yyy qqq
+    if( o.procedure && o.procedureIsNew )
     o.procedure.end();
     if( o.detaching )
     _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
 
-    // if( exitSignal && exitCode === null )
-    // exitCode = -1;
-
-    // debugger;
+    debugger;
     exitCodeSet( exitCode );
-    // o.exitCode = exitCode;
     o.exitSignal = exitSignal;
 
     if( o.verbosity >= 5 )
@@ -1082,12 +1063,10 @@ function start_body( o )
       log( infoGet() );
     }
 
-    // if( state === 2 )
     if( o.state === 'terminated' || o.state === 'error' ) /* xxx qqq : move above? */
     return;
 
     o.state = 'terminated';
-    // state = 2;
 
     if( exitSignal )
     o.terminationReason = 'signal';
@@ -1131,6 +1110,7 @@ function start_body( o )
   function handleError( err )
   {
 
+    debugger;
     exitCodeSet( -1 );
 
     if( o.state === 'terminated' || o.state === 'error' ) /* xxx qqq : move above? */
@@ -1139,15 +1119,9 @@ function start_body( o )
     o.terminationReason = 'error';
     o.state = 'error';
 
-    // if( state === 2 )
-    // return;
-    //
-    // state = 2;
-
     err = _.err( 'Error shelling command\n', o.execPath, '\nat', o.currentPath, '\n', err );
     if( o.verbosity )
     log( _.errOnce( err ), 1 );
-    // err = _.errLogOnce( err );
 
     if( o.sync && !o.deasync )
     {
