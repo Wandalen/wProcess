@@ -290,8 +290,8 @@ function start_body( o )
     o.exitSignal = null;
     o.process = null;
     o.procedure = null;
-    o.procedureIsNew = null;
-    o.ended = false;
+    o.procedureIsNew = null; /* qqq2 : remove the field( dont introduce local variable neither ) */
+    o.ended = false; /* qqq2 : remove the field( dont introduce local variable neither ) */
     Object.preventExtensions( o );
 
   }
@@ -323,10 +323,10 @@ function start_body( o )
 
     debugger;
     // yyy qqq
-    // if( o.procedure && o.procedureIsNew )
-    // o.procedure.end();
-    // if( o.detaching )
-    // _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
+    if( o.procedure && o.procedureIsNew )
+    o.procedure.end();
+    if( o.detaching )
+    _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
 
     o.ended = true;
 
@@ -1045,13 +1045,13 @@ function start_body( o )
   function handleClose( exitCode, exitSignal )
   {
 
-    // yyy qqq
-    if( o.procedure && o.procedureIsNew )
-    o.procedure.end();
-    if( o.detaching )
-    _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
-
     debugger;
+    // yyy qqq
+    // if( o.procedure && o.procedureIsNew )
+    // o.procedure.end();
+    // if( o.detaching )
+    // _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
+
     exitCodeSet( exitCode );
     o.exitSignal = exitSignal;
 
