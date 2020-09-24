@@ -188,14 +188,10 @@ function start_body( o )
   _.assert( o.onTerminate === null || _.consequenceIs( o.onTerminate ) );
   _.assert( !o.ipc || _.longHas( [ 'fork', 'spawn' ], o.mode ), `Mode: ${o.mode} doesn't support inter process communication.` );
 
-  // let state = 0;
-  // let currentExitCode;
-  // let terminatedWithTimeOut = false;
   let stderrOutput = '';
   let decoratedOutput = '';
   let decoratedErrorOutput = '';
   let startingDelay = 0;
-  // let procedure, execArgs, argumentsManual;
   let execArgs, argumentsManual;
 
   if( _.objectIs( o.when ) )
@@ -220,14 +216,10 @@ function start_body( o )
   if( _global_.debugger )
   debugger;
 
-  /* */
-
   if( _.arrayIs( o.execPath ) || _.arrayIs( o.currentPath ) )
   return multiple();
 
   preform2();
-
-  /* */
 
   if( o.sync && !o.deasync )
   {
@@ -241,7 +233,7 @@ function start_body( o )
     if( startingDelay )
     o.ready.then( () => _.time.out( startingDelay, () => null ) );
     o.ready.thenGive( single );
-    if( !o.detaching )
+    // if( !o.detaching )
     o.ready.finallyKeep( end );
     return endDeasyncing();
   }
