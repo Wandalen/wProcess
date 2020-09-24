@@ -195,7 +195,8 @@ function start_body( o )
   let decoratedOutput = '';
   let decoratedErrorOutput = '';
   let startingDelay = 0;
-  let procedure, execArgs, argumentsManual;
+  // let procedure, execArgs, argumentsManual;
+  let execArgs, argumentsManual;
 
   if( _.objectIs( o.when ) )
   {
@@ -270,7 +271,6 @@ function start_body( o )
     _.assert( o.ready === o.onTerminate && o.ready !== o.onStart );
     _.assert( o.onStart !== o.onTerminate );
 
-    debugger;
     if( o.outputDecorating === null )
     o.outputDecorating = 0;
     if( o.outputDecoratingStdout === null )
@@ -321,6 +321,14 @@ function start_body( o )
 
   function end( err, arg )
   {
+
+    debugger;
+    // yyy qqq
+    if( o.procedure )
+    o.procedure.end();
+    if( o.detaching )
+    _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
+
     // if( state > 0 )
     if( o.state !== 'initial' ) /* xxx qqq : why if? */
     {
@@ -702,7 +710,7 @@ function start_body( o )
       let result = _.procedure.find( 'PID:' + o.process.pid );
       _.assert( result.length === 0 || result.length === 1, 'Only one procedure expected for child process with pid:', o.pid );
       if( !result.length )
-      procedure = o.procedure = _.procedure.begin({ _name : 'PID:' + o.process.pid, _object : o.process });
+      o.procedure = _.procedure.begin({ _name : 'PID:' + o.process.pid, _object : o.process });
       else
       o.procedure = result[ 0 ];
     }
@@ -999,8 +1007,8 @@ function start_body( o )
   {
     // if( o.when === 'instant' ) /* qqq : ? */
     // o.ready.error( _.err( 'Detached child with pid:', o.process.pid, 'is continuing execution after parent death.' ) );
-    o.disconnect();
     _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
+    o.disconnect();
   }
 
   /* */
@@ -1041,11 +1049,11 @@ function start_body( o )
 
   function handleClose( exitCode, exitSignal )
   {
-    if( procedure )
-    procedure.end();
 
-    if( o.detaching )
-    _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
+    // if( o.procedure ) // yyy qqq
+    // o.procedure.end();
+    // if( o.detaching )
+    // _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
 
     // if( exitSignal && exitCode === null )
     // exitCode = -1;
@@ -1063,7 +1071,7 @@ function start_body( o )
     }
 
     // if( state === 2 )
-    if( o.state === 'terminated' || o.state === 'error' ) /* xxx qqq : move above */
+    if( o.state === 'terminated' || o.state === 'error' ) /* xxx qqq : move above? */
     return;
 
     o.state = 'terminated';
@@ -1368,7 +1376,7 @@ defaults.applyingExitCode = 1;
 defaults.throwingExitCode = 0;
 defaults.outputPiping = 1;
 defaults.stdio = 'inherit';
-// defaults.mode = 'spawn'; // qqq : uncomment after fix of the mode
+// defaults.mode = 'spawn'; // xxx qqq : uncomment after fix of the mode
 
 //
 
