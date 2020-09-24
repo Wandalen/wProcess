@@ -14726,9 +14726,8 @@ function shellConcurrent( test )
     test.is( arg === undefined );
     test.is( _.errIs( err ) );
     test.identical( singleErrorBeforeScalar.exitCode, null );
-    test.identical( singleErrorBeforeScalar.output, undefined );
+    test.identical( singleErrorBeforeScalar.output, null );
     test.is( !_.fileProvider.fileExists( filePath ) );
-
     _.errAttend( err );
     counter += 1;
     return null;

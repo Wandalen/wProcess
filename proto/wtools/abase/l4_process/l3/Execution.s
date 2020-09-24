@@ -803,7 +803,7 @@ function start_body( o )
       {
         let output = '   at ';
         if( !o.outputGray )
-        output = _.ct.format( output, { fg : 'bright white' } ) + _.ct.format( o.currentPath, { fg : 'path' } );
+        output = _.ct.format( output, { fg : 'bright white' } ) + _.ct.format( o.currentPath, 'path' );
         else
         output = output + o.currentPath
         log( output );
