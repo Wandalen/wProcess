@@ -296,6 +296,7 @@ function start_body( o )
     o.exitSignal = null;
     o.process = null;
     o.procedure = null;
+    o.procedureIsNew = null;
     Object.preventExtensions( o );
 
   }
@@ -324,10 +325,10 @@ function start_body( o )
 
     debugger;
     // yyy qqq
-    if( o.procedure )
-    o.procedure.end();
-    if( o.detaching )
-    _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
+    // if( o.procedure )
+    // o.procedure.end();
+    // if( o.detaching )
+    // _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
 
     // if( state > 0 )
     if( o.state !== 'initial' ) /* xxx qqq : why if? */
@@ -705,14 +706,20 @@ function start_body( o )
     o.state = 'started';
     o.onStart.take( o );
 
-    if( !o.detaching && !o.sync )
+    if( !o.detaching && !o.sync ) /* qqq2 : why no procedure for sync process?? */
     {
       let result = _.procedure.find( 'PID:' + o.process.pid );
       _.assert( result.length === 0 || result.length === 1, 'Only one procedure expected for child process with pid:', o.pid );
       if( !result.length )
-      o.procedure = _.procedure.begin({ _name : 'PID:' + o.process.pid, _object : o.process });
+      {
+        o.procedure = _.procedure.begin({ _name : 'PID:' + o.process.pid, _object : o.process });
+        o.procedureIsNew = true;
+      }
       else
-      o.procedure = result[ 0 ];
+      {
+        o.procedure = result[ 0 ];
+        o.procedureIsNew = false;
+      }
     }
 
   }
@@ -1050,10 +1057,10 @@ function start_body( o )
   function handleClose( exitCode, exitSignal )
   {
 
-    // if( o.procedure ) // yyy qqq
-    // o.procedure.end();
-    // if( o.detaching )
-    // _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
+    if( o.procedure && o.procedureIsNew ) // yyy qqq
+    o.procedure.end();
+    if( o.detaching )
+    _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
 
     // if( exitSignal && exitCode === null )
     // exitCode = -1;

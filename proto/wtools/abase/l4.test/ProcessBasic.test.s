@@ -10462,30 +10462,6 @@ function shellProcedureExists( test )
 
   /* */
 
-  // .then( () =>
-  // {
-  //   var o = { execPath : 'node ' + testAppPath, mode : 'exec' }
-  //   var con = start( o );
-  //   var procedure = _.procedure.find( 'PID:'+ o.process.pid );
-  //   test.identical( procedure.length, 1 );
-  //   test.identical( procedure[ 0 ].isAlive(), true );
-  //   test.identical( o.procedure, procedure[ 0 ] );
-  //   test.identical( procedure[ 0 ].object(), o.process );
-  //   test.identical( o.procedure, procedure[ 0 ] );
-  //   return con.then( ( got ) =>
-  //   {
-  //     test.identical( got.exitCode, 0 );
-  //     test.identical( procedure[ 0 ].isAlive(), false );
-  //     test.identical( o.procedure, procedure[ 0 ] );
-  //     test.identical( procedure[ 0 ].object(), o.process );
-  //     test.identical( o.procedure, procedure[ 0 ] );
-  //     test.is( _.strHas( o.procedure._sourcePath, 'ProcessWatcher.s' ) );
-  //     return null;
-  //   })
-  // })
-
-  /* */
-
   ready.then( () => _.process.watcherDisable() )
 
   return ready;
