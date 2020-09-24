@@ -13001,7 +13001,7 @@ function startDetachingChildExistsBeforeParentWaitForTermination( test )
 
 //
 
-startDetachingChildExistsBeforeParentWaitForTermination.description
+startDetachingChildExistsBeforeParentWaitForTermination.description =
 `
 Parent starts child process in detached mode.
 Test routine waits until o.onTerminate resolves message about termination of the child process.
