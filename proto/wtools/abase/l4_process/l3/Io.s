@@ -465,16 +465,16 @@ systemEntryAdd.defaults =
 {
   logger : 0,
   verbosity : 0,
-  entryDirPath : null,
-  appPath : null,
-  prefix : 'node ',
+  entryDirPath : null, // where to add
+  appPath : null, // where to run
+  prefix : 'node ', //
   name : null,
   platform : null,
-  relative : 1,
-  addingRights : 0o777,
-  allowingMissed : null,
-  allowingNotInPath : null,
-  forcing : 0,
+  relative : 1, // whether path is relative, other test routine
+  addingRights : 0o777, // rights to be able to run this file ( all rights )
+  allowingMissed : null, // ( test routine ) error if program is absent
+  allowingNotInPath : null, // error if entryDirPath
+  forcing : 0, // make all to run the routine ( test routine )
 }
 
 // --

@@ -6,13 +6,13 @@
 if( typeof module !== 'undefined' )
 {
 
-  let _ = require( '../../../../wtools/Tools.s' );
+  let _ = require( './../../../../wtools/Tools.s' );
 
   _.include( 'wTesting' );
   _.include( 'wFiles' );
   _.include( 'wProcessWatcher' );
 
-  require( '../l4_process/Basic.s' );
+  require( '../Basic.s' );
 
 }
 
@@ -42,63 +42,6 @@ function suiteEnd()
   _.path.tempClose( self.suiteTempPath );
 }
 
-//
-
-//
-
-function testApp()
-{
-  var ended = 0;
-  var fs = require( 'fs' );
-  var path = require( 'path' );
-  var filePath = path.join( __dirname, 'file.txt' );
-  console.log( 'begin', process.argv.slice( 2 ).join( ', ' ) );
-  var time = parseInt( process.argv[ 2 ] );
-  if( isNaN( time ) )
-  throw new Error( 'Expects number' );
-
-  setTimeout( end, time );
-  function end()
-  {
-    ended = 1;
-    fs.writeFileSync( filePath, 'written by ' + process.argv[ 2 ] );
-    console.log( 'end', process.argv.slice( 2 ).join( ', ' ) );
-  }
-
-  setTimeout( periodic, 50 );
-  function periodic()
-  {
-    console.log( 'tick', process.argv.slice( 2 ).join( ', ' ) );
-    if( !ended )
-    setTimeout( periodic, 50 );
-  }
-
-}
-
-//
-
-function testAppShell()
-{
-  let process = _global_.process;
-
-  _.include( 'wProcess' );
-  _.include( 'wStringsExtra' )
-
-  process.removeAllListeners( 'SIGINT' );
-  process.removeAllListeners( 'SIGTERM' );
-  process.removeAllListeners( 'exit' );
-
-  var args = _.process.args();
-
-  if( args.map.exitWithCode )
-  process.exit( args.map.exitWithCode )
-
-  if( args.map.loop )
-  return _.time.out( 4000 )
-
-  console.log( __filename );
-}
-
 // --
 // test
 // --
@@ -106,8 +49,10 @@ function testAppShell()
 function pathsRead( test )
 {
   test.case = 'test';
-  var got = pathsRead();
-  test.il( got, '11' );
+  var got = _.process.pathsRead();
+  test.is( _.arrayIs( got ) );
+  debugger;
+  got.forEach( ( path ) => test.is( _.path.isNormalized( path ) ) )
 
 }
 
@@ -125,8 +70,6 @@ var Proto =
   context :
   {
     suiteTempPath : null,
-    testApp,
-    testAppShell,
     toolsPath : null,
     toolsPathInclude : null,
   },
