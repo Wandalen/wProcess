@@ -905,7 +905,7 @@ function start_body( o )
 
   function argsJoin( args )
   {
-    if( !execArgs && !argumentsManual ) /* qqq : argumentsManual?? */
+    if( !execArgs && !argumentsManual ) /* qqq : argumentsManual?? should be no such global variable */
     return args.join( ' ' );
 
     let i = execArgs ? execArgs.length : args.length - argumentsManual.length;
