@@ -19867,7 +19867,9 @@ var Proto =
     realMainDir,
     effectiveMainFile,
 
-    shellExperiment
+    shellExperiment,
+
+    /* qqq : group test routines */
 
   }
 
