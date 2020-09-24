@@ -5027,6 +5027,7 @@ function startNjsStructure( test )
     exp2.state = 'terminated';
     exp2.terminationReason = 'normal';
     exp2.fullExecPath = programPath;
+    exp2.ended = true;
 
     test.identical( options, exp2 );
     test.identical( !!options.process, true );
@@ -5088,6 +5089,7 @@ function startNjsStructure( test )
     'exitSignal' : null,
     'procedure' : null,
     'procedureIsNew' : null,
+    'ended' : false,
   }
   test.identical( options, exp );
 
@@ -12845,9 +12847,6 @@ function startDetachingDisconnectedChildExistsBeforeParent( test )
 {
   let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
-
-  /* */
-
   var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
   var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
   _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
