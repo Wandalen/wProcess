@@ -16049,7 +16049,7 @@ function outputHandling( test )
       return _.process.start( o )
       .thenKeep( () =>
       {
-        test.identical( o.output, undefined );
+        test.identical( o.output, null );
         test.is( !_.strHas( loggerOutput, 'testApp-output') );
         console.log( loggerOutput )
         return true;
@@ -16063,7 +16063,7 @@ function outputHandling( test )
       return _.process.start( o )
       .thenKeep( () =>
       {
-        test.identical( o.output, undefined );
+        test.identical( o.output, null );
         test.is( _.strHas( loggerOutput, 'testApp-output') );
         return true;
       })
