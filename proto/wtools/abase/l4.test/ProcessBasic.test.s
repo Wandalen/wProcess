@@ -13918,7 +13918,7 @@ function startOnStart( test )
     })
 
     return _.Consequence.AndTake_( o.onStart, o.onTerminate );
-  // })
+  })
 
   /* */
 
@@ -14338,9 +14338,6 @@ function noEndBug1( test )
 {
   let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
-
-  /* */
-
   var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
   var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
   _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
