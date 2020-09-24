@@ -710,15 +710,15 @@ function start_body( o )
     {
       let result = _.procedure.find( 'PID:' + o.process.pid );
       _.assert( result.length === 0 || result.length === 1, 'Only one procedure expected for child process with pid:', o.pid );
-      if( !result.length )
-      {
-        o.procedure = _.procedure.begin({ _name : 'PID:' + o.process.pid, _object : o.process });
-        o.procedureIsNew = true;
-      }
-      else
+      if( result.length )
       {
         o.procedure = result[ 0 ];
         o.procedureIsNew = false;
+      }
+      else
+      {
+        o.procedure = _.procedure.begin({ _name : 'PID:' + o.process.pid, _object : o.process });
+        o.procedureIsNew = true;
       }
     }
 

@@ -5018,6 +5018,7 @@ function startNjsStructure( test )
     exp2.disconnect = options.disconnect;
     exp2.process = options.process;
     exp2.procedure = options.procedure;
+    exp2.procedureIsNew = true;
     exp2.currentPath = _.path.current();
     exp2.args = [];
     exp2.interpreterArgs = [];
@@ -5085,8 +5086,8 @@ function startNjsStructure( test )
     'output' : null,
     'exitCode' : null,
     'exitSignal' : null,
-    'procedure' : null
-
+    'procedure' : null,
+    'procedureIsNew' : null,
   }
   test.identical( options, exp );
 
@@ -14338,6 +14339,73 @@ function startOnTerminate( test )
 
 //
 
+function noEndBug1( test )
+{
+  let context = this;
+  var routinePath = _.path.join( context.suiteTempPath, test.name );
+
+  /* */
+
+  var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
+  var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
+  _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
+
+  let ready = new _.Consequence().take( null );
+
+  ready
+
+  /* */
+
+  .then( () =>
+  {
+    test.case = 'detaching on, error on spawn'
+    let o =
+    {
+      execPath : 'testAppChild.js',
+      mode : 'fork',
+      stdio : [ 'ignore', 'ignore', 'ignore', null ],
+      currentPath : routinePath,
+      detaching : 1
+    }
+
+    let result = _.process.start( o );
+
+    test.is( o.onStart === result );
+    test.is( _.consequenceIs( o.onStart ) )
+
+    result = test.shouldThrowErrorAsync( o.onStart );
+
+    result.then( () => _.time.out( 2000 ) )
+    result.then( () =>
+    {
+      test.identical( o.onTerminate.resourcesCount(), 0 );
+      return null;
+    })
+
+    return result;
+  })
+
+  /* */
+
+  return ready;
+
+  /* */
+
+  function testAppChild()
+  {
+    _.include( 'wProcess' );
+    var args = _.process.args();
+    _.time.out( 2000, () =>
+    {
+      console.log( 'Child process end' )
+      return null;
+    })
+  }
+
+}
+
+//
+
 function shellConcurrent( test )
 {
   let context = this;
@@ -19528,6 +19596,7 @@ var Proto =
 
     startOnStart,
     startOnTerminate,
+    noEndBug1,
 
     /*  */
 
