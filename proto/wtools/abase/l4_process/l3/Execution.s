@@ -46,7 +46,8 @@ function start_pre( routine, args )
 
   _.assert( arguments.length === 2 );
   _.assert( args.length === 1, 'Expects single argument' );
-  _.assert( _.longHas( [ 'fork', 'exec', 'spawn', 'shell' ], o.mode ) );
+  // _.assert( _.longHas( [ 'fork', 'exec', 'spawn', 'shell' ], o.mode ) );
+  _.assert( _.longHas( [ 'fork', 'spawn', 'shell' ], o.mode ) );
   _.assert( !!o.args || !!o.execPath, 'Expects {-args-} either {-execPath-}' )
   _.assert( o.args === null || _.arrayIs( o.args ) || _.strIs( o.args ) );
   _.assert( o.execPath === null || _.strIs( o.execPath ) || _.strsAreAll( o.execPath ), 'Expects string or strings {-o.execPath-}, but got', _.strType( o.execPath ) );
@@ -73,7 +74,7 @@ function start_pre( routine, args )
 
  * @param {Array} o.args=null Arguments for command.
  * @param {Array} o.interpreterArgs=null Arguments for node. Used only in `fork` mode. {@link https://nodejs.org/api/cli.html Command Line Options}
- * @param {String} o.mode='shell' Execution mode. Possible values: `fork`, `exec`, `spawn`, `shell`. {@link https://nodejs.org/api/child_process.html Details about modes}
+ * @param {String} o.mode='shell' Execution mode. Possible values: `fork`, `spawn`, `shell`. {@link https://nodejs.org/api/child_process.html Details about modes}
  * @param {Object} o.ready=null `wConsequence` instance that gives a message when execution is finished.
  * @param {Object} o.logger=null `wLogger` instance that prints output during command execution.
 
@@ -139,25 +140,27 @@ function start_pre( routine, args )
 function start_body( o )
 {
 
-  /* Subroutine index :
+/* Subroutine index :
 
+  preform
   endDeasyncing
   end
   multiple
   single
-  prepare
+  form
   launch
-  launchAct
+  timeOutForm
+  pipe
   disconnect
-  launchInputLog
+  inputMirror
   execPathParse
+  argsUnqoute
   argsJoin
-  escapeArg
+  argEscape
   optionsForSpawn
   optionsForFork
   execPathForFork
   onProcedureTerminationBegin
-  pipe
   exitCodeSet
   infoGet
   handleClose
@@ -170,7 +173,8 @@ function start_body( o )
 
   _.assertRoutineOptions( start_body, arguments );
   _.assert( arguments.length === 1, 'Expects single argument' );
-  _.assert( _.longHas( [ 'fork', 'exec', 'spawn', 'shell' ], o.mode ) );
+  // _.assert( _.longHas( [ 'fork', 'exec', 'spawn', 'shell' ], o.mode ) );
+  _.assert( _.longHas( [ 'fork', 'spawn', 'shell' ], o.mode ) );
   _.assert( !!o.args || !!o.execPath, 'Expects {-args-} either {-execPath-}' )
   _.assert( o.args === null || _.arrayIs( o.args ) || _.strIs( o.args ) );
   _.assert( o.execPath === null || _.strIs( o.execPath ) || _.strsAreAll( o.execPath ), 'Expects string or strings {-o.execPath-}, but got', _.strType( o.execPath ) );
@@ -183,8 +187,8 @@ function start_body( o )
   _.assert( o.onTerminate === null || _.consequenceIs( o.onTerminate ) );
   _.assert( !o.ipc || _.longHas( [ 'fork', 'spawn' ], o.mode ), `Mode: ${o.mode} doesn't support inter process communication.` );
 
-  let state = 0;
-  let currentExitCode;
+  // let state = 0;
+  // let currentExitCode;
   let killedByTimeout = false;
   let stderrOutput = '';
   let decoratedOutput = '';
@@ -209,25 +213,7 @@ function start_body( o )
     _.assert( startingDelay >= 0, 'Wrong value of {-o.when.delay } or {-o.when.time-}. Starting delay should be >= 0, current:', startingDelay )
   }
 
-  o.ready = o.ready || new _.Consequence().take( null );
-
-  if( o.onStart === null )
-  {
-    o.onStart = o.ready;
-    if( !o.detaching )
-    o.onStart = new _.Consequence();
-  }
-  if( o.onTerminate === null )
-  {
-    o.onTerminate = o.ready;
-    if( o.detaching )
-    o.onTerminate = new _.Consequence();
-  }
-
-  if( !o.detaching )
-  _.assert( o.ready === o.onTerminate && o.ready !== o.onStart );
-  else
-  _.assert( o.ready === o.onStart && o.ready !== o.onTerminate );
+  preform1();
 
   if( _global_.debugger )
   debugger;
@@ -237,13 +223,13 @@ function start_body( o )
   if( _.arrayIs( o.execPath ) || _.arrayIs( o.currentPath ) )
   return multiple();
 
+  preform2();
+
   /* */
 
   if( o.sync && !o.deasync )
   {
     let arg = o.ready.sync();
-    if( _.errIs( arg ) )
-    throw _.err( arg );
     single();
     end( undefined, o )
     return o;
@@ -256,6 +242,50 @@ function start_body( o )
     if( !o.detaching )
     o.ready.finallyKeep( end );
     return endDeasyncing();
+  }
+
+  /* */
+
+  function preform1()
+  {
+    o.ready = o.ready || new _.Consequence().take( null );
+
+    if( o.onStart === null ) /* qqq2 : implement test for multiple to check onStart works as should */
+    {
+      o.onStart = o.ready;
+      if( !o.detaching )
+      o.onStart = new _.Consequence();
+    }
+    if( o.onTerminate === null )
+    {
+      o.onTerminate = o.ready;
+      if( o.detaching )
+      o.onTerminate = new _.Consequence();
+    }
+
+    if( o.detaching )
+    _.assert( o.ready === o.onStart && o.ready !== o.onTerminate );
+    else
+    _.assert( o.ready === o.onTerminate && o.ready !== o.onStart );
+    _.assert( o.onStart !== o.onTerminate );
+
+  }
+
+  /* */
+
+  function preform2()
+  {
+
+    o.disconnect = disconnect;
+    o.state = 'initial';
+    o.fullExecPath = null;
+    o.output = null;
+    o.exitCode = null;
+    o.exitSignal = null;
+    o.process = null;
+    o.procedure = null;
+    Object.preventExtensions( o );
+
   }
 
   /* */
@@ -279,7 +309,8 @@ function start_body( o )
 
   function end( err, arg )
   {
-    if( state > 0 )
+    // if( state > 0 )
+    if( o.state !== 'initial' ) /* xxx */
     {
       if( !o.outputAdditive )
       {
@@ -291,7 +322,9 @@ function start_body( o )
     }
     if( err )
     {
-      if( state < 2 )
+      debugger;
+      // if( state < 2 )
+      if( o.state !== 'terminated' && o.state !== 'failed' )
       o.exitCode = null;
       throw _.err( err );
     }
@@ -378,29 +411,36 @@ function start_body( o )
   function single()
   {
 
-    _.assert( state === 0 );
-    state = 1;
+    // _.assert( state === 0 );
+    _.assert( o.state === 'initial' );
+    // state = 1;
 
     try
     {
-      prepare();
+      form();
       launch();
+      timeOutForm();
       pipe();
-
       if( o.dry )
-      o.ready.take( o );
+      o.ready.take( o ); /* qqq : should be no o.ready */
     }
     catch( err )
     {
       debugger
       exitCodeSet( -1 );
       if( o.sync && !o.deasync )
-      throw _.errLogOnce( err );
+      {
+        err = _.err( err );
+        log( _.errOnce( err ), 1 );
+        throw err;
+      }
       else
       {
         if( !o.detaching )
         o.onStart.error( err );
-        o.ready.error( _.errLogOnce( err ) );
+        err = _.err( err );
+        log( _.errOnce( err ), 1 );
+        o.ready.error( err ); /* qqq : should be no o.ready */
       }
     }
 
@@ -408,7 +448,7 @@ function start_body( o )
 
   /* */
 
-  function prepare()
+  function form()
   {
 
     if( _.arrayIs( o.args ) )
@@ -419,7 +459,8 @@ function start_body( o )
     {
       o.fullExecPath = o.execPath;
       execArgs = execPathParse( o.execPath );
-      if( o.mode !== 'shell' && o.mode !== 'exec' )
+      // if( o.mode !== 'shell' && o.mode !== 'exec' )
+      if( o.mode !== 'shell' )
       execArgs = argsUnqoute( execArgs );
       o.execPath = execArgs.shift();
     }
@@ -472,21 +513,18 @@ function start_body( o )
 
     if( o.passingThrough )
     {
-      // console.log( 'argv', process.argv.length, process.argv ); debugger
       argumentsManual = process.argv.slice( 2 );
-
       if( argumentsManual.length )
       o.args = _.arrayAppendArray( o.args || [], argumentsManual );
     }
 
-    /* out options */
-
-    o.exitCode = null;
-    o.exitSignal = null;
-    o.process = null;
-    o.procedure = null;
-    o.disconnect = null;
-    Object.preventExtensions( o );
+    // /* out options */
+    //
+    // o.exitCode = null;
+    // o.exitSignal = null;
+    // o.process = null;
+    // o.procedure = null;
+    // Object.preventExtensions( o );
 
     /* dependencies */
 
@@ -506,7 +544,13 @@ function start_body( o )
     catch( err )
     {
       if( o.verbosity >= 2 )
-      _.errLogOnce( err );
+      log( _.errOnce( err ), 1 );
+      // _.errLogOnce( err );
+    }
+
+    if( o.detaching )
+    {
+      _.procedure.on( 'terminationBegin', onProcedureTerminationBegin );
     }
 
   }
@@ -515,29 +559,8 @@ function start_body( o )
 
   function launch()
   {
+    o.state = 'starting';
 
-    /* launch */
-
-    launchAct();
-
-    /* time out */
-
-    if( o.timeOut && !o.dry )
-    if( !o.sync || o.deasync )
-    _.time.begin( o.timeOut, () =>
-    {
-      if( state === 2 )
-      return;
-      killedByTimeout = true;
-      o.process.kill( 'SIGTERM' ); /* qqq : ask */
-    });
-
-  }
-
-  /* */
-
-  function launchAct()
-  {
     if( _.strIs( o.interpreterArgs ) )
     o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs });
 
@@ -553,8 +576,6 @@ function start_body( o )
     if( process.platform === 'win32' )
     {
       execPath = _.path.nativizeTolerant( execPath );
-      // if( args.length )
-      // args[ 0 ] = _.path.nativizeTolerant( args[ 0 ] )
     }
 
     if( o.mode === 'fork')
@@ -563,60 +584,57 @@ function start_body( o )
       let o2 = optionsForFork();
       execPath = execPathForFork( execPath );
 
-      o.fullExecPath = _.strConcat( _.arrayAppendArray( [ execPath ], args ) ); /* xxx : rename fullExecPath */
-      launchInputLog();
+      o.fullExecPath = _.strConcat( _.arrayAppendArray( [ execPath ], args ) );
+      inputMirror();
 
       if( o.dry )
       return;
 
-      // debugger;
       o.process = ChildProcess.fork( execPath, args, o2 );
-      // debugger;
     }
-    else if( o.mode === 'exec' )
-    {
-      let currentPath = _.path.nativize( o.currentPath );
-      log( '{ shell.mode } "exec" is deprecated' );
-      if( args.length )
-      execPath = execPath + ' ' + argsJoin( args );
-
-      o.fullExecPath = execPath;
-      launchInputLog();
-
-      if( o.dry )
-      return;
-
-      // console.log( ' !! ChildProcess.exec', execPath ); /* yyy */
-
-      if( o.sync && !o.deasync )
-      {
-        try
-        {
-          o.process = ChildProcess.execSync( execPath, { env : o.env, cwd : currentPath } );
-          o.process.status = 0;
-          o.process.signal = null;
-        }
-        catch( _process )
-        {
-          o.process = _process;
-        }
-      }
-      else
-      {
-        o.process = ChildProcess.exec( execPath, { env : o.env, cwd : currentPath } );
-      }
-    }
+    // else if( o.mode === 'exec' )
+    // {
+    //   let currentPath = _.path.nativize( o.currentPath );
+    //   log( 'option::mode:exec of routine _.process.start is deprecated' );
+    //   if( args.length )
+    //   execPath = execPath + ' ' + argsJoin( args );
+    //
+    //   o.fullExecPath = execPath;
+    //   inputMirror();
+    //
+    //   if( o.dry )
+    //   return;
+    //
+    //   if( o.sync && !o.deasync )
+    //   {
+    //     // debugger;
+    //     // o.process = ChildProcess.execSync( execPath, { env : o.env, cwd : currentPath } ); /* yyy */
+    //     try
+    //     {
+    //       o.process = ChildProcess.execSync( execPath, { env : o.env, cwd : currentPath } );
+    //       o.process.status = 0;
+    //       o.process.signal = null;
+    //     }
+    //     catch( _process )
+    //     {
+    //       debugger;
+    //       o.process = _process;
+    //     }
+    //   }
+    //   else
+    //   {
+    //     o.process = ChildProcess.exec( execPath, { env : o.env, cwd : currentPath } );
+    //   }
+    // }
     else if( o.mode === 'spawn' )
     {
       let o2 = optionsForSpawn();
 
       o.fullExecPath = _.strConcat( _.arrayAppendArray( [ execPath ], args ) );
-      launchInputLog();
+      inputMirror();
 
       if( o.dry )
       return;
-
-      // console.log( ' !! ChildProcess.spawn', execPath, args ); /* yyy */
 
       if( o.sync && !o.deasync )
       o.process = ChildProcess.spawnSync( execPath, args, o2 );
@@ -648,22 +666,11 @@ function start_body( o )
       arg2 = arg2 + ' ' + argsJoin( args );
 
       o.fullExecPath = arg2;
-      launchInputLog();
+      inputMirror();
 
       if( o.dry )
       return;
 
-      // console.log( ' !! ChildProcess.spawn', execPath, [ arg1, arg2 ] ); /* yyy */
-
-      /*
-      xxx yyy qqq2 : problem!
-      it.start( `git add --force '*.will.*'` );
-      > git add --force *.will.*
-      !! argsJoin [ 'add', '--force', '*.will.*' ]
-      !! ChildProcess.spawn git [ '-c', 'git add --force *.will.*' ]
-*/
-
-      // debugger;
       if( o.sync && !o.deasync )
       o.process = ChildProcess.spawnSync( appPath, [ arg1, arg2 ], o2 );
       else
@@ -674,15 +681,10 @@ function start_body( o )
 
     /* extend with close */
 
-    o.disconnect = disconnect;
-
+    o.state = 'started';
     o.onStart.take( o );
 
-    if( o.detaching )
-    {
-      _.procedure.on( 'terminationBegin', onProcedureTerminationBegin );
-    }
-    else if( !o.sync )
+    if( !o.detaching && !o.sync )
     {
       let result = _.procedure.find( 'PID:' + o.process.pid );
       _.assert( result.length === 0 || result.length === 1, 'Only one procedure expected for child process with pid:', o.pid );
@@ -691,12 +693,81 @@ function start_body( o )
       else
       o.procedure = result[ 0 ];
     }
+
+  }
+
+  /* */
+
+  function timeOutForm()
+  {
+
+    if( o.timeOut && !o.dry )
+    if( !o.sync || o.deasync )
+    _.time.begin( o.timeOut, () =>
+    {
+      // if( state === 2 )
+      if( o.state === 'terminated' || o.state === 'failed' )
+      return;
+      killedByTimeout = true;
+      o.process.kill( 'SIGTERM' ); /* qqq : need to catch event when process is really down */
+    });
+
+  }
+
+  /* */
+
+  function pipe()
+  {
+
+    if( o.dry )
+    return;
+
+    // qqq2 xxx yyy : uncomment
+    // if( o.outputPiping || o.outputCollecting )
+    // _.assert( !!o.process.stdout || !!o.process.stderr, 'stdout is not available to collect output or pipe it. Set option::stdio to "pipe"' );
+
+    /* piping out channel */
+
+    if( o.outputPiping || o.outputCollecting )
+    if( o.process.stdout )
+    if( o.sync && !o.deasync )
+    handleStdout( o.process.stdout );
+    else
+    o.process.stdout.on( 'data', handleStdout );
+
+    /* piping error channel */
+
+    // if( o.outputPiping || o.outputCollecting ) /* qqq : why no such line? */
+    if( o.process.stderr )
+    if( o.sync && !o.deasync )
+    handleStderr( o.process.stderr );
+    else
+    o.process.stderr.on( 'data', handleStderr );
+
+    /* handling */
+
+    if( o.sync && !o.deasync )
+    {
+      if( o.process.error )
+      handleError( o.process.error ); /* qqq2 : cover this branch in all modes */
+      else
+      handleClose( o.process.status, o.process.signal ); /* qqq2 : cover this branch in all modes */
+    }
+    else
+    {
+      o.process.on( 'error', handleError );
+      o.process.on( 'close', handleClose );
+    }
+
   }
 
   /* */
 
   function disconnect()
   {
+
+    _.assert( !!this.process, 'Process is not started. Cant disconnect.' );
+
     if( this.process.stdout )
     this.process.stdout.destroy();
     if( this.process.stderr )
@@ -710,13 +781,10 @@ function start_body( o )
 
     this.process.unref();
 
-    // xxx qqq : strange?
+    // xxx qqq : strange? explain
     if( !this.detaching || this.process._disconnected )
     return true;
-    this.process._disconnected = true; /* qqq : explain */
-
-    debugger;
-    // xxx qqq : strange?
+    this.process._disconnected = true;
     if( _.process.isAlive( this.process.pid ) )
     this.onTerminate.error( _._err({ args : [ 'This process was disconnected' ], reason : 'disconnected' }) );
 
@@ -725,33 +793,35 @@ function start_body( o )
 
   /* */
 
-  function launchInputLog()
+  function inputMirror()
   {
     /* logger */
     try
     {
 
+      if( o.verbosity >= 3 )
+      {
+        let output = '   at ';
+        if( !o.outputGray )
+        output = _.ct.format( output, { fg : 'bright white' } ) + _.ct.format( o.currentPath, { fg : 'path' } );
+        else
+        output = output + o.currentPath
+        log( output );
+      }
+
       if( o.verbosity && o.inputMirroring )
       {
         let prefix = ' > ';
         if( !o.outputGray )
-        prefix = _.color.strFormat( prefix, { fg : 'bright white' } );
+        prefix = _.ct.format( prefix, { fg : 'bright white' } );
         log( prefix + o.fullExecPath );
-      }
-
-      if( o.verbosity >= 3 )
-      {
-        let prefix = '   at ';
-        if( !o.outputGray )
-        prefix = _.color.strFormat( prefix, { fg : 'bright white' } );
-        log( prefix + o.currentPath );
       }
 
     }
     catch( err )
     {
       debugger;
-      _.errLogOnce( err );
+      log( _.errOnce( err ), 1 );
     }
   }
 
@@ -808,19 +878,12 @@ function start_body( o )
           throw _.err( 'Arguments string in execPath:', src, 'has not closed quoting in argument:', args[ i ] );
         }
       })
-
-      // let begin = _.strBeginOf( args[ i ], strOptions.quotingPrefixes );
-      // let end = _.strEndOf( args[ i ], strOptions.quotingPostfixes );
-      // if( begin )
-      // if( begin && end ) /* qqq3 : add test routine to cover that */
-      // _.sure( begin === end, 'Arguments string in execPath:', src, 'has not closed quoting in argument:', args[ i ] );
-      /* qqq3 : could be `"path/key3":'val3'` */
     }
 
     return args;
   }
 
-  //
+  /* */
 
   function argsUnqoute( args )
   {
@@ -831,9 +894,8 @@ function start_body( o )
       let begin = _.strBeginOf( args[ i ], quotes );
       let end = _.strEndOf( args[ i ], quotes );
       if( begin )
-      if( begin && begin === end ) /* qqq3 : add test routine to cover that */
-      args[ i ] = _.strInsideOf( args[ i ], begin, end ); /* yyy qqq2 : should not uncover arguments here! */
-      /* qqq3 : could be `"path/key3":'val3'` */
+      if( begin && begin === end )
+      args[ i ] = _.strInsideOf( args[ i ], begin, end );
     }
 
     return args;
@@ -841,61 +903,9 @@ function start_body( o )
 
   /* */
 
-  // function _argsJoin( src )
-  // {
-  //   let args = src.slice();
-
-  //   // console.log( ' !!', 'argsJoin:before', src ) /* yyy */
-
-  //   for( let i = 0; i < args.length; i++ )
-  //   {
-  //     /* escape quotes to make shell interpret them as regular symbols */
-  //     let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', "`" ]
-  //     // _.each( quotesToEscape, ( quote ) => /* yyy qqq2 : fix? */
-  //     // {
-  //     //   args[ i ] = escapeArg( args[ i ], quote );
-  //     // })
-  //     if( process.platform !== 'win32' )
-  //     {
-  //       if( _.strHas( src[ i ], ' ' ) )
-  //       continue;
-
-  //       let begin = _.strBeginOf( src[ i ], quotesToEscape );
-  //       let end = _.strEndOf( src[ i ], quotesToEscape );
-  //       if( begin && begin === end )
-  //       continue;
-
-  //       // args[ i ] = escapeArg( args[ i ], "'" ); /* yyy qqq2 : fix? */
-  //     }
-  //   }
-
-  //   let result;
-
-  //   if( args.length === 1 )
-  //   {
-  //     result = _.strQuote( args[ 0 ] ); /* xxx qqq : ? */
-  //   }
-  //   else
-  //   {
-  //     /* quote only arguments with spaces */
-  //     _.each( args, ( arg, i ) =>
-  //     {
-  //       if( _.strHas( arg, ' ' ) )
-  //       if( arg[ 0 ] !== '\"' )
-  //       args[ i ] = _.strQuote( arg );
-  //     })
-
-  //     result = args.join( ' ' );
-  //   }
-
-  //   // console.log( ' !!', 'argsJoin:after', result ); /* yyy */
-
-  //   return result;
-  // }
-
   function argsJoin( args )
   {
-    if( !execArgs && !argumentsManual )
+    if( !execArgs && !argumentsManual ) /* qqq : argumentsManual?? */
     return args.join( ' ' );
 
     let i = execArgs ? execArgs.length : args.length - argumentsManual.length;
@@ -904,16 +914,17 @@ function start_body( o )
       let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', '`' ]
       _.each( quotesToEscape, ( quote ) =>
       {
-        args[ i ] = escapeArg( args[ i ], quote );
+        args[ i ] = argEscape( args[ i ], quote );
       })
-
       args[ i ] = _.strQuote( args[ i ] );
     }
 
     return args.join( ' ' );
   }
 
-  function escapeArg( arg, quote )
+  /* */
+
+  function argEscape( arg, quote )
   {
     return _.strReplaceAll( arg, quote, ( match, it ) =>
     {
@@ -948,7 +959,6 @@ function start_body( o )
     let interpreterArgs = o.interpreterArgs || process.execArgv;
     let o2 =
     {
-      // silent : false,
       detached : !!o.detaching,
       env : o.env,
       stdio : o.stdio,
@@ -959,6 +969,8 @@ function start_body( o )
     return o2;
   }
 
+  /* */
+
   function execPathForFork( execPath )
   {
     let quotes = [ '"', `'`, '`' ];
@@ -968,9 +980,11 @@ function start_body( o )
     return execPath;
   }
 
+  /* */
+
   function onProcedureTerminationBegin()
   {
-    // if( o.when === 'instant' )
+    // if( o.when === 'instant' ) /* qqq : ? */
     // o.ready.error( _.err( 'Detached child with pid:', o.process.pid, 'is continuing execution after parent death.' ) );
     o.disconnect();
     _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
@@ -978,59 +992,23 @@ function start_body( o )
 
   /* */
 
-  function pipe()
-  {
-
-    if( o.dry )
-    return;
-
-    // qqq xxx : uncomment
-    // if( o.outputPiping || o.outputCollecting )
-    // _.assert( !!o.process.stdout, 'stdout is not available to collect output or pipe it. Set option::stdio to "pipe"' );
-
-    /* piping out channel */
-
-    if( o.outputPiping || o.outputCollecting )
-    if( o.process.stdout )
-    if( o.sync && !o.deasync )
-    handleStdout( o.process.stdout );
-    else
-    o.process.stdout.on( 'data', handleStdout );
-
-    /* piping error channel */
-
-    if( o.process.stderr )
-    if( o.sync && !o.deasync )
-    handleStderr( o.process.stderr );
-    else
-    o.process.stderr.on( 'data', handleStderr );
-
-    if( o.sync && !o.deasync )
-    {
-      if( o.process.error )
-      handleError( o.process.error );
-      else
-      handleClose( o.process.status, o.process.signal );
-    }
-    else
-    {
-      o.process.on( 'error', handleError );
-      o.process.on( 'close', handleClose );
-    }
-
-  }
-
-  /* */
-
   function exitCodeSet( exitCode )
   {
-    if( currentExitCode )
+    // console.log( _.process.realMainFile(), 'exitCodeSet', exitCode );
+    // debugger;
+    if( o.exitCode )
     return;
-    if( o.applyingExitCode && exitCode !== 0 )
-    {
-      currentExitCode = _.numberIs( exitCode ) ? exitCode : -1;
-      _.process.exitCode( currentExitCode );
-    }
+    o.exitCode = exitCode;
+    exitCode = _.numberIs( exitCode ) ? exitCode : -1;
+    if( o.applyingExitCode )
+    _.process.exitCode( exitCode );
+    // if( currentExitCode )
+    // return;
+    // if( o.applyingExitCode && exitCode !== 0 )
+    // {
+    //   currentExitCode = _.numberIs( exitCode ) ? exitCode : -1;
+    //   _.process.exitCode( currentExitCode );
+    // }
   }
 
   /* */
@@ -1059,24 +1037,24 @@ function start_body( o )
     // if( exitSignal && exitCode === null )
     // exitCode = -1;
 
-    o.exitCode = exitCode;
+    // debugger;
+    exitCodeSet( exitCode );
+    // o.exitCode = exitCode;
     o.exitSignal = exitSignal;
 
     if( o.verbosity >= 5 )
     {
       log( ' < Process returned error code ' + exitCode );
       if( exitCode )
-      {
-        log( infoGet() );
-      }
+      log( infoGet() );
     }
 
-    if( state === 2 )
+    // if( state === 2 )
+    if( o.state === 'terminated' || o.state === 'failed' ) /* xxx qqq : move above */
     return;
 
-    state = 2;
-
-    exitCodeSet( exitCode );
+    o.state = 'terminated';
+    // state = 2;
 
     if( ( exitSignal || exitCode !== 0 ) && o.throwingExitCode )
     {
@@ -1099,13 +1077,11 @@ function start_body( o )
       else
       {
         o.onTerminate.error( err );
-        // o.ready.error( err );
       }
     }
     else if( !o.sync || o.deasync )
     {
       o.onTerminate.take( o );
-      // o.ready.take( o );
     }
 
   }
@@ -1117,21 +1093,28 @@ function start_body( o )
 
     exitCodeSet( -1 );
 
-    if( state === 2 )
+    if( o.state === 'terminated' || o.state === 'failed' ) /* xxx qqq : move above */
     return;
 
-    state = 2;
+    o.state = 'failed';
+
+    // if( state === 2 )
+    // return;
+    //
+    // state = 2;
 
     err = _.err( 'Error shelling command\n', o.execPath, '\nat', o.currentPath, '\n', err );
     if( o.verbosity )
-    err = _.errLogOnce( err );
+    log( _.errOnce( err ), 1 );
+    // err = _.errLogOnce( err );
 
     if( o.sync && !o.deasync )
-    throw err;
+    {
+      throw err;
+    }
     else
     {
       o.onTerminate.error( err );
-      // o.ready.error( err );
     }
   }
 
@@ -1161,7 +1144,7 @@ function start_body( o )
     data = 'stderr :\n' + '  ' + _.strLinesIndentation( data, '  ' );
 
     if( _.color && !o.outputGray )
-    data = _.color.strFormat( data, 'pipe.negative' );
+    data = _.ct.format( data, 'pipe.negative' );
 
     log( data, 1 );
   }
@@ -1173,12 +1156,12 @@ function start_body( o )
 
     if( _.bufferAnyIs( data ) )
     data = _.bufferToStr( data );
-
     if( o.outputGraying )
     data = StripAnsi( data );
 
     if( o.outputCollecting )
     o.output += data;
+
     if( !o.outputPiping )
     return;
 
@@ -1189,16 +1172,18 @@ function start_body( o )
     data = 'stdout :\n' + '  ' + _.strLinesIndentation( data, '  ' );
 
     if( _.color && !o.outputGray && !o.outputGrayStdout )
-    data = _.color.strFormat( data, 'pipe.neutral' );
+    data = _.ct.format( data, 'pipe.neutral' );
 
     log( data );
-
   }
 
   /* */
 
   function log( msg, isError )
   {
+
+    if( msg === undefined )
+    return;
 
     if( o.outputAdditive )
     {
@@ -1364,7 +1349,7 @@ defaults.applyingExitCode = 1;
 defaults.throwingExitCode = 0;
 defaults.outputPiping = 1;
 defaults.stdio = 'inherit';
-// defaults.mode = 'spawn'; // xxx : uncomment after fix of the mode
+// defaults.mode = 'spawn'; // qqq xxx : uncomment after fix of the mode
 
 //
 
@@ -1387,7 +1372,7 @@ defaults.stdio = 'inherit';
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
  *
- * let con = _.process.startNode({ execPath : 'path/to/script.js' });
+ * let con = _.process.startNjs({ execPath : 'path/to/script.js' });
  *
  * con.then( ( got ) =>
  * {
@@ -1395,12 +1380,12 @@ defaults.stdio = 'inherit';
  *  return got;
  * })
  *
- * @function startNode
+ * @function startNjs
  * @module Tools/base/ProcessBasic
  * @namespace Tools.process
  */
 
-function startNode_body( o )
+function startNjs_body( o )
 {
 
   if( !System )
@@ -1409,7 +1394,7 @@ function startNode_body( o )
   _.include( 'wPathBasic' );
   _.include( 'wFiles' );
 
-  _.assertRoutineOptions( startNode_body, o );
+  _.assertRoutineOptions( startNjs_body, o );
   _.assert( _.strIs( o.execPath ) );
   _.assert( !o.code );
   _.assert( arguments.length === 1, 'Expects single argument' );
@@ -1435,6 +1420,7 @@ function startNode_body( o )
   }
 
   let path = _.fileProvider.path.nativizeTolerant( o.execPath );
+
   if( o.mode === 'fork' )
   o.interpreterArgs = interpreterArgs;
   else
@@ -1450,17 +1436,22 @@ function startNode_body( o )
   o.onTerminate = startOptions.onTerminate;
   o.process = startOptions.process;
   o.disconnect = startOptions.disconnect;
+  // o.status = startOptions.status;
 
   _.assert( !!startOptions.ready );
   _.assert( !!startOptions.onStart );
   _.assert( !!startOptions.onTerminate );
+  _.assert( !!startOptions.disconnect );
+  // _.assert( !!startOptions.status );
 
   startOptions.onStart.give( function( err, arg )
   {
     _.assert( !!startOptions.process );
     _.assert( !!startOptions.disconnect );
+    // _.assert( !!startOptions.status );
     o.process = startOptions.process;
     o.disconnect = startOptions.disconnect;
+    // o.status = startOptions.status;
     this.take( err, arg );
   })
 
@@ -1469,13 +1460,14 @@ function startNode_body( o )
     o.output = startOptions.output;
     o.exitCode = startOptions.exitCode;
     o.exitSignal = startOptions.exitSignal;
+    // o.status = startOptions.status;
     this.take( err, arg );
   })
 
   return result;
 }
 
-var defaults = startNode_body.defaults = Object.create( start.defaults );
+var defaults = startNjs_body.defaults = Object.create( start.defaults );
 
 defaults.passingThrough = 0;
 defaults.maximumMemory = 0;
@@ -1483,12 +1475,12 @@ defaults.applyingExitCode = 1;
 defaults.stdio = 'inherit';
 defaults.mode = 'fork';
 
-let startNode = _.routineFromPreAndBody( start_pre, startNode_body );
+let startNjs = _.routineFromPreAndBody( start_pre, startNjs_body );
 
 //
 
 /**
- * @summary Short-cut for {@link module:Tools/base/ProcessBasic.Tools.process.startNode startNode} routine.
+ * @summary Short-cut for {@link module:Tools/base/ProcessBasic.Tools.process.startNjs startNjs} routine.
  * @description
  * Passes arguments of parent process to the child and allows `node` to use all available memory.
  * Expects path to javascript file in `o.execPath` option. Automatically prepends `node` prefix before script path `o.execPath`.
@@ -1506,7 +1498,7 @@ let startNode = _.routineFromPreAndBody( start_pre, startNode_body );
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
  *
- * let con = _.process.startNodePassingThrough({ execPath : 'path/to/script.js' });
+ * let con = _.process.startNjsPassingThrough({ execPath : 'path/to/script.js' });
  *
  * con.then( ( got ) =>
  * {
@@ -1514,14 +1506,14 @@ let startNode = _.routineFromPreAndBody( start_pre, startNode_body );
  *  return got;
  * })
  *
- * @function startNodePassingThrough
+ * @function startNjsPassingThrough
  * @module Tools/base/ProcessBasic
  * @namespace Tools.process
  */
 
-let startNodePassingThrough = _.routineFromPreAndBody( start_pre, startNode.body );
+let startNjsPassingThrough = _.routineFromPreAndBody( start_pre, startNjs.body );
 
-var defaults = startNodePassingThrough.defaults;
+var defaults = startNjsPassingThrough.defaults;
 
 defaults.verbosity = 0;
 defaults.passingThrough = 1;
@@ -1848,8 +1840,8 @@ function exitWithBeep()
 //
 
 /*
-qqq : use maybe _exitHandlerRepair instead of _exitHandlerOnce?
-qqq : investigate difference between _exitHandlerRepair and _exitHandlerOnce
+zzz : use maybe _exitHandlerRepair instead of _exitHandlerOnce?
+zzz : investigate difference between _exitHandlerRepair and _exitHandlerOnce
 Vova: _exitHandlerRepair allows app to exit safely when one of exit signals will be triggered
       _exitHandlerOnce allows to execute some code when process is about to exit:
        - process.exit() was called explcitly
@@ -1983,35 +1975,6 @@ function _exitHandlerRepair()
 
 //
 
-// /* xxx : deprecate */
-// function _exitHandlerOnce( routine )
-// {
-//   _.assert( arguments.length === 1 );
-//   _.assert( _.routineIs( routine ) );
-//
-//   console.warn( `WARNING : Routine _.process._exitHandlerOnce is deprecated. Please, use _.process.on( 'exit', callback ) instead.` ); debugger;
-//
-//   _.process.on( 'exit', routine );
-// }
-//
-// //
-//
-// /*
-// qqq : cover routine _exitHandlerOff by tests
-// Vova : wrote test routine _exitHandlerOff
-// */
-//
-// function _exitHandlerOff( routine )
-// {
-//   _.assert( arguments.length === 1 );
-//   _.assert( _.routineIs( routine ) );
-//   debugger;
-//   console.warn( `WARNING : Routine _.process._exitHandlerOff is deprecated. Please, use _.process.off( 'exit', callback ) instead.` ); debugger;
-//   _.process.off( 'exit', routine );
-// }
-
-//
-
 function _eventExitSetup()
 {
 
@@ -2035,20 +1998,7 @@ function _eventExitSetup()
 function _eventExitHandle()
 {
   let args = arguments;
-  // debugger;
   _.process.eventGive({ event : 'exit', args });
-  // debugger;
-  // _.each( _.process._ehandler.events.exit, ( callback ) =>
-  // {
-  //   try
-  //   {
-  //     callback.apply( _.process, args );
-  //   }
-  //   catch( err )
-  //   {
-  //     _.setup._errUncaughtHandler2( err, 'uncaught error on termination' );
-  //   }
-  // })
   process.removeListener( 'exit', _.process._registeredExitHandler );
   // process.removeListener( 'SIGINT', _.process._registeredExitHandler );
   // process.removeListener( 'SIGTERM', _.process._registeredExitHandler );
@@ -2074,6 +2024,7 @@ function isAlive( src )
     return err.code === 'EPERM'
   }
 
+  /* qqq : not handled branch? */
 }
 
 //
@@ -2165,7 +2116,7 @@ function kill( o )
 
   return ready;
 
-  //
+  /* */
 
   function killChildren( tree )
   {
@@ -2179,7 +2130,7 @@ function kill( o )
     return true;
   }
 
-  //
+  /* */
 
   function handleError( err )
   {
@@ -2192,7 +2143,7 @@ function kill( o )
     throw _.err( err );
   }
 
-  //
+  /* */
 
   function waitForTermination()
   {
@@ -2238,6 +2189,9 @@ function kill( o )
 
     return ready;
   }
+
+  /* */
+
 }
 
 kill.defaults =
@@ -2251,7 +2205,7 @@ kill.defaults =
 //
 
 /*
-  zzz Vova: shell,exec modes have different behaviour on Windows,OSX and Linux
+  zzz Vova: shell mode have different behaviour on Windows, OSX and Linux
   look for solution that allow to have same behaviour on each mode
 */
 
@@ -2307,12 +2261,14 @@ function terminate( o )
     if( isWindows )
     result = windowsKill( pid );
     else
-    result = process.kill( pid, 'SIGINT' ); /* xxx qqq : ? */
+    result = process.kill( pid, 'SIGINT' );
 
     timeOutMaybe( pid );
 
     return result;
   }
+
+  /* */
 
   function windowsKill( pid )
   {
@@ -2331,6 +2287,8 @@ function terminate( o )
     })
   }
 
+  /* */
+
   function timeOutMaybe( pid )
   {
     if( o.timeOut )
@@ -2338,13 +2296,14 @@ function terminate( o )
     {
       if( !_.process.isAlive( pid ) )
       return null;
-
       if( o.process )
       o.process.kill( 'SIGKILL' )
       else
       process.kill( pid, 'SIGKILL' );
     })
   }
+
+  /* */
 
   function handleError( err )
   {
@@ -2354,6 +2313,8 @@ function terminate( o )
     throw _.err( err, '\nTarget process:', _.strQuote( o.pid ), 'does not exist.' );
     throw _.err( err );
   }
+
+  /* */
 
   function terminateChildren( tree )
   {
@@ -2366,6 +2327,8 @@ function terminate( o )
     }
     return null;
   }
+
+  /* */
 
   function terminateChildrenWin( tree )
   {
@@ -2382,6 +2345,7 @@ function terminate( o )
     return _.Consequence.AndKeep_( ... cons );
     return true;
   }
+
 }
 
 terminate.defaults =
@@ -2516,21 +2480,19 @@ let Extension =
 
   start,
   startPassingThrough,
-  startNode, /* xxx : rename */
-  startNodePassingThrough,
+  startNjs,
+  startNjsPassingThrough,
   startAfterDeath,
   starter,
 
   // exit
 
-  exitReason, /* qqq : cover and document Vova:wrote test routine exitReason */
-  exitCode, /* qqq : cover and document Vova:wrote test routine exitCode */
+  exitReason,
+  exitCode,
   exit,
   exitWithBeep,
 
-  _exitHandlerRepair, /* xxx */
-  // _exitHandlerOnce, /* xxx */
-  // _exitHandlerOff, /* xxx */
+  _exitHandlerRepair, /* zzz */
 
   _eventExitSetup,
   _eventExitHandle,
