@@ -12719,6 +12719,7 @@ function startDetachingChildExitsBeforeParent( test )
       stdio : 'ignore',
       detaching : true,
       mode : 'spawn',
+
     }
 
     _.process.start( o );
@@ -12831,6 +12832,236 @@ Parent starts child process in detached mode and registers callback to wait for 
 Child process creates test file after 1 second and exits.
 Callback in parent recevies message. Parent exits.
 `
+
+//
+
+function startDetachingDisconnectedChildExistsBeforeParent( test )
+{
+  let context = this;
+  var routinePath = _.path.join( context.suiteTempPath, test.name );
+
+  /* */
+
+  var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
+  var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
+  _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
+
+  let ready = new _.Consequence().take( null );
+
+  ready
+
+  /* Vova qqq xxx: close event is not emitted for disconnected detached child in fork mode*/
+
+  .then( () =>
+  {
+    test.case = 'detaching on, disconnected forked child'
+    let o =
+    {
+      execPath : 'testAppChild.js',
+      mode : 'fork',
+      stdio : 'ignore',
+      currentPath : routinePath,
+      detaching : 1
+    }
+
+    let result = _.process.start( o );
+
+    o.disconnect();
+
+    test.identical( o.onStart, result );
+    test.is( _.consequenceIs( o.onStart ) )
+
+    o.onStart.finally( ( err, got ) =>
+    {
+      test.identical( err, undefined );
+      test.identical( got, o );
+      test.is( _.process.isAlive( o.process.pid ) )
+      return null;
+    })
+
+    o.onTerminate.finallyGive( ( err, got ) =>
+    {
+      _.errAttend( err );
+      test.is( _.errIs( err ) );
+      test.identical( got, undefined );
+      test.is( _.process.isAlive( o.process.pid ) )
+    })
+
+    result = _.time.out( 3000, () =>
+    {
+      test.identical( o.onTerminate.resourcesCount(), 0 );
+      test.is( !_.process.isAlive( o.process.pid ) )
+      return null;
+    })
+
+    return _.Consequence.AndTake_( o.onStart, result );
+  })
+
+  /* */
+
+  return ready;
+
+  /* */
+
+  function testAppChild()
+  {
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    var args = _.process.args();
+
+    _.time.out( 2000, () =>
+    {
+      console.log( 'Child process end' )
+      return null;
+    })
+  }
+
+}
+
+//
+
+function startDetachingChildExistsBeforeParentWaitForTermination( test )
+{
+  let context = this;
+  var routinePath = _.path.join( context.suiteTempPath, test.name );
+
+  /* */
+
+  var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
+  var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
+  _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
+
+  let ready = new _.Consequence().take( null );
+
+  ready
+
+  .then( () =>
+  {
+    test.case = 'detaching on, disconnected forked child'
+    let o =
+    {
+      execPath : 'testAppChild.js',
+      mode : 'fork',
+      stdio : 'ignore',
+      currentPath : routinePath,
+      detaching : 1
+    }
+
+    _.process.start( o );
+
+    o.onTerminate.finally( ( err, got ) =>
+    {
+      test.identical( err, undefined );
+      test.identical( got, o );
+      test.is( !_.process.isAlive( o.process.pid ) )
+      return null;
+    })
+
+    return o.onTerminate;
+  })
+
+  /* */
+
+  return ready;
+
+  /* */
+
+  function testAppChild()
+  {
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    var args = _.process.args();
+
+    _.time.out( 2000, () =>
+    {
+      console.log( 'Child process end' )
+      return null;
+    })
+  }
+
+}
+
+//
+
+function startDetachingEndCompetitorIsExecuted( test )
+{
+  let context = this;
+  var routinePath = _.path.join( context.suiteTempPath, test.name );
+
+  /* */
+
+  var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
+  var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
+  _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
+
+  let ready = new _.Consequence().take( null );
+
+  ready
+
+  /* Vova qqq xxx: close event is not emitted for disconnected detached child in fork mode*/
+
+  .then( () =>
+  {
+    test.case = 'detaching on, disconnected forked child'
+    let o =
+    {
+      execPath : 'testAppChild.js',
+      mode : 'fork',
+      stdio : 'ignore',
+      currentPath : routinePath,
+      detaching : 1
+    }
+
+    let result = _.process.start( o );
+
+    // test.identical( o.onStart, result );
+    test.is( _.consequenceIs( o.onStart ) )
+    test.is( _.consequenceIs( o.onTerminate ) )
+
+    o.onStart.finally( ( err, got ) =>
+    {
+      test.identical( o.ended, false );
+      test.identical( err, undefined );
+      test.identical( got, o );
+      test.is( _.process.isAlive( o.process.pid ) );
+      return null;
+    })
+
+    o.onTerminate.finally( ( err, got ) =>
+    {
+      test.identical( o.ended, true );
+      test.identical( err, undefined );
+      test.identical( got, o );
+      test.is( !_.process.isAlive( o.process.pid ) )
+      return null;
+    })
+
+    return _.Consequence.AndTake_( o.onStart, o.onTerminate );
+  })
+
+  /* */
+
+  return ready;
+
+  /* */
+
+  function testAppChild()
+  {
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    var args = _.process.args();
+
+    _.time.out( 2000, () =>
+    {
+      console.log( 'Child process end' )
+      return null;
+    })
+  }
+
+}
 
 //
 
@@ -19511,6 +19742,9 @@ var Proto =
 
     startDetachingChildExitsAfterParent,
     startDetachingChildExitsBeforeParent,
+    startDetachingDisconnectedChildExistsBeforeParent,
+    startDetachingChildExistsBeforeParentWaitForTermination,
+    startDetachingEndCompetitorIsExecuted,
 
     startDetachedOutputStdioIgnore,
     startDetachedOutputStdioPipe,
