@@ -297,6 +297,7 @@ function start_body( o )
     o.process = null;
     o.procedure = null;
     o.procedureIsNew = null;
+    o.ended = false;
     Object.preventExtensions( o );
 
   }
@@ -329,6 +330,8 @@ function start_body( o )
     // o.procedure.end();
     // if( o.detaching )
     // _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
+
+    o.ended = true;
 
     // if( state > 0 )
     if( o.state !== 'initial' ) /* xxx qqq : why if? */
