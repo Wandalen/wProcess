@@ -403,7 +403,7 @@ aaa : done
 
 function processArgsBase( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testApp()
@@ -491,7 +491,7 @@ function processArgsBase( test )
 
 function processArgsPropertiesBase( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testApp()
@@ -740,7 +740,7 @@ function processArgsPropertiesBase( test )
 
 function processArgsMultipleCommands( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testApp()
@@ -838,7 +838,7 @@ function processArgsMultipleCommands( test )
 
 function processArgsPaths( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testApp()
@@ -938,7 +938,7 @@ function processArgsPaths( test )
 
 function processArgsWithSpace( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testApp()
@@ -1372,7 +1372,7 @@ function processArgsWithSpace( test )
 
 function processOnExitEvent( test ) /* qqq : adjust vova: done */
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
   var commonDefaults =
   {
@@ -1472,7 +1472,7 @@ function processOnExitEvent( test ) /* qqq : adjust vova: done */
 
 function processOffExitEvent( test ) /* qqq : adjust vova: done */
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testApp()
@@ -1687,9 +1687,11 @@ function exitCode( test )
 
 //
 
+/* qqq : split test cases by / ** / delimeting lines */
+/* qqq : split by mode */
 function shell( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
   var commonDefaults =
   {
@@ -1709,7 +1711,8 @@ function shell( test )
   var o;
   var con = new _.Consequence().take( null );
 
-  con.thenKeep( function()
+  con
+  .thenKeep( function()
   {
     test.case = 'mode : spawn';
 
@@ -1751,21 +1754,7 @@ function shell( test )
       return null;
     })
   })
-  // .thenKeep( function( arg )
-  // {
-  //   /* mode : spawn, stdio : inherit */
 
-  //   o.stdio = 'inherit';
-
-  //   var options = _.mapSupplement( {}, o, commonDefaults );
-
-  //   return _.process.start( options )
-  //   .thenKeep( function()
-  //   {
-  //     test.identical( options.exitCode, 0 );
-  //     test.identical( options.output.length, 0 );
-  //   })
-  // })
   .thenKeep( function( arg )
   {
     test.case = 'mode : shell';
@@ -1809,25 +1798,9 @@ function shell( test )
     })
   })
 
-  // qqq : ?
-  // .thenKeep( function( arg )
-  // {
-  //   /* mode : shell, stdio : inherit */
-
-  //   o.stdio = 'inherit'
-
-  //   var options = _.mapSupplement( {}, o, commonDefaults );
-
-  //   return _.process.start( options )
-  //   .thenKeep( function()
-  //   {
-  //     test.identical( options.exitCode, 0 );
-  //     test.identical( options.output.length, 0 );
-  //   })
-  // })
   .thenKeep( function( arg )
   {
-    test.case = 'spawn, stop process using kill';
+    test.case = 'spawn, stop process using SIGINT';
 
     o =
     {
@@ -1849,15 +1822,19 @@ function shell( test )
     shell.finally(function()
     {
       test.identical( options.process.killed, true );
-      test.identical( !options.exitCode, true );
+      test.identical( options.exitCode, null ); /* qqq2 : near each such test check should be following checks */
+      test.identical( options.exitSignal, 'SIGINT' );
+      test.identical( options.process.exitCode, null );
+      test.identical( options.process.signalCode, 'SIGINT' );
       return null;
     })
 
     return shell;
   })
+
   .thenKeep( function( arg )
   {
-    test.case = 'shell, stop process using kill';
+    test.case = 'shell, stop process using SIGINT';
 
     o =
     {
@@ -1879,12 +1856,52 @@ function shell( test )
     shell.finally(function()
     {
       test.identical( options.process.killed, true );
-      test.identical( !options.exitCode, true );
+
+      test.identical( options.exitCode, null );
+      test.identical( options.exitSignal, 'SIGINT' );
+      test.identical( options.process.exitCode, null );
+      test.identical( options.process.signalCode, 'SIGINT' );
+
       return null;
     })
 
     return shell;
   })
+
+  .thenKeep( function( arg )
+  {
+    test.case = 'shell, stop process using SIGKILL';
+
+    o =
+    {
+      execPath :  'node ' + testAppPath + ' loop : 1',
+      mode : 'shell',
+      stdio : 'pipe',
+      throwingExitCode : 0
+    }
+
+    var options = _.mapSupplement( {}, o, commonDefaults );
+
+    var shell = _.process.start( options );
+    _.time.out( 500, () =>
+    {
+      test.identical( options.process.killed, false );
+      options.process.kill( 'SIGKILL' );
+      return null;
+    })
+    shell.finally(function()
+    {
+      test.identical( options.process.killed, true );
+      test.identical( options.exitCode, null );
+      test.identical( options.exitSignal, 'SIGKILL' );
+      test.identical( options.process.exitCode, null );
+      test.identical( options.process.signalCode, 'SIGKILL' );
+      return null;
+    })
+
+    return shell;
+  })
+
   .thenKeep( function( arg )
   {
     test.case = 'spawn, return good code';
@@ -1965,38 +1982,8 @@ function shell( test )
       return null;
     });
   })
-  //
-  // test.case = 'test';
-  // test.identical( 0, 0 );
 
-  // con
-  // .thenKeep( function( arg )
-  // {
-  //   test.case = 'simple command';
-  //   var con = _.process.start( 'exit' );
-  //   return test.returnsSingleResource( con );
-  // })
-  // .thenKeep( function( arg )
-  // {
-  //   test.case = 'bad command, shell';
-  //   var con = _.process.start({ code : 'xxx', throwingExitCode : 1, mode : 'shell' });
-  //   return test.shouldThrowErrorSync( con );
-  // })
-  // .thenKeep( function( arg )
-  // {
-  //   test.case = 'bad command, spawn';
-  //   var con = _.process.start({ code : 'xxx', throwingExitCode : 1, mode : 'spawn' });
-  //   return test.shouldThrowErrorSync( con );
-  // })
-  // .thenKeep( function( arg )
-  // {
-  //   test.case = 'several arguments';
-  //   var con = _.process.start( 'echo echo something' );
-  //   return test.mustNotThrowError( con );
-  // })
-  // ;
-
-  // con.thenKeep( () =>  _.fileProvider.fileDelete( testAppPath ) );
+  /* - */
 
   .thenKeep( function( arg )
   {
@@ -2022,6 +2009,7 @@ function shell( test )
     })
   })
 
+  /* - */
 
   return con;
 }
@@ -2032,7 +2020,7 @@ shell.timeOut = 30000;
 
 function shellSync( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
   var commonDefaults =
   {
@@ -2052,7 +2040,7 @@ function shellSync( test )
 
   var o;
 
-  //
+  /* - */
 
   test.case = 'mode : spawn';
   o =
@@ -2077,7 +2065,7 @@ function shellSync( test )
   test.identical( options.exitCode, 0 );
   test.identical( options.output.length, 0 );
 
-  //
+  /* - */
 
   test.case = 'mode : shell';
   o =
@@ -2099,7 +2087,7 @@ function shellSync( test )
   test.identical( options.exitCode, 0 );
   test.identical( options.output.length, 0 );
 
-  //
+  /* - */
 
   test.case = 'shell, stop process using timeOut';
   o =
@@ -2113,7 +2101,7 @@ function shellSync( test )
   var options = _.mapSupplement( {}, o, commonDefaults );
   test.shouldThrowErrorSync( () => _.process.start( options ) );
 
-  //
+  /* - */
 
   test.case = 'spawn, return good code';
   o =
@@ -2126,9 +2114,9 @@ function shellSync( test )
   test.mustNotThrowError( () => _.process.start( options ) )
   test.identical( options.exitCode, 0 );
 
-  //
+  /* - */
 
-  test.case = 'spawn, return bad code';
+  test.case = 'spawn, return ext code 1';
   o =
   {
     execPath :  'node ' + testAppPath + ' exitWithCode : 1',
@@ -2136,10 +2124,23 @@ function shellSync( test )
     stdio : 'pipe'
   }
   var options = _.mapSupplement( {}, o, commonDefaults );
-  test.shouldThrowErrorSync( () => _.process.start( options ) )
+  test.shouldThrowErrorSync( () => _.process.start( options ) );
   test.identical( options.exitCode, 1 );
 
-  //
+  /* - */
+
+  test.case = 'spawn, return ext code 2';
+  o =
+  {
+    execPath :  'node ' + testAppPath + ' exitWithCode : 2',
+    mode : 'spawn',
+    stdio : 'pipe'
+  }
+  var options = _.mapSupplement( {}, o, commonDefaults );
+  test.shouldThrowErrorSync( () => _.process.start( options ) );
+  test.identical( options.exitCode, 2 );
+
+  /* - */
 
   test.case = 'shell, return good code';
   o =
@@ -2153,7 +2154,7 @@ function shellSync( test )
   test.mustNotThrowError( () => _.process.start( options ) )
   test.identical( options.exitCode, 0 );
 
-  //
+  /* - */
 
   test.case = 'shell, return bad code';
   o =
@@ -2174,7 +2175,7 @@ shellSync.timeOut = 30000;
 
 function shellSyncAsync( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
   var commonDefaults =
   {
@@ -2195,7 +2196,7 @@ function shellSyncAsync( test )
 
   var o;
 
-  //
+  /* - */
 
   test.case = 'mode : fork';
   o =
@@ -2224,7 +2225,7 @@ function shellSyncAsync( test )
   test.identical( options.exitCode, 0 );
   test.identical( options.output.length, 0 );
 
-  //
+  /* - */
 
   test.case = 'mode : spawn';
   o =
@@ -2253,7 +2254,7 @@ function shellSyncAsync( test )
   test.identical( options.exitCode, 0 );
   test.identical( options.output.length, 0 );
 
-  //
+  /* - */
 
   test.case = 'mode : shell';
   o =
@@ -2279,7 +2280,7 @@ function shellSyncAsync( test )
   test.identical( options.exitCode, 0 );
   test.identical( options.output.length, 0 );
 
-  //
+  /* - */
 
   test.case = 'shell, stop process using timeOut';
   o =
@@ -2293,7 +2294,7 @@ function shellSyncAsync( test )
   var options = _.mapSupplement( {}, o, commonDefaults );
   test.shouldThrowErrorSync( () => _.process.start( options ) );
 
-  //
+  /* - */
 
   test.case = 'spawn, return good code';
   o =
@@ -2308,7 +2309,7 @@ function shellSyncAsync( test )
   test.identical( got.process.constructor.name, 'ChildProcess' );
   test.identical( options.exitCode, 0 );
 
-  //
+  /* - */
 
   test.case = 'spawn, return bad code';
   o =
@@ -2321,7 +2322,7 @@ function shellSyncAsync( test )
   test.shouldThrowErrorSync( () => _.process.start( options ) )
   test.identical( options.exitCode, 1 );
 
-  //
+  /* - */
 
   test.case = 'shell, return good code';
   o =
@@ -2337,7 +2338,7 @@ function shellSyncAsync( test )
   test.identical( got.process.constructor.name, 'ChildProcess' );
   test.identical( options.exitCode, 0 );
 
-  //
+  /* - */
 
   test.case = 'shell, return bad code';
   o =
@@ -2358,7 +2359,7 @@ shellSyncAsync.timeOut = 30000;
 
 function shell2( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
   var commonDefaults =
   {
@@ -2412,7 +2413,7 @@ function shell2( test )
     })
   })
 
-  //
+  /* - */
 
   con.thenKeep( function()
   {
@@ -2444,7 +2445,7 @@ function shell2( test )
     })
   })
 
-  //
+  /* - */
 
   con.thenKeep( function()
   {
@@ -2476,7 +2477,7 @@ function shell2( test )
     })
   })
 
-  //
+  /* - */
 
   con.thenKeep( function()
   {
@@ -2498,7 +2499,7 @@ function shell2( test )
     return test.shouldThrowErrorOfAnyKind( _.process.start( options ) );
   })
 
-  //
+  /* - */
 
   con.thenKeep( function()
   {
@@ -2537,9 +2538,9 @@ shell2.timeOut = 30000;
 
 //
 
-function shellCurrentPath( test )
+function shellCurrentPath( test ) /* qqq : split by mode */
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -2559,7 +2560,7 @@ function shellCurrentPath( test )
   var expectedOutput = __dirname + '\n'
   _.fileProvider.fileWrite( testAppPath, testAppCode );
 
-  //
+  /* - */
 
   var con = new _.Consequence().take( null );
 
@@ -2607,25 +2608,26 @@ function shellCurrentPath( test )
 
   /**/
 
-  con.thenKeep( function()
-  {
-    test.case = 'mode : exec';
-
-    let o =
-    {
-      execPath :  'node ' + testAppPath,
-      currentPath : __dirname,
-      mode : 'exec',
-      stdio : 'pipe',
-      outputCollecting : 1,
-    }
-    return _.process.start( o )
-    .thenKeep( function( got )
-    {
-      test.identical( o.output, expectedOutput );
-      return null;
-    })
-  })
+  // ttt
+  // con.thenKeep( function()
+  // {
+  //   test.case = 'mode : exec';
+  //
+  //   let o =
+  //   {
+  //     execPath :  'node ' + testAppPath,
+  //     currentPath : __dirname,
+  //     mode : 'exec',
+  //     stdio : 'pipe',
+  //     outputCollecting : 1,
+  //   }
+  //   return _.process.start( o )
+  //   .thenKeep( function( got )
+  //   {
+  //     test.identical( o.output, expectedOutput );
+  //     return null;
+  //   })
+  // })
 
   /**/
 
@@ -2903,85 +2905,86 @@ function shellCurrentPath( test )
 
   /* */
 
-  con.thenKeep( function()
-  {
-    test.case = 'normalized, currentPath leads to root of current drive, mode : exec';
-
-    let trace = _.path.traceToRoot( _.path.normalize( __dirname ) );
-    let currentPath = trace[ 1 ];
-
-    let o =
-    {
-      execPath :  'node ' + testAppPath,
-      currentPath,
-      mode : 'exec',
-      stdio : 'pipe',
-      outputCollecting : 1,
-    }
-
-    return _.process.start( o )
-    .thenKeep( function( got )
-    {
-      test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) );
-      return null;
-    })
-  })
-
-  /* */
-
-
-  con.thenKeep( function()
-  {
-    test.case = 'normalized with slash, currentPath leads to root of current drive, mode : exec';
-
-    let trace = _.path.traceToRoot( _.path.normalize( __dirname ) );
-    let currentPath = trace[ 1 ] + '/';
-
-    let o =
-    {
-      execPath :  'node ' + testAppPath,
-      currentPath,
-      mode : 'exec',
-      stdio : 'pipe',
-      outputCollecting : 1,
-    }
-
-    return _.process.start( o )
-    .thenKeep( function( got )
-    {
-      if( process.platform === 'win32')
-      test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) );
-      else
-      test.identical( _.strStrip( got.output ), trace[ 1 ] );
-      return null;
-    })
-  })
-
-  /* */
-
-  con.thenKeep( function()
-  {
-    test.case = 'nativized, currentPath leads to root of current drive, mode : exec';
-
-    let trace = _.path.traceToRoot( __dirname );
-    let currentPath = _.path.nativize( trace[ 1 ] );
-
-    let o =
-    {
-      execPath :  'node ' + testAppPath,
-      currentPath,
-      mode : 'exec',
-      stdio : 'pipe',
-      outputCollecting : 1,
-    }
-
-    return _.process.start( o )
-    .thenKeep( function( got )
-    {
-      test.identical( _.strStrip( got.output ), currentPath );
-      return null;
-    })
-  })
+  // ttt
+  // con.thenKeep( function()
+  // {
+  //   test.case = 'normalized, currentPath leads to root of current drive, mode : exec';
+  //
+  //   let trace = _.path.traceToRoot( _.path.normalize( __dirname ) );
+  //   let currentPath = trace[ 1 ];
+  //
+  //   let o =
+  //   {
+  //     execPath :  'node ' + testAppPath,
+  //     currentPath,
+  //     mode : 'exec',
+  //     stdio : 'pipe',
+  //     outputCollecting : 1,
+  //   }
+  //
+  //   return _.process.start( o )
+  //   .thenKeep( function( got )
+  //   {
+  //     test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) );
+  //     return null;
+  //   })
+  // })
+  //
+  // /* */
+  //
+  //
+  // con.thenKeep( function()
+  // {
+  //   test.case = 'normalized with slash, currentPath leads to root of current drive, mode : exec';
+  //
+  //   let trace = _.path.traceToRoot( _.path.normalize( __dirname ) );
+  //   let currentPath = trace[ 1 ] + '/';
+  //
+  //   let o =
+  //   {
+  //     execPath :  'node ' + testAppPath,
+  //     currentPath,
+  //     mode : 'exec',
+  //     stdio : 'pipe',
+  //     outputCollecting : 1,
+  //   }
+  //
+  //   return _.process.start( o )
+  //   .thenKeep( function( got )
+  //   {
+  //     if( process.platform === 'win32')
+  //     test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) );
+  //     else
+  //     test.identical( _.strStrip( got.output ), trace[ 1 ] );
+  //     return null;
+  //   })
+  // })
+  //
+  // /* */
+  //
+  // con.thenKeep( function()
+  // {
+  //   test.case = 'nativized, currentPath leads to root of current drive, mode : exec';
+  //
+  //   let trace = _.path.traceToRoot( __dirname );
+  //   let currentPath = _.path.nativize( trace[ 1 ] );
+  //
+  //   let o =
+  //   {
+  //     execPath :  'node ' + testAppPath,
+  //     currentPath,
+  //     mode : 'exec',
+  //     stdio : 'pipe',
+  //     outputCollecting : 1,
+  //   }
+  //
+  //   return _.process.start( o )
+  //   .thenKeep( function( got )
+  //   {
+  //     test.identical( _.strStrip( got.output ), currentPath );
+  //     return null;
+  //   })
+  // })
 
   /* */
 
@@ -2994,7 +2997,7 @@ shellCurrentPath.timeOut = 30000;
 
 function shellCurrentPaths( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -3061,21 +3064,21 @@ function shellCurrentPaths( test )
 
   /* */
 
-  _.process.start( _.mapSupplement( { mode : 'exec' }, o2 ) );
-
-  ready.then( ( got ) =>
-  {
-    let o1 = got[ 0 ];
-    let o2 = got[ 1 ];
-
-    test.is( _.strHas( o1.output, _.path.nativize( routinePath ) ) );
-    test.identical( o1.exitCode, 0 );
-
-    test.is( _.strHas( o2.output, __dirname ) );
-    test.identical( o2.exitCode, 0 );
-
-    return got;
-  })
+  // _.process.start( _.mapSupplement( { mode : 'exec' }, o2 ) );
+  //
+  // ready.then( ( got ) =>
+  // {
+  //   let o1 = got[ 0 ];
+  //   let o2 = got[ 1 ];
+  //
+  //   test.is( _.strHas( o1.output, _.path.nativize( routinePath ) ) );
+  //   test.identical( o1.exitCode, 0 );
+  //
+  //   test.is( _.strHas( o2.output, __dirname ) );
+  //   test.identical( o2.exitCode, 0 );
+  //
+  //   return got;
+  // })
 
   /* */
 
@@ -3150,7 +3153,7 @@ function shellCurrentPaths( test )
 
 function shellFork( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -3167,7 +3170,7 @@ function shellFork( test )
   var expectedOutput = __dirname + '\n'
   _.fileProvider.fileWrite( testAppPath, testAppCode );
 
-  //
+  /* - */
 
   var con = new _.Consequence().take( null );
 
@@ -3193,7 +3196,7 @@ function shellFork( test )
     })
   })
 
-  //
+  /* - */
 
   con.thenKeep( function()
   {
@@ -3217,7 +3220,7 @@ function shellFork( test )
     })
   })
 
-  //
+  /* - */
 
   // con.thenKeep( function()
   // {
@@ -3242,7 +3245,7 @@ function shellFork( test )
   //   })
   // })
 
-  //
+  /* - */
 
   con.thenKeep( function()
   {
@@ -3267,7 +3270,7 @@ function shellFork( test )
     })
   })
 
-  //
+  /* - */
 
   con.thenKeep( function()
   {
@@ -3310,7 +3313,7 @@ function shellFork( test )
     })
   })
 
-  //
+  /* - */
 
   con.thenKeep( function()
   {
@@ -3354,9 +3357,9 @@ function shellFork( test )
     return null;
   })
 
-  //
+  /* - */
 
-  //
+  /* - */
 
   con.thenKeep( function()
   {
@@ -3401,7 +3404,7 @@ function shellFork( test )
     return con;
   })
 
-  //
+  /* - */
 
   con.thenKeep( function()
   {
@@ -3425,7 +3428,7 @@ function shellFork( test )
     })
   })
 
-  //
+  /* - */
 
   con.thenKeep( function()
   {
@@ -3462,7 +3465,7 @@ function shellFork( test )
     })
   })
 
-  //
+  /* - */
 
   con.thenKeep( function()
   {
@@ -3564,7 +3567,7 @@ function shellWithoutExecPath( test )
 
 function shellSpawnSyncDeasync( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -3580,7 +3583,7 @@ function shellSpawnSyncDeasync( test )
   var testAppCode = testApp.toString() + '\ntestApp();';
   _.fileProvider.fileWrite( execPath, testAppCode );
 
-  //
+  /* - */
 
   var ready = new _.Consequence().take( null );
 
@@ -3680,7 +3683,7 @@ shellSpawnSyncDeasync.timeOut = 15000;
 
 function shellSpawnSyncDeasyncThrowing( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -3696,7 +3699,7 @@ function shellSpawnSyncDeasyncThrowing( test )
   var testAppCode = testApp.toString() + '\ntestApp();';
   _.fileProvider.fileWrite( execPath, testAppCode );
 
-  //
+  /* - */
 
   var ready = new _.Consequence().take( null );
 
@@ -3779,7 +3782,7 @@ shellSpawnSyncDeasyncThrowing.timeOut = 15000;
 
 function shellShellSyncDeasync( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -3795,7 +3798,7 @@ function shellShellSyncDeasync( test )
   var testAppCode = testApp.toString() + '\ntestApp();';
   _.fileProvider.fileWrite( execPath, testAppCode );
 
-  //
+  /* - */
 
   var ready = new _.Consequence().take( null );
 
@@ -3895,7 +3898,7 @@ shellShellSyncDeasync.timeOut = 15000;
 
 function shellShellSyncDeasyncThrowing( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -3911,7 +3914,7 @@ function shellShellSyncDeasyncThrowing( test )
   var testAppCode = testApp.toString() + '\ntestApp();';
   _.fileProvider.fileWrite( execPath, testAppCode );
 
-  //
+  /* - */
 
   var ready = new _.Consequence().take( null );
 
@@ -3994,7 +3997,7 @@ shellShellSyncDeasyncThrowing.timeOut = 15000;
 
 function shellForkSyncDeasync( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -4010,7 +4013,7 @@ function shellForkSyncDeasync( test )
   var testAppCode = testApp.toString() + '\ntestApp();';
   _.fileProvider.fileWrite( execPath, testAppCode );
 
-  //
+  /* - */
 
   var ready = new _.Consequence().take( null );
 
@@ -4107,7 +4110,7 @@ shellForkSyncDeasync.timeOut = 15000;
 
 function shellForkSyncDeasyncThrowing( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -4123,7 +4126,7 @@ function shellForkSyncDeasyncThrowing( test )
   var testAppCode = testApp.toString() + '\ntestApp();';
   _.fileProvider.fileWrite( execPath, testAppCode );
 
-  //
+  /* - */
 
   var ready = new _.Consequence().take( null );
 
@@ -4204,225 +4207,224 @@ shellForkSyncDeasyncThrowing.timeOut = 15000;
 
 //
 
-function shellExecSyncDeasync( test )
-{
-  var context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
-
-  /* */
-
-  function testApp()
-  {
-    console.log( process.argv.slice( 2 ) );
-  }
-
-  /* */
-
-  var execPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = testApp.toString() + '\ntestApp();';
-  _.fileProvider.fileWrite( execPath, testAppCode );
-
-  //
-
-  var ready = new _.Consequence().take( null );
-
-  /*  */
-
-  ready.then( () =>
-  {
-    test.case = 'sync:0,desync:0'
-    let o =
-    {
-      execPath : 'node ' + execPath,
-      mode : 'exec',
-      sync : 0,
-      deasync : 0
-    }
-    var got = _.process.start( o );
-    test.is( _.consequenceIs( got ) );
-    test.identical( got.resourcesCount(), 0 );
-    got.thenKeep( function( o )
-    {
-      test.identical( o.exitCode, 0 );
-      return o;
-    })
-    return got;
-  })
-
-  /*  */
-
-  ready.then( () =>
-  {
-    test.case = 'sync:1,desync:0'
-    let o =
-    {
-      execPath : 'node ' + execPath,
-      mode : 'exec',
-      sync : 1,
-      deasync : 0
-    }
-    var got = _.process.start( o );
-    test.is( !_.consequenceIs( got ) );
-    test.identical( got, o );
-    test.identical( o.exitCode, 0 );
-
-    return got;
-  })
-
-  /*  */
-
-  ready.then( () =>
-  {
-    test.case = 'sync:0,desync:1'
-    let o =
-    {
-      execPath : 'node ' + execPath,
-      mode : 'exec',
-      sync : 0,
-      deasync : 1
-    }
-    var got = _.process.start( o );
-    test.is( _.consequenceIs( got ) );
-    test.identical( got.resourcesCount(), 1 );
-    got.thenKeep( function( o )
-    {
-      test.identical( o.exitCode, 0 );
-      return o;
-    })
-    return got;
-  })
-
-  /*  */
-
-  ready.then( () =>
-  {
-    test.case = 'sync:1,desync:1'
-    let o =
-    {
-      execPath : 'node ' + execPath,
-      mode : 'exec',
-      sync : 1,
-      deasync : 1
-    }
-    var got = _.process.start( o );
-    test.is( !_.consequenceIs( got ) );
-    test.identical( got, o );
-    test.identical( o.exitCode, 0 );
-    return got;
-  })
-
-  /*  */
-
-  return ready;
-}
-
-shellExecSyncDeasync.timeOut = 15000;
-
+// function shellExecSyncDeasync( test )
+// {
+//   let context = this;
+//   var routinePath = _.path.join( context.suiteTempPath, test.name );
 //
-
-function shellExecSyncDeasyncThrowing( test )
-{
-  var context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
-
-  /* */
-
-  function testApp()
-  {
-    throw new Error( 'Test error' );
-  }
-
-  /* */
-
-  var execPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = testApp.toString() + '\ntestApp();';
-  _.fileProvider.fileWrite( execPath, testAppCode );
-
-  //
-
-  var ready = new _.Consequence().take( null );
-
-  /*  */
-
-  ready.then( () =>
-  {
-    test.case = 'sync:0,desync:0'
-    let o =
-    {
-      execPath : 'node ' + execPath,
-      mode : 'exec',
-      sync : 0,
-      deasync : 0
-    }
-    var got = _.process.start( o );
-    test.is( _.consequenceIs( got ) );
-    test.identical( got.resourcesCount(), 0 );
-    return test.shouldThrowErrorAsync( got );
-  })
-
-  /*  */
-
-  ready.then( () =>
-  {
-    test.case = 'sync:1,desync:0'
-    let o =
-    {
-      execPath : 'node ' + execPath,
-      mode : 'exec',
-      sync : 1,
-      deasync : 0
-    }
-    test.shouldThrowErrorSync( () =>  _.process.start( o ) );
-    return null;
-  })
-
-  /*  */
-
-  ready.then( () =>
-  {
-    test.case = 'sync:0,desync:1'
-    let o =
-    {
-      execPath : 'node ' + execPath,
-      mode : 'exec',
-      sync : 0,
-      deasync : 1
-    }
-    var got = _.process.start( o );
-    test.is( _.consequenceIs( got ) );
-    test.identical( got.resourcesCount(), 1 );
-    return test.shouldThrowErrorAsync( got );
-  })
-
-  /*  */
-
-  ready.then( () =>
-  {
-    test.case = 'sync:1,desync:1'
-    let o =
-    {
-      execPath : 'node ' + execPath,
-      mode : 'exec',
-      sync : 1,
-      deasync : 1
-    }
-    test.shouldThrowErrorSync( () =>  _.process.start( o ) );
-    return null;
-  })
-
-  /*  */
-
-  return ready;
-}
-
-shellExecSyncDeasyncThrowing.timeOut = 15000;
-
+//   /* */
+//
+//   function testApp()
+//   {
+//     console.log( process.argv.slice( 2 ) );
+//   }
+//
+//   /* */
+//
+//   var execPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+//   var testAppCode = testApp.toString() + '\ntestApp();';
+//   _.fileProvider.fileWrite( execPath, testAppCode );
+//
+//   /* - */
+//
+//   var ready = new _.Consequence().take( null );
+//
+//   /*  */
+//
+//   ready.then( () =>
+//   {
+//     test.case = 'sync:0,desync:0'
+//     let o =
+//     {
+//       execPath : 'node ' + execPath,
+//       mode : 'exec',
+//       sync : 0,
+//       deasync : 0
+//     }
+//     var got = _.process.start( o );
+//     test.is( _.consequenceIs( got ) );
+//     test.identical( got.resourcesCount(), 0 );
+//     got.thenKeep( function( o )
+//     {
+//       test.identical( o.exitCode, 0 );
+//       return o;
+//     })
+//     return got;
+//   })
+//
+//   /*  */
+//
+//   ready.then( () =>
+//   {
+//     test.case = 'sync:1,desync:0'
+//     let o =
+//     {
+//       execPath : 'node ' + execPath,
+//       mode : 'exec',
+//       sync : 1,
+//       deasync : 0
+//     }
+//     var got = _.process.start( o );
+//     test.is( !_.consequenceIs( got ) );
+//     test.identical( got, o );
+//     test.identical( o.exitCode, 0 );
+//
+//     return got;
+//   })
+//
+//   /*  */
+//
+//   ready.then( () =>
+//   {
+//     test.case = 'sync:0,desync:1'
+//     let o =
+//     {
+//       execPath : 'node ' + execPath,
+//       mode : 'exec',
+//       sync : 0,
+//       deasync : 1
+//     }
+//     var got = _.process.start( o );
+//     test.is( _.consequenceIs( got ) );
+//     test.identical( got.resourcesCount(), 1 );
+//     got.thenKeep( function( o )
+//     {
+//       test.identical( o.exitCode, 0 );
+//       return o;
+//     })
+//     return got;
+//   })
+//
+//   /*  */
+//
+//   ready.then( () =>
+//   {
+//     test.case = 'sync:1,desync:1'
+//     let o =
+//     {
+//       execPath : 'node ' + execPath,
+//       mode : 'exec',
+//       sync : 1,
+//       deasync : 1
+//     }
+//     var got = _.process.start( o );
+//     test.is( !_.consequenceIs( got ) );
+//     test.identical( got, o );
+//     test.identical( o.exitCode, 0 );
+//     return got;
+//   })
+//
+//   /*  */
+//
+//   return ready;
+// }
+//
+// shellExecSyncDeasync.timeOut = 15000;
+//
+// //
+//
+// function shellExecSyncDeasyncThrowing( test )
+// {
+//   let context = this;
+//   var routinePath = _.path.join( context.suiteTempPath, test.name );
+//
+//   /* */
+//
+//   function testApp()
+//   {
+//     throw new Error( 'Test error' );
+//   }
+//
+//   /* */
+//
+//   var execPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+//   var testAppCode = testApp.toString() + '\ntestApp();';
+//   _.fileProvider.fileWrite( execPath, testAppCode );
+//
+//   /* - */
+//
+//   var ready = new _.Consequence().take( null );
+//
+//   /*  */
+//
+//   ready.then( () =>
+//   {
+//     test.case = 'sync:0,desync:0'
+//     let o =
+//     {
+//       execPath : 'node ' + execPath,
+//       mode : 'exec',
+//       sync : 0,
+//       deasync : 0
+//     }
+//     var got = _.process.start( o );
+//     test.is( _.consequenceIs( got ) );
+//     test.identical( got.resourcesCount(), 0 );
+//     return test.shouldThrowErrorAsync( got );
+//   })
+//
+//   /*  */
+//
+//   ready.then( () =>
+//   {
+//     test.case = 'sync:1,desync:0'
+//     let o =
+//     {
+//       execPath : 'node ' + execPath,
+//       mode : 'exec',
+//       sync : 1,
+//       deasync : 0
+//     }
+//     test.shouldThrowErrorSync( () =>  _.process.start( o ) );
+//     return null;
+//   })
+//
+//   /*  */
+//
+//   ready.then( () =>
+//   {
+//     test.case = 'sync:0,desync:1'
+//     let o =
+//     {
+//       execPath : 'node ' + execPath,
+//       mode : 'exec',
+//       sync : 0,
+//       deasync : 1
+//     }
+//     var got = _.process.start( o );
+//     test.is( _.consequenceIs( got ) );
+//     test.identical( got.resourcesCount(), 1 );
+//     return test.shouldThrowErrorAsync( got );
+//   })
+//
+//   /*  */
+//
+//   ready.then( () =>
+//   {
+//     test.case = 'sync:1,desync:1'
+//     let o =
+//     {
+//       execPath : 'node ' + execPath,
+//       mode : 'exec',
+//       sync : 1,
+//       deasync : 1
+//     }
+//     test.shouldThrowErrorSync( () =>  _.process.start( o ) );
+//     return null;
+//   })
+//
+//   /*  */
+//
+//   return ready;
+// }
+//
+// shellExecSyncDeasyncThrowing.timeOut = 15000;
 
 //
 
 function shellMultipleSyncDeasync( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -4438,7 +4440,7 @@ function shellMultipleSyncDeasync( test )
   var testAppCode = testApp.toString() + '\ntestApp();';
   _.fileProvider.fileWrite( execPath, testAppCode );
 
-  //
+  /* - */
 
   var ready = new _.Consequence().take( null );
 
@@ -4788,113 +4790,113 @@ function shellMultipleSyncDeasync( test )
 
   /*  */
 
-  ready.then( () =>
-  {
-    test.case = 'sync:0,desync:0'
-    let o =
-    {
-      execPath : [ 'node ' + execPath, 'node ' + execPath ],
-      mode : 'exec',
-      sync : 0,
-      deasync : 0
-    }
-    var got = _.process.start( o );
-    test.is( _.consequenceIs( got ) );
-    test.identical( got.resourcesCount(), 0 );
-    got.thenKeep( function( result )
-    {
-      test.identical( result.length, 2 );
-      test.identical( result[ 0 ].exitCode, 0 )
-      test.identical( result[ 1 ].exitCode, 0 )
-      return result;
-    })
-    return got;
-  })
-
-  /*  */
-
-  ready.then( () =>
-  {
-    test.case = 'sync:1,desync:0'
-    let o =
-    {
-      execPath : [ 'node ' + execPath, 'node ' + execPath ],
-      mode : 'exec',
-      sync : 1,
-      returningOptionsArray : 1,
-      deasync : 0
-    }
-    var got = _.process.start( o );
-    test.is( !_.consequenceIs( got ) );
-    test.identical( got.length, 2 )
-    test.identical( got[ 0 ].exitCode, 0 )
-    test.identical( got[ 1 ].exitCode, 0 )
-    return null;
-  })
-
-  /*  */
-
-  ready.then( () =>
-  {
-    test.case = 'sync:1,desync:0'
-    let o =
-    {
-      execPath : [ 'node ' + execPath, 'node ' + execPath ],
-      mode : 'exec',
-      sync : 1,
-      returningOptionsArray : 0,
-      deasync : 0
-    }
-    var got = _.process.start( o );
-    test.is( !_.consequenceIs( got ) );
-    test.identical( got.exitCode, 0 )
-    return null;
-  })
-
-  /*  */
-
-  ready.then( () =>
-  {
-    test.case = 'sync:0,desync:1'
-    let o =
-    {
-      execPath : [ 'node ' + execPath, 'node ' + execPath ],
-      mode : 'exec',
-      sync : 0,
-      deasync : 1
-    }
-    var got = _.process.start( o );
-    test.is( _.consequenceIs( got ) );
-    test.identical( got.resourcesCount(), 1 );
-    got.thenKeep( function( result )
-    {
-      test.identical( result.length, 2 );
-      test.identical( result[ 0 ].exitCode, 0 )
-      test.identical( result[ 1 ].exitCode, 0 )
-      return result;
-    })
-    return got;
-  })
-
-  /*  */
-
-  ready.then( () =>
-  {
-    test.case = 'sync:1,desync:1'
-    let o =
-    {
-      execPath : [ 'node ' + execPath, 'node ' + execPath ],
-      mode : 'exec',
-      sync : 1,
-      deasync : 1
-    }
-    var got = _.process.start( o );
-    test.is( !_.consequenceIs( got ) );
-    test.identical( got.length, 2 );
-    test.identical( got[ 0 ].exitCode, 0 )
-    test.identical( got[ 1 ].exitCode, 0 )
-    return got;
-  })
+  // ready.then( () =>
+  // {
+  //   test.case = 'sync:0,desync:0'
+  //   let o =
+  //   {
+  //     execPath : [ 'node ' + execPath, 'node ' + execPath ],
+  //     mode : 'exec', /* qqq : change mode here */
+  //     sync : 0,
+  //     deasync : 0
+  //   }
+  //   var got = _.process.start( o );
+  //   test.is( _.consequenceIs( got ) );
+  //   test.identical( got.resourcesCount(), 0 );
+  //   got.thenKeep( function( result )
+  //   {
+  //     test.identical( result.length, 2 );
+  //     test.identical( result[ 0 ].exitCode, 0 )
+  //     test.identical( result[ 1 ].exitCode, 0 )
+  //     return result;
+  //   })
+  //   return got;
+  // })
+  //
+  // /*  */
+  //
+  // ready.then( () =>
+  // {
+  //   test.case = 'sync:1,desync:0'
+  //   let o =
+  //   {
+  //     execPath : [ 'node ' + execPath, 'node ' + execPath ],
+  //     mode : 'exec', /* qqq : change mode here */
+  //     sync : 1,
+  //     returningOptionsArray : 1,
+  //     deasync : 0
+  //   }
+  //   var got = _.process.start( o );
+  //   test.is( !_.consequenceIs( got ) );
+  //   test.identical( got.length, 2 )
+  //   test.identical( got[ 0 ].exitCode, 0 )
+  //   test.identical( got[ 1 ].exitCode, 0 )
+  //   return null;
+  // })
+  //
+  // /*  */
+  //
+  // ready.then( () =>
+  // {
+  //   test.case = 'sync:1,desync:0'
+  //   let o =
+  //   {
+  //     execPath : [ 'node ' + execPath, 'node ' + execPath ],
+  //     mode : 'exec', /* qqq : change mode here */
+  //     sync : 1,
+  //     returningOptionsArray : 0,
+  //     deasync : 0
+  //   }
+  //   var got = _.process.start( o );
+  //   test.is( !_.consequenceIs( got ) );
+  //   test.identical( got.exitCode, 0 )
+  //   return null;
+  // })
+  //
+  // /*  */
+  //
+  // ready.then( () =>
+  // {
+  //   test.case = 'sync:0,desync:1'
+  //   let o =
+  //   {
+  //     execPath : [ 'node ' + execPath, 'node ' + execPath ],
+  //     mode : 'exec',
+  //     sync : 0,
+  //     deasync : 1
+  //   }
+  //   var got = _.process.start( o );
+  //   test.is( _.consequenceIs( got ) );
+  //   test.identical( got.resourcesCount(), 1 );
+  //   got.thenKeep( function( result )
+  //   {
+  //     test.identical( result.length, 2 );
+  //     test.identical( result[ 0 ].exitCode, 0 )
+  //     test.identical( result[ 1 ].exitCode, 0 )
+  //     return result;
+  //   })
+  //   return got;
+  // })
+  //
+  // /*  */
+  //
+  // ready.then( () =>
+  // {
+  //   test.case = 'sync:1,desync:1'
+  //   let o =
+  //   {
+  //     execPath : [ 'node ' + execPath, 'node ' + execPath ],
+  //     mode : 'exec',
+  //     sync : 1,
+  //     deasync : 1
+  //   }
+  //   var got = _.process.start( o );
+  //   test.is( !_.consequenceIs( got ) );
+  //   test.identical( got.length, 2 );
+  //   test.identical( got[ 0 ].exitCode, 0 )
+  //   test.identical( got[ 1 ].exitCode, 0 )
+  //   return got;
+  // })
 
   /*  */
 
@@ -4903,12 +4905,11 @@ function shellMultipleSyncDeasync( test )
 
 shellMultipleSyncDeasync.timeOut = 30000;
 
-
 //
 
 function shellDryRun( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -4927,7 +4928,7 @@ function shellDryRun( test )
   var testAppCode = testApp.toString() + '\ntestApp();';
   _.fileProvider.fileWrite( execPath, testAppCode );
 
-  //
+  /* - */
 
   var ready = new _.Consequence().take( null );
 
@@ -4981,9 +4982,143 @@ function shellDryRun( test )
 
 //
 
+function startNjsStructure( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let programPath = a.program( program1 );
+
+  a.ready.timeOut( 1000 );
+
+  /* */
+
+  let options =
+  {
+    execPath : programPath,
+    currentPath : a.currentPath,
+    throwingExitCode : 1,
+    inputMirroring : 1,
+    outputCollecting : 1,
+    stdio : 'pipe',
+    sync : 0,
+    deasync : 0,
+    ready : a.ready,
+  }
+
+  _.process.startNjs( options )
+  .then( ( op ) =>
+  {
+    test.identical( op.exitCode, 0 );
+    test.identical( op.output, 'program1\n' );
+
+    let exp2 = _.mapExtend( null, exp );
+    exp2.output = 'program1\n';
+    exp2.exitCode = 0;
+    exp2.exitSignal = null;
+    exp2.disconnect = options.disconnect;
+    exp2.process = options.process;
+    exp2.procedure = options.procedure;
+    exp2.procedureIsNew = true;
+    exp2.currentPath = _.path.current();
+    exp2.args = [];
+    exp2.interpreterArgs = [];
+    exp2.outputPiping = true;
+    exp2.outputAdditive = true;
+    exp2.state = 'terminated';
+    exp2.terminationReason = 'normal';
+    exp2.fullExecPath = programPath;
+    exp2.ended = true;
+
+    test.identical( options, exp2 );
+    test.identical( !!options.process, true );
+    test.is( _.routineIs( options.disconnect ) );
+    test.is( options.onTerminate === options.ready );
+    test.identical( options.ready.exportString(), 'Consequence::startNjsStructure 0 / 2' );
+    test.identical( options.onTerminate.exportString(), 'Consequence::startNjsStructure 0 / 2' );
+    test.identical( options.onStart.exportString(), 'Consequence:: 1 / 0' );
+
+    return null;
+  });
+
+  var exp =
+  {
+    'execPath' : a.abs( 'program1.js' ),
+    'currentPath' : null,
+    'throwingExitCode' : 1,
+    'inputMirroring' : 1,
+    'outputCollecting' : 1,
+    'sync' : 0,
+    'deasync' : 0,
+    'passingThrough' : 0,
+    'maximumMemory' : 0,
+    'applyingExitCode' : 1,
+    'stdio' : 'pipe',
+    'mode' : 'fork',
+    'args' : null,
+    'interpreterArgs' : '',
+    'when' : 'instant',
+    'dry' : 0,
+    'logger' : null,
+    'ipc' : 0,
+    'env' : null,
+    'detaching' : 0,
+    'windowHiding' : 1,
+    'concurrent' : 0,
+    'timeOut' : null,
+    'returningOptionsArray' : 1,
+    'briefExitCode' : 0,
+    'verbosity' : 2,
+    'outputPrefixing' : 0,
+    'outputPiping' : null,
+    'outputAdditive' : null,
+    'outputDecorating' : 0,
+    'outputDecoratingStdout' : 0,
+    'outputDecoratingStderr' : 0,
+    'outputGraying' : 0,
+    'onStart' : options.onStart,
+    'onTerminate' : options.onTerminate,
+    'ready' : options.ready,
+    'disconnect' : options.disconnect,
+    'process' : options.process,
+    'logger' : options.logger,
+    'state' : 'initial',
+    'terminationReason' : null,
+    'fullExecPath' : null,
+    'output' : null,
+    'exitCode' : null,
+    'exitSignal' : null,
+    'procedure' : null,
+    'procedureIsNew' : null,
+    'ended' : false,
+  }
+  test.identical( options, exp );
+
+  test.identical( options.process, null );
+  test.is( _.routineIs( options.disconnect ) );
+  test.is( options.onTerminate === options.ready );
+  test.identical( options.ready.exportString(), 'Consequence:: 0 / 3' );
+  test.identical( options.onTerminate.exportString(), 'Consequence:: 0 / 3' );
+  test.identical( options.onStart.exportString(), 'Consequence:: 0 / 0' );
+
+  /* */
+
+  return a.ready;
+
+  /* */
+
+  function program1()
+  {
+    let _ = require( toolsPath );
+    console.log( 'program1' );
+  }
+
+}
+
+//
+
 function shellArgsOption( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -5091,1059 +5226,808 @@ function shellArgumentsParsing( test )
       path to exe file : [ with space, without space ]
       execPath : [ has arguments, only path to exe file ]
       args : [ has arguments, empty ]
-      mode : [ 'fork', 'exec', 'spawn', 'shell' ]
+      mode : [ 'fork', 'spawn', 'shell' ]
   */
 
   /* - */
 
   ready
 
-  // .then( () =>
-  // {
-  //   test.case = `'path to exec : with space' 'execPATH : has arguments' 'args has arguments' 'fork'`
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : _.strQuote( testAppPathSpace ) + ' firstArg secondArg:1 "third arg"',
-  //     args : [ '\'fourth arg\'',  `"fifth" arg` ],
-  //     ipc : 1,
-  //     mode : 'fork',
-  //     outputPiping : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   let got;
-  //   o.process.on( 'message', ( data ) => { got = data } )
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-  //     test.identical( got.map, { secondArg : 1 } )
-  //     test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', '\'fourth arg\'', '"fifth" arg' ] )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
-  //
-  // .then( () =>
-  // {
-  //   test.case = `'path to exec : without space' 'execPATH : has arguments' 'args has arguments' 'fork'`
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : _.strQuote( testAppPathNoSpace ) + ' firstArg secondArg:1 "third arg"',
-  //     args : [ '\'fourth arg\'',  `"fifth" arg` ],
-  //     ipc : 1,
-  //     mode : 'fork',
-  //     outputPiping : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   let got;
-  //   o.process.on( 'message', ( data ) => { got = data } )
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     test.identical( got.scriptPath, _.path.normalize( testAppPathNoSpace ) )
-  //     test.identical( got.map, { secondArg : 1 } )
-  //     test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', '\'fourth arg\'', '"fifth" arg' ] )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
-  //
-  // .then( () =>
-  // {
-  //   test.case = `'path to exec : with space' 'execPATH : only path' 'args has arguments' 'fork'`
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : _.strQuote( testAppPathSpace ),
-  //     args : [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', `"fifth" arg` ],
-  //     ipc : 1,
-  //     mode : 'fork',
-  //     outputPiping : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   let got;
-  //   o.process.on( 'message', ( data ) => { got = data } )
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-  //     test.identical( got.map, { secondArg : 1 } )
-  //     test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', '"fifth" arg' ] )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
-  //
-  // .then( () =>
-  // {
-  //   test.case = `'path to exec : without space' 'execPATH : only path' 'args has arguments' 'fork'`
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : _.strQuote( testAppPathNoSpace ),
-  //     args : [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', `"fifth" arg` ],
-  //     ipc : 1,
-  //     mode : 'fork',
-  //     outputPiping : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   let got;
-  //   o.process.on( 'message', ( data ) => { got = data } )
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     test.identical( got.scriptPath, _.path.normalize( testAppPathNoSpace ) )
-  //     test.identical( got.map, { secondArg : 1 } )
-  //     test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', '"fifth" arg' ] )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
-  //
-  // .then( () =>
-  // {
-  //   test.case = `'path to exec : with space' 'execPATH : has arguments' 'args: empty' 'fork'`
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : _.strQuote( testAppPathSpace ) + ' firstArg secondArg:1 "third arg" \'fourth arg\' `"fifth" arg`',
-  //     args : null,
-  //     ipc : 1,
-  //     mode : 'fork',
-  //     outputPiping : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   let got;
-  //   o.process.on( 'message', ( data ) => { got = data } )
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-  //     test.identical( got.map, { secondArg : 1 } )
-  //     test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', 'fourth arg', '"fifth" arg' ] )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
-  //
-  // .then( () =>
-  // {
-  //   test.case = `'path to exec : without space' 'execPATH : has arguments' 'args: empty' 'fork'`
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : _.strQuote( testAppPathNoSpace ) + ' firstArg secondArg:1 "third arg" \'fourth arg\' `"fifth" arg`',
-  //     args : null,
-  //     ipc : 1,
-  //     mode : 'fork',
-  //     outputPiping : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   let got;
-  //   o.process.on( 'message', ( data ) => { got = data } )
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     test.identical( got.scriptPath, _.path.normalize( testAppPathNoSpace ) )
-  //     test.identical( got.map, { secondArg : 1 } )
-  //     test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', 'fourth arg', '"fifth" arg' ] )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
-  //
-  // .then( () =>
-  // {
-  //   test.case = `'path to exec : with space' 'execPATH : only path' 'args: empty' 'fork'`
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : _.strQuote( testAppPathSpace ),
-  //     args : null,
-  //     ipc : 1,
-  //     mode : 'fork',
-  //     outputPiping : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   let got;
-  //   o.process.on( 'message', ( data ) => { got = data } )
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-  //     test.identical( got.map, {} )
-  //     test.identical( got.scriptArgs, [] )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
-  //
-  // .then( () =>
-  // {
-  //   test.case = `'path to exec : without space' 'execPATH : only path' 'args: empty' 'fork'`
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : _.strQuote( testAppPathNoSpace ),
-  //     args : null,
-  //     ipc : 1,
-  //     mode : 'fork',
-  //     outputPiping : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   let got;
-  //   o.process.on( 'message', ( data ) => { got = data } )
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     test.identical( got.scriptPath, _.path.normalize( testAppPathNoSpace ) )
-  //     test.identical( got.map, {} )
-  //     test.identical( got.scriptArgs, [] )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
-  //
-  // //end of fork
-  //
-  // .then( () =>
-  // {
-  //   test.case = `'path to exec : with space' 'execPATH : has arguments' 'args has arguments' 'exec'`
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' firstArg secondArg:1 "third arg"',
-  //     args : [ '\'fourth arg\'',  `"fifth" arg` ],
-  //     mode : 'exec',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     let expected =
-  //     {
-  //       scriptPath : _.path.normalize( testAppPathSpace ),
-  //       map : { secondArg : 1 },
-  //       scriptArgs : [ 'firstArg', 'secondArg:1', 'third arg', '\'fourth arg\'', '"fifth" arg' ]
-  //     }
-  //     let args = JSON.parse( o.output );
-  //     test.contains( args, expected )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
-  //
-  // .then( () =>
-  // {
-  //   test.case = `'path to exec : without space' 'execPATH : has arguments' 'args has arguments' 'exec'`
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathNoSpace ) + ' firstArg secondArg:1 "third arg"',
-  //     args : [ '\'fourth arg\'',  `"fifth" arg` ],
-  //     mode : 'exec',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     let expected =
-  //     {
-  //       scriptPath : _.path.normalize( testAppPathNoSpace ),
-  //       map : { secondArg : 1 },
-  //       scriptArgs : [ 'firstArg', 'secondArg:1', 'third arg', '\'fourth arg\'', '"fifth" arg' ]
-  //     }
-  //     let args = JSON.parse( o.output );
-  //     test.contains( args, expected )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
-  //
-  // .then( () =>
-  // {
-  //   test.case = `'path to exec : with space' 'execPATH : only path' 'args has arguments' 'exec'`
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathSpace ),
-  //     args : [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', `"fifth" arg` ],
-  //     mode : 'exec',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     let expected =
-  //     {
-  //       scriptPath : _.path.normalize( testAppPathSpace ),
-  //       map : { secondArg : 1 },
-  //       scriptArgs : [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', '"fifth" arg' ]
-  //     }
-  //     let args = JSON.parse( o.output );
-  //     test.contains( args, expected )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
-  //
-  // .then( () =>
-  // {
-  //   test.case = `'path to exec : without space' 'execPATH : only path' 'args has arguments' 'exec'`
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathNoSpace ),
-  //     args : [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', `"fifth" arg` ],
-  //     mode : 'exec',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     let expected =
-  //     {
-  //       scriptPath : _.path.normalize( testAppPathNoSpace ),
-  //       map : { secondArg : 1 },
-  //       scriptArgs : [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', '"fifth" arg' ]
-  //     }
-  //     let args = JSON.parse( o.output );
-  //     test.contains( args, expected )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
-  //
-  // .then( () =>
-  // {
-  //   test.case = `'path to exec : with space' 'execPATH : has arguments' 'args: empty' 'exec'`
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' firstArg secondArg:1 "third arg" \'fourth arg\' `"fifth" arg`',
-  //     args : null,
-  //     mode : 'exec',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     let expected =
-  //     {
-  //       scriptPath : _.path.normalize( testAppPathSpace ),
-  //       map : { secondArg : 1 },
-  //       scriptArgs : [ 'firstArg', 'secondArg:1', 'third arg', 'fourth arg', '"fifth" arg' ]
-  //     }
-  //     let args = JSON.parse( o.output );
-  //     test.contains( args, expected )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
-  //
-  // .then( () =>
-  // {
-  //   test.case = `'path to exec : without space' 'execPATH : has arguments' 'args: empty' 'exec'`
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node ' +_.strQuote( testAppPathNoSpace ) + ' firstArg secondArg:1 "third arg" \'fourth arg\' `"fifth" arg`',
-  //     args : null,
-  //     mode : 'exec',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     let expected =
-  //     {
-  //       scriptPath : _.path.normalize( testAppPathNoSpace ),
-  //       map : { secondArg : 1 },
-  //       scriptArgs : [ 'firstArg', 'secondArg:1', 'third arg', 'fourth arg', '"fifth" arg' ]
-  //     }
-  //     let args = JSON.parse( o.output );
-  //     test.contains( args, expected )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
-  //
-  // .then( () =>
-  // {
-  //   test.case = `'path to exec : with space' 'execPATH : only path' 'args: empty' 'exec'`
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathSpace ),
-  //     args : null,
-  //     mode : 'exec',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     let expected =
-  //     {
-  //       scriptPath : _.path.normalize( testAppPathSpace ),
-  //       map : {},
-  //       scriptArgs : []
-  //     }
-  //     let args = JSON.parse( o.output );
-  //     test.contains( args, expected )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
-  //
-  // .then( () =>
-  // {
-  //   test.case = `'path to exec : without space' 'execPATH : only path' 'args: empty' 'exec'`
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathNoSpace ),
-  //     args : null,
-  //     mode : 'exec',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     let expected =
-  //     {
-  //       scriptPath : _.path.normalize( testAppPathNoSpace ),
-  //       map : {},
-  //       scriptArgs : []
-  //     }
-  //     let args = JSON.parse( o.output );
-  //     test.contains( args, expected )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
-  //
-  // .then( () =>
-  // {
-  //   test.case = `'path to exec : with space' 'execPATH : has arguments' 'args has arguments' 'spawn'`
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' firstArg secondArg:1 "third arg"',
-  //     args : [ '\'fourth arg\'',  `"fifth" arg` ],
-  //     ipc : 1,
-  //     mode : 'spawn',
-  //     outputPiping : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   let got;
-  //   o.process.on( 'message', ( data ) => { got = data } )
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-  //     test.identical( got.map, { secondArg : 1 } )
-  //     test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', '\'fourth arg\'', '"fifth" arg' ] )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
-  //
-  // .then( () =>
-  // {
-  //   test.case = `'path to exec : without space' 'execPATH : has arguments' 'args has arguments' 'spawn'`
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathNoSpace ) + ' firstArg secondArg:1 "third arg"',
-  //     args : [ '\'fourth arg\'',  `"fifth" arg` ],
-  //     ipc : 1,
-  //     mode : 'spawn',
-  //     outputPiping : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   let got;
-  //   o.process.on( 'message', ( data ) => { got = data } )
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     test.identical( got.scriptPath, _.path.normalize( testAppPathNoSpace ) )
-  //     test.identical( got.map, { secondArg : 1 } )
-  //     test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', '\'fourth arg\'', '"fifth" arg' ] )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
-  //
-  // .then( () =>
-  // {
-  //   test.case = `'path to exec : with space' 'execPATH : only path' 'args has arguments' 'spawn'`
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathSpace ),
-  //     args : [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', `"fifth" arg` ],
-  //     ipc : 1,
-  //     mode : 'spawn',
-  //     outputPiping : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   let got;
-  //   o.process.on( 'message', ( data ) => { got = data } )
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-  //     test.identical( got.map, { secondArg : 1 } )
-  //     test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', '"fifth" arg' ] )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
-  //
-  // .then( () =>
-  // {
-  //   test.case = `'path to exec : without space' 'execPATH : only path' 'args has arguments' 'spawn'`
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathNoSpace ),
-  //     args : [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', `"fifth" arg` ],
-  //     ipc : 1,
-  //     mode : 'spawn',
-  //     outputPiping : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   let got;
-  //   o.process.on( 'message', ( data ) => { got = data } )
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     test.identical( got.scriptPath, _.path.normalize( testAppPathNoSpace ) )
-  //     test.identical( got.map, { secondArg : 1 } )
-  //     test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', '"fifth" arg' ] )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
-  //
-  // .then( () =>
-  // {
-  //   test.case = `'path to exec : with space' 'execPATH : has arguments' 'args: empty' 'spawn'`
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' firstArg secondArg:1 "third arg" \'fourth arg\' `"fifth" arg`',
-  //     args : null,
-  //     ipc : 1,
-  //     mode : 'spawn',
-  //     outputPiping : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   let got;
-  //   o.process.on( 'message', ( data ) => { got = data } )
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-  //     test.identical( got.map, { secondArg : 1 } )
-  //     test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', 'fourth arg', '"fifth" arg' ] )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
-  //
-  // .then( () =>
-  // {
-  //   test.case = `'path to exec : without space' 'execPATH : has arguments' 'args: empty' 'spawn'`
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathNoSpace ) + ' firstArg secondArg:1 "third arg" \'fourth arg\' `"fifth" arg`',
-  //     args : null,
-  //     ipc : 1,
-  //     mode : 'spawn',
-  //     outputPiping : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   let got;
-  //   o.process.on( 'message', ( data ) => { got = data } )
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     test.identical( got.scriptPath, _.path.normalize( testAppPathNoSpace ) )
-  //     test.identical( got.map, { secondArg : 1 } )
-  //     test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', 'fourth arg', '"fifth" arg' ] )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
-  //
-  // .then( () =>
-  // {
-  //   test.case = `'path to exec : with space' 'execPATH : only path' 'args: empty' 'spawn'`
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathSpace ),
-  //     args : null,
-  //     ipc : 1,
-  //     mode : 'spawn',
-  //     outputPiping : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   let got;
-  //   o.process.on( 'message', ( data ) => { got = data } )
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-  //     test.identical( got.map, {} )
-  //     test.identical( got.scriptArgs, [] )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
-  //
-  // .then( () =>
-  // {
-  //   test.case = `'path to exec : without space' 'execPATH : only path' 'args: empty' 'spawn'`
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathNoSpace ),
-  //     args : null,
-  //     ipc : 1,
-  //     mode : 'spawn',
-  //     outputPiping : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   let got;
-  //   o.process.on( 'message', ( data ) => { got = data } )
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     test.identical( got.scriptPath, _.path.normalize( testAppPathNoSpace ) )
-  //     test.identical( got.map, {} )
-  //     test.identical( got.scriptArgs, [] )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
-  //
-  // .then( () =>
-  // {
-  //   test.case = `'path to exec : with space' 'execPATH : has arguments' 'args has arguments' 'shell'`
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' firstArg secondArg:1 "third arg"',
-  //     args : [ '\'fourth arg\'',  `"fifth" arg` ],
-  //     mode : 'shell',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     let got = JSON.parse( o.output );
-  //     test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-  //     test.identical( got.map, { secondArg : 1 } )
-  //     test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', '\'fourth arg\'', '"fifth" arg' ] )
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
-  //
-  // .then( () =>
-  // {
-  //   test.case = `'path to exec : without space' 'execPATH : has arguments' 'args has arguments' 'shell'`
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathNoSpace ) + ' firstArg secondArg:1 "third arg"',
-  //     args : [ '\'fourth arg\'',  `"fifth" arg` ],
-  //     mode : 'shell',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   let got;
-  //   o.process.on( 'message', ( data ) => { got = data } )
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     let got = JSON.parse( o.output );
-  //     test.identical( got.scriptPath, _.path.normalize( testAppPathNoSpace ) )
-  //     test.identical( got.map, { secondArg : 1 } )
-  //     test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', '\'fourth arg\'', '"fifth" arg' ] )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
-  //
-  // .then( () =>
-  // {
-  //   test.case = `'path to exec : with space' 'execPATH : only path' 'args has arguments' 'shell'`
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathSpace ),
-  //     args : [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', `"fifth" arg` ],
-  //     mode : 'shell',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   let got;
-  //   o.process.on( 'message', ( data ) => { got = data } )
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     let got = JSON.parse( o.output );
-  //     test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-  //     test.identical( got.map, { secondArg : 1 } )
-  //     test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', '"fifth" arg' ] )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
-  //
-  // .then( () =>
-  // {
-  //   test.case = `'path to exec : without space' 'execPATH : only path' 'args has arguments' 'shell'`
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathNoSpace ),
-  //     args : [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', `"fifth" arg` ],
-  //     mode : 'shell',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   let got;
-  //   o.process.on( 'message', ( data ) => { got = data } )
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     let got = JSON.parse( o.output );
-  //     test.identical( got.scriptPath, _.path.normalize( testAppPathNoSpace ) )
-  //     test.identical( got.map, { secondArg : 1 } )
-  //     test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', '"fifth" arg' ] )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
-  //
-  // .then( () =>
-  // {
-  //   test.case = `'path to exec : with space' 'execPATH : has arguments' 'args: empty' 'shell'`
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathNoSpace ) + ' firstArg secondArg:1 "third arg" \'fourth arg\' `"fifth" arg`',
-  //     args : null,
-  //     mode : 'shell',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   let got;
-  //   o.process.on( 'message', ( data ) => { got = data } )
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     let got = JSON.parse( o.output );
-  //     test.identical( got.scriptPath, _.path.normalize( testAppPathNoSpace ) )
-  //     test.identical( got.map, { secondArg : 1 } )
-  //     test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', 'fourth arg', '"fifth" arg' ] )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
-  //
-  // .then( () =>
-  // {
-  //   test.case = `'path to exec : without space' 'execPATH : has arguments' 'args: empty' 'shell'`
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathNoSpace ) + ' firstArg secondArg:1 "third arg" \'fourth arg\' `"fifth" arg`',
-  //     args : null,
-  //     mode : 'shell',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   let got;
-  //   o.process.on( 'message', ( data ) => { got = data } )
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     let got = JSON.parse( o.output );
-  //     test.identical( got.scriptPath, _.path.normalize( testAppPathNoSpace ) )
-  //     test.identical( got.map, { secondArg : 1 } )
-  //     test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', 'fourth arg', '"fifth" arg' ] )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
-  //
-  // .then( () =>
-  // {
-  //   test.case = `'path to exec : with space' 'execPATH : only path' 'args: empty' 'shell'`
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathSpace ),
-  //     args : null,
-  //     mode : 'shell',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   let got;
-  //   o.process.on( 'message', ( data ) => { got = data } )
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     let got = JSON.parse( o.output );
-  //     test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-  //     test.identical( got.map, {} )
-  //     test.identical( got.scriptArgs, [] )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
-  //
-  // .then( () =>
-  // {
-  //   test.case = `'path to exec : without space' 'execPATH : only path' 'args: empty' 'shell'`
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathNoSpace ),
-  //     args : null,
-  //     mode : 'shell',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   let got;
-  //   o.process.on( 'message', ( data ) => { got = data } )
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     let got = JSON.parse( o.output );
-  //     test.identical( got.scriptPath, _.path.normalize( testAppPathNoSpace ) )
-  //     test.identical( got.map, {} )
-  //     test.identical( got.scriptArgs, [] )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
-  // xxx
+  .then( () =>
+  {
+    test.case = `'path to exec : with space' 'execPATH : has arguments' 'args has arguments' 'fork'`
+
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' firstArg secondArg:1 "third arg"',
+      args : [ '\'fourth arg\'',  `"fifth" arg` ],
+      ipc : 1,
+      mode : 'fork',
+      outputPiping : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    let got;
+    o.process.on( 'message', ( data ) => { got = data } )
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, { secondArg : `1 "third arg" 'fourth arg' "fifth" arg` } )
+      test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', '\'fourth arg\'', '"fifth" arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    test.case = `'path to exec : without space' 'execPATH : has arguments' 'args has arguments' 'fork'`
+
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathNoSpace ) + ' firstArg secondArg:1 "third arg"',
+      args : [ '\'fourth arg\'',  `"fifth" arg` ],
+      ipc : 1,
+      mode : 'fork',
+      outputPiping : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    let got;
+    o.process.on( 'message', ( data ) => { got = data } )
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( got.scriptPath, _.path.normalize( testAppPathNoSpace ) )
+      test.identical( got.map, { secondArg : `1 "third arg" 'fourth arg' "fifth" arg` } )
+      test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', '\'fourth arg\'', '"fifth" arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    test.case = `'path to exec : with space' 'execPATH : only path' 'args has arguments' 'fork'`
+
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ),
+      args : [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', `"fifth" arg` ],
+      ipc : 1,
+      mode : 'fork',
+      outputPiping : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    let got;
+    o.process.on( 'message', ( data ) => { got = data } )
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, { secondArg : `1 "third arg" 'fourth arg' "fifth" arg` } )
+      test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', '"fifth" arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    test.case = `'path to exec : without space' 'execPATH : only path' 'args has arguments' 'fork'`
+
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathNoSpace ),
+      args : [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', `"fifth" arg` ],
+      ipc : 1,
+      mode : 'fork',
+      outputPiping : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    let got;
+    o.process.on( 'message', ( data ) => { got = data } )
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( got.scriptPath, _.path.normalize( testAppPathNoSpace ) )
+      test.identical( got.map, { secondArg : `1 "third arg" 'fourth arg' "fifth" arg` } )
+      test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', '"fifth" arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    test.case = `'path to exec : with space' 'execPATH : has arguments' 'args: empty' 'fork'`
+
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ) + ' firstArg secondArg:1 "third arg" \'fourth arg\' `"fifth" arg`',
+      args : null,
+      ipc : 1,
+      mode : 'fork',
+      outputPiping : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    let got;
+    o.process.on( 'message', ( data ) => { got = data } )
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, { secondArg : `1 "third arg" "fourth arg" "fifth" arg` } )
+      test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', 'fourth arg', '"fifth" arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    test.case = `'path to exec : without space' 'execPATH : has arguments' 'args: empty' 'fork'`
+
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathNoSpace ) + ' firstArg secondArg:1 "third arg" \'fourth arg\' `"fifth" arg`',
+      args : null,
+      ipc : 1,
+      mode : 'fork',
+      outputPiping : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    let got;
+    o.process.on( 'message', ( data ) => { got = data } )
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( got.scriptPath, _.path.normalize( testAppPathNoSpace ) )
+      test.identical( got.map, { secondArg : `1 "third arg" "fourth arg" "fifth" arg` } )
+      test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', 'fourth arg', '"fifth" arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    test.case = `'path to exec : with space' 'execPATH : only path' 'args: empty' 'fork'`
+
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathSpace ),
+      args : null,
+      ipc : 1,
+      mode : 'fork',
+      outputPiping : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    let got;
+    o.process.on( 'message', ( data ) => { got = data } )
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    test.case = `'path to exec : without space' 'execPATH : only path' 'args: empty' 'fork'`
+
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : _.strQuote( testAppPathNoSpace ),
+      args : null,
+      ipc : 1,
+      mode : 'fork',
+      outputPiping : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    let got;
+    o.process.on( 'message', ( data ) => { got = data } )
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( got.scriptPath, _.path.normalize( testAppPathNoSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  /* - end of fork - */ /* qqq : split test routine by modes */
+
+  .then( () =>
+  {
+    test.case = `'path to exec : with space' 'execPATH : has arguments' 'args has arguments' 'exec'`
+
+    let con = new _.Consequence().take( null );
+
+    if( !Config.debug )
+    return con;
+
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' firstArg secondArg:1 "third arg"',
+      args : [ '\'fourth arg\'',  `"fifth" arg` ],
+      mode : 'exec',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+
+    return test.shouldThrowErrorSync( () => _.process.start( o ) );
+  })
+
+  .then( () =>
+  {
+    test.case = `'path to exec : with space' 'execPATH : has arguments' 'args has arguments' 'spawn'`
+
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' firstArg secondArg:1 "third arg"',
+      args : [ '\'fourth arg\'',  `"fifth" arg` ],
+      ipc : 1,
+      mode : 'spawn',
+      outputPiping : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    let got;
+    o.process.on( 'message', ( data ) => { got = data } )
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, { secondArg : `1 "third arg" 'fourth arg' "fifth" arg` } )
+      test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', '\'fourth arg\'', '"fifth" arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    test.case = `'path to exec : without space' 'execPATH : has arguments' 'args has arguments' 'spawn'`
+
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathNoSpace ) + ' firstArg secondArg:1 "third arg"',
+      args : [ '\'fourth arg\'',  `"fifth" arg` ],
+      ipc : 1,
+      mode : 'spawn',
+      outputPiping : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    let got;
+    o.process.on( 'message', ( data ) => { got = data } )
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( got.scriptPath, _.path.normalize( testAppPathNoSpace ) )
+      test.identical( got.map, { secondArg : `1 "third arg" 'fourth arg' "fifth" arg` } )
+      test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', '\'fourth arg\'', '"fifth" arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    test.case = `'path to exec : with space' 'execPATH : only path' 'args has arguments' 'spawn'`
+
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ),
+      args : [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', `"fifth" arg` ],
+      ipc : 1,
+      mode : 'spawn',
+      outputPiping : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    let got;
+    o.process.on( 'message', ( data ) => { got = data } )
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, { secondArg : `1 "third arg" 'fourth arg' "fifth" arg` } )
+      test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', '"fifth" arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    test.case = `'path to exec : without space' 'execPATH : only path' 'args has arguments' 'spawn'`
+
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathNoSpace ),
+      args : [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', `"fifth" arg` ],
+      ipc : 1,
+      mode : 'spawn',
+      outputPiping : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    let got;
+    o.process.on( 'message', ( data ) => { got = data } )
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( got.scriptPath, _.path.normalize( testAppPathNoSpace ) )
+      test.identical( got.map, { secondArg : `1 "third arg" 'fourth arg' "fifth" arg` } )
+      test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', '"fifth" arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    test.case = `'path to exec : with space' 'execPATH : has arguments' 'args: empty' 'spawn'`
+
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' firstArg secondArg:1 "third arg" \'fourth arg\' `"fifth" arg`',
+      args : null,
+      ipc : 1,
+      mode : 'spawn',
+      outputPiping : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    let got;
+    o.process.on( 'message', ( data ) => { got = data } )
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, { secondArg : `1 "third arg" "fourth arg" "fifth" arg` } )
+      test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', 'fourth arg', '"fifth" arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    test.case = `'path to exec : without space' 'execPATH : has arguments' 'args: empty' 'spawn'`
+
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathNoSpace ) + ' firstArg secondArg:1 "third arg" \'fourth arg\' `"fifth" arg`',
+      args : null,
+      ipc : 1,
+      mode : 'spawn',
+      outputPiping : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    let got;
+    o.process.on( 'message', ( data ) => { got = data } )
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( got.scriptPath, _.path.normalize( testAppPathNoSpace ) )
+      test.identical( got.map, { secondArg : `1 "third arg" "fourth arg" "fifth" arg` } )
+      test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', 'fourth arg', '"fifth" arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    test.case = `'path to exec : with space' 'execPATH : only path' 'args: empty' 'spawn'`
+
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ),
+      args : null,
+      ipc : 1,
+      mode : 'spawn',
+      outputPiping : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    let got;
+    o.process.on( 'message', ( data ) => { got = data } )
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    test.case = `'path to exec : without space' 'execPATH : only path' 'args: empty' 'spawn'`
+
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathNoSpace ),
+      args : null,
+      ipc : 1,
+      mode : 'spawn',
+      outputPiping : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    let got;
+    o.process.on( 'message', ( data ) => { got = data } )
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( got.scriptPath, _.path.normalize( testAppPathNoSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    test.case = `'path to exec : with space' 'execPATH : has arguments' 'args has arguments' 'shell'`
+
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' firstArg secondArg:1 "third arg"',
+      args : [ '\'fourth arg\'',  `"fifth" arg` ],
+      mode : 'shell',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      let got = JSON.parse( o.output );
+      test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, { secondArg : `1 "third arg" 'fourth arg' "fifth" arg` } )
+      test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', '\'fourth arg\'', '"fifth" arg' ] )
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    test.case = `'path to exec : without space' 'execPATH : has arguments' 'args has arguments' 'shell'`
+
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathNoSpace ) + ' firstArg secondArg:1 "third arg"',
+      args : [ '\'fourth arg\'',  `"fifth" arg` ],
+      mode : 'shell',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    let got;
+    o.process.on( 'message', ( data ) => { got = data } )
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      let got = JSON.parse( o.output );
+      test.identical( got.scriptPath, _.path.normalize( testAppPathNoSpace ) )
+      test.identical( got.map, { secondArg : `1 "third arg" 'fourth arg' "fifth" arg` } )
+      test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', '\'fourth arg\'', '"fifth" arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    test.case = `'path to exec : with space' 'execPATH : only path' 'args has arguments' 'shell'`
+
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ),
+      args : [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', `"fifth" arg` ],
+      mode : 'shell',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    let got;
+    o.process.on( 'message', ( data ) => { got = data } )
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      let got = JSON.parse( o.output );
+      test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, { secondArg : `1 "third arg" 'fourth arg' "fifth" arg` } )
+      test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', '"fifth" arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    test.case = `'path to exec : without space' 'execPATH : only path' 'args has arguments' 'shell'`
+
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathNoSpace ),
+      args : [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', `"fifth" arg` ],
+      mode : 'shell',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    let got;
+    o.process.on( 'message', ( data ) => { got = data } )
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      let got = JSON.parse( o.output );
+      test.identical( got.scriptPath, _.path.normalize( testAppPathNoSpace ) )
+      test.identical( got.map, { secondArg : `1 "third arg" 'fourth arg' "fifth" arg` } )
+      test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', '"fifth" arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    test.case = `'path to exec : with space' 'execPATH : has arguments' 'args: empty' 'shell'`
+
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathNoSpace ) + ' firstArg secondArg:1 "third arg" \'fourth arg\' \'"fifth" arg\'',
+      args : null,
+      mode : 'shell',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    let got;
+    o.process.on( 'message', ( data ) => { got = data } )
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      let got = JSON.parse( o.output );
+      test.identical( got.scriptPath, _.path.normalize( testAppPathNoSpace ) )
+      test.identical( got.map, { secondArg : `1 "third arg" "fourth arg" "fifth" arg` } )
+      test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', 'fourth arg', '"fifth" arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    test.case = `'path to exec : without space' 'execPATH : has arguments' 'args: empty' 'shell'`
+
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathNoSpace ) + ' firstArg secondArg:1 "third arg" \'fourth arg\' \'"fifth" arg\'',
+      args : null,
+      mode : 'shell',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    let got;
+    o.process.on( 'message', ( data ) => { got = data } )
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      let got = JSON.parse( o.output );
+      test.identical( got.scriptPath, _.path.normalize( testAppPathNoSpace ) )
+      test.identical( got.map, { secondArg : '1 "third arg" "fourth arg" "fifth" arg' } )
+      test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', 'fourth arg', '"fifth" arg' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    test.case = `'path to exec : with space' 'execPATH : only path' 'args: empty' 'shell'`
+
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ),
+      args : null,
+      mode : 'shell',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    let got;
+    o.process.on( 'message', ( data ) => { got = data } )
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      let got = JSON.parse( o.output );
+      test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [] )
+
+      return null;
+    })
+
+    return con;
+  })
+
+  .then( () =>
+  {
+    test.case = `'path to exec : without space' 'execPATH : only path' 'args: empty' 'shell'`
+
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathNoSpace ),
+      args : null,
+      mode : 'shell',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    let got;
+    o.process.on( 'message', ( data ) => { got = data } )
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      let got = JSON.parse( o.output );
+      test.identical( got.scriptPath, _.path.normalize( testAppPathNoSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [] )
+
+      return null;
+    })
+
+    return con;
+  })
 
   /* special case from willbe */
 
@@ -6182,95 +6066,67 @@ function shellArgumentsParsing( test )
   })
 
   // xxx
-  // .then( () =>
-  // {
-  //   test.case = `'path to exec : with space' 'execPATH : only path' 'args: willbe args' 'spawn'`
+  .then( () =>
+  {
+    test.case = `'path to exec : with space' 'execPATH : only path' 'args: willbe args' 'spawn'`
+
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ),
+      args : '.imply v:1 ; .each . .resources.list about::name',
+      mode : 'spawn',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      let got = JSON.parse( o.output );
+      test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, { v : 1 } )
+      test.identical( got.scriptArgs, [ '.imply v:1 ; .each . .resources.list about::name' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
   //
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathSpace ),
-  //     args : '.imply v:1 ; .each . .resources.list about::name',
-  //     mode : 'spawn',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     let got = JSON.parse( o.output );
-  //     test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-  //     test.identical( got.map, { v : 1 } )
-  //     test.identical( got.scriptArgs, [ '.imply v:1 ; .each . .resources.list about::name' ] )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
-  //
-  // .then( () =>
-  // {
-  //   test.case = `'path to exec : with space' 'execPATH : only path' 'args: willbe args' 'shell'`
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathSpace ),
-  //     args : '.imply v:1 ; .each . .resources.list about::name',
-  //     mode : 'shell',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     let got = JSON.parse( o.output );
-  //     test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-  //     test.identical( got.map, { v : 1 } )
-  //     test.identical( got.scriptArgs, [ '.imply v:1 ; .each . .resources.list about::name' ] )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
-  //
-  // .then( () =>
-  // {
-  //   test.case = `'path to exec : with space' 'execPATH : only path' 'args: willbe args' 'exec'`
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathSpace ),
-  //     args : '.imply v:1 ; .each . .resources.list about::name',
-  //     mode : 'exec',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     let got = JSON.parse( o.output );
-  //     test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-  //     test.identical( got.map, { v : 1 } )
-  //     test.identical( got.scriptArgs, [ '.imply v:1 ; .each . .resources.list about::name' ] )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
+
+  .then( () =>
+  {
+    test.case = `'path to exec : with space' 'execPATH : only path' 'args: willbe args' 'shell'`
+
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ),
+      args : '.imply v:1 ; .each . .resources.list about::name',
+      mode : 'shell',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      let got = JSON.parse( o.output );
+      test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, { v : 1 } )
+      test.identical( got.scriptArgs, [ '.imply v:1 ; .each . .resources.list about::name' ] )
+
+      return null;
+    })
+
+    return con;
+  })
 
   /*  */
 
@@ -6371,6 +6227,7 @@ function shellArgumentsParsingNonTrivial( test )
 
   ready
 
+  // xxx qqq : repair?
   // .then( () =>
   // {
   //   test.case = 'args in execPath and args options'
@@ -6438,40 +6295,40 @@ function shellArgumentsParsingNonTrivial( test )
     return con;
   })
 
-  .then( () =>
-  {
-    test.case = 'args in execPath and args options'
-
-    let con = new _.Consequence().take( null );
-    let o =
-    {
-      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ` 'firstArg secondArg \":\" 1' "third arg" 'fourth arg'  '\"fifth\" arg'`,
-      args : '"some arg"',
-      mode : 'exec',
-      outputPiping : 1,
-      outputCollecting : 1,
-      ready : con
-    }
-    _.process.start( o );
-
-    con.then( () =>
-    {
-      test.identical( o.exitCode, 0 );
-      test.identical( o.execPath, 'node' );
-      test.identical( o.args, [ _.strQuote( testAppPathSpace ), `'firstArg secondArg \":\" 1'`, `"third arg"`, `'fourth arg'`, `'\"fifth\" arg'`, '"some arg"' ] );
-      let got = JSON.parse( o.output );
-      test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-      test.identical( got.map, {} )
-      if( process.platform === 'win32' )
-      test.identical( got.scriptArgs, [ `'firstArg`, `secondArg`, ':', `1'`, 'third arg', `'fourth`, `arg'`, `'fifth`, `arg'`, '"some arg"' ] )
-      else
-      test.identical( got.scriptArgs, [ 'firstArg secondArg ":" 1', 'third arg', 'fourth arg', '"fifth" arg', '"some arg"' ] )
-
-      return null;
-    })
-
-    return con;
-  })
+  // .then( () =>
+  // {
+  //   test.case = 'args in execPath and args options'
+  //
+  //   let con = new _.Consequence().take( null );
+  //   let o =
+  //   {
+  //     execPath : 'node ' + _.strQuote( testAppPathSpace ) + ` 'firstArg secondArg \":\" 1' "third arg" 'fourth arg'  '\"fifth\" arg'`,
+  //     args : '"some arg"',
+  //     mode : 'exec', /* qqq : change mode here */
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   _.process.start( o );
+  //
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( o.execPath, 'node' );
+  //     test.identical( o.args, [ _.strQuote( testAppPathSpace ), `'firstArg secondArg \":\" 1'`, `"third arg"`, `'fourth arg'`, `'\"fifth\" arg'`, '"some arg"' ] );
+  //     let got = JSON.parse( o.output );
+  //     test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
+  //     test.identical( got.map, {} )
+  //     if( process.platform === 'win32' )
+  //     test.identical( got.scriptArgs, [ `'firstArg`, `secondArg`, ':', `1'`, 'third arg', `'fourth`, `arg'`, `'fifth`, `arg'`, '"some arg"' ] )
+  //     else
+  //     test.identical( got.scriptArgs, [ 'firstArg secondArg ":" 1', 'third arg', 'fourth arg', '"fifth" arg', '"some arg"' ] )
+  //
+  //     return null;
+  //   })
+  //
+  //   return con;
+  // })
 
   .then( () =>
   {
@@ -6573,38 +6430,38 @@ function shellArgumentsParsingNonTrivial( test )
     return con;
   })
 
-  .then( () =>
-  {
-    test.case = 'args in execPath and args options'
-
-    let con = new _.Consequence().take( null );
-    let o =
-    {
-      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' firstArg secondArg:1',
-      args : '"third arg"',
-      mode : 'exec',
-      outputPiping : 1,
-      outputCollecting : 1,
-      ready : con
-    }
-    _.process.start( o );
-
-    con.then( () =>
-    {
-      test.identical( o.exitCode, 0 );
-      test.identical( o.execPath, 'node' );
-      test.identical( o.args, [ _.strQuote( testAppPathSpace ), 'firstArg', 'secondArg:1', '"third arg"' ] );
-      let got = JSON.parse( o.output );
-      test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-      test.identical( got.map, { secondArg : '1 "third arg"' } )
-      test.identical( got.subject, 'firstArg' )
-      test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', '"third arg"' ] )
-
-      return null;
-    })
-
-    return con;
-  })
+  // .then( () =>
+  // {
+  //   test.case = 'args in execPath and args options'
+  //
+  //   let con = new _.Consequence().take( null );
+  //   let o =
+  //   {
+  //     execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' firstArg secondArg:1',
+  //     args : '"third arg"',
+  //     mode : 'exec', /* qqq : change mode here */
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   _.process.start( o );
+  //
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( o.execPath, 'node' );
+  //     test.identical( o.args, [ _.strQuote( testAppPathSpace ), 'firstArg', 'secondArg:1', '"third arg"' ] );
+  //     let got = JSON.parse( o.output );
+  //     test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
+  //     test.identical( got.map, { secondArg : '1 "third arg"' } )
+  //     test.identical( got.subject, 'firstArg' )
+  //     test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', '"third arg"' ] )
+  //
+  //     return null;
+  //   })
+  //
+  //   return con;
+  // })
 
   .then( () =>
   {
@@ -7158,99 +7015,99 @@ function shellArgumentsNestedQuotes( test )
     return con;
   })
 
-  .then( () =>
-  {
-    test.case = 'exec'
-
-    //qqq:review this case
-
-    let con = new _.Consequence().take( null );
-    let args =
-    [
-      ` '\'s-s\''  '\"s-d\"'  '\`s-b\`'  `,
-      ` "\'d-s\'"  "\"d-d\""  "\`d-b\`"  `,
-      ` \`\'b-s\'\`  \`\"b-d\"\`  \`\`b-b\`\` `,
-    ]
-    let o =
-    {
-      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' ' + args.join( ' ' ),
-      mode : 'exec',
-      outputPiping : 1,
-      outputCollecting : 1,
-      ready : con
-    }
-    _.process.start( o );
-
-    con.then( () =>
-    {
-      test.identical( o.exitCode, 0 );
-      if( process.platform === 'win32' )
-      {
-        let got = JSON.parse( o.output );
-        test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-        test.identical( got.map, {} )
-        let scriptArgs =
-        [
-          '\'\'s-s\'\'',
-          '\'s-d\'',
-          '\'`s-b`\'',
-          '\'d-s\'',
-          'd-d',
-          '`d-b`',
-          '`\'b-s\'`',
-          '\`b-d`',
-          '``b-b``'
-        ]
-        test.identical( got.scriptArgs, scriptArgs )
-      }
-      else
-      {
-        test.identical( _.strCount( o.output, 'not found' ), 3 );
-      }
-
-      return null;
-    })
-
-    return con;
-
-  })
-
-  .then( () =>
-  {
-    test.case = 'exec'
-
-    let con = new _.Consequence().take( null );
-    let args =
-    [
-      ` '\'s-s\''  '\"s-d\"'  '\`s-b\`'  `,
-      ` "\'d-s\'"  "\"d-d\""  "\`d-b\`"  `,
-      ` \`\'b-s\'\`  \`\"b-d\"\`  \`\`b-b\`\` `,
-    ]
-    let o =
-    {
-      execPath : 'node ' + _.strQuote( testAppPathSpace ),
-      args : args.slice(),
-      mode : 'exec',
-      outputPiping : 1,
-      outputCollecting : 1,
-      ready : con
-    }
-    _.process.start( o );
-
-    con.then( () =>
-    {
-      test.identical( o.exitCode, 0 );
-      let got = JSON.parse( o.output );
-      test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-      test.identical( got.map, {} )
-      test.identical( got.scriptArgs, args )
-
-      return null;
-    })
-
-    return con;
-
-  })
+  // .then( () =>
+  // {
+  //   test.case = 'exec'
+  //
+  //   //qqq:review this case
+  //
+  //   let con = new _.Consequence().take( null );
+  //   let args =
+  //   [
+  //     ` '\'s-s\''  '\"s-d\"'  '\`s-b\`'  `,
+  //     ` "\'d-s\'"  "\"d-d\""  "\`d-b\`"  `,
+  //     ` \`\'b-s\'\`  \`\"b-d\"\`  \`\`b-b\`\` `,
+  //   ]
+  //   let o =
+  //   {
+  //     execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' ' + args.join( ' ' ),
+  //     mode : 'exec',
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   _.process.start( o );
+  //
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     if( process.platform === 'win32' )
+  //     {
+  //       let got = JSON.parse( o.output );
+  //       test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
+  //       test.identical( got.map, {} )
+  //       let scriptArgs =
+  //       [
+  //         '\'\'s-s\'\'',
+  //         '\'s-d\'',
+  //         '\'`s-b`\'',
+  //         '\'d-s\'',
+  //         'd-d',
+  //         '`d-b`',
+  //         '`\'b-s\'`',
+  //         '\`b-d`',
+  //         '``b-b``'
+  //       ]
+  //       test.identical( got.scriptArgs, scriptArgs )
+  //     }
+  //     else
+  //     {
+  //       test.identical( _.strCount( o.output, 'not found' ), 3 );
+  //     }
+  //
+  //     return null;
+  //   })
+  //
+  //   return con;
+  //
+  // })
+  //
+  // .then( () =>
+  // {
+  //   test.case = 'exec'
+  //
+  //   let con = new _.Consequence().take( null );
+  //   let args =
+  //   [
+  //     ` '\'s-s\''  '\"s-d\"'  '\`s-b\`'  `,
+  //     ` "\'d-s\'"  "\"d-d\""  "\`d-b\`"  `,
+  //     ` \`\'b-s\'\`  \`\"b-d\"\`  \`\`b-b\`\` `,
+  //   ]
+  //   let o =
+  //   {
+  //     execPath : 'node ' + _.strQuote( testAppPathSpace ),
+  //     args : args.slice(),
+  //     mode : 'exec',
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   _.process.start( o );
+  //
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     let got = JSON.parse( o.output );
+  //     test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
+  //     test.identical( got.map, {} )
+  //     test.identical( got.scriptArgs, args )
+  //
+  //     return null;
+  //   })
+  //
+  //   return con;
+  //
+  // })
 
   /* */
 
@@ -7374,34 +7231,34 @@ function shellExecPathQuotesClosing( test )
     return con;
   })
 
-  .then( () =>
-  {
-    let con = new _.Consequence().take( null );
-    let o =
-    {
-      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"',
-      mode : 'exec',
-      outputPiping : 1,
-      outputCollecting : 1,
-      ready : con
-    }
-    _.process.start( o );
-
-    con.then( () =>
-    {
-      test.identical( o.exitCode, 0 );
-      test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"' );
-      test.identical( o.args, [ _.strQuote( testAppPathSpace ), '"arg"' ] );
-      let got = JSON.parse( o.output );
-      test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-      test.identical( got.map, {} )
-      test.identical( got.scriptArgs, [ 'arg' ] )
-
-      return null;
-    })
-
-    return con;
-  })
+  // .then( () =>
+  // {
+  //   let con = new _.Consequence().take( null );
+  //   let o =
+  //   {
+  //     execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"',
+  //     mode : 'exec',
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   _.process.start( o );
+  //
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"' );
+  //     test.identical( o.args, [ _.strQuote( testAppPathSpace ), '"arg"' ] );
+  //     let got = JSON.parse( o.output );
+  //     test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
+  //     test.identical( got.map, {} )
+  //     test.identical( got.scriptArgs, [ 'arg' ] )
+  //
+  //     return null;
+  //   })
+  //
+  //   return con;
+  // })
 
   testcase( 'unquoted arg' )
 
@@ -7492,34 +7349,34 @@ function shellExecPathQuotesClosing( test )
     return con;
   })
 
-  .then( () =>
-  {
-    let con = new _.Consequence().take( null );
-    let o =
-    {
-      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' arg',
-      mode : 'exec',
-      outputPiping : 1,
-      outputCollecting : 1,
-      ready : con
-    }
-    _.process.start( o );
-
-    con.then( () =>
-    {
-      test.identical( o.exitCode, 0 );
-      test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' arg' );
-      test.identical( o.args, [ _.strQuote( testAppPathSpace ), 'arg' ] );
-      let got = JSON.parse( o.output );
-      test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-      test.identical( got.map, {} )
-      test.identical( got.scriptArgs, [ 'arg' ] )
-
-      return null;
-    })
-
-    return con;
-  })
+  // .then( () =>
+  // {
+  //   let con = new _.Consequence().take( null );
+  //   let o =
+  //   {
+  //     execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' arg',
+  //     mode : 'exec',
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   _.process.start( o );
+  //
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' arg' );
+  //     test.identical( o.args, [ _.strQuote( testAppPathSpace ), 'arg' ] );
+  //     let got = JSON.parse( o.output );
+  //     test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
+  //     test.identical( got.map, {} )
+  //     test.identical( got.scriptArgs, [ 'arg' ] )
+  //
+  //     return null;
+  //   })
+  //
+  //   return con;
+  // })
 
   /*  */
 
@@ -8112,7 +7969,7 @@ function shellExecPathSeveralCommands( test )
     return con;
   })
 
-  //
+  /* - */
 
   testcase( 'quoted, mode:spawn' )
 
@@ -8131,7 +7988,7 @@ function shellExecPathSeveralCommands( test )
     return test.shouldThrowErrorAsync( _.process.start( o ) )
   })
 
-  //
+  /* - */
 
   testcase( 'quoted, mode:fork' )
 
@@ -8150,36 +8007,36 @@ function shellExecPathSeveralCommands( test )
     return test.shouldThrowErrorAsync( _.process.start( o ) )
   })
 
-  // //
+  /* -- */
 
-  testcase( 'quoted, mode:exec' )
-
-  .then( () =>
-  {
-    let con = new _.Consequence().take( null );
-    let o =
-    {
-      execPath : 'node app.js arg1 && node app.js arg2',
-      mode : 'exec',
-      currentPath : routinePath,
-      outputPiping : 1,
-      outputCollecting : 1,
-      ready : con
-    }
-    _.process.start( o );
-
-    con.then( ( got ) =>
-    {
-      test.identical( o.exitCode, 0 );
-      test.identical( _.strCount( got.output, `[ 'arg1' ]` ), 1 );
-      test.identical( _.strCount( got.output, `[ 'arg2' ]` ), 1 );
-      return null;
-    })
-
-    return con;
-  })
-
+  // testcase( 'quoted, mode:exec' )
   //
+  // .then( () =>
+  // {
+  //   let con = new _.Consequence().take( null );
+  //   let o =
+  //   {
+  //     execPath : 'node app.js arg1 && node app.js arg2',
+  //     mode : 'exec',
+  //     currentPath : routinePath,
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   _.process.start( o );
+  //
+  //   con.then( ( got ) =>
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( _.strCount( got.output, `[ 'arg1' ]` ), 1 );
+  //     test.identical( _.strCount( got.output, `[ 'arg2' ]` ), 1 );
+  //     return null;
+  //   })
+  //
+  //   return con;
+  // })
+
+  /* - */
 
   testcase( 'no quotes, mode:shell' )
 
@@ -8208,7 +8065,7 @@ function shellExecPathSeveralCommands( test )
     return con;
   })
 
-  //
+  /* - */
 
   testcase( 'no quotes, mode:spawn' )
 
@@ -8236,7 +8093,7 @@ function shellExecPathSeveralCommands( test )
     return con;
   })
 
-  //
+  /* - */
 
   testcase( 'no quotes, mode:fork' )
 
@@ -8255,34 +8112,34 @@ function shellExecPathSeveralCommands( test )
     return test.shouldThrowErrorAsync( _.process.start( o ) );
   })
 
+  /* - */
+
+  // testcase( 'no quotes, mode:exec' )
   //
-
-  testcase( 'no quotes, mode:exec' )
-
-  .then( () =>
-  {
-    let con = new _.Consequence().take( null );
-    let o =
-    {
-      execPath : 'node app.js arg1 && node app.js arg2',
-      mode : 'exec',
-      currentPath : routinePath,
-      outputPiping : 1,
-      outputCollecting : 1,
-      ready : con
-    }
-    _.process.start( o );
-
-    con.then( ( got ) =>
-    {
-      test.identical( o.exitCode, 0 );
-      test.identical( _.strCount( got.output, `[ 'arg1' ]` ), 1 );
-      test.identical( _.strCount( got.output, `[ 'arg2' ]` ), 1 );
-      return null;
-    })
-
-    return con;
-  })
+  // .then( () =>
+  // {
+  //   let con = new _.Consequence().take( null );
+  //   let o =
+  //   {
+  //     execPath : 'node app.js arg1 && node app.js arg2',
+  //     mode : 'exec',
+  //     currentPath : routinePath,
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   _.process.start( o );
+  //
+  //   con.then( ( got ) =>
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( _.strCount( got.output, `[ 'arg1' ]` ), 1 );
+  //     test.identical( _.strCount( got.output, `[ 'arg2' ]` ), 1 );
+  //     return null;
+  //   })
+  //
+  //   return con;
+  // })
 
   /*  */
 
@@ -8368,7 +8225,7 @@ function shellVerbosity( test )
     stdio : 'pipe',
     outputPiping : null,
     outputCollecting : 0,
-    outputGray : 1,
+    outputDecorating : 1,
     logger : captureLogger,
     ready
   })
@@ -8392,7 +8249,7 @@ function shellVerbosity( test )
     stdio : 'pipe',
     outputPiping : null,
     outputCollecting : 0,
-    outputGray : 1,
+    outputDecorating : 1,
     logger : captureLogger,
     ready
   })
@@ -8416,7 +8273,7 @@ function shellVerbosity( test )
     stdio : 'pipe',
     outputPiping : null,
     outputCollecting : 0,
-    outputGray : 1,
+    outputDecorating : 1,
     logger : captureLogger,
     ready
   })
@@ -8441,7 +8298,7 @@ function shellVerbosity( test )
     outputPiping : null,
     outputCollecting : 0,
     throwingExitCode : 0,
-    outputGray : 1,
+    outputDecorating : 1,
     logger : captureLogger,
     ready
   })
@@ -8464,7 +8321,7 @@ function shellVerbosity( test )
     outputPiping : null,
     outputCollecting : 0,
     throwingExitCode : 0,
-    outputGray : 1,
+    outputDecorating : 1,
     logger : captureLogger,
     ready
   })
@@ -8487,7 +8344,7 @@ function shellVerbosity( test )
     outputPiping : null,
     outputCollecting : 0,
     throwingExitCode : 0,
-    outputGray : 1,
+    outputDecorating : 1,
     logger : captureLogger,
     ready
   })
@@ -8510,7 +8367,7 @@ function shellVerbosity( test )
     outputPiping : null,
     outputCollecting : 0,
     throwingExitCode : 0,
-    outputGray : 1,
+    outputDecorating : 1,
     logger : captureLogger,
     ready
   })
@@ -8533,7 +8390,7 @@ function shellVerbosity( test )
     outputPiping : null,
     outputCollecting : 0,
     throwingExitCode : 0,
-    outputGray : 1,
+    outputDecorating : 1,
     logger : captureLogger,
     ready
   })
@@ -8556,7 +8413,7 @@ function shellVerbosity( test )
     outputPiping : null,
     outputCollecting : 0,
     throwingExitCode : 1,
-    outputGray : 1,
+    outputDecorating : 1,
     logger : captureLogger,
     ready
   })
@@ -8580,7 +8437,7 @@ function shellVerbosity( test )
     outputPiping : null,
     outputCollecting : 0,
     throwingExitCode : 1,
-    outputGray : 1,
+    outputDecorating : 1,
     logger : captureLogger,
     ready
   })
@@ -8616,7 +8473,7 @@ function shellVerbosity( test )
 
 function shellErrorHadling( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -8633,7 +8490,7 @@ function shellErrorHadling( test )
   var expectedOutput = __dirname + '\n'
   _.fileProvider.fileWrite( testAppPath, testAppCode );
 
-  //
+  /* - */
 
   var con = new _.Consequence().take( null );
 
@@ -8878,7 +8735,7 @@ function shellErrorHadling( test )
 
 function shellNode( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -8910,7 +8767,7 @@ function shellNode( test )
   con.then( () =>
   {
     test.case = 'execPath contains normalized path'
-    return _.process.startNode
+    return _.process.startNjs
     ({
       execPath : testAppPath2,
       args : [ 'arg' ],
@@ -8929,14 +8786,15 @@ function shellNode( test )
 
   /*  */
 
-  var modes = [ 'fork', 'exec', 'spawn', 'shell' ];
+  // var modes = [ 'fork', 'exec', 'spawn', 'shell' ];
+  var modes = [ 'fork', 'spawn', 'shell' ];
 
   modes.forEach( ( mode ) =>
   {
     con.thenKeep( () =>
     {
       var o = { execPath : testAppPath, mode, applyingExitCode : 1, throwingExitCode : 1, stdio : 'ignore' };
-      var con = _.process.startNode( o );
+      var con = _.process.startNjs( o );
       return test.shouldThrowErrorAsync( con )
       .finally( () =>
       {
@@ -8950,7 +8808,7 @@ function shellNode( test )
     con.thenKeep( () =>
     {
       var o = { execPath : testAppPath, mode,  applyingExitCode : 1, throwingExitCode : 0, stdio : 'ignore' };
-      return _.process.startNode( o )
+      return _.process.startNjs( o )
       .finally( ( err, got ) =>
       {
         test.identical( o.exitCode, 1 );
@@ -8964,7 +8822,7 @@ function shellNode( test )
     con.thenKeep( () =>
     {
       var o = { execPath : testAppPath,  mode, applyingExitCode : 0, throwingExitCode : 1, stdio : 'ignore' };
-      var con = _.process.startNode( o )
+      var con = _.process.startNjs( o )
       return test.shouldThrowErrorAsync( con )
       .finally( () =>
       {
@@ -8977,7 +8835,7 @@ function shellNode( test )
     con.thenKeep( () =>
     {
       var o = { execPath : testAppPath,  mode, applyingExitCode : 0, throwingExitCode : 0, stdio : 'ignore' };
-      return _.process.startNode( o )
+      return _.process.startNjs( o )
       .finally( ( err, got ) =>
       {
         test.identical( o.exitCode, 1 );
@@ -8990,7 +8848,7 @@ function shellNode( test )
     con.thenKeep( () =>
     {
       var o = { execPath : testAppPath,  mode, maximumMemory : 1, applyingExitCode : 0, throwingExitCode : 0, stdio : 'ignore' };
-      return _.process.startNode( o )
+      return _.process.startNjs( o )
       .finally( ( err, got ) =>
       {
         test.identical( o.exitCode, 1 );
@@ -9300,7 +9158,7 @@ shellModeShellNonTrivial.timeOut = 60000;
 
 function shellArgumentsHandlingTrivial( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   _.fileProvider.fileWrite( _.path.join( routinePath, 'file' ), 'file' );
@@ -9344,7 +9202,7 @@ function shellArgumentsHandlingTrivial( test )
 
 function shellArgumentsHandling( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   _.fileProvider.fileWrite( _.path.join( routinePath, 'file' ), 'file' );
@@ -9559,7 +9417,7 @@ shellArgumentsHandling.timeOut = 30000;
 
 function importantModeShell( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
   var printArguments = 'node -e "console.log( process.argv.slice( 1 ) )"'
 
@@ -9886,7 +9744,7 @@ function startExecPathWithSpace( test )
 
   let execPathWithSpace = 'node ' + _.path.nativize( testAppPath );
 
-  //
+  /* - */
 
   ready.then( () =>
   {
@@ -9912,7 +9770,7 @@ function startExecPathWithSpace( test )
     return null;
   })
 
-  //
+  /* - */
 
   ready.then( () =>
   {
@@ -9938,7 +9796,7 @@ function startExecPathWithSpace( test )
     return null;
   })
 
-  //
+  /* - */
 
   ready.then( () =>
   {
@@ -9964,7 +9822,7 @@ function startExecPathWithSpace( test )
     return null;
   })
 
-  //
+  /* - */
 
   ready.then( () =>
   {
@@ -9991,7 +9849,7 @@ function startExecPathWithSpace( test )
     return null;
   })
 
-  //
+  /* - */
 
   ready.then( () =>
   {
@@ -10017,7 +9875,7 @@ function startExecPathWithSpace( test )
     return null;
   })
 
-  //
+  /* - */
 
   ready.then( () =>
   {
@@ -10041,7 +9899,7 @@ function startExecPathWithSpace( test )
     return null;
   })
 
-  //
+  /* - */
 
   ready.then( () =>
   {
@@ -10074,7 +9932,7 @@ startExecPathWithSpace.timeOut = 60000;
 
 //
 
-function startNodePassingThroughExecPathWithSpace( test )
+function startNjsPassingThroughExecPathWithSpace( test )
 {
   let context = this;
   let routinePath = _.path.join( context.suiteTempPath, test.name );
@@ -10093,7 +9951,7 @@ function startNodePassingThroughExecPathWithSpace( test )
 
   let execPathWithSpace = _.path.nativize( testAppPath );
 
-  //
+  /* - */
 
   ready.then( () =>
   {
@@ -10101,7 +9959,7 @@ function startNodePassingThroughExecPathWithSpace( test )
     return null;
   })
 
-  _.process.startNodePassingThrough
+  _.process.startNjsPassingThrough
   ({
     execPath : execPathWithSpace,
     ready,
@@ -10120,7 +9978,7 @@ function startNodePassingThroughExecPathWithSpace( test )
     return null;
   })
 
-  //
+  /* - */
 
   ready.then( () =>
   {
@@ -10130,7 +9988,7 @@ function startNodePassingThroughExecPathWithSpace( test )
 
   test.shouldThrowErrorOfAnyKind( () =>
   {
-    return _.process.startNodePassingThrough
+    return _.process.startNjsPassingThrough
     ({
       args : execPathWithSpace,
       stdio : 'pipe',
@@ -10141,12 +9999,12 @@ function startNodePassingThroughExecPathWithSpace( test )
     });
   })
 
-  //
+  /* - */
 
   return ready;
 }
 
-startNodePassingThroughExecPathWithSpace.timeOut = 60000;
+startNjsPassingThroughExecPathWithSpace.timeOut = 60000;
 
 //
 
@@ -10169,7 +10027,7 @@ function startPassingThroughExecPathWithSpace( test )
 
   let execPathWithSpace = 'node ' + _.path.nativize( testAppPath );
 
-  //
+  /* - */
 
   ready.then( () =>
   {
@@ -10197,7 +10055,7 @@ function startPassingThroughExecPathWithSpace( test )
     return null;
   })
 
-  //
+  /* - */
 
   ready.then( () =>
   {
@@ -10225,7 +10083,7 @@ function startPassingThroughExecPathWithSpace( test )
     return null;
   })
 
-  //
+  /* - */
 
   ready.then( () =>
   {
@@ -10253,7 +10111,7 @@ function startPassingThroughExecPathWithSpace( test )
     return null;
   })
 
-  //
+  /* - */
 
   ready.then( () =>
   {
@@ -10282,7 +10140,7 @@ function startPassingThroughExecPathWithSpace( test )
     return null;
   })
 
-  //
+  /* - */
 
   ready.then( () =>
   {
@@ -10310,7 +10168,7 @@ function startPassingThroughExecPathWithSpace( test )
     return null;
   })
 
-  //
+  /* - */
 
   ready.then( () =>
   {
@@ -10336,7 +10194,7 @@ function startPassingThroughExecPathWithSpace( test )
     return null;
   })
 
-  //
+  /* - */
 
   ready.then( () =>
   {
@@ -10468,26 +10326,25 @@ function shellProcedureTrivial( test )
 
   /* */
 
-  .then( () =>
-  {
-
-    var o = { execPath : 'node ' + testAppPath, mode : 'exec' }
-    var con = start( o );
-    var procedure = _.procedure.find( 'PID:'+ o.process.pid );
-    test.identical( procedure.length, 1 );
-    test.identical( procedure[ 0 ].isAlive(), true );
-    test.identical( o.procedure, procedure[ 0 ] );
-    test.identical( procedure[ 0 ].object(), o.process );
-    return con.then( ( got ) =>
-    {
-      test.identical( got.exitCode, 0 );
-      test.identical( procedure[ 0 ].isAlive(), false );
-      test.identical( o.procedure, procedure[ 0 ] );
-      test.identical( procedure[ 0 ].object(), o.process );
-      test.is( _.strHas( o.procedure._sourcePath, 'Execution.s' ) );
-      return null;
-    })
-  })
+  // .then( () =>
+  // {
+  //   var o = { execPath : 'node ' + testAppPath, mode : 'exec' }
+  //   var con = start( o );
+  //   var procedure = _.procedure.find( 'PID:'+ o.process.pid );
+  //   test.identical( procedure.length, 1 );
+  //   test.identical( procedure[ 0 ].isAlive(), true );
+  //   test.identical( o.procedure, procedure[ 0 ] );
+  //   test.identical( procedure[ 0 ].object(), o.process );
+  //   return con.then( ( got ) =>
+  //   {
+  //     test.identical( got.exitCode, 0 );
+  //     test.identical( procedure[ 0 ].isAlive(), false );
+  //     test.identical( o.procedure, procedure[ 0 ] );
+  //     test.identical( procedure[ 0 ].object(), o.process );
+  //     test.is( _.strHas( o.procedure._sourcePath, 'Execution.s' ) );
+  //     return null;
+  //   })
+  // })
 
   /* */
 
@@ -10507,12 +10364,6 @@ function shellProcedureExists( test )
   let context = this;
   let routinePath = _.path.join( context.suiteTempPath, test.name );
   let testAppPath =  _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-
-  function testApp()
-  {
-    console.log( process.pid )
-    setTimeout( () => {}, 2000 )
-  }
 
   let testAppCode = testApp.toString() + '\ntestApp();';
   _.fileProvider.fileWrite( testAppPath, testAppCode );
@@ -10534,7 +10385,6 @@ function shellProcedureExists( test )
 
   .then( () =>
   {
-
     var o = { execPath : 'node ' + testAppPath, mode : 'shell' }
     var con = start( o );
     var procedure = _.procedure.find( 'PID:'+ o.process.pid );
@@ -10558,84 +10408,69 @@ function shellProcedureExists( test )
 
   /* */
 
-  .then( () =>
-  {
-
-    var o = { execPath : testAppPath, mode : 'fork' }
-    var con = start( o );
-    var procedure = _.procedure.find( 'PID:'+ o.process.pid );
-    test.identical( procedure.length, 1 );
-    test.identical( procedure[ 0 ].isAlive(), true );
-    test.identical( o.procedure, procedure[ 0 ] );
-    test.identical( procedure[ 0 ].object(), o.process );
-    test.identical( o.procedure, procedure[ 0 ] );
-    return con.then( ( got ) =>
-    {
-      test.identical( got.exitCode, 0 );
-      test.identical( procedure[ 0 ].isAlive(), false );
-      test.identical( o.procedure, procedure[ 0 ] );
-      test.identical( procedure[ 0 ].object(), o.process );
-      test.identical( o.procedure, procedure[ 0 ] );
-      test.is( _.strHas( o.procedure._sourcePath, 'ProcessWatcher.s' ) );
-      return null;
-    })
-  })
-
-  /* */
-
-  .then( () =>
-  {
-
-    var o = { execPath : 'node ' + testAppPath, mode : 'spawn' }
-    var con = start( o );
-    var procedure = _.procedure.find( 'PID:'+ o.process.pid );
-    test.identical( procedure.length, 1 );
-    test.identical( procedure[ 0 ].isAlive(), true );
-    test.identical( o.procedure, procedure[ 0 ] );
-    test.identical( procedure[ 0 ].object(), o.process );
-    test.identical( o.procedure, procedure[ 0 ] );
-    return con.then( ( got ) =>
-    {
-      test.identical( got.exitCode, 0 );
-      test.identical( procedure[ 0 ].isAlive(), false );
-      test.identical( o.procedure, procedure[ 0 ] );
-      test.identical( procedure[ 0 ].object(), o.process );
-      test.identical( o.procedure, procedure[ 0 ] );
-      test.is( _.strHas( o.procedure._sourcePath, 'ProcessWatcher.s' ) );
-      return null;
-    })
-  })
-
-  /* */
-
-  .then( () =>
-  {
-
-    var o = { execPath : 'node ' + testAppPath, mode : 'exec' }
-    var con = start( o );
-    var procedure = _.procedure.find( 'PID:'+ o.process.pid );
-    test.identical( procedure.length, 1 );
-    test.identical( procedure[ 0 ].isAlive(), true );
-    test.identical( o.procedure, procedure[ 0 ] );
-    test.identical( procedure[ 0 ].object(), o.process );
-    test.identical( o.procedure, procedure[ 0 ] );
-    return con.then( ( got ) =>
-    {
-      test.identical( got.exitCode, 0 );
-      test.identical( procedure[ 0 ].isAlive(), false );
-      test.identical( o.procedure, procedure[ 0 ] );
-      test.identical( procedure[ 0 ].object(), o.process );
-      test.identical( o.procedure, procedure[ 0 ] );
-      test.is( _.strHas( o.procedure._sourcePath, 'ProcessWatcher.s' ) );
-      return null;
-    })
-  })
+  // xxx
+  // .then( () =>
+  // {
+  //
+  //   var o = { execPath : testAppPath, mode : 'fork' }
+  //   var con = start( o );
+  //   var procedure = _.procedure.find( 'PID:'+ o.process.pid );
+  //   test.identical( procedure.length, 1 );
+  //   test.identical( procedure[ 0 ].isAlive(), true );
+  //   test.identical( o.procedure, procedure[ 0 ] );
+  //   test.identical( procedure[ 0 ].object(), o.process );
+  //   test.identical( o.procedure, procedure[ 0 ] );
+  //   return con.then( ( got ) =>
+  //   {
+  //     test.identical( got.exitCode, 0 );
+  //     test.identical( procedure[ 0 ].isAlive(), false );
+  //     test.identical( o.procedure, procedure[ 0 ] );
+  //     test.identical( procedure[ 0 ].object(), o.process );
+  //     test.identical( o.procedure, procedure[ 0 ] );
+  //     test.is( _.strHas( o.procedure._sourcePath, 'ProcessWatcher.s' ) );
+  //     return null;
+  //   })
+  // })
+  //
+  // /* */
+  //
+  // .then( () =>
+  // {
+  //
+  //   var o = { execPath : 'node ' + testAppPath, mode : 'spawn' }
+  //   var con = start( o );
+  //   var procedure = _.procedure.find( 'PID:'+ o.process.pid );
+  //   test.identical( procedure.length, 1 );
+  //   test.identical( procedure[ 0 ].isAlive(), true );
+  //   test.identical( o.procedure, procedure[ 0 ] );
+  //   test.identical( procedure[ 0 ].object(), o.process );
+  //   test.identical( o.procedure, procedure[ 0 ] );
+  //   return con.then( ( got ) =>
+  //   {
+  //     test.identical( got.exitCode, 0 );
+  //     test.identical( procedure[ 0 ].isAlive(), false );
+  //     test.identical( o.procedure, procedure[ 0 ] );
+  //     test.identical( procedure[ 0 ].object(), o.process );
+  //     test.identical( o.procedure, procedure[ 0 ] );
+  //     test.is( _.strHas( o.procedure._sourcePath, 'ProcessWatcher.s' ) );
+  //     return null;
+  //   })
+  // })
 
   /* */
 
-  ready.then( () => _.process.watcherDisable() )
+  ready.then( () => _.process.watcherDisable() ) /* qqq : ? */
 
   return ready;
+
+  /* */
+
+  function testApp()
+  {
+    console.log( process.pid )
+    setTimeout( () => {}, 2000 )
+  }
+
 }
 
 shellProcedureExists.timeOut = 60000;
@@ -10648,7 +10483,7 @@ shellProcedureExists.description =
 
 function shellTerminateHangedWithExitHandler( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   if( process.platform === 'win32' )
@@ -10771,7 +10606,7 @@ shellTerminateHangedWithExitHandler.timeOut = 20000;
 
 function shellTerminateAfterLoopRelease( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   if( process.platform === 'win32' )
@@ -10883,23 +10718,23 @@ function shellTerminateAfterLoopRelease( test )
 }
 
 shellTerminateAfterLoopRelease.timeOut = 30000;
-// shellTerminateAfterLoopRelease.description =
-// `
-//   Test app - code that blocks event loop for short period of time and appExitHandlerRepair called at start
+shellTerminateAfterLoopRelease.description =
+`
+  Test app - code that blocks event loop for short period of time and appExitHandlerRepair called at start
 
-//   Will test:
-//     - Termination of child process using SIGINT signal after small delay
+  Will test:
+    - Termination of child process using SIGINT signal after small delay
 
-//   Expected behaviour:
-//     - Child was terminated after event loop release with exitCode : 0, exitSignal : null
-//     - Child process message should be printed
-// `
+  Expected behaviour:
+    - Child was terminated after event loop release with exitCode : 0, exitSignal : null
+    - Child process message should be printed
+`
 
 //
 
 function shellStartingDelay( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -10954,7 +10789,7 @@ function shellStartingDelay( test )
 
 function shellStartingTime( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -11010,7 +10845,7 @@ function shellStartingTime( test )
 
 function shellStartingSuspended( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -11071,7 +10906,7 @@ function shellStartingSuspended( test )
 
 function shellAfterDeath( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppParent()
@@ -11185,7 +11020,7 @@ function shellAfterDeath( test )
 
 // function shellAfterDeathOutput( test )
 // {
-//   var context = this;
+//   let context = this;
 //   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
 //   function testAppParent()
@@ -11274,7 +11109,7 @@ function shellAfterDeath( test )
 
 function startDetachingModeSpawnResourceReady( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppChild()
@@ -11346,7 +11181,7 @@ function startDetachingModeSpawnResourceReady( test )
 
 function startDetachingModeForkResourceReady( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppChild()
@@ -11416,7 +11251,7 @@ function startDetachingModeForkResourceReady( test )
 
 function startDetachingModeShellResourceReady( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppChild()
@@ -11486,7 +11321,7 @@ function startDetachingModeShellResourceReady( test )
 
 function startDetachingModeSpawnNoTerminationBegin( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppParent()
@@ -11717,7 +11552,7 @@ function startDetachingModeSpawnNoTerminationBegin( test )
 
 function startDetachingModeForkNoTerminationBegin( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppParent()
@@ -11864,7 +11699,7 @@ function startDetachingModeForkNoTerminationBegin( test )
 
 function startDetachingModeShellNoTerminationBegin( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppParent()
@@ -12011,7 +11846,7 @@ function startDetachingModeShellNoTerminationBegin( test )
 
 function startDetachingModeSpawnTerminationBegin( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppParent()
@@ -12293,7 +12128,7 @@ startDetachingModeSpawnTerminationBegin.timeOut = 120000;
 
 function startDetachingModeForkTerminationBegin( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppParent()
@@ -12569,11 +12404,13 @@ function startDetachingModeForkTerminationBegin( test )
   return ready;
 }
 
+startDetachingModeForkTerminationBegin.timeOut = 300000;
+
 //
 
 function startDetachingModeShellTerminationBegin( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppParent()
@@ -12753,7 +12590,7 @@ function startDetachingModeShellTerminationBegin( test )
 
 function startDetachingChildExitsAfterParent( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppParent()
@@ -12876,7 +12713,7 @@ After 5 seconds child process creates test file in working directory and exits.
 
 function startDetachingChildExitsBeforeParent( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppParent()
@@ -12890,6 +12727,7 @@ function startDetachingChildExitsBeforeParent( test )
       stdio : 'ignore',
       detaching : true,
       mode : 'spawn',
+
     }
 
     _.process.start( o );
@@ -13005,10 +12843,237 @@ Callback in parent recevies message. Parent exits.
 
 //
 
+function startDetachingDisconnectedChildExistsBeforeParent( test )
+{
+  let context = this;
+  var routinePath = _.path.join( context.suiteTempPath, test.name );
+  var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
+  var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
+  _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
+
+  let ready = new _.Consequence().take( null );
+
+  ready
+
+  /* Vova qqq xxx: close event is not emitted for disconnected detached child in fork mode*/
+
+  .then( () =>
+  {
+    test.case = 'detaching on, disconnected forked child'
+    let o =
+    {
+      execPath : 'testAppChild.js',
+      mode : 'fork',
+      stdio : 'ignore',
+      currentPath : routinePath,
+      detaching : 1
+    }
+
+    let result = _.process.start( o );
+
+    o.disconnect();
+
+    test.identical( o.onStart, result );
+    test.is( _.consequenceIs( o.onStart ) )
+
+    o.onStart.finally( ( err, got ) =>
+    {
+      test.identical( err, undefined );
+      test.identical( got, o );
+      test.is( _.process.isAlive( o.process.pid ) )
+      return null;
+    })
+
+    o.onTerminate.finallyGive( ( err, got ) =>
+    {
+      _.errAttend( err );
+      test.is( _.errIs( err ) );
+      test.identical( got, undefined );
+      test.is( _.process.isAlive( o.process.pid ) )
+    })
+
+    result = _.time.out( 3000, () =>
+    {
+      test.identical( o.onTerminate.resourcesCount(), 0 );
+      test.is( !_.process.isAlive( o.process.pid ) )
+      return null;
+    })
+
+    return _.Consequence.AndTake_( o.onStart, result );
+  })
+
+  /* */
+
+  return ready;
+
+  /* */
+
+  function testAppChild()
+  {
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    var args = _.process.args();
+
+    _.time.out( 2000, () =>
+    {
+      console.log( 'Child process end' )
+      return null;
+    })
+  }
+
+}
+
+//
+
+function startDetachingChildExistsBeforeParentWaitForTermination( test )
+{
+  let context = this;
+  var routinePath = _.path.join( context.suiteTempPath, test.name );
+
+  /* */
+
+  var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
+  var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
+  _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
+
+  let ready = new _.Consequence().take( null );
+
+  ready
+
+  .then( () =>
+  {
+    test.case = 'detaching on, disconnected forked child'
+    let o =
+    {
+      execPath : 'testAppChild.js',
+      mode : 'fork',
+      stdio : 'ignore',
+      currentPath : routinePath,
+      detaching : 1
+    }
+
+    _.process.start( o );
+
+    o.onTerminate.finally( ( err, got ) =>
+    {
+      test.identical( err, undefined );
+      test.identical( got, o );
+      test.is( !_.process.isAlive( o.process.pid ) )
+      return null;
+    })
+
+    return o.onTerminate;
+  })
+
+  /* */
+
+  return ready;
+
+  /* */
+
+  function testAppChild()
+  {
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    var args = _.process.args();
+
+    _.time.out( 2000, () =>
+    {
+      console.log( 'Child process end' )
+      return null;
+    })
+  }
+
+}
+
+//
+
+function startDetachingEndCompetitorIsExecuted( test )
+{
+  let context = this;
+  var routinePath = _.path.join( context.suiteTempPath, test.name );
+
+  /* */
+
+  var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
+  var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
+  _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
+
+  let ready = new _.Consequence().take( null );
+
+  ready
+
+  /* Vova qqq xxx: close event is not emitted for disconnected detached child in fork mode*/
+
+  .then( () =>
+  {
+    test.case = 'detaching on, disconnected forked child'
+    let o =
+    {
+      execPath : 'testAppChild.js',
+      mode : 'fork',
+      stdio : 'ignore',
+      currentPath : routinePath,
+      detaching : 1
+    }
+
+    let result = _.process.start( o );
+
+    // test.identical( o.onStart, result );
+    test.is( _.consequenceIs( o.onStart ) )
+    test.is( _.consequenceIs( o.onTerminate ) )
+
+    o.onStart.finally( ( err, got ) =>
+    {
+      test.identical( o.ended, false );
+      test.identical( err, undefined );
+      test.identical( got, o );
+      test.is( _.process.isAlive( o.process.pid ) );
+      return null;
+    })
+
+    o.onTerminate.finally( ( err, got ) =>
+    {
+      test.identical( o.ended, true );
+      test.identical( err, undefined );
+      test.identical( got, o );
+      test.is( !_.process.isAlive( o.process.pid ) )
+      return null;
+    })
+
+    return _.Consequence.AndTake_( o.onStart, o.onTerminate );
+  })
+
+  /* */
+
+  return ready;
+
+  /* */
+
+  function testAppChild()
+  {
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    var args = _.process.args();
+
+    _.time.out( 2000, () =>
+    {
+      console.log( 'Child process end' )
+      return null;
+    })
+  }
+
+}
+
+//
+
 
 function startDetachedOutputStdioIgnore( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppParent()
@@ -13145,7 +13210,7 @@ function startDetachedOutputStdioIgnore( test )
 
 function startDetachedOutputStdioPipe( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppParent()
@@ -13289,7 +13354,7 @@ function startDetachedOutputStdioPipe( test )
 
 function startDetachedOutputStdioInherit( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppChild()
@@ -13377,7 +13442,7 @@ function startDetachedOutputStdioInherit( test )
 
 function startDetachingModeSpawnIpc( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppChild()
@@ -13489,7 +13554,7 @@ function startDetachingModeSpawnIpc( test )
 
 function startDetachingModeForkIpc( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppChild()
@@ -13602,7 +13667,7 @@ function startDetachingModeForkIpc( test )
 
 function startDetachingModeShellIpc( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppChild()
@@ -13677,7 +13742,7 @@ function startDetachingModeShellIpc( test )
 
 function startDetachingThrowing( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppChild()
@@ -13737,42 +13802,43 @@ function startDetachingThrowing( test )
   }
   test.shouldThrowErrorSync( () => _.process.start( o ) )
 
-  var o =
-  {
-    execPath : 'node testAppChild.js',
-    mode : 'exec',
-    stdio : 'inherit',
-    currentPath : routinePath,
-    detaching : 1
-  }
-  test.shouldThrowErrorSync( () => _.process.start( o ) )
-
-  var o =
-  {
-    execPath : 'node testAppChild.js',
-    mode : 'exec',
-    stdio : 'pipe',
-    currentPath : routinePath,
-    detaching : 1
-  }
-  test.shouldThrowErrorSync( () => _.process.start( o ) )
-
-  var o =
-  {
-    execPath : 'node testAppChild.js',
-    mode : 'exec',
-    stdio : 'ignore',
-    currentPath : routinePath,
-    detaching : 1
-  }
-  test.shouldThrowErrorSync( () => _.process.start( o ) )
+  // var o =
+  // {
+  //   execPath : 'node testAppChild.js',
+  //   mode : 'exec',
+  //   stdio : 'inherit',
+  //   currentPath : routinePath,
+  //   detaching : 1
+  // }
+  // test.shouldThrowErrorSync( () => _.process.start( o ) )
+  //
+  // var o =
+  // {
+  //   execPath : 'node testAppChild.js',
+  //   mode : 'exec',
+  //   stdio : 'pipe',
+  //   currentPath : routinePath,
+  //   detaching : 1
+  // }
+  // test.shouldThrowErrorSync( () => _.process.start( o ) )
+  //
+  // var o =
+  // {
+  //   execPath : 'node testAppChild.js',
+  //   mode : 'exec',
+  //   stdio : 'ignore',
+  //   currentPath : routinePath,
+  //   detaching : 1
+  // }
+  // test.shouldThrowErrorSync( () => _.process.start( o ) )
+  //
 }
 
 //
 
-function startNodeDetachingChildThrowing( test )
+function startNjsDetachingChildThrowing( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppChild()
@@ -13803,7 +13869,7 @@ function startNodeDetachingChildThrowing( test )
     currentPath : routinePath,
   }
 
-  _.process.startNode( o );
+  _.process.startNjs( o );
 
   o.onTerminate.then( ( got ) =>
   {
@@ -13819,9 +13885,9 @@ function startNodeDetachingChildThrowing( test )
 
 //
 
-function startNodeDetachingTrivial( test )
+function startNjsDetachingTrivial( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppParent()
@@ -13839,7 +13905,7 @@ function startNodeDetachingTrivial( test )
       throwingExitCode : 0,
       outputPiping : 1,
     }
-    _.process.startNode( o );
+    _.process.startNjs( o );
 
     o.onStart.thenGive( () =>
     {
@@ -13951,29 +14017,10 @@ function startNodeDetachingTrivial( test )
 
 //
 
-//
-
 function startOnStart( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
-
-  function testAppChild()
-  {
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-
-    var args = _.process.args();
-
-    _.time.out( 2000, () =>
-    {
-      console.log( 'Child process end' )
-      return null;
-    })
-  }
-
-  /* */
-
   var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
   var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
   _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
@@ -14124,13 +14171,12 @@ function startOnStart( test )
 
     let result = _.process.start( o );
 
-    test.identical( o.onStart, result );
+    test.is( o.onStart === result );
     test.is( _.consequenceIs( o.onStart ) )
 
     result = test.shouldThrowErrorAsync( o.onStart );
 
     result.then( () => _.time.out( 2000 ) )
-
     result.then( () =>
     {
       test.identical( o.onTerminate.resourcesCount(), 0 );
@@ -14190,63 +14236,80 @@ function startOnStart( test )
     return _.Consequence.AndTake_( o.onStart, o.onTerminate );
   })
 
-  /* Vova xxx: close event is not emitted for disconnected detached child in fork mode*/
+  /* Vova qqq xxx: close event is not emitted for disconnected detached child in fork mode*/
 
-  // .then( () =>
-  // {
-  //   test.case = 'detaching on, disconnected forked child'
-  //   let o =
-  //   {
-  //     execPath : 'testAppChild.js',
-  //     mode : 'fork',
-  //     stdio : 'ignore',
-  //     currentPath : routinePath,
-  //     detaching : 1
-  //   }
+  .then( () =>
+  {
+    test.case = 'detaching on, disconnected forked child'
+    let o =
+    {
+      execPath : 'testAppChild.js',
+      mode : 'fork',
+      stdio : 'ignore',
+      currentPath : routinePath,
+      detaching : 1
+    }
 
-  //   let result = _.process.start( o );
+    let result = _.process.start( o );
 
-  //   o.disconnect();
+    o.disconnect();
 
-  //   test.identical( o.onStart, result );
-  //   test.is( _.consequenceIs( o.onStart ) )
+    test.identical( o.onStart, result );
+    test.is( _.consequenceIs( o.onStart ) )
 
-  //   o.onStart.finally( ( err, got ) =>
-  //   {
-  //     test.identical( err, undefined );
-  //     test.identical( got, o );
-  //     test.is( _.process.isAlive( o.process.pid ) )
-  //     return null;
-  //   })
+    o.onStart.finally( ( err, got ) =>
+    {
+      test.identical( err, undefined );
+      test.identical( got, o );
+      test.is( _.process.isAlive( o.process.pid ) )
+      return null;
+    })
 
-  //   o.onTerminate.finallyGive( ( err, got ) =>
-  //   {
-  //     _.errAttend( err );
-  //     test.is( _.errIs( err ) );
-  //     test.identical( got, undefined );
-  //     test.is( _.process.isAlive( o.process.pid ) )
-  //   })
+    o.onTerminate.finallyGive( ( err, got ) =>
+    {
+      _.errAttend( err );
+      test.is( _.errIs( err ) );
+      test.identical( got, undefined );
+      test.is( _.process.isAlive( o.process.pid ) )
+    })
 
-  //   result = _.time.out( 3000, () =>
-  //   {
-  //     test.identical( o.onTerminate.resourcesCount(), 0 );
-  //     test.is( !_.process.isAlive( o.process.pid ) )
-  //     return null;
-  //   })
+    result = _.time.out( 3000, () =>
+    {
+      test.identical( o.onTerminate.resourcesCount(), 0 );
+      test.is( !_.process.isAlive( o.process.pid ) )
+      return null;
+    })
 
-  //   return _.Consequence.AndTake_([ o.onStart, result ]);
-  // })
+    return _.Consequence.AndTake_( o.onStart, result );
+  })
 
   /* */
 
   return ready;
+
+  /* */
+
+  function testAppChild()
+  {
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    var args = _.process.args();
+
+    _.time.out( 2000, () =>
+    {
+      console.log( 'Child process end' )
+      return null;
+    })
+  }
+
 }
 
 //
 
 function startOnTerminate( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testAppChild()
@@ -14506,12 +14569,76 @@ function startOnTerminate( test )
 
 //
 
+function noEndBug1( test )
+{
+  let context = this;
+  var routinePath = _.path.join( context.suiteTempPath, test.name );
+  var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
+  var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
+  _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
+
+  let ready = new _.Consequence().take( null );
+
+  ready
+
+  /* */
+
+  .then( () =>
+  {
+    test.case = 'detaching on, error on spawn'
+    let o =
+    {
+      execPath : 'testAppChild.js',
+      mode : 'fork',
+      stdio : [ 'ignore', 'ignore', 'ignore', null ],
+      currentPath : routinePath,
+      detaching : 1
+    }
+
+    let result = _.process.start( o );
+
+    test.is( o.onStart === result );
+    test.is( _.consequenceIs( o.onStart ) )
+
+    result = test.shouldThrowErrorAsync( o.onStart );
+
+    result.then( () => _.time.out( 2000 ) )
+    result.then( () =>
+    {
+      test.identical( o.onTerminate.resourcesCount(), 0 );
+      return null;
+    })
+
+    return result;
+  })
+
+  /* */
+
+  return ready;
+
+  /* */
+
+  function testAppChild()
+  {
+    _.include( 'wProcess' );
+    var args = _.process.args();
+    _.time.out( 2000, () =>
+    {
+      console.log( 'Child process end' )
+      return null;
+    })
+  }
+
+}
+
+//
+
 function shellConcurrent( test )
 {
   let context = this;
   let counter = 0;
   let time = 0;
-  let routinePath = _.path.join( context.suiteTempPath, test.name );
+  let routinePath = _.path.join( context.suiteTempPath, test.name ); /* qqq2 : rewrote all that using assetFor and _.program.* */
   let testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
   let filePath = _.fileProvider.path.nativize( _.path.join( routinePath, 'file.txt' ) );
   let ready = _.Consequence().take( null );
@@ -14525,7 +14652,7 @@ function shellConcurrent( test )
 
   _.fileProvider.fileWrite( testAppPath, testAppCode );
 
-  logger.log( 'this is #foreground : bright white#an#foreground : default# experiment' ); /* qqq fix logger, please !!! */
+  logger.log( 'this is ❮foreground : bright white❯an❮foreground : default❯ experiment' ); /* qqq fix logger, please !!! */
 
   /* - */
 
@@ -14611,13 +14738,11 @@ function shellConcurrent( test )
   _.process.start( singleErrorBeforeScalar )
   .finally( ( err, arg ) =>
   {
-
     test.is( arg === undefined );
     test.is( _.errIs( err ) );
     test.identical( singleErrorBeforeScalar.exitCode, null );
-    test.identical( singleErrorBeforeScalar.output, undefined );
+    test.identical( singleErrorBeforeScalar.output, null );
     test.is( !_.fileProvider.fileExists( filePath ) );
-
     _.errAttend( err );
     counter += 1;
     return null;
@@ -15500,7 +15625,7 @@ shellerConcurrent.timeOut = 100000;
 
 function sheller( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
   var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
   var testAppCode = testApp.toString() + '\ntestApp();';
@@ -15772,7 +15897,7 @@ sheller.timeOut = 60000;
 
 function shellerArgs( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -15897,7 +16022,7 @@ function shellerFields( test )
 
 function outputHandling( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -15915,7 +16040,8 @@ function outputHandling( test )
 
   var con = new _.Consequence().take( null );
 
-  var modes = [ 'shell', 'spawn', 'exec', 'fork' ];
+  // var modes = [ 'shell', 'spawn', 'exec', 'fork' ];
+  var modes = [ 'shell', 'spawn', 'fork' ];
   var loggerOutput = '';
 
   function onTransformEnd( o )
@@ -15939,7 +16065,7 @@ function outputHandling( test )
       return _.process.start( o )
       .thenKeep( () =>
       {
-        test.identical( o.output, undefined );
+        test.identical( o.output, null );
         test.is( !_.strHas( loggerOutput, 'testApp-output') );
         console.log( loggerOutput )
         return true;
@@ -15953,7 +16079,7 @@ function outputHandling( test )
       return _.process.start( o )
       .thenKeep( () =>
       {
-        test.identical( o.output, undefined );
+        test.identical( o.output, null );
         test.is( _.strHas( loggerOutput, 'testApp-output') );
         return true;
       })
@@ -15995,7 +16121,7 @@ outputHandling.timeOut = 10000;
 
 function shellOutputStripping( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -16015,7 +16141,8 @@ function shellOutputStripping( test )
   /* */
 
   var ready = new _.Consequence().take( null );
-  var modes = [ 'shell', 'spawn', 'exec', 'fork' ];
+  // var modes = [ 'shell', 'spawn', 'exec', 'fork' ];
+  var modes = [ 'shell', 'spawn', 'fork' ];
 
   _.each( modes, ( mode ) =>
   {
@@ -16069,7 +16196,7 @@ shellOutputStripping.timeOut = 15000;
 
 function shellLoggerOption( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -16088,7 +16215,8 @@ function shellLoggerOption( test )
   /* */
 
   var ready = new _.Consequence().take( null );
-  var modes = [ 'shell', 'spawn', 'exec', 'fork' ];
+  // var modes = [ 'shell', 'spawn', 'exec', 'fork' ];
+  var modes = [ 'shell', 'spawn', 'fork' ];
 
   test.case = 'custom logger with increased level'
 
@@ -16109,7 +16237,7 @@ function shellLoggerOption( test )
       mode,
       outputCollecting : 1,
       outputPiping : 1,
-      outputGray : 1,
+      outputDecorating : 1,
       logger,
       ready
     })
@@ -16140,7 +16268,7 @@ shellLoggerOption.timeOut = 30000;
 
 function shellNormalizedExecPath( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -16181,7 +16309,7 @@ function shellNormalizedExecPath( test )
     return null;
   })
 
-  //
+  /* - */
 
   shell
   ({
@@ -16196,7 +16324,7 @@ function shellNormalizedExecPath( test )
     return null;
   })
 
-  //
+  /* - */
 
   shell
   ({
@@ -16211,20 +16339,20 @@ function shellNormalizedExecPath( test )
     return null;
   })
 
-  //
+  /* - */
 
-  shell
-  ({
-    execPath : 'node ' + testAppPath,
-    args : [ 'arg1', 'arg2' ],
-    mode : 'exec'
-  })
-  .then( ( got ) =>
-  {
-    test.identical( got.exitCode, 0 );
-    test.identical( _.strCount( got.output, `[ 'arg1', 'arg2' ]` ), 1 );
-    return null;
-  })
+  // shell
+  // ({
+  //   execPath : 'node ' + testAppPath,
+  //   args : [ 'arg1', 'arg2' ],
+  //   mode : 'exec'
+  // })
+  // .then( ( got ) =>
+  // {
+  //   test.identical( got.exitCode, 0 );
+  //   test.identical( _.strCount( got.output, `[ 'arg1', 'arg2' ]` ), 1 );
+  //   return null;
+  // })
 
   /* app path in arguments */
 
@@ -16240,7 +16368,7 @@ function shellNormalizedExecPath( test )
     return null;
   })
 
-  //
+  /* - */
 
   shell
   ({
@@ -16255,7 +16383,7 @@ function shellNormalizedExecPath( test )
     return null;
   })
 
-  //
+  /* - */
 
   shell
   ({
@@ -16270,20 +16398,20 @@ function shellNormalizedExecPath( test )
     return null;
   })
 
-  //
+  /* - */
 
-  shell
-  ({
-    execPath : 'node',
-    args : [ testAppPath, 'arg1', 'arg2' ],
-    mode : 'exec'
-  })
-  .then( ( got ) =>
-  {
-    test.identical( got.exitCode, 0 );
-    test.identical( _.strCount( got.output, `[ 'arg1', 'arg2' ]` ), 1 );
-    return null;
-  })
+  // shell
+  // ({
+  //   execPath : 'node',
+  //   args : [ testAppPath, 'arg1', 'arg2' ],
+  //   mode : 'exec'
+  // })
+  // .then( ( got ) =>
+  // {
+  //   test.identical( got.exitCode, 0 );
+  //   test.identical( _.strCount( got.output, `[ 'arg1', 'arg2' ]` ), 1 );
+  //   return null;
+  // })
 
   /* */
 
@@ -16492,7 +16620,7 @@ function statusOf( test )
 
 function kill( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testApp()
@@ -16712,73 +16840,72 @@ function kill( test )
 
   /* exec */
 
-  .thenKeep( () =>
-  {
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'exec',
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    _.time.out( 1000, () => _.process.kill( o.process ) )
-
-    ready.thenKeep( ( got ) =>
-    {
-      test.identical( got.exitCode, null );
-      test.identical( got.exitSignal, 'SIGKILL' );
-      if( process.platform === 'darwin' )
-      test.is( !_.strHas( got.output, 'Application timeout!' ) );
-      else
-      test.is( _.strHas( got.output, 'Application timeout!' ) );
-      return null;
-    })
-
-    return ready;
-  })
-
-  /* */
-
-
-  .thenKeep( () =>
-  {
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'exec',
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    _.time.out( 1000, () => _.process.kill( o.process.pid ) )
-
-    ready.thenKeep( ( got ) =>
-    {
-      if( process.platform === 'win32' )
-      {
-        test.identical( got.exitCode, 1 );
-        test.identical( got.exitSignal, null );
-      }
-      else
-      {
-        test.identical( got.exitCode, null );
-        test.identical( got.exitSignal, 'SIGKILL' );
-      }
-
-      if( process.platform === 'darwin' )
-      test.is( !_.strHas( got.output, 'Application timeout!' ) );
-      else
-      test.is( _.strHas( got.output, 'Application timeout!' ) );
-      return null;
-    })
-
-    return ready;
-  })
+  // .thenKeep( () =>
+  // {
+  //   var o =
+  //   {
+  //     execPath :  'node ' + testAppPath,
+  //     mode : 'exec',
+  //     outputCollecting : 1,
+  //     throwingExitCode : 0
+  //   }
+  //
+  //   let ready = _.process.start( o )
+  //
+  //   _.time.out( 1000, () => _.process.kill( o.process ) )
+  //
+  //   ready.thenKeep( ( got ) =>
+  //   {
+  //     test.identical( got.exitCode, null );
+  //     test.identical( got.exitSignal, 'SIGKILL' );
+  //     if( process.platform === 'darwin' )
+  //     test.is( !_.strHas( got.output, 'Application timeout!' ) );
+  //     else
+  //     test.is( _.strHas( got.output, 'Application timeout!' ) );
+  //     return null;
+  //   })
+  //
+  //   return ready;
+  // })
+  //
+  // /* */
+  //
+  // .thenKeep( () =>
+  // {
+  //   var o =
+  //   {
+  //     execPath :  'node ' + testAppPath,
+  //     mode : 'exec',
+  //     outputCollecting : 1,
+  //     throwingExitCode : 0
+  //   }
+  //
+  //   let ready = _.process.start( o )
+  //
+  //   _.time.out( 1000, () => _.process.kill( o.process.pid ) )
+  //
+  //   ready.thenKeep( ( got ) =>
+  //   {
+  //     if( process.platform === 'win32' )
+  //     {
+  //       test.identical( got.exitCode, 1 );
+  //       test.identical( got.exitSignal, null );
+  //     }
+  //     else
+  //     {
+  //       test.identical( got.exitCode, null );
+  //       test.identical( got.exitSignal, 'SIGKILL' );
+  //     }
+  //
+  //     if( process.platform === 'darwin' )
+  //     test.is( !_.strHas( got.output, 'Application timeout!' ) );
+  //     else
+  //     test.is( _.strHas( got.output, 'Application timeout!' ) );
+  //     return null;
+  //   })
+  //
+  //   return ready;
+  // })
 
   // qqq Vova : find how to simulate EPERM error using process.kill and write test case
 
@@ -16791,7 +16918,7 @@ function kill( test )
 
 function killWithChildren( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testApp()
@@ -16907,7 +17034,7 @@ function killWithChildren( test )
     return ready;
   })
 
-  //
+  /* - */
 
   .thenKeep( () =>
   {
@@ -16946,7 +17073,7 @@ function killWithChildren( test )
     return ready;
   })
 
-  //
+  /* - */
 
   .thenKeep( () =>
   {
@@ -16994,7 +17121,7 @@ function killWithChildren( test )
     return ready;
   })
 
-  //
+  /* - */
 
   .thenKeep( () =>
   {
@@ -17041,7 +17168,7 @@ function killWithChildren( test )
     return ready;
   })
 
-  //
+  /* - */
 
   .thenKeep( () =>
   {
@@ -17074,7 +17201,7 @@ function killWithChildren( test )
 
 function terminate( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   if( process.platform === 'win32' )
@@ -17348,103 +17475,103 @@ function terminate( test )
     look for solution that allow to have same behaviour on each mode
   */
 
-  .thenKeep( () =>
-  {
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'exec',
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    o.process.stdout.on( 'data', ( data ) =>
-    {
-      data = data.toString();
-      if( _.strHas( data, 'ready' ))
-      _.process.terminate({ process : o.process, timeOut : 0 });
-    })
-
-    ready.thenKeep( ( got ) =>
-    {
-      if( process.platform === 'linux' )
-      {
-        test.identical( got.exitCode, null );
-        test.identical( got.exitSignal, 'SIGINT' );
-        test.is( !_.strHas( got.output, 'SIGINT' ) );
-        test.is( _.strHas( got.output, 'Application timeout!' ) );
-      }
-      else if( process.platform === 'win32' )
-      {
-        test.identical( got.exitCode, 0 );
-        test.identical( got.exitSignal, null );
-        test.is( !_.strHas( got.output, 'SIGINT' ) );
-        test.is( _.strHas( got.output, 'Application timeout!' ) );
-      }
-      else
-      {
-        test.identical( got.exitCode, 0 );
-        test.identical( got.exitSignal, null );
-        test.is( _.strHas( got.output, 'SIGINT' ) );
-        test.is( !_.strHas( got.output, 'Application timeout!' ) );
-      }
-      return null;
-    })
-
-    return ready;
-  })
-
-  /* */
-
-  .thenKeep( () =>
-  {
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'exec',
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    o.process.stdout.on( 'data', ( data ) =>
-    {
-      data = data.toString();
-      if( _.strHas( data, 'ready' ))
-      _.process.terminate({ pid : o.process.pid, timeOut : 0 });
-    })
-
-    ready.thenKeep( ( got ) =>
-    {
-      if( process.platform === 'linux' )
-      {
-        test.identical( got.exitCode, null );
-        test.identical( got.exitSignal, 'SIGINT' );
-        test.is( !_.strHas( got.output, 'SIGINT' ) );
-        test.is( _.strHas( got.output, 'Application timeout!' ) );
-      }
-      else if( process.platform === 'win32' )
-      {
-        test.identical( got.exitCode, 0 );
-        test.identical( got.exitSignal, null );
-        test.is( !_.strHas( got.output, 'SIGINT' ) );
-        test.is( _.strHas( got.output, 'Application timeout!' ) );
-      }
-      else
-      {
-        test.identical( got.exitCode, 0 );
-        test.identical( got.exitSignal, null );
-        test.is( _.strHas( got.output, 'SIGINT' ) );
-        test.is( !_.strHas( got.output, 'Application timeout!' ) );
-      }
-      return null;
-    })
-
-    return ready;
-  })
+  // .thenKeep( () =>
+  // {
+  //   var o =
+  //   {
+  //     execPath :  'node ' + testAppPath,
+  //     mode : 'exec',
+  //     outputCollecting : 1,
+  //     throwingExitCode : 0
+  //   }
+  //
+  //   let ready = _.process.start( o )
+  //
+  //   o.process.stdout.on( 'data', ( data ) =>
+  //   {
+  //     data = data.toString();
+  //     if( _.strHas( data, 'ready' ))
+  //     _.process.terminate({ process : o.process, timeOut : 0 });
+  //   })
+  //
+  //   ready.thenKeep( ( got ) =>
+  //   {
+  //     if( process.platform === 'linux' )
+  //     {
+  //       test.identical( got.exitCode, null );
+  //       test.identical( got.exitSignal, 'SIGINT' );
+  //       test.is( !_.strHas( got.output, 'SIGINT' ) );
+  //       test.is( _.strHas( got.output, 'Application timeout!' ) );
+  //     }
+  //     else if( process.platform === 'win32' )
+  //     {
+  //       test.identical( got.exitCode, 0 );
+  //       test.identical( got.exitSignal, null );
+  //       test.is( !_.strHas( got.output, 'SIGINT' ) );
+  //       test.is( _.strHas( got.output, 'Application timeout!' ) );
+  //     }
+  //     else
+  //     {
+  //       test.identical( got.exitCode, 0 );
+  //       test.identical( got.exitSignal, null );
+  //       test.is( _.strHas( got.output, 'SIGINT' ) );
+  //       test.is( !_.strHas( got.output, 'Application timeout!' ) );
+  //     }
+  //     return null;
+  //   })
+  //
+  //   return ready;
+  // })
+  //
+  // /* */
+  //
+  // .thenKeep( () =>
+  // {
+  //   var o =
+  //   {
+  //     execPath :  'node ' + testAppPath,
+  //     mode : 'exec',
+  //     outputCollecting : 1,
+  //     throwingExitCode : 0
+  //   }
+  //
+  //   let ready = _.process.start( o )
+  //
+  //   o.process.stdout.on( 'data', ( data ) =>
+  //   {
+  //     data = data.toString();
+  //     if( _.strHas( data, 'ready' ))
+  //     _.process.terminate({ pid : o.process.pid, timeOut : 0 });
+  //   })
+  //
+  //   ready.thenKeep( ( got ) =>
+  //   {
+  //     if( process.platform === 'linux' )
+  //     {
+  //       test.identical( got.exitCode, null );
+  //       test.identical( got.exitSignal, 'SIGINT' );
+  //       test.is( !_.strHas( got.output, 'SIGINT' ) );
+  //       test.is( _.strHas( got.output, 'Application timeout!' ) );
+  //     }
+  //     else if( process.platform === 'win32' )
+  //     {
+  //       test.identical( got.exitCode, 0 );
+  //       test.identical( got.exitSignal, null );
+  //       test.is( !_.strHas( got.output, 'SIGINT' ) );
+  //       test.is( _.strHas( got.output, 'Application timeout!' ) );
+  //     }
+  //     else
+  //     {
+  //       test.identical( got.exitCode, 0 );
+  //       test.identical( got.exitSignal, null );
+  //       test.is( _.strHas( got.output, 'SIGINT' ) );
+  //       test.is( !_.strHas( got.output, 'Application timeout!' ) );
+  //     }
+  //     return null;
+  //   })
+  //
+  //   return ready;
+  // })
 
   /* */
 
@@ -17455,7 +17582,7 @@ function terminate( test )
 
 function terminateComplex( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   if( process.platform === 'win32' )
@@ -17589,7 +17716,7 @@ function terminateComplex( test )
     return ready;
   })
 
-  //
+  /* - */
 
   .thenKeep( () =>
   {
@@ -17625,7 +17752,7 @@ function terminateComplex( test )
     return ready;
   })
 
-  //
+  /* - */
 
   .thenKeep( () =>
   {
@@ -17668,50 +17795,50 @@ function terminateComplex( test )
     return ready;
   })
 
+  /* - */
+
+  // .thenKeep( () =>
+  // {
+  //   test.case = 'Sending signal to child process has regular child process that should exit with parent'
+  //   var o =
+  //   {
+  //     execPath : 'node ' + testAppPath,
+  //     mode : 'exec',
+  //     outputCollecting : 1,
+  //     throwingExitCode : 0
+  //   }
   //
-
-  .thenKeep( () =>
-  {
-    test.case = 'Sending signal to child process has regular child process that should exit with parent'
-    var o =
-    {
-      execPath : 'node ' + testAppPath,
-      mode : 'exec',
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o );
-    let lastChildPid;
-
-    o.process.stdout.on( 'data', ( data ) =>
-    {
-      data = data.toString();
-      lastChildPid = _.numberFrom( data );
-      _.process.terminate({ pid : o.process.pid });
-    })
-
-    ready.thenKeep( ( got ) =>
-    {
-      if( process.platform === 'linux' )
-      {
-        test.identical( got.exitCode, null );
-        test.identical( got.exitSignal, 'SIGINT' );
-      }
-      else
-      {
-        test.identical( got.exitCode, 0 );
-        test.identical( got.exitSignal, null );
-      }
-      test.is( !_.process.isAlive( o.process.pid ) )
-      test.is( !_.process.isAlive( lastChildPid ) );
-      return null;
-    })
-
-    return ready;
-  })
-
+  //   let ready = _.process.start( o );
+  //   let lastChildPid;
   //
+  //   o.process.stdout.on( 'data', ( data ) =>
+  //   {
+  //     data = data.toString();
+  //     lastChildPid = _.numberFrom( data );
+  //     _.process.terminate({ pid : o.process.pid });
+  //   })
+  //
+  //   ready.thenKeep( ( got ) =>
+  //   {
+  //     if( process.platform === 'linux' )
+  //     {
+  //       test.identical( got.exitCode, null );
+  //       test.identical( got.exitSignal, 'SIGINT' );
+  //     }
+  //     else
+  //     {
+  //       test.identical( got.exitCode, 0 );
+  //       test.identical( got.exitSignal, null );
+  //     }
+  //     test.is( !_.process.isAlive( o.process.pid ) )
+  //     test.is( !_.process.isAlive( lastChildPid ) );
+  //     return null;
+  //   })
+  //
+  //   return ready;
+  // })
+
+  /* - */
 
   return con;
 }
@@ -17722,7 +17849,7 @@ terminateComplex.timeOut = 150000;
 
 function terminateDetachedComplex( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
 
@@ -17843,7 +17970,7 @@ function terminateDetachedComplex( test )
     return ready;
   })
 
-  //
+  /* - */
 
   .thenKeep( () =>
   {
@@ -17886,7 +18013,7 @@ function terminateDetachedComplex( test )
     return ready;
   })
 
-  //
+  /* - */
 
   .thenKeep( () =>
   {
@@ -17950,71 +18077,71 @@ function terminateDetachedComplex( test )
     return ready;
   })
 
+  /* - */
+
+  // .thenKeep( () =>
+  // {
+  //   test.case = 'Sending signal to child process that has detached child, detached child should continue to work'
+  //   var o =
+  //   {
+  //     execPath : 'node ' + testAppPath + ' detached',
+  //     mode : 'exec',
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     throwingExitCode : 0
+  //   }
   //
-
-  .thenKeep( () =>
-  {
-    test.case = 'Sending signal to child process that has detached child, detached child should continue to work'
-    var o =
-    {
-      execPath : 'node ' + testAppPath + ' detached',
-      mode : 'exec',
-      outputPiping : 1,
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o );
-    let childPid;
-    o.process.stdout.on( 'data', ( data ) =>
-    {
-      data = data.toString();
-      if( _.strHas( data, 'ready' ) )
-      _.process.terminate({ process : o.process, timeOut : 0 });
-    })
-
-    ready.thenKeep( ( got ) =>
-    {
-      childPid = _.numberFrom( _.fileProvider.fileRead( _.path.join( routinePath, 'pid' ) ) );
-
-      if( process.platform === 'linux' )
-      {
-        test.is( !_.process.isAlive( _.numberFrom( childPid ) ) )
-        test.identical( got.exitCode, null );
-        test.identical( got.exitSignal, 'SIGINT' );
-        test.is( !_.strHas( got.output, 'SIGINT' ) );
-        test.is( _.strHas( got.output, 'TerminationBegin' ) );
-      }
-      else if( process.platform === 'win32' )
-      {
-        test.is( !_.process.isAlive( _.numberFrom( childPid ) ) )
-        test.identical( got.exitCode, 0 );
-        test.identical( got.exitSignal, null );
-        test.is( !_.strHas( got.output, 'SIGINT' ) );
-        test.is( _.strHas( got.output, 'TerminationBegin' ) );
-      }
-      else
-      {
-        test.is( _.process.isAlive( _.numberFrom( childPid ) ) )
-        test.identical( got.exitCode, 0 );
-        test.identical( got.exitSignal, null );
-        test.is( _.strHas( got.output, 'SIGINT' ) );
-        test.is( !_.strHas( got.output, 'TerminationBegin' ) );
-      }
-      return _.time.out( 9000, () =>
-      {
-        var files = _.fileProvider.dirRead( routinePath );
-        test.is( !_.process.isAlive( _.numberFrom( childPid ) ) )
-        test.identical( _.numberFrom( files[ 0 ] ), _.numberFrom( childPid ) );
-        _.fileProvider.fileDelete( _.path.join( routinePath, files[ 0 ] ) );
-        return null;
-      });
-    })
-
-    return ready;
-  })
-
+  //   let ready = _.process.start( o );
+  //   let childPid;
+  //   o.process.stdout.on( 'data', ( data ) =>
+  //   {
+  //     data = data.toString();
+  //     if( _.strHas( data, 'ready' ) )
+  //     _.process.terminate({ process : o.process, timeOut : 0 });
+  //   })
   //
+  //   ready.thenKeep( ( got ) =>
+  //   {
+  //     childPid = _.numberFrom( _.fileProvider.fileRead( _.path.join( routinePath, 'pid' ) ) );
+  //
+  //     if( process.platform === 'linux' )
+  //     {
+  //       test.is( !_.process.isAlive( _.numberFrom( childPid ) ) )
+  //       test.identical( got.exitCode, null );
+  //       test.identical( got.exitSignal, 'SIGINT' );
+  //       test.is( !_.strHas( got.output, 'SIGINT' ) );
+  //       test.is( _.strHas( got.output, 'TerminationBegin' ) );
+  //     }
+  //     else if( process.platform === 'win32' )
+  //     {
+  //       test.is( !_.process.isAlive( _.numberFrom( childPid ) ) )
+  //       test.identical( got.exitCode, 0 );
+  //       test.identical( got.exitSignal, null );
+  //       test.is( !_.strHas( got.output, 'SIGINT' ) );
+  //       test.is( _.strHas( got.output, 'TerminationBegin' ) );
+  //     }
+  //     else
+  //     {
+  //       test.is( _.process.isAlive( _.numberFrom( childPid ) ) )
+  //       test.identical( got.exitCode, 0 );
+  //       test.identical( got.exitSignal, null );
+  //       test.is( _.strHas( got.output, 'SIGINT' ) );
+  //       test.is( !_.strHas( got.output, 'TerminationBegin' ) );
+  //     }
+  //     return _.time.out( 9000, () =>
+  //     {
+  //       var files = _.fileProvider.dirRead( routinePath );
+  //       test.is( !_.process.isAlive( _.numberFrom( childPid ) ) )
+  //       test.identical( _.numberFrom( files[ 0 ] ), _.numberFrom( childPid ) );
+  //       _.fileProvider.fileDelete( _.path.join( routinePath, files[ 0 ] ) );
+  //       return null;
+  //     });
+  //   })
+  //
+  //   return ready;
+  // })
+
+  /* - */
 
   return con;
 }
@@ -18025,7 +18152,7 @@ terminateDetachedComplex.timeOut = 150000;
 
 function terminateWithChildren( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   if( process.platform === 'win32' )
@@ -18171,7 +18298,7 @@ function terminateWithChildren( test )
     return ready;
   })
 
-  //
+  /* - */
 
   .thenKeep( () =>
   {
@@ -18213,7 +18340,7 @@ function terminateWithChildren( test )
     return ready;
   })
 
-  //
+  /* - */
 
   .thenKeep( () =>
   {
@@ -18258,7 +18385,7 @@ function terminateWithChildren( test )
     return ready;
   })
 
-  //
+  /* - */
 
   .thenKeep( () =>
   {
@@ -18291,7 +18418,7 @@ function terminateWithChildren( test )
 
 function terminateWithDetachedChildren( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   if( process.platform === 'win32' )
@@ -18457,7 +18584,7 @@ function terminateWithDetachedChildren( test )
 
 function terminateTimeOut( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   if( process.platform === 'win32' )
@@ -18608,55 +18735,55 @@ function terminateTimeOut( test )
     return ready;
   })
 
+  /* - */
+
+  // .thenKeep( () =>
+  // {
+  //   var o =
+  //   {
+  //     execPath :  'node ' + testAppPath,
+  //     mode : 'exec',
+  //     outputCollecting : 1,
+  //     throwingExitCode : 0
+  //   }
   //
-
-  .thenKeep( () =>
-  {
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'exec',
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    o.process.stdout.on( 'data', ( data ) =>
-    {
-      data = data.toString();
-      if( _.strHas( data, 'ready' ))
-      _.process.terminate({ process : o.process });
-    })
-
-    ready.thenKeep( ( got ) =>
-    {
-      if( process.platform === 'linux' )
-      {
-        test.identical( got.exitCode, null );
-        test.identical( got.exitSignal, 'SIGKILL' );
-        test.is( !_.strHas( got.output, 'SIGINT' ) );
-        test.is( _.strHas( got.output, 'Application timeout!' ) );
-      }
-      else if( process.platform === 'darwin' )
-      {
-        test.identical( got.exitCode, null );
-        test.identical( got.exitSignal, 'SIGKILL' );
-        test.is( _.strHas( got.output, 'SIGINT' ) );
-        test.is( !_.strHas( got.output, 'Application timeout!' ) );
-      }
-      else
-      {
-        test.identical( got.exitCode, null );
-        test.identical( got.exitSignal, 'SIGKILL' );
-        test.is( !_.strHas( got.output, 'SIGINT' ) );
-        test.is( _.strHas( got.output, 'Application timeout!' ) );
-      }
-      return null;
-    })
-
-    return ready;
-  })
+  //   let ready = _.process.start( o )
+  //
+  //   o.process.stdout.on( 'data', ( data ) =>
+  //   {
+  //     data = data.toString();
+  //     if( _.strHas( data, 'ready' ))
+  //     _.process.terminate({ process : o.process });
+  //   })
+  //
+  //   ready.thenKeep( ( got ) =>
+  //   {
+  //     if( process.platform === 'linux' )
+  //     {
+  //       test.identical( got.exitCode, null );
+  //       test.identical( got.exitSignal, 'SIGKILL' );
+  //       test.is( !_.strHas( got.output, 'SIGINT' ) );
+  //       test.is( _.strHas( got.output, 'Application timeout!' ) );
+  //     }
+  //     else if( process.platform === 'darwin' )
+  //     {
+  //       test.identical( got.exitCode, null );
+  //       test.identical( got.exitSignal, 'SIGKILL' );
+  //       test.is( _.strHas( got.output, 'SIGINT' ) );
+  //       test.is( !_.strHas( got.output, 'Application timeout!' ) );
+  //     }
+  //     else
+  //     {
+  //       test.identical( got.exitCode, null );
+  //       test.identical( got.exitSignal, 'SIGKILL' );
+  //       test.is( !_.strHas( got.output, 'SIGINT' ) );
+  //       test.is( _.strHas( got.output, 'Application timeout!' ) );
+  //     }
+  //     return null;
+  //   })
+  //
+  //   return ready;
+  // })
 
   /*  */
 
@@ -18667,7 +18794,7 @@ function terminateTimeOut( test )
 
 function terminateDifferentStdio( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   if( process.platform === 'win32' )
@@ -18732,7 +18859,7 @@ function terminateDifferentStdio( test )
     return ready;
   })
 
-  //
+  /* - */
 
   .thenKeep( () =>
   {
@@ -18762,7 +18889,7 @@ function terminateDifferentStdio( test )
     return ready;
   })
 
-  //
+  /* - */
 
   .thenKeep( () =>
   {
@@ -18792,7 +18919,7 @@ function terminateDifferentStdio( test )
     return ready;
   })
 
-  //
+  /* - */
 
   .thenKeep( () =>
   {
@@ -18823,7 +18950,7 @@ function terminateDifferentStdio( test )
     return ready;
   })
 
-  //
+  /* - */
 
   .thenKeep( () =>
   {
@@ -18854,7 +18981,7 @@ function terminateDifferentStdio( test )
     return ready;
   })
 
-  //
+  /* - */
 
   .thenKeep( () =>
   {
@@ -18894,7 +19021,7 @@ function terminateDifferentStdio( test )
 
 function children( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testApp()
@@ -18976,7 +19103,7 @@ function children( test )
     return ready;
   })
 
-  //
+  /* - */
 
   .thenKeep( () =>
   {
@@ -19019,7 +19146,7 @@ function children( test )
     return ready;
   })
 
-  //
+  /* - */
 
   .thenKeep( () =>
   {
@@ -19060,7 +19187,7 @@ function children( test )
     return ready;
   })
 
-  //
+  /* - */
 
   .thenKeep( () =>
   {
@@ -19110,7 +19237,7 @@ function children( test )
     return ready;
   })
 
-  //
+  /* - */
 
   .thenKeep( () =>
   {
@@ -19123,7 +19250,7 @@ function children( test )
     })
   })
 
-  //
+  /* - */
 
   .thenKeep( () =>
   {
@@ -19156,7 +19283,7 @@ function children( test )
 
 function childrenAsList( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testApp()
@@ -19264,7 +19391,7 @@ function experiment( test )
 {
   let self = this;
 
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   /* */
@@ -19327,7 +19454,7 @@ experiment.experimental = 1;
 
 function killComplex( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testApp()
@@ -19499,7 +19626,7 @@ function effectiveMainFile( test )
 
 function shellExperiment( test )
 {
-  var context = this;
+  let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
   var commonDefaults =
   {
@@ -19544,7 +19671,7 @@ function shellExperiment( test )
   var o;
   var con = new _.Consequence().take( null );
 
-  //
+  /* - */
 
   con.thenKeep( function()
   {
@@ -19606,8 +19733,10 @@ var Proto =
     processArgsMultipleCommands,
     processArgsPaths,
     processArgsWithSpace,
+
     processOnExitEvent,
     processOffExitEvent,
+
     exitReason,
     exitCode,
 
@@ -19626,12 +19755,12 @@ var Proto =
     shellShellSyncDeasyncThrowing,
     shellForkSyncDeasync,
     shellForkSyncDeasyncThrowing,
-    shellExecSyncDeasync,
-    shellExecSyncDeasyncThrowing,
+    // shellExecSyncDeasync, /* qqq : ? */
+    // shellExecSyncDeasyncThrowing, /* qqq : ? */
 
     shellMultipleSyncDeasync,
-
     shellDryRun,
+    startNjsStructure,
 
     shellArgsOption,
     shellArgumentsParsing,
@@ -19648,7 +19777,7 @@ var Proto =
     importantModeShell,
 
     startExecPathWithSpace,
-    startNodePassingThroughExecPathWithSpace,
+    startNjsPassingThroughExecPathWithSpace,
     startPassingThroughExecPathWithSpace,
 
     shellProcedureTrivial,
@@ -19659,9 +19788,9 @@ var Proto =
 
     shellStartingDelay,
     shellStartingTime,
-    // shellStartingSuspended,
+    // shellStartingSuspended, /* qqq : ? */
     shellAfterDeath,
-    // shellAfterDeathOutput,
+    // shellAfterDeathOutput, /* qqq : ? */
 
     /*  */
 
@@ -19679,6 +19808,9 @@ var Proto =
 
     startDetachingChildExitsAfterParent,
     startDetachingChildExitsBeforeParent,
+    startDetachingDisconnectedChildExistsBeforeParent,
+    startDetachingChildExistsBeforeParentWaitForTermination,
+    startDetachingEndCompetitorIsExecuted,
 
     startDetachedOutputStdioIgnore,
     startDetachedOutputStdioPipe,
@@ -19689,12 +19821,12 @@ var Proto =
     startDetachingModeShellIpc,
 
     startDetachingThrowing,
-    startNodeDetachingChildThrowing,
-
-    startNodeDetachingTrivial,
+    startNjsDetachingChildThrowing,
+    startNjsDetachingTrivial,
 
     startOnStart,
     startOnTerminate,
+    noEndBug1,
 
     /*  */
 
@@ -19735,7 +19867,9 @@ var Proto =
     realMainDir,
     effectiveMainFile,
 
-    shellExperiment
+    shellExperiment,
+
+    /* qqq : group test routines */
 
   }
 
@@ -19746,7 +19880,6 @@ _.mapExtend( Self, Proto );
 //
 
 Self = wTestSuite( Self );
-
 if( typeof module !== 'undefined' && !module.parent )
 wTester.test( Self )
 

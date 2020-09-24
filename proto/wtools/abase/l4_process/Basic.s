@@ -127,12 +127,7 @@ defaults.filePath = null;
 
 let tempClose = _.routineFromPreAndBody( tempClose_pre, tempClose_body );
 
-// //
 //
-// function insideTestContainer()
-// {
-//   return 'CI' in process.env && 'GITHUB_ACTIONS' in process.env;
-// }
 
 /**
  * Returns path for main module (module that running directly by node).
@@ -150,6 +145,8 @@ function realMainFile()
   _pathRealMainFile = _.path.normalize( require.main.filename );
   return _pathRealMainFile;
 }
+
+//
 
 /**
  * Returns path dir name for main module (module that running directly by node).
@@ -172,6 +169,8 @@ function realMainDir()
 
   return _pathRealMainDir;
 }
+
+//
 
 /**
  * Returns absolute path for file running directly by node
