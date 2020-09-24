@@ -92,8 +92,9 @@ function start_pre( routine, args )
  * @param {Boolean} o.applyingExitCode=0 Applies exit code to parent process.
 
  * @param {Number} o.verbosity=2 Controls amount of output, `0` disables output at all.
- * @param {Boolean} o.outputGray=0 Logger prints everything in raw mode, no styles applied.
- * @param {Boolean} o.outputGrayStdout=0 Logger prints output from `stdout` in raw mode, no styles applied.
+ * @param {Boolean} o.outputDecorating=0 Logger prints everything in raw mode, no styles applied.
+ * @param {Boolean} o.outputDecoratingStdout=0 Logger prints output from `stdout` in raw mode, no styles applied.
+ * @param {Boolean} o.outputDecoratingStderr=0 Logger prints output from `stderr` in raw mode, no styles applied.
  * @param {Boolean} o.outputPrefixing=0 Add prefix with name of output channel( stderr, stdout ) to each line.
  * @param {Boolean} o.outputPiping=null Handles output from `stdout` and `stderr` channels. Is enabled by default if `o.verbosity` levels is >= 2 and option is not specified explicitly. This option is required by other "output" options that allows output customization.
  * @param {Boolean} o.outputCollecting=0 Enables coullection of output into sinle string. Collects output into `o.output` property if enabled.
@@ -171,7 +172,7 @@ function start_body( o )
 
 */
 
-  _.assertRoutineOptions( start_body, arguments );
+  // _.assertRoutineOptions( start_body, arguments );
   _.assert( arguments.length === 1, 'Expects single argument' );
   // _.assert( _.longHas( [ 'fork', 'exec', 'spawn', 'shell' ], o.mode ) );
   _.assert( _.longHas( [ 'fork', 'spawn', 'shell' ], o.mode ) );
@@ -189,7 +190,7 @@ function start_body( o )
 
   // let state = 0;
   // let currentExitCode;
-  let killedByTimeout = false;
+  // let terminatedWithTimeOut = false;
   let stderrOutput = '';
   let decoratedOutput = '';
   let decoratedErrorOutput = '';
@@ -269,6 +270,16 @@ function start_body( o )
     _.assert( o.ready === o.onTerminate && o.ready !== o.onStart );
     _.assert( o.onStart !== o.onTerminate );
 
+    debugger;
+    if( o.outputDecorating === null )
+    o.outputDecorating = 0;
+    if( o.outputDecoratingStdout === null )
+    o.outputDecoratingStdout = o.outputDecorating;
+    if( o.outputDecoratingStderr === null )
+    o.outputDecoratingStderr = o.outputDecorating;
+
+    o.logger = o.logger || _global.logger;
+
   }
 
   /* */
@@ -277,7 +288,8 @@ function start_body( o )
   {
 
     o.disconnect = disconnect;
-    o.state = 'initial';
+    o.state = 'initial'; /* `initial`, `starting`, `started`, `terminating`, `terminated`, `error`, */
+    o.terminationReason = null;
     o.fullExecPath = null;
     o.output = null;
     o.exitCode = null;
@@ -324,9 +336,9 @@ function start_body( o )
     {
       debugger;
       // if( state < 2 )
-      if( o.state !== 'terminated' && o.state !== 'failed' )
+      if( o.state !== 'terminated' && o.state !== 'error' )
       if( !o.exitCode ) /* yyy qqq : cover */
-      o.exitCode = null;
+      o.exitCode = null; /* qqq : why? */
       throw _.err( err );
     }
     return arg;
@@ -486,8 +498,8 @@ function start_body( o )
     if( o.outputAdditive === null )
     o.outputAdditive = true;
     o.outputAdditive = !!o.outputAdditive;
+
     o.currentPath = _.path.resolve( o.currentPath || '.' );
-    o.logger = o.logger || _global.logger;
 
     /* verbosity */
 
@@ -536,10 +548,10 @@ function start_body( o )
     if( !StripAnsi )
     StripAnsi = require( 'strip-ansi' );
 
-    if( !o.outputGray && typeof module !== 'undefined' )
+    if( !o.outputDecorating && typeof module !== 'undefined' )
     try
     {
-      _.include( 'wLogger' );
+      // _.include( 'wLogger' );
       _.include( 'wColor' );
     }
     catch( err )
@@ -707,9 +719,9 @@ function start_body( o )
     _.time.begin( o.timeOut, () =>
     {
       // if( state === 2 )
-      if( o.state === 'terminated' || o.state === 'failed' )
+      if( o.state === 'terminated' || o.state === 'error' )
       return;
-      killedByTimeout = true;
+      o.terminationReason = 'time';
       o.process.kill( 'SIGTERM' ); /* qqq : need to catch event when process is really down */
     });
 
@@ -738,7 +750,7 @@ function start_body( o )
 
     /* piping error channel */
 
-    // if( o.outputPiping || o.outputCollecting ) /* qqq : why no such line? */
+    /* there is no if here because algorithm should collect error output in stderrOutput */
     if( o.process.stderr )
     if( o.sync && !o.deasync )
     handleStderr( o.process.stderr );
@@ -803,7 +815,7 @@ function start_body( o )
       if( o.verbosity >= 3 )
       {
         let output = '   at ';
-        if( !o.outputGray )
+        if( !o.outputDecorating )
         output = _.ct.format( output, { fg : 'bright white' } ) + _.ct.format( o.currentPath, 'path' );
         else
         output = output + o.currentPath
@@ -813,7 +825,7 @@ function start_body( o )
       if( o.verbosity && o.inputMirroring )
       {
         let prefix = ' > ';
-        if( !o.outputGray )
+        if( !o.outputDecorating )
         prefix = _.ct.format( prefix, { fg : 'bright white' } );
         log( prefix + o.fullExecPath );
       }
@@ -1051,11 +1063,18 @@ function start_body( o )
     }
 
     // if( state === 2 )
-    if( o.state === 'terminated' || o.state === 'failed' ) /* xxx qqq : move above */
+    if( o.state === 'terminated' || o.state === 'error' ) /* xxx qqq : move above */
     return;
 
     o.state = 'terminated';
     // state = 2;
+
+    if( exitSignal )
+    o.terminationReason = 'signal';
+    else if( exitCode )
+    o.terminationReason = 'code';
+    else
+    o.terminationReason = 'normal';
 
     if( ( exitSignal || exitCode !== 0 ) && o.throwingExitCode )
     {
@@ -1063,7 +1082,7 @@ function start_body( o )
 
       if( _.numberIs( exitCode ) )
       err = _.err( 'Process returned exit code', exitCode, '\n', infoGet() );
-      else if( killedByTimeout )
+      else if( o.reason === 'time' )
       err = _.err( 'Process timed out, killed by exit signal', exitSignal, '\n', infoGet() );
       else
       err = _.err( 'Process was killed by exit signal', exitSignal, '\n', infoGet() );
@@ -1094,10 +1113,11 @@ function start_body( o )
 
     exitCodeSet( -1 );
 
-    if( o.state === 'terminated' || o.state === 'failed' ) /* xxx qqq : move above? */
+    if( o.state === 'terminated' || o.state === 'error' ) /* xxx qqq : move above? */
     return;
 
-    o.state = 'failed';
+    o.terminationReason = 'error';
+    o.state = 'error';
 
     // if( state === 2 )
     // return;
@@ -1126,7 +1146,6 @@ function start_body( o )
 
     if( _.bufferAnyIs( data ) )
     data = _.bufferToStr( data );
-
     if( o.outputGraying )
     data = StripAnsi( data );
 
@@ -1138,13 +1157,12 @@ function start_body( o )
     if( !o.outputPiping )
     return;
 
-    if( _.strEnds( data, '\n' ) )
     data = _.strRemoveEnd( data, '\n' );
 
     if( o.outputPrefixing )
     data = 'stderr :\n' + '  ' + _.strLinesIndentation( data, '  ' );
 
-    if( _.color && !o.outputGray )
+    if( _.color && !o.outputDecorating && !o.outputDecoratingStderr )
     data = _.ct.format( data, 'pipe.negative' );
 
     log( data, 1 );
@@ -1166,13 +1184,12 @@ function start_body( o )
     if( !o.outputPiping )
     return;
 
-    if( _.strEnds( data, '\n' ) )
     data = _.strRemoveEnd( data, '\n' );
 
     if( o.outputPrefixing )
     data = 'stdout :\n' + '  ' + _.strLinesIndentation( data, '  ' );
 
-    if( _.color && !o.outputGray && !o.outputGrayStdout )
+    if( _.color && !o.outputDecorating && !o.outputDecoratingStdout )
     data = _.ct.format( data, 'pipe.neutral' );
 
     log( data );
@@ -1247,8 +1264,9 @@ start_body.defaults = /* qqq : split on _.process.start(), _.process.startBasic(
   outputAdditive : null,
   inputMirroring : 1,
 
-  outputGray : 0,
-  outputGrayStdout : 0,
+  outputDecorating : 0,
+  outputDecoratingStderr : null,
+  outputDecoratingStdout : null,
   outputGraying : 0,
 
 }
@@ -1427,43 +1445,44 @@ function startNjs_body( o )
   else
   path = _.strConcat([ 'node', interpreterArgs, path ]);
 
-  let startOptions = _.mapOnly( o, _.process.start.defaults );
+  // let startOptions = _.mapOnly( o, _.process.start.defaults );
+  let startOptions = o;
   startOptions.execPath = path;
 
-  let result = _.process.start( startOptions );
+  let result = _.process.start.body.call( _.process, startOptions );
 
-  o.ready = startOptions.ready;
-  o.onStart = startOptions.onStart;
-  o.onTerminate = startOptions.onTerminate;
-  o.process = startOptions.process;
-  o.disconnect = startOptions.disconnect;
-  // o.status = startOptions.status;
-
-  _.assert( !!startOptions.ready );
-  _.assert( !!startOptions.onStart );
-  _.assert( !!startOptions.onTerminate );
-  _.assert( !!startOptions.disconnect );
-  // _.assert( !!startOptions.status );
-
-  startOptions.onStart.give( function( err, arg )
-  {
-    _.assert( !!startOptions.process );
-    _.assert( !!startOptions.disconnect );
-    // _.assert( !!startOptions.status );
-    o.process = startOptions.process;
-    o.disconnect = startOptions.disconnect;
-    // o.status = startOptions.status;
-    this.take( err, arg );
-  })
-
-  startOptions.onTerminate.give( function( err, arg )
-  {
-    o.output = startOptions.output;
-    o.exitCode = startOptions.exitCode;
-    o.exitSignal = startOptions.exitSignal;
-    // o.status = startOptions.status;
-    this.take( err, arg );
-  })
+  // o.ready = startOptions.ready;
+  // o.onStart = startOptions.onStart;
+  // o.onTerminate = startOptions.onTerminate;
+  // o.process = startOptions.process;
+  // o.disconnect = startOptions.disconnect;
+  // // o.status = startOptions.status;
+  //
+  // _.assert( !!startOptions.ready );
+  // _.assert( !!startOptions.onStart );
+  // _.assert( !!startOptions.onTerminate );
+  // _.assert( !!startOptions.disconnect );
+  // // _.assert( !!startOptions.status );
+  //
+  // startOptions.onStart.give( function( err, arg )
+  // {
+  //   _.assert( !!startOptions.process );
+  //   _.assert( !!startOptions.disconnect );
+  //   // _.assert( !!startOptions.status );
+  //   o.process = startOptions.process;
+  //   o.disconnect = startOptions.disconnect;
+  //   // o.status = startOptions.status;
+  //   this.take( err, arg );
+  // })
+  //
+  // startOptions.onTerminate.give( function( err, arg )
+  // {
+  //   o.output = startOptions.output;
+  //   o.exitCode = startOptions.exitCode;
+  //   o.exitSignal = startOptions.exitSignal;
+  //   // o.status = startOptions.status;
+  //   this.take( err, arg );
+  // })
 
   return result;
 }
