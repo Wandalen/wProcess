@@ -5122,7 +5122,7 @@ function shellArgumentsParsing( test )
     {
       test.identical( o.exitCode, 0 );
       test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-      test.identical( got.map, { secondArg : 1 } )
+      test.identical( got.map, { secondArg : `1 "third arg" 'fourth arg' "fifth" arg` } )
       test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', '\'fourth arg\'', '"fifth" arg' ] )
 
       return null;
@@ -5154,7 +5154,7 @@ function shellArgumentsParsing( test )
     {
       test.identical( o.exitCode, 0 );
       test.identical( got.scriptPath, _.path.normalize( testAppPathNoSpace ) )
-      test.identical( got.map, { secondArg : 1 } )
+      test.identical( got.map, { secondArg : `1 "third arg" 'fourth arg' "fifth" arg` } )
       test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', '\'fourth arg\'', '"fifth" arg' ] )
 
       return null;
@@ -5186,7 +5186,7 @@ function shellArgumentsParsing( test )
     {
       test.identical( o.exitCode, 0 );
       test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-      test.identical( got.map, { secondArg : 1 } )
+      test.identical( got.map, { secondArg : `1 "third arg" 'fourth arg' "fifth" arg` } )
       test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', '"fifth" arg' ] )
 
       return null;
@@ -5218,7 +5218,7 @@ function shellArgumentsParsing( test )
     {
       test.identical( o.exitCode, 0 );
       test.identical( got.scriptPath, _.path.normalize( testAppPathNoSpace ) )
-      test.identical( got.map, { secondArg : 1 } )
+      test.identical( got.map, { secondArg : `1 "third arg" 'fourth arg' "fifth" arg` } )
       test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', '"fifth" arg' ] )
 
       return null;
@@ -5250,7 +5250,7 @@ function shellArgumentsParsing( test )
     {
       test.identical( o.exitCode, 0 );
       test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-      test.identical( got.map, { secondArg : 1 } )
+      test.identical( got.map, { secondArg : `1 "third arg" "fourth arg" "fifth" arg` } )
       test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', 'fourth arg', '"fifth" arg' ] )
 
       return null;
@@ -5282,7 +5282,7 @@ function shellArgumentsParsing( test )
     {
       test.identical( o.exitCode, 0 );
       test.identical( got.scriptPath, _.path.normalize( testAppPathNoSpace ) )
-      test.identical( got.map, { secondArg : 1 } )
+      test.identical( got.map, { secondArg : `1 "third arg" "fourth arg" "fifth" arg` } )
       test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', 'fourth arg', '"fifth" arg' ] )
 
       return null;
@@ -5362,6 +5362,10 @@ function shellArgumentsParsing( test )
     test.case = `'path to exec : with space' 'execPATH : has arguments' 'args has arguments' 'exec'`
 
     let con = new _.Consequence().take( null );
+
+    if( !Config.debug )
+    return con;
+
     let o =
     {
       execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' firstArg secondArg:1 "third arg"',
@@ -5371,262 +5375,8 @@ function shellArgumentsParsing( test )
       outputCollecting : 1,
       ready : con
     }
-    _.process.start( o );
 
-    con.then( () =>
-    {
-      test.identical( o.exitCode, 0 );
-      let expected =
-      {
-        scriptPath : _.path.normalize( testAppPathSpace ),
-        map : { secondArg : 1 },
-        scriptArgs : [ 'firstArg', 'secondArg:1', 'third arg', '\'fourth arg\'', '"fifth" arg' ]
-      }
-      let args = JSON.parse( o.output );
-      test.contains( args, expected )
-
-      return null;
-    })
-
-    return con;
-  })
-
-  .then( () =>
-  {
-    test.case = `'path to exec : without space' 'execPATH : has arguments' 'args has arguments' 'exec'`
-
-    let con = new _.Consequence().take( null );
-    let o =
-    {
-      execPath : 'node ' + _.strQuote( testAppPathNoSpace ) + ' firstArg secondArg:1 "third arg"',
-      args : [ '\'fourth arg\'',  `"fifth" arg` ],
-      mode : 'exec',
-      outputPiping : 1,
-      outputCollecting : 1,
-      ready : con
-    }
-    _.process.start( o );
-
-    con.then( () =>
-    {
-      test.identical( o.exitCode, 0 );
-      let expected =
-      {
-        scriptPath : _.path.normalize( testAppPathNoSpace ),
-        map : { secondArg : 1 },
-        scriptArgs : [ 'firstArg', 'secondArg:1', 'third arg', '\'fourth arg\'', '"fifth" arg' ]
-      }
-      let args = JSON.parse( o.output );
-      test.contains( args, expected )
-
-      return null;
-    })
-
-    return con;
-  })
-
-  .then( () =>
-  {
-    test.case = `'path to exec : with space' 'execPATH : only path' 'args has arguments' 'exec'`
-
-    let con = new _.Consequence().take( null );
-    let o =
-    {
-      execPath : 'node ' + _.strQuote( testAppPathSpace ),
-      args : [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', `"fifth" arg` ],
-      mode : 'exec',
-      outputPiping : 1,
-      outputCollecting : 1,
-      ready : con
-    }
-    _.process.start( o );
-
-    con.then( () =>
-    {
-      test.identical( o.exitCode, 0 );
-      let expected =
-      {
-        scriptPath : _.path.normalize( testAppPathSpace ),
-        map : { secondArg : 1 },
-        scriptArgs : [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', '"fifth" arg' ]
-      }
-      let args = JSON.parse( o.output );
-      test.contains( args, expected )
-
-      return null;
-    })
-
-    return con;
-  })
-
-  .then( () =>
-  {
-    test.case = `'path to exec : without space' 'execPATH : only path' 'args has arguments' 'exec'`
-
-    let con = new _.Consequence().take( null );
-    let o =
-    {
-      execPath : 'node ' + _.strQuote( testAppPathNoSpace ),
-      args : [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', `"fifth" arg` ],
-      mode : 'exec',
-      outputPiping : 1,
-      outputCollecting : 1,
-      ready : con
-    }
-    _.process.start( o );
-
-    con.then( () =>
-    {
-      test.identical( o.exitCode, 0 );
-      let expected =
-      {
-        scriptPath : _.path.normalize( testAppPathNoSpace ),
-        map : { secondArg : 1 },
-        scriptArgs : [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', '"fifth" arg' ]
-      }
-      let args = JSON.parse( o.output );
-      test.contains( args, expected )
-
-      return null;
-    })
-
-    return con;
-  })
-
-  .then( () =>
-  {
-    test.case = `'path to exec : with space' 'execPATH : has arguments' 'args: empty' 'exec'`
-
-    let con = new _.Consequence().take( null );
-    let o =
-    {
-      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' firstArg secondArg:1 "third arg" \'fourth arg\' `"fifth" arg`',
-      args : null,
-      mode : 'exec',
-      outputPiping : 1,
-      outputCollecting : 1,
-      ready : con
-    }
-    _.process.start( o );
-
-    con.then( () =>
-    {
-      test.identical( o.exitCode, 0 );
-      let expected =
-      {
-        scriptPath : _.path.normalize( testAppPathSpace ),
-        map : { secondArg : 1 },
-        scriptArgs : [ 'firstArg', 'secondArg:1', 'third arg', 'fourth arg', '"fifth" arg' ]
-      }
-      let args = JSON.parse( o.output );
-      test.contains( args, expected )
-
-      return null;
-    })
-
-    return con;
-  })
-
-  .then( () =>
-  {
-    test.case = `'path to exec : without space' 'execPATH : has arguments' 'args: empty' 'exec'`
-
-    let con = new _.Consequence().take( null );
-    let o =
-    {
-      execPath : 'node ' +_.strQuote( testAppPathNoSpace ) + ' firstArg secondArg:1 "third arg" \'fourth arg\' `"fifth" arg`',
-      args : null,
-      mode : 'exec',
-      outputPiping : 1,
-      outputCollecting : 1,
-      ready : con
-    }
-    _.process.start( o );
-
-    con.then( () =>
-    {
-      test.identical( o.exitCode, 0 );
-      let expected =
-      {
-        scriptPath : _.path.normalize( testAppPathNoSpace ),
-        map : { secondArg : 1 },
-        scriptArgs : [ 'firstArg', 'secondArg:1', 'third arg', 'fourth arg', '"fifth" arg' ]
-      }
-      let args = JSON.parse( o.output );
-      test.contains( args, expected )
-
-      return null;
-    })
-
-    return con;
-  })
-
-  .then( () =>
-  {
-    test.case = `'path to exec : with space' 'execPATH : only path' 'args: empty' 'exec'`
-
-    let con = new _.Consequence().take( null );
-    let o =
-    {
-      execPath : 'node ' + _.strQuote( testAppPathSpace ),
-      args : null,
-      mode : 'exec',
-      outputPiping : 1,
-      outputCollecting : 1,
-      ready : con
-    }
-    _.process.start( o );
-
-    con.then( () =>
-    {
-      test.identical( o.exitCode, 0 );
-      let expected =
-      {
-        scriptPath : _.path.normalize( testAppPathSpace ),
-        map : {},
-        scriptArgs : []
-      }
-      let args = JSON.parse( o.output );
-      test.contains( args, expected )
-
-      return null;
-    })
-
-    return con;
-  })
-
-  .then( () =>
-  {
-    test.case = `'path to exec : without space' 'execPATH : only path' 'args: empty' 'exec'`
-
-    let con = new _.Consequence().take( null );
-    let o =
-    {
-      execPath : 'node ' + _.strQuote( testAppPathNoSpace ),
-      args : null,
-      mode : 'exec',
-      outputPiping : 1,
-      outputCollecting : 1,
-      ready : con
-    }
-    _.process.start( o );
-
-    con.then( () =>
-    {
-      test.identical( o.exitCode, 0 );
-      let expected =
-      {
-        scriptPath : _.path.normalize( testAppPathNoSpace ),
-        map : {},
-        scriptArgs : []
-      }
-      let args = JSON.parse( o.output );
-      test.contains( args, expected )
-
-      return null;
-    })
-
-    return con;
+    return test.shouldThrowErrorSync( () => _.process.start( o ) );
   })
 
   .then( () =>
@@ -5652,7 +5402,7 @@ function shellArgumentsParsing( test )
     {
       test.identical( o.exitCode, 0 );
       test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-      test.identical( got.map, { secondArg : 1 } )
+      test.identical( got.map, { secondArg : `1 "third arg" 'fourth arg' "fifth" arg` } )
       test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', '\'fourth arg\'', '"fifth" arg' ] )
 
       return null;
@@ -5684,7 +5434,7 @@ function shellArgumentsParsing( test )
     {
       test.identical( o.exitCode, 0 );
       test.identical( got.scriptPath, _.path.normalize( testAppPathNoSpace ) )
-      test.identical( got.map, { secondArg : 1 } )
+      test.identical( got.map, { secondArg : `1 "third arg" 'fourth arg' "fifth" arg` } )
       test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', '\'fourth arg\'', '"fifth" arg' ] )
 
       return null;
@@ -5716,7 +5466,7 @@ function shellArgumentsParsing( test )
     {
       test.identical( o.exitCode, 0 );
       test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-      test.identical( got.map, { secondArg : 1 } )
+      test.identical( got.map, { secondArg : `1 "third arg" 'fourth arg' "fifth" arg` } )
       test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', '"fifth" arg' ] )
 
       return null;
@@ -5748,7 +5498,7 @@ function shellArgumentsParsing( test )
     {
       test.identical( o.exitCode, 0 );
       test.identical( got.scriptPath, _.path.normalize( testAppPathNoSpace ) )
-      test.identical( got.map, { secondArg : 1 } )
+      test.identical( got.map, { secondArg : `1 "third arg" 'fourth arg' "fifth" arg` } )
       test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', '"fifth" arg' ] )
 
       return null;
@@ -5780,7 +5530,7 @@ function shellArgumentsParsing( test )
     {
       test.identical( o.exitCode, 0 );
       test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-      test.identical( got.map, { secondArg : 1 } )
+      test.identical( got.map, { secondArg : `1 "third arg" "fourth arg" "fifth" arg` } )
       test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', 'fourth arg', '"fifth" arg' ] )
 
       return null;
@@ -5812,7 +5562,7 @@ function shellArgumentsParsing( test )
     {
       test.identical( o.exitCode, 0 );
       test.identical( got.scriptPath, _.path.normalize( testAppPathNoSpace ) )
-      test.identical( got.map, { secondArg : 1 } )
+      test.identical( got.map, { secondArg : `1 "third arg" "fourth arg" "fifth" arg` } )
       test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', 'fourth arg', '"fifth" arg' ] )
 
       return null;
@@ -5906,7 +5656,7 @@ function shellArgumentsParsing( test )
       test.identical( o.exitCode, 0 );
       let got = JSON.parse( o.output );
       test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-      test.identical( got.map, { secondArg : 1 } )
+      test.identical( got.map, { secondArg : `1 "third arg" 'fourth arg' "fifth" arg` } )
       test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', '\'fourth arg\'', '"fifth" arg' ] )
       return null;
     })
@@ -5938,7 +5688,7 @@ function shellArgumentsParsing( test )
       test.identical( o.exitCode, 0 );
       let got = JSON.parse( o.output );
       test.identical( got.scriptPath, _.path.normalize( testAppPathNoSpace ) )
-      test.identical( got.map, { secondArg : 1 } )
+      test.identical( got.map, { secondArg : `1 "third arg" 'fourth arg' "fifth" arg` } )
       test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', '\'fourth arg\'', '"fifth" arg' ] )
 
       return null;
@@ -5971,7 +5721,7 @@ function shellArgumentsParsing( test )
       test.identical( o.exitCode, 0 );
       let got = JSON.parse( o.output );
       test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-      test.identical( got.map, { secondArg : 1 } )
+      test.identical( got.map, { secondArg : `1 "third arg" 'fourth arg' "fifth" arg` } )
       test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', '"fifth" arg' ] )
 
       return null;
@@ -6004,7 +5754,7 @@ function shellArgumentsParsing( test )
       test.identical( o.exitCode, 0 );
       let got = JSON.parse( o.output );
       test.identical( got.scriptPath, _.path.normalize( testAppPathNoSpace ) )
-      test.identical( got.map, { secondArg : 1 } )
+      test.identical( got.map, { secondArg : `1 "third arg" 'fourth arg' "fifth" arg` } )
       test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', '"fifth" arg' ] )
 
       return null;
@@ -6020,7 +5770,7 @@ function shellArgumentsParsing( test )
     let con = new _.Consequence().take( null );
     let o =
     {
-      execPath : 'node ' + _.strQuote( testAppPathNoSpace ) + ' firstArg secondArg:1 "third arg" \'fourth arg\' `"fifth" arg`',
+      execPath : 'node ' + _.strQuote( testAppPathNoSpace ) + ' firstArg secondArg:1 "third arg" \'fourth arg\' \'"fifth" arg\'',
       args : null,
       mode : 'shell',
       outputPiping : 1,
@@ -6037,7 +5787,7 @@ function shellArgumentsParsing( test )
       test.identical( o.exitCode, 0 );
       let got = JSON.parse( o.output );
       test.identical( got.scriptPath, _.path.normalize( testAppPathNoSpace ) )
-      test.identical( got.map, { secondArg : 1 } )
+      test.identical( got.map, { secondArg : `1 "third arg" "fourth arg" "fifth" arg` } )
       test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', 'fourth arg', '"fifth" arg' ] )
 
       return null;
@@ -6053,7 +5803,7 @@ function shellArgumentsParsing( test )
     let con = new _.Consequence().take( null );
     let o =
     {
-      execPath : 'node ' + _.strQuote( testAppPathNoSpace ) + ' firstArg secondArg:1 "third arg" \'fourth arg\' `"fifth" arg`',
+      execPath : 'node ' + _.strQuote( testAppPathNoSpace ) + ' firstArg secondArg:1 "third arg" \'fourth arg\' \'"fifth" arg\'',
       args : null,
       mode : 'shell',
       outputPiping : 1,
@@ -6070,7 +5820,7 @@ function shellArgumentsParsing( test )
       test.identical( o.exitCode, 0 );
       let got = JSON.parse( o.output );
       test.identical( got.scriptPath, _.path.normalize( testAppPathNoSpace ) )
-      test.identical( got.map, { secondArg : 1 } )
+      test.identical( got.map, { secondArg : '1 "third arg" "fourth arg" "fifth" arg' } )
       test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', 'fourth arg', '"fifth" arg' ] )
 
       return null;
@@ -6182,95 +5932,67 @@ function shellArgumentsParsing( test )
   })
 
   // xxx
-  // .then( () =>
-  // {
-  //   test.case = `'path to exec : with space' 'execPATH : only path' 'args: willbe args' 'spawn'`
+  .then( () =>
+  {
+    test.case = `'path to exec : with space' 'execPATH : only path' 'args: willbe args' 'spawn'`
+
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ),
+      args : '.imply v:1 ; .each . .resources.list about::name',
+      mode : 'spawn',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      let got = JSON.parse( o.output );
+      test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, { v : 1 } )
+      test.identical( got.scriptArgs, [ '.imply v:1 ; .each . .resources.list about::name' ] )
+
+      return null;
+    })
+
+    return con;
+  })
+
   //
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathSpace ),
-  //     args : '.imply v:1 ; .each . .resources.list about::name',
-  //     mode : 'spawn',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     let got = JSON.parse( o.output );
-  //     test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-  //     test.identical( got.map, { v : 1 } )
-  //     test.identical( got.scriptArgs, [ '.imply v:1 ; .each . .resources.list about::name' ] )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
-  //
-  // .then( () =>
-  // {
-  //   test.case = `'path to exec : with space' 'execPATH : only path' 'args: willbe args' 'shell'`
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathSpace ),
-  //     args : '.imply v:1 ; .each . .resources.list about::name',
-  //     mode : 'shell',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     let got = JSON.parse( o.output );
-  //     test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-  //     test.identical( got.map, { v : 1 } )
-  //     test.identical( got.scriptArgs, [ '.imply v:1 ; .each . .resources.list about::name' ] )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
-  //
-  // .then( () =>
-  // {
-  //   test.case = `'path to exec : with space' 'execPATH : only path' 'args: willbe args' 'exec'`
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathSpace ),
-  //     args : '.imply v:1 ; .each . .resources.list about::name',
-  //     mode : 'exec',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     let got = JSON.parse( o.output );
-  //     test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-  //     test.identical( got.map, { v : 1 } )
-  //     test.identical( got.scriptArgs, [ '.imply v:1 ; .each . .resources.list about::name' ] )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
+
+  .then( () =>
+  {
+    test.case = `'path to exec : with space' 'execPATH : only path' 'args: willbe args' 'shell'`
+
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ),
+      args : '.imply v:1 ; .each . .resources.list about::name',
+      mode : 'shell',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o );
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      let got = JSON.parse( o.output );
+      test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, { v : 1 } )
+      test.identical( got.scriptArgs, [ '.imply v:1 ; .each . .resources.list about::name' ] )
+
+      return null;
+    })
+
+    return con;
+  })
 
   /*  */
 
