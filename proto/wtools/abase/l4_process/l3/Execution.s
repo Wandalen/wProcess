@@ -241,7 +241,7 @@ function start_body( o )
     if( startingDelay )
     o.ready.then( () => _.time.out( startingDelay, () => null ) );
     o.ready.thenGive( single );
-    if( !o.detaching )
+    // if( !o.detaching )
     o.ready.finallyKeep( end );
     return endDeasyncing();
   }
@@ -1015,6 +1015,8 @@ function start_body( o )
     // if( o.when === 'instant' ) /* qqq : ? */
     // o.ready.error( _.err( 'Detached child with pid:', o.process.pid, 'is continuing execution after parent death.' ) );
     _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
+
+    if( o.process )
     o.disconnect();
   }
 
