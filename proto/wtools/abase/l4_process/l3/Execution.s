@@ -47,7 +47,7 @@ function start_pre( routine, args )
   _.assert( arguments.length === 2 );
   _.assert( args.length === 1, 'Expects single argument' );
   // _.assert( _.longHas( [ 'fork', 'exec', 'spawn', 'shell' ], o.mode ) );
-  _.assert( _.longHas( [ 'fork', 'spawn', 'shell' ], o.mode ) );
+  _.assert( _.longHas( [ 'fork', 'spawn', 'shell' ], o.mode ), `Supports mode::[ 'fork', 'spawn', 'shell' ]. Unknown mode ${o.mode}` );
   _.assert( !!o.args || !!o.execPath, 'Expects {-args-} either {-execPath-}' )
   _.assert( o.args === null || _.arrayIs( o.args ) || _.strIs( o.args ) );
   _.assert( o.execPath === null || _.strIs( o.execPath ) || _.strsAreAll( o.execPath ), 'Expects string or strings {-o.execPath-}, but got', _.strType( o.execPath ) );
@@ -310,7 +310,7 @@ function start_body( o )
   function end( err, arg )
   {
     // if( state > 0 )
-    if( o.state !== 'initial' ) /* xxx */
+    if( o.state !== 'initial' ) /* xxx qqq : why if? */
     {
       if( !o.outputAdditive )
       {
@@ -325,6 +325,7 @@ function start_body( o )
       debugger;
       // if( state < 2 )
       if( o.state !== 'terminated' && o.state !== 'failed' )
+      if( !o.exitCode ) /* yyy qqq : cover */
       o.exitCode = null;
       throw _.err( err );
     }
@@ -722,7 +723,7 @@ function start_body( o )
     if( o.dry )
     return;
 
-    // qqq2 xxx yyy : uncomment
+    // qqq2 yyy : uncomment
     // if( o.outputPiping || o.outputCollecting )
     // _.assert( !!o.process.stdout || !!o.process.stderr, 'stdout is not available to collect output or pipe it. Set option::stdio to "pipe"' );
 
@@ -781,7 +782,7 @@ function start_body( o )
 
     this.process.unref();
 
-    // xxx qqq : strange? explain
+    // qqq : strange? explain
     if( !this.detaching || this.process._disconnected )
     return true;
     this.process._disconnected = true;
@@ -1093,7 +1094,7 @@ function start_body( o )
 
     exitCodeSet( -1 );
 
-    if( o.state === 'terminated' || o.state === 'failed' ) /* xxx qqq : move above */
+    if( o.state === 'terminated' || o.state === 'failed' ) /* xxx qqq : move above? */
     return;
 
     o.state = 'failed';
@@ -1349,7 +1350,7 @@ defaults.applyingExitCode = 1;
 defaults.throwingExitCode = 0;
 defaults.outputPiping = 1;
 defaults.stdio = 'inherit';
-// defaults.mode = 'spawn'; // qqq xxx : uncomment after fix of the mode
+// defaults.mode = 'spawn'; // qqq : uncomment after fix of the mode
 
 //
 
