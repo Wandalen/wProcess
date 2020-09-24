@@ -1687,137 +1687,6 @@ function exitCode( test )
 
 //
 
-function startNjsStructure( test )
-{
-  let context = this;
-  let a = test.assetFor( false );
-  let programPath = a.program( program1 );
-
-  a.ready.timeOut( 1000 );
-
-  /* */
-
-  let options =
-  {
-    execPath : programPath,
-    currentPath : a.currentPath,
-    throwingExitCode : 1,
-    inputMirroring : 1,
-    outputCollecting : 1,
-    stdio : 'pipe',
-    sync : 0,
-    deasync : 0,
-    ready : a.ready,
-  }
-
-  _.process.startNjs( options )
-  .then( ( op ) =>
-  {
-    test.identical( op.exitCode, 0 );
-    test.identical( op.output, 'program1\n' );
-
-    let exp2 = _.mapExtend( null, exp );
-    exp2.output = 'program1\n';
-    exp2.exitCode = 0;
-    exp2.exitSignal = null;
-    exp2.disconnect = options.disconnect;
-    exp2.process = options.process;
-    exp2.procedure = options.procedure;
-    exp2.currentPath = _.path.current();
-    exp2.args = [];
-    exp2.interpreterArgs = [];
-    exp2.outputPiping = true;
-    exp2.outputAdditive = true;
-    exp2.state = 'terminated';
-    exp2.terminationReason = 'normal';
-    exp2.fullExecPath = programPath;
-
-    test.identical( options, exp2 );
-    test.identical( !!options.process, true );
-    test.is( _.routineIs( options.disconnect ) );
-    test.is( options.onTerminate === options.ready );
-    test.identical( options.ready.exportString(), 'Consequence::startNjsStructure 0 / 2' );
-    test.identical( options.onTerminate.exportString(), 'Consequence::startNjsStructure 0 / 2' );
-    test.identical( options.onStart.exportString(), 'Consequence:: 1 / 0' );
-
-    return null;
-  });
-
-  var exp =
-  {
-    'execPath' : a.abs( 'program1.js' ),
-    'currentPath' : null,
-    'throwingExitCode' : 1,
-    'inputMirroring' : 1,
-    'outputCollecting' : 1,
-    'sync' : 0,
-    'deasync' : 0,
-    'passingThrough' : 0,
-    'maximumMemory' : 0,
-    'applyingExitCode' : 1,
-    'stdio' : 'pipe',
-    'mode' : 'fork',
-    'args' : null,
-    'interpreterArgs' : '',
-    'when' : 'instant',
-    'dry' : 0,
-    'logger' : null,
-    'ipc' : 0,
-    'env' : null,
-    'detaching' : 0,
-    'windowHiding' : 1,
-    'concurrent' : 0,
-    'timeOut' : null,
-    'returningOptionsArray' : 1,
-    'briefExitCode' : 0,
-    'verbosity' : 2,
-    'outputPrefixing' : 0,
-    'outputPiping' : null,
-    'outputAdditive' : null,
-    'outputDecorating' : 0,
-    'outputDecoratingStdout' : 0,
-    'outputDecoratingStderr' : 0,
-    'outputGraying' : 0,
-    'onStart' : options.onStart,
-    'onTerminate' : options.onTerminate,
-    'ready' : options.ready,
-    'disconnect' : options.disconnect,
-    'process' : options.process,
-    'logger' : options.logger,
-    'state' : 'initial',
-    'terminationReason' : null,
-    'fullExecPath' : null,
-    'output' : null,
-    'exitCode' : null,
-    'exitSignal' : null,
-    'procedure' : null
-
-  }
-  test.identical( options, exp );
-
-  test.identical( options.process, null );
-  test.is( _.routineIs( options.disconnect ) );
-  test.is( options.onTerminate === options.ready );
-  test.identical( options.ready.exportString(), 'Consequence:: 0 / 3' );
-  test.identical( options.onTerminate.exportString(), 'Consequence:: 0 / 3' );
-  test.identical( options.onStart.exportString(), 'Consequence:: 0 / 0' );
-
-  /* */
-
-  return a.ready;
-
-  /* */
-
-  function program1()
-  {
-    let _ = require( toolsPath );
-    console.log( 'program1' );
-  }
-
-}
-
-//
-
 /* qqq : split test cases by / ** / delimeting lines */
 /* qqq : split by mode */
 function shell( test )
@@ -5109,6 +4978,137 @@ function shellDryRun( test )
   /*  */
 
   return ready;
+}
+
+//
+
+function startNjsStructure( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let programPath = a.program( program1 );
+
+  a.ready.timeOut( 1000 );
+
+  /* */
+
+  let options =
+  {
+    execPath : programPath,
+    currentPath : a.currentPath,
+    throwingExitCode : 1,
+    inputMirroring : 1,
+    outputCollecting : 1,
+    stdio : 'pipe',
+    sync : 0,
+    deasync : 0,
+    ready : a.ready,
+  }
+
+  _.process.startNjs( options )
+  .then( ( op ) =>
+  {
+    test.identical( op.exitCode, 0 );
+    test.identical( op.output, 'program1\n' );
+
+    let exp2 = _.mapExtend( null, exp );
+    exp2.output = 'program1\n';
+    exp2.exitCode = 0;
+    exp2.exitSignal = null;
+    exp2.disconnect = options.disconnect;
+    exp2.process = options.process;
+    exp2.procedure = options.procedure;
+    exp2.currentPath = _.path.current();
+    exp2.args = [];
+    exp2.interpreterArgs = [];
+    exp2.outputPiping = true;
+    exp2.outputAdditive = true;
+    exp2.state = 'terminated';
+    exp2.terminationReason = 'normal';
+    exp2.fullExecPath = programPath;
+
+    test.identical( options, exp2 );
+    test.identical( !!options.process, true );
+    test.is( _.routineIs( options.disconnect ) );
+    test.is( options.onTerminate === options.ready );
+    test.identical( options.ready.exportString(), 'Consequence::startNjsStructure 0 / 2' );
+    test.identical( options.onTerminate.exportString(), 'Consequence::startNjsStructure 0 / 2' );
+    test.identical( options.onStart.exportString(), 'Consequence:: 1 / 0' );
+
+    return null;
+  });
+
+  var exp =
+  {
+    'execPath' : a.abs( 'program1.js' ),
+    'currentPath' : null,
+    'throwingExitCode' : 1,
+    'inputMirroring' : 1,
+    'outputCollecting' : 1,
+    'sync' : 0,
+    'deasync' : 0,
+    'passingThrough' : 0,
+    'maximumMemory' : 0,
+    'applyingExitCode' : 1,
+    'stdio' : 'pipe',
+    'mode' : 'fork',
+    'args' : null,
+    'interpreterArgs' : '',
+    'when' : 'instant',
+    'dry' : 0,
+    'logger' : null,
+    'ipc' : 0,
+    'env' : null,
+    'detaching' : 0,
+    'windowHiding' : 1,
+    'concurrent' : 0,
+    'timeOut' : null,
+    'returningOptionsArray' : 1,
+    'briefExitCode' : 0,
+    'verbosity' : 2,
+    'outputPrefixing' : 0,
+    'outputPiping' : null,
+    'outputAdditive' : null,
+    'outputDecorating' : 0,
+    'outputDecoratingStdout' : 0,
+    'outputDecoratingStderr' : 0,
+    'outputGraying' : 0,
+    'onStart' : options.onStart,
+    'onTerminate' : options.onTerminate,
+    'ready' : options.ready,
+    'disconnect' : options.disconnect,
+    'process' : options.process,
+    'logger' : options.logger,
+    'state' : 'initial',
+    'terminationReason' : null,
+    'fullExecPath' : null,
+    'output' : null,
+    'exitCode' : null,
+    'exitSignal' : null,
+    'procedure' : null
+
+  }
+  test.identical( options, exp );
+
+  test.identical( options.process, null );
+  test.is( _.routineIs( options.disconnect ) );
+  test.is( options.onTerminate === options.ready );
+  test.identical( options.ready.exportString(), 'Consequence:: 0 / 3' );
+  test.identical( options.onTerminate.exportString(), 'Consequence:: 0 / 3' );
+  test.identical( options.onStart.exportString(), 'Consequence:: 0 / 0' );
+
+  /* */
+
+  return a.ready;
+
+  /* */
+
+  function program1()
+  {
+    let _ = require( toolsPath );
+    console.log( 'program1' );
+  }
+
 }
 
 //
@@ -19743,8 +19743,6 @@ var Proto =
     exitReason,
     exitCode,
 
-    startNjsStructure,
-
     shell,
     shellSync,
     shellSyncAsync,
@@ -19765,6 +19763,7 @@ var Proto =
 
     shellMultipleSyncDeasync,
     shellDryRun,
+    startNjsStructure,
 
     shellArgsOption,
     shellArgumentsParsing,
@@ -19880,7 +19879,6 @@ _.mapExtend( Self, Proto );
 //
 
 Self = wTestSuite( Self );
-
 if( typeof module !== 'undefined' && !module.parent )
 wTester.test( Self )
 
