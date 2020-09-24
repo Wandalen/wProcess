@@ -51,7 +51,6 @@ function pathsRead( test )
   test.case = 'test';
   var got = _.process.pathsRead();
   test.is( _.arrayIs( got ) );
-  debugger;
   got.forEach( ( path ) => test.is( _.path.isNormalized( path ) ) )
 
 }
