@@ -353,8 +353,9 @@ function pathsRead()
 function systemEntryAdd( o )
 {
 
-  if( !_.mapIs( o ) )
-  o = { appPath : arguments[ 0 ] }
+  // if( !_.mapIs( o ) )
+  // o = { appPath : arguments[ 0 ] }
+  _.assert( _.mapIs( o ), `Expects option map {- o -}, but got: ${_.strType( o )} ` )
 
   _.routineOptions( systemEntryAdd, o );
 
@@ -467,7 +468,7 @@ systemEntryAdd.defaults =
   verbosity : 0,
   entryDirPath : null, // where to add
   appPath : null, // where to run
-  prefix : 'node ', //
+  prefix : 'node ',
   name : null,
   platform : null,
   relative : 1, // whether path is relative, other test routine

@@ -7,7 +7,7 @@ if( typeof module !== 'undefined' )
 {
 
   let _ = require( './../../../../wtools/Tools.s' );
-
+  debugger;
   _.include( 'wTesting' );
   _.include( 'wFiles' );
   _.include( 'wProcessWatcher' );
@@ -30,9 +30,6 @@ function suiteBegin()
   self.suiteTempPath = _.path.tempOpen( _.path.join( __dirname, '../..' ), 'Io' );
   self.assetsOriginalPath = _.path.join( __dirname, '_asset' );
   self.appJsPath = _.path.nativize( _.module.resolve( 'wProcess' ) );
-  // self.assetsOriginalPath = _.path.join( __dirname, '_asset' );
-  // self.toolsPath = _.path.nativize( _.path.resolve( __dirname, '../../../wtools/Tools.s' ) );
-  // self.toolsPathInclude = `let _ = require( '${ _.strEscape( self.toolsPath ) }' )\n`;
 }
 
 //
@@ -68,23 +65,22 @@ function systemEntryAddBasic( test )
   let a = test.assetFor( 'basic' );
 
   a.reflect();
-  console.log( 'PATH: ', _.process.pathsRead() )
+
   a.ready.then( () =>
   {
-    test.case = 'test';
-    // var src =
-    // {
-    // entryDirPath : a.abs( 'dir' ),
-    // appPath : a.abs( 'dir/file.txt' )
-    // entryDirPath : _.process.pathsRead()[ 1 ],
-    // appPath : a.abs( 'dir/file.txt' ),
-    // addingRights : parseInt( '777', 8 )
-    // }
+    test.case = 'basic';
+    var src =
+    {
+      // entryDirPath : _.process.pathsRead()[ 0 ],
+      entryDirPath : a.abs( 'dir' ),
+      appPath : a.abs( 'dir/Index.js' ),
+      allowingNotInPath : 1 //
+    }
     var exp = 1;
-    var got = _.process.systemEntryAdd( a.abs( 'dir/file.txt' ) );
+    var got = _.process.systemEntryAdd( src );
     test.il( got, exp );
-    test.is( a.fileProvider.fileExistsAct( a.abs( 'dir/file' ) ) )
-    test.is( _.objectIs( a.fileProvider.filesRead( a.abs( 'dir/file' ) ) ) )
+    test.is( a.fileProvider.fileExistsAct( a.abs( 'dir/Index' ) ) )
+    test.is( _.objectIs( a.fileProvider.filesRead( a.abs( 'dir/Index' ) ) ) )
 
     return null;
   } );
@@ -95,20 +91,45 @@ function systemEntryAddBasic( test )
   test.shouldThrowErrorSync( () => _.process.systemEntryAdd() )
   test.case = 'extra arguments'
   test.shouldThrowErrorSync( () => _.process.systemEntryAdd( {}, 1 ) )
-  test.case = 'o.entryDirPath not in PATH'
+  test.case = 'o.entryDirPath is not provided'
   test.shouldThrowErrorSync( () => _.process.systemEntryAdd( a.abs( 'dir' ) ) )
+  test.case = 'o.entryDirPath not in the PATH'
+  test.shouldThrowErrorSync( () => _.process.systemEntryAdd({ appPath : a.abs( 'dir/file.txt' ), entryDirPath : a.abs( 'dir' ) }) )
 
   return a.ready;
-
 
 }
 
 //
 
-// function systemEntryAddOptionAllowingMissed( test )
-// {
+function systemEntryAddOptionAllowingMissed( test )
+{
+  let context = this;
+  let a = test.assetFor( 'basic' );
 
-// }
+  a.reflect();
+
+  a.ready.then( () =>
+  {
+    test.case = 'not existing file';
+    var src =
+    {
+      entryDirPath : a.abs( 'dir' ),
+      appPath : a.abs( 'dir/fileNotExists.txt' ),
+      allowingNotInPath : 1, //
+      allowingMissed : 1
+    }
+    var exp = 1;
+    var got = _.process.systemEntryAdd( src );
+    test.il( got, exp );
+    test.is( a.fileProvider.fileExistsAct( a.abs( 'dir/fileNotExists' ) ) )
+    test.is( _.objectIs( a.fileProvider.filesRead( a.abs( 'dir/fileNotExists' ) ) ) )
+
+    return null;
+  } );
+
+  return a.ready;
+}
 
 //
 
@@ -121,7 +142,7 @@ function systemEntryAddOptionAllowingNotInPath( test )
 
   a.ready.then( () =>
   {
-    test.case = 'test';
+    test.case = 'entryDirPath not in PATH, allowingNotInPath : 1';
     var src =
     {
       entryDirPath : a.abs( 'dir' ),
@@ -143,7 +164,9 @@ function systemEntryAddOptionAllowingNotInPath( test )
 //
 
 // function systemEntryAddOptionEntryDirPath( test )
-// {}
+// {
+//
+// }
 
 //
 
@@ -156,7 +179,7 @@ function systemEntryAddOptionForcing( test )
 
   a.ready.then( () =>
   {
-    test.case = 'test';
+    test.case = 'entryDirPath not in PATH, forcing : 1';
     var src =
     {
       entryDirPath : a.abs( 'dir' ),
@@ -168,6 +191,24 @@ function systemEntryAddOptionForcing( test )
     test.il( got, exp );
     test.is( a.fileProvider.fileExistsAct( a.abs( 'dir/file' ) ) )
     test.is( _.objectIs( a.fileProvider.filesRead( a.abs( 'dir/file' ) ) ) )
+
+    return null;
+  } );
+
+  a.ready.then( () =>
+  {
+    test.case = 'entryDirPath not in PATH, appPath doesn\'t exist, forcing : 1';
+    var src =
+    {
+      entryDirPath : a.abs( 'dir' ),
+      appPath : a.abs( 'dir/fileNotExists.txt' ),
+      forcing : 1
+    }
+    var exp = 1;
+    var got = _.process.systemEntryAdd( src );
+    test.il( got, exp );
+    test.is( a.fileProvider.fileExistsAct( a.abs( 'dir/fileNotExists' ) ) )
+    test.is( _.objectIs( a.fileProvider.filesRead( a.abs( 'dir/fileNotExists' ) ) ) )
 
     return null;
   } );
@@ -191,15 +232,13 @@ var Proto =
     suiteTempPath : null,
     assetsOriginalPath : null,
     appJsPath : null,
-    // toolsPath : null,
-    // toolsPathInclude : null,
   },
 
   tests :
   {
     pathsRead,
     systemEntryAddBasic,
-    // systemEntryAddOptionAllowingMissed,
+    systemEntryAddOptionAllowingMissed,
     systemEntryAddOptionAllowingNotInPath,
     // systemEntryAddOptionEntryDirPath,
     systemEntryAddOptionForcing,
