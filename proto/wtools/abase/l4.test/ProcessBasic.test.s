@@ -12892,7 +12892,7 @@ function startDetachingDisconnectedChildExistsBeforeParent( test )
       test.is( _.process.isAlive( o.process.pid ) )
     })
 
-    result = _.time.out( 3000, () =>
+    result = _.time.out( 5000, () =>
     {
       test.identical( o.onTerminate.resourcesCount(), 0 );
       test.is( !_.process.isAlive( o.process.pid ) )
