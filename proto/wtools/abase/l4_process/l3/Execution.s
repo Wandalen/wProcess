@@ -205,8 +205,12 @@ function start_body( o )
   {
     /* qqq2 : use routine _.time.sleep here */
     let arg = o.ready.sync();
+
     try
     {
+      if( o.when.delay )
+      _.time.sleep( o.when.delay );
+
       single();
     }
     catch( err )
