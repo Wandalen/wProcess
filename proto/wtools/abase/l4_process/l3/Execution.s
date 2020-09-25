@@ -872,6 +872,8 @@ function start_body( o )
   {
     _.assert( !!this.process, 'Process is not started. Cant disconnect.' );
 
+    //qqq: check disconnection of regular process, probably close event is not fired
+
     if( this.process.stdout )
     this.process.stdout.destroy();
     if( this.process.stderr )
