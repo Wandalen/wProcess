@@ -10,7 +10,7 @@ Executed:
 
 Not Executed:
 
-  * If detached mode when parent exits before child
+  * In detached mode when parent exits before child
   * If ChildProcess method throws an error on early stage
 
 ### Subroutine `handleError`
