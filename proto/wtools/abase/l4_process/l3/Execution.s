@@ -290,7 +290,6 @@ function start_body( o )
     o.exitSignal = null;
     o.process = null;
     o.procedure = null;
-    o.procedureIsNew = null; /* qqq2 : remove the field( dont introduce local variable neither ) */
     o.ended = false; /* qqq2 : remove the field( dont introduce local variable neither ) */
     Object.preventExtensions( o );
 
@@ -323,7 +322,7 @@ function start_body( o )
 
     debugger;
     // yyy qqq
-    if( o.procedure && o.procedureIsNew )
+    if( o.procedure )
     o.procedure.end();
     if( o.detaching )
     _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
@@ -359,7 +358,7 @@ function start_body( o )
 
     debugger;
     // yyy qqq
-    // if( o.procedure && o.procedureIsNew )
+    // if( o.procedure )
     // o.procedure.end();
     // if( o.detaching )
     // _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
@@ -786,22 +785,18 @@ function start_body( o )
     o.state = 'started';
     o.onStart.take( o );
 
-    if( !o.detaching && !o.sync ) /* qqq2 : why no procedure for sync process?? */
+    /* create procedure */
+
+    if( o.detaching || o.sync ) /* qqq2 : why no procedure for sync process?? */
+    return;
+
+    if( Config.debug )
     {
       let result = _.procedure.find( 'PID:' + o.process.pid );
-      _.assert( result.length === 0 || result.length === 1, 'Only one procedure expected for child process with pid:', o.pid );
-      if( result.length )
-      {
-        o.procedure = result[ 0 ];
-        o.procedureIsNew = false;
-      }
-      else
-      {
-        o.procedure = _.procedure.begin({ _name : 'PID:' + o.process.pid, _object : o.process });
-        o.procedureIsNew = true;
-      }
+      _.assert( result.length === 0, 'No procedure expected for child process with pid:', o.pid );
     }
 
+    o.procedure = _.procedure.begin({ _name : 'PID:' + o.process.pid, _object : o.process });
   }
 
   /* */
