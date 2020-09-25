@@ -354,6 +354,98 @@ function start_body( o )
 
   /* */
 
+  function handleClose( exitCode, exitSignal )
+  {
+
+    debugger;
+    // yyy qqq
+    // if( o.procedure && o.procedureIsNew )
+    // o.procedure.end();
+    // if( o.detaching )
+    // _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
+
+    exitCodeSet( exitCode );
+    o.exitSignal = exitSignal;
+
+    if( o.verbosity >= 5 )
+    {
+      log( ' < Process returned error code ' + exitCode );
+      if( exitCode )
+      log( infoGet() );
+    }
+
+    if( o.state === 'terminated' || o.state === 'error' ) /* xxx qqq : move above? */
+    return;
+
+    o.state = 'terminated';
+
+    if( exitSignal )
+    o.terminationReason = 'signal';
+    else if( exitCode )
+    o.terminationReason = 'code';
+    else
+    o.terminationReason = 'normal';
+
+    if( ( exitSignal || exitCode !== 0 ) && o.throwingExitCode )
+    {
+      let err;
+
+      if( _.numberIs( exitCode ) )
+      err = _.err( 'Process returned exit code', exitCode, '\n', infoGet() );
+      else if( o.reason === 'time' )
+      err = _.err( 'Process timed out, killed by exit signal', exitSignal, '\n', infoGet() );
+      else
+      err = _.err( 'Process was killed by exit signal', exitSignal, '\n', infoGet() );
+
+      if( o.briefExitCode )
+      err = _.errBrief( err );
+
+      if( o.sync && !o.deasync )
+      {
+        throw err;
+      }
+      else
+      {
+        o.onTerminate.error( err );
+      }
+    }
+    else if( !o.sync || o.deasync )
+    {
+      o.onTerminate.take( o );
+    }
+
+  }
+
+  /* */
+
+  function handleError( err )
+  {
+
+    debugger;
+    exitCodeSet( -1 );
+
+    if( o.state === 'terminated' || o.state === 'error' ) /* xxx qqq : move above? */
+    return;
+
+    o.terminationReason = 'error';
+    o.state = 'error';
+
+    err = _.err( 'Error shelling command\n', o.execPath, '\nat', o.currentPath, '\n', err );
+    if( o.verbosity )
+    log( _.errOnce( err ), 1 );
+
+    if( o.sync && !o.deasync )
+    {
+      throw err;
+    }
+    else
+    {
+      o.onTerminate.error( err );
+    }
+  }
+
+  /* */
+
   function multiple()
   {
 
@@ -1038,98 +1130,6 @@ function start_body( o )
     if( stderrOutput.length )
     result += '\n -> Stderr' + '\n' + ' -  ' + _.strLinesIndentation( stderrOutput, ' -  ' ) + '\n -< Stderr';
     return result;
-  }
-
-  /* */
-
-  function handleClose( exitCode, exitSignal )
-  {
-
-    debugger;
-    // yyy qqq
-    // if( o.procedure && o.procedureIsNew )
-    // o.procedure.end();
-    // if( o.detaching )
-    // _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
-
-    exitCodeSet( exitCode );
-    o.exitSignal = exitSignal;
-
-    if( o.verbosity >= 5 )
-    {
-      log( ' < Process returned error code ' + exitCode );
-      if( exitCode )
-      log( infoGet() );
-    }
-
-    if( o.state === 'terminated' || o.state === 'error' ) /* xxx qqq : move above? */
-    return;
-
-    o.state = 'terminated';
-
-    if( exitSignal )
-    o.terminationReason = 'signal';
-    else if( exitCode )
-    o.terminationReason = 'code';
-    else
-    o.terminationReason = 'normal';
-
-    if( ( exitSignal || exitCode !== 0 ) && o.throwingExitCode )
-    {
-      let err;
-
-      if( _.numberIs( exitCode ) )
-      err = _.err( 'Process returned exit code', exitCode, '\n', infoGet() );
-      else if( o.reason === 'time' )
-      err = _.err( 'Process timed out, killed by exit signal', exitSignal, '\n', infoGet() );
-      else
-      err = _.err( 'Process was killed by exit signal', exitSignal, '\n', infoGet() );
-
-      if( o.briefExitCode )
-      err = _.errBrief( err );
-
-      if( o.sync && !o.deasync )
-      {
-        throw err;
-      }
-      else
-      {
-        o.onTerminate.error( err );
-      }
-    }
-    else if( !o.sync || o.deasync )
-    {
-      o.onTerminate.take( o );
-    }
-
-  }
-
-  /* */
-
-  function handleError( err )
-  {
-
-    debugger;
-    exitCodeSet( -1 );
-
-    if( o.state === 'terminated' || o.state === 'error' ) /* xxx qqq : move above? */
-    return;
-
-    o.terminationReason = 'error';
-    o.state = 'error';
-
-    err = _.err( 'Error shelling command\n', o.execPath, '\nat', o.currentPath, '\n', err );
-    if( o.verbosity )
-    log( _.errOnce( err ), 1 );
-
-    if( o.sync && !o.deasync )
-    {
-      throw err;
-    }
-    else
-    {
-      o.onTerminate.error( err );
-    }
   }
 
   /* */

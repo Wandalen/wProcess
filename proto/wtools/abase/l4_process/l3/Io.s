@@ -495,7 +495,7 @@ let Extension =
   pathsRead, /* qqq : cover | aaa : Done. Yevhen S. */
 
   systemEntryAdd, /* qqq : cover */
-  /* xxx qqq : implement entryRemove */
+  /* xxx qqq : implement stetemEntryRemove */
 
 }
 
