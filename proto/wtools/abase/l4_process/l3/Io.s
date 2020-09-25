@@ -374,14 +374,14 @@ function systemEntryAdd( o )
   if( o.allowingNotInPath === null )
   o.allowingNotInPath = !!o.forcing;
 
-  _.assert( _.path.isAbsolute( o.appPath ), () => `Epects absolute path o.appPath, but got ${o.appPath}` );
+  _.assert( _.path.isAbsolute( o.appPath ), () => `Expects absolute path o.appPath, but got ${o.appPath}` );
 
   o.appPath = _.path.normalize( o.appPath );
   if( o.name === null )
   o.name = _.path.name( o.appPath );
 
   _.assert( _.longHasAll( [ 'windows', 'posix' ], o.platform ), `Unknown platforms : ${o.platform.join( ' ' )}` );
-  _.assert( _.path.isAbsolute( o.entryDirPath ), () => `Epects absolute path o.appPath, but got ${o.appPath}` );
+  _.assert( _.path.isAbsolute( o.entryDirPath ), () => `Expects absolute path o.entryDirPath, but got ${o.entryDirPath}` );
   _.assert( _.strIs( o.prefix ) );
   _.sure( _.strDefined( o.entryDirPath ), `Neither {-o.entryDirPath-} is defined nor config has defined path::entry` );
   _.sure( _.fileProvider.isDir( o.entryDirPath ), `Not a dir : ${o.entryDirPath}` );
@@ -473,7 +473,7 @@ systemEntryAdd.defaults =
   relative : 1, // whether path is relative, other test routine
   addingRights : 0o777, // rights to be able to run this file ( all rights )
   allowingMissed : null, // ( test routine ) error if program is absent
-  allowingNotInPath : null, // error if entryDirPath
+  allowingNotInPath : null, // error if entryDirPath is not in PATH
   forcing : 0, // make all to run the routine ( test routine )
 }
 
@@ -492,7 +492,7 @@ let Extension =
   argsReadTo,
   anchor,
 
-  pathsRead, /* qqq : cover */
+  pathsRead, /* qqq : cover | aaa : Done. Yevhen S. */
 
   systemEntryAdd, /* qqq : cover */
   /* xxx qqq : implement entryRemove */
