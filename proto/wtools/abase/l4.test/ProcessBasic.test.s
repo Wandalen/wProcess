@@ -12855,7 +12855,7 @@ function startDetachingDisconnectedChildExistsBeforeParent( test )
 
   ready
 
-  /* Vova qqq xxx: close event is not emitted for disconnected detached child in fork mode*/
+  /* Vova qqq xxx: ProcessWatcher tries to kill detached process that terminates before test ends */
 
   .then( () =>
   {
@@ -12892,7 +12892,7 @@ function startDetachingDisconnectedChildExistsBeforeParent( test )
       test.is( _.process.isAlive( o.process.pid ) )
     })
 
-    result = _.time.out( 3000, () =>
+    result = _.time.out( 5000, () =>
     {
       test.identical( o.onTerminate.resourcesCount(), 0 );
       test.is( !_.process.isAlive( o.process.pid ) )
@@ -12923,6 +12923,16 @@ function startDetachingDisconnectedChildExistsBeforeParent( test )
   }
 
 }
+
+startDetachingDisconnectedChildExistsBeforeParent.description =
+`
+Parent starts child process in detached mode and disconnects it right after start.
+Child process creates test file after 1 second and exits.
+onStart recevies message when process starts.
+onTerminate recevies message when parent disconnects the child process.
+Test routine waits for few seconds and checks if child is alive.
+ProcessWatched should not throw any error.
+`
 
 //
 
@@ -12987,6 +12997,14 @@ function startDetachingChildExistsBeforeParentWaitForTermination( test )
   }
 
 }
+
+//
+
+startDetachingChildExistsBeforeParentWaitForTermination.description =
+`
+Parent starts child process in detached mode.
+Test routine waits until o.onTerminate resolves message about termination of the child process.
+`
 
 //
 
@@ -13067,6 +13085,15 @@ function startDetachingEndCompetitorIsExecuted( test )
   }
 
 }
+
+startDetachingEndCompetitorIsExecuted.description =
+
+`Parent starts child process in detached mode.
+Consequence onStart recevices message when process starts.
+Consequence onTerminate recevices message when process ends.
+o.ended is false when onStart callback is executed.
+o.ended is true when onTerminate callback is executed.
+`
 
 //
 
@@ -14630,6 +14657,14 @@ function noEndBug1( test )
   }
 
 }
+
+noEndBug1.description =
+`
+Parent starts child process in detached mode.
+ChildProcess throws an error on spawn.
+onStart receives error message.
+Parent should not try to disconnect the child.
+`
 
 //
 

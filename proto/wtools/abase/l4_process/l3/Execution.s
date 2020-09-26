@@ -205,8 +205,12 @@ function start_body( o )
   {
     /* qqq2 : use routine _.time.sleep here */
     let arg = o.ready.sync();
+
     try
     {
+      if( o.when.delay )
+      _.time.sleep( o.when.delay );
+
       single();
     }
     catch( err )
@@ -221,8 +225,11 @@ function start_body( o )
     if( o.when.delay )
     o.ready.then( () => _.time.out( o.when.delay, () => null ) );
     o.ready.thenGive( single );
-    // if( !o.detaching )
+    if( o.detaching )
+    o.onTerminate.finally( end );
+    else
     o.ready.finallyKeep( end );
+
     return endDeasyncing();
   }
 
@@ -290,7 +297,6 @@ function start_body( o )
     o.exitSignal = null;
     o.process = null;
     o.procedure = null;
-    o.procedureIsNew = null; /* qqq2 : remove the field( dont introduce local variable neither ) */
     o.ended = false; /* qqq2 : remove the field( dont introduce local variable neither ) */
     Object.preventExtensions( o );
 
@@ -323,7 +329,7 @@ function start_body( o )
 
     debugger;
     // yyy qqq
-    if( o.procedure && o.procedureIsNew )
+    if( o.procedure )
     o.procedure.end();
     if( o.detaching )
     _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
@@ -359,7 +365,7 @@ function start_body( o )
 
     debugger;
     // yyy qqq
-    // if( o.procedure && o.procedureIsNew )
+    // if( o.procedure )
     // o.procedure.end();
     // if( o.detaching )
     // _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
@@ -786,22 +792,18 @@ function start_body( o )
     o.state = 'started';
     o.onStart.take( o );
 
-    if( !o.detaching && !o.sync ) /* qqq2 : why no procedure for sync process?? */
+    /* create procedure */
+
+    if( o.sync ) /* qqq2 : why no procedure for sync process?? */
+    return;
+
+    if( Config.debug )
     {
       let result = _.procedure.find( 'PID:' + o.process.pid );
-      _.assert( result.length === 0 || result.length === 1, 'Only one procedure expected for child process with pid:', o.pid );
-      if( result.length )
-      {
-        o.procedure = result[ 0 ];
-        o.procedureIsNew = false;
-      }
-      else
-      {
-        o.procedure = _.procedure.begin({ _name : 'PID:' + o.process.pid, _object : o.process });
-        o.procedureIsNew = true;
-      }
+      _.assert( result.length === 0, 'No procedure expected for child process with pid:', o.pid );
     }
 
+    o.procedure = _.procedure.begin({ _name : 'PID:' + o.process.pid, _object : o.process });
   }
 
   /* */
@@ -872,8 +874,9 @@ function start_body( o )
 
   function disconnect()
   {
-
     _.assert( !!this.process, 'Process is not started. Cant disconnect.' );
+
+    //qqq: check disconnection of regular process, probably close event is not fired
 
     if( this.process.stdout )
     this.process.stdout.destroy();
