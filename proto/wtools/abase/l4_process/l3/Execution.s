@@ -146,6 +146,8 @@ function start_body( o )
   preform
   endDeasyncing
   end
+  handleClose
+  handleError
   multiple
   single
   form
@@ -164,8 +166,6 @@ function start_body( o )
   onProcedureTerminationBegin
   exitCodeSet
   infoGet
-  handleClose
-  handleError
   handleStderr
   handleStdout
   log
@@ -291,7 +291,7 @@ function start_body( o )
     o.process = null;
     o.procedure = null;
     o.procedureIsNew = null; /* qqq2 : remove the field( dont introduce local variable neither ) */
-    o.ended = false; /* qqq2 : remove the field( dont introduce local variable neither ) */
+    o.ended = false;
     Object.preventExtensions( o );
 
   }
@@ -321,7 +321,7 @@ function start_body( o )
   function end( err, arg )
   {
 
-    debugger;
+    // debugger;
     // yyy qqq
     if( o.procedure && o.procedureIsNew )
     o.procedure.end();
@@ -357,7 +357,7 @@ function start_body( o )
   function handleClose( exitCode, exitSignal )
   {
 
-    debugger;
+    // debugger;
     // yyy qqq
     // if( o.procedure && o.procedureIsNew )
     // o.procedure.end();
@@ -421,7 +421,7 @@ function start_body( o )
   function handleError( err )
   {
 
-    debugger;
+    // debugger;
     exitCodeSet( -1 );
 
     if( o.state === 'terminated' || o.state === 'error' ) /* xxx qqq : move above? */
@@ -2262,7 +2262,7 @@ function terminate( o )
   }
   catch( err )
   {
-    handleError( err );
+    handleError( err ); /* qqq2 : should return consequence! */
   }
 
   /* */
