@@ -206,7 +206,6 @@ function start_body( o )
   {
     /* qqq2 : use routine _.time.sleep here */
     let arg = o.ready.sync();
-
     try
     {
       if( o.when.delay )
@@ -1139,7 +1138,7 @@ function start_body( o )
     // debugger;
     if( o.exitCode )
     return;
-    debugger
+    // debugger;
     o.exitCode = exitCode;
     exitCode = _.numberIs( exitCode ) ? exitCode : -1;
     if( o.applyingExitCode )
@@ -1250,7 +1249,7 @@ function start_body( o )
 
 }
 
-start_body.defaults = /* qqq : split on _.process.start(), _.process.startBasic() */
+start_body.defaults = /* qqq : split on _.process.start(), _.process.startSingle() */
 {
 
   execPath : null,
