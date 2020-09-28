@@ -13552,20 +13552,6 @@ function startNjsDetachingTrivial( test )
         o.disconnect();
       })
     })
-
-    o.onTerminate.finally( ( err, got ) =>
-    {
-      if( err )
-      {
-        _.errAttend( err );
-        _.errLogOnce( err );
-      }
-      else
-      {
-        throw _.err( 'Detached child process terminated before parent' );
-      }
-      return null;
-    })
   }
 
   function testAppChild()
