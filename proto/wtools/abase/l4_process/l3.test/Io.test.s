@@ -64,13 +64,13 @@ function processArgsBase( test )
     process.argv = process.argv.slice( 2 );
 
     var got = _.process.args({ caching : 0 });
-    _.fileProvider.fileWrite( a.abs( 'got' ), JSON.stringify( got ) )
+    a.fileProvider.fileWrite( a.abs( 'got' ), JSON.stringify( got ) )
   }
 
-  var toolsPath = _.path.nativize( _.path.resolve( __dirname, '../../../wtools/Tools.s' ) );
+  var toolsPath = a.path.nativize( _.path.resolve( __dirname, '../../../wtools/Tools.s' ) );
   var toolsPathInclude = `let _ = require( '${ _.strEscape( toolsPath ) }' )\n`;
 
-  let testAppPath = a.fileProvider.path.nativize( a.abs( routinePath, 'testApp.js' ) );
+  let testAppPath = a.path.nativize( a.abs( routinePath, 'testApp.js' ) );
   let testAppCode = toolsPathInclude + testApp.toString() + '\ntestApp();';
   a.fileProvider.fileWrite( testAppPath, testAppCode );
 
@@ -88,9 +88,9 @@ function processArgsBase( test )
   // let temp = a.shell
 
   debugger
-  let filePath = a.abs( 'got' );
-  let interpreterPath = _.path.normalize( process.argv[ 0 ] );
-  let scriptPath = _.path.normalize( testAppPath );
+  let filePath = a.abs( routinePath, 'got' );
+  let interpreterPath = a.path.normalize( process.argv[ 0 ] );
+  let scriptPath = a.path.normalize( testAppPath );
 
   /* */
 
