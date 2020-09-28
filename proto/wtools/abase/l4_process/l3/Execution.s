@@ -184,6 +184,7 @@ function start_body( o )
   _.assert( !o.detaching || _.longHas( [ 'fork', 'spawn', 'shell' ],  o.mode ), `Unsupported mode: ${o.mode} for process detaching` );
   _.assert( o.onStart === null || _.consequenceIs( o.onStart ) );
   _.assert( o.onTerminate === null || _.consequenceIs( o.onTerminate ) );
+  _.assert( o.onDisconnect === null || _.consequenceIs( o.onDisconnect ) );
   _.assert( !o.ipc || _.longHas( [ 'fork', 'spawn' ], o.mode ), `Mode: ${o.mode} doesn't support inter process communication.` );
 
   let stderrOutput = '';
@@ -225,10 +226,21 @@ function start_body( o )
     if( o.when.delay )
     o.ready.then( () => _.time.out( o.when.delay, () => null ) );
     o.ready.thenGive( single );
-    if( o.detaching )
+
     o.onTerminate.finally( end );
-    else
-    o.ready.finallyKeep( end );
+
+    /* In detached mode competitor `end` waits for message only if user added own comperitor(s) to `onTerminate` */
+    if( o.detaching )
+    {
+      let competitors = o.onTerminate.competitorsGet();
+      let competitorForEnd = competitors[ competitors.length - 1 ];
+      if( competitorForEnd )
+      {
+        _.assert( competitorForEnd.competitorRoutine === end );
+        competitorForEnd.procedure.end();
+        competitorForEnd.procedure = null;
+      }
+    }
 
     return endDeasyncing();
   }
@@ -251,6 +263,9 @@ function start_body( o )
       if( o.detaching )
       o.onTerminate = new _.Consequence();
     }
+
+    if( o.onDisconnect === null )
+    o.onDisconnect = new _.Consequence();
 
     if( o.detaching )
     _.assert( o.ready === o.onStart && o.ready !== o.onTerminate );
@@ -298,6 +313,9 @@ function start_body( o )
     o.process = null;
     o.procedure = null;
     o.ended = false;
+    o.terminationBeginEnabled = false;
+    o.error = null;
+
     Object.preventExtensions( o );
 
   }
@@ -308,17 +326,11 @@ function start_body( o )
   {
     if( o.deasync )
     {
+      o.ready.deasync();
       if( o.sync )
-      {
-        o.ready.deasync();
-        return o.ready.sync();
-      }
-      else
-      {
-        o.ready.deasync();
-        return o.ready;
-      }
+      return o.ready.sync();
     }
+
     return o.ready;
   }
 
@@ -330,9 +342,15 @@ function start_body( o )
     // debugger;
     // yyy qqq
     if( o.procedure )
+    if( o.procedure.isAlive() )
     o.procedure.end();
+
     if( o.detaching )
-    _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
+    if( o.terminationBeginEnabled )
+    {
+      _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
+      o.terminationBeginEnabled = false;
+    }
 
     o.ended = true;
 
@@ -346,15 +364,21 @@ function start_body( o )
         o.logger.error( decoratedErrorOutput );
       }
     }
+
+    if( err )
+    o.error = err;
+
+    Object.freeze( o );
+
     if( err )
     {
       debugger;
-      o.state = 'error';
-      if( o.state !== 'terminated' && o.state !== 'error' )
+      if( o.state !== 'terminated' && !o.error )
       if( !o.exitCode ) /* yyy qqq : cover */
       o.exitCode = null; /* xxx qqq : why? */
       throw _.err( err );
     }
+
     return arg;
   }
 
@@ -363,7 +387,7 @@ function start_body( o )
   function handleClose( exitCode, exitSignal )
   {
 
-    if( o.state === 'terminated' || o.state === 'error' ) /* xxx qqq : move above? */
+    if( o.state === 'terminated' || o.error ) /* xxx qqq : move above? */
     return;
 
     // debugger;
@@ -394,25 +418,24 @@ function start_body( o )
 
     if( ( exitSignal || exitCode !== 0 ) && o.throwingExitCode )
     {
-      let err;
 
       if( _.numberIs( exitCode ) )
-      err = _.err( 'Process returned exit code', exitCode, '\n', infoGet() );
+      o.error = _.err( 'Process returned exit code', exitCode, '\n', infoGet() );
       else if( o.reason === 'time' )
-      err = _.err( 'Process timed out, killed by exit signal', exitSignal, '\n', infoGet() );
+      o.error = _.err( 'Process timed out, killed by exit signal', exitSignal, '\n', infoGet() );
       else
-      err = _.err( 'Process was killed by exit signal', exitSignal, '\n', infoGet() );
+      o.error = _.err( 'Process was killed by exit signal', exitSignal, '\n', infoGet() );
 
       if( o.briefExitCode )
-      err = _.errBrief( err );
+      o.error = _.errBrief( o.error );
 
       if( o.sync && !o.deasync )
       {
-        throw err;
+        throw o.error;
       }
       else
       {
-        o.onTerminate.error( err );
+        o.onTerminate.error( o.error );
       }
     }
     else if( !o.sync || o.deasync )
@@ -430,23 +453,22 @@ function start_body( o )
     // debugger;
     exitCodeSet( -1 );
 
-    if( o.state === 'terminated' || o.state === 'error' ) /* xxx qqq : move above? */
+    if( o.state === 'terminated' || o.error ) /* xxx qqq : move above? */
     return;
 
     o.terminationReason = 'error';
-    o.state = 'error';
 
-    err = _.err( 'Error shelling command\n', o.execPath, '\nat', o.currentPath, '\n', err );
+    o.err = _.err( 'Error shelling command\n', o.execPath, '\nat', o.currentPath, '\n', err );
     if( o.verbosity )
-    log( _.errOnce( err ), 1 );
+    log( _.errOnce( o.err ), 1 );
 
     if( o.sync && !o.deasync )
     {
-      throw err;
+      throw o.err;
     }
     else
     {
-      o.onTerminate.error( err );
+      o.onTerminate.error( o.err );
     }
   }
 
@@ -553,11 +575,9 @@ function start_body( o )
       }
       else
       {
-        if( !o.detaching )
-        o.onStart.error( err );
         err = _.err( err );
         log( _.errOnce( err ), 1 );
-        o.ready.error( err ); /* qqq : should be no o.ready */
+        o.onTerminate.error( err );
       }
     }
 
@@ -659,6 +679,7 @@ function start_body( o )
     if( o.detaching )
     {
       _.procedure.on( 'terminationBegin', onProcedureTerminationBegin );
+      o.terminationBeginEnabled = true;
     }
 
   }
@@ -815,7 +836,7 @@ function start_body( o )
     if( !o.sync || o.deasync )
     _.time.begin( o.timeOut, () =>
     {
-      if( o.state === 'terminated' || o.state === 'error' )
+      if( o.state === 'terminated' || o.error )
       return;
       o.terminationReason = 'time';
       o.process.kill( 'SIGTERM' ); /* qqq : need to catch event when process is really down */
@@ -891,12 +912,25 @@ function start_body( o )
 
     this.process.unref();
 
+    if( this.procedure )
+    if( this.procedure.isAlive() )
+    this.procedure.end();
+
     // qqq : strange? explain
     if( !this.detaching || this.process._disconnected )
     return true;
+
     this.process._disconnected = true;
+    this.state = 'disconnected';
+
+    if( this.terminationBeginEnabled )
+    {
+      _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
+      this.terminationBeginEnabled = false;
+    }
+
     if( _.process.isAlive( this.process.pid ) )
-    this.onTerminate.error( _._err({ args : [ 'This process was disconnected' ], reason : 'disconnected' }) );
+    this.onDisconnect.take( this );
 
     return true;
   }
@@ -1094,10 +1128,6 @@ function start_body( o )
 
   function onProcedureTerminationBegin()
   {
-    // if( o.when === 'instant' ) /* qqq : ? */
-    // o.ready.error( _.err( 'Detached child with pid:', o.process.pid, 'is continuing execution after parent death.' ) );
-    // _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
-
     o.disconnect();
   }
 
@@ -1241,6 +1271,7 @@ start_body.defaults = /* qqq : split on _.process.start(), _.process.startBasic(
   ready : null,
   onStart : null,
   onTerminate : null,
+  onDisconnect : null,
 
   env : null,
   detaching : 0,

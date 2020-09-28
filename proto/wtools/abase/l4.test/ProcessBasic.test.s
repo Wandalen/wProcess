@@ -14114,17 +14114,7 @@ function startOnStart( test )
     test.notIdentical( o.onStart, result );
     test.is( _.consequenceIs( o.onStart ) )
 
-    o.onStart.finally( ( err, got ) =>
-    {
-      test.is( _.errIs( err ) );
-      test.identical( got, undefined );
-      test.identical( o.process, null);
-      return null;
-    })
-
-    result = test.shouldThrowErrorAsync( result )
-
-    return _.Consequence.AndTake_( o.onStart, result );
+    return test.shouldThrowErrorAsync( o.onTerminate );
   })
 
   /* */
@@ -14146,11 +14136,7 @@ function startOnStart( test )
     test.notIdentical( o.onStart, result );
     test.is( _.consequenceIs( o.onStart ) )
 
-    result = test.shouldThrowErrorAsync( result )
-
-    let con = _.Consequence.AndTake_( o.onStart, result );
-
-    return test.shouldThrowErrorAsync( con ) ;
+    return test.shouldThrowErrorAsync( o.onTerminate );
   })
 
   /* */
@@ -14202,7 +14188,7 @@ function startOnStart( test )
     test.is( o.onStart === result );
     test.is( _.consequenceIs( o.onStart ) )
 
-    result = test.shouldThrowErrorAsync( o.onStart );
+    result = test.shouldThrowErrorAsync( o.onTerminate );
 
     result.then( () => _.time.out( 2000 ) )
     result.then( () =>
@@ -14230,38 +14216,39 @@ function startOnStart( test )
 
     let result = _.process.start( o );
 
-    o.disconnect();
-
     test.identical( o.onStart, result );
-    test.is( _.consequenceIs( o.onStart ) )
 
     o.onStart.finally( ( err, got ) =>
     {
       test.identical( err, undefined );
       test.identical( got, o );
       test.is( _.process.isAlive( o.process.pid ) )
+      test.identical( o.state, 'started' );
+      o.disconnect();
       return null;
     })
 
-    o.onTerminate.finallyGive( ( err, got ) =>
+    o.onDisconnect.finally( ( err, got ) =>
     {
-      _.errAttend( err );
-      test.is( _.errIs( err ) );
-      test.identical( got, undefined );
-      test.is( _.process.isAlive( o.process.pid ) )
+      test.identical( err, undefined );
+      test.identical( got, o );
+      test.identical( o.state, 'disconnected' );
+      test.is( _.process.isAlive( o.process.pid ) );
+      return null;
     })
 
     o.onTerminate.finally( ( err, got ) =>
     {
       test.identical( err, undefined );
       test.identical( got, o );
+      test.identical( o.state, 'terminated' );
       test.is( !_.process.isAlive( o.process.pid ) )
       test.identical( got.exitCode, 0 );
       test.identical( got.exitSignal, null );
       return null;
     })
 
-    return _.Consequence.AndTake_( o.onStart, o.onTerminate );
+    return _.Consequence.AndTake_( o.onStart, o.onDisconnect, o.onTerminate );
   })
 
   /* Vova qqq xxx: close event is not emitted for disconnected detached child in fork mode*/
@@ -14280,35 +14267,37 @@ function startOnStart( test )
 
     let result = _.process.start( o );
 
-    o.disconnect();
-
     test.identical( o.onStart, result );
-    test.is( _.consequenceIs( o.onStart ) )
 
     o.onStart.finally( ( err, got ) =>
     {
       test.identical( err, undefined );
       test.identical( got, o );
+      test.identical( o.state, 'started' )
       test.is( _.process.isAlive( o.process.pid ) )
+      o.disconnect();
       return null;
     })
 
-    o.onTerminate.finallyGive( ( err, got ) =>
+    o.onDisconnect.finally( ( err, got ) =>
     {
-      _.errAttend( err );
-      test.is( _.errIs( err ) );
-      test.identical( got, undefined );
+      test.identical( err, undefined );
+      test.identical( got, o );
+      test.identical( o.state, 'disconnected' )
       test.is( _.process.isAlive( o.process.pid ) )
+      return null;
     })
 
     result = _.time.out( 3000, () =>
     {
-      test.identical( o.onTerminate.resourcesCount(), 0 );
       test.is( !_.process.isAlive( o.process.pid ) )
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, null );
+      test.identical( o.onTerminate.resourcesCount(), 0 );
       return null;
     })
 
-    return _.Consequence.AndTake_( o.onStart, result );
+    return _.Consequence.AndTake_( o.onStart, o.onDisconnect, result );
   })
 
   /* */
