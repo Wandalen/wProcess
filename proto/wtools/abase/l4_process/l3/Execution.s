@@ -1608,13 +1608,6 @@ function startAfterDeath_body( o )
     this.take( err, got );
   })
 
-  o2.onTerminate.catchGive( function( err )
-  {
-    _.errAttend( err );
-    if( err.reason !== 'disconnected' )
-    this.error( err );
-  })
-
   return result;
 
   /* */
