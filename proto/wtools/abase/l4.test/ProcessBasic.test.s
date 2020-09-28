@@ -10401,7 +10401,7 @@ function shellProcedureExists( test )
       test.identical( procedure[ 0 ].object(), o.process );
       test.identical( o.procedure, procedure[ 0 ] );
       debugger
-      test.is( _.strHas( o.procedure._sourcePath, 'ProcessWatcher.s' ) );
+      test.is( _.strHas( o.procedure._sourcePath, 'Execution.s' ) );
       return null;
     })
   })
