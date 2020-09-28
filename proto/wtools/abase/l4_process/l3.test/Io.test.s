@@ -28,7 +28,8 @@ function suiteBegin()
   var self = this;
   self.suiteTempPath = _.path.tempOpen( _.path.join( __dirname, '../..' ), 'Io' );
   self.assetsOriginalPath = _.path.join( __dirname, '_asset' );
-  self.appJsPath = _.path.nativize( _.module.resolve( 'wProcess' ) );
+  // self.toolsPath = _.path.nativize( _.path.resolve( __dirname, '../../../wtools/Tools.s' ) );
+  // self.appJsPath = _.path.nativize( _.module.resolve( 'wProcess' ) );
 }
 
 //
@@ -49,32 +50,11 @@ function processArgsBase( test )
 {
   let context = this;
   let a = test.assetFor( 'process' );
-  var toolsPath = a.path.nativize( a.path.resolve( __dirname, '../../../../wtools/Tools.s' ) );
-  var toolsPathInclude = `let _ = require( '${ _.strEscape( toolsPath ) }' )\n`;
-
-  a.reflect();
-
-  function testApp()
-  {
-    _.include( 'wProcess' );
-    _.include( 'wStringsExtra' )
-    _.include( 'wFiles' )
-
-    if( process.env.ignoreFirstTwoArgv )
-    process.argv = process.argv.slice( 2 );
-
-    var got = _.process.args({ caching : 0 });
-    _.fileProvider.fileWrite( _.path.join( __dirname, 'got' ), JSON.stringify( got ) )
-  }
-
-  let testAppPath = a.path.nativize( a.abs( a.routinePath, 'testApp.js' ) );
-  let testAppCode = toolsPathInclude + testApp.toString() + '\ntestApp();';
-
-  a.fileProvider.fileWrite( testAppPath, testAppCode );
+  let programPath = a.program( testApp );
 
   let shell = _.process.starter
   ({
-    execPath : 'node ' + testAppPath,
+    execPath : 'node ' + programPath,
     mode : 'spawn',
     throwingExitCode : 0,
     ready : a.ready
@@ -82,7 +62,7 @@ function processArgsBase( test )
 
   let filePath = a.abs( a.routinePath, 'got' );
   let interpreterPath = a.path.normalize( process.argv[ 0 ] );
-  let scriptPath = a.path.normalize( testAppPath );
+  let scriptPath = a.path.normalize( programPath );
 
   /* */
 
@@ -131,7 +111,25 @@ function processArgsBase( test )
     test.contains( got, expected );
     return null;
   })
+
+
   return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wStringsExtra' )
+    _.include( 'wFiles' )
+
+    if( process.env.ignoreFirstTwoArgv )
+    process.argv = process.argv.slice( 2 );
+
+    var got = _.process.args({ caching : 0 });
+    _.fileProvider.fileWrite( _.path.join( __dirname, 'got' ), JSON.stringify( got ) )
+  }
 }
 
 //
