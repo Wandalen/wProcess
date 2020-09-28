@@ -14260,7 +14260,7 @@ function startOnStartWithDelay( test )
     stdio : 'pipe',
     sync : 0,
     deasync : 0,
-    onStart : a.ready,
+    ready : a.ready,
   }
 
   _.process.start( options );
@@ -14285,11 +14285,11 @@ function startOnStartWithDelay( test )
   {
     // _.errAttend( err );
     // test.is( _.errIs( err ) );
-    // test.identical( options.output, 'program1\n' );
-    // test.identical( options.exitCode, null );
-    // test.identical( options.exitSignal, 'SIGINT' );
-    // test.identical( options.ended, true );
-    // test.identical( options.terminationReason, 'signal' );
+    test.identical( op.output, 'program1\n' );
+    test.identical( op.exitCode, 0 );
+    test.identical( op.exitSignal, null );
+    test.identical( op.ended, true );
+    test.identical( op.terminationReason, 'normal' );
     return null;
   });
 
@@ -19562,10 +19562,10 @@ var Proto =
   tests :
   {
 
-    // processArgsPropertiesBase,
-    // processArgsMultipleCommands,
-    // processArgsPaths,
-    // processArgsWithSpace,
+    processArgsPropertiesBase,
+    processArgsMultipleCommands,
+    processArgsPaths,
+    processArgsWithSpace,
 
     processOnExitEvent,
     processOffExitEvent,
