@@ -11505,13 +11505,6 @@ function startDetachingModeSpawnTerminationBegin( test )
 
     _.process.start( o );
 
-    o.onTerminate.catch( ( err ) =>
-    {
-      _.errAttend( err );
-      _.errLogOnce( err );
-      return null;
-    })
-
     process.send({ childPid : o.process.pid });
 
     _.time.out( 1000, () =>
