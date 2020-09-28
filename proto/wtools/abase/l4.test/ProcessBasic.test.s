@@ -118,58 +118,18 @@ function testAppShell()
 
 function processOnExitEvent( test )
 {
+
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
-  var commonDefaults =
-  {
-    outputPiping : 1,
-    outputCollecting : 1,
-    applyingExitCode : 0,
-    throwingExitCode : 1,
-    sync : 1
-  }
-
-  function testApp()
-  {
-    _.include( 'wProcess' );
-    _.include( 'wStringsExtra' )
-
-    var args = _.process.args();
-
-    _.process.on( 'exit', ( arg ) =>
-    {
-      console.log( 'processOnExit:', arg );
-    });
-
-    _.time.out( 1000, () =>
-    {
-      console.log( 'timeOut handler executed' );
-      return 1;
-    })
-
-    if( args.map.terminate )
-    process.exit( 'SIGINT' );
-
-  }
+  let a = test.assetFor( false );
+  let programPath = a.program( testApp );
 
   /* */
 
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
-  var expectedOutput = testAppPath + '\n';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-
-  var o;
-  var con = new _.Consequence().take( null )
-
-
-  /*  */
-
-  .thenKeep( () =>
+  a.ready.thenKeep( () =>
   {
     var o =
     {
-      execPath :  'node ' + testAppPath,
+      execPath :  'node ' + programPath,
       mode : 'spawn',
       stdio : 'pipe',
       sync : 0,
@@ -192,7 +152,7 @@ function processOnExitEvent( test )
   {
     var o =
     {
-      execPath :  'node ' + testAppPath + ' terminate : 1',
+      execPath :  'node ' + programPath + ' terminate : 1',
       mode : 'spawn',
       stdio : 'pipe',
       sync : 0,
@@ -211,7 +171,34 @@ function processOnExitEvent( test )
     });
   })
 
-  return con;
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+
+    _.include( 'wProcess' );
+    _.include( 'wStringsExtra' )
+
+    var args = _.process.args();
+
+    _.process.on( 'exit', ( arg ) =>
+    {
+      console.log( 'processOnExit:', arg );
+    });
+
+    _.time.out( 1000, () =>
+    {
+      console.log( 'timeOut handler executed' );
+      return 1;
+    })
+
+    if( args.map.terminate )
+    process.exit( 'SIGINT' );
+
+  }
 }
 
 //
