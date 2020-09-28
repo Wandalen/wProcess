@@ -88,6 +88,8 @@ function testApp()
 
 function testAppShell()
 {
+  let _ = require( toolsPath );
+
   let process = _global_.process;
 
   _.include( 'wProcess' );
@@ -420,7 +422,9 @@ function exitCode( test )
 function shell( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
+  let a = test.assetFor( false );
+  let programPath = a.program( testAppShell );
+
   var commonDefaults =
   {
     outputPiping : 1,
@@ -431,22 +435,20 @@ function shell( test )
 
   /* */
 
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = context.toolsPathInclude + testAppShell.toString() + '\ntestAppShell();';
-  var expectedOutput = testAppPath + '\n';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
+  var expectedOutput = programPath + '\n';
 
   var o;
-  var con = new _.Consequence().take( null );
 
-  con
+  /* */
+
+  a.ready
   .thenKeep( function()
   {
     test.case = 'mode : spawn';
 
     o =
     {
-      execPath :  'node ' + testAppPath,
+      execPath :  'node ' + programPath,
       mode : 'spawn',
       stdio : 'pipe'
     }
@@ -483,13 +485,97 @@ function shell( test )
     })
   })
 
+  /* */
+
+  .thenKeep( function( arg )
+  {
+    test.case = 'spawn, stop process using SIGINT';
+
+    o =
+    {
+      execPath :  'node ' + programPath + ' loop : 1',
+      mode : 'spawn',
+      stdio : 'pipe',
+      throwingExitCode : 0
+    }
+
+    var options = _.mapSupplement( {}, o, commonDefaults );
+
+    var shell = _.process.start( options );
+    _.time.out( 500, () =>
+    {
+      test.identical( options.process.killed, false );
+      options.process.kill( 'SIGINT' );
+      return null;
+    })
+    shell.finally(function()
+    {
+      test.identical( options.process.killed, true );
+      test.identical( options.exitCode, null ); /* qqq2 : near each such test check should be following checks */
+      test.identical( options.exitSignal, 'SIGINT' );
+      test.identical( options.process.exitCode, null );
+      test.identical( options.process.signalCode, 'SIGINT' );
+      return null;
+    })
+
+    return shell;
+  })
+
+  /* */
+
+  .thenKeep( function( arg )
+  {
+    test.case = 'spawn, return good code';
+
+    o =
+    {
+      execPath :  'node ' + programPath + ' exitWithCode : 0',
+      mode : 'spawn',
+      stdio : 'pipe'
+    }
+
+    var options = _.mapSupplement( {}, o, commonDefaults );
+
+    return test.mustNotThrowError( _.process.start( options ) )
+    .thenKeep( () =>
+    {
+      test.identical( options.exitCode, 0 );
+      return null;
+    });
+  })
+
+  /* */
+
+  .thenKeep( function( arg )
+  {
+    test.case = 'spawn, return bad code';
+
+    o =
+    {
+      execPath :  'node ' + programPath + ' exitWithCode : 1',
+      mode : 'spawn',
+      stdio : 'pipe'
+    }
+
+    var options = _.mapSupplement( {}, o, commonDefaults );
+
+    return test.shouldThrowErrorOfAnyKind( _.process.start( options ) )
+    .thenKeep( () =>
+    {
+      test.identical( options.exitCode, 1 );
+      return null;
+    });
+  })
+
+  /* - */
+
   .thenKeep( function( arg )
   {
     test.case = 'mode : shell';
 
     o =
     {
-      execPath :  'node ' + testAppPath,
+      execPath :  'node ' + programPath,
       mode : 'shell',
       stdio : 'pipe'
     }
@@ -526,39 +612,7 @@ function shell( test )
     })
   })
 
-  .thenKeep( function( arg )
-  {
-    test.case = 'spawn, stop process using SIGINT';
-
-    o =
-    {
-      execPath :  'node ' + testAppPath + ' loop : 1',
-      mode : 'spawn',
-      stdio : 'pipe',
-      throwingExitCode : 0
-    }
-
-    var options = _.mapSupplement( {}, o, commonDefaults );
-
-    var shell = _.process.start( options );
-    _.time.out( 500, () =>
-    {
-      test.identical( options.process.killed, false );
-      options.process.kill( 'SIGINT' );
-      return null;
-    })
-    shell.finally(function()
-    {
-      test.identical( options.process.killed, true );
-      test.identical( options.exitCode, null ); /* qqq2 : near each such test check should be following checks */
-      test.identical( options.exitSignal, 'SIGINT' );
-      test.identical( options.process.exitCode, null );
-      test.identical( options.process.signalCode, 'SIGINT' );
-      return null;
-    })
-
-    return shell;
-  })
+  /* */
 
   .thenKeep( function( arg )
   {
@@ -566,7 +620,7 @@ function shell( test )
 
     o =
     {
-      execPath :  'node ' + testAppPath + ' loop : 1',
+      execPath :  'node ' + programPath + ' loop : 1',
       mode : 'shell',
       stdio : 'pipe',
       throwingExitCode : 0
@@ -596,13 +650,15 @@ function shell( test )
     return shell;
   })
 
+  /* */
+
   .thenKeep( function( arg )
   {
     test.case = 'shell, stop process using SIGKILL';
 
     o =
     {
-      execPath :  'node ' + testAppPath + ' loop : 1',
+      execPath :  'node ' + programPath + ' loop : 1',
       mode : 'shell',
       stdio : 'pipe',
       throwingExitCode : 0
@@ -630,53 +686,15 @@ function shell( test )
     return shell;
   })
 
-  .thenKeep( function( arg )
-  {
-    test.case = 'spawn, return good code';
+  /* */
 
-    o =
-    {
-      execPath :  'node ' + testAppPath + ' exitWithCode : 0',
-      mode : 'spawn',
-      stdio : 'pipe'
-    }
-
-    var options = _.mapSupplement( {}, o, commonDefaults );
-
-    return test.mustNotThrowError( _.process.start( options ) )
-    .thenKeep( () =>
-    {
-      test.identical( options.exitCode, 0 );
-      return null;
-    });
-  })
-  .thenKeep( function( arg )
-  {
-    test.case = 'spawn, return bad code';
-
-    o =
-    {
-      execPath :  'node ' + testAppPath + ' exitWithCode : 1',
-      mode : 'spawn',
-      stdio : 'pipe'
-    }
-
-    var options = _.mapSupplement( {}, o, commonDefaults );
-
-    return test.shouldThrowErrorOfAnyKind( _.process.start( options ) )
-    .thenKeep( () =>
-    {
-      test.identical( options.exitCode, 1 );
-      return null;
-    });
-  })
   .thenKeep( function( arg )
   {
     test.case = 'shell, return good code';
 
     o =
     {
-      execPath :  'node ' + testAppPath + ' exitWithCode : 0',
+      execPath :  'node ' + programPath + ' exitWithCode : 0',
       mode : 'shell',
       stdio : 'pipe'
     }
@@ -690,13 +708,16 @@ function shell( test )
       return null;
     });
   })
+
+  /* */
+
   .thenKeep( function( arg )
   {
     test.case = 'shell, return bad code';
 
     o =
     {
-      execPath :  'node ' + testAppPath + ' exitWithCode : 1',
+      execPath :  'node ' + programPath + ' exitWithCode : 1',
       mode : 'shell',
       stdio : 'pipe'
     }
@@ -719,7 +740,7 @@ function shell( test )
 
     o =
     {
-      execPath :  'node ' + testAppPath + ' loop : 1',
+      execPath :  'node ' + programPath + ' loop : 1',
       mode : 'shell',
       stdio : 'pipe',
       timeOut : 500
@@ -739,7 +760,7 @@ function shell( test )
 
   /* - */
 
-  return con;
+  return a.ready;
 }
 
 shell.timeOut = 30000;
