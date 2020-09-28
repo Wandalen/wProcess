@@ -1220,7 +1220,7 @@ function start_body( o )
 
 }
 
-start_body.defaults = /* qqq : split on _.process.start(), _.process.startBasic() */
+start_body.defaults = /* qqq : split on _.process.start(), _.process.startSingle() */
 {
 
   execPath : null,
