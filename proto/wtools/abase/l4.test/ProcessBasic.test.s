@@ -38,6 +38,9 @@ function suiteBegin()
   self.suiteTempPath = _.path.tempOpen( _.path.join( __dirname, '../..' ), 'ProcessBasic' );
   self.toolsPath = _.path.nativize( _.path.resolve( __dirname, '../../../wtools/Tools.s' ) );
   self.toolsPathInclude = `let _ = require( '${ _.strEscape( self.toolsPath ) }' )\n`;
+
+  // self.assetsOriginalPath = _.path.join( __dirname, '_asset' );
+  // self.appJsPath = _.path.nativize( _.module.resolve( 'wProcess' ) );
 }
 
 //
@@ -115,6 +118,15 @@ function testAppShell()
 function processArgsBase( test )
 {
   let context = this;
+  let a = test.assetFor( false );
+
+  a.reflect();
+
+  // a.ready.then( () =>
+  // {
+
+  // });
+
   var routinePath = _.path.join( context.suiteTempPath, test.name );
 
   function testApp()
@@ -135,14 +147,19 @@ function processArgsBase( test )
   _.fileProvider.fileWrite( testAppPath, testAppCode );
 
 
-  let ready = new _.Consequence().take( null )
+  // let ready = new _.Consequence().take( null )
+  debugger;
   let shell = _.process.starter
   ({
     execPath : 'node ' + testAppPath,
     mode : 'spawn',
     throwingExitCode : 0,
-    ready
+    ready : a.ready
   })
+  debugger
+  let temp = a.shell
+
+  debugger
   let filePath = _.path.join( routinePath, 'got' );
   let interpreterPath = _.path.normalize( process.argv[ 0 ] );
   let scriptPath = _.path.normalize( testAppPath );
@@ -152,6 +169,7 @@ function processArgsBase( test )
   shell({ args : [] })
   .then( ( o ) =>
   {
+    debugger
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
@@ -171,11 +189,14 @@ function processArgsBase( test )
     return null;
   })
 
+  debugger
+
   /* */
 
   shell({ args : [ '' ] })
   .then( ( o ) =>
   {
+    debugger
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
@@ -194,8 +215,8 @@ function processArgsBase( test )
     test.contains( got, expected );
     return null;
   })
-
-  return ready;
+  debugger
+  return a.ready;
 }
 
 //
