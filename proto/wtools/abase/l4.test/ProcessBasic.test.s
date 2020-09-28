@@ -4709,7 +4709,7 @@ function shellDryRun( test )
 
 //
 
-function startNjsStructure( test )
+function startWithReadyDelayStructural( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -4760,8 +4760,8 @@ function startNjsStructure( test )
     test.identical( !!options.process, true );
     test.is( _.routineIs( options.disconnect ) );
     test.is( options.onTerminate === options.ready );
-    test.identical( options.ready.exportString(), 'Consequence::startNjsStructure 0 / 2' );
-    test.identical( options.onTerminate.exportString(), 'Consequence::startNjsStructure 0 / 2' );
+    test.identical( options.ready.exportString(), 'Consequence::startWithReadyDelayStructural 0 / 2' );
+    test.identical( options.onTerminate.exportString(), 'Consequence::startWithReadyDelayStructural 0 / 2' );
     test.identical( options.onStart.exportString(), 'Consequence:: 1 / 0' );
 
     return null;
@@ -4840,6 +4840,13 @@ function startNjsStructure( test )
   }
 
 }
+
+startWithReadyDelayStructural.description =
+`
+ - ready has delay
+ - value of o-context is correct before start
+ - value of o-context is correct after start
+`
 
 //
 
@@ -14323,7 +14330,7 @@ function startOnTerminate( test )
 
 //
 
-function noEndBug1( test )
+function startNoEndBug1( test )
 {
   let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
@@ -14385,12 +14392,89 @@ function noEndBug1( test )
 
 }
 
-noEndBug1.description =
+startNoEndBug1.description =
 `
 Parent starts child process in detached mode.
 ChildProcess throws an error on spawn.
 onStart receives error message.
 Parent should not try to disconnect the child.
+`
+
+//
+
+function startOnStartWithDelay( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let programPath = a.program( program1 );
+
+  a.ready.timeOut( 1000 );
+
+  /* */
+
+  let options =
+  {
+    execPath : 'node',
+    args : programPath,
+    currentPath : a.currentPath,
+    throwingExitCode : 1,
+    applyingExitCode : 0,
+    inputMirroring : 1,
+    outputCollecting : 1,
+    stdio : 'pipe',
+    sync : 0,
+    deasync : 0,
+    onStart : a.ready,
+  }
+
+  _.process.start( options );
+
+  options.onStart
+  .then( ( op ) =>
+  {
+    test.is( options === op );
+    test.identical( options.output, '' );
+    test.identical( options.exitCode, null );
+    test.identical( options.exitSignal, null );
+    test.identical( options.ended, false );
+    test.identical( options.terminationReason, null );
+    test.is( options.onStart !== options.ready );
+    test.is( options.onTerminate === options.ready );
+    test.is( !!options.process );
+    return null;
+  });
+
+  options.onTerminate
+  .finally( ( err, op ) =>
+  {
+    // _.errAttend( err );
+    // test.is( _.errIs( err ) );
+    // test.identical( options.output, 'program1\n' );
+    // test.identical( options.exitCode, null );
+    // test.identical( options.exitSignal, 'SIGINT' );
+    // test.identical( options.ended, true );
+    // test.identical( options.terminationReason, 'signal' );
+    return null;
+  });
+
+  /* */
+
+  return a.ready;
+
+  /* */
+
+  function program1()
+  {
+    let _ = require( toolsPath );
+    console.log( 'program1' );
+    setTimeout( () => {}, 15000 );
+  }
+
+}
+
+startOnStartWithDelay.description =
+`
+  - consequence onStart has delay
 `
 
 //
@@ -17242,19 +17326,19 @@ function terminate( test )
 
 //
 
-function terminateStructural( test )
+function endStructuralSigint( test )
 {
   let context = this;
   let a = test.assetFor( false );
   let programPath = a.program( program1 );
-
-  a.ready.timeOut( 1000 );
+  let time1;
 
   /* */
 
   let options =
   {
-    execPath : programPath,
+    execPath : 'node',
+    args : programPath,
     currentPath : a.currentPath,
     throwingExitCode : 1,
     applyingExitCode : 0,
@@ -17266,7 +17350,7 @@ function terminateStructural( test )
     ready : a.ready,
   }
 
-  _.process.startNjs( options );
+  _.process.start( options );
 
   options.onStart
   .then( ( op ) =>
@@ -17280,14 +17364,16 @@ function terminateStructural( test )
     test.is( options.onStart !== options.ready );
     test.is( options.onTerminate === options.ready );
     test.is( !!options.process );
-    _.time.out( context.dt1, () => _.process.terminate( options.process ) );
-    // _.process.terminate( options.process );
+    time1 = _.time.now();
+    _.time.out( context.dt1, () => options.process.kill( 'SIGINT' ) );
     return null;
   });
 
   options.onTerminate
   .finally( ( err, op ) =>
   {
+    var dtime = _.time.now() - time1;
+    test.ge( dtime, 15000-1000 );
     _.errAttend( err );
     test.is( _.errIs( err ) );
     test.identical( options.output, 'program1\n' );
@@ -17312,6 +17398,177 @@ function terminateStructural( test )
   }
 
 }
+
+endStructuralSigint.description =
+`
+ - end process with SIGINT
+ - should wait more than 15s
+ - should have proper exitSignal, exitCode and terminationReason
+`
+
+//
+
+function endStructuralSigkill( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let programPath = a.program( program1 );
+  let time1;
+
+  /* */
+
+  let options =
+  {
+    execPath : 'node',
+    args : programPath,
+    currentPath : a.currentPath,
+    throwingExitCode : 1,
+    applyingExitCode : 0,
+    inputMirroring : 1,
+    outputCollecting : 1,
+    stdio : 'pipe',
+    sync : 0,
+    deasync : 0,
+    ready : a.ready,
+  }
+
+  _.process.start( options );
+
+  options.onStart
+  .then( ( op ) =>
+  {
+    test.is( options === op );
+    test.identical( options.output, '' );
+    test.identical( options.exitCode, null );
+    test.identical( options.exitSignal, null );
+    test.identical( options.ended, false );
+    test.identical( options.terminationReason, null );
+    test.is( options.onStart !== options.ready );
+    test.is( options.onTerminate === options.ready );
+    test.is( !!options.process );
+    time1 = _.time.now();
+    _.time.out( context.dt1, () => options.process.kill( 'SIGKILL' ) );
+    return null;
+  });
+
+  options.onTerminate
+  .finally( ( err, op ) =>
+  {
+    var dtime = _.time.now() - time1;
+    test.le( dtime, context.dt1*2 );
+    _.errAttend( err );
+    test.is( _.errIs( err ) );
+    test.identical( options.output, 'program1\n' );
+    test.identical( options.exitCode, null );
+    test.identical( options.exitSignal, 'SIGKILL' );
+    test.identical( options.ended, true );
+    test.identical( options.terminationReason, 'signal' );
+    return null;
+  });
+
+  /* */
+
+  return a.ready;
+
+  /* */
+
+  function program1()
+  {
+    let _ = require( toolsPath );
+    console.log( 'program1' );
+    setTimeout( () => {}, 15000 );
+  }
+
+}
+
+endStructuralSigkill.description =
+`
+ - end process with SIGKILL
+ - should wait less than 2*1s
+ - should have proper exitSignal, exitCode and terminationReason
+`
+
+//
+
+function endStructuralTerminate( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let programPath = a.program( program1 );
+  let time1;
+
+  /* */
+
+  let options =
+  {
+    execPath : 'node',
+    args : programPath,
+    currentPath : a.currentPath,
+    throwingExitCode : 1,
+    applyingExitCode : 0,
+    inputMirroring : 1,
+    outputCollecting : 1,
+    stdio : 'pipe',
+    sync : 0,
+    deasync : 0,
+    ready : a.ready,
+  }
+
+  _.process.start( options );
+
+  options.onStart
+  .then( ( op ) =>
+  {
+    test.is( options === op );
+    test.identical( options.output, '' );
+    test.identical( options.exitCode, null );
+    test.identical( options.exitSignal, null );
+    test.identical( options.ended, false );
+    test.identical( options.terminationReason, null );
+    test.is( options.onStart !== options.ready );
+    test.is( options.onTerminate === options.ready );
+    test.is( !!options.process );
+    time1 = _.time.now();
+    _.time.out( context.dt1, () => _.process.terminate( options.process ) );
+    return null;
+  });
+
+  options.onTerminate
+  .finally( ( err, op ) =>
+  {
+    var dtime = _.time.now() - time1;
+    test.le( dtime, context.dt1*2 );
+    _.errAttend( err );
+    test.is( _.errIs( err ) );
+    test.identical( options.output, 'program1\n' );
+    test.identical( options.exitCode, null );
+    test.identical( options.exitSignal, 'SIGKILL' );
+    test.identical( options.ended, true );
+    test.identical( options.terminationReason, 'signal' );
+    return null;
+  });
+
+  /* */
+
+  return a.ready;
+
+  /* */
+
+  function program1()
+  {
+    let _ = require( toolsPath );
+    console.log( 'program1' );
+    setTimeout( () => {}, 15000 );
+  }
+
+}
+
+endStructuralTerminate.description =
+`
+ - end process with _.process.terminate()
+ - should wait xxx?
+ - should have proper exitSignal, exitCode and terminationReason
+`
 
 //
 
@@ -19500,7 +19757,7 @@ var Proto =
 
     shellMultipleSyncDeasync,
     shellDryRun,
-    startNjsStructure,
+    startWithReadyDelayStructural,
 
     shellArgsOption,
     shellArgumentsParsing,
@@ -19566,7 +19823,8 @@ var Proto =
 
     startOnStart,
     startOnTerminate,
-    noEndBug1,
+    startNoEndBug1,
+    startOnStartWithDelay,
 
     /*  */
 
@@ -19592,7 +19850,9 @@ var Proto =
     kill,
     killWithChildren,
     terminate,
-    terminateStructural,
+    endStructuralSigint,
+    endStructuralSigkill,
+    endStructuralTerminate,
     terminateComplex,
     terminateDetachedComplex,
     terminateWithChildren,
