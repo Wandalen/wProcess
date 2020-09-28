@@ -38,6 +38,9 @@ function suiteBegin()
   self.suiteTempPath = _.path.tempOpen( _.path.join( __dirname, '../..' ), 'ProcessBasic' );
   self.toolsPath = _.path.nativize( _.path.resolve( __dirname, '../../../wtools/Tools.s' ) );
   self.toolsPathInclude = `let _ = require( '${ _.strEscape( self.toolsPath ) }' )\n`;
+
+  // self.assetsOriginalPath = _.path.join( __dirname, '_asset' );
+  // self.appJsPath = _.path.nativize( _.module.resolve( 'wProcess' ) );
 }
 
 //
@@ -111,94 +114,6 @@ function testAppShell()
 
 /* qqq : rewrite tests using assetFor and the best practices
 */
-
-function processArgsBase( test )
-{
-  let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
-
-  function testApp()
-  {
-    _.include( 'wProcess' );
-    _.include( 'wStringsExtra' )
-    _.include( 'wFiles' )
-
-    if( process.env.ignoreFirstTwoArgv )
-    process.argv = process.argv.slice( 2 );
-
-    var got = _.process.args({ caching : 0 });
-    _.fileProvider.fileWrite( _.path.join( __dirname, 'got' ), JSON.stringify( got ) )
-  }
-
-  let testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  let testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-
-
-  let ready = new _.Consequence().take( null )
-  let shell = _.process.starter
-  ({
-    execPath : 'node ' + testAppPath,
-    mode : 'spawn',
-    throwingExitCode : 0,
-    ready
-  })
-  let filePath = _.path.join( routinePath, 'got' );
-  let interpreterPath = _.path.normalize( process.argv[ 0 ] );
-  let scriptPath = _.path.normalize( testAppPath );
-
-  /* */
-
-  shell({ args : [] })
-  .then( ( o ) =>
-  {
-    test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
-    var expected =
-    {
-      interpreterPath,
-      scriptPath,
-      interpreterArgs : [],
-      keyValDelimeter : ':',
-      subject : '',
-      map : Object.create( null ),
-      scriptArgs : [],
-      scriptArgsString : '',
-      subjects : [],
-      maps : [],
-    }
-    test.contains( got, expected );
-    return null;
-  })
-
-  /* */
-
-  shell({ args : [ '' ] })
-  .then( ( o ) =>
-  {
-    test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
-    var expected =
-    {
-      interpreterPath,
-      scriptPath,
-      interpreterArgs : [],
-      keyValDelimeter : ':',
-      subject : '',
-      map : Object.create( null ),
-      scriptArgs : [ '' ],
-      scriptArgsString : '',
-      subjects : [],
-      maps : [],
-    }
-    test.contains( got, expected );
-    return null;
-  })
-
-  return ready;
-}
-
-//
 
 function processArgsPropertiesBase( test )
 {
@@ -19710,11 +19625,10 @@ var Proto =
   tests :
   {
 
-    processArgsBase,
-    processArgsPropertiesBase,
-    processArgsMultipleCommands,
-    processArgsPaths,
-    processArgsWithSpace,
+    // processArgsPropertiesBase,
+    // processArgsMultipleCommands,
+    // processArgsPaths,
+    // processArgsWithSpace,
 
     processOnExitEvent,
     processOffExitEvent,

@@ -28,7 +28,8 @@ function suiteBegin()
   var self = this;
   self.suiteTempPath = _.path.tempOpen( _.path.join( __dirname, '../..' ), 'Io' );
   self.assetsOriginalPath = _.path.join( __dirname, '_asset' );
-  self.appJsPath = _.path.nativize( _.module.resolve( 'wProcess' ) );
+  // self.toolsPath = _.path.nativize( _.path.resolve( __dirname, '../../../wtools/Tools.s' ) );
+  // self.appJsPath = _.path.nativize( _.module.resolve( 'wProcess' ) );
 }
 
 //
@@ -44,6 +45,94 @@ function suiteEnd()
 // --
 // test
 // --
+
+function processArgsBase( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let programPath = a.program( testApp );
+
+  let shell = _.process.starter
+  ({
+    execPath : 'node ' + programPath,
+    mode : 'spawn',
+    throwingExitCode : 0,
+    ready : a.ready
+  })
+
+  let filePath = a.abs( 'got' );
+  let interpreterPath = a.path.normalize( process.argv[ 0 ] );
+  let scriptPath = a.path.normalize( programPath );
+
+  /* */
+
+  shell({ args : [] })
+  .then( ( o ) =>
+  {
+    test.identical( o.exitCode, 0 );
+    var got =   a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var expected =
+    {
+      interpreterPath,
+      scriptPath,
+      interpreterArgs : [],
+      keyValDelimeter : ':',
+      subject : '',
+      map : Object.create( null ),
+      scriptArgs : [],
+      scriptArgsString : '',
+      subjects : [],
+      maps : [],
+    }
+    test.contains( got, expected );
+    return null;
+  })
+
+  /* */
+
+  shell({ args : [ '' ] })
+  .then( ( o ) =>
+  {
+    test.identical( o.exitCode, 0 );
+    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var expected =
+    {
+      interpreterPath,
+      scriptPath,
+      interpreterArgs : [],
+      keyValDelimeter : ':',
+      subject : '',
+      map : Object.create( null ),
+      scriptArgs : [ '' ],
+      scriptArgsString : '',
+      subjects : [],
+      maps : [],
+    }
+    test.contains( got, expected );
+    return null;
+  })
+
+
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wStringsExtra' )
+    _.include( 'wFiles' )
+
+    if( process.env.ignoreFirstTwoArgv )
+    process.argv = process.argv.slice( 2 );
+
+    var got = _.process.args({ caching : 0 });
+    _.fileProvider.fileWrite( _.path.join( __dirname, 'got' ), JSON.stringify( got ) )
+  }
+}
+
+//
 
 function pathsRead( test )
 {
@@ -61,7 +150,7 @@ function pathsRead( test )
 function systemEntryAddBasic( test )
 {
   let context = this;
-  let a = test.assetFor( 'basic' );
+  let a = test.assetFor( 'systemEntry' );
 
   a.reflect();
 
@@ -103,7 +192,7 @@ function systemEntryAddBasic( test )
 function systemEntryAddOptionAllowingMissed( test )
 {
   let context = this;
-  let a = test.assetFor( 'basic' );
+  let a = test.assetFor( 'systemEntry' );
 
   a.reflect();
 
@@ -134,7 +223,7 @@ function systemEntryAddOptionAllowingMissed( test )
 function systemEntryAddOptionAllowingNotInPath( test )
 {
   let context = this;
-  let a = test.assetFor( 'basic' );
+  let a = test.assetFor( 'systemEntry' );
 
   a.reflect();
 
@@ -164,7 +253,7 @@ function systemEntryAddOptionAllowingNotInPath( test )
 function systemEntryAddOptionForcing( test )
 {
   let context = this;
-  let a = test.assetFor( 'basic' );
+  let a = test.assetFor( 'systemEntry' );
 
   a.reflect();
 
@@ -227,6 +316,12 @@ var Proto =
 
   tests :
   {
+    processArgsBase,
+    // processArgsPropertiesBase,
+    // processArgsMultipleCommands,
+    // processArgsPaths,
+    // processArgsWithSpace,
+
     pathsRead,
 
     systemEntryAddBasic,
