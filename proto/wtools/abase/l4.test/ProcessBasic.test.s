@@ -5,7 +5,6 @@
 
 if( typeof module !== 'undefined' )
 {
-
   let _ = require( '../../../wtools/Tools.s' );
 
   _.include( 'wTesting' );
@@ -13,7 +12,6 @@ if( typeof module !== 'undefined' )
   _.include( 'wProcessWatcher' );
 
   require( '../l4_process/Basic.s' );
-
 }
 
 /*
@@ -111,295 +109,8 @@ function testAppShell()
 // test
 // --
 
-/* qqq : rewrite this test properly
-should start separate appication
-aaa : done
+/* qqq : rewrite tests using assetFor and the best practices
 */
-
-// function processArgs( test )
-// {
-//   var _argv =  process.argv.slice( 0, 2 );
-//   _argv = _.path.s.normalize( _argv );
-
-//   /* */
-
-//   var argv = [];
-//   argv.unshift.apply( argv, _argv );
-//   var got = _.process.args({ argv, caching : 0 });
-//   var expected =
-//   {
-//     interpreterPath : _argv[ 0 ],
-//     scriptPath : _argv[ 1 ],
-//     interpreterArgs : [],
-//     keyValDelimeter : ':',
-//     subject : '',
-//     map : Object.create( null ),
-//     scriptArgs : [],
-//     scriptArgsString : '',
-//     subjects : [],
-//     maps : [],
-//   }
-//   test.contains( got, expected );
-
-//   /* */
-
-//   var argv = [ '' ];
-//   argv.unshift.apply( argv, _argv );
-//   var got = _.process.args({ argv, caching : 0 });
-//   var expected =
-//   {
-//     interpreterPath : _argv[ 0 ],
-//     scriptPath : _argv[ 1 ],
-//     interpreterArgs : [],
-//     keyValDelimeter : ':',
-//     subject : '',
-//     map : Object.create( null ),
-//     scriptArgs : [ '' ],
-//     scriptArgsString : '',
-//     subjects : [],
-//     maps : [],
-//   }
-//   test.contains( got, expected );
-
-//   /* */
-
-//   var argv = [ 'x', ':', 'aa', 'bbb :' ];
-//   argv.unshift.apply( argv, _argv );
-//   var got = _.process.args({ argv, caching : 0 });
-//   var expected =
-//   {
-//     interpreterPath : _argv[ 0 ],
-//     scriptPath : _argv[ 1 ],
-//     interpreterArgs : [],
-//     keyValDelimeter : ':',
-//     map : { x : 'aa', bbb : '' },
-//     subject : '',
-//     scriptArgs : [ 'x', ':', 'aa', 'bbb :' ]
-//   }
-//   test.contains( got, expected );
-
-//   /* */
-
-//   var argv = [ 'x', ' : ', 'y' ];
-//   argv.unshift.apply( argv, _argv );
-//   var got = _.process.args({ argv, caching : 0 });
-//   var expected =
-//   {
-//     interpreterPath : _argv[ 0 ],
-//     scriptPath : _argv[ 1 ],
-//     interpreterArgs : [],
-//     keyValDelimeter : ':',
-//     map : { x : 'y' },
-//     subject : '',
-//     scriptArgs :[ 'x', ' : ', 'y' ]
-//   }
-//   test.contains( got, expected );
-
-//   /* */
-
-//   var argv = [ 'x', ' :', 'y', 'x', ' :', '1' ];
-//   argv.unshift.apply( argv, _argv );
-//   var got = _.process.args({ argv, caching : 0 });
-//   var expected =
-//   {
-//     interpreterPath : _argv[ 0 ],
-//     scriptPath : _argv[ 1 ],
-//     interpreterArgs : [],
-//     keyValDelimeter : ':',
-//     map : { x : 1 },
-//     subject : '',
-//     scriptArgs : [ 'x', ' :', 'y', 'x', ' :', '1']
-//   }
-//   test.contains( got, expected );
-
-//   /* */
-
-//   var argv = [ 'a b c d', 'x', ' :', 'y', 'xyz', 'y', ' :', 1 ];
-//   argv.unshift.apply( argv, _argv );
-//   var got = _.process.args({ argv, caching : 0 });
-//   var expected =
-//   {
-//     interpreterPath : _argv[ 0 ],
-//     scriptPath : _argv[ 1 ],
-//     interpreterArgs : [],
-//     keyValDelimeter : ':',
-//     map : { x : 'y xyz', y : 1 },
-//     subject : 'a b c d',
-//     scriptArgs : [ 'a b c d', 'x', ' :', 'y', 'xyz', 'y', ' :', 1 ]
-//   }
-//   test.contains( got, expected );
-
-//   /* */
-
-//   var argv =
-//   [
-//     'filePath',
-//     'a :', 1,
-//     'b', ' :2',
-//     'c :  ', 3,
-//     'd', ' :  4',
-//     'e', ' :  ', 5
-//   ];
-//   argv.unshift.apply( argv, _argv );
-//   var got = _.process.args({ argv, caching : 0 });
-//   var expected =
-//   {
-//     interpreterPath : _argv[ 0 ],
-//     scriptPath : _argv[ 1 ],
-//     interpreterArgs : [],
-//     keyValDelimeter : ':',
-//     map : { a : 1, b : 2, c : 3, d : 4, e : 5 },
-//     subject : 'filePath',
-//     scriptArgs :
-//     [
-//       'filePath',
-//       'a :', 1,
-//       'b', ' :2',
-//       'c :  ', 3,
-//       'd', ' :  4',
-//       'e', ' :  ', 5
-//     ]
-//   }
-//   test.contains( got, expected );
-
-//   /* */
-
-//   var argv = [ 'a :b :c :d', 'x', ' :', 0, 'y', ' :', 1 ];
-//   argv.unshift.apply( argv, _argv );
-//   var got = _.process.args({ argv, caching : 0 });
-//   var expected =
-//   {
-//     interpreterPath : _argv[ 0 ],
-//     scriptPath : _argv[ 1 ],
-//     interpreterArgs : [],
-//     keyValDelimeter : ':',
-//     map : { a : '', b : '', c : 'd', x : 0, y : 1 },
-//     subject : '',
-//     scriptArgs : [ 'a :b :c :d', 'x', ' :', 0, 'y', ' :', 1 ]
-//   }
-//   test.contains( got, expected );
-
-//   /* */
-
-//   var argv = [];
-//   var got = _.process.args({ argv : [ 'interpreter', 'main.js', '.set v:5 ; .build debug:1 ; .export' ], caching : 0 });
-//   var expected =
-//   {
-//     interpreterPath : 'interpreter',
-//     scriptPath : 'main.js',
-//     interpreterArgs : [],
-//     keyValDelimeter : ':',
-//     commandsDelimeter : ';',
-//     subject : '.set',
-//     map : { v : 5 },
-//     scriptArgs : [ '.set v:5 ; .build debug:1 ; .export' ],
-//     scriptArgsString : '.set v:5 ; .build debug:1 ; .export',
-//     subjects : [ '.set', '.build', '.export' ],
-//     maps : [ { v : 5 }, { debug : 1 }, {} ],
-//   }
-//   test.contains( got, expected );
-
-//   /* */
-
-//   var argv = [];
-//   var got = _.process.args({ argv : [ 'interpreter', 'main.js', '.set v:[1 2  3 ] ; .build debug:1 ; .export' ], caching : 0 });
-//   var expected =
-//   {
-//     interpreterPath : 'interpreter',
-//     scriptPath : 'main.js',
-//     interpreterArgs : [],
-//     keyValDelimeter : ':',
-//     commandsDelimeter : ';',
-//     subject : '.set',
-//     map : { v : [ 1, 2, 3 ] },
-//     scriptArgs : [ '.set v:[1 2  3 ] ; .build debug:1 ; .export' ],
-//     scriptArgsString : '.set v:[1 2  3 ] ; .build debug:1 ; .export',
-//     subjects : [ '.set', '.build', '.export' ],
-//     maps : [ { v : [ 1, 2, 3 ] }, { debug : 1 }, {} ],
-//   }
-//   test.contains( got, expected );
-
-//   /* */
-
-//   test.case = 'windows native path as option, no quotes'
-//   var argv = [];
-//   var got = _.process.args({ argv : [ 'interpreter', 'main.js', 'path:D:\\path\\to\\file' ], caching : 0 });
-//   var expected =
-//   {
-//     interpreterPath : 'interpreter',
-//     scriptPath : 'main.js',
-//     interpreterArgs : [],
-//     keyValDelimeter : ':',
-//     commandsDelimeter : ';',
-//     subject : '',
-//     map : { path : '', D : '\\path\\to\\file' },
-//     scriptArgs : [ 'path:D:\\path\\to\\file' ],
-//     scriptArgsString : 'path:D:\\path\\to\\file',
-//     subjects : [ '' ],
-//     maps : [ { path : '', D : '\\path\\to\\file' } ],
-//   }
-//   test.contains( got, expected );
-
-//   test.case = 'windows native path as option, with quotes'
-//   var argv = [];
-//   var got = _.process.args({ argv : [ 'interpreter', 'main.js', 'path:"D:\\path\\to\\file"' ], caching : 0 });
-//   var expected =
-//   {
-//     interpreterPath : 'interpreter',
-//     scriptPath : 'main.js',
-//     interpreterArgs : [],
-//     keyValDelimeter : ':',
-//     commandsDelimeter : ';',
-//     subject : '',
-//     map : { path : 'D:\\path\\to\\file' },
-//     scriptArgs : [ 'path:"D:\\path\\to\\file"' ],
-//     scriptArgsString : 'path:"D:\\path\\to\\file"',
-//     subjects : [ '' ],
-//     maps : [ { path : 'D:\\path\\to\\file' } ],
-//   }
-//   test.contains( got, expected );
-
-//   test.case = 'number option with quotes'
-//   var argv = [];
-//   var got = _.process.args({ argv : [ 'interpreter', 'main.js', 'v:"10"' ], caching : 0 });
-//   var expected =
-//   {
-//     interpreterPath : 'interpreter',
-//     scriptPath : 'main.js',
-//     interpreterArgs : [],
-//     keyValDelimeter : ':',
-//     commandsDelimeter : ';',
-//     subject : '',
-//     map : { v : 10 },
-//     scriptArgs : [ 'v:"10"' ],
-//     scriptArgsString : 'v:"10"',
-//     subjects : [ '' ],
-//     maps : [ { v : 10 } ],
-//   }
-//   test.contains( got, expected );
-
-//   test.case = 'string option with quotes'
-//   var argv = [];
-//   var got = _.process.args({ argv : [ 'interpreter', 'main.js', 'str:"abc"' ], caching : 0 });
-//   var expected =
-//   {
-//     interpreterPath : 'interpreter',
-//     scriptPath : 'main.js',
-//     interpreterArgs : [],
-//     keyValDelimeter : ':',
-//     commandsDelimeter : ';',
-//     subject : '',
-//     map : { str : 'abc' },
-//     scriptArgs : [ 'str:"abc"' ],
-//     scriptArgsString : 'str:"abc"',
-//     subjects : [ '' ],
-//     maps : [ { str : 'abc' } ],
-//   }
-//   test.contains( got, expected );
-
-// }
-
-//
 
 function processArgsBase( test )
 {
@@ -936,7 +647,7 @@ function processArgsPaths( test )
 
 //
 
-function processArgsWithSpace( test )
+function processArgsWithSpace( test ) /* qqq : split test cases */
 {
   let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
@@ -957,7 +668,6 @@ function processArgsWithSpace( test )
   let testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
   let testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
   _.fileProvider.fileWrite( testAppPath, testAppCode );
-
 
   let ready = new _.Consequence().take( null )
   let shell = _.process.starter
@@ -1364,13 +1074,14 @@ function processArgsWithSpace( test )
   //   test.contains( got, expected );
   //   return null;
   // })
+  /* qqq : ? */
 
   return ready;
 }
 
 //
 
-function processOnExitEvent( test ) /* qqq : adjust vova: done */
+function processOnExitEvent( test )
 {
   let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
@@ -1470,7 +1181,7 @@ function processOnExitEvent( test ) /* qqq : adjust vova: done */
 
 //
 
-function processOffExitEvent( test ) /* qqq : adjust vova: done */
+function processOffExitEvent( test )
 {
   let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
@@ -6928,7 +6639,7 @@ function shellArgumentsNestedQuotes( test )
   .then( () =>
   {
     test.case = 'shell'
-    //qqq:review this case
+    // qqq : review this case
     let con = new _.Consequence().take( null );
     let args =
     [
@@ -7019,7 +6730,7 @@ function shellArgumentsNestedQuotes( test )
   // {
   //   test.case = 'exec'
   //
-  //   //qqq:review this case
+  //   //qqq : review this case
   //
   //   let con = new _.Consequence().take( null );
   //   let args =
