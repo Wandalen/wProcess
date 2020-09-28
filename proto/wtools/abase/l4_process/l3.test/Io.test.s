@@ -70,10 +70,9 @@ function systemEntryAddBasic( test )
     test.case = 'basic';
     var src =
     {
-      // entryDirPath : _.process.pathsRead()[ 0 ],
       entryDirPath : a.abs( 'dir' ),
       appPath : a.abs( 'dir/Index.js' ),
-      allowingNotInPath : 1 //
+      allowingNotInPath : 1
     }
     var exp = 1;
     var got = _.process.systemEntryAdd( src );
@@ -115,7 +114,7 @@ function systemEntryAddOptionAllowingMissed( test )
     {
       entryDirPath : a.abs( 'dir' ),
       appPath : a.abs( 'dir/fileNotExists.txt' ),
-      allowingNotInPath : 1, //
+      allowingNotInPath : 1,
       allowingMissed : 1
     }
     var exp = 1;
