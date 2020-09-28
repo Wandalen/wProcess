@@ -457,17 +457,17 @@ function start_body( o )
 
     o.terminationReason = 'error';
 
-    o.err = _.err( 'Error shelling command\n', o.execPath, '\nat', o.currentPath, '\n', err );
+    o.error = _.err( 'Error shelling command\n', o.execPath, '\nat', o.currentPath, '\n', err );
     if( o.verbosity )
-    log( _.errOnce( o.err ), 1 );
+    log( _.errOnce( o.error ), 1 );
 
     if( o.sync && !o.deasync )
     {
-      throw o.err;
+      throw o.error;
     }
     else
     {
-      o.onTerminate.error( o.err );
+      o.onTerminate.error( o.error );
     }
   }
 
