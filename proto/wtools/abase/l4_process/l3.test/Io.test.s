@@ -45,6 +45,110 @@ function suiteEnd()
 // test
 // --
 
+function processArgsBase( test )
+{
+  let context = this;
+  let a = test.assetFor( 'process' );
+
+  a.reflect();
+
+  var routinePath = a.abs( context.suiteTempPath, test.name );
+
+  function testApp()
+  {
+    _.include( 'wProcess' );
+    _.include( 'wStringsExtra' )
+    _.include( 'wFiles' )
+
+    if( process.env.ignoreFirstTwoArgv )
+    process.argv = process.argv.slice( 2 );
+
+    var got = _.process.args({ caching : 0 });
+    _.fileProvider.fileWrite( a.abs( 'got' ), JSON.stringify( got ) )
+  }
+
+  var toolsPath = _.path.nativize( _.path.resolve( __dirname, '../../../wtools/Tools.s' ) );
+  var toolsPathInclude = `let _ = require( '${ _.strEscape( toolsPath ) }' )\n`;
+
+  let testAppPath = a.fileProvider.path.nativize( a.abs( routinePath, 'testApp.js' ) );
+  let testAppCode = toolsPathInclude + testApp.toString() + '\ntestApp();';
+  a.fileProvider.fileWrite( testAppPath, testAppCode );
+
+
+  // let ready = new _.Consequence().take( null )
+  debugger;
+  let shell = _.process.starter
+  ({
+    execPath : 'node ' + testAppPath,
+    mode : 'spawn',
+    throwingExitCode : 0,
+    ready : a.ready
+  })
+  debugger
+  // let temp = a.shell
+
+  debugger
+  let filePath = a.abs( 'got' );
+  let interpreterPath = _.path.normalize( process.argv[ 0 ] );
+  let scriptPath = _.path.normalize( testAppPath );
+
+  /* */
+
+  shell({ args : [] })
+  .then( ( o ) =>
+  {
+    debugger
+    test.identical( o.exitCode, 0 );
+    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var expected =
+    {
+      interpreterPath,
+      scriptPath,
+      interpreterArgs : [],
+      keyValDelimeter : ':',
+      subject : '',
+      map : Object.create( null ),
+      scriptArgs : [],
+      scriptArgsString : '',
+      subjects : [],
+      maps : [],
+    }
+    test.contains( got, expected );
+    return null;
+  })
+
+  debugger
+
+  /* */
+
+  shell({ args : [ '' ] })
+  .then( ( o ) =>
+  {
+    debugger
+    test.identical( o.exitCode, 0 );
+    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var expected =
+    {
+      interpreterPath,
+      scriptPath,
+      interpreterArgs : [],
+      keyValDelimeter : ':',
+      subject : '',
+      map : Object.create( null ),
+      scriptArgs : [ '' ],
+      scriptArgsString : '',
+      subjects : [],
+      maps : [],
+    }
+    test.contains( got, expected );
+    return null;
+  })
+  debugger
+  return a.ready;
+}
+
+//
+
 function pathsRead( test )
 {
   test.case = 'arrayIs';
@@ -61,7 +165,7 @@ function pathsRead( test )
 function systemEntryAddBasic( test )
 {
   let context = this;
-  let a = test.assetFor( 'basic' );
+  let a = test.assetFor( 'systemEntry' );
 
   a.reflect();
 
@@ -103,7 +207,7 @@ function systemEntryAddBasic( test )
 function systemEntryAddOptionAllowingMissed( test )
 {
   let context = this;
-  let a = test.assetFor( 'basic' );
+  let a = test.assetFor( 'systemEntry' );
 
   a.reflect();
 
@@ -134,7 +238,7 @@ function systemEntryAddOptionAllowingMissed( test )
 function systemEntryAddOptionAllowingNotInPath( test )
 {
   let context = this;
-  let a = test.assetFor( 'basic' );
+  let a = test.assetFor( 'systemEntry' );
 
   a.reflect();
 
@@ -164,7 +268,7 @@ function systemEntryAddOptionAllowingNotInPath( test )
 function systemEntryAddOptionForcing( test )
 {
   let context = this;
-  let a = test.assetFor( 'basic' );
+  let a = test.assetFor( 'systemEntry' );
 
   a.reflect();
 
@@ -227,6 +331,12 @@ var Proto =
 
   tests :
   {
+    processArgsBase,
+    // processArgsPropertiesBase,
+    // processArgsMultipleCommands,
+    // processArgsPaths,
+    // processArgsWithSpace,
+
     pathsRead,
 
     systemEntryAddBasic,

@@ -115,109 +115,104 @@ function testAppShell()
 /* qqq : rewrite tests using assetFor and the best practices
 */
 
-function processArgsBase( test )
-{
-  let context = this;
-  let a = test.assetFor( false );
+// function processArgsBase( test )
+// {
+//   let context = this;
+//   let a = test.assetFor( false );
 
-  a.reflect();
+//   a.reflect();
 
-  // a.ready.then( () =>
-  // {
+//   var routinePath = a.abs( context.suiteTempPath, test.name );
 
-  // });
+//   function testApp()
+//   {
+//     _.include( 'wProcess' );
+//     _.include( 'wStringsExtra' )
+//     _.include( 'wFiles' )
 
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
+//     if( process.env.ignoreFirstTwoArgv )
+//     process.argv = process.argv.slice( 2 );
 
-  function testApp()
-  {
-    _.include( 'wProcess' );
-    _.include( 'wStringsExtra' )
-    _.include( 'wFiles' )
+//     var got = _.process.args({ caching : 0 });
+//     _.fileProvider.fileWrite( _.path.join( __dirname, 'got' ), JSON.stringify( got ) )
+//   }
 
-    if( process.env.ignoreFirstTwoArgv )
-    process.argv = process.argv.slice( 2 );
-
-    var got = _.process.args({ caching : 0 });
-    _.fileProvider.fileWrite( _.path.join( __dirname, 'got' ), JSON.stringify( got ) )
-  }
-
-  let testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  let testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
+//   let testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
+//   let testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
+//   _.fileProvider.fileWrite( testAppPath, testAppCode );
 
 
-  // let ready = new _.Consequence().take( null )
-  debugger;
-  let shell = _.process.starter
-  ({
-    execPath : 'node ' + testAppPath,
-    mode : 'spawn',
-    throwingExitCode : 0,
-    ready : a.ready
-  })
-  debugger
-  let temp = a.shell
+//   // let ready = new _.Consequence().take( null )
+//   debugger;
+//   let shell = _.process.starter
+//   ({
+//     execPath : 'node ' + testAppPath,
+//     mode : 'spawn',
+//     throwingExitCode : 0,
+//     ready : a.ready
+//   })
+//   debugger
+//   // let temp = a.shell
 
-  debugger
-  let filePath = _.path.join( routinePath, 'got' );
-  let interpreterPath = _.path.normalize( process.argv[ 0 ] );
-  let scriptPath = _.path.normalize( testAppPath );
+//   debugger
+//   let filePath = _.path.join( routinePath, 'got' );
+//   let interpreterPath = _.path.normalize( process.argv[ 0 ] );
+//   let scriptPath = _.path.normalize( testAppPath );
 
-  /* */
+//   /* */
 
-  shell({ args : [] })
-  .then( ( o ) =>
-  {
-    debugger
-    test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
-    var expected =
-    {
-      interpreterPath,
-      scriptPath,
-      interpreterArgs : [],
-      keyValDelimeter : ':',
-      subject : '',
-      map : Object.create( null ),
-      scriptArgs : [],
-      scriptArgsString : '',
-      subjects : [],
-      maps : [],
-    }
-    test.contains( got, expected );
-    return null;
-  })
+//   shell({ args : [] })
+//   .then( ( o ) =>
+//   {
+//     debugger
+//     test.identical( o.exitCode, 0 );
+//     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+//     var expected =
+//     {
+//       interpreterPath,
+//       scriptPath,
+//       interpreterArgs : [],
+//       keyValDelimeter : ':',
+//       subject : '',
+//       map : Object.create( null ),
+//       scriptArgs : [],
+//       scriptArgsString : '',
+//       subjects : [],
+//       maps : [],
+//     }
+//     test.contains( got, expected );
+//     return null;
+//   })
 
-  debugger
+//   debugger
 
-  /* */
+//   /* */
 
-  shell({ args : [ '' ] })
-  .then( ( o ) =>
-  {
-    debugger
-    test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
-    var expected =
-    {
-      interpreterPath,
-      scriptPath,
-      interpreterArgs : [],
-      keyValDelimeter : ':',
-      subject : '',
-      map : Object.create( null ),
-      scriptArgs : [ '' ],
-      scriptArgsString : '',
-      subjects : [],
-      maps : [],
-    }
-    test.contains( got, expected );
-    return null;
-  })
-  debugger
-  return a.ready;
-}
+//   shell({ args : [ '' ] })
+//   .then( ( o ) =>
+//   {
+//     debugger
+//     test.identical( o.exitCode, 0 );
+//     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+//     var expected =
+//     {
+//       interpreterPath,
+//       scriptPath,
+//       interpreterArgs : [],
+//       keyValDelimeter : ':',
+//       subject : '',
+//       map : Object.create( null ),
+//       scriptArgs : [ '' ],
+//       scriptArgsString : '',
+//       subjects : [],
+//       maps : [],
+//     }
+//     test.contains( got, expected );
+//     return null;
+//   })
+//   debugger
+//   return a.ready;
+// }
 
 //
 
@@ -19474,7 +19469,6 @@ var Proto =
   tests :
   {
 
-    processArgsBase,
     processArgsPropertiesBase,
     processArgsMultipleCommands,
     processArgsPaths,
