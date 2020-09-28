@@ -206,10 +206,126 @@ function processOnExitEvent( test )
 function processOffExitEvent( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
+  let a = test.assetFor( false );
+  let programPath = a.program( testApp );
+
+  /*  */
+
+  a.ready.thenKeep( () =>
+  {
+    test.case = 'nothing to off'
+    var o =
+    {
+      execPath :  'node ' + programPath,
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputPiping : 1,
+      outputCollecting : 1,
+    }
+
+    return _.process.start( o )
+    .then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      test.identical( _.strCount( got.output, 'timeOut handler executed'  ), 1 );
+      test.identical( _.strCount( got.output, 'processOnExit1: 0' ), 1 );
+      test.identical( _.strCount( got.output, 'processOnExit2: 0' ), 1 );
+      test.identical( _.strCount( got.output, 'processOnExit3: 0' ), 0 );
+      return null;
+    })
+
+  })
+
+  /*  */
+
+  .thenKeep( () =>
+  {
+    test.case = 'off single handler'
+    var o =
+    {
+      execPath :  'node ' + programPath,
+      args : 'off:handler1',
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputPiping : 1,
+      outputCollecting : 1,
+    }
+
+    return _.process.start( o )
+    .then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      test.identical( _.strCount( got.output, 'timeOut handler executed'  ), 1 );
+      test.identical( _.strCount( got.output, 'processOnExit1: 0' ), 0 );
+      test.identical( _.strCount( got.output, 'processOnExit2: 0' ), 1 );
+      test.identical( _.strCount( got.output, 'processOnExit3: 0' ), 0 );
+      return null;
+    })
+  })
+
+  /*  */
+
+  .thenKeep( () =>
+  {
+    test.case = 'off all handlers'
+    var o =
+    {
+      execPath :  'node ' + programPath,
+      args : 'off:[handler1,handler2]',
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputPiping : 1,
+      outputCollecting : 1,
+    }
+
+    return _.process.start( o )
+    .then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      test.identical( _.strCount( got.output, 'timeOut handler executed'  ), 1 );
+      test.identical( _.strCount( got.output, 'processOnExit1: 0' ), 0 );
+      test.identical( _.strCount( got.output, 'processOnExit2: 0' ), 0 );
+      test.identical( _.strCount( got.output, 'processOnExit3: 0' ), 0 );
+      return null;
+    })
+  })
+
+  /*  */
+
+  .thenKeep( () =>
+  {
+    test.case = 'off unregistered handler'
+    var o =
+    {
+      execPath :  'node ' + programPath,
+      args : 'off:handler3',
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputPiping : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    return _.process.start( o )
+    .then( ( got ) =>
+    {
+      test.notIdentical( got.exitCode, 0 );
+      test.identical( _.strCount( got.output, 'uncaught error' ), 2 );
+      test.identical( _.strCount( got.output, 'processOnExit1: -1' ), 1 );
+      test.identical( _.strCount( got.output, 'processOnExit2: -1' ), 1 );
+      test.identical( _.strCount( got.output, 'processOnExit3: -1' ), 0 );
+      return null;
+    })
+  })
+
+  return a.ready;
+
+  /* - */
 
   function testApp()
   {
+    let _ = require( toolsPath );
+
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
 
@@ -252,127 +368,6 @@ function processOffExitEvent( test )
       console.log( 'processOnExit3:', arg );
     }
   }
-
-  /* */
-
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-
-  var con = new _.Consequence().take( null )
-
-  /*  */
-
-  .thenKeep( () =>
-  {
-    test.case = 'nothing to off'
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'spawn',
-      stdio : 'pipe',
-      outputPiping : 1,
-      outputCollecting : 1,
-    }
-
-    return _.process.start( o )
-    .then( ( got ) =>
-    {
-      test.identical( got.exitCode, 0 );
-      test.identical( _.strCount( got.output, 'timeOut handler executed'  ), 1 );
-      test.identical( _.strCount( got.output, 'processOnExit1: 0' ), 1 );
-      test.identical( _.strCount( got.output, 'processOnExit2: 0' ), 1 );
-      test.identical( _.strCount( got.output, 'processOnExit3: 0' ), 0 );
-      return null;
-    })
-
-  })
-
-  /*  */
-
-  .thenKeep( () =>
-  {
-    test.case = 'off single handler'
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      args : 'off:handler1',
-      mode : 'spawn',
-      stdio : 'pipe',
-      outputPiping : 1,
-      outputCollecting : 1,
-    }
-
-    return _.process.start( o )
-    .then( ( got ) =>
-    {
-      test.identical( got.exitCode, 0 );
-      test.identical( _.strCount( got.output, 'timeOut handler executed'  ), 1 );
-      test.identical( _.strCount( got.output, 'processOnExit1: 0' ), 0 );
-      test.identical( _.strCount( got.output, 'processOnExit2: 0' ), 1 );
-      test.identical( _.strCount( got.output, 'processOnExit3: 0' ), 0 );
-      return null;
-    })
-  })
-
-  /*  */
-
-  .thenKeep( () =>
-  {
-    test.case = 'off all handlers'
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      args : 'off:[handler1,handler2]',
-      mode : 'spawn',
-      stdio : 'pipe',
-      outputPiping : 1,
-      outputCollecting : 1,
-    }
-
-    return _.process.start( o )
-    .then( ( got ) =>
-    {
-      test.identical( got.exitCode, 0 );
-      test.identical( _.strCount( got.output, 'timeOut handler executed'  ), 1 );
-      test.identical( _.strCount( got.output, 'processOnExit1: 0' ), 0 );
-      test.identical( _.strCount( got.output, 'processOnExit2: 0' ), 0 );
-      test.identical( _.strCount( got.output, 'processOnExit3: 0' ), 0 );
-      return null;
-    })
-  })
-
-  /*  */
-
-  .thenKeep( () =>
-  {
-    test.case = 'off unregistered handler'
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      args : 'off:handler3',
-      mode : 'spawn',
-      stdio : 'pipe',
-      outputPiping : 1,
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    return _.process.start( o )
-    .then( ( got ) =>
-    {
-      test.notIdentical( got.exitCode, 0 );
-      test.identical( _.strCount( got.output, 'uncaught error' ), 2 );
-      test.identical( _.strCount( got.output, 'processOnExit1: -1' ), 1 );
-      test.identical( _.strCount( got.output, 'processOnExit2: -1' ), 1 );
-      test.identical( _.strCount( got.output, 'processOnExit3: -1' ), 0 );
-      return null;
-    })
-  })
-
-  /*  */
-
-  return con;
 }
 
 //
