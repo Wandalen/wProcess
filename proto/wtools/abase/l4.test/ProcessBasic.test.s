@@ -10930,7 +10930,7 @@ function shellAfterDeath( test )
 
     _.time.out( 5000, () =>
     {
-      console.log( 'parent termination begin' )
+      console.log( 'parent termination begin' );
       _.procedure.terminationBegin();
       return null;
     })
@@ -10970,6 +10970,7 @@ function shellAfterDeath( test )
       execPath : 'node testAppParent.js',
       mode : 'spawn',
       outputCollecting : 1,
+      outputPiping : 1,
       currentPath : routinePath,
       ipc : 1,
     }

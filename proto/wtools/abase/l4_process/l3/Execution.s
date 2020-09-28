@@ -1096,7 +1096,7 @@ function start_body( o )
   {
     // if( o.when === 'instant' ) /* qqq : ? */
     // o.ready.error( _.err( 'Detached child with pid:', o.process.pid, 'is continuing execution after parent death.' ) );
-    _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
+    // _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
 
     o.disconnect();
   }
@@ -1109,6 +1109,7 @@ function start_body( o )
     // debugger;
     if( o.exitCode )
     return;
+    debugger
     o.exitCode = exitCode;
     exitCode = _.numberIs( exitCode ) ? exitCode : -1;
     if( o.applyingExitCode )
