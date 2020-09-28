@@ -52,8 +52,6 @@ function processArgsBase( test )
 
   a.reflect();
 
-  var routinePath = a.abs( context.suiteTempPath, test.name );
-
   function testApp()
   {
     _.include( 'wProcess' );
@@ -64,19 +62,15 @@ function processArgsBase( test )
     process.argv = process.argv.slice( 2 );
 
     var got = _.process.args({ caching : 0 });
-    a.fileProvider.fileWrite( a.abs( 'got' ), JSON.stringify( got ) )
+    _.fileProvider.fileWrite( _.path.join( __dirname, 'got' ), JSON.stringify( got ) )
   }
-
-  var toolsPath = a.path.nativize( _.path.resolve( __dirname, '../../../wtools/Tools.s' ) );
+  var toolsPath = a.path.nativize( _.path.resolve( __dirname, '../../../../wtools/Tools.s' ) );
   var toolsPathInclude = `let _ = require( '${ _.strEscape( toolsPath ) }' )\n`;
 
-  let testAppPath = a.path.nativize( a.abs( routinePath, 'testApp.js' ) );
+  let testAppPath = a.path.nativize( a.abs( a.routinePath, 'testApp.js' ) );
   let testAppCode = toolsPathInclude + testApp.toString() + '\ntestApp();';
   a.fileProvider.fileWrite( testAppPath, testAppCode );
 
-
-  // let ready = new _.Consequence().take( null )
-  debugger;
   let shell = _.process.starter
   ({
     execPath : 'node ' + testAppPath,
@@ -84,11 +78,8 @@ function processArgsBase( test )
     throwingExitCode : 0,
     ready : a.ready
   })
-  debugger
-  // let temp = a.shell
 
-  debugger
-  let filePath = a.abs( routinePath, 'got' );
+  let filePath = a.abs( a.routinePath, 'got' );
   let interpreterPath = a.path.normalize( process.argv[ 0 ] );
   let scriptPath = a.path.normalize( testAppPath );
 
@@ -97,9 +88,8 @@ function processArgsBase( test )
   shell({ args : [] })
   .then( ( o ) =>
   {
-    debugger
     test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got =   _.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
     {
       interpreterPath,
@@ -117,14 +107,11 @@ function processArgsBase( test )
     return null;
   })
 
-  debugger
-
   /* */
 
   shell({ args : [ '' ] })
   .then( ( o ) =>
   {
-    debugger
     test.identical( o.exitCode, 0 );
     var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
@@ -143,7 +130,6 @@ function processArgsBase( test )
     test.contains( got, expected );
     return null;
   })
-  debugger
   return a.ready;
 }
 
