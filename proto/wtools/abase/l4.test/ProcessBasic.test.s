@@ -12224,13 +12224,6 @@ function startDetachingChildExitsAfterParent( test )
 
     _.process.start( o );
 
-    o.onTerminate.finallyGive( ( err, got ) =>
-    {
-      if( !err )
-      throw _.err( 'Parent did not receive error from disconnect routine' );
-      _.errAttend( err );
-    })
-
     process.send( o.process.pid );
 
     _.time.out( 1000, () => o.disconnect() );
