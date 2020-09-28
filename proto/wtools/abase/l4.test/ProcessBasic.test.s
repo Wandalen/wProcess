@@ -5018,7 +5018,7 @@ function startNjsStructure( test )
     exp2.disconnect = options.disconnect;
     exp2.process = options.process;
     exp2.procedure = options.procedure;
-    exp2.procedureIsNew = true;
+    // exp2.procedureIsNew = true;
     exp2.currentPath = _.path.current();
     exp2.args = [];
     exp2.interpreterArgs = [];
@@ -5088,7 +5088,7 @@ function startNjsStructure( test )
     'exitCode' : null,
     'exitSignal' : null,
     'procedure' : null,
-    'procedureIsNew' : null,
+    // 'procedureIsNew' : null,
     'ended' : false,
   }
   test.identical( options, exp );
@@ -17503,114 +17503,87 @@ function terminate( test )
     return ready;
   })
 
-  /* exec */
-
   /*
     zzz Vova: shell,exec modes have different behaviour on Windows,OSX and Linux
     look for solution that allow to have same behaviour on each mode
   */
 
-  // .thenKeep( () =>
-  // {
-  //   var o =
-  //   {
-  //     execPath :  'node ' + testAppPath,
-  //     mode : 'exec',
-  //     outputCollecting : 1,
-  //     throwingExitCode : 0
-  //   }
-  //
-  //   let ready = _.process.start( o )
-  //
-  //   o.process.stdout.on( 'data', ( data ) =>
-  //   {
-  //     data = data.toString();
-  //     if( _.strHas( data, 'ready' ))
-  //     _.process.terminate({ process : o.process, timeOut : 0 });
-  //   })
-  //
-  //   ready.thenKeep( ( got ) =>
-  //   {
-  //     if( process.platform === 'linux' )
-  //     {
-  //       test.identical( got.exitCode, null );
-  //       test.identical( got.exitSignal, 'SIGINT' );
-  //       test.is( !_.strHas( got.output, 'SIGINT' ) );
-  //       test.is( _.strHas( got.output, 'Application timeout!' ) );
-  //     }
-  //     else if( process.platform === 'win32' )
-  //     {
-  //       test.identical( got.exitCode, 0 );
-  //       test.identical( got.exitSignal, null );
-  //       test.is( !_.strHas( got.output, 'SIGINT' ) );
-  //       test.is( _.strHas( got.output, 'Application timeout!' ) );
-  //     }
-  //     else
-  //     {
-  //       test.identical( got.exitCode, 0 );
-  //       test.identical( got.exitSignal, null );
-  //       test.is( _.strHas( got.output, 'SIGINT' ) );
-  //       test.is( !_.strHas( got.output, 'Application timeout!' ) );
-  //     }
-  //     return null;
-  //   })
-  //
-  //   return ready;
-  // })
-  //
-  // /* */
-  //
-  // .thenKeep( () =>
-  // {
-  //   var o =
-  //   {
-  //     execPath :  'node ' + testAppPath,
-  //     mode : 'exec',
-  //     outputCollecting : 1,
-  //     throwingExitCode : 0
-  //   }
-  //
-  //   let ready = _.process.start( o )
-  //
-  //   o.process.stdout.on( 'data', ( data ) =>
-  //   {
-  //     data = data.toString();
-  //     if( _.strHas( data, 'ready' ))
-  //     _.process.terminate({ pid : o.process.pid, timeOut : 0 });
-  //   })
-  //
-  //   ready.thenKeep( ( got ) =>
-  //   {
-  //     if( process.platform === 'linux' )
-  //     {
-  //       test.identical( got.exitCode, null );
-  //       test.identical( got.exitSignal, 'SIGINT' );
-  //       test.is( !_.strHas( got.output, 'SIGINT' ) );
-  //       test.is( _.strHas( got.output, 'Application timeout!' ) );
-  //     }
-  //     else if( process.platform === 'win32' )
-  //     {
-  //       test.identical( got.exitCode, 0 );
-  //       test.identical( got.exitSignal, null );
-  //       test.is( !_.strHas( got.output, 'SIGINT' ) );
-  //       test.is( _.strHas( got.output, 'Application timeout!' ) );
-  //     }
-  //     else
-  //     {
-  //       test.identical( got.exitCode, 0 );
-  //       test.identical( got.exitSignal, null );
-  //       test.is( _.strHas( got.output, 'SIGINT' ) );
-  //       test.is( !_.strHas( got.output, 'Application timeout!' ) );
-  //     }
-  //     return null;
-  //   })
-  //
-  //   return ready;
-  // })
-
   /* */
 
   return con;
+}
+
+//
+
+function terminateStructural( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let programPath = a.program( program1 );
+
+  a.ready.timeOut( 1000 );
+
+  /* */
+
+  let options =
+  {
+    execPath : programPath,
+    currentPath : a.currentPath,
+    throwingExitCode : 1,
+    applyingExitCode : 0,
+    inputMirroring : 1,
+    outputCollecting : 1,
+    stdio : 'pipe',
+    sync : 0,
+    deasync : 0,
+    ready : a.ready,
+  }
+
+  _.process.startNjs( options );
+
+  options.onStart
+  .then( ( op ) =>
+  {
+    test.is( options === op );
+    test.identical( options.output, '' );
+    test.identical( options.exitCode, null );
+    test.identical( options.exitSignal, null );
+    test.identical( options.ended, false );
+    test.identical( options.terminationReason, null );
+    test.is( options.onStart !== options.ready );
+    test.is( options.onTerminate === options.ready );
+    test.is( !!options.process );
+    _.time.out( context.dt1, () => _.process.terminate( options.process ) );
+    // _.process.terminate( options.process );
+    return null;
+  });
+
+  options.onTerminate
+  .finally( ( err, op ) =>
+  {
+    _.errAttend( err );
+    test.is( _.errIs( err ) );
+    test.identical( options.output, 'program1\n' );
+    test.identical( options.exitCode, null );
+    test.identical( options.exitSignal, 'SIGINT' );
+    test.identical( options.ended, true );
+    test.identical( options.terminationReason, 'signal' );
+    return null;
+  });
+
+  /* */
+
+  return a.ready;
+
+  /* */
+
+  function program1()
+  {
+    let _ = require( toolsPath );
+    console.log( 'program1' );
+    setTimeout( () => {}, 15000 );
+  }
+
 }
 
 //
@@ -19753,11 +19726,17 @@ var Proto =
 
   context :
   {
+
     suiteTempPath : null,
     testApp,
     testAppShell,
     toolsPath : null,
     toolsPathInclude : null,
+
+    dt0 : 100,
+    dt1 : 1000,
+    dt2 : 5000,
+
   },
 
   tests :
@@ -19887,6 +19866,7 @@ var Proto =
     kill,
     killWithChildren,
     terminate,
+    terminateStructural,
     terminateComplex,
     terminateDetachedComplex,
     terminateWithChildren,

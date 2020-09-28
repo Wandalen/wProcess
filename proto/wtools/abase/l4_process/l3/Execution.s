@@ -363,6 +363,9 @@ function start_body( o )
   function handleClose( exitCode, exitSignal )
   {
 
+    if( o.state === 'terminated' || o.state === 'error' ) /* xxx qqq : move above? */
+    return;
+
     // debugger;
     // yyy qqq
     // if( o.procedure )
@@ -379,9 +382,6 @@ function start_body( o )
       if( exitCode )
       log( infoGet() );
     }
-
-    if( o.state === 'terminated' || o.state === 'error' ) /* xxx qqq : move above? */
-    return;
 
     o.state = 'terminated';
 
@@ -1129,7 +1129,7 @@ function start_body( o )
     let result = '';
     result += 'Launched as ' + _.strQuote( o.fullExecPath ) + '\n';
     result += 'Launched at ' + _.strQuote( o.currentPath ) + '\n';
-    debugger;
+    // debugger;
     if( stderrOutput.length )
     result += '\n -> Stderr' + '\n' + ' -  ' + _.strLinesIndentation( stderrOutput, ' -  ' ) + '\n -< Stderr';
     return result;
