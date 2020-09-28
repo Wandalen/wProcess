@@ -14197,7 +14197,7 @@ function startNoEndBug1( test )
     test.is( o.onStart === result );
     test.is( _.consequenceIs( o.onStart ) )
 
-    result = test.shouldThrowErrorAsync( o.onStart );
+    result = test.shouldThrowErrorAsync( o.onTerminate );
 
     result.then( () => _.time.out( 2000 ) )
     result.then( () =>
