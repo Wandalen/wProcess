@@ -7,7 +7,6 @@ if( typeof module !== 'undefined' )
 {
 
   let _ = require( './../../../../wtools/Tools.s' );
-  debugger;
   _.include( 'wTesting' );
   _.include( 'wFiles' );
   _.include( 'wProcessWatcher' );
@@ -163,13 +162,6 @@ function systemEntryAddOptionAllowingNotInPath( test )
 
 //
 
-// function systemEntryAddOptionEntryDirPath( test )
-// {
-//
-// }
-
-//
-
 function systemEntryAddOptionForcing( test )
 {
   let context = this;
@@ -237,10 +229,10 @@ var Proto =
   tests :
   {
     pathsRead,
+
     systemEntryAddBasic,
     systemEntryAddOptionAllowingMissed,
     systemEntryAddOptionAllowingNotInPath,
-    // systemEntryAddOptionEntryDirPath,
     systemEntryAddOptionForcing,
   }
 
