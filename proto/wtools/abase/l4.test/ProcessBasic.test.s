@@ -770,7 +770,9 @@ shell.timeOut = 30000;
 function shellSync( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
+  let a = test.assetFor( false );
+  let programPath = a.program( testAppShell );
+
   var commonDefaults =
   {
     outputPiping : 1,
@@ -782,10 +784,7 @@ function shellSync( test )
 
   /* */
 
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = context.toolsPathInclude + context.testAppShell.toString() + '\ntestAppShell();';
-  var expectedOutput = testAppPath + '\n';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
+  var expectedOutput = programPath + '\n';
 
   var o;
 
@@ -794,7 +793,7 @@ function shellSync( test )
   test.case = 'mode : spawn';
   o =
   {
-    execPath :  'node ' + testAppPath,
+    execPath :  'node ' + programPath,
     mode : 'spawn',
     stdio : 'pipe'
   }
@@ -819,7 +818,7 @@ function shellSync( test )
   test.case = 'mode : shell';
   o =
   {
-    execPath :  'node ' + testAppPath,
+    execPath :  'node ' + programPath,
     mode : 'shell',
     stdio : 'pipe'
   }
@@ -841,7 +840,7 @@ function shellSync( test )
   test.case = 'shell, stop process using timeOut';
   o =
   {
-    execPath :  'node ' + testAppPath + ' loop : 1',
+    execPath :  'node ' + programPath + ' loop : 1',
     mode : 'shell',
     stdio : 'pipe',
     timeOut : 500
@@ -855,7 +854,7 @@ function shellSync( test )
   test.case = 'spawn, return good code';
   o =
   {
-    execPath :  'node ' + testAppPath + ' exitWithCode : 0',
+    execPath :  'node ' + programPath + ' exitWithCode : 0',
     mode : 'spawn',
     stdio : 'pipe'
   }
@@ -868,7 +867,7 @@ function shellSync( test )
   test.case = 'spawn, return ext code 1';
   o =
   {
-    execPath :  'node ' + testAppPath + ' exitWithCode : 1',
+    execPath :  'node ' + programPath + ' exitWithCode : 1',
     mode : 'spawn',
     stdio : 'pipe'
   }
@@ -881,7 +880,7 @@ function shellSync( test )
   test.case = 'spawn, return ext code 2';
   o =
   {
-    execPath :  'node ' + testAppPath + ' exitWithCode : 2',
+    execPath :  'node ' + programPath + ' exitWithCode : 2',
     mode : 'spawn',
     stdio : 'pipe'
   }
@@ -894,7 +893,7 @@ function shellSync( test )
   test.case = 'shell, return good code';
   o =
   {
-    execPath :  'node ' + testAppPath + ' exitWithCode : 0',
+    execPath :  'node ' + programPath + ' exitWithCode : 0',
     mode : 'shell',
     stdio : 'pipe'
   }
@@ -908,7 +907,7 @@ function shellSync( test )
   test.case = 'shell, return bad code';
   o =
   {
-    execPath :  'node ' + testAppPath + ' exitWithCode : 1',
+    execPath :  'node ' + programPath + ' exitWithCode : 1',
     mode : 'shell',
     stdio : 'pipe'
   }
