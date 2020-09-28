@@ -505,7 +505,7 @@ function processArgsPaths( test )
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
     {
       interpreterPath : 'interpreter',
@@ -534,7 +534,7 @@ function processArgsPaths( test )
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
     {
       interpreterPath : 'interpreter',
@@ -569,7 +569,7 @@ function processArgsPaths( test )
     process.argv = process.argv.slice( 2 );
 
     var got = _.process.args({ caching : 0 });
-    _.fileProvider.fileWrite( _.path.join( __dirname, 'got' ), JSON.stringify( got ) )
+    a.fileProvider.fileWrite( _.path.join( __dirname, 'got' ), JSON.stringify( got ) )
   }
 }
 
@@ -603,7 +603,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases */
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'subject', 'option:"value with space"' ],
@@ -619,6 +619,8 @@ function processArgsWithSpace( test ) /* qqq : split test cases */
     return null;
   })
 
+  /* */
+
   a.ready.then( () =>
   {
     /* process.args should quote arguments that contain spaces and are not quoted already */
@@ -629,7 +631,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases */
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'subject', `option:'value with space'` ],
@@ -645,6 +647,8 @@ function processArgsWithSpace( test ) /* qqq : split test cases */
     return null;
   })
 
+  /* */
+
   a.ready.then( () =>
   {
     /* process.args should quote arguments that contain spaces and are not quoted already */
@@ -655,7 +659,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases */
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'subject', 'option:`value with space`' ],
@@ -671,6 +675,8 @@ function processArgsWithSpace( test ) /* qqq : split test cases */
     return null;
   })
 
+  /* */
+
   a.ready.then( () =>
   {
     test.description = 'subject + option, option value is quoted and contains space'
@@ -681,7 +687,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases */
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'subject', 'option', ':', 'value with space' ],
@@ -696,6 +702,8 @@ function processArgsWithSpace( test ) /* qqq : split test cases */
     test.contains( got, expected );
     return null;
   })
+
+  /* */
 
   a.ready.then( () =>
   {
@@ -707,7 +715,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases */
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'subject', 'option', ':', 'value with space' ],
@@ -723,6 +731,8 @@ function processArgsWithSpace( test ) /* qqq : split test cases */
     return null;
   })
 
+  /* */
+
   a.ready.then( () =>
   {
     /* process.args should quote arguments that contain spaces and are not quoted already */
@@ -733,7 +743,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases */
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'subject', 'option', ':', '"value with space"' ],
@@ -749,6 +759,8 @@ function processArgsWithSpace( test ) /* qqq : split test cases */
     return null;
   })
 
+  /* */
+
   a.ready.then( () =>
   {
     /* process.args should quote arguments that contain spaces and are not quoted already */
@@ -759,7 +771,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases */
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'subject', 'option:value', 'with', 'space' ],
@@ -774,6 +786,8 @@ function processArgsWithSpace( test ) /* qqq : split test cases */
     test.contains( got, expected );
     return null;
   })
+
+  /* */
 
   a.ready.then( () =>
   {
@@ -785,7 +799,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases */
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'subject', 'option:value', 'with', 'space' ],
@@ -801,6 +815,8 @@ function processArgsWithSpace( test ) /* qqq : split test cases */
     return null;
   })
 
+  /* */
+
   a.ready.then( () =>
   {
     /* process.args should quote arguments that contain spaces and are not quoted already */
@@ -811,7 +827,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases */
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'subject', 'option', ':', 'value', 'with', 'space' ],
@@ -827,6 +843,8 @@ function processArgsWithSpace( test ) /* qqq : split test cases */
     return null;
   })
 
+  /* */
+
   a.ready.then( () =>
   {
     /* process.args should quote arguments that contain spaces and are not quoted already */
@@ -837,7 +855,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases */
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'option:"value with space"' ],
@@ -853,6 +871,8 @@ function processArgsWithSpace( test ) /* qqq : split test cases */
     return null;
   })
 
+  /* */
+
   a.ready.then( () =>
   {
     /* process.args should quote arguments that contain spaces and are not quoted already */
@@ -863,7 +883,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases */
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'option', ':', '"value with space"' ],
@@ -879,6 +899,8 @@ function processArgsWithSpace( test ) /* qqq : split test cases */
     return null;
   })
 
+  /* */
+
   a.ready.then( () =>
   {
     /* process.args should quote arguments that contain spaces and are not quoted already */
@@ -889,7 +911,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases */
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'option', ':', 'value with space' ],
@@ -905,6 +927,8 @@ function processArgsWithSpace( test ) /* qqq : split test cases */
     return null;
   })
 
+  /* */
+
   a.ready.then( () =>
   {
     /* process.args should quote arguments that contain spaces and are not quoted already */
@@ -915,7 +939,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases */
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'option:value', 'with', 'space' ],
@@ -931,6 +955,8 @@ function processArgsWithSpace( test ) /* qqq : split test cases */
     return null;
   })
 
+  /* */
+
   a.ready.then( () =>
   {
     /* process.args should quote arguments that contain spaces and are not quoted already */
@@ -941,7 +967,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases */
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
     {
       'scriptArgs' : [ 'option', ':', 'value', 'with', 'space' ],
@@ -956,6 +982,8 @@ function processArgsWithSpace( test ) /* qqq : split test cases */
     test.contains( got, expected );
     return null;
   })
+
+  /* */
 
   a.ready.then( () =>
   {
