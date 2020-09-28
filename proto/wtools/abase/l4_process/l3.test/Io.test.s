@@ -49,7 +49,7 @@ function suiteEnd()
 function processArgsBase( test )
 {
   let context = this;
-  let a = test.assetFor( 'process' );
+  let a = test.assetFor( false );
   let programPath = a.program( testApp );
 
   let shell = _.process.starter
@@ -60,7 +60,7 @@ function processArgsBase( test )
     ready : a.ready
   })
 
-  let filePath = a.abs( a.routinePath, 'got' );
+  let filePath = a.abs( 'got' );
   let interpreterPath = a.path.normalize( process.argv[ 0 ] );
   let scriptPath = a.path.normalize( programPath );
 
