@@ -1285,36 +1285,22 @@ shell2.timeOut = 30000;
 function shellCurrentPath( test ) /* qqq : split by mode */
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
+  let a = test.assetFor( false );
+  let programPath = a.program( testApp );
 
   /* */
 
-  function testApp()
-  {
-    debugger
-    console.log( process.cwd() ); /* qqq : should not be visible if verbosity of tester is low, if possible */
-    if( process.send )
-    process.send({ currentPath : process.cwd() })
-  }
-
-  /* */
-
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = testApp.toString() + '\ntestApp();';
   var expectedOutput = __dirname + '\n'
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
 
   /* - */
 
-  var con = new _.Consequence().take( null );
-
-  con.thenKeep( function()
+  a.ready.thenKeep( function()
   {
     test.case = 'mode : shell';
 
     let o =
     {
-      execPath :  'node ' + testAppPath,
+      execPath :  'node ' + programPath,
       currentPath : __dirname,
       mode : 'shell',
       stdio : 'pipe',
@@ -1330,13 +1316,13 @@ function shellCurrentPath( test ) /* qqq : split by mode */
 
   /**/
 
-  con.thenKeep( function()
+  a.ready.thenKeep( function()
   {
     test.case = 'mode : spawn';
 
     let o =
     {
-      execPath :  'node ' + testAppPath,
+      execPath :  'node ' + programPath,
       currentPath : __dirname,
       mode : 'spawn',
       stdio : 'pipe',
@@ -1375,7 +1361,7 @@ function shellCurrentPath( test ) /* qqq : split by mode */
 
   /**/
 
-  con.thenKeep( function()
+  a.ready.thenKeep( function()
   {
     test.case = 'mode : fork';
 
@@ -1383,7 +1369,7 @@ function shellCurrentPath( test ) /* qqq : split by mode */
 
     let o =
     {
-      execPath : testAppPath,
+      execPath : programPath,
       currentPath : __dirname,
       mode : 'fork',
     }
@@ -1403,16 +1389,16 @@ function shellCurrentPath( test ) /* qqq : split by mode */
 
   /* */
 
-  con.thenKeep( function()
+  a.ready.thenKeep( function()
   {
     test.case = 'normalized, currentPath leads to root of current drive, mode : spawn';
 
-    let trace = _.path.traceToRoot( _.path.normalize( __dirname ) );
+    let trace = a.path.traceToRoot( a.path.normalize( __dirname ) );
     let currentPath = trace[ 1 ];
 
     let o =
     {
-      execPath :  'node ' + testAppPath,
+      execPath :  'node ' + programPath,
       currentPath,
       mode : 'spawn',
       stdio : 'pipe',
@@ -1422,7 +1408,7 @@ function shellCurrentPath( test ) /* qqq : split by mode */
     return _.process.start( o )
     .thenKeep( function( got )
     {
-      test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) );
+      test.identical( _.strStrip( got.output ), a.path.nativize( currentPath ) );
       return null;
     })
   })
@@ -1430,16 +1416,16 @@ function shellCurrentPath( test ) /* qqq : split by mode */
   /* */
 
 
-  con.thenKeep( function()
+  a.ready.thenKeep( function()
   {
     test.case = 'normalized with slash, currentPath leads to root of current drive, mode : spawn';
 
-    let trace = _.path.traceToRoot( _.path.normalize( __dirname ) );
+    let trace = a.path.traceToRoot( a.path.normalize( __dirname ) );
     let currentPath = trace[ 1 ] + '/';
 
     let o =
     {
-      execPath :  'node ' + testAppPath,
+      execPath :  'node ' + programPath,
       currentPath,
       mode : 'spawn',
       stdio : 'pipe',
@@ -1450,7 +1436,7 @@ function shellCurrentPath( test ) /* qqq : split by mode */
     .thenKeep( function( got )
     {
       if( process.platform === 'win32')
-      test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) );
+      test.identical( _.strStrip( got.output ), a.path.nativize( currentPath ) );
       else
       test.identical( _.strStrip( got.output ), trace[ 1 ] );
       return null;
@@ -1459,16 +1445,16 @@ function shellCurrentPath( test ) /* qqq : split by mode */
 
   /* */
 
-  con.thenKeep( function()
+  a.ready.thenKeep( function()
   {
     test.case = 'nativized, currentPath leads to root of current drive, mode : spawn';
 
-    let trace = _.path.traceToRoot( __dirname );
-    let currentPath = _.path.nativize( trace[ 1 ] );
+    let trace = a.path.traceToRoot( __dirname );
+    let currentPath = a.path.nativize( trace[ 1 ] );
 
     let o =
     {
-      execPath :  'node ' + testAppPath,
+      execPath :  'node ' + programPath,
       currentPath,
       mode : 'spawn',
       stdio : 'pipe',
@@ -1485,16 +1471,16 @@ function shellCurrentPath( test ) /* qqq : split by mode */
 
   /*  */
 
-  con.thenKeep( function()
+  a.ready.thenKeep( function()
   {
     test.case = 'normalized, currentPath leads to root of current drive, mode : fork';
 
-    let trace = _.path.traceToRoot( _.path.normalize( __dirname ) );
+    let trace = a.path.traceToRoot( a.path.normalize( __dirname ) );
     let currentPath = trace[ 1 ];
 
     let o =
     {
-      execPath : testAppPath,
+      execPath : programPath,
       currentPath,
       mode : 'fork',
       stdio : 'pipe',
@@ -1504,7 +1490,7 @@ function shellCurrentPath( test ) /* qqq : split by mode */
     return _.process.start( o )
     .thenKeep( function( got )
     {
-      test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) );
+      test.identical( _.strStrip( got.output ), a.path.nativize( currentPath ) );
       return null;
     })
   })
@@ -1512,16 +1498,16 @@ function shellCurrentPath( test ) /* qqq : split by mode */
   /* */
 
 
-  con.thenKeep( function()
+  a.ready.thenKeep( function()
   {
     test.case = 'normalized with slash, currentPath leads to root of current drive, mode : fork';
 
-    let trace = _.path.traceToRoot( _.path.normalize( __dirname ) );
+    let trace = a.path.traceToRoot( a.path.normalize( __dirname ) );
     let currentPath = trace[ 1 ] + '/';
 
     let o =
     {
-      execPath : testAppPath,
+      execPath : programPath,
       currentPath,
       mode : 'fork',
       stdio : 'pipe',
@@ -1532,7 +1518,7 @@ function shellCurrentPath( test ) /* qqq : split by mode */
     .thenKeep( function( got )
     {
       if( process.platform === 'win32')
-      test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) );
+      test.identical( _.strStrip( got.output ), a.path.nativize( currentPath ) );
       else
       test.identical( _.strStrip( got.output ), trace[ 1 ] );
       return null;
@@ -1541,16 +1527,16 @@ function shellCurrentPath( test ) /* qqq : split by mode */
 
   /* */
 
-  con.thenKeep( function()
+  a.ready.thenKeep( function()
   {
     test.case = 'nativized, currentPath leads to root of current drive, mode : fork';
 
-    let trace = _.path.traceToRoot( __dirname );
-    let currentPath = _.path.nativize( trace[ 1 ] );
+    let trace = a.path.traceToRoot( __dirname );
+    let currentPath = a.path.nativize( trace[ 1 ] );
 
     let o =
     {
-      execPath : testAppPath,
+      execPath : programPath,
       currentPath,
       mode : 'fork',
       stdio : 'pipe',
@@ -1567,16 +1553,16 @@ function shellCurrentPath( test ) /* qqq : split by mode */
 
   /* */
 
-  con.thenKeep( function()
+  a.ready.thenKeep( function()
   {
     test.case = 'normalized, currentPath leads to root of current drive, mode : shell';
 
-    let trace = _.path.traceToRoot( _.path.normalize( __dirname ) );
+    let trace = a.path.traceToRoot( a.path.normalize( __dirname ) );
     let currentPath = trace[ 1 ];
 
     let o =
     {
-      execPath :  'node ' + testAppPath,
+      execPath :  'node ' + programPath,
       currentPath,
       mode : 'shell',
       stdio : 'pipe',
@@ -1586,7 +1572,7 @@ function shellCurrentPath( test ) /* qqq : split by mode */
     return _.process.start( o )
     .thenKeep( function( got )
     {
-      test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) );
+      test.identical( _.strStrip( got.output ), a.path.nativize( currentPath ) );
       return null;
     })
   })
@@ -1594,16 +1580,16 @@ function shellCurrentPath( test ) /* qqq : split by mode */
   /* */
 
 
-  con.thenKeep( function()
+  a.ready.thenKeep( function()
   {
     test.case = 'normalized with slash, currentPath leads to root of current drive, mode : shell';
 
-    let trace = _.path.traceToRoot( _.path.normalize( __dirname ) );
+    let trace = a.path.traceToRoot( a.path.normalize( __dirname ) );
     let currentPath = trace[ 1 ] + '/';
 
     let o =
     {
-      execPath :  'node ' + testAppPath,
+      execPath :  'node ' + programPath,
       currentPath,
       mode : 'shell',
       stdio : 'pipe',
@@ -1614,7 +1600,7 @@ function shellCurrentPath( test ) /* qqq : split by mode */
     .thenKeep( function( got )
     {
       if( process.platform === 'win32')
-      test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) );
+      test.identical( _.strStrip( got.output ), a.path.nativize( currentPath ) );
       else
       test.identical( _.strStrip( got.output ), trace[ 1 ] );
       return null;
@@ -1623,16 +1609,16 @@ function shellCurrentPath( test ) /* qqq : split by mode */
 
   /* */
 
-  con.thenKeep( function()
+  a.ready.thenKeep( function()
   {
     test.case = 'nativized, currentPath leads to root of current drive, mode : shell';
 
-    let trace = _.path.traceToRoot( __dirname );
-    let currentPath = _.path.nativize( trace[ 1 ] )
+    let trace = a.path.traceToRoot( __dirname );
+    let currentPath = a.path.nativize( trace[ 1 ] )
 
     let o =
     {
-      execPath :  'node ' + testAppPath,
+      execPath :  'node ' + programPath,
       currentPath,
       mode : 'shell',
       stdio : 'pipe',
@@ -1732,7 +1718,18 @@ function shellCurrentPath( test ) /* qqq : split by mode */
 
   /* */
 
-  return con;
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    debugger
+    console.log( process.cwd() ); /* qqq : should not be visible if verbosity of tester is low, if possible */
+    if( process.send )
+    process.send({ currentPath : process.cwd() })
+  }
+
 }
 
 shellCurrentPath.timeOut = 30000;
