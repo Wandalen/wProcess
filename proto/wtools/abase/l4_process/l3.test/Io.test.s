@@ -49,6 +49,8 @@ function processArgsBase( test )
 {
   let context = this;
   let a = test.assetFor( 'process' );
+  var toolsPath = a.path.nativize( a.path.resolve( __dirname, '../../../../wtools/Tools.s' ) );
+  var toolsPathInclude = `let _ = require( '${ _.strEscape( toolsPath ) }' )\n`;
 
   a.reflect();
 
@@ -64,11 +66,10 @@ function processArgsBase( test )
     var got = _.process.args({ caching : 0 });
     _.fileProvider.fileWrite( _.path.join( __dirname, 'got' ), JSON.stringify( got ) )
   }
-  var toolsPath = a.path.nativize( _.path.resolve( __dirname, '../../../../wtools/Tools.s' ) );
-  var toolsPathInclude = `let _ = require( '${ _.strEscape( toolsPath ) }' )\n`;
 
   let testAppPath = a.path.nativize( a.abs( a.routinePath, 'testApp.js' ) );
   let testAppCode = toolsPathInclude + testApp.toString() + '\ntestApp();';
+
   a.fileProvider.fileWrite( testAppPath, testAppCode );
 
   let shell = _.process.starter
@@ -89,7 +90,7 @@ function processArgsBase( test )
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got =   _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got =   a.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
     {
       interpreterPath,
@@ -113,7 +114,7 @@ function processArgsBase( test )
   .then( ( o ) =>
   {
     test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
+    var got = a.fileProvider.fileRead({ filePath, encoding : 'json' });
     var expected =
     {
       interpreterPath,
