@@ -5,7 +5,6 @@
 
 if( typeof module !== 'undefined' )
 {
-
   let _ = require( '../../../wtools/Tools.s' );
 
   _.include( 'wTesting' );
@@ -13,7 +12,6 @@ if( typeof module !== 'undefined' )
   _.include( 'wProcessWatcher' );
 
   require( '../l4_process/Basic.s' );
-
 }
 
 /*
@@ -111,295 +109,8 @@ function testAppShell()
 // test
 // --
 
-/* qqq : rewrite this test properly
-should start separate appication
-aaa : done
+/* qqq : rewrite tests using assetFor and the best practices
 */
-
-// function processArgs( test )
-// {
-//   var _argv =  process.argv.slice( 0, 2 );
-//   _argv = _.path.s.normalize( _argv );
-
-//   /* */
-
-//   var argv = [];
-//   argv.unshift.apply( argv, _argv );
-//   var got = _.process.args({ argv, caching : 0 });
-//   var expected =
-//   {
-//     interpreterPath : _argv[ 0 ],
-//     scriptPath : _argv[ 1 ],
-//     interpreterArgs : [],
-//     keyValDelimeter : ':',
-//     subject : '',
-//     map : Object.create( null ),
-//     scriptArgs : [],
-//     scriptArgsString : '',
-//     subjects : [],
-//     maps : [],
-//   }
-//   test.contains( got, expected );
-
-//   /* */
-
-//   var argv = [ '' ];
-//   argv.unshift.apply( argv, _argv );
-//   var got = _.process.args({ argv, caching : 0 });
-//   var expected =
-//   {
-//     interpreterPath : _argv[ 0 ],
-//     scriptPath : _argv[ 1 ],
-//     interpreterArgs : [],
-//     keyValDelimeter : ':',
-//     subject : '',
-//     map : Object.create( null ),
-//     scriptArgs : [ '' ],
-//     scriptArgsString : '',
-//     subjects : [],
-//     maps : [],
-//   }
-//   test.contains( got, expected );
-
-//   /* */
-
-//   var argv = [ 'x', ':', 'aa', 'bbb :' ];
-//   argv.unshift.apply( argv, _argv );
-//   var got = _.process.args({ argv, caching : 0 });
-//   var expected =
-//   {
-//     interpreterPath : _argv[ 0 ],
-//     scriptPath : _argv[ 1 ],
-//     interpreterArgs : [],
-//     keyValDelimeter : ':',
-//     map : { x : 'aa', bbb : '' },
-//     subject : '',
-//     scriptArgs : [ 'x', ':', 'aa', 'bbb :' ]
-//   }
-//   test.contains( got, expected );
-
-//   /* */
-
-//   var argv = [ 'x', ' : ', 'y' ];
-//   argv.unshift.apply( argv, _argv );
-//   var got = _.process.args({ argv, caching : 0 });
-//   var expected =
-//   {
-//     interpreterPath : _argv[ 0 ],
-//     scriptPath : _argv[ 1 ],
-//     interpreterArgs : [],
-//     keyValDelimeter : ':',
-//     map : { x : 'y' },
-//     subject : '',
-//     scriptArgs :[ 'x', ' : ', 'y' ]
-//   }
-//   test.contains( got, expected );
-
-//   /* */
-
-//   var argv = [ 'x', ' :', 'y', 'x', ' :', '1' ];
-//   argv.unshift.apply( argv, _argv );
-//   var got = _.process.args({ argv, caching : 0 });
-//   var expected =
-//   {
-//     interpreterPath : _argv[ 0 ],
-//     scriptPath : _argv[ 1 ],
-//     interpreterArgs : [],
-//     keyValDelimeter : ':',
-//     map : { x : 1 },
-//     subject : '',
-//     scriptArgs : [ 'x', ' :', 'y', 'x', ' :', '1']
-//   }
-//   test.contains( got, expected );
-
-//   /* */
-
-//   var argv = [ 'a b c d', 'x', ' :', 'y', 'xyz', 'y', ' :', 1 ];
-//   argv.unshift.apply( argv, _argv );
-//   var got = _.process.args({ argv, caching : 0 });
-//   var expected =
-//   {
-//     interpreterPath : _argv[ 0 ],
-//     scriptPath : _argv[ 1 ],
-//     interpreterArgs : [],
-//     keyValDelimeter : ':',
-//     map : { x : 'y xyz', y : 1 },
-//     subject : 'a b c d',
-//     scriptArgs : [ 'a b c d', 'x', ' :', 'y', 'xyz', 'y', ' :', 1 ]
-//   }
-//   test.contains( got, expected );
-
-//   /* */
-
-//   var argv =
-//   [
-//     'filePath',
-//     'a :', 1,
-//     'b', ' :2',
-//     'c :  ', 3,
-//     'd', ' :  4',
-//     'e', ' :  ', 5
-//   ];
-//   argv.unshift.apply( argv, _argv );
-//   var got = _.process.args({ argv, caching : 0 });
-//   var expected =
-//   {
-//     interpreterPath : _argv[ 0 ],
-//     scriptPath : _argv[ 1 ],
-//     interpreterArgs : [],
-//     keyValDelimeter : ':',
-//     map : { a : 1, b : 2, c : 3, d : 4, e : 5 },
-//     subject : 'filePath',
-//     scriptArgs :
-//     [
-//       'filePath',
-//       'a :', 1,
-//       'b', ' :2',
-//       'c :  ', 3,
-//       'd', ' :  4',
-//       'e', ' :  ', 5
-//     ]
-//   }
-//   test.contains( got, expected );
-
-//   /* */
-
-//   var argv = [ 'a :b :c :d', 'x', ' :', 0, 'y', ' :', 1 ];
-//   argv.unshift.apply( argv, _argv );
-//   var got = _.process.args({ argv, caching : 0 });
-//   var expected =
-//   {
-//     interpreterPath : _argv[ 0 ],
-//     scriptPath : _argv[ 1 ],
-//     interpreterArgs : [],
-//     keyValDelimeter : ':',
-//     map : { a : '', b : '', c : 'd', x : 0, y : 1 },
-//     subject : '',
-//     scriptArgs : [ 'a :b :c :d', 'x', ' :', 0, 'y', ' :', 1 ]
-//   }
-//   test.contains( got, expected );
-
-//   /* */
-
-//   var argv = [];
-//   var got = _.process.args({ argv : [ 'interpreter', 'main.js', '.set v:5 ; .build debug:1 ; .export' ], caching : 0 });
-//   var expected =
-//   {
-//     interpreterPath : 'interpreter',
-//     scriptPath : 'main.js',
-//     interpreterArgs : [],
-//     keyValDelimeter : ':',
-//     commandsDelimeter : ';',
-//     subject : '.set',
-//     map : { v : 5 },
-//     scriptArgs : [ '.set v:5 ; .build debug:1 ; .export' ],
-//     scriptArgsString : '.set v:5 ; .build debug:1 ; .export',
-//     subjects : [ '.set', '.build', '.export' ],
-//     maps : [ { v : 5 }, { debug : 1 }, {} ],
-//   }
-//   test.contains( got, expected );
-
-//   /* */
-
-//   var argv = [];
-//   var got = _.process.args({ argv : [ 'interpreter', 'main.js', '.set v:[1 2  3 ] ; .build debug:1 ; .export' ], caching : 0 });
-//   var expected =
-//   {
-//     interpreterPath : 'interpreter',
-//     scriptPath : 'main.js',
-//     interpreterArgs : [],
-//     keyValDelimeter : ':',
-//     commandsDelimeter : ';',
-//     subject : '.set',
-//     map : { v : [ 1, 2, 3 ] },
-//     scriptArgs : [ '.set v:[1 2  3 ] ; .build debug:1 ; .export' ],
-//     scriptArgsString : '.set v:[1 2  3 ] ; .build debug:1 ; .export',
-//     subjects : [ '.set', '.build', '.export' ],
-//     maps : [ { v : [ 1, 2, 3 ] }, { debug : 1 }, {} ],
-//   }
-//   test.contains( got, expected );
-
-//   /* */
-
-//   test.case = 'windows native path as option, no quotes'
-//   var argv = [];
-//   var got = _.process.args({ argv : [ 'interpreter', 'main.js', 'path:D:\\path\\to\\file' ], caching : 0 });
-//   var expected =
-//   {
-//     interpreterPath : 'interpreter',
-//     scriptPath : 'main.js',
-//     interpreterArgs : [],
-//     keyValDelimeter : ':',
-//     commandsDelimeter : ';',
-//     subject : '',
-//     map : { path : '', D : '\\path\\to\\file' },
-//     scriptArgs : [ 'path:D:\\path\\to\\file' ],
-//     scriptArgsString : 'path:D:\\path\\to\\file',
-//     subjects : [ '' ],
-//     maps : [ { path : '', D : '\\path\\to\\file' } ],
-//   }
-//   test.contains( got, expected );
-
-//   test.case = 'windows native path as option, with quotes'
-//   var argv = [];
-//   var got = _.process.args({ argv : [ 'interpreter', 'main.js', 'path:"D:\\path\\to\\file"' ], caching : 0 });
-//   var expected =
-//   {
-//     interpreterPath : 'interpreter',
-//     scriptPath : 'main.js',
-//     interpreterArgs : [],
-//     keyValDelimeter : ':',
-//     commandsDelimeter : ';',
-//     subject : '',
-//     map : { path : 'D:\\path\\to\\file' },
-//     scriptArgs : [ 'path:"D:\\path\\to\\file"' ],
-//     scriptArgsString : 'path:"D:\\path\\to\\file"',
-//     subjects : [ '' ],
-//     maps : [ { path : 'D:\\path\\to\\file' } ],
-//   }
-//   test.contains( got, expected );
-
-//   test.case = 'number option with quotes'
-//   var argv = [];
-//   var got = _.process.args({ argv : [ 'interpreter', 'main.js', 'v:"10"' ], caching : 0 });
-//   var expected =
-//   {
-//     interpreterPath : 'interpreter',
-//     scriptPath : 'main.js',
-//     interpreterArgs : [],
-//     keyValDelimeter : ':',
-//     commandsDelimeter : ';',
-//     subject : '',
-//     map : { v : 10 },
-//     scriptArgs : [ 'v:"10"' ],
-//     scriptArgsString : 'v:"10"',
-//     subjects : [ '' ],
-//     maps : [ { v : 10 } ],
-//   }
-//   test.contains( got, expected );
-
-//   test.case = 'string option with quotes'
-//   var argv = [];
-//   var got = _.process.args({ argv : [ 'interpreter', 'main.js', 'str:"abc"' ], caching : 0 });
-//   var expected =
-//   {
-//     interpreterPath : 'interpreter',
-//     scriptPath : 'main.js',
-//     interpreterArgs : [],
-//     keyValDelimeter : ':',
-//     commandsDelimeter : ';',
-//     subject : '',
-//     map : { str : 'abc' },
-//     scriptArgs : [ 'str:"abc"' ],
-//     scriptArgsString : 'str:"abc"',
-//     subjects : [ '' ],
-//     maps : [ { str : 'abc' } ],
-//   }
-//   test.contains( got, expected );
-
-// }
-
-//
 
 function processArgsBase( test )
 {
@@ -936,7 +647,7 @@ function processArgsPaths( test )
 
 //
 
-function processArgsWithSpace( test )
+function processArgsWithSpace( test ) /* qqq : split test cases */
 {
   let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
@@ -957,7 +668,6 @@ function processArgsWithSpace( test )
   let testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
   let testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
   _.fileProvider.fileWrite( testAppPath, testAppCode );
-
 
   let ready = new _.Consequence().take( null )
   let shell = _.process.starter
@@ -1364,13 +1074,14 @@ function processArgsWithSpace( test )
   //   test.contains( got, expected );
   //   return null;
   // })
+  /* qqq : ? */
 
   return ready;
 }
 
 //
 
-function processOnExitEvent( test ) /* qqq : adjust vova: done */
+function processOnExitEvent( test )
 {
   let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
@@ -1470,7 +1181,7 @@ function processOnExitEvent( test ) /* qqq : adjust vova: done */
 
 //
 
-function processOffExitEvent( test ) /* qqq : adjust vova: done */
+function processOffExitEvent( test )
 {
   let context = this;
   var routinePath = _.path.join( context.suiteTempPath, test.name );
@@ -5018,7 +4729,7 @@ function startNjsStructure( test )
     exp2.disconnect = options.disconnect;
     exp2.process = options.process;
     exp2.procedure = options.procedure;
-    exp2.procedureIsNew = true;
+    // exp2.procedureIsNew = true;
     exp2.currentPath = _.path.current();
     exp2.args = [];
     exp2.interpreterArgs = [];
@@ -5088,7 +4799,7 @@ function startNjsStructure( test )
     'exitCode' : null,
     'exitSignal' : null,
     'procedure' : null,
-    'procedureIsNew' : null,
+    // 'procedureIsNew' : null,
     'ended' : false,
   }
   test.identical( options, exp );
@@ -6928,7 +6639,7 @@ function shellArgumentsNestedQuotes( test )
   .then( () =>
   {
     test.case = 'shell'
-    //qqq:review this case
+    // qqq : review this case
     let con = new _.Consequence().take( null );
     let args =
     [
@@ -7019,7 +6730,7 @@ function shellArgumentsNestedQuotes( test )
   // {
   //   test.case = 'exec'
   //
-  //   //qqq:review this case
+  //   //qqq : review this case
   //
   //   let con = new _.Consequence().take( null );
   //   let args =
@@ -12855,7 +12566,7 @@ function startDetachingDisconnectedChildExistsBeforeParent( test )
 
   ready
 
-  /* Vova qqq xxx: close event is not emitted for disconnected detached child in fork mode*/
+  /* Vova qqq xxx: ProcessWatcher tries to kill detached process that terminates before test ends */
 
   .then( () =>
   {
@@ -12892,7 +12603,7 @@ function startDetachingDisconnectedChildExistsBeforeParent( test )
       test.is( _.process.isAlive( o.process.pid ) )
     })
 
-    result = _.time.out( 3000, () =>
+    result = _.time.out( 5000, () =>
     {
       test.identical( o.onTerminate.resourcesCount(), 0 );
       test.is( !_.process.isAlive( o.process.pid ) )
@@ -12923,6 +12634,16 @@ function startDetachingDisconnectedChildExistsBeforeParent( test )
   }
 
 }
+
+startDetachingDisconnectedChildExistsBeforeParent.description =
+`
+Parent starts child process in detached mode and disconnects it right after start.
+Child process creates test file after 1 second and exits.
+onStart recevies message when process starts.
+onTerminate recevies message when parent disconnects the child process.
+Test routine waits for few seconds and checks if child is alive.
+ProcessWatched should not throw any error.
+`
 
 //
 
@@ -12987,6 +12708,14 @@ function startDetachingChildExistsBeforeParentWaitForTermination( test )
   }
 
 }
+
+//
+
+startDetachingChildExistsBeforeParentWaitForTermination.description =
+`
+Parent starts child process in detached mode.
+Test routine waits until o.onTerminate resolves message about termination of the child process.
+`
 
 //
 
@@ -13067,6 +12796,15 @@ function startDetachingEndCompetitorIsExecuted( test )
   }
 
 }
+
+startDetachingEndCompetitorIsExecuted.description =
+
+`Parent starts child process in detached mode.
+Consequence onStart recevices message when process starts.
+Consequence onTerminate recevices message when process ends.
+o.ended is false when onStart callback is executed.
+o.ended is true when onTerminate callback is executed.
+`
 
 //
 
@@ -14630,6 +14368,14 @@ function noEndBug1( test )
   }
 
 }
+
+noEndBug1.description =
+`
+Parent starts child process in detached mode.
+ChildProcess throws an error on spawn.
+onStart receives error message.
+Parent should not try to disconnect the child.
+`
 
 //
 
@@ -17468,114 +17214,87 @@ function terminate( test )
     return ready;
   })
 
-  /* exec */
-
   /*
     zzz Vova: shell,exec modes have different behaviour on Windows,OSX and Linux
     look for solution that allow to have same behaviour on each mode
   */
 
-  // .thenKeep( () =>
-  // {
-  //   var o =
-  //   {
-  //     execPath :  'node ' + testAppPath,
-  //     mode : 'exec',
-  //     outputCollecting : 1,
-  //     throwingExitCode : 0
-  //   }
-  //
-  //   let ready = _.process.start( o )
-  //
-  //   o.process.stdout.on( 'data', ( data ) =>
-  //   {
-  //     data = data.toString();
-  //     if( _.strHas( data, 'ready' ))
-  //     _.process.terminate({ process : o.process, timeOut : 0 });
-  //   })
-  //
-  //   ready.thenKeep( ( got ) =>
-  //   {
-  //     if( process.platform === 'linux' )
-  //     {
-  //       test.identical( got.exitCode, null );
-  //       test.identical( got.exitSignal, 'SIGINT' );
-  //       test.is( !_.strHas( got.output, 'SIGINT' ) );
-  //       test.is( _.strHas( got.output, 'Application timeout!' ) );
-  //     }
-  //     else if( process.platform === 'win32' )
-  //     {
-  //       test.identical( got.exitCode, 0 );
-  //       test.identical( got.exitSignal, null );
-  //       test.is( !_.strHas( got.output, 'SIGINT' ) );
-  //       test.is( _.strHas( got.output, 'Application timeout!' ) );
-  //     }
-  //     else
-  //     {
-  //       test.identical( got.exitCode, 0 );
-  //       test.identical( got.exitSignal, null );
-  //       test.is( _.strHas( got.output, 'SIGINT' ) );
-  //       test.is( !_.strHas( got.output, 'Application timeout!' ) );
-  //     }
-  //     return null;
-  //   })
-  //
-  //   return ready;
-  // })
-  //
-  // /* */
-  //
-  // .thenKeep( () =>
-  // {
-  //   var o =
-  //   {
-  //     execPath :  'node ' + testAppPath,
-  //     mode : 'exec',
-  //     outputCollecting : 1,
-  //     throwingExitCode : 0
-  //   }
-  //
-  //   let ready = _.process.start( o )
-  //
-  //   o.process.stdout.on( 'data', ( data ) =>
-  //   {
-  //     data = data.toString();
-  //     if( _.strHas( data, 'ready' ))
-  //     _.process.terminate({ pid : o.process.pid, timeOut : 0 });
-  //   })
-  //
-  //   ready.thenKeep( ( got ) =>
-  //   {
-  //     if( process.platform === 'linux' )
-  //     {
-  //       test.identical( got.exitCode, null );
-  //       test.identical( got.exitSignal, 'SIGINT' );
-  //       test.is( !_.strHas( got.output, 'SIGINT' ) );
-  //       test.is( _.strHas( got.output, 'Application timeout!' ) );
-  //     }
-  //     else if( process.platform === 'win32' )
-  //     {
-  //       test.identical( got.exitCode, 0 );
-  //       test.identical( got.exitSignal, null );
-  //       test.is( !_.strHas( got.output, 'SIGINT' ) );
-  //       test.is( _.strHas( got.output, 'Application timeout!' ) );
-  //     }
-  //     else
-  //     {
-  //       test.identical( got.exitCode, 0 );
-  //       test.identical( got.exitSignal, null );
-  //       test.is( _.strHas( got.output, 'SIGINT' ) );
-  //       test.is( !_.strHas( got.output, 'Application timeout!' ) );
-  //     }
-  //     return null;
-  //   })
-  //
-  //   return ready;
-  // })
-
   /* */
 
   return con;
+}
+
+//
+
+function terminateStructural( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let programPath = a.program( program1 );
+
+  a.ready.timeOut( 1000 );
+
+  /* */
+
+  let options =
+  {
+    execPath : programPath,
+    currentPath : a.currentPath,
+    throwingExitCode : 1,
+    applyingExitCode : 0,
+    inputMirroring : 1,
+    outputCollecting : 1,
+    stdio : 'pipe',
+    sync : 0,
+    deasync : 0,
+    ready : a.ready,
+  }
+
+  _.process.startNjs( options );
+
+  options.onStart
+  .then( ( op ) =>
+  {
+    test.is( options === op );
+    test.identical( options.output, '' );
+    test.identical( options.exitCode, null );
+    test.identical( options.exitSignal, null );
+    test.identical( options.ended, false );
+    test.identical( options.terminationReason, null );
+    test.is( options.onStart !== options.ready );
+    test.is( options.onTerminate === options.ready );
+    test.is( !!options.process );
+    _.time.out( context.dt1, () => _.process.terminate( options.process ) );
+    // _.process.terminate( options.process );
+    return null;
+  });
+
+  options.onTerminate
+  .finally( ( err, op ) =>
+  {
+    _.errAttend( err );
+    test.is( _.errIs( err ) );
+    test.identical( options.output, 'program1\n' );
+    test.identical( options.exitCode, null );
+    test.identical( options.exitSignal, 'SIGINT' );
+    test.identical( options.ended, true );
+    test.identical( options.terminationReason, 'signal' );
+    return null;
+  });
+
+  /* */
+
+  return a.ready;
+
+  /* */
+
+  function program1()
+  {
+    let _ = require( toolsPath );
+    console.log( 'program1' );
+    setTimeout( () => {}, 15000 );
+  }
+
 }
 
 //
@@ -19718,11 +19437,17 @@ var Proto =
 
   context :
   {
+
     suiteTempPath : null,
     testApp,
     testAppShell,
     toolsPath : null,
     toolsPathInclude : null,
+
+    dt0 : 100,
+    dt1 : 1000,
+    dt2 : 5000,
+
   },
 
   tests :
@@ -19852,6 +19577,7 @@ var Proto =
     kill,
     killWithChildren,
     terminate,
+    terminateStructural,
     terminateComplex,
     terminateDetachedComplex,
     terminateWithChildren,
