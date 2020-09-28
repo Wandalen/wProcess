@@ -4703,6 +4703,7 @@ function startWithReadyDelayStructural( test )
     'outputGraying' : 0,
     'onStart' : options.onStart,
     'onTerminate' : options.onTerminate,
+    'onDisconnect' : options.onDisconnect,
     'ready' : options.ready,
     'disconnect' : options.disconnect,
     'process' : options.process,
@@ -4716,6 +4717,8 @@ function startWithReadyDelayStructural( test )
     'procedure' : null,
     // 'procedureIsNew' : null,
     'ended' : false,
+    'terminationBeginEnabled' : false,
+    'error' : null
   }
   test.identical( options, exp );
 
