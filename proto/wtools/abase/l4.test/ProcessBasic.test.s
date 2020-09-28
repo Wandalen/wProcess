@@ -1739,30 +1739,14 @@ shellCurrentPath.timeOut = 30000;
 function shellCurrentPaths( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
-
-  /* */
-
-  function testApp()
-  {
-    debugger
-    console.log( process.cwd() ); /* qqq : should not be visible if verbosity of tester is low, if possible */
-  }
-
-  /* */
-
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = testApp.toString() + '\ntestApp();';
-  var expectedOutput = __dirname + '\n'
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-
-  let ready = new _.Consequence().take( null );
+  let a = test.assetFor( false );
+  let programPath = a.program( testApp );
 
   let o2 =
   {
-    execPath : 'node ' + testAppPath,
-    ready,
-    currentPath : [ routinePath, __dirname ],
+    execPath : 'node ' + programPath,
+    ready : a.ready,
+    currentPath : [ a.routinePath, __dirname ],
     stdio : 'pipe',
     outputCollecting : 1
   }
@@ -1771,12 +1755,12 @@ function shellCurrentPaths( test )
 
   _.process.start( _.mapSupplement( { mode : 'shell' }, o2 ) );
 
-  ready.then( ( got ) =>
+  a.ready.then( ( got ) =>
   {
     let o1 = got[ 0 ];
     let o2 = got[ 1 ];
 
-    test.is( _.strHas( o1.output, _.path.nativize( routinePath ) ) );
+    test.is( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
     test.identical( o1.exitCode, 0 );
 
     test.is( _.strHas( o2.output, __dirname ) );
@@ -1789,12 +1773,12 @@ function shellCurrentPaths( test )
 
   _.process.start( _.mapSupplement( { mode : 'spawn' }, o2 ) );
 
-  ready.then( ( got ) =>
+  a.ready.then( ( got ) =>
   {
     let o1 = got[ 0 ];
     let o2 = got[ 1 ];
 
-    test.is( _.strHas( o1.output, _.path.nativize( routinePath ) ) );
+    test.is( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
     test.identical( o1.exitCode, 0 );
 
     test.is( _.strHas( o2.output, __dirname ) );
@@ -1823,14 +1807,14 @@ function shellCurrentPaths( test )
 
   /* */
 
-  _.process.start( _.mapSupplement( { mode : 'fork', execPath : testAppPath }, o2 ) );
+  _.process.start( _.mapSupplement( { mode : 'fork', execPath : programPath }, o2 ) );
 
-  ready.then( ( got ) =>
+  a.ready.then( ( got ) =>
   {
     let o1 = got[ 0 ];
     let o2 = got[ 1 ];
 
-    test.is( _.strHas( o1.output, _.path.nativize( routinePath ) ) );
+    test.is( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
     test.identical( o1.exitCode, 0 );
 
     test.is( _.strHas( o2.output, __dirname ) );
@@ -1841,22 +1825,22 @@ function shellCurrentPaths( test )
 
   /*  */
 
-  _.process.start( _.mapSupplement( { mode : 'spawn', execPath : [ 'node ' + testAppPath, 'node ' + testAppPath ] }, o2 ) );
+  _.process.start( _.mapSupplement( { mode : 'spawn', execPath : [ 'node ' + programPath, 'node ' + programPath ] }, o2 ) );
 
-  ready.then( ( got ) =>
+  a.ready.then( ( got ) =>
   {
     let o1 = got[ 0 ];
     let o2 = got[ 1 ];
     let o3 = got[ 2 ];
     let o4 = got[ 3 ];
 
-    test.is( _.strHas( o1.output, _.path.nativize( routinePath ) ) );
+    test.is( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
     test.identical( o1.exitCode, 0 );
 
     test.is( _.strHas( o2.output, __dirname ) );
     test.identical( o2.exitCode, 0 );
 
-    test.is( _.strHas( o3.output, _.path.nativize( routinePath ) ) );
+    test.is( _.strHas( o3.output, a.path.nativize( a.routinePath ) ) );
     test.identical( o3.exitCode, 0 );
 
     test.is( _.strHas( o4.output, __dirname ) );
@@ -1865,7 +1849,15 @@ function shellCurrentPaths( test )
     return got;
   })
 
-  return ready;
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    debugger
+    console.log( process.cwd() ); /* qqq : should not be visible if verbosity of tester is low, if possible */
+  }
 }
 
 //
