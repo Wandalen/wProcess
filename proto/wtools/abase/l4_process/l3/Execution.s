@@ -920,11 +920,13 @@ function start_body( o )
     return true;
 
     this.process._disconnected = true;
+    if( !Object.isFrozen( this ) )
     this.state = 'disconnected';
 
     if( this.terminationBeginEnabled )
     {
       _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
+      if( !Object.isFrozen( this ) )
       this.terminationBeginEnabled = false;
     }
 

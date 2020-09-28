@@ -14057,13 +14057,6 @@ function startOnTerminate( test )
     _.process.start( o );
     _.time.out( 1000, () => o.disconnect() );
 
-    onTerminate.finallyGive( ( err, got ) =>
-    {
-      _.errAttend( err );
-      test.is( _.errIs( err ) );
-      test.identical( got, undefined )
-    })
-
     onTerminate.then( ( got ) =>
     {
       test.identical( o, got );
@@ -14157,13 +14150,6 @@ function startOnTerminate( test )
 
     _.process.start( o );
     o.disconnect();
-
-    onTerminate.finallyGive( ( err, got ) =>
-    {
-      _.errAttend( err );
-      test.is( _.errIs( err ) );
-      test.identical( got, undefined )
-    })
 
     onTerminate.then( ( got ) =>
     {
