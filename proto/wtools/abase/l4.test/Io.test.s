@@ -6,12 +6,12 @@
 if( typeof module !== 'undefined' )
 {
 
-  let _ = require( './../../../../wtools/Tools.s' );
+  let _ = require( './../../../wtools/Tools.s' );
   _.include( 'wTesting' );
   _.include( 'wFiles' );
   _.include( 'wProcessWatcher' );
 
-  require( '../Basic.s' );
+  require( '../l4_process/Basic.s' );
 
 }
 
