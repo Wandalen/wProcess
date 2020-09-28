@@ -205,7 +205,6 @@ function start_body( o )
   {
     /* qqq2 : use routine _.time.sleep here */
     let arg = o.ready.sync();
-
     try
     {
       if( o.when.delay )
@@ -229,7 +228,6 @@ function start_body( o )
     o.onTerminate.finally( end );
     else
     o.ready.finallyKeep( end );
-
     return endDeasyncing();
   }
 
