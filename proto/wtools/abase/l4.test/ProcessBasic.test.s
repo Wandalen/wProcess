@@ -924,7 +924,9 @@ shellSync.timeOut = 30000;
 function shellSyncAsync( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
+  let a = test.assetFor( false );
+  let programPath = a.program( testAppShell );
+
   var commonDefaults =
   {
     outputPiping : 1,
@@ -937,10 +939,7 @@ function shellSyncAsync( test )
 
   /* */
 
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = context.toolsPathInclude + context.testAppShell.toString() + '\ntestAppShell();';
-  var expectedOutput = testAppPath + '\n';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
+  var expectedOutput = programPath + '\n';
 
   var o;
 
@@ -949,7 +948,7 @@ function shellSyncAsync( test )
   test.case = 'mode : fork';
   o =
   {
-    execPath : testAppPath,
+    execPath : programPath,
     mode : 'fork',
     stdio : 'pipe'
   }
@@ -978,7 +977,7 @@ function shellSyncAsync( test )
   test.case = 'mode : spawn';
   o =
   {
-    execPath :  'node ' + testAppPath,
+    execPath :  'node ' + programPath,
     mode : 'spawn',
     stdio : 'pipe'
   }
@@ -1007,7 +1006,7 @@ function shellSyncAsync( test )
   test.case = 'mode : shell';
   o =
   {
-    execPath :  'node ' + testAppPath,
+    execPath :  'node ' + programPath,
     mode : 'shell',
     stdio : 'pipe'
   }
@@ -1033,7 +1032,7 @@ function shellSyncAsync( test )
   test.case = 'shell, stop process using timeOut';
   o =
   {
-    execPath :  'node ' + testAppPath + ' loop : 1',
+    execPath :  'node ' + programPath + ' loop : 1',
     mode : 'shell',
     stdio : 'pipe',
     timeOut : 500
@@ -1047,7 +1046,7 @@ function shellSyncAsync( test )
   test.case = 'spawn, return good code';
   o =
   {
-    execPath :  'node ' + testAppPath + ' exitWithCode : 0',
+    execPath :  'node ' + programPath + ' exitWithCode : 0',
     mode : 'spawn',
     stdio : 'pipe'
   }
@@ -1062,7 +1061,7 @@ function shellSyncAsync( test )
   test.case = 'spawn, return bad code';
   o =
   {
-    execPath :  'node ' + testAppPath + ' exitWithCode : 1',
+    execPath :  'node ' + programPath + ' exitWithCode : 1',
     mode : 'spawn',
     stdio : 'pipe'
   }
@@ -1075,7 +1074,7 @@ function shellSyncAsync( test )
   test.case = 'shell, return good code';
   o =
   {
-    execPath :  'node ' + testAppPath + ' exitWithCode : 0',
+    execPath :  'node ' + programPath + ' exitWithCode : 0',
     mode : 'shell',
     stdio : 'pipe'
   }
@@ -1091,7 +1090,7 @@ function shellSyncAsync( test )
   test.case = 'shell, return bad code';
   o =
   {
-    execPath :  'node ' + testAppPath + ' exitWithCode : 1',
+    execPath :  'node ' + programPath + ' exitWithCode : 1',
     mode : 'shell',
     stdio : 'pipe'
   }
@@ -1108,7 +1107,9 @@ shellSyncAsync.timeOut = 30000;
 function shell2( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
+  let a = test.assetFor( false );
+  let programPath = a.program( testApp );
+
   var commonDefaults =
   {
     outputPiping : 1,
@@ -1119,27 +1120,15 @@ function shell2( test )
 
   /* */
 
-  function testApp()
-  {
-    console.log( process.argv.slice( 2 ).join( ' ' ) );
-  }
-
-  /* */
-
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = testApp.toString() + '\ntestApp();';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-
   var o;
-  var con = new _.Consequence().take( null );
 
-  con.thenKeep( function()
+  a.ready.thenKeep( function()
   {
     test.case = 'mode : shell';
 
     o =
     {
-      execPath :  'node ' + testAppPath,
+      execPath :  'node ' + programPath,
       args : [ 'staging', 'debug' ],
       mode : 'shell',
       stdio : 'pipe'
@@ -1163,13 +1152,13 @@ function shell2( test )
 
   /* - */
 
-  con.thenKeep( function()
+  a.ready.thenKeep( function()
   {
     test.case = 'mode : shell, passingThrough : true, no args';
 
     o =
     {
-      execPath :  'node ' + testAppPath,
+      execPath :  'node ' + programPath,
       mode : 'shell',
       passingThrough : 1,
       stdio : 'pipe'
@@ -1195,14 +1184,14 @@ function shell2( test )
 
   /* - */
 
-  con.thenKeep( function()
+  a.ready.thenKeep( function()
   {
     test.case = 'mode : spawn, passingThrough : true, only filePath in args';
 
     o =
     {
       execPath :  'node',
-      args : [ testAppPath ],
+      args : [ programPath ],
       mode : 'spawn',
       passingThrough : 1,
       stdio : 'pipe'
@@ -1227,7 +1216,7 @@ function shell2( test )
 
   /* - */
 
-  con.thenKeep( function()
+  a.ready.thenKeep( function()
   {
     test.case = 'mode : spawn, passingThrough : true, incorrect usage of o.path in spawn mode';
 
@@ -1249,13 +1238,13 @@ function shell2( test )
 
   /* - */
 
-  con.thenKeep( function()
+  a.ready.thenKeep( function()
   {
     test.case = 'mode : shell, passingThrough : true';
 
     o =
     {
-      execPath :  'node ' + testAppPath,
+      execPath :  'node ' + programPath,
       args : [ 'staging', 'debug' ],
       mode : 'shell',
       passingThrough : 1,
@@ -1279,7 +1268,14 @@ function shell2( test )
     })
   })
 
-  return con;
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    console.log( process.argv.slice( 2 ).join( ' ' ) );
+  }
 }
 
 shell2.timeOut = 30000;
