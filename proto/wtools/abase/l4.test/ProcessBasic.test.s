@@ -3875,8 +3875,8 @@ function shellArgumentsParsing( test )
 
   let a = test.assetFor( false );
 
-  let testAppPathNoSpace = a.program( { routine : testApp, tempPath : a.abs( 'noSpace' ) } );
-  let testAppPathSpace = a.program( { routine : testApp, tempPath : a.abs( 'with space' ) } );
+  let testAppPathNoSpace = a.program( { routine : testApp, dirPath : a.abs( 'noSpace' ) } );
+  let testAppPathSpace = a.program( { routine : testApp, dirPath : a.abs( 'with space' ) } );
 
 
   /* for combination:
@@ -4817,8 +4817,8 @@ function shellArgumentsParsingNonTrivial( test )
 
   let a = test.assetFor( false );
 
-  let testAppPathNoSpace = a.program( { routine : testApp, tempPath : a.abs( 'noSpace' ) } );
-  let testAppPathSpace = a.program( { routine : testApp, tempPath : a.abs( 'with space' ) } );
+  let testAppPathNoSpace = a.program( { routine : testApp, dirPath : a.abs( 'noSpace' ) } );
+  let testAppPathSpace = a.program( { routine : testApp, dirPath : a.abs( 'with space' ) } );
 
   /*
 
@@ -5417,7 +5417,7 @@ function shellArgumentsNestedQuotes( test )
 
   let a = test.assetFor( false );
 
-  let testAppPathSpace = a.program( { routine : testApp, tempPath : a.abs( 'with space' ) } );
+  let testAppPathSpace = a.program( { routine : testApp, dirPath : a.abs( 'with space' ) } );
 
   /* */
 
@@ -5790,7 +5790,7 @@ function shellExecPathQuotesClosing( test )
 
   let a = test.assetFor( false );
 
-  let testAppPathSpace = a.program( { routine : testApp, tempPath : a.abs( 'with space' ) } );
+  let testAppPathSpace = a.program( { routine : testApp, dirPath : a.abs( 'with space' ) } );
 
   /* */
 
@@ -7504,33 +7504,21 @@ shellNode.timeOut = 20000;
 function shellModeShellNonTrivial( test )
 {
   let context = this;
-  let routinePath = _.path.join( context.suiteTempPath, test.name );
-  let testAppPath =  _.fileProvider.path.nativize( _.path.join( routinePath, 'app.js' ) );
-
-  function app()
-  {
-    var fs = require( 'fs' );
-    fs.writeFileSync( 'args', JSON.stringify( process.argv.slice( 2 ) ) )
-    console.log( process.argv.slice( 2 ) )
-  }
-
-  let testAppCode = app.toString() + '\napp();';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-
-  let ready = _.Consequence().take( null );
+  let a = test.assetFor( false );
+  let testAppPath =  a.program( app );
 
   let shell = _.process.starter
   ({
     mode : 'shell',
-    currentPath : routinePath,
+    currentPath : a.routinePath,
     outputPiping : 1,
     outputCollecting : 1,
-    ready
+    ready : a.ready
   })
 
   /* */
 
-  ready.then( () =>
+  a.ready.then( () =>
   {
     test.open( 'two commands' );
     return null;
@@ -7617,15 +7605,15 @@ function shellModeShellNonTrivial( test )
     return null;
   })
 
-  ready.then( () =>
+  a.ready.then( () =>
   {
     test.close( 'two commands' );
     return null;
   })
 
-  // /*  */
+  /*  */
 
-  ready.then( () =>
+  a.ready.then( () =>
   {
     test.open( 'argument with space' );
     return null;
@@ -7679,7 +7667,7 @@ function shellModeShellNonTrivial( test )
   {
     test.identical( got.exitCode, 0 );
     // test.identical( _.strCount( got.output, `[ "'quoted arg with space'" ]` ), 1 );
-    let args = _.fileProvider.fileRead({ filePath : _.path.join( routinePath, 'args' ), encoding : 'json' });
+    let args = a.fileProvider.fileRead({ filePath : a.abs( a.routinePath, 'args' ), encoding : 'json' });
     if( process.platform === 'win32' )
     test.identical( args, [ '\\`\'quoted', 'arg', 'with', 'space\'\\`' ] );
     else
@@ -7691,7 +7679,7 @@ function shellModeShellNonTrivial( test )
   .then( ( got ) =>
   {
     test.identical( got.exitCode, 0 );
-    let args = _.fileProvider.fileRead({ filePath : _.path.join( routinePath, 'args' ), encoding : 'json' });
+    let args = a.fileProvider.fileRead({ filePath : a.abs( a.routinePath, 'args' ), encoding : 'json' });
     if( process.platform === 'win32' )
     test.identical( args, [ `\'\`quoted`, 'arg', 'with', `space\`\'` ] );
     else
@@ -7715,15 +7703,15 @@ function shellModeShellNonTrivial( test )
     return null;
   })
 
-  ready.then( () =>
+  a.ready.then( () =>
   {
     test.close( 'argument with space' );
     return null;
   })
 
-  // /*  */
+  /*  */
 
-  ready.then( () =>
+  a.ready.then( () =>
   {
     test.open( 'several arguments' );
     return null;
@@ -7734,7 +7722,7 @@ function shellModeShellNonTrivial( test )
   {
     test.identical( got.exitCode, 0 );
     // test.identical( _.strCount( got.output, `[ 'arg1', 'arg2', 'arg 3', "'arg4'" ]` ), 1 );
-    let args = _.fileProvider.fileRead({ filePath : _.path.join( routinePath, 'args' ), encoding : 'json' });
+    let args = a.fileProvider.fileRead({ filePath : a.abs( a.routinePath, 'args' ), encoding : 'json' });
     test.identical( args, [ 'arg1', 'arg2', 'arg 3', `'arg4'` ] );
     return null;
   })
@@ -7744,7 +7732,7 @@ function shellModeShellNonTrivial( test )
   {
     test.identical( got.exitCode, 0 );
     // test.identical( _.strCount( got.output, '[ `arg1 "arg2" "arg 3" "\'arg4\'"` ]' ), 1 );
-    let args = _.fileProvider.fileRead({ filePath : _.path.join( routinePath, 'args' ), encoding : 'json' });
+    let args = a.fileProvider.fileRead({ filePath : a.abs( a.routinePath, 'args' ), encoding : 'json' });
     test.identical( args, [ `arg1 "arg2" "arg 3" "\'arg4\'"` ] );
     return null;
   })
@@ -7754,12 +7742,12 @@ function shellModeShellNonTrivial( test )
   {
     test.identical( got.exitCode, 0 );
     // test.identical( _.strCount( got.output, `[ 'arg1', '"arg2"', 'arg 3', "'arg4'" ]` ), 1 );
-    let args = _.fileProvider.fileRead({ filePath : _.path.join( routinePath, 'args' ), encoding : 'json' });
+    let args = a.fileProvider.fileRead({ filePath : a.abs( a.routinePath, 'args' ), encoding : 'json' });
     test.identical( args, [ 'arg1', '"arg2"', 'arg 3', `'arg4'` ] );
     return null;
   })
 
-  ready.then( () =>
+  a.ready.then( () =>
   {
     test.close( 'several arguments' );
     return null;
@@ -7781,7 +7769,16 @@ function shellModeShellNonTrivial( test )
     return null;
   })
 
-  return ready;
+  return a.ready;
+
+  /* - */
+
+  function app()
+  {
+    var fs = require( 'fs' );
+    fs.writeFileSync( 'args', JSON.stringify( process.argv.slice( 2 ) ) )
+    console.log( process.argv.slice( 2 ) )
+  }
 }
 
 shellModeShellNonTrivial.timeOut = 60000;
