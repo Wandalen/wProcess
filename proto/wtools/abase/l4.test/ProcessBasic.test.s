@@ -5414,18 +5414,16 @@ shellArgumentsParsingNonTrivial.timeOut = 60000;
 function shellArgumentsNestedQuotes( test )
 {
   let context = this;
-  let routinePath = _.path.join( context.suiteTempPath, test.name );
-  let testAppPathNoSpace = _.fileProvider.path.nativize( _.path.join( routinePath, 'noSpace', 'testApp.js' ) );
-  let testAppPathSpace= _.fileProvider.path.nativize( _.path.join( routinePath, 'with space', 'testApp.js' ) );
-  let ready = _.Consequence().take( null );
 
-  let testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
-  _.fileProvider.fileWrite( testAppPathNoSpace, testAppCode );
-  _.fileProvider.fileWrite( testAppPathSpace, testAppCode );
+  let a = test.assetFor( false );
+
+  let testAppPathNoSpace = a.program( { routine : testApp, tempPath : a.abs( 'noSpace' ) } );
+  let testAppPathSpace = a.program( { routine : testApp, tempPath : a.abs( 'with space' ) } );
+
 
   /* */
 
-  ready
+  a.ready
 
   .then( () =>
   {
@@ -5769,12 +5767,14 @@ function shellArgumentsNestedQuotes( test )
 
   /* */
 
-  return ready;
+  return a.ready;
 
   /**/
 
   function testApp()
   {
+    let _ = require( toolsPath );
+
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
     var args = _.process.args();
