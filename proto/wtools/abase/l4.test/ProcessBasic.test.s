@@ -1887,33 +1887,18 @@ function shellCurrentPaths( test )
 function shellFork( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
+  let a = test.assetFor( false );
+  let programPath = a.program( testApp );
 
   /* */
 
-  function testApp()
-  {
-    console.log( process.argv.slice( 2 ) );
-  }
-
-  /* */
-
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = testApp.toString() + '\ntestApp();';
-  var expectedOutput = __dirname + '\n'
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-
-  /* - */
-
-  var con = new _.Consequence().take( null );
-
-  con.thenKeep( function()
+  a.ready.thenKeep( function()
   {
     test.case = 'no args';
 
     let o =
     {
-      execPath :   testAppPath,
+      execPath : programPath,
       args : null,
       mode : 'fork',
       stdio : 'pipe',
@@ -1931,13 +1916,13 @@ function shellFork( test )
 
   /* - */
 
-  con.thenKeep( function()
+  a.ready.thenKeep( function()
   {
     test.case = 'args';
 
     let o =
     {
-      execPath :   testAppPath,
+      execPath : programPath,
       args : [ 'arg1', 'arg2' ],
       mode : 'fork',
       stdio : 'pipe',
@@ -1980,13 +1965,13 @@ function shellFork( test )
 
   /* - */
 
-  con.thenKeep( function()
+  a.ready.thenKeep( function()
   {
     test.case = 'stdio : ignore';
 
     let o =
     {
-      execPath :   testAppPath,
+      execPath : programPath,
       args : [ 'arg1', 'arg2' ],
       mode : 'fork',
       stdio : 'ignore',
@@ -2005,7 +1990,7 @@ function shellFork( test )
 
   /* - */
 
-  con.thenKeep( function()
+  a.ready.thenKeep( function()
   {
     test.case = 'complex';
 
@@ -2017,14 +2002,12 @@ function shellFork( test )
       console.log( process.execArgv );
     }
 
-    let testAppPath2 = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp2.js' ) );
-    var testApp2 = testApp2.toString() + '\ntestApp2();';
-    _.fileProvider.fileWrite( testAppPath2, testApp2 );
+    let programPath = a.program( testApp2 );
 
     let o =
     {
-      execPath :   testAppPath2,
-      currentPath : routinePath,
+      execPath : programPath,
+      currentPath : a.routinePath,
       env : { 'key1' : 'val' },
       args : [ 'arg1', 'arg2' ],
       interpreterArgs : [ '--no-warnings' ],
@@ -2039,7 +2022,7 @@ function shellFork( test )
       test.identical( o.exitCode, 0 );
       test.is( _.strHas( o.output,  `[ 'arg1', 'arg2' ]` ) );
       test.is( _.strHas( o.output,  `key1: 'val'` ) );
-      test.is( _.strHas( o.output,  _.fileProvider.path.nativize( routinePath ) ) );
+      test.is( _.strHas( o.output,  a.path.nativize( a.routinePath ) ) );
       test.is( _.strHas( o.output,  `[ '--no-warnings' ]` ) );
 
       return null;
@@ -2048,11 +2031,11 @@ function shellFork( test )
 
   /* - */
 
-  con.thenKeep( function()
+  a.ready.thenKeep( function()
   {
     test.case = 'complex + deasync';
 
-    function testApp2()
+    function testApp3()
     {
       console.log( process.argv.slice( 2 ) );
       console.log( process.env );
@@ -2060,14 +2043,12 @@ function shellFork( test )
       console.log( process.execArgv );
     }
 
-    let testAppPath2 = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp2.js' ) );
-    var testApp2 = testApp2.toString() + '\ntestApp2();';
-    _.fileProvider.fileWrite( testAppPath2, testApp2 );
+    let programPath = a.program( testApp3 );
 
     let o =
     {
-      execPath :   testAppPath2,
-      currentPath : routinePath,
+      execPath :   programPath,
+      currentPath : a.routinePath,
       env : { 'key1' : 'val' },
       args : [ 'arg1', 'arg2' ],
       interpreterArgs : [ '--no-warnings' ],
@@ -2080,11 +2061,11 @@ function shellFork( test )
     }
 
     _.process.start( o );
-
+    debugger
     test.identical( o.exitCode, 0 );
     test.is( _.strHas( o.output,  `[ 'arg1', 'arg2' ]` ) );
     test.is( _.strHas( o.output,  `key1: 'val'` ) );
-    test.is( _.strHas( o.output,  _.fileProvider.path.nativize( routinePath ) ) );
+    test.is( _.strHas( o.output,  a.path.nativize( a.routinePath ) ) );
     test.is( _.strHas( o.output,  `[ '--no-warnings' ]` ) );
 
     return null;
@@ -2092,13 +2073,11 @@ function shellFork( test )
 
   /* - */
 
-  /* - */
-
-  con.thenKeep( function()
+  a.ready.thenKeep( function()
   {
     test.case = 'test is ipc works';
 
-    function testApp2()
+    function testApp4()
     {
       process.on( 'message', ( got ) =>
       {
@@ -2107,13 +2086,11 @@ function shellFork( test )
       })
     }
 
-    let testAppPath2 = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp2.js' ) );
-    var testApp2 = testApp2.toString() + '\ntestApp2();';
-    _.fileProvider.fileWrite( testAppPath2, testApp2 );
+    let programPath = a.program( testApp4 );
 
     let o =
     {
-      execPath :   testAppPath2,
+      execPath :   programPath,
       mode : 'fork',
       stdio : 'pipe',
     }
@@ -2139,13 +2116,13 @@ function shellFork( test )
 
   /* - */
 
-  con.thenKeep( function()
+  a.ready.thenKeep( function()
   {
     test.case = 'execPath can contain path to js file and arguments';
 
     let o =
     {
-      execPath :   testAppPath + ' arg0',
+      execPath :   programPath + ' arg0',
       mode : 'fork',
       stdio : 'pipe',
       outputCollecting : 1,
@@ -2163,11 +2140,11 @@ function shellFork( test )
 
   /* - */
 
-  con.thenKeep( function()
+  a.ready.thenKeep( function()
   {
     test.case = 'test timeOut';
 
-    function testApp2()
+    function testApp5()
     {
       setTimeout( () =>
       {
@@ -2175,13 +2152,11 @@ function shellFork( test )
       }, 5000 )
     }
 
-    let testAppPath2 = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp2.js' ) );
-    var testApp2 = testApp2.toString() + '\ntestApp2();';
-    _.fileProvider.fileWrite( testAppPath2, testApp2 );
+    let programPath = a.program( testApp5 );
 
     let o =
     {
-      execPath :   testAppPath2,
+      execPath :   programPath,
       mode : 'fork',
       stdio : 'pipe',
       outputCollecting : 1,
@@ -2200,11 +2175,11 @@ function shellFork( test )
 
   /* - */
 
-  con.thenKeep( function()
+  a.ready.thenKeep( function()
   {
     test.case = 'test timeOut';
 
-    function testApp2()
+    function testApp6()
     {
       setTimeout( () =>
       {
@@ -2212,13 +2187,11 @@ function shellFork( test )
       }, 5000 )
     }
 
-    let testAppPath2 = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp2.js' ) );
-    var testApp2 = testApp2.toString() + '\ntestApp2();';
-    _.fileProvider.fileWrite( testAppPath2, testApp2 );
+    let programPath = a.program( testApp6 );
 
     let o =
     {
-      execPath :   testAppPath2,
+      execPath :   programPath,
       mode : 'fork',
       stdio : 'pipe',
       outputCollecting : 1,
@@ -2235,7 +2208,14 @@ function shellFork( test )
     })
   })
 
-  return con;
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
 
 }
 
