@@ -7788,22 +7788,21 @@ shellModeShellNonTrivial.timeOut = 60000;
 function shellArgumentsHandlingTrivial( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
+  let a = test.assetFor( false );
 
-  _.fileProvider.fileWrite( _.path.join( routinePath, 'file' ), 'file' );
+  a.fileProvider.fileWrite( a.abs( a.routinePath, 'file' ), 'file' );
 
   /* */
 
-  var con = new _.Consequence().take( null );
 
   let shell = _.process.starter
   ({
-    currentPath : routinePath,
+    currentPath : a.routinePath,
     mode : 'shell',
     stdio : 'pipe',
     outputPiping : 1,
     outputCollecting : 1,
-    ready : con
+    ready : a.ready
   })
 
   /* */
@@ -7824,7 +7823,7 @@ function shellArgumentsHandlingTrivial( test )
 
   /* */
 
-  return con;
+  return a.ready;
 }
 
 //
