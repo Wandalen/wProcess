@@ -2603,33 +2603,17 @@ shellShellSyncDeasync.timeOut = 15000;
 function shellShellSyncDeasyncThrowing( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
-
-  /* */
-
-  function testApp()
-  {
-    throw new Error( 'Test error' );
-  }
-
-  /* */
-
-  var execPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = testApp.toString() + '\ntestApp();';
-  _.fileProvider.fileWrite( execPath, testAppCode );
-
-  /* - */
-
-  var ready = new _.Consequence().take( null );
+  let a = test.assetFor( false );
+  let programPath = a.program( testApp );
 
   /*  */
 
-  ready.then( () =>
+  a.ready.then( () =>
   {
     test.case = 'sync:0,desync:0'
     let o =
     {
-      execPath : 'node ' + execPath,
+      execPath : 'node ' + programPath,
       mode : 'shell',
       sync : 0,
       deasync : 0
@@ -2642,12 +2626,12 @@ function shellShellSyncDeasyncThrowing( test )
 
   /*  */
 
-  ready.then( () =>
+  a.ready.then( () =>
   {
     test.case = 'sync:1,desync:0'
     let o =
     {
-      execPath : 'node ' + execPath,
+      execPath : 'node ' + programPath,
       mode : 'shell',
       sync : 1,
       deasync : 0
@@ -2658,12 +2642,12 @@ function shellShellSyncDeasyncThrowing( test )
 
   /*  */
 
-  ready.then( () =>
+  a.ready.then( () =>
   {
     test.case = 'sync:0,desync:1'
     let o =
     {
-      execPath : 'node ' + execPath,
+      execPath : 'node ' + programPath,
       mode : 'shell',
       sync : 0,
       deasync : 1
@@ -2676,12 +2660,12 @@ function shellShellSyncDeasyncThrowing( test )
 
   /*  */
 
-  ready.then( () =>
+  a.ready.then( () =>
   {
     test.case = 'sync:1,desync:1'
     let o =
     {
-      execPath : 'node ' + execPath,
+      execPath : 'node ' + programPath,
       mode : 'shell',
       sync : 1,
       deasync : 1
@@ -2692,7 +2676,15 @@ function shellShellSyncDeasyncThrowing( test )
 
   /*  */
 
-  return ready;
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    throw new Error( 'Test error' );
+  }
+
 }
 
 shellShellSyncDeasyncThrowing.timeOut = 15000;
