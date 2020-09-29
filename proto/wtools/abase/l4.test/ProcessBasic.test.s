@@ -2301,33 +2301,17 @@ function shellWithoutExecPath( test )
 function shellSpawnSyncDeasync( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
-
-  /* */
-
-  function testApp()
-  {
-    console.log( process.argv.slice( 2 ) );
-  }
-
-  /* */
-
-  var execPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = testApp.toString() + '\ntestApp();';
-  _.fileProvider.fileWrite( execPath, testAppCode );
-
-  /* - */
-
-  var ready = new _.Consequence().take( null );
+  let a = test.assetFor( false );
+  let programPath = a.program( testApp );
 
   /*  */
 
-  ready.then( () =>
+  a.ready.then( () =>
   {
     test.case = 'sync:0,desync:0'
     let o =
     {
-      execPath : 'node ' + execPath,
+      execPath : 'node ' + programPath,
       mode : 'spawn',
       sync : 0,
       deasync : 0
@@ -2345,12 +2329,12 @@ function shellSpawnSyncDeasync( test )
 
   /*  */
 
-  ready.then( () =>
+  a.ready.then( () =>
   {
     test.case = 'sync:1,desync:0'
     let o =
     {
-      execPath : 'node ' + execPath,
+      execPath : 'node ' + programPath,
       mode : 'spawn',
       sync : 1,
       deasync : 0
@@ -2365,12 +2349,12 @@ function shellSpawnSyncDeasync( test )
 
   /*  */
 
-  ready.then( () =>
+  a.ready.then( () =>
   {
     test.case = 'sync:0,desync:1'
     let o =
     {
-      execPath : 'node ' + execPath,
+      execPath : 'node ' + programPath,
       mode : 'spawn',
       sync : 0,
       deasync : 1
@@ -2388,12 +2372,12 @@ function shellSpawnSyncDeasync( test )
 
   /*  */
 
-  ready.then( () =>
+  a.ready.then( () =>
   {
     test.case = 'sync:1,desync:1'
     let o =
     {
-      execPath : 'node ' + execPath,
+      execPath : 'node ' + programPath,
       mode : 'spawn',
       sync : 1,
       deasync : 1
@@ -2405,9 +2389,14 @@ function shellSpawnSyncDeasync( test )
     return got;
   })
 
-  /*  */
+  return a.ready;
 
-  return ready;
+  /* - */
+
+  function testApp()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
 }
 
 shellSpawnSyncDeasync.timeOut = 15000;
