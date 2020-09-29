@@ -3737,10 +3737,10 @@ function startWithReadyDelayStructural( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
-    test.identical( op.output, 'program1\n' );
+    test.identical( op.output, 'program1:begin\n' );
 
     let exp2 = _.mapExtend( null, exp );
-    exp2.output = 'program1\n';
+    exp2.output = 'program1:begin\n';
     exp2.exitCode = 0;
     exp2.exitSignal = null;
     exp2.disconnect = options.disconnect;
@@ -3837,7 +3837,7 @@ function startWithReadyDelayStructural( test )
   function program1()
   {
     let _ = require( toolsPath );
-    console.log( 'program1' );
+    console.log( 'program1:begin' );
   }
 
 }
@@ -7521,8 +7521,8 @@ function shellNode( test )
 
   /*  */
 
-  // var modes = [ 'fork', 'exec', 'spawn', 'shell' ];
-  var modes = [ 'fork', 'spawn', 'shell' ];
+  // let modes = [ 'fork', 'exec', 'spawn', 'shell' ];
+  let modes = [ 'fork', 'spawn', 'shell' ];
 
   modes.forEach( ( mode ) =>
   {
@@ -13450,7 +13450,7 @@ function startOnStartWithDelay( test )
   {
     // _.errAttend( err );
     // test.is( _.errIs( err ) );
-    // test.identical( options.output, 'program1\n' );
+    // test.identical( options.output, 'program1:begin\n' );
     // test.identical( options.exitCode, null );
     // test.identical( options.exitSignal, 'SIGINT' );
     // test.identical( options.ended, true );
@@ -13467,8 +13467,8 @@ function startOnStartWithDelay( test )
   function program1()
   {
     let _ = require( toolsPath );
-    console.log( 'program1' );
-    setTimeout( () => {}, 15000 );
+    console.log( 'program1:begin' );
+    setTimeout( () => { console.log( 'program1:end' ) }, 15000 );
   }
 
 }
@@ -14887,8 +14887,8 @@ function outputHandling( test )
 
   var con = new _.Consequence().take( null );
 
-  // var modes = [ 'shell', 'spawn', 'exec', 'fork' ];
-  var modes = [ 'shell', 'spawn', 'fork' ];
+  // let modes = [ 'shell', 'spawn', 'exec', 'fork' ];
+  let modes = [ 'shell', 'spawn', 'fork' ];
   var loggerOutput = '';
 
   function onTransformEnd( o )
@@ -14988,8 +14988,8 @@ function shellOutputStripping( test )
   /* */
 
   var ready = new _.Consequence().take( null );
-  // var modes = [ 'shell', 'spawn', 'exec', 'fork' ];
-  var modes = [ 'shell', 'spawn', 'fork' ];
+  // let modes = [ 'shell', 'spawn', 'exec', 'fork' ];
+  let modes = [ 'shell', 'spawn', 'fork' ];
 
   _.each( modes, ( mode ) =>
   {
@@ -15062,8 +15062,8 @@ function shellLoggerOption( test )
   /* */
 
   var ready = new _.Consequence().take( null );
-  // var modes = [ 'shell', 'spawn', 'exec', 'fork' ];
-  var modes = [ 'shell', 'spawn', 'fork' ];
+  // let modes = [ 'shell', 'spawn', 'exec', 'fork' ];
+  let modes = [ 'shell', 'spawn', 'fork' ];
 
   test.case = 'custom logger with increased level'
 
@@ -16333,69 +16333,81 @@ function endStructuralSigint( test )
   let a = test.assetFor( false );
   let programPath = a.program( program1 );
   let time1;
+  // let modes = [ 'fork', 'spawn', 'shell' ];
+  let modes = [ 'fork' ];
 
-  /* */
-
-  let options =
-  {
-    execPath : 'node',
-    args : programPath,
-    currentPath : a.currentPath,
-    throwingExitCode : 1,
-    applyingExitCode : 0,
-    inputMirroring : 1,
-    outputCollecting : 1,
-    stdio : 'pipe',
-    sync : 0,
-    deasync : 0,
-    ready : a.ready,
-  }
-
-  _.process.start( options );
-
-  options.onStart
-  .then( ( op ) =>
-  {
-    test.is( options === op );
-    test.identical( options.output, '' );
-    test.identical( options.exitCode, null );
-    test.identical( options.exitSignal, null );
-    test.identical( options.ended, false );
-    test.identical( options.terminationReason, null );
-    test.is( options.onStart !== options.ready );
-    test.is( options.onTerminate === options.ready );
-    test.is( !!options.process );
-    time1 = _.time.now();
-    _.time.out( context.dt1, () => options.process.kill( 'SIGINT' ) );
-    return null;
-  });
-
-  options.onTerminate
-  .finally( ( err, op ) =>
-  {
-    var dtime = _.time.now() - time1;
-    test.ge( dtime, 15000-1000 );
-    _.errAttend( err );
-    test.is( _.errIs( err ) );
-    test.identical( options.output, 'program1\n' );
-    test.identical( options.exitCode, null );
-    test.identical( options.exitSignal, 'SIGINT' );
-    test.identical( options.ended, true );
-    test.identical( options.terminationReason, 'signal' );
-    return null;
-  });
-
-  /* */
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
   return a.ready;
+
+  /* */
+
+  function run( mode )
+  {
+    let ready = _.Consequence().take( null );
+
+    let options =
+    {
+      execPath : mode === 'fork' ? null : 'node',
+      args : programPath,
+      currentPath : a.currentPath,
+      throwingExitCode : 1,
+      applyingExitCode : 0,
+      inputMirroring : 1,
+      outputCollecting : 1,
+      stdio : 'pipe',
+      sync : 0,
+      deasync : 0,
+      mode,
+      ready,
+    }
+
+    _.process.start( options );
+
+    options.onStart
+    .then( ( op ) =>
+    {
+      test.is( options === op );
+      test.identical( options.output, '' );
+      test.identical( options.exitCode, null );
+      test.identical( options.exitSignal, null );
+      test.identical( options.ended, false );
+      test.identical( options.terminationReason, null );
+      test.is( options.onStart !== options.ready );
+      test.is( options.onTerminate === options.ready );
+      test.is( !!options.process );
+      time1 = _.time.now();
+      _.time.out( context.dt1, () => options.process.kill( 'SIGINT' ) );
+      return null;
+    });
+
+    options.onTerminate
+    .finally( ( err, op ) =>
+    {
+      var dtime = _.time.now() - time1;
+      test.le( dtime, context.dt1*2 );
+      _.errAttend( err );
+      test.is( _.errIs( err ) );
+      test.identical( options.output, 'program1:begin\nprogram1:end\n' );
+      test.identical( options.exitCode, null );
+      test.identical( options.exitSignal, 'SIGINT' );
+      test.identical( options.ended, true );
+      test.identical( options.terminationReason, 'signal' );
+      return null;
+    });
+
+    /* */
+
+    return ready;
+  }
 
   /* */
 
   function program1()
   {
     let _ = require( toolsPath );
-    console.log( 'program1' );
-    setTimeout( () => {}, 15000 );
+    console.log( 'program1:begin' );
+    setTimeout( () => { console.log( 'program1:end' ) }, 15000 );
   }
 
 }
@@ -16403,7 +16415,7 @@ function endStructuralSigint( test )
 endStructuralSigint.description =
 `
  - end process with SIGINT
- - should wait more than 15s
+ - should wait 1s
  - should have proper exitSignal, exitCode and terminationReason
 `
 
@@ -16415,69 +16427,81 @@ function endStructuralSigkill( test )
   let a = test.assetFor( false );
   let programPath = a.program( program1 );
   let time1;
+  let modes = [ 'fork', 'spawn', 'shell' ];
 
-  /* */
-
-  let options =
-  {
-    execPath : 'node',
-    args : programPath,
-    currentPath : a.currentPath,
-    throwingExitCode : 1,
-    applyingExitCode : 0,
-    inputMirroring : 1,
-    outputCollecting : 1,
-    stdio : 'pipe',
-    sync : 0,
-    deasync : 0,
-    ready : a.ready,
-  }
-
-  _.process.start( options );
-
-  options.onStart
-  .then( ( op ) =>
-  {
-    test.is( options === op );
-    test.identical( options.output, '' );
-    test.identical( options.exitCode, null );
-    test.identical( options.exitSignal, null );
-    test.identical( options.ended, false );
-    test.identical( options.terminationReason, null );
-    test.is( options.onStart !== options.ready );
-    test.is( options.onTerminate === options.ready );
-    test.is( !!options.process );
-    time1 = _.time.now();
-    _.time.out( context.dt1, () => options.process.kill( 'SIGKILL' ) );
-    return null;
-  });
-
-  options.onTerminate
-  .finally( ( err, op ) =>
-  {
-    var dtime = _.time.now() - time1;
-    test.le( dtime, context.dt1*2 );
-    _.errAttend( err );
-    test.is( _.errIs( err ) );
-    test.identical( options.output, 'program1\n' );
-    test.identical( options.exitCode, null );
-    test.identical( options.exitSignal, 'SIGKILL' );
-    test.identical( options.ended, true );
-    test.identical( options.terminationReason, 'signal' );
-    return null;
-  });
-
-  /* */
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
   return a.ready;
+
+  /* */
+
+  function run( mode )
+  {
+    let ready = _.Consequence().take( null );
+
+    let options =
+    {
+      execPath : mode === 'fork' ? null : 'node',
+      args : programPath,
+      currentPath : a.currentPath,
+      throwingExitCode : 1,
+      applyingExitCode : 0,
+      inputMirroring : 1,
+      outputCollecting : 1,
+      stdio : 'pipe',
+      sync : 0,
+      deasync : 0,
+      mode,
+      ready,
+    }
+
+    _.process.start( options );
+
+    options.onStart
+    .then( ( op ) =>
+    {
+      test.is( options === op );
+      test.identical( options.output, '' );
+      test.identical( options.exitCode, null );
+      test.identical( options.exitSignal, null );
+      test.identical( options.ended, false );
+      test.identical( options.terminationReason, null );
+      test.is( options.onStart !== options.ready );
+      test.is( options.onTerminate === options.ready );
+      test.is( !!options.process );
+      time1 = _.time.now();
+      _.time.out( context.dt1, () => options.process.kill( 'SIGKILL' ) );
+      return null;
+    });
+
+    options.onTerminate
+    .finally( ( err, op ) =>
+    {
+      var dtime = _.time.now() - time1;
+      test.le( dtime, context.dt1*2 );
+      _.errAttend( err );
+      test.is( _.errIs( err ) );
+      test.identical( options.output, 'program1:begin\n' );
+      test.identical( options.exitCode, null );
+      test.identical( options.exitSignal, 'SIGKILL' );
+      test.identical( options.ended, true );
+      test.identical( options.terminationReason, 'signal' );
+      return null;
+    });
+
+    /* */
+
+    return ready;
+  }
 
   /* */
 
   function program1()
   {
     let _ = require( toolsPath );
-    console.log( 'program1' );
-    setTimeout( () => {}, 15000 );
+    _.include( 'wProcess' );
+    console.log( 'program1:begin' );
+    setTimeout( () => { console.log( 'program1:end' ) }, 15000 );
   }
 
 }
@@ -16485,7 +16509,7 @@ function endStructuralSigkill( test )
 endStructuralSigkill.description =
 `
  - end process with SIGKILL
- - should wait less than 2*1s
+ - should wait 1s
  - should have proper exitSignal, exitCode and terminationReason
 `
 
@@ -16497,69 +16521,80 @@ function endStructuralTerminate( test )
   let a = test.assetFor( false );
   let programPath = a.program( program1 );
   let time1;
+  let modes = [ 'fork', 'spawn', 'shell' ];
 
-  /* */
-
-  let options =
-  {
-    execPath : 'node',
-    args : programPath,
-    currentPath : a.currentPath,
-    throwingExitCode : 1,
-    applyingExitCode : 0,
-    inputMirroring : 1,
-    outputCollecting : 1,
-    stdio : 'pipe',
-    sync : 0,
-    deasync : 0,
-    ready : a.ready,
-  }
-
-  _.process.start( options );
-
-  options.onStart
-  .then( ( op ) =>
-  {
-    test.is( options === op );
-    test.identical( options.output, '' );
-    test.identical( options.exitCode, null );
-    test.identical( options.exitSignal, null );
-    test.identical( options.ended, false );
-    test.identical( options.terminationReason, null );
-    test.is( options.onStart !== options.ready );
-    test.is( options.onTerminate === options.ready );
-    test.is( !!options.process );
-    time1 = _.time.now();
-    _.time.out( context.dt1, () => _.process.terminate( options.process ) );
-    return null;
-  });
-
-  options.onTerminate
-  .finally( ( err, op ) =>
-  {
-    var dtime = _.time.now() - time1;
-    test.le( dtime, context.dt1*2 );
-    _.errAttend( err );
-    test.is( _.errIs( err ) );
-    test.identical( options.output, 'program1\n' );
-    test.identical( options.exitCode, null );
-    test.identical( options.exitSignal, 'SIGKILL' );
-    test.identical( options.ended, true );
-    test.identical( options.terminationReason, 'signal' );
-    return null;
-  });
-
-  /* */
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
   return a.ready;
+
+  /* */
+
+  function run( mode )
+  {
+    let ready = _.Consequence().take( null );
+
+    let options =
+    {
+      execPath : mode === 'fork' ? null : 'node',
+      args : programPath,
+      currentPath : a.currentPath,
+      throwingExitCode : 1,
+      applyingExitCode : 0,
+      inputMirroring : 1,
+      outputCollecting : 1,
+      stdio : 'pipe',
+      sync : 0,
+      deasync : 0,
+      mode,
+      ready,
+    }
+
+    _.process.start( options );
+
+    options.onStart
+    .then( ( op ) =>
+    {
+      test.is( options === op );
+      test.identical( options.output, '' );
+      test.identical( options.exitCode, null );
+      test.identical( options.exitSignal, null );
+      test.identical( options.ended, false );
+      test.identical( options.terminationReason, null );
+      test.is( options.onStart !== options.ready );
+      test.is( options.onTerminate === options.ready );
+      test.is( !!options.process );
+      time1 = _.time.now();
+      _.time.out( context.dt1, () => _.process.terminate({ process : options.process, timeOut : 5000 }) );
+      return null;
+    });
+
+    options.onTerminate
+    .finally( ( err, op ) =>
+    {
+      var dtime = _.time.now() - time1;
+      test.le( dtime, context.dt1*2 );
+      _.errAttend( err );
+      test.is( _.errIs( err ) );
+      test.identical( options.output, 'program1:begin\n' );
+      test.identical( options.exitCode, null );
+      test.identical( options.exitSignal, 'SIGINT' );
+      test.identical( options.ended, true );
+      test.identical( options.terminationReason, 'signal' );
+      return null;
+    });
+
+    /* */
+
+    return ready;
+  }
 
   /* */
 
   function program1()
   {
     let _ = require( toolsPath );
-    console.log( 'program1' );
-    setTimeout( () => {}, 15000 );
+    console.log( 'program1:begin' );
+    setTimeout( () => { console.log( 'program1:end' ) }, 15000 );
   }
 
 }
@@ -16567,7 +16602,100 @@ function endStructuralTerminate( test )
 endStructuralTerminate.description =
 `
  - end process with _.process.terminate()
- - should wait xxx?
+ - should wait 1s
+ - should have proper exitSignal, exitCode and terminationReason
+`
+
+//
+
+function endStructuralKill( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let programPath = a.program( program1 );
+  let time1;
+  let modes = [ 'fork', 'spawn', 'shell' ];
+
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+
+  return a.ready;
+
+  function run( mode )
+  {
+    let ready = _.Consequence().take( null );
+
+    let options =
+    {
+      execPath : mode === 'fork' ? null : 'node',
+      args : programPath,
+      currentPath : a.currentPath,
+      throwingExitCode : 1,
+      applyingExitCode : 0,
+      inputMirroring : 1,
+      outputCollecting : 1,
+      stdio : 'pipe',
+      sync : 0,
+      deasync : 0,
+      mode,
+      ready,
+    }
+
+    test.case = `mode:${mode}`;
+
+    _.process.start( options );
+
+    options.onStart
+    .then( ( op ) =>
+    {
+      test.is( options === op );
+      test.identical( options.output, '' );
+      test.identical( options.exitCode, null );
+      test.identical( options.exitSignal, null );
+      test.identical( options.ended, false );
+      test.identical( options.terminationReason, null );
+      test.is( options.onStart !== options.ready );
+      test.is( options.onTerminate === options.ready );
+      test.is( !!options.process );
+      time1 = _.time.now();
+      _.time.out( context.dt1, () => _.process.kill( options.process ) );
+      return null;
+    });
+
+    options.onTerminate
+    .finally( ( err, op ) =>
+    {
+      var dtime = _.time.now() - time1;
+      test.le( dtime, context.dt1*2 );
+      _.errAttend( err );
+      test.is( _.errIs( err ) );
+      test.identical( options.output, 'program1:begin\n' );
+      test.identical( options.exitCode, null );
+      test.identical( options.exitSignal, 'SIGKILL' );
+      test.identical( options.ended, true );
+      test.identical( options.terminationReason, 'signal' );
+      return null;
+    });
+
+    /* */
+
+    return ready;
+  }
+
+  /* */
+
+  function program1()
+  {
+    let _ = require( toolsPath );
+    console.log( 'program1:begin' );
+    setTimeout( () => { console.log( 'program1:end' ) }, 15000 );
+  }
+
+}
+
+endStructuralKill.description =
+`
+ - end process with _.process.kill()
+ - should wait 1s
  - should have proper exitSignal, exitCode and terminationReason
 `
 
@@ -18849,6 +18977,7 @@ var Proto =
     endStructuralSigint,
     endStructuralSigkill,
     endStructuralTerminate,
+    endStructuralKill,
     terminateComplex,
     terminateDetachedComplex,
     terminateWithChildren,
