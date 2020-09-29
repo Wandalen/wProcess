@@ -420,11 +420,11 @@ function start_body( o )
     {
 
       if( _.numberIs( exitCode ) )
-      o.error = _.err( 'Process returned exit code', exitCode, '\n', infoGet() );
+      o.error = _._err({ args : [ 'Process returned exit code', exitCode, '\n', infoGet() ], reason : 'exit code' });
       else if( o.reason === 'time' )
-      o.error = _.err( 'Process timed out, killed by exit signal', exitSignal, '\n', infoGet() );
+      o.error = _._err({ args : [ 'Process timed out, killed by exit signal', exitSignal, '\n', infoGet() ], reason : 'time out' });
       else
-      o.error = _.err( 'Process was killed by exit signal', exitSignal, '\n', infoGet() );
+      o.error = _._err({ args : [ 'Process was killed by exit signal', exitSignal, '\n', infoGet() ], reason : 'exit signal' });
 
       if( o.briefExitCode )
       o.error = _.errBrief( o.error );

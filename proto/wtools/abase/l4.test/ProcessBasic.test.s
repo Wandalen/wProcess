@@ -115,941 +115,21 @@ function testAppShell()
 /* qqq : rewrite tests using assetFor and the best practices
 */
 
-function processArgsPropertiesBase( test )
-{
-  let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
-
-  function testApp()
-  {
-    _.include( 'wProcess' );
-    _.include( 'wStringsExtra' )
-    _.include( 'wFiles' )
-
-    if( process.env.ignoreFirstTwoArgv )
-    process.argv = process.argv.slice( 2 );
-
-    var got = _.process.args({ caching : 0 });
-    _.fileProvider.fileWrite( _.path.join( __dirname, 'got' ), JSON.stringify( got ) )
-  }
-
-  let testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  let testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-
-
-  let ready = new _.Consequence().take( null )
-  let shell = _.process.starter
-  ({
-    execPath : 'node ' + testAppPath,
-    mode : 'spawn',
-    throwingExitCode : 0,
-    ready
-  })
-  let filePath = _.path.join( routinePath, 'got' );
-  let interpreterPath = _.path.normalize( process.argv[ 0 ] );
-  let scriptPath = _.path.normalize( testAppPath );
-
-  /* */
-
-  shell({ args : [ 'x', ':', 'aa', 'bbb', ':', 'x' ] })
-  .then( ( o ) =>
-  {
-    test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
-    var expected =
-    {
-      interpreterPath,
-      scriptPath,
-      interpreterArgs : [],
-      keyValDelimeter : ':',
-      map : { x : 'aa', bbb : 'x' },
-      subject : '',
-      scriptArgs : [ 'x', ':', 'aa', 'bbb', ':', 'x' ]
-    }
-    test.contains( got, expected );
-    return null;
-  })
-
-  /* */
-
-  shell({ args : [ 'x', ':', 'y' ] })
-  .then( ( o ) =>
-  {
-    test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
-    var expected =
-    {
-      interpreterPath,
-      scriptPath,
-      interpreterArgs : [],
-      keyValDelimeter : ':',
-      map : { x : 'y' },
-      subject : '',
-      scriptArgs : [ 'x', ':', 'y' ]
-    }
-    test.contains( got, expected );
-    return null;
-  })
-
-  /* */
-
-  shell({ args : [ 'x', ':', 'y', 'x', ':', '1' ] })
-  .then( ( o ) =>
-  {
-    test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
-    var expected =
-    {
-      interpreterPath,
-      scriptPath,
-      interpreterArgs : [],
-      keyValDelimeter : ':',
-      map : { x : [ 'y', 1 ] },
-      subject : '',
-      scriptArgs : [ 'x', ':', 'y', 'x', ':', '1' ]
-    }
-    test.contains( got, expected );
-    return null;
-  })
-
-  /* */
-
-  shell({ args : [ 'abcd', 'x', ':', 'y', 'xyz', 'y', ':', 1  ] })
-  .then( ( o ) =>
-  {
-    test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
-    var expected =
-    {
-      interpreterPath,
-      scriptPath,
-      interpreterArgs : [],
-      keyValDelimeter : ':',
-      map : { x : 'y xyz', y : 1 },
-      subject : 'abcd',
-      scriptArgs : [ 'abcd', 'x', ':', 'y', 'xyz', 'y', ':', '1' ]
-    }
-    test.contains( got, expected );
-    return null;
-  })
-
-  /* */
-
-  shell
-  ({
-    args :
-    [
-      'filePath',
-      'a:', 1,
-      'b', ':2',
-      'c:', 3,
-      'd', ':4',
-      'e', ':', 5
-    ]
-  })
-  .then( ( o ) =>
-  {
-    test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
-    var expected =
-    {
-      interpreterPath,
-      scriptPath,
-      interpreterArgs : [],
-      keyValDelimeter : ':',
-      map : { a : 1, b : 2, c : 3, d : 4, e : 5 },
-      subject : 'filePath',
-      scriptArgs :
-      [
-        'filePath',
-        'a:', '1',
-        'b', ':2',
-        'c:', '3',
-        'd', ':4',
-        'e', ':', '5'
-      ]
-    }
-    test.contains( got, expected );
-    return null;
-  })
-
-  shell({ args : [ 'path:c:\\some', 'x', ':', 0, 'y', ':', 1  ] })
-  .then( ( o ) =>
-  {
-    test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
-    var expected =
-    {
-      interpreterPath,
-      scriptPath,
-      interpreterArgs : [],
-      keyValDelimeter : ':',
-      map : { path : 'c:\\some', x : 0, y : 1 },
-      subject : '',
-      scriptArgs : [ 'path:c:\\some', 'x', ':', '0', 'y', ':', '1' ]
-    }
-    test.contains( got, expected );
-    return null;
-  })
-
-  /* */
-
-  ready.then( () =>
-  {
-    return null;
-  })
-  shell
-  ({
-    args : [ 'interpreter', 'main.js', 'v:"10"' ],
-    env : { ignoreFirstTwoArgv : true, PATH : process.env.PATH }
-  })
-  .then( ( o ) =>
-  {
-    test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
-    var expected =
-    {
-      interpreterPath : 'interpreter',
-      scriptPath : 'main.js',
-      interpreterArgs : [],
-      keyValDelimeter : ':',
-      commandsDelimeter : ';',
-      subject : '',
-      map : { v : 10 },
-      scriptArgs : [ 'v:"10"' ],
-      scriptArgsString : 'v:"10"',
-      subjects : [ '' ],
-      maps : [ { v : 10 } ],
-    }
-    test.contains( got, expected );
-    return null;
-  })
-
-  /* */
-
-  ready.then( () =>
-  {
-    return null;
-  })
-  shell
-  ({
-    args : [ 'interpreter', 'main.js', 'str:"abc"' ],
-    env : { ignoreFirstTwoArgv : true, PATH : process.env.PATH }
-  })
-  .then( ( o ) =>
-  {
-    test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
-    var expected =
-    {
-      interpreterPath : 'interpreter',
-      scriptPath : 'main.js',
-      interpreterArgs : [],
-      keyValDelimeter : ':',
-      commandsDelimeter : ';',
-      subject : '',
-      map : { str : 'abc' },
-      scriptArgs : [ 'str:"abc"' ],
-      scriptArgsString : 'str:"abc"',
-      subjects : [ '' ],
-      maps : [ { str : 'abc' } ],
-    }
-    test.contains( got, expected );
-    return null;
-  })
-
-  return ready;
-}
-
-//
-
-function processArgsMultipleCommands( test )
-{
-  let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
-
-  function testApp()
-  {
-    _.include( 'wProcess' );
-    _.include( 'wStringsExtra' )
-    _.include( 'wFiles' )
-
-    if( process.env.ignoreFirstTwoArgv )
-    process.argv = process.argv.slice( 2 );
-
-    var got = _.process.args({ caching : 0 });
-    _.fileProvider.fileWrite( _.path.join( __dirname, 'got' ), JSON.stringify( got ) )
-  }
-
-  let testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  let testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-
-
-  let ready = new _.Consequence().take( null )
-  let shell = _.process.starter
-  ({
-    execPath : 'node ' + testAppPath,
-    mode : 'spawn',
-    throwingExitCode : 0,
-    ready
-  })
-  let filePath = _.path.join( routinePath, 'got' );
-  let interpreterPath = _.path.normalize( process.argv[ 0 ] );
-  let scriptPath = _.path.normalize( testAppPath );
-
-  /* */
-
-  shell
-  ({
-    args : [ 'interpreter', 'main.js', '.set', 'v:5', ';', '.build', 'debug:1', ';', '.export' ],
-    env : { ignoreFirstTwoArgv : true, PATH : process.env.PATH },
-  })
-  .then( ( o ) =>
-  {
-    test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
-    var expected =
-    {
-      interpreterPath : 'interpreter',
-      scriptPath : 'main.js',
-      interpreterArgs : [],
-      keyValDelimeter : ':',
-      commandsDelimeter : ';',
-      subject : '.set',
-      map : { v : 5 },
-      scriptArgs : [ '.set', 'v:5', ';', '.build', 'debug:1', ';', '.export' ],
-      scriptArgsString : '.set v:5 ; .build debug:1 ; .export',
-      subjects : [ '.set', '.build', '.export' ],
-      maps : [ { v : 5 }, { debug : 1 }, {} ],
-    }
-    test.contains( got, expected );
-    return null;
-  })
-
-  /* */
-
-  shell
-  ({
-    args : [ 'interpreter', 'main.js', '.set', 'v', ':', '[', 1, 2, 3, ']', ';', '.build', 'debug:1', ';', '.export' ],
-    env : { ignoreFirstTwoArgv : true, PATH : process.env.PATH }
-  })
-  .then( ( o ) =>
-  {
-    test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
-    var expected =
-    {
-      interpreterPath : 'interpreter',
-      scriptPath : 'main.js',
-      interpreterArgs : [],
-      keyValDelimeter : ':',
-      commandsDelimeter : ';',
-      subject : '.set',
-      map : { v : [ 1, 2, 3 ] },
-      scriptArgs : [ '.set', 'v', ':', '[', '1', '2', '3', ']', ';', '.build', 'debug:1', ';', '.export' ],
-      scriptArgsString : '.set v : [ 1 2 3 ] ; .build debug:1 ; .export',
-      subjects : [ '.set', '.build', '.export' ],
-      maps : [ { v : [ 1, 2, 3 ] }, { debug : 1 }, {} ],
-    }
-    test.contains( got, expected );
-    return null;
-  })
-
-  return ready;
-}
-
-//
-
-function processArgsPaths( test )
-{
-  let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
-
-  function testApp()
-  {
-    _.include( 'wProcess' );
-    _.include( 'wStringsExtra' )
-    _.include( 'wFiles' )
-
-    if( process.env.ignoreFirstTwoArgv )
-    process.argv = process.argv.slice( 2 );
-
-    var got = _.process.args({ caching : 0 });
-    _.fileProvider.fileWrite( _.path.join( __dirname, 'got' ), JSON.stringify( got ) )
-  }
-
-  let testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  let testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-
-
-  let ready = new _.Consequence().take( null )
-  let shell = _.process.starter
-  ({
-    execPath : 'node ' + testAppPath,
-    mode : 'spawn',
-    throwingExitCode : 0,
-    ready
-  })
-  let filePath = _.path.join( routinePath, 'got' );
-  let interpreterPath = _.path.normalize( process.argv[ 0 ] );
-  let scriptPath = _.path.normalize( testAppPath );
-
-  /* */
-
-  shell
-  ({
-    args : [ 'interpreter', 'main.js', 'path:D:\\path\\to\\file' ],
-    env : { ignoreFirstTwoArgv : true, PATH : process.env.PATH }
-  })
-  .then( ( o ) =>
-  {
-    test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
-    var expected =
-    {
-      interpreterPath : 'interpreter',
-      scriptPath : 'main.js',
-      interpreterArgs : [],
-      keyValDelimeter : ':',
-      commandsDelimeter : ';',
-      subject : '',
-      map : { path : 'D:\\path\\to\\file' },
-      scriptArgs : [ 'path:D:\\path\\to\\file' ],
-      scriptArgsString : 'path:D:\\path\\to\\file',
-      subjects : [ '' ],
-      maps : [ { path : 'D:\\path\\to\\file' } ],
-    }
-    test.contains( got, expected );
-    return null;
-  })
-
-  /* */
-
-  shell
-  ({
-    args : [ 'interpreter', 'main.js', 'path:"D:\\path\\to\\file"' ],
-    env : { ignoreFirstTwoArgv : true, PATH : process.env.PATH }
-  })
-  .then( ( o ) =>
-  {
-    test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
-    var expected =
-    {
-      interpreterPath : 'interpreter',
-      scriptPath : 'main.js',
-      interpreterArgs : [],
-      keyValDelimeter : ':',
-      commandsDelimeter : ';',
-      subject : '',
-      map : { path : 'D:\\path\\to\\file' },
-      scriptArgs : [ 'path:"D:\\path\\to\\file"' ],
-      scriptArgsString : 'path:"D:\\path\\to\\file"',
-      subjects : [ '' ],
-      maps : [ { path : 'D:\\path\\to\\file' } ],
-    }
-    test.contains( got, expected );
-    return null;
-  })
-
-  /* */
-
-  return ready;
-}
-
-//
-
-function processArgsWithSpace( test ) /* qqq : split test cases */
-{
-  let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
-
-  function testApp()
-  {
-    _.include( 'wProcess' );
-    _.include( 'wStringsExtra' )
-    _.include( 'wFiles' )
-
-    if( process.env.ignoreFirstTwoArgv )
-    process.argv = process.argv.slice( 2 );
-
-    var got = _.process.args({ caching : 0 });
-    _.fileProvider.fileWrite( _.path.join( __dirname, 'got' ), JSON.stringify( got ) )
-  }
-
-  let testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  let testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-
-  let ready = new _.Consequence().take( null )
-  let shell = _.process.starter
-  ({
-    execPath : 'node ' + testAppPath,
-    mode : 'spawn',
-    throwingExitCode : 0,
-    ready
-  })
-  let filePath = _.path.join( routinePath, 'got' );
-  let interpreterPath = _.path.normalize( process.argv[ 0 ] );
-  let scriptPath = _.path.normalize( testAppPath );
-
-  /* */
-
-  ready.then( () =>
-  {
-    /* process.args should quote arguments that contain spaces and are not quoted already */
-    test.description = 'subject + option, option value is quoted and contains space'
-    return null;
-  })
-  shell( `subject option:"value with space"` )
-  .then( ( o ) =>
-  {
-    test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
-    var expected =
-    {
-      'scriptArgs' : [ 'subject', 'option:"value with space"' ],
-      'interpreterArgsStrings' : '',
-      'scriptArgsString' : 'subject option:"value with space"',
-      'subject' : 'subject',
-      'map' : { 'option' : 'value with space' },
-      'subjects' : [ 'subject' ],
-      'maps' : [ { 'option' : 'value with space' } ],
-      'original' : 'subject option:"value with space"'
-    }
-    test.contains( got, expected );
-    return null;
-  })
-
-  ready.then( () =>
-  {
-    /* process.args should quote arguments that contain spaces and are not quoted already */
-    test.description = 'subject + option, option value is quoted and contains space'
-    return null;
-  })
-  shell( `subject option:'value with space'` )
-  .then( ( o ) =>
-  {
-    test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
-    var expected =
-    {
-      'scriptArgs' : [ 'subject', `option:'value with space'` ],
-      'interpreterArgsStrings' : '',
-      'scriptArgsString' : `subject option:'value with space'`,
-      'subject' : 'subject',
-      'map' : { 'option' : 'value with space' },
-      'subjects' : [ 'subject' ],
-      'maps' : [ { 'option' : 'value with space' } ],
-      'original' : `subject option:'value with space'`
-    }
-    test.contains( got, expected );
-    return null;
-  })
-
-  ready.then( () =>
-  {
-    /* process.args should quote arguments that contain spaces and are not quoted already */
-    test.description = 'subject + option, option value is quoted and contains space'
-    return null;
-  })
-  shell( 'subject option:`value with space`' )
-  .then( ( o ) =>
-  {
-    test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
-    var expected =
-    {
-      'scriptArgs' : [ 'subject', 'option:`value with space`' ],
-      'interpreterArgsStrings' : '',
-      'scriptArgsString' : 'subject option:`value with space`',
-      'subject' : 'subject',
-      'map' : { 'option' : 'value with space' },
-      'subjects' : [ 'subject' ],
-      'maps' : [ { 'option' : 'value with space' } ],
-      'original' : 'subject option:`value with space`'
-    }
-    test.contains( got, expected );
-    return null;
-  })
-
-  ready.then( () =>
-  {
-    test.description = 'subject + option, option value is quoted and contains space'
-    test.will = 'process.args should quote arguments with space'
-    return null;
-  })
-  shell( `subject option : "value with space"` )
-  .then( ( o ) =>
-  {
-    test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
-    var expected =
-    {
-      'scriptArgs' : [ 'subject', 'option', ':', 'value with space' ],
-      'interpreterArgsStrings' : '',
-      'scriptArgsString' : 'subject option : "value with space"',
-      'subject' : 'subject',
-      'map' : { 'option' : 'value with space' },
-      'subjects' : [ 'subject' ],
-      'maps' : [ { 'option' : 'value with space' } ],
-      'original' : 'subject option : "value with space"'
-    }
-    test.contains( got, expected );
-    return null;
-  })
-
-  ready.then( () =>
-  {
-    /* process.args should quote arguments that contain spaces and are not quoted already */
-    test.description = 'subject + option, option value contains space'
-    return null;
-  })
-  shell({ args : [ 'subject', 'option', ':', 'value with space' ] })
-  .then( ( o ) =>
-  {
-    test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
-    var expected =
-    {
-      'scriptArgs' : [ 'subject', 'option', ':', 'value with space' ],
-      'interpreterArgsStrings' : '',
-      'scriptArgsString' : 'subject option : "value with space"',
-      'subject' : 'subject',
-      'map' : { 'option' : 'value with space' },
-      'subjects' : [ 'subject' ],
-      'maps' : [ { 'option' : 'value with space' } ],
-      'original' : 'subject option : "value with space"'
-    }
-    test.contains( got, expected );
-    return null;
-  })
-
-  ready.then( () =>
-  {
-    /* process.args should quote arguments that contain spaces and are not quoted already */
-    test.description = 'subject + option, option value is quoted and contains space'
-    return null;
-  })
-  shell({ args : [ 'subject', 'option', ':', '"value with space"' ] })
-  .then( ( o ) =>
-  {
-    test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
-    var expected =
-    {
-      'scriptArgs' : [ 'subject', 'option', ':', '"value with space"' ],
-      'interpreterArgsStrings' : '',
-      'scriptArgsString' : 'subject option : "value with space"',
-      'subject' : 'subject',
-      'map' : { 'option' : 'value with space' },
-      'subjects' : [ 'subject' ],
-      'maps' : [ { 'option' : 'value with space' } ],
-      'original' : 'subject option : "value with space"'
-    }
-    test.contains( got, expected );
-    return null;
-  })
-
-  ready.then( () =>
-  {
-    /* process.args should quote arguments that contain spaces and are not quoted already */
-    test.description = 'subject + option, option value is not quoted and contains space'
-    return null;
-  })
-  shell( `subject option:value with space` )
-  .then( ( o ) =>
-  {
-    test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
-    var expected =
-    {
-      'scriptArgs' : [ 'subject', 'option:value', 'with', 'space' ],
-      'interpreterArgsStrings' : '',
-      'scriptArgsString' : 'subject option:value with space',
-      'subject' : 'subject',
-      'map' : { 'option' : 'value with space' },
-      'subjects' : [ 'subject' ],
-      'maps' : [ { 'option' : 'value with space' } ],
-      'original' : 'subject option:value with space'
-    }
-    test.contains( got, expected );
-    return null;
-  })
-
-  ready.then( () =>
-  {
-    /* process.args should quote arguments that contain spaces and are not quoted already */
-    test.description = 'subject + option, option value is not quoted and contains space'
-    return null;
-  })
-  shell({ args : [ 'subject', 'option:value', 'with', 'space' ] })
-  .then( ( o ) =>
-  {
-    test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
-    var expected =
-    {
-      'scriptArgs' : [ 'subject', 'option:value', 'with', 'space' ],
-      'interpreterArgsStrings' : '',
-      'scriptArgsString' : 'subject option:value with space',
-      'subject' : 'subject',
-      'map' : { 'option' : 'value with space' },
-      'subjects' : [ 'subject' ],
-      'maps' : [ { 'option' : 'value with space' } ],
-      'original' : 'subject option:value with space'
-    }
-    test.contains( got, expected );
-    return null;
-  })
-
-  ready.then( () =>
-  {
-    /* process.args should quote arguments that contain spaces and are not quoted already */
-    test.description = 'subject + option, option value is not quoted and contains space'
-    return null;
-  })
-  shell({ args : [ 'subject', 'option', ':', 'value', 'with', 'space' ] })
-  .then( ( o ) =>
-  {
-    test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
-    var expected =
-    {
-      'scriptArgs' : [ 'subject', 'option', ':', 'value', 'with', 'space' ],
-      'interpreterArgsStrings' : '',
-      'scriptArgsString' : 'subject option : value with space',
-      'subject' : 'subject',
-      'map' : { 'option' : 'value with space' },
-      'subjects' : [ 'subject' ],
-      'maps' : [ { 'option' : 'value with space' } ],
-      'original' : 'subject option : value with space'
-    }
-    test.contains( got, expected );
-    return null;
-  })
-
-  ready.then( () =>
-  {
-    /* process.args should quote arguments that contain spaces and are not quoted already */
-    test.description = 'options only, option value is quoted and contains space'
-    return null;
-  })
-  shell( 'option:"value with space"' )
-  .then( ( o ) =>
-  {
-    test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
-    var expected =
-    {
-      'scriptArgs' : [ 'option:"value with space"' ],
-      'interpreterArgsStrings' : '',
-      'scriptArgsString' : 'option:"value with space"',
-      'subject' : '',
-      'map' : { 'option' : 'value with space' },
-      'subjects' : [ '' ],
-      'maps' : [ { 'option' : 'value with space' } ],
-      'original' : 'option:"value with space"'
-    }
-    test.contains( got, expected );
-    return null;
-  })
-
-  ready.then( () =>
-  {
-    /* process.args should quote arguments that contain spaces and are not quoted already */
-    test.description = 'options only, option value is quoted and contains space'
-    return null;
-  })
-  shell({ args : [ 'option', ':', '"value with space"' ] })
-  .then( ( o ) =>
-  {
-    test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
-    var expected =
-    {
-      'scriptArgs' : [ 'option', ':', '"value with space"' ],
-      'interpreterArgsStrings' : '',
-      'scriptArgsString' : 'option : "value with space"',
-      'subject' : '',
-      'map' : { 'option' : 'value with space' },
-      'subjects' : [ '' ],
-      'maps' : [ { 'option' : 'value with space' } ],
-      'original' : 'option : "value with space"'
-    }
-    test.contains( got, expected );
-    return null;
-  })
-
-  ready.then( () =>
-  {
-    /* process.args should quote arguments that contain spaces and are not quoted already */
-    test.description = 'options only, option value is quoted and contains space'
-    return null;
-  })
-  shell({ args : [ 'option', ':', 'value with space' ] })
-  .then( ( o ) =>
-  {
-    test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
-    var expected =
-    {
-      'scriptArgs' : [ 'option', ':', 'value with space' ],
-      'interpreterArgsStrings' : '',
-      'scriptArgsString' : 'option : "value with space"',
-      'subject' : '',
-      'map' : { 'option' : 'value with space' },
-      'subjects' : [ '' ],
-      'maps' : [ { 'option' : 'value with space' } ],
-      'original' : 'option : "value with space"'
-    }
-    test.contains( got, expected );
-    return null;
-  })
-
-  ready.then( () =>
-  {
-    /* process.args should quote arguments that contain spaces and are not quoted already */
-    test.description = 'options only, option value is not quoted and contains space'
-    return null;
-  })
-  shell( 'option:value with space' )
-  .then( ( o ) =>
-  {
-    test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
-    var expected =
-    {
-      'scriptArgs' : [ 'option:value', 'with', 'space' ],
-      'interpreterArgsStrings' : '',
-      'scriptArgsString' : 'option:value with space',
-      'subject' : '',
-      'map' : { 'option' : 'value with space' },
-      'subjects' : [ '' ],
-      'maps' : [ { 'option' : 'value with space' } ],
-      'original' : 'option:value with space'
-    }
-    test.contains( got, expected );
-    return null;
-  })
-
-  ready.then( () =>
-  {
-    /* process.args should quote arguments that contain spaces and are not quoted already */
-    test.description = 'options only, option value is not quoted and contains space'
-    return null;
-  })
-  shell( 'option : value with space' )
-  .then( ( o ) =>
-  {
-    test.identical( o.exitCode, 0 );
-    var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
-    var expected =
-    {
-      'scriptArgs' : [ 'option', ':', 'value', 'with', 'space' ],
-      'interpreterArgsStrings' : '',
-      'scriptArgsString' : 'option : value with space',
-      'subject' : '',
-      'map' : { 'option' : 'value with space' },
-      'subjects' : [ '' ],
-      'maps' : [ { 'option' : 'value with space' } ],
-      'original' : 'option : value with space'
-    }
-    test.contains( got, expected );
-    return null;
-  })
-
-  ready.then( () =>
-  {
-    /* process.args should quote arguments that contain spaces and are not quoted already */
-    test.description = 'options only, option value is not quoted and contains space'
-    return test.shouldThrowErrorOfAnyKind( () =>
-    {
-      return shell({ execPath : 'option:value with" space', ready : null })
-    });
-  })
-  // .then( ( o ) =>
-  // {
-  //   test.identical( o.exitCode, 0 );
-  //   var got = _.fileProvider.fileRead({ filePath, encoding : 'json' });
-  //   var expected =
-  //   {
-  //     'scriptArgs' : [ 'option:value', 'with"', 'space' ],
-  //     'interpreterArgsStrings' : '',
-  //     'scriptArgsString' : 'option:value with" space',
-  //     'subject' : '',
-  //     'map' : { 'option' : 'value with" space' },
-  //     'subjects' : [ '' ],
-  //     'maps' : [ { 'option' : 'value with" space' } ],
-  //     'original' : 'option:value with" space'
-  //   }
-  //   test.contains( got, expected );
-  //   return null;
-  // })
-  /* qqq : ? */
-
-  return ready;
-}
-
-//
 
 function processOnExitEvent( test )
 {
+
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
-  var commonDefaults =
-  {
-    outputPiping : 1,
-    outputCollecting : 1,
-    applyingExitCode : 0,
-    throwingExitCode : 1,
-    sync : 1
-  }
-
-  function testApp()
-  {
-    _.include( 'wProcess' );
-    _.include( 'wStringsExtra' )
-
-    var args = _.process.args();
-
-    _.process.on( 'exit', ( arg ) =>
-    {
-      console.log( 'processOnExit:', arg );
-    });
-
-    _.time.out( 1000, () =>
-    {
-      console.log( 'timeOut handler executed' );
-      return 1;
-    })
-
-    if( args.map.terminate )
-    process.exit( 'SIGINT' );
-
-  }
+  let a = test.assetFor( false );
+  let programPath = a.program( testApp );
 
   /* */
 
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
-  var expectedOutput = testAppPath + '\n';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-
-  var o;
-  var con = new _.Consequence().take( null )
-
-
-  /*  */
-
-  .thenKeep( () =>
+  a.ready.thenKeep( () =>
   {
     var o =
     {
-      execPath :  'node ' + testAppPath,
+      execPath :  'node ' + programPath,
       mode : 'spawn',
       stdio : 'pipe',
       sync : 0,
@@ -1072,7 +152,7 @@ function processOnExitEvent( test )
   {
     var o =
     {
-      execPath :  'node ' + testAppPath + ' terminate : 1',
+      execPath :  'node ' + programPath + ' terminate : 1',
       mode : 'spawn',
       stdio : 'pipe',
       sync : 0,
@@ -1091,7 +171,34 @@ function processOnExitEvent( test )
     });
   })
 
-  return con;
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+
+    _.include( 'wProcess' );
+    _.include( 'wStringsExtra' )
+
+    var args = _.process.args();
+
+    _.process.on( 'exit', ( arg ) =>
+    {
+      console.log( 'processOnExit:', arg );
+    });
+
+    _.time.out( 1000, () =>
+    {
+      console.log( 'timeOut handler executed' );
+      return 1;
+    })
+
+    if( args.map.terminate )
+    process.exit( 'SIGINT' );
+
+  }
 }
 
 //
@@ -1099,10 +206,126 @@ function processOnExitEvent( test )
 function processOffExitEvent( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
+  let a = test.assetFor( false );
+  let programPath = a.program( testApp );
+
+  /*  */
+
+  a.ready.thenKeep( () =>
+  {
+    test.case = 'nothing to off'
+    var o =
+    {
+      execPath :  'node ' + programPath,
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputPiping : 1,
+      outputCollecting : 1,
+    }
+
+    return _.process.start( o )
+    .then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      test.identical( _.strCount( got.output, 'timeOut handler executed'  ), 1 );
+      test.identical( _.strCount( got.output, 'processOnExit1: 0' ), 1 );
+      test.identical( _.strCount( got.output, 'processOnExit2: 0' ), 1 );
+      test.identical( _.strCount( got.output, 'processOnExit3: 0' ), 0 );
+      return null;
+    })
+
+  })
+
+  /*  */
+
+  .thenKeep( () =>
+  {
+    test.case = 'off single handler'
+    var o =
+    {
+      execPath :  'node ' + programPath,
+      args : 'off:handler1',
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputPiping : 1,
+      outputCollecting : 1,
+    }
+
+    return _.process.start( o )
+    .then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      test.identical( _.strCount( got.output, 'timeOut handler executed'  ), 1 );
+      test.identical( _.strCount( got.output, 'processOnExit1: 0' ), 0 );
+      test.identical( _.strCount( got.output, 'processOnExit2: 0' ), 1 );
+      test.identical( _.strCount( got.output, 'processOnExit3: 0' ), 0 );
+      return null;
+    })
+  })
+
+  /*  */
+
+  .thenKeep( () =>
+  {
+    test.case = 'off all handlers'
+    var o =
+    {
+      execPath :  'node ' + programPath,
+      args : 'off:[handler1,handler2]',
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputPiping : 1,
+      outputCollecting : 1,
+    }
+
+    return _.process.start( o )
+    .then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      test.identical( _.strCount( got.output, 'timeOut handler executed'  ), 1 );
+      test.identical( _.strCount( got.output, 'processOnExit1: 0' ), 0 );
+      test.identical( _.strCount( got.output, 'processOnExit2: 0' ), 0 );
+      test.identical( _.strCount( got.output, 'processOnExit3: 0' ), 0 );
+      return null;
+    })
+  })
+
+  /*  */
+
+  .thenKeep( () =>
+  {
+    test.case = 'off unregistered handler'
+    var o =
+    {
+      execPath :  'node ' + programPath,
+      args : 'off:handler3',
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputPiping : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    return _.process.start( o )
+    .then( ( got ) =>
+    {
+      test.notIdentical( got.exitCode, 0 );
+      test.identical( _.strCount( got.output, 'uncaught error' ), 2 );
+      test.identical( _.strCount( got.output, 'processOnExit1: -1' ), 1 );
+      test.identical( _.strCount( got.output, 'processOnExit2: -1' ), 1 );
+      test.identical( _.strCount( got.output, 'processOnExit3: -1' ), 0 );
+      return null;
+    })
+  })
+
+  return a.ready;
+
+  /* - */
 
   function testApp()
   {
+    let _ = require( toolsPath );
+
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
 
@@ -1145,127 +368,6 @@ function processOffExitEvent( test )
       console.log( 'processOnExit3:', arg );
     }
   }
-
-  /* */
-
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-
-  var con = new _.Consequence().take( null )
-
-  /*  */
-
-  .thenKeep( () =>
-  {
-    test.case = 'nothing to off'
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'spawn',
-      stdio : 'pipe',
-      outputPiping : 1,
-      outputCollecting : 1,
-    }
-
-    return _.process.start( o )
-    .then( ( got ) =>
-    {
-      test.identical( got.exitCode, 0 );
-      test.identical( _.strCount( got.output, 'timeOut handler executed'  ), 1 );
-      test.identical( _.strCount( got.output, 'processOnExit1: 0' ), 1 );
-      test.identical( _.strCount( got.output, 'processOnExit2: 0' ), 1 );
-      test.identical( _.strCount( got.output, 'processOnExit3: 0' ), 0 );
-      return null;
-    })
-
-  })
-
-  /*  */
-
-  .thenKeep( () =>
-  {
-    test.case = 'off single handler'
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      args : 'off:handler1',
-      mode : 'spawn',
-      stdio : 'pipe',
-      outputPiping : 1,
-      outputCollecting : 1,
-    }
-
-    return _.process.start( o )
-    .then( ( got ) =>
-    {
-      test.identical( got.exitCode, 0 );
-      test.identical( _.strCount( got.output, 'timeOut handler executed'  ), 1 );
-      test.identical( _.strCount( got.output, 'processOnExit1: 0' ), 0 );
-      test.identical( _.strCount( got.output, 'processOnExit2: 0' ), 1 );
-      test.identical( _.strCount( got.output, 'processOnExit3: 0' ), 0 );
-      return null;
-    })
-  })
-
-  /*  */
-
-  .thenKeep( () =>
-  {
-    test.case = 'off all handlers'
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      args : 'off:[handler1,handler2]',
-      mode : 'spawn',
-      stdio : 'pipe',
-      outputPiping : 1,
-      outputCollecting : 1,
-    }
-
-    return _.process.start( o )
-    .then( ( got ) =>
-    {
-      test.identical( got.exitCode, 0 );
-      test.identical( _.strCount( got.output, 'timeOut handler executed'  ), 1 );
-      test.identical( _.strCount( got.output, 'processOnExit1: 0' ), 0 );
-      test.identical( _.strCount( got.output, 'processOnExit2: 0' ), 0 );
-      test.identical( _.strCount( got.output, 'processOnExit3: 0' ), 0 );
-      return null;
-    })
-  })
-
-  /*  */
-
-  .thenKeep( () =>
-  {
-    test.case = 'off unregistered handler'
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      args : 'off:handler3',
-      mode : 'spawn',
-      stdio : 'pipe',
-      outputPiping : 1,
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    return _.process.start( o )
-    .then( ( got ) =>
-    {
-      test.notIdentical( got.exitCode, 0 );
-      test.identical( _.strCount( got.output, 'uncaught error' ), 2 );
-      test.identical( _.strCount( got.output, 'processOnExit1: -1' ), 1 );
-      test.identical( _.strCount( got.output, 'processOnExit2: -1' ), 1 );
-      test.identical( _.strCount( got.output, 'processOnExit3: -1' ), 0 );
-      return null;
-    })
-  })
-
-  /*  */
-
-  return con;
 }
 
 //
@@ -4635,10 +3737,10 @@ function startWithReadyDelayStructural( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
-    test.identical( op.output, 'program1\n' );
+    test.identical( op.output, 'program1:begin\n' );
 
     let exp2 = _.mapExtend( null, exp );
-    exp2.output = 'program1\n';
+    exp2.output = 'program1:begin\n';
     exp2.exitCode = 0;
     exp2.exitSignal = null;
     exp2.disconnect = options.disconnect;
@@ -4738,7 +3840,7 @@ function startWithReadyDelayStructural( test )
   function program1()
   {
     let _ = require( toolsPath );
-    console.log( 'program1' );
+    console.log( 'program1:begin' );
   }
 
 }
@@ -8422,8 +7524,8 @@ function shellNode( test )
 
   /*  */
 
-  // var modes = [ 'fork', 'exec', 'spawn', 'shell' ];
-  var modes = [ 'fork', 'spawn', 'shell' ];
+  // let modes = [ 'fork', 'exec', 'spawn', 'shell' ];
+  let modes = [ 'fork', 'spawn', 'shell' ];
 
   modes.forEach( ( mode ) =>
   {
@@ -14302,8 +13404,8 @@ function startOnStartWithDelay( test )
   function program1()
   {
     let _ = require( toolsPath );
-    console.log( 'program1' );
-    setTimeout( () => {}, 15000 );
+    console.log( 'program1:begin' );
+    setTimeout( () => { console.log( 'program1:end' ) }, 15000 );
   }
 
 }
@@ -15722,8 +14824,8 @@ function outputHandling( test )
 
   var con = new _.Consequence().take( null );
 
-  // var modes = [ 'shell', 'spawn', 'exec', 'fork' ];
-  var modes = [ 'shell', 'spawn', 'fork' ];
+  // let modes = [ 'shell', 'spawn', 'exec', 'fork' ];
+  let modes = [ 'shell', 'spawn', 'fork' ];
   var loggerOutput = '';
 
   function onTransformEnd( o )
@@ -15823,8 +14925,8 @@ function shellOutputStripping( test )
   /* */
 
   var ready = new _.Consequence().take( null );
-  // var modes = [ 'shell', 'spawn', 'exec', 'fork' ];
-  var modes = [ 'shell', 'spawn', 'fork' ];
+  // let modes = [ 'shell', 'spawn', 'exec', 'fork' ];
+  let modes = [ 'shell', 'spawn', 'fork' ];
 
   _.each( modes, ( mode ) =>
   {
@@ -15897,8 +14999,8 @@ function shellLoggerOption( test )
   /* */
 
   var ready = new _.Consequence().take( null );
-  // var modes = [ 'shell', 'spawn', 'exec', 'fork' ];
-  var modes = [ 'shell', 'spawn', 'fork' ];
+  // let modes = [ 'shell', 'spawn', 'exec', 'fork' ];
+  let modes = [ 'shell', 'spawn', 'fork' ];
 
   test.case = 'custom logger with increased level'
 
@@ -17168,69 +16270,81 @@ function endStructuralSigint( test )
   let a = test.assetFor( false );
   let programPath = a.program( program1 );
   let time1;
+  // let modes = [ 'fork', 'spawn', 'shell' ];
+  let modes = [ 'fork' ];
 
-  /* */
-
-  let options =
-  {
-    execPath : 'node',
-    args : programPath,
-    currentPath : a.currentPath,
-    throwingExitCode : 1,
-    applyingExitCode : 0,
-    inputMirroring : 1,
-    outputCollecting : 1,
-    stdio : 'pipe',
-    sync : 0,
-    deasync : 0,
-    ready : a.ready,
-  }
-
-  _.process.start( options );
-
-  options.onStart
-  .then( ( op ) =>
-  {
-    test.is( options === op );
-    test.identical( options.output, '' );
-    test.identical( options.exitCode, null );
-    test.identical( options.exitSignal, null );
-    test.identical( options.ended, false );
-    test.identical( options.terminationReason, null );
-    test.is( options.onStart !== options.ready );
-    test.is( options.onTerminate === options.ready );
-    test.is( !!options.process );
-    time1 = _.time.now();
-    _.time.out( context.dt1, () => options.process.kill( 'SIGINT' ) );
-    return null;
-  });
-
-  options.onTerminate
-  .finally( ( err, op ) =>
-  {
-    var dtime = _.time.now() - time1;
-    test.ge( dtime, 15000-1000 );
-    _.errAttend( err );
-    test.is( _.errIs( err ) );
-    test.identical( options.output, 'program1\n' );
-    test.identical( options.exitCode, null );
-    test.identical( options.exitSignal, 'SIGINT' );
-    test.identical( options.ended, true );
-    test.identical( options.terminationReason, 'signal' );
-    return null;
-  });
-
-  /* */
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
   return a.ready;
+
+  /* */
+
+  function run( mode )
+  {
+    let ready = _.Consequence().take( null );
+
+    let options =
+    {
+      execPath : mode === 'fork' ? null : 'node',
+      args : programPath,
+      currentPath : a.currentPath,
+      throwingExitCode : 1,
+      applyingExitCode : 0,
+      inputMirroring : 1,
+      outputCollecting : 1,
+      stdio : 'pipe',
+      sync : 0,
+      deasync : 0,
+      mode,
+      ready,
+    }
+
+    _.process.start( options );
+
+    options.onStart
+    .then( ( op ) =>
+    {
+      test.is( options === op );
+      test.identical( options.output, '' );
+      test.identical( options.exitCode, null );
+      test.identical( options.exitSignal, null );
+      test.identical( options.ended, false );
+      test.identical( options.terminationReason, null );
+      test.is( options.onStart !== options.ready );
+      test.is( options.onTerminate === options.ready );
+      test.is( !!options.process );
+      time1 = _.time.now();
+      _.time.out( context.dt1, () => options.process.kill( 'SIGINT' ) );
+      return null;
+    });
+
+    options.onTerminate
+    .finally( ( err, op ) =>
+    {
+      var dtime = _.time.now() - time1;
+      test.le( dtime, context.dt1*2 );
+      _.errAttend( err );
+      test.is( _.errIs( err ) );
+      test.identical( options.output, 'program1:begin\nprogram1:end\n' );
+      test.identical( options.exitCode, null );
+      test.identical( options.exitSignal, 'SIGINT' );
+      test.identical( options.ended, true );
+      test.identical( options.terminationReason, 'signal' );
+      return null;
+    });
+
+    /* */
+
+    return ready;
+  }
 
   /* */
 
   function program1()
   {
     let _ = require( toolsPath );
-    console.log( 'program1' );
-    setTimeout( () => {}, 15000 );
+    console.log( 'program1:begin' );
+    setTimeout( () => { console.log( 'program1:end' ) }, 15000 );
   }
 
 }
@@ -17238,7 +16352,7 @@ function endStructuralSigint( test )
 endStructuralSigint.description =
 `
  - end process with SIGINT
- - should wait more than 15s
+ - should wait 1s
  - should have proper exitSignal, exitCode and terminationReason
 `
 
@@ -17250,69 +16364,81 @@ function endStructuralSigkill( test )
   let a = test.assetFor( false );
   let programPath = a.program( program1 );
   let time1;
+  let modes = [ 'fork', 'spawn', 'shell' ];
 
-  /* */
-
-  let options =
-  {
-    execPath : 'node',
-    args : programPath,
-    currentPath : a.currentPath,
-    throwingExitCode : 1,
-    applyingExitCode : 0,
-    inputMirroring : 1,
-    outputCollecting : 1,
-    stdio : 'pipe',
-    sync : 0,
-    deasync : 0,
-    ready : a.ready,
-  }
-
-  _.process.start( options );
-
-  options.onStart
-  .then( ( op ) =>
-  {
-    test.is( options === op );
-    test.identical( options.output, '' );
-    test.identical( options.exitCode, null );
-    test.identical( options.exitSignal, null );
-    test.identical( options.ended, false );
-    test.identical( options.terminationReason, null );
-    test.is( options.onStart !== options.ready );
-    test.is( options.onTerminate === options.ready );
-    test.is( !!options.process );
-    time1 = _.time.now();
-    _.time.out( context.dt1, () => options.process.kill( 'SIGKILL' ) );
-    return null;
-  });
-
-  options.onTerminate
-  .finally( ( err, op ) =>
-  {
-    var dtime = _.time.now() - time1;
-    test.le( dtime, context.dt1*2 );
-    _.errAttend( err );
-    test.is( _.errIs( err ) );
-    test.identical( options.output, 'program1\n' );
-    test.identical( options.exitCode, null );
-    test.identical( options.exitSignal, 'SIGKILL' );
-    test.identical( options.ended, true );
-    test.identical( options.terminationReason, 'signal' );
-    return null;
-  });
-
-  /* */
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
   return a.ready;
+
+  /* */
+
+  function run( mode )
+  {
+    let ready = _.Consequence().take( null );
+
+    let options =
+    {
+      execPath : mode === 'fork' ? null : 'node',
+      args : programPath,
+      currentPath : a.currentPath,
+      throwingExitCode : 1,
+      applyingExitCode : 0,
+      inputMirroring : 1,
+      outputCollecting : 1,
+      stdio : 'pipe',
+      sync : 0,
+      deasync : 0,
+      mode,
+      ready,
+    }
+
+    _.process.start( options );
+
+    options.onStart
+    .then( ( op ) =>
+    {
+      test.is( options === op );
+      test.identical( options.output, '' );
+      test.identical( options.exitCode, null );
+      test.identical( options.exitSignal, null );
+      test.identical( options.ended, false );
+      test.identical( options.terminationReason, null );
+      test.is( options.onStart !== options.ready );
+      test.is( options.onTerminate === options.ready );
+      test.is( !!options.process );
+      time1 = _.time.now();
+      _.time.out( context.dt1, () => options.process.kill( 'SIGKILL' ) );
+      return null;
+    });
+
+    options.onTerminate
+    .finally( ( err, op ) =>
+    {
+      var dtime = _.time.now() - time1;
+      test.le( dtime, context.dt1*2 );
+      _.errAttend( err );
+      test.is( _.errIs( err ) );
+      test.identical( options.output, 'program1:begin\n' );
+      test.identical( options.exitCode, null );
+      test.identical( options.exitSignal, 'SIGKILL' );
+      test.identical( options.ended, true );
+      test.identical( options.terminationReason, 'signal' );
+      return null;
+    });
+
+    /* */
+
+    return ready;
+  }
 
   /* */
 
   function program1()
   {
     let _ = require( toolsPath );
-    console.log( 'program1' );
-    setTimeout( () => {}, 15000 );
+    _.include( 'wProcess' );
+    console.log( 'program1:begin' );
+    setTimeout( () => { console.log( 'program1:end' ) }, 15000 );
   }
 
 }
@@ -17320,7 +16446,7 @@ function endStructuralSigkill( test )
 endStructuralSigkill.description =
 `
  - end process with SIGKILL
- - should wait less than 2*1s
+ - should wait 1s
  - should have proper exitSignal, exitCode and terminationReason
 `
 
@@ -17332,69 +16458,80 @@ function endStructuralTerminate( test )
   let a = test.assetFor( false );
   let programPath = a.program( program1 );
   let time1;
+  let modes = [ 'fork', 'spawn', 'shell' ];
 
-  /* */
-
-  let options =
-  {
-    execPath : 'node',
-    args : programPath,
-    currentPath : a.currentPath,
-    throwingExitCode : 1,
-    applyingExitCode : 0,
-    inputMirroring : 1,
-    outputCollecting : 1,
-    stdio : 'pipe',
-    sync : 0,
-    deasync : 0,
-    ready : a.ready,
-  }
-
-  _.process.start( options );
-
-  options.onStart
-  .then( ( op ) =>
-  {
-    test.is( options === op );
-    test.identical( options.output, '' );
-    test.identical( options.exitCode, null );
-    test.identical( options.exitSignal, null );
-    test.identical( options.ended, false );
-    test.identical( options.terminationReason, null );
-    test.is( options.onStart !== options.ready );
-    test.is( options.onTerminate === options.ready );
-    test.is( !!options.process );
-    time1 = _.time.now();
-    _.time.out( context.dt1, () => _.process.terminate( options.process ) );
-    return null;
-  });
-
-  options.onTerminate
-  .finally( ( err, op ) =>
-  {
-    var dtime = _.time.now() - time1;
-    test.le( dtime, context.dt1*2 );
-    _.errAttend( err );
-    test.is( _.errIs( err ) );
-    test.identical( options.output, 'program1\n' );
-    test.identical( options.exitCode, null );
-    test.identical( options.exitSignal, 'SIGKILL' );
-    test.identical( options.ended, true );
-    test.identical( options.terminationReason, 'signal' );
-    return null;
-  });
-
-  /* */
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
   return a.ready;
+
+  /* */
+
+  function run( mode )
+  {
+    let ready = _.Consequence().take( null );
+
+    let options =
+    {
+      execPath : mode === 'fork' ? null : 'node',
+      args : programPath,
+      currentPath : a.currentPath,
+      throwingExitCode : 1,
+      applyingExitCode : 0,
+      inputMirroring : 1,
+      outputCollecting : 1,
+      stdio : 'pipe',
+      sync : 0,
+      deasync : 0,
+      mode,
+      ready,
+    }
+
+    _.process.start( options );
+
+    options.onStart
+    .then( ( op ) =>
+    {
+      test.is( options === op );
+      test.identical( options.output, '' );
+      test.identical( options.exitCode, null );
+      test.identical( options.exitSignal, null );
+      test.identical( options.ended, false );
+      test.identical( options.terminationReason, null );
+      test.is( options.onStart !== options.ready );
+      test.is( options.onTerminate === options.ready );
+      test.is( !!options.process );
+      time1 = _.time.now();
+      _.time.out( context.dt1, () => _.process.terminate({ process : options.process, timeOut : 5000 }) );
+      return null;
+    });
+
+    options.onTerminate
+    .finally( ( err, op ) =>
+    {
+      var dtime = _.time.now() - time1;
+      test.le( dtime, context.dt1*2 );
+      _.errAttend( err );
+      test.is( _.errIs( err ) );
+      test.identical( options.output, 'program1:begin\n' );
+      test.identical( options.exitCode, null );
+      test.identical( options.exitSignal, 'SIGINT' );
+      test.identical( options.ended, true );
+      test.identical( options.terminationReason, 'signal' );
+      return null;
+    });
+
+    /* */
+
+    return ready;
+  }
 
   /* */
 
   function program1()
   {
     let _ = require( toolsPath );
-    console.log( 'program1' );
-    setTimeout( () => {}, 15000 );
+    console.log( 'program1:begin' );
+    setTimeout( () => { console.log( 'program1:end' ) }, 15000 );
   }
 
 }
@@ -17402,7 +16539,100 @@ function endStructuralTerminate( test )
 endStructuralTerminate.description =
 `
  - end process with _.process.terminate()
- - should wait xxx?
+ - should wait 1s
+ - should have proper exitSignal, exitCode and terminationReason
+`
+
+//
+
+function endStructuralKill( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let programPath = a.program( program1 );
+  let time1;
+  let modes = [ 'fork', 'spawn', 'shell' ];
+
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+
+  return a.ready;
+
+  function run( mode )
+  {
+    let ready = _.Consequence().take( null );
+
+    let options =
+    {
+      execPath : mode === 'fork' ? null : 'node',
+      args : programPath,
+      currentPath : a.currentPath,
+      throwingExitCode : 1,
+      applyingExitCode : 0,
+      inputMirroring : 1,
+      outputCollecting : 1,
+      stdio : 'pipe',
+      sync : 0,
+      deasync : 0,
+      mode,
+      ready,
+    }
+
+    test.case = `mode:${mode}`;
+
+    _.process.start( options );
+
+    options.onStart
+    .then( ( op ) =>
+    {
+      test.is( options === op );
+      test.identical( options.output, '' );
+      test.identical( options.exitCode, null );
+      test.identical( options.exitSignal, null );
+      test.identical( options.ended, false );
+      test.identical( options.terminationReason, null );
+      test.is( options.onStart !== options.ready );
+      test.is( options.onTerminate === options.ready );
+      test.is( !!options.process );
+      time1 = _.time.now();
+      _.time.out( context.dt1, () => _.process.kill( options.process ) );
+      return null;
+    });
+
+    options.onTerminate
+    .finally( ( err, op ) =>
+    {
+      var dtime = _.time.now() - time1;
+      test.le( dtime, context.dt1*2 );
+      _.errAttend( err );
+      test.is( _.errIs( err ) );
+      test.identical( options.output, 'program1:begin\n' );
+      test.identical( options.exitCode, null );
+      test.identical( options.exitSignal, 'SIGKILL' );
+      test.identical( options.ended, true );
+      test.identical( options.terminationReason, 'signal' );
+      return null;
+    });
+
+    /* */
+
+    return ready;
+  }
+
+  /* */
+
+  function program1()
+  {
+    let _ = require( toolsPath );
+    console.log( 'program1:begin' );
+    setTimeout( () => { console.log( 'program1:end' ) }, 15000 );
+  }
+
+}
+
+endStructuralKill.description =
+`
+ - end process with _.process.kill()
+ - should wait 1s
  - should have proper exitSignal, exitCode and terminationReason
 `
 
@@ -19562,10 +18792,10 @@ var Proto =
   tests :
   {
 
-    processArgsPropertiesBase,
-    processArgsMultipleCommands,
-    processArgsPaths,
-    processArgsWithSpace,
+    //processArgsPropertiesBase,
+    //processArgsMultipleCommands,
+    //processArgsPaths,
+    //processArgsWithSpace,
 
     processOnExitEvent,
     processOffExitEvent,
@@ -19689,6 +18919,7 @@ var Proto =
     endStructuralSigint,
     endStructuralSigkill,
     endStructuralTerminate,
+    endStructuralKill,
     terminateComplex,
     terminateDetachedComplex,
     terminateWithChildren,
