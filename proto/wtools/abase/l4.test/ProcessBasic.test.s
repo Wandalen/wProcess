@@ -2798,33 +2798,17 @@ shellForkSyncDeasync.timeOut = 15000;
 function shellForkSyncDeasyncThrowing( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
-
-  /* */
-
-  function testApp()
-  {
-    throw new Error( 'Test error' );
-  }
-
-  /* */
-
-  var execPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = testApp.toString() + '\ntestApp();';
-  _.fileProvider.fileWrite( execPath, testAppCode );
-
-  /* - */
-
-  var ready = new _.Consequence().take( null );
+  let a = test.assetFor( false );
+  let programPath = a.program( testApp );
 
   /*  */
 
-  ready.then( () =>
+  a.ready.then( () =>
   {
     test.case = 'sync:0,desync:0'
     let o =
     {
-      execPath,
+      execPath : programPath,
       mode : 'fork',
       sync : 0,
       deasync : 0
@@ -2837,12 +2821,12 @@ function shellForkSyncDeasyncThrowing( test )
 
   /*  */
 
-  ready.then( () =>
+  a.ready.then( () =>
   {
     test.case = 'sync:1,desync:0'
     let o =
     {
-      execPath,
+      execPath : programPath,
       mode : 'fork',
       sync : 1,
       deasync : 0
@@ -2853,12 +2837,12 @@ function shellForkSyncDeasyncThrowing( test )
 
   /*  */
 
-  ready.then( () =>
+  a.ready.then( () =>
   {
     test.case = 'sync:0,desync:1'
     let o =
     {
-      execPath,
+      execPath : programPath,
       mode : 'fork',
       sync : 0,
       deasync : 1
@@ -2871,12 +2855,12 @@ function shellForkSyncDeasyncThrowing( test )
 
   /*  */
 
-  ready.then( () =>
+  a.ready.then( () =>
   {
     test.case = 'sync:1,desync:1'
     let o =
     {
-      execPath,
+      execPath : programPath,
       mode : 'fork',
       sync : 1,
       deasync : 1
@@ -2887,7 +2871,12 @@ function shellForkSyncDeasyncThrowing( test )
 
   /*  */
 
-  return ready;
+  return a.ready;
+
+  function testApp()
+  {
+    throw new Error( 'Test error' );
+  }
 }
 
 shellForkSyncDeasyncThrowing.timeOut = 15000;
@@ -3112,33 +3101,17 @@ shellForkSyncDeasyncThrowing.timeOut = 15000;
 function shellMultipleSyncDeasync( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
-
-  /* */
-
-  function testApp()
-  {
-    console.log( process.argv.slice( 2 ) )
-  }
-
-  /* */
-
-  var execPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = testApp.toString() + '\ntestApp();';
-  _.fileProvider.fileWrite( execPath, testAppCode );
-
-  /* - */
-
-  var ready = new _.Consequence().take( null );
+  let a = test.assetFor( false );
+  let programPath = a.program( testApp );
 
   /*  */
 
-  ready.then( () =>
+  a.ready.then( () =>
   {
     test.case = 'sync:0,desync:0'
     let o =
     {
-      execPath : [ 'node ' + execPath, 'node ' + execPath ],
+      execPath : [ 'node ' + programPath, 'node ' + programPath ],
       mode : 'spawn',
       sync : 0,
       deasync : 0
@@ -3158,12 +3131,12 @@ function shellMultipleSyncDeasync( test )
 
   /*  */
 
-  ready.then( () =>
+  a.ready.then( () =>
   {
     test.case = 'sync:1,desync:0'
     let o =
     {
-      execPath : [ 'node ' + execPath, 'node ' + execPath ],
+      execPath : [ 'node ' + programPath, 'node ' + programPath ],
       mode : 'spawn',
       sync : 1,
       returningOptionsArray : 1,
@@ -3179,12 +3152,12 @@ function shellMultipleSyncDeasync( test )
 
   /*  */
 
-  ready.then( () =>
+  a.ready.then( () =>
   {
     test.case = 'sync:1,desync:0'
     let o =
     {
-      execPath : [ 'node ' + execPath, 'node ' + execPath ],
+      execPath : [ 'node ' + programPath, 'node ' + programPath ],
       mode : 'spawn',
       sync : 1,
       returningOptionsArray : 0,
@@ -3198,12 +3171,12 @@ function shellMultipleSyncDeasync( test )
 
   /*  */
 
-  ready.then( () =>
+  a.ready.then( () =>
   {
     test.case = 'sync:0,desync:1'
     let o =
     {
-      execPath : [ 'node ' + execPath, 'node ' + execPath ],
+      execPath : [ 'node ' + programPath, 'node ' + programPath ],
       mode : 'spawn',
       sync : 0,
       deasync : 1
@@ -3223,12 +3196,12 @@ function shellMultipleSyncDeasync( test )
 
   /*  */
 
-  ready.then( () =>
+  a.ready.then( () =>
   {
     test.case = 'sync:1,desync:1'
     let o =
     {
-      execPath : [ 'node ' + execPath, 'node ' + execPath ],
+      execPath : [ 'node ' + programPath, 'node ' + programPath ],
       mode : 'spawn',
       sync : 1,
       deasync : 1
@@ -3243,12 +3216,12 @@ function shellMultipleSyncDeasync( test )
 
   /*  */
 
-  ready.then( () =>
+  a.ready.then( () =>
   {
     test.case = 'sync:0,desync:0'
     let o =
     {
-      execPath : [ 'node ' + execPath, 'node ' + execPath ],
+      execPath : [ 'node ' + programPath, 'node ' + programPath ],
       mode : 'shell',
       sync : 0,
       deasync : 0
@@ -3268,12 +3241,12 @@ function shellMultipleSyncDeasync( test )
 
   /*  */
 
-  ready.then( () =>
+  a.ready.then( () =>
   {
     test.case = 'sync:1,desync:0'
     let o =
     {
-      execPath : [ 'node ' + execPath, 'node ' + execPath ],
+      execPath : [ 'node ' + programPath, 'node ' + programPath ],
       mode : 'shell',
       sync : 1,
       returningOptionsArray : 1,
@@ -3289,12 +3262,12 @@ function shellMultipleSyncDeasync( test )
 
   /*  */
 
-  ready.then( () =>
+  a.ready.then( () =>
   {
     test.case = 'sync:1,desync:0'
     let o =
     {
-      execPath : [ 'node ' + execPath, 'node ' + execPath ],
+      execPath : [ 'node ' + programPath, 'node ' + programPath ],
       mode : 'shell',
       sync : 1,
       returningOptionsArray : 0,
@@ -3308,12 +3281,12 @@ function shellMultipleSyncDeasync( test )
 
   /*  */
 
-  ready.then( () =>
+  a.ready.then( () =>
   {
     test.case = 'sync:0,desync:1'
     let o =
     {
-      execPath : [ 'node ' + execPath, 'node ' + execPath ],
+      execPath : [ 'node ' + programPath, 'node ' + programPath ],
       mode : 'shell',
       sync : 0,
       deasync : 1
@@ -3333,12 +3306,12 @@ function shellMultipleSyncDeasync( test )
 
   /*  */
 
-  ready.then( () =>
+  a.ready.then( () =>
   {
     test.case = 'sync:1,desync:1'
     let o =
     {
-      execPath : [ execPath, execPath ],
+      execPath : [ programPath, programPath ],
       mode : 'fork',
       sync : 1,
       deasync : 1
@@ -3353,12 +3326,12 @@ function shellMultipleSyncDeasync( test )
 
   /*  */
 
-  ready.then( () =>
+  a.ready.then( () =>
   {
     test.case = 'sync:0,desync:0'
     let o =
     {
-      execPath : [ execPath, execPath ],
+      execPath : [ programPath, programPath ],
       mode : 'fork',
       sync : 0,
       deasync : 0
@@ -3378,12 +3351,12 @@ function shellMultipleSyncDeasync( test )
 
   /*  */
 
-  ready.then( () =>
+  a.ready.then( () =>
   {
     test.case = 'sync:1,desync:0'
     let o =
     {
-      execPath : [ execPath, execPath ],
+      execPath : [ programPath, programPath ],
       mode : 'fork',
       sync : 1,
       returningOptionsArray : 1,
@@ -3395,12 +3368,12 @@ function shellMultipleSyncDeasync( test )
 
   /*  */
 
-  ready.then( () =>
+  a.ready.then( () =>
   {
     test.case = 'sync:1,desync:0'
     let o =
     {
-      execPath : [ execPath, execPath ],
+      execPath : [ programPath, programPath ],
       mode : 'fork',
       sync : 1,
       returningOptionsArray : 0,
@@ -3412,12 +3385,12 @@ function shellMultipleSyncDeasync( test )
 
   /*  */
 
-  ready.then( () =>
+  a.ready.then( () =>
   {
     test.case = 'sync:0,desync:1'
     let o =
     {
-      execPath : [ execPath, execPath ],
+      execPath : [ programPath, programPath ],
       mode : 'fork',
       sync : 0,
       deasync : 1
@@ -3437,12 +3410,12 @@ function shellMultipleSyncDeasync( test )
 
   /*  */
 
-  ready.then( () =>
+  a.ready.then( () =>
   {
     test.case = 'sync:1,desync:1'
     let o =
     {
-      execPath : [ execPath, execPath ],
+      execPath : [ programPath, programPath ],
       mode : 'fork',
       sync : 1,
       deasync : 1
@@ -3457,12 +3430,12 @@ function shellMultipleSyncDeasync( test )
 
   /*  */
 
-  ready.then( () =>
+  a.ready.then( () =>
   {
     test.case = 'sync:1,desync:1'
     let o =
     {
-      execPath : [ execPath, execPath ],
+      execPath : [ programPath, programPath ],
       mode : 'fork',
       sync : 1,
       deasync : 1
@@ -3587,7 +3560,14 @@ function shellMultipleSyncDeasync( test )
 
   /*  */
 
-  return ready;
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    console.log( process.argv.slice( 2 ) )
+  }
 }
 
 shellMultipleSyncDeasync.timeOut = 30000;
@@ -18860,7 +18840,7 @@ var Proto =
     startNjsPassingThroughExecPathWithSpace,
     startPassingThroughExecPathWithSpace,
 
-    shellProcedureTrivial,
+    shellProcedureTrivial, //
     shellProcedureExists,
 
     shellTerminateHangedWithExitHandler,
