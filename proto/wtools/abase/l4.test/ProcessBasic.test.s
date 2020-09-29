@@ -8846,28 +8846,17 @@ startPassingThroughExecPathWithSpace.timeOut = 60000;
 function shellProcedureTrivial( test )
 {
   let context = this;
-  let routinePath = _.path.join( context.suiteTempPath, test.name );
-  let testAppPath =  _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-
-  function testApp()
-  {
-    console.log( process.pid )
-    setTimeout( () => {}, 2000 )
-  }
-
-  let testAppCode = testApp.toString() + '\ntestApp();';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-
-  let ready = _.Consequence().take( null );
+  let a = test.assetFor( false );
+  let testAppPath = a.program( testApp );
 
   let start = _.process.starter
   ({
-    currentPath : routinePath,
+    currentPath : a.routinePath,
     outputPiping : 1,
     outputCollecting : 1,
   });
 
-  ready
+  a.ready
 
   /* */
 
@@ -8962,7 +8951,16 @@ function shellProcedureTrivial( test )
 
   /* */
 
-  return ready;
+
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    console.log( process.pid )
+    setTimeout( () => {}, 2000 )
+  }
 }
 
 shellProcedureTrivial.timeOut = 60000;
