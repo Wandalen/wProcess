@@ -271,6 +271,7 @@ function start_body( o )
     else
     _.assert( o.ready === o.onTerminate && o.ready !== o.onStart );
     _.assert( o.onStart !== o.onTerminate );
+    _.assert( o.onDisconnect !== o.onStart );
 
     if( o.outputDecorating === null )
     o.outputDecorating = 0;
@@ -560,7 +561,7 @@ function start_body( o )
       timeOutForm();
       pipe();
       if( o.dry )
-      o.ready.take( o ); /* qqq : should be no o.ready */
+      o.onTerminate.take( o ); /* qqq : should be no o.ready aaa: replaced with onTerminate*/
     }
     catch( err )
     {
