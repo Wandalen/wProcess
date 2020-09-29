@@ -4788,12 +4788,10 @@ function shellArgumentsParsing( test )
 
   return ready;
 
-  /**/
+  /* - */
 
   function testApp()
   {
-    let _ = require( toolsPath );
-
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
     debugger;
@@ -6583,22 +6581,10 @@ shellExecPathQuotesClosing.timeOut = 60000;
 function shellExecPathSeveralCommands( test )
 {
   let context = this;
-  let routinePath = _.path.join( context.suiteTempPath, test.name );
-  let testAppPath =  _.fileProvider.path.nativize( _.path.join( routinePath, 'app.js' ) );
+  let a = test.assetFor( false );
+  let testAppPath = a.program( app );
 
-  function app()
-  {
-    console.log( process.argv.slice( 2 ) );
-  }
-
-  let testAppCode = app.toString() + '\napp();';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-
-  let ready = _.Consequence().take( null );
-
-  /* */
-
-  ready
+  a.ready
 
   testcase( 'quoted, mode:shell' )
 
@@ -6609,7 +6595,7 @@ function shellExecPathSeveralCommands( test )
     {
       execPath : 'node app.js arg1 && node app.js arg2',
       mode : 'shell',
-      currentPath : routinePath,
+      currentPath : a.routinePath,
       outputPiping : 1,
       outputCollecting : 1,
       ready : con
@@ -6638,7 +6624,7 @@ function shellExecPathSeveralCommands( test )
     {
       execPath : '"node app.js arg1 && node app.js arg2"',
       mode : 'spawn',
-      currentPath : routinePath,
+      currentPath : a.routinePath,
       outputPiping : 1,
       outputCollecting : 1,
       ready : con
@@ -6657,7 +6643,7 @@ function shellExecPathSeveralCommands( test )
     {
       execPath : '"node app.js arg1 && node app.js arg2"',
       mode : 'fork',
-      currentPath : routinePath,
+      currentPath : a.routinePath,
       outputPiping : 1,
       outputCollecting : 1,
       ready : con
@@ -6705,7 +6691,7 @@ function shellExecPathSeveralCommands( test )
     {
       execPath : 'node app.js arg1 && node app.js arg2',
       mode : 'shell',
-      currentPath : routinePath,
+      currentPath : a.routinePath,
       outputPiping : 1,
       outputCollecting : 1,
       ready : con
@@ -6734,7 +6720,7 @@ function shellExecPathSeveralCommands( test )
     {
       execPath : 'node app.js arg1 && node app.js arg2',
       mode : 'spawn',
-      currentPath : routinePath,
+      currentPath : a.routinePath,
       outputPiping : 1,
       outputCollecting : 1,
       ready : con
@@ -6762,7 +6748,7 @@ function shellExecPathSeveralCommands( test )
     {
       execPath : 'node app.js arg1 && node app.js arg2',
       mode : 'fork',
-      currentPath : routinePath,
+      currentPath : a.routinePath,
       outputPiping : 1,
       outputCollecting : 1,
       ready : con
@@ -6801,22 +6787,27 @@ function shellExecPathSeveralCommands( test )
 
   /*  */
 
-  return ready;
+  return a.ready;
 
   /*  */
 
   function testcase( src )
   {
-    ready.then( () =>
+    a.ready.then( () =>
     {
       test.case = src;
       return null;
     })
-    return ready;
+    return a.ready;
+  }
+
+  function app()
+  {
+    console.log( process.argv.slice( 2 ) );
   }
 }
 
-shellExecPathQuotesClosing.timeOut = 60000;
+shellExecPathSeveralCommands.timeOut = 60000;
 
 //
 
