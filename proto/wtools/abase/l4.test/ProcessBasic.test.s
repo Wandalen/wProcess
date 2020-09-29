@@ -2226,26 +2226,15 @@ shellFork.timeOut = 30000;
 function shellWithoutExecPath( test )
 {
   let context = this;
+  let a = test.assetFor( false );
+  let programPath = a.program( testApp );
   let counter = 0;
   let time = 0;
-  let routinePath = _.path.join( context.suiteTempPath, test.name );
-  let testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  let filePath = _.fileProvider.path.nativize( _.path.join( routinePath, 'file.txt' ) );
-  let ready = _.Consequence().take( null );
-
-  let testAppCode =
-  [
-    `let filePath = '${_.strEscape( filePath )}';\n`,
-    context.toolsPathInclude,
-    context.testApp.toString(),
-    '\ntestApp();'
-  ].join( '' );
-
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
+  let filePath = a.path.nativize( a.abs( a.routinePath, 'file.txt' ) );
 
   /* - */
 
-  ready.then( ( arg ) =>
+  a.ready.then( ( arg ) =>
   {
     test.case = 'single';
     time = _.time.now();
@@ -2254,8 +2243,8 @@ function shellWithoutExecPath( test )
 
   let singleOption =
   {
-    args : [ 'node', testAppPath, '1000' ],
-    ready,
+    args : [ 'node', programPath, '1000' ],
+    ready : a.ready,
     verbosity : 3,
     outputCollecting : 1,
   }
@@ -2267,13 +2256,44 @@ function shellWithoutExecPath( test )
     test.is( singleOption === arg );
     test.is( _.strHas( arg.output, 'begin 1000' ) );
     test.is( _.strHas( arg.output, 'end 1000' ) );
-    test.identical( _.fileProvider.fileRead( filePath ), 'written by 1000' );
-    _.fileProvider.fileDelete( filePath );
+    test.identical( a.fileProvider.fileRead( filePath ), 'written by 1000' );
+    a.fileProvider.fileDelete( filePath );
     counter += 1;
     return null;
   });
 
-  return ready;
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+    var ended = 0;
+    var fs = require( 'fs' );
+    var path = require( 'path' );
+    var filePath = path.join( __dirname, 'file.txt' );
+    console.log( 'begin', process.argv.slice( 2 ).join( ', ' ) );
+    var time = parseInt( process.argv[ 2 ] );
+    if( isNaN( time ) )
+    throw new Error( 'Expects number' );
+
+    setTimeout( end, time );
+    function end()
+    {
+      ended = 1;
+      fs.writeFileSync( filePath, 'written by ' + process.argv[ 2 ] );
+      console.log( 'end', process.argv.slice( 2 ).join( ', ' ) );
+    }
+
+    setTimeout( periodic, 50 );
+    function periodic()
+    {
+      console.log( 'tick', process.argv.slice( 2 ).join( ', ' ) );
+      if( !ended )
+      setTimeout( periodic, 50 );
+    }
+  }
 }
 
 //
