@@ -3784,34 +3784,18 @@ startWithReadyDelayStructural.description =
 function shellArgsOption( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
+  let a = test.assetFor( false );
+  let programPath = a.program( testApp );
 
   /* */
 
-  function testApp()
-  {
-    console.log( process.argv.slice( 2 ) );
-  }
-
-  /* */
-
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = testApp.toString() + '\ntestApp();';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-
-  /* */
-
-  var ready = new _.Consequence().take( null );
-
-  /* */
-
-  ready.then( () =>
+  a.ready.then( () =>
   {
     test.case = 'args option as array, source args array should not be changed'
     var args = [ 'arg1', 'arg2' ];
     var shellOptions =
     {
-      execPath : 'node ' + testAppPath,
+      execPath : 'node ' + programPath,
       outputCollecting : 1,
       args,
       mode : 'spawn',
@@ -3822,7 +3806,7 @@ function shellArgsOption( test )
     con.then( ( got ) =>
     {
       test.identical( got.exitCode, 0 );
-      test.identical( got.args, [ testAppPath, 'arg1', 'arg2' ] );
+      test.identical( got.args, [ programPath, 'arg1', 'arg2' ] );
       test.identical( _.strCount( got.output, `[ 'arg1', 'arg2' ]` ), 1 );
       test.identical( shellOptions.args, got.args );
       test.identical( args, [ 'arg1', 'arg2' ] );
@@ -3834,13 +3818,13 @@ function shellArgsOption( test )
 
   /* */
 
-  ready.then( () =>
+  a.ready.then( () =>
   {
     test.case = 'args option as string'
     var args = 'arg1'
     var shellOptions =
     {
-      execPath : 'node ' + testAppPath,
+      execPath : 'node ' + programPath,
       outputCollecting : 1,
       args,
       mode : 'spawn',
@@ -3851,7 +3835,7 @@ function shellArgsOption( test )
     con.then( ( got ) =>
     {
       test.identical( got.exitCode, 0 );
-      test.identical( got.args, [ testAppPath, 'arg1' ] );
+      test.identical( got.args, [ programPath, 'arg1' ] );
       test.identical( _.strCount( got.output, 'arg1' ), 1 );
       test.identical( shellOptions.args, got.args );
       test.identical( args, 'arg1' );
@@ -3863,7 +3847,14 @@ function shellArgsOption( test )
 
   /*  */
 
-  return ready;
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
 }
 
 shellArgsOption.timeOut = 30000;
@@ -4801,6 +4792,8 @@ function shellArgumentsParsing( test )
 
   function testApp()
   {
+    let _ = require( toolsPath );
+
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
     debugger;
