@@ -6814,8 +6814,7 @@ shellExecPathSeveralCommands.timeOut = 60000;
 function shellVerbosity( test )
 {
   let context = this;
-  let routinePath = _.path.join( context.suiteTempPath, test.name );
-  let ready = _.Consequence().take( null );
+  let a = test.assetFor( false );
 
   let capturedOutput = '';
   let captureLogger = new _.Logger({ output : null, onTransformEnd, raw : 1 })
@@ -6831,7 +6830,7 @@ function shellVerbosity( test )
     outputPiping : null,
     outputCollecting : 0,
     logger : captureLogger,
-    ready
+    ready : a.ready
   })
   .then( ( got ) =>
   {
@@ -6851,7 +6850,7 @@ function shellVerbosity( test )
     outputPiping : null,
     outputCollecting : 0,
     logger : captureLogger,
-    ready
+    ready : a.ready
   })
   .then( ( got ) =>
   {
@@ -6876,7 +6875,7 @@ function shellVerbosity( test )
     outputCollecting : 0,
     outputDecorating : 1,
     logger : captureLogger,
-    ready
+    ready : a.ready
   })
   .then( ( got ) =>
   {
@@ -6900,7 +6899,7 @@ function shellVerbosity( test )
     outputCollecting : 0,
     outputDecorating : 1,
     logger : captureLogger,
-    ready
+    ready : a.ready
   })
   .then( ( got ) =>
   {
@@ -6924,7 +6923,7 @@ function shellVerbosity( test )
     outputCollecting : 0,
     outputDecorating : 1,
     logger : captureLogger,
-    ready
+    ready : a.ready
   })
   .then( ( got ) =>
   {
@@ -6949,7 +6948,7 @@ function shellVerbosity( test )
     throwingExitCode : 0,
     outputDecorating : 1,
     logger : captureLogger,
-    ready
+    ready : a.ready
   })
   .then( ( got ) =>
   {
@@ -6972,7 +6971,7 @@ function shellVerbosity( test )
     throwingExitCode : 0,
     outputDecorating : 1,
     logger : captureLogger,
-    ready
+    ready : a.ready
   })
   .then( ( got ) =>
   {
@@ -6995,7 +6994,7 @@ function shellVerbosity( test )
     throwingExitCode : 0,
     outputDecorating : 1,
     logger : captureLogger,
-    ready
+    ready : a.ready
   })
   .then( ( got ) =>
   {
@@ -7018,7 +7017,7 @@ function shellVerbosity( test )
     throwingExitCode : 0,
     outputDecorating : 1,
     logger : captureLogger,
-    ready
+    ready : a.ready
   })
   .then( ( got ) =>
   {
@@ -7041,7 +7040,7 @@ function shellVerbosity( test )
     throwingExitCode : 0,
     outputDecorating : 1,
     logger : captureLogger,
-    ready
+    ready : a.ready
   })
   .then( ( got ) =>
   {
@@ -7064,7 +7063,7 @@ function shellVerbosity( test )
     throwingExitCode : 1,
     outputDecorating : 1,
     logger : captureLogger,
-    ready
+    ready : a.ready
   })
   .then( ( got ) =>
   {
@@ -7088,7 +7087,7 @@ function shellVerbosity( test )
     throwingExitCode : 1,
     outputDecorating : 1,
     logger : captureLogger,
-    ready
+    ready : a.ready
   })
   .then( ( got ) =>
   {
@@ -7098,13 +7097,13 @@ function shellVerbosity( test )
     return true;
   })
 
-  return ready;
+  return a.ready;
 
   /*  */
 
   function testCase( src )
   {
-    ready.then( () =>
+    a.ready.then( () =>
     {
       capturedOutput = '';
       test.case = src;
