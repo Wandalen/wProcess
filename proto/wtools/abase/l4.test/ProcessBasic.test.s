@@ -8044,23 +8044,21 @@ shellArgumentsHandling.timeOut = 30000;
 function importantModeShell( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
+  let a = test.assetFor( false );
   var printArguments = 'node -e "console.log( process.argv.slice( 1 ) )"'
 
-  _.fileProvider.fileWrite( _.path.join( routinePath, 'file' ), 'file' );
+  a.fileProvider.fileWrite( a.abs( a.routinePath, 'file' ), 'file' );
 
   /* */
 
-  var con = new _.Consequence().take( null );
-
   let shell = _.process.starter
   ({
-    currentPath : routinePath,
+    currentPath : a.routinePath,
     mode : 'shell',
     stdio : 'pipe',
     outputPiping : 1,
     outputCollecting : 1,
-    ready : con
+    ready : a.ready
   })
 
   /* */
@@ -8342,7 +8340,7 @@ function importantModeShell( test )
     return null;
   })
 
-  return con;
+  return a.ready;
 
 }
 
