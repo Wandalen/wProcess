@@ -5417,9 +5417,7 @@ function shellArgumentsNestedQuotes( test )
 
   let a = test.assetFor( false );
 
-  let testAppPathNoSpace = a.program( { routine : testApp, tempPath : a.abs( 'noSpace' ) } );
   let testAppPathSpace = a.program( { routine : testApp, tempPath : a.abs( 'with space' ) } );
-
 
   /* */
 
@@ -5789,16 +5787,14 @@ shellArgumentsNestedQuotes.timeOut = 60000;
 function shellExecPathQuotesClosing( test )
 {
   let context = this;
-  let routinePath = _.path.join( context.suiteTempPath, test.name );
-  let testAppPathSpace= _.fileProvider.path.nativize( _.path.join( routinePath, 'with space', 'testApp.js' ) );
-  let ready = _.Consequence().take( null );
 
-  let testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
-  _.fileProvider.fileWrite( testAppPathSpace, testAppCode );
+  let a = test.assetFor( false );
+
+  let testAppPathSpace = a.program( { routine : testApp, tempPath : a.abs( 'with space' ) } );
 
   /* */
 
-  ready
+  a.ready
 
   testcase( 'quoted arg' )
 
@@ -6553,22 +6549,24 @@ function shellExecPathQuotesClosing( test )
 
   /*  */
 
-  return ready;
+  return a.ready;
 
   /*  */
 
   function testcase( src )
   {
-    ready.then( () =>
+    a.ready.then( () =>
     {
       test.case = src;
       return null;
     })
-    return ready;
+    return a.ready;
   }
 
   function testApp()
   {
+    let _ = require( toolsPath );
+
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
     var args = _.process.args();
