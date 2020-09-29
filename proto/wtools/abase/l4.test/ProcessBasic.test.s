@@ -3869,14 +3869,12 @@ a test routine per mode
 function shellArgumentsParsing( test )
 {
   let context = this;
-  let routinePath = _.path.join( context.suiteTempPath, test.name );
-  let testAppPathNoSpace = _.fileProvider.path.nativize( _.path.join( routinePath, 'noSpace', 'testApp.js' ) );
-  let testAppPathSpace = _.fileProvider.path.nativize( _.path.join( routinePath, 'with space', 'testApp.js' ) );
-  let ready = _.Consequence().take( null );
 
-  let testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
-  _.fileProvider.fileWrite( testAppPathNoSpace, testAppCode );
-  _.fileProvider.fileWrite( testAppPathSpace, testAppCode );
+  let a = test.assetFor( false );
+
+  let testAppPathNoSpace = a.program( { routine : testApp, tempPath : a.abs( 'noSpace' ) } );
+  let testAppPathSpace = a.program( { routine : testApp, tempPath : a.abs( 'with space' ) } );
+
 
   /* for combination:
       path to exe file : [ with space, without space ]
@@ -3887,7 +3885,7 @@ function shellArgumentsParsing( test )
 
   /* - */
 
-  ready
+  a.ready
 
   .then( () =>
   {
@@ -4786,12 +4784,14 @@ function shellArgumentsParsing( test )
 
   /*  */
 
-  return ready;
+  return a.ready;
 
   /* - */
 
   function testApp()
   {
+    let _ = require( toolsPath );
+
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
     debugger;
@@ -4811,14 +4811,11 @@ shellArgumentsParsing.timeOut = 60000;
 function shellArgumentsParsingNonTrivial( test )
 {
   let context = this;
-  let routinePath = _.path.join( context.suiteTempPath, test.name );
-  let testAppPathNoSpace = _.fileProvider.path.nativize( _.path.join( routinePath, 'noSpace', 'testApp.js' ) );
-  let testAppPathSpace= _.fileProvider.path.nativize( _.path.join( routinePath, 'with space', 'testApp.js' ) );
-  let ready = _.Consequence().take( null );
 
-  let testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
-  _.fileProvider.fileWrite( testAppPathNoSpace, testAppCode );
-  _.fileProvider.fileWrite( testAppPathSpace, testAppCode );
+  let a = test.assetFor( false );
+
+  let testAppPathNoSpace = a.program( { routine : testApp, tempPath : a.abs( 'noSpace' ) } );
+  let testAppPathSpace = a.program( { routine : testApp, tempPath : a.abs( 'with space' ) } );
 
   /*
 
@@ -4881,7 +4878,7 @@ function shellArgumentsParsingNonTrivial( test )
 
   */
 
-  ready
+  a.ready
 
   // xxx qqq : repair?
   // .then( () =>
@@ -5390,13 +5387,15 @@ function shellArgumentsParsingNonTrivial( test )
 
   /*  */
 
-  return ready;
+  return a.ready;
 
 
   /**/
 
   function testApp()
   {
+    let _ = require( toolsPath );
+
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
     var args = _.process.args();
@@ -7377,7 +7376,9 @@ function shellNode( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  var testAppPath = a.program( testApp )
+  debugger
+  var testAppPath = a.program( { routine : testApp, locals : 'aaa' } )
+  console.log( 'PATHHHHHHHHHH: ', testAppPath )
   var testAppPath2 = a.program( testApp2 )
 
   /* */
