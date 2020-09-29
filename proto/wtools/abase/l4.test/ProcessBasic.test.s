@@ -7122,27 +7122,12 @@ function shellVerbosity( test )
 function shellErrorHadling( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
+  let a = test.assetFor( false );
+  let testAppPath = a.program( testApp );
 
   /* */
 
-  function testApp()
-  {
-    throw new Error( 'Error message from child' )
-  }
-
-  /* */
-
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = testApp.toString() + '\ntestApp();';
-  var expectedOutput = __dirname + '\n'
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-
-  /* - */
-
-  var con = new _.Consequence().take( null );
-
-  con.thenKeep( function()
+  a.ready.thenKeep( function()
   {
     test.case = 'collecting, verbosity and piping off';
 
@@ -7171,7 +7156,7 @@ function shellErrorHadling( test )
 
   })
 
-  con.thenKeep( function()
+  a.ready.thenKeep( function()
   {
     test.case = 'collecting, verbosity and piping off';
 
@@ -7200,7 +7185,7 @@ function shellErrorHadling( test )
 
   })
 
-  con.thenKeep( function()
+  a.ready.thenKeep( function()
   {
     test.case = 'collecting, verbosity and piping off';
 
@@ -7229,7 +7214,7 @@ function shellErrorHadling( test )
 
   })
 
-  con.thenKeep( function()
+  a.ready.thenKeep( function()
   {
     test.case = 'sync, collecting, verbosity and piping off';
 
@@ -7258,7 +7243,7 @@ function shellErrorHadling( test )
 
   })
 
-  con.thenKeep( function()
+  a.ready.thenKeep( function()
   {
     test.case = 'sync, collecting, verbosity and piping off';
 
@@ -7287,7 +7272,7 @@ function shellErrorHadling( test )
 
   })
 
-  con.thenKeep( function()
+  a.ready.thenKeep( function()
   {
     test.case = 'sync, collecting, verbosity and piping off';
 
@@ -7316,7 +7301,7 @@ function shellErrorHadling( test )
 
   })
 
-  con.thenKeep( function()
+  a.ready.thenKeep( function()
   {
     test.case = 'stdio ignore, sync, collecting, verbosity and piping off';
 
@@ -7374,7 +7359,14 @@ function shellErrorHadling( test )
 
   // })
 
-  return con;
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    throw new Error( 'Error message from child' )
+  }
 
 }
 
