@@ -8556,21 +8556,10 @@ startExecPathWithSpace.timeOut = 60000;
 function startNjsPassingThroughExecPathWithSpace( test )
 {
   let context = this;
-  let routinePath = _.path.join( context.suiteTempPath, test.name );
-  let testAppPath =  _.fileProvider.path.nativize( _.path.join( routinePath, 'path with space/testApp.js' ) );
+  let a = test.assetFor( false );
+  let testAppPath =  a.program({ routine : testApp, dirPath : 'path with space' });
 
-  function testApp()
-  {
-    console.log( process.pid )
-    setTimeout( () => {}, 2000 )
-  }
-
-  let testAppCode = testApp.toString() + '\ntestApp();';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-
-  let ready = _.Consequence().take( null );
-
-  let execPathWithSpace = _.path.nativize( testAppPath );
+  let execPathWithSpace = a.path.nativize( testAppPath );
 
   /* - */
 
@@ -8594,14 +8583,14 @@ function startNjsPassingThroughExecPathWithSpace( test )
   a.ready.then( ( got ) =>
   {
     test.notIdentical( got.exitCode, 0 );
-    test.is( _.fileProvider.fileExists( testAppPath ) );
+    test.is( a.fileProvider.fileExists( testAppPath ) );
     test.is( _.strHas( got.output, `Error: Cannot find module` ) );
     return null;
   })
 
   /* - */
 
-  ready.then( () =>
+  a.ready.then( () =>
   {
     test.case = 'args: string that contains unquoted path with space'
     return null;
@@ -8622,7 +8611,15 @@ function startNjsPassingThroughExecPathWithSpace( test )
 
   /* - */
 
-  return ready;
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    console.log( process.pid )
+    setTimeout( () => {}, 2000 )
+  }
 }
 
 startNjsPassingThroughExecPathWithSpace.timeOut = 60000;
