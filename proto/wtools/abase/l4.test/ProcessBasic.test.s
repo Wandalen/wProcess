@@ -7376,35 +7376,13 @@ function shellErrorHadling( test )
 function shellNode( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
+  let a = test.assetFor( false );
+  var testAppPath = a.program( testApp )
+  var testAppPath2 = a.program( testApp2 )
 
   /* */
 
-  function testApp()
-  {
-    throw new Error( 'Error message from child' );
-  }
-
-  function testApp2()
-  {
-    console.log( process.argv.slice( 2 ) )
-  }
-
-
-  /* */
-
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppPath2 = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp2.js' ) );
-  var testAppCode = testApp.toString() + '\ntestApp();';
-  var testAppCode2 = testApp2.toString() + '\ntestApp2();';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-  _.fileProvider.fileWrite( testAppPath2, testAppCode2 );
-
-  var con = new _.Consequence().take( null );
-
-  /* */
-
-  con.then( () =>
+  a.ready.then( () =>
   {
     test.case = 'execPath contains normalized path'
     return _.process.startNjs
@@ -7431,7 +7409,7 @@ function shellNode( test )
 
   modes.forEach( ( mode ) =>
   {
-    con.thenKeep( () =>
+    a.ready.thenKeep( () =>
     {
       var o = { execPath : testAppPath, mode, applyingExitCode : 1, throwingExitCode : 1, stdio : 'ignore' };
       var con = _.process.startNjs( o );
@@ -7445,7 +7423,7 @@ function shellNode( test )
       })
     })
 
-    con.thenKeep( () =>
+    a.ready.thenKeep( () =>
     {
       var o = { execPath : testAppPath, mode,  applyingExitCode : 1, throwingExitCode : 0, stdio : 'ignore' };
       return _.process.startNjs( o )
@@ -7459,7 +7437,7 @@ function shellNode( test )
       })
     })
 
-    con.thenKeep( () =>
+    a.ready.thenKeep( () =>
     {
       var o = { execPath : testAppPath,  mode, applyingExitCode : 0, throwingExitCode : 1, stdio : 'ignore' };
       var con = _.process.startNjs( o )
@@ -7472,7 +7450,7 @@ function shellNode( test )
       })
     })
 
-    con.thenKeep( () =>
+    a.ready.thenKeep( () =>
     {
       var o = { execPath : testAppPath,  mode, applyingExitCode : 0, throwingExitCode : 0, stdio : 'ignore' };
       return _.process.startNjs( o )
@@ -7485,7 +7463,7 @@ function shellNode( test )
       })
     })
 
-    con.thenKeep( () =>
+    a.ready.thenKeep( () =>
     {
       var o = { execPath : testAppPath,  mode, maximumMemory : 1, applyingExitCode : 0, throwingExitCode : 0, stdio : 'ignore' };
       return _.process.startNjs( o )
@@ -7501,7 +7479,19 @@ function shellNode( test )
     })
   })
 
-  return con;
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    throw new Error( 'Error message from child' );
+  }
+
+  function testApp2()
+  {
+    console.log( process.argv.slice( 2 ) )
+  }
 
 }
 
