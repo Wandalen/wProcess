@@ -3735,6 +3735,7 @@ function startWithReadyDelayStructural( test )
     'outputGraying' : 0,
     'onStart' : options.onStart,
     'onTerminate' : options.onTerminate,
+    'onDisconnect' : options.onDisconnect,
     'ready' : options.ready,
     'disconnect' : options.disconnect,
     'process' : options.process,
@@ -3748,6 +3749,8 @@ function startWithReadyDelayStructural( test )
     'procedure' : null,
     // 'procedureIsNew' : null,
     'ended' : false,
+    'terminationBeginEnabled' : false,
+    'error' : null
   }
   test.identical( options, exp );
 
@@ -9032,7 +9035,7 @@ function shellProcedureExists( test )
       test.identical( procedure[ 0 ].object(), o.process );
       test.identical( o.procedure, procedure[ 0 ] );
       debugger
-      test.is( _.strHas( o.procedure._sourcePath, 'ProcessWatcher.s' ) );
+      test.is( _.strHas( o.procedure._sourcePath, 'Execution.s' ) );
       return null;
     })
   })
@@ -9561,7 +9564,7 @@ function shellAfterDeath( test )
 
     _.time.out( 5000, () =>
     {
-      console.log( 'parent termination begin' )
+      console.log( 'parent termination begin' );
       _.procedure.terminationBegin();
       return null;
     })
@@ -9601,6 +9604,7 @@ function shellAfterDeath( test )
       execPath : 'node testAppParent.js',
       mode : 'spawn',
       outputCollecting : 1,
+      outputPiping : 1,
       currentPath : routinePath,
       ipc : 1,
     }
@@ -10499,13 +10503,6 @@ function startDetachingModeSpawnTerminationBegin( test )
 
     _.process.start( o );
 
-    o.onTerminate.catch( ( err ) =>
-    {
-      _.errAttend( err );
-      _.errLogOnce( err );
-      return null;
-    })
-
     process.send({ childPid : o.process.pid });
 
     _.time.out( 1000, () =>
@@ -10780,13 +10777,6 @@ function startDetachingModeForkTerminationBegin( test )
     _.mapExtend( o, args.map );
 
     _.process.start( o );
-
-    o.onTerminate.catch( ( err ) =>
-    {
-      _.errAttend( err );
-      _.errLogOnce( err );
-      return null;
-    })
 
     process.send({ childPid : o.process.pid });
 
@@ -11063,13 +11053,6 @@ function startDetachingModeShellTerminationBegin( test )
 
     _.process.start( o );
 
-    o.onTerminate.catch( ( err ) =>
-    {
-      _.errAttend( err );
-      _.errLogOnce( err );
-      return null;
-    })
-
     process.send({ childPid : o.process.pid });
 
     _.time.out( 1000, () =>
@@ -11238,13 +11221,6 @@ function startDetachingChildExitsAfterParent( test )
     }
 
     _.process.start( o );
-
-    o.onTerminate.finallyGive( ( err, got ) =>
-    {
-      if( !err )
-      throw _.err( 'Parent did not receive error from disconnect routine' );
-      _.errAttend( err );
-    })
 
     process.send( o.process.pid );
 
@@ -12574,20 +12550,6 @@ function startNjsDetachingTrivial( test )
         o.disconnect();
       })
     })
-
-    o.onTerminate.finally( ( err, got ) =>
-    {
-      if( err )
-      {
-        _.errAttend( err );
-        _.errLogOnce( err );
-      }
-      else
-      {
-        throw _.err( 'Detached child process terminated before parent' );
-      }
-      return null;
-    })
   }
 
   function testAppChild()
@@ -12744,17 +12706,7 @@ function startOnStart( test )
     test.notIdentical( o.onStart, result );
     test.is( _.consequenceIs( o.onStart ) )
 
-    o.onStart.finally( ( err, got ) =>
-    {
-      test.is( _.errIs( err ) );
-      test.identical( got, undefined );
-      test.identical( o.process, null);
-      return null;
-    })
-
-    result = test.shouldThrowErrorAsync( result )
-
-    return _.Consequence.AndTake_( o.onStart, result );
+    return test.shouldThrowErrorAsync( o.onTerminate );
   })
 
   /* */
@@ -12776,11 +12728,7 @@ function startOnStart( test )
     test.notIdentical( o.onStart, result );
     test.is( _.consequenceIs( o.onStart ) )
 
-    result = test.shouldThrowErrorAsync( result )
-
-    let con = _.Consequence.AndTake_( o.onStart, result );
-
-    return test.shouldThrowErrorAsync( con ) ;
+    return test.shouldThrowErrorAsync( o.onTerminate );
   })
 
   /* */
@@ -12832,7 +12780,7 @@ function startOnStart( test )
     test.is( o.onStart === result );
     test.is( _.consequenceIs( o.onStart ) )
 
-    result = test.shouldThrowErrorAsync( o.onStart );
+    result = test.shouldThrowErrorAsync( o.onTerminate );
 
     result.then( () => _.time.out( 2000 ) )
     result.then( () =>
@@ -12860,38 +12808,39 @@ function startOnStart( test )
 
     let result = _.process.start( o );
 
-    o.disconnect();
-
     test.identical( o.onStart, result );
-    test.is( _.consequenceIs( o.onStart ) )
 
     o.onStart.finally( ( err, got ) =>
     {
       test.identical( err, undefined );
       test.identical( got, o );
       test.is( _.process.isAlive( o.process.pid ) )
+      test.identical( o.state, 'started' );
+      o.disconnect();
       return null;
     })
 
-    o.onTerminate.finallyGive( ( err, got ) =>
+    o.onDisconnect.finally( ( err, got ) =>
     {
-      _.errAttend( err );
-      test.is( _.errIs( err ) );
-      test.identical( got, undefined );
-      test.is( _.process.isAlive( o.process.pid ) )
+      test.identical( err, undefined );
+      test.identical( got, o );
+      test.identical( o.state, 'disconnected' );
+      test.is( _.process.isAlive( o.process.pid ) );
+      return null;
     })
 
     o.onTerminate.finally( ( err, got ) =>
     {
       test.identical( err, undefined );
       test.identical( got, o );
+      test.identical( o.state, 'terminated' );
       test.is( !_.process.isAlive( o.process.pid ) )
       test.identical( got.exitCode, 0 );
       test.identical( got.exitSignal, null );
       return null;
     })
 
-    return _.Consequence.AndTake_( o.onStart, o.onTerminate );
+    return _.Consequence.AndTake_( o.onStart, o.onDisconnect, o.onTerminate );
   })
 
   /* Vova qqq xxx: close event is not emitted for disconnected detached child in fork mode*/
@@ -12910,35 +12859,37 @@ function startOnStart( test )
 
     let result = _.process.start( o );
 
-    o.disconnect();
-
     test.identical( o.onStart, result );
-    test.is( _.consequenceIs( o.onStart ) )
 
     o.onStart.finally( ( err, got ) =>
     {
       test.identical( err, undefined );
       test.identical( got, o );
+      test.identical( o.state, 'started' )
       test.is( _.process.isAlive( o.process.pid ) )
+      o.disconnect();
       return null;
     })
 
-    o.onTerminate.finallyGive( ( err, got ) =>
+    o.onDisconnect.finally( ( err, got ) =>
     {
-      _.errAttend( err );
-      test.is( _.errIs( err ) );
-      test.identical( got, undefined );
+      test.identical( err, undefined );
+      test.identical( got, o );
+      test.identical( o.state, 'disconnected' )
       test.is( _.process.isAlive( o.process.pid ) )
+      return null;
     })
 
     result = _.time.out( 3000, () =>
     {
-      test.identical( o.onTerminate.resourcesCount(), 0 );
       test.is( !_.process.isAlive( o.process.pid ) )
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, null );
+      test.identical( o.onTerminate.resourcesCount(), 0 );
       return null;
     })
 
-    return _.Consequence.AndTake_( o.onStart, result );
+    return _.Consequence.AndTake_( o.onStart, o.onDisconnect, result );
   })
 
   /* */
@@ -13104,13 +13055,6 @@ function startOnTerminate( test )
     _.process.start( o );
     _.time.out( 1000, () => o.disconnect() );
 
-    onTerminate.finallyGive( ( err, got ) =>
-    {
-      _.errAttend( err );
-      test.is( _.errIs( err ) );
-      test.identical( got, undefined )
-    })
-
     onTerminate.then( ( got ) =>
     {
       test.identical( o, got );
@@ -13205,13 +13149,6 @@ function startOnTerminate( test )
     _.process.start( o );
     o.disconnect();
 
-    onTerminate.finallyGive( ( err, got ) =>
-    {
-      _.errAttend( err );
-      test.is( _.errIs( err ) );
-      test.identical( got, undefined )
-    })
-
     onTerminate.then( ( got ) =>
     {
       test.notIdentical( got.exitCode, 0 );
@@ -13258,7 +13195,7 @@ function startNoEndBug1( test )
     test.is( o.onStart === result );
     test.is( _.consequenceIs( o.onStart ) )
 
-    result = test.shouldThrowErrorAsync( o.onStart );
+    result = test.shouldThrowErrorAsync( o.onTerminate );
 
     result.then( () => _.time.out( 2000 ) )
     result.then( () =>
@@ -13321,7 +13258,7 @@ function startOnStartWithDelay( test )
     stdio : 'pipe',
     sync : 0,
     deasync : 0,
-    onStart : a.ready,
+    ready : a.ready,
   }
 
   _.process.start( options );
@@ -13346,11 +13283,11 @@ function startOnStartWithDelay( test )
   {
     // _.errAttend( err );
     // test.is( _.errIs( err ) );
-    // test.identical( options.output, 'program1:begin\n' );
-    // test.identical( options.exitCode, null );
-    // test.identical( options.exitSignal, 'SIGINT' );
-    // test.identical( options.ended, true );
-    // test.identical( options.terminationReason, 'signal' );
+    test.identical( op.output, 'program1\n' );
+    test.identical( op.exitCode, 0 );
+    test.identical( op.exitSignal, null );
+    test.identical( op.ended, true );
+    test.identical( op.terminationReason, 'normal' );
     return null;
   });
 
@@ -18750,6 +18687,11 @@ var Proto =
 
   tests :
   {
+
+    //processArgsPropertiesBase,
+    //processArgsMultipleCommands,
+    //processArgsPaths,
+    //processArgsWithSpace,
 
     processOnExitEvent,
     processOffExitEvent,
