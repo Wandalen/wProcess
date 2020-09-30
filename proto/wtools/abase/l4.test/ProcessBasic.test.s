@@ -9209,7 +9209,8 @@ shellTerminateHangedWithExitHandler.timeOut = 20000;
 function shellTerminateAfterLoopRelease( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
+  let a = test.assetFor( false );
+  let testAppPath = a.program( testApp );
 
   if( process.platform === 'win32' )
   {
@@ -9221,32 +9222,7 @@ function shellTerminateAfterLoopRelease( test )
 
   /* */
 
-  function testApp()
-  {
-    _.include( 'wProcess' );
-    _.process._exitHandlerRepair();
-    let loop = true;
-    setTimeout( () =>
-    {
-      loop = false;
-    }, 5000 )
-    process.send( process.pid );
-    while( loop )
-    {
-      loop = loop;
-    }
-    console.log( 'Exit after release' );
-  }
-
-  /* */
-
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-  testAppPath = _.strQuote( testAppPath );
-  var ready = new _.Consequence().take( null );
-
-  ready
+  a.ready
 
   .then( () =>
   {
@@ -9316,7 +9292,28 @@ function shellTerminateAfterLoopRelease( test )
 
   /*  */
 
-  return ready;
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+
+    _.include( 'wProcess' );
+    _.process._exitHandlerRepair();
+    let loop = true;
+    setTimeout( () =>
+    {
+      loop = false;
+    }, 5000 )
+    process.send( process.pid );
+    while( loop )
+    {
+      loop = loop;
+    }
+    console.log( 'Exit after release' );
+  }
 }
 
 shellTerminateAfterLoopRelease.timeOut = 30000;
