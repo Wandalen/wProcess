@@ -15150,26 +15150,16 @@ function statusOf( test )
 function kill( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
-
-  function testApp()
-  {
-    setTimeout( () =>
-    {
-      console.log( 'Application timeout!' )
-    }, 5000 )
-  }
+  let a = test.assetFor( false );
+  let testAppPath = a.program( testApp );
 
   /* */
 
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
   var expectedOutput = testAppPath + '\n';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-
-  var con = new _.Consequence().take( null )
 
   /* */
+
+  a.ready
 
   .thenKeep( () =>
   {
@@ -15440,7 +15430,17 @@ function kill( test )
 
   /* */
 
-  return con;
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    setTimeout( () =>
+    {
+      console.log( 'Application timeout!' )
+    }, 5000 )
+  }
 }
 
 //
