@@ -18195,6 +18195,10 @@ function experiment( test )
 
     return con;
   }
+
+  //
+
+  function testApp(){}
 }
 
 experiment.experimental = 1;
@@ -18206,43 +18210,13 @@ experiment.experimental = 1;
 function killComplex( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
-
-  function testApp()
-  {
-    setTimeout( () =>
-    {
-      console.log( 'Application timeout!' )
-    }, 2500 )
-  }
-
-  function testApp2()
-  {
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-    var testAppPath = _.fileProvider.path.nativize( _.path.join( __dirname, 'testApp.js' ) );
-    var o = { execPath : 'node ' + testAppPath, throwingExitCode : 0  }
-    var ready = _.process.start( o )
-    process.send( o.process.pid );
-    ready.then( ( got ) =>
-    {
-      process.send({ exitCode : o.exitCode, pid : o.process.pid, exitSignal : o.exitSignal })
-      return null;
-    })
-    return ready;
-  }
+  let a = test.assetFor( false );
+  let testAppPath = a.program( testApp );
+  let testAppPath2 = a.program( testApp2 );
 
   /* */
 
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-
-  var testAppPath2 = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp2.js' ) );
-  var testAppCode2 = context.toolsPathInclude + testApp2.toString() + '\ntestApp2();';
-  _.fileProvider.fileWrite( testAppPath2, testAppCode2 );
-
-  var con = new _.Consequence().take( null )
+  a.ready
 
   .thenKeep( () =>
   {
@@ -18297,7 +18271,35 @@ function killComplex( test )
 
   /* */
 
-  return con;
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    setTimeout( () =>
+    {
+      console.log( 'Application timeout!' )
+    }, 2500 )
+  }
+
+  function testApp2()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+    var testAppPath = _.fileProvider.path.nativize( _.path.join( __dirname, 'testApp.js' ) );
+    var o = { execPath : 'node ' + testAppPath, throwingExitCode : 0  }
+    var ready = _.process.start( o )
+    process.send( o.process.pid );
+    ready.then( ( got ) =>
+    {
+      process.send({ exitCode : o.exitCode, pid : o.process.pid, exitSignal : o.exitSignal })
+      return null;
+    })
+    return ready;
+  }
+
 }
 
 //
