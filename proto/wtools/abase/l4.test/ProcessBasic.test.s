@@ -13215,27 +13215,17 @@ startOnTerminateWithDelay.description =
 function shellConcurrent( test )
 {
   let context = this;
+  let a = test.assetFor( false );
+  let testAppPath = a.program( context.testApp );
   let counter = 0;
   let time = 0;
-  let routinePath = _.path.join( context.suiteTempPath, test.name ); /* qqq2 : rewrote all that using assetFor and _.program.* */
-  let testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  let filePath = _.fileProvider.path.nativize( _.path.join( routinePath, 'file.txt' ) );
-  let ready = _.Consequence().take( null );
-
-  let testAppCode =
-  [
-    `let filePath = '${_.strEscape( filePath )}';\n`,
-    context.testApp.toString(),
-    '\ntestApp();'
-  ].join( '' );
-
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
+  let filePath = a.path.nativize( a.abs( a.routinePath, 'file.txt' ) );
 
   logger.log( 'this is ❮foreground : bright white❯an❮foreground : default❯ experiment' ); /* qqq fix logger, please !!! */
 
   /* - */
 
-  ready.then( ( arg ) =>
+  a.ready.then( ( arg ) =>
   {
     test.case = 'single';
     time = _.time.now();
@@ -13245,7 +13235,7 @@ function shellConcurrent( test )
   let singleOption =
   {
     execPath : 'node ' + testAppPath + ' 1000',
-    ready,
+    ready : a.ready,
     verbosity : 3,
     outputCollecting : 1,
   }
@@ -13258,15 +13248,15 @@ function shellConcurrent( test )
     test.is( singleOption === arg );
     test.is( _.strHas( arg.output, 'begin 1000' ) );
     test.is( _.strHas( arg.output, 'end 1000' ) );
-    test.identical( _.fileProvider.fileRead( filePath ), 'written by 1000' );
-    _.fileProvider.fileDelete( filePath );
+    test.identical( a.fileProvider.fileRead( filePath ), 'written by 1000' );
+    a.fileProvider.fileDelete( filePath );
     counter += 1;
     return null;
   });
 
   /* - */
 
-  ready.then( ( arg ) =>
+  a.ready.then( ( arg ) =>
   {
     test.case = 'single, execPath in array';
     time = _.time.now();
@@ -13276,7 +13266,7 @@ function shellConcurrent( test )
   let singleExecPathInArrayOptions =
   {
     execPath : [ 'node ' + testAppPath + ' 1000' ],
-    ready,
+    ready : a.ready,
     verbosity : 3,
     outputCollecting : 1,
   }
@@ -13290,8 +13280,8 @@ function shellConcurrent( test )
     test.is( singleExecPathInArrayOptions !== arg[ 0 ] );
     test.is( _.strHas( arg[ 0 ].output, 'begin 1000' ) );
     test.is( _.strHas( arg[ 0 ].output, 'end 1000' ) );
-    test.identical( _.fileProvider.fileRead( filePath ), 'written by 1000' );
-    _.fileProvider.fileDelete( filePath );
+    test.identical( a.fileProvider.fileRead( filePath ), 'written by 1000' );
+    a.fileProvider.fileDelete( filePath );
 
     counter += 1;
     return null;
@@ -13299,7 +13289,7 @@ function shellConcurrent( test )
 
   /* - */
 
-  ready.then( ( arg ) =>
+  a.ready.then( ( arg ) =>
   {
     test.case = 'single, error in ready';
     time = _.time.now();
@@ -13309,7 +13299,7 @@ function shellConcurrent( test )
   let singleErrorBeforeScalar =
   {
     execPath : 'node ' + testAppPath + ' 1000',
-    ready,
+    ready : a.ready,
     verbosity : 3,
     outputCollecting : 1,
   }
@@ -13321,7 +13311,7 @@ function shellConcurrent( test )
     test.is( _.errIs( err ) );
     test.identical( singleErrorBeforeScalar.exitCode, null );
     test.identical( singleErrorBeforeScalar.output, null );
-    test.is( !_.fileProvider.fileExists( filePath ) );
+    test.is( !a.fileProvider.fileExists( filePath ) );
     _.errAttend( err );
     counter += 1;
     return null;
@@ -13329,7 +13319,7 @@ function shellConcurrent( test )
 
   /* - */
 
-  ready.then( ( arg ) =>
+  a.ready.then( ( arg ) =>
   {
     test.case = 'single, error in ready';
     time = _.time.now();
@@ -13339,7 +13329,7 @@ function shellConcurrent( test )
   let singleErrorBefore =
   {
     execPath : [ 'node ' + testAppPath + ' 1000' ],
-    ready,
+    ready : a.ready,
     verbosity : 3,
     outputCollecting : 1,
   }
@@ -13352,7 +13342,7 @@ function shellConcurrent( test )
     test.is( _.errIs( err ) );
     test.identical( singleErrorBefore.exitCode, null );
     test.identical( singleErrorBefore.output, undefined );
-    test.is( !_.fileProvider.fileExists( filePath ) );
+    test.is( !a.fileProvider.fileExists( filePath ) );
 
     _.errAttend( err );
     counter += 1;
@@ -13361,7 +13351,7 @@ function shellConcurrent( test )
 
   /* - */
 
-  ready.then( ( arg ) =>
+  a.ready.then( ( arg ) =>
   {
     test.case = 'subprocesses, serial';
     time = _.time.now();
@@ -13371,7 +13361,7 @@ function shellConcurrent( test )
   let subprocessesOptionsSerial =
   {
     execPath :  [ 'node ' + testAppPath + ' 1000', 'node ' + testAppPath + ' 10' ],
-    ready,
+    ready : a.ready,
     outputCollecting : 1,
     verbosity : 3,
     concurrent : 0,
@@ -13388,8 +13378,8 @@ function shellConcurrent( test )
 
     test.identical( subprocessesOptionsSerial.exitCode, 0 );
     test.identical( arg.length, 2 );
-    test.identical( _.fileProvider.fileRead( filePath ), 'written by 10' );
-    _.fileProvider.fileDelete( filePath );
+    test.identical( a.fileProvider.fileRead( filePath ), 'written by 10' );
+    a.fileProvider.fileDelete( filePath );
 
     test.identical( arg[ 0 ].exitCode, 0 );
     test.is( _.strHas( arg[ 0 ].output, 'begin 1000' ) );
@@ -13405,7 +13395,7 @@ function shellConcurrent( test )
 
   /* - */
 
-  ready.then( ( arg ) =>
+  a.ready.then( ( arg ) =>
   {
     test.case = 'subprocesses, serial, error, throwingExitCode : 1';
     time = _.time.now();
@@ -13415,7 +13405,7 @@ function shellConcurrent( test )
   let subprocessesError =
   {
     execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 10' ],
-    ready,
+    ready : a.ready,
     outputCollecting : 1,
     verbosity : 3,
     concurrent : 0,
@@ -13433,7 +13423,7 @@ function shellConcurrent( test )
     test.identical( subprocessesError.exitCode, 1 );
     test.is( _.errIs( err ) );
     test.is( arg === undefined );
-    test.is( !_.fileProvider.fileExists( filePath ) );
+    test.is( !a.fileProvider.fileExists( filePath ) );
 
     _.errAttend( err );
     counter += 1;
@@ -13442,7 +13432,7 @@ function shellConcurrent( test )
 
   /* - */
 
-  ready.then( ( arg ) =>
+  a.ready.then( ( arg ) =>
   {
     test.case = 'subprocesses, serial, error, throwingExitCode : 0';
     time = _.time.now();
@@ -13452,7 +13442,7 @@ function shellConcurrent( test )
   let subprocessesErrorNonThrowing =
   {
     execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 10' ],
-    ready,
+    ready : a.ready,
     outputCollecting : 1,
     verbosity : 3,
     concurrent : 0,
@@ -13471,8 +13461,8 @@ function shellConcurrent( test )
 
     test.identical( subprocessesErrorNonThrowing.exitCode, 1 );
     test.identical( arg.length, 2 );
-    test.identical( _.fileProvider.fileRead( filePath ), 'written by 10' );
-    _.fileProvider.fileDelete( filePath );
+    test.identical( a.fileProvider.fileRead( filePath ), 'written by 10' );
+    a.fileProvider.fileDelete( filePath );
 
     test.identical( arg[ 0 ].exitCode, 1 );
     test.is( _.strHas( arg[ 0 ].output, 'begin x' ) );
@@ -13489,7 +13479,7 @@ function shellConcurrent( test )
 
   /* - */
 
-  ready.then( ( arg ) =>
+  a.ready.then( ( arg ) =>
   {
     test.case = 'subprocesses, concurrent : 1, error, throwingExitCode : 1';
     time = _.time.now();
@@ -13499,7 +13489,7 @@ function shellConcurrent( test )
   let subprocessesErrorConcurrent =
   {
     execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 10' ],
-    ready,
+    ready : a.ready,
     outputCollecting : 1,
     verbosity : 3,
     concurrent : 1,
@@ -13517,8 +13507,8 @@ function shellConcurrent( test )
     test.identical( subprocessesErrorConcurrent.exitCode, 1 );
     test.is( _.errIs( err ) );
     test.is( arg === undefined );
-    test.identical( _.fileProvider.fileRead( filePath ), 'written by 10' );
-    _.fileProvider.fileDelete( filePath );
+    test.identical( a.fileProvider.fileRead( filePath ), 'written by 10' );
+    a.fileProvider.fileDelete( filePath );
 
     _.errAttend( err );
     counter += 1;
@@ -13527,7 +13517,7 @@ function shellConcurrent( test )
 
   /* - */
 
-  ready.then( ( arg ) =>
+  a.ready.then( ( arg ) =>
   {
     test.case = 'subprocesses, concurrent : 1, error, throwingExitCode : 0';
     time = _.time.now();
@@ -13537,7 +13527,7 @@ function shellConcurrent( test )
   let subprocessesErrorConcurrentNonThrowing =
   {
     execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 10' ],
-    ready,
+    ready : a.ready,
     outputCollecting : 1,
     verbosity : 3,
     concurrent : 1,
@@ -13556,8 +13546,8 @@ function shellConcurrent( test )
 
     test.identical( subprocessesErrorConcurrentNonThrowing.exitCode, 1 );
     test.identical( arg.length, 2 );
-    test.identical( _.fileProvider.fileRead( filePath ), 'written by 10' );
-    _.fileProvider.fileDelete( filePath );
+    test.identical( a.fileProvider.fileRead( filePath ), 'written by 10' );
+    a.fileProvider.fileDelete( filePath );
 
     test.identical( arg[ 0 ].exitCode, 1 );
     test.is( _.strHas( arg[ 0 ].output, 'begin x' ) );
@@ -13574,7 +13564,7 @@ function shellConcurrent( test )
 
   /* - */
 
-  ready.then( ( arg ) =>
+  a.ready.then( ( arg ) =>
   {
     test.case = 'subprocesses, concurrent : 1';
     time = _.time.now();
@@ -13584,7 +13574,7 @@ function shellConcurrent( test )
   let suprocessesConcurrentOptions =
   {
     execPath :  [ 'node ' + testAppPath + ' 1000', 'node ' + testAppPath + ' 100' ],
-    ready,
+    ready : a.ready,
     outputCollecting : 1,
     verbosity : 3,
     concurrent : 1,
@@ -13601,8 +13591,8 @@ function shellConcurrent( test )
 
     test.identical( suprocessesConcurrentOptions.exitCode, 0 );
     test.identical( arg.length, 2 );
-    test.identical( _.fileProvider.fileRead( filePath ), 'written by 1000' );
-    _.fileProvider.fileDelete( filePath );
+    test.identical( a.fileProvider.fileRead( filePath ), 'written by 1000' );
+    a.fileProvider.fileDelete( filePath );
 
     test.identical( arg[ 0 ].exitCode, 0 );
     test.is( _.strHas( arg[ 0 ].output, 'begin 1000' ) );
@@ -13618,7 +13608,7 @@ function shellConcurrent( test )
 
   /* - */
 
-  ready.then( ( arg ) =>
+  a.ready.then( ( arg ) =>
   {
     test.case = 'args';
     time = _.time.now();
@@ -13629,7 +13619,7 @@ function shellConcurrent( test )
   {
     execPath :  [ 'node ' + testAppPath + ' 1000', 'node ' + testAppPath + ' 100' ],
     args : [ 'second', 'argument' ],
-    ready,
+    ready : a.ready,
     outputCollecting : 1,
     verbosity : 3,
     concurrent : 1,
@@ -13645,8 +13635,8 @@ function shellConcurrent( test )
 
     test.identical( suprocessesConcurrentArgumentsOptions.exitCode, 0 );
     test.identical( arg.length, 2 );
-    test.identical( _.fileProvider.fileRead( filePath ), 'written by 1000' );
-    _.fileProvider.fileDelete( filePath );
+    test.identical( a.fileProvider.fileRead( filePath ), 'written by 1000' );
+    a.fileProvider.fileDelete( filePath );
 
     test.identical( arg[ 0 ].exitCode, 0 );
     test.is( _.strHas( arg[ 0 ].output, 'begin 1000, second, argument' ) );
@@ -13662,7 +13652,7 @@ function shellConcurrent( test )
 
   /* - */
 
-  return ready.finally( ( err, arg ) =>
+  return a.ready.finally( ( err, arg ) =>
   {
     debugger;
     test.identical( counter, 11 );
@@ -13670,6 +13660,8 @@ function shellConcurrent( test )
     throw err;
     return arg;
   });
+
+
 }
 
 shellConcurrent.timeOut = 100000;
