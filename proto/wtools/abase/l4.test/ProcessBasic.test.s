@@ -11535,17 +11535,10 @@ Test routine waits until o.onTerminate resolves message about termination of the
 function startDetachingEndCompetitorIsExecuted( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
+  let a = test.assetFor( false );
+  let testAppChildPath = a.program( testAppChild );
 
-  /* */
-
-  var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
-  var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
-  _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
-
-  let ready = new _.Consequence().take( null );
-
-  ready
+  a.ready
 
   /* Vova qqq xxx: close event is not emitted for disconnected detached child in fork mode*/
 
@@ -11557,7 +11550,7 @@ function startDetachingEndCompetitorIsExecuted( test )
       execPath : 'testAppChild.js',
       mode : 'fork',
       stdio : 'ignore',
-      currentPath : routinePath,
+      currentPath : a.routinePath,
       detaching : 1
     }
 
@@ -11590,12 +11583,13 @@ function startDetachingEndCompetitorIsExecuted( test )
 
   /* */
 
-  return ready;
+  return a.ready;
 
-  /* */
+  /* - */
 
   function testAppChild()
   {
+    let _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
