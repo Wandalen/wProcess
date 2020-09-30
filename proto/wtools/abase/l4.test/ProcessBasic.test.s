@@ -18050,42 +18050,13 @@ function children( test )
 function childrenAsList( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
-
-  function testApp()
-  {
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-    var o =
-    {
-      execPath : 'node testApp2.js',
-      currentPath : __dirname,
-      mode : 'spawn',
-      inputMirroring : 0
-    }
-    _.process.start( o );
-    process.send( o.process.pid )
-  }
-
-  function testApp2()
-  {
-    if( process.send )
-    process.send( process.pid );
-    setTimeout( () => {}, 1500 )
-  }
+  let a = test.assetFor( false );
+  let testAppPath = a.program( testApp );
+  let testAppPath2 = a.program( testApp2 );
 
   /* */
 
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
-  var testAppPath2 = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp2.js' ) );
-  var testAppCode2 = context.toolsPathInclude + testApp2.toString() + '\ntestApp2();';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-  _.fileProvider.fileWrite( testAppPath2, testAppCode2 );
-
-  var con = new _.Consequence().take( null )
-
-  /* */
+  a.ready
 
   .thenKeep( () =>
   {
@@ -18148,7 +18119,32 @@ function childrenAsList( test )
 
   /*  */
 
-  return con;
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+    var o =
+    {
+      execPath : 'node testApp2.js',
+      currentPath : __dirname,
+      mode : 'spawn',
+      inputMirroring : 0
+    }
+    _.process.start( o );
+    process.send( o.process.pid )
+  }
+
+  function testApp2()
+  {
+    if( process.send )
+    process.send( process.pid );
+    setTimeout( () => {}, 1500 )
+  }
 }
 
 //
