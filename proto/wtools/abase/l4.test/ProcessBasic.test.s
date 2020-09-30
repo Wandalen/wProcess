@@ -11134,57 +11134,15 @@ function startDetachingModeShellTerminationBegin( test )
 function startDetachingChildExitsAfterParent( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
+  let a = test.assetFor( false );
+  let testAppParentPath = a.program( testAppParent );
+  let testAppChildPath = a.program( testAppChild );
 
-  function testAppParent()
-  {
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-
-    let o =
-    {
-      execPath : 'node testAppChild.js',
-      stdio : 'ignore',
-      detaching : true,
-      mode : 'spawn',
-    }
-
-    _.process.start( o );
-
-    process.send( o.process.pid );
-
-    _.time.out( 1000, () => o.disconnect() );
-  }
-
-  function testAppChild()
-  {
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-
-    console.log( 'Child process start' );
-
-    _.time.out( 5000, () =>
-    {
-      let filePath = _.path.join( __dirname, 'testFile' );
-      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
-      console.log( 'Child process end' );
-    })
-  }
+  let testFilePath = a.abs( a.routinePath, 'testFile' );
 
   /* */
 
-  var testAppParentPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppParent.js' ) );
-  var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
-  var testAppParentCode = context.toolsPathInclude + testAppParent.toString() + '\ntestAppParent();';
-  var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
-  _.fileProvider.fileWrite( testAppParentPath, testAppParentCode );
-  _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
-  testAppParentPath = _.strQuote( testAppParentPath );
-  var ready = new _.Consequence().take( null );
-
-  let testFilePath = _.path.join( routinePath, 'testFile' );
-
-  ready
+  a.ready
 
   .then( () =>
   {
@@ -11196,7 +11154,7 @@ function startDetachingChildExitsAfterParent( test )
       stdio : 'pipe',
       outputPiping : 1,
       outputCollecting : 1,
-      currentPath : routinePath,
+      currentPath : a.routinePath,
       detaching : 0,
       ipc : 1,
     }
@@ -11235,7 +11193,46 @@ function startDetachingChildExitsAfterParent( test )
 
   /*  */
 
-  return ready;
+  return a.ready;
+
+  /* - */
+
+  function testAppParent()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    let o =
+    {
+      execPath : 'node testAppChild.js',
+      stdio : 'ignore',
+      detaching : true,
+      mode : 'spawn',
+    }
+
+    _.process.start( o );
+
+    process.send( o.process.pid );
+
+    _.time.out( 1000, () => o.disconnect() );
+  }
+
+  function testAppChild()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    console.log( 'Child process start' );
+
+    _.time.out( 5000, () =>
+    {
+      let filePath = _.path.join( __dirname, 'testFile' );
+      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
+      console.log( 'Child process end' );
+    })
+  }
 }
 
 startDetachingChildExitsAfterParent.description =
