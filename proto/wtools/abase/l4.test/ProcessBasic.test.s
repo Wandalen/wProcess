@@ -11619,56 +11619,13 @@ o.ended is true when onTerminate callback is executed.
 function startDetachedOutputStdioIgnore( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
-
-  function testAppParent()
-  {
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-
-    let args = _.process.args();
-
-    let o =
-    {
-      execPath : 'testAppChild.js',
-      detaching : true,
-      ipc : false
-    }
-
-    _.mapExtend( o, args.map );
-
-    if( o.mode !== 'fork' )
-    o.execPath = 'node ' + o.execPath;
-
-    _.process.start( o );
-  }
-
-  function testAppChild()
-  {
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-
-    console.log( 'Child process start' )
-
-    _.time.out( 5000, () =>
-    {
-      console.log( 'Child process end' )
-      return null;
-    })
-  }
+  let a = test.assetFor( false );
+  let testAppParentPath = a.program( testAppParent );
+  let testAppChildPath = a.program( testAppChild );
 
   /* */
 
-  var testAppParentPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppParent.js' ) );
-  var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
-  var testAppParentCode = context.toolsPathInclude + testAppParent.toString() + '\ntestAppParent();';
-  var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
-  _.fileProvider.fileWrite( testAppParentPath, testAppParentCode );
-  _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
-  testAppParentPath = _.strQuote( testAppParentPath );
-  var ready = new _.Consequence().take( null );
-
-  ready
+  a.ready
 
   .then( () =>
   {
@@ -11679,7 +11636,7 @@ function startDetachedOutputStdioIgnore( test )
       execPath : 'node testAppParent.js mode : spawn stdio : ignore',
       mode : 'spawn',
       outputCollecting : 1,
-      currentPath : routinePath,
+      currentPath : a.routinePath,
     }
     let con = _.process.start( o );
 
@@ -11705,7 +11662,7 @@ function startDetachedOutputStdioIgnore( test )
       execPath : 'node testAppParent.js mode : fork stdio : ignore',
       mode : 'spawn',
       outputCollecting : 1,
-      currentPath : routinePath,
+      currentPath : a.routinePath,
     }
     let con = _.process.start( o );
 
@@ -11731,7 +11688,7 @@ function startDetachedOutputStdioIgnore( test )
       execPath : 'node testAppParent.js mode : shell stdio : ignore',
       mode : 'spawn',
       outputCollecting : 1,
-      currentPath : routinePath,
+      currentPath : a.routinePath,
     }
     let con = _.process.start( o );
 
@@ -11748,7 +11705,49 @@ function startDetachedOutputStdioIgnore( test )
 
   /*  */
 
-  return ready;
+  return a.ready;
+
+  /* - */
+
+
+  function testAppParent()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    let args = _.process.args();
+
+    let o =
+    {
+      execPath : 'testAppChild.js',
+      detaching : true,
+      ipc : false
+    }
+
+    _.mapExtend( o, args.map );
+
+    if( o.mode !== 'fork' )
+    o.execPath = 'node ' + o.execPath;
+
+    _.process.start( o );
+  }
+
+  function testAppChild()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    console.log( 'Child process start' )
+
+    _.time.out( 5000, () =>
+    {
+      console.log( 'Child process end' )
+      return null;
+    })
+  }
+
 }
 
 //
