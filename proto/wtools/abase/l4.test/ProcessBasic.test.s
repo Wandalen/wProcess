@@ -9843,32 +9843,12 @@ function startDetachingModeForkResourceReady( test )
 function startDetachingModeShellResourceReady( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
-
-  function testAppChild()
-  {
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-
-    console.log( 'Child process start' )
-
-    _.time.out( 5000, () =>
-    {
-      let filePath = _.path.join( __dirname, 'testFile' );
-      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
-      console.log( 'Child process end' )
-      return null;
-    })
-  }
+  let a = test.assetFor( false );
+  let testAppChildPath = a.program( testAppChild );
 
   /* */
 
-  var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
-  var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
-  _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
-  var ready = new _.Consequence().take( null );
-
-  ready
+  a.ready
 
   .then( () =>
   {
@@ -9879,7 +9859,7 @@ function startDetachingModeShellResourceReady( test )
       execPath : 'node testAppChild.js',
       mode : 'shell',
       detaching : 1,
-      currentPath : routinePath,
+      currentPath : a.routinePath,
       throwingExitCode : 0
     }
     let result = _.process.start( o );
@@ -9905,7 +9885,25 @@ function startDetachingModeShellResourceReady( test )
     return o.onTerminate;
   })
 
-  return ready;
+  return a.ready;
+
+  function testAppChild()
+  {
+    let _ = require( toolsPath );
+
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    console.log( 'Child process start' )
+
+    _.time.out( 5000, () =>
+    {
+      let filePath = _.path.join( __dirname, 'testFile' );
+      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
+      console.log( 'Child process end' )
+      return null;
+    })
+  }
 }
 
 //
