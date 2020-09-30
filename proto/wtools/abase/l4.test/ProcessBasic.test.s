@@ -17569,7 +17569,8 @@ function terminateTimeOut( test )
 function terminateDifferentStdio( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
+  let a = test.assetFor( false );
+  let testAppPath = a.program( testApp );
 
   if( process.platform === 'win32' )
   {
@@ -17578,6 +17579,197 @@ function terminateDifferentStdio( test )
     test.identical( 1, 1 )
     return;
   }
+
+  /* */
+
+  a.ready
+
+  .thenKeep( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'spawn',
+      stdio : 'inherit',
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    _.time.out( 1500, () =>
+    {
+      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
+    })
+
+    ready.thenKeep( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      test.identical( got.exitSignal, null );
+      test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+      return null;
+    })
+
+    return ready;
+  })
+
+  /* - */
+
+  .thenKeep( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'spawn',
+      stdio : 'ignore',
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    _.time.out( 1500, () =>
+    {
+      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
+    })
+
+    ready.thenKeep( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      test.identical( got.exitSignal, null );
+      test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+      return null;
+    })
+
+    return ready;
+  })
+
+  /* - */
+
+  .thenKeep( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'spawn',
+      stdio : 'pipe',
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    _.time.out( 1500, () =>
+    {
+      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
+    })
+
+    ready.thenKeep( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      test.identical( got.exitSignal, null );
+      test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+      return null;
+    })
+
+    return ready;
+  })
+
+  /* - */
+
+  .thenKeep( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'spawn',
+      stdio : 'pipe',
+      ipc : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    _.time.out( 1500, () =>
+    {
+      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
+    })
+
+    ready.thenKeep( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      test.identical( got.exitSignal, null );
+      test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+      return null;
+    })
+
+    return ready;
+  })
+
+  /* - */
+
+  .thenKeep( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'spawn',
+      stdio : 'inherit',
+      ipc : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    _.time.out( 1500, () =>
+    {
+      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
+    })
+
+    ready.thenKeep( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      test.identical( got.exitSignal, null );
+      test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+      return null;
+    })
+
+    return ready;
+  })
+
+  /* - */
+
+  .thenKeep( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'spawn',
+      stdio : 'ignore',
+      ipc : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    _.time.out( 1500, () =>
+    {
+      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
+    })
+
+    ready.thenKeep( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      test.identical( got.exitSignal, null );
+      test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+      return null;
+    })
+
+    return ready;
+  })
+
+  /* */
+
+  return a.ready;
+
+  /* - */
 
   function testApp()
   {
@@ -17593,202 +17785,6 @@ function terminateDifferentStdio( test )
       process.exit( -1 );
     }, 5000 )
   }
-
-  /* */
-
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
-  var expectedOutput = testAppPath + '\n';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-
-  var con = new _.Consequence().take( null )
-
-  /* */
-
-  .thenKeep( () =>
-  {
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'spawn',
-      stdio : 'inherit',
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    _.time.out( 1500, () =>
-    {
-      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
-    })
-
-    ready.thenKeep( ( got ) =>
-    {
-      test.identical( got.exitCode, 0 );
-      test.identical( got.exitSignal, null );
-      test.is( _.fileProvider.fileExists( _.path.join( routinePath, o.process.pid.toString() ) ) );
-      return null;
-    })
-
-    return ready;
-  })
-
-  /* - */
-
-  .thenKeep( () =>
-  {
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'spawn',
-      stdio : 'ignore',
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    _.time.out( 1500, () =>
-    {
-      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
-    })
-
-    ready.thenKeep( ( got ) =>
-    {
-      test.identical( got.exitCode, 0 );
-      test.identical( got.exitSignal, null );
-      test.is( _.fileProvider.fileExists( _.path.join( routinePath, o.process.pid.toString() ) ) );
-      return null;
-    })
-
-    return ready;
-  })
-
-  /* - */
-
-  .thenKeep( () =>
-  {
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'spawn',
-      stdio : 'pipe',
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    _.time.out( 1500, () =>
-    {
-      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
-    })
-
-    ready.thenKeep( ( got ) =>
-    {
-      test.identical( got.exitCode, 0 );
-      test.identical( got.exitSignal, null );
-      test.is( _.fileProvider.fileExists( _.path.join( routinePath, o.process.pid.toString() ) ) );
-      return null;
-    })
-
-    return ready;
-  })
-
-  /* - */
-
-  .thenKeep( () =>
-  {
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'spawn',
-      stdio : 'pipe',
-      ipc : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    _.time.out( 1500, () =>
-    {
-      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
-    })
-
-    ready.thenKeep( ( got ) =>
-    {
-      test.identical( got.exitCode, 0 );
-      test.identical( got.exitSignal, null );
-      test.is( _.fileProvider.fileExists( _.path.join( routinePath, o.process.pid.toString() ) ) );
-      return null;
-    })
-
-    return ready;
-  })
-
-  /* - */
-
-  .thenKeep( () =>
-  {
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'spawn',
-      stdio : 'inherit',
-      ipc : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    _.time.out( 1500, () =>
-    {
-      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
-    })
-
-    ready.thenKeep( ( got ) =>
-    {
-      test.identical( got.exitCode, 0 );
-      test.identical( got.exitSignal, null );
-      test.is( _.fileProvider.fileExists( _.path.join( routinePath, o.process.pid.toString() ) ) );
-      return null;
-    })
-
-    return ready;
-  })
-
-  /* - */
-
-  .thenKeep( () =>
-  {
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'spawn',
-      stdio : 'ignore',
-      ipc : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    _.time.out( 1500, () =>
-    {
-      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
-    })
-
-    ready.thenKeep( ( got ) =>
-    {
-      test.identical( got.exitCode, 0 );
-      test.identical( got.exitSignal, null );
-      test.is( _.fileProvider.fileExists( _.path.join( routinePath, o.process.pid.toString() ) ) );
-      return null;
-    })
-
-    return ready;
-  })
-
-  /* */
-
-  return con;
 }
 
 //
