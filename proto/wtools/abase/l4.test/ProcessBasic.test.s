@@ -9091,7 +9091,8 @@ shellProcedureExists.description =
 function shellTerminateHangedWithExitHandler( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
+  let a = test.assetFor( false );
+  let testAppPath = a.program( testApp );
 
   if( process.platform === 'win32' )
   {
@@ -9103,26 +9104,7 @@ function shellTerminateHangedWithExitHandler( test )
 
   /* */
 
-  function testApp()
-  {
-    _.include( 'wProcess' );
-    _.process._exitHandlerRepair();
-    process.send( process.pid )
-    while( 1 )
-    {
-      console.log( _.time.now() )
-    }
-  }
-
-  /* */
-
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-  testAppPath = _.strQuote( testAppPath );
-  var ready = new _.Consequence().take( null );
-
-  ready
+  a.ready
 
   .then( () =>
   {
@@ -9188,9 +9170,22 @@ function shellTerminateHangedWithExitHandler( test )
     return con;
   })
 
-  /*  */
+  return a.ready;
 
-  return ready;
+  /* - */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+
+    _.include( 'wProcess' );
+    _.process._exitHandlerRepair();
+    process.send( process.pid )
+    while( 1 )
+    {
+      console.log( _.time.now() )
+    }
+  }
 }
 
 shellTerminateHangedWithExitHandler.timeOut = 20000;
