@@ -14670,25 +14670,11 @@ outputHandling.timeOut = 10000;
 function shellOutputStripping( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
+  let a = test.assetFor( false );
+  let testAppPath = a.program( testApp );
 
   /* */
 
-  function testApp()
-  {
-    console.log( '\u001b[31m\u001b[43mColored message1\u001b[49;0m\u001b[39;0m' )
-    console.log( '\u001b[31m\u001b[43mColored message2\u001b[49;0m\u001b[39;0m' )
-  }
-
-  /* */
-
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = testApp.toString() + '\ntestApp();';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-
-  /* */
-
-  var ready = new _.Consequence().take( null );
   // let modes = [ 'shell', 'spawn', 'exec', 'fork' ];
   let modes = [ 'shell', 'spawn', 'fork' ];
 
@@ -14704,7 +14690,7 @@ function shellOutputStripping( test )
       mode,
       outputGraying : 0,
       outputCollecting : 1,
-      ready
+      ready : a.ready
     })
     .then( ( got ) =>
     {
@@ -14722,7 +14708,7 @@ function shellOutputStripping( test )
       mode,
       outputGraying : 1,
       outputCollecting : 1,
-      ready
+      ready : a.ready
     })
     .then( ( got ) =>
     {
@@ -14735,7 +14721,15 @@ function shellOutputStripping( test )
     })
   })
 
-  return ready;
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    console.log( '\u001b[31m\u001b[43mColored message1\u001b[49;0m\u001b[39;0m' )
+    console.log( '\u001b[31m\u001b[43mColored message2\u001b[49;0m\u001b[39;0m' )
+  }
 }
 
 shellOutputStripping.timeOut = 15000;
