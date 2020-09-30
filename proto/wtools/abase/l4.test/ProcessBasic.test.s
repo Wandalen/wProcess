@@ -16377,7 +16377,9 @@ endStructuralKill.description =
 function terminateComplex( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
+  let a = test.assetFor( false );
+  let testAppPath = a.program( testApp );
+  let testAppPath2 = a.program( testApp2 );
 
   if( process.platform === 'win32' )
   {
@@ -16387,57 +16389,9 @@ function terminateComplex( test )
     return;
   }
 
-  function testApp()
-  {
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-    let detaching = process.argv[ 2 ] === 'detached';
-    var o =
-    {
-      execPath : 'node testApp2.js',
-      currentPath : __dirname,
-      mode : 'spawn',
-      stdio : 'inherit',
-      detaching,
-      inputMirroring : 0,
-      throwingExitCode : 0
-    }
-    _.process.start( o );
-    _.time.out( 1000, () =>
-    {
-      console.log( o.process.pid )
-      if( process.send )
-      process.send( o.process.pid )
-    })
-  }
-
-  function testApp2()
-  {
-    process.on( 'SIGINT', () =>
-    {
-      console.log( 'second child SIGINT' )
-      var fs = require( 'fs' );
-      var path = require( 'path' )
-      fs.writeFileSync( path.join( __dirname, process.pid.toString() ), process.pid.toString() )
-      process.exit( 0 );
-    })
-    if( process.send )
-    process.send( process.pid );
-    setTimeout( () => {}, 5000 )
-  }
-
   /* */
 
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
-  var testAppPath2 = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp2.js' ) );
-  var testAppCode2 = context.toolsPathInclude + testApp2.toString() + '\ntestApp2();';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-  _.fileProvider.fileWrite( testAppPath2, testAppCode2 );
-
-  var con = new _.Consequence().take( null )
-
-  /* */
+  a.ready
 
   .thenKeep( () =>
   {
@@ -16634,7 +16588,50 @@ function terminateComplex( test )
 
   /* - */
 
-  return con;
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+    let detaching = process.argv[ 2 ] === 'detached';
+    var o =
+    {
+      execPath : 'node testApp2.js',
+      currentPath : __dirname,
+      mode : 'spawn',
+      stdio : 'inherit',
+      detaching,
+      inputMirroring : 0,
+      throwingExitCode : 0
+    }
+    _.process.start( o );
+    _.time.out( 1000, () =>
+    {
+      console.log( o.process.pid )
+      if( process.send )
+      process.send( o.process.pid )
+    })
+  }
+
+  function testApp2()
+  {
+    process.on( 'SIGINT', () =>
+    {
+      console.log( 'second child SIGINT' )
+      var fs = require( 'fs' );
+      var path = require( 'path' )
+      fs.writeFileSync( path.join( __dirname, process.pid.toString() ), process.pid.toString() )
+      process.exit( 0 );
+    })
+    if( process.send )
+    process.send( process.pid );
+    setTimeout( () => {}, 5000 )
+  }
+
 }
 
 terminateComplex.timeOut = 150000;
