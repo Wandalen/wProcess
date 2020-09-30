@@ -18151,31 +18151,20 @@ function childrenAsList( test )
 
 function experiment( test )
 {
-  let self = this;
-
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
+  let a = test.assetFor( false );
+  let programPath = a.program( testApp );
 
   /* */
 
-  function testApp()
-  {
-  }
-
-  /* */
-
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = testApp.toString() + '\ntestApp();';
   var expectedOutput = __dirname + '\n'
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
 
   let ChildProcess = require( 'child_process' );
 
-  let ready = new _.Consequence().take( null )
   for( var i = 0; i < 1000; i++ )
-  ready.then( () => f() );
+  a.ready.then( () => f() );
 
-  return ready;
+  return a.ready;
 
   /* */
 
