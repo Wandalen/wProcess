@@ -15448,75 +15448,14 @@ function kill( test )
 function killWithChildren( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
-
-  function testApp()
-  {
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-    var o =
-    {
-      execPath : 'node testApp2.js',
-      currentPath : __dirname,
-      mode : 'spawn',
-      stdio : 'inherit',
-      inputMirroring : 0,
-      throwingExitCode : 0
-    }
-    _.process.start( o );
-    process.send( o.process.pid )
-  }
-
-  function testApp2()
-  {
-    if( process.send )
-    process.send( process.pid );
-    setTimeout( () => { console.log( 'Application timeout' ) }, 5000 )
-  }
-
-  function testApp3()
-  {
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-    let detaching = process.argv[ 2 ] === 'detached';
-    var o1 =
-    {
-      execPath : 'node testApp2.js',
-      currentPath : __dirname,
-      mode : 'spawn',
-      detaching,
-      inputMirroring : 0,
-      throwingExitCode : 0
-    }
-    _.process.start( o1 );
-    var o2 =
-    {
-      execPath : 'node testApp2.js',
-      currentPath : __dirname,
-      mode : 'spawn',
-      detaching,
-      inputMirroring : 0,
-      throwingExitCode : 0
-    }
-    _.process.start( o2 );
-    process.send( [ o1.process.pid, o2.process.pid ] )
-  }
+  let a = test.assetFor( false );
+  let testAppPath = a.program( testApp );
+  let testAppPath2 = a.program( testApp2 );
+  let testAppPath3 = a.program( testApp3 );
 
   /* */
 
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
-  var testAppPath2 = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp2.js' ) );
-  var testAppCode2 = context.toolsPathInclude + testApp2.toString() + '\ntestApp2();';
-  var testAppPath3 = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp3.js' ) );
-  var testAppCode3 = context.toolsPathInclude + testApp3.toString() + '\ntestApp3();';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-  _.fileProvider.fileWrite( testAppPath2, testAppCode2 );
-  _.fileProvider.fileWrite( testAppPath3, testAppCode3 );
-
-  var con = new _.Consequence().take( null )
-
-  /* */
+  a.ready
 
   .thenKeep( () =>
   {
@@ -15539,7 +15478,7 @@ function killWithChildren( test )
       killed = _.process.kill({ pid : o.process.pid, withChildren : 1 });
     })
 
-    ready.thenKeep( ( got ) =>
+    a.ready.thenKeep( ( got ) =>
     {
       return killed.then( () =>
       {
@@ -15723,7 +15662,64 @@ function killWithChildren( test )
 
   /* */
 
-  return con;
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+    var o =
+    {
+      execPath : 'node testApp2.js',
+      currentPath : __dirname,
+      mode : 'spawn',
+      stdio : 'inherit',
+      inputMirroring : 0,
+      throwingExitCode : 0
+    }
+    _.process.start( o );
+    process.send( o.process.pid )
+  }
+
+  function testApp2()
+  {
+    if( process.send )
+    process.send( process.pid );
+    setTimeout( () => { console.log( 'Application timeout' ) }, 5000 )
+  }
+
+  function testApp3()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+    let detaching = process.argv[ 2 ] === 'detached';
+    var o1 =
+    {
+      execPath : 'node testApp2.js',
+      currentPath : __dirname,
+      mode : 'spawn',
+      detaching,
+      inputMirroring : 0,
+      throwingExitCode : 0
+    }
+    _.process.start( o1 );
+    var o2 =
+    {
+      execPath : 'node testApp2.js',
+      currentPath : __dirname,
+      mode : 'spawn',
+      detaching,
+      inputMirroring : 0,
+      throwingExitCode : 0
+    }
+    _.process.start( o2 );
+    process.send( [ o1.process.pid, o2.process.pid ] )
+  }
+
 }
 
 //
