@@ -13064,14 +13064,10 @@ function startOnTerminate( test )
 function startNoEndBug1( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
-  var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
-  var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
-  _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
+  let a = test.assetFor( false );
+  let testAppChildPath = a.program( testAppChild );
 
-  let ready = new _.Consequence().take( null );
-
-  ready
+  a.ready
 
   /* */
 
@@ -13083,7 +13079,7 @@ function startNoEndBug1( test )
       execPath : 'testAppChild.js',
       mode : 'fork',
       stdio : [ 'ignore', 'ignore', 'ignore', null ],
-      currentPath : routinePath,
+      currentPath : a.routinePath,
       detaching : 1
     }
 
@@ -13106,7 +13102,7 @@ function startNoEndBug1( test )
 
   /* */
 
-  return ready;
+  return a.ready;
 
   /* */
 
