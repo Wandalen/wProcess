@@ -12377,21 +12377,10 @@ function startDetachingThrowing( test )
 function startNjsDetachingChildThrowing( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
-
-  function testAppChild()
-  {
-    setTimeout( () =>
-    {
-      throw new Error( 'Child process error' );
-    }, 1000)
-  }
+  let a = test.assetFor( false );
+  let testAppChildPath = a.program( testAppChild );
 
   /* */
-
-  var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
-  var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
-  _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
 
   test.case = 'detached child throws error, onTerminate receives resource with error';
 
@@ -12404,7 +12393,7 @@ function startNjsDetachingChildThrowing( test )
     applyingExitCode : 0,
     throwingExitCode : 0,
     outputPiping : 0,
-    currentPath : routinePath,
+    currentPath : a.routinePath,
   }
 
   _.process.startNjs( o );
@@ -12419,6 +12408,17 @@ function startNjsDetachingChildThrowing( test )
   })
 
   return o.onTerminate;
+
+  /* - */
+
+  function testAppChild()
+  {
+    setTimeout( () =>
+    {
+      throw new Error( 'Child process error' );
+    }, 1000)
+  }
+
 }
 
 //
