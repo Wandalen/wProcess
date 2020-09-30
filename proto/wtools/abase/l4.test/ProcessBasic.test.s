@@ -12426,10 +12426,66 @@ function startNjsDetachingChildThrowing( test )
 function startNjsDetachingTrivial( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
+  let a = test.assetFor( false );
+  let testAppParentPath = a.program( testAppParent );
+  let testAppChildPath = a.program( testAppChild );
+
+  /* */
+
+  let testFilePath = a.abs( a.routinePath, 'testFile' );
+
+  test.case = 'trivial use case';
+
+  let o =
+  {
+    execPath : 'testAppParent.js',
+    outputCollecting : 1,
+    mode : 'fork',
+    stdio : 'pipe',
+    detaching : 0,
+    throwingExitCode : 0,
+    currentPath : a.routinePath,
+  }
+
+  _.process.start( o );
+
+  let childPid;
+  o.process.on( 'message', ( data ) =>
+  {
+    childPid = _.numberFrom( data );
+  })
+
+  o.onTerminate.then( ( got ) =>
+  {
+    test.is( _.process.isAlive( childPid ) );
+
+    test.identical( got.exitCode, 0 );
+    test.is( _.strHas( got.output, 'Child process start' ) );
+    test.is( _.strHas( got.output, 'from parent: data' ) );
+    test.is( !_.strHas( got.output, 'Child process end' ) );
+    test.identical( o.exitCode, got.exitCode );
+    test.identical( o.output, got.output );
+    return _.time.out( 10000 );
+  })
+
+  o.onTerminate.then( () =>
+  {
+    test.is( !_.process.isAlive( childPid ) );
+
+    let childPidFromFile = a.fileProvider.fileRead( testFilePath );
+    childPidFromFile = _.numberFrom( childPidFromFile )
+    test.is( !_.process.isAlive( childPidFromFile ) );
+    test.identical( childPid, childPidFromFile )
+    return null;
+  })
+
+  return o.onTerminate;
+
+  /* - */
 
   function testAppParent()
   {
+    let _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -12458,6 +12514,7 @@ function startNjsDetachingTrivial( test )
 
   function testAppChild()
   {
+    let _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -12478,65 +12535,6 @@ function startNjsDetachingTrivial( test )
     })
 
   }
-
-  /* */
-
-  var testAppParentPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppParent.js' ) );
-  var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
-  var testAppParentCode = context.toolsPathInclude + testAppParent.toString() + '\ntestAppParent();';
-  var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
-  _.fileProvider.fileWrite( testAppParentPath, testAppParentCode );
-  _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
-  testAppParentPath = _.strQuote( testAppParentPath );
-
-  let testFilePath = _.path.join( routinePath, 'testFile' );
-
-  test.case = 'trivial use case';
-
-  let o =
-  {
-    execPath : 'testAppParent.js',
-    outputCollecting : 1,
-    mode : 'fork',
-    stdio : 'pipe',
-    detaching : 0,
-    throwingExitCode : 0,
-    currentPath : routinePath,
-  }
-
-  _.process.start( o );
-
-  let childPid;
-  o.process.on( 'message', ( data ) =>
-  {
-    childPid = _.numberFrom( data );
-  })
-
-  o.onTerminate.then( ( got ) =>
-  {
-    test.is( _.process.isAlive( childPid ) );
-
-    test.identical( got.exitCode, 0 );
-    test.is( _.strHas( got.output, 'Child process start' ) );
-    test.is( _.strHas( got.output, 'from parent: data' ) );
-    test.is( !_.strHas( got.output, 'Child process end' ) );
-    test.identical( o.exitCode, got.exitCode );
-    test.identical( o.output, got.output );
-    return _.time.out( 10000 );
-  })
-
-  o.onTerminate.then( () =>
-  {
-    test.is( !_.process.isAlive( childPid ) );
-
-    let childPidFromFile = _.fileProvider.fileRead( testFilePath );
-    childPidFromFile = _.numberFrom( childPidFromFile )
-    test.is( !_.process.isAlive( childPidFromFile ) );
-    test.identical( childPid, childPidFromFile )
-    return null;
-  })
-
-  return o.onTerminate;
 }
 
 //
