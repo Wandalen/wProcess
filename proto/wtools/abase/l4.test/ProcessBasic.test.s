@@ -14459,31 +14459,18 @@ sheller.timeOut = 60000;
 function shellerArgs( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
+  let a = test.assetFor( false );
+  let testAppPath = a.program( testApp );
 
   /* */
 
-  function testApp()
-  {
-    console.log( process.argv.slice( 2 ) );
-  }
-
-  /* */
-
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = testApp.toString() + '\ntestApp();';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-
-  /* */
-
-  var ready = new _.Consequence().take( null );
 
   let shellerOptions =
   {
     outputCollecting : 1,
     args : [ 'arg1', 'arg2' ],
     mode : 'spawn',
-    ready
+    ready : a.ready
   }
 
   let shell = _.process.starter( shellerOptions )
@@ -14533,7 +14520,14 @@ function shellerArgs( test )
 
   /* */
 
-  return ready;
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
 }
 
 shellerArgs.timeOut = 30000;
