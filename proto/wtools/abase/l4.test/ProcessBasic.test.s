@@ -14578,22 +14578,10 @@ function shellerFields( test )
 function outputHandling( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
+  let a = test.assetFor( false );
+  let testAppPath = a.program( testApp );
 
   /* */
-
-  function testApp()
-  {
-    console.log( 'testApp-output\n' );
-  }
-
-  /* */
-
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = testApp.toString() + '\ntestApp();';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-
-  var con = new _.Consequence().take( null );
 
   // let modes = [ 'shell', 'spawn', 'exec', 'fork' ];
   let modes = [ 'shell', 'spawn', 'fork' ];
@@ -14613,7 +14601,7 @@ function outputHandling( test )
 
     console.log( mode )
 
-    con.thenKeep( () =>
+    a.ready.thenKeep( () =>
     {
       loggerOutput = '';
       var o = { execPath : path, mode, outputPiping : 0, outputCollecting : 0, logger };
@@ -14627,7 +14615,7 @@ function outputHandling( test )
       })
     })
 
-    con.thenKeep( () =>
+    a.ready.thenKeep( () =>
     {
       loggerOutput = '';
       var o = { execPath : path, mode, outputPiping : 1, outputCollecting : 0, logger };
@@ -14640,7 +14628,7 @@ function outputHandling( test )
       })
     })
 
-    con.thenKeep( () =>
+    a.ready.thenKeep( () =>
     {
       loggerOutput = '';
       var o = { execPath : path, mode, outputPiping : 0, outputCollecting : 1, logger };
@@ -14653,7 +14641,7 @@ function outputHandling( test )
       })
     })
 
-    con.thenKeep( () =>
+    a.ready.thenKeep( () =>
     {
       loggerOutput = '';
       var o = { execPath : path, mode, outputPiping : 1, outputCollecting : 1, logger };
@@ -14667,7 +14655,12 @@ function outputHandling( test )
     })
   })
 
-  return con;
+  return a.ready;
+
+  function testApp()
+  {
+    console.log( 'testApp-output\n' );
+  }
 }
 
 outputHandling.timeOut = 10000;
