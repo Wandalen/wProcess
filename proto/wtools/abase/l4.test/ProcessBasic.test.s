@@ -12818,33 +12818,12 @@ function startOnStart( test )
 function startOnTerminate( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
-
-  function testAppChild()
-  {
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-
-    var args = _.process.args();
-
-    _.time.out( 5000, () =>
-    {
-      if( args.map.throwing )
-      throw _.err( 'Child process error' );
-      console.log( 'Child process end' )
-      return null;
-    })
-  }
+  let a = test.assetFor( false );
+  let testAppChildPath = a.program( testAppChild );
 
   /* */
 
-  var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
-  var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
-  _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
-
-  let ready = new _.Consequence().take( null );
-
-  ready
+  a.ready
 
   /* */
 
@@ -12856,7 +12835,7 @@ function startOnTerminate( test )
       execPath : 'node testAppChild.js',
       mode : 'spawn',
       stdio : 'ignore',
-      currentPath : routinePath,
+      currentPath : a.routinePath,
       detaching : 0
     }
 
@@ -12885,7 +12864,7 @@ function startOnTerminate( test )
       execPath : 'node testAppChild.js',
       mode : 'spawn',
       stdio : 'ignore',
-      currentPath : routinePath,
+      currentPath : a.routinePath,
       detaching : 0
     }
 
@@ -12917,7 +12896,7 @@ function startOnTerminate( test )
       execPath : 'node testAppChild.js',
       mode : 'spawn',
       stdio : 'ignore',
-      currentPath : routinePath,
+      currentPath : a.routinePath,
       onTerminate,
       detaching : 1
     }
@@ -12946,7 +12925,7 @@ function startOnTerminate( test )
       execPath : 'node testAppChild.js',
       mode : 'spawn',
       stdio : 'pipe',
-      currentPath : routinePath,
+      currentPath : a.routinePath,
       onTerminate,
       detaching : 1
     }
@@ -12976,7 +12955,7 @@ function startOnTerminate( test )
       execPath : 'node testAppChild.js',
       mode : 'spawn',
       stdio : 'ignore',
-      currentPath : routinePath,
+      currentPath : a.routinePath,
       onTerminate,
       detaching : 1
     }
@@ -13010,7 +12989,7 @@ function startOnTerminate( test )
       execPath : 'node testAppChild.js throwing:1',
       mode : 'spawn',
       stdio : 'ignore',
-      currentPath : routinePath,
+      currentPath : a.routinePath,
       onTerminate,
       throwingExitCode : 0,
       detaching : 1
@@ -13039,7 +13018,7 @@ function startOnTerminate( test )
       execPath : 'node testAppChild.js throwing:1',
       mode : 'spawn',
       stdio : 'ignore',
-      currentPath : routinePath,
+      currentPath : a.routinePath,
       onTerminate,
       throwingExitCode : 0,
       detaching : 1
@@ -13058,7 +13037,26 @@ function startOnTerminate( test )
     return onTerminate;
   })
 
-  return ready;
+  return a.ready;
+
+  /* - */
+
+  function testAppChild()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    var args = _.process.args();
+
+    _.time.out( 5000, () =>
+    {
+      if( args.map.throwing )
+      throw _.err( 'Child process error' );
+      console.log( 'Child process end' )
+      return null;
+    })
+  }
 }
 
 //
