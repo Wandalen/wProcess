@@ -821,7 +821,7 @@ function start_body( o )
     if( Config.debug )
     {
       let result = _.procedure.find( 'PID:' + o.process.pid );
-      _.assert( result.length === 0, 'No procedure expected for child process with pid:', o.pid );
+      _.assert( result.length === 0, `No procedure expected for child process with pid:${o.process.pid}` );
     }
 
     o.procedure = _.procedure.begin({ _name : 'PID:' + o.process.pid, _object : o.process });
