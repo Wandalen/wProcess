@@ -12097,29 +12097,12 @@ function startDetachingModeSpawnIpc( test )
 function startDetachingModeForkIpc( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
-
-  function testAppChild()
-  {
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-
-    process.on( 'message', ( data ) =>
-    {
-      process.send( data );
-      process.exit();
-    })
-
-  }
+  let a = test.assetFor( false );
+  let testAppChildPath = a.program( testAppChild );
 
   /* */
 
-  var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
-  var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
-  _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
-  var ready = new _.Consequence().take( null );
-
-  ready
+  a.ready
 
   .then( () =>
   {
@@ -12131,7 +12114,7 @@ function startDetachingModeForkIpc( test )
       mode : 'fork',
       outputCollecting : 1,
       stdio : 'ignore',
-      currentPath : routinePath,
+      currentPath : a.routinePath,
       detaching : 1,
       ipc : 1,
     }
@@ -12172,7 +12155,7 @@ function startDetachingModeForkIpc( test )
       mode : 'fork',
       outputCollecting : 1,
       stdio : 'pipe',
-      currentPath : routinePath,
+      currentPath : a.routinePath,
       detaching : 1,
       ipc : 1,
     }
@@ -12202,7 +12185,23 @@ function startDetachingModeForkIpc( test )
 
   /*  */
 
-  return ready;
+  return a.ready;
+
+  /* - */
+
+  function testAppChild()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    process.on( 'message', ( data ) =>
+    {
+      process.send( data );
+      process.exit();
+    })
+
+  }
 }
 
 //
