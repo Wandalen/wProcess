@@ -15727,7 +15727,8 @@ function killWithChildren( test )
 function terminate( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
+  let a = test.assetFor( false );
+  let testAppPath = a.program( testApp );
 
   if( process.platform === 'win32' )
   {
@@ -15737,30 +15738,7 @@ function terminate( test )
     return;
   }
 
-  function testApp()
-  {
-    _.include( 'wProcess' );
-    _.process._exitHandlerRepair();
-    if( process.send )
-    process.send( process.pid );
-    else
-    console.log( 'ready' );
-    setTimeout( () =>
-    {
-      console.log( 'Application timeout!' )
-    }, 5000 )
-  }
-
-  /* */
-
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
-  var expectedOutput = testAppPath + '\n';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-
-  var con = new _.Consequence().take( null )
-
-  /* */
+  a.ready
 
   .thenKeep( () =>
   {
@@ -16000,7 +15978,24 @@ function terminate( test )
 
   /* */
 
-  return con;
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.process._exitHandlerRepair();
+    if( process.send )
+    process.send( process.pid );
+    else
+    console.log( 'ready' );
+    setTimeout( () =>
+    {
+      console.log( 'Application timeout!' )
+    }, 5000 )
+  }
 }
 
 //
