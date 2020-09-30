@@ -16940,7 +16940,10 @@ terminateDetachedComplex.timeOut = 150000;
 function terminateWithChildren( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
+  let a = test.assetFor( false );
+  let testAppPath = a.program( testApp );
+  let testAppPath2 = a.program( testApp2 );
+  let testAppPath3 = a.program( testApp3 );
 
   if( process.platform === 'win32' )
   {
@@ -16950,8 +16953,170 @@ function terminateWithChildren( test )
     return;
   }
 
+  /* */
+
+  a.ready
+
+  .thenKeep( () =>
+  {
+    test.case = 'child -> child, kill first child'
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'spawn',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o );
+    let lastChildPid, terminated;
+
+    o.process.on( 'message', ( data ) =>
+    {
+      lastChildPid = _.numberFrom( data );
+      terminated = _.process.terminate({ pid : o.process.pid, withChildren : 1 });
+    })
+
+    ready.thenKeep( ( got ) =>
+    {
+      return terminated.then( () =>
+      {
+        test.identical( got.exitCode, 0 );
+        test.identical( got.exitSignal, null );
+        test.identical( _.strCount( got.output, 'SIGINT' ), 2 );
+        test.identical( _.strCount( got.output, 'SIGINT CHILD' ), 1 );
+        test.is( !_.process.isAlive( o.process.pid ) )
+        test.is( !_.process.isAlive( lastChildPid ) );
+        var file = a.fileProvider.fileRead( a.abs( a.routinePath, lastChildPid.toString() ) );
+        test.identical( file, lastChildPid.toString() )
+        return null;
+      })
+    })
+
+    return ready;
+  })
+
+  /* - */
+
+  .thenKeep( () =>
+  {
+    test.case = 'child -> child, kill last child'
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'spawn',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o );
+    let lastChildPid, terminated;
+
+    o.process.on( 'message', ( data ) =>
+    {
+      lastChildPid = _.numberFrom( data );
+      terminated = _.process.terminate({ pid : lastChildPid, withChildren : 1 });
+    })
+
+    ready.thenKeep( ( got ) =>
+    {
+      return terminated.then( () =>
+      {
+        test.identical( got.exitCode, 0 );
+        test.identical( got.exitSignal, null );
+        test.identical( _.strCount( got.output, 'SIGINT' ), 1 );
+        test.identical( _.strCount( got.output, 'SIGINT CHILD' ), 1 );
+        test.is( !_.process.isAlive( o.process.pid ) )
+        test.is( !_.process.isAlive( lastChildPid ) );
+        var file = a.fileProvider.fileRead( a.abs( a.routinePath, lastChildPid.toString() ) );
+        test.identical( file, lastChildPid.toString() )
+        return null;
+      })
+    })
+
+    return ready;
+  })
+
+  /* - */
+
+  .thenKeep( () =>
+  {
+    test.case = 'parent -> child*'
+    var o =
+    {
+      execPath : 'node ' + testAppPath3,
+      mode : 'spawn',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o );
+    let children, terminated;
+    o.process.on( 'message', ( data ) =>
+    {
+      children = data.map( ( src ) => _.numberFrom( src ) )
+      terminated = _.process.terminate({ pid : o.process.pid, withChildren : 1 });
+    })
+
+    ready.thenKeep( ( got ) =>
+    {
+      return terminated.then( () =>
+      {
+        test.identical( got.exitCode, 0 );
+        test.identical( got.exitSignal, null );
+        test.identical( _.strCount( got.output, 'SIGINT' ), 3 );
+        test.identical( _.strCount( got.output, 'SIGINT CHILD' ), 2 );
+        test.is( !_.process.isAlive( o.process.pid ) )
+        test.is( !_.process.isAlive( children[ 0 ] ) );
+        test.is( !_.process.isAlive( children[ 1 ] ) );
+        var file = a.fileProvider.fileRead( a.abs( a.routinePath, children[ 0 ].toString() ) );
+        test.identical( file, children[ 0 ].toString() )
+        var file = a.fileProvider.fileRead( a.abs( a.routinePath, children[ 1 ].toString() ) );
+        test.identical( file, children[ 1 ].toString() )
+        return null;
+      })
+
+    })
+
+    return ready;
+  })
+
+  /* - */
+
+  .thenKeep( () =>
+  {
+    test.case = 'process is not running';
+    var o =
+    {
+      execPath : 'node ' + testAppPath2,
+      mode : 'spawn',
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    _.process.start( o );
+    o.process.kill('SIGKILL');
+
+    return o.ready.then( () =>
+    {
+      let ready = _.process.terminate({ pid : o.process.pid, withChildren : 1 });
+      return test.shouldThrowErrorAsync( ready );
+    })
+
+  })
+
+  /* */
+
+  return a.ready;
+
+  /* - */
+
   function testApp()
   {
+    let _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
     var o =
@@ -16986,6 +17151,7 @@ function terminateWithChildren( test )
 
   function testApp3()
   {
+    let _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
     let detaching = process.argv[ 2 ] === 'detached';
@@ -17028,177 +17194,6 @@ function terminateWithChildren( test )
     })
     setTimeout( () => {}, 5000 )
   }
-
-  /* */
-
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
-  var testAppPath2 = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp2.js' ) );
-  var testAppCode2 = context.toolsPathInclude + testApp2.toString() + '\ntestApp2();';
-  var testAppPath3 = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp3.js' ) );
-  var testAppCode3 = context.toolsPathInclude + testApp3.toString() + '\ntestApp3();';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-  _.fileProvider.fileWrite( testAppPath2, testAppCode2 );
-  _.fileProvider.fileWrite( testAppPath3, testAppCode3 );
-
-  var con = new _.Consequence().take( null )
-
-  /* */
-
-  .thenKeep( () =>
-  {
-    test.case = 'child -> child, kill first child'
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'spawn',
-      ipc : 1,
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o );
-    let lastChildPid, terminated;
-
-    o.process.on( 'message', ( data ) =>
-    {
-      lastChildPid = _.numberFrom( data );
-      terminated = _.process.terminate({ pid : o.process.pid, withChildren : 1 });
-    })
-
-    ready.thenKeep( ( got ) =>
-    {
-      return terminated.then( () =>
-      {
-        test.identical( got.exitCode, 0 );
-        test.identical( got.exitSignal, null );
-        test.identical( _.strCount( got.output, 'SIGINT' ), 2 );
-        test.identical( _.strCount( got.output, 'SIGINT CHILD' ), 1 );
-        test.is( !_.process.isAlive( o.process.pid ) )
-        test.is( !_.process.isAlive( lastChildPid ) );
-        var file = _.fileProvider.fileRead( _.path.join( routinePath, lastChildPid.toString() ) );
-        test.identical( file, lastChildPid.toString() )
-        return null;
-      })
-    })
-
-    return ready;
-  })
-
-  /* - */
-
-  .thenKeep( () =>
-  {
-    test.case = 'child -> child, kill last child'
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'spawn',
-      ipc : 1,
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o );
-    let lastChildPid, terminated;
-
-    o.process.on( 'message', ( data ) =>
-    {
-      lastChildPid = _.numberFrom( data );
-      terminated = _.process.terminate({ pid : lastChildPid, withChildren : 1 });
-    })
-
-    ready.thenKeep( ( got ) =>
-    {
-      return terminated.then( () =>
-      {
-        test.identical( got.exitCode, 0 );
-        test.identical( got.exitSignal, null );
-        test.identical( _.strCount( got.output, 'SIGINT' ), 1 );
-        test.identical( _.strCount( got.output, 'SIGINT CHILD' ), 1 );
-        test.is( !_.process.isAlive( o.process.pid ) )
-        test.is( !_.process.isAlive( lastChildPid ) );
-        var file = _.fileProvider.fileRead( _.path.join( routinePath, lastChildPid.toString() ) );
-        test.identical( file, lastChildPid.toString() )
-        return null;
-      })
-    })
-
-    return ready;
-  })
-
-  /* - */
-
-  .thenKeep( () =>
-  {
-    test.case = 'parent -> child*'
-    var o =
-    {
-      execPath : 'node ' + testAppPath3,
-      mode : 'spawn',
-      ipc : 1,
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o );
-    let children, terminated;
-    o.process.on( 'message', ( data ) =>
-    {
-      children = data.map( ( src ) => _.numberFrom( src ) )
-      terminated = _.process.terminate({ pid : o.process.pid, withChildren : 1 });
-    })
-
-    ready.thenKeep( ( got ) =>
-    {
-      return terminated.then( () =>
-      {
-        test.identical( got.exitCode, 0 );
-        test.identical( got.exitSignal, null );
-        test.identical( _.strCount( got.output, 'SIGINT' ), 3 );
-        test.identical( _.strCount( got.output, 'SIGINT CHILD' ), 2 );
-        test.is( !_.process.isAlive( o.process.pid ) )
-        test.is( !_.process.isAlive( children[ 0 ] ) );
-        test.is( !_.process.isAlive( children[ 1 ] ) );
-        var file = _.fileProvider.fileRead( _.path.join( routinePath, children[ 0 ].toString() ) );
-        test.identical( file, children[ 0 ].toString() )
-        var file = _.fileProvider.fileRead( _.path.join( routinePath, children[ 1 ].toString() ) );
-        test.identical( file, children[ 1 ].toString() )
-        return null;
-      })
-
-    })
-
-    return ready;
-  })
-
-  /* - */
-
-  .thenKeep( () =>
-  {
-    test.case = 'process is not running';
-    var o =
-    {
-      execPath : 'node ' + testAppPath2,
-      mode : 'spawn',
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    _.process.start( o );
-    o.process.kill('SIGKILL');
-
-    return o.ready.then( () =>
-    {
-      let ready = _.process.terminate({ pid : o.process.pid, withChildren : 1 });
-      return test.shouldThrowErrorAsync( ready );
-    })
-
-  })
-
-  /* */
-
-  return con;
 }
 
 //
