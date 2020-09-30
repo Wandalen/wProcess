@@ -14805,29 +14805,15 @@ shellLoggerOption.timeOut = 30000;
 function shellNormalizedExecPath( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
+  let a = test.assetFor( false );
+  let testAppPath = a.program( testApp );
 
   /* */
-
-  function testApp()
-  {
-    console.log( process.argv.slice( 2 ) );
-  }
-
-  /* */
-
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = testApp.toString() + '\ntestApp();';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-
-  /* */
-
-  var ready = new _.Consequence().take( null );
 
   let shell = _.process.starter
   ({
     outputCollecting : 1,
-    ready
+    ready : a.ready
   })
 
   /* */
@@ -14951,7 +14937,14 @@ function shellNormalizedExecPath( test )
 
   /* */
 
-  return ready;
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
 }
 
 shellNormalizedExecPath.timeOut = 60000;
