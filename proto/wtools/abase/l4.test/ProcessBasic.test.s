@@ -12209,34 +12209,17 @@ function startDetachingModeForkIpc( test )
 function startDetachingModeShellIpc( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
-
-  function testAppChild()
-  {
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-
-    process.on( 'message', ( data ) =>
-    {
-      process.send( data );
-      process.exit();
-    })
-
-  }
+  let a = test.assetFor( false );
+  let testAppChildPath = a.program( testAppChild );
 
   /* */
-
-  var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
-  var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
-  _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
-  var ready = new _.Consequence().take( null );
 
   test.is( true );
 
   if( !Config.debug )
-  return ready;
+  return a.ready;
 
-  ready
+  a.ready
 
   .then( () =>
   {
@@ -12248,7 +12231,7 @@ function startDetachingModeShellIpc( test )
       mode : 'shell',
       outputCollecting : 1,
       stdio : 'ignore',
-      currentPath : routinePath,
+      currentPath : a.routinePath,
       detaching : 1,
       ipc : 1,
     }
@@ -12267,7 +12250,7 @@ function startDetachingModeShellIpc( test )
       mode : 'shell',
       outputCollecting : 1,
       stdio : 'pipe',
-      currentPath : routinePath,
+      currentPath : a.routinePath,
       detaching : 1,
       ipc : 1,
     }
@@ -12276,7 +12259,23 @@ function startDetachingModeShellIpc( test )
 
   /*  */
 
-  return ready;
+  return a.ready;
+
+  /* - */
+
+  function testAppChild()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    process.on( 'message', ( data ) =>
+    {
+      process.send( data );
+      process.exit();
+    })
+
+  }
 }
 
 //
