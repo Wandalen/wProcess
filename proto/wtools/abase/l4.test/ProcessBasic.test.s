@@ -14187,19 +14187,12 @@ shellerConcurrent.timeOut = 100000;
 function sheller( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = testApp.toString() + '\ntestApp();';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-
-  function testApp()
-  {
-    console.log( process.argv.slice( 2 ) );
-  }
+  let a = test.assetFor( false );
+  let testAppPath = a.program( testApp );
 
   /* */
 
-  var con = new _.Consequence().take( null )
+  a.ready
 
   .thenKeep( () =>
   {
@@ -14449,7 +14442,14 @@ function sheller( test )
     })
   })
 
-  return con;
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
 }
 
 sheller.timeOut = 60000;
