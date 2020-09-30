@@ -14739,24 +14739,11 @@ shellOutputStripping.timeOut = 15000;
 function shellLoggerOption( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
+  let a = test.assetFor( false );
+  let testAppPath = a.program( testApp );
 
   /* */
 
-  function testApp()
-  {
-    console.log( '  One tab' );
-  }
-
-  /* */
-
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = testApp.toString() + '\ntestApp();';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-
-  /* */
-
-  var ready = new _.Consequence().take( null );
   // let modes = [ 'shell', 'spawn', 'exec', 'fork' ];
   let modes = [ 'shell', 'spawn', 'fork' ];
 
@@ -14781,7 +14768,7 @@ function shellLoggerOption( test )
       outputPiping : 1,
       outputDecorating : 1,
       logger,
-      ready
+      ready : a.ready
     })
     .then( ( got ) =>
     {
@@ -14801,7 +14788,14 @@ function shellLoggerOption( test )
 
   /* */
 
-  return ready;
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    console.log( '  One tab' );
+  }
 }
 
 shellLoggerOption.timeOut = 30000;
