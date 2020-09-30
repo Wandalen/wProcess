@@ -8974,24 +8974,19 @@ shellProcedureTrivial.description =
 function shellProcedureExists( test )
 {
   let context = this;
-  let routinePath = _.path.join( context.suiteTempPath, test.name );
-  let testAppPath =  _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-
-  let testAppCode = testApp.toString() + '\ntestApp();';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-
-  let ready = _.Consequence().take( null );
+  let a = test.assetFor( false );
+  let testAppPath = a.program( testApp );
 
   let start = _.process.starter
   ({
-    currentPath : routinePath,
+    currentPath : a.routinePath,
     outputPiping : 1,
     outputCollecting : 1,
   });
 
   _.process.watcherEnable();
 
-  ready
+  a.ready
 
   /* */
 
@@ -9071,11 +9066,11 @@ function shellProcedureExists( test )
 
   /* */
 
-  ready.then( () => _.process.watcherDisable() ) /* qqq : ? */
+  a.ready.then( () => _.process.watcherDisable() ) /* qqq : ? */
 
-  return ready;
+  return a.ready;
 
-  /* */
+  /* - */
 
   function testApp()
   {
@@ -18665,12 +18660,6 @@ var Proto =
 
   tests :
   {
-
-    //processArgsPropertiesBase,
-    //processArgsMultipleCommands,
-    //processArgsPaths,
-    //processArgsWithSpace,
-
     processOnExitEvent,
     processOffExitEvent,
 
