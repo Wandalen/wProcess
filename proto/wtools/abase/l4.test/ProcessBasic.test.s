@@ -9519,9 +9519,10 @@ function shellAfterDeath( test )
       currentPath : a.routinePath,
       ipc : 1,
     }
+    debugger;
     let con = _.process.start( o );
-
     let childPid;
+    debugger;
 
     o.process.on( 'message', ( got ) =>
     {
@@ -9712,7 +9713,7 @@ function startDetachingModeSpawnResourceReady( test )
 
   .then( () =>
   {
-    test.case = 'consequence receives resources after child spawn';
+    test.case = 'consequence receive resources after child spawn';
 
     let o =
     {
@@ -9727,15 +9728,16 @@ function startDetachingModeSpawnResourceReady( test )
     test.identical( result, o.onStart );
     test.notIdentical( result, o.onTerminate );
 
-    o.onStart.thenGive( ( got ) =>
+    o.onStart.then( ( got ) =>
     {
       test.is( _.mapIs( got ) );
       test.identical( got, o );
       test.is( _.process.isAlive( o.process.pid ) );
       o.process.kill();
+      return null;
     })
 
-    o.onTerminate.then( ( got ) =>
+    o.onTerminate.then( ( got ) => /* qqq2 : should be not got, but op. check whole test suite, please */
     {
       test.notIdentical( got.exitCode, 0 );
       test.identical( got.exitSignal, 'SIGTERM' );
@@ -13179,11 +13181,12 @@ Parent should not try to disconnect the child.
 
 //
 
-function startOnStartWithDelay( test )
+function startOnTerminateWithDelay( test )
 {
   let context = this;
   let a = test.assetFor( false );
   let programPath = a.program( program1 );
+  let time1 = _.time.now();
 
   a.ready.timeOut( 1000 );
 
@@ -13201,10 +13204,19 @@ function startOnStartWithDelay( test )
     stdio : 'pipe',
     sync : 0,
     deasync : 0,
-    ready : a.ready,
+    onTerminate : a.ready,
   }
 
   _.process.start( options );
+
+  test.is( _.consequenceIs( options.onStart ) );
+  test.is( _.consequenceIs( options.onDisconnect ) );
+  test.is( _.consequenceIs( options.onTerminate ) );
+  test.is( _.consequenceIs( options.ready ) );
+  test.is( options.onStart !== options.ready );
+  test.is( options.onDisconnect !== options.ready );
+  test.is( options.onTerminate === options.ready );
+  debugger;
 
   options.onStart
   .then( ( op ) =>
@@ -13215,8 +13227,6 @@ function startOnStartWithDelay( test )
     test.identical( options.exitSignal, null );
     test.identical( options.ended, false );
     test.identical( options.terminationReason, null );
-    test.is( options.onStart !== options.ready );
-    test.is( options.onTerminate === options.ready );
     test.is( !!options.process );
     return null;
   });
@@ -13224,9 +13234,7 @@ function startOnStartWithDelay( test )
   options.onTerminate
   .finally( ( err, op ) =>
   {
-    // _.errAttend( err );
-    // test.is( _.errIs( err ) );
-    test.identical( op.output, 'program1\n' );
+    test.identical( op.output, 'program1:begin\nprogram1:end\n' );
     test.identical( op.exitCode, 0 );
     test.identical( op.exitSignal, null );
     test.identical( op.ended, true );
@@ -13249,7 +13257,7 @@ function startOnStartWithDelay( test )
 
 }
 
-startOnStartWithDelay.description =
+startOnTerminateWithDelay.description =
 `
   - consequence onStart has delay
 `
@@ -18723,7 +18731,7 @@ var Proto =
     startOnStart,
     startOnTerminate,
     startNoEndBug1,
-    startOnStartWithDelay,
+    startOnTerminateWithDelay,
 
     /*  */
 

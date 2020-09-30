@@ -205,12 +205,12 @@ function start_body( o )
   if( o.sync && !o.deasync )
   {
     /* qqq2 : use routine _.time.sleep here */
+    /* xxx : use deasync here? */
     let arg = o.ready.sync();
     try
     {
       if( o.when.delay )
       _.time.sleep( o.when.delay );
-
       single();
     }
     catch( err )
@@ -222,6 +222,7 @@ function start_body( o )
   }
   else
   {
+
     if( o.when.delay )
     o.ready.then( () => _.time.out( o.when.delay, () => null ) );
     o.ready.thenGive( single );
@@ -248,30 +249,74 @@ function start_body( o )
 
   function preform1()
   {
-    o.ready = o.ready || new _.Consequence().take( null );
 
-    if( o.onStart === null ) /* qqq2 : implement test for multiple to check onStart works as should */
+    /* qqq2 : implement test for multiple to check onStart works as should */
+
+    debugger;
+
+    if( o.ready === null )
     {
-      o.onStart = o.ready;
-      if( !o.detaching )
-      o.onStart = new _.Consequence();
+      if( o.detaching )
+      o.ready = o.onStart || new _.Consequence().take( null );
+      else
+      o.ready = o.onTerminate || new _.Consequence().take( null );
     }
+
+    if( o.onStart === null )
+    {
+      if( o.detaching )
+      o.onStart = o.ready;
+      else
+      o.onStart = new _.Consequence();
+      // o.onStart = new _.Consequence();
+    }
+
     if( o.onTerminate === null )
     {
-      o.onTerminate = o.ready;
       if( o.detaching )
       o.onTerminate = new _.Consequence();
+      else
+      o.onTerminate = o.ready;
     }
 
     if( o.onDisconnect === null )
-    o.onDisconnect = new _.Consequence();
+    {
+      // if( o.detaching )
+      // o.onDisconnect = o.ready;
+      // else
+      o.onDisconnect = new _.Consequence();
+    }
 
-    if( o.detaching )
-    _.assert( o.ready === o.onStart && o.ready !== o.onTerminate );
-    else
-    _.assert( o.ready === o.onTerminate && o.ready !== o.onStart );
+    // o.ready = o.ready || new _.Consequence().take( null );
+    //
+    // if( o.onStart === null )
+    // {
+    //   o.onStart = o.ready;
+    //   if( !o.detaching )
+    //   o.onStart = new _.Consequence();
+    // }
+    // if( o.onTerminate === null )
+    // {
+    //   o.onTerminate = o.ready;
+    //   if( o.detaching )
+    //   o.onTerminate = new _.Consequence();
+    // }
+    //
+    // if( o.onDisconnect === null )
+    // o.onDisconnect = new _.Consequence();
+
+    // if( o.detaching )
+    // _.assert( o.ready === o.onStart && o.ready !== o.onTerminate );
+    // else
+    // _.assert( o.ready === o.onTerminate && o.ready !== o.onStart );
+
     _.assert( o.onStart !== o.onTerminate );
-    _.assert( o.onDisconnect !== o.onStart );
+    _.assert( o.onStart !== o.onDisconnect );
+    _.assert( o.onTerminate !== o.onDisconnect );
+    _.assert( o.ready === o.onStart || o.ready === o.onDisconnect || o.ready === o.onTerminate );
+    // _.assert( o.onStart.resourcesCount() === 0 );
+    _.assert( o.onDisconnect.resourcesCount() === 0 );
+    _.assert( o.onTerminate.resourcesCount() <= 1 );
 
     if( o.outputDecorating === null )
     o.outputDecorating = 0;
@@ -281,7 +326,6 @@ function start_body( o )
     o.outputDecoratingStderr = o.outputDecorating;
 
     o.logger = o.logger || _global.logger;
-
   }
 
   /* */
@@ -304,7 +348,7 @@ function start_body( o )
     }
 
     o.disconnect = disconnect;
-    o.state = 'initial'; /* `initial`, `starting`, `started`, `terminating`, `terminated`, `error`, */
+    o.state = 'initial'; /* `initial`, `starting`, `started`, `terminating`, `terminated`, `error`, */ /* xxx qqq : remove state error */
     o.terminationReason = null;
     o.fullExecPath = null;
     o.output = null;
@@ -317,7 +361,6 @@ function start_body( o )
     o.error = null;
 
     Object.preventExtensions( o );
-
   }
 
   /* */
@@ -330,7 +373,6 @@ function start_body( o )
       if( o.sync )
       return o.ready.sync();
     }
-
     return o.ready;
   }
 
@@ -339,8 +381,6 @@ function start_body( o )
   function end( err, arg )
   {
 
-    // debugger;
-    // yyy qqq
     if( o.procedure )
     if( o.procedure.isAlive() )
     o.procedure.end();
@@ -368,7 +408,7 @@ function start_body( o )
     if( err )
     o.error = err;
 
-    Object.freeze( o );
+    Object.freeze( o ); debugger;
 
     if( err )
     {
