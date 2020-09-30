@@ -12283,29 +12283,10 @@ function startDetachingModeShellIpc( test )
 function startDetachingThrowing( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
-
-  function testAppChild()
-  {
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-
-    console.log( 'Child process start' )
-
-    _.time.out( 5000, () =>
-    {
-      let filePath = _.path.join( __dirname, 'testFile' );
-      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
-      console.log( 'Child process end' )
-      return null;
-    })
-  }
+  let a = test.assetFor( false );
+  let testAppChildPath = a.program( testAppChild );
 
   /* */
-
-  var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
-  var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
-  _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
 
   test.is( true );
 
@@ -12317,7 +12298,7 @@ function startDetachingThrowing( test )
     execPath : 'node testAppChild.js',
     mode : 'spawn',
     stdio : 'inherit',
-    currentPath : routinePath,
+    currentPath : a.routinePath,
     detaching : 1
   }
   test.shouldThrowErrorSync( () => _.process.start( o ) )
@@ -12327,7 +12308,7 @@ function startDetachingThrowing( test )
     execPath : 'node testAppChild.js',
     mode : 'shell',
     stdio : 'inherit',
-    currentPath : routinePath,
+    currentPath : a.routinePath,
     detaching : 1
   }
   test.shouldThrowErrorSync( () => _.process.start( o ) )
@@ -12337,7 +12318,7 @@ function startDetachingThrowing( test )
     execPath : 'testAppChild.js',
     mode : 'fork',
     stdio : 'inherit',
-    currentPath : routinePath,
+    currentPath : a.routinePath,
     detaching : 1
   }
   test.shouldThrowErrorSync( () => _.process.start( o ) )
@@ -12372,6 +12353,23 @@ function startDetachingThrowing( test )
   // }
   // test.shouldThrowErrorSync( () => _.process.start( o ) )
   //
+
+  function testAppChild()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    console.log( 'Child process start' )
+
+    _.time.out( 5000, () =>
+    {
+      let filePath = _.path.join( __dirname, 'testFile' );
+      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
+      console.log( 'Child process end' )
+      return null;
+    })
+  }
 }
 
 //
