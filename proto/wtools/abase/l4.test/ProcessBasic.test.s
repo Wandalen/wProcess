@@ -17363,7 +17363,8 @@ function terminateWithDetachedChildren( test )
 function terminateTimeOut( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
+  let a = test.assetFor( false );
+  let testAppPath = a.program( testApp );
 
   if( process.platform === 'win32' )
   {
@@ -17373,32 +17374,9 @@ function terminateTimeOut( test )
     return;
   }
 
-  function testApp()
-  {
-    process.on( 'SIGINT', () =>
-    {
-      console.log( 'SIGINT' )
-    })
-    if( process.send )
-    process.send( process.pid );
-    else
-    console.log( 'ready' );
-    setTimeout( () =>
-    {
-      console.log( 'Application timeout!' )
-    }, 10000 )
-  }
-
   /* */
 
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
-  var expectedOutput = testAppPath + '\n';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-
-  var con = new _.Consequence().take( null )
-
-  /* */
+  a.ready
 
   .thenKeep( () =>
   {
@@ -17565,7 +17543,25 @@ function terminateTimeOut( test )
 
   /*  */
 
-  return con;
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    process.on( 'SIGINT', () =>
+    {
+      console.log( 'SIGINT' )
+    })
+    if( process.send )
+    process.send( process.pid );
+    else
+    console.log( 'ready' );
+    setTimeout( () =>
+    {
+      console.log( 'Application timeout!' )
+    }, 10000 )
+  }
 }
 
 //
