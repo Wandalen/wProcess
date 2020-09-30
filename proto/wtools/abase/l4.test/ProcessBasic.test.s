@@ -3716,7 +3716,7 @@ function startWithReadyDelayStructural( test )
     'interpreterArgs' : '',
     'when' : 'instant',
     'dry' : 0,
-    'logger' : null,
+    // 'logger' : null,
     'ipc' : 0,
     'env' : null,
     'detaching' : 0,
@@ -13671,25 +13671,15 @@ shellConcurrent.timeOut = 100000;
 function shellerConcurrent( test )
 {
   let context = this;
+  let a = test.assetFor( false );
+  let testAppPath = a.program( context.testApp );
   let counter = 0;
   let time = 0;
-  let routinePath = _.path.join( context.suiteTempPath, test.name );
-  let testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  let filePath = _.fileProvider.path.nativize( _.path.join( routinePath, 'file.txt' ) );
-  let ready = _.Consequence().take( null );
-
-  let testAppCode =
-  [
-    `let filePath = '${_.strEscape( filePath )}';\n`,
-    context.testApp.toString(),
-    '\ntestApp();'
-  ].join( '' );
-
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
+  let filePath = a.path.nativize( a.abs( a.routinePath, 'file.txt' ) );
 
   /* - */
 
-  ready.then( ( arg ) =>
+  a.ready.then( ( arg ) =>
   {
     test.case = 'single';
     time = _.time.now();
@@ -13700,7 +13690,7 @@ function shellerConcurrent( test )
   let singleOption =
   {
     execPath : 'node ' + testAppPath + ' 1000',
-    ready,
+    ready : a.ready,
     verbosity : 3,
     outputCollecting : 1,
   }
@@ -13723,7 +13713,7 @@ function shellerConcurrent( test )
 
   /* - */
 
-  ready.then( ( arg ) =>
+  a.ready.then( ( arg ) =>
   {
     test.case = 'single, no second options';
     time = _.time.now();
@@ -13733,7 +13723,7 @@ function shellerConcurrent( test )
   let singleOptionWithoutSecond =
   {
     execPath : 'node ' + testAppPath + ' 1000',
-    ready,
+    ready : a.ready,
     verbosity : 3,
     outputCollecting : 1,
   }
@@ -13756,7 +13746,7 @@ function shellerConcurrent( test )
 
   /* - */
 
-  ready.then( ( arg ) =>
+  a.ready.then( ( arg ) =>
   {
     test.case = 'single, execPath in array';
     time = _.time.now();
@@ -13767,7 +13757,7 @@ function shellerConcurrent( test )
   let singleExecPathInArrayOptions =
   {
     execPath : 'node ' + testAppPath + ' 1000',
-    ready,
+    ready : a.ready,
     verbosity : 3,
     outputCollecting : 1,
   }
@@ -13789,7 +13779,7 @@ function shellerConcurrent( test )
 
   /* - */
 
-  ready.then( ( arg ) =>
+  a.ready.then( ( arg ) =>
   {
     test.case = 'single, error in ready, exec is scalar';
     time = _.time.now();
@@ -13800,7 +13790,7 @@ function shellerConcurrent( test )
   let singleErrorBeforeScalar =
   {
     execPath : 'node ' + testAppPath + ' 1000',
-    ready,
+    ready : a.ready,
     verbosity : 3,
     outputCollecting : 1,
   }
@@ -13824,7 +13814,7 @@ function shellerConcurrent( test )
 
   /* - */
 
-  ready.then( ( arg ) =>
+  a.ready.then( ( arg ) =>
   {
     test.case = 'single, error in ready, exec is single-element vector';
     time = _.time.now();
@@ -13835,7 +13825,7 @@ function shellerConcurrent( test )
   let singleErrorBefore =
   {
     execPath : [ 'node ' + testAppPath + ' 1000' ],
-    ready,
+    ready : a.ready,
     verbosity : 3,
     outputCollecting : 1,
   }
@@ -13859,7 +13849,7 @@ function shellerConcurrent( test )
 
   /* - */
 
-  ready.then( ( arg ) =>
+  a.ready.then( ( arg ) =>
   {
     test.case = 'subprocesses, serial';
     time = _.time.now();
@@ -13870,7 +13860,7 @@ function shellerConcurrent( test )
   let subprocessesOptionsSerial =
   {
     execPath :  [ 'node ' + testAppPath + ' 1000', 'node ' + testAppPath + ' 10' ],
-    ready,
+    ready : a.ready,
     outputCollecting : 1,
     verbosity : 3,
     concurrent : 0,
@@ -13906,7 +13896,7 @@ function shellerConcurrent( test )
 
   /* - */
 
-  ready.then( ( arg ) =>
+  a.ready.then( ( arg ) =>
   {
     test.case = 'subprocesses, serial, error, throwingExitCode : 1';
     time = _.time.now();
@@ -13917,7 +13907,7 @@ function shellerConcurrent( test )
   let subprocessesError =
   {
     execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 10' ],
-    ready,
+    ready : a.ready,
     outputCollecting : 1,
     verbosity : 3,
     concurrent : 0,
@@ -13946,7 +13936,7 @@ function shellerConcurrent( test )
 
   /* - */
 
-  ready.then( ( arg ) =>
+  a.ready.then( ( arg ) =>
   {
     test.case = 'subprocesses, serial, error, throwingExitCode : 0';
     time = _.time.now();
@@ -13957,7 +13947,7 @@ function shellerConcurrent( test )
   let subprocessesErrorNonThrowing =
   {
     execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 10' ],
-    ready,
+    ready : a.ready,
     outputCollecting : 1,
     verbosity : 3,
     concurrent : 0,
@@ -13995,7 +13985,7 @@ function shellerConcurrent( test )
 
   /* - */
 
-  ready.then( ( arg ) =>
+  a.ready.then( ( arg ) =>
   {
     test.case = 'subprocesses, concurrent : 1, error, throwingExitCode : 1';
     time = _.time.now();
@@ -14006,7 +13996,7 @@ function shellerConcurrent( test )
   let subprocessesErrorConcurrent =
   {
     execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 10' ],
-    ready,
+    ready : a.ready,
     outputCollecting : 1,
     verbosity : 3,
     concurrent : 1,
@@ -14036,7 +14026,7 @@ function shellerConcurrent( test )
 
   /* - */
 
-  ready.then( ( arg ) =>
+  a.ready.then( ( arg ) =>
   {
     test.case = 'subprocesses, concurrent : 1, error, throwingExitCode : 0';
     time = _.time.now();
@@ -14047,7 +14037,7 @@ function shellerConcurrent( test )
   let subprocessesErrorConcurrentNonThrowing =
   {
     execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 10' ],
-    ready,
+    ready : a.ready,
     outputCollecting : 1,
     verbosity : 3,
     concurrent : 1,
@@ -14085,7 +14075,7 @@ function shellerConcurrent( test )
 
   /* - */
 
-  ready.then( ( arg ) =>
+  a.ready.then( ( arg ) =>
   {
     test.case = 'subprocesses, concurrent : 1';
     time = _.time.now();
@@ -14096,7 +14086,7 @@ function shellerConcurrent( test )
   let subprocessesConcurrentOptions =
   {
     execPath :  [ 'node ' + testAppPath + ' 1000', 'node ' + testAppPath + ' 100' ],
-    ready,
+    ready : a.ready,
     outputCollecting : 1,
     verbosity : 3,
     concurrent : 1,
@@ -14132,7 +14122,7 @@ function shellerConcurrent( test )
 
   /* - */
 
-  ready.then( ( arg ) =>
+  a.ready.then( ( arg ) =>
   {
     test.case = 'args';
     time = _.time.now();
@@ -14144,7 +14134,7 @@ function shellerConcurrent( test )
   {
     execPath :  [ 'node ' + testAppPath + ' 1000', 'node ' + testAppPath + ' 100' ],
     args : [ 'second', 'argument' ],
-    ready,
+    ready : a.ready,
     outputCollecting : 1,
     verbosity : 3,
     concurrent : 1,
@@ -14180,7 +14170,7 @@ function shellerConcurrent( test )
 
   /* - */
 
-  return ready.finally( ( err, arg ) =>
+  return a.ready.finally( ( err, arg ) =>
   {
     debugger;
     test.identical( counter, 12 );
