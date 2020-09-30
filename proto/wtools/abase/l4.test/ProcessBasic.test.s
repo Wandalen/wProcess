@@ -9439,25 +9439,13 @@ function shellStartingTime( test )
 function shellStartingSuspended( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
+  let a = test.assetFor( false );
+  let testAppPath = a.program( testApp );
+
 
   /* */
 
-  function testApp()
-  {
-    let data = { t2 : _.time.now() };
-    console.log( JSON.stringify( data ) );
-  }
-
-  /* */
-
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-  testAppPath = _.strQuote( testAppPath );
-  var ready = new _.Consequence().take( null );
-
-  ready
+  a.ready
 
   .then( () =>
   {
@@ -9492,7 +9480,17 @@ function shellStartingSuspended( test )
     return con;
   })
 
-  return ready;
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+
+    let data = { t2 : _.time.now() };
+    console.log( JSON.stringify( data ) );
+  }
 }
 
 //
