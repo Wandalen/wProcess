@@ -9498,61 +9498,15 @@ function shellStartingSuspended( test )
 function shellAfterDeath( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
-
-  function testAppParent()
-  {
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-
-    let o =
-    {
-      execPath : 'node testAppChild.js',
-      outputCollecting : 1,
-      mode : 'spawn',
-    }
-
-    _.process.startAfterDeath( o );
-
-    o.onStart.thenGive( () =>
-    {
-      process.send( o.process.pid );
-    })
-
-    _.time.out( 5000, () =>
-    {
-      console.log( 'parent termination begin' );
-      _.procedure.terminationBegin();
-      return null;
-    })
-  }
-
-  function testAppChild()
-  {
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-
-    _.time.out( 5000, () =>
-    {
-      let filePath = _.path.join( __dirname, 'testFile' );
-      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
-    })
-  }
+  let a = test.assetFor( false );
+  let testAppParentPath = a.program( testAppParent );
+  let testAppChildPath = a.program( testAppChild );
 
   /* */
 
-  var testAppParentPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppParent.js' ) );
-  var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
-  var testAppParentCode = context.toolsPathInclude + testAppParent.toString() + '\ntestAppParent();';
-  var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
-  _.fileProvider.fileWrite( testAppParentPath, testAppParentCode );
-  _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
-  testAppParentPath = _.strQuote( testAppParentPath );
-  var ready = new _.Consequence().take( null );
+  let testFilePath = a.abs( a.routinePath, 'testFile' );
 
-  let testFilePath = _.path.join( routinePath, 'testFile' );
-
-  ready
+  a.ready
 
   .then( () =>
   {
@@ -9562,7 +9516,7 @@ function shellAfterDeath( test )
       mode : 'spawn',
       outputCollecting : 1,
       outputPiping : 1,
-      currentPath : routinePath,
+      currentPath : a.routinePath,
       ipc : 1,
     }
     let con = _.process.start( o );
@@ -9590,8 +9544,8 @@ function shellAfterDeath( test )
       test.is( !_.process.isAlive( childPid ) );
 
       test.case = 'child of secondary process is executed'
-      test.is( _.fileProvider.fileExists( testFilePath ) );
-      let childPid2 = _.fileProvider.fileRead( testFilePath );
+      test.is( a.fileProvider.fileExists( testFilePath ) );
+      let childPid2 = a.fileProvider.fileRead( testFilePath );
       childPid2 = _.numberFrom( childPid2 );
 
       test.case = 'secondary process and child are not same'
@@ -9605,7 +9559,54 @@ function shellAfterDeath( test )
 
   /*  */
 
-  return ready;
+  return a.ready;
+
+  /* - */
+
+  function testAppParent()
+  {
+    let _ = require( toolsPath );
+
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    let o =
+    {
+      execPath : 'node testAppChild.js',
+      outputCollecting : 1,
+      mode : 'spawn',
+    }
+
+    _.process.startAfterDeath( o );
+
+    o.onStart.thenGive( () =>
+    {
+      process.send( o.process.pid );
+    })
+
+    _.time.out( 5000, () =>
+    {
+      console.log( 'parent termination begin' );
+      _.procedure.terminationBegin();
+      return null;
+    })
+  }
+
+  //
+
+  function testAppChild()
+  {
+    let _ = require( toolsPath );
+
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    _.time.out( 5000, () =>
+    {
+      let filePath = _.path.join( __dirname, 'testFile' );
+      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
+    })
+  }
 }
 
 //
