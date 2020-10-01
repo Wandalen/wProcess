@@ -922,9 +922,9 @@ function start_body( o )
     this.process.stdin.destroy();
 
     // debugger;
-    // if( this.process.disconnect )
-    // if( this.process.connected )
-    // this.process.disconnect();
+    if( this.process.disconnect )
+    if( this.process.connected )
+    this.process.disconnect();
 
     this.process.unref();
 
