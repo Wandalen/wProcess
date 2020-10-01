@@ -8741,7 +8741,7 @@ function startPassingThroughExecPathWithSpace( test )
   {
     _.errAttend( err );
     test.is( !!err );
-    test.is( _.fileProvider.fileExists( testAppPath ) );
+    test.is( a.fileProvider.fileExists( testAppPath ) );
     test.is( _.strHas( err.message, `ENOENT` ) );
     return null;
   })
@@ -8769,7 +8769,7 @@ function startPassingThroughExecPathWithSpace( test )
   a.ready.then( ( got ) =>
   {
     test.notIdentical( got.exitCode, 0 );
-    test.is( _.fileProvider.fileExists( testAppPath ) );
+    test.is( a.fileProvider.fileExists( testAppPath ) );
     test.is( _.strHas( got.output, `Cannot find module` ) );
     return null;
   })
@@ -8823,7 +8823,7 @@ function startPassingThroughExecPathWithSpace( test )
   a.ready.then( ( got ) =>
   {
     test.notIdentical( got.exitCode, 0 );
-    test.is( _.fileProvider.fileExists( testAppPath ) );
+    test.is( a.fileProvider.fileExists( testAppPath ) );
     test.is( _.strHas( got.output, `Cannot find module` ) );
     return null;
   })
@@ -9535,7 +9535,7 @@ function shellAfterDeath( test )
       test.case = 'secondary process is alive'
       test.is( _.process.isAlive( childPid ) );
       test.case = 'child of secondary process does not exit yet'
-      test.is( !_.fileProvider.fileExists( testFilePath ) );
+      test.is( !a.fileProvider.fileExists( testFilePath ) );
       return _.time.out( 10000 );
     })
 
@@ -13705,8 +13705,8 @@ function shellerConcurrent( test )
     test.is( singleOption2 === arg );
     test.is( _.strHas( arg.output, 'begin 1000' ) );
     test.is( _.strHas( arg.output, 'end 1000' ) );
-    test.identical( _.fileProvider.fileRead( filePath ), 'written by 1000' );
-    _.fileProvider.fileDelete( filePath );
+    test.identical( a.fileProvider.fileRead( filePath ), 'written by 1000' );
+    a.fileProvider.fileDelete( filePath );
     counter += 1;
     return null;
   });
@@ -13738,8 +13738,8 @@ function shellerConcurrent( test )
     test.is( singleOptionWithoutSecond !== arg );
     test.is( _.strHas( arg.output, 'begin 1000' ) );
     test.is( _.strHas( arg.output, 'end 1000' ) );
-    test.identical( _.fileProvider.fileRead( filePath ), 'written by 1000' );
-    _.fileProvider.fileDelete( filePath );
+    test.identical( a.fileProvider.fileRead( filePath ), 'written by 1000' );
+    a.fileProvider.fileDelete( filePath );
     counter += 1;
     return null;
   });
@@ -13771,8 +13771,8 @@ function shellerConcurrent( test )
     test.is( singleExecPathInArrayOptions2 === arg );
     test.is( _.strHas( arg.output, 'begin 1000' ) );
     test.is( _.strHas( arg.output, 'end 1000' ) );
-    test.identical( _.fileProvider.fileRead( filePath ), 'written by 1000' );
-    _.fileProvider.fileDelete( filePath );
+    test.identical( a.fileProvider.fileRead( filePath ), 'written by 1000' );
+    a.fileProvider.fileDelete( filePath );
     counter += 1;
     return null;
   });
@@ -13805,7 +13805,7 @@ function shellerConcurrent( test )
     test.is( _.errIs( err ) );
     test.identical( singleErrorBeforeScalar.exitCode, undefined );
     test.identical( singleErrorBeforeScalar.output, undefined );
-    test.is( !_.fileProvider.fileExists( filePath ) );
+    test.is( !a.fileProvider.fileExists( filePath ) );
 
     _.errAttend( err );
     counter += 1;
@@ -13840,7 +13840,7 @@ function shellerConcurrent( test )
     test.is( _.errIs( err ) );
     test.identical( singleErrorBefore.exitCode, undefined );
     test.identical( singleErrorBefore.output, undefined );
-    test.is( !_.fileProvider.fileExists( filePath ) );
+    test.is( !a.fileProvider.fileExists( filePath ) );
 
     _.errAttend( err );
     counter += 1;
@@ -13879,8 +13879,8 @@ function shellerConcurrent( test )
 
     test.identical( subprocessesOptionsSerial2.exitCode, 0 );
     test.identical( arg.length, 2 );
-    test.identical( _.fileProvider.fileRead( filePath ), 'written by 10' );
-    _.fileProvider.fileDelete( filePath );
+    test.identical( a.fileProvider.fileRead( filePath ), 'written by 10' );
+    a.fileProvider.fileDelete( filePath );
 
     test.identical( arg[ 0 ].exitCode, 0 );
     test.is( _.strHas( arg[ 0 ].output, 'begin 1000' ) );
@@ -13927,7 +13927,7 @@ function shellerConcurrent( test )
     test.identical( subprocessesError2.exitCode, 1 );
     test.is( _.errIs( err ) );
     test.is( arg === undefined );
-    test.is( !_.fileProvider.fileExists( filePath ) );
+    test.is( !a.fileProvider.fileExists( filePath ) );
 
     _.errAttend( err );
     counter += 1;
@@ -13967,8 +13967,8 @@ function shellerConcurrent( test )
 
     test.identical( subprocessesErrorNonThrowing2.exitCode, 1 );
     test.identical( arg.length, 2 );
-    test.identical( _.fileProvider.fileRead( filePath ), 'written by 10' );
-    _.fileProvider.fileDelete( filePath );
+    test.identical( a.fileProvider.fileRead( filePath ), 'written by 10' );
+    a.fileProvider.fileDelete( filePath );
 
     test.identical( arg[ 0 ].exitCode, 1 );
     test.is( _.strHas( arg[ 0 ].output, 'begin x' ) );
@@ -14016,8 +14016,8 @@ function shellerConcurrent( test )
     test.identical( subprocessesErrorConcurrent2.exitCode, 1 );
     test.is( _.errIs( err ) );
     test.is( arg === undefined );
-    test.identical( _.fileProvider.fileRead( filePath ), 'written by 10' );
-    _.fileProvider.fileDelete( filePath );
+    test.identical( a.fileProvider.fileRead( filePath ), 'written by 10' );
+    a.fileProvider.fileDelete( filePath );
 
     _.errAttend( err );
     counter += 1;
@@ -14057,8 +14057,8 @@ function shellerConcurrent( test )
 
     test.identical( subprocessesErrorConcurrentNonThrowing2.exitCode, 1 );
     test.identical( arg.length, 2 );
-    test.identical( _.fileProvider.fileRead( filePath ), 'written by 10' );
-    _.fileProvider.fileDelete( filePath );
+    test.identical( a.fileProvider.fileRead( filePath ), 'written by 10' );
+    a.fileProvider.fileDelete( filePath );
 
     test.identical( arg[ 0 ].exitCode, 1 );
     test.is( _.strHas( arg[ 0 ].output, 'begin x' ) );
@@ -14105,8 +14105,8 @@ function shellerConcurrent( test )
 
     test.identical( subprocessesConcurrentOptions2.exitCode, 0 );
     test.identical( arg.length, 2 );
-    test.identical( _.fileProvider.fileRead( filePath ), 'written by 1000' );
-    _.fileProvider.fileDelete( filePath );
+    test.identical( a.fileProvider.fileRead( filePath ), 'written by 1000' );
+    a.fileProvider.fileDelete( filePath );
 
     test.identical( arg[ 0 ].exitCode, 0 );
     test.is( _.strHas( arg[ 0 ].output, 'begin 1000' ) );
@@ -14153,8 +14153,8 @@ function shellerConcurrent( test )
 
     test.identical( subprocessesConcurrentArgumentsOptions2.exitCode, 0 );
     test.identical( arg.length, 2 );
-    test.identical( _.fileProvider.fileRead( filePath ), 'written by 1000' );
-    _.fileProvider.fileDelete( filePath );
+    test.identical( a.fileProvider.fileRead( filePath ), 'written by 1000' );
+    a.fileProvider.fileDelete( filePath );
 
     test.identical( arg[ 0 ].exitCode, 0 );
     test.is( _.strHas( arg[ 0 ].output, 'begin 1000, second, argument' ) );
