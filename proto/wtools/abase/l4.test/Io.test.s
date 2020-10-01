@@ -568,7 +568,7 @@ function processArgsPaths( test )
     process.argv = process.argv.slice( 2 );
 
     var got = _.process.args({ caching : 0 });
-    a.fileProvider.fileWrite( _.path.join( __dirname, 'got' ), JSON.stringify( got ) )
+    _.fileProvider.fileWrite( _.path.join( __dirname, 'got' ), JSON.stringify( got ) )
   }
 }
 
