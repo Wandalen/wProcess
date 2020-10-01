@@ -18380,7 +18380,10 @@ function effectiveMainFile( test )
 function shellExperiment( test )
 {
   let context = this;
-  var routinePath = _.path.join( context.suiteTempPath, test.name );
+  let a = test.assetFor( false );
+  let testAppPath = a.program( testApp );
+  let testAppPath2 = a.program( testApp2 );
+
   var commonDefaults =
   {
     outputPiping : 1,
@@ -18391,49 +18394,18 @@ function shellExperiment( test )
 
   /* */
 
-  function testApp()
-  {
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-
-    _.process.start
-    ({
-      execPath : 'node testApp2.js',
-      mode : 'shell',
-      passingThrough : 1,
-      stdio : 'inherit',
-      inputMirroring : 0
-    })
-  }
-
-  function testApp2()
-  {
-    console.log( process.argv.slice( 2 ) );
-  }
-
-  /* */
-
-  var testAppPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp.js' ) );
-  var testAppCode = context.toolsPathInclude + testApp.toString() + '\ntestApp();';
-  _.fileProvider.fileWrite( testAppPath, testAppCode );
-
-  var testAppPath2 = _.fileProvider.path.nativize( _.path.join( routinePath, 'testApp2.js' ) );
-  var testAppCode2 = testApp2.toString() + '\ntestApp2();';
-  _.fileProvider.fileWrite( testAppPath2, testAppCode2 );
-
   var o;
-  var con = new _.Consequence().take( null );
 
   /* - */
 
-  con.thenKeep( function()
+  a.ready.thenKeep( function()
   {
     test.case = 'mode : shell, passingThrough : true, no args';
 
     o =
     {
       execPath :  'node testApp.js *',
-      currentPath : routinePath,
+      currentPath : a.routinePath,
       mode : 'spawn',
       stdio : 'pipe'
     }
@@ -18453,7 +18425,30 @@ function shellExperiment( test )
     })
   })
 
-  return con;
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    _.process.start
+    ({
+      execPath : 'node testApp2.js',
+      mode : 'shell',
+      passingThrough : 1,
+      stdio : 'inherit',
+      inputMirroring : 0
+    })
+  }
+
+  function testApp2()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
 }
 
 shellExperiment.timeOut = 30000;
