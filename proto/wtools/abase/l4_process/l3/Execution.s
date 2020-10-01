@@ -148,6 +148,7 @@ function start_body( o )
   end
   handleClose
   handleError
+  handleDisconnect
   multiple
   single
   form
@@ -476,6 +477,13 @@ function start_body( o )
     {
       o.onTerminate.error( o.error );
     }
+  }
+
+  /* */
+
+  function handleDisconnect( arg )
+  {
+    // console.log( 'disconnect' ); debugger;
   }
 
   /* */
@@ -891,9 +899,9 @@ function start_body( o )
     }
     else
     {
-      debugger;
       o.process.on( 'error', handleError );
       o.process.on( 'close', handleClose );
+      o.process.on( 'disconnect', handleDisconnect );
     }
 
   }
@@ -913,9 +921,10 @@ function start_body( o )
     if( this.process.stdin )
     this.process.stdin.destroy();
 
-    if( this.process.disconnect )
-    if( this.process.connected )
-    this.process.disconnect();
+    // debugger;
+    // if( this.process.disconnect )
+    // if( this.process.connected )
+    // this.process.disconnect();
 
     this.process.unref();
 
