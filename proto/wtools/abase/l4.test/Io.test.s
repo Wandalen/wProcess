@@ -28,8 +28,7 @@ function suiteBegin()
   var self = this;
   self.suiteTempPath = _.path.tempOpen( _.path.join( __dirname, '../..' ), 'Io' );
   self.assetsOriginalPath = _.path.join( __dirname, '_asset' );
-  // self.toolsPath = _.path.nativize( _.path.resolve( __dirname, '../../../wtools/Tools.s' ) );
-  // self.appJsPath = _.path.nativize( _.module.resolve( 'wProcess' ) );
+  self.appJsPath = _.path.nativize( _.module.resolve( 'wProcess' ) );
 }
 
 //
@@ -569,7 +568,7 @@ function processArgsPaths( test )
     process.argv = process.argv.slice( 2 );
 
     var got = _.process.args({ caching : 0 });
-    a.fileProvider.fileWrite( _.path.join( __dirname, 'got' ), JSON.stringify( got ) )
+    _.fileProvider.fileWrite( _.path.join( __dirname, 'got' ), JSON.stringify( got ) )
   }
 }
 
