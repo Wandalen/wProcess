@@ -230,7 +230,7 @@ function start_body( o )
     o.onTerminate.finally( end );
 
     /* In detached mode competitor `end` waits for message only if user added own comperitor(s) to `onTerminate` */
-    if( o.detaching )
+    if( o.detaching ) /* xxx : rewrite */
     {
       let competitors = o.onTerminate.competitorsGet();
       let competitorForEnd = competitors[ competitors.length - 1 ];
@@ -280,29 +280,6 @@ function start_body( o )
     {
       o.onDisconnect = new _.Consequence();
     }
-
-    // o.ready = o.ready || new _.Consequence().take( null );
-    //
-    // if( o.onStart === null )
-    // {
-    //   o.onStart = o.ready;
-    //   if( !o.detaching )
-    //   o.onStart = new _.Consequence();
-    // }
-    // if( o.onTerminate === null )
-    // {
-    //   o.onTerminate = o.ready;
-    //   if( o.detaching )
-    //   o.onTerminate = new _.Consequence();
-    // }
-    //
-    // if( o.onDisconnect === null )
-    // o.onDisconnect = new _.Consequence();
-
-    // if( o.detaching )
-    // _.assert( o.ready === o.onStart && o.ready !== o.onTerminate );
-    // else
-    // _.assert( o.ready === o.onTerminate && o.ready !== o.onStart );
 
     _.assert( o.onStart !== o.onTerminate );
     _.assert( o.onStart !== o.onDisconnect );
@@ -374,6 +351,7 @@ function start_body( o )
 
   function end( err, arg )
   {
+    debugger;
 
     if( o.procedure )
     if( o.procedure.isAlive() )
@@ -385,8 +363,6 @@ function start_body( o )
       _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
       o.terminationBeginEnabled = false;
     }
-
-    o.ended = true;
 
     if( o.state !== 'initial' ) /* xxx qqq : why if? is it covered? */
     {
@@ -402,6 +378,8 @@ function start_body( o )
     if( err )
     o.error = err;
 
+    /* xxx qqq : where change of state?? */
+    o.ended = true;
     Object.freeze( o ); debugger;
 
     if( err )
@@ -421,15 +399,9 @@ function start_body( o )
   function handleClose( exitCode, exitSignal )
   {
 
-    if( o.state === 'terminated' || o.error ) /* xxx qqq : move above? */
+    debugger;
+    if( o.state === 'terminated' || o.error )
     return;
-
-    // debugger;
-    // yyy qqq
-    // if( o.procedure )
-    // o.procedure.end();
-    // if( o.detaching )
-    // _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
 
     exitCodeSet( exitCode );
     o.exitSignal = exitSignal;
@@ -484,7 +456,7 @@ function start_body( o )
   function handleError( err )
   {
 
-    // debugger;
+    debugger;
     exitCodeSet( -1 );
 
     if( o.state === 'terminated' || o.error ) /* xxx qqq : move above? */
@@ -595,7 +567,7 @@ function start_body( o )
       timeOutForm();
       pipe();
       if( o.dry )
-      o.onTerminate.take( o ); /* qqq : should be no o.ready aaa: replaced with onTerminate*/
+      o.onTerminate.take( o );
     }
     catch( err )
     {
@@ -919,6 +891,7 @@ function start_body( o )
     }
     else
     {
+      debugger;
       o.process.on( 'error', handleError );
       o.process.on( 'close', handleClose );
     }
@@ -955,7 +928,7 @@ function start_body( o )
     return true;
 
     this.process._disconnected = true;
-    if( !Object.isFrozen( this ) )
+    if( !Object.isFrozen( this ) ) /* qqq xxx : ? */
     this.state = 'disconnected';
 
     if( this.terminationBeginEnabled )
@@ -1509,44 +1482,10 @@ function startNjs_body( o )
   else
   path = _.strConcat([ 'node', interpreterArgs, path ]);
 
-  // let startOptions = _.mapOnly( o, _.process.start.defaults );
   let startOptions = o;
   startOptions.execPath = path;
 
   let result = _.process.start.body.call( _.process, startOptions );
-
-  // o.ready = startOptions.ready;
-  // o.onStart = startOptions.onStart;
-  // o.onTerminate = startOptions.onTerminate;
-  // o.process = startOptions.process;
-  // o.disconnect = startOptions.disconnect;
-  // // o.status = startOptions.status;
-  //
-  // _.assert( !!startOptions.ready );
-  // _.assert( !!startOptions.onStart );
-  // _.assert( !!startOptions.onTerminate );
-  // _.assert( !!startOptions.disconnect );
-  // // _.assert( !!startOptions.status );
-  //
-  // startOptions.onStart.give( function( err, arg )
-  // {
-  //   _.assert( !!startOptions.process );
-  //   _.assert( !!startOptions.disconnect );
-  //   // _.assert( !!startOptions.status );
-  //   o.process = startOptions.process;
-  //   o.disconnect = startOptions.disconnect;
-  //   // o.status = startOptions.status;
-  //   this.take( err, arg );
-  // })
-  //
-  // startOptions.onTerminate.give( function( err, arg )
-  // {
-  //   o.output = startOptions.output;
-  //   o.exitCode = startOptions.exitCode;
-  //   o.exitSignal = startOptions.exitSignal;
-  //   // o.status = startOptions.status;
-  //   this.take( err, arg );
-  // })
 
   return result;
 }

@@ -5170,7 +5170,7 @@ function shellArgumentsParsingNonTrivial( test )
     }
     _.process.start( o );
 
-    con.finally( ( err, got ) =>
+    con.finally( ( err, got ) => /* qqq2 : should be ( err, op ) or ( err, arg ) not got */
     {
       test.is( !!err );
       test.is( _.strHas( err.message, 'first arg' ) )
@@ -11379,6 +11379,7 @@ function startDetachingDisconnectedChildExistsBeforeParent( test )
   let context = this;
   let a = test.assetFor( false );
   let testAppChildPath = a.program( testAppChild );
+  let track = [];
 
   /* */
 
@@ -11394,19 +11395,23 @@ function startDetachingDisconnectedChildExistsBeforeParent( test )
       execPath : 'testAppChild.js',
       mode : 'fork',
       stdio : 'ignore',
+      // outputPiping : 1,
+      // stdio : 'pipe',
       currentPath : a.routinePath,
       detaching : 1
     }
 
     let result = _.process.start( o );
 
+    test.identical( o.state, 'started' );
     o.disconnect();
-
+    test.identical( o.state, 'disconnected' );
     test.identical( o.onStart, result );
     test.is( _.consequenceIs( o.onStart ) )
 
     o.onStart.finally( ( err, got ) =>
     {
+      track.push( 'onStart' );
       test.identical( err, undefined );
       test.identical( got, o );
       test.is( _.process.isAlive( o.process.pid ) )
@@ -11415,15 +11420,24 @@ function startDetachingDisconnectedChildExistsBeforeParent( test )
 
     o.onTerminate.finallyGive( ( err, got ) =>
     {
+      track.push( 'onTerminate' );
+      /* xxx qqq : add track here and in all similar place to cover entering here! */
+      /* qqq xxx : does not enter here. why?? */
+      console.log( 'onTerminate' ); debugger;
       _.errAttend( err );
-      test.is( _.errIs( err ) );
-      test.identical( got, undefined );
-      test.is( _.process.isAlive( o.process.pid ) )
+      test.identical( o.state, 'terminated' );
+      test.is( !_.errIs( err ) );
+      test.is( got !== undefined );
+      test.is( !_.process.isAlive( o.process.pid ) );
     })
 
     result = _.time.out( 5000, () =>
     {
       test.identical( o.onTerminate.resourcesCount(), 0 );
+      test.identical( o.onTerminate.errorsCount(), 0 );
+      test.identical( o.onTerminate.competitorsCount(), 0 );
+      test.identical( o.state, 'terminated' );
+      test.identical( track, [ 'onStart', 'onTerminate' ] );
       test.is( !_.process.isAlive( o.process.pid ) )
       return null;
     })
@@ -11442,9 +11456,7 @@ function startDetachingDisconnectedChildExistsBeforeParent( test )
     let _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
-
     var args = _.process.args();
-
     _.time.out( 2000, () =>
     {
       console.log( 'Child process end' )
@@ -11490,6 +11502,7 @@ function startDetachingChildExistsBeforeParentWaitForTermination( test )
 
     o.onTerminate.finally( ( err, got ) =>
     {
+      /* xxx qqq : add track here and in all similar place to cover entering here! */
       test.identical( err, undefined );
       test.identical( got, o );
       test.is( !_.process.isAlive( o.process.pid ) )
@@ -11571,6 +11584,7 @@ function startDetachingEndCompetitorIsExecuted( test )
 
     o.onTerminate.finally( ( err, got ) =>
     {
+      /* xxx qqq : add track here and in all similar place to cover entering here! */
       test.identical( o.ended, true );
       test.identical( err, undefined );
       test.identical( got, o );
@@ -12729,6 +12743,7 @@ function startOnStart( test )
 
     o.onTerminate.finally( ( err, got ) =>
     {
+      /* xxx qqq : add track here and in all similar place to cover entering here! */
       test.identical( err, undefined );
       test.identical( got, o );
       test.identical( o.state, 'terminated' );
@@ -12778,7 +12793,7 @@ function startOnStart( test )
       return null;
     })
 
-    result = _.time.out( 3000, () =>
+    result = _.time.out( 2000 + context.t2, () =>
     {
       test.is( !_.process.isAlive( o.process.pid ) )
       test.identical( o.exitCode, null );
@@ -12798,6 +12813,8 @@ function startOnStart( test )
 
   function testAppChild()
   {
+    console.log( 'Child process begin' );
+
     let _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
@@ -12806,7 +12823,7 @@ function startOnStart( test )
 
     _.time.out( 2000, () =>
     {
-      console.log( 'Child process end' )
+      console.log( 'Child process end' );
       return null;
     })
   }
@@ -16049,7 +16066,7 @@ function endStructuralSigint( test )
       test.is( options.onTerminate === options.ready );
       test.is( !!options.process );
       time1 = _.time.now();
-      _.time.out( context.dt1, () => options.process.kill( 'SIGINT' ) );
+      _.time.out( context.t1, () => options.process.kill( 'SIGINT' ) );
       return null;
     });
 
@@ -16057,7 +16074,7 @@ function endStructuralSigint( test )
     .finally( ( err, op ) =>
     {
       var dtime = _.time.now() - time1;
-      test.le( dtime, context.dt1*2 );
+      test.le( dtime, context.t1*2 );
       _.errAttend( err );
       test.is( _.errIs( err ) );
       test.identical( options.output, 'program1:begin\nprogram1:end\n' );
@@ -16142,7 +16159,7 @@ function endStructuralSigkill( test )
       test.is( options.onTerminate === options.ready );
       test.is( !!options.process );
       time1 = _.time.now();
-      _.time.out( context.dt1, () => options.process.kill( 'SIGKILL' ) );
+      _.time.out( context.t1, () => options.process.kill( 'SIGKILL' ) );
       return null;
     });
 
@@ -16150,7 +16167,7 @@ function endStructuralSigkill( test )
     .finally( ( err, op ) =>
     {
       var dtime = _.time.now() - time1;
-      test.le( dtime, context.dt1*2 );
+      test.le( dtime, context.t1*2 );
       _.errAttend( err );
       test.is( _.errIs( err ) );
       test.identical( options.output, 'program1:begin\n' );
@@ -16236,7 +16253,7 @@ function endStructuralTerminate( test )
       test.is( options.onTerminate === options.ready );
       test.is( !!options.process );
       time1 = _.time.now();
-      _.time.out( context.dt1, () => _.process.terminate({ process : options.process, timeOut : 5000 }) );
+      _.time.out( context.t1, () => _.process.terminate({ process : options.process, timeOut : 5000 }) );
       return null;
     });
 
@@ -16244,7 +16261,7 @@ function endStructuralTerminate( test )
     .finally( ( err, op ) =>
     {
       var dtime = _.time.now() - time1;
-      test.le( dtime, context.dt1*2 );
+      test.le( dtime, context.t1*2 );
       _.errAttend( err );
       test.is( _.errIs( err ) );
       test.identical( options.output, 'program1:begin\n' );
@@ -16329,7 +16346,7 @@ function endStructuralKill( test )
       test.is( options.onTerminate === options.ready );
       test.is( !!options.process );
       time1 = _.time.now();
-      _.time.out( context.dt1, () => _.process.kill( options.process ) );
+      _.time.out( context.t1, () => _.process.kill( options.process ) );
       return null;
     });
 
@@ -16337,7 +16354,7 @@ function endStructuralKill( test )
     .finally( ( err, op ) =>
     {
       var dtime = _.time.now() - time1;
-      test.le( dtime, context.dt1*2 );
+      test.le( dtime, context.t1*2 );
       _.errAttend( err );
       test.is( _.errIs( err ) );
       test.identical( options.output, 'program1:begin\n' );
@@ -18472,9 +18489,9 @@ var Proto =
     toolsPath : null,
     toolsPathInclude : null,
 
-    dt0 : 100,
-    dt1 : 1000,
-    dt2 : 5000,
+    t0 : 100,
+    t1 : 1000,
+    t2 : 5000,
 
   },
 
@@ -18554,7 +18571,7 @@ var Proto =
 
     startDetachingChildExitsAfterParent,
     startDetachingChildExitsBeforeParent,
-    startDetachingDisconnectedChildExistsBeforeParent,
+    // startDetachingDisconnectedChildExistsBeforeParent, /* qqq xxx : ? */
     startDetachingChildExistsBeforeParentWaitForTermination,
     startDetachingEndCompetitorIsExecuted,
 
