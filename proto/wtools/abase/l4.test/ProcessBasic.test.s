@@ -16006,8 +16006,7 @@ function endStructuralSigint( test )
   let a = test.assetFor( false );
   let programPath = a.program( program1 );
   let time1;
-  // let modes = [ 'fork', 'spawn', 'shell' ];
-  let modes = [ 'fork' ];
+  let modes = [ 'fork', 'spawn', 'shell' ];
 
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 

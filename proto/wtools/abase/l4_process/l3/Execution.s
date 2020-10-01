@@ -252,8 +252,6 @@ function start_body( o )
 
     /* qqq2 : implement test for multiple to check onStart works as should */
 
-    debugger;
-
     if( o.ready === null )
     {
       if( o.detaching )
@@ -268,7 +266,6 @@ function start_body( o )
       o.onStart = o.ready;
       else
       o.onStart = new _.Consequence();
-      // o.onStart = new _.Consequence();
     }
 
     if( o.onTerminate === null )
@@ -281,9 +278,6 @@ function start_body( o )
 
     if( o.onDisconnect === null )
     {
-      // if( o.detaching )
-      // o.onDisconnect = o.ready;
-      // else
       o.onDisconnect = new _.Consequence();
     }
 
