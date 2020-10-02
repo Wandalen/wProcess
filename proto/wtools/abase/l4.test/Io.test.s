@@ -1067,8 +1067,8 @@ function systemEntryAddBasic( test )
     var exp = 1;
     var got = _.process.systemEntryAdd( src );
     test.il( got, exp );
-    test.is( a.fileProvider.fileExistsAct( a.abs( 'dir/Index' ) ) )
-    test.is( _.objectIs( a.fileProvider.filesRead( a.abs( 'dir/Index' ) ) ) )
+    test.is( a.fileProvider.fileExistsAct( a.abs( 'dir/Index.js' ) ) )
+    test.is( _.objectIs( a.fileProvider.filesRead( a.abs( 'dir/Index.js' ) ) ) )
 
     return null;
   } );
