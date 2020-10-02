@@ -3684,7 +3684,7 @@ function startWithReadyDelayStructural( test )
     exp2.outputAdditive = true;
     exp2.state = 'terminated';
     exp2.terminationReason = 'normal';
-    exp2.fullExecPath = programPath;
+    exp2.fullExecPath = a.path.nativize( programPath );
     exp2.ended = true;
 
     test.identical( options, exp2 );
@@ -3700,7 +3700,7 @@ function startWithReadyDelayStructural( test )
 
   var exp =
   {
-    'execPath' : a.abs( 'program1.js' ),
+    'execPath' : a.path.nativize( a.abs( 'program1.js' ) ),
     'currentPath' : null,
     'throwingExitCode' : 1,
     'inputMirroring' : 1,
