@@ -1140,8 +1140,8 @@ function systemEntryAddOptionAllowingNotInPath( test )
     var exp = 1;
     var got = _.process.systemEntryAdd( src );
     test.il( got, exp );
-    test.is( a.fileProvider.fileExistsAct( a.abs( 'dir/file' ) ) )
-    test.is( _.objectIs( a.fileProvider.filesRead( a.abs( 'dir/file' ) ) ) )
+    test.is( a.fileProvider.fileExistsAct( a.abs( 'dir/file.txt' ) ) )
+    test.is( _.objectIs( a.fileProvider.filesRead( a.abs( 'dir/file.txt' ) ) ) )
 
     return null;
   } );
@@ -1170,8 +1170,8 @@ function systemEntryAddOptionForcing( test )
     var exp = 1;
     var got = _.process.systemEntryAdd( src );
     test.il( got, exp );
-    test.is( a.fileProvider.fileExistsAct( a.abs( 'dir/file' ) ) )
-    test.is( _.objectIs( a.fileProvider.filesRead( a.abs( 'dir/file' ) ) ) )
+    test.is( a.fileProvider.fileExistsAct( a.abs( 'dir/file.txt' ) ) )
+    test.is( _.objectIs( a.fileProvider.filesRead( a.abs( 'dir/file.txt' ) ) ) )
 
     return null;
   } );
