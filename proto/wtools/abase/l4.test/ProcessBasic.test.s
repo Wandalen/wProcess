@@ -123,7 +123,7 @@ function processOnExitEvent( test )
 
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testApp );
+  let programPath = a.path.nativize( a.program( testApp ) );
 
   /* */
 
@@ -209,7 +209,7 @@ function processOffExitEvent( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testApp );
+  let programPath = a.path.nativize( a.program( testApp ) );
 
   /*  */
 
@@ -423,7 +423,7 @@ function shell( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testAppShell );
+  let programPath = a.path.nativize( a.program( testAppShell ) );
 
   var commonDefaults =
   {
@@ -771,7 +771,7 @@ function shellSync( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testAppShell );
+  let programPath = a.path.nativize( a.program( testAppShell ) );
 
   var commonDefaults =
   {
@@ -925,7 +925,7 @@ function shellSyncAsync( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testAppShell );
+  let programPath = a.path.nativize( a.program( testAppShell ) );
 
   var commonDefaults =
   {
@@ -1108,7 +1108,7 @@ function shell2( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testApp );
+  let programPath = a.path.nativize( a.program( testApp ) );
 
   var commonDefaults =
   {
@@ -1286,7 +1286,7 @@ function shellCurrentPath( test ) /* qqq : split by mode */
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testApp );
+  let programPath = a.path.nativize( a.program( testApp ) );
 
   /* */
 
@@ -1740,7 +1740,7 @@ function shellCurrentPaths( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testApp );
+  let programPath = a.path.nativize( a.program( testApp ) );
 
   let o2 =
   {
@@ -1888,7 +1888,7 @@ function shellFork( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testApp );
+  let programPath = a.path.nativize( a.program( testApp ) );
 
   /* */
 
@@ -2002,7 +2002,7 @@ function shellFork( test )
       console.log( process.execArgv );
     }
 
-    let programPath = a.program( testApp2 );
+    let programPath = a.path.nativize( a.program( testApp2 ) );
 
     let o =
     {
@@ -2043,7 +2043,7 @@ function shellFork( test )
       console.log( process.execArgv );
     }
 
-    let programPath = a.program( testApp3 );
+    let programPath = a.path.nativize( a.program( testApp3 ) );
 
     let o =
     {
@@ -2086,7 +2086,7 @@ function shellFork( test )
       })
     }
 
-    let programPath = a.program( testApp4 );
+    let programPath = a.path.nativize( a.program( testApp4 ) );
 
     let o =
     {
@@ -2152,7 +2152,7 @@ function shellFork( test )
       }, 5000 )
     }
 
-    let programPath = a.program( testApp5 );
+    let programPath = a.path.nativize( a.program( testApp5 ) );
 
     let o =
     {
@@ -2187,7 +2187,7 @@ function shellFork( test )
       }, 5000 )
     }
 
-    let programPath = a.program( testApp6 );
+    let programPath = a.path.nativize( a.program( testApp6 ) );
 
     let o =
     {
@@ -2227,7 +2227,7 @@ function shellWithoutExecPath( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testApp );
+  let programPath = a.path.nativize( a.program( testApp ) );
   let counter = 0;
   let time = 0;
   let filePath = a.path.nativize( a.abs( a.routinePath, 'file.txt' ) );
@@ -2302,7 +2302,7 @@ function shellSpawnSyncDeasync( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testApp );
+  let programPath = a.path.nativize( a.program( testApp ) );
 
   /*  */
 
@@ -2407,7 +2407,7 @@ function shellSpawnSyncDeasyncThrowing( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testApp );
+  let programPath = a.path.nativize( a.program( testApp ) );
 
   /* */
 
@@ -2497,7 +2497,7 @@ function shellShellSyncDeasync( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testApp );
+  let programPath = a.path.nativize( a.program( testApp ) );
 
   /*  */
 
@@ -2604,7 +2604,7 @@ function shellShellSyncDeasyncThrowing( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testApp );
+  let programPath = a.path.nativize( a.program( testApp ) );
 
   /*  */
 
@@ -2695,7 +2695,7 @@ function shellForkSyncDeasync( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testApp );
+  let programPath = a.path.nativize( a.program( testApp ) );
 
   /*  */
 
@@ -2799,7 +2799,7 @@ function shellForkSyncDeasyncThrowing( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testApp );
+  let programPath = a.path.nativize( a.program( testApp ) );
 
   /*  */
 
@@ -3102,7 +3102,7 @@ function shellMultipleSyncDeasync( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testApp );
+  let programPath = a.path.nativize( a.program( testApp ) );
 
   /*  */
 
@@ -3578,7 +3578,7 @@ function shellDryRun( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testApp );
+  let programPath = a.path.nativize( a.program( testApp ) );
 
   /*  */
 
@@ -3644,7 +3644,7 @@ function startWithReadyDelayStructural( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( program1 );
+  let programPath = a.path.nativize( a.program( program1 ) );
 
   a.ready.timeOut( 1000 );
 
@@ -3788,7 +3788,7 @@ function shellArgsOption( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testApp );
+  let programPath = a.path.nativize( a.program( testApp ) );
 
   /* */
 
@@ -3875,8 +3875,8 @@ function shellArgumentsParsing( test )
 
   let a = test.assetFor( false );
 
-  let testAppPathNoSpace = a.program( { routine : testApp, dirPath : a.abs( 'noSpace' ) } );
-  let testAppPathSpace = a.program( { routine : testApp, dirPath : a.abs( 'with space' ) } );
+  let testAppPathNoSpace = a.path.nativize( a.program( { routine : testApp, dirPath : a.abs( 'noSpace' ) } ) );
+  let testAppPathSpace = a.path.nativize( a.program( { routine : testApp, dirPath : a.abs( 'with space' ) } ) );
 
 
   /* for combination:
@@ -4817,8 +4817,8 @@ function shellArgumentsParsingNonTrivial( test )
 
   let a = test.assetFor( false );
 
-  let testAppPathNoSpace = a.program( { routine : testApp, dirPath : a.abs( 'noSpace' ) } );
-  let testAppPathSpace = a.program( { routine : testApp, dirPath : a.abs( 'with space' ) } );
+  let testAppPathNoSpace = a.path.nativize( a.program( { routine : testApp, dirPath : a.abs( 'noSpace' ) } ) );
+  let testAppPathSpace = a.path.nativize( a.program( { routine : testApp, dirPath : a.abs( 'with space' ) } ) );
 
   /*
 
@@ -5417,7 +5417,7 @@ function shellArgumentsNestedQuotes( test )
 
   let a = test.assetFor( false );
 
-  let testAppPathSpace = a.program( { routine : testApp, dirPath : a.abs( 'with space' ) } );
+  let testAppPathSpace = a.path.nativize( a.program( { routine : testApp, dirPath : a.abs( 'with space' ) } ) );
 
   /* */
 
@@ -5790,7 +5790,7 @@ function shellExecPathQuotesClosing( test )
 
   let a = test.assetFor( false );
 
-  let testAppPathSpace = a.program( { routine : testApp, dirPath : a.abs( 'with space' ) } );
+  let testAppPathSpace = a.path.nativize( a.program( { routine : testApp, dirPath : a.abs( 'with space' ) } ) );
 
   /* */
 
@@ -6582,7 +6582,7 @@ function shellExecPathSeveralCommands( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( app );
+  let testAppPath = a.path.nativize( a.program( app ) );
 
   a.ready
 
@@ -7123,7 +7123,7 @@ function shellErrorHadling( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
 
   /* */
 
@@ -7378,9 +7378,8 @@ function shellNode( test )
   let context = this;
   let a = test.assetFor( false );
   debugger
-  var testAppPath = a.program( { routine : testApp, locals : 'aaa' } )
-  console.log( 'PATHHHHHHHHHH: ', testAppPath )
-  var testAppPath2 = a.program( testApp2 )
+  var testAppPath = a.path.nativize( a.program( { routine : testApp, locals : 'aaa' } ) );
+  var testAppPath2 = a.path.nativize( a.program( testApp2 ) );
 
   /* */
 
@@ -7505,7 +7504,7 @@ function shellModeShellNonTrivial( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath =  a.program( app );
+  let testAppPath = a.path.nativize( a.program( app ) );
 
   let shell = _.process.starter
   ({
@@ -8353,7 +8352,7 @@ function startExecPathWithSpace( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( { routine : testApp, dirPath : 'path with space' } );
+  let testAppPath = a.path.nativize( a.program( { routine : testApp, dirPath : 'path with space' } ) );
 
   let execPathWithSpace = 'node ' + a.path.nativize( testAppPath );
 
@@ -8557,7 +8556,7 @@ function startNjsPassingThroughExecPathWithSpace( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath =  a.program({ routine : testApp, dirPath : 'path with space' });
+  let testAppPath = a.path.nativize( a.program({ routine : testApp, dirPath : 'path with space' }) );
 
   let execPathWithSpace = a.path.nativize( testAppPath );
 
@@ -8629,7 +8628,7 @@ startNjsPassingThroughExecPathWithSpace.timeOut = 60000;
 function startPassingThroughExecPathWithSpace( test )
 {
   let a = test.assetFor( false );
-  let testAppPath = a.program({ routine : testApp, dirPath : 'path with space' });
+  let testAppPath = a.path.nativize( a.program({ routine : testApp, dirPath : 'path with space' }) );
 
   let execPathWithSpace = 'node ' + _.path.nativize( testAppPath );
 
@@ -8847,7 +8846,7 @@ function shellProcedureTrivial( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
 
   let start = _.process.starter
   ({
@@ -8975,7 +8974,7 @@ function shellProcedureExists( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
 
   let start = _.process.starter
   ({
@@ -9092,7 +9091,7 @@ function shellTerminateHangedWithExitHandler( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
 
   if( process.platform === 'win32' )
   {
@@ -9210,7 +9209,7 @@ function shellTerminateAfterLoopRelease( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
 
   if( process.platform === 'win32' )
   {
@@ -9335,7 +9334,7 @@ function shellStartingDelay( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
 
   /* */
 
@@ -9387,7 +9386,7 @@ function shellStartingTime( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
 
   /* */
 
@@ -9440,7 +9439,7 @@ function shellStartingSuspended( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
 
 
   /* */
@@ -9499,8 +9498,8 @@ function shellAfterDeath( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppParentPath = a.program( testAppParent );
-  let testAppChildPath = a.program( testAppChild );
+  let testAppParentPath = a.path.nativize( a.program( testAppParent ) );
+  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
   /* */
 
@@ -9705,7 +9704,7 @@ function startDetachingModeSpawnResourceReady( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppChildPath = a.program( testAppChild );
+  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
   /* */
 
@@ -9776,7 +9775,7 @@ function startDetachingModeForkResourceReady( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppChildPath = a.program( testAppChild );
+  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
   /* */
 
@@ -9846,7 +9845,7 @@ function startDetachingModeShellResourceReady( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppChildPath = a.program( testAppChild );
+  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
   /* */
 
@@ -9914,8 +9913,8 @@ function startDetachingModeSpawnNoTerminationBegin( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppParentPath = a.program( testAppParent );
-  let testAppChildPath = a.program( testAppChild );
+  let testAppParentPath = a.path.nativize( a.program( testAppParent ) );
+  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
   let testFilePath = a.abs( a.routinePath, 'testFile' );
 
@@ -10142,8 +10141,8 @@ function startDetachingModeForkNoTerminationBegin( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppParentPath = a.program( testAppParent );
-  let testAppChildPath = a.program( testAppChild );
+  let testAppParentPath = a.path.nativize( a.program( testAppParent ) );
+  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
   let testFilePath = a.abs( a.routinePath, 'testFile' );
 
@@ -10286,8 +10285,8 @@ function startDetachingModeShellNoTerminationBegin( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppParentPath = a.program( testAppParent );
-  let testAppChildPath = a.program( testAppChild );
+  let testAppParentPath = a.path.nativize( a.program( testAppParent ) );
+  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
   let testFilePath = a.abs( a.routinePath, 'testFile' );
 
@@ -10428,8 +10427,8 @@ function startDetachingModeSpawnTerminationBegin( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppParentPath = a.program( testAppParent );
-  let testAppChildPath = a.program( testAppChild );
+  let testAppParentPath = a.path.nativize( a.program( testAppParent ) );
+  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
   let testFilePath = a.abs( a.routinePath, 'testFile' );
 
@@ -10696,8 +10695,8 @@ function startDetachingModeForkTerminationBegin( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppParentPath = a.program( testAppParent );
-  let testAppChildPath = a.program( testAppChild );
+  let testAppParentPath = a.path.nativize( a.program( testAppParent ) );
+  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
   let testFilePath = a.abs( a.routinePath, 'testFile' );
 
@@ -10968,8 +10967,8 @@ function startDetachingModeShellTerminationBegin( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppParentPath = a.program( testAppParent );
-  let testAppChildPath = a.program( testAppChild );
+  let testAppParentPath = a.path.nativize( a.program( testAppParent ) );
+  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
   let testFilePath = a.abs( a.routinePath, 'testFile' );
 
@@ -11135,8 +11134,8 @@ function startDetachingChildExitsAfterParent( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppParentPath = a.program( testAppParent );
-  let testAppChildPath = a.program( testAppChild );
+  let testAppParentPath = a.path.nativize( a.program( testAppParent ) );
+  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
   let testFilePath = a.abs( a.routinePath, 'testFile' );
 
@@ -11248,8 +11247,8 @@ function startDetachingChildExitsBeforeParent( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppParentPath = a.program( testAppParent );
-  let testAppChildPath = a.program( testAppChild );
+  let testAppParentPath = a.path.nativize( a.program( testAppParent ) );
+  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
   let testFilePath = a.abs( a.routinePath, 'testFile' );
 
@@ -11378,7 +11377,7 @@ function startDetachingDisconnectedChildExistsBeforeParent( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppChildPath = a.program( testAppChild );
+  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
   let track = [];
 
   /* */
@@ -11408,9 +11407,9 @@ function startDetachingDisconnectedChildExistsBeforeParent( test )
 
     // _.time.begin( 1000, () =>
     // {
-      test.identical( o.state, 'started' );
-      o.disconnect();
-      test.identical( o.state, 'disconnected' );
+    test.identical( o.state, 'started' );
+    o.disconnect();
+    test.identical( o.state, 'disconnected' );
     // });
 
     test.is( o.onStart === result );
@@ -11488,7 +11487,7 @@ function startDetachingChildExistsBeforeParentWaitForTermination( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppChildPath = a.program( testAppChild );
+  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
 
   a.ready
@@ -11556,7 +11555,7 @@ function startDetachingEndCompetitorIsExecuted( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppChildPath = a.program( testAppChild );
+  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
   a.ready
 
@@ -11641,8 +11640,8 @@ function startDetachedOutputStdioIgnore( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppParentPath = a.program( testAppParent );
-  let testAppChildPath = a.program( testAppChild );
+  let testAppParentPath = a.path.nativize( a.program( testAppParent ) );
+  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
   /* */
 
@@ -11777,8 +11776,8 @@ function startDetachedOutputStdioPipe( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppParentPath = a.program( testAppParent );
-  let testAppChildPath = a.program( testAppChild );
+  let testAppParentPath = a.path.nativize( a.program( testAppParent ) );
+  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
   /* */
 
@@ -11921,7 +11920,7 @@ function startDetachedOutputStdioInherit( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppChildPath = a.program( testAppChild );
+  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
   /* */
 
@@ -12008,7 +12007,7 @@ function startDetachingModeSpawnIpc( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppChildPath = a.program( testAppChild );
+  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
   /* */
 
@@ -12119,7 +12118,7 @@ function startDetachingModeForkIpc( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppChildPath = a.program( testAppChild );
+  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
   /* */
 
@@ -12231,7 +12230,7 @@ function startDetachingModeShellIpc( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppChildPath = a.program( testAppChild );
+  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
   /* */
 
@@ -12305,7 +12304,7 @@ function startDetachingThrowing( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppChildPath = a.program( testAppChild );
+  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
   /* */
 
@@ -12399,7 +12398,7 @@ function startNjsDetachingChildThrowing( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppChildPath = a.program( testAppChild );
+  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
   /* */
 
@@ -12448,8 +12447,8 @@ function startNjsDetachingTrivial( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppParentPath = a.program( testAppParent );
-  let testAppChildPath = a.program( testAppChild );
+  let testAppParentPath = a.path.nativize( a.program( testAppParent ) );
+  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
   /* */
 
@@ -12564,7 +12563,7 @@ function startOnStart( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppChildPath = a.program( testAppChild );
+  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
   a.ready
 
@@ -12843,7 +12842,7 @@ function startOnTerminate( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppChildPath = a.program( testAppChild );
+  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
   /* */
 
@@ -13089,7 +13088,7 @@ function startNoEndBug1( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppChildPath = a.program( testAppChild );
+  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
   a.ready
 
@@ -13157,7 +13156,7 @@ function startOnTerminateWithDelay( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( program1 );
+  let programPath = a.path.nativize( a.program( program1 ) );
   let time1 = _.time.now();
 
   a.ready.timeOut( 1000 );
@@ -13209,6 +13208,8 @@ function startOnTerminateWithDelay( test )
   options.onTerminate
   .finally( ( err, op ) =>
   {
+    if( err )
+    console.log( err )
     test.identical( op.output, 'program1:begin\nprogram1:end\n' );
     test.identical( op.exitCode, 0 );
     test.identical( op.exitSignal, null );
@@ -13243,7 +13244,7 @@ function shellConcurrent( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( context.testApp );
+  let testAppPath = a.path.nativize( a.program( context.testApp ) );
   let counter = 0;
   let time = 0;
   let filePath = a.path.nativize( a.abs( a.routinePath, 'file.txt' ) );
@@ -13699,7 +13700,7 @@ function shellerConcurrent( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( context.testApp );
+  let testAppPath = a.path.nativize( a.program( context.testApp ) );
   let counter = 0;
   let time = 0;
   let filePath = a.path.nativize( a.abs( a.routinePath, 'file.txt' ) );
@@ -14215,7 +14216,7 @@ function sheller( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
 
   /* */
 
@@ -14487,7 +14488,7 @@ function shellerArgs( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
 
   /* */
 
@@ -14606,7 +14607,7 @@ function outputHandling( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
 
   /* */
 
@@ -14698,7 +14699,7 @@ function shellOutputStripping( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
 
   /* */
 
@@ -14767,7 +14768,7 @@ function shellLoggerOption( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
 
   /* */
 
@@ -14833,7 +14834,7 @@ function shellNormalizedExecPath( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
 
   /* */
 
@@ -15178,7 +15179,7 @@ function kill( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
 
   /* */
 
@@ -15476,9 +15477,9 @@ function killWithChildren( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( testApp );
-  let testAppPath2 = a.program( testApp2 );
-  let testAppPath3 = a.program( testApp3 );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
+  let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+  let testAppPath3 = a.path.nativize( a.program( testApp3 ) );
 
   /* */
 
@@ -15755,7 +15756,7 @@ function terminate( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
 
   if( process.platform === 'win32' )
   {
@@ -16031,7 +16032,7 @@ function endStructuralSigint( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( program1 );
+  let programPath = a.path.nativize( a.program( program1 ) );
   let time1;
   let modes = [ 'fork', 'spawn', 'shell' ];
 
@@ -16129,7 +16130,7 @@ function endStructuralSigkill( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( program1 );
+  let programPath = a.path.nativize( a.program( program1 ) );
   let time1;
   let modes = [ 'fork', 'spawn', 'shell' ];
 
@@ -16229,7 +16230,7 @@ function endStructuralTerminate( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( program1 );
+  let programPath = a.path.nativize( a.program( program1 ) );
   let time1;
   let modes = [ 'fork', 'spawn', 'shell' ];
 
@@ -16327,7 +16328,7 @@ function endStructuralKill( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( program1 );
+  let programPath = a.path.nativize( a.program( program1 ) );
   let time1;
   let modes = [ 'fork', 'spawn', 'shell' ];
 
@@ -16426,8 +16427,8 @@ function terminateComplex( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( testApp );
-  let testAppPath2 = a.program( testApp2 );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
+  let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
 
   if( process.platform === 'win32' )
   {
@@ -16690,8 +16691,8 @@ function terminateDetachedComplex( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( testApp );
-  let testAppPath2 = a.program( testApp2 );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
+  let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
 
 
   if( process.platform === 'win32' )
@@ -16989,9 +16990,9 @@ function terminateWithChildren( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( testApp );
-  let testAppPath2 = a.program( testApp2 );
-  let testAppPath3 = a.program( testApp3 );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
+  let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+  let testAppPath3 = a.path.nativize( a.program( testApp3 ) );
 
   if( process.platform === 'win32' )
   {
@@ -17250,9 +17251,9 @@ function terminateWithDetachedChildren( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( testApp );
-  let testAppPath2 = a.program( testApp2 );
-  let testAppPath3 = a.program( testApp3 );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
+  let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+  let testAppPath3 = a.path.nativize( a.program( testApp3 ) );
 
   if( process.platform === 'win32' )
   {
@@ -17412,7 +17413,7 @@ function terminateTimeOut( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
 
   if( process.platform === 'win32' )
   {
@@ -17618,7 +17619,7 @@ function terminateDifferentStdio( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
 
   if( process.platform === 'win32' )
   {
@@ -17841,8 +17842,8 @@ function children( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( testApp );
-  let testAppPath2 = a.program( testApp2 );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
+  let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
 
   /* */
 
@@ -18099,8 +18100,8 @@ function childrenAsList( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( testApp );
-  let testAppPath2 = a.program( testApp2 );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
+  let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
 
   /* */
 
@@ -18201,7 +18202,7 @@ function experiment( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testApp );
+  let programPath = a.path.nativize( a.program( testApp ) );
 
   /* */
 
@@ -18259,8 +18260,8 @@ function killComplex( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( testApp );
-  let testAppPath2 = a.program( testApp2 );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
+  let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
 
   /* */
 
@@ -18429,8 +18430,8 @@ function shellExperiment( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( testApp );
-  let testAppPath2 = a.program( testApp2 );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
+  let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
 
   var commonDefaults =
   {
