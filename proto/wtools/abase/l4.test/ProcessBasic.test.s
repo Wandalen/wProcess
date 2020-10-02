@@ -16084,7 +16084,7 @@ function endStructuralSigint( test )
       test.le( dtime, context.t1*2 );
       _.errAttend( err );
       test.is( _.errIs( err ) );
-      test.identical( options.output, 'program1:begin\nprogram1:end\n' );
+      test.identical( options.output, 'program1:begin\n' );
       test.identical( options.exitCode, null );
       test.identical( options.exitSignal, 'SIGINT' );
       test.identical( options.ended, true );
@@ -18623,10 +18623,12 @@ var Proto =
     kill,
     killWithChildren,
     terminate,
+
     // endStructuralSigint,
     // endStructuralSigkill,
     // endStructuralTerminate,
     // endStructuralKill,
+
     terminateComplex,
     terminateDetachedComplex,
     terminateWithChildren,
