@@ -49,7 +49,7 @@ function processArgsBase( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testApp );
+  let programPath = a.path.nativize( a.program( testApp ) );
 
   let shell = _.process.starter
   ({
@@ -138,7 +138,7 @@ function processArgsPropertiesBase( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testApp );
+  let programPath = a.path.nativize( a.program( testApp ) );
 
   let shell = _.process.starter
   ({
@@ -386,7 +386,7 @@ function processArgsMultipleCommands( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testApp );
+  let programPath = a.path.nativize( a.program( testApp ) );
 
   let shell = _.process.starter
   ({
@@ -482,7 +482,7 @@ function processArgsPaths( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testApp );
+  let programPath = a.path.nativize( a.program( testApp ) );
 
   let shell = _.process.starter
   ({
@@ -578,7 +578,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testApp );
+  let programPath = a.path.nativize( a.program( testApp ) );
 
   let shell = _.process.starter
   ({
@@ -1067,8 +1067,8 @@ function systemEntryAddBasic( test )
     var exp = 1;
     var got = _.process.systemEntryAdd( src );
     test.il( got, exp );
-    test.is( a.fileProvider.fileExistsAct( a.abs( 'dir/Index' ) ) )
-    test.is( _.objectIs( a.fileProvider.filesRead( a.abs( 'dir/Index' ) ) ) )
+    test.is( a.fileProvider.fileExistsAct( a.abs( 'dir/Index.js' ) ) )
+    test.is( _.objectIs( a.fileProvider.filesRead( a.abs( 'dir/Index.js' ) ) ) )
 
     return null;
   } );
@@ -1103,15 +1103,16 @@ function systemEntryAddOptionAllowingMissed( test )
     var src =
     {
       entryDirPath : a.abs( 'dir' ),
-      appPath : a.abs( 'dir/fileNotExists.txt' ),
+      appPath : a.abs( 'dir/fileNotExists.js' ),
       allowingNotInPath : 1,
       allowingMissed : 1
     }
     var exp = 1;
+    var expFilePath = process.platform === 'win32' ? a.abs( 'dir' ) + '/fileNotExists.bat' : a.abs( 'dir' ) + '/fileNotExists';
     var got = _.process.systemEntryAdd( src );
     test.il( got, exp );
-    test.is( a.fileProvider.fileExistsAct( a.abs( 'dir/fileNotExists' ) ) )
-    test.is( _.objectIs( a.fileProvider.filesRead( a.abs( 'dir/fileNotExists' ) ) ) )
+    test.is( a.fileProvider.fileExistsAct( expFilePath ) )
+    test.is( _.objectIs( a.fileProvider.filesRead( expFilePath ) ) )
 
     return null;
   } );
@@ -1138,10 +1139,11 @@ function systemEntryAddOptionAllowingNotInPath( test )
       allowingNotInPath : 1
     }
     var exp = 1;
+    var expFilePath = process.platform === 'win32' ? a.abs( 'dir' ) + '/file.bat' : a.abs( 'dir' ) + '/file';
     var got = _.process.systemEntryAdd( src );
     test.il( got, exp );
-    test.is( a.fileProvider.fileExistsAct( a.abs( 'dir/file' ) ) )
-    test.is( _.objectIs( a.fileProvider.filesRead( a.abs( 'dir/file' ) ) ) )
+    test.is( a.fileProvider.fileExistsAct( expFilePath ) )
+    test.is( _.objectIs( a.fileProvider.filesRead( expFilePath ) ) )
 
     return null;
   } );
@@ -1168,10 +1170,11 @@ function systemEntryAddOptionForcing( test )
       forcing : 1
     }
     var exp = 1;
+    var expFilePath = process.platform === 'win32' ? a.abs( 'dir' ) + '/file.bat' : a.abs( 'dir' ) + '/file';
     var got = _.process.systemEntryAdd( src );
     test.il( got, exp );
-    test.is( a.fileProvider.fileExistsAct( a.abs( 'dir/file' ) ) )
-    test.is( _.objectIs( a.fileProvider.filesRead( a.abs( 'dir/file' ) ) ) )
+    test.is( a.fileProvider.fileExistsAct( expFilePath ) )
+    test.is( _.objectIs( a.fileProvider.filesRead( expFilePath ) ) )
 
     return null;
   } );
@@ -1186,10 +1189,11 @@ function systemEntryAddOptionForcing( test )
       forcing : 1
     }
     var exp = 1;
+    var expFilePath = process.platform === 'win32' ? a.abs( 'dir' ) + '/fileNotExists.bat' : a.abs( 'dir' ) + '/fileNotExists';
     var got = _.process.systemEntryAdd( src );
     test.il( got, exp );
-    test.is( a.fileProvider.fileExistsAct( a.abs( 'dir/fileNotExists' ) ) )
-    test.is( _.objectIs( a.fileProvider.filesRead( a.abs( 'dir/fileNotExists' ) ) ) )
+    test.is( a.fileProvider.fileExistsAct( expFilePath ) )
+    test.is( _.objectIs( a.fileProvider.filesRead( expFilePath ) ) )
 
     return null;
   } );
@@ -1226,8 +1230,8 @@ var Proto =
     pathsRead,
 
     systemEntryAddBasic,
-    systemEntryAddOptionAllowingMissed,
-    systemEntryAddOptionAllowingNotInPath,
+    systemEntryAddOptionAllowingMissed, // missed appPath
+    systemEntryAddOptionAllowingNotInPath, // entryDirPath not in path
     systemEntryAddOptionForcing,
   }
 
