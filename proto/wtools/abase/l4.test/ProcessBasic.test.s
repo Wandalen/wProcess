@@ -11378,97 +11378,101 @@ function startDetachingDisconnectedChildExistsBeforeParent( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppChildPath = a.program( testAppChild );
-  let track = [];
+  let program1Path = a.program( program1 );
 
   /* */
 
-  a.ready
-
-  /* Vova qqq xxx: ProcessWatcher tries to kill detached process that terminates before test ends */
-
-  .then( () =>
-  {
-    test.case = 'detaching on, disconnected forked child'
-    let o =
-    {
-      execPath : 'testAppChild.js',
-      mode : 'fork',
-      stdio : 'ignore',
-      // outputPiping : 1,
-      // stdio : 'pipe',
-      currentPath : a.routinePath,
-      detaching : 1,
-      ipc : 0,
-    }
-
-    let result = _.process.start( o );
-
-    test.identical( o.state, 'started' );
-
-    // _.time.begin( 1000, () =>
-    // {
-      test.identical( o.state, 'started' );
-      o.disconnect();
-      test.identical( o.state, 'disconnected' );
-    // });
-
-    test.is( o.onStart === result );
-    test.is( _.consequenceIs( o.onStart ) )
-
-    o.onStart.finally( ( err, got ) =>
-    {
-      track.push( 'onStart' );
-      test.identical( err, undefined );
-      test.identical( got, o );
-      test.is( _.process.isAlive( o.process.pid ) )
-      return null;
-    })
-
-    o.onTerminate.finallyGive( ( err, got ) =>
-    {
-      track.push( 'onTerminate' );
-      /* xxx qqq : add track here and in all similar place to cover entering here! */
-      /* qqq xxx : does not enter here. why?? */
-      console.log( 'onTerminate' ); debugger;
-      _.errAttend( err );
-      // test.identical( o.state, 'terminated' );
-      test.is( !_.errIs( err ) );
-      test.is( got !== undefined );
-      test.is( !_.process.isAlive( o.process.pid ) );
-    })
-
-    result = _.time.out( 5000, () =>
-    {
-      test.identical( o.onTerminate.resourcesCount(), 0 );
-      test.identical( o.onTerminate.errorsCount(), 0 );
-      // test.identical( o.onTerminate.competitorsCount(), 0 );
-      // test.identical( o.state, 'terminated' );
-      // test.identical( track, [ 'onStart', 'onTerminate' ] );
-      test.is( !_.process.isAlive( o.process.pid ) )
-      return null;
-    })
-
-    return _.Consequence.AndTake_( o.onStart, result );
-  })
-
-  /* */
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
   return a.ready;
 
+  /* Vova qqq xxx: ProcessWatcher tries to kill detached process that terminates before test ends */
+
+  function run( mode )
+  {
+    let ready = _.Consequence().take( null );
+    let track = [];
+
+    ready
+    .then( () =>
+    {
+      test.case = 'detaching on, disconnected forked child'
+      let o =
+      {
+        execPath : 'program1.js',
+        mode : 'fork',
+        stdio : 'ignore',
+        // outputPiping : 1,
+        // stdio : 'pipe',
+        currentPath : a.routinePath,
+        detaching : 1,
+        ipc : 0,
+      }
+
+      let result = _.process.start( o );
+
+      test.identical( o.state, 'started' );
+
+      // _.time.begin( 1000, () =>
+      // {
+        test.identical( o.state, 'started' );
+        o.disconnect();
+        test.identical( o.state, 'disconnected' );
+      // });
+
+      test.is( o.onStart === result );
+      test.is( _.consequenceIs( o.onStart ) )
+
+      o.onStart.finally( ( err, got ) =>
+      {
+        track.push( 'onStart' );
+        test.identical( err, undefined );
+        test.identical( got, o );
+        test.is( _.process.isAlive( o.process.pid ) )
+        return null;
+      })
+
+      o.onTerminate.finallyGive( ( err, got ) =>
+      {
+        track.push( 'onTerminate' );
+        /* xxx qqq : add track here and in all similar place to cover entering here! */
+        /* qqq xxx : does not enter here. why?? */
+        console.log( 'onTerminate' ); debugger;
+        test.identical( o.state, 'terminated' );
+        test.is( !_.errIs( err ) );
+        test.is( got !== undefined );
+        test.is( !_.process.isAlive( o.process.pid ) );
+      })
+
+      result = _.time.out( 5000, () =>
+      {
+        test.identical( o.onTerminate.resourcesCount(), 0 );
+        test.identical( o.onTerminate.errorsCount(), 0 );
+        test.identical( o.onTerminate.competitorsCount(), 0 );
+        test.identical( o.state, 'terminated' );
+        test.identical( track, [ 'onStart', 'onTerminate' ] );
+        test.is( !_.process.isAlive( o.process.pid ) )
+        return null;
+      })
+
+      return _.Consequence.AndTake_( o.onStart, result );
+    })
+
+    /* */
+
+    return ready;
+  }
+
   /* */
 
-  function testAppChild()
+  function program1()
   {
-    let _ = require( toolsPath );
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-    var args = _.process.args();
-    _.time.out( 2000, () =>
-    {
-      console.log( 'Child process end' )
-      return null;
-    })
+    console.log( 'program1:begin' );
+    setTimeout( () => { console.log( 'program1:end' ) }, 2000 );
+    // let _ = require( toolsPath );
+    // _.include( 'wProcess' );
+    // _.include( 'wFiles' );
   }
 }
 
@@ -14608,7 +14612,7 @@ function outputHandling( test )
   /* */
 
   // let modes = [ 'shell', 'spawn', 'exec', 'fork' ];
-  let modes = [ 'shell', 'spawn', 'fork' ];
+  let modes = [ 'fork', 'spawn', 'shell' ];
   var loggerOutput = '';
 
   function onTransformEnd( o )
@@ -14700,7 +14704,7 @@ function shellOutputStripping( test )
   /* */
 
   // let modes = [ 'shell', 'spawn', 'exec', 'fork' ];
-  let modes = [ 'shell', 'spawn', 'fork' ];
+  let modes = [ 'fork', 'spawn', 'shell' ];
 
   _.each( modes, ( mode ) =>
   {
@@ -14769,7 +14773,7 @@ function shellLoggerOption( test )
   /* */
 
   // let modes = [ 'shell', 'spawn', 'exec', 'fork' ];
-  let modes = [ 'shell', 'spawn', 'fork' ];
+  let modes = [ 'fork', 'spawn', 'shell' ];
 
   test.case = 'custom logger with increased level'
 
@@ -18624,7 +18628,7 @@ var Proto =
     killWithChildren,
     terminate,
 
-    // endStructuralSigint,
+    // endStructuralSigint, /* qqq xxx : switch on */
     // endStructuralSigkill,
     // endStructuralTerminate,
     // endStructuralKill,
