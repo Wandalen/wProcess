@@ -16048,6 +16048,9 @@ function endStructuralSigint( test )
 
   function run( mode )
   {
+
+    test.case = mode;
+
     let ready = _.Consequence().take( null );
 
     let options =
@@ -16074,10 +16077,9 @@ function endStructuralSigint( test )
       test.is( options === op );
       test.identical( options.output, '' );
       test.identical( options.exitCode, null );
-      test.identical( options.exitSignal, 'SIGINT' );
+      test.identical( options.exitSignal, null );
       test.identical( options.process.exitCode, null );
-      test.identical( options.process.signalCode, 'SIGINT' );
-      // test.identical( options.exitSignal, null );
+      test.identical( options.process.signalCode, null );
       test.identical( options.ended, false );
       test.identical( options.terminationReason, null );
       test.is( options.onStart !== options.ready );
@@ -16146,6 +16148,8 @@ function endStructuralSigkill( test )
 
   function run( mode )
   {
+    test.case = mode;
+
     let ready = _.Consequence().take( null );
 
     let options =
@@ -16172,9 +16176,9 @@ function endStructuralSigkill( test )
       test.is( options === op );
       test.identical( options.output, '' );
       test.identical( options.exitCode, null );
-      test.identical( options.exitSignal, 'SIGINT' );
+      test.identical( options.exitSignal, null );
       test.identical( options.process.exitCode, null );
-      test.identical( options.process.signalCode, 'SIGINT' );
+      test.identical( options.process.signalCode, null );
       // test.identical( options.exitSignal, null );
       test.identical( options.ended, false );
       test.identical( options.terminationReason, null );
@@ -16195,9 +16199,9 @@ function endStructuralSigkill( test )
       test.is( _.errIs( err ) );
       test.identical( options.output, 'program1:begin\n' );
       test.identical( options.exitCode, null );
-      test.identical( options.exitSignal, 'SIGINT' );
+      test.identical( options.exitSignal, 'SIGKILL' );
       test.identical( options.process.exitCode, null );
-      test.identical( options.process.signalCode, 'SIGINT' );
+      test.identical( options.process.signalCode, 'SIGKILL' );
       // test.identical( options.exitSignal, 'SIGKILL' );
       test.identical( options.ended, true );
       test.identical( options.terminationReason, 'signal' );
@@ -16246,6 +16250,8 @@ function endStructuralTerminate( test )
 
   function run( mode )
   {
+    test.case = mode;
+
     let ready = _.Consequence().take( null );
 
     let options =
@@ -16272,10 +16278,9 @@ function endStructuralTerminate( test )
       test.is( options === op );
       test.identical( options.output, '' );
       test.identical( options.exitCode, null );
-      // test.identical( options.exitSignal, null );
-      test.identical( options.exitSignal, 'SIGINT' );
+      test.identical( options.exitSignal, null );
       test.identical( options.process.exitCode, null );
-      test.identical( options.process.signalCode, 'SIGINT' );
+      test.identical( options.process.signalCode, null );
       test.identical( options.ended, false );
       test.identical( options.terminationReason, null );
       test.is( options.onStart !== options.ready );
@@ -16342,6 +16347,8 @@ function endStructuralKill( test )
 
   function run( mode )
   {
+    test.case = mode;
+
     let ready = _.Consequence().take( null );
 
     let options =
@@ -16370,10 +16377,9 @@ function endStructuralKill( test )
       test.is( options === op );
       test.identical( options.output, '' );
       test.identical( options.exitCode, null );
-      test.identical( options.exitSignal, 'SIGINT' );
+      test.identical( options.exitSignal, null );
       test.identical( options.process.exitCode, null );
-      test.identical( options.process.signalCode, 'SIGINT' );
-      // test.identical( options.exitSignal, null );
+      test.identical( options.process.signalCode, null );
       test.identical( options.ended, false );
       test.identical( options.terminationReason, null );
       test.is( options.onStart !== options.ready );
@@ -16393,10 +16399,9 @@ function endStructuralKill( test )
       test.is( _.errIs( err ) );
       test.identical( options.output, 'program1:begin\n' );
       test.identical( options.exitCode, null );
-      test.identical( options.exitSignal, 'SIGINT' );
+      test.identical( options.exitSignal, 'SIGKILL' );
       test.identical( options.process.exitCode, null );
-      test.identical( options.process.signalCode, 'SIGINT' );
-      // test.identical( options.exitSignal, 'SIGKILL' );
+      test.identical( options.process.signalCode, 'SIGKILL' );
       test.identical( options.ended, true );
       test.identical( options.terminationReason, 'signal' );
       return null;
@@ -18697,10 +18702,10 @@ var Proto =
     killWithChildren,
     terminate,
 
-    // endStructuralSigint, /* qqq xxx : switch on */
-    // endStructuralSigkill,
-    // endStructuralTerminate,
-    // endStructuralKill,
+    endStructuralSigint, /* qqq xxx : switch on */
+    endStructuralSigkill,
+    endStructuralTerminate,
+    endStructuralKill,
 
     terminateComplex,
     terminateDetachedComplex,
