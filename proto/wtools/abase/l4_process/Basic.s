@@ -236,15 +236,15 @@ on.defaults =
 
 //
 
-function eventGive()
-{
-  return _.event.eventGive( _.process._ehandler, ... arguments );
-}
-
-eventGive.defaults =
-{
-  ... _.event.eventGive.defaults,
-}
+// function eventGive()
+// {
+//   return _.event.eventGive( _.process._ehandler, ... arguments );
+// }
+//
+// eventGive.defaults =
+// {
+//   ... _.event.eventGive.defaults,
+// }
 
 //
 
@@ -312,7 +312,7 @@ let Extension =
   // eventer
 
   on,
-  eventGive,
+  // eventGive,
   _eventAvailableHandle,
 
   // meta

@@ -11386,7 +11386,7 @@ Callback in parent recevies message. Parent exits.
 
 //
 
-function startDetachingDisconnectedChildExistsBeforeParent( test )
+function startDetachingDisconnectedEarly( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -11395,7 +11395,8 @@ function startDetachingDisconnectedChildExistsBeforeParent( test )
 
   /* */
 
-  let modes = [ 'fork', 'spawn', 'shell' ];
+  // let modes = [ 'fork', 'spawn', 'shell' ];
+  let modes = [ 'fork' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
   return a.ready;
@@ -11437,6 +11438,15 @@ function startDetachingDisconnectedChildExistsBeforeParent( test )
       test.is( o.onStart === result );
       test.is( _.consequenceIs( o.onStart ) )
 
+      o.onDisconnect.finally( ( err, got ) =>
+      {
+        track.push( 'onDisconnect' );
+        test.identical( err, undefined );
+        test.identical( got, o );
+        test.is( _.process.isAlive( o.process.pid ) )
+        return null;
+      })
+
       o.onStart.finally( ( err, got ) =>
       {
         track.push( 'onStart' );
@@ -11460,11 +11470,12 @@ function startDetachingDisconnectedChildExistsBeforeParent( test )
 
       result = _.time.out( 5000, () =>
       {
-        test.identical( o.onTerminate.resourcesCount(), 0 );
-        test.identical( o.onTerminate.errorsCount(), 0 );
-        test.identical( o.onTerminate.competitorsCount(), 0 );
-        test.identical( o.state, 'terminated' );
-        test.identical( track, [ 'onStart', 'onTerminate' ] );
+        // test.identical( o.onTerminate.resourcesCount(), 0 );
+        // test.identical( o.onTerminate.errorsCount(), 0 );
+        // test.identical( o.onTerminate.competitorsCount(), 0 );
+        test.identical( o.state, 'disconnected' );
+        test.identical( o.ended, true );
+        test.identical( track, [ 'onDisconnect', 'onStart' ] );
         test.is( !_.process.isAlive( o.process.pid ) )
         return null;
       })
@@ -11489,7 +11500,7 @@ function startDetachingDisconnectedChildExistsBeforeParent( test )
   }
 }
 
-startDetachingDisconnectedChildExistsBeforeParent.description =
+startDetachingDisconnectedEarly.description =
 `
 Parent starts child process in detached mode and disconnects it right after start.
 Child process creates test file after 1 second and exits.
@@ -18814,7 +18825,7 @@ var Proto =
 
     startDetachingChildExitsAfterParent,
     startDetachingChildExitsBeforeParent,
-    startDetachingDisconnectedChildExistsBeforeParent, /* qqq xxx : ? */
+    startDetachingDisconnectedEarly, /* qqq xxx : ? */
     startDetachingChildExistsBeforeParentWaitForTermination,
     startDetachingEndCompetitorIsExecuted,
 

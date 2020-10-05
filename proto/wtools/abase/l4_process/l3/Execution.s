@@ -149,13 +149,13 @@ function start_body( o )
   handleClose
   handleError
   handleDisconnect
+  disconnect
   multiple
   single
   form
   launch
   timeOutForm
   pipe
-  disconnect
   inputMirror
   execPathParse
   argsUnqoute
@@ -383,7 +383,7 @@ function start_body( o )
     o.ended = true;
     Object.freeze( o );
 
-    if( err )
+    if( err ) /* qqq xxx : strange! */
     {
       debugger;
       if( o.state !== 'terminated' && !o.error )
@@ -487,6 +487,57 @@ function start_body( o )
   function handleDisconnect( arg )
   {
     // console.log( 'disconnect' ); debugger;
+  }
+
+  /* */
+
+  function disconnect()
+  {
+    _.assert( !!this.process, 'Process is not started. Cant disconnect.' );
+
+    //qqq: check disconnection of regular process, probably close event is not fired
+
+    if( this.process.stdout )
+    this.process.stdout.destroy();
+    if( this.process.stderr )
+    this.process.stderr.destroy();
+    if( this.process.stdin )
+    this.process.stdin.destroy();
+
+    // debugger; // yyy
+    if( this.process.disconnect )
+    if( this.process.connected )
+    this.process.disconnect();
+
+    this.process.unref();
+
+    if( this.procedure )
+    if( this.procedure.isAlive() )
+    this.procedure.end();
+
+    // qqq : strange? explain
+    if( !this.detaching || this.process._disconnected )
+    return true;
+
+    this.process._disconnected = true;
+    if( !Object.isFrozen( this ) ) /* qqq xxx : ? */
+    this.state = 'disconnected';
+
+    if( this.terminationBeginEnabled )
+    {
+      _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
+      if( !Object.isFrozen( this ) )
+      this.terminationBeginEnabled = false;
+    }
+
+    // if( _.process.isAlive( this.process.pid ) )
+    if( !this.eneded )
+    {
+      this.onDisconnect.take( this );
+      // end( undefined, null );
+    }
+
+    return true;
   }
 
   /* */
@@ -907,53 +958,6 @@ function start_body( o )
       o.process.on( 'disconnect', handleDisconnect );
     }
 
-  }
-
-  /* */
-
-  function disconnect()
-  {
-    _.assert( !!this.process, 'Process is not started. Cant disconnect.' );
-
-    //qqq: check disconnection of regular process, probably close event is not fired
-
-    if( this.process.stdout )
-    this.process.stdout.destroy();
-    if( this.process.stderr )
-    this.process.stderr.destroy();
-    if( this.process.stdin )
-    this.process.stdin.destroy();
-
-    // debugger; // yyy
-    if( this.process.disconnect )
-    if( this.process.connected )
-    this.process.disconnect();
-
-    this.process.unref();
-
-    if( this.procedure )
-    if( this.procedure.isAlive() )
-    this.procedure.end();
-
-    // qqq : strange? explain
-    if( !this.detaching || this.process._disconnected )
-    return true;
-
-    this.process._disconnected = true;
-    if( !Object.isFrozen( this ) ) /* qqq xxx : ? */
-    this.state = 'disconnected';
-
-    if( this.terminationBeginEnabled )
-    {
-      _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
-      if( !Object.isFrozen( this ) )
-      this.terminationBeginEnabled = false;
-    }
-
-    if( _.process.isAlive( this.process.pid ) )
-    this.onDisconnect.take( this );
-
-    return true;
   }
 
   /* */
