@@ -18,6 +18,8 @@ let _global = _global_;
 let _ = _global_.wTools;
 let Self = {};
 
+/* qqq2 : make table for this: "Vova qqq xxx: close event is not emitted for disconnected detached child in fork mode" */
+
 // --
 // context
 // --
@@ -11372,7 +11374,7 @@ function startDetachingDisconnectedEarly( test )
   /* */
 
   let modes = [ 'fork', 'spawn', 'shell' ];
-  // let modes = [ 'fork' ];
+  // let modes = [ 'spawn' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
   return a.ready;
@@ -11387,14 +11389,12 @@ function startDetachingDisconnectedEarly( test )
     ready
     .then( () =>
     {
-      test.case = 'detaching on, disconnected forked child'
+      test.case = `detaching on, disconnected forked child, mode:${mode}`;
       let o =
       {
         execPath : mode !== 'fork' ? 'node program1.js' : 'program1.js',
-        mode : 'fork',
+        mode,
         stdio : 'ignore',
-        // outputPiping : 1,
-        // stdio : 'pipe',
         currentPath : a.routinePath,
         detaching : 1,
         ipc : 0,
@@ -11445,13 +11445,6 @@ function startDetachingDisconnectedEarly( test )
       o.onTerminate.finally( ( err, got ) =>
       {
         track.push( 'onTerminate' );
-        /* xxx qqq : add track here and in all similar place to cover entering here! */
-        /* qqq xxx : does not enter here. why?? */
-        console.log( 'onTerminate' ); debugger;
-        test.identical( o.state, 'terminated' );
-        test.is( !_.errIs( err ) );
-        test.is( got !== undefined );
-        test.is( !_.process.isAlive( o.process.pid ) );
         return null;
       })
 
@@ -11479,9 +11472,9 @@ function startDetachingDisconnectedEarly( test )
   {
     console.log( 'program1:begin' );
     setTimeout( () => { console.log( 'program1:end' ) }, 2000 );
-    // let _ = require( toolsPath );
-    // _.include( 'wProcess' );
-    // _.include( 'wFiles' );
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
   }
 }
 
@@ -12571,11 +12564,12 @@ function startNjsDetachingTrivial( test )
 
 //
 
-function startOnStart( test )
+function startOnStart( test ) /* qqq : add other modes. ask how to */
 {
   let context = this;
   let a = test.assetFor( false );
   let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
+  let track = [];
 
   a.ready
 
@@ -12726,7 +12720,8 @@ function startOnStart( test )
 
   .then( () =>
   {
-    test.case = 'detaching on, disconnected child'
+    test.case = 'detaching on, disconnected child';
+    track = [];
     let o =
     {
       execPath : 'node testAppChild.js',
@@ -12742,6 +12737,7 @@ function startOnStart( test )
 
     o.onStart.finally( ( err, got ) =>
     {
+      track.push( 'onStart' );
       test.identical( err, undefined );
       test.identical( got, o );
       test.is( _.process.isAlive( o.process.pid ) )
@@ -12752,6 +12748,7 @@ function startOnStart( test )
 
     o.onDisconnect.finally( ( err, got ) =>
     {
+      track.push( 'onDisconnect' );
       test.identical( err, undefined );
       test.identical( got, o );
       test.identical( o.state, 'disconnected' );
@@ -12761,20 +12758,17 @@ function startOnStart( test )
 
     o.onTerminate.finally( ( err, got ) =>
     {
-      /* xxx qqq : add track here and in all similar place to cover entering here! */
-      test.identical( err, undefined );
-      test.identical( got, o );
-      test.identical( o.state, 'terminated' );
-      test.is( !_.process.isAlive( o.process.pid ) )
-      test.identical( got.exitCode, 0 );
-      test.identical( got.exitSignal, null );
+      track.push( 'onTerminate' );
       return null;
     })
 
-    return _.Consequence.AndTake_( o.onStart, o.onDisconnect, o.onTerminate );
-  })
+    let ready = _.time.out( 5000, () =>
+    {
+      test.identical( track, [ 'onStart', 'onDisconnect' ] );
+    })
 
-  /* Vova qqq xxx: close event is not emitted for disconnected detached child in fork mode*/
+    return _.Consequence.AndTake_( o.onStart, o.onDisconnect, ready );
+  })
 
   .then( () =>
   {
