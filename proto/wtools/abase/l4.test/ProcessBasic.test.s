@@ -18504,6 +18504,49 @@ shellExperiment.timeOut = 30000;
 
 //
 
+function experimentErrorAfterTermination( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
+
+  /* */
+
+  var o =
+  {
+    execPath :  'node',
+    args : [ testAppPath ],
+    mode : 'spawn',
+    ipc : 1
+  }
+
+  let result = _.process.start( o );
+
+  o.onTerminate.finally( ( err, got ) =>
+  {
+    test.identical( err, undefined );
+    test.identical( got, o );
+    test.identical( o.exitCode, 0 );
+
+    /* Attempt to send data when ipc channel is closed */
+    o.process.send( 1 );
+
+    return null;
+  })
+
+  return result;
+
+  /* - */
+
+  function testApp()
+  {
+    setTimeout( () => {}, 2000 );
+  }
+
+}
+
+//
+
 var Proto =
 {
 
@@ -18671,6 +18714,7 @@ var Proto =
     effectiveMainFile,
 
     shellExperiment,
+    experimentErrorAfterTermination
 
     /* qqq : group test routines */
 
