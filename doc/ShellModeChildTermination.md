@@ -1,4 +1,4 @@
-### Shell mode termination results on Travis:
+### Shell mode termination results on GitHub:
 
 | Signal  | Windows | Linux | MacOS |
 | ------- | ------- | ----- | ----- |

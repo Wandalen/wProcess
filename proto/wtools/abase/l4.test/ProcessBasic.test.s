@@ -14,16 +14,6 @@ if( typeof module !== 'undefined' )
   require( '../l4_process/Basic.s' );
 }
 
-/*
-
-qqq :
-
-- reacts on requests ( qqq ) in the module
-- use application code from test rouitne shellConcurrent for all test routines, maybe?
-- make sure tests works in collection, not only in stand-alone mode
-
-*/
-
 let _global = _global_;
 let _ = _global_.wTools;
 let Self = {};
@@ -1282,7 +1272,9 @@ shell2.timeOut = 30000;
 
 //
 
-function shellCurrentPath( test ) /* qqq : split by mode */
+/* qqq : split by modes */
+/* qqq : actualize names of test routines */
+function shellCurrentPath( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -1338,7 +1330,7 @@ function shellCurrentPath( test ) /* qqq : split by mode */
 
   /**/
 
-  // ttt
+  // qqq : switch on?
   // con.thenKeep( function()
   // {
   //   test.case = 'mode : exec';
@@ -1635,7 +1627,7 @@ function shellCurrentPath( test ) /* qqq : split by mode */
 
   /* */
 
-  // ttt
+  // qqq : switch on?
   // con.thenKeep( function()
   // {
   //   test.case = 'normalized, currentPath leads to root of current drive, mode : exec';
@@ -3872,10 +3864,8 @@ a test routine per mode
 function shellArgumentsParsing( test )
 {
   let context = this;
-
   let a = test.assetFor( false );
-
-  let testAppPathNoSpace = a.path.nativize( a.program( { routine : testApp, dirPath : a.abs( 'noSpace' ) } ) );
+  let testAppPathNoSpace = a.path.nativize( a.program( { routine : testApp, dirPath : a.abs( 'noSpace' ) } ) ); /* qqq : a.path.nativize? */
   let testAppPathSpace = a.path.nativize( a.program( { routine : testApp, dirPath : a.abs( 'with space' ) } ) );
 
 
@@ -16129,7 +16119,51 @@ function terminate( test )
   }
 }
 
-//
+/*
+### Modes in which child process terminates after signal:
+
+| Signal  |  Windows   |   Linux    |       Mac        |
+| ------- | ---------- | ---------- | ---------------- |
+| SIGINT  | spawn,fork | spawn,fork | shell,spawn,fork |
+| SIGKILL | spawn,fork | spawn,fork | shell,spawn,fork |
+
+### Test routines and modes that pass test checks:
+
+|        Routine         |  Windows   | Windows + windows-kill |   Linux    |       Mac        |
+| ---------------------- | ---------- | ---------------------- | ---------- | ---------------- |
+| endStructuralSigint    | spawn,fork | spawn,fork             | spawn,fork | shell,spawn,fork |
+| endStructuralSigkill   | spawn,fork | spawn,fork             | spawn,fork | shell,spawn,fork |
+| endStructuralTerminate |          |                      | spawn,fork | shell,spawn,fork |
+| endStructuralKill      | spawn,fork | spawn,fork             | spawn,fork | shell,spawn,fork |
+
+#### endStructuralTerminate on Windows, without windows-kill
+
+For each mode:
+exitCode : 1, exitSignal : null
+
+Child process terminates in modes spawn and fork
+Child process continues to work in mode spawn
+
+See: doc/ProcessKillMethodsDifference.md
+
+#### endStructuralTerminate on Windows, with windows-kill
+
+For each mode:
+exitCode : 3221225725, exitSignal : null
+
+Child process terminates in modes spawn and fork
+Child process continues to work in mode spawn
+
+### Shell mode termination results:
+
+| Signal  | Windows | Linux | MacOS |
+| ------- | ------- | ----- | ----- |
+| SIGINT  | 0       | 0     | 1     |
+| SIGKILL | 0       | 0     | 1     |
+
+0 - Child continues to work
+1 - Child is terminated
+*/
 
 function endStructuralSigint( test )
 {
@@ -16147,6 +16181,9 @@ function endStructuralSigint( test )
 
   function run( mode )
   {
+
+    test.case = mode;
+
     let ready = _.Consequence().take( null );
 
     let options =
@@ -16173,10 +16210,9 @@ function endStructuralSigint( test )
       test.is( options === op );
       test.identical( options.output, '' );
       test.identical( options.exitCode, null );
-      test.identical( options.exitSignal, 'SIGINT' );
+      test.identical( options.exitSignal, null );
       test.identical( options.process.exitCode, null );
-      test.identical( options.process.signalCode, 'SIGINT' );
-      // test.identical( options.exitSignal, null );
+      test.identical( options.process.signalCode, null );
       test.identical( options.ended, false );
       test.identical( options.terminationReason, null );
       test.is( options.onStart !== options.ready );
@@ -16245,6 +16281,8 @@ function endStructuralSigkill( test )
 
   function run( mode )
   {
+    test.case = mode;
+
     let ready = _.Consequence().take( null );
 
     let options =
@@ -16271,9 +16309,9 @@ function endStructuralSigkill( test )
       test.is( options === op );
       test.identical( options.output, '' );
       test.identical( options.exitCode, null );
-      test.identical( options.exitSignal, 'SIGINT' );
+      test.identical( options.exitSignal, null );
       test.identical( options.process.exitCode, null );
-      test.identical( options.process.signalCode, 'SIGINT' );
+      test.identical( options.process.signalCode, null );
       // test.identical( options.exitSignal, null );
       test.identical( options.ended, false );
       test.identical( options.terminationReason, null );
@@ -16294,9 +16332,9 @@ function endStructuralSigkill( test )
       test.is( _.errIs( err ) );
       test.identical( options.output, 'program1:begin\n' );
       test.identical( options.exitCode, null );
-      test.identical( options.exitSignal, 'SIGINT' );
+      test.identical( options.exitSignal, 'SIGKILL' );
       test.identical( options.process.exitCode, null );
-      test.identical( options.process.signalCode, 'SIGINT' );
+      test.identical( options.process.signalCode, 'SIGKILL' );
       // test.identical( options.exitSignal, 'SIGKILL' );
       test.identical( options.ended, true );
       test.identical( options.terminationReason, 'signal' );
@@ -16345,6 +16383,8 @@ function endStructuralTerminate( test )
 
   function run( mode )
   {
+    test.case = mode;
+
     let ready = _.Consequence().take( null );
 
     let options =
@@ -16371,10 +16411,9 @@ function endStructuralTerminate( test )
       test.is( options === op );
       test.identical( options.output, '' );
       test.identical( options.exitCode, null );
-      // test.identical( options.exitSignal, null );
-      test.identical( options.exitSignal, 'SIGINT' );
+      test.identical( options.exitSignal, null );
       test.identical( options.process.exitCode, null );
-      test.identical( options.process.signalCode, 'SIGINT' );
+      test.identical( options.process.signalCode, null );
       test.identical( options.ended, false );
       test.identical( options.terminationReason, null );
       test.is( options.onStart !== options.ready );
@@ -16441,6 +16480,8 @@ function endStructuralKill( test )
 
   function run( mode )
   {
+    test.case = mode;
+
     let ready = _.Consequence().take( null );
 
     let options =
@@ -16469,10 +16510,9 @@ function endStructuralKill( test )
       test.is( options === op );
       test.identical( options.output, '' );
       test.identical( options.exitCode, null );
-      test.identical( options.exitSignal, 'SIGINT' );
+      test.identical( options.exitSignal, null );
       test.identical( options.process.exitCode, null );
-      test.identical( options.process.signalCode, 'SIGINT' );
-      // test.identical( options.exitSignal, null );
+      test.identical( options.process.signalCode, null );
       test.identical( options.ended, false );
       test.identical( options.terminationReason, null );
       test.is( options.onStart !== options.ready );
@@ -16492,10 +16532,9 @@ function endStructuralKill( test )
       test.is( _.errIs( err ) );
       test.identical( options.output, 'program1:begin\n' );
       test.identical( options.exitCode, null );
-      test.identical( options.exitSignal, 'SIGINT' );
+      test.identical( options.exitSignal, 'SIGKILL' );
       test.identical( options.process.exitCode, null );
-      test.identical( options.process.signalCode, 'SIGINT' );
-      // test.identical( options.exitSignal, 'SIGKILL' );
+      test.identical( options.process.signalCode, 'SIGKILL' );
       test.identical( options.ended, true );
       test.identical( options.terminationReason, 'signal' );
       return null;
@@ -16522,6 +16561,81 @@ endStructuralKill.description =
  - end process with _.process.kill()
  - should wait 1s
  - should have proper exitSignal, exitCode and terminationReason
+`
+
+//
+
+function errorAfterTerminationWithSend( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
+  let track = [];
+
+  /* */
+
+  var o =
+  {
+    execPath :  'node',
+    args : [ testAppPath ],
+    mode : 'spawn',
+    ipc : 1
+  }
+
+  _.process.on( 'uncaughtError', ( e ) =>
+  {
+    test.identical( e.err.originalMessage, 'Channel closed' )
+    _.errAttend( e.err );
+    track.push( 'uncaughtError' );
+  });
+
+  let result = _.process.start( o );
+
+  o.onStart.then( ( arg ) =>
+  {
+    track.push( 'onStart' );
+    return null
+  });
+
+  o.onTerminate.finally( ( err, got ) => /* xxx qqq : normalize */
+  {
+    track.push( 'onTerminate' );
+    test.identical( err, undefined );
+    test.identical( got, o );
+    test.identical( o.exitCode, 0 );
+
+    /* Attempt to send data when ipc channel is closed */
+    o.process.send( 1 );
+
+    return null;
+  })
+
+  return _.time.out( 10000, () =>
+  {
+    test.identical( track, [ 'onStart', 'onTerminate', 'uncaughtError' ] );
+    test.identical( o.ended, true );
+    test.identical( o.state, 'terminated' );
+    test.identical( o.error, null );
+    test.identical( o.exitCode, 0 );
+    test.identical( o.exitSignal, null );
+    test.identical( o.process.exitCode, 0 );
+    test.identical( o.process.signalCode, null );
+  });
+
+  /* - */
+
+  function testApp()
+  {
+    setTimeout( () => {}, 1000 );
+  }
+
+}
+
+errorAfterTerminationWithSend.description =
+`
+  - handleClose receive error after termination of the process
+  - error caused by call o.process.send()
+  - throws asynchronouse uncahught error
 `
 
 //
@@ -18605,52 +18719,9 @@ function shellExperiment( test )
 
 shellExperiment.timeOut = 30000;
 
-//
-
-function experimentErrorAfterTermination( test )
-{
-  let context = this;
-  let a = test.assetFor( false );
-  let track = [];
-  let testAppPath = a.path.nativize( a.program( testApp ) );
-
-  /* */
-
-  var o =
-  {
-    execPath :  'node',
-    args : [ testAppPath ],
-    mode : 'spawn',
-    ipc : 1
-  }
-
-  let result = _.process.start( o );
-
-  o.onTerminate.finally( ( err, got ) =>
-  {
-    track.push( 'onTerminate' );
-    test.identical( err, undefined );
-    test.identical( got, o );
-    test.identical( o.exitCode, 0 );
-    test.identical( track, [ 'onTerminate' ] );
-    /* Attempt to send data when ipc channel is closed */
-    o.process.send( 1 );
-
-    return null;
-  })
-
-  return result;
-
-  /* - */
-
-  function testApp()
-  {
-    setTimeout( () => {}, 2000 );
-  }
-
-}
-
-//
+// --
+// suite
+// --
 
 var Proto =
 {
@@ -18798,10 +18869,11 @@ var Proto =
     killWithChildren,
     terminate,
 
-    // endStructuralSigint, /* qqq xxx : switch on */
-    // endStructuralSigkill,
-    // endStructuralTerminate,
-    // endStructuralKill,
+    endStructuralSigint, /* qqq xxx : switch on */
+    endStructuralSigkill,
+    endStructuralTerminate,
+    endStructuralKill,
+    errorAfterTerminationWithSend,
 
     terminateComplex,
     terminateDetachedComplex,
@@ -18819,7 +18891,6 @@ var Proto =
     effectiveMainFile,
 
     shellExperiment,
-    experimentErrorAfterTermination
 
     /* qqq : group test routines */
 

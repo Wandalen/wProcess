@@ -352,8 +352,8 @@ function start_body( o )
 
   function end( err, arg )
   {
-    debugger;
 
+    debugger;
     if( o.procedure )
     if( o.procedure.isAlive() )
     o.procedure.end();
@@ -381,7 +381,7 @@ function start_body( o )
 
     /* xxx qqq : where change of state?? */
     o.ended = true;
-    Object.freeze( o ); debugger;
+    Object.freeze( o );
 
     if( err )
     {
@@ -457,11 +457,14 @@ function start_body( o )
   function handleError( err )
   {
 
+    if( o.state === 'terminated' || o.error ) /* xxx qqq : move above? */
+    {
+      debugger;
+      throw _.err( err );
+    }
+
     debugger;
     exitCodeSet( -1 );
-
-    if( o.state === 'terminated' || o.error ) /* xxx qqq : move above? */
-    return;
 
     o.terminationReason = 'error';
 
