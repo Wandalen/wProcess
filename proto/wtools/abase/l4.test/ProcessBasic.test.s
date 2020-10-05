@@ -5054,7 +5054,7 @@ function shellArgumentsParsingNonTrivial( test )
 
   a.ready
 
-  // xxx qqq : repair?
+  // xxx qqq : repair? aaa Vova: doen't fail on mac/centos for me
   .then( () =>
   {
     test.case = 'args in execPath and args options'
