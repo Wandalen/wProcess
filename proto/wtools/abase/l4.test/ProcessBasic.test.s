@@ -11372,7 +11372,7 @@ function startDetachingDisconnectedEarly( test )
   /* */
 
   // let modes = [ 'fork', 'spawn', 'shell' ];
-  let modes = [ 'fork' ];
+  let modes = [ 'spawn' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
   return a.ready;
@@ -11390,8 +11390,8 @@ function startDetachingDisconnectedEarly( test )
       test.case = 'detaching on, disconnected forked child'
       let o =
       {
-        execPath : 'program1.js',
-        mode : 'fork',
+        execPath : mode !== 'fork' ? 'node program1.js' : 'program1.js',
+        mode : mode,
         stdio : 'ignore',
         // outputPiping : 1,
         // stdio : 'pipe',
@@ -11404,15 +11404,22 @@ function startDetachingDisconnectedEarly( test )
 
       test.identical( o.state, 'started' );
 
-      // _.time.begin( 1000, () =>
-      // {
+      test.is( o.onStart === result );
+      test.is( _.consequenceIs( o.onStart ) )
+
+      o.onStart.finally( ( err, got ) =>
+      {
+        track.push( 'onStart' );
+        test.identical( err, undefined );
+        test.identical( got, o );
+        test.is( _.process.isAlive( o.process.pid ) )
+
         test.identical( o.state, 'started' );
         o.disconnect();
         test.identical( o.state, 'disconnected' );
-      // });
 
-      test.is( o.onStart === result );
-      test.is( _.consequenceIs( o.onStart ) )
+        return null;
+      })
 
       o.onDisconnect.finally( ( err, got ) =>
       {
@@ -11423,16 +11430,7 @@ function startDetachingDisconnectedEarly( test )
         return null;
       })
 
-      o.onStart.finally( ( err, got ) =>
-      {
-        track.push( 'onStart' );
-        test.identical( err, undefined );
-        test.identical( got, o );
-        test.is( _.process.isAlive( o.process.pid ) )
-        return null;
-      })
-
-      o.onTerminate.finallyGive( ( err, got ) =>
+      o.onTerminate.finally( ( err, op ) =>
       {
         track.push( 'onTerminate' );
         /* xxx qqq : add track here and in all similar place to cover entering here! */
@@ -11440,23 +11438,38 @@ function startDetachingDisconnectedEarly( test )
         console.log( 'onTerminate' ); debugger;
         test.identical( o.state, 'terminated' );
         test.is( !_.errIs( err ) );
-        test.is( got !== undefined );
+        test.is( op === o );
         test.is( !_.process.isAlive( o.process.pid ) );
+
+        test.identical( op.exitCode, 0 );
+        test.identical( op.exitSignal, null );
+
+        return null;
       })
 
       result = _.time.out( 5000, () =>
       {
-        // test.identical( o.onTerminate.resourcesCount(), 0 );
-        // test.identical( o.onTerminate.errorsCount(), 0 );
-        // test.identical( o.onTerminate.competitorsCount(), 0 );
-        test.identical( o.state, 'disconnected' );
+        test.identical( o.onStart.resourcesCount(), 0 );
+        test.identical( o.onStart.errorsCount(), 0 );
+        test.identical( o.onStart.competitorsCount(), 0 );
+
+        test.identical( o.onDisconnect.resourcesCount(), 0 );
+        test.identical( o.onDisconnect.errorsCount(), 0 );
+        test.identical( o.onDisconnect.competitorsCount(), 0 );
+
+        test.identical( o.onTerminate.resourcesCount(), 0 );
+        test.identical( o.onTerminate.errorsCount(), 0 );
+        test.identical( o.onTerminate.competitorsCount(), 0 );
+
+        test.identical( o.state, 'terminated' );
         test.identical( o.ended, true );
-        test.identical( track, [ 'onDisconnect', 'onStart' ] );
-        test.is( !_.process.isAlive( o.process.pid ) )
+        test.identical( track, [ 'onStart', 'onDisconnect', 'onTerminate' ] );
+        test.is( !_.process.isAlive( o.process.pid ) );
+
         return null;
       })
 
-      return _.Consequence.AndTake_( o.onStart, result );
+      return _.Consequence.AndTake_( o.onStart, o.onDisconnect, o.onTerminate, result );
     })
 
     /* */
