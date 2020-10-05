@@ -113,7 +113,7 @@ function processOnExitEvent( test )
 
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testApp );
+  let programPath = a.path.nativize( a.program( testApp ) );
 
   /* */
 
@@ -199,7 +199,7 @@ function processOffExitEvent( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testApp );
+  let programPath = a.path.nativize( a.program( testApp ) );
 
   /*  */
 
@@ -413,7 +413,7 @@ function shell( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testAppShell );
+  let programPath = a.path.nativize( a.program( testAppShell ) );
 
   var commonDefaults =
   {
@@ -761,7 +761,7 @@ function shellSync( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testAppShell );
+  let programPath = a.path.nativize( a.program( testAppShell ) );
 
   var commonDefaults =
   {
@@ -915,7 +915,7 @@ function shellSyncAsync( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testAppShell );
+  let programPath = a.path.nativize( a.program( testAppShell ) );
 
   var commonDefaults =
   {
@@ -1098,7 +1098,7 @@ function shell2( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testApp );
+  let programPath = a.path.nativize( a.program( testApp ) );
 
   var commonDefaults =
   {
@@ -1278,7 +1278,7 @@ function shellCurrentPath( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testApp );
+  let programPath = a.path.nativize( a.program( testApp ) );
 
   /* */
 
@@ -1732,7 +1732,7 @@ function shellCurrentPaths( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testApp );
+  let programPath = a.path.nativize( a.program( testApp ) );
 
   let o2 =
   {
@@ -2219,7 +2219,7 @@ function shellWithoutExecPath( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testApp );
+  let programPath = a.path.nativize( a.program( testApp ) );
   let counter = 0;
   let time = 0;
   let filePath = a.path.nativize( a.abs( a.routinePath, 'file.txt' ) );
@@ -2294,7 +2294,7 @@ function shellSpawnSyncDeasync( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testApp );
+  let programPath = a.path.nativize( a.program( testApp ) );
 
   /*  */
 
@@ -2489,7 +2489,7 @@ function shellShellSyncDeasync( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testApp );
+  let programPath = a.path.nativize( a.program( testApp ) );
 
   /*  */
 
@@ -3094,7 +3094,7 @@ function shellMultipleSyncDeasync( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testApp );
+  let programPath = a.path.nativize( a.program( testApp ) );
 
   /*  */
 
@@ -3780,7 +3780,7 @@ function shellArgsOption( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testApp );
+  let programPath = a.path.nativize( a.program( testApp ) );
 
   /* */
 
@@ -3865,8 +3865,8 @@ function shellArgumentsParsing( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPathNoSpace = a.program( { routine : testApp, dirPath : a.abs( 'noSpace' ) } ); /* qqq : a.path.nativize? */
-  let testAppPathSpace = a.program({ routine : testApp, dirPath : a.abs( 'with space' ) });
+  let testAppPathNoSpace = a.path.nativize( a.program({ routine : testApp, dirPath : a.abs( 'noSpace' ) }) ); /* qqq : a.path.nativize? */
+  let testAppPathSpace = a.path.nativize( a.program({ routine : testApp, dirPath : a.abs( 'with space' ) }) );
 
 
   /* for combination:
@@ -4807,8 +4807,8 @@ function shellArgumentsParsingNonTrivial( test )
 
   let a = test.assetFor( false );
 
-  let testAppPathNoSpace = a.program( { routine : testApp, dirPath : a.abs( 'noSpace' ) } );
-  let testAppPathSpace = a.program({ routine : testApp, dirPath : a.abs( 'with space' ) });
+  let testAppPathNoSpace = a.path.nativize( a.program({ routine : testApp, dirPath : a.abs( 'noSpace' ) }) );
+  let testAppPathSpace = a.path.nativize( a.program({ routine : testApp, dirPath : a.abs( 'with space' ) }) );
 
   /*
 
@@ -5407,7 +5407,7 @@ function shellArgumentsNestedQuotes( test )
 
   let a = test.assetFor( false );
 
-  let testAppPathSpace = a.program({ routine : testApp, dirPath : a.abs( 'with space' ) });
+  let testAppPathSpace = a.path.nativize( a.program({ routine : testApp, dirPath : a.abs( 'with space' ) }) );
 
   /* */
 
@@ -5780,7 +5780,7 @@ function shellExecPathQuotesClosing( test )
 
   let a = test.assetFor( false );
 
-  let testAppPathSpace = a.program({ routine : testApp, dirPath : a.abs( 'with space' ) });
+  let testAppPathSpace = a.path.normalize( a.program({ routine : testApp, dirPath : a.abs( 'with space' ) }) );
 
   /* */
 
