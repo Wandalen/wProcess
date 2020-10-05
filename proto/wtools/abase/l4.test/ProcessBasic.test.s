@@ -12029,7 +12029,6 @@ function startDetachingModeSpawnIpc( test )
   let context = this;
   let a = test.assetFor( false );
   let track = [];
-  let trackOverall = [];
   let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
   /* */
@@ -12062,14 +12061,12 @@ function startDetachingModeSpawnIpc( test )
     o.onStart.thenGive( () =>
     {
       track.push( 'onStart' );
-      trackOverall.push( 'onStart' );
       o.process.send( 'child' );
     })
 
     o.onTerminate.then( ( op ) =>
     {
       track.push( 'onTerminate' );
-      trackOverall.push( 'onTerminate' );
       test.identical( op.exitCode, 0 );
       test.identical( message, 'child' );
       test.identical( track, [ 'onStart', 'onTerminate' ] );
@@ -12108,18 +12105,15 @@ function startDetachingModeSpawnIpc( test )
     o.onStart.thenGive( () =>
     {
       track.push( 'onStart' );
-      trackOverall.push( 'onStart' );
       o.process.send( 'child' );
     })
 
     o.onTerminate.then( ( op ) =>
     {
       track.push( 'onTerminate' );
-      trackOverall.push( 'onTerminate' );
       test.identical( op.exitCode, 0 );
       test.identical( message, 'child' );
       test.identical( track, [ 'onStart', 'onTerminate' ] );
-      test.identical( trackOverall, [ 'onStart', 'onTerminate', 'onStart', 'onTerminate'  ] );
       track = [];
       return null;
     })
@@ -12155,7 +12149,6 @@ function startDetachingModeForkIpc( test )
   let context = this;
   let a = test.assetFor( false );
   let track = [];
-  let trackOverall = [];
   let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
   /* */
@@ -12188,14 +12181,12 @@ function startDetachingModeForkIpc( test )
     o.onStart.thenGive( () =>
     {
       track.push( 'onStart' );
-      trackOverall.push( 'onStart' );
       o.process.send( 'child' );
     })
 
     o.onTerminate.then( ( op ) =>
     {
       track.push( 'onTerminate' );
-      trackOverall.push( 'onTerminate' );
       debugger
       test.identical( op.exitCode, 0 );
       test.identical( message, 'child' );
@@ -12235,18 +12226,15 @@ function startDetachingModeForkIpc( test )
     o.onStart.thenGive( () =>
     {
       track.push( 'onStart' );
-      trackOverall.push( 'onStart' );
       o.process.send( 'child' );
     })
 
     o.onTerminate.then( ( op ) =>
     {
       track.push( 'onTerminate' );
-      trackOverall.push( 'onTerminate' );
       test.identical( op.exitCode, 0 );
       test.identical( message, 'child' );
       test.identical( track, [ 'onStart', 'onTerminate' ] );
-      test.identical( trackOverall, [ 'onStart', 'onTerminate', 'onStart', 'onTerminate'  ] );
       track = [];
       return null;
     })
@@ -12620,7 +12608,6 @@ function startOnStart( test )
   let context = this;
   let a = test.assetFor( false );
   let track = [];
-  let trackOverall = [];
   let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
   a.ready
@@ -12647,7 +12634,6 @@ function startOnStart( test )
     o.onStart.finally( ( err, got ) =>
     {
       track.push( 'onStart' );
-      trackOverall.push( 'onStart' );
       test.identical( err, undefined );
       test.identical( got, o );
       test.is( _.process.isAlive( o.process.pid ) );
@@ -12733,7 +12719,6 @@ function startOnStart( test )
     o.onStart.then( ( got ) =>
     {
       track.push( 'onStart' );
-      trackOverall.push( 'onStart' );
       test.identical( o, got );
       test.identical( got.exitCode, null );
       test.identical( got.exitSignal, null );
@@ -12797,7 +12782,6 @@ function startOnStart( test )
     o.onStart.finally( ( err, got ) =>
     {
       track.push( 'onStart' );
-      trackOverall.push( 'onStart' );
       test.identical( err, undefined );
       test.identical( got, o );
       test.is( _.process.isAlive( o.process.pid ) )
@@ -12809,7 +12793,6 @@ function startOnStart( test )
     o.onDisconnect.finally( ( err, got ) =>
     {
       track.push( 'onDisconnect' );
-      trackOverall.push( 'onDisconnect' );
       test.identical( err, undefined );
       test.identical( got, o );
       test.identical( o.state, 'disconnected' );
@@ -12821,7 +12804,6 @@ function startOnStart( test )
     {
       /* xxx qqq : add track here and in all similar place to cover entering here! */
       track.push( 'onTerminate' );
-      trackOverall.push( 'onTerminate' );
       test.identical( err, undefined );
       test.identical( got, o );
       test.identical( o.state, 'terminated' );
@@ -12857,7 +12839,6 @@ function startOnStart( test )
     o.onStart.finally( ( err, got ) =>
     {
       track.push( 'onStart' );
-      trackOverall.push( 'onStart' );
       test.identical( err, undefined );
       test.identical( got, o );
       test.identical( o.state, 'started' )
@@ -12869,7 +12850,6 @@ function startOnStart( test )
     o.onDisconnect.finally( ( err, got ) =>
     {
       track.push( 'onDisconnect' );
-      trackOverall.push( 'onDisconnect' );
       test.identical( err, undefined );
       test.identical( got, o );
       test.identical( o.state, 'disconnected' )
@@ -12884,7 +12864,6 @@ function startOnStart( test )
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, null );
       test.identical( o.onTerminate.resourcesCount(), 0 );
-      test.identical( trackOverall, [ 'onStart', 'onStart', 'onStart', 'onDisconnect', 'onTerminate', 'onStart', 'onDisconnect' ] )
       return null;
     })
 
@@ -13013,6 +12992,8 @@ function startOnTerminate( test )
       test.identical( o, got );
       test.identical( got.exitCode, 0 );
       test.identical( got.exitSignal, null );
+      test.identical( track, [ 'onTerminate' ] );
+      track = [];
       return null;
     })
 
@@ -13044,6 +13025,8 @@ function startOnTerminate( test )
       test.identical( o, got );
       test.identical( got.exitCode, 0 );
       test.identical( got.exitSignal, null );
+      test.identical( track, [ 'onTerminate' ] );
+      track = []
       return null;
     })
 
@@ -13072,6 +13055,8 @@ function startOnTerminate( test )
     {
       track.push( 'onTerminate' );
       o.disconnect();
+      test.identical( track, [ 'onTerminate' ] );
+      track = [];
       return op;
     })
 
@@ -13109,6 +13094,8 @@ function startOnTerminate( test )
       track.push( 'onTerminate' );
       test.notIdentical( got.exitCode, 0 );
       test.identical( got.exitSignal, null );
+      test.identical( track, [ 'onTerminate' ] );
+      track = [];
       return null;
     })
 
@@ -13140,7 +13127,8 @@ function startOnTerminate( test )
       track.push( 'onTerminate' );
       test.notIdentical( got.exitCode, 0 );
       test.identical( got.exitSignal, null );
-      test.identical( track, [ 'onTerminate', 'onTerminate', 'onTerminate', 'onTerminate', 'onTerminate' ] )
+      test.identical( track, [ 'onTerminate' ] )
+      track = [];
       return null;
     })
 
