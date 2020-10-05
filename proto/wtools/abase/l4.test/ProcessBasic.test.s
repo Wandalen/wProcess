@@ -16507,15 +16507,14 @@ function errorAfterTerminationWithSend( test )
 
   return _.time.out( 10000, () =>
   {
-    debugger;
-    test.identical( track, [] );
-    test.identical( options.ended, true );
-    test.identical( options.state, 'terminated' );
-    test.identical( options.error, null );
-    test.identical( options.exitCode, 0 );
-    test.identical( options.exitSignal, null );
-    test.identical( options.process.exitCode, 0 );
-    test.identical( options.process.signalCode, null );
+    test.identical( track, [ 'onStart', 'onTerminate', 'uncaughtError' ] );
+    test.identical( o.ended, true );
+    test.identical( o.state, 'terminated' );
+    test.identical( o.error, null );
+    test.identical( o.exitCode, 0 );
+    test.identical( o.exitSignal, null );
+    test.identical( o.process.exitCode, 0 );
+    test.identical( o.process.signalCode, null );
   });
 
   /* - */
@@ -18769,7 +18768,7 @@ var Proto =
     endStructuralSigkill,
     endStructuralTerminate,
     endStructuralKill,
-    // errorAfterTerminationWithSend,
+    errorAfterTerminationWithSend,
 
     terminateComplex,
     terminateDetachedComplex,
