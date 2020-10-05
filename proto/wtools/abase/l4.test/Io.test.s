@@ -49,7 +49,7 @@ function processArgsBase( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testApp );
+  let programPath = a.path.nativize( a.program( testApp ) );
 
   let shell = _.process.starter
   ({
@@ -138,7 +138,7 @@ function processArgsPropertiesBase( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testApp );
+  let programPath = a.path.nativize( a.program( testApp ) );
 
   let shell = _.process.starter
   ({
@@ -386,7 +386,7 @@ function processArgsMultipleCommands( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testApp );
+  let programPath = a.path.nativize( a.program( testApp ) );
 
   let shell = _.process.starter
   ({
@@ -482,7 +482,7 @@ function processArgsPaths( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testApp );
+  let programPath = a.path.nativize( a.program( testApp ) );
 
   let shell = _.process.starter
   ({
@@ -578,7 +578,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testApp );
+  let programPath = a.path.nativize( a.program( testApp ) );
 
   let shell = _.process.starter
   ({
