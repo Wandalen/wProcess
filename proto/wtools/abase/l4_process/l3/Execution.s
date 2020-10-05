@@ -1085,7 +1085,7 @@ function start_body( o )
 
   function argsJoin( args )
   {
-    if( !execArgs && !argumentsManual ) /* qqq : argumentsManual?? should be no such global variable */
+    if( !execArgs && !argumentsManual ) /* qqq2 : argumentsManual?? should be no such global variable */
     return args.join( ' ' );
 
     let i = execArgs ? execArgs.length : args.length - argumentsManual.length;
@@ -1171,22 +1171,15 @@ function start_body( o )
 
   function exitCodeSet( exitCode )
   {
-    // console.log( _.process.realMainFile(), 'exitCodeSet', exitCode );
-    // debugger;
+    /*
+    console.log( _.process.realMainFile(), 'exitCodeSet', exitCode );
+    */
     if( o.exitCode )
     return;
-    // debugger;
     o.exitCode = exitCode;
     exitCode = _.numberIs( exitCode ) ? exitCode : -1;
     if( o.applyingExitCode )
     _.process.exitCode( exitCode );
-    // if( currentExitCode )
-    // return;
-    // if( o.applyingExitCode && exitCode !== 0 )
-    // {
-    //   currentExitCode = _.numberIs( exitCode ) ? exitCode : -1;
-    //   _.process.exitCode( currentExitCode );
-    // }
   }
 
   /* */
@@ -1196,7 +1189,6 @@ function start_body( o )
     let result = '';
     result += 'Launched as ' + _.strQuote( o.fullExecPath ) + '\n';
     result += 'Launched at ' + _.strQuote( o.currentPath ) + '\n';
-    // debugger;
     if( stderrOutput.length )
     result += '\n -> Stderr' + '\n' + ' -  ' + _.strLinesIndentation( stderrOutput, ' -  ' ) + '\n -< Stderr';
     return result;
