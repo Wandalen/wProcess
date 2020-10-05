@@ -7494,7 +7494,7 @@ function shellModeShellNonTrivial( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( app );
+  let testAppPath = a.path.normalize( a.program( app ) );
 
   let shell = _.process.starter
   ({
@@ -8836,7 +8836,7 @@ function shellProcedureTrivial( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
 
   let start = _.process.starter
   ({
@@ -8964,7 +8964,7 @@ function shellProcedureExists( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
 
   let start = _.process.starter
   ({
@@ -13242,7 +13242,7 @@ function startOnTerminateWithDelay( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( program1 );
+  let programPath = a.path.nativize( a.program( program1 ) );
   let time1 = _.time.now();
 
   a.ready.timeOut( 1000 );
@@ -13328,7 +13328,7 @@ function shellConcurrent( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( context.testApp );
+  let testAppPath = a.path.nativize( a.program( context.testApp ) );
   let counter = 0;
   let time = 0;
   let filePath = a.path.nativize( a.abs( a.routinePath, 'file.txt' ) );
@@ -13784,7 +13784,7 @@ function shellerConcurrent( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( context.testApp );
+  let testAppPath = a.path.nativize( a.program( context.testApp ) );
   let counter = 0;
   let time = 0;
   let filePath = a.path.nativize( a.abs( a.routinePath, 'file.txt' ) );
