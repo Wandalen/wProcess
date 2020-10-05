@@ -2253,7 +2253,8 @@ function terminate( o )
 
   _.assert( _.numberIs( o.pid ) );
 
-  let isWindows = process.platform === 'win32';
+  // let isWindows = process.platform === 'win32';
+  let isWindows = false;
 
   try
   {
