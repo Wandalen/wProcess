@@ -11469,7 +11469,7 @@ function startDetachingDisconnectedEarly( test )
       o.onTerminate.finally( ( err, got ) =>
       {
         track.push( 'onTerminate' );
-        /* xxx qqq : add track here and in all similar place to cover entering here! */
+        /* xxx qqq : add track here and in all similar place to cover entering here! | aaa : Done. Yevhen S. */
         /* qqq xxx : does not enter here. why?? */
         console.log( 'onTerminate' ); debugger;
         test.identical( o.state, 'terminated' );
@@ -11629,7 +11629,7 @@ function startDetachingEndCompetitorIsExecuted( test )
 
     o.onTerminate.finally( ( err, got ) =>
     {
-      /* xxx qqq : add track here and in all similar place to cover entering here! */
+      /* xxx qqq : add track here and in all similar place to cover entering here! | aaa : Done. Yevhen S. */
       track.push( 'onTerminate' );
       test.identical( o.ended, true );
       test.identical( err, undefined );
@@ -12822,7 +12822,7 @@ function startOnStart( test )
 
     o.onTerminate.finally( ( err, got ) =>
     {
-      /* xxx qqq : add track here and in all similar place to cover entering here! */
+      /* xxx qqq : add track here and in all similar place to cover entering here! | aaa : Done. Yevhen S.  */
       track.push( 'onTerminate' );
       test.identical( err, undefined );
       test.identical( got, o );
