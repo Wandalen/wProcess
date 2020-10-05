@@ -3448,7 +3448,7 @@ function shellMultipleSyncDeasync( test )
     let o =
     {
       execPath : [ 'node ' + programPath, 'node ' + programPath ],
-      mode : 'shell', /* qqq : change mode here */
+      mode : 'shell', /* qqq : change mode here aaa:done*/
       sync : 0,
       deasync : 0
     }
@@ -3473,7 +3473,7 @@ function shellMultipleSyncDeasync( test )
     let o =
     {
       execPath : [ 'node ' + programPath, 'node ' + programPath ],
-      mode : 'spawn', /* qqq : change mode here */
+      mode : 'spawn', /* qqq : change mode here aaa:done*/
       sync : 0,
       deasync : 0
     }
@@ -3498,7 +3498,7 @@ function shellMultipleSyncDeasync( test )
     let o =
     {
       execPath : [ programPath, programPath ],
-      mode : 'fork', /* qqq : change mode here */
+      mode : 'fork', /* qqq : change mode here aaa:done*/
       sync : 0,
       deasync : 0
     }
@@ -3523,7 +3523,7 @@ function shellMultipleSyncDeasync( test )
     let o =
     {
       execPath : [ 'node ' + programPath, 'node ' + programPath ],
-      mode : 'shell', /* qqq : change mode here */
+      mode : 'shell', /* qqq : change mode here aaa:done*/
       sync : 1,
       returningOptionsArray : 1,
       deasync : 0
@@ -3544,7 +3544,7 @@ function shellMultipleSyncDeasync( test )
     let o =
     {
       execPath : [ 'node ' + programPath, 'node ' + programPath ],
-      mode : 'spawn', /* qqq : change mode here */
+      mode : 'spawn', /* qqq : change mode here aaa:done*/
       sync : 1,
       returningOptionsArray : 1,
       deasync : 0
@@ -3565,7 +3565,7 @@ function shellMultipleSyncDeasync( test )
     let o =
     {
       execPath : [ 'node ' + programPath, 'node ' + programPath ],
-      mode : 'shell', /* qqq : change mode here */
+      mode : 'shell', /* qqq : change mode here aaa:done*/
       sync : 1,
       returningOptionsArray : 0,
       deasync : 0
@@ -3584,7 +3584,7 @@ function shellMultipleSyncDeasync( test )
     let o =
     {
       execPath : [ 'node ' + programPath, 'node ' + programPath ],
-      mode : 'spawn', /* qqq : change mode here */
+      mode : 'spawn', /* qqq : change mode here aaa:done*/
       sync : 1,
       returningOptionsArray : 0,
       deasync : 0
@@ -5055,37 +5055,37 @@ function shellArgumentsParsingNonTrivial( test )
   a.ready
 
   // xxx qqq : repair?
-  // .then( () =>
-  // {
-  //   test.case = 'args in execPath and args options'
+  .then( () =>
+  {
+    test.case = 'args in execPath and args options'
 
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' `firstArg secondArg ":" 1` "third arg" \'fourth arg\'  `"fifth" arg`',
-  //     args : '"some arg"',
-  //     mode : 'spawn',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
+    let con = new _.Consequence().take( null );
+    let o =
+    {
+      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' `firstArg secondArg ":" 1` "third arg" \'fourth arg\'  `"fifth" arg`',
+      args : '"some arg"',
+      mode : 'spawn',
+      outputPiping : 1,
+      outputCollecting : 1,
+      ready : con
+    }
+    _.process.start( o );
 
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     test.identical( o.execPath, 'node' );
-  //     test.identical( o.args, [ testAppPathSpace, 'firstArg secondArg ":" 1', 'third arg', 'fourth arg', '"fifth" arg', '"some arg"' ] );
-  //     let got = JSON.parse( o.output );
-  //     test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-  //     test.identical( got.map, {} )
-  //     test.identical( got.scriptArgs, [ 'firstArg secondArg ":" 1', 'third arg', 'fourth arg', '"fifth" arg', '"some arg"' ] )
+    con.then( () =>
+    {
+      test.identical( o.exitCode, 0 );
+      test.identical( o.execPath, 'node' );
+      test.identical( o.args, [ testAppPathSpace, 'firstArg secondArg ":" 1', 'third arg', 'fourth arg', '"fifth" arg', '"some arg"' ] );
+      let got = JSON.parse( o.output );
+      test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
+      test.identical( got.map, {} )
+      test.identical( got.scriptArgs, [ 'firstArg secondArg ":" 1', 'third arg', 'fourth arg', '"fifth" arg', '"some arg"' ] )
 
-  //     return null;
-  //   })
+      return null;
+    })
 
-  //   return con;
-  // })
+    return con;
+  })
 
   .then( () =>
   {
@@ -5121,41 +5121,6 @@ function shellArgumentsParsingNonTrivial( test )
 
     return con;
   })
-
-  // .then( () =>
-  // {
-  //   test.case = 'args in execPath and args options'
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathSpace ) + ` 'firstArg secondArg \":\" 1' "third arg" 'fourth arg'  '\"fifth\" arg'`,
-  //     args : '"some arg"',
-  //     mode : 'exec', /* qqq : change mode here */
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     test.identical( o.execPath, 'node' );
-  //     test.identical( o.args, [ _.strQuote( testAppPathSpace ), `'firstArg secondArg \":\" 1'`, `"third arg"`, `'fourth arg'`, `'\"fifth\" arg'`, '"some arg"' ] );
-  //     let got = JSON.parse( o.output );
-  //     test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-  //     test.identical( got.map, {} )
-  //     if( process.platform === 'win32' )
-  //     test.identical( got.scriptArgs, [ `'firstArg`, `secondArg`, ':', `1'`, 'third arg', `'fourth`, `arg'`, `'fifth`, `arg'`, '"some arg"' ] )
-  //     else
-  //     test.identical( got.scriptArgs, [ 'firstArg secondArg ":" 1', 'third arg', 'fourth arg', '"fifth" arg', '"some arg"' ] )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
 
   .then( () =>
   {
