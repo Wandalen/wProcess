@@ -186,7 +186,7 @@ function start_body( o )
   _.assert( o.onStart === null || _.consequenceIs( o.onStart ) );
   _.assert( o.onTerminate === null || _.consequenceIs( o.onTerminate ) );
   _.assert( o.onDisconnect === null || _.consequenceIs( o.onDisconnect ) );
-  _.assert( !o.ipc || _.longHas( [ 'fork', 'spawn' ], o.mode ), `Mode: ${o.mode} doesn't support inter process communication.` );
+  _.assert( !o.ipc || _.longHas( [ 'fork', 'spawn' ], o.mode ), `Mode::${o.mode} doesn't support inter process communication.` );
 
   let stderrOutput = '';
   let decoratedOutput = '';
@@ -400,8 +400,11 @@ function start_body( o )
   function handleClose( exitCode, exitSignal )
   {
 
-    debugger;
-    if( o.state === 'terminated' || o.error )
+    // debugger;
+    // if( o.state === 'terminated' || o.error ) /* yyy */
+    // return;
+
+    if( o.ended )
     return;
 
     exitCodeSet( exitCode );
@@ -457,7 +460,13 @@ function start_body( o )
   function handleError( err )
   {
 
-    if( o.state === 'terminated' || o.error ) /* xxx qqq : move above? */
+    // if( o.state === 'terminated' || o.error ) /* xxx qqq : move above? */
+    // {
+    //   debugger;
+    //   throw _.err( err );
+    // }
+
+    if( o.ended )
     {
       debugger;
       throw _.err( err );
@@ -516,26 +525,28 @@ function start_body( o )
     this.procedure.end();
 
     // qqq : strange? explain
-    if( !this.detaching || this.process._disconnected )
-    return true;
-
-    this.process._disconnected = true;
-    if( !Object.isFrozen( this ) ) /* qqq xxx : ? */
-    this.state = 'disconnected';
-
-    if( this.terminationBeginEnabled )
-    {
-      _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
-      if( !Object.isFrozen( this ) )
-      this.terminationBeginEnabled = false;
-    }
+    // if( !this.detaching || this.process._disconnected )
+    if( !this.detaching )
+    return true; /* qqq */
 
     // if( _.process.isAlive( this.process.pid ) )
     if( !this.eneded )
     {
+      this.state = 'disconnected';
       this.onDisconnect.take( this );
       end( undefined, null );
     }
+
+    // this.process._disconnected = true;
+    // if( !Object.isFrozen( this ) ) /* qqq xxx : ? */
+    // this.state = 'disconnected';
+
+    // if( this.terminationBeginEnabled )
+    // {
+    //   _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
+    //   // if( !Object.isFrozen( this ) )
+    //   this.terminationBeginEnabled = false;
+    // }
 
     return true;
   }

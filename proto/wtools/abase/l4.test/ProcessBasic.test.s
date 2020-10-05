@@ -18,6 +18,8 @@ let _global = _global_;
 let _ = _global_.wTools;
 let Self = {};
 
+/* qqq2 : make table for this: "Vova qqq xxx: close event is not emitted for disconnected detached child in fork mode" */
+
 // --
 // context
 // --
@@ -407,7 +409,7 @@ function exitCode( test )
 
 //
 
-/* qqq : split test cases by / ** / delimeting lines | aaa : Done. Yevhen S. */
+/* qqq : split test cases by / ** / delimeting lines. whole file */
 /* qqq : split by mode | aaa : Done. Yevhen S. */
 function shell( test )
 {
@@ -9004,54 +9006,53 @@ function shellProcedureExists( test )
 
   /* */
 
-  // xxx
-  // .then( () =>
-  // {
-  //
-  //   var o = { execPath : testAppPath, mode : 'fork' }
-  //   var con = start( o );
-  //   var procedure = _.procedure.find( 'PID:'+ o.process.pid );
-  //   test.identical( procedure.length, 1 );
-  //   test.identical( procedure[ 0 ].isAlive(), true );
-  //   test.identical( o.procedure, procedure[ 0 ] );
-  //   test.identical( procedure[ 0 ].object(), o.process );
-  //   test.identical( o.procedure, procedure[ 0 ] );
-  //   return con.then( ( got ) =>
-  //   {
-  //     test.identical( got.exitCode, 0 );
-  //     test.identical( procedure[ 0 ].isAlive(), false );
-  //     test.identical( o.procedure, procedure[ 0 ] );
-  //     test.identical( procedure[ 0 ].object(), o.process );
-  //     test.identical( o.procedure, procedure[ 0 ] );
-  //     test.is( _.strHas( o.procedure._sourcePath, 'ProcessWatcher.s' ) );
-  //     return null;
-  //   })
-  // })
-  //
-  // /* */
-  //
-  // .then( () =>
-  // {
-  //
-  //   var o = { execPath : 'node ' + testAppPath, mode : 'spawn' }
-  //   var con = start( o );
-  //   var procedure = _.procedure.find( 'PID:'+ o.process.pid );
-  //   test.identical( procedure.length, 1 );
-  //   test.identical( procedure[ 0 ].isAlive(), true );
-  //   test.identical( o.procedure, procedure[ 0 ] );
-  //   test.identical( procedure[ 0 ].object(), o.process );
-  //   test.identical( o.procedure, procedure[ 0 ] );
-  //   return con.then( ( got ) =>
-  //   {
-  //     test.identical( got.exitCode, 0 );
-  //     test.identical( procedure[ 0 ].isAlive(), false );
-  //     test.identical( o.procedure, procedure[ 0 ] );
-  //     test.identical( procedure[ 0 ].object(), o.process );
-  //     test.identical( o.procedure, procedure[ 0 ] );
-  //     test.is( _.strHas( o.procedure._sourcePath, 'ProcessWatcher.s' ) );
-  //     return null;
-  //   })
-  // })
+  .then( () =>
+  {
+
+    var o = { execPath : testAppPath, mode : 'fork' }
+    var con = start( o );
+    var procedure = _.procedure.find( 'PID:'+ o.process.pid );
+    test.identical( procedure.length, 1 );
+    test.identical( procedure[ 0 ].isAlive(), true );
+    test.identical( o.procedure, procedure[ 0 ] );
+    test.identical( procedure[ 0 ].object(), o.process );
+    test.identical( o.procedure, procedure[ 0 ] );
+    return con.then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      test.identical( procedure[ 0 ].isAlive(), false );
+      test.identical( o.procedure, procedure[ 0 ] );
+      test.identical( procedure[ 0 ].object(), o.process );
+      test.identical( o.procedure, procedure[ 0 ] );
+      test.identical( _.strCount( o.procedure._sourcePath, 'ProcessWatcher' ), 0 );
+      return null;
+    })
+  })
+
+  /* */
+
+  .then( () =>
+  {
+
+    var o = { execPath : 'node ' + testAppPath, mode : 'spawn' }
+    var con = start( o );
+    var procedure = _.procedure.find( 'PID:'+ o.process.pid );
+    test.identical( procedure.length, 1 );
+    test.identical( procedure[ 0 ].isAlive(), true );
+    test.identical( o.procedure, procedure[ 0 ] );
+    test.identical( procedure[ 0 ].object(), o.process );
+    test.identical( o.procedure, procedure[ 0 ] );
+    return con.then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      test.identical( procedure[ 0 ].isAlive(), false );
+      test.identical( o.procedure, procedure[ 0 ] );
+      test.identical( procedure[ 0 ].object(), o.process );
+      test.identical( o.procedure, procedure[ 0 ] );
+      test.identical( _.strCount( o.procedure._sourcePath, 'ProcessWatcher' ), 0 );
+      return null;
+    })
+  })
 
   /* */
 
@@ -9085,7 +9086,7 @@ function shellTerminateHangedWithExitHandler( test )
 
   if( process.platform === 'win32' )
   {
-    //xxx: windows-kill doesn't work correctrly on node 14
+    //qqq: windows-kill doesn't work correctrly on node 14
     //qqq: investigate if its possible to use process.kill instead of windows-kill
     test.identical( 1, 1 )
     return;
@@ -9203,7 +9204,7 @@ function shellTerminateAfterLoopRelease( test )
 
   if( process.platform === 'win32' )
   {
-    //xxx: windows-kill doesn't work correctrly on node 14
+    //qqq: windows-kill doesn't work correctrly on node 14
     //qqq: investigate if its possible to use process.kill instead of windows-kill
     test.identical( 1, 1 )
     return;
@@ -11396,12 +11397,9 @@ function startDetachingDisconnectedEarly( test )
   /* */
 
   let modes = [ 'fork', 'spawn', 'shell' ];
-  // let modes = [ 'fork' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
   return a.ready;
-
-  /* Vova qqq xxx: ProcessWatcher tries to kill detached process that terminates before test ends */
 
   function run( mode )
   {
@@ -11411,14 +11409,12 @@ function startDetachingDisconnectedEarly( test )
     ready
     .then( () =>
     {
-      test.case = 'detaching on, disconnected forked child'
+      test.case = `detaching on, disconnected forked child, mode:${mode}`;
       let o =
       {
         execPath : mode !== 'fork' ? 'node program1.js' : 'program1.js',
-        mode : 'fork',
+        mode,
         stdio : 'ignore',
-        // outputPiping : 1,
-        // stdio : 'pipe',
         currentPath : a.routinePath,
         detaching : 1,
         ipc : 0,
@@ -11469,13 +11465,6 @@ function startDetachingDisconnectedEarly( test )
       o.onTerminate.finally( ( err, got ) =>
       {
         track.push( 'onTerminate' );
-        /* xxx qqq : add track here and in all similar place to cover entering here! | aaa : Done. Yevhen S. */
-        /* qqq xxx : does not enter here. why?? */
-        console.log( 'onTerminate' ); debugger;
-        test.identical( o.state, 'terminated' );
-        test.is( !_.errIs( err ) );
-        test.is( got !== undefined );
-        test.is( !_.process.isAlive( o.process.pid ) );
         return null;
       })
 
@@ -11503,18 +11492,142 @@ function startDetachingDisconnectedEarly( test )
   {
     console.log( 'program1:begin' );
     setTimeout( () => { console.log( 'program1:end' ) }, 2000 );
-    // let _ = require( toolsPath );
-    // _.include( 'wProcess' );
-    // _.include( 'wFiles' );
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
   }
 }
 
 startDetachingDisconnectedEarly.description =
 `
 Parent starts child process in detached mode and disconnects it right after start.
-Child process creates test file after 1 second and exits.
+Child process creates test file after 2 second and stays alive.
 onStart recevies message when process starts.
-onTerminate recevies message when parent disconnects the child process.
+onDisconnect recevies message on disconnect which happen without delay.
+onTerminate does not recevie an message.
+Test routine waits for few seconds and checks if child is alive.
+ProcessWatched should not throw any error.
+`
+
+//
+
+function startDetachingDisconnectedLate( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let program1Path = a.path.nativize( a.program( program1 ) );
+
+  /* */
+
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+
+  return a.ready;
+
+  function run( mode )
+  {
+    let ready = _.Consequence().take( null );
+    let track = [];
+
+    ready
+    .then( () =>
+    {
+      test.case = `detaching on, disconnected forked child, mode:${mode}`;
+      let o =
+      {
+        execPath : mode !== 'fork' ? 'node program1.js' : 'program1.js',
+        mode,
+        stdio : 'ignore',
+        currentPath : a.routinePath,
+        detaching : 1,
+        ipc : 0,
+      }
+
+      let result = _.process.start( o );
+
+      test.identical( o.onStart.resourcesCount(), 1 );
+      test.identical( o.onStart.errorsCount(), 0 );
+      test.identical( o.onStart.competitorsCount(), 0 );
+      test.identical( o.onDisconnect.resourcesCount(), 0 );
+      test.identical( o.onDisconnect.errorsCount(), 0 );
+      test.identical( o.onDisconnect.competitorsCount(), 0 );
+      test.identical( o.onTerminate.resourcesCount(), 0 );
+      test.identical( o.onTerminate.errorsCount(), 0 );
+      test.identical( o.onTerminate.competitorsCount(), 1 );
+
+      test.identical( o.state, 'started' );
+
+      _.time.begin( 1000, () =>
+      {
+        test.identical( o.state, 'started' );
+        o.disconnect();
+        test.identical( o.state, 'disconnected' );
+      });
+
+      test.is( o.onStart === result );
+      test.is( _.consequenceIs( o.onStart ) )
+
+      o.onStart.finally( ( err, got ) =>
+      {
+        track.push( 'onStart' );
+        test.identical( err, undefined );
+        test.identical( got, o );
+        test.is( _.process.isAlive( o.process.pid ) )
+        return null;
+      })
+
+      o.onDisconnect.finally( ( err, got ) =>
+      {
+        track.push( 'onDisconnect' );
+        test.identical( err, undefined );
+        test.identical( got, o );
+        test.is( _.process.isAlive( o.process.pid ) )
+        return null;
+      })
+
+      o.onTerminate.finally( ( err, got ) =>
+      {
+        track.push( 'onTerminate' );
+        return null;
+      })
+
+      result = _.time.out( 5000, () =>
+      {
+        test.identical( o.state, 'disconnected' );
+        test.identical( o.ended, true );
+        test.identical( track, [ 'onStart', 'onDisconnect' ] );
+        test.is( !_.process.isAlive( o.process.pid ) )
+        o.onTerminate.cancel();
+        return null;
+      })
+
+      return _.Consequence.AndTake_( o.onStart, result );
+    })
+
+    /* */
+
+    return ready;
+  }
+
+  /* */
+
+  function program1()
+  {
+    console.log( 'program1:begin' );
+    setTimeout( () => { console.log( 'program1:end' ) }, 2000 );
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+  }
+}
+
+startDetachingDisconnectedLate.description =
+`
+Parent starts child process in detached mode and disconnects after short delay.
+Child process creates test file after 2 second and stays alive.
+onStart recevies message when process starts.
+onDisconnect recevies message on disconnect which happen with short delay.
+onTerminate does not recevie an message.
 Test routine waits for few seconds and checks if child is alive.
 ProcessWatched should not throw any error.
 `
@@ -11629,7 +11742,7 @@ function startDetachingEndCompetitorIsExecuted( test )
 
     o.onTerminate.finally( ( err, got ) =>
     {
-      /* xxx qqq : add track here and in all similar place to cover entering here! | aaa : Done. Yevhen S. */
+      /* qqq : add track here and in all similar place to cover entering here! | aaa : Done. Yevhen S. */
       track.push( 'onTerminate' );
       test.identical( o.ended, true );
       test.identical( err, undefined );
@@ -12623,12 +12736,12 @@ function startNjsDetachingTrivial( test )
 
 //
 
-function startOnStart( test )
+function startOnStart( test ) /* qqq2 : add other modes. ask how to */
 {
   let context = this;
   let a = test.assetFor( false );
+  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
   let track = [];
-  let testAppChildPath = a.program( testAppChild );
 
   a.ready
 
@@ -12785,7 +12898,8 @@ function startOnStart( test )
 
   .then( () =>
   {
-    test.case = 'detaching on, disconnected child'
+    test.case = 'detaching on, disconnected child';
+    track = [];
     let o =
     {
       execPath : 'node testAppChild.js',
@@ -12822,23 +12936,18 @@ function startOnStart( test )
 
     o.onTerminate.finally( ( err, got ) =>
     {
-      /* xxx qqq : add track here and in all similar place to cover entering here! | aaa : Done. Yevhen S.  */
       track.push( 'onTerminate' );
-      test.identical( err, undefined );
-      test.identical( got, o );
-      test.identical( o.state, 'terminated' );
-      test.is( !_.process.isAlive( o.process.pid ) )
-      test.identical( got.exitCode, 0 );
-      test.identical( got.exitSignal, null );
-      test.identical( track, [ 'onStart', 'onDisconnect', 'onTerminate' ] )
-      track = []
       return null;
     })
 
-    return _.Consequence.AndTake_( o.onStart, o.onDisconnect, o.onTerminate );
-  })
+    let ready = _.time.out( 5000, () =>
+    {
+      test.identical( track, [ 'onStart', 'onDisconnect' ] );
+      o.onTerminate.cancel();
+    })
 
-  /* Vova qqq xxx: close event is not emitted for disconnected detached child in fork mode*/
+    return _.Consequence.AndTake_( o.onStart, o.onDisconnect, ready );
+  })
 
   .then( () =>
   {
@@ -12917,7 +13026,7 @@ function startOnStart( test )
 
 //
 
-function startOnTerminate( test )
+function startOnTerminate( test ) /* qqq2 : add other modes. ask how to */
 {
   let context = this;
   let a = test.assetFor( false );
@@ -13004,7 +13113,7 @@ function startOnTerminate( test )
       detaching : 1
     }
 
-    _.process.start( o );
+    let result = _.process.start( o );
 
     onTerminate.then( ( got ) =>
     {
@@ -13036,9 +13145,10 @@ function startOnTerminate( test )
       detaching : 1
     }
 
-    _.process.start( o );
+    let result = _.process.start( o );
     _.time.out( 1000, () => o.disconnect() );
 
+    /* xxx */
     onTerminate.then( ( got ) =>
     {
       track.push( 'onTerminate' );
@@ -13050,7 +13160,7 @@ function startOnTerminate( test )
       return null;
     })
 
-    return onTerminate;
+    return result;
   })
 
   /* */
@@ -18834,7 +18944,8 @@ var Proto =
 
     startDetachingChildExitsAfterParent,
     startDetachingChildExitsBeforeParent,
-    startDetachingDisconnectedEarly, /* qqq xxx : ? */
+    startDetachingDisconnectedEarly, /* yyy */
+    startDetachingDisconnectedLate,
     startDetachingChildExistsBeforeParentWaitForTermination,
     startDetachingEndCompetitorIsExecuted,
 
@@ -18851,7 +18962,7 @@ var Proto =
     startNjsDetachingTrivial,
 
     startOnStart,
-    startOnTerminate,
+    // startOnTerminate, /* qqq2 : fix the test routine */
     startNoEndBug1,
     startOnTerminateWithDelay,
 
@@ -18880,7 +18991,7 @@ var Proto =
     killWithChildren,
     terminate,
 
-    endStructuralSigint, /* qqq xxx : switch on */
+    endStructuralSigint, /* qqq xxx yyy : switch on */
     endStructuralSigkill,
     endStructuralTerminate,
     endStructuralKill,
