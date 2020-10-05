@@ -11515,9 +11515,7 @@ function startDetachingChildExistsBeforeParentWaitForTermination( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let track = [];
   let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
-
 
   a.ready
 
@@ -11538,10 +11536,8 @@ function startDetachingChildExistsBeforeParentWaitForTermination( test )
     o.onTerminate.finally( ( err, got ) =>
     {
       /* xxx qqq : add track here and in all similar place to cover entering here! */
-      track.push( 'onTerminate' );
       test.identical( err, undefined );
       test.identical( got, o );
-      test.identical( track, [ 'onTerminate' ] )
       test.is( !_.process.isAlive( o.process.pid ) )
       return null;
     })
@@ -13023,6 +13019,7 @@ function startOnTerminate( test )
 
     onTerminate.then( ( got ) =>
     {
+      track.push( 'onTerminate' );
       test.identical( o, got );
       test.identical( got.exitCode, 0 );
       test.identical( got.exitSignal, null );
@@ -13053,6 +13050,7 @@ function startOnTerminate( test )
 
     onTerminate.then( ( got ) =>
     {
+      track.push( 'onTerminate' );
       test.identical( o, got );
       test.identical( got.exitCode, 0 );
       test.identical( got.exitSignal, null );
@@ -13082,6 +13080,7 @@ function startOnTerminate( test )
 
     o.onTerminate.then( ( op ) =>
     {
+      track.push( 'onTerminate' );
       o.disconnect();
       return op;
     })
@@ -13117,6 +13116,7 @@ function startOnTerminate( test )
 
     onTerminate.then( ( got ) =>
     {
+      track.push( 'onTerminate' );
       test.notIdentical( got.exitCode, 0 );
       test.identical( got.exitSignal, null );
       return null;
@@ -13147,8 +13147,10 @@ function startOnTerminate( test )
 
     onTerminate.then( ( got ) =>
     {
+      track.push( 'onTerminate' );
       test.notIdentical( got.exitCode, 0 );
       test.identical( got.exitSignal, null );
+      test.identical( track, [ 'onTerminate', 'onTerminate', 'onTerminate', 'onTerminate', 'onTerminate' ] )
       return null;
     })
 
@@ -18609,6 +18611,7 @@ function experimentErrorAfterTermination( test )
 {
   let context = this;
   let a = test.assetFor( false );
+  let track = [];
   let testAppPath = a.path.nativize( a.program( testApp ) );
 
   /* */
@@ -18625,10 +18628,11 @@ function experimentErrorAfterTermination( test )
 
   o.onTerminate.finally( ( err, got ) =>
   {
+    track.push( 'onTerminate' );
     test.identical( err, undefined );
     test.identical( got, o );
     test.identical( o.exitCode, 0 );
-
+    test.identical( track, [ 'onTerminate' ] );
     /* Attempt to send data when ipc channel is closed */
     o.process.send( 1 );
 
