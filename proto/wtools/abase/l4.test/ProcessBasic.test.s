@@ -5222,39 +5222,6 @@ function shellArgumentsParsingNonTrivial( test )
     return con;
   })
 
-  // .then( () =>
-  // {
-  //   test.case = 'args in execPath and args options'
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' firstArg secondArg:1',
-  //     args : '"third arg"',
-  //     mode : 'exec', /* qqq : change mode here */
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     test.identical( o.execPath, 'node' );
-  //     test.identical( o.args, [ _.strQuote( testAppPathSpace ), 'firstArg', 'secondArg:1', '"third arg"' ] );
-  //     let got = JSON.parse( o.output );
-  //     test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-  //     test.identical( got.map, { secondArg : '1 "third arg"' } )
-  //     test.identical( got.subject, 'firstArg' )
-  //     test.identical( got.scriptArgs, [ 'firstArg', 'secondArg:1', '"third arg"' ] )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
-
   .then( () =>
   {
     test.case = 'args in execPath and args options'
