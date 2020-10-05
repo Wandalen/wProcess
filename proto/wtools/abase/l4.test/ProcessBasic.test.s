@@ -1272,7 +1272,9 @@ shell2.timeOut = 30000;
 
 //
 
-function shellCurrentPath( test ) /* qqq : split by mode */
+/* qqq : split by modes */
+/* qqq : actualize names of test routines */
+function shellCurrentPath( test )
 {
   let context = this;
   let a = test.assetFor( false );
