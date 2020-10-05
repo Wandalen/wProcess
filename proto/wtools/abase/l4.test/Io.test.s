@@ -1230,8 +1230,8 @@ var Proto =
     pathsRead,
 
     systemEntryAddBasic,
-    systemEntryAddOptionAllowingMissed, // missed appPath
-    systemEntryAddOptionAllowingNotInPath, // entryDirPath not in path
+    systemEntryAddOptionAllowingMissed,
+    systemEntryAddOptionAllowingNotInPath,
     systemEntryAddOptionForcing,
   }
 
