@@ -3442,113 +3442,294 @@ function shellMultipleSyncDeasync( test )
 
   /*  */
 
-  // ready.then( () =>
-  // {
-  //   test.case = 'sync:0,desync:0'
-  //   let o =
-  //   {
-  //     execPath : [ 'node ' + execPath, 'node ' + execPath ],
-  //     mode : 'exec', /* qqq : change mode here */
-  //     sync : 0,
-  //     deasync : 0
-  //   }
-  //   var got = _.process.start( o );
-  //   test.is( _.consequenceIs( got ) );
-  //   test.identical( got.resourcesCount(), 0 );
-  //   got.thenKeep( function( result )
-  //   {
-  //     test.identical( result.length, 2 );
-  //     test.identical( result[ 0 ].exitCode, 0 )
-  //     test.identical( result[ 1 ].exitCode, 0 )
-  //     return result;
-  //   })
-  //   return got;
-  // })
-  //
-  // /*  */
-  //
-  // ready.then( () =>
-  // {
-  //   test.case = 'sync:1,desync:0'
-  //   let o =
-  //   {
-  //     execPath : [ 'node ' + execPath, 'node ' + execPath ],
-  //     mode : 'exec', /* qqq : change mode here */
-  //     sync : 1,
-  //     returningOptionsArray : 1,
-  //     deasync : 0
-  //   }
-  //   var got = _.process.start( o );
-  //   test.is( !_.consequenceIs( got ) );
-  //   test.identical( got.length, 2 )
-  //   test.identical( got[ 0 ].exitCode, 0 )
-  //   test.identical( got[ 1 ].exitCode, 0 )
-  //   return null;
-  // })
-  //
-  // /*  */
-  //
-  // ready.then( () =>
-  // {
-  //   test.case = 'sync:1,desync:0'
-  //   let o =
-  //   {
-  //     execPath : [ 'node ' + execPath, 'node ' + execPath ],
-  //     mode : 'exec', /* qqq : change mode here */
-  //     sync : 1,
-  //     returningOptionsArray : 0,
-  //     deasync : 0
-  //   }
-  //   var got = _.process.start( o );
-  //   test.is( !_.consequenceIs( got ) );
-  //   test.identical( got.exitCode, 0 )
-  //   return null;
-  // })
-  //
-  // /*  */
-  //
-  // ready.then( () =>
-  // {
-  //   test.case = 'sync:0,desync:1'
-  //   let o =
-  //   {
-  //     execPath : [ 'node ' + execPath, 'node ' + execPath ],
-  //     mode : 'exec',
-  //     sync : 0,
-  //     deasync : 1
-  //   }
-  //   var got = _.process.start( o );
-  //   test.is( _.consequenceIs( got ) );
-  //   test.identical( got.resourcesCount(), 1 );
-  //   got.thenKeep( function( result )
-  //   {
-  //     test.identical( result.length, 2 );
-  //     test.identical( result[ 0 ].exitCode, 0 )
-  //     test.identical( result[ 1 ].exitCode, 0 )
-  //     return result;
-  //   })
-  //   return got;
-  // })
-  //
-  // /*  */
-  //
-  // ready.then( () =>
-  // {
-  //   test.case = 'sync:1,desync:1'
-  //   let o =
-  //   {
-  //     execPath : [ 'node ' + execPath, 'node ' + execPath ],
-  //     mode : 'exec',
-  //     sync : 1,
-  //     deasync : 1
-  //   }
-  //   var got = _.process.start( o );
-  //   test.is( !_.consequenceIs( got ) );
-  //   test.identical( got.length, 2 );
-  //   test.identical( got[ 0 ].exitCode, 0 )
-  //   test.identical( got[ 1 ].exitCode, 0 )
-  //   return got;
-  // })
+  a.ready.then( () =>
+  {
+    test.case = 'sync:0,desync:0'
+    let o =
+    {
+      execPath : [ 'node ' + programPath, 'node ' + programPath ],
+      mode : 'shell', /* qqq : change mode here */
+      sync : 0,
+      deasync : 0
+    }
+    var got = _.process.start( o );
+    test.is( _.consequenceIs( got ) );
+    test.identical( got.resourcesCount(), 0 );
+    got.thenKeep( function( result )
+    {
+      test.identical( result.length, 2 );
+      test.identical( result[ 0 ].exitCode, 0 )
+      test.identical( result[ 1 ].exitCode, 0 )
+      return result;
+    })
+    return got;
+  })
+
+  /*  */
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync:0,desync:0'
+    let o =
+    {
+      execPath : [ 'node ' + programPath, 'node ' + programPath ],
+      mode : 'spawn', /* qqq : change mode here */
+      sync : 0,
+      deasync : 0
+    }
+    var got = _.process.start( o );
+    test.is( _.consequenceIs( got ) );
+    test.identical( got.resourcesCount(), 0 );
+    got.thenKeep( function( result )
+    {
+      test.identical( result.length, 2 );
+      test.identical( result[ 0 ].exitCode, 0 )
+      test.identical( result[ 1 ].exitCode, 0 )
+      return result;
+    })
+    return got;
+  })
+
+  /*  */
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync:0,desync:0'
+    let o =
+    {
+      execPath : [ programPath, programPath ],
+      mode : 'fork', /* qqq : change mode here */
+      sync : 0,
+      deasync : 0
+    }
+    var got = _.process.start( o );
+    test.is( _.consequenceIs( got ) );
+    test.identical( got.resourcesCount(), 0 );
+    got.thenKeep( function( result )
+    {
+      test.identical( result.length, 2 );
+      test.identical( result[ 0 ].exitCode, 0 )
+      test.identical( result[ 1 ].exitCode, 0 )
+      return result;
+    })
+    return got;
+  })
+
+  /*  */
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync:1,desync:0'
+    let o =
+    {
+      execPath : [ 'node ' + programPath, 'node ' + programPath ],
+      mode : 'shell', /* qqq : change mode here */
+      sync : 1,
+      returningOptionsArray : 1,
+      deasync : 0
+    }
+    var got = _.process.start( o );
+    test.is( !_.consequenceIs( got ) );
+    test.identical( got.length, 2 )
+    test.identical( got[ 0 ].exitCode, 0 )
+    test.identical( got[ 1 ].exitCode, 0 )
+    return null;
+  })
+
+  /*  */
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync:1,desync:0'
+    let o =
+    {
+      execPath : [ 'node ' + programPath, 'node ' + programPath ],
+      mode : 'spawn', /* qqq : change mode here */
+      sync : 1,
+      returningOptionsArray : 1,
+      deasync : 0
+    }
+    var got = _.process.start( o );
+    test.is( !_.consequenceIs( got ) );
+    test.identical( got.length, 2 )
+    test.identical( got[ 0 ].exitCode, 0 )
+    test.identical( got[ 1 ].exitCode, 0 )
+    return null;
+  })
+
+  /*  */
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync:1,desync:0'
+    let o =
+    {
+      execPath : [ 'node ' + programPath, 'node ' + programPath ],
+      mode : 'shell', /* qqq : change mode here */
+      sync : 1,
+      returningOptionsArray : 0,
+      deasync : 0
+    }
+    var got = _.process.start( o );
+    test.is( !_.consequenceIs( got ) );
+    test.identical( got.exitCode, 0 )
+    return null;
+  })
+
+  /*  */
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync:1,desync:0'
+    let o =
+    {
+      execPath : [ 'node ' + programPath, 'node ' + programPath ],
+      mode : 'spawn', /* qqq : change mode here */
+      sync : 1,
+      returningOptionsArray : 0,
+      deasync : 0
+    }
+    var got = _.process.start( o );
+    test.is( !_.consequenceIs( got ) );
+    test.identical( got.exitCode, 0 )
+    return null;
+  })
+
+
+  /*  */
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync:0,desync:1'
+    let o =
+    {
+      execPath : [ 'node ' + programPath, 'node ' + programPath ],
+      mode : 'shell',
+      sync : 0,
+      deasync : 1
+    }
+    var got = _.process.start( o );
+    test.is( _.consequenceIs( got ) );
+    test.identical( got.resourcesCount(), 1 );
+    got.thenKeep( function( result )
+    {
+      test.identical( result.length, 2 );
+      test.identical( result[ 0 ].exitCode, 0 )
+      test.identical( result[ 1 ].exitCode, 0 )
+      return result;
+    })
+    return got;
+  })
+
+  /*  */
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync:0,desync:1'
+    let o =
+    {
+      execPath : [ 'node ' + programPath, 'node ' + programPath ],
+      mode : 'spawn',
+      sync : 0,
+      deasync : 1
+    }
+    var got = _.process.start( o );
+    test.is( _.consequenceIs( got ) );
+    test.identical( got.resourcesCount(), 1 );
+    got.thenKeep( function( result )
+    {
+      test.identical( result.length, 2 );
+      test.identical( result[ 0 ].exitCode, 0 )
+      test.identical( result[ 1 ].exitCode, 0 )
+      return result;
+    })
+    return got;
+  })
+
+  /*  */
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync:0,desync:1'
+    let o =
+    {
+      execPath : [ programPath, programPath ],
+      mode : 'fork',
+      sync : 0,
+      deasync : 1
+    }
+    var got = _.process.start( o );
+    test.is( _.consequenceIs( got ) );
+    test.identical( got.resourcesCount(), 1 );
+    got.thenKeep( function( result )
+    {
+      test.identical( result.length, 2 );
+      test.identical( result[ 0 ].exitCode, 0 )
+      test.identical( result[ 1 ].exitCode, 0 )
+      return result;
+    })
+    return got;
+  })
+
+  /*  */
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync:1,desync:1'
+    let o =
+    {
+      execPath : [ 'node ' + programPath, 'node ' + programPath ],
+      mode : 'shell',
+      sync : 1,
+      deasync : 1
+    }
+    var got = _.process.start( o );
+    test.is( !_.consequenceIs( got ) );
+    test.identical( got.length, 2 );
+    test.identical( got[ 0 ].exitCode, 0 )
+    test.identical( got[ 1 ].exitCode, 0 )
+    return got;
+  })
+
+  /*  */
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync:1,desync:1'
+    let o =
+    {
+      execPath : [ 'node ' + programPath, 'node ' + programPath ],
+      mode : 'spawn',
+      sync : 1,
+      deasync : 1
+    }
+    var got = _.process.start( o );
+    test.is( !_.consequenceIs( got ) );
+    test.identical( got.length, 2 );
+    test.identical( got[ 0 ].exitCode, 0 )
+    test.identical( got[ 1 ].exitCode, 0 )
+    return got;
+  })
+
+  /*  */
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync:1,desync:1'
+    let o =
+    {
+      execPath : [ programPath, programPath ],
+      mode : 'fork',
+      sync : 1,
+      deasync : 1
+    }
+    var got = _.process.start( o );
+    test.is( !_.consequenceIs( got ) );
+    test.identical( got.length, 2 );
+    test.identical( got[ 0 ].exitCode, 0 )
+    test.identical( got[ 1 ].exitCode, 0 )
+    return got;
+  })
 
   /*  */
 
