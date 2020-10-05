@@ -4943,6 +4943,7 @@ function shellArgumentsParsingNonTrivial( test )
     return con;
   })
 
+  // xxx qqq : repair?
   // .then( () =>
   // {
   //   test.case = 'args in execPath and args options'
@@ -5078,6 +5079,7 @@ function shellArgumentsParsingNonTrivial( test )
     return con;
   })
 
+  // xxx qqq : repair?
   // .then( () =>
   // {
   //   test.case = 'args in execPath and args options'
