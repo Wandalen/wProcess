@@ -251,7 +251,7 @@ function start_body( o )
   function preform1()
   {
 
-    /* qqq2 : implement test for multiple to check onStart works as should */
+    /* xxx : implement test for multiple to check onStart works as should */
 
     if( o.ready === null )
     {
@@ -352,8 +352,8 @@ function start_body( o )
 
   function end( err, arg )
   {
-    debugger;
 
+    debugger;
     if( o.procedure )
     if( o.procedure.isAlive() )
     o.procedure.end();
@@ -381,7 +381,7 @@ function start_body( o )
 
     /* xxx qqq : where change of state?? */
     o.ended = true;
-    Object.freeze( o ); debugger;
+    Object.freeze( o );
 
     if( err )
     {
@@ -457,11 +457,14 @@ function start_body( o )
   function handleError( err )
   {
 
+    if( o.state === 'terminated' || o.error ) /* xxx qqq : move above? */
+    {
+      debugger;
+      throw _.err( err );
+    }
+
     debugger;
     exitCodeSet( -1 );
-
-    if( o.state === 'terminated' || o.error ) /* xxx qqq : move above? */
-    return;
 
     o.terminationReason = 'error';
 
@@ -921,7 +924,7 @@ function start_body( o )
     if( this.process.stdin )
     this.process.stdin.destroy();
 
-    // debugger;
+    // debugger; // yyy
     if( this.process.disconnect )
     if( this.process.connected )
     this.process.disconnect();
