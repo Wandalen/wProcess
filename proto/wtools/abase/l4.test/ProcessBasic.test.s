@@ -14,16 +14,6 @@ if( typeof module !== 'undefined' )
   require( '../l4_process/Basic.s' );
 }
 
-/*
-
-qqq :
-
-- reacts on requests ( qqq ) in the module
-- use application code from test rouitne shellConcurrent for all test routines, maybe?
-- make sure tests works in collection, not only in stand-alone mode
-
-*/
-
 let _global = _global_;
 let _ = _global_.wTools;
 let Self = {};
@@ -1338,7 +1328,7 @@ function shellCurrentPath( test ) /* qqq : split by mode */
 
   /**/
 
-  // ttt
+  // qqq : switch on?
   // con.thenKeep( function()
   // {
   //   test.case = 'mode : exec';
@@ -1635,7 +1625,7 @@ function shellCurrentPath( test ) /* qqq : split by mode */
 
   /* */
 
-  // ttt
+  // qqq : switch on?
   // con.thenKeep( function()
   // {
   //   test.case = 'normalized, currentPath leads to root of current drive, mode : exec';
@@ -3872,10 +3862,8 @@ a test routine per mode
 function shellArgumentsParsing( test )
 {
   let context = this;
-
   let a = test.assetFor( false );
-
-  let testAppPathNoSpace = a.path.nativize( a.program( { routine : testApp, dirPath : a.abs( 'noSpace' ) } ) );
+  let testAppPathNoSpace = a.path.nativize( a.program( { routine : testApp, dirPath : a.abs( 'noSpace' ) } ) ); /* qqq : a.path.nativize? */
   let testAppPathSpace = a.path.nativize( a.program( { routine : testApp, dirPath : a.abs( 'with space' ) } ) );
 
 
@@ -16423,6 +16411,82 @@ endStructuralKill.description =
 
 //
 
+function errorAfterTerminationWithSend( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
+  let track = [];
+
+  /* */
+
+  var o =
+  {
+    execPath :  'node',
+    args : [ testAppPath ],
+    mode : 'spawn',
+    ipc : 1
+  }
+
+  _.process.on( 'uncaughtError', ( e ) =>
+  {
+    test.identical( e.err.originalMessage, 'Channel closed' )
+    _.errAttend( e.err );
+    track.push( 'uncaughtError' );
+  });
+
+  let result = _.process.start( o );
+
+  o.onStart.then( ( arg ) =>
+  {
+    track.push( 'onStart' );
+    return null
+  });
+
+  o.onTerminate.finally( ( err, got ) => /* xxx qqq : normalize */
+  {
+    track.push( 'onTerminate' );
+    test.identical( err, undefined );
+    test.identical( got, o );
+    test.identical( o.exitCode, 0 );
+
+    /* Attempt to send data when ipc channel is closed */
+    o.process.send( 1 );
+
+    return null;
+  })
+
+  return _.time.out( 10000, () =>
+  {
+    debugger;
+    test.identical( track, [] );
+    test.identical( options.ended, true );
+    test.identical( options.state, 'terminated' );
+    test.identical( options.error, null );
+    test.identical( options.exitCode, 0 );
+    test.identical( options.exitSignal, null );
+    test.identical( options.process.exitCode, 0 );
+    test.identical( options.process.signalCode, null );
+  });
+
+  /* - */
+
+  function testApp()
+  {
+    setTimeout( () => {}, 1000 );
+  }
+
+}
+
+errorAfterTerminationWithSend.description =
+`
+  - handleClose receive error after termination of the process
+  - error caused by call o.process.send()
+  - throws asynchronouse uncahught error
+`
+
+//
+
 function terminateComplex( test )
 {
   let context = this;
@@ -18502,50 +18566,9 @@ function shellExperiment( test )
 
 shellExperiment.timeOut = 30000;
 
-//
-
-function experimentErrorAfterTermination( test )
-{
-  let context = this;
-  let a = test.assetFor( false );
-  let testAppPath = a.path.nativize( a.program( testApp ) );
-
-  /* */
-
-  var o =
-  {
-    execPath :  'node',
-    args : [ testAppPath ],
-    mode : 'spawn',
-    ipc : 1
-  }
-
-  let result = _.process.start( o );
-
-  o.onTerminate.finally( ( err, got ) =>
-  {
-    test.identical( err, undefined );
-    test.identical( got, o );
-    test.identical( o.exitCode, 0 );
-
-    /* Attempt to send data when ipc channel is closed */
-    o.process.send( 1 );
-
-    return null;
-  })
-
-  return result;
-
-  /* - */
-
-  function testApp()
-  {
-    setTimeout( () => {}, 2000 );
-  }
-
-}
-
-//
+// --
+// suite
+// --
 
 var Proto =
 {
@@ -18697,6 +18720,7 @@ var Proto =
     // endStructuralSigkill,
     // endStructuralTerminate,
     // endStructuralKill,
+    // errorAfterTerminationWithSend,
 
     terminateComplex,
     terminateDetachedComplex,
@@ -18714,7 +18738,6 @@ var Proto =
     effectiveMainFile,
 
     shellExperiment,
-    experimentErrorAfterTermination
 
     /* qqq : group test routines */
 
