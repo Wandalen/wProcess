@@ -16570,12 +16570,7 @@ function errorAfterTerminationWithSend( test )
     ipc : 1
   }
 
-  _.process.on( 'uncaughtError', ( e ) =>
-  {
-    test.identical( e.err.originalMessage, 'Channel closed' )
-    _.errAttend( e.err );
-    track.push( 'uncaughtError' );
-  });
+  _.process.on( 'uncaughtError', uncaughtError );
 
   let result = _.process.start( o );
 
@@ -16615,6 +16610,14 @@ function errorAfterTerminationWithSend( test )
   function testApp()
   {
     setTimeout( () => {}, 1000 );
+  }
+
+  function uncaughtError( e )
+  {
+    test.identical( e.err.originalMessage, 'Channel closed' )
+    _.errAttend( e.err );
+    track.push( 'uncaughtError' );
+    _.process.off( 'uncaughtError' );
   }
 
 }
