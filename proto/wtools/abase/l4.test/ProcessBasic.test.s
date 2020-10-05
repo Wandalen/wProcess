@@ -11371,8 +11371,8 @@ function startDetachingDisconnectedEarly( test )
 
   /* */
 
-  // let modes = [ 'fork', 'spawn', 'shell' ];
-  let modes = [ 'fork' ];
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  // let modes = [ 'fork' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
   return a.ready;
@@ -11430,7 +11430,6 @@ function startDetachingDisconnectedEarly( test )
         test.identical( err, undefined );
         test.identical( got, o );
         test.is( _.process.isAlive( o.process.pid ) )
-        // o.disconnect();
         return null;
       })
 
@@ -11443,7 +11442,7 @@ function startDetachingDisconnectedEarly( test )
         return null;
       })
 
-      o.onTerminate.finallyGive( ( err, got ) =>
+      o.onTerminate.finally( ( err, got ) =>
       {
         track.push( 'onTerminate' );
         /* xxx qqq : add track here and in all similar place to cover entering here! */
@@ -11453,17 +11452,16 @@ function startDetachingDisconnectedEarly( test )
         test.is( !_.errIs( err ) );
         test.is( got !== undefined );
         test.is( !_.process.isAlive( o.process.pid ) );
+        return null;
       })
 
       result = _.time.out( 5000, () =>
       {
-        // test.identical( o.onTerminate.resourcesCount(), 0 );
-        // test.identical( o.onTerminate.errorsCount(), 0 );
-        // test.identical( o.onTerminate.competitorsCount(), 0 );
         test.identical( o.state, 'disconnected' );
         test.identical( o.ended, true );
         test.identical( track, [ 'onStart', 'onDisconnect' ] );
         test.is( !_.process.isAlive( o.process.pid ) )
+        o.onTerminate.cancel();
         return null;
       })
 
