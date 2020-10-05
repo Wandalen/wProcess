@@ -16030,7 +16030,51 @@ function terminate( test )
   }
 }
 
-//
+/*
+### Modes in which child process terminates after signal:
+
+| Signal  |  Windows   |   Linux    |       Mac        |
+| ------- | ---------- | ---------- | ---------------- |
+| SIGINT  | spawn,fork | spawn,fork | shell,spawn,fork |
+| SIGKILL | spawn,fork | spawn,fork | shell,spawn,fork |
+
+### Test routines and modes that pass test checks:
+
+|        Routine         |  Windows   | Windows + windows-kill |   Linux    |       Mac        |
+| ---------------------- | ---------- | ---------------------- | ---------- | ---------------- |
+| endStructuralSigint    | spawn,fork | spawn,fork             | spawn,fork | shell,spawn,fork |
+| endStructuralSigkill   | spawn,fork | spawn,fork             | spawn,fork | shell,spawn,fork |
+| endStructuralTerminate |          |                      | spawn,fork | shell,spawn,fork |
+| endStructuralKill      | spawn,fork | spawn,fork             | spawn,fork | shell,spawn,fork |
+
+#### endStructuralTerminate on Windows, without windows-kill
+
+For each mode:
+exitCode : 1, exitSignal : null
+
+Child process terminates in modes spawn and fork
+Child process continues to work in mode spawn
+
+See: doc/ProcessKillMethodsDifference.md
+
+#### endStructuralTerminate on Windows, with windows-kill
+
+For each mode:
+exitCode : 3221225725, exitSignal : null
+
+Child process terminates in modes spawn and fork
+Child process continues to work in mode spawn
+
+### Shell mode termination results:
+
+| Signal  | Windows | Linux | MacOS |
+| ------- | ------- | ----- | ----- |
+| SIGINT  | 0       | 0     | 1     |
+| SIGKILL | 0       | 0     | 1     |
+
+0 - Child continues to work
+1 - Child is terminated
+*/
 
 function endStructuralSigint( test )
 {
