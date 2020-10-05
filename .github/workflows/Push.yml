@@ -36,7 +36,7 @@ jobs :
       with :
         node-version : ${{ matrix.node-version }}
     - run : npm i
-    - name : npm test
-      run : npm test
-      env :
-        WTOOLS_BOT_TOKEN : ${{ secrets.WTOOLS_BOT_TOKEN }}
+    - run : node proto/wtools/abase/l4.test/ProcessBasic.test.s r:endStructuralSigint v:10
+    - run : node proto/wtools/abase/l4.test/ProcessBasic.test.s r:endStructuralSigkill v:10
+    - run : node proto/wtools/abase/l4.test/ProcessBasic.test.s r:endStructuralTerminate v:10
+    - run : node proto/wtools/abase/l4.test/ProcessBasic.test.s r:endStructuralKill v:10
