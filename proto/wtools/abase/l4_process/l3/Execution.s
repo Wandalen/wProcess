@@ -534,7 +534,7 @@ function start_body( o )
     if( !this.eneded )
     {
       this.onDisconnect.take( this );
-      // end( undefined, null );
+      end( undefined, null );
     }
 
     return true;
