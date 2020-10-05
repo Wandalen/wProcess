@@ -251,7 +251,7 @@ function start_body( o )
   function preform1()
   {
 
-    /* qqq2 : implement test for multiple to check onStart works as should */
+    /* xxx : implement test for multiple to check onStart works as should */
 
     if( o.ready === null )
     {
@@ -921,7 +921,7 @@ function start_body( o )
     if( this.process.stdin )
     this.process.stdin.destroy();
 
-    // debugger;
+    // debugger; // yyy
     if( this.process.disconnect )
     if( this.process.connected )
     this.process.disconnect();

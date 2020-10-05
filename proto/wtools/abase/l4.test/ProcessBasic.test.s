@@ -12453,10 +12453,9 @@ function startNjsDetachingTrivial( test )
   let a = test.assetFor( false );
   let testAppParentPath = a.path.nativize( a.program( testAppParent ) );
   let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
+  let testFilePath = a.abs( a.routinePath, 'testFile' );
 
   /* */
-
-  let testFilePath = a.abs( a.routinePath, 'testFile' );
 
   test.case = 'trivial use case';
 
@@ -12473,16 +12472,16 @@ function startNjsDetachingTrivial( test )
 
   _.process.start( o );
 
-  let childPid;
+  var childPid;
   o.process.on( 'message', ( data ) =>
   {
     childPid = _.numberFrom( data );
   })
 
+  /* qqq xxx : where is track? */
   o.onTerminate.then( ( op ) =>
   {
     test.is( _.process.isAlive( childPid ) );
-
     test.identical( op.exitCode, 0 );
     test.is( _.strHas( op.output, 'Child process start' ) );
     test.is( _.strHas( op.output, 'from parent: data' ) );
@@ -12512,7 +12511,6 @@ function startNjsDetachingTrivial( test )
     let _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
-
     let o =
     {
       execPath : 'testAppChild.js',
@@ -13191,7 +13189,6 @@ function startOnTerminateWithDelay( test )
   test.is( options.onStart !== options.ready );
   test.is( options.onDisconnect !== options.ready );
   test.is( options.onTerminate === options.ready );
-  debugger;
 
   options.onStart
   .then( ( op ) =>
@@ -13199,10 +13196,9 @@ function startOnTerminateWithDelay( test )
     test.is( options === op );
     test.identical( options.output, '' );
     test.identical( options.exitCode, null );
-    // test.identical( options.exitSignal, null );
-    test.identical( options.exitSignal, 'SIGINT' );
+    test.identical( options.exitSignal, null );
     test.identical( options.process.exitCode, null );
-    test.identical( options.process.signalCode, 'SIGINT' );
+    test.identical( options.process.signalCode, null );
     test.identical( options.ended, false );
     test.identical( options.terminationReason, null );
     test.is( !!options.process );
@@ -18608,7 +18604,7 @@ var Proto =
 
     startDetachingChildExitsAfterParent,
     startDetachingChildExitsBeforeParent,
-    // startDetachingDisconnectedChildExistsBeforeParent, /* qqq xxx : ? */
+    startDetachingDisconnectedChildExistsBeforeParent, /* qqq xxx : ? */
     startDetachingChildExistsBeforeParentWaitForTermination,
     startDetachingEndCompetitorIsExecuted,
 
