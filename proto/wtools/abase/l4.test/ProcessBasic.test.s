@@ -114,7 +114,7 @@ function testAppShell()
 // test
 // --
 
-/* qqq : rewrite tests using assetFor and the best practices
+/* qqq : rewrite tests using assetFor and the best practices | aaa : Done. Yevhen S.
 */
 
 
@@ -417,8 +417,8 @@ function exitCode( test )
 
 //
 
-/* qqq : split test cases by / ** / delimeting lines */
-/* qqq : split by mode */
+/* qqq : split test cases by / ** / delimeting lines | aaa : Done. Yevhen S. */
+/* qqq : split by mode | aaa : Done. Yevhen S. */
 function shell( test )
 {
   let context = this;
@@ -511,7 +511,7 @@ function shell( test )
     shell.finally(function()
     {
       test.identical( options.process.killed, true );
-      test.identical( options.exitCode, null ); /* qqq2 : near each such test check should be following checks */
+      test.identical( options.exitCode, null ); /* qqq2 : near each such test check should be following checks | aaa : Done. Yevhen S. */
       test.identical( options.exitSignal, 'SIGINT' );
       test.identical( options.process.exitCode, null );
       test.identical( options.process.signalCode, 'SIGINT' );
@@ -9498,6 +9498,7 @@ function shellAfterDeath( test )
 {
   let context = this;
   let a = test.assetFor( false );
+  let stack = [];
   let testAppParentPath = a.path.nativize( a.program( testAppParent ) );
   let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
@@ -9530,6 +9531,7 @@ function shellAfterDeath( test )
 
     o.onTerminate.then( () =>
     {
+      stack.push( 'onTerminate' );
       test.identical( o.exitCode, 0 );
       test.case = 'secondary process is alive'
       test.is( _.process.isAlive( childPid ) );
@@ -9540,6 +9542,8 @@ function shellAfterDeath( test )
 
     o.onTerminate.then( () =>
     {
+      stack.push( 'onTerminate' );
+      test.identical( stack, [ 'onTerminate', 'onTerminate' ] );
       test.case = 'secondary process is dead'
       test.is( !_.process.isAlive( childPid ) );
 
@@ -9704,6 +9708,7 @@ function startDetachingModeSpawnResourceReady( test )
 {
   let context = this;
   let a = test.assetFor( false );
+  let track = [];
   let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
   /* */
@@ -9729,6 +9734,7 @@ function startDetachingModeSpawnResourceReady( test )
 
     o.onStart.then( ( got ) =>
     {
+      track.push( 'onStart' );
       test.is( _.mapIs( got ) );
       test.identical( got, o );
       test.is( _.process.isAlive( o.process.pid ) );
@@ -9736,10 +9742,12 @@ function startDetachingModeSpawnResourceReady( test )
       return null;
     })
 
-    o.onTerminate.then( ( op ) => /* qqq2 : should be not got, but op. check whole test suite, please */
+    o.onTerminate.then( ( op ) => /* qqq2 : should be not got, but op. check whole test suite, please | aaa: Done. Yevhen S. */
     {
+      track.push( 'onTerminate' );
       test.notIdentical( op.exitCode, 0 );
       test.identical( op.exitSignal, 'SIGTERM' );
+      test.identical( track, [ 'onStart', 'onTerminate' ] );
       return null;
     })
 
@@ -9775,6 +9783,7 @@ function startDetachingModeForkResourceReady( test )
 {
   let context = this;
   let a = test.assetFor( false );
+  let track = [];
   let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
   /* */
@@ -9800,6 +9809,7 @@ function startDetachingModeForkResourceReady( test )
 
     o.onStart.thenGive( ( got ) =>
     {
+      track.push( 'onStart' );
       test.is( _.mapIs( got ) );
       test.identical( got, o );
       test.is( _.process.isAlive( o.process.pid ) );
@@ -9808,8 +9818,10 @@ function startDetachingModeForkResourceReady( test )
 
     o.onTerminate.then( ( op ) =>
     {
+      track.push( 'onTerminate' );
       test.notIdentical( op.exitCode, 0 );
       test.identical( op.exitSignal, 'SIGTERM' );
+      test.identical( track, [ 'onStart', 'onTerminate' ] )
       return null;
     })
 
@@ -9845,6 +9857,7 @@ function startDetachingModeShellResourceReady( test )
 {
   let context = this;
   let a = test.assetFor( false );
+  let track = [];
   let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
   /* */
@@ -9870,6 +9883,7 @@ function startDetachingModeShellResourceReady( test )
 
     o.onStart.thenGive( ( got ) =>
     {
+      track.push( 'onStart' );
       test.is( _.mapIs( got ) );
       test.identical( got, o );
       test.is( _.process.isAlive( o.process.pid ) );
@@ -9878,8 +9892,10 @@ function startDetachingModeShellResourceReady( test )
 
     o.onTerminate.then( ( op ) =>
     {
+      track.push( 'onTerminate' );
       test.notIdentical( op.exitCode, 0 );
       test.identical( op.exitSignal, 'SIGTERM' );
+      test.identical( track, [ 'onStart', 'onTerminate' ] );
       return null;
     })
 
@@ -11134,6 +11150,7 @@ function startDetachingChildExitsAfterParent( test )
 {
   let context = this;
   let a = test.assetFor( false );
+  let track = [];
   let testAppParentPath = a.path.nativize( a.program( testAppParent ) );
   let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
@@ -11168,6 +11185,7 @@ function startDetachingChildExitsAfterParent( test )
 
     o.onTerminate.then( ( op ) =>
     {
+      track.push( 'onTerminate' );
       test.identical( op.exitCode, 0 );
 
       test.will = 'parent is dead, detached child is still running'
@@ -11180,10 +11198,12 @@ function startDetachingChildExitsAfterParent( test )
 
     o.onTerminate.then( () =>
     {
+      track.push( 'onTerminate' );
       let childPid2 = a.fileProvider.fileRead( testFilePath );
       childPid2 = _.numberFrom( childPid2 )
       test.is( !_.process.isAlive( childPid2 ) );
       test.identical( childPid, childPid2 )
+      test.identical( track, [ 'onTerminate', 'onTerminate' ] );
       return null;
     })
 
@@ -11247,6 +11267,7 @@ function startDetachingChildExitsBeforeParent( test )
 {
   let context = this;
   let a = test.assetFor( false );
+  let track = [];
   let testAppParentPath = a.path.nativize( a.program( testAppParent ) );
   let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
@@ -11287,6 +11308,7 @@ function startDetachingChildExitsBeforeParent( test )
 
     o.onTerminate.then( ( op ) =>
     {
+      track.push( 'onTerminate' );
       test.identical( op.exitCode, 0 );
 
       test.will = 'parent and chid are dead';
@@ -11303,6 +11325,7 @@ function startDetachingChildExitsBeforeParent( test )
       test.is( !_.process.isAlive( childPid ) );
 
       test.identical( child.pid, childPid );
+      test.identical( track, [ 'onTerminate' ] )
 
       return null;
     })
@@ -11377,6 +11400,7 @@ function startDetachingDisconnectedChildExistsBeforeParent( test )
 {
   let context = this;
   let a = test.assetFor( false );
+  let track = [];
   let program1Path = a.path.nativize( a.program( program1 ) );
 
   /* */
@@ -11415,9 +11439,9 @@ function startDetachingDisconnectedChildExistsBeforeParent( test )
 
       // _.time.begin( 1000, () =>
       // {
-        test.identical( o.state, 'started' );
-        o.disconnect();
-        test.identical( o.state, 'disconnected' );
+      test.identical( o.state, 'started' );
+      o.disconnect();
+      test.identical( o.state, 'disconnected' );
       // });
 
       test.is( o.onStart === result );
@@ -11491,6 +11515,7 @@ function startDetachingChildExistsBeforeParentWaitForTermination( test )
 {
   let context = this;
   let a = test.assetFor( false );
+  let track = [];
   let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
 
@@ -11513,8 +11538,10 @@ function startDetachingChildExistsBeforeParentWaitForTermination( test )
     o.onTerminate.finally( ( err, got ) =>
     {
       /* xxx qqq : add track here and in all similar place to cover entering here! */
+      track.push( 'onTerminate' );
       test.identical( err, undefined );
       test.identical( got, o );
+      test.identical( track, [ 'onTerminate' ] )
       test.is( !_.process.isAlive( o.process.pid ) )
       return null;
     })
@@ -11559,6 +11586,7 @@ function startDetachingEndCompetitorIsExecuted( test )
 {
   let context = this;
   let a = test.assetFor( false );
+  let track = [];
   let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
   a.ready
@@ -11585,6 +11613,7 @@ function startDetachingEndCompetitorIsExecuted( test )
 
     o.onStart.finally( ( err, got ) =>
     {
+      track.push( 'onStart' );
       test.identical( o.ended, false );
       test.identical( err, undefined );
       test.identical( got, o );
@@ -11595,9 +11624,11 @@ function startDetachingEndCompetitorIsExecuted( test )
     o.onTerminate.finally( ( err, got ) =>
     {
       /* xxx qqq : add track here and in all similar place to cover entering here! */
+      track.push( 'onTerminate' );
       test.identical( o.ended, true );
       test.identical( err, undefined );
       test.identical( got, o );
+      test.identical( track, [ 'onStart', 'onTerminate' ] )
       test.is( !_.process.isAlive( o.process.pid ) )
       return null;
     })
@@ -12011,6 +12042,8 @@ function startDetachingModeSpawnIpc( test )
 {
   let context = this;
   let a = test.assetFor( false );
+  let track = [];
+  let trackOverall = [];
   let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
   /* */
@@ -12042,13 +12075,19 @@ function startDetachingModeSpawnIpc( test )
 
     o.onStart.thenGive( () =>
     {
+      track.push( 'onStart' );
+      trackOverall.push( 'onStart' );
       o.process.send( 'child' );
     })
 
     o.onTerminate.then( ( op ) =>
     {
+      track.push( 'onTerminate' );
+      trackOverall.push( 'onTerminate' );
       test.identical( op.exitCode, 0 );
       test.identical( message, 'child' );
+      test.identical( track, [ 'onStart', 'onTerminate' ] );
+      track = [];
       return null;
     })
 
@@ -12082,13 +12121,20 @@ function startDetachingModeSpawnIpc( test )
 
     o.onStart.thenGive( () =>
     {
+      track.push( 'onStart' );
+      trackOverall.push( 'onStart' );
       o.process.send( 'child' );
     })
 
     o.onTerminate.then( ( op ) =>
     {
+      track.push( 'onTerminate' );
+      trackOverall.push( 'onTerminate' );
       test.identical( op.exitCode, 0 );
       test.identical( message, 'child' );
+      test.identical( track, [ 'onStart', 'onTerminate' ] );
+      test.identical( trackOverall, [ 'onStart', 'onTerminate', 'onStart', 'onTerminate'  ] );
+      track = [];
       return null;
     })
 
@@ -12122,6 +12168,8 @@ function startDetachingModeForkIpc( test )
 {
   let context = this;
   let a = test.assetFor( false );
+  let track = [];
+  let trackOverall = [];
   let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
   /* */
@@ -12153,14 +12201,20 @@ function startDetachingModeForkIpc( test )
 
     o.onStart.thenGive( () =>
     {
+      track.push( 'onStart' );
+      trackOverall.push( 'onStart' );
       o.process.send( 'child' );
     })
 
     o.onTerminate.then( ( op ) =>
     {
+      track.push( 'onTerminate' );
+      trackOverall.push( 'onTerminate' );
       debugger
       test.identical( op.exitCode, 0 );
       test.identical( message, 'child' );
+      test.identical( track, [ 'onStart', 'onTerminate' ] );
+      track = [];
       return null;
     })
 
@@ -12194,13 +12248,20 @@ function startDetachingModeForkIpc( test )
 
     o.onStart.thenGive( () =>
     {
+      track.push( 'onStart' );
+      trackOverall.push( 'onStart' );
       o.process.send( 'child' );
     })
 
     o.onTerminate.then( ( op ) =>
     {
+      track.push( 'onTerminate' );
+      trackOverall.push( 'onTerminate' );
       test.identical( op.exitCode, 0 );
       test.identical( message, 'child' );
+      test.identical( track, [ 'onStart', 'onTerminate' ] );
+      test.identical( trackOverall, [ 'onStart', 'onTerminate', 'onStart', 'onTerminate'  ] );
+      track = [];
       return null;
     })
 
@@ -12402,6 +12463,7 @@ function startNjsDetachingChildThrowing( test )
 {
   let context = this;
   let a = test.assetFor( false );
+  let track = [];
   let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
   /* */
@@ -12424,10 +12486,12 @@ function startNjsDetachingChildThrowing( test )
 
   o.onTerminate.then( ( op ) =>
   {
+    track.push( 'onTerminate' );
     test.notIdentical( op.exitCode, 0 );
     test.is( _.strHas( op.output, 'Child process error' ) );
     test.identical( o.exitCode, op.exitCode );
     test.identical( o.output, op.output );
+    test.identical( track, [ 'onTerminate' ] )
     return null;
   })
 
@@ -12451,6 +12515,7 @@ function startNjsDetachingTrivial( test )
 {
   let context = this;
   let a = test.assetFor( false );
+  let track = [];
   let testAppParentPath = a.path.nativize( a.program( testAppParent ) );
   let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
@@ -12481,6 +12546,7 @@ function startNjsDetachingTrivial( test )
 
   o.onTerminate.then( ( op ) =>
   {
+    track.push( 'onTerminate' );
     test.is( _.process.isAlive( childPid ) );
 
     test.identical( op.exitCode, 0 );
@@ -12494,12 +12560,14 @@ function startNjsDetachingTrivial( test )
 
   o.onTerminate.then( () =>
   {
+    track.push( 'onTerminate' );
     test.is( !_.process.isAlive( childPid ) );
 
     let childPidFromFile = a.fileProvider.fileRead( testFilePath );
     childPidFromFile = _.numberFrom( childPidFromFile )
     test.is( !_.process.isAlive( childPidFromFile ) );
     test.identical( childPid, childPidFromFile )
+    test.identical( track, [ 'onTerminate', 'onTerminate' ] );
     return null;
   })
 
@@ -12567,6 +12635,8 @@ function startOnStart( test )
 {
   let context = this;
   let a = test.assetFor( false );
+  let track = [];
+  let trackOverall = [];
   let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
   a.ready
@@ -12592,6 +12662,8 @@ function startOnStart( test )
 
     o.onStart.finally( ( err, got ) =>
     {
+      track.push( 'onStart' );
+      trackOverall.push( 'onStart' );
       test.identical( err, undefined );
       test.identical( got, o );
       test.is( _.process.isAlive( o.process.pid ) );
@@ -12603,6 +12675,8 @@ function startOnStart( test )
       test.identical( o, got );
       test.identical( got.exitCode, 0 );
       test.identical( got.exitSignal, null );
+      test.identical( track, [ 'onStart' ] );
+      track = [];
       return null;
     })
 
@@ -12674,9 +12748,13 @@ function startOnStart( test )
 
     o.onStart.then( ( got ) =>
     {
+      track.push( 'onStart' );
+      trackOverall.push( 'onStart' );
       test.identical( o, got );
       test.identical( got.exitCode, null );
       test.identical( got.exitSignal, null );
+      test.identical( track, [ 'onStart' ] );
+      track = [];
       return null;
     })
 
@@ -12734,6 +12812,8 @@ function startOnStart( test )
 
     o.onStart.finally( ( err, got ) =>
     {
+      track.push( 'onStart' );
+      trackOverall.push( 'onStart' );
       test.identical( err, undefined );
       test.identical( got, o );
       test.is( _.process.isAlive( o.process.pid ) )
@@ -12744,6 +12824,8 @@ function startOnStart( test )
 
     o.onDisconnect.finally( ( err, got ) =>
     {
+      track.push( 'onDisconnect' );
+      trackOverall.push( 'onDisconnect' );
       test.identical( err, undefined );
       test.identical( got, o );
       test.identical( o.state, 'disconnected' );
@@ -12754,12 +12836,16 @@ function startOnStart( test )
     o.onTerminate.finally( ( err, got ) =>
     {
       /* xxx qqq : add track here and in all similar place to cover entering here! */
+      track.push( 'onTerminate' );
+      trackOverall.push( 'onTerminate' );
       test.identical( err, undefined );
       test.identical( got, o );
       test.identical( o.state, 'terminated' );
       test.is( !_.process.isAlive( o.process.pid ) )
       test.identical( got.exitCode, 0 );
       test.identical( got.exitSignal, null );
+      test.identical( track, [ 'onStart', 'onDisconnect', 'onTerminate' ] )
+      track = []
       return null;
     })
 
@@ -12786,6 +12872,8 @@ function startOnStart( test )
 
     o.onStart.finally( ( err, got ) =>
     {
+      track.push( 'onStart' );
+      trackOverall.push( 'onStart' );
       test.identical( err, undefined );
       test.identical( got, o );
       test.identical( o.state, 'started' )
@@ -12796,10 +12884,13 @@ function startOnStart( test )
 
     o.onDisconnect.finally( ( err, got ) =>
     {
+      track.push( 'onDisconnect' );
+      trackOverall.push( 'onDisconnect' );
       test.identical( err, undefined );
       test.identical( got, o );
       test.identical( o.state, 'disconnected' )
       test.is( _.process.isAlive( o.process.pid ) )
+      test.identical( track, [ 'onStart', 'onDisconnect' ] );
       return null;
     })
 
@@ -12809,6 +12900,7 @@ function startOnStart( test )
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, null );
       test.identical( o.onTerminate.resourcesCount(), 0 );
+      test.identical( trackOverall, [ 'onStart', 'onStart', 'onStart', 'onDisconnect', 'onTerminate', 'onStart', 'onDisconnect' ] )
       return null;
     })
 
@@ -12846,6 +12938,7 @@ function startOnTerminate( test )
 {
   let context = this;
   let a = test.assetFor( false );
+  let track = [];
   let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
 
   /* */
@@ -15091,6 +15184,7 @@ function pidFrom( test )
 
 function isAlive( test )
 {
+  let track = [];
   let o =
   {
     execPath : `node -e "setTimeout( () => { console.log( 'child terminate' ) }, 3000 )"`,
@@ -15099,6 +15193,7 @@ function isAlive( test )
 
   o.onStart.then( () =>
   {
+    track.push( 'onStart' );
     test.identical( _.process.isAlive( o ), true );
     test.identical( _.process.isAlive( o.process ), true );
     test.identical( _.process.isAlive( o.process.pid ), true );
@@ -15107,9 +15202,11 @@ function isAlive( test )
 
   o.onTerminate.then( () =>
   {
+    track.push( 'onTerminate' );
     test.identical( _.process.isAlive( o ), false );
     test.identical( _.process.isAlive( o.process ), false );
     test.identical( _.process.isAlive( o.process.pid ), false );
+    test.identical( track, [ 'onStart', 'onTerminate' ] )
     return null;
   })
 
@@ -15140,10 +15237,12 @@ function statusOf( test )
   {
     execPath : `node -e "setTimeout( () => { console.log( 'child terminate' ) }, 3000 )"`,
   }
+  let track = [];
   _.process.start( o );
 
   o.onStart.then( () =>
   {
+    track.push( 'onStart' )
     test.identical( _.process.statusOf( o ), 'alive' );
     test.identical( _.process.statusOf( o.process ), 'alive' );
     test.identical( _.process.statusOf( o.process.pid ), 'alive' );
@@ -15152,9 +15251,11 @@ function statusOf( test )
 
   o.onTerminate.then( () =>
   {
+    track.push( 'onTerminate' );
     test.identical( _.process.statusOf( o ), 'dead' );
     test.identical( _.process.statusOf( o.process ), 'dead' );
     test.identical( _.process.statusOf( o.process.pid ), 'dead' );
+    test.identical( track, [ 'onStart', 'onTerminate' ] );
     return null;
   })
 
