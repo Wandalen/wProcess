@@ -10795,7 +10795,7 @@ function startDetachingTerminationBegin( test ) /* qqq2 : extend for other modes
 
     process.send({ childPid : o.process.pid });
 
-    o.onStart.thenGive( () => /* qqq : minimize and parametrize all time outs */
+    o.onStart.thenGive( () => /* qqq : minimize and parametrize all time outs aaa : done*/
     {
       _.procedure.terminationBegin();
     })
