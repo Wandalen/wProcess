@@ -11574,7 +11574,7 @@ function startDetachingDisconnectedEarly( test )
 
       o.onDisconnect.finally( ( err, got ) =>
       {
-        track.push( 'onStart' );
+        track.push( 'onDisconnect' );
         test.identical( err, undefined );
         test.identical( got, o );
         test.is( _.process.isAlive( o.process.pid ) )
@@ -11596,7 +11596,7 @@ function startDetachingDisconnectedEarly( test )
       {
         test.identical( o.state, 'disconnected' );
         test.identical( o.ended, true );
-        test.identical( track, [ 'onStart', 'onDisconnect' ] );
+        test.identical( track, [ 'onStart', 'onDisconnect', 'onTerminate' ] );
         test.is( !_.process.isAlive( o.process.pid ) )
         o.onTerminate.cancel();
         return null;
