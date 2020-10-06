@@ -12730,7 +12730,12 @@ function startOnTerminate( test ) /* qqq2 : add other modes. ask how to aaa:done
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
+  let locals =
+  {
+    context : { t1 : context.t1 },
+    toolsPath : context.toolsPath
+  }
+  let testAppChildPath = a.path.nativize( a.program({ routine : testAppChild, locals }) );
   let modes = [ 'fork', 'spawn', 'shell' ];
 
   modes.forEach( ( mode ) =>
@@ -12788,9 +12793,7 @@ function startOnTerminate( test ) /* qqq2 : add other modes. ask how to aaa:done
       {
         execPath : mode !== 'fork' ? 'node testAppChild.js' : 'testAppChild.js',
         mode,
-        stdio : 'ignore',
-        outputPiping : 0,
-        outputCollecting : 0,
+        stdio : 'pipe',
         currentPath : a.routinePath,
         detaching : 0
       }
@@ -16177,6 +16180,8 @@ function killWithChildren( test )
       currentPath : __dirname,
       mode : 'spawn',
       stdio : 'inherit',
+      outputPiping : 0,
+      outputCollecting : 0,
       inputMirroring : 0,
       throwingExitCode : 0
     }
