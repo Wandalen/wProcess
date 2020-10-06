@@ -14529,7 +14529,7 @@ function sheller( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
 
   /* */
 
