@@ -5347,7 +5347,7 @@ function shellArgumentsParsingNonTrivial( test )
     }
     _.process.start( o );
 
-    con.finally( ( err, op ) => /* qqq2 : should be ( err, op ) or ( err, arg ) not got */
+    con.finally( ( err, op ) => /* qqq2 : should be ( err, op ) or ( err, arg ) not got | aaa : Done. Yevhen S. */
     {
       test.is( !!err );
       test.is( _.strHas( err.message, 'first arg' ) )
@@ -7653,7 +7653,7 @@ function shellNode( test )
     {
       var o = { execPath : testAppPath, mode,  applyingExitCode : 1, throwingExitCode : 0, stdio : 'ignore' };
       return _.process.startNjs( o )
-      .finally( ( err, got ) =>
+      .finally( ( err, op ) =>
       {
         test.identical( o.exitCode, 1 );
         test.identical( process.exitCode, 1 );
@@ -7684,7 +7684,7 @@ function shellNode( test )
     {
       var o = { execPath : testAppPath,  mode, applyingExitCode : 0, throwingExitCode : 0, stdio : 'ignore' };
       return _.process.startNjs( o )
-      .finally( ( err, got ) =>
+      .finally( ( err, op ) =>
       {
         test.identical( o.exitCode, 1 );
         test.identical( process.exitCode, 0 );
@@ -7699,7 +7699,7 @@ function shellNode( test )
     {
       var o = { execPath : testAppPath,  mode, maximumMemory : 1, applyingExitCode : 0, throwingExitCode : 0, stdio : 'ignore' };
       return _.process.startNjs( o )
-      .finally( ( err, got ) =>
+      .finally( ( err, op ) =>
       {
         test.identical( o.exitCode, 1 );
         test.identical( process.exitCode, 0 );
@@ -8682,7 +8682,7 @@ function startExecPathWithSpace( test )
     throwingExitCode : 0
   });
 
-  a.ready.finally( ( err, got ) =>
+  a.ready.finally( ( err, op ) =>
   {
     _.errAttend( err );
     test.is( !!err );
@@ -8966,7 +8966,7 @@ function startPassingThroughExecPathWithSpace( test )
     stdio : 'pipe'
   });
 
-  a.ready.finally( ( err, got ) =>
+  a.ready.finally( ( err, op ) =>
   {
     _.errAttend( err );
     test.is( !!err );
@@ -11586,9 +11586,9 @@ function startDetachingChildExitsBeforeParent( test )
 
     _.process.start( o );
 
-    o.onTerminate.finally( ( err, got ) =>
+    o.onTerminate.finally( ( err, op ) =>
     {
-      process.send({ exitCode : got.exitCode, err, pid : o.process.pid });
+      process.send({ exitCode : op.exitCode, err, pid : o.process.pid });
       return null;
     })
 
@@ -11676,20 +11676,20 @@ function startDetachingDisconnectedEarly( test )
       test.is( o.onStart === result );
       test.is( _.consequenceIs( o.onStart ) )
 
-      o.onStart.finally( ( err, got ) =>
+      o.onStart.finally( ( err, op ) =>
       {
         track.push( 'onStart' );
         test.identical( err, undefined );
-        test.identical( got, o );
+        test.identical( op, o );
         test.is( _.process.isAlive( o.process.pid ) )
         return null;
       })
 
-      o.onDisconnect.finally( ( err, got ) =>
+      o.onDisconnect.finally( ( err, op ) =>
       {
         track.push( 'onDisconnect' );
         test.identical( err, undefined );
-        test.identical( got, o );
+        test.identical( op, o );
         test.is( _.process.isAlive( o.process.pid ) )
 
         test.identical( o.state, 'started' );
@@ -11699,7 +11699,7 @@ function startDetachingDisconnectedEarly( test )
         return null;
       })
 
-      o.onTerminate.finally( ( err, got ) =>
+      o.onTerminate.finally( ( err, op ) =>
       {
         track.push( 'onTerminate' );
         return null;
@@ -11804,25 +11804,25 @@ function startDetachingDisconnectedLate( test )
       test.is( o.onStart === result );
       test.is( _.consequenceIs( o.onStart ) )
 
-      o.onStart.finally( ( err, got ) =>
+      o.onStart.finally( ( err, op ) =>
       {
         track.push( 'onStart' );
         test.identical( err, undefined );
-        test.identical( got, o );
+        test.identical( op, o );
         test.is( _.process.isAlive( o.process.pid ) )
         return null;
       })
 
-      o.onDisconnect.finally( ( err, got ) =>
+      o.onDisconnect.finally( ( err, op ) =>
       {
         track.push( 'onDisconnect' );
         test.identical( err, undefined );
-        test.identical( got, o );
+        test.identical( op, o );
         test.is( _.process.isAlive( o.process.pid ) )
         return null;
       })
 
-      o.onTerminate.finally( ( err, got ) =>
+      o.onTerminate.finally( ( err, op ) =>
       {
         track.push( 'onTerminate' );
         return null;
@@ -11893,11 +11893,11 @@ function startDetachingChildExistsBeforeParentWaitForTermination( test )
 
     _.process.start( o );
 
-    o.onTerminate.finally( ( err, got ) =>
+    o.onTerminate.finally( ( err, op ) =>
     {
       /* xxx qqq : add track here and in all similar place to cover entering here! */
       test.identical( err, undefined );
-      test.identical( got, o );
+      test.identical( op, o );
       test.is( !_.process.isAlive( o.process.pid ) )
       return null;
     })
@@ -11965,23 +11965,23 @@ function startDetachingEndCompetitorIsExecuted( test )
     test.is( _.consequenceIs( o.onStart ) )
     test.is( _.consequenceIs( o.onTerminate ) )
 
-    o.onStart.finally( ( err, got ) =>
+    o.onStart.finally( ( err, op ) =>
     {
       track.push( 'onStart' );
       test.identical( o.ended, false );
       test.identical( err, undefined );
-      test.identical( got, o );
+      test.identical( op, o );
       test.is( _.process.isAlive( o.process.pid ) );
       return null;
     })
 
-    o.onTerminate.finally( ( err, got ) =>
+    o.onTerminate.finally( ( err, op ) =>
     {
       /* qqq : add track here and in all similar place to cover entering here! | aaa : Done. Yevhen S. */
       track.push( 'onTerminate' );
       test.identical( o.ended, true );
       test.identical( err, undefined );
-      test.identical( got, o );
+      test.identical( op, o );
       test.identical( track, [ 'onStart', 'onTerminate' ] )
       test.is( !_.process.isAlive( o.process.pid ) )
       return null;
@@ -13005,11 +13005,11 @@ function startOnStart( test ) /* qqq2 : add other modes. ask how to */
     test.notIdentical( o.onStart, result );
     test.is( _.consequenceIs( o.onStart ) )
 
-    o.onStart.finally( ( err, got ) =>
+    o.onStart.finally( ( err, op ) =>
     {
       track.push( 'onStart' );
       test.identical( err, undefined );
-      test.identical( got, o );
+      test.identical( op, o );
       test.is( _.process.isAlive( o.process.pid ) );
       return null;
     })
@@ -13154,28 +13154,28 @@ function startOnStart( test ) /* qqq2 : add other modes. ask how to */
 
     test.identical( o.onStart, result );
 
-    o.onStart.finally( ( err, got ) =>
+    o.onStart.finally( ( err, op ) =>
     {
       track.push( 'onStart' );
       test.identical( err, undefined );
-      test.identical( got, o );
+      test.identical( op, o );
       test.is( _.process.isAlive( o.process.pid ) )
       test.identical( o.state, 'started' );
       o.disconnect();
       return null;
     })
 
-    o.onDisconnect.finally( ( err, got ) =>
+    o.onDisconnect.finally( ( err, op ) =>
     {
       track.push( 'onDisconnect' );
       test.identical( err, undefined );
-      test.identical( got, o );
+      test.identical( op, o );
       test.identical( o.state, 'disconnected' );
       test.is( _.process.isAlive( o.process.pid ) );
       return null;
     })
 
-    o.onTerminate.finally( ( err, got ) =>
+    o.onTerminate.finally( ( err, op ) =>
     {
       track.push( 'onTerminate' );
       return null;
@@ -13209,22 +13209,22 @@ function startOnStart( test ) /* qqq2 : add other modes. ask how to */
 
     test.identical( o.onStart, result );
 
-    o.onStart.finally( ( err, got ) =>
+    o.onStart.finally( ( err, op ) =>
     {
       track.push( 'onStart' );
       test.identical( err, undefined );
-      test.identical( got, o );
+      test.identical( op, o );
       test.identical( o.state, 'started' )
       test.is( _.process.isAlive( o.process.pid ) )
       o.disconnect();
       return null;
     })
 
-    o.onDisconnect.finally( ( err, got ) =>
+    o.onDisconnect.finally( ( err, op ) =>
     {
       track.push( 'onDisconnect' );
       test.identical( err, undefined );
-      test.identical( got, o );
+      test.identical( op, o );
       test.identical( o.state, 'disconnected' )
       test.is( _.process.isAlive( o.process.pid ) )
       test.identical( track, [ 'onStart', 'onDisconnect' ] );
@@ -16630,11 +16630,11 @@ function errorAfterTerminationWithSend( test )
   });
 
   /* xxx qqq : normalize */
-  o.onTerminate.finally( ( err, got ) =>
+  o.onTerminate.finally( ( err, op ) =>
   {
     track.push( 'onTerminate' );
     test.identical( err, undefined );
-    test.identical( got, o );
+    test.identical( op, o );
     test.identical( o.exitCode, 0 );
 
     /* Attempt to send data when ipc channel is closed */
