@@ -17741,6 +17741,8 @@ function terminateWithChildren( test )
       currentPath : __dirname,
       mode : 'spawn',
       stdio : 'inherit',
+      outputPiping : 0,
+      outputCollecting : 0,
       ipc : 1,
       inputMirroring : 0,
       throwingExitCode : 0
@@ -17782,6 +17784,8 @@ function terminateWithChildren( test )
       detaching,
       ipc : 1,
       stdio : 'inherit',
+      outputCollecting : 0,
+      outputPiping : 0,
       inputMirroring : 0,
       throwingExitCode : 0
     }
@@ -17796,6 +17800,8 @@ function terminateWithChildren( test )
       detaching,
       ipc : 1,
       stdio : 'inherit',
+      outputCollecting : 0,
+      outputPiping : 0,
       inputMirroring : 0,
       throwingExitCode : 0
     }
