@@ -421,7 +421,7 @@ function exitCode( test )
 
 //
 
-/* qqq : split test cases by / ** / delimeting lines. whole file */
+/* qqq : split test cases by / ** / delimeting lines. whole file | aaa : Done. Yevhen S.  */
 /* qqq : split by mode | aaa : Done. Yevhen S. */
 function shell( test )
 {
@@ -1920,7 +1920,7 @@ function shellFork( test )
     })
   })
 
-  /* - */
+  /* */
 
   a.ready.thenKeep( function()
   {
@@ -1944,7 +1944,7 @@ function shellFork( test )
     })
   })
 
-  /* - */
+  /* */
 
   // con.thenKeep( function()
   // {
@@ -1969,7 +1969,7 @@ function shellFork( test )
   //   })
   // })
 
-  /* - */
+  /* */
 
   a.ready.thenKeep( function()
   {
@@ -1994,7 +1994,7 @@ function shellFork( test )
     })
   })
 
-  /* - */
+  /* */
 
   a.ready.thenKeep( function()
   {
@@ -2035,7 +2035,7 @@ function shellFork( test )
     })
   })
 
-  /* - */
+  /* */
 
   a.ready.thenKeep( function()
   {
@@ -2077,7 +2077,7 @@ function shellFork( test )
     return null;
   })
 
-  /* - */
+  /* */
 
   a.ready.thenKeep( function()
   {
@@ -2120,7 +2120,7 @@ function shellFork( test )
     return con;
   })
 
-  /* - */
+  /* */
 
   a.ready.thenKeep( function()
   {
@@ -2144,7 +2144,7 @@ function shellFork( test )
     })
   })
 
-  /* - */
+  /* */
 
   a.ready.thenKeep( function()
   {
@@ -2179,7 +2179,7 @@ function shellFork( test )
     })
   })
 
-  /* - */
+  /* */
 
   a.ready.thenKeep( function()
   {
@@ -4107,6 +4107,8 @@ function shellArgumentsParsing( test )
     return con;
   })
 
+  /* */
+
   .then( () =>
   {
     test.case = `'path to exec : without space' 'execPATH : has arguments' 'args has arguments' 'fork'`
@@ -4138,6 +4140,8 @@ function shellArgumentsParsing( test )
 
     return con;
   })
+
+  /* */
 
   .then( () =>
   {
@@ -4171,6 +4175,8 @@ function shellArgumentsParsing( test )
     return con;
   })
 
+  /* */
+
   .then( () =>
   {
     test.case = `'path to exec : without space' 'execPATH : only path' 'args has arguments' 'fork'`
@@ -4202,6 +4208,8 @@ function shellArgumentsParsing( test )
 
     return con;
   })
+
+  /* */
 
   .then( () =>
   {
@@ -4235,6 +4243,8 @@ function shellArgumentsParsing( test )
     return con;
   })
 
+  /* */
+
   .then( () =>
   {
     test.case = `'path to exec : without space' 'execPATH : has arguments' 'args: empty' 'fork'`
@@ -4266,6 +4276,8 @@ function shellArgumentsParsing( test )
 
     return con;
   })
+
+  /* */
 
   .then( () =>
   {
@@ -4299,6 +4311,8 @@ function shellArgumentsParsing( test )
     return con;
   })
 
+  /* */
+
   .then( () =>
   {
     test.case = `'path to exec : without space' 'execPATH : only path' 'args: empty' 'fork'`
@@ -4331,6 +4345,8 @@ function shellArgumentsParsing( test )
     return con;
   })
 
+  /* - */
+
   /* - end of fork - */ /* qqq : split test routine by modes */
 
   .then( () =>
@@ -4354,6 +4370,8 @@ function shellArgumentsParsing( test )
 
     return test.shouldThrowErrorSync( () => _.process.start( o ) );
   })
+
+  /* */
 
   .then( () =>
   {
@@ -4387,6 +4405,8 @@ function shellArgumentsParsing( test )
     return con;
   })
 
+  /* */
+
   .then( () =>
   {
     test.case = `'path to exec : without space' 'execPATH : has arguments' 'args has arguments' 'spawn'`
@@ -4418,6 +4438,8 @@ function shellArgumentsParsing( test )
 
     return con;
   })
+
+  /* */
 
   .then( () =>
   {
@@ -4451,6 +4473,8 @@ function shellArgumentsParsing( test )
     return con;
   })
 
+  /* */
+
   .then( () =>
   {
     test.case = `'path to exec : without space' 'execPATH : only path' 'args has arguments' 'spawn'`
@@ -4482,6 +4506,8 @@ function shellArgumentsParsing( test )
 
     return con;
   })
+
+  /* */
 
   .then( () =>
   {
@@ -4515,6 +4541,8 @@ function shellArgumentsParsing( test )
     return con;
   })
 
+  /* */
+
   .then( () =>
   {
     test.case = `'path to exec : without space' 'execPATH : has arguments' 'args: empty' 'spawn'`
@@ -4546,6 +4574,8 @@ function shellArgumentsParsing( test )
 
     return con;
   })
+
+  /* */
 
   .then( () =>
   {
@@ -4579,6 +4609,8 @@ function shellArgumentsParsing( test )
     return con;
   })
 
+  /* */
+
   .then( () =>
   {
     test.case = `'path to exec : without space' 'execPATH : only path' 'args: empty' 'spawn'`
@@ -4611,6 +4643,8 @@ function shellArgumentsParsing( test )
     return con;
   })
 
+  /* */
+
   .then( () =>
   {
     test.case = `'path to exec : with space' 'execPATH : has arguments' 'args has arguments' 'shell'`
@@ -4639,6 +4673,8 @@ function shellArgumentsParsing( test )
 
     return con;
   })
+
+  /* */
 
   .then( () =>
   {
@@ -4673,6 +4709,8 @@ function shellArgumentsParsing( test )
     return con;
   })
 
+  /* */
+
   .then( () =>
   {
     test.case = `'path to exec : with space' 'execPATH : only path' 'args has arguments' 'shell'`
@@ -4705,6 +4743,8 @@ function shellArgumentsParsing( test )
 
     return con;
   })
+
+  /* */
 
   .then( () =>
   {
@@ -4739,6 +4779,8 @@ function shellArgumentsParsing( test )
     return con;
   })
 
+  /* */
+
   .then( () =>
   {
     test.case = `'path to exec : with space' 'execPATH : has arguments' 'args: empty' 'shell'`
@@ -4771,6 +4813,8 @@ function shellArgumentsParsing( test )
 
     return con;
   })
+
+  /* */
 
   .then( () =>
   {
@@ -4805,6 +4849,8 @@ function shellArgumentsParsing( test )
     return con;
   })
 
+  /* */
+
   .then( () =>
   {
     test.case = `'path to exec : with space' 'execPATH : only path' 'args: empty' 'shell'`
@@ -4838,6 +4884,8 @@ function shellArgumentsParsing( test )
     return con;
   })
 
+  /* */
+
   .then( () =>
   {
     test.case = `'path to exec : without space' 'execPATH : only path' 'args: empty' 'shell'`
@@ -4870,6 +4918,8 @@ function shellArgumentsParsing( test )
 
     return con;
   })
+
+  /* */
 
   /* special case from willbe */
 
@@ -4907,6 +4957,8 @@ function shellArgumentsParsing( test )
     return con;
   })
 
+  /* */
+
   /* xxx */
   .then( () =>
   {
@@ -4938,7 +4990,7 @@ function shellArgumentsParsing( test )
     return con;
   })
 
-  //
+  /* */
 
   .then( () =>
   {
@@ -5101,6 +5153,8 @@ function shellArgumentsParsingNonTrivial( test )
     return con;
   })
 
+  /* */
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -5135,6 +5189,8 @@ function shellArgumentsParsingNonTrivial( test )
 
     return con;
   })
+
+  /* */
 
   .then( () =>
   {
@@ -5203,6 +5259,8 @@ function shellArgumentsParsingNonTrivial( test )
     return con;
   })
 
+  /* */
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -5235,6 +5293,8 @@ function shellArgumentsParsingNonTrivial( test )
 
     return con;
   })
+
+  /* */
 
   .then( () =>
   {
@@ -5269,7 +5329,7 @@ function shellArgumentsParsingNonTrivial( test )
     return con;
   })
 
-  /*  */
+  /* */
 
   .then( () =>
   {
@@ -5393,6 +5453,8 @@ function shellArgumentsParsingNonTrivial( test )
     return con;
   })
 
+  /* */
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -5420,6 +5482,8 @@ function shellArgumentsParsingNonTrivial( test )
 
     return con;
   })
+
+  /* */
 
   .then( () =>
   {
@@ -5449,6 +5513,8 @@ function shellArgumentsParsingNonTrivial( test )
 
     return con;
   })
+
+  /* */
 
   .then( () =>
   {
@@ -5581,6 +5647,8 @@ function shellArgumentsNestedQuotes( test )
     return con;
   })
 
+  /* */
+
   .then( () =>
   {
     test.case = 'fork'
@@ -5616,6 +5684,8 @@ function shellArgumentsNestedQuotes( test )
 
     return con;
   })
+
+  /* */
 
   .then( () =>
   {
@@ -5659,6 +5729,8 @@ function shellArgumentsNestedQuotes( test )
 
   })
 
+  /* */
+
   .then( () =>
   {
     test.case = 'spawn'
@@ -5695,6 +5767,8 @@ function shellArgumentsNestedQuotes( test )
     return con;
 
   })
+
+  /* */
 
   .then( () =>
   {
@@ -5749,6 +5823,8 @@ function shellArgumentsNestedQuotes( test )
 
     return con;
   })
+
+  /* */
 
   .then( () =>
   {
@@ -6031,6 +6107,8 @@ function shellExecPathQuotesClosing( test )
   //   return con;
   // })
 
+  /* */
+
   testcase( 'unquoted arg' )
 
   .then( () =>
@@ -6244,6 +6322,8 @@ function shellExecPathQuotesClosing( test )
     return con;
   })
 
+  /* */
+
   testcase( 'arg starts with quote' )
 
   .then( () =>
@@ -6273,6 +6353,8 @@ function shellExecPathQuotesClosing( test )
     }
     return test.mustNotThrowError( _.process.start( o ) );
   })
+
+  /* */
 
   testcase( 'arg ends with quote' )
 
@@ -6334,6 +6416,8 @@ function shellExecPathQuotesClosing( test )
     return con;
   })
 
+  /* */
+
   testcase( 'quoted with different symbols' )
 
   .then( () =>
@@ -6349,6 +6433,8 @@ function shellExecPathQuotesClosing( test )
     }
     return test.shouldThrowErrorOfAnyKind( _.process.start( o ) );
   })
+
+  /* */
 
   testcase( 'quote as part of arg' )
 
@@ -6409,6 +6495,8 @@ function shellExecPathQuotesClosing( test )
 
     return con;
   })
+
+  /* */
 
   testcase( 'option arg with quoted value' )
 
@@ -6571,6 +6659,8 @@ function shellExecPathQuotesClosing( test )
     return test.shouldThrowErrorOfAnyKind( _.process.start( o ) );
   })
 
+  /* */
+
   testcase( 'double quoted with space inside, same quotes' )
 
   .then( () =>
@@ -6602,6 +6692,8 @@ function shellExecPathQuotesClosing( test )
     return con
   })
 
+  /* */
+
   testcase( 'double quoted with space inside, diff quotes' )
 
   .then( () =>
@@ -6632,6 +6724,8 @@ function shellExecPathQuotesClosing( test )
 
     return con;
   })
+
+  /* */
 
   testcase( 'escaped quotes, mode shell' )
 
@@ -7074,7 +7168,7 @@ function shellVerbosity( test )
     return true;
   })
 
-  /*  */
+  /* */
 
   testCase( 'error, verbosity : 1' )
   _.process.start
@@ -7097,7 +7191,7 @@ function shellVerbosity( test )
     return true;
   })
 
-  /*  */
+  /* */
 
   testCase( 'error, verbosity : 2' )
   _.process.start
@@ -7143,7 +7237,7 @@ function shellVerbosity( test )
     return true;
   })
 
-  /*  */
+  /* */
 
   testCase( 'error, verbosity : 5' )
   _.process.start
@@ -7166,7 +7260,7 @@ function shellVerbosity( test )
     return true;
   })
 
-  /*  */
+  /* */
 
   testCase( 'execPath has quotes, verbosity : 1' )
   _.process.start
@@ -7273,6 +7367,8 @@ function shellErrorHadling( test )
 
   })
 
+  /* */
+
   a.ready.thenKeep( function()
   {
     test.case = 'collecting, verbosity and piping off';
@@ -7302,6 +7398,8 @@ function shellErrorHadling( test )
 
   })
 
+  /* */
+
   a.ready.thenKeep( function()
   {
     test.case = 'collecting, verbosity and piping off';
@@ -7330,6 +7428,8 @@ function shellErrorHadling( test )
     })
 
   })
+
+  /* */
 
   a.ready.thenKeep( function()
   {
@@ -7360,6 +7460,8 @@ function shellErrorHadling( test )
 
   })
 
+  /* */
+
   a.ready.thenKeep( function()
   {
     test.case = 'sync, collecting, verbosity and piping off';
@@ -7389,6 +7491,8 @@ function shellErrorHadling( test )
 
   })
 
+  /* */
+
   a.ready.thenKeep( function()
   {
     test.case = 'sync, collecting, verbosity and piping off';
@@ -7417,6 +7521,8 @@ function shellErrorHadling( test )
     return null;
 
   })
+
+  /* */
 
   a.ready.thenKeep( function()
   {
@@ -7520,7 +7626,7 @@ function shellNode( test )
     })
   })
 
-  /*  */
+  /* */
 
   // let modes = [ 'fork', 'exec', 'spawn', 'shell' ];
   let modes = [ 'fork', 'spawn', 'shell' ];
@@ -7541,6 +7647,8 @@ function shellNode( test )
       })
     })
 
+    /* */
+
     a.ready.thenKeep( () =>
     {
       var o = { execPath : testAppPath, mode,  applyingExitCode : 1, throwingExitCode : 0, stdio : 'ignore' };
@@ -7555,6 +7663,8 @@ function shellNode( test )
       })
     })
 
+    /* */
+
     a.ready.thenKeep( () =>
     {
       var o = { execPath : testAppPath,  mode, applyingExitCode : 0, throwingExitCode : 1, stdio : 'ignore' };
@@ -7568,6 +7678,8 @@ function shellNode( test )
       })
     })
 
+    /* */
+
     a.ready.thenKeep( () =>
     {
       var o = { execPath : testAppPath,  mode, applyingExitCode : 0, throwingExitCode : 0, stdio : 'ignore' };
@@ -7580,6 +7692,8 @@ function shellNode( test )
         return true;
       })
     })
+
+    /* */
 
     a.ready.thenKeep( () =>
     {
@@ -7910,7 +8024,6 @@ function shellArgumentsHandlingTrivial( test )
 
   /* */
 
-
   let shell = _.process.starter
   ({
     currentPath : a.routinePath,
@@ -8220,7 +8333,6 @@ function importantModeShell( test )
     return null;
   })
 
-
   /* */
 
   shell({ execPath : 'node -v && node -v', args : [] })
@@ -8241,6 +8353,8 @@ function importantModeShell( test )
     return null;
   })
 
+  /* */
+
   shell({ execPath : `echo -v "&&" node -v`, args : [] })
   .thenKeep( function( op )
   {
@@ -8251,7 +8365,6 @@ function importantModeShell( test )
     test.is( _.strHas( op.output, '-v && node -v'  ) );
     return null;
   })
-
 
   /* */
 
@@ -12617,6 +12730,8 @@ function startDetachingThrowing( test )
   }
   test.shouldThrowErrorSync( () => _.process.start( o ) )
 
+  /* */
+
   var o =
   {
     execPath : 'node testAppChild.js',
@@ -12627,6 +12742,8 @@ function startDetachingThrowing( test )
   }
   test.shouldThrowErrorSync( () => _.process.start( o ) )
 
+  /* */
+
   var o =
   {
     execPath : 'testAppChild.js',
@@ -12636,6 +12753,8 @@ function startDetachingThrowing( test )
     detaching : 1
   }
   test.shouldThrowErrorSync( () => _.process.start( o ) )
+
+  /* */
 
   // var o =
   // {
@@ -13071,6 +13190,8 @@ function startOnStart( test ) /* qqq2 : add other modes. ask how to */
 
     return _.Consequence.AndTake_( o.onStart, o.onDisconnect, ready );
   })
+
+  /* */
 
   .then( () =>
   {
@@ -14653,6 +14774,8 @@ function sheller( test )
     })
   })
 
+  /* */
+
   .thenKeep( () =>
   {
     var shell = _.process.starter
@@ -14679,6 +14802,7 @@ function sheller( test )
     })
   })
 
+  /* */
 
   .thenKeep( () =>
   {
@@ -14708,6 +14832,8 @@ function sheller( test )
     })
   })
 
+  /* */
+
   .thenKeep( () =>
   {
     var shell = _.process.starter
@@ -14726,6 +14852,8 @@ function sheller( test )
       return got;
     })
   })
+
+  /* */
 
   .thenKeep( () =>
   {
@@ -14756,6 +14884,8 @@ function sheller( test )
       return got;
     })
   })
+
+  /* */
 
   .thenKeep( () =>
   {
@@ -14793,6 +14923,8 @@ function sheller( test )
     })
   })
 
+  /* */
+
   .thenKeep( () =>
   {
     var shell = _.process.starter
@@ -14812,6 +14944,8 @@ function sheller( test )
       return got;
     })
   })
+
+  /* */
 
   .thenKeep( () =>
   {
@@ -14833,6 +14967,8 @@ function sheller( test )
     })
   })
 
+  /* */
+
   .thenKeep( () =>
   {
     var shell = _.process.starter
@@ -14852,6 +14988,8 @@ function sheller( test )
       return got;
     })
   })
+
+  /* */
 
   .thenKeep( () =>
   {
@@ -14921,6 +15059,8 @@ function shellerArgs( test )
     return null;
   })
 
+  /* */
+
   shell
   ({
     execPath : 'node ' + testAppPath,
@@ -14934,6 +15074,8 @@ function shellerArgs( test )
     test.identical( shellerOptions.args, [ 'arg1', 'arg2' ] );
     return null;
   })
+
+  /* */
 
   shell
   ({
@@ -14977,6 +15119,8 @@ function shellerFields( test )
   test.identical( start.body, _.process.start.body );
   test.identical( _.mapKeys( start.predefined ), _.mapKeys( _.process.start.body.defaults ) );
 
+  /* */
+
   test.case = 'execPath';
   var start = _.process.starter( 'node -v' );
   test.contains( _.mapKeys( start ), _.mapKeys( _.process.start ) );
@@ -14985,6 +15129,8 @@ function shellerFields( test )
   test.identical( start.body, _.process.start.body );
   test.identical( _.mapKeys( start.predefined ), _.mapKeys( _.process.start.body.defaults ) );
   test.identical( start.predefined.execPath, 'node -v' );
+
+  /* */
 
   test.case = 'object';
   var ready = new _.Consequence().take( null )
@@ -15046,6 +15192,8 @@ function outputHandling( test )
       })
     })
 
+    /* */
+
     a.ready.thenKeep( () =>
     {
       loggerOutput = '';
@@ -15059,6 +15207,8 @@ function outputHandling( test )
       })
     })
 
+    /* */
+
     a.ready.thenKeep( () =>
     {
       loggerOutput = '';
@@ -15071,6 +15221,8 @@ function outputHandling( test )
         return true;
       })
     })
+
+    /* */
 
     a.ready.thenKeep( () =>
     {
@@ -15132,6 +15284,8 @@ function shellOutputStripping( test )
       test.identical( output[ 1 ], '\u001b[31m\u001b[43mColored message2\u001b[49;0m\u001b[39;0m' );
       return null;
     })
+
+    /* */
 
     _.process.start
     ({
@@ -15262,7 +15416,7 @@ function shellNormalizedExecPath( test )
     return null;
   })
 
-  /* - */
+  /* */
 
   shell
   ({
@@ -15277,7 +15431,7 @@ function shellNormalizedExecPath( test )
     return null;
   })
 
-  /* - */
+  /* */
 
   shell
   ({
@@ -15292,7 +15446,7 @@ function shellNormalizedExecPath( test )
     return null;
   })
 
-  /* - */
+  /* */
 
   // shell
   // ({
@@ -15321,7 +15475,7 @@ function shellNormalizedExecPath( test )
     return null;
   })
 
-  /* - */
+  /* */
 
   shell
   ({
@@ -15336,7 +15490,7 @@ function shellNormalizedExecPath( test )
     return null;
   })
 
-  /* - */
+  /* */
 
   shell
   ({
@@ -15351,7 +15505,7 @@ function shellNormalizedExecPath( test )
     return null;
   })
 
-  /* - */
+  /* */
 
   // shell
   // ({
@@ -15404,12 +15558,16 @@ function appTempApplication( test )
   _.process.tempClose( got );
   test.is( !_.fileProvider.fileExists( got ) );
 
+  /* */
+
   test.case = 'string';
   var got = _.process.tempOpen({ sourceCode : testAppCode });
   var read = _.fileProvider.fileRead( got );
   test.identical( read, testAppCode );
   _.process.tempClose( got );
   test.is( !_.fileProvider.fileExists( got ) );
+
+  /* */
 
   test.case = 'raw buffer';
   var got = _.process.tempOpen( _.bufferRawFrom( testAppCode ) );
@@ -15418,12 +15576,16 @@ function appTempApplication( test )
   _.process.tempClose( got );
   test.is( !_.fileProvider.fileExists( got ) );
 
+  /* */
+
   test.case = 'raw buffer';
   var got = _.process.tempOpen({ sourceCode : _.bufferRawFrom( testAppCode ) });
   var read = _.fileProvider.fileRead( got );
   test.identical( read, testAppCode );
   _.process.tempClose( got );
   test.is( !_.fileProvider.fileExists( got ) );
+
+  /* */
 
   test.case = 'remove all';
   var got1 = _.process.tempOpen( testAppCode );
@@ -15444,11 +15606,15 @@ function appTempApplication( test )
     _.process.tempOpen( [] );
   })
 
+  /* */
+
   test.case = 'unexpected option';
   test.shouldThrowErrorSync( () =>
   {
     _.process.tempOpen({ someOption : true });
   })
+
+  /* */
 
   test.case = 'try to remove file that does not exist in registry';
   var got = _.process.tempOpen( testAppCode );
@@ -15627,7 +15793,6 @@ function kill( test )
 
   /* */
 
-
   .thenKeep( () =>
   {
     var o =
@@ -15690,7 +15855,6 @@ function kill( test )
   })
 
   /* */
-
 
   .thenKeep( () =>
   {
@@ -15757,7 +15921,6 @@ function kill( test )
   })
 
   /* */
-
 
   .thenKeep( () =>
   {
@@ -15941,7 +16104,7 @@ function killWithChildren( test )
     return ready;
   })
 
-  /* - */
+  /* */
 
   .thenKeep( () =>
   {
@@ -15980,7 +16143,7 @@ function killWithChildren( test )
     return ready;
   })
 
-  /* - */
+  /* */
 
   .thenKeep( () =>
   {
@@ -16028,7 +16191,7 @@ function killWithChildren( test )
     return ready;
   })
 
-  /* - */
+  /* */
 
   .thenKeep( () =>
   {
@@ -16075,7 +16238,7 @@ function killWithChildren( test )
     return ready;
   })
 
-  /* - */
+  /* */
 
   .thenKeep( () =>
   {
