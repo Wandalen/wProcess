@@ -12766,7 +12766,7 @@ function startOnTerminate( test ) /* qqq2 : add other modes. ask how to aaa:done
         return null;
       })
 
-      return _.time.out( 3000, () =>
+      return _.time.out( context.t1 * 3, () =>
       {
         test.identical( o.state, 'disconnected' );
         test.identical( o.ended, true );
@@ -12849,7 +12849,7 @@ function startOnTerminate( test ) /* qqq2 : add other modes. ask how to aaa:done
         return null;
       })
 
-      return _.time.out( 3000, () =>
+      return _.time.out( context.t1 * 3, () =>
       {
         test.identical( track, [] );
         test.identical( o.state, 'disconnected' );
@@ -12979,7 +12979,7 @@ function startOnTerminate( test ) /* qqq2 : add other modes. ask how to aaa:done
         return null;
       })
 
-      return _.time.out( 3000, () =>
+      return _.time.out( context.t1 * 3, () =>
       {
         test.identical( track, [] );
         test.identical( o.state, 'disconnected' );
@@ -13010,7 +13010,7 @@ function startOnTerminate( test ) /* qqq2 : add other modes. ask how to aaa:done
 
     var args = _.process.args();
 
-    _.time.out( 2000, () =>
+    _.time.out( context.t1 * 2, () =>
     {
       if( args.map.throwing )
       throw _.err( 'Child process error' );
