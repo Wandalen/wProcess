@@ -10589,7 +10589,7 @@ function startDetachingTerminationBegin( test ) /* qqq2 : extend for other modes
 
       let o =
       {
-        execPath : 'node testAppParent.js stdio : ignore',
+        execPath : 'node testAppParent.js stdio : ignore outputPiping : 0 outputCollecting : 0',
         mode : 'spawn',
         outputCollecting : 1,
         currentPath : a.routinePath,
@@ -10642,7 +10642,7 @@ function startDetachingTerminationBegin( test ) /* qqq2 : extend for other modes
 
       let o =
       {
-        execPath : 'node testAppParent.js stdio : ignore ipc : true',
+        execPath : 'node testAppParent.js stdio : ignore ipc : true outputPiping : 0 outputCollecting : 0',
         mode : 'spawn',
         outputCollecting : 1,
         currentPath : a.routinePath,
