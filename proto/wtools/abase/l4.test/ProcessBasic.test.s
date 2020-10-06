@@ -10527,7 +10527,7 @@ function startDetachingModeShellNoTerminationBegin( test )
 
 //
 
-function startDetachingTerminationBegin( test ) /* qqq2 : extend for other modes? */
+function startDetachingTerminationBegin( test ) /* qqq2 : extend for other modes? aaa:done */
 {
   let context = this;
   let a = test.assetFor( false );
