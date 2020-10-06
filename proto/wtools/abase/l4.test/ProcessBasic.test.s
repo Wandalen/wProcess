@@ -5907,7 +5907,7 @@ function shellExecPathQuotesClosing( test )
 
   let a = test.assetFor( false );
 
-  let testAppPathSpace = a.path.normalize( a.path.nativize( a.program({ routine : testApp, dirPath : a.abs( 'with space' ) }) ) );
+  let testAppPathSpace = a.path.nativize( a.path.normalize( a.program({ routine : testApp, dirPath : a.abs( 'with space' ) }) ) );
 
   /* */
 
@@ -7621,7 +7621,7 @@ function shellModeShellNonTrivial( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.path.normalize( a.path.nativize( a.program( app ) ) );
+  let testAppPath = a.path.nativize( a.path.normalize( a.program( app ) ) );
 
   let shell = _.process.starter
   ({
@@ -15237,7 +15237,7 @@ function shellNormalizedExecPath( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.path.normalize( a.path.nativize( a.program( testApp ) ) );
+  let testAppPath = a.path.nativize( a.path.normalize( a.program( testApp ) ) );
 
   /* */
 
