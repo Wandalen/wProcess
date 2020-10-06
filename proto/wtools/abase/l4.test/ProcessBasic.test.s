@@ -11041,6 +11041,8 @@ function startDetachingChildExitsBeforeParent( test )
     {
       execPath : 'node testAppChild.js',
       stdio : 'ignore',
+      outputPiping : 0,
+      outputCollecting : 0,
       detaching : true,
       mode : 'spawn',
 
