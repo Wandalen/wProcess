@@ -186,7 +186,7 @@ function start_body( o )
   _.assert( o.onStart === null || _.consequenceIs( o.onStart ) );
   _.assert( o.onTerminate === null || _.consequenceIs( o.onTerminate ) );
   _.assert( o.onDisconnect === null || _.consequenceIs( o.onDisconnect ) );
-  _.assert( !o.ipc || _.longHas( [ 'fork', 'spawn' ], o.mode ), `Mode: ${o.mode} doesn't support inter process communication.` );
+  _.assert( !o.ipc || _.longHas( [ 'fork', 'spawn' ], o.mode ), `Mode::${o.mode} doesn't support inter process communication.` );
 
   let stderrOutput = '';
   let decoratedOutput = '';
@@ -205,7 +205,6 @@ function start_body( o )
 
   if( o.sync && !o.deasync )
   {
-    /* qqq2 : use routine _.time.sleep here */
     /* xxx : use deasync here? */
     let arg = o.ready.sync();
     try
@@ -228,20 +227,23 @@ function start_body( o )
     o.ready.then( () => _.time.out( o.when.delay, () => null ) );
     o.ready.thenGive( single );
 
+    let procedure = o.onTerminate._procedure;
+    o.onTerminate.procedure( false );
     o.onTerminate.finally( end );
+    if( procedure !== false )
+    o.onTerminate.procedure( true );
 
-    /* In detached mode competitor `end` waits for message only if user added own comperitor(s) to `onTerminate` */
-    if( o.detaching ) /* xxx : rewrite */
-    {
-      let competitors = o.onTerminate.competitorsGet();
-      let competitorForEnd = competitors[ competitors.length - 1 ];
-      if( competitorForEnd )
-      {
-        _.assert( competitorForEnd.competitorRoutine === end );
-        competitorForEnd.procedure.end();
-        competitorForEnd.procedure = null;
-      }
-    }
+    // /* In detached mode competitor `end` waits for message only if user added own comperitor(s) to `onTerminate` */
+    // if( o.detaching ) /* yyy : rewrite */
+    // {
+    //   let competitorForEnd = o.onTerminate.competitorOwn( end );
+    //   if( competitorForEnd )
+    //   {
+    //     _.assert( competitorForEnd.competitorRoutine === end );
+    //     competitorForEnd.procedure.end();
+    //     competitorForEnd.procedure = null;
+    //   }
+    // }
 
     return endDeasyncing();
   }
@@ -286,7 +288,8 @@ function start_body( o )
     _.assert( o.onStart !== o.onDisconnect );
     _.assert( o.onTerminate !== o.onDisconnect );
     _.assert( o.ready === o.onStart || o.ready === o.onDisconnect || o.ready === o.onTerminate );
-    // _.assert( o.onStart.resourcesCount() === 0 );
+    // _.assert( o.ready !== o.onStart && o.ready !== o.onDisconnect && o.ready !== o.onTerminate );
+    // _.assert( o.onStart.resourcesCount() === 0 ); /* xxx */
     _.assert( o.onDisconnect.resourcesCount() === 0 );
     _.assert( o.onTerminate.resourcesCount() <= 1 );
 
@@ -320,7 +323,7 @@ function start_body( o )
     }
 
     o.disconnect = disconnect;
-    o.state = 'initial'; /* `initial`, `starting`, `started`, `terminating`, `terminated`, `error`, */ /* xxx qqq : remove state error */
+    o.state = 'initial'; /* `initial`, `starting`, `started`, `terminating`, `terminated` */
     o.terminationReason = null;
     o.fullExecPath = null;
     o.output = null;
@@ -353,42 +356,45 @@ function start_body( o )
   function end( err, arg )
   {
 
-    debugger;
     if( o.procedure )
     if( o.procedure.isAlive() )
     o.procedure.end();
 
-    if( o.detaching )
+    // if( o.detaching ) /* yyy */
     if( o.terminationBeginEnabled )
     {
       _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
       o.terminationBeginEnabled = false;
     }
 
-    if( o.state !== 'initial' ) /* xxx qqq : why if? is it covered? */
+    if( !o.outputAdditive )
     {
-      if( !o.outputAdditive )
-      {
-        if( decoratedOutput )
-        o.logger.log( decoratedOutput );
-        if( decoratedErrorOutput )
-        o.logger.error( decoratedErrorOutput );
-      }
+      if( decoratedOutput )
+      o.logger.log( decoratedOutput );
+      if( decoratedErrorOutput )
+      o.logger.error( decoratedErrorOutput );
     }
 
     if( err )
-    o.error = err;
+    o.error = o.error || err;
 
-    /* xxx qqq : where change of state?? */
+    if( Config.debug )
+    try
+    {
+      _.assert( o.state === 'terminated' || o.state === 'disconnected' || !!o.error );
+      _.assert( o.ended === false );
+    }
+    catch( err2 )
+    {
+      err = err || err2;
+    }
+
     o.ended = true;
     Object.freeze( o );
 
-    if( err ) /* qqq xxx : strange! */
+    if( err )
     {
       debugger;
-      if( o.state !== 'terminated' && !o.error )
-      if( !o.exitCode ) /* yyy qqq : cover */
-      o.exitCode = null; /* xxx qqq : why? */
       throw _.err( err );
     }
 
@@ -399,9 +405,11 @@ function start_body( o )
 
   function handleClose( exitCode, exitSignal )
   {
+    /*
+    console.log( 'handleClose', _.process.realMainFile(), o.ended ); debugger;
+    */
 
-    debugger;
-    if( o.state === 'terminated' || o.error )
+    if( o.ended )
     return;
 
     exitCodeSet( exitCode );
@@ -457,13 +465,13 @@ function start_body( o )
   function handleError( err )
   {
 
-    if( o.state === 'terminated' || o.error ) /* xxx qqq : move above? */
+    if( o.ended )
     {
       debugger;
       throw _.err( err );
     }
 
-    debugger;
+
     exitCodeSet( -1 );
 
     o.terminationReason = 'error';
@@ -486,16 +494,47 @@ function start_body( o )
 
   function handleDisconnect( arg )
   {
-    // console.log( 'disconnect' ); debugger;
+    /*
+    console.log( 'handleDisconnect', _.process.realMainFile(), o.ended ); debugger;
+    */
+
+    /*
+    event "disconnect" may come just before event "close"
+    so need to give a chance to event "close" to come first
+    */
+
+    /*
+    if( !o.ended )
+    _.time.begin( 1000, () =>
+    {
+      if( !o.ended )
+      {
+        debugger;
+        o.state = 'disconnected';
+        o.onDisconnect.take( this );
+        end( undefined, o );
+        throw _.err( 'not tested' );
+      }
+    });
+    */
+
+    /* bad solution
+    subprocess waits and does not let emit event "close"
+    */
+
   }
 
   /* */
 
   function disconnect()
   {
+    /*
+    console.log( 'disconnect', _.process.realMainFile(), this.ended ); debugger;
+    */
+
     _.assert( !!this.process, 'Process is not started. Cant disconnect.' );
 
-    //qqq: check disconnection of regular process, probably close event is not fired
+    // qqq2 : check disconnection of regular process, probably close event is not fired
 
     if( this.process.stdout )
     this.process.stdout.destroy();
@@ -504,7 +543,6 @@ function start_body( o )
     if( this.process.stdin )
     this.process.stdin.destroy();
 
-    // debugger; // yyy
     if( this.process.disconnect )
     if( this.process.connected )
     this.process.disconnect();
@@ -515,26 +553,11 @@ function start_body( o )
     if( this.procedure.isAlive() )
     this.procedure.end();
 
-    // qqq : strange? explain
-    if( !this.detaching || this.process._disconnected )
-    return true;
-
-    this.process._disconnected = true;
-    if( !Object.isFrozen( this ) ) /* qqq xxx : ? */
-    this.state = 'disconnected';
-
-    if( this.terminationBeginEnabled )
+    if( !this.ended )
     {
-      _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
-      if( !Object.isFrozen( this ) )
-      this.terminationBeginEnabled = false;
-    }
-
-    // if( _.process.isAlive( this.process.pid ) )
-    if( !this.eneded )
-    {
+      this.state = 'disconnected';
       this.onDisconnect.take( this );
-      // end( undefined, null );
+      end( undefined, o );
     }
 
     return true;
@@ -628,25 +651,35 @@ function start_body( o )
       launch();
       timeOutForm();
       pipe();
+
       if( o.dry )
-      o.onTerminate.take( o );
+      {
+        _.assert( o.state === 'starting' );
+        o.state = 'terminated';
+        o.onTerminate.take( o );
+      }
+
+      // if( o.dry ) /* yyy */
+      // o.onTerminate.take( o );
+
     }
     catch( err )
     {
       debugger
-      exitCodeSet( -1 );
-      if( o.sync && !o.deasync )
-      {
-        err = _.err( err );
-        log( _.errOnce( err ), 1 );
-        throw err;
-      }
-      else
-      {
-        err = _.err( err );
-        log( _.errOnce( err ), 1 );
-        o.onTerminate.error( err );
-      }
+      handleError( err );
+      // exitCodeSet( -1 ); /* xxx yyy : ? */
+      // if( o.sync && !o.deasync )
+      // {
+      //   err = _.err( err );
+      //   log( _.errOnce( err ), 1 );
+      //   throw err;
+      // }
+      // else
+      // {
+      //   err = _.err( err );
+      //   log( _.errOnce( err ), 1 );
+      //   o.onTerminate.error( err );
+      // }
     }
 
   }
@@ -735,7 +768,6 @@ function start_body( o )
     if( !o.outputDecorating && typeof module !== 'undefined' )
     try
     {
-      // _.include( 'wLogger' );
       _.include( 'wColor' );
     }
     catch( err )
@@ -1074,7 +1106,7 @@ function start_body( o )
 
   function argsJoin( args )
   {
-    if( !execArgs && !argumentsManual ) /* qqq : argumentsManual?? should be no such global variable */
+    if( !execArgs && !argumentsManual ) /* qqq2 : argumentsManual?? should be no such global variable */
     return args.join( ' ' );
 
     let i = execArgs ? execArgs.length : args.length - argumentsManual.length;
@@ -1160,22 +1192,15 @@ function start_body( o )
 
   function exitCodeSet( exitCode )
   {
-    // console.log( _.process.realMainFile(), 'exitCodeSet', exitCode );
-    // debugger;
+    /*
+    console.log( _.process.realMainFile(), 'exitCodeSet', exitCode );
+    */
     if( o.exitCode )
     return;
-    // debugger;
     o.exitCode = exitCode;
     exitCode = _.numberIs( exitCode ) ? exitCode : -1;
     if( o.applyingExitCode )
     _.process.exitCode( exitCode );
-    // if( currentExitCode )
-    // return;
-    // if( o.applyingExitCode && exitCode !== 0 )
-    // {
-    //   currentExitCode = _.numberIs( exitCode ) ? exitCode : -1;
-    //   _.process.exitCode( currentExitCode );
-    // }
   }
 
   /* */
@@ -1185,7 +1210,6 @@ function start_body( o )
     let result = '';
     result += 'Launched as ' + _.strQuote( o.fullExecPath ) + '\n';
     result += 'Launched at ' + _.strQuote( o.currentPath ) + '\n';
-    // debugger;
     if( stderrOutput.length )
     result += '\n -> Stderr' + '\n' + ' -  ' + _.strLinesIndentation( stderrOutput, ' -  ' ) + '\n -< Stderr';
     return result;
@@ -1421,7 +1445,7 @@ defaults.applyingExitCode = 1;
 defaults.throwingExitCode = 0;
 defaults.outputPiping = 1;
 defaults.stdio = 'inherit';
-// defaults.mode = 'spawn'; // xxx qqq : uncomment after fix of the mode
+// defaults.mode = 'spawn'; // qqq2 : uncomment after fix of the mode
 
 //
 

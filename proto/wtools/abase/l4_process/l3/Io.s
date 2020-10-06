@@ -333,6 +333,88 @@ anchor.defaults =
 
 //
 
+/**
+ * Returns path for main module (module that running directly by node).
+ * @returns {String}
+ * @function realMainFile
+ * @namespace Tools.process
+ * @module Tools/base/ProcessBasic
+ */
+
+let _pathRealMainFile;
+function realMainFile()
+{
+  if( _pathRealMainFile )
+  return _pathRealMainFile;
+  _pathRealMainFile = _.path.normalize( require.main.filename );
+  return _pathRealMainFile;
+}
+
+//
+
+/**
+ * Returns path dir name for main module (module that running directly by node).
+ * @returns {String}
+ * @function realMainDir
+ * @namespace Tools.process
+ * @module Tools/base/ProcessBasic
+ */
+
+let _pathRealMainDir;
+function realMainDir()
+{
+  if( _pathRealMainDir )
+  return _pathRealMainDir;
+
+  if( require.main )
+  _pathRealMainDir = _.path.normalize( _.path.dir( require.main.filename ) );
+  else
+  return this.effectiveMainFile();
+
+  return _pathRealMainDir;
+}
+
+//
+
+/**
+ * Returns absolute path for file running directly by node
+ * @returns {String}
+ * @throws {Error} If passed any argument.
+ * @function effectiveMainFile
+ * @namespace Tools.process
+ * @module Tools/base/ProcessBasic
+ */
+
+let _effectiveMainFilePath = '';
+function effectiveMainFile() /* qqq2 : move to process, review */
+{
+  _.assert( arguments.length === 0, 'Expects no arguments' );
+
+  if( _effectiveMainFilePath )
+  return _effectiveMainFilePath;
+
+  if( process.argv[ 0 ] || process.argv[ 1 ] )
+  {
+    _effectiveMainFilePath = _.path.join( this._initialCurrentPath, process.argv[ 1 ] || process.argv[ 0 ] );
+    _effectiveMainFilePath = _.path.resolve( _effectiveMainFilePath );
+  }
+
+  if( !_.fileProvider.fileExists( _effectiveMainFilePath ) )
+  {
+    //xxx : review
+    debugger;
+    console.error( 'process.argv :', process.argv.join( ', ' ) );
+    console.error( 'currentAtBegin :', this._initialCurrentPath );
+    console.error( 'effectiveMainFile.raw :', this.join( this._initialCurrentPath, process.argv[ 1 ] || process.argv[ 0 ] ) );
+    console.error( 'effectiveMainFile :', _effectiveMainFilePath );
+    _effectiveMainFilePath = this.realMainFile();
+  }
+
+  return _effectiveMainFilePath;
+}
+
+//
+
 function pathsRead()
 {
   if( !_global_.process )
@@ -493,6 +575,9 @@ let Extension =
   argsReadTo,
   anchor,
 
+  realMainFile, /* qqq : rewrite test. start process in test */
+  realMainDir, /* qqq : rewrite test. start process in test */
+  effectiveMainFile, /* qqq : rewrite test. start process in test */
   pathsRead, /* qqq : cover | aaa : Done. Yevhen S. */
 
   systemEntryAdd, /* qqq : cover | aaa : Done. Yevhen S. */
