@@ -10527,223 +10527,251 @@ function startDetachingModeShellNoTerminationBegin( test )
 
 //
 
-function startDetachingModeSpawnTerminationBegin( test ) /* qqq2 : extend for other modes? */
+function startDetachingTerminationBegin( test ) /* qqq2 : extend for other modes? */
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppParentPath = a.path.nativize( a.program( testAppParent ) );
-  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
   let testFilePath = a.abs( a.routinePath, 'testFile' );
 
-  a.ready
+  let modes = [ 'fork', 'spawn', 'shell' ];
 
-  /*  */
-
-  .then( () =>
+  modes.forEach( ( mode ) =>
   {
-    test.case = 'process termination begins after short delay, detached process should continue to work after parent death';
-
-    let o =
+    a.ready.then( () =>
     {
-      execPath : 'node testAppParent.js stdio : ignore',
-      mode : 'spawn',
-      outputCollecting : 1,
-      currentPath : a.routinePath,
-      ipc : 1,
-    }
-    let con = _.process.start( o );
-
-    let data;
-
-    o.process.on( 'message', ( got ) => /* qqq : got -> e */
-    {
-      data = got;
-      data.childPid = _.numberFrom( data.childPid );
-    })
-
-    con.then( ( got ) =>
-    {
-      test.will = 'parent is dead, child is still alive';
-      test.identical( got.exitCode, 0 );
-      test.is( !_.process.isAlive( o.process.pid ) );
-      test.is( _.process.isAlive( data.childPid ) );
-      return _.time.out( 10000 );
-    })
-
-    con.then( () =>
-    {
-      test.will = 'both dead';
-
-      test.is( !_.process.isAlive( o.process.pid ) );
-      test.is( !_.process.isAlive( data.childPid ) );
-
-      test.is( a.fileProvider.fileExists( testFilePath ) );
-      let childPid = a.fileProvider.fileRead( testFilePath );
-      childPid = _.numberFrom( childPid );
-      test.identical( data.childPid, childPid )
-
+      a.fileProvider.filesDelete( a.routinePath );
+      let locals =
+      {
+        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
+        mode
+      }
+      a.path.nativize( a.program({ routine : testAppParent, locals }) );
+      a.path.nativize( a.program( testAppChild ) );
       return null;
     })
 
-    return con;
-  })
-
-  /*  */
-
-  .then( () =>
-  {
-    test.case = 'process termination begins after short delay, detached process should continue to work after parent death';
-
-    let o =
-    {
-      execPath : 'node testAppParent.js stdio : ignore ipc : true',
-      mode : 'spawn',
-      outputCollecting : 1,
-      currentPath : a.routinePath,
-      ipc : 1,
-    }
-    let con = _.process.start( o );
-
-    let data;
-
-    o.process.on( 'message', ( got ) =>
-    {
-      data = got;
-      data.childPid = _.numberFrom( data.childPid );
-    })
-
-    con.then( ( got ) =>
-    {
-      test.identical( got.exitCode, 0 );
-      test.will = 'parent is dead, child is still alive';
-      test.is( !_.process.isAlive( o.process.pid ) );
-      test.is( _.process.isAlive( data.childPid ) );
-      return _.time.out( 10000 );
-    })
-
-    con.then( () =>
-    {
-      test.will = 'both dead';
-
-      test.is( !_.process.isAlive( o.process.pid ) );
-      test.is( !_.process.isAlive( data.childPid ) );
-
-      test.is( a.fileProvider.fileExists( testFilePath ) );
-      let childPid = a.fileProvider.fileRead( testFilePath );
-      childPid = _.numberFrom( childPid );
-      test.identical( data.childPid, childPid )
-
-      return null;
-    })
-
-    return con;
-  })
-
-  /*  */
-
-  .then( () =>
-  {
-    test.case = 'process termination begins after short delay, detached process should continue to work after parent death';
-
-    let o =
-    {
-      execPath : 'node testAppParent.js stdio : pipe',
-      mode : 'spawn',
-      outputCollecting : 1,
-      currentPath : a.routinePath,
-      ipc : 1,
-    }
-    let con = _.process.start( o );
-
-    let data;
-
-    o.process.on( 'message', ( got ) =>
-    {
-      data = got;
-      data.childPid = _.numberFrom( data.childPid );
-    })
-
-    con.then( ( got ) =>
-    {
-      test.identical( got.exitCode, 0 );
-      test.will = 'parent is dead, child is still alive';
-      test.is( !_.process.isAlive( o.process.pid ) );
-      test.is( _.process.isAlive( data.childPid ) );
-      return _.time.out( 10000 );
-    })
-
-    con.then( () =>
-    {
-      test.will = 'both dead';
-
-      test.is( !_.process.isAlive( o.process.pid ) );
-      test.is( !_.process.isAlive( data.childPid ) );
-
-      test.is( a.fileProvider.fileExists( testFilePath ) );
-      let childPid = a.fileProvider.fileRead( testFilePath );
-      childPid = _.numberFrom( childPid );
-      test.identical( data.childPid, childPid )
-
-      return null;
-    })
-
-    return con;
-  })
-
-  /*  */
-
-  .then( () =>
-  {
-    test.case = 'process termination begins after short delay, detached process should continue to work after parent death';
-
-    let o =
-    {
-      execPath : 'node testAppParent.js stdio : pipe ipc : true',
-      mode : 'spawn',
-      outputCollecting : 1,
-      currentPath : a.routinePath,
-      ipc : 1,
-    }
-    let con = _.process.start( o );
-
-    let data;
-
-    o.process.on( 'message', ( got ) =>
-    {
-      data = got;
-      data.childPid = _.numberFrom( data.childPid );
-    })
-
-    con.then( ( got ) =>
-    {
-      test.identical( got.exitCode, 0 );
-      test.will = 'parent is dead, child is still alive';
-      test.is( !_.process.isAlive( o.process.pid ) );
-      test.is( _.process.isAlive( data.childPid ) );
-      return _.time.out( 10000 );
-    })
-
-    con.then( () =>
-    {
-      test.will = 'both dead';
-
-      test.is( !_.process.isAlive( o.process.pid ) );
-      test.is( !_.process.isAlive( data.childPid ) );
-
-      test.is( a.fileProvider.fileExists( testFilePath ) );
-      let childPid = a.fileProvider.fileRead( testFilePath );
-      childPid = _.numberFrom( childPid );
-      test.identical( data.childPid, childPid )
-
-      return null;
-    })
-
-    return con;
-  })
-
-  /*  */
+    a.ready.tap( () => test.open( mode ) );
+    a.ready.then( () => run( mode ) );
+    a.ready.tap( () => test.close( mode ) );
+  });
 
   return a.ready;
+
+  /*  */
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null )
+
+    .then( () =>
+    {
+      test.case = 'process termination begins after short delay, detached process should continue to work after parent death';
+
+      let o =
+      {
+        execPath : 'node testAppParent.js stdio : ignore',
+        mode : 'spawn',
+        outputCollecting : 1,
+        currentPath : a.routinePath,
+        ipc : 1,
+      }
+      let con = _.process.start( o );
+
+      let data;
+
+      o.process.on( 'message', ( got ) => /* qqq : got -> e */
+      {
+        data = got;
+        data.childPid = _.numberFrom( data.childPid );
+      })
+
+      con.then( ( got ) =>
+      {
+        test.will = 'parent is dead, child is still alive';
+        test.identical( got.exitCode, 0 );
+        test.is( !_.process.isAlive( o.process.pid ) );
+        test.is( _.process.isAlive( data.childPid ) );
+        return _.time.out( context.t2 );
+      })
+
+      con.then( () =>
+      {
+        test.will = 'both dead';
+
+        test.is( !_.process.isAlive( o.process.pid ) );
+        test.is( !_.process.isAlive( data.childPid ) );
+
+        test.is( a.fileProvider.fileExists( testFilePath ) );
+        let childPid = a.fileProvider.fileRead( testFilePath );
+        childPid = _.numberFrom( childPid );
+        test.identical( data.childPid, childPid )
+
+        return null;
+      })
+
+      return con;
+    })
+
+    /*  */
+
+    if( mode !== 'shell' )
+    ready.then( () =>
+    {
+
+      test.case = 'process termination begins after short delay, detached process should continue to work after parent death';
+
+      let o =
+      {
+        execPath : 'node testAppParent.js stdio : ignore ipc : true',
+        mode : 'spawn',
+        outputCollecting : 1,
+        currentPath : a.routinePath,
+        ipc : 1,
+      }
+      let con = _.process.start( o );
+
+      let data;
+
+      o.process.on( 'message', ( got ) =>
+      {
+        data = got;
+        data.childPid = _.numberFrom( data.childPid );
+      })
+
+      con.then( ( got ) =>
+      {
+        test.identical( got.exitCode, 0 );
+        test.will = 'parent is dead, child is still alive';
+        test.is( !_.process.isAlive( o.process.pid ) );
+        test.is( _.process.isAlive( data.childPid ) );
+        return _.time.out( context.t2 );
+      })
+
+      con.then( () =>
+      {
+        test.will = 'both dead';
+
+        test.is( !_.process.isAlive( o.process.pid ) );
+        test.is( !_.process.isAlive( data.childPid ) );
+
+        test.is( a.fileProvider.fileExists( testFilePath ) );
+        let childPid = a.fileProvider.fileRead( testFilePath );
+        childPid = _.numberFrom( childPid );
+        test.identical( data.childPid, childPid )
+
+        return null;
+      })
+
+      return con;
+    })
+
+    /*  */
+
+    .then( () =>
+    {
+      test.case = 'process termination begins after short delay, detached process should continue to work after parent death';
+
+      let o =
+      {
+        execPath : 'node testAppParent.js stdio : pipe',
+        mode : 'spawn',
+        outputCollecting : 1,
+        currentPath : a.routinePath,
+        ipc : 1,
+      }
+      let con = _.process.start( o );
+
+      let data;
+
+      o.process.on( 'message', ( got ) =>
+      {
+        data = got;
+        data.childPid = _.numberFrom( data.childPid );
+      })
+
+      con.then( ( got ) =>
+      {
+        test.identical( got.exitCode, 0 );
+        test.will = 'parent is dead, child is still alive';
+        test.is( !_.process.isAlive( o.process.pid ) );
+        test.is( _.process.isAlive( data.childPid ) );
+        return _.time.out( context.t2 );
+      })
+
+      con.then( () =>
+      {
+        test.will = 'both dead';
+
+        test.is( !_.process.isAlive( o.process.pid ) );
+        test.is( !_.process.isAlive( data.childPid ) );
+
+        test.is( a.fileProvider.fileExists( testFilePath ) );
+        let childPid = a.fileProvider.fileRead( testFilePath );
+        childPid = _.numberFrom( childPid );
+        test.identical( data.childPid, childPid )
+
+        return null;
+      })
+
+      return con;
+    })
+
+    /*  */
+
+    if( mode !== 'shell' )
+    ready.then( () =>
+    {
+      test.case = 'process termination begins after short delay, detached process should continue to work after parent death';
+
+      let o =
+      {
+        execPath : 'node testAppParent.js stdio : pipe ipc : true',
+        mode : 'spawn',
+        outputCollecting : 1,
+        currentPath : a.routinePath,
+        ipc : 1,
+      }
+      let con = _.process.start( o );
+
+      let data;
+
+      o.process.on( 'message', ( got ) =>
+      {
+        data = got;
+        data.childPid = _.numberFrom( data.childPid );
+      })
+
+      con.then( ( got ) =>
+      {
+        test.identical( got.exitCode, 0 );
+        test.will = 'parent is dead, child is still alive';
+        test.is( !_.process.isAlive( o.process.pid ) );
+        test.is( _.process.isAlive( data.childPid ) );
+        return _.time.out( context.t2 );
+      })
+
+      con.then( () =>
+      {
+        test.will = 'both dead';
+
+        test.is( !_.process.isAlive( o.process.pid ) );
+        test.is( !_.process.isAlive( data.childPid ) );
+
+        test.is( a.fileProvider.fileExists( testFilePath ) );
+        let childPid = a.fileProvider.fileRead( testFilePath );
+        childPid = _.numberFrom( childPid );
+        test.identical( data.childPid, childPid )
+
+        return null;
+      })
+
+      return con;
+    })
+
+    return ready;
+  }
+
+  /*  */
 
   function testAppParent()
   {
@@ -10755,8 +10783,8 @@ function startDetachingModeSpawnTerminationBegin( test ) /* qqq2 : extend for ot
 
     let o =
     {
-      execPath : 'node testAppChild.js',
-      mode : 'spawn',
+      execPath : mode === 'fork' ? 'testAppChild.js' : 'node testAppChild.js',
+      mode,
       ipc : 0,
       detaching : true,
     }
@@ -10767,10 +10795,9 @@ function startDetachingModeSpawnTerminationBegin( test ) /* qqq2 : extend for ot
 
     process.send({ childPid : o.process.pid });
 
-    _.time.out( 1000, () => /* qqq : minimize and parametrize all time outs */
+    o.onStart.thenGive( () => /* qqq : minimize and parametrize all time outs */
     {
       _.procedure.terminationBegin();
-      return null;
     })
   }
 
@@ -10782,7 +10809,7 @@ function startDetachingModeSpawnTerminationBegin( test ) /* qqq2 : extend for ot
 
     console.log( 'Child process start' )
 
-    _.time.out( 5000, () =>
+    _.time.out( 2000, () =>
     {
       let filePath = _.path.join( __dirname, 'testFile' );
       _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
@@ -10792,446 +10819,7 @@ function startDetachingModeSpawnTerminationBegin( test ) /* qqq2 : extend for ot
   }
 }
 
-startDetachingModeSpawnTerminationBegin.timeOut = 120000;
-
-//
-
-function startDetachingModeForkTerminationBegin( test )
-{
-  let context = this;
-  let a = test.assetFor( false );
-  let testAppParentPath = a.path.nativize( a.program( testAppParent ) );
-  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
-
-  let testFilePath = a.abs( a.routinePath, 'testFile' );
-
-  /* */
-
-  a.ready
-
-  .then( () =>
-  {
-    test.case = 'process termination begins after short delay, detached process should continue to work after parent death';
-
-    let o =
-    {
-      execPath : 'node testAppParent.js stdio : ignore',
-      mode : 'spawn',
-      outputCollecting : 1,
-      currentPath : a.routinePath,
-      ipc : 1,
-    }
-    let con = _.process.start( o );
-
-    let data;
-
-    o.process.on( 'message', ( got ) =>
-    {
-      data = got;
-      data.childPid = _.numberFrom( data.childPid );
-    })
-
-    con.then( ( got ) =>
-    {
-      test.identical( got.exitCode, 0 );
-      test.will = 'parent is dead, child is still alive';
-      test.is( !_.process.isAlive( o.process.pid ) );
-      test.is( _.process.isAlive( data.childPid ) );
-      return _.time.out( 10000 );
-    })
-
-    con.then( () =>
-    {
-      test.will = 'both dead';
-
-      test.is( !_.process.isAlive( o.process.pid ) );
-      test.is( !_.process.isAlive( data.childPid ) );
-
-      test.is( a.fileProvider.fileExists( testFilePath ) );
-      let childPid = a.fileProvider.fileRead( testFilePath );
-      childPid = _.numberFrom( childPid );
-      test.identical( data.childPid, childPid )
-
-      return null;
-    })
-
-    return con;
-  })
-
-  /*  */
-
-  .then( () =>
-  {
-    test.case = 'process termination begins after short delay, detached process should continue to work after parent death';
-
-    let o =
-    {
-      execPath : 'node testAppParent.js stdio : ignore ipc : true',
-      mode : 'spawn',
-      outputCollecting : 1,
-      currentPath : a.routinePath,
-      ipc : 1,
-    }
-    let con = _.process.start( o );
-
-    let data;
-
-    o.process.on( 'message', ( got ) =>
-    {
-      data = got;
-      data.childPid = _.numberFrom( data.childPid );
-    })
-
-    con.then( ( got ) =>
-    {
-      test.identical( got.exitCode, 0 );
-      test.will = 'parent is dead, child is still alive';
-      test.is( !_.process.isAlive( o.process.pid ) );
-      test.is( _.process.isAlive( data.childPid ) );
-      return _.time.out( 10000 );
-    })
-
-    con.then( () =>
-    {
-      test.will = 'both dead';
-
-      test.is( !_.process.isAlive( o.process.pid ) );
-      test.is( !_.process.isAlive( data.childPid ) );
-
-      test.is( a.fileProvider.fileExists( testFilePath ) );
-      let childPid = a.fileProvider.fileRead( testFilePath );
-      childPid = _.numberFrom( childPid );
-      test.identical( data.childPid, childPid )
-
-      return null;
-    })
-
-    return con;
-  })
-
-  /*  */
-
-  .then( () =>
-  {
-    test.case = 'process termination begins after short delay, detached process should continue to work after parent death';
-
-    let o =
-    {
-      execPath : 'node testAppParent.js stdio : pipe',
-      mode : 'spawn',
-      outputCollecting : 1,
-      currentPath : a.routinePath,
-      ipc : 1,
-    }
-    let con = _.process.start( o );
-
-    let data;
-
-    o.process.on( 'message', ( got ) =>
-    {
-      data = got;
-      data.childPid = _.numberFrom( data.childPid );
-    })
-
-    con.then( ( got ) =>
-    {
-      test.identical( got.exitCode, 0 );
-      test.will = 'parent is dead, child is still alive';
-      test.is( !_.process.isAlive( o.process.pid ) );
-      test.is( _.process.isAlive( data.childPid ) );
-      return _.time.out( 10000 );
-    })
-
-    con.then( () =>
-    {
-      test.will = 'both dead';
-
-      test.is( !_.process.isAlive( o.process.pid ) );
-      test.is( !_.process.isAlive( data.childPid ) );
-
-      test.is( a.fileProvider.fileExists( testFilePath ) );
-      let childPid = a.fileProvider.fileRead( testFilePath );
-      childPid = _.numberFrom( childPid );
-      test.identical( data.childPid, childPid )
-
-      return null;
-    })
-
-    return con;
-  })
-
-  /*  */
-
-  .then( () =>
-  {
-    test.case = 'process termination begins after short delay, detached process should continue to work after parent death';
-
-    let o =
-    {
-      execPath : 'node testAppParent.js stdio : pipe ipc : true',
-      mode : 'spawn',
-      outputCollecting : 1,
-      currentPath : a.routinePath,
-      ipc : 1,
-    }
-    let con = _.process.start( o );
-
-    let data;
-
-    o.process.on( 'message', ( got ) =>
-    {
-      data = got;
-      data.childPid = _.numberFrom( data.childPid );
-    })
-
-    con.then( ( got ) =>
-    {
-      test.identical( got.exitCode, 0 );
-      test.will = 'parent is dead, child is still alive';
-      test.is( !_.process.isAlive( o.process.pid ) );
-      test.is( _.process.isAlive( data.childPid ) );
-      return _.time.out( 10000 );
-    })
-
-    con.then( () =>
-    {
-      test.will = 'both dead';
-
-      test.is( !_.process.isAlive( o.process.pid ) );
-      test.is( !_.process.isAlive( data.childPid ) );
-
-      test.is( a.fileProvider.fileExists( testFilePath ) );
-      let childPid = a.fileProvider.fileRead( testFilePath );
-      childPid = _.numberFrom( childPid );
-      test.identical( data.childPid, childPid )
-
-      return null;
-    })
-
-    return con;
-  })
-
-  /*  */
-
-  return a.ready;
-
-  /* - */
-
-  function testAppParent()
-  {
-    let _ = require( toolsPath );
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-
-    let args = _.process.args();
-
-    let o =
-    {
-      execPath : 'testAppChild.js',
-      mode : 'fork',
-      ipc : 0,
-      detaching : true,
-    }
-
-    _.mapExtend( o, args.map );
-
-    _.process.start( o );
-
-    process.send({ childPid : o.process.pid });
-
-    _.time.out( 1000, () =>
-    {
-      _.procedure.terminationBegin();
-      return null;
-    })
-  }
-
-  function testAppChild()
-  {
-    let _ = require( toolsPath );
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-
-    console.log( 'Child process start' )
-
-    _.time.out( 5000, () =>
-    {
-      let filePath = _.path.join( __dirname, 'testFile' );
-      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
-      console.log( 'Child process end' )
-      return null;
-    })
-  }
-}
-
-startDetachingModeForkTerminationBegin.timeOut = 300000;
-
-//
-
-function startDetachingModeShellTerminationBegin( test )
-{
-  let context = this;
-  let a = test.assetFor( false );
-  let testAppParentPath = a.path.nativize( a.program( testAppParent ) );
-  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
-
-  let testFilePath = a.abs( a.routinePath, 'testFile' );
-
-  a.ready
-
-  .then( () =>
-  {
-    test.case = 'process termination begins after short delay, detached process should continue to work after parent death';
-
-    let o =
-    {
-      execPath : 'node testAppParent.js stdio : ignore',
-      mode : 'spawn',
-      outputCollecting : 1,
-      currentPath : a.routinePath,
-      ipc : 1,
-    }
-    let con = _.process.start( o );
-
-    let data;
-
-    o.process.on( 'message', ( got ) =>
-    {
-      data = got;
-      data.childPid = _.numberFrom( data.childPid );
-    })
-
-    con.then( ( got ) =>
-    {
-      test.identical( got.exitCode, 0 );
-      test.will = 'parent is dead, child is still alive';
-      test.is( !_.process.isAlive( o.process.pid ) );
-      test.is( _.process.isAlive( data.childPid ) );
-      return _.time.out( 10000 );
-    })
-
-    con.then( () =>
-    {
-      test.will = 'both dead';
-
-      test.is( !_.process.isAlive( o.process.pid ) );
-      test.is( !_.process.isAlive( data.childPid ) );
-
-      test.is( a.fileProvider.fileExists( testFilePath ) );
-      let childPid = a.fileProvider.fileRead( testFilePath );
-      childPid = _.numberFrom( childPid );
-
-      test.is( !_.process.isAlive( childPid ) );
-
-      return null;
-    })
-
-    return con;
-  })
-
-  /*  */
-
-  .then( () =>
-  {
-    test.case = 'process termination begins after short delay, detached process should continue to work after parent death';
-
-    let o =
-    {
-      execPath : 'node testAppParent.js stdio : pipe',
-      mode : 'spawn',
-      outputCollecting : 1,
-      currentPath : a.routinePath,
-      ipc : 1,
-    }
-    let con = _.process.start( o );
-
-    let data;
-
-    o.process.on( 'message', ( got ) =>
-    {
-      data = got;
-      data.childPid = _.numberFrom( data.childPid );
-    })
-
-    con.then( ( got ) =>
-    {
-      test.identical( got.exitCode, 0 );
-      test.will = 'parent is dead, child is still alive';
-      test.is( !_.process.isAlive( o.process.pid ) );
-      test.is( _.process.isAlive( data.childPid ) );
-      return _.time.out( 10000 );
-    })
-
-    con.then( () =>
-    {
-      test.will = 'both dead';
-
-      test.is( !_.process.isAlive( o.process.pid ) );
-      test.is( !_.process.isAlive( data.childPid ) );
-
-      test.is( a.fileProvider.fileExists( testFilePath ) );
-      let childPid = a.fileProvider.fileRead( testFilePath );
-      childPid = _.numberFrom( childPid );
-
-      test.is( !_.process.isAlive( childPid ) );
-
-      return null;
-    })
-
-    return con;
-  })
-
-  /*  */
-
-  return a.ready;
-
-  function testAppParent()
-  {
-    let _ = require( toolsPath );
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-
-    let args = _.process.args();
-
-    let o =
-    {
-      execPath : 'node testAppChild.js',
-      mode : 'shell',
-      ipc : 0,
-      detaching : true,
-    }
-
-    _.mapExtend( o, args.map );
-
-    _.process.start( o );
-
-    process.send({ childPid : o.process.pid });
-
-    _.time.out( 1000, () =>
-    {
-      _.procedure.terminationBegin();
-      return null;
-    })
-  }
-
-  function testAppChild()
-  {
-    let _ = require( toolsPath );
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-
-    console.log( 'Child process start' )
-
-    _.time.out( 5000, () =>
-    {
-      let filePath = _.path.join( __dirname, 'testFile' );
-      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
-      console.log( 'Child process end' )
-      return null;
-    })
-  }
-
-}
+startDetachingTerminationBegin.timeOut = 180000;
 
 //
 
@@ -19038,9 +18626,7 @@ var Proto =
     startDetachingModeForkNoTerminationBegin,
     startDetachingModeShellNoTerminationBegin,
 
-    startDetachingModeSpawnTerminationBegin,
-    startDetachingModeForkTerminationBegin,
-    startDetachingModeShellTerminationBegin,
+    startDetachingTerminationBegin,
 
     startDetachingChildExitsAfterParent,
     startDetachingChildExitsBeforeParent,
