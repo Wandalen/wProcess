@@ -12794,263 +12794,283 @@ function startNjsDetachingTrivial( test )
 
 //
 
-function startOnStart( test ) /* qqq2 : add other modes. ask how to */
+function startOnStart( test ) /* qqq2 : add other modes. ask how to aaa:done */
 {
   let context = this;
   let a = test.assetFor( false );
   let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
   let track = [];
 
-  a.ready
+  let modes = [ 'fork', 'spawn', 'shell' ];
 
-  /* */
-
-  .then( () =>
+  modes.forEach( ( mode ) =>
   {
-    test.case = 'detaching off, no errors'
-    let o =
-    {
-      execPath : 'node testAppChild.js',
-      mode : 'spawn',
-      stdio : 'ignore',
-      currentPath : a.routinePath,
-      detaching : 0
-    }
-
-    let result = _.process.start( o );
-
-    test.notIdentical( o.onStart, result );
-    test.is( _.consequenceIs( o.onStart ) )
-
-    o.onStart.finally( ( err, got ) =>
-    {
-      test.identical( err, undefined );
-      test.identical( got, o );
-      test.is( _.process.isAlive( o.process.pid ) );
-      return null;
-    })
-
-    result.then( ( got ) =>
-    {
-      test.identical( o, got );
-      test.identical( got.exitCode, 0 );
-      test.identical( got.exitSignal, null );
-      return null;
-    })
-
-    return _.Consequence.AndTake_( o.onStart, result );
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    test.case = 'detaching off, error on spawn'
-    let o =
-    {
-      execPath : 'node -v',
-      mode : 'spawn',
-      stdio : [ null, 'something', null ],
-      currentPath : a.routinePath,
-      detaching : 0
-    }
-
-    let result = _.process.start( o );
-
-    test.notIdentical( o.onStart, result );
-    test.is( _.consequenceIs( o.onStart ) )
-
-    return test.shouldThrowErrorAsync( o.onTerminate );
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    test.case = 'detaching off, error on spawn, no callback for onStart'
-    let o =
-    {
-      execPath : 'node -v',
-      mode : 'spawn',
-      stdio : [ null, 'something', null ],
-      currentPath : a.routinePath,
-      detaching : 0
-    }
-
-    let result = _.process.start( o );
-
-    test.notIdentical( o.onStart, result );
-    test.is( _.consequenceIs( o.onStart ) )
-
-    return test.shouldThrowErrorAsync( o.onTerminate );
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    test.case = 'detaching on, onStart and result are same and give resource on start'
-    let o =
-    {
-      execPath : 'node testAppChild.js',
-      mode : 'spawn',
-      stdio : 'ignore',
-      currentPath : a.routinePath,
-      detaching : 1
-    }
-
-    let result = _.process.start( o );
-
-    test.identical( o.onStart, result );
-    test.is( _.consequenceIs( o.onStart ) )
-
-    o.onStart.then( ( got ) =>
-    {
-      test.identical( o, got );
-      test.identical( got.exitCode, null );
-      test.identical( got.exitSignal, null );
-      return null;
-    })
-
-    return _.Consequence.AndTake_( o.onStart, o.onTerminate );
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    test.case = 'detaching on, error on spawn'
-    let o =
-    {
-      execPath : 'testAppChild.js',
-      mode : 'fork',
-      stdio : [ 'ignore', 'ignore', 'ignore', null ],
-      currentPath : a.routinePath,
-      detaching : 1
-    }
-
-    let result = _.process.start( o );
-
-    test.is( o.onStart === result );
-    test.is( _.consequenceIs( o.onStart ) )
-
-    result = test.shouldThrowErrorAsync( o.onTerminate );
-
-    result.then( () => _.time.out( 2000 ) )
-    result.then( () =>
-    {
-      test.identical( o.onTerminate.resourcesCount(), 0 );
-      return null;
-    })
-
-    return result;
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    test.case = 'detaching on, disconnected child';
-    track = [];
-    let o =
-    {
-      execPath : 'node testAppChild.js',
-      mode : 'spawn',
-      stdio : 'ignore',
-      currentPath : a.routinePath,
-      detaching : 1
-    }
-
-    let result = _.process.start( o );
-
-    test.identical( o.onStart, result );
-
-    o.onStart.finally( ( err, got ) =>
-    {
-      track.push( 'onStart' );
-      test.identical( err, undefined );
-      test.identical( got, o );
-      test.is( _.process.isAlive( o.process.pid ) )
-      test.identical( o.state, 'started' );
-      o.disconnect();
-      return null;
-    })
-
-    o.onDisconnect.finally( ( err, got ) =>
-    {
-      track.push( 'onDisconnect' );
-      test.identical( err, undefined );
-      test.identical( got, o );
-      test.identical( o.state, 'disconnected' );
-      test.is( _.process.isAlive( o.process.pid ) );
-      return null;
-    })
-
-    o.onTerminate.finally( ( err, got ) =>
-    {
-      track.push( 'onTerminate' );
-      return null;
-    })
-
-    let ready = _.time.out( 5000, () =>
-    {
-      test.identical( track, [ 'onStart', 'onDisconnect' ] );
-      o.onTerminate.cancel();
-    })
-
-    return _.Consequence.AndTake_( o.onStart, o.onDisconnect, ready );
-  })
-
-  .then( () =>
-  {
-    test.case = 'detaching on, disconnected forked child'
-    let o =
-    {
-      execPath : 'testAppChild.js',
-      mode : 'fork',
-      stdio : 'ignore',
-      currentPath : a.routinePath,
-      detaching : 1
-    }
-
-    let result = _.process.start( o );
-
-    test.identical( o.onStart, result );
-
-    o.onStart.finally( ( err, got ) =>
-    {
-      test.identical( err, undefined );
-      test.identical( got, o );
-      test.identical( o.state, 'started' )
-      test.is( _.process.isAlive( o.process.pid ) )
-      o.disconnect();
-      return null;
-    })
-
-    o.onDisconnect.finally( ( err, got ) =>
-    {
-      test.identical( err, undefined );
-      test.identical( got, o );
-      test.identical( o.state, 'disconnected' )
-      test.is( _.process.isAlive( o.process.pid ) )
-      return null;
-    })
-
-    result = _.time.out( 2000 + context.t2, () =>
-    {
-      test.is( !_.process.isAlive( o.process.pid ) )
-      test.identical( o.exitCode, null );
-      test.identical( o.exitSignal, null );
-      test.identical( o.onTerminate.resourcesCount(), 0 );
-      return null;
-    })
-
-    return _.Consequence.AndTake_( o.onStart, o.onDisconnect, result );
-  })
-
-  /* */
+    a.ready.tap( () => test.open( mode ) );
+    a.ready.then( () => run( mode ) );
+    a.ready.tap( () => test.close( mode ) );
+  });
 
   return a.ready;
+
+  /* */
+
+  function run( mode )
+  {
+    let fork = mode === 'fork';
+    let ready = new _.Consequence().take( null )
+
+    /* */
+
+    .then( () =>
+    {
+      test.case = 'detaching off, no errors'
+      let o =
+      {
+        execPath : !fork ? 'node testAppChild.js' : 'testAppChild.js',
+        mode,
+        stdio : 'ignore',
+        currentPath : a.routinePath,
+        detaching : 0
+      }
+
+      let result = _.process.start( o );
+
+      test.notIdentical( o.onStart, result );
+      test.is( _.consequenceIs( o.onStart ) )
+
+      o.onStart.finally( ( err, got ) =>
+      {
+        test.identical( err, undefined );
+        test.identical( got, o );
+        test.is( _.process.isAlive( o.process.pid ) );
+        return null;
+      })
+
+      result.then( ( got ) =>
+      {
+        test.identical( o, got );
+        test.identical( got.exitCode, 0 );
+        test.identical( got.exitSignal, null );
+        return null;
+      })
+
+      return _.Consequence.AndTake_( o.onStart, result );
+    })
+
+    /* */
+
+    .then( () =>
+    {
+      test.case = 'detaching off, error on spawn'
+      let o =
+      {
+        execPath : 'unknownScript.js',
+        mode,
+        stdio : [ null, 'something', null ],
+        currentPath : a.routinePath,
+        detaching : 0
+      }
+
+      let result = _.process.start( o );
+
+      test.notIdentical( o.onStart, result );
+      test.is( _.consequenceIs( o.onStart ) )
+
+      return test.shouldThrowErrorAsync( o.onTerminate );
+    })
+
+    /* */
+
+    .then( () =>
+    {
+      test.case = 'detaching off, error on spawn, no callback for onStart'
+      let o =
+      {
+        execPath : 'unknownScript.js',
+        mode,
+        stdio : [ null, 'something', null ],
+        currentPath : a.routinePath,
+        detaching : 0
+      }
+
+      let result = _.process.start( o );
+
+      test.notIdentical( o.onStart, result );
+      test.is( _.consequenceIs( o.onStart ) )
+
+      return test.shouldThrowErrorAsync( o.onTerminate );
+    })
+
+    /* */
+
+    .then( () =>
+    {
+      test.case = 'detaching on, onStart and result are same and give resource on start'
+      let o =
+      {
+        execPath : !fork ? 'node testAppChild.js' : 'testAppChild.js',
+        mode,
+        stdio : 'ignore',
+        currentPath : a.routinePath,
+        detaching : 1
+      }
+
+      let result = _.process.start( o );
+
+      test.identical( o.onStart, result );
+      test.is( _.consequenceIs( o.onStart ) )
+
+      o.onStart.then( ( got ) =>
+      {
+        test.identical( o, got );
+        test.identical( got.exitCode, null );
+        test.identical( got.exitSignal, null );
+        return null;
+      })
+
+      return _.Consequence.AndTake_( o.onStart, o.onTerminate );
+    })
+
+    /* */
+
+    .then( () =>
+    {
+      test.case = 'detaching on, error on spawn'
+      let o =
+      {
+        execPath : 'unknownScript.js',
+        mode,
+        stdio : [ 'ignore', 'ignore', 'ignore', null ],
+        currentPath : a.routinePath,
+        detaching : 1
+      }
+
+      let result = _.process.start( o );
+
+      test.is( o.onStart === result );
+      test.is( _.consequenceIs( o.onStart ) )
+
+      result = test.shouldThrowErrorAsync( o.onTerminate );
+
+      result.then( () => _.time.out( 2000 ) )
+      result.then( () =>
+      {
+        test.identical( o.onTerminate.resourcesCount(), 0 );
+        return null;
+      })
+
+      return result;
+    })
+
+    /* */
+
+    .then( () =>
+    {
+      test.case = 'detaching on, disconnected child';
+      track = [];
+      let o =
+      {
+        execPath : !fork ? 'node testAppChild.js' : 'testAppChild.js',
+        mode,
+        stdio : 'ignore',
+        currentPath : a.routinePath,
+        detaching : 1
+      }
+
+      let result = _.process.start( o );
+
+      test.identical( o.onStart, result );
+
+      o.onStart.finally( ( err, got ) =>
+      {
+        track.push( 'onStart' );
+        test.identical( err, undefined );
+        test.identical( got, o );
+        test.is( _.process.isAlive( o.process.pid ) )
+        test.identical( o.state, 'started' );
+        o.disconnect();
+        return null;
+      })
+
+      o.onDisconnect.finally( ( err, got ) =>
+      {
+        track.push( 'onDisconnect' );
+        test.identical( err, undefined );
+        test.identical( got, o );
+        test.identical( o.state, 'disconnected' );
+        test.is( _.process.isAlive( o.process.pid ) );
+        return null;
+      })
+
+      o.onTerminate.finally( ( err, got ) =>
+      {
+        track.push( 'onTerminate' );
+        return null;
+      })
+
+      let ready = _.time.out( 5000, () =>
+      {
+        test.identical( track, [ 'onStart', 'onDisconnect' ] );
+        o.onTerminate.cancel();
+      })
+
+      return _.Consequence.AndTake_( o.onStart, o.onDisconnect, ready );
+    })
+
+    /* */
+
+    .then( () =>
+    {
+      test.case = 'detaching on, disconnected forked child'
+      let o =
+      {
+        execPath : !fork ? 'node testAppChild.js' : 'testAppChild.js',
+        mode,
+        stdio : 'ignore',
+        currentPath : a.routinePath,
+        detaching : 1
+      }
+
+      let result = _.process.start( o );
+
+      test.identical( o.onStart, result );
+
+      o.onStart.finally( ( err, got ) =>
+      {
+        test.identical( err, undefined );
+        test.identical( got, o );
+        test.identical( o.state, 'started' )
+        test.is( _.process.isAlive( o.process.pid ) )
+        o.disconnect();
+        return null;
+      })
+
+      o.onDisconnect.finally( ( err, got ) =>
+      {
+        test.identical( err, undefined );
+        test.identical( got, o );
+        test.identical( o.state, 'disconnected' )
+        test.is( _.process.isAlive( o.process.pid ) )
+        return null;
+      })
+
+      result = _.time.out( 2000 + context.t2, () =>
+      {
+        test.is( !_.process.isAlive( o.process.pid ) )
+        test.identical( o.exitCode, null );
+        test.identical( o.exitSignal, null );
+        test.identical( o.onTerminate.resourcesCount(), 0 );
+        return null;
+      })
+
+      return _.Consequence.AndTake_( o.onStart, o.onDisconnect, result );
+    })
+
+    /* */
+
+    return ready;
+  }
+
 
   /* */
 
@@ -13073,9 +13093,11 @@ function startOnStart( test ) /* qqq2 : add other modes. ask how to */
 
 }
 
+startOnStart.timeOut = 120000;
+
 //
 
-function startOnTerminate( test ) /* qqq2 : add other modes. ask how to */
+function startOnTerminate( test ) /* qqq2 : add other modes. ask how to aaa:done */
 {
   let context = this;
   let a = test.assetFor( false );
