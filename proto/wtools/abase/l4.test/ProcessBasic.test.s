@@ -16262,6 +16262,87 @@ function terminate( test )
   }
 }
 
+//
+
+function errorAfterTerminationWithSend( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
+  let track = [];
+
+  /* */
+
+  var o =
+  {
+    execPath :  'node',
+    args : [ testAppPath ],
+    mode : 'spawn',
+    ipc : 1
+  }
+
+  _.process.on( 'uncaughtError', uncaughtError );
+
+  let result = _.process.start( o );
+
+  o.onStart.then( ( arg ) =>
+  {
+    track.push( 'onStart' );
+    return null
+  });
+
+  /* xxx qqq : normalize */
+  o.onTerminate.finally( ( err, got ) =>
+  {
+    track.push( 'onTerminate' );
+    test.identical( err, undefined );
+    test.identical( got, o );
+    test.identical( o.exitCode, 0 );
+
+    /* Attempt to send data when ipc channel is closed */
+    o.process.send( 1 );
+
+    return null;
+  })
+
+  return _.time.out( 10000, () =>
+  {
+    test.identical( track, [ 'onStart', 'onTerminate', 'uncaughtError' ] );
+    test.identical( o.ended, true );
+    test.identical( o.state, 'terminated' );
+    test.identical( o.error, null );
+    test.identical( o.exitCode, 0 );
+    test.identical( o.exitSignal, null );
+    test.identical( o.process.exitCode, 0 );
+    test.identical( o.process.signalCode, null );
+  });
+
+  /* - */
+
+  function testApp()
+  {
+    setTimeout( () => {}, 1000 );
+  }
+
+  function uncaughtError( e )
+  {
+    test.identical( e.err.originalMessage, 'Channel closed' )
+    _.errAttend( e.err );
+    track.push( 'uncaughtError' );
+    _.process.off( 'uncaughtError' );
+  }
+
+}
+
+errorAfterTerminationWithSend.description =
+`
+  - handleClose receive error after termination of the process
+  - error caused by call o.process.send()
+  - throws asynchronouse uncahught error
+`
+
+//
+
 /*
 ### Modes in which child process terminates after signal:
 
@@ -16704,85 +16785,6 @@ endStructuralKill.description =
  - end process with _.process.kill()
  - should wait 1s
  - should have proper exitSignal, exitCode and terminationReason
-`
-
-//
-
-function errorAfterTerminationWithSend( test )
-{
-  let context = this;
-  let a = test.assetFor( false );
-  let testAppPath = a.path.nativize( a.program( testApp ) );
-  let track = [];
-
-  /* */
-
-  var o =
-  {
-    execPath :  'node',
-    args : [ testAppPath ],
-    mode : 'spawn',
-    ipc : 1
-  }
-
-  _.process.on( 'uncaughtError', uncaughtError );
-
-  let result = _.process.start( o );
-
-  o.onStart.then( ( arg ) =>
-  {
-    track.push( 'onStart' );
-    return null
-  });
-
-  /* xxx qqq : normalize */
-  o.onTerminate.finally( ( err, got ) =>
-  {
-    track.push( 'onTerminate' );
-    test.identical( err, undefined );
-    test.identical( got, o );
-    test.identical( o.exitCode, 0 );
-
-    /* Attempt to send data when ipc channel is closed */
-    o.process.send( 1 );
-
-    return null;
-  })
-
-  return _.time.out( 10000, () =>
-  {
-    test.identical( track, [ 'onStart', 'onTerminate', 'uncaughtError' ] );
-    test.identical( o.ended, true );
-    test.identical( o.state, 'terminated' );
-    test.identical( o.error, null );
-    test.identical( o.exitCode, 0 );
-    test.identical( o.exitSignal, null );
-    test.identical( o.process.exitCode, 0 );
-    test.identical( o.process.signalCode, null );
-  });
-
-  /* - */
-
-  function testApp()
-  {
-    setTimeout( () => {}, 1000 );
-  }
-
-  function uncaughtError( e )
-  {
-    test.identical( e.err.originalMessage, 'Channel closed' )
-    _.errAttend( e.err );
-    track.push( 'uncaughtError' );
-    _.process.off( 'uncaughtError' );
-  }
-
-}
-
-errorAfterTerminationWithSend.description =
-`
-  - handleClose receive error after termination of the process
-  - error caused by call o.process.send()
-  - throws asynchronouse uncahught error
 `
 
 //
@@ -18974,12 +18976,12 @@ var Proto =
     kill,
     killWithChildren,
     terminate,
-
-    endStructuralSigint, /* qqq yyy : switch on */
-    endStructuralSigkill,
-    endStructuralTerminate,
-    endStructuralKill,
     errorAfterTerminationWithSend,
+
+    // endStructuralSigint, /* qqq yyy : switch on */
+    // endStructuralSigkill,
+    // endStructuralTerminate,
+    // endStructuralKill,
 
     terminateComplex,
     terminateDetachedComplex,
