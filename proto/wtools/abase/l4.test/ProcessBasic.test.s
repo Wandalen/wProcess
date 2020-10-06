@@ -17220,6 +17220,8 @@ function terminateComplex( test )
       stdio : 'inherit',
       detaching,
       inputMirroring : 0,
+      outputPiping : 0,
+      outputCollecting : 0,
       throwingExitCode : 0
     }
     _.process.start( o );
