@@ -1989,15 +1989,15 @@ function shellFork( test )
       args : [ 'arg1', 'arg2' ],
       mode : 'fork',
       stdio : 'ignore',
-      outputCollecting : 1,
-      outputPiping : 1,
+      outputCollecting : 0,
+      outputPiping : 0,
     }
 
     return _.process.start( o )
     .thenKeep( function( got )
     {
       test.identical( o.exitCode, 0 );
-      test.identical( o.output.length, 0 );
+      test.identical( o.output, null );
       return null;
     })
   })
