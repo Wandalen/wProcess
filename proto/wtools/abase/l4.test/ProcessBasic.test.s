@@ -10416,16 +10416,17 @@ function startDetachingModeShellNoTerminationBegin( test )
 
 //
 
-function startDetachingModeSpawnTerminationBegin( test )
+function startDetachingModeSpawnTerminationBegin( test ) /* qqq2 : extend for other modes? */
 {
   let context = this;
   let a = test.assetFor( false );
   let testAppParentPath = a.path.nativize( a.program( testAppParent ) );
   let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
-
   let testFilePath = a.abs( a.routinePath, 'testFile' );
 
   a.ready
+
+  /*  */
 
   .then( () =>
   {
@@ -10443,7 +10444,7 @@ function startDetachingModeSpawnTerminationBegin( test )
 
     let data;
 
-    o.process.on( 'message', ( got ) =>
+    o.process.on( 'message', ( got ) => /* qqq : got -> e */
     {
       data = got;
       data.childPid = _.numberFrom( data.childPid );
@@ -10451,11 +10452,11 @@ function startDetachingModeSpawnTerminationBegin( test )
 
     con.then( ( got ) =>
     {
-      test.identical( got.exitCode, 0 );
       test.will = 'parent is dead, child is still alive';
+      test.identical( got.exitCode, 0 );
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( _.process.isAlive( data.childPid ) );
-      return _.time.out( 20000 );
+      return _.time.out( 10000 );
     })
 
     con.then( () =>
@@ -10506,7 +10507,7 @@ function startDetachingModeSpawnTerminationBegin( test )
       test.will = 'parent is dead, child is still alive';
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( _.process.isAlive( data.childPid ) );
-      return _.time.out( 20000 );
+      return _.time.out( 10000 );
     })
 
     con.then( () =>
@@ -10557,7 +10558,7 @@ function startDetachingModeSpawnTerminationBegin( test )
       test.will = 'parent is dead, child is still alive';
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( _.process.isAlive( data.childPid ) );
-      return _.time.out( 20000 );
+      return _.time.out( 10000 );
     })
 
     con.then( () =>
@@ -10608,7 +10609,7 @@ function startDetachingModeSpawnTerminationBegin( test )
       test.will = 'parent is dead, child is still alive';
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( _.process.isAlive( data.childPid ) );
-      return _.time.out( 20000 );
+      return _.time.out( 10000 );
     })
 
     con.then( () =>
@@ -10655,7 +10656,7 @@ function startDetachingModeSpawnTerminationBegin( test )
 
     process.send({ childPid : o.process.pid });
 
-    _.time.out( 1000, () =>
+    _.time.out( 1000, () => /* qqq : minimize and parametrize all time outs */
     {
       _.procedure.terminationBegin();
       return null;

@@ -378,11 +378,19 @@ function start_body( o )
     if( err )
     o.error = o.error || err;
 
-    debugger;
+    if( Config.debug )
+    try
+    {
+      _.assert( o.state === 'terminated' || o.state === 'disconnected' || !!o.error );
+      _.assert( o.ended === false );
+    }
+    catch( err2 )
+    {
+      err = err || err2;
+    }
+
     o.ended = true;
     Object.freeze( o );
-
-    _.assert( o.state === 'terminated' || o.state === 'disconnected' || !!o.error );
 
     if( err )
     {
@@ -397,6 +405,7 @@ function start_body( o )
 
   function handleClose( exitCode, exitSignal )
   {
+    debugger;
 
     if( o.ended )
     return;
@@ -460,6 +469,7 @@ function start_body( o )
       throw _.err( err );
     }
 
+
     exitCodeSet( -1 );
 
     o.terminationReason = 'error';
@@ -482,13 +492,34 @@ function start_body( o )
 
   function handleDisconnect( arg )
   {
-    // console.log( 'disconnect' ); debugger;
+    console.log( 'handleDisconnect', _.process.realMainFile(), o.ended ); debugger;
+
+    /*
+    event "disconnect" may come just before event "close"
+    so need to give a chance to event "close" to come first
+    */
+
+    if( !o.ended )
+    _.time.begin( 100, () =>
+    {
+      if( !o.ended )
+      {
+        debugger;
+        o.state = 'disconnected';
+        o.onDisconnect.take( this );
+        end( undefined, o );
+        throw _.err( 'not tested' );
+      }
+    });
+
   }
 
   /* */
 
   function disconnect()
   {
+    console.log( 'disconnect', _.process.realMainFile(), this.ended ); debugger;
+
     _.assert( !!this.process, 'Process is not started. Cant disconnect.' );
 
     // qqq2 : check disconnection of regular process, probably close event is not fired
@@ -510,7 +541,7 @@ function start_body( o )
     if( this.procedure.isAlive() )
     this.procedure.end();
 
-    if( !this.eneded )
+    if( !this.ended )
     {
       this.state = 'disconnected';
       this.onDisconnect.take( this );
@@ -614,10 +645,9 @@ function start_body( o )
         _.assert( o.state === 'starting' );
         o.state = 'terminated';
         o.onTerminate.take( o );
-        // end( undefined, o );
       }
 
-      // if( o.dry )
+      // if( o.dry ) /* yyy */
       // o.onTerminate.take( o );
 
     }
