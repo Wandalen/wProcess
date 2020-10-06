@@ -1590,7 +1590,8 @@ defaults.passingThrough = 1;
 defaults.maximumMemory = 1;
 defaults.applyingExitCode = 1;
 defaults.throwingExitCode = 0;
-defaults.outputPiping = 1;
+defaults.outputPiping = 0;
+defaults.outputCollecting = 0;
 defaults.mode = 'fork';
 
 //
