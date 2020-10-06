@@ -11099,7 +11099,13 @@ function startDetachingDisconnectedEarly( test )
   /* */
 
   let modes = [ 'fork', 'spawn', 'shell' ];
-  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  modes.forEach( ( mode ) =>
+  {
+    a.ready.tap( () => test.open( mode ) )
+    a.ready.then( () => run( mode ) )
+    a.ready.tap( () => test.close( mode ) )
+
+  });
 
   return a.ready;
 
@@ -11111,7 +11117,7 @@ function startDetachingDisconnectedEarly( test )
     ready
     .then( () =>
     {
-      test.case = `detaching on, disconnected forked child, mode:${mode}`;
+      test.case = `detaching on, disconnected forked child`;
       let o =
       {
         execPath : mode !== 'fork' ? 'node program1.js' : 'program1.js',
@@ -11139,32 +11145,33 @@ function startDetachingDisconnectedEarly( test )
       test.identical( o.state, 'started' );
 
       test.is( o.onStart === result );
-      test.is( _.consequenceIs( o.onStart ) )
+      test.is( _.consequenceIs( o.onStart ) );
 
-      o.onStart.finally( ( err, got ) =>
+      o.disconnect();
+
+      o.onStart.finally( ( err, op ) =>
       {
         track.push( 'onStart' );
         test.identical( err, undefined );
-        test.identical( got, o );
+        test.identical( op, o );
         test.is( _.process.isAlive( o.process.pid ) )
-        return null;
-      })
-
-      o.onDisconnect.finally( ( err, got ) =>
-      {
-        track.push( 'onStart' );
-        test.identical( err, undefined );
-        test.identical( got, o );
-        test.is( _.process.isAlive( o.process.pid ) )
-
-        test.identical( o.state, 'started' );
-        o.disconnect();
         test.identical( o.state, 'disconnected' );
 
         return null;
       })
 
-      o.onTerminate.finally( ( err, got ) =>
+      o.onDisconnect.finally( ( err, op ) =>
+      {
+        track.push( 'onDisconnect' );
+        test.identical( err, undefined );
+        test.identical( op, o );
+        test.is( _.process.isAlive( o.process.pid ) )
+        test.identical( o.state, 'disconnected' );
+
+        return null;
+      })
+
+      o.onTerminate.finally( ( err, op ) =>
       {
         track.push( 'onTerminate' );
         return null;
@@ -11180,7 +11187,7 @@ function startDetachingDisconnectedEarly( test )
         return null;
       })
 
-      return _.Consequence.AndTake_( o.onStart, result );
+      return _.Consequence.AndTake_( o.onStart, o.onDisconnect, result );
     })
 
     /* */
@@ -11240,6 +11247,8 @@ function startDetachingDisconnectedLate( test )
         execPath : mode !== 'fork' ? 'node program1.js' : 'program1.js',
         mode,
         stdio : 'ignore',
+        outputPiping : 0,
+        outputCollecting : 0,
         currentPath : a.routinePath,
         detaching : 1,
         ipc : 0,
