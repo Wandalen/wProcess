@@ -12448,6 +12448,8 @@ function startOnStart( test ) /* qqq2 : add other modes. ask how to aaa:done */
         execPath : !fork ? 'node testAppChild.js' : 'testAppChild.js',
         mode,
         stdio : 'ignore',
+        outputPiping : 0,
+        outputCollecting : 0,
         currentPath : a.routinePath,
         detaching : 0
       }
@@ -12530,6 +12532,8 @@ function startOnStart( test ) /* qqq2 : add other modes. ask how to aaa:done */
         execPath : !fork ? 'node testAppChild.js' : 'testAppChild.js',
         mode,
         stdio : 'ignore',
+        outputPiping : 0,
+        outputCollecting : 0,
         currentPath : a.routinePath,
         detaching : 1
       }
@@ -12560,6 +12564,8 @@ function startOnStart( test ) /* qqq2 : add other modes. ask how to aaa:done */
         execPath : 'unknownScript.js',
         mode,
         stdio : [ 'ignore', 'ignore', 'ignore', null ],
+        outputPiping : 0,
+        outputCollecting : 0,
         currentPath : a.routinePath,
         detaching : 1
       }
@@ -12592,6 +12598,8 @@ function startOnStart( test ) /* qqq2 : add other modes. ask how to aaa:done */
         execPath : !fork ? 'node testAppChild.js' : 'testAppChild.js',
         mode,
         stdio : 'ignore',
+        outputPiping : 0,
+        outputCollecting : 0,
         currentPath : a.routinePath,
         detaching : 1
       }
@@ -12646,6 +12654,8 @@ function startOnStart( test ) /* qqq2 : add other modes. ask how to aaa:done */
         execPath : !fork ? 'node testAppChild.js' : 'testAppChild.js',
         mode,
         stdio : 'ignore',
+        outputPiping : 0,
+        outputCollecting : 0,
         currentPath : a.routinePath,
         detaching : 1
       }
