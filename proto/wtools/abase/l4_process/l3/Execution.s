@@ -1598,9 +1598,9 @@ function startAfterDeath_body( o )
   let toolsPathInclude = `let _ = require( '${_.strEscape( toolsPath )}' );\n`
   let secondaryProcessSource = toolsPathInclude + afterDeathSecondaryProcess.toString() + '\nafterDeathSecondaryProcess();';
   let secondaryFilePath = _.process.tempOpen({ sourceCode : secondaryProcessSource });
-  let srcOptions = _.mapExtend( null, o );
+  let srcOptions = _.mapExtend( null, o ); /* qqq : remove duplication of o-map */
 
-  let o2 = _.mapExtend( null, o );
+  let o2 = _.mapExtend( null, o ); /* qqq : remove duplication of o-map */
   o2.execPath = _.path.nativize( secondaryFilePath );
   o2.mode = 'fork';
   o2.args = [];
