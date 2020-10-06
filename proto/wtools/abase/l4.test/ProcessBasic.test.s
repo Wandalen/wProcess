@@ -11997,7 +11997,8 @@ function startDetachingModeForkIpc( test )
     {
       execPath : 'testAppChild.js',
       mode : 'fork',
-      outputCollecting : 1,
+      outputPiping : 0,
+      outputCollecting : 0,
       stdio : 'ignore',
       currentPath : a.routinePath,
       detaching : 1,
