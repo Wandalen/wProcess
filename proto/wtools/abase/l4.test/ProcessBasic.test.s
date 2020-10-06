@@ -11117,6 +11117,8 @@ function startDetachingDisconnectedEarly( test )
         execPath : mode !== 'fork' ? 'node program1.js' : 'program1.js',
         mode,
         stdio : 'ignore',
+        outputPiping : 0,
+        outputCollecting : 0,
         currentPath : a.routinePath,
         detaching : 1,
         ipc : 0,
