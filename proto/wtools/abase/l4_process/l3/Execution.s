@@ -953,8 +953,8 @@ function start_body( o )
     return;
 
     // qqq2 yyy : uncomment
-    // if( o.outputPiping || o.outputCollecting )
-    // _.assert( !!o.process.stdout || !!o.process.stderr, 'stdout is not available to collect output or pipe it. Set option::stdio to "pipe"' );
+    if( o.outputPiping || o.outputCollecting )
+    _.assert( !!o.process.stdout || !!o.process.stderr, 'stdout is not available to collect output or pipe it. Set option::stdio to "pipe"' );
 
     /* piping out channel */
 

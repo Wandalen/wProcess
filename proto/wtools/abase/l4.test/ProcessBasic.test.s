@@ -14768,6 +14768,481 @@ shellLoggerOption.timeOut = 30000;
 
 //
 
+function startOutputOptionsCompatibilityLateCheck( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
+
+  let modes = [ 'spawn', 'fork', 'shell' ];
+
+  modes.forEach( ( mode ) =>
+  {
+    a.ready.tap( () => test.open( mode ) );
+    a.ready.then( () => run( mode ) );
+    a.ready.tap( () => test.close( mode ) );
+  })
+
+  return a.ready;
+
+  /* */
+
+  function run( mode )
+  {
+    let commonOptions =
+    {
+      execPath : mode === 'fork' ? 'testApp.js' : 'node testApp.js',
+      mode,
+      currentPath : a.routinePath,
+    }
+
+    let ready = _.Consequence().take( null )
+
+    .then( () =>
+    {
+      let o =
+      {
+        outputPiping : 0,
+        outputCollecting : 0,
+        stdio : 'ignore',
+      }
+
+      _.mapExtend( o, commonOptions );
+
+      _.process.start( o );
+
+      o.onTerminate.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.exitSignal, null );
+        return null;
+      })
+
+      return o.onTerminate;
+    })
+
+    /* */
+
+    .then( () =>
+    {
+      let o =
+      {
+        outputPiping : 1,
+        outputCollecting : 0,
+        stdio : 'ignore',
+      }
+      _.mapExtend( o, commonOptions );
+
+      return test.shouldThrowErrorAsync( _.process.start( o ) );
+    })
+
+    /* */
+
+    .then( () =>
+    {
+      let o =
+      {
+        outputPiping : 0,
+        outputCollecting : 1,
+        stdio : 'ignore',
+      }
+      _.mapExtend( o, commonOptions );
+
+      return test.shouldThrowErrorAsync( _.process.start( o ) );
+    })
+
+    /* */
+
+    .then( () =>
+    {
+      let o =
+      {
+        outputPiping : 1,
+        outputCollecting : 1,
+        stdio : 'ignore',
+      }
+      _.mapExtend( o, commonOptions );
+
+      return test.shouldThrowErrorAsync( _.process.start( o ) );
+    })
+
+    /* */
+
+    .then( () =>
+    {
+      let o =
+      {
+        outputPiping : 0,
+        outputCollecting : 0,
+        stdio : 'pipe',
+      }
+
+      _.mapExtend( o, commonOptions );
+
+      _.process.start( o );
+
+      o.onTerminate.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.exitSignal, null );
+        return null;
+      })
+
+      return o.onTerminate;
+    })
+
+    /* */
+
+    .then( () =>
+    {
+      let o =
+      {
+        outputPiping : 1,
+        outputCollecting : 0,
+        stdio : 'pipe',
+      }
+
+      _.mapExtend( o, commonOptions );
+
+      _.process.start( o );
+
+      o.onTerminate.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.exitSignal, null );
+        return null;
+      })
+
+      return o.onTerminate;
+    })
+
+    /* */
+
+    .then( () =>
+    {
+      let o =
+      {
+        outputPiping : 0,
+        outputCollecting : 1,
+        stdio : 'pipe',
+      }
+
+      _.mapExtend( o, commonOptions );
+
+      _.process.start( o );
+
+      o.onTerminate.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.exitSignal, null );
+        test.is( _.strHas( op.output, 'Test output' ) );
+        return null;
+      })
+
+      return o.onTerminate;
+    })
+
+    /* */
+
+    .then( () =>
+    {
+      let o =
+      {
+        outputPiping : 1,
+        outputCollecting : 1,
+        stdio : 'pipe',
+      }
+
+      _.mapExtend( o, commonOptions );
+
+      _.process.start( o );
+
+      o.onTerminate.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.exitSignal, null );
+        test.is( _.strHas( op.output, 'Test output' ) );
+        return null;
+      })
+
+      return o.onTerminate;
+    })
+
+    /* */
+
+    .then( () =>
+    {
+      let o =
+      {
+        outputPiping : 0,
+        outputCollecting : 0,
+        stdio : 'inherit',
+      }
+
+      _.mapExtend( o, commonOptions );
+
+      _.process.start( o );
+
+      o.onTerminate.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.exitSignal, null );
+        return null;
+      })
+
+      return o.onTerminate;
+    })
+
+    /* */
+
+    .then( () =>
+    {
+      let o =
+      {
+        outputPiping : 1,
+        outputCollecting : 0,
+        stdio : 'inherit',
+      }
+
+      _.mapExtend( o, commonOptions );
+
+      return test.shouldThrowErrorAsync( _.process.start( o ) );
+    })
+
+    /* */
+
+    .then( () =>
+    {
+      let o =
+      {
+        outputPiping : 0,
+        outputCollecting : 1,
+        stdio : 'inherit',
+      }
+
+      _.mapExtend( o, commonOptions );
+
+      return test.shouldThrowErrorAsync( _.process.start( o ) );
+    })
+
+    /* */
+
+    .then( () =>
+    {
+      let o =
+      {
+        outputPiping : 1,
+        outputCollecting : 1,
+        stdio : 'inherit',
+      }
+
+      _.mapExtend( o, commonOptions );
+
+      return test.shouldThrowErrorAsync( _.process.start( o ) );
+    })
+
+    /* */
+
+    .then( () =>
+    {
+      let o =
+      {
+        outputPiping : 1,
+        outputCollecting : 1,
+        stdio : [ 'ignore', 'ignore', 'ignore', mode === 'fork' ? 'ipc' : null ],
+      }
+
+      _.mapExtend( o, commonOptions );
+
+      return test.shouldThrowErrorAsync( _.process.start( o ) );
+    })
+
+    /* */
+
+    .then( () =>
+    {
+      let o =
+      {
+        outputPiping : 1,
+        outputCollecting : 1,
+        stdio : [ 'inherit', 'inherit', 'inherit', mode === 'fork' ? 'ipc' : null ],
+      }
+
+      _.mapExtend( o, commonOptions );
+
+      return test.shouldThrowErrorAsync( _.process.start( o ) );
+    })
+
+    /* */
+
+    .then( () =>
+    {
+      let o =
+      {
+        outputPiping : 1,
+        outputCollecting : 1,
+        stdio : [ 'pipe', 'pipe', 'pipe', mode === 'fork' ? 'ipc' : null ],
+      }
+
+      _.mapExtend( o, commonOptions );
+
+      _.process.start( o );
+
+      o.onTerminate.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.exitSignal, null );
+        test.is( _.strHas( op.output, 'Test output' ) );
+        return null;
+      })
+
+      return o.onTerminate;
+    })
+
+    /* */
+
+    .then( () =>
+    {
+      let o =
+      {
+        outputPiping : 1,
+        outputCollecting : 1,
+        stdio : [ 'ignore', 'pipe', 'ignore', mode === 'fork' ? 'ipc' : null ],
+      }
+
+      _.mapExtend( o, commonOptions );
+
+      _.process.start( o );
+
+      o.onTerminate.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.exitSignal, null );
+        test.is( _.strHas( op.output, 'Test output' ) );
+        return null;
+      })
+
+      return o.onTerminate;
+    })
+
+    /* */
+
+    .then( () =>
+    {
+      let o =
+      {
+        outputPiping : 1,
+        outputCollecting : 1,
+        stdio : [ 'ignore', 'ignore', 'pipe', mode === 'fork' ? 'ipc' : null ],
+      }
+
+      _.mapExtend( o, commonOptions );
+
+      _.process.start( o );
+
+      o.onTerminate.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.exitSignal, null );
+        test.is( !_.strHas( op.output, 'Test output' ) );
+        return null;
+      })
+
+      return o.onTerminate;
+    })
+
+    /* */
+
+    .then( () =>
+    {
+      let o =
+      {
+        outputPiping : 1,
+        outputCollecting : 1,
+        stdio : [ 'ignore', 'pipe', 'inherit', mode === 'fork' ? 'ipc' : null ],
+      }
+
+      _.mapExtend( o, commonOptions );
+
+      _.process.start( o );
+
+      o.onTerminate.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.exitSignal, null );
+        test.is( _.strHas( op.output, 'Test output' ) );
+        return null;
+      })
+
+      return o.onTerminate;
+    })
+
+    /* */
+
+    .then( () =>
+    {
+      let o =
+      {
+        outputPiping : 1,
+        outputCollecting : 1,
+        stdio : [ 'ignore', 'inherit', 'pipe', mode === 'fork' ? 'ipc' : null ],
+      }
+
+      _.mapExtend( o, commonOptions );
+
+      _.process.start( o );
+
+      o.onTerminate.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.exitSignal, null );
+        test.is( !_.strHas( op.output, 'Test output' ) );
+        return null;
+      })
+
+      return o.onTerminate;
+    })
+
+    /* */
+
+    .then( () =>
+    {
+      let o =
+      {
+        outputPiping : 1,
+        outputCollecting : 1,
+        stdio : [ 'ignore', 'pipe', 'pipe', mode === 'fork' ? 'ipc' : null ],
+      }
+
+      _.mapExtend( o, commonOptions );
+
+      _.process.start( o );
+
+      o.onTerminate.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.exitSignal, null );
+        test.is( _.strHas( op.output, 'Test output' ) );
+        return null;
+      })
+
+      return o.onTerminate;
+    })
+
+    return ready;
+  }
+
+  /* */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+    console.log( 'Test output' )
+  }
+}
+
+//
+
 function shellNormalizedExecPath( test )
 {
   let context = this;
@@ -18664,6 +19139,8 @@ var Proto =
     outputHandling,
     shellOutputStripping,
     shellLoggerOption,
+
+    startOutputOptionsCompatibilityLateCheck,
 
     shellNormalizedExecPath,
 
