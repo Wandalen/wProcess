@@ -666,19 +666,20 @@ function start_body( o )
     catch( err )
     {
       debugger
-      exitCodeSet( -1 ); /* xxx : ? */
-      if( o.sync && !o.deasync )
-      {
-        err = _.err( err );
-        log( _.errOnce( err ), 1 );
-        throw err;
-      }
-      else
-      {
-        err = _.err( err );
-        log( _.errOnce( err ), 1 );
-        o.onTerminate.error( err );
-      }
+      handleError( err );
+      // exitCodeSet( -1 ); /* xxx yyy : ? */
+      // if( o.sync && !o.deasync )
+      // {
+      //   err = _.err( err );
+      //   log( _.errOnce( err ), 1 );
+      //   throw err;
+      // }
+      // else
+      // {
+      //   err = _.err( err );
+      //   log( _.errOnce( err ), 1 );
+      //   o.onTerminate.error( err );
+      // }
     }
 
   }

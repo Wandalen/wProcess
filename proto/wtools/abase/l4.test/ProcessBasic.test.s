@@ -18,7 +18,7 @@ let _global = _global_;
 let _ = _global_.wTools;
 let Self = {};
 
-/* qqq2 : make table for this: "Vova qqq xxx: close event is not emitted for disconnected detached child in fork mode" */
+/* qqq2 : make general table in md file for this: "Vova qqq: close event is not emitted for disconnected detached child in fork mode" */
 
 // --
 // context
@@ -4714,7 +4714,7 @@ function shellArgumentsParsing( test )
     return con;
   })
 
-  // xxx
+  /* xxx */
   .then( () =>
   {
     test.case = `'path to exec : with space' 'execPATH : only path' 'args: willbe args' 'spawn'`
@@ -11689,8 +11689,6 @@ function startDetachingEndCompetitorIsExecuted( test )
 
   a.ready
 
-  /* Vova qqq xxx: close event is not emitted for disconnected detached child in fork mode*/
-
   .then( () =>
   {
     test.case = 'detaching on, disconnected forked child'
@@ -11983,7 +11981,7 @@ function startDetachedOutputStdioPipe( test )
     {
       test.identical( o.exitCode, 0 )
 
-      //xxx: output piping doesn't work as expected in mode "shell" on windows
+      //qqq: output piping doesn't work as expected in mode "shell" on windows
       //qqq: investigate if its fixed in never verions of node or implement alternative solution
 
       if( process.platform === 'win32' )
@@ -15889,7 +15887,7 @@ function terminate( test )
 
   if( process.platform === 'win32' )
   {
-    //xxx: windows-kill doesn't work correctrly on node 14
+    //qqq: windows-kill doesn't work correctrly on node 14
     //qqq: investigate if its possible to use process.kill instead of windows-kill
     test.identical( 1, 1 )
     return;
@@ -16628,7 +16626,8 @@ function errorAfterTerminationWithSend( test )
     return null
   });
 
-  o.onTerminate.finally( ( err, got ) => /* xxx qqq : normalize */
+  /* xxx qqq : normalize */
+  o.onTerminate.finally( ( err, got ) =>
   {
     track.push( 'onTerminate' );
     test.identical( err, undefined );
@@ -16688,7 +16687,7 @@ function terminateComplex( test )
 
   if( process.platform === 'win32' )
   {
-    //xxx: windows-kill doesn't work correctly in all scenarios
+    //qqq: windows-kill doesn't work correctly in all scenarios
     //qqq: investigate if its possible to use process.kill instead of windows-kill
     test.identical( 1, 1 )
     return;
@@ -16911,7 +16910,7 @@ function terminateDetachedComplex( test )
 
   if( process.platform === 'win32' )
   {
-    //xxx: windows-kill doesn't work correctly with detached processes
+    //qqq: windows-kill doesn't work correctly with detached processes
     //qqq: investigate if its possible to use process.kill instead of windows-kill
     test.identical( 1, 1 )
     return;
@@ -17210,7 +17209,7 @@ function terminateWithChildren( test )
 
   if( process.platform === 'win32' )
   {
-    //xxx: windows-kill doesn't work correctly with detached processes
+    //qqq: windows-kill doesn't work correctly with detached processes
     //qqq: investigate if its possible to use process.kill instead of windows-kill
     test.identical( 1, 1 )
     return;
@@ -17471,7 +17470,7 @@ function terminateWithDetachedChildren( test )
 
   if( process.platform === 'win32' )
   {
-    //xxx: windows-kill doesn't work correctly with detached processes
+    //qqq: windows-kill doesn't work correctly with detached processes
     //qqq: investigate if its possible to use process.kill instead of windows-kill
     test.identical( 1, 1 )
     return;
@@ -17510,7 +17509,7 @@ function terminateWithDetachedChildren( test )
         test.is( _.strHas( got.output, 'SIGINT' ) );
         return _.time.out( 9000, () =>
         {
-          /* xxx Vova : problem with termination of detached proces on Windows, child process does't receive SIGINT */
+          /* qqq Vova : problem with termination of detached proces on Windows, child process does't receive SIGINT */
           test.is( a.fileProvider.fileExists( a.abs( a.routinePath, children[ 0 ].toString() ) ) )
           test.is( a.fileProvider.fileExists( a.abs( a.routinePath, children[ 1 ].toString() ) ) )
           test.is( !_.process.isAlive( o.process.pid ) )
@@ -17631,7 +17630,7 @@ function terminateTimeOut( test )
 
   if( process.platform === 'win32' )
   {
-    //xxx: windows-kill doesn't work correctly on node14
+    //qqq: windows-kill doesn't work correctly on node14
     //qqq: investigate if its possible to use process.kill instead of windows-kill
     test.identical( 1, 1 )
     return;
@@ -17837,7 +17836,7 @@ function terminateDifferentStdio( test )
 
   if( process.platform === 'win32' )
   {
-    //xxx: windows-kill doesn't work correctly on node14
+    //qqq: windows-kill doesn't work correctly on node14
     //qqq: investigate if its possible to use process.kill instead of windows-kill
     test.identical( 1, 1 )
     return;
@@ -18867,7 +18866,7 @@ var Proto =
     killWithChildren,
     terminate,
 
-    endStructuralSigint, /* qqq xxx yyy : switch on */
+    endStructuralSigint, /* qqq yyy : switch on */
     endStructuralSigkill,
     endStructuralTerminate,
     endStructuralKill,
