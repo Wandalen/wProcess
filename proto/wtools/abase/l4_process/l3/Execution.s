@@ -1541,6 +1541,8 @@ defaults.passingThrough = 0;
 defaults.maximumMemory = 0;
 defaults.applyingExitCode = 1;
 defaults.stdio = 'inherit';
+defaults.outputPiping = 0;
+defaults.outputCollecting = 0;
 defaults.mode = 'fork';
 
 let startNjs = _.routineFromPreAndBody( start_pre, startNjs_body );
