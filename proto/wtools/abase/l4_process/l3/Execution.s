@@ -1611,6 +1611,7 @@ function startAfterDeath_body( o )
   o2.args = [];
   o2.stdio = 'ignore';
   o2.outputPiping = 0;
+  o2.outputCollecting = 0;
   o2.detaching = true;
   o2.inputMirroring = 0;
 
