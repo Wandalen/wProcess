@@ -11422,6 +11422,8 @@ function startDetachingEndCompetitorIsExecuted( test )
       execPath : 'testAppChild.js',
       mode : 'fork',
       stdio : 'ignore',
+      outputPiping : 0,
+      outputCollecting : 0,
       currentPath : a.routinePath,
       detaching : 1
     }
