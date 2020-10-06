@@ -12756,6 +12756,8 @@ function startOnTerminate( test ) /* qqq2 : add other modes. ask how to aaa:done
         execPath : mode !== 'fork' ? 'node testAppChild.js' : 'testAppChild.js',
         mode,
         stdio : 'ignore',
+        outputPiping : 0,
+        outputCollecting : 0,
         currentPath : a.routinePath,
         detaching : 0
       }
@@ -12787,6 +12789,8 @@ function startOnTerminate( test ) /* qqq2 : add other modes. ask how to aaa:done
         execPath : mode !== 'fork' ? 'node testAppChild.js' : 'testAppChild.js',
         mode,
         stdio : 'ignore',
+        outputPiping : 0,
+        outputCollecting : 0,
         currentPath : a.routinePath,
         detaching : 0
       }
@@ -12832,6 +12836,8 @@ function startOnTerminate( test ) /* qqq2 : add other modes. ask how to aaa:done
         execPath : mode !== 'fork' ? 'node testAppChild.js' : 'testAppChild.js',
         mode,
         stdio : 'ignore',
+        outputPiping : 0,
+        outputCollecting : 0,
         currentPath : a.routinePath,
         onTerminate,
         detaching : 1
@@ -12916,6 +12922,8 @@ function startOnTerminate( test ) /* qqq2 : add other modes. ask how to aaa:done
         execPath : mode !== 'fork' ? 'node testAppChild.js' : 'testAppChild.js',
         mode,
         stdio : 'ignore',
+        outputPiping : 0,
+        outputCollecting : 0,
         currentPath : a.routinePath,
         onTerminate,
         detaching : 1
@@ -12961,6 +12969,8 @@ function startOnTerminate( test ) /* qqq2 : add other modes. ask how to aaa:done
         args : [ 'throwing:1' ],
         mode,
         stdio : 'ignore',
+        outputPiping : 0,
+        outputCollecting : 0,
         currentPath : a.routinePath,
         onTerminate,
         throwingExitCode : 0,
@@ -12999,6 +13009,8 @@ function startOnTerminate( test ) /* qqq2 : add other modes. ask how to aaa:done
         args : [ 'throwing:1' ],
         mode,
         stdio : 'ignore',
+        outputPiping : 0,
+        outputCollecting : 0,
         currentPath : a.routinePath,
         onTerminate,
         throwingExitCode : 0,
