@@ -127,93 +127,6 @@ defaults.filePath = null;
 
 let tempClose = _.routineFromPreAndBody( tempClose_pre, tempClose_body );
 
-//
-
-/**
- * Returns path for main module (module that running directly by node).
- * @returns {String}
- * @function realMainFile
- * @namespace Tools.process
- * @module Tools/base/ProcessBasic
- */
-
-let _pathRealMainFile;
-function realMainFile()
-{
-  if( _pathRealMainFile )
-  return _pathRealMainFile;
-  _pathRealMainFile = _.path.normalize( require.main.filename );
-  return _pathRealMainFile;
-}
-
-//
-
-/**
- * Returns path dir name for main module (module that running directly by node).
- * @returns {String}
- * @function realMainDir
- * @namespace Tools.process
- * @module Tools/base/ProcessBasic
- */
-
-let _pathRealMainDir;
-function realMainDir()
-{
-  if( _pathRealMainDir )
-  return _pathRealMainDir;
-
-  if( require.main )
-  _pathRealMainDir = _.path.normalize( _.path.dir( require.main.filename ) );
-  else
-  return this.effectiveMainFile();
-
-  return _pathRealMainDir;
-}
-
-//
-
-/**
- * Returns absolute path for file running directly by node
- * @returns {String}
- * @throws {Error} If passed any argument.
- * @function effectiveMainFile
- * @namespace Tools.process
- * @module Tools/base/ProcessBasic
- */
-
-let effectiveMainFile = ( function effectiveMainFile()
-{
-  let result = '';
-
-  return function effectiveMainFile() /* qqq2 : move to process, review */
-  {
-    _.assert( arguments.length === 0, 'Expects no arguments' );
-
-    if( result )
-    return result;
-
-    if( process.argv[ 0 ] || process.argv[ 1 ] )
-    {
-      result = _.path.join( this._currentAtBegin, process.argv[ 1 ] || process.argv[ 0 ] );
-      result = _.path.resolve( result );
-    }
-
-    if( !_.fileProvider.fileExists( result ) )
-    {
-      //xxx : review
-      debugger;
-      console.error( 'process.argv :', process.argv.join( ', ' ) );
-      console.error( 'currentAtBegin :', this._currentAtBegin );
-      console.error( 'effectiveMainFile.raw :', this.join( this._currentAtBegin, process.argv[ 1 ] || process.argv[ 0 ] ) );
-      console.error( 'effectiveMainFile :', result );
-      result = this.realMainFile();
-    }
-
-    return result;
-  }
-
-})();
-
 // --
 // eventer
 // --
@@ -275,7 +188,8 @@ function _eventAvailableHandle()
 
 function _Setup1()
 {
-  this._currentAtBegin = _.path.current();
+  if( _.path && _.path.current )
+  this._initialCurrentPath = _.path.current();
 
   _.process._eventAvailableHandle();
   _.process._exitHandlerRepair();
@@ -301,14 +215,6 @@ let Extension =
   tempOpen,
   tempClose,
 
-  // // checker
-  //
-  // insideTestContainer,
-
-  realMainFile,
-  realMainDir,
-  effectiveMainFile,
-
   // eventer
 
   on,
@@ -323,7 +229,7 @@ let Extension =
 
   _tempFiles,
   _registeredExitHandler : null,
-  _currentAtBegin : null
+  _initialCurrentPath : null
 
 }
 
