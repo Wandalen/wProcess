@@ -360,7 +360,7 @@ function start_body( o )
     if( o.procedure.isAlive() )
     o.procedure.end();
 
-    if( o.detaching )
+    // if( o.detaching ) /* yyy */
     if( o.terminationBeginEnabled )
     {
       _.procedure.off( 'terminationBegin', onProcedureTerminationBegin );
@@ -405,7 +405,9 @@ function start_body( o )
 
   function handleClose( exitCode, exitSignal )
   {
-    debugger;
+    /*
+    console.log( 'handleClose', _.process.realMainFile(), o.ended ); debugger;
+    */
 
     if( o.ended )
     return;
@@ -492,15 +494,18 @@ function start_body( o )
 
   function handleDisconnect( arg )
   {
+    /*
     console.log( 'handleDisconnect', _.process.realMainFile(), o.ended ); debugger;
+    */
 
     /*
     event "disconnect" may come just before event "close"
     so need to give a chance to event "close" to come first
     */
 
+    /*
     if( !o.ended )
-    _.time.begin( 100, () =>
+    _.time.begin( 1000, () =>
     {
       if( !o.ended )
       {
@@ -511,6 +516,11 @@ function start_body( o )
         throw _.err( 'not tested' );
       }
     });
+    */
+
+    /* bad solution
+    subprocess waits and does not let emit event "close"
+    */
 
   }
 
@@ -518,7 +528,9 @@ function start_body( o )
 
   function disconnect()
   {
+    /*
     console.log( 'disconnect', _.process.realMainFile(), this.ended ); debugger;
+    */
 
     _.assert( !!this.process, 'Process is not started. Cant disconnect.' );
 

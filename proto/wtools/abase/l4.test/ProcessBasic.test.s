@@ -16756,9 +16756,10 @@ function terminateComplex( test )
       _.process.terminate({ pid : o.process.pid });
     })
 
+    /* xxx */
     ready.thenKeep( ( got ) =>
     {
-      test.identical( got.exitCode, 0 );
+      test.identical( got.exitCode, 0 ); /* qqq2 : check op.ended if op.exitCode is checked */
       test.identical( got.exitSignal, null );
       test.identical( _.strCount( got.output, 'SIGINT' ), 1 );
       test.is( !_.process.isAlive( o.process.pid ) )
@@ -16847,49 +16848,6 @@ function terminateComplex( test )
 
     return ready;
   })
-
-  /* - */
-
-  // .thenKeep( () =>
-  // {
-  //   test.case = 'Sending signal to child process has regular child process that should exit with parent'
-  //   var o =
-  //   {
-  //     execPath : 'node ' + testAppPath,
-  //     mode : 'exec',
-  //     outputCollecting : 1,
-  //     throwingExitCode : 0
-  //   }
-  //
-  //   let ready = _.process.start( o );
-  //   let lastChildPid;
-  //
-  //   o.process.stdout.on( 'data', ( data ) =>
-  //   {
-  //     data = data.toString();
-  //     lastChildPid = _.numberFrom( data );
-  //     _.process.terminate({ pid : o.process.pid });
-  //   })
-  //
-  //   ready.thenKeep( ( got ) =>
-  //   {
-  //     if( process.platform === 'linux' )
-  //     {
-  //       test.identical( got.exitCode, null );
-  //       test.identical( got.exitSignal, 'SIGINT' );
-  //     }
-  //     else
-  //     {
-  //       test.identical( got.exitCode, 0 );
-  //       test.identical( got.exitSignal, null );
-  //     }
-  //     test.is( !_.process.isAlive( o.process.pid ) )
-  //     test.is( !_.process.isAlive( lastChildPid ) );
-  //     return null;
-  //   })
-  //
-  //   return ready;
-  // })
 
   /* - */
 
