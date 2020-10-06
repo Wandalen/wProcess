@@ -466,13 +466,16 @@ function shell( test )
     /* mode : spawn, stdio : ignore */
 
     o.stdio = 'ignore';
+    o.outputCollecting = 0;
+    o.outputPiping = 0;
+
     var options = _.mapSupplement( {}, o, commonDefaults );
 
     return _.process.start( options )
     .thenKeep( function()
     {
       test.identical( options.exitCode, 0 );
-      test.identical( options.output.length, 0 );
+      test.identical( options.output, null );
       return null;
     })
   })
@@ -592,6 +595,8 @@ function shell( test )
     /* mode : shell, stdio : ignore */
 
     o.stdio = 'ignore'
+    o.outputCollecting = 0;
+    o.outputPiping = 0;
 
     var options = _.mapSupplement( {}, o, commonDefaults );
 
@@ -599,7 +604,7 @@ function shell( test )
     .thenKeep( function()
     {
       test.identical( options.exitCode, 0 );
-      test.identical( options.output.length, 0 );
+      test.identical( options.output, null );
       return null;
     })
   })
