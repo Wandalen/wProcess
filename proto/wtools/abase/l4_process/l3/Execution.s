@@ -952,7 +952,7 @@ function start_body( o )
     if( o.dry )
     return;
 
-    // qqq2 yyy : uncomment
+    // qqq2 yyy : uncomment aaa:done, wrote a test routine
     if( o.outputPiping || o.outputCollecting )
     _.assert( !!o.process.stdout || !!o.process.stderr, 'stdout is not available to collect output or pipe it. Set option::stdio to "pipe"' );
 
