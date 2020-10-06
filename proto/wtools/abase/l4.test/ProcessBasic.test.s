@@ -7537,7 +7537,7 @@ function shellNode( test )
   {
     a.ready.thenKeep( () =>
     {
-      var o = { execPath : testAppPath, mode, applyingExitCode : 1, throwingExitCode : 1, stdio : 'ignore' };
+      var o = { execPath : testAppPath, mode, applyingExitCode : 1, throwingExitCode : 1, stdio : 'ignore', outputPiping : 0, outputCollecting : 0 };
       var con = _.process.startNjs( o );
       return test.shouldThrowErrorAsync( con )
       .finally( () =>
@@ -7551,7 +7551,7 @@ function shellNode( test )
 
     a.ready.thenKeep( () =>
     {
-      var o = { execPath : testAppPath, mode,  applyingExitCode : 1, throwingExitCode : 0, stdio : 'ignore' };
+      var o = { execPath : testAppPath, mode,  applyingExitCode : 1, throwingExitCode : 0, stdio : 'ignore', outputPiping : 0, outputCollecting : 0 };
       return _.process.startNjs( o )
       .finally( ( err, got ) =>
       {
@@ -7565,7 +7565,7 @@ function shellNode( test )
 
     a.ready.thenKeep( () =>
     {
-      var o = { execPath : testAppPath,  mode, applyingExitCode : 0, throwingExitCode : 1, stdio : 'ignore' };
+      var o = { execPath : testAppPath,  mode, applyingExitCode : 0, throwingExitCode : 1, stdio : 'ignore', outputPiping : 0, outputCollecting : 0 };
       var con = _.process.startNjs( o )
       return test.shouldThrowErrorAsync( con )
       .finally( () =>
@@ -7578,7 +7578,7 @@ function shellNode( test )
 
     a.ready.thenKeep( () =>
     {
-      var o = { execPath : testAppPath,  mode, applyingExitCode : 0, throwingExitCode : 0, stdio : 'ignore' };
+      var o = { execPath : testAppPath,  mode, applyingExitCode : 0, throwingExitCode : 0, stdio : 'ignore', outputPiping : 0, outputCollecting : 0 };
       return _.process.startNjs( o )
       .finally( ( err, got ) =>
       {
@@ -7591,7 +7591,7 @@ function shellNode( test )
 
     a.ready.thenKeep( () =>
     {
-      var o = { execPath : testAppPath,  mode, maximumMemory : 1, applyingExitCode : 0, throwingExitCode : 0, stdio : 'ignore' };
+      var o = { execPath : testAppPath,  mode, maximumMemory : 1, applyingExitCode : 0, throwingExitCode : 0, stdio : 'ignore', outputPiping : 0, outputCollecting : 0 };
       return _.process.startNjs( o )
       .finally( ( err, got ) =>
       {
