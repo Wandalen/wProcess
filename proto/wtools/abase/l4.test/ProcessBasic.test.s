@@ -19071,6 +19071,8 @@ function shellExperiment( test )
       mode : 'shell',
       passingThrough : 1,
       stdio : 'inherit',
+      outputPiping : 0,
+      outputCollecting : 0,
       inputMirroring : 0
     })
   }
