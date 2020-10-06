@@ -10050,7 +10050,7 @@ function startDetachingModeSpawnNoTerminationBegin( test )
 
     let o =
     {
-      execPath : 'node testAppParent.js stdio : ignore ipc : false',
+      execPath : 'node testAppParent.js stdio : ignore ipc : false outputPiping : 0 outputCollecting : 0',
       mode : 'spawn',
       outputCollecting : 1,
       currentPath : a.routinePath,
@@ -10092,7 +10092,7 @@ function startDetachingModeSpawnNoTerminationBegin( test )
 
     let o =
     {
-      execPath : 'node testAppParent.js stdio : ignore ipc : true',
+      execPath : 'node testAppParent.js stdio : ignore ipc : true outputPiping : 0 outputCollecting : 0',
       mode : 'spawn',
       outputCollecting : 1,
       currentPath : a.routinePath,
@@ -10280,7 +10280,7 @@ function startDetachingModeForkNoTerminationBegin( test )
 
     let o =
     {
-      execPath : 'node testAppParent.js stdio : ignore',
+      execPath : 'node testAppParent.js stdio : ignore outputPiping : 0 outputCollecting : 0',
       mode : 'spawn',
       outputCollecting : 1,
       currentPath : a.routinePath,
