@@ -1000,12 +1000,15 @@ function shellSyncAsync( test )
   /* mode : spawn, stdio : ignore */
 
   o.stdio = 'ignore';
+  o.outputCollecting = 0;
+  o.outputPiping = 0;
+
   var options = _.mapSupplement( {}, o, commonDefaults );
   var got = _.process.start( options );
   test.is( got === options );
   test.identical( got.process.constructor.name, 'ChildProcess' );
   test.identical( options.exitCode, 0 );
-  test.identical( options.output.length, 0 );
+  test.identical( options.output, null );
 
   /* - */
 
