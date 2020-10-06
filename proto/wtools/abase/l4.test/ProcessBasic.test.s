@@ -18213,6 +18213,8 @@ function terminateDifferentStdio( test )
       execPath :  'node ' + testAppPath,
       mode : 'spawn',
       stdio : 'inherit',
+      outputPiping : 0,
+      outputCollecting : 0,
       throwingExitCode : 0
     }
 
@@ -18243,6 +18245,8 @@ function terminateDifferentStdio( test )
       execPath :  'node ' + testAppPath,
       mode : 'spawn',
       stdio : 'ignore',
+      outputPiping : 0,
+      outputCollecting : 0,
       throwingExitCode : 0
     }
 
@@ -18334,6 +18338,8 @@ function terminateDifferentStdio( test )
       execPath :  'node ' + testAppPath,
       mode : 'spawn',
       stdio : 'inherit',
+      outputPiping : 0,
+      outputCollecting : 0,
       ipc : 1,
       throwingExitCode : 0
     }
@@ -18365,6 +18371,8 @@ function terminateDifferentStdio( test )
       execPath :  'node ' + testAppPath,
       mode : 'spawn',
       stdio : 'ignore',
+      outputPiping : 0,
+      outputCollecting : 0,
       ipc : 1,
       throwingExitCode : 0
     }
