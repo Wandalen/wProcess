@@ -142,6 +142,8 @@ function processOnExitEvent( test )
 
   })
 
+  /* */
+
   .thenKeep( () =>
   {
     var o =
@@ -203,7 +205,7 @@ function processOffExitEvent( test )
   let a = test.assetFor( false );
   let programPath = a.path.nativize( a.program( testApp ) );
 
-  /*  */
+  /* */
 
   a.ready.thenKeep( () =>
   {
@@ -230,7 +232,7 @@ function processOffExitEvent( test )
 
   })
 
-  /*  */
+  /* */
 
   .thenKeep( () =>
   {
@@ -257,7 +259,7 @@ function processOffExitEvent( test )
     })
   })
 
-  /*  */
+  /* */
 
   .thenKeep( () =>
   {
@@ -284,7 +286,7 @@ function processOffExitEvent( test )
     })
   })
 
-  /*  */
+  /* */
 
   .thenKeep( () =>
   {
@@ -372,10 +374,14 @@ function exitReason( test )
   var got = _.process.exitReason();
   test.identical( got, null );
 
+  /* */
+
   test.case = 'set reason'
   _.process.exitReason( 'reason' );
   var got = _.process.exitReason();
   test.identical( got, 'reason' );
+
+  /* */
 
   test.case = 'update reason'
   _.process.exitReason( 'reason2' );
@@ -391,15 +397,21 @@ function exitCode( test )
   var got = _.process.exitCode();
   test.identical( got, 0 );
 
+  /* */
+
   test.case = 'set code'
   _.process.exitCode( 1 );
   var got = _.process.exitCode();
   test.identical( got, 1 );
 
+  /* */
+
   test.case = 'update reason'
   _.process.exitCode( 2 );
   var got = _.process.exitCode();
   test.identical( got, 2 );
+
+  /* */
 
   test.case = 'change to zero'
   _.process.exitCode( 0 );
@@ -724,7 +736,7 @@ function shell( test )
     });
   })
 
-  /* - */
+  /* */
 
   .thenKeep( function( arg )
   {
@@ -805,7 +817,7 @@ function shellSync( test )
   test.identical( options.exitCode, 0 );
   test.identical( options.output.length, 0 );
 
-  /* - */
+  /* */
 
   test.case = 'mode : shell';
   o =
@@ -827,7 +839,7 @@ function shellSync( test )
   test.identical( options.exitCode, 0 );
   test.identical( options.output.length, 0 );
 
-  /* - */
+  /* */
 
   test.case = 'shell, stop process using timeOut';
   o =
@@ -841,7 +853,7 @@ function shellSync( test )
   var options = _.mapSupplement( {}, o, commonDefaults );
   test.shouldThrowErrorSync( () => _.process.start( options ) );
 
-  /* - */
+  /* */
 
   test.case = 'spawn, return good code';
   o =
@@ -854,7 +866,7 @@ function shellSync( test )
   test.mustNotThrowError( () => _.process.start( options ) )
   test.identical( options.exitCode, 0 );
 
-  /* - */
+  /* */
 
   test.case = 'spawn, return ext code 1';
   o =
@@ -867,7 +879,7 @@ function shellSync( test )
   test.shouldThrowErrorSync( () => _.process.start( options ) );
   test.identical( options.exitCode, 1 );
 
-  /* - */
+  /* */
 
   test.case = 'spawn, return ext code 2';
   o =
@@ -880,7 +892,7 @@ function shellSync( test )
   test.shouldThrowErrorSync( () => _.process.start( options ) );
   test.identical( options.exitCode, 2 );
 
-  /* - */
+  /* */
 
   test.case = 'shell, return good code';
   o =
@@ -894,7 +906,7 @@ function shellSync( test )
   test.mustNotThrowError( () => _.process.start( options ) )
   test.identical( options.exitCode, 0 );
 
-  /* - */
+  /* */
 
   test.case = 'shell, return bad code';
   o =
@@ -964,7 +976,7 @@ function shellSyncAsync( test )
   test.identical( options.exitCode, 0 );
   test.identical( options.output.length, 0 );
 
-  /* - */
+  /* */
 
   test.case = 'mode : spawn';
   o =
@@ -993,7 +1005,7 @@ function shellSyncAsync( test )
   test.identical( options.exitCode, 0 );
   test.identical( options.output.length, 0 );
 
-  /* - */
+  /* */
 
   test.case = 'mode : shell';
   o =
@@ -1019,7 +1031,7 @@ function shellSyncAsync( test )
   test.identical( options.exitCode, 0 );
   test.identical( options.output.length, 0 );
 
-  /* - */
+  /* */
 
   test.case = 'shell, stop process using timeOut';
   o =
@@ -1033,7 +1045,7 @@ function shellSyncAsync( test )
   var options = _.mapSupplement( {}, o, commonDefaults );
   test.shouldThrowErrorSync( () => _.process.start( options ) );
 
-  /* - */
+  /* */
 
   test.case = 'spawn, return good code';
   o =
@@ -1048,7 +1060,7 @@ function shellSyncAsync( test )
   test.identical( got.process.constructor.name, 'ChildProcess' );
   test.identical( options.exitCode, 0 );
 
-  /* - */
+  /* */
 
   test.case = 'spawn, return bad code';
   o =
@@ -1061,7 +1073,7 @@ function shellSyncAsync( test )
   test.shouldThrowErrorSync( () => _.process.start( options ) )
   test.identical( options.exitCode, 1 );
 
-  /* - */
+  /* */
 
   test.case = 'shell, return good code';
   o =
@@ -1077,7 +1089,7 @@ function shellSyncAsync( test )
   test.identical( got.process.constructor.name, 'ChildProcess' );
   test.identical( options.exitCode, 0 );
 
-  /* - */
+  /* */
 
   test.case = 'shell, return bad code';
   o =
@@ -1142,7 +1154,7 @@ function shell2( test )
     })
   })
 
-  /* - */
+  /* */
 
   a.ready.thenKeep( function()
   {
@@ -1174,7 +1186,7 @@ function shell2( test )
     })
   })
 
-  /* - */
+  /* */
 
   a.ready.thenKeep( function()
   {
@@ -1206,7 +1218,7 @@ function shell2( test )
     })
   })
 
-  /* - */
+  /* */
 
   a.ready.thenKeep( function()
   {
@@ -1228,7 +1240,7 @@ function shell2( test )
     return test.shouldThrowErrorOfAnyKind( _.process.start( options ) );
   })
 
-  /* - */
+  /* */
 
   a.ready.thenKeep( function()
   {
@@ -1286,7 +1298,7 @@ function shellCurrentPath( test )
 
   var expectedOutput = __dirname + '\n'
 
-  /* - */
+  /* */
 
   a.ready.thenKeep( function()
   {
@@ -1308,7 +1320,7 @@ function shellCurrentPath( test )
     })
   })
 
-  /**/
+  /* */
 
   a.ready.thenKeep( function()
   {
@@ -1353,7 +1365,7 @@ function shellCurrentPath( test )
   //   })
   // })
 
-  /**/
+  /* - */
 
   a.ready.thenKeep( function()
   {
@@ -1463,7 +1475,7 @@ function shellCurrentPath( test )
     })
   })
 
-  /*  */
+  /* */
 
   a.ready.thenKeep( function()
   {
@@ -5895,7 +5907,7 @@ function shellExecPathQuotesClosing( test )
 
   let a = test.assetFor( false );
 
-  let testAppPathSpace = a.path.normalize( a.program({ routine : testApp, dirPath : a.abs( 'with space' ) }) );
+  let testAppPathSpace = a.path.normalize( a.path.nativize( a.program({ routine : testApp, dirPath : a.abs( 'with space' ) }) ) );
 
   /* */
 
@@ -7609,7 +7621,7 @@ function shellModeShellNonTrivial( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.path.normalize( a.program( app ) );
+  let testAppPath = a.path.normalize( a.path.nativize( a.program( app ) ) );
 
   let shell = _.process.starter
   ({
@@ -13052,7 +13064,8 @@ function startOnStart( test ) /* qqq2 : add other modes. ask how to */
 
     let ready = _.time.out( 5000, () =>
     {
-      test.identical( track, [ 'onStart', 'onDisconnect' ] );
+      test.identical( track, [ 'onStart', 'onDisconnect', 'onTerminate' ] );
+      track = []
       o.onTerminate.cancel();
     })
 
@@ -13094,6 +13107,7 @@ function startOnStart( test ) /* qqq2 : add other modes. ask how to */
       test.identical( o.state, 'disconnected' )
       test.is( _.process.isAlive( o.process.pid ) )
       test.identical( track, [ 'onStart', 'onDisconnect' ] );
+      track = [];
       return null;
     })
 
@@ -13313,16 +13327,6 @@ function startOnTerminate( test ) /* qqq2 : add other modes. ask how to */
         return null;
       });
 
-<<<<<<< HEAD
-    o.onTerminate.then( ( op ) =>
-    {
-      track.push( 'onTerminate' );
-      o.disconnect();
-      test.identical( track, [ 'onTerminate' ] );
-      track = [];
-      return op;
-=======
->>>>>>> 84ea2a7dfdf2b5ffcc072b974eb53d846360fa51
     })
 
     /* */
@@ -13389,21 +13393,9 @@ function startOnTerminate( test ) /* qqq2 : add other modes. ask how to */
 
       let result = _.process.start( o );
 
-<<<<<<< HEAD
-    onTerminate.then( ( got ) =>
-    {
-      track.push( 'onTerminate' );
-      test.notIdentical( got.exitCode, 0 );
-      test.identical( got.exitSignal, null );
-      test.identical( track, [ 'onTerminate' ] );
-      track = [];
-      return null;
-    })
-=======
       test.identical( result, o.onStart );
       test.notIdentical( result, o.onTerminate );
       test.identical( onTerminate, o.onTerminate );
->>>>>>> 84ea2a7dfdf2b5ffcc072b974eb53d846360fa51
 
       onTerminate.then( ( op ) =>
       {
@@ -13440,21 +13432,9 @@ function startOnTerminate( test ) /* qqq2 : add other modes. ask how to */
 
       let result = _.process.start( o );
 
-<<<<<<< HEAD
-    onTerminate.then( ( got ) =>
-    {
-      track.push( 'onTerminate' );
-      test.notIdentical( got.exitCode, 0 );
-      test.identical( got.exitSignal, null );
-      test.identical( track, [ 'onTerminate' ] )
-      track = [];
-      return null;
-    })
-=======
       test.identical( result, o.onStart );
       test.notIdentical( result, o.onTerminate );
       test.identical( onTerminate, o.onTerminate );
->>>>>>> 84ea2a7dfdf2b5ffcc072b974eb53d846360fa51
 
       o.disconnect();
 
@@ -14911,7 +14891,7 @@ function shellerArgs( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
 
   /* */
 
@@ -15030,7 +15010,7 @@ function outputHandling( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
 
   /* */
 
@@ -15122,7 +15102,7 @@ function shellOutputStripping( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
 
   /* */
 
@@ -15191,7 +15171,7 @@ function shellLoggerOption( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
 
   /* */
 
@@ -15257,7 +15237,7 @@ function shellNormalizedExecPath( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.path.normalize( a.program( testApp ) );
+  let testAppPath = a.path.normalize( a.path.nativize( a.program( testApp ) ) );
 
   /* */
 
