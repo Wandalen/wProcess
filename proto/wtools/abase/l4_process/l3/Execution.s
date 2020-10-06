@@ -747,6 +747,11 @@ function start_body( o )
       o.stdio.push( 'ipc' );
     }
 
+    /* stdio compatibility check */
+    if( Config.debug )
+    if( o.outputPiping || o.outputCollecting )
+    _.assert( o.stdio === 'pipe' || o.stdio[ 1 ] === 'pipe' || o.stdio[ 2 ] === 'pipe', 'stdout is not available to collect output or pipe it. Set stdout/stderr channel(s) or option::stdio to "pipe"' );
+
     /* passingThrough */
 
     if( o.passingThrough )

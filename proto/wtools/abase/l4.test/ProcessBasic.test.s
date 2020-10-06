@@ -14774,6 +14774,12 @@ function startOutputOptionsCompatibilityLateCheck( test )
   let a = test.assetFor( false );
   let testAppPath = a.path.nativize( a.program( testApp ) );
 
+  if( !Config.debug )
+  {
+    test.identical( 1,1 );
+    return;
+  }
+
   let modes = [ 'spawn', 'fork', 'shell' ];
 
   modes.forEach( ( mode ) =>
