@@ -16567,7 +16567,7 @@ function errorAfterTerminationWithSend( test )
 
   function uncaughtError( e )
   {
-    test.identical( e.err.originalMessage, 'Channel closed' )
+    test.is( _.strHas( e.err.originalMessage, 'Channel closed' ) )
     _.errAttend( e.err );
     track.push( 'uncaughtError' );
     _.process.off( 'uncaughtError' );
