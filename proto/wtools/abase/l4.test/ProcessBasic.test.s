@@ -11876,7 +11876,8 @@ function startDetachingModeSpawnIpc( test )
     {
       execPath : 'node testAppChild.js',
       mode : 'spawn',
-      outputCollecting : 1,
+      outputPiping : 0,
+      outputCollecting : 0,
       stdio : 'ignore',
       currentPath : a.routinePath,
       detaching : 1,
