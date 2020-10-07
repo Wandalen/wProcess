@@ -190,7 +190,7 @@ function start_body( o )
   let stderrOutput = '';
   let decoratedOutput = '';
   let decoratedErrorOutput = '';
-  let execArgs;/* qqq : remove argumentsManual aaa:removed*/
+  let execArgs, argumentsManual;/* qqq : remove argumentsManual */
   let readyCallback;
 
   preform1();
@@ -205,10 +205,6 @@ function start_body( o )
     try
     {
 
-      /* xxx : use deasync here. cover it */
-
-      debugger;
-
       o.ready.deasync();
 
       let arg = o.ready.sync(); /* xxx : should sync() remove the resource? */
@@ -220,6 +216,7 @@ function start_body( o )
 
       if( o.when.delay )
       _.time.sleep( o.when.delay );
+
       single();
 
     }
@@ -691,32 +688,16 @@ function start_body( o )
       {
         _.assert( o.state === 'starting' );
         o.state = 'terminated';
-        // o.onTerminate.take( o );
         end( undefined, o.onTerminate );
       }
-
-      // if( o.dry ) /* ttt */
-      // o.onTerminate.take( o );
 
     }
     catch( err )
     {
       debugger
       handleError( err );
-      // exitCodeSet( -1 ); /* xxx ttt : ? */
-      // if( o.sync && !o.deasync )
-      // {
-      //   err = _.err( err );
-      //   log( _.errOnce( err ), 1 );
-      //   throw err;
-      // }
-      // else
-      // {
-      //   err = _.err( err );
-      //   log( _.errOnce( err ), 1 );
-      //   o.onTerminate.error( err );
-      // }
     }
+    /* xxx : remove ttt */
 
   }
 
@@ -819,6 +800,8 @@ function start_body( o )
       if( o.verbosity >= 2 )
       log( _.errOnce( err ), 1 );
     }
+
+    /* handler of event terminationBegin */
 
     if( o.detaching )
     {
@@ -962,7 +945,7 @@ function start_body( o )
 
     o.procedure = _.procedure.begin({ _name : 'PID:' + o.process.pid, _object : o.process }); /* xxx : adjust stack and source path of the procedure */
 
-    /* extend with close */
+    /* state */
 
     o.state = 'started';
     o.onStart.take( o );
@@ -1147,10 +1130,17 @@ function start_body( o )
 
   function argsJoin( args )
   {
-    if( !execArgs && !o.passingThrough ) /* qqq2 : argumentsManual?? should be no such global variable aaa:removed*/
+
+    if( !execArgs && !argumentsManual ) /* qqq2 : argumentsManual?? should be no such global variable */
     return args.join( ' ' );
 
-    let i = execArgs ? execArgs.length : args.length - process.argv.length - 2;
+    let i = execArgs ? execArgs.length : args.length - argumentsManual.length;
+
+    // if( !execArgs && !o.passingThrough ) /* qqq2 : argumentsManual?? should be no such global variable aaa:removed*/
+    // return args.join( ' ' );
+    //
+    // let i = execArgs ? execArgs.length : args.length - process.argv.length - 2;
+
     for( ; i < args.length; i++ )
     {
       let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', '`' ]

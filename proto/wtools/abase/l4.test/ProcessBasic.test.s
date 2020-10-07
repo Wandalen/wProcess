@@ -3710,7 +3710,7 @@ function startArgsOption( test )
   {
     test.case = 'args option as array, source args array should not be changed'
     var args = [ 'arg1', 'arg2' ];
-    var shellOptions =
+    var startOptions =
     {
       execPath : 'node ' + programPath,
       outputCollecting : 1,
@@ -3718,7 +3718,7 @@ function startArgsOption( test )
       mode : 'spawn',
     }
 
-    let con = _.process.start( shellOptions )
+    let con = _.process.start( startOptions )
 
     con.then( ( op ) =>
     {
@@ -3726,7 +3726,7 @@ function startArgsOption( test )
       test.identical( op.ended, true );
       test.identical( op.args, [ programPath, 'arg1', 'arg2' ] );
       test.identical( _.strCount( op.output, `[ 'arg1', 'arg2' ]` ), 1 );
-      test.identical( shellOptions.args, op.args );
+      test.identical( startOptions.args, op.args );
       test.identical( args, [ 'arg1', 'arg2' ] );
       return null;
     })
@@ -3740,7 +3740,7 @@ function startArgsOption( test )
   {
     test.case = 'args option as string'
     var args = 'arg1'
-    var shellOptions =
+    var startOptions =
     {
       execPath : 'node ' + programPath,
       outputCollecting : 1,
@@ -3748,7 +3748,7 @@ function startArgsOption( test )
       mode : 'spawn',
     }
 
-    let con = _.process.start( shellOptions )
+    let con = _.process.start( startOptions )
 
     con.then( ( op ) =>
     {
@@ -3756,7 +3756,7 @@ function startArgsOption( test )
       test.identical( op.ended, true );
       test.identical( op.args, [ programPath, 'arg1' ] );
       test.identical( _.strCount( op.output, 'arg1' ), 1 );
-      test.identical( shellOptions.args, op.args );
+      test.identical( startOptions.args, op.args );
       test.identical( args, 'arg1' );
       return null;
     })
@@ -7880,7 +7880,7 @@ function startArgumentsHandling( test )
 
 //
 
-function importantModeShell( test )
+function startImportantExecPath( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -8147,9 +8147,11 @@ function importantModeShell( test )
       test.is( _.strHas( op.output, 'file' ) );
       test.is( _.strHas( op.output, '*' ) );
     }
-
     return null;
   })
+
+  /* qqq for Yevhen : separate test routine startImportantExecPathPassingThrough and run it from separate process */
+  /* xxx */
 
   /* */
 
@@ -8179,14 +8181,11 @@ function importantModeShell( test )
     return null;
   })
 
-  /* */
-
   shell({ execPath : 'echo *', args : [ '*' ], passingThrough : 1 })
   .then( function( op )
   {
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
-
     if( process.platform === 'win32' )
     {
       test.is( _.strHas( op.output, '*' ) );
@@ -8203,10 +8202,12 @@ function importantModeShell( test )
   })
 
   return a.ready;
-
 }
 
-importantModeShell.description = 'core cases for mode "shell"'
+startImportantExecPath.description =
+`
+exec paths with special chars
+`
 
 //
 
@@ -9550,7 +9551,7 @@ startTerminateAfterLoopRelease.description =
 
 //
 
-function startStartingDelay( test )
+function startReadyDelay( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -9558,9 +9559,81 @@ function startStartingDelay( test )
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => run( 1, 0, mode ) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => run( 1, 1, mode ) ) );
-  // xxx
+  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 0, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 1, mode ) ) );
+  return a.ready;
+
+  /*  */
+
+  function run( sync, deasync, mode )
+  {
+    let ready = new _.Consequence().take( null )
+
+    if( sync && !deasync && mode === 'fork' )
+    return null;
+
+    ready.then( () =>
+    {
+      test.case = `sync:${sync} deasync:${deasync} mode:${mode}`;
+      let t1 = _.time.now();
+      let ready = new _.Consequence().take( null ).timeOut( context.t2 );
+      let o =
+      {
+        execPath : mode !== `fork` ? `node ${programPath}` : `${programPath}`,
+        currentPath : a.abs( '.' ),
+        outputPiping : 1,
+        outputCollecting : 1,
+        mode,
+        sync,
+        deasync,
+        ready,
+      }
+
+      let returned = _.process.start( o );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        let parsed = JSON.parse( op.output );
+        let diff = parsed.time - t1;
+        console.log( diff );
+        test.ge( diff, context.t2 );
+        return null;
+      })
+
+      return returned;
+    })
+
+    return ready;
+  }
+
+  /* - */
+
+  function program1()
+  {
+    let _ = require( toolsPath );
+    let data = { time : _.time.now() };
+    console.log( JSON.stringify( data ) );
+  }
+
+}
+
+startReadyDelay.timeOut = 300000;
+
+//
+
+function startOptionWhenDelay( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let programPath = a.path.nativize( a.program( program1 ) );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  // let modes = [ 'spawn' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 0, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 1, mode ) ) );
   return a.ready;
 
   /*  */
@@ -9596,7 +9669,8 @@ function startStartingDelay( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         let parsed = JSON.parse( op.output );
-        let diff = parsed.t2 - t1;
+        let diff = parsed.time - t1;
+        console.log( diff );
         test.ge( diff, when.delay );
         return null;
       })
@@ -9612,16 +9686,17 @@ function startStartingDelay( test )
   function program1()
   {
     let _ = require( toolsPath );
-    let data = { t2 : _.time.now() };
+    let data = { time : _.time.now() };
     console.log( JSON.stringify( data ) );
   }
 
 }
 
+startOptionWhenDelay.timeOut = 300000;
+
 //
 
-/* qqq2 : make it similar to test routine startStartingDelay aaa:done*/
-function startStartingTime( test )
+function startOptionWhenTime( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -9668,7 +9743,7 @@ function startStartingTime( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         let parsed = JSON.parse( op.output );
-        let diff = parsed.t2 - t1;
+        let diff = parsed.time - t1;
         test.ge( diff, delay );
         return null;
       })
@@ -9685,14 +9760,16 @@ function startStartingTime( test )
   {
     let _ = require( toolsPath );
 
-    let data = { t2 : _.time.now() };
+    let data = { time : _.time.now() };
     console.log( JSON.stringify( data ) );
   }
 }
 
+startOptionWhenTime.timeOut = 300000;
+
 //
 
-function shellStartingSuspended( test )
+function startOptionWhenSuspended( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -9729,7 +9806,7 @@ function shellStartingSuspended( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
       let parsed = JSON.parse( op.output );
-      let diff = parsed.t2 - t1;
+      let diff = parsed.time - t1;
       test.ge( diff, delay );
       return null;
     })
@@ -9745,14 +9822,14 @@ function shellStartingSuspended( test )
   {
     let _ = require( toolsPath );
 
-    let data = { t2 : _.time.now() };
+    let data = { time : _.time.now() };
     console.log( JSON.stringify( data ) );
   }
 }
 
 //
 
-function shellAfterDeath( test )
+function startAfterDeath( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -9873,7 +9950,7 @@ function shellAfterDeath( test )
 
 //
 
-// function shellAfterDeathOutput( test )
+// function startAfterDeathOutput( test )
 // {
 //   let context = this;
 //   var routinePath = _.path.join( context.suiteTempPath, test.name );
@@ -13457,7 +13534,7 @@ startWithDelayOnReady.description =
 
 //
 
-function startCallbackIsNotAConsequence( test )
+function startOnIsNotConsequence( test )
 {
   let context = this;
   let track;
@@ -13654,7 +13731,7 @@ function startCallbackIsNotAConsequence( test )
 
 }
 
-startCallbackIsNotAConsequence.timeOut = 300000;
+startOnIsNotConsequence.timeOut = 300000;
 
 //
 
@@ -19763,6 +19840,7 @@ var Proto =
 
   tests :
   {
+
     processOnExitEvent,
     processOffExitEvent,
 
@@ -19803,7 +19881,7 @@ var Proto =
     startModeShellNonTrivial,
     startArgumentsHandlingTrivial,
     startArgumentsHandling,
-    importantModeShell,
+    startImportantExecPath,
 
     startExecPathWithSpace,
     startNjsPassingThroughExecPathWithSpace,
@@ -19818,13 +19896,16 @@ var Proto =
     startTerminateHangedWithExitHandler,
     startTerminateAfterLoopRelease,
 
-    startStartingDelay,
-    startStartingTime,
-    // shellStartingSuspended, /* zzz : ? */
-    // shellAfterDeath, /* zzz : fix */
-    // shellAfterDeathOutput, /* zzz : ? */
+    // delay
 
-    /*  */
+    startReadyDelay,
+    startOptionWhenDelay,
+    startOptionWhenTime,
+    // startOptionWhenSuspended, /* zzz : ? */
+    // startAfterDeath, /* zzz : fix */
+    // startAfterDeathOutput, /* zzz : ? */
+
+    // detaching
 
     startDetachingModeSpawnResourceReady,
     startDetachingModeForkResourceReady,
@@ -19855,25 +19936,32 @@ var Proto =
     startNjsDetachingChildThrowing,
     startDetachingTrivial,
 
+    // on
+
     startOnStart,
     startOnTerminate,
     startNoEndBug1,
     startWithDelayOnReady,
+    startOnIsNotConsequence,
 
-    startCallbackIsNotAConsequence,
-
-    /*  */
+    // concurrent
 
     startConcurrent,
     shellerConcurrent,
+
+    // sheller
 
     sheller,
     shellerArgs,
     shellerFields,
 
+    // output
+
     outputHandling,
     startOutputStripping,
     startLoggerOption,
+
+    // etc
 
     startOutputOptionsCompatibilityLateCheck,
 
@@ -19905,6 +19993,8 @@ var Proto =
     childrenAsList,
 
     killComplex,
+
+    //
 
     realMainFile,
     realMainDir,
