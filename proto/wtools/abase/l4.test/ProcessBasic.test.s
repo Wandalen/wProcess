@@ -18,10 +18,11 @@ let _global = _global_;
 let _ = _global_.wTools;
 let Self = {};
 
-/* qqq2 : make general table in md file for this: "Vova qqq: close event is not emitted for disconnected detached child in fork mode" */
-/* qqq2 : don't use shouldThrowErrorOfAnyKind, use specific shouldThrowError* */
-/* qqq2 : parametrize all time delays, don't forget to leave comment if you change any time delay */
-/* qqq : implement for 3 modes where test routine is not implemented for 3 modes */
+/* qqq Vova : make general table in md file for this: "Vova qqq: close event is not emitted for disconnected detached child in fork mode" */
+
+/* qqq Yevgen : parametrize all time delays, don't forget to leave comment if you change any time delay */
+/* qqq Yevgen : implement for 3 modes where test routine is not implemented for 3 modes */
+/* qqq Yevgen : make sure variable "got" is used as should */
 
 // --
 // context
@@ -29,23 +30,19 @@ let Self = {};
 
 function suiteBegin()
 {
-  var self = this;
-  self.suiteTempPath = _.path.tempOpen( _.path.join( __dirname, '../..' ), 'ProcessBasic' );
-  self.toolsPath = _.path.nativize( _.path.resolve( __dirname, '../../../wtools/Tools.s' ) );
-  self.toolsPathInclude = `let _ = require( '${ _.strEscape( self.toolsPath ) }' )\n`;
-
-  // self.assetsOriginalPath = _.path.join( __dirname, '_asset' );
-  // self.appJsPath = _.path.nativize( _.module.resolve( 'wProcess' ) );
+  var context = this;
+  context.suiteTempPath = _.path.tempOpen( _.path.join( __dirname, '../..' ), 'ProcessBasic' );
+  context.toolsPath = _.path.nativize( _.path.resolve( __dirname, '../../../wtools/Tools.s' ) );
+  context.toolsPathInclude = `let _ = require( '${ _.strEscape( context.toolsPath ) }' )\n`;
 }
 
 //
 
 function suiteEnd()
 {
-  var self = this;
-
-  _.assert( _.strHas( self.suiteTempPath, '/ProcessBasic-' ) )
-  _.path.tempClose( self.suiteTempPath );
+  var context = this;
+  _.assert( _.strHas( context.suiteTempPath, '/ProcessBasic-' ) )
+  _.path.tempClose( context.suiteTempPath );
 }
 
 //
@@ -84,7 +81,6 @@ function testApp()
 function testAppShell()
 {
   let _ = require( toolsPath );
-
   let process = _global_.process;
 
   _.include( 'wProcess' );
@@ -109,20 +105,16 @@ function testAppShell()
 // test
 // --
 
-/* qqq : rewrite tests using assetFor and the best practices
-*/
-
-
 function processOnExitEvent( test )
 {
-
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ) );
+  let programPath = a.path.nativize( a.program( testApp ) );  /* zzz : a.path.nativize? */
+  // let programPath = a.program( testApp );
 
   /* */
 
-  a.ready.thenKeep( () =>
+  a.ready.then( () =>
   {
     var o =
     {
@@ -135,7 +127,7 @@ function processOnExitEvent( test )
     }
 
     return _.process.start( o )
-    .thenKeep( ( got ) =>
+    .then( ( got ) =>
     {
       test.is( got.exitCode === 0 );
       test.is( _.strHas( got.output, 'timeOut handler executed' ) )
@@ -145,7 +137,9 @@ function processOnExitEvent( test )
 
   })
 
-  .thenKeep( () =>
+  /* */
+
+  .then( () =>
   {
     var o =
     {
@@ -158,7 +152,7 @@ function processOnExitEvent( test )
     }
 
     return _.process.start( o )
-    .thenKeep( ( got ) =>
+    .then( ( got ) =>
     {
       test.is( got.exitCode === 0 );
       test.is( !_.strHas( got.output, 'timeOut handler executed' ) )
@@ -206,9 +200,9 @@ function processOffExitEvent( test )
   let a = test.assetFor( false );
   let programPath = a.path.nativize( a.program( testApp ) );
 
-  /*  */
+  /* */
 
-  a.ready.thenKeep( () =>
+  a.ready.then( () =>
   {
     test.case = 'nothing to off'
     var o =
@@ -233,9 +227,9 @@ function processOffExitEvent( test )
 
   })
 
-  /*  */
+  /* */
 
-  .thenKeep( () =>
+  .then( () =>
   {
     test.case = 'off single handler'
     var o =
@@ -260,9 +254,9 @@ function processOffExitEvent( test )
     })
   })
 
-  /*  */
+  /* */
 
-  .thenKeep( () =>
+  .then( () =>
   {
     test.case = 'off all handlers'
     var o =
@@ -287,9 +281,9 @@ function processOffExitEvent( test )
     })
   })
 
-  /*  */
+  /* */
 
-  .thenKeep( () =>
+  .then( () =>
   {
     test.case = 'off unregistered handler'
     var o =
@@ -375,10 +369,14 @@ function exitReason( test )
   var got = _.process.exitReason();
   test.identical( got, null );
 
+  /* */
+
   test.case = 'set reason'
   _.process.exitReason( 'reason' );
   var got = _.process.exitReason();
   test.identical( got, 'reason' );
+
+  /* */
 
   test.case = 'update reason'
   _.process.exitReason( 'reason2' );
@@ -394,15 +392,21 @@ function exitCode( test )
   var got = _.process.exitCode();
   test.identical( got, 0 );
 
+  /* */
+
   test.case = 'set code'
   _.process.exitCode( 1 );
   var got = _.process.exitCode();
   test.identical( got, 1 );
 
+  /* */
+
   test.case = 'update reason'
   _.process.exitCode( 2 );
   var got = _.process.exitCode();
   test.identical( got, 2 );
+
+  /* */
 
   test.case = 'change to zero'
   _.process.exitCode( 0 );
@@ -412,15 +416,17 @@ function exitCode( test )
 
 //
 
-/* qqq : split test cases by / ** / delimeting lines. whole file */
-/* qqq : split by mode */
+/* qqq : split test cases by / ** / delimeting lines. whole file | aaa : Done. Yevhen S.  */
+/* qqq : split by mode | aaa : Done. Yevhen S.
+qqq xxx : ?
+*/
+
 function basic( test )
 {
   let context = this;
   let a = test.assetFor( false );
   let programPath = a.path.nativize( a.program( testAppShell ) );
-
-  var commonDefaults = /* xxx : rename */
+  let o3 =
   {
     outputPiping : 1,
     outputCollecting : 1,
@@ -436,7 +442,7 @@ function basic( test )
 
   /* */
 
-  .thenKeep( function()
+  .then( function()
   {
     test.case = 'mode : spawn';
 
@@ -449,21 +455,21 @@ function basic( test )
 
     return null;
   })
-  .thenKeep( function( arg )
+  .then( function( arg )
   {
     /* mode : spawn, stdio : pipe */
 
-    var options = _.mapSupplement( {}, o2, commonDefaults );
+    var options = _.mapSupplement( {}, o2, o3 );
 
     return _.process.start( options )
-    .thenKeep( function()
+    .then( function()
     {
       test.identical( options.exitCode, 0 );
       test.identical( options.output, expectedOutput );
       return null;
     })
   })
-  .thenKeep( function( arg )
+  .then( function( arg )
   {
     /* mode : spawn, stdio : ignore */
 
@@ -471,10 +477,10 @@ function basic( test )
     o2.outputCollecting = 0;
     o2.outputPiping = 0;
 
-    var options = _.mapSupplement( {}, o2, commonDefaults );
+    var options = _.mapSupplement( {}, o2, o3 );
 
     return _.process.start( options )
-    .thenKeep( function()
+    .then( function()
     {
       test.identical( options.exitCode, 0 );
       test.identical( options.output, null );
@@ -484,7 +490,7 @@ function basic( test )
 
   /* */
 
-  .thenKeep( function( arg )
+  .then( function( arg )
   {
     test.case = 'spawn, stop process using SIGINT';
 
@@ -496,7 +502,7 @@ function basic( test )
       throwingExitCode : 0
     }
 
-    var options = _.mapSupplement( {}, o2, commonDefaults );
+    var options = _.mapSupplement( {}, o2, o3 );
 
     var shell = _.process.start( options );
     _.time.out( 500, () =>
@@ -508,7 +514,7 @@ function basic( test )
     shell.finally(function()
     {
       test.identical( options.process.killed, true );
-      test.identical( options.exitCode, null ); /* qqq2 : near each such test check should be following checks */
+      test.identical( options.exitCode, null ); /* qqq2 : near each such test check should be following checks | aaa : Done. Yevhen S. */
       test.identical( options.exitSignal, 'SIGINT' );
       test.identical( options.process.exitCode, null );
       test.identical( options.process.signalCode, 'SIGINT' );
@@ -520,7 +526,7 @@ function basic( test )
 
   /* */
 
-  .thenKeep( function( arg )
+  .then( function( arg )
   {
     test.case = 'spawn, return good code';
 
@@ -531,10 +537,10 @@ function basic( test )
       stdio : 'pipe'
     }
 
-    var options = _.mapSupplement( {}, o2, commonDefaults );
+    var options = _.mapSupplement( {}, o2, o3 );
 
     return test.mustNotThrowError( _.process.start( options ) )
-    .thenKeep( () =>
+    .then( () =>
     {
       test.identical( options.exitCode, 0 );
       return null;
@@ -543,7 +549,7 @@ function basic( test )
 
   /* */
 
-  .thenKeep( function( arg )
+  .then( function( arg )
   {
     test.case = 'spawn, return bad code';
 
@@ -554,10 +560,10 @@ function basic( test )
       stdio : 'pipe',
     }
 
-    var options = _.mapSupplement( {}, o2, commonDefaults );
+    var options = _.mapSupplement( {}, o2, o3 );
 
     debugger;
-    return test.shouldThrowErrorOfAnyKind( _.process.start( options ), ( err, arg ) =>
+    return test.shouldThrowErrorAsync( _.process.start( options ), ( err, arg ) =>
     {
       debugger;
     })
@@ -571,7 +577,7 @@ function basic( test )
 
   /* - */
 
-  .thenKeep( function( arg )
+  .then( function( arg )
   {
     test.case = 'mode : shell';
 
@@ -583,21 +589,21 @@ function basic( test )
     }
     return null;
   })
-  .thenKeep( function( arg )
+  .then( function( arg )
   {
     /* mode : shell, stdio : pipe */
 
-    var options = _.mapSupplement( {}, o2, commonDefaults );
+    var options = _.mapSupplement( {}, o2, o3 );
 
     return _.process.start( options )
-    .thenKeep( function()
+    .then( function()
     {
       test.identical( options.exitCode, 0 );
       test.identical( options.output, expectedOutput );
       return null;
     })
   })
-  .thenKeep( function( arg )
+  .then( function( arg )
   {
     /* mode : shell, stdio : ignore */
 
@@ -605,10 +611,10 @@ function basic( test )
     o2.outputCollecting = 0;
     o2.outputPiping = 0;
 
-    var options = _.mapSupplement( {}, o2, commonDefaults );
+    var options = _.mapSupplement( {}, o2, o3 );
 
     return _.process.start( options )
-    .thenKeep( function()
+    .then( function()
     {
       test.identical( options.exitCode, 0 );
       test.identical( options.output, null );
@@ -618,7 +624,7 @@ function basic( test )
 
   /* */
 
-  .thenKeep( function( arg )
+  .then( function( arg )
   {
     test.case = 'shell, stop process using SIGINT';
 
@@ -630,7 +636,7 @@ function basic( test )
       throwingExitCode : 0
     }
 
-    var options = _.mapSupplement( {}, o2, commonDefaults );
+    var options = _.mapSupplement( {}, o2, o3 );
 
     var shell = _.process.start( options );
     _.time.out( 500, () =>
@@ -656,7 +662,7 @@ function basic( test )
 
   /* */
 
-  .thenKeep( function( arg )
+  .then( function( arg )
   {
     test.case = 'shell, stop process using SIGKILL';
 
@@ -668,7 +674,7 @@ function basic( test )
       throwingExitCode : 0
     }
 
-    var options = _.mapSupplement( {}, o2, commonDefaults );
+    var options = _.mapSupplement( {}, o2, o3 );
 
     var shell = _.process.start( options );
     _.time.out( 500, () =>
@@ -692,7 +698,7 @@ function basic( test )
 
   /* */
 
-  .thenKeep( function( arg )
+  .then( function( arg )
   {
     test.case = 'shell, return good code';
 
@@ -703,10 +709,10 @@ function basic( test )
       stdio : 'pipe'
     }
 
-    var options = _.mapSupplement( {}, o2, commonDefaults );
+    var options = _.mapSupplement( {}, o2, o3 );
 
     return test.mustNotThrowError( _.process.start( options ) )
-    .thenKeep( () =>
+    .then( () =>
     {
       test.identical( options.exitCode, 0 );
       return null;
@@ -715,7 +721,7 @@ function basic( test )
 
   /* */
 
-  .thenKeep( function( arg )
+  .then( function( arg )
   {
     test.case = 'shell, return bad code';
 
@@ -726,19 +732,19 @@ function basic( test )
       stdio : 'pipe'
     }
 
-    var options = _.mapSupplement( {}, o2, commonDefaults );
+    var options = _.mapSupplement( {}, o2, o3 );
 
-    return test.shouldThrowErrorOfAnyKind( _.process.start( options ) )
-    .thenKeep( () =>
+    return test.shouldThrowErrorAsync( _.process.start( options ) )
+    .then( () =>
     {
       test.identical( options.exitCode, 1 );
       return null;
     });
   })
 
-  /* - */
+  /* */
 
-  .thenKeep( function( arg )
+  .then( function( arg )
   {
     test.case = 'shell, stop using timeOut';
 
@@ -750,11 +756,11 @@ function basic( test )
       timeOut : 500
     }
 
-    var options = _.mapSupplement( {}, o2, commonDefaults );
+    var options = _.mapSupplement( {}, o2, o3 );
 
     var shell = _.process.start( options );
     return test.shouldThrowErrorAsync( shell )
-    .thenKeep( () =>
+    .then( () =>
     {
       test.identical( options.process.killed, true );
       test.identical( !options.exitCode, true );
@@ -775,7 +781,7 @@ function shellSync( test )
   let a = test.assetFor( false );
   let programPath = a.path.nativize( a.program( testAppShell ) );
 
-  var commonDefaults =
+  let o3 =
   {
     outputPiping : 1,
     outputCollecting : 1,
@@ -787,7 +793,7 @@ function shellSync( test )
   /* */
 
   var expectedOutput = programPath + '\n';
-  var o2; /* qqq : should be o2 if o-map is not passed to routine directly */
+  var o2;
 
   /* - */
 
@@ -801,7 +807,7 @@ function shellSync( test )
 
   /* mode : spawn, stdio : pipe */
 
-  var options = _.mapSupplement( {}, o2, commonDefaults );
+  var options = _.mapSupplement( {}, o2, o3 );
   _.process.start( options );
   debugger;
   test.identical( options.exitCode, 0 );
@@ -813,12 +819,12 @@ function shellSync( test )
   o2.outputCollecting = 0;
   o2.outputPiping = 0;
 
-  var options = _.mapSupplement( {}, o2, commonDefaults );
+  var options = _.mapSupplement( {}, o2, o3 );
   _.process.start( options )
   test.identical( options.exitCode, 0 );
   test.identical( options.output, null );
 
-  /* - */
+  /* */
 
   test.case = 'mode : shell';
   o2 =
@@ -827,7 +833,7 @@ function shellSync( test )
     mode : 'shell',
     stdio : 'pipe'
   }
-  var options = _.mapSupplement( {}, o2, commonDefaults );
+  var options = _.mapSupplement( {}, o2, o3 );
   _.process.start( options )
   test.identical( options.exitCode, 0 );
   test.identical( options.output, expectedOutput );
@@ -838,12 +844,12 @@ function shellSync( test )
   o2.outputCollecting = 0;
   o2.outputPiping = 0;
 
-  var options = _.mapSupplement( {}, o2, commonDefaults );
+  var options = _.mapSupplement( {}, o2, o3 );
   _.process.start( options )
   test.identical( options.exitCode, 0 );
   test.identical( options.output, null );
 
-  /* - */
+  /* */
 
   test.case = 'shell, stop process using timeOut';
   o2 =
@@ -854,10 +860,10 @@ function shellSync( test )
     timeOut : 500
   }
 
-  var options = _.mapSupplement( {}, o2, commonDefaults );
+  var options = _.mapSupplement( {}, o2, o3 );
   test.shouldThrowErrorSync( () => _.process.start( options ) );
 
-  /* - */
+  /* */
 
   test.case = 'spawn, return good code';
   o2 =
@@ -866,11 +872,11 @@ function shellSync( test )
     mode : 'spawn',
     stdio : 'pipe'
   }
-  var options = _.mapSupplement( {}, o2, commonDefaults );
+  var options = _.mapSupplement( {}, o2, o3 );
   test.mustNotThrowError( () => _.process.start( options ) )
   test.identical( options.exitCode, 0 );
 
-  /* - */
+  /* */
 
   test.case = 'spawn, return ext code 1';
   o2 =
@@ -879,11 +885,11 @@ function shellSync( test )
     mode : 'spawn',
     stdio : 'pipe'
   }
-  var options = _.mapSupplement( {}, o2, commonDefaults );
+  var options = _.mapSupplement( {}, o2, o3 );
   test.shouldThrowErrorSync( () => _.process.start( options ) );
   test.identical( options.exitCode, 1 );
 
-  /* - */
+  /* */
 
   test.case = 'spawn, return ext code 2';
   o2 =
@@ -892,11 +898,11 @@ function shellSync( test )
     mode : 'spawn',
     stdio : 'pipe'
   }
-  var options = _.mapSupplement( {}, o2, commonDefaults );
+  var options = _.mapSupplement( {}, o2, o3 );
   test.shouldThrowErrorSync( () => _.process.start( options ) );
   test.identical( options.exitCode, 2 );
 
-  /* - */
+  /* */
 
   test.case = 'shell, return good code';
   o2 =
@@ -906,11 +912,11 @@ function shellSync( test )
     stdio : 'pipe'
   }
 
-  var options = _.mapSupplement( {}, o2, commonDefaults );
+  var options = _.mapSupplement( {}, o2, o3 );
   test.mustNotThrowError( () => _.process.start( options ) )
   test.identical( options.exitCode, 0 );
 
-  /* - */
+  /* */
 
   test.case = 'shell, return bad code';
   o2 =
@@ -919,7 +925,7 @@ function shellSync( test )
     mode : 'shell',
     stdio : 'pipe'
   }
-  var options = _.mapSupplement( {}, o2, commonDefaults );
+  var options = _.mapSupplement( {}, o2, o3 );
   test.shouldThrowErrorSync( () => _.process.start( options ) )
   test.identical( options.exitCode, 1 );
 
@@ -933,7 +939,7 @@ function shellSyncAsync( test )
   let a = test.assetFor( false );
   let programPath = a.path.nativize( a.program( testAppShell ) );
 
-  var commonDefaults =
+  let o3 =
   {
     outputPiping : 1,
     outputCollecting : 1,
@@ -946,7 +952,6 @@ function shellSyncAsync( test )
   /* */
 
   var expectedOutput = programPath + '\n';
-
   var o;
 
   /* - */
@@ -961,7 +966,7 @@ function shellSyncAsync( test )
 
   /* mode : spawn, stdio : pipe */
 
-  var options = _.mapSupplement( {}, o, commonDefaults );
+  var options = _.mapSupplement( {}, o, o3 );
   var got = _.process.start( options );
   test.is( got === options );
   test.identical( got.process.constructor.name, 'ChildProcess' );
@@ -974,14 +979,14 @@ function shellSyncAsync( test )
   o.outputCollecting = 0;
   o.outputPiping = 0;
 
-  var options = _.mapSupplement( {}, o, commonDefaults );
+  var options = _.mapSupplement( {}, o, o3 );
   var got = _.process.start( options );
   test.is( got === options );
   test.identical( got.process.constructor.name, 'ChildProcess' );
   test.identical( options.exitCode, 0 );
   test.identical( options.output, null );
 
-  /* - */
+  /* */
 
   test.case = 'mode : spawn';
   o =
@@ -993,7 +998,7 @@ function shellSyncAsync( test )
 
   /* mode : spawn, stdio : pipe */
 
-  var options = _.mapSupplement( {}, o, commonDefaults );
+  var options = _.mapSupplement( {}, o, o3 );
   var got = _.process.start( options );
   test.is( got === options );
   test.identical( got.process.constructor.name, 'ChildProcess' );
@@ -1006,14 +1011,14 @@ function shellSyncAsync( test )
   o.outputCollecting = 0;
   o.outputPiping = 0;
 
-  var options = _.mapSupplement( {}, o, commonDefaults );
+  var options = _.mapSupplement( {}, o, o3 );
   var got = _.process.start( options );
   test.is( got === options );
   test.identical( got.process.constructor.name, 'ChildProcess' );
   test.identical( options.exitCode, 0 );
   test.identical( options.output, null );
 
-  /* - */
+  /* */
 
   test.case = 'mode : shell';
   o =
@@ -1022,7 +1027,7 @@ function shellSyncAsync( test )
     mode : 'shell',
     stdio : 'pipe'
   }
-  var options = _.mapSupplement( {}, o, commonDefaults );
+  var options = _.mapSupplement( {}, o, o3 );
   var got = _.process.start( options );
   test.is( got === options );
   test.identical( got.process.constructor.name, 'ChildProcess' );
@@ -1035,14 +1040,14 @@ function shellSyncAsync( test )
   o.outputCollecting = 0;
   o.outputPiping = 0;
 
-  var options = _.mapSupplement( {}, o, commonDefaults );
+  var options = _.mapSupplement( {}, o, o3 );
   var got = _.process.start( options );
   test.is( got === options );
   test.identical( got.process.constructor.name, 'ChildProcess' );
   test.identical( options.exitCode, 0 );
   test.identical( options.output, null );
 
-  /* - */
+  /* */
 
   test.case = 'shell, stop process using timeOut';
   o =
@@ -1053,10 +1058,10 @@ function shellSyncAsync( test )
     timeOut : 500
   }
 
-  var options = _.mapSupplement( {}, o, commonDefaults );
+  var options = _.mapSupplement( {}, o, o3 );
   test.shouldThrowErrorSync( () => _.process.start( options ) );
 
-  /* - */
+  /* */
 
   test.case = 'spawn, return good code';
   o =
@@ -1065,13 +1070,13 @@ function shellSyncAsync( test )
     mode : 'spawn',
     stdio : 'pipe'
   }
-  var options = _.mapSupplement( {}, o, commonDefaults );
+  var options = _.mapSupplement( {}, o, o3 );
   var got = _.process.start( options );
   test.is( got === options );
   test.identical( got.process.constructor.name, 'ChildProcess' );
   test.identical( options.exitCode, 0 );
 
-  /* - */
+  /* */
 
   test.case = 'spawn, return bad code';
   o =
@@ -1080,11 +1085,11 @@ function shellSyncAsync( test )
     mode : 'spawn',
     stdio : 'pipe'
   }
-  var options = _.mapSupplement( {}, o, commonDefaults );
+  var options = _.mapSupplement( {}, o, o3 );
   test.shouldThrowErrorSync( () => _.process.start( options ) )
   test.identical( options.exitCode, 1 );
 
-  /* - */
+  /* */
 
   test.case = 'shell, return good code';
   o =
@@ -1094,13 +1099,13 @@ function shellSyncAsync( test )
     stdio : 'pipe'
   }
 
-  var options = _.mapSupplement( {}, o, commonDefaults );
+  var options = _.mapSupplement( {}, o, o3 );
   var got = _.process.start( options );
   test.is( got === options );
   test.identical( got.process.constructor.name, 'ChildProcess' );
   test.identical( options.exitCode, 0 );
 
-  /* - */
+  /* */
 
   test.case = 'shell, return bad code';
   o =
@@ -1109,7 +1114,7 @@ function shellSyncAsync( test )
     mode : 'shell',
     stdio : 'pipe'
   }
-  var options = _.mapSupplement( {}, o, commonDefaults );
+  var options = _.mapSupplement( {}, o, o3 );
   test.shouldThrowErrorSync( () => _.process.start( options ) )
   test.identical( options.exitCode, 1 );
 
@@ -1123,7 +1128,7 @@ function shell2( test )
   let a = test.assetFor( false );
   let programPath = a.path.nativize( a.program( testApp ) );
 
-  var commonDefaults =
+  let o3 =
   {
     outputPiping : 1,
     outputCollecting : 1,
@@ -1133,9 +1138,10 @@ function shell2( test )
 
   /* */
 
+  /* qqq : should be o2 if o-map is not passed to routine directly */
   var o;
 
-  a.ready.thenKeep( function()
+  a.ready.then( function()
   {
     test.case = 'mode : shell';
 
@@ -1148,14 +1154,14 @@ function shell2( test )
     }
     return null;
   })
-  .thenKeep( function( arg )
+  .then( function( arg )
   {
     /* mode : shell, stdio : pipe */
 
-    var options = _.mapSupplement( {}, _.cloneJust( o ), commonDefaults );
+    var options = _.mapSupplement( {}, _.cloneJust( o ), o3 );
 
     return _.process.start( options )
-    .thenKeep( function()
+    .then( function()
     {
       test.identical( options.exitCode, 0 );
       test.identical( options.output, o.args.join( ' ' ) + '\n' );
@@ -1163,9 +1169,9 @@ function shell2( test )
     })
   })
 
-  /* - */
+  /* */
 
-  a.ready.thenKeep( function()
+  a.ready.then( function()
   {
     test.case = 'mode : shell, passingThrough : true, no args';
 
@@ -1179,14 +1185,14 @@ function shell2( test )
 
     return null;
   })
-  .thenKeep( function( arg )
+  .then( function( arg )
   {
     /* mode : shell, stdio : pipe, passingThrough : true */
 
-    var options = _.mapSupplement( {}, o, commonDefaults );
+    var options = _.mapSupplement( {}, o, o3 );
 
     return _.process.start( options )
-    .thenKeep( function()
+    .then( function()
     {
       test.identical( options.exitCode, 0 );
       var expectedArgs= _.arrayAppendArray( [], process.argv.slice( 2 ) );
@@ -1195,9 +1201,9 @@ function shell2( test )
     })
   })
 
-  /* - */
+  /* */
 
-  a.ready.thenKeep( function()
+  a.ready.then( function()
   {
     test.case = 'mode : spawn, passingThrough : true, only filePath in args';
 
@@ -1211,14 +1217,14 @@ function shell2( test )
     }
     return null;
   })
-  .thenKeep( function( arg )
+  .then( function( arg )
   {
     /* mode : spawn, stdio : pipe, passingThrough : true */
 
-    var options = _.mapSupplement( {}, o, commonDefaults );
+    var options = _.mapSupplement( {}, o, o3 );
 
     return _.process.start( options )
-    .thenKeep( function()
+    .then( function()
     {
       test.identical( options.exitCode, 0 );
       var expectedArgs = _.arrayAppendArray( [], process.argv.slice( 2 ) );
@@ -1227,9 +1233,9 @@ function shell2( test )
     })
   })
 
-  /* - */
+  /* */
 
-  a.ready.thenKeep( function()
+  a.ready.then( function()
   {
     test.case = 'mode : spawn, passingThrough : true, incorrect usage of o.path in spawn mode';
 
@@ -1243,15 +1249,15 @@ function shell2( test )
     }
     return null;
   })
-  .thenKeep( function( arg )
+  .then( function( arg )
   {
-    var options = _.mapSupplement( {}, o, commonDefaults );
-    return test.shouldThrowErrorOfAnyKind( _.process.start( options ) );
+    var options = _.mapSupplement( {}, o, o3 );
+    return test.shouldThrowErrorAsync( _.process.start( options ) );
   })
 
-  /* - */
+  /* */
 
-  a.ready.thenKeep( function()
+  a.ready.then( function()
   {
     test.case = 'mode : shell, passingThrough : true';
 
@@ -1265,14 +1271,14 @@ function shell2( test )
     }
     return null;
   })
-  .thenKeep( function( arg )
+  .then( function( arg )
   {
     /* mode : shell, stdio : pipe, passingThrough : true */
 
-    var options = _.mapSupplement( {}, o, commonDefaults );
+    var options = _.mapSupplement( {}, o, o3 );
 
     return _.process.start( options )
-    .thenKeep( function()
+    .then( function()
     {
       test.identical( options.exitCode, 0 );
       var expectedArgs = _.arrayAppendArray( [ 'staging', 'debug' ], process.argv.slice( 2 ) );
@@ -1293,7 +1299,7 @@ function shell2( test )
 
 //
 
-/* qqq : split by modes */
+/* qqq : split by modes | aaa : Done. Yevhen S. */
 /* qqq : actualize names of test routines */
 function shellCurrentPath( test )
 {
@@ -1305,9 +1311,9 @@ function shellCurrentPath( test )
 
   var expectedOutput = __dirname + '\n'
 
-  /* - */
+  /* mode : shell */
 
-  a.ready.thenKeep( function()
+  a.ready.then( function()
   {
     test.case = 'mode : shell';
 
@@ -1320,253 +1326,16 @@ function shellCurrentPath( test )
       outputCollecting : 1,
     }
     return _.process.start( o )
-    .thenKeep( function( got )
+    .then( function( got )
     {
       test.identical( o.output, expectedOutput );
       return null;
     })
   })
 
-  /**/
-
-  a.ready.thenKeep( function()
-  {
-    test.case = 'mode : spawn';
-
-    let o =
-    {
-      execPath :  'node ' + programPath,
-      currentPath : __dirname,
-      mode : 'spawn',
-      stdio : 'pipe',
-      outputCollecting : 1,
-    }
-    return _.process.start( o )
-    .thenKeep( function( got )
-    {
-      test.identical( o.output, expectedOutput );
-      return null;
-    })
-  })
-
-  /**/
-
-  // qqq : switch on?
-  // con.thenKeep( function()
-  // {
-  //   test.case = 'mode : exec';
-  //
-  //   let o =
-  //   {
-  //     execPath :  'node ' + testAppPath,
-  //     currentPath : __dirname,
-  //     mode : 'exec',
-  //     stdio : 'pipe',
-  //     outputCollecting : 1,
-  //   }
-  //   return _.process.start( o )
-  //   .thenKeep( function( got )
-  //   {
-  //     test.identical( o.output, expectedOutput );
-  //     return null;
-  //   })
-  // })
-
-  /**/
-
-  a.ready.thenKeep( function()
-  {
-    test.case = 'mode : fork';
-
-    let output;
-
-    let o =
-    {
-      execPath : programPath,
-      currentPath : __dirname,
-      mode : 'fork',
-    }
-    let con = _.process.start( o );
-    o.process.on( 'message', ( m ) =>
-    {
-      output = m;
-    })
-    con.thenKeep( function( got )
-    {
-      test.identical( output.currentPath, __dirname );
-      return null;
-    })
-
-    return con;
-  })
-
   /* */
 
-  a.ready.thenKeep( function()
-  {
-    test.case = 'normalized, currentPath leads to root of current drive, mode : spawn';
-
-    let trace = a.path.traceToRoot( a.path.normalize( __dirname ) );
-    let currentPath = trace[ 1 ];
-
-    let o =
-    {
-      execPath :  'node ' + programPath,
-      currentPath,
-      mode : 'spawn',
-      stdio : 'pipe',
-      outputCollecting : 1,
-    }
-
-    return _.process.start( o )
-    .thenKeep( function( got )
-    {
-      test.identical( _.strStrip( got.output ), a.path.nativize( currentPath ) );
-      return null;
-    })
-  })
-
-  /* */
-
-
-  a.ready.thenKeep( function()
-  {
-    test.case = 'normalized with slash, currentPath leads to root of current drive, mode : spawn';
-
-    let trace = a.path.traceToRoot( a.path.normalize( __dirname ) );
-    let currentPath = trace[ 1 ] + '/';
-
-    let o =
-    {
-      execPath :  'node ' + programPath,
-      currentPath,
-      mode : 'spawn',
-      stdio : 'pipe',
-      outputCollecting : 1,
-    }
-
-    return _.process.start( o )
-    .thenKeep( function( got )
-    {
-      if( process.platform === 'win32')
-      test.identical( _.strStrip( got.output ), a.path.nativize( currentPath ) );
-      else
-      test.identical( _.strStrip( got.output ), trace[ 1 ] );
-      return null;
-    })
-  })
-
-  /* */
-
-  a.ready.thenKeep( function()
-  {
-    test.case = 'nativized, currentPath leads to root of current drive, mode : spawn';
-
-    let trace = a.path.traceToRoot( __dirname );
-    let currentPath = a.path.nativize( trace[ 1 ] );
-
-    let o =
-    {
-      execPath :  'node ' + programPath,
-      currentPath,
-      mode : 'spawn',
-      stdio : 'pipe',
-      outputCollecting : 1,
-    }
-
-    return _.process.start( o )
-    .thenKeep( function( got )
-    {
-      test.identical( _.strStrip( got.output ), currentPath );
-      return null;
-    })
-  })
-
-  /*  */
-
-  a.ready.thenKeep( function()
-  {
-    test.case = 'normalized, currentPath leads to root of current drive, mode : fork';
-
-    let trace = a.path.traceToRoot( a.path.normalize( __dirname ) );
-    let currentPath = trace[ 1 ];
-
-    let o =
-    {
-      execPath : programPath,
-      currentPath,
-      mode : 'fork',
-      stdio : 'pipe',
-      outputCollecting : 1,
-    }
-
-    return _.process.start( o )
-    .thenKeep( function( got )
-    {
-      test.identical( _.strStrip( got.output ), a.path.nativize( currentPath ) );
-      return null;
-    })
-  })
-
-  /* */
-
-
-  a.ready.thenKeep( function()
-  {
-    test.case = 'normalized with slash, currentPath leads to root of current drive, mode : fork';
-
-    let trace = a.path.traceToRoot( a.path.normalize( __dirname ) );
-    let currentPath = trace[ 1 ] + '/';
-
-    let o =
-    {
-      execPath : programPath,
-      currentPath,
-      mode : 'fork',
-      stdio : 'pipe',
-      outputCollecting : 1,
-    }
-
-    return _.process.start( o )
-    .thenKeep( function( got )
-    {
-      if( process.platform === 'win32')
-      test.identical( _.strStrip( got.output ), a.path.nativize( currentPath ) );
-      else
-      test.identical( _.strStrip( got.output ), trace[ 1 ] );
-      return null;
-    })
-  })
-
-  /* */
-
-  a.ready.thenKeep( function()
-  {
-    test.case = 'nativized, currentPath leads to root of current drive, mode : fork';
-
-    let trace = a.path.traceToRoot( __dirname );
-    let currentPath = a.path.nativize( trace[ 1 ] );
-
-    let o =
-    {
-      execPath : programPath,
-      currentPath,
-      mode : 'fork',
-      stdio : 'pipe',
-      outputCollecting : 1,
-    }
-
-    return _.process.start( o )
-    .thenKeep( function( got )
-    {
-      test.identical( _.strStrip( got.output ), currentPath );
-      return null;
-    })
-  })
-
-  /* */
-
-  a.ready.thenKeep( function()
+  a.ready.then( function()
   {
     test.case = 'normalized, currentPath leads to root of current drive, mode : shell';
 
@@ -1583,7 +1352,7 @@ function shellCurrentPath( test )
     }
 
     return _.process.start( o )
-    .thenKeep( function( got )
+    .then( function( got )
     {
       test.identical( _.strStrip( got.output ), a.path.nativize( currentPath ) );
       return null;
@@ -1592,8 +1361,7 @@ function shellCurrentPath( test )
 
   /* */
 
-
-  a.ready.thenKeep( function()
+  a.ready.then( function()
   {
     test.case = 'normalized with slash, currentPath leads to root of current drive, mode : shell';
 
@@ -1610,7 +1378,7 @@ function shellCurrentPath( test )
     }
 
     return _.process.start( o )
-    .thenKeep( function( got )
+    .then( function( got )
     {
       if( process.platform === 'win32')
       test.identical( _.strStrip( got.output ), a.path.nativize( currentPath ) );
@@ -1622,7 +1390,7 @@ function shellCurrentPath( test )
 
   /* */
 
-  a.ready.thenKeep( function()
+  a.ready.then( function()
   {
     test.case = 'nativized, currentPath leads to root of current drive, mode : shell';
 
@@ -1639,7 +1407,242 @@ function shellCurrentPath( test )
     }
 
     return _.process.start( o )
-    .thenKeep( function( got )
+    .then( function( got )
+    {
+      test.identical( _.strStrip( got.output ), currentPath );
+      return null;
+    })
+  })
+
+  // qqq Vova : switch on?
+  // con.then( function()
+  // {
+  //   test.case = 'mode : exec';
+  //
+  //   let o =
+  //   {
+  //     execPath :  'node ' + testAppPath,
+  //     currentPath : __dirname,
+  //     mode : 'exec',
+  //     stdio : 'pipe',
+  //     outputCollecting : 1,
+  //   }
+  //   return _.process.start( o )
+  //   .then( function( got )
+  //   {
+  //     test.identical( o.output, expectedOutput );
+  //     return null;
+  //   })
+  // })
+
+  /* mode : fork */
+
+  a.ready.then( function()
+  {
+    test.case = 'mode : fork';
+
+    let output;
+
+    let o =
+    {
+      execPath : programPath,
+      currentPath : __dirname,
+      mode : 'fork',
+    }
+    let con = _.process.start( o );
+    o.process.on( 'message', ( m ) =>
+    {
+      output = m;
+    })
+    con.then( function( got )
+    {
+      test.identical( output.currentPath, __dirname );
+      return null;
+    })
+
+    return con;
+  })
+
+  /* */
+
+  a.ready.then( function()
+  {
+    test.case = 'normalized, currentPath leads to root of current drive, mode : fork';
+
+    let trace = a.path.traceToRoot( a.path.normalize( __dirname ) );
+    let currentPath = trace[ 1 ];
+
+    let o =
+    {
+      execPath : programPath,
+      currentPath,
+      mode : 'fork',
+      stdio : 'pipe',
+      outputCollecting : 1,
+    }
+
+    return _.process.start( o )
+    .then( function( got )
+    {
+      test.identical( _.strStrip( got.output ), a.path.nativize( currentPath ) );
+      return null;
+    })
+  })
+
+  /* */
+
+
+  a.ready.then( function()
+  {
+    test.case = 'normalized with slash, currentPath leads to root of current drive, mode : fork';
+
+    let trace = a.path.traceToRoot( a.path.normalize( __dirname ) );
+    let currentPath = trace[ 1 ] + '/';
+
+    let o =
+    {
+      execPath : programPath,
+      currentPath,
+      mode : 'fork',
+      stdio : 'pipe',
+      outputCollecting : 1,
+    }
+
+    return _.process.start( o )
+    .then( function( got )
+    {
+      if( process.platform === 'win32')
+      test.identical( _.strStrip( got.output ), a.path.nativize( currentPath ) );
+      else
+      test.identical( _.strStrip( got.output ), trace[ 1 ] );
+      return null;
+    })
+  })
+
+  /* */
+
+  a.ready.then( function()
+  {
+    test.case = 'nativized, currentPath leads to root of current drive, mode : fork';
+
+    let trace = a.path.traceToRoot( __dirname );
+    let currentPath = a.path.nativize( trace[ 1 ] );
+
+    let o =
+    {
+      execPath : programPath,
+      currentPath,
+      mode : 'fork',
+      stdio : 'pipe',
+      outputCollecting : 1,
+    }
+
+    return _.process.start( o )
+    .then( function( got )
+    {
+      test.identical( _.strStrip( got.output ), currentPath );
+      return null;
+    })
+  })
+
+  /* mode: spawn */
+
+  a.ready.then( function()
+  {
+    test.case = 'mode : spawn';
+
+    let o =
+    {
+      execPath :  'node ' + programPath,
+      currentPath : __dirname,
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputCollecting : 1,
+    }
+    return _.process.start( o )
+    .then( function( got )
+    {
+      test.identical( o.output, expectedOutput );
+      return null;
+    })
+  })
+
+  /* */
+
+  a.ready.then( function()
+  {
+    test.case = 'normalized, currentPath leads to root of current drive, mode : spawn';
+
+    let trace = a.path.traceToRoot( a.path.normalize( __dirname ) );
+    let currentPath = trace[ 1 ];
+
+    let o =
+    {
+      execPath :  'node ' + programPath,
+      currentPath,
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputCollecting : 1,
+    }
+
+    return _.process.start( o )
+    .then( function( got )
+    {
+      test.identical( _.strStrip( got.output ), a.path.nativize( currentPath ) );
+      return null;
+    })
+  })
+
+  /* */
+
+
+  a.ready.then( function()
+  {
+    test.case = 'normalized with slash, currentPath leads to root of current drive, mode : spawn';
+
+    let trace = a.path.traceToRoot( a.path.normalize( __dirname ) );
+    let currentPath = trace[ 1 ] + '/';
+
+    let o =
+    {
+      execPath :  'node ' + programPath,
+      currentPath,
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputCollecting : 1,
+    }
+
+    return _.process.start( o )
+    .then( function( got )
+    {
+      if( process.platform === 'win32')
+      test.identical( _.strStrip( got.output ), a.path.nativize( currentPath ) );
+      else
+      test.identical( _.strStrip( got.output ), trace[ 1 ] );
+      return null;
+    })
+  })
+
+  /* */
+
+  a.ready.then( function()
+  {
+    test.case = 'nativized, currentPath leads to root of current drive, mode : spawn';
+
+    let trace = a.path.traceToRoot( __dirname );
+    let currentPath = a.path.nativize( trace[ 1 ] );
+
+    let o =
+    {
+      execPath :  'node ' + programPath,
+      currentPath,
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputCollecting : 1,
+    }
+
+    return _.process.start( o )
+    .then( function( got )
     {
       test.identical( _.strStrip( got.output ), currentPath );
       return null;
@@ -1648,8 +1651,8 @@ function shellCurrentPath( test )
 
   /* */
 
-  // qqq : switch on?
-  // con.thenKeep( function()
+  // qqq Vova : switch on?
+  // con.then( function()
   // {
   //   test.case = 'normalized, currentPath leads to root of current drive, mode : exec';
   //
@@ -1666,7 +1669,7 @@ function shellCurrentPath( test )
   //   }
   //
   //   return _.process.start( o )
-  //   .thenKeep( function( got )
+  //   .then( function( got )
   //   {
   //     test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) );
   //     return null;
@@ -1676,7 +1679,7 @@ function shellCurrentPath( test )
   // /* */
   //
   //
-  // con.thenKeep( function()
+  // con.then( function()
   // {
   //   test.case = 'normalized with slash, currentPath leads to root of current drive, mode : exec';
   //
@@ -1693,7 +1696,7 @@ function shellCurrentPath( test )
   //   }
   //
   //   return _.process.start( o )
-  //   .thenKeep( function( got )
+  //   .then( function( got )
   //   {
   //     if( process.platform === 'win32')
   //     test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) );
@@ -1705,7 +1708,7 @@ function shellCurrentPath( test )
   //
   // /* */
   //
-  // con.thenKeep( function()
+  // con.then( function()
   // {
   //   test.case = 'nativized, currentPath leads to root of current drive, mode : exec';
   //
@@ -1722,7 +1725,7 @@ function shellCurrentPath( test )
   //   }
   //
   //   return _.process.start( o )
-  //   .thenKeep( function( got )
+  //   .then( function( got )
   //   {
   //     test.identical( _.strStrip( got.output ), currentPath );
   //     return null;
@@ -1899,11 +1902,11 @@ function shellFork( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ) );
+  let programPath = a.program( testApp );
 
   /* */
 
-  a.ready.thenKeep( function()
+  a.ready.then( function()
   {
     test.case = 'no args';
 
@@ -1917,7 +1920,7 @@ function shellFork( test )
       outputPiping : 1,
     }
     return _.process.start( o )
-    .thenKeep( function( got )
+    .then( function( got )
     {
       test.identical( o.exitCode, 0 );
       test.is( _.strHas( o.output, '[]' ) );
@@ -1925,9 +1928,9 @@ function shellFork( test )
     })
   })
 
-  /* - */
+  /* */
 
-  a.ready.thenKeep( function()
+  a.ready.then( function()
   {
     test.case = 'args';
 
@@ -1941,7 +1944,7 @@ function shellFork( test )
       outputPiping : 1,
     }
     return _.process.start( o )
-    .thenKeep( function( got )
+    .then( function( got )
     {
       test.identical( o.exitCode, 0 );
       test.is( _.strHas( o.output,  `[ 'arg1', 'arg2' ]` ) );
@@ -1949,9 +1952,9 @@ function shellFork( test )
     })
   })
 
-  /* - */
+  /* */
 
-  // con.thenKeep( function()
+  // con.then( function()
   // {
   //   test.case = 'stdio : inherit';
 
@@ -1966,7 +1969,7 @@ function shellFork( test )
   //   }
 
   //   return _.process.start( o )
-  //   .thenKeep( function( got )
+  //   .then( function( got )
   //   {
   //     test.identical( o.exitCode, 0 );
   //     test.identical( o.output.length, 0 );
@@ -1974,9 +1977,9 @@ function shellFork( test )
   //   })
   // })
 
-  /* - */
+  /* */
 
-  a.ready.thenKeep( function()
+  a.ready.then( function()
   {
     test.case = 'stdio : ignore';
 
@@ -1991,7 +1994,7 @@ function shellFork( test )
     }
 
     return _.process.start( o )
-    .thenKeep( function( got )
+    .then( function( got )
     {
       test.identical( o.exitCode, 0 );
       test.identical( o.output, null );
@@ -1999,9 +2002,9 @@ function shellFork( test )
     })
   })
 
-  /* - */
+  /* */
 
-  a.ready.thenKeep( function()
+  a.ready.then( function()
   {
     test.case = 'complex';
 
@@ -2013,7 +2016,7 @@ function shellFork( test )
       console.log( process.execArgv );
     }
 
-    let programPath = a.path.nativize( a.program( testApp2 ) );
+    let programPath = a.program( testApp2 );
 
     let o =
     {
@@ -2028,7 +2031,7 @@ function shellFork( test )
       outputPiping : 1,
     }
     return _.process.start( o )
-    .thenKeep( function( got )
+    .then( function( got )
     {
       test.identical( o.exitCode, 0 );
       test.is( _.strHas( o.output,  `[ 'arg1', 'arg2' ]` ) );
@@ -2040,9 +2043,9 @@ function shellFork( test )
     })
   })
 
-  /* - */
+  /* */
 
-  a.ready.thenKeep( function()
+  a.ready.then( function()
   {
     test.case = 'complex + deasync';
 
@@ -2054,7 +2057,7 @@ function shellFork( test )
       console.log( process.execArgv );
     }
 
-    let programPath = a.path.nativize( a.program( testApp3 ) );
+    let programPath = a.program( testApp3 );
 
     let o =
     {
@@ -2082,9 +2085,9 @@ function shellFork( test )
     return null;
   })
 
-  /* - */
+  /* */
 
-  a.ready.thenKeep( function()
+  a.ready.then( function()
   {
     test.case = 'test is ipc works';
 
@@ -2097,7 +2100,7 @@ function shellFork( test )
       })
     }
 
-    let programPath = a.path.nativize( a.program( testApp4 ) );
+    let programPath = a.program( testApp4 );
 
     let o =
     {
@@ -2110,12 +2113,12 @@ function shellFork( test )
     let con = _.process.start( o );
 
     o.process.send({ message : 'message from parent' });
-    o.process.on( 'message', ( got ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      gotMessage = got.message;
+      gotMessage = e.message;
     })
 
-    con.thenKeep( function( got )
+    con.then( function( got )
     {
       test.identical( gotMessage, 'child received message from parent' )
       test.identical( o.exitCode, 0 );
@@ -2125,9 +2128,9 @@ function shellFork( test )
     return con;
   })
 
-  /* - */
+  /* */
 
-  a.ready.thenKeep( function()
+  a.ready.then( function()
   {
     test.case = 'execPath can contain path to js file and arguments';
 
@@ -2141,7 +2144,7 @@ function shellFork( test )
     }
 
     return _.process.start( o )
-    .thenKeep( function( got )
+    .then( function( got )
     {
       test.identical( o.exitCode, 0 );
       test.is( _.strHas( o.output,  `[ 'arg0' ]` ) );
@@ -2149,9 +2152,9 @@ function shellFork( test )
     })
   })
 
-  /* - */
+  /* */
 
-  a.ready.thenKeep( function()
+  a.ready.then( function()
   {
     test.case = 'test timeOut';
 
@@ -2163,7 +2166,7 @@ function shellFork( test )
       }, 5000 )
     }
 
-    let programPath = a.path.nativize( a.program( testApp5 ) );
+    let programPath = a.program( testApp5 );
 
     let o =
     {
@@ -2176,17 +2179,17 @@ function shellFork( test )
       timeOut : 1000,
     }
 
-    return test.shouldThrowErrorOfAnyKind( _.process.start( o ) )
-    .thenKeep( function( got )
+    return test.shouldThrowErrorAsync( _.process.start( o ) )
+    .then( function( got )
     {
       test.identical( o.exitCode, null );
       return null;
     })
   })
 
-  /* - */
+  /* */
 
-  a.ready.thenKeep( function()
+  a.ready.then( function()
   {
     test.case = 'test timeOut';
 
@@ -2198,7 +2201,7 @@ function shellFork( test )
       }, 5000 )
     }
 
-    let programPath = a.path.nativize( a.program( testApp6 ) );
+    let programPath = a.program( testApp6 );
 
     let o =
     {
@@ -2212,7 +2215,7 @@ function shellFork( test )
     }
 
     return _.process.start( o )
-    .thenKeep( function( got )
+    .then( function( got )
     {
       test.identical( o.exitCode, null );
       return null;
@@ -2328,7 +2331,7 @@ function shellSpawnSyncDeasync( test )
     var got = _.process.start( o );
     test.is( _.consequenceIs( got ) );
     test.identical( got.resourcesCount(), 0 );
-    got.thenKeep( function( o )
+    got.then( function( o )
     {
       test.identical( o.exitCode, 0 );
       return o;
@@ -2371,7 +2374,7 @@ function shellSpawnSyncDeasync( test )
     var got = _.process.start( o );
     test.is( _.consequenceIs( got ) );
     test.identical( got.resourcesCount(), 1 );
-    got.thenKeep( function( o )
+    got.then( function( o )
     {
       test.identical( o.exitCode, 0 );
       return o;
@@ -2416,7 +2419,7 @@ function shellSpawnSyncDeasyncThrowing( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ) );
+  let programPath = a.program( testApp );
 
   /* */
 
@@ -2523,7 +2526,7 @@ function shellShellSyncDeasync( test )
     var got = _.process.start( o );
     test.is( _.consequenceIs( got ) );
     test.identical( got.resourcesCount(), 0 );
-    got.thenKeep( function( o )
+    got.then( function( o )
     {
       test.identical( o.exitCode, 0 );
       return o;
@@ -2566,7 +2569,7 @@ function shellShellSyncDeasync( test )
     var got = _.process.start( o );
     test.is( _.consequenceIs( got ) );
     test.identical( got.resourcesCount(), 1 );
-    got.thenKeep( function( o )
+    got.then( function( o )
     {
       test.identical( o.exitCode, 0 );
       return o;
@@ -2613,7 +2616,7 @@ function shellShellSyncDeasyncThrowing( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ) );
+  let programPath = a.program( testApp );
 
   /*  */
 
@@ -2704,7 +2707,7 @@ function shellForkSyncDeasync( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ) );
+  let programPath = a.program( testApp );
 
   /*  */
 
@@ -2721,7 +2724,7 @@ function shellForkSyncDeasync( test )
     var got = _.process.start( o );
     test.is( _.consequenceIs( got ) );
     test.identical( got.resourcesCount(), 0 );
-    got.thenKeep( function( o )
+    got.then( function( o )
     {
       test.identical( o.exitCode, 0 );
       return o;
@@ -2761,7 +2764,7 @@ function shellForkSyncDeasync( test )
     var got = _.process.start( o );
     test.is( _.consequenceIs( got ) );
     test.identical( got.resourcesCount(), 1 );
-    got.thenKeep( function( o )
+    got.then( function( o )
     {
       test.identical( o.exitCode, 0 );
       return o;
@@ -2808,7 +2811,7 @@ function shellForkSyncDeasyncThrowing( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ) );
+  let programPath = a.program( testApp );
 
   /*  */
 
@@ -2929,7 +2932,7 @@ shellForkSyncDeasyncThrowing.timeOut = 15000;
 //     var got = _.process.start( o );
 //     test.is( _.consequenceIs( got ) );
 //     test.identical( got.resourcesCount(), 0 );
-//     got.thenKeep( function( o )
+//     got.then( function( o )
 //     {
 //       test.identical( o.exitCode, 0 );
 //       return o;
@@ -2972,7 +2975,7 @@ shellForkSyncDeasyncThrowing.timeOut = 15000;
 //     var got = _.process.start( o );
 //     test.is( _.consequenceIs( got ) );
 //     test.identical( got.resourcesCount(), 1 );
-//     got.thenKeep( function( o )
+//     got.then( function( o )
 //     {
 //       test.identical( o.exitCode, 0 );
 //       return o;
@@ -3128,7 +3131,7 @@ function shellMultipleSyncDeasync( test )
     var got = _.process.start( o );
     test.is( _.consequenceIs( got ) );
     test.identical( got.resourcesCount(), 0 );
-    got.thenKeep( function( result )
+    got.then( function( result )
     {
       test.identical( result.length, 2 );
       test.identical( result[ 0 ].exitCode, 0 )
@@ -3193,7 +3196,7 @@ function shellMultipleSyncDeasync( test )
     var got = _.process.start( o );
     test.is( _.consequenceIs( got ) );
     test.identical( got.resourcesCount(), 1 );
-    got.thenKeep( function( result )
+    got.then( function( result )
     {
       test.identical( result.length, 2 );
       test.identical( result[ 0 ].exitCode, 0 )
@@ -3238,7 +3241,7 @@ function shellMultipleSyncDeasync( test )
     var got = _.process.start( o );
     test.is( _.consequenceIs( got ) );
     test.identical( got.resourcesCount(), 0 );
-    got.thenKeep( function( result )
+    got.then( function( result )
     {
       test.identical( result.length, 2 );
       test.identical( result[ 0 ].exitCode, 0 )
@@ -3303,7 +3306,7 @@ function shellMultipleSyncDeasync( test )
     var got = _.process.start( o );
     test.is( _.consequenceIs( got ) );
     test.identical( got.resourcesCount(), 1 );
-    got.thenKeep( function( result )
+    got.then( function( result )
     {
       test.identical( result.length, 2 );
       test.identical( result[ 0 ].exitCode, 0 )
@@ -3348,7 +3351,7 @@ function shellMultipleSyncDeasync( test )
     var got = _.process.start( o );
     test.is( _.consequenceIs( got ) );
     test.identical( got.resourcesCount(), 0 );
-    got.thenKeep( function( result )
+    got.then( function( result )
     {
       test.identical( result.length, 2 );
       test.identical( result[ 0 ].exitCode, 0 )
@@ -3407,7 +3410,7 @@ function shellMultipleSyncDeasync( test )
     var got = _.process.start( o );
     test.is( _.consequenceIs( got ) );
     test.identical( got.resourcesCount(), 1 );
-    got.thenKeep( function( result )
+    got.then( function( result )
     {
       test.identical( result.length, 2 );
       test.identical( result[ 0 ].exitCode, 0 )
@@ -3465,14 +3468,14 @@ function shellMultipleSyncDeasync( test )
     let o =
     {
       execPath : [ 'node ' + programPath, 'node ' + programPath ],
-      mode : 'shell', /* qqq : change mode here aaa:done*/
+      mode : 'shell',
       sync : 0,
       deasync : 0
     }
     var got = _.process.start( o );
     test.is( _.consequenceIs( got ) );
     test.identical( got.resourcesCount(), 0 );
-    got.thenKeep( function( result )
+    got.then( function( result )
     {
       test.identical( result.length, 2 );
       test.identical( result[ 0 ].exitCode, 0 )
@@ -3490,14 +3493,14 @@ function shellMultipleSyncDeasync( test )
     let o =
     {
       execPath : [ 'node ' + programPath, 'node ' + programPath ],
-      mode : 'spawn', /* qqq : change mode here aaa:done*/
+      mode : 'spawn',
       sync : 0,
       deasync : 0
     }
     var got = _.process.start( o );
     test.is( _.consequenceIs( got ) );
     test.identical( got.resourcesCount(), 0 );
-    got.thenKeep( function( result )
+    got.then( function( result )
     {
       test.identical( result.length, 2 );
       test.identical( result[ 0 ].exitCode, 0 )
@@ -3515,14 +3518,14 @@ function shellMultipleSyncDeasync( test )
     let o =
     {
       execPath : [ programPath, programPath ],
-      mode : 'fork', /* qqq : change mode here aaa:done*/
+      mode : 'fork',
       sync : 0,
       deasync : 0
     }
     var got = _.process.start( o );
     test.is( _.consequenceIs( got ) );
     test.identical( got.resourcesCount(), 0 );
-    got.thenKeep( function( result )
+    got.then( function( result )
     {
       test.identical( result.length, 2 );
       test.identical( result[ 0 ].exitCode, 0 )
@@ -3540,7 +3543,7 @@ function shellMultipleSyncDeasync( test )
     let o =
     {
       execPath : [ 'node ' + programPath, 'node ' + programPath ],
-      mode : 'shell', /* qqq : change mode here aaa:done*/
+      mode : 'shell',
       sync : 1,
       returningOptionsArray : 1,
       deasync : 0
@@ -3561,7 +3564,7 @@ function shellMultipleSyncDeasync( test )
     let o =
     {
       execPath : [ 'node ' + programPath, 'node ' + programPath ],
-      mode : 'spawn', /* qqq : change mode here aaa:done*/
+      mode : 'spawn',
       sync : 1,
       returningOptionsArray : 1,
       deasync : 0
@@ -3582,7 +3585,7 @@ function shellMultipleSyncDeasync( test )
     let o =
     {
       execPath : [ 'node ' + programPath, 'node ' + programPath ],
-      mode : 'shell', /* qqq : change mode here aaa:done*/
+      mode : 'shell',
       sync : 1,
       returningOptionsArray : 0,
       deasync : 0
@@ -3601,7 +3604,7 @@ function shellMultipleSyncDeasync( test )
     let o =
     {
       execPath : [ 'node ' + programPath, 'node ' + programPath ],
-      mode : 'spawn', /* qqq : change mode here aaa:done*/
+      mode : 'spawn',
       sync : 1,
       returningOptionsArray : 0,
       deasync : 0
@@ -3628,7 +3631,7 @@ function shellMultipleSyncDeasync( test )
     var got = _.process.start( o );
     test.is( _.consequenceIs( got ) );
     test.identical( got.resourcesCount(), 1 );
-    got.thenKeep( function( result )
+    got.then( function( result )
     {
       test.identical( result.length, 2 );
       test.identical( result[ 0 ].exitCode, 0 )
@@ -3653,7 +3656,7 @@ function shellMultipleSyncDeasync( test )
     var got = _.process.start( o );
     test.is( _.consequenceIs( got ) );
     test.identical( got.resourcesCount(), 1 );
-    got.thenKeep( function( result )
+    got.then( function( result )
     {
       test.identical( result.length, 2 );
       test.identical( result[ 0 ].exitCode, 0 )
@@ -3678,7 +3681,7 @@ function shellMultipleSyncDeasync( test )
     var got = _.process.start( o );
     test.is( _.consequenceIs( got ) );
     test.identical( got.resourcesCount(), 1 );
-    got.thenKeep( function( result )
+    got.then( function( result )
     {
       test.identical( result.length, 2 );
       test.identical( result[ 0 ].exitCode, 0 )
@@ -3766,7 +3769,7 @@ function shellDryRun( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ) );
+  let programPath = a.program( testApp );
 
   /*  */
 
@@ -3792,7 +3795,7 @@ function shellDryRun( test )
     var t1 = _.time.now();
     var got = _.process.start( o );
     test.is( _.consequenceIs( got ) );
-    got.thenKeep( function( o )
+    got.then( function( o )
     {
       var t2 = _.time.now();
       test.ge( t2 - t1, 1000 )
@@ -3826,13 +3829,15 @@ function shellDryRun( test )
   }
 }
 
+/* qqq : describe shellDryRun */
+
 //
 
 function startNjsWithReadyDelayStructural( test ) /* qqq : implement additional test case with option detaching:1 */
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( program1 ) );
+  let programPath = a.program( program1 );
 
   a.ready.timeOut( 1000 );
 
@@ -4060,9 +4065,8 @@ function shellArgumentsParsing( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPathNoSpace = a.path.nativize( a.program( { routine : testApp, dirPath : a.abs( 'noSpace' ) } ) ); /* qqq : a.path.nativize? */
-  let testAppPathSpace = a.path.nativize( a.program( { routine : testApp, dirPath : a.abs( 'with space' ) } ) );
-
+  let testAppPathNoSpace = a.path.nativize( a.program({ routine : testApp, dirPath : a.abs( 'noSpace' ) }) );
+  let testAppPathSpace = a.path.nativize( a.program({ routine : testApp, dirPath : a.abs( 'with space' ) }) );
 
   /* for combination:
       path to exe file : [ with space, without space ]
@@ -4107,6 +4111,8 @@ function shellArgumentsParsing( test )
     return con;
   })
 
+  /* */
+
   .then( () =>
   {
     test.case = `'path to exec : without space' 'execPATH : has arguments' 'args has arguments' 'fork'`
@@ -4138,6 +4144,8 @@ function shellArgumentsParsing( test )
 
     return con;
   })
+
+  /* */
 
   .then( () =>
   {
@@ -4171,6 +4179,8 @@ function shellArgumentsParsing( test )
     return con;
   })
 
+  /* */
+
   .then( () =>
   {
     test.case = `'path to exec : without space' 'execPATH : only path' 'args has arguments' 'fork'`
@@ -4202,6 +4212,8 @@ function shellArgumentsParsing( test )
 
     return con;
   })
+
+  /* */
 
   .then( () =>
   {
@@ -4235,6 +4247,8 @@ function shellArgumentsParsing( test )
     return con;
   })
 
+  /* */
+
   .then( () =>
   {
     test.case = `'path to exec : without space' 'execPATH : has arguments' 'args: empty' 'fork'`
@@ -4266,6 +4280,8 @@ function shellArgumentsParsing( test )
 
     return con;
   })
+
+  /* */
 
   .then( () =>
   {
@@ -4299,6 +4315,8 @@ function shellArgumentsParsing( test )
     return con;
   })
 
+  /* */
+
   .then( () =>
   {
     test.case = `'path to exec : without space' 'execPATH : only path' 'args: empty' 'fork'`
@@ -4331,6 +4349,8 @@ function shellArgumentsParsing( test )
     return con;
   })
 
+  /* - */
+
   /* - end of fork - */ /* qqq : split test routine by modes */
 
   .then( () =>
@@ -4354,6 +4374,8 @@ function shellArgumentsParsing( test )
 
     return test.shouldThrowErrorSync( () => _.process.start( o ) );
   })
+
+  /* */
 
   .then( () =>
   {
@@ -4387,6 +4409,8 @@ function shellArgumentsParsing( test )
     return con;
   })
 
+  /* */
+
   .then( () =>
   {
     test.case = `'path to exec : without space' 'execPATH : has arguments' 'args has arguments' 'spawn'`
@@ -4418,6 +4442,8 @@ function shellArgumentsParsing( test )
 
     return con;
   })
+
+  /* */
 
   .then( () =>
   {
@@ -4451,6 +4477,8 @@ function shellArgumentsParsing( test )
     return con;
   })
 
+  /* */
+
   .then( () =>
   {
     test.case = `'path to exec : without space' 'execPATH : only path' 'args has arguments' 'spawn'`
@@ -4482,6 +4510,8 @@ function shellArgumentsParsing( test )
 
     return con;
   })
+
+  /* */
 
   .then( () =>
   {
@@ -4515,6 +4545,8 @@ function shellArgumentsParsing( test )
     return con;
   })
 
+  /* */
+
   .then( () =>
   {
     test.case = `'path to exec : without space' 'execPATH : has arguments' 'args: empty' 'spawn'`
@@ -4546,6 +4578,8 @@ function shellArgumentsParsing( test )
 
     return con;
   })
+
+  /* */
 
   .then( () =>
   {
@@ -4579,6 +4613,8 @@ function shellArgumentsParsing( test )
     return con;
   })
 
+  /* */
+
   .then( () =>
   {
     test.case = `'path to exec : without space' 'execPATH : only path' 'args: empty' 'spawn'`
@@ -4611,6 +4647,8 @@ function shellArgumentsParsing( test )
     return con;
   })
 
+  /* */
+
   .then( () =>
   {
     test.case = `'path to exec : with space' 'execPATH : has arguments' 'args has arguments' 'shell'`
@@ -4639,6 +4677,8 @@ function shellArgumentsParsing( test )
 
     return con;
   })
+
+  /* */
 
   .then( () =>
   {
@@ -4673,6 +4713,8 @@ function shellArgumentsParsing( test )
     return con;
   })
 
+  /* */
+
   .then( () =>
   {
     test.case = `'path to exec : with space' 'execPATH : only path' 'args has arguments' 'shell'`
@@ -4705,6 +4747,8 @@ function shellArgumentsParsing( test )
 
     return con;
   })
+
+  /* */
 
   .then( () =>
   {
@@ -4739,6 +4783,8 @@ function shellArgumentsParsing( test )
     return con;
   })
 
+  /* */
+
   .then( () =>
   {
     test.case = `'path to exec : with space' 'execPATH : has arguments' 'args: empty' 'shell'`
@@ -4771,6 +4817,8 @@ function shellArgumentsParsing( test )
 
     return con;
   })
+
+  /* */
 
   .then( () =>
   {
@@ -4805,6 +4853,8 @@ function shellArgumentsParsing( test )
     return con;
   })
 
+  /* */
+
   .then( () =>
   {
     test.case = `'path to exec : with space' 'execPATH : only path' 'args: empty' 'shell'`
@@ -4838,6 +4888,8 @@ function shellArgumentsParsing( test )
     return con;
   })
 
+  /* */
+
   .then( () =>
   {
     test.case = `'path to exec : without space' 'execPATH : only path' 'args: empty' 'shell'`
@@ -4870,6 +4922,8 @@ function shellArgumentsParsing( test )
 
     return con;
   })
+
+  /* */
 
   /* special case from willbe */
 
@@ -5003,8 +5057,8 @@ function shellArgumentsParsingNonTrivial( test )
 
   let a = test.assetFor( false );
 
-  let testAppPathNoSpace = a.path.nativize( a.program( { routine : testApp, dirPath : a.abs( 'noSpace' ) } ) );
-  let testAppPathSpace = a.path.nativize( a.program( { routine : testApp, dirPath : a.abs( 'with space' ) } ) );
+  let testAppPathNoSpace = a.path.nativize( a.program({ routine : testApp, dirPath : a.abs( 'noSpace' ) }) );
+  let testAppPathSpace = a.path.nativize( a.program({ routine : testApp, dirPath : a.abs( 'with space' ) }) );
 
   /*
 
@@ -5069,7 +5123,6 @@ function shellArgumentsParsingNonTrivial( test )
 
   a.ready
 
-  // qqq : repair? aaa Vova: doesn't fail on mac/centos for me
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -5101,6 +5154,8 @@ function shellArgumentsParsingNonTrivial( test )
 
     return con;
   })
+
+  /* */
 
   .then( () =>
   {
@@ -5136,6 +5191,8 @@ function shellArgumentsParsingNonTrivial( test )
 
     return con;
   })
+
+  /* */
 
   .then( () =>
   {
@@ -5204,6 +5261,8 @@ function shellArgumentsParsingNonTrivial( test )
     return con;
   })
 
+  /* */
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -5236,6 +5295,8 @@ function shellArgumentsParsingNonTrivial( test )
 
     return con;
   })
+
+  /* */
 
   .then( () =>
   {
@@ -5270,7 +5331,7 @@ function shellArgumentsParsingNonTrivial( test )
     return con;
   })
 
-  /*  */
+  /* */
 
   .then( () =>
   {
@@ -5288,7 +5349,7 @@ function shellArgumentsParsingNonTrivial( test )
     }
     _.process.start( o );
 
-    con.finally( ( err, op ) => /* qqq2 : should be ( err, op ) or ( err, arg ) not got */
+    con.finally( ( err, op ) => /* qqq2 : should be ( err, op ) or ( err, arg ) not got | aaa : Done. Yevhen S. */
     {
       test.is( !!err );
       test.is( _.strHas( err.message, 'first arg' ) )
@@ -5394,6 +5455,8 @@ function shellArgumentsParsingNonTrivial( test )
     return con;
   })
 
+  /* */
+
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -5421,6 +5484,8 @@ function shellArgumentsParsingNonTrivial( test )
 
     return con;
   })
+
+  /* */
 
   .then( () =>
   {
@@ -5451,6 +5516,8 @@ function shellArgumentsParsingNonTrivial( test )
     return con;
   })
 
+  /* */
+
   .then( () =>
   {
     test.case = 'no execPath, empty args'
@@ -5468,7 +5535,7 @@ function shellArgumentsParsingNonTrivial( test )
 
     _.process.start( o );
 
-    return test.shouldThrowErrorOfAnyKind( con );
+    return test.shouldThrowErrorAsync( con );
   })
 
   /*  */
@@ -5535,7 +5602,7 @@ function shellArgumentsNestedQuotes( test )
 
   let a = test.assetFor( false );
 
-  let testAppPathSpace = a.path.nativize( a.program( { routine : testApp, dirPath : a.abs( 'with space' ) } ) );
+  let testAppPathSpace = a.path.nativize( a.program({ routine : testApp, dirPath : a.abs( 'with space' ) }) );
 
   /* */
 
@@ -5582,6 +5649,8 @@ function shellArgumentsNestedQuotes( test )
     return con;
   })
 
+  /* */
+
   .then( () =>
   {
     test.case = 'fork'
@@ -5617,6 +5686,8 @@ function shellArgumentsNestedQuotes( test )
 
     return con;
   })
+
+  /* */
 
   .then( () =>
   {
@@ -5660,6 +5731,8 @@ function shellArgumentsNestedQuotes( test )
 
   })
 
+  /* */
+
   .then( () =>
   {
     test.case = 'spawn'
@@ -5697,10 +5770,12 @@ function shellArgumentsNestedQuotes( test )
 
   })
 
+  /* */
+
   .then( () =>
   {
     test.case = 'shell'
-    // qqq : review this case
+    // qqq Vova : review this case
     let con = new _.Consequence().take( null );
     let args =
     [
@@ -5751,6 +5826,8 @@ function shellArgumentsNestedQuotes( test )
     return con;
   })
 
+  /* */
+
   .then( () =>
   {
     test.case = 'shell'
@@ -5791,7 +5868,7 @@ function shellArgumentsNestedQuotes( test )
   // {
   //   test.case = 'exec'
   //
-  //   //qqq : review this case
+  //   // qqq Vova : review this case
   //
   //   let con = new _.Consequence().take( null );
   //   let args =
@@ -5908,7 +5985,7 @@ function shellExecPathQuotesClosing( test )
 
   let a = test.assetFor( false );
 
-  let testAppPathSpace = a.path.nativize( a.program( { routine : testApp, dirPath : a.abs( 'with space' ) } ) );
+  let testAppPathSpace = a.path.nativize( a.path.normalize( a.program({ routine : testApp, dirPath : a.abs( 'with space' ) }) ) );
 
   /* */
 
@@ -6031,6 +6108,8 @@ function shellExecPathQuotesClosing( test )
   //
   //   return con;
   // })
+
+  /* */
 
   testcase( 'unquoted arg' )
 
@@ -6245,6 +6324,8 @@ function shellExecPathQuotesClosing( test )
     return con;
   })
 
+  /* */
+
   testcase( 'arg starts with quote' )
 
   .then( () =>
@@ -6258,7 +6339,7 @@ function shellExecPathQuotesClosing( test )
       outputCollecting : 1,
       ready : con
     }
-    return test.shouldThrowErrorOfAnyKind( _.process.start( o ) );
+    return test.shouldThrowErrorAsync( _.process.start( o ) );
   })
 
   .then( () =>
@@ -6274,6 +6355,8 @@ function shellExecPathQuotesClosing( test )
     }
     return test.mustNotThrowError( _.process.start( o ) );
   })
+
+  /* */
 
   testcase( 'arg ends with quote' )
 
@@ -6303,7 +6386,7 @@ function shellExecPathQuotesClosing( test )
     //   return null;
     // })
 
-    return test.shouldThrowErrorOfAnyKind( _.process.start( o ) );
+    return test.shouldThrowErrorAsync( _.process.start( o ) );
   })
 
   .then( () =>
@@ -6335,6 +6418,8 @@ function shellExecPathQuotesClosing( test )
     return con;
   })
 
+  /* */
+
   testcase( 'quoted with different symbols' )
 
   .then( () =>
@@ -6348,8 +6433,10 @@ function shellExecPathQuotesClosing( test )
       outputCollecting : 1,
       ready : con
     }
-    return test.shouldThrowErrorOfAnyKind( _.process.start( o ) );
+    return test.shouldThrowErrorAsync( _.process.start( o ) );
   })
+
+  /* */
 
   testcase( 'quote as part of arg' )
 
@@ -6379,7 +6466,7 @@ function shellExecPathQuotesClosing( test )
     //   return null;
     // })
 
-    return test.shouldThrowErrorOfAnyKind( _.process.start( o ) );
+    return test.shouldThrowErrorAsync( _.process.start( o ) );
   })
 
   .then( () =>
@@ -6410,6 +6497,8 @@ function shellExecPathQuotesClosing( test )
 
     return con;
   })
+
+  /* */
 
   testcase( 'option arg with quoted value' )
 
@@ -6511,22 +6600,8 @@ function shellExecPathQuotesClosing( test )
       outputCollecting : 1,
       ready : con
     }
-    // _.process.start( o );
 
-    // con.then( () =>
-    // {
-    //   test.identical( o.exitCode, 0 );
-    //   test.identical( o.fullExecPath, testAppPathSpace + ' option:"value' );
-    //   test.identical( o.args, [ 'option:"value' ] );
-    //   let got = JSON.parse( o.output );
-    //   test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-    //   test.identical( got.map, { option : '"value' } )
-    //   test.identical( got.scriptArgs, [ 'option:"value' ] )
-
-    //   return null;
-    // })
-
-    return test.shouldThrowErrorOfAnyKind( _.process.start( o ) );
+    return test.shouldThrowErrorAsync( _.process.start( o ) );
   })
 
   .then( () =>
@@ -6551,7 +6626,6 @@ function shellExecPathQuotesClosing( test )
       test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
       test.identical( got.map, { option : 'value' } )
       test.identical( got.scriptArgs, [ 'option: "value"' ] )
-
       return null;
     })
 
@@ -6569,8 +6643,10 @@ function shellExecPathQuotesClosing( test )
       outputCollecting : 1,
       ready : con
     }
-    return test.shouldThrowErrorOfAnyKind( _.process.start( o ) );
+    return test.shouldThrowErrorAsync( _.process.start( o ) );
   })
+
+  /* */
 
   testcase( 'double quoted with space inside, same quotes' )
 
@@ -6603,6 +6679,8 @@ function shellExecPathQuotesClosing( test )
     return con
   })
 
+  /* */
+
   testcase( 'double quoted with space inside, diff quotes' )
 
   .then( () =>
@@ -6633,6 +6711,8 @@ function shellExecPathQuotesClosing( test )
 
     return con;
   })
+
+  /* */
 
   testcase( 'escaped quotes, mode shell' )
 
@@ -6700,7 +6780,7 @@ function shellExecPathSeveralCommands( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.path.nativize( a.program( app ) );
+  let testAppPath = a.program( app );
 
   a.ready
 
@@ -6770,35 +6850,6 @@ function shellExecPathSeveralCommands( test )
   })
 
   /* -- */
-
-  // testcase( 'quoted, mode:exec' )
-  //
-  // .then( () =>
-  // {
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node app.js arg1 && node app.js arg2',
-  //     mode : 'exec',
-  //     currentPath : routinePath,
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   con.then( ( got ) =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     test.identical( _.strCount( got.output, `[ 'arg1' ]` ), 1 );
-  //     test.identical( _.strCount( got.output, `[ 'arg2' ]` ), 1 );
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
-
-  /* - */
 
   testcase( 'no quotes, mode:shell' )
 
@@ -6873,35 +6924,6 @@ function shellExecPathSeveralCommands( test )
     }
     return test.shouldThrowErrorAsync( _.process.start( o ) );
   })
-
-  /* - */
-
-  // testcase( 'no quotes, mode:exec' )
-  //
-  // .then( () =>
-  // {
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node app.js arg1 && node app.js arg2',
-  //     mode : 'exec',
-  //     currentPath : routinePath,
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   con.then( ( got ) =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     test.identical( _.strCount( got.output, `[ 'arg1' ]` ), 1 );
-  //     test.identical( _.strCount( got.output, `[ 'arg2' ]` ), 1 );
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
 
   /*  */
 
@@ -7075,7 +7097,7 @@ function shellVerbosity( test )
     return true;
   })
 
-  /*  */
+  /* */
 
   testCase( 'error, verbosity : 1' )
   _.process.start
@@ -7098,7 +7120,7 @@ function shellVerbosity( test )
     return true;
   })
 
-  /*  */
+  /* */
 
   testCase( 'error, verbosity : 2' )
   _.process.start
@@ -7144,7 +7166,7 @@ function shellVerbosity( test )
     return true;
   })
 
-  /*  */
+  /* */
 
   testCase( 'error, verbosity : 5' )
   _.process.start
@@ -7167,7 +7189,7 @@ function shellVerbosity( test )
     return true;
   })
 
-  /*  */
+  /* */
 
   testCase( 'execPath has quotes, verbosity : 1' )
   _.process.start
@@ -7241,11 +7263,11 @@ function shellErrorHadling( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.path.nativize( a.program( testApp ) );
+  let testAppPath = a.program( testApp );
 
   /* */
 
-  a.ready.thenKeep( function()
+  a.ready.then( function()
   {
     test.case = 'collecting, verbosity and piping off';
 
@@ -7258,8 +7280,8 @@ function shellErrorHadling( test )
       outputCollecting : 0,
       outputPiping : 0
     }
-    return test.shouldThrowErrorOfAnyKind( _.process.start( o ) )
-    .thenKeep( function( got )
+    return test.shouldThrowErrorAsync( _.process.start( o ) )
+    .then( function( got )
     {
       test.is( _.errIs( got ) );
       test.is( _.strHas( got.message, 'Process returned exit code' ) )
@@ -7274,7 +7296,9 @@ function shellErrorHadling( test )
 
   })
 
-  a.ready.thenKeep( function()
+  /* */
+
+  a.ready.then( function()
   {
     test.case = 'collecting, verbosity and piping off';
 
@@ -7287,8 +7311,8 @@ function shellErrorHadling( test )
       outputCollecting : 0,
       outputPiping : 0
     }
-    return test.shouldThrowErrorOfAnyKind( _.process.start( o ) )
-    .thenKeep( function( got )
+    return test.shouldThrowErrorAsync( _.process.start( o ) )
+    .then( function( got )
     {
       test.is( _.errIs( got ) );
       test.is( _.strHas( got.message, 'Process returned exit code' ) )
@@ -7303,7 +7327,9 @@ function shellErrorHadling( test )
 
   })
 
-  a.ready.thenKeep( function()
+  /* */
+
+  a.ready.then( function()
   {
     test.case = 'collecting, verbosity and piping off';
 
@@ -7316,8 +7342,8 @@ function shellErrorHadling( test )
       outputCollecting : 0,
       outputPiping : 0
     }
-    return test.shouldThrowErrorOfAnyKind( _.process.start( o ) )
-    .thenKeep( function( got )
+    return test.shouldThrowErrorAsync( _.process.start( o ) )
+    .then( function( got )
     {
       test.is( _.errIs( got ) );
       test.is( _.strHas( got.message, 'Process returned exit code' ) )
@@ -7332,7 +7358,9 @@ function shellErrorHadling( test )
 
   })
 
-  a.ready.thenKeep( function()
+  /* */
+
+  a.ready.then( function()
   {
     test.case = 'sync, collecting, verbosity and piping off';
 
@@ -7361,7 +7389,9 @@ function shellErrorHadling( test )
 
   })
 
-  a.ready.thenKeep( function()
+  /* */
+
+  a.ready.then( function()
   {
     test.case = 'sync, collecting, verbosity and piping off';
 
@@ -7390,7 +7420,9 @@ function shellErrorHadling( test )
 
   })
 
-  a.ready.thenKeep( function()
+  /* */
+
+  a.ready.then( function()
   {
     test.case = 'sync, collecting, verbosity and piping off';
 
@@ -7419,7 +7451,9 @@ function shellErrorHadling( test )
 
   })
 
-  a.ready.thenKeep( function()
+  /* */
+
+  a.ready.then( function()
   {
     test.case = 'stdio ignore, sync, collecting, verbosity and piping off';
 
@@ -7448,7 +7482,7 @@ function shellErrorHadling( test )
 
   })
 
-  // con.thenKeep( function()
+  // con.then( function()
   // {
   //   test.case = 'stdio inherit, sync, collecting, verbosity and piping off';
 
@@ -7496,8 +7530,8 @@ function shellNode( test )
   let context = this;
   let a = test.assetFor( false );
   debugger
-  var testAppPath = a.path.nativize( a.program( { routine : testApp, locals : 'aaa' } ) );
-  var testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+  var testAppPath = a.program( testApp );
+  var testAppPath2 = a.program( testApp2 );
 
   /* */
 
@@ -7521,14 +7555,14 @@ function shellNode( test )
     })
   })
 
-  /*  */
+  /* */
 
   // let modes = [ 'fork', 'exec', 'spawn', 'shell' ];
   let modes = [ 'fork', 'spawn', 'shell' ];
 
   modes.forEach( ( mode ) =>
   {
-    a.ready.thenKeep( () =>
+    a.ready.then( () =>
     {
       var o = { execPath : testAppPath, mode, applyingExitCode : 1, throwingExitCode : 1, stdio : 'ignore', outputPiping : 0, outputCollecting : 0 };
       var con = _.process.startNjs( o );
@@ -7542,11 +7576,13 @@ function shellNode( test )
       })
     })
 
-    a.ready.thenKeep( () =>
+    /* */
+
+    a.ready.then( () =>
     {
       var o = { execPath : testAppPath, mode,  applyingExitCode : 1, throwingExitCode : 0, stdio : 'ignore', outputPiping : 0, outputCollecting : 0 };
       return _.process.startNjs( o )
-      .finally( ( err, got ) =>
+      .finally( ( err, op ) =>
       {
         test.identical( o.exitCode, 1 );
         test.identical( process.exitCode, 1 );
@@ -7556,7 +7592,9 @@ function shellNode( test )
       })
     })
 
-    a.ready.thenKeep( () =>
+    /* */
+
+    a.ready.then( () =>
     {
       var o = { execPath : testAppPath,  mode, applyingExitCode : 0, throwingExitCode : 1, stdio : 'ignore', outputPiping : 0, outputCollecting : 0 };
       var con = _.process.startNjs( o )
@@ -7569,11 +7607,13 @@ function shellNode( test )
       })
     })
 
-    a.ready.thenKeep( () =>
+    /* */
+
+    a.ready.then( () =>
     {
       var o = { execPath : testAppPath,  mode, applyingExitCode : 0, throwingExitCode : 0, stdio : 'ignore', outputPiping : 0, outputCollecting : 0 };
       return _.process.startNjs( o )
-      .finally( ( err, got ) =>
+      .finally( ( err, op ) =>
       {
         test.identical( o.exitCode, 1 );
         test.identical( process.exitCode, 0 );
@@ -7582,11 +7622,13 @@ function shellNode( test )
       })
     })
 
-    a.ready.thenKeep( () =>
+    /* */
+
+    a.ready.then( () =>
     {
       var o = { execPath : testAppPath,  mode, maximumMemory : 1, applyingExitCode : 0, throwingExitCode : 0, stdio : 'ignore', outputPiping : 0, outputCollecting : 0 };
       return _.process.startNjs( o )
-      .finally( ( err, got ) =>
+      .finally( ( err, op ) =>
       {
         test.identical( o.exitCode, 1 );
         test.identical( process.exitCode, 0 );
@@ -7622,7 +7664,7 @@ function shellModeShellNonTrivial( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.path.nativize( a.program( app ) );
+  let testAppPath = a.path.nativize( a.path.normalize( a.program( app ) ) );
 
   let shell = _.process.starter
   ({
@@ -7873,7 +7915,7 @@ function shellModeShellNonTrivial( test )
   /*  */
 
   shell({ execPath : 'echo', args : [ 'a b', '*', 'c' ] })
-  .thenKeep( function( op )
+  .then( function( op )
   {
     test.identical( op.exitCode, 0 );
     if( process.platform === 'win32' )
@@ -7911,7 +7953,6 @@ function shellArgumentsHandlingTrivial( test )
 
   /* */
 
-
   let shell = _.process.starter
   ({
     currentPath : a.routinePath,
@@ -7925,7 +7966,7 @@ function shellArgumentsHandlingTrivial( test )
   /* */
 
   shell({ execPath : 'echo *' })
-  .thenKeep( function( op )
+  .then( function( op )
   {
     test.identical( op.exitCode, 0 );
     if( process.platform === 'win32' )
@@ -7967,7 +8008,7 @@ function shellArgumentsHandling( test )
   /* */
 
   shell({ execPath : 'echo *' })
-  .thenKeep( function( op )
+  .then( function( op )
   {
     test.identical( op.exitCode, 0 );
     if( process.platform === 'win32' )
@@ -7983,7 +8024,7 @@ function shellArgumentsHandling( test )
   /* */
 
   shell({ execPath : 'echo', args : '*' })
-  .thenKeep( function( op )
+  .then( function( op )
   {
     test.identical( op.exitCode, 0 );
     test.is( _.strHas( op.output, `*` ) );
@@ -8010,7 +8051,7 @@ function shellArgumentsHandling( test )
   /* */
 
   shell({ execPath : 'echo "a b" "*" c' })
-  .thenKeep( function( op )
+  .then( function( op )
   {
     test.identical( op.exitCode, 0 );
     if( process.platform === 'win32' )
@@ -8026,7 +8067,7 @@ function shellArgumentsHandling( test )
   /* */
 
   shell({ execPath : 'echo', args : [ 'a b', '*', 'c' ] })
-  .thenKeep( function( op )
+  .then( function( op )
   {
     test.identical( op.exitCode, 0 );
     if( process.platform === 'win32' )
@@ -8179,7 +8220,7 @@ function importantModeShell( test )
   /* */
 
   shell({ execPath : null, args : [ 'node', '-v', '&&', 'node', '-v' ] })
-  .thenKeep( function( op )
+  .then( function( op )
   {
     test.identical( op.exitCode, 0 );
     test.identical( _.strCount( op.output, process.version ), 2 );
@@ -8189,7 +8230,7 @@ function importantModeShell( test )
   /* */
 
   shell({ execPath : 'node', args : [ '-v', '&&', 'node', '-v' ] })
-  .thenKeep( function( op )
+  .then( function( op )
   {
     test.identical( op.exitCode, 0 );
     test.identical( _.strCount( op.output, process.version ), 1 );
@@ -8199,7 +8240,7 @@ function importantModeShell( test )
   /* */
 
   shell({ execPath : printArguments, args : [ 'a', '&&', 'node', 'b' ] })
-  .thenKeep( function( op )
+  .then( function( op )
   {
     test.identical( op.exitCode, 0 );
     test.is( _.strHas( op.output, `[ 'a', '&&', 'node', 'b' ]` ) )
@@ -8209,7 +8250,7 @@ function importantModeShell( test )
   /* */
 
   shell({ execPath : 'echo', args : [ '-v', '&&', 'echo', '-v' ] })
-  .thenKeep( function( op )
+  .then( function( op )
   {
     test.identical( op.exitCode, 0 );
     if( process.platform === 'win32' )
@@ -8219,11 +8260,10 @@ function importantModeShell( test )
     return null;
   })
 
-
   /* */
 
   shell({ execPath : 'node -v && node -v', args : [] })
-  .thenKeep( function( op )
+  .then( function( op )
   {
     test.identical( op.exitCode, 0 );
     test.identical( _.strCount( op.output, process.version ), 2 );
@@ -8233,15 +8273,17 @@ function importantModeShell( test )
   /* */
 
   shell({ execPath : `node -v "&&" node -v`, args : [] })
-  .thenKeep( function( op )
+  .then( function( op )
   {
     test.identical( op.exitCode, 0 );
     test.identical( _.strCount( op.output, process.version ), 1 );
     return null;
   })
 
+  /* */
+
   shell({ execPath : `echo -v "&&" node -v`, args : [] })
-  .thenKeep( function( op )
+  .then( function( op )
   {
     test.identical( op.exitCode, 0 );
     if( process.platform === 'win32' )
@@ -8251,11 +8293,10 @@ function importantModeShell( test )
     return null;
   })
 
-
   /* */
 
   shell({ execPath : null, args : [ 'echo', '*' ] })
-  .thenKeep( function( op )
+  .then( function( op )
   {
     test.identical( op.exitCode, 0 );
     if( process.platform === 'win32' )
@@ -8268,7 +8309,7 @@ function importantModeShell( test )
   /* */
 
   shell({ execPath : 'echo', args : [ '*' ] })
-  .thenKeep( function( op )
+  .then( function( op )
   {
     test.identical( op.exitCode, 0 );
     test.identical( _.strCount( op.output, '*' ), 1 );
@@ -8278,7 +8319,7 @@ function importantModeShell( test )
   /* */
 
   shell({ execPath : 'echo *' })
-  .thenKeep( function( op )
+  .then( function( op )
   {
     test.identical( op.exitCode, 0 );
     if( process.platform === 'win32' )
@@ -8291,7 +8332,7 @@ function importantModeShell( test )
   /* */
 
   shell({ execPath : 'echo "*"' })
-  .thenKeep( function( op )
+  .then( function( op )
   {
     test.identical( op.exitCode, 0 );
     test.identical( _.strCount( op.output, '*' ), 1 );
@@ -8301,7 +8342,7 @@ function importantModeShell( test )
   /* */
 
   shell({ execPath : null, args : [ printArguments, 'a b' ] })
-  .thenKeep( function( op )
+  .then( function( op )
   {
     test.identical( op.exitCode, 0 );
     test.is( _.strHas( op.output, `[ 'a', 'b' ]` ) );
@@ -8311,7 +8352,7 @@ function importantModeShell( test )
   /* */
 
   shell({ execPath : printArguments, args : [ 'a b' ] })
-  .thenKeep( function( op )
+  .then( function( op )
   {
     test.identical( op.exitCode, 0 );
     test.is( _.strHas( op.output, `[ 'a b' ]` ) );
@@ -8321,7 +8362,7 @@ function importantModeShell( test )
   /* */
 
   shell({ execPath : `${printArguments} a b` })
-  .thenKeep( function( op )
+  .then( function( op )
   {
     test.identical( op.exitCode, 0 );
     test.is( _.strHas( op.output, `[ 'a', 'b' ]` ) );
@@ -8331,7 +8372,7 @@ function importantModeShell( test )
   /* */
 
   shell({ execPath : `${printArguments} "a b"` })
-  .thenKeep( function( op )
+  .then( function( op )
   {
     test.identical( op.exitCode, 0 );
     test.is( _.strHas( op.output, `[ 'a b' ]` ) );
@@ -8341,7 +8382,7 @@ function importantModeShell( test )
   /* */
 
   shell({ execPath : null, args : [ 'echo', '"*"' ] })
-  .thenKeep( function( op )
+  .then( function( op )
   {
     test.identical( op.exitCode, 0 );
     test.is( _.strHas( op.output, '*' ) );
@@ -8351,7 +8392,7 @@ function importantModeShell( test )
   /* */
 
   shell({ execPath : 'echo', args : [ '"*"' ] })
-  .thenKeep( function( op )
+  .then( function( op )
   {
     test.identical( op.exitCode, 0 );
     if( process.platform === 'win32' )
@@ -8364,7 +8405,7 @@ function importantModeShell( test )
   /* */
 
   shell({ execPath : null, args : [ 'echo', '\\"*\\"' ] })
-  .thenKeep( function( op )
+  .then( function( op )
   {
     test.identical( op.exitCode, 0 );
     if( process.platform === 'win32' )
@@ -8377,7 +8418,7 @@ function importantModeShell( test )
   /* */
 
   shell({ execPath : 'echo "\\"*\\""', args : [] })
-  .thenKeep( function( op )
+  .then( function( op )
   {
     test.identical( op.exitCode, 0 );
     if( process.platform === 'win32' )
@@ -8390,7 +8431,7 @@ function importantModeShell( test )
   /* */
 
   shell({ execPath : 'echo *', args : [ '*' ] })
-  .thenKeep( function( op )
+  .then( function( op )
   {
     test.identical( op.exitCode, 0 );
     if( process.platform === 'win32' )
@@ -8410,7 +8451,7 @@ function importantModeShell( test )
   /* */
 
   shell({ execPath : 'echo', args : null, passingThrough : 1 })
-  .thenKeep( function( op )
+  .then( function( op )
   {
     test.identical( op.exitCode, 0 );
     if( process.platform === 'win32' )
@@ -8423,7 +8464,7 @@ function importantModeShell( test )
   /* */
 
   shell({ execPath : null, args : [ 'echo' ], passingThrough : 1 })
-  .thenKeep( function( op )
+  .then( function( op )
   {
     test.identical( op.exitCode, 0 );
     if( process.platform === 'win32' )
@@ -8436,7 +8477,7 @@ function importantModeShell( test )
   /* */
 
   shell({ execPath : 'echo *', args : [ '*' ], passingThrough : 1 })
-  .thenKeep( function( op )
+  .then( function( op )
   {
     test.identical( op.exitCode, 0 );
 
@@ -8467,9 +8508,9 @@ function startExecPathWithSpace( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.path.nativize( a.program( { routine : testApp, dirPath : 'path with space' } ) );
+  let testAppPath = a.program( { routine : testApp, dirPath : 'path with space' } );
 
-  let execPathWithSpace = 'node ' + a.path.nativize( testAppPath );
+  let execPathWithSpace = 'node ' + testAppPath;
 
   /* - */
 
@@ -8567,7 +8608,7 @@ function startExecPathWithSpace( test )
     throwingExitCode : 0
   });
 
-  a.ready.finally( ( err, got ) =>
+  a.ready.finally( ( err, op ) =>
   {
     _.errAttend( err );
     test.is( !!err );
@@ -8671,9 +8712,9 @@ function startNjsPassingThroughExecPathWithSpace( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.path.nativize( a.program({ routine : testApp, dirPath : 'path with space' }) );
+  let testAppPath = a.program({ routine : testApp, dirPath : 'path with space' });
 
-  let execPathWithSpace = a.path.nativize( testAppPath );
+  let execPathWithSpace = testAppPath;
 
   /* - */
 
@@ -8710,7 +8751,7 @@ function startNjsPassingThroughExecPathWithSpace( test )
     return null;
   })
 
-  test.shouldThrowErrorOfAnyKind( () =>
+  test.shouldThrowErrorSync( () =>
   {
     return _.process.startNjsPassingThrough
     ({
@@ -8743,7 +8784,7 @@ startNjsPassingThroughExecPathWithSpace.timeOut = 60000;
 function startPassingThroughExecPathWithSpace( test )
 {
   let a = test.assetFor( false );
-  let testAppPath = a.path.nativize( a.program({ routine : testApp, dirPath : 'path with space' }) );
+  let testAppPath = a.program({ routine : testApp, dirPath : 'path with space' });
 
   let execPathWithSpace = 'node ' + _.path.nativize( testAppPath );
 
@@ -8851,7 +8892,7 @@ function startPassingThroughExecPathWithSpace( test )
     stdio : 'pipe'
   });
 
-  a.ready.finally( ( err, got ) =>
+  a.ready.finally( ( err, op ) =>
   {
     _.errAttend( err );
     test.is( !!err );
@@ -8979,7 +9020,7 @@ function shellProcedureTrivial( test )
 
     var o = { execPath : 'node ' + testAppPath, mode : 'shell' }
     var con = start( o );
-    var procedure = _.procedure.find( 'PID:'+ o.process.pid );
+    var procedure = _.procedure.find( 'PID:' + o.process.pid );
     test.identical( procedure.length, 1 );
     test.identical( procedure[ 0 ].isAlive(), true );
     test.identical( o.procedure, procedure[ 0 ] );
@@ -9002,7 +9043,7 @@ function shellProcedureTrivial( test )
 
     var o = { execPath : testAppPath, mode : 'fork' }
     var con = start( o );
-    var procedure = _.procedure.find( 'PID:'+ o.process.pid );
+    var procedure = _.procedure.find( 'PID:' + o.process.pid );
     test.identical( procedure.length, 1 );
     test.identical( procedure[ 0 ].isAlive(), true );
     test.identical( o.procedure, procedure[ 0 ] );
@@ -9025,7 +9066,7 @@ function shellProcedureTrivial( test )
 
     var o = { execPath : 'node ' + testAppPath, mode : 'spawn' }
     var con = start( o );
-    var procedure = _.procedure.find( 'PID:'+ o.process.pid );
+    var procedure = _.procedure.find( 'PID:' + o.process.pid );
     test.identical( procedure.length, 1 );
     test.identical( procedure[ 0 ].isAlive(), true );
     test.identical( o.procedure, procedure[ 0 ] );
@@ -9047,7 +9088,7 @@ function shellProcedureTrivial( test )
   // {
   //   var o = { execPath : 'node ' + testAppPath, mode : 'exec' }
   //   var con = start( o );
-  //   var procedure = _.procedure.find( 'PID:'+ o.process.pid );
+  //   var procedure = _.procedure.find( 'PID:' + o.process.pid );
   //   test.identical( procedure.length, 1 );
   //   test.identical( procedure[ 0 ].isAlive(), true );
   //   test.identical( o.procedure, procedure[ 0 ] );
@@ -9108,7 +9149,7 @@ function shellProcedureExists( test )
   {
     var o = { execPath : 'node ' + testAppPath, mode : 'shell' }
     var con = start( o );
-    var procedure = _.procedure.find( 'PID:'+ o.process.pid );
+    var procedure = _.procedure.find( 'PID:' + o.process.pid );
     test.identical( procedure.length, 1 );
     test.identical( procedure[ 0 ].isAlive(), true );
     test.identical( o.procedure, procedure[ 0 ] );
@@ -9134,7 +9175,7 @@ function shellProcedureExists( test )
 
     var o = { execPath : testAppPath, mode : 'fork' }
     var con = start( o );
-    var procedure = _.procedure.find( 'PID:'+ o.process.pid );
+    var procedure = _.procedure.find( 'PID:' + o.process.pid );
     test.identical( procedure.length, 1 );
     test.identical( procedure[ 0 ].isAlive(), true );
     test.identical( o.procedure, procedure[ 0 ] );
@@ -9159,7 +9200,7 @@ function shellProcedureExists( test )
 
     var o = { execPath : 'node ' + testAppPath, mode : 'spawn' }
     var con = start( o );
-    var procedure = _.procedure.find( 'PID:'+ o.process.pid );
+    var procedure = _.procedure.find( 'PID:' + o.process.pid );
     test.identical( procedure.length, 1 );
     test.identical( procedure[ 0 ].isAlive(), true );
     test.identical( o.procedure, procedure[ 0 ] );
@@ -9179,7 +9220,7 @@ function shellProcedureExists( test )
 
   /* */
 
-  a.ready.then( () => _.process.watcherDisable() ) /* qqq : ? */
+  a.ready.then( () => _.process.watcherDisable() ) /* xxx qqq : ? */
 
   return a.ready;
 
@@ -9201,7 +9242,7 @@ shellProcedureExists.description =
 
 //
 
-/* qqq xxx : implement for other modes */
+/* qqq Yevgen : implement for other modes */
 function startOnTerminateSeveralCallbacksChronology( test )
 {
   let context = this;
@@ -9370,13 +9411,13 @@ function startChronology( test )
     test.identical( _.Procedure.FindAlive().length - pacounter, 1 );
     pacounter = _.Procedure.FindAlive().length;
 
-    /* xxx qqq : normalize */
+    /* zzz : ! */
     o.onTerminate.tap( ( err, got ) =>
     {
       track.push( 'onTerminate' );
 
       test.identical( err, undefined );
-      test.identical( got, o ); /* xxx */
+      test.identical( got, o );
 
       test.identical( o.ready.resourcesCount(), 0 );
       test.identical( o.ready.errorsCount(), 0 );
@@ -9544,7 +9585,7 @@ function shellTerminateHangedWithExitHandler( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.path.nativize( a.program( testApp ) );
+  let testAppPath = a.program( testApp );
 
   if( process.platform === 'win32' )
   {
@@ -9662,7 +9703,7 @@ function shellTerminateAfterLoopRelease( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.path.nativize( a.program( testApp ) );
+  let testAppPath = a.program( testApp );
 
   if( process.platform === 'win32' )
   {
@@ -9786,59 +9827,76 @@ function shellStartingDelay( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.path.nativize( a.program( testApp ) );
+  let program1Path = a.path.nativize( a.program( program1 ) );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 0, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 1, mode ) ) );
+  return a.ready;
 
-  /* */
+  /*  */
 
-  a.ready
-
-  .then( () =>
+  function run( sync, deasync, mode )
   {
-    let starting = { delay : 5000 };
-    let o =
-    {
-      execPath : testAppPath,
-      mode : 'fork',
-      outputPiping : 1,
-      outputCollecting : 1,
-      when : starting
-    }
+    let ready = new _.Consequence().take( null )
 
-    let t1 = _.time.now();
-    let con = _.process.start( o );
+    if( sync && !deasync && mode === 'fork' )
+    return null;
 
-    con.then( ( got ) =>
+    ready.then( () =>
     {
-      test.identical( got.exitCode, 0 );
-      let parsed = JSON.parse( got.output );
-      let diff = parsed.t2 - t1;
-      test.ge( diff, starting.delay );
-      return null;
+      test.case = `sync:${sync} deasync:${deasync} mode:${mode}`;
+      let t1 = _.time.now();
+      let when = { delay : context.t2 };
+      let o =
+      {
+        execPath : mode !== 'fork' ? 'node program1.js' : 'program1.js',
+        currentPath : a.abs( '.' ),
+        mode,
+        outputPiping : 1,
+        outputCollecting : 1,
+        when : when,
+        sync,
+        deasync,
+      }
+
+      let returned = _.process.start( o );
+
+      o.ready.then( ( got ) =>
+      {
+        test.identical( got.exitCode, 0 );
+        let parsed = JSON.parse( got.output );
+        let diff = parsed.t2 - t1;
+        test.ge( diff, when.delay );
+        return null;
+      })
+
+      return returned;
     })
 
-    return con;
-  })
-
-  return a.ready;
+    return ready;
+  }
 
   /* - */
 
-  function testApp()
+  function program1()
   {
     let _ = require( toolsPath );
-
     let data = { t2 : _.time.now() };
     console.log( JSON.stringify( data ) );
   }
+
 }
 
 //
 
+/* qqq2 : make it similar to test routine shellStartingDelay */
 function shellStartingTime( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.path.nativize( a.program( testApp ) );
+  let testAppPath = a.program( testApp );
 
   /* */
 
@@ -9848,14 +9906,14 @@ function shellStartingTime( test )
   {
     let t1 = _.time.now();
     let delay = 5000;
-    let starting = { time : _.time.now() + delay };
+    let when = { time : _.time.now() + delay };
     let o =
     {
       execPath : testAppPath,
       mode : 'fork',
       outputPiping : 1,
       outputCollecting : 1,
-      when : starting
+      when : when
     }
 
     let con = _.process.start( o );
@@ -9891,7 +9949,7 @@ function shellStartingSuspended( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.path.nativize( a.program( testApp ) );
+  let testAppPath = a.program( testApp );
 
 
   /* */
@@ -9950,8 +10008,9 @@ function shellAfterDeath( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppParentPath = a.path.nativize( a.program( testAppParent ) );
-  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
+  let stack = [];
+  let testAppParentPath = a.program( testAppParent );
+  let testAppChildPath = a.program( testAppChild );
 
   /* */
 
@@ -9975,13 +10034,14 @@ function shellAfterDeath( test )
     let childPid;
     debugger;
 
-    o.process.on( 'message', ( got ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      childPid = _.numberFrom( got );
+      childPid = _.numberFrom( e );
     })
 
     o.onTerminate.then( () =>
     {
+      stack.push( 'onTerminate' );
       test.identical( o.exitCode, 0 );
       test.case = 'secondary process is alive'
       test.is( _.process.isAlive( childPid ) );
@@ -9992,6 +10052,8 @@ function shellAfterDeath( test )
 
     o.onTerminate.then( () =>
     {
+      stack.push( 'onTerminate' );
+      test.identical( stack, [ 'onTerminate', 'onTerminate' ] );
       test.case = 'secondary process is dead'
       test.is( !_.process.isAlive( childPid ) );
 
@@ -10156,7 +10218,8 @@ function startDetachingModeSpawnResourceReady( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
+  let track = [];
+  let testAppChildPath = a.program( testAppChild );
 
   /* */
 
@@ -10181,6 +10244,7 @@ function startDetachingModeSpawnResourceReady( test )
 
     o.onStart.then( ( got ) =>
     {
+      track.push( 'onStart' );
       test.is( _.mapIs( got ) );
       test.identical( got, o );
       test.is( _.process.isAlive( o.process.pid ) );
@@ -10188,10 +10252,12 @@ function startDetachingModeSpawnResourceReady( test )
       return null;
     })
 
-    o.onTerminate.then( ( op ) => /* qqq2 : should be not got, but op. check whole test suite, please */
+    o.onTerminate.then( ( op ) => /* qqq2 : should be not got, but op. check whole test suite, please | aaa: Done. Yevhen S. */
     {
+      track.push( 'onTerminate' );
       test.notIdentical( op.exitCode, 0 );
       test.identical( op.exitSignal, 'SIGTERM' );
+      test.identical( track, [ 'onStart', 'onTerminate' ] );
       return null;
     })
 
@@ -10227,7 +10293,8 @@ function startDetachingModeForkResourceReady( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
+  let track = [];
+  let testAppChildPath = a.program( testAppChild );
 
   /* */
 
@@ -10252,6 +10319,7 @@ function startDetachingModeForkResourceReady( test )
 
     o.onStart.thenGive( ( got ) =>
     {
+      track.push( 'onStart' );
       test.is( _.mapIs( got ) );
       test.identical( got, o );
       test.is( _.process.isAlive( o.process.pid ) );
@@ -10260,8 +10328,10 @@ function startDetachingModeForkResourceReady( test )
 
     o.onTerminate.then( ( op ) =>
     {
+      track.push( 'onTerminate' );
       test.notIdentical( op.exitCode, 0 );
       test.identical( op.exitSignal, 'SIGTERM' );
+      test.identical( track, [ 'onStart', 'onTerminate' ] )
       return null;
     })
 
@@ -10297,7 +10367,8 @@ function startDetachingModeShellResourceReady( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
+  let track = [];
+  let testAppChildPath = a.program( testAppChild );
 
   /* */
 
@@ -10322,6 +10393,7 @@ function startDetachingModeShellResourceReady( test )
 
     o.onStart.thenGive( ( got ) =>
     {
+      track.push( 'onStart' );
       test.is( _.mapIs( got ) );
       test.identical( got, o );
       test.is( _.process.isAlive( o.process.pid ) );
@@ -10330,8 +10402,10 @@ function startDetachingModeShellResourceReady( test )
 
     o.onTerminate.then( ( op ) =>
     {
+      track.push( 'onTerminate' );
       test.notIdentical( op.exitCode, 0 );
       test.identical( op.exitSignal, 'SIGTERM' );
+      test.identical( track, [ 'onStart', 'onTerminate' ] );
       return null;
     })
 
@@ -10365,8 +10439,8 @@ function startDetachingModeSpawnNoTerminationBegin( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppParentPath = a.path.nativize( a.program( testAppParent ) );
-  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
+  let testAppParentPath = a.program( testAppParent );
+  let testAppChildPath = a.program( testAppChild );
 
   let testFilePath = a.abs( a.routinePath, 'testFile' );
 
@@ -10388,9 +10462,9 @@ function startDetachingModeSpawnNoTerminationBegin( test )
 
     let data;
 
-    o.process.on( 'message', ( got ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      data = got;
+      data = e;
       data.childPid = _.numberFrom( data.childPid );
     })
 
@@ -10430,9 +10504,9 @@ function startDetachingModeSpawnNoTerminationBegin( test )
 
     let data;
 
-    o.process.on( 'message', ( got ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      data = got;
+      data = e;
       data.childPid = _.numberFrom( data.childPid );
     })
 
@@ -10472,9 +10546,9 @@ function startDetachingModeSpawnNoTerminationBegin( test )
 
     let data;
 
-    o.process.on( 'message', ( got ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      data = got;
+      data = e;
       data.childPid = _.numberFrom( data.childPid );
     })
 
@@ -10514,9 +10588,9 @@ function startDetachingModeSpawnNoTerminationBegin( test )
 
     let data;
 
-    o.process.on( 'message', ( got ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      data = got;
+      data = e;
       data.childPid = _.numberFrom( data.childPid );
     })
 
@@ -10593,8 +10667,8 @@ function startDetachingModeForkNoTerminationBegin( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppParentPath = a.path.nativize( a.program( testAppParent ) );
-  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
+  let testAppParentPath = a.program( testAppParent );
+  let testAppChildPath = a.program( testAppChild );
 
   let testFilePath = a.abs( a.routinePath, 'testFile' );
 
@@ -10618,9 +10692,9 @@ function startDetachingModeForkNoTerminationBegin( test )
 
     let data;
 
-    o.process.on( 'message', ( got ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      data = got;
+      data = e;
       data.childPid = _.numberFrom( data.childPid );
     })
 
@@ -10660,9 +10734,9 @@ function startDetachingModeForkNoTerminationBegin( test )
 
     let data;
 
-    o.process.on( 'message', ( got ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      data = got;
+      data = e;
       data.childPid = _.numberFrom( data.childPid );
     })
 
@@ -10737,8 +10811,8 @@ function startDetachingModeShellNoTerminationBegin( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppParentPath = a.path.nativize( a.program( testAppParent ) );
-  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
+  let testAppParentPath = a.program( testAppParent );
+  let testAppChildPath = a.program( testAppChild );
 
   let testFilePath = a.abs( a.routinePath, 'testFile' );
 
@@ -10760,9 +10834,9 @@ function startDetachingModeShellNoTerminationBegin( test )
 
     let data;
 
-    o.process.on( 'message', ( got ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      data = got;
+      data = e;
       data.childPid = _.numberFrom( data.childPid );
     })
 
@@ -10802,9 +10876,9 @@ function startDetachingModeShellNoTerminationBegin( test )
 
     let data;
 
-    o.process.on( 'message', ( got ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      data = got;
+      data = e;
       data.childPid = _.numberFrom( data.childPid );
     })
 
@@ -11155,7 +11229,7 @@ function startDetachingTerminationBegin( test ) /* qqq2 : extend for other modes
 
     process.send({ childPid : o.process.pid });
 
-    o.onStart.thenGive( () => /* qqq : minimize and parametrize all time outs aaa : done*/
+    o.onStart.thenGive( () =>
     {
       _.procedure.terminationBegin();
     })
@@ -11183,7 +11257,7 @@ startDetachingTerminationBegin.timeOut = 180000;
 
 //
 
-/* qqq xxx : implement for other modes */
+/* qqq : implement for other modes */
 function startDetachingChildExitsAfterParent( test )
 {
   let context = this;
@@ -11214,9 +11288,9 @@ function startDetachingChildExitsAfterParent( test )
 
     let childPid;
 
-    o.process.on( 'message', ( got ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      childPid = _.numberFrom( got ); /* xxx : add pid to descriptor? */
+      childPid = _.numberFrom( e );
     })
 
     o.onTerminate.then( ( op ) =>
@@ -11225,7 +11299,7 @@ function startDetachingChildExitsAfterParent( test )
       test.identical( op.exitCode, 0 );
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( _.process.isAlive( childPid ) );
-      return _.time.out( 10000 ); /* xxx qqq2 : ask about time out */
+      return _.time.out( 10000 ); /* zzz : ask about time out */
     })
 
     o.onTerminate.then( () =>
@@ -11295,7 +11369,7 @@ After 5 seconds child process creates test file in working directory and exits.
 
 //
 
-/* qqq xxx : implement for other modes */
+/* qqq : implement for other modes */
 function startDetachingChildExitsBeforeParent( test )
 {
   let context = this;
@@ -11324,10 +11398,10 @@ function startDetachingChildExitsBeforeParent( test )
     let child;
     let onChildTerminate = new _.Consequence();
 
-    o.process.on( 'message', ( got ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      child = got;
-      onChildTerminate.take( got );
+      child = e;
+      onChildTerminate.take( e );
     })
 
     onChildTerminate.then( () =>
@@ -11435,7 +11509,6 @@ function startDetachingDisconnectedEarly( test )
   let program1Path = a.path.nativize( a.program( program1 ) );
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
-
   return a.ready;
 
   function run( mode )
@@ -11491,18 +11564,19 @@ function startDetachingDisconnectedEarly( test )
         return null;
       })
 
-      o.onDisconnect.finally( ( err, got ) =>
+      o.onDisconnect.finally( ( err, op ) =>
       {
         track.push( 'onDisconnect' );
         test.identical( err, undefined );
-        test.identical( got, o );
+        test.identical( op, o );
         test.is( _.process.isAlive( o.process.pid ) )
         return null;
       })
 
-      o.onTerminate.finally( ( err, got ) =>
+      o.onTerminate.finally( ( err, op ) =>
       {
         track.push( 'onTerminate' );
+        test.identical( err, undefined );
         return null;
       })
 
@@ -11606,27 +11680,28 @@ function startDetachingDisconnectedLate( test )
       test.is( o.onStart !== result );
       test.is( _.consequenceIs( o.onStart ) )
 
-      o.onStart.finally( ( err, got ) =>
+      o.onStart.finally( ( err, op ) =>
       {
         track.push( 'onStart' );
         test.identical( err, undefined );
-        test.identical( got, o );
+        test.identical( op, o );
         test.is( _.process.isAlive( o.process.pid ) )
         return null;
       })
 
-      o.onDisconnect.finally( ( err, got ) =>
+      o.onDisconnect.finally( ( err, op ) =>
       {
         track.push( 'onDisconnect' );
         test.identical( err, undefined );
-        test.identical( got, o );
+        test.identical( op, o );
         test.is( _.process.isAlive( o.process.pid ) )
         return null;
       })
 
-      o.onTerminate.finally( ( err, got ) =>
+      o.onTerminate.finally( ( err, op ) =>
       {
         track.push( 'onTerminate' );
+        test.identical( err, undefined );
         return null;
       })
 
@@ -11673,7 +11748,7 @@ ProcessWatched should not throw any error.
 
 //
 
-/* qqq xxx : implement for other modes */
+/* qqq : implement for other modes */
 function startDetachingChildExistsBeforeParentWaitForTermination( test )
 {
   let context = this;
@@ -11698,11 +11773,10 @@ function startDetachingChildExistsBeforeParentWaitForTermination( test )
 
     _.process.start( o );
 
-    o.onTerminate.finally( ( err, got ) =>
+    o.onTerminate.finally( ( err, op ) =>
     {
-      /* xxx qqq : add track here and in all similar place to cover entering here! */
       test.identical( err, undefined );
-      test.identical( got, o );
+      test.identical( op, o );
       test.is( !_.process.isAlive( o.process.pid ) )
       return null;
     })
@@ -11743,12 +11817,13 @@ Test routine waits until o.onTerminate resolves message about termination of the
 
 //
 
-/* qqq xxx : implement for other modes */
+/* qqq : implement for other modes */
 function startDetachingEndCompetitorIsExecuted( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
+  let track = [];
+  let testAppChildPath = a.program( testAppChild );
 
   a.ready
 
@@ -11772,21 +11847,24 @@ function startDetachingEndCompetitorIsExecuted( test )
     test.is( _.consequenceIs( o.onStart ) )
     test.is( _.consequenceIs( o.onTerminate ) )
 
-    o.onStart.finally( ( err, got ) =>
+    o.onStart.finally( ( err, op ) =>
     {
+      track.push( 'onStart' );
       test.identical( o.ended, false );
       test.identical( err, undefined );
-      test.identical( got, o );
+      test.identical( op, o );
       test.is( _.process.isAlive( o.process.pid ) );
       return null;
     })
 
-    o.onTerminate.finally( ( err, got ) =>
+    o.onTerminate.finally( ( err, op ) =>
     {
-      /* qqq : add track here and in all similar place to cover entering here! */
+      /* qqq : add track here and in all similar place to cover entering here! | aaa : Done. Yevhen S. */
+      track.push( 'onTerminate' );
       test.identical( o.ended, true );
       test.identical( err, undefined );
-      test.identical( got, o );
+      test.identical( op, o );
+      test.identical( track, [ 'onStart', 'onTerminate' ] )
       test.is( !_.process.isAlive( o.process.pid ) )
       return null;
     })
@@ -11828,13 +11906,13 @@ o.ended is true when onTerminate callback is executed.
 
 //
 
-/* qqq xxx : implement for other modes */
+/* qqq : implement for other modes */
 function startDetachedOutputStdioIgnore( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppParentPath = a.path.nativize( a.program( testAppParent ) );
-  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
+  let testAppParentPath = a.program( testAppParent );
+  let testAppChildPath = a.program( testAppChild );
 
   /* */
 
@@ -11964,13 +12042,13 @@ function startDetachedOutputStdioIgnore( test )
 }
 
 //
-/* qqq xxx : implement for other modes */
+/* qqq : implement for other modes */
 function startDetachedOutputStdioPipe( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppParentPath = a.path.nativize( a.program( testAppParent ) );
-  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
+  let testAppParentPath = a.program( testAppParent );
+  let testAppChildPath = a.program( testAppChild );
 
   /* */
 
@@ -12108,12 +12186,12 @@ function startDetachedOutputStdioPipe( test )
 }
 
 //
-/* qqq xxx : implement for other modes */
+/* qqq : implement for other modes */
 function startDetachedOutputStdioInherit( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
+  let testAppChildPath = a.program( testAppChild );
 
   /* */
 
@@ -12195,12 +12273,13 @@ function startDetachedOutputStdioInherit( test )
 }
 
 //
-/* qqq xxx : implement for other modes */
+/* qqq : implement for other modes */
 function startDetachingModeSpawnIpc( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
+  let track = [];
+  let testAppChildPath = a.program( testAppChild );
 
   /* */
 
@@ -12232,13 +12311,17 @@ function startDetachingModeSpawnIpc( test )
 
     o.onStart.thenGive( () =>
     {
+      track.push( 'onStart' );
       o.process.send( 'child' );
     })
 
     o.onTerminate.then( ( op ) =>
     {
+      track.push( 'onTerminate' );
       test.identical( op.exitCode, 0 );
       test.identical( message, 'child' );
+      test.identical( track, [ 'onStart', 'onTerminate' ] );
+      track = [];
       return null;
     })
 
@@ -12272,13 +12355,17 @@ function startDetachingModeSpawnIpc( test )
 
     o.onStart.thenGive( () =>
     {
+      track.push( 'onStart' );
       o.process.send( 'child' );
     })
 
     o.onTerminate.then( ( op ) =>
     {
+      track.push( 'onTerminate' );
       test.identical( op.exitCode, 0 );
       test.identical( message, 'child' );
+      test.identical( track, [ 'onStart', 'onTerminate' ] );
+      track = [];
       return null;
     })
 
@@ -12307,12 +12394,13 @@ function startDetachingModeSpawnIpc( test )
 }
 
 //
-/* qqq xxx : implement for other modes */
+/* qqq : implement for other modes */
 function startDetachingModeForkIpc( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
+  let track = [];
+  let testAppChildPath = a.program( testAppChild );
 
   /* */
 
@@ -12344,14 +12432,18 @@ function startDetachingModeForkIpc( test )
 
     o.onStart.thenGive( () =>
     {
+      track.push( 'onStart' );
       o.process.send( 'child' );
     })
 
     o.onTerminate.then( ( op ) =>
     {
+      track.push( 'onTerminate' );
       debugger
       test.identical( op.exitCode, 0 );
       test.identical( message, 'child' );
+      test.identical( track, [ 'onStart', 'onTerminate' ] );
+      track = [];
       return null;
     })
 
@@ -12385,13 +12477,17 @@ function startDetachingModeForkIpc( test )
 
     o.onStart.thenGive( () =>
     {
+      track.push( 'onStart' );
       o.process.send( 'child' );
     })
 
     o.onTerminate.then( ( op ) =>
     {
+      track.push( 'onTerminate' );
       test.identical( op.exitCode, 0 );
       test.identical( message, 'child' );
+      test.identical( track, [ 'onStart', 'onTerminate' ] );
+      track = [];
       return null;
     })
 
@@ -12420,12 +12516,12 @@ function startDetachingModeForkIpc( test )
 }
 
 //
-/* qqq xxx : implement for other modes */
+/* qqq : implement for other modes */
 function startDetachingModeShellIpc( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
+  let testAppChildPath = a.program( testAppChild );
 
   /* */
 
@@ -12494,12 +12590,12 @@ function startDetachingModeShellIpc( test )
 }
 
 //
-/* qqq xxx : implement for other modes */
+/* qqq : implement for other modes */
 function startDetachingThrowing( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
+  let testAppChildPath = a.program( testAppChild );
 
   /* */
 
@@ -12518,6 +12614,8 @@ function startDetachingThrowing( test )
   }
   test.shouldThrowErrorSync( () => _.process.start( o ) )
 
+  /* */
+
   var o =
   {
     execPath : 'node testAppChild.js',
@@ -12527,6 +12625,8 @@ function startDetachingThrowing( test )
     detaching : 1
   }
   test.shouldThrowErrorSync( () => _.process.start( o ) )
+
+  /* */
 
   var o =
   {
@@ -12594,7 +12694,8 @@ function startNjsDetachingChildThrowing( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
+  let track = [];
+  let testAppChildPath = a.program( testAppChild );
 
   /* */
 
@@ -12616,10 +12717,12 @@ function startNjsDetachingChildThrowing( test )
 
   o.onTerminate.then( ( op ) =>
   {
+    track.push( 'onTerminate' );
     test.notIdentical( op.exitCode, 0 );
     test.is( _.strHas( op.output, 'Child process error' ) );
     test.identical( o.exitCode, op.exitCode );
     test.identical( o.output, op.output );
+    test.identical( track, [ 'onTerminate' ] )
     return null;
   })
 
@@ -12639,13 +12742,14 @@ function startNjsDetachingChildThrowing( test )
 
 //
 
-/* qqq xxx : implement for other modes */
+/* qqq : implement for other modes */
 function startDetachingTrivial( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppParentPath = a.path.nativize( a.program( testAppParent ) );
-  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
+  let track = [];
+  let testAppParentPath = a.program( testAppParent );
+  let testAppChildPath = a.program( testAppChild );
   let testFilePath = a.abs( a.routinePath, 'testFile' );
 
   /* */
@@ -12671,9 +12775,9 @@ function startDetachingTrivial( test )
     childPid = _.numberFrom( data );
   })
 
-  /* qqq xxx : where is track? */
   o.onTerminate.then( ( op ) =>
   {
+    track.push( 'onTerminate' );
     test.is( _.process.isAlive( childPid ) );
     test.identical( op.exitCode, 0 );
     test.is( _.strHas( op.output, 'Child process start' ) );
@@ -12686,12 +12790,14 @@ function startDetachingTrivial( test )
 
   o.onTerminate.then( () =>
   {
+    track.push( 'onTerminate' );
     test.is( !_.process.isAlive( childPid ) );
 
     let childPidFromFile = a.fileProvider.fileRead( testFilePath );
     childPidFromFile = _.numberFrom( childPidFromFile )
     test.is( !_.process.isAlive( childPidFromFile ) );
     test.identical( childPid, childPidFromFile )
+    test.identical( track, [ 'onTerminate', 'onTerminate' ] );
     return null;
   })
 
@@ -12973,6 +13079,7 @@ function startOnStart( test ) /* qqq2 : add other modes. ask how to aaa:done */
       o.onTerminate.finally( ( err, got ) =>
       {
         track.push( 'onTerminate' );
+        test.identical( err, undefined );
         return null;
       })
 
@@ -13227,7 +13334,6 @@ function startOnTerminate( test ) /* qqq2 : add other modes. ask how to */
 
       _.time.out( context.t1, () => o.disconnect() );
 
-      /* xxx */
       onTerminate.then( ( op ) =>
       {
         track.push( 'onTerminate' );
@@ -13424,7 +13530,7 @@ function startNoEndBug1( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
+  let testAppChildPath = a.program( testAppChild );
 
   a.ready
 
@@ -13542,8 +13648,7 @@ function startWithDelayOnReady( test )
   options.onTerminate
   .finally( ( err, op ) =>
   {
-    if( err )
-    console.log( err );
+    test.identical( err, undefined );
     debugger;
     test.identical( op.output, 'program1:begin\nprogram1:end\n' );
     test.identical( op.exitCode, 0 );
@@ -13572,6 +13677,141 @@ startWithDelayOnReady.description =
 `
   - consequence onStart has delay
 `
+
+//
+
+function startCallbackIsNotAConsequence( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let programPath = a.path.nativize( a.program( testApp ) );
+
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+
+  return a.ready;
+
+  /* - */
+
+  function run( mode )
+  {
+    let con = _.Consequence().take( null );
+    let track = [];
+
+    con.then( () =>
+    {
+      test.case = `onStart, mode:${mode}`
+      let o =
+      {
+        execPath : mode !== 'fork' ? 'node testApp.js' : 'testApp.js',
+        mode,
+        onStart
+      }
+      var got = _.process.start( o );
+      test.is( _.consequenceIs( got ) );
+      test.identical( got.resourcesCount(), 0 );
+      got.then( function( o )
+      {
+        test.identical( o.exitCode, 0 );
+        return o;
+      })
+      return got;
+    })
+
+    /* */
+
+    con.then( () =>
+    {
+      test.case = `onTerminate, mode:${mode}`
+      let o =
+      {
+        execPath : mode !== 'fork' ? 'node testApp.js' : 'testApp.js',
+        mode,
+        onTerminate
+      }
+      var got = _.process.start( o );
+      test.is( _.consequenceIs( got ) );
+      test.identical( got.resourcesCount(), 0 );
+      got.then( function( o )
+      {
+        test.identical( o.exitCode, 0 );
+        return o;
+      })
+      return got;
+    })
+
+    /* */
+
+    con.then( () =>
+    {
+      test.case = `onDisconnect, mode:${mode}`
+      let o =
+      {
+        execPath : mode !== 'fork' ? 'node testApp.js' : 'testApp.js',
+        mode,
+        onDisconnect
+      }
+      var got = _.process.start( o );
+      test.is( _.consequenceIs( got ) );
+      test.identical( got.resourcesCount(), 0 );
+      got.then( function( o )
+      {
+        test.identical( o.exitCode, 0 );
+        return o;
+      })
+      return got;
+    })
+
+    /* */
+
+    con.then( () =>
+    {
+      test.case = `ready, mode:${mode}`
+      let o =
+      {
+        execPath : mode !== 'fork' ? 'node testApp.js' : 'testApp.js',
+        mode,
+        ready
+      }
+      var got = _.process.start( o );
+      test.is( _.consequenceIs( got ) );
+      test.identical( got.resourcesCount(), 0 );
+      got.then( function( o )
+      {
+        test.identical( o.exitCode, 0 );
+        return o;
+      })
+      return got;
+    })
+
+    return con
+  }
+
+  function testApp()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+
+  function ready()
+  {
+    console.log( 'ready' );
+  }
+
+  function onStart()
+  {
+    console.log( 'onStart' );
+  }
+
+  function onTerminate()
+  {
+    console.log( 'onTerminate' );
+  }
+
+  function onDisconnect()
+  {
+    console.log( 'onDisconnect' );
+  }
+}
 
 //
 
@@ -14557,7 +14797,7 @@ function sheller( test )
 
   a.ready
 
-  .thenKeep( () =>
+  .then( () =>
   {
     var shell = _.process.starter
     ({
@@ -14568,7 +14808,7 @@ function sheller( test )
 
     debugger;
     return shell({ execPath :  [ 'arg1', 'arg2' ] })
-    .thenKeep( ( got ) =>
+    .then( ( got ) =>
     {
       debugger;
       test.identical( got.length, 2 );
@@ -14585,7 +14825,7 @@ function sheller( test )
     })
   })
 
-  .thenKeep( () =>
+  .then( () =>
   {
     var shell = _.process.starter
     ({
@@ -14595,7 +14835,7 @@ function sheller( test )
     })
 
     return shell({ execPath :  [ 'arg1', 'arg2' ] })
-    .thenKeep( ( got ) =>
+    .then( ( got ) =>
     {
       test.identical( got.length, 2 );
 
@@ -14612,7 +14852,7 @@ function sheller( test )
   })
 
 
-  .thenKeep( () =>
+  .then( () =>
   {
     var shell = _.process.starter
     ({
@@ -14622,7 +14862,7 @@ function sheller( test )
     })
 
     return shell({ execPath :  [ 'arg1', 'arg2' ], args : [ 'arg3' ] })
-    .thenKeep( ( got ) =>
+    .then( ( got ) =>
     {
       test.identical( got.length, 2 );
 
@@ -14640,7 +14880,7 @@ function sheller( test )
     })
   })
 
-  .thenKeep( () =>
+  .then( () =>
   {
     var shell = _.process.starter
     ({
@@ -14650,7 +14890,7 @@ function sheller( test )
     })
 
     return shell({ execPath :  'arg1' })
-    .thenKeep( ( got ) =>
+    .then( ( got ) =>
     {
       test.identical( got.execPath, 'node' );
       test.is( _.strHas( got.output, `[ 'arg1' ]` ) );
@@ -14659,7 +14899,7 @@ function sheller( test )
     })
   })
 
-  .thenKeep( () =>
+  .then( () =>
   {
     var shell = _.process.starter
     ({
@@ -14673,7 +14913,7 @@ function sheller( test )
     })
 
     return shell({ execPath :  'arg1' })
-    .thenKeep( ( got ) =>
+    .then( ( got ) =>
     {
       test.identical( got.length, 2 );
 
@@ -14689,7 +14929,7 @@ function sheller( test )
     })
   })
 
-  .thenKeep( () =>
+  .then( () =>
   {
     var shell = _.process.starter
     ({
@@ -14703,7 +14943,7 @@ function sheller( test )
     })
 
     return shell({ execPath :  [ 'arg1', 'arg2' ] })
-    .thenKeep( ( got ) =>
+    .then( ( got ) =>
     {
       test.identical( got.length, 4 );
 
@@ -14725,7 +14965,7 @@ function sheller( test )
     })
   })
 
-  .thenKeep( () =>
+  .then( () =>
   {
     var shell = _.process.starter
     ({
@@ -14736,7 +14976,7 @@ function sheller( test )
     })
 
     return shell({ execPath : testAppPath })
-    .thenKeep( ( got ) =>
+    .then( ( got ) =>
     {
       test.identical( got.execPath, 'node' );
       test.is( _.strHas( got.output, `[ 'arg1' ]` ) );
@@ -14745,7 +14985,7 @@ function sheller( test )
     })
   })
 
-  .thenKeep( () =>
+  .then( () =>
   {
     var shell = _.process.starter
     ({
@@ -14756,7 +14996,7 @@ function sheller( test )
     })
 
     return shell({ execPath : testAppPath, args : 'arg2' })
-    .thenKeep( ( got ) =>
+    .then( ( got ) =>
     {
       test.identical( got.execPath, 'node' );
       test.is( _.strHas( got.output, `[ 'arg2' ]` ) );
@@ -14765,7 +15005,7 @@ function sheller( test )
     })
   })
 
-  .thenKeep( () =>
+  .then( () =>
   {
     var shell = _.process.starter
     ({
@@ -14776,7 +15016,7 @@ function sheller( test )
     })
 
     return shell({ execPath : testAppPath, args : 'arg3' })
-    .thenKeep( ( got ) =>
+    .then( ( got ) =>
     {
       test.identical( got.execPath, 'node' );
       test.is( _.strHas( got.output, `[ 'arg3' ]` ) );
@@ -14785,7 +15025,7 @@ function sheller( test )
     })
   })
 
-  .thenKeep( () =>
+  .then( () =>
   {
     var shell = _.process.starter
     ({
@@ -14796,7 +15036,7 @@ function sheller( test )
     })
 
     return shell({ execPath : testAppPath, args : [ 'arg2', 'arg3' ] })
-    .thenKeep( ( got ) =>
+    .then( ( got ) =>
     {
       test.identical( got.execPath, 'node' );
       test.is( _.strHas( got.output, `[ 'arg2', 'arg3' ]` ) );
@@ -14964,12 +15204,12 @@ function outputHandling( test )
 
     console.log( mode )
 
-    a.ready.thenKeep( () =>
+    a.ready.then( () =>
     {
       loggerOutput = '';
       var o = { execPath : path, mode, outputPiping : 0, outputCollecting : 0, logger };
       return _.process.start( o )
-      .thenKeep( () =>
+      .then( () =>
       {
         test.identical( o.output, null );
         test.is( !_.strHas( loggerOutput, 'testApp-output') );
@@ -14978,12 +15218,12 @@ function outputHandling( test )
       })
     })
 
-    a.ready.thenKeep( () =>
+    a.ready.then( () =>
     {
       loggerOutput = '';
       var o = { execPath : path, mode, outputPiping : 1, outputCollecting : 0, logger };
       return _.process.start( o )
-      .thenKeep( () =>
+      .then( () =>
       {
         test.identical( o.output, null );
         test.is( _.strHas( loggerOutput, 'testApp-output') );
@@ -14991,12 +15231,12 @@ function outputHandling( test )
       })
     })
 
-    a.ready.thenKeep( () =>
+    a.ready.then( () =>
     {
       loggerOutput = '';
       var o = { execPath : path, mode, outputPiping : 0, outputCollecting : 1, logger };
       return _.process.start( o )
-      .thenKeep( () =>
+      .then( () =>
       {
         test.identical( o.output, 'testApp-output\n\n' );
         test.is( !_.strHas( loggerOutput, 'testApp-output') );
@@ -15004,12 +15244,12 @@ function outputHandling( test )
       })
     })
 
-    a.ready.thenKeep( () =>
+    a.ready.then( () =>
     {
       loggerOutput = '';
       var o = { execPath : path, mode, outputPiping : 1, outputCollecting : 1, logger };
       return _.process.start( o )
-      .thenKeep( () =>
+      .then( () =>
       {
         test.identical( o.output, 'testApp-output\n\n' );
         test.is( _.strHas( loggerOutput, 'testApp-output') );
@@ -15174,7 +15414,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
 
   if( !Config.debug )
   {
-    test.identical( 1,1 );
+    test.identical( 1, 1 );
     return;
   }
 
@@ -15694,7 +15934,7 @@ function shellNormalizedExecPath( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.path.nativize( a.program( testApp ) );
+  let testAppPath = a.path.nativize( a.path.normalize( a.program( testApp ) ) );
 
   /* */
 
@@ -15719,7 +15959,7 @@ function shellNormalizedExecPath( test )
     return null;
   })
 
-  /* - */
+  /* */
 
   shell
   ({
@@ -15734,7 +15974,7 @@ function shellNormalizedExecPath( test )
     return null;
   })
 
-  /* - */
+  /* */
 
   shell
   ({
@@ -15749,7 +15989,7 @@ function shellNormalizedExecPath( test )
     return null;
   })
 
-  /* - */
+  /* */
 
   // shell
   // ({
@@ -15778,7 +16018,7 @@ function shellNormalizedExecPath( test )
     return null;
   })
 
-  /* - */
+  /* */
 
   shell
   ({
@@ -15793,7 +16033,7 @@ function shellNormalizedExecPath( test )
     return null;
   })
 
-  /* - */
+  /* */
 
   shell
   ({
@@ -15808,7 +16048,7 @@ function shellNormalizedExecPath( test )
     return null;
   })
 
-  /* - */
+  /* */
 
   // shell
   // ({
@@ -15861,12 +16101,16 @@ function appTempApplication( test )
   _.process.tempClose( got );
   test.is( !_.fileProvider.fileExists( got ) );
 
+  /* */
+
   test.case = 'string';
   var got = _.process.tempOpen({ sourceCode : testAppCode });
   var read = _.fileProvider.fileRead( got );
   test.identical( read, testAppCode );
   _.process.tempClose( got );
   test.is( !_.fileProvider.fileExists( got ) );
+
+  /* */
 
   test.case = 'raw buffer';
   var got = _.process.tempOpen( _.bufferRawFrom( testAppCode ) );
@@ -15875,12 +16119,16 @@ function appTempApplication( test )
   _.process.tempClose( got );
   test.is( !_.fileProvider.fileExists( got ) );
 
+  /* */
+
   test.case = 'raw buffer';
   var got = _.process.tempOpen({ sourceCode : _.bufferRawFrom( testAppCode ) });
   var read = _.fileProvider.fileRead( got );
   test.identical( read, testAppCode );
   _.process.tempClose( got );
   test.is( !_.fileProvider.fileExists( got ) );
+
+  /* */
 
   test.case = 'remove all';
   var got1 = _.process.tempOpen( testAppCode );
@@ -15901,11 +16149,15 @@ function appTempApplication( test )
     _.process.tempOpen( [] );
   })
 
+  /* */
+
   test.case = 'unexpected option';
   test.shouldThrowErrorSync( () =>
   {
     _.process.tempOpen({ someOption : true });
   })
+
+  /* */
 
   test.case = 'try to remove file that does not exist in registry';
   var got = _.process.tempOpen( testAppCode );
@@ -15947,6 +16199,7 @@ function pidFrom( test )
 
 function isAlive( test )
 {
+  let track = [];
   let o =
   {
     execPath : `node -e "setTimeout( () => { console.log( 'child terminate' ) }, 3000 )"`,
@@ -15955,6 +16208,7 @@ function isAlive( test )
 
   o.onStart.then( () =>
   {
+    track.push( 'onStart' );
     test.identical( _.process.isAlive( o ), true );
     test.identical( _.process.isAlive( o.process ), true );
     test.identical( _.process.isAlive( o.process.pid ), true );
@@ -15963,9 +16217,11 @@ function isAlive( test )
 
   o.onTerminate.then( () =>
   {
+    track.push( 'onTerminate' );
     test.identical( _.process.isAlive( o ), false );
     test.identical( _.process.isAlive( o.process ), false );
     test.identical( _.process.isAlive( o.process.pid ), false );
+    test.identical( track, [ 'onStart', 'onTerminate' ] )
     return null;
   })
 
@@ -15996,10 +16252,12 @@ function statusOf( test )
   {
     execPath : `node -e "setTimeout( () => { console.log( 'child terminate' ) }, 3000 )"`,
   }
+  let track = [];
   _.process.start( o );
 
   o.onStart.then( () =>
   {
+    track.push( 'onStart' )
     test.identical( _.process.statusOf( o ), 'alive' );
     test.identical( _.process.statusOf( o.process ), 'alive' );
     test.identical( _.process.statusOf( o.process.pid ), 'alive' );
@@ -16008,9 +16266,11 @@ function statusOf( test )
 
   o.onTerminate.then( () =>
   {
+    track.push( 'onTerminate' );
     test.identical( _.process.statusOf( o ), 'dead' );
     test.identical( _.process.statusOf( o.process ), 'dead' );
     test.identical( _.process.statusOf( o.process.pid ), 'dead' );
+    test.identical( track, [ 'onStart', 'onTerminate' ] );
     return null;
   })
 
@@ -16039,7 +16299,7 @@ function kill( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.path.nativize( a.program( testApp ) );
+  let testAppPath = a.program( testApp );
 
   /* */
 
@@ -16049,7 +16309,7 @@ function kill( test )
 
   a.ready
 
-  .thenKeep( () =>
+  .then( () =>
   {
     var o =
     {
@@ -16063,7 +16323,7 @@ function kill( test )
 
     _.time.out( 1000, () => _.process.kill( o.process ) )
 
-    ready.thenKeep( ( got ) =>
+    ready.then( ( got ) =>
     {
       test.identical( got.exitCode, null );
       test.identical( got.exitSignal, 'SIGKILL' );
@@ -16076,8 +16336,7 @@ function kill( test )
 
   /* */
 
-
-  .thenKeep( () =>
+  .then( () =>
   {
     var o =
     {
@@ -16091,7 +16350,7 @@ function kill( test )
 
     _.time.out( 1000, () => _.process.kill( o.process.pid ) )
 
-    ready.thenKeep( ( got ) =>
+    ready.then( ( got ) =>
     {
       if( process.platform === 'win32' )
       {
@@ -16113,7 +16372,7 @@ function kill( test )
 
   /* fork */
 
-  .thenKeep( () =>
+  .then( () =>
   {
     var o =
     {
@@ -16127,7 +16386,7 @@ function kill( test )
 
     _.time.out( 1000, () => _.process.kill( o.process ) )
 
-    ready.thenKeep( ( got ) =>
+    ready.then( ( got ) =>
     {
       test.identical( got.exitCode, null );
       test.identical( got.exitSignal, 'SIGKILL' );
@@ -16140,8 +16399,7 @@ function kill( test )
 
   /* */
 
-
-  .thenKeep( () =>
+  .then( () =>
   {
     var o =
     {
@@ -16155,7 +16413,7 @@ function kill( test )
 
     _.time.out( 1000, () => _.process.kill( o.process.pid ) )
 
-    ready.thenKeep( ( got ) =>
+    ready.then( ( got ) =>
     {
       if( process.platform === 'win32' )
       {
@@ -16177,7 +16435,7 @@ function kill( test )
 
   /* shell */
 
-  .thenKeep( () =>
+  .then( () =>
   {
     var o =
     {
@@ -16191,7 +16449,7 @@ function kill( test )
 
     _.time.out( 1000, () => _.process.kill( o.process ) )
 
-    ready.thenKeep( ( got ) =>
+    ready.then( ( got ) =>
     {
       test.identical( got.exitCode, null );
       test.identical( got.exitSignal, 'SIGKILL' );
@@ -16207,8 +16465,7 @@ function kill( test )
 
   /* */
 
-
-  .thenKeep( () =>
+  .then( () =>
   {
     var o =
     {
@@ -16222,7 +16479,7 @@ function kill( test )
 
     _.time.out( 1000, () => _.process.kill( o.process.pid ) )
 
-    ready.thenKeep( ( got ) =>
+    ready.then( ( got ) =>
     {
       if( process.platform === 'win32' )
       {
@@ -16247,7 +16504,7 @@ function kill( test )
 
   /* exec */
 
-  // .thenKeep( () =>
+  // .then( () =>
   // {
   //   var o =
   //   {
@@ -16261,7 +16518,7 @@ function kill( test )
   //
   //   _.time.out( 1000, () => _.process.kill( o.process ) )
   //
-  //   ready.thenKeep( ( got ) =>
+  //   ready.then( ( got ) =>
   //   {
   //     test.identical( got.exitCode, null );
   //     test.identical( got.exitSignal, 'SIGKILL' );
@@ -16277,7 +16534,7 @@ function kill( test )
   //
   // /* */
   //
-  // .thenKeep( () =>
+  // .then( () =>
   // {
   //   var o =
   //   {
@@ -16291,7 +16548,7 @@ function kill( test )
   //
   //   _.time.out( 1000, () => _.process.kill( o.process.pid ) )
   //
-  //   ready.thenKeep( ( got ) =>
+  //   ready.then( ( got ) =>
   //   {
   //     if( process.platform === 'win32' )
   //     {
@@ -16337,15 +16594,15 @@ function killWithChildren( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.path.nativize( a.program( testApp ) );
-  let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
-  let testAppPath3 = a.path.nativize( a.program( testApp3 ) );
+  let testAppPath = a.program( testApp );
+  let testAppPath2 = a.program( testApp2 );
+  let testAppPath3 = a.program( testApp3 );
 
   /* */
 
   a.ready
 
-  .thenKeep( () =>
+  .then( () =>
   {
     test.case = 'child -> child, kill first child'
     var o =
@@ -16366,7 +16623,7 @@ function killWithChildren( test )
       killed = _.process.kill({ pid : o.process.pid, withChildren : 1 });
     })
 
-    a.ready.thenKeep( ( got ) =>
+    a.ready.then( ( got ) =>
     {
       return killed.then( () =>
       {
@@ -16390,9 +16647,9 @@ function killWithChildren( test )
     return ready;
   })
 
-  /* - */
+  /* */
 
-  .thenKeep( () =>
+  .then( () =>
   {
     test.case = 'child -> child, kill last child'
     var o =
@@ -16413,7 +16670,7 @@ function killWithChildren( test )
       killed = _.process.kill({ pid : lastChildPid, withChildren : 1 });
     })
 
-    ready.thenKeep( ( got ) =>
+    ready.then( ( got ) =>
     {
       return killed.then( () =>
       {
@@ -16429,9 +16686,9 @@ function killWithChildren( test )
     return ready;
   })
 
-  /* - */
+  /* */
 
-  .thenKeep( () =>
+  .then( () =>
   {
     test.case = 'parent -> child*'
     var o =
@@ -16452,7 +16709,7 @@ function killWithChildren( test )
       killed = _.process.kill({ pid : o.process.pid, withChildren : 1 });
     })
 
-    ready.thenKeep( ( got ) =>
+    ready.then( ( got ) =>
     {
       return killed.then( () =>
       {
@@ -16477,9 +16734,9 @@ function killWithChildren( test )
     return ready;
   })
 
-  /* - */
+  /* */
 
-  .thenKeep( () =>
+  .then( () =>
   {
     test.case = 'parent -> detached'
     var o =
@@ -16499,7 +16756,7 @@ function killWithChildren( test )
       killed = _.process.kill({ pid : o.process.pid, withChildren : 1 });
     })
 
-    ready.thenKeep( ( got ) =>
+    ready.then( ( got ) =>
     {
       return killed.then( () =>
       {
@@ -16524,9 +16781,9 @@ function killWithChildren( test )
     return ready;
   })
 
-  /* - */
+  /* */
 
-  .thenKeep( () =>
+  .then( () =>
   {
     test.case = 'process is not running';
     var o =
@@ -16618,7 +16875,7 @@ function terminate( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.path.nativize( a.program( testApp ) );
+  let testAppPath = a.program( testApp );
 
   if( process.platform === 'win32' )
   {
@@ -16630,7 +16887,7 @@ function terminate( test )
 
   a.ready
 
-  .thenKeep( () =>
+  .then( () =>
   {
     var o =
     {
@@ -16648,7 +16905,7 @@ function terminate( test )
       _.process.terminate({ process : o.process });
     })
 
-    ready.thenKeep( ( got ) =>
+    ready.then( ( got ) =>
     {
       test.identical( got.exitCode, 0 );
       test.identical( got.exitSignal, null );
@@ -16662,7 +16919,7 @@ function terminate( test )
 
   /* */
 
-  .thenKeep( () =>
+  .then( () =>
   {
     var o =
     {
@@ -16680,7 +16937,7 @@ function terminate( test )
       _.process.terminate( o.process.pid );
     })
 
-    ready.thenKeep( ( got ) =>
+    ready.then( ( got ) =>
     {
       test.identical( got.exitCode, 0 );
       test.identical( got.exitSignal, null );
@@ -16694,7 +16951,7 @@ function terminate( test )
 
   /* fork */
 
-  .thenKeep( () =>
+  .then( () =>
   {
     var o =
     {
@@ -16712,7 +16969,7 @@ function terminate( test )
       _.process.terminate( o.process.pid );
     })
 
-    ready.thenKeep( ( got ) =>
+    ready.then( ( got ) =>
     {
       test.identical( got.exitCode, 0 );
       test.identical( got.exitSignal, null );
@@ -16726,7 +16983,7 @@ function terminate( test )
 
   /* */
 
-  .thenKeep( () =>
+  .then( () =>
   {
     var o =
     {
@@ -16743,7 +17000,7 @@ function terminate( test )
       _.process.terminate({ process : o.process });
     })
 
-    ready.thenKeep( ( got ) =>
+    ready.then( ( got ) =>
     {
       test.identical( got.exitCode, 0 );
       test.identical( got.exitSignal, null );
@@ -16762,7 +17019,7 @@ function terminate( test )
     look for solution that allow to have same behaviour on each mode
   */
 
-  .thenKeep( () =>
+  .then( () =>
   {
     var o =
     {
@@ -16781,7 +17038,7 @@ function terminate( test )
       _.process.terminate({ process : o.process, timeOut : 0 });
     })
 
-    ready.thenKeep( ( got ) =>
+    ready.then( ( got ) =>
     {
       if( process.platform === 'linux' )
       {
@@ -16813,7 +17070,7 @@ function terminate( test )
 
   /* */
 
-  .thenKeep( () =>
+  .then( () =>
   {
     var o =
     {
@@ -16832,7 +17089,7 @@ function terminate( test )
       _.process.terminate({ pid : o.process.pid, timeOut : 0 });
     })
 
-    ready.thenKeep( ( got ) =>
+    ready.then( ( got ) =>
     {
       if( process.platform === 'linux' )
       {
@@ -16925,7 +17182,7 @@ function startErrorAfterTerminationWithSend( test )
       return null
     });
 
-    /* xxx qqq : normalize */
+    /* zzz */
     o.onTerminate.finally( ( err, got ) =>
     {
       track.push( 'onTerminate' );
@@ -16974,10 +17231,10 @@ function startErrorAfterTerminationWithSend( test )
     if( process.platform === 'darwin' )
     exp += `code : 'ERR_IPC_CHANNEL_CLOSED'`;
 
-      test.equivalent( e.err.originalMessage, exp )
-      _.errAttend( e.err );
-      track.push( 'uncaughtError' );
-      _.process.off( 'uncaughtError', uncaughtError );
+    test.equivalent( e.err.originalMessage, exp )
+    _.errAttend( e.err );
+    track.push( 'uncaughtError' );
+    _.process.off( 'uncaughtError', uncaughtError );
     }
   }
 
@@ -17042,7 +17299,7 @@ function endStructuralSigint( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( program1 ) );
+  let programPath = a.program( program1 );
   let time1;
   let modes = [ 'fork', 'spawn', 'shell' ];
 
@@ -17142,7 +17399,7 @@ function endStructuralSigkill( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( program1 ) );
+  let programPath = a.program( program1 );
   let time1;
   let modes = [ 'fork', 'spawn', 'shell' ];
 
@@ -17244,7 +17501,7 @@ function endStructuralTerminate( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( program1 ) );
+  let programPath = a.program( program1 );
   let time1;
   let modes = [ 'fork', 'spawn', 'shell' ];
 
@@ -17343,7 +17600,7 @@ function endStructuralKill( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( program1 ) );
+  let programPath = a.program( program1 );
   let time1;
   let modes = [ 'fork', 'spawn', 'shell' ];
 
@@ -17442,8 +17699,8 @@ function terminateComplex( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.path.nativize( a.program( testApp ) );
-  let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+  let testAppPath = a.program( testApp );
+  let testAppPath2 = a.program( testApp2 );
 
   if( process.platform === 'win32' )
   {
@@ -17457,7 +17714,7 @@ function terminateComplex( test )
 
   a.ready
 
-  .thenKeep( () =>
+  .then( () =>
   {
     test.case = 'Sending signal to other process'
     var o =
@@ -17478,7 +17735,7 @@ function terminateComplex( test )
       _.process.terminate({ pid : lastChildPid });
     })
 
-    ready.thenKeep( ( got ) =>
+    ready.then( ( got ) =>
     {
       test.identical( got.exitCode, 0 );
       test.identical( got.exitSignal, null );
@@ -17494,7 +17751,7 @@ function terminateComplex( test )
 
   /*  */
 
-  .thenKeep( () =>
+  .then( () =>
   {
     test.case = 'Sending signal to child process has regular child process that should exit with parent'
     var o =
@@ -17515,8 +17772,8 @@ function terminateComplex( test )
       _.process.terminate({ pid : o.process.pid });
     })
 
-    /* xxx */
-    ready.thenKeep( ( got ) =>
+    /* zzz */
+    ready.then( ( got ) =>
     {
       test.identical( got.exitCode, 0 ); /* qqq2 : check op.ended if op.exitCode is checked */
       test.identical( got.exitSignal, null );
@@ -17531,7 +17788,7 @@ function terminateComplex( test )
 
   /* - */
 
-  .thenKeep( () =>
+  .then( () =>
   {
     test.case = 'Sending signal to child process has regular child process that should exit with parent'
     var o =
@@ -17552,7 +17809,7 @@ function terminateComplex( test )
       _.process.terminate({ pid : o.process.pid });
     })
 
-    ready.thenKeep( ( got ) =>
+    ready.then( ( got ) =>
     {
       test.identical( got.exitCode, 0 );
       test.identical( got.exitSignal, null );
@@ -17567,7 +17824,7 @@ function terminateComplex( test )
 
   /* - */
 
-  .thenKeep( () =>
+  .then( () =>
   {
     test.case = 'Sending signal to child process has regular child process that should exit with parent'
     var o =
@@ -17588,7 +17845,7 @@ function terminateComplex( test )
       _.process.terminate({ pid : o.process.pid });
     })
 
-    ready.thenKeep( ( got ) =>
+    ready.then( ( got ) =>
     {
       if( process.platform === 'linux' )
       {
@@ -17666,8 +17923,8 @@ function terminateDetachedComplex( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.path.nativize( a.program( testApp ) );
-  let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+  let testAppPath = a.program( testApp );
+  let testAppPath2 = a.program( testApp2 );
 
 
   if( process.platform === 'win32' )
@@ -17682,7 +17939,7 @@ function terminateDetachedComplex( test )
 
   a.ready
 
-  .thenKeep( () =>
+  .then( () =>
   {
     test.case = 'Sending signal to child process that has detached child, detached child should continue to work'
     var o =
@@ -17702,7 +17959,7 @@ function terminateDetachedComplex( test )
       _.process.terminate( o.process );
     })
 
-    ready.thenKeep( ( got ) =>
+    ready.then( ( got ) =>
     {
       test.identical( got.exitCode, 0 );
       test.identical( got.exitSignal, null );
@@ -17725,7 +17982,7 @@ function terminateDetachedComplex( test )
 
   /* - */
 
-  .thenKeep( () =>
+  .then( () =>
   {
     test.case = 'Sending signal to child process that has detached child, detached child should continue to work'
     var o =
@@ -17745,7 +18002,7 @@ function terminateDetachedComplex( test )
       _.process.terminate( o.process );
     })
 
-    ready.thenKeep( ( got ) =>
+    ready.then( ( got ) =>
     {
       test.identical( got.exitCode, 0 );
       test.identical( got.exitSignal, null );
@@ -17768,7 +18025,7 @@ function terminateDetachedComplex( test )
 
   /* - */
 
-  .thenKeep( () =>
+  .then( () =>
   {
     test.case = 'Sending signal to child process that has detached child, detached child should continue to work'
     var o =
@@ -17789,7 +18046,7 @@ function terminateDetachedComplex( test )
       _.process.terminate({ process : o.process, timeOut : 0 });
     })
 
-    ready.thenKeep( ( got ) =>
+    ready.then( ( got ) =>
     {
       childPid = _.numberFrom( a.fileProvider.fileRead( a.abs( a.routinePath, 'pid' ) ) );
 
@@ -17832,7 +18089,8 @@ function terminateDetachedComplex( test )
 
   /* - */
 
-  // .thenKeep( () =>
+  // qqq Vova : switch on?
+  // .then( () =>
   // {
   //   test.case = 'Sending signal to child process that has detached child, detached child should continue to work'
   //   var o =
@@ -17853,7 +18111,7 @@ function terminateDetachedComplex( test )
   //     _.process.terminate({ process : o.process, timeOut : 0 });
   //   })
   //
-  //   ready.thenKeep( ( got ) =>
+  //   ready.then( ( got ) =>
   //   {
   //     childPid = _.numberFrom( _.fileProvider.fileRead( _.path.join( routinePath, 'pid' ) ) );
   //
@@ -17965,9 +18223,9 @@ function terminateWithChildren( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.path.nativize( a.program( testApp ) );
-  let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
-  let testAppPath3 = a.path.nativize( a.program( testApp3 ) );
+  let testAppPath = a.program( testApp );
+  let testAppPath2 = a.program( testApp2 );
+  let testAppPath3 = a.program( testApp3 );
 
   if( process.platform === 'win32' )
   {
@@ -17981,7 +18239,7 @@ function terminateWithChildren( test )
 
   a.ready
 
-  .thenKeep( () =>
+  .then( () =>
   {
     test.case = 'child -> child, kill first child'
     var o =
@@ -18002,7 +18260,7 @@ function terminateWithChildren( test )
       terminated = _.process.terminate({ pid : o.process.pid, withChildren : 1 });
     })
 
-    ready.thenKeep( ( got ) =>
+    ready.then( ( got ) =>
     {
       return terminated.then( () =>
       {
@@ -18023,7 +18281,7 @@ function terminateWithChildren( test )
 
   /* - */
 
-  .thenKeep( () =>
+  .then( () =>
   {
     test.case = 'child -> child, kill last child'
     var o =
@@ -18044,7 +18302,7 @@ function terminateWithChildren( test )
       terminated = _.process.terminate({ pid : lastChildPid, withChildren : 1 });
     })
 
-    ready.thenKeep( ( got ) =>
+    ready.then( ( got ) =>
     {
       return terminated.then( () =>
       {
@@ -18065,7 +18323,7 @@ function terminateWithChildren( test )
 
   /* - */
 
-  .thenKeep( () =>
+  .then( () =>
   {
     test.case = 'parent -> child*'
     var o =
@@ -18085,7 +18343,7 @@ function terminateWithChildren( test )
       terminated = _.process.terminate({ pid : o.process.pid, withChildren : 1 });
     })
 
-    ready.thenKeep( ( got ) =>
+    ready.then( ( got ) =>
     {
       return terminated.then( () =>
       {
@@ -18110,7 +18368,7 @@ function terminateWithChildren( test )
 
   /* - */
 
-  .thenKeep( () =>
+  .then( () =>
   {
     test.case = 'process is not running';
     var o =
@@ -18232,9 +18490,9 @@ function terminateWithDetachedChildren( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.path.nativize( a.program( testApp ) );
-  let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
-  let testAppPath3 = a.path.nativize( a.program( testApp3 ) );
+  let testAppPath = a.program( testApp );
+  let testAppPath2 = a.program( testApp2 );
+  let testAppPath3 = a.program( testApp3 );
 
   if( process.platform === 'win32' )
   {
@@ -18248,7 +18506,7 @@ function terminateWithDetachedChildren( test )
 
   a.ready
 
-  .thenKeep( () =>
+  .then( () =>
   {
     test.case = 'parent -> detached'
     var o =
@@ -18268,7 +18526,7 @@ function terminateWithDetachedChildren( test )
       terminated = _.process.terminate({ pid : o.process.pid, withChildren : 1 });
     })
 
-    ready.thenKeep( ( got ) =>
+    ready.then( ( got ) =>
     {
       return terminated.then( () =>
       {
@@ -18394,7 +18652,7 @@ function terminateTimeOut( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.path.nativize( a.program( testApp ) );
+  let testAppPath = a.program( testApp );
 
   if( process.platform === 'win32' )
   {
@@ -18408,7 +18666,7 @@ function terminateTimeOut( test )
 
   a.ready
 
-  .thenKeep( () =>
+  .then( () =>
   {
     var o =
     {
@@ -18426,7 +18684,7 @@ function terminateTimeOut( test )
       _.process.terminate({ process : o.process, timeOut : 1000 });
     })
 
-    ready.thenKeep( ( got ) =>
+    ready.then( ( got ) =>
     {
       test.identical( got.exitCode, null );
       test.identical( got.exitSignal, 'SIGKILL' );
@@ -18440,7 +18698,7 @@ function terminateTimeOut( test )
 
   /*  */
 
-  .thenKeep( () =>
+  .then( () =>
   {
     var o =
     {
@@ -18458,7 +18716,7 @@ function terminateTimeOut( test )
       _.process.terminate({ process : o.process, timeOut : 1000 });
     })
 
-    ready.thenKeep( ( got ) =>
+    ready.then( ( got ) =>
     {
       test.identical( got.exitCode, null );
       test.identical( got.exitSignal, 'SIGKILL' );
@@ -18472,7 +18730,7 @@ function terminateTimeOut( test )
 
   /*  */
 
-  .thenKeep( () =>
+  .then( () =>
   {
     var o =
     {
@@ -18491,7 +18749,7 @@ function terminateTimeOut( test )
       _.process.terminate({ process : o.process });
     })
 
-    ready.thenKeep( ( got ) =>
+    ready.then( ( got ) =>
     {
       if( process.platform === 'linux' )
       {
@@ -18523,7 +18781,8 @@ function terminateTimeOut( test )
 
   /* - */
 
-  // .thenKeep( () =>
+  // qqq Vova : switch on?
+  // .then( () =>
   // {
   //   var o =
   //   {
@@ -18542,7 +18801,7 @@ function terminateTimeOut( test )
   //     _.process.terminate({ process : o.process });
   //   })
   //
-  //   ready.thenKeep( ( got ) =>
+  //   ready.then( ( got ) =>
   //   {
   //     if( process.platform === 'linux' )
   //     {
@@ -18600,7 +18859,7 @@ function terminateDifferentStdio( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.path.nativize( a.program( testApp ) );
+  let testAppPath = a.program( testApp );
 
   if( process.platform === 'win32' )
   {
@@ -18614,7 +18873,7 @@ function terminateDifferentStdio( test )
 
   a.ready
 
-  .thenKeep( () =>
+  .then( () =>
   {
     var o =
     {
@@ -18633,7 +18892,7 @@ function terminateDifferentStdio( test )
       return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
     })
 
-    ready.thenKeep( ( got ) =>
+    ready.then( ( got ) =>
     {
       test.identical( got.exitCode, 0 );
       test.identical( got.exitSignal, null );
@@ -18646,7 +18905,7 @@ function terminateDifferentStdio( test )
 
   /* - */
 
-  .thenKeep( () =>
+  .then( () =>
   {
     var o =
     {
@@ -18665,7 +18924,7 @@ function terminateDifferentStdio( test )
       return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
     })
 
-    ready.thenKeep( ( got ) =>
+    ready.then( ( got ) =>
     {
       test.identical( got.exitCode, 0 );
       test.identical( got.exitSignal, null );
@@ -18678,7 +18937,7 @@ function terminateDifferentStdio( test )
 
   /* - */
 
-  .thenKeep( () =>
+  .then( () =>
   {
     var o =
     {
@@ -18695,7 +18954,7 @@ function terminateDifferentStdio( test )
       return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
     })
 
-    ready.thenKeep( ( got ) =>
+    ready.then( ( got ) =>
     {
       test.identical( got.exitCode, 0 );
       test.identical( got.exitSignal, null );
@@ -18708,7 +18967,7 @@ function terminateDifferentStdio( test )
 
   /* - */
 
-  .thenKeep( () =>
+  .then( () =>
   {
     var o =
     {
@@ -18726,7 +18985,7 @@ function terminateDifferentStdio( test )
       return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
     })
 
-    ready.thenKeep( ( got ) =>
+    ready.then( ( got ) =>
     {
       test.identical( got.exitCode, 0 );
       test.identical( got.exitSignal, null );
@@ -18739,7 +18998,7 @@ function terminateDifferentStdio( test )
 
   /* - */
 
-  .thenKeep( () =>
+  .then( () =>
   {
     var o =
     {
@@ -18759,7 +19018,7 @@ function terminateDifferentStdio( test )
       return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
     })
 
-    ready.thenKeep( ( got ) =>
+    ready.then( ( got ) =>
     {
       test.identical( got.exitCode, 0 );
       test.identical( got.exitSignal, null );
@@ -18772,7 +19031,7 @@ function terminateDifferentStdio( test )
 
   /* - */
 
-  .thenKeep( () =>
+  .then( () =>
   {
     var o =
     {
@@ -18792,7 +19051,7 @@ function terminateDifferentStdio( test )
       return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
     })
 
-    ready.thenKeep( ( got ) =>
+    ready.then( ( got ) =>
     {
       test.identical( got.exitCode, 0 );
       test.identical( got.exitSignal, null );
@@ -18831,14 +19090,14 @@ function children( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.path.nativize( a.program( testApp ) );
-  let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+  let testAppPath = a.program( testApp );
+  let testAppPath2 = a.program( testApp2 );
 
   /* */
 
   a.ready
 
-  .thenKeep( () =>
+  .then( () =>
   {
     test.case = 'parent -> child -> child'
     var o =
@@ -18859,7 +19118,7 @@ function children( test )
       children = _.process.children( process.pid )
     })
 
-    ready.thenKeep( ( got ) =>
+    ready.then( ( got ) =>
     {
       test.identical( got.exitCode, 0 );
       var expected =
@@ -18884,7 +19143,7 @@ function children( test )
 
   /* - */
 
-  .thenKeep( () =>
+  .then( () =>
   {
     test.case = 'parent -> child -> child, search from fist child'
     var o =
@@ -18905,7 +19164,7 @@ function children( test )
       children = _.process.children( o.process.pid )
     })
 
-    ready.thenKeep( ( got ) =>
+    ready.then( ( got ) =>
     {
       test.identical( got.exitCode, 0 );
       var expected =
@@ -18927,7 +19186,7 @@ function children( test )
 
   /* - */
 
-  .thenKeep( () =>
+  .then( () =>
   {
     test.case = 'parent -> child -> child, start from last child'
     var o =
@@ -18948,7 +19207,7 @@ function children( test )
       children = _.process.children( lastChildPid )
     })
 
-    ready.thenKeep( ( got ) =>
+    ready.then( ( got ) =>
     {
       test.identical( got.exitCode, 0 );
       var expected =
@@ -18968,7 +19227,7 @@ function children( test )
 
   /* - */
 
-  .thenKeep( () =>
+  .then( () =>
   {
     test.case = 'parent -> child*'
     var o =
@@ -18994,7 +19253,7 @@ function children( test )
       children = _.process.children( process.pid )
     })
 
-    ready.thenKeep( ( got ) =>
+    ready.then( ( got ) =>
     {
       test.identical( got[ 0 ].exitCode, 0 );
       test.identical( got[ 1 ].exitCode, 0 );
@@ -19018,7 +19277,7 @@ function children( test )
 
   /* - */
 
-  .thenKeep( () =>
+  .then( () =>
   {
     test.case = 'only parent'
     return _.process.children( process.pid )
@@ -19031,7 +19290,7 @@ function children( test )
 
   /* - */
 
-  .thenKeep( () =>
+  .then( () =>
   {
     test.case = 'process is not running';
     var o =
@@ -19089,14 +19348,14 @@ function childrenAsList( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.path.nativize( a.program( testApp ) );
-  let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+  let testAppPath = a.program( testApp );
+  let testAppPath2 = a.program( testApp2 );
 
   /* */
 
   a.ready
 
-  .thenKeep( () =>
+  .then( () =>
   {
     test.case = 'parent -> child -> child'
     var o =
@@ -19117,7 +19376,7 @@ function childrenAsList( test )
       children = _.process.children({ pid : process.pid, asList : 1 })
     })
 
-    ready.thenKeep( ( got ) =>
+    ready.then( ( got ) =>
     {
       test.identical( got.exitCode, 0 );
       return children.then( ( got ) =>
@@ -19191,7 +19450,7 @@ function experiment( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ) );
+  let programPath = a.program( testApp );
 
   /* */
 
@@ -19210,7 +19469,7 @@ function experiment( test )
   {
     var con = new _.Consequence().take( null );
 
-    con.thenKeep( function()
+    con.then( function()
     {
       test.case = 'no args';
 
@@ -19224,7 +19483,7 @@ function experiment( test )
       return r;
     })
 
-    con.thenKeep( function()
+    con.then( function()
     {
       test.case = 'deasync';
       _.time.out( 1 ).finallyDeasyncGive();
@@ -19249,14 +19508,14 @@ function killComplex( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.path.nativize( a.program( testApp ) );
-  let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+  let testAppPath = a.program( testApp );
+  let testAppPath2 = a.program( testApp2 );
 
   /* */
 
   a.ready
 
-  .thenKeep( () =>
+  .then( () =>
   {
     test.case = 'Kill child of child process'
     var o =
@@ -19285,7 +19544,7 @@ function killComplex( test )
       }
     })
 
-    ready.thenKeep( ( got ) =>
+    ready.then( ( got ) =>
     {
       test.identical( got.exitCode, 0 );
       test.identical( got.exitSignal, null );
@@ -19344,14 +19603,39 @@ function killComplex( test )
 
 function realMainFile( test )
 {
-  if( require.main === module )
-  var expected1 = __filename;
-  else
-  var expected1 = require.main.filename;
+  let context = this;
+  let a = test.assetFor( false );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
 
-  test.case = 'compare with __filename path for main file';
-  var got = _.fileProvider.path.nativize( _.process.realMainFile( ) );
-  test.identical( got, expected1 );
+  a.ready.then( () =>
+  {
+    test.case = 'compare with `testAppPath`'
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      outputCollecting : 1,
+    }
+
+    return _.process.start( o )
+    .then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      test.identical( got.output.trim(), testAppPath );
+      return null;
+    })
+  });
+
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+
+    console.log( _.process.realMainFile() )
+  }
 };
 
 //
@@ -19419,10 +19703,10 @@ function experiment( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.path.nativize( a.program( testApp ) );
-  let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+  let testAppPath = a.program( testApp );
+  let testAppPath2 = a.program( testApp2 );
 
-  var commonDefaults =
+  let o3 =
   {
     outputPiping : 1,
     outputCollecting : 1,
@@ -19436,7 +19720,7 @@ function experiment( test )
 
   /* - */
 
-  a.ready.thenKeep( function()
+  a.ready.then( function()
   {
     test.case = 'mode : shell, passingThrough : true, no args';
 
@@ -19450,12 +19734,12 @@ function experiment( test )
 
     return null;
   })
-  .thenKeep( function( arg )
+  .then( function( arg )
   {
-    var options = _.mapSupplement( {}, o, commonDefaults );
+    var options = _.mapSupplement( {}, o, o3 );
 
     return _.process.start( options )
-    .thenKeep( function()
+    .then( function()
     {
       test.identical( options.exitCode, 0 );
       test.is( _.strHas( options.output, `[ '*' ]` ) );
@@ -19569,11 +19853,6 @@ function experiment2( test )
 
 }
 
-experiment2.description =
-`
-  - xxx
-`
-
 experiment2.experimental = 1;
 
 // --
@@ -19682,7 +19961,7 @@ var Proto =
 
     startDetachingChildExitsAfterParent,
     startDetachingChildExitsBeforeParent,
-    startDetachingDisconnectedEarly, /* yyy */
+    startDetachingDisconnectedEarly,
     startDetachingDisconnectedLate,
     startDetachingChildExistsBeforeParentWaitForTermination,
     startDetachingEndCompetitorIsExecuted,
@@ -19700,9 +19979,11 @@ var Proto =
     startDetachingTrivial,
 
     startOnStart,
-    startOnTerminate, /* qqq2 : fix the test routine */
+    startOnTerminate,
     startNoEndBug1,
     startWithDelayOnReady,
+
+    startCallbackIsNotAConsequence,
 
     /*  */
 
@@ -19732,7 +20013,7 @@ var Proto =
     terminate,
     startErrorAfterTerminationWithSend,
 
-    // endStructuralSigint, /* qqq yyy : switch on */
+    // endStructuralSigint, /* qqq zzz : switch on */
     // endStructuralSigkill,
     // endStructuralTerminate,
     // endStructuralKill,

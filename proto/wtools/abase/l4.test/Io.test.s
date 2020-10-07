@@ -25,20 +25,19 @@ let Self = {};
 
 function suiteBegin()
 {
-  var self = this;
-  self.suiteTempPath = _.path.tempOpen( _.path.join( __dirname, '../..' ), 'Io' );
-  self.assetsOriginalPath = _.path.join( __dirname, '_asset' );
-  self.appJsPath = _.path.nativize( _.module.resolve( 'wProcess' ) );
+  var context = this;
+  context.suiteTempPath = _.path.tempOpen( _.path.join( __dirname, '../..' ), 'Io' );
+  context.assetsOriginalPath = _.path.join( __dirname, '_asset' );
+  context.appJsPath = _.path.nativize( _.module.resolve( 'wProcess' ) );
 }
 
 //
 
 function suiteEnd()
 {
-  var self = this;
-
-  _.assert( _.strHas( self.suiteTempPath, '/Io' ) )
-  _.path.tempClose( self.suiteTempPath );
+  var context = this;
+  _.assert( _.strHas( context.suiteTempPath, '/Io' ) )
+  _.path.tempClose( context.suiteTempPath );
 }
 
 // --
@@ -1230,8 +1229,8 @@ var Proto =
     pathsRead,
 
     systemEntryAddBasic,
-    systemEntryAddOptionAllowingMissed, // missed appPath
-    systemEntryAddOptionAllowingNotInPath, // entryDirPath not in path
+    systemEntryAddOptionAllowingMissed,
+    systemEntryAddOptionAllowingNotInPath,
     systemEntryAddOptionForcing,
   }
 
