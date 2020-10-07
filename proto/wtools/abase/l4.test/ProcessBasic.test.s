@@ -22,7 +22,6 @@ let Self = {};
 
 /* qqq for Yevhen : make sure variable "got" is used as should | aaa : Done. Yevhen S. */
 /* qqq for Yevhen : actualize names of test routines | aaa : Done. Yevhen S. */
-
 /* qqq for Yevhen : check op.ended if op.exitCode is checked | aaa : Done. Yevhen S. */
 
 /* qqq for Yevhen : parametrize all time delays, don't forget to leave comment if you change any time delay
