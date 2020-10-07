@@ -60,6 +60,7 @@ function start_pre( routine, args )
   _.assert( o.onDisconnect === null || _.routineIs( o.onDisconnect ) );
   _.assert( o.ready === null || _.routineIs( o.ready ) );
   _.assert( !o.ipc || _.longHas( [ 'fork', 'spawn' ], o.mode ), `Mode::${o.mode} doesn't support inter process communication.` );
+  _.assert( o.mode !== 'fork' || !o.sync || o.deasync, 'Mode::fork is available only if either sync:0 or deasync:1' );
 
   return o;
 }
@@ -189,12 +190,9 @@ function start_body( o )
   let stderrOutput = '';
   let decoratedOutput = '';
   let decoratedErrorOutput = '';
-  let execArgs, argumentsManual;
+  let execArgs, argumentsManual; /* qqq : remove argumentsManual */
 
   preform1();
-
-  if( _global_.debugger )
-  debugger;
 
   if( _.arrayIs( o.execPath ) || _.arrayIs( o.currentPath ) )
   return multiple();
@@ -218,6 +216,7 @@ function start_body( o )
       end( err, o.onTerminate );
     }
     // debugger; /* xxx : is states set? */
+    _.assert( o.state === 'terminated' || o.state === 'disconnected' );
     end( undefined, o.onTerminate );
     return o;
     /* xxx qqq2 : implement tests to check all 4 consequences and states in sync:0 deasync:0 mode */
@@ -327,7 +326,7 @@ function start_body( o )
     }
 
     o.disconnect = disconnect;
-    o.state = 'initial'; /* `initial`, `starting`, `started`, `terminating`, `terminated` */
+    o.state = 'initial'; /* `initial`, `starting`, `started`, `terminating`, `terminated`, `disconnected` */
     o.exitReason = null;
     o.fullExecPath = null;
     o.output = null;
@@ -839,7 +838,6 @@ function start_body( o )
 
     if( o.mode === 'fork')
     {
-      _.assert( !o.sync || o.deasync, 'mode::fork is available only if either sync:0 or deasync:1' ); /* qqq xxx : move assert */
       let o2 = optionsForFork();
       execPath = execPathForFork( execPath );
 
