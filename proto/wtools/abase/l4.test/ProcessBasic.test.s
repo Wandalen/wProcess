@@ -13796,6 +13796,7 @@ function startCallbackIsNotAConsequence( test )
   function ready()
   {
     console.log( 'ready' );
+    track.push( 'ready' );
   }
 
   function onStart()
