@@ -1,3 +1,1 @@
-let _ = require( '..' );
-
-console.log( _.process.args() );
+console.log(process.ppid,process.pid)
