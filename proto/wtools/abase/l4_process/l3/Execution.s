@@ -767,7 +767,10 @@ function start_body( o )
     if( o.verbosity < 0 )
     o.verbosity = 0;
     if( o.outputPiping === null )
-    o.outputPiping = o.verbosity >= 2;
+    {
+      if( o.stdio === 'pipe' || o.stdio[ 1 ] === 'pipe' )
+      o.outputPiping = o.verbosity >= 2;
+    }
     if( o.outputCollecting && !o.output )
     o.output = ''; /* qqq : test for multiple run? where does it collect output? */
 
@@ -1575,8 +1578,6 @@ defaults.passingThrough = 0;
 defaults.maximumMemory = 0;
 defaults.applyingExitCode = 1;
 defaults.stdio = 'inherit';
-defaults.outputPiping = 0;
-defaults.outputCollecting = 0;
 defaults.mode = 'fork';
 
 let startNjs = _.routineFromPreAndBody( start_pre, startNjs_body );
@@ -1624,8 +1625,6 @@ defaults.passingThrough = 1;
 defaults.maximumMemory = 1;
 defaults.applyingExitCode = 1;
 defaults.throwingExitCode = 0;
-defaults.outputPiping = 0;
-defaults.outputCollecting = 0;
 defaults.mode = 'fork';
 
 //
