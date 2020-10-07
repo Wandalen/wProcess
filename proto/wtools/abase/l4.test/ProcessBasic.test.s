@@ -19,6 +19,9 @@ let _ = _global_.wTools;
 let Self = {};
 
 /* qqq2 : make general table in md file for this: "Vova qqq: close event is not emitted for disconnected detached child in fork mode" */
+/* qqq2 : don't use shouldThrowErrorOfAnyKind, use specific shouldThrowError* */
+/* qqq2 : parametrize all time delays, don't forget to leave comment if you change any time delay */
+/* qqq : implement for 3 modes where test routine is not implemented for 3 modes */
 
 // --
 // context
@@ -411,13 +414,13 @@ function exitCode( test )
 
 /* qqq : split test cases by / ** / delimeting lines. whole file */
 /* qqq : split by mode */
-function shell( test )
+function basic( test )
 {
   let context = this;
   let a = test.assetFor( false );
   let programPath = a.path.nativize( a.program( testAppShell ) );
 
-  var commonDefaults =
+  var commonDefaults = /* xxx : rename */
   {
     outputPiping : 1,
     outputCollecting : 1,
@@ -428,17 +431,16 @@ function shell( test )
   /* */
 
   var expectedOutput = programPath + '\n';
-
-  var o;
+  var o2;
+  a.ready
 
   /* */
 
-  a.ready
   .thenKeep( function()
   {
     test.case = 'mode : spawn';
 
-    o =
+    o2 =
     {
       execPath :  'node ' + programPath,
       mode : 'spawn',
@@ -451,7 +453,7 @@ function shell( test )
   {
     /* mode : spawn, stdio : pipe */
 
-    var options = _.mapSupplement( {}, o, commonDefaults );
+    var options = _.mapSupplement( {}, o2, commonDefaults );
 
     return _.process.start( options )
     .thenKeep( function()
@@ -465,8 +467,8 @@ function shell( test )
   {
     /* mode : spawn, stdio : ignore */
 
-    o.stdio = 'ignore';
-    var options = _.mapSupplement( {}, o, commonDefaults );
+    o2.stdio = 'ignore';
+    var options = _.mapSupplement( {}, o2, commonDefaults );
 
     return _.process.start( options )
     .thenKeep( function()
@@ -483,7 +485,7 @@ function shell( test )
   {
     test.case = 'spawn, stop process using SIGINT';
 
-    o =
+    o2 =
     {
       execPath :  'node ' + programPath + ' loop : 1',
       mode : 'spawn',
@@ -491,7 +493,7 @@ function shell( test )
       throwingExitCode : 0
     }
 
-    var options = _.mapSupplement( {}, o, commonDefaults );
+    var options = _.mapSupplement( {}, o2, commonDefaults );
 
     var shell = _.process.start( options );
     _.time.out( 500, () =>
@@ -519,14 +521,14 @@ function shell( test )
   {
     test.case = 'spawn, return good code';
 
-    o =
+    o2 =
     {
       execPath :  'node ' + programPath + ' exitWithCode : 0',
       mode : 'spawn',
       stdio : 'pipe'
     }
 
-    var options = _.mapSupplement( {}, o, commonDefaults );
+    var options = _.mapSupplement( {}, o2, commonDefaults );
 
     return test.mustNotThrowError( _.process.start( options ) )
     .thenKeep( () =>
@@ -542,18 +544,23 @@ function shell( test )
   {
     test.case = 'spawn, return bad code';
 
-    o =
+    o2 =
     {
       execPath :  'node ' + programPath + ' exitWithCode : 1',
       mode : 'spawn',
-      stdio : 'pipe'
+      stdio : 'pipe',
     }
 
-    var options = _.mapSupplement( {}, o, commonDefaults );
+    var options = _.mapSupplement( {}, o2, commonDefaults );
 
-    return test.shouldThrowErrorOfAnyKind( _.process.start( options ) )
-    .thenKeep( () =>
+    debugger;
+    return test.shouldThrowErrorOfAnyKind( _.process.start( options ), ( err, arg ) =>
     {
+      debugger;
+    })
+    .finally( ( err, arg ) =>
+    {
+      debugger;
       test.identical( options.exitCode, 1 );
       return null;
     });
@@ -565,7 +572,7 @@ function shell( test )
   {
     test.case = 'mode : shell';
 
-    o =
+    o2 =
     {
       execPath :  'node ' + programPath,
       mode : 'shell',
@@ -577,7 +584,7 @@ function shell( test )
   {
     /* mode : shell, stdio : pipe */
 
-    var options = _.mapSupplement( {}, o, commonDefaults );
+    var options = _.mapSupplement( {}, o2, commonDefaults );
 
     return _.process.start( options )
     .thenKeep( function()
@@ -591,9 +598,9 @@ function shell( test )
   {
     /* mode : shell, stdio : ignore */
 
-    o.stdio = 'ignore'
+    o2.stdio = 'ignore'
 
-    var options = _.mapSupplement( {}, o, commonDefaults );
+    var options = _.mapSupplement( {}, o2, commonDefaults );
 
     return _.process.start( options )
     .thenKeep( function()
@@ -610,7 +617,7 @@ function shell( test )
   {
     test.case = 'shell, stop process using SIGINT';
 
-    o =
+    o2 =
     {
       execPath :  'node ' + programPath + ' loop : 1',
       mode : 'shell',
@@ -618,7 +625,7 @@ function shell( test )
       throwingExitCode : 0
     }
 
-    var options = _.mapSupplement( {}, o, commonDefaults );
+    var options = _.mapSupplement( {}, o2, commonDefaults );
 
     var shell = _.process.start( options );
     _.time.out( 500, () =>
@@ -648,7 +655,7 @@ function shell( test )
   {
     test.case = 'shell, stop process using SIGKILL';
 
-    o =
+    o2 =
     {
       execPath :  'node ' + programPath + ' loop : 1',
       mode : 'shell',
@@ -656,7 +663,7 @@ function shell( test )
       throwingExitCode : 0
     }
 
-    var options = _.mapSupplement( {}, o, commonDefaults );
+    var options = _.mapSupplement( {}, o2, commonDefaults );
 
     var shell = _.process.start( options );
     _.time.out( 500, () =>
@@ -684,14 +691,14 @@ function shell( test )
   {
     test.case = 'shell, return good code';
 
-    o =
+    o2 =
     {
       execPath :  'node ' + programPath + ' exitWithCode : 0',
       mode : 'shell',
       stdio : 'pipe'
     }
 
-    var options = _.mapSupplement( {}, o, commonDefaults );
+    var options = _.mapSupplement( {}, o2, commonDefaults );
 
     return test.mustNotThrowError( _.process.start( options ) )
     .thenKeep( () =>
@@ -707,14 +714,14 @@ function shell( test )
   {
     test.case = 'shell, return bad code';
 
-    o =
+    o2 =
     {
       execPath :  'node ' + programPath + ' exitWithCode : 1',
       mode : 'shell',
       stdio : 'pipe'
     }
 
-    var options = _.mapSupplement( {}, o, commonDefaults );
+    var options = _.mapSupplement( {}, o2, commonDefaults );
 
     return test.shouldThrowErrorOfAnyKind( _.process.start( options ) )
     .thenKeep( () =>
@@ -730,7 +737,7 @@ function shell( test )
   {
     test.case = 'shell, stop using timeOut';
 
-    o =
+    o2 =
     {
       execPath :  'node ' + programPath + ' loop : 1',
       mode : 'shell',
@@ -738,7 +745,7 @@ function shell( test )
       timeOut : 500
     }
 
-    var options = _.mapSupplement( {}, o, commonDefaults );
+    var options = _.mapSupplement( {}, o2, commonDefaults );
 
     var shell = _.process.start( options );
     return test.shouldThrowErrorAsync( shell )
@@ -754,8 +761,6 @@ function shell( test )
 
   return a.ready;
 }
-
-shell.timeOut = 30000;
 
 //
 
@@ -777,8 +782,7 @@ function shellSync( test )
   /* */
 
   var expectedOutput = programPath + '\n';
-
-  var o;
+  var o; /* qqq : should be o2 if o-map is not passed to routine directly */
 
   /* - */
 
@@ -793,7 +797,8 @@ function shellSync( test )
   /* mode : spawn, stdio : pipe */
 
   var options = _.mapSupplement( {}, o, commonDefaults );
-  _.process.start( options )
+  _.process.start( options );
+  debugger;
   test.identical( options.exitCode, 0 );
   test.identical( options.output, expectedOutput );
 
@@ -908,8 +913,6 @@ function shellSync( test )
   test.identical( options.exitCode, 1 );
 
 }
-
-shellSync.timeOut = 30000;
 
 //
 
@@ -1092,8 +1095,6 @@ function shellSyncAsync( test )
 
 }
 
-shellSyncAsync.timeOut = 30000;
-
 //
 
 function shell2( test )
@@ -1269,8 +1270,6 @@ function shell2( test )
     console.log( process.argv.slice( 2 ).join( ' ' ) );
   }
 }
-
-shell2.timeOut = 30000;
 
 //
 
@@ -1725,8 +1724,6 @@ function shellCurrentPath( test )
   }
 
 }
-
-shellCurrentPath.timeOut = 30000;
 
 //
 
@@ -2212,8 +2209,6 @@ function shellFork( test )
   }
 
 }
-
-shellFork.timeOut = 30000;
 
 //
 
@@ -3745,8 +3740,6 @@ function shellMultipleSyncDeasync( test )
   }
 }
 
-shellMultipleSyncDeasync.timeOut = 30000;
-
 //
 
 function shellDryRun( test )
@@ -3815,7 +3808,7 @@ function shellDryRun( test )
 
 //
 
-function startWithReadyDelayStructural( test )
+function startNjsWithReadyDelayStructural( test ) /* qqq : implement additional test case with option detaching:1 */
 {
   let context = this;
   let a = test.assetFor( false );
@@ -3851,23 +3844,23 @@ function startWithReadyDelayStructural( test )
     exp2.disconnect = options.disconnect;
     exp2.process = options.process;
     exp2.procedure = options.procedure;
-    // exp2.procedureIsNew = true;
     exp2.currentPath = _.path.current();
     exp2.args = [];
     exp2.interpreterArgs = [];
     exp2.outputPiping = true;
     exp2.outputAdditive = true;
     exp2.state = 'terminated';
-    exp2.terminationReason = 'normal';
+    exp2.exitReason = 'normal';
     exp2.fullExecPath = a.path.nativize( programPath );
     exp2.ended = true;
 
     test.identical( options, exp2 );
     test.identical( !!options.process, true );
     test.is( _.routineIs( options.disconnect ) );
-    test.is( options.onTerminate === options.ready );
-    test.identical( options.ready.exportString(), 'Consequence::startWithReadyDelayStructural 0 / 2' );
-    test.identical( options.onTerminate.exportString(), 'Consequence::startWithReadyDelayStructural 0 / 2' );
+    test.is( options.onTerminate !== options.ready );
+    test.identical( options.ready.exportString(), 'Consequence::startNjsWithReadyDelayStructural 0 / 2' );
+    test.identical( options.onTerminate.exportString(), 'Consequence:: 1 / 0' );
+    test.identical( options.onDisconnect.exportString(), 'Consequence:: 0 / 0' );
     test.identical( options.onStart.exportString(), 'Consequence:: 1 / 0' );
 
     return null;
@@ -3891,7 +3884,6 @@ function startWithReadyDelayStructural( test )
     'interpreterArgs' : '',
     'when' : 'instant',
     'dry' : 0,
-    // 'logger' : null,
     'ipc' : 0,
     'env' : null,
     'detaching' : 0,
@@ -3916,24 +3908,26 @@ function startWithReadyDelayStructural( test )
     'process' : options.process,
     'logger' : options.logger,
     'state' : 'initial',
-    'terminationReason' : null,
+    'exitReason' : null,
     'fullExecPath' : null,
     'output' : null,
     'exitCode' : null,
     'exitSignal' : null,
     'procedure' : null,
-    // 'procedureIsNew' : null,
     'ended' : false,
-    'terminationBeginEnabled' : false,
+    'handleProcedureTerminationBegin' : false,
     'error' : null
   }
   test.identical( options, exp );
 
-  test.identical( options.process, null );
   test.is( _.routineIs( options.disconnect ) );
-  test.is( options.onTerminate === options.ready );
-  test.identical( options.ready.exportString(), 'Consequence:: 0 / 3' );
-  test.identical( options.onTerminate.exportString(), 'Consequence:: 0 / 3' );
+  test.is( options.onTerminate !== options.ready );
+  test.is( !!options.disconnect );
+  test.identical( options.process, null );
+  test.is( !!options.logger );
+  test.identical( options.ready.exportString(), 'Consequence:: 0 / 2' );
+  test.identical( options.onDisconnect.exportString(), 'Consequence:: 0 / 0' );
+  test.identical( options.onTerminate.exportString(), 'Consequence:: 0 / 0' );
   test.identical( options.onStart.exportString(), 'Consequence:: 0 / 0' );
 
   /* */
@@ -3950,7 +3944,7 @@ function startWithReadyDelayStructural( test )
 
 }
 
-startWithReadyDelayStructural.description =
+startNjsWithReadyDelayStructural.description =
 `
  - ready has delay
  - value of o-context is correct before start
@@ -4034,8 +4028,6 @@ function shellArgsOption( test )
     console.log( process.argv.slice( 2 ) );
   }
 }
-
-shellArgsOption.timeOut = 30000;
 
 //
 
@@ -8141,8 +8133,6 @@ function shellArgumentsHandling( test )
   return a.ready;
 }
 
-shellArgumentsHandling.timeOut = 30000;
-
 //
 
 function importantModeShell( test )
@@ -8449,7 +8439,6 @@ function importantModeShell( test )
 }
 
 importantModeShell.description = 'core cases for mode "shell"'
-importantModeShell.timeOut = 30000;
 
 //
 
@@ -9191,6 +9180,345 @@ shellProcedureExists.description =
 
 //
 
+/* qqq xxx : implement for other modes */
+function startOnTerminateSeveralCallbacksChronology( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let program1Path = a.path.nativize( a.program( program1 ) );
+  let track = [];
+
+  /* */
+
+  a.ready
+
+  .then( () =>
+  {
+    test.case = 'parent disconnects detached child process and exits, child contiues to work'
+    let o =
+    {
+      execPath : 'node program1.js',
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputPiping : 1,
+      outputCollecting : 1,
+      currentPath : a.routinePath,
+      detaching : 0,
+      ipc : 1,
+    }
+    let con = _.process.start( o );
+
+    o.onTerminate.then( ( op ) =>
+    {
+      track.push( 'onTerminate.1' );
+      test.identical( op.exitCode, 0 );
+      test.identical( op.state, 'terminated' );
+      return null;
+    })
+
+    o.onTerminate.then( () =>
+    {
+      track.push( 'onTerminate.2' );
+      test.identical( o.exitCode, 0 );
+      test.identical( o.state, 'terminated' );
+      return _.time.out( 1000 + context.t2 );
+    })
+
+    o.onTerminate.then( () =>
+    {
+      track.push( 'onTerminate.3' );
+      test.identical( o.exitCode, 0 );
+      test.identical( o.state, 'terminated' );
+      return null;
+    })
+
+    track.push( 'end' );
+    return con;
+  })
+
+  .tap( () =>
+  {
+    track.push( 'ready' );
+  })
+
+  /*  */
+
+  return _.time.out( 1000 + context.t2 + context.t2, () =>
+  {
+    test.identical( track, [ 'end', 'onTerminate.1', 'onTerminate.2', 'ready', 'onTerminate.3' ] );
+  });
+
+  /* - */
+
+  function program1()
+  {
+    console.log( 'program1:begin' );
+    setTimeout( () => { console.log( 'program1:end' ) }, 1000 );
+  }
+
+}
+
+startOnTerminateSeveralCallbacksChronology.description =
+`
+- xxx
+`
+
+//
+
+function startChronology( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
+  let track;
+  let niteration = 0;
+
+  var modes = [ 'fork', 'spawn', 'shell' ];
+  // let modes = [ 'spawn' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( 0, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 1, mode ) ) );
+
+  return a.ready;
+
+  /* */
+
+  function run( sync, mode )
+  {
+    test.case = `sync:${sync} mode:${mode}`;
+
+    if( sync && mode === 'fork' )
+    return null;
+
+    niteration += 1;
+    let ptcounter = _.Procedure.Counter;
+    let pacounter = _.Procedure.FindAlive().length;
+    track = [];
+
+    var o =
+    {
+      execPath : mode !== 'fork' ? 'node' : null,
+      args : [ testAppPath ],
+      ipc : 0,
+      mode,
+      sync,
+      ready : new _.Consequence().take( null ),
+      onStart : new _.Consequence(),
+      onDisconnect : new _.Consequence(),
+      onTerminate : new _.Consequence(),
+    }
+
+    test.identical( _.Procedure.Counter - ptcounter, 0 );
+    ptcounter = _.Procedure.Counter;
+    test.identical( _.Procedure.FindAlive().length - pacounter, 0 );
+    pacounter = _.Procedure.FindAlive().length;
+
+    o.onStart.tap( ( err, got ) =>
+    {
+      track.push( 'onStart' );
+
+      test.identical( err, undefined );
+      test.identical( got, o ); /* xxx */
+
+      test.identical( o.ready.resourcesCount(), 0 );
+      test.identical( o.ready.errorsCount(), 0 );
+      test.identical( o.ready.competitorsCount(), 0 );
+      test.identical( o.onStart.resourcesCount(), 1 );
+      test.identical( o.onStart.errorsCount(), 0 );
+      test.identical( o.onStart.competitorsCount(), 0 );
+      test.identical( o.onDisconnect.resourcesCount(), 0 );
+      test.identical( o.onDisconnect.errorsCount(), 0 );
+      test.identical( o.onDisconnect.competitorsCount(), 0 );
+      test.identical( o.onTerminate.resourcesCount(), 0 );
+      test.identical( o.onTerminate.errorsCount(), 0 );
+      test.identical( o.onTerminate.competitorsCount(), 1 );
+      test.identical( o.ended, false );
+      test.identical( o.state, 'started' );
+      test.identical( o.error, null );
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, null );
+      test.identical( o.process.exitCode, sync ? undefined : null );
+      test.identical( o.process.signalCode, sync ? undefined : null );
+      test.identical( _.Procedure.Counter - ptcounter, 2 );
+      ptcounter = _.Procedure.Counter;
+      test.identical( _.Procedure.FindAlive().length - pacounter, sync ? 1 : 2 );
+      pacounter = _.Procedure.FindAlive().length;
+    });
+
+    test.identical( _.Procedure.Counter - ptcounter, 1 );
+    ptcounter = _.Procedure.Counter;
+    test.identical( _.Procedure.FindAlive().length - pacounter, 1 );
+    pacounter = _.Procedure.FindAlive().length;
+
+    /* xxx qqq : normalize */
+    o.onTerminate.tap( ( err, got ) =>
+    {
+      track.push( 'onTerminate' );
+
+      test.identical( err, undefined );
+      test.identical( got, o ); /* xxx */
+
+      test.identical( o.ready.resourcesCount(), 0 );
+      test.identical( o.ready.errorsCount(), 0 );
+      test.identical( o.ready.competitorsCount(), sync ? 0 : 1 );
+      test.identical( o.onStart.resourcesCount(), 1 );
+      test.identical( o.onStart.errorsCount(), 0 );
+      test.identical( o.onStart.competitorsCount(), 0 );
+      test.identical( o.onDisconnect.resourcesCount(), 0 );
+      test.identical( o.onDisconnect.errorsCount(), 0 );
+      test.identical( o.onDisconnect.competitorsCount(), 0 );
+      test.identical( o.onTerminate.resourcesCount(), 1 );
+      test.identical( o.onTerminate.errorsCount(), 0 );
+      test.identical( o.onTerminate.competitorsCount(), 0 );
+      test.identical( o.ended, true );
+      test.identical( o.state, 'terminated' );
+      test.identical( o.error, null );
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.identical( o.process.exitCode, 0 );
+      test.identical( o.process.signalCode, null );
+      test.identical( _.Procedure.Counter - ptcounter, sync ? 0 : 1 );
+      ptcounter = _.Procedure.Counter;
+      if( sync )
+      test.identical( _.Procedure.FindAlive().length - pacounter, -2 );
+      else
+      test.identical( _.Procedure.FindAlive().length - pacounter, niteration > 1 ? -2 : 0 );
+      pacounter = _.Procedure.FindAlive().length;
+      /*
+      2 extra procedures dies here on non-first iteration
+        2 procedures of _.time.out()
+      */
+    })
+
+    let result = _.time.out( 1000 + context.t2, () =>
+    {
+      test.identical( track, [ 'onStart', 'onTerminate', 'ready' ] );
+
+      test.identical( o.ready.resourcesCount(), 1 );
+      test.identical( o.ready.errorsCount(), 0 );
+      test.identical( o.ready.competitorsCount(), 0 );
+      test.identical( o.onStart.resourcesCount(), 1 );
+      test.identical( o.onStart.errorsCount(), 0 );
+      test.identical( o.onStart.competitorsCount(), 0 );
+      test.identical( o.onDisconnect.resourcesCount(), 0 );
+      test.identical( o.onDisconnect.errorsCount(), 0 );
+      test.identical( o.onDisconnect.competitorsCount(), 0 );
+      test.identical( o.onTerminate.resourcesCount(), 1 );
+      test.identical( o.onTerminate.errorsCount(), 0 );
+      test.identical( o.onTerminate.competitorsCount(), 0 );
+      test.identical( o.ended, true );
+      test.identical( o.state, 'terminated' );
+      test.identical( o.error, null );
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.identical( o.process.exitCode, 0 );
+      test.identical( o.process.signalCode, null );
+      test.identical( _.Procedure.Counter - ptcounter, 0 );
+      ptcounter = _.Procedure.Counter;
+      if( sync )
+      test.identical( _.Procedure.FindAlive().length - pacounter, niteration > 1 ? -3 : -1 );
+      else
+      test.identical( _.Procedure.FindAlive().length - pacounter, -1 );
+      pacounter = _.Procedure.FindAlive().length;
+      /*
+      2 extra procedures dies here on non-first iteration
+        2 procedures of _.time.out()
+      */
+    });
+
+    test.identical( _.Procedure.Counter - ptcounter, 3 );
+    ptcounter = _.Procedure.Counter;
+    test.identical( _.Procedure.FindAlive().length - pacounter, 3 );
+    pacounter = _.Procedure.FindAlive().length;
+
+    let returned = _.process.start( o );
+
+    if( sync )
+    test.is( returned === o );
+    else
+    test.is( returned === o.ready );
+    test.is( o.onStart !== o.ready );
+    test.is( o.onDisconnect !== o.ready );
+    test.is( o.onTerminate !== o.ready );
+
+    test.identical( o.ready.resourcesCount(), sync ? 1 : 0 );
+    test.identical( o.ready.errorsCount(), 0 );
+    test.identical( o.ready.competitorsCount(), 0 );
+    test.identical( o.onStart.resourcesCount(), 1 );
+    test.identical( o.onStart.errorsCount(), 0 );
+    test.identical( o.onStart.competitorsCount(), 0 );
+    test.identical( o.onDisconnect.resourcesCount(), 0 );
+    test.identical( o.onDisconnect.errorsCount(), 0 );
+    test.identical( o.onDisconnect.competitorsCount(), 0 );
+    test.identical( o.onTerminate.resourcesCount(), sync ? 1 : 0 );
+    test.identical( o.onTerminate.errorsCount(), 0 );
+    test.identical( o.onTerminate.competitorsCount(), sync ? 0 : 1 );
+    test.identical( o.ended, sync ? true : false );
+    test.identical( o.state, sync ? 'terminated' : 'started' );
+    test.identical( o.error, null );
+    test.identical( o.exitCode, sync ? 0 : null );
+    test.identical( o.exitSignal, null );
+    test.identical( o.process.exitCode, sync ? 0 : null );
+    test.identical( o.process.signalCode, null );
+    test.identical( _.Procedure.Counter - ptcounter, 0 );
+    ptcounter = _.Procedure.Counter;
+    test.identical( _.Procedure.FindAlive().length - pacounter, sync ? -1 : -2 );
+    pacounter = _.Procedure.FindAlive().length;
+
+    o.ready.tap( ( err, got ) =>
+    {
+      track.push( 'ready' );
+
+      test.identical( err, undefined );
+      test.identical( got, o );
+
+      test.identical( o.ready.resourcesCount(), 1 );
+      test.identical( o.ready.errorsCount(), 0 );
+      test.identical( o.ready.competitorsCount(), 0 );
+      test.identical( o.onStart.resourcesCount(), 1 );
+      test.identical( o.onStart.errorsCount(), 0 );
+      test.identical( o.onStart.competitorsCount(), 0 );
+      test.identical( o.onDisconnect.resourcesCount(), 0 );
+      test.identical( o.onDisconnect.errorsCount(), 0 );
+      test.identical( o.onDisconnect.competitorsCount(), 0 );
+      test.identical( o.onTerminate.resourcesCount(), 1 );
+      test.identical( o.onTerminate.errorsCount(), 0 );
+      test.identical( o.onTerminate.competitorsCount(), 0 );
+      test.identical( o.ended, true );
+      test.identical( o.state, 'terminated' );
+      test.identical( o.error, null );
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.identical( o.process.exitCode, 0 );
+      test.identical( o.process.signalCode, null );
+      test.identical( _.Procedure.Counter - ptcounter, sync ? 1 : 0 );
+      ptcounter = _.Procedure.Counter;
+      test.identical( _.Procedure.FindAlive().length - pacounter, sync ? 1 : -1 );
+      pacounter = _.Procedure.FindAlive().length;
+      return null;
+    })
+
+    return result;
+  }
+
+  /* - */
+
+  function testApp()
+  {
+    setTimeout( () => {}, 1000 );
+  }
+
+}
+
+startChronology.description =
+`
+  - onTerminate goes before ready
+  - onStart goes before onTerminate
+  - procedures generated
+  - no extra procedures generated
+`
+
+//
+
 function shellTerminateHangedWithExitHandler( test )
 {
   let context = this;
@@ -9419,7 +9747,6 @@ function shellTerminateAfterLoopRelease( test )
   }
 }
 
-shellTerminateAfterLoopRelease.timeOut = 30000;
 shellTerminateAfterLoopRelease.description =
 `
   Test app - code that blocks event loop for short period of time and appExitHandlerRepair called at start
@@ -9828,8 +10155,8 @@ function startDetachingModeSpawnResourceReady( test )
     }
     let result = _.process.start( o );
 
-    test.identical( result, o.onStart );
-    test.notIdentical( result, o.onTerminate );
+    test.is( result !== o.onStart );
+    test.is( result !== o.onTerminate );
 
     o.onStart.then( ( got ) =>
     {
@@ -9899,8 +10226,8 @@ function startDetachingModeForkResourceReady( test )
     }
     let result = _.process.start( o );
 
-    test.identical( result, o.onStart );
-    test.notIdentical( result, o.onTerminate );
+    test.is( result !== o.onStart );
+    test.is( result !== o.onTerminate );
 
     o.onStart.thenGive( ( got ) =>
     {
@@ -9969,8 +10296,8 @@ function startDetachingModeShellResourceReady( test )
     }
     let result = _.process.start( o );
 
-    test.identical( result, o.onStart );
-    test.notIdentical( result, o.onTerminate );
+    test.is( result !== o.onStart );
+    test.is( result !== o.onTerminate );
 
     o.onStart.thenGive( ( got ) =>
     {
@@ -11235,13 +11562,13 @@ function startDetachingModeShellTerminationBegin( test )
 
 //
 
+/* qqq xxx : implement for other modes */
 function startDetachingChildExitsAfterParent( test )
 {
   let context = this;
   let a = test.assetFor( false );
   let testAppParentPath = a.path.nativize( a.program( testAppParent ) );
   let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
-
   let testFilePath = a.abs( a.routinePath, 'testFile' );
 
   /* */
@@ -11268,19 +11595,16 @@ function startDetachingChildExitsAfterParent( test )
 
     o.process.on( 'message', ( got ) =>
     {
-      childPid = _.numberFrom( got );
+      childPid = _.numberFrom( got ); /* xxx : add pid to descriptor? */
     })
 
     o.onTerminate.then( ( op ) =>
     {
-      test.identical( op.exitCode, 0 );
-
       test.will = 'parent is dead, detached child is still running'
-
+      test.identical( op.exitCode, 0 );
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( _.process.isAlive( childPid ) );
-
-      return _.time.out( 10000 );
+      return _.time.out( 10000 ); /* xxx qqq2 : ask about time out */
     })
 
     o.onTerminate.then( () =>
@@ -11292,7 +11616,7 @@ function startDetachingChildExitsAfterParent( test )
       return null;
     })
 
-    return con;
+    return o.onTerminate;
   })
 
   /*  */
@@ -11348,6 +11672,7 @@ After 5 seconds child process creates test file in working directory and exits.
 
 //
 
+/* qqq xxx : implement for other modes */
 function startDetachingChildExitsBeforeParent( test )
 {
   let context = this;
@@ -11483,9 +11808,6 @@ function startDetachingDisconnectedEarly( test )
   let context = this;
   let a = test.assetFor( false );
   let program1Path = a.path.nativize( a.program( program1 ) );
-
-  /* */
-
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
@@ -11512,6 +11834,9 @@ function startDetachingDisconnectedEarly( test )
 
       let result = _.process.start( o );
 
+      test.identical( o.ready.resourcesCount(), 0 );
+      test.identical( o.ready.errorsCount(), 0 );
+      test.identical( o.ready.competitorsCount(), 0 );
       test.identical( o.onStart.resourcesCount(), 1 );
       test.identical( o.onStart.errorsCount(), 0 );
       test.identical( o.onStart.competitorsCount(), 0 );
@@ -11520,33 +11845,31 @@ function startDetachingDisconnectedEarly( test )
       test.identical( o.onDisconnect.competitorsCount(), 0 );
       test.identical( o.onTerminate.resourcesCount(), 0 );
       test.identical( o.onTerminate.errorsCount(), 0 );
-      test.identical( o.onTerminate.competitorsCount(), 1 );
+      test.identical( o.onTerminate.competitorsCount(), 0 );
 
       test.identical( o.state, 'started' );
-
-      test.is( o.onStart === result );
+      test.is( o.onStart !== result );
       test.is( _.consequenceIs( o.onStart ) )
+
+      test.identical( o.state, 'started' );
+      o.disconnect();
+      test.identical( o.state, 'disconnected' );
 
       o.onStart.finally( ( err, got ) =>
       {
         track.push( 'onStart' );
         test.identical( err, undefined );
         test.identical( got, o );
-        test.is( _.process.isAlive( o.process.pid ) )
+        test.is( _.process.isAlive( o.process.pid ) );
         return null;
       })
 
       o.onDisconnect.finally( ( err, got ) =>
       {
-        track.push( 'onStart' );
+        track.push( 'onDisconnect' );
         test.identical( err, undefined );
         test.identical( got, o );
         test.is( _.process.isAlive( o.process.pid ) )
-
-        test.identical( o.state, 'started' );
-        o.disconnect();
-        test.identical( o.state, 'disconnected' );
-
         return null;
       })
 
@@ -11604,12 +11927,8 @@ function startDetachingDisconnectedLate( test )
   let context = this;
   let a = test.assetFor( false );
   let program1Path = a.path.nativize( a.program( program1 ) );
-
-  /* */
-
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
-
   return a.ready;
 
   function run( mode )
@@ -11633,6 +11952,9 @@ function startDetachingDisconnectedLate( test )
 
       let result = _.process.start( o );
 
+      test.identical( o.ready.resourcesCount(), 0 );
+      test.identical( o.ready.errorsCount(), 0 );
+      test.identical( o.ready.competitorsCount(), 0 );
       test.identical( o.onStart.resourcesCount(), 1 );
       test.identical( o.onStart.errorsCount(), 0 );
       test.identical( o.onStart.competitorsCount(), 0 );
@@ -11641,7 +11963,7 @@ function startDetachingDisconnectedLate( test )
       test.identical( o.onDisconnect.competitorsCount(), 0 );
       test.identical( o.onTerminate.resourcesCount(), 0 );
       test.identical( o.onTerminate.errorsCount(), 0 );
-      test.identical( o.onTerminate.competitorsCount(), 1 );
+      test.identical( o.onTerminate.competitorsCount(), 0 );
 
       test.identical( o.state, 'started' );
 
@@ -11652,7 +11974,7 @@ function startDetachingDisconnectedLate( test )
         test.identical( o.state, 'disconnected' );
       });
 
-      test.is( o.onStart === result );
+      test.is( o.onStart !== result );
       test.is( _.consequenceIs( o.onStart ) )
 
       o.onStart.finally( ( err, got ) =>
@@ -11722,6 +12044,7 @@ ProcessWatched should not throw any error.
 
 //
 
+/* qqq xxx : implement for other modes */
 function startDetachingChildExistsBeforeParentWaitForTermination( test )
 {
   let context = this;
@@ -11790,6 +12113,7 @@ Test routine waits until o.onTerminate resolves message about termination of the
 
 //
 
+/* qqq xxx : implement for other modes */
 function startDetachingEndCompetitorIsExecuted( test )
 {
   let context = this;
@@ -11812,7 +12136,7 @@ function startDetachingEndCompetitorIsExecuted( test )
 
     let result = _.process.start( o );
 
-    // test.identical( o.onStart, result );
+    test.is( o.onStart !== result );
     test.is( _.consequenceIs( o.onStart ) )
     test.is( _.consequenceIs( o.onTerminate ) )
 
@@ -11872,7 +12196,7 @@ o.ended is true when onTerminate callback is executed.
 
 //
 
-
+/* qqq xxx : implement for other modes */
 function startDetachedOutputStdioIgnore( test )
 {
   let context = this;
@@ -12009,6 +12333,7 @@ function startDetachedOutputStdioIgnore( test )
 
 //
 
+/* qqq xxx : implement for other modes */
 function startDetachedOutputStdioPipe( test )
 {
   let context = this;
@@ -12153,6 +12478,7 @@ function startDetachedOutputStdioPipe( test )
 
 //
 
+/* qqq xxx : implement for other modes */
 function startDetachedOutputStdioInherit( test )
 {
   let context = this;
@@ -12240,6 +12566,7 @@ function startDetachedOutputStdioInherit( test )
 
 //
 
+/* qqq xxx : implement for other modes */
 function startDetachingModeSpawnIpc( test )
 {
   let context = this;
@@ -12351,6 +12678,7 @@ function startDetachingModeSpawnIpc( test )
 
 //
 
+/* qqq xxx : implement for other modes */
 function startDetachingModeForkIpc( test )
 {
   let context = this;
@@ -12463,6 +12791,7 @@ function startDetachingModeForkIpc( test )
 
 //
 
+/* qqq xxx : implement for other modes */
 function startDetachingModeShellIpc( test )
 {
   let context = this;
@@ -12537,6 +12866,7 @@ function startDetachingModeShellIpc( test )
 
 //
 
+/* qqq xxx : implement for other modes */
 function startDetachingThrowing( test )
 {
   let context = this;
@@ -12580,6 +12910,7 @@ function startDetachingThrowing( test )
   }
   test.shouldThrowErrorSync( () => _.process.start( o ) )
 
+  // qqq : uncomment?
   // var o =
   // {
   //   execPath : 'node testAppChild.js',
@@ -12680,7 +13011,8 @@ function startNjsDetachingChildThrowing( test )
 
 //
 
-function startNjsDetachingTrivial( test )
+/* qqq xxx : implement for other modes */
+function startDetachingTrivial( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -12794,6 +13126,7 @@ function startNjsDetachingTrivial( test )
 
 //
 
+/* qqq xxx : implement for other modes */
 function startOnStart( test ) /* qqq2 : add other modes. ask how to */
 {
   let context = this;
@@ -12901,7 +13234,7 @@ function startOnStart( test ) /* qqq2 : add other modes. ask how to */
 
     let result = _.process.start( o );
 
-    test.identical( o.onStart, result );
+    test.is( o.onStart !== result );
     test.is( _.consequenceIs( o.onStart ) )
 
     o.onStart.then( ( got ) =>
@@ -12931,7 +13264,7 @@ function startOnStart( test ) /* qqq2 : add other modes. ask how to */
 
     let result = _.process.start( o );
 
-    test.is( o.onStart === result );
+    test.is( o.onStart !== result );
     test.is( _.consequenceIs( o.onStart ) )
 
     result = test.shouldThrowErrorAsync( o.onTerminate );
@@ -12963,7 +13296,7 @@ function startOnStart( test ) /* qqq2 : add other modes. ask how to */
 
     let result = _.process.start( o );
 
-    test.identical( o.onStart, result );
+    test.is( o.onStart !== result );
 
     o.onStart.finally( ( err, got ) =>
     {
@@ -13015,7 +13348,7 @@ function startOnStart( test ) /* qqq2 : add other modes. ask how to */
 
     let result = _.process.start( o );
 
-    test.identical( o.onStart, result );
+    test.is( o.onStart !== result );
 
     o.onStart.finally( ( err, got ) =>
     {
@@ -13111,7 +13444,7 @@ function startOnTerminate( test ) /* qqq2 : add other modes. ask how to */
 
       let result = _.process.start( o );
 
-      test.identical( o.onTerminate, result );
+      test.is( o.onTerminate !== result );
 
       result.then( ( op ) =>
       {
@@ -13145,7 +13478,7 @@ function startOnTerminate( test ) /* qqq2 : add other modes. ask how to */
 
       o.disconnect();
 
-      test.identical( o.onTerminate, result );
+      test.is( o.onTerminate !== result );
 
       o.onTerminate.then( ( op ) =>
       {
@@ -13163,7 +13496,7 @@ function startOnTerminate( test ) /* qqq2 : add other modes. ask how to */
         test.identical( track, [] );
         test.identical( o.onTerminate.resourcesCount(), 0 );
         test.identical( o.onTerminate.errorsCount(), 0 );
-        test.identical( o.onTerminate.competitorsCount(), 2 );
+        test.identical( o.onTerminate.competitorsCount(), 1 );
         test.is( !_.process.isAlive( o.process.pid ) );
         o.onTerminate.cancel();
         return null;
@@ -13188,7 +13521,7 @@ function startOnTerminate( test ) /* qqq2 : add other modes. ask how to */
 
       let result = _.process.start( o );
 
-      test.identical( result, o.onStart );
+      test.is( result !== o.onStart );
       test.notIdentical( onTerminate, result );
       test.identical( onTerminate, o.onTerminate );
 
@@ -13223,8 +13556,8 @@ function startOnTerminate( test ) /* qqq2 : add other modes. ask how to */
       let track = [];
 
       let result = _.process.start( o );
-      test.identical( result, o.onStart );
-      test.notIdentical( result, o.onTerminate );
+      test.is( result !== o.onStart );
+      test.is( result !== o.onTerminate );
       test.identical( onTerminate, o.onTerminate );
 
       _.time.out( 1000, () => o.disconnect() );
@@ -13239,14 +13572,14 @@ function startOnTerminate( test ) /* qqq2 : add other modes. ask how to */
         return null;
       })
 
-      return _.time.out( 3000, () =>
+      return _.time.out( 2000 + context.t2, () => /* 3000 is not enough */
       {
         test.identical( track, [] );
         test.identical( o.state, 'disconnected' );
         test.identical( o.ended, true );
         test.identical( o.onTerminate.resourcesCount(), 0 );
         test.identical( o.onTerminate.errorsCount(), 0 );
-        test.identical( o.onTerminate.competitorsCount(), 2 );
+        test.identical( o.onTerminate.competitorsCount(), 1 );
         test.is( !_.process.isAlive( o.process.pid ) );
         o.onTerminate.cancel();
         return null;
@@ -13272,8 +13605,8 @@ function startOnTerminate( test ) /* qqq2 : add other modes. ask how to */
 
       let result = _.process.start( o );
 
-      test.identical( result, o.onStart );
-      test.notIdentical( result, o.onTerminate )
+      test.is( result !== o.onStart );
+      test.is( result !== o.onTerminate )
       test.identical( onTerminate, o.onTerminate )
 
       onTerminate.then( ( op ) =>
@@ -13318,8 +13651,8 @@ function startOnTerminate( test ) /* qqq2 : add other modes. ask how to */
 
       let result = _.process.start( o );
 
-      test.identical( result, o.onStart );
-      test.notIdentical( result, o.onTerminate );
+      test.is( result !== o.onStart );
+      test.is( result !== o.onTerminate );
       test.identical( onTerminate, o.onTerminate );
 
       onTerminate.then( ( op ) =>
@@ -13357,8 +13690,8 @@ function startOnTerminate( test ) /* qqq2 : add other modes. ask how to */
 
       let result = _.process.start( o );
 
-      test.identical( result, o.onStart );
-      test.notIdentical( result, o.onTerminate );
+      test.is( result !== o.onStart );
+      test.is( result !== o.onTerminate );
       test.identical( onTerminate, o.onTerminate );
 
       o.disconnect();
@@ -13369,7 +13702,7 @@ function startOnTerminate( test ) /* qqq2 : add other modes. ask how to */
         return null;
       })
 
-      return _.time.out( 3000, () =>
+      return _.time.out( 2000 + context.t2, () => /* 3000 is not enough */
       {
         test.identical( track, [] );
         test.identical( o.state, 'disconnected' );
@@ -13380,12 +13713,14 @@ function startOnTerminate( test ) /* qqq2 : add other modes. ask how to */
 
         test.identical( o.onTerminate.resourcesCount(), 0 );
         test.identical( o.onTerminate.errorsCount(), 0 );
-        test.identical( o.onTerminate.competitorsCount(), 2 );
+        test.identical( o.onTerminate.competitorsCount(), 1 );
         test.is( !_.process.isAlive( o.process.pid ) );
         o.onTerminate.cancel();
         return null;
       });
     })
+
+    /* */
 
     return ready;
   }
@@ -13438,7 +13773,7 @@ function startNoEndBug1( test )
 
     let result = _.process.start( o );
 
-    test.is( o.onStart === result );
+    test.is( o.onStart !== result );
     test.is( _.consequenceIs( o.onStart ) )
 
     result = test.shouldThrowErrorAsync( o.onTerminate );
@@ -13482,7 +13817,7 @@ Parent should not try to disconnect the child.
 
 //
 
-function startOnTerminateWithDelay( test )
+function startWithDelayOnReady( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -13505,7 +13840,7 @@ function startOnTerminateWithDelay( test )
     stdio : 'pipe',
     sync : 0,
     deasync : 0,
-    onTerminate : a.ready,
+    ready : a.ready,
   }
 
   _.process.start( options );
@@ -13516,7 +13851,7 @@ function startOnTerminateWithDelay( test )
   test.is( _.consequenceIs( options.ready ) );
   test.is( options.onStart !== options.ready );
   test.is( options.onDisconnect !== options.ready );
-  test.is( options.onTerminate === options.ready );
+  test.is( options.onTerminate !== options.ready );
 
   options.onStart
   .then( ( op ) =>
@@ -13528,7 +13863,7 @@ function startOnTerminateWithDelay( test )
     test.identical( options.process.exitCode, null );
     test.identical( options.process.signalCode, null );
     test.identical( options.ended, false );
-    test.identical( options.terminationReason, null );
+    test.identical( options.exitReason, null );
     test.is( !!options.process );
     return null;
   });
@@ -13537,12 +13872,13 @@ function startOnTerminateWithDelay( test )
   .finally( ( err, op ) =>
   {
     if( err )
-    console.log( err )
+    console.log( err );
+    debugger;
     test.identical( op.output, 'program1:begin\nprogram1:end\n' );
     test.identical( op.exitCode, 0 );
     test.identical( op.exitSignal, null );
     test.identical( op.ended, true );
-    test.identical( op.terminationReason, 'normal' );
+    test.identical( op.exitReason, 'normal' );
     return null;
   });
 
@@ -13561,7 +13897,7 @@ function startOnTerminateWithDelay( test )
 
 }
 
-startOnTerminateWithDelay.description =
+startWithDelayOnReady.description =
 `
   - consequence onStart has delay
 `
@@ -14886,8 +15222,6 @@ function shellerArgs( test )
   }
 }
 
-shellerArgs.timeOut = 30000;
-
 //
 
 function shellerFields( test )
@@ -15153,8 +15487,6 @@ function shellLoggerOption( test )
     console.log( '  One tab' );
   }
 }
-
-shellLoggerOption.timeOut = 30000;
 
 //
 
@@ -16356,58 +16688,68 @@ function terminate( test )
 
 //
 
-function errorAfterTerminationWithSend( test )
+function startErrorAfterTerminationWithSend( test )
 {
   let context = this;
   let a = test.assetFor( false );
   let testAppPath = a.path.nativize( a.program( testApp ) );
-  let track = [];
+  let track;
+
+  let modes = [ 'fork', 'spawn' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
 
   /* */
 
-  var o =
+  function run( mode )
   {
-    execPath :  'node',
-    args : [ testAppPath ],
-    mode : 'spawn',
-    ipc : 1
+    track = [];
+
+    var o =
+    {
+      execPath : mode !== 'fork' ? 'node' : null,
+      args : [ testAppPath ],
+      mode,
+      ipc : 1,
+    }
+
+    _.process.on( 'uncaughtError', uncaughtError_functor( mode ) );
+
+    let result = _.process.start( o );
+
+    o.onStart.then( ( arg ) =>
+    {
+      track.push( 'onStart' );
+      return null
+    });
+
+    /* xxx qqq : normalize */
+    o.onTerminate.finally( ( err, got ) =>
+    {
+      track.push( 'onTerminate' );
+      test.identical( err, undefined );
+      test.identical( got, o );
+      test.identical( o.exitCode, 0 );
+
+      /* Attempt to send data when ipc channel is closed */
+      o.process.send( 1 );
+
+      return null;
+    })
+
+    return _.time.out( 10000, () =>
+    {
+      test.identical( track, [ 'onStart', 'onTerminate', 'uncaughtError' ] );
+      test.identical( o.ended, true );
+      test.identical( o.state, 'terminated' );
+      test.identical( o.error, null );
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.identical( o.process.exitCode, 0 );
+      test.identical( o.process.signalCode, null );
+    });
+
   }
-
-  _.process.on( 'uncaughtError', uncaughtError );
-
-  let result = _.process.start( o );
-
-  o.onStart.then( ( arg ) =>
-  {
-    track.push( 'onStart' );
-    return null
-  });
-
-  /* xxx qqq : normalize */
-  o.onTerminate.finally( ( err, got ) =>
-  {
-    track.push( 'onTerminate' );
-    test.identical( err, undefined );
-    test.identical( got, o );
-    test.identical( o.exitCode, 0 );
-
-    /* Attempt to send data when ipc channel is closed */
-    o.process.send( 1 );
-
-    return null;
-  })
-
-  return _.time.out( 10000, () =>
-  {
-    test.identical( track, [ 'onStart', 'onTerminate', 'uncaughtError' ] );
-    test.identical( o.ended, true );
-    test.identical( o.state, 'terminated' );
-    test.identical( o.error, null );
-    test.identical( o.exitCode, 0 );
-    test.identical( o.exitSignal, null );
-    test.identical( o.process.exitCode, 0 );
-    test.identical( o.process.signalCode, null );
-  });
 
   /* - */
 
@@ -16416,17 +16758,27 @@ function errorAfterTerminationWithSend( test )
     setTimeout( () => {}, 1000 );
   }
 
-  function uncaughtError( e )
+  function uncaughtError_functor( mode )
   {
-    test.identical( e.err.originalMessage, 'Channel closed' )
-    _.errAttend( e.err );
-    track.push( 'uncaughtError' );
-    _.process.off( 'uncaughtError' );
+    return function uncaughtError( e )
+    {
+      var exp =
+  `
+  Error starting the process
+      Exec path : ${ mode === 'fork' ? '' : 'node ' }${a.abs( 'testApp.js' )}
+      Current path : ${a.path.current()}
+  Channel closed
+  `
+      test.equivalent( e.err.originalMessage, exp )
+      _.errAttend( e.err );
+      track.push( 'uncaughtError' );
+      _.process.off( 'uncaughtError', uncaughtError );
+    }
   }
 
 }
 
-errorAfterTerminationWithSend.description =
+startErrorAfterTerminationWithSend.description =
 `
   - handleClose receive error after termination of the process
   - error caused by call o.process.send()
@@ -16530,9 +16882,9 @@ function endStructuralSigint( test )
       test.identical( options.process.exitCode, null );
       test.identical( options.process.signalCode, null );
       test.identical( options.ended, false );
-      test.identical( options.terminationReason, null );
+      test.identical( options.exitReason, null );
       test.is( options.onStart !== options.ready );
-      test.is( options.onTerminate === options.ready );
+      test.is( options.onTerminate !== options.ready );
       test.is( !!options.process );
       time1 = _.time.now();
       _.time.out( context.t1, () => options.process.kill( 'SIGINT' ) );
@@ -16552,7 +16904,7 @@ function endStructuralSigint( test )
       test.identical( options.process.exitCode, null );
       test.identical( options.process.signalCode, 'SIGINT' );
       test.identical( options.ended, true );
-      test.identical( options.terminationReason, 'signal' );
+      test.identical( options.exitReason, 'signal' );
       return null;
     });
 
@@ -16576,7 +16928,7 @@ endStructuralSigint.description =
 `
  - end process with SIGINT
  - should wait 1s
- - should have proper exitSignal, exitCode and terminationReason
+ - should have proper exitSignal, exitCode and exitReason
 `
 
 //
@@ -16630,9 +16982,9 @@ function endStructuralSigkill( test )
       test.identical( options.process.signalCode, null );
       // test.identical( options.exitSignal, null );
       test.identical( options.ended, false );
-      test.identical( options.terminationReason, null );
+      test.identical( options.exitReason, null );
       test.is( options.onStart !== options.ready );
-      test.is( options.onTerminate === options.ready );
+      test.is( options.onTerminate !== options.ready );
       test.is( !!options.process );
       time1 = _.time.now();
       _.time.out( context.t1, () => options.process.kill( 'SIGKILL' ) );
@@ -16653,7 +17005,7 @@ function endStructuralSigkill( test )
       test.identical( options.process.signalCode, 'SIGKILL' );
       // test.identical( options.exitSignal, 'SIGKILL' );
       test.identical( options.ended, true );
-      test.identical( options.terminationReason, 'signal' );
+      test.identical( options.exitReason, 'signal' );
       return null;
     });
 
@@ -16678,7 +17030,7 @@ endStructuralSigkill.description =
 `
  - end process with SIGKILL
  - should wait 1s
- - should have proper exitSignal, exitCode and terminationReason
+ - should have proper exitSignal, exitCode and exitReason
 `
 
 //
@@ -16731,9 +17083,9 @@ function endStructuralTerminate( test )
       test.identical( options.process.exitCode, null );
       test.identical( options.process.signalCode, null );
       test.identical( options.ended, false );
-      test.identical( options.terminationReason, null );
+      test.identical( options.exitReason, null );
       test.is( options.onStart !== options.ready );
-      test.is( options.onTerminate === options.ready );
+      test.is( options.onTerminate !== options.ready );
       test.is( !!options.process );
       time1 = _.time.now();
       _.time.out( context.t1, () => _.process.terminate({ process : options.process, timeOut : 5000 }) );
@@ -16753,7 +17105,7 @@ function endStructuralTerminate( test )
       test.identical( options.process.exitCode, null );
       test.identical( options.process.signalCode, 'SIGINT' );
       test.identical( options.ended, true );
-      test.identical( options.terminationReason, 'signal' );
+      test.identical( options.exitReason, 'signal' );
       return null;
     });
 
@@ -16777,7 +17129,7 @@ endStructuralTerminate.description =
 `
  - end process with _.process.terminate()
  - should wait 1s
- - should have proper exitSignal, exitCode and terminationReason
+ - should have proper exitSignal, exitCode and exitReason
 `
 
 //
@@ -16830,9 +17182,9 @@ function endStructuralKill( test )
       test.identical( options.process.exitCode, null );
       test.identical( options.process.signalCode, null );
       test.identical( options.ended, false );
-      test.identical( options.terminationReason, null );
+      test.identical( options.exitReason, null );
       test.is( options.onStart !== options.ready );
-      test.is( options.onTerminate === options.ready );
+      test.is( options.onTerminate !== options.ready );
       test.is( !!options.process );
       time1 = _.time.now();
       _.time.out( context.t1, () => _.process.kill( options.process ) );
@@ -16852,7 +17204,7 @@ function endStructuralKill( test )
       test.identical( options.process.exitCode, null );
       test.identical( options.process.signalCode, 'SIGKILL' );
       test.identical( options.ended, true );
-      test.identical( options.terminationReason, 'signal' );
+      test.identical( options.exitReason, 'signal' );
       return null;
     });
 
@@ -16876,7 +17228,7 @@ endStructuralKill.description =
 `
  - end process with _.process.kill()
  - should wait 1s
- - should have proper exitSignal, exitCode and terminationReason
+ - should have proper exitSignal, exitCode and exitReason
 `
 
 //
@@ -18842,7 +19194,7 @@ function effectiveMainFile( test )
 
 //
 
-function shellExperiment( test )
+function experiment( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -18916,7 +19268,7 @@ function shellExperiment( test )
   }
 }
 
-shellExperiment.timeOut = 30000;
+experiment.experimental = 1;
 
 // --
 // suite
@@ -18943,6 +19295,7 @@ var Proto =
     t0 : 100,
     t1 : 1000,
     t2 : 5000,
+    t3 : 15000,
 
   },
 
@@ -18954,7 +19307,7 @@ var Proto =
     exitReason,
     exitCode,
 
-    shell,
+    basic,
     shellSync,
     shellSyncAsync,
     shell2,
@@ -18974,7 +19327,7 @@ var Proto =
 
     shellMultipleSyncDeasync,
     shellDryRun,
-    startWithReadyDelayStructural,
+    startNjsWithReadyDelayStructural,
 
     shellArgsOption,
     shellArgumentsParsing,
@@ -18994,8 +19347,10 @@ var Proto =
     startNjsPassingThroughExecPathWithSpace,
     startPassingThroughExecPathWithSpace,
 
-    shellProcedureTrivial, //
+    shellProcedureTrivial,
     shellProcedureExists,
+    startOnTerminateSeveralCallbacksChronology,
+    startChronology,
 
     shellTerminateHangedWithExitHandler,
     shellTerminateAfterLoopRelease,
@@ -19003,7 +19358,7 @@ var Proto =
     shellStartingDelay,
     shellStartingTime,
     // shellStartingSuspended, /* qqq : ? */
-    shellAfterDeath,
+    // shellAfterDeath, /* qqq : fix */
     // shellAfterDeathOutput, /* qqq : ? */
 
     /*  */
@@ -19037,12 +19392,12 @@ var Proto =
 
     startDetachingThrowing,
     startNjsDetachingChildThrowing,
-    startNjsDetachingTrivial,
+    startDetachingTrivial,
 
     startOnStart,
     startOnTerminate, /* qqq2 : fix the test routine */
     startNoEndBug1,
-    startOnTerminateWithDelay,
+    startWithDelayOnReady,
 
     /*  */
 
@@ -19068,7 +19423,7 @@ var Proto =
     kill,
     killWithChildren,
     terminate,
-    errorAfterTerminationWithSend,
+    startErrorAfterTerminationWithSend,
 
     // endStructuralSigint, /* qqq yyy : switch on */
     // endStructuralSigkill,
@@ -19090,7 +19445,9 @@ var Proto =
     realMainDir,
     effectiveMainFile,
 
-    shellExperiment,
+    // experiments
+
+    experiment,
 
     /* qqq : group test routines */
 
