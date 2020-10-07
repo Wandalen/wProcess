@@ -9181,7 +9181,7 @@ shellProcedureExists.description =
 
 //
 
-/* qqq : implement for other modes */
+/* qqq xxx : implement for other modes */
 function startOnTerminateSeveralCallbacksChronology( test )
 {
   let context = this;
@@ -11563,7 +11563,7 @@ function startDetachingModeShellTerminationBegin( test )
 
 //
 
-/* qqq : implement for other modes */
+/* qqq xxx : implement for other modes */
 function startDetachingChildExitsAfterParent( test )
 {
   let context = this;
@@ -11673,7 +11673,7 @@ After 5 seconds child process creates test file in working directory and exits.
 
 //
 
-/* qqq : implement for other modes */
+/* qqq xxx : implement for other modes */
 function startDetachingChildExitsBeforeParent( test )
 {
   let context = this;
@@ -12045,7 +12045,7 @@ ProcessWatched should not throw any error.
 
 //
 
-/* qqq : implement for other modes */
+/* qqq xxx : implement for other modes */
 function startDetachingChildExistsBeforeParentWaitForTermination( test )
 {
   let context = this;
@@ -12114,7 +12114,7 @@ Test routine waits until o.onTerminate resolves message about termination of the
 
 //
 
-/* qqq : implement for other modes */
+/* qqq xxx : implement for other modes */
 function startDetachingEndCompetitorIsExecuted( test )
 {
   let context = this;
@@ -12197,7 +12197,7 @@ o.ended is true when onTerminate callback is executed.
 
 //
 
-/* qqq : implement for other modes */
+/* qqq xxx : implement for other modes */
 function startDetachedOutputStdioIgnore( test )
 {
   let context = this;
@@ -12334,7 +12334,7 @@ function startDetachedOutputStdioIgnore( test )
 
 //
 
-/* qqq : implement for other modes */
+/* qqq xxx : implement for other modes */
 function startDetachedOutputStdioPipe( test )
 {
   let context = this;
@@ -12479,7 +12479,7 @@ function startDetachedOutputStdioPipe( test )
 
 //
 
-/* qqq : implement for other modes */
+/* qqq xxx : implement for other modes */
 function startDetachedOutputStdioInherit( test )
 {
   let context = this;
@@ -12567,7 +12567,7 @@ function startDetachedOutputStdioInherit( test )
 
 //
 
-/* qqq : implement for other modes */
+/* qqq xxx : implement for other modes */
 function startDetachingModeSpawnIpc( test )
 {
   let context = this;
@@ -12679,7 +12679,7 @@ function startDetachingModeSpawnIpc( test )
 
 //
 
-/* qqq : implement for other modes */
+/* qqq xxx : implement for other modes */
 function startDetachingModeForkIpc( test )
 {
   let context = this;
@@ -12792,7 +12792,7 @@ function startDetachingModeForkIpc( test )
 
 //
 
-/* qqq : implement for other modes */
+/* qqq xxx : implement for other modes */
 function startDetachingModeShellIpc( test )
 {
   let context = this;
@@ -12867,7 +12867,7 @@ function startDetachingModeShellIpc( test )
 
 //
 
-/* qqq : implement for other modes */
+/* qqq xxx : implement for other modes */
 function startDetachingThrowing( test )
 {
   let context = this;
@@ -13012,7 +13012,7 @@ function startNjsDetachingChildThrowing( test )
 
 //
 
-/* qqq : implement for other modes */
+/* qqq xxx : implement for other modes */
 function startDetachingTrivial( test )
 {
   let context = this;
@@ -13127,7 +13127,7 @@ function startDetachingTrivial( test )
 
 //
 
-/* qqq : implement for other modes */
+/* qqq xxx : implement for other modes */
 function startOnStart( test ) /* qqq2 : add other modes. ask how to */
 {
   let context = this;
