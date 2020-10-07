@@ -563,7 +563,7 @@ function shell( test )
 
     var options = _.mapSupplement( {}, o, commonDefaults );
 
-    return test.shouldThrowErrorOfAnyKind( _.process.start( options ) )
+    return test.shouldThrowErrorAsync( _.process.start( options ) )
     .thenKeep( () =>
     {
       test.identical( options.exitCode, 1 );
@@ -728,7 +728,7 @@ function shell( test )
 
     var options = _.mapSupplement( {}, o, commonDefaults );
 
-    return test.shouldThrowErrorOfAnyKind( _.process.start( options ) )
+    return test.shouldThrowErrorAsync( _.process.start( options ) )
     .thenKeep( () =>
     {
       test.identical( options.exitCode, 1 );
@@ -1237,7 +1237,7 @@ function shell2( test )
   .thenKeep( function( arg )
   {
     var options = _.mapSupplement( {}, o, commonDefaults );
-    return test.shouldThrowErrorOfAnyKind( _.process.start( options ) );
+    return test.shouldThrowErrorAsync( _.process.start( options ) );
   })
 
   /* */
@@ -2171,7 +2171,7 @@ function shellFork( test )
       timeOut : 1000,
     }
 
-    return test.shouldThrowErrorOfAnyKind( _.process.start( o ) )
+    return test.shouldThrowErrorAsync( _.process.start( o ) )
     .thenKeep( function( got )
     {
       test.identical( o.exitCode, null );
@@ -5533,7 +5533,7 @@ function shellArgumentsParsingNonTrivial( test )
 
     _.process.start( o );
 
-    return test.shouldThrowErrorOfAnyKind( con );
+    return test.shouldThrowErrorAsync( con );
   })
 
   /*  */
@@ -6337,7 +6337,7 @@ function shellExecPathQuotesClosing( test )
       outputCollecting : 1,
       ready : con
     }
-    return test.shouldThrowErrorOfAnyKind( _.process.start( o ) );
+    return test.shouldThrowErrorAsync( _.process.start( o ) );
   })
 
   .then( () =>
@@ -6384,7 +6384,7 @@ function shellExecPathQuotesClosing( test )
     //   return null;
     // })
 
-    return test.shouldThrowErrorOfAnyKind( _.process.start( o ) );
+    return test.shouldThrowErrorAsync( _.process.start( o ) );
   })
 
   .then( () =>
@@ -6431,7 +6431,7 @@ function shellExecPathQuotesClosing( test )
       outputCollecting : 1,
       ready : con
     }
-    return test.shouldThrowErrorOfAnyKind( _.process.start( o ) );
+    return test.shouldThrowErrorAsync( _.process.start( o ) );
   })
 
   /* */
@@ -6464,7 +6464,7 @@ function shellExecPathQuotesClosing( test )
     //   return null;
     // })
 
-    return test.shouldThrowErrorOfAnyKind( _.process.start( o ) );
+    return test.shouldThrowErrorAsync( _.process.start( o ) );
   })
 
   .then( () =>
@@ -6613,7 +6613,7 @@ function shellExecPathQuotesClosing( test )
     //   return null;
     // })
 
-    return test.shouldThrowErrorOfAnyKind( _.process.start( o ) );
+    return test.shouldThrowErrorAsync( _.process.start( o ) );
   })
 
   .then( () =>
@@ -6656,7 +6656,7 @@ function shellExecPathQuotesClosing( test )
       outputCollecting : 1,
       ready : con
     }
-    return test.shouldThrowErrorOfAnyKind( _.process.start( o ) );
+    return test.shouldThrowErrorAsync( _.process.start( o ) );
   })
 
   /* */
@@ -7351,7 +7351,7 @@ function shellErrorHadling( test )
       outputCollecting : 0,
       outputPiping : 0
     }
-    return test.shouldThrowErrorOfAnyKind( _.process.start( o ) )
+    return test.shouldThrowErrorAsync( _.process.start( o ) )
     .thenKeep( function( got )
     {
       test.is( _.errIs( got ) );
@@ -7382,7 +7382,7 @@ function shellErrorHadling( test )
       outputCollecting : 0,
       outputPiping : 0
     }
-    return test.shouldThrowErrorOfAnyKind( _.process.start( o ) )
+    return test.shouldThrowErrorAsync( _.process.start( o ) )
     .thenKeep( function( got )
     {
       test.is( _.errIs( got ) );
@@ -7413,7 +7413,7 @@ function shellErrorHadling( test )
       outputCollecting : 0,
       outputPiping : 0
     }
-    return test.shouldThrowErrorOfAnyKind( _.process.start( o ) )
+    return test.shouldThrowErrorAsync( _.process.start( o ) )
     .thenKeep( function( got )
     {
       test.is( _.errIs( got ) );
@@ -8825,7 +8825,7 @@ function startNjsPassingThroughExecPathWithSpace( test )
     return null;
   })
 
-  test.shouldThrowErrorOfAnyKind( () =>
+  test.shouldThrowErrorSync( () =>
   {
     return _.process.startNjsPassingThrough
     ({
