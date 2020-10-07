@@ -21,7 +21,7 @@ let Self = {};
 /* qqq for Vova : make general table in md file for this: "Vova qqq: close event is not emitted for disconnected detached child in fork mode" */
 
 /* qqq for Yevhen : make sure variable "got" is used as should | aaa : Done. Yevhen S. */
-/* qqq for Yevhen : actualize names of test routines */
+/* qqq for Yevhen : actualize names of test routines | aaa : Done. Yevhen S. */
 
 /* qqq for Yevhen : check op.ended if op.exitCode is checked */
 
@@ -1742,7 +1742,6 @@ function startCurrentPath( test )
 
   function testApp()
   {
-    debugger
     console.log( process.cwd() ); /* qqq for Vova : should not be visible if verbosity of tester is low, if possible */
     if( process.send )
     process.send({ currentPath : process.cwd() })
@@ -1871,8 +1870,8 @@ function startCurrentPaths( test )
 
   function testApp()
   {
-    debugger
-    console.log( process.cwd() ); /* qqq : should not be visible if verbosity of tester is low, if possible */
+    // debugger
+    console.log( process.cwd() ); /* qqq for Vova : should not be visible if verbosity of tester is low, if possible */
   }
 }
 
@@ -2936,8 +2935,8 @@ startForkSyncDeasyncThrowing.timeOut = 15000;
 //     test.identical( returned.resourcesCount(), 0 );
 //     returned.then( function( o )
 //     {
-//       test.identical( o.exitCode, 0 );
-//       return o;
+//       test.identical( op.exitCode, 0 );
+//       return op;
 //     })
 //     return returned;
 //   })
@@ -2979,8 +2978,8 @@ startForkSyncDeasyncThrowing.timeOut = 15000;
 //     test.identical( returned.resourcesCount(), 1 );
 //     returned.then( function( o )
 //     {
-//       test.identical( o.exitCode, 0 );
-//       return o;
+//       test.identical( op.exitCode, 0 );
+//       return op;
 //     })
 //     return returned;
 //   })
@@ -3811,7 +3810,7 @@ function startDryRun( test )
 
       test.is( !a.fileProvider.fileExists( a.path.join( a.routinePath, 'file' ) ) )
 
-      return null;
+      return op;
     })
     return returned;
   })
@@ -9853,7 +9852,7 @@ function startStartingDelay( test )
       let when = { delay : context.t2 };
       let o =
       {
-        execPath : mode !== 'fork' ? 'node program1.js' : 'program1.js',
+        execPath : mode !== `fork` ? `node ${programPath}` : `${programPath}`,
         currentPath : a.abs( '.' ),
         mode,
         outputPiping : 1,
@@ -9924,7 +9923,7 @@ function startStartingTime( test )
       let when = { time : _.time.now() + delay };
       let o =
       {
-        execPath : mode !== 'fork' ? 'node program1.js' : 'program1.js',
+        execPath : mode !== `fork` ? `node ${programPath}` : `${programPath}`,
         currentPath : a.abs( '.' ),
         mode,
         outputPiping : 1,
@@ -11541,7 +11540,7 @@ function startDetachingDisconnectedEarly( test )
       test.case = `detaching on, disconnected forked child, mode:${mode}`;
       let o =
       {
-        execPath : mode !== 'fork' ? 'node program1.js' : 'program1.js',
+        execPath : mode !== `fork` ? `node ${programPath}` : `${programPath}`,
         mode,
         stdio : 'ignore',
         outputPiping : 0,
@@ -11662,7 +11661,7 @@ function startDetachingDisconnectedLate( test )
       test.case = `detaching on, disconnected forked child, mode:${mode}`;
       let o =
       {
-        execPath : mode !== 'fork' ? 'node program1.js' : 'program1.js',
+        execPath : mode !== `fork` ? `node ${programPath}` : `${programPath}`,
         mode,
         stdio : 'ignore',
         outputPiping : 0,
@@ -13701,26 +13700,68 @@ startWithDelayOnReady.description =
 function startCallbackIsNotAConsequence( test )
 {
   let context = this;
+  let track;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ) );
-  // let modes = [ 'fork', 'spawn', 'shell' ];
-  let modes = [ 'fork' ];
-  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  let programPath = a.path.nativize( a.program( program1 ) );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  // let modes = [ 'spawn' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 0, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 1, mode ) ) );
   return a.ready;
 
   /* - */
 
-  function run( mode )
+  function run( sync, deasync, mode )
   {
     let con = _.Consequence().take( null );
-    let track = [];
+
+    if( sync && !deasync && mode === 'fork' )
+    return null;
+
+    /* */
 
     con.then( () =>
     {
-      test.case = `onStart, mode:${mode}`
+      test.case = `normal sync:${sync} deasync:${deasync} mode:${mode}`
+      track = [];
       let o =
       {
-        execPath : mode !== 'fork' ? 'node testApp.js' : 'testApp.js',
+        execPath : mode !== `fork` ? `node ${programPath}` : `${programPath}`,
+        mode,
+        sync,
+        deasync,
+        onStart,
+        onDisconnect,
+        onTerminate,
+        ready,
+      }
+      var returned = _.process.start( o );
+      o.ready.finally( function( err, op )
+      {
+        track.push( 'returned' );
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        return op;
+      })
+
+      return _.time.out( context.t2, () =>
+      {
+        test.identical( track, [ 'onStart', 'onTerminate', 'ready', 'returned' ] );
+      });
+    })
+
+    /* */
+
+    con.then( () =>
+    {
+      test.case = `throwing sync:${sync} deasync:${deasync} mode:${mode}`
+      track = [];
+      let o =
+      {
+        execPath : mode !== `fork` ? `node ${programPath}` : `${programPath}`,
+        args : [ 'throwing' ],
         mode,
         onStart,
         onDisconnect,
@@ -13728,24 +13769,32 @@ function startCallbackIsNotAConsequence( test )
         ready,
       }
       var returned = _.process.start( o );
-      test.is( _.consequenceIs( returned ) );
-      test.identical( returned.resourcesCount(), 0 );
-      returned.then( function( op )
+      o.ready.finally( function( err, op )
       {
-        test.identical( op.exitCode, 0 );
-        return op;
+        track.push( 'returned' );
+        test.is( _.errIs( err ) );
+        test.identical( op, undefined );
+        test.notIdentical( o.exitCode, 0 );
+        test.identical( o.ended, true );
+        _.errAttend( err );
+        return null;
       })
-      return returned;
+      return _.time.out( context.t2, () =>
+      {
+        test.identical( track, [ 'onStart', 'onTerminate', 'ready', 'returned' ] );
+      });
     })
 
     /* */
 
     con.then( () =>
     {
-      test.case = `onTerminate, mode:${mode}`
+      test.case = `detaching sync:${sync} deasync:${deasync} mode:${mode}`
+      track = [];
       let o =
       {
-        execPath : mode !== 'fork' ? 'node testApp.js' : 'testApp.js',
+        execPath : mode !== `fork` ? `node ${programPath}` : `${programPath}`,
+        detaching : 1,
         mode,
         onStart,
         onDisconnect,
@@ -13753,89 +13802,99 @@ function startCallbackIsNotAConsequence( test )
         ready,
       }
       var returned = _.process.start( o );
-      test.is( _.consequenceIs( returned ) );
-      test.identical( returned.resourcesCount(), 0 );
-      returned.then( function( op )
+      o.ready.finally( function( err, op )
       {
+        track.push( 'returned' );
         test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
         return op;
       })
-      return returned;
+
+      return _.time.out( context.t2, () =>
+      {
+        test.identical( track, [ 'onStart', 'onTerminate', 'ready', 'returned' ] );
+      });
     })
 
     /* */
 
     con.then( () =>
     {
-      test.case = `onDisconnect, mode:${mode}`
+      test.case = `disconnecting sync:${sync} deasync:${deasync} mode:${mode}`
+      track = [];
       let o =
       {
-        execPath : mode !== 'fork' ? 'node testApp.js' : 'testApp.js',
+        execPath : mode !== `fork` ? `node ${programPath}` : `${programPath}`,
+        detaching : 1,
         mode,
-        onDisconnect
+        onStart,
+        onDisconnect,
+        onTerminate,
+        ready,
       }
       var returned = _.process.start( o );
-      test.is( _.consequenceIs( returned ) );
-      test.identical( returned.resourcesCount(), 0 );
-      returned.then( function( op )
+      o.disconnect();
+      o.ready.finally( function( err, op )
       {
-        test.identical( op.exitCode, 0 );
+        track.push( 'returned' );
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
         return op;
       })
-      return returned;
+
+      return _.time.out( context.t2, () =>
+      {
+        test.identical( track, [ 'onStart', 'onDisconnect', 'ready', 'returned' ] );
+      });
     })
 
     /* */
-
-    con.then( () =>
-    {
-      test.case = `ready, mode:${mode}`
-      let o =
-      {
-        execPath : mode !== 'fork' ? 'node testApp.js' : 'testApp.js',
-        mode,
-        ready
-      }
-      var returned = _.process.start( o );
-      test.is( _.consequenceIs( returned ) );
-      test.identical( returned.resourcesCount(), 0 );
-      returned.then( function( op )
-      {
-        test.identical( op.exitCode, 0 );
-        return op;
-      })
-      return returned;
-    })
 
     return con
   }
 
-  function testApp()
+  function program1()
   {
     console.log( process.argv.slice( 2 ) );
+    if( process.argv.slice( 2 ).join( ' ' ).includes( 'throwing' ) )
+    throw 'Error1!'
   }
 
-  function ready()
+  function ready( err, arg )
   {
-    console.log( 'ready' );
     track.push( 'ready' );
+    if( err )
+    throw err;
+    return arg;
   }
 
-  function onStart()
+  function onStart( err, arg )
   {
-    console.log( 'onStart' );
+    track.push( 'onStart' );
+    if( err )
+    throw err;
+    return arg;
   }
 
-  function onTerminate()
+  function onTerminate( err, arg )
   {
-    console.log( 'onTerminate' );
+    track.push( 'onTerminate' );
+    if( err )
+    throw err;
+    return arg;
   }
 
-  function onDisconnect()
+  function onDisconnect( err, arg )
   {
-    console.log( 'onDisconnect' );
+    track.push( 'onDisconnect' );
+    if( err )
+    throw err;
+    return arg;
   }
+
 }
+
+startCallbackIsNotAConsequence.timeOut = 300000;
 
 //
 
