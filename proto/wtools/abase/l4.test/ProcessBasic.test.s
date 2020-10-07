@@ -9248,7 +9248,7 @@ function startOnTerminateSeveralCallbacksChronology( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let program1Path = a.path.nativize( a.program( program1 ) );
+  let programPath = a.path.nativize( a.program( program1 ) );
   let track = [];
 
   /* */
@@ -9401,7 +9401,7 @@ function startChronology( test )
       test.identical( o.exitSignal, null );
       test.identical( o.process.exitCode, sync ? undefined : null );
       test.identical( o.process.signalCode, sync ? undefined : null );
-      test.identical( _.Procedure.Counter - ptcounter, 2 );
+      test.identical( _.Procedure.Counter - ptcounter, sync ? 3 : 2 );
       ptcounter = _.Procedure.Counter;
       test.identical( _.Procedure.FindAlive().length - pacounter, sync ? 1 : 2 );
       pacounter = _.Procedure.FindAlive().length;
@@ -9828,7 +9828,7 @@ function shellStartingDelay( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let program1Path = a.path.nativize( a.program( program1 ) );
+  let programPath = a.path.nativize( a.program( program1 ) );
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
@@ -9897,7 +9897,7 @@ function shellStartingTime( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let program1Path = a.path.nativize( a.program( program1 ) );
+  let programPath = a.path.nativize( a.program( program1 ) );
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
@@ -11524,7 +11524,7 @@ function startDetachingDisconnectedEarly( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let program1Path = a.path.nativize( a.program( program1 ) );
+  let programPath = a.path.nativize( a.program( program1 ) );
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -11645,7 +11645,7 @@ function startDetachingDisconnectedLate( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let program1Path = a.path.nativize( a.program( program1 ) );
+  let programPath = a.path.nativize( a.program( program1 ) );
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
