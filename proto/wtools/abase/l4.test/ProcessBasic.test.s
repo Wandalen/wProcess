@@ -22,9 +22,14 @@ let Self = {};
 
 /* qqq for Yevhen : make sure variable "got" is used as should */
 /* qqq for Yevhen : actualize names of test routines */
+
 /* qqq for Yevhen : check op.ended if op.exitCode is checked */
 
-/* qqq for Yevhen : parametrize all time delays, don't forget to leave comment if you change any time delay */
+/* qqq for Yevhen : parametrize all time delays, don't forget to leave comment if you change any time delay
+time.out
+setTimeout
+*/
+
 /* qqq for Yevhen : implement for 3 modes where test routine is not implemented for 3 modes */
 
 // --
@@ -130,11 +135,11 @@ function processOnExitEvent( test )
     }
 
     return _.process.start( o )
-    .then( ( got ) =>
+    .then( ( op ) =>
     {
-      test.is( got.exitCode === 0 );
-      test.is( _.strHas( got.output, 'timeOut handler executed' ) )
-      test.is( _.strHas( got.output, 'processOnExit: 0' ) );
+      test.is( op.exitCode === 0 );
+      test.is( _.strHas( op.output, 'timeOut handler executed' ) )
+      test.is( _.strHas( op.output, 'processOnExit: 0' ) );
       return null;
     })
 
