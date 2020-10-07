@@ -19866,71 +19866,15 @@ function experiment2( test )
   let a = test.assetFor( false );
   let testAppPath = a.path.nativize( a.program( testApp ) );
   let track;
-  let niteration = 0;
 
-  var modes = [ 'fork', 'spawn', 'shell' ];
-  // let modes = [ 'spawn' ];
-  modes.forEach( ( mode ) => a.ready.then( () => run( 0, mode ) ) );
-
-  return a.ready;
-
-  /* */
-
-  function run( sync, mode )
+  var o =
   {
-    test.case = `sync:${sync} mode:${mode}`;
-
-    if( sync && mode === 'fork' )
-    return null;
-
-    niteration += 1;
-    let ptcounter = _.Procedure.Counter;
-    let pacounter = _.Procedure.FindAlive().length;
-    track = [];
-
-    var o =
-    {
-      execPath : mode !== 'fork' ? 'node' : null,
-      args : [ testAppPath ],
-      ipc : 0,
-      mode,
-      sync,
-      ready : new _.Consequence().take( null ),
-      onStart : new _.Consequence(),
-      onDisconnect : new _.Consequence(),
-      onTerminate : new _.Consequence(),
-    }
-
-    let returned = _.process.start( o );
-
-    o.onStart.tap( ( err, op ) =>
-    {
-      track.push( 'onStart' );
-      test.identical( err, undefined );
-      test.identical( op, o );
-      debugger;
-      return null;
-    })
-
-    o.ready.tap( ( err, op ) =>
-    {
-      track.push( 'ready' );
-      test.identical( err, undefined );
-      test.identical( op, o );
-      test.identical( o.exitCode, 0 );
-      debugger;
-      return null;
-    })
-
-    return returned;
+    execPath : 'node -e "console.log(process.ppid,process.pid)"',
+    mode : 'shell',
+    stdio : 'pipe'
   }
-
-  /* - */
-
-  function testApp()
-  {
-    setTimeout( () => {}, 1000 );
-  }
+  _.process.start( o );
+  console.log( 'Shell:', o.process.pid )
 
 }
 
