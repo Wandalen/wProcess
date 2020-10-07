@@ -10671,7 +10671,7 @@ function startDetachingTerminationBegin( test ) /* qqq2 : extend for other modes
 
     /*  */
 
-    if( mode !== 'shell' )
+    if( mode !== 'shell' ) //no ipc in shell mode
     ready.then( () =>
     {
 
@@ -10781,7 +10781,7 @@ function startDetachingTerminationBegin( test ) /* qqq2 : extend for other modes
 
     /*  */
 
-    if( mode !== 'shell' )
+    if( mode !== 'shell' ) //no ipc in shell mode
     ready.then( () =>
     {
       test.case = 'process termination begins after short delay, detached process should continue to work after parent death';
