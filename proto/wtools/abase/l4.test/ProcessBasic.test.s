@@ -1300,7 +1300,7 @@ function start2( test )
 //
 
 /* qqq for Yevhen : split by modes | aaa : Done. Yevhen S.
-xxx qqq for Yevhen : not really
+qqq for Yevhen : not really
 */
 /* qqq for Yevhen : actualize names of test routines */
 function startCurrentPath( test )
@@ -9832,8 +9832,9 @@ function startStartingDelay( test )
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 0, mode ) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 1, mode ) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => run( 1, 0, mode ) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => run( 1, 1, mode ) ) );
+  // xxx
   return a.ready;
 
   /*  */
