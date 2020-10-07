@@ -571,12 +571,10 @@ function basic( test )
     debugger;
     return test.shouldThrowErrorAsync( _.process.start( options ), ( err, arg ) =>
     {
-      test.identical( err, undefined );
       debugger;
     })
     .finally( ( err, arg ) =>
     {
-      test.identical( err, undefined );
       debugger;
       test.identical( options.exitCode, 1 );
       return null;
