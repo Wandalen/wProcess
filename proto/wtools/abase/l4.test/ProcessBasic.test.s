@@ -13129,7 +13129,7 @@ function startOnTerminate( test ) /* qqq2 : add other modes. ask how to */
         return null;
       })
 
-      return _.time.out( 3000, () =>
+      return _.time.out( 2000 + context.t2, () =>
       {
         test.identical( o.state, 'disconnected' );
         test.identical( o.ended, true );
@@ -13200,7 +13200,7 @@ function startOnTerminate( test ) /* qqq2 : add other modes. ask how to */
       test.is( result !== o.onTerminate );
       test.identical( onTerminate, o.onTerminate );
 
-      _.time.out( 1000, () => o.disconnect() );
+      _.time.out( context.t1, () => o.disconnect() );
 
       /* xxx */
       onTerminate.then( ( op ) =>
