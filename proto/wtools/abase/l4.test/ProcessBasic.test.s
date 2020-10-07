@@ -4949,7 +4949,6 @@ function shellArgumentsParsing( test )
 
   /* */
 
-  /* xxx */
   .then( () =>
   {
     test.case = `'path to exec : with space' 'execPATH : only path' 'args: willbe args' 'spawn'`
@@ -4980,7 +4979,7 @@ function shellArgumentsParsing( test )
     return con;
   })
 
-  /* */
+  /* - */
 
   .then( () =>
   {
@@ -5110,7 +5109,7 @@ function shellArgumentsParsingNonTrivial( test )
 
   a.ready
 
-  // xxx qqq : repair? aaa Vova: doesn't fail on mac/centos for me
+  // qqq : repair? aaa Vova: doesn't fail on mac/centos for me
   .then( () =>
   {
     test.case = 'args in execPath and args options'
@@ -9383,7 +9382,7 @@ function startOnTerminateSeveralCallbacksChronology( test )
 
 startOnTerminateSeveralCallbacksChronology.description =
 `
-- xxx
+- second onTerminal callbacks called after ready callback
 `
 
 //
@@ -9440,7 +9439,7 @@ function startChronology( test )
       track.push( 'onStart' );
 
       test.identical( err, undefined );
-      test.identical( got, o ); /* xxx */
+      test.identical( got, o );
 
       test.identical( o.ready.resourcesCount(), 0 );
       test.identical( o.ready.errorsCount(), 0 );
@@ -19525,21 +19524,6 @@ function realMainFile( test )
     })
   });
 
-  // test.case = 'compare with __filename path for main file';
-  // var got = _.fileProvider.path.nativize( _.process.realMainFile( ) );
-  // test.identical( got, expected1 );
-
-  // var o =
-  // {
-  //   execPath :  'node ' + testAppPath,
-  //   mode : 'spawn',
-  //   ipc : 1,
-  //   outputCollecting : 1,
-  //   throwingExitCode : 0
-  // }
-
-  // let ready = _.process.start( o );
-
   return a.ready;
 
   /* - */
@@ -19690,6 +19674,89 @@ function experiment( test )
 
 experiment.experimental = 1;
 
+//
+
+function experiment2( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
+  let track;
+  let niteration = 0;
+
+  var modes = [ 'fork', 'spawn', 'shell' ];
+  // let modes = [ 'spawn' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( 0, mode ) ) );
+
+  return a.ready;
+
+  /* */
+
+  function run( sync, mode )
+  {
+    test.case = `sync:${sync} mode:${mode}`;
+
+    if( sync && mode === 'fork' )
+    return null;
+
+    niteration += 1;
+    let ptcounter = _.Procedure.Counter;
+    let pacounter = _.Procedure.FindAlive().length;
+    track = [];
+
+    var o =
+    {
+      execPath : mode !== 'fork' ? 'node' : null,
+      args : [ testAppPath ],
+      ipc : 0,
+      mode,
+      sync,
+      ready : new _.Consequence().take( null ),
+      onStart : new _.Consequence(),
+      onDisconnect : new _.Consequence(),
+      onTerminate : new _.Consequence(),
+    }
+
+    let returned = _.process.start( o );
+
+    o.onStart.tap( ( err, op ) =>
+    {
+      track.push( 'onStart' );
+      test.identical( err, undefined );
+      test.identical( op, o );
+      debugger;
+      return null;
+    })
+
+    o.ready.tap( ( err, op ) =>
+    {
+      track.push( 'ready' );
+      test.identical( err, undefined );
+      test.identical( op, o );
+      test.identical( o.exitCode, 0 );
+      debugger;
+      return null;
+    })
+
+    return returned;
+  }
+
+  /* - */
+
+  function testApp()
+  {
+    setTimeout( () => {}, 1000 );
+  }
+
+}
+
+experiment2.description =
+`
+  - xxx
+`
+
+experiment2.experimental = 1;
+
 // --
 // suite
 // --
@@ -19771,6 +19838,7 @@ var Proto =
     shellProcedureExists,
     startOnTerminateSeveralCallbacksChronology,
     startChronology,
+    experiment2,
 
     shellTerminateHangedWithExitHandler,
     shellTerminateAfterLoopRelease,
@@ -19870,6 +19938,7 @@ var Proto =
     // experiments
 
     experiment,
+    experiment2,
 
     /* qqq : group test routines */
 
