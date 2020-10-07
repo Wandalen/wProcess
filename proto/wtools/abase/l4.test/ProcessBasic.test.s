@@ -1307,444 +1307,141 @@ function startCurrentPath( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ) );
+  let testFilePath = a.path.join( a.routinePath, 'program1TestFile' );
+  let locals = { toolsPath : context.toolsPath, testFilePath }
+  let programPath = a.path.nativize( a.program({ routine: program1, locals }) );
+  let modes = [ 'shell', 'spawn', 'fork' ]
 
-  /* */
-
-  var expectedOutput = __dirname + '\n'
-
-  /* mode : shell */
-
-  a.ready.then( function()
+  modes.forEach( ( mode ) =>
   {
-    test.case = 'mode : shell';
-
-    let o =
-    {
-      execPath :  'node ' + programPath,
-      currentPath : __dirname,
-      mode : 'shell',
-      stdio : 'pipe',
-      outputCollecting : 1,
-    }
-    return _.process.start( o )
-    .then( function( op )
-    {
-      test.identical( o.output, expectedOutput );
-      return null;
-    })
+    a.ready.tap( () => test.open( mode ) )
+    a.ready.then( () => run( mode ) )
+    a.ready.tap( () => test.close( mode ) )
   })
-
-  /* */
-
-  a.ready.then( function()
-  {
-    test.case = 'normalized, currentPath leads to root of current drive, mode : shell';
-
-    let trace = a.path.traceToRoot( a.path.normalize( __dirname ) );
-    let currentPath = trace[ 1 ];
-
-    let o =
-    {
-      execPath :  'node ' + programPath,
-      currentPath,
-      mode : 'shell',
-      stdio : 'pipe',
-      outputCollecting : 1,
-    }
-
-    return _.process.start( o )
-    .then( function( op )
-    {
-      test.identical( _.strStrip( op.output ), a.path.nativize( currentPath ) );
-      return null;
-    })
-  })
-
-  /* */
-
-  a.ready.then( function()
-  {
-    test.case = 'normalized with slash, currentPath leads to root of current drive, mode : shell';
-
-    let trace = a.path.traceToRoot( a.path.normalize( __dirname ) );
-    let currentPath = trace[ 1 ] + '/';
-
-    let o =
-    {
-      execPath :  'node ' + programPath,
-      currentPath,
-      mode : 'shell',
-      stdio : 'pipe',
-      outputCollecting : 1,
-    }
-
-    return _.process.start( o )
-    .then( function( op )
-    {
-      if( process.platform === 'win32')
-      test.identical( _.strStrip( op.output ), a.path.nativize( currentPath ) );
-      else
-      test.identical( _.strStrip( op.output ), trace[ 1 ] );
-      return null;
-    })
-  })
-
-  /* */
-
-  a.ready.then( function()
-  {
-    test.case = 'nativized, currentPath leads to root of current drive, mode : shell';
-
-    let trace = a.path.traceToRoot( __dirname );
-    let currentPath = a.path.nativize( trace[ 1 ] )
-
-    let o =
-    {
-      execPath :  'node ' + programPath,
-      currentPath,
-      mode : 'shell',
-      stdio : 'pipe',
-      outputCollecting : 1,
-    }
-
-    return _.process.start( o )
-    .then( function( op )
-    {
-      test.identical( _.strStrip( op.output ), currentPath );
-      return null;
-    })
-  })
-
-  // qqq for Vova : switch on?
-  // con.then( function()
-  // {
-  //   test.case = 'mode : exec';
-  //
-  //   let o =
-  //   {
-  //     execPath :  'node ' + testAppPath,
-  //     currentPath : __dirname,
-  //     mode : 'exec',
-  //     stdio : 'pipe',
-  //     outputCollecting : 1,
-  //   }
-  //   return _.process.start( o )
-  //   .then( function( op )
-  //   {
-  //     test.identical( o.output, expectedOutput );
-  //     return null;
-  //   })
-  // })
-
-  /* mode : fork */
-
-  a.ready.then( function()
-  {
-    test.case = 'mode : fork';
-
-    let output;
-
-    let o =
-    {
-      execPath : programPath,
-      currentPath : __dirname,
-      mode : 'fork',
-    }
-    let con = _.process.start( o );
-    o.process.on( 'message', ( e ) =>
-    {
-      output = e;
-    })
-    con.then( function( op )
-    {
-      test.identical( output.currentPath, __dirname );
-      return null;
-    })
-
-    return con;
-  })
-
-  /* */
-
-  a.ready.then( function()
-  {
-    test.case = 'normalized, currentPath leads to root of current drive, mode : fork';
-
-    let trace = a.path.traceToRoot( a.path.normalize( __dirname ) );
-    let currentPath = trace[ 1 ];
-
-    let o =
-    {
-      execPath : programPath,
-      currentPath,
-      mode : 'fork',
-      stdio : 'pipe',
-      outputCollecting : 1,
-    }
-
-    return _.process.start( o )
-    .then( function( op )
-    {
-      test.identical( _.strStrip( op.output ), a.path.nativize( currentPath ) );
-      return null;
-    })
-  })
-
-  /* */
-
-
-  a.ready.then( function()
-  {
-    test.case = 'normalized with slash, currentPath leads to root of current drive, mode : fork';
-
-    let trace = a.path.traceToRoot( a.path.normalize( __dirname ) );
-    let currentPath = trace[ 1 ] + '/';
-
-    let o =
-    {
-      execPath : programPath,
-      currentPath,
-      mode : 'fork',
-      stdio : 'pipe',
-      outputCollecting : 1,
-    }
-
-    return _.process.start( o )
-    .then( function( op )
-    {
-      if( process.platform === 'win32')
-      test.identical( _.strStrip( op.output ), a.path.nativize( currentPath ) );
-      else
-      test.identical( _.strStrip( op.output ), trace[ 1 ] );
-      return null;
-    })
-  })
-
-  /* */
-
-  a.ready.then( function()
-  {
-    test.case = 'nativized, currentPath leads to root of current drive, mode : fork';
-
-    let trace = a.path.traceToRoot( __dirname );
-    let currentPath = a.path.nativize( trace[ 1 ] );
-
-    let o =
-    {
-      execPath : programPath,
-      currentPath,
-      mode : 'fork',
-      stdio : 'pipe',
-      outputCollecting : 1,
-    }
-
-    return _.process.start( o )
-    .then( function( op )
-    {
-      test.identical( _.strStrip( op.output ), currentPath );
-      return null;
-    })
-  })
-
-  /* mode: spawn */
-
-  a.ready.then( function()
-  {
-    test.case = 'mode : spawn';
-
-    let o =
-    {
-      execPath :  'node ' + programPath,
-      currentPath : __dirname,
-      mode : 'spawn',
-      stdio : 'pipe',
-      outputCollecting : 1,
-    }
-    return _.process.start( o )
-    .then( function( op )
-    {
-      test.identical( o.output, expectedOutput );
-      return null;
-    })
-  })
-
-  /* */
-
-  a.ready.then( function()
-  {
-    test.case = 'normalized, currentPath leads to root of current drive, mode : spawn';
-
-    let trace = a.path.traceToRoot( a.path.normalize( __dirname ) );
-    let currentPath = trace[ 1 ];
-
-    let o =
-    {
-      execPath :  'node ' + programPath,
-      currentPath,
-      mode : 'spawn',
-      stdio : 'pipe',
-      outputCollecting : 1,
-    }
-
-    return _.process.start( o )
-    .then( function( op )
-    {
-      test.identical( _.strStrip( op.output ), a.path.nativize( currentPath ) );
-      return null;
-    })
-  })
-
-  /* */
-
-
-  a.ready.then( function()
-  {
-    test.case = 'normalized with slash, currentPath leads to root of current drive, mode : spawn';
-
-    let trace = a.path.traceToRoot( a.path.normalize( __dirname ) );
-    let currentPath = trace[ 1 ] + '/';
-
-    let o =
-    {
-      execPath :  'node ' + programPath,
-      currentPath,
-      mode : 'spawn',
-      stdio : 'pipe',
-      outputCollecting : 1,
-    }
-
-    return _.process.start( o )
-    .then( function( op )
-    {
-      if( process.platform === 'win32')
-      test.identical( _.strStrip( op.output ), a.path.nativize( currentPath ) );
-      else
-      test.identical( _.strStrip( op.output ), trace[ 1 ] );
-      return null;
-    })
-  })
-
-  /* */
-
-  a.ready.then( function()
-  {
-    test.case = 'nativized, currentPath leads to root of current drive, mode : spawn';
-
-    let trace = a.path.traceToRoot( __dirname );
-    let currentPath = a.path.nativize( trace[ 1 ] );
-
-    let o =
-    {
-      execPath :  'node ' + programPath,
-      currentPath,
-      mode : 'spawn',
-      stdio : 'pipe',
-      outputCollecting : 1,
-    }
-
-    return _.process.start( o )
-    .then( function( op )
-    {
-      test.identical( _.strStrip( op.output ), currentPath );
-      return null;
-    })
-  })
-
-  /* */
-
-  // qqq for Vova : switch on?
-  // con.then( function()
-  // {
-  //   test.case = 'normalized, currentPath leads to root of current drive, mode : exec';
-  //
-  //   let trace = _.path.traceToRoot( _.path.normalize( __dirname ) );
-  //   let currentPath = trace[ 1 ];
-  //
-  //   let o =
-  //   {
-  //     execPath :  'node ' + testAppPath,
-  //     currentPath,
-  //     mode : 'exec',
-  //     stdio : 'pipe',
-  //     outputCollecting : 1,
-  //   }
-  //
-  //   return _.process.start( o )
-  //   .then( function( op )
-  //   {
-  //     test.identical( _.strStrip( op.output ), _.path.nativize( currentPath ) );
-  //     return null;
-  //   })
-  // })
-  //
-  // /* */
-  //
-  //
-  // con.then( function()
-  // {
-  //   test.case = 'normalized with slash, currentPath leads to root of current drive, mode : exec';
-  //
-  //   let trace = _.path.traceToRoot( _.path.normalize( __dirname ) );
-  //   let currentPath = trace[ 1 ] + '/';
-  //
-  //   let o =
-  //   {
-  //     execPath :  'node ' + testAppPath,
-  //     currentPath,
-  //     mode : 'exec',
-  //     stdio : 'pipe',
-  //     outputCollecting : 1,
-  //   }
-  //
-  //   return _.process.start( o )
-  //   .then( function( op )
-  //   {
-  //     if( process.platform === 'win32')
-  //     test.identical( _.strStrip( op.output ), _.path.nativize( currentPath ) );
-  //     else
-  //     test.identical( _.strStrip( op.output ), trace[ 1 ] );
-  //     return null;
-  //   })
-  // })
-  //
-  // /* */
-  //
-  // con.then( function()
-  // {
-  //   test.case = 'nativized, currentPath leads to root of current drive, mode : exec';
-  //
-  //   let trace = _.path.traceToRoot( __dirname );
-  //   let currentPath = _.path.nativize( trace[ 1 ] );
-  //
-  //   let o =
-  //   {
-  //     execPath :  'node ' + testAppPath,
-  //     currentPath,
-  //     mode : 'exec',
-  //     stdio : 'pipe',
-  //     outputCollecting : 1,
-  //   }
-  //
-  //   return _.process.start( o )
-  //   .then( function( op )
-  //   {
-  //     test.identical( _.strStrip( op.output ), currentPath );
-  //     return null;
-  //   })
-  // })
-
-  /* */
 
   return a.ready;
 
+  /* */
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( function()
+    {
+      let o =
+      {
+        execPath :  mode !== 'fork' ? 'node ' + programPath : programPath,
+        currentPath : __dirname,
+        mode,
+        stdio : 'pipe',
+        outputCollecting : 1,
+      }
+      return _.process.start( o )
+      .then( function( op )
+      {
+        let got = a.fileProvider.fileRead( testFilePath );
+        test.identical( got, __dirname );
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( function()
+    {
+      test.case = 'normalized, currentPath leads to root of current drive';
+
+      let trace = a.path.traceToRoot( a.path.normalize( __dirname ) );
+      let currentPath = trace[ 1 ];
+
+      let o =
+      {
+        execPath :  mode !== 'fork' ? 'node ' + programPath : programPath,
+        currentPath,
+        mode,
+        stdio : 'pipe',
+        outputCollecting : 1,
+      }
+
+      return _.process.start( o )
+      .then( function( op )
+      {
+        let got = a.fileProvider.fileRead( testFilePath );
+        test.identical( got, a.path.nativize( currentPath ) );
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( function()
+    {
+      test.case = 'normalized with slash, currentPath leads to root of current drive';
+
+      let trace = a.path.traceToRoot( a.path.normalize( __dirname ) );
+      let currentPath = trace[ 1 ] + '/';
+
+      let o =
+      {
+        execPath :  mode !== 'fork' ? 'node ' + programPath : programPath,
+        currentPath,
+        mode,
+        stdio : 'pipe',
+        outputCollecting : 1,
+      }
+
+      return _.process.start( o )
+      .then( function( op )
+      {
+        let got = a.fileProvider.fileRead( testFilePath );
+        if( process.platform === 'win32')
+        test.identical( got, a.path.nativize( currentPath ) );
+        else
+        test.identical( got, trace[ 1 ] );
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( function()
+    {
+      test.case = 'nativized, currentPath leads to root of current drive';
+
+      let trace = a.path.traceToRoot( __dirname );
+      let currentPath = a.path.nativize( trace[ 1 ] )
+
+      let o =
+      {
+        execPath :  mode !== 'fork' ? 'node ' + programPath : programPath,
+        currentPath,
+        mode,
+        stdio : 'pipe',
+        outputCollecting : 1,
+      }
+
+      return _.process.start( o )
+      .then( function( op )
+      {
+        let got = a.fileProvider.fileRead( testFilePath );
+        test.identical( got, currentPath )
+        return null;
+      })
+    })
+
+    return ready;
+  }
+
+
+
   /* - */
 
-  function testApp()
+  function program1()
   {
-    console.log( process.cwd() ); /* qqq for Vova : should not be visible if verbosity of tester is low, if possible */
-    if( process.send )
-    process.send({ currentPath : process.cwd() })
+    let _ = require( toolsPath );
+    _.include( 'wFiles' );
+    _.fileProvider.fileWrite( testFilePath, process.cwd() );
   }
 
 }
@@ -3830,7 +3527,13 @@ function startDryRun( test )
   }
 }
 
-/* qqq for Vova : describe shellDryRun */
+shellDryRun.description =
+`
+Simulates run of routine start with all possible options.
+After execution checks fields of run descriptor.
+`
+
+/* qqq for Vova : describe shellDryRun aaa:added description*/
 
 //
 
@@ -5776,7 +5479,12 @@ function startArgumentsNestedQuotes( test )
   .then( () =>
   {
     test.case = 'shell'
-    // qqq for Vova : review this case
+    /*
+     This case shows how shell is interpreting backquote on different platforms.
+     It can't be used for arguments wrapping on linux/mac:
+     https://www.gnu.org/software/bash/manual/html_node/Command-Substitution.html
+    */
+
     let con = new _.Consequence().take( null );
     let args =
     [
@@ -5864,100 +5572,6 @@ function startArgumentsNestedQuotes( test )
 
     return con;
   })
-
-  // .then( () =>
-  // {
-  //   test.case = 'exec'
-  //
-  //   // qqq for Vova : review this case
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let args =
-  //   [
-  //     ` '\'s-s\''  '\"s-d\"'  '\`s-b\`'  `,
-  //     ` "\'d-s\'"  "\"d-d\""  "\`d-b\`"  `,
-  //     ` \`\'b-s\'\`  \`\"b-d\"\`  \`\`b-b\`\` `,
-  //   ]
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' ' + args.join( ' ' ),
-  //     mode : 'exec',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     if( process.platform === 'win32' )
-  //     {
-  //       let op = JSON.parse( o.output );
-  //       test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
-  //       test.identical( op.map, {} )
-  //       let scriptArgs =
-  //       [
-  //         '\'\'s-s\'\'',
-  //         '\'s-d\'',
-  //         '\'`s-b`\'',
-  //         '\'d-s\'',
-  //         'd-d',
-  //         '`d-b`',
-  //         '`\'b-s\'`',
-  //         '\`b-d`',
-  //         '``b-b``'
-  //       ]
-  //       test.identical( op.scriptArgs, scriptArgs )
-  //     }
-  //     else
-  //     {
-  //       test.identical( _.strCount( o.output, 'not found' ), 3 );
-  //     }
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  //
-  // })
-  //
-  // .then( () =>
-  // {
-  //   test.case = 'exec'
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let args =
-  //   [
-  //     ` '\'s-s\''  '\"s-d\"'  '\`s-b\`'  `,
-  //     ` "\'d-s\'"  "\"d-d\""  "\`d-b\`"  `,
-  //     ` \`\'b-s\'\`  \`\"b-d\"\`  \`\`b-b\`\` `,
-  //   ]
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathSpace ),
-  //     args : args.slice(),
-  //     mode : 'exec',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     let op = JSON.parse( o.output );
-  //     test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
-  //     test.identical( op.map, {} )
-  //     test.identical( op.scriptArgs, args )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  //
-  // })
 
   /* */
 
@@ -11050,6 +10664,7 @@ function startDetachingTerminationBegin( test ) /* qqq2 : extend for other modes
         test.is( a.fileProvider.fileExists( testFilePath ) );
         let childPid = a.fileProvider.fileRead( testFilePath );
         childPid = _.numberFrom( childPid );
+        console.log(  childPid );
         test.identical( data.childPid, childPid );
 
         return null;
@@ -11248,6 +10863,8 @@ function startDetachingTerminationBegin( test ) /* qqq2 : extend for other modes
 
     _.process.start( o );
 
+    console.log( o.process.pid )
+
     process.send({ childPid : o.process.pid });
 
     o.onStart.thenGive( () =>
@@ -11261,7 +10878,7 @@ function startDetachingTerminationBegin( test ) /* qqq2 : extend for other modes
     let _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
-    console.log( 'Child process start' )
+    console.log( 'Child process start', process.pid )
     _.time.out( 2000, () =>
     {
       let filePath = _.path.join( __dirname, 'testFile' );
@@ -18174,6 +17791,8 @@ function terminateDetachedComplex( test )
 
   /* - */
 
+<<<<<<< HEAD
+=======
   // qqq for Vova : switch on?
   // .then( () =>
   // {
@@ -18239,6 +17858,7 @@ function terminateDetachedComplex( test )
 
   /* - */
 
+>>>>>>> 2d821183a217a3a3b5a13a0e9eb9fc73c57c5da9
   return a.ready;
 
   /* - */
@@ -18866,6 +18486,8 @@ function terminateTimeOut( test )
 
   /* - */
 
+<<<<<<< HEAD
+=======
   // qqq for Vova : switch on?
   // .then( () =>
   // {
@@ -18917,6 +18539,7 @@ function terminateTimeOut( test )
 
   /*  */
 
+>>>>>>> 2d821183a217a3a3b5a13a0e9eb9fc73c57c5da9
   return a.ready;
 
   /* - */
