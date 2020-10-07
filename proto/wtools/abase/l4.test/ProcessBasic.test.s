@@ -11345,7 +11345,7 @@ function startDetachingChildExitsAfterParent( test )
 
     o.process.on( 'message', ( e ) =>
     {
-      childPid = _.numberFrom( got ); /* xxx : add pid to descriptor? */
+      childPid = _.numberFrom( e ); /* xxx : add pid to descriptor? */
     })
 
     o.onTerminate.then( ( op ) =>
@@ -11455,8 +11455,8 @@ function startDetachingChildExitsBeforeParent( test )
 
     o.process.on( 'message', ( e ) =>
     {
-      child = got;
-      onChildTerminate.take( got );
+      child = e;
+      onChildTerminate.take( e );
     })
 
     onChildTerminate.then( () =>
