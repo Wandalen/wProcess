@@ -1452,9 +1452,9 @@ function startCurrentPath( test )
       mode : 'fork',
     }
     let con = _.process.start( o );
-    o.process.on( 'message', ( m ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      output = m;
+      output = e;
     })
     con.then( function( op )
     {
@@ -12322,9 +12322,9 @@ function startDetachingModeSpawnIpc( test )
 
     let message;
 
-    o.process.on( 'message', ( data ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      message = data;
+      message = e;
     })
 
     o.onStart.thenGive( () =>
@@ -12366,9 +12366,9 @@ function startDetachingModeSpawnIpc( test )
 
     let message;
 
-    o.process.on( 'message', ( data ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      message = data;
+      message = e;
     })
 
     o.onStart.thenGive( () =>
@@ -12443,9 +12443,9 @@ function startDetachingModeForkIpc( test )
 
     let message;
 
-    o.process.on( 'message', ( data ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      message = data;
+      message = e;
     })
 
     o.onStart.thenGive( () =>
@@ -12487,9 +12487,9 @@ function startDetachingModeForkIpc( test )
 
     let message;
 
-    o.process.on( 'message', ( data ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      message = data;
+      message = e;
     })
 
     o.onStart.thenGive( () =>
@@ -12787,9 +12787,9 @@ function startDetachingTrivial( test )
   _.process.start( o );
 
   var childPid;
-  o.process.on( 'message', ( data ) =>
+  o.process.on( 'message', ( e ) =>
   {
-    childPid = _.numberFrom( data );
+    childPid = _.numberFrom( e );
   })
 
   o.onTerminate.then( ( op ) =>
@@ -16701,9 +16701,9 @@ function killWithChildren( test )
     let ready = _.process.start( o );
     let lastChildPid, killed;
 
-    o.process.on( 'message', ( data ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      lastChildPid = _.numberFrom( data );
+      lastChildPid = _.numberFrom( e );
       killed = _.process.kill({ pid : o.process.pid, withChildren : 1 });
     })
 
@@ -16748,9 +16748,9 @@ function killWithChildren( test )
     let ready = _.process.start( o );
     let lastChildPid, killed;
 
-    o.process.on( 'message', ( data ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      lastChildPid = _.numberFrom( data );
+      lastChildPid = _.numberFrom( e );
       killed = _.process.kill({ pid : lastChildPid, withChildren : 1 });
     })
 
@@ -16787,9 +16787,9 @@ function killWithChildren( test )
     let ready = _.process.start( o );
     let children, killed;
 
-    o.process.on( 'message', ( data ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      children = data.map( ( src ) => _.numberFrom( src ) )
+      children = e.map( ( src ) => _.numberFrom( src ) )
       killed = _.process.kill({ pid : o.process.pid, withChildren : 1 });
     })
 
@@ -16834,9 +16834,9 @@ function killWithChildren( test )
 
     let ready = _.process.start( o );
     let children, killed;
-    o.process.on( 'message', ( data ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      children = data.map( ( src ) => _.numberFrom( src ) )
+      children = e.map( ( src ) => _.numberFrom( src ) )
       killed = _.process.kill({ pid : o.process.pid, withChildren : 1 });
     })
 
@@ -17813,9 +17813,9 @@ function terminateComplex( test )
     let ready = _.process.start( o );
     let lastChildPid;
 
-    o.process.on( 'message', ( data ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      lastChildPid = _.numberFrom( data );
+      lastChildPid = _.numberFrom( e );
       _.process.terminate({ pid : lastChildPid });
     })
 
@@ -17850,9 +17850,9 @@ function terminateComplex( test )
     let ready = _.process.start( o );
     let lastChildPid;
 
-    o.process.on( 'message', ( data ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      lastChildPid = _.numberFrom( data );
+      lastChildPid = _.numberFrom( e );
       _.process.terminate({ pid : o.process.pid });
     })
 
@@ -17887,9 +17887,9 @@ function terminateComplex( test )
     let ready = _.process.start( o );
     let lastChildPid;
 
-    o.process.on( 'message', ( data ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      lastChildPid = _.numberFrom( data );
+      lastChildPid = _.numberFrom( e );
       _.process.terminate({ pid : o.process.pid });
     })
 
@@ -18037,9 +18037,9 @@ function terminateDetachedComplex( test )
 
     let ready = _.process.start( o );
     let childPid;
-    o.process.on( 'message', ( data ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      childPid = data;
+      childPid = e;
       _.process.terminate( o.process );
     })
 
@@ -18080,9 +18080,9 @@ function terminateDetachedComplex( test )
 
     let ready = _.process.start( o );
     let childPid;
-    o.process.on( 'message', ( data ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      childPid = data;
+      childPid = e;
       _.process.terminate( o.process );
     })
 
@@ -18338,9 +18338,9 @@ function terminateWithChildren( test )
     let ready = _.process.start( o );
     let lastChildPid, terminated;
 
-    o.process.on( 'message', ( data ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      lastChildPid = _.numberFrom( data );
+      lastChildPid = _.numberFrom( e );
       terminated = _.process.terminate({ pid : o.process.pid, withChildren : 1 });
     })
 
@@ -18380,9 +18380,9 @@ function terminateWithChildren( test )
     let ready = _.process.start( o );
     let lastChildPid, terminated;
 
-    o.process.on( 'message', ( data ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      lastChildPid = _.numberFrom( data );
+      lastChildPid = _.numberFrom( e );
       terminated = _.process.terminate({ pid : lastChildPid, withChildren : 1 });
     })
 
@@ -18421,9 +18421,9 @@ function terminateWithChildren( test )
 
     let ready = _.process.start( o );
     let children, terminated;
-    o.process.on( 'message', ( data ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      children = data.map( ( src ) => _.numberFrom( src ) )
+      children = e.map( ( src ) => _.numberFrom( src ) )
       terminated = _.process.terminate({ pid : o.process.pid, withChildren : 1 });
     })
 
@@ -18604,9 +18604,9 @@ function terminateWithDetachedChildren( test )
 
     let ready = _.process.start( o );
     let children, terminated;
-    o.process.on( 'message', ( data ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      children = data.map( ( src ) => _.numberFrom( src ) )
+      children = e.map( ( src ) => _.numberFrom( src ) )
       terminated = _.process.terminate({ pid : o.process.pid, withChildren : 1 });
     })
 
@@ -19196,9 +19196,9 @@ function children( test )
     let ready = _.process.start( o );
     let children, lastChildPid;
 
-    o.process.on( 'message', ( data ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      lastChildPid = _.numberFrom( data );
+      lastChildPid = _.numberFrom( e );
       children = _.process.children( process.pid )
     })
 
@@ -19242,9 +19242,9 @@ function children( test )
     let ready = _.process.start( o );
     let children, lastChildPid;
 
-    o.process.on( 'message', ( data ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      lastChildPid = _.numberFrom( data )
+      lastChildPid = _.numberFrom( e )
       children = _.process.children( o.process.pid )
     })
 
@@ -19285,9 +19285,9 @@ function children( test )
     let ready = _.process.start( o );
     let children, lastChildPid;
 
-    o.process.on( 'message', ( data ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      lastChildPid = _.numberFrom( data )
+      lastChildPid = _.numberFrom( e )
       children = _.process.children( lastChildPid )
     })
 
@@ -19454,9 +19454,9 @@ function childrenAsList( test )
     let ready = _.process.start( o );
     let children, lastChildPid;
 
-    o.process.on( 'message', ( data ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      lastChildPid = _.numberFrom( data );
+      lastChildPid = _.numberFrom( e );
       children = _.process.children({ pid : process.pid, asList : 1 })
     })
 
@@ -19615,16 +19615,16 @@ function killComplex( test )
 
     let pid = null;
     let childOfChild = null;
-    o.process.on( 'message', ( data ) =>
+    o.process.on( 'message', ( e ) =>
     {
       if( !pid )
       {
-        pid = _.numberFrom( data )
+        pid = _.numberFrom( e )
         _.process.kill( pid );
       }
       else
       {
-        childOfChild = data;
+        childOfChild = e;
       }
     })
 
