@@ -9520,94 +9520,6 @@ startChronology.description =
 
 //
 
-function startPid( test )
-{
-  let context = this;
-  let a = test.assetFor( false );
-  let testAppPath = a.path.nativize( a.program( testApp ) );
-  let track;
-  let niteration = 0;
-
-  // var modes = [ 'fork', 'spawn', 'shell' ];
-  let modes = [ 'spawn' ];
-  modes.forEach( ( mode ) => a.ready.then( () => run( 0, mode ) ) );
-
-  return a.ready;
-
-  /* */
-
-  function run( sync, mode )
-  {
-    test.case = `sync:${sync} mode:${mode}`;
-
-    if( sync && mode === 'fork' )
-    return null;
-
-    niteration += 1;
-    let ptcounter = _.Procedure.Counter;
-    let pacounter = _.Procedure.FindAlive().length;
-    track = [];
-
-    var o =
-    {
-      execPath : mode !== 'fork' ? 'node' : null,
-      args : [ testAppPath ],
-      ipc : 0,
-      mode,
-      sync,
-      ready : new _.Consequence().take( null ),
-      onStart : new _.Consequence(),
-      onDisconnect : new _.Consequence(),
-      onTerminate : new _.Consequence(),
-    }
-
-    let returned = _.process.start( o );
-
-    o.onStart.tap( ( err, op ) =>
-    {
-      track.push( 'onStart' );
-      test.identical( err, undefined );
-      test.identical( op, o );
-      debugger;
-      return null;
-    })
-
-    o.ready.tap( ( err, op ) =>
-    {
-      track.push( 'ready' );
-      test.identical( err, undefined );
-      test.identical( op, o );
-      test.identical( o.exitCode, 0 );
-      debugger;
-      return null;
-    })
-
-    return returned;
-  }
-
-  /* - */
-
-  function testApp()
-  {
-    setTimeout( () => {}, 1000 );
-  }
-
-}
-
-startPid.description =
-`
-  - xxx
-`
-
-startPid.experimental = 1;
-
-// o.process.on( 'message', ( got ) =>
-// {
-//   childPid = _.numberFrom( got ); /* xxx : add pid to descriptor? */
-// })
-
-//
-
 function shellTerminateHangedWithExitHandler( test )
 {
   let context = this;
@@ -19359,6 +19271,89 @@ function experiment( test )
 
 experiment.experimental = 1;
 
+//
+
+function experiment2( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
+  let track;
+  let niteration = 0;
+
+  var modes = [ 'fork', 'spawn', 'shell' ];
+  // let modes = [ 'spawn' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( 0, mode ) ) );
+
+  return a.ready;
+
+  /* */
+
+  function run( sync, mode )
+  {
+    test.case = `sync:${sync} mode:${mode}`;
+
+    if( sync && mode === 'fork' )
+    return null;
+
+    niteration += 1;
+    let ptcounter = _.Procedure.Counter;
+    let pacounter = _.Procedure.FindAlive().length;
+    track = [];
+
+    var o =
+    {
+      execPath : mode !== 'fork' ? 'node' : null,
+      args : [ testAppPath ],
+      ipc : 0,
+      mode,
+      sync,
+      ready : new _.Consequence().take( null ),
+      onStart : new _.Consequence(),
+      onDisconnect : new _.Consequence(),
+      onTerminate : new _.Consequence(),
+    }
+
+    let returned = _.process.start( o );
+
+    o.onStart.tap( ( err, op ) =>
+    {
+      track.push( 'onStart' );
+      test.identical( err, undefined );
+      test.identical( op, o );
+      debugger;
+      return null;
+    })
+
+    o.ready.tap( ( err, op ) =>
+    {
+      track.push( 'ready' );
+      test.identical( err, undefined );
+      test.identical( op, o );
+      test.identical( o.exitCode, 0 );
+      debugger;
+      return null;
+    })
+
+    return returned;
+  }
+
+  /* - */
+
+  function testApp()
+  {
+    setTimeout( () => {}, 1000 );
+  }
+
+}
+
+experiment2.description =
+`
+  - xxx
+`
+
+experiment2.experimental = 1;
+
 // --
 // suite
 // --
@@ -19440,7 +19435,7 @@ var Proto =
     shellProcedureExists,
     startOnTerminateSeveralCallbacksChronology,
     startChronology,
-    startPid,
+    experiment2,
 
     shellTerminateHangedWithExitHandler,
     shellTerminateAfterLoopRelease,
@@ -19538,6 +19533,7 @@ var Proto =
     // experiments
 
     experiment,
+    experiment2,
 
     /* qqq : group test routines */
 
