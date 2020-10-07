@@ -1,11 +1,19 @@
 let _ = require( '..' );
 _.include( 'wFiles' )
 
-var o =
+/* How to execute command asynchronously */
+
+let execPath = process.platform === 'win32' ? 'dir' : 'ls';
+
+_.process.start( execPath )
+.finally( ( err, got ) =>
 {
-  execPath : `node -e "console.log( 'NodePID:',process.pid, '\\n', 'ParentPID:', process.ppid)"`,
-  mode : 'shell',
-  stdio : 'inherit'
-}
-_.process.start( o );
-console.log( 'ShellPID:', o.process.pid )
+  if( err )
+  throw err;
+
+  //do something after execution of the command
+
+  console.log( `Command "${execPath}" returned exit code: ${got.exitCode}` );
+
+  return null;
+})
