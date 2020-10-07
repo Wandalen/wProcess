@@ -19,7 +19,7 @@ let _ = _global_.wTools;
 let Self = {};
 
 /* qqq2 : make general table in md file for this: "Vova qqq: close event is not emitted for disconnected detached child in fork mode" */
-/* qqq2 : don't use shouldThrowErrorOfAnyKind, use specific shouldThrowError* */
+/* qqq2 : don't use shouldThrowErrorOfAnyKind, use specific shouldThrowError* | aaa : Done. Yevhen S. */
 /* qqq2 : parametrize all time delays, don't forget to leave comment if you change any time delay */
 /* qqq : implement for 3 modes where test routine is not implemented for 3 modes */
 
@@ -2102,9 +2102,9 @@ function shellFork( test )
     let con = _.process.start( o );
 
     o.process.send({ message : 'message from parent' });
-    o.process.on( 'message', ( got ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      gotMessage = got.message;
+      gotMessage = e.message;
     })
 
     con.thenKeep( function( got )
@@ -10080,9 +10080,9 @@ function shellAfterDeath( test )
     let childPid;
     debugger;
 
-    o.process.on( 'message', ( got ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      childPid = _.numberFrom( got );
+      childPid = _.numberFrom( e );
     })
 
     o.onTerminate.then( () =>
@@ -10508,9 +10508,9 @@ function startDetachingModeSpawnNoTerminationBegin( test )
 
     let data;
 
-    o.process.on( 'message', ( got ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      data = got;
+      data = e;
       data.childPid = _.numberFrom( data.childPid );
     })
 
@@ -10550,9 +10550,9 @@ function startDetachingModeSpawnNoTerminationBegin( test )
 
     let data;
 
-    o.process.on( 'message', ( got ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      data = got;
+      data = e;
       data.childPid = _.numberFrom( data.childPid );
     })
 
@@ -10592,9 +10592,9 @@ function startDetachingModeSpawnNoTerminationBegin( test )
 
     let data;
 
-    o.process.on( 'message', ( got ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      data = got;
+      data = e;
       data.childPid = _.numberFrom( data.childPid );
     })
 
@@ -10634,9 +10634,9 @@ function startDetachingModeSpawnNoTerminationBegin( test )
 
     let data;
 
-    o.process.on( 'message', ( got ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      data = got;
+      data = e;
       data.childPid = _.numberFrom( data.childPid );
     })
 
@@ -10738,9 +10738,9 @@ function startDetachingModeForkNoTerminationBegin( test )
 
     let data;
 
-    o.process.on( 'message', ( got ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      data = got;
+      data = e;
       data.childPid = _.numberFrom( data.childPid );
     })
 
@@ -10780,9 +10780,9 @@ function startDetachingModeForkNoTerminationBegin( test )
 
     let data;
 
-    o.process.on( 'message', ( got ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      data = got;
+      data = e;
       data.childPid = _.numberFrom( data.childPid );
     })
 
@@ -10880,9 +10880,9 @@ function startDetachingModeShellNoTerminationBegin( test )
 
     let data;
 
-    o.process.on( 'message', ( got ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      data = got;
+      data = e;
       data.childPid = _.numberFrom( data.childPid );
     })
 
@@ -10922,9 +10922,9 @@ function startDetachingModeShellNoTerminationBegin( test )
 
     let data;
 
-    o.process.on( 'message', ( got ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      data = got;
+      data = e;
       data.childPid = _.numberFrom( data.childPid );
     })
 
@@ -11023,9 +11023,9 @@ function startDetachingModeSpawnTerminationBegin( test ) /* qqq2 : extend for ot
 
     let data;
 
-    o.process.on( 'message', ( got ) => /* qqq : got -> e */
+    o.process.on( 'message', ( e ) => /* qqq : got -> e | aaa : Done. Yevhen S. */
     {
-      data = got;
+      data = e;
       data.childPid = _.numberFrom( data.childPid );
     })
 
@@ -11074,9 +11074,9 @@ function startDetachingModeSpawnTerminationBegin( test ) /* qqq2 : extend for ot
 
     let data;
 
-    o.process.on( 'message', ( got ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      data = got;
+      data = e;
       data.childPid = _.numberFrom( data.childPid );
     })
 
@@ -11125,9 +11125,9 @@ function startDetachingModeSpawnTerminationBegin( test ) /* qqq2 : extend for ot
 
     let data;
 
-    o.process.on( 'message', ( got ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      data = got;
+      data = e;
       data.childPid = _.numberFrom( data.childPid );
     })
 
@@ -11176,9 +11176,9 @@ function startDetachingModeSpawnTerminationBegin( test ) /* qqq2 : extend for ot
 
     let data;
 
-    o.process.on( 'message', ( got ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      data = got;
+      data = e;
       data.childPid = _.numberFrom( data.childPid );
     })
 
@@ -11293,9 +11293,9 @@ function startDetachingModeForkTerminationBegin( test )
 
     let data;
 
-    o.process.on( 'message', ( got ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      data = got;
+      data = e;
       data.childPid = _.numberFrom( data.childPid );
     })
 
@@ -11344,9 +11344,9 @@ function startDetachingModeForkTerminationBegin( test )
 
     let data;
 
-    o.process.on( 'message', ( got ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      data = got;
+      data = e;
       data.childPid = _.numberFrom( data.childPid );
     })
 
@@ -11395,9 +11395,9 @@ function startDetachingModeForkTerminationBegin( test )
 
     let data;
 
-    o.process.on( 'message', ( got ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      data = got;
+      data = e;
       data.childPid = _.numberFrom( data.childPid );
     })
 
@@ -11446,9 +11446,9 @@ function startDetachingModeForkTerminationBegin( test )
 
     let data;
 
-    o.process.on( 'message', ( got ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      data = got;
+      data = e;
       data.childPid = _.numberFrom( data.childPid );
     })
 
@@ -11563,9 +11563,9 @@ function startDetachingModeShellTerminationBegin( test )
 
     let data;
 
-    o.process.on( 'message', ( got ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      data = got;
+      data = e;
       data.childPid = _.numberFrom( data.childPid );
     })
 
@@ -11615,9 +11615,9 @@ function startDetachingModeShellTerminationBegin( test )
 
     let data;
 
-    o.process.on( 'message', ( got ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      data = got;
+      data = e;
       data.childPid = _.numberFrom( data.childPid );
     })
 
@@ -11734,9 +11734,9 @@ function startDetachingChildExitsAfterParent( test )
 
     let childPid;
 
-    o.process.on( 'message', ( got ) =>
+    o.process.on( 'message', ( e ) =>
     {
-      childPid = _.numberFrom( got ); /* xxx : add pid to descriptor? */
+      childPid = _.numberFrom( e ); /* xxx : add pid to descriptor? */
     })
 
     o.onTerminate.then( ( op ) =>
