@@ -13764,6 +13764,128 @@ startOnTerminateWithDelay.description =
 
 //
 
+function startCallbackIsNotAConsequence( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let programPath = a.path.nativize( a.program( testApp ) );
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'onStart'
+    let o =
+    {
+      execPath : 'node ' + programPath,
+      onStart
+    }
+    var got = _.process.start( o );
+    test.is( _.consequenceIs( got ) );
+    test.identical( got.resourcesCount(), 0 );
+    got.thenKeep( function( o )
+    {
+      test.identical( o.exitCode, 0 );
+      return o;
+    })
+    return got;
+  })
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'onTerminate'
+    let o =
+    {
+      execPath : 'node ' + programPath,
+      onTerminate
+    }
+    var got = _.process.start( o );
+    test.is( _.consequenceIs( got ) );
+    test.identical( got.resourcesCount(), 0 );
+    got.thenKeep( function( o )
+    {
+      test.identical( o.exitCode, 0 );
+      return o;
+    })
+    return got;
+  })
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'onDisconnect'
+    let o =
+    {
+      execPath : 'node ' + programPath,
+      onTerminate
+    }
+    var got = _.process.start( o );
+    test.is( _.consequenceIs( got ) );
+    test.identical( got.resourcesCount(), 0 );
+    got.thenKeep( function( o )
+    {
+      test.identical( o.exitCode, 0 );
+      return o;
+    })
+    return got;
+  })
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'ready'
+    let o =
+    {
+      execPath : 'node ' + programPath,
+      ready
+    }
+    var got = _.process.start( o );
+    test.is( _.consequenceIs( got ) );
+    test.identical( got.resourcesCount(), 0 );
+    got.thenKeep( function( o )
+    {
+      test.identical( o.exitCode, 0 );
+      return o;
+    })
+    return got;
+  })
+
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+
+  function ready()
+  {
+    console.log( 'ready' );
+  }
+
+  function onStart()
+  {
+    console.log( 'onStart' );
+  }
+
+  function onTerminate()
+  {
+    console.log( 'onTerminate' );
+  }
+
+  function onDisconnect()
+  {
+    console.log( 'onDisconnect' );
+  }
+}
+
+//
+
 function shellConcurrent( test )
 {
   let context = this;
@@ -19289,6 +19411,8 @@ var Proto =
     startOnTerminate, /* qqq2 : fix the test routine */
     startNoEndBug1,
     startOnTerminateWithDelay,
+
+    startCallbackIsNotAConsequence,
 
     /*  */
 
