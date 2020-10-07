@@ -1411,27 +1411,6 @@ function shellCurrentPath( test )
     })
   })
 
-  // qqq for Vova : switch on?
-  // con.then( function()
-  // {
-  //   test.case = 'mode : exec';
-  //
-  //   let o =
-  //   {
-  //     execPath :  'node ' + testAppPath,
-  //     currentPath : __dirname,
-  //     mode : 'exec',
-  //     stdio : 'pipe',
-  //     outputCollecting : 1,
-  //   }
-  //   return _.process.start( o )
-  //   .then( function( got )
-  //   {
-  //     test.identical( o.output, expectedOutput );
-  //     return null;
-  //   })
-  // })
-
   /* mode : fork */
 
   a.ready.then( function()
@@ -1645,89 +1624,6 @@ function shellCurrentPath( test )
       return null;
     })
   })
-
-  /* */
-
-  // qqq for Vova : switch on?
-  // con.then( function()
-  // {
-  //   test.case = 'normalized, currentPath leads to root of current drive, mode : exec';
-  //
-  //   let trace = _.path.traceToRoot( _.path.normalize( __dirname ) );
-  //   let currentPath = trace[ 1 ];
-  //
-  //   let o =
-  //   {
-  //     execPath :  'node ' + testAppPath,
-  //     currentPath,
-  //     mode : 'exec',
-  //     stdio : 'pipe',
-  //     outputCollecting : 1,
-  //   }
-  //
-  //   return _.process.start( o )
-  //   .then( function( got )
-  //   {
-  //     test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) );
-  //     return null;
-  //   })
-  // })
-  //
-  // /* */
-  //
-  //
-  // con.then( function()
-  // {
-  //   test.case = 'normalized with slash, currentPath leads to root of current drive, mode : exec';
-  //
-  //   let trace = _.path.traceToRoot( _.path.normalize( __dirname ) );
-  //   let currentPath = trace[ 1 ] + '/';
-  //
-  //   let o =
-  //   {
-  //     execPath :  'node ' + testAppPath,
-  //     currentPath,
-  //     mode : 'exec',
-  //     stdio : 'pipe',
-  //     outputCollecting : 1,
-  //   }
-  //
-  //   return _.process.start( o )
-  //   .then( function( got )
-  //   {
-  //     if( process.platform === 'win32')
-  //     test.identical( _.strStrip( got.output ), _.path.nativize( currentPath ) );
-  //     else
-  //     test.identical( _.strStrip( got.output ), trace[ 1 ] );
-  //     return null;
-  //   })
-  // })
-  //
-  // /* */
-  //
-  // con.then( function()
-  // {
-  //   test.case = 'nativized, currentPath leads to root of current drive, mode : exec';
-  //
-  //   let trace = _.path.traceToRoot( __dirname );
-  //   let currentPath = _.path.nativize( trace[ 1 ] );
-  //
-  //   let o =
-  //   {
-  //     execPath :  'node ' + testAppPath,
-  //     currentPath,
-  //     mode : 'exec',
-  //     stdio : 'pipe',
-  //     outputCollecting : 1,
-  //   }
-  //
-  //   return _.process.start( o )
-  //   .then( function( got )
-  //   {
-  //     test.identical( _.strStrip( got.output ), currentPath );
-  //     return null;
-  //   })
-  // })
 
   /* */
 
@@ -18108,71 +18004,6 @@ function terminateDetachedComplex( test )
 
   /* - */
 
-  // qqq for Vova : switch on?
-  // .then( () =>
-  // {
-  //   test.case = 'Sending signal to child process that has detached child, detached child should continue to work'
-  //   var o =
-  //   {
-  //     execPath : 'node ' + testAppPath + ' detached',
-  //     mode : 'exec',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     throwingExitCode : 0
-  //   }
-  //
-  //   let ready = _.process.start( o );
-  //   let childPid;
-  //   o.process.stdout.on( 'data', ( data ) =>
-  //   {
-  //     data = data.toString();
-  //     if( _.strHas( data, 'ready' ) )
-  //     _.process.terminate({ process : o.process, timeOut : 0 });
-  //   })
-  //
-  //   ready.then( ( got ) =>
-  //   {
-  //     childPid = _.numberFrom( _.fileProvider.fileRead( _.path.join( routinePath, 'pid' ) ) );
-  //
-  //     if( process.platform === 'linux' )
-  //     {
-  //       test.is( !_.process.isAlive( _.numberFrom( childPid ) ) )
-  //       test.identical( got.exitCode, null );
-  //       test.identical( got.exitSignal, 'SIGINT' );
-  //       test.is( !_.strHas( got.output, 'SIGINT' ) );
-  //       test.is( _.strHas( got.output, 'TerminationBegin' ) );
-  //     }
-  //     else if( process.platform === 'win32' )
-  //     {
-  //       test.is( !_.process.isAlive( _.numberFrom( childPid ) ) )
-  //       test.identical( got.exitCode, 0 );
-  //       test.identical( got.exitSignal, null );
-  //       test.is( !_.strHas( got.output, 'SIGINT' ) );
-  //       test.is( _.strHas( got.output, 'TerminationBegin' ) );
-  //     }
-  //     else
-  //     {
-  //       test.is( _.process.isAlive( _.numberFrom( childPid ) ) )
-  //       test.identical( got.exitCode, 0 );
-  //       test.identical( got.exitSignal, null );
-  //       test.is( _.strHas( got.output, 'SIGINT' ) );
-  //       test.is( !_.strHas( got.output, 'TerminationBegin' ) );
-  //     }
-  //     return _.time.out( 9000, () =>
-  //     {
-  //       var files = _.fileProvider.dirRead( routinePath );
-  //       test.is( !_.process.isAlive( _.numberFrom( childPid ) ) )
-  //       test.identical( _.numberFrom( files[ 0 ] ), _.numberFrom( childPid ) );
-  //       _.fileProvider.fileDelete( _.path.join( routinePath, files[ 0 ] ) );
-  //       return null;
-  //     });
-  //   })
-  //
-  //   return ready;
-  // })
-
-  /* - */
-
   return a.ready;
 
   /* - */
@@ -18799,57 +18630,6 @@ function terminateTimeOut( test )
   })
 
   /* - */
-
-  // qqq for Vova : switch on?
-  // .then( () =>
-  // {
-  //   var o =
-  //   {
-  //     execPath :  'node ' + testAppPath,
-  //     mode : 'exec',
-  //     outputCollecting : 1,
-  //     throwingExitCode : 0
-  //   }
-  //
-  //   let ready = _.process.start( o )
-  //
-  //   o.process.stdout.on( 'data', ( data ) =>
-  //   {
-  //     data = data.toString();
-  //     if( _.strHas( data, 'ready' ))
-  //     _.process.terminate({ process : o.process });
-  //   })
-  //
-  //   ready.then( ( got ) =>
-  //   {
-  //     if( process.platform === 'linux' )
-  //     {
-  //       test.identical( got.exitCode, null );
-  //       test.identical( got.exitSignal, 'SIGKILL' );
-  //       test.is( !_.strHas( got.output, 'SIGINT' ) );
-  //       test.is( _.strHas( got.output, 'Application timeout!' ) );
-  //     }
-  //     else if( process.platform === 'darwin' )
-  //     {
-  //       test.identical( got.exitCode, null );
-  //       test.identical( got.exitSignal, 'SIGKILL' );
-  //       test.is( _.strHas( got.output, 'SIGINT' ) );
-  //       test.is( !_.strHas( got.output, 'Application timeout!' ) );
-  //     }
-  //     else
-  //     {
-  //       test.identical( got.exitCode, null );
-  //       test.identical( got.exitSignal, 'SIGKILL' );
-  //       test.is( !_.strHas( got.output, 'SIGINT' ) );
-  //       test.is( _.strHas( got.output, 'Application timeout!' ) );
-  //     }
-  //     return null;
-  //   })
-  //
-  //   return ready;
-  // })
-
-  /*  */
 
   return a.ready;
 
