@@ -3522,7 +3522,13 @@ function shellDryRun( test )
   }
 }
 
-/* qqq for Vova : describe shellDryRun */
+shellDryRun.description =
+`
+Simulates run of routine start with all possible options.
+After execution checks fields of run descriptor.
+`
+
+/* qqq for Vova : describe shellDryRun aaa:added description*/
 
 //
 
