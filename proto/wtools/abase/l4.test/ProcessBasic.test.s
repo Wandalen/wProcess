@@ -467,11 +467,11 @@ function basic( test )
   {
     /* mode : spawn, stdio : ignore */
 
-    o.stdio = 'ignore';
-    o.outputCollecting = 0;
-    o.outputPiping = 0;
+    o2.stdio = 'ignore';
+    o2.outputCollecting = 0;
+    o2.outputPiping = 0;
 
-    var options = _.mapSupplement( {}, o, commonDefaults );
+    var options = _.mapSupplement( {}, o2, commonDefaults );
 
     return _.process.start( options )
     .thenKeep( function()
@@ -601,9 +601,9 @@ function basic( test )
   {
     /* mode : shell, stdio : ignore */
 
-    o.stdio = 'ignore'
-    o.outputCollecting = 0;
-    o.outputPiping = 0;
+    o2.stdio = 'ignore'
+    o2.outputCollecting = 0;
+    o2.outputPiping = 0;
 
     var options = _.mapSupplement( {}, o2, commonDefaults );
 
@@ -809,11 +809,11 @@ function shellSync( test )
 
   /* mode : spawn, stdio : ignore */
 
-  o.stdio = 'ignore';
-  o.outputCollecting = 0;
-  o.outputPiping = 0;
+  o2.stdio = 'ignore';
+  o2.outputCollecting = 0;
+  o2.outputPiping = 0;
 
-  var options = _.mapSupplement( {}, o, commonDefaults );
+  var options = _.mapSupplement( {}, o2, commonDefaults );
   _.process.start( options )
   test.identical( options.exitCode, 0 );
   test.identical( options.output, null );
@@ -834,11 +834,11 @@ function shellSync( test )
 
   /* mode : shell, stdio : ignore */
 
-  o.stdio = 'ignore'
-  o.outputCollecting = 0;
-  o.outputPiping = 0;
+  o2.stdio = 'ignore'
+  o2.outputCollecting = 0;
+  o2.outputPiping = 0;
 
-  var options = _.mapSupplement( {}, o, commonDefaults );
+  var options = _.mapSupplement( {}, o2, commonDefaults );
   _.process.start( options )
   test.identical( options.exitCode, 0 );
   test.identical( options.output, null );
