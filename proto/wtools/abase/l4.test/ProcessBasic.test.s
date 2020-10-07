@@ -11439,6 +11439,8 @@ function startDetachingDisconnectedEarly( test )
         execPath : mode !== 'fork' ? 'node program1.js' : 'program1.js',
         mode,
         stdio : 'ignore',
+        outputPiping : 0,
+        outputCollecting : 0,
         currentPath : a.routinePath,
         detaching : 1,
         ipc : 0,
@@ -11557,6 +11559,8 @@ function startDetachingDisconnectedLate( test )
         execPath : mode !== 'fork' ? 'node program1.js' : 'program1.js',
         mode,
         stdio : 'ignore',
+        outputPiping : 0,
+        outputCollecting : 0,
         currentPath : a.routinePath,
         detaching : 1,
         ipc : 0,
@@ -11743,6 +11747,8 @@ function startDetachingEndCompetitorIsExecuted( test )
       execPath : 'testAppChild.js',
       mode : 'fork',
       stdio : 'ignore',
+      outputPiping : 0,
+      outputCollecting : 0,
       currentPath : a.routinePath,
       detaching : 1
     }
@@ -13078,6 +13084,8 @@ function startOnTerminate( test ) /* qqq2 : add other modes. ask how to */
         execPath : mode !== 'fork' ? 'node testAppChild.js' : 'testAppChild.js',
         mode,
         stdio : 'ignore',
+        outputPiping : 0,
+        outputCollecting : 0,
         currentPath : a.routinePath,
         detaching : 0
       }
@@ -13109,6 +13117,8 @@ function startOnTerminate( test ) /* qqq2 : add other modes. ask how to */
         execPath : mode !== 'fork' ? 'node testAppChild.js' : 'testAppChild.js',
         mode,
         stdio : 'ignore',
+        outputPiping : 0,
+        outputCollecting : 0,
         currentPath : a.routinePath,
         detaching : 0
       }
@@ -13154,6 +13164,8 @@ function startOnTerminate( test ) /* qqq2 : add other modes. ask how to */
         execPath : mode !== 'fork' ? 'node testAppChild.js' : 'testAppChild.js',
         mode,
         stdio : 'ignore',
+        outputPiping : 0,
+        outputCollecting : 0,
         currentPath : a.routinePath,
         onTerminate,
         detaching : 1
@@ -13238,6 +13250,8 @@ function startOnTerminate( test ) /* qqq2 : add other modes. ask how to */
         execPath : mode !== 'fork' ? 'node testAppChild.js' : 'testAppChild.js',
         mode,
         stdio : 'ignore',
+        outputPiping : 0,
+        outputCollecting : 0,
         currentPath : a.routinePath,
         onTerminate,
         detaching : 1
@@ -13283,6 +13297,8 @@ function startOnTerminate( test ) /* qqq2 : add other modes. ask how to */
         args : [ 'throwing:1' ],
         mode,
         stdio : 'ignore',
+        outputPiping : 0,
+        outputCollecting : 0,
         currentPath : a.routinePath,
         onTerminate,
         throwingExitCode : 0,
@@ -13321,6 +13337,8 @@ function startOnTerminate( test ) /* qqq2 : add other modes. ask how to */
         args : [ 'throwing:1' ],
         mode,
         stdio : 'ignore',
+        outputPiping : 0,
+        outputCollecting : 0,
         currentPath : a.routinePath,
         onTerminate,
         throwingExitCode : 0,
@@ -16896,6 +16914,9 @@ function startErrorAfterTerminationWithSend( test )
       Current path : ${a.path.current()}
   Channel closed
   `
+    if( process.platform === 'darwin' )
+    exp += `code : 'ERR_IPC_CHANNEL_CLOSED'`;
+
       test.equivalent( e.err.originalMessage, exp )
       _.errAttend( e.err );
       track.push( 'uncaughtError' );
