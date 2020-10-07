@@ -7661,7 +7661,7 @@ startNode.timeOut = 20000;
 
 //
 
-function shellModeShellNonTrivial( test )
+function startModeShellNonTrivial( test )
 {
   let context = this;
   let a = test.assetFor( false );
