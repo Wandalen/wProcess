@@ -55,9 +55,9 @@ function start_pre( routine, args )
   _.assert( o.when !== 'afterdeath', `Starting mode:'afterdeath' is moved to separate routine _.process.startAfterDeath` );
   _.assert( !o.detaching || !_.longHas( _.arrayAs( o.stdio ), 'inherit' ), `Unsupported stdio: ${o.stdio} for process detaching` );
   _.assert( !o.detaching || _.longHas( [ 'fork', 'spawn', 'shell' ],  o.mode ), `Unsupported mode: ${o.mode} for process detaching` );
-  _.assert( o.onStart === null || _.routineIs( o.onStart ) );
-  _.assert( o.onTerminate === null || _.routineIs( o.onTerminate ) );
-  _.assert( o.onDisconnect === null || _.routineIs( o.onDisconnect ) );
+  _.assert( o.conStart === null || _.routineIs( o.conStart ) );
+  _.assert( o.conTerminate === null || _.routineIs( o.conTerminate ) );
+  _.assert( o.conDisconnect === null || _.routineIs( o.conDisconnect ) );
   _.assert( o.ready === null || _.routineIs( o.ready ) );
   _.assert( !o.ipc || _.longHas( [ 'fork', 'spawn' ], o.mode ), `Mode::${o.mode} doesn't support inter process communication.` );
   _.assert( o.mode !== 'fork' || !o.sync || o.deasync, 'Mode::fork is available only if either sync:0 or deasync:1' );
@@ -121,10 +121,10 @@ function start_pre( routine, args )
  *
  * let con = _.process.start( 'node -v' );
  *
- * con.then( ( got ) =>
+ * con.then( ( op ) =>
  * {
- *  console.log( 'ExitCode:', got.exitCode );
- *  return got;
+ *  console.log( 'ExitCode:', op.exitCode );
+ *  return op;
  * })
  *
  * @example //command and arguments as options
@@ -136,10 +136,10 @@ function start_pre( routine, args )
  *
  * let con = _.process.start({ execPath : 'node', args : [ '-v' ] });
  *
- * con.then( ( got ) =>
+ * con.then( ( op ) =>
  * {
- *  console.log( 'ExitCode:', got.exitCode );
- *  return got;
+ *  console.log( 'ExitCode:', op.exitCode );
+ *  return op;
  * })
  *
  * @function shell
@@ -182,8 +182,6 @@ function start_body( o )
 
 */
 
-  /* xxx : rename options on* -> con* */
-
   _.assert( arguments.length === 1, 'Expects single argument' );
 
   let stderrOutput = '';
@@ -221,18 +219,19 @@ function start_body( o )
     }
     catch( err )
     {
-      debugger; /* qqq xxx : is covered? */
-      end( err, o.onTerminate );
+      debugger; /* qqq for Yevhen : is covered? */
+      end( err, o.conTerminate );
     }
-    // debugger; /* xxx : is states set? */
     _.assert( o.state === 'terminated' || o.state === 'disconnected' );
-    end( undefined, o.onTerminate );
+    end( undefined, o.conTerminate );
     return o;
   }
   else
   {
     if( o.when.delay )
-    o.ready.then( () => _.time.out( o.when.delay, () => null ) ); /* xxx : redundant callback? */
+    // o.ready.then( () => _.time.out( o.when.delay, () => null ) ); /* xxx yyy : redundant callback? */
+    o.ready.timeOut( o.when.delay );
+
     o.ready.thenGive( single );
 
     if( readyCallback )
@@ -247,8 +246,6 @@ function start_body( o )
 
   function preform1()
   {
-
-    /* xxx qqq : implement test for multiple to check onStart works as should */
 
     if( o.ready === null )
     {
@@ -279,40 +276,40 @@ function start_body( o )
   function preform2()
   {
 
-    if( o.onStart === null )
+    if( o.conStart === null )
     {
-      o.onStart = new _.Consequence();
+      o.conStart = new _.Consequence();
     }
-    else if( !_.consequenceIs( o.onStart ) )
+    else if( !_.consequenceIs( o.conStart ) )
     {
-      o.onStart = new _.Consequence().finally( o.onStart );
-    }
-
-    if( o.onTerminate === null )
-    {
-      o.onTerminate = new _.Consequence();
-    }
-    else if( !_.consequenceIs( o.onTerminate ) )
-    {
-      o.onTerminate = new _.Consequence({ _procedure : false }).finally( o.onTerminate );
+      o.conStart = new _.Consequence().finally( o.conStart );
     }
 
-    if( o.onDisconnect === null )
+    if( o.conTerminate === null )
     {
-      o.onDisconnect = new _.Consequence();
+      o.conTerminate = new _.Consequence();
     }
-    else if( !_.consequenceIs( o.onDisconnect ) )
+    else if( !_.consequenceIs( o.conTerminate ) )
     {
-      o.onDisconnect = new _.Consequence({ _procedure : false }).finally( o.onDisconnect );
+      o.conTerminate = new _.Consequence({ _procedure : false }).finally( o.conTerminate );
     }
 
-    _.assert( o.onStart !== o.onTerminate );
-    _.assert( o.onStart !== o.onDisconnect );
-    _.assert( o.onTerminate !== o.onDisconnect );
-    _.assert( o.ready !== o.onStart && o.ready !== o.onDisconnect && o.ready !== o.onTerminate );
-    _.assert( o.onStart.resourcesCount() === 0 );
-    _.assert( o.onDisconnect.resourcesCount() === 0 );
-    _.assert( o.onTerminate.resourcesCount() === 0 );
+    if( o.conDisconnect === null )
+    {
+      o.conDisconnect = new _.Consequence();
+    }
+    else if( !_.consequenceIs( o.conDisconnect ) )
+    {
+      o.conDisconnect = new _.Consequence({ _procedure : false }).finally( o.conDisconnect );
+    }
+
+    _.assert( o.conStart !== o.conTerminate );
+    _.assert( o.conStart !== o.conDisconnect );
+    _.assert( o.conTerminate !== o.conDisconnect );
+    _.assert( o.ready !== o.conStart && o.ready !== o.conDisconnect && o.ready !== o.conTerminate );
+    _.assert( o.conStart.resourcesCount() === 0 );
+    _.assert( o.conDisconnect.resourcesCount() === 0 );
+    _.assert( o.conTerminate.resourcesCount() === 0 );
 
     if( !_.strIs( o.when ) )
     {
@@ -362,7 +359,7 @@ function start_body( o )
   function end( err, consequence )
   {
 
-    if( o.procedure )
+    if( !_.primitiveIs( o.procedure ) )
     if( o.procedure.isAlive() )
     o.procedure.end();
 
@@ -458,18 +455,18 @@ function start_body( o )
       if( o.briefExitCode )
       o.error = _.errBrief( o.error );
 
-      if( o.sync && !o.deasync ) /* xxx : remove? */
+      if( o.sync && !o.deasync )
       {
         throw o.error;
       }
       else
       {
-        end( o.error, o.onTerminate );
+        end( o.error, o.conTerminate );
       }
     }
     else if( !o.sync || o.deasync )
     {
-      end( undefined, o.onTerminate );
+      end( undefined, o.conTerminate );
     }
 
   }
@@ -507,7 +504,7 @@ function start_body( o )
     }
     else
     {
-      end( o.error, o.onTerminate );
+      end( o.error, o.conTerminate );
     }
   }
 
@@ -532,7 +529,7 @@ function start_body( o )
       {
         debugger;
         o.state = 'disconnected';
-        o.onDisconnect.take( this );
+        o.conDisconnect.take( this );
         end( undefined, o );
         throw _.err( 'not tested' );
       }
@@ -577,7 +574,7 @@ function start_body( o )
     if( !this.ended )
     {
       this.state = 'disconnected';
-      end( undefined, o.onDisconnect );
+      end( undefined, o.conDisconnect );
     }
 
     return true;
@@ -618,8 +615,8 @@ function start_body( o )
       }
 
       let o2 = _.mapExtend( null, o );
-      o2.onStart = null;
-      o2.onTerminate = null;
+      o2.conStart = null;
+      o2.conTerminate = null;
       o2.execPath = execPath[ p ];
       o2.args = o.args ? o.args.slice() : o.args;
       o2.currentPath = currentPath[ c ];
@@ -676,7 +673,7 @@ function start_body( o )
       {
         _.assert( o.state === 'starting' );
         o.state = 'terminated';
-        end( undefined, o.onTerminate );
+        end( undefined, o.conTerminate );
       }
 
     }
@@ -889,18 +886,20 @@ function start_body( o )
 
     /* procedure */
 
-    if( Config.debug )
+    if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
     {
-      let result = _.procedure.find( 'PID:' + o.process.pid );
-      _.assert( result.length === 0, `No procedure expected for child process with pid:${o.process.pid}` );
+      if( Config.debug )
+      {
+        let result = _.procedure.find( 'PID:' + o.process.pid );
+        _.assert( result.length === 0, `No procedure expected for child process with pid:${o.process.pid}` );
+      }
+      o.procedure = _.procedure.begin({ _name : 'PID:' + o.process.pid, _object : o.process }); /* xxx : adjust stack and source path of the procedure */
     }
-
-    o.procedure = _.procedure.begin({ _name : 'PID:' + o.process.pid, _object : o.process }); /* xxx : adjust stack and source path of the procedure */
 
     /* state */
 
     o.state = 'started';
-    o.onStart.take( o );
+    o.conStart.take( o );
   }
 
   /* */
@@ -1297,14 +1296,16 @@ start_body.defaults = /* qqq for Vova : split on _.process.start(), _.process.st
   dry : 0,
 
   mode : 'shell', /* fork / spawn / shell */
-  logger : null,
   stdio : 'pipe', /* pipe / ignore / inherit */
   ipc : 0,
 
+  logger : null,
+  procedure : null,
+
   ready : null,
-  onStart : null,
-  onTerminate : null,
-  onDisconnect : null,
+  conStart : null,
+  conTerminate : null,
+  conDisconnect : null,
 
   env : null,
   detaching : 0,
@@ -1346,7 +1347,7 @@ defaults.applyingExitCode = 1;
 defaults.throwingExitCode = 0;
 defaults.outputPiping = 1;
 defaults.stdio = 'inherit';
-// defaults.mode = 'spawn'; // xxx qqq : uncomment after fix of the mode?
+defaults.mode = 'spawn'; // xxx yyy qqq : uncomment after fix of the mode?
 
 //
 
@@ -1371,10 +1372,10 @@ defaults.stdio = 'inherit';
  *
  * let con = _.process.startNjs({ execPath : 'path/to/script.js' });
  *
- * con.then( ( got ) =>
+ * con.then( ( op ) =>
  * {
- *  console.log( 'ExitCode:', got.exitCode );
- *  return got;
+ *  console.log( 'ExitCode:', op.exitCode );
+ *  return op;
  * })
  *
  * @function startNjs
@@ -1464,10 +1465,10 @@ let startNjs = _.routineFromPreAndBody( start_pre, startNjs_body );
  *
  * let con = _.process.startNjsPassingThrough({ execPath : 'path/to/script.js' });
  *
- * con.then( ( got ) =>
+ * con.then( ( op ) =>
  * {
- *  console.log( 'ExitCode:', got.exitCode );
- *  return got;
+ *  console.log( 'ExitCode:', op.exitCode );
+ *  return op;
  * })
  *
  * @function startNjsPassingThrough
@@ -1512,17 +1513,17 @@ function startAfterDeath_body( o )
 
   let result = _.process.start( o2 );
 
-  o.onStart = o2.onStart;
-  o.onTerminate = o2.onTerminate;
+  o.conStart = o2.conStart;
+  o.conTerminate = o2.conTerminate;
   o.ready = o2.ready;
   o.process = o2.process;
   o.disconnect = _.routineJoin( o2, o2.disconnect );
 
-  o2.onStart.give( function( err, got )
+  o2.conStart.give( function( err, op )
   {
     if( !err )
     o2.process.send( srcOptions );
-    this.take( err, got );
+    this.take( err, op );
   })
 
   return result;
@@ -1567,10 +1568,10 @@ let startAfterDeath = _.routineFromPreAndBody( start_pre, startAfterDeath_body )
  *
  * let con = start({ args : [ '-v' ] });
  *
- * con.then( ( got ) =>
+ * con.then( ( op ) =>
  * {
- *  console.log( 'ExitCode:', got.exitCode );
- *  return got;
+ *  console.log( 'ExitCode:', op.exitCode );
+ *  return op;
  * })
  *
  * @example //multiple commands execution with same args
@@ -1584,10 +1585,10 @@ let startAfterDeath = _.routineFromPreAndBody( start_pre, startAfterDeath_body )
  *
  * let con = start({ execPath : [ 'node', 'npm' ] });
  *
- * con.then( ( got ) =>
+ * con.then( ( op ) =>
  * {
- *  console.log( 'ExitCode:', got.exitCode );
- *  return got;
+ *  console.log( 'ExitCode:', op.exitCode );
+ *  return op;
  * })
  *
  * @example
@@ -1604,18 +1605,18 @@ let startAfterDeath = _.routineFromPreAndBody( start_pre, startAfterDeath_body )
  *
  * start({ execPath : 'node' });
  *
- * ready.then( ( got ) => xxx : normalize
+ * ready.then( ( op ) =>
  * {
- *  console.log( 'node ExitCode:', got.exitCode );
- *  return got;
+ *  console.log( 'node ExitCode:', op.exitCode );
+ *  return op;
  * })
  *
  * start({ execPath : 'npm' });
  *
- * ready.then( ( got ) =>
+ * ready.then( ( op ) =>
  * {
- *  console.log( 'npm ExitCode:', got.exitCode );
- *  return got;
+ *  console.log( 'npm ExitCode:', op.exitCode );
+ *  return op;
  * })
  *
  * @function starter
@@ -2129,7 +2130,7 @@ function kill( o )
 
     ready.orKeepingSplit( [ timeOutError ] );
 
-    ready.finally( ( err, got ) =>
+    ready.finally( ( err, op ) =>
     {
       if( !timeOutError.resourcesCount() )
       timeOutError.take( _.dont );
@@ -2141,7 +2142,7 @@ function kill( o )
         err = _.err( err, `\nTarget process: ${_.strQuote( o.pid )} is still alive. Waited for ${o.waitTimeOut} ms.` );
         throw err;
       }
-      return got;
+      return op;
     })
 
     return ready;
@@ -2363,10 +2364,10 @@ function children( o )
     }
     else
     {
-      WindowsProcessTree.getProcessTree( o.pid, ( got ) =>
+      WindowsProcessTree.getProcessTree( o.pid, ( list ) =>
       {
         result = Object.create( null );
-        handleWindowsResult( result, got );
+        handleWindowsResult( result, list );
         con.take( result );
       })
     }
@@ -2396,16 +2397,16 @@ function children( o )
       throwingExitCode : 0,
       inputMirroring : 0
     })
-    .then( ( got ) => /* xxx : normalize */
+    .then( ( op ) => /* xxx : normalize */
     {
       if( o.asList )
       _result.push( _.numberFrom( pid ) );
       else
       _result[ pid ] = Object.create( null );
-      if( got.exitCode !== 0 )
+      if( op.exitCode !== 0 )
       return result;
       let ready = new _.Consequence().take( null );
-      let pids = _.strSplitNonPreserving({ src : got.output, delimeter : '\n' });
+      let pids = _.strSplitNonPreserving({ src : op.output, delimeter : '\n' });
       _.each( pids, ( cpid ) => ready.then( () => childrenOf( command, cpid, o.asList ? _result : _result[ pid ] ) ) )
       return ready;
     })
