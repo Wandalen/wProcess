@@ -18,11 +18,13 @@ let _global = _global_;
 let _ = _global_.wTools;
 let Self = {};
 
-/* qqq Vova : make general table in md file for this: "Vova qqq: close event is not emitted for disconnected detached child in fork mode" */
+/* qqq for Vova : make general table in md file for this: "Vova qqq: close event is not emitted for disconnected detached child in fork mode" */
 
-/* qqq Yevgen : parametrize all time delays, don't forget to leave comment if you change any time delay */
-/* qqq Yevgen : implement for 3 modes where test routine is not implemented for 3 modes */
-/* qqq Yevgen : make sure variable "got" is used as should */
+/* qqq for Yevhen : parametrize all time delays, don't forget to leave comment if you change any time delay */
+/* qqq for Yevhen : implement for 3 modes where test routine is not implemented for 3 modes */
+/* qqq for Yevhen : make sure variable "got" is used as should */
+/* qqq for Yevhen : actualize names of test routines */
+/* qqq for Yevhen : check op.ended if op.exitCode is checked */
 
 // --
 // context
@@ -418,7 +420,7 @@ function exitCode( test )
 
 /* qqq : split test cases by / ** / delimeting lines. whole file | aaa : Done. Yevhen S.  */
 /* qqq : split by mode | aaa : Done. Yevhen S.
-qqq xxx : ?
+xxx qqq for Yevhen : ?
 */
 
 function basic( test )
@@ -511,10 +513,10 @@ function basic( test )
       options.process.kill( 'SIGINT' );
       return null;
     })
-    shell.finally(function()
+    shell.finally( function()
     {
       test.identical( options.process.killed, true );
-      test.identical( options.exitCode, null ); /* qqq2 : near each such test check should be following checks | aaa : Done. Yevhen S. */
+      test.identical( options.exitCode, null );
       test.identical( options.exitSignal, 'SIGINT' );
       test.identical( options.process.exitCode, null );
       test.identical( options.process.signalCode, 'SIGINT' );
@@ -938,7 +940,6 @@ function shellSyncAsync( test )
   let context = this;
   let a = test.assetFor( false );
   let programPath = a.path.nativize( a.program( testAppShell ) );
-
   let o3 =
   {
     outputPiping : 1,
@@ -948,16 +949,13 @@ function shellSyncAsync( test )
     sync : 1,
     deasync : 1
   }
-
-  /* */
-
-  var expectedOutput = programPath + '\n';
-  var o;
+  let expectedOutput = programPath + '\n';
+  let o2;
 
   /* - */
 
   test.case = 'mode : fork';
-  o =
+  o2 =
   {
     execPath : programPath,
     mode : 'fork',
@@ -966,7 +964,7 @@ function shellSyncAsync( test )
 
   /* mode : spawn, stdio : pipe */
 
-  var options = _.mapSupplement( {}, o, o3 );
+  var options = _.mapSupplement( {}, o2, o3 );
   var got = _.process.start( options );
   test.is( got === options );
   test.identical( got.process.constructor.name, 'ChildProcess' );
@@ -975,11 +973,11 @@ function shellSyncAsync( test )
 
   /* mode : fork, stdio : ignore */
 
-  o.stdio = 'ignore';
-  o.outputCollecting = 0;
-  o.outputPiping = 0;
+  o2.stdio = 'ignore';
+  o2.outputCollecting = 0;
+  o2.outputPiping = 0;
 
-  var options = _.mapSupplement( {}, o, o3 );
+  var options = _.mapSupplement( {}, o2, o3 );
   var got = _.process.start( options );
   test.is( got === options );
   test.identical( got.process.constructor.name, 'ChildProcess' );
@@ -989,7 +987,7 @@ function shellSyncAsync( test )
   /* */
 
   test.case = 'mode : spawn';
-  o =
+  o2 =
   {
     execPath :  'node ' + programPath,
     mode : 'spawn',
@@ -998,7 +996,7 @@ function shellSyncAsync( test )
 
   /* mode : spawn, stdio : pipe */
 
-  var options = _.mapSupplement( {}, o, o3 );
+  var options = _.mapSupplement( {}, o2, o3 );
   var got = _.process.start( options );
   test.is( got === options );
   test.identical( got.process.constructor.name, 'ChildProcess' );
@@ -1007,11 +1005,11 @@ function shellSyncAsync( test )
 
   /* mode : spawn, stdio : ignore */
 
-  o.stdio = 'ignore';
-  o.outputCollecting = 0;
-  o.outputPiping = 0;
+  o2.stdio = 'ignore';
+  o2.outputCollecting = 0;
+  o2.outputPiping = 0;
 
-  var options = _.mapSupplement( {}, o, o3 );
+  var options = _.mapSupplement( {}, o2, o3 );
   var got = _.process.start( options );
   test.is( got === options );
   test.identical( got.process.constructor.name, 'ChildProcess' );
@@ -1021,13 +1019,13 @@ function shellSyncAsync( test )
   /* */
 
   test.case = 'mode : shell';
-  o =
+  o2 =
   {
     execPath :  'node ' + programPath,
     mode : 'shell',
     stdio : 'pipe'
   }
-  var options = _.mapSupplement( {}, o, o3 );
+  var options = _.mapSupplement( {}, o2, o3 );
   var got = _.process.start( options );
   test.is( got === options );
   test.identical( got.process.constructor.name, 'ChildProcess' );
@@ -1036,11 +1034,11 @@ function shellSyncAsync( test )
 
   /* mode : shell, stdio : ignore */
 
-  o.stdio = 'ignore'
-  o.outputCollecting = 0;
-  o.outputPiping = 0;
+  o2.stdio = 'ignore'
+  o2.outputCollecting = 0;
+  o2.outputPiping = 0;
 
-  var options = _.mapSupplement( {}, o, o3 );
+  var options = _.mapSupplement( {}, o2, o3 );
   var got = _.process.start( options );
   test.is( got === options );
   test.identical( got.process.constructor.name, 'ChildProcess' );
@@ -1050,7 +1048,7 @@ function shellSyncAsync( test )
   /* */
 
   test.case = 'shell, stop process using timeOut';
-  o =
+  o2 =
   {
     execPath :  'node ' + programPath + ' loop : 1',
     mode : 'shell',
@@ -1058,19 +1056,19 @@ function shellSyncAsync( test )
     timeOut : 500
   }
 
-  var options = _.mapSupplement( {}, o, o3 );
+  var options = _.mapSupplement( {}, o2, o3 );
   test.shouldThrowErrorSync( () => _.process.start( options ) );
 
   /* */
 
   test.case = 'spawn, return good code';
-  o =
+  o2 =
   {
     execPath :  'node ' + programPath + ' exitWithCode : 0',
     mode : 'spawn',
     stdio : 'pipe'
   }
-  var options = _.mapSupplement( {}, o, o3 );
+  var options = _.mapSupplement( {}, o2, o3 );
   var got = _.process.start( options );
   test.is( got === options );
   test.identical( got.process.constructor.name, 'ChildProcess' );
@@ -1079,27 +1077,27 @@ function shellSyncAsync( test )
   /* */
 
   test.case = 'spawn, return bad code';
-  o =
+  o2 =
   {
     execPath :  'node ' + programPath + ' exitWithCode : 1',
     mode : 'spawn',
     stdio : 'pipe'
   }
-  var options = _.mapSupplement( {}, o, o3 );
+  var options = _.mapSupplement( {}, o2, o3 );
   test.shouldThrowErrorSync( () => _.process.start( options ) )
   test.identical( options.exitCode, 1 );
 
   /* */
 
   test.case = 'shell, return good code';
-  o =
+  o2 =
   {
     execPath :  'node ' + programPath + ' exitWithCode : 0',
     mode : 'shell',
     stdio : 'pipe'
   }
 
-  var options = _.mapSupplement( {}, o, o3 );
+  var options = _.mapSupplement( {}, o2, o3 );
   var got = _.process.start( options );
   test.is( got === options );
   test.identical( got.process.constructor.name, 'ChildProcess' );
@@ -1108,13 +1106,13 @@ function shellSyncAsync( test )
   /* */
 
   test.case = 'shell, return bad code';
-  o =
+  o2 =
   {
     execPath :  'node ' + programPath + ' exitWithCode : 1',
     mode : 'shell',
     stdio : 'pipe'
   }
-  var options = _.mapSupplement( {}, o, o3 );
+  var options = _.mapSupplement( {}, o2, o3 );
   test.shouldThrowErrorSync( () => _.process.start( options ) )
   test.identical( options.exitCode, 1 );
 
@@ -1136,16 +1134,13 @@ function shell2( test )
     throwingExitCode : 1
   }
 
-  /* */
-
-  /* qqq : should be o2 if o-map is not passed to routine directly */
-  var o;
+  let o2;
 
   a.ready.then( function()
   {
     test.case = 'mode : shell';
 
-    o =
+    o2 =
     {
       execPath :  'node ' + programPath,
       args : [ 'staging', 'debug' ],
@@ -1158,13 +1153,13 @@ function shell2( test )
   {
     /* mode : shell, stdio : pipe */
 
-    var options = _.mapSupplement( {}, _.cloneJust( o ), o3 );
+    var options = _.mapSupplement( {}, o2, o3 );
 
     return _.process.start( options )
     .then( function()
     {
       test.identical( options.exitCode, 0 );
-      test.identical( options.output, o.args.join( ' ' ) + '\n' );
+      test.identical( options.output, o2.args.join( ' ' ) + '\n' );
       return null;
     })
   })
@@ -1175,7 +1170,7 @@ function shell2( test )
   {
     test.case = 'mode : shell, passingThrough : true, no args';
 
-    o =
+    o2 =
     {
       execPath :  'node ' + programPath,
       mode : 'shell',
@@ -1189,7 +1184,7 @@ function shell2( test )
   {
     /* mode : shell, stdio : pipe, passingThrough : true */
 
-    var options = _.mapSupplement( {}, o, o3 );
+    var options = _.mapSupplement( {}, o2, o3 );
 
     return _.process.start( options )
     .then( function()
@@ -1207,7 +1202,7 @@ function shell2( test )
   {
     test.case = 'mode : spawn, passingThrough : true, only filePath in args';
 
-    o =
+    o2 =
     {
       execPath :  'node',
       args : [ programPath ],
@@ -1221,7 +1216,7 @@ function shell2( test )
   {
     /* mode : spawn, stdio : pipe, passingThrough : true */
 
-    var options = _.mapSupplement( {}, o, o3 );
+    var options = _.mapSupplement( {}, o2, o3 );
 
     return _.process.start( options )
     .then( function()
@@ -1239,7 +1234,7 @@ function shell2( test )
   {
     test.case = 'mode : spawn, passingThrough : true, incorrect usage of o.path in spawn mode';
 
-    o =
+    o2 =
     {
       execPath :  'node ' + testApp,
       args : [ 'staging' ],
@@ -1251,7 +1246,7 @@ function shell2( test )
   })
   .then( function( arg )
   {
-    var options = _.mapSupplement( {}, o, o3 );
+    var options = _.mapSupplement( {}, o2, o3 );
     return test.shouldThrowErrorAsync( _.process.start( options ) );
   })
 
@@ -1261,7 +1256,7 @@ function shell2( test )
   {
     test.case = 'mode : shell, passingThrough : true';
 
-    o =
+    o2 =
     {
       execPath :  'node ' + programPath,
       args : [ 'staging', 'debug' ],
@@ -1275,7 +1270,7 @@ function shell2( test )
   {
     /* mode : shell, stdio : pipe, passingThrough : true */
 
-    var options = _.mapSupplement( {}, o, o3 );
+    var options = _.mapSupplement( {}, o2, o3 );
 
     return _.process.start( options )
     .then( function()
@@ -1299,8 +1294,10 @@ function shell2( test )
 
 //
 
-/* qqq : split by modes | aaa : Done. Yevhen S. */
-/* qqq : actualize names of test routines */
+/* qqq for Yevhen : split by modes | aaa : Done. Yevhen S.
+xxx qqq for Yevhen : ?
+*/
+/* qqq for Yevhen : actualize names of test routines */
 function shellCurrentPath( test )
 {
   let context = this;
@@ -1414,7 +1411,7 @@ function shellCurrentPath( test )
     })
   })
 
-  // qqq Vova : switch on?
+  // qqq for Vova : switch on?
   // con.then( function()
   // {
   //   test.case = 'mode : exec';
@@ -1651,7 +1648,7 @@ function shellCurrentPath( test )
 
   /* */
 
-  // qqq Vova : switch on?
+  // qqq for Vova : switch on?
   // con.then( function()
   // {
   //   test.case = 'normalized, currentPath leads to root of current drive, mode : exec';
@@ -1741,7 +1738,7 @@ function shellCurrentPath( test )
   function testApp()
   {
     debugger
-    console.log( process.cwd() ); /* qqq : should not be visible if verbosity of tester is low, if possible */
+    console.log( process.cwd() ); /* qqq for Vova : should not be visible if verbosity of tester is low, if possible */
     if( process.send )
     process.send({ currentPath : process.cwd() })
   }
@@ -1878,7 +1875,7 @@ function shellCurrentPaths( test )
 
 /*
 
-  qqq : investigate please
+  zzz : investigate please
   test routine shellFork causes
 
  1: node::DecodeWrite
@@ -3829,11 +3826,11 @@ function shellDryRun( test )
   }
 }
 
-/* qqq : describe shellDryRun */
+/* qqq for Vova : describe shellDryRun */
 
 //
 
-function startNjsWithReadyDelayStructural( test ) /* qqq : implement additional test case with option detaching:1 */
+function startNjsWithReadyDelayStructural( test ) /* qqq for Yevhen : implement additional test case with option detaching:1 */
 {
   let context = this;
   let a = test.assetFor( false );
@@ -4057,7 +4054,7 @@ function shellArgsOption( test )
 //
 
 /*
-qqq : split shellArgumentsParsing and similar test routine
+qqq for Yevhen : split shellArgumentsParsing and similar test routine
 a test routine per mode
 */
 
@@ -4351,7 +4348,7 @@ function shellArgumentsParsing( test )
 
   /* - */
 
-  /* - end of fork - */ /* qqq : split test routine by modes */
+  /* - end of fork - */ /* qqq for Yevhen : split test routine by modes */
 
   .then( () =>
   {
@@ -5775,7 +5772,7 @@ function shellArgumentsNestedQuotes( test )
   .then( () =>
   {
     test.case = 'shell'
-    // qqq Vova : review this case
+    // qqq for Vova : review this case
     let con = new _.Consequence().take( null );
     let args =
     [
@@ -5868,7 +5865,7 @@ function shellArgumentsNestedQuotes( test )
   // {
   //   test.case = 'exec'
   //
-  //   // qqq Vova : review this case
+  //   // qqq for Vova : review this case
   //
   //   let con = new _.Consequence().take( null );
   //   let args =
@@ -9242,7 +9239,7 @@ shellProcedureExists.description =
 
 //
 
-/* qqq Yevgen : implement for other modes */
+/* qqq for Yevhen : implement for other modes */
 function startOnTerminateSeveralCallbacksChronology( test )
 {
   let context = this;
@@ -9589,8 +9586,8 @@ function shellTerminateHangedWithExitHandler( test )
 
   if( process.platform === 'win32' )
   {
-    //qqq: windows-kill doesn't work correctrly on node 14
-    //qqq: investigate if its possible to use process.kill instead of windows-kill
+    //zzz: windows-kill doesn't work correctrly on node 14
+    //zzz: investigate if its possible to use process.kill instead of windows-kill
     test.identical( 1, 1 )
     return;
   }
@@ -9707,8 +9704,8 @@ function shellTerminateAfterLoopRelease( test )
 
   if( process.platform === 'win32' )
   {
-    //qqq: windows-kill doesn't work correctrly on node 14
-    //qqq: investigate if its possible to use process.kill instead of windows-kill
+    //zzz: windows-kill doesn't work correctrly on node 14
+    //zzz: investigate if its possible to use process.kill instead of windows-kill
     test.identical( 1, 1 )
     return;
   }
@@ -11245,7 +11242,7 @@ startDetachingTerminationBegin.timeOut = 180000;
 
 //
 
-/* qqq : implement for other modes */
+/* qqq for Yevhen : implement for other modes */
 function startDetachingChildExitsAfterParent( test )
 {
   let context = this;
@@ -11357,7 +11354,7 @@ After 5 seconds child process creates test file in working directory and exits.
 
 //
 
-/* qqq : implement for other modes */
+/* qqq for Yevhen : implement for other modes */
 function startDetachingChildExitsBeforeParent( test )
 {
   let context = this;
@@ -11736,7 +11733,7 @@ ProcessWatched should not throw any error.
 
 //
 
-/* qqq : implement for other modes */
+/* qqq for Yevhen : implement for other modes */
 function startDetachingChildExistsBeforeParentWaitForTermination( test )
 {
   let context = this;
@@ -11805,7 +11802,7 @@ Test routine waits until o.onTerminate resolves message about termination of the
 
 //
 
-/* qqq : implement for other modes */
+/* qqq for Yevhen : implement for other modes */
 function startDetachingEndCompetitorIsExecuted( test )
 {
   let context = this;
@@ -11894,7 +11891,7 @@ o.ended is true when onTerminate callback is executed.
 
 //
 
-/* qqq : implement for other modes */
+/* qqq for Yevhen : implement for other modes */
 function startDetachedOutputStdioIgnore( test )
 {
   let context = this;
@@ -12030,7 +12027,7 @@ function startDetachedOutputStdioIgnore( test )
 }
 
 //
-/* qqq : implement for other modes */
+/* qqq for Yevhen : implement for other modes */
 function startDetachedOutputStdioPipe( test )
 {
   let context = this;
@@ -12174,7 +12171,7 @@ function startDetachedOutputStdioPipe( test )
 }
 
 //
-/* qqq : implement for other modes */
+/* qqq for Yevhen : implement for other modes */
 function startDetachedOutputStdioInherit( test )
 {
   let context = this;
@@ -12261,7 +12258,7 @@ function startDetachedOutputStdioInherit( test )
 }
 
 //
-/* qqq : implement for other modes */
+/* qqq for Yevhen : implement for other modes */
 function startDetachingModeSpawnIpc( test )
 {
   let context = this;
@@ -12382,7 +12379,7 @@ function startDetachingModeSpawnIpc( test )
 }
 
 //
-/* qqq : implement for other modes */
+/* qqq for Yevhen : implement for other modes */
 function startDetachingModeForkIpc( test )
 {
   let context = this;
@@ -12427,7 +12424,6 @@ function startDetachingModeForkIpc( test )
     o.onTerminate.then( ( op ) =>
     {
       track.push( 'onTerminate' );
-      debugger
       test.identical( op.exitCode, 0 );
       test.identical( message, 'child' );
       test.identical( track, [ 'onStart', 'onTerminate' ] );
@@ -12504,7 +12500,7 @@ function startDetachingModeForkIpc( test )
 }
 
 //
-/* qqq : implement for other modes */
+/* qqq for Yevhen : implement for other modes */
 function startDetachingModeShellIpc( test )
 {
   let context = this;
@@ -12578,7 +12574,7 @@ function startDetachingModeShellIpc( test )
 }
 
 //
-/* qqq : implement for other modes */
+/* qqq for Yevhen : implement for other modes */
 function startDetachingThrowing( test )
 {
   let context = this;
@@ -12730,7 +12726,7 @@ function startNjsDetachingChildThrowing( test )
 
 //
 
-/* qqq : implement for other modes */
+/* qqq for Yevhen : implement for other modes */
 function startDetachingTrivial( test )
 {
   let context = this;
@@ -13162,7 +13158,7 @@ startOnStart.timeOut = 120000;
 
 //
 
-function startOnTerminate( test ) /* qqq2 : add other modes. ask how to */
+function startOnTerminate( test ) /* qqq for Yevhen : add other modes. ask how to */
 {
   let context = this;
   let a = test.assetFor( false );
@@ -13673,10 +13669,9 @@ function startCallbackIsNotAConsequence( test )
   let context = this;
   let a = test.assetFor( false );
   let programPath = a.path.nativize( a.program( testApp ) );
-
-  let modes = [ 'fork', 'spawn', 'shell' ];
+  // let modes = [ 'fork', 'spawn', 'shell' ];
+  let modes = [ 'fork' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
-
   return a.ready;
 
   /* - */
@@ -13693,7 +13688,10 @@ function startCallbackIsNotAConsequence( test )
       {
         execPath : mode !== 'fork' ? 'node testApp.js' : 'testApp.js',
         mode,
-        onStart
+        onStart,
+        onDisconnect,
+        onTerminate,
+        ready,
       }
       var got = _.process.start( o );
       test.is( _.consequenceIs( got ) );
@@ -13715,7 +13713,10 @@ function startCallbackIsNotAConsequence( test )
       {
         execPath : mode !== 'fork' ? 'node testApp.js' : 'testApp.js',
         mode,
-        onTerminate
+        onStart,
+        onDisconnect,
+        onTerminate,
+        ready,
       }
       var got = _.process.start( o );
       test.is( _.consequenceIs( got ) );
@@ -13812,7 +13813,7 @@ function shellConcurrent( test )
   let time = 0;
   let filePath = a.path.nativize( a.abs( a.routinePath, 'file.txt' ) );
 
-  logger.log( 'this is ❮foreground : bright white❯an❮foreground : default❯ experiment' ); /* qqq fix logger, please !!! */
+  logger.log( 'this is ❮foreground : bright white❯an❮foreground : default❯ experiment' ); /* xxx fix logger, please !!! */
 
   /* - */
 
@@ -16515,7 +16516,8 @@ function kill( test )
   //   return ready;
   // })
 
-  // qqq Vova : find how to simulate EPERM error using process.kill and write test case
+  // qqq for Vova : separate this into stand-alone experiment
+  // zzz for Vova : find how to simulate EPERM error using process.kill and write test case
 
   /* */
 
@@ -16823,8 +16825,8 @@ function terminate( test )
 
   if( process.platform === 'win32' )
   {
-    //qqq: windows-kill doesn't work correctrly on node 14
-    //qqq: investigate if its possible to use process.kill instead of windows-kill
+    // zzz : windows-kill doesn't work correctrly on node 14
+    // zzz : investigate if its possible to use process.kill instead of windows-kill
     test.identical( 1, 1 )
     return;
   }
@@ -17648,8 +17650,8 @@ function terminateComplex( test )
 
   if( process.platform === 'win32' )
   {
-    //qqq: windows-kill doesn't work correctly in all scenarios
-    //qqq: investigate if its possible to use process.kill instead of windows-kill
+    // zzz : windows-kill doesn't work correctly in all scenarios
+    // zzz : investigate if its possible to use process.kill instead of windows-kill
     test.identical( 1, 1 )
     return;
   }
@@ -17719,7 +17721,7 @@ function terminateComplex( test )
     /* zzz */
     ready.then( ( got ) =>
     {
-      test.identical( got.exitCode, 0 ); /* qqq2 : check op.ended if op.exitCode is checked */
+      test.identical( got.exitCode, 0 ); /* qqq for Yevhen : check op.ended if op.exitCode is checked */
       test.identical( got.exitSignal, null );
       test.identical( _.strCount( got.output, 'SIGINT' ), 1 );
       test.is( !_.process.isAlive( o.process.pid ) )
@@ -17873,8 +17875,8 @@ function terminateDetachedComplex( test )
 
   if( process.platform === 'win32' )
   {
-    //qqq: windows-kill doesn't work correctly with detached processes
-    //qqq: investigate if its possible to use process.kill instead of windows-kill
+    // zzz : windows-kill doesn't work correctly with detached processes
+    // zzz : investigate if its possible to use process.kill instead of windows-kill
     test.identical( 1, 1 )
     return;
   }
@@ -18033,7 +18035,7 @@ function terminateDetachedComplex( test )
 
   /* - */
 
-  // qqq Vova : switch on?
+  // qqq for Vova : switch on?
   // .then( () =>
   // {
   //   test.case = 'Sending signal to child process that has detached child, detached child should continue to work'
@@ -18173,8 +18175,8 @@ function terminateWithChildren( test )
 
   if( process.platform === 'win32' )
   {
-    //qqq: windows-kill doesn't work correctly with detached processes
-    //qqq: investigate if its possible to use process.kill instead of windows-kill
+    // zzz : windows-kill doesn't work correctly with detached processes
+    // zzz : investigate if its possible to use process.kill instead of windows-kill
     test.identical( 1, 1 )
     return;
   }
@@ -18440,8 +18442,8 @@ function terminateWithDetachedChildren( test )
 
   if( process.platform === 'win32' )
   {
-    //qqq: windows-kill doesn't work correctly with detached processes
-    //qqq: investigate if its possible to use process.kill instead of windows-kill
+    // zzz : windows-kill doesn't work correctly with detached processes
+    // zzz : investigate if its possible to use process.kill instead of windows-kill
     test.identical( 1, 1 )
     return;
   }
@@ -18479,7 +18481,7 @@ function terminateWithDetachedChildren( test )
         test.is( _.strHas( got.output, 'SIGINT' ) );
         return _.time.out( 9000, () =>
         {
-          /* qqq Vova : problem with termination of detached proces on Windows, child process does't receive SIGINT */
+          /* xxx zzz : problem with termination of detached proces on Windows, child process does't receive SIGINT */
           test.is( a.fileProvider.fileExists( a.abs( a.routinePath, children[ 0 ].toString() ) ) )
           test.is( a.fileProvider.fileExists( a.abs( a.routinePath, children[ 1 ].toString() ) ) )
           test.is( !_.process.isAlive( o.process.pid ) )
@@ -18600,8 +18602,8 @@ function terminateTimeOut( test )
 
   if( process.platform === 'win32' )
   {
-    //qqq: windows-kill doesn't work correctly on node14
-    //qqq: investigate if its possible to use process.kill instead of windows-kill
+    // zzz : windows-kill doesn't work correctly on node14
+    // zzz : investigate if its possible to use process.kill instead of windows-kill
     test.identical( 1, 1 )
     return;
   }
@@ -18725,7 +18727,7 @@ function terminateTimeOut( test )
 
   /* - */
 
-  // qqq Vova : switch on?
+  // qqq for Vova : switch on?
   // .then( () =>
   // {
   //   var o =
@@ -18807,8 +18809,8 @@ function terminateDifferentStdio( test )
 
   if( process.platform === 'win32' )
   {
-    //qqq: windows-kill doesn't work correctly on node14
-    //qqq: investigate if its possible to use process.kill instead of windows-kill
+    // zzz : windows-kill doesn't work correctly on node14
+    // zzz : investigate if its possible to use process.kill instead of windows-kill
     test.identical( 1, 1 )
     return;
   }
@@ -19446,7 +19448,7 @@ experiment.experimental = 1;
 
 //
 
-/* qqq Vova : extend, cover kill of group of processes */
+/* zzz for Vova : extend, cover kill of group of processes */
 
 function killComplex( test )
 {
@@ -19649,7 +19651,6 @@ function experiment( test )
   let a = test.assetFor( false );
   let testAppPath = a.program( testApp );
   let testAppPath2 = a.program( testApp2 );
-
   let o3 =
   {
     outputPiping : 1,
@@ -19658,9 +19659,7 @@ function experiment( test )
     throwingExitCode : 1
   }
 
-  /* */
-
-  var o;
+  let o2;
 
   /* - */
 
@@ -19680,7 +19679,7 @@ function experiment( test )
   })
   .then( function( arg )
   {
-    var options = _.mapSupplement( {}, o, o3 );
+    var options = _.mapSupplement( {}, o2, o3 );
 
     return _.process.start( options )
     .then( function()
@@ -19851,8 +19850,8 @@ var Proto =
     shellShellSyncDeasyncThrowing,
     shellForkSyncDeasync,
     shellForkSyncDeasyncThrowing,
-    // shellExecSyncDeasync, /* qqq : ? */
-    // shellExecSyncDeasyncThrowing, /* qqq : ? */
+    // shellExecSyncDeasync, /* qqq for Vova : ? */
+    // shellExecSyncDeasyncThrowing, /* qqq for Vova : ? */
 
     shellMultipleSyncDeasync,
     shellDryRun,
@@ -19887,9 +19886,9 @@ var Proto =
 
     shellStartingDelay,
     shellStartingTime,
-    // shellStartingSuspended, /* qqq : ? */
-    // shellAfterDeath, /* qqq : fix */
-    // shellAfterDeathOutput, /* qqq : ? */
+    // shellStartingSuspended, /* zzz : ? */
+    // shellAfterDeath, /* zzz : fix */
+    // shellAfterDeathOutput, /* zzz : ? */
 
     /*  */
 
@@ -19965,7 +19964,7 @@ var Proto =
     terminateComplex,
     terminateDetachedComplex,
     terminateWithChildren,
-    terminateWithDetachedChildren, // qqq Vova:investigate and fix termination of deatched process on Windows
+    terminateWithDetachedChildren, // zzz for Vova:investigate and fix termination of deatched process on Windows
     terminateTimeOut,
     terminateDifferentStdio,
     children,
