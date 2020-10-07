@@ -20,11 +20,12 @@ let Self = {};
 
 /* qqq for Vova : make general table in md file for this: "Vova qqq: close event is not emitted for disconnected detached child in fork mode" */
 
-/* qqq for Yevhen : parametrize all time delays, don't forget to leave comment if you change any time delay */
-/* qqq for Yevhen : implement for 3 modes where test routine is not implemented for 3 modes */
 /* qqq for Yevhen : make sure variable "got" is used as should */
 /* qqq for Yevhen : actualize names of test routines */
 /* qqq for Yevhen : check op.ended if op.exitCode is checked */
+
+/* qqq for Yevhen : parametrize all time delays, don't forget to leave comment if you change any time delay */
+/* qqq for Yevhen : implement for 3 modes where test routine is not implemented for 3 modes */
 
 // --
 // context
