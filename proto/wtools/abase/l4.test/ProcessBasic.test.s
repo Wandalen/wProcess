@@ -5474,7 +5474,12 @@ function shellArgumentsNestedQuotes( test )
   .then( () =>
   {
     test.case = 'shell'
-    // qqq for Vova : review this case
+    /*
+     This case shows how shell is interpreting backquote on different platforms.
+     It can't be used for arguments wrapping on linux/mac:
+     https://www.gnu.org/software/bash/manual/html_node/Command-Substitution.html
+    */
+
     let con = new _.Consequence().take( null );
     let args =
     [
@@ -5562,100 +5567,6 @@ function shellArgumentsNestedQuotes( test )
 
     return con;
   })
-
-  // .then( () =>
-  // {
-  //   test.case = 'exec'
-  //
-  //   // qqq for Vova : review this case
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let args =
-  //   [
-  //     ` '\'s-s\''  '\"s-d\"'  '\`s-b\`'  `,
-  //     ` "\'d-s\'"  "\"d-d\""  "\`d-b\`"  `,
-  //     ` \`\'b-s\'\`  \`\"b-d\"\`  \`\`b-b\`\` `,
-  //   ]
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' ' + args.join( ' ' ),
-  //     mode : 'exec',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     if( process.platform === 'win32' )
-  //     {
-  //       let got = JSON.parse( o.output );
-  //       test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-  //       test.identical( got.map, {} )
-  //       let scriptArgs =
-  //       [
-  //         '\'\'s-s\'\'',
-  //         '\'s-d\'',
-  //         '\'`s-b`\'',
-  //         '\'d-s\'',
-  //         'd-d',
-  //         '`d-b`',
-  //         '`\'b-s\'`',
-  //         '\`b-d`',
-  //         '``b-b``'
-  //       ]
-  //       test.identical( got.scriptArgs, scriptArgs )
-  //     }
-  //     else
-  //     {
-  //       test.identical( _.strCount( o.output, 'not found' ), 3 );
-  //     }
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  //
-  // })
-  //
-  // .then( () =>
-  // {
-  //   test.case = 'exec'
-  //
-  //   let con = new _.Consequence().take( null );
-  //   let args =
-  //   [
-  //     ` '\'s-s\''  '\"s-d\"'  '\`s-b\`'  `,
-  //     ` "\'d-s\'"  "\"d-d\""  "\`d-b\`"  `,
-  //     ` \`\'b-s\'\`  \`\"b-d\"\`  \`\`b-b\`\` `,
-  //   ]
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathSpace ),
-  //     args : args.slice(),
-  //     mode : 'exec',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     let got = JSON.parse( o.output );
-  //     test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-  //     test.identical( got.map, {} )
-  //     test.identical( got.scriptArgs, args )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  //
-  // })
 
   /* */
 
