@@ -782,7 +782,7 @@ function basic( test )
 
 //
 
-function shellSync( test )
+function startSync( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -940,7 +940,7 @@ function shellSync( test )
 
 //
 
-function shellSyncAsync( test )
+function startSyncAsync( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -1125,7 +1125,7 @@ function shellSyncAsync( test )
 
 //
 
-function shell2( test )
+function start2( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -1303,7 +1303,7 @@ function shell2( test )
 xxx qqq for Yevhen : not really
 */
 /* qqq for Yevhen : actualize names of test routines */
-function shellCurrentPath( test )
+function startCurrentPath( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -1752,7 +1752,7 @@ function shellCurrentPath( test )
 
 //
 
-function shellCurrentPaths( test )
+function startCurrentPaths( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -1900,7 +1900,7 @@ function shellCurrentPaths( test )
 */
 
 
-function shellFork( test )
+function startFork( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -2237,7 +2237,7 @@ function shellFork( test )
 
 //
 
-function shellWithoutExecPath( test )
+function startWithoutExecPath( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -2312,7 +2312,7 @@ function shellWithoutExecPath( test )
 
 //
 
-function shellSpawnSyncDeasync( test )
+function startSpawnSyncDeasync( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -2413,11 +2413,11 @@ function shellSpawnSyncDeasync( test )
   }
 }
 
-shellSpawnSyncDeasync.timeOut = 15000;
+startSpawnSyncDeasync.timeOut = 15000;
 
 //
 
-function shellSpawnSyncDeasyncThrowing( test )
+function startSpawnSyncDeasyncThrowing( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -2503,11 +2503,11 @@ function shellSpawnSyncDeasyncThrowing( test )
   }
 }
 
-shellSpawnSyncDeasyncThrowing.timeOut = 15000;
+startSpawnSyncDeasyncThrowing.timeOut = 15000;
 
 //
 
-function shellShellSyncDeasync( test )
+function startShellSyncDeasync( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -2610,11 +2610,11 @@ function shellShellSyncDeasync( test )
   }
 }
 
-shellShellSyncDeasync.timeOut = 15000;
+startShellSyncDeasync.timeOut = 15000;
 
 //
 
-function shellShellSyncDeasyncThrowing( test )
+function startShellSyncDeasyncThrowing( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -2701,11 +2701,11 @@ function shellShellSyncDeasyncThrowing( test )
 
 }
 
-shellShellSyncDeasyncThrowing.timeOut = 15000;
+startShellSyncDeasyncThrowing.timeOut = 15000;
 
 //
 
-function shellForkSyncDeasync( test )
+function startForkSyncDeasync( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -2805,11 +2805,11 @@ function shellForkSyncDeasync( test )
   }
 }
 
-shellForkSyncDeasync.timeOut = 15000;
+startForkSyncDeasync.timeOut = 15000;
 
 //
 
-function shellForkSyncDeasyncThrowing( test )
+function startForkSyncDeasyncThrowing( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -2893,7 +2893,7 @@ function shellForkSyncDeasyncThrowing( test )
   }
 }
 
-shellForkSyncDeasyncThrowing.timeOut = 15000;
+startForkSyncDeasyncThrowing.timeOut = 15000;
 
 //
 
@@ -3112,7 +3112,7 @@ shellForkSyncDeasyncThrowing.timeOut = 15000;
 
 //
 
-function shellMultipleSyncDeasync( test )
+function startMultipleSyncDeasync( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -3767,7 +3767,7 @@ function shellMultipleSyncDeasync( test )
 
 //
 
-function shellDryRun( test )
+function startDryRun( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -3980,7 +3980,7 @@ startNjsWithReadyDelayStructural.description =
 
 //
 
-function shellArgsOption( test )
+function startArgsOption( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -4063,7 +4063,7 @@ qqq for Yevhen : split shellArgumentsParsing and similar test routine
 a test routine per mode
 */
 
-function shellArgumentsParsing( test )
+function startArgumentsParsing( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -5049,11 +5049,11 @@ function shellArgumentsParsing( test )
 
 }
 
-shellArgumentsParsing.timeOut = 60000;
+startArgumentsParsing.timeOut = 60000;
 
 //
 
-function shellArgumentsParsingNonTrivial( test )
+function startArgumentsParsingNonTrivial( test )
 {
   let context = this;
 
@@ -5593,12 +5593,12 @@ function shellArgumentsParsingNonTrivial( test )
   }
 }
 
-shellArgumentsParsingNonTrivial.timeOut = 60000;
+startArgumentsParsingNonTrivial.timeOut = 60000;
 
 
 //
 
-function shellArgumentsNestedQuotes( test )
+function startArgumentsNestedQuotes( test )
 {
   let context = this;
 
@@ -5977,11 +5977,11 @@ function shellArgumentsNestedQuotes( test )
   }
 }
 
-shellArgumentsNestedQuotes.timeOut = 60000;
+startArgumentsNestedQuotes.timeOut = 60000;
 
 //
 
-function shellExecPathQuotesClosing( test )
+function startExecPathQuotesClosing( test )
 {
   let context = this;
 
@@ -6774,11 +6774,11 @@ function shellExecPathQuotesClosing( test )
   }
 }
 
-shellExecPathQuotesClosing.timeOut = 60000;
+startExecPathQuotesClosing.timeOut = 60000;
 
 //
 
-function shellExecPathSeveralCommands( test )
+function startExecPathSeveralCommands( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -6949,11 +6949,11 @@ function shellExecPathSeveralCommands( test )
   }
 }
 
-shellExecPathSeveralCommands.timeOut = 60000;
+startExecPathSeveralCommands.timeOut = 60000;
 
 //
 
-function shellVerbosity( test )
+function startVerbosity( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -7261,7 +7261,7 @@ function shellVerbosity( test )
 
 //
 
-function shellErrorHadling( test )
+function startErrorHadling( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -7527,7 +7527,7 @@ function shellErrorHadling( test )
 
 //
 
-function shellNode( test )
+function startNode( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -7658,7 +7658,7 @@ function shellNode( test )
 
 }
 
-shellNode.timeOut = 20000;
+startNode.timeOut = 20000;
 
 //
 
@@ -7942,11 +7942,11 @@ function shellModeShellNonTrivial( test )
   }
 }
 
-shellModeShellNonTrivial.timeOut = 60000;
+startModeShellNonTrivial.timeOut = 60000;
 
 //
 
-function shellArgumentsHandlingTrivial( test )
+function startArgumentsHandlingTrivial( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -7988,7 +7988,7 @@ function shellArgumentsHandlingTrivial( test )
 
 //
 
-function shellArgumentsHandling( test )
+function startArgumentsHandling( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -9000,7 +9000,7 @@ startPassingThroughExecPathWithSpace.timeOut = 60000;
 
 //
 
-function shellProcedureTrivial( test )
+function startProcedureTrivial( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -9120,15 +9120,15 @@ function shellProcedureTrivial( test )
   }
 }
 
-shellProcedureTrivial.timeOut = 60000;
-shellProcedureTrivial.description =
+startProcedureTrivial.timeOut = 60000;
+startProcedureTrivial.description =
 `
   Start routine creates procedure for new child process, start it and terminates when process closes
 `
 
 //
 
-function shellProcedureExists( test )
+function startProcedureExists( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -9236,8 +9236,8 @@ function shellProcedureExists( test )
 
 }
 
-shellProcedureExists.timeOut = 60000;
-shellProcedureExists.description =
+startProcedureExists.timeOut = 60000;
+startProcedureExists.description =
 `
   Start routine does not create procedure for new child process if it was already created by process watcher
 `
@@ -9583,7 +9583,7 @@ startChronology.description =
 
 //
 
-function shellTerminateHangedWithExitHandler( test )
+function startTerminateHangedWithExitHandler( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -9683,9 +9683,9 @@ function shellTerminateHangedWithExitHandler( test )
   }
 }
 
-shellTerminateHangedWithExitHandler.timeOut = 20000;
+startTerminateHangedWithExitHandler.timeOut = 20000;
 
-/* shellTerminateHangedWithExitHandler.description =
+/* startTerminateHangedWithExitHandler.description =
 `
   Test app - code that blocks event loop and appExitHandlerRepair called at start
 
@@ -9701,7 +9701,7 @@ shellTerminateHangedWithExitHandler.timeOut = 20000;
 
 //
 
-function shellTerminateAfterLoopRelease( test )
+function startTerminateAfterLoopRelease( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -9811,7 +9811,7 @@ function shellTerminateAfterLoopRelease( test )
   }
 }
 
-shellTerminateAfterLoopRelease.description =
+startTerminateAfterLoopRelease.description =
 `
   Test app - code that blocks event loop for short period of time and appExitHandlerRepair called at start
 
@@ -9825,7 +9825,7 @@ shellTerminateAfterLoopRelease.description =
 
 //
 
-function shellStartingDelay( test )
+function startStartingDelay( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -9893,8 +9893,8 @@ function shellStartingDelay( test )
 
 //
 
-/* qqq2 : make it similar to test routine shellStartingDelay aaa:done*/
-function shellStartingTime( test )
+/* qqq2 : make it similar to test routine startStartingDelay aaa:done*/
+function startStartingTime( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -19915,56 +19915,56 @@ var Proto =
     exitCode,
 
     basic,
-    shellSync,
-    shellSyncAsync,
-    shell2,
-    shellCurrentPath,
-    shellCurrentPaths,
-    shellFork,
-    shellWithoutExecPath,
+    startSync,
+    startSyncAsync,
+    start2,
+    startCurrentPath,
+    startCurrentPaths,
+    startFork,
+    startWithoutExecPath,
 
-    shellSpawnSyncDeasync,
-    shellSpawnSyncDeasyncThrowing,
-    shellShellSyncDeasync,
-    shellShellSyncDeasyncThrowing,
-    shellForkSyncDeasync,
-    shellForkSyncDeasyncThrowing,
+    startSpawnSyncDeasync,
+    startSpawnSyncDeasyncThrowing,
+    startShellSyncDeasync,
+    startShellSyncDeasyncThrowing,
+    startForkSyncDeasync,
+    startForkSyncDeasyncThrowing,
     // shellExecSyncDeasync, /* qqq for Vova : ? */
     // shellExecSyncDeasyncThrowing, /* qqq for Vova : ? */
 
-    shellMultipleSyncDeasync,
-    shellDryRun,
+    startMultipleSyncDeasync,
+    startDryRun,
     startNjsWithReadyDelayStructural,
 
-    shellArgsOption,
-    shellArgumentsParsing,
-    shellArgumentsParsingNonTrivial,
-    shellArgumentsNestedQuotes,
-    shellExecPathQuotesClosing,
-    shellExecPathSeveralCommands,
-    shellVerbosity,
-    shellErrorHadling,
-    shellNode,
-    shellModeShellNonTrivial,
-    shellArgumentsHandlingTrivial,
-    shellArgumentsHandling,
+    startArgsOption,
+    startArgumentsParsing,
+    startArgumentsParsingNonTrivial,
+    startArgumentsNestedQuotes,
+    startExecPathQuotesClosing,
+    startExecPathSeveralCommands,
+    startVerbosity,
+    startErrorHadling,
+    startNode,
+    startModeShellNonTrivial,
+    startArgumentsHandlingTrivial,
+    startArgumentsHandling,
     importantModeShell,
 
     startExecPathWithSpace,
     startNjsPassingThroughExecPathWithSpace,
     startPassingThroughExecPathWithSpace,
 
-    shellProcedureTrivial,
-    shellProcedureExists,
+    startProcedureTrivial,
+    startProcedureExists,
     startOnTerminateSeveralCallbacksChronology,
     startChronology,
     experiment2,
 
-    shellTerminateHangedWithExitHandler,
-    shellTerminateAfterLoopRelease,
+    startTerminateHangedWithExitHandler,
+    startTerminateAfterLoopRelease,
 
-    shellStartingDelay,
-    shellStartingTime,
+    startStartingDelay,
+    startStartingTime,
     // shellStartingSuspended, /* zzz : ? */
     // shellAfterDeath, /* zzz : fix */
     // shellAfterDeathOutput, /* zzz : ? */
