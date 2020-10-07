@@ -10915,6 +10915,9 @@ function startDetachingTerminationBegin( test ) /* qqq2 : extend for other modes
     {
       test.case = 'process termination begins after short delay, detached process should continue to work after parent death';
 
+      a.fileProvider.filesDelete( testFilePath );
+      a.fileProvider.dirMakeForFile( testFilePath );
+
       let o =
       {
         execPath : 'node testAppParent.js stdio : ignore outputPiping : 0 outputCollecting : 0',
@@ -10927,19 +10930,19 @@ function startDetachingTerminationBegin( test ) /* qqq2 : extend for other modes
 
       let data;
 
-      o.process.on( 'message', ( got ) => /* qqq : got -> e */
+      o.process.on( 'message', ( e ) => /* qqq : got -> e */
       {
-        data = got;
+        data = e;
         data.childPid = _.numberFrom( data.childPid );
       })
 
-      con.then( ( got ) =>
+      con.then( ( op ) =>
       {
         test.will = 'parent is dead, child is still alive';
-        test.identical( got.exitCode, 0 );
-        test.is( !_.process.isAlive( o.process.pid ) );
+        test.identical( op.exitCode, 0 );
+        test.is( !_.process.isAlive( op.process.pid ) );
         test.is( _.process.isAlive( data.childPid ) );
-        return _.time.out( context.t2 );
+        return _.time.out( context.t2 * 2 );
       })
 
       con.then( () =>
@@ -10968,6 +10971,9 @@ function startDetachingTerminationBegin( test ) /* qqq2 : extend for other modes
 
       test.case = 'process termination begins after short delay, detached process should continue to work after parent death';
 
+      a.fileProvider.filesDelete( testFilePath );
+      a.fileProvider.dirMakeForFile( testFilePath );
+
       let o =
       {
         execPath : 'node testAppParent.js stdio : ignore ipc : true outputPiping : 0 outputCollecting : 0',
@@ -10980,19 +10986,19 @@ function startDetachingTerminationBegin( test ) /* qqq2 : extend for other modes
 
       let data;
 
-      o.process.on( 'message', ( got ) =>
+      o.process.on( 'message', ( e ) =>
       {
-        data = got;
+        data = e;
         data.childPid = _.numberFrom( data.childPid );
       })
 
-      con.then( ( got ) =>
+      con.then( ( op ) =>
       {
-        test.identical( got.exitCode, 0 );
+        test.identical( op.exitCode, 0 );
         test.will = 'parent is dead, child is still alive';
-        test.is( !_.process.isAlive( o.process.pid ) );
+        test.is( !_.process.isAlive( op.process.pid ) );
         test.is( _.process.isAlive( data.childPid ) );
-        return _.time.out( context.t2 );
+        return _.time.out( context.t2 * 2 );
       })
 
       con.then( () =>
@@ -11019,6 +11025,9 @@ function startDetachingTerminationBegin( test ) /* qqq2 : extend for other modes
     {
       test.case = 'process termination begins after short delay, detached process should continue to work after parent death';
 
+      a.fileProvider.filesDelete( testFilePath );
+      a.fileProvider.dirMakeForFile( testFilePath );
+
       let o =
       {
         execPath : 'node testAppParent.js stdio : pipe',
@@ -11031,19 +11040,19 @@ function startDetachingTerminationBegin( test ) /* qqq2 : extend for other modes
 
       let data;
 
-      o.process.on( 'message', ( got ) =>
+      o.process.on( 'message', ( e ) =>
       {
-        data = got;
+        data = e;
         data.childPid = _.numberFrom( data.childPid );
       })
 
-      con.then( ( got ) =>
+      con.then( ( op ) =>
       {
-        test.identical( got.exitCode, 0 );
+        test.identical( op.exitCode, 0 );
         test.will = 'parent is dead, child is still alive';
-        test.is( !_.process.isAlive( o.process.pid ) );
+        test.is( !_.process.isAlive( op.process.pid ) );
         test.is( _.process.isAlive( data.childPid ) );
-        return _.time.out( context.t2 );
+        return _.time.out( context.t2 * 2 );
       })
 
       con.then( () =>
@@ -11071,6 +11080,9 @@ function startDetachingTerminationBegin( test ) /* qqq2 : extend for other modes
     {
       test.case = 'process termination begins after short delay, detached process should continue to work after parent death';
 
+      a.fileProvider.filesDelete( testFilePath );
+      a.fileProvider.dirMakeForFile( testFilePath );
+
       let o =
       {
         execPath : 'node testAppParent.js stdio : pipe ipc : true',
@@ -11083,19 +11095,19 @@ function startDetachingTerminationBegin( test ) /* qqq2 : extend for other modes
 
       let data;
 
-      o.process.on( 'message', ( got ) =>
+      o.process.on( 'message', ( e ) =>
       {
-        data = got;
+        data = e;
         data.childPid = _.numberFrom( data.childPid );
       })
 
-      con.then( ( got ) =>
+      con.then( ( op ) =>
       {
-        test.identical( got.exitCode, 0 );
+        test.identical( op.exitCode, 0 );
         test.will = 'parent is dead, child is still alive';
-        test.is( !_.process.isAlive( o.process.pid ) );
+        test.is( !_.process.isAlive( op.process.pid ) );
         test.is( _.process.isAlive( data.childPid ) );
-        return _.time.out( context.t2 );
+        return _.time.out( context.t2 * 2 );
       })
 
       con.then( () =>
