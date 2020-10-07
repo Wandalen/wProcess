@@ -11701,6 +11701,8 @@ function startDetachingDisconnectedEarly( test )
 
       o.onTerminate.finally( ( err, op ) =>
       {
+        if( err )
+        console.log( err );
         track.push( 'onTerminate' );
         return null;
       })
@@ -11824,6 +11826,8 @@ function startDetachingDisconnectedLate( test )
 
       o.onTerminate.finally( ( err, op ) =>
       {
+        if( err )
+        console.log( err )
         track.push( 'onTerminate' );
         return null;
       })
@@ -13177,6 +13181,8 @@ function startOnStart( test ) /* qqq2 : add other modes. ask how to */
 
     o.onTerminate.finally( ( err, op ) =>
     {
+      if( err )
+      console.log( err )
       track.push( 'onTerminate' );
       return null;
     })
@@ -13770,93 +13776,106 @@ function startCallbackIsNotAConsequence( test )
   let a = test.assetFor( false );
   let programPath = a.path.nativize( a.program( testApp ) );
 
-  /* */
-
-  a.ready.then( () =>
-  {
-    test.case = 'onStart'
-    let o =
-    {
-      execPath : 'node ' + programPath,
-      onStart
-    }
-    var got = _.process.start( o );
-    test.is( _.consequenceIs( got ) );
-    test.identical( got.resourcesCount(), 0 );
-    got.thenKeep( function( o )
-    {
-      test.identical( o.exitCode, 0 );
-      return o;
-    })
-    return got;
-  })
-
-  /* */
-
-  a.ready.then( () =>
-  {
-    test.case = 'onTerminate'
-    let o =
-    {
-      execPath : 'node ' + programPath,
-      onTerminate
-    }
-    var got = _.process.start( o );
-    test.is( _.consequenceIs( got ) );
-    test.identical( got.resourcesCount(), 0 );
-    got.thenKeep( function( o )
-    {
-      test.identical( o.exitCode, 0 );
-      return o;
-    })
-    return got;
-  })
-
-  /* */
-
-  a.ready.then( () =>
-  {
-    test.case = 'onDisconnect'
-    let o =
-    {
-      execPath : 'node ' + programPath,
-      onTerminate
-    }
-    var got = _.process.start( o );
-    test.is( _.consequenceIs( got ) );
-    test.identical( got.resourcesCount(), 0 );
-    got.thenKeep( function( o )
-    {
-      test.identical( o.exitCode, 0 );
-      return o;
-    })
-    return got;
-  })
-
-  /* */
-
-  a.ready.then( () =>
-  {
-    test.case = 'ready'
-    let o =
-    {
-      execPath : 'node ' + programPath,
-      ready
-    }
-    var got = _.process.start( o );
-    test.is( _.consequenceIs( got ) );
-    test.identical( got.resourcesCount(), 0 );
-    got.thenKeep( function( o )
-    {
-      test.identical( o.exitCode, 0 );
-      return o;
-    })
-    return got;
-  })
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
   return a.ready;
 
   /* - */
+
+  function run( mode )
+  {
+    let con = _.Consequence().take( null );
+    let track = [];
+
+    con.then( () =>
+    {
+      test.case = `onStart, mode:${mode}`
+      let o =
+      {
+        execPath : mode !== 'fork' ? 'node testApp.js' : 'testApp.js',
+        mode,
+        onStart
+      }
+      var got = _.process.start( o );
+      test.is( _.consequenceIs( got ) );
+      test.identical( got.resourcesCount(), 0 );
+      got.thenKeep( function( o )
+      {
+        test.identical( o.exitCode, 0 );
+        return o;
+      })
+      return got;
+    })
+
+    /* */
+
+    con.then( () =>
+    {
+      test.case = `onTerminate, mode:${mode}`
+      let o =
+      {
+        execPath : mode !== 'fork' ? 'node testApp.js' : 'testApp.js',
+        mode,
+        onTerminate
+      }
+      var got = _.process.start( o );
+      test.is( _.consequenceIs( got ) );
+      test.identical( got.resourcesCount(), 0 );
+      got.thenKeep( function( o )
+      {
+        test.identical( o.exitCode, 0 );
+        return o;
+      })
+      return got;
+    })
+
+    /* */
+
+    con.then( () =>
+    {
+      test.case = `onDisconnect, mode:${mode}`
+      let o =
+      {
+        execPath : mode !== 'fork' ? 'node testApp.js' : 'testApp.js',
+        mode,
+        onDisconnect
+      }
+      var got = _.process.start( o );
+      test.is( _.consequenceIs( got ) );
+      test.identical( got.resourcesCount(), 0 );
+      got.thenKeep( function( o )
+      {
+        test.identical( o.exitCode, 0 );
+        return o;
+      })
+      return got;
+    })
+
+    /* */
+
+    con.then( () =>
+    {
+      test.case = `ready, mode:${mode}`
+      let o =
+      {
+        execPath : mode !== 'fork' ? 'node testApp.js' : 'testApp.js',
+        mode,
+        ready
+      }
+      var got = _.process.start( o );
+      test.is( _.consequenceIs( got ) );
+      test.identical( got.resourcesCount(), 0 );
+      got.thenKeep( function( o )
+      {
+        test.identical( o.exitCode, 0 );
+        return o;
+      })
+      return got;
+    })
+
+    return con
+  }
 
   function testApp()
   {
