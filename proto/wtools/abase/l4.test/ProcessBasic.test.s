@@ -3826,6 +3826,8 @@ function shellDryRun( test )
   }
 }
 
+/* qqq : describe shellDryRun */
+
 //
 
 function startNjsWithReadyDelayStructural( test ) /* qqq : implement additional test case with option detaching:1 */
@@ -9786,54 +9788,71 @@ function shellStartingDelay( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.path.nativize( a.program( testApp ) );
+  let program1Path = a.path.nativize( a.program( program1 ) );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 0, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 1, mode ) ) );
+  return a.ready;
 
-  /* */
+  /*  */
 
-  a.ready
-
-  .then( () =>
+  function run( sync, deasync, mode )
   {
-    let starting = { delay : 5000 };
-    let o =
-    {
-      execPath : testAppPath,
-      mode : 'fork',
-      outputPiping : 1,
-      outputCollecting : 1,
-      when : starting
-    }
+    let ready = new _.Consequence().take( null )
 
-    let t1 = _.time.now();
-    let con = _.process.start( o );
+    if( sync && !deasync && mode === 'fork' )
+    return null;
 
-    con.then( ( got ) =>
+    ready.then( () =>
     {
-      test.identical( got.exitCode, 0 );
-      let parsed = JSON.parse( got.output );
-      let diff = parsed.t2 - t1;
-      test.ge( diff, starting.delay );
-      return null;
+      test.case = `sync:${sync} deasync:${deasync} mode:${mode}`;
+      let t1 = _.time.now();
+      let when = { delay : context.t2 };
+      let o =
+      {
+        execPath : mode !== 'fork' ? 'node program1.js' : 'program1.js',
+        currentPath : a.abs( '.' ),
+        mode,
+        outputPiping : 1,
+        outputCollecting : 1,
+        when : when,
+        sync,
+        deasync,
+      }
+
+      let returned = _.process.start( o );
+
+      o.ready.then( ( got ) =>
+      {
+        test.identical( got.exitCode, 0 );
+        let parsed = JSON.parse( got.output );
+        let diff = parsed.t2 - t1;
+        test.ge( diff, when.delay );
+        return null;
+      })
+
+      return returned;
     })
 
-    return con;
-  })
-
-  return a.ready;
+    return ready;
+  }
 
   /* - */
 
-  function testApp()
+  function program1()
   {
     let _ = require( toolsPath );
-
     let data = { t2 : _.time.now() };
     console.log( JSON.stringify( data ) );
   }
+
 }
 
 //
 
+/* qqq2 : make it similar to test routine shellStartingDelay */
 function shellStartingTime( test )
 {
   let context = this;
@@ -9848,14 +9867,14 @@ function shellStartingTime( test )
   {
     let t1 = _.time.now();
     let delay = 5000;
-    let starting = { time : _.time.now() + delay };
+    let when = { time : _.time.now() + delay };
     let o =
     {
       execPath : testAppPath,
       mode : 'fork',
       outputPiping : 1,
       outputCollecting : 1,
-      when : starting
+      when : when
     }
 
     let con = _.process.start( o );
@@ -10927,7 +10946,7 @@ function startDetachingTerminationBegin( test ) /* qqq2 : extend for other modes
 
       let data;
 
-      o.process.on( 'message', ( got ) => /* qqq : got -> e */
+      o.process.on( 'message', ( got ) => /* qqq3 : got -> e */
       {
         data = got;
         data.childPid = _.numberFrom( data.childPid );
@@ -11423,7 +11442,6 @@ function startDetachingDisconnectedEarly( test )
   let program1Path = a.path.nativize( a.program( program1 ) );
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
-
   return a.ready;
 
   function run( mode )
@@ -19621,7 +19639,7 @@ var Proto =
 
     startDetachingChildExitsAfterParent,
     startDetachingChildExitsBeforeParent,
-    startDetachingDisconnectedEarly, /* yyy */
+    startDetachingDisconnectedEarly,
     startDetachingDisconnectedLate,
     startDetachingChildExistsBeforeParentWaitForTermination,
     startDetachingEndCompetitorIsExecuted,
