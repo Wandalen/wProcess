@@ -19657,7 +19657,7 @@ var Proto =
     startDetachingTrivial,
 
     startOnStart,
-    startOnTerminate, /* qqq2 : fix the test routine */
+    startOnTerminate,
     startNoEndBug1,
     startWithDelayOnReady,
 
