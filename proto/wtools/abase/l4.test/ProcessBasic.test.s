@@ -419,9 +419,8 @@ function exitCode( test )
 
 //
 
-/* qqq : split test cases by / ** / delimeting lines. whole file | aaa : Done. Yevhen S.  */
 /* qqq : split by mode | aaa : Done. Yevhen S.
-xxx qqq for Yevhen : ?
+qqq for Yevhen : not really
 */
 
 function basic( test )
@@ -1296,7 +1295,7 @@ function shell2( test )
 //
 
 /* qqq for Yevhen : split by modes | aaa : Done. Yevhen S.
-xxx qqq for Yevhen : ?
+xxx qqq for Yevhen : not really
 */
 /* qqq for Yevhen : actualize names of test routines */
 function shellCurrentPath( test )
