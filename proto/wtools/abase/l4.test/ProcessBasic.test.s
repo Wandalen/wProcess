@@ -1302,341 +1302,141 @@ function shellCurrentPath( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ) );
+  let testFilePath = a.path.join( a.routinePath, 'program1TestFile' );
+  let locals = { toolsPath : context.toolsPath, testFilePath }
+  let programPath = a.path.nativize( a.program({ routine: program1, locals }) );
+  let modes = [ 'shell', 'spawn', 'fork' ]
 
-  /* */
-
-  var expectedOutput = __dirname + '\n'
-
-  /* mode : shell */
-
-  a.ready.then( function()
+  modes.forEach( ( mode ) =>
   {
-    test.case = 'mode : shell';
-
-    let o =
-    {
-      execPath :  'node ' + programPath,
-      currentPath : __dirname,
-      mode : 'shell',
-      stdio : 'pipe',
-      outputCollecting : 1,
-    }
-    return _.process.start( o )
-    .then( function( got )
-    {
-      test.identical( o.output, expectedOutput );
-      return null;
-    })
+    a.ready.tap( () => test.open( mode ) )
+    a.ready.then( () => run( mode ) )
+    a.ready.tap( () => test.close( mode ) )
   })
-
-  /* */
-
-  a.ready.then( function()
-  {
-    test.case = 'normalized, currentPath leads to root of current drive, mode : shell';
-
-    let trace = a.path.traceToRoot( a.path.normalize( __dirname ) );
-    let currentPath = trace[ 1 ];
-
-    let o =
-    {
-      execPath :  'node ' + programPath,
-      currentPath,
-      mode : 'shell',
-      stdio : 'pipe',
-      outputCollecting : 1,
-    }
-
-    return _.process.start( o )
-    .then( function( got )
-    {
-      test.identical( _.strStrip( got.output ), a.path.nativize( currentPath ) );
-      return null;
-    })
-  })
-
-  /* */
-
-  a.ready.then( function()
-  {
-    test.case = 'normalized with slash, currentPath leads to root of current drive, mode : shell';
-
-    let trace = a.path.traceToRoot( a.path.normalize( __dirname ) );
-    let currentPath = trace[ 1 ] + '/';
-
-    let o =
-    {
-      execPath :  'node ' + programPath,
-      currentPath,
-      mode : 'shell',
-      stdio : 'pipe',
-      outputCollecting : 1,
-    }
-
-    return _.process.start( o )
-    .then( function( got )
-    {
-      if( process.platform === 'win32')
-      test.identical( _.strStrip( got.output ), a.path.nativize( currentPath ) );
-      else
-      test.identical( _.strStrip( got.output ), trace[ 1 ] );
-      return null;
-    })
-  })
-
-  /* */
-
-  a.ready.then( function()
-  {
-    test.case = 'nativized, currentPath leads to root of current drive, mode : shell';
-
-    let trace = a.path.traceToRoot( __dirname );
-    let currentPath = a.path.nativize( trace[ 1 ] )
-
-    let o =
-    {
-      execPath :  'node ' + programPath,
-      currentPath,
-      mode : 'shell',
-      stdio : 'pipe',
-      outputCollecting : 1,
-    }
-
-    return _.process.start( o )
-    .then( function( got )
-    {
-      test.identical( _.strStrip( got.output ), currentPath );
-      return null;
-    })
-  })
-
-  /* mode : fork */
-
-  a.ready.then( function()
-  {
-    test.case = 'mode : fork';
-
-    let output;
-
-    let o =
-    {
-      execPath : programPath,
-      currentPath : __dirname,
-      mode : 'fork',
-    }
-    let con = _.process.start( o );
-    o.process.on( 'message', ( m ) =>
-    {
-      output = m;
-    })
-    con.then( function( got )
-    {
-      test.identical( output.currentPath, __dirname );
-      return null;
-    })
-
-    return con;
-  })
-
-  /* */
-
-  a.ready.then( function()
-  {
-    test.case = 'normalized, currentPath leads to root of current drive, mode : fork';
-
-    let trace = a.path.traceToRoot( a.path.normalize( __dirname ) );
-    let currentPath = trace[ 1 ];
-
-    let o =
-    {
-      execPath : programPath,
-      currentPath,
-      mode : 'fork',
-      stdio : 'pipe',
-      outputCollecting : 1,
-    }
-
-    return _.process.start( o )
-    .then( function( got )
-    {
-      test.identical( _.strStrip( got.output ), a.path.nativize( currentPath ) );
-      return null;
-    })
-  })
-
-  /* */
-
-
-  a.ready.then( function()
-  {
-    test.case = 'normalized with slash, currentPath leads to root of current drive, mode : fork';
-
-    let trace = a.path.traceToRoot( a.path.normalize( __dirname ) );
-    let currentPath = trace[ 1 ] + '/';
-
-    let o =
-    {
-      execPath : programPath,
-      currentPath,
-      mode : 'fork',
-      stdio : 'pipe',
-      outputCollecting : 1,
-    }
-
-    return _.process.start( o )
-    .then( function( got )
-    {
-      if( process.platform === 'win32')
-      test.identical( _.strStrip( got.output ), a.path.nativize( currentPath ) );
-      else
-      test.identical( _.strStrip( got.output ), trace[ 1 ] );
-      return null;
-    })
-  })
-
-  /* */
-
-  a.ready.then( function()
-  {
-    test.case = 'nativized, currentPath leads to root of current drive, mode : fork';
-
-    let trace = a.path.traceToRoot( __dirname );
-    let currentPath = a.path.nativize( trace[ 1 ] );
-
-    let o =
-    {
-      execPath : programPath,
-      currentPath,
-      mode : 'fork',
-      stdio : 'pipe',
-      outputCollecting : 1,
-    }
-
-    return _.process.start( o )
-    .then( function( got )
-    {
-      test.identical( _.strStrip( got.output ), currentPath );
-      return null;
-    })
-  })
-
-  /* mode: spawn */
-
-  a.ready.then( function()
-  {
-    test.case = 'mode : spawn';
-
-    let o =
-    {
-      execPath :  'node ' + programPath,
-      currentPath : __dirname,
-      mode : 'spawn',
-      stdio : 'pipe',
-      outputCollecting : 1,
-    }
-    return _.process.start( o )
-    .then( function( got )
-    {
-      test.identical( o.output, expectedOutput );
-      return null;
-    })
-  })
-
-  /* */
-
-  a.ready.then( function()
-  {
-    test.case = 'normalized, currentPath leads to root of current drive, mode : spawn';
-
-    let trace = a.path.traceToRoot( a.path.normalize( __dirname ) );
-    let currentPath = trace[ 1 ];
-
-    let o =
-    {
-      execPath :  'node ' + programPath,
-      currentPath,
-      mode : 'spawn',
-      stdio : 'pipe',
-      outputCollecting : 1,
-    }
-
-    return _.process.start( o )
-    .then( function( got )
-    {
-      test.identical( _.strStrip( got.output ), a.path.nativize( currentPath ) );
-      return null;
-    })
-  })
-
-  /* */
-
-
-  a.ready.then( function()
-  {
-    test.case = 'normalized with slash, currentPath leads to root of current drive, mode : spawn';
-
-    let trace = a.path.traceToRoot( a.path.normalize( __dirname ) );
-    let currentPath = trace[ 1 ] + '/';
-
-    let o =
-    {
-      execPath :  'node ' + programPath,
-      currentPath,
-      mode : 'spawn',
-      stdio : 'pipe',
-      outputCollecting : 1,
-    }
-
-    return _.process.start( o )
-    .then( function( got )
-    {
-      if( process.platform === 'win32')
-      test.identical( _.strStrip( got.output ), a.path.nativize( currentPath ) );
-      else
-      test.identical( _.strStrip( got.output ), trace[ 1 ] );
-      return null;
-    })
-  })
-
-  /* */
-
-  a.ready.then( function()
-  {
-    test.case = 'nativized, currentPath leads to root of current drive, mode : spawn';
-
-    let trace = a.path.traceToRoot( __dirname );
-    let currentPath = a.path.nativize( trace[ 1 ] );
-
-    let o =
-    {
-      execPath :  'node ' + programPath,
-      currentPath,
-      mode : 'spawn',
-      stdio : 'pipe',
-      outputCollecting : 1,
-    }
-
-    return _.process.start( o )
-    .then( function( got )
-    {
-      test.identical( _.strStrip( got.output ), currentPath );
-      return null;
-    })
-  })
-
-  /* */
 
   return a.ready;
 
+  /* */
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( function()
+    {
+      let o =
+      {
+        execPath :  mode !== 'fork' ? 'node ' + programPath : programPath,
+        currentPath : __dirname,
+        mode,
+        stdio : 'pipe',
+        outputCollecting : 1,
+      }
+      return _.process.start( o )
+      .then( function( op )
+      {
+        let got = a.fileProvider.fileRead( testFilePath );
+        test.identical( got, __dirname );
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( function()
+    {
+      test.case = 'normalized, currentPath leads to root of current drive';
+
+      let trace = a.path.traceToRoot( a.path.normalize( __dirname ) );
+      let currentPath = trace[ 1 ];
+
+      let o =
+      {
+        execPath :  mode !== 'fork' ? 'node ' + programPath : programPath,
+        currentPath,
+        mode,
+        stdio : 'pipe',
+        outputCollecting : 1,
+      }
+
+      return _.process.start( o )
+      .then( function( op )
+      {
+        let got = a.fileProvider.fileRead( testFilePath );
+        test.identical( got, a.path.nativize( currentPath ) );
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( function()
+    {
+      test.case = 'normalized with slash, currentPath leads to root of current drive';
+
+      let trace = a.path.traceToRoot( a.path.normalize( __dirname ) );
+      let currentPath = trace[ 1 ] + '/';
+
+      let o =
+      {
+        execPath :  mode !== 'fork' ? 'node ' + programPath : programPath,
+        currentPath,
+        mode,
+        stdio : 'pipe',
+        outputCollecting : 1,
+      }
+
+      return _.process.start( o )
+      .then( function( op )
+      {
+        let got = a.fileProvider.fileRead( testFilePath );
+        if( process.platform === 'win32')
+        test.identical( got, a.path.nativize( currentPath ) );
+        else
+        test.identical( got, trace[ 1 ] );
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( function()
+    {
+      test.case = 'nativized, currentPath leads to root of current drive';
+
+      let trace = a.path.traceToRoot( __dirname );
+      let currentPath = a.path.nativize( trace[ 1 ] )
+
+      let o =
+      {
+        execPath :  mode !== 'fork' ? 'node ' + programPath : programPath,
+        currentPath,
+        mode,
+        stdio : 'pipe',
+        outputCollecting : 1,
+      }
+
+      return _.process.start( o )
+      .then( function( op )
+      {
+        let got = a.fileProvider.fileRead( testFilePath );
+        test.identical( got, currentPath )
+        return null;
+      })
+    })
+
+    return ready;
+  }
+
+
+
   /* - */
 
-  function testApp()
+  function program1()
   {
-    debugger
-    console.log( process.cwd() ); /* qqq for Vova : should not be visible if verbosity of tester is low, if possible */
-    if( process.send )
-    process.send({ currentPath : process.cwd() })
+    let _ = require( toolsPath );
+    _.include( 'wFiles' );
+    _.fileProvider.fileWrite( testFilePath, process.cwd() );
   }
 
 }
