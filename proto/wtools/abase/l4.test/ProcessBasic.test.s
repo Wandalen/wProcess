@@ -20,10 +20,6 @@ let Self = {};
 
 /* qqq for Vova : make general table in md file for this: "Vova qqq: close event is not emitted for disconnected detached child in fork mode" */
 
-/* qqq for Yevhen : make sure variable "got" is used as should | aaa : Done. Yevhen S. */
-/* qqq for Yevhen : actualize names of test routines | aaa : Done. Yevhen S. */
-/* qqq for Yevhen : check op.ended if op.exitCode is checked | aaa : Done. Yevhen S. */
-
 /* qqq for Yevhen : parametrize all time delays, don't forget to leave comment if you change any time delay
 time.out
 setTimeout
@@ -1307,7 +1303,7 @@ function start2( test )
 /* qqq for Yevhen : split by modes | aaa : Done. Yevhen S.
 qqq for Yevhen : not really
 */
-/* qqq for Yevhen : actualize names of test routines */
+
 function startCurrentPath( test )
 {
   let context = this;
@@ -3547,8 +3543,6 @@ Simulates run of routine start with all possible options.
 After execution checks fields of run descriptor.
 `
 
-/* qqq for Vova : describe startDryRun aaa:added description*/
-
 //
 
 function startNjsWithReadyDelayStructural( test ) /* qqq for Yevhen : implement additional test case with option detaching:1 */
@@ -5070,7 +5064,7 @@ function startArgumentsParsingNonTrivial( test )
     }
     _.process.start( o );
 
-    con.finally( ( err, op ) => /* qqq2 : should be ( err, op ) or ( err, arg ) not got | aaa : Done. Yevhen S. */
+    con.finally( ( err, op ) =>
     {
       test.is( !!err );
       test.is( _.strHas( err.message, 'first arg' ) )
@@ -9138,7 +9132,6 @@ function startChronology( test )
     test.identical( _.Procedure.FindAlive().length - pacounter, 1 );
     pacounter = _.Procedure.FindAlive().length;
 
-    /* zzz : ! */
     o.onTerminate.tap( ( err, op ) =>
     {
       track.push( 'onTerminate' );
@@ -10076,7 +10069,7 @@ function startDetachingModeSpawnResourceReady( test )
       return null;
     })
 
-    o.onTerminate.then( ( op ) => /* qqq2 : should be not got, but op. check whole test suite, please | aaa: Done. Yevhen S. */
+    o.onTerminate.then( ( op ) =>
     {
       track.push( 'onTerminate' );
       test.notIdentical( op.exitCode, 0 );
@@ -11703,7 +11696,6 @@ function startDetachingEndCompetitorIsExecuted( test )
 
     o.onTerminate.finally( ( err, op ) =>
     {
-      /* qqq : add track here and in all similar place to cover entering here! | aaa : Done. Yevhen S. */
       track.push( 'onTerminate' );
       test.identical( o.ended, true );
       test.identical( err, undefined );
@@ -11968,8 +11960,8 @@ function startDetachedOutputStdioPipe( test )
     {
       test.identical( o.exitCode, 0 )
 
-      //qqq: output piping doesn't work as expected in mode "shell" on windows
-      //qqq: investigate if its fixed in never verions of node or implement alternative solution
+      // qqq for Vova: output piping doesn't work as expected in mode "shell" on windows
+      // investigate if its fixed in never verions of node or implement alternative solution
 
       if( process.platform === 'win32' )
       return null;
@@ -12030,6 +12022,7 @@ function startDetachedOutputStdioPipe( test )
 }
 
 //
+
 /* qqq for Yevhen : implement for other modes */
 function startDetachedOutputStdioInherit( test )
 {
@@ -12117,6 +12110,7 @@ function startDetachedOutputStdioInherit( test )
 }
 
 //
+
 /* qqq for Yevhen : implement for other modes */
 function startDetachingModeSpawnIpc( test )
 {
@@ -12240,6 +12234,7 @@ function startDetachingModeSpawnIpc( test )
 }
 
 //
+
 /* qqq for Yevhen : implement for other modes */
 function startDetachingModeForkIpc( test )
 {
@@ -12363,6 +12358,7 @@ function startDetachingModeForkIpc( test )
 }
 
 //
+
 /* qqq for Yevhen : implement for other modes */
 function startDetachingModeShellIpc( test )
 {
@@ -12437,6 +12433,7 @@ function startDetachingModeShellIpc( test )
 }
 
 //
+
 /* qqq for Yevhen : implement for other modes */
 function startDetachingThrowing( test )
 {
@@ -12485,7 +12482,7 @@ function startDetachingThrowing( test )
   }
   test.shouldThrowErrorSync( () => _.process.start( o ) )
 
-  // qqq : uncomment?
+  // qqq for Vova : uncomment?
   // var o =
   // {
   //   execPath : 'node testAppChild.js',
@@ -12709,7 +12706,7 @@ function startDetachingTrivial( test )
 
 //
 
-function startOnStart( test ) /* qqq2 : add other modes. ask how to aaa:done */
+function startOnStart( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -13025,7 +13022,7 @@ startOnStart.timeOut = 120000;
 
 //
 
-function startOnTerminate( test ) /* qqq for Yevhen : add other modes. ask how to */
+function startOnTerminate( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -13742,8 +13739,6 @@ function startConcurrent( test )
   let counter = 0;
   let time = 0;
   let filePath = a.path.nativize( a.abs( a.routinePath, 'file.txt' ) );
-
-  logger.log( 'this is ❮foreground : bright white❯an❮foreground : default❯ experiment' ); /* xxx fix logger, please !!! */
 
   /* - */
 
@@ -16845,7 +16840,7 @@ function terminate( test )
   if( process.platform === 'win32' )
   {
     // zzz : windows-kill doesn't work correctrly on node 14
-    // zzz : investigate if its possible to use process.kill instead of windows-kill
+    // investigate if its possible to use process.kill instead of windows-kill
     test.identical( 1, 1 )
     return;
   }
@@ -17157,7 +17152,6 @@ function startErrorAfterTerminationWithSend( test )
       return null
     });
 
-    /* zzz */
     o.onTerminate.finally( ( err, op ) =>
     {
       track.push( 'onTerminate' );
@@ -17680,7 +17674,7 @@ function terminateComplex( test )
   if( process.platform === 'win32' )
   {
     // zzz : windows-kill doesn't work correctly in all scenarios
-    // zzz : investigate if its possible to use process.kill instead of windows-kill
+    // investigate if its possible to use process.kill instead of windows-kill
     test.identical( 1, 1 )
     return;
   }
@@ -17748,10 +17742,9 @@ function terminateComplex( test )
       _.process.terminate({ pid : o.process.pid });
     })
 
-    /* zzz */
     ready.then( ( op ) =>
     {
-      test.identical( op.exitCode, 0 ); /* qqq for Yevhen : check op.ended if op.exitCode is checked | aaa : Done. Yevhen S.  */
+      test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
       test.identical( op.exitSignal, null );
       test.identical( _.strCount( op.output, 'SIGINT' ), 1 );
@@ -17910,7 +17903,7 @@ function terminateDetachedComplex( test )
   if( process.platform === 'win32' )
   {
     // zzz : windows-kill doesn't work correctly with detached processes
-    // zzz : investigate if its possible to use process.kill instead of windows-kill
+    // investigate if its possible to use process.kill instead of windows-kill
     test.identical( 1, 1 )
     return;
   }
@@ -18218,7 +18211,7 @@ function terminateWithChildren( test )
   if( process.platform === 'win32' )
   {
     // zzz : windows-kill doesn't work correctly with detached processes
-    // zzz : investigate if its possible to use process.kill instead of windows-kill
+    // investigate if its possible to use process.kill instead of windows-kill
     test.identical( 1, 1 )
     return;
   }
@@ -18488,7 +18481,7 @@ function terminateWithDetachedChildren( test )
   if( process.platform === 'win32' )
   {
     // zzz : windows-kill doesn't work correctly with detached processes
-    // zzz : investigate if its possible to use process.kill instead of windows-kill
+    // investigate if its possible to use process.kill instead of windows-kill
     test.identical( 1, 1 )
     return;
   }
@@ -18649,7 +18642,7 @@ function terminateTimeOut( test )
   if( process.platform === 'win32' )
   {
     // zzz : windows-kill doesn't work correctly on node14
-    // zzz : investigate if its possible to use process.kill instead of windows-kill
+    // investigate if its possible to use process.kill instead of windows-kill
     test.identical( 1, 1 )
     return;
   }
@@ -18864,7 +18857,7 @@ function terminateDifferentStdio( test )
   if( process.platform === 'win32' )
   {
     // zzz : windows-kill doesn't work correctly on node14
-    // zzz : investigate if its possible to use process.kill instead of windows-kill
+    // investigate if its possible to use process.kill instead of windows-kill
     test.identical( 1, 1 )
     return;
   }

@@ -182,7 +182,6 @@ function start_body( o )
 
 */
 
-  /* qqq xxx : implement test wich passs routines in 4 on* options */
   /* xxx : rename options on* -> con* */
 
   _.assert( arguments.length === 1, 'Expects single argument' );
@@ -190,7 +189,7 @@ function start_body( o )
   let stderrOutput = '';
   let decoratedOutput = '';
   let decoratedErrorOutput = '';
-  let execArgs, argumentsManual;/* qqq : remove argumentsManual */
+  let execArgs, argumentsManual; /* qqq : remove argumentsManual */
   let readyCallback;
 
   preform1();
@@ -229,7 +228,6 @@ function start_body( o )
     _.assert( o.state === 'terminated' || o.state === 'disconnected' );
     end( undefined, o.onTerminate );
     return o;
-    /* xxx qqq2 : implement tests to check all 4 consequences and states in sync:0 deasync:0 mode */
   }
   else
   {
@@ -361,7 +359,6 @@ function start_body( o )
 
   /* */
 
-  // function end( err, arg )
   function end( err, consequence )
   {
 
@@ -369,7 +366,6 @@ function start_body( o )
     if( o.procedure.isAlive() )
     o.procedure.end();
 
-    // if( o.detaching ) /* ttt */
     if( o.handleProcedureTerminationBegin )
     {
       _.procedure.off( 'terminationBegin', handleProcedureTerminationBegin );
@@ -401,9 +397,6 @@ function start_body( o )
     o.ended = true;
     Object.freeze( o );
 
-    // debugger;
-    // yyy
-
     if( err )
     {
       debugger;
@@ -419,7 +412,6 @@ function start_body( o )
     }
 
     return o;
-    // return arg;
   }
 
   /* */
@@ -435,9 +427,9 @@ function start_body( o )
 
     if( o.verbosity >= 5 )
     {
-      log( ' < Process returned error code ' + exitCode ); /* qqq : is covered? */
+      log( ' < Process returned error code ' + exitCode ); /* qqq for Yevhen : is covered? */
       if( exitCode )
-      log( infoGet() ); /* qqq : is covered? */
+      log( infoGet() ); /* qqq for Yevhen : is covered? */
     }
 
     exitCodeSet( exitCode );
@@ -472,13 +464,11 @@ function start_body( o )
       }
       else
       {
-        // o.onTerminate.error( o.error );
         end( o.error, o.onTerminate );
       }
     }
     else if( !o.sync || o.deasync )
     {
-      // o.onTerminate.take( o );
       end( undefined, o.onTerminate );
     }
 
@@ -517,7 +507,6 @@ function start_body( o )
     }
     else
     {
-      // o.onTerminate.error( o.error );
       end( o.error, o.onTerminate );
     }
   }
@@ -566,7 +555,7 @@ function start_body( o )
 
     _.assert( !!this.process, 'Process is not started. Cant disconnect.' );
 
-    // qqq2 : check disconnection of regular process, probably close event is not fired
+    /* qqq for Vova : check disconnection of regular process, probably close event is not fired */
 
     if( this.process.stdout )
     this.process.stdout.destroy();
@@ -588,7 +577,6 @@ function start_body( o )
     if( !this.ended )
     {
       this.state = 'disconnected';
-      // this.onDisconnect.take( this );
       end( undefined, o.onDisconnect );
     }
 
@@ -697,7 +685,6 @@ function start_body( o )
       debugger
       handleError( err );
     }
-    /* xxx : remove ttt */
 
   }
 
@@ -714,7 +701,6 @@ function start_body( o )
     {
       o.fullExecPath = o.execPath;
       execArgs = execPathParse( o.execPath );
-      // if( o.mode !== 'shell' && o.mode !== 'exec' )
       if( o.mode !== 'shell' )
       execArgs = argsUnqoute( execArgs );
       o.execPath = execArgs.shift();
@@ -755,7 +741,7 @@ function start_body( o )
       o.outputPiping = o.verbosity >= 2;
     }
     if( o.outputCollecting && !o.output )
-    o.output = ''; /* qqq : test for multiple run? where does it collect output? */
+    o.output = ''; /* qqq for Vova : test for multiple run? to which o-map does it collect output? */
 
     /* ipc */
 
@@ -848,40 +834,6 @@ function start_body( o )
 
       o.process = ChildProcess.fork( execPath, args, o2 );
     }
-    // else if( o.mode === 'exec' )
-    // {
-    //   let currentPath = _.path.nativize( o.currentPath );
-    //   log( 'option::mode:exec of routine _.process.start is deprecated' );
-    //   if( args.length )
-    //   execPath = execPath + ' ' + argsJoin( args );
-    //
-    //   o.fullExecPath = execPath;
-    //   inputMirror();
-    //
-    //   if( o.dry )
-    //   return;
-    //
-    //   if( o.sync && !o.deasync )
-    //   {
-    //     // debugger;
-    //     // o.process = ChildProcess.execSync( execPath, { env : o.env, cwd : currentPath } ); /* ttt */
-    //     try
-    //     {
-    //       o.process = ChildProcess.execSync( execPath, { env : o.env, cwd : currentPath } );
-    //       o.process.status = 0;
-    //       o.process.signal = null;
-    //     }
-    //     catch( _process )
-    //     {
-    //       debugger;
-    //       o.process = _process;
-    //     }
-    //   }
-    //   else
-    //   {
-    //     o.process = ChildProcess.exec( execPath, { env : o.env, cwd : currentPath } );
-    //   }
-    // }
     else if( o.mode === 'spawn' )
     {
       let o2 = optionsForSpawn();
@@ -963,7 +915,7 @@ function start_body( o )
       if( o.state === 'terminated' || o.error )
       return;
       o.exitReason = 'time';
-      o.process.kill( 'SIGTERM' ); /* qqq : need to catch event when process is really down */
+      o.process.kill( 'SIGTERM' ); /* qqq for Vova : need to catch event when process is really down */
     });
 
   }
@@ -976,7 +928,6 @@ function start_body( o )
     if( o.dry )
     return;
 
-    // qqq2 yyy : uncomment aaa:done, wrote a test routine
     if( o.outputPiping || o.outputCollecting )
     _.assert( !!o.process.stdout || !!o.process.stderr, 'stdout is not available to collect output or pipe it. Set option::stdio to "pipe"' );
 
@@ -1003,9 +954,9 @@ function start_body( o )
     if( o.sync && !o.deasync )
     {
       if( o.process.error )
-      handleError( o.process.error ); /* qqq2 : cover this branch in all modes */
+      handleError( o.process.error );
       else
-      handleClose( o.process.status, o.process.signal ); /* qqq2 : cover this branch in all modes */
+      handleClose( o.process.status, o.process.signal );
     }
     else
     {
@@ -1131,12 +1082,12 @@ function start_body( o )
   function argsJoin( args )
   {
 
-    if( !execArgs && !argumentsManual ) /* qqq2 : argumentsManual?? should be no such global variable */
+    if( !execArgs && !argumentsManual ) /* qqq for Vova : argumentsManual?? should be no such global variable */
     return args.join( ' ' );
 
     let i = execArgs ? execArgs.length : args.length - argumentsManual.length;
 
-    // if( !execArgs && !o.passingThrough ) /* qqq2 : argumentsManual?? should be no such global variable aaa:removed*/
+    // if( !execArgs && !o.passingThrough )
     // return args.join( ' ' );
     //
     // let i = execArgs ? execArgs.length : args.length - process.argv.length - 2;
@@ -1332,7 +1283,7 @@ function start_body( o )
 
 }
 
-start_body.defaults = /* qqq : split on _.process.start(), _.process.startSingle() */
+start_body.defaults = /* qqq for Vova : split on _.process.start(), _.process.startSingle() */
 {
 
   execPath : null,
@@ -1383,89 +1334,6 @@ start_body.defaults = /* qqq : split on _.process.start(), _.process.startSingle
 
 let start = _.routineFromPreAndBody( start_pre, start_body );
 
-/*
-
-qqq
-add coverage
-Vova: tests routines :
-
-  shellArgsOption,
-  shellArgumentsParsing,
-  shellArgumentsParsingNonTrivial,
-  shellArgumentsNestedQuotes,
-  shellExecPathQuotesClosing,
-  shellExecPathSeveralCommands
-
-for combination:
-  path to exe file : [ with space, without space ]
-  execPath : [ has arguments, only path to exe file ]
-  args : [ has arguments, empty ]
-  mode : [ 'fork', 'exec', 'spawn', 'shell' ]
-
-example of execPath :
-  execPath : '"/dir with space/app.exe" firstArg secondArg:1 "third arg" \'fourth arg\'  `"fifth" arg`
-
-== samples
-
-execPath : '"/dir with space/app.exe" `firstArg secondArg ":" 1` "third arg" \'fourth arg\'  `"fifth" arg`,
-args : '"some arg"'
-mode : 'spawn'
-->
-execPath : '/dir with space/app.exe'
-args : [ 'firstArg secondArg ":" 1', 'third arg', 'fourth arg', '"fifth" arg', '"some arg"' ],
-
-=
-
-execPath : '"/dir with space/app.exe" firstArg secondArg:1',
-args : '"third arg"',
-->
-execPath : '/dir with space/app.exe'
-args : [ 'firstArg', 'secondArg:1', '"third arg"' ]
-
-=
-
-execPath : '"first arg"'
-->
-execPath : 'first arg'
-args : []
-
-=
-
-args : '"first arg"'
-->
-execPath : 'first arg'
-args : []
-
-=
-
-args : [ '"first arg"', 'second arg' ]
-->
-execPath : 'first arg'
-args : [ 'second arg' ]
-
-=
-
-args : [ '"', 'first', 'arg', '"' ]
-->
-execPath : '"'
-args : [ 'first', 'arg', '"' ]
-
-=
-
-args : [ '', 'first', 'arg', '"' ]
-->
-execPath : ''
-args : [ 'first', 'arg', '"' ]
-
-=
-
-args : [ '"', '"', 'first', 'arg', '"' ]
-->
-execPath : '"'
-args : [ '"', 'first', 'arg', '"' ]
-
-*/
-
 //
 
 let startPassingThrough = _.routineFromPreAndBody( start_pre, start_body );
@@ -1478,7 +1346,7 @@ defaults.applyingExitCode = 1;
 defaults.throwingExitCode = 0;
 defaults.outputPiping = 1;
 defaults.stdio = 'inherit';
-// defaults.mode = 'spawn'; // qqq2 : uncomment after fix of the mode
+// defaults.mode = 'spawn'; // xxx qqq : uncomment after fix of the mode?
 
 //
 
@@ -1630,9 +1498,9 @@ function startAfterDeath_body( o )
   let toolsPathInclude = `let _ = require( '${_.strEscape( toolsPath )}' );\n`
   let secondaryProcessSource = toolsPathInclude + afterDeathSecondaryProcess.toString() + '\nafterDeathSecondaryProcess();';
   let secondaryFilePath = _.process.tempOpen({ sourceCode : secondaryProcessSource });
-  let srcOptions = _.mapExtend( null, o ); /* qqq : remove duplication of o-map */
+  let srcOptions = _.mapExtend( null, o ); /* qqq for Vova : remove duplication of o-map and repair */
 
-  let o2 = _.mapExtend( null, o ); /* qqq : remove duplication of o-map */
+  let o2 = _.mapExtend( null, o ); /* qqq for Vova : remove duplication of o-map and repair */
   o2.execPath = _.path.nativize( secondaryFilePath );
   o2.mode = 'fork';
   o2.args = [];
@@ -1765,7 +1633,6 @@ function starter( o0 )
 
   _.routineExtend( er, _.process.start );
   er.predefined = o0;
-  /* qqq : cover fields of generated routine Vova: wrote test routine shellerFields */
 
   return er;
 
@@ -1930,7 +1797,7 @@ function exitWithBeep()
 
 /*
 zzz : use maybe _exitHandlerRepair instead of _exitHandlerOnce?
-zzz : investigate difference between _exitHandlerRepair and _exitHandlerOnce
+investigate difference between _exitHandlerRepair and _exitHandlerOnce
 Vova: _exitHandlerRepair allows app to exit safely when one of exit signals will be triggered
       _exitHandlerOnce allows to execute some code when process is about to exit:
        - process.exit() was called explcitly
@@ -2113,7 +1980,6 @@ function isAlive( src )
     return err.code === 'EPERM'
   }
 
-  /* qqq : not handled branch? */
 }
 
 //
@@ -2148,6 +2014,8 @@ function statusOf( src )
 }
 
 //
+
+/* qqq for Vova : rewrite and cover */
 
 function kill( o )
 {
@@ -2228,7 +2096,7 @@ function kill( o )
     if( err.code === 'EPERM' )
     throw _.err( err, '\nCurrent process does not have permission to kill target process' );
     if( err.code === 'ESRCH' )
-    throw _.err( err, '\nTarget process:', _.strQuote( o.pid ), 'does not exist.' ); /* qqq : rewrite all strings as template-strings */
+    throw _.err( err, '\nTarget process:', _.strQuote( o.pid ), 'does not exist.' ); /* qqq for Yevhen : rewrite such strings as template-strings */
     throw _.err( err );
   }
 
@@ -2294,9 +2162,11 @@ kill.defaults =
 //
 
 /*
-  zzz Vova: shell mode have different behaviour on Windows, OSX and Linux
+  zzz for Vova: shell mode have different behaviour on Windows, OSX and Linux
   look for solution that allow to have same behaviour on each mode
 */
+
+/* qqq for Vova : rewrite and cover */
 
 function terminate( o )
 {
@@ -2338,7 +2208,7 @@ function terminate( o )
   }
   catch( err )
   {
-    handleError( err ); /* qqq2 : should return consequence! */
+    handleError( err ); /* qqq for Vova : should alwas return consequence! */
   }
 
   /* */
