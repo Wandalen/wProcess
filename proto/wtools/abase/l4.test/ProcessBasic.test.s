@@ -23,7 +23,7 @@ let Self = {};
 /* qqq for Yevhen : make sure variable "got" is used as should | aaa : Done. Yevhen S. */
 /* qqq for Yevhen : actualize names of test routines | aaa : Done. Yevhen S. */
 
-/* qqq for Yevhen : check op.ended if op.exitCode is checked */
+/* qqq for Yevhen : check op.ended if op.exitCode is checked | aaa : Done. Yevhen S. */
 
 /* qqq for Yevhen : parametrize all time delays, don't forget to leave comment if you change any time delay
 time.out
@@ -138,6 +138,7 @@ function processOnExitEvent( test )
     .then( ( op ) =>
     {
       test.is( op.exitCode === 0 );
+      test.identical( op.ended, true );
       test.is( _.strHas( op.output, 'timeOut handler executed' ) )
       test.is( _.strHas( op.output, 'processOnExit: 0' ) );
       return null;
@@ -163,6 +164,7 @@ function processOnExitEvent( test )
     .then( ( op ) =>
     {
       test.is( op.exitCode === 0 );
+      test.identical( op.ended, true );
       test.is( !_.strHas( op.output, 'timeOut handler executed' ) )
       test.is( !_.strHas( op.output, 'processOnExit: 0' ) );
       test.is( _.strHas( op.output, 'processOnExit: SIGINT' ) );
@@ -226,6 +228,7 @@ function processOffExitEvent( test )
     .then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.identical( _.strCount( op.output, 'timeOut handler executed'  ), 1 );
       test.identical( _.strCount( op.output, 'processOnExit1: 0' ), 1 );
       test.identical( _.strCount( op.output, 'processOnExit2: 0' ), 1 );
@@ -254,6 +257,7 @@ function processOffExitEvent( test )
     .then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.identical( _.strCount( op.output, 'timeOut handler executed'  ), 1 );
       test.identical( _.strCount( op.output, 'processOnExit1: 0' ), 0 );
       test.identical( _.strCount( op.output, 'processOnExit2: 0' ), 1 );
@@ -281,6 +285,7 @@ function processOffExitEvent( test )
     .then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.identical( _.strCount( op.output, 'timeOut handler executed'  ), 1 );
       test.identical( _.strCount( op.output, 'processOnExit1: 0' ), 0 );
       test.identical( _.strCount( op.output, 'processOnExit2: 0' ), 0 );
@@ -309,6 +314,7 @@ function processOffExitEvent( test )
     .then( ( op ) =>
     {
       test.notIdentical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.identical( _.strCount( op.output, 'uncaught error' ), 2 );
       test.identical( _.strCount( op.output, 'processOnExit1: -1' ), 1 );
       test.identical( _.strCount( op.output, 'processOnExit2: -1' ), 1 );
@@ -2335,6 +2341,7 @@ function startSpawnSyncDeasync( test )
     returned.then( function( op )
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       return op;
     })
     return returned;
@@ -2378,6 +2385,7 @@ function startSpawnSyncDeasync( test )
     returned.then( function( op )
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       return op;
     })
     return returned;
@@ -2530,6 +2538,7 @@ function startShellSyncDeasync( test )
     returned.then( function( op )
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       return op;
     })
     return returned;
@@ -2573,6 +2582,7 @@ function startShellSyncDeasync( test )
     returned.then( function( op )
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       return op;
     })
     return returned;
@@ -2728,6 +2738,7 @@ function startForkSyncDeasync( test )
     returned.then( function( op )
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       return op;
     })
     return returned;
@@ -2768,6 +2779,7 @@ function startForkSyncDeasync( test )
     returned.then( function( op )
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       return op;
     })
     return returned;
@@ -2936,6 +2948,7 @@ startForkSyncDeasyncThrowing.timeOut = 15000;
 //     returned.then( function( o )
 //     {
 //       test.identical( op.exitCode, 0 );
+//       test.identical( op.ended, true );
 //       return op;
 //     })
 //     return returned;
@@ -2979,6 +2992,7 @@ startForkSyncDeasyncThrowing.timeOut = 15000;
 //     returned.then( function( o )
 //     {
 //       test.identical( op.exitCode, 0 );
+//       test.identical( op.ended, true );
 //       return op;
 //     })
 //     return returned;
@@ -3802,6 +3816,7 @@ function startDryRun( test )
       test.ge( t2 - t1, 1000 )
 
       test.identical( op.exitCode, null );
+      test.identical( op.ended, true );
       test.identical( op.exitSignal, null );
       test.identical( op.process, null );
       test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
@@ -3861,6 +3876,7 @@ function startNjsWithReadyDelayStructural( test ) /* qqq for Yevhen : implement 
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.identical( op.output, 'program1:begin\n' );
 
     let exp2 = _.mapExtend( null, exp );
@@ -4004,6 +4020,7 @@ function startArgsOption( test )
     con.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.identical( op.args, [ programPath, 'arg1', 'arg2' ] );
       test.identical( _.strCount( op.output, `[ 'arg1', 'arg2' ]` ), 1 );
       test.identical( shellOptions.args, op.args );
@@ -4033,6 +4050,7 @@ function startArgsOption( test )
     con.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.identical( op.args, [ programPath, 'arg1' ] );
       test.identical( _.strCount( op.output, 'arg1' ), 1 );
       test.identical( shellOptions.args, op.args );
@@ -6976,6 +6994,7 @@ function startVerbosity( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.identical( capturedOutput, '' );
     return true;
   })
@@ -6996,6 +7015,7 @@ function startVerbosity( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     console.log( capturedOutput )
     test.identical( _.strCount( capturedOutput, `node -e console.log('message')`), 1 );
     test.identical( _.strCount( capturedOutput, 'message' ), 1 );
@@ -7021,6 +7041,7 @@ function startVerbosity( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.identical( _.strCount( capturedOutput, `node -e console.log('message')` ), 1 );
     test.identical( _.strCount( capturedOutput, 'message' ), 2 );
     test.identical( _.strCount( capturedOutput, 'at ' + _.path.current() ), 0 );
@@ -7045,6 +7066,7 @@ function startVerbosity( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.identical( _.strCount( capturedOutput, `node -e console.log('message')` ), 1 );
     test.identical( _.strCount( capturedOutput, 'message' ), 2 );
     test.identical( _.strCount( capturedOutput, 'at ' + _.path.current() ), 1 );
@@ -7069,6 +7091,7 @@ function startVerbosity( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.identical( _.strCount( capturedOutput, `node -e console.log('message')` ), 1 );
     test.identical( _.strCount( capturedOutput, 'message' ), 2 );
     test.identical( _.strCount( capturedOutput, 'at ' + _.path.current() ), 1 );
@@ -7094,6 +7117,7 @@ function startVerbosity( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 1 );
+    test.identical( op.ended, true );
     test.identical( _.strCount( capturedOutput, 'Process returned error code ' + op.exitCode ), 0 );
     return true;
   })
@@ -7117,6 +7141,7 @@ function startVerbosity( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 1 );
+    test.identical( op.ended, true );
     test.identical( _.strCount( capturedOutput, 'Process returned error code ' + op.exitCode ), 0 );
     return true;
   })
@@ -7140,6 +7165,7 @@ function startVerbosity( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 1 );
+    test.identical( op.ended, true );
     test.identical( _.strCount( capturedOutput, 'Process returned error code ' + op.exitCode ), 0 );
     return true;
   })
@@ -7163,6 +7189,7 @@ function startVerbosity( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 1 );
+    test.identical( op.ended, true );
     test.identical( _.strCount( capturedOutput, 'Process returned error code ' + op.exitCode ), 0 );
     return true;
   })
@@ -7186,6 +7213,7 @@ function startVerbosity( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 1 );
+    test.identical( op.ended, true );
     test.identical( _.strCount( capturedOutput, 'Process returned error code ' + op.exitCode ), 1 );
     return true;
   })
@@ -7209,6 +7237,7 @@ function startVerbosity( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.identical( op.fullExecPath, `node -e console.log( \"a\", 'b', \`c\` )` );
     test.identical( _.strCount( capturedOutput, `node -e console.log( \"a\", 'b', \`c\` )` ), 1 );
     return true;
@@ -7233,6 +7262,7 @@ function startVerbosity( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.identical( op.fullExecPath, `node -e console.log( '"a"', "'b'", \`"c"\` )` );
     test.identical( _.strCount( capturedOutput, `node -e console.log( '"a"', "'b'", \`"c"\` )` ), 1 );
     return true;
@@ -7549,6 +7579,7 @@ function startNode( test )
     .then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.identical( op.args, [ 'arg' ] );
       console.log( op.output )
       test.is( _.strHas( op.output, `[ 'arg' ]` ) );
@@ -7688,6 +7719,7 @@ function startModeShellNonTrivial( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.identical( _.strCount( op.output, process.version ), 2 );
     return null;
   })
@@ -7698,11 +7730,13 @@ function startModeShellNonTrivial( test )
     if( process.platform ==='win32' )
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.identical( _.strCount( op.output, process.version ), 2 );
     }
     else
     {
       test.notIdentical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.identical( _.strCount( op.output, process.version ), 0 );
     }
 
@@ -7713,6 +7747,7 @@ function startModeShellNonTrivial( test )
   .then( ( op ) =>
   {
     test.notIdentical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.identical( _.strCount( op.output, process.version ), 1 );
     return null;
   })
@@ -7721,6 +7756,7 @@ function startModeShellNonTrivial( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.identical( _.strCount( op.output, process.version ), 2 );
     return null;
   })
@@ -7729,6 +7765,7 @@ function startModeShellNonTrivial( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.identical( _.strCount( op.output, process.version ), 2 );
     return null;
   })
@@ -7737,6 +7774,7 @@ function startModeShellNonTrivial( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.identical( _.strCount( op.output, process.version ), 2 );
     return null;
   })
@@ -7745,6 +7783,7 @@ function startModeShellNonTrivial( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.identical( _.strCount( op.output, process.version ), 2 );
     return null;
   })
@@ -7753,6 +7792,7 @@ function startModeShellNonTrivial( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.identical( _.strCount( op.output, process.version ), 2 );
     return null;
   })
@@ -7761,6 +7801,7 @@ function startModeShellNonTrivial( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.identical( _.strCount( op.output, process.version ), 2 );
     return null;
   })
@@ -7783,6 +7824,7 @@ function startModeShellNonTrivial( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.identical( _.strCount( op.output, `[ 'arg', 'with', 'space' ]` ), 1 );
     return null;
   })
@@ -7791,6 +7833,7 @@ function startModeShellNonTrivial( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.identical( _.strCount( op.output, `[ 'arg with space' ]` ), 1 );
     return null;
   })
@@ -7799,6 +7842,7 @@ function startModeShellNonTrivial( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.identical( _.strCount( op.output, `[ 'arg with space' ]` ), 1 );
     return null;
   })
@@ -7807,6 +7851,7 @@ function startModeShellNonTrivial( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.identical( _.strCount( op.output, `[ 'arg with space' ]` ), 1 );
     return null;
   })
@@ -7815,6 +7860,7 @@ function startModeShellNonTrivial( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     if( process.platform === 'win32' )
     test.identical( _.strCount( op.output, `[ '\`quoted arg with space\`' ]` ), 1 );
     else
@@ -7826,6 +7872,7 @@ function startModeShellNonTrivial( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     // test.identical( _.strCount( op.output, `[ "'quoted arg with space'" ]` ), 1 );
     let args = a.fileProvider.fileRead({ filePath : a.abs( a.routinePath, 'args' ), encoding : 'json' });
     if( process.platform === 'win32' )
@@ -7839,6 +7886,7 @@ function startModeShellNonTrivial( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     let args = a.fileProvider.fileRead({ filePath : a.abs( a.routinePath, 'args' ), encoding : 'json' });
     if( process.platform === 'win32' )
     test.identical( args, [ `\'\`quoted`, 'arg', 'with', `space\`\'` ] );
@@ -7851,6 +7899,7 @@ function startModeShellNonTrivial( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.identical( _.strCount( op.output, `[ '"quoted arg with space"' ]` ), 1 );
     return null;
   })
@@ -7859,6 +7908,7 @@ function startModeShellNonTrivial( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.identical( _.strCount( op.output, `[ '\`quoted arg with space\`' ]` ), 1 );
     return null;
   })
@@ -7881,6 +7931,7 @@ function startModeShellNonTrivial( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     // test.identical( _.strCount( op.output, `[ 'arg1', 'arg2', 'arg 3', "'arg4'" ]` ), 1 );
     let args = a.fileProvider.fileRead({ filePath : a.abs( a.routinePath, 'args' ), encoding : 'json' });
     test.identical( args, [ 'arg1', 'arg2', 'arg 3', `'arg4'` ] );
@@ -7891,6 +7942,7 @@ function startModeShellNonTrivial( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     // test.identical( _.strCount( op.output, '[ `arg1 "arg2" "arg 3" "\'arg4\'"` ]' ), 1 );
     let args = a.fileProvider.fileRead({ filePath : a.abs( a.routinePath, 'args' ), encoding : 'json' });
     test.identical( args, [ `arg1 "arg2" "arg 3" "\'arg4\'"` ] );
@@ -7901,6 +7953,7 @@ function startModeShellNonTrivial( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     // test.identical( _.strCount( op.output, `[ 'arg1', '"arg2"', 'arg 3', "'arg4'" ]` ), 1 );
     let args = a.fileProvider.fileRead({ filePath : a.abs( a.routinePath, 'args' ), encoding : 'json' });
     test.identical( args, [ 'arg1', '"arg2"', 'arg 3', `'arg4'` ] );
@@ -7919,6 +7972,7 @@ function startModeShellNonTrivial( test )
   .then( function( op )
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     if( process.platform === 'win32' )
     test.is( _.strHas( op.output, `"a b" "*" "c"` ) );
     else
@@ -7970,6 +8024,7 @@ function startArgumentsHandlingTrivial( test )
   .then( function( op )
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     if( process.platform === 'win32' )
     test.is( _.strHas( op.output, `*` ) );
     else
@@ -8012,6 +8067,7 @@ function startArgumentsHandling( test )
   .then( function( op )
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     if( process.platform === 'win32' )
     test.is( _.strHas( op.output, `*` ) );
     else
@@ -8028,6 +8084,7 @@ function startArgumentsHandling( test )
   .then( function( op )
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.is( _.strHas( op.output, `*` ) );
     test.identical( op.execPath, 'echo' )
     test.identical( op.args, [ '*' ] )
@@ -8041,6 +8098,7 @@ function startArgumentsHandling( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.is( _.strHas( op.output, `*` ) );
     test.identical( op.execPath, 'echo' )
     test.identical( op.args, [ '"*"' ] )
@@ -8055,6 +8113,7 @@ function startArgumentsHandling( test )
   .then( function( op )
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     if( process.platform === 'win32' )
     test.is( _.strHas( op.output, `"a b" "*" c` ) );
     else
@@ -8071,6 +8130,7 @@ function startArgumentsHandling( test )
   .then( function( op )
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     if( process.platform === 'win32' )
     test.is( _.strHas( op.output, `"a b" "*" "c"` ) );
     else
@@ -8087,6 +8147,7 @@ function startArgumentsHandling( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.identical( _.strCount( op.output, '"*"' ), 1 );
     test.identical( op.execPath, 'echo' )
     test.identical( op.args, [ `'"*"'` ] )
@@ -8100,6 +8161,7 @@ function startArgumentsHandling( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     if( process.platform === 'win32' )
     test.identical( _.strCount( op.output, `"'\\"*\\"'"` ), 1 );
     else
@@ -8116,6 +8178,7 @@ function startArgumentsHandling( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.identical( _.strCount( op.output, `'*'` ), 1 );
     test.identical( op.execPath, 'echo' )
     test.identical( op.args, [ `"'*'"` ] )
@@ -8129,6 +8192,7 @@ function startArgumentsHandling( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.identical( _.strCount( op.output, `'*'` ), 1 );
     test.identical( op.execPath, 'echo' )
     test.identical( op.args, [ `"'*'"` ] )
@@ -8142,6 +8206,7 @@ function startArgumentsHandling( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     if( process.platform === 'win32' )
     test.identical( _.strCount( op.output, '`*`' ), 1 );
     else
@@ -8158,6 +8223,7 @@ function startArgumentsHandling( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.identical( _.strCount( op.output, '`*`' ), 1 );
     test.identical( op.execPath, 'echo' )
     test.identical( op.args, [ '`*`' ] )
@@ -8174,6 +8240,7 @@ function startArgumentsHandling( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.is( _.strHas( op.output, `a b c` ) );
     return null;
   })
@@ -8184,6 +8251,7 @@ function startArgumentsHandling( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.is( _.strHas( op.output, `"a b c"` ) );
     test.identical( op.execPath, 'node' )
     test.identical( op.args, [ '-e', '"console.log( process.argv.slice( 1 ) )"', '"a b c"' ] )
@@ -8224,6 +8292,7 @@ function importantModeShell( test )
   .then( function( op )
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.identical( _.strCount( op.output, process.version ), 2 );
     return null;
   })
@@ -8234,6 +8303,7 @@ function importantModeShell( test )
   .then( function( op )
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.identical( _.strCount( op.output, process.version ), 1 );
     return null;
   })
@@ -8244,6 +8314,7 @@ function importantModeShell( test )
   .then( function( op )
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.is( _.strHas( op.output, `[ 'a', '&&', 'node', 'b' ]` ) )
     return null;
   })
@@ -8254,6 +8325,7 @@ function importantModeShell( test )
   .then( function( op )
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     if( process.platform === 'win32' )
     test.is( _.strHas( op.output, '"-v" "&&" "echo" "-v"' ) )
     else
@@ -8267,6 +8339,7 @@ function importantModeShell( test )
   .then( function( op )
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.identical( _.strCount( op.output, process.version ), 2 );
     return null;
   })
@@ -8277,6 +8350,7 @@ function importantModeShell( test )
   .then( function( op )
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.identical( _.strCount( op.output, process.version ), 1 );
     return null;
   })
@@ -8287,6 +8361,7 @@ function importantModeShell( test )
   .then( function( op )
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     if( process.platform === 'win32' )
     test.is( _.strHas( op.output, '-v "&&" node -v'  ) );
     else
@@ -8300,6 +8375,7 @@ function importantModeShell( test )
   .then( function( op )
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     if( process.platform === 'win32' )
     test.identical( _.strCount( op.output, '*' ), 1 );
     else
@@ -8313,6 +8389,7 @@ function importantModeShell( test )
   .then( function( op )
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.identical( _.strCount( op.output, '*' ), 1 );
     return null;
   })
@@ -8323,6 +8400,7 @@ function importantModeShell( test )
   .then( function( op )
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     if( process.platform === 'win32' )
     test.identical( _.strCount( op.output, '*' ), 1 );
     else
@@ -8336,6 +8414,7 @@ function importantModeShell( test )
   .then( function( op )
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.identical( _.strCount( op.output, '*' ), 1 );
     return null;
   })
@@ -8346,6 +8425,7 @@ function importantModeShell( test )
   .then( function( op )
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.is( _.strHas( op.output, `[ 'a', 'b' ]` ) );
     return null;
   })
@@ -8356,6 +8436,7 @@ function importantModeShell( test )
   .then( function( op )
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.is( _.strHas( op.output, `[ 'a b' ]` ) );
     return null;
   })
@@ -8366,6 +8447,7 @@ function importantModeShell( test )
   .then( function( op )
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.is( _.strHas( op.output, `[ 'a', 'b' ]` ) );
     return null;
   })
@@ -8376,6 +8458,7 @@ function importantModeShell( test )
   .then( function( op )
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.is( _.strHas( op.output, `[ 'a b' ]` ) );
     return null;
   })
@@ -8386,6 +8469,7 @@ function importantModeShell( test )
   .then( function( op )
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.is( _.strHas( op.output, '*' ) );
     return null;
   })
@@ -8396,6 +8480,7 @@ function importantModeShell( test )
   .then( function( op )
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     if( process.platform === 'win32' )
     test.is( _.strHas( op.output, '\\"*\\"' ) );
     else
@@ -8409,6 +8494,7 @@ function importantModeShell( test )
   .then( function( op )
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     if( process.platform === 'win32' )
     test.is( _.strHas( op.output, '\\"*\\"' ) );
     else
@@ -8422,6 +8508,7 @@ function importantModeShell( test )
   .then( function( op )
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     if( process.platform === 'win32' )
     test.is( _.strHas( op.output, '"\\"*\\"' ) );
     else
@@ -8435,6 +8522,7 @@ function importantModeShell( test )
   .then( function( op )
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     if( process.platform === 'win32' )
     {
       test.is( _.strHas( op.output, '*' ) );
@@ -8455,6 +8543,7 @@ function importantModeShell( test )
   .then( function( op )
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     if( process.platform === 'win32' )
     test.is( _.strHas( op.output, '"' + process.argv.slice( 2 ).join( '" "' ) + '"' ) );
     else
@@ -8468,6 +8557,7 @@ function importantModeShell( test )
   .then( function( op )
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     if( process.platform === 'win32' )
     test.is( _.strHas( op.output, '"' + process.argv.slice( 2 ).join( '" "' ) + '"' ) );
     else
@@ -8481,6 +8571,7 @@ function importantModeShell( test )
   .then( function( op )
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
 
     if( process.platform === 'win32' )
     {
@@ -8534,6 +8625,7 @@ function startExecPathWithSpace( test )
   a.ready.then( ( op ) =>
   {
     test.notIdentical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.is( a.fileProvider.fileExists( testAppPath ) );
     test.is( _.strHas( op.output, `Error: Cannot find module` ) );
     return null;
@@ -8560,6 +8652,7 @@ function startExecPathWithSpace( test )
   a.ready.then( ( op ) =>
   {
     test.notIdentical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.is( a.fileProvider.fileExists( testAppPath ) );
     test.is( _.strHas( op.output, `Error: Cannot find module` ) );
     return null;
@@ -8586,6 +8679,7 @@ function startExecPathWithSpace( test )
   a.ready.then( ( op ) =>
   {
     test.notIdentical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.is( a.fileProvider.fileExists( testAppPath ) );
     test.is( _.strHas( op.output, `Error: Cannot find module` ) );
     return null;
@@ -8639,6 +8733,7 @@ function startExecPathWithSpace( test )
   a.ready.then( ( op ) =>
   {
     test.notIdentical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.is( a.fileProvider.fileExists( testAppPath ) );
     test.is( _.strHas( op.output, `Cannot find module` ) );
     return null;
@@ -8665,6 +8760,7 @@ function startExecPathWithSpace( test )
   a.ready.then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     return null;
   })
 
@@ -8689,6 +8785,7 @@ function startExecPathWithSpace( test )
   a.ready.then( ( op ) =>
   {
     test.notIdentical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.is( a.fileProvider.fileExists( testAppPath ) );
     test.is( _.strHas( op.output, `Cannot find module` ) );
     return null;
@@ -8739,6 +8836,7 @@ function startNjsPassingThroughExecPathWithSpace( test )
   a.ready.then( ( op ) =>
   {
     test.notIdentical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.is( a.fileProvider.fileExists( testAppPath ) );
     test.is( _.strHas( op.output, `Error: Cannot find module` ) );
     return null;
@@ -8812,6 +8910,7 @@ function startPassingThroughExecPathWithSpace( test )
   a.ready.then( ( op ) =>
   {
     test.notIdentical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.is( a.fileProvider.fileExists( testAppPath ) );
     test.is( _.strHas( op.output, `Error: Cannot find module` ) );
     return null;
@@ -8840,6 +8939,7 @@ function startPassingThroughExecPathWithSpace( test )
   a.ready.then( ( op ) =>
   {
     test.notIdentical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.is( a.fileProvider.fileExists( testAppPath ) );
     test.is( _.strHas( op.output, `Error: Cannot find module` ) );
     return null;
@@ -8868,6 +8968,7 @@ function startPassingThroughExecPathWithSpace( test )
   a.ready.then( ( op ) =>
   {
     test.notIdentical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.is( a.fileProvider.fileExists( testAppPath ) );
     test.is( _.strHas( op.output, `Error: Cannot find module` ) );
     return null;
@@ -8925,6 +9026,7 @@ function startPassingThroughExecPathWithSpace( test )
   a.ready.then( ( op ) =>
   {
     test.notIdentical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.is( a.fileProvider.fileExists( testAppPath ) );
     test.is( _.strHas( op.output, `Cannot find module` ) );
     return null;
@@ -8953,6 +9055,7 @@ function startPassingThroughExecPathWithSpace( test )
   a.ready.then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     return null;
   })
 
@@ -8979,6 +9082,7 @@ function startPassingThroughExecPathWithSpace( test )
   a.ready.then( ( op ) =>
   {
     test.notIdentical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.is( a.fileProvider.fileExists( testAppPath ) );
     test.is( _.strHas( op.output, `Cannot find module` ) );
     return null;
@@ -9029,6 +9133,7 @@ function startProcedureTrivial( test )
     return con.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.identical( procedure[ 0 ].isAlive(), false );
       test.identical( o.procedure, procedure[ 0 ] );
       test.identical( procedure[ 0 ].object(), o.process );
@@ -9052,6 +9157,7 @@ function startProcedureTrivial( test )
     return con.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.identical( procedure[ 0 ].isAlive(), false );
       test.identical( o.procedure, procedure[ 0 ] );
       test.identical( procedure[ 0 ].object(), o.process );
@@ -9075,6 +9181,7 @@ function startProcedureTrivial( test )
     return con.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.identical( procedure[ 0 ].isAlive(), false );
       test.identical( o.procedure, procedure[ 0 ] );
       test.identical( procedure[ 0 ].object(), o.process );
@@ -9097,6 +9204,7 @@ function startProcedureTrivial( test )
   //   return con.then( ( op ) =>
   //   {
   //     test.identical( op.exitCode, 0 );
+  //     test.identical( op.ended, true );
   //     test.identical( procedure[ 0 ].isAlive(), false );
   //     test.identical( o.procedure, procedure[ 0 ] );
   //     test.identical( procedure[ 0 ].object(), o.process );
@@ -9159,6 +9267,7 @@ function startProcedureExists( test )
     return con.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.identical( procedure[ 0 ].isAlive(), false );
       test.identical( o.procedure, procedure[ 0 ] );
       test.identical( procedure[ 0 ].object(), o.process );
@@ -9185,6 +9294,7 @@ function startProcedureExists( test )
     return con.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.identical( procedure[ 0 ].isAlive(), false );
       test.identical( o.procedure, procedure[ 0 ] );
       test.identical( procedure[ 0 ].object(), o.process );
@@ -9210,6 +9320,7 @@ function startProcedureExists( test )
     return con.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.identical( procedure[ 0 ].isAlive(), false );
       test.identical( o.procedure, procedure[ 0 ] );
       test.identical( procedure[ 0 ].object(), o.process );
@@ -9275,6 +9386,7 @@ function startOnTerminateSeveralCallbacksChronology( test )
     {
       track.push( 'onTerminate.1' );
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.identical( op.state, 'terminated' );
       return null;
     })
@@ -9867,6 +9979,7 @@ function startStartingDelay( test )
       o.ready.then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
         let parsed = JSON.parse( op.output );
         let diff = parsed.t2 - t1;
         test.ge( diff, when.delay );
@@ -9938,6 +10051,7 @@ function startStartingTime( test )
       o.ready.then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
         let parsed = JSON.parse( op.output );
         let diff = parsed.t2 - t1;
         test.ge( diff, delay );
@@ -9998,6 +10112,7 @@ function shellStartingSuspended( test )
     con.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       let parsed = JSON.parse( op.output );
       let diff = parsed.t2 - t1;
       test.ge( diff, delay );
@@ -10213,7 +10328,7 @@ function shellAfterDeath( test )
 //     con.then( ( op ) =>
 //     {
 //       test.identical( op.exitCode, 0 );
-
+//       test.identical( op.ended, true );
 //       test.is( _.strHas( op.output, 'Parent process exit' ) )
 //       test.is( _.strHas( op.output, 'Secondary: starting child process...' ) )
 //       test.is( _.strHas( op.output, 'Child process start' ) )
@@ -10274,6 +10389,7 @@ function startDetachingModeSpawnResourceReady( test )
     {
       track.push( 'onTerminate' );
       test.notIdentical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.identical( op.exitSignal, 'SIGTERM' );
       test.identical( track, [ 'onStart', 'onTerminate' ] );
       return null;
@@ -10348,6 +10464,7 @@ function startDetachingModeForkResourceReady( test )
     {
       track.push( 'onTerminate' );
       test.notIdentical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.identical( op.exitSignal, 'SIGTERM' );
       test.identical( track, [ 'onStart', 'onTerminate' ] )
       return null;
@@ -10422,6 +10539,7 @@ function startDetachingModeShellResourceReady( test )
     {
       track.push( 'onTerminate' );
       test.notIdentical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.identical( op.exitSignal, 'SIGTERM' );
       test.identical( track, [ 'onStart', 'onTerminate' ] );
       return null;
@@ -10489,6 +10607,7 @@ function startDetachingModeSpawnNoTerminationBegin( test )
     con.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.will = 'parent and child are dead';
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( !_.process.isAlive( data.childPid ) );
@@ -10531,6 +10650,7 @@ function startDetachingModeSpawnNoTerminationBegin( test )
     con.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.will = 'parent and child are dead';
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( !_.process.isAlive( data.childPid ) );
@@ -10573,6 +10693,7 @@ function startDetachingModeSpawnNoTerminationBegin( test )
     con.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.will = 'parent and child are dead';
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( !_.process.isAlive( data.childPid ) );
@@ -10615,6 +10736,7 @@ function startDetachingModeSpawnNoTerminationBegin( test )
     con.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.will = 'parent and child are dead';
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( !_.process.isAlive( data.childPid ) );
@@ -10719,6 +10841,7 @@ function startDetachingModeForkNoTerminationBegin( test )
     con.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.will = 'parent and child are dead';
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( !_.process.isAlive( data.childPid ) );
@@ -10761,6 +10884,7 @@ function startDetachingModeForkNoTerminationBegin( test )
     con.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.will = 'parent and child are dead';
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( !_.process.isAlive( data.childPid ) );
@@ -10861,6 +10985,7 @@ function startDetachingModeShellNoTerminationBegin( test )
     con.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.will = 'parent and child are dead';
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( !_.process.isAlive( data.childPid ) );
@@ -10903,6 +11028,7 @@ function startDetachingModeShellNoTerminationBegin( test )
     con.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.will = 'parent and child are dead';
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( !_.process.isAlive( data.childPid ) );
@@ -11034,6 +11160,7 @@ function startDetachingTerminationBegin( test ) /* qqq2 : extend for other modes
       {
         test.will = 'parent is dead, child is still alive';
         test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
         test.is( !_.process.isAlive( op.process.pid ) );
         test.is( _.process.isAlive( data.childPid ) );
         return _.time.out( context.t2 * 2 );
@@ -11089,6 +11216,7 @@ function startDetachingTerminationBegin( test ) /* qqq2 : extend for other modes
     //   con.then( ( op ) =>
     //   {
     //     test.identical( op.exitCode, 0 );
+    //     test.identical( op.ended, true );
     //     test.will = 'parent is dead, child is still alive';
     //     test.is( !_.process.isAlive( op.process.pid ) );
     //     test.is( _.process.isAlive( data.childPid ) );
@@ -11143,6 +11271,7 @@ function startDetachingTerminationBegin( test ) /* qqq2 : extend for other modes
     //   con.then( ( op ) =>
     //   {
     //     test.identical( op.exitCode, 0 );
+    //     test.identical( op.ended, true );
     //     test.will = 'parent is dead, child is still alive';
     //     test.is( !_.process.isAlive( op.process.pid ) );
     //     test.is( _.process.isAlive( data.childPid ) );
@@ -11198,6 +11327,7 @@ function startDetachingTerminationBegin( test ) /* qqq2 : extend for other modes
     //   con.then( ( op ) =>
     //   {
     //     test.identical( op.exitCode, 0 );
+    //     test.identical( op.ended, true );
     //     test.will = 'parent is dead, child is still alive';
     //     test.is( !_.process.isAlive( op.process.pid ) );
     //     test.is( _.process.isAlive( data.childPid ) );
@@ -11315,6 +11445,7 @@ function startDetachingChildExitsAfterParent( test )
     {
       test.will = 'parent is dead, detached child is still running'
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( _.process.isAlive( childPid ) );
       return _.time.out( 10000 ); /* zzz : ask about time out */
@@ -11433,6 +11564,7 @@ function startDetachingChildExitsBeforeParent( test )
     o.onTerminate.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
 
       test.will = 'parent and chid are dead';
 
@@ -12337,6 +12469,7 @@ function startDetachingModeSpawnIpc( test )
     {
       track.push( 'onTerminate' );
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.identical( message, 'child' );
       test.identical( track, [ 'onStart', 'onTerminate' ] );
       track = [];
@@ -12381,6 +12514,7 @@ function startDetachingModeSpawnIpc( test )
     {
       track.push( 'onTerminate' );
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.identical( message, 'child' );
       test.identical( track, [ 'onStart', 'onTerminate' ] );
       track = [];
@@ -12458,6 +12592,7 @@ function startDetachingModeForkIpc( test )
     {
       track.push( 'onTerminate' );
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.identical( message, 'child' );
       test.identical( track, [ 'onStart', 'onTerminate' ] );
       track = [];
@@ -12502,6 +12637,7 @@ function startDetachingModeForkIpc( test )
     {
       track.push( 'onTerminate' );
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.identical( message, 'child' );
       test.identical( track, [ 'onStart', 'onTerminate' ] );
       track = [];
@@ -12736,6 +12872,7 @@ function startNjsDetachingChildThrowing( test )
   {
     track.push( 'onTerminate' );
     test.notIdentical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.is( _.strHas( op.output, 'Child process error' ) );
     test.identical( o.exitCode, op.exitCode );
     test.identical( o.output, op.output );
@@ -12797,6 +12934,7 @@ function startDetachingTrivial( test )
     track.push( 'onTerminate' );
     test.is( _.process.isAlive( childPid ) );
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.is( _.strHas( op.output, 'Child process start' ) );
     test.is( _.strHas( op.output, 'from parent: data' ) );
     test.is( !_.strHas( op.output, 'Child process end' ) );
@@ -12935,6 +13073,7 @@ function startOnStart( test ) /* qqq2 : add other modes. ask how to aaa:done */
       {
         test.identical( o, op );
         test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
         return null;
       })
@@ -13011,6 +13150,7 @@ function startOnStart( test ) /* qqq2 : add other modes. ask how to aaa:done */
       {
         test.identical( o, op );
         test.identical( op.exitCode, null );
+        test.identical( op.ended, false );
         test.identical( op.exitSignal, null );
         return null;
       })
@@ -13235,8 +13375,8 @@ function startOnTerminate( test ) /* qqq for Yevhen : add other modes. ask how t
       {
         test.identical( o, op );
         test.identical( op.state, 'terminated' );
-        test.identical( op.ended, true );
         test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
         return null;
       })
@@ -13272,6 +13412,7 @@ function startOnTerminate( test ) /* qqq for Yevhen : add other modes. ask how t
         track.push( 'onTerminate' );
         test.identical( o, op );
         test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
         return null;
       })
@@ -13318,8 +13459,8 @@ function startOnTerminate( test ) /* qqq for Yevhen : add other modes. ask how t
       {
         test.identical( o, op );
         test.identical( op.state, 'terminated' );
-        test.identical( op.ended, true );
         test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
         return null;
       })
@@ -13356,6 +13497,7 @@ function startOnTerminate( test ) /* qqq for Yevhen : add other modes. ask how t
         track.push( 'onTerminate' );
         test.identical( o, op );
         test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
         return null;
       })
@@ -15170,6 +15312,7 @@ function shellerArgs( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.identical( op.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
     test.identical( _.strCount( op.output, `[ 'arg3', 'arg1', 'arg2' ]` ), 1 );
     test.identical( shellerOptions.args, [ 'arg1', 'arg2' ] );
@@ -15184,6 +15327,7 @@ function shellerArgs( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.identical( op.args, [ testAppPath, 'arg3' ] );
     test.identical( _.strCount( op.output, `[ 'arg3' ]` ), 1 );
     test.identical( shellerOptions.args, [ 'arg1', 'arg2' ] );
@@ -15198,6 +15342,7 @@ function shellerArgs( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.identical( op.args, [ testAppPath, 'arg3' ] );
     test.identical( _.strCount( op.output, `[ 'arg3' ]` ), 1 );
     test.identical( shellerOptions.args, [ 'arg1', 'arg2' ] );
@@ -15381,6 +15526,7 @@ function startOutputStripping( test )
     .then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       let output = _.strSplitNonPreserving({ src : op.output, delimeter : '\n' });
       test.identical( output.length, 2 );
       test.identical( output[ 0 ], '\u001b[31m\u001b[43mColored message1\u001b[49;0m\u001b[39;0m' );
@@ -15399,6 +15545,7 @@ function startOutputStripping( test )
     .then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       let output = _.strSplitNonPreserving({ src : op.output, delimeter : '\n' });
       test.identical( output.length, 2 );
       test.identical( output[ 0 ], 'Colored message1' );
@@ -15459,6 +15606,7 @@ function startLoggerOption( test )
     .then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.is( _.strHas( op.output, '  One tab' ) )
       test.is( _.strHas( loggerOutput, '    One tab' ) )
       return null;
@@ -15541,6 +15689,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
       o.onTerminate.then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
         return null;
       })
@@ -15611,6 +15760,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
       o.onTerminate.then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
         return null;
       })
@@ -15636,6 +15786,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
       o.onTerminate.then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
         return null;
       })
@@ -15661,6 +15812,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
       o.onTerminate.then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
         test.is( _.strHas( op.output, 'Test output' ) );
         return null;
@@ -15687,6 +15839,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
       o.onTerminate.then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
         test.is( _.strHas( op.output, 'Test output' ) );
         return null;
@@ -15726,6 +15879,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
       o2.onTerminate.then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
         return null;
       })
@@ -15831,6 +15985,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
       o.onTerminate.then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
         test.is( _.strHas( op.output, 'Test output' ) );
         return null;
@@ -15857,6 +16012,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
       o.onTerminate.then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
         test.is( _.strHas( op.output, 'Test output' ) );
         return null;
@@ -15883,6 +16039,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
       o.onTerminate.then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
         test.is( !_.strHas( op.output, 'Test output' ) );
         return null;
@@ -15909,6 +16066,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
       o.onTerminate.then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
         test.is( _.strHas( op.output, 'Test output' ) );
         return null;
@@ -15948,6 +16106,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
       o2.onTerminate.then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
         test.is( _.strHas( op.output, 'Test output' ) );
         return null;
@@ -15974,6 +16133,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
       o.onTerminate.then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
         test.is( _.strHas( op.output, 'Test output' ) );
         return null;
@@ -16038,6 +16198,7 @@ function startNormalizedExecPath( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.identical( _.strCount( op.output, `[ 'arg1', 'arg2' ]` ), 1 );
     return null;
   })
@@ -16053,6 +16214,7 @@ function startNormalizedExecPath( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.identical( _.strCount( op.output, `[ 'arg1', 'arg2' ]` ), 1 );
     return null;
   })
@@ -16068,6 +16230,7 @@ function startNormalizedExecPath( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.identical( _.strCount( op.output, `[ 'arg1', 'arg2' ]` ), 1 );
     return null;
   })
@@ -16083,6 +16246,7 @@ function startNormalizedExecPath( test )
   // .then( ( op ) =>
   // {
   //   test.identical( op.exitCode, 0 );
+  //   test.identical( op.ended, true );
   //   test.identical( _.strCount( op.output, `[ 'arg1', 'arg2' ]` ), 1 );
   //   return null;
   // })
@@ -16097,6 +16261,7 @@ function startNormalizedExecPath( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.identical( _.strCount( op.output, `[ 'arg1', 'arg2' ]` ), 1 );
     return null;
   })
@@ -16112,6 +16277,7 @@ function startNormalizedExecPath( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.identical( _.strCount( op.output, `[ 'arg1', 'arg2' ]` ), 1 );
     return null;
   })
@@ -16127,6 +16293,7 @@ function startNormalizedExecPath( test )
   .then( ( op ) =>
   {
     test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
     test.identical( _.strCount( op.output, `[ 'arg1', 'arg2' ]` ), 1 );
     return null;
   })
@@ -16142,6 +16309,7 @@ function startNormalizedExecPath( test )
   // .then( ( op ) =>
   // {
   //   test.identical( op.exitCode, 0 );
+  //   test.identical( op.ended, true );
   //   test.identical( _.strCount( op.output, `[ 'arg1', 'arg2' ]` ), 1 );
   //   return null;
   // })
@@ -16409,6 +16577,7 @@ function kill( test )
     ready.then( ( op ) =>
     {
       test.identical( op.exitCode, null );
+      test.identical( op.ended, true );
       test.identical( op.exitSignal, 'SIGKILL' );
       test.is( !_.strHas( op.output, 'Application timeout!' ) );
       return null;
@@ -16438,11 +16607,13 @@ function kill( test )
       if( process.platform === 'win32' )
       {
         test.identical( op.exitCode, 1 );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
       }
       else
       {
         test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, 'SIGKILL' );
       }
 
@@ -16472,6 +16643,7 @@ function kill( test )
     ready.then( ( op ) =>
     {
       test.identical( op.exitCode, null );
+      test.identical( op.ended, true );
       test.identical( op.exitSignal, 'SIGKILL' );
       test.is( !_.strHas( op.output, 'Application timeout!' ) );
       return null;
@@ -16501,11 +16673,13 @@ function kill( test )
       if( process.platform === 'win32' )
       {
         test.identical( op.exitCode, 1 );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
       }
       else
       {
         test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, 'SIGKILL' );
       }
 
@@ -16535,6 +16709,7 @@ function kill( test )
     ready.then( ( op ) =>
     {
       test.identical( op.exitCode, null );
+      test.identical( op.ended, true );
       test.identical( op.exitSignal, 'SIGKILL' );
       if( process.platform === 'darwin' )
       test.is( !_.strHas( op.output, 'Application timeout!' ) );
@@ -16567,11 +16742,13 @@ function kill( test )
       if( process.platform === 'win32' )
       {
         test.identical( op.exitCode, 1 );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
       }
       else
       {
         test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, 'SIGKILL' );
       }
 
@@ -16604,6 +16781,7 @@ function kill( test )
   //   ready.then( ( op ) =>
   //   {
   //     test.identical( op.exitCode, null );
+  //     test.identical( op.ended, true );
   //     test.identical( op.exitSignal, 'SIGKILL' );
   //     if( process.platform === 'darwin' )
   //     test.is( !_.strHas( op.output, 'Application timeout!' ) );
@@ -16636,11 +16814,13 @@ function kill( test )
   //     if( process.platform === 'win32' )
   //     {
   //       test.identical( op.exitCode, 1 );
+  //       test.identical( op.ended, true );
   //       test.identical( op.exitSignal, null );
   //     }
   //     else
   //     {
   //       test.identical( op.exitCode, null );
+  //       test.identical( op.ended, true );
   //       test.identical( op.exitSignal, 'SIGKILL' );
   //     }
   //
@@ -16714,11 +16894,13 @@ function killWithChildren( test )
         if( process.platform === 'win32' )
         {
           test.identical( op.exitCode, 1 );
+          test.identical( op.ended, true );
           test.identical( op.exitSignal, null );
         }
         else
         {
           test.identical( op.exitCode, null );
+          test.identical( op.ended, true );
           test.identical( op.exitSignal, 'SIGKILL' );
         }
         test.identical( _.strCount( op.output, 'Application timeout' ), 0 );
@@ -16759,6 +16941,7 @@ function killWithChildren( test )
       return killed.then( () =>
       {
         test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
         test.identical( _.strCount( op.output, 'Application timeout' ), 0 );
         test.is( !_.process.isAlive( o.process.pid ) );
@@ -16800,11 +16983,13 @@ function killWithChildren( test )
         if( process.platform === 'win32' )
         {
           test.identical( op.exitCode, 1 );
+          test.identical( op.ended, true );
           test.identical( op.exitSignal, null );
         }
         else
         {
           test.identical( op.exitCode, null );
+          test.identical( op.ended, true );
           test.identical( op.exitSignal, 'SIGKILL' );
         }
         test.identical( _.strCount( op.output, 'Application timeout' ), 0 );
@@ -16847,11 +17032,13 @@ function killWithChildren( test )
         if( process.platform === 'win32' )
         {
           test.identical( op.exitCode, 1 );
+          test.identical( op.ended, true );
           test.identical( op.exitSignal, null );
         }
         else
         {
           test.identical( op.exitCode, null );
+          test.identical( op.ended, true );
           test.identical( op.exitSignal, 'SIGKILL' );
         }
         test.identical( _.strCount( op.output, 'Application timeout' ), 0 );
@@ -16992,6 +17179,7 @@ function terminate( test )
     ready.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.identical( op.exitSignal, null );
       test.is( _.strHas( op.output, 'SIGINT' ) );
       test.is( !_.strHas( op.output, 'Application timeout!' ) );
@@ -17024,6 +17212,7 @@ function terminate( test )
     ready.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.identical( op.exitSignal, null );
       test.is( _.strHas( op.output, 'SIGINT' ) );
       test.is( !_.strHas( op.output, 'Application timeout!' ) );
@@ -17056,6 +17245,7 @@ function terminate( test )
     ready.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.identical( op.exitSignal, null );
       test.is( _.strHas( op.output, 'SIGINT' ) );
       test.is( !_.strHas( op.output, 'Application timeout!' ) );
@@ -17087,6 +17277,7 @@ function terminate( test )
     ready.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.identical( op.exitSignal, null );
       test.is( _.strHas( op.output, 'SIGINT' ) );
       test.is( !_.strHas( op.output, 'Application timeout!' ) );
@@ -17127,6 +17318,7 @@ function terminate( test )
       if( process.platform === 'linux' )
       {
         test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, 'SIGINT' );
         test.is( !_.strHas( op.output, 'SIGINT' ) );
         test.is( _.strHas( op.output, 'Application timeout!' ) );
@@ -17134,6 +17326,7 @@ function terminate( test )
       else if( process.platform === 'win32' )
       {
         test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
         test.is( !_.strHas( op.output, 'SIGINT' ) );
         test.is( _.strHas( op.output, 'Application timeout!' ) );
@@ -17141,6 +17334,7 @@ function terminate( test )
       else
       {
         test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
         test.is( _.strHas( op.output, 'SIGINT' ) );
         test.is( !_.strHas( op.output, 'Application timeout!' ) );
@@ -17178,6 +17372,7 @@ function terminate( test )
       if( process.platform === 'linux' )
       {
         test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, 'SIGINT' );
         test.is( !_.strHas( op.output, 'SIGINT' ) );
         test.is( _.strHas( op.output, 'Application timeout!' ) );
@@ -17185,6 +17380,7 @@ function terminate( test )
       else if( process.platform === 'win32' )
       {
         test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
         test.is( !_.strHas( op.output, 'SIGINT' ) );
         test.is( _.strHas( op.output, 'Application timeout!' ) );
@@ -17192,6 +17388,7 @@ function terminate( test )
       else
       {
         test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
         test.is( _.strHas( op.output, 'SIGINT' ) );
         test.is( !_.strHas( op.output, 'Application timeout!' ) );
@@ -17822,6 +18019,7 @@ function terminateComplex( test )
     ready.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.identical( op.exitSignal, null );
       test.identical( _.strCount( op.output, 'SIGINT' ), 1 );
       test.identical( _.strCount( op.output, 'second child SIGINT' ), 1 );
@@ -17859,7 +18057,8 @@ function terminateComplex( test )
     /* zzz */
     ready.then( ( op ) =>
     {
-      test.identical( op.exitCode, 0 ); /* qqq for Yevhen : check op.ended if op.exitCode is checked */
+      test.identical( op.exitCode, 0 ); /* qqq for Yevhen : check op.ended if op.exitCode is checked | aaa : Done. Yevhen S.  */
+      test.identical( op.ended, true );
       test.identical( op.exitSignal, null );
       test.identical( _.strCount( op.output, 'SIGINT' ), 1 );
       test.is( !_.process.isAlive( o.process.pid ) )
@@ -17896,6 +18095,7 @@ function terminateComplex( test )
     ready.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.identical( op.exitSignal, null );
       test.identical( _.strCount( op.output, 'SIGINT' ), 1 );
       test.is( !_.process.isAlive( o.process.pid ) )
@@ -17934,11 +18134,13 @@ function terminateComplex( test )
       if( process.platform === 'linux' )
       {
         test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, 'SIGINT' );
       }
       else
       {
         test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
       }
       test.is( !_.process.isAlive( o.process.pid ) )
@@ -18046,6 +18248,7 @@ function terminateDetachedComplex( test )
     ready.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.identical( op.exitSignal, null );
       test.is( _.strHas( op.output, 'SIGINT' ) );
       test.is( !_.strHas( op.output, 'TerminationBegin' ) );
@@ -18089,6 +18292,7 @@ function terminateDetachedComplex( test )
     ready.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.identical( op.exitSignal, null );
       test.is( _.strHas( op.output, 'SIGINT' ) );
       test.is( !_.strHas( op.output, 'TerminationBegin' ) );
@@ -18138,6 +18342,7 @@ function terminateDetachedComplex( test )
       {
         test.is( !_.process.isAlive( _.numberFrom( childPid ) ) )
         test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, 'SIGINT' );
         test.is( !_.strHas( op.output, 'SIGINT' ) );
         test.is( _.strHas( op.output, 'TerminationBegin' ) );
@@ -18146,6 +18351,7 @@ function terminateDetachedComplex( test )
       {
         test.is( !_.process.isAlive( _.numberFrom( childPid ) ) )
         test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
         test.is( !_.strHas( op.output, 'SIGINT' ) );
         test.is( _.strHas( op.output, 'TerminationBegin' ) );
@@ -18154,6 +18360,7 @@ function terminateDetachedComplex( test )
       {
         test.is( _.process.isAlive( _.numberFrom( childPid ) ) )
         test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
         test.is( _.strHas( op.output, 'SIGINT' ) );
         test.is( !_.strHas( op.output, 'TerminationBegin' ) );
@@ -18203,6 +18410,7 @@ function terminateDetachedComplex( test )
   //     {
   //       test.is( !_.process.isAlive( _.numberFrom( childPid ) ) )
   //       test.identical( op.exitCode, null );
+  //       test.identical( op.ended, true );
   //       test.identical( op.exitSignal, 'SIGINT' );
   //       test.is( !_.strHas( op.output, 'SIGINT' ) );
   //       test.is( _.strHas( op.output, 'TerminationBegin' ) );
@@ -18211,6 +18419,7 @@ function terminateDetachedComplex( test )
   //     {
   //       test.is( !_.process.isAlive( _.numberFrom( childPid ) ) )
   //       test.identical( op.exitCode, 0 );
+  //       test.identical( op.ended, true );
   //       test.identical( op.exitSignal, null );
   //       test.is( !_.strHas( op.output, 'SIGINT' ) );
   //       test.is( _.strHas( op.output, 'TerminationBegin' ) );
@@ -18219,6 +18428,7 @@ function terminateDetachedComplex( test )
   //     {
   //       test.is( _.process.isAlive( _.numberFrom( childPid ) ) )
   //       test.identical( op.exitCode, 0 );
+  //       test.identical( op.ended, true );
   //       test.identical( op.exitSignal, null );
   //       test.is( _.strHas( op.output, 'SIGINT' ) );
   //       test.is( !_.strHas( op.output, 'TerminationBegin' ) );
@@ -18349,6 +18559,7 @@ function terminateWithChildren( test )
       return terminated.then( () =>
       {
         test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
         test.identical( _.strCount( op.output, 'SIGINT' ), 2 );
         test.identical( _.strCount( op.output, 'SIGINT CHILD' ), 1 );
@@ -18391,6 +18602,7 @@ function terminateWithChildren( test )
       return terminated.then( () =>
       {
         test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
         test.identical( _.strCount( op.output, 'SIGINT' ), 1 );
         test.identical( _.strCount( op.output, 'SIGINT CHILD' ), 1 );
@@ -18432,6 +18644,7 @@ function terminateWithChildren( test )
       return terminated.then( () =>
       {
         test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
         test.identical( _.strCount( op.output, 'SIGINT' ), 3 );
         test.identical( _.strCount( op.output, 'SIGINT CHILD' ), 2 );
@@ -18615,6 +18828,7 @@ function terminateWithDetachedChildren( test )
       return terminated.then( () =>
       {
         test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
         test.is( _.strHas( op.output, 'SIGINT' ) );
         return _.time.out( 9000, () =>
@@ -18771,6 +18985,7 @@ function terminateTimeOut( test )
     ready.then( ( op ) =>
     {
       test.identical( op.exitCode, null );
+      test.identical( op.ended, true );
       test.identical( op.exitSignal, 'SIGKILL' );
       test.is( _.strHas( op.output, 'SIGINT' ) );
       test.is( !_.strHas( op.output, 'Application timeout!' ) );
@@ -18803,6 +19018,7 @@ function terminateTimeOut( test )
     ready.then( ( op ) =>
     {
       test.identical( op.exitCode, null );
+      test.identical( op.ended, true );
       test.identical( op.exitSignal, 'SIGKILL' );
       test.is( _.strHas( op.output, 'SIGINT' ) );
       test.is( !_.strHas( op.output, 'Application timeout!' ) );
@@ -18838,6 +19054,7 @@ function terminateTimeOut( test )
       if( process.platform === 'linux' )
       {
         test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, 'SIGKILL' );
         test.is( !_.strHas( op.output, 'SIGINT' ) );
         test.is( _.strHas( op.output, 'Application timeout!' ) );
@@ -18845,6 +19062,7 @@ function terminateTimeOut( test )
       else if( process.platform === 'darwin' )
       {
         test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, 'SIGKILL' );
         test.is( _.strHas( op.output, 'SIGINT' ) );
         test.is( !_.strHas( op.output, 'Application timeout!' ) );
@@ -18852,6 +19070,7 @@ function terminateTimeOut( test )
       else
       {
         test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
         test.identical( op.exitSignal, 'SIGKILL' );
         test.is( !_.strHas( op.output, 'SIGINT' ) );
         test.is( _.strHas( op.output, 'Application timeout!' ) );
@@ -18890,6 +19109,7 @@ function terminateTimeOut( test )
   //     if( process.platform === 'linux' )
   //     {
   //       test.identical( op.exitCode, null );
+  //       test.identical( op.ended, true );
   //       test.identical( op.exitSignal, 'SIGKILL' );
   //       test.is( !_.strHas( op.output, 'SIGINT' ) );
   //       test.is( _.strHas( op.output, 'Application timeout!' ) );
@@ -18897,6 +19117,7 @@ function terminateTimeOut( test )
   //     else if( process.platform === 'darwin' )
   //     {
   //       test.identical( op.exitCode, null );
+  //       test.identical( op.ended, true );
   //       test.identical( op.exitSignal, 'SIGKILL' );
   //       test.is( _.strHas( op.output, 'SIGINT' ) );
   //       test.is( !_.strHas( op.output, 'Application timeout!' ) );
@@ -18904,6 +19125,7 @@ function terminateTimeOut( test )
   //     else
   //     {
   //       test.identical( op.exitCode, null );
+  //       test.identical( op.ended, true );
   //       test.identical( op.exitSignal, 'SIGKILL' );
   //       test.is( !_.strHas( op.output, 'SIGINT' ) );
   //       test.is( _.strHas( op.output, 'Application timeout!' ) );
@@ -18979,6 +19201,7 @@ function terminateDifferentStdio( test )
     ready.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.identical( op.exitSignal, null );
       test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
       return null;
@@ -19011,6 +19234,7 @@ function terminateDifferentStdio( test )
     ready.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.identical( op.exitSignal, null );
       test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
       return null;
@@ -19041,6 +19265,7 @@ function terminateDifferentStdio( test )
     ready.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.identical( op.exitSignal, null );
       test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
       return null;
@@ -19072,6 +19297,7 @@ function terminateDifferentStdio( test )
     ready.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.identical( op.exitSignal, null );
       test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
       return null;
@@ -19105,6 +19331,7 @@ function terminateDifferentStdio( test )
     ready.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.identical( op.exitSignal, null );
       test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
       return null;
@@ -19138,6 +19365,7 @@ function terminateDifferentStdio( test )
     ready.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.identical( op.exitSignal, null );
       test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
       return null;
@@ -19205,6 +19433,7 @@ function children( test )
     ready.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       var expected =
       {
         [ process.pid ] :
@@ -19251,6 +19480,7 @@ function children( test )
     ready.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       var expected =
       {
         [ o.process.pid ] :
@@ -19294,6 +19524,7 @@ function children( test )
     ready.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       var expected =
       {
         [ lastChildPid ] : {}
@@ -19463,6 +19694,7 @@ function childrenAsList( test )
     ready.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       return children.then( ( op ) =>
       {
         if( process.platform === 'win32' )
@@ -19631,6 +19863,7 @@ function killComplex( test )
     ready.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.identical( op.exitSignal, null );
       test.identical( childOfChild.pid, pid );
       if( process.platform === 'win32' )
@@ -19704,6 +19937,7 @@ function realMainFile( test )
     .then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
       test.identical( op.output.trim(), testAppPath );
       return null;
     })
