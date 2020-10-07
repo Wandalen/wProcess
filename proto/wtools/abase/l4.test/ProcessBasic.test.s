@@ -160,12 +160,12 @@ function processOnExitEvent( test )
     }
 
     return _.process.start( o )
-    .then( ( got ) =>
+    .then( ( op ) =>
     {
-      test.is( got.exitCode === 0 );
-      test.is( !_.strHas( got.output, 'timeOut handler executed' ) )
-      test.is( !_.strHas( got.output, 'processOnExit: 0' ) );
-      test.is( _.strHas( got.output, 'processOnExit: SIGINT' ) );
+      test.is( op.exitCode === 0 );
+      test.is( !_.strHas( op.output, 'timeOut handler executed' ) )
+      test.is( !_.strHas( op.output, 'processOnExit: 0' ) );
+      test.is( _.strHas( op.output, 'processOnExit: SIGINT' ) );
       return null;
     });
   })
@@ -223,13 +223,13 @@ function processOffExitEvent( test )
     }
 
     return _.process.start( o )
-    .then( ( got ) =>
+    .then( ( op ) =>
     {
-      test.identical( got.exitCode, 0 );
-      test.identical( _.strCount( got.output, 'timeOut handler executed'  ), 1 );
-      test.identical( _.strCount( got.output, 'processOnExit1: 0' ), 1 );
-      test.identical( _.strCount( got.output, 'processOnExit2: 0' ), 1 );
-      test.identical( _.strCount( got.output, 'processOnExit3: 0' ), 0 );
+      test.identical( op.exitCode, 0 );
+      test.identical( _.strCount( op.output, 'timeOut handler executed'  ), 1 );
+      test.identical( _.strCount( op.output, 'processOnExit1: 0' ), 1 );
+      test.identical( _.strCount( op.output, 'processOnExit2: 0' ), 1 );
+      test.identical( _.strCount( op.output, 'processOnExit3: 0' ), 0 );
       return null;
     })
 
@@ -251,13 +251,13 @@ function processOffExitEvent( test )
     }
 
     return _.process.start( o )
-    .then( ( got ) =>
+    .then( ( op ) =>
     {
-      test.identical( got.exitCode, 0 );
-      test.identical( _.strCount( got.output, 'timeOut handler executed'  ), 1 );
-      test.identical( _.strCount( got.output, 'processOnExit1: 0' ), 0 );
-      test.identical( _.strCount( got.output, 'processOnExit2: 0' ), 1 );
-      test.identical( _.strCount( got.output, 'processOnExit3: 0' ), 0 );
+      test.identical( op.exitCode, 0 );
+      test.identical( _.strCount( op.output, 'timeOut handler executed'  ), 1 );
+      test.identical( _.strCount( op.output, 'processOnExit1: 0' ), 0 );
+      test.identical( _.strCount( op.output, 'processOnExit2: 0' ), 1 );
+      test.identical( _.strCount( op.output, 'processOnExit3: 0' ), 0 );
       return null;
     })
   })
@@ -278,13 +278,13 @@ function processOffExitEvent( test )
     }
 
     return _.process.start( o )
-    .then( ( got ) =>
+    .then( ( op ) =>
     {
-      test.identical( got.exitCode, 0 );
-      test.identical( _.strCount( got.output, 'timeOut handler executed'  ), 1 );
-      test.identical( _.strCount( got.output, 'processOnExit1: 0' ), 0 );
-      test.identical( _.strCount( got.output, 'processOnExit2: 0' ), 0 );
-      test.identical( _.strCount( got.output, 'processOnExit3: 0' ), 0 );
+      test.identical( op.exitCode, 0 );
+      test.identical( _.strCount( op.output, 'timeOut handler executed'  ), 1 );
+      test.identical( _.strCount( op.output, 'processOnExit1: 0' ), 0 );
+      test.identical( _.strCount( op.output, 'processOnExit2: 0' ), 0 );
+      test.identical( _.strCount( op.output, 'processOnExit3: 0' ), 0 );
       return null;
     })
   })
@@ -306,13 +306,13 @@ function processOffExitEvent( test )
     }
 
     return _.process.start( o )
-    .then( ( got ) =>
+    .then( ( op ) =>
     {
-      test.notIdentical( got.exitCode, 0 );
-      test.identical( _.strCount( got.output, 'uncaught error' ), 2 );
-      test.identical( _.strCount( got.output, 'processOnExit1: -1' ), 1 );
-      test.identical( _.strCount( got.output, 'processOnExit2: -1' ), 1 );
-      test.identical( _.strCount( got.output, 'processOnExit3: -1' ), 0 );
+      test.notIdentical( op.exitCode, 0 );
+      test.identical( _.strCount( op.output, 'uncaught error' ), 2 );
+      test.identical( _.strCount( op.output, 'processOnExit1: -1' ), 1 );
+      test.identical( _.strCount( op.output, 'processOnExit2: -1' ), 1 );
+      test.identical( _.strCount( op.output, 'processOnExit3: -1' ), 0 );
       return null;
     })
   })
@@ -970,9 +970,9 @@ function shellSyncAsync( test )
   /* mode : spawn, stdio : pipe */
 
   var options = _.mapSupplement( {}, o2, o3 );
-  var got = _.process.start( options );
-  test.is( got === options );
-  test.identical( got.process.constructor.name, 'ChildProcess' );
+  var returned = _.process.start( options );
+  test.is( returned === options );
+  test.identical( returned.process.constructor.name, 'ChildProcess' );
   test.identical( options.exitCode, 0 );
   test.identical( options.output, expectedOutput );
 
@@ -983,9 +983,9 @@ function shellSyncAsync( test )
   o2.outputPiping = 0;
 
   var options = _.mapSupplement( {}, o2, o3 );
-  var got = _.process.start( options );
-  test.is( got === options );
-  test.identical( got.process.constructor.name, 'ChildProcess' );
+  var returned = _.process.start( options );
+  test.is( returned === options );
+  test.identical( returned.process.constructor.name, 'ChildProcess' );
   test.identical( options.exitCode, 0 );
   test.identical( options.output, null );
 
@@ -1002,9 +1002,9 @@ function shellSyncAsync( test )
   /* mode : spawn, stdio : pipe */
 
   var options = _.mapSupplement( {}, o2, o3 );
-  var got = _.process.start( options );
-  test.is( got === options );
-  test.identical( got.process.constructor.name, 'ChildProcess' );
+  var returned = _.process.start( options );
+  test.is( returned === options );
+  test.identical( returned.process.constructor.name, 'ChildProcess' );
   test.identical( options.exitCode, 0 );
   test.identical( options.output, expectedOutput );
 
@@ -1015,9 +1015,9 @@ function shellSyncAsync( test )
   o2.outputPiping = 0;
 
   var options = _.mapSupplement( {}, o2, o3 );
-  var got = _.process.start( options );
-  test.is( got === options );
-  test.identical( got.process.constructor.name, 'ChildProcess' );
+  var returned = _.process.start( options );
+  test.is( returned === options );
+  test.identical( returned.process.constructor.name, 'ChildProcess' );
   test.identical( options.exitCode, 0 );
   test.identical( options.output, null );
 
@@ -1031,9 +1031,9 @@ function shellSyncAsync( test )
     stdio : 'pipe'
   }
   var options = _.mapSupplement( {}, o2, o3 );
-  var got = _.process.start( options );
-  test.is( got === options );
-  test.identical( got.process.constructor.name, 'ChildProcess' );
+  var returned = _.process.start( options );
+  test.is( returned === options );
+  test.identical( returned.process.constructor.name, 'ChildProcess' );
   test.identical( options.exitCode, 0 );
   test.identical( options.output, expectedOutput );
 
@@ -1044,9 +1044,9 @@ function shellSyncAsync( test )
   o2.outputPiping = 0;
 
   var options = _.mapSupplement( {}, o2, o3 );
-  var got = _.process.start( options );
-  test.is( got === options );
-  test.identical( got.process.constructor.name, 'ChildProcess' );
+  var returned = _.process.start( options );
+  test.is( returned === options );
+  test.identical( returned.process.constructor.name, 'ChildProcess' );
   test.identical( options.exitCode, 0 );
   test.identical( options.output, null );
 
@@ -1074,9 +1074,9 @@ function shellSyncAsync( test )
     stdio : 'pipe'
   }
   var options = _.mapSupplement( {}, o2, o3 );
-  var got = _.process.start( options );
-  test.is( got === options );
-  test.identical( got.process.constructor.name, 'ChildProcess' );
+  var returned = _.process.start( options );
+  test.is( returned === options );
+  test.identical( returned.process.constructor.name, 'ChildProcess' );
   test.identical( options.exitCode, 0 );
 
   /* */
@@ -1103,9 +1103,9 @@ function shellSyncAsync( test )
   }
 
   var options = _.mapSupplement( {}, o2, o3 );
-  var got = _.process.start( options );
-  test.is( got === options );
-  test.identical( got.process.constructor.name, 'ChildProcess' );
+  var returned = _.process.start( options );
+  test.is( returned === options );
+  test.identical( returned.process.constructor.name, 'ChildProcess' );
   test.identical( options.exitCode, 0 );
 
   /* */
@@ -1328,7 +1328,7 @@ function shellCurrentPath( test )
       outputCollecting : 1,
     }
     return _.process.start( o )
-    .then( function( got )
+    .then( function( op )
     {
       test.identical( o.output, expectedOutput );
       return null;
@@ -1354,9 +1354,9 @@ function shellCurrentPath( test )
     }
 
     return _.process.start( o )
-    .then( function( got )
+    .then( function( op )
     {
-      test.identical( _.strStrip( got.output ), a.path.nativize( currentPath ) );
+      test.identical( _.strStrip( op.output ), a.path.nativize( currentPath ) );
       return null;
     })
   })
@@ -1380,12 +1380,12 @@ function shellCurrentPath( test )
     }
 
     return _.process.start( o )
-    .then( function( got )
+    .then( function( op )
     {
       if( process.platform === 'win32')
-      test.identical( _.strStrip( got.output ), a.path.nativize( currentPath ) );
+      test.identical( _.strStrip( op.output ), a.path.nativize( currentPath ) );
       else
-      test.identical( _.strStrip( got.output ), trace[ 1 ] );
+      test.identical( _.strStrip( op.output ), trace[ 1 ] );
       return null;
     })
   })
@@ -1409,9 +1409,9 @@ function shellCurrentPath( test )
     }
 
     return _.process.start( o )
-    .then( function( got )
+    .then( function( op )
     {
-      test.identical( _.strStrip( got.output ), currentPath );
+      test.identical( _.strStrip( op.output ), currentPath );
       return null;
     })
   })
@@ -1456,7 +1456,7 @@ function shellCurrentPath( test )
     {
       output = m;
     })
-    con.then( function( got )
+    con.then( function( op )
     {
       test.identical( output.currentPath, __dirname );
       return null;
@@ -1484,9 +1484,9 @@ function shellCurrentPath( test )
     }
 
     return _.process.start( o )
-    .then( function( got )
+    .then( function( op )
     {
-      test.identical( _.strStrip( got.output ), a.path.nativize( currentPath ) );
+      test.identical( _.strStrip( op.output ), a.path.nativize( currentPath ) );
       return null;
     })
   })
@@ -1511,12 +1511,12 @@ function shellCurrentPath( test )
     }
 
     return _.process.start( o )
-    .then( function( got )
+    .then( function( op )
     {
       if( process.platform === 'win32')
-      test.identical( _.strStrip( got.output ), a.path.nativize( currentPath ) );
+      test.identical( _.strStrip( op.output ), a.path.nativize( currentPath ) );
       else
-      test.identical( _.strStrip( got.output ), trace[ 1 ] );
+      test.identical( _.strStrip( op.output ), trace[ 1 ] );
       return null;
     })
   })
@@ -1540,9 +1540,9 @@ function shellCurrentPath( test )
     }
 
     return _.process.start( o )
-    .then( function( got )
+    .then( function( op )
     {
-      test.identical( _.strStrip( got.output ), currentPath );
+      test.identical( _.strStrip( op.output ), currentPath );
       return null;
     })
   })
@@ -1562,7 +1562,7 @@ function shellCurrentPath( test )
       outputCollecting : 1,
     }
     return _.process.start( o )
-    .then( function( got )
+    .then( function( op )
     {
       test.identical( o.output, expectedOutput );
       return null;
@@ -1588,9 +1588,9 @@ function shellCurrentPath( test )
     }
 
     return _.process.start( o )
-    .then( function( got )
+    .then( function( op )
     {
-      test.identical( _.strStrip( got.output ), a.path.nativize( currentPath ) );
+      test.identical( _.strStrip( op.output ), a.path.nativize( currentPath ) );
       return null;
     })
   })
@@ -1615,12 +1615,12 @@ function shellCurrentPath( test )
     }
 
     return _.process.start( o )
-    .then( function( got )
+    .then( function( op )
     {
       if( process.platform === 'win32')
-      test.identical( _.strStrip( got.output ), a.path.nativize( currentPath ) );
+      test.identical( _.strStrip( op.output ), a.path.nativize( currentPath ) );
       else
-      test.identical( _.strStrip( got.output ), trace[ 1 ] );
+      test.identical( _.strStrip( op.output ), trace[ 1 ] );
       return null;
     })
   })
@@ -1644,9 +1644,9 @@ function shellCurrentPath( test )
     }
 
     return _.process.start( o )
-    .then( function( got )
+    .then( function( op )
     {
-      test.identical( _.strStrip( got.output ), currentPath );
+      test.identical( _.strStrip( op.output ), currentPath );
       return null;
     })
   })
