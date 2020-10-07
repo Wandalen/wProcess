@@ -190,7 +190,7 @@ function start_body( o )
   let stderrOutput = '';
   let decoratedOutput = '';
   let decoratedErrorOutput = '';
-  let execArgs, argumentsManual; /* qqq : remove argumentsManual */
+  let execArgs;/* qqq : remove argumentsManual aaa:removed*/
 
   preform1();
 
@@ -787,7 +787,7 @@ function start_body( o )
 
     if( o.passingThrough )
     {
-      argumentsManual = process.argv.slice( 2 );
+      let argumentsManual = process.argv.slice( 2 );
       if( argumentsManual.length )
       o.args = _.arrayAppendArray( o.args || [], argumentsManual );
     }
@@ -1139,10 +1139,10 @@ function start_body( o )
 
   function argsJoin( args )
   {
-    if( !execArgs && !argumentsManual ) /* qqq2 : argumentsManual?? should be no such global variable */
+    if( !execArgs && !o.passingThrough ) /* qqq2 : argumentsManual?? should be no such global variable aaa:removed*/
     return args.join( ' ' );
 
-    let i = execArgs ? execArgs.length : args.length - argumentsManual.length;
+    let i = execArgs ? execArgs.length : args.length - process.argv.length - 2;
     for( ; i < args.length; i++ )
     {
       let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', '`' ]
