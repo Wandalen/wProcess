@@ -19503,14 +19503,54 @@ function killComplex( test )
 
 function realMainFile( test )
 {
-  if( require.main === module )
-  var expected1 = __filename;
-  else
-  var expected1 = require.main.filename;
+  let context = this;
+  let a = test.assetFor( false );
+  let testAppPath = a.program( testApp );
 
-  test.case = 'compare with __filename path for main file';
-  var got = _.fileProvider.path.nativize( _.process.realMainFile( ) );
-  test.identical( got, expected1 );
+  a.ready.then( () => 
+  {
+    test.case = 'compare with `testAppPath`'
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      outputCollecting : 1,
+    }
+
+    return _.process.start( o )
+    .then( ( got ) =>
+    {
+      test.identical( got.exitCode, 0 );
+      test.identical( got.output.trim(), testAppPath );
+      return null;
+    })
+  });
+
+  // test.case = 'compare with __filename path for main file';
+  // var got = _.fileProvider.path.nativize( _.process.realMainFile( ) );
+  // test.identical( got, expected1 );
+
+  // var o =
+  // {
+  //   execPath :  'node ' + testAppPath,
+  //   mode : 'spawn',
+  //   ipc : 1,
+  //   outputCollecting : 1,
+  //   throwingExitCode : 0
+  // }
+
+  // let ready = _.process.start( o );
+
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+
+    console.log( _.process.realMainFile() )
+  }
 };
 
 //
