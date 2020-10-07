@@ -3542,13 +3542,13 @@ function startDryRun( test )
   }
 }
 
-shellDryRun.description =
+startDryRun.description =
 `
 Simulates run of routine start with all possible options.
 After execution checks fields of run descriptor.
 `
 
-/* qqq for Vova : describe shellDryRun aaa:added description*/
+/* qqq for Vova : describe startDryRun aaa:added description*/
 
 //
 
@@ -17998,8 +17998,6 @@ function terminateDetachedComplex( test )
 
   /* - */
 
-<<<<<<< HEAD
-=======
   // qqq for Vova : switch on?
   // .then( () =>
   // {
@@ -18068,7 +18066,6 @@ function terminateDetachedComplex( test )
 
   /* - */
 
->>>>>>> 2d821183a217a3a3b5a13a0e9eb9fc73c57c5da9
   return a.ready;
 
   /* - */
@@ -18705,8 +18702,6 @@ function terminateTimeOut( test )
 
   /* - */
 
-<<<<<<< HEAD
-=======
   // qqq for Vova : switch on?
   // .then( () =>
   // {
@@ -18761,7 +18756,6 @@ function terminateTimeOut( test )
 
   /*  */
 
->>>>>>> 2d821183a217a3a3b5a13a0e9eb9fc73c57c5da9
   return a.ready;
 
   /* - */
