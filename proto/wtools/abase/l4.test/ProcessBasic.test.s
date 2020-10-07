@@ -9891,50 +9891,67 @@ function shellStartingDelay( test )
 
 //
 
-/* qqq2 : make it similar to test routine shellStartingDelay */
+/* qqq2 : make it similar to test routine shellStartingDelay aaa:done*/
 function shellStartingTime( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( testApp );
+  let program1Path = a.path.nativize( a.program( program1 ) );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 0, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 1, mode ) ) );
+  return a.ready;
 
   /* */
 
-  a.ready
-
-  .then( () =>
+  function run( sync, deasync, mode )
   {
-    let t1 = _.time.now();
-    let delay = 5000;
-    let when = { time : _.time.now() + delay };
-    let o =
-    {
-      execPath : testAppPath,
-      mode : 'fork',
-      outputPiping : 1,
-      outputCollecting : 1,
-      when : when
-    }
+    let ready = new _.Consequence().take( null )
 
-    let con = _.process.start( o );
+    if( sync && !deasync && mode === 'fork' )
+    return null;
 
-    con.then( ( got ) =>
+    ready.then( () =>
     {
-      test.identical( got.exitCode, 0 );
-      let parsed = JSON.parse( got.output );
-      let diff = parsed.t2 - t1;
-      test.ge( diff, delay );
-      return null;
+      test.case = `sync:${sync} deasync:${deasync} mode:${mode}`;
+
+      let t1 = _.time.now();
+      let delay = 5000;
+      let when = { time : _.time.now() + delay };
+      let o =
+      {
+        execPath : mode !== 'fork' ? 'node program1.js' : 'program1.js',
+        currentPath : a.abs( '.' ),
+        mode,
+        outputPiping : 1,
+        outputCollecting : 1,
+        when,
+        sync,
+        deasync,
+      }
+
+      let returned = _.process.start( o );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        let parsed = JSON.parse( op.output );
+        let diff = parsed.t2 - t1;
+        test.ge( diff, delay );
+        return null;
+      })
+
+      return returned;
     })
 
-    return con;
-  })
-
-  return a.ready;
+    return ready;
+  }
 
   /* - */
 
-  function testApp()
+  function program1()
   {
     let _ = require( toolsPath );
 
