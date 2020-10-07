@@ -787,12 +787,12 @@ function shellSync( test )
   /* */
 
   var expectedOutput = programPath + '\n';
-  var o; /* qqq : should be o2 if o-map is not passed to routine directly */
+  var o2; /* qqq : should be o2 if o-map is not passed to routine directly */
 
   /* - */
 
   test.case = 'mode : spawn';
-  o =
+  o2 =
   {
     execPath :  'node ' + programPath,
     mode : 'spawn',
@@ -801,7 +801,7 @@ function shellSync( test )
 
   /* mode : spawn, stdio : pipe */
 
-  var options = _.mapSupplement( {}, o, commonDefaults );
+  var options = _.mapSupplement( {}, o2, commonDefaults );
   _.process.start( options );
   debugger;
   test.identical( options.exitCode, 0 );
@@ -821,13 +821,13 @@ function shellSync( test )
   /* - */
 
   test.case = 'mode : shell';
-  o =
+  o2 =
   {
     execPath :  'node ' + programPath,
     mode : 'shell',
     stdio : 'pipe'
   }
-  var options = _.mapSupplement( {}, o, commonDefaults );
+  var options = _.mapSupplement( {}, o2, commonDefaults );
   _.process.start( options )
   test.identical( options.exitCode, 0 );
   test.identical( options.output, expectedOutput );
@@ -846,7 +846,7 @@ function shellSync( test )
   /* - */
 
   test.case = 'shell, stop process using timeOut';
-  o =
+  o2 =
   {
     execPath :  'node ' + programPath + ' loop : 1',
     mode : 'shell',
@@ -854,72 +854,72 @@ function shellSync( test )
     timeOut : 500
   }
 
-  var options = _.mapSupplement( {}, o, commonDefaults );
+  var options = _.mapSupplement( {}, o2, commonDefaults );
   test.shouldThrowErrorSync( () => _.process.start( options ) );
 
   /* - */
 
   test.case = 'spawn, return good code';
-  o =
+  o2 =
   {
     execPath :  'node ' + programPath + ' exitWithCode : 0',
     mode : 'spawn',
     stdio : 'pipe'
   }
-  var options = _.mapSupplement( {}, o, commonDefaults );
+  var options = _.mapSupplement( {}, o2, commonDefaults );
   test.mustNotThrowError( () => _.process.start( options ) )
   test.identical( options.exitCode, 0 );
 
   /* - */
 
   test.case = 'spawn, return ext code 1';
-  o =
+  o2 =
   {
     execPath :  'node ' + programPath + ' exitWithCode : 1',
     mode : 'spawn',
     stdio : 'pipe'
   }
-  var options = _.mapSupplement( {}, o, commonDefaults );
+  var options = _.mapSupplement( {}, o2, commonDefaults );
   test.shouldThrowErrorSync( () => _.process.start( options ) );
   test.identical( options.exitCode, 1 );
 
   /* - */
 
   test.case = 'spawn, return ext code 2';
-  o =
+  o2 =
   {
     execPath :  'node ' + programPath + ' exitWithCode : 2',
     mode : 'spawn',
     stdio : 'pipe'
   }
-  var options = _.mapSupplement( {}, o, commonDefaults );
+  var options = _.mapSupplement( {}, o2, commonDefaults );
   test.shouldThrowErrorSync( () => _.process.start( options ) );
   test.identical( options.exitCode, 2 );
 
   /* - */
 
   test.case = 'shell, return good code';
-  o =
+  o2 =
   {
     execPath :  'node ' + programPath + ' exitWithCode : 0',
     mode : 'shell',
     stdio : 'pipe'
   }
 
-  var options = _.mapSupplement( {}, o, commonDefaults );
+  var options = _.mapSupplement( {}, o2, commonDefaults );
   test.mustNotThrowError( () => _.process.start( options ) )
   test.identical( options.exitCode, 0 );
 
   /* - */
 
   test.case = 'shell, return bad code';
-  o =
+  o2 =
   {
     execPath :  'node ' + programPath + ' exitWithCode : 1',
     mode : 'shell',
     stdio : 'pipe'
   }
-  var options = _.mapSupplement( {}, o, commonDefaults );
+  var options = _.mapSupplement( {}, o2, commonDefaults );
   test.shouldThrowErrorSync( () => _.process.start( options ) )
   test.identical( options.exitCode, 1 );
 
@@ -11243,6 +11243,8 @@ function startDetachingChildExitsAfterParent( test )
     {
       execPath : 'node testAppChild.js',
       stdio : 'ignore',
+      outputPiping : 0,
+      outputCollecting : 0,
       detaching : true,
       mode : 'spawn',
     }
@@ -11364,6 +11366,8 @@ function startDetachingChildExitsBeforeParent( test )
     {
       execPath : 'node testAppChild.js',
       stdio : 'ignore',
+      outputPiping : 0,
+      outputCollecting : 0,
       detaching : true,
       mode : 'spawn',
 
