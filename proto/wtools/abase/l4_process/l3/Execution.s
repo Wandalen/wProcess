@@ -2397,7 +2397,7 @@ function children( o )
       throwingExitCode : 0,
       inputMirroring : 0
     })
-    .then( ( op ) => /* xxx : normalize */
+    .then( ( op ) =>
     {
       if( o.asList )
       _result.push( _.numberFrom( pid ) );
