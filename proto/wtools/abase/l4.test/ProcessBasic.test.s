@@ -18,10 +18,11 @@ let _global = _global_;
 let _ = _global_.wTools;
 let Self = {};
 
-/* qqq2 : make general table in md file for this: "Vova qqq: close event is not emitted for disconnected detached child in fork mode" */
-/* qqq2 : don't use shouldThrowErrorOfAnyKind, use specific shouldThrowError* | aaa : Done. Yevhen S. */
-/* qqq2 : parametrize all time delays, don't forget to leave comment if you change any time delay */
-/* qqq : implement for 3 modes where test routine is not implemented for 3 modes */
+/* qqq Vova : make general table in md file for this: "Vova qqq: close event is not emitted for disconnected detached child in fork mode" */
+
+/* qqq Yevgen : parametrize all time delays, don't forget to leave comment if you change any time delay */
+/* qqq Yevgen : implement for 3 modes where test routine is not implemented for 3 modes */
+/* qqq Yevgen : make sure variable "got" is used as should */
 
 // --
 // context
@@ -29,23 +30,19 @@ let Self = {};
 
 function suiteBegin()
 {
-  var self = this;
-  self.suiteTempPath = _.path.tempOpen( _.path.join( __dirname, '../..' ), 'ProcessBasic' );
-  self.toolsPath = _.path.nativize( _.path.resolve( __dirname, '../../../wtools/Tools.s' ) );
-  self.toolsPathInclude = `let _ = require( '${ _.strEscape( self.toolsPath ) }' )\n`;
-
-  // self.assetsOriginalPath = _.path.join( __dirname, '_asset' );
-  // self.appJsPath = _.path.nativize( _.module.resolve( 'wProcess' ) );
+  var context = this;
+  context.suiteTempPath = _.path.tempOpen( _.path.join( __dirname, '../..' ), 'ProcessBasic' );
+  context.toolsPath = _.path.nativize( _.path.resolve( __dirname, '../../../wtools/Tools.s' ) );
+  context.toolsPathInclude = `let _ = require( '${ _.strEscape( context.toolsPath ) }' )\n`;
 }
 
 //
 
 function suiteEnd()
 {
-  var self = this;
-
-  _.assert( _.strHas( self.suiteTempPath, '/ProcessBasic-' ) )
-  _.path.tempClose( self.suiteTempPath );
+  var context = this;
+  _.assert( _.strHas( context.suiteTempPath, '/ProcessBasic-' ) )
+  _.path.tempClose( context.suiteTempPath );
 }
 
 //
@@ -84,7 +81,6 @@ function testApp()
 function testAppShell()
 {
   let _ = require( toolsPath );
-
   let process = _global_.process;
 
   _.include( 'wProcess' );
@@ -111,10 +107,10 @@ function testAppShell()
 
 function processOnExitEvent( test )
 {
-
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ) );
+  let programPath = a.path.nativize( a.program( testApp ) );  /* zzz : a.path.nativize? */
+  // let programPath = a.program( testApp );
 
   /* */
 
@@ -1418,7 +1414,7 @@ function shellCurrentPath( test )
     })
   })
 
-  // qqq : switch on?
+  // qqq Vova : switch on?
   // con.then( function()
   // {
   //   test.case = 'mode : exec';
@@ -1655,7 +1651,7 @@ function shellCurrentPath( test )
 
   /* */
 
-  // qqq : switch on?
+  // qqq Vova : switch on?
   // con.then( function()
   // {
   //   test.case = 'normalized, currentPath leads to root of current drive, mode : exec';
@@ -4069,7 +4065,7 @@ function shellArgumentsParsing( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPathNoSpace = a.path.nativize( a.program({ routine : testApp, dirPath : a.abs( 'noSpace' ) }) ); /* xxx qqq : a.path.nativize? */
+  let testAppPathNoSpace = a.path.nativize( a.program({ routine : testApp, dirPath : a.abs( 'noSpace' ) }) );
   let testAppPathSpace = a.path.nativize( a.program({ routine : testApp, dirPath : a.abs( 'with space' ) }) );
 
   /* for combination:
@@ -6604,20 +6600,6 @@ function shellExecPathQuotesClosing( test )
       outputCollecting : 1,
       ready : con
     }
-    // _.process.start( o );
-
-    // con.then( () =>
-    // {
-    //   test.identical( o.exitCode, 0 );
-    //   test.identical( o.fullExecPath, testAppPathSpace + ' option:"value' );
-    //   test.identical( o.args, [ 'option:"value' ] );
-    //   let got = JSON.parse( o.output );
-    //   test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
-    //   test.identical( got.map, { option : '"value' } )
-    //   test.identical( got.scriptArgs, [ 'option:"value' ] )
-
-    //   return null;
-    // })
 
     return test.shouldThrowErrorAsync( _.process.start( o ) );
   })
@@ -6644,7 +6626,6 @@ function shellExecPathQuotesClosing( test )
       test.identical( got.scriptPath, _.path.normalize( testAppPathSpace ) )
       test.identical( got.map, { option : 'value' } )
       test.identical( got.scriptArgs, [ 'option: "value"' ] )
-
       return null;
     })
 
@@ -6870,35 +6851,6 @@ function shellExecPathSeveralCommands( test )
 
   /* -- */
 
-  // testcase( 'quoted, mode:exec' )
-  //
-  // .then( () =>
-  // {
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node app.js arg1 && node app.js arg2',
-  //     mode : 'exec',
-  //     currentPath : routinePath,
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   con.then( ( got ) =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     test.identical( _.strCount( got.output, `[ 'arg1' ]` ), 1 );
-  //     test.identical( _.strCount( got.output, `[ 'arg2' ]` ), 1 );
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
-
-  /* - */
-
   testcase( 'no quotes, mode:shell' )
 
   .then( () =>
@@ -6972,35 +6924,6 @@ function shellExecPathSeveralCommands( test )
     }
     return test.shouldThrowErrorAsync( _.process.start( o ) );
   })
-
-  /* - */
-
-  // testcase( 'no quotes, mode:exec' )
-  //
-  // .then( () =>
-  // {
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node app.js arg1 && node app.js arg2',
-  //     mode : 'exec',
-  //     currentPath : routinePath,
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   con.then( ( got ) =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     test.identical( _.strCount( got.output, `[ 'arg1' ]` ), 1 );
-  //     test.identical( _.strCount( got.output, `[ 'arg2' ]` ), 1 );
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
 
   /*  */
 
@@ -9488,7 +9411,7 @@ function startChronology( test )
     test.identical( _.Procedure.FindAlive().length - pacounter, 1 );
     pacounter = _.Procedure.FindAlive().length;
 
-    /* yyy : ! */
+    /* zzz : ! */
     o.onTerminate.tap( ( err, got ) =>
     {
       track.push( 'onTerminate' );
@@ -11355,7 +11278,7 @@ function startDetachingChildExitsAfterParent( test )
 
     o.process.on( 'message', ( e ) =>
     {
-      childPid = _.numberFrom( e ); /* xxx : add pid to descriptor? */
+      childPid = _.numberFrom( e );
     })
 
     o.onTerminate.then( ( op ) =>
@@ -11364,7 +11287,7 @@ function startDetachingChildExitsAfterParent( test )
       test.identical( op.exitCode, 0 );
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( _.process.isAlive( childPid ) );
-      return _.time.out( 10000 ); /* xxx qqq2 : ask about time out */
+      return _.time.out( 10000 ); /* zzz : ask about time out */
     })
 
     o.onTerminate.then( () =>
@@ -11840,7 +11763,6 @@ function startDetachingChildExistsBeforeParentWaitForTermination( test )
 
     o.onTerminate.finally( ( err, op ) =>
     {
-      /* xxx qqq : add track here and in all similar place to cover entering here! */
       test.identical( err, undefined );
       test.identical( op, o );
       test.is( !_.process.isAlive( o.process.pid ) )
@@ -12841,7 +12763,6 @@ function startDetachingTrivial( test )
     childPid = _.numberFrom( data );
   })
 
-  /* qqq xxx : where is track? */
   o.onTerminate.then( ( op ) =>
   {
     track.push( 'onTerminate' );
@@ -13401,7 +13322,6 @@ function startOnTerminate( test ) /* qqq2 : add other modes. ask how to */
 
       _.time.out( context.t1, () => o.disconnect() );
 
-      /* xxx */
       onTerminate.then( ( op ) =>
       {
         track.push( 'onTerminate' );
@@ -17206,7 +17126,7 @@ function startErrorAfterTerminationWithSend( test )
       return null
     });
 
-    /* xxx qqq : normalize */
+    /* zzz */
     o.onTerminate.finally( ( err, got ) =>
     {
       track.push( 'onTerminate' );
@@ -17796,7 +17716,7 @@ function terminateComplex( test )
       _.process.terminate({ pid : o.process.pid });
     })
 
-    /* xxx */
+    /* zzz */
     ready.then( ( got ) =>
     {
       test.identical( got.exitCode, 0 ); /* qqq2 : check op.ended if op.exitCode is checked */
@@ -18113,6 +18033,7 @@ function terminateDetachedComplex( test )
 
   /* - */
 
+  // qqq Vova : switch on?
   // .then( () =>
   // {
   //   test.case = 'Sending signal to child process that has detached child, detached child should continue to work'
@@ -18804,6 +18725,7 @@ function terminateTimeOut( test )
 
   /* - */
 
+  // qqq Vova : switch on?
   // .then( () =>
   // {
   //   var o =
@@ -20035,7 +19957,7 @@ var Proto =
     terminate,
     startErrorAfterTerminationWithSend,
 
-    // endStructuralSigint, /* qqq yyy : switch on */
+    // endStructuralSigint, /* qqq zzz : switch on */
     // endStructuralSigkill,
     // endStructuralTerminate,
     // endStructuralKill,
