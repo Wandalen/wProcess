@@ -191,6 +191,7 @@ function start_body( o )
   let decoratedOutput = '';
   let decoratedErrorOutput = '';
   let execArgs;/* qqq : remove argumentsManual aaa:removed*/
+  let readyCallback;
 
   preform1();
 
@@ -203,12 +204,24 @@ function start_body( o )
   {
     try
     {
-      /* xxx : use deasync here? */
+
+      /* xxx : use deasync here. cover it */
+
+      debugger;
+
+      o.ready.deasync();
+
       let arg = o.ready.sync(); /* xxx : should sync() remove the resource? */
+
       o.ready.give( 1 );
+
+      if( readyCallback )
+      o.ready.finally( readyCallback );
+
       if( o.when.delay )
       _.time.sleep( o.when.delay );
       single();
+
     }
     catch( err )
     {
@@ -223,28 +236,14 @@ function start_body( o )
   }
   else
   {
-
     if( o.when.delay )
     o.ready.then( () => _.time.out( o.when.delay, () => null ) ); /* xxx : redundant callback? */
     o.ready.thenGive( single );
 
-    // let procedure = o.onTerminate._procedure; /* xxx yyy : try to remove */
-    // o.onTerminate.procedure( false );
-    // o.onTerminate.finally( end );
-    // if( procedure !== false )
-    // o.onTerminate.procedure( true );
-
-    // /* In detached mode competitor `end` waits for message only if user added own comperitor(s) to `onTerminate` */
-    // if( o.detaching ) /* ttt : rewrite */
-    // {
-    //   let competitorForEnd = o.onTerminate.competitorOwn( end );
-    //   if( competitorForEnd )
-    //   {
-    //     _.assert( competitorForEnd.competitorRoutine === end );
-    //     competitorForEnd.procedure.end();
-    //     competitorForEnd.procedure = null;
-    //   }
-    // }
+    if( readyCallback )
+    debugger;
+    if( readyCallback )
+    o.ready.finally( readyCallback );
 
     return endDeasyncing();
   }
@@ -254,47 +253,20 @@ function start_body( o )
   function preform1()
   {
 
-    /* xxx : implement test for multiple to check onStart works as should */
+    /* xxx qqq : implement test for multiple to check onStart works as should */
 
     if( o.ready === null )
     {
-      // if( o.detaching )
-      // o.ready = o.onStart || new _.Consequence().take( null );
-      // else
-      // o.ready = o.onTerminate || new _.Consequence().take( null );
+      o.ready = new _.Consequence().take( null );
+    }
+    else if( !_.consequenceIs( o.ready ) )
+    {
+      readyCallback = o.ready;
+      _.assert( _.routineIs( readyCallback ) );
       o.ready = new _.Consequence().take( null );
     }
 
-    if( o.onStart === null )
-    {
-      // if( o.detaching )
-      // o.onStart = o.ready;
-      // else
-      o.onStart = new _.Consequence();
-    }
-
-    if( o.onTerminate === null )
-    {
-      // if( o.detaching )
-      o.onTerminate = new _.Consequence();
-      // else
-      // o.onTerminate = o.ready;
-    }
-
-    if( o.onDisconnect === null )
-    {
-      o.onDisconnect = new _.Consequence();
-    }
-
-    _.assert( o.onStart !== o.onTerminate );
-    _.assert( o.onStart !== o.onDisconnect );
-    _.assert( o.onTerminate !== o.onDisconnect );
-    // _.assert( o.ready === o.onStart || o.ready === o.onDisconnect || o.ready === o.onTerminate );
-    _.assert( o.ready !== o.onStart && o.ready !== o.onDisconnect && o.ready !== o.onTerminate );
-    _.assert( o.onStart.resourcesCount() === 0 ); /* yyy */
-    _.assert( o.onDisconnect.resourcesCount() === 0 );
-    _.assert( o.onTerminate.resourcesCount() === 0 );
-    _.assert( o.ready.resourcesCount() <= 1 );
+    _.assert( !_.consequenceIs( o.ready ) || o.ready.resourcesCount() <= 1 );
 
     if( o.outputDecorating === null )
     o.outputDecorating = 0;
@@ -304,12 +276,48 @@ function start_body( o )
     o.outputDecoratingStderr = o.outputDecorating;
 
     o.logger = o.logger || _global.logger;
+
   }
 
   /* */
 
   function preform2()
   {
+
+    if( o.onStart === null )
+    {
+      o.onStart = new _.Consequence();
+    }
+    else if( !_.consequenceIs( o.onStart ) )
+    {
+      o.onStart = new _.Consequence().finally( o.onStart );
+    }
+
+    if( o.onTerminate === null )
+    {
+      o.onTerminate = new _.Consequence();
+    }
+    else if( !_.consequenceIs( o.onTerminate ) )
+    {
+      o.onTerminate = new _.Consequence({ _procedure : false }).finally( o.onTerminate );
+    }
+
+    if( o.onDisconnect === null )
+    {
+      o.onDisconnect = new _.Consequence();
+    }
+    else if( !_.consequenceIs( o.onDisconnect ) )
+    {
+      o.onDisconnect = new _.Consequence({ _procedure : false }).finally( o.onDisconnect );
+    }
+
+    _.assert( o.onStart !== o.onTerminate );
+    _.assert( o.onStart !== o.onDisconnect );
+    _.assert( o.onTerminate !== o.onDisconnect );
+    _.assert( o.ready !== o.onStart && o.ready !== o.onDisconnect && o.ready !== o.onTerminate );
+    _.assert( o.onStart.resourcesCount() === 0 );
+    _.assert( o.onDisconnect.resourcesCount() === 0 );
+    _.assert( o.onTerminate.resourcesCount() === 0 );
 
     if( !_.strIs( o.when ) )
     {
@@ -1347,7 +1355,7 @@ start_body.defaults = /* qqq : split on _.process.start(), _.process.startSingle
   when : 'instant', /* instant / afterdeath / time / delay */
   dry : 0,
 
-  mode : 'shell', /* fork / exec / spawn / shell */
+  mode : 'shell', /* fork / spawn / shell */
   logger : null,
   stdio : 'pipe', /* pipe / ignore / inherit */
   ipc : 0,
