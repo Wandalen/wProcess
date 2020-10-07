@@ -761,7 +761,10 @@ function start_body( o )
     if( o.verbosity < 0 )
     o.verbosity = 0;
     if( o.outputPiping === null )
-    o.outputPiping = o.verbosity >= 2;
+    {
+      if( o.stdio === 'pipe' || o.stdio[ 1 ] === 'pipe' )
+      o.outputPiping = o.verbosity >= 2;
+    }
     if( o.outputCollecting && !o.output )
     o.output = ''; /* qqq : test for multiple run? where does it collect output? */
 
@@ -774,6 +777,11 @@ function start_body( o )
       if( !_.longHas( o.stdio, 'ipc' ) )
       o.stdio.push( 'ipc' );
     }
+
+    /* stdio compatibility check */
+    if( Config.debug )
+    if( o.outputPiping || o.outputCollecting || o.outputPrefixing )
+    _.assert( o.stdio === 'pipe' || o.stdio[ 1 ] === 'pipe' || o.stdio[ 2 ] === 'pipe', 'stdout is not available to collect output or pipe it. Set stdout/stderr channel(s) or option::stdio to "pipe"' );
 
     /* passingThrough */
 
@@ -977,9 +985,9 @@ function start_body( o )
     if( o.dry )
     return;
 
-    // qqq2 yyy : uncomment
-    // if( o.outputPiping || o.outputCollecting )
-    // _.assert( !!o.process.stdout || !!o.process.stderr, 'stdout is not available to collect output or pipe it. Set option::stdio to "pipe"' );
+    // qqq2 yyy : uncomment aaa:done, wrote a test routine
+    if( o.outputPiping || o.outputCollecting )
+    _.assert( !!o.process.stdout || !!o.process.stderr, 'stdout is not available to collect output or pipe it. Set option::stdio to "pipe"' );
 
     /* piping out channel */
 
@@ -1610,7 +1618,6 @@ defaults.passingThrough = 1;
 defaults.maximumMemory = 1;
 defaults.applyingExitCode = 1;
 defaults.throwingExitCode = 0;
-defaults.outputPiping = 1;
 defaults.mode = 'fork';
 
 //
@@ -1633,6 +1640,7 @@ function startAfterDeath_body( o )
   o2.args = [];
   o2.stdio = 'ignore';
   o2.outputPiping = 0;
+  o2.outputCollecting = 0;
   o2.detaching = true;
   o2.inputMirroring = 0;
 
