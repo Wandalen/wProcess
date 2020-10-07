@@ -571,14 +571,12 @@ function basic( test )
     debugger;
     return test.shouldThrowErrorAsync( _.process.start( options ), ( err, arg ) =>
     {
-      if( err )
-      console.log( err )
+      test.identical( err, undefined );
       debugger;
     })
     .finally( ( err, arg ) =>
     {
-      if( err )
-      console.log( err )
+      test.identical( err, undefined );
       debugger;
       test.identical( options.exitCode, 1 );
       return null;
@@ -11631,9 +11629,8 @@ function startDetachingDisconnectedEarly( test )
 
       o.onTerminate.finally( ( err, op ) =>
       {
-        if( err )
-        console.log( err );
         track.push( 'onTerminate' );
+        test.identical( err, undefined );
         return null;
       })
 
@@ -11757,9 +11754,8 @@ function startDetachingDisconnectedLate( test )
 
       o.onTerminate.finally( ( err, op ) =>
       {
-        if( err )
-        console.log( err )
         track.push( 'onTerminate' );
+        test.identical( err, undefined );
         return null;
       })
 
@@ -13138,9 +13134,8 @@ function startOnStart( test ) /* qqq2 : add other modes. ask how to aaa:done */
 
       o.onTerminate.finally( ( err, got ) =>
       {
-        if( err )
-        console.log( err )
         track.push( 'onTerminate' );
+        test.identical( err, undefined );
         return null;
       })
 
@@ -13710,8 +13705,7 @@ function startWithDelayOnReady( test )
   options.onTerminate
   .finally( ( err, op ) =>
   {
-    if( err )
-    console.log( err );
+    test.identical( err, undefined );
     debugger;
     test.identical( op.output, 'program1:begin\nprogram1:end\n' );
     test.identical( op.exitCode, 0 );
