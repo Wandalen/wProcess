@@ -13898,7 +13898,7 @@ startCallbackIsNotAConsequence.timeOut = 300000;
 
 //
 
-function shellConcurrent( test )
+function startConcurrent( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -14350,7 +14350,7 @@ function shellConcurrent( test )
 
 }
 
-shellConcurrent.timeOut = 100000;
+startConcurrent.timeOut = 100000;
 
 //
 
@@ -15353,7 +15353,7 @@ outputHandling.timeOut = 10000;
 
 //
 
-function shellOutputStripping( test )
+function startOutputStripping( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -15418,11 +15418,11 @@ function shellOutputStripping( test )
   }
 }
 
-shellOutputStripping.timeOut = 15000;
+startOutputStripping.timeOut = 15000;
 
 //
 
-function shellLoggerOption( test )
+function startLoggerOption( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -15484,7 +15484,7 @@ function shellLoggerOption( test )
   }
 }
 
-shellLoggerOption.timeOut = 30000;
+startLoggerOption.timeOut = 30000;
 
 //
 
@@ -16013,7 +16013,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
 
 //
 
-function shellNormalizedExecPath( test )
+function startNormalizedExecPath( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -16158,7 +16158,7 @@ function shellNormalizedExecPath( test )
   }
 }
 
-shellNormalizedExecPath.timeOut = 60000;
+startNormalizedExecPath.timeOut = 60000;
 
 //
 
@@ -20068,7 +20068,7 @@ var Proto =
 
     /*  */
 
-    shellConcurrent,
+    startConcurrent,
     shellerConcurrent,
 
     sheller,
@@ -20076,12 +20076,12 @@ var Proto =
     shellerFields,
 
     outputHandling,
-    shellOutputStripping,
-    shellLoggerOption,
+    startOutputStripping,
+    startLoggerOption,
 
     startOutputOptionsCompatibilityLateCheck,
 
-    shellNormalizedExecPath,
+    startNormalizedExecPath,
 
     appTempApplication,
 
