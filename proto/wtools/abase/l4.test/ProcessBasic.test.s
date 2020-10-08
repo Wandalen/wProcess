@@ -10417,23 +10417,19 @@ function startDisconnectNonDetached( test )
   let data = [];
 
   let modes = [ 'spawn', 'fork', 'shell' ];
-  let stdio = [ 'inherit', 'pipe', 'ignore' ];
   let ipc = [ false, true ]
   let detaching = [ false, true ];
   let disconnecting = [ false, true ];
 
   modes.forEach( mode =>
   {
-    stdio.forEach( stdio =>
+    ipc.forEach( ipc =>
     {
-      ipc.forEach( ipc =>
+      detaching.forEach( detaching =>
       {
-        detaching.forEach( detaching =>
+        disconnecting.forEach( disconnecting =>
         {
-          disconnecting.forEach( disconnecting =>
-          {
-            a.ready.then( () => run( mode,ipc,stdio, detaching,disconnecting ) );
-          })
+          a.ready.then( () => run( mode,ipc,stdio, detaching,disconnecting ) );
         })
       })
     })
@@ -10441,9 +10437,9 @@ function startDisconnectNonDetached( test )
 
   a.ready.then( () =>
   {
-    var dim = [ data.length / 6, 6 ];
+    var dim = [ data.length / 5, 5 ];
     var style = 'doubleBorder';
-    var topHead = [ 'mode', 'stdio', 'ipc', 'detaching', 'disconnecting', 'closeExecuted' ];
+    var topHead = [ 'mode', 'ipc', 'detaching', 'disconnecting', 'closeExecuted' ];
     var got = _.strTable({ data, dim, style, topHead, colWidth : 18 });
     console.log( got.result )
     return null;
@@ -10453,9 +10449,9 @@ function startDisconnectNonDetached( test )
 
   /* - */
 
-  function run( mode, ipc, stdio, detaching, disconnecting )
+  function run( mode, ipc, detaching, disconnecting )
   {
-    let result = [ mode, stdio, ipc, detaching, disconnecting, false ];
+    let result = [ mode, ipc, detaching, disconnecting, false ];
     let ready = new _.Consequence().take( null );
 
     ipc = mode === 'shell' ? 0 : ipc;
@@ -10468,13 +10464,13 @@ function startDisconnectNonDetached( test )
         currentPath : a.routinePath,
         outputPiping : 0,
         outputCollecting : 0,
-        stdio,
+        stdio : 'ignore',
         mode,
         ipc,
         detaching
       }
 
-      test.case = _.toJs({ mode, ipc, stdio, detaching, disconnecting });
+      test.case = _.toJs({ mode, ipc, detaching, disconnecting });
 
       _.process.start( o );
 
@@ -10485,7 +10481,7 @@ function startDisconnectNonDetached( test )
       })
       o.process.on( 'close', () =>
       {
-        result[ 5 ] = true;
+        result[ 4 ] = true;
       })
 
       return _.time.out( context.t1 * 3, () =>
