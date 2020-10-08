@@ -33,7 +33,7 @@ setTimeout
 
 function suiteBegin()
 {
-  var context = this;
+  let context = this;
   context.suiteTempPath = _.path.tempOpen( _.path.join( __dirname, '../..' ), 'ProcessBasic' );
   context.toolsPath = _.path.nativize( _.path.resolve( __dirname, '../../../wtools/Tools.s' ) );
   context.toolsPathInclude = `let _ = require( '${ _.strEscape( context.toolsPath ) }' )\n`;
@@ -43,7 +43,7 @@ function suiteBegin()
 
 function suiteEnd()
 {
-  var context = this;
+  let context = this;
   _.assert( _.strHas( context.suiteTempPath, '/ProcessBasic-' ) )
   _.path.tempClose( context.suiteTempPath );
 }
@@ -3545,6 +3545,7 @@ After execution checks fields of run descriptor.
 
 //
 
+/* xxx : make similar routine for multiple */
 function startNjsWithReadyDelayStructural( test ) /* qqq for Yevhen : implement additional test case with option detaching:1 */
 {
   let context = this;
@@ -8841,6 +8842,7 @@ startProcedureTrivial.description =
 
 //
 
+/* qqq for Yevgen : introduce subroutine for modes */
 function startProcedureExists( test )
 {
   let context = this;
@@ -8938,7 +8940,7 @@ function startProcedureExists( test )
 
   /* */
 
-  a.ready.then( () => _.process.watcherDisable() ) /* xxx qqq : ? */
+  a.ready.then( () => _.process.watcherDisable() );
 
   return a.ready;
 
@@ -9546,17 +9548,16 @@ function startReadyDelay( test )
   let context = this;
   let a = test.assetFor( false );
   let programPath = a.path.nativize( a.program( program1 ) );
-  // let modes = [ 'fork', 'spawn', 'shell' ];
-  let modes = [ 'spawn' ];
-  // modes.forEach( ( mode ) => a.ready.then( () => single( 0, 0, mode ) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => single( 0, 1, mode ) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => single( 1, 0, mode ) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => single( 1, 1, mode ) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => multiple( 0, 0, mode ) ) );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  // let modes = [ 'spawn' ];
+  modes.forEach( ( mode ) => a.ready.then( () => single( 0, 0, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => single( 0, 1, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => single( 1, 0, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => single( 1, 1, mode ) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => multiple( 0, 0, mode ) ) );
   // modes.forEach( ( mode ) => a.ready.then( () => multiple( 0, 1, mode ) ) );
   // modes.forEach( ( mode ) => a.ready.then( () => multiple( 1, 0, mode ) ) );
   // modes.forEach( ( mode ) => a.ready.then( () => multiple( 1, 1, mode ) ) );
-
   return a.ready;
 
   /*  */
@@ -9578,7 +9579,7 @@ function startReadyDelay( test )
         execPath : mode !== `fork` ? `node ${programPath} id:1` : `${programPath} id:1`,
         currentPath : a.abs( '.' ),
         outputPiping : 1,
-        outputCollecting : 1,
+        outputCollecting : 1, /* xxx : make option outputCollecting:1 set outputPiping:1 implicitly if outputPiping is not set explicitly */
         mode,
         sync,
         deasync,
@@ -9606,6 +9607,7 @@ function startReadyDelay( test )
 
   /*  */
 
+  /* xxx : make multiple work */
   function multiple( sync, deasync, mode )
   {
     let ready = new _.Consequence().take( null )
@@ -9624,6 +9626,7 @@ function startReadyDelay( test )
         currentPath : a.abs( '.' ),
         outputPiping : 1,
         outputCollecting : 1,
+        returningOptionsArray : 0,
         mode,
         sync,
         deasync,
@@ -9635,6 +9638,7 @@ function startReadyDelay( test )
       o.ready.then( ( op ) =>
       {
         debugger;
+        test.is( op === o );
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         let parsed = JSON.parse( op.output );
@@ -15103,8 +15107,6 @@ function shellerArgs( test )
   }
 }
 
-shellerArgs.timeOut = 30000;
-
 //
 
 function shellerFields( test )
@@ -15146,9 +15148,235 @@ function shellerFields( test )
   test.identical( start.predefined.ready, ready  );
 }
 
+// --
+// output
+// --
+
+function startOptionOutputCollecting( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let programPath = a.path.nativize( a.program( program1 ) );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => single( mode ) ) );
+  return a.ready;
+
+  /*  */
+
+  function single( sync, deasync, mode )
+  {
+    let ready = new _.Consequence().take( null )
+
+    if( sync && !deasync && mode === 'fork' )
+    return null;
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode:${mode} outputPiping:1`;
+
+      let o =
+      {
+        execPath : mode !== `fork` ? `node ${programPath}` : `${programPath}`,
+        currentPath : a.abs( '.' ),
+        outputPiping : 1,
+        outputCollecting : 1,
+      }
+
+      let returned = _.process.start( o );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, 'program1:begin\n' );
+        return op;
+      })
+
+      return returned;
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode:${mode} outputPiping:0`;
+
+      let o =
+      {
+        execPath : mode !== `fork` ? `node ${programPath}` : `${programPath}`,
+        currentPath : a.abs( '.' ),
+        outputPiping : 0,
+        outputCollecting : 1,
+      }
+
+      let returned = _.process.start( o );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, 'program1:begin\n' );
+        return op;
+      })
+
+      return returned;
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode:${mode} outputPiping:null`;
+
+      let o =
+      {
+        execPath : mode !== `fork` ? `node ${programPath}` : `${programPath}`,
+        currentPath : a.abs( '.' ),
+        outputPiping : null,
+        outputCollecting : 1,
+      }
+
+      let returned = _.process.start( o );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, 'program1:begin\n' );
+        return op;
+      })
+
+      return returned;
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode:${mode} outputPiping:implicit`;
+
+      let o =
+      {
+        execPath : mode !== `fork` ? `node ${programPath}` : `${programPath}`,
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+      }
+
+      let returned = _.process.start( o );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, 'program1:begin\n' );
+        return op;
+      })
+
+      return returned;
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode:${mode} outputPiping:0 verbosity:0`;
+
+      let o =
+      {
+        execPath : mode !== `fork` ? `node ${programPath}` : `${programPath}`,
+        currentPath : a.abs( '.' ),
+        outputPiping : 0,
+        outputCollecting : 1,
+        verbosity : 0,
+      }
+
+      let returned = _.process.start( o );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, 'program1:begin\n' );
+        return op;
+      })
+
+      return returned;
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode:${mode} outputPiping:null verbosity:0`;
+
+      let o =
+      {
+        execPath : mode !== `fork` ? `node ${programPath}` : `${programPath}`,
+        currentPath : a.abs( '.' ),
+        outputPiping : null,
+        outputCollecting : 1,
+        verbosity : 0,
+      }
+
+      let returned = _.process.start( o );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, 'program1:begin\n' );
+        return op;
+      })
+
+      return returned;
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode:${mode} outputPiping:implicit verbosity:0`;
+
+      let o =
+      {
+        execPath : mode !== `fork` ? `node ${programPath}` : `${programPath}`,
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+        verbosity : 0,
+      }
+
+      let returned = _.process.start( o );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, 'program1:begin\n' );
+        return op;
+      })
+
+      return returned;
+    })
+
+    /* */
+
+    return ready;
+  }
+
+  /*  */
+
+  function program1()
+  {
+    console.log( 'program1:begin' );
+  }
+
+}
+
 //
 
-function outputHandling( test )
+function startOptionOutputGraying( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -15156,14 +15384,143 @@ function outputHandling( test )
 
   /* */
 
-  // let modes = [ 'shell', 'spawn', 'exec', 'fork' ];
+
+  let modes = [ 'fork', 'spawn', 'shell' ];
+
+  _.each( modes, ( mode ) =>
+  {
+    let execPath = testAppPath;
+    if( mode !== 'fork' )
+    execPath = 'node ' + execPath;
+
+    _.process.start
+    ({
+      execPath,
+      mode,
+      outputGraying : 0,
+      outputCollecting : 1,
+      ready : a.ready
+    })
+    .then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      let output = _.strSplitNonPreserving({ src : op.output, delimeter : '\n' });
+      test.identical( output.length, 2 );
+      test.identical( output[ 0 ], '\u001b[31m\u001b[43mColored message1\u001b[49;0m\u001b[39;0m' );
+      test.identical( output[ 1 ], '\u001b[31m\u001b[43mColored message2\u001b[49;0m\u001b[39;0m' );
+      return null;
+    })
+
+    _.process.start
+    ({
+      execPath,
+      mode,
+      outputGraying : 1,
+      outputCollecting : 1,
+      ready : a.ready
+    })
+    .then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      let output = _.strSplitNonPreserving({ src : op.output, delimeter : '\n' });
+      test.identical( output.length, 2 );
+      test.identical( output[ 0 ], 'Colored message1' );
+      test.identical( output[ 1 ], 'Colored message2' );
+      return null;
+    })
+  })
+
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    console.log( '\u001b[31m\u001b[43mColored message1\u001b[49;0m\u001b[39;0m' )
+    console.log( '\u001b[31m\u001b[43mColored message2\u001b[49;0m\u001b[39;0m' )
+  }
+}
+
+startOptionOutputGraying.timeOut = 15000;
+
+//
+
+function startOptionLogger( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+
+  /* */
+
+  test.case = 'custom logger with increased level'
+
+  _.each( modes, ( mode ) =>
+  {
+    let execPath = testAppPath;
+    if( mode !== 'fork' )
+    execPath = 'node ' + execPath;
+
+    let loggerOutput = '';
+
+    let logger = new _.Logger({ output : null, onTransformEnd });
+    logger.up();
+
+    _.process.start
+    ({
+      execPath,
+      mode,
+      outputCollecting : 1,
+      outputPiping : 1,
+      outputDecorating : 1,
+      logger,
+      ready : a.ready
+    })
+    .then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.is( _.strHas( op.output, '  One tab' ) )
+      test.is( _.strHas( loggerOutput, '    One tab' ) )
+      return null;
+    })
+
+    /*  */
+
+    function onTransformEnd( o )
+    {
+      loggerOutput += o.outputForPrinter[ 0 ] + '\n';
+    }
+  })
+
+  /* */
+
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    console.log( '  One tab' );
+  }
+}
+
+//
+
+function startOptionLoggerTransofrmation( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
+
+  /* */
+
   let modes = [ 'fork', 'spawn', 'shell' ];
   var loggerOutput = '';
 
-  function onTransformEnd( o )
-  {
-    loggerOutput += o.outputForPrinter[ 0 ];
-  }
   var logger = new _.Logger({ output : null, onTransformEnd });
 
   modes.forEach( ( mode ) =>
@@ -15230,151 +15587,16 @@ function outputHandling( test )
 
   return a.ready;
 
+  function onTransformEnd( o )
+  {
+    loggerOutput += o.outputForPrinter[ 0 ];
+  }
+
   function testApp()
   {
     console.log( 'testApp-output\n' );
   }
 }
-
-outputHandling.timeOut = 10000;
-
-//
-
-function startOutputStripping( test )
-{
-  let context = this;
-  let a = test.assetFor( false );
-  let testAppPath = a.path.nativize( a.program( testApp ) );
-
-  /* */
-
-  // let modes = [ 'shell', 'spawn', 'exec', 'fork' ];
-  let modes = [ 'fork', 'spawn', 'shell' ];
-
-  _.each( modes, ( mode ) =>
-  {
-    let execPath = testAppPath;
-    if( mode !== 'fork' )
-    execPath = 'node ' + execPath;
-
-    _.process.start
-    ({
-      execPath,
-      mode,
-      outputGraying : 0,
-      outputCollecting : 1,
-      ready : a.ready
-    })
-    .then( ( op ) =>
-    {
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      let output = _.strSplitNonPreserving({ src : op.output, delimeter : '\n' });
-      test.identical( output.length, 2 );
-      test.identical( output[ 0 ], '\u001b[31m\u001b[43mColored message1\u001b[49;0m\u001b[39;0m' );
-      test.identical( output[ 1 ], '\u001b[31m\u001b[43mColored message2\u001b[49;0m\u001b[39;0m' );
-      return null;
-    })
-
-    _.process.start
-    ({
-      execPath,
-      mode,
-      outputGraying : 1,
-      outputCollecting : 1,
-      ready : a.ready
-    })
-    .then( ( op ) =>
-    {
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      let output = _.strSplitNonPreserving({ src : op.output, delimeter : '\n' });
-      test.identical( output.length, 2 );
-      test.identical( output[ 0 ], 'Colored message1' );
-      test.identical( output[ 1 ], 'Colored message2' );
-      return null;
-    })
-  })
-
-  return a.ready;
-
-  /* - */
-
-  function testApp()
-  {
-    console.log( '\u001b[31m\u001b[43mColored message1\u001b[49;0m\u001b[39;0m' )
-    console.log( '\u001b[31m\u001b[43mColored message2\u001b[49;0m\u001b[39;0m' )
-  }
-}
-
-startOutputStripping.timeOut = 15000;
-
-//
-
-function startLoggerOption( test )
-{
-  let context = this;
-  let a = test.assetFor( false );
-  let testAppPath = a.path.nativize( a.program( testApp ) );
-
-  /* */
-
-  // let modes = [ 'shell', 'spawn', 'exec', 'fork' ];
-  let modes = [ 'fork', 'spawn', 'shell' ];
-
-  test.case = 'custom logger with increased level'
-
-  _.each( modes, ( mode ) =>
-  {
-    let execPath = testAppPath;
-    if( mode !== 'fork' )
-    execPath = 'node ' + execPath;
-
-    let loggerOutput = '';
-
-    let logger = new _.Logger({ output : null, onTransformEnd });
-    logger.up();
-
-    _.process.start
-    ({
-      execPath,
-      mode,
-      outputCollecting : 1,
-      outputPiping : 1,
-      outputDecorating : 1,
-      logger,
-      ready : a.ready
-    })
-    .then( ( op ) =>
-    {
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      test.is( _.strHas( op.output, '  One tab' ) )
-      test.is( _.strHas( loggerOutput, '    One tab' ) )
-      return null;
-    })
-
-    /*  */
-
-    function onTransformEnd( o )
-    {
-      loggerOutput += o.outputForPrinter[ 0 ] + '\n';
-    }
-  })
-
-  /* */
-
-  return a.ready;
-
-  /* - */
-
-  function testApp()
-  {
-    console.log( '  One tab' );
-  }
-}
-
-startLoggerOption.timeOut = 30000;
 
 //
 
@@ -20002,9 +20224,10 @@ var Proto =
 
     // output
 
-    outputHandling,
-    startOutputStripping,
-    startLoggerOption,
+    startOptionOutputCollecting,
+    startOptionOutputGraying,
+    startOptionLogger,
+    startOptionLoggerTransofrmation,
 
     // etc
 

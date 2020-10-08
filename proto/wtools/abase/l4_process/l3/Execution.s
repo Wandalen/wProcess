@@ -751,7 +751,8 @@ function start_body( o )
 
     /* stdio compatibility check */
     if( Config.debug )
-    if( o.outputPiping || o.outputCollecting || o.outputPrefixing )
+    // if( o.outputPiping || o.outputCollecting || o.outputPrefixing )
+    if( o.outputPiping || o.outputCollecting )
     _.assert( o.stdio === 'pipe' || o.stdio[ 1 ] === 'pipe' || o.stdio[ 2 ] === 'pipe', 'stdout is not available to collect output or pipe it. Set stdout/stderr channel(s) or option::stdio to "pipe"' );
 
     /* passingThrough */
@@ -1318,17 +1319,16 @@ start_body.defaults = /* qqq for Vova : split on _.process.start(), _.process.st
   applyingExitCode : 0,
   briefExitCode : 0,
 
-  verbosity : 2,
-  outputPrefixing : 0,
-  outputPiping : null,
+  verbosity : 2, /* qqq for Yevhen : cover the option */
+  outputPrefixing : 0, /* qqq for Yevhen : cover the option */
+  outputPiping : null, /* qqq for Yevhen : cover the option */
   outputCollecting : 0,
-  outputAdditive : null,
-  inputMirroring : 1,
-
-  outputDecorating : 0,
-  outputDecoratingStderr : null,
-  outputDecoratingStdout : null,
+  outputAdditive : null, /* qqq for Yevhen : cover the option */
+  outputDecorating : 0, /* qqq for Yevhen : cover the option */
+  outputDecoratingStderr : null, /* qqq for Yevhen : cover the option */
+  outputDecoratingStdout : null, /* qqq for Yevhen : cover the option */
   outputGraying : 0,
+  inputMirroring : 1, /* qqq for Yevhen : cover the option */
 
 }
 
