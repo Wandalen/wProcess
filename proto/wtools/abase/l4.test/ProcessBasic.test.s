@@ -829,10 +829,9 @@ so error is triggered when trying to parse.
       /* 
         Test checks that were now are not correct ?
         process.argv.slice( 2 ) here gives arguments of test suite process ? 
-  
+
       var expectedArgs = _.arrayAppendArray( [], process.argv.slice( 2 ) );
       test.identical( options.output, expectedArgs.join( ' ' ) + '\n' );
-      test.identical( programPath2, op.output )
       */
       return null;
     })
