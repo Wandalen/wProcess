@@ -10418,28 +10418,24 @@ function startDisconnectNonDetached( test )
 
   let modes = [ 'spawn', 'fork', 'shell' ];
   let ipc = [ false, true ]
-  let detaching = [ false, true ];
   let disconnecting = [ false, true ];
 
   modes.forEach( mode =>
   {
     ipc.forEach( ipc =>
     {
-      detaching.forEach( detaching =>
+      disconnecting.forEach( disconnecting =>
       {
-        disconnecting.forEach( disconnecting =>
-        {
-          a.ready.then( () => run( mode,ipc,detaching,disconnecting ) );
-        })
+        a.ready.then( () => run( mode,ipc,detaching,disconnecting ) );
       })
     })
   })
 
   a.ready.then( () =>
   {
-    var dim = [ data.length / 5, 5 ];
+    var dim = [ data.length / 4, 4 ];
     var style = 'doubleBorder';
-    var topHead = [ 'mode', 'ipc', 'detaching', 'disconnecting', 'closeExecuted' ];
+    var topHead = [ 'mode', 'ipc', 'disconnecting', 'closeExecuted' ];
     var got = _.strTable({ data, dim, style, topHead, colWidth : 18 });
     console.log( got.result )
     return null;
@@ -10449,7 +10445,7 @@ function startDisconnectNonDetached( test )
 
   /* - */
 
-  function run( mode, ipc, detaching, disconnecting )
+  function run( mode, ipc, disconnecting )
   {
     let ready = new _.Consequence().take( null );
 
@@ -10459,7 +10455,7 @@ function startDisconnectNonDetached( test )
     if( !ipc && mode === 'fork' )
     return ready;
 
-    let result = [ mode, ipc, detaching, disconnecting, false ];
+    let result = [ mode, ipc, disconnecting, false ];
 
     ready.then( () =>
     {
@@ -10472,10 +10468,10 @@ function startDisconnectNonDetached( test )
         stdio : 'ignore',
         mode,
         ipc,
-        detaching
+        detaching : 0
       }
 
-      test.case = _.toJs({ mode, ipc, detaching, disconnecting });
+      test.case = _.toJs({ mode, ipc, disconnecting });
 
       _.process.start( o );
 
@@ -10486,7 +10482,7 @@ function startDisconnectNonDetached( test )
       })
       o.process.on( 'close', () =>
       {
-        result[ 4 ] = true;
+        result[ 3 ] = true;
       })
 
       return _.time.out( context.t1 * 3, () =>
