@@ -25,7 +25,7 @@ let Self = {};
 
 function suiteBegin()
 {
-  var context = this;
+  let context = this;
   context.suiteTempPath = _.path.tempOpen( _.path.join( __dirname, '../..' ), 'Io' );
   context.assetsOriginalPath = _.path.join( __dirname, '_asset' );
   context.appJsPath = _.path.nativize( _.module.resolve( 'wProcess' ) );
@@ -35,7 +35,7 @@ function suiteBegin()
 
 function suiteEnd()
 {
-  var context = this;
+  let context = this;
   _.assert( _.strHas( context.suiteTempPath, '/Io' ) )
   _.path.tempClose( context.suiteTempPath );
 }
