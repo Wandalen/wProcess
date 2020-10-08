@@ -3330,13 +3330,11 @@ After execution checks fields of run descriptor.
 //
 
 /* xxx : make similar routine for multiple */
-function startNjsWithReadyDelayStructural( test ) /* qqq for Yevhen : implement additional test case with option detaching:1 */
+function startNjsWithReadyDelayStructural( test ) /* qqq for Yevhen : implement additional test case with option detaching:1 | aaa : Done. Yevhen S. */
 {
   let context = this;
   let a = test.assetFor( false );
   let programPath = a.program( program1 );
-
-  // a.ready.timeOut( 1000 );
 
   /* */
 
@@ -3345,7 +3343,7 @@ function startNjsWithReadyDelayStructural( test ) /* qqq for Yevhen : implement 
     test.case = 'basic';
     let con = new _.Consequence().take( null );
 
-    con.timeOut( 1000 );
+    con.timeOut( context.t1 ); /* 1000 */
 
     let options =
     {
@@ -3360,9 +3358,9 @@ function startNjsWithReadyDelayStructural( test ) /* qqq for Yevhen : implement 
       ready : con,
     }
 
-    _.process.startNjs( options );
+    let returned = _.process.startNjs( options );
 
-    con.then( ( op ) =>
+    returned.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
@@ -3389,7 +3387,7 @@ function startNjsWithReadyDelayStructural( test ) /* qqq for Yevhen : implement 
       test.identical( !!options.process, true );
       test.is( _.routineIs( options.disconnect ) );
       test.is( options.conTerminate !== options.ready );
-      test.identical( options.ready.exportString(), 'Consequence::startNjsWithReadyDelayStructural 0 / 2' );
+      test.identical( options.ready.exportString(), 'Consequence:: 0 / 1' );
       test.identical( options.conTerminate.exportString(), 'Consequence:: 1 / 0' );
       test.identical( options.conDisconnect.exportString(), 'Consequence:: 0 / 0' );
       test.identical( options.conStart.exportString(), 'Consequence:: 1 / 0' );
@@ -3461,133 +3459,135 @@ function startNjsWithReadyDelayStructural( test ) /* qqq for Yevhen : implement 
     test.identical( options.conTerminate.exportString(), 'Consequence:: 0 / 0' );
     test.identical( options.conStart.exportString(), 'Consequence:: 0 / 0' );
 
-    return con;
+    return returned;
   } )
 
   /* */
 
-  // .then( () =>
-  // {
-  //   test.case = 'detaching:1';
-  //   let con = new _.Consequence().take( null );
-  //   let options =
-  //   {
-  //     execPath : programPath,
-  //     currentPath : a.currentPath,
-  //     throwingExitCode : 1,
-  //     inputMirroring : 1,
-  //     outputCollecting : 1,
-  //     stdio : 'pipe',
-  //     sync : 0,
-  //     deasync : 0,
-  //     ready : con,
-  //     detaching : 1
-  //   }
+  a.ready.then( () =>
+  {
+    test.case = 'detaching : 1';
+    let con = new _.Consequence().take( null );
 
-  //   _.process.startNjs( options );
+    con.timeOut( context.t1 ); /* 1000 */
 
-  //   con.then( ( op ) =>
-  //   {
-  //     test.identical( op.exitCode, 0 );
-  //     test.identical( op.ended, true );
-  //     test.identical( op.output, 'program1:begin\n' );
+    let options =
+    {
+      execPath : programPath,
+      currentPath : a.currentPath,
+      throwingExitCode : 1,
+      inputMirroring : 1,
+      outputCollecting : 1,
+      stdio : 'pipe',
+      sync : 0,
+      deasync : 0,
+      detaching : 1,
+      ready : con,
+    }
 
-  //     let exp2 = _.mapExtend( null, exp );
-  //     exp2.output = 'program1:begin\n';
-  //     exp2.exitCode = 0;
-  //     exp2.exitSignal = null;
-  //     exp2.disconnect = options.disconnect;
-  //     exp2.process = options.process;
-  //     exp2.procedure = options.procedure;
-  //     exp2.currentPath = _.path.current();
-  //     exp2.args = [];
-  //     exp2.interpreterArgs = [];
-  //     exp2.outputPiping = true;
-  //     exp2.outputAdditive = true;
-  //     exp2.state = 'terminated';
-  //     exp2.exitReason = 'normal';
-  //     exp2.fullExecPath = a.path.nativize( programPath );
-  //     exp2.ended = true;
+    let returned = _.process.startNjs( options );
 
-  //     test.identical( options, exp2 );
-  //     test.identical( !!options.process, true );
-  //     test.is( _.routineIs( options.disconnect ) );
-  //     test.is( options.conTerminate !== options.ready );
-  //     test.identical( options.ready.exportString(), 'Consequence::startNjsWithReadyDelayStructural 0 / 2' );
-  //     test.identical( options.conTerminate.exportString(), 'Consequence:: 1 / 0' );
-  //     test.identical( options.conDisconnect.exportString(), 'Consequence:: 0 / 0' );
-  //     test.identical( options.conStart.exportString(), 'Consequence:: 1 / 0' );
+    returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.identical( op.output, 'program1:begin\n' );
 
-  //     return null;
-  //   });
+      let exp2 = _.mapExtend( null, exp );
+      exp2.output = 'program1:begin\n';
+      exp2.exitCode = 0;
+      exp2.exitSignal = null;
+      exp2.disconnect = options.disconnect;
+      exp2.process = options.process;
+      exp2.procedure = options.procedure;
+      exp2.currentPath = _.path.current();
+      exp2.args = [];
+      exp2.interpreterArgs = [];
+      exp2.outputPiping = true;
+      exp2.outputAdditive = true;
+      exp2.state = 'terminated';
+      exp2.exitReason = 'normal';
+      exp2.fullExecPath = a.path.nativize( programPath );
+      exp2.ended = true;
 
-  //   var exp =
-  //   {
-  //     'execPath' : a.path.nativize( a.abs( 'program1.js' ) ),
-  //     'currentPath' : null,
-  //     'throwingExitCode' : 1,
-  //     'inputMirroring' : 1,
-  //     'outputCollecting' : 1,
-  //     'sync' : 0,
-  //     'deasync' : 0,
-  //     'passingThrough' : 0,
-  //     'maximumMemory' : 0,
-  //     'applyingExitCode' : 1,
-  //     'stdio' : 'pipe',
-  //     'mode' : 'fork',
-  //     'args' : null,
-  //     'interpreterArgs' : '',
-  //     'when' : 'instant',
-  //     'dry' : 0,
-  //     'ipc' : 0,
-  //     'env' : null,
-  //     'detaching' : 1,
-  //     'windowHiding' : 1,
-  //     'concurrent' : 0,
-  //     'timeOut' : null,
-  //     'returningOptionsArray' : 1,
-  //     'briefExitCode' : 0,
-  //     'verbosity' : 2,
-  //     'outputPrefixing' : 0,
-  //     'outputPiping' : null,
-  //     'outputAdditive' : null,
-  //     'outputDecorating' : 0,
-  //     'outputDecoratingStdout' : 0,
-  //     'outputDecoratingStderr' : 0,
-  //     'outputGraying' : 0,
-  //     'conStart' : options.conStart,
-  //     'conTerminate' : options.conTerminate,
-  //     'conDisconnect' : options.conDisconnect,
-  //     'ready' : options.ready,
-  //     'disconnect' : options.disconnect,
-  //     'process' : options.process,
-  //     'logger' : options.logger,
-  //     'state' : 'initial',
-  //     'exitReason' : null,
-  //     'fullExecPath' : null,
-  //     'output' : null,
-  //     'exitCode' : null,
-  //     'exitSignal' : null,
-  //     'procedure' : null,
-  //     'ended' : false,
-  //     'handleProcedureTerminationBegin' : false,
-  //     'error' : null
-  //   }
-  //   test.identical( options, exp );
+      test.identical( options, exp2 );
+      test.identical( !!options.process, true );
+      test.is( _.routineIs( options.disconnect ) );
+      test.is( options.conTerminate !== options.ready );
+      test.identical( options.ready.exportString(), 'Consequence:: 0 / 1' );
+      test.identical( options.conTerminate.exportString(), 'Consequence:: 1 / 0' );
+      test.identical( options.conDisconnect.exportString(), 'Consequence:: 0 / 0' );
+      test.identical( options.conStart.exportString(), 'Consequence:: 1 / 0' );
 
-  //   test.is( _.routineIs( options.disconnect ) );
-  //   test.is( options.conTerminate !== options.ready );
-  //   test.is( !!options.disconnect );
-  //   test.identical( options.process, null );
-  //   test.is( !!options.logger );
-  //   test.identical( options.ready.exportString(), 'Consequence:: 0 / 2' );
-  //   test.identical( options.conDisconnect.exportString(), 'Consequence:: 0 / 0' );
-  //   test.identical( options.conTerminate.exportString(), 'Consequence:: 0 / 0' );
-  //   test.identical( options.conStart.exportString(), 'Consequence:: 0 / 0' );
+      return null;
+    });
 
-  //   return con;
-  // } )
+    var exp =
+    {
+      'execPath' : a.path.nativize( a.abs( 'program1.js' ) ),
+      'currentPath' : null,
+      'throwingExitCode' : 1,
+      'inputMirroring' : 1,
+      'outputCollecting' : 1,
+      'sync' : 0,
+      'deasync' : 0,
+      'passingThrough' : 0,
+      'maximumMemory' : 0,
+      'applyingExitCode' : 1,
+      'stdio' : 'pipe',
+      'mode' : 'fork',
+      'args' : null,
+      'interpreterArgs' : '',
+      'when' : 'instant',
+      'dry' : 0,
+      'ipc' : 0,
+      'env' : null,
+      'detaching' : 1,
+      'windowHiding' : 1,
+      'concurrent' : 0,
+      'timeOut' : null,
+      'returningOptionsArray' : 1,
+      'briefExitCode' : 0,
+      'verbosity' : 2,
+      'outputPrefixing' : 0,
+      'outputPiping' : null,
+      'outputAdditive' : null,
+      'outputDecorating' : 0,
+      'outputDecoratingStdout' : 0,
+      'outputDecoratingStderr' : 0,
+      'outputGraying' : 0,
+      'conStart' : options.conStart,
+      'conTerminate' : options.conTerminate,
+      'conDisconnect' : options.conDisconnect,
+      'ready' : options.ready,
+      'disconnect' : options.disconnect,
+      'process' : options.process,
+      'logger' : options.logger,
+      'state' : 'initial',
+      'exitReason' : null,
+      'fullExecPath' : null,
+      'output' : null,
+      'exitCode' : null,
+      'exitSignal' : null,
+      'procedure' : null,
+      'ended' : false,
+      'handleProcedureTerminationBegin' : false,
+      'error' : null
+    }
+    test.identical( options, exp );
 
+    test.is( _.routineIs( options.disconnect ) );
+    test.is( options.conTerminate !== options.ready );
+    test.is( !!options.disconnect );
+    test.identical( options.process, null );
+    test.is( !!options.logger );
+    test.identical( options.ready.exportString(), 'Consequence:: 0 / 2' );
+    test.identical( options.conDisconnect.exportString(), 'Consequence:: 0 / 0' );
+    test.identical( options.conTerminate.exportString(), 'Consequence:: 0 / 0' );
+    test.identical( options.conStart.exportString(), 'Consequence:: 0 / 0' );
+
+    return returned;
+  } )
 
   return a.ready;
 
