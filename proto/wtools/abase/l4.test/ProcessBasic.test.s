@@ -18,8 +18,100 @@ let _global = _global_;
 let _ = _global_.wTools;
 let Self = {};
 
-/* qqq for Vova : make general table in md file for this: "Vova qqq: close event is not emitted for disconnected detached child in fork mode" */
-/* qqq for Vova : move all tables here */
+
+/*
+### Modes in which child process terminates after signal:
+
+| Signal  |  Windows   |   Linux    |       Mac        |
+| ------- | ---------- | ---------- | ---------------- |
+| SIGINT  | spawn,fork | spawn,fork | shell,spawn,fork |
+| SIGKILL | spawn,fork | spawn,fork | shell,spawn,fork |
+
+### Test routines and modes that pass test checks:
+
+|        Routine         |  Windows   | Windows + windows-kill |   Linux    |       Mac        |
+| ---------------------- | ---------- | ---------------------- | ---------- | ---------------- |
+| endStructuralSigint    | spawn,fork | spawn,fork             | spawn,fork | shell,spawn,fork |
+| endStructuralSigkill   | spawn,fork | spawn,fork             | spawn,fork | shell,spawn,fork |
+| endStructuralTerminate |          |                      | spawn,fork | shell,spawn,fork |
+| endStructuralKill      | spawn,fork | spawn,fork             | spawn,fork | shell,spawn,fork |
+
+#### endStructuralTerminate on Windows, without windows-kill
+
+For each mode:
+exitCode : 1, exitSignal : null
+
+Child process terminates in modes spawn and fork
+Child process continues to work in mode spawn
+
+See: doc/ProcessKillMethodsDifference.md
+
+#### endStructuralTerminate on Windows, with windows-kill
+
+For each mode:
+exitCode : 3221225725, exitSignal : null
+
+Child process terminates in modes spawn and fork
+Child process continues to work in mode spawn
+
+### Shell mode termination results:
+
+| Signal  | Windows | Linux | MacOS |
+| ------- | ------- | ----- | ----- |
+| SIGINT  | 0       | 0     | 1     |
+| SIGKILL | 0       | 0     | 1     |
+
+0 - Child continues to work
+1 - Child is terminated
+*/
+
+/*
+
+### Info about event `close`
+╔════════════════════════════════════════════════════════════════════════╗
+║       mode               ipc          disconnecting      close event ║
+╟────────────────────────────────────────────────────────────────────────╢
+║       spawn             false             false             true     ║
+║       spawn             false             true              true     ║
+║       spawn             true              false             true     ║
+║       spawn             true              true              false    ║
+║       fork              true              false             true     ║
+║       fork              true              true              false    ║
+║       shell             false             false             true     ║
+║       shell             false             true              true     ║
+╚════════════════════════════════════════════════════════════════════════╝
+
+Summary:
+
+* Options `stdio` and `detaching` don't affect `close` event.
+* Mode `spawn`: IPC is optionable. Event close is not called if disconnected process had IPC enabled.
+* Mode `fork` : IPC is always enabled. Event close is not called if process is disconnected.
+* Mode `shell` : IPC is not available. Event close is always called.
+*/
+
+/*
+## Event exit
+
+This section shows when event `exit` of child process is called. The behavior is the same for Windows,Linux and Mac.
+
+╔════════════════════════════════════════════════════════════════════════╗
+║       mode               ipc          disconnecting      event exit  ║
+╟────────────────────────────────────────────────────────────────────────╢
+║       spawn             false             false             true     ║
+║       spawn             false             true              true     ║
+║       spawn             true              false             true     ║
+║       spawn             true              true              true     ║
+║       fork              true              false             true     ║
+║       fork              true              true              true     ║
+║       shell             false             false             true     ║
+║       shell             false             true              true     ║
+╚════════════════════════════════════════════════════════════════════════╝
+
+Event 'exit' is aways called. Options `stdio` and `detaching` also don't affect `exit` event.
+*/
+
+/* qqq for Vova : make general table in md file for this: "Vova qqq: close event is not emitted for disconnected detached child in fork mode" aaa:done*/
+/* qqq for Vova : move all tables here aaa:done*/
 
 /* qqq for Yevhen : find all tests with passingThrough:1, separate them from the rest of the test
 and rewrite to run process which run process to avoid influence of arguments of tester on testing
@@ -55,35 +147,7 @@ function suiteEnd()
 
 //
 
-/* qqq for Vova : simplify and make it subroutine */
-function testApp()
-{
-  var ended = 0;
-  var fs = require( 'fs' );
-  var path = require( 'path' );
-  var filePath = path.join( __dirname, 'file.txt' );
-  console.log( 'begin', process.argv.slice( 2 ).join( ', ' ) );
-  var time = parseInt( process.argv[ 2 ] );
-  if( isNaN( time ) )
-  throw new Error( 'Expects number' );
-
-  setTimeout( end, time );
-  function end()
-  {
-    ended = 1;
-    fs.writeFileSync( filePath, 'written by ' + process.argv[ 2 ] );
-    console.log( 'end', process.argv.slice( 2 ).join( ', ' ) );
-  }
-
-  setTimeout( periodic, 50 );
-  function periodic()
-  {
-    console.log( 'tick', process.argv.slice( 2 ).join( ', ' ) );
-    if( !ended )
-    setTimeout( periodic, 50 );
-  }
-
-}
+/* qqq for Vova : simplify and make it subroutine aaa: just moved*/
 
 //
 
@@ -972,7 +1036,7 @@ function startFork( test )
 
   /* - */
 
-  function testApp()
+  function program1()
   {
     console.log( process.argv.slice( 2 ) );
   }
@@ -983,7 +1047,8 @@ function startErrorHandling( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.program( program1 );
+  let testAppPath2 = a.program( program2 );
 
   /* */
 
@@ -1202,44 +1267,80 @@ function startErrorHandling( test )
 
   })
 
-  /* qqq for Vova : switch on? */
+  /* qqq for Vova : switch on? aaa:done */
 
-  // con.then( function()
-  // {
-  //   test.case = 'stdio inherit, sync, collecting, verbosity and piping off';
+  a.ready.then( function()
+  {
+    test.case = 'stdio inherit, sync, collecting, verbosity and piping off';
 
-  //   let o =
-  //   {
-  //     execPath :   testAppPath,
-  //     mode : 'fork',
-  //     stdio : 'inherit',
-  //     sync : 1,
-  //     deasync : 1,
-  //     verbosity : 0,
-  //     outputCollecting : 0,
-  //     outputPiping : 0
-  //   }
-  //   var returned = test.shouldThrowErrorSync( () => _.process.start( o ) )
+    let o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      stdio : 'inherit',
+      sync : 1,
+      deasync : 1,
+      verbosity : 0,
+      outputCollecting : 0,
+      outputPiping : 0
+    }
 
-  //   test.is( _.errIs( returned ) );
-  //   test.is( _.strHas( returned.message, 'Process returned error code' ) )
-  //   test.is( _.strHas( returned.message, 'Launched as' ) )
-  //   test.is( !_.strHas( returned.message, 'Stderr' ) )
-  //   test.is( !_.strHas( returned.message, 'Error message from child' ) )
+    a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' });
 
-  //   test.notIdentical( o.exitCode, 0 );
+    let o2 =
+    {
+      execPath : testAppPath2,
+      mode : 'fork',
+      stdio : 'pipe',
+      sync : 1,
+      deasync : 1,
+      verbosity : 0,
+      outputPiping : 1,
+      outputPrefixing : 1,
+      outputCollecting : 1,
+    }
+    var returned = test.shouldThrowErrorSync( () => _.process.start( o2 ) )
 
-  //   return null;
+    test.is( _.errIs( returned ) );
+    test.is( _.strHas( returned.message, 'Process returned exit code' ) )
+    test.is( _.strHas( returned.message, 'Launched as' ) )
+    test.is( _.strHas( returned.message, 'Stderr' ) )
+    test.is( _.strHas( returned.message, 'Error message from child' ) )
 
-  // })
+    test.is( _.strHas( o2.output, 'Process returned exit code' ) )
+    test.is( _.strHas( o2.output, 'Launched as' ) )
+    test.is( !_.strHas( o2.output, 'Stderr' ) )
+    test.is( _.strHas( o2.output, 'Error message from child' ) )
+
+    test.notIdentical( o2.exitCode, 0 );
+
+    return null;
+
+  })
 
   return a.ready;
 
   /* - */
 
-  function testApp()
+  function program1()
   {
     throw new Error( 'Error message from child' )
+  }
+
+  function program2()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wFiles' );
+    _.include( 'wProcess' );
+
+    let op = _.fileProvider.fileRead
+    ({
+      filePath : _.path.join( __dirname, 'op.json'),
+      encoding : 'json'
+    });
+
+    _.process.start( op );
+
   }
 
 }
@@ -10146,72 +10247,107 @@ function startDetachingTrivial( test )
   }
 }
 
-function startDisconnectNonDetached( test )
+//
+
+function startEventClose( test )
 {
   let context = this;
   let a = test.assetFor( false );
   let locals = { toolsPath : context.toolsPath, context : { t1 : context.t1 } };
   let testAppPath = a.path.nativize( a.program({ routine : program1, locals }) );
+  let data = [];
 
   let modes = [ 'spawn', 'fork', 'shell' ];
+  let ipc = [ false, true ]
+  let disconnecting = [ false, true ];
 
-  modes.forEach( ( mode ) =>
+  modes.forEach( mode =>
   {
-    a.ready.tap( () => test.open( mode ) );
-    a.ready.then( () => run( mode ) );
-    a.ready.tap( () => test.close( mode ) );
+    ipc.forEach( ipc =>
+    {
+      disconnecting.forEach( disconnecting =>
+      {
+        a.ready.then( () => run( mode,ipc,disconnecting ) );
+      })
+    })
+  })
+
+  a.ready.then( () =>
+  {
+    var dim = [ data.length / 4, 4 ];
+    var style = 'doubleBorder';
+    var topHead = [ 'mode', 'ipc', 'disconnecting', 'event close' ];
+    var got = _.strTable({ data, dim, style, topHead, colWidth : 18 });
+    console.log( got.result )
+    return null;
   })
 
   return a.ready;
 
-  function run( mode )
+  /* - */
+
+  function run( mode, ipc, disconnecting )
   {
     let ready = new _.Consequence().take( null );
 
+    if( ipc && mode === 'shell' )
+    return ready;
+
+    if( !ipc && mode === 'fork' )
+    return ready;
+
+    let result = [ mode, ipc, disconnecting, false ];
+
     ready.then( () =>
     {
-      let track = [];
       let o =
       {
         execPath : mode === 'fork' ? 'program1.js' : 'node program1.js',
         currentPath : a.routinePath,
-        stdio : 'pipe',
-        outputPiping : 1,
-        outputCollecting : 1,
-        detaching : 0,
+        outputPiping : 0,
+        outputCollecting : 0,
+        stdio : 'ignore',
         mode,
+        ipc,
+        detaching : 0
       }
+
+      test.case = _.toJs({ mode, ipc, disconnecting });
 
       _.process.start( o );
 
-      o.conStart.then( () =>
+      o.conStart.thenGive( () =>
       {
-        track.push( 'conStart' );
-        o.disconnect();
-        return null;
+        if( disconnecting )
+        o.disconnect()
+      })
+      o.process.on( 'close', () =>
+      {
+        result[ 3 ] = true;
       })
 
-      o.conTerminate.thenGive( ( op ) =>
+      return _.time.out( context.t1 * 3, () =>
       {
-        track.push( 'conTerminate' );
-        test.identical( op.exitCode, 0 );
-        test.identical( op.exitSignal, null );
-      })
-
-      let timeOut = _.time.out( context.t1 * 3, () =>
-      {
-        test.identical( track, [ 'conStart' ] );
         test.is( !_.process.isAlive( o.process.pid ) );
-        test.identical( o.output, '' );
-        o.conTerminate.cancel();
+
+        if( mode === 'shell' )
+        test.identical( result[ 3 ], true )
+
+        if( mode === 'spawn' )
+        test.identical( result[ 3 ], ipc && disconnecting ? false : true )
+
+        if( mode === 'fork' )
+        test.identical( result[ 3 ], !disconnecting )
+
+        data.push.apply( data, result );
         return null;
       })
-
-      return _.Consequence.AndKeep( o.conStart, timeOut );
     })
 
     return ready;
   }
+
+  /* - */
 
   function program1()
   {
@@ -10224,11 +10360,125 @@ function startDisconnectNonDetached( test )
   }
 }
 
-startDisconnectNonDetached.description =
+startEventClose.timeOut = 300000;
+startEventClose.description =
 `
-Checks that disconnected non detached process doesn't emit close signal.
+Check if close event is called.
 `
 
+function startEventExit( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let locals = { toolsPath : context.toolsPath, context : { t1 : context.t1 } };
+  let testAppPath = a.path.nativize( a.program({ routine : program1, locals }) );
+  let data = [];
+
+  let modes = [ 'spawn', 'fork', 'shell' ];
+  let stdio = [ 'inherit', 'pipe', 'ignore' ];
+  let ipc = [ false, true ]
+  let detaching = [ false, true ]
+  let disconnecting = [ false, true ];
+
+  modes.forEach(mode => {
+    stdio.forEach(stdio => {
+      ipc.forEach(ipc => {
+        detaching.forEach(detaching => {
+          disconnecting.forEach(disconnecting => {
+            a.ready.then(() => run(mode, stdio, ipc, detaching, disconnecting));
+          })
+        })
+      })
+    })
+  })
+
+  a.ready.then( () =>
+  {
+    var dim = [ data.length / 6, 6 ];
+    var style = 'doubleBorder';
+    var topHead = [ 'mode', 'stdio','ipc', 'detaching', 'disconnecting', 'event exit' ];
+    var got = _.strTable({ data, dim, style, topHead, colWidth : 18 });
+    console.log( got.result )
+    return null;
+  })
+
+  return a.ready;
+
+  /* - */
+
+  function run( mode,stdio,ipc,detaching,disconnecting )
+  {
+    let ready = new _.Consequence().take( null );
+
+    if( detaching && stdio === 'inherit' ) //qqq for Vova: enable if assert in start is removed
+    return ready;
+
+    if( ipc && mode === 'shell' )
+    return ready;
+
+    if( !ipc && mode === 'fork' )
+    return ready;
+
+    let result = [ mode, stdio, ipc, disconnecting, detaching, false ];
+
+    ready.then( () =>
+    {
+      let o =
+      {
+        execPath : mode === 'fork' ? 'program1.js' : 'node program1.js',
+        currentPath : a.routinePath,
+        outputPiping : 0,
+        outputCollecting : 0,
+        stdio,
+        mode,
+        ipc,
+        detaching
+      }
+
+      test.case = _.toJs({ mode, stdio, ipc, disconnecting, detaching });
+
+      _.process.start( o );
+
+      o.conStart.thenGive( () =>
+      {
+        if( disconnecting )
+        o.disconnect()
+      })
+      o.process.on( 'exit', () =>
+      {
+        result[ 5 ] = true;
+      })
+
+      return _.time.out( context.t1 * 3, () =>
+      {
+        test.is( !_.process.isAlive( o.process.pid ) );
+        test.identical( result[ 5 ], true );
+        data.push.apply( data, result );
+        return null;
+      })
+    })
+
+    return ready;
+  }
+
+  /* - */
+
+  function program1()
+  {
+    let _ = require( toolsPath )
+    console.log( 'program1::begin' );
+    setTimeout( () =>
+    {
+      console.log( 'program1::end' );
+    }, context.t1 * 2 );
+  }
+}
+
+startEventExit.timeOut = 300000;
+startEventExit.description =
+`
+Check if exit event is called.
+`
 //
 
 /* qqq for Yevhen : implement for other modes */
@@ -12348,7 +12598,7 @@ function startConcurrent( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.path.nativize( a.program( context.testApp ) );
+  let testAppPath = a.path.nativize( a.program( program1 ) );
   let counter = 0;
   let time = 0;
   let filePath = a.path.nativize( a.abs( a.routinePath, 'file.txt' ) );
@@ -12791,6 +13041,33 @@ function startConcurrent( test )
     return arg;
   });
 
+  function program1()
+  {
+    var ended = 0;
+    var fs = require( 'fs' );
+    var path = require( 'path' );
+    var filePath = path.join( __dirname, 'file.txt' );
+    console.log( 'begin', process.argv.slice( 2 ).join( ', ' ) );
+    var time = parseInt( process.argv[ 2 ] );
+    if( isNaN( time ) )
+    throw new Error( 'Expects number' );
+
+    setTimeout( end, time );
+    function end()
+    {
+      ended = 1;
+      fs.writeFileSync( filePath, 'written by ' + process.argv[ 2 ] );
+      console.log( 'end', process.argv.slice( 2 ).join( ', ' ) );
+    }
+
+    setTimeout( periodic, 50 );
+    function periodic()
+    {
+      console.log( 'tick', process.argv.slice( 2 ).join( ', ' ) );
+      if( !ended )
+      setTimeout( periodic, 50 );
+    }
+  }
 
 }
 
@@ -12802,7 +13079,7 @@ function shellerConcurrent( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.path.nativize( a.program( context.testApp ) );
+  let testAppPath = a.path.nativize( a.program( program1 ) );
   let counter = 0;
   let time = 0;
   let filePath = a.path.nativize( a.abs( a.routinePath, 'file.txt' ) );
@@ -13308,6 +13585,36 @@ function shellerConcurrent( test )
     throw err;
     return arg;
   });
+
+  /* - */
+
+  function program1()
+  {
+    var ended = 0;
+    var fs = require( 'fs' );
+    var path = require( 'path' );
+    var filePath = path.join( __dirname, 'file.txt' );
+    console.log( 'begin', process.argv.slice( 2 ).join( ', ' ) );
+    var time = parseInt( process.argv[ 2 ] );
+    if( isNaN( time ) )
+    throw new Error( 'Expects number' );
+
+    setTimeout( end, time );
+    function end()
+    {
+      ended = 1;
+      fs.writeFileSync( filePath, 'written by ' + process.argv[ 2 ] );
+      console.log( 'end', process.argv.slice( 2 ).join( ', ' ) );
+    }
+
+    setTimeout( periodic, 50 );
+    function periodic()
+    {
+      console.log( 'tick', process.argv.slice( 2 ).join( ', ' ) );
+      if( !ended )
+      setTimeout( periodic, 50 );
+    }
+  }
 }
 
 shellerConcurrent.timeOut = 100000;
@@ -15759,7 +16066,7 @@ function startOptionCurrentPaths( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ) );
+  let programPath = a.path.nativize( a.program( program1 ) );
 
   let o2 =
   {
@@ -15779,10 +16086,12 @@ function startOptionCurrentPaths( test )
     let o1 = op[ 0 ];
     let o2 = op[ 1 ];
 
-    test.is( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
+    let cwd1 = a.fileProvider.fileRead( a.abs( o1.process.pid.toString() ) );
+    test.is( _.strHas( cwd1, a.path.nativize( a.routinePath ) ) );
     test.identical( o1.exitCode, 0 );
 
-    test.is( _.strHas( o2.output, __dirname ) );
+    let cwd2 = a.fileProvider.fileRead( a.abs( o2.process.pid.toString() ) );
+    test.is( _.strHas( cwd2, __dirname ) );
     test.identical( o2.exitCode, 0 );
 
     return op;
@@ -15797,10 +16106,12 @@ function startOptionCurrentPaths( test )
     let o1 = op[ 0 ];
     let o2 = op[ 1 ];
 
-    test.is( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
+    let cwd1 = a.fileProvider.fileRead( a.abs( o1.process.pid.toString() ) );
+    test.is( _.strHas( cwd1, a.path.nativize( a.routinePath ) ) );
     test.identical( o1.exitCode, 0 );
 
-    test.is( _.strHas( o2.output, __dirname ) );
+    let cwd2 = a.fileProvider.fileRead( a.abs( o2.process.pid.toString() ) );
+    test.is( _.strHas( cwd2, __dirname ) );
     test.identical( o2.exitCode, 0 );
 
     return op;
@@ -15815,10 +16126,12 @@ function startOptionCurrentPaths( test )
     let o1 = op[ 0 ];
     let o2 = op[ 1 ];
 
-    test.is( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
+    let cwd1 = a.fileProvider.fileRead( a.abs( o1.process.pid.toString() ) );
+    test.is( _.strHas( cwd1, a.path.nativize( a.routinePath ) ) );
     test.identical( o1.exitCode, 0 );
 
-    test.is( _.strHas( o2.output, __dirname ) );
+    let cwd2 = a.fileProvider.fileRead( a.abs( o2.process.pid.toString() ) );
+    test.is( _.strHas( cwd2, __dirname ) );
     test.identical( o2.exitCode, 0 );
 
     return op;
@@ -15835,16 +16148,20 @@ function startOptionCurrentPaths( test )
     let o3 = op[ 2 ];
     let o4 = op[ 3 ];
 
-    test.is( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
+    let cwd1 = a.fileProvider.fileRead( a.abs( o1.process.pid.toString() ) );
+    test.is( _.strHas( cwd1, a.path.nativize( a.routinePath ) ) );
     test.identical( o1.exitCode, 0 );
 
-    test.is( _.strHas( o2.output, __dirname ) );
+    let cwd2 = a.fileProvider.fileRead( a.abs( o2.process.pid.toString() ) );
+    test.is( _.strHas( cwd2, __dirname ) );
     test.identical( o2.exitCode, 0 );
 
-    test.is( _.strHas( o3.output, a.path.nativize( a.routinePath ) ) );
+    let cwd3 = a.fileProvider.fileRead( a.abs( o3.process.pid.toString() ) );
+    test.is( _.strHas( cwd3, a.path.nativize( a.routinePath ) ) );
     test.identical( o3.exitCode, 0 );
 
-    test.is( _.strHas( o4.output, __dirname ) );
+    let cwd4 = a.fileProvider.fileRead( a.abs( o4.process.pid.toString() ) );
+    test.is( _.strHas( cwd4, __dirname ) );
     test.identical( o4.exitCode, 0 );
 
     return op;
@@ -15854,12 +16171,14 @@ function startOptionCurrentPaths( test )
 
   /* - */
 
-  function testApp()
+  function program1()
   {
-    // debugger
-    console.log( process.cwd() ); /* qqq for Vova : should not be visible if verbosity of tester is low, if possible */
+    let _ = require( toolsPath );
+    _.include( 'wFiles' );
+    _.fileProvider.fileWrite( _.path.join( __dirname, process.pid.toString() ), process.cwd() ); /* qqq for Vova : should not be visible if verbosity of tester is low, if possible aaa:done*/
   }
 }
+
 
 // --
 // termination
@@ -17195,52 +17514,6 @@ startTerminateAfterLoopRelease.description =
 `
 
 //
-
-/*
-### Modes in which child process terminates after signal:
-
-| Signal  |  Windows   |   Linux    |       Mac        |
-| ------- | ---------- | ---------- | ---------------- |
-| SIGINT  | spawn,fork | spawn,fork | shell,spawn,fork |
-| SIGKILL | spawn,fork | spawn,fork | shell,spawn,fork |
-
-### Test routines and modes that pass test checks:
-
-|        Routine         |  Windows   | Windows + windows-kill |   Linux    |       Mac        |
-| ---------------------- | ---------- | ---------------------- | ---------- | ---------------- |
-| endStructuralSigint    | spawn,fork | spawn,fork             | spawn,fork | shell,spawn,fork |
-| endStructuralSigkill   | spawn,fork | spawn,fork             | spawn,fork | shell,spawn,fork |
-| endStructuralTerminate |          |                      | spawn,fork | shell,spawn,fork |
-| endStructuralKill      | spawn,fork | spawn,fork             | spawn,fork | shell,spawn,fork |
-
-#### endStructuralTerminate on Windows, without windows-kill
-
-For each mode:
-exitCode : 1, exitSignal : null
-
-Child process terminates in modes spawn and fork
-Child process continues to work in mode spawn
-
-See: doc/ProcessKillMethodsDifference.md
-
-#### endStructuralTerminate on Windows, with windows-kill
-
-For each mode:
-exitCode : 3221225725, exitSignal : null
-
-Child process terminates in modes spawn and fork
-Child process continues to work in mode spawn
-
-### Shell mode termination results:
-
-| Signal  | Windows | Linux | MacOS |
-| ------- | ------- | ----- | ----- |
-| SIGINT  | 0       | 0     | 1     |
-| SIGKILL | 0       | 0     | 1     |
-
-0 - Child continues to work
-1 - Child is terminated
-*/
 
 function endStructuralSigint( test )
 {
@@ -19521,7 +19794,6 @@ var Proto =
   {
 
     suiteTempPath : null,
-    testApp,
     testAppShell,
     toolsPath : null,
     toolsPathInclude : null,
@@ -19613,7 +19885,8 @@ var Proto =
     startDetachingChildExistsBeforeParentWaitForTermination,
     startDetachingEndCompetitorIsExecuted,
     startDetachingTerminationBegin,
-    startDisconnectNonDetached,
+    startEventClose,
+    startEventExit,
     startDetachingThrowing,
     startNjsDetachingChildThrowing,
 
