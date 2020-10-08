@@ -135,10 +135,8 @@ let _on = _.process.on;
 function on()
 {
   let o2 = _on.apply( this, arguments );
-
   if( o2.callbackMap.available )
   _.process._eventAvailableHandle();
-
   return o2;
 }
 
