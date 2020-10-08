@@ -20,7 +20,7 @@ let Self = {};
 
 /* qqq for Vova : make general table in md file for this: "Vova qqq: close event is not emitted for disconnected detached child in fork mode" */
 
-/* qqq for Yevhen : parametrize all time delays, don't forget to leave comment if you change any time delay
+/* qqq for Yevhen : parametrize all time delays, don't forget to leave comment of old value
 time.out
 setTimeout
 */
@@ -3772,8 +3772,7 @@ function startArgsOption( test )
 //
 
 /*
-qqq for Yevhen : split shellArgumentsParsing and similar test routine
-a test routine per mode
+qqq for Yevhen : split shellArgumentsParsing and similar test routine by mode
 */
 
 function startArgumentsParsing( test )
@@ -9549,15 +9548,20 @@ function startReadyDelay( test )
   let programPath = a.path.nativize( a.program( program1 ) );
   // let modes = [ 'fork', 'spawn', 'shell' ];
   let modes = [ 'spawn' ];
-  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => run( 1, 0, mode ) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => run( 1, 1, mode ) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => single( 0, 0, mode ) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => single( 0, 1, mode ) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => single( 1, 0, mode ) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => single( 1, 1, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => multiple( 0, 0, mode ) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => multiple( 0, 1, mode ) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => multiple( 1, 0, mode ) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => multiple( 1, 1, mode ) ) );
+
   return a.ready;
 
   /*  */
 
-  function sinle( sync, deasync, mode )
+  function single( sync, deasync, mode )
   {
     let ready = new _.Consequence().take( null )
 
@@ -9630,6 +9634,7 @@ function startReadyDelay( test )
 
       o.ready.then( ( op ) =>
       {
+        debugger;
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         let parsed = JSON.parse( op.output );
@@ -9650,8 +9655,9 @@ function startReadyDelay( test )
   function program1()
   {
     let _ = require( toolsPath );
-    let parsed = JSON.parse( op.output );
-    let data = { time : _.time.now() };
+    _.include( 'wProcess' );
+    let args = _.process.args();
+    let data = { time : _.time.now(), id : args.map.id };
     console.log( JSON.stringify( data ) );
   }
 
@@ -10823,7 +10829,7 @@ function startDetachingModeShellNoTerminationBegin( test )
 
 //
 
-function startDetachingTerminationBegin( test ) /* qqq2 : extend for other modes? aaa:done */
+function startDetachingTerminationBegin( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -11924,6 +11930,7 @@ function startDetachedOutputStdioIgnore( test )
 }
 
 //
+
 /* qqq for Yevhen : implement for other modes */
 function startDetachedOutputStdioPipe( test )
 {
@@ -19900,8 +19907,8 @@ var Proto =
     startShellSyncDeasyncThrowing,
     startForkSyncDeasync,
     startForkSyncDeasyncThrowing,
-    // shellExecSyncDeasync, /* qqq for Vova : ? */
-    // shellExecSyncDeasyncThrowing, /* qqq for Vova : ? */
+    // shellExecSyncDeasync, /* qqq for Vova : switch on? */
+    // shellExecSyncDeasyncThrowing, /* qqq for Vova : switch on? */
 
     startMultipleSyncDeasync,
     startDryRun,
@@ -20043,7 +20050,7 @@ var Proto =
     experiment,
     experiment2,
 
-    /* qqq : group test routines */
+    /* xxx qqq : group test routines */
 
   }
 
