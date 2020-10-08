@@ -1175,7 +1175,33 @@ function start2( test )
     })
   })
 
-  /* */
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    console.log( process.argv.slice( 2 ).join( ' ' ) );
+  }
+}
+
+//
+
+function start2OptionPassingThrough( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let programPath = a.path.nativize( a.program( testApp ) );
+
+  let o3 =
+  {
+    outputPiping : 1,
+    outputCollecting : 1,
+    applyingExitCode : 0,
+    throwingExitCode : 1
+  }
+
+  let o2;
 
   a.ready.then( function()
   {
@@ -8060,6 +8086,8 @@ function startImportantExecPath( test )
   shell({ execPath : 'echo', args : null, passingThrough : 1 })
   .then( function( op )
   {
+    // console.log( 'OP.OUTPUT: ', '-' + op.output + '-' );
+    // console.log( 'ARGS: : ', '-' + process.argv.slice( 2 ).join( ' ') + '-' );
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     if( process.platform === 'win32' )
@@ -8110,6 +8138,79 @@ startImportantExecPath.description =
 `
 exec paths with special chars
 `
+
+//
+
+function startImportantExecPathPassingThrough( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let testAppPath = a.program({ routine : testApp, locals : { routinePath : a.routinePath, toolsPath : context.toolsPath } });
+
+  a.fileProvider.fileWrite( a.abs( a.routinePath, 'file' ), 'file' );
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    let options =
+    {
+      execPath :  'node testApp.js',
+      currentPath : a.routinePath,
+      args : null,
+      outputCollecting : 1,
+      outputPiping : 1,
+      passingThrough : 1,
+    }
+    let returned = _.process.start( options );
+
+    returned.then( function( op )
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      if( process.platform === 'win32' )
+      test.is( _.strHas( op.output, '"' + process.argv.slice( 2 ).join( '" "' ) + '"' ) );
+      else
+      test.is( _.strHas( op.output, process.argv.slice( 2 ).join( ' ') ) );
+
+      return null;
+    })
+
+    return returned;
+  } )
+
+  /* */
+
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    let returned = _.process.start
+    ({
+      currentPath : routinePath,
+      mode : 'shell',
+      stdio : 'pipe',
+      outputCollecting : 1,
+      execPath : 'echo',
+      args : null,
+    });
+
+    returned.then( ( arg ) =>
+    {
+      console.log( process.argv.slice( 2 ).join( ' ' ) )
+      return null;
+    } )
+
+    return returned;
+  }
+
+}
 
 //
 
@@ -19775,6 +19876,7 @@ var Proto =
     startSync,
     startSyncDeasync,
     start2,
+    start2OptionPassingThrough,
     startCurrentPath,
     startCurrentPaths,
     startFork,
@@ -19804,6 +19906,8 @@ var Proto =
     startArgumentsHandlingTrivial,
     startArgumentsHandling,
     startImportantExecPath,
+
+    startImportantExecPathPassingThrough,
 
     startExecPathWithSpace,
     startNjsPassingThroughExecPathWithSpace,
