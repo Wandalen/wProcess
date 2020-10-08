@@ -10962,7 +10962,7 @@ function startEventExit( test )
   {
     let ready = new _.Consequence().take( null );
 
-    if( detaching && stdio === 'inherit' ) //xxx: enable if assert is removed
+    if( detaching && stdio === 'inherit' ) //qqq fov Vova: enable if assert in start is removed
     return ready;
 
     if( ipc && mode === 'shell' )
