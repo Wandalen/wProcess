@@ -84,9 +84,9 @@ Child process continues to work in mode spawn
 Summary:
 
 * Options `stdio` and `detaching` don't affect `close` event.
-* Mode `spawn`: IPC is optionable. Event close is not fired if disconnected process had IPC enabled.
-* Mode `fork` : IPC is always enabled. Event close is not fired if process is disconnected.
-* Mode `shell` : IPC is not available. Event close is always fired.
+* Mode `spawn`: IPC is optionable. Event close is not called if disconnected process had IPC enabled.
+* Mode `fork` : IPC is always enabled. Event close is not called if process is disconnected.
+* Mode `shell` : IPC is not available. Event close is always called.
 */
 
 /* qqq for Vova : make general table in md file for this: "Vova qqq: close event is not emitted for disconnected detached child in fork mode" */
