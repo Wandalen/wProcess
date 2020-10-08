@@ -12224,7 +12224,6 @@ function startDetachingThrowing( test )
   }
   test.shouldThrowErrorSync( () => _.process.start( o ) )
 
-  // qqq for Vova : uncomment, aaa:removed redundant cases of exec?
   function testAppChild()
   {
     let _ = require( toolsPath );
@@ -16465,7 +16464,6 @@ function kill( test )
     return ready;
   })
 
-  // qqq for Vova : separate this into stand-alone experiment
   // zzz for Vova : find how to simulate EPERM error using process.kill and write test case
 
   /* */
