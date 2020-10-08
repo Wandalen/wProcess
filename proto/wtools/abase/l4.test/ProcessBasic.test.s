@@ -3552,13 +3552,17 @@ function startNjsWithReadyDelayStructural( test ) /* qqq for Yevhen : implement 
   let a = test.assetFor( false );
   let programPath = a.program( program1 );
 
-  a.ready.timeOut( 1000 );
+  // a.ready.timeOut( 1000 );
 
   /* */
 
   a.ready.then( () =>
   {
     test.case = 'basic';
+    let con = new _.Consequence().take( null );
+
+    con.timeOut( 1000 );
+
     let options =
     {
       execPath : programPath,
@@ -3569,12 +3573,12 @@ function startNjsWithReadyDelayStructural( test ) /* qqq for Yevhen : implement 
       stdio : 'pipe',
       sync : 0,
       deasync : 0,
-      ready : a.ready,
+      ready : con,
     }
 
-    let returned = _.process.startNjs( options );
+    _.process.startNjs( options );
 
-    returned.then( ( op ) =>
+    con.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
@@ -3678,126 +3682,127 @@ function startNjsWithReadyDelayStructural( test ) /* qqq for Yevhen : implement 
 
   /* */
 
-  a.ready.then( () =>
-  {
-    test.case = 'detaching:1'
-    let options =
-    {
-      execPath : programPath,
-      currentPath : a.currentPath,
-      throwingExitCode : 1,
-      inputMirroring : 1,
-      outputCollecting : 1,
-      stdio : 'pipe',
-      sync : 0,
-      deasync : 0,
-      ready : a.ready,
-      detaching : 1
-    }
+  // .then( () =>
+  // {
+  //   test.case = 'detaching:1';
+  //   let con = new _.Consequence().take( null );
+  //   let options =
+  //   {
+  //     execPath : programPath,
+  //     currentPath : a.currentPath,
+  //     throwingExitCode : 1,
+  //     inputMirroring : 1,
+  //     outputCollecting : 1,
+  //     stdio : 'pipe',
+  //     sync : 0,
+  //     deasync : 0,
+  //     ready : con,
+  //     detaching : 1
+  //   }
 
-    let returned = _.process.startNjs( options );
+  //   _.process.startNjs( options );
 
-    returned.then( ( op ) =>
-    {
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      test.identical( op.output, 'program1:begin\n' );
+  //   con.then( ( op ) =>
+  //   {
+  //     test.identical( op.exitCode, 0 );
+  //     test.identical( op.ended, true );
+  //     test.identical( op.output, 'program1:begin\n' );
 
-      let exp2 = _.mapExtend( null, exp );
-      exp2.output = 'program1:begin\n';
-      exp2.exitCode = 0;
-      exp2.exitSignal = null;
-      exp2.disconnect = options.disconnect;
-      exp2.process = options.process;
-      exp2.procedure = options.procedure;
-      exp2.currentPath = _.path.current();
-      exp2.args = [];
-      exp2.interpreterArgs = [];
-      exp2.outputPiping = true;
-      exp2.outputAdditive = true;
-      exp2.state = 'terminated';
-      exp2.exitReason = 'normal';
-      exp2.fullExecPath = a.path.nativize( programPath );
-      exp2.ended = true;
+  //     let exp2 = _.mapExtend( null, exp );
+  //     exp2.output = 'program1:begin\n';
+  //     exp2.exitCode = 0;
+  //     exp2.exitSignal = null;
+  //     exp2.disconnect = options.disconnect;
+  //     exp2.process = options.process;
+  //     exp2.procedure = options.procedure;
+  //     exp2.currentPath = _.path.current();
+  //     exp2.args = [];
+  //     exp2.interpreterArgs = [];
+  //     exp2.outputPiping = true;
+  //     exp2.outputAdditive = true;
+  //     exp2.state = 'terminated';
+  //     exp2.exitReason = 'normal';
+  //     exp2.fullExecPath = a.path.nativize( programPath );
+  //     exp2.ended = true;
 
-      test.identical( options, exp2 );
-      test.identical( !!options.process, true );
-      test.is( _.routineIs( options.disconnect ) );
-      test.is( options.conTerminate !== options.ready );
-      test.identical( options.ready.exportString(), 'Consequence::startNjsWithReadyDelayStructural 0 / 2' );
-      test.identical( options.conTerminate.exportString(), 'Consequence:: 1 / 0' );
-      test.identical( options.conDisconnect.exportString(), 'Consequence:: 0 / 0' );
-      test.identical( options.conStart.exportString(), 'Consequence:: 1 / 0' );
+  //     test.identical( options, exp2 );
+  //     test.identical( !!options.process, true );
+  //     test.is( _.routineIs( options.disconnect ) );
+  //     test.is( options.conTerminate !== options.ready );
+  //     test.identical( options.ready.exportString(), 'Consequence::startNjsWithReadyDelayStructural 0 / 2' );
+  //     test.identical( options.conTerminate.exportString(), 'Consequence:: 1 / 0' );
+  //     test.identical( options.conDisconnect.exportString(), 'Consequence:: 0 / 0' );
+  //     test.identical( options.conStart.exportString(), 'Consequence:: 1 / 0' );
 
-      return null;
-    });
+  //     return null;
+  //   });
 
-    var exp =
-    {
-      'execPath' : a.path.nativize( a.abs( 'program1.js' ) ),
-      'currentPath' : null,
-      'throwingExitCode' : 1,
-      'inputMirroring' : 1,
-      'outputCollecting' : 1,
-      'sync' : 0,
-      'deasync' : 0,
-      'passingThrough' : 0,
-      'maximumMemory' : 0,
-      'applyingExitCode' : 1,
-      'stdio' : 'pipe',
-      'mode' : 'fork',
-      'args' : null,
-      'interpreterArgs' : '',
-      'when' : 'instant',
-      'dry' : 0,
-      'ipc' : 0,
-      'env' : null,
-      'detaching' : 1,
-      'windowHiding' : 1,
-      'concurrent' : 0,
-      'timeOut' : null,
-      'returningOptionsArray' : 1,
-      'briefExitCode' : 0,
-      'verbosity' : 2,
-      'outputPrefixing' : 0,
-      'outputPiping' : null,
-      'outputAdditive' : null,
-      'outputDecorating' : 0,
-      'outputDecoratingStdout' : 0,
-      'outputDecoratingStderr' : 0,
-      'outputGraying' : 0,
-      'conStart' : options.conStart,
-      'conTerminate' : options.conTerminate,
-      'conDisconnect' : options.conDisconnect,
-      'ready' : options.ready,
-      'disconnect' : options.disconnect,
-      'process' : options.process,
-      'logger' : options.logger,
-      'state' : 'initial',
-      'exitReason' : null,
-      'fullExecPath' : null,
-      'output' : null,
-      'exitCode' : null,
-      'exitSignal' : null,
-      'procedure' : null,
-      'ended' : false,
-      'handleProcedureTerminationBegin' : false,
-      'error' : null
-    }
-    test.identical( options, exp );
+  //   var exp =
+  //   {
+  //     'execPath' : a.path.nativize( a.abs( 'program1.js' ) ),
+  //     'currentPath' : null,
+  //     'throwingExitCode' : 1,
+  //     'inputMirroring' : 1,
+  //     'outputCollecting' : 1,
+  //     'sync' : 0,
+  //     'deasync' : 0,
+  //     'passingThrough' : 0,
+  //     'maximumMemory' : 0,
+  //     'applyingExitCode' : 1,
+  //     'stdio' : 'pipe',
+  //     'mode' : 'fork',
+  //     'args' : null,
+  //     'interpreterArgs' : '',
+  //     'when' : 'instant',
+  //     'dry' : 0,
+  //     'ipc' : 0,
+  //     'env' : null,
+  //     'detaching' : 1,
+  //     'windowHiding' : 1,
+  //     'concurrent' : 0,
+  //     'timeOut' : null,
+  //     'returningOptionsArray' : 1,
+  //     'briefExitCode' : 0,
+  //     'verbosity' : 2,
+  //     'outputPrefixing' : 0,
+  //     'outputPiping' : null,
+  //     'outputAdditive' : null,
+  //     'outputDecorating' : 0,
+  //     'outputDecoratingStdout' : 0,
+  //     'outputDecoratingStderr' : 0,
+  //     'outputGraying' : 0,
+  //     'conStart' : options.conStart,
+  //     'conTerminate' : options.conTerminate,
+  //     'conDisconnect' : options.conDisconnect,
+  //     'ready' : options.ready,
+  //     'disconnect' : options.disconnect,
+  //     'process' : options.process,
+  //     'logger' : options.logger,
+  //     'state' : 'initial',
+  //     'exitReason' : null,
+  //     'fullExecPath' : null,
+  //     'output' : null,
+  //     'exitCode' : null,
+  //     'exitSignal' : null,
+  //     'procedure' : null,
+  //     'ended' : false,
+  //     'handleProcedureTerminationBegin' : false,
+  //     'error' : null
+  //   }
+  //   test.identical( options, exp );
 
-    test.is( _.routineIs( options.disconnect ) );
-    test.is( options.conTerminate !== options.ready );
-    test.is( !!options.disconnect );
-    test.identical( options.process, null );
-    test.is( !!options.logger );
-    test.identical( options.ready.exportString(), 'Consequence:: 0 / 2' );
-    test.identical( options.conDisconnect.exportString(), 'Consequence:: 0 / 0' );
-    test.identical( options.conTerminate.exportString(), 'Consequence:: 0 / 0' );
-    test.identical( options.conStart.exportString(), 'Consequence:: 0 / 0' );
+  //   test.is( _.routineIs( options.disconnect ) );
+  //   test.is( options.conTerminate !== options.ready );
+  //   test.is( !!options.disconnect );
+  //   test.identical( options.process, null );
+  //   test.is( !!options.logger );
+  //   test.identical( options.ready.exportString(), 'Consequence:: 0 / 2' );
+  //   test.identical( options.conDisconnect.exportString(), 'Consequence:: 0 / 0' );
+  //   test.identical( options.conTerminate.exportString(), 'Consequence:: 0 / 0' );
+  //   test.identical( options.conStart.exportString(), 'Consequence:: 0 / 0' );
 
-    return null;
-  } )
+  //   return con;
+  // } )
 
 
   return a.ready;
