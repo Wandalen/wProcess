@@ -19119,107 +19119,8 @@ function childrenAsList( test )
 }
 
 // --
-//
+// experiment
 // --
-
-function realMainFile( test )
-{
-  let context = this;
-  let a = test.assetFor( false );
-  let testAppPath = a.path.nativize( a.program( testApp ) );
-
-  a.ready.then( () =>
-  {
-    test.case = 'compare with `testAppPath`'
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      outputCollecting : 1,
-    }
-
-    return _.process.start( o )
-    .then( ( op ) =>
-    {
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      test.identical( op.output.trim(), testAppPath );
-      return null;
-    })
-  });
-
-  return a.ready;
-
-  /* - */
-
-  function testApp()
-  {
-    let _ = require( toolsPath );
-    _.include( 'wProcess' );
-
-    console.log( _.process.realMainFile() )
-  }
-};
-
-//
-
-function realMainDir( test )
-{
-
-  if( require.main === module )
-  var file = __filename;
-  else
-  var file = require.main.filename;
-
-  var expected1 = _.path.dir( file );
-
-  test.case = 'compare with __filename path dir';
-  var got = _.fileProvider.path.nativize( _.process.realMainDir( ) );
-  test.identical( _.path.normalize( got ), _.path.normalize( expected1 ) );
-
-  /* */
-
-  test.case = 'absolute paths';
-  var from = _.process.realMainDir();
-  var to = _.process.realMainFile();
-  var expected = _.path.name({ path : _.process.realMainFile(), full : 1 });
-  var got = _.path.relative( from, to );
-  test.identical( got, expected );
-
-  /* */
-
-  test.case = 'absolute paths, from === to';
-  var from = _.process.realMainDir();
-  var to = _.process.realMainDir();
-  var expected = '.';
-  var got = _.path.relative( from, to );
-  test.identical( got, expected );
-
-}
-
-//
-
-function effectiveMainFile( test )
-{
-  if( require.main === module )
-  var expected1 = __filename;
-  else
-  var expected1 = process.argv[ 1 ];
-
-  test.case = 'compare with __filename path for main file';
-  var got = _.path.nativize( _.process.effectiveMainFile() );
-  test.identical( got, expected1 );
-
-  if( Config.debug )
-  {
-    test.case = 'extra arguments';
-    test.shouldThrowErrorSync( function( )
-    {
-      _.process.effectiveMainFile( 'package.json' );
-    });
-  }
-};
-
-//
 
 function experiment( test )
 {
@@ -19505,12 +19406,6 @@ var Proto =
 
     children,
     childrenAsList,
-
-    //
-
-    realMainFile,
-    realMainDir,
-    effectiveMainFile,
 
     // experiments
 
