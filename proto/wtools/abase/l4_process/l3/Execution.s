@@ -266,8 +266,8 @@ function start_body( o )
 
     o.logger = o.logger || _global.logger;
 
-    // if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
-    // o.stack = _.Procedure.Stack( o.stack, 2 );
+    if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
+    o.stack = _.Procedure.Stack( o.stack, 3 );
   }
 
   /* */

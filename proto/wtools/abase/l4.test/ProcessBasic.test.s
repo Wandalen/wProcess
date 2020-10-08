@@ -3913,10 +3913,9 @@ function startArgumentsParsing( test )
     {
       test.identical( o.exitCode, 0 );
       let op = JSON.parse( o.output );
-      test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
-      test.identical( op.map, { secondArg : `1 "third arg" 'fourth arg' "fifth" arg` } )
-      test.identical( op.scriptArgs, [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', '"fifth" arg' ] )
-
+      test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) );
+      test.identical( op.map, { secondArg : `1 "third arg" 'fourth arg' "fifth" arg` } );
+      test.identical( op.scriptArgs, [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', '"fifth" arg' ] );
       return null;
     })
 
@@ -7685,6 +7684,343 @@ startProcedureExists.description =
 
 //
 
+function startProcedureStack( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let programPath = a.path.nativize( a.program( program1 ) );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  // let modes = [ 'spawn' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 0, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 1, mode ) ) );
+  return a.ready;
+
+  /*  */
+
+  function run( sync, deasync, mode )
+  {
+    let ready = new _.Consequence().take( null )
+
+    if( sync && !deasync && mode === 'fork' )
+    return null;
+
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `sync:${sync} deasync:${deasync} mode:${mode} stack:implicit`;
+      let t1 = _.time.now();
+      let o =
+      {
+        execPath : mode !== `fork` ? `node ${programPath} id:1` : `${programPath} id:1`,
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+        mode,
+        sync,
+        deasync,
+      }
+
+      _.process.start( o );
+
+      test.identical( _.strCount( o.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
+      test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
+        test.identical( _.strCount( op.procedure._sourcePath, 'case1' ), 1 );
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `sync:${sync} deasync:${deasync} mode:${mode} stack:true`;
+      let t1 = _.time.now();
+      let o =
+      {
+        execPath : mode !== `fork` ? `node ${programPath} id:1` : `${programPath} id:1`,
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+        stack : true,
+        mode,
+        sync,
+        deasync,
+      }
+
+      _.process.start( o );
+
+      test.identical( _.strCount( o.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
+      test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
+        test.identical( _.strCount( op.procedure._sourcePath, 'case1' ), 1 );
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `sync:${sync} deasync:${deasync} mode:${mode} stack:0`;
+      let t1 = _.time.now();
+      let o =
+      {
+        execPath : mode !== `fork` ? `node ${programPath} id:1` : `${programPath} id:1`,
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+        stack : 0,
+        mode,
+        sync,
+        deasync,
+      }
+
+      _.process.start( o );
+
+      test.identical( _.strCount( o.procedure._stack, 'case1' ), 1 );
+      test.identical( _.strCount( o.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
+      test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( o.procedure._stack, 'case1' ), 1 );
+        test.identical( _.strCount( op.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
+        test.identical( _.strCount( op.procedure._sourcePath, 'case1' ), 1 );
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `sync:${sync} deasync:${deasync} mode:${mode} stack:-1`;
+      let t1 = _.time.now();
+      let o =
+      {
+        execPath : mode !== `fork` ? `node ${programPath} id:1` : `${programPath} id:1`,
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+        stack : -1,
+        mode,
+        sync,
+        deasync,
+      }
+
+      _.process.start( o );
+
+      test.identical( _.strCount( o.procedure._stack, 'case1' ), 1 );
+      test.identical( _.strCount( o.procedure._sourcePath, 'start' ), 1 );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( o.procedure._stack, 'case1' ), 1 );
+        test.identical( _.strCount( op.procedure._sourcePath, 'start' ), 1 );
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `sync:${sync} deasync:${deasync} mode:${mode} stack:false`;
+      let t1 = _.time.now();
+      let o =
+      {
+        execPath : mode !== `fork` ? `node ${programPath} id:1` : `${programPath} id:1`,
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+        stack : false,
+        mode,
+        sync,
+        deasync,
+      }
+
+      _.process.start( o );
+
+      test.identical( o.procedure._stack, '' );
+      test.identical( o.procedure._sourcePath, '' );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( o.procedure._stack, '' );
+        test.identical( o.procedure._sourcePath, '' );
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `sync:${sync} deasync:${deasync} mode:${mode} stack:str`;
+      let t1 = _.time.now();
+      let o =
+      {
+        execPath : mode !== `fork` ? `node ${programPath} id:1` : `${programPath} id:1`,
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+        stack : 'abc',
+        mode,
+        sync,
+        deasync,
+      }
+
+      _.process.start( o );
+
+      test.identical( o.procedure._stack, 'abc' );
+      test.identical( o.procedure._sourcePath, 'abc' );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( o.procedure._stack, 'abc' );
+        test.identical( o.procedure._sourcePath, 'abc' );
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* */
+
+    return ready;
+  }
+
+  /* - */
+
+  function program1()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    let args = _.process.args();
+    let data = { time : _.time.now(), id : args.map.id };
+    console.log( JSON.stringify( data ) );
+  }
+
+}
+
+startProcedureStack.description =
+`
+  - option stack used to get stack
+  - stack may be defined relatively
+  - stack may be switched off
+`
+
+//
+
+function startProcedureStackMultiple( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let programPath = a.path.nativize( a.program( program1 ) );
+  // let modes = [ 'fork', 'spawn', 'shell' ];
+  // xxx
+  let modes = [ 'spawn' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => run( 1, 0, mode ) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => run( 1, 1, mode ) ) );
+  return a.ready;
+
+  /*  */
+
+  function run( sync, deasync, mode )
+  {
+    let ready = new _.Consequence().take( null )
+
+    if( sync && !deasync && mode === 'fork' )
+    return null;
+
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `sync:${sync} deasync:${deasync} mode:${mode} stack:implicit`;
+      let t1 = _.time.now();
+      let o =
+      {
+        execPath : mode !== `fork` ? [ `node ${programPath} id:1`, `node ${programPath} id:2` ] : [ `${programPath} id:1`, `${programPath} id:2` ],
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+        // stack : 'abc',
+        mode,
+        sync,
+        deasync,
+      }
+
+      _.process.start( o );
+
+      // xxx
+      // test.identical( _.strCount( o.procedure._stack, 'case1' ), 1 );
+      // test.identical( _.strCount( o.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
+      // test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
+
+      o.ready.then( ( ops ) =>
+      {
+        test.identical( o.exitCode, 0 );
+        test.identical( o.ended, true ); /* xxx */
+        ops.forEach( ( op ) =>
+        {
+          test.identical( _.strCount( op.procedure._stack, 'case1' ), 1 );
+          test.identical( _.strCount( op.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
+          test.identical( _.strCount( op.procedure._sourcePath, 'case1' ), 1 );
+        });
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* */
+
+    return ready;
+  }
+
+  /* - */
+
+  function program1()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    let args = _.process.args();
+    let data = { time : _.time.now(), id : args.map.id };
+    console.log( JSON.stringify( data ) );
+  }
+
+}
+
+//
+
 /* qqq for Yevhen : implement for other modes */
 function startOnTerminateSeveralCallbacksChronology( test )
 {
@@ -8131,6 +8467,7 @@ function startNjsWithReadyDelayStructural( test ) /* qqq for Yevhen : implement 
       'disconnect' : options.disconnect,
       'process' : options.process,
       'logger' : options.logger,
+      'stack' : null,
       'state' : 'initial',
       'exitReason' : null,
       'fullExecPath' : null,
@@ -8155,63 +8492,7 @@ function startNjsWithReadyDelayStructural( test ) /* qqq for Yevhen : implement 
     test.identical( options.conStart.exportString(), 'Consequence:: 0 / 0' );
 
     return returned;
-  } )
-
-
-  var exp =
-  {
-    'execPath' : a.path.nativize( a.abs( 'program1.js' ) ),
-    'currentPath' : null,
-    'throwingExitCode' : 1,
-    'inputMirroring' : 1,
-    'outputCollecting' : 1,
-    'sync' : 0,
-    'deasync' : 0,
-    'passingThrough' : 0,
-    'maximumMemory' : 0,
-    'applyingExitCode' : 1,
-    'stdio' : 'pipe',
-    'mode' : 'fork',
-    'args' : null,
-    'interpreterArgs' : '',
-    'when' : 'instant',
-    'dry' : 0,
-    'ipc' : 0,
-    'env' : null,
-    'detaching' : 0,
-    'windowHiding' : 1,
-    'concurrent' : 0,
-    'timeOut' : null,
-    'returningOptionsArray' : 1,
-    'briefExitCode' : 0,
-    'verbosity' : 2,
-    'outputPrefixing' : 0,
-    'outputPiping' : null,
-    'outputAdditive' : null,
-    'outputDecorating' : 0,
-    'outputDecoratingStdout' : 0,
-    'outputDecoratingStderr' : 0,
-    'outputGraying' : 0,
-    'conStart' : options.conStart,
-    'conTerminate' : options.conTerminate,
-    'conDisconnect' : options.conDisconnect,
-    'ready' : options.ready,
-    'disconnect' : options.disconnect,
-    'process' : options.process,
-    'logger' : options.logger,
-    'stack' : null,
-    'state' : 'initial',
-    'exitReason' : null,
-    'fullExecPath' : null,
-    'output' : null,
-    'exitCode' : null,
-    'exitSignal' : null,
-    'procedure' : null,
-    'ended' : false,
-    'handleProcedureTerminationBegin' : false,
-    'error' : null
-  }
-  test.identical( options, exp );
+  })
 
   /* */
 
@@ -8314,6 +8595,7 @@ function startNjsWithReadyDelayStructural( test ) /* qqq for Yevhen : implement 
       'disconnect' : options.disconnect,
       'process' : options.process,
       'logger' : options.logger,
+      'stack' : null,
       'state' : 'initial',
       'exitReason' : null,
       'fullExecPath' : null,
@@ -8338,7 +8620,7 @@ function startNjsWithReadyDelayStructural( test ) /* qqq for Yevhen : implement 
     test.identical( options.conStart.exportString(), 'Consequence:: 0 / 0' );
 
     return returned;
-  } )
+  })
 
   return a.ready;
 
@@ -8398,8 +8680,7 @@ function startReadyDelay( test )
       {
         execPath : mode !== `fork` ? `node ${programPath} id:1` : `${programPath} id:1`,
         currentPath : a.abs( '.' ),
-        outputPiping : 1,
-        outputCollecting : 1, /* xxx : make option outputCollecting:1 set outputPiping:1 implicitly if outputPiping is not set explicitly */
+        outputCollecting : 1,
         mode,
         sync,
         deasync,
@@ -19294,6 +19575,8 @@ var Proto =
 
     startProcedureTrivial,
     startProcedureExists,
+    startProcedureStack,
+    // startProcedureStackMultiple, /* xxx : make it working */
     startOnTerminateSeveralCallbacksChronology,
     startChronology,
 
