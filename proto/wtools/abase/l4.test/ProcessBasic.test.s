@@ -8625,12 +8625,11 @@ startProcedureTrivial.description =
 
 //
 
-/* qqq for Yevgen : introduce subroutine for modes */
 function startProcedureExists( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.path.nativize( a.program( testApp ) );
+  let testAppPath = a.path.nativize( a.program( program1 ) );
 
   let start = _.process.starter
   ({
@@ -8641,95 +8640,58 @@ function startProcedureExists( test )
 
   _.process.watcherEnable();
 
-  a.ready
+  let modes = [ 'spawn', 'shell', 'fork' ];
 
-  /* */
-
-  .then( () =>
+  modes.forEach( mode =>
   {
-    var o = { execPath : 'node ' + testAppPath, mode : 'shell' }
-    var con = start( o );
-    var procedure = _.procedure.find( 'PID:' + o.process.pid );
-    test.identical( procedure.length, 1 );
-    test.identical( procedure[ 0 ].isAlive(), true );
-    test.identical( o.procedure, procedure[ 0 ] );
-    test.identical( procedure[ 0 ].object(), o.process );
-    test.identical( o.procedure, procedure[ 0 ] );
-    return con.then( ( op ) =>
-    {
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      test.identical( procedure[ 0 ].isAlive(), false );
-      test.identical( o.procedure, procedure[ 0 ] );
-      test.identical( procedure[ 0 ].object(), o.process );
-      test.identical( o.procedure, procedure[ 0 ] );
-      debugger
-      test.is( _.strHas( o.procedure._sourcePath, 'Execution.s' ) );
-      return null;
-    })
+    a.ready.tap( () => test.open( mode ) );
+    a.ready.then( () => run( mode ) );
+    a.ready.tap( () => test.close( mode ) );
   })
-
-  /* */
-
-  .then( () =>
-  {
-
-    var o = { execPath : testAppPath, mode : 'fork' }
-    var con = start( o );
-    var procedure = _.procedure.find( 'PID:' + o.process.pid );
-    test.identical( procedure.length, 1 );
-    test.identical( procedure[ 0 ].isAlive(), true );
-    test.identical( o.procedure, procedure[ 0 ] );
-    test.identical( procedure[ 0 ].object(), o.process );
-    test.identical( o.procedure, procedure[ 0 ] );
-    return con.then( ( op ) =>
-    {
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      test.identical( procedure[ 0 ].isAlive(), false );
-      test.identical( o.procedure, procedure[ 0 ] );
-      test.identical( procedure[ 0 ].object(), o.process );
-      test.identical( o.procedure, procedure[ 0 ] );
-      test.identical( _.strCount( o.procedure._sourcePath, 'ProcessWatcher' ), 0 );
-      return null;
-    })
-  })
-
-  /* */
-
-  .then( () =>
-  {
-
-    var o = { execPath : 'node ' + testAppPath, mode : 'spawn' }
-    var con = start( o );
-    var procedure = _.procedure.find( 'PID:' + o.process.pid );
-    test.identical( procedure.length, 1 );
-    test.identical( procedure[ 0 ].isAlive(), true );
-    test.identical( o.procedure, procedure[ 0 ] );
-    test.identical( procedure[ 0 ].object(), o.process );
-    test.identical( o.procedure, procedure[ 0 ] );
-    return con.then( ( op ) =>
-    {
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      test.identical( procedure[ 0 ].isAlive(), false );
-      test.identical( o.procedure, procedure[ 0 ] );
-      test.identical( procedure[ 0 ].object(), o.process );
-      test.identical( o.procedure, procedure[ 0 ] );
-      test.identical( _.strCount( o.procedure._sourcePath, 'ProcessWatcher' ), 0 );
-      return null;
-    })
-  })
-
-  /* */
 
   a.ready.then( () => _.process.watcherDisable() );
 
-  return a.ready;
+  return a.ready
 
-  /* - */
+  /* */
 
-  function testApp()
+  function run( mode )
+  {
+    let ready = _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      var o = { execPath : 'node ' + testAppPath, mode }
+      if( mode === 'fork' )
+      o.execPath = testAppPath;
+      var con = start( o );
+      var procedure = _.procedure.find( 'PID:' + o.process.pid );
+      test.identical( procedure.length, 1 );
+      test.identical( procedure[ 0 ].isAlive(), true );
+      test.identical( o.procedure, procedure[ 0 ] );
+      test.identical( procedure[ 0 ].object(), o.process );
+      test.identical( o.procedure, procedure[ 0 ] );
+      return con.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( procedure[ 0 ].isAlive(), false );
+        test.identical( o.procedure, procedure[ 0 ] );
+        test.identical( procedure[ 0 ].object(), o.process );
+        test.identical( o.procedure, procedure[ 0 ] );
+        debugger
+        test.is( _.strHas( o.procedure._sourcePath, 'Execution.s' ) );
+        return null;
+      })
+    })
+
+    return ready;
+  }
+
+  /* */
+
+
+  function program1()
   {
     console.log( process.pid )
     setTimeout( () => {}, 2000 )
