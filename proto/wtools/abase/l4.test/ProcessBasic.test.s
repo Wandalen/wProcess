@@ -10408,7 +10408,7 @@ function startDetachingTrivial( test )
 
 //
 
-function startDisconnectNonDetached( test )
+function startEventCloseExperiment( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -10435,7 +10435,7 @@ function startDisconnectNonDetached( test )
   {
     var dim = [ data.length / 4, 4 ];
     var style = 'doubleBorder';
-    var topHead = [ 'mode', 'ipc', 'disconnecting', 'closeExecuted' ];
+    var topHead = [ 'mode', 'ipc', 'disconnecting', 'event close' ];
     var got = _.strTable({ data, dim, style, topHead, colWidth : 18 });
     console.log( got.result )
     return null;
@@ -10509,9 +10509,9 @@ function startDisconnectNonDetached( test )
   }
 }
 
-startDisconnectNonDetached.experimental = 1;
-startDisconnectNonDetached.timeOut = 300000;
-startDisconnectNonDetached.description =
+startEventCloseExperiment.experimental = 1;
+startEventCloseExperiment.timeOut = 300000;
+startEventCloseExperiment.description =
 `
 Checks that disconnected non detached process doesn't emit close signal.
 `
@@ -19355,7 +19355,7 @@ var Proto =
     startDetachingChildExistsBeforeParentWaitForTermination,
     startDetachingEndCompetitorIsExecuted,
     startDetachingTerminationBegin,
-    startDisconnectNonDetached,
+    startEventCloseExperiment,
     startDetachingThrowing,
     startNjsDetachingChildThrowing,
 
