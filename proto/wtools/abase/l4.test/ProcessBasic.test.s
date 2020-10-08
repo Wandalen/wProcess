@@ -6552,7 +6552,7 @@ function startImportantExecPath( test )
   })
 
   /* qqq for Yevhen : separate test routine startImportantExecPathPassingThrough and run it from separate process */
-  /* xxx */
+  /* zzz */
 
   /* */
 
@@ -7722,7 +7722,7 @@ function startProcedureStackMultiple( test )
 
       _.process.start( o );
 
-      // xxx
+      // zzz
       // test.identical( _.strCount( o.procedure._stack, 'case1' ), 1 );
       // test.identical( _.strCount( o.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
       // test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
@@ -7730,7 +7730,7 @@ function startProcedureStackMultiple( test )
       o.ready.then( ( ops ) =>
       {
         test.identical( o.exitCode, 0 );
-        test.identical( o.ended, true ); /* xxx */
+        test.identical( o.ended, true ); /* zzz */
         ops.forEach( ( op ) =>
         {
           test.identical( _.strCount( op.procedure._stack, 'case1' ), 1 );
@@ -8102,7 +8102,7 @@ startChronology.description =
 
 //
 
-/* xxx : make similar routine for multiple */
+/* xxx : add test case for multiple */
 function startNjsWithReadyDelayStructural( test )
 {
   let context = this;
@@ -8146,6 +8146,7 @@ function startNjsWithReadyDelayStructural( test )
       exp2.disconnect = options.disconnect;
       exp2.process = options.process;
       exp2.procedure = options.procedure;
+      exp2.stack = options.stack;
       exp2.currentPath = _.path.current();
       exp2.args = [];
       exp2.interpreterArgs = [];
@@ -8209,7 +8210,7 @@ function startNjsWithReadyDelayStructural( test )
       'disconnect' : options.disconnect,
       'process' : options.process,
       'logger' : options.logger,
-      'stack' : null,
+      'stack' : options.stack,
       'state' : 'initial',
       'exitReason' : null,
       'fullExecPath' : null,
@@ -8228,6 +8229,7 @@ function startNjsWithReadyDelayStructural( test )
     test.is( !!options.disconnect );
     test.identical( options.process, null );
     test.is( !!options.logger );
+    test.is( !!options.stack );
     test.identical( options.ready.exportString(), 'Consequence:: 0 / 2' );
     test.identical( options.conDisconnect.exportString(), 'Consequence:: 0 / 0' );
     test.identical( options.conTerminate.exportString(), 'Consequence:: 0 / 0' );
@@ -8274,6 +8276,7 @@ function startNjsWithReadyDelayStructural( test )
       exp2.disconnect = options.disconnect;
       exp2.process = options.process;
       exp2.procedure = options.procedure;
+      exp2.stack = options.stack;
       exp2.currentPath = _.path.current();
       exp2.args = [];
       exp2.interpreterArgs = [];
@@ -8337,7 +8340,7 @@ function startNjsWithReadyDelayStructural( test )
       'disconnect' : options.disconnect,
       'process' : options.process,
       'logger' : options.logger,
-      'stack' : null,
+      'stack' : options.stack,
       'state' : 'initial',
       'exitReason' : null,
       'fullExecPath' : null,
@@ -8356,6 +8359,7 @@ function startNjsWithReadyDelayStructural( test )
     test.is( !!options.disconnect );
     test.identical( options.process, null );
     test.is( !!options.logger );
+    test.is( !!options.stack );
     test.identical( options.ready.exportString(), 'Consequence:: 0 / 2' );
     test.identical( options.conDisconnect.exportString(), 'Consequence:: 0 / 0' );
     test.identical( options.conTerminate.exportString(), 'Consequence:: 0 / 0' );
