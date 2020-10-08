@@ -1310,7 +1310,7 @@ function startCurrentPath( test )
   let a = test.assetFor( false );
   let testFilePath = a.path.join( a.routinePath, 'program1TestFile' );
   let locals = { toolsPath : context.toolsPath, testFilePath }
-  let programPath = a.path.nativize( a.program({ routine: program1, locals }) );
+  let programPath = a.path.nativize( a.program({ routine : program1, locals }) );
   let modes = [ 'shell', 'spawn', 'fork' ]
 
   modes.forEach( ( mode ) =>
