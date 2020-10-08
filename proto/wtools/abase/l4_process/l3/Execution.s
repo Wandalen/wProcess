@@ -53,7 +53,7 @@ function start_pre( routine, args )
   _.assert( o.timeOut === null || _.numberIs( o.timeOut ), 'Expects null or number {-o.timeOut-}, but got', _.strType( o.timeOut ) );
   _.assert( _.longHas( [ 'instant' ],  o.when ) || _.objectIs( o.when ), 'Unsupported starting mode:', o.when );
   _.assert( o.when !== 'afterdeath', `Starting mode:'afterdeath' is moved to separate routine _.process.startAfterDeath` );
-  // _.assert( !o.detaching || !_.longHas( _.arrayAs( o.stdio ), 'inherit' ), `Unsupported stdio: ${o.stdio} for process detaching` );
+  _.assert( !o.detaching || !_.longHas( _.arrayAs( o.stdio ), 'inherit' ), `Unsupported stdio: ${o.stdio} for process detaching` );
   _.assert( !o.detaching || _.longHas( [ 'fork', 'spawn', 'shell' ],  o.mode ), `Unsupported mode: ${o.mode} for process detaching` );
   _.assert( o.conStart === null || _.routineIs( o.conStart ) );
   _.assert( o.conTerminate === null || _.routineIs( o.conTerminate ) );
