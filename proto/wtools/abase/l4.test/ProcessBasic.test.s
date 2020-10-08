@@ -10474,6 +10474,8 @@ function startDisconnectNonDetached( test )
         detaching
       }
 
+      test.case = _.toJs({ mode, ipc, stdio, detaching, disconnecting });
+
       _.process.start( o );
 
       o.conStart.thenGive( () =>
