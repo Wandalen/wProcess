@@ -8488,11 +8488,10 @@ startNjsPassingThroughExecPathWithSpace.timeOut = 60000;
 
 //
 
-function startPassingThroughExecPathWithSpace( test )
+function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subroutine for modes */
 {
   let a = test.assetFor( false );
   let testAppPath = a.program({ routine : testApp, dirPath : 'path with space' });
-
   let execPathWithSpace = 'node ' + _.path.nativize( testAppPath );
 
   /* - */
@@ -9548,16 +9547,17 @@ function startReadyDelay( test )
   let context = this;
   let a = test.assetFor( false );
   let programPath = a.path.nativize( a.program( program1 ) );
-  let modes = [ 'fork', 'spawn', 'shell' ];
+  // let modes = [ 'fork', 'spawn', 'shell' ];
+  let modes = [ 'spawn' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 0, mode ) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 1, mode ) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => run( 1, 0, mode ) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => run( 1, 1, mode ) ) );
   return a.ready;
 
   /*  */
 
-  function run( sync, deasync, mode )
+  function sinle( sync, deasync, mode )
   {
     let ready = new _.Consequence().take( null )
 
@@ -9571,7 +9571,52 @@ function startReadyDelay( test )
       let ready = new _.Consequence().take( null ).timeOut( context.t2 );
       let o =
       {
-        execPath : mode !== `fork` ? `node ${programPath}` : `${programPath}`,
+        execPath : mode !== `fork` ? `node ${programPath} id:1` : `${programPath} id:1`,
+        currentPath : a.abs( '.' ),
+        outputPiping : 1,
+        outputCollecting : 1,
+        mode,
+        sync,
+        deasync,
+        ready,
+      }
+
+      let returned = _.process.start( o );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        let parsed = JSON.parse( op.output );
+        let diff = parsed.time - t1;
+        console.log( diff );
+        test.ge( diff, context.t2 );
+        return null;
+      })
+
+      return returned;
+    })
+
+    return ready;
+  }
+
+  /*  */
+
+  function multiple( sync, deasync, mode )
+  {
+    let ready = new _.Consequence().take( null )
+
+    if( sync && !deasync && mode === 'fork' )
+    return null;
+
+    ready.then( () =>
+    {
+      test.case = `sync:${sync} deasync:${deasync} mode:${mode}`;
+      let t1 = _.time.now();
+      let ready = new _.Consequence().take( null ).timeOut( context.t2 );
+      let o =
+      {
+        execPath : mode !== `fork` ? [ `node ${programPath} id:1`, `node ${programPath} id:2` ] : [ `${programPath} id:1`, `${programPath} id:2` ],
         currentPath : a.abs( '.' ),
         outputPiping : 1,
         outputCollecting : 1,
@@ -9605,6 +9650,7 @@ function startReadyDelay( test )
   function program1()
   {
     let _ = require( toolsPath );
+    let parsed = JSON.parse( op.output );
     let data = { time : _.time.now() };
     console.log( JSON.stringify( data ) );
   }
@@ -11271,7 +11317,7 @@ function startDetachingChildExitsBeforeParent( test )
       return null;
     })
 
-    return _.Consequence.AndKeep_( onChildTerminate, o.conTerminate );
+    return _.Consequence.AndKeep( onChildTerminate, o.conTerminate );
   })
 
   /*  */
@@ -11427,7 +11473,7 @@ function startDetachingDisconnectedEarly( test )
         return null;
       })
 
-      return _.Consequence.AndTake_( o.conStart, result );
+      return _.Consequence.AndTake( o.conStart, result );
     })
 
     /* */
@@ -11552,7 +11598,7 @@ function startDetachingDisconnectedLate( test )
         return null;
       })
 
-      return _.Consequence.AndTake_( o.conStart, result );
+      return _.Consequence.AndTake( o.conStart, result );
     })
 
     /* */
@@ -11705,7 +11751,7 @@ function startDetachingEndCompetitorIsExecuted( test )
       return null;
     })
 
-    return _.Consequence.AndTake_( o.conStart, o.conTerminate );
+    return _.Consequence.AndTake( o.conStart, o.conTerminate );
   })
 
   /* */
@@ -12769,7 +12815,7 @@ function startOnStart( test )
         return null;
       })
 
-      return _.Consequence.AndTake_( o.conStart, result );
+      return _.Consequence.AndTake( o.conStart, result );
     })
 
     /* */
@@ -12846,7 +12892,7 @@ function startOnStart( test )
         return null;
       })
 
-      return _.Consequence.AndTake_( o.conStart, o.conTerminate );
+      return _.Consequence.AndTake( o.conStart, o.conTerminate );
     })
 
     /* */
@@ -12937,7 +12983,7 @@ function startOnStart( test )
         o.conTerminate.cancel();
       })
 
-      return _.Consequence.AndTake_( o.conStart, o.conDisconnect, ready );
+      return _.Consequence.AndTake( o.conStart, o.conDisconnect, ready );
     })
 
     /* */
@@ -12988,7 +13034,7 @@ function startOnStart( test )
         return null;
       })
 
-      return _.Consequence.AndTake_( o.conStart, o.conDisconnect, result );
+      return _.Consequence.AndTake( o.conStart, o.conDisconnect, result );
     })
 
     /* */
@@ -16165,7 +16211,7 @@ function isAlive( test )
     return null;
   })
 
-  let ready = _.Consequence.AndKeep_( o.conStart, o.conTerminate );
+  let ready = _.Consequence.AndKeep( o.conStart, o.conTerminate );
 
   if( !Config.debug )
   return ready;
@@ -16214,7 +16260,7 @@ function statusOf( test )
     return null;
   })
 
-  let ready = _.Consequence.AndKeep_( o.conStart, o.conTerminate );
+  let ready = _.Consequence.AndKeep( o.conStart, o.conTerminate );
 
   if( !Config.debug )
   return ready;
@@ -18458,7 +18504,7 @@ function terminateWithChildren( test )
     _.process.start( o2 );
     o2.process.on( 'message', () => c2.take( o2.process.pid ) )
 
-    _.Consequence.AndKeep_( c1, c2 )
+    _.Consequence.AndKeep( c1, c2 )
     .then( () =>
     {
       process.send([ o1.process.pid, o2.process.pid ]);
@@ -19248,7 +19294,7 @@ function children( test )
     let r2 = _.process.start( o2 );
     let children;
 
-    let ready = _.Consequence.AndTake_( r1, r2 );
+    let ready = _.Consequence.AndTake( r1, r2 );
 
     o1.process.on( 'message', () =>
     {

@@ -187,7 +187,7 @@ function start_body( o )
   let stderrOutput = '';
   let decoratedOutput = '';
   let decoratedErrorOutput = '';
-  let execArgs, argumentsManual; /* qqq : remove argumentsManual */
+  let execArgs, argumentsManual; /* xxx qqq for Vova : remove argumentsManual */
   let readyCallback;
 
   preform1();
@@ -203,9 +203,7 @@ function start_body( o )
     {
 
       o.ready.deasync();
-
-      let arg = o.ready.sync(); /* xxx : should sync() remove the resource? */
-
+      let arg = o.ready.sync();
       o.ready.give( 1 );
 
       if( readyCallback )
@@ -229,7 +227,7 @@ function start_body( o )
   else
   {
     if( o.when.delay )
-    // o.ready.then( () => _.time.out( o.when.delay, () => null ) ); /* xxx yyy : redundant callback? */
+    // o.ready.then( () => _.time.out( o.when.delay, () => null ) ); /* yyy : redundant callback? */
     o.ready.timeOut( o.when.delay );
 
     o.ready.thenGive( single );
@@ -475,7 +473,6 @@ function start_body( o )
 
   function handleError( err )
   {
-    debugger;
     err = _.err
     (
         `Error starting the process`
@@ -497,6 +494,7 @@ function start_body( o )
     o.error = err;
     if( o.verbosity )
     log( _.errOnce( o.error ), 1 );
+    debugger;
 
     if( o.sync && !o.deasync )
     {
@@ -627,7 +625,7 @@ function start_body( o )
     }
 
     o.ready
-    .then( () => _.Consequence.AndKeep_( ... readies ) )
+    .then( () => _.Consequence.AndKeep( ... readies ) )
     .finally( ( err, arg ) =>
     {
       o.exitCode = err ? null : 0;
@@ -671,6 +669,7 @@ function start_body( o )
 
       if( o.dry )
       {
+        /* qqq for Yevhen : make sure option dry is covered good enough */
         _.assert( o.state === 'starting' );
         o.state = 'terminated';
         end( undefined, o.conTerminate );
@@ -738,7 +737,7 @@ function start_body( o )
       o.outputPiping = o.verbosity >= 2;
     }
     if( o.outputCollecting && !o.output )
-    o.output = ''; /* qqq for Vova : test for multiple run? to which o-map does it collect output? */
+    o.output = ''; /* xxx qqq for Vova : test for multiple run? to which o-map does it collect output? */
 
     /* ipc */
 
@@ -1313,7 +1312,7 @@ start_body.defaults = /* qqq for Vova : split on _.process.start(), _.process.st
   passingThrough : 0,
   concurrent : 0,
   timeOut : null,
-  returningOptionsArray : 1, /* Vova: returns array of maps of options for multiprocess launch in sync mode */
+  returningOptionsArray : 1, /* returns array of maps of options for multiprocess launch in sync mode */
 
   throwingExitCode : 1, /* must be on by default */
   applyingExitCode : 0,
@@ -1347,7 +1346,7 @@ defaults.applyingExitCode = 1;
 defaults.throwingExitCode = 0;
 defaults.outputPiping = 1;
 defaults.stdio = 'inherit';
-defaults.mode = 'spawn'; // xxx yyy qqq : uncomment after fix of the mode?
+defaults.mode = 'spawn'; /* yyy qqq : uncomment after fix of the mode? */
 
 //
 
@@ -2302,7 +2301,7 @@ function terminate( o )
       cons.push( terminateProcess( tree[ l ].pid ) );
     }
     if( cons.length )
-    return _.Consequence.AndKeep_( ... cons );
+    return _.Consequence.AndKeep( ... cons );
     return true;
   }
 
