@@ -187,7 +187,7 @@ function start_body( o )
   let stderrOutput = '';
   let decoratedOutput = '';
   let decoratedErrorOutput = '';
-  let execArgs, argumentsManual; /* xxx qqq for Vova : remove argumentsManual */
+  let execArgs, argumentsManual; /* qqq for Vova : remove argumentsManual */
   let readyCallback;
 
   preform1();
@@ -227,7 +227,6 @@ function start_body( o )
   else
   {
     if( o.when.delay )
-    // o.ready.then( () => _.time.out( o.when.delay, () => null ) ); /* yyy : redundant callback? */
     o.ready.timeOut( o.when.delay );
 
     o.ready.thenGive( single );
@@ -267,6 +266,8 @@ function start_body( o )
 
     o.logger = o.logger || _global.logger;
 
+    // if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
+    // o.stack = _.Procedure.Stack( o.stack, 2 );
   }
 
   /* */
@@ -895,7 +896,7 @@ function start_body( o )
         let result = _.procedure.find( 'PID:' + o.process.pid );
         _.assert( result.length === 0, `No procedure expected for child process with pid:${o.process.pid}` );
       }
-      o.procedure = _.procedure.begin({ _name : 'PID:' + o.process.pid, _object : o.process }); /* xxx : adjust stack and source path of the procedure */
+      o.procedure = _.procedure.begin({ _name : 'PID:' + o.process.pid, _object : o.process, _stack : o.stack }); /* xxx : adjust stack and source path of the procedure */
     }
 
     /* state */
@@ -1083,14 +1084,12 @@ function start_body( o )
   function argsJoin( args )
   {
 
-    if( !execArgs && !argumentsManual ) /* qqq for Vova : argumentsManual?? should be no such global variable */
+    if( !execArgs && !argumentsManual ) /* xxx yyy qqq for Vova : argumentsManual?? should be no such global variable */
     return args.join( ' ' );
-
     let i = execArgs ? execArgs.length : args.length - argumentsManual.length;
 
     // if( !execArgs && !o.passingThrough )
     // return args.join( ' ' );
-    //
     // let i = execArgs ? execArgs.length : args.length - process.argv.length - 2;
 
     for( ; i < args.length; i++ )
@@ -1303,6 +1302,7 @@ start_body.defaults = /* qqq for Vova : split on _.process.start(), _.process.st
 
   logger : null,
   procedure : null,
+  stack : null,
 
   ready : null,
   conStart : null,
@@ -1348,7 +1348,7 @@ defaults.applyingExitCode = 1;
 defaults.throwingExitCode = 0;
 defaults.outputPiping = 1;
 defaults.stdio = 'inherit';
-defaults.mode = 'spawn'; /* yyy qqq : uncomment after fix of the mode? */
+defaults.mode = 'spawn';
 
 //
 
