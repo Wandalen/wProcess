@@ -3461,7 +3461,7 @@ function startNjsWithReadyDelayStructural( test ) /* qqq for Yevhen : implement 
     test.identical( options.conTerminate.exportString(), 'Consequence:: 0 / 0' );
     test.identical( options.conStart.exportString(), 'Consequence:: 0 / 0' );
 
-    return null;
+    return con;
   } )
 
   /* */
