@@ -12224,38 +12224,7 @@ function startDetachingThrowing( test )
   }
   test.shouldThrowErrorSync( () => _.process.start( o ) )
 
-  // qqq for Vova : uncomment?
-  // var o =
-  // {
-  //   execPath : 'node testAppChild.js',
-  //   mode : 'exec',
-  //   stdio : 'inherit',
-  //   currentPath : routinePath,
-  //   detaching : 1
-  // }
-  // test.shouldThrowErrorSync( () => _.process.start( o ) )
-  //
-  // var o =
-  // {
-  //   execPath : 'node testAppChild.js',
-  //   mode : 'exec',
-  //   stdio : 'pipe',
-  //   currentPath : routinePath,
-  //   detaching : 1
-  // }
-  // test.shouldThrowErrorSync( () => _.process.start( o ) )
-  //
-  // var o =
-  // {
-  //   execPath : 'node testAppChild.js',
-  //   mode : 'exec',
-  //   stdio : 'ignore',
-  //   currentPath : routinePath,
-  //   detaching : 1
-  // }
-  // test.shouldThrowErrorSync( () => _.process.start( o ) )
-  //
-
+  // qqq for Vova : uncomment, aaa:removed redundant cases of exec?
   function testAppChild()
   {
     let _ = require( toolsPath );
