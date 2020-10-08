@@ -2158,7 +2158,8 @@ kill.defaults =
   pid : null,
   process : null,
   withChildren : 0,
-  waitTimeOut : 5000
+  waitTimeOut : 5000,
+  // qqq for Vova : implement and over option sync
 }
 
 //
@@ -2314,7 +2315,8 @@ terminate.defaults =
   process : null,
   pid : null,
   withChildren : 0,
-  timeOut : 5000
+  timeOut : 5000,
+  // qqq for Vova : implement and over option sync
 }
 
 //

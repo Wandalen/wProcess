@@ -19,6 +19,7 @@ let _ = _global_.wTools;
 let Self = {};
 
 /* qqq for Vova : make general table in md file for this: "Vova qqq: close event is not emitted for disconnected detached child in fork mode" */
+/* qqq for Vova : move all tables here */
 
 /* qqq for Yevhen : parametrize all time delays, don't forget to leave comment of old value
 time.out
