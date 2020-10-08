@@ -10451,10 +10451,15 @@ function startDisconnectNonDetached( test )
 
   function run( mode, ipc, detaching, disconnecting )
   {
-    let result = [ mode, ipc, detaching, disconnecting, false ];
     let ready = new _.Consequence().take( null );
 
-    ipc = mode === 'shell' ? 0 : ipc;
+    if( ipc && mode === 'shell' )
+    return ready;
+
+    if( !ipc && mode === 'fork' )
+    return ready;
+
+    let result = [ mode, ipc, detaching, disconnecting, false ];
 
     ready.then( () =>
     {
