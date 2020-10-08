@@ -10962,6 +10962,9 @@ function startEventExit( test )
   {
     let ready = new _.Consequence().take( null );
 
+    if( detaching && stdio === 'inherit' ) //xxx: enable if assert is removed
+    return ready;
+
     if( ipc && mode === 'shell' )
     return ready;
 
