@@ -9309,8 +9309,8 @@ function startTerminateHangedWithExitHandler( test )
 
   if( process.platform === 'win32' )
   {
-    //zzz: windows-kill doesn't work correctrly on node 14
-    //zzz: investigate if its possible to use process.kill instead of windows-kill
+    // zzz: windows-kill doesn't work correctrly on node 14
+    // investigate if its possible to use process.kill instead of windows-kill
     test.identical( 1, 1 )
     return;
   }
@@ -9427,8 +9427,8 @@ function startTerminateAfterLoopRelease( test )
 
   if( process.platform === 'win32' )
   {
-    //zzz: windows-kill doesn't work correctrly on node 14
-    //zzz: investigate if its possible to use process.kill instead of windows-kill
+    // zzz: windows-kill doesn't work correctrly on node 14
+    // investigate if its possible to use process.kill instead of windows-kill
     test.identical( 1, 1 )
     return;
   }
@@ -9814,66 +9814,6 @@ function startOptionWhenTime( test )
 }
 
 startOptionWhenTime.timeOut = 300000;
-
-//
-
-function startOptionWhenSuspended( test )
-{
-  let context = this;
-  let a = test.assetFor( false );
-  let testAppPath = a.program( testApp );
-
-
-  /* */
-
-  a.ready
-
-  .then( () =>
-  {
-    let o =
-    {
-      execPath : testAppPath,
-      mode : 'fork',
-      outputPiping : 1,
-      outputCollecting : 1,
-      when : 'suspended'
-    }
-
-    let t1 = _.time.now();
-    let delay = 1000;
-    let con = _.process.start( o );
-
-    _.time.out( delay, () =>
-    {
-      o.resume();
-      return null;
-    })
-
-    con.then( ( op ) =>
-    {
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      let parsed = JSON.parse( op.output );
-      let diff = parsed.time - t1;
-      test.ge( diff, delay );
-      return null;
-    })
-
-    return con;
-  })
-
-  return a.ready;
-
-  /* - */
-
-  function testApp()
-  {
-    let _ = require( toolsPath );
-
-    let data = { time : _.time.now() };
-    console.log( JSON.stringify( data ) );
-  }
-}
 
 //
 
@@ -10890,7 +10830,7 @@ function startDetachingTerminationBegin( test )
 
       let data;
 
-      o.process.on( 'message', ( e ) => /* zzz : got -> e */
+      o.process.on( 'message', ( e ) =>
       {
         data = e;
         data.childPid = _.numberFrom( data.childPid );
@@ -11191,7 +11131,7 @@ function startDetachingChildExitsAfterParent( test )
       test.identical( op.ended, true );
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( _.process.isAlive( childPid ) );
-      return _.time.out( 10000 ); /* zzz : ask about time out */
+      return _.time.out( 10000 ); /* zzz */
     })
 
     o.conTerminate.then( () =>
@@ -20168,7 +20108,6 @@ var Proto =
     startReadyDelay,
     startOptionWhenDelay,
     startOptionWhenTime,
-    // startOptionWhenSuspended, /* zzz : ? */
     // startAfterDeath, /* zzz : fix */
     // startAfterDeathOutput, /* zzz : ? */
 

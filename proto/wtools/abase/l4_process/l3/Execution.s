@@ -1293,7 +1293,7 @@ start_body.defaults = /* qqq for Vova : split on _.process.start(), _.process.st
   sync : 0,
   deasync : 0,
   when : 'instant', /* instant / afterdeath / time / delay */
-  dry : 0,
+  dry : 0, /* qqq for Yevhen : cover the option */
 
   mode : 'shell', /* fork / spawn / shell */
   stdio : 'pipe', /* pipe / ignore / inherit */
