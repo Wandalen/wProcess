@@ -21,6 +21,10 @@ let Self = {};
 /* qqq for Vova : make general table in md file for this: "Vova qqq: close event is not emitted for disconnected detached child in fork mode" */
 /* qqq for Vova : move all tables here */
 
+/* qqq for Yevhen : find all tests with passingThrough:1, separate them from the rest of the test
+and rewrite to run process which run process to avoid influence of arguments of tester on testing
+*/
+
 /* qqq for Yevhen : parametrize all time delays, don't forget to leave comment of old value
 time.out
 setTimeout
@@ -4546,8 +4550,6 @@ function startArgumentsParsing( test )
 
 }
 
-startArgumentsParsing.timeOut = 60000;
-
 //
 
 function startArgumentsParsingNonTrivial( test )
@@ -5090,9 +5092,6 @@ function startArgumentsParsingNonTrivial( test )
   }
 }
 
-startArgumentsParsingNonTrivial.timeOut = 60000;
-
-
 //
 
 function startArgumentsNestedQuotes( test )
@@ -5384,8 +5383,6 @@ function startArgumentsNestedQuotes( test )
     console.log( JSON.stringify( args ) );
   }
 }
-
-startArgumentsNestedQuotes.timeOut = 60000;
 
 //
 
@@ -6182,8 +6179,6 @@ function startExecPathQuotesClosing( test )
   }
 }
 
-startExecPathQuotesClosing.timeOut = 60000;
-
 //
 
 function startExecPathSeveralCommands( test )
@@ -6356,8 +6351,6 @@ function startExecPathSeveralCommands( test )
     console.log( process.argv.slice( 2 ) );
   }
 }
-
-startExecPathSeveralCommands.timeOut = 60000;
 
 //
 
@@ -7386,8 +7379,6 @@ function startModeShellNonTrivial( test )
   }
 }
 
-startModeShellNonTrivial.timeOut = 60000;
-
 //
 
 function startArgumentsHandlingTrivial( test )
@@ -8194,8 +8185,6 @@ function startExecPathWithSpace( test )
   }
 }
 
-startExecPathWithSpace.timeOut = 60000;
-
 //
 
 function startNjsPassingThroughExecPathWithSpace( test )
@@ -8267,8 +8256,6 @@ function startNjsPassingThroughExecPathWithSpace( test )
     setTimeout( () => {}, 2000 )
   }
 }
-
-startNjsPassingThroughExecPathWithSpace.timeOut = 60000;
 
 //
 
@@ -8490,8 +8477,6 @@ function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subrou
   }
 }
 
-startPassingThroughExecPathWithSpace.timeOut = 60000;
-
 //
 
 function startProcedureTrivial( test )
@@ -8618,7 +8603,6 @@ function startProcedureTrivial( test )
   }
 }
 
-startProcedureTrivial.timeOut = 60000;
 startProcedureTrivial.description =
 `
   Start routine creates procedure for new child process, start it and terminates when process closes
@@ -8700,7 +8684,6 @@ function startProcedureExists( test )
 
 }
 
-startProcedureExists.timeOut = 60000;
 startProcedureExists.description =
 `
   Start routine does not create procedure for new child process if it was already created by process watcher
@@ -14680,8 +14663,6 @@ function sheller( test )
   }
 }
 
-sheller.timeOut = 60000;
-
 //
 
 function shellerArgs( test )
@@ -15944,8 +15925,6 @@ function startNormalizedExecPath( test )
   }
 }
 
-startNormalizedExecPath.timeOut = 60000;
-
 //
 
 function startDisconnectNonDetached( test )
@@ -16009,7 +15988,7 @@ function startDisconnectNonDetached( test )
         return null;
       })
 
-      return _.Consequence.AndKeep_( o.conStart, timeOut );
+      return _.Consequence.AndKeep( o.conStart, timeOut );
     })
 
     return ready;
