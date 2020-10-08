@@ -53,7 +53,7 @@ function start_pre( routine, args )
   _.assert( o.timeOut === null || _.numberIs( o.timeOut ), 'Expects null or number {-o.timeOut-}, but got', _.strType( o.timeOut ) );
   _.assert( _.longHas( [ 'instant' ],  o.when ) || _.objectIs( o.when ), 'Unsupported starting mode:', o.when );
   _.assert( o.when !== 'afterdeath', `Starting mode:'afterdeath' is moved to separate routine _.process.startAfterDeath` );
-  _.assert( !o.detaching || !_.longHas( _.arrayAs( o.stdio ), 'inherit' ), `Unsupported stdio: ${o.stdio} for process detaching` );
+  _.assert( !o.detaching || !_.longHas( _.arrayAs( o.stdio ), 'inherit' ), `Unsupported stdio: ${o.stdio} for process detaching. Parent will wait for child process.` ); //xxx
   _.assert( !o.detaching || _.longHas( [ 'fork', 'spawn', 'shell' ],  o.mode ), `Unsupported mode: ${o.mode} for process detaching` );
   _.assert( o.conStart === null || _.routineIs( o.conStart ) );
   _.assert( o.conTerminate === null || _.routineIs( o.conTerminate ) );
@@ -266,8 +266,8 @@ function start_body( o )
 
     o.logger = o.logger || _global.logger;
 
-    // if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
-    // o.stack = _.Procedure.Stack( o.stack, 2 );
+    if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
+    o.stack = _.Procedure.Stack( o.stack, 3 );
   }
 
   /* */
@@ -740,7 +740,7 @@ function start_body( o )
       o.outputPiping = o.verbosity >= 2;
     }
     if( o.outputCollecting && !o.output )
-    o.output = ''; /* xxx qqq for Vova : test for multiple run? to which o-map does it collect output? */
+    o.output = ''; /* xxx : test for multiple run? to which o-map does it collect output? */
 
     /* ipc */
 
@@ -896,7 +896,7 @@ function start_body( o )
         let result = _.procedure.find( 'PID:' + o.process.pid );
         _.assert( result.length === 0, `No procedure expected for child process with pid:${o.process.pid}` );
       }
-      o.procedure = _.procedure.begin({ _name : 'PID:' + o.process.pid, _object : o.process, _stack : o.stack }); /* xxx : adjust stack and source path of the procedure */
+      o.procedure = _.procedure.begin({ _name : 'PID:' + o.process.pid, _object : o.process, _stack : o.stack });
     }
 
     /* state */
@@ -1084,7 +1084,7 @@ function start_body( o )
   function argsJoin( args )
   {
 
-    if( !execArgs && !argumentsManual ) /* xxx yyy qqq for Vova : argumentsManual?? should be no such global variable */
+    if( !execArgs && !argumentsManual ) /* yyy qqq for Vova : argumentsManual?? should be no such global variable */
     return args.join( ' ' );
     let i = execArgs ? execArgs.length : args.length - argumentsManual.length;
 
