@@ -10406,72 +10406,98 @@ function startDetachingTrivial( test )
   }
 }
 
+//
+
 function startDisconnectNonDetached( test )
 {
   let context = this;
   let a = test.assetFor( false );
   let locals = { toolsPath : context.toolsPath, context : { t1 : context.t1 } };
   let testAppPath = a.path.nativize( a.program({ routine : program1, locals }) );
+  let data = [];
 
   let modes = [ 'spawn', 'fork', 'shell' ];
+  let stdio = [ 'inherit', 'pipe', 'ignore' ];
+  let ipc = [ false, true ]
+  let detaching = [ false, true ];
+  let disconnecting = [ false, true ];
 
-  modes.forEach( ( mode ) =>
+  modes.forEach( mode =>
   {
-    a.ready.tap( () => test.open( mode ) );
-    a.ready.then( () => run( mode ) );
-    a.ready.tap( () => test.close( mode ) );
+    stdio.forEach( stdio =>
+    {
+      ipc.forEach( ipc =>
+      {
+        detaching.forEach( detaching =>
+        {
+          disconnecting.forEach( disconnecting =>
+          {
+            a.ready.then( () => run( mode,ipc,stdio, detaching,disconnecting ) );
+          })
+        })
+      })
+    })
+  })
+
+  a.ready.then( () =>
+  {
+    var dim = [ data.length / 6, 6 ];
+    var style = 'doubleBorder';
+    var topHead = [ 'mode', 'stdio', 'ipc', 'detaching', 'disconnecting', 'closeExecuted' ];
+    var got = _.strTable({ data, dim, style, topHead, colWidth : 18 });
+    console.log( got.result )
+    return null;
   })
 
   return a.ready;
 
-  function run( mode )
+  /* - */
+
+  function run( mode, ipc, stdio, detaching, disconnecting )
   {
+    let result = [ mode, stdio, ipc, detaching, disconnecting, false ];
     let ready = new _.Consequence().take( null );
+
+    ipc = mode === 'shell' ? 0 : ipc;
 
     ready.then( () =>
     {
-      let track = [];
       let o =
       {
         execPath : mode === 'fork' ? 'program1.js' : 'node program1.js',
         currentPath : a.routinePath,
-        stdio : 'pipe',
-        outputPiping : 1,
-        outputCollecting : 1,
-        detaching : 0,
+        outputPiping : 0,
+        outputCollecting : 0,
+        stdio,
         mode,
+        ipc,
+        detaching
       }
 
       _.process.start( o );
 
-      o.conStart.then( () =>
+      o.conStart.thenGive( () =>
       {
-        track.push( 'conStart' );
-        o.disconnect();
-        return null;
+        if( disconnecting )
+        o.disconnect()
+      })
+      o.process.on( 'close', () =>
+      {
+        result[ 5 ] = true;
       })
 
-      o.conTerminate.thenGive( ( op ) =>
+      return _.time.out( context.t1 * 3, () =>
       {
-        track.push( 'conTerminate' );
-        test.identical( op.exitCode, 0 );
-        test.identical( op.exitSignal, null );
-      })
-
-      let timeOut = _.time.out( context.t1 * 3, () =>
-      {
-        test.identical( track, [ 'conStart' ] );
         test.is( !_.process.isAlive( o.process.pid ) );
-        test.identical( o.output, '' );
-        o.conTerminate.cancel();
+        data.push.apply( data, result );
         return null;
       })
-
-      return _.Consequence.AndKeep( o.conStart, timeOut );
     })
 
     return ready;
   }
+
+  /* - */
 
   function program1()
   {
@@ -10484,6 +10510,8 @@ function startDisconnectNonDetached( test )
   }
 }
 
+startDisconnectNonDetached.experimental = 1;
+startDisconnectNonDetached.timeOut = 300000;
 startDisconnectNonDetached.description =
 `
 Checks that disconnected non detached process doesn't emit close signal.
