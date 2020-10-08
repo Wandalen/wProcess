@@ -147,35 +147,7 @@ function suiteEnd()
 
 //
 
-/* qqq for Vova : simplify and make it subroutine */
-function testApp()
-{
-  var ended = 0;
-  var fs = require( 'fs' );
-  var path = require( 'path' );
-  var filePath = path.join( __dirname, 'file.txt' );
-  console.log( 'begin', process.argv.slice( 2 ).join( ', ' ) );
-  var time = parseInt( process.argv[ 2 ] );
-  if( isNaN( time ) )
-  throw new Error( 'Expects number' );
-
-  setTimeout( end, time );
-  function end()
-  {
-    ended = 1;
-    fs.writeFileSync( filePath, 'written by ' + process.argv[ 2 ] );
-    console.log( 'end', process.argv.slice( 2 ).join( ', ' ) );
-  }
-
-  setTimeout( periodic, 50 );
-  function periodic()
-  {
-    console.log( 'tick', process.argv.slice( 2 ).join( ', ' ) );
-    if( !ended )
-    setTimeout( periodic, 50 );
-  }
-
-}
+/* qqq for Vova : simplify and make it subroutine aaa: just moved*/
 
 //
 
@@ -1344,7 +1316,8 @@ function startErrorHandling( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.program( program1 );
+  let testAppPath2 = a.program( program2 );
 
   /* */
 
@@ -1563,44 +1536,80 @@ function startErrorHandling( test )
 
   })
 
-  /* qqq for Vova : switch on? */
+  /* qqq for Vova : switch on? aaa:done */
 
-  // con.then( function()
-  // {
-  //   test.case = 'stdio inherit, sync, collecting, verbosity and piping off';
+  a.ready.then( function()
+  {
+    test.case = 'stdio inherit, sync, collecting, verbosity and piping off';
 
-  //   let o =
-  //   {
-  //     execPath :   testAppPath,
-  //     mode : 'fork',
-  //     stdio : 'inherit',
-  //     sync : 1,
-  //     deasync : 1,
-  //     verbosity : 0,
-  //     outputCollecting : 0,
-  //     outputPiping : 0
-  //   }
-  //   var returned = test.shouldThrowErrorSync( () => _.process.start( o ) )
+    let o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      stdio : 'inherit',
+      sync : 1,
+      deasync : 1,
+      verbosity : 0,
+      outputCollecting : 0,
+      outputPiping : 0
+    }
 
-  //   test.is( _.errIs( returned ) );
-  //   test.is( _.strHas( returned.message, 'Process returned error code' ) )
-  //   test.is( _.strHas( returned.message, 'Launched as' ) )
-  //   test.is( !_.strHas( returned.message, 'Stderr' ) )
-  //   test.is( !_.strHas( returned.message, 'Error message from child' ) )
+    a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' });
 
-  //   test.notIdentical( o.exitCode, 0 );
+    let o2 =
+    {
+      execPath : testAppPath2,
+      mode : 'fork',
+      stdio : 'pipe',
+      sync : 1,
+      deasync : 1,
+      verbosity : 0,
+      outputPiping : 1,
+      outputPrefixing : 1,
+      outputCollecting : 1,
+    }
+    var returned = test.shouldThrowErrorSync( () => _.process.start( o2 ) )
 
-  //   return null;
+    test.is( _.errIs( returned ) );
+    test.is( _.strHas( returned.message, 'Process returned exit code' ) )
+    test.is( _.strHas( returned.message, 'Launched as' ) )
+    test.is( _.strHas( returned.message, 'Stderr' ) )
+    test.is( _.strHas( returned.message, 'Error message from child' ) )
 
-  // })
+    test.is( _.strHas( o2.output, 'Process returned exit code' ) )
+    test.is( _.strHas( o2.output, 'Launched as' ) )
+    test.is( !_.strHas( o2.output, 'Stderr' ) )
+    test.is( _.strHas( o2.output, 'Error message from child' ) )
+
+    test.notIdentical( o2.exitCode, 0 );
+
+    return null;
+
+  })
 
   return a.ready;
 
   /* - */
 
-  function testApp()
+  function program1()
   {
     throw new Error( 'Error message from child' )
+  }
+
+  function program2()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wFiles' );
+    _.include( 'wProcess' );
+
+    let op = _.fileProvider.fileRead
+    ({
+      filePath : _.path.join( __dirname, 'op.json'),
+      encoding : 'json'
+    });
+
+    _.process.start( op );
+
   }
 
 }
@@ -13126,7 +13135,7 @@ function startConcurrent( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.path.nativize( a.program( context.testApp ) );
+  let testAppPath = a.path.nativize( a.program( program1 ) );
   let counter = 0;
   let time = 0;
   let filePath = a.path.nativize( a.abs( a.routinePath, 'file.txt' ) );
@@ -13569,6 +13578,33 @@ function startConcurrent( test )
     return arg;
   });
 
+  function program1()
+  {
+    var ended = 0;
+    var fs = require( 'fs' );
+    var path = require( 'path' );
+    var filePath = path.join( __dirname, 'file.txt' );
+    console.log( 'begin', process.argv.slice( 2 ).join( ', ' ) );
+    var time = parseInt( process.argv[ 2 ] );
+    if( isNaN( time ) )
+    throw new Error( 'Expects number' );
+
+    setTimeout( end, time );
+    function end()
+    {
+      ended = 1;
+      fs.writeFileSync( filePath, 'written by ' + process.argv[ 2 ] );
+      console.log( 'end', process.argv.slice( 2 ).join( ', ' ) );
+    }
+
+    setTimeout( periodic, 50 );
+    function periodic()
+    {
+      console.log( 'tick', process.argv.slice( 2 ).join( ', ' ) );
+      if( !ended )
+      setTimeout( periodic, 50 );
+    }
+  }
 
 }
 
@@ -13580,7 +13616,7 @@ function shellerConcurrent( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.path.nativize( a.program( context.testApp ) );
+  let testAppPath = a.path.nativize( a.program( program1 ) );
   let counter = 0;
   let time = 0;
   let filePath = a.path.nativize( a.abs( a.routinePath, 'file.txt' ) );
@@ -14086,6 +14122,36 @@ function shellerConcurrent( test )
     throw err;
     return arg;
   });
+
+  /* - */
+
+  function program1()
+  {
+    var ended = 0;
+    var fs = require( 'fs' );
+    var path = require( 'path' );
+    var filePath = path.join( __dirname, 'file.txt' );
+    console.log( 'begin', process.argv.slice( 2 ).join( ', ' ) );
+    var time = parseInt( process.argv[ 2 ] );
+    if( isNaN( time ) )
+    throw new Error( 'Expects number' );
+
+    setTimeout( end, time );
+    function end()
+    {
+      ended = 1;
+      fs.writeFileSync( filePath, 'written by ' + process.argv[ 2 ] );
+      console.log( 'end', process.argv.slice( 2 ).join( ', ' ) );
+    }
+
+    setTimeout( periodic, 50 );
+    function periodic()
+    {
+      console.log( 'tick', process.argv.slice( 2 ).join( ', ' ) );
+      if( !ended )
+      setTimeout( periodic, 50 );
+    }
+  }
 }
 
 shellerConcurrent.timeOut = 100000;
@@ -19708,7 +19774,6 @@ var Proto =
   {
 
     suiteTempPath : null,
-    testApp,
     testAppShell,
     toolsPath : null,
     toolsPathInclude : null,
