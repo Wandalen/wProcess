@@ -36,7 +36,8 @@ jobs :
       with :
         node-version : ${{ matrix.node-version }}
     - run : npm i
-    - name : npm test
-      run : npm test
-      env :
-        WTOOLS_BOT_TOKEN : ${{ secrets.WTOOLS_BOT_TOKEN }}
+    - run : node proto/wtools/abase/l4.test/ProcessBasic.test.s r:startEventExitExperiment v:10
+    # - name : npm test
+    #   run : npm test
+    #   env :
+    #     WTOOLS_BOT_TOKEN : ${{ secrets.WTOOLS_BOT_TOKEN }}
