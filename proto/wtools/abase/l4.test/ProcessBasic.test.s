@@ -10801,7 +10801,7 @@ function startDetachingTrivial( test )
 
 //
 
-function startEventCloseExperiment( test )
+function startEventClose( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -10881,6 +10881,16 @@ function startEventCloseExperiment( test )
       return _.time.out( context.t1 * 3, () =>
       {
         test.is( !_.process.isAlive( o.process.pid ) );
+
+        if( mode === 'shell' )
+        test.identical( result[ 3 ], true )
+
+        if( mode === 'spawn' )
+        test.identical( result[ 3 ], ipc && disconnecting ? false : true )
+
+        if( mode === 'fork' )
+        test.identical( result[ 3 ], !disconnecting )
+
         data.push.apply( data, result );
         return null;
       })
@@ -10902,14 +10912,13 @@ function startEventCloseExperiment( test )
   }
 }
 
-startEventCloseExperiment.experimental = 1;
-startEventCloseExperiment.timeOut = 300000;
-startEventCloseExperiment.description =
+startEventClose.timeOut = 300000;
+startEventClose.description =
 `
-Checks that disconnected non detached process doesn't emit close signal.
+Check if close event is called.
 `
 
-function startEventExitExperiment( test )
+function startEventExit( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -10992,6 +11001,7 @@ function startEventExitExperiment( test )
       return _.time.out( context.t1 * 3, () =>
       {
         test.is( !_.process.isAlive( o.process.pid ) );
+        test.identical( result[ 5 ], true );
         data.push.apply( data, result );
         return null;
       })
@@ -11013,9 +11023,11 @@ function startEventExitExperiment( test )
   }
 }
 
-startEventExitExperiment.experimental = 1;
-startEventExitExperiment.timeOut = 300000;
-
+startEventExit.timeOut = 300000;
+startEventExit.description =
+`
+Check if exit event is called.
+`
 //
 
 /* qqq for Yevhen : implement for other modes */
@@ -19867,8 +19879,8 @@ var Proto =
     startDetachingChildExistsBeforeParentWaitForTermination,
     startDetachingEndCompetitorIsExecuted,
     startDetachingTerminationBegin,
-    startEventCloseExperiment,
-    startEventExitExperiment,
+    startEventClose,
+    startEventExit,
     startDetachingThrowing,
     startNjsDetachingChildThrowing,
 
