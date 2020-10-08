@@ -110,8 +110,8 @@ This section shows when event `exit` of child process is called. The behavior is
 Event 'exit' is aways called. Options `stdio` and `detaching` also don't affect `exit` event.
 */
 
-/* qqq for Vova : make general table in md file for this: "Vova qqq: close event is not emitted for disconnected detached child in fork mode" */
-/* qqq for Vova : move all tables here */
+/* qqq for Vova : make general table in md file for this: "Vova qqq: close event is not emitted for disconnected detached child in fork mode" aaa:done*/
+/* qqq for Vova : move all tables here aaa:done*/
 
 /* qqq for Yevhen : find all tests with passingThrough:1, separate them from the rest of the test
 and rewrite to run process which run process to avoid influence of arguments of tester on testing
@@ -893,7 +893,7 @@ function startOptionCurrentPaths( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ) );
+  let programPath = a.path.nativize( a.program( program1 ) );
 
   let o2 =
   {
@@ -913,10 +913,12 @@ function startOptionCurrentPaths( test )
     let o1 = op[ 0 ];
     let o2 = op[ 1 ];
 
-    test.is( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
+    let cwd1 = a.fileProvider.fileRead( a.abs( o1.process.pid.toString() ) );
+    test.is( _.strHas( cwd1, a.path.nativize( a.routinePath ) ) );
     test.identical( o1.exitCode, 0 );
 
-    test.is( _.strHas( o2.output, __dirname ) );
+    let cwd2 = a.fileProvider.fileRead( a.abs( o2.process.pid.toString() ) );
+    test.is( _.strHas( cwd2, __dirname ) );
     test.identical( o2.exitCode, 0 );
 
     return op;
@@ -931,10 +933,12 @@ function startOptionCurrentPaths( test )
     let o1 = op[ 0 ];
     let o2 = op[ 1 ];
 
-    test.is( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
+    let cwd1 = a.fileProvider.fileRead( a.abs( o1.process.pid.toString() ) );
+    test.is( _.strHas( cwd1, a.path.nativize( a.routinePath ) ) );
     test.identical( o1.exitCode, 0 );
 
-    test.is( _.strHas( o2.output, __dirname ) );
+    let cwd2 = a.fileProvider.fileRead( a.abs( o2.process.pid.toString() ) );
+    test.is( _.strHas( cwd2, __dirname ) );
     test.identical( o2.exitCode, 0 );
 
     return op;
@@ -949,10 +953,12 @@ function startOptionCurrentPaths( test )
     let o1 = op[ 0 ];
     let o2 = op[ 1 ];
 
-    test.is( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
+    let cwd1 = a.fileProvider.fileRead( a.abs( o1.process.pid.toString() ) );
+    test.is( _.strHas( cwd1, a.path.nativize( a.routinePath ) ) );
     test.identical( o1.exitCode, 0 );
 
-    test.is( _.strHas( o2.output, __dirname ) );
+    let cwd2 = a.fileProvider.fileRead( a.abs( o2.process.pid.toString() ) );
+    test.is( _.strHas( cwd2, __dirname ) );
     test.identical( o2.exitCode, 0 );
 
     return op;
@@ -969,16 +975,20 @@ function startOptionCurrentPaths( test )
     let o3 = op[ 2 ];
     let o4 = op[ 3 ];
 
-    test.is( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
+    let cwd1 = a.fileProvider.fileRead( a.abs( o1.process.pid.toString() ) );
+    test.is( _.strHas( cwd1, a.path.nativize( a.routinePath ) ) );
     test.identical( o1.exitCode, 0 );
 
-    test.is( _.strHas( o2.output, __dirname ) );
+    let cwd2 = a.fileProvider.fileRead( a.abs( o2.process.pid.toString() ) );
+    test.is( _.strHas( cwd2, __dirname ) );
     test.identical( o2.exitCode, 0 );
 
-    test.is( _.strHas( o3.output, a.path.nativize( a.routinePath ) ) );
+    let cwd3 = a.fileProvider.fileRead( a.abs( o3.process.pid.toString() ) );
+    test.is( _.strHas( cwd3, a.path.nativize( a.routinePath ) ) );
     test.identical( o3.exitCode, 0 );
 
-    test.is( _.strHas( o4.output, __dirname ) );
+    let cwd4 = a.fileProvider.fileRead( a.abs( o4.process.pid.toString() ) );
+    test.is( _.strHas( cwd4, __dirname ) );
     test.identical( o4.exitCode, 0 );
 
     return op;
@@ -988,10 +998,11 @@ function startOptionCurrentPaths( test )
 
   /* - */
 
-  function testApp()
+  function program1()
   {
-    // debugger
-    console.log( process.cwd() ); /* qqq for Vova : should not be visible if verbosity of tester is low, if possible */
+    let _ = require( toolsPath );
+    _.include( 'wFiles' );
+    _.fileProvider.fileWrite( _.path.join( __dirname, process.pid.toString() ), process.cwd() ); /* qqq for Vova : should not be visible if verbosity of tester is low, if possible aaa:done*/
   }
 }
 
