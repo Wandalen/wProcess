@@ -1454,6 +1454,7 @@ function startCurrentPath( test )
 
 //
 
+/* qqq for Yevhen : try to introduce subroutine for modes */
 function startCurrentPaths( test )
 {
   let context = this;
@@ -1504,24 +1505,6 @@ function startCurrentPaths( test )
 
     return op;
   })
-
-  /* */
-
-  // _.process.start( _.mapSupplement( { mode : 'exec' }, o2 ) );
-  //
-  // ready.then( ( op ) =>
-  // {
-  //   let o1 = op[ 0 ];
-  //   let o2 = op[ 1 ];
-  //
-  //   test.is( _.strHas( o1.output, _.path.nativize( routinePath ) ) );
-  //   test.identical( o1.exitCode, 0 );
-  //
-  //   test.is( _.strHas( o2.output, __dirname ) );
-  //   test.identical( o2.exitCode, 0 );
-  //
-  //   return op;
-  // })
 
   /* */
 
@@ -3434,6 +3417,7 @@ function startNjsWithReadyDelayStructural( test ) /* qqq for Yevhen : implement 
     'disconnect' : options.disconnect,
     'process' : options.process,
     'logger' : options.logger,
+    'stack' : null,
     'state' : 'initial',
     'exitReason' : null,
     'fullExecPath' : null,
@@ -3563,6 +3547,8 @@ function startArgsOption( test )
 /*
 qqq for Yevhen : split shellArgumentsParsing and similar test routine by mode
 */
+
+/* qqq for Yevhen : try to introduce subroutine for modes */
 
 function startArgumentsParsing( test )
 {
@@ -3855,28 +3841,6 @@ function startArgumentsParsing( test )
   /* - */
 
   /* - end of fork - */ /* qqq for Yevhen : split test routine by modes */
-
-  .then( () =>
-  {
-    test.case = `'path to exec : with space' 'execPATH : has arguments' 'args has arguments' 'exec'`
-
-    let con = new _.Consequence().take( null );
-
-    if( !Config.debug )
-    return con;
-
-    let o =
-    {
-      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' firstArg secondArg:1 "third arg"',
-      args : [ '\'fourth arg\'',  `"fifth" arg` ],
-      mode : 'exec',
-      outputPiping : 1,
-      outputCollecting : 1,
-      ready : con
-    }
-
-    return test.shouldThrowErrorSync( () => _.process.start( o ) );
-  })
 
   /* */
 
@@ -5487,35 +5451,6 @@ function startExecPathQuotesClosing( test )
     return con;
   })
 
-  // .then( () =>
-  // {
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"',
-  //     mode : 'exec',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"' );
-  //     test.identical( o.args, [ _.strQuote( testAppPathSpace ), '"arg"' ] );
-  //     let op = JSON.parse( o.output );
-  //     test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
-  //     test.identical( op.map, {} )
-  //     test.identical( op.scriptArgs, [ 'arg' ] )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
-
   /* */
 
   testcase( 'unquoted arg' )
@@ -5606,35 +5541,6 @@ function startExecPathQuotesClosing( test )
 
     return con;
   })
-
-  // .then( () =>
-  // {
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' arg',
-  //     mode : 'exec',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-  //
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' arg' );
-  //     test.identical( o.args, [ _.strQuote( testAppPathSpace ), 'arg' ] );
-  //     let op = JSON.parse( o.output );
-  //     test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
-  //     test.identical( op.map, {} )
-  //     test.identical( op.scriptArgs, [ 'arg' ] )
-  //
-  //     return null;
-  //   })
-  //
-  //   return con;
-  // })
 
   /*  */
 
@@ -8477,7 +8383,9 @@ function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subrou
   }
 }
 
-//
+// --
+// procedures and chronology
+// --
 
 function startProcedureTrivial( test )
 {
@@ -8565,29 +8473,6 @@ function startProcedureTrivial( test )
       return null;
     })
   })
-
-  /* */
-
-  // .then( () =>
-  // {
-  //   var o = { execPath : 'node ' + testAppPath, mode : 'exec' }
-  //   var con = start( o );
-  //   var procedure = _.procedure.find( 'PID:' + o.process.pid );
-  //   test.identical( procedure.length, 1 );
-  //   test.identical( procedure[ 0 ].isAlive(), true );
-  //   test.identical( o.procedure, procedure[ 0 ] );
-  //   test.identical( procedure[ 0 ].object(), o.process );
-  //   return con.then( ( op ) =>
-  //   {
-  //     test.identical( op.exitCode, 0 );
-  //     test.identical( op.ended, true );
-  //     test.identical( procedure[ 0 ].isAlive(), false );
-  //     test.identical( o.procedure, procedure[ 0 ] );
-  //     test.identical( procedure[ 0 ].object(), o.process );
-  //     test.is( _.strHas( o.procedure._sourcePath, 'Execution.s' ) );
-  //     return null;
-  //   })
-  // })
 
   /* */
 
@@ -9028,249 +8913,9 @@ startChronology.description =
   - no extra procedures generated
 `
 
-//
-
-function startTerminateHangedWithExitHandler( test )
-{
-  let context = this;
-  let a = test.assetFor( false );
-  let testAppPath = a.program( testApp );
-
-  if( process.platform === 'win32' )
-  {
-    // zzz: windows-kill doesn't work correctrly on node 14
-    // investigate if its possible to use process.kill instead of windows-kill
-    test.identical( 1, 1 )
-    return;
-  }
-
-  /* */
-
-  a.ready
-
-  .then( () =>
-  {
-    let o =
-    {
-      execPath : 'node ' + testAppPath,
-      mode : 'spawn',
-      throwingExitCode : 0,
-      outputPiping : 0,
-      ipc : 1,
-      outputCollecting : 1,
-    }
-
-    let con = _.process.start( o );
-
-    o.process.on( 'message', () =>
-    {
-      _.process.terminate({ process : o.process, timeOut : 5000 });
-    })
-
-    con.then( () =>
-    {
-      test.identical( o.exitCode, null );
-      test.identical( o.exitSignal, 'SIGKILL' );
-      test.is( !_.strHas( o.output, 'SIGINT' ) );
-
-      return null;
-    })
-
-    return con;
-  })
-
-  /*  */
-
-  .then( () =>
-  {
-    let o =
-    {
-      execPath : testAppPath,
-      mode : 'fork',
-      throwingExitCode : 0,
-      outputPiping : 0,
-      ipc : 1,
-      outputCollecting : 1,
-    }
-
-    let con = _.process.start( o );
-
-    o.process.on( 'message', () =>
-    {
-      _.process.terminate({ process : o.process, timeOut : 5000 });
-    })
-
-    con.then( () =>
-    {
-      test.identical( o.exitCode, null );
-      test.identical( o.exitSignal, 'SIGKILL' );
-      test.is( !_.strHas( o.output, 'SIGINT' ) );
-
-      return null;
-    })
-
-    return con;
-  })
-
-  return a.ready;
-
-  /* - */
-
-  function testApp()
-  {
-    let _ = require( toolsPath );
-
-    _.include( 'wProcess' );
-    _.process._exitHandlerRepair();
-    process.send( process.pid )
-    while( 1 )
-    {
-      console.log( _.time.now() )
-    }
-  }
-}
-
-startTerminateHangedWithExitHandler.timeOut = 20000;
-
-/* startTerminateHangedWithExitHandler.description =
-`
-  Test app - code that blocks event loop and appExitHandlerRepair called at start
-
-  Will test:
-    - Termination of child process using SIGINT signal after small delay
-    - Termination of child process using SIGKILL signal after small delay
-
-  Expected behaviour:
-    - For SIGINT: Child was terminated with exitCode : 0, exitSignal : null
-    - For SIGKILL: Child was terminated with exitCode : null, exitSignal : SIGKILL
-    - No time out message in output
-` */
-
-//
-
-function startTerminateAfterLoopRelease( test )
-{
-  let context = this;
-  let a = test.assetFor( false );
-  let testAppPath = a.program( testApp );
-
-  if( process.platform === 'win32' )
-  {
-    // zzz: windows-kill doesn't work correctrly on node 14
-    // investigate if its possible to use process.kill instead of windows-kill
-    test.identical( 1, 1 )
-    return;
-  }
-
-  /* */
-
-  a.ready
-
-  .then( () =>
-  {
-    let o =
-    {
-      execPath : 'node ' + testAppPath,
-      mode : 'spawn',
-      throwingExitCode : 0,
-      outputPiping : 0,
-      ipc : 1,
-      outputCollecting : 1,
-    }
-
-    let con = _.process.start( o );
-
-    o.process.on( 'message', () =>
-    {
-      _.process.terminate({ process : o.process, timeOut : 10000 });
-    })
-
-    con.then( () =>
-    {
-      test.identical( o.exitCode, null );
-      test.identical( o.exitSignal, 'SIGKILL' );
-      test.is( !_.strHas( o.output, 'SIGINT' ) );
-      test.is( !_.strHas( o.output, 'Exit after release' ) );
-
-      return null;
-    })
-
-    return con;
-  })
-
-  /*  */
-
-  .then( () =>
-  {
-    let o =
-    {
-      execPath : testAppPath,
-      mode : 'fork',
-      throwingExitCode : 0,
-      outputPiping : 0,
-      ipc : 1,
-      outputCollecting : 1,
-    }
-
-    let con = _.process.start( o );
-
-    o.process.on( 'message', () =>
-    {
-      _.process.terminate({ process : o.process, timeOut : 10000 });
-    })
-
-    con.then( () =>
-    {
-      test.identical( o.exitCode, null );
-      test.identical( o.exitSignal, 'SIGKILL' );
-      test.is( !_.strHas( o.output, 'SIGINT' ) );
-      test.is( !_.strHas( o.output, 'Exit after release' ) );
-
-      return null;
-    })
-
-    return con;
-  })
-
-  /*  */
-
-  return a.ready;
-
-  /* - */
-
-  function testApp()
-  {
-    let _ = require( toolsPath );
-
-    _.include( 'wProcess' );
-    _.process._exitHandlerRepair();
-    let loop = true;
-    setTimeout( () =>
-    {
-      loop = false;
-    }, 5000 )
-    process.send( process.pid );
-    while( loop )
-    {
-      loop = loop;
-    }
-    console.log( 'Exit after release' );
-  }
-}
-
-startTerminateAfterLoopRelease.description =
-`
-  Test app - code that blocks event loop for short period of time and appExitHandlerRepair called at start
-
-  Will test:
-    - Termination of child process using SIGINT signal after small delay
-
-  Expected behaviour:
-    - Child was terminated after event loop release with exitCode : 0, exitSignal : null
-    - Child process message should be printed
-`
-
-//
+// --
+// delay
+// --
 
 function startReadyDelay( test )
 {
@@ -15834,22 +15479,6 @@ function startNormalizedExecPath( test )
     return null;
   })
 
-  /* */
-
-  // shell
-  // ({
-  //   execPath : 'node ' + testAppPath,
-  //   args : [ 'arg1', 'arg2' ],
-  //   mode : 'exec'
-  // })
-  // .then( ( op ) =>
-  // {
-  //   test.identical( op.exitCode, 0 );
-  //   test.identical( op.ended, true );
-  //   test.identical( _.strCount( op.output, `[ 'arg1', 'arg2' ]` ), 1 );
-  //   return null;
-  // })
-
   /* app path in arguments */
 
   shell
@@ -15896,22 +15525,6 @@ function startNormalizedExecPath( test )
     test.identical( _.strCount( op.output, `[ 'arg1', 'arg2' ]` ), 1 );
     return null;
   })
-
-  /* */
-
-  // shell
-  // ({
-  //   execPath : 'node',
-  //   args : [ testAppPath, 'arg1', 'arg2' ],
-  //   mode : 'exec'
-  // })
-  // .then( ( op ) =>
-  // {
-  //   test.identical( op.exitCode, 0 );
-  //   test.identical( op.ended, true );
-  //   test.identical( _.strCount( op.output, `[ 'arg1', 'arg2' ]` ), 1 );
-  //   return null;
-  // })
 
   /* */
 
@@ -18883,6 +18496,248 @@ function terminateDifferentStdio( test )
 
 //
 
+function startTerminateHangedWithExitHandler( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let testAppPath = a.program( testApp );
+
+  if( process.platform === 'win32' )
+  {
+    // zzz: windows-kill doesn't work correctrly on node 14
+    // investigate if its possible to use process.kill instead of windows-kill
+    test.identical( 1, 1 )
+    return;
+  }
+
+  /* */
+
+  a.ready
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'spawn',
+      throwingExitCode : 0,
+      outputPiping : 0,
+      ipc : 1,
+      outputCollecting : 1,
+    }
+
+    let con = _.process.start( o );
+
+    o.process.on( 'message', () =>
+    {
+      _.process.terminate({ process : o.process, timeOut : 5000 });
+    })
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, 'SIGKILL' );
+      test.is( !_.strHas( o.output, 'SIGINT' ) );
+
+      return null;
+    })
+
+    return con;
+  })
+
+  /*  */
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      throwingExitCode : 0,
+      outputPiping : 0,
+      ipc : 1,
+      outputCollecting : 1,
+    }
+
+    let con = _.process.start( o );
+
+    o.process.on( 'message', () =>
+    {
+      _.process.terminate({ process : o.process, timeOut : 5000 });
+    })
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, 'SIGKILL' );
+      test.is( !_.strHas( o.output, 'SIGINT' ) );
+
+      return null;
+    })
+
+    return con;
+  })
+
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+
+    _.include( 'wProcess' );
+    _.process._exitHandlerRepair();
+    process.send( process.pid )
+    while( 1 )
+    {
+      console.log( _.time.now() )
+    }
+  }
+}
+
+startTerminateHangedWithExitHandler.timeOut = 20000;
+
+/* startTerminateHangedWithExitHandler.description =
+`
+  Test app - code that blocks event loop and appExitHandlerRepair called at start
+
+  Will test:
+    - Termination of child process using SIGINT signal after small delay
+    - Termination of child process using SIGKILL signal after small delay
+
+  Expected behaviour:
+    - For SIGINT: Child was terminated with exitCode : 0, exitSignal : null
+    - For SIGKILL: Child was terminated with exitCode : null, exitSignal : SIGKILL
+    - No time out message in output
+` */
+
+//
+
+function startTerminateAfterLoopRelease( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let testAppPath = a.program( testApp );
+
+  if( process.platform === 'win32' )
+  {
+    // zzz: windows-kill doesn't work correctrly on node 14
+    // investigate if its possible to use process.kill instead of windows-kill
+    test.identical( 1, 1 )
+    return;
+  }
+
+  /* */
+
+  a.ready
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'spawn',
+      throwingExitCode : 0,
+      outputPiping : 0,
+      ipc : 1,
+      outputCollecting : 1,
+    }
+
+    let con = _.process.start( o );
+
+    o.process.on( 'message', () =>
+    {
+      _.process.terminate({ process : o.process, timeOut : 10000 });
+    })
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, 'SIGKILL' );
+      test.is( !_.strHas( o.output, 'SIGINT' ) );
+      test.is( !_.strHas( o.output, 'Exit after release' ) );
+
+      return null;
+    })
+
+    return con;
+  })
+
+  /*  */
+
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      throwingExitCode : 0,
+      outputPiping : 0,
+      ipc : 1,
+      outputCollecting : 1,
+    }
+
+    let con = _.process.start( o );
+
+    o.process.on( 'message', () =>
+    {
+      _.process.terminate({ process : o.process, timeOut : 10000 });
+    })
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, 'SIGKILL' );
+      test.is( !_.strHas( o.output, 'SIGINT' ) );
+      test.is( !_.strHas( o.output, 'Exit after release' ) );
+
+      return null;
+    })
+
+    return con;
+  })
+
+  /*  */
+
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+
+    _.include( 'wProcess' );
+    _.process._exitHandlerRepair();
+    let loop = true;
+    setTimeout( () =>
+    {
+      loop = false;
+    }, 5000 )
+    process.send( process.pid );
+    while( loop )
+    {
+      loop = loop;
+    }
+    console.log( 'Exit after release' );
+  }
+}
+
+startTerminateAfterLoopRelease.description =
+`
+  Test app - code that blocks event loop for short period of time and appExitHandlerRepair called at start
+
+  Will test:
+    - Termination of child process using SIGINT signal after small delay
+
+  Expected behaviour:
+    - Child was terminated after event loop release with exitCode : 0, exitSignal : null
+    - Child process message should be printed
+`
+
+//
+
 function children( test )
 {
   let context = this;
@@ -19675,14 +19530,12 @@ var Proto =
     startNjsPassingThroughExecPathWithSpace,
     startPassingThroughExecPathWithSpace,
 
+    // procedures and chronology
+
     startProcedureTrivial,
     startProcedureExists,
     startOnTerminateSeveralCallbacksChronology,
     startChronology,
-    experiment2,
-
-    startTerminateHangedWithExitHandler,
-    startTerminateAfterLoopRelease,
 
     // delay
 
@@ -19779,6 +19632,10 @@ var Proto =
     terminateWithDetachedChildren, // zzz for Vova:investigate and fix termination of deatched process on Windows
     terminateTimeOut,
     terminateDifferentStdio,
+
+    startTerminateHangedWithExitHandler,
+    startTerminateAfterLoopRelease,
+
     children,
     childrenAsList,
 
