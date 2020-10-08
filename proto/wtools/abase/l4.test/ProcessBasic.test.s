@@ -10426,7 +10426,7 @@ function startDisconnectNonDetached( test )
     {
       disconnecting.forEach( disconnecting =>
       {
-        a.ready.then( () => run( mode,ipc,detaching,disconnecting ) );
+        a.ready.then( () => run( mode,ipc,disconnecting ) );
       })
     })
   })
