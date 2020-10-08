@@ -33,7 +33,10 @@ _.assert( !!_realGlobal_ );
   | sync:1 deasync:0 | -                        | +                  | -           |
 */
 
-function start_pre( routine, args )
+
+//
+
+function startCommon_pre( routine, args )
 {
   let o;
 
@@ -49,11 +52,14 @@ function start_pre( routine, args )
   _.assert( _.longHas( [ 'fork', 'spawn', 'shell' ], o.mode ), `Supports mode::[ 'fork', 'spawn', 'shell' ]. Unknown mode ${o.mode}` );
   _.assert( !!o.args || !!o.execPath, 'Expects {-args-} either {-execPath-}' )
   _.assert( o.args === null || _.arrayIs( o.args ) || _.strIs( o.args ) );
-  _.assert( o.execPath === null || _.strIs( o.execPath ) || _.strsAreAll( o.execPath ), 'Expects string or strings {-o.execPath-}, but got', _.strType( o.execPath ) );
   _.assert( o.timeOut === null || _.numberIs( o.timeOut ), 'Expects null or number {-o.timeOut-}, but got', _.strType( o.timeOut ) );
   _.assert( _.longHas( [ 'instant' ],  o.when ) || _.objectIs( o.when ), 'Unsupported starting mode:', o.when );
   _.assert( o.when !== 'afterdeath', `Starting mode:'afterdeath' is moved to separate routine _.process.startAfterDeath` );
-  _.assert( !o.detaching || !_.longHas( _.arrayAs( o.stdio ), 'inherit' ), `Unsupported stdio: ${o.stdio} for process detaching. Parent will wait for child process.` ); //xxx
+  _.assert
+  (
+    !o.detaching || !_.longHas( _.arrayAs( o.stdio ), 'inherit' ),
+    `Unsupported stdio: ${o.stdio} for process detaching. Parent will wait for child process.`
+  ); /* xxx */
   _.assert( !o.detaching || _.longHas( [ 'fork', 'spawn', 'shell' ],  o.mode ), `Unsupported mode: ${o.mode} for process detaching` );
   _.assert( o.conStart === null || _.routineIs( o.conStart ) );
   _.assert( o.conTerminate === null || _.routineIs( o.conTerminate ) );
@@ -67,118 +73,62 @@ function start_pre( routine, args )
 
 //
 
-/**
- * @summary Executes command in a controled child process.
- *
- * @param {Object} o Options map
- * @param {String} o.execPath Command to execute, path to application, etc.
- * @param {String} o.currentPath Current working directory of child process.
+function startSingle_pre( routine, args )
+{
+  let o = startCommon_pre( routine, args );
 
- * @param {Boolean} o.sync=0 Execute command in synchronous mode.
-   There are two synchrounous modes: first uses sync method of `ChildProcess` module , second uses async method, but in combination with {@link https://www.npmjs.com/package/deasync deasync} and `wConsequence` to turn async execution into synchrounous.
-   Which sync mode will be selected depends on value of `o.deasync` option.
-   Sync mode returns options map.
-   Async mode returns instance of {@link module:Tools/base/Consequence.Consequence wConsequence} with gives a message( options map ) when execution of child process is finished.
- * @param {Boolean} o.deasync=1 Controls usage of `deasync` module in synchrounous mode. Allows to run command synchrounously in modes( o.mode ) that don't support synchrounous execution, like `fork`.
+  _.assert( arguments.length === 2 );
 
- * @param {Array} o.args=null Arguments for command.
- * @param {Array} o.interpreterArgs=null Arguments for node. Used only in `fork` mode. {@link https://nodejs.org/api/cli.html Command Line Options}
- * @param {String} o.mode='shell' Execution mode. Possible values: `fork`, `spawn`, `shell`. {@link https://nodejs.org/api/child_process.html Details about modes}
- * @param {Object} o.ready=null `wConsequence` instance that gives a message when execution is finished.
- * @param {Object} o.logger=null `wLogger` instance that prints output during command execution.
+  _.assert
+  (
+      o.execPath === null || _.strIs( o.execPath )
+    , 'Expects string or strings {-o.execPath-}, but got', _.strType( o.execPath )
+  );
 
- * @param {Object} o.env=null Environment variables( key-value pairs ).
- * @param {String/Array} o.stdio='pipe' Controls stdin,stdout configuration. {@link https://nodejs.org/api/child_process.html#child_process_options_stdio Details}
- * @param {Boolean} o.ipc=0  Creates `ipc` channel between parent and child processes.
- * @param {Boolean} o.detaching=0 Creates independent process for a child. Allows child process to continue execution when parent process exits. Platform dependent option. {@link https://nodejs.org/api/child_process.html#child_process_options_detached Details}.
- * @param {Boolean} o.windowHiding=1 Hide the child process console window that would normally be created on Windows. {@link https://nodejs.org/api/child_process.html#child_process_child_process_spawn_command_args_options Details}.
- * @param {Boolean} o.passingThrough=0 Allows to pass arguments of parent process to the child process.
- * @param {Boolean} o.concurrent=0 Allows paralel execution of several child processes. By default executes commands one by one.
- * @param {Number} o.timeOut=null Time in milliseconds before execution will be terminated.
+  _.assert
+  (
+      o.currentPath === null || _.strIs( o.currentPath )
+    , 'Expects string or strings {-o.currentPath-}, but got', _.strType( o.currentPath )
+  );
 
- * @param {Boolean} o.throwingExitCode=1 Throws an Error if child process returns non-zero exit code. Child returns non-zero exit code if it was terminated by parent, timeOut or when internal error occurs.
+  return o;
+}
 
- * @param {Boolean} o.applyingExitCode=0 Applies exit code to parent process.
+//
 
- * @param {Number} o.verbosity=2 Controls amount of output, `0` disables output at all.
- * @param {Boolean} o.outputDecorating=0 Logger prints everything in raw mode, no styles applied.
- * @param {Boolean} o.outputDecoratingStdout=0 Logger prints output from `stdout` in raw mode, no styles applied.
- * @param {Boolean} o.outputDecoratingStderr=0 Logger prints output from `stderr` in raw mode, no styles applied.
- * @param {Boolean} o.outputPrefixing=0 Add prefix with name of output channel( stderr, stdout ) to each line.
- * @param {Boolean} o.outputPiping=null Handles output from `stdout` and `stderr` channels. Is enabled by default if `o.verbosity` levels is >= 2 and option is not specified explicitly. This option is required by other "output" options that allows output customization.
- * @param {Boolean} o.outputCollecting=0 Enables coullection of output into sinle string. Collects output into `o.output` property if enabled.
- * @param {Boolean} o.outputAdditive=null Prints output during execution. Enabled by default if shell executes only single command and option is not specified explicitly.
- * @param {Boolean} o.inputMirroring=1 Print complete input line before execution: path to command, arguments.
- *
- * @return {Object} Returns `wConsequence` instance in async mode. In sync mode returns options map. Options map contains not only input options, but child process descriptor, collected output, exit code and other useful info.
- *
- * @example //short way, command and arguments in one string
- *
- * let _ = require('wTools')
- * _.include( 'wProcessBasic' )
- * _.include( 'wConsequence' )
- * _.include( 'wLogger' )
- *
- * let con = _.process.start( 'node -v' );
- *
- * con.then( ( op ) =>
- * {
- *  console.log( 'ExitCode:', op.exitCode );
- *  return op;
- * })
- *
- * @example //command and arguments as options
- *
- * let _ = require('wTools')
- * _.include( 'wProcessBasic' )
- * _.include( 'wConsequence' )
- * _.include( 'wLogger' )
- *
- * let con = _.process.start({ execPath : 'node', args : [ '-v' ] });
- *
- * con.then( ( op ) =>
- * {
- *  console.log( 'ExitCode:', op.exitCode );
- *  return op;
- * })
- *
- * @function shell
- * @module Tools/base/ProcessBasic
- * @namespace Tools.process
- */
-
-function start_body( o )
+function startSingle_body( o )
 {
 
-/* Subroutine index :
+/* subroutines index :
 
-  preform
-  endDeasyncing
-  end
-  handleClose
-  handleError
-  handleDisconnect
-  disconnect
-  multiple
-  single
-  form
-  launch
-  timeOutForm
-  pipe
-  inputMirror
-  execPathParse
-  argsUnqoute
-  argsJoin
-  argEscape
-  optionsForSpawn
-  optionsForFork
-  execPathForFork
-  handleProcedureTerminationBegin
-  exitCodeSet
-  infoGet
-  handleStderr
-  handleStdout
-  log
+  form1,
+  form2,
+  form3,
+  run1,
+  run2,
+  run3,
+  endDeasyncing,
+  end,
+  handleClose,
+  handleError,
+  handleDisconnect,
+  disconnect,
+  timeOutForm,
+  pipe,
+  inputMirror,
+  execPathParse,
+  argsUnqoute,
+  argsJoin,
+  argEscape,
+  optionsForSpawn,
+  optionsForFork,
+  execPathForFork,
+  handleProcedureTerminationBegin,
+  exitCodeSet,
+  infoGet,
+  handleStderr,
+  handleStdout,
+  log,
 
 */
 
@@ -190,58 +140,17 @@ function start_body( o )
   let execArgs, argumentsManual; /* qqq for Vova : remove argumentsManual */
   let readyCallback;
 
-  preform1();
+  form1();
 
-  if( _.arrayIs( o.execPath ) || _.arrayIs( o.currentPath ) )
-  return multiple();
+  _.assert( !_.arrayIs( o.execPath ) && !_.arrayIs( o.currentPath ) );
 
-  preform2();
+  form2();
 
-  if( o.sync && !o.deasync )
-  {
-    try
-    {
-
-      o.ready.deasync();
-      let arg = o.ready.sync();
-      o.ready.give( 1 );
-
-      if( readyCallback )
-      o.ready.finally( readyCallback );
-
-      if( o.when.delay )
-      _.time.sleep( o.when.delay );
-
-      single();
-
-    }
-    catch( err )
-    {
-      debugger; /* qqq for Yevhen : is covered? */
-      end( err, o.conTerminate );
-    }
-    _.assert( o.state === 'terminated' || o.state === 'disconnected' );
-    end( undefined, o.conTerminate );
-    return o;
-  }
-  else
-  {
-    if( o.when.delay )
-    o.ready.timeOut( o.when.delay );
-
-    o.ready.thenGive( single );
-
-    if( readyCallback )
-    debugger;
-    if( readyCallback )
-    o.ready.finally( readyCallback );
-
-    return endDeasyncing();
-  }
+  return run1();
 
   /* */
 
-  function preform1()
+  function form1()
   {
 
     if( o.ready === null )
@@ -257,23 +166,21 @@ function start_body( o )
 
     _.assert( !_.consequenceIs( o.ready ) || o.ready.resourcesCount() <= 1 );
 
-    if( o.outputDecorating === null )
-    o.outputDecorating = 0;
-    if( o.outputDecoratingStdout === null )
-    o.outputDecoratingStdout = o.outputDecorating;
-    if( o.outputDecoratingStderr === null )
-    o.outputDecoratingStderr = o.outputDecorating;
-
     o.logger = o.logger || _global.logger;
 
-    if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
-    o.stack = _.Procedure.Stack( o.stack, 3 );
   }
 
   /* */
 
-  function preform2()
+  function form2()
   {
+
+    /* procedure */
+
+    if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
+    o.stack = _.Procedure.Stack( o.stack, 3 );
+
+    /* */
 
     if( o.conStart === null )
     {
@@ -310,6 +217,17 @@ function start_body( o )
     _.assert( o.conDisconnect.resourcesCount() === 0 );
     _.assert( o.conTerminate.resourcesCount() === 0 );
 
+    /* */
+
+    if( o.outputDecorating === null )
+    o.outputDecorating = 0;
+    if( o.outputDecoratingStdout === null )
+    o.outputDecoratingStdout = o.outputDecorating;
+    if( o.outputDecoratingStderr === null )
+    o.outputDecoratingStderr = o.outputDecorating;
+
+    /* */
+
     if( !_.strIs( o.when ) )
     {
       if( Config.debug )
@@ -323,6 +241,8 @@ function start_body( o )
       o.when.delay = Math.max( 0, o.when.time - _.time.now() );
       _.assert( o.when.delay >= 0, `Wrong value of {-o.when.delay } or {-o.when.time-}. Starting delay should be >= 0, current : ${o.when.delay}` );
     }
+
+    /* */
 
     o.disconnect = disconnect;
     o.state = 'initial'; /* `initial`, `starting`, `started`, `terminating`, `terminated`, `disconnected` */
@@ -338,6 +258,351 @@ function start_body( o )
     o.error = null;
 
     Object.preventExtensions( o );
+  }
+
+  /* */
+
+  function form3()
+  {
+
+    if( _.arrayIs( o.args ) )
+    o.args = o.args.slice();
+    o.args = _.arrayAs( o.args );
+
+    if( _.strIs( o.execPath ) )
+    {
+      o.fullExecPath = o.execPath;
+      execArgs = execPathParse( o.execPath );
+      if( o.mode !== 'shell' )
+      execArgs = argsUnqoute( execArgs );
+      o.execPath = execArgs.shift();
+    }
+
+    if( o.execPath === null )
+    {
+      _.assert( o.args.length, 'Expects {-args-} to have at least one argument if {-execPath-} is not defined' );
+
+      o.execPath = o.args.shift();
+      o.fullExecPath = o.execPath;
+
+      let begin = _.strBeginOf( o.execPath, [ '"', `'`, '`' ] );
+      let end = _.strEndOf( o.execPath, [ '"', `'`, '`' ] );
+
+      if( begin && begin === end )
+      o.execPath = _.strInsideOf( o.execPath, begin, end );
+    }
+
+    if( execArgs && execArgs.length )
+    o.args = _.arrayPrependArray( o.args || [], execArgs );
+
+    if( _.strIs( o.interpreterArgs ) )
+    o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs });
+
+    if( o.outputAdditive === null )
+    o.outputAdditive = true;
+    o.outputAdditive = !!o.outputAdditive;
+
+    o.currentPath = _.path.resolve( o.currentPath || '.' );
+
+    /* verbosity */
+
+    if( !_.numberIs( o.verbosity ) )
+    o.verbosity = o.verbosity ? 1 : 0;
+    if( o.verbosity < 0 )
+    o.verbosity = 0;
+    if( o.outputPiping === null )
+    {
+      if( o.stdio === 'pipe' || o.stdio[ 1 ] === 'pipe' )
+      o.outputPiping = o.verbosity >= 2;
+    }
+    if( o.outputCollecting && !o.output )
+    o.output = ''; /* xxx : test for multiple run? to which o-map does it collect output? */
+
+    /* ipc */
+
+    if( o.ipc )
+    {
+      if( _.strIs( o.stdio ) )
+      o.stdio = _.dup( o.stdio, 3 );
+      if( !_.longHas( o.stdio, 'ipc' ) )
+      o.stdio.push( 'ipc' );
+    }
+
+    /* stdio compatibility check */
+    if( Config.debug )
+    if( o.outputPiping || o.outputCollecting )
+    _.assert( o.stdio === 'pipe' || o.stdio[ 1 ] === 'pipe' || o.stdio[ 2 ] === 'pipe', 'stdout is not available to collect output or pipe it. Set stdout/stderr channel(s) or option::stdio to "pipe"' );
+
+    /* passingThrough */
+
+    if( o.passingThrough )
+    {
+      let argumentsManual = process.argv.slice( 2 );
+      if( argumentsManual.length )
+      o.args = _.arrayAppendArray( o.args || [], argumentsManual );
+    }
+
+    /* dependencies */
+
+    if( !ChildProcess )
+    ChildProcess = require( 'child_process' );
+
+    if( o.outputGraying )
+    if( !StripAnsi )
+    StripAnsi = require( 'strip-ansi' );
+
+    if( !o.outputDecorating && typeof module !== 'undefined' )
+    try
+    {
+      _.include( 'wColor' );
+    }
+    catch( err )
+    {
+      if( o.verbosity >= 2 )
+      log( _.errOnce( err ), 1 );
+    }
+
+    /* handler of event terminationBegin */
+
+    if( o.detaching )
+    {
+      _.procedure.on( 'terminationBegin', handleProcedureTerminationBegin );
+      o.handleProcedureTerminationBegin = handleProcedureTerminationBegin;
+    }
+
+  }
+
+  /* */
+
+  function run1()
+  {
+
+    if( o.sync && !o.deasync )
+    {
+      try
+      {
+
+        o.ready.deasync();
+        let arg = o.ready.sync();
+        o.ready.give( 1 );
+
+        if( readyCallback )
+        o.ready.finally( readyCallback );
+
+        if( o.when.delay )
+        _.time.sleep( o.when.delay );
+
+        run2();
+
+      }
+      catch( err )
+      {
+        debugger; /* qqq for Yevhen : is covered? */
+        end( err, o.conTerminate );
+      }
+      _.assert( o.state === 'terminated' || o.state === 'disconnected' );
+      end( undefined, o.conTerminate );
+      return o;
+    }
+    else
+    {
+      if( o.when.delay )
+      o.ready.timeOut( o.when.delay );
+
+      o.ready.thenGive( run2 );
+
+      if( readyCallback )
+      debugger;
+      if( readyCallback )
+      o.ready.finally( readyCallback );
+
+      return endDeasyncing();
+    }
+
+  }
+
+  /* */
+
+  function run2()
+  {
+
+    _.assert( o.state === 'initial' );
+
+    try
+    {
+      form3();
+      run3();
+      timeOutForm();
+      pipe();
+      if( o.dry )
+      {
+        /* qqq for Yevhen : make sure option dry is covered good enough */
+        _.assert( o.state === 'starting' );
+        o.state = 'terminated';
+        end( undefined, o.conTerminate );
+      }
+    }
+    catch( err )
+    {
+      debugger
+      handleError( err );
+    }
+
+  }
+
+  /* */
+
+  function run3()
+  {
+    o.state = 'starting';
+
+    if( Config.debug )
+    _.assert
+    (
+      _.fileProvider.isDir( o.currentPath ),
+      () => `Current path ( ${o.currentPath} ) doesn\'t exist or it\'s not a directory.\n> ${o.fullExecPath}`
+    );
+
+    // let execPath = o.execPath;
+    // let args = o.args; /* yyy xxx : remove? */
+    // /* let args = o.args.slice(); */
+
+    if( process.platform === 'win32' )
+    {
+      execPath = _.path.nativizeTolerant( execPath );
+    }
+
+    if( o.mode === 'fork')
+    {
+      runFork();
+    }
+    else if( o.mode === 'spawn' )
+    {
+      runSpawn();
+    }
+    else if( o.mode === 'shell' )
+    {
+      runShell();
+    }
+    else _.assert( 0, 'Unknown mode', _.strQuote( o.mode ), 'to start process at path', _.strQuote( o.currentPath ) );
+
+    /* procedure */
+
+    if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
+    {
+      if( Config.debug )
+      {
+        let result = _.procedure.find( 'PID:' + o.process.pid );
+        _.assert( result.length === 0, `No procedure expected for child process with pid:${o.process.pid}` );
+      }
+      o.procedure = _.procedure.begin({ _name : 'PID:' + o.process.pid, _object : o.process, _stack : o.stack });
+    }
+
+    /* state */
+
+    o.state = 'started';
+    o.conStart.take( o );
+  }
+
+  /* */
+
+  function runFork()
+  {
+    let execPath = o.execPath;
+    let args = o.args; /* yyy xxx : remove? */
+    // let args = o.args.slice();
+
+    let o2 = optionsForFork();
+    execPath = execPathForFork( execPath );
+
+    o.fullExecPath = _.strConcat( _.arrayAppendArray( [ execPath ], args ) );
+    inputMirror();
+
+    if( o.dry )
+    return;
+
+    o.process = ChildProcess.fork( execPath, args, o2 );
+
+  }
+
+  /* */
+
+  function runSpawn()
+  {
+    let execPath = o.execPath;
+    let args = o.args; /* yyy xxx : remove? */
+    // let args = o.args.slice();
+
+    let o2 = optionsForSpawn();
+
+    o.fullExecPath = _.strConcat( _.arrayAppendArray( [ execPath ], args ) );
+    inputMirror();
+
+    if( o.dry )
+    return;
+
+    if( o.sync && !o.deasync )
+    o.process = ChildProcess.spawnSync( execPath, args, o2 );
+    else
+    o.process = ChildProcess.spawn( execPath, args, o2 );
+
+  }
+
+  /* */
+
+  function runShell()
+  {
+    let execPath = o.execPath;
+    let args = o.args; /* yyy xxx : remove? */
+    // let args = o.args.slice();
+
+    let shellPath = process.platform === 'win32' ? 'cmd' : 'sh';
+    let arg1 = process.platform === 'win32' ? '/c' : '-c';
+    let arg2 = execPath;
+    let o2 = optionsForSpawn();
+
+    /*
+
+    windowsVerbatimArguments allows to have arguments with space(s) in shell on Windows
+    Following calls will not work as expected( argument will be splitted by space ), if windowsVerbatimArguments is disabled:
+
+    _.process.start( 'node path/to/script.js "path with space"' );
+    _.process.start({ execPath : 'node path/to/script.js', args : [ "path with space" ] });
+
+   */
+
+    o2.windowsVerbatimArguments = true;
+
+    if( args.length )
+    arg2 = arg2 + ' ' + argsJoin( args.slice() );
+
+    o.fullExecPath = arg2;
+    inputMirror();
+
+    if( o.dry )
+    return;
+
+    if( o.sync && !o.deasync )
+    o.process = ChildProcess.spawnSync( shellPath, [ arg1, arg2 ], o2 );
+    else
+    o.process = ChildProcess.spawn( shellPath, [ arg1, arg2 ], o2 );
+  }
+
+  /* */
+
+  function timeOutForm()
+  {
+
+    if( o.timeOut && !o.dry )
+    if( !o.sync || o.deasync )
+    _.time.begin( o.timeOut, () =>
+    {
+      if( o.state === 'terminated' || o.error )
+      return;
+      o.exitReason = 'time';
+      o.process.kill( 'SIGTERM' ); /* qqq for Vova : need to catch event when process is really down */
+    });
+
   }
 
   /* */
@@ -552,7 +817,7 @@ function start_body( o )
     _.assert( !!this.process, 'Process is not started. Cant disconnect.' );
 
     /*
-    close event will not be fired for regular/detached process
+    close event will not be called for regular/detached process
     */
 
     if( this.process.stdout )
@@ -579,347 +844,6 @@ function start_body( o )
     }
 
     return true;
-  }
-
-  /* */
-
-  function multiple()
-  {
-
-    if( _.arrayIs( o.execPath ) && o.execPath.length > 1 && o.concurrent && o.outputAdditive === null )
-    o.outputAdditive = 0;
-
-    o.currentPath = o.currentPath || _.path.current();
-
-    let prevReady = o.ready;
-    let readies = [];
-    let optionsArray = [];
-
-    let execPath = _.arrayAs( o.execPath );
-    let currentPath = _.arrayAs( o.currentPath );
-
-    for( let p = 0 ; p < execPath.length ; p++ )
-    for( let c = 0 ; c < currentPath.length ; c++ )
-    {
-
-      let currentReady = new _.Consequence();
-      readies.push( currentReady );
-
-      if( o.concurrent )
-      {
-        prevReady.then( currentReady );
-      }
-      else
-      {
-        prevReady.finally( currentReady );
-        prevReady = currentReady;
-      }
-
-      let o2 = _.mapExtend( null, o );
-      o2.conStart = null;
-      o2.conTerminate = null;
-      o2.execPath = execPath[ p ];
-      o2.args = o.args ? o.args.slice() : o.args;
-      o2.currentPath = currentPath[ c ];
-      o2.ready = currentReady;
-      optionsArray.push( o2 );
-      _.process.start( o2 );
-
-    }
-
-    o.ready
-    .then( () => _.Consequence.AndKeep( ... readies ) )
-    .finally( ( err, arg ) =>
-    {
-      o.exitCode = err ? null : 0;
-
-      for( let a = 0 ; a < optionsArray.length-1 ; a++ )
-      {
-        let o2 = optionsArray[ a ];
-        if( !o.exitCode && o2.exitCode )
-        o.exitCode = o2.exitCode;
-      }
-
-      if( err )
-      throw err;
-
-      return arg;
-    });
-
-    if( o.sync && !o.deasync )
-    {
-      if( o.returningOptionsArray )
-      return optionsArray;
-      return o;
-    }
-
-    return endDeasyncing();
-  }
-
-  /* */
-
-  function single()
-  {
-
-    _.assert( o.state === 'initial' );
-
-    try
-    {
-      form();
-      launch();
-      timeOutForm();
-      pipe();
-
-      if( o.dry )
-      {
-        /* qqq for Yevhen : make sure option dry is covered good enough */
-        _.assert( o.state === 'starting' );
-        o.state = 'terminated';
-        end( undefined, o.conTerminate );
-      }
-
-    }
-    catch( err )
-    {
-      debugger
-      handleError( err );
-    }
-
-  }
-
-  /* */
-
-  function form()
-  {
-
-    if( _.arrayIs( o.args ) )
-    o.args = o.args.slice();
-    o.args = _.arrayAs( o.args );
-
-    if( _.strIs( o.execPath ) )
-    {
-      o.fullExecPath = o.execPath;
-      execArgs = execPathParse( o.execPath );
-      if( o.mode !== 'shell' )
-      execArgs = argsUnqoute( execArgs );
-      o.execPath = execArgs.shift();
-    }
-
-    if( o.execPath === null )
-    {
-      _.assert( o.args.length, 'Expects {-args-} to have at least one argument if {-execPath-} is not defined' );
-
-      o.execPath = o.args.shift();
-      o.fullExecPath = o.execPath;
-
-      let begin = _.strBeginOf( o.execPath, [ '"', `'`, '`' ] );
-      let end = _.strEndOf( o.execPath, [ '"', `'`, '`' ] );
-
-      if( begin && begin === end )
-      o.execPath = _.strInsideOf( o.execPath, begin, end );
-    }
-
-    if( execArgs && execArgs.length )
-    o.args = _.arrayPrependArray( o.args || [], execArgs );
-
-    if( o.outputAdditive === null )
-    o.outputAdditive = true;
-    o.outputAdditive = !!o.outputAdditive;
-
-    o.currentPath = _.path.resolve( o.currentPath || '.' );
-
-    /* verbosity */
-
-    if( !_.numberIs( o.verbosity ) )
-    o.verbosity = o.verbosity ? 1 : 0;
-    if( o.verbosity < 0 )
-    o.verbosity = 0;
-    if( o.outputPiping === null )
-    {
-      if( o.stdio === 'pipe' || o.stdio[ 1 ] === 'pipe' )
-      o.outputPiping = o.verbosity >= 2;
-    }
-    if( o.outputCollecting && !o.output )
-    o.output = ''; /* xxx : test for multiple run? to which o-map does it collect output? */
-
-    /* ipc */
-
-    if( o.ipc )
-    {
-      if( _.strIs( o.stdio ) )
-      o.stdio = _.dup( o.stdio, 3 );
-      if( !_.longHas( o.stdio, 'ipc' ) )
-      o.stdio.push( 'ipc' );
-    }
-
-    /* stdio compatibility check */
-    if( Config.debug )
-    // if( o.outputPiping || o.outputCollecting || o.outputPrefixing )
-    if( o.outputPiping || o.outputCollecting )
-    _.assert( o.stdio === 'pipe' || o.stdio[ 1 ] === 'pipe' || o.stdio[ 2 ] === 'pipe', 'stdout is not available to collect output or pipe it. Set stdout/stderr channel(s) or option::stdio to "pipe"' );
-
-    /* passingThrough */
-
-    if( o.passingThrough )
-    {
-      let argumentsManual = process.argv.slice( 2 );
-      if( argumentsManual.length )
-      o.args = _.arrayAppendArray( o.args || [], argumentsManual );
-    }
-
-    /* dependencies */
-
-    if( !ChildProcess )
-    ChildProcess = require( 'child_process' );
-
-    if( o.outputGraying )
-    if( !StripAnsi )
-    StripAnsi = require( 'strip-ansi' );
-
-    if( !o.outputDecorating && typeof module !== 'undefined' )
-    try
-    {
-      _.include( 'wColor' );
-    }
-    catch( err )
-    {
-      if( o.verbosity >= 2 )
-      log( _.errOnce( err ), 1 );
-    }
-
-    /* handler of event terminationBegin */
-
-    if( o.detaching )
-    {
-      _.procedure.on( 'terminationBegin', handleProcedureTerminationBegin );
-      o.handleProcedureTerminationBegin = handleProcedureTerminationBegin;
-    }
-
-  }
-
-  /* */
-
-  function launch()
-  {
-    o.state = 'starting';
-
-    if( _.strIs( o.interpreterArgs ) )
-    o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs });
-
-    if( Config.debug )
-    _.assert
-    (
-      _.fileProvider.isDir( o.currentPath ),
-      () => `Current path ( ${o.currentPath} ) doesn\'t exist or it\'s not a directory.\n> ${o.fullExecPath}`
-    );
-
-    let execPath = o.execPath;
-    let args = o.args.slice();
-
-    if( process.platform === 'win32' )
-    {
-      execPath = _.path.nativizeTolerant( execPath );
-    }
-
-    if( o.mode === 'fork')
-    {
-      let o2 = optionsForFork();
-      execPath = execPathForFork( execPath );
-
-      o.fullExecPath = _.strConcat( _.arrayAppendArray( [ execPath ], args ) );
-      inputMirror();
-
-      if( o.dry )
-      return;
-
-      o.process = ChildProcess.fork( execPath, args, o2 );
-    }
-    else if( o.mode === 'spawn' )
-    {
-      let o2 = optionsForSpawn();
-
-      o.fullExecPath = _.strConcat( _.arrayAppendArray( [ execPath ], args ) );
-      inputMirror();
-
-      if( o.dry )
-      return;
-
-      if( o.sync && !o.deasync )
-      o.process = ChildProcess.spawnSync( execPath, args, o2 );
-      else
-      o.process = ChildProcess.spawn( execPath, args, o2 );
-
-    }
-    else if( o.mode === 'shell' )
-    {
-
-      let appPath = process.platform === 'win32' ? 'cmd' : 'sh';
-      let arg1 = process.platform === 'win32' ? '/c' : '-c';
-      let arg2 = execPath;
-      let o2 = optionsForSpawn();
-
-      /*
-
-      windowsVerbatimArguments allows to have arguments with space(s) in shell on Windows
-      Following calls will not work as expected( argument will be splitted by space ), if windowsVerbatimArguments is disabled:
-
-      _.process.start( 'node path/to/script.js "path with space"' );
-      _.process.start({ execPath : 'node path/to/script.js', args : [ "path with space" ] });
-
-     */
-
-      o2.windowsVerbatimArguments = true;
-
-      if( args.length )
-      arg2 = arg2 + ' ' + argsJoin( args );
-
-      o.fullExecPath = arg2;
-      inputMirror();
-
-      if( o.dry )
-      return;
-
-      if( o.sync && !o.deasync )
-      o.process = ChildProcess.spawnSync( appPath, [ arg1, arg2 ], o2 );
-      else
-      o.process = ChildProcess.spawn( appPath, [ arg1, arg2 ], o2 );
-
-    }
-    else _.assert( 0, 'Unknown mode', _.strQuote( o.mode ), 'to start process at path', _.strQuote( o.paths ) );
-
-    /* procedure */
-
-    if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
-    {
-      if( Config.debug )
-      {
-        let result = _.procedure.find( 'PID:' + o.process.pid );
-        _.assert( result.length === 0, `No procedure expected for child process with pid:${o.process.pid}` );
-      }
-      o.procedure = _.procedure.begin({ _name : 'PID:' + o.process.pid, _object : o.process, _stack : o.stack });
-    }
-
-    /* state */
-
-    o.state = 'started';
-    o.conStart.take( o );
-  }
-
-  /* */
-
-  function timeOutForm()
-  {
-
-    if( o.timeOut && !o.dry )
-    if( !o.sync || o.deasync )
-    _.time.begin( o.timeOut, () =>
-    {
-      if( o.state === 'terminated' || o.error )
-      return;
-      o.exitReason = 'time';
-      o.process.kill( 'SIGTERM' ); /* qqq for Vova : need to catch event when process is really down */
-    });
-
   }
 
   /* */
@@ -1283,7 +1207,7 @@ function start_body( o )
 
 }
 
-start_body.defaults = /* qqq for Vova : split on _.process.start(), _.process.startSingle() */
+startSingle_body.defaults = /* qqq for Vova : split on _.process.start(), _.process.startSingle() */
 {
 
   execPath : null,
@@ -1331,6 +1255,266 @@ start_body.defaults = /* qqq for Vova : split on _.process.start(), _.process.st
   outputDecoratingStdout : null, /* qqq for Yevhen : cover the option */
   outputGraying : 0,
   inputMirroring : 1, /* qqq for Yevhen : cover the option */
+
+}
+
+let startSingle = _.routineFromPreAndBody( startSingle_pre, startSingle_body );
+
+//
+
+function start_pre( routine, args )
+{
+  let o = startCommon_pre( routine, args );
+
+  _.assert( arguments.length === 2 );
+
+  _.assert
+  (
+      o.execPath === null || _.strIs( o.execPath ) || _.strsAreAll( o.execPath )
+    , 'Expects string or strings {-o.execPath-}, but got', _.strType( o.execPath )
+  );
+  _.assert
+  (
+      o.currentPath === null || _.strIs( o.currentPath ) || _.strsAreAll( o.currentPath )
+    , 'Expects string or strings {-o.currentPath-}, but got', _.strType( o.currentPath )
+  );
+
+  return o;
+}
+
+//
+
+/**
+ * @summary Executes command in a controled child process.
+ *
+ * @param {Object} o Options map
+ * @param {String} o.execPath Command to execute, path to application, etc.
+ * @param {String} o.currentPath Current working directory of child process.
+
+ * @param {Boolean} o.sync=0 Execute command in synchronous mode.
+   There are two synchrounous modes: first uses sync method of `ChildProcess` module , second uses async method, but in combination with {@link https://www.npmjs.com/package/deasync deasync} and `wConsequence` to turn async execution into synchrounous.
+   Which sync mode will be selected depends on value of `o.deasync` option.
+   Sync mode returns options map.
+   Async mode returns instance of {@link module:Tools/base/Consequence.Consequence wConsequence} with gives a message( options map ) when execution of child process is finished.
+ * @param {Boolean} o.deasync=1 Controls usage of `deasync` module in synchrounous mode. Allows to run command synchrounously in modes( o.mode ) that don't support synchrounous execution, like `fork`.
+
+ * @param {Array} o.args=null Arguments for command.
+ * @param {Array} o.interpreterArgs=null Arguments for node. Used only in `fork` mode. {@link https://nodejs.org/api/cli.html Command Line Options}
+ * @param {String} o.mode='shell' Execution mode. Possible values: `fork`, `spawn`, `shell`. {@link https://nodejs.org/api/child_process.html Details about modes}
+ * @param {Object} o.ready=null `wConsequence` instance that gives a message when execution is finished.
+ * @param {Object} o.logger=null `wLogger` instance that prints output during command execution.
+
+ * @param {Object} o.env=null Environment variables( key-value pairs ).
+ * @param {String/Array} o.stdio='pipe' Controls stdin,stdout configuration. {@link https://nodejs.org/api/child_process.html#child_process_options_stdio Details}
+ * @param {Boolean} o.ipc=0  Creates `ipc` channel between parent and child processes.
+ * @param {Boolean} o.detaching=0 Creates independent process for a child. Allows child process to continue execution when parent process exits. Platform dependent option. {@link https://nodejs.org/api/child_process.html#child_process_options_detached Details}.
+ * @param {Boolean} o.windowHiding=1 Hide the child process console window that would normally be created on Windows. {@link https://nodejs.org/api/child_process.html#child_process_child_process_spawn_command_args_options Details}.
+ * @param {Boolean} o.passingThrough=0 Allows to pass arguments of parent process to the child process.
+ * @param {Boolean} o.concurrent=0 Allows paralel execution of several child processes. By default executes commands one by one.
+ * @param {Number} o.timeOut=null Time in milliseconds before execution will be terminated.
+
+ * @param {Boolean} o.throwingExitCode=1 Throws an Error if child process returns non-zero exit code. Child returns non-zero exit code if it was terminated by parent, timeOut or when internal error occurs.
+
+ * @param {Boolean} o.applyingExitCode=0 Applies exit code to parent process.
+
+ * @param {Number} o.verbosity=2 Controls amount of output, `0` disables output at all.
+ * @param {Boolean} o.outputDecorating=0 Logger prints everything in raw mode, no styles applied.
+ * @param {Boolean} o.outputDecoratingStdout=0 Logger prints output from `stdout` in raw mode, no styles applied.
+ * @param {Boolean} o.outputDecoratingStderr=0 Logger prints output from `stderr` in raw mode, no styles applied.
+ * @param {Boolean} o.outputPrefixing=0 Add prefix with name of output channel( stderr, stdout ) to each line.
+ * @param {Boolean} o.outputPiping=null Handles output from `stdout` and `stderr` channels. Is enabled by default if `o.verbosity` levels is >= 2 and option is not specified explicitly. This option is required by other "output" options that allows output customization.
+ * @param {Boolean} o.outputCollecting=0 Enables coullection of output into sinle string. Collects output into `o.output` property if enabled.
+ * @param {Boolean} o.outputAdditive=null Prints output during execution. Enabled by default if shell executes only single command and option is not specified explicitly.
+ * @param {Boolean} o.inputMirroring=1 Print complete input line before execution: path to command, arguments.
+ *
+ * @return {Object} Returns `wConsequence` instance in async mode. In sync mode returns options map. Options map contains not only input options, but child process descriptor, collected output, exit code and other useful info.
+ *
+ * @example //short way, command and arguments in one string
+ *
+ * let _ = require('wTools')
+ * _.include( 'wProcessBasic' )
+ * _.include( 'wConsequence' )
+ * _.include( 'wLogger' )
+ *
+ * let con = _.process.start( 'node -v' );
+ *
+ * con.then( ( op ) =>
+ * {
+ *  console.log( 'ExitCode:', op.exitCode );
+ *  return op;
+ * })
+ *
+ * @example //command and arguments as options
+ *
+ * let _ = require('wTools')
+ * _.include( 'wProcessBasic' )
+ * _.include( 'wConsequence' )
+ * _.include( 'wLogger' )
+ *
+ * let con = _.process.start({ execPath : 'node', args : [ '-v' ] });
+ *
+ * con.then( ( op ) =>
+ * {
+ *  console.log( 'ExitCode:', op.exitCode );
+ *  return op;
+ * })
+ *
+ * @function shell
+ * @module Tools/base/ProcessBasic
+ * @namespace Tools.process
+ */
+
+function start_body( o )
+{
+
+/* subroutines index :
+
+  form1,
+  endDeasyncing,
+  multiple,
+
+*/
+
+  _.assert( arguments.length === 1, 'Expects single argument' );
+
+  let readyCallback; /* xxx : cover ready callback for multiple */
+
+  form0();
+
+  if( _.arrayIs( o.execPath ) || _.arrayIs( o.currentPath ) )
+  return multiple();
+
+  return _.process.startSingle.body.call( this, o );
+
+  /* */
+
+  function form0()
+  {
+
+    if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
+    o.stack = _.Procedure.Stack( o.stack, 3 );
+  }
+
+  /* */
+
+  function form1()
+  {
+
+    if( o.ready === null )
+    {
+      o.ready = new _.Consequence().take( null );
+    }
+    else if( !_.consequenceIs( o.ready ) )
+    {
+      readyCallback = o.ready;
+      _.assert( _.routineIs( readyCallback ) );
+      o.ready = new _.Consequence().take( null );
+    }
+
+    _.assert( !_.consequenceIs( o.ready ) || o.ready.resourcesCount() <= 1 );
+
+    o.logger = o.logger || _global.logger;
+
+  }
+
+  /* */
+
+  function endDeasyncing()
+  {
+    if( o.deasync )
+    {
+      o.ready.deasync();
+      if( o.sync )
+      return o.ready.sync();
+    }
+    return o.ready;
+  }
+
+  /* */
+
+  function multiple()
+  {
+
+    form1();
+
+    if( _.arrayIs( o.execPath ) && o.execPath.length > 1 && o.concurrent && o.outputAdditive === null )
+    o.outputAdditive = 0;
+
+    o.currentPath = o.currentPath || _.path.current();
+
+    let prevReady = o.ready;
+    let readies = [];
+    let optionsArray = [];
+
+    let execPath = _.arrayAs( o.execPath );
+    let currentPath = _.arrayAs( o.currentPath );
+
+    for( let p = 0 ; p < execPath.length ; p++ )
+    for( let c = 0 ; c < currentPath.length ; c++ )
+    {
+
+      let currentReady = new _.Consequence();
+      readies.push( currentReady );
+
+      if( o.concurrent )
+      {
+        prevReady.then( currentReady );
+      }
+      else
+      {
+        prevReady.finally( currentReady );
+        prevReady = currentReady;
+      }
+
+      let o2 = _.mapExtend( null, o );
+      o2.conStart = null;
+      o2.conTerminate = null;
+      o2.execPath = execPath[ p ];
+      o2.args = o.args ? o.args.slice() : o.args;
+      o2.currentPath = currentPath[ c ];
+      o2.ready = currentReady;
+      optionsArray.push( o2 );
+      _.process.start( o2 );
+
+    }
+
+    o.ready
+    .then( () => _.Consequence.AndKeep( ... readies ) )
+    .finally( ( err, arg ) =>
+    {
+      o.exitCode = err ? null : 0;
+
+      for( let a = 0 ; a < optionsArray.length-1 ; a++ )
+      {
+        let o2 = optionsArray[ a ];
+        if( !o.exitCode && o2.exitCode )
+        o.exitCode = o2.exitCode;
+      }
+
+      if( err )
+      throw err;
+
+      return arg;
+    });
+
+    if( o.sync && !o.deasync )
+    {
+      if( o.returningOptionsArray )
+      return optionsArray;
+      return o;
+    }
+
+    return endDeasyncing();
+  }
+
+  /* */
+
+}
+
+start_body.defaults = /* xxx : split on _.process.start(), _.process.startSingle() */
+{
+
+  ... startSingle.defaults,
 
 }
 
@@ -2441,6 +2625,7 @@ let Extension =
 
   // start
 
+  startSingle,
   start,
   startPassingThrough,
   startNjs,

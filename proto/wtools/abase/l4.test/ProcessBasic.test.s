@@ -111,9 +111,6 @@ This section shows when event `exit` of child process is called. The behavior is
 Event 'exit' is aways called. Options `stdio` and `detaching` also don't affect `exit` event.
 */
 
-/* qqq for Vova : make general table in md file for this: "Vova qqq: close event is not emitted for disconnected detached child in fork mode" aaa:done*/
-/* qqq for Vova : move all tables here aaa:done*/
-
 /* qqq for Yevhen : find all tests with passingThrough:1, separate them from the rest of the test
 and rewrite to run process which run process to avoid influence of arguments of tester on testing
 */
@@ -145,10 +142,6 @@ function suiteEnd()
   _.assert( _.strHas( context.suiteTempPath, '/ProcessBasic-' ) )
   _.path.tempClose( context.suiteTempPath );
 }
-
-//
-
-/* qqq for Vova : simplify and make it subroutine aaa: just moved*/
 
 //
 
@@ -989,7 +982,7 @@ function startFork( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testApp );
+  let programPath = a.program( program1 );
 
   /* */
 
@@ -1295,6 +1288,8 @@ function startFork( test )
 
 }
 
+//
+
 function startErrorHandling( test )
 {
   let context = this;
@@ -1519,7 +1514,7 @@ function startErrorHandling( test )
 
   })
 
-  /* qqq for Vova : switch on? aaa:done */
+  /* */
 
   a.ready.then( function()
   {
@@ -1569,6 +1564,8 @@ function startErrorHandling( test )
     return null;
 
   })
+
+  /* */
 
   return a.ready;
 
@@ -7624,7 +7621,7 @@ function startProcedureTrivial( test )
       test.identical( procedure[ 0 ].isAlive(), false );
       test.identical( o.procedure, procedure[ 0 ] );
       test.identical( procedure[ 0 ].object(), o.process );
-      test.is( _.strHas( o.procedure._sourcePath, 'Execution.s' ) );
+      test.is( _.strHas( o.procedure._sourcePath, 'Execution.s' ) ); debugger;
       return null;
     })
   })
@@ -9908,7 +9905,7 @@ function startDetachedOutputStdioPipe( test )
     {
       test.identical( o.exitCode, 0 )
 
-      // qqq for Vova: output piping doesn't work as expected in mode "shell" on windows
+      // zzz for Vova: output piping doesn't work as expected in mode "shell" on windows
       // investigate if its fixed in never verions of node or implement alternative solution
 
       if( process.platform === 'win32' )
@@ -10618,6 +10615,8 @@ startEventClose.description =
 Check if close event is called.
 `
 
+//
+
 function startEventExit( test )
 {
   let context = this;
@@ -10625,19 +10624,23 @@ function startEventExit( test )
   let locals = { toolsPath : context.toolsPath, context : { t1 : context.t1 } };
   let testAppPath = a.path.nativize( a.program({ routine : program1, locals }) );
   let data = [];
-
   let modes = [ 'spawn', 'fork', 'shell' ];
   let stdio = [ 'inherit', 'pipe', 'ignore' ];
   let ipc = [ false, true ]
   let detaching = [ false, true ]
   let disconnecting = [ false, true ];
 
-  modes.forEach(mode => {
-    stdio.forEach(stdio => {
-      ipc.forEach(ipc => {
-        detaching.forEach(detaching => {
-          disconnecting.forEach(disconnecting => {
-            a.ready.then(() => run(mode, stdio, ipc, detaching, disconnecting));
+  modes.forEach( mode =>
+  {
+    stdio.forEach( stdio =>
+    {
+      ipc.forEach( ipc =>
+      {
+        detaching.forEach( detaching =>
+        {
+          disconnecting.forEach( disconnecting =>
+          {
+            a.ready.then(() => run( mode, stdio, ipc, detaching, disconnecting ) );
           })
         })
       })
@@ -10658,11 +10661,11 @@ function startEventExit( test )
 
   /* - */
 
-  function run( mode,stdio,ipc,detaching,disconnecting )
+  function run( mode, stdio, ipc, detaching, disconnecting )
   {
     let ready = new _.Consequence().take( null );
 
-    if( detaching && stdio === 'inherit' ) //qqq for Vova: enable if assert in start is removed
+    if( detaching && stdio === 'inherit' ) /* remove if assert in start is removed */
     return ready;
 
     if( ipc && mode === 'shell' )
@@ -10717,12 +10720,7 @@ function startEventExit( test )
 
   function program1()
   {
-    let _ = require( toolsPath )
-    console.log( 'program1::begin' );
-    setTimeout( () =>
-    {
-      console.log( 'program1::end' );
-    }, context.t1 * 2 );
+    setTimeout( () => {}, context.t1 );
   }
 }
 
@@ -10731,6 +10729,7 @@ startEventExit.description =
 `
 Check if exit event is called.
 `
+
 //
 
 /* qqq for Yevhen : implement for other modes */
@@ -16318,7 +16317,7 @@ function startOptionCurrentPaths( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( program1 ) );
+  let programPath = a.path.nativize( a.program( testApp ) );
 
   let o2 =
   {
@@ -16338,12 +16337,10 @@ function startOptionCurrentPaths( test )
     let o1 = op[ 0 ];
     let o2 = op[ 1 ];
 
-    let cwd1 = a.fileProvider.fileRead( a.abs( o1.process.pid.toString() ) );
-    test.is( _.strHas( cwd1, a.path.nativize( a.routinePath ) ) );
+    test.is( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
     test.identical( o1.exitCode, 0 );
 
-    let cwd2 = a.fileProvider.fileRead( a.abs( o2.process.pid.toString() ) );
-    test.is( _.strHas( cwd2, __dirname ) );
+    test.is( _.strHas( o2.output, __dirname ) );
     test.identical( o2.exitCode, 0 );
 
     return op;
@@ -16358,12 +16355,10 @@ function startOptionCurrentPaths( test )
     let o1 = op[ 0 ];
     let o2 = op[ 1 ];
 
-    let cwd1 = a.fileProvider.fileRead( a.abs( o1.process.pid.toString() ) );
-    test.is( _.strHas( cwd1, a.path.nativize( a.routinePath ) ) );
+    test.is( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
     test.identical( o1.exitCode, 0 );
 
-    let cwd2 = a.fileProvider.fileRead( a.abs( o2.process.pid.toString() ) );
-    test.is( _.strHas( cwd2, __dirname ) );
+    test.is( _.strHas( o2.output, __dirname ) );
     test.identical( o2.exitCode, 0 );
 
     return op;
@@ -16378,12 +16373,10 @@ function startOptionCurrentPaths( test )
     let o1 = op[ 0 ];
     let o2 = op[ 1 ];
 
-    let cwd1 = a.fileProvider.fileRead( a.abs( o1.process.pid.toString() ) );
-    test.is( _.strHas( cwd1, a.path.nativize( a.routinePath ) ) );
+    test.is( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
     test.identical( o1.exitCode, 0 );
 
-    let cwd2 = a.fileProvider.fileRead( a.abs( o2.process.pid.toString() ) );
-    test.is( _.strHas( cwd2, __dirname ) );
+    test.is( _.strHas( o2.output, __dirname ) );
     test.identical( o2.exitCode, 0 );
 
     return op;
@@ -16400,20 +16393,16 @@ function startOptionCurrentPaths( test )
     let o3 = op[ 2 ];
     let o4 = op[ 3 ];
 
-    let cwd1 = a.fileProvider.fileRead( a.abs( o1.process.pid.toString() ) );
-    test.is( _.strHas( cwd1, a.path.nativize( a.routinePath ) ) );
+    test.is( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
     test.identical( o1.exitCode, 0 );
 
-    let cwd2 = a.fileProvider.fileRead( a.abs( o2.process.pid.toString() ) );
-    test.is( _.strHas( cwd2, __dirname ) );
+    test.is( _.strHas( o2.output, __dirname ) );
     test.identical( o2.exitCode, 0 );
 
-    let cwd3 = a.fileProvider.fileRead( a.abs( o3.process.pid.toString() ) );
-    test.is( _.strHas( cwd3, a.path.nativize( a.routinePath ) ) );
+    test.is( _.strHas( o3.output, a.path.nativize( a.routinePath ) ) );
     test.identical( o3.exitCode, 0 );
 
-    let cwd4 = a.fileProvider.fileRead( a.abs( o4.process.pid.toString() ) );
-    test.is( _.strHas( cwd4, __dirname ) );
+    test.is( _.strHas( o4.output, __dirname ) );
     test.identical( o4.exitCode, 0 );
 
     return op;
@@ -16423,14 +16412,11 @@ function startOptionCurrentPaths( test )
 
   /* - */
 
-  function program1()
+  function testApp()
   {
-    let _ = require( toolsPath );
-    _.include( 'wFiles' );
-    _.fileProvider.fileWrite( _.path.join( __dirname, process.pid.toString() ), process.cwd() ); /* qqq for Vova : should not be visible if verbosity of tester is low, if possible aaa:done*/
+    console.log( process.cwd() );
   }
 }
-
 
 // --
 // termination
