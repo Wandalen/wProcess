@@ -15855,6 +15855,91 @@ startNormalizedExecPath.timeOut = 60000;
 
 //
 
+function startDisconnectNonDetached( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let locals = { toolsPath : context.toolsPath, context : { t1 : context.t1 } };
+  let testAppPath = a.path.nativize( a.program({ routine : program1, locals }) );
+
+  let modes = [ 'spawn', 'fork', 'shell' ];
+
+  modes.forEach( ( mode ) =>
+  {
+    a.ready.tap( () => test.open( mode ) );
+    a.ready.then( () => run( mode ) );
+    a.ready.tap( () => test.close( mode ) );
+  })
+
+  return a.ready;
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      let track = [];
+      let o =
+      {
+        execPath : mode === 'fork' ? 'program1.js' : 'node program1.js',
+        currentPath : a.routinePath,
+        stdio : 'pipe',
+        outputPiping : 1,
+        outputCollecting : 1,
+        detaching : 0,
+        mode,
+      }
+
+      _.process.start( o );
+
+      o.conStart.then( () =>
+      {
+        track.push( 'conStart' );
+        o.disconnect();
+        return null;
+      })
+
+      o.conTerminate.thenGive( ( op ) =>
+      {
+        track.push( 'conTerminate' );
+        test.identical( op.exitCode, 0 );
+        test.identical( op.exitSignal, null );
+      })
+
+      let timeOut = _.time.out( context.t1 * 3, () =>
+      {
+        test.identical( track, [ 'conStart' ] );
+        test.is( !_.process.isAlive( o.process.pid ) );
+        test.identical( o.output, '' );
+        o.conTerminate.cancel();
+        return null;
+      })
+
+      return _.Consequence.AndKeep_( o.conStart, timeOut );
+    })
+
+    return ready;
+  }
+
+  function program1()
+  {
+    let _ = require( toolsPath )
+    console.log( 'program1::begin' );
+    setTimeout( () =>
+    {
+      console.log( 'program1::end' );
+    }, context.t1 * 2 );
+  }
+}
+
+startDisconnectNonDetached.description =
+`
+Checks that disconnected non detached process doesn't emit close signal.
+`
+
+//
+
 function appTempApplication( test )
 {
   let context = this;
@@ -19670,6 +19755,8 @@ var Proto =
     startOutputOptionsCompatibilityLateCheck,
 
     startNormalizedExecPath,
+
+    startDisconnectNonDetached,
 
     appTempApplication,
 
