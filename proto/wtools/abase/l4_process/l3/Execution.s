@@ -740,7 +740,7 @@ function start_body( o )
       o.outputPiping = o.verbosity >= 2;
     }
     if( o.outputCollecting && !o.output )
-    o.output = ''; /* xxx qqq for Vova : test for multiple run? to which o-map does it collect output? */
+    o.output = ''; /* xxx : test for multiple run? to which o-map does it collect output? */
 
     /* ipc */
 
@@ -896,7 +896,7 @@ function start_body( o )
         let result = _.procedure.find( 'PID:' + o.process.pid );
         _.assert( result.length === 0, `No procedure expected for child process with pid:${o.process.pid}` );
       }
-      o.procedure = _.procedure.begin({ _name : 'PID:' + o.process.pid, _object : o.process, _stack : o.stack }); /* xxx : adjust stack and source path of the procedure */
+      o.procedure = _.procedure.begin({ _name : 'PID:' + o.process.pid, _object : o.process, _stack : o.stack });
     }
 
     /* state */
@@ -1084,7 +1084,7 @@ function start_body( o )
   function argsJoin( args )
   {
 
-    if( !execArgs && !argumentsManual ) /* xxx yyy qqq for Vova : argumentsManual?? should be no such global variable */
+    if( !execArgs && !argumentsManual ) /* yyy qqq for Vova : argumentsManual?? should be no such global variable */
     return args.join( ' ' );
     let i = execArgs ? execArgs.length : args.length - argumentsManual.length;
 

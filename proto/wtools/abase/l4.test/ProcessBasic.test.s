@@ -647,264 +647,6 @@ function start2( test )
 
 //
 
-/* qqq for Yevhen : split by modes | aaa : Done. Yevhen S.
-qqq for Yevhen : not really
-*/
-
-function startOptionCurrentPath( test )
-{
-  let context = this;
-  let a = test.assetFor( false );
-  let testFilePath = a.path.join( a.routinePath, 'program1TestFile' );
-  let locals = { toolsPath : context.toolsPath, testFilePath }
-  let programPath = a.path.nativize( a.program({ routine : program1, locals }) );
-  let modes = [ 'shell', 'spawn', 'fork' ]
-
-  modes.forEach( ( mode ) =>
-  {
-    a.ready.tap( () => test.open( mode ) )
-    a.ready.then( () => run( mode ) )
-    a.ready.tap( () => test.close( mode ) )
-  })
-
-  return a.ready;
-
-  /* */
-
-  function run( mode )
-  {
-    let ready = new _.Consequence().take( null );
-
-    ready.then( function()
-    {
-      let o =
-      {
-        execPath :  mode !== 'fork' ? 'node ' + programPath : programPath,
-        currentPath : __dirname,
-        mode,
-        stdio : 'pipe',
-        outputCollecting : 1,
-      }
-      return _.process.start( o )
-      .then( function( op )
-      {
-        let got = a.fileProvider.fileRead( testFilePath );
-        test.identical( got, __dirname );
-        return null;
-      })
-    })
-
-    /* */
-
-    ready.then( function()
-    {
-      test.case = 'normalized, currentPath leads to root of current drive';
-
-      let trace = a.path.traceToRoot( a.path.normalize( __dirname ) );
-      let currentPath = trace[ 1 ];
-
-      let o =
-      {
-        execPath :  mode !== 'fork' ? 'node ' + programPath : programPath,
-        currentPath,
-        mode,
-        stdio : 'pipe',
-        outputCollecting : 1,
-      }
-
-      return _.process.start( o )
-      .then( function( op )
-      {
-        let got = a.fileProvider.fileRead( testFilePath );
-        test.identical( got, a.path.nativize( currentPath ) );
-        return null;
-      })
-    })
-
-    /* */
-
-    ready.then( function()
-    {
-      test.case = 'normalized with slash, currentPath leads to root of current drive';
-
-      let trace = a.path.traceToRoot( a.path.normalize( __dirname ) );
-      let currentPath = trace[ 1 ] + '/';
-
-      let o =
-      {
-        execPath :  mode !== 'fork' ? 'node ' + programPath : programPath,
-        currentPath,
-        mode,
-        stdio : 'pipe',
-        outputCollecting : 1,
-      }
-
-      return _.process.start( o )
-      .then( function( op )
-      {
-        let got = a.fileProvider.fileRead( testFilePath );
-        if( process.platform === 'win32')
-        test.identical( got, a.path.nativize( currentPath ) );
-        else
-        test.identical( got, trace[ 1 ] );
-        return null;
-      })
-    })
-
-    /* */
-
-    ready.then( function()
-    {
-      test.case = 'nativized, currentPath leads to root of current drive';
-
-      let trace = a.path.traceToRoot( __dirname );
-      let currentPath = a.path.nativize( trace[ 1 ] )
-
-      let o =
-      {
-        execPath :  mode !== 'fork' ? 'node ' + programPath : programPath,
-        currentPath,
-        mode,
-        stdio : 'pipe',
-        outputCollecting : 1,
-      }
-
-      return _.process.start( o )
-      .then( function( op )
-      {
-        let got = a.fileProvider.fileRead( testFilePath );
-        test.identical( got, currentPath )
-        return null;
-      })
-    })
-
-    return ready;
-  }
-
-
-
-  /* - */
-
-  function program1()
-  {
-    let _ = require( toolsPath );
-    _.include( 'wFiles' );
-    _.fileProvider.fileWrite( testFilePath, process.cwd() );
-  }
-
-}
-
-//
-
-/* qqq for Yevhen : try to introduce subroutine for modes */
-function startOptionCurrentPaths( test )
-{
-  let context = this;
-  let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testApp ) );
-
-  let o2 =
-  {
-    execPath : 'node ' + programPath,
-    ready : a.ready,
-    currentPath : [ a.routinePath, __dirname ],
-    stdio : 'pipe',
-    outputCollecting : 1
-  }
-
-  /* */
-
-  _.process.start( _.mapSupplement( { mode : 'shell' }, o2 ) );
-
-  a.ready.then( ( op ) =>
-  {
-    let o1 = op[ 0 ];
-    let o2 = op[ 1 ];
-
-    test.is( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
-    test.identical( o1.exitCode, 0 );
-
-    test.is( _.strHas( o2.output, __dirname ) );
-    test.identical( o2.exitCode, 0 );
-
-    return op;
-  })
-
-  /* */
-
-  _.process.start( _.mapSupplement( { mode : 'spawn' }, o2 ) );
-
-  a.ready.then( ( op ) =>
-  {
-    let o1 = op[ 0 ];
-    let o2 = op[ 1 ];
-
-    test.is( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
-    test.identical( o1.exitCode, 0 );
-
-    test.is( _.strHas( o2.output, __dirname ) );
-    test.identical( o2.exitCode, 0 );
-
-    return op;
-  })
-
-  /* */
-
-  _.process.start( _.mapSupplement( { mode : 'fork', execPath : programPath }, o2 ) );
-
-  a.ready.then( ( op ) =>
-  {
-    let o1 = op[ 0 ];
-    let o2 = op[ 1 ];
-
-    test.is( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
-    test.identical( o1.exitCode, 0 );
-
-    test.is( _.strHas( o2.output, __dirname ) );
-    test.identical( o2.exitCode, 0 );
-
-    return op;
-  })
-
-  /*  */
-
-  _.process.start( _.mapSupplement( { mode : 'spawn', execPath : [ 'node ' + programPath, 'node ' + programPath ] }, o2 ) );
-
-  a.ready.then( ( op ) =>
-  {
-    let o1 = op[ 0 ];
-    let o2 = op[ 1 ];
-    let o3 = op[ 2 ];
-    let o4 = op[ 3 ];
-
-    test.is( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
-    test.identical( o1.exitCode, 0 );
-
-    test.is( _.strHas( o2.output, __dirname ) );
-    test.identical( o2.exitCode, 0 );
-
-    test.is( _.strHas( o3.output, a.path.nativize( a.routinePath ) ) );
-    test.identical( o3.exitCode, 0 );
-
-    test.is( _.strHas( o4.output, __dirname ) );
-    test.identical( o4.exitCode, 0 );
-
-    return op;
-  })
-
-  return a.ready;
-
-  /* - */
-
-  function testApp()
-  {
-    // debugger
-    console.log( process.cwd() ); /* qqq for Vova : should not be visible if verbosity of tester is low, if possible */
-  }
-}
-
-//
-
 /*
 
   zzz : investigate please
@@ -8361,7 +8103,7 @@ startChronology.description =
 //
 
 /* xxx : make similar routine for multiple */
-function startNjsWithReadyDelayStructural( test ) /* qqq for Yevhen : implement additional test case with option detaching:1 | aaa : Done. Yevhen S. */
+function startNjsWithReadyDelayStructural( test )
 {
   let context = this;
   let a = test.assetFor( false );
@@ -15857,6 +15599,264 @@ Simulates run of routine start with all possible options.
 After execution checks fields of run descriptor.
 `
 
+//
+
+/* qqq for Yevhen : split by modes | aaa : Done. Yevhen S.
+qqq for Yevhen : not really
+*/
+
+function startOptionCurrentPath( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let testFilePath = a.path.join( a.routinePath, 'program1TestFile' );
+  let locals = { toolsPath : context.toolsPath, testFilePath }
+  let programPath = a.path.nativize( a.program({ routine : program1, locals }) );
+  let modes = [ 'shell', 'spawn', 'fork' ]
+
+  modes.forEach( ( mode ) =>
+  {
+    a.ready.tap( () => test.open( mode ) )
+    a.ready.then( () => run( mode ) )
+    a.ready.tap( () => test.close( mode ) )
+  })
+
+  return a.ready;
+
+  /* */
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( function()
+    {
+      let o =
+      {
+        execPath :  mode !== 'fork' ? 'node ' + programPath : programPath,
+        currentPath : __dirname,
+        mode,
+        stdio : 'pipe',
+        outputCollecting : 1,
+      }
+      return _.process.start( o )
+      .then( function( op )
+      {
+        let got = a.fileProvider.fileRead( testFilePath );
+        test.identical( got, __dirname );
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( function()
+    {
+      test.case = 'normalized, currentPath leads to root of current drive';
+
+      let trace = a.path.traceToRoot( a.path.normalize( __dirname ) );
+      let currentPath = trace[ 1 ];
+
+      let o =
+      {
+        execPath :  mode !== 'fork' ? 'node ' + programPath : programPath,
+        currentPath,
+        mode,
+        stdio : 'pipe',
+        outputCollecting : 1,
+      }
+
+      return _.process.start( o )
+      .then( function( op )
+      {
+        let got = a.fileProvider.fileRead( testFilePath );
+        test.identical( got, a.path.nativize( currentPath ) );
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( function()
+    {
+      test.case = 'normalized with slash, currentPath leads to root of current drive';
+
+      let trace = a.path.traceToRoot( a.path.normalize( __dirname ) );
+      let currentPath = trace[ 1 ] + '/';
+
+      let o =
+      {
+        execPath :  mode !== 'fork' ? 'node ' + programPath : programPath,
+        currentPath,
+        mode,
+        stdio : 'pipe',
+        outputCollecting : 1,
+      }
+
+      return _.process.start( o )
+      .then( function( op )
+      {
+        let got = a.fileProvider.fileRead( testFilePath );
+        if( process.platform === 'win32')
+        test.identical( got, a.path.nativize( currentPath ) );
+        else
+        test.identical( got, trace[ 1 ] );
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( function()
+    {
+      test.case = 'nativized, currentPath leads to root of current drive';
+
+      let trace = a.path.traceToRoot( __dirname );
+      let currentPath = a.path.nativize( trace[ 1 ] )
+
+      let o =
+      {
+        execPath :  mode !== 'fork' ? 'node ' + programPath : programPath,
+        currentPath,
+        mode,
+        stdio : 'pipe',
+        outputCollecting : 1,
+      }
+
+      return _.process.start( o )
+      .then( function( op )
+      {
+        let got = a.fileProvider.fileRead( testFilePath );
+        test.identical( got, currentPath )
+        return null;
+      })
+    })
+
+    return ready;
+  }
+
+
+
+  /* - */
+
+  function program1()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wFiles' );
+    _.fileProvider.fileWrite( testFilePath, process.cwd() );
+  }
+
+}
+
+//
+
+/* qqq for Yevhen : try to introduce subroutine for modes */
+function startOptionCurrentPaths( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let programPath = a.path.nativize( a.program( testApp ) );
+
+  let o2 =
+  {
+    execPath : 'node ' + programPath,
+    ready : a.ready,
+    currentPath : [ a.routinePath, __dirname ],
+    stdio : 'pipe',
+    outputCollecting : 1
+  }
+
+  /* */
+
+  _.process.start( _.mapSupplement( { mode : 'shell' }, o2 ) );
+
+  a.ready.then( ( op ) =>
+  {
+    let o1 = op[ 0 ];
+    let o2 = op[ 1 ];
+
+    test.is( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
+    test.identical( o1.exitCode, 0 );
+
+    test.is( _.strHas( o2.output, __dirname ) );
+    test.identical( o2.exitCode, 0 );
+
+    return op;
+  })
+
+  /* */
+
+  _.process.start( _.mapSupplement( { mode : 'spawn' }, o2 ) );
+
+  a.ready.then( ( op ) =>
+  {
+    let o1 = op[ 0 ];
+    let o2 = op[ 1 ];
+
+    test.is( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
+    test.identical( o1.exitCode, 0 );
+
+    test.is( _.strHas( o2.output, __dirname ) );
+    test.identical( o2.exitCode, 0 );
+
+    return op;
+  })
+
+  /* */
+
+  _.process.start( _.mapSupplement( { mode : 'fork', execPath : programPath }, o2 ) );
+
+  a.ready.then( ( op ) =>
+  {
+    let o1 = op[ 0 ];
+    let o2 = op[ 1 ];
+
+    test.is( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
+    test.identical( o1.exitCode, 0 );
+
+    test.is( _.strHas( o2.output, __dirname ) );
+    test.identical( o2.exitCode, 0 );
+
+    return op;
+  })
+
+  /*  */
+
+  _.process.start( _.mapSupplement( { mode : 'spawn', execPath : [ 'node ' + programPath, 'node ' + programPath ] }, o2 ) );
+
+  a.ready.then( ( op ) =>
+  {
+    let o1 = op[ 0 ];
+    let o2 = op[ 1 ];
+    let o3 = op[ 2 ];
+    let o4 = op[ 3 ];
+
+    test.is( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
+    test.identical( o1.exitCode, 0 );
+
+    test.is( _.strHas( o2.output, __dirname ) );
+    test.identical( o2.exitCode, 0 );
+
+    test.is( _.strHas( o3.output, a.path.nativize( a.routinePath ) ) );
+    test.identical( o3.exitCode, 0 );
+
+    test.is( _.strHas( o4.output, __dirname ) );
+    test.identical( o4.exitCode, 0 );
+
+    return op;
+  })
+
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    // debugger
+    console.log( process.cwd() ); /* qqq for Vova : should not be visible if verbosity of tester is low, if possible */
+  }
+}
+
 // --
 // termination
 // --
@@ -18426,7 +18426,7 @@ function terminateWithDetachedChildren( test )
         test.is( _.strHas( op.output, 'SIGINT' ) );
         return _.time.out( 9000, () =>
         {
-          /* xxx zzz : problem with termination of detached proces on Windows, child process does't receive SIGINT */
+          /* zzz : problem with termination of detached proces on Windows, child process does't receive SIGINT */
           test.is( a.fileProvider.fileExists( a.abs( a.routinePath, children[ 0 ].toString() ) ) )
           test.is( a.fileProvider.fileExists( a.abs( a.routinePath, children[ 1 ].toString() ) ) )
           test.is( !_.process.isAlive( o.process.pid ) )
@@ -19536,8 +19536,6 @@ var Proto =
 
     basic,
     start2,
-    startOptionCurrentPath,
-    startOptionCurrentPaths,
     startFork,
     startErrorHandling,
 
@@ -19655,6 +19653,8 @@ var Proto =
     // other options
 
     startOptionDryRun,
+    startOptionCurrentPath,
+    startOptionCurrentPaths,
 
     // termination
 
