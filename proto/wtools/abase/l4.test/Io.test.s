@@ -41,7 +41,273 @@ function suiteEnd()
 }
 
 // --
-// test
+// event
+// --
+
+function processOnExitEvent( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let programPath = a.path.nativize( a.program( testApp ) );  /* zzz : a.path.nativize? */
+  // let programPath = a.program( testApp );
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + programPath,
+      mode : 'spawn',
+      stdio : 'pipe',
+      sync : 0,
+      outputPiping : 1,
+      outputCollecting : 1,
+    }
+
+    return _.process.start( o )
+    .then( ( op ) =>
+    {
+      test.is( op.exitCode === 0 );
+      test.identical( op.ended, true );
+      test.is( _.strHas( op.output, 'timeOut handler executed' ) )
+      test.is( _.strHas( op.output, 'processOnExit: 0' ) );
+      return null;
+    })
+
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + programPath + ' terminate : 1',
+      mode : 'spawn',
+      stdio : 'pipe',
+      sync : 0,
+      outputPiping : 1,
+      outputCollecting : 1,
+    }
+
+    return _.process.start( o )
+    .then( ( op ) =>
+    {
+      test.is( op.exitCode === 0 );
+      test.identical( op.ended, true );
+      test.is( !_.strHas( op.output, 'timeOut handler executed' ) )
+      test.is( !_.strHas( op.output, 'processOnExit: 0' ) );
+      test.is( _.strHas( op.output, 'processOnExit: SIGINT' ) );
+      return null;
+    });
+  })
+
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+
+    _.include( 'wProcess' );
+    _.include( 'wStringsExtra' )
+
+    var args = _.process.args();
+
+    _.process.on( 'exit', ( arg ) =>
+    {
+      console.log( 'processOnExit:', arg );
+    });
+
+    _.time.out( 1000, () =>
+    {
+      console.log( 'timeOut handler executed' );
+      return 1;
+    })
+
+    if( args.map.terminate )
+    process.exit( 'SIGINT' );
+
+  }
+}
+
+//
+
+function processOffExitEvent( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let programPath = a.path.nativize( a.program( testApp ) );
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'nothing to off'
+    var o =
+    {
+      execPath :  'node ' + programPath,
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputPiping : 1,
+      outputCollecting : 1,
+    }
+
+    return _.process.start( o )
+    .then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.identical( _.strCount( op.output, 'timeOut handler executed'  ), 1 );
+      test.identical( _.strCount( op.output, 'processOnExit1: 0' ), 1 );
+      test.identical( _.strCount( op.output, 'processOnExit2: 0' ), 1 );
+      test.identical( _.strCount( op.output, 'processOnExit3: 0' ), 0 );
+      return null;
+    })
+
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    test.case = 'off single handler'
+    var o =
+    {
+      execPath :  'node ' + programPath,
+      args : 'off:handler1',
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputPiping : 1,
+      outputCollecting : 1,
+    }
+
+    return _.process.start( o )
+    .then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.identical( _.strCount( op.output, 'timeOut handler executed'  ), 1 );
+      test.identical( _.strCount( op.output, 'processOnExit1: 0' ), 0 );
+      test.identical( _.strCount( op.output, 'processOnExit2: 0' ), 1 );
+      test.identical( _.strCount( op.output, 'processOnExit3: 0' ), 0 );
+      return null;
+    })
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    test.case = 'off all handlers'
+    var o =
+    {
+      execPath :  'node ' + programPath,
+      args : 'off:[handler1,handler2]',
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputPiping : 1,
+      outputCollecting : 1,
+    }
+
+    return _.process.start( o )
+    .then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.identical( _.strCount( op.output, 'timeOut handler executed'  ), 1 );
+      test.identical( _.strCount( op.output, 'processOnExit1: 0' ), 0 );
+      test.identical( _.strCount( op.output, 'processOnExit2: 0' ), 0 );
+      test.identical( _.strCount( op.output, 'processOnExit3: 0' ), 0 );
+      return null;
+    })
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    test.case = 'off unregistered handler'
+    var o =
+    {
+      execPath :  'node ' + programPath,
+      args : 'off:handler3',
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputPiping : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    return _.process.start( o )
+    .then( ( op ) =>
+    {
+      test.notIdentical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.identical( _.strCount( op.output, 'uncaught error' ), 2 );
+      test.identical( _.strCount( op.output, 'processOnExit1: -1' ), 1 );
+      test.identical( _.strCount( op.output, 'processOnExit2: -1' ), 1 );
+      test.identical( _.strCount( op.output, 'processOnExit3: -1' ), 0 );
+      return null;
+    })
+  })
+
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+
+    _.include( 'wProcess' );
+    _.include( 'wStringsExtra' )
+
+    var handlersMap = {};
+    var args = _.process.args();
+
+    handlersMap[ 'handler1' ] = handler1;
+    handlersMap[ 'handler2' ] = handler2;
+    handlersMap[ 'handler3' ] = handler3;
+
+    _.process.on( 'exit', handler1 );
+    _.process.on( 'exit', handler2 );
+
+    if( args.map.off )
+    {
+      args.map.off = _.arrayAs( args.map.off );
+      _.each( args.map.off, ( name ) =>
+      {
+        _.assert( handlersMap[ name ] );
+        _.process.off( 'exit', handlersMap[ name ] );
+      })
+    }
+
+    _.time.out( 1000, () =>
+    {
+      console.log( 'timeOut handler executed' );
+      return 1;
+    })
+
+    function handler1( arg )
+    {
+      console.log( 'processOnExit1:', arg );
+    }
+    function handler2( arg )
+    {
+      console.log( 'processOnExit2:', arg );
+    }
+    function handler3( arg )
+    {
+      console.log( 'processOnExit3:', arg );
+    }
+  }
+}
+
+// --
+// args
 // --
 
 function processArgsBase( test )
@@ -1220,13 +1486,25 @@ var Proto =
 
   tests :
   {
+
+    // event
+
+    processOnExitEvent,
+    processOffExitEvent,
+
+    // process args
+
     processArgsBase,
     processArgsPropertiesBase,
     processArgsMultipleCommands,
     processArgsPaths,
     processArgsWithSpace,
 
+    //
+
     pathsRead,
+
+    //
 
     systemEntryAddBasic,
     systemEntryAddOptionAllowingMissed,
