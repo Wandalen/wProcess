@@ -58,8 +58,8 @@ function startCommon_pre( routine, args )
   _.assert
   (
     !o.detaching || !_.longHas( _.arrayAs( o.stdio ), 'inherit' ),
-    `Unsupported stdio: ${o.stdio} for process detaching. Parent will wait for child process.`
-  ); /* xxx */
+    `Unsupported stdio: ${o.stdio} for process detaching. Parent will wait for child process.` /* xxx : check */
+  );
   _.assert( !o.detaching || _.longHas( [ 'fork', 'spawn', 'shell' ],  o.mode ), `Unsupported mode: ${o.mode} for process detaching` );
   _.assert( o.conStart === null || _.routineIs( o.conStart ) );
   _.assert( o.conTerminate === null || _.routineIs( o.conTerminate ) );
@@ -107,9 +107,14 @@ function startSingle_body( o )
   run1,
   run2,
   run3,
-  endDeasyncing,
-  end,
+  runFork,
+  runSpawn,
+  runShell,
+  end1,
+  end2,
+
   handleClose,
+  handleExit,
   handleError,
   handleDisconnect,
   disconnect,
@@ -137,7 +142,7 @@ function startSingle_body( o )
   let stderrOutput = '';
   let decoratedOutput = '';
   let decoratedErrorOutput = '';
-  let execArgs, argumentsManual; /* qqq for Vova : remove argumentsManual */
+  let execArgs;
   let readyCallback;
 
   form1();
@@ -398,10 +403,10 @@ function startSingle_body( o )
       catch( err )
       {
         debugger; /* qqq for Yevhen : is covered? */
-        end( err, o.conTerminate );
+        end2( err, o.conTerminate );
       }
       _.assert( o.state === 'terminated' || o.state === 'disconnected' );
-      end( undefined, o.conTerminate );
+      end2( undefined, o.conTerminate );
       return o;
     }
     else
@@ -416,7 +421,7 @@ function startSingle_body( o )
       if( readyCallback )
       o.ready.finally( readyCallback );
 
-      return endDeasyncing();
+      return end1();
     }
 
   }
@@ -437,9 +442,9 @@ function startSingle_body( o )
       if( o.dry )
       {
         /* qqq for Yevhen : make sure option dry is covered good enough */
-        _.assert( o.state === 'starting' );
+        _.assert( o.state === 'started' );
         o.state = 'terminated';
-        end( undefined, o.conTerminate );
+        end2( undefined, o.conTerminate );
       }
     }
     catch( err )
@@ -488,6 +493,7 @@ function startSingle_body( o )
 
     /* procedure */
 
+    if( !o.dry )
     if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
     {
       if( Config.debug )
@@ -607,7 +613,7 @@ function startSingle_body( o )
 
   /* */
 
-  function endDeasyncing()
+  function end1()
   {
     if( o.deasync )
     {
@@ -620,7 +626,7 @@ function startSingle_body( o )
 
   /* */
 
-  function end( err, consequence )
+  function end2( err, consequence )
   {
 
     if( !_.primitiveIs( o.procedure ) )
@@ -680,25 +686,18 @@ function startSingle_body( o )
   function handleClose( exitCode, exitSignal )
   {
     /*
-    console.log( 'handleClose', _.process.realMainFile(), o.ended ); debugger;
+    console.log( 'handleClose', _.process.realMainFile(), o.ended, ... arguments ); debugger;
     */
 
     if( o.ended )
     return;
 
-    if( o.verbosity >= 5 )
-    {
-      log( ' < Process returned error code ' + exitCode ); /* qqq for Yevhen : is covered? */
-      if( exitCode )
-      log( infoGet() ); /* qqq for Yevhen : is covered? */
-    }
+    o.state = 'terminated';
 
     exitCodeSet( exitCode );
     o.exitSignal = exitSignal;
     if( o.process && o.process.signalCode === undefined )
     o.process.signalCode = exitSignal;
-
-    o.state = 'terminated';
 
     if( exitSignal )
     o.exitReason = 'signal';
@@ -706,6 +705,13 @@ function startSingle_body( o )
     o.exitReason = 'code';
     else
     o.exitReason = 'normal';
+
+    if( o.verbosity >= 5 )
+    {
+      log( ' < Process returned error code ' + exitCode ); /* qqq for Yevhen : is covered? */
+      if( exitCode )
+      log( infoGet() ); /* qqq for Yevhen : is covered? */
+    }
 
     if( ( exitSignal || exitCode !== 0 ) && o.throwingExitCode )
     {
@@ -725,14 +731,23 @@ function startSingle_body( o )
       }
       else
       {
-        end( o.error, o.conTerminate );
+        end2( o.error, o.conTerminate );
       }
     }
     else if( !o.sync || o.deasync )
     {
-      end( undefined, o.conTerminate );
+      end2( undefined, o.conTerminate );
     }
 
+  }
+
+  /* */
+
+  function handleExit( a, b, c )
+  {
+    /*
+    console.log( 'handleExit', _.process.realMainFile(), o.ended, ... arguments ); debugger;
+    */
   }
 
   /* */
@@ -768,7 +783,7 @@ function startSingle_body( o )
     }
     else
     {
-      end( o.error, o.conTerminate );
+      end2( o.error, o.conTerminate );
     }
   }
 
@@ -794,7 +809,7 @@ function startSingle_body( o )
         debugger;
         o.state = 'disconnected';
         o.conDisconnect.take( this );
-        end( undefined, o );
+        end2( undefined, o );
         throw _.err( 'not tested' );
       }
     });
@@ -820,12 +835,16 @@ function startSingle_body( o )
     close event will not be called for regular/detached process
     */
 
+/*
+    if( this.process.stdin )
+    this.process.stdin.destroy();
+*/
+    if( this.process.stdin )
+    this.process.stdin.end(); /* yyy */
     if( this.process.stdout )
     this.process.stdout.destroy();
     if( this.process.stderr )
     this.process.stderr.destroy();
-    if( this.process.stdin )
-    this.process.stdin.destroy();
 
     if( this.process.disconnect )
     if( this.process.connected )
@@ -840,7 +859,7 @@ function startSingle_body( o )
     if( !this.ended )
     {
       this.state = 'disconnected';
-      end( undefined, o.conDisconnect );
+      end2( undefined, o.conDisconnect );
     }
 
     return true;
@@ -888,6 +907,7 @@ function startSingle_body( o )
     {
       o.process.on( 'error', handleError );
       o.process.on( 'close', handleClose );
+      o.process.on( 'exit', handleExit );
       o.process.on( 'disconnect', handleDisconnect );
     }
 
@@ -1007,14 +1027,15 @@ function startSingle_body( o )
 
   function argsJoin( args )
   {
-
-    if( !execArgs && !argumentsManual ) /* yyy qqq for Vova : argumentsManual?? should be no such global variable */
+    if( !execArgs && !o.passingThrough )
     return args.join( ' ' );
-    let i = execArgs ? execArgs.length : args.length - argumentsManual.length;
 
-    // if( !execArgs && !o.passingThrough )
-    // return args.join( ' ' );
-    // let i = execArgs ? execArgs.length : args.length - process.argv.length - 2;
+    let i;
+
+    if( execArgs )
+    i = execArgs.length;
+    else
+    i = args.length - ( process.argv.length - 2 );
 
     for( ; i < args.length; i++ )
     {
@@ -1207,7 +1228,7 @@ function startSingle_body( o )
 
 }
 
-startSingle_body.defaults = /* qqq for Vova : split on _.process.start(), _.process.startSingle() */
+startSingle_body.defaults =
 {
 
   execPath : null,
@@ -1218,7 +1239,7 @@ startSingle_body.defaults = /* qqq for Vova : split on _.process.start(), _.proc
   sync : 0,
   deasync : 0,
   when : 'instant', /* instant / afterdeath / time / delay */
-  dry : 0, /* qqq for Yevhen : cover the option */
+  dry : 0, /* qqq for Yevhen : cover the option. make sure all con* called once. make sure all con* called in correct order */
 
   mode : 'shell', /* fork / spawn / shell */
   stdio : 'pipe', /* pipe / ignore / inherit */
@@ -1370,7 +1391,7 @@ function start_body( o )
 /* subroutines index :
 
   form1,
-  endDeasyncing,
+  end1,
   multiple,
 
 */
@@ -1419,7 +1440,7 @@ function start_body( o )
 
   /* */
 
-  function endDeasyncing()
+  function end1()
   {
     if( o.deasync )
     {
@@ -1504,7 +1525,7 @@ function start_body( o )
       return o;
     }
 
-    return endDeasyncing();
+    return end1();
   }
 
   /* */
@@ -2343,7 +2364,7 @@ kill.defaults =
   process : null,
   withChildren : 0,
   waitTimeOut : 5000,
-  // qqq for Vova : implement and over option sync
+  // qqq for Vova : implement and сover option sync
 }
 
 //
@@ -2500,7 +2521,7 @@ terminate.defaults =
   pid : null,
   withChildren : 0,
   timeOut : 5000,
-  // qqq for Vova : implement and over option sync
+  // qqq for Vova : implement and сover option sync
 }
 
 //
