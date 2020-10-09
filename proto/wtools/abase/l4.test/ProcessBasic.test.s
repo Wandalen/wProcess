@@ -495,7 +495,6 @@ function basic( test )
     return test.shouldThrowErrorAsync( shell )
     .then( () =>
     {
-      test.identical( options.process.killed, true );
       test.identical( !options.exitCode, true );
       return null;
     })
@@ -18273,14 +18272,14 @@ function startTerminateHangedWithExitHandler( test )
 
     o.process.on( 'message', () =>
     {
-      _.process.terminate({ process : o.process, timeOut : 5000 });
+      _.process.terminate({ process : o.process, waitTimeOut : 5000 });
     })
 
     con.then( () =>
     {
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGKILL' );
-      test.is( !_.strHas( o.output, 'SIGINT' ) );
+      test.is( !_.strHas( o.output, 'SIGTERM' ) );
 
       return null;
     })
@@ -18306,14 +18305,14 @@ function startTerminateHangedWithExitHandler( test )
 
     o.process.on( 'message', () =>
     {
-      _.process.terminate({ process : o.process, timeOut : 5000 });
+      _.process.terminate({ process : o.process, waitTimeOut : 5000 });
     })
 
     con.then( () =>
     {
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGKILL' );
-      test.is( !_.strHas( o.output, 'SIGINT' ) );
+      test.is( !_.strHas( o.output, 'SIGTERM' ) );
 
       return null;
     })
@@ -18391,14 +18390,14 @@ function startTerminateAfterLoopRelease( test )
 
     o.process.on( 'message', () =>
     {
-      _.process.terminate({ process : o.process, timeOut : 10000 });
+      _.process.terminate({ process : o.process, waitTimeOut : 10000 });
     })
 
     con.then( () =>
     {
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGKILL' );
-      test.is( !_.strHas( o.output, 'SIGINT' ) );
+      test.is( !_.strHas( o.output, 'SIGTERM' ) );
       test.is( !_.strHas( o.output, 'Exit after release' ) );
 
       return null;
@@ -18425,14 +18424,14 @@ function startTerminateAfterLoopRelease( test )
 
     o.process.on( 'message', () =>
     {
-      _.process.terminate({ process : o.process, timeOut : 10000 });
+      _.process.terminate({ process : o.process, waitTimeOut : 10000 });
     })
 
     con.then( () =>
     {
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGKILL' );
-      test.is( !_.strHas( o.output, 'SIGINT' ) );
+      test.is( !_.strHas( o.output, 'SIGTERM' ) );
       test.is( !_.strHas( o.output, 'Exit after release' ) );
 
       return null;
@@ -18926,8 +18925,8 @@ function terminateComplex( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
       test.identical( op.exitSignal, null );
-      test.identical( _.strCount( op.output, 'SIGINT' ), 1 );
-      test.identical( _.strCount( op.output, 'second child SIGINT' ), 1 );
+      test.identical( _.strCount( op.output, 'SIGTERM' ), 1 );
+      test.identical( _.strCount( op.output, 'second child SIGTERM' ), 1 );
       test.is( !_.process.isAlive( o.process.pid ) )
       test.is( !_.process.isAlive( lastChildPid ) );
       return null;
@@ -18964,7 +18963,7 @@ function terminateComplex( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
       test.identical( op.exitSignal, null );
-      test.identical( _.strCount( op.output, 'SIGINT' ), 1 );
+      test.identical( _.strCount( op.output, 'SIGTERM' ), 1 );
       test.is( !_.process.isAlive( o.process.pid ) )
       test.is( !_.process.isAlive( lastChildPid ) );
       return null;
@@ -19001,7 +19000,7 @@ function terminateComplex( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
       test.identical( op.exitSignal, null );
-      test.identical( _.strCount( op.output, 'SIGINT' ), 1 );
+      test.identical( _.strCount( op.output, 'SIGTERM' ), 1 );
       test.is( !_.process.isAlive( o.process.pid ) )
       test.is( !_.process.isAlive( lastChildPid ) );
       return null;
@@ -19039,7 +19038,7 @@ function terminateComplex( test )
       {
         test.identical( op.exitCode, null );
         test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGINT' );
+        test.identical( op.exitSignal, 'SIGTERM' );
       }
       else
       {
@@ -19090,9 +19089,9 @@ function terminateComplex( test )
 
   function testApp2()
   {
-    process.on( 'SIGINT', () =>
+    process.on( 'SIGTERM', () =>
     {
-      console.log( 'second child SIGINT' )
+      console.log( 'second child SIGTERM' )
       var fs = require( 'fs' );
       var path = require( 'path' )
       fs.writeFileSync( path.join( __dirname, process.pid.toString() ), process.pid.toString() )
@@ -19154,7 +19153,7 @@ function terminateDetachedComplex( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
       test.identical( op.exitSignal, null );
-      test.is( _.strHas( op.output, 'SIGINT' ) );
+      test.is( _.strHas( op.output, 'SIGTERM' ) );
       test.is( !_.strHas( op.output, 'TerminationBegin' ) );
       test.is( !_.process.isAlive( o.process.pid ) )
       test.is( _.process.isAlive( _.numberFrom( childPid ) ) )
@@ -19198,7 +19197,7 @@ function terminateDetachedComplex( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
       test.identical( op.exitSignal, null );
-      test.is( _.strHas( op.output, 'SIGINT' ) );
+      test.is( _.strHas( op.output, 'SIGTERM' ) );
       test.is( !_.strHas( op.output, 'TerminationBegin' ) );
       test.is( !_.process.isAlive( o.process.pid ) )
       test.is( _.process.isAlive( _.numberFrom( childPid ) ) )
@@ -19235,7 +19234,7 @@ function terminateDetachedComplex( test )
     {
       data = data.toString();
       if( _.strHas( data, 'ready' ) )
-      _.process.terminate({ process : o.process, timeOut : 0 });
+      _.process.terminate({ process : o.process, waitTimeOut : 0 });
     })
 
     ready.then( ( op ) =>
@@ -19247,8 +19246,8 @@ function terminateDetachedComplex( test )
         test.is( !_.process.isAlive( _.numberFrom( childPid ) ) )
         test.identical( op.exitCode, null );
         test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGINT' );
-        test.is( !_.strHas( op.output, 'SIGINT' ) );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
         test.is( _.strHas( op.output, 'TerminationBegin' ) );
       }
       else if( process.platform === 'win32' )
@@ -19257,7 +19256,7 @@ function terminateDetachedComplex( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
-        test.is( !_.strHas( op.output, 'SIGINT' ) );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
         test.is( _.strHas( op.output, 'TerminationBegin' ) );
       }
       else
@@ -19266,7 +19265,7 @@ function terminateDetachedComplex( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
-        test.is( _.strHas( op.output, 'SIGINT' ) );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
         test.is( !_.strHas( op.output, 'TerminationBegin' ) );
       }
       return _.time.out( 9000, () =>
@@ -19328,9 +19327,9 @@ function terminateDetachedComplex( test )
 
   function testApp2()
   {
-    process.on( 'SIGINT', () =>
+    process.on( 'SIGTERM', () =>
     {
-      console.log( 'second child SIGINT' )
+      console.log( 'second child SIGTERM' )
       process.exit( 0 );
     })
     if( process.send )
@@ -19815,7 +19814,7 @@ function terminateTimeOut( test )
 
     o.process.on( 'message', () =>
     {
-      _.process.terminate({ process : o.process, timeOut : 1000 });
+      _.process.terminate({ process : o.process, waitTimeOut : 1000 });
     })
 
     ready.then( ( op ) =>
@@ -19823,7 +19822,7 @@ function terminateTimeOut( test )
       test.identical( op.exitCode, null );
       test.identical( op.ended, true );
       test.identical( op.exitSignal, 'SIGKILL' );
-      test.is( _.strHas( op.output, 'SIGINT' ) );
+      test.is( _.strHas( op.output, 'SIGTERM' ) );
       test.is( !_.strHas( op.output, 'Application timeout!' ) );
       return null;
     })
@@ -19848,7 +19847,7 @@ function terminateTimeOut( test )
 
     o.process.on( 'message', () =>
     {
-      _.process.terminate({ process : o.process, timeOut : 1000 });
+      _.process.terminate({ process : o.process, waitTimeOut : 1000 });
     })
 
     ready.then( ( op ) =>
@@ -19856,7 +19855,7 @@ function terminateTimeOut( test )
       test.identical( op.exitCode, null );
       test.identical( op.ended, true );
       test.identical( op.exitSignal, 'SIGKILL' );
-      test.is( _.strHas( op.output, 'SIGINT' ) );
+      test.is( _.strHas( op.output, 'SIGTERM' ) );
       test.is( !_.strHas( op.output, 'Application timeout!' ) );
       return null;
     })
@@ -19892,7 +19891,7 @@ function terminateTimeOut( test )
         test.identical( op.exitCode, null );
         test.identical( op.ended, true );
         test.identical( op.exitSignal, 'SIGKILL' );
-        test.is( !_.strHas( op.output, 'SIGINT' ) );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
         test.is( _.strHas( op.output, 'Application timeout!' ) );
       }
       else if( process.platform === 'darwin' )
@@ -19900,7 +19899,7 @@ function terminateTimeOut( test )
         test.identical( op.exitCode, null );
         test.identical( op.ended, true );
         test.identical( op.exitSignal, 'SIGKILL' );
-        test.is( _.strHas( op.output, 'SIGINT' ) );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
         test.is( !_.strHas( op.output, 'Application timeout!' ) );
       }
       else
@@ -19908,7 +19907,7 @@ function terminateTimeOut( test )
         test.identical( op.exitCode, null );
         test.identical( op.ended, true );
         test.identical( op.exitSignal, 'SIGKILL' );
-        test.is( !_.strHas( op.output, 'SIGINT' ) );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
         test.is( _.strHas( op.output, 'Application timeout!' ) );
       }
 
@@ -19926,9 +19925,9 @@ function terminateTimeOut( test )
 
   function testApp()
   {
-    process.on( 'SIGINT', () =>
+    process.on( 'SIGTERM', () =>
     {
-      console.log( 'SIGINT' )
+      console.log( 'SIGTERM' )
     })
     if( process.send )
     process.send( process.pid );
@@ -20164,7 +20163,7 @@ function terminateDifferentStdio( test )
 
   function testApp()
   {
-    process.on( 'SIGINT', () =>
+    process.on( 'SIGTERM', () =>
     {
       var fs = require( 'fs' );
       var path = require( 'path' )
