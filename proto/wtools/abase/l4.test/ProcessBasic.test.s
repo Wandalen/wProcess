@@ -144,29 +144,7 @@ function suiteEnd()
 
 //
 
-/* qqq for Vova : simplify and make it subroutine */
-function testAppShell()
-{
-  let _ = require( toolsPath );
-  let process = _global_.process;
-
-  _.include( 'wProcess' );
-  _.include( 'wStringsExtra' )
-
-  process.removeAllListeners( 'SIGINT' );
-  process.removeAllListeners( 'SIGTERM' );
-  process.removeAllListeners( 'exit' );
-
-  var args = _.process.args();
-
-  if( args.map.exitWithCode )
-  process.exit( args.map.exitWithCode )
-
-  if( args.map.loop )
-  return _.time.out( 4000 )
-
-  console.log( __filename );
-}
+/* qqq for Vova : simplify and make it subroutine aaa:moved to test routines */
 
 // --
 // basic
@@ -180,7 +158,7 @@ function basic( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testAppShell ) );
+  let programPath = a.path.nativize( a.program( program1 ) );
   let o3 =
   {
     outputPiping : 1,
@@ -526,6 +504,31 @@ function basic( test )
   /* - */
 
   return a.ready;
+
+  /* - */
+
+  function program1()
+  {
+    let _ = require( toolsPath );
+    let process = _global_.process;
+
+    _.include( 'wProcess' );
+    _.include( 'wStringsExtra' )
+
+    process.removeAllListeners( 'SIGINT' );
+    process.removeAllListeners( 'SIGTERM' );
+    process.removeAllListeners( 'exit' );
+
+    var args = _.process.args();
+
+    if( args.map.exitWithCode )
+    process.exit( args.map.exitWithCode )
+
+    if( args.map.loop )
+    return _.time.out( 4000 )
+
+    console.log( __filename );
+  }
 }
 
 //
@@ -1350,7 +1353,7 @@ function startSync( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testAppShell ) );
+  let programPath = a.path.nativize( a.program( program1 ) );
 
   let o3 =
   {
@@ -1500,6 +1503,30 @@ function startSync( test )
   test.shouldThrowErrorSync( () => _.process.start( options ) )
   test.identical( options.exitCode, 1 );
 
+  /* - */
+
+  function program1()
+  {
+    let _ = require( toolsPath );
+    let process = _global_.process;
+
+    _.include( 'wProcess' );
+    _.include( 'wStringsExtra' )
+
+    process.removeAllListeners( 'SIGINT' );
+    process.removeAllListeners( 'SIGTERM' );
+    process.removeAllListeners( 'exit' );
+
+    var args = _.process.args();
+
+    if( args.map.exitWithCode )
+    process.exit( args.map.exitWithCode )
+
+    if( args.map.loop )
+    return _.time.out( 4000 )
+
+    console.log( __filename );
+  }
 }
 
 //
@@ -1508,7 +1535,7 @@ function startSyncDeasync( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.path.nativize( a.program( testAppShell ) );
+  let programPath = a.path.nativize( a.program( program1 ) );
   let o3 =
   {
     outputPiping : 1,
@@ -1684,6 +1711,31 @@ function startSyncDeasync( test )
   var options = _.mapSupplement( {}, o2, o3 );
   test.shouldThrowErrorSync( () => _.process.start( options ) )
   test.identical( options.exitCode, 1 );
+
+  /* - */
+
+  function program1()
+  {
+    let _ = require( toolsPath );
+    let process = _global_.process;
+
+    _.include( 'wProcess' );
+    _.include( 'wStringsExtra' )
+
+    process.removeAllListeners( 'SIGINT' );
+    process.removeAllListeners( 'SIGTERM' );
+    process.removeAllListeners( 'exit' );
+
+    var args = _.process.args();
+
+    if( args.map.exitWithCode )
+    process.exit( args.map.exitWithCode )
+
+    if( args.map.loop )
+    return _.time.out( 4000 )
+
+    console.log( __filename );
+  }
 
 }
 
@@ -7119,6 +7171,15 @@ function startPassingThroughTrivial( test )
   let a = test.assetFor( false );
   let testAppPath1 = a.path.nativize( a.program( program1 ) );
   let testAppPath2 = a.path.nativize( a.program( program2 ) );
+
+  /*
+   program1 spawns program2 with options read from op.js
+   Options for program2 are provided to program1 through file op.js.
+   This method is used instead of ipc messages because second method requires to call process.disconnect in program1,
+   otherwise program1 will not exit after termination of program2.
+   File op.js is written on each test case, before spawn of program1
+   Also, this method is used to exclude output of program2 from tester in case when stdio:inherit is used
+  */
 
   run();
 
@@ -19889,7 +19950,6 @@ var Proto =
   {
 
     suiteTempPath : null,
-    testAppShell,
     toolsPath : null,
     toolsPathInclude : null,
 
