@@ -2260,11 +2260,7 @@ function signal_body( o )
   })
 
   ready.then( killProcess );
-  if( cons.length )
-  ready.then( () => _.Consequence.AndKeep( ...cons ) )
-
   ready.catch( handleError );
-
   ready.then( handleResult );
 
   if( o.sync )
@@ -2301,7 +2297,10 @@ function signal_body( o )
       sendSignal( arg );
     }
 
+    if( !cons.length )
     return true;
+
+    return _.Consequence.AndKeep( ...cons );
   }
 
   /* - */
@@ -2367,8 +2366,12 @@ function signal_body( o )
 
   function handleResult( result )
   {
+    if( !_.arrayIs( result ) )
+    return result;
+
     if( result.length === 1 )
     return result[ 0 ];
+
     return result;
   }
 
