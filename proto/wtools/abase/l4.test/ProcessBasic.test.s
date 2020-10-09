@@ -575,7 +575,70 @@ function start2( test )
   })
 
   /* */
-  /* REWRITTEN */
+
+  a.ready.then( function()
+  {
+    test.case = 'mode : spawn, passingThrough : true, incorrect usage of o.path in spawn mode';
+
+    o2 =
+    {
+      execPath :  'node ' + testApp,
+      args : [ 'staging' ],
+      mode : 'spawn',
+      passingThrough : 1,
+      stdio : 'pipe'
+    }
+    return null;
+  })
+  .then( function( arg )
+  {
+    var options = _.mapSupplement( {}, o2, o3 );
+    return test.shouldThrowErrorAsync( _.process.start( options ) );
+  })
+
+  /* */
+
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    console.log( process.argv.slice( 2 ).join( ' ' ) );
+  }
+}
+
+//
+
+function start2OptionPassingThrough( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let programPathChild = a.path.nativize( a.program( testAppChild ) );
+
+  /* */
+
+  /* ORIGINAL
+
+  let programPath = a.path.nativize( a.program( testApp ) );
+
+  let o3 =
+  {
+    outputPiping : 1,
+    outputCollecting : 1,
+    applyingExitCode : 0,
+    throwingExitCode : 1
+  }
+
+  let o2;
+
+  function testApp()
+  {
+    console.log( process.argv.slice( 2 ).join( ' ' ) );
+  }
+  */
+
+  /* ORIGINAL */
   // a.ready.then( function()
   // {
   //   test.case = 'mode : shell, passingThrough : true, no args';
@@ -606,114 +669,9 @@ function start2( test )
   //   })
   // })
 
-  /* */
-  /* REWRITTEN */
-  // a.ready.then( function()
-  // {
-  //   test.case = 'mode : spawn, passingThrough : true, only filePath in args';
-
-  //   o2 =
-  //   {
-  //     execPath :  'node',
-  //     args : [ programPath ],
-  //     mode : 'spawn',
-  //     passingThrough : 1,
-  //     stdio : 'pipe'
-  //   }
-  //   return null;
-  // })
-  // .then( function( arg )
-  // {
-  //   /* mode : spawn, stdio : pipe, passingThrough : true */
-
-  //   var options = _.mapSupplement( {}, o2, o3 );
-
-  //   return _.process.start( options )
-  //   .then( function()
-  //   {
-  //     test.identical( options.exitCode, 0 );
-  //     var expectedArgs = _.arrayAppendArray( [], process.argv.slice( 2 ) );
-  //     test.identical( options.output, expectedArgs.join( ' ' ) + '\n' );
-  //     return null;
-  //   })
-  // })
-
-  /* */
-
-  /* Throws error, no checks, leave here ? */
-  a.ready.then( function()
-  {
-    test.case = 'mode : spawn, passingThrough : true, incorrect usage of o.path in spawn mode';
-
-    o2 =
-    {
-      execPath :  'node ' + testApp,
-      args : [ 'staging' ],
-      mode : 'spawn',
-      passingThrough : 1,
-      stdio : 'pipe'
-    }
-    return null;
-  })
-  .then( function( arg )
-  {
-    var options = _.mapSupplement( {}, o2, o3 );
-    return test.shouldThrowErrorAsync( _.process.start( options ) );
-  })
-
-  /* */
 
   /* REWRITTEN */
-  // a.ready.then( function()
-  // {
-  //   test.case = 'mode : shell, passingThrough : true';
-
-  //   o2 =
-  //   {
-  //     execPath :  'node ' + programPath,
-  //     args : [ 'staging', 'debug' ],
-  //     mode : 'shell',
-  //     passingThrough : 1,
-  //     stdio : 'pipe'
-  //   }
-  //   return null;
-  // })
-  // .then( function( arg )
-  // {
-  //   /* mode : shell, stdio : pipe, passingThrough : true */
-
-  //   var options = _.mapSupplement( {}, o2, o3 );
-
-  //   return _.process.start( options )
-  //   .then( function()
-  //   {
-  //     test.identical( options.exitCode, 0 );
-  //     var expectedArgs = _.arrayAppendArray( [ 'staging', 'debug' ], process.argv.slice( 2 ) );
-  //     test.identical( options.output, expectedArgs.join( ' ' ) + '\n');
-  //     return null;
-  //   })
-  // })
-
-  return a.ready;
-
-  /* - */
-
-  function testApp()
-  {
-    console.log( process.argv.slice( 2 ).join( ' ' ) );
-  }
-}
-
-//
-
-function start2OptionPassingThrough( test )
-{
-  let context = this;
-  let a = test.assetFor( false );
-  let programPathChild = a.path.nativize( a.program( testAppChild ) );
-
-  /* */
-
+  /* PASSES */
   a.ready.then( () =>
   {
     /* mode : shell, stdio : pipe, passingThrough : true */
@@ -787,6 +745,39 @@ function start2OptionPassingThrough( test )
 
   /* */
 
+  /* ORIGINAL */
+  // a.ready.then( function()
+  // {
+  //   test.case = 'mode : spawn, passingThrough : true, only filePath in args';
+
+  //   o2 =
+  //   {
+  //     execPath :  'node',
+  //     args : [ programPath ],
+  //     mode : 'spawn',
+  //     passingThrough : 1,
+  //     stdio : 'pipe'
+  //   }
+  //   return null;
+  // })
+  // .then( function( arg )
+  // {
+  //   /* mode : spawn, stdio : pipe, passingThrough : true */
+
+  //   var options = _.mapSupplement( {}, o2, o3 );
+
+  //   return _.process.start( options )
+  //   .then( function()
+  //   {
+  //     test.identical( options.exitCode, 0 );
+  //     var expectedArgs = _.arrayAppendArray( [], process.argv.slice( 2 ) );
+  //     test.identical( options.output, expectedArgs.join( ' ' ) + '\n' );
+  //     return null;
+  //   })
+  // })
+
+  /* REWRITTEN */
+  /* PASSES */
   a.ready.then( function()
   {
     /* mode : spawn, stdio : pipe, passingThrough : true */
@@ -879,6 +870,39 @@ so error is triggered when trying to parse.
 
   /* */
 
+  /* ORIGINAL */
+  // a.ready.then( function()
+  // {
+  //   test.case = 'mode : shell, passingThrough : true';
+
+  //   o2 =
+  //   {
+  //     execPath :  'node ' + programPath,
+  //     args : [ 'staging', 'debug' ],
+  //     mode : 'shell',
+  //     passingThrough : 1,
+  //     stdio : 'pipe'
+  //   }
+  //   return null;
+  // })
+  // .then( function( arg )
+  // {
+  //   /* mode : shell, stdio : pipe, passingThrough : true */
+
+  //   var options = _.mapSupplement( {}, o2, o3 );
+
+  //   return _.process.start( options )
+  //   .then( function()
+  //   {
+  //     test.identical( options.exitCode, 0 );
+  //     var expectedArgs = _.arrayAppendArray( [ 'staging', 'debug' ], process.argv.slice( 2 ) );
+  //     test.identical( options.output, expectedArgs.join( ' ' ) + '\n');
+  //     return null;
+  //   })
+  // })
+
+  /* REWRITTEN */
+  /* PASSES */
   a.ready.then( function()
   {
     /* mode : shell, stdio : pipe, passingThrough : true */
@@ -939,8 +963,6 @@ so error is triggered when trying to parse.
       })
     }
   })
-
-
 
   return a.ready;
 
@@ -6957,6 +6979,43 @@ startImportantExecPath.description =
 `
 exec paths with special chars
 `
+
+//
+
+// function startImportantExecPathPassingThrough( test )
+// {
+//   let context = this;
+//   let a = test.assetFor( false );
+//   var printArguments = 'node -e "console.log( process.argv.slice( 1 ) )"'
+
+//   a.fileProvider.fileWrite( a.abs( a.routinePath, 'file' ), 'file' );
+
+//   /* */
+
+//   let shell = _.process.starter
+//   ({
+//     currentPath : a.routinePath,
+//     mode : 'shell',
+//     stdio : 'pipe',
+//     outputPiping : 1,
+//     outputCollecting : 1,
+//     ready : a.ready
+//   })
+
+//   /* */
+
+//   shell({ execPath : 'echo', args : null, passingThrough : 1 })
+//   .then( function( op )
+//   {
+//     test.identical( op.exitCode, 0 );
+//     test.identical( op.ended, true );
+//     if( process.platform === 'win32' )
+//     test.is( _.strHas( op.output, '"' + process.argv.slice( 2 ).join( '" "' ) + '"' ) );
+//     else
+//     test.is( _.strHas( op.output, process.argv.slice( 2 ).join( ' ') ) );
+//     return null;
+//   })
+// }
 
 //
 
@@ -20150,6 +20209,7 @@ var Proto =
     startArgumentsHandlingTrivial,
     startArgumentsHandling,
     startImportantExecPath,
+    // startImportantExecPathPassingThrough,
     startNormalizedExecPath,
     startExecPathWithSpace,
     startNjsPassingThroughExecPathWithSpace,
