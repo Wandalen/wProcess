@@ -771,7 +771,7 @@ function start2OptionPassingThrough( test )
         console.log( op.output );
         return null;
 
-        /* 
+        /*
         This is used to send proper JSON,
         but here need to send child stdout.
 
