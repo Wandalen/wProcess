@@ -1614,6 +1614,394 @@ function startErrorHandling( test )
 
 }
 
+//
+
+function startSingleOptionDry( test )
+{
+  /* FROM TEST ROUTINE `startChronology` */
+  let context = this;
+  let a = test.assetFor( false );
+
+  let testAppPath = a.path.nativize( a.program( testApp ) );
+  let track;
+  let niteration = 0;
+
+
+  // var modes = [ 'fork', 'spawn', 'shell' ];
+  let modes = [ 'spawn' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( 0, mode ) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => run( 1, mode ) ) );
+
+  return a.ready;
+
+  /* */
+
+  function run( sync, mode )
+  {
+    test.case = `sync:${sync} mode:${mode}`;
+
+    if( sync && mode === 'fork' )
+    return null;
+
+    niteration += 1;
+    let ptcounter = _.Procedure.Counter;
+    let pacounter = _.Procedure.FindAlive().length;
+    track = [];
+
+    var o =
+    {
+      execPath : mode !== 'fork' ? 'node' : null,
+      args : [ testAppPath ],
+      ipc : 0,
+      mode,
+      sync,
+      ready : new _.Consequence().take( null ),
+      conStart : new _.Consequence(),
+      conDisconnect : new _.Consequence(),
+      conTerminate : new _.Consequence(),
+    }
+
+    test.identical( _.Procedure.Counter - ptcounter, 0 );
+    ptcounter = _.Procedure.Counter;
+    test.identical( _.Procedure.FindAlive().length - pacounter, 0 );
+    pacounter = _.Procedure.FindAlive().length;
+
+    o.conStart.tap( ( err, op ) =>
+    {
+      track.push( 'conStart' );
+
+      test.identical( err, undefined );
+      test.identical( op, o );
+
+      test.identical( o.ready.resourcesCount(), 0 );
+      test.identical( o.ready.errorsCount(), 0 );
+      test.identical( o.ready.competitorsCount(), 0 );
+      test.identical( o.conStart.resourcesCount(), 1 );
+      test.identical( o.conStart.errorsCount(), 0 );
+      test.identical( o.conStart.competitorsCount(), 0 );
+      test.identical( o.conDisconnect.resourcesCount(), 0 );
+      test.identical( o.conDisconnect.errorsCount(), 0 );
+      test.identical( o.conDisconnect.competitorsCount(), 0 );
+      test.identical( o.conTerminate.resourcesCount(), 0 );
+      test.identical( o.conTerminate.errorsCount(), 0 );
+      test.identical( o.conTerminate.competitorsCount(), 1 );
+      test.identical( o.ended, false );
+      test.identical( o.state, 'started' );
+      test.identical( o.error, null );
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, null );
+      test.identical( o.process.exitCode, sync ? undefined : null );
+      test.identical( o.process.signalCode, sync ? undefined : null );
+      test.identical( _.Procedure.Counter - ptcounter, sync ? 3 : 2 );
+      ptcounter = _.Procedure.Counter;
+      test.identical( _.Procedure.FindAlive().length - pacounter, sync ? 1 : 2 );
+      pacounter = _.Procedure.FindAlive().length;
+    });
+
+    test.identical( _.Procedure.Counter - ptcounter, 1 );
+    ptcounter = _.Procedure.Counter;
+    test.identical( _.Procedure.FindAlive().length - pacounter, 1 );
+    pacounter = _.Procedure.FindAlive().length;
+
+    o.conTerminate.tap( ( err, op ) =>
+    {
+      track.push( 'conTerminate' );
+
+      test.identical( err, undefined );
+      test.identical( op, o );
+
+      test.identical( o.ready.resourcesCount(), 0 );
+      test.identical( o.ready.errorsCount(), 0 );
+      test.identical( o.ready.competitorsCount(), sync ? 0 : 1 );
+      test.identical( o.conStart.resourcesCount(), 1 );
+      test.identical( o.conStart.errorsCount(), 0 );
+      test.identical( o.conStart.competitorsCount(), 0 );
+      test.identical( o.conDisconnect.resourcesCount(), 0 );
+      test.identical( o.conDisconnect.errorsCount(), 0 );
+      test.identical( o.conDisconnect.competitorsCount(), 0 );
+      test.identical( o.conTerminate.resourcesCount(), 1 );
+      test.identical( o.conTerminate.errorsCount(), 0 );
+      test.identical( o.conTerminate.competitorsCount(), 0 );
+      test.identical( o.ended, true );
+      test.identical( o.state, 'terminated' );
+      test.identical( o.error, null );
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.identical( o.process.exitCode, 0 );
+      test.identical( o.process.signalCode, null );
+      test.identical( _.Procedure.Counter - ptcounter, sync ? 0 : 1 );
+      ptcounter = _.Procedure.Counter;
+      if( sync )
+      test.identical( _.Procedure.FindAlive().length - pacounter, -2 );
+      else
+      test.identical( _.Procedure.FindAlive().length - pacounter, niteration > 1 ? -2 : 0 );
+      pacounter = _.Procedure.FindAlive().length;
+      /*
+      2 extra procedures dies here on non-first iteration
+        2 procedures of _.time.out()
+      */
+    })
+
+    let result = _.time.out( 1000 + context.t2, () =>
+    {
+      test.identical( track, [ 'conStart', 'conTerminate', 'ready' ] );
+
+      test.identical( o.ready.resourcesCount(), 1 );
+      test.identical( o.ready.errorsCount(), 0 );
+      test.identical( o.ready.competitorsCount(), 0 );
+      test.identical( o.conStart.resourcesCount(), 1 );
+      test.identical( o.conStart.errorsCount(), 0 );
+      test.identical( o.conStart.competitorsCount(), 0 );
+      test.identical( o.conDisconnect.resourcesCount(), 0 );
+      test.identical( o.conDisconnect.errorsCount(), 0 );
+      test.identical( o.conDisconnect.competitorsCount(), 0 );
+      test.identical( o.conTerminate.resourcesCount(), 1 );
+      test.identical( o.conTerminate.errorsCount(), 0 );
+      test.identical( o.conTerminate.competitorsCount(), 0 );
+      test.identical( o.ended, true );
+      test.identical( o.state, 'terminated' );
+      test.identical( o.error, null );
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.identical( o.process.exitCode, 0 );
+      test.identical( o.process.signalCode, null );
+      test.identical( _.Procedure.Counter - ptcounter, 0 );
+      ptcounter = _.Procedure.Counter;
+      if( sync )
+      test.identical( _.Procedure.FindAlive().length - pacounter, niteration > 1 ? -3 : -1 );
+      else
+      test.identical( _.Procedure.FindAlive().length - pacounter, -1 );
+      pacounter = _.Procedure.FindAlive().length;
+      /*
+      2 extra procedures dies here on non-first iteration
+        2 procedures of _.time.out()
+      */
+    });
+
+    test.identical( _.Procedure.Counter - ptcounter, 3 );
+    ptcounter = _.Procedure.Counter;
+    test.identical( _.Procedure.FindAlive().length - pacounter, 3 );
+    pacounter = _.Procedure.FindAlive().length;
+
+    let returned = _.process.startSingle( o );
+
+    if( sync )
+    test.is( returned === o );
+    else
+    test.is( returned === o.ready );
+    test.is( o.conStart !== o.ready );
+    test.is( o.conDisconnect !== o.ready );
+    test.is( o.conTerminate !== o.ready );
+
+    test.identical( o.ready.resourcesCount(), sync ? 1 : 0 );
+    test.identical( o.ready.errorsCount(), 0 );
+    test.identical( o.ready.competitorsCount(), 0 );
+    test.identical( o.conStart.resourcesCount(), 1 );
+    test.identical( o.conStart.errorsCount(), 0 );
+    test.identical( o.conStart.competitorsCount(), 0 );
+    test.identical( o.conDisconnect.resourcesCount(), 0 );
+    test.identical( o.conDisconnect.errorsCount(), 0 );
+    test.identical( o.conDisconnect.competitorsCount(), 0 );
+    test.identical( o.conTerminate.resourcesCount(), sync ? 1 : 0 );
+    test.identical( o.conTerminate.errorsCount(), 0 );
+    test.identical( o.conTerminate.competitorsCount(), sync ? 0 : 1 );
+    test.identical( o.ended, sync ? true : false );
+    test.identical( o.state, sync ? 'terminated' : 'started' );
+    test.identical( o.error, null );
+    test.identical( o.exitCode, sync ? 0 : null );
+    test.identical( o.exitSignal, null );
+    test.identical( o.process.exitCode, sync ? 0 : null );
+    test.identical( o.process.signalCode, null );
+    test.identical( _.Procedure.Counter - ptcounter, 0 );
+    ptcounter = _.Procedure.Counter;
+    test.identical( _.Procedure.FindAlive().length - pacounter, sync ? -1 : -2 );
+    pacounter = _.Procedure.FindAlive().length;
+
+    o.ready.tap( ( err, op ) =>
+    {
+      track.push( 'ready' );
+
+      test.identical( err, undefined );
+      test.identical( op, o );
+
+      test.identical( o.ready.resourcesCount(), 1 );
+      test.identical( o.ready.errorsCount(), 0 );
+      test.identical( o.ready.competitorsCount(), 0 );
+      test.identical( o.conStart.resourcesCount(), 1 );
+      test.identical( o.conStart.errorsCount(), 0 );
+      test.identical( o.conStart.competitorsCount(), 0 );
+      test.identical( o.conDisconnect.resourcesCount(), 0 );
+      test.identical( o.conDisconnect.errorsCount(), 0 );
+      test.identical( o.conDisconnect.competitorsCount(), 0 );
+      test.identical( o.conTerminate.resourcesCount(), 1 );
+      test.identical( o.conTerminate.errorsCount(), 0 );
+      test.identical( o.conTerminate.competitorsCount(), 0 );
+      test.identical( o.ended, true );
+      test.identical( o.state, 'terminated' );
+      test.identical( o.error, null );
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.identical( o.process.exitCode, 0 );
+      test.identical( o.process.signalCode, null );
+      test.identical( _.Procedure.Counter - ptcounter, sync ? 1 : 0 );
+      ptcounter = _.Procedure.Counter;
+      test.identical( _.Procedure.FindAlive().length - pacounter, sync ? 1 : -1 );
+      pacounter = _.Procedure.FindAlive().length;
+      return null;
+    })
+
+    return result;
+  }
+
+  /* - */
+
+  function testApp()
+  {
+    setTimeout( () => {}, 1000 );
+  }
+  // let programPath = a.program( program1 );
+  // let track = [];
+
+  // a.ready.then( () =>
+  // {
+  //   // let options =
+  //   // {
+  //   //   execPath : 'node ' + programPath,
+  //   //   dry : 1
+  //   // }
+
+  //   let o =
+  //   {
+  //     execPath : `node ${programPath}`,
+  //     dry : 1
+  //     // mode,
+  //     // stdio : 'ignore',
+  //     // outputPiping : 0,
+  //     // outputCollecting : 0,
+  //     // currentPath : a.routinePath,
+  //     // detaching : 1,
+  //     // ipc : 0,
+  //   }
+
+  //   let result = _.process.startSingle( o );
+  //   // result.then( ( op ) =>
+  //   // {
+  //   //   console.log( 'OP: ',  op )
+  //   // } )
+
+  //   // test.identical( o.ready.resourcesCount(), 0 );
+  //   // test.identical( o.ready.errorsCount(), 0 );
+  //   // test.identical( o.ready.competitorsCount(), 0 );
+  //   // test.identical( o.conStart.resourcesCount(), 1 );
+  //   // test.identical( o.conStart.errorsCount(), 0 );
+  //   // test.identical( o.conStart.competitorsCount(), 0 );
+  //   // test.identical( o.conDisconnect.resourcesCount(), 0 );
+  //   // test.identical( o.conDisconnect.errorsCount(), 0 );
+  //   // test.identical( o.conDisconnect.competitorsCount(), 0 );
+  //   // test.identical( o.conTerminate.resourcesCount(), 0 );
+  //   // test.identical( o.conTerminate.errorsCount(), 0 );
+  //   // test.identical( o.conTerminate.competitorsCount(), 0 );
+
+  //   // test.identical( o.state, 'started' );
+  //   // test.is( o.conStart !== result );
+  //   // test.is( _.consequenceIs( o.conStart ) )
+
+  //   // test.identical( o.state, 'started' );
+  //   // o.disconnect();
+  //   // test.identical( o.state, 'disconnected' );
+
+  //   o.conStart.finally( ( err, op ) =>
+  //   {
+  //     track.push( 'conStart1' );
+  //     // test.identical( err, undefined );
+  //     // test.identical( op, o );
+  //     // test.is( _.process.isAlive( o.process.pid ) );
+  //     return null;
+  //   })
+
+  //   o.conStart.finally( ( err, op ) =>
+  //   {
+  //     track.push( 'conStart2' );
+  //     // test.identical( err, undefined );
+  //     // test.identical( op, o );
+  //     // test.is( _.process.isAlive( o.process.pid ) );
+  //     return null;
+  //   })
+
+  //   o.conDisconnect.finally( ( err, op ) =>
+  //   {
+  //     track.push( 'conDisconnect1' );
+  //     // test.identical( err, undefined );
+  //     // test.identical( op, o );
+  //     // test.is( _.process.isAlive( o.process.pid ) )
+  //     return null;
+  //   })
+
+  //   o.conDisconnect.finally( ( err, op ) =>
+  //   {
+  //     track.push( 'conDisconnect2' );
+  //     // test.identical( err, undefined );
+  //     // test.identical( op, o );
+  //     // test.is( _.process.isAlive( o.process.pid ) )
+  //     return null;
+  //   })
+
+  //   o.conTerminate.finally( ( err, op ) =>
+  //   {
+  //     track.push( 'conTerminate1' );
+  //     // test.identical( err, undefined );
+  //     return null;
+  //   })
+
+  //   o.conTerminate.finally( ( err, op ) =>
+  //   {
+  //     track.push( 'conTerminate2' );
+  //     console.log( 'TRACK: ', track )
+  //     // test.identical( err, undefined );
+  //     return null;
+  //   })
+
+  //   result = _.time.out( 5000, () =>
+  //   {
+  //     // test.identical( o.state, 'disconnected' );
+  //     // test.identical( o.ended, true );
+  //     test.identical( track, [ 'conStart1', 'conTerminate1' ] );
+  //     // test.is( !_.process.isAlive( o.process.pid ) )
+  //     o.conTerminate.cancel();
+  //     return null;
+  //   })
+  //   console.log( 'TRACK: ', track )
+  //   return result;
+  //   // return _.Consequence.AndTake( o.conStart, result );
+
+  // } );
+
+  // return a.ready;
+
+  // /* - */
+
+  // function program1()
+  // {
+  //   console.log( process.argv.slice( 2 ) );
+  // }
+
+  // function program2()
+  // {
+  //   let _ = require( toolsPath );
+  //   _.include( 'wFiles' );
+  //   _.include( 'wProcess' );
+
+  //   let op = _.fileProvider.fileRead
+  //   ({
+  //     filePath : _.path.join( __dirname, 'op.json'),
+  //     encoding : 'json'
+  //   });
+
+  //   _.process.start( op );
+
+  // }
+}
+
 // --
 // sync
 // --
@@ -20463,6 +20851,7 @@ var Proto =
     start2OptionPassingThrough,
     startFork,
     startErrorHandling,
+    startSingleOptionDry,
 
     // sync
 
@@ -20582,7 +20971,7 @@ var Proto =
     startOptionDryRun,
     startOptionCurrentPath,
     startOptionCurrentPaths,
-    startOptionPassingThrough, /* qqq for Yevhen : extend please */
+    startOptionPassingThrough, /* qqq for Yevhen : extend please | aaa : Done. Yevhen S. */
 
     // termination
 
