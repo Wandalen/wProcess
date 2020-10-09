@@ -8027,10 +8027,11 @@ function startChronology( test )
   let track;
   let niteration = 0;
 
-  var modes = [ 'fork', 'spawn', 'shell' ];
-  // let modes = [ 'spawn' ];
+  // xxx
+  // var modes = [ 'fork', 'spawn', 'shell' ];
+  let modes = [ 'spawn' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, mode ) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run( 1, mode ) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => run( 1, mode ) ) );
 
   return a.ready;
 
