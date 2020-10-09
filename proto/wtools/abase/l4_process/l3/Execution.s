@@ -2250,6 +2250,7 @@ function signal_body( o )
 
   let isWindows = process.platform === 'win32';
   let ready = _.Consequence().take( null );
+  let cons = [];
 
   ready.then( () =>
   {
@@ -2259,9 +2260,12 @@ function signal_body( o )
   })
 
   ready.then( killProcess );
-  if( o.waitTimeOut )
-  ready.then( waitForTermination );
+  if( cons.length )
+  ready.then( () => _.Consequence.AndKeep( ...cons ) )
+
   ready.catch( handleError );
+
+  ready.then( handleResult );
 
   if( o.sync )
   ready.deasync();
@@ -2272,8 +2276,15 @@ function signal_body( o )
 
   function sendSignal( pid )
   {
-    if( _.process.isAlive( pid ) )
+    if( !_.process.isAlive( pid ) )
+    return;
+
     process.kill( pid, o.signal );
+    if( !o.waitTimeOut )
+    return;
+
+    let con = waitForTermination( pid );
+    cons.push( con );
   }
 
   function killProcess( arg )
@@ -2295,13 +2306,13 @@ function signal_body( o )
 
   /* - */
 
-  function waitForTermination()
+  function waitForTermination( pid )
   {
     var ready = _.Consequence();
     var timer;
     timer = _.time._periodic( 100, () =>
     {
-      if( _.process.isAlive( o.pid ) )
+      if( _.process.isAlive( pid ) )
       return false;
       timer._cancel();
       ready.take( true );
@@ -2332,7 +2343,7 @@ function signal_body( o )
         timer._cancel();
         _.errAttend( err );
         if( err.reason === 'time out' )
-        err = _.err( err, `\nTarget process: ${_.strQuote( o.pid )} is still alive. Waited for ${o.waitTimeOut} ms.` );
+        err = _.err( err, `\nTarget process: ${_.strQuote( pid )} is still alive. Waited for ${o.waitTimeOut} ms.` );
         throw err;
       }
       return op;
@@ -2352,6 +2363,13 @@ function signal_body( o )
     if( err.code === 'ESRCH' )
     throw _.err( err, '\nTarget process:', _.strQuote( o.pid ), 'does not exist.' ); /* qqq for Yevhen : rewrite such strings as template-strings */
     throw _.err( err );
+  }
+
+  function handleResult( result )
+  {
+    if( result.length === 1 )
+    return result[ 0 ];
+    return result;
   }
 
 }
@@ -2411,7 +2429,6 @@ function terminate_body( o )
 
   ready.catch( err =>
   {
-    debugger
     if( err.reason !== 'time out' )
     throw err;
 
