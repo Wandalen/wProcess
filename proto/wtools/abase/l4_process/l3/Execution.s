@@ -1682,33 +1682,26 @@ function startAfterDeath_body( o )
   _.assert( arguments.length === 1, 'Expects single argument' );
 
   let toolsPath = _.path.nativize( _.path.join( __dirname, '../../../../wtools/Tools.s' ) );
-  let toolsPathInclude = `let _ = require( '${_.strEscape( toolsPath )}' );\n`
-  let secondaryProcessSource = toolsPathInclude + afterDeathSecondaryProcess.toString() + '\nafterDeathSecondaryProcess();';
-  let secondaryFilePath = _.process.tempOpen({ sourceCode : secondaryProcessSource });
-  let srcOptions = _.mapExtend( null, o ); /* qqq for Vova : remove duplication of o-map and repair */
+  let locals = { toolsPath, o };
+  let secondaryProcessRoutine = _.program.preform({ routine : afterDeathSecondaryProcess, locals })
+  let secondaryFilePath = _.process.tempOpen({ sourceCode : secondaryProcessRoutine.sourceCode });
+  /* qqq for Vova : remove duplication of o-map and repair aaa:done */
 
-  let o2 = _.mapExtend( null, o ); /* qqq for Vova : remove duplication of o-map and repair */
-  o2.execPath = _.path.nativize( secondaryFilePath );
-  o2.mode = 'fork';
-  o2.args = [];
-  o2.stdio = 'ignore';
-  o2.outputPiping = 0;
-  o2.outputCollecting = 0;
-  o2.detaching = true;
-  o2.inputMirroring = 0;
+  /* qqq for Vova : remove duplication of o-map and repair aaa:done*/
+  o.execPath = _.path.nativize( secondaryFilePath );
+  o.mode = 'fork';
+  o.args = [];
+  o.detaching = true;
+  o.inputMirroring = 0;
+  o.outputPiping = 1;
+  o.stdio = 'pipe';
 
-  let result = _.process.start( o2 );
+  let result = _.process.start( o );
 
-  o.conStart = o2.conStart;
-  o.conTerminate = o2.conTerminate;
-  o.ready = o2.ready;
-  o.process = o2.process;
-  o.disconnect = _.routineJoin( o2, o2.disconnect );
-
-  o2.conStart.give( function( err, op )
+  o.conStart.give( function( err, op )
   {
     if( !err )
-    o2.process.send( srcOptions );
+    o.process.send( true );
     this.take( err, op );
   })
 
@@ -1718,10 +1711,11 @@ function startAfterDeath_body( o )
 
   function afterDeathSecondaryProcess()
   {
+    let _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
-    process.on( 'message', ( o ) =>
+    process.on( 'message', () =>
     {
       process.on( 'disconnect', () => _.process.start( o ) )
     })
