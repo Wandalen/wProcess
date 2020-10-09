@@ -8539,7 +8539,7 @@ function startOptionTimeOut( test )
   let programPath2 = a.path.nativize( a.program({ routine : program2, locals }) );
   let programPath3 = a.path.nativize( a.program({ routine : program3, locals }) );
   let programPath4 = a.path.nativize( a.program({ routine : program4, locals }) );
-  let modes = [ 'fork' ];
+  let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
 
