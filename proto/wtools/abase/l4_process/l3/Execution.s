@@ -1,5 +1,3 @@
-const { read } = require('fs');
-
 ( function _Execution_s_()
 {
 
@@ -608,7 +606,7 @@ function startSingle_body( o )
       if( o.state === 'terminated' || o.error )
       return;
       o.exitReason = 'time';
-      o.process.kill( 'SIGTERM' ); /* qqq for Vova : need to catch event when process is really down aaa:this works as expected see experiment3*/
+      _.process.terminate({ process : o.process, withChildren : 1 }); /* qqq for Vova : need to catch event when process is really down aaa:*/
     });
 
   }
@@ -2272,7 +2270,7 @@ function signal_body( o )
 
   /* - */
 
-  function killPID( pid )
+  function sendSignal( pid )
   {
     if( _.process.isAlive( pid ) )
     process.kill( pid, o.signal );
@@ -2285,11 +2283,11 @@ function signal_body( o )
     {
       if( isWindows && i && arg[ i ].name === 'conhost.exe' )
       continue;
-      killPID( arg[ i ].pid );
+      sendSignal( arg[ i ].pid );
     }
     else
     {
-      killPID( arg );
+      sendSignal( arg );
     }
 
     return true;
@@ -2322,7 +2320,7 @@ function signal_body( o )
 
     let timeOutError = _.time.outError( o.waitTimeOut )
 
-    ready.orKeepingSplit( [ timeOutError ] );
+    ready.orKeeping( [ timeOutError ] );
 
     ready.finally( ( err, op ) =>
     {
@@ -2331,6 +2329,7 @@ function signal_body( o )
 
       if( err )
       {
+        timer._cancel();
         _.errAttend( err );
         if( err.reason === 'time out' )
         err = _.err( err, `\nTarget process: ${_.strQuote( o.pid )} is still alive. Waited for ${o.waitTimeOut} ms.` );
@@ -2365,14 +2364,13 @@ signal_body.defaults =
   waitTimeOut : 5000,
   signal : null,
   sync : 0
-  // qqq for Vova : implement and сover option sync
 }
 
 let signal = _.routineFromPreAndBody( signal_pre, signal_body );
 
 //
 
-/* qqq for Vova : rewrite and cover */
+/* qqq for Vova : rewrite and cover,aaa:done */
 
 function kill_body( o )
 {
@@ -2388,7 +2386,7 @@ kill_body.defaults =
   withChildren : 0,
   waitTimeOut : 5000,
   sync : 0
-  // qqq for Vova : implement and сover option sync
+  // qqq for Vova : implement and сover option sync aaa:done
 }
 
 let kill = _.routineFromPreAndBody( signal_pre, kill_body );
@@ -2401,18 +2399,19 @@ let kill = _.routineFromPreAndBody( signal_pre, kill_body );
   look for solution that allow to have same behaviour on each mode
 */
 
-/* qqq for Vova : rewrite and cover */
+/* qqq for Vova : rewrite and cover aaa:done*/
 
 function terminate_body( o )
 {
   _.assert( arguments.length === 1 );
 
-  o.signal = 'SIGINT';
+  o.signal = 'SIGTERM';
 
   let ready = _.process.signal.body( o );
 
   ready.catch( err =>
   {
+    debugger
     if( err.reason !== 'time out' )
     throw err;
 
@@ -2438,7 +2437,7 @@ terminate_body.defaults =
   pid : null,
   withChildren : 0,
   waitTimeOut : 5000,
-  sync : 0 // qqq for Vova : implement and сover option sync
+  sync : 0 // qqq for Vova : implement and сover option sync aaa:done
 }
 
 let terminate = _.routineFromPreAndBody( signal_pre, terminate_body );
