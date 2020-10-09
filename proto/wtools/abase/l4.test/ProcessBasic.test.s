@@ -16578,6 +16578,9 @@ function exitReason( test )
 /* qqq for Yevgen : poor tests, please extend it */
 function exitCode( test )
 {
+  let context = this;
+  let a = test.assetFor( false );
+
   test.case = 'initial value'
   var got = _.process.exitCode();
   test.identical( got, 0 );
@@ -16598,10 +16601,210 @@ function exitCode( test )
 
   /* */
 
+  test.case = 'update reason, set exitCode to 3'
+  _.process.exitCode( 3 );
+  var got = _.process.exitCode();
+  test.identical( got, 3 );
+
+  /* */
+
+  test.case = 'update reason, set exitCode to 4'
+  _.process.exitCode( 4 );
+  var got = _.process.exitCode();
+  test.identical( got, 4 );
+
+  /* */
+
+  test.case = 'update reason, set exitCode to 5'
+  _.process.exitCode( 5 );
+  var got = _.process.exitCode();
+  test.identical( got, 5 );
+
+  /* */
+
+  test.case = 'update reason, set exitCode to 6'
+  _.process.exitCode( 6 );
+  var got = _.process.exitCode();
+  test.identical( got, 6 );
+
+  /* */
+
+  test.case = 'update reason, set exitCode to 7'
+  _.process.exitCode( 7 );
+  var got = _.process.exitCode();
+  test.identical( got, 7 );
+
+  /* */
+
+  test.case = 'update reason, set exitCode to 8'
+  _.process.exitCode( 8 );
+  var got = _.process.exitCode();
+  test.identical( got, 8 );
+
+  /* */
+
+  test.case = 'update reason, set exitCode to 9'
+  _.process.exitCode( 9 );
+  var got = _.process.exitCode();
+  test.identical( got, 9 );
+
+  /* */
+
+  test.case = 'update reason, set exitCode to 10'
+  _.process.exitCode( 10 );
+  var got = _.process.exitCode();
+  test.identical( got, 10 );
+
+  /* */
+
+  test.case = 'update reason, set exitCode to 11'
+  _.process.exitCode( 11 );
+  var got = _.process.exitCode();
+  test.identical( got, 11 );
+
+  /* */
+
+  test.case = 'update reason, set exitCode to 12'
+  _.process.exitCode( 12 );
+  var got = _.process.exitCode();
+  test.identical( got, 12 );
+
+  /* */
+
+  test.case = 'update reason, set exitCode to 129'
+  _.process.exitCode( 129 )
+  var got = _.process.exitCode()
+  test.il( got, 129 )
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'wrong execPath'
+
+    return _.process.start({ execPath : '1', throwingExitCode : 0 })
+    .then( ( op ) =>
+    {
+      test.il( op.exitCode, 127 );
+      _.process.exitCode( 0 );
+      return null;
+    } )
+  })
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'uncaught fatal exception'
+    let programPath = a.program( testApp );
+    let options =
+    {
+      execPath : 'node ' + programPath,
+      throwingExitCode : 0
+    }
+    return _.process.start( options )
+    .then( ( op ) =>
+    {
+      test.il( op.exitCode, 1 );
+      return null;
+    } )
+
+    function testApp()
+    {
+      asasdasd
+    }
+  })
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'throw error in app';
+    let programPath = a.program( testApp2 );
+    let options =
+    {
+      execPath : 'node ' + programPath,
+      throwingExitCode : 0
+    }
+    return _.process.start( options )
+    .then( ( op ) =>
+    {
+      test.il( op.exitCode, 1 );
+      return null;
+    } )
+
+    function testApp2()
+    {
+      throw new Error();
+    }
+  })
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'error in child process';
+    let programPath = a.program( testApp3 );
+    let options =
+    {
+      execPath : 'node ' + programPath,
+      throwingExitCode : 0
+    }
+    return _.process.start( options )
+    .then( ( op ) =>
+    {
+      test.il( op.exitCode, 255 );
+      return null;
+    } )
+
+    function testApp3()
+    {
+      let _ = require( toolsPath );
+      _.include( 'wProcess' );
+      _.include( 'wFiles' );
+
+      return _.process.start()
+    }
+  })
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'explicitly exit';
+    let programPath = a.program( testApp4 );
+    let options =
+    {
+      execPath : 'node ' + programPath,
+      throwingExitCode : 0
+    }
+    return _.process.start( options )
+    .then( ( op ) =>
+    {
+      test.il( op.exitCode, 100 );
+      return null;
+    } )
+
+    function testApp4()
+    {
+      let _ = require( toolsPath );
+      _.include( 'wProcess' );
+      _.include( 'wFiles' );
+
+      return _.process.exit( 100 );
+    }
+  })
+
+
+  /* */
+
   test.case = 'change to zero'
   _.process.exitCode( 0 );
   var got = _.process.exitCode();
   test.identical( got, 0 );
+
+  return a.ready;
+
 }
 
 //
