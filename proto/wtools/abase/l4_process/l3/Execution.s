@@ -835,10 +835,10 @@ function startSingle_body( o )
     close event will not be called for regular/detached process
     */
 
-/*
+    /*
     if( this.process.stdin )
     this.process.stdin.destroy();
-*/
+    */
     if( this.process.stdin )
     this.process.stdin.end(); /* yyy */
     if( this.process.stdout )
@@ -997,7 +997,7 @@ function startSingle_body( o )
           for( let j = 0; j < r.ranges.length; j += 2 )
           if( pos >= r.ranges[ j ] && pos <= r.ranges[ j + 1 ] )
           break;
-          throw _.err( 'Arguments string in execPath:', src, 'has not closed quoting in argument:', args[ i ] );
+          throw _.err( `Arguments string in execPath: ${src} has not closed quoting in argument: ${args[ i ]}` );
         }
       })
     }
@@ -1137,10 +1137,10 @@ function startSingle_body( o )
   function infoGet()
   {
     let result = '';
-    result += 'Launched as ' + _.strQuote( o.fullExecPath ) + '\n';
-    result += 'Launched at ' + _.strQuote( o.currentPath ) + '\n';
+    result += `Launched as ${_.strQuote( o.fullExecPath )} \n`;
+    result += `Launched at ${_.strQuote( o.currentPath )} \n`;
     if( stderrOutput.length )
-    result += '\n -> Stderr' + '\n' + ' -  ' + _.strLinesIndentation( stderrOutput, ' -  ' ) + '\n -< Stderr';
+    result += `\n -> Stderr\n -  ${_.strLinesIndentation( stderrOutput, ' -  ' )} '\n -< Stderr`;
     return result;
   }
 
@@ -1291,13 +1291,13 @@ function start_pre( routine, args )
 
   _.assert
   (
-      o.execPath === null || _.strIs( o.execPath ) || _.strsAreAll( o.execPath )
-    , 'Expects string or strings {-o.execPath-}, but got', _.strType( o.execPath )
+    o.execPath === null || _.strIs( o.execPath ) || _.strsAreAll( o.execPath )
+    , `Expects string or strings {-o.execPath-}, but got ${_.strType( o.execPath )}`
   );
   _.assert
   (
-      o.currentPath === null || _.strIs( o.currentPath ) || _.strsAreAll( o.currentPath )
-    , 'Expects string or strings {-o.currentPath-}, but got', _.strType( o.currentPath )
+    o.currentPath === null || _.strIs( o.currentPath ) || _.strsAreAll( o.currentPath )
+    , `Expects string or strings {-o.currentPath-}, but got ${_.strType( o.currentPath )}`
   );
 
   return o;
@@ -1877,7 +1877,7 @@ function starter( o0 )
 
     if( src.execPath !== null && src.execPath !== undefined && dst.execPath !== null && dst.execPath !== undefined )
     {
-      _.assert( _.arrayIs( src.execPath ) || _.strIs( src.execPath ), () => 'Expects string or array, but got ' + _.strType( src.execPath ) );
+      _.assert( _.arrayIs( src.execPath ) || _.strIs( src.execPath ), () => `Expects string or array, but got ${_.strType( src.execPath )}` );
       if( _.arrayIs( src.execPath ) )
       src.execPath = _.arrayFlatten( src.execPath );
 
@@ -2303,7 +2303,7 @@ function kill( o )
     if( err.code === 'EPERM' )
     throw _.err( err, '\nCurrent process does not have permission to kill target process' );
     if( err.code === 'ESRCH' )
-    throw _.err( err, '\nTarget process:', _.strQuote( o.pid ), 'does not exist.' ); /* qqq for Yevhen : rewrite such strings as template-strings */
+    throw _.err( err, `\nTarget process: ${_.strQuote( o.pid )} does not exist.` ); /* qqq for Yevhen : rewrite such strings as template-strings */
     throw _.err( err );
   }
 
@@ -2477,7 +2477,7 @@ function terminate( o )
     if( err.code === 'EPERM' )
     throw _.err( err, '\nCurrent process does not have permission to kill target process' );
     if( err.code === 'ESRCH' )
-    throw _.err( err, '\nTarget process:', _.strQuote( o.pid ), 'does not exist.' );
+    throw _.err( err, `\nTarget process: ${_.strQuote( o.pid )} does not exist.` );
     throw _.err( err );
   }
 
@@ -2547,7 +2547,7 @@ function children( o )
 
   if( !_.process.isAlive( o.pid ) )
   {
-    let err = _.err( '\nTarget process:', _.strQuote( o.pid ), 'does not exist.' );
+    let err = _.err( `\nTarget process: ${_.strQuote( o.pid )} does not exist.` );
     return new _.Consequence().error( err );
   }
 
