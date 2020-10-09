@@ -1,3 +1,4 @@
+/* eslint-disable */
 ( function _ProcessBasic_test_s( )
 {
 
@@ -163,7 +164,7 @@ function testAppShell()
   process.exit( args.map.exitWithCode )
 
   if( args.map.loop )
-  return _.time.out( 4000 )
+  return _.time.out( context.t2 - context.t1 ) /* 4000 */
 
   console.log( __filename );
 }
@@ -260,7 +261,7 @@ function basic( test )
     var options = _.mapSupplement( {}, o2, o3 );
 
     var shell = _.process.start( options );
-    _.time.out( 500, () =>
+    _.time.out( context.t0 * 5, () => /* 500 */
     {
       test.identical( options.process.killed, false );
       options.process.kill( 'SIGINT' );
@@ -394,7 +395,7 @@ function basic( test )
     var options = _.mapSupplement( {}, o2, o3 );
 
     var shell = _.process.start( options );
-    _.time.out( 500, () =>
+    _.time.out( context.t0 * 5, () => /* 500 */
     {
       test.identical( options.process.killed, false );
       options.process.kill( 'SIGINT' );
@@ -432,7 +433,7 @@ function basic( test )
     var options = _.mapSupplement( {}, o2, o3 );
 
     var shell = _.process.start( options );
-    _.time.out( 500, () =>
+    _.time.out( context.t0 * 5, () => /* 500 */
     {
       test.identical( options.process.killed, false );
       options.process.kill( 'SIGKILL' );
@@ -671,7 +672,8 @@ function start2OptionPassingThrough( test )
 
 
   /* REWRITTEN */
-  /* PASSES */
+  /* NOT COMPLETED */
+  /* PASSES basic checks */
   a.ready.then( () =>
   {
     /* mode : shell, stdio : pipe, passingThrough : true */
@@ -690,16 +692,18 @@ function start2OptionPassingThrough( test )
     let options =
     {
       execPath :  'node ' + programPath,
-      outputCollecting : 1
+      outputCollecting : 1,
+      outputPiping : 0
     }
 
     return _.process.start( options )
     .then( ( op ) =>
     {
-      test.identical( options.exitCode, 0 );
-      test.is( _.strHas( op.output, programPathChild ));
-      // var expectedArgs= _.arrayAppendArray( [], process.argv.slice( 2 ) );
-      // test.identical( options.output, expectedArgs.join( ' ' ) + '\n' );
+      let parsed = JSON.parse( op.output );
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.identical( parsed.data, '' )
+
       return null;
     })
 
@@ -717,28 +721,18 @@ function start2OptionPassingThrough( test )
         mode : 'shell',
         passingThrough : 1,
         stdio : 'pipe',
-        outputPiping : 1,
+        outputPiping : 0,
         outputCollecting : 1,
         applyingExitCode : 0,
-        throwingExitCode : 1
+        throwingExitCode : 1,
+        inputMirroring : 0
       }
 
       return _.process.start( options )
       .then( ( op ) =>
       {
-        console.log( op.output );
+        console.log( JSON.stringify({ data : op.output.trim() }) );
         return null;
-
-        /*
-        This is used to send proper JSON,
-        but here need to send child stdout.
-
-        var args = _.process.args();
-        if( process.send )
-        process.send( args );
-        else
-        console.log( JSON.stringify( args ) );
-        */
       })
     }
   })
@@ -777,7 +771,8 @@ function start2OptionPassingThrough( test )
   // })
 
   /* REWRITTEN */
-  /* PASSES */
+  /* NOT COMPLETED */
+  /* PASSES basic checks */
   a.ready.then( function()
   {
     /* mode : spawn, stdio : pipe, passingThrough : true */
@@ -795,35 +790,18 @@ function start2OptionPassingThrough( test )
     let options =
     {
       execPath :  'node ' + programPath,
-      outputCollecting : 1
+      outputCollecting : 1,
+      outputPiping : 0
     }
 
     return _.process.start( options )
     .then( ( op ) =>
     {
-      /* 
-        Cannot properly convert to json
-        output like: 
-        ` > node /Users/jackiejo/Temp/ProcessBasic-2020-10-8-22-48-9-795-2b91.tmp/start2OptionPassingThrough/testAppChild.js
-
-"\n"`
-so error is triggered when trying to parse.
-      */
-
-      /*
-        Here check exitCode.
-        And check `programPathChild` to be in op.output( which is child stdout )
-      */
+      let parsed = JSON.parse( op.output );
       test.identical( op.exitCode, 0 );
-      test.is( _.strHas( op.output, programPathChild ));
+      test.identical( op.ended, true );
+      test.identical( parsed.data, '' )
 
-      /* 
-        Test checks that were now are not correct ?
-        process.argv.slice( 2 ) here gives arguments of test suite process ? 
-
-      var expectedArgs = _.arrayAppendArray( [], process.argv.slice( 2 ) );
-      test.identical( options.output, expectedArgs.join( ' ' ) + '\n' );
-      */
       return null;
     })
 
@@ -842,28 +820,18 @@ so error is triggered when trying to parse.
         mode : 'spawn',
         passingThrough : 1,
         stdio : 'pipe',
-        outputPiping : 1,
+        outputPiping : 0,
         outputCollecting : 1,
         applyingExitCode : 0,
-        throwingExitCode : 1
+        throwingExitCode : 1,
+        inputMirroring : 0
       }
 
       return _.process.start( options )
       .then( ( op ) =>
       {
-        // console.log( JSON.stringify( op.output ) );
-        console.log( op.output );
+        console.log( JSON.stringify({ data : op.output.trim() }) );
         return null;
-        /* 
-        This is used to send proper JSON,
-        but here need to send child stdout.
-
-        var args = _.process.args();
-        if( process.send )
-        process.send( args );
-        else
-        console.log( JSON.stringify( args ) );
-        */
       })
     }
   })
@@ -902,7 +870,8 @@ so error is triggered when trying to parse.
   // })
 
   /* REWRITTEN */
-  /* PASSES */
+  /* NOT COMPLETED */
+  /* PASSES basic checks */
   a.ready.then( function()
   {
     /* mode : shell, stdio : pipe, passingThrough : true */
@@ -921,16 +890,17 @@ so error is triggered when trying to parse.
     let options =
     {
       execPath :  'node ' + programPath,
-      outputCollecting : 1
+      outputCollecting : 1,
+      outputPiping : 0,
     }
 
     return _.process.start( options )
     .then( ( op ) =>
     {
+      let parsed = JSON.parse( op.output );
       test.identical( op.exitCode, 0 );
-      test.is( _.strHas( op.output, '"staging" "debug"' ) )
-      // var expectedArgs = _.arrayAppendArray( [ 'staging', 'debug' ], process.argv.slice( 2 ) );
-      // test.identical( options.output, expectedArgs.join( ' ' ) + '\n');
+      test.identical( op.ended, true );
+      test.identical( parsed.data, 'staging debug' )
       return null;
     })
 
@@ -949,16 +919,17 @@ so error is triggered when trying to parse.
         mode : 'shell',
         passingThrough : 1,
         stdio : 'pipe',
-        outputPiping : 1,
+        outputPiping : 0,
         outputCollecting : 1,
         applyingExitCode : 0,
-        throwingExitCode : 1
+        throwingExitCode : 1,
+        inputMirroring : 0
       }
 
       return _.process.start( options )
       .then( ( op ) =>
       {
-        console.log( op.output );
+        console.log( JSON.stringify({ data : op.output.trim() }) );
         return null;
       })
     }
@@ -1742,7 +1713,7 @@ function startSingleOptionDry( test )
       */
     })
 
-    let result = _.time.out( 1000 + context.t2, () =>
+    let result = _.time.out( context.t1 + context.t2, () => /* 1000 + context.t2 */
     {
       test.identical( track, [ 'conStart', 'conTerminate', 'ready' ] );
 
@@ -16924,82 +16895,82 @@ function exitCode( test )
   var got = _.process.exitCode();
   test.identical( got, 2 );
 
-  /* */
+  // /* */
 
-  test.case = 'update reason, set exitCode to 3'
-  _.process.exitCode( 3 );
-  var got = _.process.exitCode();
-  test.identical( got, 3 );
+  // test.case = 'update reason, set exitCode to 3'
+  // _.process.exitCode( 3 );
+  // var got = _.process.exitCode();
+  // test.identical( got, 3 );
 
-  /* */
+  // /* */
 
-  test.case = 'update reason, set exitCode to 4'
-  _.process.exitCode( 4 );
-  var got = _.process.exitCode();
-  test.identical( got, 4 );
+  // test.case = 'update reason, set exitCode to 4'
+  // _.process.exitCode( 4 );
+  // var got = _.process.exitCode();
+  // test.identical( got, 4 );
 
-  /* */
+  // /* */
 
-  test.case = 'update reason, set exitCode to 5'
-  _.process.exitCode( 5 );
-  var got = _.process.exitCode();
-  test.identical( got, 5 );
+  // test.case = 'update reason, set exitCode to 5'
+  // _.process.exitCode( 5 );
+  // var got = _.process.exitCode();
+  // test.identical( got, 5 );
 
-  /* */
+  // /* */
 
-  test.case = 'update reason, set exitCode to 6'
-  _.process.exitCode( 6 );
-  var got = _.process.exitCode();
-  test.identical( got, 6 );
+  // test.case = 'update reason, set exitCode to 6'
+  // _.process.exitCode( 6 );
+  // var got = _.process.exitCode();
+  // test.identical( got, 6 );
 
-  /* */
+  // /* */
 
-  test.case = 'update reason, set exitCode to 7'
-  _.process.exitCode( 7 );
-  var got = _.process.exitCode();
-  test.identical( got, 7 );
+  // test.case = 'update reason, set exitCode to 7'
+  // _.process.exitCode( 7 );
+  // var got = _.process.exitCode();
+  // test.identical( got, 7 );
 
-  /* */
+  // /* */
 
-  test.case = 'update reason, set exitCode to 8'
-  _.process.exitCode( 8 );
-  var got = _.process.exitCode();
-  test.identical( got, 8 );
+  // test.case = 'update reason, set exitCode to 8'
+  // _.process.exitCode( 8 );
+  // var got = _.process.exitCode();
+  // test.identical( got, 8 );
 
-  /* */
+  // /* */
 
-  test.case = 'update reason, set exitCode to 9'
-  _.process.exitCode( 9 );
-  var got = _.process.exitCode();
-  test.identical( got, 9 );
+  // test.case = 'update reason, set exitCode to 9'
+  // _.process.exitCode( 9 );
+  // var got = _.process.exitCode();
+  // test.identical( got, 9 );
 
-  /* */
+  // /* */
 
-  test.case = 'update reason, set exitCode to 10'
-  _.process.exitCode( 10 );
-  var got = _.process.exitCode();
-  test.identical( got, 10 );
+  // test.case = 'update reason, set exitCode to 10'
+  // _.process.exitCode( 10 );
+  // var got = _.process.exitCode();
+  // test.identical( got, 10 );
 
-  /* */
+  // /* */
 
-  test.case = 'update reason, set exitCode to 11'
-  _.process.exitCode( 11 );
-  var got = _.process.exitCode();
-  test.identical( got, 11 );
+  // test.case = 'update reason, set exitCode to 11'
+  // _.process.exitCode( 11 );
+  // var got = _.process.exitCode();
+  // test.identical( got, 11 );
 
-  /* */
+  // /* */
 
-  test.case = 'update reason, set exitCode to 12'
-  _.process.exitCode( 12 );
-  var got = _.process.exitCode();
-  test.identical( got, 12 );
+  // test.case = 'update reason, set exitCode to 12'
+  // _.process.exitCode( 12 );
+  // var got = _.process.exitCode();
+  // test.identical( got, 12 );
 
-  /* */
+  // /* */
 
-  test.case = 'update reason, set exitCode to 129'
-  _.process.exitCode( 129 )
-  var got = _.process.exitCode()
-  test.il( got, 129 )
+  // test.case = 'update reason, set exitCode to 129'
+  // _.process.exitCode( 129 )
+  // var got = _.process.exitCode()
+  // test.il( got, 129 )
 
   /* */
 
@@ -17068,7 +17039,7 @@ function exitCode( test )
 
   a.ready.then( () =>
   {
-    test.case = 'error in child process';
+    test.case = 'error in subprocess process ( uncaught asynchronous error )';
     let programPath = a.program( testApp3 );
     let options =
     {
@@ -17120,6 +17091,44 @@ function exitCode( test )
     }
   })
 
+  /* */
+
+  // a.ready.then( () =>
+  // {
+  //   test.case = 'error in child process';
+  //   let programPath = a.program( testApp6 );
+  //   let programPath2 = a.program( testApp7 );
+  //   let options =
+  //   {
+  //     execPath : 'node ' + programPath,
+  //     throwingExitCode : 0
+  //   }
+  //   return _.process.start( options )
+  //   .then( ( op ) =>
+  //   {
+  //     test.il( op.exitCode, 100 );
+  //     return null;
+  //   } )
+
+  //   function testApp6()
+  //   {
+  //     let _ = require( toolsPath );
+  //     _.include( 'wProcess' );
+  //     _.include( 'wFiles' );
+
+  //     let options =
+  //     {
+  //       execPath : 'node testApp7.js',
+  //     }
+
+  //     return _.process.start( options );
+  //   }
+
+  //   function testApp7()
+  //   {
+  //     console.log( process.argv.slice( 3 ) );
+  //   }
+  // })
 
   /* */
 
