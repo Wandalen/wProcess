@@ -705,7 +705,7 @@ function start2OptionPassingThrough( test )
       let parsed = JSON.parse( op.output );
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
-      test.identical( parsed.data, 'testArg' )
+      test.identical( parsed.output, 'testArg\n' )
 
       return null;
     })
@@ -734,7 +734,7 @@ function start2OptionPassingThrough( test )
       return _.process.start( options )
       .then( ( op ) =>
       {
-        console.log( JSON.stringify({ data : op.output.trim() }) );
+        console.log( JSON.stringify({ output : op.output }) );
         return null;
       })
     }
@@ -804,7 +804,7 @@ function start2OptionPassingThrough( test )
       let parsed = JSON.parse( op.output );
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
-      test.identical( parsed.data, 'testArg' )
+      test.identical( parsed.output, 'testArg\n' )
 
       return null;
     })
@@ -834,7 +834,7 @@ function start2OptionPassingThrough( test )
       return _.process.start( options )
       .then( ( op ) =>
       {
-        console.log( JSON.stringify({ data : op.output.trim() }) );
+        console.log( JSON.stringify({ output : op.output }) );
         return null;
       })
     }
@@ -905,7 +905,7 @@ function start2OptionPassingThrough( test )
       let parsed = JSON.parse( op.output );
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
-      test.identical( parsed.data, 'staging debug testArg' )
+      test.identical( parsed.output, 'staging debug testArg\n' )
       return null;
     })
 
@@ -934,7 +934,7 @@ function start2OptionPassingThrough( test )
       return _.process.start( options )
       .then( ( op ) =>
       {
-        console.log( JSON.stringify({ data : op.output.trim() }) );
+        console.log( JSON.stringify({ output : op.output }) );
         return null;
       })
     }
