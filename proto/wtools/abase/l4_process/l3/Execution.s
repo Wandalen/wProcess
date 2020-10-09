@@ -606,7 +606,7 @@ function startSingle_body( o )
       if( o.state === 'terminated' || o.error )
       return;
       o.exitReason = 'time';
-      _.process.terminate({ process : o.process, withChildren : 1 }); /* qqq for Vova : need to catch event when process is really down aaa:*/
+      _.process.terminate({ process : o.process, withChildren : 1 }); /* qqq for Vova : need to catch event when process is really down aaa:done*/
     });
 
   }
