@@ -19666,7 +19666,7 @@ function terminateWithDetachedChildren( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
-        test.is( _.strHas( op.output, 'SIGINT' ) );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
         return _.time.out( 9000, () =>
         {
           /* zzz : problem with termination of detached proces on Windows, child process does't receive SIGINT */
@@ -19712,9 +19712,9 @@ function terminateWithDetachedChildren( test )
 
   function testApp2()
   {
-    process.on( 'SIGINT', () =>
+    process.on( 'SIGTERM', () =>
     {
-      console.log( 'SIGINT' )
+      console.log( 'SIGTERM' )
       var fs = require( 'fs' );
       var path = require( 'path' )
       fs.writeFileSync( path.join( __dirname, process.pid.toString() ), process.pid.toString() )
