@@ -16495,6 +16495,7 @@ function startOptionPassingThrough( test )
   {
     a.ready.then( () =>
     {
+      test.case = 'args in `execPath`';
       let o =
       {
         args : testAppPath2,
@@ -16525,7 +16526,83 @@ function startOptionPassingThrough( test )
 
       return o2.conTerminate;
     })
+
+    /* */
+
+    a.ready.then( () =>
+    {
+      test.case = 'args in `args` field';
+
+      let o =
+      {
+        args : testAppPath2,
+        outputCollecting : 0,
+        outputPiping : 0,
+        mode : 'fork',
+        throwingExitCode : 0,
+        applyingExitCode : 0,
+        stdio : 'inherit'
+      }
+      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' });
+
+      let o2 =
+      {
+        execPath : 'node ' + testAppPath1,
+        args : [ 'a', 'b', 'c' ],
+        mode : 'spawn',
+        stdio : 'pipe',
+        outputPiping : 1,
+        outputCollecting : 1,
+      }
+      _.process.start( o2 );
+
+      o2.conTerminate.then( () =>
+      {
+        test.is( _.strHas( o2.output, `[ 'a', 'b', 'c' ]` ) );
+        return null;
+      })
+      return o2.conTerminate;
+    })
+
+    /* */
+
+    a.ready.then( () =>
+    {
+      test.case = 'args in `execPath` and `args` field';
+
+      let o =
+      {
+        args : testAppPath2,
+        outputCollecting : 0,
+        outputPiping : 0,
+        mode : 'fork',
+        throwingExitCode : 0,
+        applyingExitCode : 0,
+        stdio : 'inherit'
+      }
+      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' });
+
+      let o2 =
+      {
+        execPath : 'node ' + testAppPath1 + ' a1 b1 c1',
+        args : [ 'a2', 'b2', 'c2' ],
+        mode : 'spawn',
+        stdio : 'pipe',
+        outputPiping : 1,
+        outputCollecting : 1,
+      }
+      _.process.start( o2 );
+
+      o2.conTerminate.then( () =>
+      {
+        test.is( _.strHas( o2.output, `[ 'a1', 'b1', 'c1', 'a2', 'b2', 'c2' ]` ) );
+        return null;
+      })
+      return o2.conTerminate;
+    })
   }
+
+  /* - */
 
   function program1()
   {
@@ -16533,7 +16610,7 @@ function startOptionPassingThrough( test )
     _.include( 'wFiles' );
     _.include( 'wProcess' );
 
-    let o = _.fileProvider.fileRead({ filePath : _.path.join(__dirname, 'op.json' ), encoding : 'json'});
+    let o = _.fileProvider.fileRead({ filePath : _.path.join( __dirname, 'op.json' ), encoding : 'json' });
     o.currentPath = __dirname;
     _.process.startPassingThrough( o );
   }
