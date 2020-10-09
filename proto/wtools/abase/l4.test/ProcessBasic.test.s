@@ -19397,8 +19397,8 @@ function terminateWithChildren( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
-        test.identical( _.strCount( op.output, 'SIGINT' ), 2 );
-        test.identical( _.strCount( op.output, 'SIGINT CHILD' ), 1 );
+        test.identical( _.strCount( op.output, 'SIGTERM' ), 2 );
+        test.identical( _.strCount( op.output, 'SIGTERM CHILD' ), 1 );
         test.is( !_.process.isAlive( o.process.pid ) )
         test.is( !_.process.isAlive( lastChildPid ) );
         var file = a.fileProvider.fileRead( a.abs( a.routinePath, lastChildPid.toString() ) );
@@ -19440,8 +19440,8 @@ function terminateWithChildren( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
-        test.identical( _.strCount( op.output, 'SIGINT' ), 1 );
-        test.identical( _.strCount( op.output, 'SIGINT CHILD' ), 1 );
+        test.identical( _.strCount( op.output, 'SIGTERM' ), 1 );
+        test.identical( _.strCount( op.output, 'SIGTERM CHILD' ), 1 );
         test.is( !_.process.isAlive( o.process.pid ) )
         test.is( !_.process.isAlive( lastChildPid ) );
         var file = a.fileProvider.fileRead( a.abs( a.routinePath, lastChildPid.toString() ) );
@@ -19482,8 +19482,8 @@ function terminateWithChildren( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
-        test.identical( _.strCount( op.output, 'SIGINT' ), 3 );
-        test.identical( _.strCount( op.output, 'SIGINT CHILD' ), 2 );
+        test.identical( _.strCount( op.output, 'SIGTERM' ), 3 );
+        test.identical( _.strCount( op.output, 'SIGTERM CHILD' ), 2 );
         test.is( !_.process.isAlive( o.process.pid ) )
         test.is( !_.process.isAlive( children[ 0 ] ) );
         test.is( !_.process.isAlive( children[ 1 ] ) );
@@ -19553,9 +19553,9 @@ function terminateWithChildren( test )
 
   function testApp2()
   {
-    process.on( 'SIGINT', () =>
+    process.on( 'SIGTERM', () =>
     {
-      console.log( 'SIGINT CHILD' )
+      console.log( 'SIGTERM CHILD' )
       var fs = require( 'fs' );
       var path = require( 'path' )
       fs.writeFileSync( path.join( __dirname, process.pid.toString() ), process.pid.toString() )
