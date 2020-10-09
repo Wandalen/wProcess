@@ -696,6 +696,7 @@ function start2OptionPassingThrough( test )
       execPath :  'node ' + programPath,
       outputCollecting : 1,
       outputPiping : 0,
+      args : 'testArg',
     }
 
     return _.process.start( options )
@@ -720,7 +721,6 @@ function start2OptionPassingThrough( test )
       let options =
       {
         execPath :  'node ' + programPath,
-        args : 'testArg',
         mode : 'shell',
         passingThrough : 1,
         stdio : 'pipe',
@@ -794,7 +794,8 @@ function start2OptionPassingThrough( test )
     {
       execPath :  'node ' + programPath,
       outputCollecting : 1,
-      outputPiping : 0
+      outputPiping : 0,
+      args : 'testArg'
     }
 
     return _.process.start( options )
@@ -819,7 +820,7 @@ function start2OptionPassingThrough( test )
       let options =
       {
         execPath :  'node',
-        args : [ programPath, 'testArg' ],
+        args : [ programPath ],
         mode : 'spawn',
         passingThrough : 1,
         stdio : 'pipe',
@@ -895,6 +896,7 @@ function start2OptionPassingThrough( test )
       execPath :  'node ' + programPath,
       outputCollecting : 1,
       outputPiping : 0,
+      args : 'testArg',
     }
 
     return _.process.start( options )
@@ -918,7 +920,7 @@ function start2OptionPassingThrough( test )
       let options =
       {
         execPath :  'node ' + programPath,
-        args : [ 'staging', 'debug', 'testArg' ],
+        args : [ 'staging', 'debug' ],
         mode : 'shell',
         passingThrough : 1,
         stdio : 'pipe',
@@ -17154,42 +17156,44 @@ function exitCode( test )
 
   /* */
 
-  // a.ready.then( () =>
-  // {
-  //   test.case = 'error in child process';
-  //   let programPath = a.program( testApp6 );
-  //   let programPath2 = a.program( testApp7 );
-  //   let options =
-  //   {
-  //     execPath : 'node ' + programPath,
-  //     throwingExitCode : 0
-  //   }
-  //   return _.process.start( options )
-  //   .then( ( op ) =>
-  //   {
-  //     test.il( op.exitCode, 100 );
-  //     return null;
-  //   } )
+  a.ready.then( () =>
+  {
+    test.case = 'SIGKILL in child process';
 
-  //   function testApp6()
-  //   {
-  //     let _ = require( toolsPath );
-  //     _.include( 'wProcess' );
-  //     _.include( 'wFiles' );
+    let programPath = a.program( testApp6 );
+    let programPath2 = a.program( testApp7 );
 
-  //     let options =
-  //     {
-  //       execPath : 'node testApp7.js',
-  //     }
+    let options =
+    {
+      execPath : 'node ' + programPath,
+      throwingExitCode : 0
+    }
+    return _.process.start( options )
+    .then( ( op ) =>
+    {
+      test.il( op.exitCode, 'SIGKILL' );
+      return null;
+    } )
 
-  //     return _.process.start( options );
-  //   }
+    // function testApp6()
+    // {
+    //   let _ = require( toolsPath );
+    //   _.include( 'wProcess' );
+    //   _.include( 'wFiles' );
 
-  //   function testApp7()
-  //   {
-  //     console.log( process.argv.slice( 3 ) );
-  //   }
-  // })
+    //   let options =
+    //   {
+    //     execPath : 'node testApp7.js',
+    //   }
+
+    //   return _.process.start( options );
+    // }
+
+    // function testApp7()
+    // {
+    //   console.log( process.argv.slice( 3 ) );
+    // }
+  })
 
   /* */
 
