@@ -606,7 +606,7 @@ function startSingle_body( o )
       if( o.state === 'terminated' || o.error )
       return;
       o.exitReason = 'time';
-      o.process.kill( 'SIGTERM' ); /* qqq for Vova : need to catch event when process is really down */
+      _.process.terminate({ process : o.process, withChildren : 1 }); /* qqq for Vova : need to catch event when process is really down aaa:*/
     });
 
   }
@@ -1702,33 +1702,26 @@ function startAfterDeath_body( o )
   _.assert( arguments.length === 1, 'Expects single argument' );
 
   let toolsPath = _.path.nativize( _.path.join( __dirname, '../../../../wtools/Tools.s' ) );
-  let toolsPathInclude = `let _ = require( '${_.strEscape( toolsPath )}' );\n`
-  let secondaryProcessSource = toolsPathInclude + afterDeathSecondaryProcess.toString() + '\nafterDeathSecondaryProcess();';
-  let secondaryFilePath = _.process.tempOpen({ sourceCode : secondaryProcessSource });
-  let srcOptions = _.mapExtend( null, o ); /* qqq for Vova : remove duplication of o-map and repair */
+  let locals = { toolsPath, o };
+  let secondaryProcessRoutine = _.program.preform({ routine : afterDeathSecondaryProcess, locals })
+  let secondaryFilePath = _.process.tempOpen({ sourceCode : secondaryProcessRoutine.sourceCode });
+  /* qqq for Vova : remove duplication of o-map and repair aaa:done */
 
-  let o2 = _.mapExtend( null, o ); /* qqq for Vova : remove duplication of o-map and repair */
-  o2.execPath = _.path.nativize( secondaryFilePath );
-  o2.mode = 'fork';
-  o2.args = [];
-  o2.stdio = 'ignore';
-  o2.outputPiping = 0;
-  o2.outputCollecting = 0;
-  o2.detaching = true;
-  o2.inputMirroring = 0;
+  /* qqq for Vova : remove duplication of o-map and repair aaa:done*/
+  o.execPath = _.path.nativize( secondaryFilePath );
+  o.mode = 'fork';
+  o.args = [];
+  o.detaching = true;
+  o.inputMirroring = 0;
+  o.outputPiping = 1;
+  o.stdio = 'pipe';
 
-  let result = _.process.start( o2 );
+  let result = _.process.start( o );
 
-  o.conStart = o2.conStart;
-  o.conTerminate = o2.conTerminate;
-  o.ready = o2.ready;
-  o.process = o2.process;
-  o.disconnect = _.routineJoin( o2, o2.disconnect );
-
-  o2.conStart.give( function( err, op )
+  o.conStart.give( function( err, op )
   {
     if( !err )
-    o2.process.send( srcOptions );
+    o.process.send( true );
     this.take( err, op );
   })
 
@@ -1738,10 +1731,11 @@ function startAfterDeath_body( o )
 
   function afterDeathSecondaryProcess()
   {
+    let _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
-    process.on( 'message', ( o ) =>
+    process.on( 'message', () =>
     {
       process.on( 'disconnect', () => _.process.start( o ) )
     })
@@ -2222,17 +2216,18 @@ function statusOf( src )
 
 //
 
-/* qqq for Vova : rewrite and cover */
-
-function kill( o )
+function signal_pre( routine, args )
 {
+  let o = args[ 0 ];
+
+  _.assert( args.length === 1 );
+
   if( _.numberIs( o ) )
   o = { pid : o };
   else if( _.routineIs( o.kill ) )
   o = { process : o };
 
-  _.assert( arguments.length === 1 );
-  _.routineOptions( kill, o );
+  o = _.routineOptions( routine, o );
 
   if( o.process )
   {
@@ -2241,73 +2236,64 @@ function kill( o )
   }
 
   _.assert( _.numberIs( o.pid ) );
-  _.assert( _.numberIs( o.waitTimeOut ) );
+  _.assert( !o.waitTimeOut || _.numberIs( o.waitTimeOut ) );
+
+  return o;
+}
+
+//
+
+function signal_body( o )
+{
+  _.assert( arguments.length === 1 );
+  _.assert( _.strIs( o.signal ), 'Expects signal to be provided explicitly as string' );
 
   let isWindows = process.platform === 'win32';
-
   let ready = _.Consequence().take( null );
 
   ready.then( () =>
   {
-    if( !o.withChildren )
-    {
-      if( o.process )
-      o.process.kill( 'SIGKILL' );
-      else
-      process.kill( o.pid, 'SIGKILL' )
-      return true;
-    }
-
-    return _.process.children({ pid : o.pid, asList : isWindows })
-    .then( ( children ) =>
-    {
-      if( !isWindows )
-      return killChildren( children );
-
-      for( var l = children.length - 1; l >= 0; l-- )
-      {
-        if( l && children[ l ].name === 'conhost.exe' )
-        continue;
-        if( _.process.isAlive( children[ l ].pid ) )
-        process.kill( children[ l ].pid, 'SIGKILL' );
-      }
-      return true;
-    })
+    if( o.withChildren )
+    return _.process.children({ pid : o.pid, asList : 1 });
+    return o.pid;
   })
 
-  ready.then( waitForTermination )
+  ready.then( killProcess );
+  if( o.waitTimeOut )
+  ready.then( waitForTermination );
   ready.catch( handleError );
+
+  if( o.sync )
+  ready.deasync();
 
   return ready;
 
-  /* */
+  /* - */
 
-  function killChildren( tree )
+  function sendSignal( pid )
   {
-    for( let pid in tree )
+    if( _.process.isAlive( pid ) )
+    process.kill( pid, o.signal );
+  }
+
+  function killProcess( arg )
+  {
+    if( o.withChildren )
+    for( let i = arg.length - 1; i >= 0; i-- )
     {
-      pid = _.numberFrom( pid );
-      if( _.process.isAlive( pid ) )
-      process.kill( pid, 'SIGKILL' );
-      killChildren( tree[ pid ] );
+      if( isWindows && i && arg[ i ].name === 'conhost.exe' )
+      continue;
+      sendSignal( arg[ i ].pid );
     }
+    else
+    {
+      sendSignal( arg );
+    }
+
     return true;
   }
 
-  /* */
-
-  function handleError( err )
-  {
-    // if( err.code === 'EINVAL' )
-    // throw _.err( err, '\nAn invalid signal was specified:', _.strQuote( o.signal ) )
-    if( err.code === 'EPERM' )
-    throw _.err( err, '\nCurrent process does not have permission to kill target process' );
-    if( err.code === 'ESRCH' )
-    throw _.err( err, '\nTarget process:', _.strQuote( o.pid ), 'does not exist.' ); /* qqq for Yevhen : rewrite such strings as template-strings */
-    throw _.err( err );
-  }
-
-  /* */
+  /* - */
 
   function waitForTermination()
   {
@@ -2334,7 +2320,7 @@ function kill( o )
 
     let timeOutError = _.time.outError( o.waitTimeOut )
 
-    ready.orKeepingSplit( [ timeOutError ] );
+    ready.orKeeping( [ timeOutError ] );
 
     ready.finally( ( err, op ) =>
     {
@@ -2343,6 +2329,7 @@ function kill( o )
 
       if( err )
       {
+        timer._cancel();
         _.errAttend( err );
         if( err.reason === 'time out' )
         err = _.err( err, `\nTarget process: ${_.strQuote( o.pid )} is still alive. Waited for ${o.waitTimeOut} ms.` );
@@ -2354,18 +2341,56 @@ function kill( o )
     return ready;
   }
 
-  /* */
+  /* - */
+
+  function handleError( err )
+  {
+    // if( err.code === 'EINVAL' )
+    // throw _.err( err, '\nAn invalid signal was specified:', _.strQuote( o.signal ) )
+    if( err.code === 'EPERM' )
+    throw _.err( err, '\nCurrent process does not have permission to kill target process' );
+    if( err.code === 'ESRCH' )
+    throw _.err( err, '\nTarget process:', _.strQuote( o.pid ), 'does not exist.' ); /* qqq for Yevhen : rewrite such strings as template-strings */
+    throw _.err( err );
+  }
 
 }
 
-kill.defaults =
+signal_body.defaults =
 {
   pid : null,
   process : null,
   withChildren : 0,
   waitTimeOut : 5000,
-  // qqq for Vova : implement and сover option sync
+  signal : null,
+  sync : 0
 }
+
+let signal = _.routineFromPreAndBody( signal_pre, signal_body );
+
+//
+
+/* qqq for Vova : rewrite and cover,aaa:done */
+
+function kill_body( o )
+{
+  _.assert( arguments.length === 1 );
+  o.signal = 'SIGKILL';
+  return _.process.signal.body( o );
+}
+
+kill_body.defaults =
+{
+  pid : null,
+  process : null,
+  withChildren : 0,
+  waitTimeOut : 5000,
+  sync : 0
+  // qqq for Vova : implement and сover option sync aaa:done
+}
+
+let kill = _.routineFromPreAndBody( signal_pre, kill_body );
+
 
 //
 
@@ -2374,155 +2399,48 @@ kill.defaults =
   look for solution that allow to have same behaviour on each mode
 */
 
-/* qqq for Vova : rewrite and cover */
+/* qqq for Vova : rewrite and cover aaa:done*/
 
-function terminate( o )
+function terminate_body( o )
 {
-  if( _.numberIs( o ) )
-  o = { pid : o };
-  else if( _.routineIs( o.kill ) )
-  o = { process : o };
-
   _.assert( arguments.length === 1 );
-  _.routineOptions( terminate, o );
-  _.assert( o.timeOut === null || _.numberIs( o.timeOut ) );
 
-  if( o.process )
+  o.signal = 'SIGTERM';
+
+  let ready = _.process.signal.body( o );
+
+  ready.catch( err =>
   {
-    _.assert( o.pid === null );
-    o.pid = o.process.pid;
-  }
+    debugger
+    if( err.reason !== 'time out' )
+    throw err;
 
-  _.assert( _.numberIs( o.pid ) );
+    _.errAttend( err );
 
-  let isWindows = process.platform === 'win32';
-
-  try
-  {
-    if( !o.withChildren )
-    return terminateProcess( o.pid );
-
-    let ready = _.process.children({ pid : o.pid, asList : isWindows })
-    .then( ( tree ) =>
+    delete o.signal;
+    return _.process.kill.body( o )
+    .then( () =>
     {
-      if( isWindows )
-      return terminateChildrenWin( tree )
-      else
-      return terminateChildren( tree );
+      throw err;
     })
-    .catch( handleError );
+  })
 
-    return ready;
-  }
-  catch( err )
-  {
-    handleError( err ); /* qqq for Vova : should alwas return consequence! */
-  }
+  if( o.sync )
+  ready.deasync();
 
-  /* */
-
-  function terminateProcess( pid )
-  {
-    let result;
-
-    if( isWindows )
-    result = windowsKill( pid );
-    else
-    result = process.kill( pid, 'SIGINT' );
-
-    timeOutMaybe( pid );
-
-    return result;
-  }
-
-  /* */
-
-  function windowsKill( pid )
-  {
-    return _.process.start
-    ({
-      execPath : 'node',
-      args : [ '-e', `var kill = require( 'wwindowskill' )();kill( ${pid},'SIGINT' )` ],
-      currentPath : __dirname,
-      inputMirroring : 0,
-      outputPiping : 1,
-      mode : 'spawn',
-      windowHiding : 1,
-      timeOut : o.timeOut,
-      throwingExitCode : 0,
-      sync : 0
-    })
-  }
-
-  /* */
-
-  function timeOutMaybe( pid )
-  {
-    if( o.timeOut )
-    _.time.out( o.timeOut, () =>
-    {
-      if( !_.process.isAlive( pid ) )
-      return null;
-      if( o.process )
-      o.process.kill( 'SIGKILL' )
-      else
-      process.kill( pid, 'SIGKILL' );
-    })
-  }
-
-  /* */
-
-  function handleError( err )
-  {
-    if( err.code === 'EPERM' )
-    throw _.err( err, '\nCurrent process does not have permission to kill target process' );
-    if( err.code === 'ESRCH' )
-    throw _.err( err, '\nTarget process:', _.strQuote( o.pid ), 'does not exist.' );
-    throw _.err( err );
-  }
-
-  /* */
-
-  function terminateChildren( tree )
-  {
-    for( let pid in tree )
-    {
-      pid = _.numberFrom( pid );
-      if( _.process.isAlive( pid ) )
-      terminateProcess( pid );
-      terminateChildren( tree[ pid ] );
-    }
-    return null;
-  }
-
-  /* */
-
-  function terminateChildrenWin( tree )
-  {
-    let cons = [];
-    for( var l = tree.length - 1; l >= 0; l-- )
-    {
-      if( l && tree[ l ].name === 'conhost.exe' )
-      continue;
-      if( !_.process.isAlive( tree[ l ].pid ) )
-      continue;
-      cons.push( terminateProcess( tree[ l ].pid ) );
-    }
-    if( cons.length )
-    return _.Consequence.AndKeep( ... cons );
-    return true;
-  }
-
+  return ready;
 }
 
-terminate.defaults =
+terminate_body.defaults =
 {
   process : null,
   pid : null,
   withChildren : 0,
-  timeOut : 5000,
-  // qqq for Vova : implement and сover option sync
+  waitTimeOut : 5000,
+  sync : 0 // qqq for Vova : implement and сover option sync aaa:done
 }
+
+let terminate = _.routineFromPreAndBody( signal_pre, terminate_body );
 
 //
 
@@ -2608,7 +2526,7 @@ function children( o )
     .then( ( op ) =>
     {
       if( o.asList )
-      _result.push( _.numberFrom( pid ) );
+      _result.push({ pid : _.numberFrom( pid ) });
       else
       _result[ pid ] = Object.create( null );
       if( op.exitCode !== 0 )
@@ -2671,6 +2589,7 @@ let Extension =
   isAlive,
   pidFrom,
   statusOf,
+  signal,
   kill,
   terminate,
   children,
