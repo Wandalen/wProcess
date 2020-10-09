@@ -680,7 +680,7 @@ function start2OptionPassingThrough( test )
   {
     /* mode : shell, stdio : pipe, passingThrough : true */
 
-    test.case = 'mode : shell, passingThrough : true, no args';
+    test.case = 'mode : shell, passingThrough : true, args : testArg';
 
     let locals =
     {
@@ -695,7 +695,7 @@ function start2OptionPassingThrough( test )
     {
       execPath :  'node ' + programPath,
       outputCollecting : 1,
-      outputPiping : 0
+      outputPiping : 0,
     }
 
     return _.process.start( options )
@@ -704,7 +704,7 @@ function start2OptionPassingThrough( test )
       let parsed = JSON.parse( op.output );
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
-      test.identical( parsed.data, '' )
+      test.identical( parsed.data, 'testArg' )
 
       return null;
     })
@@ -720,6 +720,7 @@ function start2OptionPassingThrough( test )
       let options =
       {
         execPath :  'node ' + programPath,
+        args : 'testArg',
         mode : 'shell',
         passingThrough : 1,
         stdio : 'pipe',
@@ -727,7 +728,7 @@ function start2OptionPassingThrough( test )
         outputCollecting : 1,
         applyingExitCode : 0,
         throwingExitCode : 1,
-        inputMirroring : 0
+        inputMirroring : 0,
       }
 
       return _.process.start( options )
@@ -778,7 +779,7 @@ function start2OptionPassingThrough( test )
   a.ready.then( function()
   {
     /* mode : spawn, stdio : pipe, passingThrough : true */
-    test.case = 'mode : spawn, passingThrough : true, only filePath in args';
+    test.case = 'mode : spawn, passingThrough : true, 2 args : filePath, testArg';
 
     let locals =
     {
@@ -802,7 +803,7 @@ function start2OptionPassingThrough( test )
       let parsed = JSON.parse( op.output );
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
-      test.identical( parsed.data, '' )
+      test.identical( parsed.data, 'testArg' )
 
       return null;
     })
@@ -818,7 +819,7 @@ function start2OptionPassingThrough( test )
       let options =
       {
         execPath :  'node',
-        args : [ programPath ],
+        args : [ programPath, 'testArg' ],
         mode : 'spawn',
         passingThrough : 1,
         stdio : 'pipe',
@@ -878,7 +879,7 @@ function start2OptionPassingThrough( test )
   {
     /* mode : shell, stdio : pipe, passingThrough : true */
 
-    test.case = 'mode : shell, passingThrough : true';
+    test.case = 'mode : shell, passingThrough : true, args : "staging", "debug", "testArg"';
 
     let locals =
     {
@@ -902,7 +903,7 @@ function start2OptionPassingThrough( test )
       let parsed = JSON.parse( op.output );
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
-      test.identical( parsed.data, 'staging debug' )
+      test.identical( parsed.data, 'staging debug testArg' )
       return null;
     })
 
@@ -917,7 +918,7 @@ function start2OptionPassingThrough( test )
       let options =
       {
         execPath :  'node ' + programPath,
-        args : [ 'staging', 'debug' ],
+        args : [ 'staging', 'debug', 'testArg' ],
         mode : 'shell',
         passingThrough : 1,
         stdio : 'pipe',
