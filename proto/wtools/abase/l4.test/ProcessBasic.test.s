@@ -19835,6 +19835,42 @@ function experiment2( test )
 
 experiment2.experimental = 1;
 
+//
+
+function experiment3( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+
+  var o =
+  {
+    execPath : 'node -e "console.log(setTimeout(()=>{},10000))"',
+    mode : 'spawn',
+    stdio : 'pipe',
+    timeOut : 2000,
+    throwingExitCode : 0
+  }
+  _.process.start( o );
+
+  o.conTerminate.then( ( op ) =>
+  {
+    test.identical( op.ended, true );
+    test.identical( op.exitReason, 'signal' );
+    test.identical( op.exitCode, null );
+    test.identical( op.exitSignal, 'SIGTERM' );
+    test.is( !_.process.isAlive( op.process.pid ) );
+    return null;
+  })
+
+  return o.conTerminate;
+}
+
+experiment3.experimental = 1;
+experiment3.description =
+`
+Shows that timeOut kills the child process and handleClose is called
+`
+
 // --
 // suite
 // --
@@ -20030,6 +20066,8 @@ var Proto =
 
     experiment,
     experiment2,
+    experiment3
+
 
   }
 

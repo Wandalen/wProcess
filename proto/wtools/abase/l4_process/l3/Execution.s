@@ -600,7 +600,7 @@ function startSingle_body( o )
       if( o.state === 'terminated' || o.error )
       return;
       o.exitReason = 'time';
-      o.process.kill( 'SIGTERM' ); /* qqq for Vova : need to catch event when process is really down */
+      o.process.kill( 'SIGTERM' ); /* qqq for Vova : need to catch event when process is really down aaa:this works as expected see experiment3*/
     });
 
   }
