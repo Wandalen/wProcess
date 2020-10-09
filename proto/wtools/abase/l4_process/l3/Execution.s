@@ -142,7 +142,7 @@ function startSingle_body( o )
   let stderrOutput = '';
   let decoratedOutput = '';
   let decoratedErrorOutput = '';
-  let execArgs; /* qqq for Vova : remove argumentsManual aaa:removed*/
+  let execArgs;
   let readyCallback;
 
   form1();
@@ -442,7 +442,7 @@ function startSingle_body( o )
       if( o.dry )
       {
         /* qqq for Yevhen : make sure option dry is covered good enough */
-        _.assert( o.state === 'starting' );
+        _.assert( o.state === 'started' );
         o.state = 'terminated';
         end2( undefined, o.conTerminate );
       }
@@ -493,6 +493,7 @@ function startSingle_body( o )
 
     /* procedure */
 
+    if( !o.dry )
     if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
     {
       if( Config.debug )
@@ -691,19 +692,12 @@ function startSingle_body( o )
     if( o.ended )
     return;
 
-    if( o.verbosity >= 5 )
-    {
-      log( ' < Process returned error code ' + exitCode ); /* qqq for Yevhen : is covered? */
-      if( exitCode )
-      log( infoGet() ); /* qqq for Yevhen : is covered? */
-    }
+    o.state = 'terminated';
 
     exitCodeSet( exitCode );
     o.exitSignal = exitSignal;
     if( o.process && o.process.signalCode === undefined )
     o.process.signalCode = exitSignal;
-
-    o.state = 'terminated';
 
     if( exitSignal )
     o.exitReason = 'signal';
@@ -711,6 +705,13 @@ function startSingle_body( o )
     o.exitReason = 'code';
     else
     o.exitReason = 'normal';
+
+    if( o.verbosity >= 5 )
+    {
+      log( ' < Process returned error code ' + exitCode ); /* qqq for Yevhen : is covered? */
+      if( exitCode )
+      log( infoGet() ); /* qqq for Yevhen : is covered? */
+    }
 
     if( ( exitSignal || exitCode !== 0 ) && o.throwingExitCode )
     {
@@ -1026,7 +1027,7 @@ function startSingle_body( o )
 
   function argsJoin( args )
   {
-    if( !execArgs && !o.passingThrough ) /* yyy qqq for Vova : argumentsManual?? should be no such global variable aaa:removed */
+    if( !execArgs && !o.passingThrough )
     return args.join( ' ' );
 
     let i;
@@ -1227,7 +1228,7 @@ function startSingle_body( o )
 
 }
 
-startSingle_body.defaults = /* qqq for Vova : split on _.process.start(), _.process.startSingle() */
+startSingle_body.defaults =
 {
 
   execPath : null,
@@ -1238,7 +1239,7 @@ startSingle_body.defaults = /* qqq for Vova : split on _.process.start(), _.proc
   sync : 0,
   deasync : 0,
   when : 'instant', /* instant / afterdeath / time / delay */
-  dry : 0, /* qqq for Yevhen : cover the option */
+  dry : 0, /* qqq for Yevhen : cover the option. make sure all con* called once. make sure all con* called in correct order */
 
   mode : 'shell', /* fork / spawn / shell */
   stdio : 'pipe', /* pipe / ignore / inherit */
@@ -2357,7 +2358,7 @@ kill.defaults =
   process : null,
   withChildren : 0,
   waitTimeOut : 5000,
-  // qqq for Vova : implement and over option sync
+  // qqq for Vova : implement and сover option sync
 }
 
 //
@@ -2514,7 +2515,7 @@ terminate.defaults =
   pid : null,
   withChildren : 0,
   timeOut : 5000,
-  // qqq for Vova : implement and over option sync
+  // qqq for Vova : implement and сover option sync
 }
 
 //
