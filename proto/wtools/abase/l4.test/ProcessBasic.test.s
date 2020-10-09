@@ -20537,6 +20537,58 @@ experiment3.description =
 Shows that timeOut kills the child process and handleClose is called
 `
 
+//
+
+//
+
+function experimentIPCDeasync( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+
+  for( let i = 0 ; i < 10; i++ )
+  a.ready.then( run )
+
+  return a.ready;
+
+  function run( )
+  {
+    var o =
+    {
+      execPath : 'node -e "process.send(1);setTimeout(()=>{},500)"',
+      mode : 'spawn',
+      stdio : 'pipe',
+      ipc : 1,
+      throwingExitCode : 0
+    }
+    _.process.start( o );
+
+    var ready = _.Consequence();
+
+    o.process.on( 'message', () =>
+    {
+      let interval = setInterval( () =>
+      {
+        if( _.process.isAlive( o.process.pid ) )
+        return false;
+        ready.take( true );
+        clearInterval( interval );
+      })
+      ready.deasync();
+    })
+
+
+    return _.Consequence.AndKeep( o.conTerminate, ready );
+  }
+}
+
+experimentIPCDeasync.experimental = 1;
+experimentIPCDeasync.description =
+`
+This expriment shows problem with usage of _.time.periodic with deasync.
+Problem happens only if code if deasync is launched from 'message' callback
+`
+
 // --
 // suite
 // --
@@ -20733,7 +20785,8 @@ var Proto =
 
     experiment,
     experiment2,
-    experiment3
+    experiment3,
+    experimentIPCDeasync
 
 
   }
