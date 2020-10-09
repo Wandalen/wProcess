@@ -2249,23 +2249,7 @@ function kill( o )
     return o.pid;
   })
 
-  ready.then( ( arg ) =>
-  {
-    if( o.withChildren )
-    for( var l = arg.length - 1; l >= 0; l-- )
-    {
-      if( isWindows )
-      if( l && arg[ l ].name === 'conhost.exe' )
-      continue;
-      let pid = isWindows ? arg[ l ].pid : arg[ l ];
-      killPid( pid );
-    }
-    else
-    killPid( arg );
-
-    return true;
-  })
-
+  ready.then( killProcess );
   ready.then( waitForTermination );
   ready.catch( handleError );
 
@@ -2276,10 +2260,27 @@ function kill( o )
 
   /* - */
 
-  function killPid( pid )
+  function killPID( pid )
   {
     if( _.process.isAlive( pid ) )
     process.kill( pid, 'SIGKILL' );
+  }
+
+  function killProcess( arg )
+  {
+    if( o.withChildren )
+    for( let i = arg.length - 1; i >= 0; i-- )
+    {
+      if( isWindows && i && arg[ i ].name === 'conhost.exe' )
+      continue;
+      killPID( arg[ i ].pid );
+    }
+    else
+    {
+      killPID( arg );
+    }
+
+    return true;
   }
 
   /* - */
@@ -2595,7 +2596,7 @@ function children( o )
     .then( ( op ) =>
     {
       if( o.asList )
-      _result.push( _.numberFrom( pid ) );
+      _result.push({ pid : _.numberFrom( pid ) });
       else
       _result[ pid ] = Object.create( null );
       if( op.exitCode !== 0 )

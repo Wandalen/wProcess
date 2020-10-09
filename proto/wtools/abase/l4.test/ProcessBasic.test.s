@@ -20056,9 +20056,9 @@ function childrenAsList( test )
         {
           var expected =
           [
-            process.pid,
-            o.process.pid,
-            lastChildPid
+            { pid : process.pid },
+            { pid : o.process.pid },
+            { pid : lastChildPid }
           ]
           test.contains( op, expected );
         }
