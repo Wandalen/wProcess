@@ -7113,6 +7113,76 @@ function startNjsPassingThroughExecPathWithSpace( test )
 
 //
 
+function startPassingThroughTrivial( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let testAppPath1 = a.path.nativize( a.program( program1 ) );
+  let testAppPath2 = a.path.nativize( a.program( program2 ) );
+
+  run();
+
+  return a.ready;
+
+  function run()
+  {
+    a.ready.then( () =>
+    {
+      let o =
+      {
+        args : testAppPath2,
+        outputCollecting : 0,
+        outputPiping : 0,
+        mode : 'fork',
+        throwingExitCode : 0,
+        applyingExitCode : 0,
+        stdio : 'inherit'
+      }
+      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' });
+
+      let o2 =
+      {
+        execPath : 'node ' + testAppPath1 + ' a b c',
+        mode : 'spawn',
+        stdio : 'pipe',
+        outputPiping : 1,
+        outputCollecting : 1,
+      }
+      _.process.start( o2 );
+
+      o2.conTerminate.then( () =>
+      {
+        test.is( _.strHas( o2.output, `[ 'a', 'b', 'c' ]` ) );
+        return null;
+      })
+
+      return o2.conTerminate;
+    })
+  }
+
+  function program1()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wFiles' );
+    _.include( 'wProcess' );
+
+    let o = _.fileProvider.fileRead({ filePath : _.path.join(__dirname, 'op.json' ), encoding : 'json'});
+    o.currentPath = __dirname;
+    _.process.startPassingThrough( o );
+  }
+
+  function program2()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wFiles' );
+    _.include( 'wProcess' );
+
+    console.log( process.argv.slice( 2 ) );
+  }
+}
+
+//
+
 function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subroutine for modes */
 {
   let a = test.assetFor( false );
@@ -7330,6 +7400,8 @@ function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subrou
     setTimeout( () => {}, 2000 )
   }
 }
+
+
 
 // --
 // procedures / chronology / structural
@@ -19830,6 +19902,7 @@ var Proto =
     startNormalizedExecPath,
     startExecPathWithSpace,
     startNjsPassingThroughExecPathWithSpace,
+    startPassingThroughTrivial,
     startPassingThroughExecPathWithSpace,
 
     // procedures / chronology / structural

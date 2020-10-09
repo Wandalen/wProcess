@@ -142,7 +142,7 @@ function startSingle_body( o )
   let stderrOutput = '';
   let decoratedOutput = '';
   let decoratedErrorOutput = '';
-  let execArgs, argumentsManual; /* qqq for Vova : remove argumentsManual */
+  let execArgs; /* qqq for Vova : remove argumentsManual aaa:removed*/
   let readyCallback;
 
   form1();
@@ -1026,14 +1026,15 @@ function startSingle_body( o )
 
   function argsJoin( args )
   {
-
-    if( !execArgs && !argumentsManual ) /* yyy qqq for Vova : argumentsManual?? should be no such global variable */
+    if( !execArgs && !o.passingThrough ) /* yyy qqq for Vova : argumentsManual?? should be no such global variable aaa:removed */
     return args.join( ' ' );
-    let i = execArgs ? execArgs.length : args.length - argumentsManual.length;
 
-    // if( !execArgs && !o.passingThrough )
-    // return args.join( ' ' );
-    // let i = execArgs ? execArgs.length : args.length - process.argv.length - 2;
+    let i;
+
+    if( execArgs )
+    i = execArgs.length;
+    else
+    i = args.length - ( process.argv.length - 2 );
 
     for( ; i < args.length; i++ )
     {
