@@ -1,3 +1,5 @@
+const { read } = require('fs');
+
 ( function _Execution_s_()
 {
 
@@ -2238,70 +2240,49 @@ function kill( o )
   _.assert( _.numberIs( o.waitTimeOut ) );
 
   let isWindows = process.platform === 'win32';
-
   let ready = _.Consequence().take( null );
 
   ready.then( () =>
   {
-    if( !o.withChildren )
-    {
-      if( o.process )
-      o.process.kill( 'SIGKILL' );
-      else
-      process.kill( o.pid, 'SIGKILL' )
-      return true;
-    }
-
-    return _.process.children({ pid : o.pid, asList : isWindows })
-    .then( ( children ) =>
-    {
-      if( !isWindows )
-      return killChildren( children );
-
-      for( var l = children.length - 1; l >= 0; l-- )
-      {
-        if( l && children[ l ].name === 'conhost.exe' )
-        continue;
-        if( _.process.isAlive( children[ l ].pid ) )
-        process.kill( children[ l ].pid, 'SIGKILL' );
-      }
-      return true;
-    })
+    if( o.withChildren )
+    return _.process.children({ pid : o.pid, asList : 1 });
+    return o.pid;
   })
 
-  ready.then( waitForTermination )
+  ready.then( ( arg ) =>
+  {
+    if( o.withChildren )
+    for( var l = arg.length - 1; l >= 0; l-- )
+    {
+      if( isWindows )
+      if( l && arg[ l ].name === 'conhost.exe' )
+      continue;
+      let pid = isWindows ? arg[ l ].pid : arg[ l ];
+      killPid( pid );
+    }
+    else
+    killPid( arg );
+
+    return true;
+  })
+
+  ready.then( waitForTermination );
   ready.catch( handleError );
+
+  if( o.sync )
+  ready.deasync();
 
   return ready;
 
-  /* */
+  /* - */
 
-  function killChildren( tree )
+  function killPid( pid )
   {
-    for( let pid in tree )
-    {
-      pid = _.numberFrom( pid );
-      if( _.process.isAlive( pid ) )
-      process.kill( pid, 'SIGKILL' );
-      killChildren( tree[ pid ] );
-    }
-    return true;
+    if( _.process.isAlive( pid ) )
+    process.kill( pid, 'SIGKILL' );
   }
 
-  /* */
-
-  function handleError( err )
-  {
-    // if( err.code === 'EINVAL' )
-    // throw _.err( err, '\nAn invalid signal was specified:', _.strQuote( o.signal ) )
-    if( err.code === 'EPERM' )
-    throw _.err( err, '\nCurrent process does not have permission to kill target process' );
-    if( err.code === 'ESRCH' )
-    throw _.err( err, '\nTarget process:', _.strQuote( o.pid ), 'does not exist.' ); /* qqq for Yevhen : rewrite such strings as template-strings */
-    throw _.err( err );
-  }
-
-  /* */
+  /* - */
 
   function waitForTermination()
   {
@@ -2348,7 +2329,18 @@ function kill( o )
     return ready;
   }
 
-  /* */
+  /* - */
+
+  function handleError( err )
+  {
+    // if( err.code === 'EINVAL' )
+    // throw _.err( err, '\nAn invalid signal was specified:', _.strQuote( o.signal ) )
+    if( err.code === 'EPERM' )
+    throw _.err( err, '\nCurrent process does not have permission to kill target process' );
+    if( err.code === 'ESRCH' )
+    throw _.err( err, '\nTarget process:', _.strQuote( o.pid ), 'does not exist.' ); /* qqq for Yevhen : rewrite such strings as template-strings */
+    throw _.err( err );
+  }
 
 }
 
@@ -2358,6 +2350,7 @@ kill.defaults =
   process : null,
   withChildren : 0,
   waitTimeOut : 5000,
+  sync : 0
   // qqq for Vova : implement and сover option sync
 }
 
