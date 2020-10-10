@@ -606,7 +606,7 @@ function startSingle_body( o )
       if( o.state === 'terminated' || o.error )
       return;
       o.exitReason = 'time';
-      _.process.terminate({ process : o.process, withChildren : 1 }); /* qqq for Vova : need to catch event when process is really down aaa:done*/
+      _.process.terminate({ process : o.process, withChildren : 0 }); /* xxx qqq for Vova : need to catch event when process is really down aaa:done*/
     });
 
   }
@@ -1705,9 +1705,7 @@ function startAfterDeath_body( o )
   let locals = { toolsPath, o };
   let secondaryProcessRoutine = _.program.preform({ routine : afterDeathSecondaryProcess, locals })
   let secondaryFilePath = _.process.tempOpen({ sourceCode : secondaryProcessRoutine.sourceCode });
-  /* qqq for Vova : remove duplication of o-map and repair aaa:done */
 
-  /* qqq for Vova : remove duplication of o-map and repair aaa:done*/
   o.execPath = _.path.nativize( secondaryFilePath );
   o.mode = 'fork';
   o.args = [];
@@ -2309,11 +2307,11 @@ function signal_body( o )
   {
     var ready = _.Consequence();
     var timer;
-    timer = _.time._periodic( 100, () =>
+    timer = _.time._periodic( 25, () =>
     {
       if( _.process.isAlive( pid ) )
       return false;
-      timer._cancel();
+      timer._cancel(); /* xxx : remove? */
       ready.take( true );
       return true;
       /* Dmytro ; new implementation of periodic timer require to return something different to undefined or _.dont.
@@ -2391,8 +2389,6 @@ let signal = _.routineFromPreAndBody( signal_pre, signal_body );
 
 //
 
-/* qqq for Vova : rewrite and cover,aaa:done */
-
 function kill_body( o )
 {
   _.assert( arguments.length === 1 );
@@ -2402,12 +2398,7 @@ function kill_body( o )
 
 kill_body.defaults =
 {
-  pid : null,
-  process : null,
-  withChildren : 0,
-  waitTimeOut : 5000,
-  sync : 0
-  // qqq for Vova : implement and сover option sync aaa:done
+  ... _.mapBut( signal.defaults, [ 'signal', 'waitTimeOut' ] ),
 }
 
 let kill = _.routineFromPreAndBody( signal_pre, kill_body );
@@ -2453,11 +2444,7 @@ function terminate_body( o )
 
 terminate_body.defaults =
 {
-  process : null,
-  pid : null,
-  withChildren : 0,
-  waitTimeOut : 5000,
-  sync : 0 // qqq for Vova : implement and сover option sync aaa:done
+  ... _.mapBut( signal.defaults, [ 'signal' ] ),
 }
 
 let terminate = _.routineFromPreAndBody( signal_pre, terminate_body );
