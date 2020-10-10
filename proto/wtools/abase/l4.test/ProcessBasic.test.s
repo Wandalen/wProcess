@@ -142,10 +142,6 @@ function suiteEnd()
   _.path.tempClose( context.suiteTempPath );
 }
 
-//
-
-/* qqq for Vova : simplify and make it subroutine aaa:moved to test routines */
-
 // --
 // basic
 // --
@@ -295,7 +291,6 @@ function basic( test )
 
     var options = _.mapSupplement( {}, o2, o3 );
 
-    debugger;
     return test.shouldThrowErrorAsync( _.process.start( options ), ( err, arg ) =>
     {
       debugger;
@@ -492,11 +487,11 @@ function basic( test )
     var options = _.mapSupplement( {}, o2, o3 );
 
     var shell = _.process.start( options );
-    return test.shouldThrowErrorAsync( shell )
+    return test.shouldThrowErrorAsync( shell, function( arg, err ) { debugger } )
     .then( () =>
     {
       test.identical( options.process.killed, true );
-      test.identical( !options.exitCode, true );
+      test.identical( options.exitCode, 0 );
       return null;
     })
   })
@@ -10330,6 +10325,23 @@ function startEventClose( test )
     var style = 'doubleBorder';
     var topHead = [ 'mode', 'ipc', 'disconnecting', 'event close' ];
     var got = _.strTable({ data, dim, style, topHead, colWidth : 18 });
+
+    var exp =
+`
+╔════════════════════════════════════════════════════════════════════════╗
+║       mode               ipc          disconnecting      event close   ║
+╟────────────────────────────────────────────────────────────────────────╢
+║       spawn             false             false             true       ║
+║       spawn             false             true              true       ║
+║       spawn             true              false             true       ║
+║       spawn             true              true              false      ║
+║       fork              true              false             true       ║
+║       fork              true              true              false      ║
+║       shell             false             false             true       ║
+║       shell             false             true              true       ║
+╚════════════════════════════════════════════════════════════════════════╝
+`
+    test.equivalent( got.result, exp );
     console.log( got.result )
     return null;
   })
@@ -10456,6 +10468,56 @@ function startEventExit( test )
     var style = 'doubleBorder';
     var topHead = [ 'mode', 'stdio','ipc', 'detaching', 'disconnecting', 'event exit' ];
     var got = _.strTable({ data, dim, style, topHead, colWidth : 18 });
+
+    var exp =
+`
+╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+║       mode              stdio              ipc            detaching       disconnecting      event exit    ║
+╟────────────────────────────────────────────────────────────────────────────────────────────────────────────╢
+║       spawn            inherit            false             false             false             true       ║
+║       spawn            inherit            false             true              false             true       ║
+║       spawn            inherit            true              false             false             true       ║
+║       spawn            inherit            true              true              false             true       ║
+║       spawn             pipe              false             false             false             true       ║
+║       spawn             pipe              false             true              false             true       ║
+║       spawn             pipe              false             false             true              true       ║
+║       spawn             pipe              false             true              true              true       ║
+║       spawn             pipe              true              false             false             true       ║
+║       spawn             pipe              true              true              false             true       ║
+║       spawn             pipe              true              false             true              true       ║
+║       spawn             pipe              true              true              true              true       ║
+║       spawn            ignore             false             false             false             true       ║
+║       spawn            ignore             false             true              false             true       ║
+║       spawn            ignore             false             false             true              true       ║
+║       spawn            ignore             false             true              true              true       ║
+║       spawn            ignore             true              false             false             true       ║
+║       spawn            ignore             true              true              false             true       ║
+║       spawn            ignore             true              false             true              true       ║
+║       spawn            ignore             true              true              true              true       ║
+║       fork             inherit            true              false             false             true       ║
+║       fork             inherit            true              true              false             true       ║
+║       fork              pipe              true              false             false             true       ║
+║       fork              pipe              true              true              false             true       ║
+║       fork              pipe              true              false             true              true       ║
+║       fork              pipe              true              true              true              true       ║
+║       fork             ignore             true              false             false             true       ║
+║       fork             ignore             true              true              false             true       ║
+║       fork             ignore             true              false             true              true       ║
+║       fork             ignore             true              true              true              true       ║
+║       shell            inherit            false             false             false             true       ║
+║       shell            inherit            false             true              false             true       ║
+║       shell             pipe              false             false             false             true       ║
+║       shell             pipe              false             true              false             true       ║
+║       shell             pipe              false             false             true              true       ║
+║       shell             pipe              false             true              true              true       ║
+║       shell            ignore             false             false             false             true       ║
+║       shell            ignore             false             true              false             true       ║
+║       shell            ignore             false             false             true              true       ║
+║       shell            ignore             false             true              true              true       ║
+╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+`
+    test.equivalent( got.result, exp );
+
     console.log( got.result )
     return null;
   })
@@ -15889,6 +15951,155 @@ function appTempApplication( test )
   })
 }
 
+//
+
+function startDiffPid( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let testFilePath = a.abs( a.routinePath, 'testFile' );
+  // let modes = [ 'fork', 'spawn', 'shell' ]; /* qqq xxx */
+  let modes = [ 'shell' ];
+
+  modes.forEach( ( mode ) =>
+  {
+    a.ready.then( () =>
+    {
+      a.fileProvider.filesDelete( a.routinePath );
+      let locals =
+      {
+        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
+        mode
+      }
+      a.path.nativize( a.program({ routine : testAppParent, locals }) );
+      a.path.nativize( a.program( testAppChild ) );
+      return null;
+    })
+
+    a.ready.tap( () => test.open( mode ) );
+    a.ready.then( () => run( mode ) );
+    a.ready.tap( () => test.close( mode ) );
+  });
+
+  return a.ready;
+
+  /* - */
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null )
+
+    /*  */
+
+    ready.then( () =>
+    {
+      test.case = 'process termination begins after short delay, detached process should continue to work after parent death';
+
+      a.fileProvider.filesDelete( testFilePath );
+      a.fileProvider.dirMakeForFile( testFilePath );
+
+      let o =
+      {
+        execPath : 'node testAppParent.js stdio : ignore outputPiping : 0 outputCollecting : 0',
+        mode : 'spawn',
+        outputCollecting : 1,
+        currentPath : a.routinePath,
+        ipc : 1,
+      }
+      let con = _.process.start( o );
+
+      let data;
+
+      o.process.on( 'message', ( e ) =>
+      {
+        data = e;
+        data.childPid = _.numberFrom( data.childPid );
+      })
+
+      con.then( ( op ) =>
+      {
+        test.will = 'parent is dead, child is still alive';
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.is( !_.process.isAlive( op.process.pid ) );
+        test.is( _.process.isAlive( data.childPid ) );
+        return _.time.out( context.t2 * 2 );
+      })
+
+      con.then( () =>
+      {
+        test.will = 'both dead';
+
+        test.is( !_.process.isAlive( o.process.pid ) );
+        test.is( !_.process.isAlive( data.childPid ) );
+
+        test.is( a.fileProvider.fileExists( testFilePath ) );
+        let childPid = a.fileProvider.fileRead( testFilePath );
+        childPid = _.numberFrom( childPid );
+        console.log(  childPid );
+        test.identical( data.childPid, childPid );
+
+        return null;
+      })
+
+      return con;
+    })
+
+    /*  */
+
+    return ready;
+  }
+
+  /*  */
+
+  function testAppParent()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    let args = _.process.args();
+
+    let o =
+    {
+      execPath : mode === 'fork' ? 'testAppChild.js' : 'node testAppChild.js',
+      mode,
+      ipc : 0,
+      detaching : true,
+    }
+
+    _.mapExtend( o, args.map );
+
+    _.process.start( o );
+
+    console.log( o.process.pid )
+
+    process.send({ childPid : o.process.pid });
+
+    o.conStart.thenGive( () =>
+    {
+      _.procedure.terminationBegin();
+    })
+  }
+
+  function testAppChild()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+    console.log( 'Child process start', process.pid )
+    _.time.out( 2000, () =>
+    {
+      let filePath = _.path.join( __dirname, 'testFile' );
+      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
+      console.log( 'Child process end' )
+      return null;
+    })
+  }
+}
+
+startDiffPid.timeOut = 180000;
+
 // --
 // other options
 // --
@@ -20737,6 +20948,7 @@ var Proto =
     // etc
 
     appTempApplication,
+    startDiffPid,
 
     // other options
 
