@@ -613,7 +613,7 @@ function startSingle_body( o )
       if( o.state === 'terminated' || o.error )
       return;
       o.exitReason = 'time';
-      _.process.terminate({ process : o.process, withChildren : 1 }); /* qqq for Vova : need to catch event when process is really down aaa:*/
+      _.process.terminate({ process : o.process, withChildren : 0 }); /* xxx qqq for Vova : need to catch event when process is really down aaa:done*/
     });
 
   }
@@ -1712,9 +1712,7 @@ function startAfterDeath_body( o )
   let locals = { toolsPath, o };
   let secondaryProcessRoutine = _.program.preform({ routine : afterDeathSecondaryProcess, locals })
   let secondaryFilePath = _.process.tempOpen({ sourceCode : secondaryProcessRoutine.sourceCode });
-  /* qqq for Vova : remove duplication of o-map and repair aaa:done */
 
-  /* qqq for Vova : remove duplication of o-map and repair aaa:done*/
   o.execPath = _.path.nativize( secondaryFilePath );
   o.mode = 'fork';
   o.args = [];
@@ -2261,6 +2259,7 @@ function signal_body( o )
 
   let isWindows = process.platform === 'win32';
   let ready = _.Consequence().take( null );
+  let cons = [];
 
   ready.then( () =>
   {
@@ -2270,9 +2269,8 @@ function signal_body( o )
   })
 
   ready.then( killProcess );
-  if( o.waitTimeOut )
-  ready.then( waitForTermination );
   ready.catch( handleError );
+  ready.then( handleResult );
 
   if( o.sync )
   ready.deasync();
@@ -2283,8 +2281,15 @@ function signal_body( o )
 
   function sendSignal( pid )
   {
-    if( _.process.isAlive( pid ) )
+    if( !_.process.isAlive( pid ) )
+    return;
+
     process.kill( pid, o.signal );
+    if( !o.waitTimeOut )
+    return;
+
+    let con = waitForTermination( pid );
+    cons.push( con );
   }
 
   function killProcess( arg )
@@ -2301,20 +2306,23 @@ function signal_body( o )
       sendSignal( arg );
     }
 
+    if( !cons.length )
     return true;
+
+    return _.Consequence.AndKeep( ...cons );
   }
 
   /* - */
 
-  function waitForTermination()
+  function waitForTermination( pid )
   {
     var ready = _.Consequence();
     var timer;
-    timer = _.time._periodic( 100, () =>
+    timer = _.time._periodic( 25, () =>
     {
-      if( _.process.isAlive( o.pid ) )
+      if( _.process.isAlive( pid ) )
       return false;
-      timer._cancel();
+      timer._cancel(); /* xxx : remove? */
       ready.take( true );
       return true;
       /* Dmytro ; new implementation of periodic timer require to return something different to undefined or _.dont.
@@ -2343,7 +2351,7 @@ function signal_body( o )
         timer._cancel();
         _.errAttend( err );
         if( err.reason === 'time out' )
-        err = _.err( err, `\nTarget process: ${_.strQuote( o.pid )} is still alive. Waited for ${o.waitTimeOut} ms.` );
+        err = _.err( err, `\nTarget process: ${_.strQuote( pid )} is still alive. Waited for ${o.waitTimeOut} ms.` );
         throw err;
       }
       return op;
@@ -2365,6 +2373,17 @@ function signal_body( o )
     throw _.err( err );
   }
 
+  function handleResult( result )
+  {
+    if( !_.arrayIs( result ) )
+    return result;
+
+    if( result.length === 1 )
+    return result[ 0 ];
+
+    return result;
+  }
+
 }
 
 signal_body.defaults =
@@ -2381,8 +2400,6 @@ let signal = _.routineFromPreAndBody( signal_pre, signal_body );
 
 //
 
-/* qqq for Vova : rewrite and cover,aaa:done */
-
 function kill_body( o )
 {
   _.assert( arguments.length === 1 );
@@ -2392,12 +2409,7 @@ function kill_body( o )
 
 kill_body.defaults =
 {
-  pid : null,
-  process : null,
-  withChildren : 0,
-  waitTimeOut : 5000,
-  sync : 0
-  // qqq for Vova : implement and сover option sync aaa:done
+  ... _.mapBut( signal.defaults, [ 'signal', 'waitTimeOut' ] ),
 }
 
 let kill = _.routineFromPreAndBody( signal_pre, kill_body );
@@ -2422,7 +2434,6 @@ function terminate_body( o )
 
   ready.catch( ( err ) =>
   {
-    debugger
     if( err.reason !== 'time out' )
     throw err;
 
@@ -2444,11 +2455,7 @@ function terminate_body( o )
 
 terminate_body.defaults =
 {
-  process : null,
-  pid : null,
-  withChildren : 0,
-  waitTimeOut : 5000,
-  sync : 0 // qqq for Vova : implement and сover option sync aaa:done
+  ... _.mapBut( signal.defaults, [ 'signal' ] ),
 }
 
 let terminate = _.routineFromPreAndBody( signal_pre, terminate_body );
