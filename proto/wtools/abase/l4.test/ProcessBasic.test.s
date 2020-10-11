@@ -18069,7 +18069,7 @@ function exitSignal( test )
   function run( signal )
   {
     test.case = `signal = ${ signal }`
-    let programPath = a.program({ routine : testApp6, locals : { signal : signal, toolsPath : context.toolsPath } });
+    let programPath = a.program({ routine : testApp, locals : { signal : signal, toolsPath : context.toolsPath } });
 
     let o =
     {
@@ -18091,7 +18091,7 @@ function exitSignal( test )
 
     /* - */
 
-    function testApp6()
+    function testApp()
     {
       let _ = require( toolsPath );
       _.include( 'wProcess' );
