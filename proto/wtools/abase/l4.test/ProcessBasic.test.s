@@ -1,3 +1,4 @@
+/* eslint-disable */
 ( function _ProcessBasic_test_s( )
 {
 
@@ -17473,7 +17474,7 @@ function exitCode( test )
     .then( ( op ) =>
     {
       test.il( op.exitCode, 127 );
-      _.process.exitCode( 0 );
+      test.il( op.ended, true );
       return null;
     } )
   })
@@ -17493,6 +17494,7 @@ function exitCode( test )
     .then( ( op ) =>
     {
       test.il( op.exitCode, 1 );
+      test.il( op.ended, true );
       return null;
     } )
 
@@ -17517,6 +17519,7 @@ function exitCode( test )
     .then( ( op ) =>
     {
       test.il( op.exitCode, 1 );
+      test.il( op.ended, true );
       return null;
     } )
 
@@ -17541,6 +17544,7 @@ function exitCode( test )
     .then( ( op ) =>
     {
       test.il( op.exitCode, 255 );
+      test.il( op.ended, true );
       return null;
     } )
 
@@ -17558,7 +17562,7 @@ function exitCode( test )
 
   a.ready.then( () =>
   {
-    test.case = 'explicitly exit';
+    test.case = 'explicitly exit with code : 100';
     let programPath = a.program( testApp4 );
     let options =
     {
@@ -17569,6 +17573,7 @@ function exitCode( test )
     .then( ( op ) =>
     {
       test.il( op.exitCode, 100 );
+      test.il( op.ended, true );
       return null;
     } )
 
@@ -17584,47 +17589,6 @@ function exitCode( test )
 
   /* */
 
-  a.ready.then( () =>
-  {
-    test.case = 'SIGKILL in child process';
-
-    let programPath = a.program( testApp6 );
-    let programPath2 = a.program( testApp7 );
-
-    let options =
-    {
-      execPath : 'node ' + programPath,
-      throwingExitCode : 0
-    }
-    return _.process.start( options )
-    .then( ( op ) =>
-    {
-      test.il( op.exitCode, 'SIGKILL' );
-      return null;
-    } )
-
-    // function testApp6()
-    // {
-    //   let _ = require( toolsPath );
-    //   _.include( 'wProcess' );
-    //   _.include( 'wFiles' );
-
-    //   let options =
-    //   {
-    //     execPath : 'node testApp7.js',
-    //   }
-
-    //   return _.process.start( options );
-    // }
-
-    // function testApp7()
-    // {
-    //   console.log( process.argv.slice( 3 ) );
-    // }
-  })
-
-  /* */
-
   test.case = 'change to zero'
   _.process.exitCode( 0 );
   var got = _.process.exitCode();
@@ -17632,6 +17596,58 @@ function exitCode( test )
 
   return a.ready;
 
+}
+
+//
+
+function exitSignal( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+
+  let signals = [ 'SIGINT', 'SIGTERM', 'SIGKILL', /*'SIGSTOP',*/ 'SIGUSR1', 'SIGPIPE', 'SIGHUP', 'SIGBREAK', 'SIGWINCH', 'SIGBUS', 'SIGFPE', 'SIGSEGV', 'SIGILL' ];
+
+  signals.forEach( ( signal ) => a.ready.then( () => run( signal ) ) );
+
+  return a.ready;
+
+  /* - */
+
+  function run( signal )
+  {
+    test.case = `signal = ${ signal }`
+    let programPath = a.program({ routine : testApp6, locals : { signal : signal, toolsPath : context.toolsPath } });
+
+    let o =
+    {
+      execPath : 'node ' + programPath,
+      throwingExitCode : 0,
+    }
+
+    return _.process.start( o ).then( ( op ) =>
+    {
+      test.il( op.exitCode, null );
+      test.il( op.ended, true );
+      test.il( op.exitSignal, signal );
+      test.il( op.exitReason, 'signal' );
+
+      a.fileProvider.fileDelete( programPath );
+      return null;
+    } )
+
+
+    /* - */
+
+    function testApp6()
+    {
+      let _ = require( toolsPath );
+      _.include( 'wProcess' );
+      _.include( 'wFiles' );
+
+      // process.kill( process.pid, signal );
+      _.process.signal({ signal : signal, pid : process.pid });
+    }
+  }
 }
 
 //
@@ -22030,6 +22046,7 @@ var Proto =
 
     exitReason,
     exitCode,
+    exitSignal,
 
     pidFrom,
     isAlive,
