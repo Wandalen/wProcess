@@ -225,10 +225,10 @@ ${programPath}:end
       .then( function()
       {
         test.identical( options.exitCode, 0 );
-        test.identical( o.exitSignal, null );
-        test.identical( o.exitReason, 'normal' );
-        test.identical( o.ended, true );
-        test.identical( o.state, 'terminated' );
+        test.identical( options.exitSignal, null );
+        test.identical( options.exitReason, 'normal' );
+        test.identical( options.ended, true );
+        test.identical( options.state, 'terminated' );
         test.identical( options.output, expectedOutput );
         return null;
       })
@@ -253,10 +253,10 @@ ${programPath}:end
       .then( function()
       {
         test.identical( options.exitCode, 0 );
-        test.identical( o.exitSignal, null );
-        test.identical( o.exitReason, 'normal' );
-        test.identical( o.ended, true );
-        test.identical( o.state, 'terminated' );
+        test.identical( options.exitSignal, null );
+        test.identical( options.exitReason, 'normal' );
+        test.identical( options.ended, true );
+        test.identical( options.state, 'terminated' );
         test.identical( options.output, expectedOutput );
         return null;
       })
@@ -281,10 +281,10 @@ ${programPath}:end
       .then( function()
       {
         test.identical( options.exitCode, 0 );
-        test.identical( o.exitSignal, null );
-        test.identical( o.exitReason, 'normal' );
-        test.identical( o.ended, true );
-        test.identical( o.state, 'terminated' );
+        test.identical( options.exitSignal, null );
+        test.identical( options.exitReason, 'normal' );
+        test.identical( options.ended, true );
+        test.identical( options.state, 'terminated' );
         test.identical( options.output, expectedOutput );
         return null;
       })
@@ -309,10 +309,10 @@ ${programPath}:end
       .then( function()
       {
         test.identical( options.exitCode, 0 );
-        test.identical( o.exitSignal, null );
-        test.identical( o.exitReason, 'normal' );
-        test.identical( o.ended, true );
-        test.identical( o.state, 'terminated' );
+        test.identical( options.exitSignal, null );
+        test.identical( options.exitReason, 'normal' );
+        test.identical( options.ended, true );
+        test.identical( options.state, 'terminated' );
         test.identical( options.output, expectedOutput );
         return null;
       })
@@ -337,10 +337,10 @@ ${programPath}:end
       .then( function()
       {
         test.identical( options.exitCode, 0 );
-        test.identical( o.exitSignal, null );
-        test.identical( o.exitReason, 'normal' );
-        test.identical( o.ended, true );
-        test.identical( o.state, 'terminated' );
+        test.identical( options.exitSignal, null );
+        test.identical( options.exitReason, 'normal' );
+        test.identical( options.ended, true );
+        test.identical( options.state, 'terminated' );
         test.identical( options.output, expectedOutput );
         return null;
       })
@@ -366,10 +366,10 @@ ${programPath}:end
       .then( function()
       {
         test.identical( options.exitCode, 0 );
-        test.identical( o.exitSignal, null );
-        test.identical( o.exitReason, 'normal' );
-        test.identical( o.ended, true );
-        test.identical( o.state, 'terminated' );
+        test.identical( options.exitSignal, null );
+        test.identical( options.exitReason, 'normal' );
+        test.identical( options.ended, true );
+        test.identical( options.state, 'terminated' );
         test.identical( options.output, expectedOutput );
         return null;
       })
@@ -397,10 +397,10 @@ ${programPath}:end
       .then( function()
       {
         test.identical( options.exitCode, 0 );
-        test.identical( o.exitSignal, null );
-        test.identical( o.exitReason, 'normal' );
-        test.identical( o.ended, true );
-        test.identical( o.state, 'terminated' );
+        test.identical( options.exitSignal, null );
+        test.identical( options.exitReason, 'normal' );
+        test.identical( options.ended, true );
+        test.identical( options.state, 'terminated' );
         test.identical( options.output, null );
         return null;
       })
@@ -579,10 +579,10 @@ function startBasic2( test ) /* qqq for Evhen : merge with test routine startBas
     .then( function()
     {
       test.identical( options.exitCode, 0 );
-      test.identical( o.exitSignal, null );
-      test.identical( o.exitReason, 'normal' );
-      test.identical( o.ended, true );
-      test.identical( o.state, 'terminated' );
+      test.identical( options.exitSignal, null );
+      test.identical( options.exitReason, 'normal' );
+      test.identical( options.ended, true );
+      test.identical( options.state, 'terminated' );
       test.identical( options.output, o2.args.join( ' ' ) + '\n' );
       return null;
     })
@@ -1332,10 +1332,10 @@ function startSync( test )
   _.process.start( options );
   debugger;
   test.identical( options.exitCode, 0 );
-  test.identical( o.exitSignal, null );
-  test.identical( o.exitReason, 'normal' );
-  test.identical( o.ended, true );
-  test.identical( o.state, 'terminated' );
+  test.identical( options.exitSignal, null );
+  test.identical( options.exitReason, 'normal' );
+  test.identical( options.ended, true );
+  test.identical( options.state, 'terminated' );
   test.identical( options.output, expectedOutput );
 
   /* mode : spawn, stdio : ignore */
@@ -1347,10 +1347,10 @@ function startSync( test )
   var options = _.mapSupplement( {}, o2, o3 );
   _.process.start( options )
   test.identical( options.exitCode, 0 );
-  test.identical( o.exitSignal, null );
-  test.identical( o.exitReason, 'normal' );
-  test.identical( o.ended, true );
-  test.identical( o.state, 'terminated' );
+  test.identical( options.exitSignal, null );
+  test.identical( options.exitReason, 'normal' );
+  test.identical( options.ended, true );
+  test.identical( options.state, 'terminated' );
   test.identical( options.output, null );
 
   /* */
@@ -1365,10 +1365,10 @@ function startSync( test )
   var options = _.mapSupplement( {}, o2, o3 );
   _.process.start( options )
   test.identical( options.exitCode, 0 );
-  test.identical( o.exitSignal, null );
-  test.identical( o.exitReason, 'normal' );
-  test.identical( o.ended, true );
-  test.identical( o.state, 'terminated' );
+  test.identical( options.exitSignal, null );
+  test.identical( options.exitReason, 'normal' );
+  test.identical( options.ended, true );
+  test.identical( options.state, 'terminated' );
   test.identical( options.output, expectedOutput );
 
   /* mode : shell, stdio : ignore */
@@ -1380,10 +1380,10 @@ function startSync( test )
   var options = _.mapSupplement( {}, o2, o3 );
   _.process.start( options )
   test.identical( options.exitCode, 0 );
-  test.identical( o.exitSignal, null );
-  test.identical( o.exitReason, 'normal' );
-  test.identical( o.ended, true );
-  test.identical( o.state, 'terminated' );
+  test.identical( options.exitSignal, null );
+  test.identical( options.exitReason, 'normal' );
+  test.identical( options.ended, true );
+  test.identical( options.state, 'terminated' );
   test.identical( options.output, null );
 
   /* */
@@ -1412,10 +1412,10 @@ function startSync( test )
   var options = _.mapSupplement( {}, o2, o3 );
   test.mustNotThrowError( () => _.process.start( options ) )
   test.identical( options.exitCode, 0 );
-  test.identical( o.exitSignal, null );
-  test.identical( o.exitReason, 'normal' );
-  test.identical( o.ended, true );
-  test.identical( o.state, 'terminated' );
+  test.identical( options.exitSignal, null );
+  test.identical( options.exitReason, 'normal' );
+  test.identical( options.ended, true );
+  test.identical( options.state, 'terminated' );
 
   /* */
 
@@ -1456,10 +1456,10 @@ function startSync( test )
   var options = _.mapSupplement( {}, o2, o3 );
   test.mustNotThrowError( () => _.process.start( options ) )
   test.identical( options.exitCode, 0 );
-  test.identical( o.exitSignal, null );
-  test.identical( o.exitReason, 'normal' );
-  test.identical( o.ended, true );
-  test.identical( o.state, 'terminated' );
+  test.identical( options.exitSignal, null );
+  test.identical( options.exitReason, 'normal' );
+  test.identical( options.ended, true );
+  test.identical( options.state, 'terminated' );
 
   /* */
 
@@ -1536,10 +1536,10 @@ function startSyncDeasync( test )
   test.is( returned === options );
   test.identical( returned.process.constructor.name, 'ChildProcess' );
   test.identical( options.exitCode, 0 );
-  test.identical( o.exitSignal, null );
-  test.identical( o.exitReason, 'normal' );
-  test.identical( o.ended, true );
-  test.identical( o.state, 'terminated' );
+  test.identical( options.exitSignal, null );
+  test.identical( options.exitReason, 'normal' );
+  test.identical( options.ended, true );
+  test.identical( options.state, 'terminated' );
   test.identical( options.output, expectedOutput );
 
   /* mode : fork, stdio : ignore */
@@ -1553,10 +1553,10 @@ function startSyncDeasync( test )
   test.is( returned === options );
   test.identical( returned.process.constructor.name, 'ChildProcess' );
   test.identical( options.exitCode, 0 );
-  test.identical( o.exitSignal, null );
-  test.identical( o.exitReason, 'normal' );
-  test.identical( o.ended, true );
-  test.identical( o.state, 'terminated' );
+  test.identical( options.exitSignal, null );
+  test.identical( options.exitReason, 'normal' );
+  test.identical( options.ended, true );
+  test.identical( options.state, 'terminated' );
   test.identical( options.output, null );
 
   /* */
@@ -1576,10 +1576,10 @@ function startSyncDeasync( test )
   test.is( returned === options );
   test.identical( returned.process.constructor.name, 'ChildProcess' );
   test.identical( options.exitCode, 0 );
-  test.identical( o.exitSignal, null );
-  test.identical( o.exitReason, 'normal' );
-  test.identical( o.ended, true );
-  test.identical( o.state, 'terminated' );
+  test.identical( options.exitSignal, null );
+  test.identical( options.exitReason, 'normal' );
+  test.identical( options.ended, true );
+  test.identical( options.state, 'terminated' );
   test.identical( options.output, expectedOutput );
 
   /* mode : spawn, stdio : ignore */
@@ -1593,10 +1593,10 @@ function startSyncDeasync( test )
   test.is( returned === options );
   test.identical( returned.process.constructor.name, 'ChildProcess' );
   test.identical( options.exitCode, 0 );
-  test.identical( o.exitSignal, null );
-  test.identical( o.exitReason, 'normal' );
-  test.identical( o.ended, true );
-  test.identical( o.state, 'terminated' );
+  test.identical( options.exitSignal, null );
+  test.identical( options.exitReason, 'normal' );
+  test.identical( options.ended, true );
+  test.identical( options.state, 'terminated' );
   test.identical( options.output, null );
 
   /* */
@@ -1613,10 +1613,10 @@ function startSyncDeasync( test )
   test.is( returned === options );
   test.identical( returned.process.constructor.name, 'ChildProcess' );
   test.identical( options.exitCode, 0 );
-  test.identical( o.exitSignal, null );
-  test.identical( o.exitReason, 'normal' );
-  test.identical( o.ended, true );
-  test.identical( o.state, 'terminated' );
+  test.identical( options.exitSignal, null );
+  test.identical( options.exitReason, 'normal' );
+  test.identical( options.ended, true );
+  test.identical( options.state, 'terminated' );
   test.identical( options.output, expectedOutput );
 
   /* mode : shell, stdio : ignore */
@@ -1630,10 +1630,10 @@ function startSyncDeasync( test )
   test.is( returned === options );
   test.identical( returned.process.constructor.name, 'ChildProcess' );
   test.identical( options.exitCode, 0 );
-  test.identical( o.exitSignal, null );
-  test.identical( o.exitReason, 'normal' );
-  test.identical( o.ended, true );
-  test.identical( o.state, 'terminated' );
+  test.identical( options.exitSignal, null );
+  test.identical( options.exitReason, 'normal' );
+  test.identical( options.ended, true );
+  test.identical( options.state, 'terminated' );
   test.identical( options.output, null );
 
   /* */
@@ -1664,10 +1664,10 @@ function startSyncDeasync( test )
   test.is( returned === options );
   test.identical( returned.process.constructor.name, 'ChildProcess' );
   test.identical( options.exitCode, 0 );
-  test.identical( o.exitSignal, null );
-  test.identical( o.exitReason, 'normal' );
-  test.identical( o.ended, true );
-  test.identical( o.state, 'terminated' );
+  test.identical( options.exitSignal, null );
+  test.identical( options.exitReason, 'normal' );
+  test.identical( options.ended, true );
+  test.identical( options.state, 'terminated' );
 
   /* */
 
@@ -1697,10 +1697,10 @@ function startSyncDeasync( test )
   test.is( returned === options );
   test.identical( returned.process.constructor.name, 'ChildProcess' );
   test.identical( options.exitCode, 0 );
-  test.identical( o.exitSignal, null );
-  test.identical( o.exitReason, 'normal' );
-  test.identical( o.ended, true );
-  test.identical( o.state, 'terminated' );
+  test.identical( options.exitSignal, null );
+  test.identical( options.exitReason, 'normal' );
+  test.identical( options.ended, true );
+  test.identical( options.state, 'terminated' );
 
   /* */
 
@@ -2874,12 +2874,12 @@ test.identical( o.state, 'terminated' );
     {
       test.is( result === o );
       test.identical( o.runs.length, 2 );
-      ttest.identical( o.runs[ 0 ].exitCode, 0 );
+      test.identical( o.runs[ 0 ].exitCode, 0 );
       test.identical( o.runs[ 0 ].exitSignal, null );
       test.identical( o.runs[ 0 ].exitReason, 'normal' );
       test.identical( o.runs[ 0 ].ended, true );
       test.identical( o.runs[ 0 ].state, 'terminated' );
-  
+
       test.identical( o.runs[ 1 ].exitCode, 0 );
       test.identical( o.runs[ 1 ].exitSignal, null );
       test.identical( o.runs[ 1 ].exitReason, 'normal' );
