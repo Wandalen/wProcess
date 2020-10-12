@@ -643,7 +643,8 @@ function startSingle_body( o )
   function end2( err, consequence )
   {
 
-    // if( !_.primitiveIs( o.procedure ) )
+    // if( !_.primitiveIs( o.procedure ) ) /* yyy */
+    if( o.procedure )
     if( o.procedure.isAlive() )
     o.procedure.end();
 
