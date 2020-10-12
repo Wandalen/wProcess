@@ -1,4 +1,3 @@
-/* eslint-disable */
 ( function _ProcessBasic_test_s( )
 {
 
@@ -12323,10 +12322,6 @@ function startDetachingChildExitsBeforeParent( test )
 
       test.identical( child.err, undefined );
       test.identical( child.exitCode, 0 );
-      test.identical( child.exitSignal, null );
-      test.identical( child.exitReason, 'normal' );
-      test.identical( child.ended, true );
-      test.identical( child.state, 'terminated' );
 
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( !_.process.isAlive( child.pid ) );
