@@ -16732,7 +16732,6 @@ function startOptionPassingThrough( test )
 
     /* */
 
-
     a.ready.then( () =>
     {
       test.open( '0 args to parent process' );
@@ -17533,7 +17532,7 @@ function exitReason( test )
 
 //
 
-/* qqq for Yevgen : poor tests, please extend it */
+/* qqq for Yevhen : poor tests, please extend it */
 function exitCode( test )
 {
   let context = this;
@@ -21214,6 +21213,8 @@ endSignalsBasic.description =
   - signals terminate or kill started process
 `
 
+/* zzz : find a way to really freeze a process to test routine _.process.terminate() with timeout */
+
 //
 
 function endSignalsOnExit( test )
@@ -21526,8 +21527,7 @@ exit:end
 `
         var exp2 =
 `program1:begin
-program1:end
-exit:end
+Killed
 `
         if( mode === 'shell' )
         test.is( options.output === exp1 || options.output === exp2 );
@@ -21579,8 +21579,7 @@ exit:end
 `
         var exp2 =
 `program1:begin
-program1:end
-exit:end
+Killed
 `
         if( mode === 'shell' )
         test.is( options.output === exp1 || options.output === exp2 );
@@ -23665,7 +23664,7 @@ Shows that timeOut kills the child process and handleClose is called
 
 //
 
-function experimentIPCDeasync( test )
+function experimentIpcDeasync( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -23706,8 +23705,8 @@ function experimentIPCDeasync( test )
   }
 }
 
-experimentIPCDeasync.experimental = 1;
-experimentIPCDeasync.description =
+experimentIpcDeasync.experimental = 1;
+experimentIpcDeasync.description =
 `
 This expriment shows problem with usage of _.time.periodic with deasync.
 Problem happens only if code if deasync is launched from 'message' callback
@@ -23786,7 +23785,7 @@ var Proto =
     startProcedureTrivial,
     startProcedureExists,
     startProcedureStack,
-    // startProcedureStackMultiple, /* xxx : make it working */
+    startProcedureStackMultiple, /* xxx : make it working */
     startOnTerminateSeveralCallbacksChronology,
     startChronology,
 
@@ -23913,8 +23912,7 @@ var Proto =
     experiment,
     experiment2,
     experiment3,
-    experimentIPCDeasync
-
+    experimentIpcDeasync, /* xxx : investigate */
 
   }
 
