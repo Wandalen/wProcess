@@ -1762,6 +1762,7 @@ function startSpawnSyncDeasync( test )
     }
     var returned = _.process.start( o );
     test.is( !_.consequenceIs( returned ) );
+    test.is( returned === o );
     test.identical( returned, o );
     test.identical( o.exitCode, 0 );
 
@@ -1806,6 +1807,7 @@ function startSpawnSyncDeasync( test )
     }
     var returned = _.process.start( o );
     test.is( !_.consequenceIs( returned ) );
+    test.is( returned === o );
     test.identical( returned, o );
     test.identical( o.exitCode, 0 );
     return returned;
@@ -1959,6 +1961,7 @@ function startShellSyncDeasync( test )
     }
     var returned = _.process.start( o );
     test.is( !_.consequenceIs( returned ) );
+    test.is( returned === o );
     test.identical( returned, o );
     test.identical( o.exitCode, 0 );
 
@@ -2003,6 +2006,7 @@ function startShellSyncDeasync( test )
     }
     var returned = _.process.start( o );
     test.is( !_.consequenceIs( returned ) );
+    test.is( returned === o );
     test.identical( returned, o );
     test.identical( o.exitCode, 0 );
     return returned;
@@ -2200,6 +2204,7 @@ function startForkSyncDeasync( test )
     }
     var returned = _.process.start( o );
     test.is( !_.consequenceIs( returned ) );
+    test.is( returned === o );
     test.identical( returned, o );
     test.identical( o.exitCode, 0 );
     return returned;
@@ -2309,12 +2314,25 @@ startForkSyncDeasyncThrowing.timeOut = 15000;
 
 //
 
+/* qqq2 for Yevhen : introduce subroutine for modes */
 function startMultipleSyncDeasync( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
   let programPath = a.path.nativize( a.program( testApp ) );
 
+/*
+
+qqq for Yevhen : should check all that
+
+test.identical( o.exitCode, 0 );
+test.identical( o.exitSignal, null );
+test.identical( o.exitReason, 'normal' );
+test.identical( o.ended, true );
+test.identical( o.state, 'terminated' );
+
+*/
+
   /*  */
 
   a.ready.then( () =>
@@ -2332,9 +2350,18 @@ function startMultipleSyncDeasync( test )
     test.identical( returned.resourcesCount(), 0 );
     returned.then( function( result )
     {
-      test.identical( result.length, 2 );
-      test.identical( result[ 0 ].exitCode, 0 )
-      test.identical( result[ 1 ].exitCode, 0 )
+      // debugger;
+      test.is( result === o );
+      test.identical( o.runs.length, 2 );
+      test.identical( o.runs[ 0 ].exitCode, 0 );
+      test.identical( o.runs[ 1 ].exitCode, 0 );
+
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.identical( o.exitReason, 'normal' );
+      test.identical( o.ended, true );
+      test.identical( o.state, 'terminated' );
+
       return result;
     })
     return returned;
@@ -2350,14 +2377,22 @@ function startMultipleSyncDeasync( test )
       execPath : [ 'node ' + programPath, 'node ' + programPath ],
       mode : 'spawn',
       sync : 1,
-      returningOptionsArray : 1,
+      // returningOptionsArray : 1,
       deasync : 0
     }
     var returned = _.process.start( o );
     test.is( !_.consequenceIs( returned ) );
-    test.identical( returned.length, 2 );
-    test.identical( returned[ 0 ].exitCode, 0 )
-    test.identical( returned[ 1 ].exitCode, 0 )
+    test.is( returned === o );
+    test.identical( returned.runs.length, 2 );
+    test.identical( returned.runs[ 0 ].exitCode, 0 );
+    test.identical( returned.runs[ 1 ].exitCode, 0 );
+
+    test.identical( o.exitCode, 0 );
+    test.identical( o.exitSignal, null );
+    test.identical( o.exitReason, 'normal' );
+    test.identical( o.ended, true );
+    test.identical( o.state, 'terminated' );
+
     return returned;
   })
 
@@ -2371,12 +2406,20 @@ function startMultipleSyncDeasync( test )
       execPath : [ 'node ' + programPath, 'node ' + programPath ],
       mode : 'spawn',
       sync : 1,
-      returningOptionsArray : 0,
+      // returningOptionsArray : 0,
       deasync : 0
     }
     var returned = _.process.start( o );
     test.is( !_.consequenceIs( returned ) );
+    test.is( returned === o );
     test.identical( returned.exitCode, 0 )
+
+    test.identical( o.exitCode, 0 );
+    test.identical( o.exitSignal, null );
+    test.identical( o.exitReason, 'normal' );
+    test.identical( o.ended, true );
+    test.identical( o.state, 'terminated' );
+
     return returned;
   })
 
@@ -2397,9 +2440,17 @@ function startMultipleSyncDeasync( test )
     test.identical( returned.resourcesCount(), 1 );
     returned.then( function( result )
     {
-      test.identical( result.length, 2 );
-      test.identical( result[ 0 ].exitCode, 0 )
-      test.identical( result[ 1 ].exitCode, 0 )
+      test.is( result === o );
+      test.identical( o.runs.length, 2 );
+      test.identical( o.runs[ 0 ].exitCode, 0 );
+      test.identical( o.runs[ 1 ].exitCode, 0 );
+
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.identical( o.exitReason, 'normal' );
+      test.identical( o.ended, true );
+      test.identical( o.state, 'terminated' );
+
       return result;
     })
     return returned;
@@ -2419,9 +2470,17 @@ function startMultipleSyncDeasync( test )
     }
     var returned = _.process.start( o );
     test.is( !_.consequenceIs( returned ) );
-    test.identical( returned.length, 2 );
-    test.identical( returned[ 0 ].exitCode, 0 )
-    test.identical( returned[ 1 ].exitCode, 0 )
+    test.is( returned === o );
+    test.identical( o.runs.length, 2 );
+    test.identical( o.runs[ 0 ].exitCode, 0 )
+    test.identical( o.runs[ 1 ].exitCode, 0 )
+
+    test.identical( o.exitCode, 0 );
+    test.identical( o.exitSignal, null );
+    test.identical( o.exitReason, 'normal' );
+    test.identical( o.ended, true );
+    test.identical( o.state, 'terminated' );
+
     return returned;
   })
 
@@ -2442,9 +2501,17 @@ function startMultipleSyncDeasync( test )
     test.identical( returned.resourcesCount(), 0 );
     returned.then( function( result )
     {
-      test.identical( result.length, 2 );
-      test.identical( result[ 0 ].exitCode, 0 )
-      test.identical( result[ 1 ].exitCode, 0 )
+      test.is( result === o );
+      test.identical( o.runs.length, 2 );
+      test.identical( o.runs[ 0 ].exitCode, 0 );
+      test.identical( o.runs[ 1 ].exitCode, 0 );
+
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.identical( o.exitReason, 'normal' );
+      test.identical( o.ended, true );
+      test.identical( o.state, 'terminated' );
+
       return result;
     })
     return returned;
@@ -2460,14 +2527,22 @@ function startMultipleSyncDeasync( test )
       execPath : [ 'node ' + programPath, 'node ' + programPath ],
       mode : 'shell',
       sync : 1,
-      returningOptionsArray : 1,
+      // returningOptionsArray : 1,
       deasync : 0
     }
     var returned = _.process.start( o );
     test.is( !_.consequenceIs( returned ) );
-    test.identical( returned.length, 2 );
-    test.identical( returned[ 0 ].exitCode, 0 )
-    test.identical( returned[ 1 ].exitCode, 0 )
+    test.is( returned === o );
+    test.identical( returned.runs.length, 2 );
+    test.identical( returned.runs[ 0 ].exitCode, 0 )
+    test.identical( returned.runs[ 1 ].exitCode, 0 )
+
+    test.identical( o.exitCode, 0 );
+    test.identical( o.exitSignal, null );
+    test.identical( o.exitReason, 'normal' );
+    test.identical( o.ended, true );
+    test.identical( o.state, 'terminated' );
+
     return returned;
   })
 
@@ -2481,12 +2556,20 @@ function startMultipleSyncDeasync( test )
       execPath : [ 'node ' + programPath, 'node ' + programPath ],
       mode : 'shell',
       sync : 1,
-      returningOptionsArray : 0,
+      // returningOptionsArray : 0,
       deasync : 0
     }
     var returned = _.process.start( o );
     test.is( !_.consequenceIs( returned ) );
+    test.is( returned === o );
     test.identical( returned.exitCode, 0 )
+
+    test.identical( o.exitCode, 0 );
+    test.identical( o.exitSignal, null );
+    test.identical( o.exitReason, 'normal' );
+    test.identical( o.ended, true );
+    test.identical( o.state, 'terminated' );
+
     return returned;
   })
 
@@ -2507,9 +2590,17 @@ function startMultipleSyncDeasync( test )
     test.identical( returned.resourcesCount(), 1 );
     returned.then( function( result )
     {
-      test.identical( result.length, 2 );
-      test.identical( result[ 0 ].exitCode, 0 )
-      test.identical( result[ 1 ].exitCode, 0 )
+      test.is( result === o );
+      test.identical( o.runs.length, 2 );
+      test.identical( o.runs[ 0 ].exitCode, 0 )
+      test.identical( o.runs[ 1 ].exitCode, 0 )
+
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.identical( o.exitReason, 'normal' );
+      test.identical( o.ended, true );
+      test.identical( o.state, 'terminated' );
+
       return result;
     })
     return returned;
@@ -2529,9 +2620,17 @@ function startMultipleSyncDeasync( test )
     }
     var returned = _.process.start( o );
     test.is( !_.consequenceIs( returned ) );
-    test.identical( returned.length, 2 );
-    test.identical( returned[ 0 ].exitCode, 0 )
-    test.identical( returned[ 1 ].exitCode, 0 )
+    test.is( returned === o );
+    test.identical( o.runs.length, 2 );
+    test.identical( o.runs[ 0 ].exitCode, 0 )
+    test.identical( o.runs[ 1 ].exitCode, 0 )
+
+    test.identical( o.exitCode, 0 );
+    test.identical( o.exitSignal, null );
+    test.identical( o.exitReason, 'normal' );
+    test.identical( o.ended, true );
+    test.identical( o.state, 'terminated' );
+
     return returned;
   })
 
@@ -2552,9 +2651,17 @@ function startMultipleSyncDeasync( test )
     test.identical( returned.resourcesCount(), 0 );
     returned.then( function( result )
     {
-      test.identical( result.length, 2 );
-      test.identical( result[ 0 ].exitCode, 0 )
-      test.identical( result[ 1 ].exitCode, 0 )
+      test.is( result === o );
+      test.identical( o.runs.length, 2 );
+      test.identical( o.runs[ 0 ].exitCode, 0 )
+      test.identical( o.runs[ 1 ].exitCode, 0 )
+
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.identical( o.exitReason, 'normal' );
+      test.identical( o.ended, true );
+      test.identical( o.state, 'terminated' );
+
       return result;
     })
     return returned;
@@ -2570,7 +2677,7 @@ function startMultipleSyncDeasync( test )
       execPath : [ programPath, programPath ],
       mode : 'fork',
       sync : 1,
-      returningOptionsArray : 1,
+      // returningOptionsArray : 1,
       deasync : 0
     }
     test.shouldThrowErrorSync( () => _.process.start( o ) );
@@ -2587,7 +2694,7 @@ function startMultipleSyncDeasync( test )
       execPath : [ programPath, programPath ],
       mode : 'fork',
       sync : 1,
-      returningOptionsArray : 0,
+      // returningOptionsArray : 0,
       deasync : 0
     }
     test.shouldThrowErrorSync( () => _.process.start( o ) );
@@ -2611,9 +2718,17 @@ function startMultipleSyncDeasync( test )
     test.identical( returned.resourcesCount(), 1 );
     returned.then( function( result )
     {
-      test.identical( result.length, 2 );
-      test.identical( result[ 0 ].exitCode, 0 )
-      test.identical( result[ 1 ].exitCode, 0 )
+      test.is( result === o );
+      test.identical( o.runs.length, 2 );
+      test.identical( o.runs[ 0 ].exitCode, 0 )
+      test.identical( o.runs[ 1 ].exitCode, 0 )
+
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.identical( o.exitReason, 'normal' );
+      test.identical( o.ended, true );
+      test.identical( o.state, 'terminated' );
+
       return result;
     })
     return returned;
@@ -2633,9 +2748,17 @@ function startMultipleSyncDeasync( test )
     }
     var returned = _.process.start( o );
     test.is( !_.consequenceIs( returned ) );
-    test.identical( returned.length, 2 );
-    test.identical( returned[ 0 ].exitCode, 0 )
-    test.identical( returned[ 1 ].exitCode, 0 )
+    test.is( returned === o );
+    test.identical( o.runs.length, 2 );
+    test.identical( o.runs[ 0 ].exitCode, 0 )
+    test.identical( o.runs[ 1 ].exitCode, 0 )
+
+    test.identical( o.exitCode, 0 );
+    test.identical( o.exitSignal, null );
+    test.identical( o.exitReason, 'normal' );
+    test.identical( o.ended, true );
+    test.identical( o.state, 'terminated' );
+
     return returned;
   })
 
@@ -2653,9 +2776,17 @@ function startMultipleSyncDeasync( test )
     }
     var returned = _.process.start( o );
     test.is( !_.consequenceIs( returned ) );
-    test.identical( returned.length, 2 );
-    test.identical( returned[ 0 ].exitCode, 0 )
-    test.identical( returned[ 1 ].exitCode, 0 )
+    test.is( returned === o );
+    test.identical( o.runs.length, 2 );
+    test.identical( o.runs[ 0 ].exitCode, 0 )
+    test.identical( o.runs[ 1 ].exitCode, 0 )
+
+    test.identical( o.exitCode, 0 );
+    test.identical( o.exitSignal, null );
+    test.identical( o.exitReason, 'normal' );
+    test.identical( o.ended, true );
+    test.identical( o.state, 'terminated' );
+
     return returned;
   })
 
@@ -2676,9 +2807,17 @@ function startMultipleSyncDeasync( test )
     test.identical( returned.resourcesCount(), 0 );
     returned.then( function( result )
     {
-      test.identical( result.length, 2 );
-      test.identical( result[ 0 ].exitCode, 0 )
-      test.identical( result[ 1 ].exitCode, 0 )
+      test.is( result === o );
+      test.identical( o.runs.length, 2 );
+      test.identical( o.runs[ 0 ].exitCode, 0 )
+      test.identical( o.runs[ 1 ].exitCode, 0 )
+
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.identical( o.exitReason, 'normal' );
+      test.identical( o.ended, true );
+      test.identical( o.state, 'terminated' );
+
       return result;
     })
     return returned;
@@ -2701,9 +2840,17 @@ function startMultipleSyncDeasync( test )
     test.identical( returned.resourcesCount(), 0 );
     returned.then( function( result )
     {
-      test.identical( result.length, 2 );
-      test.identical( result[ 0 ].exitCode, 0 )
-      test.identical( result[ 1 ].exitCode, 0 )
+      test.is( result === o );
+      test.identical( o.runs.length, 2 );
+      test.identical( o.runs[ 0 ].exitCode, 0 )
+      test.identical( o.runs[ 1 ].exitCode, 0 )
+
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.identical( o.exitReason, 'normal' );
+      test.identical( o.ended, true );
+      test.identical( o.state, 'terminated' );
+
       return result;
     })
     return returned;
@@ -2726,9 +2873,17 @@ function startMultipleSyncDeasync( test )
     test.identical( returned.resourcesCount(), 0 );
     returned.then( function( result )
     {
-      test.identical( result.length, 2 );
-      test.identical( result[ 0 ].exitCode, 0 )
-      test.identical( result[ 1 ].exitCode, 0 )
+      test.is( result === o );
+      test.identical( o.runs.length, 2 );
+      test.identical( o.runs[ 0 ].exitCode, 0 )
+      test.identical( o.runs[ 1 ].exitCode, 0 )
+
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.identical( o.exitReason, 'normal' );
+      test.identical( o.ended, true );
+      test.identical( o.state, 'terminated' );
+
       return result;
     })
     return returned;
@@ -2744,14 +2899,22 @@ function startMultipleSyncDeasync( test )
       execPath : [ 'node ' + programPath, 'node ' + programPath ],
       mode : 'shell',
       sync : 1,
-      returningOptionsArray : 1,
+      // returningOptionsArray : 1,
       deasync : 0
     }
     var returned = _.process.start( o );
     test.is( !_.consequenceIs( returned ) );
-    test.identical( returned.length, 2 )
-    test.identical( returned[ 0 ].exitCode, 0 )
-    test.identical( returned[ 1 ].exitCode, 0 )
+    test.is( returned === o );
+    test.identical( returned.runs.length, 2 )
+    test.identical( returned.runs[ 0 ].exitCode, 0 )
+    test.identical( returned.runs[ 1 ].exitCode, 0 )
+
+    test.identical( o.exitCode, 0 );
+    test.identical( o.exitSignal, null );
+    test.identical( o.exitReason, 'normal' );
+    test.identical( o.ended, true );
+    test.identical( o.state, 'terminated' );
+
     return null;
   })
 
@@ -2765,14 +2928,22 @@ function startMultipleSyncDeasync( test )
       execPath : [ 'node ' + programPath, 'node ' + programPath ],
       mode : 'spawn',
       sync : 1,
-      returningOptionsArray : 1,
+      // returningOptionsArray : 1,
       deasync : 0
     }
     var returned = _.process.start( o );
     test.is( !_.consequenceIs( returned ) );
-    test.identical( returned.length, 2 )
-    test.identical( returned[ 0 ].exitCode, 0 )
-    test.identical( returned[ 1 ].exitCode, 0 )
+    test.is( returned === o );
+    test.identical( o.runs.length, 2 )
+    test.identical( o.runs[ 0 ].exitCode, 0 )
+    test.identical( o.runs[ 1 ].exitCode, 0 )
+
+    test.identical( o.exitCode, 0 );
+    test.identical( o.exitSignal, null );
+    test.identical( o.exitReason, 'normal' );
+    test.identical( o.ended, true );
+    test.identical( o.state, 'terminated' );
+
     return null;
   })
 
@@ -2786,12 +2957,20 @@ function startMultipleSyncDeasync( test )
       execPath : [ 'node ' + programPath, 'node ' + programPath ],
       mode : 'shell',
       sync : 1,
-      returningOptionsArray : 0,
+      // returningOptionsArray : 0,
       deasync : 0
     }
     var returned = _.process.start( o );
     test.is( !_.consequenceIs( returned ) );
+    test.is( returned === o );
     test.identical( returned.exitCode, 0 )
+
+    test.identical( o.exitCode, 0 );
+    test.identical( o.exitSignal, null );
+    test.identical( o.exitReason, 'normal' );
+    test.identical( o.ended, true );
+    test.identical( o.state, 'terminated' );
+
     return null;
   })
 
@@ -2805,12 +2984,20 @@ function startMultipleSyncDeasync( test )
       execPath : [ 'node ' + programPath, 'node ' + programPath ],
       mode : 'spawn',
       sync : 1,
-      returningOptionsArray : 0,
+      // returningOptionsArray : 0,
       deasync : 0
     }
     var returned = _.process.start( o );
     test.is( !_.consequenceIs( returned ) );
-    test.identical( returned.exitCode, 0 )
+    test.is( returned === o );
+    test.identical( returned.exitCode, 0 );
+
+    test.identical( o.exitCode, 0 );
+    test.identical( o.exitSignal, null );
+    test.identical( o.exitReason, 'normal' );
+    test.identical( o.ended, true );
+    test.identical( o.state, 'terminated' );
+
     return null;
   })
 
@@ -2832,9 +3019,17 @@ function startMultipleSyncDeasync( test )
     test.identical( returned.resourcesCount(), 1 );
     returned.then( function( result )
     {
-      test.identical( result.length, 2 );
-      test.identical( result[ 0 ].exitCode, 0 )
-      test.identical( result[ 1 ].exitCode, 0 )
+      test.is( result === o );
+      test.identical( o.runs.length, 2 );
+      test.identical( o.runs[ 0 ].exitCode, 0 )
+      test.identical( o.runs[ 1 ].exitCode, 0 )
+
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.identical( o.exitReason, 'normal' );
+      test.identical( o.ended, true );
+      test.identical( o.state, 'terminated' );
+
       return result;
     })
     return returned;
@@ -2857,9 +3052,17 @@ function startMultipleSyncDeasync( test )
     test.identical( returned.resourcesCount(), 1 );
     returned.then( function( result )
     {
-      test.identical( result.length, 2 );
-      test.identical( result[ 0 ].exitCode, 0 )
-      test.identical( result[ 1 ].exitCode, 0 )
+      test.is( result === o );
+      test.identical( o.runs.length, 2 );
+      test.identical( o.runs[ 0 ].exitCode, 0 )
+      test.identical( o.runs[ 1 ].exitCode, 0 )
+
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.identical( o.exitReason, 'normal' );
+      test.identical( o.ended, true );
+      test.identical( o.state, 'terminated' );
+
       return result;
     })
     return returned;
@@ -2882,9 +3085,17 @@ function startMultipleSyncDeasync( test )
     test.identical( returned.resourcesCount(), 1 );
     returned.then( function( result )
     {
-      test.identical( result.length, 2 );
-      test.identical( result[ 0 ].exitCode, 0 )
-      test.identical( result[ 1 ].exitCode, 0 )
+      test.is( result === o );
+      test.identical( o.runs.length, 2 );
+      test.identical( o.runs[ 0 ].exitCode, 0 )
+      test.identical( o.runs[ 1 ].exitCode, 0 )
+
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.identical( o.exitReason, 'normal' );
+      test.identical( o.ended, true );
+      test.identical( o.state, 'terminated' );
+
       return result;
     })
     return returned;
@@ -2904,9 +3115,17 @@ function startMultipleSyncDeasync( test )
     }
     var returned = _.process.start( o );
     test.is( !_.consequenceIs( returned ) );
-    test.identical( returned.length, 2 );
-    test.identical( returned[ 0 ].exitCode, 0 )
-    test.identical( returned[ 1 ].exitCode, 0 )
+    test.is( returned === o );
+    test.identical( o.runs.length, 2 );
+    test.identical( o.runs[ 0 ].exitCode, 0 )
+    test.identical( o.runs[ 1 ].exitCode, 0 )
+
+    test.identical( o.exitCode, 0 );
+    test.identical( o.exitSignal, null );
+    test.identical( o.exitReason, 'normal' );
+    test.identical( o.ended, true );
+    test.identical( o.state, 'terminated' );
+
     return returned;
   })
 
@@ -2924,9 +3143,17 @@ function startMultipleSyncDeasync( test )
     }
     var returned = _.process.start( o );
     test.is( !_.consequenceIs( returned ) );
-    test.identical( returned.length, 2 );
-    test.identical( returned[ 0 ].exitCode, 0 )
-    test.identical( returned[ 1 ].exitCode, 0 )
+    test.is( returned === o );
+    test.identical( o.runs.length, 2 );
+    test.identical( o.runs[ 0 ].exitCode, 0 )
+    test.identical( o.runs[ 1 ].exitCode, 0 )
+
+    test.identical( o.exitCode, 0 );
+    test.identical( o.exitSignal, null );
+    test.identical( o.exitReason, 'normal' );
+    test.identical( o.ended, true );
+    test.identical( o.state, 'terminated' );
+
     return returned;
   })
 
@@ -2944,9 +3171,17 @@ function startMultipleSyncDeasync( test )
     }
     var returned = _.process.start( o );
     test.is( !_.consequenceIs( returned ) );
-    test.identical( returned.length, 2 );
-    test.identical( returned[ 0 ].exitCode, 0 )
-    test.identical( returned[ 1 ].exitCode, 0 )
+    test.is( returned === o );
+    test.identical( o.runs.length, 2 );
+    test.identical( o.runs[ 0 ].exitCode, 0 )
+    test.identical( o.runs[ 1 ].exitCode, 0 )
+
+    test.identical( o.exitCode, 0 );
+    test.identical( o.exitSignal, null );
+    test.identical( o.exitReason, 'normal' );
+    test.identical( o.ended, true );
+    test.identical( o.state, 'terminated' );
+
     return returned;
   })
 
@@ -7816,7 +8051,6 @@ function startProcedureStackMultiple( test )
   let a = context.assetFor( test, false );
   let programPath = a.path.nativize( a.program( program1 ) );
   // let modes = [ 'fork', 'spawn', 'shell' ];
-  // xxx
   let modes = [ 'spawn' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
   // modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
@@ -7844,7 +8078,6 @@ function startProcedureStackMultiple( test )
         execPath : mode !== `fork` ? [ `node ${programPath} id:1`, `node ${programPath} id:2` ] : [ `${programPath} id:1`, `${programPath} id:2` ],
         currentPath : a.abs( '.' ),
         outputCollecting : 1,
-        // stack : 'abc',
         mode,
         sync,
         deasync,
@@ -7852,21 +8085,32 @@ function startProcedureStackMultiple( test )
 
       _.process.start( o );
 
-      // zzz
-      // test.identical( _.strCount( o.procedure._stack, 'case1' ), 1 );
-      // test.identical( _.strCount( o.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
-      // test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
+      test.identical( _.strCount( o.procedure._stack, 'case1' ), 1 );
+      test.identical( _.strCount( o.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
+      test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
 
-      o.ready.then( ( ops ) =>
+      o.ready.then( ( op ) =>
       {
+        debugger;
+        test.is( op === o );
         test.identical( o.exitCode, 0 );
+        test.identical( o.exitSignal, null );
+        test.identical( o.exitReason, 'normal' );
         test.identical( o.ended, true ); /* zzz */
-        ops.forEach( ( op ) =>
+        test.identical( o.state, 'terminated' );
+
+        test.identical( _.strCount( o.procedure._stack, 'case1' ), 1 );
+        test.identical( _.strCount( o.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
+        test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
+
+        o.runs.forEach( ( op2 ) =>
         {
-          test.identical( _.strCount( op.procedure._stack, 'case1' ), 1 );
-          test.identical( _.strCount( op.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
-          test.identical( _.strCount( op.procedure._sourcePath, 'case1' ), 1 );
+          test.identical( _.strCount( op2.procedure._stack, 'case1' ), 1 );
+          test.identical( _.strCount( op2.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
+          test.identical( _.strCount( op2.procedure._sourcePath, 'case1' ), 1 );
+          test.is( o.procedure !== op2.procedure );
         });
+
         return null;
       })
 
@@ -8243,10 +8487,6 @@ function startReadyDelay( test )
   modes.forEach( ( mode ) => a.ready.then( () => single( 0, 1, mode ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => single( 1, 0, mode ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => single( 1, 1, mode ) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => multiple( 0, 0, mode ) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => multiple( 0, 1, mode ) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => multiple( 1, 0, mode ) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => multiple( 1, 1, mode ) ) );
   return a.ready;
 
   /*  */
@@ -8314,7 +8554,7 @@ function startReadyDelay( test )
         currentPath : a.abs( '.' ),
         outputPiping : 1,
         outputCollecting : 1,
-        returningOptionsArray : 0,
+        // returningOptionsArray : 0,
         mode,
         sync,
         deasync,
@@ -8356,6 +8596,92 @@ function startReadyDelay( test )
 }
 
 startReadyDelay.timeOut = 300000;
+
+//
+
+function startReadyDelayMultiple( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let programPath = a.path.nativize( a.program( program1 ) );
+  // let modes = [ 'fork', 'spawn', 'shell' ];
+  let modes = [ 'spawn' ];
+  modes.forEach( ( mode ) => a.ready.then( () => multiple( 0, 0, mode ) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => multiple( 0, 1, mode ) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => multiple( 1, 0, mode ) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => multiple( 1, 1, mode ) ) );
+  return a.ready;
+
+  /*  */
+
+  /* xxx : make multiple work */
+  /* xxx : review */
+  function multiple( sync, deasync, mode )
+  {
+    let ready = new _.Consequence().take( null )
+
+    if( sync && !deasync && mode === 'fork' )
+    return null;
+
+    ready.then( () =>
+    {
+      test.case = `sync:${sync} deasync:${deasync} mode:${mode}`;
+      let t1 = _.time.now();
+      let ready = new _.Consequence().take( null ).timeOut( context.t2 );
+      let o =
+      {
+        execPath : mode !== `fork` ? [ `node ${programPath} id:1`, `node ${programPath} id:2` ] : [ `${programPath} id:1`, `${programPath} id:2` ],
+        currentPath : a.abs( '.' ),
+        outputPiping : 1,
+        outputCollecting : 1,
+        // returningOptionsArray : 0,
+        mode,
+        sync,
+        deasync,
+        ready,
+      }
+
+      let returned = _.process.start( o );
+
+      o.ready.then( ( op ) =>
+      {
+        debugger;
+        test.is( op === o );
+        test.identical( op.exitCode, 0 );
+        test.identical( op.exitSignal, null );
+        test.identical( op.exitReason, 'normal' );
+        test.identical( op.ended, true );
+        op.runs.forEach( ( op2 ) =>
+        {
+          console.log( `op.output : ${op2.output}` );
+          let parsed = JSON.parse( op2.output );
+          let diff = parsed.time - t1;
+          console.log( diff );
+          test.ge( diff, context.t2 );
+        });
+        return null;
+      })
+
+      return returned;
+    })
+
+    return ready;
+  }
+
+  /* - */
+
+  function program1()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    let args = _.process.args();
+    let data = { time : _.time.now(), id : args.map.id };
+    console.log( JSON.stringify( data ) );
+  }
+
+}
+
+startReadyDelayMultiple.timeOut = 300000;
 
 //
 
@@ -17931,7 +18257,7 @@ function terminate( test )
 
     ready.then( ( op ) =>
     {
-      if( process.platform === 'linux' )
+      if( process.platform === 'linux' ) /* xxx qqq : ? */
       {
         test.identical( op.exitCode, null );
         test.identical( op.ended, true );
@@ -22753,13 +23079,14 @@ var Proto =
     startProcedureTrivial,
     startProcedureExists,
     startProcedureStack,
-    startProcedureStackMultiple, /* xxx : make it working */
+    startProcedureStackMultiple, /* qqq for Yevhen : extend it using startProcedureStack as example */
     startOnTerminateSeveralCallbacksChronology,
     startChronology,
 
     // delay
 
     startReadyDelay,
+    startReadyDelayMultiple,
     startOptionWhenDelay,
     startOptionWhenTime,
     // startOptionTimeOut, /* qqq for Vova : fix please */
