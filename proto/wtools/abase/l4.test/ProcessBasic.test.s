@@ -17177,9 +17177,19 @@ function killSync( test )
 
     ready.then( ( op ) =>
     {
-      test.identical( op.exitCode, null );
+
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, 1 );
+        test.identical( op.exitSignal, null );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGKILL' );
+      }
+
       test.identical( op.ended, true );
-      test.identical( op.exitSignal, 'SIGKILL' );
       test.is( !_.strHas( op.output, 'Application timeout!' ) );
       return null;
     })
@@ -17219,16 +17229,15 @@ function killSync( test )
       if( process.platform === 'win32' )
       {
         test.identical( op.exitCode, 1 );
-        test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
       }
       else
       {
         test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
         test.identical( op.exitSignal, 'SIGKILL' );
       }
 
+      test.identical( op.ended, true );
       test.is( !_.strHas( op.output, 'Application timeout!' ) );
       return null;
     })
@@ -17265,9 +17274,18 @@ function killSync( test )
 
     ready.then( ( op ) =>
     {
-      test.identical( op.exitCode, null );
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, 1 );
+        test.identical( op.exitSignal, null );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGKILL' );
+      }
+
       test.identical( op.ended, true );
-      test.identical( op.exitSignal, 'SIGKILL' );
       test.is( !_.strHas( op.output, 'Application timeout!' ) );
       return null;
     })
@@ -17308,16 +17326,15 @@ function killSync( test )
       if( process.platform === 'win32' )
       {
         test.identical( op.exitCode, 1 );
-        test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
       }
       else
       {
         test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
         test.identical( op.exitSignal, 'SIGKILL' );
       }
 
+      test.identical( op.ended, true );
       test.is( !_.strHas( op.output, 'Application timeout!' ) );
       return null;
     })
@@ -17355,13 +17372,19 @@ function killSync( test )
 
     ready.then( ( op ) =>
     {
-      test.identical( op.exitCode, null );
-      test.identical( op.ended, true );
-      test.identical( op.exitSignal, 'SIGKILL' );
-      if( process.platform === 'darwin' )
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, 1 );
+        test.identical( op.exitSignal, null );
+      }
       else
-      test.is( _.strHas( op.output, 'Application timeout!' ) );
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGKILL' );
+      }
+
+      test.identical( op.ended, true );
+      test.is( !_.strHas( op.output, 'Application timeout!' ) );
       return null;
     })
 
@@ -17400,20 +17423,17 @@ function killSync( test )
       if( process.platform === 'win32' )
       {
         test.identical( op.exitCode, 1 );
-        test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
       }
       else
       {
         test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
         test.identical( op.exitSignal, 'SIGKILL' );
       }
 
-      if( process.platform === 'darwin' )
+      test.identical( op.ended, true );
       test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      else
-      test.is( _.strHas( op.output, 'Application timeout!' ) );
+
       return null;
     })
 

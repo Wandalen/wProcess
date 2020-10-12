@@ -2343,7 +2343,7 @@ signal_body.defaults =
 {
   pid : null,
   pnd : null,
-  withChildren : 0, /* xxx : set to 1 */
+  withChildren : 1, /* xxx : set to 1 aaa Vova:changed*/
   timeOut : 5000,
   signal : null,
   sync : 0
