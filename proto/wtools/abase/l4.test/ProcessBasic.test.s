@@ -17504,17 +17504,8 @@ function killSync( test )
     ready.then( ( op ) =>
     {
 
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, 1 );
-        test.identical( op.exitSignal, null );
-      }
-      else
-      {
-        test.identical( op.exitCode, null );
-        test.identical( op.exitSignal, 'SIGKILL' );
-      }
-
+      test.identical( op.exitCode, null );
+      test.identical( op.exitSignal, 'SIGKILL' );
       test.identical( op.ended, true );
       test.is( !_.strHas( op.output, 'Application timeout!' ) );
       return null;
@@ -17600,17 +17591,8 @@ function killSync( test )
 
     ready.then( ( op ) =>
     {
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, 1 );
-        test.identical( op.exitSignal, null );
-      }
-      else
-      {
-        test.identical( op.exitCode, null );
-        test.identical( op.exitSignal, 'SIGKILL' );
-      }
-
+      test.identical( op.exitCode, null );
+      test.identical( op.exitSignal, 'SIGKILL' );
       test.identical( op.ended, true );
       test.is( !_.strHas( op.output, 'Application timeout!' ) );
       return null;
@@ -17698,7 +17680,7 @@ function killSync( test )
 
     ready.then( ( op ) =>
     {
-      if( process.platform === 'win32' )
+      if( process.platform === 'win32')
       {
         test.identical( op.exitCode, 1 );
         test.identical( op.exitSignal, null );
@@ -17790,7 +17772,7 @@ function killSync( test )
     setTimeout( () =>
     {
       console.log( 'Application timeout!' )
-    }, 5000 )
+    }, context.t2 )
   }
 }
 
