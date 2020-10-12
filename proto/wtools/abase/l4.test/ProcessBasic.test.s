@@ -17177,9 +17177,19 @@ function killSync( test )
 
     ready.then( ( op ) =>
     {
-      test.identical( op.exitCode, null );
+
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, 1 );
+        test.identical( op.exitSignal, null );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGKILL' );
+      }
+
       test.identical( op.ended, true );
-      test.identical( op.exitSignal, 'SIGKILL' );
       test.is( !_.strHas( op.output, 'Application timeout!' ) );
       return null;
     })
@@ -17219,16 +17229,15 @@ function killSync( test )
       if( process.platform === 'win32' )
       {
         test.identical( op.exitCode, 1 );
-        test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
       }
       else
       {
         test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
         test.identical( op.exitSignal, 'SIGKILL' );
       }
 
+      test.identical( op.ended, true );
       test.is( !_.strHas( op.output, 'Application timeout!' ) );
       return null;
     })
@@ -17265,9 +17274,18 @@ function killSync( test )
 
     ready.then( ( op ) =>
     {
-      test.identical( op.exitCode, null );
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, 1 );
+        test.identical( op.exitSignal, null );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGKILL' );
+      }
+
       test.identical( op.ended, true );
-      test.identical( op.exitSignal, 'SIGKILL' );
       test.is( !_.strHas( op.output, 'Application timeout!' ) );
       return null;
     })
@@ -17308,16 +17326,15 @@ function killSync( test )
       if( process.platform === 'win32' )
       {
         test.identical( op.exitCode, 1 );
-        test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
       }
       else
       {
         test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
         test.identical( op.exitSignal, 'SIGKILL' );
       }
 
+      test.identical( op.ended, true );
       test.is( !_.strHas( op.output, 'Application timeout!' ) );
       return null;
     })
@@ -17355,13 +17372,19 @@ function killSync( test )
 
     ready.then( ( op ) =>
     {
-      test.identical( op.exitCode, null );
-      test.identical( op.ended, true );
-      test.identical( op.exitSignal, 'SIGKILL' );
-      if( process.platform === 'darwin' )
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, 1 );
+        test.identical( op.exitSignal, null );
+      }
       else
-      test.is( _.strHas( op.output, 'Application timeout!' ) );
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGKILL' );
+      }
+
+      test.identical( op.ended, true );
+      test.is( !_.strHas( op.output, 'Application timeout!' ) );
       return null;
     })
 
@@ -17400,20 +17423,17 @@ function killSync( test )
       if( process.platform === 'win32' )
       {
         test.identical( op.exitCode, 1 );
-        test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
       }
       else
       {
         test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
         test.identical( op.exitSignal, 'SIGKILL' );
       }
 
-      if( process.platform === 'darwin' )
+      test.identical( op.ended, true );
       test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      else
-      test.is( _.strHas( op.output, 'Application timeout!' ) );
+
       return null;
     })
 
@@ -20951,9 +20971,8 @@ function terminateDetachedComplex( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
-  let testAppPath2 = a.program( testApp2 );
-
+  let testAppPath = a.program( program1 );
+  let testAppPath2 = a.program( program2 );
 
   // if( process.platform === 'win32' )
   // {
@@ -20965,198 +20984,196 @@ function terminateDetachedComplex( test )
 
   /* */
 
-  a.ready
+  let modes = [ 'fork', 'spawn', 'shell' ];
 
-  .then( () =>
+  modes.forEach( ( modeParent ) =>
   {
-    test.case = 'Sending signal to child process that has detached child, detached child should continue to work'
-    var o =
+    modes.forEach( ( modeChild ) =>
     {
-      execPath : 'node ' + testAppPath + ' detached',
-      mode : 'spawn',
-      ipc : 1,
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o );
-    let childPid;
-    o.process.on( 'message', ( e ) =>
-    {
-      childPid = e;
-      _.process.terminate( o.process );
+      a.ready.then( () => run( modeParent, modeChild ) )
     })
-
-    ready.then( ( op ) =>
-    {
-      test.identical( op.exitCode, null );
-      test.identical( op.ended, true );
-      test.identical( op.exitSignal, 'SIGTERM' );
-      test.is( _.strHas( op.output, 'SIGTERM' ) );
-      test.is( !_.strHas( op.output, 'TerminationBegin' ) );
-      test.is( !_.process.isAlive( o.process.pid ) )
-      test.is( _.process.isAlive( _.numberFrom( childPid ) ) )
-      return _.time.out( 9000, () =>
-      {
-        var files = a.fileProvider.dirRead( a.routinePath );
-        test.is( !_.process.isAlive( _.numberFrom( childPid ) ) )
-        test.identical( _.numberFrom( files[ 0 ] ), _.numberFrom( childPid ) );
-        a.fileProvider.fileDelete( a.abs( a.routinePath, files[ 0 ] ) );
-        return null;
-      });
-    })
-
-    return ready;
-  })
-
-  /* - */
-
-  .then( () =>
-  {
-    test.case = 'Sending signal to child process that has detached child, detached child should continue to work'
-    var o =
-    {
-      execPath : testAppPath + ' detached',
-      mode : 'fork',
-      ipc : 1,
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o );
-    let childPid;
-    o.process.on( 'message', ( e ) =>
-    {
-      childPid = e;
-      _.process.terminate( o.process );
-    })
-
-    ready.then( ( op ) =>
-    {
-      test.identical( op.exitCode, null );
-      test.identical( op.ended, true );
-      test.identical( op.exitSignal, 'SIGTERM' );
-      test.is( _.strHas( op.output, 'SIGTERM' ) );
-      test.is( !_.strHas( op.output, 'TerminationBegin' ) );
-      test.is( !_.process.isAlive( o.process.pid ) )
-      test.is( _.process.isAlive( _.numberFrom( childPid ) ) )
-      return _.time.out( 9000, () =>
-      {
-        var files = a.fileProvider.dirRead( a.routinePath );
-        test.is( !_.process.isAlive( _.numberFrom( childPid ) ) )
-        test.identical( _.numberFrom( files[ 0 ] ), _.numberFrom( childPid ) );
-        a.fileProvider.fileDelete( a.abs( a.routinePath, files[ 0 ] ) );
-        return null;
-      });
-    })
-
-    return ready;
-  })
-
-  /* - */
-
-  .then( () =>
-  {
-    test.case = 'Sending signal to child process that has detached child, detached child should continue to work'
-    var o =
-    {
-      execPath : 'node ' + testAppPath + ' detached',
-      mode : 'shell',
-      outputPiping : 1,
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o );
-    let childPid;
-    o.process.stdout.on( 'data', ( data ) =>
-    {
-      data = data.toString();
-      if( _.strHas( data, 'ready' ) )
-      _.process.terminate({ pnd : o.process, timeOut : 0 });
-    })
-
-    ready.then( ( op ) =>
-    {
-      childPid = _.numberFrom( a.fileProvider.fileRead( a.abs( a.routinePath, 'pid' ) ) );
-
-      if( process.platform === 'linux' )
-      {
-        test.is( !_.process.isAlive( _.numberFrom( childPid ) ) )
-        test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( _.strHas( op.output, 'TerminationBegin' ) );
-      }
-      else if( process.platform === 'win32' )
-      {
-        test.is( !_.process.isAlive( _.numberFrom( childPid ) ) )
-        test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( _.strHas( op.output, 'TerminationBegin' ) );
-      }
-      else
-      {
-        test.is( _.process.isAlive( _.numberFrom( childPid ) ) ) /* qqq for Vova : ?? */
-        test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.is( _.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'TerminationBegin' ) );
-      }
-      return _.time.out( 9000, () =>
-      {
-        var files = a.fileProvider.dirRead( a.routinePath );
-        test.is( !_.process.isAlive( _.numberFrom( childPid ) ) )
-        test.identical( _.numberFrom( files[ 0 ] ), _.numberFrom( childPid ) );
-        a.fileProvider.fileDelete( a.abs( a.routinePath, files[ 0 ] ) );
-        return null;
-      });
-    })
-
-    return ready;
-  })
-
-  /* - */
-
+  });
   return a.ready;
 
   /* - */
 
-  function testApp()
+  function run( modeParent, modeChild )
+  {
+    let ready = _.Consequence().take( null )
+
+    .then( () =>
+    {
+      test.case = `modeParent:${modeParent} modeChild:${modeChild} parent -> detached child, terminate withChildren : 0, detached child should stay alive`
+      var o =
+      {
+        execPath : modeParent === 'fork' ? testAppPath : 'node ' + testAppPath,
+        args : [ modeChild ],
+        mode : modeParent,
+        outputPiping : 1,
+        outputCollecting : 1,
+        throwingExitCode : 0
+      }
+
+      let childPid;
+      let ready = _.Consequence();
+
+      _.process.start( o );
+
+      o.process.stdout.on( 'data', ( data ) =>
+      {
+        data = data.toString();
+        if( _.strHas( data, 'ready' ) )
+        ready.take( null );
+      });
+
+      ready.then( () =>
+      {
+        childPid = _.numberFrom( a.fileProvider.fileRead( a.abs( a.routinePath, 'childPID' ) ) );
+        return _.process.terminate({ pnd : o.process, withChildren : 0 });
+      });
+
+      ready.then( () =>
+      {
+        test.identical( o.conTerminate.resourcesCount(), 1 );
+
+        test.identical( o.exitCode, null );
+        test.identical( o.exitSignal, 'SIGTERM' );
+        test.identical( o.ended, true );
+        test.is( _.strHas( o.output, 'SIGTERM' ) );
+        test.is( !_.strHas( o.output, 'TerminationBegin' ) );
+        test.is( !_.process.isAlive( _.numberFrom( o.process.pid ) ) );
+        test.is( _.process.isAlive( _.numberFrom( childPid ) ) );
+
+        // if( process.platform === 'linux' )
+        // {
+        //   test.is( !_.process.isAlive( _.numberFrom( childPid ) ) )
+        //   test.identical( op.exitCode, null );
+        //   test.identical( op.ended, true );
+        //   test.identical( op.exitSignal, 'SIGTERM' );
+        //   test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        //   test.is( _.strHas( op.output, 'TerminationBegin' ) );
+        // }
+        // else if( process.platform === 'win32' )
+        // {
+        //   test.is( !_.process.isAlive( _.numberFrom( childPid ) ) )
+        //   test.identical( op.exitCode, null );
+        //   test.identical( op.ended, true );
+        //   test.identical( op.exitSignal, 'SIGTERM' );
+        //   test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        //   test.is( _.strHas( op.output, 'TerminationBegin' ) );
+        // }
+        // else
+        // {
+        //   test.is( _.process.isAlive( _.numberFrom( childPid ) ) ) /* qqq for Vova : ?? aaa : remade this test */
+        //   test.identical( op.exitCode, null );
+        //   test.identical( op.ended, true );
+        //   test.identical( op.exitSignal, 'SIGTERM' );
+        //   test.is( _.strHas( op.output, 'SIGTERM' ) );
+        //   test.is( !_.strHas( op.output, 'TerminationBegin' ) );
+        // }
+
+        return _.time.out( context.t1 * 3, () =>
+        {
+          test.is( !_.process.isAlive( _.numberFrom( childPid ) ) )
+          var detachedPID = _.numberFrom( a.fileProvider.fileRead( a.abs( a.routinePath, 'detachedPID' ) ) );
+          test.identical( detachedPID, _.numberFrom( childPid ) );
+          a.fileProvider.fileDelete( a.abs( a.routinePath, 'detachedPID' ) );
+          return null;
+        });
+      })
+
+      return ready;
+    })
+
+    /* */
+
+    .then( () =>
+    {
+      test.case = `modeParent:${modeParent} modeChild:${modeChild} parent -> detached child, terminate withChildren : 1, detached child should be terminated`
+      var o =
+      {
+        execPath : modeParent === 'fork' ? testAppPath : 'node ' + testAppPath,
+        args : [ modeChild ],
+        mode : modeParent,
+        outputPiping : 1,
+        outputCollecting : 1,
+        throwingExitCode : 0
+      }
+
+      let childPid;
+      let ready = _.Consequence();
+
+      _.process.start( o );
+
+      o.process.stdout.on( 'data', ( data ) =>
+      {
+        data = data.toString();
+        if( _.strHas( data, 'ready' ) )
+        ready.take( null );
+      });
+
+      ready.then( () =>
+      {
+        childPid = _.numberFrom( a.fileProvider.fileRead( a.abs( a.routinePath, 'childPID' ) ) );
+        return _.process.terminate({ pnd : o.process, withChildren : 1 });
+      });
+
+      ready.then( () =>
+      {
+        test.identical( o.conTerminate.resourcesCount(), 1 );
+
+        test.identical( o.exitCode, null );
+        test.identical( o.exitSignal, 'SIGTERM' );
+        test.identical( o.ended, true );
+        test.is( _.strHas( o.output, 'SIGTERM' ) );
+        test.is( !_.strHas( o.output, 'TerminationBegin' ) );
+        test.is( !_.process.isAlive( _.numberFrom( o.process.pid ) ) );
+        test.is( !_.process.isAlive( _.numberFrom( childPid ) ) );
+
+        return _.time.out( context.t1 * 3, () =>
+        {
+          test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, 'detachedPID' ) ) );
+          return null;
+        });
+      })
+
+      return ready;
+    })
+
+    /* - */
+
+    return ready;
+  }
+
+  /* - */
+
+  function program1()
   {
     let _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
-    let detaching = process.argv[ 2 ] === 'detached';
+    let mode = process.argv[ 2 ];
     var o =
     {
-      execPath : 'node testApp2.js',
+      execPath : mode === 'fork' ? 'program2.js' : 'node program2.js',
       currentPath : __dirname,
-      mode : 'spawn',
+      mode,
       stdio : 'ignore',
-      detaching,
+      detaching : 1,
       inputMirroring : 0,
       outputPiping : 0,
       throwingExitCode : 0
     }
+
     _.process.start( o );
-    o.conTerminate.catch( ( err ) =>
+
+    o.conStart.thenGive( () =>
     {
-      _.errAttend( err );
-      return null;
+      _.fileProvider.fileWrite( _.path.join( __dirname, 'childPID' ), o.process.pid.toString() );
+      console.log( 'ready' );
     })
-    if( process.send )
-    process.send( o.process.pid )
-    else
-    {
-      console.log( 'ready' )
-      _.fileProvider.fileWrite( _.path.join( __dirname, 'pid' ), o.process.pid.toString() )
-    }
-    _.time.out( 10000, () =>
+
+    _.time.out( context.t1, () =>
     {
       console.log( 'TerminationBegin' )
       _.procedure.terminationBegin()
@@ -21164,22 +21181,16 @@ function terminateDetachedComplex( test )
     })
   }
 
-  function testApp2()
+  function program2()
   {
-    process.on( 'SIGTERM', () =>
-    {
-      console.log( 'second child SIGTERM' )
-      process.exit( 0 );
-    })
-    if( process.send )
-    process.send( process.pid );
+    console.log( 'program2::start' )
     setTimeout( () =>
     {
-      console.log( 'second child timeout' )
+      console.log( 'program2::end' )
       var fs = require( 'fs' );
       var path = require( 'path' )
-      fs.writeFileSync( path.join( __dirname, process.pid.toString() ), process.pid.toString() )
-    }, 5000 )
+      fs.writeFileSync( path.join( __dirname, 'detachedPID' ), process.pid.toString() )
+    }, context.t1 * 3 );
   }
 }
 

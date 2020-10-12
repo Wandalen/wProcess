@@ -2180,9 +2180,6 @@ function signal_pre( routine, args )
     o.pid = o.pnd.pid;
   }
 
-  _.assert( _.numberIs( o.pid ) );
-  _.assert( !o.timeOut || _.numberIs( o.timeOut ) );
-
   return o;
 }
 
@@ -2191,6 +2188,7 @@ function signal_pre( routine, args )
 function signal_body( o )
 {
   _.assert( arguments.length === 1 );
+  _.assert( _.numberIs( o.timeOut ) && o.timeOut > 0, 'Expects positive number as option {-timeOut-}' );
   _.assert( _.strIs( o.signal ), 'Expects signal to be provided explicitly as string' );
   _.assert( _.intIs( o.pid ) );
 
@@ -2232,8 +2230,8 @@ function signal_body( o )
     // else
     process.kill( p.pid, o.signal );
 
-    if( !o.timeOut )
-    return;
+    // if( !o.timeOut )
+    // return;
 
     let con = waitForTermination( p.pid );
     cons.push( con );
@@ -2347,7 +2345,7 @@ signal_body.defaults =
 {
   pid : null,
   pnd : null,
-  withChildren : 0, /* xxx : set to 1 */
+  withChildren : 1, /* xxx : set to 1 aaa Vova:changed*/
   timeOut : 5000,
   signal : null,
   sync : 0
@@ -2361,6 +2359,7 @@ function kill_body( o )
 {
   _.assert( arguments.length === 1 );
   o.signal = 'SIGKILL';
+  o.timeOut = signal.defaults.timeOut;
   return _.process.signal.body( o );
 }
 
