@@ -168,7 +168,7 @@ function assetFor( test, name )
     o.locals = o.locals || locals;
     _.mapSupplement( o.locals, locals );
     _.mapSupplement( o.locals.context, locals.context );
-    let programPath = a.path.nativize( oprogram.body.call( a, o ) ); /* xxx : modify a.program()? */
+    let programPath = a.path.nativize( oprogram.body.call( a, o ) ); /* zzz : modify a.program()? */
     return programPath;
   }
 
@@ -16257,6 +16257,7 @@ function startDiffPid( test )
         let childPid = a.fileProvider.fileRead( testFilePath );
         childPid = _.numberFrom( childPid );
         console.log(  childPid );
+        if( mode !== 'shell' )
         test.identical( data.childPid, childPid );
         console.log( `${mode} : PID is ${ data.childPid === childPid ? 'same' : 'different' }` );
 
@@ -16285,7 +16286,6 @@ function startDiffPid( test )
     {
       execPath : mode === 'fork' ? 'testAppChild.js' : 'node testAppChild.js',
       mode,
-      ipc : 0,
       detaching : true,
     }
 
@@ -21653,7 +21653,7 @@ function terminateTimeOut( test )
 
     o.process.on( 'message', () =>
     {
-      _.process.terminate({ pnd : o.process, timeOut : 1000 });
+      _.process.terminate({ pnd : o.process, timeOut : 1000, withChildren : 0 });
     })
 
     ready.then( ( op ) =>
@@ -21686,7 +21686,7 @@ function terminateTimeOut( test )
 
     o.process.on( 'message', () =>
     {
-      _.process.terminate({ pnd : o.process, timeOut : 1000 });
+      _.process.terminate({ pnd : o.process, timeOut : 1000, withChildren : 0 });
     })
 
     ready.then( ( op ) =>
@@ -22854,7 +22854,7 @@ var Proto =
     terminateDetachedComplex,
     terminateWithChildren,
     terminateWithDetachedChildren, // zzz for Vova:investigate and fix termination of deatched process on Windows
-    terminateTimeOut,
+    terminateTimeOut, /* xxx qqq for Vova : make it working */
     terminateDifferentStdio,
     killComplex,
 
