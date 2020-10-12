@@ -17790,7 +17790,7 @@ function exitSignal( test )
   let context = this;
   let a = test.assetFor( false );
 
-  /* Not passing : SIGINT, SIGTERM, SIGUSR1, SIGPIPE, SIGBREAK( windows ), SIGWINCH, SIGSTOP? */
+  /* Not passing : SIGPIPE, SIGBREAK( windows ), SIGWINCH, SIGSTOP? */
   let signals = [ 'SIGINT', 'SIGTERM', 'SIGKILL', /*'SIGSTOP',*/ 'SIGUSR1', 'SIGPIPE', 'SIGHUP', /*'SIGBREAK'*/, 'SIGWINCH', 'SIGBUS', 'SIGFPE', 'SIGSEGV', 'SIGILL' ];
 
   signals.forEach( ( signal ) => a.ready.then( () => run( signal ) ) );
@@ -17802,7 +17802,7 @@ function exitSignal( test )
   function run( signal )
   {
     test.case = `signal = ${ signal }`
-    let programPath = a.program({ routine : testApp, locals : { signal : signal, toolsPath : context.toolsPath } });
+    let programPath = a.program({ routine : testApp, locals : { signal : signal, toolsPath : a.path.nativize( _.module.toolsPathGet() ) } });
 
     let o =
     {
