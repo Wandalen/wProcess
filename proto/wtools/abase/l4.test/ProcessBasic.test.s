@@ -613,7 +613,7 @@ function start2OptionPassingThrough( test )
 
     let locals =
     {
-      toolsPath : context.toolsPath,
+      toolsPath : a.path.nativize( _.module.toolsPathGet() ),
       routinePath : a.routinePath,
       programPath : programPathChild
     }
@@ -677,7 +677,7 @@ function start2OptionPassingThrough( test )
 
     let locals =
     {
-      toolsPath : context.toolsPath,
+      toolsPath : a.path.nativize( _.module.toolsPathGet() ),
       routinePath : a.routinePath,
       programPath : programPathChild
     }
@@ -743,7 +743,7 @@ function start2OptionPassingThrough( test )
 
     let locals =
     {
-      toolsPath : context.toolsPath,
+      toolsPath : a.path.nativize( _.module.toolsPathGet() ),
       routinePath : a.routinePath,
       programPath : programPathChild
     }
@@ -875,7 +875,7 @@ function start2OptionPassingThrough( test )
 
     let locals =
     {
-      toolsPath : context.toolsPath,
+      toolsPath : a.path.nativize( _.module.toolsPathGet() ),
       routinePath : a.routinePath,
       programPath : programPathChild
     }
@@ -974,7 +974,7 @@ function start2OptionPassingThrough( test )
 
     let locals =
     {
-      toolsPath : context.toolsPath,
+      toolsPath : a.path.nativize( _.module.toolsPathGet() ),
       routinePath : a.routinePath,
       programPath : programPathChild
     }
@@ -1075,7 +1075,7 @@ function start2OptionPassingThrough( test )
 
     let locals =
     {
-      toolsPath : context.toolsPath,
+      toolsPath : a.path.nativize( _.module.toolsPathGet() ),
       routinePath : a.routinePath,
       programPath : programPathChild
     }
@@ -1154,7 +1154,7 @@ function start2OptionPassingThrough( test )
 
     let locals =
     {
-      toolsPath : context.toolsPath,
+      toolsPath : a.path.nativize( _.module.toolsPathGet() ),
       routinePath : a.routinePath,
       programPath : programPathChild
     }
@@ -1219,7 +1219,7 @@ function start2OptionPassingThrough( test )
 
     let locals =
     {
-      toolsPath : context.toolsPath,
+      toolsPath : a.path.nativize( _.module.toolsPathGet() ),
       routinePath : a.routinePath,
       programPath : programPathChild
     }
@@ -1284,7 +1284,7 @@ function start2OptionPassingThrough( test )
 
     let locals =
     {
-      toolsPath : context.toolsPath,
+      toolsPath : a.path.nativize( _.module.toolsPathGet() ),
       routinePath : a.routinePath,
       programPath : programPathChild
     }
@@ -1997,252 +1997,6 @@ function startErrorHandling( test )
 }
 
 //
-
-function startSingleOptionDry( test )
-{
-  /* FROM TEST ROUTINE `startChronology` */
-  let context = this;
-  let a = test.assetFor( false );
-
-  let testAppPath = a.path.nativize( a.program( testApp ) );
-  let track;
-  let niteration = 0;
-
-
-  // var modes = [ 'fork', 'spawn', 'shell' ];
-  let modes = [ 'spawn' ];
-  modes.forEach( ( mode ) => a.ready.then( () => run( 0, mode ) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => run( 1, mode ) ) );
-
-  return a.ready;
-
-  /* */
-
-  function run( sync, mode )
-  {
-    test.case = `sync:${sync} mode:${mode}`;
-
-    if( sync && mode === 'fork' )
-    return null;
-
-    niteration += 1;
-    let ptcounter = _.Procedure.Counter;
-    let pacounter = _.Procedure.FindAlive().length;
-    track = [];
-
-    var o =
-    {
-      execPath : mode !== 'fork' ? 'node' : null,
-      args : [ testAppPath ],
-      ipc : 0,
-      mode,
-      sync,
-      ready : new _.Consequence().take( null ),
-      conStart : new _.Consequence(),
-      conDisconnect : new _.Consequence(),
-      conTerminate : new _.Consequence(),
-    }
-
-    test.identical( _.Procedure.Counter - ptcounter, 0 );
-    ptcounter = _.Procedure.Counter;
-    test.identical( _.Procedure.FindAlive().length - pacounter, 0 );
-    pacounter = _.Procedure.FindAlive().length;
-
-    o.conStart.tap( ( err, op ) =>
-    {
-      track.push( 'conStart' );
-
-      test.identical( err, undefined );
-      test.identical( op, o );
-
-      test.identical( o.ready.resourcesCount(), 0 );
-      test.identical( o.ready.errorsCount(), 0 );
-      test.identical( o.ready.competitorsCount(), 0 );
-      test.identical( o.conStart.resourcesCount(), 1 );
-      test.identical( o.conStart.errorsCount(), 0 );
-      test.identical( o.conStart.competitorsCount(), 0 );
-      test.identical( o.conDisconnect.resourcesCount(), 0 );
-      test.identical( o.conDisconnect.errorsCount(), 0 );
-      test.identical( o.conDisconnect.competitorsCount(), 0 );
-      test.identical( o.conTerminate.resourcesCount(), 0 );
-      test.identical( o.conTerminate.errorsCount(), 0 );
-      test.identical( o.conTerminate.competitorsCount(), 1 );
-      test.identical( o.ended, false );
-      test.identical( o.state, 'started' );
-      test.identical( o.error, null );
-      test.identical( o.exitCode, null );
-      test.identical( o.exitSignal, null );
-      test.identical( o.process.exitCode, sync ? undefined : null );
-      test.identical( o.process.signalCode, sync ? undefined : null );
-      test.identical( _.Procedure.Counter - ptcounter, sync ? 3 : 2 );
-      ptcounter = _.Procedure.Counter;
-      test.identical( _.Procedure.FindAlive().length - pacounter, sync ? 1 : 2 );
-      pacounter = _.Procedure.FindAlive().length;
-    });
-
-    test.identical( _.Procedure.Counter - ptcounter, 1 );
-    ptcounter = _.Procedure.Counter;
-    test.identical( _.Procedure.FindAlive().length - pacounter, 1 );
-    pacounter = _.Procedure.FindAlive().length;
-
-    o.conTerminate.tap( ( err, op ) =>
-    {
-      track.push( 'conTerminate' );
-
-      test.identical( err, undefined );
-      test.identical( op, o );
-
-      test.identical( o.ready.resourcesCount(), 0 );
-      test.identical( o.ready.errorsCount(), 0 );
-      test.identical( o.ready.competitorsCount(), sync ? 0 : 1 );
-      test.identical( o.conStart.resourcesCount(), 1 );
-      test.identical( o.conStart.errorsCount(), 0 );
-      test.identical( o.conStart.competitorsCount(), 0 );
-      test.identical( o.conDisconnect.resourcesCount(), 0 );
-      test.identical( o.conDisconnect.errorsCount(), 0 );
-      test.identical( o.conDisconnect.competitorsCount(), 0 );
-      test.identical( o.conTerminate.resourcesCount(), 1 );
-      test.identical( o.conTerminate.errorsCount(), 0 );
-      test.identical( o.conTerminate.competitorsCount(), 0 );
-      test.identical( o.ended, true );
-      test.identical( o.state, 'terminated' );
-      test.identical( o.error, null );
-      test.identical( o.exitCode, 0 );
-      test.identical( o.exitSignal, null );
-      test.identical( o.process.exitCode, 0 );
-      test.identical( o.process.signalCode, null );
-      test.identical( _.Procedure.Counter - ptcounter, sync ? 0 : 1 );
-      ptcounter = _.Procedure.Counter;
-      if( sync )
-      test.identical( _.Procedure.FindAlive().length - pacounter, -2 );
-      else
-      test.identical( _.Procedure.FindAlive().length - pacounter, niteration > 1 ? -2 : 0 );
-      pacounter = _.Procedure.FindAlive().length;
-      /*
-      2 extra procedures dies here on non-first iteration
-        2 procedures of _.time.out()
-      */
-    })
-
-    let result = _.time.out( context.t1 + context.t2, () => /* 1000 + context.t2 */
-    {
-      test.identical( track, [ 'conStart', 'conTerminate', 'ready' ] );
-
-      test.identical( o.ready.resourcesCount(), 1 );
-      test.identical( o.ready.errorsCount(), 0 );
-      test.identical( o.ready.competitorsCount(), 0 );
-      test.identical( o.conStart.resourcesCount(), 1 );
-      test.identical( o.conStart.errorsCount(), 0 );
-      test.identical( o.conStart.competitorsCount(), 0 );
-      test.identical( o.conDisconnect.resourcesCount(), 0 );
-      test.identical( o.conDisconnect.errorsCount(), 0 );
-      test.identical( o.conDisconnect.competitorsCount(), 0 );
-      test.identical( o.conTerminate.resourcesCount(), 1 );
-      test.identical( o.conTerminate.errorsCount(), 0 );
-      test.identical( o.conTerminate.competitorsCount(), 0 );
-      test.identical( o.ended, true );
-      test.identical( o.state, 'terminated' );
-      test.identical( o.error, null );
-      test.identical( o.exitCode, 0 );
-      test.identical( o.exitSignal, null );
-      test.identical( o.process.exitCode, 0 );
-      test.identical( o.process.signalCode, null );
-      test.identical( _.Procedure.Counter - ptcounter, 0 );
-      ptcounter = _.Procedure.Counter;
-      if( sync )
-      test.identical( _.Procedure.FindAlive().length - pacounter, niteration > 1 ? -3 : -1 );
-      else
-      test.identical( _.Procedure.FindAlive().length - pacounter, -1 );
-      pacounter = _.Procedure.FindAlive().length;
-      /*
-      2 extra procedures dies here on non-first iteration
-        2 procedures of _.time.out()
-      */
-    });
-
-    test.identical( _.Procedure.Counter - ptcounter, 3 );
-    ptcounter = _.Procedure.Counter;
-    test.identical( _.Procedure.FindAlive().length - pacounter, 3 );
-    pacounter = _.Procedure.FindAlive().length;
-
-    let returned = _.process.startSingle( o );
-
-    if( sync )
-    test.is( returned === o );
-    else
-    test.is( returned === o.ready );
-    test.is( o.conStart !== o.ready );
-    test.is( o.conDisconnect !== o.ready );
-    test.is( o.conTerminate !== o.ready );
-
-    test.identical( o.ready.resourcesCount(), sync ? 1 : 0 );
-    test.identical( o.ready.errorsCount(), 0 );
-    test.identical( o.ready.competitorsCount(), 0 );
-    test.identical( o.conStart.resourcesCount(), 1 );
-    test.identical( o.conStart.errorsCount(), 0 );
-    test.identical( o.conStart.competitorsCount(), 0 );
-    test.identical( o.conDisconnect.resourcesCount(), 0 );
-    test.identical( o.conDisconnect.errorsCount(), 0 );
-    test.identical( o.conDisconnect.competitorsCount(), 0 );
-    test.identical( o.conTerminate.resourcesCount(), sync ? 1 : 0 );
-    test.identical( o.conTerminate.errorsCount(), 0 );
-    test.identical( o.conTerminate.competitorsCount(), sync ? 0 : 1 );
-    test.identical( o.ended, sync ? true : false );
-    test.identical( o.state, sync ? 'terminated' : 'started' );
-    test.identical( o.error, null );
-    test.identical( o.exitCode, sync ? 0 : null );
-    test.identical( o.exitSignal, null );
-    test.identical( o.process.exitCode, sync ? 0 : null );
-    test.identical( o.process.signalCode, null );
-    test.identical( _.Procedure.Counter - ptcounter, 0 );
-    ptcounter = _.Procedure.Counter;
-    test.identical( _.Procedure.FindAlive().length - pacounter, sync ? -1 : -2 );
-    pacounter = _.Procedure.FindAlive().length;
-
-    o.ready.tap( ( err, op ) =>
-    {
-      track.push( 'ready' );
-
-      test.identical( err, undefined );
-      test.identical( op, o );
-
-      test.identical( o.ready.resourcesCount(), 1 );
-      test.identical( o.ready.errorsCount(), 0 );
-      test.identical( o.ready.competitorsCount(), 0 );
-      test.identical( o.conStart.resourcesCount(), 1 );
-      test.identical( o.conStart.errorsCount(), 0 );
-      test.identical( o.conStart.competitorsCount(), 0 );
-      test.identical( o.conDisconnect.resourcesCount(), 0 );
-      test.identical( o.conDisconnect.errorsCount(), 0 );
-      test.identical( o.conDisconnect.competitorsCount(), 0 );
-      test.identical( o.conTerminate.resourcesCount(), 1 );
-      test.identical( o.conTerminate.errorsCount(), 0 );
-      test.identical( o.conTerminate.competitorsCount(), 0 );
-      test.identical( o.ended, true );
-      test.identical( o.state, 'terminated' );
-      test.identical( o.error, null );
-      test.identical( o.exitCode, 0 );
-      test.identical( o.exitSignal, null );
-      test.identical( o.process.exitCode, 0 );
-      test.identical( o.process.signalCode, null );
-      test.identical( _.Procedure.Counter - ptcounter, sync ? 1 : 0 );
-      ptcounter = _.Procedure.Counter;
-      test.identical( _.Procedure.FindAlive().length - pacounter, sync ? 1 : -1 );
-      pacounter = _.Procedure.FindAlive().length;
-      return null;
-    })
-
-    return result;
-  }
-
-  /* - */
-
-  function testApp()
-  {
-    setTimeout( () => {}, 1000 );
-  }
-
-}
 
 // --
 // sync
@@ -24002,7 +23756,7 @@ var Proto =
     start2OptionPassingThrough,
     startFork,
     startErrorHandling,
-    startSingleOptionDry,
+    // startSingleOptionDry,
 
     // sync
 
