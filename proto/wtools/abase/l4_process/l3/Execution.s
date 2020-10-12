@@ -2178,9 +2178,6 @@ function signal_pre( routine, args )
     o.pid = o.pnd.pid;
   }
 
-  _.assert( _.numberIs( o.timeOut ) );
-  _.assert( o.timeOut > 0, 'Expects positive value for option {-timeOut-}.' );
-
   return o;
 }
 
@@ -2189,6 +2186,7 @@ function signal_pre( routine, args )
 function signal_body( o )
 {
   _.assert( arguments.length === 1 );
+  _.assert( _.numberIs( o.timeOut ) && o.timeOut > 0, 'Expects positive number as option {-timeOut-}' );
   _.assert( _.strIs( o.signal ), 'Expects signal to be provided explicitly as string' );
   _.assert( _.intIs( o.pid ) );
 
@@ -2230,8 +2228,8 @@ function signal_body( o )
     // else
     process.kill( p.pid, o.signal );
 
-    if( !o.timeOut )
-    return;
+    // if( !o.timeOut )
+    // return;
 
     let con = waitForTermination( p.pid );
     cons.push( con );
@@ -2359,6 +2357,7 @@ function kill_body( o )
 {
   _.assert( arguments.length === 1 );
   o.signal = 'SIGKILL';
+  o.timeOut = signal.defaults.timeOut;
   return _.process.signal.body( o );
 }
 
