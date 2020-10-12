@@ -2195,6 +2195,7 @@ function signal_body( o )
   let isWindows = process.platform === 'win32';
   let ready = _.Consequence().take( null );
   let cons = [];
+  let interval = isWindows ? 150 : 25;
 
   ready.then( () =>
   {
@@ -2273,7 +2274,7 @@ function signal_body( o )
   {
     var ready = _.Consequence();
     var timer;
-    timer = _.time._periodic( 25, () =>
+    timer = _.time._periodic( interval, () => //xxx: hangs on Windows with interval 25 if run in sync mode, routine killsync
     {
       if( _.process.isAlive( pid ) )
       return false;
