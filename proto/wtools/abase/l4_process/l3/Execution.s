@@ -2188,7 +2188,7 @@ function signal_pre( routine, args )
 function signal_body( o )
 {
   _.assert( arguments.length === 1 );
-  _.assert( _.numberIs( o.timeOut ) && o.timeOut > 0, 'Expects positive number as option {-timeOut-}' );
+  _.assert( _.numberIs( o.timeOut ), 'Expects number as option {-timeOut-}' );
   _.assert( _.strIs( o.signal ), 'Expects signal to be provided explicitly as string' );
   _.assert( _.intIs( o.pid ) );
 
