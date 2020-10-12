@@ -18058,7 +18058,8 @@ function exitSignal( test )
   let context = this;
   let a = test.assetFor( false );
 
-  let signals = [ 'SIGINT', 'SIGTERM', 'SIGKILL', /*'SIGSTOP',*/ 'SIGUSR1', 'SIGPIPE', 'SIGHUP', 'SIGBREAK', 'SIGWINCH', 'SIGBUS', 'SIGFPE', 'SIGSEGV', 'SIGILL' ];
+  /* Not passing : SIGINT, SIGTERM, SIGUSR1, SIGPIPE, SIGBREAK( windows ), SIGWINCH, SIGSTOP? */
+  let signals = [ 'SIGINT', 'SIGTERM', 'SIGKILL', /*'SIGSTOP',*/ 'SIGUSR1', 'SIGPIPE', 'SIGHUP', /*'SIGBREAK'*/, 'SIGWINCH', 'SIGBUS', 'SIGFPE', 'SIGSEGV', 'SIGILL' ];
 
   signals.forEach( ( signal ) => a.ready.then( () => run( signal ) ) );
 
