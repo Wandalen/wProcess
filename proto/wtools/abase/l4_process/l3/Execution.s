@@ -2178,8 +2178,8 @@ function signal_pre( routine, args )
     o.pid = o.pnd.pid;
   }
 
-  _.assert( _.numberIs( o.pid ) );
-  _.assert( !o.timeOut || _.numberIs( o.timeOut ) );
+  _.assert( _.numberIs( o.timeOut ) );
+  _.assert( o.timeOut > 0, 'Expects positive value for option {-timeOut-}.' );
 
   return o;
 }
