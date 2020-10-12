@@ -20965,23 +20965,30 @@ function terminateDetachedComplex( test )
   /* */
 
   let modes = [ 'fork', 'spawn', 'shell' ];
-  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+
+  modes.forEach( ( modeParent ) =>
+  {
+    modes.forEach( ( modeChild ) =>
+    {
+      a.ready.then( () => run( modeParent, modeChild ) )
+    })
+  });
   return a.ready;
 
   /* - */
 
-  function run( mode )
+  function run( modeParent, modeChild )
   {
     let ready = _.Consequence().take( null )
 
     .then( () =>
     {
-      test.case = `mode:${mode} parent -> detached child, terminate withChildren : 0, detached child should stay alive`
+      test.case = `modeParent:${modeParent} modeChild:${modeChild} parent -> detached child, terminate withChildren : 0, detached child should stay alive`
       var o =
       {
-        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
-        args : [ 'detached' ],
-        mode,
+        execPath : modeParent === 'fork' ? testAppPath : 'node ' + testAppPath,
+        args : [ modeChild ],
+        mode : modeParent,
         outputPiping : 1,
         outputCollecting : 1,
         throwingExitCode : 0
@@ -21045,7 +21052,7 @@ function terminateDetachedComplex( test )
         //   test.is( !_.strHas( op.output, 'TerminationBegin' ) );
         // }
 
-        return _.time.out( context.t2 * 2, () =>
+        return _.time.out( context.t1 * 3, () =>
         {
           test.is( !_.process.isAlive( _.numberFrom( childPid ) ) )
           var detachedPID = _.numberFrom( a.fileProvider.fileRead( a.abs( a.routinePath, 'detachedPID' ) ) );
@@ -21062,12 +21069,12 @@ function terminateDetachedComplex( test )
 
     .then( () =>
     {
-      test.case = `mode:${mode} parent -> detached child, terminate withChildren : 1, detached child should be terminated`
+      test.case = `modeParent:${modeParent} modeChild:${modeChild} parent -> detached child, terminate withChildren : 1, detached child should be terminated`
       var o =
       {
-        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
-        args : [ 'detached' ],
-        mode,
+        execPath : modeParent === 'fork' ? testAppPath : 'node ' + testAppPath,
+        args : [ modeChild ],
+        mode : modeParent,
         outputPiping : 1,
         outputCollecting : 1,
         throwingExitCode : 0
@@ -21103,7 +21110,7 @@ function terminateDetachedComplex( test )
         test.is( !_.process.isAlive( _.numberFrom( o.process.pid ) ) );
         test.is( !_.process.isAlive( _.numberFrom( childPid ) ) );
 
-        return _.time.out( context.t2 * 2, () =>
+        return _.time.out( context.t1 * 3, () =>
         {
           test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, 'detachedPID' ) ) );
           return null;
@@ -21125,14 +21132,14 @@ function terminateDetachedComplex( test )
     let _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
-    let detaching = process.argv[ 2 ] === 'detached';
+    let mode = process.argv[ 2 ];
     var o =
     {
-      execPath : 'node program2.js',
+      execPath : mode === 'fork' ? 'program2.js' : 'node program2.js',
       currentPath : __dirname,
-      mode : 'spawn',
+      mode,
       stdio : 'ignore',
-      detaching,
+      detaching : 1,
       inputMirroring : 0,
       outputPiping : 0,
       throwingExitCode : 0
@@ -21142,11 +21149,11 @@ function terminateDetachedComplex( test )
 
     o.conStart.thenGive( () =>
     {
-      console.log( 'ready' )
       _.fileProvider.fileWrite( _.path.join( __dirname, 'childPID' ), o.process.pid.toString() );
+      console.log( 'ready' );
     })
 
-    _.time.out( context.t2 * 2, () =>
+    _.time.out( context.t1, () =>
     {
       console.log( 'TerminationBegin' )
       _.procedure.terminationBegin()
@@ -21163,7 +21170,7 @@ function terminateDetachedComplex( test )
       var fs = require( 'fs' );
       var path = require( 'path' )
       fs.writeFileSync( path.join( __dirname, 'detachedPID' ), process.pid.toString() )
-    }, context.t2 );
+    }, context.t1 * 3 );
   }
 }
 
