@@ -487,7 +487,7 @@ function startSingle_body( o )
     );
 
     // let execPath = o.execPath;
-    // let args = o.args; /* yyy xxx : remove? */
+    // let args = o.args; /* yyy zzz : remove? */
     // /* let args = o.args.slice(); */
 
     // if( process.platform === 'win32' )
@@ -533,19 +533,19 @@ function startSingle_body( o )
   function runFork()
   {
     let execPath = o.execPath;
-    let args = o.args; /* yyy xxx : remove? */
+    // let args = o.args; /* yyy zzz : remove? */
     // let args = o.args.slice();
 
     let o2 = optionsForFork();
     execPath = execPathForFork( execPath );
 
-    o.fullExecPath = _.strConcat( _.arrayAppendArray( [ execPath ], args ) );
+    o.fullExecPath = _.strConcat( _.arrayAppendArray( [ execPath ], o.args ) );
     inputMirror();
 
     if( o.dry )
     return;
 
-    o.process = ChildProcess.fork( execPath, args, o2 );
+    o.process = ChildProcess.fork( execPath, o.args, o2 );
 
   }
 
@@ -554,21 +554,21 @@ function startSingle_body( o )
   function runSpawn()
   {
     let execPath = o.execPath;
-    let args = o.args; /* yyy xxx : remove? */
+    // let args = o.args; /* yyy zzz : remove? */
     // let args = o.args.slice();
 
     let o2 = optionsForSpawn();
 
-    o.fullExecPath = _.strConcat( _.arrayAppendArray( [ execPath ], args ) );
+    o.fullExecPath = _.strConcat( _.arrayAppendArray( [ execPath ], o.args ) );
     inputMirror();
 
     if( o.dry )
     return;
 
     if( o.sync && !o.deasync )
-    o.process = ChildProcess.spawnSync( execPath, args, o2 );
+    o.process = ChildProcess.spawnSync( execPath, o.args, o2 );
     else
-    o.process = ChildProcess.spawn( execPath, args, o2 );
+    o.process = ChildProcess.spawn( execPath, o.args, o2 );
 
   }
 
@@ -577,7 +577,7 @@ function startSingle_body( o )
   function runShell()
   {
     let execPath = o.execPath;
-    let args = o.args; /* yyy xxx : remove? */
+    // let args = o.args; /* yyy zzz : remove? */
     // let args = o.args.slice();
 
     let shellPath = process.platform === 'win32' ? 'cmd' : 'sh';
@@ -597,8 +597,8 @@ function startSingle_body( o )
 
     o2.windowsVerbatimArguments = true;
 
-    if( args.length )
-    arg2 = arg2 + ' ' + argsJoin( args.slice() );
+    if( o.args.length )
+    arg2 = arg2 + ' ' + argsJoin( o.args.slice() );
 
     o.fullExecPath = arg2;
     inputMirror();
@@ -1279,7 +1279,7 @@ startSingle_body.defaults =
   passingThrough : 0,
   concurrent : 0,
   timeOut : null,
-  returningOptionsArray : 1, /* returns array of maps of options for multiprocess launch in sync mode */
+  returningOptionsArray : 1, /* returns array of maps of options for multiprocess launch in sync mode */ /* xxx : remove the option */
 
   throwingExitCode : 1, /* must be on by default */
   applyingExitCode : 0,
@@ -1298,6 +1298,7 @@ startSingle_body.defaults =
 
 }
 
+/* xxx : move advanced options to _.process.start() */
 /* xxx : add option stdio and other? */
 
 let startSingle = _.routineFromPreAndBody( startSingle_pre, startSingle_body );
@@ -1419,7 +1420,7 @@ function start_body( o )
 
   _.assert( arguments.length === 1, 'Expects single argument' );
 
-  let readyCallback; /* xxx : cover ready callback for multiple */
+  let readyCallback; /* xxx : cover and implement ready callback for multiple */
 
   form0();
 
@@ -1486,7 +1487,7 @@ function start_body( o )
 
     let prevReady = o.ready;
     let readies = [];
-    let optionsArray = [];
+    o.runs = [];
 
     let execPath = _.arrayAs( o.execPath );
     let currentPath = _.arrayAs( o.currentPath );
@@ -1511,12 +1512,14 @@ function start_body( o )
       let o2 = _.mapExtend( null, o );
       o2.conStart = null;
       o2.conTerminate = null;
+      o2.conDisconnect = null;
       o2.execPath = execPath[ p ];
       o2.args = o.args ? o.args.slice() : o.args;
       o2.currentPath = currentPath[ c ];
       o2.ready = currentReady;
-      optionsArray.push( o2 );
-      _.process.start( o2 );
+      delete o2.runs;
+      o.runs.push( o2 );
+      _.process.startSingle( o2 ); /* xxx : call body here */
 
     }
 
@@ -1526,9 +1529,9 @@ function start_body( o )
     {
       o.exitCode = err ? null : 0;
 
-      for( let a = 0 ; a < optionsArray.length-1 ; a++ )
+      for( let a = 0 ; a < o.runs.length-1 ; a++ )
       {
-        let o2 = optionsArray[ a ];
+        let o2 = o.runs[ a ];
         if( !o.exitCode && o2.exitCode )
         o.exitCode = o2.exitCode;
       }
@@ -1542,7 +1545,7 @@ function start_body( o )
     if( o.sync && !o.deasync )
     {
       if( o.returningOptionsArray )
-      return optionsArray;
+      return o.runs;
       return o;
     }
 
@@ -1553,7 +1556,7 @@ function start_body( o )
 
 }
 
-start_body.defaults = /* xxx : split on _.process.start(), _.process.startSingle() */
+start_body.defaults =
 {
 
   ... startSingle.defaults,
@@ -2026,7 +2029,6 @@ function _exitHandlerRepair()
 
   _.assert( arguments.length === 0, 'Expects no arguments' );
 
-  // debugger; /* xxx : experiment */
   if( _realGlobal_._exitHandlerRepairDone )
   return;
   _realGlobal_._exitHandlerRepairDone = 1;
@@ -2049,7 +2051,7 @@ function _exitHandlerRepair()
       if( _realGlobal_._exitHandlerRepairTerminating )
       return;
       _realGlobal_._exitHandlerRepairTerminating = 1;
-      _.time.begin( _.process._sanitareTime, () =>
+      _.time.begin( _.process._sanitareTime, () => /* xxx : experiment to remove delay */
       {
         try
         {
@@ -2189,9 +2191,6 @@ function signal_pre( routine, args )
     o.pid = o.pnd.pid;
   }
 
-  _.assert( _.numberIs( o.pid ) );
-  _.assert( !o.timeOut || _.numberIs( o.timeOut ) );
-
   return o;
 }
 
@@ -2200,6 +2199,7 @@ function signal_pre( routine, args )
 function signal_body( o )
 {
   _.assert( arguments.length === 1 );
+  _.assert( _.numberIs( o.timeOut ) && o.timeOut > 0, 'Expects positive number as option {-timeOut-}' );
   _.assert( _.strIs( o.signal ), 'Expects signal to be provided explicitly as string' );
   _.assert( _.intIs( o.pid ) );
 
@@ -2241,8 +2241,8 @@ function signal_body( o )
     // else
     process.kill( p.pid, o.signal );
 
-    if( !o.timeOut )
-    return;
+    // if( !o.timeOut )
+    // return;
 
     let con = waitForTermination( p.pid );
     cons.push( con );
@@ -2288,9 +2288,9 @@ function signal_body( o )
     {
       if( _.process.isAlive( pid ) )
       return false;
-      timer._cancel(); /* xxx : remove? */
+      // timer._cancel(); /* zzz yyy : remove? */
       ready.take( true );
-      return true;
+      // return true;
       /* Dmytro ; new implementation of periodic timer require to return something different to undefined or _.dont.
          Otherwise, timer will be canceled. This code does not affect current behavior of routines and will work with
          new behavior.
@@ -2356,7 +2356,7 @@ signal_body.defaults =
 {
   pid : null,
   pnd : null,
-  withChildren : 0, /* xxx : set to 1 */
+  withChildren : 1, /* xxx : set to 1 aaa Vova:changed*/
   timeOut : 5000,
   signal : null,
   sync : 0
@@ -2370,6 +2370,7 @@ function kill_body( o )
 {
   _.assert( arguments.length === 1 );
   o.signal = 'SIGKILL';
+  o.timeOut = signal.defaults.timeOut;
   return _.process.signal.body( o );
 }
 
