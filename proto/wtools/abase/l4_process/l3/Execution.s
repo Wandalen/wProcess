@@ -238,11 +238,11 @@ function startSingle_body( o )
     if( o.ipc === null )
     o.ipc = o.mode === 'fork' ? 1 : 0;
 
-    debugger;
     if( _.strIs( o.stdio ) )
     o.stdio = _.dup( o.stdio, 3 );
     if( o.ipc )
     {
+      // yyy
       // if( _.strIs( o.stdio ) )
       // o.stdio = _.dup( o.stdio, 3 );
       if( !_.longHas( o.stdio, 'ipc' ) )
@@ -274,18 +274,20 @@ function startSingle_body( o )
 
     /* */
 
+    _.assert( _.boolLike( o.outputCollecting ) );
+
     o.disconnect = disconnect;
     o.state = 'initial'; /* `initial`, `starting`, `started`, `terminating`, `terminated`, `disconnected` */
     o.exitReason = null;
-    o.fullExecPath = null;
-    o.output = null;
     o.exitCode = null;
     o.exitSignal = null;
+    o.error = null;
     o.process = null;
     o.procedure = null;
+    o.fullExecPath = null;
+    o.output = o.outputCollecting ? '' : null;
     o.ended = false;
     o.handleProcedureTerminationBegin = false;
-    o.error = null;
 
     Object.preventExtensions( o );
   }
@@ -348,8 +350,9 @@ function startSingle_body( o )
       if( o.stdio === 'pipe' || o.stdio[ 1 ] === 'pipe' )
       o.outputPiping = o.verbosity >= 2;
     }
-    if( o.outputCollecting && !o.output )
-    o.output = ''; /* xxx : test for multiple run? to which o-map does it collect output? */
+
+    // if( o.outputCollecting && !o.output )
+    // o.output = ''; /* xxx : test for multiple run? to which o-map does it collect output? */
 
     /* stdio compatibility check */
     if( Config.debug )
@@ -511,7 +514,7 @@ function startSingle_body( o )
 
     /* procedure */
 
-    if( !o.dry )
+    if( !o.dry ) /* xxx : remove if? */
     if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
     {
       if( Config.debug )
@@ -647,7 +650,7 @@ function startSingle_body( o )
   function end2( err, consequence )
   {
 
-    if( !_.primitiveIs( o.procedure ) )
+    // if( !_.primitiveIs( o.procedure ) )
     if( o.procedure.isAlive() )
     o.procedure.end();
 
@@ -1279,7 +1282,7 @@ startSingle_body.defaults =
   passingThrough : 0,
   concurrent : 0,
   timeOut : null,
-  returningOptionsArray : 1, /* returns array of maps of options for multiprocess launch in sync mode */ /* xxx : remove the option */
+  // returningOptionsArray : 1, /* returns array of maps of options for multiprocess launch in sync mode */ /* xxx : remove the option */
 
   throwingExitCode : 1, /* must be on by default */
   applyingExitCode : 0,
@@ -1414,7 +1417,9 @@ function start_body( o )
 
   form1,
   end1,
-  multiple,
+  end2,
+  run1,
+  run2,
 
 */
 
@@ -1425,7 +1430,7 @@ function start_body( o )
   form0();
 
   if( _.arrayIs( o.execPath ) || _.arrayIs( o.currentPath ) )
-  return multiple();
+  return run1();
 
   return _.process.startSingle.body.call( this, o );
 
@@ -1470,25 +1475,122 @@ function start_body( o )
       if( o.sync )
       return o.ready.sync();
     }
+    if( o.sync ) /* xxx : make similar change in startSingle() */
+    return o.ready.sync();
     return o.ready;
   }
 
   /* */
 
-  function multiple()
+  function end2( err, arg )
+  {
+    // o.exitCode = err ? null : 0;
+    o.state = 'terminated';
+    o.ended = true;
+
+    if( o.procedure.isAlive() )
+    o.procedure.end();
+
+    if( o.exitCode === null && !o.exitSginal )
+    for( let a = 0 ; a < o.runs.length-1 ; a++ )
+    {
+      let o2 = o.runs[ a ];
+      if( o2.exitCode || o2.exitSginal !== null )
+      {
+        o.exitCode = o2.exitCode;
+        o.exitSignal = o2.exitSignal;
+        o.exitReason = o2.exitReason;
+        break;
+      }
+    }
+
+    if( !o.error )
+    for( let a = 0 ; a < o.runs.length-1 ; a++ )
+    {
+      let o2 = o.runs[ a ];
+      if( o2.error )
+      {
+        o.error = o2.error;
+        o.exitReason = o2.exitReason;
+        break;
+      }
+    }
+
+    for( let a = 0 ; a < o.runs.length-1 ; a++ )
+    {
+      let o2 = o.runs[ a ];
+      o.output += o2.output;
+    }
+
+    if( err && !o.error )
+    o.error = err;
+
+    if( err )
+    throw err;
+    // debugger;
+    // return arg;
+
+    // if( o.returningOptionsArray )
+    // return o.runs;
+    return o;
+  }
+
+  /* */
+
+  function run1()
   {
 
     form1();
 
     if( _.arrayIs( o.execPath ) && o.execPath.length > 1 && o.concurrent && o.outputAdditive === null )
     o.outputAdditive = 0;
-
     o.currentPath = o.currentPath || _.path.current();
 
-    let prevReady = o.ready;
-    let readies = [];
     o.runs = [];
+    // o.disconnect = disconnect; /* xxx */
+    o.state = 'initial'; /* `initial`, `starting`, `started`, `terminating`, `terminated`, `disconnected` */
+    o.exitReason = null;
+    o.exitCode = null;
+    o.exitSignal = null;
+    o.error = null;
+    // o.process = null;
+    o.procedure = null;
+    // o.fullExecPath = null;
+    o.output = o.outputCollecting ? '' : null;
+    o.ended = false;
+    // o.handleProcedureTerminationBegin = false;
 
+    if( !o.dry )
+    if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
+    {
+      o.procedure = _.procedure.begin({ _object : o, _stack : o.stack });
+    }
+
+    // let readies = run2();
+
+    o.ready
+    .then( run2 )
+    // .then( () => _.Consequence.AndKeep( ... readies ) )
+    .finally( end2 )
+    ;
+
+    // if( o.sync && !o.deasync )
+    // {
+    //   if( o.returningOptionsArray )
+    //   return o.runs;
+    //   return o;
+    // }
+
+    return end1();
+  }
+
+  /* */
+
+  function run2()
+  {
+    // let prevReady = o.ready;
+    let prevReady = new _.Consequence().take( null );
+    let readies = [];
     let execPath = _.arrayAs( o.execPath );
     let currentPath = _.arrayAs( o.currentPath );
 
@@ -1501,10 +1603,12 @@ function start_body( o )
 
       if( o.concurrent )
       {
+        // if( prevReady )
         prevReady.then( currentReady );
       }
       else
       {
+        // if( prevReady )
         prevReady.finally( currentReady );
         prevReady = currentReady;
       }
@@ -1518,38 +1622,20 @@ function start_body( o )
       o2.currentPath = currentPath[ c ];
       o2.ready = currentReady;
       delete o2.runs;
+      delete o2.output;
+      delete o2.state;
+      delete o2.exitReason;
+      delete o2.exitCode;
+      delete o2.exitSignal;
+      delete o2.error;
+      delete o2.ended;
       o.runs.push( o2 );
       _.process.startSingle( o2 ); /* xxx : call body here */
-
     }
 
-    o.ready
-    .then( () => _.Consequence.AndKeep( ... readies ) )
-    .finally( ( err, arg ) =>
-    {
-      o.exitCode = err ? null : 0;
-
-      for( let a = 0 ; a < o.runs.length-1 ; a++ )
-      {
-        let o2 = o.runs[ a ];
-        if( !o.exitCode && o2.exitCode )
-        o.exitCode = o2.exitCode;
-      }
-
-      if( err )
-      throw err;
-
-      return arg;
-    });
-
-    if( o.sync && !o.deasync )
-    {
-      if( o.returningOptionsArray )
-      return o.runs;
-      return o;
-    }
-
-    return end1();
+    // debugger;
+    return _.Consequence.AndKeep( ... readies );
+    // return readies;
   }
 
   /* */
@@ -1562,6 +1648,8 @@ start_body.defaults =
   ... startSingle.defaults,
 
 }
+
+/* xxx : implement test with throwing error in the first process */
 
 let start = _.routineFromPreAndBody( start_pre, start_body );
 
@@ -2199,13 +2287,14 @@ function signal_pre( routine, args )
 function signal_body( o )
 {
   _.assert( arguments.length === 1 );
-  _.assert( _.numberIs( o.timeOut ) && o.timeOut > 0, 'Expects positive number as option {-timeOut-}' );
+  _.assert( _.numberIs( o.timeOut ), 'Expects number as option {-timeOut-}' );
   _.assert( _.strIs( o.signal ), 'Expects signal to be provided explicitly as string' );
   _.assert( _.intIs( o.pid ) );
 
   let isWindows = process.platform === 'win32';
   let ready = _.Consequence().take( null );
   let cons = [];
+  let interval = isWindows ? 150 : 25;
 
   ready.then( () =>
   {
@@ -2284,7 +2373,7 @@ function signal_body( o )
   {
     var ready = _.Consequence();
     var timer;
-    timer = _.time._periodic( 25, () =>
+    timer = _.time._periodic( interval, () => //xxx: hangs on Windows with interval 25 if run in sync mode, routine killsync
     {
       if( _.process.isAlive( pid ) )
       return false;
