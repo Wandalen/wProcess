@@ -2225,9 +2225,9 @@ function signal_body( o )
     if( !pnd && o.pnd && o.pnd.pid === p.pid )
     pnd = o.pnd;
 
-    // if( pnd )
-    // pnd.kill( o.signal );
-    // else
+    if( pnd )
+    pnd.kill( o.signal );
+    else
     process.kill( p.pid, o.signal );
 
     // if( !o.timeOut )
