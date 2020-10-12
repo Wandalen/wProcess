@@ -16624,17 +16624,45 @@ function startOptionPassingThrough( test )
   {
     a.ready.then( () =>
     {
-      test.open( 'arguments provided through file' );
-      return null;
-    } );
-
-    /* - */
-
-    a.ready.then( () =>
-    {
       test.open( '0 args to parent process' );
       return null;
     } );
+
+    a.ready.then( () =>
+    {
+      test.case = 'child args = `testAppPath2`';
+      let o =
+      {
+        args : testAppPath2,
+        outputCollecting : 0,
+        outputPiping : 0,
+        mode : 'fork',
+        throwingExitCode : 0,
+        applyingExitCode : 0,
+        stdio : 'inherit'
+      }
+      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' });
+
+      let o2 =
+      {
+        execPath : 'node ' + testAppPath1,
+        mode : 'spawn',
+        stdio : 'pipe',
+        outputPiping : 1,
+        outputCollecting : 1,
+      }
+      _.process.start( o2 );
+
+      o2.conTerminate.then( () =>
+      {
+        test.il( o2.output, `[]\n` );
+        return null;
+      })
+
+      return o2.conTerminate;
+    })
+
+    /* */
 
     a.ready.then( () =>
     {
@@ -16821,6 +16849,202 @@ function startOptionPassingThrough( test )
 
       return o2.conTerminate;
     })
+
+    /* */
+
+    a.ready.then( () =>
+    {
+      /* mode : shell, stdio : pipe, passingThrough : true */
+
+      test.case = 'mode : shell, passingThrough : true, parent args : none, child args : none';
+
+      let locals =
+      {
+        toolsPath : a.path.nativize( _.module.toolsPathGet() ),
+        routinePath : a.routinePath,
+        programPath : testAppPath2
+      }
+
+      let programPath = a.path.nativize( a.program({ routine : testAppParent1, locals }) );
+
+      let options =
+      {
+        execPath :  'node ' + programPath,
+        outputCollecting : 1,
+        outputPiping : 0,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        let parsed = JSON.parse( op.output );
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( parsed.output, '[]\n' )
+
+        return null;
+      })
+
+      /* - */
+
+      function testAppParent1()
+      {
+        let _ = require( toolsPath );
+        _.include( 'wFiles' );
+        _.include( 'wProcess' );
+
+        let options =
+        {
+          execPath :  'node ' + programPath,
+          mode : 'shell',
+          passingThrough : 1,
+          stdio : 'pipe',
+          outputPiping : 0,
+          outputCollecting : 1,
+          applyingExitCode : 0,
+          throwingExitCode : 1,
+          inputMirroring : 0,
+        }
+
+        return _.process.start( options )
+        .then( ( op ) =>
+        {
+          console.log( JSON.stringify({ output : op.output }) );
+          return null;
+        })
+      }
+    })
+
+    /* */
+
+    a.ready.then( function()
+    {
+      /* mode : spawn, stdio : pipe, passingThrough : true */
+      test.case = 'mode : spawn, passingThrough : true, parent args : none, child args : programPath';
+
+      let locals =
+      {
+        toolsPath : a.path.nativize( _.module.toolsPathGet() ),
+        routinePath : a.routinePath,
+        programPath : testAppPath2
+      }
+
+      let programPath = a.path.nativize( a.program({ routine : testAppParent2, locals }) );
+
+      let options =
+      {
+        execPath :  'node ' + programPath,
+        outputCollecting : 1,
+        outputPiping : 0,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        let parsed = JSON.parse( op.output );
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( parsed.output, '[]\n' )
+
+        return null;
+      })
+
+      /* - */
+
+      function testAppParent2()
+      {
+        let _ = require( toolsPath );
+        _.include( 'wFiles' );
+        _.include( 'wProcess' );
+
+        let options =
+        {
+          execPath :  'node',
+          args : [ programPath ],
+          mode : 'spawn',
+          passingThrough : 1,
+          stdio : 'pipe',
+          outputPiping : 0,
+          outputCollecting : 1,
+          applyingExitCode : 0,
+          throwingExitCode : 1,
+          inputMirroring : 0
+        }
+
+        return _.process.start( options )
+        .then( ( op ) =>
+        {
+          console.log( JSON.stringify({ output : op.output }) );
+          return null;
+        })
+      }
+    })
+
+    /* */
+
+    a.ready.then( function()
+    {
+      /* mode : shell, stdio : pipe, passingThrough : true */
+
+      test.case = 'mode : shell, passingThrough : true, parent args : none, child args : "staging", "debug"';
+
+      let locals =
+      {
+        toolsPath : a.path.nativize( _.module.toolsPathGet() ),
+        routinePath : a.routinePath,
+        programPath : testAppPath2
+      }
+
+      let programPath = a.path.nativize( a.program({ routine : testAppParent3, locals }) );
+
+      let options =
+      {
+        execPath :  'node ' + programPath,
+        outputCollecting : 1,
+        outputPiping : 0,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        let parsed = JSON.parse( op.output );
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( parsed.output, '[ \'staging\', \'debug\' ]\n' )
+        return null;
+      })
+
+      /* - */
+
+      function testAppParent3()
+      {
+        let _ = require( toolsPath );
+        _.include( 'wFiles' );
+        _.include( 'wProcess' );
+
+        let options =
+        {
+          execPath :  'node ' + programPath,
+          args : [ 'staging', 'debug' ],
+          mode : 'shell',
+          passingThrough : 1,
+          stdio : 'pipe',
+          outputPiping : 0,
+          outputCollecting : 1,
+          applyingExitCode : 0,
+          throwingExitCode : 1,
+          inputMirroring : 0
+        }
+
+        return _.process.start( options )
+        .then( ( op ) =>
+        {
+          console.log( JSON.stringify({ output : op.output }) );
+          return null;
+        })
+      }
+    })
+
 
     a.ready.then( () =>
     {
@@ -17026,440 +17250,7 @@ function startOptionPassingThrough( test )
       return o2.conTerminate;
     })
 
-
-    a.ready.then( () =>
-    {
-      test.close( '1 arg to parent process' );
-      return null;
-    } )
-
-    /* - */
-
-    a.ready.then( () =>
-    {
-      test.open( '3 args to parent process' );
-      return null;
-    } );
-
-
-    a.ready.then( () =>
-    {
-      test.close( '3 args to parent process' );
-      return null;
-    } )
-
-    a.ready.then( () =>
-    {
-      test.case = 'args to child : none; args to parent : parentA, parentB, parentC';
-
-      let o =
-      {
-        execPath : testAppPath2,
-        outputCollecting : 0,
-        outputPiping : 0,
-        mode : 'fork',
-        throwingExitCode : 0,
-        applyingExitCode : 0,
-        stdio : 'inherit'
-      }
-      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' });
-
-      let o2 =
-      {
-        execPath : 'node ' + testAppPath1,
-        args : [ 'parentA', 'parentB', 'parentC' ],
-        mode : 'spawn',
-        stdio : 'pipe',
-        outputPiping : 1,
-        outputCollecting : 1,
-      }
-      _.process.start( o2 );
-
-      o2.conTerminate.then( () =>
-      {
-        test.il( o2.output, `[ 'parentA', 'parentB', 'parentC' ]\n` );
-        return null;
-      });
-
-      return o2.conTerminate;
-    })
-
     /* */
-
-    a.ready.then( () =>
-    {
-      test.case = 'args to child : a; args to parent : parentA, parentB, parentC';
-
-      let o =
-      {
-        execPath : testAppPath2,
-        args : 'a',
-        outputCollecting : 0,
-        outputPiping : 0,
-        mode : 'fork',
-        throwingExitCode : 0,
-        applyingExitCode : 0,
-        stdio : 'inherit'
-      }
-      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' });
-
-      let o2 =
-      {
-        execPath : 'node ' + testAppPath1,
-        mode : 'spawn',
-        args : [ 'parentA', 'parentB', 'parentC' ],
-        stdio : 'pipe',
-        outputPiping : 1,
-        outputCollecting : 1,
-      }
-      _.process.start( o2 );
-
-      o2.conTerminate.then( () =>
-      {
-        test.il( o2.output, `[ 'a', 'parentA', 'parentB', 'parentC' ]\n` );
-        return null;
-      });
-
-      return o2.conTerminate;
-    })
-
-    /*  */
-
-    a.ready.then( () =>
-    {
-      test.case = 'args to child : a, b, c; args to parent : parentA, parentB, parentC';
-
-      let o =
-      {
-        execPath : testAppPath2,
-        args : [ 'a', 'b', 'c' ],
-        outputCollecting : 0,
-        outputPiping : 0,
-        mode : 'fork',
-        throwingExitCode : 0,
-        applyingExitCode : 0,
-        stdio : 'inherit'
-      }
-      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' });
-
-      let o2 =
-      {
-        execPath : 'node ' + testAppPath1,
-        mode : 'spawn',
-        args : [ 'parentA', 'parentB', 'parentC' ],
-        stdio : 'pipe',
-        outputPiping : 1,
-        outputCollecting : 1,
-      }
-      _.process.start( o2 );
-
-      o2.conTerminate.then( () =>
-      {
-        test.il( o2.output, `[ 'a', 'b', 'c', 'parentA', 'parentB', 'parentC' ]\n` );
-        return null;
-      });
-
-      return o2.conTerminate;
-    })
-
-    /* */
-
-    a.ready.then( () =>
-    {
-      test.case = 'args to child in execPath: a, b, c; args to parent in execPath : parentA, parentB, parentC';
-
-      let o =
-      {
-        execPath : testAppPath2 + ' a b c',
-        outputCollecting : 0,
-        outputPiping : 0,
-        mode : 'fork',
-        throwingExitCode : 0,
-        applyingExitCode : 0,
-        stdio : 'inherit'
-      }
-      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' });
-
-      let o2 =
-      {
-        execPath : 'node ' + testAppPath1 + ' parentA parentB parentC',
-        mode : 'spawn',
-        stdio : 'pipe',
-        outputPiping : 1,
-        outputCollecting : 1,
-      }
-      _.process.start( o2 );
-
-      o2.conTerminate.then( () =>
-      {
-        test.il( o2.output, `[ 'a', 'b', 'c', 'parentA', 'parentB', 'parentC' ]\n` );
-        return null;
-      });
-
-      return o2.conTerminate;
-    })
-
-    /* */
-
-    a.ready.then( () =>
-    {
-      test.case = 'args to child in args : a and execPath: b, c; args to parent in args : parentA and in execPath : parentB, parentC';
-
-      let o =
-      {
-        execPath : testAppPath2 + ' a',
-        args : [ 'b', 'c' ],
-        outputCollecting : 0,
-        outputPiping : 0,
-        mode : 'fork',
-        throwingExitCode : 0,
-        applyingExitCode : 0,
-        stdio : 'inherit'
-      }
-      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' });
-
-      let o2 =
-      {
-        execPath : 'node ' + testAppPath1 + ' parentA',
-        mode : 'spawn',
-        args : [ 'parentB', 'parentC' ],
-        stdio : 'pipe',
-        outputPiping : 1,
-        outputCollecting : 1,
-      }
-      _.process.start( o2 );
-
-      o2.conTerminate.then( () =>
-      {
-        test.il( o2.output, `[ 'a', 'b', 'c', 'parentA', 'parentB', 'parentC' ]\n` );
-        return null;
-      });
-
-      return o2.conTerminate;
-    })
-
-    a.ready.then( () =>
-    {
-      test.close( 'arguments provided through file' );
-      return null;
-    } );
-
-    /* - */
-
-    a.ready.then( () =>
-    {
-      test.open( 'arguments provided through JSON' );
-      test.open( '0 args to parent process' );
-      return null;
-    } )
-
-
-    a.ready.then( () =>
-    {
-      /* mode : shell, stdio : pipe, passingThrough : true */
-
-      test.case = 'mode : shell, passingThrough : true, parent args : none, child args : none';
-
-      let locals =
-      {
-        toolsPath : a.path.nativize( _.module.toolsPathGet() ),
-        routinePath : a.routinePath,
-        programPath : testAppPath2
-      }
-
-      let programPath = a.path.nativize( a.program({ routine : testAppParent1, locals }) );
-
-      let options =
-      {
-        execPath :  'node ' + programPath,
-        outputCollecting : 1,
-        outputPiping : 0,
-      }
-
-      return _.process.start( options )
-      .then( ( op ) =>
-      {
-        let parsed = JSON.parse( op.output );
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( parsed.output, '[]\n' )
-
-        return null;
-      })
-
-      /* - */
-
-      function testAppParent1()
-      {
-        let _ = require( toolsPath );
-        _.include( 'wFiles' );
-        _.include( 'wProcess' );
-
-        let options =
-        {
-          execPath :  'node ' + programPath,
-          mode : 'shell',
-          passingThrough : 1,
-          stdio : 'pipe',
-          outputPiping : 0,
-          outputCollecting : 1,
-          applyingExitCode : 0,
-          throwingExitCode : 1,
-          inputMirroring : 0,
-        }
-
-        return _.process.start( options )
-        .then( ( op ) =>
-        {
-          console.log( JSON.stringify({ output : op.output }) );
-          return null;
-        })
-      }
-    })
-
-    /* */
-
-    a.ready.then( function()
-    {
-      /* mode : spawn, stdio : pipe, passingThrough : true */
-      test.case = 'mode : spawn, passingThrough : true, parent args : none, child args : programPath';
-
-      let locals =
-      {
-        toolsPath : a.path.nativize( _.module.toolsPathGet() ),
-        routinePath : a.routinePath,
-        programPath : testAppPath2
-      }
-
-      let programPath = a.path.nativize( a.program({ routine : testAppParent2, locals }) );
-
-      let options =
-      {
-        execPath :  'node ' + programPath,
-        outputCollecting : 1,
-        outputPiping : 0,
-      }
-
-      return _.process.start( options )
-      .then( ( op ) =>
-      {
-        let parsed = JSON.parse( op.output );
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( parsed.output, '[]\n' )
-
-        return null;
-      })
-
-      /* - */
-
-      function testAppParent2()
-      {
-        let _ = require( toolsPath );
-        _.include( 'wFiles' );
-        _.include( 'wProcess' );
-
-        let options =
-        {
-          execPath :  'node',
-          args : [ programPath ],
-          mode : 'spawn',
-          passingThrough : 1,
-          stdio : 'pipe',
-          outputPiping : 0,
-          outputCollecting : 1,
-          applyingExitCode : 0,
-          throwingExitCode : 1,
-          inputMirroring : 0
-        }
-
-        return _.process.start( options )
-        .then( ( op ) =>
-        {
-          console.log( JSON.stringify({ output : op.output }) );
-          return null;
-        })
-      }
-    })
-
-    /* */
-
-    a.ready.then( function()
-    {
-      /* mode : shell, stdio : pipe, passingThrough : true */
-
-      test.case = 'mode : shell, passingThrough : true, parent args : none, child args : "staging", "debug"';
-
-      let locals =
-      {
-        toolsPath : a.path.nativize( _.module.toolsPathGet() ),
-        routinePath : a.routinePath,
-        programPath : testAppPath2
-      }
-
-      let programPath = a.path.nativize( a.program({ routine : testAppParent3, locals }) );
-
-      let options =
-      {
-        execPath :  'node ' + programPath,
-        outputCollecting : 1,
-        outputPiping : 0,
-      }
-
-      return _.process.start( options )
-      .then( ( op ) =>
-      {
-        let parsed = JSON.parse( op.output );
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( parsed.output, '[ \'staging\', \'debug\' ]\n' )
-        return null;
-      })
-
-      /* - */
-
-      function testAppParent3()
-      {
-        let _ = require( toolsPath );
-        _.include( 'wFiles' );
-        _.include( 'wProcess' );
-
-        let options =
-        {
-          execPath :  'node ' + programPath,
-          args : [ 'staging', 'debug' ],
-          mode : 'shell',
-          passingThrough : 1,
-          stdio : 'pipe',
-          outputPiping : 0,
-          outputCollecting : 1,
-          applyingExitCode : 0,
-          throwingExitCode : 1,
-          inputMirroring : 0
-        }
-
-        return _.process.start( options )
-        .then( ( op ) =>
-        {
-          console.log( JSON.stringify({ output : op.output }) );
-          return null;
-        })
-      }
-    })
-
-    a.ready.then( () =>
-    {
-      test.close( '0 args to parent process' );
-      return null;
-    } );
-
-    /* - */
-
-    a.ready.then( () =>
-    {
-      test.open( '1 arg to parent process' );
-      return null;
-    } )
 
     /* ORIGINAL
 
@@ -17784,7 +17575,7 @@ function startOptionPassingThrough( test )
     {
       test.close( '1 arg to parent process' );
       return null;
-    } );
+    } )
 
     /* - */
 
@@ -17992,120 +17783,212 @@ function startOptionPassingThrough( test )
     a.ready.then( () =>
     {
       test.close( '2 args to parent process' );
-      test.close( 'arguments provided through JSON' );
       return null;
     } );
 
     /* - */
 
+    a.ready.then( () =>
+    {
+      test.open( '3 args to parent process' );
+      return null;
+    } );
 
-    // a.ready.then( () =>
-    // {
-    //   test.case = 'args in `execPath`';
-    //   let o =
-    //   {
-    //     args : testAppPath2,
-    //     outputCollecting : 0,
-    //     outputPiping : 0,
-    //     mode : 'fork',
-    //     throwingExitCode : 0,
-    //     applyingExitCode : 0,
-    //     stdio : 'inherit'
-    //   }
-    //   a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' });
+    a.ready.then( () =>
+    {
+      test.case = 'args to child : none; args to parent : parentA, parentB, parentC';
 
-    //   let o2 =
-    //   {
-    //     execPath : 'node ' + testAppPath1 + ' a b c',
-    //     mode : 'spawn',
-    //     stdio : 'pipe',
-    //     outputPiping : 1,
-    //     outputCollecting : 1,
-    //   }
-    //   _.process.start( o2 );
+      let o =
+      {
+        execPath : testAppPath2,
+        outputCollecting : 0,
+        outputPiping : 0,
+        mode : 'fork',
+        throwingExitCode : 0,
+        applyingExitCode : 0,
+        stdio : 'inherit'
+      }
+      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' });
 
-    //   o2.conTerminate.then( () =>
-    //   {
-    //     test.is( _.strHas( o2.output, `[ 'a', 'b', 'c' ]` ) );
-    //     return null;
-    //   })
+      let o2 =
+      {
+        execPath : 'node ' + testAppPath1,
+        args : [ 'parentA', 'parentB', 'parentC' ],
+        mode : 'spawn',
+        stdio : 'pipe',
+        outputPiping : 1,
+        outputCollecting : 1,
+      }
+      _.process.start( o2 );
 
-    //   return o2.conTerminate;
-    // })
+      o2.conTerminate.then( () =>
+      {
+        test.il( o2.output, `[ 'parentA', 'parentB', 'parentC' ]\n` );
+        return null;
+      });
 
-    // /* */
+      return o2.conTerminate;
+    })
 
-    // a.ready.then( () =>
-    // {
-    //   test.case = 'args in `args` field';
+    /* */
 
-    //   let o =
-    //   {
-    //     args : testAppPath2,
-    //     outputCollecting : 0,
-    //     outputPiping : 0,
-    //     mode : 'fork',
-    //     throwingExitCode : 0,
-    //     applyingExitCode : 0,
-    //     stdio : 'inherit'
-    //   }
-    //   a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' });
+    a.ready.then( () =>
+    {
+      test.case = 'args to child : a; args to parent : parentA, parentB, parentC';
 
-    //   let o2 =
-    //   {
-    //     execPath : 'node ' + testAppPath1,
-    //     args : [ 'a', 'b', 'c' ],
-    //     mode : 'spawn',
-    //     stdio : 'pipe',
-    //     outputPiping : 1,
-    //     outputCollecting : 1,
-    //   }
-    //   _.process.start( o2 );
+      let o =
+      {
+        execPath : testAppPath2,
+        args : 'a',
+        outputCollecting : 0,
+        outputPiping : 0,
+        mode : 'fork',
+        throwingExitCode : 0,
+        applyingExitCode : 0,
+        stdio : 'inherit'
+      }
+      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' });
 
-    //   o2.conTerminate.then( () =>
-    //   {
-    //     test.is( _.strHas( o2.output, `[ 'a', 'b', 'c' ]` ) );
-    //     return null;
-    //   })
-    //   return o2.conTerminate;
-    // })
+      let o2 =
+      {
+        execPath : 'node ' + testAppPath1,
+        mode : 'spawn',
+        args : [ 'parentA', 'parentB', 'parentC' ],
+        stdio : 'pipe',
+        outputPiping : 1,
+        outputCollecting : 1,
+      }
+      _.process.start( o2 );
 
-    // /* */
+      o2.conTerminate.then( () =>
+      {
+        test.il( o2.output, `[ 'a', 'parentA', 'parentB', 'parentC' ]\n` );
+        return null;
+      });
 
-    // a.ready.then( () =>
-    // {
-    //   test.case = 'args in `execPath` and `args` field';
+      return o2.conTerminate;
+    })
 
-    //   let o =
-    //   {
-    //     args : testAppPath2,
-    //     outputCollecting : 0,
-    //     outputPiping : 0,
-    //     mode : 'fork',
-    //     throwingExitCode : 0,
-    //     applyingExitCode : 0,
-    //     stdio : 'inherit'
-    //   }
-    //   a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' });
+    /*  */
 
-    //   let o2 =
-    //   {
-    //     execPath : 'node ' + testAppPath1 + ' a1 b1 c1',
-    //     args : [ 'a2', 'b2', 'c2' ],
-    //     mode : 'spawn',
-    //     stdio : 'pipe',
-    //     outputPiping : 1,
-    //     outputCollecting : 1,
-    //   }
-    //   _.process.start( o2 );
+    a.ready.then( () =>
+    {
+      test.case = 'args to child : a, b, c; args to parent : parentA, parentB, parentC';
 
-    //   o2.conTerminate.then( () =>
-    //   {
-    //     test.is( _.strHas( o2.output, `[ 'a1', 'b1', 'c1', 'a2', 'b2', 'c2' ]` ) );
-    //     return null;
-    //   })
-    //   return o2.conTerminate;
-    // })
+      let o =
+      {
+        execPath : testAppPath2,
+        args : [ 'a', 'b', 'c' ],
+        outputCollecting : 0,
+        outputPiping : 0,
+        mode : 'fork',
+        throwingExitCode : 0,
+        applyingExitCode : 0,
+        stdio : 'inherit'
+      }
+      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' });
+
+      let o2 =
+      {
+        execPath : 'node ' + testAppPath1,
+        mode : 'spawn',
+        args : [ 'parentA', 'parentB', 'parentC' ],
+        stdio : 'pipe',
+        outputPiping : 1,
+        outputCollecting : 1,
+      }
+      _.process.start( o2 );
+
+      o2.conTerminate.then( () =>
+      {
+        test.il( o2.output, `[ 'a', 'b', 'c', 'parentA', 'parentB', 'parentC' ]\n` );
+        return null;
+      });
+
+      return o2.conTerminate;
+    })
+
+    /* */
+
+    a.ready.then( () =>
+    {
+      test.case = 'args to child in execPath: a, b, c; args to parent in execPath : parentA, parentB, parentC';
+
+      let o =
+      {
+        execPath : testAppPath2 + ' a b c',
+        outputCollecting : 0,
+        outputPiping : 0,
+        mode : 'fork',
+        throwingExitCode : 0,
+        applyingExitCode : 0,
+        stdio : 'inherit'
+      }
+      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' });
+
+      let o2 =
+      {
+        execPath : 'node ' + testAppPath1 + ' parentA parentB parentC',
+        mode : 'spawn',
+        stdio : 'pipe',
+        outputPiping : 1,
+        outputCollecting : 1,
+      }
+      _.process.start( o2 );
+
+      o2.conTerminate.then( () =>
+      {
+        test.il( o2.output, `[ 'a', 'b', 'c', 'parentA', 'parentB', 'parentC' ]\n` );
+        return null;
+      });
+
+      return o2.conTerminate;
+    })
+
+    /* */
+
+    a.ready.then( () =>
+    {
+      test.case = 'args to child in args : a and execPath: b, c; args to parent in args : parentA and in execPath : parentB, parentC';
+
+      let o =
+      {
+        execPath : testAppPath2 + ' a',
+        args : [ 'b', 'c' ],
+        outputCollecting : 0,
+        outputPiping : 0,
+        mode : 'fork',
+        throwingExitCode : 0,
+        applyingExitCode : 0,
+        stdio : 'inherit'
+      }
+      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' });
+
+      let o2 =
+      {
+        execPath : 'node ' + testAppPath1 + ' parentA',
+        mode : 'spawn',
+        args : [ 'parentB', 'parentC' ],
+        stdio : 'pipe',
+        outputPiping : 1,
+        outputCollecting : 1,
+      }
+      _.process.start( o2 );
+
+      o2.conTerminate.then( () =>
+      {
+        test.il( o2.output, `[ 'a', 'b', 'c', 'parentA', 'parentB', 'parentC' ]\n` );
+        return null;
+      });
+
+      return o2.conTerminate;
+    })
+
+    a.ready.then( () =>
+    {
+      test.close( '3 args to parent process' );
+      return null;
+    } )
 
   }
 
