@@ -7415,25 +7415,22 @@ exec paths with special chars
 
 //
 
-// function startImportantExecPathPassingThrough( test )
-// {
-//   let context = this;
-//   let a = test.assetFor( false );
-//   var printArguments = 'node -e "console.log( process.argv.slice( 1 ) )"'
+function startImportantExecPathPassingThrough( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
 
-//   a.fileProvider.fileWrite( a.abs( a.routinePath, 'file' ), 'file' );
+  /* */
 
-//   /* */
-
-//   let shell = _.process.starter
-//   ({
-//     currentPath : a.routinePath,
-//     mode : 'shell',
-//     stdio : 'pipe',
-//     outputPiping : 1,
-//     outputCollecting : 1,
-//     ready : a.ready
-//   })
+  let shell = _.process.starter
+  ({
+    currentPath : a.routinePath,
+    mode : 'shell',
+    stdio : 'pipe',
+    outputPiping : 1,
+    outputCollecting : 1,
+    ready : a.ready
+  })
 
 //   /* */
 
@@ -7448,7 +7445,7 @@ exec paths with special chars
 //     test.is( _.strHas( op.output, process.argv.slice( 2 ).join( ' ') ) );
 //     return null;
 //   })
-// }
+}
 
 //
 
@@ -23783,7 +23780,7 @@ var Proto =
     startArgumentsHandlingTrivial,
     startArgumentsHandling,
     startImportantExecPath,
-    // startImportantExecPathPassingThrough,
+    startImportantExecPathPassingThrough,
     startNormalizedExecPath,
     startExecPathWithSpace,
     startNjsPassingThroughExecPathWithSpace,
