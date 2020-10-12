@@ -17769,59 +17769,6 @@ function exitCode( test )
 
 //
 
-function exitSignal( test )
-{
-  let context = this;
-  let a = test.assetFor( false );
-
-  /* Not passing : SIGPIPE, SIGBREAK( windows ), SIGWINCH, SIGSTOP? */
-  let signals = [ 'SIGINT', 'SIGTERM', 'SIGKILL', /*'SIGSTOP',*/ 'SIGUSR1', 'SIGPIPE', 'SIGHUP', /*'SIGBREAK'*/, 'SIGWINCH', 'SIGBUS', 'SIGFPE', 'SIGSEGV', 'SIGILL' ];
-
-  signals.forEach( ( signal ) => a.ready.then( () => run( signal ) ) );
-
-  return a.ready;
-
-  /* - */
-
-  function run( signal )
-  {
-    test.case = `signal = ${ signal }`
-    let programPath = a.program({ routine : testApp, locals : { signal : signal, toolsPath : a.path.nativize( _.module.toolsPathGet() ) } });
-
-    let o =
-    {
-      execPath : 'node ' + programPath,
-      throwingExitCode : 0,
-    }
-
-    return _.process.start( o ).then( ( op ) =>
-    {
-      test.il( op.exitCode, null );
-      test.il( op.ended, true );
-      test.il( op.exitSignal, signal );
-      // test.il( op.exitReason, 'signal' );
-
-      a.fileProvider.fileDelete( programPath );
-      return null;
-    } )
-
-
-    /* - */
-
-    function testApp()
-    {
-      let _ = require( toolsPath );
-      _.include( 'wProcess' );
-      _.include( 'wFiles' );
-
-      // process.kill( process.pid, signal );
-      _.process.signal({ signal : signal, pid : process.pid });
-    }
-  }
-}
-
-//
-
 function pidFrom( test )
 {
   let o =
