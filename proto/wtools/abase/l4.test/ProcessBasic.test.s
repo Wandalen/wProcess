@@ -2418,7 +2418,7 @@ aaa : Done.
     return test.shouldThrowErrorSync( () => 
     {
       _.process.start
-      ({ execPath,
+      ({ execPath : [ programPath, programPath ],
         mode,
         sync,
         deasync
