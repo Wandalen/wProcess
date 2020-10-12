@@ -69,7 +69,6 @@ function startCommon_pre( routine, args )
   _.assert( o.conTerminate === null || _.routineIs( o.conTerminate ) );
   _.assert( o.conDisconnect === null || _.routineIs( o.conDisconnect ) );
   _.assert( o.ready === null || _.routineIs( o.ready ) );
-  _.assert( !o.ipc || _.longHas( [ 'fork', 'spawn' ], o.mode ), `Mode::${o.mode} doesn't support inter process communication.` );
   _.assert( o.mode !== 'fork' || !o.sync || o.deasync, 'Mode::fork is available only if either sync:0 or deasync:1' );
 
   return o;
@@ -234,6 +233,25 @@ function startSingle_body( o )
     if( o.outputDecoratingStderr === null )
     o.outputDecoratingStderr = o.outputDecorating;
 
+    /* ipc */
+
+    if( o.ipc === null )
+    o.ipc = o.mode === 'fork' ? 1 : 0;
+
+    debugger;
+    if( _.strIs( o.stdio ) )
+    o.stdio = _.dup( o.stdio, 3 );
+    if( o.ipc )
+    {
+      // if( _.strIs( o.stdio ) )
+      // o.stdio = _.dup( o.stdio, 3 );
+      if( !_.longHas( o.stdio, 'ipc' ) )
+      o.stdio.push( 'ipc' );
+    }
+
+    _.assert( !o.ipc || _.longHas( [ 'fork', 'spawn' ], o.mode ), `Mode::${o.mode} doesn't support inter process communication.` );
+    _.assert( o.mode !== 'fork' || !!o.ipc, `In mode::fork option::ipc must be true. Such subprocess can not have no ipc.` );
+
     /* */
 
     if( !_.strIs( o.when ) )
@@ -287,7 +305,10 @@ function startSingle_body( o )
       execArgs = execPathParse( o.execPath );
       if( o.mode !== 'shell' )
       execArgs = argsUnqoute( execArgs );
+      if( execArgs.length )
       o.execPath = execArgs.shift();
+      else
+      o.execPath = null;
     }
 
     if( o.execPath === null )
@@ -330,20 +351,10 @@ function startSingle_body( o )
     if( o.outputCollecting && !o.output )
     o.output = ''; /* xxx : test for multiple run? to which o-map does it collect output? */
 
-    /* ipc */
-
-    if( o.ipc )
-    {
-      if( _.strIs( o.stdio ) )
-      o.stdio = _.dup( o.stdio, 3 );
-      if( !_.longHas( o.stdio, 'ipc' ) )
-      o.stdio.push( 'ipc' );
-    }
-
     /* stdio compatibility check */
     if( Config.debug )
     if( o.outputPiping || o.outputCollecting )
-    _.assert( o.stdio === 'pipe' || o.stdio[ 1 ] === 'pipe' || o.stdio[ 2 ] === 'pipe', 'stdout is not available to collect output or pipe it. Set stdout/stderr channel(s) or option::stdio to "pipe"' );
+    _.assert( o.stdio === 'pipe' || o.stdio[ 1 ] === 'pipe' || o.stdio[ 2 ] === 'pipe', '"stdout" is not available to collect output or pipe it. Set stdout/stderr channel(s) or option::stdio to "pipe", please' );
 
     /* passingThrough */
 
@@ -479,10 +490,10 @@ function startSingle_body( o )
     // let args = o.args; /* yyy xxx : remove? */
     // /* let args = o.args.slice(); */
 
-    if( process.platform === 'win32' )
-    {
-      execPath = _.path.nativizeTolerant( execPath );
-    }
+    // if( process.platform === 'win32' )
+    // {
+    //   execPath = _.path.nativizeTolerant( execPath );
+    // }
 
     if( o.mode === 'fork')
     {
@@ -613,7 +624,7 @@ function startSingle_body( o )
       if( o.state === 'terminated' || o.error )
       return;
       o.exitReason = 'time';
-      _.process.terminate({ process : o.process, withChildren : 0 }); /* xxx qqq for Vova : need to catch event when process is really down aaa:done*/
+      _.process.terminate({ pnd : o.process, withChildren : 1 });
     });
 
   }
@@ -763,11 +774,12 @@ function startSingle_body( o )
   {
     err = _.err
     (
-      `Error starting the process`
+      err
+      , `\nError starting the process`
       , `\n    Exec path : ${o.fullExecPath || o.execPath}`
       , `\n    Current path : ${o.currentPath}`
-      , `\n\n`
-      , err
+      // , `\n\n`
+      // , err
     );
 
     if( o.ended )
@@ -1250,7 +1262,7 @@ startSingle_body.defaults =
 
   mode : 'shell', /* fork / spawn / shell */
   stdio : 'pipe', /* pipe / ignore / inherit */
-  ipc : 0,
+  ipc : null,
 
   logger : null,
   procedure : null,
@@ -1285,6 +1297,8 @@ startSingle_body.defaults =
   inputMirroring : 1, /* qqq for Yevhen : cover the option */
 
 }
+
+/* xxx : add option stdio and other? */
 
 let startSingle = _.routineFromPreAndBody( startSingle_pre, startSingle_body );
 
@@ -1359,7 +1373,7 @@ function start_pre( routine, args )
  *
  * @example //short way, command and arguments in one string
  *
- * let _ = require('wTools')
+ * let _ = require( 'wTools' )
  * _.include( 'wProcessBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
@@ -1374,7 +1388,7 @@ function start_pre( routine, args )
  *
  * @example //command and arguments as options
  *
- * let _ = require('wTools')
+ * let _ = require( 'wTools' )
  * _.include( 'wProcessBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
@@ -1578,7 +1592,7 @@ defaults.mode = 'spawn';
  *
  * @example
  *
- * let _ = require('wTools')
+ * let _ = require( 'wTools' )
  * _.include( 'wProcessBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
@@ -1671,7 +1685,7 @@ let startNjs = _.routineFromPreAndBody( start_pre, startNjs_body );
  *
  * @example
  *
- * let _ = require('wTools')
+ * let _ = require( 'wTools' )
  * _.include( 'wProcessBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
@@ -1764,7 +1778,7 @@ let startAfterDeath = _.routineFromPreAndBody( start_pre, startAfterDeath_body )
  *
  * @example //single command execution
  *
- * let _ = require('wTools')
+ * let _ = require( 'wTools' )
  * _.include( 'wProcessBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
@@ -1781,7 +1795,7 @@ let startAfterDeath = _.routineFromPreAndBody( start_pre, startAfterDeath_body )
  *
  * @example //multiple commands execution with same args
  *
- * let _ = require('wTools')
+ * let _ = require( 'wTools' )
  * _.include( 'wProcessBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
@@ -1800,7 +1814,7 @@ let startAfterDeath = _.routineFromPreAndBody( start_pre, startAfterDeath_body )
  * //multiple commands execution with same args, using sinle consequence
  * //second command will be executed when first is finished
  *
- * let _ = require('wTools')
+ * let _ = require( 'wTools' )
  * _.include( 'wProcessBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
@@ -2005,137 +2019,66 @@ function exitWithBeep()
 
 //
 
-/*
-zzz : use maybe _exitHandlerRepair instead of _exitHandlerOnce?
-investigate difference between _exitHandlerRepair and _exitHandlerOnce
-Vova: _exitHandlerRepair allows app to exit safely when one of exit signals will be triggered
-      _exitHandlerOnce allows to execute some code when process is about to exit:
-       - process.exit() was called explcitly
-       - no additional work for nodejs event loop
-      Correct work of _exitHandlerOnce can't be achieved without _exitHandlerRepair.
-      _exitHandlerRepair allows _exitHandlerOnce to execute handlers in case when one of termination signals was raised.
-*/
-
-let appRepairExitHandlerDone = 0;
+_realGlobal_._exitHandlerRepairDone = _realGlobal_._exitHandlerRepairDone || 0;
+_realGlobal_._exitHandlerRepairTerminating = _realGlobal_._exitHandlerRepairTerminating || 0;
 function _exitHandlerRepair()
 {
 
   _.assert( arguments.length === 0, 'Expects no arguments' );
 
-  if( appRepairExitHandlerDone )
+  // debugger; /* xxx : experiment */
+  if( _realGlobal_._exitHandlerRepairDone )
   return;
-  appRepairExitHandlerDone = 1;
+  _realGlobal_._exitHandlerRepairDone = 1;
 
   if( !_global.process )
   return;
 
-  // process.on( 'SIGHUP', function()
-  // {
-  //   debugger;
-  //   console.log( 'SIGHUP' );
-  //   try
-  //   {
-  //     process.exit();
-  //   }
-  //   catch( err )
-  //   {
-  //     console.log( 'Error!' );
-  //     console.log( err.toString() );
-  //     console.log( err.stack );
-  //     process.removeAllListeners( 'exit' );
-  //     process.exit();
-  //   }
-  // });
+  // process.on( 'SIGHUP', handle_functor( 'SIGHUP', 1 ) ); /* yyy */
+  process.on( 'SIGQUIT', handle_functor( 'SIGQUIT', 3 ) );
+  process.on( 'SIGINT', handle_functor( 'SIGINT' ), 2 );
+  process.on( 'SIGTERM', handle_functor( 'SIGTERM' ), 15 );
+  process.on( 'SIGUSR1', handle_functor( 'SIGUSR1' ), 16 );
+  process.on( 'SIGUSR2', handle_functor( 'SIGUSR2' ), 17 );
 
-  process.on( 'SIGQUIT', function()
+  function handle_functor( signal, signalCode )
   {
-    debugger;
-    console.log( 'SIGQUIT' );
-    try
+    return function handle()
     {
-      process.exit();
+      console.log( signal );
+      if( _realGlobal_._exitHandlerRepairTerminating )
+      return;
+      _realGlobal_._exitHandlerRepairTerminating = 1;
+      _.time.begin( _.process._sanitareTime, () =>
+      {
+        try
+        {
+          process.removeListener( signal, handle );
+          if( !process._exiting )
+          {
+            try
+            {
+              process._exiting = true;
+              process.emit( 'exit', 128 + signalCode );
+            }
+            catch( err )
+            {
+              console.error( _.err( err ) );
+            }
+            process.kill( process.pid, signal );
+          }
+        }
+        catch( err )
+        {
+          console.log( `Error on signal ${signal}` );
+          console.log( err.toString() );
+          console.log( err.stack );
+          process.removeAllListeners( 'exit' );
+          process.exit();
+        }
+      });
     }
-    catch( err )
-    {
-      console.log( 'Error!' );
-      console.log( err.toString() );
-      console.log( err.stack );
-      process.removeAllListeners( 'exit' );
-      process.exit();
-    }
-  });
-
-  process.on( 'SIGINT', function()
-  {
-    debugger;
-    console.log( 'SIGINT' );
-    try
-    {
-      process.exit();
-    }
-    catch( err )
-    {
-      console.log( 'Error!' );
-      console.log( err.toString() );
-      console.log( err.stack );
-      process.removeAllListeners( 'exit' );
-      process.exit();
-    }
-  });
-
-  process.on( 'SIGTERM', function()
-  {
-    debugger;
-    console.log( 'SIGTERM' );
-    try
-    {
-      process.exit();
-    }
-    catch( err )
-    {
-      console.log( 'Error!' );
-      console.log( err.toString() );
-      console.log( err.stack );
-      process.removeAllListeners( 'exit' );
-      process.exit();
-    }
-  });
-
-  process.on( 'SIGUSR1', function()
-  {
-    debugger;
-    console.log( 'SIGUSR1' );
-    try
-    {
-      process.exit();
-    }
-    catch( err )
-    {
-      console.log( 'Error!' );
-      console.log( err.toString() );
-      console.log( err.stack );
-      process.removeAllListeners( 'exit' );
-      process.exit();
-    }
-  });
-
-  process.on( 'SIGUSR2', function()
-  {
-    debugger;
-    console.log( 'SIGUSR2' );
-    try
-    {
-      process.exit();
-    }
-    catch( err )
-    {
-      console.log( 'Error!' );
-      console.log( err.toString() );
-      console.log( err.stack );
-      process.removeAllListeners( 'exit' );
-      process.exit();
-    }
-  });
+  }
 
 }
 
@@ -2207,6 +2150,8 @@ function pidFrom( src )
   {
     if( src.process )
     src = src.process;
+    if( src.pnd )
+    src = src.pnd;
     _.assert( src instanceof ChildProcess.ChildProcess );
     return src.pid;
   }
@@ -2234,18 +2179,18 @@ function signal_pre( routine, args )
   if( _.numberIs( o ) )
   o = { pid : o };
   else if( _.routineIs( o.kill ) )
-  o = { process : o };
+  o = { pnd : o };
 
   o = _.routineOptions( routine, o );
 
-  if( o.process )
+  if( o.pnd )
   {
     _.assert( o.pid === null );
-    o.pid = o.process.pid;
+    o.pid = o.pnd.pid;
   }
 
   _.assert( _.numberIs( o.pid ) );
-  _.assert( !o.waitTimeOut || _.numberIs( o.waitTimeOut ) );
+  _.assert( !o.timeOut || _.numberIs( o.timeOut ) );
 
   return o;
 }
@@ -2256,6 +2201,7 @@ function signal_body( o )
 {
   _.assert( arguments.length === 1 );
   _.assert( _.strIs( o.signal ), 'Expects signal to be provided explicitly as string' );
+  _.assert( _.intIs( o.pid ) );
 
   let isWindows = process.platform === 'win32';
   let ready = _.Consequence().take( null );
@@ -2264,11 +2210,11 @@ function signal_body( o )
   ready.then( () =>
   {
     if( o.withChildren )
-    return _.process.children({ pid : o.pid, asList : 1 });
-    return o.pid;
+    return _.process.children({ pid : o.pid, format : 'list' });
+    return { pid : o.pid, pnd : o.pnd };
   })
 
-  ready.then( killProcess );
+  ready.then( processKill );
   ready.catch( handleError );
   ready.then( handleResult );
 
@@ -2279,37 +2225,57 @@ function signal_body( o )
 
   /* - */
 
-  function sendSignal( pid )
+  function signalSend( p )
   {
-    if( !_.process.isAlive( pid ) )
+    _.assert( _.intIs( p.pid ) );
+
+    if( !_.process.isAlive( p.pid ) )
     return;
 
-    process.kill( pid, o.signal );
-    if( !o.waitTimeOut )
+    let pnd = p.pnd;
+    if( !pnd && o.pnd && o.pnd.pid === p.pid )
+    pnd = o.pnd;
+
+    // if( pnd )
+    // pnd.kill( o.signal );
+    // else
+    process.kill( p.pid, o.signal );
+
+    if( !o.timeOut )
     return;
 
-    let con = waitForTermination( pid );
+    let con = waitForTermination( p.pid );
     cons.push( con );
   }
 
-  function killProcess( arg )
+  /* */
+
+  function processKill( processes )
   {
+
+    // if( o.withChildren )
+    // {
+    //   console.log( `pid : ${o.pid}` );
+    //   console.log( `pids' : ${processes}` );
+    //   debugger;
+    // }
+
     if( o.withChildren )
-    for( let i = arg.length - 1; i >= 0; i-- )
+    for( let i = processes.length - 1; i >= 0; i-- )
     {
-      if( isWindows && i && arg[ i ].name === 'conhost.exe' )
+      if( isWindows && i && processes[ i ].name === 'conhost.exe' )
       continue;
-      sendSignal( arg[ i ].pid );
+      signalSend( processes[ i ] );
     }
     else
     {
-      sendSignal( arg );
+      signalSend( processes );
     }
 
     if( !cons.length )
     return true;
 
-    return _.Consequence.AndKeep( ...cons );
+    return _.Consequence.AndKeep( ... cons );
   }
 
   /* - */
@@ -2337,7 +2303,7 @@ function signal_body( o )
        */
     });
 
-    let timeOutError = _.time.outError( o.waitTimeOut )
+    let timeOutError = _.time.outError( o.timeOut )
 
     ready.orKeeping( [ timeOutError ] );
 
@@ -2351,7 +2317,7 @@ function signal_body( o )
         timer._cancel();
         _.errAttend( err );
         if( err.reason === 'time out' )
-        err = _.err( err, `\nTarget process: ${_.strQuote( pid )} is still alive. Waited for ${o.waitTimeOut} ms.` );
+        err = _.err( err, `\nTarget process: ${_.strQuote( pid )} is still alive. Waited for ${o.timeOut} ms.` );
         throw err;
       }
       return op;
@@ -2389,9 +2355,9 @@ function signal_body( o )
 signal_body.defaults =
 {
   pid : null,
-  process : null,
-  withChildren : 0,
-  waitTimeOut : 5000,
+  pnd : null,
+  withChildren : 0, /* xxx : set to 1 */
+  timeOut : 5000,
   signal : null,
   sync : 0
 }
@@ -2409,7 +2375,7 @@ function kill_body( o )
 
 kill_body.defaults =
 {
-  ... _.mapBut( signal.defaults, [ 'signal', 'waitTimeOut' ] ),
+  ... _.mapBut( signal.defaults, [ 'signal', 'timeOut' ] ),
 }
 
 let kill = _.routineFromPreAndBody( signal_pre, kill_body );
@@ -2421,8 +2387,6 @@ let kill = _.routineFromPreAndBody( signal_pre, kill_body );
   zzz for Vova: shell mode have different behaviour on Windows, OSX and Linux
   look for solution that allow to have same behaviour on each mode
 */
-
-/* qqq for Vova : rewrite and cover aaa:done*/
 
 function terminate_body( o )
 {
@@ -2472,6 +2436,7 @@ function children( o )
   _.routineOptions( children, o )
   _.assert( arguments.length === 1 );
   _.assert( _.numberIs( o.pid ) );
+  _.assert( _.longHas( [ 'list', 'tree' ], o.format ) );
 
   if( o.process )
   {
@@ -2502,7 +2467,7 @@ function children( o )
     }
 
     let con = new _.Consequence();
-    if( o.asList )
+    if( o.format === 'list' )
     {
       WindowsProcessTree.getProcessList( o.pid, ( result ) => con.take( result ) )
     }
@@ -2519,15 +2484,16 @@ function children( o )
   }
   else
   {
-    if( o.asList )
+    if( o.format === 'list' )
     result = [];
     else
     result = Object.create( null );
 
     if( process.platform === 'darwin' )
-    return childrenOf( 'pgrep -P', o.pid, result )
+    return childrenOf( 'pgrep -P', o.pid, result );
     else
-    return childrenOf( 'ps -o pid --no-headers --ppid', o.pid, result )
+    return childrenOf( 'ps -o pid --no-headers --ppid', o.pid, result );
+    /* qqq for Vova : use optimal solution */
   }
 
   /* */
@@ -2538,12 +2504,14 @@ function children( o )
     ({
       execPath : command + ' ' + pid,
       outputCollecting : 1,
+      outputPiping : 0,
       throwingExitCode : 0,
-      inputMirroring : 0
+      inputMirroring : 0,
+      stdio : 'pipe',
     })
     .then( ( op ) =>
     {
-      if( o.asList )
+      if( o.format === 'list' )
       _result.push({ pid : _.numberFrom( pid ) });
       else
       _result[ pid ] = Object.create( null );
@@ -2551,7 +2519,7 @@ function children( o )
       return result;
       let ready = new _.Consequence().take( null );
       let pids = _.strSplitNonPreserving({ src : op.output, delimeter : '\n' });
-      _.each( pids, ( cpid ) => ready.then( () => childrenOf( command, cpid, o.asList ? _result : _result[ pid ] ) ) )
+      _.each( pids, ( cpid ) => ready.then( () => childrenOf( command, cpid, o.format === 'list' ? _result : _result[ pid ] ) ) )
       return ready;
     })
   }
@@ -2570,7 +2538,8 @@ children.defaults =
 {
   process : null,
   pid : null,
-  asList : 0
+  format : 'list',
+  // asList : 0
 }
 
 // --
@@ -2598,7 +2567,6 @@ let Extension =
   exitWithBeep,
 
   _exitHandlerRepair, /* zzz */
-
   _eventExitSetup,
   _eventExitHandle,
 
@@ -2614,6 +2582,7 @@ let Extension =
 
   // fields
 
+  _sanitareTime : 10,
   _exitReason : null,
 
 }
