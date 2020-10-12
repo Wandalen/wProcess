@@ -225,6 +225,10 @@ ${programPath}:end
       .then( function()
       {
         test.identical( options.exitCode, 0 );
+        test.identical( o.exitSignal, null );
+        test.identical( o.exitReason, 'normal' );
+        test.identical( o.ended, true );
+        test.identical( o.state, 'terminated' );
         test.identical( options.output, expectedOutput );
         return null;
       })
@@ -249,6 +253,10 @@ ${programPath}:end
       .then( function()
       {
         test.identical( options.exitCode, 0 );
+        test.identical( o.exitSignal, null );
+        test.identical( o.exitReason, 'normal' );
+        test.identical( o.ended, true );
+        test.identical( o.state, 'terminated' );
         test.identical( options.output, expectedOutput );
         return null;
       })
@@ -273,6 +281,10 @@ ${programPath}:end
       .then( function()
       {
         test.identical( options.exitCode, 0 );
+        test.identical( o.exitSignal, null );
+        test.identical( o.exitReason, 'normal' );
+        test.identical( o.ended, true );
+        test.identical( o.state, 'terminated' );
         test.identical( options.output, expectedOutput );
         return null;
       })
@@ -297,6 +309,10 @@ ${programPath}:end
       .then( function()
       {
         test.identical( options.exitCode, 0 );
+        test.identical( o.exitSignal, null );
+        test.identical( o.exitReason, 'normal' );
+        test.identical( o.ended, true );
+        test.identical( o.state, 'terminated' );
         test.identical( options.output, expectedOutput );
         return null;
       })
@@ -321,6 +337,10 @@ ${programPath}:end
       .then( function()
       {
         test.identical( options.exitCode, 0 );
+        test.identical( o.exitSignal, null );
+        test.identical( o.exitReason, 'normal' );
+        test.identical( o.ended, true );
+        test.identical( o.state, 'terminated' );
         test.identical( options.output, expectedOutput );
         return null;
       })
@@ -346,6 +366,10 @@ ${programPath}:end
       .then( function()
       {
         test.identical( options.exitCode, 0 );
+        test.identical( o.exitSignal, null );
+        test.identical( o.exitReason, 'normal' );
+        test.identical( o.ended, true );
+        test.identical( o.state, 'terminated' );
         test.identical( options.output, expectedOutput );
         return null;
       })
@@ -373,6 +397,10 @@ ${programPath}:end
       .then( function()
       {
         test.identical( options.exitCode, 0 );
+        test.identical( o.exitSignal, null );
+        test.identical( o.exitReason, 'normal' );
+        test.identical( o.ended, true );
+        test.identical( o.state, 'terminated' );
         test.identical( options.output, null );
         return null;
       })
@@ -400,10 +428,12 @@ ${programPath}:end
         test.is( !options.error );
         test.identical( options.process.killed, false );
         test.identical( options.exitCode, 0 );
+        test.identical( options.exitReason, 'normal' );
+        test.identical( options.ended, true );
+        test.identical( options.state, 'terminated' );
         test.identical( options.exitSignal, null );
         test.identical( options.process.exitCode, 0 );
         test.identical( options.process.signalCode, null );
-        test.identical( options.state, 'terminated' );
         test.identical( _.strCount( options.output, ':begin' ), 1 );
         test.identical( _.strCount( options.output, ':end' ), 0 );
         return null;
@@ -549,6 +579,10 @@ function startBasic2( test ) /* qqq for Evhen : merge with test routine startBas
     .then( function()
     {
       test.identical( options.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.identical( o.exitReason, 'normal' );
+      test.identical( o.ended, true );
+      test.identical( o.state, 'terminated' );
       test.identical( options.output, o2.args.join( ' ' ) + '\n' );
       return null;
     })
@@ -637,6 +671,10 @@ function startFork( test )
     .then( function( op )
     {
       test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.identical( o.exitReason, 'normal' );
+      test.identical( o.ended, true );
+      test.identical( o.state, 'terminated' );
       test.is( _.strHas( o.output, '[]' ) );
       return null;
     })
@@ -661,6 +699,10 @@ function startFork( test )
     .then( function( op )
     {
       test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.identical( o.exitReason, 'normal' );
+      test.identical( o.ended, true );
+      test.identical( o.state, 'terminated' );
       test.is( _.strHas( o.output,  `[ 'arg1', 'arg2' ]` ) );
       return null;
     })
@@ -686,6 +728,10 @@ function startFork( test )
     .then( function( op )
     {
       test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.identical( o.exitReason, 'normal' );
+      test.identical( o.ended, true );
+      test.identical( o.state, 'terminated' );
       test.identical( o.output, null );
       return null;
     })
@@ -723,6 +769,10 @@ function startFork( test )
     .then( function( op )
     {
       test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.identical( o.exitReason, 'normal' );
+      test.identical( o.ended, true );
+      test.identical( o.state, 'terminated' );
       test.is( _.strHas( o.output,  `[ 'arg1', 'arg2' ]` ) );
       test.is( _.strHas( o.output,  `key1: 'val'` ) );
       test.is( _.strHas( o.output,  a.path.nativize( a.routinePath ) ) );
@@ -766,6 +816,10 @@ function startFork( test )
     _.process.start( o );
     debugger
     test.identical( o.exitCode, 0 );
+    test.identical( o.exitSignal, null );
+    test.identical( o.exitReason, 'normal' );
+    test.identical( o.ended, true );
+    test.identical( o.state, 'terminated' );
     test.is( _.strHas( o.output,  `[ 'arg1', 'arg2' ]` ) );
     test.is( _.strHas( o.output,  `key1: 'val'` ) );
     test.is( _.strHas( o.output,  a.path.nativize( a.routinePath ) ) );
@@ -811,6 +865,10 @@ function startFork( test )
     {
       test.identical( gotMessage, 'child received message from parent' )
       test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      test.identical( o.exitReason, 'normal' );
+      test.identical( o.ended, true );
+      test.identical( o.state, 'terminated' );
       return null;
     })
 
