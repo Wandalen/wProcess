@@ -20497,8 +20497,7 @@ exit:end
 `
         var exp2 =
 `program1:begin
-program1:end
-exit:end
+Killed
 `
         if( mode === 'shell' )
         test.is( options.output === exp1 || options.output === exp2 );
@@ -20550,8 +20549,7 @@ exit:end
 `
         var exp2 =
 `program1:begin
-program1:end
-exit:end
+Killed
 `
         if( mode === 'shell' )
         test.is( options.output === exp1 || options.output === exp2 );
