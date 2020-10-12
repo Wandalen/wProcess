@@ -2481,19 +2481,19 @@ aaa : Done.
           test.identical( o.runs[ 0 ].exitReason, 'normal' );
           test.identical( o.runs[ 0 ].ended, true );
           test.identical( o.runs[ 0 ].state, 'terminated' );
-  
+
           test.identical( o.runs[ 1 ].exitCode, 0 );
           test.identical( o.runs[ 1 ].exitSignal, null );
           test.identical( o.runs[ 1 ].exitReason, 'normal' );
           test.identical( o.runs[ 1 ].ended, true );
           test.identical( o.runs[ 1 ].state, 'terminated' );
-  
+
           test.identical( o.exitCode, 0 );
           test.identical( o.exitSignal, null );
           test.identical( o.exitReason, 'normal' );
           test.identical( o.ended, true );
           test.identical( o.state, 'terminated' );
-  
+
           return result;
         })
       }
