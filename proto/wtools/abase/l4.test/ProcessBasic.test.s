@@ -23860,7 +23860,7 @@ var Proto =
     startReadyDelayMultiple,
     startOptionWhenDelay,
     startOptionWhenTime,
-    // startOptionTimeOut, /* qqq for Vova : fix please */
+    startOptionTimeOut, /* qqq for Vova : fix please */
     // startAfterDeath, /* zzz : fix */
     // startAfterDeathOutput, /* zzz : ? */
 
