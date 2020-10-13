@@ -19154,7 +19154,6 @@ function exitCodeLogging( test )
       execPath : 'node ' + testAppPath,
       throwingExitCode : 0,
       outputCollecting : 1,
-      verbosity : 5
     }
 
     return _.process.start( options )
@@ -19170,6 +19169,8 @@ function exitCodeLogging( test )
       test.identical( _.strCount( op.output, `Launched at ${ _.strQuote( op.currentPath ) }` ), 0 );
       test.identical( _.strCount( op.output, '-> Stderr' ), 0 );
       test.identical( _.strCount( op.output, '-< Stderr' ), 0 );
+
+      return null;
     } )
 
     /* - */
@@ -19223,7 +19224,6 @@ function exitCodeLogging( test )
       test.identical( _.strCount( op.output, '-> Stderr' ), 1 );
       test.identical( _.strCount( op.output, '-< Stderr' ), 1 );
 
-      // console.log( 'opOutput: ', '\n\n===START\n' + op.output + '\n===END\n\n' );
       return null;
     } )
 
