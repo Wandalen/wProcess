@@ -22164,15 +22164,35 @@ function terminateWithDetachedChildren( test )
     {
       return terminated.then( () =>
       {
-        test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        if( process.platform === 'win32' )
+        {
+          test.identical( op.exitCode, 1 );
+          test.identical( op.ended, true );
+          test.identical( op.exitSignal, null );
+          test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        }
+        else
+        {
+          test.identical( op.exitCode, null );
+          test.identical( op.ended, true );
+          test.identical( op.exitSignal, 'SIGTERM' );
+          test.is( _.strHas( op.output, 'SIGTERM' ) );
+        }
+
         return _.time.out( 9000, () =>
         {
           /* zzz : problem with termination of detached proces on Windows, child process does't receive SIGINT */
-          test.is( a.fileProvider.fileExists( a.abs( a.routinePath, children[ 0 ].toString() ) ) )
-          test.is( a.fileProvider.fileExists( a.abs( a.routinePath, children[ 1 ].toString() ) ) )
+          if( process.platform === 'win32' )
+          {
+            test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, children[ 0 ].toString() ) ) )
+            test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, children[ 1 ].toString() ) ) )
+          }
+          else
+          {
+            test.is( a.fileProvider.fileExists( a.abs( a.routinePath, children[ 0 ].toString() ) ) )
+            test.is( a.fileProvider.fileExists( a.abs( a.routinePath, children[ 1 ].toString() ) ) )
+          }
+
           test.is( !_.process.isAlive( o.process.pid ) )
           test.is( !_.process.isAlive( children[ 0 ] ) );
           test.is( !_.process.isAlive( children[ 1 ] ) );
