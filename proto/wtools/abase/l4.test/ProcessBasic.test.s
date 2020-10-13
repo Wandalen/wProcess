@@ -22667,7 +22667,7 @@ function terminateTimeOut( test )
     setTimeout( () =>
     {
       console.log( 'Application timeout!' )
-    }, 100000 )
+    }, 10000 )
   }
 }
 
