@@ -18448,28 +18448,20 @@ function terminate( test )
 
     ready.then( ( op ) =>
     {
-      if( process.platform === 'linux' ) /* xxx qqq : ? */
+      if( process.platform === 'win32' )
       {
-        test.identical( op.exitCode, null );
+        test.identical( op.exitCode, 1 );
         test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( _.strHas( op.output, 'Application timeout!' ) );
-      }
-      else if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, null );
+        test.identical( op.exitSignal, 'SIGKILL' );
         test.is( !_.strHas( op.output, 'SIGTERM' ) );
         test.is( _.strHas( op.output, 'Application timeout!' ) );
       }
       else
       {
-        test.identical( op.exitCode, 0 );
+        test.identical( op.exitCode, null );
         test.identical( op.ended, true );
-        test.identical( op.exitSignal, null );
-        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.identical( op.exitSignal, 'SIGKILL' );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
         test.is( !_.strHas( op.output, 'Application timeout!' ) );
       }
 
@@ -18502,28 +18494,20 @@ function terminate( test )
 
     ready.then( ( op ) =>
     {
-      if( process.platform === 'linux' )
+      if( process.platform === 'win32' )
       {
-        test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( _.strHas( op.output, 'Application timeout!' ) );
-      }
-      else if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, 0 );
+        test.identical( op.exitCode, 1 );
         test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
         test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( _.strHas( op.output, 'Application timeout!' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
       }
       else
       {
-        test.identical( op.exitCode, 0 );
+        test.identical( op.exitCode, null );
         test.identical( op.ended, true );
-        test.identical( op.exitSignal, null );
-        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.identical( op.exitSignal, 'SIGKILL' );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
         test.is( !_.strHas( op.output, 'Application timeout!' ) );
       }
       return null;
