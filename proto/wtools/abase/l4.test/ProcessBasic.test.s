@@ -17615,10 +17615,10 @@ function kill( test )
       test.identical( op.exitCode, null );
       test.identical( op.ended, true );
       test.identical( op.exitSignal, 'SIGKILL' );
-      if( process.platform === 'darwin' )
+      // if( process.platform === 'darwin' )
       test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      else
-      test.is( _.strHas( op.output, 'Application timeout!' ) );
+      // else
+      // test.is( _.strHas( op.output, 'Application timeout!' ) );
       return null;
     })
 
@@ -17643,23 +17643,23 @@ function kill( test )
 
     ready.then( ( op ) =>
     {
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, 1 );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, null );
-      }
-      else
-      {
+      // if( process.platform === 'win32' )
+      // {
+      //   test.identical( op.exitCode, 1 );
+      //   test.identical( op.ended, true );
+      //   test.identical( op.exitSignal, null );
+      // }
+      // else
+      // {
         test.identical( op.exitCode, null );
         test.identical( op.ended, true );
         test.identical( op.exitSignal, 'SIGKILL' );
-      }
+      // }
 
-      if( process.platform === 'darwin' )
+      // if( process.platform === 'darwin' )
       test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      else
-      test.is( _.strHas( op.output, 'Application timeout!' ) );
+      // else
+      // test.is( _.strHas( op.output, 'Application timeout!' ) );
       return null;
     })
 
@@ -18441,8 +18441,10 @@ function terminate( test )
     {
       data = data.toString();
       if( _.strHas( data, 'ready' ))
-      _.process.terminate({ pnd : o.process, timeOut : 0 });
+      _.process.terminate({ pnd : o.process, timeOut : 0 }); /* qqq for Vova : should send kill signal! */
     })
+
+    /* qqq for Vova : add test case with low timeOut */
 
     ready.then( ( op ) =>
     {
@@ -21329,7 +21331,7 @@ function terminateComplex( test )
     o.process.on( 'message', ( e ) =>
     {
       lastChildPid = _.numberFrom( e );
-      _.process.terminate({ pid : o.process.pid });
+      _.process.terminate({ pid : o.process.pid, withChildren : 0 });
     })
 
     ready.then( ( op ) =>
@@ -21366,7 +21368,7 @@ function terminateComplex( test )
     o.process.on( 'message', ( e ) =>
     {
       lastChildPid = _.numberFrom( e );
-      _.process.terminate({ pid : o.process.pid });
+      _.process.terminate({ pid : o.process.pid, withChildren : 0 });
     })
 
     ready.then( ( op ) =>

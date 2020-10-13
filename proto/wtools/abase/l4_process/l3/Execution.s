@@ -2344,8 +2344,8 @@ function signal_body( o )
   })
 
   ready.then( processKill );
-  ready.catch( handleError );
   ready.then( handleResult );
+  ready.catch( handleError );
 
   if( o.sync )
   ready.deasync();
@@ -2448,12 +2448,12 @@ function signal_body( o )
 
     ready.finally( ( err, op ) =>
     {
-      if( !timeOutError.resourcesCount() )
+      if( !timeOutError.resourcesCount() ) /* xxx : rewrite */
       timeOutError.take( _.dont );
 
       if( err )
       {
-        timer._cancel();
+        timer._cancel(); /* xxx : rewrite */
         _.errAttend( err );
         if( err.reason === 'time out' )
         err = _.err( err, `\nTarget process: ${_.strQuote( pid )} is still alive. Waited for ${o.timeOut} ms.` );
@@ -2480,13 +2480,16 @@ function signal_body( o )
 
   function handleResult( result )
   {
-    if( !_.arrayIs( result ) )
-    return result;
 
-    if( result.length === 1 )
-    return result[ 0 ];
+    result = _.arrayAs( result );
 
-    return result;
+    for( let i = 0 ; i < result.length ; i++ )
+    {
+      if( result[ i ] !== true )
+      return result[ i ];
+    }
+
+    return true;
   }
 
 }
