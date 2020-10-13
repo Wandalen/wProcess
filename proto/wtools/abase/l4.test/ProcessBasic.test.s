@@ -8879,12 +8879,9 @@ function startOptionTimeOut( test )
       return test.shouldThrowErrorAsync( o.conTerminate )
       .then( () =>
       {
-        test.notIdentical( o.exitCode, 0 );
+        /* Child process on Windows terminates with 'SIGTERM' because process was terminated using process descriptor*/
+        test.identical( o.exitCode, null );
         test.identical( o.ended, true );
-
-        if( process.platform === 'win32' )
-        test.identical( o.exitSignal, null );
-        else
         test.identical( o.exitSignal, 'SIGTERM' );
 
         return null;
@@ -8910,14 +8907,18 @@ function startOptionTimeOut( test )
       return test.shouldThrowErrorAsync( o.conTerminate )
       .then( () =>
       {
-        test.notIdentical( o.exitCode, 0 );
-        test.identical( o.ended, true );
-
         if( process.platform === 'win32' )
-        test.identical( o.exitSignal, null );
+        {
+          test.identical( o.exitCode, null );
+          test.identical( o.ended, true );
+          test.identical( o.exitSignal, 'SIGTERM' );
+        }
         else
-        test.identical( o.exitSignal, 'SIGKILL' );
-
+        {
+          test.identical( o.exitCode, null );
+          test.identical( o.ended, true );
+          test.identical( o.exitSignal, 'SIGKILL' );
+        }
         return null;
       })
     })
@@ -8942,17 +8943,23 @@ function startOptionTimeOut( test )
       _.process.start( o );
 
       return test.shouldThrowErrorAsync( o.conTerminate )
-      .then( ( got ) =>
+      .then( () =>
       {
-        test.notIdentical( o.exitCode, 0 );
-        test.identical( o.ended, true );
-
         if( process.platform === 'win32' )
-        test.identical( o.exitSignal, null );
+        {
+          test.identical( o.exitCode, null );
+          test.identical( o.ended, true );
+          test.identical( o.exitSignal, 'SIGTERM' );
+          test.is( !_.strHas( o.output, 'Process was killed by exit signal SIGTERM' ) );
+        }
         else
-        test.identical( o.exitSignal, 'SIGTERM' );
+        {
+          test.identical( o.exitCode, null );
+          test.identical( o.ended, true );
+          test.identical( o.exitSignal, 'SIGTERM' );
+          test.is( _.strHas( o.output, 'Process was killed by exit signal SIGTERM' ) );
+        }
 
-        test.is( _.strHas( o.output, 'Process was killed by exit signal SIGTERM' ) );
 
         return null;
       })
@@ -8978,15 +8985,20 @@ function startOptionTimeOut( test )
       _.process.start( o );
 
       return test.shouldThrowErrorAsync( o.conTerminate )
-      .then( ( got ) =>
+      .then( () =>
       {
-        test.notIdentical( o.exitCode, 0 );
-        test.identical( o.ended, true );
-
         if( process.platform === 'win32' )
-        test.identical( o.exitSignal, null );
+        {
+          test.identical( o.exitCode, null );
+          test.identical( o.ended, true );
+          test.identical( o.exitSignal, 'SIGTERM' );
+        }
         else
-        test.identical( o.exitSignal, 'SIGKILL' );
+        {
+          test.identical( o.exitCode, null );
+          test.identical( o.ended, true );
+          test.identical( o.exitSignal, 'SIGKILL' );
+        }
 
         return null;
       })
