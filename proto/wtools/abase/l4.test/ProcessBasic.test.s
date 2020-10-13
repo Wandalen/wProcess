@@ -22169,87 +22169,87 @@ function terminateTimeOut( test )
 
   a.ready
 
-  // .then( () =>
-  // {
-  //   var o =
-  //   {
-  //     execPath :  'node ' + testAppPath,
-  //     mode : 'spawn',
-  //     ipc : 1,
-  //     outputCollecting : 1,
-  //     throwingExitCode : 0
-  //   }
+  .then( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'spawn',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
 
-  //   let ready = _.process.start( o )
+    let ready = _.process.start( o )
 
-  //   o.process.on( 'message', () =>
-  //   {
-  //     _.process.terminate({ pnd : o.process, timeOut : 1000, withChildren : 0 });
-  //   })
+    o.process.on( 'message', () =>
+    {
+      _.process.terminate({ pnd : o.process, timeOut : 1000, withChildren : 0 });
+    })
 
-  //   ready.then( ( op ) =>
-  //   {
-  //     test.identical( op.exitCode, null );
-  //     test.identical( op.ended, true );
+    ready.then( ( op ) =>
+    {
+      test.identical( op.exitCode, null );
+      test.identical( op.ended, true );
 
-  //     if( process.platform === 'win32' )
-  //     {
-  //       test.identical( op.exitSignal, 'SIGTERM' );
-  //       test.is( !_.strHas( op.output, 'SIGTERM' ) );
-  //     }
-  //     else
-  //     {
-  //       test.identical( op.exitSignal, 'SIGKILL' );
-  //       test.is( _.strHas( op.output, 'SIGTERM' ) );
-  //     }
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+      }
+      else
+      {
+        test.identical( op.exitSignal, 'SIGKILL' );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+      }
 
-  //     test.is( !_.strHas( op.output, 'Application timeout!' ) );
-  //     return null;
-  //   })
+      test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      return null;
+    })
 
-  //   return ready;
-  // })
+    return ready;
+  })
 
-  // /*  */
+  /*  */
 
-  // .then( () =>
-  // {
-  //   var o =
-  //   {
-  //     execPath :  testAppPath,
-  //     mode : 'fork',
-  //     ipc : 1,
-  //     outputCollecting : 1,
-  //     throwingExitCode : 0
-  //   }
+  .then( () =>
+  {
+    var o =
+    {
+      execPath :  testAppPath,
+      mode : 'fork',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
 
-  //   let ready = _.process.start( o )
+    let ready = _.process.start( o )
 
-  //   o.process.on( 'message', () =>
-  //   {
-  //     _.process.terminate({ pnd : o.process, timeOut : 1000, withChildren : 0 });
-  //   })
+    o.process.on( 'message', () =>
+    {
+      _.process.terminate({ pnd : o.process, timeOut : 1000, withChildren : 0 });
+    })
 
-  //   ready.then( ( op ) =>
-  //   {
-  //     test.identical( op.exitCode, null );
-  //     test.identical( op.ended, true );
-  //     if( process.platform === 'win32' )
-  //     {
-  //       test.identical( op.exitSignal, 'SIGTERM' );
-  //       test.is( !_.strHas( op.output, 'SIGTERM' ) );
-  //     }
-  //     else
-  //     {
-  //       test.identical( op.exitSignal, 'SIGKILL' );
-  //       test.is( _.strHas( op.output, 'SIGTERM' ) );
-  //     }
-  //     test.is( !_.strHas( op.output, 'Application timeout!' ) );
-  //     return null;
-  //   })
+    ready.then( ( op ) =>
+    {
+      test.identical( op.exitCode, null );
+      test.identical( op.ended, true );
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+      }
+      else
+      {
+        test.identical( op.exitSignal, 'SIGKILL' );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+      }
+      test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      return null;
+    })
 
-  //   return ready;
-  // })
+    return ready;
+  })
 
   /*  */
 
