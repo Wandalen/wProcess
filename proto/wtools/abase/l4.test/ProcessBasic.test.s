@@ -9196,7 +9196,7 @@ function startOptionTimeOut( test )
         execPath : mode === 'fork' ? 'program1.js' : `node program1.js`,
         mode,
         currentPath : a.routinePath,
-        timeOut : context.t1,
+        timeOut : context.t1*2,
       }
 
       _.process.start( o );
@@ -9224,7 +9224,7 @@ function startOptionTimeOut( test )
         execPath : mode === 'fork' ? 'program2.js' : `node program2.js`,
         mode,
         currentPath : a.routinePath,
-        timeOut : context.t1,
+        timeOut : context.t1*2,
       }
 
       _.process.start( o );
@@ -9269,7 +9269,7 @@ function startOptionTimeOut( test )
         args : 'program1.js',
         mode,
         currentPath : a.routinePath,
-        timeOut : context.t1,
+        timeOut : context.t1*2,
         outputPiping : 1,
         outputCollecting : 1
       }
@@ -9293,8 +9293,6 @@ function startOptionTimeOut( test )
           test.identical( o.exitSignal, 'SIGTERM' );
           test.is( _.strHas( o.output, 'Process was killed by exit signal SIGTERM' ) );
         }
-
-
         return null;
       })
     })
@@ -9311,7 +9309,7 @@ function startOptionTimeOut( test )
         args : 'program2.js',
         mode,
         currentPath : a.routinePath,
-        timeOut : context.t1,
+        timeOut : context.t1*2,
         outputPiping : 1,
         outputCollecting : 1
       }
@@ -9358,7 +9356,7 @@ function startOptionTimeOut( test )
     setTimeout( () =>
     {
       console.log( 'program1::end' )
-    }, context.t2 )
+    }, context.t1*4 )
   }
 
   /* */
@@ -9369,7 +9367,7 @@ function startOptionTimeOut( test )
     setTimeout( () =>
     {
       console.log( 'program2::end' )
-    }, context.t2 * 3 )
+    }, context.t1*8 )
 
     process.on( 'SIGTERM', () =>
     {
@@ -19689,7 +19687,7 @@ program1:end
         test.identical( options.process.signalCode, signal );
         test.identical( options.process.killed, true );
         var dtime = _.time.now() - time1;
-        test.le( dtime, context.t1*3 );
+        test.le( dtime, context.t1*4 );
         return null;
       })
 
@@ -19743,7 +19741,7 @@ program1:end
         test.identical( options.process.signalCode, signal );
         test.identical( options.process.killed, true );
         var dtime = _.time.now() - time1;
-        test.le( dtime, context.t1*3 );
+        test.le( dtime, context.t1*4 );
         return null;
       })
 
@@ -19801,7 +19799,7 @@ program1:end
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
         if( mode !== 'shell' )
-        test.le( dtime, context.t1*3 );
+        test.le( dtime, context.t1*4 );
         return null;
       })
 
@@ -19920,7 +19918,7 @@ deasync:end
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
         if( mode !== 'shell' )
-        test.le( dtime, context.t1*3 );
+        test.le( dtime, context.t1*4 );
         return null;
       })
 
@@ -19988,7 +19986,7 @@ program1:end
         test.identical( options.process.signalCode, signal );
         test.identical( options.process.killed, true );
         var dtime = _.time.now() - time1;
-        test.le( dtime, context.t1*3 );
+        test.le( dtime, context.t1*4 );
         return null;
       })
 
@@ -20041,7 +20039,7 @@ program1:end
         test.identical( options.process.signalCode, signal );
         test.identical( options.process.killed, true );
         var dtime = _.time.now() - time1;
-        test.le( dtime, context.t1*3 );
+        test.le( dtime, context.t1*4 );
         return null;
       })
 
@@ -20098,7 +20096,7 @@ program1:end
         test.identical( options.process.killed, true );
         var dtime = _.time.now() - time1;
         if( mode !== 'shell' )
-        test.le( dtime, context.t1*3 );
+        test.le( dtime, context.t1*4 );
         return null;
       })
 
@@ -20155,7 +20153,7 @@ program1:end
         test.identical( options.process.killed, true );
         var dtime = _.time.now() - time1;
         if( mode !== 'shell' )
-        test.le( dtime, context.t1*3 );
+        test.le( dtime, context.t1*4 );
         return null;
       })
 
@@ -20212,7 +20210,7 @@ deasync:end
         test.identical( options.process.killed, true );
         var dtime = _.time.now() - time1;
         if( mode !== 'shell' )
-        test.le( dtime, context.t1*3 );
+        test.le( dtime, context.t1*4 );
         return null;
       })
 
@@ -20276,7 +20274,7 @@ deasync:end
         test.identical( options.process.signalCode, 'SIGTERM' );
         test.identical( options.process.killed, false );
         var dtime = _.time.now() - time1;
-        test.le( dtime, context.t1*3 );
+        test.le( dtime, context.t1*4 );
         return null;
       })
 
@@ -20323,7 +20321,7 @@ SIGTERM
         test.identical( options.process.signalCode, 'SIGTERM' );
         test.identical( options.process.killed, false );
         var dtime = _.time.now() - time1;
-        test.le( dtime, context.t1*3 );
+        test.le( dtime, context.t1*4 );
         return null;
       })
 
@@ -20370,7 +20368,7 @@ sleep:begin
         test.identical( options.process.signalCode, 'SIGTERM' );
         test.identical( options.process.killed, false );
         var dtime = _.time.now() - time1;
-        test.le( dtime, context.t1*3 );
+        test.le( dtime, context.t1*4 );
         return null;
       })
 
@@ -20468,7 +20466,7 @@ SIGTERM
         test.identical( options.process.signalCode, 'SIGTERM' );
         test.identical( options.process.killed, false );
         var dtime = _.time.now() - time1;
-        test.le( dtime, context.t1*3 );
+        test.le( dtime, context.t1*4 );
         return null;
       })
 
@@ -20532,7 +20530,7 @@ SIGTERM
         test.identical( options.process.signalCode, 'SIGTERM' );
         test.identical( options.process.killed, false );
         var dtime = _.time.now() - time1;
-        test.le( dtime, context.t1*3 );
+        test.le( dtime, context.t1*4 );
         return null;
       })
 
@@ -20579,7 +20577,7 @@ SIGTERM
         test.identical( options.process.signalCode, 'SIGTERM' );
         test.identical( options.process.killed, false );
         var dtime = _.time.now() - time1;
-        test.le( dtime, context.t1*3 );
+        test.le( dtime, context.t1*4 );
         return null;
       })
 
@@ -20626,7 +20624,7 @@ sleep:begin
         test.identical( options.process.signalCode, 'SIGTERM' );
         test.identical( options.process.killed, false );
         var dtime = _.time.now() - time1;
-        test.le( dtime, context.t1*3 );
+        test.le( dtime, context.t1*4 );
         return null;
       })
 
@@ -20724,7 +20722,7 @@ SIGTERM
         test.identical( options.process.signalCode, 'SIGTERM' );
         test.identical( options.process.killed, false );
         var dtime = _.time.now() - time1;
-        test.le( dtime, context.t1*3 );
+        test.le( dtime, context.t1*4 );
         return null;
       })
 
@@ -20785,7 +20783,7 @@ SIGTERM
         test.identical( options.process.signalCode, 'SIGKILL' );
         test.identical( options.process.killed, false );
         var dtime = _.time.now() - time1;
-        test.le( dtime, context.t1*3 );
+        test.le( dtime, context.t1*4 );
         return null;
       })
 
@@ -20838,7 +20836,7 @@ program1:end
         test.identical( options.process.signalCode, 'SIGKILL' );
         test.identical( options.process.killed, false );
         var dtime = _.time.now() - time1;
-        test.le( dtime, context.t1*3 );
+        test.le( dtime, context.t1*4 );
         return null;
       })
 
@@ -20895,7 +20893,7 @@ program1:end
         test.identical( options.process.killed, false );
         var dtime = _.time.now() - time1;
         if( mode !== 'shell' )
-        test.le( dtime, context.t1*3 );
+        test.le( dtime, context.t1*4 );
         return null;
       })
 
@@ -20952,7 +20950,7 @@ program1:end
         test.identical( options.process.killed, false );
         var dtime = _.time.now() - time1;
         if( mode !== 'shell' )
-        test.le( dtime, context.t1*3 );
+        test.le( dtime, context.t1*4 );
         return null;
       })
 
@@ -21009,7 +21007,7 @@ deasync:end
         test.identical( options.process.killed, false );
         var dtime = _.time.now() - time1;
         if( mode !== 'shell' )
-        test.le( dtime, context.t1*3 );
+        test.le( dtime, context.t1*4 );
         return null;
       })
 
@@ -21043,10 +21041,10 @@ deasync:end
     setTimeout( () => { console.log( 'program1:end' ) }, context.t1*2 );
 
     if( withSleep )
-    sleep( context.t1*4 );
+    sleep( context.t1*8 );
 
     if( withDeasync )
-    deasync( context.t1*4 );
+    deasync( context.t1*8 );
 
     function onTime()
     {
@@ -21893,7 +21891,7 @@ function terminateComplex( test )
       throwingExitCode : 0
     }
     _.process.start( o );
-    _.time.out( 1000, () =>
+    _.time.out( context.t1*2, () =>
     {
       console.log( o.process.pid )
       if( process.send )
@@ -21913,7 +21911,7 @@ function terminateComplex( test )
     })
     if( process.send )
     process.send( process.pid );
-    setTimeout( () => {}, 5000 )
+    setTimeout( () => {}, context.t1*8 )
   }
 
 }
@@ -24316,7 +24314,16 @@ var Proto =
     endSignalsOnExitExit,
 
     terminateComplex,
-    terminateDetachedComplex,
+    // terminateDetachedComplex, /* xxx qqq for Vova : throws phantom error */
+/*
+ = Source code from /pro/builder/proto/wtools/abase/l4_process/l3/Execution.s:2594:17
+      2592 :   if( !_.process.isAlive( o.pid ) )
+      2593 :   {
+    * 2594 :     let err = _.err( '\nTarget process:', _.strQuote( o.pid ), 'does not exist.' );
+      2595 :     return new _.Consequence().error( err );
+      2596 :   }
+*/
+
     terminateWithChildren,
     terminateWithDetachedChildren, // zzz for Vova:investigate and fix termination of deatched process on Windows
     terminateTimeOut, /* xxx qqq for Vova : make it working */

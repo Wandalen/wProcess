@@ -2397,6 +2397,8 @@ function signal_body( o )
     /*
       leader of the group of processes should receive the signal first
       so progression sould be positive
+      it gives chance terminal to terminate child processes properly
+      otherwise more fails appear in shell mode for OS spawing extra process for applications
     */
 
     if( o.withChildren )
