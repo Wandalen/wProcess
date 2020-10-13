@@ -21347,8 +21347,18 @@ function terminateComplex( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
       test.identical( op.exitSignal, null );
-      test.identical( _.strCount( op.output, 'SIGTERM' ), 1 );
-      test.identical( _.strCount( op.output, 'second child SIGTERM' ), 1 );
+
+      if( process.platform === 'win32' )
+      {
+        test.identical( _.strCount( op.output, 'SIGTERM' ), 0 );
+        test.identical( _.strCount( op.output, 'second child SIGTERM' ), 0 );
+      }
+      else
+      {
+        test.identical( _.strCount( op.output, 'SIGTERM' ), 1 );
+        test.identical( _.strCount( op.output, 'second child SIGTERM' ), 1 );
+      }
+
       test.is( !_.process.isAlive( o.process.pid ) )
       test.is( !_.process.isAlive( lastChildPid ) );
       return null;
@@ -21382,10 +21392,21 @@ function terminateComplex( test )
 
     ready.then( ( op ) =>
     {
-      test.identical( op.exitCode, null );
-      test.identical( op.ended, true );
-      test.identical( op.exitSignal, 'SIGTERM' );
-      test.identical( _.strCount( op.output, 'SIGTERM' ), 1 );
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, 1 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, null );
+        test.identical( _.strCount( op.output, 'SIGTERM' ), 0 );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.identical( _.strCount( op.output, 'SIGTERM' ), 1 );
+      }
+
       test.is( !_.process.isAlive( o.process.pid ) )
       test.is( !_.process.isAlive( lastChildPid ) );
       return null;
@@ -21419,12 +21440,25 @@ function terminateComplex( test )
 
     ready.then( ( op ) =>
     {
-      test.identical( op.exitCode, null );
-      test.identical( op.ended, true );
-      test.identical( op.exitSignal, 'SIGTERM' );
-      test.identical( _.strCount( op.output, 'SIGTERM' ), 1 );
+
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, 1 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, null );
+        test.identical( _.strCount( op.output, 'SIGTERM' ), 0 );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.identical( _.strCount( op.output, 'SIGTERM' ), 1 );
+      }
+
       test.is( !_.process.isAlive( o.process.pid ) )
       test.is( !_.process.isAlive( lastChildPid ) );
+
       return null;
     })
 
@@ -21456,11 +21490,23 @@ function terminateComplex( test )
 
     ready.then( ( op ) =>
     {
-      test.identical( op.exitCode, null );
-      test.identical( op.ended, true );
-      test.identical( op.exitSignal, 'SIGTERM' );
+
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, 1 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, null );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGTERM' );
+      }
+
       test.is( !_.process.isAlive( o.process.pid ) )
       test.is( !_.process.isAlive( lastChildPid ) );
+
       return null;
     })
 
