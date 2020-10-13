@@ -18309,11 +18309,23 @@ function terminate( test )
 
     ready.then( ( op ) =>
     {
-      test.identical( op.exitCode, null );
-      test.identical( op.exitSignal, 'SIGTERM' );
-      test.identical( op.ended, true );
-      test.is( _.strHas( op.output, 'SIGTERM' ) );
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.identical( op.ended, true );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.identical( op.ended, true );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+
       return null;
     })
 
@@ -18342,11 +18354,22 @@ function terminate( test )
 
     ready.then( ( op ) =>
     {
-      test.identical( op.exitCode, null );
-      test.identical( op.exitSignal, 'SIGTERM' );
-      test.identical( op.ended, true );
-      test.is( _.strHas( op.output, 'SIGTERM' ) );
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, 1 );//1 because process was killed using pid
+        test.identical( op.exitSignal, null );
+        test.identical( op.ended, true );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.identical( op.ended, true );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
       return null;
     })
 
@@ -18375,11 +18398,22 @@ function terminate( test )
 
     ready.then( ( op ) =>
     {
-      test.identical( op.exitCode, null );
-      test.identical( op.exitSignal, 'SIGTERM' );
-      test.identical( op.ended, true );
-      test.is( _.strHas( op.output, 'SIGTERM' ) );
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, 1 );//1 because process was killed using pid
+        test.identical( op.exitSignal, null );
+        test.identical( op.ended, true );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.identical( op.ended, true );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
       return null;
     })
 
@@ -18407,11 +18441,22 @@ function terminate( test )
 
     ready.then( ( op ) =>
     {
-      test.identical( op.exitCode, null );
-      test.identical( op.exitSignal, 'SIGTERM' );
-      test.identical( op.ended, true );
-      test.is( _.strHas( op.output, 'SIGTERM' ) );
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.identical( op.ended, true );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.identical( op.ended, true );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
       return null;
     })
 
@@ -18450,11 +18495,11 @@ function terminate( test )
     {
       if( process.platform === 'win32' )
       {
-        test.identical( op.exitCode, 1 );
+        test.identical( op.exitCode, null );// null because process was killed using pnd
         test.identical( op.ended, true );
         test.identical( op.exitSignal, 'SIGKILL' );
         test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( _.strHas( op.output, 'Application timeout!' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
       }
       else
       {
