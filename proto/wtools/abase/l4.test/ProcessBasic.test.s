@@ -25206,7 +25206,7 @@ var Proto =
     startProcedureTrivial,
     startProcedureExists,
     startProcedureStack,
-    startProcedureStackMultiple, /* qqq for Yevhen : extend it using startProcedureStack as example */
+    startProcedureStackMultiple, /* qqq for Yevhen : extend it using startProcedureStack as example | aaa : Done*/
     startOnTerminateSeveralCallbacksChronology,
     startChronology,
 
