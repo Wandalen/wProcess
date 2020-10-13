@@ -71,6 +71,42 @@ function startCommon_pre( routine, args )
   _.assert( o.ready === null || _.routineIs( o.ready ) );
   _.assert( o.mode !== 'fork' || !o.sync || o.deasync, 'Mode::fork is available only if either sync:0 or deasync:1' );
 
+  if( o.outputDecorating === null )
+  o.outputDecorating = 0;
+  if( o.outputDecoratingStdout === null )
+  o.outputDecoratingStdout = o.outputDecorating;
+  if( o.outputDecoratingStderr === null )
+  o.outputDecoratingStderr = o.outputDecorating;
+  _.assert( _.boolLike( o.outputDecorating ) );
+  _.assert( _.boolLike( o.outputDecoratingStdout ) );
+  _.assert( _.boolLike( o.outputDecoratingStderr ) );
+
+  if( !_.numberIs( o.verbosity ) )
+  o.verbosity = o.verbosity ? 1 : 0;
+  if( o.verbosity < 0 )
+  o.verbosity = 0;
+  if( o.outputPiping === null )
+  {
+    if( o.stdio === 'pipe' || o.stdio[ 1 ] === 'pipe' )
+    o.outputPiping = o.verbosity >= 2;
+  }
+  o.outputPiping = !!o.outputPiping;
+  _.assert( _.numberIs( o.verbosity ) );
+  _.assert( _.boolLike( o.outputPiping ) );
+
+  if( o.outputAdditive === null )
+  o.outputAdditive = true;
+  o.outputAdditive = !!o.outputAdditive;
+  _.assert( _.boolLike( o.outputAdditive ) );
+
+  if( o.ipc === null )
+  o.ipc = o.mode === 'fork' ? true : false;
+  _.assert( _.boolLike( o.ipc ) );
+
+  if( _.strIs( o.interpreterArgs ) )
+  o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs });
+  _.assert( o.interpreterArgs === null || _.arrayIs( o.interpreterArgs ) );
+
   return o;
 }
 
@@ -226,17 +262,19 @@ function startSingle_body( o )
 
     /* */
 
-    if( o.outputDecorating === null )
-    o.outputDecorating = 0;
-    if( o.outputDecoratingStdout === null )
-    o.outputDecoratingStdout = o.outputDecorating;
-    if( o.outputDecoratingStderr === null )
-    o.outputDecoratingStderr = o.outputDecorating;
+    // if( o.outputDecorating === null )
+    // o.outputDecorating = 0;
+    // if( o.outputDecoratingStdout === null )
+    // o.outputDecoratingStdout = o.outputDecorating;
+    // if( o.outputDecoratingStderr === null )
+    // o.outputDecoratingStderr = o.outputDecorating;
 
     /* ipc */
 
-    if( o.ipc === null )
-    o.ipc = o.mode === 'fork' ? 1 : 0;
+    _.assert( _.boolLike( o.ipc ) );
+
+    // if( o.ipc === null )
+    // o.ipc = o.mode === 'fork' ? 1 : 0;
 
     if( _.strIs( o.stdio ) )
     o.stdio = _.dup( o.stdio, 3 );
@@ -274,6 +312,9 @@ function startSingle_body( o )
 
     /* */
 
+    _.assert( _.boolLike( o.outputDecorating ) );
+    _.assert( _.boolLike( o.outputDecoratingStdout ) );
+    _.assert( _.boolLike( o.outputDecoratingStderr ) );
     _.assert( _.boolLike( o.outputCollecting ) );
 
     o.disconnect = disconnect;
@@ -330,26 +371,30 @@ function startSingle_body( o )
     if( execArgs && execArgs.length )
     o.args = _.arrayPrependArray( o.args || [], execArgs );
 
-    if( _.strIs( o.interpreterArgs ) )
-    o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs });
+    _.assert( o.interpreterArgs === null || _.arrayIs( o.interpreterArgs ) );
+    // if( _.strIs( o.interpreterArgs ) )
+    // o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs });
 
-    if( o.outputAdditive === null )
-    o.outputAdditive = true;
-    o.outputAdditive = !!o.outputAdditive;
+    // if( o.outputAdditive === null )
+    // o.outputAdditive = true;
+    // o.outputAdditive = !!o.outputAdditive;
+    _.assert( _.boolLike( o.outputAdditive ) );
 
     o.currentPath = _.path.resolve( o.currentPath || '.' );
 
     /* verbosity */
 
-    if( !_.numberIs( o.verbosity ) )
-    o.verbosity = o.verbosity ? 1 : 0;
-    if( o.verbosity < 0 )
-    o.verbosity = 0;
-    if( o.outputPiping === null )
-    {
-      if( o.stdio === 'pipe' || o.stdio[ 1 ] === 'pipe' )
-      o.outputPiping = o.verbosity >= 2;
-    }
+    // if( !_.numberIs( o.verbosity ) )
+    // o.verbosity = o.verbosity ? 1 : 0;
+    // if( o.verbosity < 0 )
+    // o.verbosity = 0;
+    // if( o.outputPiping === null )
+    // {
+    //   if( o.stdio === 'pipe' || o.stdio[ 1 ] === 'pipe' )
+    //   o.outputPiping = o.verbosity >= 2;
+    // }
+    _.assert( _.numberIs( o.verbosity ) );
+    _.assert( _.boolLike( o.outputPiping ) );
 
     // if( o.outputCollecting && !o.output )
     // o.output = ''; /* xxx : test for multiple run? to which o-map does it collect output? */
@@ -1416,11 +1461,13 @@ function start_body( o )
 
   /* subroutines index :
 
+  form0,
   form1,
-  end1,
-  end2,
+  form2,
   run1,
   run2,
+  end1,
+  end2,
 
 */
 
@@ -1468,80 +1515,13 @@ function start_body( o )
 
   /* */
 
-  function end1()
-  {
-    if( o.deasync )
-    {
-      o.ready.deasync();
-      if( o.sync )
-      return o.ready.sync();
-    }
-    if( o.sync ) /* xxx : make similar change in startSingle() */
-    return o.ready.sync();
-    return o.ready;
-  }
-
-  /* */
-
-  function end2( err, arg )
-  {
-    // o.exitCode = err ? null : 0;
-    o.state = 'terminated';
-    o.ended = true;
-
-    if( o.procedure.isAlive() )
-    o.procedure.end();
-
-    if( o.exitCode === null && !o.exitSginal )
-    for( let a = 0 ; a < o.runs.length-1 ; a++ )
-    {
-      let o2 = o.runs[ a ];
-      if( o2.exitCode || o2.exitSginal !== null )
-      {
-        o.exitCode = o2.exitCode;
-        o.exitSignal = o2.exitSignal;
-        o.exitReason = o2.exitReason;
-        break;
-      }
-    }
-
-    if( !o.error )
-    for( let a = 0 ; a < o.runs.length-1 ; a++ )
-    {
-      let o2 = o.runs[ a ];
-      if( o2.error )
-      {
-        o.error = o2.error;
-        o.exitReason = o2.exitReason;
-        break;
-      }
-    }
-
-    for( let a = 0 ; a < o.runs.length-1 ; a++ )
-    {
-      let o2 = o.runs[ a ];
-      o.output += o2.output;
-    }
-
-    if( err && !o.error )
-    o.error = err;
-
-    if( err )
-    throw err;
-    // debugger;
-    // return arg;
-
-    // if( o.returningOptionsArray )
-    // return o.runs;
-    return o;
-  }
-
-  /* */
-
-  function run1()
+  function form2()
   {
 
-    form1();
+    _.assert( _.boolLike( o.outputDecorating ) );
+    _.assert( _.boolLike( o.outputDecoratingStdout ) );
+    _.assert( _.boolLike( o.outputDecoratingStderr ) );
+    _.assert( _.boolLike( o.outputCollecting ) );
 
     if( _.arrayIs( o.execPath ) && o.execPath.length > 1 && o.concurrent && o.outputAdditive === null )
     o.outputAdditive = 0;
@@ -1554,12 +1534,9 @@ function start_body( o )
     o.exitCode = null;
     o.exitSignal = null;
     o.error = null;
-    // o.process = null;
     o.procedure = null;
-    // o.fullExecPath = null;
     o.output = o.outputCollecting ? '' : null;
     o.ended = false;
-    // o.handleProcedureTerminationBegin = false;
 
     if( !o.dry )
     if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
@@ -1567,20 +1544,20 @@ function start_body( o )
       o.procedure = _.procedure.begin({ _object : o, _stack : o.stack });
     }
 
-    // let readies = run2();
+  }
+
+  /* */
+
+  function run1()
+  {
+
+    form1();
+    form2();
 
     o.ready
     .then( run2 )
-    // .then( () => _.Consequence.AndKeep( ... readies ) )
     .finally( end2 )
     ;
-
-    // if( o.sync && !o.deasync )
-    // {
-    //   if( o.returningOptionsArray )
-    //   return o.runs;
-    //   return o;
-    // }
 
     return end1();
   }
@@ -1589,7 +1566,6 @@ function start_body( o )
 
   function run2()
   {
-    // let prevReady = o.ready;
     let prevReady = new _.Consequence().take( null );
     let readies = [];
     let execPath = _.arrayAs( o.execPath );
@@ -1602,14 +1578,12 @@ function start_body( o )
       let currentReady = new _.Consequence();
       readies.push( currentReady );
 
-      if( o.concurrent )
+      if( o.concurrent ) /* xxx : coverage? */
       {
-        // if( prevReady )
         prevReady.then( currentReady );
       }
       else
       {
-        // if( prevReady )
         prevReady.finally( currentReady );
         prevReady = currentReady;
       }
@@ -1631,12 +1605,76 @@ function start_body( o )
       delete o2.error;
       delete o2.ended;
       o.runs.push( o2 );
-      _.process.startSingle( o2 ); /* xxx : call body here */
+      _.assertMapHasAll( o2, _.process.startSingle.defaults );
+      _.process.startSingle.body.call( _.process, o2 );
     }
 
-    // debugger;
     return _.Consequence.AndKeep( ... readies );
-    // return readies;
+  }
+
+  /* */
+
+  function end1()
+  {
+    if( o.deasync )
+    {
+      o.ready.deasync();
+      if( o.sync )
+      return o.ready.sync();
+    }
+    if( o.sync ) /* xxx : make similar change in startSingle() */
+    return o.ready.sync();
+    return o.ready;
+  }
+
+  /* */
+
+  function end2( err, arg )
+  {
+    o.state = 'terminated';
+    o.ended = true;
+
+    if( o.procedure.isAlive() )
+    o.procedure.end();
+
+    if( o.exitCode === null && !o.exitSginal )
+    for( let a = 0 ; a < o.runs.length ; a++ )
+    {
+      let o2 = o.runs[ a ];
+      if( o2.exitCode || o2.exitSginal !== null )
+      {
+        o.exitCode = o2.exitCode;
+        o.exitSignal = o2.exitSignal;
+        o.exitReason = o2.exitReason;
+        break;
+      }
+    }
+
+    if( !o.error )
+    for( let a = 0 ; a < o.runs.length ; a++ )
+    {
+      let o2 = o.runs[ a ];
+      if( o2.error )
+      {
+        o.error = o2.error;
+        o.exitReason = o2.exitReason;
+        break;
+      }
+    }
+
+    for( let a = 0 ; a < o.runs.length ; a++ )
+    {
+      let o2 = o.runs[ a ];
+      o.output += o2.output;
+    }
+
+    if( err && !o.error )
+    o.error = err;
+
+    if( err )
+    throw err;
+
+    return o;
   }
 
   /* */
@@ -1727,26 +1765,33 @@ function startNjs_body( o )
   if( o.maximumMemory )
   {
     let totalmem = System.totalmem();
-    if( o.verbosity )
+    if( o.verbosity >= 3 )
     logger.log( 'System.totalmem()', _.strMetricFormatBytes( totalmem ) );
     if( totalmem < 1024*1024*1024 )
     Math.floor( ( totalmem / ( 1024*1024*1.4 ) - 1 ) / 256 ) * 256;
     else
     Math.floor( ( totalmem / ( 1024*1024*1.1 ) - 1 ) / 256 ) * 256;
     interpreterArgs = '--expose-gc --stack-trace-limit=999 --max_old_space_size=' + totalmem;
+    interpreterArgs = _.strSplitNonPreserving({ src : interpreterArgs });
   }
 
-  let path = _.fileProvider.path.nativizeTolerant( o.execPath );
+  let execPath = o.execPath ? _.fileProvider.path.nativizeTolerant( o.execPath ) : '';
+
+  _.assert( o.interpreterArgs === null || o.interpreterArgs === '', 'not implemented' ); /* qqq for Yevhen : implement and cover */
 
   if( o.mode === 'fork' )
-  o.interpreterArgs = interpreterArgs;
+  {
+    if( interpreterArgs )
+    o.interpreterArgs = interpreterArgs;
+  }
   else
-  path = _.strConcat([ 'node', interpreterArgs, path ]);
+  {
+    execPath = _.strConcat([ 'node', interpreterArgs, execPath ]);
+  }
 
-  let startOptions = o;
-  startOptions.execPath = path;
+  o.execPath = execPath;
 
-  let result = _.process.start.body.call( _.process, startOptions );
+  let result = _.process.start.body.call( _.process, o );
 
   return result;
 }
@@ -2296,6 +2341,11 @@ function signal_body( o )
   let ready = _.Consequence().take( null );
   let cons = [];
   let interval = isWindows ? 150 : 25;
+  /*
+    xxx : hangs up on Windows with interval 25 if run in sync mode. see test routine killSync
+  */
+
+  // console.log( 'killing', o.pid );
 
   ready.then( () =>
   {
@@ -2305,8 +2355,8 @@ function signal_body( o )
   })
 
   ready.then( processKill );
-  ready.catch( handleError );
   ready.then( handleResult );
+  ready.catch( handleError );
 
   if( o.sync )
   ready.deasync();
@@ -2326,6 +2376,8 @@ function signal_body( o )
     if( !pnd && o.pnd && o.pnd.pid === p.pid )
     pnd = o.pnd;
 
+    // console.log( o.signal, p.pid );
+
     if( pnd )
     pnd.kill( o.signal );
     else
@@ -2343,6 +2395,8 @@ function signal_body( o )
   function processKill( processes )
   {
 
+    _.assert( !o.withChildren || o.pid === processes[ 0 ].pid, 'Something wrong, first process must be the leader' );
+
     // if( o.withChildren )
     // {
     //   console.log( `pid : ${o.pid}` );
@@ -2350,8 +2404,14 @@ function signal_body( o )
     //   debugger;
     // }
 
+    /*
+      leader of the group of processes should receive the signal first
+      so progression sould be positive
+    */
+
     if( o.withChildren )
-    for( let i = processes.length - 1; i >= 0; i-- )
+    // for( let i = processes.length - 1; i >= 0; i-- )
+    for( let i = 0 ; i < processes.length ; i++ )
     {
       if( isWindows && i && processes[ i ].name === 'conhost.exe' )
       continue;
@@ -2374,7 +2434,7 @@ function signal_body( o )
   {
     var ready = _.Consequence();
     var timer;
-    timer = _.time._periodic( interval, () => //xxx: hangs on Windows with interval 25 if run in sync mode, routine killsync
+    timer = _.time._periodic( interval, () =>
     {
       if( _.process.isAlive( pid ) )
       return false;
@@ -2399,12 +2459,12 @@ function signal_body( o )
 
     ready.finally( ( err, op ) =>
     {
-      if( !timeOutError.resourcesCount() )
+      if( !timeOutError.resourcesCount() ) /* xxx : rewrite */
       timeOutError.take( _.dont );
 
       if( err )
       {
-        timer._cancel();
+        timer._cancel(); /* xxx : rewrite */
         _.errAttend( err );
         if( err.reason === 'time out' )
         err = _.err( err, `\nTarget process: ${_.strQuote( pid )} is still alive. Waited for ${o.timeOut} ms.` );
@@ -2431,13 +2491,16 @@ function signal_body( o )
 
   function handleResult( result )
   {
-    if( !_.arrayIs( result ) )
-    return result;
 
-    if( result.length === 1 )
-    return result[ 0 ];
+    result = _.arrayAs( result );
 
-    return result;
+    for( let i = 0 ; i < result.length ; i++ )
+    {
+      if( result[ i ] !== true )
+      return result[ i ];
+    }
+
+    return true;
   }
 
 }
