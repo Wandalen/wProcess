@@ -2330,6 +2330,7 @@ function signal_body( o )
   let ready = _.Consequence().take( null );
   let cons = [];
   let interval = isWindows ? 150 : 25;
+  let signal = o.signal;
   /*
     xxx : hangs up on Windows with interval 25 if run in sync mode. see test routine killSync
   */
@@ -2372,8 +2373,8 @@ function signal_body( o )
     else
     process.kill( p.pid, o.signal );
 
-    // if( !o.timeOut )
-    // return;
+    if( !o.timeOut )
+    return;
 
     let con = waitForTermination( p.pid );
     cons.push( con );
@@ -2421,8 +2422,8 @@ function signal_body( o )
 
   function waitForTermination( pid )
   {
-    var ready = _.Consequence();
-    var timer;
+    let ready = _.Consequence();
+    let timer;
     timer = _.time._periodic( interval, () =>
     {
       if( _.process.isAlive( pid ) )
@@ -2451,15 +2452,21 @@ function signal_body( o )
       if( !timeOutError.resourcesCount() ) /* xxx : rewrite */
       timeOutError.take( _.dont );
 
-      if( err )
-      {
-        timer._cancel(); /* xxx : rewrite */
-        _.errAttend( err );
-        if( err.reason === 'time out' )
-        err = _.err( err, `\nTarget process: ${_.strQuote( pid )} is still alive. Waited for ${o.timeOut} ms.` );
-        throw err;
-      }
+      if( !err )
       return op;
+
+      timer._cancel(); /* xxx : rewrite */
+      _.errAttend( err );
+
+      if( err.reason === 'time out' )
+      {
+        if( signal === 'SIGKILL' )
+        err = _.err( err, `\nTarget process: ${_.strQuote( pid )} is still alive after kill. Waited for ${o.timeOut} ms.` );
+        else
+        return _.process.kill({ pid, withChildren : 0 });
+      }
+
+      throw err;
     })
 
     return ready;
@@ -2512,7 +2519,7 @@ function kill_body( o )
 {
   _.assert( arguments.length === 1 );
   o.signal = 'SIGKILL';
-  o.timeOut = signal.defaults.timeOut;
+  o.timeOut = 0;
   return _.process.signal.body( o );
 }
 
@@ -2535,24 +2542,9 @@ function terminate_body( o )
 {
   _.assert( arguments.length === 1 );
 
-  o.signal = 'SIGTERM';
+  o.signal = o.timeOut ? 'SIGTERM' : 'SIGKILL';
 
   let ready = _.process.signal.body( o );
-
-  ready.catch( ( err ) =>
-  {
-    if( err.reason !== 'time out' )
-    throw err;
-
-    _.errAttend( err );
-
-    delete o.signal;
-    return _.process.kill.body( o )
-    .then( () =>
-    {
-      throw err;
-    })
-  })
 
   if( o.sync )
   ready.deasync();

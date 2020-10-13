@@ -8879,12 +8879,9 @@ function startOptionTimeOut( test )
       return test.shouldThrowErrorAsync( o.conTerminate )
       .then( () =>
       {
-        test.notIdentical( o.exitCode, 0 );
+        /* Child process on Windows terminates with 'SIGTERM' because process was terminated using process descriptor*/
+        test.identical( o.exitCode, null );
         test.identical( o.ended, true );
-
-        if( process.platform === 'win32' )
-        test.identical( o.exitSignal, null );
-        else
         test.identical( o.exitSignal, 'SIGTERM' );
 
         return null;
@@ -8910,14 +8907,27 @@ function startOptionTimeOut( test )
       return test.shouldThrowErrorAsync( o.conTerminate )
       .then( () =>
       {
-        test.notIdentical( o.exitCode, 0 );
-        test.identical( o.ended, true );
-
         if( process.platform === 'win32' )
-        test.identical( o.exitSignal, null );
+        {
+          test.identical( o.exitCode, null );
+          test.identical( o.ended, true );
+          test.identical( o.exitSignal, 'SIGTERM' );
+        }
+        else if( process.platform === 'darwin' )
+        {
+          test.identical( o.exitCode, null );
+          test.identical( o.ended, true );
+          test.identical( o.exitSignal, 'SIGKILL' );
+        }
         else
-        test.identical( o.exitSignal, 'SIGKILL' );
-
+        {
+          test.identical( o.exitCode, null );
+          test.identical( o.ended, true );
+          if( mode === 'shell' )
+          test.identical( o.exitSignal, 'SIGTERM' );
+          else
+          test.identical( o.exitSignal, 'SIGKILL' );
+        }
         return null;
       })
     })
@@ -8942,17 +8952,23 @@ function startOptionTimeOut( test )
       _.process.start( o );
 
       return test.shouldThrowErrorAsync( o.conTerminate )
-      .then( ( got ) =>
+      .then( () =>
       {
-        test.notIdentical( o.exitCode, 0 );
-        test.identical( o.ended, true );
-
         if( process.platform === 'win32' )
-        test.identical( o.exitSignal, null );
+        {
+          test.identical( o.exitCode, null );
+          test.identical( o.ended, true );
+          test.identical( o.exitSignal, 'SIGTERM' );
+          test.is( !_.strHas( o.output, 'Process was killed by exit signal SIGTERM' ) );
+        }
         else
-        test.identical( o.exitSignal, 'SIGTERM' );
+        {
+          test.identical( o.exitCode, null );
+          test.identical( o.ended, true );
+          test.identical( o.exitSignal, 'SIGTERM' );
+          test.is( _.strHas( o.output, 'Process was killed by exit signal SIGTERM' ) );
+        }
 
-        test.is( _.strHas( o.output, 'Process was killed by exit signal SIGTERM' ) );
 
         return null;
       })
@@ -8978,15 +8994,29 @@ function startOptionTimeOut( test )
       _.process.start( o );
 
       return test.shouldThrowErrorAsync( o.conTerminate )
-      .then( ( got ) =>
+      .then( () =>
       {
-        test.notIdentical( o.exitCode, 0 );
-        test.identical( o.ended, true );
-
         if( process.platform === 'win32' )
-        test.identical( o.exitSignal, null );
+        {
+          test.identical( o.exitCode, null );
+          test.identical( o.ended, true );
+          test.identical( o.exitSignal, 'SIGTERM' );
+        }
+        else if( process.platform === 'darwin' )
+        {
+          test.identical( o.exitCode, null );
+          test.identical( o.ended, true );
+          test.identical( o.exitSignal, 'SIGKILL' );
+        }
         else
-        test.identical( o.exitSignal, 'SIGKILL' );
+        {
+          test.identical( o.exitCode, null );
+          test.identical( o.ended, true );
+          if( mode === 'shell' )
+          test.identical( o.exitSignal, 'SIGTERM' );
+          else
+          test.identical( o.exitSignal, 'SIGKILL' );
+        }
 
         return null;
       })
@@ -18309,11 +18339,23 @@ function terminate( test )
 
     ready.then( ( op ) =>
     {
-      test.identical( op.exitCode, null );
-      test.identical( op.exitSignal, 'SIGTERM' );
-      test.identical( op.ended, true );
-      test.is( _.strHas( op.output, 'SIGTERM' ) );
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.identical( op.ended, true );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.identical( op.ended, true );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+
       return null;
     })
 
@@ -18342,11 +18384,22 @@ function terminate( test )
 
     ready.then( ( op ) =>
     {
-      test.identical( op.exitCode, null );
-      test.identical( op.exitSignal, 'SIGTERM' );
-      test.identical( op.ended, true );
-      test.is( _.strHas( op.output, 'SIGTERM' ) );
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, 1 );//1 because process was killed using pid
+        test.identical( op.exitSignal, null );
+        test.identical( op.ended, true );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.identical( op.ended, true );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
       return null;
     })
 
@@ -18375,11 +18428,22 @@ function terminate( test )
 
     ready.then( ( op ) =>
     {
-      test.identical( op.exitCode, null );
-      test.identical( op.exitSignal, 'SIGTERM' );
-      test.identical( op.ended, true );
-      test.is( _.strHas( op.output, 'SIGTERM' ) );
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, 1 );//1 because process was killed using pid
+        test.identical( op.exitSignal, null );
+        test.identical( op.ended, true );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.identical( op.ended, true );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
       return null;
     })
 
@@ -18407,11 +18471,22 @@ function terminate( test )
 
     ready.then( ( op ) =>
     {
-      test.identical( op.exitCode, null );
-      test.identical( op.exitSignal, 'SIGTERM' );
-      test.identical( op.ended, true );
-      test.is( _.strHas( op.output, 'SIGTERM' ) );
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.identical( op.ended, true );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.identical( op.ended, true );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
       return null;
     })
 
@@ -18448,28 +18523,20 @@ function terminate( test )
 
     ready.then( ( op ) =>
     {
-      if( process.platform === 'linux' ) /* xxx qqq : ? */
+      if( process.platform === 'win32' )
       {
-        test.identical( op.exitCode, null );
+        test.identical( op.exitCode, null );// null because process was killed using pnd
         test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGTERM' );
+        test.identical( op.exitSignal, 'SIGKILL' );
         test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( _.strHas( op.output, 'Application timeout!' ) );
-      }
-      else if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, null );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( _.strHas( op.output, 'Application timeout!' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
       }
       else
       {
-        test.identical( op.exitCode, 0 );
+        test.identical( op.exitCode, null );
         test.identical( op.ended, true );
-        test.identical( op.exitSignal, null );
-        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.identical( op.exitSignal, 'SIGKILL' );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
         test.is( !_.strHas( op.output, 'Application timeout!' ) );
       }
 
@@ -18502,28 +18569,20 @@ function terminate( test )
 
     ready.then( ( op ) =>
     {
-      if( process.platform === 'linux' )
+      if( process.platform === 'win32' )
       {
-        test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( _.strHas( op.output, 'Application timeout!' ) );
-      }
-      else if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, 0 );
+        test.identical( op.exitCode, 1 );
         test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
         test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( _.strHas( op.output, 'Application timeout!' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
       }
       else
       {
-        test.identical( op.exitCode, 0 );
+        test.identical( op.exitCode, null );
         test.identical( op.ended, true );
-        test.identical( op.exitSignal, null );
-        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.identical( op.exitSignal, 'SIGKILL' );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
         test.is( !_.strHas( op.output, 'Application timeout!' ) );
       }
       return null;
@@ -18592,11 +18651,22 @@ function terminateSync( test )
 
     o.conTerminate.then( ( op ) =>
     {
-      test.identical( op.ended, true );
-      test.identical( op.exitCode, null );
-      test.identical( op.exitSignal, 'SIGTERM' );
-      test.is( _.strHas( op.output, 'SIGTERM' ) );
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.ended, true );
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.ended, true );
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
       return null;
     })
 
@@ -18627,11 +18697,22 @@ function terminateSync( test )
 
     o.conTerminate.then( ( op ) =>
     {
-      test.identical( op.ended, true );
-      test.identical( op.exitCode, null );
-      test.identical( op.exitSignal, 'SIGTERM' );
-      test.is( _.strHas( op.output, 'SIGTERM' ) );
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.ended, true );
+        test.identical( op.exitCode, 1 );
+        test.identical( op.exitSignal, null );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.ended, true );
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
       return null;
     })
 
@@ -18663,11 +18744,22 @@ function terminateSync( test )
 
     o.conTerminate.then( ( op ) =>
     {
-      test.identical( op.ended, true );
-      test.identical( op.exitCode, null );
-      test.identical( op.exitSignal, 'SIGTERM' );
-      test.is( _.strHas( op.output, 'SIGTERM' ) );
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.ended, true );
+        test.identical( op.exitCode, 1 );
+        test.identical( op.exitSignal, null );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.ended, true );
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
       return null;
     })
 
@@ -18700,11 +18792,23 @@ function terminateSync( test )
 
     o.conTerminate.then( ( op ) =>
     {
-      test.identical( op.ended, true );
-      test.identical( op.exitCode, null );
-      test.identical( op.exitSignal, 'SIGTERM' );
-      test.is( _.strHas( op.output, 'SIGTERM' ) );
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.ended, true );
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.ended, true );
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+
       return null;
     })
 
@@ -18740,30 +18844,11 @@ function terminateSync( test )
 
     o.conTerminate.then( ( op ) =>
     {
-      if( process.platform === 'linux' ) /* xxx */
-      {
-        test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.is( _.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-      else if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, null );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( _.strHas( op.output, 'Application timeout!' ) );
-      }
-      else
-      {
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, null );
-        test.is( _.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
+      test.identical( op.exitCode, null );
+      test.identical( op.ended, true );
+      test.identical( op.exitSignal, 'SIGKILL' );
+      test.is( !_.strHas( op.output, 'SIGTERM' ) );
+      test.is( !_.strHas( op.output, 'Application timeout!' ) );
 
       return null;
     })
@@ -18795,31 +18880,22 @@ function terminateSync( test )
 
     o.conTerminate.then( ( op ) =>
     {
-      if( process.platform === 'linux' )
+      if( process.platform === 'win32' )
       {
-        test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( _.strHas( op.output, 'Application timeout!' ) );
-      }
-      else if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, 0 );
+        test.identical( op.exitCode, 1 );
         test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
         test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( _.strHas( op.output, 'Application timeout!' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
       }
       else
       {
-        test.identical( op.exitCode, 0 );
+        test.identical( op.exitCode, null );
         test.identical( op.ended, true );
-        test.identical( op.exitSignal, null );
-        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.identical( op.exitSignal, 'SIGKILL' );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
         test.is( !_.strHas( op.output, 'Application timeout!' ) );
       }
-
       return null;
     })
 
@@ -21301,8 +21377,18 @@ function terminateComplex( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
       test.identical( op.exitSignal, null );
-      test.identical( _.strCount( op.output, 'SIGTERM' ), 1 );
-      test.identical( _.strCount( op.output, 'second child SIGTERM' ), 1 );
+
+      if( process.platform === 'win32' )
+      {
+        test.identical( _.strCount( op.output, 'SIGTERM' ), 0 );
+        test.identical( _.strCount( op.output, 'second child SIGTERM' ), 0 );
+      }
+      else
+      {
+        test.identical( _.strCount( op.output, 'SIGTERM' ), 1 );
+        test.identical( _.strCount( op.output, 'second child SIGTERM' ), 1 );
+      }
+
       test.is( !_.process.isAlive( o.process.pid ) )
       test.is( !_.process.isAlive( lastChildPid ) );
       return null;
@@ -21336,10 +21422,21 @@ function terminateComplex( test )
 
     ready.then( ( op ) =>
     {
-      test.identical( op.exitCode, null );
-      test.identical( op.ended, true );
-      test.identical( op.exitSignal, 'SIGTERM' );
-      test.identical( _.strCount( op.output, 'SIGTERM' ), 1 );
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, 1 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, null );
+        test.identical( _.strCount( op.output, 'SIGTERM' ), 0 );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.identical( _.strCount( op.output, 'SIGTERM' ), 1 );
+      }
+
       test.is( !_.process.isAlive( o.process.pid ) )
       test.is( !_.process.isAlive( lastChildPid ) );
       return null;
@@ -21373,12 +21470,25 @@ function terminateComplex( test )
 
     ready.then( ( op ) =>
     {
-      test.identical( op.exitCode, null );
-      test.identical( op.ended, true );
-      test.identical( op.exitSignal, 'SIGTERM' );
-      test.identical( _.strCount( op.output, 'SIGTERM' ), 1 );
+
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, 1 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, null );
+        test.identical( _.strCount( op.output, 'SIGTERM' ), 0 );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.identical( _.strCount( op.output, 'SIGTERM' ), 1 );
+      }
+
       test.is( !_.process.isAlive( o.process.pid ) )
       test.is( !_.process.isAlive( lastChildPid ) );
+
       return null;
     })
 
@@ -21410,11 +21520,23 @@ function terminateComplex( test )
 
     ready.then( ( op ) =>
     {
-      test.identical( op.exitCode, null );
-      test.identical( op.ended, true );
-      test.identical( op.exitSignal, 'SIGTERM' );
+
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, 1 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, null );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGTERM' );
+      }
+
       test.is( !_.process.isAlive( o.process.pid ) )
       test.is( !_.process.isAlive( lastChildPid ) );
+
       return null;
     })
 
@@ -21551,6 +21673,9 @@ function terminateDetachedComplex( test )
         test.identical( o.exitCode, null );
         test.identical( o.exitSignal, 'SIGTERM' );
         test.identical( o.ended, true );
+        if( process.platform === 'win32' )
+        test.is( !_.strHas( o.output, 'SIGTERM' ) );
+        else
         test.is( _.strHas( o.output, 'SIGTERM' ) );
         test.is( !_.strHas( o.output, 'TerminationBegin' ) );
         test.is( !_.process.isAlive( _.numberFrom( o.process.pid ) ) );
@@ -21639,6 +21764,9 @@ function terminateDetachedComplex( test )
         test.identical( o.exitCode, null );
         test.identical( o.exitSignal, 'SIGTERM' );
         test.identical( o.ended, true );
+        if( process.platform === 'win32')
+        test.is( !_.strHas( o.output, 'SIGTERM' ) );
+        else
         test.is( _.strHas( o.output, 'SIGTERM' ) );
         test.is( !_.strHas( o.output, 'TerminationBegin' ) );
         test.is( !_.process.isAlive( _.numberFrom( o.process.pid ) ) );
@@ -21757,15 +21885,28 @@ function terminateWithChildren( test )
     {
       return terminated.then( () =>
       {
-        test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.identical( _.strCount( op.output, 'SIGTERM' ), 2 );
-        test.identical( _.strCount( op.output, 'SIGTERM CHILD' ), 1 );
+        if( process.platform === 'win32' )
+        {
+          test.identical( op.exitCode, 1 );
+          test.identical( op.ended, true );
+          test.identical( op.exitSignal, null );
+          test.identical( _.strCount( op.output, 'SIGTERM' ), 0 );
+          test.identical( _.strCount( op.output, 'SIGTERM CHILD' ), 0 );
+        }
+        else
+        {
+          test.identical( op.exitCode, null );
+          test.identical( op.ended, true );
+          test.identical( op.exitSignal, 'SIGTERM' );
+          test.identical( _.strCount( op.output, 'SIGTERM' ), 2 );
+          test.identical( _.strCount( op.output, 'SIGTERM CHILD' ), 1 );
+          var file = a.fileProvider.fileRead( a.abs( a.routinePath, lastChildPid.toString() ) );
+          test.identical( file, lastChildPid.toString() )
+        }
+
         test.is( !_.process.isAlive( o.process.pid ) )
         test.is( !_.process.isAlive( lastChildPid ) );
-        var file = a.fileProvider.fileRead( a.abs( a.routinePath, lastChildPid.toString() ) );
-        test.identical( file, lastChildPid.toString() )
+
         return null;
       })
     })
@@ -21800,15 +21941,27 @@ function terminateWithChildren( test )
     {
       return terminated.then( () =>
       {
-        test.identical( op.exitCode, null ); /* qqq for Vova : test is probably bad. fails on Mint */
+        test.identical( op.exitCode, 0 ); /* qqq for Vova : test is probably bad. fails on Mint */
         test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.identical( _.strCount( op.output, 'SIGTERM' ), 1 );
-        test.identical( _.strCount( op.output, 'SIGTERM CHILD' ), 1 );
+        test.identical( op.exitSignal, null );
+
+        if( process.platform === 'win32' )
+        {
+          test.identical( _.strCount( op.output, 'SIGTERM' ), 0 );
+          test.identical( _.strCount( op.output, 'SIGTERM CHILD' ), 0 );
+          test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, lastChildPid.toString() ) ) );
+        }
+        else
+        {
+          test.identical( _.strCount( op.output, 'SIGTERM' ), 1 );
+          test.identical( _.strCount( op.output, 'SIGTERM CHILD' ), 1 );
+          var file = a.fileProvider.fileRead( a.abs( a.routinePath, lastChildPid.toString() ) );
+          test.identical( file, lastChildPid.toString() )
+        }
+
         test.is( !_.process.isAlive( o.process.pid ) )
         test.is( !_.process.isAlive( lastChildPid ) );
-        var file = a.fileProvider.fileRead( a.abs( a.routinePath, lastChildPid.toString() ) );
-        test.identical( file, lastChildPid.toString() )
+
         return null;
       })
     })
@@ -21842,18 +21995,33 @@ function terminateWithChildren( test )
     {
       return terminated.then( () =>
       {
-        test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.identical( _.strCount( op.output, 'SIGTERM' ), 3 );
-        test.identical( _.strCount( op.output, 'SIGTERM CHILD' ), 2 );
+        if( process.platform === 'win32' )
+        {
+          test.identical( op.exitCode, 1 );
+          test.identical( op.ended, true );
+          test.identical( op.exitSignal, null );
+          test.identical( _.strCount( op.output, 'SIGTERM' ), 0 );
+          test.identical( _.strCount( op.output, 'SIGTERM CHILD' ), 0 );
+          test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, children[ 0 ].toString() ) ) );
+          test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, children[ 1 ].toString() ) ) );
+        }
+        else
+        {
+          test.identical( op.exitCode, null );
+          test.identical( op.ended, true );
+          test.identical( op.exitSignal, 'SIGTERM' );
+          test.identical( _.strCount( op.output, 'SIGTERM' ), 3 );
+          test.identical( _.strCount( op.output, 'SIGTERM CHILD' ), 2 );
+          var file = a.fileProvider.fileRead( a.abs( a.routinePath, children[ 0 ].toString() ) );
+          test.identical( file, children[ 0 ].toString() )
+          var file = a.fileProvider.fileRead( a.abs( a.routinePath, children[ 1 ].toString() ) );
+          test.identical( file, children[ 1 ].toString() )
+        }
+
         test.is( !_.process.isAlive( o.process.pid ) )
         test.is( !_.process.isAlive( children[ 0 ] ) );
         test.is( !_.process.isAlive( children[ 1 ] ) );
-        var file = a.fileProvider.fileRead( a.abs( a.routinePath, children[ 0 ].toString() ) );
-        test.identical( file, children[ 0 ].toString() )
-        var file = a.fileProvider.fileRead( a.abs( a.routinePath, children[ 1 ].toString() ) );
-        test.identical( file, children[ 1 ].toString() )
+
         return null;
       })
 
@@ -22026,15 +22194,35 @@ function terminateWithDetachedChildren( test )
     {
       return terminated.then( () =>
       {
-        test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        if( process.platform === 'win32' )
+        {
+          test.identical( op.exitCode, 1 );
+          test.identical( op.ended, true );
+          test.identical( op.exitSignal, null );
+          test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        }
+        else
+        {
+          test.identical( op.exitCode, null );
+          test.identical( op.ended, true );
+          test.identical( op.exitSignal, 'SIGTERM' );
+          test.is( _.strHas( op.output, 'SIGTERM' ) );
+        }
+
         return _.time.out( 9000, () =>
         {
           /* zzz : problem with termination of detached proces on Windows, child process does't receive SIGINT */
-          test.is( a.fileProvider.fileExists( a.abs( a.routinePath, children[ 0 ].toString() ) ) )
-          test.is( a.fileProvider.fileExists( a.abs( a.routinePath, children[ 1 ].toString() ) ) )
+          if( process.platform === 'win32' )
+          {
+            test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, children[ 0 ].toString() ) ) )
+            test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, children[ 1 ].toString() ) ) )
+          }
+          else
+          {
+            test.is( a.fileProvider.fileExists( a.abs( a.routinePath, children[ 0 ].toString() ) ) )
+            test.is( a.fileProvider.fileExists( a.abs( a.routinePath, children[ 1 ].toString() ) ) )
+          }
+
           test.is( !_.process.isAlive( o.process.pid ) )
           test.is( !_.process.isAlive( children[ 0 ] ) );
           test.is( !_.process.isAlive( children[ 1 ] ) );
@@ -22185,8 +22373,127 @@ function terminateTimeOut( test )
     {
       test.identical( op.exitCode, null );
       test.identical( op.ended, true );
+
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+      }
+      else
+      {
+        test.identical( op.exitSignal, 'SIGKILL' );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+      }
+
+      test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      return null;
+    })
+
+    return ready;
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'spawn',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    o.process.on( 'message', () =>
+    {
+      _.process.terminate({ pnd : o.process, timeOut : 1000, withChildren : 1 });
+    })
+
+    ready.then( ( op ) =>
+    {
+      test.identical( op.exitCode, null );
+      test.identical( op.ended, true );
+
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+      }
+      else
+      {
+        test.identical( op.exitSignal, 'SIGKILL' );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+      }
+
+      test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      return null;
+    })
+
+    return ready;
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'spawn',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    o.process.on( 'message', () =>
+    {
+      _.process.terminate({ pnd : o.process, timeOut : 0, withChildren : 0 });
+    })
+
+    ready.then( ( op ) =>
+    {
+      test.identical( op.exitCode, null );
+      test.identical( op.ended, true );
       test.identical( op.exitSignal, 'SIGKILL' );
-      test.is( _.strHas( op.output, 'SIGTERM' ) );
+      test.is( !_.strHas( op.output, 'SIGTERM' ) );
+      test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      return null;
+    })
+
+    return ready;
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'spawn',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    o.process.on( 'message', () =>
+    {
+      _.process.terminate({ pnd : o.process, timeOut : 0, withChildren : 1 });
+    })
+
+    ready.then( ( op ) =>
+    {
+      test.identical( op.exitCode, null );
+      test.identical( op.ended, true );
+      test.identical( op.exitSignal, 'SIGKILL' );
+      test.is( !_.strHas( op.output, 'SIGTERM' ) );
       test.is( !_.strHas( op.output, 'Application timeout!' ) );
       return null;
     })
@@ -22218,8 +22525,123 @@ function terminateTimeOut( test )
     {
       test.identical( op.exitCode, null );
       test.identical( op.ended, true );
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+      }
+      else
+      {
+        test.identical( op.exitSignal, 'SIGKILL' );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+      }
+      test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      return null;
+    })
+
+    return ready;
+  })
+
+  /*  */
+
+  .then( () =>
+  {
+    var o =
+    {
+      execPath :  testAppPath,
+      mode : 'fork',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    o.process.on( 'message', () =>
+    {
+      _.process.terminate({ pnd : o.process, timeOut : 1000, withChildren : 1 });
+    })
+
+    ready.then( ( op ) =>
+    {
+      test.identical( op.exitCode, null );
+      test.identical( op.ended, true );
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+      }
+      else
+      {
+        test.identical( op.exitSignal, 'SIGKILL' );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+      }
+      test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      return null;
+    })
+
+    return ready;
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    var o =
+    {
+      execPath :  testAppPath,
+      mode : 'fork',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    o.process.on( 'message', () =>
+    {
+      _.process.terminate({ pnd : o.process, timeOut : 0, withChildren : 0 });
+    })
+
+    ready.then( ( op ) =>
+    {
+      test.identical( op.exitCode, null );
+      test.identical( op.ended, true );
       test.identical( op.exitSignal, 'SIGKILL' );
-      test.is( _.strHas( op.output, 'SIGTERM' ) );
+      test.is( !_.strHas( op.output, 'SIGTERM' ) );
+      test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      return null;
+    })
+
+    return ready;
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    var o =
+    {
+      execPath :  testAppPath,
+      mode : 'fork',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    o.process.on( 'message', () =>
+    {
+      _.process.terminate({ pnd : o.process, timeOut : 0, withChildren : 1 });
+    })
+
+    ready.then( ( op ) =>
+    {
+      test.identical( op.exitCode, null );
+      test.identical( op.ended, true );
+      test.identical( op.exitSignal, 'SIGKILL' );
+      test.is( !_.strHas( op.output, 'SIGTERM' ) );
       test.is( !_.strHas( op.output, 'Application timeout!' ) );
       return null;
     })
@@ -22245,12 +22667,68 @@ function terminateTimeOut( test )
     {
       data = data.toString();
       if( _.strHas( data, 'ready' ))
-      _.process.terminate({ pnd : o.process });
+      _.process.terminate({ pnd : o.process, timeOut : 1000, withChildren : 1 });
     })
 
     ready.then( ( op ) =>
     {
-      if( process.platform === 'linux' )
+
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else if( process.platform === 'darwin' )
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGKILL' );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+
+      return null;
+    })
+
+    return ready;
+  })
+
+  /*  */
+
+  .then( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'shell',
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    o.process.stdout.on( 'data', ( data ) =>
+    {
+      data = data.toString();
+      if( _.strHas( data, 'ready' ))
+      _.process.terminate({ pnd : o.process, timeOut : 1000, withChildren : 0 });
+    })
+
+    ready.then( ( op ) =>
+    {
+
+      if( process.platform === 'win32' )
       {
         test.identical( op.exitCode, null );
         test.identical( op.ended, true );
@@ -22270,10 +22748,83 @@ function terminateTimeOut( test )
       {
         test.identical( op.exitCode, null );
         test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGKILL' );
+        test.identical( op.exitSignal, 'SIGTERM' );
         test.is( !_.strHas( op.output, 'SIGTERM' ) );
         test.is( _.strHas( op.output, 'Application timeout!' ) );
       }
+
+      return null;
+    })
+
+    return ready;
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'shell',
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    o.process.stdout.on( 'data', ( data ) =>
+    {
+      data = data.toString();
+      if( _.strHas( data, 'ready' ))
+      _.process.terminate({ pnd : o.process, timeOut : 0, withChildren : 1 });
+    })
+
+    ready.then( ( op ) =>
+    {
+      test.identical( op.exitCode, null );
+      test.identical( op.ended, true );
+      test.identical( op.exitSignal, 'SIGKILL' );
+      test.is( !_.strHas( op.output, 'SIGTERM' ) );
+      test.is( !_.strHas( op.output, 'Application timeout!' ) );
+
+      return null;
+    })
+
+    return ready;
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'shell',
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    o.process.stdout.on( 'data', ( data ) =>
+    {
+      data = data.toString();
+      if( _.strHas( data, 'ready' ))
+      _.process.terminate({ pnd : o.process, timeOut : 0, withChildren : 0 });
+    })
+
+    ready.then( ( op ) =>
+    {
+      test.identical( op.exitCode, null );
+      test.identical( op.ended, true );
+      test.identical( op.exitSignal, 'SIGKILL' );
+      test.is( !_.strHas( op.output, 'SIGTERM' ) );
+      if( process.platform === 'darwin' )
+      test.is( _.strHas( op.output, '!Application timeout!' ) );
+      else
+      test.is( _.strHas( op.output, 'Application timeout!' ) );
 
       return null;
     })
@@ -22289,9 +22840,10 @@ function terminateTimeOut( test )
 
   function testApp()
   {
+    console.log( process.pid, process.ppid)
     process.on( 'SIGTERM', () =>
     {
-      console.log( 'SIGTERM' )
+      console.log( 'SIGTERM ignored' )
     })
     if( process.send )
     process.send( process.pid );
@@ -22300,7 +22852,7 @@ function terminateTimeOut( test )
     setTimeout( () =>
     {
       console.log( 'Application timeout!' )
-    }, 10000 )
+    }, context.t2 )
   }
 }
 
@@ -22345,10 +22897,20 @@ function terminateDifferentStdio( test )
 
     ready.then( ( op ) =>
     {
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      test.identical( op.exitSignal, null );
-      test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, 1 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, null );
+        test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, null );
+        test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+      }
       return null;
     })
 
@@ -22378,10 +22940,20 @@ function terminateDifferentStdio( test )
 
     ready.then( ( op ) =>
     {
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      test.identical( op.exitSignal, null );
-      test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, 1 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, null );
+        test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, null );
+        test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+      }
       return null;
     })
 
@@ -22409,10 +22981,20 @@ function terminateDifferentStdio( test )
 
     ready.then( ( op ) =>
     {
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      test.identical( op.exitSignal, null );
-      test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, 1 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, null );
+        test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, null );
+        test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+      }
       return null;
     })
 
@@ -22441,10 +23023,20 @@ function terminateDifferentStdio( test )
 
     ready.then( ( op ) =>
     {
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      test.identical( op.exitSignal, null );
-      test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, 1 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, null );
+        test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, null );
+        test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+      }
       return null;
     })
 
@@ -22475,10 +23067,20 @@ function terminateDifferentStdio( test )
 
     ready.then( ( op ) =>
     {
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      test.identical( op.exitSignal, null );
-      test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, 1 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, null );
+        test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, null );
+        test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+      }
       return null;
     })
 
@@ -22509,10 +23111,21 @@ function terminateDifferentStdio( test )
 
     ready.then( ( op ) =>
     {
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      test.identical( op.exitSignal, null );
-      test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, 1 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, null );
+        test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, null );
+        test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+      }
+
       return null;
     })
 
@@ -23277,7 +23890,7 @@ var Proto =
     startReadyDelayMultiple,
     startOptionWhenDelay,
     startOptionWhenTime,
-    // startOptionTimeOut, /* qqq for Vova : fix please */
+    startOptionTimeOut, /* qqq for Vova : fix please */
     // startAfterDeath, /* zzz : fix */
     // startAfterDeathOutput, /* zzz : ? */
 
@@ -23381,7 +23994,7 @@ var Proto =
     terminateDetachedComplex,
     terminateWithChildren,
     terminateWithDetachedChildren, // zzz for Vova:investigate and fix termination of deatched process on Windows
-    // terminateTimeOut, /* xxx qqq for Vova : make it working */
+    terminateTimeOut, /* xxx qqq for Vova : make it working */
     terminateDifferentStdio,
     killComplex,
 
