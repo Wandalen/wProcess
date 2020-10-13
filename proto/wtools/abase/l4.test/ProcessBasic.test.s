@@ -6824,54 +6824,6 @@ function startImportantExecPath( test )
   /* qqq for Yevhen : separate test routine startImportantExecPathPassingThrough and run it from separate process */
   /* zzz */
 
-  /* */
-
-  shell({ execPath : 'echo', args : null, passingThrough : 1 })
-  .then( function( op )
-  {
-    test.identical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    if( process.platform === 'win32' )
-    test.is( _.strHas( op.output, '"' + process.argv.slice( 2 ).join( '" "' ) + '"' ) );
-    else
-    test.is( _.strHas( op.output, process.argv.slice( 2 ).join( ' ') ) );
-    return null;
-  })
-
-  /* */
-
-  shell({ execPath : null, args : [ 'echo' ], passingThrough : 1 })
-  .then( function( op )
-  {
-    test.identical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    if( process.platform === 'win32' )
-    test.is( _.strHas( op.output, '"' + process.argv.slice( 2 ).join( '" "' ) + '"' ) );
-    else
-    test.is( _.strHas( op.output, process.argv.slice( 2 ).join( ' ') ) );
-    return null;
-  })
-
-  shell({ execPath : 'echo *', args : [ '*' ], passingThrough : 1 })
-  .then( function( op )
-  {
-    test.identical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    if( process.platform === 'win32' )
-    {
-      test.is( _.strHas( op.output, '*' ) );
-      test.is( _.strHas( op.output, '"*"' ) );
-      test.is( _.strHas( op.output, '"' + process.argv.slice( 2 ).join( '" "' ) + '"' ) );
-    }
-    else
-    {
-      test.is( _.strHas( op.output, 'file' ) );
-      test.is( _.strHas( op.output, '*' ) );
-      test.is( _.strHas( op.output, process.argv.slice( 2 ).join( ' ') ) );
-    }
-    return null;
-  })
-
   return a.ready;
 }
 
@@ -6885,33 +6837,549 @@ exec paths with special chars
 function startImportantExecPathPassingThrough( test )
 {
   let context = this;
-  let a = test.assetFor( false );
+  let a = context.assetFor( test, false );
 
   /* */
 
-  let shell = _.process.starter
-  ({
-    currentPath : a.routinePath,
-    mode : 'shell',
-    stdio : 'pipe',
-    outputPiping : 1,
-    outputCollecting : 1,
-    ready : a.ready
+  a.ready.then( () =>
+  {
+    test.open( '0 args to parent' );
+    return null;
+  } )
+
+  a.ready.then( function()
+  {
+    test.case = `execPath : 'echo', args : null`;
+
+    let locals =
+    {
+      toolsPath : a.path.nativize( _.module.toolsPathGet() ),
+      routinePath : a.routinePath,
+    }
+
+    let programPath = a.path.nativize( a.program({ routine : testAppParent1, locals }) );
+
+    let options =
+    {
+      execPath :  'node ' + programPath,
+      outputCollecting : 1,
+    }
+
+    return _.process.start( options )
+    .then( ( op ) =>
+    {
+      console.log( 'Output: ', op.output );
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.is( _.strHas( op.output, 'echo\n' ) );
+      return null;
+
+    })
+
+    /* - */
+
+    function testAppParent1()
+    {
+      let _ = require( toolsPath );
+      _.include( 'wFiles' );
+      _.include( 'wProcess' );
+
+      let shell = _.process.starter
+      ({
+        currentPath : routinePath,
+        mode : 'shell',
+        stdio : 'pipe',
+        outputPiping : 0,
+      })
+      return shell({ execPath : 'echo', args : null, passingThrough : 1 })
+    }
   })
 
-//   /* */
+  /* */
 
-//   shell({ execPath : 'echo', args : null, passingThrough : 1 })
-//   .then( function( op )
-//   {
-//     test.identical( op.exitCode, 0 );
-//     test.identical( op.ended, true );
-//     if( process.platform === 'win32' )
-//     test.is( _.strHas( op.output, '"' + process.argv.slice( 2 ).join( '" "' ) + '"' ) );
-//     else
-//     test.is( _.strHas( op.output, process.argv.slice( 2 ).join( ' ') ) );
-//     return null;
-//   })
+  a.ready.then( function()
+  {
+    test.case = `execPath : null, args : [ 'echo' ]`;
+
+    let locals =
+    {
+      toolsPath : a.path.nativize( _.module.toolsPathGet() ),
+      routinePath : a.routinePath,
+    }
+
+    let programPath = a.path.nativize( a.program({ routine : testAppParent2, locals }) );
+
+    let options =
+    {
+      execPath :  'node ' + programPath,
+      outputCollecting : 1,
+    }
+
+    return _.process.start( options )
+    .then( ( op ) =>
+    {
+      console.log( 'Output: ', op.output );
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.is( _.strHas( op.output, 'echo\n' ) );
+      return null;
+
+    })
+
+    /* - */
+
+    function testAppParent2()
+    {
+      let _ = require( toolsPath );
+      _.include( 'wFiles' );
+      _.include( 'wProcess' );
+
+      let shell = _.process.starter
+      ({
+        currentPath : routinePath,
+        mode : 'shell',
+        stdio : 'pipe',
+        outputPiping : 0,
+      })
+      return shell({ execPath : null, args : [ 'echo' ], passingThrough : 1 })
+    }
+  })
+
+  /* */
+
+  a.ready.then( function()
+  {
+    test.case = `shell({ execPath : 'echo *', args : [ '*' ], passingThrough : 1 })`;
+
+    let locals =
+    {
+      toolsPath : a.path.nativize( _.module.toolsPathGet() ),
+      routinePath : a.routinePath,
+    }
+
+    let programPath = a.path.nativize( a.program({ routine : testAppParent3, locals }) );
+
+    let options =
+    {
+      execPath :  'node ' + programPath,
+      outputCollecting : 1,
+    }
+
+    return _.process.start( options )
+    .then( ( op ) =>
+    {
+      console.log( 'Output: ', op.output );
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.is( _.strHas( op.output, 'echo * "*"\n' ) );
+      return null;
+
+    })
+
+    /* - */
+
+    function testAppParent3()
+    {
+      let _ = require( toolsPath );
+      _.include( 'wFiles' );
+      _.include( 'wProcess' );
+
+      let shell = _.process.starter
+      ({
+        currentPath : routinePath,
+        mode : 'shell',
+        stdio : 'pipe',
+        outputPiping : 0,
+      })
+      return shell({ execPath : 'echo *', args : [ '*' ], passingThrough : 1 })
+    }
+  })
+
+  a.ready.then( () =>
+  {
+    test.close( '0 args to parent' );
+    return null;
+  } )
+
+  /* - */
+
+  a.ready.then( () =>
+  {
+    test.open( '1 arg to parent' );
+    return null;
+  } )
+
+  /* ORIGINAL */
+  // shell({ execPath : 'echo', args : null, passingThrough : 1 })
+  // .then( function( op )
+  // {
+  //   test.identical( op.exitCode, 0 );
+  //   test.identical( op.ended, true );
+  //   if( process.platform === 'win32' )
+  //   test.is( _.strHas( op.output, '"' + process.argv.slice( 2 ).join( '" "' ) + '"' ) );
+  //   else
+  //   test.is( _.strHas( op.output, process.argv.slice( 2 ).join( ' ') ) );
+  //   return null;
+  // })
+
+  /* REWRITTEN */
+  /* PASSING */
+  a.ready.then( function()
+  {
+    test.case = `execPath : 'echo', args : null`;
+
+    let locals =
+    {
+      toolsPath : a.path.nativize( _.module.toolsPathGet() ),
+      routinePath : a.routinePath,
+    }
+
+    let programPath = a.path.nativize( a.program({ routine : testAppParent4, locals }) );
+
+    let options =
+    {
+      execPath :  'node ' + programPath,
+      outputCollecting : 1,
+      args : 'argFromParent',
+    }
+
+    return _.process.start( options )
+    .then( ( op ) =>
+    {
+      console.log( 'Output: ', op.output );
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.is( _.strHas( op.output, 'echo "argFromParent"\n' ) );
+      return null;
+
+    })
+
+    /* - */
+
+    function testAppParent4()
+    {
+      let _ = require( toolsPath );
+      _.include( 'wFiles' );
+      _.include( 'wProcess' );
+
+      let shell = _.process.starter
+      ({
+        currentPath : routinePath,
+        mode : 'shell',
+        stdio : 'pipe',
+        outputPiping : 0,
+      })
+      return shell({ execPath : 'echo', args : null, passingThrough : 1 });
+    }
+  })
+
+  /* ORIGINAL */
+  // shell({ execPath : null, args : [ 'echo' ], passingThrough : 1 })
+  // .then( function( op )
+  // {
+  //   test.identical( op.exitCode, 0 );
+  //   test.identical( op.ended, true );
+  //   if( process.platform === 'win32' )
+  //   test.is( _.strHas( op.output, '"' + process.argv.slice( 2 ).join( '" "' ) + '"' ) );
+  //   else
+  //   test.is( _.strHas( op.output, process.argv.slice( 2 ).join( ' ') ) );
+  //   return null;
+  // })
+
+  /* REWRITTEN */
+  /* PASSING */
+  a.ready.then( function()
+  {
+    test.case = `execPath : null, args : [ 'echo' ]`;
+
+    let locals =
+    {
+      toolsPath : a.path.nativize( _.module.toolsPathGet() ),
+      routinePath : a.routinePath,
+    }
+
+    let programPath = a.path.nativize( a.program({ routine : testAppParent5, locals }) );
+
+    let options =
+    {
+      execPath :  'node ' + programPath,
+      outputCollecting : 1,
+      args : 'argFromParent',
+    }
+
+    return _.process.start( options )
+    .then( ( op ) =>
+    {
+      console.log( 'Output: ', op.output );
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.is( _.strHas( op.output, 'echo "argFromParent"\n' ) );
+      return null;
+
+    })
+
+    /* - */
+
+    function testAppParent5()
+    {
+      let _ = require( toolsPath );
+      _.include( 'wFiles' );
+      _.include( 'wProcess' );
+
+      let shell = _.process.starter
+      ({
+        currentPath : routinePath,
+        mode : 'shell',
+        stdio : 'pipe',
+        outputPiping : 0,
+      })
+      return shell({ execPath : null, args : [ 'echo' ], passingThrough : 1 });
+    }
+  })
+
+  /* ORIGINAL */
+  // shell({ execPath : 'echo *', args : [ '*' ], passingThrough : 1 })
+  // .then( function( op )
+  // {
+  //   test.identical( op.exitCode, 0 );
+  //   test.identical( op.ended, true );
+  //   if( process.platform === 'win32' )
+  //   {
+  //     test.is( _.strHas( op.output, '*' ) );
+  //     test.is( _.strHas( op.output, '"*"' ) );
+  //     test.is( _.strHas( op.output, '"' + process.argv.slice( 2 ).join( '" "' ) + '"' ) );
+  //   }
+  //   else
+  //   {
+  //     test.is( _.strHas( op.output, 'file' ) );
+  //     test.is( _.strHas( op.output, '*' ) );
+  //     test.is( _.strHas( op.output, process.argv.slice( 2 ).join( ' ') ) );
+  //   }
+  //   return null;
+  // })
+
+  /* REWRITTEN */
+  a.ready.then( function()
+  {
+    test.case = `execPath : 'echo *', args : *`;
+
+    let locals =
+    {
+      toolsPath : a.path.nativize( _.module.toolsPathGet() ),
+      routinePath : a.routinePath,
+    }
+
+    let programPath = a.path.nativize( a.program({ routine : testAppParent6, locals }) );
+
+    let options =
+    {
+      execPath :  'node ' + programPath,
+      outputCollecting : 1,
+      args : 'argFromParent',
+    }
+
+    return _.process.start( options )
+    .then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.is( _.strHas( op.output, 'echo * "*" "argFromParent"\n' ) );
+      return null;
+
+    })
+
+    /* - */
+
+    function testAppParent6()
+    {
+      let _ = require( toolsPath );
+      _.include( 'wFiles' );
+      _.include( 'wProcess' );
+
+      let shell = _.process.starter
+      ({
+        currentPath : routinePath,
+        mode : 'shell',
+        stdio : 'pipe',
+        outputPiping : 0,
+      })
+      return shell({ execPath : 'echo *', args : [ '*' ], passingThrough : 1 });
+    }
+  })
+
+  a.ready.then( () =>
+  {
+    test.close( '1 arg to parent' );
+    return null;
+  } )
+
+  /* - */
+
+  a.ready.then( () =>
+  {
+    test.open( '2 args to parent' );
+    return null;
+  } )
+
+  a.ready.then( function()
+  {
+    test.case = `execPath : 'echo', args : null`;
+
+    let locals =
+    {
+      toolsPath : a.path.nativize( _.module.toolsPathGet() ),
+      routinePath : a.routinePath,
+    }
+
+    let programPath = a.path.nativize( a.program({ routine : testAppParent7, locals }) );
+
+    let options =
+    {
+      execPath :  'node ' + programPath,
+      outputCollecting : 1,
+      args : [ 'argFromParent1', 'argFromParent2' ],
+    }
+
+    return _.process.start( options )
+    .then( ( op ) =>
+    {
+      console.log( 'Output: ', op.output );
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.is( _.strHas( op.output, 'echo "argFromParent1" "argFromParent2"\n' ) );
+      return null;
+
+    })
+
+    /* - */
+
+    function testAppParent7()
+    {
+      let _ = require( toolsPath );
+      _.include( 'wFiles' );
+      _.include( 'wProcess' );
+
+      let shell = _.process.starter
+      ({
+        currentPath : routinePath,
+        mode : 'shell',
+        stdio : 'pipe',
+        outputPiping : 0,
+      })
+      return shell({ execPath : 'echo', args : null, passingThrough : 1 });
+    }
+  })
+
+  /* */
+
+  a.ready.then( function()
+  {
+    test.case = `execPath : null, args : [ 'echo' ]`;
+
+    let locals =
+    {
+      toolsPath : a.path.nativize( _.module.toolsPathGet() ),
+      routinePath : a.routinePath,
+    }
+
+    let programPath = a.path.nativize( a.program({ routine : testAppParent8, locals }) );
+
+    let options =
+    {
+      execPath :  'node ' + programPath,
+      outputCollecting : 1,
+      args : [ 'argFromParent1', 'argFromParent2' ],
+    }
+
+    return _.process.start( options )
+    .then( ( op ) =>
+    {
+      console.log( 'Output: ', op.output );
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.is( _.strHas( op.output, 'echo "argFromParent1" "argFromParent2"\n' ) );
+      return null;
+
+    })
+
+    /* - */
+
+    function testAppParent8()
+    {
+      let _ = require( toolsPath );
+      _.include( 'wFiles' );
+      _.include( 'wProcess' );
+
+      let shell = _.process.starter
+      ({
+        currentPath : routinePath,
+        mode : 'shell',
+        stdio : 'pipe',
+        outputPiping : 0,
+      })
+      return shell({ execPath : null, args : [ 'echo' ], passingThrough : 1 });
+    }
+  })
+
+  /* */
+
+  a.ready.then( function()
+  {
+    test.case = `execPath : 'echo *', args : *`;
+
+    let locals =
+    {
+      toolsPath : a.path.nativize( _.module.toolsPathGet() ),
+      routinePath : a.routinePath,
+    }
+
+    let programPath = a.path.nativize( a.program({ routine : testAppParent9, locals }) );
+
+    let options =
+    {
+      execPath :  'node ' + programPath,
+      outputCollecting : 1,
+      args : [ 'argFromParent1', 'argFromParent2' ],
+    }
+
+    return _.process.start( options )
+    .then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.is( _.strHas( op.output, 'echo * "*" "argFromParent1" "argFromParent2"\n' ) );
+      return null;
+
+    })
+
+    /* - */
+
+    function testAppParent9()
+    {
+      let _ = require( toolsPath );
+      _.include( 'wFiles' );
+      _.include( 'wProcess' );
+
+      let shell = _.process.starter
+      ({
+        currentPath : routinePath,
+        mode : 'shell',
+        stdio : 'pipe',
+        outputPiping : 0,
+      })
+      return shell({ execPath : 'echo *', args : [ '*' ], passingThrough : 1 });
+    }
+  })
+
+  a.ready.then( () =>
+  {
+    test.close( '2 args to parent' );
+    return null;
+  } )
+
+
+  return a.ready;
+
 }
 
 //
@@ -17139,6 +17607,19 @@ function startOptionPassingThrough( test )
   let testAppPath1 = a.path.nativize( a.program( program1 ) );
   let testAppPath2 = a.path.nativize( a.program( program2 ) );
 
+  // modes.forEach( ( modeTester ) =>
+  // {
+  //   modes.forEach( ( modeParent ) =>
+  //   {
+  //     a.ready.then( () => run( modeTester, modeParent ) )
+  //   })
+  // });
+  // return a.ready;
+
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
+
   /*
    program1 spawns program2 with options read from op.js
    Options for program2 are provided to program1 through file op.js.
@@ -17148,19 +17629,21 @@ function startOptionPassingThrough( test )
    Also, this method is used to exclude output of program2 from tester in case when stdio:inherit is used
   */
 
-  run();
+  // run();
 
-  return a.ready;
+  // return a.ready;
 
-  function run()
+  function run( mode )
   {
-    a.ready.then( () =>
-    {
-      test.open( '0 args to parent process' );
-      return null;
-    } );
+    test.case = `mode : ${ mode }`
+    let ready = new _.Consequence().take( null );
+    // a.ready.then( () =>
+    // {
+    //   test.open( '0 args to parent process' );
+    //   return null;
+    // } );
 
-    a.ready.then( () =>
+    ready.then( () =>
     {
       test.case = 'child args = `testAppPath2`';
       let o =
@@ -17196,7 +17679,7 @@ function startOptionPassingThrough( test )
 
     /* */
 
-    a.ready.then( () =>
+    ready.then( () =>
     {
       test.case = 'args to child : none';
 
@@ -17233,7 +17716,7 @@ function startOptionPassingThrough( test )
 
     /* */
 
-    a.ready.then( () =>
+    ready.then( () =>
     {
       test.case = 'args to child : a';
 
@@ -17271,7 +17754,7 @@ function startOptionPassingThrough( test )
 
     /*  */
 
-    a.ready.then( () =>
+    ready.then( () =>
     {
       test.case = 'args to child : a, b, c';
 
@@ -17309,7 +17792,7 @@ function startOptionPassingThrough( test )
 
     /* */
 
-    a.ready.then( () =>
+    ready.then( () =>
     {
       test.case = 'args to child in execPath: a, b, c';
 
@@ -17346,7 +17829,7 @@ function startOptionPassingThrough( test )
 
     /* */
 
-    a.ready.then( () =>
+    ready.then( () =>
     {
       test.case = 'args to child in execPath: a and in args : b, c';
 
@@ -17384,215 +17867,215 @@ function startOptionPassingThrough( test )
 
     /* */
 
-    a.ready.then( () =>
-    {
-      /* mode : shell, stdio : pipe, passingThrough : true */
+    // ready.then( () =>
+    // {
+    //   /* mode : shell, stdio : pipe, passingThrough : true */
 
-      test.case = 'mode : shell, passingThrough : true, parent args : none, child args : none';
+    //   test.case = 'mode : shell, passingThrough : true, parent args : none, child args : none';
 
-      let locals =
-      {
-        toolsPath : a.path.nativize( _.module.toolsPathGet() ),
-        routinePath : a.routinePath,
-        programPath : testAppPath2
-      }
+    //   let locals =
+    //   {
+    //     toolsPath : a.path.nativize( _.module.toolsPathGet() ),
+    //     routinePath : a.routinePath,
+    //     programPath : testAppPath2
+    //   }
 
-      let programPath = a.path.nativize( a.program({ routine : testAppParent1, locals }) );
+    //   let programPath = a.path.nativize( a.program({ routine : testAppParent1, locals }) );
 
-      let options =
-      {
-        execPath :  'node ' + programPath,
-        outputCollecting : 1,
-        outputPiping : 0,
-      }
+    //   let options =
+    //   {
+    //     execPath :  'node ' + programPath,
+    //     outputCollecting : 1,
+    //     outputPiping : 0,
+    //   }
 
-      return _.process.start( options )
-      .then( ( op ) =>
-      {
-        let parsed = JSON.parse( op.output );
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( parsed.output, '[]\n' )
+    //   return _.process.start( options )
+    //   .then( ( op ) =>
+    //   {
+    //     let parsed = JSON.parse( op.output );
+    //     test.identical( op.exitCode, 0 );
+    //     test.identical( op.ended, true );
+    //     test.identical( parsed.output, '[]\n' )
 
-        return null;
-      })
+    //     return null;
+    //   })
 
-      /* - */
+    //   /* - */
 
-      function testAppParent1()
-      {
-        let _ = require( toolsPath );
-        _.include( 'wFiles' );
-        _.include( 'wProcess' );
+    //   function testAppParent1()
+    //   {
+    //     let _ = require( toolsPath );
+    //     _.include( 'wFiles' );
+    //     _.include( 'wProcess' );
 
-        let options =
-        {
-          execPath :  'node ' + programPath,
-          mode : 'shell',
-          passingThrough : 1,
-          stdio : 'pipe',
-          outputPiping : 0,
-          outputCollecting : 1,
-          applyingExitCode : 0,
-          throwingExitCode : 1,
-          inputMirroring : 0,
-        }
+    //     let options =
+    //     {
+    //       execPath :  'node ' + programPath,
+    //       mode : 'shell',
+    //       passingThrough : 1,
+    //       stdio : 'pipe',
+    //       outputPiping : 0,
+    //       outputCollecting : 1,
+    //       applyingExitCode : 0,
+    //       throwingExitCode : 1,
+    //       inputMirroring : 0,
+    //     }
 
-        return _.process.start( options )
-        .then( ( op ) =>
-        {
-          console.log( JSON.stringify({ output : op.output }) );
-          return null;
-        })
-      }
-    })
+    //     return _.process.start( options )
+    //     .then( ( op ) =>
+    //     {
+    //       console.log( JSON.stringify({ output : op.output }) );
+    //       return null;
+    //     })
+    //   }
+    // })
+
+    // /* */
+
+    // ready.then( function()
+    // {
+    //   /* mode : spawn, stdio : pipe, passingThrough : true */
+    //   test.case = 'mode : spawn, passingThrough : true, parent args : none, child args : programPath';
+
+    //   let locals =
+    //   {
+    //     toolsPath : a.path.nativize( _.module.toolsPathGet() ),
+    //     routinePath : a.routinePath,
+    //     programPath : testAppPath2
+    //   }
+
+    //   let programPath = a.path.nativize( a.program({ routine : testAppParent2, locals }) );
+
+    //   let options =
+    //   {
+    //     execPath :  'node ' + programPath,
+    //     outputCollecting : 1,
+    //     outputPiping : 0,
+    //   }
+
+    //   return _.process.start( options )
+    //   .then( ( op ) =>
+    //   {
+    //     let parsed = JSON.parse( op.output );
+    //     test.identical( op.exitCode, 0 );
+    //     test.identical( op.ended, true );
+    //     test.identical( parsed.output, '[]\n' )
+
+    //     return null;
+    //   })
+
+    //   /* - */
+
+    //   function testAppParent2()
+    //   {
+    //     let _ = require( toolsPath );
+    //     _.include( 'wFiles' );
+    //     _.include( 'wProcess' );
+
+    //     let options =
+    //     {
+    //       execPath :  'node',
+    //       args : [ programPath ],
+    //       mode : 'spawn',
+    //       passingThrough : 1,
+    //       stdio : 'pipe',
+    //       outputPiping : 0,
+    //       outputCollecting : 1,
+    //       applyingExitCode : 0,
+    //       throwingExitCode : 1,
+    //       inputMirroring : 0
+    //     }
+
+    //     return _.process.start( options )
+    //     .then( ( op ) =>
+    //     {
+    //       console.log( JSON.stringify({ output : op.output }) );
+    //       return null;
+    //     })
+    //   }
+    // })
 
     /* */
 
-    a.ready.then( function()
-    {
-      /* mode : spawn, stdio : pipe, passingThrough : true */
-      test.case = 'mode : spawn, passingThrough : true, parent args : none, child args : programPath';
+    // ready.then( function()
+    // {
+    //   /* mode : shell, stdio : pipe, passingThrough : true */
 
-      let locals =
-      {
-        toolsPath : a.path.nativize( _.module.toolsPathGet() ),
-        routinePath : a.routinePath,
-        programPath : testAppPath2
-      }
+    //   test.case = 'mode : shell, passingThrough : true, parent args : none, child args : "staging", "debug"';
 
-      let programPath = a.path.nativize( a.program({ routine : testAppParent2, locals }) );
+    //   let locals =
+    //   {
+    //     toolsPath : a.path.nativize( _.module.toolsPathGet() ),
+    //     routinePath : a.routinePath,
+    //     programPath : testAppPath2
+    //   }
 
-      let options =
-      {
-        execPath :  'node ' + programPath,
-        outputCollecting : 1,
-        outputPiping : 0,
-      }
+    //   let programPath = a.path.nativize( a.program({ routine : testAppParent3, locals }) );
 
-      return _.process.start( options )
-      .then( ( op ) =>
-      {
-        let parsed = JSON.parse( op.output );
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( parsed.output, '[]\n' )
+    //   let options =
+    //   {
+    //     execPath :  'node ' + programPath,
+    //     outputCollecting : 1,
+    //     outputPiping : 0,
+    //   }
 
-        return null;
-      })
+    //   return _.process.start( options )
+    //   .then( ( op ) =>
+    //   {
+    //     let parsed = JSON.parse( op.output );
+    //     test.identical( op.exitCode, 0 );
+    //     test.identical( op.ended, true );
+    //     test.identical( parsed.output, '[ \'staging\', \'debug\' ]\n' )
+    //     return null;
+    //   })
 
-      /* - */
+    //   /* - */
 
-      function testAppParent2()
-      {
-        let _ = require( toolsPath );
-        _.include( 'wFiles' );
-        _.include( 'wProcess' );
+    //   function testAppParent3()
+    //   {
+    //     let _ = require( toolsPath );
+    //     _.include( 'wFiles' );
+    //     _.include( 'wProcess' );
 
-        let options =
-        {
-          execPath :  'node',
-          args : [ programPath ],
-          mode : 'spawn',
-          passingThrough : 1,
-          stdio : 'pipe',
-          outputPiping : 0,
-          outputCollecting : 1,
-          applyingExitCode : 0,
-          throwingExitCode : 1,
-          inputMirroring : 0
-        }
+    //     let options =
+    //     {
+    //       execPath :  'node ' + programPath,
+    //       args : [ 'staging', 'debug' ],
+    //       mode : 'shell',
+    //       passingThrough : 1,
+    //       stdio : 'pipe',
+    //       outputPiping : 0,
+    //       outputCollecting : 1,
+    //       applyingExitCode : 0,
+    //       throwingExitCode : 1,
+    //       inputMirroring : 0
+    //     }
 
-        return _.process.start( options )
-        .then( ( op ) =>
-        {
-          console.log( JSON.stringify({ output : op.output }) );
-          return null;
-        })
-      }
-    })
-
-    /* */
-
-    a.ready.then( function()
-    {
-      /* mode : shell, stdio : pipe, passingThrough : true */
-
-      test.case = 'mode : shell, passingThrough : true, parent args : none, child args : "staging", "debug"';
-
-      let locals =
-      {
-        toolsPath : a.path.nativize( _.module.toolsPathGet() ),
-        routinePath : a.routinePath,
-        programPath : testAppPath2
-      }
-
-      let programPath = a.path.nativize( a.program({ routine : testAppParent3, locals }) );
-
-      let options =
-      {
-        execPath :  'node ' + programPath,
-        outputCollecting : 1,
-        outputPiping : 0,
-      }
-
-      return _.process.start( options )
-      .then( ( op ) =>
-      {
-        let parsed = JSON.parse( op.output );
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( parsed.output, '[ \'staging\', \'debug\' ]\n' )
-        return null;
-      })
-
-      /* - */
-
-      function testAppParent3()
-      {
-        let _ = require( toolsPath );
-        _.include( 'wFiles' );
-        _.include( 'wProcess' );
-
-        let options =
-        {
-          execPath :  'node ' + programPath,
-          args : [ 'staging', 'debug' ],
-          mode : 'shell',
-          passingThrough : 1,
-          stdio : 'pipe',
-          outputPiping : 0,
-          outputCollecting : 1,
-          applyingExitCode : 0,
-          throwingExitCode : 1,
-          inputMirroring : 0
-        }
-
-        return _.process.start( options )
-        .then( ( op ) =>
-        {
-          console.log( JSON.stringify({ output : op.output }) );
-          return null;
-        })
-      }
-    })
+    //     return _.process.start( options )
+    //     .then( ( op ) =>
+    //     {
+    //       console.log( JSON.stringify({ output : op.output }) );
+    //       return null;
+    //     })
+    //   }
+    // })
 
 
-    a.ready.then( () =>
-    {
-      test.close( '0 args to parent process' );
-      return null;
-    } )
+    // a.ready.then( () =>
+    // {
+    //   test.close( '0 args to parent process' );
+    //   return null;
+    // } )
 
-    /* - */
+    // /* - */
 
-    a.ready.then( () =>
-    {
-      test.open( '1 arg to parent process' );
-      return null;
-    } );
+    // a.ready.then( () =>
+    // {
+    //   test.open( '1 arg to parent process' );
+    //   return null;
+    // } );
 
-    a.ready.then( () =>
+    ready.then( () =>
     {
       test.case = 'args to child : none; args to parent : parentA';
 
@@ -17630,7 +18113,7 @@ function startOptionPassingThrough( test )
 
     /* */
 
-    a.ready.then( () =>
+    ready.then( () =>
     {
       test.case = 'args to child : a; args to parent : parentA';
 
@@ -17669,7 +18152,7 @@ function startOptionPassingThrough( test )
 
     /*  */
 
-    a.ready.then( () =>
+    ready.then( () =>
     {
       test.case = 'args to child : a, b, c; args to parent : parentA';
 
@@ -17708,7 +18191,7 @@ function startOptionPassingThrough( test )
 
     /* */
 
-    a.ready.then( () =>
+    ready.then( () =>
     {
       test.case = 'args to child in execPath: a, b, c; args to parent in execPath : parentA';
 
@@ -17745,7 +18228,7 @@ function startOptionPassingThrough( test )
 
     /* */
 
-    a.ready.then( () =>
+    ready.then( () =>
     {
       test.case = 'args to child in execPath: a and in args : b, c; args to parent in execPath : parentA, and in args : empty array'
 
@@ -17839,69 +18322,69 @@ function startOptionPassingThrough( test )
     /* REWRITTEN */
     /* NOT COMPLETED */
     /* PASSES basic checks */
-    a.ready.then( () =>
-    {
-      /* mode : shell, stdio : pipe, passingThrough : true */
+    // ready.then( () =>
+    // {
+    //   /* mode : shell, stdio : pipe, passingThrough : true */
 
-      test.case = 'mode : shell, passingThrough : true, parent args : testArg, child args : none';
+    //   test.case = 'mode : shell, passingThrough : true, parent args : testArg, child args : none';
 
-      let locals =
-      {
-        toolsPath : a.path.nativize( _.module.toolsPathGet() ),
-        routinePath : a.routinePath,
-        programPath : testAppPath2
-      }
+    //   let locals =
+    //   {
+    //     toolsPath : a.path.nativize( _.module.toolsPathGet() ),
+    //     routinePath : a.routinePath,
+    //     programPath : testAppPath2
+    //   }
 
-      let programPath = a.path.nativize( a.program({ routine : testAppParent4, locals }) );
+    //   let programPath = a.path.nativize( a.program({ routine : testAppParent4, locals }) );
 
-      let options =
-      {
-        execPath :  'node ' + programPath,
-        outputCollecting : 1,
-        outputPiping : 0,
-        args : 'testArg',
-      }
+    //   let options =
+    //   {
+    //     execPath :  'node ' + programPath,
+    //     outputCollecting : 1,
+    //     outputPiping : 0,
+    //     args : 'testArg',
+    //   }
 
-      return _.process.start( options )
-      .then( ( op ) =>
-      {
-        let parsed = JSON.parse( op.output );
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( parsed.output, '[ \'testArg\' ]\n' )
+    //   return _.process.start( options )
+    //   .then( ( op ) =>
+    //   {
+    //     let parsed = JSON.parse( op.output );
+    //     test.identical( op.exitCode, 0 );
+    //     test.identical( op.ended, true );
+    //     test.identical( parsed.output, '[ \'testArg\' ]\n' )
 
-        return null;
-      })
+    //     return null;
+    //   })
 
-      /* - */
+    //   /* - */
 
-      function testAppParent4()
-      {
-        let _ = require( toolsPath );
-        _.include( 'wFiles' );
-        _.include( 'wProcess' );
+    //   function testAppParent4()
+    //   {
+    //     let _ = require( toolsPath );
+    //     _.include( 'wFiles' );
+    //     _.include( 'wProcess' );
 
-        let options =
-        {
-          execPath :  'node ' + programPath,
-          mode : 'shell',
-          passingThrough : 1,
-          stdio : 'pipe',
-          outputPiping : 0,
-          outputCollecting : 1,
-          applyingExitCode : 0,
-          throwingExitCode : 1,
-          inputMirroring : 0,
-        }
+    //     let options =
+    //     {
+    //       execPath :  'node ' + programPath,
+    //       mode : 'shell',
+    //       passingThrough : 1,
+    //       stdio : 'pipe',
+    //       outputPiping : 0,
+    //       outputCollecting : 1,
+    //       applyingExitCode : 0,
+    //       throwingExitCode : 1,
+    //       inputMirroring : 0,
+    //     }
 
-        return _.process.start( options )
-        .then( ( op ) =>
-        {
-          console.log( JSON.stringify({ output : op.output }) );
-          return null;
-        })
-      }
-    })
+    //     return _.process.start( options )
+    //     .then( ( op ) =>
+    //     {
+    //       console.log( JSON.stringify({ output : op.output }) );
+    //       return null;
+    //     })
+    //   }
+    // })
 
     /* */
 
@@ -17939,69 +18422,69 @@ function startOptionPassingThrough( test )
     /* REWRITTEN */
     /* NOT COMPLETED */
     /* PASSES basic checks */
-    a.ready.then( function()
-    {
-      /* mode : spawn, stdio : pipe, passingThrough : true */
-      test.case = 'mode : spawn, passingThrough : true, parent args : testArg, child args : programPath';
+    // ready.then( function()
+    // {
+    //   /* mode : spawn, stdio : pipe, passingThrough : true */
+    //   test.case = 'mode : spawn, passingThrough : true, parent args : testArg, child args : programPath';
 
-      let locals =
-      {
-        toolsPath : a.path.nativize( _.module.toolsPathGet() ),
-        routinePath : a.routinePath,
-        programPath : testAppPath2
-      }
+    //   let locals =
+    //   {
+    //     toolsPath : a.path.nativize( _.module.toolsPathGet() ),
+    //     routinePath : a.routinePath,
+    //     programPath : testAppPath2
+    //   }
 
-      let programPath = a.path.nativize( a.program({ routine : testAppParent5, locals }) );
+    //   let programPath = a.path.nativize( a.program({ routine : testAppParent5, locals }) );
 
-      let options =
-      {
-        execPath :  'node ' + programPath,
-        outputCollecting : 1,
-        outputPiping : 0,
-        args : 'testArg'
-      }
+    //   let options =
+    //   {
+    //     execPath :  'node ' + programPath,
+    //     outputCollecting : 1,
+    //     outputPiping : 0,
+    //     args : 'testArg'
+    //   }
 
-      return _.process.start( options )
-      .then( ( op ) =>
-      {
-        let parsed = JSON.parse( op.output );
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( parsed.output, '[ \'testArg\' ]\n' )
+    //   return _.process.start( options )
+    //   .then( ( op ) =>
+    //   {
+    //     let parsed = JSON.parse( op.output );
+    //     test.identical( op.exitCode, 0 );
+    //     test.identical( op.ended, true );
+    //     test.identical( parsed.output, '[ \'testArg\' ]\n' )
 
-        return null;
-      })
+    //     return null;
+    //   })
 
-      /* - */
+    //   /* - */
 
-      function testAppParent5()
-      {
-        let _ = require( toolsPath );
-        _.include( 'wFiles' );
-        _.include( 'wProcess' );
+    //   function testAppParent5()
+    //   {
+    //     let _ = require( toolsPath );
+    //     _.include( 'wFiles' );
+    //     _.include( 'wProcess' );
 
-        let options =
-        {
-          execPath :  'node',
-          args : [ programPath ],
-          mode : 'spawn',
-          passingThrough : 1,
-          stdio : 'pipe',
-          outputPiping : 0,
-          outputCollecting : 1,
-          applyingExitCode : 0,
-          throwingExitCode : 1,
-          inputMirroring : 0
-        }
+    //     let options =
+    //     {
+    //       execPath :  'node',
+    //       args : [ programPath ],
+    //       mode : 'spawn',
+    //       passingThrough : 1,
+    //       stdio : 'pipe',
+    //       outputPiping : 0,
+    //       outputCollecting : 1,
+    //       applyingExitCode : 0,
+    //       throwingExitCode : 1,
+    //       inputMirroring : 0
+    //     }
 
-        return _.process.start( options )
-        .then( ( op ) =>
-        {
-          console.log( JSON.stringify({ output : op.output }) );
-          return null;
-        })
-      }
-    })
+    //     return _.process.start( options )
+    //     .then( ( op ) =>
+    //     {
+    //       console.log( JSON.stringify({ output : op.output }) );
+    //       return null;
+    //     })
+    //   }
+    // })
 
     /* */
 
@@ -18039,294 +18522,294 @@ function startOptionPassingThrough( test )
     /* REWRITTEN */
     /* NOT COMPLETED */
     /* PASSES basic checks */
-    a.ready.then( function()
-    {
-      /* mode : shell, stdio : pipe, passingThrough : true */
+    // ready.then( function()
+    // {
+    //   /* mode : shell, stdio : pipe, passingThrough : true */
 
-      test.case = 'mode : shell, passingThrough : true, parent args : testArg, child args : "staging", "debug" ';
+    //   test.case = 'mode : shell, passingThrough : true, parent args : testArg, child args : "staging", "debug" ';
 
-      let locals =
-      {
-        toolsPath : a.path.nativize( _.module.toolsPathGet() ),
-        routinePath : a.routinePath,
-        programPath : testAppPath2
-      }
+    //   let locals =
+    //   {
+    //     toolsPath : a.path.nativize( _.module.toolsPathGet() ),
+    //     routinePath : a.routinePath,
+    //     programPath : testAppPath2
+    //   }
 
-      let programPath = a.path.nativize( a.program({ routine : testAppParent6, locals }) );
+    //   let programPath = a.path.nativize( a.program({ routine : testAppParent6, locals }) );
 
-      let options =
-      {
-        execPath :  'node ' + programPath,
-        outputCollecting : 1,
-        outputPiping : 0,
-        args : 'testArg',
-      }
+    //   let options =
+    //   {
+    //     execPath :  'node ' + programPath,
+    //     outputCollecting : 1,
+    //     outputPiping : 0,
+    //     args : 'testArg',
+    //   }
 
-      return _.process.start( options )
-      .then( ( op ) =>
-      {
-        let parsed = JSON.parse( op.output );
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( parsed.output, '[ \'staging\', \'debug\', \'testArg\' ]\n' )
-        return null;
-      })
+    //   return _.process.start( options )
+    //   .then( ( op ) =>
+    //   {
+    //     let parsed = JSON.parse( op.output );
+    //     test.identical( op.exitCode, 0 );
+    //     test.identical( op.ended, true );
+    //     test.identical( parsed.output, '[ \'staging\', \'debug\', \'testArg\' ]\n' )
+    //     return null;
+    //   })
 
-      /* - */
+    //   /* - */
 
-      function testAppParent6()
-      {
-        let _ = require( toolsPath );
-        _.include( 'wFiles' );
-        _.include( 'wProcess' );
+    //   function testAppParent6()
+    //   {
+    //     let _ = require( toolsPath );
+    //     _.include( 'wFiles' );
+    //     _.include( 'wProcess' );
 
-        let options =
-        {
-          execPath :  'node ' + programPath,
-          args : [ 'staging', 'debug' ],
-          mode : 'shell',
-          passingThrough : 1,
-          stdio : 'pipe',
-          outputPiping : 0,
-          outputCollecting : 1,
-          applyingExitCode : 0,
-          throwingExitCode : 1,
-          inputMirroring : 0
-        }
+    //     let options =
+    //     {
+    //       execPath :  'node ' + programPath,
+    //       args : [ 'staging', 'debug' ],
+    //       mode : 'shell',
+    //       passingThrough : 1,
+    //       stdio : 'pipe',
+    //       outputPiping : 0,
+    //       outputCollecting : 1,
+    //       applyingExitCode : 0,
+    //       throwingExitCode : 1,
+    //       inputMirroring : 0
+    //     }
 
-        return _.process.start( options )
-        .then( ( op ) =>
-        {
-          console.log( JSON.stringify({ output : op.output }) );
-          return null;
-        })
-      }
-    })
+    //     return _.process.start( options )
+    //     .then( ( op ) =>
+    //     {
+    //       console.log( JSON.stringify({ output : op.output }) );
+    //       return null;
+    //     })
+    //   }
+    // })
 
-    a.ready.then( () =>
-    {
-      test.close( '1 arg to parent process' );
-      return null;
-    } )
-
-    /* - */
-
-    a.ready.then( () =>
-    {
-      test.open( '2 args to parent process' );
-      return null;
-    } )
-
-
-    a.ready.then( () =>
-    {
-      /* mode : shell, stdio : pipe, passingThrough : true */
-
-      test.case = 'mode : shell, passingThrough : true, parent args : testArg1, testArg2, child args : none';
-
-      let locals =
-      {
-        toolsPath : a.path.nativize( _.module.toolsPathGet() ),
-        routinePath : a.routinePath,
-        programPath : testAppPath2
-      }
-
-      let programPath = a.path.nativize( a.program({ routine : testAppParent7, locals }) );
-
-      let options =
-      {
-        execPath :  'node ' + programPath,
-        outputCollecting : 1,
-        outputPiping : 0,
-        args : [ 'testArg1', 'testArg2' ]
-      }
-
-      return _.process.start( options )
-      .then( ( op ) =>
-      {
-        let parsed = JSON.parse( op.output );
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( parsed.output, '[ \'testArg1\', \'testArg2\' ]\n' )
-
-        return null;
-      })
-
-      /* - */
-
-      function testAppParent7()
-      {
-        let _ = require( toolsPath );
-        _.include( 'wFiles' );
-        _.include( 'wProcess' );
-
-        let options =
-        {
-          execPath :  'node ' + programPath,
-          mode : 'shell',
-          passingThrough : 1,
-          stdio : 'pipe',
-          outputPiping : 0,
-          outputCollecting : 1,
-          applyingExitCode : 0,
-          throwingExitCode : 1,
-          inputMirroring : 0,
-        }
-
-        return _.process.start( options )
-        .then( ( op ) =>
-        {
-          console.log( JSON.stringify({ output : op.output }) );
-          return null;
-        })
-      }
-    })
-
-    /* */
-
-    a.ready.then( function()
-    {
-      /* mode : spawn, stdio : pipe, passingThrough : true */
-      test.case = 'mode : spawn, passingThrough : true, parent args : testArg1, testArg2, child args : programPath';
-
-      let locals =
-      {
-        toolsPath : a.path.nativize( _.module.toolsPathGet() ),
-        routinePath : a.routinePath,
-        programPath : testAppPath2
-      }
-
-      let programPath = a.path.nativize( a.program({ routine : testAppParent8, locals }) );
-
-      let options =
-      {
-        execPath :  'node ' + programPath,
-        outputCollecting : 1,
-        outputPiping : 0,
-        args : [ 'testArg1', 'testArg2' ]
-      }
-
-      return _.process.start( options )
-      .then( ( op ) =>
-      {
-        let parsed = JSON.parse( op.output );
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( parsed.output, '[ \'testArg1\', \'testArg2\' ]\n' )
-
-        return null;
-      })
-
-      /* - */
-
-      function testAppParent8()
-      {
-        let _ = require( toolsPath );
-        _.include( 'wFiles' );
-        _.include( 'wProcess' );
-
-        let options =
-        {
-          execPath :  'node',
-          args : [ programPath ],
-          mode : 'spawn',
-          passingThrough : 1,
-          stdio : 'pipe',
-          outputPiping : 0,
-          outputCollecting : 1,
-          applyingExitCode : 0,
-          throwingExitCode : 1,
-          inputMirroring : 0
-        }
-
-        return _.process.start( options )
-        .then( ( op ) =>
-        {
-          console.log( JSON.stringify({ output : op.output }) );
-          return null;
-        })
-      }
-    })
-
-    a.ready.then( function()
-    {
-      /* mode : shell, stdio : pipe, passingThrough : true */
-
-      test.case = 'mode : shell, passingThrough : true, parent args : testArg1, testArg2, child args : "staging", "debug"';
-
-      let locals =
-      {
-        toolsPath : a.path.nativize( _.module.toolsPathGet() ),
-        routinePath : a.routinePath,
-        programPath : testAppPath2
-      }
-
-      let programPath = a.path.nativize( a.program({ routine : testAppParent9, locals }) );
-
-      let options =
-      {
-        execPath :  'node ' + programPath,
-        outputCollecting : 1,
-        outputPiping : 0,
-        args : [ 'testArg1', 'testArg2' ]
-      }
-
-      return _.process.start( options )
-      .then( ( op ) =>
-      {
-        let parsed = JSON.parse( op.output );
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( parsed.output, '[ \'staging\', \'debug\', \'testArg1\', \'testArg2\' ]\n' )
-        return null;
-      })
-
-      /* - */
-
-      function testAppParent9()
-      {
-        let _ = require( toolsPath );
-        _.include( 'wFiles' );
-        _.include( 'wProcess' );
-
-        let options =
-        {
-          execPath :  'node ' + programPath,
-          args : [ 'staging', 'debug' ],
-          mode : 'shell',
-          passingThrough : 1,
-          stdio : 'pipe',
-          outputPiping : 0,
-          outputCollecting : 1,
-          applyingExitCode : 0,
-          throwingExitCode : 1,
-          inputMirroring : 0
-        }
-
-        return _.process.start( options )
-        .then( ( op ) =>
-        {
-          console.log( JSON.stringify({ output : op.output }) );
-          return null;
-        })
-      }
-    })
-
-    a.ready.then( () =>
-    {
-      test.close( '2 args to parent process' );
-      return null;
-    } );
+    // a.ready.then( () =>
+    // {
+    //   test.close( '1 arg to parent process' );
+    //   return null;
+    // } )
 
     /* - */
 
-    a.ready.then( () =>
-    {
-      test.open( '3 args to parent process' );
-      return null;
-    } );
+    // a.ready.then( () =>
+    // {
+    //   test.open( '2 args to parent process' );
+    //   return null;
+    // } )
 
-    a.ready.then( () =>
+
+    // ready.then( () =>
+    // {
+    //   /* mode : shell, stdio : pipe, passingThrough : true */
+
+    //   test.case = 'mode : shell, passingThrough : true, parent args : testArg1, testArg2, child args : none';
+
+    //   let locals =
+    //   {
+    //     toolsPath : a.path.nativize( _.module.toolsPathGet() ),
+    //     routinePath : a.routinePath,
+    //     programPath : testAppPath2
+    //   }
+
+    //   let programPath = a.path.nativize( a.program({ routine : testAppParent7, locals }) );
+
+    //   let options =
+    //   {
+    //     execPath :  'node ' + programPath,
+    //     outputCollecting : 1,
+    //     outputPiping : 0,
+    //     args : [ 'testArg1', 'testArg2' ]
+    //   }
+
+    //   return _.process.start( options )
+    //   .then( ( op ) =>
+    //   {
+    //     let parsed = JSON.parse( op.output );
+    //     test.identical( op.exitCode, 0 );
+    //     test.identical( op.ended, true );
+    //     test.identical( parsed.output, '[ \'testArg1\', \'testArg2\' ]\n' )
+
+    //     return null;
+    //   })
+
+    //   /* - */
+
+    //   function testAppParent7()
+    //   {
+    //     let _ = require( toolsPath );
+    //     _.include( 'wFiles' );
+    //     _.include( 'wProcess' );
+
+    //     let options =
+    //     {
+    //       execPath :  'node ' + programPath,
+    //       mode : 'shell',
+    //       passingThrough : 1,
+    //       stdio : 'pipe',
+    //       outputPiping : 0,
+    //       outputCollecting : 1,
+    //       applyingExitCode : 0,
+    //       throwingExitCode : 1,
+    //       inputMirroring : 0,
+    //     }
+
+    //     return _.process.start( options )
+    //     .then( ( op ) =>
+    //     {
+    //       console.log( JSON.stringify({ output : op.output }) );
+    //       return null;
+    //     })
+    //   }
+    // })
+
+    // /* */
+
+    // ready.then( function()
+    // {
+    //   /* mode : spawn, stdio : pipe, passingThrough : true */
+    //   test.case = 'mode : spawn, passingThrough : true, parent args : testArg1, testArg2, child args : programPath';
+
+    //   let locals =
+    //   {
+    //     toolsPath : a.path.nativize( _.module.toolsPathGet() ),
+    //     routinePath : a.routinePath,
+    //     programPath : testAppPath2
+    //   }
+
+    //   let programPath = a.path.nativize( a.program({ routine : testAppParent8, locals }) );
+
+    //   let options =
+    //   {
+    //     execPath :  'node ' + programPath,
+    //     outputCollecting : 1,
+    //     outputPiping : 0,
+    //     args : [ 'testArg1', 'testArg2' ]
+    //   }
+
+    //   return _.process.start( options )
+    //   .then( ( op ) =>
+    //   {
+    //     let parsed = JSON.parse( op.output );
+    //     test.identical( op.exitCode, 0 );
+    //     test.identical( op.ended, true );
+    //     test.identical( parsed.output, '[ \'testArg1\', \'testArg2\' ]\n' )
+
+    //     return null;
+    //   })
+
+    //   /* - */
+
+    //   function testAppParent8()
+    //   {
+    //     let _ = require( toolsPath );
+    //     _.include( 'wFiles' );
+    //     _.include( 'wProcess' );
+
+    //     let options =
+    //     {
+    //       execPath :  'node',
+    //       args : [ programPath ],
+    //       mode : 'spawn',
+    //       passingThrough : 1,
+    //       stdio : 'pipe',
+    //       outputPiping : 0,
+    //       outputCollecting : 1,
+    //       applyingExitCode : 0,
+    //       throwingExitCode : 1,
+    //       inputMirroring : 0
+    //     }
+
+    //     return _.process.start( options )
+    //     .then( ( op ) =>
+    //     {
+    //       console.log( JSON.stringify({ output : op.output }) );
+    //       return null;
+    //     })
+    //   }
+    // })
+
+    // ready.then( function()
+    // {
+    //   /* mode : shell, stdio : pipe, passingThrough : true */
+
+    //   test.case = 'mode : shell, passingThrough : true, parent args : testArg1, testArg2, child args : "staging", "debug"';
+
+    //   let locals =
+    //   {
+    //     toolsPath : a.path.nativize( _.module.toolsPathGet() ),
+    //     routinePath : a.routinePath,
+    //     programPath : testAppPath2
+    //   }
+
+    //   let programPath = a.path.nativize( a.program({ routine : testAppParent9, locals }) );
+
+    //   let options =
+    //   {
+    //     execPath :  'node ' + programPath,
+    //     outputCollecting : 1,
+    //     outputPiping : 0,
+    //     args : [ 'testArg1', 'testArg2' ]
+    //   }
+
+    //   return _.process.start( options )
+    //   .then( ( op ) =>
+    //   {
+    //     let parsed = JSON.parse( op.output );
+    //     test.identical( op.exitCode, 0 );
+    //     test.identical( op.ended, true );
+    //     test.identical( parsed.output, '[ \'staging\', \'debug\', \'testArg1\', \'testArg2\' ]\n' )
+    //     return null;
+    //   })
+
+    //   /* - */
+
+    //   function testAppParent9()
+    //   {
+    //     let _ = require( toolsPath );
+    //     _.include( 'wFiles' );
+    //     _.include( 'wProcess' );
+
+    //     let options =
+    //     {
+    //       execPath :  'node ' + programPath,
+    //       args : [ 'staging', 'debug' ],
+    //       mode : 'shell',
+    //       passingThrough : 1,
+    //       stdio : 'pipe',
+    //       outputPiping : 0,
+    //       outputCollecting : 1,
+    //       applyingExitCode : 0,
+    //       throwingExitCode : 1,
+    //       inputMirroring : 0
+    //     }
+
+    //     return _.process.start( options )
+    //     .then( ( op ) =>
+    //     {
+    //       console.log( JSON.stringify({ output : op.output }) );
+    //       return null;
+    //     })
+    //   }
+    // })
+
+    // a.ready.then( () =>
+    // {
+    //   test.close( '2 args to parent process' );
+    //   return null;
+    // } );
+
+    /* - */
+
+    // a.ready.then( () =>
+    // {
+    //   test.open( '3 args to parent process' );
+    //   return null;
+    // } );
+
+    ready.then( () =>
     {
       test.case = 'args to child : none; args to parent : parentA, parentB, parentC';
 
@@ -18364,7 +18847,7 @@ function startOptionPassingThrough( test )
 
     /* */
 
-    a.ready.then( () =>
+    ready.then( () =>
     {
       test.case = 'args to child : a; args to parent : parentA, parentB, parentC';
 
@@ -18403,7 +18886,7 @@ function startOptionPassingThrough( test )
 
     /*  */
 
-    a.ready.then( () =>
+    ready.then( () =>
     {
       test.case = 'args to child : a, b, c; args to parent : parentA, parentB, parentC';
 
@@ -18442,7 +18925,7 @@ function startOptionPassingThrough( test )
 
     /* */
 
-    a.ready.then( () =>
+    ready.then( () =>
     {
       test.case = 'args to child in execPath: a, b, c; args to parent in execPath : parentA, parentB, parentC';
 
@@ -18479,7 +18962,7 @@ function startOptionPassingThrough( test )
 
     /* */
 
-    a.ready.then( () =>
+    ready.then( () =>
     {
       test.case = 'args to child in args : a and execPath: b, c; args to parent in args : parentA and in execPath : parentB, parentC';
 
@@ -18516,11 +18999,13 @@ function startOptionPassingThrough( test )
       return o2.conTerminate;
     })
 
-    a.ready.then( () =>
-    {
-      test.close( '3 args to parent process' );
-      return null;
-    } )
+    // a.ready.then( () =>
+    // {
+    //   test.close( '3 args to parent process' );
+    //   return null;
+    // } )
+
+    return ready;
 
   }
 
@@ -18546,6 +19031,8 @@ function startOptionPassingThrough( test )
     console.log( process.argv.slice( 2 ) );
   }
 }
+
+startOptionPassingThrough.timeOut = 120000;
 
 // --
 // termination
