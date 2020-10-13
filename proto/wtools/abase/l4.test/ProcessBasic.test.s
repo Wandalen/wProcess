@@ -22552,7 +22552,7 @@ function terminateTimeOut( test )
         test.identical( op.ended, true );
         test.identical( op.exitSignal, 'SIGTERM' );
         test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+        test.is( _.strHas( op.output, 'Application timeout!' ) );
       }
       else if( process.platform === 'darwin' )
       {
@@ -22641,7 +22641,7 @@ function terminateTimeOut( test )
       test.is( !_.strHas( op.output, 'SIGTERM' ) );
       if( process.platform === 'darwin' )
       test.is( _.strHas( op.output, '!Application timeout!' ) );
-      else 
+      else
       test.is( _.strHas( op.output, 'Application timeout!' ) );
 
       return null;
