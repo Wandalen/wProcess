@@ -21876,7 +21876,7 @@ function terminateWithChildren( test )
     }
 
     _.process.start( o );
-    o.process.kill('SIGKILL');
+    o.process.kill( 'SIGKILL' );
 
     return o.ready.then( () =>
     {
