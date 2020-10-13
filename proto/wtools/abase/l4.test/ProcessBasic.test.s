@@ -21551,6 +21551,9 @@ function terminateDetachedComplex( test )
         test.identical( o.exitCode, null );
         test.identical( o.exitSignal, 'SIGTERM' );
         test.identical( o.ended, true );
+        if( process.platform === 'win32' )
+        test.is( !_.strHas( o.output, 'SIGTERM' ) );
+        else
         test.is( _.strHas( o.output, 'SIGTERM' ) );
         test.is( !_.strHas( o.output, 'TerminationBegin' ) );
         test.is( !_.process.isAlive( _.numberFrom( o.process.pid ) ) );
@@ -21639,6 +21642,9 @@ function terminateDetachedComplex( test )
         test.identical( o.exitCode, null );
         test.identical( o.exitSignal, 'SIGTERM' );
         test.identical( o.ended, true );
+        if( process.platform === 'win32')
+        test.is( !_.strHas( o.output, 'SIGTERM' ) );
+        else
         test.is( _.strHas( o.output, 'SIGTERM' ) );
         test.is( !_.strHas( o.output, 'TerminationBegin' ) );
         test.is( !_.process.isAlive( _.numberFrom( o.process.pid ) ) );
