@@ -8140,6 +8140,266 @@ function startProcedureStackMultiple( test )
       return o.ready;
     })
 
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `sync:${sync} deasync:${deasync} mode:${mode} stack:0`;
+      let t1 = _.time.now();
+      let o =
+      {
+        execPath : mode !== `fork` ? [ `node ${programPath} id:1`, `node ${programPath} id:2` ] : [ `${programPath} id:1`, `${programPath} id:2` ],
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+        stack : 0,
+        mode,
+        sync,
+        deasync,
+      }
+
+      _.process.start( o );
+
+      if( sync || deasync )
+      {
+        test.identical( o.exitCode, 0 );
+        test.identical( o.exitSignal, null );
+        test.identical( o.exitReason, 'normal' );
+        test.identical( o.ended, true );
+        test.identical( o.state, 'terminated' );
+      }
+      else
+      {
+        test.identical( o.exitCode, null );
+        test.identical( o.exitSignal, null );
+        test.identical( o.exitReason, null );
+        test.identical( o.ended, false );
+        test.identical( o.state, 'initial' );
+      }
+
+      test.identical( _.strCount( o.procedure._stack, 'case1' ), 1 );
+      test.identical( _.strCount( o.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
+      test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
+
+      o.ready.then( ( op ) =>
+      {
+        test.is( op === o );
+        test.identical( o.exitCode, 0 );
+        test.identical( o.exitSignal, null );
+        test.identical( o.exitReason, 'normal' );
+        test.identical( o.ended, true );
+        test.identical( o.state, 'terminated' );
+        test.identical( _.strCount( o.procedure._stack, 'case1' ), 1 );
+        test.identical( _.strCount( o.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
+        test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
+
+        o.runs.forEach( ( op2 ) =>
+        {
+          test.identical( _.strCount( op2.procedure._stack, 'case1' ), 1 );
+          test.identical( _.strCount( op2.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
+          test.identical( _.strCount( op2.procedure._sourcePath, 'case1' ), 1 );
+          test.is( o.procedure !== op2.procedure );
+        });
+
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `sync:${sync} deasync:${deasync} mode:${mode} stack:-1`;
+      let t1 = _.time.now();
+      let o =
+      {
+        execPath : mode !== `fork` ? [ `node ${programPath} id:1`, `node ${programPath} id:2` ] : [ `${programPath} id:1`, `${programPath} id:2` ],
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+        stack : -1,
+        mode,
+        sync,
+        deasync,
+      }
+
+      _.process.start( o );
+
+      if( sync || deasync )
+      {
+        test.identical( o.exitCode, 0 );
+        test.identical( o.exitSignal, null );
+        test.identical( o.exitReason, 'normal' );
+        test.identical( o.ended, true );
+        test.identical( o.state, 'terminated' );
+      }
+      else
+      {
+        test.identical( o.exitCode, null );
+        test.identical( o.exitSignal, null );
+        test.identical( o.exitReason, null );
+        test.identical( o.ended, false );
+        test.identical( o.state, 'initial' );
+      }
+
+      test.identical( _.strCount( o.procedure._stack, 'case1' ), 1 );
+      test.identical( _.strCount( o.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
+      test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
+
+      o.ready.then( ( op ) =>
+      {
+        test.is( op === o );
+        test.identical( o.exitCode, 0 );
+        test.identical( o.exitSignal, null );
+        test.identical( o.exitReason, 'normal' );
+        test.identical( o.ended, true );
+        test.identical( o.state, 'terminated' );
+        test.identical( _.strCount( o.procedure._stack, 'case1' ), 1 );
+        test.identical( _.strCount( o.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
+        test.identical( _.strCount( op.procedure._sourcePath, 'case1' ), 1 );
+
+        o.runs.forEach( ( op2 ) =>
+        {
+          test.identical( _.strCount( op2.procedure._stack, 'case1' ), 1 );
+          test.identical( _.strCount( op2.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
+          test.identical( _.strCount( op2.procedure._sourcePath, 'case1' ), 1 );
+          test.is( o.procedure !== op2.procedure );
+        });
+
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `sync:${sync} deasync:${deasync} mode:${mode} stack:false`;
+      let t1 = _.time.now();
+      let o =
+      {
+        execPath : mode !== `fork` ? [ `node ${programPath} id:1`, `node ${programPath} id:2` ] : [ `${programPath} id:1`, `${programPath} id:2` ],
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+        stack : false,
+        mode,
+        sync,
+        deasync,
+      }
+
+      _.process.start( o );
+
+      if( sync || deasync )
+      {
+        test.identical( o.exitCode, 0 );
+        test.identical( o.exitSignal, null );
+        test.identical( o.exitReason, 'normal' );
+        test.identical( o.ended, true );
+        test.identical( o.state, 'terminated' );
+      }
+      else
+      {
+        test.identical( o.exitCode, null );
+        test.identical( o.exitSignal, null );
+        test.identical( o.exitReason, null );
+        test.identical( o.ended, false );
+        test.identical( o.state, 'initial' );
+      }
+
+      test.identical( o.procedure._stack, '' );
+      test.identical( o.procedure._sourcePath, '' );
+      test.identical( o.procedure._sourcePath, '' );
+
+      o.ready.then( ( op ) =>
+      {
+        test.is( op === o );
+        test.identical( o.exitCode, 0 );
+        test.identical( o.exitSignal, null );
+        test.identical( o.exitReason, 'normal' );
+        test.identical( o.ended, true );
+        test.identical( o.state, 'terminated' );
+        test.identical( o.procedure._stack, '' );
+        test.identical( o.procedure._sourcePath, '' );
+
+        o.runs.forEach( ( op2 ) =>
+        {
+          test.identical( op2.procedure._stack, '' );
+          test.identical( op2.procedure._sourcePath, '' );
+          test.is( o.procedure !== op2.procedure );
+        });
+
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `sync:${sync} deasync:${deasync} mode:${mode} stack:str`;
+      let t1 = _.time.now();
+      let o =
+      {
+        execPath : mode !== `fork` ? [ `node ${programPath} id:1`, `node ${programPath} id:2` ] : [ `${programPath} id:1`, `${programPath} id:2` ],
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+        stack : 'abc',
+        mode,
+        sync,
+        deasync,
+      }
+
+      _.process.start( o );
+
+      if( sync || deasync )
+      {
+        test.identical( o.exitCode, 0 );
+        test.identical( o.exitSignal, null );
+        test.identical( o.exitReason, 'normal' );
+        test.identical( o.ended, true );
+        test.identical( o.state, 'terminated' );
+      }
+      else
+      {
+        test.identical( o.exitCode, null );
+        test.identical( o.exitSignal, null );
+        test.identical( o.exitReason, null );
+        test.identical( o.ended, false );
+        test.identical( o.state, 'initial' );
+      }
+
+      test.identical( o.procedure._stack, 'abc' );
+      test.identical( o.procedure._sourcePath, 'abc' );
+      test.identical( o.procedure._sourcePath, 'abc' );
+
+      o.ready.then( ( op ) =>
+      {
+        test.is( op === o );
+        test.identical( o.exitCode, 0 );
+        test.identical( o.exitSignal, null );
+        test.identical( o.exitReason, 'normal' );
+        test.identical( o.ended, true );
+        test.identical( o.state, 'terminated' );
+        test.identical( o.procedure._stack, 'abc' );
+        test.identical( o.procedure._sourcePath, 'abc' );
+
+        o.runs.forEach( ( op2 ) =>
+        {
+          test.identical( op2.procedure._stack, 'abc' );
+          test.identical( op2.procedure._sourcePath, 'abc' );
+          test.is( o.procedure !== op2.procedure );
+        });
+
+        return null;
+      })
+
+      return o.ready;
+    })
+
     return ready;
   }
 
