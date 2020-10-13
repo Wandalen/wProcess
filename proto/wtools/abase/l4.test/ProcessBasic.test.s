@@ -23387,7 +23387,7 @@ var Proto =
     terminateDetachedComplex,
     terminateWithChildren,
     terminateWithDetachedChildren, // zzz for Vova:investigate and fix termination of deatched process on Windows
-    // terminateTimeOut, /* xxx qqq for Vova : make it working */
+    terminateTimeOut, /* xxx qqq for Vova : make it working */
     terminateDifferentStdio,
     killComplex,
 
