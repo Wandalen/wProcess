@@ -22567,8 +22567,8 @@ function terminateTimeOut( test )
         test.identical( op.exitCode, null );
         test.identical( op.ended, true );
         test.identical( op.exitSignal, 'SIGTERM' );
-        test.is( _.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( _.strHas( op.output, 'Application timeout!' ) );
       }
 
       return null;
@@ -22639,7 +22639,10 @@ function terminateTimeOut( test )
       test.identical( op.ended, true );
       test.identical( op.exitSignal, 'SIGKILL' );
       test.is( !_.strHas( op.output, 'SIGTERM' ) );
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      if( process.platform === 'darwin' )
+      test.is( _.strHas( op.output, '!Application timeout!' ) );
+      else 
+      test.is( _.strHas( op.output, 'Application timeout!' ) );
 
       return null;
     })
@@ -22667,7 +22670,7 @@ function terminateTimeOut( test )
     setTimeout( () =>
     {
       console.log( 'Application timeout!' )
-    }, 10000 )
+    }, context.t2 )
   }
 }
 
