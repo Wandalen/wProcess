@@ -21855,15 +21855,28 @@ function terminateWithChildren( test )
     {
       return terminated.then( () =>
       {
-        test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.identical( _.strCount( op.output, 'SIGTERM' ), 2 );
-        test.identical( _.strCount( op.output, 'SIGTERM CHILD' ), 1 );
+        if( process.platform === 'win32' )
+        {
+          test.identical( op.exitCode, 1 );
+          test.identical( op.ended, true );
+          test.identical( op.exitSignal, null );
+          test.identical( _.strCount( op.output, 'SIGTERM' ), 0 );
+          test.identical( _.strCount( op.output, 'SIGTERM CHILD' ), 0 );
+        }
+        else
+        {
+          test.identical( op.exitCode, null );
+          test.identical( op.ended, true );
+          test.identical( op.exitSignal, 'SIGTERM' );
+          test.identical( _.strCount( op.output, 'SIGTERM' ), 2 );
+          test.identical( _.strCount( op.output, 'SIGTERM CHILD' ), 1 );
+          var file = a.fileProvider.fileRead( a.abs( a.routinePath, lastChildPid.toString() ) );
+          test.identical( file, lastChildPid.toString() )
+        }
+
         test.is( !_.process.isAlive( o.process.pid ) )
         test.is( !_.process.isAlive( lastChildPid ) );
-        var file = a.fileProvider.fileRead( a.abs( a.routinePath, lastChildPid.toString() ) );
-        test.identical( file, lastChildPid.toString() )
+
         return null;
       })
     })
@@ -21904,11 +21917,13 @@ function terminateWithChildren( test )
 
         if( process.platform === 'win32' )
         {
+          test.identical( _.strCount( op.output, 'SIGTERM' ), 0 );
           test.identical( _.strCount( op.output, 'SIGTERM CHILD' ), 0 );
           test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, lastChildPid.toString() ) ) );
         }
         else
         {
+          test.identical( _.strCount( op.output, 'SIGTERM' ), 1 );
           test.identical( _.strCount( op.output, 'SIGTERM CHILD' ), 1 );
           var file = a.fileProvider.fileRead( a.abs( a.routinePath, lastChildPid.toString() ) );
           test.identical( file, lastChildPid.toString() )
