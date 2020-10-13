@@ -18621,11 +18621,22 @@ function terminateSync( test )
 
     o.conTerminate.then( ( op ) =>
     {
-      test.identical( op.ended, true );
-      test.identical( op.exitCode, null );
-      test.identical( op.exitSignal, 'SIGTERM' );
-      test.is( _.strHas( op.output, 'SIGTERM' ) );
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.ended, true );
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.ended, true );
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
       return null;
     })
 
@@ -18656,11 +18667,22 @@ function terminateSync( test )
 
     o.conTerminate.then( ( op ) =>
     {
-      test.identical( op.ended, true );
-      test.identical( op.exitCode, null );
-      test.identical( op.exitSignal, 'SIGTERM' );
-      test.is( _.strHas( op.output, 'SIGTERM' ) );
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.ended, true );
+        test.identical( op.exitCode, 1 );
+        test.identical( op.exitSignal, null );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.ended, true );
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
       return null;
     })
 
@@ -18692,11 +18714,22 @@ function terminateSync( test )
 
     o.conTerminate.then( ( op ) =>
     {
-      test.identical( op.ended, true );
-      test.identical( op.exitCode, null );
-      test.identical( op.exitSignal, 'SIGTERM' );
-      test.is( _.strHas( op.output, 'SIGTERM' ) );
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.ended, true );
+        test.identical( op.exitCode, 1 );
+        test.identical( op.exitSignal, null );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.ended, true );
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
       return null;
     })
 
@@ -18729,11 +18762,23 @@ function terminateSync( test )
 
     o.conTerminate.then( ( op ) =>
     {
-      test.identical( op.ended, true );
-      test.identical( op.exitCode, null );
-      test.identical( op.exitSignal, 'SIGTERM' );
-      test.is( _.strHas( op.output, 'SIGTERM' ) );
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.ended, true );
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.ended, true );
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+
       return null;
     })
 
