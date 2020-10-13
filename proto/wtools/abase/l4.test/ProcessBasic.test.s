@@ -6868,7 +6868,6 @@ function startImportantExecPathPassingThrough( test )
     return _.process.start( options )
     .then( ( op ) =>
     {
-      console.log( 'Output: ', op.output );
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
       test.is( _.strHas( op.output, 'echo\n' ) );
@@ -6918,7 +6917,6 @@ function startImportantExecPathPassingThrough( test )
     return _.process.start( options )
     .then( ( op ) =>
     {
-      console.log( 'Output: ', op.output );
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
       test.is( _.strHas( op.output, 'echo\n' ) );
@@ -6968,7 +6966,6 @@ function startImportantExecPathPassingThrough( test )
     return _.process.start( options )
     .then( ( op ) =>
     {
-      console.log( 'Output: ', op.output );
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
       test.is( _.strHas( op.output, 'echo * "*"\n' ) );
@@ -7046,7 +7043,6 @@ function startImportantExecPathPassingThrough( test )
     return _.process.start( options )
     .then( ( op ) =>
     {
-      console.log( 'Output: ', op.output );
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
       test.is( _.strHas( op.output, 'echo "argFromParent"\n' ) );
@@ -7110,7 +7106,6 @@ function startImportantExecPathPassingThrough( test )
     return _.process.start( options )
     .then( ( op ) =>
     {
-      console.log( 'Output: ', op.output );
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
       test.is( _.strHas( op.output, 'echo "argFromParent"\n' ) );
@@ -7243,7 +7238,6 @@ function startImportantExecPathPassingThrough( test )
     return _.process.start( options )
     .then( ( op ) =>
     {
-      console.log( 'Output: ', op.output );
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
       test.is( _.strHas( op.output, 'echo "argFromParent1" "argFromParent2"\n' ) );
@@ -7294,7 +7288,6 @@ function startImportantExecPathPassingThrough( test )
     return _.process.start( options )
     .then( ( op ) =>
     {
-      console.log( 'Output: ', op.output );
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
       test.is( _.strHas( op.output, 'echo "argFromParent1" "argFromParent2"\n' ) );
