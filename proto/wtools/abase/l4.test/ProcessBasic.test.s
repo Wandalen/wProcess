@@ -8913,10 +8913,19 @@ function startOptionTimeOut( test )
           test.identical( o.ended, true );
           test.identical( o.exitSignal, 'SIGTERM' );
         }
+        else if( process.platform === 'darwin' )
+        {
+          test.identical( o.exitCode, null );
+          test.identical( o.ended, true );
+          test.identical( o.exitSignal, 'SIGKILL' );
+        }
         else
         {
           test.identical( o.exitCode, null );
           test.identical( o.ended, true );
+          if( mode === 'shell' )
+          test.identical( o.exitSignal, 'SIGTERM' );
+          else
           test.identical( o.exitSignal, 'SIGKILL' );
         }
         return null;
@@ -8993,10 +9002,19 @@ function startOptionTimeOut( test )
           test.identical( o.ended, true );
           test.identical( o.exitSignal, 'SIGTERM' );
         }
+        else if( process.platform === 'darwin' )
+        {
+          test.identical( o.exitCode, null );
+          test.identical( o.ended, true );
+          test.identical( o.exitSignal, 'SIGKILL' );
+        }
         else
         {
           test.identical( o.exitCode, null );
           test.identical( o.ended, true );
+          if( mode === 'shell' )
+          test.identical( o.exitSignal, 'SIGTERM' );
+          else
           test.identical( o.exitSignal, 'SIGKILL' );
         }
 
