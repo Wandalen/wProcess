@@ -8301,8 +8301,7 @@ function startProcedureStackMultiple( test )
       }
 
       test.identical( _.strCount( o.procedure._stack, 'case1' ), 1 );
-      test.identical( _.strCount( o.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
-      test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
+      test.identical( _.strCount( o.procedure._sourcePath, 'start' ), 1 );
 
       o.ready.then( ( op ) =>
       {
@@ -8313,14 +8312,12 @@ function startProcedureStackMultiple( test )
         test.identical( o.ended, true );
         test.identical( o.state, 'terminated' );
         test.identical( _.strCount( o.procedure._stack, 'case1' ), 1 );
-        test.identical( _.strCount( o.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
-        test.identical( _.strCount( op.procedure._sourcePath, 'case1' ), 1 );
+        test.identical( _.strCount( op.procedure._sourcePath, 'start' ), 1 );
 
         o.runs.forEach( ( op2 ) =>
         {
           test.identical( _.strCount( op2.procedure._stack, 'case1' ), 1 );
-          test.identical( _.strCount( op2.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
-          test.identical( _.strCount( op2.procedure._sourcePath, 'case1' ), 1 );
+          test.identical( _.strCount( op2.procedure._sourcePath, 'start' ), 1 );
           test.is( o.procedure !== op2.procedure );
         });
 
