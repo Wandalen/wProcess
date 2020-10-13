@@ -2373,8 +2373,8 @@ function signal_body( o )
     else
     process.kill( p.pid, o.signal );
 
-    // if( !o.timeOut )
-    // return;
+    if( !o.timeOut )
+    return;
 
     let con = waitForTermination( p.pid );
     cons.push( con );
@@ -2519,7 +2519,7 @@ function kill_body( o )
 {
   _.assert( arguments.length === 1 );
   o.signal = 'SIGKILL';
-  o.timeOut = signal.defaults.timeOut;
+  o.timeOut = 0;
   return _.process.signal.body( o );
 }
 
@@ -2542,7 +2542,7 @@ function terminate_body( o )
 {
   _.assert( arguments.length === 1 );
 
-  o.signal = 'SIGTERM';
+  o.signal = o.timeOut ? 'SIGTERM' : 'SIGKILL';
 
   let ready = _.process.signal.body( o );
 
