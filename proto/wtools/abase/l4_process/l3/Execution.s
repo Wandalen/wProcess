@@ -664,7 +664,7 @@ function startSingle_body( o )
     {
       if( o.state === 'terminated' || o.error )
       return;
-      o.exitReason = 'time';
+      o.exitReason = 'time'; /* qqq for Yevhen : cover termination on time out */
       _.process.terminate({ pnd : o.process, withChildren : 1 });
     });
 
@@ -2310,8 +2310,9 @@ function signal_pre( routine, args )
 
   if( o.pnd )
   {
-    _.assert( o.pid === null );
+    _.assert( o.pid === o.pnd.pid || o.pid === null );
     o.pid = o.pnd.pid;
+    _.assert( _.intIs( o.pid ) );
   }
 
   return o;

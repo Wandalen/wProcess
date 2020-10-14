@@ -8548,55 +8548,6 @@ function startReadyDelay( test )
     return ready;
   }
 
-  /*  */
-
-  /* xxx : make multiple work */
-  function multiple( sync, deasync, mode )
-  {
-    let ready = new _.Consequence().take( null )
-
-    if( sync && !deasync && mode === 'fork' )
-    return null;
-
-    ready.then( () =>
-    {
-      test.case = `sync:${sync} deasync:${deasync} mode:${mode}`;
-      let t1 = _.time.now();
-      let ready = new _.Consequence().take( null ).timeOut( context.t2 );
-      let o =
-      {
-        execPath : mode !== `fork` ? [ `node ${programPath} id:1`, `node ${programPath} id:2` ] : [ `${programPath} id:1`, `${programPath} id:2` ],
-        currentPath : a.abs( '.' ),
-        outputPiping : 1,
-        outputCollecting : 1,
-        // returningOptionsArray : 0,
-        mode,
-        sync,
-        deasync,
-        ready,
-      }
-
-      let returned = _.process.start( o );
-
-      o.ready.then( ( op ) =>
-      {
-        debugger;
-        test.is( op === o );
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        let parsed = JSON.parse( op.output );
-        let diff = parsed.time - t1;
-        console.log( diff );
-        test.ge( diff, context.t2 );
-        return null;
-      })
-
-      return returned;
-    })
-
-    return ready;
-  }
-
   /* - */
 
   function program1()
@@ -8621,7 +8572,7 @@ function startReadyDelayMultiple( test )
   let programPath = a.path.nativize( a.program( program1 ) );
   // let modes = [ 'fork', 'spawn', 'shell' ];
   let modes = [ 'spawn' ];
-  modes.forEach( ( mode ) => a.ready.then( () => multiple( 0, 0, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => multiple({ sync : 0, deasync : 0, concurrent : 0, mode }) ) );
   // modes.forEach( ( mode ) => a.ready.then( () => multiple( 0, 1, mode ) ) );
   // modes.forEach( ( mode ) => a.ready.then( () => multiple( 1, 0, mode ) ) );
   // modes.forEach( ( mode ) => a.ready.then( () => multiple( 1, 1, mode ) ) );
@@ -8631,28 +8582,29 @@ function startReadyDelayMultiple( test )
 
   /* xxx : make multiple work */
   /* xxx : review */
-  function multiple( sync, deasync, mode )
+  // function multiple( sync, deasync, concurrent, mode )
+  function multiple( op )
   {
     let ready = new _.Consequence().take( null )
 
-    if( sync && !deasync && mode === 'fork' )
+    if( op.sync && !op.deasync && op.mode === 'fork' )
     return null;
 
     ready.then( () =>
     {
-      test.case = `sync:${sync} deasync:${deasync} mode:${mode}`;
+      test.case = `sync:${op.sync} deasync:${op.deasync} concurrent:${op.concurrent} mode:${op.mode}`;
       let t1 = _.time.now();
       let ready = new _.Consequence().take( null ).timeOut( context.t2 );
       let o =
       {
-        execPath : mode !== `fork` ? [ `node ${programPath} id:1`, `node ${programPath} id:2` ] : [ `${programPath} id:1`, `${programPath} id:2` ],
+        execPath : [ ( op.mode !== `fork` ?  `node ` : '' ) + `${programPath} id:1`, ( op.mode !== `fork` ?  `node ` : '' ) + `${programPath} id:2` ],
         currentPath : a.abs( '.' ),
         outputPiping : 1,
         outputCollecting : 1,
-        // returningOptionsArray : 0,
-        mode,
-        sync,
-        deasync,
+        sync : op.sync,
+        deasync : op.deasync,
+        concurrent : op.concurrent,
+        mode : op.mode,
         ready,
       }
 
@@ -8660,19 +8612,19 @@ function startReadyDelayMultiple( test )
 
       o.ready.then( ( op ) =>
       {
-        debugger;
         test.is( op === o );
         test.identical( op.exitCode, 0 );
         test.identical( op.exitSignal, null );
         test.identical( op.exitReason, 'normal' );
         test.identical( op.ended, true );
-        op.runs.forEach( ( op2 ) =>
+        op.runs.forEach( ( op2, counter ) =>
         {
           console.log( `op.output : ${op2.output}` );
           let parsed = JSON.parse( op2.output );
           let diff = parsed.time - t1;
           console.log( diff );
           test.ge( diff, context.t2 );
+          test.identical( parsed.id, counter+1 );
         });
         return null;
       })
@@ -19293,6 +19245,8 @@ function endSignalsBasic( test )
     stdio : 'pipe',
   }
 
+  // xxx
+  // let modes = [ 'fork' ];
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGQUIT' ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGINT' ) ) );
@@ -20075,19 +20029,16 @@ sleep:begin
         var exp1 =
 `program1:begin
 sleep:begin
-sleep:end
-program1:end
-SIGTERM
 `
         test.identical( options.output, exp1 );
         test.identical( options.exitCode, null );
-        test.identical( options.exitSignal, 'SIGTERM' );
+        test.identical( options.exitSignal, 'SIGKILL' );
         test.identical( options.ended, true );
         test.identical( options.exitReason, 'signal' );
         test.identical( options.state, 'terminated' );
         test.identical( options.error, null );
         test.identical( options.process.exitCode, null );
-        test.identical( options.process.signalCode, 'SIGTERM' );
+        test.identical( options.process.signalCode, 'SIGKILL' );
         test.identical( options.process.killed, false );
         var dtime = _.time.now() - time1;
         test.ge( dtime, context.t1*3 );
