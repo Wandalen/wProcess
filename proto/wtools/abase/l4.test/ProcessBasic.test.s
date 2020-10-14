@@ -7706,7 +7706,7 @@ function startNjsPassingThroughExecPathWithSpace( test )
 
 //
 
-function startNjsPassingThroughWindowsPath( test )
+function startNjsPassingThroughDifferentTypesOfPaths( test )
 {
   let context = this;
   let a = context.assetFor( test, 'basic' );
@@ -24451,7 +24451,7 @@ var Proto =
     startNormalizedExecPath,
     startExecPathWithSpace,
     startNjsPassingThroughExecPathWithSpace,
-    startNjsPassingThroughWindowsPath,
+    startNjsPassingThroughDifferentTypesOfPaths,
     startPassingThroughExecPathWithSpace,
 
     // procedures / chronology / structural
