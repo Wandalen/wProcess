@@ -7735,7 +7735,7 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
   {
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
-    test.is( a.fileProvider.fileExists( execPath ) );
+    test.is( a.fileProvider.fileExists( testAppPath ) );
     test.is( !_.strHas( op.output, `Error: Cannot find module` ) );
     return null;
   })
@@ -7762,7 +7762,7 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
   {
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
-    test.is( a.fileProvider.fileExists( execPath ) );
+    test.is( a.fileProvider.fileExists( testAppPath ) );
     test.is( !_.strHas( op.output, `Error: Cannot find module` ) );
     return null;
   })
