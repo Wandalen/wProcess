@@ -7650,6 +7650,7 @@ function startNjsPassingThroughExecPathWithSpace( test )
     return null;
   })
 
+  debugger;
   _.process.startNjsPassingThrough
   ({
     execPath : execPathWithSpace,
@@ -7702,6 +7703,68 @@ function startNjsPassingThroughExecPathWithSpace( test )
     console.log( process.pid )
     setTimeout( () => {}, 2000 )
   }
+}
+
+//
+
+function startNjsPassingThroughWindowsPath( test )
+{
+  let context = this;
+  let a = context.assetFor( test, 'basic' );
+
+  // if( !( process.platform === 'win32' ) )
+  // {
+  //   test.is( true );
+  //   return;
+  // }
+
+  let program =
+  `function testApp()
+  {
+    console.log( process.pid );
+    setTimeout( () => {}, 2000 );
+  }
+  testApp();
+  `;
+  let execPath = a.abs( 'Program.js' );
+  a.fileProvider.fileWrite( execPath, program );
+
+  /* - */
+
+  a.ready.then( () =>
+  {
+    test.case = 'execute simple js program'
+    test.is( a.fileProvider.fileExists( execPath ) );
+    return null;
+  })
+
+  execPath = 'D:\\some\\file';
+  execPath = '/D/some/file';
+
+  debugger;
+  _.process.startNjsPassingThrough
+  ({
+    execPath,
+    ready : a.ready,
+    stdio : 'pipe',
+    outputCollecting : 1,
+    outputPiping : 1,
+    throwingExitCode : 0,
+    applyingExitCode : 0,
+  });
+
+  a.ready.then( ( op ) =>
+  {
+    test.notIdentical( op.exitCode, 0 );
+    test.identical( op.ended, true );
+    test.is( a.fileProvider.fileExists( execPath ) );
+    test.is( !_.strHas( op.output, `Error: Cannot find module` ) );
+    return null;
+  })
+
+  /* - */
+
+  return a.ready;
 }
 
 //
@@ -24344,6 +24407,7 @@ var Proto =
     startNormalizedExecPath,
     startExecPathWithSpace,
     startNjsPassingThroughExecPathWithSpace,
+    startNjsPassingThroughWindowsPath,
     startPassingThroughExecPathWithSpace,
 
     // procedures / chronology / structural
