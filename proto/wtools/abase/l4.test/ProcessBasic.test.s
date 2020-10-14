@@ -2351,14 +2351,14 @@ aaa : Done.
     let con = new _.Consequence().take( null );
 
     if( sync && !deasync && mode === 'fork' )
-    return test.shouldThrowErrorSync( () => 
+    return test.shouldThrowErrorSync( () =>
     {
       _.process.start
       ({ execPath : [ programPath, programPath ],
         mode,
         sync,
         deasync
-      }) 
+      })
     });
 
     con.then( () =>
@@ -18880,7 +18880,7 @@ function terminate( test )
     {
       data = data.toString();
       if( _.strHas( data, 'ready' ))
-      _.process.terminate({ pnd : o.process, timeOut : 0 }); /* qqq for Vova : should send kill signal! */
+      _.process.terminate({ pnd : o.process, timeOut : 0 }); /* qqq for Vova : should send kill signal! aaa: added test routine terminateZeroTimeOut*/
     })
 
     /* qqq for Vova : add test case with low timeOut */
@@ -21974,188 +21974,164 @@ function terminateDetachedComplex( test )
   let testAppPath = a.program( program1 );
   let testAppPath2 = a.program( program2 );
 
-  // if( process.platform === 'win32' )
-  // {
-  //   // qqq for Vova : windows-kill doesn't work correctly with detached processes
-  //   // investigate if its possible to use process.kill instead of windows-kill
-  //   test.identical( 1, 1 )
-  //   return;
-  // }
+  /* */
+
+  a.ready.then( () =>
+  {
+    a.fileProvider.filesDelete( a.abs( 'program2PID' ) );
+    a.fileProvider.filesDelete( a.abs( 'program2RealPID' ) );
+
+    test.description =
+    `program1 starts program2 in detached mode
+     tester terminates program1 with option withChildren : 0
+     program2 should continue to work
+    `
+    var o =
+    {
+      execPath : 'node',
+      args : [ testAppPath ],
+      mode : 'spawn',
+      outputPiping : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let program2PID;
+    let ready = _.Consequence();
+
+    _.process.start( o );
+
+    o.process.stdout.on( 'data', ( data ) =>
+    {
+      data = data.toString();
+
+      if( !_.strHas( data, 'program1::conStart' ) )
+      return;
+
+      program2PID = a.fileProvider.fileRead( a.abs( 'program2PID' ) );
+      program2PID = _.numberFrom( program2PID );
+
+      ready.take( null );
+    })
+
+    ready.then( () => _.process.terminate({ pnd : o.process, withChildren : 0 }) );
+
+    ready.then( () =>
+    {
+      test.identical( o.conTerminate.resourcesCount(), 1 );
+
+      test.will = 'program1 exists with SIGTERM'
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, 'SIGTERM' );
+      test.identical( o.ended, true );
+
+      test.will = 'SIGTERM is handled on all platforms except Windows'
+      if( process.platform === 'win32' )
+      test.is( !_.strHas( o.output, 'SIGTERM' ) );
+      else
+      test.is( _.strHas( o.output, 'SIGTERM' ) );
+
+      test.will = 'program1 does not exit normally'
+      test.is( !_.strHas( o.output, 'program1::end' ) );
+
+      test.will = 'program2 continues to work when program1 is dead'
+      test.is( !_.process.isAlive( o.process.pid ) );
+      test.is( _.process.isAlive( program2PID ) );
+
+      return _.time.out( context.t1 * 6, () =>
+      {
+        let program2RealPID = a.fileProvider.fileRead( a.abs( 'program2RealPID' ) );
+        program2RealPID = _.numberFrom( program2RealPID );
+
+        test.will = 'program2 exits normally after some time'
+        test.is( !_.process.isAlive( program2PID ) );
+        test.is( !_.process.isAlive( program2RealPID ) );
+
+        test.will = 'program2 pid received from program1 and real pid of program2 are same'
+        test.identical( program2RealPID, program2PID );
+
+        return null;
+      });
+    })
+
+    return ready;
+  })
 
   /* */
 
-  let modes = [ 'fork', 'spawn', 'shell' ];
-
-  modes.forEach( ( modeTester ) =>
+  a.ready.then( () =>
   {
-    modes.forEach( ( modeParent ) =>
+    a.fileProvider.filesDelete( a.abs( 'program2PID' ) );
+    a.fileProvider.filesDelete( a.abs( 'program2RealPID' ) );
+
+    test.description =
+    `program1 starts program2 in detached mode
+     tester terminates program1 with option withChildren : 1
+     program1 and program2 should be terminated
+    `
+    var o =
     {
-      a.ready.then( () => run( modeTester, modeParent ) )
+      execPath : 'node',
+      args : [ testAppPath ],
+      mode : 'spawn',
+      outputPiping : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let program2PID;
+    let ready = _.Consequence();
+
+    _.process.start( o );
+
+    o.process.stdout.on( 'data', ( data ) =>
+    {
+      data = data.toString();
+
+      if( !_.strHas( data, 'program1::conStart' ) )
+      return;
+
+      program2PID = a.fileProvider.fileRead( a.abs( 'program2PID' ) );
+      program2PID = _.numberFrom( program2PID );
+
+      ready.take( null );
     })
-  });
-  return a.ready;
+
+    ready.then( () => _.process.terminate({ pnd : o.process, withChildren : 1 }) );
+
+    ready.then( () =>
+    {
+      test.identical( o.conTerminate.resourcesCount(), 1 );
+
+      test.will = 'program1 exists with SIGTERM'
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, 'SIGTERM' );
+      test.identical( o.ended, true );
+
+      test.will = 'SIGTERM is handled on all platforms except Windows'
+      if( process.platform === 'win32' )
+      test.is( !_.strHas( o.output, 'SIGTERM' ) );
+      else
+      test.is( _.strHas( o.output, 'SIGTERM' ) );
+
+      test.will = 'program1 does not exit normally'
+      test.is( !_.strHas( o.output, 'program1::end' ) );
+
+      test.will = 'program1 and program2 are dead'
+      test.is( !_.process.isAlive( o.process.pid ) );
+      test.is( !_.process.isAlive( program2PID ) );
+      test.is( !a.fileProvider.fileExists( a.abs( 'program2RealPID' ) ) )
+
+      return null;
+    })
+
+    return ready;
+
+  })
 
   /* - */
 
-  function run( modeTester, modeParent )
-  {
-    let ready = _.Consequence().take( null )
-
-    .then( () =>
-    {
-
-      if( modeTester === 'shell' )
-      return null;
-
-      test.case = `modeTester:${modeTester} modeParent:${modeParent} parent -> detached child, terminate withChildren : 0, detached child should stay alive`
-      var o =
-      {
-        execPath : modeTester === 'fork' ? testAppPath : 'node ' + testAppPath,
-        args : [ modeParent ],
-        mode : modeTester,
-        outputPiping : 1,
-        outputCollecting : 1,
-        throwingExitCode : 0
-      }
-
-      let childPid;
-      let ready = _.Consequence();
-
-      _.process.start( o );
-
-      o.process.stdout.on( 'data', ( data ) =>
-      {
-        data = data.toString();
-        if( _.strHas( data, 'ready' ) )
-        ready.take( null );
-      });
-
-      ready.then( () =>
-      {
-        childPid = _.numberFrom( a.fileProvider.fileRead( a.abs( a.routinePath, 'childPID' ) ) );
-        return _.process.terminate({ pnd : o.process, withChildren : 0 });
-      });
-
-      ready.then( () =>
-      {
-
-        test.identical( o.conTerminate.resourcesCount(), 1 );
-        test.identical( o.exitCode, null );
-        test.identical( o.exitSignal, 'SIGTERM' );
-        test.identical( o.ended, true );
-        if( process.platform === 'win32' )
-        test.is( !_.strHas( o.output, 'SIGTERM' ) );
-        else
-        test.is( _.strHas( o.output, 'SIGTERM' ) );
-        test.is( !_.strHas( o.output, 'TerminationBegin' ) );
-        test.is( !_.process.isAlive( _.numberFrom( o.process.pid ) ) );
-        test.is( _.process.isAlive( _.numberFrom( childPid ) ) );
-
-        // xxx
-        // if( process.platform === 'linux' )
-        // {
-        //   test.is( !_.process.isAlive( _.numberFrom( childPid ) ) )
-        //   test.identical( op.exitCode, null );
-        //   test.identical( op.ended, true );
-        //   test.identical( op.exitSignal, 'SIGTERM' );
-        //   test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        //   test.is( _.strHas( op.output, 'TerminationBegin' ) );
-        // }
-        // else if( process.platform === 'win32' )
-        // {
-        //   test.is( !_.process.isAlive( _.numberFrom( childPid ) ) )
-        //   test.identical( op.exitCode, null );
-        //   test.identical( op.ended, true );
-        //   test.identical( op.exitSignal, 'SIGTERM' );
-        //   test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        //   test.is( _.strHas( op.output, 'TerminationBegin' ) );
-        // }
-        // else
-        // {
-        //   test.is( _.process.isAlive( _.numberFrom( childPid ) ) ) /* qqq for Vova : ?? aaa : remade this test */
-        //   test.identical( op.exitCode, null );
-        //   test.identical( op.ended, true );
-        //   test.identical( op.exitSignal, 'SIGTERM' );
-        //   test.is( _.strHas( op.output, 'SIGTERM' ) );
-        //   test.is( !_.strHas( op.output, 'TerminationBegin' ) );
-        // }
-
-        return _.time.out( context.t1 * 3, () =>
-        {
-          test.is( !_.process.isAlive( _.numberFrom( childPid ) ) )
-          var detachedPID = _.numberFrom( a.fileProvider.fileRead( a.abs( a.routinePath, 'detachedPID' ) ) );
-          if( modeParent !== 'shell' )
-          test.identical( detachedPID, _.numberFrom( childPid ) );
-          a.fileProvider.fileDelete( a.abs( a.routinePath, 'detachedPID' ) );
-          return null;
-        });
-      })
-
-      return ready;
-    })
-
-    /* */
-
-    .then( () =>
-    {
-      test.case = `modeTester:${modeTester} modeParent:${modeParent} parent -> detached child, terminate withChildren : 1, detached child should be terminated`
-      var o =
-      {
-        execPath : modeTester === 'fork' ? testAppPath : 'node ' + testAppPath,
-        args : [ modeParent ],
-        mode : modeTester,
-        outputPiping : 1,
-        outputCollecting : 1,
-        throwingExitCode : 0
-      }
-
-      let childPid;
-      let ready = _.Consequence();
-
-      _.process.start( o );
-
-      o.process.stdout.on( 'data', ( data ) =>
-      {
-        data = data.toString();
-        if( _.strHas( data, 'ready' ) )
-        ready.take( null );
-      });
-
-      ready.then( () =>
-      {
-        childPid = _.numberFrom( a.fileProvider.fileRead( a.abs( a.routinePath, 'childPID' ) ) );
-        return _.process.terminate({ pnd : o.process, withChildren : 1 });
-      });
-
-      ready.then( () =>
-      {
-        test.identical( o.conTerminate.resourcesCount(), 1 );
-
-        test.identical( o.exitCode, null );
-        test.identical( o.exitSignal, 'SIGTERM' );
-        test.identical( o.ended, true );
-        if( process.platform === 'win32')
-        test.is( !_.strHas( o.output, 'SIGTERM' ) );
-        else
-        test.is( _.strHas( o.output, 'SIGTERM' ) );
-        test.is( !_.strHas( o.output, 'TerminationBegin' ) );
-        test.is( !_.process.isAlive( _.numberFrom( o.process.pid ) ) );
-        test.is( !_.process.isAlive( _.numberFrom( childPid ) ) );
-
-        return _.time.out( context.t1 * 3, () =>
-        {
-          test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, 'detachedPID' ) ) );
-          return null;
-        });
-      })
-
-      return ready;
-    })
-
-    /* - */
-
-    return ready;
-  }
+  return a.ready;
 
   /* - */
 
@@ -22164,12 +22140,14 @@ function terminateDetachedComplex( test )
     let _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
-    let mode = process.argv[ 2 ];
+
+    console.log( 'program1::start' )
+
     var o =
     {
-      execPath : mode === 'fork' ? 'program2.js' : 'node program2.js',
+      execPath : 'node program2.js',
       currentPath : __dirname,
-      mode,
+      mode : 'spawn',
       stdio : 'ignore',
       detaching : 1,
       inputMirroring : 0,
@@ -22181,14 +22159,13 @@ function terminateDetachedComplex( test )
 
     o.conStart.thenGive( () =>
     {
-      _.fileProvider.fileWrite( _.path.join( __dirname, 'childPID' ), o.process.pid.toString() );
-      console.log( 'ready' );
+      _.fileProvider.fileWrite( _.path.join( __dirname, 'program2PID' ), o.process.pid.toString() );
+      console.log( 'program1::conStart' );
     })
 
-    _.time.out( context.t1, () =>
+    _.time.out( context.t1 * 6, () =>
     {
-      console.log( 'TerminationBegin' )
-      _.procedure.terminationBegin()
+      console.log( 'program1::end' );
       return null;
     })
   }
@@ -22196,17 +22173,25 @@ function terminateDetachedComplex( test )
   function program2()
   {
     console.log( 'program2::start' )
+
     setTimeout( () =>
     {
       console.log( 'program2::end' )
       var fs = require( 'fs' );
       var path = require( 'path' )
-      fs.writeFileSync( path.join( __dirname, 'detachedPID' ), process.pid.toString() )
+      fs.writeFileSync( path.join( __dirname, 'program2RealPID' ), process.pid.toString() )
     }, context.t1 * 3 );
   }
 }
 
-terminateDetachedComplex.timeOut = 150000; /* qqq for Vova : suspicious! what is this test routine for?? */
+terminateDetachedComplex.timeOut = 30000; /* qqq for Vova : suspicious! what is this test routine for?? aaa: remade,added description */
+terminateDetachedComplex.description =
+`
+Checks termination of process chain program1 -> program2 with option withChildren : 0/1
+Program1 spawns program2 in detached mode, then progra1 exits after few seconds
+Program2 should continue to work if program1 was terminated with withChildren : 0
+Both processes should exit if program1 was terminated with withChildren : 1
+`
 
 //
 
@@ -23223,6 +23208,122 @@ function terminateTimeOut( test )
     {
       console.log( 'Application timeout!' )
     }, context.t2 )
+  }
+}
+
+//
+
+function terminateZeroTimeOut( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( program1 );
+
+  /* */
+
+  a.ready
+
+  .then( () =>
+  {
+    test.case = 'terminate process by pnd';
+
+    var o =
+    {
+      execPath :  'node program1.js',
+      currentPath : a.routinePath,
+      mode : 'spawn',
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    _.process.start( o )
+
+    let ready = o.conStart;
+
+    ready.then( () => _.process.terminate({ pnd : o.process, timeOut : 0 }) )
+
+    ready.then( () =>
+    {
+      test.identical( o.conTerminate.resourcesCount(), 1 );
+
+      test.is( !_.strHas( o.output, 'program1::end' ) );
+      test.identical( o.ended, true );
+
+      if( process.platform === 'win32' )
+      {
+        test.identical( o.exitCode, 1 );
+        test.identical( o.exitSignal, null );
+      }
+      else
+      {
+        test.identical( o.exitCode, null );
+        test.identical( o.exitSignal, 'SIGKILL' );
+      }
+
+      return null;
+    })
+
+    return ready;
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    test.case = 'terminate process by id';
+
+    var o =
+    {
+      execPath :  'node program1.js',
+      currentPath : a.routinePath,
+      mode : 'spawn',
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    _.process.start( o )
+
+    let ready = o.conStart;
+
+    ready.then( () => _.process.terminate({ pid : o.process.pid, timeOut : 0 }) )
+
+    ready.then( () =>
+    {
+      test.identical( o.conTerminate.resourcesCount(), 1 );
+
+      test.is( !_.strHas( o.output, 'program1::end' ) );
+      test.identical( o.ended, true );
+
+      if( process.platform === 'win32' )
+      {
+        test.identical( o.exitCode, 1 );
+        test.identical( o.exitSignal, null );
+      }
+      else
+      {
+        test.identical( o.exitCode, null );
+        test.identical( o.exitSignal, 'SIGKILL' );
+      }
+
+      return null;
+    })
+
+    return ready;
+  })
+
+  /* - */
+
+  return a.ready;
+
+  /* - */
+
+  function program1()
+  {
+    console.log( 'program1::start' );
+    setTimeout( () =>
+    {
+      console.log( 'program1::end' )
+    }, context.t1 * 3 );
   }
 }
 
@@ -24361,7 +24462,7 @@ var Proto =
     endSignalsOnExitExit,
 
     terminateComplex,
-    // terminateDetachedComplex, /* xxx qqq for Vova : throws phantom error */
+    terminateDetachedComplex, /* xxx qqq for Vova : throws phantom error */
 /*
  = Source code from /pro/builder/proto/wtools/abase/l4_process/l3/Execution.s:2594:17
       2592 :   if( !_.process.isAlive( o.pid ) )
@@ -24374,6 +24475,7 @@ var Proto =
     terminateWithChildren,
     terminateWithDetachedChildren, // zzz for Vova:investigate and fix termination of deatched process on Windows
     terminateTimeOut, /* xxx qqq for Vova : make it working */
+    terminateZeroTimeOut,
     terminateDifferentStdio,
     killComplex,
 
