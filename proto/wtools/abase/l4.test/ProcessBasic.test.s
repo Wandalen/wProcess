@@ -2318,888 +2318,1213 @@ startForkSyncDeasyncThrowing.timeOut = 15000;
 
 //
 
-/* qqq2 for Yevhen : introduce subroutine for modes */
+/* qqq2 for Yevhen : introduce subroutine for modes | aaa : Done. */
 function startMultipleSyncDeasync( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
   let programPath = a.path.nativize( a.program( testApp ) );
+  let modes = [ 'fork', 'spawn', 'shell' ];
 
-/*
+  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 0, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 1, mode ) ) );
 
+  return a.ready;
+  /*
 qqq for Yevhen : should check all that
-
 test.identical( o.exitCode, 0 );
 test.identical( o.exitSignal, null );
 test.identical( o.exitReason, 'normal' );
 test.identical( o.ended, true );
 test.identical( o.state, 'terminated' );
-
+aaa : Done.
 */
 
-  /*  */
+  /* - */
 
-  a.ready.then( () =>
+  function run( sync, deasync, mode )
   {
-    test.case = 'sync:0,desync:0'
-    let o =
-    {
-      execPath : [ 'node ' + programPath, 'node ' + programPath ],
-      mode : 'spawn',
-      sync : 0,
-      deasync : 0
-    }
-    var returned = _.process.start( o );
-    test.is( _.consequenceIs( returned ) );
-    test.identical( returned.resourcesCount(), 0 );
-    returned.then( function( result )
-    {
-      // debugger;
-      test.is( result === o );
-      test.identical( o.runs.length, 2 );
-      test.identical( o.runs[ 0 ].exitCode, 0 );
-      test.identical( o.runs[ 1 ].exitCode, 0 );
+    test.case = `mode : ${ mode }; sync : ${ sync }; deasync : ${ deasync }`;
 
-      test.identical( o.exitCode, 0 );
-      test.identical( o.exitSignal, null );
-      test.identical( o.exitReason, 'normal' );
-      test.identical( o.ended, true );
-      test.identical( o.state, 'terminated' );
+    let con = new _.Consequence().take( null );
 
-      return result;
+    if( sync && !deasync && mode === 'fork' )
+    return test.shouldThrowErrorSync( () => 
+    {
+      _.process.start
+      ({ execPath : [ programPath, programPath ],
+        mode,
+        sync,
+        deasync
+      }) 
+    });
+
+    con.then( () =>
+    {
+      let execPath = mode === 'fork' ? [ programPath, programPath ] : [ 'node ' + programPath, 'node ' + programPath ];
+      let o =
+      {
+        execPath,
+        mode,
+        sync,
+        deasync
+      }
+      var returned = _.process.start( o );
+
+      if( sync )
+      {
+        test.is( !_.consequenceIs( returned ) );
+        test.is( returned === o );
+        test.identical( returned.runs.length, 2 );
+        test.identical( o.runs[ 0 ].exitCode, 0 );
+        test.identical( o.runs[ 0 ].exitSignal, null );
+        test.identical( o.runs[ 0 ].exitReason, 'normal' );
+        test.identical( o.runs[ 0 ].ended, true );
+        test.identical( o.runs[ 0 ].state, 'terminated' );
+
+        test.identical( o.runs[ 1 ].exitCode, 0 );
+        test.identical( o.runs[ 1 ].exitSignal, null );
+        test.identical( o.runs[ 1 ].exitReason, 'normal' );
+        test.identical( o.runs[ 1 ].ended, true );
+        test.identical( o.runs[ 1 ].state, 'terminated' );
+
+        test.identical( o.exitCode, 0 );
+        test.identical( o.exitSignal, null );
+        test.identical( o.exitReason, 'normal' );
+        test.identical( o.ended, true );
+        test.identical( o.state, 'terminated' );
+
+        return returned;
+      }
+      else
+      {
+        test.is( _.consequenceIs( returned ) );
+
+        if( deasync )
+        test.identical( returned.resourcesCount(), 1 );
+        else
+        test.identical( returned.resourcesCount(), 0 );
+
+        returned.then( function( result )
+        {
+          // debugger;
+          test.is( result === o );
+          test.identical( o.runs.length, 2 );
+          test.identical( o.runs[ 0 ].exitCode, 0 );
+          test.identical( o.runs[ 0 ].exitSignal, null );
+          test.identical( o.runs[ 0 ].exitReason, 'normal' );
+          test.identical( o.runs[ 0 ].ended, true );
+          test.identical( o.runs[ 0 ].state, 'terminated' );
+
+          test.identical( o.runs[ 1 ].exitCode, 0 );
+          test.identical( o.runs[ 1 ].exitSignal, null );
+          test.identical( o.runs[ 1 ].exitReason, 'normal' );
+          test.identical( o.runs[ 1 ].ended, true );
+          test.identical( o.runs[ 1 ].state, 'terminated' );
+
+          test.identical( o.exitCode, 0 );
+          test.identical( o.exitSignal, null );
+          test.identical( o.exitReason, 'normal' );
+          test.identical( o.ended, true );
+          test.identical( o.state, 'terminated' );
+
+          return result;
+        })
+      }
+
+      return returned;
     })
-    return returned;
-  })
+
+    return con;
+  }
 
   /*  */
 
-  a.ready.then( () =>
-  {
-    test.case = 'sync:1,desync:0'
-    let o =
-    {
-      execPath : [ 'node ' + programPath, 'node ' + programPath ],
-      mode : 'spawn',
-      sync : 1,
-      // returningOptionsArray : 1,
-      deasync : 0
-    }
-    var returned = _.process.start( o );
-    test.is( !_.consequenceIs( returned ) );
-    test.is( returned === o );
-    test.identical( returned.runs.length, 2 );
-    test.identical( returned.runs[ 0 ].exitCode, 0 );
-    test.identical( returned.runs[ 1 ].exitCode, 0 );
-
-    test.identical( o.exitCode, 0 );
-    test.identical( o.exitSignal, null );
-    test.identical( o.exitReason, 'normal' );
-    test.identical( o.ended, true );
-    test.identical( o.state, 'terminated' );
-
-    return returned;
-  })
-
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync:1,desync:0'
-    let o =
-    {
-      execPath : [ 'node ' + programPath, 'node ' + programPath ],
-      mode : 'spawn',
-      sync : 1,
-      // returningOptionsArray : 0,
-      deasync : 0
-    }
-    var returned = _.process.start( o );
-    test.is( !_.consequenceIs( returned ) );
-    test.is( returned === o );
-    test.identical( returned.exitCode, 0 )
-
-    test.identical( o.exitCode, 0 );
-    test.identical( o.exitSignal, null );
-    test.identical( o.exitReason, 'normal' );
-    test.identical( o.ended, true );
-    test.identical( o.state, 'terminated' );
-
-    return returned;
-  })
-
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync:0,desync:1'
-    let o =
-    {
-      execPath : [ 'node ' + programPath, 'node ' + programPath ],
-      mode : 'spawn',
-      sync : 0,
-      deasync : 1
-    }
-    var returned = _.process.start( o );
-    test.is( _.consequenceIs( returned ) );
-    test.identical( returned.resourcesCount(), 1 );
-    returned.then( function( result )
-    {
-      test.is( result === o );
-      test.identical( o.runs.length, 2 );
-      test.identical( o.runs[ 0 ].exitCode, 0 );
-      test.identical( o.runs[ 1 ].exitCode, 0 );
-
-      test.identical( o.exitCode, 0 );
-      test.identical( o.exitSignal, null );
-      test.identical( o.exitReason, 'normal' );
-      test.identical( o.ended, true );
-      test.identical( o.state, 'terminated' );
-
-      return result;
-    })
-    return returned;
-  })
-
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync:1,desync:1'
-    let o =
-    {
-      execPath : [ 'node ' + programPath, 'node ' + programPath ],
-      mode : 'spawn',
-      sync : 1,
-      deasync : 1
-    }
-    var returned = _.process.start( o );
-    test.is( !_.consequenceIs( returned ) );
-    test.is( returned === o );
-    test.identical( o.runs.length, 2 );
-    test.identical( o.runs[ 0 ].exitCode, 0 )
-    test.identical( o.runs[ 1 ].exitCode, 0 )
-
-    test.identical( o.exitCode, 0 );
-    test.identical( o.exitSignal, null );
-    test.identical( o.exitReason, 'normal' );
-    test.identical( o.ended, true );
-    test.identical( o.state, 'terminated' );
-
-    return returned;
-  })
-
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync:0,desync:0'
-    let o =
-    {
-      execPath : [ 'node ' + programPath, 'node ' + programPath ],
-      mode : 'shell',
-      sync : 0,
-      deasync : 0
-    }
-    var returned = _.process.start( o );
-    test.is( _.consequenceIs( returned ) );
-    test.identical( returned.resourcesCount(), 0 );
-    returned.then( function( result )
-    {
-      test.is( result === o );
-      test.identical( o.runs.length, 2 );
-      test.identical( o.runs[ 0 ].exitCode, 0 );
-      test.identical( o.runs[ 1 ].exitCode, 0 );
-
-      test.identical( o.exitCode, 0 );
-      test.identical( o.exitSignal, null );
-      test.identical( o.exitReason, 'normal' );
-      test.identical( o.ended, true );
-      test.identical( o.state, 'terminated' );
-
-      return result;
-    })
-    return returned;
-  })
-
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync:1,desync:0'
-    let o =
-    {
-      execPath : [ 'node ' + programPath, 'node ' + programPath ],
-      mode : 'shell',
-      sync : 1,
-      // returningOptionsArray : 1,
-      deasync : 0
-    }
-    var returned = _.process.start( o );
-    test.is( !_.consequenceIs( returned ) );
-    test.is( returned === o );
-    test.identical( returned.runs.length, 2 );
-    test.identical( returned.runs[ 0 ].exitCode, 0 )
-    test.identical( returned.runs[ 1 ].exitCode, 0 )
-
-    test.identical( o.exitCode, 0 );
-    test.identical( o.exitSignal, null );
-    test.identical( o.exitReason, 'normal' );
-    test.identical( o.ended, true );
-    test.identical( o.state, 'terminated' );
-
-    return returned;
-  })
-
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync:1,desync:0'
-    let o =
-    {
-      execPath : [ 'node ' + programPath, 'node ' + programPath ],
-      mode : 'shell',
-      sync : 1,
-      // returningOptionsArray : 0,
-      deasync : 0
-    }
-    var returned = _.process.start( o );
-    test.is( !_.consequenceIs( returned ) );
-    test.is( returned === o );
-    test.identical( returned.exitCode, 0 )
-
-    test.identical( o.exitCode, 0 );
-    test.identical( o.exitSignal, null );
-    test.identical( o.exitReason, 'normal' );
-    test.identical( o.ended, true );
-    test.identical( o.state, 'terminated' );
-
-    return returned;
-  })
-
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync:0,desync:1'
-    let o =
-    {
-      execPath : [ 'node ' + programPath, 'node ' + programPath ],
-      mode : 'shell',
-      sync : 0,
-      deasync : 1
-    }
-    var returned = _.process.start( o );
-    test.is( _.consequenceIs( returned ) );
-    test.identical( returned.resourcesCount(), 1 );
-    returned.then( function( result )
-    {
-      test.is( result === o );
-      test.identical( o.runs.length, 2 );
-      test.identical( o.runs[ 0 ].exitCode, 0 )
-      test.identical( o.runs[ 1 ].exitCode, 0 )
-
-      test.identical( o.exitCode, 0 );
-      test.identical( o.exitSignal, null );
-      test.identical( o.exitReason, 'normal' );
-      test.identical( o.ended, true );
-      test.identical( o.state, 'terminated' );
-
-      return result;
-    })
-    return returned;
-  })
-
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync:1,desync:1'
-    let o =
-    {
-      execPath : [ programPath, programPath ],
-      mode : 'fork',
-      sync : 1,
-      deasync : 1
-    }
-    var returned = _.process.start( o );
-    test.is( !_.consequenceIs( returned ) );
-    test.is( returned === o );
-    test.identical( o.runs.length, 2 );
-    test.identical( o.runs[ 0 ].exitCode, 0 )
-    test.identical( o.runs[ 1 ].exitCode, 0 )
-
-    test.identical( o.exitCode, 0 );
-    test.identical( o.exitSignal, null );
-    test.identical( o.exitReason, 'normal' );
-    test.identical( o.ended, true );
-    test.identical( o.state, 'terminated' );
-
-    return returned;
-  })
-
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync:0,desync:0'
-    let o =
-    {
-      execPath : [ programPath, programPath ],
-      mode : 'fork',
-      sync : 0,
-      deasync : 0
-    }
-    var returned = _.process.start( o );
-    test.is( _.consequenceIs( returned ) );
-    test.identical( returned.resourcesCount(), 0 );
-    returned.then( function( result )
-    {
-      test.is( result === o );
-      test.identical( o.runs.length, 2 );
-      test.identical( o.runs[ 0 ].exitCode, 0 )
-      test.identical( o.runs[ 1 ].exitCode, 0 )
-
-      test.identical( o.exitCode, 0 );
-      test.identical( o.exitSignal, null );
-      test.identical( o.exitReason, 'normal' );
-      test.identical( o.ended, true );
-      test.identical( o.state, 'terminated' );
-
-      return result;
-    })
-    return returned;
-  })
-
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync:1,desync:0'
-    let o =
-    {
-      execPath : [ programPath, programPath ],
-      mode : 'fork',
-      sync : 1,
-      // returningOptionsArray : 1,
-      deasync : 0
-    }
-    test.shouldThrowErrorSync( () => _.process.start( o ) );
-    return null;
-  })
-
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync:1,desync:0'
-    let o =
-    {
-      execPath : [ programPath, programPath ],
-      mode : 'fork',
-      sync : 1,
-      // returningOptionsArray : 0,
-      deasync : 0
-    }
-    test.shouldThrowErrorSync( () => _.process.start( o ) );
-    return null;
-  })
-
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync:0,desync:1'
-    let o =
-    {
-      execPath : [ programPath, programPath ],
-      mode : 'fork',
-      sync : 0,
-      deasync : 1
-    }
-    var returned = _.process.start( o );
-    test.is( _.consequenceIs( returned ) );
-    test.identical( returned.resourcesCount(), 1 );
-    returned.then( function( result )
-    {
-      test.is( result === o );
-      test.identical( o.runs.length, 2 );
-      test.identical( o.runs[ 0 ].exitCode, 0 )
-      test.identical( o.runs[ 1 ].exitCode, 0 )
-
-      test.identical( o.exitCode, 0 );
-      test.identical( o.exitSignal, null );
-      test.identical( o.exitReason, 'normal' );
-      test.identical( o.ended, true );
-      test.identical( o.state, 'terminated' );
-
-      return result;
-    })
-    return returned;
-  })
-
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync:1,desync:1'
-    let o =
-    {
-      execPath : [ programPath, programPath ],
-      mode : 'fork',
-      sync : 1,
-      deasync : 1
-    }
-    var returned = _.process.start( o );
-    test.is( !_.consequenceIs( returned ) );
-    test.is( returned === o );
-    test.identical( o.runs.length, 2 );
-    test.identical( o.runs[ 0 ].exitCode, 0 )
-    test.identical( o.runs[ 1 ].exitCode, 0 )
-
-    test.identical( o.exitCode, 0 );
-    test.identical( o.exitSignal, null );
-    test.identical( o.exitReason, 'normal' );
-    test.identical( o.ended, true );
-    test.identical( o.state, 'terminated' );
-
-    return returned;
-  })
-
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync:1,desync:1'
-    let o =
-    {
-      execPath : [ programPath, programPath ],
-      mode : 'fork',
-      sync : 1,
-      deasync : 1
-    }
-    var returned = _.process.start( o );
-    test.is( !_.consequenceIs( returned ) );
-    test.is( returned === o );
-    test.identical( o.runs.length, 2 );
-    test.identical( o.runs[ 0 ].exitCode, 0 )
-    test.identical( o.runs[ 1 ].exitCode, 0 )
-
-    test.identical( o.exitCode, 0 );
-    test.identical( o.exitSignal, null );
-    test.identical( o.exitReason, 'normal' );
-    test.identical( o.ended, true );
-    test.identical( o.state, 'terminated' );
-
-    return returned;
-  })
-
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync:0,desync:0'
-    let o =
-    {
-      execPath : [ 'node ' + programPath, 'node ' + programPath ],
-      mode : 'shell',
-      sync : 0,
-      deasync : 0
-    }
-    var returned = _.process.start( o );
-    test.is( _.consequenceIs( returned ) );
-    test.identical( returned.resourcesCount(), 0 );
-    returned.then( function( result )
-    {
-      test.is( result === o );
-      test.identical( o.runs.length, 2 );
-      test.identical( o.runs[ 0 ].exitCode, 0 )
-      test.identical( o.runs[ 1 ].exitCode, 0 )
-
-      test.identical( o.exitCode, 0 );
-      test.identical( o.exitSignal, null );
-      test.identical( o.exitReason, 'normal' );
-      test.identical( o.ended, true );
-      test.identical( o.state, 'terminated' );
-
-      return result;
-    })
-    return returned;
-  })
-
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync:0,desync:0'
-    let o =
-    {
-      execPath : [ 'node ' + programPath, 'node ' + programPath ],
-      mode : 'spawn',
-      sync : 0,
-      deasync : 0
-    }
-    var returned = _.process.start( o );
-    test.is( _.consequenceIs( returned ) );
-    test.identical( returned.resourcesCount(), 0 );
-    returned.then( function( result )
-    {
-      test.is( result === o );
-      test.identical( o.runs.length, 2 );
-      test.identical( o.runs[ 0 ].exitCode, 0 )
-      test.identical( o.runs[ 1 ].exitCode, 0 )
-
-      test.identical( o.exitCode, 0 );
-      test.identical( o.exitSignal, null );
-      test.identical( o.exitReason, 'normal' );
-      test.identical( o.ended, true );
-      test.identical( o.state, 'terminated' );
-
-      return result;
-    })
-    return returned;
-  })
-
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync:0,desync:0'
-    let o =
-    {
-      execPath : [ programPath, programPath ],
-      mode : 'fork',
-      sync : 0,
-      deasync : 0
-    }
-    var returned = _.process.start( o );
-    test.is( _.consequenceIs( returned ) );
-    test.identical( returned.resourcesCount(), 0 );
-    returned.then( function( result )
-    {
-      test.is( result === o );
-      test.identical( o.runs.length, 2 );
-      test.identical( o.runs[ 0 ].exitCode, 0 )
-      test.identical( o.runs[ 1 ].exitCode, 0 )
-
-      test.identical( o.exitCode, 0 );
-      test.identical( o.exitSignal, null );
-      test.identical( o.exitReason, 'normal' );
-      test.identical( o.ended, true );
-      test.identical( o.state, 'terminated' );
-
-      return result;
-    })
-    return returned;
-  })
-
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync:1,desync:0'
-    let o =
-    {
-      execPath : [ 'node ' + programPath, 'node ' + programPath ],
-      mode : 'shell',
-      sync : 1,
-      // returningOptionsArray : 1,
-      deasync : 0
-    }
-    var returned = _.process.start( o );
-    test.is( !_.consequenceIs( returned ) );
-    test.is( returned === o );
-    test.identical( returned.runs.length, 2 )
-    test.identical( returned.runs[ 0 ].exitCode, 0 )
-    test.identical( returned.runs[ 1 ].exitCode, 0 )
-
-    test.identical( o.exitCode, 0 );
-    test.identical( o.exitSignal, null );
-    test.identical( o.exitReason, 'normal' );
-    test.identical( o.ended, true );
-    test.identical( o.state, 'terminated' );
-
-    return null;
-  })
-
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync:1,desync:0'
-    let o =
-    {
-      execPath : [ 'node ' + programPath, 'node ' + programPath ],
-      mode : 'spawn',
-      sync : 1,
-      // returningOptionsArray : 1,
-      deasync : 0
-    }
-    var returned = _.process.start( o );
-    test.is( !_.consequenceIs( returned ) );
-    test.is( returned === o );
-    test.identical( o.runs.length, 2 )
-    test.identical( o.runs[ 0 ].exitCode, 0 )
-    test.identical( o.runs[ 1 ].exitCode, 0 )
-
-    test.identical( o.exitCode, 0 );
-    test.identical( o.exitSignal, null );
-    test.identical( o.exitReason, 'normal' );
-    test.identical( o.ended, true );
-    test.identical( o.state, 'terminated' );
-
-    return null;
-  })
-
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync:1,desync:0'
-    let o =
-    {
-      execPath : [ 'node ' + programPath, 'node ' + programPath ],
-      mode : 'shell',
-      sync : 1,
-      // returningOptionsArray : 0,
-      deasync : 0
-    }
-    var returned = _.process.start( o );
-    test.is( !_.consequenceIs( returned ) );
-    test.is( returned === o );
-    test.identical( returned.exitCode, 0 )
-
-    test.identical( o.exitCode, 0 );
-    test.identical( o.exitSignal, null );
-    test.identical( o.exitReason, 'normal' );
-    test.identical( o.ended, true );
-    test.identical( o.state, 'terminated' );
-
-    return null;
-  })
-
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync:1,desync:0'
-    let o =
-    {
-      execPath : [ 'node ' + programPath, 'node ' + programPath ],
-      mode : 'spawn',
-      sync : 1,
-      // returningOptionsArray : 0,
-      deasync : 0
-    }
-    var returned = _.process.start( o );
-    test.is( !_.consequenceIs( returned ) );
-    test.is( returned === o );
-    test.identical( returned.exitCode, 0 );
-
-    test.identical( o.exitCode, 0 );
-    test.identical( o.exitSignal, null );
-    test.identical( o.exitReason, 'normal' );
-    test.identical( o.ended, true );
-    test.identical( o.state, 'terminated' );
-
-    return null;
-  })
-
-
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync:0,desync:1'
-    let o =
-    {
-      execPath : [ 'node ' + programPath, 'node ' + programPath ],
-      mode : 'shell',
-      sync : 0,
-      deasync : 1
-    }
-    var returned = _.process.start( o );
-    test.is( _.consequenceIs( returned ) );
-    test.identical( returned.resourcesCount(), 1 );
-    returned.then( function( result )
-    {
-      test.is( result === o );
-      test.identical( o.runs.length, 2 );
-      test.identical( o.runs[ 0 ].exitCode, 0 )
-      test.identical( o.runs[ 1 ].exitCode, 0 )
-
-      test.identical( o.exitCode, 0 );
-      test.identical( o.exitSignal, null );
-      test.identical( o.exitReason, 'normal' );
-      test.identical( o.ended, true );
-      test.identical( o.state, 'terminated' );
-
-      return result;
-    })
-    return returned;
-  })
-
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync:0,desync:1'
-    let o =
-    {
-      execPath : [ 'node ' + programPath, 'node ' + programPath ],
-      mode : 'spawn',
-      sync : 0,
-      deasync : 1
-    }
-    var returned = _.process.start( o );
-    test.is( _.consequenceIs( returned ) );
-    test.identical( returned.resourcesCount(), 1 );
-    returned.then( function( result )
-    {
-      test.is( result === o );
-      test.identical( o.runs.length, 2 );
-      test.identical( o.runs[ 0 ].exitCode, 0 )
-      test.identical( o.runs[ 1 ].exitCode, 0 )
-
-      test.identical( o.exitCode, 0 );
-      test.identical( o.exitSignal, null );
-      test.identical( o.exitReason, 'normal' );
-      test.identical( o.ended, true );
-      test.identical( o.state, 'terminated' );
-
-      return result;
-    })
-    return returned;
-  })
-
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync:0,desync:1'
-    let o =
-    {
-      execPath : [ programPath, programPath ],
-      mode : 'fork',
-      sync : 0,
-      deasync : 1
-    }
-    var returned = _.process.start( o );
-    test.is( _.consequenceIs( returned ) );
-    test.identical( returned.resourcesCount(), 1 );
-    returned.then( function( result )
-    {
-      test.is( result === o );
-      test.identical( o.runs.length, 2 );
-      test.identical( o.runs[ 0 ].exitCode, 0 )
-      test.identical( o.runs[ 1 ].exitCode, 0 )
-
-      test.identical( o.exitCode, 0 );
-      test.identical( o.exitSignal, null );
-      test.identical( o.exitReason, 'normal' );
-      test.identical( o.ended, true );
-      test.identical( o.state, 'terminated' );
-
-      return result;
-    })
-    return returned;
-  })
-
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync:1,desync:1'
-    let o =
-    {
-      execPath : [ 'node ' + programPath, 'node ' + programPath ],
-      mode : 'shell',
-      sync : 1,
-      deasync : 1
-    }
-    var returned = _.process.start( o );
-    test.is( !_.consequenceIs( returned ) );
-    test.is( returned === o );
-    test.identical( o.runs.length, 2 );
-    test.identical( o.runs[ 0 ].exitCode, 0 )
-    test.identical( o.runs[ 1 ].exitCode, 0 )
-
-    test.identical( o.exitCode, 0 );
-    test.identical( o.exitSignal, null );
-    test.identical( o.exitReason, 'normal' );
-    test.identical( o.ended, true );
-    test.identical( o.state, 'terminated' );
-
-    return returned;
-  })
-
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync:1,desync:1'
-    let o =
-    {
-      execPath : [ 'node ' + programPath, 'node ' + programPath ],
-      mode : 'spawn',
-      sync : 1,
-      deasync : 1
-    }
-    var returned = _.process.start( o );
-    test.is( !_.consequenceIs( returned ) );
-    test.is( returned === o );
-    test.identical( o.runs.length, 2 );
-    test.identical( o.runs[ 0 ].exitCode, 0 )
-    test.identical( o.runs[ 1 ].exitCode, 0 )
-
-    test.identical( o.exitCode, 0 );
-    test.identical( o.exitSignal, null );
-    test.identical( o.exitReason, 'normal' );
-    test.identical( o.ended, true );
-    test.identical( o.state, 'terminated' );
-
-    return returned;
-  })
-
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync:1,desync:1'
-    let o =
-    {
-      execPath : [ programPath, programPath ],
-      mode : 'fork',
-      sync : 1,
-      deasync : 1
-    }
-    var returned = _.process.start( o );
-    test.is( !_.consequenceIs( returned ) );
-    test.is( returned === o );
-    test.identical( o.runs.length, 2 );
-    test.identical( o.runs[ 0 ].exitCode, 0 )
-    test.identical( o.runs[ 1 ].exitCode, 0 )
-
-    test.identical( o.exitCode, 0 );
-    test.identical( o.exitSignal, null );
-    test.identical( o.exitReason, 'normal' );
-    test.identical( o.ended, true );
-    test.identical( o.state, 'terminated' );
-
-    return returned;
-  })
-
-  /*  */
-
-  return a.ready;
+  // a.ready.then( () =>
+  // {
+  //   test.case = 'sync:0,desync:0'
+  //   let o =
+  //   {
+  //     execPath : [ 'node ' + programPath, 'node ' + programPath ],
+  //     mode : 'spawn',
+  //     sync : 0,
+  //     deasync : 0
+  //   }
+  //   var returned = _.process.start( o );
+  //   test.is( _.consequenceIs( returned ) );
+  //   test.identical( returned.resourcesCount(), 0 );
+  //   returned.then( function( result )
+  //   {
+  //     // debugger;
+  //     test.is( result === o );
+  //     test.identical( o.runs.length, 2 );
+  //     test.identical( o.runs[ 0 ].exitCode, 0 );
+  //     test.identical( o.runs[ 0 ].exitSignal, null );
+  //     test.identical( o.runs[ 0 ].exitReason, 'normal' );
+  //     test.identical( o.runs[ 0 ].ended, true );
+  //     test.identical( o.runs[ 0 ].state, 'terminated' );
+
+  //     test.identical( o.runs[ 1 ].exitCode, 0 );
+  //     test.identical( o.runs[ 1 ].exitSignal, null );
+  //     test.identical( o.runs[ 1 ].exitReason, 'normal' );
+  //     test.identical( o.runs[ 1 ].ended, true );
+  //     test.identical( o.runs[ 1 ].state, 'terminated' );
+
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( o.exitSignal, null );
+  //     test.identical( o.exitReason, 'normal' );
+  //     test.identical( o.ended, true );
+  //     test.identical( o.state, 'terminated' );
+
+  //     return result;
+  //   })
+  //   return returned;
+  // })
+
+  // /*  */
+
+  // a.ready.then( () =>
+  // {
+  //   test.case = 'sync:1,desync:0'
+  //   let o =
+  //   {
+  //     execPath : [ 'node ' + programPath, 'node ' + programPath ],
+  //     mode : 'spawn',
+  //     sync : 1,
+  //     // returningOptionsArray : 1,
+  //     deasync : 0
+  //   }
+  //   var returned = _.process.start( o );
+  //   test.is( !_.consequenceIs( returned ) );
+  //   test.is( returned === o );
+  //   test.identical( returned.runs.length, 2 );
+  //   test.identical( o.runs[ 0 ].exitCode, 0 );
+  //   test.identical( o.runs[ 0 ].exitSignal, null );
+  //   test.identical( o.runs[ 0 ].exitReason, 'normal' );
+  //   test.identical( o.runs[ 0 ].ended, true );
+  //   test.identical( o.runs[ 0 ].state, 'terminated' );
+
+  //   test.identical( o.runs[ 1 ].exitCode, 0 );
+  //   test.identical( o.runs[ 1 ].exitSignal, null );
+  //   test.identical( o.runs[ 1 ].exitReason, 'normal' );
+  //   test.identical( o.runs[ 1 ].ended, true );
+  //   test.identical( o.runs[ 1 ].state, 'terminated' );
+
+  //   test.identical( o.exitCode, 0 );
+  //   test.identical( o.exitSignal, null );
+  //   test.identical( o.exitReason, 'normal' );
+  //   test.identical( o.ended, true );
+  //   test.identical( o.state, 'terminated' );
+
+  //   return returned;
+  // })
+
+  // /*  */
+
+  // a.ready.then( () =>
+  // {
+  //   test.case = 'sync:1,desync:0'
+  //   let o =
+  //   {
+  //     execPath : [ 'node ' + programPath, 'node ' + programPath ],
+  //     mode : 'spawn',
+  //     sync : 1,
+  //     // returningOptionsArray : 0,
+  //     deasync : 0
+  //   }
+  //   var returned = _.process.start( o );
+  //   test.is( !_.consequenceIs( returned ) );
+  //   test.is( returned === o );
+  //   test.identical( returned.exitCode, 0 )
+  //   test.identical( returned.exitSignal, null );
+  //   test.identical( returned.exitReason, 'normal' );
+  //   test.identical( returned.ended, true );
+  //   test.identical( returned.state, 'terminated' );
+
+  //   test.identical( o.exitCode, 0 );
+  //   test.identical( o.exitSignal, null );
+  //   test.identical( o.exitReason, 'normal' );
+  //   test.identical( o.ended, true );
+  //   test.identical( o.state, 'terminated' );
+
+  //   return returned;
+  // })
+
+  // /*  */
+
+  // a.ready.then( () =>
+  // {
+  //   test.case = 'sync:0,desync:1'
+  //   let o =
+  //   {
+  //     execPath : [ 'node ' + programPath, 'node ' + programPath ],
+  //     mode : 'spawn',
+  //     sync : 0,
+  //     deasync : 1
+  //   }
+  //   var returned = _.process.start( o );
+  //   test.is( _.consequenceIs( returned ) );
+  //   test.identical( returned.resourcesCount(), 1 );
+  //   returned.then( function( result )
+  //   {
+  //     test.is( result === o );
+  //     test.identical( o.runs.length, 2 );
+  //     test.identical( o.runs[ 0 ].exitCode, 0 );
+  //     test.identical( o.runs[ 0 ].exitSignal, null );
+  //     test.identical( o.runs[ 0 ].exitReason, 'normal' );
+  //     test.identical( o.runs[ 0 ].ended, true );
+  //     test.identical( o.runs[ 0 ].state, 'terminated' );
+
+  //     test.identical( o.runs[ 1 ].exitCode, 0 );
+  //     test.identical( o.runs[ 1 ].exitSignal, null );
+  //     test.identical( o.runs[ 1 ].exitReason, 'normal' );
+  //     test.identical( o.runs[ 1 ].ended, true );
+  //     test.identical( o.runs[ 1 ].state, 'terminated' );
+
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( o.exitSignal, null );
+  //     test.identical( o.exitReason, 'normal' );
+  //     test.identical( o.ended, true );
+  //     test.identical( o.state, 'terminated' );
+
+  //     return result;
+  //   })
+  //   return returned;
+  // })
+
+  // /*  */
+
+  // a.ready.then( () =>
+  // {
+  //   test.case = 'sync:1,desync:1'
+  //   let o =
+  //   {
+  //     execPath : [ 'node ' + programPath, 'node ' + programPath ],
+  //     mode : 'spawn',
+  //     sync : 1,
+  //     deasync : 1
+  //   }
+  //   var returned = _.process.start( o );
+  //   test.is( !_.consequenceIs( returned ) );
+  //   test.is( returned === o );
+  //   test.identical( o.runs.length, 2 );
+  //   test.identical( o.runs[ 0 ].exitCode, 0 );
+  //   test.identical( o.runs[ 0 ].exitSignal, null );
+  //   test.identical( o.runs[ 0 ].exitReason, 'normal' );
+  //   test.identical( o.runs[ 0 ].ended, true );
+  //   test.identical( o.runs[ 0 ].state, 'terminated' );
+
+  //   test.identical( o.runs[ 1 ].exitCode, 0 );
+  //   test.identical( o.runs[ 1 ].exitSignal, null );
+  //   test.identical( o.runs[ 1 ].exitReason, 'normal' );
+  //   test.identical( o.runs[ 1 ].ended, true );
+  //   test.identical( o.runs[ 1 ].state, 'terminated' );
+
+  //   test.identical( o.exitCode, 0 );
+  //   test.identical( o.exitSignal, null );
+  //   test.identical( o.exitReason, 'normal' );
+  //   test.identical( o.ended, true );
+  //   test.identical( o.state, 'terminated' );
+
+  //   return returned;
+  // })
+
+  // /* SPAWN ENDS */
+
+  // a.ready.then( () =>
+  // {
+  //   test.case = 'sync:0,desync:0'
+  //   let o =
+  //   {
+  //     execPath : [ 'node ' + programPath, 'node ' + programPath ],
+  //     mode : 'shell',
+  //     sync : 0,
+  //     deasync : 0
+  //   }
+  //   var returned = _.process.start( o );
+  //   test.is( _.consequenceIs( returned ) );
+  //   test.identical( returned.resourcesCount(), 0 );
+  //   returned.then( function( result )
+  //   {
+  //     test.is( result === o );
+  //     test.identical( o.runs.length, 2 );
+  //     test.identical( o.runs[ 0 ].exitCode, 0 );
+  //     test.identical( o.runs[ 0 ].exitSignal, null );
+  //     test.identical( o.runs[ 0 ].exitReason, 'normal' );
+  //     test.identical( o.runs[ 0 ].ended, true );
+  //     test.identical( o.runs[ 0 ].state, 'terminated' );
+
+  //     test.identical( o.runs[ 1 ].exitCode, 0 );
+  //     test.identical( o.runs[ 1 ].exitSignal, null );
+  //     test.identical( o.runs[ 1 ].exitReason, 'normal' );
+  //     test.identical( o.runs[ 1 ].ended, true );
+  //     test.identical( o.runs[ 1 ].state, 'terminated' );
+
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( o.exitSignal, null );
+  //     test.identical( o.exitReason, 'normal' );
+  //     test.identical( o.ended, true );
+  //     test.identical( o.state, 'terminated' );
+
+  //     return result;
+  //   })
+  //   return returned;
+  // })
+
+  // /*  */
+
+  // a.ready.then( () =>
+  // {
+  //   test.case = 'sync:1,desync:0'
+  //   let o =
+  //   {
+  //     execPath : [ 'node ' + programPath, 'node ' + programPath ],
+  //     mode : 'shell',
+  //     sync : 1,
+  //     // returningOptionsArray : 1,
+  //     deasync : 0
+  //   }
+  //   var returned = _.process.start( o );
+  //   test.is( !_.consequenceIs( returned ) );
+  //   test.is( returned === o );
+  //   test.identical( returned.runs.length, 2 );
+  //   test.identical( o.runs[ 0 ].exitCode, 0 );
+  //   test.identical( o.runs[ 0 ].exitSignal, null );
+  //   test.identical( o.runs[ 0 ].exitReason, 'normal' );
+  //   test.identical( o.runs[ 0 ].ended, true );
+  //   test.identical( o.runs[ 0 ].state, 'terminated' );
+
+  //   test.identical( o.runs[ 1 ].exitCode, 0 );
+  //   test.identical( o.runs[ 1 ].exitSignal, null );
+  //   test.identical( o.runs[ 1 ].exitReason, 'normal' );
+  //   test.identical( o.runs[ 1 ].ended, true );
+  //   test.identical( o.runs[ 1 ].state, 'terminated' );
+
+  //   test.identical( o.exitCode, 0 );
+  //   test.identical( o.exitSignal, null );
+  //   test.identical( o.exitReason, 'normal' );
+  //   test.identical( o.ended, true );
+  //   test.identical( o.state, 'terminated' );
+
+  //   return returned;
+  // })
+
+  // /*  */
+
+  // a.ready.then( () =>
+  // {
+  //   test.case = 'sync:1,desync:0'
+  //   let o =
+  //   {
+  //     execPath : [ 'node ' + programPath, 'node ' + programPath ],
+  //     mode : 'shell',
+  //     sync : 1,
+  //     // returningOptionsArray : 0,
+  //     deasync : 0
+  //   }
+  //   var returned = _.process.start( o );
+  //   test.is( !_.consequenceIs( returned ) );
+  //   test.is( returned === o );
+  //   test.identical( returned.exitCode, 0 )
+  //   test.identical( returned.exitSignal, null );
+  //   test.identical( returned.exitReason, 'normal' );
+  //   test.identical( returned.ended, true );
+  //   test.identical( returned.state, 'terminated' );
+
+  //   test.identical( o.exitCode, 0 );
+  //   test.identical( o.exitSignal, null );
+  //   test.identical( o.exitReason, 'normal' );
+  //   test.identical( o.ended, true );
+  //   test.identical( o.state, 'terminated' );
+
+  //   return returned;
+  // })
+
+  // /*  */
+
+  // a.ready.then( () =>
+  // {
+  //   test.case = 'sync:0,desync:1'
+  //   let o =
+  //   {
+  //     execPath : [ 'node ' + programPath, 'node ' + programPath ],
+  //     mode : 'shell',
+  //     sync : 0,
+  //     deasync : 1
+  //   }
+  //   var returned = _.process.start( o );
+  //   test.is( _.consequenceIs( returned ) );
+  //   test.identical( returned.resourcesCount(), 1 );
+  //   returned.then( function( result )
+  //   {
+  //     test.is( result === o );
+  //     test.identical( o.runs.length, 2 );
+  //     test.identical( o.runs[ 0 ].exitCode, 0 );
+  //     test.identical( o.runs[ 0 ].exitSignal, null );
+  //     test.identical( o.runs[ 0 ].exitReason, 'normal' );
+  //     test.identical( o.runs[ 0 ].ended, true );
+  //     test.identical( o.runs[ 0 ].state, 'terminated' );
+
+  //     test.identical( o.runs[ 1 ].exitCode, 0 );
+  //     test.identical( o.runs[ 1 ].exitSignal, null );
+  //     test.identical( o.runs[ 1 ].exitReason, 'normal' );
+  //     test.identical( o.runs[ 1 ].ended, true );
+  //     test.identical( o.runs[ 1 ].state, 'terminated' );
+
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( o.exitSignal, null );
+  //     test.identical( o.exitReason, 'normal' );
+  //     test.identical( o.ended, true );
+  //     test.identical( o.state, 'terminated' );
+
+  //     return result;
+  //   })
+  //   return returned;
+  // })
+
+  // /*  */
+
+  // a.ready.then( () =>
+  // {
+  //   test.case = 'sync:1,desync:1'
+  //   let o =
+  //   {
+  //     execPath : [ programPath, programPath ],
+  //     mode : 'fork',
+  //     sync : 1,
+  //     deasync : 1
+  //   }
+  //   var returned = _.process.start( o );
+  //   test.is( !_.consequenceIs( returned ) );
+  //   test.is( returned === o );
+  //   test.identical( o.runs.length, 2 );
+  //   test.identical( o.runs[ 0 ].exitCode, 0 );
+  //   test.identical( o.runs[ 0 ].exitSignal, null );
+  //   test.identical( o.runs[ 0 ].exitReason, 'normal' );
+  //   test.identical( o.runs[ 0 ].ended, true );
+  //   test.identical( o.runs[ 0 ].state, 'terminated' );
+
+  //   test.identical( o.runs[ 1 ].exitCode, 0 );
+  //   test.identical( o.runs[ 1 ].exitSignal, null );
+  //   test.identical( o.runs[ 1 ].exitReason, 'normal' );
+  //   test.identical( o.runs[ 1 ].ended, true );
+  //   test.identical( o.runs[ 1 ].state, 'terminated' );
+
+  //   test.identical( o.exitCode, 0 );
+  //   test.identical( o.exitSignal, null );
+  //   test.identical( o.exitReason, 'normal' );
+  //   test.identical( o.ended, true );
+  //   test.identical( o.state, 'terminated' );
+
+  //   return returned;
+  // })
+
+  // /*  */
+
+  // a.ready.then( () =>
+  // {
+  //   test.case = 'sync:0,desync:0'
+  //   let o =
+  //   {
+  //     execPath : [ programPath, programPath ],
+  //     mode : 'fork',
+  //     sync : 0,
+  //     deasync : 0
+  //   }
+  //   var returned = _.process.start( o );
+  //   test.is( _.consequenceIs( returned ) );
+  //   test.identical( returned.resourcesCount(), 0 );
+  //   returned.then( function( result )
+  //   {
+  //     test.is( result === o );
+  //     test.identical( o.runs.length, 2 );
+  //     test.identical( o.runs[ 0 ].exitCode, 0 );
+  //     test.identical( o.runs[ 0 ].exitSignal, null );
+  //     test.identical( o.runs[ 0 ].exitReason, 'normal' );
+  //     test.identical( o.runs[ 0 ].ended, true );
+  //     test.identical( o.runs[ 0 ].state, 'terminated' );
+
+  //     test.identical( o.runs[ 1 ].exitCode, 0 );
+  //     test.identical( o.runs[ 1 ].exitSignal, null );
+  //     test.identical( o.runs[ 1 ].exitReason, 'normal' );
+  //     test.identical( o.runs[ 1 ].ended, true );
+  //     test.identical( o.runs[ 1 ].state, 'terminated' );
+
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( o.exitSignal, null );
+  //     test.identical( o.exitReason, 'normal' );
+  //     test.identical( o.ended, true );
+  //     test.identical( o.state, 'terminated' );
+
+  //     return result;
+  //   })
+  //   return returned;
+  // })
+
+  // /*  */
+
+  // a.ready.then( () =>
+  // {
+  //   test.case = 'sync:1,desync:0'
+  //   let o =
+  //   {
+  //     execPath : [ programPath, programPath ],
+  //     mode : 'fork',
+  //     sync : 1,
+  //     // returningOptionsArray : 1,
+  //     deasync : 0
+  //   }
+  //   test.shouldThrowErrorSync( () => _.process.start( o ) );
+  //   return null;
+  // })
+
+  // /*  */
+
+  // a.ready.then( () =>
+  // {
+  //   test.case = 'sync:1,desync:0'
+  //   let o =
+  //   {
+  //     execPath : [ programPath, programPath ],
+  //     mode : 'fork',
+  //     sync : 1,
+  //     // returningOptionsArray : 0,
+  //     deasync : 0
+  //   }
+  //   test.shouldThrowErrorSync( () => _.process.start( o ) );
+  //   return null;
+  // })
+
+  // /*  */
+
+  // a.ready.then( () =>
+  // {
+  //   test.case = 'sync:0,desync:1'
+  //   let o =
+  //   {
+  //     execPath : [ programPath, programPath ],
+  //     mode : 'fork',
+  //     sync : 0,
+  //     deasync : 1
+  //   }
+  //   var returned = _.process.start( o );
+  //   test.is( _.consequenceIs( returned ) );
+  //   test.identical( returned.resourcesCount(), 1 );
+  //   returned.then( function( result )
+  //   {
+  //     test.is( result === o );
+  //     test.identical( o.runs.length, 2 );
+  //     test.identical( o.runs[ 0 ].exitCode, 0 );
+  //     test.identical( o.runs[ 0 ].exitSignal, null );
+  //     test.identical( o.runs[ 0 ].exitReason, 'normal' );
+  //     test.identical( o.runs[ 0 ].ended, true );
+  //     test.identical( o.runs[ 0 ].state, 'terminated' );
+
+  //     test.identical( o.runs[ 1 ].exitCode, 0 );
+  //     test.identical( o.runs[ 1 ].exitSignal, null );
+  //     test.identical( o.runs[ 1 ].exitReason, 'normal' );
+  //     test.identical( o.runs[ 1 ].ended, true );
+  //     test.identical( o.runs[ 1 ].state, 'terminated' );
+
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( o.exitSignal, null );
+  //     test.identical( o.exitReason, 'normal' );
+  //     test.identical( o.ended, true );
+  //     test.identical( o.state, 'terminated' );
+
+  //     return result;
+  //   })
+  //   return returned;
+  // })
+
+  // /*  */
+
+  // a.ready.then( () =>
+  // {
+  //   test.case = 'sync:1,desync:1'
+  //   let o =
+  //   {
+  //     execPath : [ programPath, programPath ],
+  //     mode : 'fork',
+  //     sync : 1,
+  //     deasync : 1
+  //   }
+  //   var returned = _.process.start( o );
+  //   test.is( !_.consequenceIs( returned ) );
+  //   test.is( returned === o );
+  //   test.identical( o.runs.length, 2 );
+  //   test.identical( o.runs[ 0 ].exitCode, 0 );
+  //   test.identical( o.runs[ 0 ].exitSignal, null );
+  //   test.identical( o.runs[ 0 ].exitReason, 'normal' );
+  //   test.identical( o.runs[ 0 ].ended, true );
+  //   test.identical( o.runs[ 0 ].state, 'terminated' );
+
+  //   test.identical( o.runs[ 1 ].exitCode, 0 );
+  //   test.identical( o.runs[ 1 ].exitSignal, null );
+  //   test.identical( o.runs[ 1 ].exitReason, 'normal' );
+  //   test.identical( o.runs[ 1 ].ended, true );
+  //   test.identical( o.runs[ 1 ].state, 'terminated' );
+
+  //   test.identical( o.exitCode, 0 );
+  //   test.identical( o.exitSignal, null );
+  //   test.identical( o.exitReason, 'normal' );
+  //   test.identical( o.ended, true );
+  //   test.identical( o.state, 'terminated' );
+
+  //   return returned;
+  // })
+
+  // /*  */
+
+  // a.ready.then( () =>
+  // {
+  //   test.case = 'sync:1,desync:1'
+  //   let o =
+  //   {
+  //     execPath : [ programPath, programPath ],
+  //     mode : 'fork',
+  //     sync : 1,
+  //     deasync : 1
+  //   }
+  //   var returned = _.process.start( o );
+  //   test.is( !_.consequenceIs( returned ) );
+  //   test.is( returned === o );
+  //   test.identical( o.runs.length, 2 );
+  //   test.identical( o.runs[ 0 ].exitCode, 0 );
+  //   test.identical( o.runs[ 0 ].exitSignal, null );
+  //   test.identical( o.runs[ 0 ].exitReason, 'normal' );
+  //   test.identical( o.runs[ 0 ].ended, true );
+  //   test.identical( o.runs[ 0 ].state, 'terminated' );
+
+  //   test.identical( o.runs[ 1 ].exitCode, 0 );
+  //   test.identical( o.runs[ 1 ].exitSignal, null );
+  //   test.identical( o.runs[ 1 ].exitReason, 'normal' );
+  //   test.identical( o.runs[ 1 ].ended, true );
+  //   test.identical( o.runs[ 1 ].state, 'terminated' );
+
+  //   test.identical( o.exitCode, 0 );
+  //   test.identical( o.exitSignal, null );
+  //   test.identical( o.exitReason, 'normal' );
+  //   test.identical( o.ended, true );
+  //   test.identical( o.state, 'terminated' );
+
+  //   return returned;
+  // })
+
+  // /*  */
+
+  // a.ready.then( () =>
+  // {
+  //   test.case = 'sync:0,desync:0'
+  //   let o =
+  //   {
+  //     execPath : [ 'node ' + programPath, 'node ' + programPath ],
+  //     mode : 'shell',
+  //     sync : 0,
+  //     deasync : 0
+  //   }
+  //   var returned = _.process.start( o );
+  //   test.is( _.consequenceIs( returned ) );
+  //   test.identical( returned.resourcesCount(), 0 );
+  //   returned.then( function( result )
+  //   {
+  //     test.is( result === o );
+  //     test.identical( o.runs.length, 2 );
+  //     test.identical( o.runs[ 0 ].exitCode, 0 );
+  //     test.identical( o.runs[ 0 ].exitSignal, null );
+  //     test.identical( o.runs[ 0 ].exitReason, 'normal' );
+  //     test.identical( o.runs[ 0 ].ended, true );
+  //     test.identical( o.runs[ 0 ].state, 'terminated' );
+
+  //     test.identical( o.runs[ 1 ].exitCode, 0 );
+  //     test.identical( o.runs[ 1 ].exitSignal, null );
+  //     test.identical( o.runs[ 1 ].exitReason, 'normal' );
+  //     test.identical( o.runs[ 1 ].ended, true );
+  //     test.identical( o.runs[ 1 ].state, 'terminated' );
+
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( o.exitSignal, null );
+  //     test.identical( o.exitReason, 'normal' );
+  //     test.identical( o.ended, true );
+  //     test.identical( o.state, 'terminated' );
+
+  //     return result;
+  //   })
+  //   return returned;
+  // })
+
+  // /*  */
+
+  // a.ready.then( () =>
+  // {
+  //   test.case = 'sync:0,desync:0'
+  //   let o =
+  //   {
+  //     execPath : [ 'node ' + programPath, 'node ' + programPath ],
+  //     mode : 'spawn',
+  //     sync : 0,
+  //     deasync : 0
+  //   }
+  //   var returned = _.process.start( o );
+  //   test.is( _.consequenceIs( returned ) );
+  //   test.identical( returned.resourcesCount(), 0 );
+  //   returned.then( function( result )
+  //   {
+  //     test.is( result === o );
+  //     test.identical( o.runs.length, 2 );
+  //     test.identical( o.runs[ 0 ].exitCode, 0 );
+  //     test.identical( o.runs[ 0 ].exitSignal, null );
+  //     test.identical( o.runs[ 0 ].exitReason, 'normal' );
+  //     test.identical( o.runs[ 0 ].ended, true );
+  //     test.identical( o.runs[ 0 ].state, 'terminated' );
+
+  //     test.identical( o.runs[ 1 ].exitCode, 0 );
+  //     test.identical( o.runs[ 1 ].exitSignal, null );
+  //     test.identical( o.runs[ 1 ].exitReason, 'normal' );
+  //     test.identical( o.runs[ 1 ].ended, true );
+  //     test.identical( o.runs[ 1 ].state, 'terminated' );
+
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( o.exitSignal, null );
+  //     test.identical( o.exitReason, 'normal' );
+  //     test.identical( o.ended, true );
+  //     test.identical( o.state, 'terminated' );
+
+  //     return result;
+  //   })
+  //   return returned;
+  // })
+
+  // /*  */
+
+  // a.ready.then( () =>
+  // {
+  //   test.case = 'sync:0,desync:0'
+  //   let o =
+  //   {
+  //     execPath : [ programPath, programPath ],
+  //     mode : 'fork',
+  //     sync : 0,
+  //     deasync : 0
+  //   }
+  //   var returned = _.process.start( o );
+  //   test.is( _.consequenceIs( returned ) );
+  //   test.identical( returned.resourcesCount(), 0 );
+  //   returned.then( function( result )
+  //   {
+  //     test.is( result === o );
+  //     test.identical( o.runs.length, 2 );
+  //     test.identical( o.runs[ 0 ].exitCode, 0 );
+  //     test.identical( o.runs[ 0 ].exitSignal, null );
+  //     test.identical( o.runs[ 0 ].exitReason, 'normal' );
+  //     test.identical( o.runs[ 0 ].ended, true );
+  //     test.identical( o.runs[ 0 ].state, 'terminated' );
+
+  //     test.identical( o.runs[ 1 ].exitCode, 0 );
+  //     test.identical( o.runs[ 1 ].exitSignal, null );
+  //     test.identical( o.runs[ 1 ].exitReason, 'normal' );
+  //     test.identical( o.runs[ 1 ].ended, true );
+  //     test.identical( o.runs[ 1 ].state, 'terminated' );
+
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( o.exitSignal, null );
+  //     test.identical( o.exitReason, 'normal' );
+  //     test.identical( o.ended, true );
+  //     test.identical( o.state, 'terminated' );
+
+  //     return result;
+  //   })
+  //   return returned;
+  // })
+
+  // /*  */
+
+  // a.ready.then( () =>
+  // {
+  //   test.case = 'sync:1,desync:0'
+  //   let o =
+  //   {
+  //     execPath : [ 'node ' + programPath, 'node ' + programPath ],
+  //     mode : 'shell',
+  //     sync : 1,
+  //     // returningOptionsArray : 1,
+  //     deasync : 0
+  //   }
+  //   var returned = _.process.start( o );
+  //   test.is( !_.consequenceIs( returned ) );
+  //   test.is( returned === o );
+  //   test.identical( returned.runs.length, 2 )
+  //   test.identical( o.runs[ 0 ].exitCode, 0 );
+  //   test.identical( o.runs[ 0 ].exitSignal, null );
+  //   test.identical( o.runs[ 0 ].exitReason, 'normal' );
+  //   test.identical( o.runs[ 0 ].ended, true );
+  //   test.identical( o.runs[ 0 ].state, 'terminated' );
+
+  //   test.identical( o.runs[ 1 ].exitCode, 0 );
+  //   test.identical( o.runs[ 1 ].exitSignal, null );
+  //   test.identical( o.runs[ 1 ].exitReason, 'normal' );
+  //   test.identical( o.runs[ 1 ].ended, true );
+  //   test.identical( o.runs[ 1 ].state, 'terminated' );
+
+  //   test.identical( o.exitCode, 0 );
+  //   test.identical( o.exitSignal, null );
+  //   test.identical( o.exitReason, 'normal' );
+  //   test.identical( o.ended, true );
+  //   test.identical( o.state, 'terminated' );
+
+  //   return null;
+  // })
+
+  // /*  */
+
+  // a.ready.then( () =>
+  // {
+  //   test.case = 'sync:1,desync:0'
+  //   let o =
+  //   {
+  //     execPath : [ 'node ' + programPath, 'node ' + programPath ],
+  //     mode : 'spawn',
+  //     sync : 1,
+  //     // returningOptionsArray : 1,
+  //     deasync : 0
+  //   }
+  //   var returned = _.process.start( o );
+  //   test.is( !_.consequenceIs( returned ) );
+  //   test.is( returned === o );
+  //   test.identical( o.runs.length, 2 )
+  //   test.identical( o.runs[ 0 ].exitCode, 0 );
+  //   test.identical( o.runs[ 0 ].exitSignal, null );
+  //   test.identical( o.runs[ 0 ].exitReason, 'normal' );
+  //   test.identical( o.runs[ 0 ].ended, true );
+  //   test.identical( o.runs[ 0 ].state, 'terminated' );
+
+  //   test.identical( o.runs[ 1 ].exitCode, 0 );
+  //   test.identical( o.runs[ 1 ].exitSignal, null );
+  //   test.identical( o.runs[ 1 ].exitReason, 'normal' );
+  //   test.identical( o.runs[ 1 ].ended, true );
+  //   test.identical( o.runs[ 1 ].state, 'terminated' );
+
+  //   test.identical( o.exitCode, 0 );
+  //   test.identical( o.exitSignal, null );
+  //   test.identical( o.exitReason, 'normal' );
+  //   test.identical( o.ended, true );
+  //   test.identical( o.state, 'terminated' );
+
+  //   return null;
+  // })
+
+  // /*  */
+
+  // a.ready.then( () =>
+  // {
+  //   test.case = 'sync:1,desync:0'
+  //   let o =
+  //   {
+  //     execPath : [ 'node ' + programPath, 'node ' + programPath ],
+  //     mode : 'shell',
+  //     sync : 1,
+  //     // returningOptionsArray : 0,
+  //     deasync : 0
+  //   }
+  //   var returned = _.process.start( o );
+  //   test.is( !_.consequenceIs( returned ) );
+  //   test.is( returned === o );
+  //   test.identical( returned.exitCode, 0 )
+  //   test.identical( returned.exitSignal, null );
+  //   test.identical( returned.exitReason, 'normal' );
+  //   test.identical( returned.ended, true );
+  //   test.identical( returned.state, 'terminated' );
+
+  //   test.identical( o.exitCode, 0 );
+  //   test.identical( o.exitSignal, null );
+  //   test.identical( o.exitReason, 'normal' );
+  //   test.identical( o.ended, true );
+  //   test.identical( o.state, 'terminated' );
+
+  //   return null;
+  // })
+
+  // /*  */
+
+  // a.ready.then( () =>
+  // {
+  //   test.case = 'sync:1,desync:0'
+  //   let o =
+  //   {
+  //     execPath : [ 'node ' + programPath, 'node ' + programPath ],
+  //     mode : 'spawn',
+  //     sync : 1,
+  //     // returningOptionsArray : 0,
+  //     deasync : 0
+  //   }
+  //   var returned = _.process.start( o );
+  //   test.is( !_.consequenceIs( returned ) );
+  //   test.is( returned === o );
+  //   test.identical( returned.exitCode, 0 );
+  //   test.identical( returned.exitSignal, null );
+  //   test.identical( returned.exitReason, 'normal' );
+  //   test.identical( returned.ended, true );
+  //   test.identical( returned.state, 'terminated' );
+
+  //   test.identical( o.exitCode, 0 );
+  //   test.identical( o.exitSignal, null );
+  //   test.identical( o.exitReason, 'normal' );
+  //   test.identical( o.ended, true );
+  //   test.identical( o.state, 'terminated' );
+
+  //   return null;
+  // })
+
+
+  // /*  */
+
+  // a.ready.then( () =>
+  // {
+  //   test.case = 'sync:0,desync:1'
+  //   let o =
+  //   {
+  //     execPath : [ 'node ' + programPath, 'node ' + programPath ],
+  //     mode : 'shell',
+  //     sync : 0,
+  //     deasync : 1
+  //   }
+  //   var returned = _.process.start( o );
+  //   test.is( _.consequenceIs( returned ) );
+  //   test.identical( returned.resourcesCount(), 1 );
+  //   returned.then( function( result )
+  //   {
+  //     test.is( result === o );
+  //     test.identical( o.runs.length, 2 );
+  //     test.identical( o.runs[ 0 ].exitCode, 0 );
+  //     test.identical( o.runs[ 0 ].exitSignal, null );
+  //     test.identical( o.runs[ 0 ].exitReason, 'normal' );
+  //     test.identical( o.runs[ 0 ].ended, true );
+  //     test.identical( o.runs[ 0 ].state, 'terminated' );
+
+  //     test.identical( o.runs[ 1 ].exitCode, 0 );
+  //     test.identical( o.runs[ 1 ].exitSignal, null );
+  //     test.identical( o.runs[ 1 ].exitReason, 'normal' );
+  //     test.identical( o.runs[ 1 ].ended, true );
+  //     test.identical( o.runs[ 1 ].state, 'terminated' );
+
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( o.exitSignal, null );
+  //     test.identical( o.exitReason, 'normal' );
+  //     test.identical( o.ended, true );
+  //     test.identical( o.state, 'terminated' );
+
+  //     return result;
+  //   })
+  //   return returned;
+  // })
+
+  // /*  */
+
+  // a.ready.then( () =>
+  // {
+  //   test.case = 'sync:0,desync:1'
+  //   let o =
+  //   {
+  //     execPath : [ 'node ' + programPath, 'node ' + programPath ],
+  //     mode : 'spawn',
+  //     sync : 0,
+  //     deasync : 1
+  //   }
+  //   var returned = _.process.start( o );
+  //   test.is( _.consequenceIs( returned ) );
+  //   test.identical( returned.resourcesCount(), 1 );
+  //   returned.then( function( result )
+  //   {
+  //     test.is( result === o );
+  //     test.identical( o.runs.length, 2 );
+  //     test.identical( o.runs[ 0 ].exitCode, 0 );
+  //     test.identical( o.runs[ 0 ].exitSignal, null );
+  //     test.identical( o.runs[ 0 ].exitReason, 'normal' );
+  //     test.identical( o.runs[ 0 ].ended, true );
+  //     test.identical( o.runs[ 0 ].state, 'terminated' );
+
+  //     test.identical( o.runs[ 1 ].exitCode, 0 );
+  //     test.identical( o.runs[ 1 ].exitSignal, null );
+  //     test.identical( o.runs[ 1 ].exitReason, 'normal' );
+  //     test.identical( o.runs[ 1 ].ended, true );
+  //     test.identical( o.runs[ 1 ].state, 'terminated' );
+
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( o.exitSignal, null );
+  //     test.identical( o.exitReason, 'normal' );
+  //     test.identical( o.ended, true );
+  //     test.identical( o.state, 'terminated' );
+
+  //     return result;
+  //   })
+  //   return returned;
+  // })
+
+  // /*  */
+
+  // a.ready.then( () =>
+  // {
+  //   test.case = 'sync:0,desync:1'
+  //   let o =
+  //   {
+  //     execPath : [ programPath, programPath ],
+  //     mode : 'fork',
+  //     sync : 0,
+  //     deasync : 1
+  //   }
+  //   var returned = _.process.start( o );
+  //   test.is( _.consequenceIs( returned ) );
+  //   test.identical( returned.resourcesCount(), 1 );
+  //   returned.then( function( result )
+  //   {
+  //     test.is( result === o );
+  //     test.identical( o.runs.length, 2 );
+  //     test.identical( o.runs[ 0 ].exitCode, 0 );
+  //     test.identical( o.runs[ 0 ].exitSignal, null );
+  //     test.identical( o.runs[ 0 ].exitReason, 'normal' );
+  //     test.identical( o.runs[ 0 ].ended, true );
+  //     test.identical( o.runs[ 0 ].state, 'terminated' );
+
+  //     test.identical( o.runs[ 1 ].exitCode, 0 );
+  //     test.identical( o.runs[ 1 ].exitSignal, null );
+  //     test.identical( o.runs[ 1 ].exitReason, 'normal' );
+  //     test.identical( o.runs[ 1 ].ended, true );
+  //     test.identical( o.runs[ 1 ].state, 'terminated' );
+
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( o.exitSignal, null );
+  //     test.identical( o.exitReason, 'normal' );
+  //     test.identical( o.ended, true );
+  //     test.identical( o.state, 'terminated' );
+
+  //     return result;
+  //   })
+  //   return returned;
+  // })
+
+  // /*  */
+
+  // a.ready.then( () =>
+  // {
+  //   test.case = 'sync:1,desync:1'
+  //   let o =
+  //   {
+  //     execPath : [ 'node ' + programPath, 'node ' + programPath ],
+  //     mode : 'shell',
+  //     sync : 1,
+  //     deasync : 1
+  //   }
+  //   var returned = _.process.start( o );
+  //   test.is( !_.consequenceIs( returned ) );
+  //   test.is( returned === o );
+  //   test.identical( o.runs.length, 2 );
+  //   test.identical( o.runs[ 0 ].exitCode, 0 );
+  //   test.identical( o.runs[ 0 ].exitSignal, null );
+  //   test.identical( o.runs[ 0 ].exitReason, 'normal' );
+  //   test.identical( o.runs[ 0 ].ended, true );
+  //   test.identical( o.runs[ 0 ].state, 'terminated' );
+
+  //   test.identical( o.runs[ 1 ].exitCode, 0 );
+  //   test.identical( o.runs[ 1 ].exitSignal, null );
+  //   test.identical( o.runs[ 1 ].exitReason, 'normal' );
+  //   test.identical( o.runs[ 1 ].ended, true );
+  //   test.identical( o.runs[ 1 ].state, 'terminated' );
+
+  //   test.identical( o.exitCode, 0 );
+  //   test.identical( o.exitSignal, null );
+  //   test.identical( o.exitReason, 'normal' );
+  //   test.identical( o.ended, true );
+  //   test.identical( o.state, 'terminated' );
+
+  //   return returned;
+  // })
+
+  // /*  */
+
+  // a.ready.then( () =>
+  // {
+  //   test.case = 'sync:1,desync:1'
+  //   let o =
+  //   {
+  //     execPath : [ 'node ' + programPath, 'node ' + programPath ],
+  //     mode : 'spawn',
+  //     sync : 1,
+  //     deasync : 1
+  //   }
+  //   var returned = _.process.start( o );
+  //   test.is( !_.consequenceIs( returned ) );
+  //   test.is( returned === o );
+  //   test.identical( o.runs.length, 2 );
+  //   test.identical( o.runs[ 0 ].exitCode, 0 );
+  //   test.identical( o.runs[ 0 ].exitSignal, null );
+  //   test.identical( o.runs[ 0 ].exitReason, 'normal' );
+  //   test.identical( o.runs[ 0 ].ended, true );
+  //   test.identical( o.runs[ 0 ].state, 'terminated' );
+
+  //   test.identical( o.runs[ 1 ].exitCode, 0 );
+  //   test.identical( o.runs[ 1 ].exitSignal, null );
+  //   test.identical( o.runs[ 1 ].exitReason, 'normal' );
+  //   test.identical( o.runs[ 1 ].ended, true );
+  //   test.identical( o.runs[ 1 ].state, 'terminated' );
+
+  //   test.identical( o.exitCode, 0 );
+  //   test.identical( o.exitSignal, null );
+  //   test.identical( o.exitReason, 'normal' );
+  //   test.identical( o.ended, true );
+  //   test.identical( o.state, 'terminated' );
+
+  //   return returned;
+  // })
+
+  // /*  */
+
+  // a.ready.then( () =>
+  // {
+  //   test.case = 'sync:1,desync:1'
+  //   let o =
+  //   {
+  //     execPath : [ programPath, programPath ],
+  //     mode : 'fork',
+  //     sync : 1,
+  //     deasync : 1
+  //   }
+  //   var returned = _.process.start( o );
+  //   test.is( !_.consequenceIs( returned ) );
+  //   test.is( returned === o );
+  //   test.identical( o.runs.length, 2 );
+  //   test.identical( o.runs[ 0 ].exitCode, 0 );
+  //   test.identical( o.runs[ 0 ].exitSignal, null );
+  //   test.identical( o.runs[ 0 ].exitReason, 'normal' );
+  //   test.identical( o.runs[ 0 ].ended, true );
+  //   test.identical( o.runs[ 0 ].state, 'terminated' );
+
+  //   test.identical( o.runs[ 1 ].exitCode, 0 );
+  //   test.identical( o.runs[ 1 ].exitSignal, null );
+  //   test.identical( o.runs[ 1 ].exitReason, 'normal' );
+  //   test.identical( o.runs[ 1 ].ended, true );
+  //   test.identical( o.runs[ 1 ].state, 'terminated' );
+
+  //   test.identical( o.exitCode, 0 );
+  //   test.identical( o.exitSignal, null );
+  //   test.identical( o.exitReason, 'normal' );
+  //   test.identical( o.ended, true );
+  //   test.identical( o.state, 'terminated' );
+
+  //   return returned;
+  // })
+
+  // /*  */
+
+  // return a.ready;
 
   /* - */
 
   function testApp()
   {
     console.log( process.argv.slice( 2 ) )
-  }
-}
+  }}
 
 // --
 // arguments
