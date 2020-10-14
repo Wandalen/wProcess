@@ -2347,14 +2347,14 @@ aaa : Done.
     let con = new _.Consequence().take( null );
 
     if( sync && !deasync && mode === 'fork' )
-    return test.shouldThrowErrorSync( () => 
+    return test.shouldThrowErrorSync( () =>
     {
       _.process.start
       ({ execPath : [ programPath, programPath ],
         mode,
         sync,
         deasync
-      }) 
+      })
     });
 
     con.then( () =>
@@ -18788,7 +18788,7 @@ function terminate( test )
     {
       data = data.toString();
       if( _.strHas( data, 'ready' ))
-      _.process.terminate({ pnd : o.process, timeOut : 0 }); /* qqq for Vova : should send kill signal! */
+      _.process.terminate({ pnd : o.process, timeOut : 0 }); /* qqq for Vova : should send kill signal! aaa: added test routine terminateZeroTimeOut*/
     })
 
     /* qqq for Vova : add test case with low timeOut */
@@ -23114,6 +23114,122 @@ function terminateTimeOut( test )
 
 //
 
+function terminateZeroTimeOut( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( program1 );
+
+  /* */
+
+  a.ready
+
+  .then( () =>
+  {
+    test.case = 'terminate process by pnd';
+
+    var o =
+    {
+      execPath :  'node program1.js',
+      currentPath : a.routinePath,
+      mode : 'spawn',
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    _.process.start( o )
+
+    let ready = o.conStart;
+
+    ready.then( () => _.process.terminate({ pnd : o.process, timeOut : 0 }) )
+
+    ready.then( () =>
+    {
+      test.identical( o.conTerminate.resourcesCount(), 1 );
+
+      test.is( !_.strHas( o.output, 'program1::end' ) );
+      test.identical( o.ended, true );
+
+      if( process.platform === 'win32' )
+      {
+        test.identical( o.exitCode, 1 );
+        test.identical( o.exitSignal, null );
+      }
+      else
+      {
+        test.identical( o.exitCode, null );
+        test.identical( o.exitSignal, 'SIGKILL' );
+      }
+
+      return null;
+    })
+
+    return ready;
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    test.case = 'terminate process by id';
+
+    var o =
+    {
+      execPath :  'node program1.js',
+      currentPath : a.routinePath,
+      mode : 'spawn',
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    _.process.start( o )
+
+    let ready = o.conStart;
+
+    ready.then( () => _.process.terminate({ pid : o.process.pid, timeOut : 0 }) )
+
+    ready.then( () =>
+    {
+      test.identical( o.conTerminate.resourcesCount(), 1 );
+
+      test.is( !_.strHas( o.output, 'program1::end' ) );
+      test.identical( o.ended, true );
+
+      if( process.platform === 'win32' )
+      {
+        test.identical( o.exitCode, 1 );
+        test.identical( o.exitSignal, null );
+      }
+      else
+      {
+        test.identical( o.exitCode, null );
+        test.identical( o.exitSignal, 'SIGKILL' );
+      }
+
+      return null;
+    })
+
+    return ready;
+  })
+
+  /* - */
+
+  return a.ready;
+
+  /* - */
+
+  function program1()
+  {
+    console.log( 'program1::start' );
+    setTimeout( () =>
+    {
+      console.log( 'program1::end' )
+    }, context.t1 * 3 );
+  }
+}
+
+//
+
 function terminateDifferentStdio( test )
 {
   let context = this;
@@ -24260,6 +24376,7 @@ var Proto =
     terminateWithChildren,
     terminateWithDetachedChildren, // zzz for Vova:investigate and fix termination of deatched process on Windows
     terminateTimeOut, /* xxx qqq for Vova : make it working */
+    terminateZeroTimeOut,
     terminateDifferentStdio,
     killComplex,
 
