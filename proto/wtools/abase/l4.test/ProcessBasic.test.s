@@ -7718,21 +7718,19 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
   {
     test.case = 'execute simple js program with normalized path'
 
-    let ready = new _.Consequence().take( null );
     let execPath = _.path.normalize( testAppPath );
     let o =
     {
       execPath : _.strQuote( execPath ),
-      ready,
       stdio : 'pipe',
       outputCollecting : 1,
       outputPiping : 1,
       throwingExitCode : 0,
       applyingExitCode : 0,
     };
-    _.process.startNjsPassingThrough( o );
 
-    ready.then( ( op ) =>
+    return _.process.startNjsPassingThrough( o )
+    .then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
@@ -7741,7 +7739,6 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
       return null;
     })
 
-    return ready;
   });
 
   /* */
@@ -7750,21 +7747,19 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
   {
     test.case = 'execute simple js program with nativized path'
 
-    let ready = new _.Consequence().take( null );
     let execPath = _.path.nativize( testAppPath );
     let o =
     {
       execPath : _.strQuote( execPath ),
-      ready,
       stdio : 'pipe',
       outputCollecting : 1,
       outputPiping : 1,
       throwingExitCode : 0,
       applyingExitCode : 0,
     };
-    _.process.startNjsPassingThrough( o );
 
-    ready.then( ( op ) =>
+    return _.process.startNjsPassingThrough( o )
+    .then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
@@ -7773,7 +7768,6 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
       return null;
     })
 
-    return ready;
   })
 
   /* */
