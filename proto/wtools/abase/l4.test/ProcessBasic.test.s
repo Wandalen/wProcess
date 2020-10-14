@@ -7784,6 +7784,129 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
 
 //
 
+function startNormalizedExecPath( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.path.nativize( a.path.normalize( a.program( testApp ) ) );
+
+  /* */
+
+  let shell = _.process.starter
+  ({
+    outputCollecting : 1,
+    ready : a.ready
+  })
+
+  /* */
+
+  shell
+  ({
+    execPath : testAppPath,
+    args : [ 'arg1', 'arg2' ],
+    mode : 'fork'
+  })
+  .then( ( op ) =>
+  {
+    test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
+    test.identical( _.strCount( op.output, `[ 'arg1', 'arg2' ]` ), 1 );
+    return null;
+  })
+
+  /* */
+
+  shell
+  ({
+    execPath : 'node ' + testAppPath,
+    args : [ 'arg1', 'arg2' ],
+    mode : 'spawn'
+  })
+  .then( ( op ) =>
+  {
+    test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
+    test.identical( _.strCount( op.output, `[ 'arg1', 'arg2' ]` ), 1 );
+    return null;
+  })
+
+  /* */
+
+  shell
+  ({
+    execPath : 'node ' + testAppPath,
+    args : [ 'arg1', 'arg2' ],
+    mode : 'shell'
+  })
+  .then( ( op ) =>
+  {
+    test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
+    test.identical( _.strCount( op.output, `[ 'arg1', 'arg2' ]` ), 1 );
+    return null;
+  })
+
+  /* app path in arguments */
+
+  shell
+  ({
+    args : [ testAppPath, 'arg1', 'arg2' ],
+    mode : 'fork'
+  })
+  .then( ( op ) =>
+  {
+    test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
+    test.identical( _.strCount( op.output, `[ 'arg1', 'arg2' ]` ), 1 );
+    return null;
+  })
+
+  /* */
+
+  shell
+  ({
+    execPath : 'node',
+    args : [ testAppPath, 'arg1', 'arg2' ],
+    mode : 'spawn'
+  })
+  .then( ( op ) =>
+  {
+    test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
+    test.identical( _.strCount( op.output, `[ 'arg1', 'arg2' ]` ), 1 );
+    return null;
+  })
+
+  /* */
+
+  shell
+  ({
+    execPath : 'node',
+    args : [ testAppPath, 'arg1', 'arg2' ],
+    mode : 'shell'
+  })
+  .then( ( op ) =>
+  {
+    test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
+    test.identical( _.strCount( op.output, `[ 'arg1', 'arg2' ]` ), 1 );
+    return null;
+  })
+
+  /* */
+
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+}
+
+//
+
 function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subroutine for modes */
 {
   let context = this;
@@ -19272,10 +19395,10 @@ function startOptionPassingThrough( test )
 
       let o =
       {
-        execPath : testAppPath2,
+        execPath : mode === 'fork' ? testAppPath2 : 'node ' + testAppPath2,
         outputCollecting : 0,
         outputPiping : 0,
-        mode : 'fork',
+        mode,
         throwingExitCode : 0,
         applyingExitCode : 0,
         stdio : 'inherit'
@@ -19310,11 +19433,11 @@ function startOptionPassingThrough( test )
 
       let o =
       {
-        execPath : testAppPath2,
+        execPath : mode === 'fork' ? testAppPath2 : 'node ' + testAppPath2,
         args : 'a',
         outputCollecting : 0,
         outputPiping : 0,
-        mode : 'fork',
+        mode,
         throwingExitCode : 0,
         applyingExitCode : 0,
         stdio : 'inherit'
@@ -19349,11 +19472,11 @@ function startOptionPassingThrough( test )
 
       let o =
       {
-        execPath : testAppPath2,
+        execPath : mode === 'fork' ? testAppPath2 : 'node ' + testAppPath2,
         args : [ 'a', 'b', 'c' ],
         outputCollecting : 0,
         outputPiping : 0,
-        mode : 'fork',
+        mode,
         throwingExitCode : 0,
         applyingExitCode : 0,
         stdio : 'inherit'
@@ -19388,10 +19511,10 @@ function startOptionPassingThrough( test )
 
       let o =
       {
-        execPath : testAppPath2 + ' a b c',
+        execPath : mode === 'fork' ? testAppPath2 + ' a b c' : 'node ' + testAppPath2 + ' a b c',
         outputCollecting : 0,
         outputPiping : 0,
-        mode : 'fork',
+        mode,
         throwingExitCode : 0,
         applyingExitCode : 0,
         stdio : 'inherit'
@@ -19425,11 +19548,11 @@ function startOptionPassingThrough( test )
 
       let o =
       {
-        execPath : testAppPath2 + ' a',
+        execPath : mode === 'fork' ? testAppPath2 + ' a' : 'node ' + testAppPath2 + ' a',
         args : [ 'b', 'c' ],
         outputCollecting : 0,
         outputPiping : 0,
-        mode : 'fork',
+        mode,
         throwingExitCode : 0,
         applyingExitCode : 0,
         stdio : 'inherit'
