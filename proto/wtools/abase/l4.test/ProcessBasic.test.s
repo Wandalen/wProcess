@@ -7706,6 +7706,84 @@ function startNjsPassingThroughExecPathWithSpace( test )
 
 //
 
+function startNjsPassingThroughDifferentTypesOfPaths( test )
+{
+  let context = this;
+  let a = context.assetFor( test, 'basic' );
+  let testAppPath = a.program( testApp );
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'execute simple js program with normalized path'
+
+    let execPath = _.path.normalize( testAppPath );
+    let o =
+    {
+      execPath : _.strQuote( execPath ),
+      stdio : 'pipe',
+      outputCollecting : 1,
+      outputPiping : 1,
+      throwingExitCode : 0,
+      applyingExitCode : 0,
+    };
+
+    return _.process.startNjsPassingThrough( o )
+    .then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.is( a.fileProvider.fileExists( testAppPath ) );
+      test.is( !_.strHas( op.output, `Error: Cannot find module` ) );
+      return null;
+    })
+
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'execute simple js program with nativized path'
+
+    let execPath = _.path.nativize( testAppPath );
+    let o =
+    {
+      execPath : _.strQuote( execPath ),
+      stdio : 'pipe',
+      outputCollecting : 1,
+      outputPiping : 1,
+      throwingExitCode : 0,
+      applyingExitCode : 0,
+    };
+
+    return _.process.startNjsPassingThrough( o )
+    .then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.is( a.fileProvider.fileExists( testAppPath ) );
+      test.is( !_.strHas( op.output, `Error: Cannot find module` ) );
+      return null;
+    })
+
+  })
+
+  /* */
+
+  return a.ready;
+
+  /* */
+
+  function testApp()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+}
+
+//
+
 function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subroutine for modes */
 {
   let context = this;
@@ -24878,6 +24956,7 @@ var Proto =
     startNormalizedExecPath,
     startExecPathWithSpace,
     startNjsPassingThroughExecPathWithSpace,
+    startNjsPassingThroughDifferentTypesOfPaths,
     startPassingThroughExecPathWithSpace,
 
     // procedures / chronology / structural
