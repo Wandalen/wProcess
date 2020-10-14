@@ -3,6 +3,8 @@
 
 'use strict';
 
+let Stream;
+
 if( typeof module !== 'undefined' )
 {
   let _ = require( '../../../wtools/Tools.s' );
@@ -12,12 +14,30 @@ if( typeof module !== 'undefined' )
   _.include( 'wProcessWatcher' );
 
   require( '../l4_process/Basic.s' );
+  Stream = require( 'stream' );
 }
 
 let _global = _global_;
 let _ = _global_.wTools;
 let Self = {};
 
+/*
+
+RET=0
+until [ ${RET} -ne 0 ]; do
+    node wtools/abase/l4.test/ProcessBasic.test.s n:1 v:5 s:0 r:terminateDetachedComplex
+    RET=$?
+    sleep 1
+done
+
+RET=0
+until [ ${RET} -ne 0 ]; do
+    node wtools/abase/l4.test/ProcessBasic.test.s n:1 v:5 s:0 r:terminateWithChildren
+    RET=$?
+    sleep 1
+done
+
+*/
 
 /*
 ### Modes in which child process terminates after signal:
@@ -7639,7 +7659,6 @@ function startNjsPassingThroughExecPathWithSpace( test )
   let context = this;
   let a = context.assetFor( test, false );
   let testAppPath = a.program({ routine : testApp, dirPath : 'path with space' });
-
   let execPathWithSpace = testAppPath;
 
   /* - */
@@ -8904,12 +8923,12 @@ function startReadyDelayMultiple( test )
   let a = context.assetFor( test, false );
   let programPath = a.path.nativize( a.program( program1 ) );
   // xxx
-  let modes = [ 'fork', 'spawn', 'shell' ];
-  // let modes = [ 'spawn' ];
+  // let modes = [ 'fork', 'spawn', 'shell' ];
+  let modes = [ 'spawn' ];
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, mode }) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, mode }) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, mode }) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, mode }) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, mode }) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, mode }) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, mode }) ) );
   return a.ready;
 
   /* - */
@@ -15087,7 +15106,9 @@ function startNjsWithReadyDelayStructuralMultiple( test )
         'passingThrough' : 0,
         'maximumMemory' : 0,
         'applyingExitCode' : 1,
-        'stdio' : 'pipe',
+        'stdio' : mode === 'fork' ? [ 'pipe', 'pipe', 'pipe', 'ipc' ] : [ 'pipe', 'pipe', 'pipe' ],
+        'stdout' : null,
+        'stderr' : null,
         'args' : null,
         'interpreterArgs' : null,
         'when' : 'instant',
@@ -17250,6 +17271,55 @@ function startDiffPid( test )
 }
 
 startDiffPid.timeOut = 180000;
+
+//
+
+function streamJoin()
+{
+  let context = this;
+
+  let pass = new Stream.PassThrough();
+  let src1 = new Stream.PassThrough();
+  let src2 = new Stream.PassThrough();
+
+  src1.pipe( pass );
+  src2.pipe( pass );
+  // pass.unpipe( writable );
+  // readableFlowing is now false.
+
+  pass.on( 'data', ( chunk ) =>
+  {
+    console.log( chunk.toString() );
+  });
+
+  pass.on( 'end', () =>
+  {
+    console.log( 'end' );
+  });
+
+  pass.on( 'finish', () =>
+  {
+    console.log( 'finish' );
+  });
+
+  src1.write( 'src1a' );
+  src2.write( 'src2a' );
+  src1.write( 'src1b' );
+  src2.write( 'src2b' );
+
+  console.log( '1' );
+  src1.end();
+  console.log( '2' );
+  src2.end();
+  console.log( '3' );
+  debugger;
+
+  // src1.resume();
+
+  return _.time.out( 1000 );
+}
+
+streamJoin.experimental = 1;
 
 // --
 // other options
@@ -24427,10 +24497,11 @@ var Proto =
     startOutputOptionsCompatibilityLateCheck,
     startOptionVerbosity,
 
-    // etc
+    // etc /* xxx : move */
 
     appTempApplication,
     startDiffPid,
+    streamJoin,
 
     // other options
 
