@@ -20062,7 +20062,7 @@ function startErrorAfterTerminationWithSend( test )
   Channel closed
   `
     if( process.platform === 'darwin' )
-    exp += `code : 'ERR_IPC_CHANNEL_CLOSED'` + exp;
+    exp += `code : 'ERR_IPC_CHANNEL_CLOSED'`
 
     exp +=
 `

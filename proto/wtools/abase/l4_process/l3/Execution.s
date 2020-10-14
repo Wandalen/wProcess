@@ -581,7 +581,7 @@ function startSingle_body( o )
   {
     let execPath = o.execPath;
 
-    execPath = _.fileProvider.path.nativize( execPath );
+    execPath = _.fileProvider.path.nativizeMinimal( execPath );
 
     // let args = o.args; /* yyy zzz : remove? */
     // let args = o.args.slice();
@@ -609,7 +609,7 @@ function startSingle_body( o )
     // let args = o.args; /* yyy zzz : remove? */
     // let args = o.args.slice();
 
-    execPath = _.fileProvider.path.nativize( execPath );
+    execPath = _.fileProvider.path.nativizeMinimal( execPath );
 
     let shellPath = process.platform === 'win32' ? 'cmd' : 'sh';
     let arg1 = process.platform === 'win32' ? '/c' : '-c';
