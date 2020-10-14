@@ -348,9 +348,6 @@ function startSingle_body( o )
       o.execPath = _.strInsideOf( o.execPath, begin, end );
     }
 
-    if( process.platform === 'win32' )
-    o.execPath = _.path.nativizeTolerant( o.execPath );
-
     if( execArgs && execArgs.length )
     o.args = _.arrayPrependArray( o.args || [], execArgs );
 

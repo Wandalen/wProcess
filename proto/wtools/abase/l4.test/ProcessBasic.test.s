@@ -7650,7 +7650,6 @@ function startNjsPassingThroughExecPathWithSpace( test )
     return null;
   })
 
-  debugger;
   _.process.startNjsPassingThrough
   ({
     execPath : execPathWithSpace,
@@ -7711,23 +7710,9 @@ function startNjsPassingThroughWindowsPath( test )
 {
   let context = this;
   let a = context.assetFor( test, 'basic' );
+  let testAppPath = a.program( testApp );
 
-  if( !( process.platform === 'win32' ) )
-  {
-    test.is( true );
-    return;
-  }
-
-  let program =
-  `function testApp()
-  {
-    console.log( process.pid );
-    setTimeout( () => {}, 2000 );
-  }
-  testApp();
-  `;
-  let execPath = a.abs( 'Program.js' );
-  a.fileProvider.fileWrite( execPath, program );
+  let execPath = testAppPath;
 
   /* - */
 
@@ -7761,6 +7746,13 @@ function startNjsPassingThroughWindowsPath( test )
   /* - */
 
   return a.ready;
+
+  /* */
+
+  function testApp()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
 }
 
 //
