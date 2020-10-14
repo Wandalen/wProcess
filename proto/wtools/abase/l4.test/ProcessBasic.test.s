@@ -7712,11 +7712,11 @@ function startNjsPassingThroughWindowsPath( test )
   let context = this;
   let a = context.assetFor( test, 'basic' );
 
-  // if( !( process.platform === 'win32' ) )
-  // {
-  //   test.is( true );
-  //   return;
-  // }
+  if( !( process.platform === 'win32' ) )
+  {
+    test.is( true );
+    return;
+  }
 
   let program =
   `function testApp()
@@ -7738,10 +7738,6 @@ function startNjsPassingThroughWindowsPath( test )
     return null;
   })
 
-  execPath = 'D:\\some\\file';
-  execPath = '/D/some/file';
-
-  debugger;
   _.process.startNjsPassingThrough
   ({
     execPath,
@@ -7755,7 +7751,7 @@ function startNjsPassingThroughWindowsPath( test )
 
   a.ready.then( ( op ) =>
   {
-    test.notIdentical( op.exitCode, 0 );
+    test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     test.is( a.fileProvider.fileExists( execPath ) );
     test.is( !_.strHas( op.output, `Error: Cannot find module` ) );
