@@ -259,27 +259,19 @@ function startSingle_body( o )
 
     /* */
 
-    // if( o.outputDecorating === null )
-    // o.outputDecorating = 0;
-    // if( o.outputDecoratingStdout === null )
-    // o.outputDecoratingStdout = o.outputDecorating;
-    // if( o.outputDecoratingStderr === null )
-    // o.outputDecoratingStderr = o.outputDecorating;
+    _.assert( _.boolLike( o.outputDecorating ) );
+    _.assert( _.boolLike( o.outputDecoratingStdout ) );
+    _.assert( _.boolLike( o.outputDecoratingStderr ) );
+    _.assert( _.boolLike( o.outputCollecting ) );
 
     /* ipc */
 
     _.assert( _.boolLike( o.ipc ) );
 
-    // if( o.ipc === null )
-    // o.ipc = o.mode === 'fork' ? 1 : 0;
-
     if( _.strIs( o.stdio ) )
     o.stdio = _.dup( o.stdio, 3 );
     if( o.ipc )
     {
-      // yyy
-      // if( _.strIs( o.stdio ) )
-      // o.stdio = _.dup( o.stdio, 3 );
       if( !_.longHas( o.stdio, 'ipc' ) )
       o.stdio.push( 'ipc' );
     }
@@ -304,11 +296,6 @@ function startSingle_body( o )
     }
 
     /* */
-
-    _.assert( _.boolLike( o.outputDecorating ) );
-    _.assert( _.boolLike( o.outputDecoratingStdout ) );
-    _.assert( _.boolLike( o.outputDecoratingStderr ) );
-    _.assert( _.boolLike( o.outputCollecting ) );
 
     o.disconnect = disconnect;
     o.state = 'initial'; /* `initial`, `starting`, `started`, `terminating`, `terminated`, `disconnected` */
@@ -365,27 +352,12 @@ function startSingle_body( o )
     o.args = _.arrayPrependArray( o.args || [], execArgs );
 
     _.assert( o.interpreterArgs === null || _.arrayIs( o.interpreterArgs ) );
-    // if( _.strIs( o.interpreterArgs ) )
-    // o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs });
-
-    // if( o.outputAdditive === null )
-    // o.outputAdditive = true;
-    // o.outputAdditive = !!o.outputAdditive;
     _.assert( _.boolLike( o.outputAdditive ) );
 
     o.currentPath = _.path.resolve( o.currentPath || '.' );
 
     /* verbosity */
 
-    // if( !_.numberIs( o.verbosity ) )
-    // o.verbosity = o.verbosity ? 1 : 0;
-    // if( o.verbosity < 0 )
-    // o.verbosity = 0;
-    // if( o.outputPiping === null )
-    // {
-    //   if( o.stdio === 'pipe' || o.stdio[ 1 ] === 'pipe' )
-    //   o.outputPiping = o.verbosity >= 2;
-    // }
     _.assert( _.numberIs( o.verbosity ) );
     _.assert( _.boolLike( o.outputPiping ) );
 
@@ -447,9 +419,7 @@ function startSingle_body( o )
       {
 
         o.ready.deasync();
-        let arg = o.ready.sync();
         o.ready.give( 1 );
-
         if( readyCallback )
         o.ready.finally( readyCallback );
 
@@ -664,7 +634,7 @@ function startSingle_body( o )
     {
       if( o.state === 'terminated' || o.error )
       return;
-      o.exitReason = 'time';
+      o.exitReason = 'time'; /* qqq for Yevhen : cover termination on time out */
       _.process.terminate({ pnd : o.process, withChildren : 1 });
     });
 
@@ -1547,6 +1517,14 @@ function start_body( o )
     form1();
     form2();
 
+    if( o.sync && !o.deasync )
+    {
+      o.ready.deasync();
+      // o.ready.give( 1 );
+      // if( readyCallback )
+      // o.ready.finally( readyCallback );
+    }
+
     o.ready
     .then( run2 )
     .finally( end2 )
@@ -1559,6 +1537,7 @@ function start_body( o )
 
   function run2()
   {
+    debugger;
     let prevReady = new _.Consequence().take( null );
     let readies = [];
     let execPath = _.arrayAs( o.execPath );
@@ -1607,15 +1586,14 @@ function start_body( o )
 
   /* */
 
-  function end1()
+  function end1() /* xxx : make similar change in startSingle() */
   {
+    debugger;
+    if( readyCallback )
+    o.ready.finally( readyCallback );
     if( o.deasync )
-    {
-      o.ready.deasync();
-      if( o.sync )
-      return o.ready.sync();
-    }
-    if( o.sync ) /* xxx : make similar change in startSingle() */
+    o.ready.deasync();
+    if( o.sync )
     return o.ready.sync();
     return o.ready;
   }
@@ -1624,6 +1602,7 @@ function start_body( o )
 
   function end2( err, arg )
   {
+    debugger;
     o.state = 'terminated';
     o.ended = true;
 
@@ -2310,8 +2289,9 @@ function signal_pre( routine, args )
 
   if( o.pnd )
   {
-    _.assert( o.pid === null );
+    _.assert( o.pid === o.pnd.pid || o.pid === null );
     o.pid = o.pnd.pid;
+    _.assert( _.intIs( o.pid ) );
   }
 
   return o;
@@ -2335,7 +2315,9 @@ function signal_body( o )
     xxx : hangs up on Windows with interval 25 if run in sync mode. see test routine killSync
   */
 
-  // console.log( 'killing', o.pid );
+/*
+  console.log( 'killing', o.pid );
+*/
 
   ready.then( () =>
   {
@@ -2366,17 +2348,16 @@ function signal_body( o )
     if( !pnd && o.pnd && o.pnd.pid === p.pid )
     pnd = o.pnd;
 
-    // console.log( o.signal, p.pid );
+/*
+    console.log( o.signal, p.pid );
+*/
 
     if( pnd )
     pnd.kill( o.signal );
     else
     process.kill( p.pid, o.signal );
 
-    if( !o.timeOut )
-    return;
-
-    let con = waitForTermination( p.pid );
+    let con = waitForTermination( p );
     cons.push( con );
   }
 
@@ -2387,20 +2368,14 @@ function signal_body( o )
 
     _.assert( !o.withChildren || o.pid === processes[ 0 ].pid, 'Something wrong, first process must be the leader' );
 
-    // if( o.withChildren )
-    // {
-    //   console.log( `pid : ${o.pid}` );
-    //   console.log( `pids' : ${processes}` );
-    //   debugger;
-    // }
-
     /*
       leader of the group of processes should receive the signal first
       so progression sould be positive
+      it gives chance terminal to terminate child processes properly
+      otherwise more fails appear in shell mode for OS spawing extra process for applications
     */
 
     if( o.withChildren )
-    // for( let i = processes.length - 1; i >= 0; i-- )
     for( let i = 0 ; i < processes.length ; i++ )
     {
       if( isWindows && i && processes[ i ].name === 'conhost.exe' )
@@ -2420,50 +2395,43 @@ function signal_body( o )
 
   /* - */
 
-  function waitForTermination( pid )
+  function waitForTermination( p )
   {
+    let timeOut = signal === 'SIGKILL' ? 5000 : o.timeOut;
+
+    if( timeOut === 0 )
+    return _.process.kill({ pid : p.pid, pnd : p.pnd, withChildren : 0 });
+
     let ready = _.Consequence();
-    let timer;
-    timer = _.time._periodic( interval, () =>
+    let timer = _.time.periodic( interval, () =>
     {
-      if( _.process.isAlive( pid ) )
+      if( _.process.isAlive( p.pid ) )
       return false;
-      // timer._cancel(); /* zzz yyy : remove? */
       ready.take( true );
-      // return true;
-      /* Dmytro ; new implementation of periodic timer require to return something different to undefined or _.dont.
-         Otherwise, timer will be canceled. This code does not affect current behavior of routines and will work with
-         new behavior.
-
-         When module Tools will be updated, we can use next code instead of current :
-
-        if( _.process.isAlive( o.pid ) )
-        return false;
-        ready.take( true );
-       */
     });
 
-    let timeOutError = _.time.outError( o.timeOut )
+    let timeOutError = _.time.outError( timeOut )
 
     ready.orKeeping( [ timeOutError ] );
 
-    ready.finally( ( err, op ) =>
+    ready.finally( ( err, arg ) =>
     {
-      if( !timeOutError.resourcesCount() ) /* xxx : rewrite */
+      if( !err || err.reason !== 'time out' )
       timeOutError.take( _.dont );
 
       if( !err )
-      return op;
+      return arg;
 
-      timer._cancel(); /* xxx : rewrite */
+      /* qqq for Vova : not tested */
+      timer.cancel();
       _.errAttend( err );
 
       if( err.reason === 'time out' )
       {
         if( signal === 'SIGKILL' )
-        err = _.err( err, `\nTarget process: ${_.strQuote( pid )} is still alive after kill. Waited for ${o.timeOut} ms.` );
+        err = _.err( err, `\nTarget process: ${_.strQuote( p.pid )} is still alive after kill. Waited for ${o.timeOut} ms.` );
         else
-        return _.process.kill({ pid, withChildren : 0 });
+        return _.process.kill({ pid : p.pid, pnd : p.pnd, withChildren : 0 });
       }
 
       throw err;
@@ -2479,7 +2447,7 @@ function signal_body( o )
     // if( err.code === 'EINVAL' )
     // throw _.err( err, '\nAn invalid signal was specified:', _.strQuote( o.signal ) )
     if( err.code === 'EPERM' )
-    throw _.err( err, '\nCurrent process does not have permission to kill target process' );
+    throw _.err( err, `\nCurrent process does not have permission to kill target process ${o.pid}` );
     if( err.code === 'ESRCH' )
     throw _.err( err, '\nTarget process:', _.strQuote( o.pid ), 'does not exist.' ); /* qqq for Yevhen : rewrite such strings as template-strings */
     throw _.err( err );
@@ -2505,10 +2473,10 @@ signal_body.defaults =
 {
   pid : null,
   pnd : null,
-  withChildren : 1, /* xxx : set to 1 aaa Vova:changed*/
+  withChildren : 1,
   timeOut : 5000,
   signal : null,
-  sync : 0
+  sync : 0,
 }
 
 let signal = _.routineFromPreAndBody( signal_pre, signal_body );
@@ -2518,9 +2486,10 @@ let signal = _.routineFromPreAndBody( signal_pre, signal_body );
 function kill_body( o )
 {
   _.assert( arguments.length === 1 );
-  o.signal = 'SIGKILL';
-  o.timeOut = 0;
-  return _.process.signal.body( o );
+  let o2 = _.mapExtend( null, o );
+  o2.signal = 'SIGKILL';
+  o2.timeOut = 5000;
+  return _.process.signal.body( o2 );
 }
 
 kill_body.defaults =
@@ -2541,14 +2510,8 @@ let kill = _.routineFromPreAndBody( signal_pre, kill_body );
 function terminate_body( o )
 {
   _.assert( arguments.length === 1 );
-
   o.signal = o.timeOut ? 'SIGTERM' : 'SIGKILL';
-
   let ready = _.process.signal.body( o );
-
-  if( o.sync )
-  ready.deasync();
-
   return ready;
 }
 
