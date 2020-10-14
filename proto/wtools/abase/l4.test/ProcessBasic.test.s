@@ -8238,6 +8238,240 @@ function startExecPathWithSpace( test )
 
 //
 
+function startDifferentTypesOfPaths( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let execPath = a.program({ routine : testApp });
+  let execPathWithSpace = a.program({ routine : testApp, dirPath : 'path with space' });
+  let nodeWithSpace = a.abs( 'path with space/node' );
+  a.fileProvider.softLink( nodeWithSpace, process.argv[ 0 ] );
+
+  /* - */
+
+  a.ready
+
+  .then( () =>
+  {
+    test.case = 'mode : fork, path with space'
+    let o =
+    {
+      args : execPathWithSpace,
+      mode : 'fork',
+      stdio : 'pipe',
+      outputCollecting : 1,
+      outputPiping : 1,
+      throwingExitCode : 0,
+      applyingExitCode : 0,
+    }
+
+    _.process.start( o );
+
+    o.conTerminate.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.is( _.strHas( op.output, execPathWithSpace ) );
+      return null;
+    })
+
+    return o.conTerminate;
+
+  })
+
+  .then( () =>
+  {
+    test.case = 'mode : fork, quoted path with space'
+    let o =
+    {
+      execPath : _.strQuote( execPathWithSpace ),
+      mode : 'fork',
+      stdio : 'pipe',
+      outputCollecting : 1,
+      outputPiping : 1,
+      throwingExitCode : 0,
+      applyingExitCode : 0,
+    }
+
+    _.process.start( o );
+
+    o.conTerminate.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.is( _.strHas( op.output, execPathWithSpace ) );
+      return null;
+    })
+
+    return o.conTerminate;
+
+  })
+
+  /* qqq for Vova: fix it*/
+
+  // .then( () =>
+  // {
+  //   test.case = 'mode : fork, double quoted path with space'
+  //   let o =
+  //   {
+  //     execPath : `""${execPathWithSpace}""`,
+  //     mode : 'fork',
+  //     stdio : 'pipe',
+  //     outputCollecting : 1,
+  //     outputPiping : 1,
+  //     throwingExitCode : 0,
+  //     applyingExitCode : 0,
+  //   }
+
+  //   _.process.start( o );
+
+  //   o.conTerminate.then( ( op ) =>
+  //   {
+  //     test.identical( op.exitCode, 0 );
+  //     test.identical( op.ended, true );
+  //     test.is( _.strHas( op.output, execPathWithSpace ) );
+  //     return null;
+  //   })
+
+  //   return o.conTerminate;
+
+  // })
+
+  /* */
+
+  .then( () =>
+  {
+    test.case = 'mode : spawn, path to node with space'
+    let o =
+    {
+      args : [ nodeWithSpace, '-v' ],
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputCollecting : 1,
+      outputPiping : 1,
+      throwingExitCode : 0,
+      applyingExitCode : 0,
+    }
+
+    _.process.start( o );
+
+    o.conTerminate.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.is( _.strHas( op.output, process.version ) );
+      return null;
+    })
+
+    return o.conTerminate;
+
+  })
+
+  .then( () =>
+  {
+    test.case = 'mode : spawn, path to node with space'
+    let o =
+    {
+      execPath : _.strQuote( nodeWithSpace ),
+      args : [ '-v' ],
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputCollecting : 1,
+      outputPiping : 1,
+      throwingExitCode : 0,
+      applyingExitCode : 0,
+    }
+
+    _.process.start( o );
+
+    o.conTerminate.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.is( _.strHas( op.output, process.version ) );
+      return null;
+    })
+
+    return o.conTerminate;
+
+  })
+
+  /* qqq for Vova : fix it */
+
+  // .then( () =>
+  // {
+  //   test.case = 'mode : spawn, path to node with space'
+  //   let o =
+  //   {
+  //     execPath : `""${nodeWithSpace}""`,
+  //     args : [ '-v' ],
+  //     mode : 'spawn',
+  //     stdio : 'pipe',
+  //     outputCollecting : 1,
+  //     outputPiping : 1,
+  //     throwingExitCode : 0,
+  //     applyingExitCode : 0,
+  //   }
+
+  //   _.process.start( o );
+
+  //   o.conTerminate.then( ( op ) =>
+  //   {
+  //     test.identical( op.exitCode, 0 );
+  //     test.identical( op.ended, true );
+  //     test.is( _.strHas( op.output, process.version ) );
+  //     return null;
+  //   })
+
+  //   return o.conTerminate;
+
+  // })
+
+  /* */
+
+  .then( () =>
+  {
+    test.case = 'mode : spawn, path to node with space'
+    let o =
+    {
+      execPath : `""${nodeWithSpace}""`,
+      args : [ '-v' ],
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputCollecting : 1,
+      outputPiping : 1,
+      throwingExitCode : 0,
+      applyingExitCode : 0,
+    }
+
+    _.process.start( o );
+
+    o.conTerminate.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.is( _.strHas( op.output, process.version ) );
+      return null;
+    })
+
+    return o.conTerminate;
+
+  })
+
+  /* - */
+
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    console.log( __filename );
+  }
+}
+
+//
+
 
 function startNjsPassingThroughExecPathWithSpace( test )
 {
@@ -26263,6 +26497,7 @@ var Proto =
     startImportantExecPathPassingThrough,
     startNormalizedExecPath,
     startExecPathWithSpace,
+    startDifferentTypesOfPaths,
     startNjsPassingThroughExecPathWithSpace,
     startNjsPassingThroughDifferentTypesOfPaths,
     startPassingThroughExecPathWithSpace,
