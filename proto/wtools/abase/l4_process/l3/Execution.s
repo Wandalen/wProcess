@@ -563,6 +563,8 @@ function startSingle_body( o )
     let o2 = optionsForFork();
     execPath = execPathForFork( execPath );
 
+    execPath = _.fileProvider.path.nativize( execPath );
+
     o.fullExecPath = _.strConcat( _.arrayAppendArray( [ execPath ], o.args ) );
     inputMirror();
 
@@ -578,6 +580,9 @@ function startSingle_body( o )
   function runSpawn()
   {
     let execPath = o.execPath;
+
+    execPath = _.fileProvider.path.nativize( execPath );
+
     // let args = o.args; /* yyy zzz : remove? */
     // let args = o.args.slice();
 
@@ -603,6 +608,8 @@ function startSingle_body( o )
     let execPath = o.execPath;
     // let args = o.args; /* yyy zzz : remove? */
     // let args = o.args.slice();
+
+    execPath = _.fileProvider.path.nativize( execPath );
 
     let shellPath = process.platform === 'win32' ? 'cmd' : 'sh';
     let arg1 = process.platform === 'win32' ? '/c' : '-c';
@@ -1951,7 +1958,8 @@ function startNjs_body( o )
     interpreterArgs = _.strSplitNonPreserving({ src : interpreterArgs });
   }
 
-  let execPath = o.execPath ? _.fileProvider.path.nativizeMinimal( o.execPath ) : '';
+  // let execPath = o.execPath ? _.fileProvider.path.nativizeMinimal( o.execPath ) : '';
+  let execPath = o.execPath || '';
 
   _.assert( o.interpreterArgs === null || o.interpreterArgs === '', 'not implemented' ); /* qqq for Yevhen : implement and cover */
 
