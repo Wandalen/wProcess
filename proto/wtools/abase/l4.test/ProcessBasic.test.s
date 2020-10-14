@@ -21300,7 +21300,7 @@ function startErrorAfterTerminationWithSend( test )
   Channel closed
   `
     if( process.platform === 'darwin' )
-    exp += `code : 'ERR_IPC_CHANNEL_CLOSED'` + exp;
+    exp += `code : 'ERR_IPC_CHANNEL_CLOSED'`
 
     exp +=
 `
@@ -25097,7 +25097,7 @@ function terminateTimeOut( test )
       test.identical( op.exitSignal, 'SIGKILL' );
       test.is( !_.strHas( op.output, 'SIGTERM' ) );
       if( process.platform === 'darwin' )
-      test.is( _.strHas( op.output, '!Application timeout!' ) );
+      test.is( !_.strHas( op.output, 'Application timeout!' ) );
       else
       test.is( _.strHas( op.output, 'Application timeout!' ) );
 
