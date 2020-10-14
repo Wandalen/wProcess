@@ -115,6 +115,10 @@ and rewrite to run process which run process to avoid influence of arguments of 
 */
 
 /* qqq for Yevhen : parametrize all time delays, don't forget to leave comment of old value
+
+use no more than one parameter in test routine
+
+hint :
 time.out
 setTimeout
 */
@@ -8887,6 +8891,10 @@ function startReadyDelay( test )
 }
 
 startReadyDelay.timeOut = 300000;
+startReadyDelay.description =
+`
+  - delay in consequence ready delay starting of the process
+`
 
 //
 
@@ -8895,42 +8903,45 @@ function startReadyDelayMultiple( test )
   let context = this;
   let a = context.assetFor( test, false );
   let programPath = a.path.nativize( a.program( program1 ) );
-  // let modes = [ 'fork', 'spawn', 'shell' ];
-  let modes = [ 'spawn' ];
-  modes.forEach( ( mode ) => a.ready.then( () => multiple({ sync : 0, deasync : 0, concurrent : 0, mode }) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => multiple( 0, 1, mode ) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => multiple( 1, 0, mode ) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => multiple( 1, 1, mode ) ) );
+  // xxx
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  // let modes = [ 'spawn' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, mode }) ) );
   return a.ready;
 
-  /*  */
+  /* - */
 
   /* xxx : make multiple work */
   /* xxx : review */
-  // function multiple( sync, deasync, concurrent, mode )
-  function multiple( op )
+  function run( op )
   {
     let ready = new _.Consequence().take( null )
 
     if( op.sync && !op.deasync && op.mode === 'fork' )
     return null;
 
+    /* */
+
     ready.then( () =>
     {
-      test.case = `sync:${op.sync} deasync:${op.deasync} concurrent:${op.concurrent} mode:${op.mode}`;
+      test.case = `sync:${op.sync} deasync:${op.deasync} concurrent:0 mode:${op.mode}`;
       let t1 = _.time.now();
-      let ready = new _.Consequence().take( null ).timeOut( context.t2 );
+      let ready2 = new _.Consequence().take( null ).timeOut( context.t1*4 );
       let o =
       {
         execPath : [ ( op.mode !== `fork` ?  `node ` : '' ) + `${programPath} id:1`, ( op.mode !== `fork` ?  `node ` : '' ) + `${programPath} id:2` ],
         currentPath : a.abs( '.' ),
         outputPiping : 1,
         outputCollecting : 1,
+        outputAdditive : 1,
         sync : op.sync,
         deasync : op.deasync,
-        concurrent : op.concurrent,
+        concurrent : 0,
         mode : op.mode,
-        ready,
+        ready : ready2,
       }
 
       let returned = _.process.start( o );
@@ -8942,13 +8953,24 @@ function startReadyDelayMultiple( test )
         test.identical( op.exitSignal, null );
         test.identical( op.exitReason, 'normal' );
         test.identical( op.ended, true );
+        let exp =
+`
+1::begin
+1::end
+2::begin
+2::end
+`
+        test.equivalent( op.output, exp );
         op.runs.forEach( ( op2, counter ) =>
         {
-          console.log( `op.output : ${op2.output}` );
-          let parsed = JSON.parse( op2.output );
+          test.identical( op2.exitCode, 0 );
+          test.identical( op2.exitSignal, null );
+          test.identical( op2.exitReason, 'normal' );
+          test.identical( op2.ended, true );
+          let parsed = a.fileProvider.fileRead({ filePath : a.abs( `${counter+1}.json` ), encoding : 'json' });
           let diff = parsed.time - t1;
           console.log( diff );
-          test.ge( diff, context.t2 );
+          test.ge( diff, context.t1*4 );
           test.identical( parsed.id, counter+1 );
         });
         return null;
@@ -8956,6 +8978,65 @@ function startReadyDelayMultiple( test )
 
       return returned;
     })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `sync:${op.sync} deasync:${op.deasync} concurrent:1 mode:${op.mode}`;
+      let t1 = _.time.now();
+      let ready2 = new _.Consequence().take( null ).timeOut( context.t1*4 );
+      let o =
+      {
+        execPath : [ ( op.mode !== `fork` ?  `node ` : '' ) + `${programPath} id:1`, ( op.mode !== `fork` ?  `node ` : '' ) + `${programPath} id:2` ],
+        currentPath : a.abs( '.' ),
+        outputPiping : 1,
+        outputCollecting : 1,
+        outputAdditive : 1,
+        sync : op.sync,
+        deasync : op.deasync,
+        concurrent : 1,
+        mode : op.mode,
+        ready : ready2,
+      }
+
+      let returned = _.process.start( o );
+
+      o.ready.then( ( op ) =>
+      {
+        test.is( op === o );
+        test.identical( op.exitCode, 0 );
+        test.identical( op.exitSignal, null );
+        test.identical( op.exitReason, 'normal' );
+        test.identical( op.ended, true );
+// xxx : introduce streams into o-descriptor
+//         let exp =
+// `
+// 1::begin
+// 2::begin
+// 1::end
+// 2::end
+// `
+//         test.equivalent( op.output, exp );
+        op.runs.forEach( ( op2, counter ) =>
+        {
+          test.identical( op2.exitCode, 0 );
+          test.identical( op2.exitSignal, null );
+          test.identical( op2.exitReason, 'normal' );
+          test.identical( op2.ended, true );
+          let parsed = a.fileProvider.fileRead({ filePath : a.abs( `${counter+1}.json` ), encoding : 'json' });
+          let diff = parsed.time - t1;
+          console.log( diff );
+          test.ge( diff, context.t1*4 );
+          test.identical( parsed.id, counter+1 );
+        });
+        return null;
+      })
+
+      return returned;
+    })
+
+    /* */
 
     return ready;
   }
@@ -8966,14 +9047,25 @@ function startReadyDelayMultiple( test )
   {
     let _ = require( toolsPath );
     _.include( 'wProcess' );
+    _.include( 'wFiles' );
     let args = _.process.args();
     let data = { time : _.time.now(), id : args.map.id };
-    console.log( JSON.stringify( data ) );
+    _.fileProvider.fileWrite({ filePath : _.path.join(__dirname, `${args.map.id}.json` ), data, encoding : 'json' });
+    console.log( `${args.map.id}::begin` );
+    setTimeout( () =>
+    {
+      console.log( `${args.map.id}::end` );
+    }, context.t1 );
   }
 
 }
 
 startReadyDelayMultiple.timeOut = 300000;
+startReadyDelayMultiple.description =
+`
+  - delay in consequence ready delay starting of 2 processes
+  - concurrent starting does not cause problems
+`
 
 //
 
@@ -20614,6 +20706,13 @@ sleep:end
 program1:end
 SIGTERM
 `
+        var exp2 =
+`program1:begin
+sleep:begin
+`
+        if( mode === 'shell' )
+        test.is( options.output === exp1 || options.output === exp2 );
+        else
         test.identical( options.output, exp1 );
         test.identical( options.exitCode, null );
         test.identical( options.exitSignal, 'SIGTERM' );
