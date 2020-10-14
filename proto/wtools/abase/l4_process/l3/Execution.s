@@ -517,15 +517,6 @@ function startSingle_body( o )
       () => `Current path ( ${o.currentPath} ) doesn\'t exist or it\'s not a directory.\n> ${o.fullExecPath}`
     );
 
-    // let execPath = o.execPath;
-    // let args = o.args; /* yyy zzz : remove? */
-    // /* let args = o.args.slice(); */
-
-    // if( process.platform === 'win32' )
-    // {
-    //   execPath = _.path.nativizeMinimal( execPath );
-    // }
-
     if( o.mode === 'fork')
     {
       runFork();
@@ -568,7 +559,7 @@ function startSingle_body( o )
     let o2 = optionsForFork();
     execPath = execPathForFork( execPath );
 
-    execPath = _.fileProvider.path.nativize( execPath );
+    execPath = _.path.nativize( execPath );
 
     o.fullExecPath = _.strConcat( _.arrayAppendArray( [ execPath ], o.args ) );
     inputMirror();
@@ -586,7 +577,7 @@ function startSingle_body( o )
   {
     let execPath = o.execPath;
 
-    execPath = _.fileProvider.path.nativize( execPath );
+    execPath = _.path.nativizeMinimal( execPath );
 
     let o2 = optionsForSpawn();
 
@@ -609,9 +600,7 @@ function startSingle_body( o )
   {
     let execPath = o.execPath;
 
-    debugger;
-    execPath = _.fileProvider.path.nativize( execPath );
-    debugger;
+    execPath = _.path.nativizeMinimal( execPath );
 
     let shellPath = process.platform === 'win32' ? 'cmd' : 'sh';
     let arg1 = process.platform === 'win32' ? '/c' : '-c';
@@ -1960,7 +1949,7 @@ function startNjs_body( o )
     interpreterArgs = _.strSplitNonPreserving({ src : interpreterArgs });
   }
 
-  // let execPath = o.execPath ? _.fileProvider.path.nativizeMinimal( o.execPath ) : '';
+  // let execPath = o.execPath ? _.path.nativizeMinimal( o.execPath ) : '';
   let execPath = o.execPath || '';
 
   _.assert( o.interpreterArgs === null || o.interpreterArgs === '', 'not implemented' ); /* qqq for Yevhen : implement and cover */
