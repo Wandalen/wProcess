@@ -18044,7 +18044,7 @@ function exitCode( test )
 //
 
 
-function exitCodeLogging( test )
+function startOptionVerbosityLogging( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -24876,6 +24876,7 @@ var Proto =
     startOptionLoggerTransofrmation,
     startOutputOptionsCompatibilityLateCheck,
     startOptionVerbosity,
+    startOptionVerbosityLogging,
 
     // etc
 
@@ -24893,7 +24894,6 @@ var Proto =
 
     exitReason,
     exitCode,
-    exitCodeLogging,
 
     pidFrom,
     isAlive,
