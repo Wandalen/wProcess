@@ -3,7 +3,7 @@
 
 'use strict';
 
-let System, ChildProcess, StripAnsi, WindowsKill, WindowsProcessTree;
+let System, ChildProcess, StripAnsi, WindowsKill, WindowsProcessTree, Stream;
 let _global = _global_;
 let _ = _global_.wTools;
 let Self = _.process = _.process || Object.create( null );
@@ -98,6 +98,18 @@ function startCommon_pre( routine, args )
   if( o.ipc === null )
   o.ipc = o.mode === 'fork' ? true : false;
   _.assert( _.boolLike( o.ipc ) );
+
+  if( _.strIs( o.stdio ) )
+  o.stdio = _.dup( o.stdio, 3 );
+  if( o.ipc )
+  {
+    if( !_.longHas( o.stdio, 'ipc' ) )
+    o.stdio.push( 'ipc' );
+  }
+
+  _.assert( _.longIs( o.stdio ) );
+  _.assert( !o.ipc || _.longHas( [ 'fork', 'spawn' ], o.mode ), `Mode::${o.mode} doesn't support inter process communication.` );
+  _.assert( o.mode !== 'fork' || !!o.ipc, `In mode::fork option::ipc must be true. Such subprocess can not have no ipc.` );
 
   if( _.strIs( o.interpreterArgs ) )
   o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs });
@@ -268,14 +280,15 @@ function startSingle_body( o )
 
     _.assert( _.boolLike( o.ipc ) );
 
-    if( _.strIs( o.stdio ) )
-    o.stdio = _.dup( o.stdio, 3 );
-    if( o.ipc )
-    {
-      if( !_.longHas( o.stdio, 'ipc' ) )
-      o.stdio.push( 'ipc' );
-    }
+    // if( _.strIs( o.stdio ) )
+    // o.stdio = _.dup( o.stdio, 3 );
+    // if( o.ipc )
+    // {
+    //   if( !_.longHas( o.stdio, 'ipc' ) )
+    //   o.stdio.push( 'ipc' );
+    // }
 
+    _.assert( _.longIs( o.stdio ) );
     _.assert( !o.ipc || _.longHas( [ 'fork', 'spawn' ], o.mode ), `Mode::${o.mode} doesn't support inter process communication.` );
     _.assert( o.mode !== 'fork' || !!o.ipc, `In mode::fork option::ipc must be true. Such subprocess can not have no ipc.` );
 
@@ -503,7 +516,7 @@ function startSingle_body( o )
 
     // if( process.platform === 'win32' )
     // {
-    //   execPath = _.path.nativizeTolerant( execPath );
+    //   execPath = _.path.nativizeMinimal( execPath );
     // }
 
     if( o.mode === 'fork')
@@ -550,6 +563,8 @@ function startSingle_body( o )
     let o2 = optionsForFork();
     execPath = execPathForFork( execPath );
 
+    execPath = _.fileProvider.path.nativize( execPath );
+
     o.fullExecPath = _.strConcat( _.arrayAppendArray( [ execPath ], o.args ) );
     inputMirror();
 
@@ -565,6 +580,9 @@ function startSingle_body( o )
   function runSpawn()
   {
     let execPath = o.execPath;
+
+    execPath = _.fileProvider.path.nativize( execPath );
+
     // let args = o.args; /* yyy zzz : remove? */
     // let args = o.args.slice();
 
@@ -590,6 +608,8 @@ function startSingle_body( o )
     let execPath = o.execPath;
     // let args = o.args; /* yyy zzz : remove? */
     // let args = o.args.slice();
+
+    execPath = _.fileProvider.path.nativize( execPath );
 
     let shellPath = process.platform === 'win32' ? 'cmd' : 'sh';
     let arg1 = process.platform === 'win32' ? '/c' : '-c';
@@ -1501,11 +1521,35 @@ function start_body( o )
     o.output = o.outputCollecting ? '' : null;
     o.ended = false;
 
+    o.stdout = null;
+    o.stderr = null
+
+    if( o.stdio[ 1 ] !== 'ignore' )
+    formStreams();
+
     if( !o.dry )
     if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
     {
       o.procedure = _.procedure.begin({ _object : o, _stack : o.stack });
     }
+
+  }
+
+  /* */
+
+  function formStreams()
+  {
+
+    if( !Stream )
+    Stream = require( 'stream' );
+
+    // var a = new stream.PassThrough()
+    // a.write("your string")
+    // a.end()
+    // if( o.stdio[ 1 ] !== 'ignore' )
+    // {
+    //   o.stdout =
+    // }
 
   }
 
@@ -1666,6 +1710,173 @@ let start = _.routineFromPreAndBody( start_pre, start_body );
 
 //
 
+function _streamsJoin( o )
+{
+  let streams2 = [];
+  let joining = false;
+  let pipesCount;
+
+  if( _.longIs( o ) )
+  o = { streams : o }
+
+  _.routineOptions( _streamsJoin );
+
+  if( o.highWaterMark == null )
+  o.highWaterMark = 1 << 18;
+
+  if( Config.debug )
+  {
+    _.assert( _.intIs( o.highWaterMark ) );
+    _.assert( _.longIs( o.streams ) );
+    _.assert( o.streams.every( ( stream ) => _.streamIs( stream ) ), 'Expects array of streams' );
+  }
+
+  let o2 =
+  {
+    objectMode : o.objectMode ? true : false,
+    highWaterMark : o.highWaterMark,
+  }
+
+  let resultStream = Stream.PassThrough( o2 );
+  resultStream.joined = o;
+
+  resultStream.setMaxListeners( 0 )
+  resultStream.add = join1
+  resultStream.on( 'unpipe', function ( stream )
+  {
+    for( let i = 0 ; i < o.streams.length ; i++ )
+    {
+      stream = o.streams[ i ];
+      stream.emit( 'unpipe2' );
+    }
+  });
+
+  join1( ... o.streams )
+
+  return resultStream;
+
+  /* */
+
+  function join1()
+  {
+    for( let i = 0, len = arguments.length; i < len; i++ )
+    streams2.push( streamPause( arguments[ i ] ) )
+    join2();
+    return this;
+  }
+
+  /* */
+
+  function join2()
+  {
+    if( joining )
+    return;
+
+    joining = true;
+
+    let streams = streams2.shift();
+    if( !streams )
+    {
+      _.time.begin( 0, end );
+      return
+    }
+
+    streams = _.arrayAs( streams );
+    pipesCount = streams.length + 1;
+
+    for( let i = 0; i < streams.length; i++ )
+    pipe( streams[ i ] )
+
+    next()
+  }
+
+  /* */
+
+  function next()
+  {
+    if( --pipesCount > 0 )
+    return;
+    joining = false;
+    join2();
+  }
+
+  /* */
+
+  function pipe( stream )
+  {
+    if( stream._readableState.endEmitted )
+    return next();
+
+    stream.on( 'unpipe2', onEnd );
+    stream.on( 'end', onEnd );
+
+    if( o.pipingError )
+    stream.on( 'error', onError );
+
+    stream.pipe( resultStream, { end : false } );
+    stream.resume();
+  }
+
+  /* */
+
+  function onEnd()
+  {
+    debugger;
+    _.assert( 0, 'not tested' );
+    stream.removeListener( 'unpipe2', onEnd );
+    stream.removeListener( 'end', onEnd );
+    if( o.pipingError )
+    stream.removeListener( 'error', onError );
+    next();
+  }
+
+  /* */
+
+  function onError( err )
+  {
+    debugger;
+    _.assert( 0, 'not tested' );
+    resultStream.emit( 'error', err )
+  }
+
+  /* */
+
+  function end()
+  {
+    joining = false
+    resultStream.emit( 'streams.join.end' )
+    if( o.ending )
+    resultStream.end()
+  }
+
+  /* */
+
+  function streamPause( stream )
+  {
+    _.assert( _.streamIs( stream ) );
+    if( !stream._readableState && stream.pipe )
+    stream = stream.pipe( PassThrough( o2 ) );
+    if( !stream._readableState || !stream.pause || !stream.pipe )
+    throw _.err( 'Cant join stream which is not readable.' )
+    stream.pause();
+    return stream;
+  }
+
+  /* */
+
+}
+
+_streamsJoin.defaults =
+{
+  streams : null,
+  ending : 1,
+  pipingError : 1,
+  highWaterMark : null,
+  objectMode : 1,
+}
+
+//
+
 let startPassingThrough = _.routineFromPreAndBody( start_pre, start_body );
 
 var defaults = startPassingThrough.defaults;
@@ -1747,7 +1958,8 @@ function startNjs_body( o )
     interpreterArgs = _.strSplitNonPreserving({ src : interpreterArgs });
   }
 
-  let execPath = o.execPath ? _.fileProvider.path.nativizeTolerant( o.execPath ) : '';
+  // let execPath = o.execPath ? _.fileProvider.path.nativizeMinimal( o.execPath ) : '';
+  let execPath = o.execPath || '';
 
   _.assert( o.interpreterArgs === null || o.interpreterArgs === '', 'not implemented' ); /* qqq for Yevhen : implement and cover */
 
@@ -2651,6 +2863,9 @@ let Extension =
 
   startSingle,
   start,
+
+  _streamsJoin,
+
   startPassingThrough,
   startNjs,
   startNjsPassingThrough,
