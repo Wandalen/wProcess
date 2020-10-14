@@ -7706,9 +7706,6 @@ function startImportantExecPathPassingThrough( test )
 
 //
 
-<<<<<<< HEAD
-function startNormalizedExecPath( test )
-=======
 function startNjsPassingThroughDifferentTypesOfPaths( test )
 {
   let context = this;
@@ -7788,7 +7785,6 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
 //
 
 function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subroutine for modes */
->>>>>>> fe1b9692d26394aa09373d26026dec1d0d29d436
 {
   let context = this;
   let a = context.assetFor( test, false );
