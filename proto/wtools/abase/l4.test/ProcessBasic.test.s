@@ -17758,6 +17758,55 @@ function startDiffPid( test )
 
 startDiffPid.timeOut = 180000;
 
+//
+
+function streamJoin()
+{
+  let context = this;
+
+  let pass = new Stream.PassThrough();
+  let src1 = new Stream.PassThrough();
+  let src2 = new Stream.PassThrough();
+
+  src1.pipe( pass );
+  src2.pipe( pass );
+  // pass.unpipe( writable );
+  // readableFlowing is now false.
+
+  pass.on( 'data', ( chunk ) =>
+  {
+    console.log( chunk.toString() );
+  });
+
+  pass.on( 'end', () =>
+  {
+    console.log( 'end' );
+  });
+
+  pass.on( 'finish', () =>
+  {
+    console.log( 'finish' );
+  });
+
+  src1.write( 'src1a' );
+  src2.write( 'src2a' );
+  src1.write( 'src1b' );
+  src2.write( 'src2b' );
+
+  console.log( '1' );
+  src1.end();
+  console.log( '2' );
+  src2.end();
+  console.log( '3' );
+  debugger;
+
+  // src1.resume();
+
+  return _.time.out( 1000 );
+}
+
+streamJoin.experimental = 1;
+
 // --
 // other options
 // --
@@ -18350,7 +18399,6 @@ function startOptionPassingThrough( test )
 
     /* */
 
-<<<<<<< HEAD
     // ready.then( () =>
     // {
     //   /* mode : shell, stdio : pipe, passingThrough : true */
@@ -18413,60 +18461,6 @@ function startOptionPassingThrough( test )
     //     })
     //   }
     // })
-=======
-//
-
-function streamJoin()
-{
-  let context = this;
-
-  let pass = new Stream.PassThrough();
-  let src1 = new Stream.PassThrough();
-  let src2 = new Stream.PassThrough();
-
-  src1.pipe( pass );
-  src2.pipe( pass );
-  // pass.unpipe( writable );
-  // readableFlowing is now false.
-
-  pass.on( 'data', ( chunk ) =>
-  {
-    console.log( chunk.toString() );
-  });
-
-  pass.on( 'end', () =>
-  {
-    console.log( 'end' );
-  });
-
-  pass.on( 'finish', () =>
-  {
-    console.log( 'finish' );
-  });
-
-  src1.write( 'src1a' );
-  src2.write( 'src2a' );
-  src1.write( 'src1b' );
-  src2.write( 'src2b' );
-
-  console.log( '1' );
-  src1.end();
-  console.log( '2' );
-  src2.end();
-  console.log( '3' );
-  debugger;
-
-  // src1.resume();
-
-  return _.time.out( 1000 );
-}
-
-streamJoin.experimental = 1;
-
-// --
-// other options
-// --
->>>>>>> 7aa3e11efcbc42609e9e6b7ef1aabea4efe3a3f2
 
     // /* */
 
