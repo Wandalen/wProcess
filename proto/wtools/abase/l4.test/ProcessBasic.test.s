@@ -17630,15 +17630,6 @@ function startOptionPassingThrough( test )
   let testAppPath1 = a.path.nativize( a.program( program1 ) );
   let testAppPath2 = a.path.nativize( a.program( program2 ) );
 
-  // modes.forEach( ( modeTester ) =>
-  // {
-  //   modes.forEach( ( modeParent ) =>
-  //   {
-  //     a.ready.then( () => run( modeTester, modeParent ) )
-  //   })
-  // });
-  // return a.ready;
-
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -17652,14 +17643,11 @@ function startOptionPassingThrough( test )
    Also, this method is used to exclude output of program2 from tester in case when stdio:inherit is used
   */
 
-  // run();
-
-  // return a.ready;
-
   function run( mode )
   {
     test.case = `mode : ${ mode }`
     let ready = new _.Consequence().take( null );
+
     // a.ready.then( () =>
     // {
     //   test.open( '0 args to parent process' );
@@ -17671,10 +17659,11 @@ function startOptionPassingThrough( test )
       test.case = 'child args = `testAppPath2`';
       let o =
       {
+        execPath : mode === 'fork' ? null : 'node ',
         args : testAppPath2,
         outputCollecting : 0,
         outputPiping : 0,
-        mode : 'fork',
+        mode,
         throwingExitCode : 0,
         applyingExitCode : 0,
         stdio : 'inherit'
@@ -17708,10 +17697,10 @@ function startOptionPassingThrough( test )
 
       let o =
       {
-        execPath : testAppPath2,
+        execPath : mode === 'fork' ? testAppPath2 : 'node ' + testAppPath2,
         outputCollecting : 0,
         outputPiping : 0,
-        mode : 'fork',
+        mode,
         throwingExitCode : 0,
         applyingExitCode : 0,
         stdio : 'inherit'
@@ -17745,11 +17734,11 @@ function startOptionPassingThrough( test )
 
       let o =
       {
-        execPath : testAppPath2,
+        execPath : mode === 'fork' ? testAppPath2 : 'node ' + testAppPath2,
         args : 'a',
         outputCollecting : 0,
         outputPiping : 0,
-        mode : 'fork',
+        mode,
         throwingExitCode : 0,
         applyingExitCode : 0,
         stdio : 'inherit'
@@ -17783,11 +17772,11 @@ function startOptionPassingThrough( test )
 
       let o =
       {
-        execPath : testAppPath2,
+        execPath : mode === 'fork' ? testAppPath2 : 'node ' + testAppPath2,
         args : [ 'a', 'b', 'c' ],
         outputCollecting : 0,
         outputPiping : 0,
-        mode : 'fork',
+        mode,
         throwingExitCode : 0,
         applyingExitCode : 0,
         stdio : 'inherit'
@@ -17821,10 +17810,10 @@ function startOptionPassingThrough( test )
 
       let o =
       {
-        execPath : testAppPath2 + ' a b c',
+        execPath : mode === 'fork' ? testAppPath2 + ' a b c' : 'node ' + testAppPath2 + ' a b c',
         outputCollecting : 0,
         outputPiping : 0,
-        mode : 'fork',
+        mode,
         throwingExitCode : 0,
         applyingExitCode : 0,
         stdio : 'inherit'
@@ -17858,11 +17847,11 @@ function startOptionPassingThrough( test )
 
       let o =
       {
-        execPath : testAppPath2 + ' a',
+        execPath : mode === 'fork' ? testAppPath2 + ' a' : 'node ' + testAppPath2 + ' a',
         args : [ 'b', 'c' ],
         outputCollecting : 0,
         outputPiping : 0,
-        mode : 'fork',
+        mode,
         throwingExitCode : 0,
         applyingExitCode : 0,
         stdio : 'inherit'
@@ -18104,10 +18093,10 @@ function startOptionPassingThrough( test )
 
       let o =
       {
-        execPath : testAppPath2,
+        execPath : mode === 'fork' ? testAppPath2 : 'node ' + testAppPath2,
         outputCollecting : 0,
         outputPiping : 0,
-        mode : 'fork',
+        mode,
         throwingExitCode : 0,
         applyingExitCode : 0,
         stdio : 'inherit'
@@ -18142,11 +18131,11 @@ function startOptionPassingThrough( test )
 
       let o =
       {
-        execPath : testAppPath2,
+        execPath : mode === 'fork' ? testAppPath2 : 'node ' + testAppPath2,
         args : 'a',
         outputCollecting : 0,
         outputPiping : 0,
-        mode : 'fork',
+        mode,
         throwingExitCode : 0,
         applyingExitCode : 0,
         stdio : 'inherit'
@@ -18181,7 +18170,7 @@ function startOptionPassingThrough( test )
 
       let o =
       {
-        execPath : testAppPath2,
+        execPath : mode === 'fork' ? testAppPath2 : 'node ' + testAppPath2,
         args : [ 'a', 'b', 'c' ],
         outputCollecting : 0,
         outputPiping : 0,
@@ -18220,10 +18209,10 @@ function startOptionPassingThrough( test )
 
       let o =
       {
-        execPath : testAppPath2 + ' a b c',
+        execPath : mode === 'fork' ? testAppPath2 + ' a b c' : 'node ' + testAppPath2 + ' a b c',
         outputCollecting : 0,
         outputPiping : 0,
-        mode : 'fork',
+        mode,
         throwingExitCode : 0,
         applyingExitCode : 0,
         stdio : 'inherit'
@@ -18257,11 +18246,11 @@ function startOptionPassingThrough( test )
 
       let o =
       {
-        execPath : testAppPath2 + ' a',
+        execPath : mode === 'fork' ? testAppPath2 + ' a' : 'node ' + testAppPath2 + ' a',
         args : [ 'b', 'c' ],
         outputCollecting : 0,
         outputPiping : 0,
-        mode : 'fork',
+        mode,
         throwingExitCode : 0,
         applyingExitCode : 0,
         stdio : 'inherit'
