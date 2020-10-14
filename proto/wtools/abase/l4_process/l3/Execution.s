@@ -564,8 +564,6 @@ function startSingle_body( o )
   function runFork()
   {
     let execPath = o.execPath;
-    // let args = o.args; /* yyy zzz : remove? */
-    // let args = o.args.slice();
 
     let o2 = optionsForFork();
     execPath = execPathForFork( execPath );
@@ -590,9 +588,6 @@ function startSingle_body( o )
 
     execPath = _.fileProvider.path.nativize( execPath );
 
-    // let args = o.args; /* yyy zzz : remove? */
-    // let args = o.args.slice();
-
     let o2 = optionsForSpawn();
 
     o.fullExecPath = _.strConcat( _.arrayAppendArray( [ execPath ], o.args ) );
@@ -613,10 +608,10 @@ function startSingle_body( o )
   function runShell()
   {
     let execPath = o.execPath;
-    // let args = o.args; /* yyy zzz : remove? */
-    // let args = o.args.slice();
 
+    debugger;
     execPath = _.fileProvider.path.nativize( execPath );
+    debugger;
 
     let shellPath = process.platform === 'win32' ? 'cmd' : 'sh';
     let arg1 = process.platform === 'win32' ? '/c' : '-c';
@@ -685,7 +680,6 @@ function startSingle_body( o )
   function end2( err, consequence )
   {
 
-    // if( !_.primitiveIs( o.procedure ) ) /* yyy */
     if( o.procedure )
     if( o.procedure.isAlive() )
     o.procedure.end();

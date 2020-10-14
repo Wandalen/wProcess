@@ -5042,7 +5042,6 @@ function startArgumentsParsingNonTrivial( test )
       test.is( _.strHas( err.message, `spawn " ENOENT` ) );
       test.identical( o.execPath, '"' );
       test.identical( o.args, [ '"', 'first', 'arg', '"' ] );
-
       return null;
     })
 
@@ -6375,7 +6374,6 @@ function startExecPathNonTrivialModeShell( test )
       test.identical( op.ended, true );
       test.identical( _.strCount( op.output, process.version ), 0 );
     }
-
     return null;
   })
 
@@ -6922,253 +6920,256 @@ function startImportantExecPath( test )
 
   /* */
 
-  shell({ execPath : null, args : [ 'node', '-v', '&&', 'node', '-v' ] })
-  .then( function( op )
-  {
-    test.identical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    test.identical( _.strCount( op.output, process.version ), 2 );
-    return null;
-  })
-
-  /* */
-
-  shell({ execPath : 'node', args : [ '-v', '&&', 'node', '-v' ] })
-  .then( function( op )
-  {
-    test.identical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    test.identical( _.strCount( op.output, process.version ), 1 );
-    return null;
-  })
-
-  /* */
-
-  shell({ execPath : printArguments, args : [ 'a', '&&', 'node', 'b' ] })
-  .then( function( op )
-  {
-    test.identical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    test.is( _.strHas( op.output, `[ 'a', '&&', 'node', 'b' ]` ) )
-    return null;
-  })
-
-  /* */
-
-  shell({ execPath : 'echo', args : [ '-v', '&&', 'echo', '-v' ] })
-  .then( function( op )
-  {
-    test.identical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    if( process.platform === 'win32' )
-    test.is( _.strHas( op.output, '"-v" "&&" "echo" "-v"' ) )
-    else
-    test.is( _.strHas( op.output, '-v && echo -v' ) )
-    return null;
-  })
-
-  /* */
-
-  shell({ execPath : 'node -v && node -v', args : [] })
-  .then( function( op )
-  {
-    test.identical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    test.identical( _.strCount( op.output, process.version ), 2 );
-    return null;
-  })
-
-  /* */
-
-  shell({ execPath : `node -v "&&" node -v`, args : [] })
-  .then( function( op )
-  {
-    test.identical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    test.identical( _.strCount( op.output, process.version ), 1 );
-    return null;
-  })
-
-  /* */
-
-  shell({ execPath : `echo -v "&&" node -v`, args : [] })
-  .then( function( op )
-  {
-    test.identical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    if( process.platform === 'win32' )
-    test.is( _.strHas( op.output, '-v "&&" node -v'  ) );
-    else
-    test.is( _.strHas( op.output, '-v && node -v'  ) );
-    return null;
-  })
-
-  /* */
-
-  shell({ execPath : null, args : [ 'echo', '*' ] })
-  .then( function( op )
-  {
-    test.identical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    if( process.platform === 'win32' )
-    test.identical( _.strCount( op.output, '*' ), 1 );
-    else
-    test.identical( _.strCount( op.output, 'file' ), 1 );
-    return null;
-  })
-
-  /* */
-
-  shell({ execPath : 'echo', args : [ '*' ] })
-  .then( function( op )
-  {
-    test.identical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    test.identical( _.strCount( op.output, '*' ), 1 );
-    return null;
-  })
-
-  /* */
-
-  shell({ execPath : 'echo *' })
-  .then( function( op )
-  {
-    test.identical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    if( process.platform === 'win32' )
-    test.identical( _.strCount( op.output, '*' ), 1 );
-    else
-    test.identical( _.strCount( op.output, 'file' ), 1 );
-    return null;
-  })
-
-  /* */
-
-  shell({ execPath : 'echo "*"' })
-  .then( function( op )
-  {
-    test.identical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    test.identical( _.strCount( op.output, '*' ), 1 );
-    return null;
-  })
+  // shell({ execPath : null, args : [ 'node', '-v', '&&', 'node', '-v' ] })
+  // .then( function( op )
+  // {
+  //   test.identical( op.exitCode, 0 );
+  //   test.identical( op.ended, true );
+  //   test.identical( _.strCount( op.output, process.version ), 2 );
+  //   return null;
+  // })
+  //
+  // /* */
+  //
+  // shell({ execPath : 'node', args : [ '-v', '&&', 'node', '-v' ] })
+  // .then( function( op )
+  // {
+  //   test.identical( op.exitCode, 0 );
+  //   test.identical( op.ended, true );
+  //   test.identical( _.strCount( op.output, process.version ), 1 );
+  //   return null;
+  // })
+  //
+  // /* */
+  //
+  // shell({ execPath : printArguments, args : [ 'a', '&&', 'node', 'b' ] })
+  // .then( function( op )
+  // {
+  //   test.identical( op.exitCode, 0 );
+  //   test.identical( op.ended, true );
+  //   test.is( _.strHas( op.output, `[ 'a', '&&', 'node', 'b' ]` ) )
+  //   return null;
+  // })
+  //
+  // /* */
+  //
+  // shell({ execPath : 'echo', args : [ '-v', '&&', 'echo', '-v' ] })
+  // .then( function( op )
+  // {
+  //   test.identical( op.exitCode, 0 );
+  //   test.identical( op.ended, true );
+  //   if( process.platform === 'win32' )
+  //   test.is( _.strHas( op.output, '"-v" "&&" "echo" "-v"' ) )
+  //   else
+  //   test.is( _.strHas( op.output, '-v && echo -v' ) )
+  //   return null;
+  // })
+  //
+  // /* */
+  //
+  // shell({ execPath : 'node -v && node -v', args : [] })
+  // .then( function( op )
+  // {
+  //   test.identical( op.exitCode, 0 );
+  //   test.identical( op.ended, true );
+  //   test.identical( _.strCount( op.output, process.version ), 2 );
+  //   return null;
+  // })
+  //
+  // /* */
+  //
+  // shell({ execPath : `node -v "&&" node -v`, args : [] })
+  // .then( function( op )
+  // {
+  //   test.identical( op.exitCode, 0 );
+  //   test.identical( op.ended, true );
+  //   test.identical( _.strCount( op.output, process.version ), 1 );
+  //   return null;
+  // })
+  //
+  // /* */
+  //
+  // shell({ execPath : `echo -v "&&" node -v`, args : [] })
+  // .then( function( op )
+  // {
+  //   test.identical( op.exitCode, 0 );
+  //   test.identical( op.ended, true );
+  //   if( process.platform === 'win32' )
+  //   test.is( _.strHas( op.output, '-v "&&" node -v'  ) );
+  //   else
+  //   test.is( _.strHas( op.output, '-v && node -v'  ) );
+  //   return null;
+  // })
+  //
+  // /* */
+  //
+  // shell({ execPath : null, args : [ 'echo', '*' ] })
+  // .then( function( op )
+  // {
+  //   test.identical( op.exitCode, 0 );
+  //   test.identical( op.ended, true );
+  //   if( process.platform === 'win32' )
+  //   test.identical( _.strCount( op.output, '*' ), 1 );
+  //   else
+  //   test.identical( _.strCount( op.output, 'file' ), 1 );
+  //   return null;
+  // })
+  //
+  // /* */
+  //
+  // shell({ execPath : 'echo', args : [ '*' ] })
+  // .then( function( op )
+  // {
+  //   test.identical( op.exitCode, 0 );
+  //   test.identical( op.ended, true );
+  //   test.identical( _.strCount( op.output, '*' ), 1 );
+  //   return null;
+  // })
+  //
+  // /* */
+  //
+  // shell({ execPath : 'echo *' })
+  // .then( function( op )
+  // {
+  //   test.identical( op.exitCode, 0 );
+  //   test.identical( op.ended, true );
+  //   if( process.platform === 'win32' )
+  //   test.identical( _.strCount( op.output, '*' ), 1 );
+  //   else
+  //   test.identical( _.strCount( op.output, 'file' ), 1 );
+  //   return null;
+  // })
+  //
+  // /* */
+  //
+  // shell({ execPath : 'echo "*"' })
+  // .then( function( op )
+  // {
+  //   test.identical( op.exitCode, 0 );
+  //   test.identical( op.ended, true );
+  //   test.identical( _.strCount( op.output, '*' ), 1 );
+  //   return null;
+  // })
+  // xxx
 
   /* */
 
   shell({ execPath : null, args : [ printArguments, 'a b' ] })
   .then( function( op )
   {
+    debugger;
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     test.is( _.strHas( op.output, `[ 'a', 'b' ]` ) );
+    debugger;
     return null;
   })
 
   /* */
 
-  shell({ execPath : printArguments, args : [ 'a b' ] })
-  .then( function( op )
-  {
-    test.identical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    test.is( _.strHas( op.output, `[ 'a b' ]` ) );
-    return null;
-  })
-
-  /* */
-
-  shell({ execPath : `${printArguments} a b` })
-  .then( function( op )
-  {
-    test.identical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    test.is( _.strHas( op.output, `[ 'a', 'b' ]` ) );
-    return null;
-  })
-
-  /* */
-
-  shell({ execPath : `${printArguments} "a b"` })
-  .then( function( op )
-  {
-    test.identical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    test.is( _.strHas( op.output, `[ 'a b' ]` ) );
-    return null;
-  })
-
-  /* */
-
-  shell({ execPath : null, args : [ 'echo', '"*"' ] })
-  .then( function( op )
-  {
-    test.identical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    test.is( _.strHas( op.output, '*' ) );
-    return null;
-  })
-
-  /* */
-
-  shell({ execPath : 'echo', args : [ '"*"' ] })
-  .then( function( op )
-  {
-    test.identical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    if( process.platform === 'win32' )
-    test.is( _.strHas( op.output, '\\"*\\"' ) );
-    else
-    test.is( _.strHas( op.output, '"*"' ) );
-    return null;
-  })
-
-  /* */
-
-  shell({ execPath : null, args : [ 'echo', '\\"*\\"' ] })
-  .then( function( op )
-  {
-    test.identical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    if( process.platform === 'win32' )
-    test.is( _.strHas( op.output, '\\"*\\"' ) );
-    else
-    test.is( _.strHas( op.output, '"*"' ) );
-    return null;
-  })
-
-  /* */
-
-  shell({ execPath : 'echo "\\"*\\""', args : [] })
-  .then( function( op )
-  {
-    test.identical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    if( process.platform === 'win32' )
-    test.is( _.strHas( op.output, '"\\"*\\"' ) );
-    else
-    test.is( _.strHas( op.output, '"*"' ) );
-    return null;
-  })
-
-  /* */
-
-  shell({ execPath : 'echo *', args : [ '*' ] })
-  .then( function( op )
-  {
-    test.identical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    if( process.platform === 'win32' )
-    {
-      test.is( _.strHas( op.output, '*' ) );
-      test.is( _.strHas( op.output, '"*"' ) );
-    }
-    else
-    {
-      test.is( _.strHas( op.output, 'file' ) );
-      test.is( _.strHas( op.output, '*' ) );
-    }
-    return null;
-  })
+  // shell({ execPath : printArguments, args : [ 'a b' ] })
+  // .then( function( op )
+  // {
+  //   test.identical( op.exitCode, 0 );
+  //   test.identical( op.ended, true );
+  //   test.is( _.strHas( op.output, `[ 'a b' ]` ) );
+  //   return null;
+  // })
+  //
+  // /* */
+  //
+  // shell({ execPath : `${printArguments} a b` })
+  // .then( function( op )
+  // {
+  //   test.identical( op.exitCode, 0 );
+  //   test.identical( op.ended, true );
+  //   test.is( _.strHas( op.output, `[ 'a', 'b' ]` ) );
+  //   return null;
+  // })
+  //
+  // /* */
+  //
+  // shell({ execPath : `${printArguments} "a b"` })
+  // .then( function( op )
+  // {
+  //   test.identical( op.exitCode, 0 );
+  //   test.identical( op.ended, true );
+  //   test.is( _.strHas( op.output, `[ 'a b' ]` ) );
+  //   return null;
+  // })
+  //
+  // /* */
+  //
+  // shell({ execPath : null, args : [ 'echo', '"*"' ] })
+  // .then( function( op )
+  // {
+  //   test.identical( op.exitCode, 0 );
+  //   test.identical( op.ended, true );
+  //   test.is( _.strHas( op.output, '*' ) );
+  //   return null;
+  // })
+  //
+  // /* */
+  //
+  // shell({ execPath : 'echo', args : [ '"*"' ] })
+  // .then( function( op )
+  // {
+  //   test.identical( op.exitCode, 0 );
+  //   test.identical( op.ended, true );
+  //   if( process.platform === 'win32' )
+  //   test.is( _.strHas( op.output, '\\"*\\"' ) );
+  //   else
+  //   test.is( _.strHas( op.output, '"*"' ) );
+  //   return null;
+  // })
+  //
+  // /* */
+  //
+  // shell({ execPath : null, args : [ 'echo', '\\"*\\"' ] })
+  // .then( function( op )
+  // {
+  //   test.identical( op.exitCode, 0 );
+  //   test.identical( op.ended, true );
+  //   if( process.platform === 'win32' )
+  //   test.is( _.strHas( op.output, '\\"*\\"' ) );
+  //   else
+  //   test.is( _.strHas( op.output, '"*"' ) );
+  //   return null;
+  // })
+  //
+  // /* */
+  //
+  // shell({ execPath : 'echo "\\"*\\""', args : [] })
+  // .then( function( op )
+  // {
+  //   test.identical( op.exitCode, 0 );
+  //   test.identical( op.ended, true );
+  //   if( process.platform === 'win32' )
+  //   test.is( _.strHas( op.output, '"\\"*\\"' ) );
+  //   else
+  //   test.is( _.strHas( op.output, '"*"' ) );
+  //   return null;
+  // })
+  //
+  // /* */
+  //
+  // shell({ execPath : 'echo *', args : [ '*' ] })
+  // .then( function( op )
+  // {
+  //   test.identical( op.exitCode, 0 );
+  //   test.identical( op.ended, true );
+  //   if( process.platform === 'win32' )
+  //   {
+  //     test.is( _.strHas( op.output, '*' ) );
+  //     test.is( _.strHas( op.output, '"*"' ) );
+  //   }
+  //   else
+  //   {
+  //     test.is( _.strHas( op.output, 'file' ) );
+  //     test.is( _.strHas( op.output, '*' ) );
+  //   }
+  //   return null;
+  // })
 
   /* qqq for Yevhen : separate test routine startImportantExecPathPassingThrough and run it from separate process */
   /* zzz */
