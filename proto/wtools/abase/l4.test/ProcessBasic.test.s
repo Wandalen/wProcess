@@ -8244,6 +8244,7 @@ function startDifferentTypesOfPaths( test )
   let a = context.assetFor( test, false );
   let execPath = a.program({ routine : testApp });
   let execPathWithSpace = a.program({ routine : testApp, dirPath : 'path with space' });
+  let execPathWithSpaceNative = a.fileProvider.path.nativize( execPathWithSpace );
   let nodeWithSpace = a.abs( 'path with space/node' );
   a.fileProvider.softLink( nodeWithSpace, process.argv[ 0 ] );
 
@@ -8367,6 +8368,8 @@ function startDifferentTypesOfPaths( test )
 
   })
 
+  /* */
+
   .then( () =>
   {
     test.case = 'mode : spawn, path to node with space'
@@ -8431,12 +8434,103 @@ function startDifferentTypesOfPaths( test )
 
   .then( () =>
   {
-    test.case = 'mode : spawn, path to node with space'
+    test.case = 'mode : spawn, path to node with space, path to program with space'
     let o =
     {
-      execPath : `""${nodeWithSpace}""`,
-      args : [ '-v' ],
+      execPath : _.strQuote( nodeWithSpace ) + ' ' + _.strQuote( execPathWithSpaceNative ),
       mode : 'spawn',
+      stdio : 'pipe',
+      outputCollecting : 1,
+      outputPiping : 1,
+      throwingExitCode : 0,
+      applyingExitCode : 0,
+    }
+
+    _.process.start( o );
+
+    o.conTerminate.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.is( _.strHas( op.output, execPathWithSpace ) );
+      return null;
+    })
+
+    return o.conTerminate;
+
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    test.case = 'mode : spawn, path to node with space, path to program with space'
+    let o =
+    {
+      execPath : _.strQuote( nodeWithSpace ),
+      args : [ execPathWithSpaceNative ],
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputCollecting : 1,
+      outputPiping : 1,
+      throwingExitCode : 0,
+      applyingExitCode : 0,
+    }
+
+    _.process.start( o );
+
+    o.conTerminate.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.is( _.strHas( op.output, execPathWithSpace ) );
+      return null;
+    })
+
+    return o.conTerminate;
+
+  })
+
+  /* qqq for Vova : fix it */
+
+  // .then( () =>
+  // {
+  //   test.case = 'mode : shell, path to node with space'
+  //   let o =
+  //   {
+  //     args : [ _.strQuote( nodeWithSpace ), '-v' ],
+  //     mode : 'shell',
+  //     stdio : 'pipe',
+  //     outputCollecting : 1,
+  //     outputPiping : 1,
+  //     throwingExitCode : 0,
+  //     applyingExitCode : 0,
+  //   }
+
+  //   _.process.start( o );
+
+  //   o.conTerminate.then( ( op ) =>
+  //   {
+  //     test.identical( op.exitCode, 0 );
+  //     test.identical( op.ended, true );
+  //     test.is( _.strHas( op.output, process.version ) );
+  //     return null;
+  //   })
+
+  //   return o.conTerminate;
+
+  // })
+
+  /* */
+
+  .then( () =>
+  {
+    test.case = 'mode : shell, path to node with space'
+    let o =
+    {
+      execPath : _.strQuote( nodeWithSpace ),
+      args : [ '-v' ],
+      mode : 'shell',
       stdio : 'pipe',
       outputCollecting : 1,
       outputPiping : 1,
@@ -8458,6 +8552,67 @@ function startDifferentTypesOfPaths( test )
 
   })
 
+  /* */
+
+  .then( () =>
+  {
+    test.case = 'mode : shell, path to node with space, program path with space'
+    let o =
+    {
+      execPath : _.strQuote( nodeWithSpace ),
+      args : [ execPathWithSpaceNative ],
+      mode : 'shell',
+      stdio : 'pipe',
+      outputCollecting : 1,
+      outputPiping : 1,
+      throwingExitCode : 0,
+      applyingExitCode : 0,
+    }
+
+    _.process.start( o );
+
+    o.conTerminate.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.is( _.strHas( op.output, execPathWithSpace ) );
+      return null;
+    })
+
+    return o.conTerminate;
+
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    test.case = 'mode : shell, path to node with space, program path with space'
+    let o =
+    {
+      execPath : _.strQuote( nodeWithSpace ) + ' ' + _.strQuote( execPathWithSpaceNative ),
+      mode : 'shell',
+      stdio : 'pipe',
+      outputCollecting : 1,
+      outputPiping : 1,
+      throwingExitCode : 0,
+      applyingExitCode : 0,
+    }
+
+    _.process.start( o );
+
+    o.conTerminate.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.is( _.strHas( op.output, execPathWithSpace ) );
+      return null;
+    })
+
+    return o.conTerminate;
+
+  })
+
   /* - */
 
   return a.ready;
@@ -8466,7 +8621,8 @@ function startDifferentTypesOfPaths( test )
 
   function testApp()
   {
-    console.log( __filename );
+    let _ = require( toolsPath );
+    console.log( _.path.normalize( __filename ) );
   }
 }
 
