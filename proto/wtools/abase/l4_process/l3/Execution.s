@@ -259,27 +259,19 @@ function startSingle_body( o )
 
     /* */
 
-    // if( o.outputDecorating === null )
-    // o.outputDecorating = 0;
-    // if( o.outputDecoratingStdout === null )
-    // o.outputDecoratingStdout = o.outputDecorating;
-    // if( o.outputDecoratingStderr === null )
-    // o.outputDecoratingStderr = o.outputDecorating;
+    _.assert( _.boolLike( o.outputDecorating ) );
+    _.assert( _.boolLike( o.outputDecoratingStdout ) );
+    _.assert( _.boolLike( o.outputDecoratingStderr ) );
+    _.assert( _.boolLike( o.outputCollecting ) );
 
     /* ipc */
 
     _.assert( _.boolLike( o.ipc ) );
 
-    // if( o.ipc === null )
-    // o.ipc = o.mode === 'fork' ? 1 : 0;
-
     if( _.strIs( o.stdio ) )
     o.stdio = _.dup( o.stdio, 3 );
     if( o.ipc )
     {
-      // yyy
-      // if( _.strIs( o.stdio ) )
-      // o.stdio = _.dup( o.stdio, 3 );
       if( !_.longHas( o.stdio, 'ipc' ) )
       o.stdio.push( 'ipc' );
     }
@@ -304,11 +296,6 @@ function startSingle_body( o )
     }
 
     /* */
-
-    _.assert( _.boolLike( o.outputDecorating ) );
-    _.assert( _.boolLike( o.outputDecoratingStdout ) );
-    _.assert( _.boolLike( o.outputDecoratingStderr ) );
-    _.assert( _.boolLike( o.outputCollecting ) );
 
     o.disconnect = disconnect;
     o.state = 'initial'; /* `initial`, `starting`, `started`, `terminating`, `terminated`, `disconnected` */
@@ -365,27 +352,12 @@ function startSingle_body( o )
     o.args = _.arrayPrependArray( o.args || [], execArgs );
 
     _.assert( o.interpreterArgs === null || _.arrayIs( o.interpreterArgs ) );
-    // if( _.strIs( o.interpreterArgs ) )
-    // o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs });
-
-    // if( o.outputAdditive === null )
-    // o.outputAdditive = true;
-    // o.outputAdditive = !!o.outputAdditive;
     _.assert( _.boolLike( o.outputAdditive ) );
 
     o.currentPath = _.path.resolve( o.currentPath || '.' );
 
     /* verbosity */
 
-    // if( !_.numberIs( o.verbosity ) )
-    // o.verbosity = o.verbosity ? 1 : 0;
-    // if( o.verbosity < 0 )
-    // o.verbosity = 0;
-    // if( o.outputPiping === null )
-    // {
-    //   if( o.stdio === 'pipe' || o.stdio[ 1 ] === 'pipe' )
-    //   o.outputPiping = o.verbosity >= 2;
-    // }
     _.assert( _.numberIs( o.verbosity ) );
     _.assert( _.boolLike( o.outputPiping ) );
 
@@ -447,9 +419,7 @@ function startSingle_body( o )
       {
 
         o.ready.deasync();
-        let arg = o.ready.sync();
         o.ready.give( 1 );
-
         if( readyCallback )
         o.ready.finally( readyCallback );
 
@@ -1547,6 +1517,14 @@ function start_body( o )
     form1();
     form2();
 
+    if( o.sync && !o.deasync )
+    {
+      o.ready.deasync();
+      // o.ready.give( 1 );
+      // if( readyCallback )
+      // o.ready.finally( readyCallback );
+    }
+
     o.ready
     .then( run2 )
     .finally( end2 )
@@ -1559,6 +1537,7 @@ function start_body( o )
 
   function run2()
   {
+    debugger;
     let prevReady = new _.Consequence().take( null );
     let readies = [];
     let execPath = _.arrayAs( o.execPath );
@@ -1607,15 +1586,14 @@ function start_body( o )
 
   /* */
 
-  function end1()
+  function end1() /* xxx : make similar change in startSingle() */
   {
+    debugger;
+    if( readyCallback )
+    o.ready.finally( readyCallback );
     if( o.deasync )
-    {
-      o.ready.deasync();
-      if( o.sync )
-      return o.ready.sync();
-    }
-    if( o.sync ) /* xxx : make similar change in startSingle() */
+    o.ready.deasync();
+    if( o.sync )
     return o.ready.sync();
     return o.ready;
   }
@@ -1624,6 +1602,7 @@ function start_body( o )
 
   function end2( err, arg )
   {
+    debugger;
     o.state = 'terminated';
     o.ended = true;
 
