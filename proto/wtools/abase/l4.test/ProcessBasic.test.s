@@ -7724,6 +7724,7 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
   _.process.startNjsPassingThrough
   ({
     execPath : _.path.normalize( testAppPath ),
+    ready : a.ready
     stdio : 'pipe',
     outputCollecting : 1,
     outputPiping : 1,
@@ -7752,7 +7753,6 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
   _.process.startNjsPassingThrough
   ({
     execPath : _.path.nativize( testAppPath ),
-    ready : a.ready,
     stdio : 'pipe',
     outputCollecting : 1,
     outputPiping : 1,
