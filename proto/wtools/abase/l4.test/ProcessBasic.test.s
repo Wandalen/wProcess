@@ -7204,9 +7204,10 @@ function startImportantExecPathPassingThrough( test )
     {
       toolsPath : a.path.nativize( _.module.toolsPathGet() ),
       routinePath : a.routinePath,
+      options : { execPath : 'echo', args : null, passingThrough : 1 }
     }
 
-    let programPath = a.path.nativize( a.program({ routine : testAppParent1, locals }) );
+    let programPath = a.path.nativize( a.program({ routine : testAppParent, locals }) );
 
     let options =
     {
@@ -7220,27 +7221,11 @@ function startImportantExecPathPassingThrough( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
       test.is( _.strHas( op.output, 'echo\n' ) );
+
+      a.fileProvider.fileDelete( programPath );
       return null;
 
     })
-
-    /* - */
-
-    function testAppParent1()
-    {
-      let _ = require( toolsPath );
-      _.include( 'wFiles' );
-      _.include( 'wProcess' );
-
-      let shell = _.process.starter
-      ({
-        currentPath : routinePath,
-        mode : 'shell',
-        stdio : 'pipe',
-        outputPiping : 0,
-      })
-      return shell({ execPath : 'echo', args : null, passingThrough : 1 })
-    }
   })
 
   /* */
@@ -7253,9 +7238,10 @@ function startImportantExecPathPassingThrough( test )
     {
       toolsPath : a.path.nativize( _.module.toolsPathGet() ),
       routinePath : a.routinePath,
+      options : { execPath : null, args : [ 'echo' ], passingThrough : 1 }
     }
 
-    let programPath = a.path.nativize( a.program({ routine : testAppParent2, locals }) );
+    let programPath = a.path.nativize( a.program({ routine : testAppParent, locals }) );
 
     let options =
     {
@@ -7269,27 +7255,11 @@ function startImportantExecPathPassingThrough( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
       test.is( _.strHas( op.output, 'echo\n' ) );
+
+      a.fileProvider.fileDelete( programPath );
       return null;
 
     })
-
-    /* - */
-
-    function testAppParent2()
-    {
-      let _ = require( toolsPath );
-      _.include( 'wFiles' );
-      _.include( 'wProcess' );
-
-      let shell = _.process.starter
-      ({
-        currentPath : routinePath,
-        mode : 'shell',
-        stdio : 'pipe',
-        outputPiping : 0,
-      })
-      return shell({ execPath : null, args : [ 'echo' ], passingThrough : 1 })
-    }
   })
 
   /* */
@@ -7302,9 +7272,10 @@ function startImportantExecPathPassingThrough( test )
     {
       toolsPath : a.path.nativize( _.module.toolsPathGet() ),
       routinePath : a.routinePath,
+      options : { execPath : 'echo *', args : [ '*' ], passingThrough : 1 }
     }
 
-    let programPath = a.path.nativize( a.program({ routine : testAppParent3, locals }) );
+    let programPath = a.path.nativize( a.program({ routine : testAppParent, locals }) );
 
     let options =
     {
@@ -7318,27 +7289,11 @@ function startImportantExecPathPassingThrough( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
       test.is( _.strHas( op.output, 'echo * "*"\n' ) );
+
+      a.fileProvider.fileDelete( programPath );
       return null;
 
     })
-
-    /* - */
-
-    function testAppParent3()
-    {
-      let _ = require( toolsPath );
-      _.include( 'wFiles' );
-      _.include( 'wProcess' );
-
-      let shell = _.process.starter
-      ({
-        currentPath : routinePath,
-        mode : 'shell',
-        stdio : 'pipe',
-        outputPiping : 0,
-      })
-      return shell({ execPath : 'echo *', args : [ '*' ], passingThrough : 1 })
-    }
   })
 
   a.ready.then( () =>
@@ -7378,9 +7333,10 @@ function startImportantExecPathPassingThrough( test )
     {
       toolsPath : a.path.nativize( _.module.toolsPathGet() ),
       routinePath : a.routinePath,
+      options : { execPath : 'echo', args : null, passingThrough : 1 }
     }
 
-    let programPath = a.path.nativize( a.program({ routine : testAppParent4, locals }) );
+    let programPath = a.path.nativize( a.program({ routine : testAppParent, locals }) );
 
     let options =
     {
@@ -7395,27 +7351,11 @@ function startImportantExecPathPassingThrough( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
       test.is( _.strHas( op.output, 'echo "argFromParent"\n' ) );
+
+      a.fileProvider.fileDelete( programPath );
       return null;
 
     })
-
-    /* - */
-
-    function testAppParent4()
-    {
-      let _ = require( toolsPath );
-      _.include( 'wFiles' );
-      _.include( 'wProcess' );
-
-      let shell = _.process.starter
-      ({
-        currentPath : routinePath,
-        mode : 'shell',
-        stdio : 'pipe',
-        outputPiping : 0,
-      })
-      return shell({ execPath : 'echo', args : null, passingThrough : 1 });
-    }
   })
 
   /* ORIGINAL */
@@ -7441,9 +7381,10 @@ function startImportantExecPathPassingThrough( test )
     {
       toolsPath : a.path.nativize( _.module.toolsPathGet() ),
       routinePath : a.routinePath,
+      options : { execPath : null, args : [ 'echo' ], passingThrough : 1 }
     }
 
-    let programPath = a.path.nativize( a.program({ routine : testAppParent5, locals }) );
+    let programPath = a.path.nativize( a.program({ routine : testAppParent, locals }) );
 
     let options =
     {
@@ -7458,27 +7399,11 @@ function startImportantExecPathPassingThrough( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
       test.is( _.strHas( op.output, 'echo "argFromParent"\n' ) );
+
+      a.fileProvider.fileDelete( programPath );
       return null;
 
     })
-
-    /* - */
-
-    function testAppParent5()
-    {
-      let _ = require( toolsPath );
-      _.include( 'wFiles' );
-      _.include( 'wProcess' );
-
-      let shell = _.process.starter
-      ({
-        currentPath : routinePath,
-        mode : 'shell',
-        stdio : 'pipe',
-        outputPiping : 0,
-      })
-      return shell({ execPath : null, args : [ 'echo' ], passingThrough : 1 });
-    }
   })
 
   /* ORIGINAL */
@@ -7511,9 +7436,10 @@ function startImportantExecPathPassingThrough( test )
     {
       toolsPath : a.path.nativize( _.module.toolsPathGet() ),
       routinePath : a.routinePath,
+      options : { execPath : 'echo *', args : [ '*' ], passingThrough : 1 }
     }
 
-    let programPath = a.path.nativize( a.program({ routine : testAppParent6, locals }) );
+    let programPath = a.path.nativize( a.program({ routine : testAppParent, locals }) );
 
     let options =
     {
@@ -7528,27 +7454,11 @@ function startImportantExecPathPassingThrough( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
       test.is( _.strHas( op.output, 'echo * "*" "argFromParent"\n' ) );
+
+      a.fileProvider.fileDelete( programPath );
       return null;
 
     })
-
-    /* - */
-
-    function testAppParent6()
-    {
-      let _ = require( toolsPath );
-      _.include( 'wFiles' );
-      _.include( 'wProcess' );
-
-      let shell = _.process.starter
-      ({
-        currentPath : routinePath,
-        mode : 'shell',
-        stdio : 'pipe',
-        outputPiping : 0,
-      })
-      return shell({ execPath : 'echo *', args : [ '*' ], passingThrough : 1 });
-    }
   })
 
   a.ready.then( () =>
@@ -7573,9 +7483,10 @@ function startImportantExecPathPassingThrough( test )
     {
       toolsPath : a.path.nativize( _.module.toolsPathGet() ),
       routinePath : a.routinePath,
+      options : { execPath : 'echo', args : null, passingThrough : 1 }
     }
 
-    let programPath = a.path.nativize( a.program({ routine : testAppParent7, locals }) );
+    let programPath = a.path.nativize( a.program({ routine : testAppParent, locals }) );
 
     let options =
     {
@@ -7590,27 +7501,11 @@ function startImportantExecPathPassingThrough( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
       test.is( _.strHas( op.output, 'echo "argFromParent1" "argFromParent2"\n' ) );
+
+      a.fileProvider.fileDelete( programPath );
       return null;
 
     })
-
-    /* - */
-
-    function testAppParent7()
-    {
-      let _ = require( toolsPath );
-      _.include( 'wFiles' );
-      _.include( 'wProcess' );
-
-      let shell = _.process.starter
-      ({
-        currentPath : routinePath,
-        mode : 'shell',
-        stdio : 'pipe',
-        outputPiping : 0,
-      })
-      return shell({ execPath : 'echo', args : null, passingThrough : 1 });
-    }
   })
 
   /* */
@@ -7623,9 +7518,10 @@ function startImportantExecPathPassingThrough( test )
     {
       toolsPath : a.path.nativize( _.module.toolsPathGet() ),
       routinePath : a.routinePath,
+      options : { execPath : null, args : [ 'echo' ], passingThrough : 1 }
     }
 
-    let programPath = a.path.nativize( a.program({ routine : testAppParent8, locals }) );
+    let programPath = a.path.nativize( a.program({ routine : testAppParent, locals }) );
 
     let options =
     {
@@ -7640,27 +7536,11 @@ function startImportantExecPathPassingThrough( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
       test.is( _.strHas( op.output, 'echo "argFromParent1" "argFromParent2"\n' ) );
+
+      a.fileProvider.fileDelete( programPath );
       return null;
 
     })
-
-    /* - */
-
-    function testAppParent8()
-    {
-      let _ = require( toolsPath );
-      _.include( 'wFiles' );
-      _.include( 'wProcess' );
-
-      let shell = _.process.starter
-      ({
-        currentPath : routinePath,
-        mode : 'shell',
-        stdio : 'pipe',
-        outputPiping : 0,
-      })
-      return shell({ execPath : null, args : [ 'echo' ], passingThrough : 1 });
-    }
   })
 
   /* */
@@ -7673,9 +7553,10 @@ function startImportantExecPathPassingThrough( test )
     {
       toolsPath : a.path.nativize( _.module.toolsPathGet() ),
       routinePath : a.routinePath,
+      options : { execPath : 'echo *', args : [ '*' ], passingThrough : 1 }
     }
 
-    let programPath = a.path.nativize( a.program({ routine : testAppParent9, locals }) );
+    let programPath = a.path.nativize( a.program({ routine : testAppParent, locals }) );
 
     let options =
     {
@@ -7690,27 +7571,11 @@ function startImportantExecPathPassingThrough( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
       test.is( _.strHas( op.output, 'echo * "*" "argFromParent1" "argFromParent2"\n' ) );
+
+      a.fileProvider.fileDelete( programPath );
       return null;
 
     })
-
-    /* - */
-
-    function testAppParent9()
-    {
-      let _ = require( toolsPath );
-      _.include( 'wFiles' );
-      _.include( 'wProcess' );
-
-      let shell = _.process.starter
-      ({
-        currentPath : routinePath,
-        mode : 'shell',
-        stdio : 'pipe',
-        outputPiping : 0,
-      })
-      return shell({ execPath : 'echo *', args : [ '*' ], passingThrough : 1 });
-    }
   })
 
   a.ready.then( () =>
@@ -7719,8 +7584,26 @@ function startImportantExecPathPassingThrough( test )
     return null;
   } )
 
-
   return a.ready;
+
+  /* - */
+
+  function testAppParent()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wFiles' );
+    _.include( 'wProcess' );
+
+    let shell = _.process.starter
+    ({
+      currentPath : routinePath,
+      mode : 'shell',
+      stdio : 'pipe',
+      outputPiping : 0,
+    })
+    return shell( options )
+  }
+
 
 }
 
