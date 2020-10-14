@@ -3,6 +3,8 @@
 
 'use strict';
 
+let Stream;
+
 if( typeof module !== 'undefined' )
 {
   let _ = require( '../../../wtools/Tools.s' );
@@ -12,12 +14,30 @@ if( typeof module !== 'undefined' )
   _.include( 'wProcessWatcher' );
 
   require( '../l4_process/Basic.s' );
+  Stream = require( 'stream' );
 }
 
 let _global = _global_;
 let _ = _global_.wTools;
 let Self = {};
 
+/*
+
+RET=0
+until [ ${RET} -ne 0 ]; do
+    node wtools/abase/l4.test/ProcessBasic.test.s n:1 v:5 s:0 r:terminateDetachedComplex
+    RET=$?
+    sleep 1
+done
+
+RET=0
+until [ ${RET} -ne 0 ]; do
+    node wtools/abase/l4.test/ProcessBasic.test.s n:1 v:5 s:0 r:terminateWithChildren
+    RET=$?
+    sleep 1
+done
+
+*/
 
 /*
 ### Modes in which child process terminates after signal:
@@ -7784,116 +7804,214 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
 
 //
 
-function startNormalizedExecPath( test )
+
+function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subroutine for modes */
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.path.nativize( a.path.normalize( a.program( testApp ) ) );
+  let testAppPath = a.program({ routine : testApp, dirPath : 'path with space' });
+  let execPathWithSpace = 'node ' + _.path.nativize( testAppPath );
 
-  /* */
+  /* - */
 
-  let shell = _.process.starter
+  a.ready.then( () =>
+  {
+    test.case = 'execPath contains unquoted path with space, spawn'
+    return null;
+  })
+
+  _.process.startPassingThrough
   ({
+    execPath : execPathWithSpace,
+    ready : a.ready,
     outputCollecting : 1,
-    ready : a.ready
-  })
+    outputPiping : 1,
+    mode : 'spawn',
+    throwingExitCode : 0,
+    applyingExitCode : 0,
+    stdio : 'pipe'
+  });
 
-  /* */
-
-  shell
-  ({
-    execPath : testAppPath,
-    args : [ 'arg1', 'arg2' ],
-    mode : 'fork'
-  })
-  .then( ( op ) =>
+  a.ready.then( ( op ) =>
   {
-    test.identical( op.exitCode, 0 );
+    test.notIdentical( op.exitCode, 0 );
     test.identical( op.ended, true );
-    test.identical( _.strCount( op.output, `[ 'arg1', 'arg2' ]` ), 1 );
+    test.is( a.fileProvider.fileExists( testAppPath ) );
+    test.is( _.strHas( op.output, `Error: Cannot find module` ) );
     return null;
   })
 
-  /* */
+  /* - */
 
-  shell
-  ({
-    execPath : 'node ' + testAppPath,
-    args : [ 'arg1', 'arg2' ],
-    mode : 'spawn'
-  })
-  .then( ( op ) =>
+  a.ready.then( () =>
   {
-    test.identical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    test.identical( _.strCount( op.output, `[ 'arg1', 'arg2' ]` ), 1 );
+    test.case = 'execPath contains unquoted path with space, shell'
     return null;
   })
 
-  /* */
-
-  shell
+  _.process.startPassingThrough
   ({
-    execPath : 'node ' + testAppPath,
-    args : [ 'arg1', 'arg2' ],
-    mode : 'shell'
-  })
-  .then( ( op ) =>
+    execPath : execPathWithSpace,
+    ready : a.ready,
+    outputCollecting : 1,
+    outputPiping : 1,
+    mode : 'shell',
+    throwingExitCode : 0,
+    applyingExitCode : 0,
+    stdio : 'pipe'
+  });
+
+  a.ready.then( ( op ) =>
   {
-    test.identical( op.exitCode, 0 );
+    test.notIdentical( op.exitCode, 0 );
     test.identical( op.ended, true );
-    test.identical( _.strCount( op.output, `[ 'arg1', 'arg2' ]` ), 1 );
+    test.is( a.fileProvider.fileExists( testAppPath ) );
+    test.is( _.strHas( op.output, `Error: Cannot find module` ) );
     return null;
   })
 
-  /* app path in arguments */
+  /* - */
 
-  shell
-  ({
-    args : [ testAppPath, 'arg1', 'arg2' ],
-    mode : 'fork'
-  })
-  .then( ( op ) =>
+  a.ready.then( () =>
   {
-    test.identical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    test.identical( _.strCount( op.output, `[ 'arg1', 'arg2' ]` ), 1 );
+    test.case = 'execPath contains unquoted path with space, fork'
     return null;
   })
 
-  /* */
-
-  shell
+  _.process.startPassingThrough
   ({
-    execPath : 'node',
-    args : [ testAppPath, 'arg1', 'arg2' ],
-    mode : 'spawn'
-  })
-  .then( ( op ) =>
+    execPath : a.path.nativize( testAppPath ),
+    ready : a.ready,
+    outputCollecting : 1,
+    outputPiping : 1,
+    mode : 'spawn',
+    throwingExitCode : 0,
+    applyingExitCode : 0,
+    stdio : 'pipe'
+  });
+
+  a.ready.then( ( op ) =>
   {
-    test.identical( op.exitCode, 0 );
+    test.notIdentical( op.exitCode, 0 );
     test.identical( op.ended, true );
-    test.identical( _.strCount( op.output, `[ 'arg1', 'arg2' ]` ), 1 );
+    test.is( a.fileProvider.fileExists( testAppPath ) );
+    test.is( _.strHas( op.output, `Error: Cannot find module` ) );
     return null;
   })
 
-  /* */
+  /* - */
 
-  shell
-  ({
-    execPath : 'node',
-    args : [ testAppPath, 'arg1', 'arg2' ],
-    mode : 'shell'
-  })
-  .then( ( op ) =>
+  a.ready.then( () =>
   {
-    test.identical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    test.identical( _.strCount( op.output, `[ 'arg1', 'arg2' ]` ), 1 );
+    test.case = 'args is a string with unquoted path with space, spawn'
     return null;
   })
 
-  /* */
+  _.process.startPassingThrough
+  ({
+    args : execPathWithSpace,
+    ready : a.ready,
+    outputCollecting : 1,
+    outputPiping : 1,
+    mode : 'spawn',
+    throwingExitCode : 0,
+    applyingExitCode : 0,
+    stdio : 'pipe'
+  });
+
+  a.ready.finally( ( err, op ) =>
+  {
+    _.errAttend( err );
+    test.is( !!err );
+    test.is( a.fileProvider.fileExists( testAppPath ) );
+    test.is( _.strHas( err.message, `ENOENT` ) );
+    return null;
+  })
+
+  /* - */
+
+  a.ready.then( () =>
+  {
+    test.case = 'args is a string with unquoted path with space, shell'
+    return null;
+  })
+
+  _.process.startPassingThrough
+  ({
+    args : execPathWithSpace,
+    ready : a.ready,
+    outputCollecting : 1,
+    outputPiping : 1,
+    mode : 'shell',
+    throwingExitCode : 0,
+    applyingExitCode : 0,
+    stdio : 'pipe'
+  });
+
+  a.ready.then( ( op ) =>
+  {
+    test.notIdentical( op.exitCode, 0 );
+    test.identical( op.ended, true );
+    test.is( a.fileProvider.fileExists( testAppPath ) );
+    test.is( _.strHas( op.output, `Cannot find module` ) );
+    return null;
+  })
+
+  /* - */
+
+  a.ready.then( () =>
+  {
+    test.case = 'args is a string with unquoted path with space, fork'
+    return null;
+  })
+
+  _.process.startPassingThrough
+  ({
+    args : a.path.nativize( testAppPath ),
+    ready : a.ready,
+    outputCollecting : 1,
+    outputPiping : 1,
+    mode : 'fork',
+    throwingExitCode : 0,
+    applyingExitCode : 0,
+    stdio : 'pipe'
+  });
+
+  a.ready.then( ( op ) =>
+  {
+    test.identical( op.exitCode, 0 );
+    test.identical( op.ended, true );
+    return null;
+  })
+
+  /* - */
+
+  a.ready.then( () =>
+  {
+    test.case = 'args is a string with unquoted path with space and argument, fork'
+    return null;
+  })
+
+  _.process.startPassingThrough
+  ({
+    args : a.path.nativize( testAppPath ) + ' arg',
+    ready : a.ready,
+    outputCollecting : 1,
+    outputPiping : 1,
+    mode : 'fork',
+    throwingExitCode : 0,
+    applyingExitCode : 0,
+    stdio : 'pipe'
+  });
+
+  a.ready.then( ( op ) =>
+  {
+    test.notIdentical( op.exitCode, 0 );
+    test.identical( op.ended, true );
+    test.is( a.fileProvider.fileExists( testAppPath ) );
+    test.is( _.strHas( op.output, `Cannot find module` ) );
+    return null;
+  })
 
   return a.ready;
 
@@ -7901,13 +8019,14 @@ function startNormalizedExecPath( test )
 
   function testApp()
   {
-    console.log( process.argv.slice( 2 ) );
+    console.log( process.pid )
+    setTimeout( () => {}, 2000 )
   }
 }
 
 //
 
-function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subroutine for modes */
+function startNormalizedExecPath( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -8238,12 +8357,12 @@ function startExecPathWithSpace( test )
 
 //
 
+
 function startNjsPassingThroughExecPathWithSpace( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
   let testAppPath = a.program({ routine : testApp, dirPath : 'path with space' });
-
   let execPathWithSpace = testAppPath;
 
   /* - */
@@ -8309,227 +8428,6 @@ function startNjsPassingThroughExecPathWithSpace( test )
 }
 
 //
-
-function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subroutine for modes */
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-  let testAppPath = a.program({ routine : testApp, dirPath : 'path with space' });
-  let execPathWithSpace = 'node ' + _.path.nativize( testAppPath );
-
-  /* - */
-
-  a.ready.then( () =>
-  {
-    test.case = 'execPath contains unquoted path with space, spawn'
-    return null;
-  })
-
-  _.process.startPassingThrough
-  ({
-    execPath : execPathWithSpace,
-    ready : a.ready,
-    outputCollecting : 1,
-    outputPiping : 1,
-    mode : 'spawn',
-    throwingExitCode : 0,
-    applyingExitCode : 0,
-    stdio : 'pipe'
-  });
-
-  a.ready.then( ( op ) =>
-  {
-    test.notIdentical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    test.is( a.fileProvider.fileExists( testAppPath ) );
-    test.is( _.strHas( op.output, `Error: Cannot find module` ) );
-    return null;
-  })
-
-  /* - */
-
-  a.ready.then( () =>
-  {
-    test.case = 'execPath contains unquoted path with space, shell'
-    return null;
-  })
-
-  _.process.startPassingThrough
-  ({
-    execPath : execPathWithSpace,
-    ready : a.ready,
-    outputCollecting : 1,
-    outputPiping : 1,
-    mode : 'shell',
-    throwingExitCode : 0,
-    applyingExitCode : 0,
-    stdio : 'pipe'
-  });
-
-  a.ready.then( ( op ) =>
-  {
-    test.notIdentical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    test.is( a.fileProvider.fileExists( testAppPath ) );
-    test.is( _.strHas( op.output, `Error: Cannot find module` ) );
-    return null;
-  })
-
-  /* - */
-
-  a.ready.then( () =>
-  {
-    test.case = 'execPath contains unquoted path with space, fork'
-    return null;
-  })
-
-  _.process.startPassingThrough
-  ({
-    execPath : a.path.nativize( testAppPath ),
-    ready : a.ready,
-    outputCollecting : 1,
-    outputPiping : 1,
-    mode : 'spawn',
-    throwingExitCode : 0,
-    applyingExitCode : 0,
-    stdio : 'pipe'
-  });
-
-  a.ready.then( ( op ) =>
-  {
-    test.notIdentical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    test.is( a.fileProvider.fileExists( testAppPath ) );
-    test.is( _.strHas( op.output, `Error: Cannot find module` ) );
-    return null;
-  })
-
-  /* - */
-
-  a.ready.then( () =>
-  {
-    test.case = 'args is a string with unquoted path with space, spawn'
-    return null;
-  })
-
-  _.process.startPassingThrough
-  ({
-    args : execPathWithSpace,
-    ready : a.ready,
-    outputCollecting : 1,
-    outputPiping : 1,
-    mode : 'spawn',
-    throwingExitCode : 0,
-    applyingExitCode : 0,
-    stdio : 'pipe'
-  });
-
-  a.ready.finally( ( err, op ) =>
-  {
-    _.errAttend( err );
-    test.is( !!err );
-    test.is( a.fileProvider.fileExists( testAppPath ) );
-    test.is( _.strHas( err.message, `ENOENT` ) );
-    return null;
-  })
-
-  /* - */
-
-  a.ready.then( () =>
-  {
-    test.case = 'args is a string with unquoted path with space, shell'
-    return null;
-  })
-
-  _.process.startPassingThrough
-  ({
-    args : execPathWithSpace,
-    ready : a.ready,
-    outputCollecting : 1,
-    outputPiping : 1,
-    mode : 'shell',
-    throwingExitCode : 0,
-    applyingExitCode : 0,
-    stdio : 'pipe'
-  });
-
-  a.ready.then( ( op ) =>
-  {
-    test.notIdentical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    test.is( a.fileProvider.fileExists( testAppPath ) );
-    test.is( _.strHas( op.output, `Cannot find module` ) );
-    return null;
-  })
-
-  /* - */
-
-  a.ready.then( () =>
-  {
-    test.case = 'args is a string with unquoted path with space, fork'
-    return null;
-  })
-
-  _.process.startPassingThrough
-  ({
-    args : a.path.nativize( testAppPath ),
-    ready : a.ready,
-    outputCollecting : 1,
-    outputPiping : 1,
-    mode : 'fork',
-    throwingExitCode : 0,
-    applyingExitCode : 0,
-    stdio : 'pipe'
-  });
-
-  a.ready.then( ( op ) =>
-  {
-    test.identical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    return null;
-  })
-
-  /* - */
-
-  a.ready.then( () =>
-  {
-    test.case = 'args is a string with unquoted path with space and argument, fork'
-    return null;
-  })
-
-  _.process.startPassingThrough
-  ({
-    args : a.path.nativize( testAppPath ) + ' arg',
-    ready : a.ready,
-    outputCollecting : 1,
-    outputPiping : 1,
-    mode : 'fork',
-    throwingExitCode : 0,
-    applyingExitCode : 0,
-    stdio : 'pipe'
-  });
-
-  a.ready.then( ( op ) =>
-  {
-    test.notIdentical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    test.is( a.fileProvider.fileExists( testAppPath ) );
-    test.is( _.strHas( op.output, `Cannot find module` ) );
-    return null;
-  })
-
-  return a.ready;
-
-  /* - */
-
-  function testApp()
-  {
-    console.log( process.pid )
-    setTimeout( () => {}, 2000 )
-  }
-}
-
-
 
 // --
 // procedures / chronology / structural
@@ -9508,12 +9406,12 @@ function startReadyDelayMultiple( test )
   let a = context.assetFor( test, false );
   let programPath = a.path.nativize( a.program( program1 ) );
   // xxx
-  let modes = [ 'fork', 'spawn', 'shell' ];
-  // let modes = [ 'spawn' ];
+  // let modes = [ 'fork', 'spawn', 'shell' ];
+  let modes = [ 'spawn' ];
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, mode }) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, mode }) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, mode }) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, mode }) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, mode }) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, mode }) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, mode }) ) );
   return a.ready;
 
   /* - */
@@ -12819,7 +12717,7 @@ o.ended is true when conTerminate callback is executed.
 
 //
 
-/* qqq for Vova : remove negligence. name test cases carefully */
+/* qqq for Vova : remove negligence. name test cases carefully aaa:adjusted names*/
 function startDetachingTerminationBegin( test )
 {
   let context = this;
@@ -12859,7 +12757,7 @@ function startDetachingTerminationBegin( test )
 
     ready.then( () =>
     {
-      test.case = 'process termination begins after short delay, detached process should continue to work after parent death 1';
+      test.case = `child mode:${mode} stdio:ignore ipc:0, child continues to work after parent death`
 
       a.fileProvider.filesDelete( testFilePath );
       a.fileProvider.dirMakeForFile( testFilePath );
@@ -12916,7 +12814,7 @@ function startDetachingTerminationBegin( test )
 
     ready.then( () =>
     {
-      test.case = 'process termination begins after short delay, detached process should continue to work after parent death 2';
+      test.case = `child mode:${mode} stdio:ignore ipc:1, child continues to work after parent death`
 
       a.fileProvider.filesDelete( testFilePath );
       a.fileProvider.dirMakeForFile( testFilePath );
@@ -12972,8 +12870,7 @@ function startDetachingTerminationBegin( test )
 
     ready.then( () =>
     {
-      test.case = 'process termination begins after short delay, detached process should continue to work after parent death 3';
-
+      test.case = `child mode:${mode} stdio:pipe ipc:0, child continues to work after parent death`
       a.fileProvider.filesDelete( testFilePath );
       a.fileProvider.dirMakeForFile( testFilePath );
 
@@ -13028,7 +12925,7 @@ function startDetachingTerminationBegin( test )
 
     ready.then( () =>
     {
-      test.case = 'process termination begins after short delay, detached process should continue to work after parent death 4';
+      test.case = `child mode:${mode} stdio:pipe ipc:1, child continues to work after parent death`
 
       a.fileProvider.filesDelete( testFilePath );
       a.fileProvider.dirMakeForFile( testFilePath );
@@ -13133,7 +13030,11 @@ function startDetachingTerminationBegin( test )
 }
 
 startDetachingTerminationBegin.timeOut = 180000;
-
+startDetachingTerminationBegin.description =
+`
+Checks that detached child process continues to work after parent death.
+Parent spawns child in detached mode with different stdio and ipc.
+`
 //
 
 /* qqq for Yevhen : implement for other modes */
@@ -15691,7 +15592,9 @@ function startNjsWithReadyDelayStructuralMultiple( test )
         'passingThrough' : 0,
         'maximumMemory' : 0,
         'applyingExitCode' : 1,
-        'stdio' : 'pipe',
+        'stdio' : mode === 'fork' ? [ 'pipe', 'pipe', 'pipe', 'ipc' ] : [ 'pipe', 'pipe', 'pipe' ],
+        'stdout' : null,
+        'stderr' : null,
         'args' : null,
         'interpreterArgs' : null,
         'when' : 'instant',
@@ -18447,6 +18350,7 @@ function startOptionPassingThrough( test )
 
     /* */
 
+<<<<<<< HEAD
     // ready.then( () =>
     // {
     //   /* mode : shell, stdio : pipe, passingThrough : true */
@@ -18509,6 +18413,60 @@ function startOptionPassingThrough( test )
     //     })
     //   }
     // })
+=======
+//
+
+function streamJoin()
+{
+  let context = this;
+
+  let pass = new Stream.PassThrough();
+  let src1 = new Stream.PassThrough();
+  let src2 = new Stream.PassThrough();
+
+  src1.pipe( pass );
+  src2.pipe( pass );
+  // pass.unpipe( writable );
+  // readableFlowing is now false.
+
+  pass.on( 'data', ( chunk ) =>
+  {
+    console.log( chunk.toString() );
+  });
+
+  pass.on( 'end', () =>
+  {
+    console.log( 'end' );
+  });
+
+  pass.on( 'finish', () =>
+  {
+    console.log( 'finish' );
+  });
+
+  src1.write( 'src1a' );
+  src2.write( 'src2a' );
+  src1.write( 'src1b' );
+  src2.write( 'src2b' );
+
+  console.log( '1' );
+  src1.end();
+  console.log( '2' );
+  src2.end();
+  console.log( '3' );
+  debugger;
+
+  // src1.resume();
+
+  return _.time.out( 1000 );
+}
+
+streamJoin.experimental = 1;
+
+// --
+// other options
+// --
+>>>>>>> 7aa3e11efcbc42609e9e6b7ef1aabea4efe3a3f2
 
     // /* */
 
@@ -20926,6 +20884,186 @@ function terminate( test )
     return ready;
   })
 
+  /* */
+
+  .then( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'spawn',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    o.process.on( 'message', () =>
+    {
+      _.process.terminate({ pid : o.process.pid, timeOut : 0 });
+    })
+
+    ready.then( ( op ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, 1 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, null );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGKILL' );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+
+      return null;
+    })
+
+    return ready;
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'spawn',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    o.process.on( 'message', () =>
+    {
+      _.process.terminate({ pnd : o.process, timeOut : 10 });
+    })
+
+    ready.then( ( op ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.identical( op.ended, true );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.identical( op.ended, true );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+
+      return null;
+    })
+
+    return ready;
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'spawn',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    o.process.on( 'message', () =>
+    {
+      _.process.terminate({ pnd : o.process, timeOut : 0 });
+    })
+
+    ready.then( ( op ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGKILL' );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGKILL' );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+
+      return null;
+    })
+
+    return ready;
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'spawn',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    o.process.on( 'message', () =>
+    {
+      _.process.terminate({ pnd : o.process, timeOut : 10 });
+    })
+
+    ready.then( ( op ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.identical( op.ended, true );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.identical( op.ended, true );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+
+      return null;
+    })
+
+    return ready;
+  })
+
   /* fork */
 
   .then( () =>
@@ -21013,6 +21151,182 @@ function terminate( test )
     return ready;
   })
 
+  /* */
+
+  .then( () =>
+  {
+    var o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    o.process.on( 'message', () =>
+    {
+      _.process.terminate({ pid : o.process.pid, timeOut : 0 });
+    })
+
+    ready.then( ( op ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, 1 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, null );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGKILL' );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      return null;
+    })
+
+    return ready;
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    var o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    o.process.on( 'message', () =>
+    {
+      _.process.terminate({ pnd : o.process, timeOut : 0 });
+    })
+
+    ready.then( ( op ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGKILL' );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGKILL' );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      return null;
+    })
+
+    return ready;
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    var o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    o.process.on( 'message', () =>
+    {
+      _.process.terminate({ pid : o.process.pid, timeOut : 10 });
+    })
+
+    ready.then( ( op ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, 1 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, null );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      return null;
+    })
+
+    return ready;
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    var o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    o.process.on( 'message', () =>
+    {
+      _.process.terminate({ pnd : o.process, timeOut : 10 });
+    })
+
+    ready.then( ( op ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      return null;
+    })
+
+    return ready;
+  })
+
   /* shell */
 
   /*
@@ -21036,10 +21350,102 @@ function terminate( test )
     {
       data = data.toString();
       if( _.strHas( data, 'ready' ))
+      _.process.terminate( o.process );
+    })
+
+    ready.then( ( op ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, null );// null because process was killed using pnd
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+
+      return null;
+    })
+
+    return ready;
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'shell',
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    o.process.stdout.on( 'data', ( data ) =>
+    {
+      data = data.toString();
+      if( _.strHas( data, 'ready' ))
+      _.process.terminate( o.process.pid );
+    })
+
+    ready.then( ( op ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, 1 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, null );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+
+      return null;
+    })
+
+    return ready;
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'shell',
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    o.process.stdout.on( 'data', ( data ) =>
+    {
+      data = data.toString();
+      if( _.strHas( data, 'ready' ))
       _.process.terminate({ pnd : o.process, timeOut : 0 }); /* qqq for Vova : should send kill signal! aaa: added test routine terminateZeroTimeOut*/
     })
 
-    /* qqq for Vova : add test case with low timeOut */
+    /* qqq for Vova : add test case with low timeOut aaa:added*/
 
     ready.then( ( op ) =>
     {
@@ -21111,10 +21517,93 @@ function terminate( test )
     return ready;
   })
 
-  /*
-    zzz Vova: shell,exec modes have different behaviour on Windows,OSX and Linux
-    look for solution that allow to have same behaviour on each mode
-  */
+  .then( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'shell',
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    o.process.stdout.on( 'data', ( data ) =>
+    {
+      data = data.toString();
+      if( _.strHas( data, 'ready' ))
+      _.process.terminate({ pnd : o.process, timeOut : 10 });
+    })
+
+    ready.then( ( op ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      return null;
+    })
+
+    return ready;
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'shell',
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    o.process.stdout.on( 'data', ( data ) =>
+    {
+      data = data.toString();
+      if( _.strHas( data, 'ready' ))
+      _.process.terminate({ pid : o.process.pid, timeOut : 10 });
+    })
+
+    ready.then( ( op ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, 1 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, null );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      return null;
+    })
+
+    return ready;
+  })
 
   /* */
 
@@ -26586,10 +27075,11 @@ var Proto =
     startOutputOptionsCompatibilityLateCheck,
     startOptionVerbosity,
 
-    // etc
+    // etc /* xxx : move */
 
     appTempApplication,
     startDiffPid,
+    streamJoin,
 
     // other options
 
