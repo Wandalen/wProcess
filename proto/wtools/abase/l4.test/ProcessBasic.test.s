@@ -18194,7 +18194,6 @@ function exitCode( test )
 
 //
 
-
 function startOptionVerbosityLogging( test )
 {
   let context = this;
@@ -18208,8 +18207,13 @@ function startOptionVerbosityLogging( test )
 
   function run( mode )
   {
-    test.case = `mode : {mode}`
     let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.open( `mode : ${mode}` );
+      return null;
+    } )
 
     ready.then( () =>
     {
@@ -18253,8 +18257,8 @@ function startOptionVerbosityLogging( test )
     ready.then( () =>
     {
       test.case = 'logging with error';
-      let testAppPath2 = a.program( testAppError );
-      let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPath2 };
+      let testAppPathError = a.program( testAppError );
+      let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPathError };
       let testAppPath = a.program( { routine : testApp, locals } );
 
       let options =
@@ -18270,18 +18274,29 @@ function startOptionVerbosityLogging( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( _.strCount( op.output, '< Process returned error code 255' ), 1 );
-        test.identical( _.strCount( op.output, `Launched as "node ${ testAppPath2 }"` ), 1 );
+        test.identical( _.strCount( op.output, `Launched as "node ${ testAppPathError }"` ), 1 );
         test.identical( _.strCount( op.output, `Launched at ${ _.strQuote( op.currentPath ) }` ), 1 );
         test.identical( _.strCount( op.output, '-> Stderr' ), 1 );
+        test.is( _.strHas( op.output, '= Message of error' ) );
+        test.is( _.strHas( op.output, '= Beautified calls stack' ) );
+        test.is( _.strHas( op.output, '= Throws stack' ) );
+        test.is( _.strHas( op.output, '= Process' ) );
+        test.is( _.strHas( op.output, 'Source code from' ) );
         test.identical( _.strCount( op.output, '-< Stderr' ), 1 );
 
         a.fileProvider.fileDelete( testAppPath );
-        a.fileProvider.fileDelete( testAppPath2 );
+        a.fileProvider.fileDelete( testAppPathError );
 
         return null;
       } )
 
     })
+
+    ready.then( () =>
+    {
+      test.close( `mode : ${mode}` );
+      return null;
+    } )
 
     return ready;
   }
