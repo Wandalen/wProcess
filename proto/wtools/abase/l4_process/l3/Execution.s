@@ -597,7 +597,6 @@ function startSingle_body( o )
     // let args = o.args.slice();
 
     execPath = _.fileProvider.path.nativize( execPath );
-    execPath = _.strQuote( strQuote );
 
     let shellPath = process.platform === 'win32' ? 'cmd' : 'sh';
     let arg1 = process.platform === 'win32' ? '/c' : '-c';
