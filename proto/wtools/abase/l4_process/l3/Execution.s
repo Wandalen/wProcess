@@ -740,9 +740,9 @@ function startMinimal_body( o )
 
     if( o.verbosity >= 5 )
     {
-      log( ` < Process returned error code ${exitCode}` ); /* qqq for Yevhen : is covered? */
+      log( ` < Process returned error code ${exitCode}` ); /* qqq for Yevhen : is covered? | aaa : Yes. */
       if( exitCode )
-      log( infoGet() ); /* qqq for Yevhen : is covered? */
+      log( infoGet() ); /* qqq for Yevhen : is covered? | aaa : Yes. */
     }
 
     if( ( exitSignal || exitCode !== 0 ) && o.throwingExitCode )
