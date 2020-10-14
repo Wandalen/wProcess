@@ -18048,124 +18048,140 @@ function startOptionVerbosityLogging( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-
-  /* */
-
-  a.ready.then( () =>
-  {
-    test.case = 'logging without error';
-    let testAppPath2 = a.program( testApp2 );
-    let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPath2 };
-    let testAppPath = a.program( { routine : testApp, locals } );
-
-    let options =
-    {
-      execPath : 'node ' + testAppPath,
-      throwingExitCode : 0,
-      outputCollecting : 1,
-    }
-
-    return _.process.start( options )
-    .then( ( op ) =>
-    {
-      test.identical( op.exitCode, 0 );
-      test.identical( op.exitSignal, null );
-      test.identical( op.exitReason, 'normal' );
-      test.identical( op.ended, true );
-      test.identical( op.state, 'terminated' );
-      test.identical( _.strCount( op.output, '< Process returned error code 0' ), 1 );
-      test.identical( _.strCount( op.output, `Launched as "node ${ testAppPath2 }"` ), 0 );
-      test.identical( _.strCount( op.output, `Launched at ${ _.strQuote( op.currentPath ) }` ), 0 );
-      test.identical( _.strCount( op.output, '-> Stderr' ), 0 );
-      test.identical( _.strCount( op.output, '-< Stderr' ), 0 );
-
-      return null;
-    } )
-
-    /* - */
-
-    function testApp()
-    {
-      let _ = require( toolsPath );
-      _.include( 'wProcess' );
-      _.include( 'wFiles' );
-
-      let options =
-      {
-        execPath : 'node ' + programPath,
-        throwingExitCode : 0,
-        verbosity : 5
-      }
-
-      return _.process.start( options )
-    }
-
-    function testApp2()
-    {
-      console.log();
-    }
-
-  })
-
-  /* */
-
-  a.ready.then( () =>
-  {
-    test.case = 'logging with error';
-    let testAppPath2 = a.program( testApp4 );
-    let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPath2 };
-    let testAppPath = a.program( { routine : testApp3, locals } );
-
-    let options =
-    {
-      execPath : 'node ' + testAppPath,
-      throwingExitCode : 0,
-      outputCollecting : 1,
-    }
-
-    return _.process.start( options )
-    .then( ( op ) =>
-    {
-      test.identical( op.exitCode, 0 );
-      test.identical( _.strCount( op.output, '< Process returned error code 255' ), 1 );
-      test.identical( _.strCount( op.output, `Launched as "node ${ testAppPath2 }"` ), 1 );
-      test.identical( _.strCount( op.output, `Launched at ${ _.strQuote( op.currentPath ) }` ), 1 );
-      test.identical( _.strCount( op.output, '-> Stderr' ), 1 );
-      test.identical( _.strCount( op.output, '-< Stderr' ), 1 );
-
-      return null;
-    } )
-
-    /* - */
-
-    function testApp3()
-    {
-      let _ = require( toolsPath );
-      _.include( 'wProcess' );
-      _.include( 'wFiles' );
-
-      let options =
-      {
-        execPath : 'node ' + programPath,
-        throwingExitCode : 0,
-        verbosity : 5
-      }
-
-      return _.process.start( options )
-    }
-
-    function testApp4()
-    {
-      let _ = require( toolsPath );
-      _.include( 'wProcess' );
-      _.include( 'wFiles' );
-
-      return _.process.start();
-    }
-
-  })
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
   return a.ready;
+
+  /* */
+
+  function run( mode )
+  {
+    test.case = `mode : {mode}`
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = 'logging without error';
+      let testAppPath2 = a.program( testApp2 );
+      let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPath2 };
+      let testAppPath = a.program( { routine : testApp, locals } );
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+        throwingExitCode : 0,
+        outputCollecting : 1,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.exitSignal, null );
+        test.identical( op.exitReason, 'normal' );
+        test.identical( op.ended, true );
+        test.identical( op.state, 'terminated' );
+        test.identical( _.strCount( op.output, '< Process returned error code 0' ), 1 );
+        test.identical( _.strCount( op.output, `Launched as "node ${ testAppPath2 }"` ), 0 );
+        test.identical( _.strCount( op.output, `Launched at ${ _.strQuote( op.currentPath ) }` ), 0 );
+        test.identical( _.strCount( op.output, '-> Stderr' ), 0 );
+        test.identical( _.strCount( op.output, '-< Stderr' ), 0 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      } )
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = 'logging with error';
+      let testAppPath2 = a.program( testApp4 );
+      let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPath2 };
+      let testAppPath = a.program( { routine : testApp3, locals } );
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+        throwingExitCode : 0,
+        outputCollecting : 1,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( _.strCount( op.output, '< Process returned error code 255' ), 1 );
+        test.identical( _.strCount( op.output, `Launched as "node ${ testAppPath2 }"` ), 1 );
+        test.identical( _.strCount( op.output, `Launched at ${ _.strQuote( op.currentPath ) }` ), 1 );
+        test.identical( _.strCount( op.output, '-> Stderr' ), 1 );
+        test.identical( _.strCount( op.output, '-< Stderr' ), 1 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      } )
+
+    })
+
+    return ready;
+  }
+
+  /* - */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    let options =
+    {
+      execPath : 'node ' + programPath,
+      throwingExitCode : 0,
+      verbosity : 5
+    }
+
+    return _.process.start( options )
+  }
+
+  function testApp2()
+  {
+    console.log();
+  }
+
+  function testApp3()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    let options =
+    {
+      execPath : 'node ' + programPath,
+      throwingExitCode : 0,
+      verbosity : 5
+    }
+
+    return _.process.start( options )
+  }
+
+  function testApp4()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    return _.process.start();
+  }
 
 }
 
