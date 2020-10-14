@@ -7717,7 +7717,6 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
   a.ready.then( () =>
   {
     test.case = 'execute simple js program with normalized path'
-    test.is( a.fileProvider.fileExists( execPath ) );
     return null;
   })
 
@@ -7746,7 +7745,6 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
   a.ready.then( () =>
   {
     test.case = 'execute simple js program with nativized path'
-    test.is( a.fileProvider.fileExists( execPath ) );
     return null;
   })
 
