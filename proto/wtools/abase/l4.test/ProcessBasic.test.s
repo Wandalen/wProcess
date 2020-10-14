@@ -18102,9 +18102,9 @@ function startOptionVerbosityLogging( test )
     ready.then( () =>
     {
       test.case = 'logging with error';
-      let testAppPath2 = a.program( testApp4 );
+      let testAppPath2 = a.program( testAppError );
       let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPath2 };
-      let testAppPath = a.program( { routine : testApp3, locals } );
+      let testAppPath = a.program( { routine : testApp, locals } );
 
       let options =
       {
@@ -18158,23 +18158,7 @@ function startOptionVerbosityLogging( test )
     console.log();
   }
 
-  function testApp3()
-  {
-    let _ = require( toolsPath );
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-
-    let options =
-    {
-      execPath : 'node ' + programPath,
-      throwingExitCode : 0,
-      verbosity : 5
-    }
-
-    return _.process.start( options )
-  }
-
-  function testApp4()
+  function testAppError()
   {
     let _ = require( toolsPath );
     _.include( 'wProcess' );
