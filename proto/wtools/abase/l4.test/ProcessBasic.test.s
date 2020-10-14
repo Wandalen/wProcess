@@ -18165,18 +18165,18 @@ function startOptionPassingThrough( test )
 
   function run( mode )
   {
-    test.case = `mode : ${ mode }`
     let ready = new _.Consequence().take( null );
-
-    // a.ready.then( () =>
-    // {
-    //   test.open( '0 args to parent process' );
-    //   return null;
-    // } );
 
     ready.then( () =>
     {
-      test.case = 'child args = `testAppPath2`';
+      test.open( `mode : ${ mode }` );
+      test.open( '0 args to parent process' );
+      return null;
+    } );
+
+    ready.then( () =>
+    {
+      test.case = 'args to child = `testAppPath2`';
       let o =
       {
         execPath : mode === 'fork' ? null : 'node ',
@@ -18593,19 +18593,19 @@ function startOptionPassingThrough( test )
     // })
 
 
-    // a.ready.then( () =>
-    // {
-    //   test.close( '0 args to parent process' );
-    //   return null;
-    // } )
+    ready.then( () =>
+    {
+      test.close( '0 args to parent process' );
+      return null;
+    } )
 
     // /* - */
 
-    // a.ready.then( () =>
-    // {
-    //   test.open( '1 arg to parent process' );
-    //   return null;
-    // } );
+    ready.then( () =>
+    {
+      test.open( '1 arg to parent process' );
+      return null;
+    } );
 
     ready.then( () =>
     {
@@ -18694,7 +18694,7 @@ function startOptionPassingThrough( test )
         args : [ 'a', 'b', 'c' ],
         outputCollecting : 0,
         outputPiping : 0,
-        mode : 'fork',
+        mode,
         throwingExitCode : 0,
         applyingExitCode : 0,
         stdio : 'inherit'
@@ -19118,11 +19118,11 @@ function startOptionPassingThrough( test )
     //   }
     // })
 
-    // a.ready.then( () =>
-    // {
-    //   test.close( '1 arg to parent process' );
-    //   return null;
-    // } )
+    ready.then( () =>
+    {
+      test.close( '1 arg to parent process' );
+      return null;
+    } )
 
     /* - */
 
@@ -19335,11 +19335,11 @@ function startOptionPassingThrough( test )
 
     /* - */
 
-    // a.ready.then( () =>
-    // {
-    //   test.open( '3 args to parent process' );
-    //   return null;
-    // } );
+    ready.then( () =>
+    {
+      test.open( '3 args to parent process' );
+      return null;
+    } );
 
     ready.then( () =>
     {
@@ -19531,11 +19531,12 @@ function startOptionPassingThrough( test )
       return o2.conTerminate;
     })
 
-    // a.ready.then( () =>
-    // {
-    //   test.close( '3 args to parent process' );
-    //   return null;
-    // } )
+    ready.then( () =>
+    {
+      test.close( '3 args to parent process' );
+      test.close( `mode : ${ mode }` );
+      return null;
+    } )
 
     return ready;
 
