@@ -12123,7 +12123,7 @@ o.ended is true when conTerminate callback is executed.
 
 //
 
-/* qqq for Vova : remove negligence. name test cases carefully */
+/* qqq for Vova : remove negligence. name test cases carefully aaa:adjusted names*/
 function startDetachingTerminationBegin( test )
 {
   let context = this;
@@ -12163,7 +12163,7 @@ function startDetachingTerminationBegin( test )
 
     ready.then( () =>
     {
-      test.case = 'process termination begins after short delay, detached process should continue to work after parent death 1';
+      test.case = `child mode:${mode} stdio:ignore ipc:0, child continues to work after parent death`
 
       a.fileProvider.filesDelete( testFilePath );
       a.fileProvider.dirMakeForFile( testFilePath );
@@ -12220,7 +12220,7 @@ function startDetachingTerminationBegin( test )
 
     ready.then( () =>
     {
-      test.case = 'process termination begins after short delay, detached process should continue to work after parent death 2';
+      test.case = `child mode:${mode} stdio:ignore ipc:1, child continues to work after parent death`
 
       a.fileProvider.filesDelete( testFilePath );
       a.fileProvider.dirMakeForFile( testFilePath );
@@ -12276,8 +12276,7 @@ function startDetachingTerminationBegin( test )
 
     ready.then( () =>
     {
-      test.case = 'process termination begins after short delay, detached process should continue to work after parent death 3';
-
+      test.case = `child mode:${mode} stdio:pipe ipc:0, child continues to work after parent death`
       a.fileProvider.filesDelete( testFilePath );
       a.fileProvider.dirMakeForFile( testFilePath );
 
@@ -12332,7 +12331,7 @@ function startDetachingTerminationBegin( test )
 
     ready.then( () =>
     {
-      test.case = 'process termination begins after short delay, detached process should continue to work after parent death 4';
+      test.case = `child mode:${mode} stdio:pipe ipc:1, child continues to work after parent death`
 
       a.fileProvider.filesDelete( testFilePath );
       a.fileProvider.dirMakeForFile( testFilePath );
@@ -12437,7 +12436,11 @@ function startDetachingTerminationBegin( test )
 }
 
 startDetachingTerminationBegin.timeOut = 180000;
-
+startDetachingTerminationBegin.description =
+`
+Checks that detached child process continues to work after parent death.
+Parent spawns child in detached mode with different stdio and ipc.
+`
 //
 
 /* qqq for Yevhen : implement for other modes */
