@@ -1929,6 +1929,7 @@ function startNjs_body( o )
   if( !System )
   System = require( 'os' );
 
+  /* xxx qqq : remove? */
   _.include( 'wPathBasic' );
   _.include( 'wFiles' );
 
