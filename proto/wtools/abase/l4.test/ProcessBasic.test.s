@@ -17750,7 +17750,7 @@ function killSync( test )
     {
       let result = _.process.kill({ pnd : o.process, sync : 1 });
       test.identical( result.resourcesCount(), 1 );
-      test.is( !_.process.isAlive( o.process.pid ) ); debugger;
+      test.is( !_.process.isAlive( o.process.pid ) );
 
       result.then( ( arg ) =>
       {
@@ -17759,7 +17759,7 @@ function killSync( test )
       })
 
       return result;
-    })
+    });
   })
 
   /* */
@@ -18004,10 +18004,7 @@ function killSync( test )
 
   function testApp()
   {
-    setTimeout( () =>
-    {
-      console.log( 'Application timeout!' )
-    }, context.t2 )
+    setTimeout( () => { console.log( 'Application timeout!' ) }, context.t1*10 );
   }
 }
 
@@ -23976,7 +23973,7 @@ var Proto =
     statusOf,
 
     kill,
-    killSync, /* qqq for Vova : does not work! */
+    killSync,
     killOptionWithChildren,
     terminate,
     terminateSync,
