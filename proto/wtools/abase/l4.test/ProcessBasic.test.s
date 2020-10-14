@@ -7711,36 +7711,7 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
   let context = this;
   let a = context.assetFor( test, 'basic' );
   let testAppPath = a.program( testApp );
-
-  /* */
-
-  a.ready.then( () =>
-  {
-    test.case = 'execute simple js program with quoted path'
-    test.is( a.fileProvider.fileExists( execPath ) );
-    return null;
-  })
-
-  _.process.startNjsPassingThrough
-  ({
-    execPath : _.strQuote( testAppPath ),
-    ready : a.ready,
-    stdio : 'pipe',
-    outputCollecting : 1,
-    outputPiping : 1,
-    throwingExitCode : 0,
-    applyingExitCode : 0,
-  });
-
-  a.ready.then( ( op ) =>
-  {
-    test.identical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    test.is( a.fileProvider.fileExists( execPath ) );
-    test.is( !_.strHas( op.output, `Error: Cannot find module` ) );
-    return null;
-  })
-
+  testAppPath = _.strQuote( testAppPath );
   /* */
 
   a.ready.then( () =>
@@ -7753,7 +7724,6 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
   _.process.startNjsPassingThrough
   ({
     execPath : _.path.normalize( testAppPath ),
-    ready : a.ready,
     stdio : 'pipe',
     outputCollecting : 1,
     outputPiping : 1,
