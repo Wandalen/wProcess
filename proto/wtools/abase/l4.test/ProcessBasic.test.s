@@ -18908,83 +18908,6 @@ function exitCode( test )
   var got = _.process.exitCode();
   test.identical( got, 2 );
 
-  // /* */
-
-  // test.case = 'update reason, set exitCode to 3'
-  // _.process.exitCode( 3 );
-  // var got = _.process.exitCode();
-  // test.identical( got, 3 );
-
-  // /* */
-
-  // test.case = 'update reason, set exitCode to 4'
-  // _.process.exitCode( 4 );
-  // var got = _.process.exitCode();
-  // test.identical( got, 4 );
-
-  // /* */
-
-  // test.case = 'update reason, set exitCode to 5'
-  // _.process.exitCode( 5 );
-  // var got = _.process.exitCode();
-  // test.identical( got, 5 );
-
-  // /* */
-
-  // test.case = 'update reason, set exitCode to 6'
-  // _.process.exitCode( 6 );
-  // var got = _.process.exitCode();
-  // test.identical( got, 6 );
-
-  // /* */
-
-  // test.case = 'update reason, set exitCode to 7'
-  // _.process.exitCode( 7 );
-  // var got = _.process.exitCode();
-  // test.identical( got, 7 );
-
-  // /* */
-
-  // test.case = 'update reason, set exitCode to 8'
-  // _.process.exitCode( 8 );
-  // var got = _.process.exitCode();
-  // test.identical( got, 8 );
-
-  // /* */
-
-  // test.case = 'update reason, set exitCode to 9'
-  // _.process.exitCode( 9 );
-  // var got = _.process.exitCode();
-  // test.identical( got, 9 );
-
-  // /* */
-
-  // test.case = 'update reason, set exitCode to 10'
-  // _.process.exitCode( 10 );
-  // var got = _.process.exitCode();
-  // test.identical( got, 10 );
-
-  // /* */
-
-  // test.case = 'update reason, set exitCode to 11'
-  // _.process.exitCode( 11 );
-  // var got = _.process.exitCode();
-  // test.identical( got, 11 );
-
-  // /* */
-
-  // test.case = 'update reason, set exitCode to 12'
-  // _.process.exitCode( 12 );
-  // var got = _.process.exitCode();
-  // test.identical( got, 12 );
-
-  // /* */
-
-  // test.case = 'update reason, set exitCode to 129'
-  // _.process.exitCode( 129 )
-  // var got = _.process.exitCode()
-  // test.il( got, 129 )
-
   /* */
 
   a.ready.then( () =>
@@ -18994,7 +18917,8 @@ function exitCode( test )
     return _.process.start({ execPath : '1', throwingExitCode : 0 })
     .then( ( op ) =>
     {
-      test.ni( op.exitCode, 127 );
+      test.ni( op.exitCode, 0 );
+      test.ni( op.exitCode, 1 );
       test.il( op.ended, true );
       return null;
     } )
@@ -19064,7 +18988,8 @@ function exitCode( test )
     return _.process.start( options )
     .then( ( op ) =>
     {
-      test.ni( op.exitCode, 255 );
+      test.ni( op.exitCode, 0 );
+      test.ni( op.exitCode, 1 );
       test.il( op.ended, true );
       return null;
     } )
