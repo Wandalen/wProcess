@@ -6357,21 +6357,22 @@ function startExecPathNonTrivialModeShell( test )
     return null;
   })
 
+  //Vova: same behaviour on win and linux now
   shell({ execPath : '"node -v && node -v"', throwingExitCode : 0 })
   .then( ( op ) =>
   {
-    if( process.platform ==='win32' )
-    {
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      test.identical( _.strCount( op.output, process.version ), 2 );
-    }
-    else
-    {
+    // if( process.platform ==='win32' )
+    // {
+    //   test.identical( op.exitCode, 0 );
+    //   test.identical( op.ended, true );
+    //   test.identical( _.strCount( op.output, process.version ), 2 );
+    // }
+    // else
+    // {
       test.notIdentical( op.exitCode, 0 );
       test.identical( op.ended, true );
       test.identical( _.strCount( op.output, process.version ), 0 );
-    }
+    // }
     return null;
   })
 
@@ -15667,6 +15668,7 @@ function startNjsWithReadyDelayStructural( test )
 
     ready.then( () =>
     {
+      // zzz for Vova: output piping doesn't work as expected in mode "shell" on windows
       test.case = `mode:${mode} detaching:${detaching}`;
       let con = new _.Consequence().take( null ).timeOut( context.t1 ); /* 1000 */
 
@@ -18565,7 +18567,7 @@ function startOptionPassingThrough( test )
 
       o2.conTerminate.then( () =>
       {
-        test.il( o2.output, `[]\n` );
+        test.identical( o2.output, `[]\n` );
         return null;
       })
 
@@ -18635,7 +18637,7 @@ function startOptionPassingThrough( test )
 
       o2.conTerminate.then( () =>
       {
-        test.il( o2.output, `[]\n` );
+        test.identical( o2.output, `[]\n` );
         return null;
       });
 
@@ -18673,7 +18675,7 @@ function startOptionPassingThrough( test )
 
       o2.conTerminate.then( () =>
       {
-        test.il( o2.output, `[ \'a\' ]\n` );
+        test.identical( o2.output, `[ \'a\' ]\n` );
         return null;
       });
 
@@ -18745,7 +18747,7 @@ function startOptionPassingThrough( test )
 
       o2.conTerminate.then( () =>
       {
-        test.il( o2.output, `[ \'a\', \'b\', \'c\' ]\n` );
+        test.identical( o2.output, `[ \'a\', \'b\', \'c\' ]\n` );
         return null;
       });
 
@@ -18782,7 +18784,7 @@ function startOptionPassingThrough( test )
 
       o2.conTerminate.then( () =>
       {
-        test.il( o2.output, `[ \'a\', \'b\', \'c\' ]\n` );
+        test.identical( o2.output, `[ \'a\', \'b\', \'c\' ]\n` );
         return null;
       });
 
@@ -18820,7 +18822,7 @@ function startOptionPassingThrough( test )
 
       o2.conTerminate.then( () =>
       {
-        test.il( o2.output, `[ \'a\', \'b\', \'c\' ]\n` );
+        test.identical( o2.output, `[ \'a\', \'b\', \'c\' ]\n` );
         return null;
       });
 
@@ -18872,7 +18874,7 @@ function startOptionPassingThrough( test )
 
       o2.conTerminate.then( () =>
       {
-        test.il( o2.output, `[ 'parentA' ]\n` );
+        test.identical( o2.output, `[ 'parentA' ]\n` );
         return null;
       });
 
@@ -18911,7 +18913,7 @@ function startOptionPassingThrough( test )
 
       o2.conTerminate.then( () =>
       {
-        test.il( o2.output, `[ 'a', 'parentA' ]\n` );
+        test.identical( o2.output, `[ 'a', 'parentA' ]\n` );
         return null;
       });
 
@@ -18950,7 +18952,7 @@ function startOptionPassingThrough( test )
 
       o2.conTerminate.then( () =>
       {
-        test.il( o2.output, `[ 'a', 'b', 'c', 'parentA' ]\n` );
+        test.identical( o2.output, `[ 'a', 'b', 'c', 'parentA' ]\n` );
         return null;
       });
 
@@ -18987,7 +18989,7 @@ function startOptionPassingThrough( test )
 
       o2.conTerminate.then( () =>
       {
-        test.il( o2.output, `[ 'a', 'b', 'c', 'parentA' ]\n` );
+        test.identical( o2.output, `[ 'a', 'b', 'c', 'parentA' ]\n` );
         return null;
       });
 
@@ -19026,7 +19028,7 @@ function startOptionPassingThrough( test )
 
       o2.conTerminate.then( () =>
       {
-        test.il( o2.output, `[ 'a', 'b', 'c', 'parentA' ]\n` );
+        test.identical( o2.output, `[ 'a', 'b', 'c', 'parentA' ]\n` );
         return null;
       });
 
@@ -19078,7 +19080,7 @@ function startOptionPassingThrough( test )
 
       o2.conTerminate.then( () =>
       {
-        test.il( o2.output, `[ 'parentA', 'parentB', 'parentC' ]\n` );
+        test.identical( o2.output, `[ 'parentA', 'parentB', 'parentC' ]\n` );
         return null;
       });
 
@@ -19117,7 +19119,7 @@ function startOptionPassingThrough( test )
 
       o2.conTerminate.then( () =>
       {
-        test.il( o2.output, `[ 'a', 'parentA', 'parentB', 'parentC' ]\n` );
+        test.identical( o2.output, `[ 'a', 'parentA', 'parentB', 'parentC' ]\n` );
         return null;
       });
 
@@ -19156,7 +19158,7 @@ function startOptionPassingThrough( test )
 
       o2.conTerminate.then( () =>
       {
-        test.il( o2.output, `[ 'a', 'b', 'c', 'parentA', 'parentB', 'parentC' ]\n` );
+        test.identical( o2.output, `[ 'a', 'b', 'c', 'parentA', 'parentB', 'parentC' ]\n` );
         return null;
       });
 
@@ -19193,7 +19195,7 @@ function startOptionPassingThrough( test )
 
       o2.conTerminate.then( () =>
       {
-        test.il( o2.output, `[ 'a', 'b', 'c', 'parentA', 'parentB', 'parentC' ]\n` );
+        test.identical( o2.output, `[ 'a', 'b', 'c', 'parentA', 'parentB', 'parentC' ]\n` );
         return null;
       });
 
@@ -19232,7 +19234,7 @@ function startOptionPassingThrough( test )
 
       o2.conTerminate.then( () =>
       {
-        test.il( o2.output, `[ 'a', 'b', 'c', 'parentA', 'parentB', 'parentC' ]\n` );
+        test.identical( o2.output, `[ 'a', 'b', 'c', 'parentA', 'parentB', 'parentC' ]\n` );
         return null;
       });
 
@@ -19400,7 +19402,7 @@ function exitCode( test )
   // test.case = 'update reason, set exitCode to 129'
   // _.process.exitCode( 129 )
   // var got = _.process.exitCode()
-  // test.il( got, 129 )
+  // test.identical( got, 129 )
 
   /* */
 
@@ -19411,8 +19413,11 @@ function exitCode( test )
     return _.process.start({ execPath : '1', throwingExitCode : 0 })
     .then( ( op ) =>
     {
-      test.il( op.exitCode, 127 );
-      test.il( op.ended, true );
+      if( process.platform === 'win32' )
+      test.identical( op.exitCode, 1 );
+      else
+      test.identical( op.exitCode, 127 );
+      test.identical( op.ended, true );
       return null;
     } )
   })
@@ -19425,14 +19430,14 @@ function exitCode( test )
     let programPath = a.program( testApp );
     let options =
     {
-      execPath : 'node ' + programPath,
+      execPath : 'node ' + _.path.nativize( programPath ),
       throwingExitCode : 0
     }
     return _.process.start( options )
     .then( ( op ) =>
     {
-      test.il( op.exitCode, 1 );
-      test.il( op.ended, true );
+      test.identical( op.exitCode, 1 );
+      test.identical( op.ended, true );
       return null;
     } )
 
@@ -19450,14 +19455,14 @@ function exitCode( test )
     let programPath = a.program( testApp2 );
     let options =
     {
-      execPath : 'node ' + programPath,
+      execPath : 'node ' + _.path.nativize( programPath ),
       throwingExitCode : 0
     }
     return _.process.start( options )
     .then( ( op ) =>
     {
-      test.il( op.exitCode, 1 );
-      test.il( op.ended, true );
+      test.identical( op.exitCode, 1 );
+      test.identical( op.ended, true );
       return null;
     } )
 
@@ -19475,14 +19480,17 @@ function exitCode( test )
     let programPath = a.program( testApp3 );
     let options =
     {
-      execPath : 'node ' + programPath,
+      execPath : 'node ' + _.path.nativize( programPath ),
       throwingExitCode : 0
     }
     return _.process.start( options )
     .then( ( op ) =>
     {
-      test.il( op.exitCode, 255 );
-      test.il( op.ended, true );
+      if( process.platform === 'win32' )
+      test.notIdentical( op.exitCode, 0 )// returns 4294967295 which is -1 to uint32
+      else
+      test.identical( op.exitCode, 255 );
+      test.identical( op.ended, true );
       return null;
     } )
 
@@ -19504,14 +19512,14 @@ function exitCode( test )
     let programPath = a.program( testApp4 );
     let options =
     {
-      execPath : 'node ' + programPath,
+      execPath : 'node ' + _.path.nativize( programPath ),
       throwingExitCode : 0
     }
     return _.process.start( options )
     .then( ( op ) =>
     {
-      test.il( op.exitCode, 100 );
-      test.il( op.ended, true );
+      test.identical( op.exitCode, 100 );
+      test.identical( op.ended, true );
       return null;
     } )
 
