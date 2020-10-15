@@ -6358,21 +6358,22 @@ function startExecPathNonTrivialModeShell( test )
     return null;
   })
 
+  //Vova: same behaviour on win and linux now
   shell({ execPath : '"node -v && node -v"', throwingExitCode : 0 })
   .then( ( op ) =>
   {
-    if( process.platform ==='win32' )
-    {
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      test.identical( _.strCount( op.output, process.version ), 2 );
-    }
-    else
-    {
+    // if( process.platform ==='win32' )
+    // {
+    //   test.identical( op.exitCode, 0 );
+    //   test.identical( op.ended, true );
+    //   test.identical( _.strCount( op.output, process.version ), 2 );
+    // }
+    // else
+    // {
       test.notIdentical( op.exitCode, 0 );
       test.identical( op.ended, true );
       test.identical( _.strCount( op.output, process.version ), 0 );
-    }
+    // }
     return null;
   })
 
@@ -8232,6 +8233,425 @@ function startExecPathWithSpace( test )
   {
     console.log( process.pid )
     setTimeout( () => {}, context.t1 * 2 ) /* 2000 */
+  }
+}
+
+//
+
+function startDifferentTypesOfPaths( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let execPath = a.program({ routine : testApp });
+  let execPathWithSpace = a.program({ routine : testApp, dirPath : 'path with space' });
+  execPathWithSpace = a.fileProvider.path.normalize( execPathWithSpace );
+  let execPathWithSpaceNative = a.fileProvider.path.nativize( execPathWithSpace );
+  let nodeWithSpace = a.abs( 'path with space', _.path.name({ path : process.argv[ 0 ], full : 1 }) );
+  a.fileProvider.softLink( nodeWithSpace, process.argv[ 0 ] );
+
+  /* - */
+
+  a.ready
+
+  // .then( () =>
+  // {
+  //   test.case = 'mode : fork, path with space'
+  //   let o =
+  //   {
+  //     args : execPathWithSpace,
+  //     mode : 'fork',
+  //     stdio : 'pipe',
+  //     outputCollecting : 1,
+  //     outputPiping : 1,
+  //     throwingExitCode : 0,
+  //     applyingExitCode : 0,
+  //   }
+
+  //   _.process.start( o );
+
+  //   o.conTerminate.then( ( op ) =>
+  //   {
+  //     test.identical( op.exitCode, 0 );
+  //     test.identical( op.ended, true );
+  //     test.is( _.strHas( op.output, execPathWithSpace ) );
+  //     return null;
+  //   })
+
+  //   return o.conTerminate;
+
+  // })
+
+  // .then( () =>
+  // {
+  //   test.case = 'mode : fork, quoted path with space'
+  //   let o =
+  //   {
+  //     execPath : _.strQuote( execPathWithSpace ),
+  //     mode : 'fork',
+  //     stdio : 'pipe',
+  //     outputCollecting : 1,
+  //     outputPiping : 1,
+  //     throwingExitCode : 0,
+  //     applyingExitCode : 0,
+  //   }
+
+  //   _.process.start( o );
+
+  //   o.conTerminate.then( ( op ) =>
+  //   {
+  //     test.identical( op.exitCode, 0 );
+  //     test.identical( op.ended, true );
+  //     test.is( _.strHas( op.output, execPathWithSpace ) );
+  //     return null;
+  //   })
+
+  //   return o.conTerminate;
+
+  // })
+
+  /* qqq for Vova: fix it*/
+
+  // .then( () =>
+  // {
+  //   test.case = 'mode : fork, double quoted path with space'
+  //   let o =
+  //   {
+  //     execPath : `""${execPathWithSpace}""`,
+  //     mode : 'fork',
+  //     stdio : 'pipe',
+  //     outputCollecting : 1,
+  //     outputPiping : 1,
+  //     throwingExitCode : 0,
+  //     applyingExitCode : 0,
+  //   }
+
+  //   _.process.start( o );
+
+  //   o.conTerminate.then( ( op ) =>
+  //   {
+  //     test.identical( op.exitCode, 0 );
+  //     test.identical( op.ended, true );
+  //     test.is( _.strHas( op.output, execPathWithSpace ) );
+  //     return null;
+  //   })
+
+  //   return o.conTerminate;
+
+  // })
+
+  /* */
+
+  .then( () =>
+  {
+    test.case = 'mode : spawn, path to node with space'
+    let o =
+    {
+      args : [ nodeWithSpace, '-v' ],
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputCollecting : 1,
+      outputPiping : 1,
+      throwingExitCode : 0,
+      applyingExitCode : 0,
+    }
+
+    _.process.start( o );
+
+    o.conTerminate.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.is( _.strHas( op.output, process.version ) );
+      return null;
+    })
+
+    return o.conTerminate;
+
+  })
+
+  .then( () =>
+  {
+    test.case = 'mode : spawn, path to node with space'
+    let o =
+    {
+      args : [ _.strQuote( nodeWithSpace ), '-v' ],
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputCollecting : 1,
+      outputPiping : 1,
+      throwingExitCode : 0,
+      applyingExitCode : 0,
+    }
+
+    _.process.start( o );
+
+    o.conTerminate.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.is( _.strHas( op.output, process.version ) );
+      return null;
+    })
+
+    return o.conTerminate;
+
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    test.case = 'mode : spawn, path to node with space'
+    let o =
+    {
+      execPath : _.strQuote( nodeWithSpace ),
+      args : [ '-v' ],
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputCollecting : 1,
+      outputPiping : 1,
+      throwingExitCode : 0,
+      applyingExitCode : 0,
+    }
+
+    _.process.start( o );
+
+    o.conTerminate.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.is( _.strHas( op.output, process.version ) );
+      return null;
+    })
+
+    return o.conTerminate;
+
+  })
+
+  /* qqq for Vova : fix it */
+
+  // .then( () =>
+  // {
+  //   test.case = 'mode : spawn, path to node with space'
+  //   let o =
+  //   {
+  //     execPath : `""${nodeWithSpace}""`,
+  //     args : [ '-v' ],
+  //     mode : 'spawn',
+  //     stdio : 'pipe',
+  //     outputCollecting : 1,
+  //     outputPiping : 1,
+  //     throwingExitCode : 0,
+  //     applyingExitCode : 0,
+  //   }
+
+  //   _.process.start( o );
+
+  //   o.conTerminate.then( ( op ) =>
+  //   {
+  //     test.identical( op.exitCode, 0 );
+  //     test.identical( op.ended, true );
+  //     test.is( _.strHas( op.output, process.version ) );
+  //     return null;
+  //   })
+
+  //   return o.conTerminate;
+
+  // })
+
+  /* */
+
+  .then( () =>
+  {
+    test.case = 'mode : spawn, path to node with space, path to program with space'
+    let o =
+    {
+      execPath : _.strQuote( nodeWithSpace ) + ' ' + _.strQuote( execPathWithSpaceNative ),
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputCollecting : 1,
+      outputPiping : 1,
+      throwingExitCode : 0,
+      applyingExitCode : 0,
+    }
+
+    _.process.start( o );
+
+    o.conTerminate.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.is( _.strHas( op.output, execPathWithSpace ) );
+      return null;
+    })
+
+    return o.conTerminate;
+
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    test.case = 'mode : spawn, path to node with space, path to program with space'
+    let o =
+    {
+      execPath : _.strQuote( nodeWithSpace ),
+      args : [ execPathWithSpaceNative ],
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputCollecting : 1,
+      outputPiping : 1,
+      throwingExitCode : 0,
+      applyingExitCode : 0,
+    }
+
+    _.process.start( o );
+
+    o.conTerminate.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.is( _.strHas( op.output, execPathWithSpace ) );
+      return null;
+    })
+
+    return o.conTerminate;
+
+  })
+
+  /* qqq for Vova : fix it */
+
+  // .then( () =>
+  // {
+  //   test.case = 'mode : shell, path to node with space'
+  //   let o =
+  //   {
+  //     args : [ _.strQuote( nodeWithSpace ), '-v' ],
+  //     mode : 'shell',
+  //     stdio : 'pipe',
+  //     outputCollecting : 1,
+  //     outputPiping : 1,
+  //     throwingExitCode : 0,
+  //     applyingExitCode : 0,
+  //   }
+
+  //   _.process.start( o );
+
+  //   o.conTerminate.then( ( op ) =>
+  //   {
+  //     test.identical( op.exitCode, 0 );
+  //     test.identical( op.ended, true );
+  //     test.is( _.strHas( op.output, process.version ) );
+  //     return null;
+  //   })
+
+  //   return o.conTerminate;
+
+  // })
+
+  /* */
+
+  .then( () =>
+  {
+    test.case = 'mode : shell, path to node with space'
+    let o =
+    {
+      execPath : _.strQuote( nodeWithSpace ),
+      args : [ '-v' ],
+      mode : 'shell',
+      stdio : 'pipe',
+      outputCollecting : 1,
+      outputPiping : 1,
+      throwingExitCode : 0,
+      applyingExitCode : 0,
+    }
+
+    _.process.start( o );
+
+    o.conTerminate.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.is( _.strHas( op.output, process.version ) );
+      return null;
+    })
+
+    return o.conTerminate;
+
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    test.case = 'mode : shell, path to node with space, program path with space'
+    let o =
+    {
+      execPath : _.strQuote( nodeWithSpace ),
+      args : [ execPathWithSpaceNative ],
+      mode : 'shell',
+      stdio : 'pipe',
+      outputCollecting : 1,
+      outputPiping : 1,
+      throwingExitCode : 0,
+      applyingExitCode : 0,
+    }
+
+    _.process.start( o );
+
+    o.conTerminate.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.is( _.strHas( op.output, execPathWithSpace ) );
+      return null;
+    })
+
+    return o.conTerminate;
+
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    test.case = 'mode : shell, path to node with space, program path with space'
+    let o =
+    {
+      execPath : _.strQuote( nodeWithSpace ) + ' ' + _.strQuote( execPathWithSpaceNative ),
+      mode : 'shell',
+      stdio : 'pipe',
+      outputCollecting : 1,
+      outputPiping : 1,
+      throwingExitCode : 0,
+      applyingExitCode : 0,
+    }
+
+    _.process.start( o );
+
+    o.conTerminate.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.is( _.strHas( op.output, execPathWithSpace ) );
+      return null;
+    })
+
+    return o.conTerminate;
+
+  })
+
+  /* - */
+
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+    console.log( _.path.normalize( __filename ) );
   }
 }
 
@@ -15723,6 +16143,7 @@ function startNjsWithReadyDelayStructural( test )
 
     ready.then( () =>
     {
+      // zzz for Vova: output piping doesn't work as expected in mode "shell" on windows
       test.case = `mode:${mode} detaching:${detaching}`;
       let con = new _.Consequence().take( null ).timeOut( context.t1 ); /* 1000 */
 
@@ -18630,7 +19051,7 @@ function startOptionPassingThrough( test )
 
       o2.conTerminate.then( () =>
       {
-        test.il( o2.output, `[]\n` );
+        test.identical( o2.output, `[]\n` );
         return null;
       })
 
@@ -18700,7 +19121,7 @@ function startOptionPassingThrough( test )
 
       o2.conTerminate.then( () =>
       {
-        test.il( o2.output, `[]\n` );
+        test.identical( o2.output, `[]\n` );
         return null;
       });
 
@@ -18738,7 +19159,7 @@ function startOptionPassingThrough( test )
 
       o2.conTerminate.then( () =>
       {
-        test.il( o2.output, `[ \'a\' ]\n` );
+        test.identical( o2.output, `[ \'a\' ]\n` );
         return null;
       });
 
@@ -18810,7 +19231,7 @@ function startOptionPassingThrough( test )
 
       o2.conTerminate.then( () =>
       {
-        test.il( o2.output, `[ \'a\', \'b\', \'c\' ]\n` );
+        test.identical( o2.output, `[ \'a\', \'b\', \'c\' ]\n` );
         return null;
       });
 
@@ -18847,7 +19268,7 @@ function startOptionPassingThrough( test )
 
       o2.conTerminate.then( () =>
       {
-        test.il( o2.output, `[ \'a\', \'b\', \'c\' ]\n` );
+        test.identical( o2.output, `[ \'a\', \'b\', \'c\' ]\n` );
         return null;
       });
 
@@ -18885,7 +19306,7 @@ function startOptionPassingThrough( test )
 
       o2.conTerminate.then( () =>
       {
-        test.il( o2.output, `[ \'a\', \'b\', \'c\' ]\n` );
+        test.identical( o2.output, `[ \'a\', \'b\', \'c\' ]\n` );
         return null;
       });
 
@@ -18937,7 +19358,7 @@ function startOptionPassingThrough( test )
 
       o2.conTerminate.then( () =>
       {
-        test.il( o2.output, `[ 'parentA' ]\n` );
+        test.identical( o2.output, `[ 'parentA' ]\n` );
         return null;
       });
 
@@ -18976,7 +19397,7 @@ function startOptionPassingThrough( test )
 
       o2.conTerminate.then( () =>
       {
-        test.il( o2.output, `[ 'a', 'parentA' ]\n` );
+        test.identical( o2.output, `[ 'a', 'parentA' ]\n` );
         return null;
       });
 
@@ -19015,7 +19436,7 @@ function startOptionPassingThrough( test )
 
       o2.conTerminate.then( () =>
       {
-        test.il( o2.output, `[ 'a', 'b', 'c', 'parentA' ]\n` );
+        test.identical( o2.output, `[ 'a', 'b', 'c', 'parentA' ]\n` );
         return null;
       });
 
@@ -19052,7 +19473,7 @@ function startOptionPassingThrough( test )
 
       o2.conTerminate.then( () =>
       {
-        test.il( o2.output, `[ 'a', 'b', 'c', 'parentA' ]\n` );
+        test.identical( o2.output, `[ 'a', 'b', 'c', 'parentA' ]\n` );
         return null;
       });
 
@@ -19091,7 +19512,7 @@ function startOptionPassingThrough( test )
 
       o2.conTerminate.then( () =>
       {
-        test.il( o2.output, `[ 'a', 'b', 'c', 'parentA' ]\n` );
+        test.identical( o2.output, `[ 'a', 'b', 'c', 'parentA' ]\n` );
         return null;
       });
 
@@ -19143,7 +19564,7 @@ function startOptionPassingThrough( test )
 
       o2.conTerminate.then( () =>
       {
-        test.il( o2.output, `[ 'parentA', 'parentB', 'parentC' ]\n` );
+        test.identical( o2.output, `[ 'parentA', 'parentB', 'parentC' ]\n` );
         return null;
       });
 
@@ -19182,7 +19603,7 @@ function startOptionPassingThrough( test )
 
       o2.conTerminate.then( () =>
       {
-        test.il( o2.output, `[ 'a', 'parentA', 'parentB', 'parentC' ]\n` );
+        test.identical( o2.output, `[ 'a', 'parentA', 'parentB', 'parentC' ]\n` );
         return null;
       });
 
@@ -19221,7 +19642,7 @@ function startOptionPassingThrough( test )
 
       o2.conTerminate.then( () =>
       {
-        test.il( o2.output, `[ 'a', 'b', 'c', 'parentA', 'parentB', 'parentC' ]\n` );
+        test.identical( o2.output, `[ 'a', 'b', 'c', 'parentA', 'parentB', 'parentC' ]\n` );
         return null;
       });
 
@@ -19258,7 +19679,7 @@ function startOptionPassingThrough( test )
 
       o2.conTerminate.then( () =>
       {
-        test.il( o2.output, `[ 'a', 'b', 'c', 'parentA', 'parentB', 'parentC' ]\n` );
+        test.identical( o2.output, `[ 'a', 'b', 'c', 'parentA', 'parentB', 'parentC' ]\n` );
         return null;
       });
 
@@ -19297,7 +19718,7 @@ function startOptionPassingThrough( test )
 
       o2.conTerminate.then( () =>
       {
-        test.il( o2.output, `[ 'a', 'b', 'c', 'parentA', 'parentB', 'parentC' ]\n` );
+        test.identical( o2.output, `[ 'a', 'b', 'c', 'parentA', 'parentB', 'parentC' ]\n` );
         return null;
       });
 
@@ -19465,7 +19886,7 @@ function exitCode( test )
   // test.case = 'update reason, set exitCode to 129'
   // _.process.exitCode( 129 )
   // var got = _.process.exitCode()
-  // test.il( got, 129 )
+  // test.identical( got, 129 )
 
   /* */
 
@@ -19476,8 +19897,11 @@ function exitCode( test )
     return _.process.start({ execPath : '1', throwingExitCode : 0 })
     .then( ( op ) =>
     {
-      test.il( op.exitCode, 127 );
-      test.il( op.ended, true );
+      if( process.platform === 'win32' )
+      test.identical( op.exitCode, 1 );
+      else
+      test.identical( op.exitCode, 127 );
+      test.identical( op.ended, true );
       return null;
     } )
   })
@@ -19490,14 +19914,14 @@ function exitCode( test )
     let programPath = a.program( testApp );
     let options =
     {
-      execPath : 'node ' + programPath,
+      execPath : 'node ' + _.path.nativize( programPath ),
       throwingExitCode : 0
     }
     return _.process.start( options )
     .then( ( op ) =>
     {
-      test.il( op.exitCode, 1 );
-      test.il( op.ended, true );
+      test.identical( op.exitCode, 1 );
+      test.identical( op.ended, true );
       return null;
     } )
 
@@ -19515,14 +19939,14 @@ function exitCode( test )
     let programPath = a.program( testApp2 );
     let options =
     {
-      execPath : 'node ' + programPath,
+      execPath : 'node ' + _.path.nativize( programPath ),
       throwingExitCode : 0
     }
     return _.process.start( options )
     .then( ( op ) =>
     {
-      test.il( op.exitCode, 1 );
-      test.il( op.ended, true );
+      test.identical( op.exitCode, 1 );
+      test.identical( op.ended, true );
       return null;
     } )
 
@@ -19540,14 +19964,17 @@ function exitCode( test )
     let programPath = a.program( testApp3 );
     let options =
     {
-      execPath : 'node ' + programPath,
+      execPath : 'node ' + _.path.nativize( programPath ),
       throwingExitCode : 0
     }
     return _.process.start( options )
     .then( ( op ) =>
     {
-      test.il( op.exitCode, 255 );
-      test.il( op.ended, true );
+      if( process.platform === 'win32' )
+      test.notIdentical( op.exitCode, 0 )// returns 4294967295 which is -1 to uint32
+      else
+      test.identical( op.exitCode, 255 );
+      test.identical( op.ended, true );
       return null;
     } )
 
@@ -19569,14 +19996,14 @@ function exitCode( test )
     let programPath = a.program( testApp4 );
     let options =
     {
-      execPath : 'node ' + programPath,
+      execPath : 'node ' + _.path.nativize( programPath ),
       throwingExitCode : 0
     }
     return _.process.start( options )
     .then( ( op ) =>
     {
-      test.il( op.exitCode, 100 );
-      test.il( op.ended, true );
+      test.identical( op.exitCode, 100 );
+      test.identical( op.ended, true );
       return null;
     } )
 
@@ -23350,12 +23777,23 @@ sleep:begin
         else
         test.identical( options.output, exp1 );
         test.identical( options.exitCode, null );
+        /*xxx:
+          on linux has two processes( shell + node ), on mac shell has only node
+          on linux shell receives SIGTERM and kills node
+          on mac node ignores SIGTERM because of sleep option enabled
+        */
+        if( process.platform === 'darwin' )
+        test.identical( options.exitSignal, 'SIGKILL' );
+        else
         test.identical( options.exitSignal, 'SIGTERM' );
         test.identical( options.ended, true );
         test.identical( options.exitReason, 'signal' );
         test.identical( options.state, 'terminated' );
         test.identical( options.error, null );
         test.identical( options.process.exitCode, null );
+        if( process.platform === 'darwin' )
+        test.identical( options.process.signalCode, 'SIGTERM' );
+        else
         test.identical( options.process.signalCode, 'SIGTERM' );
         test.identical( options.process.killed, false );
         var dtime = _.time.now() - time1;
@@ -24361,7 +24799,7 @@ function terminateComplex( test )
 
   .then( () =>
   {
-    test.case = 'Sending signal to other process'
+    test.case = 'mode:spawn, Child1 -> Child2, terminate Child2'
     var o =
     {
       execPath :  'node ' + testAppPath,
@@ -24407,10 +24845,10 @@ function terminateComplex( test )
 
   /*  */
 
-  /* qqq for Vova : make good test case descriptions */
+  /* qqq for Vova : make good test case descriptions aaa: good? */
   .then( () =>
   {
-    test.case = 'Sending signal to child process has regular child process that should exit with parent'
+    test.case = 'mode:spawn, Child1 -> Child2, terminate Child1 '
     var o =
     {
       execPath :  'node ' + testAppPath,
@@ -24458,7 +24896,7 @@ function terminateComplex( test )
 
   .then( () =>
   {
-    test.case = 'Sending signal to child process has regular child process that should exit with parent'
+    test.case = 'mode:fork, Child1->Child2, terminate Child1'
     var o =
     {
       execPath : testAppPath,
@@ -24508,7 +24946,7 @@ function terminateComplex( test )
 
   .then( () =>
   {
-    test.case = 'Sending signal to child process has regular child process that should exit with parent'
+    test.case = 'mode:shell, Child1->Child2, terminate Child1'
     var o =
     {
       execPath : 'node ' + testAppPath,
@@ -26982,6 +27420,7 @@ var Proto =
     startImportantExecPathPassingThrough,
     startNormalizedExecPath,
     startExecPathWithSpace,
+    startDifferentTypesOfPaths,
     startNjsPassingThroughExecPathWithSpace,
     startNjsPassingThroughDifferentTypesOfPaths,
     startPassingThroughExecPathWithSpace,

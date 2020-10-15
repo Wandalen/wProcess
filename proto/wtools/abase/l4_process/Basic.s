@@ -181,6 +181,85 @@ function _eventAvailableHandle()
 }
 
 // --
+// escape
+// --
+
+function escapeArg( arg )
+{
+  _.assert( arguments.length === 1 );
+  _.assert( _.strIs( arg ) );
+
+  if( process.platform !== 'win32' )
+  {
+		// Backslash-escape any hairy characters:
+    arg = arg.replace( /([^a-zA-Z0-9_])/g, '\\$1' );
+  }
+  else
+  {
+    //Sequence of backslashes followed by a double quote:
+    //double up all the backslashes and escape the double quote
+    arg = arg.replace( /(\\*)"/g, '$1$1\\"' );
+
+    // Sequence of backslashes followed by the end of the string
+    // (which will become a double quote later):
+    // double up all the backslashes
+    arg = arg.replace( /(\\*)$/,'$1$1' );
+
+    // All other backslashes occur literally
+
+    // Quote the whole thing:
+    arg = `"${arg}"`;
+
+    // Escape shell metacharacters:
+    arg = arg.replace( /([()\][%!^"`<>&|;, *?])/g, '^$1' );
+  }
+
+  return arg;
+}
+
+//
+
+function escapeProg( prog )
+{
+  _.assert( arguments.length === 1 );
+  _.assert( _.strIs( prog ) );
+
+  // Windows cmd.exe: needs special treatment
+  if( process.platform === 'win32' )
+  {
+		// Escape shell metacharacters:
+    prog = prog.replace( /([()\][%!^"`<>&|;, *?])/g, '^$1' );
+  }
+  else
+  {
+    // Unix shells: same procedure as for arguments
+		prog = _.process.escapeArg( prog );
+  }
+
+  return prog;
+}
+
+
+//
+
+function escapeCmd( prog, args )
+{
+  _.assert( arguments.length === 2 );
+  _.assert( _.strIs( prog ) );
+  _.assert( _.arrayIs( args ) );
+
+  prog = _.process.escapeProg( prog );
+
+  if( !args.length )
+  return prog;
+
+  args = args.map( ( arg ) => _.process.escapeArg( arg ) );
+
+  return `${prog} ${args.join( ' ' )}`;
+}
+
+
+// --
 // meta
 // --
 
@@ -218,6 +297,12 @@ let Extension =
   on,
   // eventGive,
   _eventAvailableHandle,
+
+  // escape
+
+  escapeArg,
+  escapeProg,
+  escapeCmd,
 
   // meta
 

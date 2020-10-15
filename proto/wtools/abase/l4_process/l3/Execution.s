@@ -604,7 +604,8 @@ function startMinimal_body( o )
   {
     let execPath = o.execPath;
 
-    execPath = _.path.nativizeMinimal( execPath );
+    execPath = _.path.nativizeEscaping( execPath );
+    // execPath = _.process.escapeProg( execPath ); //zzz for Vova: use this routine, review fails
 
     let shellPath = process.platform === 'win32' ? 'cmd' : 'sh';
     let arg1 = process.platform === 'win32' ? '/c' : '-c';
@@ -628,6 +629,16 @@ function startMinimal_body( o )
 
     o.fullExecPath = arg2;
     inputMirror();
+
+    /* Fixes problem with space in path on windows and makes behavior similar to unix
+      Examples:
+      win: shell({ execPath : '"/path/with space/node.exe"', throwingExitCode : 0 }) - works
+      unix: shell({ execPath : '"/path/with space/node"', throwingExitCode : 0 }) - works
+      both: shell({ execPath : 'node -v && node -v', throwingExitCode : 0 }) - prints version twice
+      both: shell({ execPath : '"node -v && node -v"', throwingExitCode : 0 }) - expected error about unknown command
+    */
+    if( process.platform === 'win32' )
+    arg2 = _.strQuote( arg2 );
 
     if( o.dry )
     return;
@@ -1088,6 +1099,8 @@ function startMinimal_body( o )
         args[ i ] = argEscape( args[ i ], quote );
       })
       args[ i ] = _.strQuote( args[ i ] );
+
+      // args[ i ] = _.process.escapeArg( args[ i ]  ); //zzz for Vova: use this routine, review fails
     }
 
     return args.join( ' ' );
@@ -2737,7 +2750,10 @@ function signal_body( o )
       if( !err )
       return arg;
 
-      /* qqq for Vova : not tested */
+      /*
+        qqq for Vova : write a test where kill is called after timeout on all platfroms and modes
+        run some sync code in program that will freeze the process
+      */
       timer.cancel();
       _.errAttend( err );
 
@@ -2906,7 +2922,7 @@ function children( o )
     return childrenOf( 'pgrep -P', o.pid, result );
     else
     return childrenOf( 'ps -o pid --no-headers --ppid', o.pid, result );
-    /* qqq for Vova : use optimal solution */
+    /* zzz for Vova : use optimal solution */
   }
 
   /* */
