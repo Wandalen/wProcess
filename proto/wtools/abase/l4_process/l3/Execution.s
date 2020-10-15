@@ -592,7 +592,8 @@ function startMinimal_body( o )
   {
     let execPath = o.execPath;
 
-    execPath = _.path.nativizeMinimal( execPath );
+    execPath = _.path.nativizeEscaping( execPath );
+    execPath = _.process.escapeProg( execPath );
 
     let shellPath = process.platform === 'win32' ? 'cmd' : 'sh';
     let arg1 = process.platform === 'win32' ? '/c' : '-c';
@@ -1071,12 +1072,14 @@ function startMinimal_body( o )
 
     for( ; i < args.length; i++ )
     {
-      let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', '`' ]
-      _.each( quotesToEscape, ( quote ) =>
-      {
-        args[ i ] = argEscape( args[ i ], quote );
-      })
-      args[ i ] = _.strQuote( args[ i ] );
+      // let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', '`' ]
+      // _.each( quotesToEscape, ( quote ) =>
+      // {
+      //   args[ i ] = argEscape( args[ i ], quote );
+      // })
+      // args[ i ] = _.strQuote( args[ i ] );
+
+      args[ i ] = _.process.escapeArg( args[ i ]  );
     }
 
     return args.join( ' ' );
