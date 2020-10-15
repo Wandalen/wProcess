@@ -2793,7 +2793,7 @@ function children( o )
     return childrenOf( 'pgrep -P', o.pid, result );
     else
     return childrenOf( 'ps -o pid --no-headers --ppid', o.pid, result );
-    /* qqq for Vova : use optimal solution */
+    /* zzz for Vova : use optimal solution */
   }
 
   /* */
