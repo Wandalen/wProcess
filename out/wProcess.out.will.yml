@@ -169,6 +169,7 @@ module:
           - ../proto/wtools/Tools.s
           - ../proto/wtools/abase
           - ../proto/wtools/abase/l4.test
+          - ../proto/wtools/abase/l4.test/Basic.test.s
           - ../proto/wtools/abase/l4.test/Io.test.s
           - ../proto/wtools/abase/l4.test/ProcessBasic.test.s
           - ../proto/wtools/abase/l4.test/_asset
