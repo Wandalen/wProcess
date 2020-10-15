@@ -1465,7 +1465,6 @@ function start_body( o )
 
   function form0()
   {
-
     if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
     o.stack = _.Procedure.Stack( o.stack, 3 );
   }
