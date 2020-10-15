@@ -8242,69 +8242,70 @@ function startDifferentTypesOfPaths( test )
   let a = context.assetFor( test, false );
   let execPath = a.program({ routine : testApp });
   let execPathWithSpace = a.program({ routine : testApp, dirPath : 'path with space' });
+  execPathWithSpace = a.fileProvider.path.normalize( execPathWithSpace );
   let execPathWithSpaceNative = a.fileProvider.path.nativize( execPathWithSpace );
-  let nodeWithSpace = a.abs( 'path with space/node' );
+  let nodeWithSpace = a.abs( 'path with space', _.path.name({ path : process.argv[ 0 ], full : 1 }) );
   a.fileProvider.softLink( nodeWithSpace, process.argv[ 0 ] );
 
   /* - */
 
   a.ready
 
-  .then( () =>
-  {
-    test.case = 'mode : fork, path with space'
-    let o =
-    {
-      args : execPathWithSpace,
-      mode : 'fork',
-      stdio : 'pipe',
-      outputCollecting : 1,
-      outputPiping : 1,
-      throwingExitCode : 0,
-      applyingExitCode : 0,
-    }
+  // .then( () =>
+  // {
+  //   test.case = 'mode : fork, path with space'
+  //   let o =
+  //   {
+  //     args : execPathWithSpace,
+  //     mode : 'fork',
+  //     stdio : 'pipe',
+  //     outputCollecting : 1,
+  //     outputPiping : 1,
+  //     throwingExitCode : 0,
+  //     applyingExitCode : 0,
+  //   }
 
-    _.process.start( o );
+  //   _.process.start( o );
 
-    o.conTerminate.then( ( op ) =>
-    {
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      test.is( _.strHas( op.output, execPathWithSpace ) );
-      return null;
-    })
+  //   o.conTerminate.then( ( op ) =>
+  //   {
+  //     test.identical( op.exitCode, 0 );
+  //     test.identical( op.ended, true );
+  //     test.is( _.strHas( op.output, execPathWithSpace ) );
+  //     return null;
+  //   })
 
-    return o.conTerminate;
+  //   return o.conTerminate;
 
-  })
+  // })
 
-  .then( () =>
-  {
-    test.case = 'mode : fork, quoted path with space'
-    let o =
-    {
-      execPath : _.strQuote( execPathWithSpace ),
-      mode : 'fork',
-      stdio : 'pipe',
-      outputCollecting : 1,
-      outputPiping : 1,
-      throwingExitCode : 0,
-      applyingExitCode : 0,
-    }
+  // .then( () =>
+  // {
+  //   test.case = 'mode : fork, quoted path with space'
+  //   let o =
+  //   {
+  //     execPath : _.strQuote( execPathWithSpace ),
+  //     mode : 'fork',
+  //     stdio : 'pipe',
+  //     outputCollecting : 1,
+  //     outputPiping : 1,
+  //     throwingExitCode : 0,
+  //     applyingExitCode : 0,
+  //   }
 
-    _.process.start( o );
+  //   _.process.start( o );
 
-    o.conTerminate.then( ( op ) =>
-    {
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      test.is( _.strHas( op.output, execPathWithSpace ) );
-      return null;
-    })
+  //   o.conTerminate.then( ( op ) =>
+  //   {
+  //     test.identical( op.exitCode, 0 );
+  //     test.identical( op.ended, true );
+  //     test.is( _.strHas( op.output, execPathWithSpace ) );
+  //     return null;
+  //   })
 
-    return o.conTerminate;
+  //   return o.conTerminate;
 
-  })
+  // })
 
   /* qqq for Vova: fix it*/
 
@@ -8344,6 +8345,34 @@ function startDifferentTypesOfPaths( test )
     let o =
     {
       args : [ nodeWithSpace, '-v' ],
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputCollecting : 1,
+      outputPiping : 1,
+      throwingExitCode : 0,
+      applyingExitCode : 0,
+    }
+
+    _.process.start( o );
+
+    o.conTerminate.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.is( _.strHas( op.output, process.version ) );
+      return null;
+    })
+
+    return o.conTerminate;
+
+  })
+
+  .then( () =>
+  {
+    test.case = 'mode : spawn, path to node with space'
+    let o =
+    {
+      args : [ _.strQuote( nodeWithSpace ), '-v' ],
       mode : 'spawn',
       stdio : 'pipe',
       outputCollecting : 1,
