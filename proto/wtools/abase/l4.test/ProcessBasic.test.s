@@ -1252,8 +1252,6 @@ function startErrorHandling( test )
 
 }
 
-//
-
 // --
 // sync
 // --
@@ -18031,7 +18029,7 @@ startDiffPid.timeOut = 180000;
 
 //
 
-function streamJoin()
+function streamJoinExperiment()
 {
   let context = this;
 
@@ -18039,24 +18037,39 @@ function streamJoin()
   let src1 = new Stream.PassThrough();
   let src2 = new Stream.PassThrough();
 
-  src1.pipe( pass );
-  src2.pipe( pass );
-  // pass.unpipe( writable );
-  // readableFlowing is now false.
+  src1.pipe( pass, { end : false } );
+  src2.pipe( pass, { end : false } );
+
+  src1.on( 'data', ( chunk ) =>
+  {
+    console.log( 'src1.data', chunk.toString() );
+  });
+
+  src1.on( 'end', () =>
+  {
+    console.log( 'src1.end' );
+  });
+
+  src1.on( 'finish', () =>
+  {
+    console.log( 'src1.finish' );
+  });
 
   pass.on( 'data', ( chunk ) =>
   {
-    console.log( chunk.toString() );
+    console.log( 'pass.data', chunk.toString() );
   });
 
   pass.on( 'end', () =>
   {
-    console.log( 'end' );
+    debugger;
+    console.log( 'pass.end' );
   });
 
   pass.on( 'finish', () =>
   {
-    console.log( 'finish' );
+    debugger;
+    console.log( 'pass.finish' );
   });
 
   src1.write( 'src1a' );
@@ -18069,14 +18082,11 @@ function streamJoin()
   console.log( '2' );
   src2.end();
   console.log( '3' );
-  debugger;
-
-  // src1.resume();
 
   return _.time.out( 1000 );
 }
 
-streamJoin.experimental = 1;
+streamJoinExperiment.experimental = 1;
 
 // --
 // other options
@@ -18414,6 +18424,7 @@ function startOptionCurrentPaths( test )
 
 //
 
+/* qqq for Yevhen : no need to pass 3 arguments */
 function startOptionPassingThrough( test )
 {
   let context = this;
@@ -19204,10 +19215,9 @@ function startOptionPassingThrough( test )
       test.close( '3 args to parent process' );
       test.close( `mode : ${ mode }` );
       return null;
-    } )
+    })
 
     return ready;
-
   }
 
   /* - */
@@ -19233,7 +19243,7 @@ function startOptionPassingThrough( test )
   }
 }
 
-startOptionPassingThrough.timeOut = 120000;
+startOptionPassingThrough.timeOut = 300000;
 
 // --
 // termination
@@ -24490,6 +24500,7 @@ function terminateDetachedComplex( test )
       fs.writeFileSync( path.join( __dirname, 'program2RealPID' ), process.pid.toString() )
     }, context.t1 * 3 );
   }
+
 }
 
 terminateDetachedComplex.timeOut = 30000; /* qqq for Vova : suspicious! what is this test routine for?? aaa: remade,added description */
@@ -26623,7 +26634,6 @@ var Proto =
     startBasic2,
     startFork,
     startErrorHandling,
-    // startSingleOptionDry,
 
     // sync
 
@@ -26743,7 +26753,7 @@ var Proto =
 
     appTempApplication,
     startDiffPid,
-    streamJoin,
+    streamJoinExperiment,
 
     // other options
 
