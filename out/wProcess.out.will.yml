@@ -14,7 +14,7 @@ module:
       name: wProcess
       org: noorg
       description: >-
-        Collection of routines to execute system commands, run shell, batches,
+        Collection of cross-platform routines to execute system commands, run shell, batches,
         launch external processes from JavaScript application. Module Process
         leverages not only outputting data from an application but also
         inputting, makes application arguments parsing and accounting easier.
@@ -831,7 +831,7 @@ module:
       name: wProcess
       org: noorg
       description: >-
-        Collection of routines to execute system commands, run shell, batches,
+        Collection of cross-platform routines to execute system commands, run shell, batches,
         launch external processes from JavaScript application. Module Process
         leverages not only outputting data from an application but also
         inputting, makes application arguments parsing and accounting easier.
