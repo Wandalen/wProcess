@@ -19461,13 +19461,7 @@ function startOptionVerbosityLogging( test )
 
     ready.then( () =>
     {
-      test.open( `mode : ${mode}; verbosity : 4` );
-      return null;
-    } )
-
-    ready.then( () =>
-    {
-      test.case = 'logging without error';
+      test.case = `logging without error; mode : ${mode}; verbosity : 4`;
       let testAppPath2 = a.program( testApp2 );
       let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPath2, verbosity : 4 };
       let testAppPath = a.program( { routine : testApp, locals } );
@@ -19506,7 +19500,7 @@ function startOptionVerbosityLogging( test )
 
     ready.then( () =>
     {
-      test.case = 'logging with error';
+      test.case = `logging with error; mode : ${mode}; verbosity : 4`;
       let testAppPathError = a.program( testAppError );
       let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPathError, verbosity : 4 };
       let testAppPath = a.program( { routine : testApp, locals } );
@@ -19546,23 +19540,11 @@ function startOptionVerbosityLogging( test )
 
     })
 
-    ready.then( () =>
-    {
-      test.close( `mode : ${mode}; verbosity : 4` );
-      return null;
-    } )
-
-    /* - */
+    /* */
 
     ready.then( () =>
     {
-      test.open( `mode : ${mode}; verbosity : 5` );
-      return null;
-    } )
-
-    ready.then( () =>
-    {
-      test.case = 'logging without error';
+      test.case = `logging without error; mode : ${mode}; verbosity : 5`;
       let testAppPath2 = a.program( testApp2 );
       let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPath2, verbosity : 5 };
       let testAppPath = a.program( { routine : testApp, locals } );
@@ -19601,7 +19583,7 @@ function startOptionVerbosityLogging( test )
 
     ready.then( () =>
     {
-      test.case = 'logging with error';
+      test.case = `logging with error; mode : ${mode}; verbosity : 5`;
       let testAppPathError = a.program( testAppError );
       let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPathError, verbosity : 5 };
       let testAppPath = a.program( { routine : testApp, locals } );
@@ -19640,12 +19622,6 @@ function startOptionVerbosityLogging( test )
       } )
 
     })
-
-    ready.then( () =>
-    {
-      test.close( `mode : ${mode}; verbosity : 5` );
-      return null;
-    } )
 
     return ready;
   }
