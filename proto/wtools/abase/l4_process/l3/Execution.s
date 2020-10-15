@@ -93,6 +93,15 @@ function startCommon_head( routine, args )
   o.outputPiping = !!o.outputPiping;
   _.assert( _.numberIs( o.verbosity ) );
   _.assert( _.boolLike( o.outputPiping ) );
+  _.assert( _.boolLike( o.outputCollecting ) );
+
+  if( Config.debug )
+  if( o.outputPiping || o.outputCollecting )
+  _.assert
+  (
+    o.stdio === 'pipe' || o.stdio[ 1 ] === 'pipe' || o.stdio[ 2 ] === 'pipe'
+    , '"stdout" is not available to collect output or pipe it. Set stdout/stderr channel(s) or option::stdio to "pipe", please'
+  );
 
   if( o.outputAdditive === null )
   o.outputAdditive = true;
@@ -182,8 +191,8 @@ function startMinimal_body( o )
   handleProcedureTerminationBegin,
   exitCodeSet,
   infoGet,
-  handleStderr,
-  handleStdout,
+  handleStreamErr,
+  handleStreamOut,
   log,
 
 */
@@ -282,7 +291,6 @@ function startMinimal_body( o )
     /* ipc */
 
     _.assert( _.boolLike( o.ipc ) );
-
     _.assert( _.longIs( o.stdio ) );
     _.assert( !o.ipc || _.longHas( [ 'fork', 'spawn' ], o.mode ), `Mode::${o.mode} doesn't support inter process communication.` );
     _.assert( o.mode !== 'fork' || !!o.ipc, `In mode::fork option::ipc must be true. Such subprocess can not have no ipc.` );
@@ -379,7 +387,11 @@ function startMinimal_body( o )
     /* stdio compatibility check */
     if( Config.debug )
     if( o.outputPiping || o.outputCollecting )
-    _.assert( o.stdio === 'pipe' || o.stdio[ 1 ] === 'pipe' || o.stdio[ 2 ] === 'pipe', '"stdout" is not available to collect output or pipe it. Set stdout/stderr channel(s) or option::stdio to "pipe", please' );
+    _.assert
+    (
+      o.stdio === 'pipe' || o.stdio[ 1 ] === 'pipe' || o.stdio[ 2 ] === 'pipe'
+      , '"stdout" is not available to collect output or pipe it. Set stdout/stderr channel(s) or option::stdio to "pipe", please'
+    );
 
     /* passingThrough */
 
@@ -905,26 +917,29 @@ function startMinimal_body( o )
     if( o.dry )
     return;
 
-    if( o.outputPiping || o.outputCollecting )
-    _.assert( !!o.process.stdout || !!o.process.stderr, 'stdout is not available to collect output or pipe it. Set option::stdio to "pipe"' );
+    _.assert
+    (
+      ( !o.outputPiping && !o.outputCollecting ) || !!o.process.stdout || !!o.process.stderr,
+      'stdout is not available to collect output or pipe it. Set option::stdio to "pipe"'
+    );
 
     /* piping out channel */
 
     if( o.outputPiping || o.outputCollecting )
     if( o.process.stdout )
     if( o.sync && !o.deasync )
-    handleStdout( o.process.stdout );
+    handleStreamOut( o.process.stdout );
     else
-    o.process.stdout.on( 'data', handleStdout );
+    o.process.stdout.on( 'data', handleStreamOut );
 
     /* piping error channel */
 
     /* there is no if here because algorithm should collect error output in stderrOutput */
     if( o.process.stderr )
     if( o.sync && !o.deasync )
-    handleStderr( o.process.stderr );
+    handleStreamErr( o.process.stderr );
     else
-    o.process.stderr.on( 'data', handleStderr );
+    o.process.stderr.on( 'data', handleStreamErr );
 
     /* handling */
 
@@ -1178,7 +1193,7 @@ function startMinimal_body( o )
 
   /* */
 
-  function handleStderr( data )
+  function handleStreamErr( data )
   {
 
     if( _.bufferAnyIs( data ) )
@@ -1207,7 +1222,7 @@ function startMinimal_body( o )
 
   /* */
 
-  function handleStdout( data )
+  function handleStreamOut( data )
   {
 
     if( _.bufferAnyIs( data ) )
@@ -1506,8 +1521,8 @@ function start_body( o )
     o.streamErr = null
 
     // xxx : swich on
-    // if( o.stdio[ 1 ] !== 'ignore' )
-    // formStreams();
+    if( o.stdio[ 1 ] !== 'ignore' )
+    formStreams();
 
     if( !o.dry )
     if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
@@ -1528,6 +1543,20 @@ function start_body( o )
     o.streamOut = new Stream.PassThrough();
     _.assert( o.streamOut._pipes === undefined );
     o.streamOut._pipes = [];
+
+    /* piping out channel */
+
+    if( /*o.outputPiping ||*/ o.outputCollecting )
+    if( o.streamOut )
+    // if( !o.sync || o.deasync ) /* xxx : hanle sync case */
+    o.streamOut.on( 'data', handleStreamOut );
+
+    /* piping error channel */
+
+    if( /*o.outputPiping ||*/ o.outputCollecting )
+    if( o.streamErr )
+    // if( !o.sync || o.deasync ) /* xxx : hanle sync case */
+    o.streamErr.on( 'data', handleStreamOut );
 
   }
 
@@ -1556,13 +1585,25 @@ function start_body( o )
     {
       console.log( 'streamPipe.end' ); debugger;
       _.arrayRemoveOnceStrictly( o.streamOut._pipes, stream );
-      if( o.streamOut._pipes.length === 0 )
+      if( o.streamOut._pipes.length === 0 && o.concurrent )
       {
         console.log( 'o.streamOut.end' );
-        // o.streamOut.end();
+        o.streamOut.end();
       }
     });
 
+  }
+
+  /* */
+
+  function handleStreamOut( data )
+  {
+    if( _.bufferAnyIs( data ) )
+    data = _.bufferToStr( data );
+    if( o.outputGraying )
+    data = StripAnsi( data );
+    if( o.outputCollecting )
+    o.output += data;
   }
 
   /* */
@@ -1574,12 +1615,7 @@ function start_body( o )
     form2();
 
     if( o.sync && !o.deasync )
-    {
-      o.ready.deasync();
-      // o.ready.give( 1 );
-      // if( readyCallback )
-      // o.ready.finally( readyCallback );
-    }
+    o.ready.deasync();
 
     o.ready
     .then( run2 )
@@ -1692,6 +1728,8 @@ function start_body( o )
       }
     }
 
+    if( 0 )
+    if( o.outputCollecting )
     for( let a = 0 ; a < o.runs.length ; a++ )
     {
       let o2 = o.runs[ a ];

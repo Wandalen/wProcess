@@ -9391,14 +9391,14 @@ function startReadyDelayMultiple( test )
         test.identical( op.exitReason, 'normal' );
         test.identical( op.ended, true );
 // xxx : introduce streams into o-descriptor
-//         let exp =
-// `
-// 1::begin
-// 2::begin
-// 1::end
-// 2::end
-// `
-//         test.equivalent( op.output, exp );
+        let exp =
+`
+1::begin
+2::begin
+1::end
+2::end
+`
+        test.equivalent( op.output, exp );
         op.runs.forEach( ( op2, counter ) =>
         {
           test.identical( op2.exitCode, 0 );
