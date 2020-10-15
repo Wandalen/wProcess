@@ -9391,14 +9391,14 @@ function startReadyDelayMultiple( test )
         test.identical( op.exitReason, 'normal' );
         test.identical( op.ended, true );
 // xxx : introduce streams into o-descriptor
-        let exp =
-`
-1::begin
-2::begin
-1::end
-2::end
-`
-        test.equivalent( op.output, exp );
+//         let exp =
+// `
+// 1::begin
+// 2::begin
+// 1::end
+// 2::end
+// `
+//         test.equivalent( op.output, exp );
         op.runs.forEach( ( op2, counter ) =>
         {
           test.identical( op2.exitCode, 0 );
@@ -16539,6 +16539,7 @@ function startOptionLoggerTransofrmation( test )
 
 //
 
+/* qqq for Yevhen : describe test cases */
 function startOutputOptionsCompatibilityLateCheck( test )
 {
   let context = this;
@@ -16612,7 +16613,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
       }
       _.mapExtend( o, commonOptions );
 
-      return test.shouldThrowErrorAsync( _.process.start( o ) );
+      return test.shouldThrowErrorSync( () => _.process.start( o ) );
     })
 
     /* */
@@ -16627,7 +16628,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
       }
       _.mapExtend( o, commonOptions );
 
-      return test.shouldThrowErrorAsync( _.process.start( o ) );
+      return test.shouldThrowErrorSync( () => _.process.start( o ) );
     })
 
     /* */
@@ -16642,7 +16643,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
       }
       _.mapExtend( o, commonOptions );
 
-      return test.shouldThrowErrorAsync( _.process.start( o ) );
+      return test.shouldThrowErrorSync( () => _.process.start( o ) );
     })
 
     /* */
@@ -16803,7 +16804,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
 
       _.mapExtend( o, commonOptions );
 
-      return test.shouldThrowErrorAsync( _.process.start( o ) );
+      return test.shouldThrowErrorSync( () => _.process.start( o ) );
     })
 
     /* */
@@ -16819,7 +16820,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
 
       _.mapExtend( o, commonOptions );
 
-      return test.shouldThrowErrorAsync( _.process.start( o ) );
+      return test.shouldThrowErrorSync( () => _.process.start( o ) );
     })
 
     /* */
@@ -16835,7 +16836,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
 
       _.mapExtend( o, commonOptions );
 
-      return test.shouldThrowErrorAsync( _.process.start( o ) );
+      return test.shouldThrowErrorSync( () => _.process.start( o ) );
     })
 
     /* */
@@ -16851,7 +16852,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
 
       _.mapExtend( o, commonOptions );
 
-      return test.shouldThrowErrorAsync( _.process.start( o ) );
+      return test.shouldThrowErrorSync( () => _.process.start( o ) );
     })
 
     /* */
@@ -16867,7 +16868,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
 
       _.mapExtend( o, commonOptions );
 
-      return test.shouldThrowErrorAsync( _.process.start( o ) );
+      return test.shouldThrowErrorSync(  () => _.process.start( o ) );
     })
 
     /* */
