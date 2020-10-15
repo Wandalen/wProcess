@@ -3,8 +3,8 @@ root:
   - wProcess.out
 consistency:
   ../.ex.will.yml: &ref_0
-    hash: 6643e08d0b3c09445e54e71704696a7b
-    size: 2146
+    hash: ad280127a9f801a3bf1cdd9b30cb663b
+    size: 2161
   ../.im.will.yml: &ref_1
     hash: b734539a1cb97c3f19a71a75a1828015
     size: 5552
@@ -14,12 +14,12 @@ module:
       name: wProcess
       org: noorg
       description: >-
-        Collection of cross-platform routines to execute system commands, run shell, batches,
-        launch external processes from JavaScript application. Module Process
-        leverages not only outputting data from an application but also
-        inputting, makes application arguments parsing and accounting easier.
-        Use the module to get uniform experience from interaction with an
-        external processes on different platforms and operating systems.
+        Collection of cross-platform routines to execute system commands, run
+        shell, batches, launch external processes from JavaScript application.
+        Module Process leverages not only outputting data from an application
+        but also inputting, makes application arguments parsing and accounting
+        easier. Use the module to get uniform experience from interaction with
+        an external processes on different platforms and operating systems.
       enabled: 1
       version: 0.4.0
       interpreters: &ref_2
@@ -831,12 +831,12 @@ module:
       name: wProcess
       org: noorg
       description: >-
-        Collection of cross-platform routines to execute system commands, run shell, batches,
-        launch external processes from JavaScript application. Module Process
-        leverages not only outputting data from an application but also
-        inputting, makes application arguments parsing and accounting easier.
-        Use the module to get uniform experience from interaction with an
-        external processes on different platforms and operating systems.
+        Collection of cross-platform routines to execute system commands, run
+        shell, batches, launch external processes from JavaScript application.
+        Module Process leverages not only outputting data from an application
+        but also inputting, makes application arguments parsing and accounting
+        easier. Use the module to get uniform experience from interaction with
+        an external processes on different platforms and operating systems.
       enabled: 1
       version: 0.4.0
       interpreters: *ref_2
@@ -1535,8 +1535,8 @@ module:
           - 'build::npm'
     consistency:
       ../.ex.will.yml:
-        hash: 6643e08d0b3c09445e54e71704696a7b
-        size: 2146
+        hash: ad280127a9f801a3bf1cdd9b30cb663b
+        size: 2161
       ../.im.will.yml:
         hash: b734539a1cb97c3f19a71a75a1828015
         size: 5552
