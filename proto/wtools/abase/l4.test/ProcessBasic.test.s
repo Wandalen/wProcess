@@ -19449,19 +19449,20 @@ function startOptionVerbosityLogging( test )
   let context = this;
   let a = context.assetFor( test, false );
   let modes = [ 'fork', 'spawn', 'shell' ];
-  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode, 4 ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode, 5 ) ) );
 
   return a.ready;
 
   /* */
 
-  function run( mode )
+  function run( mode, verbosity )
   {
     let ready = new _.Consequence().take( null );
 
     ready.then( () =>
     {
-      test.open( `mode : ${mode}` );
+      test.open( `mode : ${mode}; verbosity : ${verbosity}` );
       return null;
     } )
 
@@ -19469,7 +19470,7 @@ function startOptionVerbosityLogging( test )
     {
       test.case = 'logging without error';
       let testAppPath2 = a.program( testApp2 );
-      let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPath2 };
+      let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPath2, verbosity };
       let testAppPath = a.program( { routine : testApp, locals } );
 
       let options =
@@ -19488,7 +19489,14 @@ function startOptionVerbosityLogging( test )
         test.identical( op.exitReason, 'normal' );
         test.identical( op.ended, true );
         test.identical( op.state, 'terminated' );
-        test.identical( _.strCount( op.output, '< Process returned error code 0' ), 1 );
+        if( verbosity < 5 )
+        {
+          test.identical( _.strCount( op.output, '< Process returned error code 0' ), 0 );
+        }
+        else if( verbosity >=5 )
+        {
+          test.identical( _.strCount( op.output, '< Process returned error code 0' ), 1 );
+        }
         test.identical( _.strCount( op.output, `Launched as "node ${ testAppPath2 }"` ), 0 );
         test.identical( _.strCount( op.output, `Launched at ${ _.strQuote( op.currentPath ) }` ), 0 );
         test.identical( _.strCount( op.output, '-> Stderr' ), 0 );
@@ -19508,7 +19516,7 @@ function startOptionVerbosityLogging( test )
     {
       test.case = 'logging with error';
       let testAppPathError = a.program( testAppError );
-      let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPathError };
+      let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPathError, verbosity };
       let testAppPath = a.program( { routine : testApp, locals } );
 
       let options =
@@ -19523,16 +19531,36 @@ function startOptionVerbosityLogging( test )
       .then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
-        test.identical( _.strCount( op.output, '< Process returned error code 255' ), 1 );
-        test.identical( _.strCount( op.output, `Launched as "node ${ testAppPathError }"` ), 1 );
-        test.identical( _.strCount( op.output, `Launched at ${ _.strQuote( op.currentPath ) }` ), 1 );
-        test.identical( _.strCount( op.output, '-> Stderr' ), 1 );
-        test.is( _.strHas( op.output, '= Message of error' ) );
-        test.is( _.strHas( op.output, '= Beautified calls stack' ) );
-        test.is( _.strHas( op.output, '= Throws stack' ) );
-        test.is( _.strHas( op.output, '= Process' ) );
-        test.is( _.strHas( op.output, 'Source code from' ) );
-        test.identical( _.strCount( op.output, '-< Stderr' ), 1 );
+        test.identical( op.exitSignal, null );
+        test.identical( op.exitReason, 'normal' );
+        test.identical( op.ended, true );
+        test.identical( op.state, 'terminated' );
+        if( verbosity < 5 )
+        {
+          test.identical( _.strCount( op.output, '< Process returned error code 255' ), 0 );
+          test.identical( _.strCount( op.output, `Launched as "node ${ testAppPathError }"` ), 0 );
+          test.identical( _.strCount( op.output, `Launched at ${ _.strQuote( op.currentPath ) }` ), 0 );
+          test.identical( _.strCount( op.output, '-> Stderr' ), 0 );
+          test.is( !_.strHas( op.output, '= Message of error' ) );
+          test.is( !_.strHas( op.output, '= Beautified calls stack' ) );
+          test.is( !_.strHas( op.output, '= Throws stack' ) );
+          test.is( !_.strHas( op.output, '= Process' ) );
+          test.is( !_.strHas( op.output, 'Source code from' ) );
+          test.identical( _.strCount( op.output, '-< Stderr' ), 0 );
+        }
+        else if( verbosity >= 5 )
+        {
+          test.identical( _.strCount( op.output, '< Process returned error code 255' ), 1 );
+          test.identical( _.strCount( op.output, `Launched as "node ${ testAppPathError }"` ), 1 );
+          test.identical( _.strCount( op.output, `Launched at ${ _.strQuote( op.currentPath ) }` ), 1 );
+          test.identical( _.strCount( op.output, '-> Stderr' ), 1 );
+          test.is( _.strHas( op.output, '= Message of error' ) );
+          test.is( _.strHas( op.output, '= Beautified calls stack' ) );
+          test.is( _.strHas( op.output, '= Throws stack' ) );
+          test.is( _.strHas( op.output, '= Process' ) );
+          test.is( _.strHas( op.output, 'Source code from' ) );
+          test.identical( _.strCount( op.output, '-< Stderr' ), 1 );
+        }
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPathError );
@@ -19544,7 +19572,7 @@ function startOptionVerbosityLogging( test )
 
     ready.then( () =>
     {
-      test.close( `mode : ${mode}` );
+      test.close( `mode : ${mode}; verbosity : ${verbosity}` );
       return null;
     } )
 
@@ -19563,10 +19591,12 @@ function startOptionVerbosityLogging( test )
     {
       execPath : 'node ' + programPath,
       throwingExitCode : 0,
-      verbosity : 5
+      outputCollecting : 0,
+      outputPiping : 0,
+      verbosity
     }
 
-    return _.process.start( options )
+    return _.process.start( options );
   }
 
   function testApp2()
