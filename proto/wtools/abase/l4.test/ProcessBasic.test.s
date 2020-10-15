@@ -527,7 +527,7 @@ ${programPath}:end
     process.exit( args.map.exitWithCode )
 
     if( args.map.loop )
-    _.time.out( 5000 );
+    _.time.out( context.t2 ); /* 5000 */
 
     console.log( `${__filename}:end` );
   }
@@ -1431,7 +1431,7 @@ function startSync( test )
     process.exit( args.map.exitWithCode )
 
     if( args.map.loop )
-    _.time.out( 5000 )
+    _.time.out( context.t2 ) /* 5000 */
 
     console.log( __filename );
   }
@@ -1640,7 +1640,7 @@ function startSyncDeasync( test )
     process.exit( args.map.exitWithCode )
 
     if( args.map.loop )
-    _.time.out( 5000 )
+    _.time.out( context.t2 ) /* 5000 */
 
     console.log( __filename );
   }
@@ -8905,7 +8905,7 @@ function startOnTerminateSeveralCallbacksChronology( test )
       track.push( 'conTerminate.2' );
       test.identical( o.exitCode, 0 );
       test.identical( o.state, 'terminated' );
-      return _.time.out( 1000 + context.t2 );
+      return _.time.out( context.t1 * 6 ); /* 1000 + context.t2 */
     })
 
     o.conTerminate.then( () =>
@@ -8927,7 +8927,7 @@ function startOnTerminateSeveralCallbacksChronology( test )
 
   /*  */
 
-  return _.time.out( 1000 + context.t2 + context.t2, () =>
+  return _.time.out( context.t1 * 11, () => /* 1000 + context.t2 + context.t2 */
   {
     test.identical( track, [ 'end', 'conTerminate.1', 'conTerminate.2', 'ready', 'conTerminate.3' ] );
   });
@@ -9070,7 +9070,7 @@ function startChronology( test )
       */
     })
 
-    let result = _.time.out( 1000 + context.t2, () =>
+    let result = _.time.out( context.t1 * 6, () => /* 1000 + context.t2 */
     {
       test.identical( track, [ 'conStart', 'conTerminate', 'ready' ] );
 
@@ -9918,7 +9918,7 @@ function startAfterDeath( test )
       test.is( _.process.isAlive( childPid ) );
       test.case = 'child of secondary process does not exit yet'
       test.is( !a.fileProvider.fileExists( testFilePath ) );
-      return _.time.out( 10000 );
+      return _.time.out( context.t2 * 2 ); /* 10000 */
     })
 
     o.conTerminate.then( () =>
@@ -9969,7 +9969,7 @@ function startAfterDeath( test )
       process.send( o.process.pid );
     })
 
-    _.time.out( 5000, () =>
+    _.time.out( context.t2, () => /* 5000 */
     {
       console.log( 'parent termination begin' );
       _.procedure.terminationBegin();
@@ -9986,7 +9986,7 @@ function startAfterDeath( test )
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
-    _.time.out( 5000, () =>
+    _.time.out( context.t2, () => /* 5000 */
     {
       let filePath = _.path.join( __dirname, 'testFile' );
       _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
@@ -10152,7 +10152,7 @@ function startDetachingModeSpawnResourceReady( test )
 
     console.log( 'Child process start' )
 
-    _.time.out( 5000, () =>
+    _.time.out( context.t2, () => /* 5000 */
     {
       let filePath = _.path.join( __dirname, 'testFile' );
       _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
@@ -10227,7 +10227,7 @@ function startDetachingModeForkResourceReady( test )
 
     console.log( 'Child process start' )
 
-    _.time.out( 5000, () =>
+    _.time.out( context.t2, () => /* 5000 */
     {
       let filePath = _.path.join( __dirname, 'testFile' );
       _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
@@ -10300,7 +10300,7 @@ function startDetachingModeShellResourceReady( test )
 
     console.log( 'Child process start' )
 
-    _.time.out( 5000, () =>
+    _.time.out( context.t2, () => /* 5000 */
     {
       let filePath = _.path.join( __dirname, 'testFile' );
       _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
@@ -10531,7 +10531,7 @@ function startDetachingModeSpawnNoTerminationBegin( test )
 
     console.log( 'Child process start' )
 
-    _.time.out( 5000, () =>
+    _.time.out( context.t2, () => /* 5000 */
     {
       let filePath = _.path.join( __dirname, 'testFile' );
       _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
@@ -10680,7 +10680,7 @@ function startDetachingModeForkNoTerminationBegin( test )
 
     console.log( 'Child process start' )
 
-    _.time.out( 5000, () =>
+    _.time.out( context.t2, () => /* 5000 */
     {
       let filePath = _.path.join( __dirname, 'testFile' );
       _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
@@ -10827,7 +10827,7 @@ function startDetachingModeShellNoTerminationBegin( test )
 
     console.log( 'Child process start' )
 
-    _.time.out( 5000, () =>
+    _.time.out( context.t2, () => /* 5000 */
     {
       let filePath = _.path.join( __dirname, 'testFile' );
       _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
@@ -10966,7 +10966,7 @@ function startDetachedOutputStdioIgnore( test )
 
     console.log( 'Child process start' )
 
-    _.time.out( 5000, () =>
+    _.time.out( context.t2, () => /* 5000 */
     {
       console.log( 'Child process end' )
       return null;
@@ -11110,7 +11110,7 @@ function startDetachedOutputStdioPipe( test )
 
     console.log( 'Child process start' )
 
-    _.time.out( 5000, () =>
+    _.time.out( context.t2, () => /* 5000 */
     {
       console.log( 'Child process end' )
       return null;
@@ -11198,7 +11198,7 @@ function startDetachedOutputStdioInherit( test )
 
     console.log( 'Child process start' )
 
-    _.time.out( 5000, () =>
+    _.time.out( context.t2, () => /* 5000 */
     {
       let filePath = _.path.join( __dirname, 'testFile' );
       _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
@@ -11577,7 +11577,7 @@ function startDetachingTrivial( test )
     test.is( !_.strHas( op.output, 'Child process end' ) );
     test.identical( o.exitCode, op.exitCode );
     test.identical( o.output, op.output );
-    return _.time.out( 10000 );
+    return _.time.out( context.t2 * 2 ); /* 10000 */
   })
 
   o.conTerminate.then( () =>
@@ -11639,7 +11639,7 @@ function startDetachingTrivial( test )
       process.send( 'ready to disconnect' )
     })
 
-    _.time.out( 5000, () =>
+    _.time.out( context.t2, () => /* 5000 */
     {
       console.log( 'Child process end' );
       let filePath = _.path.join( __dirname, 'testFile' );
@@ -11992,7 +11992,7 @@ function startDetachingChildExitsAfterParent( test )
       test.identical( op.ended, true );
       test.is( !_.process.isAlive( o.process.pid ) );
       test.is( _.process.isAlive( childPid ) );
-      return _.time.out( 10000 ); /* zzz */
+      return _.time.out( context.t2 * 2 ); /* 10000 */ /* zzz */
     })
 
     o.conTerminate.then( () =>
@@ -12033,7 +12033,7 @@ function startDetachingChildExitsAfterParent( test )
 
     process.send( o.process.pid );
 
-    _.time.out( 1000, () => o.disconnect() );
+    _.time.out( context.t1, () => o.disconnect() ); /* 1000 */
   }
 
   function testAppChild()
@@ -12044,7 +12044,7 @@ function startDetachingChildExitsAfterParent( test )
 
     console.log( 'Child process start' );
 
-    _.time.out( 5000, () =>
+    _.time.out( context.t2, () => /* 5000 */
     {
       let filePath = _.path.join( __dirname, 'testFile' );
       _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
@@ -12162,7 +12162,7 @@ function startDetachingChildExitsBeforeParent( test )
       return null;
     })
 
-    _.time.out( 5000, () =>
+    _.time.out( context.t2, () => /* 5000 */
     {
       console.log( 'Parent process end' )
     });
@@ -12176,7 +12176,7 @@ function startDetachingChildExitsBeforeParent( test )
 
     console.log( 'Child process start' )
 
-    _.time.out( 1000, () =>
+    _.time.out( context.t1, () => /* 1000 */
     {
       let filePath = _.path.join( __dirname, 'testFile' );
       _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
@@ -12273,7 +12273,7 @@ function startDetachingDisconnectedEarly( test )
         return null;
       })
 
-      result = _.time.out( 5000, () =>
+      result = _.time.out( context.t2, () => /* 5000 */
       {
         test.identical( o.state, 'disconnected' );
         test.identical( o.ended, true );
@@ -12397,7 +12397,7 @@ function startDetachingDisconnectedLate( test )
         return null;
       })
 
-      result = _.time.out( 5000, () =>
+      result = _.time.out( context.t2, () => /* 5000 */
       {
         test.identical( o.state, 'disconnected' );
         test.identical( o.ended, true );
@@ -12490,7 +12490,7 @@ function startDetachingChildExistsBeforeParentWaitForTermination( test )
 
     var args = _.process.args();
 
-    _.time.out( 2000, () =>
+    _.time.out( context.t1 * 2, () => /* 2000 */
     {
       console.log( 'Child process end' )
       return null;
@@ -12577,7 +12577,7 @@ function startDetachingEndCompetitorIsExecuted( test )
 
     var args = _.process.args();
 
-    _.time.out( 2000, () =>
+    _.time.out( context.t1 * 2, () => /* 2000 */
     {
       console.log( 'Child process end' )
       return null;
@@ -12899,7 +12899,7 @@ function startDetachingTerminationBegin( test )
     _.include( 'wProcess' );
     _.include( 'wFiles' );
     console.log( 'Child process start', process.pid )
-    _.time.out( 2000, () =>
+    _.time.out( context.t1 * 2, () => /* 2000 */
     {
       let filePath = _.path.join( __dirname, 'testFile' );
       _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
@@ -12973,7 +12973,7 @@ function startDetachingThrowing( test )
 
     console.log( 'Child process start' )
 
-    _.time.out( 5000, () =>
+    _.time.out( context.t2, () => /* 5000 */
     {
       let filePath = _.path.join( __dirname, 'testFile' );
       _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
@@ -13206,7 +13206,7 @@ function startOnStart( test )
 
       result = test.shouldThrowErrorAsync( o.conTerminate );
 
-      result.then( () => _.time.out( 2000 ) )
+      result.then( () => _.time.out( context.t1 * 2 ) ) /* 2000 */
       result.then( () =>
       {
         test.identical( o.conTerminate.resourcesCount(), 0 );
@@ -13265,7 +13265,7 @@ function startOnStart( test )
         return null;
       })
 
-      let ready = _.time.out( 5000, () =>
+      let ready = _.time.out( context.t2, () => /* 5000 */
       {
         test.identical( track, [ 'conStart', 'conDisconnect' ] );
         o.conTerminate.cancel();
@@ -13313,7 +13313,7 @@ function startOnStart( test )
         return null;
       })
 
-      result = _.time.out( 2000 + context.t2, () =>
+      result = _.time.out( context.t1 * 7, () => /* 2000 + context.t2 */
       {
         test.is( !_.process.isAlive( o.process.pid ) )
         test.identical( o.exitCode, null );
@@ -13343,7 +13343,7 @@ function startOnStart( test )
 
     var args = _.process.args();
 
-    _.time.out( 2000, () =>
+    _.time.out( context.t1 * 2, () => /* 2000 */
     {
       console.log( 'Child process end' );
       return null;
@@ -13442,7 +13442,7 @@ function startOnTerminate( test )
         return null;
       })
 
-      return _.time.out( 2000 + context.t2, () =>
+      return _.time.out( context.t1 * 7, () => /* 2000 + context.t2 */
       {
         test.identical( o.state, 'disconnected' );
         test.identical( o.ended, true );
@@ -13527,7 +13527,7 @@ function startOnTerminate( test )
         return null;
       })
 
-      return _.time.out( 2000 + context.t2, () => /* 3000 is not enough */
+      return _.time.out( context.t1 * 7, () =>  /* 2000 + context.t2 */ /* 3000 is not enough */
       {
         test.identical( track, [] );
         test.identical( o.state, 'disconnected' );
@@ -13663,7 +13663,7 @@ function startOnTerminate( test )
         return null;
       })
 
-      return _.time.out( 2000 + context.t2, () => /* 3000 is not enough */
+      return _.time.out( context.t1 * 7, () =>  /* 2000 + context.t2 */ /* 3000 is not enough */
       {
         test.identical( track, [] );
         test.identical( o.state, 'disconnected' );
@@ -13696,7 +13696,7 @@ function startOnTerminate( test )
 
     var args = _.process.args();
 
-    _.time.out( 2000, () =>
+    _.time.out( context.t1 * 2, () => /* 2000 */
     {
       if( args.map.throwing )
       throw _.err( 'Child process error' );
@@ -13739,7 +13739,7 @@ function startNoEndBug1( test )
 
     result = test.shouldThrowErrorAsync( o.conTerminate );
 
-    result.then( () => _.time.out( 2000 ) )
+    result.then( () => _.time.out( context.t1 * 2 ) ) /* 2000 */
     result.then( () =>
     {
       test.identical( o.conTerminate.resourcesCount(), 0 );
@@ -17626,7 +17626,7 @@ function startDiffPid( test )
     _.include( 'wProcess' );
     _.include( 'wFiles' );
     console.log( 'Child process start', process.pid );
-    _.time.out( 2000, () =>
+    _.time.out( context.t1 * 2, () => /* 2000 */
     {
       let filePath = _.path.join( __dirname, 'testFile' );
       _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
@@ -17694,7 +17694,7 @@ function streamJoinExperiment()
   src2.end();
   console.log( '3' );
 
-  return _.time.out( 1000 );
+  return _.time.out( context.t1 ); /* 1000 */
 }
 
 streamJoinExperiment.experimental = 1;
@@ -19271,7 +19271,7 @@ function kill( test )
 
     let ready = _.process.start( o )
 
-    _.time.out( 1000, () => _.process.kill( o.process ) )
+    _.time.out( context.t1, () => _.process.kill( o.process ) ) /* 1000 */
 
     ready.then( ( op ) =>
     {
@@ -19299,7 +19299,7 @@ function kill( test )
 
     let ready = _.process.start( o )
 
-    _.time.out( 1000, () => _.process.kill( o.process.pid ) )
+    _.time.out( context.t1, () => _.process.kill( o.process.pid ) ) /* 1000 */
 
     ready.then( ( op ) =>
     {
@@ -19337,7 +19337,7 @@ function kill( test )
 
     let ready = _.process.start( o )
 
-    _.time.out( 1000, () => _.process.kill( o.process ) )
+    _.time.out( context.t1, () => _.process.kill( o.process ) ) /* 1000 */
 
     ready.then( ( op ) =>
     {
@@ -19365,7 +19365,7 @@ function kill( test )
 
     let ready = _.process.start( o )
 
-    _.time.out( 1000, () => _.process.kill( o.process.pid ) )
+    _.time.out( context.t1, () => _.process.kill( o.process.pid ) ) /* 1000 */
 
     ready.then( ( op ) =>
     {
@@ -19403,7 +19403,7 @@ function kill( test )
 
     let ready = _.process.start( o )
 
-    _.time.out( 1000, () => _.process.kill( o.process ) )
+    _.time.out( context.t1, () => _.process.kill( o.process ) ) /* 1000 */
 
     ready.then( ( op ) =>
     {
@@ -19434,7 +19434,7 @@ function kill( test )
 
     let ready = _.process.start( o )
 
-    _.time.out( 1000, () => _.process.kill( o.process.pid ) )
+    _.time.out( context.t1, () => _.process.kill( o.process.pid ) ) /* 1000 */
 
     ready.then( ( op ) =>
     {
@@ -21279,7 +21279,7 @@ function startErrorAfterTerminationWithSend( test )
       return null;
     })
 
-    return _.time.out( 10000, () =>
+    return _.time.out( context.t2 * 2, () => /* 10000 */
     {
       test.identical( track, [ 'conStart', 'conTerminate', 'uncaughtError' ] );
       test.identical( o.ended, true );
@@ -24494,7 +24494,7 @@ function terminateWithDetachedChildren( test )
           test.is( _.strHas( op.output, 'SIGTERM' ) );
         }
 
-        return _.time.out( 9000, () =>
+        return _.time.out( context.t1 * 9, () => /* 9000 */
         {
           /* zzz : problem with termination of detached proces on Windows, child process does't receive SIGINT */
           if( process.platform === 'win32' )
@@ -24540,7 +24540,7 @@ function terminateWithDetachedChildren( test )
       throwingExitCode : 0
     }
     _.process.start( o );
-    _.time.out( 1000, () =>
+    _.time.out( context.t1, () => /* 1000 */
     {
       process.send( o.process.pid )
     })
@@ -24603,11 +24603,11 @@ function terminateWithDetachedChildren( test )
       _.errAttend( err )
       return null;
     })
-    _.time.out( 1000, () =>
+    _.time.out( context.t1, () => /* 1000 */
     {
       process.send( [ o1.process.pid, o2.process.pid ] )
     })
-    _.time.out( 4000, () =>
+    _.time.out( context.t1 * 4, () => /* 4000 */
     {
       _.procedure.terminationBegin();
     })
@@ -25291,7 +25291,7 @@ function terminateDifferentStdio( test )
 
     let ready = _.process.start( o )
 
-    _.time.out( 1500, () =>
+    _.time.out( context.t0 * 15, () => /* 1500 */
     {
       return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
     })
@@ -25334,7 +25334,7 @@ function terminateDifferentStdio( test )
 
     let ready = _.process.start( o )
 
-    _.time.out( 1500, () =>
+    _.time.out( context.t0 * 15, () => /* 1500 */
     {
       return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
     })
@@ -25375,7 +25375,7 @@ function terminateDifferentStdio( test )
 
     let ready = _.process.start( o )
 
-    _.time.out( 1500, () =>
+    _.time.out( context.t0 * 15, () => /* 1500 */
     {
       return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
     })
@@ -25417,7 +25417,7 @@ function terminateDifferentStdio( test )
 
     let ready = _.process.start( o )
 
-    _.time.out( 1500, () =>
+    _.time.out( context.t0 * 15, () => /* 1500 */
     {
       return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
     })
@@ -25461,7 +25461,7 @@ function terminateDifferentStdio( test )
 
     let ready = _.process.start( o )
 
-    _.time.out( 1500, () =>
+    _.time.out( context.t0 * 15, () => /* 1500 */
     {
       return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
     })
@@ -25505,7 +25505,7 @@ function terminateDifferentStdio( test )
 
     let ready = _.process.start( o )
 
-    _.time.out( 1500, () =>
+    _.time.out( context.t0 * 15, () => /* 1500 */
     {
       return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
     })
