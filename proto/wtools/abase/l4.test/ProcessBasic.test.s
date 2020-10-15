@@ -16958,6 +16958,7 @@ function startOptionLoggerTransofrmation( test )
 
 //
 
+/* qqq for Yevhen : describe test cases */
 function startOutputOptionsCompatibilityLateCheck( test )
 {
   let context = this;
@@ -17031,7 +17032,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
       }
       _.mapExtend( o, commonOptions );
 
-      return test.shouldThrowErrorAsync( _.process.start( o ) );
+      return test.shouldThrowErrorSync( () => _.process.start( o ) );
     })
 
     /* */
@@ -17046,7 +17047,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
       }
       _.mapExtend( o, commonOptions );
 
-      return test.shouldThrowErrorAsync( _.process.start( o ) );
+      return test.shouldThrowErrorSync( () => _.process.start( o ) );
     })
 
     /* */
@@ -17061,7 +17062,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
       }
       _.mapExtend( o, commonOptions );
 
-      return test.shouldThrowErrorAsync( _.process.start( o ) );
+      return test.shouldThrowErrorSync( () => _.process.start( o ) );
     })
 
     /* */
@@ -17222,7 +17223,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
 
       _.mapExtend( o, commonOptions );
 
-      return test.shouldThrowErrorAsync( _.process.start( o ) );
+      return test.shouldThrowErrorSync( () => _.process.start( o ) );
     })
 
     /* */
@@ -17238,7 +17239,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
 
       _.mapExtend( o, commonOptions );
 
-      return test.shouldThrowErrorAsync( _.process.start( o ) );
+      return test.shouldThrowErrorSync( () => _.process.start( o ) );
     })
 
     /* */
@@ -17254,7 +17255,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
 
       _.mapExtend( o, commonOptions );
 
-      return test.shouldThrowErrorAsync( _.process.start( o ) );
+      return test.shouldThrowErrorSync( () => _.process.start( o ) );
     })
 
     /* */
@@ -17270,7 +17271,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
 
       _.mapExtend( o, commonOptions );
 
-      return test.shouldThrowErrorAsync( _.process.start( o ) );
+      return test.shouldThrowErrorSync( () => _.process.start( o ) );
     })
 
     /* */
@@ -17286,7 +17287,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
 
       _.mapExtend( o, commonOptions );
 
-      return test.shouldThrowErrorAsync( _.process.start( o ) );
+      return test.shouldThrowErrorSync(  () => _.process.start( o ) );
     })
 
     /* */
@@ -24117,6 +24118,7 @@ function terminateComplex( test )
 
   /*  */
 
+  /* qqq for Vova : make good test case descriptions */
   .then( () =>
   {
     test.case = 'Sending signal to child process has regular child process that should exit with parent'
