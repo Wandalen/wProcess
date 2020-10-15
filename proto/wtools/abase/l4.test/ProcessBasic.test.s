@@ -24092,7 +24092,7 @@ function terminateComplex( test )
 
   .then( () =>
   {
-    test.case = 'Sending signal to other process'
+    test.case = 'mode:spawn, Child1 -> Child2, terminate Child2'
     var o =
     {
       execPath :  'node ' + testAppPath,
@@ -24138,10 +24138,10 @@ function terminateComplex( test )
 
   /*  */
 
-  /* qqq for Vova : make good test case descriptions */
+  /* qqq for Vova : make good test case descriptions aaa: good? */
   .then( () =>
   {
-    test.case = 'Sending signal to child process has regular child process that should exit with parent'
+    test.case = 'mode:spawn, Child1 -> Child2, terminate Child1 '
     var o =
     {
       execPath :  'node ' + testAppPath,
@@ -24189,7 +24189,7 @@ function terminateComplex( test )
 
   .then( () =>
   {
-    test.case = 'Sending signal to child process has regular child process that should exit with parent'
+    test.case = 'mode:fork, Child1->Child2, terminate Child1'
     var o =
     {
       execPath : testAppPath,
@@ -24239,7 +24239,7 @@ function terminateComplex( test )
 
   .then( () =>
   {
-    test.case = 'Sending signal to child process has regular child process that should exit with parent'
+    test.case = 'mode:shell, Child1->Child2, terminate Child1'
     var o =
     {
       execPath : 'node ' + testAppPath,
