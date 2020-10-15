@@ -1728,7 +1728,7 @@ function start_body( o )
       }
     }
 
-    if( 0 )
+    // if( 0 ) // xxx yyy
     if( o.outputCollecting )
     for( let a = 0 ; a < o.runs.length ; a++ )
     {
