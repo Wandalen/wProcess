@@ -879,12 +879,8 @@ function startMinimal_body( o )
     close event will not be called for regular/detached process
     */
 
-    /*
     if( this.process.stdin )
-    this.process.stdin.destroy();
-    */
-    if( this.process.stdin )
-    this.process.stdin.end(); /* yyy */
+    this.process.stdin.end();
     if( this.process.stdout )
     this.process.stdout.destroy();
     if( this.process.stderr )
@@ -1305,7 +1301,7 @@ startMinimal_body.defaults =
   detaching : 0,
   windowHiding : 1,
   passingThrough : 0,
-  concurrent : 0,
+  // concurrent : 0, /* xxx : move */
   timeOut : null,
 
   throwingExitCode : 1, /* must be on by default */
@@ -1338,6 +1334,13 @@ function start_head( routine, args )
 
   _.assert( arguments.length === 2 );
 
+  /* xxx : specail handling of deasync:1 sync:1 should be in body of start */
+
+  _.assert
+  (
+    !o.concurrent || !o.sync || o.deasync
+    , `option::concurrent should be 0 if sync:1 and deasync:0`
+  );
   _.assert
   (
     o.execPath === null || _.strIs( o.execPath ) || _.strsAreAll( o.execPath )
@@ -1442,11 +1445,15 @@ function start_body( o )
   form0,
   form1,
   form2,
-  formStreams,
   run1,
   run2,
   end1,
   end2,
+
+  formStreams,,
+  processPipe,
+  streamPipe,
+  handleStreamOut,
 
 */
 
@@ -1501,8 +1508,9 @@ function start_body( o )
     _.assert( _.boolLike( o.outputDecoratingStderr ) );
     _.assert( _.boolLike( o.outputCollecting ) );
 
-    if( _.arrayIs( o.execPath ) && o.execPath.length > 1 && o.concurrent && o.outputAdditive === null )
-    o.outputAdditive = 0;
+    if( o.outputAdditive === null )
+    o.outputAdditive = _.arrayIs( o.execPath ) && o.execPath.length > 1 && o.concurrent;
+    _.assert( _.boolLike( o.outputAdditive ) );
     o.currentPath = o.currentPath || _.path.current();
 
     o.runs = [];
@@ -1519,9 +1527,9 @@ function start_body( o )
     o.streamOut = null;
     o.streamErr = null
 
-    // xxx : swich on
-    // if( o.stdio[ 1 ] !== 'ignore' )
-    // formStreams();
+    // yyy : swich on
+    if( o.stdio[ 1 ] !== 'ignore' || o.stdio[ 2 ] !== 'ignore' )
+    formStreams();
 
     if( !o.dry )
     if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
@@ -1529,80 +1537,6 @@ function start_body( o )
       o.procedure = _.procedure.begin({ _object : o, _stack : o.stack });
     }
 
-  }
-
-  /* */
-
-  function formStreams()
-  {
-
-    if( !Stream )
-    Stream = require( 'stream' );
-
-    o.streamOut = new Stream.PassThrough();
-    _.assert( o.streamOut._pipes === undefined );
-    o.streamOut._pipes = [];
-
-    /* piping out channel */
-
-    if( /*o.outputPiping ||*/ o.outputCollecting )
-    if( o.streamOut )
-    // if( !o.sync || o.deasync ) /* xxx : hanle sync case */
-    o.streamOut.on( 'data', handleStreamOut );
-
-    /* piping error channel */
-
-    if( /*o.outputPiping ||*/ o.outputCollecting )
-    if( o.streamErr )
-    // if( !o.sync || o.deasync ) /* xxx : hanle sync case */
-    o.streamErr.on( 'data', handleStreamOut );
-
-  }
-
-  /* */
-
-  function processPipe( o2 )
-  {
-
-    console.log( 'processPipe' );
-    o2.conStart.tap( ( err, op2 ) =>
-    {
-      if( o2.process.stdout )
-      streamPipe( o2.process.stdout );
-    });
-
-  }
-
-  /* */
-
-  function streamPipe( stream )
-  {
-    console.log( 'streamPipe' );
-    o.streamOut._pipes.push( stream );
-    stream.pipe( o.streamOut, { end : false } );
-    stream.on( 'end', () =>
-    {
-      console.log( 'streamPipe.end' ); debugger;
-      _.arrayRemoveOnceStrictly( o.streamOut._pipes, stream );
-      if( o.streamOut._pipes.length === 0 && o.concurrent )
-      {
-        console.log( 'o.streamOut.end' );
-        o.streamOut.end();
-      }
-    });
-
-  }
-
-  /* */
-
-  function handleStreamOut( data )
-  {
-    if( _.bufferAnyIs( data ) )
-    data = _.bufferToStr( data );
-    if( o.outputGraying )
-    data = StripAnsi( data );
-    if( o.outputCollecting )
-    o.output += data;
   }
 
   /* */
@@ -1666,11 +1600,17 @@ function start_body( o )
       delete o2.exitSignal;
       delete o2.error;
       delete o2.ended;
+      delete o2.concurrent;
+      if( o.deasync )
+      {
+        o2.deasync = 0;
+        o2.sync = 0;
+      }
       o.runs.push( o2 );
       _.assertMapHasAll( o2, _.process.startMinimal.defaults );
       _.process.startMinimal.body.call( _.process, o2 );
 
-      if( o.streamOut )
+      if( o.streamOut || o.streamErr )
       processPipe( o2 );
 
     }
@@ -1695,9 +1635,11 @@ function start_body( o )
 
   function end2( err, arg )
   {
-    debugger;
     o.state = 'terminated';
     o.ended = true;
+
+    if( !o.error && err )
+    o.error = err;
 
     if( o.procedure.isAlive() )
     o.procedure.end();
@@ -1727,7 +1669,7 @@ function start_body( o )
       }
     }
 
-    // if( 0 ) // xxx yyy
+    if( 0 ) // xxx yyy
     if( o.outputCollecting )
     for( let a = 0 ; a < o.runs.length ; a++ )
     {
@@ -1746,12 +1688,113 @@ function start_body( o )
 
   /* */
 
+  function formStreams()
+  {
+
+    if( !Stream )
+    Stream = require( 'stream' );
+
+    if( o.stdio[ 1 ] !== 'ignore' )
+    {
+      o.streamOut = new Stream.PassThrough();
+      _.assert( o.streamOut._pipes === undefined );
+      o.streamOut._pipes = [];
+    }
+
+    if( o.stdio[ 2 ] !== 'ignore' )
+    {
+      o.streamErr = new Stream.PassThrough();
+      _.assert( o.streamErr._pipes === undefined );
+      o.streamErr._pipes = [];
+    }
+
+    /* piping out channel */
+
+    if( o.outputCollecting )
+    if( o.streamOut )
+    o.streamOut.on( 'data', handleStreamOut );
+
+    /* piping error channel */
+
+    if( o.outputCollecting )
+    if( o.streamErr )
+    o.streamErr.on( 'data', handleStreamOut );
+
+  }
+
+  /* */
+
+  function processPipe( o2 )
+  {
+
+    o2.conStart.tap( ( err, op2 ) =>
+    {
+      if( o2.process.stdout )
+      streamPipe( o.streamOut, o2.process.stdout );
+      if( o2.process.stderr )
+      streamPipe( o.streamErr, o2.process.stderr );
+    });
+
+  }
+
+  /* */
+
+  function streamPipe( dst, src )
+  {
+
+    if( o.sync && !o.deasync )
+    {
+      dst.write( src );
+      // handleStreamOut( src );
+      /* xxx : need also take care of emitting end in sync case */
+      return;
+    }
+
+    if( _.longHas( dst._pipes, src ) )
+    {
+      debugger;
+      return;
+    }
+
+    _.assert( !!src && !!src.pipe );
+    // dst._pipes.push( src );
+    _.arrayAppendOnceStrictly( dst._pipes, src );
+    src.pipe( dst, { end : false } );
+
+    src.on( 'end', () =>
+    {
+      _.arrayRemoveOnceStrictly( dst._pipes, src );
+      /* xxx : add checking of statqe here. should be not starting */
+      if( dst._pipes.length === 0 && o.concurrent )
+      {
+        dst.end();
+      }
+    });
+
+  }
+
+  /* */
+
+  function handleStreamOut( data )
+  {
+    if( _.bufferAnyIs( data ) )
+    data = _.bufferToStr( data );
+    if( o.outputGraying )
+    data = StripAnsi( data );
+    if( o.outputCollecting )
+    o.output += data;
+  }
+
+  /* */
+
 }
 
 start_body.defaults =
 {
 
   ... startMinimal.defaults,
+
+  concurrent : 0,
 
 }
 
@@ -2410,7 +2453,7 @@ function _exitHandlerRepair()
   if( !_global.process )
   return;
 
-  // process.on( 'SIGHUP', handle_functor( 'SIGHUP', 1 ) ); /* yyy */
+  // process.on( 'SIGHUP', handle_functor( 'SIGHUP', 1 ) ); /* xxx : experiment? */
   process.on( 'SIGQUIT', handle_functor( 'SIGQUIT', 3 ) );
   process.on( 'SIGINT', handle_functor( 'SIGINT' ), 2 );
   process.on( 'SIGTERM', handle_functor( 'SIGTERM' ), 15 );

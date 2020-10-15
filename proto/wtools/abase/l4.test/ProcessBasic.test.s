@@ -2246,7 +2246,7 @@ startForkSyncDeasyncThrowing.timeOut = 15000;
 //
 
 /* qqq2 for Yevhen : introduce subroutine for modes | aaa : Done. */
-function startMultipleSyncDeasync( test )
+function startSyncDeasyncMultiple( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -9335,14 +9335,6 @@ function startReadyDelayMultiple( test )
         test.identical( op.exitSignal, null );
         test.identical( op.exitReason, 'normal' );
         test.identical( op.ended, true );
-        let exp =
-`
-1::begin
-1::end
-2::begin
-2::end
-`
-        test.equivalent( op.output, exp );
         op.runs.forEach( ( op2, counter ) =>
         {
           test.identical( op2.exitCode, 0 );
@@ -9391,15 +9383,6 @@ function startReadyDelayMultiple( test )
         test.identical( op.exitSignal, null );
         test.identical( op.exitReason, 'normal' );
         test.identical( op.ended, true );
-// xxx : introduce streams into o-descriptor
-//         let exp =
-// `
-// 1::begin
-// 2::begin
-// 1::end
-// 2::end
-// `
-//         test.equivalent( op.output, exp );
         op.runs.forEach( ( op2, counter ) =>
         {
           test.identical( op2.exitCode, 0 );
@@ -9433,11 +9416,8 @@ function startReadyDelayMultiple( test )
     let args = _.process.args();
     let data = { time : _.time.now(), id : args.map.id };
     _.fileProvider.fileWrite({ filePath : _.path.join(__dirname, `${args.map.id}.json` ), data, encoding : 'json' });
-    console.log( `${args.map.id}::begin` );
-    setTimeout( () =>
-    {
-      console.log( `${args.map.id}::end` );
-    }, context.t1 );
+    console.log( `${args.map.id}::begin` )
+    setTimeout( () => console.log( `${args.map.id}::end` ), context.t1 );
   }
 
 }
@@ -9447,6 +9427,177 @@ startReadyDelayMultiple.description =
 `
   - delay in consequence ready delay starting of 2 processes
   - concurrent starting does not cause problems
+`
+
+//
+
+function startOutputMultiple( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let programPath = a.path.nativize( a.program( program1 ) );
+  // xxx
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  // let modes = [ 'spawn' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, mode }) ) );
+  return a.ready;
+
+  /* - */
+
+  /* xxx : make multiple work */
+  /* xxx : review */
+  function run( op )
+  {
+    let ready = new _.Consequence().take( null )
+
+    if( op.sync && !op.deasync && op.mode === 'fork' )
+    return null;
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `sync:${op.sync} deasync:${op.deasync} concurrent:0 mode:${op.mode}`;
+      let t1 = _.time.now();
+      let ready2 = new _.Consequence().take( null ).timeOut( context.t1*4 );
+      let o =
+      {
+        execPath : [ ( op.mode !== `fork` ?  `node ` : '' ) + `${programPath} id:1`, ( op.mode !== `fork` ?  `node ` : '' ) + `${programPath} id:2` ],
+        currentPath : a.abs( '.' ),
+        outputPiping : 1,
+        outputCollecting : 1,
+        outputAdditive : 1,
+        sync : op.sync,
+        deasync : op.deasync,
+        concurrent : 0,
+        mode : op.mode,
+        ready : ready2,
+      }
+
+      let returned = _.process.start( o );
+
+      o.ready.then( ( op ) =>
+      {
+        test.is( op === o );
+        test.identical( op.exitCode, 0 );
+        test.identical( op.exitSignal, null );
+        test.identical( op.exitReason, 'normal' );
+        test.identical( op.ended, true );
+        let exp =
+`
+1::begin
+1::end
+1::err
+2::begin
+2::end
+2::err
+`
+        test.equivalent( op.output, exp );
+        op.runs.forEach( ( op2, counter ) =>
+        {
+          test.identical( op2.exitCode, 0 );
+          test.identical( op2.exitSignal, null );
+          test.identical( op2.exitReason, 'normal' );
+          test.identical( op2.ended, true );
+          let parsed = a.fileProvider.fileRead({ filePath : a.abs( `${counter+1}.json` ), encoding : 'json' });
+          test.identical( parsed.id, counter+1 );
+        });
+        return null;
+      })
+
+      return returned;
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+
+      if( op.sync && !op.deasync )
+      return null;
+
+      test.case = `sync:${op.sync} deasync:${op.deasync} concurrent:1 mode:${op.mode}`;
+      let t1 = _.time.now();
+      let ready2 = new _.Consequence().take( null ).timeOut( context.t1*4 );
+      let o =
+      {
+        execPath : [ ( op.mode !== `fork` ?  `node ` : '' ) + `${programPath} id:1`, ( op.mode !== `fork` ?  `node ` : '' ) + `${programPath} id:2` ],
+        currentPath : a.abs( '.' ),
+        outputPiping : 1,
+        outputCollecting : 1,
+        outputAdditive : 1,
+        sync : op.sync,
+        deasync : op.deasync,
+        concurrent : 1,
+        mode : op.mode,
+        ready : ready2,
+      }
+
+      let returned = _.process.start( o );
+
+      o.ready.then( ( op ) =>
+      {
+        test.is( op === o );
+        test.identical( op.exitCode, 0 );
+        test.identical( op.exitSignal, null );
+        test.identical( op.exitReason, 'normal' );
+        test.identical( op.ended, true );
+// xxx : introduce streams into o-descriptor
+        let exp =
+`
+1::begin
+2::begin
+1::end
+2::end
+1::err
+2::err
+`
+        test.equivalent( op.output, exp );
+        op.runs.forEach( ( op2, counter ) =>
+        {
+          test.identical( op2.exitCode, 0 );
+          test.identical( op2.exitSignal, null );
+          test.identical( op2.exitReason, 'normal' );
+          test.identical( op2.ended, true );
+          let parsed = a.fileProvider.fileRead({ filePath : a.abs( `${counter+1}.json` ), encoding : 'json' });
+          test.identical( parsed.id, counter+1 );
+        });
+        return null;
+      })
+
+      return returned;
+    })
+
+    /* */
+
+    return ready;
+  }
+
+  /* - */
+
+  function program1()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+    let args = _.process.args();
+    let data = { time : _.time.now(), id : args.map.id };
+    _.fileProvider.fileWrite({ filePath : _.path.join(__dirname, `${args.map.id}.json` ), data, encoding : 'json' });
+    let individualDelay = context.t1*0.1*args.map.id;
+    setTimeout( () => console.log( `${args.map.id}::begin` ), individualDelay );
+    setTimeout( () => console.log( `${args.map.id}::end` ), context.t1+individualDelay );
+    setTimeout( () => console.error( `${args.map.id}::err` ), context.t1*2+individualDelay );
+  }
+
+}
+
+startOutputMultiple.timeOut = 300000;
+startOutputMultiple.description =
+`
+  xxx
 `
 
 //
@@ -15447,6 +15598,9 @@ function startNjsWithReadyDelayStructuralMultiple( test )
 
         test.identical( options, exp2 );
         test.is( !options.process );
+        test.is( _.streamIs( options.streamOut ) );
+        test.is( _.streamIs( options.streamErr ) );
+        test.is( options.streamOut !== options.streamErr );
         test.is( ! options.disconnect );
         test.is( options.conTerminate !== options.ready );
         test.is( _.arrayIs( options.runs ) );
@@ -15500,6 +15654,8 @@ function startNjsWithReadyDelayStructuralMultiple( test )
         'procedure' : options.procedure,
         'logger' : options.logger,
         'stack' : options.stack,
+        'streamOut' : options.streamOut,
+        'streamErr' : options.streamErr,
         'runs' : [],
         'state' : 'initial',
         'exitReason' : null,
@@ -15520,6 +15676,9 @@ function startNjsWithReadyDelayStructuralMultiple( test )
       test.is( !!options.procedure );
       test.is( !!options.logger );
       test.is( !!options.stack );
+      test.is( _.streamIs( options.streamOut ) );
+      test.is( _.streamIs( options.streamErr ) );
+      test.is( options.streamOut !== options.streamErr );
       test.identical( options.ready.exportString(), 'Consequence:: 0 / 3' );
       test.identical( options.conTerminate, null );
       test.identical( options.conDisconnect, null );
@@ -19776,6 +19935,8 @@ function killSync( test )
   }
 }
 
+killSync.timeOut = 300000;
+
 //
 
 function killOptionWithChildren( test )
@@ -21230,6 +21391,8 @@ function terminateSync( test )
     }, context.t2 ) /* 5000 */
   }
 }
+
+terminateSync.timeOut = 300000;
 
 //
 
@@ -26257,7 +26420,7 @@ var Proto =
     startShellSyncDeasyncThrowing,
     startForkSyncDeasync,
     startForkSyncDeasyncThrowing,
-    startMultipleSyncDeasync,
+    startSyncDeasyncMultiple,
 
     // arguments
 
@@ -26292,6 +26455,7 @@ var Proto =
 
     startReadyDelay,
     startReadyDelayMultiple,
+    startOutputMultiple,
     startOptionWhenDelay,
     startOptionWhenTime,
     startOptionTimeOut, /* qqq for Vova : fix please */
