@@ -8845,6 +8845,327 @@ function startProcedureStackMultiple( test )
 
     /* */
 
+    ready.then( function case1()
+    {
+      test.case = `sync:${sync} deasync:${deasync} mode:${mode} stack:true`;
+      let t1 = _.time.now();
+      let o =
+      {
+        execPath : mode !== `fork` ? [ `node ${programPath} id:1`, `node ${programPath} id:2` ] : [ `${programPath} id:1`, `${programPath} id:2` ],
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+        stack : true,
+        mode,
+        sync,
+        deasync,
+      }
+
+      _.process.start( o );
+
+      if( sync || deasync )
+      {
+        test.identical( o.exitCode, 0 );
+        test.identical( o.exitSignal, null );
+        test.identical( o.exitReason, 'normal' );
+        test.identical( o.ended, true );
+        test.identical( o.state, 'terminated' );
+      }
+      else
+      {
+        test.identical( o.exitCode, null );
+        test.identical( o.exitSignal, null );
+        test.identical( o.exitReason, null );
+        test.identical( o.ended, false );
+        test.identical( o.state, 'initial' );
+      }
+
+      test.identical( _.strCount( o.procedure._stack, 'case1' ), 1 );
+      test.identical( _.strCount( o.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
+      test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
+
+      o.ready.then( ( op ) =>
+      {
+        test.is( op === o );
+        test.identical( o.exitCode, 0 );
+        test.identical( o.exitSignal, null );
+        test.identical( o.exitReason, 'normal' );
+        test.identical( o.ended, true );
+        test.identical( o.state, 'terminated' );
+        test.identical( _.strCount( o.procedure._stack, 'case1' ), 1 );
+        test.identical( _.strCount( o.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
+        test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
+
+        o.runs.forEach( ( op2 ) =>
+        {
+          test.identical( _.strCount( op2.procedure._stack, 'case1' ), 1 );
+          test.identical( _.strCount( op2.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
+          test.identical( _.strCount( op2.procedure._sourcePath, 'case1' ), 1 );
+          test.is( o.procedure !== op2.procedure );
+        });
+
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `sync:${sync} deasync:${deasync} mode:${mode} stack:0`;
+      let t1 = _.time.now();
+      let o =
+      {
+        execPath : mode !== `fork` ? [ `node ${programPath} id:1`, `node ${programPath} id:2` ] : [ `${programPath} id:1`, `${programPath} id:2` ],
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+        stack : 0,
+        mode,
+        sync,
+        deasync,
+      }
+
+      _.process.start( o );
+
+      if( sync || deasync )
+      {
+        test.identical( o.exitCode, 0 );
+        test.identical( o.exitSignal, null );
+        test.identical( o.exitReason, 'normal' );
+        test.identical( o.ended, true );
+        test.identical( o.state, 'terminated' );
+      }
+      else
+      {
+        test.identical( o.exitCode, null );
+        test.identical( o.exitSignal, null );
+        test.identical( o.exitReason, null );
+        test.identical( o.ended, false );
+        test.identical( o.state, 'initial' );
+      }
+
+      test.identical( _.strCount( o.procedure._stack, 'case1' ), 1 );
+      test.identical( _.strCount( o.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
+      test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
+
+      o.ready.then( ( op ) =>
+      {
+        test.is( op === o );
+        test.identical( o.exitCode, 0 );
+        test.identical( o.exitSignal, null );
+        test.identical( o.exitReason, 'normal' );
+        test.identical( o.ended, true );
+        test.identical( o.state, 'terminated' );
+        test.identical( _.strCount( o.procedure._stack, 'case1' ), 1 );
+        test.identical( _.strCount( o.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
+        test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
+
+        o.runs.forEach( ( op2 ) =>
+        {
+          test.identical( _.strCount( op2.procedure._stack, 'case1' ), 1 );
+          test.identical( _.strCount( op2.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
+          test.identical( _.strCount( op2.procedure._sourcePath, 'case1' ), 1 );
+          test.is( o.procedure !== op2.procedure );
+        });
+
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `sync:${sync} deasync:${deasync} mode:${mode} stack:-1`;
+      let t1 = _.time.now();
+      let o =
+      {
+        execPath : mode !== `fork` ? [ `node ${programPath} id:1`, `node ${programPath} id:2` ] : [ `${programPath} id:1`, `${programPath} id:2` ],
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+        stack : -1,
+        mode,
+        sync,
+        deasync,
+      }
+
+      _.process.start( o );
+
+      if( sync || deasync )
+      {
+        test.identical( o.exitCode, 0 );
+        test.identical( o.exitSignal, null );
+        test.identical( o.exitReason, 'normal' );
+        test.identical( o.ended, true );
+        test.identical( o.state, 'terminated' );
+      }
+      else
+      {
+        test.identical( o.exitCode, null );
+        test.identical( o.exitSignal, null );
+        test.identical( o.exitReason, null );
+        test.identical( o.ended, false );
+        test.identical( o.state, 'initial' );
+      }
+
+      test.identical( _.strCount( o.procedure._stack, 'case1' ), 1 );
+      test.identical( _.strCount( o.procedure._sourcePath, 'start' ), 1 );
+
+      o.ready.then( ( op ) =>
+      {
+        test.is( op === o );
+        test.identical( o.exitCode, 0 );
+        test.identical( o.exitSignal, null );
+        test.identical( o.exitReason, 'normal' );
+        test.identical( o.ended, true );
+        test.identical( o.state, 'terminated' );
+        test.identical( _.strCount( o.procedure._stack, 'case1' ), 1 );
+        test.identical( _.strCount( op.procedure._sourcePath, 'start' ), 1 );
+
+        o.runs.forEach( ( op2 ) =>
+        {
+          test.identical( _.strCount( op2.procedure._stack, 'case1' ), 1 );
+          test.identical( _.strCount( op2.procedure._sourcePath, 'start' ), 1 );
+          test.is( o.procedure !== op2.procedure );
+        });
+
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `sync:${sync} deasync:${deasync} mode:${mode} stack:false`;
+      let t1 = _.time.now();
+      let o =
+      {
+        execPath : mode !== `fork` ? [ `node ${programPath} id:1`, `node ${programPath} id:2` ] : [ `${programPath} id:1`, `${programPath} id:2` ],
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+        stack : false,
+        mode,
+        sync,
+        deasync,
+      }
+
+      _.process.start( o );
+
+      if( sync || deasync )
+      {
+        test.identical( o.exitCode, 0 );
+        test.identical( o.exitSignal, null );
+        test.identical( o.exitReason, 'normal' );
+        test.identical( o.ended, true );
+        test.identical( o.state, 'terminated' );
+      }
+      else
+      {
+        test.identical( o.exitCode, null );
+        test.identical( o.exitSignal, null );
+        test.identical( o.exitReason, null );
+        test.identical( o.ended, false );
+        test.identical( o.state, 'initial' );
+      }
+
+      test.identical( o.procedure._stack, '' );
+      test.identical( o.procedure._sourcePath, '' );
+      test.identical( o.procedure._sourcePath, '' );
+
+      o.ready.then( ( op ) =>
+      {
+        test.is( op === o );
+        test.identical( o.exitCode, 0 );
+        test.identical( o.exitSignal, null );
+        test.identical( o.exitReason, 'normal' );
+        test.identical( o.ended, true );
+        test.identical( o.state, 'terminated' );
+        test.identical( o.procedure._stack, '' );
+        test.identical( o.procedure._sourcePath, '' );
+
+        o.runs.forEach( ( op2 ) =>
+        {
+          test.identical( op2.procedure._stack, '' );
+          test.identical( op2.procedure._sourcePath, '' );
+          test.is( o.procedure !== op2.procedure );
+        });
+
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `sync:${sync} deasync:${deasync} mode:${mode} stack:str`;
+      let t1 = _.time.now();
+      let o =
+      {
+        execPath : mode !== `fork` ? [ `node ${programPath} id:1`, `node ${programPath} id:2` ] : [ `${programPath} id:1`, `${programPath} id:2` ],
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+        stack : 'abc',
+        mode,
+        sync,
+        deasync,
+      }
+
+      _.process.start( o );
+
+      if( sync || deasync )
+      {
+        test.identical( o.exitCode, 0 );
+        test.identical( o.exitSignal, null );
+        test.identical( o.exitReason, 'normal' );
+        test.identical( o.ended, true );
+        test.identical( o.state, 'terminated' );
+      }
+      else
+      {
+        test.identical( o.exitCode, null );
+        test.identical( o.exitSignal, null );
+        test.identical( o.exitReason, null );
+        test.identical( o.ended, false );
+        test.identical( o.state, 'initial' );
+      }
+
+      test.identical( o.procedure._stack, 'abc' );
+      test.identical( o.procedure._sourcePath, 'abc' );
+      test.identical( o.procedure._sourcePath, 'abc' );
+
+      o.ready.then( ( op ) =>
+      {
+        test.is( op === o );
+        test.identical( o.exitCode, 0 );
+        test.identical( o.exitSignal, null );
+        test.identical( o.exitReason, 'normal' );
+        test.identical( o.ended, true );
+        test.identical( o.state, 'terminated' );
+        test.identical( o.procedure._stack, 'abc' );
+        test.identical( o.procedure._sourcePath, 'abc' );
+
+        o.runs.forEach( ( op2 ) =>
+        {
+          test.identical( op2.procedure._stack, 'abc' );
+          test.identical( op2.procedure._sourcePath, 'abc' );
+          test.is( o.procedure !== op2.procedure );
+        });
+
+        return null;
+      })
+
+      return o.ready;
+    })
+
     return ready;
   }
 
@@ -8860,6 +9181,8 @@ function startProcedureStackMultiple( test )
   }
 
 }
+
+startProcedureStackMultiple.timeOut = 120000;
 
 //
 
@@ -19121,6 +19444,227 @@ function exitCode( test )
 
 //
 
+function startOptionVerbosityLogging( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+
+  return a.ready;
+
+  /* */
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `logging without error; mode : ${mode}; verbosity : 4`;
+      let testAppPath2 = a.program( testApp2 );
+      let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPath2, verbosity : 4 };
+      let testAppPath = a.program( { routine : testApp, locals } );
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+        throwingExitCode : 0,
+        outputCollecting : 1,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.exitSignal, null );
+        test.identical( op.exitReason, 'normal' );
+        test.identical( op.ended, true );
+        test.identical( op.state, 'terminated' );
+        test.identical( _.strCount( op.output, '< Process returned error code 0' ), 0 );
+        test.identical( _.strCount( op.output, `Launched as "node ${ testAppPath2 }"` ), 0 );
+        test.identical( _.strCount( op.output, `Launched at ${ _.strQuote( op.currentPath ) }` ), 0 );
+        test.identical( _.strCount( op.output, '-> Stderr' ), 0 );
+        test.identical( _.strCount( op.output, '-< Stderr' ), 0 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      } )
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `logging with error; mode : ${mode}; verbosity : 4`;
+      let testAppPathError = a.program( testAppError );
+      let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPathError, verbosity : 4 };
+      let testAppPath = a.program( { routine : testApp, locals } );
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+        throwingExitCode : 0,
+        outputCollecting : 1,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.exitSignal, null );
+        test.identical( op.exitReason, 'normal' );
+        test.identical( op.ended, true );
+        test.identical( op.state, 'terminated' );
+        test.identical( _.strCount( op.output, '< Process returned error code 255' ), 0 );
+        test.identical( _.strCount( op.output, `Launched as "node ${ testAppPathError }"` ), 0 );
+        test.identical( _.strCount( op.output, `Launched at ${ _.strQuote( op.currentPath ) }` ), 0 );
+        test.identical( _.strCount( op.output, '-> Stderr' ), 0 );
+        test.is( !_.strHas( op.output, '= Message of error' ) );
+        test.is( !_.strHas( op.output, '= Beautified calls stack' ) );
+        test.is( !_.strHas( op.output, '= Throws stack' ) );
+        test.is( !_.strHas( op.output, '= Process' ) );
+        test.is( !_.strHas( op.output, 'Source code from' ) );
+        test.identical( _.strCount( op.output, '-< Stderr' ), 0 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPathError );
+
+        return null;
+      } )
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `logging without error; mode : ${mode}; verbosity : 5`;
+      let testAppPath2 = a.program( testApp2 );
+      let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPath2, verbosity : 5 };
+      let testAppPath = a.program( { routine : testApp, locals } );
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+        throwingExitCode : 0,
+        outputCollecting : 1,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.exitSignal, null );
+        test.identical( op.exitReason, 'normal' );
+        test.identical( op.ended, true );
+        test.identical( op.state, 'terminated' );
+        test.identical( _.strCount( op.output, '< Process returned error code 0' ), 1 );
+        test.identical( _.strCount( op.output, `Launched as "node ${ testAppPath2 }"` ), 0 );
+        test.identical( _.strCount( op.output, `Launched at ${ _.strQuote( op.currentPath ) }` ), 0 );
+        test.identical( _.strCount( op.output, '-> Stderr' ), 0 );
+        test.identical( _.strCount( op.output, '-< Stderr' ), 0 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      } )
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `logging with error; mode : ${mode}; verbosity : 5`;
+      let testAppPathError = a.program( testAppError );
+      let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPathError, verbosity : 5 };
+      let testAppPath = a.program( { routine : testApp, locals } );
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+        throwingExitCode : 0,
+        outputCollecting : 1,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.exitSignal, null );
+        test.identical( op.exitReason, 'normal' );
+        test.identical( op.ended, true );
+        test.identical( op.state, 'terminated' );
+        test.identical( _.strCount( op.output, '< Process returned error code 255' ), 1 );
+        test.identical( _.strCount( op.output, `Launched as "node ${ testAppPathError }"` ), 1 );
+        test.identical( _.strCount( op.output, `Launched at ${ _.strQuote( op.currentPath ) }` ), 1 );
+        test.identical( _.strCount( op.output, '-> Stderr' ), 1 );
+        test.is( _.strHas( op.output, '= Message of error' ) );
+        test.is( _.strHas( op.output, '= Beautified calls stack' ) );
+        test.is( _.strHas( op.output, '= Throws stack' ) );
+        test.is( _.strHas( op.output, '= Process' ) );
+        test.is( _.strHas( op.output, 'Source code from' ) );
+        test.identical( _.strCount( op.output, '-< Stderr' ), 1 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPathError );
+
+        return null;
+      } )
+
+    })
+
+    return ready;
+  }
+
+  /* - */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    let options =
+    {
+      execPath : 'node ' + programPath,
+      throwingExitCode : 0,
+      outputCollecting : 0,
+      outputPiping : 0,
+      verbosity
+    }
+
+    return _.process.start( options );
+  }
+
+  function testApp2()
+  {
+    console.log();
+  }
+
+  function testAppError()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    return _.process.start();
+  }
+
+}
+
+
+//
+
 function pidFrom( test )
 {
   let o =
@@ -26284,7 +26828,7 @@ var Proto =
     startProcedureTrivial,
     startProcedureExists,
     startProcedureStack,
-    startProcedureStackMultiple, /* qqq for Yevhen : extend it using startProcedureStack as example */
+    startProcedureStackMultiple, /* qqq for Yevhen : extend it using startProcedureStack as example | aaa : Done. */
     startOnTerminateSeveralCallbacksChronology,
     startChronology,
 
@@ -26359,6 +26903,7 @@ var Proto =
     startOptionLoggerTransofrmation,
     startOutputOptionsCompatibilityLateCheck,
     startOptionVerbosity,
+    startOptionVerbosityLogging,
 
     // etc /* xxx : move */
 
