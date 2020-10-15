@@ -1072,14 +1072,14 @@ function startMinimal_body( o )
 
     for( ; i < args.length; i++ )
     {
-      // let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', '`' ]
-      // _.each( quotesToEscape, ( quote ) =>
-      // {
-      //   args[ i ] = argEscape( args[ i ], quote );
-      // })
-      // args[ i ] = _.strQuote( args[ i ] );
+      let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', '`' ]
+      _.each( quotesToEscape, ( quote ) =>
+      {
+        args[ i ] = argEscape( args[ i ], quote );
+      })
+      args[ i ] = _.strQuote( args[ i ] );
 
-      args[ i ] = _.process.escapeArg( args[ i ]  );
+      // args[ i ] = _.process.escapeArg( args[ i ]  ); //zzz for Vova: use this routine, review fails
     }
 
     return args.join( ' ' );
