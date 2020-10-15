@@ -132,6 +132,7 @@ Event 'exit' is aways called. Options `stdio` and `detaching` also don't affect 
 
 /* qqq for Yevhen : find all tests with passingThrough:1, separate them from the rest of the test
 and rewrite to run process which run process to avoid influence of arguments of tester on testing
+aaa : Done
 */
 
 /* qqq for Yevhen : parametrize all time delays, don't forget to leave comment of old value
