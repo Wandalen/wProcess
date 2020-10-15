@@ -171,12 +171,12 @@ function assetFor( test, name )
   let context = this;
   let a = test.assetFor( name );
 
-  _.assert( _.routineIs( a.program.pre ) );
+  _.assert( _.routineIs( a.program.head ) );
   _.assert( _.routineIs( a.program.body ) );
 
   let oprogram = a.program;
   program_body.defaults = a.program.defaults;
-  a.program = _.routineFromPreAndBody( a.program.pre, program_body );
+  a.program = _.routineUnite( a.program.head, program_body );
 
   return a;
 
@@ -14210,7 +14210,7 @@ function startConcurrent( test )
 
   let subprocessesOptionsSerial =
   {
-    execPath :  [ 'node ' + testAppPath + ' 1000', 'node ' + testAppPath + ' 10' ],
+    execPath :  [ 'node ' + testAppPath + ' 1000', 'node ' + testAppPath + ' 10' ], /* xxx : 10 -> 1? */
     ready : a.ready,
     outputCollecting : 1,
     verbosity : 3,
@@ -15472,8 +15472,8 @@ function startNjsWithReadyDelayStructuralMultiple( test )
         'maximumMemory' : 0,
         'applyingExitCode' : 1,
         'stdio' : mode === 'fork' ? [ 'pipe', 'pipe', 'pipe', 'ipc' ] : [ 'pipe', 'pipe', 'pipe' ],
-        'stdout' : null,
-        'stderr' : null,
+        'streamOut' : null,
+        'streamErr' : null,
         'args' : null,
         'interpreterArgs' : null,
         'when' : 'instant',
@@ -16056,7 +16056,7 @@ function shellerFields( test )
 
   test.contains( _.mapKeys( start ), _.mapKeys( _.process.start ) );
   test.identical( _.mapKeys( start.defaults ), _.mapKeys( _.process.start.body.defaults ) );
-  test.identical( start.pre, _.process.start.pre );
+  test.identical( start.head, _.process.start.head );
   test.identical( start.body, _.process.start.body );
   test.identical( _.mapKeys( start.predefined ), _.mapKeys( _.process.start.body.defaults ) );
 
@@ -16064,7 +16064,7 @@ function shellerFields( test )
   var start = _.process.starter( 'node -v' );
   test.contains( _.mapKeys( start ), _.mapKeys( _.process.start ) );
   test.identical( _.mapKeys( start.defaults ), _.mapKeys( _.process.start.body.defaults ) );
-  test.identical( start.pre, _.process.start.pre );
+  test.identical( start.head, _.process.start.head );
   test.identical( start.body, _.process.start.body );
   test.identical( _.mapKeys( start.predefined ), _.mapKeys( _.process.start.body.defaults ) );
   test.identical( start.predefined.execPath, 'node -v' );
@@ -16079,7 +16079,7 @@ function shellerFields( test )
   });
   test.contains( _.mapKeys( start ), _.mapKeys( _.process.start ) );
   test.identical( _.mapKeys( start.defaults ), _.mapKeys( _.process.start.body.defaults ) );
-  test.identical( start.pre, _.process.start.pre );
+  test.identical( start.head, _.process.start.head );
   test.identical( start.body, _.process.start.body );
   test.is( _.arraySetIdentical( _.mapKeys( start.predefined ), _.mapKeys( _.process.start.body.defaults ) ) );
   test.identical( start.predefined.execPath, 'node -v' );
@@ -19096,7 +19096,7 @@ function exitCode( test )
       return null;
     } )
 
-    function testApp4()
+    function testApp4() /* qqq for Yevhen : should be no subsubroutines */
     {
       let _ = require( toolsPath );
       _.include( 'wProcess' );
@@ -20064,6 +20064,7 @@ function killOptionWithChildren( test )
 
 //
 
+/* qqq for Vova : describe test cases. describe test. this and related */
 function terminate( test )
 {
   let context = this;
@@ -20229,7 +20230,7 @@ function terminate( test )
 
     o.process.on( 'message', () =>
     {
-      _.process.terminate({ pnd : o.process, timeOut : 10 });
+      _.process.terminate({ pnd : o.process, timeOut : 1 });
     })
 
     ready.then( ( op ) =>
@@ -20245,7 +20246,7 @@ function terminate( test )
       else
       {
         test.identical( op.exitCode, null );
-        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( op.exitSignal === 'SIGKILL' || op.exitSignal === 'SIGTERM' );
         test.identical( op.ended, true );
         test.is( _.strHas( op.output, 'SIGTERM' ) );
         test.is( !_.strHas( op.output, 'Application timeout!' ) );
@@ -20319,7 +20320,7 @@ function terminate( test )
 
     o.process.on( 'message', () =>
     {
-      _.process.terminate({ pnd : o.process, timeOut : 10 });
+      _.process.terminate({ pnd : o.process, timeOut : 1 });
     })
 
     ready.then( ( op ) =>
@@ -20539,7 +20540,7 @@ function terminate( test )
 
     o.process.on( 'message', () =>
     {
-      _.process.terminate({ pid : o.process.pid, timeOut : 10 });
+      _.process.terminate({ pid : o.process.pid, timeOut : 1 });
     })
 
     ready.then( ( op ) =>
@@ -20556,7 +20557,7 @@ function terminate( test )
       {
         test.identical( op.exitCode, null );
         test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( op.exitSignal === 'SIGKILL' || op.exitSignal === 'SIGTERM' );
         test.is( _.strHas( op.output, 'SIGTERM' ) );
         test.is( !_.strHas( op.output, 'Application timeout!' ) );
       }
@@ -20583,7 +20584,7 @@ function terminate( test )
 
     o.process.on( 'message', () =>
     {
-      _.process.terminate({ pnd : o.process, timeOut : 10 });
+      _.process.terminate({ pnd : o.process, timeOut : 1 });
     })
 
     ready.then( ( op ) =>
@@ -20592,7 +20593,7 @@ function terminate( test )
       {
         test.identical( op.exitCode, null );
         test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGTERM' );
+        test.identical( op.exitSignal, 'SIGKILL' );
         test.is( !_.strHas( op.output, 'SIGTERM' ) );
         test.is( !_.strHas( op.output, 'Application timeout!' ) );
       }
@@ -20600,7 +20601,7 @@ function terminate( test )
       {
         test.identical( op.exitCode, null );
         test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( op.exitSignal === 'SIGKILL' || op.exitSignal === 'SIGTERM' );
         test.is( _.strHas( op.output, 'SIGTERM' ) );
         test.is( !_.strHas( op.output, 'Application timeout!' ) );
       }
@@ -20816,7 +20817,7 @@ function terminate( test )
     {
       data = data.toString();
       if( _.strHas( data, 'ready' ))
-      _.process.terminate({ pnd : o.process, timeOut : 10 });
+      _.process.terminate({ pnd : o.process, timeOut : 1 });
     })
 
     ready.then( ( op ) =>
@@ -20861,7 +20862,7 @@ function terminate( test )
     {
       data = data.toString();
       if( _.strHas( data, 'ready' ))
-      _.process.terminate({ pid : o.process.pid, timeOut : 10 });
+      _.process.terminate({ pid : o.process.pid, timeOut : 1 });
     })
 
     ready.then( ( op ) =>
@@ -22970,7 +22971,7 @@ deasync:end
         if( mode === 'shell' )
         test.is( options.output === exp1 || options.output === exp2 );
         else
-        test.identical( options.output, exp1 );
+        test.identical( options.output, exp1 ); /* xxx : sometimes only program1:begin */
         test.identical( options.exitCode, null );
         test.identical( options.exitSignal, 'SIGKILL' );
         test.identical( options.ended, true );
@@ -23140,7 +23141,7 @@ exit:end
         if( mode === 'shell' )
         test.is( options.output === exp1 || options.output === exp2 );
         else
-        test.identical( options.output, exp1 );
+        test.identical( options.output, exp1 ); /* xxx : sometimes only program1:begin */
         test.identical( options.exitCode, null );
         test.identical( options.exitSignal, signal );
         test.identical( options.ended, true );
@@ -26156,8 +26157,6 @@ experiment3.description =
 `
 Shows that timeOut kills the child process and handleClose is called
 `
-
-//
 
 //
 
