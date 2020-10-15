@@ -249,9 +249,11 @@ function escapeCmd( prog, args )
   _.assert( _.arrayIs( args ) );
 
   prog = _.process.escapeProg( prog );
-  args = args.map( ( arg ) => _.process.escapeArg( arg ) );
 
-  args.unshift( prog );
+  if( !args.length )
+  return prog;
+
+  args = args.map( ( arg ) => _.process.escapeArg( arg ) );
 
   return `${prog} ${args.join( ' ' )}`;
 }
