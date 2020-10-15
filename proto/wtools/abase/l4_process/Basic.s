@@ -4,12 +4,12 @@
 'use strict';
 
 /**
- * Collection of routines to execute system commands, run shell, batches, launch external processes from JavaScript application. Module Process leverages not only outputting data from an application but also inputting, makes application arguments parsing and accounting easier. Use the module to get uniform experience from interaction with an external processes on different platforms and operating systems.
+ * Collection of cross-platform routines to execute system commands, run shell, batches, launch external processes from JavaScript application. Module Process leverages not only outputting data from an application but also inputting, makes application arguments parsing and accounting easier. Use the module to get uniform experience from interaction with an external processes on different platforms and operating systems.
   @module Tools/base/ProcessBasic
 */
 
 /**
- * Collection of routines to execute system commands, run shell, batches, launch external processes from JavaScript application.
+ * Collection of cross-platform routines to execute system commands, run shell, batches, launch external processes from JavaScript application.
   @namespace Tools.process
   @extends Tools
   @module Tools/base/ProcessBasic
@@ -42,7 +42,7 @@ _.assert( !!_realGlobal_ );
 
 let _tempFiles = [];
 
-function tempOpen_pre( routine, args )
+function tempOpen_head( routine, args )
 {
   let o;
 
@@ -75,11 +75,11 @@ function tempOpen_body( o )
 var defaults = tempOpen_body.defaults = Object.create( null );
 defaults.sourceCode = null;
 
-let tempOpen = _.routineFromPreAndBody( tempOpen_pre, tempOpen_body );
+let tempOpen = _.routineUnite( tempOpen_head, tempOpen_body );
 
 //
 
-function tempClose_pre( routine, args )
+function tempClose_head( routine, args )
 {
   let o;
 
@@ -125,7 +125,7 @@ function tempClose_body( o )
 var defaults = tempClose_body.defaults = Object.create( null );
 defaults.filePath = null;
 
-let tempClose = _.routineFromPreAndBody( tempClose_pre, tempClose_body );
+let tempClose = _.routineUnite( tempClose_head, tempClose_body );
 
 // --
 // eventer
