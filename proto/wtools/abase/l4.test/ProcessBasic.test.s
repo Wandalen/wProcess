@@ -18994,7 +18994,7 @@ function exitCode( test )
     return _.process.start({ execPath : '1', throwingExitCode : 0 })
     .then( ( op ) =>
     {
-      test.il( op.exitCode, 127 );
+      test.ni( op.exitCode, 127 );
       test.il( op.ended, true );
       return null;
     } )
@@ -19064,7 +19064,7 @@ function exitCode( test )
     return _.process.start( options )
     .then( ( op ) =>
     {
-      test.il( op.exitCode, 255 );
+      test.ni( op.exitCode, 255 );
       test.il( op.ended, true );
       return null;
     } )
