@@ -36,7 +36,7 @@ _.assert( !!_realGlobal_ );
 
 //
 
-function startCommon_pre( routine, args )
+function startCommon_head( routine, args )
 {
   let o;
 
@@ -124,9 +124,9 @@ function startCommon_pre( routine, args )
 
 //
 
-function startMinimal_pre( routine, args )
+function startMinimal_head( routine, args )
 {
-  let o = startCommon_pre( routine, args );
+  let o = startCommon_head( routine, args );
 
   _.assert( arguments.length === 2 );
 
@@ -1313,13 +1313,13 @@ startMinimal_body.defaults =
 /* xxx : move advanced options to _.process.start() */
 /* xxx : add option stdio and other? */
 
-let startMinimal = _.routineFromPreAndBody( startMinimal_pre, startMinimal_body );
+let startMinimal = _.routineUnite( startMinimal_head, startMinimal_body );
 
 //
 
-function start_pre( routine, args )
+function start_head( routine, args )
 {
-  let o = startCommon_pre( routine, args );
+  let o = startCommon_head( routine, args );
 
   _.assert( arguments.length === 2 );
 
@@ -1502,11 +1502,12 @@ function start_body( o )
     o.output = o.outputCollecting ? '' : null;
     o.ended = false;
 
-    o.stdout = null;
-    o.stderr = null
+    o.streamOut = null;
+    o.streamErr = null
 
-    if( o.stdio[ 1 ] !== 'ignore' )
-    formStreams();
+    // xxx : swich on
+    // if( o.stdio[ 1 ] !== 'ignore' )
+    // formStreams();
 
     if( !o.dry )
     if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
@@ -1524,13 +1525,43 @@ function start_body( o )
     if( !Stream )
     Stream = require( 'stream' );
 
-    // var a = new stream.PassThrough()
-    // a.write("your string")
-    // a.end()
-    // if( o.stdio[ 1 ] !== 'ignore' )
-    // {
-    //   o.stdout =
-    // }
+    o.streamOut = new Stream.PassThrough();
+    _.assert( o.streamOut._pipes === undefined );
+    o.streamOut._pipes = [];
+
+  }
+
+  /* */
+
+  function processPipe( o2 )
+  {
+
+    console.log( 'processPipe' );
+    o2.conStart.tap( ( err, op2 ) =>
+    {
+      if( o2.process.stdout )
+      streamPipe( o2.process.stdout );
+    });
+
+  }
+
+  /* */
+
+  function streamPipe( stream )
+  {
+    console.log( 'streamPipe' );
+    o.streamOut._pipes.push( stream );
+    stream.pipe( o.streamOut, { end : false } );
+    stream.on( 'end', () =>
+    {
+      console.log( 'streamPipe.end' ); debugger;
+      _.arrayRemoveOnceStrictly( o.streamOut._pipes, stream );
+      if( o.streamOut._pipes.length === 0 )
+      {
+        console.log( 'o.streamOut.end' );
+        // o.streamOut.end();
+      }
+    });
 
   }
 
@@ -1562,7 +1593,6 @@ function start_body( o )
 
   function run2()
   {
-    debugger;
     let prevReady = new _.Consequence().take( null );
     let readies = [];
     let execPath = _.arrayAs( o.execPath );
@@ -1604,6 +1634,10 @@ function start_body( o )
       o.runs.push( o2 );
       _.assertMapHasAll( o2, _.process.startMinimal.defaults );
       _.process.startMinimal.body.call( _.process, o2 );
+
+      if( o.streamOut )
+      processPipe( o2 );
+
     }
 
     return _.Consequence.AndKeep( ... readies );
@@ -1613,7 +1647,6 @@ function start_body( o )
 
   function end1() /* xxx : make similar change in startMinimal() */
   {
-    debugger;
     if( readyCallback )
     o.ready.finally( readyCallback );
     if( o.deasync )
@@ -1687,7 +1720,7 @@ start_body.defaults =
 
 /* xxx : implement test with throwing error in the first process / second process */
 
-let start = _.routineFromPreAndBody( start_pre, start_body );
+let start = _.routineUnite( start_head, start_body );
 
 //
 
@@ -1862,7 +1895,7 @@ _streamsJoin.defaults =
 
 //
 
-let startPassingThrough = _.routineFromPreAndBody( start_pre, start_body );
+let startPassingThrough = _.routineUnite( start_head, start_body );
 
 var defaults = startPassingThrough.defaults;
 
@@ -1974,7 +2007,7 @@ defaults.applyingExitCode = 1;
 defaults.stdio = 'inherit';
 defaults.mode = 'fork';
 
-let startNjs = _.routineFromPreAndBody( start_pre, startNjs_body );
+let startNjs = _.routineUnite( start_head, startNjs_body );
 
 //
 
@@ -2010,7 +2043,7 @@ let startNjs = _.routineFromPreAndBody( start_pre, startNjs_body );
  * @namespace Tools.process
  */
 
-let startNjsPassingThrough = _.routineFromPreAndBody( start_pre, startNjs.body );
+let startNjsPassingThrough = _.routineUnite( start_head, startNjs.body );
 
 var defaults = startNjsPassingThrough.defaults;
 
@@ -2071,7 +2104,7 @@ function startAfterDeath_body( o )
 
 var defaults = startAfterDeath_body.defaults = Object.create( start.defaults );
 
-let startAfterDeath = _.routineFromPreAndBody( start_pre, startAfterDeath_body );
+let startAfterDeath = _.routineUnite( start_head, startAfterDeath_body );
 
 //
 
@@ -2476,7 +2509,7 @@ function statusOf( src )
 
 //
 
-function signal_pre( routine, args )
+function signal_head( routine, args )
 {
   let o = args[ 0 ];
 
@@ -2681,7 +2714,7 @@ signal_body.defaults =
   sync : 0,
 }
 
-let signal = _.routineFromPreAndBody( signal_pre, signal_body );
+let signal = _.routineUnite( signal_head, signal_body );
 
 //
 
@@ -2699,7 +2732,7 @@ kill_body.defaults =
   ... _.mapBut( signal.defaults, [ 'signal', 'timeOut' ] ),
 }
 
-let kill = _.routineFromPreAndBody( signal_pre, kill_body );
+let kill = _.routineUnite( signal_head, kill_body );
 
 
 //
@@ -2722,7 +2755,7 @@ terminate_body.defaults =
   ... _.mapBut( signal.defaults, [ 'signal' ] ),
 }
 
-let terminate = _.routineFromPreAndBody( signal_pre, terminate_body );
+let terminate = _.routineUnite( signal_head, terminate_body );
 
 //
 
@@ -2885,7 +2918,7 @@ let Extension =
 
   // fields
 
-  _sanitareTime : 10,
+  _sanitareTime : 1,
   _exitReason : null,
 
 }
