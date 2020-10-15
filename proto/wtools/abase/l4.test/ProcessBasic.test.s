@@ -9181,6 +9181,8 @@ function startProcedureStackMultiple( test )
 
 }
 
+startProcedureStackMultiple.timeOut = 120000;
+
 //
 
 /* qqq for Yevhen : implement for other modes */
