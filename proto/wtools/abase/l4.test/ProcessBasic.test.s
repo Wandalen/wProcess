@@ -23070,12 +23070,23 @@ sleep:begin
         else
         test.identical( options.output, exp1 );
         test.identical( options.exitCode, null );
+        /*xxx:
+          on linux has two processes( shell + node ), on mac shell has only node
+          on linux shell receives SIGTERM and kills node
+          on mac node ignores SIGTERM because of sleep option enabled
+        */
+        if( process.platform === 'darwin' )
+        test.identical( options.exitSignal, 'SIGKILL' );
+        else
         test.identical( options.exitSignal, 'SIGTERM' );
         test.identical( options.ended, true );
         test.identical( options.exitReason, 'signal' );
         test.identical( options.state, 'terminated' );
         test.identical( options.error, null );
         test.identical( options.process.exitCode, null );
+        if( process.platform === 'darwin' )
+        test.identical( options.process.signalCode, 'SIGTERM' );
+        else
         test.identical( options.process.signalCode, 'SIGTERM' );
         test.identical( options.process.killed, false );
         var dtime = _.time.now() - time1;
