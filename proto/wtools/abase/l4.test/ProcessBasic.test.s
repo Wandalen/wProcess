@@ -23699,6 +23699,7 @@ function terminateComplex( test )
 
   /*  */
 
+  /* qqq for Vova : make good test case descriptions */
   .then( () =>
   {
     test.case = 'Sending signal to child process has regular child process that should exit with parent'
