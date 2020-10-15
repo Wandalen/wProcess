@@ -1465,7 +1465,6 @@ function start_body( o )
 
   function form0()
   {
-
     if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
     o.stack = _.Procedure.Stack( o.stack, 3 );
   }
@@ -1728,7 +1727,7 @@ function start_body( o )
       }
     }
 
-    if( 0 )
+    // if( 0 ) // xxx yyy
     if( o.outputCollecting )
     for( let a = 0 ; a < o.runs.length ; a++ )
     {
