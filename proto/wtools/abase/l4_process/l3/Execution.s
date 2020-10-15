@@ -1521,8 +1521,8 @@ function start_body( o )
     o.streamErr = null
 
     // xxx : swich on
-    if( o.stdio[ 1 ] !== 'ignore' )
-    formStreams();
+    // if( o.stdio[ 1 ] !== 'ignore' )
+    // formStreams();
 
     if( !o.dry )
     if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
