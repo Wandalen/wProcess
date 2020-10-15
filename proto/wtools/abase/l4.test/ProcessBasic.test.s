@@ -877,7 +877,7 @@ function startFork( test )
       setTimeout( () =>
       {
         console.log( 'timeOut' );
-      }, 5000 )
+      }, context.t2 ) /* 5000 */
     }
 
     let programPath = a.program( testApp5 );
@@ -912,7 +912,7 @@ function startFork( test )
       setTimeout( () =>
       {
         console.log( 'timeOut' );
-      }, 5000 )
+      }, context.t2 ) /* 5000 */
     }
 
     let programPath = a.program( testApp6 );
@@ -3520,12 +3520,12 @@ function startWithoutExecPath( test )
       console.log( 'end', process.argv.slice( 2 ).join( ', ' ) );
     }
 
-    setTimeout( periodic, 50 );
+    setTimeout( periodic, context.t0 / 2 ); /* 50 */
     function periodic()
     {
       console.log( 'tick', process.argv.slice( 2 ).join( ', ' ) );
       if( !ended )
-      setTimeout( periodic, 50 );
+      setTimeout( periodic, context.t0 / 2 ); /* 50 */
     }
   }
 }
@@ -7900,7 +7900,7 @@ function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subrou
   function testApp()
   {
     console.log( process.pid )
-    setTimeout( () => {}, 2000 )
+    setTimeout( () => {}, context.t1 * 2 ) /* 2000 */
   }
 }
 
@@ -8231,7 +8231,7 @@ function startExecPathWithSpace( test )
   function testApp()
   {
     console.log( process.pid )
-    setTimeout( () => {}, 2000 )
+    setTimeout( () => {}, context.t1 * 2 ) /* 2000 */
   }
 }
 
@@ -8303,7 +8303,7 @@ function startNjsPassingThroughExecPathWithSpace( test )
   function testApp()
   {
     console.log( process.pid )
-    setTimeout( () => {}, 2000 )
+    setTimeout( () => {}, context.t1 * 2 ) /* 2000 */
   }
 }
 
@@ -8410,7 +8410,7 @@ function startProcedureTrivial( test )
   function testApp()
   {
     console.log( process.pid )
-    setTimeout( () => {}, 2000 )
+    setTimeout( () => {}, context.t1 * 2 ) /* 2000 */
   }
 }
 
@@ -8490,7 +8490,7 @@ function startProcedureExists( test )
   function program1()
   {
     console.log( process.pid )
-    setTimeout( () => {}, 2000 )
+    setTimeout( () => {}, context.t1 * 2 ) /* 2000 */
   }
 
 }
@@ -8937,7 +8937,7 @@ function startOnTerminateSeveralCallbacksChronology( test )
   function program1()
   {
     console.log( 'program1:begin' );
-    setTimeout( () => { console.log( 'program1:end' ) }, 1000 );
+    setTimeout( () => { console.log( 'program1:end' ) }, context.t1 ); /* 1000 */
   }
 
 }
@@ -9185,7 +9185,7 @@ function startChronology( test )
 
   function testApp()
   {
-    setTimeout( () => {}, 1000 );
+    setTimeout( () => {}, context.t1 ); /* 1000 */
   }
 
 }
@@ -12296,7 +12296,7 @@ function startDetachingDisconnectedEarly( test )
   function program1()
   {
     console.log( 'program1:begin' );
-    setTimeout( () => { console.log( 'program1:end' ) }, 2000 );
+    setTimeout( () => { console.log( 'program1:end' ) }, context.t1 * 2 ); /* 2000 */
     let _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
@@ -12420,7 +12420,7 @@ function startDetachingDisconnectedLate( test )
   function program1()
   {
     console.log( 'program1:begin' );
-    setTimeout( () => { console.log( 'program1:end' ) }, 2000 );
+    setTimeout( () => { console.log( 'program1:end' ) }, context.t1 * 2 ); /* 2000 */
     let _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
@@ -13031,7 +13031,7 @@ function startNjsDetachingChildThrowing( test )
     setTimeout( () =>
     {
       throw new Error( 'Child process error' );
-    }, 1000)
+    }, context.t1 ); /* 1000 */
   }
 
 }
@@ -13852,7 +13852,7 @@ function startWithDelayOnReady( test )
   {
     let _ = require( toolsPath );
     console.log( 'program1:begin' );
-    setTimeout( () => { console.log( 'program1:end' ) }, 15000 );
+    setTimeout( () => { console.log( 'program1:end' ) }, context.t3 ); /* 15000 */
   }
 
 }
@@ -14531,12 +14531,12 @@ function startConcurrent( test )
       console.log( 'end', process.argv.slice( 2 ).join( ', ' ) );
     }
 
-    setTimeout( periodic, 50 );
+    setTimeout( periodic, context.t0 / 2 ); /* 50 */
     function periodic()
     {
       console.log( 'tick', process.argv.slice( 2 ).join( ', ' ) );
       if( !ended )
-      setTimeout( periodic, 50 );
+      setTimeout( periodic, context.t0 / 2 ); /* 50 */
     }
   }
 
@@ -15078,12 +15078,12 @@ function starterConcurrent( test )
       console.log( 'end', process.argv.slice( 2 ).join( ', ' ) );
     }
 
-    setTimeout( periodic, 50 );
+    setTimeout( periodic, context.t0 / 2 ); /* 50 */
     function periodic()
     {
       console.log( 'tick', process.argv.slice( 2 ).join( ', ' ) );
       if( !ended )
-      setTimeout( periodic, 50 );
+      setTimeout( periodic, context.t0 / 2 ); /* 50 */
     }
   }
 }
@@ -19474,7 +19474,7 @@ function kill( test )
     setTimeout( () =>
     {
       console.log( 'Application timeout!' )
-    }, 5000 )
+    }, context.t2 ) /* 5000 */
   }
 }
 
@@ -20029,7 +20029,7 @@ function killOptionWithChildren( test )
   {
     if( process.send )
     process.send( process.pid );
-    setTimeout( () => { console.log( 'Application timeout' ) }, 5000 )
+    setTimeout( () => { console.log( 'Application timeout' ) }, context.t2 ) /* 5000 */
   }
 
   function testApp3()
@@ -20907,7 +20907,7 @@ function terminate( test )
     setTimeout( () =>
     {
       console.log( 'Application timeout!' )
-    }, 5000 )
+    }, context.t2 ) /* 5000 */
   }
 }
 
@@ -21225,7 +21225,7 @@ function terminateSync( test )
     setTimeout( () =>
     {
       console.log( 'Application timeout!' )
-    }, 5000 )
+    }, context.t2 ) /* 5000 */
   }
 }
 
@@ -21297,7 +21297,7 @@ function startErrorAfterTerminationWithSend( test )
 
   function testApp()
   {
-    setTimeout( () => {}, 1000 );
+    setTimeout( () => {}, context.t1 ); /* 1000 */
   }
 
   function uncaughtError_functor( mode )
@@ -21553,7 +21553,7 @@ function startTerminateAfterLoopRelease( test )
     setTimeout( () =>
     {
       loop = false;
-    }, 5000 )
+    }, context.t2 ) /* 5000 */
     process.send( process.pid );
     while( loop )
     {
@@ -24364,7 +24364,7 @@ function terminateWithChildren( test )
     }
     _.process.start( o );
     o.process.on( 'message', () => process.send( o.process.pid ) )
-    setTimeout( () => {}, 5000 )
+    setTimeout( () => {}, context.t2 ) /* 5000 */
   }
 
   function testApp2()
@@ -24379,7 +24379,7 @@ function terminateWithChildren( test )
     })
     if( process.send )
     process.send( process.pid );
-    setTimeout( () => {}, 5000 )
+    setTimeout( () => {}, context.t2 ) /* 5000 */
   }
 
   function testApp3()
@@ -24429,7 +24429,7 @@ function terminateWithChildren( test )
       process.send([ o1.process.pid, o2.process.pid ]);
       return null;
     })
-    setTimeout( () => {}, 5000 )
+    setTimeout( () => {}, context.t2 ) /* 5000 */
   }
 }
 
@@ -24558,7 +24558,7 @@ function terminateWithDetachedChildren( test )
     })
     if( process.send )
     process.send( process.pid );
-    setTimeout( () => {}, 5000 )
+    setTimeout( () => {}, context.t2 ) /* 5000 */
   }
 
   function testApp3()
@@ -25551,7 +25551,7 @@ function terminateDifferentStdio( test )
     setTimeout( () =>
     {
       process.exit( -1 );
-    }, 5000 )
+    }, context.t2 ) /* 5000 */
   }
 }
 
@@ -25633,7 +25633,7 @@ function killComplex( test )
     setTimeout( () =>
     {
       console.log( 'Application timeout!' )
-    }, 2500 )
+    }, context.t2 / 2 ) /* 2500 */
   }
 
   function testApp2()
@@ -25914,7 +25914,7 @@ function children( test )
   {
     if( process.send )
     process.send( process.pid );
-    setTimeout( () => {}, 1500 )
+    setTimeout( () => {}, context.t0 * 15 ) /* 1500 */
   }
 }
 
@@ -26017,7 +26017,7 @@ function childrenOptionFormatList( test )
   {
     if( process.send )
     process.send( process.pid );
-    setTimeout( () => {}, 1500 )
+    setTimeout( () => {}, context.t0 * 15 ) /* 1500 */
   }
 }
 
