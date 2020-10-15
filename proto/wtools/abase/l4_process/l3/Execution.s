@@ -2708,7 +2708,10 @@ function signal_body( o )
       if( !err )
       return arg;
 
-      /* qqq for Vova : not tested */
+      /*
+        qqq for Vova : write a test where kill is called after timeout on all platfroms and modes
+        run some sync code in program that will freeze the process
+      */
       timer.cancel();
       _.errAttend( err );
 
