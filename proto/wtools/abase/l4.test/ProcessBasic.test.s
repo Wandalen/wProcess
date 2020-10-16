@@ -21200,1175 +21200,6 @@ function killOptionWithChildren( test )
 
 //
 
-/* qqq for Vova : describe test cases. describe test. this and related */
-function terminate( test )
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
-
-  // if( process.platform === 'win32' )
-  // {
-  //   // qqq for Vova : windows-kill doesn't work correctrly on node 14
-  //   // investigate if its possible to use process.kill instead of windows-kill
-  //   test.identical( 1, 1 )
-  //   return;
-  // }
-
-  a.ready
-
-  .then( () =>
-  {
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'spawn',
-      ipc : 1,
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    o.process.on( 'message', () =>
-    {
-      _.process.terminate({ pnd : o.process });
-    })
-
-    ready.then( ( op ) =>
-    {
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, null );
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.identical( op.ended, true );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-      else
-      {
-        test.identical( op.exitCode, null );
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.identical( op.ended, true );
-        test.is( _.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-
-      return null;
-    })
-
-    return ready;
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'spawn',
-      ipc : 1,
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    o.process.on( 'message', () =>
-    {
-      _.process.terminate( o.process.pid );
-    })
-
-    ready.then( ( op ) =>
-    {
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, 1 );//1 because process was killed using pid
-        test.identical( op.exitSignal, null );
-        test.identical( op.ended, true );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-      else
-      {
-        test.identical( op.exitCode, null );
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.identical( op.ended, true );
-        test.is( _.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-      return null;
-    })
-
-    return ready;
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'spawn',
-      ipc : 1,
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    o.process.on( 'message', () =>
-    {
-      _.process.terminate({ pid : o.process.pid, timeOut : 0 });
-    })
-
-    ready.then( ( op ) =>
-    {
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, 1 );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, null );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-      else
-      {
-        test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGKILL' );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-
-      return null;
-    })
-
-    return ready;
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'spawn',
-      ipc : 1,
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    o.process.on( 'message', () =>
-    {
-      _.process.terminate({ pnd : o.process, timeOut : 1 });
-    })
-
-    ready.then( ( op ) =>
-    {
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, null );
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.identical( op.ended, true );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-      else
-      {
-        test.identical( op.exitCode, null );
-        test.is( op.exitSignal === 'SIGKILL' || op.exitSignal === 'SIGTERM' );
-        test.identical( op.ended, true );
-        test.is( _.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-
-      return null;
-    })
-
-    return ready;
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'spawn',
-      ipc : 1,
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    o.process.on( 'message', () =>
-    {
-      _.process.terminate({ pnd : o.process, timeOut : 0 });
-    })
-
-    ready.then( ( op ) =>
-    {
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGKILL' );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-      else
-      {
-        test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGKILL' );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-
-      return null;
-    })
-
-    return ready;
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'spawn',
-      ipc : 1,
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    o.process.on( 'message', () =>
-    {
-      _.process.terminate({ pnd : o.process, timeOut : 1 });
-    })
-
-    ready.then( ( op ) =>
-    {
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, null );
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.identical( op.ended, true );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-      else
-      {
-        test.identical( op.exitCode, null );
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.identical( op.ended, true );
-        test.is( _.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-
-      return null;
-    })
-
-    return ready;
-  })
-
-  /* fork */
-
-  .then( () =>
-  {
-    var o =
-    {
-      execPath : testAppPath,
-      mode : 'fork',
-      ipc : 1,
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    o.process.on( 'message', () =>
-    {
-      _.process.terminate( o.process.pid );
-    })
-
-    ready.then( ( op ) =>
-    {
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, 1 );//1 because process was killed using pid
-        test.identical( op.exitSignal, null );
-        test.identical( op.ended, true );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-      else
-      {
-        test.identical( op.exitCode, null );
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.identical( op.ended, true );
-        test.is( _.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-      return null;
-    })
-
-    return ready;
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    var o =
-    {
-      execPath : testAppPath,
-      mode : 'fork',
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    o.process.on( 'message', () =>
-    {
-      _.process.terminate({ pnd : o.process });
-    })
-
-    ready.then( ( op ) =>
-    {
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, null );
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.identical( op.ended, true );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-      else
-      {
-        test.identical( op.exitCode, null );
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.identical( op.ended, true );
-        test.is( _.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-      return null;
-    })
-
-    return ready;
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    var o =
-    {
-      execPath : testAppPath,
-      mode : 'fork',
-      ipc : 1,
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    o.process.on( 'message', () =>
-    {
-      _.process.terminate({ pid : o.process.pid, timeOut : 0 });
-    })
-
-    ready.then( ( op ) =>
-    {
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, 1 );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, null );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-      else
-      {
-        test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGKILL' );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-      return null;
-    })
-
-    return ready;
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    var o =
-    {
-      execPath : testAppPath,
-      mode : 'fork',
-      ipc : 1,
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    o.process.on( 'message', () =>
-    {
-      _.process.terminate({ pnd : o.process, timeOut : 0 });
-    })
-
-    ready.then( ( op ) =>
-    {
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGKILL' );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-      else
-      {
-        test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGKILL' );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-      return null;
-    })
-
-    return ready;
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    var o =
-    {
-      execPath : testAppPath,
-      mode : 'fork',
-      ipc : 1,
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    o.process.on( 'message', () =>
-    {
-      _.process.terminate({ pid : o.process.pid, timeOut : 1 });
-    })
-
-    ready.then( ( op ) =>
-    {
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, 1 );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, null );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-      else
-      {
-        test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
-        test.is( op.exitSignal === 'SIGKILL' || op.exitSignal === 'SIGTERM' );
-        test.is( _.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-      return null;
-    })
-
-    return ready;
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    var o =
-    {
-      execPath : testAppPath,
-      mode : 'fork',
-      ipc : 1,
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    o.process.on( 'message', () =>
-    {
-      _.process.terminate({ pnd : o.process, timeOut : 1 });
-    })
-
-    ready.then( ( op ) =>
-    {
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGKILL' );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-      else
-      {
-        test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
-        test.is( op.exitSignal === 'SIGKILL' || op.exitSignal === 'SIGTERM' );
-        test.is( _.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-      return null;
-    })
-
-    return ready;
-  })
-
-  /* shell */
-
-  /*
-    zzz Vova: shell,exec modes have different behaviour on Windows,OSX and Linux
-    look for solution that allow to have same behaviour on each mode
-  */
-
-  .then( () =>
-  {
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'shell',
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    o.process.stdout.on( 'data', ( data ) =>
-    {
-      data = data.toString();
-      if( _.strHas( data, 'ready' ))
-      _.process.terminate( o.process );
-    })
-
-    ready.then( ( op ) =>
-    {
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, null );// null because process was killed using pnd
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-      else
-      {
-        test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.is( _.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-
-      return null;
-    })
-
-    return ready;
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'shell',
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    o.process.stdout.on( 'data', ( data ) =>
-    {
-      data = data.toString();
-      if( _.strHas( data, 'ready' ))
-      _.process.terminate( o.process.pid );
-    })
-
-    ready.then( ( op ) =>
-    {
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, 1 );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, null );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-      else
-      {
-        test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.is( _.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-
-      return null;
-    })
-
-    return ready;
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'shell',
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    o.process.stdout.on( 'data', ( data ) =>
-    {
-      data = data.toString();
-      if( _.strHas( data, 'ready' ))
-      _.process.terminate({ pnd : o.process, timeOut : 0 }); /* qqq for Vova : should send kill signal! aaa: added test routine terminateZeroTimeOut*/
-    })
-
-    /* qqq for Vova : add test case with low timeOut aaa:added*/
-
-    ready.then( ( op ) =>
-    {
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, null );// null because process was killed using pnd
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGKILL' );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-      else
-      {
-        test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGKILL' );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-
-      return null;
-    })
-
-    return ready;
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'shell',
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    o.process.stdout.on( 'data', ( data ) =>
-    {
-      data = data.toString();
-      if( _.strHas( data, 'ready' ))
-      _.process.terminate({ pid : o.process.pid, timeOut : 0 });
-    })
-
-    ready.then( ( op ) =>
-    {
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, 1 );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, null );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-      else
-      {
-        test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGKILL' );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-      return null;
-    })
-
-    return ready;
-  })
-
-  .then( () =>
-  {
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'shell',
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    o.process.stdout.on( 'data', ( data ) =>
-    {
-      data = data.toString();
-      if( _.strHas( data, 'ready' ))
-      _.process.terminate({ pnd : o.process, timeOut : 1 });
-    })
-
-    ready.then( ( op ) =>
-    {
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-      else
-      {
-        test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.is( _.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-      return null;
-    })
-
-    return ready;
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'shell',
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    o.process.stdout.on( 'data', ( data ) =>
-    {
-      data = data.toString();
-      if( _.strHas( data, 'ready' ))
-      _.process.terminate({ pid : o.process.pid, timeOut : 1 });
-    })
-
-    ready.then( ( op ) =>
-    {
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, 1 );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, null );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-      else
-      {
-        test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.is( _.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-      return null;
-    })
-
-    return ready;
-  })
-
-  /* */
-
-  return a.ready;
-
-  /* - */
-
-  function testApp()
-  {
-    let _ = require( toolsPath );
-    _.include( 'wProcess' );
-    _.process._exitHandlerRepair();
-    if( process.send )
-    process.send( process.pid );
-    else
-    console.log( 'ready' );
-    setTimeout( () =>
-    {
-      console.log( 'Application timeout!' )
-    }, context.t2 ) /* 5000 */
-  }
-}
-
-//
-
-function terminateSync( test )
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
-
-  // if( process.platform === 'win32' )
-  // {
-  //   // qqq for Vova : windows-kill doesn't work correctrly on node 14
-  //   // investigate if its possible to use process.kill instead of windows-kill
-  //   test.identical( 1, 1 );
-  //   return;
-  // }
-
-  a.ready
-
-  .then( () =>
-  {
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'spawn',
-      ipc : 1,
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    _.process.start( o );
-
-    o.conTerminate.then( ( op ) =>
-    {
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.ended, true );
-        test.identical( op.exitCode, null );
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-      else
-      {
-        test.identical( op.ended, true );
-        test.identical( op.exitCode, null );
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.is( _.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-      return null;
-    })
-
-    return _.time.out( context.t1, () =>
-    {
-      let result = _.process.terminate({ pnd : o.process, sync : 1 });
-      test.identical( result.resourcesCount(), 1 );
-      let got = result.sync();
-      test.identical( got, true );
-      return o.conTerminate;
-    })
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'spawn',
-      ipc : 1,
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    _.process.start( o );
-
-    o.conTerminate.then( ( op ) =>
-    {
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.ended, true );
-        test.identical( op.exitCode, 1 );
-        test.identical( op.exitSignal, null );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-      else
-      {
-        test.identical( op.ended, true );
-        test.identical( op.exitCode, null );
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.is( _.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-      return null;
-    })
-
-    return _.time.out( context.t1, () =>
-    {
-      let result = _.process.terminate({ pid : o.process.pid, sync : 1  });
-      test.identical( result.resourcesCount(), 1 );
-      let got = result.sync();
-      test.identical( got, true );
-      return o.conTerminate;
-    })
-  })
-
-  /* fork */
-
-  .then( () =>
-  {
-
-    var o =
-    {
-      execPath : testAppPath,
-      mode : 'fork',
-      ipc : 1,
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    _.process.start( o )
-
-    o.conTerminate.then( ( op ) =>
-    {
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.ended, true );
-        test.identical( op.exitCode, 1 );
-        test.identical( op.exitSignal, null );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-      else
-      {
-        test.identical( op.ended, true );
-        test.identical( op.exitCode, null );
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.is( _.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-      return null;
-    })
-
-    return _.time.out( context.t1, () =>
-    {
-      let result = _.process.terminate({ pid : o.process.pid, sync : 1  });
-      test.identical( result.resourcesCount(), 1 );
-      let got = result.sync();
-      test.identical( got, true );
-      return o.conTerminate;
-    })
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    let ready = _.Consequence();
-
-    var o =
-    {
-      execPath : testAppPath,
-      mode : 'fork',
-      ipc : 1,
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    _.process.start( o )
-
-    o.conTerminate.then( ( op ) =>
-    {
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.ended, true );
-        test.identical( op.exitCode, null );
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-      else
-      {
-        test.identical( op.ended, true );
-        test.identical( op.exitCode, null );
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.is( _.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-
-      return null;
-    })
-
-    return _.time.out( context.t1, () =>
-    {
-      let result = _.process.terminate({ pnd : o.process, sync : 1  });
-      test.identical( result.resourcesCount(), 1 );
-      let got = result.sync();
-      test.identical( got, true );
-      return o.conTerminate;
-    })
-  })
-
-  /* shell */
-
-  /*
-    zzz Vova: shell,exec modes have different behaviour on Windows,OSX and Linux
-    look for solution that allow to have same behaviour on each mode
-  */
-
-  .then( () =>
-  {
-
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'shell',
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    _.process.start( o )
-
-    o.conTerminate.then( ( op ) =>
-    {
-      test.identical( op.exitCode, null );
-      test.identical( op.ended, true );
-      test.identical( op.exitSignal, 'SIGKILL' );
-      test.is( !_.strHas( op.output, 'SIGTERM' ) );
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
-
-      return null;
-    })
-
-    return _.time.out( context.t1, () =>
-    {
-      let result = _.process.terminate({ pnd : o.process, timeOut : 0, sync : 1  });
-      test.identical( result.resourcesCount(), 1 );
-      let got = result.sync();
-      test.identical( got, true );
-      return o.conTerminate;
-    })
-  })
-
-  /* */
-
-  .then( () =>
-  {
-
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'shell',
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    _.process.start( o )
-
-    o.conTerminate.then( ( op ) =>
-    {
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, 1 );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, null );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-      else
-      {
-        test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGKILL' );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-      return null;
-    })
-
-    return _.time.out( context.t1, () =>
-    {
-      let result = _.process.terminate({ pid : o.process.pid, timeOut : 0, sync : 1 });
-      test.identical( result.resourcesCount(), 1 );
-      let got = result.sync();
-      test.identical( got, true );
-      return o.conTerminate;
-    })
-  })
-
-  /*
-    zzz Vova: shell,exec modes have different behaviour on Windows,OSX and Linux
-    look for solution that allow to have same behaviour on each mode
-  */
-
-  /* */
-
-  return a.ready;
-
-  /* - */
-
-  function testApp()
-  {
-    let _ = require( toolsPath );
-    _.include( 'wProcess' );
-    _.process._exitHandlerRepair();
-    if( process.send )
-    process.send( process.pid );
-    else
-    console.log( 'ready' );
-    setTimeout( () =>
-    {
-      console.log( 'Application timeout!' )
-    }, context.t2 ) /* 5000 */
-  }
-}
-
-terminateSync.timeOut = 300000;
-
-//
-
 function startErrorAfterTerminationWithSend( test )
 {
   let context = this;
@@ -24780,269 +23611,1172 @@ endSignalsOnExitExit.description =
 
 //
 
-// function terminateComplex( test )
-// {
-//   let context = this;
-//   let a = context.assetFor( test, false );
-//   let testAppPath = a.program( testApp );
-//   let testAppPath2 = a.program( testApp2 );
+/* qqq for Vova : describe test cases. describe test. this and related */
+function terminate( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( testApp );
 
-//   // if( process.platform === 'win32' )
-//   // {
-//   //   // qqq for Vova : windows-kill doesn't work correctly in all scenarios
-//   //   // investigate if its possible to use process.kill instead of windows-kill
-//   //   test.identical( 1, 1 )
-//   //   return;
-//   // }
+  // if( process.platform === 'win32' )
+  // {
+  //   // qqq for Vova : windows-kill doesn't work correctrly on node 14
+  //   // investigate if its possible to use process.kill instead of windows-kill
+  //   test.identical( 1, 1 )
+  //   return;
+  // }
 
-//   /* */
+  a.ready
 
-//   a.ready
+  .then( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'spawn',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
 
-//   .then( () =>
-//   {
-//     test.case = 'mode:spawn, Child1 -> Child2, terminate Child2'
-//     var o =
-//     {
-//       execPath :  'node ' + testAppPath,
-//       mode : 'spawn',
-//       ipc : 1,
-//       outputCollecting : 1,
-//       throwingExitCode : 0
-//     }
+    let ready = _.process.start( o )
 
-//     let ready = _.process.start( o );
-//     let lastChildPid;
+    o.process.on( 'message', () =>
+    {
+      _.process.terminate({ pnd : o.process });
+    })
 
-//     o.process.on( 'message', ( e ) =>
-//     {
-//       lastChildPid = _.numberFrom( e );
-//       _.process.terminate({ pid : lastChildPid });
-//     })
+    ready.then( ( op ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.identical( op.ended, true );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.identical( op.ended, true );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
 
-//     ready.then( ( op ) =>
-//     {
-//       test.identical( op.exitCode, 0 );
-//       test.identical( op.ended, true );
-//       test.identical( op.exitSignal, null );
+      return null;
+    })
 
-//       if( process.platform === 'win32' )
-//       {
-//         test.identical( _.strCount( op.output, 'SIGTERM' ), 0 );
-//         test.identical( _.strCount( op.output, 'second child SIGTERM' ), 0 );
-//       }
-//       else
-//       {
-//         test.identical( _.strCount( op.output, 'SIGTERM' ), 1 );
-//         test.identical( _.strCount( op.output, 'second child SIGTERM' ), 1 );
-//       }
+    return ready;
+  })
 
-//       test.is( !_.process.isAlive( o.process.pid ) )
-//       test.is( !_.process.isAlive( lastChildPid ) );
-//       return null;
-//     })
+  /* */
 
-//     return ready;
-//   })
+  .then( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'spawn',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
 
-//   /*  */
+    let ready = _.process.start( o )
 
-//   /* qqq for Vova : make good test case descriptions aaa: good? */
-//   .then( () =>
-//   {
-//     test.case = 'mode:spawn, Child1 -> Child2, terminate Child1 '
-//     var o =
-//     {
-//       execPath :  'node ' + testAppPath,
-//       mode : 'spawn',
-//       ipc : 1,
-//       outputCollecting : 1,
-//       throwingExitCode : 0
-//     }
+    o.process.on( 'message', () =>
+    {
+      _.process.terminate( o.process.pid );
+    })
 
-//     let ready = _.process.start( o );
-//     let lastChildPid;
+    ready.then( ( op ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, 1 );//1 because process was killed using pid
+        test.identical( op.exitSignal, null );
+        test.identical( op.ended, true );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.identical( op.ended, true );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      return null;
+    })
 
-//     o.process.on( 'message', ( e ) =>
-//     {
-//       lastChildPid = _.numberFrom( e );
-//       _.process.terminate({ pid : o.process.pid, withChildren : 0 });
-//     })
+    return ready;
+  })
 
-//     ready.then( ( op ) =>
-//     {
-//       if( process.platform === 'win32' )
-//       {
-//         test.identical( op.exitCode, 1 );
-//         test.identical( op.ended, true );
-//         test.identical( op.exitSignal, null );
-//         test.identical( _.strCount( op.output, 'SIGTERM' ), 0 );
-//       }
-//       else
-//       {
-//         test.identical( op.exitCode, null );
-//         test.identical( op.ended, true );
-//         test.identical( op.exitSignal, 'SIGTERM' );
-//         test.identical( _.strCount( op.output, 'SIGTERM' ), 1 );
-//       }
+  /* */
 
-//       test.is( !_.process.isAlive( o.process.pid ) )
-//       test.is( !_.process.isAlive( lastChildPid ) );
-//       return null;
-//     })
+  .then( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'spawn',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
 
-//     return ready;
-//   })
+    let ready = _.process.start( o )
 
-//   /* - */
+    o.process.on( 'message', () =>
+    {
+      _.process.terminate({ pid : o.process.pid, timeOut : 0 });
+    })
 
-//   .then( () =>
-//   {
-//     test.case = 'mode:fork, Child1->Child2, terminate Child1'
-//     var o =
-//     {
-//       execPath : testAppPath,
-//       mode : 'fork',
-//       ipc : 1,
-//       outputCollecting : 1,
-//       throwingExitCode : 0
-//     }
+    ready.then( ( op ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, 1 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, null );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGKILL' );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
 
-//     let ready = _.process.start( o );
-//     let lastChildPid;
+      return null;
+    })
 
-//     o.process.on( 'message', ( e ) =>
-//     {
-//       lastChildPid = _.numberFrom( e );
-//       _.process.terminate({ pid : o.process.pid, withChildren : 0 });
-//     })
+    return ready;
+  })
 
-//     ready.then( ( op ) =>
-//     {
+  /* */
 
-//       if( process.platform === 'win32' )
-//       {
-//         test.identical( op.exitCode, 1 );
-//         test.identical( op.ended, true );
-//         test.identical( op.exitSignal, null );
-//         test.identical( _.strCount( op.output, 'SIGTERM' ), 0 );
-//       }
-//       else
-//       {
-//         test.identical( op.exitCode, null );
-//         test.identical( op.ended, true );
-//         test.identical( op.exitSignal, 'SIGTERM' );
-//         test.identical( _.strCount( op.output, 'SIGTERM' ), 1 );
-//       }
+  .then( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'spawn',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
 
-//       test.is( !_.process.isAlive( o.process.pid ) )
-//       test.is( !_.process.isAlive( lastChildPid ) );
+    let ready = _.process.start( o )
 
-//       return null;
-//     })
+    o.process.on( 'message', () =>
+    {
+      _.process.terminate({ pnd : o.process, timeOut : 1 });
+    })
 
-//     return ready;
-//   })
+    ready.then( ( op ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.identical( op.ended, true );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.is( op.exitSignal === 'SIGKILL' || op.exitSignal === 'SIGTERM' );
+        test.identical( op.ended, true );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
 
-//   /* - */
+      return null;
+    })
 
-//   .then( () =>
-//   {
-//     test.case = 'mode:shell, Child1->Child2, terminate Child1'
-//     var o =
-//     {
-//       execPath : 'node ' + testAppPath,
-//       mode : 'shell',
-//       outputCollecting : 1,
-//       throwingExitCode : 0
-//     }
+    return ready;
+  })
 
-//     let ready = _.process.start( o );
-//     let lastChildPid;
+  /* */
 
-//     o.process.stdout.on( 'data', ( data ) =>
-//     {
-//       data = data.toString();
-//       lastChildPid = _.numberFrom( data );
-//       _.process.terminate({ pid : o.process.pid });
-//     })
+  .then( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'spawn',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
 
-//     ready.then( ( op ) =>
-//     {
+    let ready = _.process.start( o )
 
-//       if( process.platform === 'win32' )
-//       {
-//         test.identical( op.exitCode, 1 );
-//         test.identical( op.ended, true );
-//         test.identical( op.exitSignal, null );
-//       }
-//       else
-//       {
-//         test.identical( op.exitCode, null );
-//         test.identical( op.ended, true );
-//         test.identical( op.exitSignal, 'SIGTERM' );
-//       }
+    o.process.on( 'message', () =>
+    {
+      _.process.terminate({ pnd : o.process, timeOut : 0 });
+    })
 
-//       test.is( !_.process.isAlive( o.process.pid ) )
-//       test.is( !_.process.isAlive( lastChildPid ) );
+    ready.then( ( op ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGKILL' );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGKILL' );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
 
-//       return null;
-//     })
+      return null;
+    })
 
-//     return ready;
-//   })
+    return ready;
+  })
 
-//   /* - */
+  /* */
 
-//   return a.ready;
+  .then( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'spawn',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
 
-//   /* - */
+    let ready = _.process.start( o )
 
-//   function testApp()
-//   {
-//     let _ = require( toolsPath );
-//     _.include( 'wProcess' );
-//     _.include( 'wFiles' );
-//     let detaching = process.argv[ 2 ] === 'detached';
-//     var o =
-//     {
-//       execPath : 'node testApp2.js',
-//       currentPath : __dirname,
-//       mode : 'spawn',
-//       stdio : 'inherit',
-//       detaching,
-//       inputMirroring : 0,
-//       outputPiping : 0,
-//       outputCollecting : 0,
-//       throwingExitCode : 0
-//     }
-//     _.process.start( o );
-//     _.time.out( context.t1*2, () =>
-//     {
-//       console.log( o.process.pid )
-//       if( process.send )
-//       process.send( o.process.pid )
-//     })
-//   }
+    o.process.on( 'message', () =>
+    {
+      _.process.terminate({ pnd : o.process, timeOut : 1 });
+    })
 
-//   function testApp2()
-//   {
-//     process.on( 'SIGTERM', () =>
-//     {
-//       console.log( 'second child SIGTERM' )
-//       var fs = require( 'fs' );
-//       var path = require( 'path' )
-//       fs.writeFileSync( path.join( __dirname, process.pid.toString() ), process.pid.toString() )
-//       process.exit( 0 );
-//     })
-//     if( process.send )
-//     process.send( process.pid );
-//     setTimeout( () => {}, context.t1*8 )
-//   }
+    ready.then( ( op ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.identical( op.ended, true );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.identical( op.ended, true );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
 
-// }
+      return null;
+    })
 
-// terminateComplex.timeOut = 150000;
+    return ready;
+  })
+
+  /* fork */
+
+  .then( () =>
+  {
+    var o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    o.process.on( 'message', () =>
+    {
+      _.process.terminate( o.process.pid );
+    })
+
+    ready.then( ( op ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, 1 );//1 because process was killed using pid
+        test.identical( op.exitSignal, null );
+        test.identical( op.ended, true );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.identical( op.ended, true );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      return null;
+    })
+
+    return ready;
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    var o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    o.process.on( 'message', () =>
+    {
+      _.process.terminate({ pnd : o.process });
+    })
+
+    ready.then( ( op ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.identical( op.ended, true );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.identical( op.ended, true );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      return null;
+    })
+
+    return ready;
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    var o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    o.process.on( 'message', () =>
+    {
+      _.process.terminate({ pid : o.process.pid, timeOut : 0 });
+    })
+
+    ready.then( ( op ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, 1 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, null );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGKILL' );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      return null;
+    })
+
+    return ready;
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    var o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    o.process.on( 'message', () =>
+    {
+      _.process.terminate({ pnd : o.process, timeOut : 0 });
+    })
+
+    ready.then( ( op ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGKILL' );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGKILL' );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      return null;
+    })
+
+    return ready;
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    var o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    o.process.on( 'message', () =>
+    {
+      _.process.terminate({ pid : o.process.pid, timeOut : 1 });
+    })
+
+    ready.then( ( op ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, 1 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, null );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.is( op.exitSignal === 'SIGKILL' || op.exitSignal === 'SIGTERM' );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      return null;
+    })
+
+    return ready;
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    var o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    o.process.on( 'message', () =>
+    {
+      _.process.terminate({ pnd : o.process, timeOut : 1 });
+    })
+
+    ready.then( ( op ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGKILL' );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.is( op.exitSignal === 'SIGKILL' || op.exitSignal === 'SIGTERM' );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      return null;
+    })
+
+    return ready;
+  })
+
+  /* shell */
+
+  /*
+    zzz Vova: shell,exec modes have different behaviour on Windows,OSX and Linux
+    look for solution that allow to have same behaviour on each mode
+  */
+
+  .then( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'shell',
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    o.process.stdout.on( 'data', ( data ) =>
+    {
+      data = data.toString();
+      if( _.strHas( data, 'ready' ))
+      _.process.terminate( o.process );
+    })
+
+    ready.then( ( op ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, null );// null because process was killed using pnd
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+
+      return null;
+    })
+
+    return ready;
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'shell',
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    o.process.stdout.on( 'data', ( data ) =>
+    {
+      data = data.toString();
+      if( _.strHas( data, 'ready' ))
+      _.process.terminate( o.process.pid );
+    })
+
+    ready.then( ( op ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, 1 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, null );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+
+      return null;
+    })
+
+    return ready;
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'shell',
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    o.process.stdout.on( 'data', ( data ) =>
+    {
+      data = data.toString();
+      if( _.strHas( data, 'ready' ))
+      _.process.terminate({ pnd : o.process, timeOut : 0 }); /* qqq for Vova : should send kill signal! aaa: added test routine terminateZeroTimeOut*/
+    })
+
+    /* qqq for Vova : add test case with low timeOut aaa:added*/
+
+    ready.then( ( op ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, null );// null because process was killed using pnd
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGKILL' );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGKILL' );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+
+      return null;
+    })
+
+    return ready;
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'shell',
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    o.process.stdout.on( 'data', ( data ) =>
+    {
+      data = data.toString();
+      if( _.strHas( data, 'ready' ))
+      _.process.terminate({ pid : o.process.pid, timeOut : 0 });
+    })
+
+    ready.then( ( op ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, 1 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, null );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGKILL' );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      return null;
+    })
+
+    return ready;
+  })
+
+  .then( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'shell',
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    o.process.stdout.on( 'data', ( data ) =>
+    {
+      data = data.toString();
+      if( _.strHas( data, 'ready' ))
+      _.process.terminate({ pnd : o.process, timeOut : 1 });
+    })
+
+    ready.then( ( op ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      return null;
+    })
+
+    return ready;
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'shell',
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    let ready = _.process.start( o )
+
+    o.process.stdout.on( 'data', ( data ) =>
+    {
+      data = data.toString();
+      if( _.strHas( data, 'ready' ))
+      _.process.terminate({ pid : o.process.pid, timeOut : 1 });
+    })
+
+    ready.then( ( op ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, 1 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, null );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      return null;
+    })
+
+    return ready;
+  })
+
+  /* */
+
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.process._exitHandlerRepair();
+    if( process.send )
+    process.send( process.pid );
+    else
+    console.log( 'ready' );
+    setTimeout( () =>
+    {
+      console.log( 'Application timeout!' )
+    }, context.t2 ) /* 5000 */
+  }
+}
+
+//
+
+function terminateSync( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( testApp );
+
+  // if( process.platform === 'win32' )
+  // {
+  //   // qqq for Vova : windows-kill doesn't work correctrly on node 14
+  //   // investigate if its possible to use process.kill instead of windows-kill
+  //   test.identical( 1, 1 );
+  //   return;
+  // }
+
+  a.ready
+
+  .then( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'spawn',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    _.process.start( o );
+
+    o.conTerminate.then( ( op ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.ended, true );
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.ended, true );
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      return null;
+    })
+
+    return _.time.out( context.t1, () =>
+    {
+      let result = _.process.terminate({ pnd : o.process, sync : 1 });
+      test.identical( result.resourcesCount(), 1 );
+      let got = result.sync();
+      test.identical( got, true );
+      return o.conTerminate;
+    })
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'spawn',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    _.process.start( o );
+
+    o.conTerminate.then( ( op ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.ended, true );
+        test.identical( op.exitCode, 1 );
+        test.identical( op.exitSignal, null );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.ended, true );
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      return null;
+    })
+
+    return _.time.out( context.t1, () =>
+    {
+      let result = _.process.terminate({ pid : o.process.pid, sync : 1  });
+      test.identical( result.resourcesCount(), 1 );
+      let got = result.sync();
+      test.identical( got, true );
+      return o.conTerminate;
+    })
+  })
+
+  /* fork */
+
+  .then( () =>
+  {
+
+    var o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    _.process.start( o )
+
+    o.conTerminate.then( ( op ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.ended, true );
+        test.identical( op.exitCode, 1 );
+        test.identical( op.exitSignal, null );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.ended, true );
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      return null;
+    })
+
+    return _.time.out( context.t1, () =>
+    {
+      let result = _.process.terminate({ pid : o.process.pid, sync : 1  });
+      test.identical( result.resourcesCount(), 1 );
+      let got = result.sync();
+      test.identical( got, true );
+      return o.conTerminate;
+    })
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    let ready = _.Consequence();
+
+    var o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      ipc : 1,
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    _.process.start( o )
+
+    o.conTerminate.then( ( op ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.ended, true );
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.ended, true );
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.is( _.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+
+      return null;
+    })
+
+    return _.time.out( context.t1, () =>
+    {
+      let result = _.process.terminate({ pnd : o.process, sync : 1  });
+      test.identical( result.resourcesCount(), 1 );
+      let got = result.sync();
+      test.identical( got, true );
+      return o.conTerminate;
+    })
+  })
+
+  /* shell */
+
+  /*
+    zzz Vova: shell,exec modes have different behaviour on Windows,OSX and Linux
+    look for solution that allow to have same behaviour on each mode
+  */
+
+  .then( () =>
+  {
+
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'shell',
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    _.process.start( o )
+
+    o.conTerminate.then( ( op ) =>
+    {
+      test.identical( op.exitCode, null );
+      test.identical( op.ended, true );
+      test.identical( op.exitSignal, 'SIGKILL' );
+      test.is( !_.strHas( op.output, 'SIGTERM' ) );
+      test.is( !_.strHas( op.output, 'Application timeout!' ) );
+
+      return null;
+    })
+
+    return _.time.out( context.t1, () =>
+    {
+      let result = _.process.terminate({ pnd : o.process, timeOut : 0, sync : 1  });
+      test.identical( result.resourcesCount(), 1 );
+      let got = result.sync();
+      test.identical( got, true );
+      return o.conTerminate;
+    })
+  })
+
+  /* */
+
+  .then( () =>
+  {
+
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'shell',
+      outputCollecting : 1,
+      throwingExitCode : 0
+    }
+
+    _.process.start( o )
+
+    o.conTerminate.then( ( op ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, 1 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, null );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGKILL' );
+        test.is( !_.strHas( op.output, 'SIGTERM' ) );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      }
+      return null;
+    })
+
+    return _.time.out( context.t1, () =>
+    {
+      let result = _.process.terminate({ pid : o.process.pid, timeOut : 0, sync : 1 });
+      test.identical( result.resourcesCount(), 1 );
+      let got = result.sync();
+      test.identical( got, true );
+      return o.conTerminate;
+    })
+  })
+
+  /*
+    zzz Vova: shell,exec modes have different behaviour on Windows,OSX and Linux
+    look for solution that allow to have same behaviour on each mode
+  */
+
+  /* */
+
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.process._exitHandlerRepair();
+    if( process.send )
+    process.send( process.pid );
+    else
+    console.log( 'ready' );
+    setTimeout( () =>
+    {
+      console.log( 'Application timeout!' )
+    }, context.t2 ) /* 5000 */
+  }
+}
+
+terminateSync.timeOut = 300000;
 
 //
 
@@ -25108,8 +24842,15 @@ function terminateFirstChildSpawn( test )
     test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
     test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
-    test.is( !_.process.isAlive( program2PID ) );
+    test.is( _.process.isAlive( program2PID ) );
 
+    return _.time.out( context.t1*15 );
+  })
+
+  o.conTerminate.then( () =>
+  {
+    test.is( !_.process.isAlive( program2PID ) );
+    test.is( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
     return null;
   })
 
@@ -25128,9 +24869,9 @@ function terminateFirstChildSpawn( test )
       execPath : 'node program2.js',
       currentPath : __dirname,
       mode : 'spawn',
-      stdio : 'inherit',
+      stdio : 'pipe',
       inputMirroring : 0,
-      outputPiping : 0,
+      outputPiping : 1,
       outputCollecting : 0,
       throwingExitCode : 0,
     }
@@ -25173,8 +24914,9 @@ terminateFirstChildSpawn.timeOut = 40000;
 terminateFirstChildSpawn.description =
 `
 mode : spawn
-terminate first child
+terminate first child withChildren:0
 first child with signal SIGTERM on unix and exit code 1 on win
+second child continues to work
 `
 
 function terminateFirstChildFork( test )
@@ -25239,8 +24981,15 @@ function terminateFirstChildFork( test )
     test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
     test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
-    test.is( !_.process.isAlive( program2PID ) );
+    test.is( _.process.isAlive( program2PID ) );
 
+    return _.time.out( context.t1*15 );
+  })
+
+  o.conTerminate.then( () =>
+  {
+    test.is( !_.process.isAlive( program2PID ) );
+    test.is( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
     return null;
   })
 
@@ -25259,9 +25008,9 @@ function terminateFirstChildFork( test )
       execPath : 'program2.js',
       currentPath : __dirname,
       mode : 'fork',
-      stdio : 'inherit',
+      stdio : 'pipe',
       inputMirroring : 0,
-      outputPiping : 0,
+      outputPiping : 1,
       outputCollecting : 0,
       throwingExitCode : 0,
     }
@@ -25370,8 +25119,15 @@ function terminateFirstChildShell( test )
     test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
     test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
-    test.is( !_.process.isAlive( program2PID ) );
+    test.is( _.process.isAlive( program2PID ) );
 
+    return _.time.out( context.t1*15 );
+  })
+
+  o.conTerminate.then( () =>
+  {
+    test.is( !_.process.isAlive( program2PID ) );
+    test.is( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
     return null;
   })
 
@@ -25390,9 +25146,9 @@ function terminateFirstChildShell( test )
       execPath : 'node program2.js',
       currentPath : __dirname,
       mode : 'shell',
-      stdio : 'inherit',
+      stdio : 'pipe',
       inputMirroring : 0,
-      outputPiping : 0,
+      outputPiping : 1,
       outputCollecting : 0,
       throwingExitCode : 0,
     }
@@ -25894,236 +25650,6 @@ terminate second child
 first child exits as normal
 second exits with signal SIGTERM on unix and exit code 1 on win
 `
-
-
-//
-
-// function terminateDetachedComplex( test )
-// {
-//   let context = this;
-//   let a = context.assetFor( test, false );
-//   let testAppPath = a.program( program1 );
-//   let testAppPath2 = a.program( program2 );
-
-//   /* */
-
-//   a.ready.then( () =>
-//   {
-//     a.fileProvider.filesDelete( a.abs( 'program2PID' ) );
-//     a.fileProvider.filesDelete( a.abs( 'program2RealPID' ) );
-
-//     test.description =
-//     `program1 starts program2 in detached mode
-//      tester terminates program1 with option withChildren : 0
-//      program2 should continue to work
-//     `
-//     var o =
-//     {
-//       execPath : 'node',
-//       args : [ testAppPath ],
-//       mode : 'spawn',
-//       outputPiping : 1,
-//       outputCollecting : 1,
-//       throwingExitCode : 0
-//     }
-
-//     let program2PID;
-//     let ready = _.Consequence();
-
-//     _.process.start( o );
-
-//     o.process.stdout.on( 'data', ( data ) =>
-//     {
-//       data = data.toString();
-
-//       if( !_.strHas( data, 'program1::conStart' ) )
-//       return;
-
-//       program2PID = a.fileProvider.fileRead( a.abs( 'program2PID' ) );
-//       program2PID = _.numberFrom( program2PID );
-
-//       ready.take( null );
-//     })
-
-//     ready.then( () => _.process.terminate({ pnd : o.process, withChildren : 0 }) );
-
-//     ready.then( () =>
-//     {
-//       test.identical( o.conTerminate.resourcesCount(), 1 );
-
-//       test.will = 'program1 exists with SIGTERM'
-//       test.identical( o.exitCode, null );
-//       test.identical( o.exitSignal, 'SIGTERM' );
-//       test.identical( o.ended, true );
-
-//       test.will = 'SIGTERM is handled on all platforms except Windows'
-//       if( process.platform === 'win32' )
-//       test.is( !_.strHas( o.output, 'SIGTERM' ) );
-//       else
-//       test.is( _.strHas( o.output, 'SIGTERM' ) );
-
-//       test.will = 'program1 does not exit normally'
-//       test.is( !_.strHas( o.output, 'program1::end' ) );
-
-//       test.will = 'program2 continues to work when program1 is dead'
-//       test.is( !_.process.isAlive( o.process.pid ) );
-//       test.is( _.process.isAlive( program2PID ) );
-
-//       return _.time.out( context.t1 * 6, () =>
-//       {
-//         let program2RealPID = a.fileProvider.fileRead( a.abs( 'program2RealPID' ) );
-//         program2RealPID = _.numberFrom( program2RealPID );
-
-//         test.will = 'program2 exits normally after some time'
-//         test.is( !_.process.isAlive( program2PID ) );
-//         test.is( !_.process.isAlive( program2RealPID ) );
-
-//         test.will = 'program2 pid received from program1 and real pid of program2 are same'
-//         test.identical( program2RealPID, program2PID );
-
-//         return null;
-//       });
-//     })
-
-//     return ready;
-//   })
-
-//   /* */
-
-//   a.ready.then( () =>
-//   {
-//     a.fileProvider.filesDelete( a.abs( 'program2PID' ) );
-//     a.fileProvider.filesDelete( a.abs( 'program2RealPID' ) );
-
-//     test.description =
-//     `program1 starts program2 in detached mode
-//      tester terminates program1 with option withChildren : 1
-//      program1 and program2 should be terminated
-//     `
-//     var o =
-//     {
-//       execPath : 'node',
-//       args : [ testAppPath ],
-//       mode : 'spawn',
-//       outputPiping : 1,
-//       outputCollecting : 1,
-//       throwingExitCode : 0
-//     }
-
-//     let program2PID;
-//     let ready = _.Consequence();
-
-//     _.process.start( o );
-
-//     o.process.stdout.on( 'data', ( data ) =>
-//     {
-//       data = data.toString();
-
-//       if( !_.strHas( data, 'program1::conStart' ) )
-//       return;
-
-//       program2PID = a.fileProvider.fileRead( a.abs( 'program2PID' ) );
-//       program2PID = _.numberFrom( program2PID );
-
-//       ready.take( null );
-//     })
-
-//     ready.then( () => _.process.terminate({ pnd : o.process, withChildren : 1 }) );
-
-//     ready.then( () =>
-//     {
-//       test.identical( o.conTerminate.resourcesCount(), 1 );
-
-//       test.will = 'program1 exists with SIGTERM'
-//       test.identical( o.exitCode, null );
-//       test.identical( o.exitSignal, 'SIGTERM' );
-//       test.identical( o.ended, true );
-
-//       test.will = 'SIGTERM is handled on all platforms except Windows'
-//       if( process.platform === 'win32' )
-//       test.is( !_.strHas( o.output, 'SIGTERM' ) );
-//       else
-//       test.is( _.strHas( o.output, 'SIGTERM' ) );
-
-//       test.will = 'program1 does not exit normally'
-//       test.is( !_.strHas( o.output, 'program1::end' ) );
-
-//       test.will = 'program1 and program2 are dead'
-//       test.is( !_.process.isAlive( o.process.pid ) );
-//       test.is( !_.process.isAlive( program2PID ) );
-//       test.is( !a.fileProvider.fileExists( a.abs( 'program2RealPID' ) ) )
-
-//       return null;
-//     })
-
-//     return ready;
-
-//   })
-
-//   /* - */
-
-//   return a.ready;
-
-//   /* - */
-
-//   function program1()
-//   {
-//     let _ = require( toolsPath );
-//     _.include( 'wProcess' );
-//     _.include( 'wFiles' );
-
-//     console.log( 'program1::start' )
-
-//     var o =
-//     {
-//       execPath : 'node program2.js',
-//       currentPath : __dirname,
-//       mode : 'spawn',
-//       stdio : 'ignore',
-//       detaching : 1,
-//       inputMirroring : 0,
-//       outputPiping : 0,
-//       throwingExitCode : 0
-//     }
-
-//     _.process.start( o );
-
-//     o.conStart.thenGive( () =>
-//     {
-//       _.fileProvider.fileWrite( _.path.join( __dirname, 'program2PID' ), o.process.pid.toString() );
-//       console.log( 'program1::conStart' );
-//     })
-
-//     _.time.out( context.t1 * 6, () =>
-//     {
-//       console.log( 'program1::end' );
-//       return null;
-//     })
-//   }
-
-//   function program2()
-//   {
-//     console.log( 'program2::start' )
-
-//     setTimeout( () =>
-//     {
-//       console.log( 'program2::end' )
-//       var fs = require( 'fs' );
-//       var path = require( 'path' )
-//       fs.writeFileSync( path.join( __dirname, 'program2RealPID' ), process.pid.toString() )
-//     }, context.t1 * 3 );
-//   }
-
-// }
-
-// terminateDetachedComplex.timeOut = 30000; /* qqq for Vova : suspicious! what is this test routine for?? aaa: remade,added description */
-// terminateDetachedComplex.description =
-// `
-// Checks termination of process chain program1 -> program2 with option withChildren : 0/1
-// Program1 spawns program2 in detached mode, then progra1 exits after few seconds
-// Program2 should continue to work if program1 was terminated with withChildren : 0
-// Both processes should exit if program1 was terminated with withChildren : 1
-// `
 
 //
 
@@ -26952,1137 +26478,970 @@ program1 and program2 should be terminated
 
 //
 
-function terminateWithChildren( test )
+function terminateSeveralChildren( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
-  let testAppPath2 = a.program( testApp2 );
-  let testAppPath3 = a.program( testApp3 );
+  let testAppPath = a.program( program1 );
+  let testAppPath2 = a.program( program2 );
+  let testAppPath3 = a.program( program3 );
 
-  // if( process.platform === 'win32' )
-  // {
-  //   // qqq for Vova : windows-kill doesn't work correctly with detached processes
-  //   // investigate if its possible to use process.kill instead of windows-kill
-  //   test.identical( 1, 1 )
-  //   return;
-  // }
-
-  /* */
-
-  a.ready
-
-  .then( () =>
+  let o =
   {
-    test.case = 'child -> child, kill first child'
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'spawn',
-      ipc : 1,
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o );
-    let lastChildPid, terminated;
-
-    o.process.on( 'message', ( e ) =>
-    {
-      lastChildPid = _.numberFrom( e );
-      terminated = _.process.terminate({ pid : o.process.pid, withChildren : 1 });
-    })
-
-    ready.then( ( op ) =>
-    {
-      return terminated.then( () =>
-      {
-        if( process.platform === 'win32' )
-        {
-          test.identical( op.exitCode, 1 );
-          test.identical( op.ended, true );
-          test.identical( op.exitSignal, null );
-          test.identical( _.strCount( op.output, 'SIGTERM' ), 0 );
-          test.identical( _.strCount( op.output, 'SIGTERM CHILD' ), 0 );
-        }
-        else
-        {
-          test.identical( op.exitCode, null );
-          test.identical( op.ended, true );
-          test.identical( op.exitSignal, 'SIGTERM' );
-          test.identical( _.strCount( op.output, 'SIGTERM' ), 2 );
-          test.identical( _.strCount( op.output, 'SIGTERM CHILD' ), 1 );
-          var file = a.fileProvider.fileRead( a.abs( a.routinePath, lastChildPid.toString() ) );
-          test.identical( file, lastChildPid.toString() )
-        }
-
-        test.is( !_.process.isAlive( o.process.pid ) )
-        test.is( !_.process.isAlive( lastChildPid ) );
-
-        return null;
-      })
-    })
-
-    return ready;
-  })
-
-  /* - */
-
-  .then( () =>
-  {
-    test.case = 'child -> child, kill last child'
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'spawn',
-      ipc : 1,
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o );
-    let lastChildPid, terminated;
-
-    o.process.on( 'message', ( e ) =>
-    {
-      lastChildPid = _.numberFrom( e );
-      terminated = _.process.terminate({ pid : lastChildPid, withChildren : 1 });
-    })
-
-    ready.then( ( op ) =>
-    {
-      return terminated.then( () =>
-      {
-        test.identical( op.exitCode, 0 ); /* qqq for Vova : test is probably bad. fails on Mint */
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, null );
-
-        if( process.platform === 'win32' )
-        {
-          test.identical( _.strCount( op.output, 'SIGTERM' ), 0 );
-          test.identical( _.strCount( op.output, 'SIGTERM CHILD' ), 0 );
-          test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, lastChildPid.toString() ) ) );
-        }
-        else
-        {
-          test.identical( _.strCount( op.output, 'SIGTERM' ), 1 );
-          test.identical( _.strCount( op.output, 'SIGTERM CHILD' ), 1 );
-          var file = a.fileProvider.fileRead( a.abs( a.routinePath, lastChildPid.toString() ) );
-          test.identical( file, lastChildPid.toString() )
-        }
-
-        test.is( !_.process.isAlive( o.process.pid ) )
-        test.is( !_.process.isAlive( lastChildPid ) );
-
-        return null;
-      })
-    })
-
-    return ready;
-  })
-
-  /* - */
-
-  .then( () =>
-  {
-    test.case = 'parent -> child*'
-    var o =
-    {
-      execPath : 'node ' + testAppPath3,
-      mode : 'spawn',
-      ipc : 1,
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o );
-    let children, terminated;
-    o.process.on( 'message', ( e ) =>
-    {
-      children = e.map( ( src ) => _.numberFrom( src ) )
-      terminated = _.process.terminate({ pid : o.process.pid, withChildren : 1 });
-    })
-
-    ready.then( ( op ) =>
-    {
-      return terminated.then( () =>
-      {
-        if( process.platform === 'win32' )
-        {
-          test.identical( op.exitCode, 1 );
-          test.identical( op.ended, true );
-          test.identical( op.exitSignal, null );
-          test.identical( _.strCount( op.output, 'SIGTERM' ), 0 );
-          test.identical( _.strCount( op.output, 'SIGTERM CHILD' ), 0 );
-          test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, children[ 0 ].toString() ) ) );
-          test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, children[ 1 ].toString() ) ) );
-        }
-        else
-        {
-          test.identical( op.exitCode, null );
-          test.identical( op.ended, true );
-          test.identical( op.exitSignal, 'SIGTERM' );
-          test.identical( _.strCount( op.output, 'SIGTERM' ), 3 );
-          test.identical( _.strCount( op.output, 'SIGTERM CHILD' ), 2 );
-          var file = a.fileProvider.fileRead( a.abs( a.routinePath, children[ 0 ].toString() ) );
-          test.identical( file, children[ 0 ].toString() )
-          var file = a.fileProvider.fileRead( a.abs( a.routinePath, children[ 1 ].toString() ) );
-          test.identical( file, children[ 1 ].toString() )
-        }
-
-        test.is( !_.process.isAlive( o.process.pid ) )
-        test.is( !_.process.isAlive( children[ 0 ] ) );
-        test.is( !_.process.isAlive( children[ 1 ] ) );
-
-        return null;
-      })
-
-    })
-
-    return ready;
-  })
-
-  /* - */
-
-  .then( () =>
-  {
-    test.case = 'process is not running';
-    var o =
-    {
-      execPath : 'node ' + testAppPath2,
-      mode : 'spawn',
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    _.process.start( o );
-    o.process.kill( 'SIGKILL' );
-
-    return o.ready.then( () =>
-    {
-      let ready = _.process.terminate({ pid : o.process.pid, withChildren : 1 });
-      return test.shouldThrowErrorAsync( ready );
-    })
-
-  })
-
-  /* */
-
-  return a.ready;
-
-  /* - */
-
-  function testApp()
-  {
-    let _ = require( toolsPath );
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-    var o =
-    {
-      execPath : 'node testApp2.js',
-      currentPath : __dirname,
-      mode : 'spawn',
-      stdio : 'inherit',
-      outputPiping : 0,
-      outputCollecting : 0,
-      ipc : 1,
-      inputMirroring : 0,
-      throwingExitCode : 0
-    }
-    _.process.start( o );
-    o.process.on( 'message', () => process.send( o.process.pid ) )
-    setTimeout( () => {}, context.t2 ) /* 5000 */
+    execPath : 'node program1.js',
+    currentPath : a.routinePath,
+    mode : 'spawn',
+    outputPiping : 1,
+    outputCollecting : 1,
+    throwingExitCode : 0
   }
 
-  function testApp2()
+  _.process.start( o );
+
+  let program2PID = null;
+  let program3PID = null;
+  let c = 0;
+  let terminate = _.Consequence();
+
+  function handleOutput ( output )
   {
-    process.on( 'SIGTERM', () =>
-    {
-      console.log( 'SIGTERM CHILD' )
-      var fs = require( 'fs' );
-      var path = require( 'path' )
-      fs.writeFileSync( path.join( __dirname, process.pid.toString() ), process.pid.toString() )
-      process.exit( 0 );
-    })
-    if( process.send )
-    process.send( process.pid );
-    setTimeout( () => {}, context.t2 ) /* 5000 */
+    output = output.toString();
+    if( _.strHas( output, 'program2::begin' ) || _.strHas( output, 'program3::begin' ) )
+    c += 1;
+
+    if( c !== 2 )
+    return;
+
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
   }
 
-  function testApp3()
+  o.process.stdout.on( 'data', handleOutput );
+
+  terminate.then( () =>
   {
-    let _ = require( toolsPath );
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-    let detaching = process.argv[ 2 ] === 'detached';
-    let c1 = new _.Consequence();
-    let c2 = new _.Consequence();
-
-    var o1 =
-    {
-      execPath : 'node testApp2.js',
-      currentPath : __dirname,
-      mode : 'spawn',
-      detaching,
-      ipc : 1,
-      stdio : 'inherit',
-      outputCollecting : 0,
-      outputPiping : 0,
-      inputMirroring : 0,
-      throwingExitCode : 0
-    }
-    _.process.start( o1 );
-    o1.process.on( 'message', () => c1.take( o1.process.pid ) )
-
-    var o2 =
-    {
-      execPath : 'node testApp2.js',
-      currentPath : __dirname,
-      mode : 'spawn',
-      detaching,
-      ipc : 1,
-      stdio : 'inherit',
-      outputCollecting : 0,
-      outputPiping : 0,
-      inputMirroring : 0,
-      throwingExitCode : 0
-    }
-    _.process.start( o2 );
-    o2.process.on( 'message', () => c2.take( o2.process.pid ) )
-
-    _.Consequence.AndKeep( c1, c2 )
-    .then( () =>
-    {
-      process.send([ o1.process.pid, o2.process.pid ]);
-      return null;
+    program2PID = _.fileProvider.fileRead({ filePath : a.abs( 'program2PID' ), encoding : 'json' });
+    program2PID = program2PID.pid;
+    program3PID = _.fileProvider.fileRead({ filePath : a.abs( 'program3PID' ), encoding : 'json' });
+    program3PID = program3PID.pid;
+    return _.process.terminate
+    ({
+      pid : o.process.pid,
+      timeOut : context.t1 * 5,
+      withChildren : 1
     })
-    setTimeout( () => {}, context.t2 ) /* 5000 */
-  }
-}
-
-//
-
-function terminateWithDetachedChildren( test )
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
-  let testAppPath2 = a.program( testApp2 );
-  let testAppPath3 = a.program( testApp3 );
-
-  // if( process.platform === 'win32' )
-  // {
-  //   // qqq for Vova : windows-kill doesn't work correctly with detached processes
-  //   // investigate if its possible to use process.kill instead of windows-kill
-  //   test.identical( 1, 1 )
-  //   return;
-  // }
-
-  /* */
-
-  a.ready
-
-  .then( () =>
-  {
-    test.case = 'parent -> detached'
-    var o =
-    {
-      execPath : 'node ' + testAppPath3 + ' detached',
-      mode : 'spawn',
-      ipc : 1,
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o );
-    let children, terminated;
-    o.process.on( 'message', ( e ) =>
-    {
-      children = e.map( ( src ) => _.numberFrom( src ) )
-      terminated = _.process.terminate({ pid : o.process.pid, withChildren : 1 });
-    })
-
-    ready.then( ( op ) =>
-    {
-      return terminated.then( () =>
-      {
-        if( process.platform === 'win32' )
-        {
-          test.identical( op.exitCode, 1 );
-          test.identical( op.ended, true );
-          test.identical( op.exitSignal, null );
-          test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        }
-        else
-        {
-          test.identical( op.exitCode, null );
-          test.identical( op.ended, true );
-          test.identical( op.exitSignal, 'SIGTERM' );
-          test.is( _.strHas( op.output, 'SIGTERM' ) );
-        }
-
-        return _.time.out( context.t1 * 9, () => /* 9000 */
-        {
-          /* zzz : problem with termination of detached proces on Windows, child process does't receive SIGINT */
-          if( process.platform === 'win32' )
-          {
-            test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, children[ 0 ].toString() ) ) )
-            test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, children[ 1 ].toString() ) ) )
-          }
-          else
-          {
-            test.is( a.fileProvider.fileExists( a.abs( a.routinePath, children[ 0 ].toString() ) ) )
-            test.is( a.fileProvider.fileExists( a.abs( a.routinePath, children[ 1 ].toString() ) ) )
-          }
-
-          test.is( !_.process.isAlive( o.process.pid ) )
-          test.is( !_.process.isAlive( children[ 0 ] ) );
-          test.is( !_.process.isAlive( children[ 1 ] ) );
-          return null;
-        })
-      })
-    })
-
-    return ready;
   })
 
-  /* */
-
-  return a.ready;
-
-  /* - */
-
-  function testApp()
+  o.conTerminate.then( () =>
   {
-    let _ = require( toolsPath );
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-    var o =
+    if( process.platform === 'win32' )
     {
-      execPath : 'node testApp2.js',
-      currentPath : __dirname,
-      mode : 'spawn',
-      stdio : 'inherit',
-      inputMirroring : 0,
-      throwingExitCode : 0
+      test.identical( o.exitCode, 1 );
+      test.identical( o.exitSignal, null );
     }
-    _.process.start( o );
-    _.time.out( context.t1, () => /* 1000 */
-    {
-      process.send( o.process.pid )
-    })
-  }
-
-  function testApp2()
-  {
-    process.on( 'SIGTERM', () =>
-    {
-      console.log( 'SIGTERM' )
-      var fs = require( 'fs' );
-      var path = require( 'path' )
-      fs.writeFileSync( path.join( __dirname, process.pid.toString() ), process.pid.toString() )
-      process.exit( 0 );
-    })
-    if( process.send )
-    process.send( process.pid );
-    setTimeout( () => {}, context.t2 ) /* 5000 */
-  }
-
-  function testApp3()
-  {
-    let _ = require( toolsPath );
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-    let detaching = process.argv[ 2 ] === 'detached';
-    var o1 =
-    {
-      execPath : 'node testApp2.js',
-      currentPath : __dirname,
-      mode : 'spawn',
-      detaching : 1,
-      stdio : 'ignore',
-      outputPiping : 0,
-      inputMirroring : 0,
-      outputCollecting : 0,
-      throwingExitCode : 0
-    }
-    _.process.start( o1 );
-    o1.conTerminate.catch( ( err ) =>
-    {
-      _.errAttend( err )
-      return null;
-    })
-    var o2 =
-    {
-      execPath : 'node testApp2.js',
-      currentPath : __dirname,
-      mode : 'spawn',
-      detaching : 1,
-      stdio : 'ignore',
-      outputPiping : 0,
-      inputMirroring : 0,
-      outputCollecting : 0,
-      throwingExitCode : 0
-    }
-    _.process.start( o2 );
-    o2.conTerminate.catch( ( err ) =>
-    {
-      _.errAttend( err )
-      return null;
-    })
-    _.time.out( context.t1, () => /* 1000 */
-    {
-      process.send( [ o1.process.pid, o2.process.pid ] )
-    })
-    _.time.out( context.t1 * 4, () => /* 4000 */
-    {
-      _.procedure.terminationBegin();
-    })
-
-  }
-
-}
-
-//
-
-function terminateTimeOut( test )
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
-
-  // if( process.platform === 'win32' )
-  // {
-  //   // qqq for Vova : windows-kill doesn't work correctly on node14
-  //   // investigate if its possible to use process.kill instead of windows-kill
-  //   test.identical( 1, 1 )
-  //   return;
-  // }
-
-  /* */
-
-  a.ready
-
-  .then( () =>
-  {
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'spawn',
-      ipc : 1,
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    o.process.on( 'message', () =>
-    {
-      _.process.terminate({ pnd : o.process, timeOut : 1000, withChildren : 0 });
-    })
-
-    ready.then( ( op ) =>
-    {
-      test.identical( op.exitCode, null );
-      test.identical( op.ended, true );
-
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-      }
-      else
-      {
-        test.identical( op.exitSignal, 'SIGKILL' );
-        test.is( _.strHas( op.output, 'SIGTERM' ) );
-      }
-
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      return null;
-    })
-
-    return ready;
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'spawn',
-      ipc : 1,
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    o.process.on( 'message', () =>
-    {
-      _.process.terminate({ pnd : o.process, timeOut : 1000, withChildren : 1 });
-    })
-
-    ready.then( ( op ) =>
-    {
-      test.identical( op.exitCode, null );
-      test.identical( op.ended, true );
-
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-      }
-      else
-      {
-        test.identical( op.exitSignal, 'SIGKILL' );
-        test.is( _.strHas( op.output, 'SIGTERM' ) );
-      }
-
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      return null;
-    })
-
-    return ready;
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'spawn',
-      ipc : 1,
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    o.process.on( 'message', () =>
-    {
-      _.process.terminate({ pnd : o.process, timeOut : 0, withChildren : 0 });
-    })
-
-    ready.then( ( op ) =>
-    {
-      test.identical( op.exitCode, null );
-      test.identical( op.ended, true );
-      test.identical( op.exitSignal, 'SIGKILL' );
-      test.is( !_.strHas( op.output, 'SIGTERM' ) );
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      return null;
-    })
-
-    return ready;
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'spawn',
-      ipc : 1,
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    o.process.on( 'message', () =>
-    {
-      _.process.terminate({ pnd : o.process, timeOut : 0, withChildren : 1 });
-    })
-
-    ready.then( ( op ) =>
-    {
-      test.identical( op.exitCode, null );
-      test.identical( op.ended, true );
-      test.identical( op.exitSignal, 'SIGKILL' );
-      test.is( !_.strHas( op.output, 'SIGTERM' ) );
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      return null;
-    })
-
-    return ready;
-  })
-
-  /*  */
-
-  .then( () =>
-  {
-    var o =
-    {
-      execPath :  testAppPath,
-      mode : 'fork',
-      ipc : 1,
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    o.process.on( 'message', () =>
-    {
-      _.process.terminate({ pnd : o.process, timeOut : 1000, withChildren : 0 });
-    })
-
-    ready.then( ( op ) =>
-    {
-      test.identical( op.exitCode, null );
-      test.identical( op.ended, true );
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-      }
-      else
-      {
-        test.identical( op.exitSignal, 'SIGKILL' );
-        test.is( _.strHas( op.output, 'SIGTERM' ) );
-      }
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      return null;
-    })
-
-    return ready;
-  })
-
-  /*  */
-
-  .then( () =>
-  {
-    var o =
-    {
-      execPath :  testAppPath,
-      mode : 'fork',
-      ipc : 1,
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    o.process.on( 'message', () =>
-    {
-      _.process.terminate({ pnd : o.process, timeOut : 1000, withChildren : 1 });
-    })
-
-    ready.then( ( op ) =>
-    {
-      test.identical( op.exitCode, null );
-      test.identical( op.ended, true );
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-      }
-      else
-      {
-        test.identical( op.exitSignal, 'SIGKILL' );
-        test.is( _.strHas( op.output, 'SIGTERM' ) );
-      }
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      return null;
-    })
-
-    return ready;
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    var o =
-    {
-      execPath :  testAppPath,
-      mode : 'fork',
-      ipc : 1,
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    o.process.on( 'message', () =>
-    {
-      _.process.terminate({ pnd : o.process, timeOut : 0, withChildren : 0 });
-    })
-
-    ready.then( ( op ) =>
-    {
-      test.identical( op.exitCode, null );
-      test.identical( op.ended, true );
-      test.identical( op.exitSignal, 'SIGKILL' );
-      test.is( !_.strHas( op.output, 'SIGTERM' ) );
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      return null;
-    })
-
-    return ready;
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    var o =
-    {
-      execPath :  testAppPath,
-      mode : 'fork',
-      ipc : 1,
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    o.process.on( 'message', () =>
-    {
-      _.process.terminate({ pnd : o.process, timeOut : 0, withChildren : 1 });
-    })
-
-    ready.then( ( op ) =>
-    {
-      test.identical( op.exitCode, null );
-      test.identical( op.ended, true );
-      test.identical( op.exitSignal, 'SIGKILL' );
-      test.is( !_.strHas( op.output, 'SIGTERM' ) );
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      return null;
-    })
-
-    return ready;
-  })
-
-  /*  */
-
-  .then( () =>
-  {
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'shell',
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    o.process.stdout.on( 'data', ( data ) =>
-    {
-      data = data.toString();
-      if( _.strHas( data, 'ready' ))
-      _.process.terminate({ pnd : o.process, timeOut : 1000, withChildren : 1 });
-    })
-
-    ready.then( ( op ) =>
-    {
-
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-      else if( process.platform === 'darwin' )
-      {
-        test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGKILL' );
-        test.is( _.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-      else
-      {
-        test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.is( _.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-
-      return null;
-    })
-
-    return ready;
-  })
-
-  /*  */
-
-  .then( () =>
-  {
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'shell',
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    o.process.stdout.on( 'data', ( data ) =>
-    {
-      data = data.toString();
-      if( _.strHas( data, 'ready' ))
-      _.process.terminate({ pnd : o.process, timeOut : 1000, withChildren : 0 });
-    })
-
-    ready.then( ( op ) =>
-    {
-
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( _.strHas( op.output, 'Application timeout!' ) );
-      }
-      else if( process.platform === 'darwin' )
-      {
-        test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGKILL' );
-        test.is( _.strHas( op.output, 'SIGTERM' ) );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      }
-      else
-      {
-        test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGTERM' );
-        test.is( !_.strHas( op.output, 'SIGTERM' ) );
-        test.is( _.strHas( op.output, 'Application timeout!' ) );
-      }
-
-      return null;
-    })
-
-    return ready;
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'shell',
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    o.process.stdout.on( 'data', ( data ) =>
-    {
-      data = data.toString();
-      if( _.strHas( data, 'ready' ))
-      _.process.terminate({ pnd : o.process, timeOut : 0, withChildren : 1 });
-    })
-
-    ready.then( ( op ) =>
-    {
-      test.identical( op.exitCode, null );
-      test.identical( op.ended, true );
-      test.identical( op.exitSignal, 'SIGKILL' );
-      test.is( !_.strHas( op.output, 'SIGTERM' ) );
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
-
-      return null;
-    })
-
-    return ready;
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'shell',
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    o.process.stdout.on( 'data', ( data ) =>
-    {
-      data = data.toString();
-      if( _.strHas( data, 'ready' ))
-      _.process.terminate({ pnd : o.process, timeOut : 0, withChildren : 0 });
-    })
-
-    ready.then( ( op ) =>
-    {
-      test.identical( op.exitCode, null );
-      test.identical( op.ended, true );
-      test.identical( op.exitSignal, 'SIGKILL' );
-      test.is( !_.strHas( op.output, 'SIGTERM' ) );
-      if( process.platform === 'darwin' )
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      else
-      test.is( _.strHas( op.output, 'Application timeout!' ) );
-
-      return null;
-    })
-
-    return ready;
-  })
-
-  /* - */
-
-  return a.ready;
-
-  /* - */
-
-  function testApp()
-  {
-    console.log( process.pid, process.ppid)
-    process.on( 'SIGTERM', () =>
-    {
-      console.log( 'SIGTERM ignored' )
-    })
-    if( process.send )
-    process.send( process.pid );
     else
-    console.log( 'ready' );
+    {
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, 'SIGTERM' );
+    }
+
+    test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
+    test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
+    test.identical( _.strCount( o.output, 'program3::begin' ), 1 );
+    test.identical( _.strCount( o.output, 'program2::end' ), 0 );
+    test.identical( _.strCount( o.output, 'program3::end' ), 0 );
+    test.is( !_.process.isAlive( program2PID ) );
+    test.is( !_.process.isAlive( program3PID ) );
+    test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+    test.is( !a.fileProvider.fileExists( a.abs( 'program3end' ) ) );
+
+    return null;
+  })
+
+  return _.Consequence.AndKeep( terminate, o.conTerminate );
+
+
+  function program1()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    var o =
+    {
+      currentPath : __dirname,
+      mode : 'spawn',
+      stdio : 'inherit',
+      inputMirroring : 0,
+      outputPiping : 0,
+      outputCollecting : 0,
+      throwingExitCode : 0,
+    }
+
+    _.process.start( _.mapExtend( null, o, { execPath : 'node program2.js' }));
+    _.process.start( _.mapExtend( null, o, { execPath : 'node program3.js' }));
+
+    let timer = _.time.outError( context.t1*25 );
+
+    console.log( 'program1::begin' );
+  }
+
+  /* - */
+
+  function program2()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wFiles' );
+
+    process.removeAllListeners( 'SIGTERM' )
+
+    _.fileProvider.fileWrite
+    ({
+      filePath : _.path.join( __dirname, 'program2PID' ),
+      data : { pid : process.pid },
+      encoding : 'json'
+    })
+
     setTimeout( () =>
     {
-      console.log( 'Application timeout!' )
-    }, context.t2 )
+      console.log( 'program2::end' );
+      _.fileProvider.fileWrite
+      ({
+        filePath : _.path.join( __dirname, 'program2end' ),
+        data : 'end'
+      })
+    }, context.t1*15 )
+
+    console.log( 'program2::begin' );
+
   }
+
+  /* - */
+
+  function program3()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wFiles' );
+
+    process.removeAllListeners( 'SIGTERM' )
+
+    _.fileProvider.fileWrite
+    ({
+      filePath : _.path.join( __dirname, 'program3PID' ),
+      data : { pid : process.pid },
+      encoding : 'json'
+    })
+
+    setTimeout( () =>
+    {
+      console.log( 'program3::end' );
+      _.fileProvider.fileWrite
+      ({
+        filePath : _.path.join( __dirname, 'program3end' ),
+        data : 'end'
+      })
+    }, context.t1*15 )
+
+    console.log( 'program3::begin' );
+
+  }
+
 }
 
 //
 
-function terminateZeroTimeOut( test )
+function terminateWithSeveralDetachedChildren( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( program1 );
+  let testAppPath2 = a.program( program2 );
+  let testAppPath3 = a.program( program3 );
+
+  let o =
+  {
+    execPath : 'node program1.js',
+    currentPath : a.routinePath,
+    mode : 'spawn',
+    outputPiping : 1,
+    outputCollecting : 1,
+    throwingExitCode : 0
+  }
+
+  _.process.start( o );
+
+  let program2PID = null;
+  let program3PID = null;
+  let c = 0;
+  let terminate = _.Consequence();
+
+  function handleOutput ( output )
+  {
+    output = output.toString();
+    if( _.strHas( output, 'program2::begin' ) || _.strHas( output, 'program3::begin' ) )
+    c += 1;
+
+    if( c !== 2 )
+    return;
+
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
+
+  o.process.stdout.on( 'data', handleOutput );
+
+  terminate.then( () =>
+  {
+    program2PID = _.fileProvider.fileRead({ filePath : a.abs( 'program2PID' ), encoding : 'json' });
+    program2PID = program2PID.pid;
+    program3PID = _.fileProvider.fileRead({ filePath : a.abs( 'program3PID' ), encoding : 'json' });
+    program3PID = program3PID.pid;
+    return _.process.terminate
+    ({
+      pid : o.process.pid,
+      timeOut : context.t1 * 5,
+      withChildren : 1
+    })
+  })
+
+  o.conTerminate.then( () =>
+  {
+    if( process.platform === 'win32' )
+    {
+      test.identical( o.exitCode, 1 );
+      test.identical( o.exitSignal, null );
+    }
+    else
+    {
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, 'SIGTERM' );
+    }
+
+    test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
+    test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
+    test.identical( _.strCount( o.output, 'program3::begin' ), 1 );
+    test.identical( _.strCount( o.output, 'program2::end' ), 0 );
+    test.identical( _.strCount( o.output, 'program3::end' ), 0 );
+    test.is( !_.process.isAlive( program2PID ) );
+    test.is( !_.process.isAlive( program3PID ) );
+    test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+    test.is( !a.fileProvider.fileExists( a.abs( 'program3end' ) ) );
+
+    return null;
+  })
+
+  return _.Consequence.AndKeep( terminate, o.conTerminate );
+
+
+  function program1()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    var o =
+    {
+      currentPath : __dirname,
+      mode : 'spawn',
+      stdio : 'pipe',
+      inputMirroring : 0,
+      outputPiping : 1,
+      detaching : 1,
+      outputCollecting : 0,
+      throwingExitCode : 0,
+    }
+
+    _.process.start( _.mapExtend( null, o, { execPath : 'node program2.js' }));
+    _.process.start( _.mapExtend( null, o, { execPath : 'node program3.js' }));
+
+    let timer = _.time.outError( context.t1*25 );
+
+    console.log( 'program1::begin' );
+  }
+
+  /* - */
+
+  function program2()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wFiles' );
+
+    process.removeAllListeners( 'SIGTERM' )
+
+    _.fileProvider.fileWrite
+    ({
+      filePath : _.path.join( __dirname, 'program2PID' ),
+      data : { pid : process.pid },
+      encoding : 'json'
+    })
+
+    setTimeout( () =>
+    {
+      console.log( 'program2::end' );
+      _.fileProvider.fileWrite
+      ({
+        filePath : _.path.join( __dirname, 'program2end' ),
+        data : 'end'
+      })
+    }, context.t1*15 )
+
+    console.log( 'program2::begin' );
+
+  }
+
+  /* - */
+
+  function program3()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wFiles' );
+
+    process.removeAllListeners( 'SIGTERM' )
+
+    _.fileProvider.fileWrite
+    ({
+      filePath : _.path.join( __dirname, 'program3PID' ),
+      data : { pid : process.pid },
+      encoding : 'json'
+    })
+
+    setTimeout( () =>
+    {
+      console.log( 'program3::end' );
+      _.fileProvider.fileWrite
+      ({
+        filePath : _.path.join( __dirname, 'program3end' ),
+        data : 'end'
+      })
+    }, context.t1*15 )
+
+    console.log( 'program3::begin' );
+
+  }
+
+}
+
+terminateWithSeveralDetachedChildren.description =
+`
+Program1 spawns two detached children.
+Tester terminates Program1 with option withChildren:1
+All three processes should be dead before timeOut.
+`
+
+//
+
+function terminateDeadProcess( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
   let testAppPath = a.program( program1 );
 
-  /* */
-
-  a.ready
-
-  .then( () =>
+  let o =
   {
-    test.case = 'terminate process by pnd';
+    execPath : 'node program1.js',
+    currentPath : a.routinePath,
+    mode : 'spawn',
+    outputPiping : 1,
+    outputCollecting : 1,
+    throwingExitCode : 0
+  }
 
-    var o =
-    {
-      execPath :  'node program1.js',
-      currentPath : a.routinePath,
-      mode : 'spawn',
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
+  _.process.start( o );
 
-    _.process.start( o )
-
-    let ready = o.conStart;
-
-    ready.then( () => _.process.terminate({ pnd : o.process, timeOut : 0 }) )
-
-    ready.then( () =>
-    {
-      test.identical( o.conTerminate.resourcesCount(), 1 );
-
-      test.is( !_.strHas( o.output, 'program1::end' ) );
-      test.identical( o.ended, true );
-
-      if( process.platform === 'win32' )
-      {
-        test.identical( o.exitCode, 1 );
-        test.identical( o.exitSignal, null );
-      }
-      else
-      {
-        test.identical( o.exitCode, null );
-        test.identical( o.exitSignal, 'SIGKILL' );
-      }
-
-      return null;
-    })
-
-    return ready;
+  o.conTerminate.then( () =>
+  {
+    test.identical( o.exitCode, 0 )
+    test.identical( o.exitSignal, null );
+    return _.process.terminate({ pid : o.process.pid, withChildren : 0 });
   })
 
-  /* */
-
-  .then( () =>
+  o.conTerminate.then( ( got ) =>
   {
-    test.case = 'terminate process by id';
-
-    var o =
-    {
-      execPath :  'node program1.js',
-      currentPath : a.routinePath,
-      mode : 'spawn',
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    _.process.start( o )
-
-    let ready = o.conStart;
-
-    ready.then( () => _.process.terminate({ pid : o.process.pid, timeOut : 0 }) )
-
-    ready.then( () =>
-    {
-      test.identical( o.conTerminate.resourcesCount(), 1 );
-
-      test.is( !_.strHas( o.output, 'program1::end' ) );
-      test.identical( o.ended, true );
-
-      if( process.platform === 'win32' )
-      {
-        test.identical( o.exitCode, 1 );
-        test.identical( o.exitSignal, null );
-      }
-      else
-      {
-        test.identical( o.exitCode, null );
-        test.identical( o.exitSignal, 'SIGKILL' );
-      }
-
-      return null;
-    })
-
-    return ready;
+    test.identical( got, true );
+    let con = _.process.terminate({ pid : o.process.pid, withChildren : 1 });
+    return test.shouldThrowErrorAsync( con );
   })
 
-  /* - */
-
-  return a.ready;
+  return o.conTerminate;
 
   /* - */
 
   function program1()
   {
-    console.log( 'program1::start' );
+    console.log( 'program1::begin' );
     setTimeout( () =>
     {
-      console.log( 'program1::end' )
-    }, context.t1 * 3 );
+      console.log( 'program1::begin' );
+    }, context.t1 );
   }
 }
+
+terminateDeadProcess.description =
+`
+Terminated dead process.
+Returns true with withChildren:0
+Throws an error with withChildren:1
+`
+
+//
+
+function terminateTimeOutNoHandler( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( program1 );
+
+  /* - */
+
+  var o =
+  {
+    execPath :  'node ' + testAppPath,
+    mode : 'spawn',
+    outputPiping : 1,
+    outputCollecting : 1,
+    throwingExitCode : 0
+  }
+
+  _.process.start( o )
+  let terminate = _.Consequence();
+
+  function handleOutput ( output )
+  {
+    output = output.toString();
+    if( !_.strHas( output, 'program1::begin' ) )
+    return;
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
+
+  o.process.stdout.on( 'data', handleOutput );
+
+  terminate.then( () =>
+  {
+    return _.process.terminate
+    ({
+      pid : o.process.pid,
+      timeOut : context.t1 * 5,
+      withChildren : 0
+    })
+  })
+
+  o.conTerminate.then( ( op ) =>
+  {
+    test.identical( op.ended, true );
+
+    if( process.platform === 'win32' )
+    {
+      test.identical( op.exitCode, 1 );
+      test.identical( op.exitSignal, 0 );
+    }
+    else
+    {
+      test.identical( op.exitCode, null );
+      test.identical( op.exitSignal, 'SIGTERM' );
+    }
+
+    test.identical( _.strCount( op.output, 'SIGTERM' ), 0 );
+    test.identical( _.strCount( op.output, 'program1::begin' ), 1 );
+    test.identical( _.strCount( op.output, 'program1::end' ), 0 );
+
+    return null;
+  })
+
+  return _.Consequence.AndKeep( terminate, o.conTerminate );
+
+  /* - */
+
+  function program1()
+  {
+    setTimeout( () =>
+    {
+      console.log( 'program1::end' );
+    }, context.t1 * 15 );
+
+    console.log( 'program1::begin' );
+  }
+}
+
+terminateTimeOutNoHandler.description =
+`
+Program1 has no SIGTERM handler.
+Should terminate before timeOut with SIGTERM on unix and exit code 1 on win
+`
+
+//
+
+function terminateTimeOutIgnoreSignal( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( program1 );
+
+  /* - */
+
+  var o =
+  {
+    execPath :  'node ' + testAppPath,
+    mode : 'spawn',
+    outputPiping : 1,
+    outputCollecting : 1,
+    throwingExitCode : 0
+  }
+
+  _.process.start( o )
+  let terminate = _.Consequence();
+
+  function handleOutput ( output )
+  {
+    output = output.toString();
+    if( !_.strHas( output, 'program1::begin' ) )
+    return;
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
+
+  o.process.stdout.on( 'data', handleOutput );
+
+  terminate.then( () =>
+  {
+    return _.process.terminate
+    ({
+      pid : o.process.pid,
+      timeOut : context.t1 * 5,
+      withChildren : 0
+    })
+  })
+
+  o.conTerminate.then( ( op ) =>
+  {
+    test.identical( op.ended, true );
+
+    if( process.platform === 'win32' )
+    {
+      test.identical( op.exitCode, 1 );
+      test.identical( op.exitSignal, 0 );
+      test.identical( _.strCount( op.output, 'program1::SIGTERM' ), 0 );
+    }
+    else
+    {
+      test.identical( op.exitCode, null );
+      test.identical( op.exitSignal, 'SIGKILL' );
+      test.identical( _.strCount( op.output, 'program1::SIGTERM' ), 1 );
+    }
+
+    test.identical( _.strCount( op.output, 'program1::begin' ), 1 );
+    test.identical( _.strCount( op.output, 'program1::end' ), 0 );
+
+    return null;
+  })
+
+  return _.Consequence.AndKeep( terminate, o.conTerminate );
+
+  /* - */
+
+  function program1()
+  {
+    process.on( 'SIGTERM', () =>
+    {
+      console.log( 'program1::SIGTERM' )
+    })
+
+    setTimeout( () =>
+    {
+      console.log( 'program1::end' );
+    }, context.t1 * 15 );
+
+    console.log( 'program1::begin' );
+  }
+}
+
+terminateTimeOutIgnoreSignal.description =
+`
+Program1 has SIGTERM handler that ignores signal.
+Should terminate after timeOut with SIGKILL on unix and exit code 1 on win
+Windows doesn't support signals
+`
+
+//
+
+function terminateZeroTimeOutSpawn( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( program1 );
+
+  /* - */
+
+  var o =
+  {
+    execPath :  'node ' + testAppPath,
+    mode : 'spawn',
+    outputPiping : 1,
+    outputCollecting : 1,
+    throwingExitCode : 0
+  }
+
+  _.process.start( o )
+  let terminate = _.Consequence();
+
+  function handleOutput ( output )
+  {
+    output = output.toString();
+    if( !_.strHas( output, 'program1::begin' ) )
+    return;
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
+
+  o.process.stdout.on( 'data', handleOutput );
+
+  terminate.then( () =>
+  {
+    return _.process.terminate
+    ({
+      pid : o.process.pid,
+      timeOut : 0,
+      withChildren : 0
+    })
+  })
+
+  o.conTerminate.then( ( op ) =>
+  {
+    test.identical( op.ended, true );
+
+    if( process.platform === 'win32' )
+    {
+      test.identical( op.exitCode, 1 );
+      test.identical( op.exitSignal, 0 );
+    }
+    else
+    {
+      test.identical( op.exitCode, null );
+      test.identical( op.exitSignal, 'SIGKILL' );
+    }
+
+    test.identical( _.strCount( op.output, 'program1::SIGTERM' ), 0 );
+    test.identical( _.strCount( op.output, 'program1::begin' ), 1 );
+    test.identical( _.strCount( op.output, 'program1::end' ), 0 );
+
+    return null;
+  })
+
+  return _.Consequence.AndKeep( terminate, o.conTerminate );
+
+  /* - */
+
+  function program1()
+  {
+    process.on( 'SIGTERM', () =>
+    {
+      console.log( 'program1::SIGTERM' )
+    })
+
+    setTimeout( () =>
+    {
+      console.log( 'program1::end' );
+    }, context.t1 * 15 );
+
+    console.log( 'program1::begin' );
+  }
+}
+
+terminateZeroTimeOutSpawn.description =
+`
+Program1 has SIGTERM handler that ignores signal.
+Should terminate right after call with SIGKILL on unix and exit code 1 on win
+Signal handler should not be executed
+`
+
+//
+
+function terminateZeroTimeOutFork( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( program1 );
+
+  /* - */
+
+  var o =
+  {
+    execPath : 'program1',
+    currentPath : a.routinePath,
+    mode : 'fork',
+    outputPiping : 1,
+    outputCollecting : 1,
+    throwingExitCode : 0
+  }
+
+  _.process.start( o )
+  let terminate = _.Consequence();
+
+  function handleOutput ( output )
+  {
+    output = output.toString();
+    if( !_.strHas( output, 'program1::begin' ) )
+    return;
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
+
+  o.process.stdout.on( 'data', handleOutput );
+
+  terminate.then( () =>
+  {
+    return _.process.terminate
+    ({
+      pid : o.process.pid,
+      timeOut : 0,
+      withChildren : 0
+    })
+  })
+
+  o.conTerminate.then( ( op ) =>
+  {
+    test.identical( op.ended, true );
+
+    if( process.platform === 'win32' )
+    {
+      test.identical( op.exitCode, 1 );
+      test.identical( op.exitSignal, 0 );
+    }
+    else
+    {
+      test.identical( op.exitCode, null );
+      test.identical( op.exitSignal, 'SIGKILL' );
+    }
+
+    test.identical( _.strCount( op.output, 'program1::SIGTERM' ), 0 );
+    test.identical( _.strCount( op.output, 'program1::begin' ), 1 );
+    test.identical( _.strCount( op.output, 'program1::end' ), 0 );
+
+    return null;
+  })
+
+  return _.Consequence.AndKeep( terminate, o.conTerminate );
+
+  /* - */
+
+  function program1()
+  {
+    process.on( 'SIGTERM', () =>
+    {
+      console.log( 'program1::SIGTERM' )
+    })
+
+    setTimeout( () =>
+    {
+      console.log( 'program1::end' );
+    }, context.t1 * 15 );
+
+    console.log( 'program1::begin' );
+  }
+}
+
+terminateZeroTimeOutFork.description =
+`
+Program1 has SIGTERM handler that ignores signal.
+Should terminate right after call with SIGKILL on unix and exit code 1 on win
+Signal handler should not be executed
+`
+
+//
+
+function terminateZeroTimeOutWithoutChildrenShell( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( program1 );
+
+  /* - */
+
+  var o =
+  {
+    execPath : 'node program1',
+    currentPath : a.routinePath,
+    mode : 'shell',
+    outputPiping : 1,
+    outputCollecting : 1,
+    throwingExitCode : 0
+  }
+
+  _.process.start( o )
+  let terminate = _.Consequence();
+
+  function handleOutput ( output )
+  {
+    output = output.toString();
+    if( !_.strHas( output, 'program1::begin' ) )
+    return;
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
+
+  o.process.stdout.on( 'data', handleOutput );
+
+  terminate.then( () =>
+  {
+    return _.process.terminate
+    ({
+      pid : o.process.pid,
+      timeOut : 0,
+      withChildren : 0
+    })
+  })
+
+  o.conTerminate.then( ( op ) =>
+  {
+    test.identical( op.ended, true );
+
+    if( process.platform === 'win32' )
+    {
+      test.identical( op.exitCode, 1 );
+      test.identical( op.exitSignal, 0 );
+    }
+    else
+    {
+      test.identical( op.exitCode, null );
+      test.identical( op.exitSignal, 'SIGKILL' );
+    }
+
+    test.identical( _.strCount( op.output, 'program1::SIGTERM' ), 0 );
+    test.identical( _.strCount( op.output, 'program1::begin' ), 1 );
+
+    /*
+      Single process on darwin, Two processes on linux and windows
+      Child continues to work on linux/windows
+    */
+    if( process.platform === 'darwin' )
+    test.identical( _.strCount( op.output, 'program1::end' ), 0 );
+    else
+    test.identical( _.strCount( op.output, 'program1::end' ), 1 );
+
+    return null;
+  })
+
+  return _.Consequence.AndKeep( terminate, o.conTerminate );
+
+  /* - */
+
+  function program1()
+  {
+    process.on( 'SIGTERM', () =>
+    {
+      console.log( 'program1::SIGTERM' )
+    })
+
+    setTimeout( () =>
+    {
+      console.log( 'program1::end' );
+    }, context.t1 * 15 );
+
+    console.log( 'program1::begin' );
+  }
+}
+
+terminateZeroTimeOutWithoutChildrenShell.description =
+`
+Program1 has SIGTERM handler that ignores signal.
+Should terminate right after call with SIGKILL on unix and exit code 1 on win
+On darwin node exists right after signal, because it is a single process
+On unix/windows shell is spawned in addition to node process, so node continues to work after signal
+Signal handler should not be executed
+`
+
+function terminateZeroTimeOutWithtChildrenShell( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( program1 );
+
+  /* - */
+
+  var o =
+  {
+    execPath : 'node program1',
+    currentPath : a.routinePath,
+    mode : 'shell',
+    outputPiping : 1,
+    outputCollecting : 1,
+    throwingExitCode : 0
+  }
+
+  _.process.start( o )
+  let terminate = _.Consequence();
+
+  function handleOutput ( output )
+  {
+    output = output.toString();
+    if( !_.strHas( output, 'program1::begin' ) )
+    return;
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
+
+  o.process.stdout.on( 'data', handleOutput );
+
+  terminate.then( () =>
+  {
+    return _.process.terminate
+    ({
+      pid : o.process.pid,
+      timeOut : 0,
+      withChildren : 1
+    })
+  })
+
+  o.conTerminate.then( ( op ) =>
+  {
+    test.identical( op.ended, true );
+
+    if( process.platform === 'win32' )
+    {
+      test.identical( op.exitCode, 1 );
+      test.identical( op.exitSignal, 0 );
+    }
+    else
+    {
+      test.identical( op.exitCode, null );
+      test.identical( op.exitSignal, 'SIGKILL' );
+    }
+
+    test.identical( _.strCount( op.output, 'program1::SIGTERM' ), 0 );
+    test.identical( _.strCount( op.output, 'program1::begin' ), 1 );
+    test.identical( _.strCount( op.output, 'program1::end' ), 0 );
+
+    return null;
+  })
+
+  return _.Consequence.AndKeep( terminate, o.conTerminate );
+
+  /* - */
+
+  function program1()
+  {
+    process.on( 'SIGTERM', () =>
+    {
+      console.log( 'program1::SIGTERM' )
+    })
+
+    setTimeout( () =>
+    {
+      console.log( 'program1::end' );
+    }, context.t1 * 15 );
+
+    console.log( 'program1::begin' );
+  }
+}
+
+terminateZeroTimeOutWithtChildrenShell.description =
+`
+Program1 has SIGTERM handler that ignores signal.
+Should terminate right after call with SIGKILL on unix and exit code 1 on win
+On darwin node exists right after signal, because it is a single process
+On unix/windows shell is spawned in addition to node process, so node continues to work after signal
+Signal handler should not be executed
+`
 
 //
 
@@ -28091,14 +27450,6 @@ function terminateDifferentStdio( test )
   let context = this;
   let a = context.assetFor( test, false );
   let testAppPath = a.program( testApp );
-
-  // if( process.platform === 'win32' )
-  // {
-  //   // qqq for Vova : windows-kill doesn't work correctly on node14
-  //   // investigate if its possible to use process.kill instead of windows-kill
-  //   test.identical( 1, 1 )
-  //   return;
-  // }
 
   /* */
 
@@ -29212,8 +28563,7 @@ var Proto =
     kill,
     killSync,
     killOptionWithChildren,
-    terminate,
-    terminateSync,
+
     startErrorAfterTerminationWithSend,
     startTerminateHangedWithExitHandler,
     startTerminateAfterLoopRelease,
@@ -29222,15 +28572,17 @@ var Proto =
     endSignalsOnExit,
     endSignalsOnExitExit,
 
-    // terminateComplex, //zzz:remove
+    terminate,//qqq for Vova: review, remove duplicates, check timeouts
+    terminateSync,
+
     terminateFirstChildSpawn,
     terminateFirstChildFork,
     terminateFirstChildShell,
+
     terminateSecondChildSpawn,
     terminateSecondChildFork,
     terminateSecondChildShell,
 
-    // terminateDetachedComplex, /* xxx qqq for Vova : throws phantom error aaa:rewrote,splitted into smaller routines,remove*/
     terminateDetachedFirstChildSpawn,
     terminateDetachedFirstChildFork,
     terminateDetachedFirstChildShell,
@@ -29247,12 +28599,20 @@ var Proto =
       2596 :   }
 */
 
-    //qqq for Vova: review terminate routines
-    terminateWithChildren,
-    terminateWithDetachedChildren, // zzz for Vova:investigate and fix termination of deatched process on Windows
-    terminateTimeOut, /* xxx qqq for Vova : make it working */
-    terminateZeroTimeOut,
-    terminateDifferentStdio,
+    terminateSeveralChildren,
+    terminateWithSeveralDetachedChildren,
+    terminateDeadProcess,
+
+    // terminateTimeOut, /* xxx qqq for Vova : make it working */
+
+    terminateTimeOutNoHandler,
+    terminateTimeOutIgnoreSignal,
+    terminateZeroTimeOutSpawn,
+    terminateZeroTimeOutFork,
+    terminateZeroTimeOutWithoutChildrenShell,
+    terminateZeroTimeOutWithtChildrenShell,
+
+    terminateDifferentStdio, //qqq for Vova: rewrite, don't use timeout to run terminate
 
     killComplex,
 
