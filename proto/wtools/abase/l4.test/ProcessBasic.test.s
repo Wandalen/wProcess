@@ -10028,19 +10028,15 @@ function startReadyDelayMultiple( test )
   let context = this;
   let a = context.assetFor( test, false );
   let programPath = a.path.nativize( a.program( program1 ) );
-  // xxx
-  // let modes = [ 'fork', 'spawn', 'shell' ];
-  let modes = [ 'spawn' ];
+  let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, mode }) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, mode }) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, mode }) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, mode }) ) );
   return a.ready;
 
   /* - */
 
-  /* xxx : make multiple work */
-  /* xxx : review */
   function run( op )
   {
     let ready = new _.Consequence().take( null )
@@ -10101,6 +10097,10 @@ function startReadyDelayMultiple( test )
     ready.then( () =>
     {
       test.case = `sync:${op.sync} deasync:${op.deasync} concurrent:1 mode:${op.mode}`;
+
+      if( op.sync && !op.deasync )
+      return null;
+
       let t1 = _.time.now();
       let ready2 = new _.Consequence().take( null ).timeOut( context.t1*4 );
       let o =
@@ -10174,11 +10174,13 @@ startReadyDelayMultiple.description =
 
 //
 
+/* xxx : cover con*multiple */
 function startOutputMultiple( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
   let programPath = a.path.nativize( a.program( program1 ) );
+  let track = [];
   // xxx
   let modes = [ 'fork', 'spawn', 'shell' ];
   // let modes = [ 'spawn' ];
@@ -10204,6 +10206,7 @@ function startOutputMultiple( test )
     ready.then( () =>
     {
       test.case = `sync:${op.sync} deasync:${op.deasync} concurrent:0 mode:${op.mode}`;
+      track = [];
       let t1 = _.time.now();
       let ready2 = new _.Consequence().take( null ).timeOut( context.t1*4 );
       let o =
@@ -10222,14 +10225,34 @@ function startOutputMultiple( test )
 
       let returned = _.process.start( o );
 
+      o.conStart.then( ( op ) =>
+      {
+        track.push( 'conStart' );
+        test.is( op === o );
+
+        pipe( o, 0 );
+
+        return op;
+      });
+
       o.ready.then( ( op ) =>
       {
-        test.is( op === o );
-        test.identical( op.exitCode, 0 );
-        test.identical( op.exitSignal, null );
-        test.identical( op.exitReason, 'normal' );
-        test.identical( op.ended, true );
-        let exp =
+        track.push( 'ready' );
+
+        var exp =
+        [
+          'conStart',
+          '0.out:1::begin',
+          '0.out:1::end',
+          '0.err:1::err',
+          '0.out:2::begin',
+          '0.out:2::end',
+          '0.err:2::err',
+          'ready'
+        ]
+        test.identical( track, exp );
+
+        var exp =
 `
 1::begin
 1::end
@@ -10239,6 +10262,12 @@ function startOutputMultiple( test )
 2::err
 `
         test.equivalent( op.output, exp );
+        test.identical( op.exitCode, 0 );
+        test.identical( op.exitSignal, null );
+        test.identical( op.exitReason, 'normal' );
+        test.identical( op.ended, true );
+        test.is( op === o );
+
         op.runs.forEach( ( op2, counter ) =>
         {
           test.identical( op2.exitCode, 0 );
@@ -10258,11 +10287,10 @@ function startOutputMultiple( test )
 
     ready.then( () =>
     {
-
+      test.case = `sync:${op.sync} deasync:${op.deasync} concurrent:1 mode:${op.mode}`;
       if( op.sync && !op.deasync )
       return null;
-
-      test.case = `sync:${op.sync} deasync:${op.deasync} concurrent:1 mode:${op.mode}`;
+      track = [];
       let t1 = _.time.now();
       let ready2 = new _.Consequence().take( null ).timeOut( context.t1*4 );
       let o =
@@ -10281,15 +10309,44 @@ function startOutputMultiple( test )
 
       let returned = _.process.start( o );
 
+      o.conStart.then( ( op ) =>
+      {
+        track.push( 'conStart' );
+        test.is( op === o );
+
+        debugger;
+        pipe( o, 0 );
+        pipe( o.runs[ 0 ], 1 );
+        pipe( o.runs[ 1 ], 2 );
+        debugger;
+
+        return op;
+      });
+
       o.ready.then( ( op ) =>
       {
-        test.is( op === o );
-        test.identical( op.exitCode, 0 );
-        test.identical( op.exitSignal, null );
-        test.identical( op.exitReason, 'normal' );
-        test.identical( op.ended, true );
-// xxx : introduce streams into o-descriptor
-        let exp =
+        track.push( 'ready' );
+
+        var exp =
+        [
+          'conStart',
+          '0.out:1::begin',
+          '1.out:1::begin',
+          '0.out:2::begin',
+          '2.out:2::begin',
+          '0.out:1::end',
+          '1.out:1::end',
+          '0.out:2::end',
+          '2.out:2::end',
+          '0.err:1::err',
+          '1.err:1::err',
+          '0.err:2::err',
+          '2.err:2::err',
+          'ready'
+        ]
+        test.identical( track, exp );
+
+        var exp =
 `
 1::begin
 2::begin
@@ -10299,6 +10356,13 @@ function startOutputMultiple( test )
 2::err
 `
         test.equivalent( op.output, exp );
+
+        test.identical( op.exitCode, 0 );
+        test.identical( op.exitSignal, null );
+        test.identical( op.exitReason, 'normal' );
+        test.identical( op.ended, true );
+        test.is( op === o );
+
         op.runs.forEach( ( op2, counter ) =>
         {
           test.identical( op2.exitCode, 0 );
@@ -10320,6 +10384,26 @@ function startOutputMultiple( test )
   }
 
   /* - */
+
+  function pipe( op, id )
+  {
+    op.streamOut.on( 'data', ( data ) =>
+    {
+      if( _.bufferAnyIs( data ) )
+      data = _.bufferToStr( data );
+      data = data.trim();
+      console.log( `${id}.out`, data );
+      track.push( `${id}.out:` + data );
+    });
+    op.streamErr.on( 'data', ( data ) =>
+    {
+      if( _.bufferAnyIs( data ) )
+      data = _.bufferToStr( data );
+      data = data.trim();
+      console.log( `${id}.err`, data );
+      track.push( `${id}.err:` + data );
+    });
+  }
 
   function program1()
   {
@@ -15149,7 +15233,7 @@ function startConcurrent( test )
 
   let subprocessesError =
   {
-    execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 10' ],
+    execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 10' ], // xxx
     ready : a.ready,
     outputCollecting : 1,
     verbosity : 3,
@@ -15399,8 +15483,8 @@ function startConcurrent( test )
 
   return a.ready.finally( ( err, arg ) =>
   {
-    debugger;
-    test.identical( counter, 11 );
+    _.procedure.terminationBegin();
+    test.identical( counter, 11 ); // xxx
     if( err )
     throw err;
     return arg;
@@ -16176,6 +16260,8 @@ function startNjsWithReadyDelayStructural( test )
         exp2.exitSignal = null;
         exp2.process = options.process;
         exp2.procedure = options.procedure;
+        exp2.streamOut = options.streamOut;
+        exp2.streamErr = options.streamErr;
         exp2.execPath = mode === 'fork' ? programPath : 'node';
         exp2.args = mode === 'fork' ? [] : [ programPath ];
         exp2.fullExecPath = ( mode === 'fork' ? '' : 'node ' ) + programPath;
@@ -16186,6 +16272,9 @@ function startNjsWithReadyDelayStructural( test )
         test.identical( options, exp2 );
         test.identical( !!options.process, true );
         test.is( _.routineIs( options.disconnect ) );
+        test.is( _.streamIs( options.streamOut ) );
+        test.is( _.streamIs( options.streamErr ) );
+        test.is( options.streamOut !== options.streamErr );
         test.is( options.conTerminate !== options.ready );
         test.identical( options.ready.exportString(), 'Consequence:: 0 / 1' );
         test.identical( options.conTerminate.exportString(), 'Consequence:: 1 / 0' );
@@ -16216,7 +16305,7 @@ function startNjsWithReadyDelayStructural( test )
         'dry' : 0,
         'ipc' : mode === 'fork' ? true : false,
         'env' : null,
-        'windowHiding' : 1,
+        'hiding' : 1,
         'concurrent' : 0,
         'timeOut' : null,
         'briefExitCode' : 0,
@@ -16227,6 +16316,11 @@ function startNjsWithReadyDelayStructural( test )
         'outputDecorating' : 0,
         'outputDecoratingStdout' : 0,
         'outputDecoratingStderr' : 0,
+        'uid' : null,
+        'gid' : null,
+        'streamSizeLimit' : null,
+        'streamOut' : null,
+        'streamErr' : null,
         'outputGraying' : 0,
         'conStart' : options.conStart,
         'conTerminate' : options.conTerminate,
@@ -16283,8 +16377,6 @@ startNjsWithReadyDelayStructural.description =
 `
 
 //
-
-/* xxx : add test case for multiple */
 
 function startNjsWithReadyDelayStructuralMultiple( test )
 {
@@ -16349,9 +16441,9 @@ function startNjsWithReadyDelayStructuralMultiple( test )
         test.is( options.conTerminate !== options.ready );
         test.is( _.arrayIs( options.runs ) );
         test.identical( options.ready.exportString(), 'Consequence:: 0 / 1' );
-        test.identical( options.conTerminate, null );
+        test.identical( options.conTerminate.exportString(), 'Consequence:: 1 / 0' );
         test.identical( options.conDisconnect, null );
-        test.identical( options.conStart, null );
+        test.identical( options.conStart.exportString(), 'Consequence:: 1 / 0' );
 
         return null;
       });
@@ -16379,7 +16471,7 @@ function startNjsWithReadyDelayStructuralMultiple( test )
         'dry' : 0,
         'ipc' : mode === 'fork' ? true : false,
         'env' : null,
-        'windowHiding' : 1,
+        'hiding' : 1,
         'concurrent' : 0,
         'timeOut' : null,
         'briefExitCode' : 0,
@@ -16400,6 +16492,9 @@ function startNjsWithReadyDelayStructuralMultiple( test )
         'stack' : options.stack,
         'streamOut' : options.streamOut,
         'streamErr' : options.streamErr,
+        'uid' : null,
+        'gid' : null,
+        'streamSizeLimit' : null,
         'runs' : [],
         'state' : 'initial',
         'exitReason' : null,
@@ -16424,9 +16519,9 @@ function startNjsWithReadyDelayStructuralMultiple( test )
       test.is( _.streamIs( options.streamErr ) );
       test.is( options.streamOut !== options.streamErr );
       test.identical( options.ready.exportString(), 'Consequence:: 0 / 3' );
-      test.identical( options.conTerminate, null );
+      test.identical( options.conTerminate.exportString(), 'Consequence:: 0 / 0' );
       test.identical( options.conDisconnect, null );
-      test.identical( options.conStart, null );
+      test.identical( options.conStart.exportString(), 'Consequence:: 0 / 0' );
 
       return returned;
     })
@@ -16529,7 +16624,7 @@ function startNjsWithReadyDelayStructuralMultiple( test )
 //       'ipc' : null,
 //       'env' : null,
 //       'detaching' : 0,
-//       'windowHiding' : 1,
+//       'hiding' : 1,
 //       'concurrent' : 0,
 //       'timeOut' : null,
 //       // 'returningOptionsArray' : 1,
@@ -18607,7 +18702,7 @@ streamJoinExperiment.experimental = 1;
 // other options
 // --
 
-function startOptionDryRun( test )
+function startOptionDry( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -18672,7 +18767,7 @@ function startOptionDryRun( test )
   }
 }
 
-startOptionDryRun.description =
+startOptionDry.description =
 `
 Simulates run of routine start with all possible options.
 After execution checks fields of run descriptor.
@@ -27438,7 +27533,7 @@ var Proto =
 
     startReadyDelay,
     startReadyDelayMultiple,
-    startOutputMultiple,
+    // startOutputMultiple, // xxx
     startOptionWhenDelay,
     startOptionWhenTime,
     startOptionTimeOut, /* qqq for Vova : fix please */
@@ -27516,7 +27611,8 @@ var Proto =
 
     // other options
 
-    startOptionDryRun,
+    startOptionDry, /* qqq for Yevhen : make sure option dry is covered good enough */
+    /* qqq for Yevhen : write test routine startOptionDryMultiple */
     startOptionCurrentPath,
     startOptionCurrentPaths,
     startOptionPassingThrough, /* qqq for Yevhen : extend please | aaa : Done. Yevhen S. */
