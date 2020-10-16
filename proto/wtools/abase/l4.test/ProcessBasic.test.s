@@ -25212,17 +25212,33 @@ function terminateFirstChildShell( test )
 
     test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
     test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
-    test.identical( _.strCount( o.output, 'program2::end' ), 0 );
-    test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
-    test.is( _.process.isAlive( program2PID ) );
+    test.identical( _.strCount( o.output, 'Time out!' ), 0 );
 
-    return _.time.out( context.t1*15 );
-  })
+    /*
+       On darwing program1 exists right after signal, program2 continues to work
+       On win/linux program1 waits for termination of program2 because only shell was terminated
+    */
 
-  o.conTerminate.then( () =>
-  {
-    test.is( !_.process.isAlive( program2PID ) );
-    test.is( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+    if( process.platform === 'darwin' )
+    {
+      test.identical( _.strCount( o.output, 'program2::end' ), 0 );
+      test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+      test.is( _.process.isAlive( program2PID ) );
+
+      return _.time.out( context.t1*15, () =>
+      {
+        test.is( !_.process.isAlive( program2PID ) );
+        test.is( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+        return null;
+      });
+    }
+    else
+    {
+      test.identical( _.strCount( o.output, 'program2::end' ), 1 );
+      test.is( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+      test.is( !_.process.isAlive( program2PID ) );
+    }
+
     return null;
   })
 
@@ -25249,9 +25265,14 @@ function terminateFirstChildShell( test )
     }
     _.process.start( o );
 
-    let timer = _.time.outError( context.t1*25 );
+    let timer = _.time.out( context.t1*25 );
 
     console.log( 'program1::begin' );
+
+    process.on( 'exit', () =>
+    {
+      console.log( 'program1::end' );
+    })
   }
 
   /* - */
@@ -25288,6 +25309,8 @@ terminateFirstChildShell.description =
 mode : shell
 terminate first child
 first child with signal SIGTERM on unix and exit code 1 on win
+On darwing program1 exists right after signal, program2 continues to work
+On win/linux program1 waits for termination of program2 because only shell was terminated
 `
 
 //
