@@ -124,6 +124,11 @@ function startCommon_head( routine, args )
   _.assert( !o.ipc || _.longHas( [ 'fork', 'spawn' ], o.mode ), `Mode::${o.mode} doesn't support inter process communication.` );
   _.assert( o.mode !== 'fork' || !!o.ipc, `In mode::fork option::ipc must be true. Such subprocess can not have no ipc.` );
 
+  _.assert /* qqq for Yevhen : cover all forbidden combinations of options */
+  (
+    o.timeOut === null || !o.sync || !!o.deasync, `Option::timeOut should not be defined if option::sync:1 and option::deasync:0`
+  );
+
   if( _.strIs( o.interpreterArgs ) )
   o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs });
   _.assert( o.interpreterArgs === null || _.arrayIs( o.interpreterArgs ) );
@@ -159,7 +164,22 @@ function startMinimal_head( routine, args )
 function startMinimal_body( o )
 {
 
-  /* subroutines index :
+  _.assert( arguments.length === 1, 'Expects single argument' );
+
+  let stderrOutput = '';
+  let decoratedOutput = '';
+  let decoratedErrorOutput = '';
+  let execArgs, readyCallback;
+
+  form1();
+
+  _.assert( !_.arrayIs( o.execPath ) && !_.arrayIs( o.currentPath ) );
+
+  form2();
+
+  return run1();
+
+  /* subroutines :
 
   form1,
   form2,
@@ -196,21 +216,6 @@ function startMinimal_body( o )
   log,
 
 */
-
-  _.assert( arguments.length === 1, 'Expects single argument' );
-
-  let stderrOutput = '';
-  let decoratedOutput = '';
-  let decoratedErrorOutput = '';
-  let execArgs, readyCallback;
-
-  form1();
-
-  _.assert( !_.arrayIs( o.execPath ) && !_.arrayIs( o.currentPath ) );
-
-  form2();
-
-  return run1();
 
   /* */
 
@@ -329,6 +334,8 @@ function startMinimal_body( o )
     o.output = o.outputCollecting ? '' : null;
     o.ended = false;
     o.handleProcedureTerminationBegin = false;
+    o.streamOut = null;
+    o.streamErr = null;
 
     Object.preventExtensions( o );
   }
@@ -371,27 +378,25 @@ function startMinimal_body( o )
     if( execArgs && execArgs.length )
     o.args = _.arrayPrependArray( o.args || [], execArgs );
 
-    _.assert( o.interpreterArgs === null || _.arrayIs( o.interpreterArgs ) );
-    _.assert( _.boolLike( o.outputAdditive ) );
-
     o.currentPath = _.path.resolve( o.currentPath || '.' );
 
-    /* verbosity */
-
+    _.assert( o.interpreterArgs === null || _.arrayIs( o.interpreterArgs ) );
+    _.assert( _.boolLike( o.outputAdditive ) );
     _.assert( _.numberIs( o.verbosity ) );
     _.assert( _.boolLike( o.outputPiping ) );
+    _.assert( _.boolLike( o.outputCollecting ) );
 
     // if( o.outputCollecting && !o.output )
     // o.output = ''; /* xxx : test for multiple run? to which o-map does it collect output? */
-
-    /* stdio compatibility check */
-    if( Config.debug )
-    if( o.outputPiping || o.outputCollecting )
-    _.assert
-    (
-      o.stdio === 'pipe' || o.stdio[ 1 ] === 'pipe' || o.stdio[ 2 ] === 'pipe'
-      , '"stdout" is not available to collect output or pipe it. Set stdout/stderr channel(s) or option::stdio to "pipe", please'
-    );
+    //
+    // /* stdio compatibility check */
+    // if( Config.debug )
+    // if( o.outputPiping || o.outputCollecting )
+    // _.assert
+    // (
+    //   o.stdio === 'pipe' || o.stdio[ 1 ] === 'pipe' || o.stdio[ 2 ] === 'pipe'
+    //   , '"stdout" is not available to collect output or pipe it. Set stdout/stderr channel(s) or option::stdio to "pipe", please'
+    // );
 
     /* passingThrough */
 
@@ -484,8 +489,6 @@ function startMinimal_body( o )
   function run2()
   {
 
-    _.assert( o.state === 'initial' );
-
     try
     {
       form3();
@@ -512,6 +515,8 @@ function startMinimal_body( o )
 
   function run3()
   {
+
+    _.assert( o.state === 'initial' );
     o.state = 'starting';
 
     if( Config.debug )
@@ -522,22 +527,16 @@ function startMinimal_body( o )
     );
 
     if( o.mode === 'fork')
-    {
-      runFork();
-    }
+    runFork();
     else if( o.mode === 'spawn' )
-    {
-      runSpawn();
-    }
+    runSpawn();
     else if( o.mode === 'shell' )
-    {
-      runShell();
-    }
+    runShell();
     else _.assert( 0, 'Unknown mode', _.strQuote( o.mode ), 'to start process at path', _.strQuote( o.currentPath ) );
 
     /* procedure */
 
-    if( !o.dry ) /* xxx : remove if? */
+    if( !o.dry )
     if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
     {
       if( Config.debug )
@@ -605,7 +604,7 @@ function startMinimal_body( o )
     let execPath = o.execPath;
 
     execPath = _.path.nativizeEscaping( execPath );
-    // execPath = _.process.escapeProg( execPath ); //zzz for Vova: use this routine, review fails
+    // execPath = _.process.escapeProg( execPath ); /* zzz for Vova: use this routine, review fails */
 
     let shellPath = process.platform === 'win32' ? 'cmd' : 'sh';
     let arg1 = process.platform === 'win32' ? '/c' : '-c';
@@ -719,9 +718,17 @@ function startMinimal_body( o )
     o.ended = true;
     Object.freeze( o );
 
+    /* `initial`, `starting`, `started`, `terminating`, `terminated`, `disconnected` */
     if( err )
     {
       debugger;
+      /* yyy xxx : give error to all not-signaled consequences */
+
+      // console.log( `o.state : ${o.state}` );
+      if( o.state === 'initial' || o.state === 'starting' )
+      o.conStart.error( err );
+      if( o.state !== 'terminated' && o.state !== 'disconnected' )
+      o.conDisconnect.error( err );
       consequence.error( err );
       o.ready.error( err );
       if( o.sync && !o.deasync )
@@ -729,6 +736,7 @@ function startMinimal_body( o )
     }
     else
     {
+      /* xxx : give attended error to all not-signaled consequences? */
       consequence.take( o );
       o.ready.take( o );
     }
@@ -930,6 +938,11 @@ function startMinimal_body( o )
       'stdout is not available to collect output or pipe it. Set option::stdio to "pipe"'
     );
 
+    if( _.streamIs( o.process.stdout ) )
+    o.streamOut = o.process.stdout;
+    if( _.streamIs( o.process.stderr ) )
+    o.streamErr = o.process.stderr;
+
     /* piping out channel */
 
     if( o.outputPiping || o.outputCollecting )
@@ -941,7 +954,7 @@ function startMinimal_body( o )
 
     /* piping error channel */
 
-    /* there is no if here because algorithm should collect error output in stderrOutput */
+    /* there is no if options here because algorithm should collect error output in stderrOutput anyway */
     if( o.process.stderr )
     if( o.sync && !o.deasync )
     handleStreamErr( o.process.stderr );
@@ -1132,7 +1145,7 @@ function startMinimal_body( o )
     o2.cwd = _.path.nativize( o.currentPath );
     if( o.timeOut && o.sync )
     o2.timeout = o.timeOut;
-    o2.windowsHide = !!o.windowHiding;
+    o2.windowsHide = !!o.hiding;
     return o2;
   }
 
@@ -1206,7 +1219,7 @@ function startMinimal_body( o )
   {
 
     if( _.bufferAnyIs( data ) )
-    data = _.bufferToStr( data );
+    data = _.bufferToStr( data ); /* qqq for Yevhen use more optimal condition and routine to convert buffer here and in other places */
     if( o.outputGraying )
     data = StripAnsi( data );
 
@@ -1312,9 +1325,11 @@ startMinimal_body.defaults =
 
   env : null,
   detaching : 0,
-  windowHiding : 1,
+  hiding : 1,
+  uid : null, /* qqq for Yevhen : implement and cover the option */
+  gid : null, /* qqq for Yevhen : implement and cover the option */
+  streamSizeLimit : null, /* qqq for Yevhen : implement and cover the option. look option maxBuffer of spawn */
   passingThrough : 0,
-  // concurrent : 0, /* xxx : move */
   timeOut : null,
 
   throwingExitCode : 1, /* must be on by default */
@@ -1335,7 +1350,6 @@ startMinimal_body.defaults =
 }
 
 /* xxx : move advanced options to _.process.start() */
-/* xxx : add option stdio and other? */
 
 let startMinimal = _.routineUnite( startMinimal_head, startMinimal_body );
 
@@ -1346,8 +1360,6 @@ function start_head( routine, args )
   let o = startCommon_head( routine, args );
 
   _.assert( arguments.length === 2 );
-
-  /* xxx : specail handling of deasync:1 sync:1 should be in body of start */
 
   _.assert
   (
@@ -1394,7 +1406,7 @@ function start_head( routine, args )
  * @param {String/Array} o.stdio='pipe' Controls stdin,stdout configuration. {@link https://nodejs.org/api/child_process.html#child_process_options_stdio Details}
  * @param {Boolean} o.ipc=0  Creates `ipc` channel between parent and child processes.
  * @param {Boolean} o.detaching=0 Creates independent process for a child. Allows child process to continue execution when parent process exits. Platform dependent option. {@link https://nodejs.org/api/child_process.html#child_process_options_detached Details}.
- * @param {Boolean} o.windowHiding=1 Hide the child process console window that would normally be created on Windows. {@link https://nodejs.org/api/child_process.html#child_process_child_process_spawn_command_args_options Details}.
+ * @param {Boolean} o.hiding=1 Hide the child process console window that would normally be created on Windows. {@link https://nodejs.org/api/child_process.html#child_process_child_process_spawn_command_args_options Details}.
  * @param {Boolean} o.passingThrough=0 Allows to pass arguments of parent process to the child process.
  * @param {Boolean} o.concurrent=0 Allows paralel execution of several child processes. By default executes commands one by one.
  * @param {Number} o.timeOut=null Time in milliseconds before execution will be terminated.
@@ -1463,7 +1475,7 @@ function start_body( o )
   end1,
   end2,
 
-  formStreams,,
+  formStreams,
   processPipe,
   streamPipe,
   handleStreamOut,
@@ -1516,6 +1528,24 @@ function start_body( o )
   function form2()
   {
 
+    if( o.conStart === null )
+    {
+      o.conStart = new _.Consequence();
+    }
+    else if( !_.consequenceIs( o.conStart ) )
+    {
+      o.conStart = new _.Consequence().finally( o.conStart );
+    }
+
+    if( o.conTerminate === null )
+    {
+      o.conTerminate = new _.Consequence();
+    }
+    else if( !_.consequenceIs( o.conTerminate ) )
+    {
+      o.conTerminate = new _.Consequence({ _procedure : false }).finally( o.conTerminate );
+    }
+
     _.assert( _.boolLike( o.outputDecorating ) );
     _.assert( _.boolLike( o.outputDecoratingStdout ) );
     _.assert( _.boolLike( o.outputDecoratingStderr ) );
@@ -1540,15 +1570,7 @@ function start_body( o )
     o.streamOut = null;
     o.streamErr = null
 
-    // yyy : swich on
-    if( o.stdio[ 1 ] !== 'ignore' || o.stdio[ 2 ] !== 'ignore' )
-    formStreams();
-
-    if( !o.dry )
-    if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
-    {
-      o.procedure = _.procedure.begin({ _object : o, _stack : o.stack });
-    }
+    Object.preventExtensions( o );
 
   }
 
@@ -1557,8 +1579,20 @@ function start_body( o )
   function run1()
   {
 
+    /* xxx : add try catch block */
+
     form1();
     form2();
+
+    // yyy : swich on
+    if( o.stdio[ 1 ] !== 'ignore' || o.stdio[ 2 ] !== 'ignore' )
+    formStreams();
+
+    if( !o.dry ) /* xxx : remove dry? */
+    if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
+    {
+      o.procedure = _.procedure.begin({ _object : o, _stack : o.stack });
+    }
 
     if( o.sync && !o.deasync )
     o.ready.deasync();
@@ -1577,6 +1611,8 @@ function start_body( o )
   {
     let prevReady = new _.Consequence().take( null );
     let readies = [];
+    let conStart = [];
+    let conTerminate = [];
     let execPath = _.arrayAs( o.execPath );
     let currentPath = _.arrayAs( o.currentPath );
 
@@ -1614,19 +1650,40 @@ function start_body( o )
       delete o2.error;
       delete o2.ended;
       delete o2.concurrent;
+
       if( o.deasync )
       {
         o2.deasync = 0;
         o2.sync = 0;
       }
+
       o.runs.push( o2 );
       _.assertMapHasAll( o2, _.process.startMinimal.defaults );
       _.process.startMinimal.body.call( _.process, o2 );
+
+      conStart.push( o2.conStart );
+      conTerminate.push( o2.conTerminate );
 
       if( o.streamOut || o.streamErr )
       processPipe( o2 );
 
     }
+
+    // if( o.concurrent )
+    // _.Consequence.AndKeep( ... conStart ).tap( ( err, arg ) =>
+    // {
+    //   o.conStart.take( err, err ? undefined : o );
+    // });
+    // else
+    // _.Consequence.OrKeep( ... conStart ).tap( ( err, arg ) =>
+    // {
+    //   o.conStart.take( err, err ? undefined : o );
+    // });
+    //
+    // _.Consequence.AndKeep( ... conTerminate ).tap( ( err, arg ) =>
+    // {
+    //   o.conTerminate.take( err, err ? undefined : o );
+    // });
 
     return _.Consequence.AndKeep( ... readies );
   }
@@ -1740,6 +1797,7 @@ function start_body( o )
   function processPipe( o2 )
   {
 
+    if( 0 ) // xxx yyy
     o2.conStart.tap( ( err, op2 ) =>
     {
       if( o2.process.stdout )
