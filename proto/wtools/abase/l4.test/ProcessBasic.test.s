@@ -1005,130 +1005,6 @@ function startErrorHandling( test )
 
     ready.then( function()
     {
-      test.case = `mode : ${ mode }; collecting, verbosity and piping off`;
-
-      let o =
-      {
-        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
-        mode,
-        stdio : 'pipe',
-        verbosity : 0,
-        outputCollecting : 0,
-        outputPiping : 0
-      }
-      return test.shouldThrowErrorAsync( _.process.start( o ) )
-      .then( function( op )
-      {
-        test.is( _.errIs( op ) );
-        test.is( _.strHas( op.message, 'Process returned exit code' ) )
-        test.is( _.strHas( op.message, 'Launched as' ) )
-        test.is( _.strHas( op.message, 'Stderr' ) )
-        test.is( _.strHas( op.message, 'Error message from child' ) )
-
-        test.notIdentical( o.exitCode, 0 );
-
-        return null;
-      })
-
-    })
-
-    /* */
-
-    ready.then( function()
-    {
-      test.case = `mode : ${ mode }; collecting, verbosity and piping off`;
-
-      let o =
-      {
-        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
-        mode,
-        stdio : 'pipe',
-        verbosity : 0,
-        outputCollecting : 0,
-        outputPiping : 0
-      }
-      return test.shouldThrowErrorAsync( _.process.start( o ) )
-      .then( function( op )
-      {
-        test.is( _.errIs( op ) );
-        test.is( _.strHas( op.message, 'Process returned exit code' ) )
-        test.is( _.strHas( op.message, 'Launched as' ) )
-        test.is( _.strHas( op.message, 'Stderr' ) )
-        test.is( _.strHas( op.message, 'Error message from child' ) )
-
-        test.notIdentical( o.exitCode, 0 );
-
-        return null;
-      })
-
-    })
-
-    /* */
-
-    ready.then( function()
-    {
-      test.case = `mode : ${ mode }; sync, collecting, verbosity and piping off`;
-
-      let o =
-      {
-        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
-        mode,
-        stdio : 'pipe',
-        sync : 1,
-        deasync : 1,
-        verbosity : 0,
-        outputCollecting : 0,
-        outputPiping : 0
-      }
-      var returned = test.shouldThrowErrorSync( () => _.process.start( o ) )
-
-      test.is( _.errIs( returned ) );
-      test.is( _.strHas( returned.message, 'Process returned exit code' ) )
-      test.is( _.strHas( returned.message, 'Launched as' ) )
-      test.is( _.strHas( returned.message, 'Stderr' ) )
-      test.is( _.strHas( returned.message, 'Error message from child' ) )
-
-      test.notIdentical( o.exitCode, 0 );
-
-      return null;
-
-    })
-
-    /* */
-
-    ready.then( function()
-    {
-      test.case = `mode : ${ mode }; sync, collecting, verbosity and piping off`;
-
-      let o =
-      {
-        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
-        mode,
-        stdio : 'pipe',
-        sync : 1,
-        deasync : 1,
-        verbosity : 0,
-        outputCollecting : 0,
-        outputPiping : 0
-      }
-      var returned = test.shouldThrowErrorSync( () => _.process.start( o ) )
-
-      test.is( _.errIs( returned ) );
-      test.is( _.strHas( returned.message, 'Process returned exit code' ) )
-      test.is( _.strHas( returned.message, 'Launched as' ) )
-      test.is( _.strHas( returned.message, 'Stderr' ) )
-      test.is( _.strHas( returned.message, 'Error message from child' ) )
-
-      test.notIdentical( o.exitCode, 0 );
-
-      return null;
-
-    })
-
-    /* */
-
-    ready.then( function()
-    {
       test.case = `mode : ${ mode }; sync, collecting, verbosity and piping off`;
 
       let o =
@@ -1263,6 +1139,274 @@ function startErrorHandling( test )
     _.process.start( op );
 
   }
+
+  /* ORIGINAL */
+  // a.ready.then( function()
+  // {
+  //   test.case = 'collecting, verbosity and piping off';
+
+  //   let o =
+  //   {
+  //     execPath :   'node ' + testAppPath,
+  //     mode : 'spawn',
+  //     stdio : 'pipe',
+  //     verbosity : 0,
+  //     outputCollecting : 0,
+  //     outputPiping : 0
+  //   }
+  //   return test.shouldThrowErrorAsync( _.process.start( o ) )
+  //   .then( function( op )
+  //   {
+  //     test.is( _.errIs( op ) );
+  //     test.is( _.strHas( op.message, 'Process returned exit code' ) )
+  //     test.is( _.strHas( op.message, 'Launched as' ) )
+  //     test.is( _.strHas( op.message, 'Stderr' ) )
+  //     test.is( _.strHas( op.message, 'Error message from child' ) )
+
+  //     test.notIdentical( o.exitCode, 0 );
+
+  //     return null;
+  //   })
+
+  // })
+
+  // /* */
+
+  // a.ready.then( function()
+  // {
+  //   test.case = 'collecting, verbosity and piping off';
+
+  //   let o =
+  //   {
+  //     execPath :   'node ' + testAppPath,
+  //     mode : 'shell',
+  //     stdio : 'pipe',
+  //     verbosity : 0,
+  //     outputCollecting : 0,
+  //     outputPiping : 0
+  //   }
+  //   return test.shouldThrowErrorAsync( _.process.start( o ) )
+  //   .then( function( op )
+  //   {
+  //     test.is( _.errIs( op ) );
+  //     test.is( _.strHas( op.message, 'Process returned exit code' ) )
+  //     test.is( _.strHas( op.message, 'Launched as' ) )
+  //     test.is( _.strHas( op.message, 'Stderr' ) )
+  //     test.is( _.strHas( op.message, 'Error message from child' ) )
+
+  //     test.notIdentical( o.exitCode, 0 );
+
+  //     return null;
+  //   })
+
+  // })
+
+  // /* */
+
+  // a.ready.then( function()
+  // {
+  //   test.case = 'collecting, verbosity and piping off';
+
+  //   let o =
+  //   {
+  //     execPath :   testAppPath,
+  //     mode : 'fork',
+  //     stdio : 'pipe',
+  //     verbosity : 0,
+  //     outputCollecting : 0,
+  //     outputPiping : 0
+  //   }
+  //   return test.shouldThrowErrorAsync( _.process.start( o ) )
+  //   .then( function( op )
+  //   {
+  //     test.is( _.errIs( op ) );
+  //     test.is( _.strHas( op.message, 'Process returned exit code' ) )
+  //     test.is( _.strHas( op.message, 'Launched as' ) )
+  //     test.is( _.strHas( op.message, 'Stderr' ) )
+  //     test.is( _.strHas( op.message, 'Error message from child' ) )
+
+  //     test.notIdentical( o.exitCode, 0 );
+
+  //     return null;
+  //   })
+
+  // })
+
+  // /* */
+
+  // a.ready.then( function()
+  // {
+  //   test.case = 'sync, collecting, verbosity and piping off';
+
+  //   let o =
+  //   {
+  //     execPath :   'node ' + testAppPath,
+  //     mode : 'spawn',
+  //     stdio : 'pipe',
+  //     sync : 1,
+  //     deasync : 1,
+  //     verbosity : 0,
+  //     outputCollecting : 0,
+  //     outputPiping : 0
+  //   }
+  //   var returned = test.shouldThrowErrorSync( () => _.process.start( o ) )
+
+  //   test.is( _.errIs( returned ) );
+  //   test.is( _.strHas( returned.message, 'Process returned exit code' ) )
+  //   test.is( _.strHas( returned.message, 'Launched as' ) )
+  //   test.is( _.strHas( returned.message, 'Stderr' ) )
+  //   test.is( _.strHas( returned.message, 'Error message from child' ) )
+
+  //   test.notIdentical( o.exitCode, 0 );
+
+  //   return null;
+
+  // })
+
+  // /* */
+
+  // a.ready.then( function()
+  // {
+  //   test.case = 'sync, collecting, verbosity and piping off';
+
+  //   let o =
+  //   {
+  //     execPath :   'node ' + testAppPath,
+  //     mode : 'shell',
+  //     stdio : 'pipe',
+  //     sync : 1,
+  //     deasync : 1,
+  //     verbosity : 0,
+  //     outputCollecting : 0,
+  //     outputPiping : 0
+  //   }
+  //   var returned = test.shouldThrowErrorSync( () => _.process.start( o ) )
+
+  //   test.is( _.errIs( returned ) );
+  //   test.is( _.strHas( returned.message, 'Process returned exit code' ) )
+  //   test.is( _.strHas( returned.message, 'Launched as' ) )
+  //   test.is( _.strHas( returned.message, 'Stderr' ) )
+  //   test.is( _.strHas( returned.message, 'Error message from child' ) )
+
+  //   test.notIdentical( o.exitCode, 0 );
+
+  //   return null;
+
+  // })
+
+  // /* */
+
+  // a.ready.then( function()
+  // {
+  //   test.case = 'sync, collecting, verbosity and piping off';
+
+  //   let o =
+  //   {
+  //     execPath :   testAppPath,
+  //     mode : 'fork',
+  //     stdio : 'pipe',
+  //     sync : 1,
+  //     deasync : 1,
+  //     verbosity : 0,
+  //     outputCollecting : 0,
+  //     outputPiping : 0
+  //   }
+  //   var returned = test.shouldThrowErrorSync( () => _.process.start( o ) )
+
+  //   test.is( _.errIs( returned ) );
+  //   test.is( _.strHas( returned.message, 'Process returned exit code' ) )
+  //   test.is( _.strHas( returned.message, 'Launched as' ) )
+  //   test.is( _.strHas( returned.message, 'Stderr' ) )
+  //   test.is( _.strHas( returned.message, 'Error message from child' ) )
+
+  //   test.notIdentical( o.exitCode, 0 );
+
+  //   return null;
+
+  // })
+
+  // /* */
+
+  // a.ready.then( function()
+  // {
+  //   test.case = 'stdio ignore, sync, collecting, verbosity and piping off';
+
+  //   let o =
+  //   {
+  //     execPath :   testAppPath,
+  //     mode : 'fork',
+  //     stdio : 'ignore',
+  //     sync : 1,
+  //     deasync : 1,
+  //     verbosity : 0,
+  //     outputCollecting : 0,
+  //     outputPiping : 0
+  //   }
+  //   var returned = test.shouldThrowErrorSync( () => _.process.start( o ) )
+
+  //   test.is( _.errIs( returned ) );
+  //   test.is( _.strHas( returned.message, 'Process returned exit code' ) )
+  //   test.is( _.strHas( returned.message, 'Launched as' ) )
+  //   test.is( !_.strHas( returned.message, 'Stderr' ) )
+  //   test.is( !_.strHas( returned.message, 'Error message from child' ) )
+
+  //   test.notIdentical( o.exitCode, 0 );
+
+  //   return null;
+
+  // })
+
+  // /* */
+
+  // a.ready.then( function()
+  // {
+  //   test.case = 'stdio inherit, sync, collecting, verbosity and piping off';
+
+  //   let o =
+  //   {
+  //     execPath : testAppPath,
+  //     mode : 'fork',
+  //     stdio : 'inherit',
+  //     sync : 1,
+  //     deasync : 1,
+  //     verbosity : 0,
+  //     outputCollecting : 0,
+  //     outputPiping : 0
+  //   }
+
+  //   a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' });
+
+  //   let o2 =
+  //   {
+  //     execPath : testAppPath2,
+  //     mode : 'fork',
+  //     stdio : 'pipe',
+  //     sync : 1,
+  //     deasync : 1,
+  //     verbosity : 0,
+  //     outputPiping : 1,
+  //     outputPrefixing : 1,
+  //     outputCollecting : 1,
+  //   }
+  //   var returned = test.shouldThrowErrorSync( () => _.process.start( o2 ) )
+
+  //   test.is( _.errIs( returned ) );
+  //   test.is( _.strHas( returned.message, 'Process returned exit code' ) )
+  //   test.is( _.strHas( returned.message, 'Launched as' ) )
+  //   test.is( _.strHas( returned.message, 'Stderr' ) )
+  //   test.is( _.strHas( returned.message, 'Error message from child' ) )
+
+  //   test.is( _.strHas( o2.output, 'Process returned exit code' ) )
+  //   test.is( _.strHas( o2.output, 'Launched as' ) )
+  //   test.is( !_.strHas( o2.output, 'Stderr' ) )
+  //   test.is( _.strHas( o2.output, 'Error message from child' ) )
+
+  //   test.notIdentical( o2.exitCode, 0 );
+
+  //   return null;
+
+  // })
+
 
 }
 
@@ -3657,6 +3801,16 @@ function startWithoutExecPath( test )
   let counter = 0;
   let time = 0;
   let filePath = a.path.nativize( a.abs( a.routinePath, 'file.txt' ) );
+
+  // let modes = [ 'fork', 'spawn', 'shell' ];
+
+  // modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+
+  // return a.ready;
+
+  /* */
+
+  // function run( mode )
 
   /* - */
 
