@@ -1303,12 +1303,12 @@ function startSync( test )
     test.case = `mode : ${ mode }`;
     o2 =
     {
-      execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+      execPath : 'node ' + programPath,
       mode,
       stdio : 'pipe'
     }
 
-    /* mode : spawn, stdio : pipe */
+    /* stdio : pipe */
 
     var options = _.mapSupplement( {}, o2, o3 );
     _.process.start( options );
@@ -1316,7 +1316,7 @@ function startSync( test )
     test.identical( options.exitCode, 0 );
     test.identical( options.output, expectedOutput );
 
-    /* mode : spawn, stdio : ignore */
+    /* stdio : ignore */
 
     o2.stdio = 'ignore';
     o2.outputCollecting = 0;
@@ -1329,35 +1329,10 @@ function startSync( test )
 
     /* */
 
-    // test.case = 'mode : shell';
-    // o2 =
-    // {
-    //   execPath :  'node ' + programPath,
-    //   mode : 'shell',
-    //   stdio : 'pipe'
-    // }
-    // var options = _.mapSupplement( {}, o2, o3 );
-    // _.process.start( options )
-    // test.identical( options.exitCode, 0 );
-    // test.identical( options.output, expectedOutput );
-
-    // /* mode : shell, stdio : ignore */
-
-    // o2.stdio = 'ignore'
-    // o2.outputCollecting = 0;
-    // o2.outputPiping = 0;
-
-    // var options = _.mapSupplement( {}, o2, o3 );
-    // _.process.start( options )
-    // test.identical( options.exitCode, 0 );
-    // test.identical( options.output, null );
-
-    /* */
-
     test.case = `mode : ${ mode }, timeOut`;
     o2 =
     {
-      execPath : mode === 'fork' ? programPath + ' loop : 1' : 'node ' + programPath + ' loop : 1',
+      execPath : 'node ' + programPath + ' loop : 1',
       mode,
       stdio : 'pipe',
       timeOut : 2*context.t1
@@ -1371,8 +1346,8 @@ function startSync( test )
     test.case = `mode : ${ mode }, return good code`;
     o2 =
     {
-      execPath : mode === 'fork' ? programPath + ' exitWithCode : 0' : 'node ' + programPath + ' exitWithCode : 0',
-      mode : 'spawn',
+      execPath : 'node ' + programPath + ' exitWithCode : 0',
+      mode,
       stdio : 'pipe'
     }
     var options = _.mapSupplement( {}, o2, o3 );
@@ -1384,8 +1359,8 @@ function startSync( test )
     test.case = `mode : ${ mode }, return exit code 1`;
     o2 =
     {
-      execPath : mode === 'fork' ? programPath + ' exitWithCode : 1' : 'node ' + programPath + ' exitWithCode : 1',
-      mode : 'spawn',
+      execPath : 'node ' + programPath + ' exitWithCode : 1',
+      mode,
       stdio : 'pipe'
     }
     var options = _.mapSupplement( {}, o2, o3 );
@@ -1397,40 +1372,14 @@ function startSync( test )
     test.case = `mode : ${ mode }, return exit code 2`;
     o2 =
     {
-      execPath : mode === 'fork' ? programPath + ' exitWithCode : 2' : 'node ' + programPath + ' exitWithCode : 2',
-      mode : 'spawn',
+      execPath : 'node ' + programPath + ' exitWithCode : 2',
+      mode,
       stdio : 'pipe'
     }
     var options = _.mapSupplement( {}, o2, o3 );
     test.shouldThrowErrorSync( () => _.process.start( options ) );
     test.identical( options.exitCode, 2 );
 
-    /* */
-
-    // test.case = 'shell, return good code';
-    // o2 =
-    // {
-    //   execPath :  'node ' + programPath + ' exitWithCode : 0',
-    //   mode : 'shell',
-    //   stdio : 'pipe'
-    // }
-
-    // var options = _.mapSupplement( {}, o2, o3 );
-    // test.mustNotThrowError( () => _.process.start( options ) )
-    // test.identical( options.exitCode, 0 );
-
-    /* */
-
-  //   test.case = 'shell, return bad code';
-  //   o2 =
-  //   {
-  //     execPath :  'node ' + programPath + ' exitWithCode : 1',
-  //     mode : 'shell',
-  //     stdio : 'pipe'
-  //   }
-  //   var options = _.mapSupplement( {}, o2, o3 );
-  //   test.shouldThrowErrorSync( () => _.process.start( options ) )
-  //   test.identical( options.exitCode, 1 );
     return null;
   }
 
@@ -1467,181 +1416,104 @@ function startSyncDeasync( test )
   let context = this;
   let a = context.assetFor( test, false );
   let programPath = a.path.nativize( a.program( program1 ) );
-  let o3 =
-  {
-    outputPiping : 1,
-    outputCollecting : 1,
-    applyingExitCode : 0,
-    throwingExitCode : 1,
-    sync : 1,
-    deasync : 1
-  }
-  let expectedOutput = programPath + '\n';
-  let o2;
+  let modes = [ 'fork', 'spawn', 'shell' ];
 
-  /* - */
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
-  test.case = 'mode : fork';
-  o2 =
-  {
-    execPath : programPath,
-    mode : 'fork',
-    stdio : 'pipe'
-  }
-
-  /* mode : spawn, stdio : pipe */
-
-  var options = _.mapSupplement( {}, o2, o3 );
-  var returned = _.process.start( options );
-  test.is( returned === options );
-  test.identical( returned.process.constructor.name, 'ChildProcess' );
-  test.identical( options.exitCode, 0 );
-  test.identical( options.output, expectedOutput );
-
-  /* mode : fork, stdio : ignore */
-
-  o2.stdio = 'ignore';
-  o2.outputCollecting = 0;
-  o2.outputPiping = 0;
-
-  var options = _.mapSupplement( {}, o2, o3 );
-  var returned = _.process.start( options );
-  test.is( returned === options );
-  test.identical( returned.process.constructor.name, 'ChildProcess' );
-  test.identical( options.exitCode, 0 );
-  test.identical( options.output, null );
+  return a.ready;
 
   /* */
 
-  test.case = 'mode : spawn';
-  o2 =
+  function run( mode )
   {
-    execPath :  'node ' + programPath,
-    mode : 'spawn',
-    stdio : 'pipe'
+    let o3 =
+    {
+      outputPiping : 1,
+      outputCollecting : 1,
+      applyingExitCode : 0,
+      throwingExitCode : 1,
+      sync : 1,
+      deasync : 1
+    }
+    let expectedOutput = programPath + '\n';
+    let o2;
+  
+    /* - */
+  
+    test.case = `mode : ${ mode }`;
+    o2 =
+    {
+      execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+      mode,
+      stdio : 'pipe'
+    }
+  
+    /* stdio : pipe */
+  
+    var options = _.mapSupplement( {}, o2, o3 );
+    var returned = _.process.start( options );
+    test.is( returned === options );
+    test.identical( returned.process.constructor.name, 'ChildProcess' );
+    test.identical( options.exitCode, 0 );
+    test.identical( options.output, expectedOutput );
+  
+    /* stdio : ignore */
+  
+    o2.stdio = 'ignore';
+    o2.outputCollecting = 0;
+    o2.outputPiping = 0;
+  
+    var options = _.mapSupplement( {}, o2, o3 );
+    var returned = _.process.start( options );
+    test.is( returned === options );
+    test.identical( returned.process.constructor.name, 'ChildProcess' );
+    test.identical( options.exitCode, 0 );
+    test.identical( options.output, null );
+  
+    /* */
+
+    test.case = `mode : ${ mode }, timeOut`;
+    o2 =
+    {
+      execPath : mode === 'fork' ? programPath + ' loop : 1' : 'node ' + programPath + ' loop : 1',
+      mode,
+      stdio : 'pipe',
+      timeOut : 2*context.t1,
+    }
+  
+    var options = _.mapSupplement( {}, o2, o3 );
+    test.shouldThrowErrorSync( () => _.process.start( options ) );
+  
+    /* */
+  
+    test.case = `mode : ${ mode }, return good code`;
+    o2 =
+    {
+      execPath : mode === 'fork' ? programPath + ' exitWithCode : 0' : 'node ' + programPath + ' exitWithCode : 0',
+      mode,
+      stdio : 'pipe'
+    }
+    var options = _.mapSupplement( {}, o2, o3 );
+    var returned = _.process.start( options );
+    test.is( returned === options );
+    test.identical( returned.process.constructor.name, 'ChildProcess' );
+    test.identical( options.exitCode, 0 );
+  
+    /* */
+  
+    test.case = `mode : ${ mode }, return bad code`;
+    o2 =
+    {
+      execPath : mode === 'fork' ? programPath + ' exitWithCode : 1' : 'node ' + programPath + ' exitWithCode : 1',
+      mode,
+      stdio : 'pipe'
+    }
+    var options = _.mapSupplement( {}, o2, o3 );
+    test.shouldThrowErrorSync( () => _.process.start( options ) )
+    test.identical( options.exitCode, 1 );
+
+    return null;
   }
-
-  /* mode : spawn, stdio : pipe */
-
-  var options = _.mapSupplement( {}, o2, o3 );
-  var returned = _.process.start( options );
-  test.is( returned === options );
-  test.identical( returned.process.constructor.name, 'ChildProcess' );
-  test.identical( options.exitCode, 0 );
-  test.identical( options.output, expectedOutput );
-
-  /* mode : spawn, stdio : ignore */
-
-  o2.stdio = 'ignore';
-  o2.outputCollecting = 0;
-  o2.outputPiping = 0;
-
-  var options = _.mapSupplement( {}, o2, o3 );
-  var returned = _.process.start( options );
-  test.is( returned === options );
-  test.identical( returned.process.constructor.name, 'ChildProcess' );
-  test.identical( options.exitCode, 0 );
-  test.identical( options.output, null );
-
-  /* */
-
-  test.case = 'mode : shell';
-  o2 =
-  {
-    execPath :  'node ' + programPath,
-    mode : 'shell',
-    stdio : 'pipe'
-  }
-  var options = _.mapSupplement( {}, o2, o3 );
-  var returned = _.process.start( options );
-  test.is( returned === options );
-  test.identical( returned.process.constructor.name, 'ChildProcess' );
-  test.identical( options.exitCode, 0 );
-  test.identical( options.output, expectedOutput );
-
-  /* mode : shell, stdio : ignore */
-
-  o2.stdio = 'ignore'
-  o2.outputCollecting = 0;
-  o2.outputPiping = 0;
-
-  var options = _.mapSupplement( {}, o2, o3 );
-  var returned = _.process.start( options );
-  test.is( returned === options );
-  test.identical( returned.process.constructor.name, 'ChildProcess' );
-  test.identical( options.exitCode, 0 );
-  test.identical( options.output, null );
-
-  /* */
-
-  test.case = 'shell, timeOut';
-  o2 =
-  {
-    execPath :  'node ' + programPath + ' loop : 1',
-    mode : 'shell',
-    stdio : 'pipe',
-    timeOut : 2*context.t1,
-  }
-
-  var options = _.mapSupplement( {}, o2, o3 );
-  test.shouldThrowErrorSync( () => _.process.start( options ) );
-
-  /* */
-
-  test.case = 'spawn, return good code';
-  o2 =
-  {
-    execPath :  'node ' + programPath + ' exitWithCode : 0',
-    mode : 'spawn',
-    stdio : 'pipe'
-  }
-  var options = _.mapSupplement( {}, o2, o3 );
-  var returned = _.process.start( options );
-  test.is( returned === options );
-  test.identical( returned.process.constructor.name, 'ChildProcess' );
-  test.identical( options.exitCode, 0 );
-
-  /* */
-
-  test.case = 'spawn, return bad code';
-  o2 =
-  {
-    execPath :  'node ' + programPath + ' exitWithCode : 1',
-    mode : 'spawn',
-    stdio : 'pipe'
-  }
-  var options = _.mapSupplement( {}, o2, o3 );
-  test.shouldThrowErrorSync( () => _.process.start( options ) )
-  test.identical( options.exitCode, 1 );
-
-  /* */
-
-  test.case = 'shell, return good code';
-  o2 =
-  {
-    execPath :  'node ' + programPath + ' exitWithCode : 0',
-    mode : 'shell',
-    stdio : 'pipe'
-  }
-
-  var options = _.mapSupplement( {}, o2, o3 );
-  var returned = _.process.start( options );
-  test.is( returned === options );
-  test.identical( returned.process.constructor.name, 'ChildProcess' );
-  test.identical( options.exitCode, 0 );
-
-  /* */
-
-  test.case = 'shell, return bad code';
-  o2 =
-  {
-    execPath :  'node ' + programPath + ' exitWithCode : 1',
-    mode : 'shell',
-    stdio : 'pipe'
-  }
-  var options = _.mapSupplement( {}, o2, o3 );
-  test.shouldThrowErrorSync( () => _.process.start( options ) )
-  test.identical( options.exitCode, 1 );
 
   /* - */
 
