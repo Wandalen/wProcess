@@ -1407,6 +1407,140 @@ function startSync( test )
 
     console.log( __filename );
   }
+
+  /* ORIGINAL */
+  // test.case = 'mode : spawn';
+  // o2 =
+  // {
+  //   execPath :  'node ' + programPath,
+  //   mode : 'spawn',
+  //   stdio : 'pipe'
+  // }
+
+  // /* mode : spawn, stdio : pipe */
+
+  // var options = _.mapSupplement( {}, o2, o3 );
+  // _.process.start( options );
+  // debugger;
+  // test.identical( options.exitCode, 0 );
+  // test.identical( options.output, expectedOutput );
+
+  // /* mode : spawn, stdio : ignore */
+
+  // o2.stdio = 'ignore';
+  // o2.outputCollecting = 0;
+  // o2.outputPiping = 0;
+
+  // var options = _.mapSupplement( {}, o2, o3 );
+  // _.process.start( options )
+  // test.identical( options.exitCode, 0 );
+  // test.identical( options.output, null );
+
+  // /* */
+
+  // test.case = 'mode : shell';
+  // o2 =
+  // {
+  //   execPath :  'node ' + programPath,
+  //   mode : 'shell',
+  //   stdio : 'pipe'
+  // }
+  // var options = _.mapSupplement( {}, o2, o3 );
+  // _.process.start( options )
+  // test.identical( options.exitCode, 0 );
+  // test.identical( options.output, expectedOutput );
+
+  // /* mode : shell, stdio : ignore */
+
+  // o2.stdio = 'ignore'
+  // o2.outputCollecting = 0;
+  // o2.outputPiping = 0;
+
+  // var options = _.mapSupplement( {}, o2, o3 );
+  // _.process.start( options )
+  // test.identical( options.exitCode, 0 );
+  // test.identical( options.output, null );
+
+  // /* */
+
+  // test.case = 'shell, timeOut';
+  // o2 =
+  // {
+  //   execPath :  'node ' + programPath + ' loop : 1',
+  //   mode : 'shell',
+  //   stdio : 'pipe',
+  //   timeOut : 2*context.t1
+  // }
+
+  // var options = _.mapSupplement( {}, o2, o3 );
+  // test.shouldThrowErrorSync( () => _.process.start( options ) );
+
+  // /* */
+
+  // test.case = 'spawn, return good code';
+  // o2 =
+  // {
+  //   execPath :  'node ' + programPath + ' exitWithCode : 0',
+  //   mode : 'spawn',
+  //   stdio : 'pipe'
+  // }
+  // var options = _.mapSupplement( {}, o2, o3 );
+  // test.mustNotThrowError( () => _.process.start( options ) )
+  // test.identical( options.exitCode, 0 );
+
+  // /* */
+
+  // test.case = 'spawn, return ext code 1';
+  // o2 =
+  // {
+  //   execPath :  'node ' + programPath + ' exitWithCode : 1',
+  //   mode : 'spawn',
+  //   stdio : 'pipe'
+  // }
+  // var options = _.mapSupplement( {}, o2, o3 );
+  // test.shouldThrowErrorSync( () => _.process.start( options ) );
+  // test.identical( options.exitCode, 1 );
+
+  // /* */
+
+  // test.case = 'spawn, return ext code 2';
+  // o2 =
+  // {
+  //   execPath :  'node ' + programPath + ' exitWithCode : 2',
+  //   mode : 'spawn',
+  //   stdio : 'pipe'
+  // }
+  // var options = _.mapSupplement( {}, o2, o3 );
+  // test.shouldThrowErrorSync( () => _.process.start( options ) );
+  // test.identical( options.exitCode, 2 );
+
+  // /* */
+
+  // test.case = 'shell, return good code';
+  // o2 =
+  // {
+  //   execPath :  'node ' + programPath + ' exitWithCode : 0',
+  //   mode : 'shell',
+  //   stdio : 'pipe'
+  // }
+
+  // var options = _.mapSupplement( {}, o2, o3 );
+  // test.mustNotThrowError( () => _.process.start( options ) )
+  // test.identical( options.exitCode, 0 );
+
+  // /* */
+
+  // test.case = 'shell, return bad code';
+  // o2 =
+  // {
+  //   execPath :  'node ' + programPath + ' exitWithCode : 1',
+  //   mode : 'shell',
+  //   stdio : 'pipe'
+  // }
+  // var options = _.mapSupplement( {}, o2, o3 );
+  // test.shouldThrowErrorSync( () => _.process.start( options ) )
+  // test.identical( options.exitCode, 1 );
+
 }
 
 //
@@ -1539,6 +1673,169 @@ function startSyncDeasync( test )
 
     console.log( __filename );
   }
+
+  /* ORIGINAL */
+  // test.case = 'mode : fork';
+  // o2 =
+  // {
+  //   execPath : programPath,
+  //   mode : 'fork',
+  //   stdio : 'pipe'
+  // }
+
+  // /* mode : spawn, stdio : pipe */
+
+  // var options = _.mapSupplement( {}, o2, o3 );
+  // var returned = _.process.start( options );
+  // test.is( returned === options );
+  // test.identical( returned.process.constructor.name, 'ChildProcess' );
+  // test.identical( options.exitCode, 0 );
+  // test.identical( options.output, expectedOutput );
+
+  // /* mode : fork, stdio : ignore */
+
+  // o2.stdio = 'ignore';
+  // o2.outputCollecting = 0;
+  // o2.outputPiping = 0;
+
+  // var options = _.mapSupplement( {}, o2, o3 );
+  // var returned = _.process.start( options );
+  // test.is( returned === options );
+  // test.identical( returned.process.constructor.name, 'ChildProcess' );
+  // test.identical( options.exitCode, 0 );
+  // test.identical( options.output, null );
+
+  // /* */
+
+  // test.case = 'mode : spawn';
+  // o2 =
+  // {
+  //   execPath :  'node ' + programPath,
+  //   mode : 'spawn',
+  //   stdio : 'pipe'
+  // }
+
+  // /* mode : spawn, stdio : pipe */
+
+  // var options = _.mapSupplement( {}, o2, o3 );
+  // var returned = _.process.start( options );
+  // test.is( returned === options );
+  // test.identical( returned.process.constructor.name, 'ChildProcess' );
+  // test.identical( options.exitCode, 0 );
+  // test.identical( options.output, expectedOutput );
+
+  // /* mode : spawn, stdio : ignore */
+
+  // o2.stdio = 'ignore';
+  // o2.outputCollecting = 0;
+  // o2.outputPiping = 0;
+
+  // var options = _.mapSupplement( {}, o2, o3 );
+  // var returned = _.process.start( options );
+  // test.is( returned === options );
+  // test.identical( returned.process.constructor.name, 'ChildProcess' );
+  // test.identical( options.exitCode, 0 );
+  // test.identical( options.output, null );
+
+  // /* */
+
+  // test.case = 'mode : shell';
+  // o2 =
+  // {
+  //   execPath :  'node ' + programPath,
+  //   mode : 'shell',
+  //   stdio : 'pipe'
+  // }
+  // var options = _.mapSupplement( {}, o2, o3 );
+  // var returned = _.process.start( options );
+  // test.is( returned === options );
+  // test.identical( returned.process.constructor.name, 'ChildProcess' );
+  // test.identical( options.exitCode, 0 );
+  // test.identical( options.output, expectedOutput );
+
+  // /* mode : shell, stdio : ignore */
+
+  // o2.stdio = 'ignore'
+  // o2.outputCollecting = 0;
+  // o2.outputPiping = 0;
+
+  // var options = _.mapSupplement( {}, o2, o3 );
+  // var returned = _.process.start( options );
+  // test.is( returned === options );
+  // test.identical( returned.process.constructor.name, 'ChildProcess' );
+  // test.identical( options.exitCode, 0 );
+  // test.identical( options.output, null );
+
+  // /* */
+
+  // test.case = 'shell, timeOut';
+  // o2 =
+  // {
+  //   execPath :  'node ' + programPath + ' loop : 1',
+  //   mode : 'shell',
+  //   stdio : 'pipe',
+  //   timeOut : 2*context.t1,
+  // }
+
+  // var options = _.mapSupplement( {}, o2, o3 );
+  // test.shouldThrowErrorSync( () => _.process.start( options ) );
+
+  // /* */
+
+  // test.case = 'spawn, return good code';
+  // o2 =
+  // {
+  //   execPath :  'node ' + programPath + ' exitWithCode : 0',
+  //   mode : 'spawn',
+  //   stdio : 'pipe'
+  // }
+  // var options = _.mapSupplement( {}, o2, o3 );
+  // var returned = _.process.start( options );
+  // test.is( returned === options );
+  // test.identical( returned.process.constructor.name, 'ChildProcess' );
+  // test.identical( options.exitCode, 0 );
+
+  // /* */
+
+  // test.case = 'spawn, return bad code';
+  // o2 =
+  // {
+  //   execPath :  'node ' + programPath + ' exitWithCode : 1',
+  //   mode : 'spawn',
+  //   stdio : 'pipe'
+  // }
+  // var options = _.mapSupplement( {}, o2, o3 );
+  // test.shouldThrowErrorSync( () => _.process.start( options ) )
+  // test.identical( options.exitCode, 1 );
+
+  // /* */
+
+  // test.case = 'shell, return good code';
+  // o2 =
+  // {
+  //   execPath :  'node ' + programPath + ' exitWithCode : 0',
+  //   mode : 'shell',
+  //   stdio : 'pipe'
+  // }
+
+  // var options = _.mapSupplement( {}, o2, o3 );
+  // var returned = _.process.start( options );
+  // test.is( returned === options );
+  // test.identical( returned.process.constructor.name, 'ChildProcess' );
+  // test.identical( options.exitCode, 0 );
+
+  // /* */
+
+  // test.case = 'shell, return bad code';
+  // o2 =
+  // {
+  //   execPath :  'node ' + programPath + ' exitWithCode : 1',
+  //   mode : 'shell',
+  //   stdio : 'pipe'
+  // }
+  // var options = _.mapSupplement( {}, o2, o3 );
+  // test.shouldThrowErrorSync( () => _.process.start( options ) )
+  // test.identical( options.exitCode, 1 );
 
 }
 
