@@ -19936,6 +19936,9 @@ function exitCode( test )
     {
       test.case = 'wrong execPath'
 
+      if( mode === 'spawn' )
+      return test.shouldThrowErrorAsync( _.process.start({ execPath : '1', throwingExitCode : 0, mode }) );
+
       return _.process.start({ execPath : '1', throwingExitCode : 0, mode })
       .then( ( op ) =>
       {
@@ -20001,8 +20004,8 @@ function exitCode( test )
 
     ready.then( () =>
     {
-      test.case = 'error in subprocess ( uncaught asynchronous error )';
-      let programPath = a.program({ routine : testApp, locals : { options : null } })
+      test.case = 'error in subprocess';
+      let programPath = a.program({ routine : testApp, locals : { toolsPath : a.path.nativize( _.module.toolsPathGet() ), options : null } })
       let options =
       {
         execPath : mode === 'fork' ? a.path.nativize( programPath ) : 'node ' + a.path.nativize( programPath ),
@@ -20012,11 +20015,10 @@ function exitCode( test )
       return _.process.start( options )
       .then( ( op ) =>
       {
-        // if( process.platform === 'win32' )
-        // test.notIdentical( op.exitCode, 0 )// returns 4294967295 which is -1 to uint32
-        // else
-        // test.identical( op.exitCode, 255 );
-        test.ni( op.exitCode, 0 );
+        if( process.platform === 'win32' )
+        test.notIdentical( op.exitCode, 0 )// returns 4294967295 which is -1 to uint32
+        else
+        test.identical( op.exitCode, 255 );
         test.identical( op.ended, true );
 
         a.fileProvider.fileDelete( programPath );
@@ -20029,7 +20031,12 @@ function exitCode( test )
     ready.then( () =>
     {
       test.case = 'no error in subprocess process';
-      let programPath = a.program({ routine : testApp, locals : { options : { execPath : 'echo' } } });
+      let locals =
+      {
+        toolsPath : a.path.nativize( _.module.toolsPathGet() ),
+        options : { execPath : 'echo' }
+      }
+      let programPath = a.program({ routine : testApp, locals });
       let options =
       {
         execPath : mode === 'fork' ? a.path.nativize( programPath ) : 'node ' + a.path.nativize( programPath ),
@@ -20052,7 +20059,12 @@ function exitCode( test )
     ready.then( () =>
     {
       test.case = 'explicitly exit with code : 100';
-      let programPath = a.program({ routine : testAppExit, locals : { code : 100 } });
+      let locals =
+      {
+        toolsPath : a.path.nativize( _.module.toolsPathGet() ),
+        code : 100
+      }
+      let programPath = a.program({ routine : testAppExit, locals});
       let options =
       {
         execPath : mode === 'fork' ? a.path.nativize( programPath ) : 'node ' + a.path.nativize( programPath ),
@@ -20095,10 +20107,7 @@ function exitCode( test )
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
-    if( options )
     return _.process.start( options );
-
-    return _.process.start();
   }
 
   function testAppError()
@@ -20112,8 +20121,7 @@ function exitCode( test )
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
-    // return _.process.exit( code );
-    return process.exit( code );
+    return _.process.exit( code );
   }
 
 }
