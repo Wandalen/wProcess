@@ -19857,6 +19857,116 @@ function startOptionPassingThrough( test )
 
 startOptionPassingThrough.timeOut = 300000;
 
+//
+
+function startOptionUid( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let modes = [ 'fork' /*'spawn', */ /*'shell'*/ ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+
+  return a.ready;
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }`;
+
+      let programPath = a.path.nativize( a.program( program1 ) );
+
+      let options =
+      {
+        execPath : mode === 'fork' ? a.path.nativize( programPath ) : 'node ' + a.path.nativize( programPath ),
+        throwingExitCode : 0,
+        outputCollecting : 1,
+        mode,
+        uid : 11
+      }
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, 11 );
+        return null;
+      } )
+
+    } )
+
+    return ready;
+  }
+
+  /* - */
+
+  function program1()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wFiles' );
+    _.include( 'wProcess' );
+
+    console.log( process.getuid() );
+  }
+}
+
+//
+
+function startOptionGid( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let modes = [ 'fork' /*'spawn', */ /*'shell'*/ ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+
+  return a.ready;
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }`;
+
+      let programPath = a.path.nativize( a.program( program1 ) );
+
+      let options =
+      {
+        execPath : mode === 'fork' ? a.path.nativize( programPath ) : 'node ' + a.path.nativize( programPath ),
+        throwingExitCode : 0,
+        outputCollecting : 1,
+        mode,
+        gid : 11
+      }
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, 11 );
+        return null;
+      } )
+
+    } )
+
+    return ready;
+  }
+
+  /* - */
+
+  function program1()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wFiles' );
+    _.include( 'wProcess' );
+
+    console.log( process.getgid() );
+  }
+}
+
 // --
 // termination
 // --
@@ -28669,6 +28779,9 @@ var Proto =
     startOptionCurrentPath,
     startOptionCurrentPaths,
     startOptionPassingThrough, /* qqq for Yevhen : extend please | aaa : Done. Yevhen S. */
+    startOptionUid,
+    startOptionGid,
+
 
     // termination
 

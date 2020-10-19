@@ -1161,6 +1161,12 @@ function startMinimal_body( o )
       stdio : o.stdio,
       execArgv : interpreterArgs,
     }
+    if( process.platform !== 'win32' )
+    {
+      o2.uid = o.uid;
+      o2.gid = o.gid;
+    }
+
     if( o.currentPath )
     o2.cwd = _.path.nativize( o.currentPath );
     return o2;
