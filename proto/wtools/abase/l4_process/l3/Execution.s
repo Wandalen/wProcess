@@ -1146,6 +1146,11 @@ function startMinimal_body( o )
     if( o.timeOut && o.sync )
     o2.timeout = o.timeOut;
     o2.windowsHide = !!o.hiding;
+    if( process.platform !== 'win32' )
+    {
+      o2.uid = o.uid;
+      o2.gid = o.gid;
+    }
     return o2;
   }
 
