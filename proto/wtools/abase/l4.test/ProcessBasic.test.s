@@ -1,4 +1,3 @@
-/* eslint-disable */
 const { time } = require('console');
 
 ( function _ProcessBasic_test_s( )
