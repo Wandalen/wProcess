@@ -6449,7 +6449,7 @@ function startArgumentsNestedQuotes( test )
 
   /* */
 
-  function run()
+  function run( mode )
   {
     let ready = new _.Consequence().take( null );
 
@@ -6457,10 +6457,11 @@ function startArgumentsNestedQuotes( test )
 
     .then( () =>
     {
-      test.case = 'fork'
+      test.case = `mode : ${ mode }`;
 
       let con = new _.Consequence().take( null );
-      let args =
+
+      let args = 
       [
         ` '\'s-s\''  '\"s-d\"'  '\`s-b\`'  `,
         ` "\'d-s\'"  "\"d-d\""  "\`d-b\`"  `,
@@ -6468,7 +6469,7 @@ function startArgumentsNestedQuotes( test )
       ]
       let o =
       {
-        execPath : _.strQuote( testAppPathSpace ) + ' ' + args.join( ' ' ),
+        execPath : mode === 'fork' ? _.strQuote( testAppPathSpace ) + ' ' + args.join( ' ' ) : 'node ' + _.strQuote( testAppPathSpace ) + ' ' + args.join( ' ' ),
         mode,
         outputPiping : 1,
         outputCollecting : 1,
@@ -6479,199 +6480,51 @@ function startArgumentsNestedQuotes( test )
       con.then( () =>
       {
         test.identical( o.exitCode, 0 );
-        let op = JSON.parse( o.output );
-        test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
-        test.identical( op.map, {} )
-        let scriptArgs =
-        [
-          `'s-s'`, `"s-d"`, `\`s-b\``,
-          `'d-s'`, `"d-d"`, `\`d-b\``,
-          `'b-s'`, `"b-d"`, `\`b-b\``,
-        ]
-        test.identical( op.scriptArgs, scriptArgs )
-
-        return null;
-      })
-
-      return con;
-    })
-
-    /* */
-
-    .then( () =>
-    {
-      test.case = 'fork'
-
-      let con = new _.Consequence().take( null );
-      let args =
-      [
-        ` '\'s-s\''  '\"s-d\"'  '\`s-b\`'  `,
-        ` "\'d-s\'"  "\"d-d\""  "\`d-b\`"  `,
-        ` \`\'b-s\'\`  \`\"b-d\"\`  \`\`b-b\`\` `,
-      ]
-      let o =
-      {
-        execPath : _.strQuote( testAppPathSpace ),
-        args : args.slice(),
-        mode,
-        outputPiping : 1,
-        outputCollecting : 1,
-        ready : con
-      }
-      _.process.start( o );
-
-      con.then( () =>
-      {
-        test.identical( o.exitCode, 0 );
-        let op = JSON.parse( o.output );
-        test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
-        test.identical( op.map, {} )
-        test.identical( op.scriptArgs, args )
-
-        return null;
-      })
-
-      return con;
-    })
-
-    /* */
-
-    .then( () =>
-    {
-      test.case = 'spawn'
-
-      let con = new _.Consequence().take( null );
-      let args =
-      [
-        ` '\'s-s\''  '\"s-d\"'  '\`s-b\`'  `,
-        ` "\'d-s\'"  "\"d-d\""  "\`d-b\`"  `,
-        ` \`\'b-s\'\`  \`\"b-d\"\`  \`\`b-b\`\` `,
-      ]
-      let o =
-      {
-        execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' ' + args.join( ' ' ),
-        mode : 'spawn',
-        outputPiping : 1,
-        outputCollecting : 1,
-        ready : con
-      }
-      _.process.start( o );
-
-      con.then( () =>
-      {
-        test.identical( o.exitCode, 0 );
-        let op = JSON.parse( o.output );
-        test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
-        test.identical( op.map, {} )
-        let scriptArgs =
-        [
-          `'s-s'`, `"s-d"`, `\`s-b\``,
-          `'d-s'`, `"d-d"`, `\`d-b\``,
-          `'b-s'`, `"b-d"`, `\`b-b\``,
-        ]
-        test.identical( op.scriptArgs, scriptArgs )
-
-        return null;
-      })
-
-      return con;
-
-    })
-
-    /* */
-
-    .then( () =>
-    {
-      test.case = 'spawn'
-
-      let con = new _.Consequence().take( null );
-      let args =
-      [
-        ` '\'s-s\''  '\"s-d\"'  '\`s-b\`'  `,
-        ` "\'d-s\'"  "\"d-d\""  "\`d-b\`"  `,
-        ` \`\'b-s\'\`  \`\"b-d\"\`  \`\`b-b\`\` `,
-      ]
-      let o =
-      {
-        execPath : 'node ' + _.strQuote( testAppPathSpace ),
-        args : args.slice(),
-        mode : 'spawn',
-        outputPiping : 1,
-        outputCollecting : 1,
-        ready : con
-      }
-      _.process.start( o );
-
-      con.then( () =>
-      {
-        test.identical( o.exitCode, 0 );
-        let op = JSON.parse( o.output );
-        test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
-        test.identical( op.map, {} )
-        test.identical( op.scriptArgs, args )
-
-        return null;
-      })
-
-      return con;
-
-    })
-
-    /* */
-
-    .then( () =>
-    {
-      test.case = 'shell'
-      /*
-       This case shows how shell is interpreting backquote on different platforms.
-       It can't be used for arguments wrapping on linux/mac:
-       https://www.gnu.org/software/bash/manual/html_node/Command-Substitution.html
-      */
-
-      let con = new _.Consequence().take( null );
-      let args =
-      [
-        ` '\'s-s\''  '\"s-d\"'  '\`s-b\`'  `,
-        ` "\'d-s\'"  "\"d-d\""  "\`d-b\`"  `,
-        ` \`\'b-s\'\`  \`\"b-d\"\`  \`\`b-b\`\` `,
-      ]
-      let o =
-      {
-        execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' ' + args.join( ' ' ),
-        mode : 'shell',
-        outputPiping : 1,
-        outputCollecting : 1,
-        ready : con
-      }
-      _.process.start( o );
-
-      con.then( () =>
-      {
-        test.identical( o.exitCode, 0 );
-        if( process.platform === 'win32' )
+        if( mode === 'shell' )
         {
+          /*
+          This case shows how shell is interpreting backquote on different platforms.
+          It can't be used for arguments wrapping on linux/mac:
+          https://www.gnu.org/software/bash/manual/html_node/Command-Substitution.html
+          */
+          if( process.platform === 'win32' )
+          {
+            let op = JSON.parse( o.output );
+            test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
+            test.identical( op.map, {} )
+            let scriptArgs =
+            [
+              '\'\'s-s\'\'',
+              '\'s-d\'',
+              '\'`s-b`\'',
+              '\'d-s\'',
+              'd-d',
+              '`d-b`',
+              '`\'b-s\'`',
+              '\`b-d`',
+              '``b-b``'
+            ]
+            test.identical( op.scriptArgs, scriptArgs )
+          }
+          else
+          {
+            test.identical( _.strCount( o.output, 'not found' ), 3 );
+          }
+        }
+        else
+        {
+          test.identical( o.exitCode, 0 );
           let op = JSON.parse( o.output );
           test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
           test.identical( op.map, {} )
           let scriptArgs =
           [
-            '\'\'s-s\'\'',
-            '\'s-d\'',
-            '\'`s-b`\'',
-            '\'d-s\'',
-            'd-d',
-            '`d-b`',
-            '`\'b-s\'`',
-            '\`b-d`',
-            '``b-b``'
+            `'s-s'`, `"s-d"`, `\`s-b\``,
+            `'d-s'`, `"d-d"`, `\`d-b\``,
+            `'b-s'`, `"b-d"`, `\`b-b\``,
           ]
           test.identical( op.scriptArgs, scriptArgs )
         }
-        else
-        {
-          test.identical( _.strCount( o.output, 'not found' ), 3 );
-        }
-
         return null;
       })
 
@@ -6682,7 +6535,7 @@ function startArgumentsNestedQuotes( test )
 
     .then( () =>
     {
-      test.case = 'shell'
+      test.case = `mode : ${ mode }`;
 
       let con = new _.Consequence().take( null );
       let args =
@@ -6693,9 +6546,9 @@ function startArgumentsNestedQuotes( test )
       ]
       let o =
       {
-        execPath : 'node ' + _.strQuote( testAppPathSpace ),
+        execPath :  mode === 'fork' ? _.strQuote( testAppPathSpace ) : 'node ' + _.strQuote( testAppPathSpace ),
         args : args.slice(),
-        mode : 'shell',
+        mode,
         outputPiping : 1,
         outputCollecting : 1,
         ready : con
@@ -6715,8 +6568,6 @@ function startArgumentsNestedQuotes( test )
 
       return con;
     })
-
-    /* */
 
     return ready;
   }
@@ -8757,7 +8608,7 @@ function startImportantExecPath( test )
     return null;
   })
 
-  /* qqq for Yevhen : separate test routine startImportantExecPathPassingThrough and run it from separate process */
+  /* qqq for Yevhen : separate test routine startImportantExecPathPassingThrough and run it from separate process | aaa : Done */
   /* zzz */
 
   return a.ready;
