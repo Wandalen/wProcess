@@ -17318,6 +17318,72 @@ function startOptionOutputCollecting( test )
 
 function startOptionOutputDecorating( test )
 {
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
+
+  /* */
+
+  let modes = [ 'fork', 'spawn', 'shell' ];
+
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+
+  return a.ready;
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, decorating : 0`;
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+        outputCollecting : 1,
+        outputDecorating : 0
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        // console.log( 'OUT: ', _.ct.format( op.output, { fg : 'bright white' } ) );
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, 'Log\n' );
+        // test.identical( op.output, _.ct.format( 'Log\n', { fg : 'bright white' } ) );
+
+        return null
+      })
+    } )
+
+    return ready;
+
+  }
+
+  function testApp()
+  {
+    // throw new Error()
+    // console.log( _.ct.format( 'Log\n', { fg : 'bright white' } ) );
+    console.log( 'Log' );
+    // console.log( '\u001b[31m\u001b[43mColored message1\u001b[49;0m\u001b[39;0m' )
+    // console.log( '\u001b[31m\u001b[43mColored message2\u001b[49;0m\u001b[39;0m' )
+  }
+}
+
+//
+
+function startOptionOutputDecoratingStderr( test )
+{
+
+}
+
+//
+
+function startOptionOutputDecoratingStdout( test )
+{
 }
 
 //
@@ -28656,6 +28722,8 @@ var Proto =
 
     startOptionOutputCollecting,
     startOptionOutputDecorating,
+    startOptionOutputDecoratingStderr,
+    startOptionOutputDecoratingStdout,
     startOptionOutputGraying,
     startOptionLogger,
     startOptionLoggerTransofrmation,
