@@ -1714,9 +1714,9 @@ function startSyncDeasync( test )
     }
     let expectedOutput = programPath + '\n';
     let o2;
-  
+
     /* - */
-  
+
     test.case = `mode : ${ mode }`;
     o2 =
     {
@@ -1724,29 +1724,29 @@ function startSyncDeasync( test )
       mode,
       stdio : 'pipe'
     }
-  
+
     /* stdio : pipe */
-  
+
     var options = _.mapSupplement( {}, o2, o3 );
     var returned = _.process.start( options );
     test.is( returned === options );
     test.identical( returned.process.constructor.name, 'ChildProcess' );
     test.identical( options.exitCode, 0 );
     test.identical( options.output, expectedOutput );
-  
+
     /* stdio : ignore */
-  
+
     o2.stdio = 'ignore';
     o2.outputCollecting = 0;
     o2.outputPiping = 0;
-  
+
     var options = _.mapSupplement( {}, o2, o3 );
     var returned = _.process.start( options );
     test.is( returned === options );
     test.identical( returned.process.constructor.name, 'ChildProcess' );
     test.identical( options.exitCode, 0 );
     test.identical( options.output, null );
-  
+
     /* */
 
     test.case = `mode : ${ mode }, timeOut`;
@@ -1757,12 +1757,12 @@ function startSyncDeasync( test )
       stdio : 'pipe',
       timeOut : 2*context.t1,
     }
-  
+
     var options = _.mapSupplement( {}, o2, o3 );
     test.shouldThrowErrorSync( () => _.process.start( options ) );
-  
+
     /* */
-  
+
     test.case = `mode : ${ mode }, return good code`;
     o2 =
     {
@@ -1775,9 +1775,9 @@ function startSyncDeasync( test )
     test.is( returned === options );
     test.identical( returned.process.constructor.name, 'ChildProcess' );
     test.identical( options.exitCode, 0 );
-  
+
     /* */
-  
+
     test.case = `mode : ${ mode }, return bad code`;
     o2 =
     {
@@ -3895,9 +3895,9 @@ function startArgsOption( test )
         args,
         mode,
       }
-  
+
       let con = _.process.start( startOptions )
-  
+
       con.then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
@@ -3911,12 +3911,12 @@ function startArgsOption( test )
         test.identical( args, [ 'arg1', 'arg2' ] );
         return null;
       })
-  
+
       return con;
     })
-  
+
     /* */
-  
+
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, args option as string`;
@@ -3928,9 +3928,9 @@ function startArgsOption( test )
         args,
         mode,
       }
-  
+
       let con = _.process.start( startOptions )
-  
+
       con.then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
@@ -3944,7 +3944,7 @@ function startArgsOption( test )
         test.identical( args, 'arg1' );
         return null;
       })
-  
+
       return con;
     })
 
@@ -4058,11 +4058,11 @@ function startArgumentsParsing( test )
     let ready = new _.Consequence().take( null );
 
     ready
-  
+
     .then( () =>
     {
       test.case = `mode : ${mode}, 'path to exec : with space' 'execPATH : has arguments' 'args has arguments'`
-  
+
       let con = new _.Consequence().take( null );
       let o =
       {
@@ -4075,7 +4075,7 @@ function startArgumentsParsing( test )
         ready : con
       }
       _.process.start( o );
-  
+
       let op;
 
       if( mode === 'shell' )
@@ -4093,27 +4093,27 @@ function startArgumentsParsing( test )
       else
       {
         o.process.on( 'message', ( e ) => { op = e } )
-    
+
         con.then( () =>
         {
           test.identical( o.exitCode, 0 );
           test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
           test.identical( op.map, { secondArg : `1 "third arg" 'fourth arg' "fifth" arg` } )
           test.identical( op.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', '\'fourth arg\'', '"fifth" arg' ] )
-    
+
           return null;
         })
       }
-  
+
       return con;
     })
-  
+
     /* */
-  
+
     .then( () =>
     {
       test.case = `mode : ${mode}, 'path to exec : without space' 'execPATH : has arguments' 'args has arguments'`
-  
+
       let con = new _.Consequence().take( null );
       let o =
       {
@@ -4126,7 +4126,7 @@ function startArgumentsParsing( test )
         ready : con
       }
       _.process.start( o );
-  
+
       let op;
       if( mode === 'shell' )
       {
@@ -4144,27 +4144,27 @@ function startArgumentsParsing( test )
       else
       {
         o.process.on( 'message', ( e ) => { op = e } )
-    
+
         con.then( () =>
         {
           test.identical( o.exitCode, 0 );
           test.identical( op.scriptPath, _.path.normalize( testAppPathNoSpace ) )
           test.identical( op.map, { secondArg : `1 "third arg" 'fourth arg' "fifth" arg` } )
           test.identical( op.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', '\'fourth arg\'', '"fifth" arg' ] )
-    
+
           return null;
         })
       }
-  
+
       return con;
     })
-  
+
     /* */
-  
+
     .then( () =>
     {
       test.case = `mode : ${mode}, 'path to exec : with space' 'execPATH : only path' 'args has arguments'`
-  
+
       let con = new _.Consequence().take( null );
       let o =
       {
@@ -4177,7 +4177,7 @@ function startArgumentsParsing( test )
         ready : con
       }
       _.process.start( o );
-  
+
       let op;
       if( mode === 'shell' )
       {
@@ -4194,27 +4194,27 @@ function startArgumentsParsing( test )
       else
       {
         o.process.on( 'message', ( e ) => { op = e } )
-    
+
         con.then( () =>
         {
           test.identical( o.exitCode, 0 );
           test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
           test.identical( op.map, { secondArg : `1 "third arg" 'fourth arg' "fifth" arg` } )
           test.identical( op.scriptArgs, [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', '"fifth" arg' ] )
-    
+
           return null;
         })
       }
-  
+
       return con;
     })
-  
+
     /* */
-  
+
     .then( () =>
     {
       test.case = `mode : ${mode}, 'path to exec : without space' 'execPATH : only path' 'args has arguments'`
-  
+
       let con = new _.Consequence().take( null );
       let o =
       {
@@ -4227,7 +4227,7 @@ function startArgumentsParsing( test )
         ready : con
       }
       _.process.start( o );
-  
+
       let op;
       if( mode === 'shell' )
       {
@@ -4245,33 +4245,30 @@ function startArgumentsParsing( test )
       else
       {
         o.process.on( 'message', ( e ) => { op = e } )
-    
+
         con.then( () =>
         {
           test.identical( o.exitCode, 0 );
           test.identical( op.scriptPath, _.path.normalize( testAppPathNoSpace ) )
           test.identical( op.map, { secondArg : `1 "third arg" 'fourth arg' "fifth" arg` } )
           test.identical( op.scriptArgs, [ 'firstArg', 'secondArg:1', '"third arg"', '\'fourth arg\'', '"fifth" arg' ] )
-    
+
           return null;
         })
       }
-  
+
       return con;
     })
-  
+
     /* */
-  
+
     .then( () =>
     {
       test.case = `mode : ${mode}, 'path to exec : with space' 'execPATH : has arguments' 'args: empty'`
-  
+
       let con = new _.Consequence().take( null );
 
-      let execPathStr = mode === 'shell' ?
-      _.strQuote( testAppPathNoSpace ) + ' firstArg secondArg:1 "third arg" \'fourth arg\' \'"fifth" arg\''
-      :
-      _.strQuote( testAppPathSpace ) + ' firstArg secondArg:1 "third arg" \'fourth arg\' `"fifth" arg`';
+      let execPathStr = mode === 'shell' ? _.strQuote( testAppPathNoSpace ) + ' firstArg secondArg:1 "third arg" \'fourth arg\' \'"fifth" arg\'' : _.strQuote( testAppPathSpace ) + ' firstArg secondArg:1 "third arg" \'fourth arg\' `"fifth" arg`';
 
       let o =
       {
@@ -4284,7 +4281,7 @@ function startArgumentsParsing( test )
         ready : con
       }
       _.process.start( o );
-  
+
       let op;
       if( mode === 'shell' )
       {
@@ -4302,27 +4299,27 @@ function startArgumentsParsing( test )
       else
       {
         o.process.on( 'message', ( e ) => { op = e } )
-    
+
         con.then( () =>
         {
           test.identical( o.exitCode, 0 );
           test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
           test.identical( op.map, { secondArg : `1 "third arg" "fourth arg" "fifth" arg` } )
           test.identical( op.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', 'fourth arg', '"fifth" arg' ] )
-    
+
           return null;
         })
       }
-  
+
       return con;
     })
-  
+
     /* */
-  
+
     .then( () =>
     {
       test.case = `mode : ${mode}, 'path to exec : without space' 'execPATH : has arguments' 'args: empty'`
-  
+
       let con = new _.Consequence().take( null );
       let execPathStr = mode === 'shell' ? _.strQuote( testAppPathNoSpace ) + ' firstArg secondArg:1 "third arg" \'fourth arg\' \'"fifth" arg\'' : _.strQuote( testAppPathNoSpace ) + ' firstArg secondArg:1 "third arg" \'fourth arg\' `"fifth" arg`';
       let o =
@@ -4336,7 +4333,7 @@ function startArgumentsParsing( test )
         ready : con
       }
       _.process.start( o );
-  
+
       let op;
       if( mode === 'shell' )
       {
@@ -4354,27 +4351,27 @@ function startArgumentsParsing( test )
       else
       {
         o.process.on( 'message', ( e ) => { op = e } )
-    
+
         con.then( () =>
         {
           test.identical( o.exitCode, 0 );
           test.identical( op.scriptPath, _.path.normalize( testAppPathNoSpace ) )
           test.identical( op.map, { secondArg : `1 "third arg" "fourth arg" "fifth" arg` } )
           test.identical( op.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', 'fourth arg', '"fifth" arg' ] )
-    
+
           return null;
         })
       }
-  
+
       return con;
     })
-  
+
     /* */
-  
+
     .then( () =>
     {
       test.case = `mode : ${mode}, 'path to exec : with space' 'execPATH : only path' 'args: empty'`
-  
+
       let con = new _.Consequence().take( null );
       let o =
       {
@@ -4387,7 +4384,7 @@ function startArgumentsParsing( test )
         ready : con
       }
       _.process.start( o );
-  
+
       let op;
       if( mode === 'shell' )
       {
@@ -4405,27 +4402,27 @@ function startArgumentsParsing( test )
       else
       {
         o.process.on( 'message', ( e ) => { op = e } )
-    
+
         con.then( () =>
         {
           test.identical( o.exitCode, 0 );
           test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
           test.identical( op.map, {} )
           test.identical( op.scriptArgs, [] )
-    
+
           return null;
         })
       }
-  
+
       return con;
     })
-  
+
     /* */
-  
+
     .then( () =>
     {
       test.case = `mode : ${mode}, 'path to exec : without space' 'execPATH : only path' 'args: empty'`
-  
+
       let con = new _.Consequence().take( null );
       let o =
       {
@@ -4438,7 +4435,7 @@ function startArgumentsParsing( test )
         ready : con
       }
       _.process.start( o );
-  
+
       let op;
 
       if( mode === 'shell' )
@@ -4457,29 +4454,29 @@ function startArgumentsParsing( test )
       else
       {
         o.process.on( 'message', ( e ) => { op = e } )
-    
+
         con.then( () =>
         {
           test.identical( o.exitCode, 0 );
           test.identical( op.scriptPath, _.path.normalize( testAppPathNoSpace ) )
           test.identical( op.map, {} )
           test.identical( op.scriptArgs, [] )
-    
+
           return null;
         })
       }
-      
+
       return con;
     })
-  
+
     /* */
 
     /* special case from willbe */
-  
+
     .then( () =>
     {
       test.case = `mode : ${ mode }, 'path to exec : with space' 'execPATH : only path' 'args: willbe args'`
-  
+
       debugger;
       let con = new _.Consequence().take( null );
       let o =
@@ -4492,12 +4489,12 @@ function startArgumentsParsing( test )
         ready : con
       }
       _.process.start( o );
-  
+
       let op;
       if( mode === 'fork' )
       {
         o.process.on( 'message', ( e ) => { op = e } )
-    
+
         con.then( () =>
         {
           debugger;
@@ -4505,7 +4502,7 @@ function startArgumentsParsing( test )
           test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) );
           test.identical( op.map, { v : 1 } );
           test.identical( op.scriptArgs, [ '.imply v:1 ; .each . .resources.list about::name' ] );
-    
+
           return null;
         })
       }
@@ -4522,7 +4519,7 @@ function startArgumentsParsing( test )
           return null;
         })
       }
-  
+
       return con;
     })
 
