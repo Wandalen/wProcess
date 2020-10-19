@@ -17316,6 +17316,12 @@ function startOptionOutputCollecting( test )
 
 //
 
+function startOptionOutputDecorating( test )
+{
+}
+
+//
+
 function startOptionOutputGraying( test )
 {
   let context = this;
@@ -28649,6 +28655,7 @@ var Proto =
     // output
 
     startOptionOutputCollecting,
+    startOptionOutputDecorating,
     startOptionOutputGraying,
     startOptionLogger,
     startOptionLoggerTransofrmation,
