@@ -19876,6 +19876,14 @@ function startOptionUid( test )
     {
       test.case = `mode : ${ mode }`;
 
+      let locals =
+      {
+        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
+        routinePath : a.routinePath,
+        mode
+      }
+      // let programPath = a.path.nativize( a.program({ routine : program1, locals }) );
+      // let programPath2 = a.path.nativize( a.program( program2 ) );
       let programPath = a.path.nativize( a.program( program1 ) );
 
       let options =
@@ -19884,10 +19892,9 @@ function startOptionUid( test )
         throwingExitCode : 0,
         outputCollecting : 1,
         mode,
-        // verbosity : 7,
         uid : 11
       }
-      debugger
+
       return _.process.start( options )
       .then( ( op ) =>
       {
@@ -19896,6 +19903,7 @@ function startOptionUid( test )
         test.identical( op.output, '11\n' );
         return null;
       } )
+
 
     } )
 
@@ -19910,8 +19918,30 @@ function startOptionUid( test )
     _.include( 'wFiles' );
     _.include( 'wProcess' );
 
+    // let options =
+    // {
+    //   execPath : mode === 'fork' ? 'sudo program2.js' : 'sudo node program2.js',
+    //   currentPath : routinePath,
+    //   mode,
+    //   throwingExitCode : 0,
+    //   outputCollecting : 1,
+    //   uid : 11
+    // }
+
+    // return _.process.start( options )
+    // .then( ( op ) =>
+    // {
+    //   console.log( op.output );
+    //   return null;
+    // })
+
     console.log( process.getuid() );
   }
+
+  // function program2()
+  // {
+  //   console.log( process.getuid() );
+  // }
 }
 
 //
