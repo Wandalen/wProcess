@@ -5767,11 +5767,13 @@ function startArgumentsParsingNonTrivial( test )
     {
       test.case = `mode : ${mode}, args in execPath and args options`
 
+      if( mode === 'fork' ) return null;
+
       let con = new _.Consequence().take( null );
       let o =
       {
         args : [ '"', 'first', 'arg', '"' ],
-        mode : 'spawn',
+        mode,
         outputPiping : 1,
         outputCollecting : 1,
         throwingExitCode : 0,
@@ -5781,8 +5783,17 @@ function startArgumentsParsingNonTrivial( test )
 
       con.finally( ( err, op ) =>
       {
-        test.is( !!err );
-        test.is( _.strHas( err.message, '"' ) )
+        if( mode === 'spawn' )
+        {
+          test.is( !!err );
+          test.is( _.strHas( err.message, '"' ) )
+        }
+        else
+        {
+          test.ni( op.exitCode, 0 );
+          test.is( _.strHas( op.output, ': command not found' ) );
+        }
+
         test.identical( o.execPath, '"' );
         test.identical( o.args, [ 'first', 'arg', '"' ] );
 
@@ -5797,12 +5808,14 @@ function startArgumentsParsingNonTrivial( test )
     .then( () =>
     {
       test.case = `mode : ${mode}, args in execPath and args options`
+
+      if( mode === 'fork' ) return null;
 
       let con = new _.Consequence().take( null );
       let o =
       {
         args : [ '', 'first', 'arg', '"' ],
-        mode : 'spawn',
+        mode,
         outputPiping : 1,
         outputCollecting : 1,
         throwingExitCode : 0,
@@ -5812,8 +5825,17 @@ function startArgumentsParsingNonTrivial( test )
 
       con.finally( ( err, op ) =>
       {
-        test.is( !!err );
-        test.identical( o.execPath, '' );
+        if( mode === 'spawn' )
+        {
+          test.is( !!err );
+          test.identical( o.execPath, '' );
+        }
+        else
+        {
+          test.ni( op.exitCode, 0 );
+          test.is( _.strHas( op.output, 'unexpected EOF while looking for matching' ) );
+        }
+
         test.identical( o.args, [ 'first', 'arg', '"' ] );
 
         return null;
@@ -5828,11 +5850,13 @@ function startArgumentsParsingNonTrivial( test )
     {
       test.case = `mode : ${mode}, args in execPath and args options`
 
+      if( mode === 'fork' ) return null;
+
       let con = new _.Consequence().take( null );
       let o =
       {
         args : [ '"', '"', 'first', 'arg', '"' ],
-        mode : 'spawn',
+        mode,
         outputPiping : 1,
         outputCollecting : 1,
         throwingExitCode : 0,
@@ -5842,10 +5866,21 @@ function startArgumentsParsingNonTrivial( test )
 
       con.finally( ( err, op ) =>
       {
-        test.is( !!err );
-        test.is( _.strHas( err.message, `spawn " ENOENT` ) );
+        if( mode === 'spawn' )
+        {
+          test.is( !!err );
+          test.is( _.strHas( err.message, `spawn " ENOENT` ) );
+        }
+        else
+        {
+          test.ni( o.exitCode, 0 );
+          console.log( 'OP', o.output )
+          test.is( _.strHas( o.output, 'unexpected EOF while looking for matching' ) );
+        }
+
         test.identical( o.execPath, '"' );
         test.identical( o.args, [ '"', 'first', 'arg', '"' ] );
+
         return null;
       })
 
@@ -5862,7 +5897,7 @@ function startArgumentsParsingNonTrivial( test )
       let o =
       {
         args : [],
-        mode : 'spawn',
+        mode,
         outputPiping : 1,
         outputCollecting : 1,
         throwingExitCode : 0,
@@ -5883,9 +5918,9 @@ function startArgumentsParsingNonTrivial( test )
       let con = new _.Consequence().take( null );
       let o =
       {
-        execPath : _.strQuote( testAppPathSpace ) + ` "path/key3":'val3'`,
+        execPath : mode === 'fork' ? _.strQuote( testAppPathSpace ) + ` "path/key3":'val3'` : 'node ' + _.strQuote( testAppPathSpace ) + ` "path/key3":'val3'`,
         args : [],
-        mode : 'fork',
+        mode,
         outputPiping : 1,
         outputCollecting : 1,
         ready : con
@@ -5895,13 +5930,29 @@ function startArgumentsParsingNonTrivial( test )
       con.then( () =>
       {
         test.identical( o.exitCode, 0 );
-        test.identical( o.execPath, testAppPathSpace );
-        test.identical( o.args, [ `"path/key3":'val3'` ] );
         let op = JSON.parse( o.output );
+        if( mode === 'shell' )
+        {
+          test.identical( o.execPath, 'node' );
+          test.identical( o.args, [ _.strQuote( testAppPathSpace ), `"path/key3":'val3'` ] );
+          test.identical( op.scriptArgs, [ 'path/key3:val3' ] )
+        }
+        else if( mode === 'spawn' )
+        {
+          test.identical( o.execPath, 'node' );
+          test.identical( o.args, [ testAppPathSpace, `"path/key3":'val3'` ] );
+          test.identical( op.scriptArgs, [ `"path/key3":'val3'` ] )
+        }
+        else
+        {
+          test.identical( o.execPath, testAppPathSpace );
+          test.identical( o.args, [ `"path/key3":'val3'` ] );
+          test.identical( op.scriptArgs, [ `"path/key3":'val3'` ] )
+        }
         test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
         test.identical( op.map, { 'path/key3' : 'val3' } )
         test.identical( op.subject, '' )
-        test.identical( op.scriptArgs, [ `"path/key3":'val3'` ] )
+        
 
         return null;
       })
