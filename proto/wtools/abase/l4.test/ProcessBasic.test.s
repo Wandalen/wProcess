@@ -19863,7 +19863,7 @@ function startOptionUid( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let modes = [ /*'fork' */ 'spawn' /*'shell'*/ ];
+  let modes = [ 'fork', 'spawn' /*'shell'*/ ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
   return a.ready;
@@ -19876,12 +19876,12 @@ function startOptionUid( test )
     {
       test.case = `mode : ${ mode }`;
 
-      let locals =
-      {
-        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
-        routinePath : a.routinePath,
-        mode
-      }
+      // let locals =
+      // {
+      //   toolsPath : _.path.nativize( _.module.toolsPathGet() ),
+      //   routinePath : a.routinePath,
+      //   mode
+      // }
       // let programPath = a.path.nativize( a.program({ routine : program1, locals }) );
       // let programPath2 = a.path.nativize( a.program( program2 ) );
       let programPath = a.path.nativize( a.program( program1 ) );
@@ -19901,6 +19901,8 @@ function startOptionUid( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.identical( op.output, '11\n' );
+
+        a.fileProvider.filesDelete( programPath );
         return null;
       } )
 
