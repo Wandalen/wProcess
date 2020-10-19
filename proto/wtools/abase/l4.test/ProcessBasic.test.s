@@ -20120,14 +20120,8 @@ function exitCode( test )
 
     ready.then( () =>
     {
-      test.case = 'change to zero'
-      _.process.exitCode( 0 );
-      var got = _.process.exitCode();
-      test.identical( got, 0 );
-
       test.close( `mode : ${ mode }` );
-
-      return null
+      return null;
     } )
 
     return ready;
