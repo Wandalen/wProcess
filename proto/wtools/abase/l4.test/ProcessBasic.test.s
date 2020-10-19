@@ -19863,7 +19863,7 @@ function startOptionUid( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let modes = [ 'fork', 'spawn' /*'shell'*/ ];
+  let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
   return a.ready;
@@ -19952,7 +19952,7 @@ function startOptionGid( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let modes = [ 'fork', 'spawn', /*'shell'*/ ];
+  let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
   return a.ready;
