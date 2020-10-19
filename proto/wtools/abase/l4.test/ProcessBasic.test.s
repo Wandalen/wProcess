@@ -1,4 +1,3 @@
-/* eslint-disable */
 const { time } = require('console');
 
 ( function _ProcessBasic_test_s( )
@@ -21247,35 +21246,12 @@ function exitReason( test )
 
 //
 
-/* qqq for Yevhen : poor tests, please extend it */
+/* qqq for Yevhen : poor tests, please extend it | aaa : Done */
 function exitCode( test )
 {
   let context = this;
   let a = test.assetFor( false );
   let modes = [ 'fork', 'spawn', 'shell' ];
-
-  a.ready.then( () =>
-  {
-    test.case = 'initial value'
-    var got = _.process.exitCode();
-    test.identical( got, 0 );
-
-    /* */
-
-    test.case = 'set code'
-    _.process.exitCode( 1 );
-    var got = _.process.exitCode();
-    test.identical( got, 1 );
-
-    /* */
-
-    test.case = 'update reason'
-    _.process.exitCode( 2 );
-    var got = _.process.exitCode();
-    test.identical( got, 2 );
-
-    return null;
-  } )
 
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
@@ -21291,6 +21267,88 @@ function exitCode( test )
     {
       test.open( `mode : ${ mode }` );
       return null
+    })
+
+    ready.then( () =>
+    {
+      test.case = 'initial value';
+      let locals =
+      {
+        toolsPath : a.path.nativize( _.module.toolsPathGet() ),
+        code : null
+      }
+      let programPath = a.program({ routine : testAppExitCode, locals });
+      let options =
+      {
+        execPath : mode === 'fork' ? a.path.nativize( programPath ) : 'node ' + a.path.nativize( programPath ),
+        throwingExitCode : 0,
+        mode
+      }
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        a.fileProvider.fileDelete( programPath );
+        return null;
+      } )
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = 'set code';
+      let locals =
+      {
+        toolsPath : a.path.nativize( _.module.toolsPathGet() ),
+        code : 1
+      }
+      let programPath = a.program({ routine : testAppExitCode, locals});
+      let options =
+      {
+        execPath : mode === 'fork' ? a.path.nativize( programPath ) : 'node ' + a.path.nativize( programPath ),
+        throwingExitCode : 0,
+        mode
+      }
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 1 );
+        test.identical( op.ended, true );
+
+        a.fileProvider.fileDelete( programPath );
+        return null;
+      } )
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = 'update reason';
+      let locals =
+      {
+        toolsPath : a.path.nativize( _.module.toolsPathGet() ),
+        code : 2
+      }
+      let programPath = a.program({ routine : testAppExitCode, locals});
+      let options =
+      {
+        execPath : mode === 'fork' ? a.path.nativize( programPath ) : 'node ' + a.path.nativize( programPath ),
+        throwingExitCode : 0,
+        mode
+      }
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 2 );
+        test.identical( op.ended, true );
+
+        a.fileProvider.fileDelete( programPath );
+        return null;
+      } )
     })
 
     /* */
@@ -21368,7 +21426,7 @@ function exitCode( test )
 
     ready.then( () =>
     {
-      test.case = 'no error in subprocess process';
+      test.case = 'no error in subprocess';
       let locals =
       {
         toolsPath : a.path.nativize( _.module.toolsPathGet() ),
@@ -21460,6 +21518,18 @@ function exitCode( test )
     _.include( 'wFiles' );
 
     return _.process.exit( code );
+  }
+
+  function testAppExitCode()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    if( code )
+    return _.process.exitCode( code );
+
+    return _.process.exitCode();
   }
 
 }
