@@ -6441,274 +6441,554 @@ function startArgumentsNestedQuotes( test )
 
   let testAppPathSpace = a.path.nativize( a.program({ routine : testApp, dirPath : a.abs( 'with space' ) }) );
 
+  let modes = [ 'fork', 'spawn', 'shell' ];
+
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+
+  return a.ready;
+
   /* */
 
-  a.ready
-
-  .then( () =>
+  function run()
   {
-    test.case = 'fork'
+    let ready = new _.Consequence().take( null );
 
-    let con = new _.Consequence().take( null );
-    let args =
-    [
-      ` '\'s-s\''  '\"s-d\"'  '\`s-b\`'  `,
-      ` "\'d-s\'"  "\"d-d\""  "\`d-b\`"  `,
-      ` \`\'b-s\'\`  \`\"b-d\"\`  \`\`b-b\`\` `,
-    ]
-    let o =
-    {
-      execPath : _.strQuote( testAppPathSpace ) + ' ' + args.join( ' ' ),
-      mode : 'fork',
-      outputPiping : 1,
-      outputCollecting : 1,
-      ready : con
-    }
-    _.process.start( o );
+    ready
 
-    con.then( () =>
+    .then( () =>
     {
-      test.identical( o.exitCode, 0 );
-      let op = JSON.parse( o.output );
-      test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
-      test.identical( op.map, {} )
-      let scriptArgs =
+      test.case = 'fork'
+
+      let con = new _.Consequence().take( null );
+      let args =
       [
-        `'s-s'`, `"s-d"`, `\`s-b\``,
-        `'d-s'`, `"d-d"`, `\`d-b\``,
-        `'b-s'`, `"b-d"`, `\`b-b\``,
+        ` '\'s-s\''  '\"s-d\"'  '\`s-b\`'  `,
+        ` "\'d-s\'"  "\"d-d\""  "\`d-b\`"  `,
+        ` \`\'b-s\'\`  \`\"b-d\"\`  \`\`b-b\`\` `,
       ]
-      test.identical( op.scriptArgs, scriptArgs )
-
-      return null;
-    })
-
-    return con;
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    test.case = 'fork'
-
-    let con = new _.Consequence().take( null );
-    let args =
-    [
-      ` '\'s-s\''  '\"s-d\"'  '\`s-b\`'  `,
-      ` "\'d-s\'"  "\"d-d\""  "\`d-b\`"  `,
-      ` \`\'b-s\'\`  \`\"b-d\"\`  \`\`b-b\`\` `,
-    ]
-    let o =
-    {
-      execPath : _.strQuote( testAppPathSpace ),
-      args : args.slice(),
-      mode : 'fork',
-      outputPiping : 1,
-      outputCollecting : 1,
-      ready : con
-    }
-    _.process.start( o );
-
-    con.then( () =>
-    {
-      test.identical( o.exitCode, 0 );
-      let op = JSON.parse( o.output );
-      test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
-      test.identical( op.map, {} )
-      test.identical( op.scriptArgs, args )
-
-      return null;
-    })
-
-    return con;
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    test.case = 'spawn'
-
-    let con = new _.Consequence().take( null );
-    let args =
-    [
-      ` '\'s-s\''  '\"s-d\"'  '\`s-b\`'  `,
-      ` "\'d-s\'"  "\"d-d\""  "\`d-b\`"  `,
-      ` \`\'b-s\'\`  \`\"b-d\"\`  \`\`b-b\`\` `,
-    ]
-    let o =
-    {
-      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' ' + args.join( ' ' ),
-      mode : 'spawn',
-      outputPiping : 1,
-      outputCollecting : 1,
-      ready : con
-    }
-    _.process.start( o );
-
-    con.then( () =>
-    {
-      test.identical( o.exitCode, 0 );
-      let op = JSON.parse( o.output );
-      test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
-      test.identical( op.map, {} )
-      let scriptArgs =
-      [
-        `'s-s'`, `"s-d"`, `\`s-b\``,
-        `'d-s'`, `"d-d"`, `\`d-b\``,
-        `'b-s'`, `"b-d"`, `\`b-b\``,
-      ]
-      test.identical( op.scriptArgs, scriptArgs )
-
-      return null;
-    })
-
-    return con;
-
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    test.case = 'spawn'
-
-    let con = new _.Consequence().take( null );
-    let args =
-    [
-      ` '\'s-s\''  '\"s-d\"'  '\`s-b\`'  `,
-      ` "\'d-s\'"  "\"d-d\""  "\`d-b\`"  `,
-      ` \`\'b-s\'\`  \`\"b-d\"\`  \`\`b-b\`\` `,
-    ]
-    let o =
-    {
-      execPath : 'node ' + _.strQuote( testAppPathSpace ),
-      args : args.slice(),
-      mode : 'spawn',
-      outputPiping : 1,
-      outputCollecting : 1,
-      ready : con
-    }
-    _.process.start( o );
-
-    con.then( () =>
-    {
-      test.identical( o.exitCode, 0 );
-      let op = JSON.parse( o.output );
-      test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
-      test.identical( op.map, {} )
-      test.identical( op.scriptArgs, args )
-
-      return null;
-    })
-
-    return con;
-
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    test.case = 'shell'
-    /*
-     This case shows how shell is interpreting backquote on different platforms.
-     It can't be used for arguments wrapping on linux/mac:
-     https://www.gnu.org/software/bash/manual/html_node/Command-Substitution.html
-    */
-
-    let con = new _.Consequence().take( null );
-    let args =
-    [
-      ` '\'s-s\''  '\"s-d\"'  '\`s-b\`'  `,
-      ` "\'d-s\'"  "\"d-d\""  "\`d-b\`"  `,
-      ` \`\'b-s\'\`  \`\"b-d\"\`  \`\`b-b\`\` `,
-    ]
-    let o =
-    {
-      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' ' + args.join( ' ' ),
-      mode : 'shell',
-      outputPiping : 1,
-      outputCollecting : 1,
-      ready : con
-    }
-    _.process.start( o );
-
-    con.then( () =>
-    {
-      test.identical( o.exitCode, 0 );
-      if( process.platform === 'win32' )
+      let o =
       {
+        execPath : _.strQuote( testAppPathSpace ) + ' ' + args.join( ' ' ),
+        mode,
+        outputPiping : 1,
+        outputCollecting : 1,
+        ready : con
+      }
+      _.process.start( o );
+
+      con.then( () =>
+      {
+        test.identical( o.exitCode, 0 );
         let op = JSON.parse( o.output );
         test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
         test.identical( op.map, {} )
         let scriptArgs =
         [
-          '\'\'s-s\'\'',
-          '\'s-d\'',
-          '\'`s-b`\'',
-          '\'d-s\'',
-          'd-d',
-          '`d-b`',
-          '`\'b-s\'`',
-          '\`b-d`',
-          '``b-b``'
+          `'s-s'`, `"s-d"`, `\`s-b\``,
+          `'d-s'`, `"d-d"`, `\`d-b\``,
+          `'b-s'`, `"b-d"`, `\`b-b\``,
         ]
         test.identical( op.scriptArgs, scriptArgs )
-      }
-      else
+
+        return null;
+      })
+
+      return con;
+    })
+
+    /* */
+
+    .then( () =>
+    {
+      test.case = 'fork'
+
+      let con = new _.Consequence().take( null );
+      let args =
+      [
+        ` '\'s-s\''  '\"s-d\"'  '\`s-b\`'  `,
+        ` "\'d-s\'"  "\"d-d\""  "\`d-b\`"  `,
+        ` \`\'b-s\'\`  \`\"b-d\"\`  \`\`b-b\`\` `,
+      ]
+      let o =
       {
-        test.identical( _.strCount( o.output, 'not found' ), 3 );
+        execPath : _.strQuote( testAppPathSpace ),
+        args : args.slice(),
+        mode,
+        outputPiping : 1,
+        outputCollecting : 1,
+        ready : con
       }
+      _.process.start( o );
 
-      return null;
+      con.then( () =>
+      {
+        test.identical( o.exitCode, 0 );
+        let op = JSON.parse( o.output );
+        test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
+        test.identical( op.map, {} )
+        test.identical( op.scriptArgs, args )
+
+        return null;
+      })
+
+      return con;
     })
 
-    return con;
-  })
+    /* */
 
-  /* */
-
-  .then( () =>
-  {
-    test.case = 'shell'
-
-    let con = new _.Consequence().take( null );
-    let args =
-    [
-      ` '\'s-s\''  '\"s-d\"'  '\`s-b\`'  `,
-      ` "\'d-s\'"  "\"d-d\""  "\`d-b\`"  `,
-      ` \`\'b-s\'\`  \`\"b-d\"\`  \`\`b-b\`\` `,
-    ]
-    let o =
+    .then( () =>
     {
-      execPath : 'node ' + _.strQuote( testAppPathSpace ),
-      args : args.slice(),
-      mode : 'shell',
-      outputPiping : 1,
-      outputCollecting : 1,
-      ready : con
-    }
-    _.process.start( o );
+      test.case = 'spawn'
 
-    con.then( () =>
-    {
-      test.identical( o.exitCode, 0 );
-      let op = JSON.parse( o.output );
-      test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
-      test.identical( op.map, {} )
-      test.identical( op.scriptArgs, args )
+      let con = new _.Consequence().take( null );
+      let args =
+      [
+        ` '\'s-s\''  '\"s-d\"'  '\`s-b\`'  `,
+        ` "\'d-s\'"  "\"d-d\""  "\`d-b\`"  `,
+        ` \`\'b-s\'\`  \`\"b-d\"\`  \`\`b-b\`\` `,
+      ]
+      let o =
+      {
+        execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' ' + args.join( ' ' ),
+        mode : 'spawn',
+        outputPiping : 1,
+        outputCollecting : 1,
+        ready : con
+      }
+      _.process.start( o );
 
-      return null;
+      con.then( () =>
+      {
+        test.identical( o.exitCode, 0 );
+        let op = JSON.parse( o.output );
+        test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
+        test.identical( op.map, {} )
+        let scriptArgs =
+        [
+          `'s-s'`, `"s-d"`, `\`s-b\``,
+          `'d-s'`, `"d-d"`, `\`d-b\``,
+          `'b-s'`, `"b-d"`, `\`b-b\``,
+        ]
+        test.identical( op.scriptArgs, scriptArgs )
+
+        return null;
+      })
+
+      return con;
+
     })
 
-    return con;
-  })
+    /* */
 
-  /* */
+    .then( () =>
+    {
+      test.case = 'spawn'
 
-  return a.ready;
+      let con = new _.Consequence().take( null );
+      let args =
+      [
+        ` '\'s-s\''  '\"s-d\"'  '\`s-b\`'  `,
+        ` "\'d-s\'"  "\"d-d\""  "\`d-b\`"  `,
+        ` \`\'b-s\'\`  \`\"b-d\"\`  \`\`b-b\`\` `,
+      ]
+      let o =
+      {
+        execPath : 'node ' + _.strQuote( testAppPathSpace ),
+        args : args.slice(),
+        mode : 'spawn',
+        outputPiping : 1,
+        outputCollecting : 1,
+        ready : con
+      }
+      _.process.start( o );
+
+      con.then( () =>
+      {
+        test.identical( o.exitCode, 0 );
+        let op = JSON.parse( o.output );
+        test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
+        test.identical( op.map, {} )
+        test.identical( op.scriptArgs, args )
+
+        return null;
+      })
+
+      return con;
+
+    })
+
+    /* */
+
+    .then( () =>
+    {
+      test.case = 'shell'
+      /*
+       This case shows how shell is interpreting backquote on different platforms.
+       It can't be used for arguments wrapping on linux/mac:
+       https://www.gnu.org/software/bash/manual/html_node/Command-Substitution.html
+      */
+
+      let con = new _.Consequence().take( null );
+      let args =
+      [
+        ` '\'s-s\''  '\"s-d\"'  '\`s-b\`'  `,
+        ` "\'d-s\'"  "\"d-d\""  "\`d-b\`"  `,
+        ` \`\'b-s\'\`  \`\"b-d\"\`  \`\`b-b\`\` `,
+      ]
+      let o =
+      {
+        execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' ' + args.join( ' ' ),
+        mode : 'shell',
+        outputPiping : 1,
+        outputCollecting : 1,
+        ready : con
+      }
+      _.process.start( o );
+
+      con.then( () =>
+      {
+        test.identical( o.exitCode, 0 );
+        if( process.platform === 'win32' )
+        {
+          let op = JSON.parse( o.output );
+          test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
+          test.identical( op.map, {} )
+          let scriptArgs =
+          [
+            '\'\'s-s\'\'',
+            '\'s-d\'',
+            '\'`s-b`\'',
+            '\'d-s\'',
+            'd-d',
+            '`d-b`',
+            '`\'b-s\'`',
+            '\`b-d`',
+            '``b-b``'
+          ]
+          test.identical( op.scriptArgs, scriptArgs )
+        }
+        else
+        {
+          test.identical( _.strCount( o.output, 'not found' ), 3 );
+        }
+
+        return null;
+      })
+
+      return con;
+    })
+
+    /* */
+
+    .then( () =>
+    {
+      test.case = 'shell'
+
+      let con = new _.Consequence().take( null );
+      let args =
+      [
+        ` '\'s-s\''  '\"s-d\"'  '\`s-b\`'  `,
+        ` "\'d-s\'"  "\"d-d\""  "\`d-b\`"  `,
+        ` \`\'b-s\'\`  \`\"b-d\"\`  \`\`b-b\`\` `,
+      ]
+      let o =
+      {
+        execPath : 'node ' + _.strQuote( testAppPathSpace ),
+        args : args.slice(),
+        mode : 'shell',
+        outputPiping : 1,
+        outputCollecting : 1,
+        ready : con
+      }
+      _.process.start( o );
+
+      con.then( () =>
+      {
+        test.identical( o.exitCode, 0 );
+        let op = JSON.parse( o.output );
+        test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
+        test.identical( op.map, {} )
+        test.identical( op.scriptArgs, args )
+
+        return null;
+      })
+
+      return con;
+    })
+
+    /* */
+
+    return ready;
+  }
+
+
+  /* ORIGINAL */
+  // a.ready
+
+  // .then( () =>
+  // {
+  //   test.case = 'fork'
+
+  //   let con = new _.Consequence().take( null );
+  //   let args =
+  //   [
+  //     ` '\'s-s\''  '\"s-d\"'  '\`s-b\`'  `,
+  //     ` "\'d-s\'"  "\"d-d\""  "\`d-b\`"  `,
+  //     ` \`\'b-s\'\`  \`\"b-d\"\`  \`\`b-b\`\` `,
+  //   ]
+  //   let o =
+  //   {
+  //     execPath : _.strQuote( testAppPathSpace ) + ' ' + args.join( ' ' ),
+  //     mode : 'fork',
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   _.process.start( o );
+
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     let op = JSON.parse( o.output );
+  //     test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
+  //     test.identical( op.map, {} )
+  //     let scriptArgs =
+  //     [
+  //       `'s-s'`, `"s-d"`, `\`s-b\``,
+  //       `'d-s'`, `"d-d"`, `\`d-b\``,
+  //       `'b-s'`, `"b-d"`, `\`b-b\``,
+  //     ]
+  //     test.identical( op.scriptArgs, scriptArgs )
+
+  //     return null;
+  //   })
+
+  //   return con;
+  // })
+
+  // /* */
+
+  // .then( () =>
+  // {
+  //   test.case = 'fork'
+
+  //   let con = new _.Consequence().take( null );
+  //   let args =
+  //   [
+  //     ` '\'s-s\''  '\"s-d\"'  '\`s-b\`'  `,
+  //     ` "\'d-s\'"  "\"d-d\""  "\`d-b\`"  `,
+  //     ` \`\'b-s\'\`  \`\"b-d\"\`  \`\`b-b\`\` `,
+  //   ]
+  //   let o =
+  //   {
+  //     execPath : _.strQuote( testAppPathSpace ),
+  //     args : args.slice(),
+  //     mode : 'fork',
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   _.process.start( o );
+
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     let op = JSON.parse( o.output );
+  //     test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
+  //     test.identical( op.map, {} )
+  //     test.identical( op.scriptArgs, args )
+
+  //     return null;
+  //   })
+
+  //   return con;
+  // })
+
+  // /* */
+
+  // .then( () =>
+  // {
+  //   test.case = 'spawn'
+
+  //   let con = new _.Consequence().take( null );
+  //   let args =
+  //   [
+  //     ` '\'s-s\''  '\"s-d\"'  '\`s-b\`'  `,
+  //     ` "\'d-s\'"  "\"d-d\""  "\`d-b\`"  `,
+  //     ` \`\'b-s\'\`  \`\"b-d\"\`  \`\`b-b\`\` `,
+  //   ]
+  //   let o =
+  //   {
+  //     execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' ' + args.join( ' ' ),
+  //     mode : 'spawn',
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   _.process.start( o );
+
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     let op = JSON.parse( o.output );
+  //     test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
+  //     test.identical( op.map, {} )
+  //     let scriptArgs =
+  //     [
+  //       `'s-s'`, `"s-d"`, `\`s-b\``,
+  //       `'d-s'`, `"d-d"`, `\`d-b\``,
+  //       `'b-s'`, `"b-d"`, `\`b-b\``,
+  //     ]
+  //     test.identical( op.scriptArgs, scriptArgs )
+
+  //     return null;
+  //   })
+
+  //   return con;
+
+  // })
+
+  // /* */
+
+  // .then( () =>
+  // {
+  //   test.case = 'spawn'
+
+  //   let con = new _.Consequence().take( null );
+  //   let args =
+  //   [
+  //     ` '\'s-s\''  '\"s-d\"'  '\`s-b\`'  `,
+  //     ` "\'d-s\'"  "\"d-d\""  "\`d-b\`"  `,
+  //     ` \`\'b-s\'\`  \`\"b-d\"\`  \`\`b-b\`\` `,
+  //   ]
+  //   let o =
+  //   {
+  //     execPath : 'node ' + _.strQuote( testAppPathSpace ),
+  //     args : args.slice(),
+  //     mode : 'spawn',
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   _.process.start( o );
+
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     let op = JSON.parse( o.output );
+  //     test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
+  //     test.identical( op.map, {} )
+  //     test.identical( op.scriptArgs, args )
+
+  //     return null;
+  //   })
+
+  //   return con;
+
+  // })
+
+  // /* */
+
+  // .then( () =>
+  // {
+  //   test.case = 'shell'
+  //   /*
+  //    This case shows how shell is interpreting backquote on different platforms.
+  //    It can't be used for arguments wrapping on linux/mac:
+  //    https://www.gnu.org/software/bash/manual/html_node/Command-Substitution.html
+  //   */
+
+  //   let con = new _.Consequence().take( null );
+  //   let args =
+  //   [
+  //     ` '\'s-s\''  '\"s-d\"'  '\`s-b\`'  `,
+  //     ` "\'d-s\'"  "\"d-d\""  "\`d-b\`"  `,
+  //     ` \`\'b-s\'\`  \`\"b-d\"\`  \`\`b-b\`\` `,
+  //   ]
+  //   let o =
+  //   {
+  //     execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' ' + args.join( ' ' ),
+  //     mode : 'shell',
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   _.process.start( o );
+
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     if( process.platform === 'win32' )
+  //     {
+  //       let op = JSON.parse( o.output );
+  //       test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
+  //       test.identical( op.map, {} )
+  //       let scriptArgs =
+  //       [
+  //         '\'\'s-s\'\'',
+  //         '\'s-d\'',
+  //         '\'`s-b`\'',
+  //         '\'d-s\'',
+  //         'd-d',
+  //         '`d-b`',
+  //         '`\'b-s\'`',
+  //         '\`b-d`',
+  //         '``b-b``'
+  //       ]
+  //       test.identical( op.scriptArgs, scriptArgs )
+  //     }
+  //     else
+  //     {
+  //       test.identical( _.strCount( o.output, 'not found' ), 3 );
+  //     }
+
+  //     return null;
+  //   })
+
+  //   return con;
+  // })
+
+  // /* */
+
+  // .then( () =>
+  // {
+  //   test.case = 'shell'
+
+  //   let con = new _.Consequence().take( null );
+  //   let args =
+  //   [
+  //     ` '\'s-s\''  '\"s-d\"'  '\`s-b\`'  `,
+  //     ` "\'d-s\'"  "\"d-d\""  "\`d-b\`"  `,
+  //     ` \`\'b-s\'\`  \`\"b-d\"\`  \`\`b-b\`\` `,
+  //   ]
+  //   let o =
+  //   {
+  //     execPath : 'node ' + _.strQuote( testAppPathSpace ),
+  //     args : args.slice(),
+  //     mode : 'shell',
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   _.process.start( o );
+
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     let op = JSON.parse( o.output );
+  //     test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
+  //     test.identical( op.map, {} )
+  //     test.identical( op.scriptArgs, args )
+
+  //     return null;
+  //   })
+
+  //   return con;
+  // })
+
+  // /* */
+
+  // return a.ready;
 
   /**/
 
