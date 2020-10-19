@@ -19952,7 +19952,7 @@ function startOptionGid( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let modes = [ 'fork' /*'spawn', */ /*'shell'*/ ];
+  let modes = [ 'fork', 'spawn', /*'shell'*/ ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
   return a.ready;
@@ -19973,14 +19973,16 @@ function startOptionGid( test )
         throwingExitCode : 0,
         outputCollecting : 1,
         mode,
-        gid : 11
+        gid : 15
       }
       return _.process.start( options )
       .then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.identical( op.output, 11 );
+        test.identical( op.output, '15\n' );
+
+        a.fileProvider.filesDelete( programPath );
         return null;
       } )
 
