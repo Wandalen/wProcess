@@ -17387,6 +17387,71 @@ startOptionOutputGraying.timeOut = 15000;
 
 //
 
+function startOptionOutputPrefixing( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.path.nativize( a.program( testApp ) );
+
+  /* */
+
+  let modes = [ 'fork', 'spawn', 'shell' ];
+
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+
+  return a.ready;
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    let execPath = testAppPath;
+    if( mode !== 'fork' )
+    execPath = 'node ' + execPath;
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputPrefixing : 0`
+      return _.process.start
+      ({
+        execPath,
+        mode,
+        outputCollecting : 1,
+        outputPrefixing : 0,
+        ready : a.ready
+      })
+      .then( ( op ) =>
+      {
+        console.log( 'OP: ', op.output );
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        // let output = _.strSplitNonPreserving({ src : op.output, delimeter : '\n' });
+        // test.identical( output.length, 2 );
+        // test.identical( output[ 0 ], '\u001b[31m\u001b[43mColored message1\u001b[49;0m\u001b[39;0m' );
+        // test.identical( output[ 1 ], '\u001b[31m\u001b[43mColored message2\u001b[49;0m\u001b[39;0m' );
+
+        a.fileProvider.filesDelete( testAppPath );
+
+        return null;
+      })
+    })
+
+    return ready;
+
+  }
+
+  /* - */
+
+  function testApp()
+  {
+    console.log( 'Log' );
+    // console.log( '\u001b[31m\u001b[43mColored message1\u001b[49;0m\u001b[39;0m' )
+    // console.log( '\u001b[31m\u001b[43mColored message2\u001b[49;0m\u001b[39;0m' )
+  }
+}
+
+//
+
 function startOptionLogger( test )
 {
   let context = this;
@@ -28650,6 +28715,7 @@ var Proto =
 
     startOptionOutputCollecting,
     startOptionOutputGraying,
+    startOptionOutputPrefixing,
     startOptionLogger,
     startOptionLoggerTransofrmation,
     startOutputOptionsCompatibilityLateCheck,
