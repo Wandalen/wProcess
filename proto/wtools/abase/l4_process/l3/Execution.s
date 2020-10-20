@@ -1262,7 +1262,7 @@ function startMinimal_body( o )
   {
 
     if( _.bufferAnyIs( data ) )
-    data = _.bufferToStr( data ); /* qqq for Yevhen : use more optimal condition and routine to convert buffer here and in other places */
+    data = _.bufferToStr( data ); /* qqq for Yevhen : use more optimal condition and routine to convert buffer here and in other places .*/
     if( o.outputGraying )
     data = StripAnsi( data );
 
