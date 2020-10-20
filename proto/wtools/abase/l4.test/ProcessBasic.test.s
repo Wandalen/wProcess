@@ -19128,7 +19128,7 @@ function startOptionStreamSizeLimit( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${ mode }, data is less than streamSizeLimit ( default )`;
+      test.case = `data is less than streamSizeLimit ( default )`;
 
       let testAppPath = a.path.nativize( a.program( testApp ) );
 
@@ -19153,7 +19153,7 @@ function startOptionStreamSizeLimit( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${ mode }, data is less than streamSizeLimit ( 20 )`;
+      test.case = `data is less than streamSizeLimit ( 20 )`;
 
       let testAppPath = a.path.nativize( a.program( testApp ) );
 
@@ -19179,7 +19179,7 @@ function startOptionStreamSizeLimit( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${ mode }, data is equal to the streamSizeLimit`;
+      test.case = `data is equal to the streamSizeLimit`;
 
       let testAppPath = a.path.nativize( a.program( testApp ) );
 
@@ -19204,7 +19204,7 @@ function startOptionStreamSizeLimit( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${ mode }, data is bigger than streamSizeLimit`;
+      test.case = `data is bigger than streamSizeLimit`;
 
       let testAppPath = a.path.nativize( a.program( testApp ) );
 
@@ -19217,7 +19217,7 @@ function startOptionStreamSizeLimit( test )
         outputCollecting : 1,
       }
 
-      var returned = test.shouldThrowErrorSync( () => _.process.start( options ) )
+      let returned = test.shouldThrowErrorSync( () => _.process.start( options ) )
 
       test.is( _.errIs( returned ) );
       test.is( _.strHas( returned.message, `spawnSync ${mode === 'shell' ? 'sh' : 'node' } ENOBUFS` ) )
