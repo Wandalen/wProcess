@@ -1,3 +1,4 @@
+/* eslint-disable */
 ( function _ProcessBasic_test_s( )
 {
 
@@ -16781,6 +16782,105 @@ startNjsWithReadyDelayStructural.description =
 
 //
 
+function startNjsOptionInterpreterArgs( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let programPath = a.program( program1 );
+
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
+
+  /* */
+
+  function run( mode )
+  {
+    let ready = _.Consequence().take( null );
+
+  //   ready.then( () =>
+  //   {
+  //     test.case = `mode:${mode}, interpreterArgs : '--version'`;
+  //     let con = new _.Consequence().take( null ); 
+
+  //     let options =
+  //     {
+  //       execPath : programPath,
+  //       mode,
+  //       outputCollecting : 1,
+  //       // interpreterArgs : '--v8-options',
+  //       interpreterArgs : '--version',
+  //       stdio : 'pipe'
+  //       // detaching,
+  //       // execPath : programPath,
+  //       // currentPath : a.abs( '.' ),
+  //       // throwingExitCode : 1,
+  //       // inputMirroring : 1,
+  //       // outputCollecting : 1,
+  //       // stdio : 'pipe',
+  //       // sync : 0,
+  //       // deasync : 0,
+  //       // ready : con,
+  //     }
+
+  //     return _.process.startNjs( options )
+  //     .then( ( op ) =>
+  //     {
+  //       // console.log( 'Output: ', op.output )
+  //       if( mode === 'fork' )
+  //       test.identical( op.output, process.version + '\n' );
+  //       else
+  //       test.identical( op.output, 'Log\n' );
+  //       test.identical( op.exitCode, 0 );
+  //       test.identical( op.ended, true );
+  //       return null;
+  //     } )
+  //   })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode:${mode}, interpreterArgs : `;
+      // let con = new _.Consequence().take( null ); 
+
+      let options =
+      {
+        execPath : programPath,
+        mode,
+        outputCollecting : 1,
+        interpreterArgs : '--report-compact',
+        stdio : 'pipe'
+      }
+
+      return _.process.startNjs( options )
+      .then( ( op ) =>
+      {
+        console.log( 'Output report: ', op.output )
+        if( mode === 'fork' )
+        test.identical( op.output, process.version + '\n' );
+        else
+        test.identical( op.output, 'Log\n' );
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        return null;
+      } )
+    })
+
+    return ready;
+
+  }
+
+  /* - */
+
+  function program1()
+  {
+    console.log( 'Log' );
+  }
+}
+
+//
+
 function startNjsWithReadyDelayStructuralMultiple( test )
 {
   let context = this;
@@ -29044,6 +29144,7 @@ var Proto =
 
     startNjs,
     startNjsWithReadyDelayStructural,
+    startNjsOptionInterpreterArgs,
     // startNjsWithReadyDelayStructuralMultiple, // xxx : switch on
 
     // sheller

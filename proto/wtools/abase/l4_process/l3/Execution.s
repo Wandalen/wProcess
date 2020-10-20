@@ -2244,6 +2244,11 @@ function startNjs_body( o )
   _.assert( !o.code );
   _.assert( arguments.length === 1, 'Expects single argument' );
 
+  if( _.strIs( o.interpreterArgs ) )
+  o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs });
+  o.interpreterArgs = o.interpreterArgs || process.execArgv;
+  _.assert( _.arrayIs( o.interpreterArgs ) );
+
   /*
   1024*1024 for megabytes
   1.4 factor found empirically for windows
@@ -2268,12 +2273,23 @@ function startNjs_body( o )
   // let execPath = o.execPath ? _.path.nativizeMinimal( o.execPath ) : '';
   let execPath = o.execPath || '';
 
-  _.assert( o.interpreterArgs === null || o.interpreterArgs === '', 'not implemented' ); /* qqq for Yevhen : implement and cover. */
+  // _.assert( o.interpreterArgs === null || o.interpreterArgs === '', 'not implemented' ); /* qqq for Yevhen : implement and cover. */
 
+  /* ORIGINAL */
+  // if( o.mode === 'fork' )
+  // {
+  //   if( interpreterArgs )
+  //   o.interpreterArgs = interpreterArgs;
+  // }
   if( o.mode === 'fork' )
   {
     if( interpreterArgs )
-    o.interpreterArgs = interpreterArgs;
+    {
+      if( _.arrayIsEmpty( o.interpreterArgs ) )
+      o.interpreterArgs = interpreterArgs;
+      else
+      o.interpreterArgs = o.interpreterArgs.concat( interpreterArgs );
+    }
   }
   else
   {
