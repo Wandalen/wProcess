@@ -17607,47 +17607,11 @@ function startOptionOutputPiping( test )
   {
     let ready = new _.Consequence().take( null );
 
-    ready.then( () =>
-    {
-      test.case = `mode : ${ mode }, parent outputPiping : 0, child outputPiping : 0, normal output`
-      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
-
-      let locals =
-      {
-        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
-        piping : 0,
-        programPath : testAppPath2,
-        mode,
-        prefixing : 0 
-      }
-
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
-
-      return _.process.start
-      ({
-        execPath : 'node ' + testAppPath,
-        outputCollecting : 1,
-        outputPiping : 0
-      })
-      .then( ( op ) =>
-      {
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( _.strCount( op.output, 'Log' ), 1 );
-
-        a.fileProvider.fileDelete( testAppPath );
-        a.fileProvider.fileDelete( testAppPath2 );
-
-        return null;
-      })
-
-    })
-
     /* */
 
     ready.then( () =>
     {
-      test.case = `mode : ${ mode }, parent outputPiping : 0, child outputPiping : 1, normal output`
+      test.case = `mode : ${ mode } outputPiping : 1, normal output`
       let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
 
       let locals =
@@ -17665,7 +17629,6 @@ function startOptionOutputPiping( test )
       ({
         execPath : 'node ' + testAppPath,
         outputCollecting : 1,
-        outputPiping : 1
       })
       .then( ( op ) =>
       {
@@ -17685,7 +17648,7 @@ function startOptionOutputPiping( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${ mode }, parent outputPiping : 1, child outputPiping : 0, normal output`
+      test.case = `mode : ${ mode }, outputPiping : 0, normal output`
       let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
 
       let locals =
@@ -17703,7 +17666,6 @@ function startOptionOutputPiping( test )
       ({
         execPath : 'node ' + testAppPath,
         outputCollecting : 1,
-        outputPiping : 1
       })
       .then( ( op ) =>
       {
@@ -17798,45 +17760,7 @@ function startOptionOutputPiping( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${ mode }, parent outputPiping : 0, child outputPiping : 0, error output`
-      let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
-
-      let locals =
-      {
-        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
-        piping : 0,
-        programPath : testAppPath2,
-        mode,
-        prefixing : 0
-      }
-
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
-
-      return _.process.start
-      ({
-        execPath : 'node ' + testAppPath,
-        outputCollecting : 1,
-        outputPiping : 0
-      })
-      .then( ( op ) =>
-      {
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( _.strCount( op.output, 'Error\n    at' ), 1 );
-
-        a.fileProvider.fileDelete( testAppPath );
-        a.fileProvider.fileDelete( testAppPath2 );
-
-        return null;
-      })
-
-    })
-
-    /* */
-
-    ready.then( () =>
-    {
-      test.case = `mode : ${ mode }, parent outputPiping : 0, child outputPiping : 1, error output`
+      test.case = `mode : ${ mode }, outputPiping : 1, error output`
       let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
 
       let locals =
@@ -17854,7 +17778,6 @@ function startOptionOutputPiping( test )
       ({
         execPath : 'node ' + testAppPath,
         outputCollecting : 1,
-        outputPrefixing : 1
       })
       .then( ( op ) =>
       {
@@ -17874,7 +17797,7 @@ function startOptionOutputPiping( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${ mode }, parent outputPiping : 1, child outputPiping : 0, error output`
+      test.case = `mode : ${ mode }, outputPiping : 0, error output`
       let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
 
       let locals =
@@ -17892,7 +17815,6 @@ function startOptionOutputPiping( test )
       ({
         execPath : 'node ' + testAppPath,
         outputCollecting : 1,
-        outputPiping : 1
       })
       .then( ( op ) =>
       {
