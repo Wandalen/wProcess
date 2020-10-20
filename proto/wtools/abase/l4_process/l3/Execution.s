@@ -1394,7 +1394,7 @@ startMinimal_body.defaults =
   hiding : 1,
   uid : null, /* qqq for Yevhen : implement and cover the option */
   gid : null, /* qqq for Yevhen : implement and cover the option */
-  streamSizeLimit : null, /* qqq for Yevhen : implement and cover the option. look option maxBuffer of spawn */
+  streamSizeLimit : null, /* qqq for Yevhen : implement and cover the option. look option maxBuffer of spawn | aaa : Done */
   passingThrough : 0,
   timeOut : null,
 
