@@ -19065,7 +19065,9 @@ streamJoinExperiment.experimental = 1;
 
 function startOptionStreamSizeLimit( test )
 {
-  let modes = [ 'shell', 'spawn', 'fork' ]
+  let context = this;
+  let a = context.assetFor( test, false );
+  let modes = [ /*'shell', */'spawn', /*'fork' */]
 
   modes.forEach( ( mode ) =>
   {
@@ -19080,12 +19082,12 @@ function startOptionStreamSizeLimit( test )
 
   function run( mode )
   {
-    let ready = new _.Consequence().take( null );
-    // let ready = _.take( null );
+    // let ready = new _.Consequence().take( null );
+    let ready = _.take( null );
 
     ready.then( () =>
     {
-      test.case = 'data > streamSizeLimit';
+      test.case = 'data is bigger than streamSizeLimit';
 
       let testAppPath = a.path.nativize( a.program( testApp ) );
 
@@ -19093,13 +19095,24 @@ function startOptionStreamSizeLimit( test )
       {
         execPath : mode  === 'fork' ? testAppPath : 'node ' + testAppPath,
         mode,
+        ipc : 1,
         streamSizeLimit : 4,
         outputCollecting : 1
       }
 
-      return _.process.start( options )
+      let returned =  _.process.start( options );
+
+      // options.process.stdout.on( 'data', ( data ) =>
+      // {
+      //   data = data.toString();
+      //   console.log( 'DATA: ', data )
+      //   // if( _.strHas( data, 'ready' ))
+      //   // _.process.terminate( o.process );
+      // });
+      returned
       .then( ( op ) =>
       {
+        // console.log( 'OP: ', op.process )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.identical( op.output, 'da\n' )
@@ -19107,6 +19120,13 @@ function startOptionStreamSizeLimit( test )
         a.fileProvider.fileDelete( testAppPath );
         return null;
       })
+
+      options.process.stdout.on( 'data', ( data ) =>
+      {
+        console.log( 'DATA: ', data.toString() );
+      } )
+
+      return returned;
 
     });
 
@@ -19117,7 +19137,8 @@ function startOptionStreamSizeLimit( test )
 
   function testApp()
   {
-    console.log( 'data' );
+    process.send( 'data1data2data3data4data5data6' );
+    // console.log( 'data1data2data3data4data5data6' );
   }
 }
 
