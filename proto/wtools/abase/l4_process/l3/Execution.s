@@ -475,10 +475,10 @@ function startMinimal_body( o )
       catch( err )
       {
         debugger; /* qqq for Yevhen : is covered? */
-        end2( err, o.conTerminate );
+        end2( err/*, o.conTerminate */ );
       }
       _.assert( o.state === 'terminated' || o.state === 'disconnected' );
-      end2( undefined, o.conTerminate );
+      end2( undefined/*, o.conTerminate */ );
       return o;
     }
     else
@@ -514,7 +514,7 @@ function startMinimal_body( o )
         /* qqq for Yevhen : make sure option dry is covered good enough */
         _.assert( o.state === 'started' );
         o.state = 'terminated';
-        end2( undefined, o.conTerminate );
+        end2( undefined/*, o.conTerminate */ );
       }
     }
     catch( err )
@@ -683,7 +683,7 @@ function startMinimal_body( o )
 
   /* */
 
-  function end2( err, consequence ) /* xxx : remove 2-nd argument */
+  function end2( err /*, consequence*/ ) /* xxx : remove 2-nd argument */
   {
 
     if( Config.debug )
@@ -818,12 +818,12 @@ function startMinimal_body( o )
       }
       else
       {
-        end2( o.error, o.conTerminate );
+        end2( o.error/*, o.conTerminate */ );
       }
     }
     else if( !o.sync || o.deasync )
     {
-      end2( undefined, o.conTerminate );
+      end2( undefined/*, o.conTerminate */ );
     }
 
   }
@@ -870,7 +870,7 @@ function startMinimal_body( o )
     }
     else
     {
-      end2( o.error, o.conTerminate );
+      end2( o.error/*, o.conTerminate */ );
     }
   }
 
@@ -896,7 +896,7 @@ function startMinimal_body( o )
         debugger;
         o.state = 'disconnected';
         o.conDisconnect.take( this );
-        end2( undefined, o );
+        end2( undefined );
         throw _.err( 'not tested' );
       }
     });
@@ -935,16 +935,16 @@ function startMinimal_body( o )
 
     this.process.unref();
 
-    if( this.procedure )
-    if( this.procedure.isAlive() )
-    this.procedure.end();
-    else
-    this.procedure.finit();
+    // if( this.procedure )
+    // if( this.procedure.isAlive() )
+    // this.procedure.end();
+    // else
+    // this.procedure.finit();
 
     if( !this.ended )
     {
       this.state = 'disconnected';
-      end2( undefined, o.conDisconnect );
+      end2( undefined /*, o.conDisconnect*/ );
     }
 
     return true;
@@ -1788,7 +1788,6 @@ function start_body( o )
 
   function end2( err, arg )
   {
-    // debugger;
     _.assert( o.state !== 'terminated' ); /* xxx */
     o.state = 'terminated';
     o.ended = true;
@@ -1806,7 +1805,20 @@ function start_body( o )
     for( let a = 0 ; a < o.runs.length ; a++ )
     {
       let o2 = o.runs[ a ];
-      if( o2.exitCode || o2.exitSignal !== null )
+      if( o2.exitCode || o2.exitSignal )
+      {
+        o.exitCode = o2.exitCode;
+        o.exitSignal = o2.exitSignal;
+        o.exitReason = o2.exitReason;
+        break;
+      }
+    }
+
+    if( o.exitCode === null && o.exitSignal === null )
+    for( let a = 0 ; a < o.runs.length ; a++ )
+    {
+      let o2 = o.runs[ a ];
+      if( o2.exitCode !== null || o2.exitSignal !== null )
       {
         o.exitCode = o2.exitCode;
         o.exitSignal = o2.exitSignal;
