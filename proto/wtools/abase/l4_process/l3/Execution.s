@@ -2246,6 +2246,7 @@ function startNjs_body( o )
 
   if( _.strIs( o.interpreterArgs ) )
   o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs });
+
   o.interpreterArgs = o.interpreterArgs || process.execArgv;
   _.assert( _.arrayIs( o.interpreterArgs ) );
 
