@@ -16889,31 +16889,6 @@ function startNjsOptionInterpreterArgs( test )
       } )
     })
 
-    /* */
-
-    // ready.then( () =>
-    // {
-    //   test.case = `mode:${mode}, interpreterArgs = [ '--not-existing-arg' ]`;
-
-    //   let options =
-    //   {
-    //     execPath : programPath,
-    //     mode,
-    //     outputCollecting : 1,
-    //     interpreterArgs : [ '--not-existing-arg' ],
-    //     stdio : 'pipe',
-    //   }
-
-    //   return test.shouldThrowErrorOfAnyKind( () => _.process.startNjs( options ) )
-
-    //   // return _.process.startNjs( options )
-    //   // .then( ( op ) =>
-    //   // {
-    //   //   return null;
-    //   // })
-
-    // })
-
     return ready;
 
   }
