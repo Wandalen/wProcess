@@ -19086,6 +19086,85 @@ function startOptionStreamSizeLimit( test )
 
     ready.then( () =>
     {
+      test.case = 'data is less than streamSizeLimit ( default ) ';
+
+      let testAppPath = a.path.nativize( a.program( testApp ) );
+
+      let options =
+      {
+        execPath : mode  === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+        sync : 1,
+        // streamSizeLimit : 10,
+        outputCollecting : 1,
+        throwingExitCode :0
+      }
+
+      let returned =  _.process.start( options );
+      test.identical( returned.process.stdout.toString(), 'data1\n' );
+
+      a.fileProvider.fileDelete( testAppPath );
+
+      return returned;
+
+    });
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = 'data is equal to the streamSizeLimit';
+
+      let testAppPath = a.path.nativize( a.program( testApp ) );
+
+      let options =
+      {
+        execPath : mode  === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+        sync : 1,
+        streamSizeLimit : 10,
+        outputCollecting : 1,
+        throwingExitCode :0
+      }
+
+      let returned =  _.process.start( options );
+      test.identical( returned.process.stdout.toString(), 'data1\n' )
+      // console.log( 'process.stdout: ', returned.process.stdout.toString( 'utf-8' ) );
+      // console.log( 'RRR: ', returned )
+      // options.process.stdout.on( 'data', ( data ) =>
+      // {
+      //   data = data.toString();
+      //   console.log( 'DATA: ', data )
+      //   // if( _.strHas( data, 'ready' ))
+      //   // _.process.terminate( o.process );
+      // });
+
+      // returned
+      // .then( ( op ) =>
+      // {
+      //   // console.log( 'OP: ', op.process )
+      //   test.identical( op.exitCode, 0 );
+      //   test.identical( op.ended, true );
+      //   test.identical( op.output, 'da\n' )
+
+      //   a.fileProvider.fileDelete( testAppPath );
+      //   return null;
+      // })
+
+      // options.process.stdout.on( 'data', ( data ) =>
+      // {
+      //   console.log( 'DATA: ', data.toString() );
+      // } )
+
+      a.fileProvider.fileDelete( testAppPath );
+      return returned;
+
+    });
+
+    /* */
+
+    ready.then( () =>
+    {
       test.case = 'data is bigger than streamSizeLimit';
 
       let testAppPath = a.path.nativize( a.program( testApp ) );
@@ -19094,38 +19173,18 @@ function startOptionStreamSizeLimit( test )
       {
         execPath : mode  === 'fork' ? testAppPath : 'node ' + testAppPath,
         mode,
-        ipc : 1,
+        sync : 1,
         streamSizeLimit : 4,
-        outputCollecting : 1
+        outputCollecting : 1,
+        // throwingExitCode :0
       }
 
-      let returned =  _.process.start( options );
+      test.shouldThrowErrorSync( () => _.process.start( options ) );
+      // let returned =  _.process.start( options );
+      // test.identical( returned.process.stdout.toString(), 'data1\n' );
 
-      // options.process.stdout.on( 'data', ( data ) =>
-      // {
-      //   data = data.toString();
-      //   console.log( 'DATA: ', data )
-      //   // if( _.strHas( data, 'ready' ))
-      //   // _.process.terminate( o.process );
-      // });
-      returned
-      .then( ( op ) =>
-      {
-        // console.log( 'OP: ', op.process )
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( op.output, 'da\n' )
-
-        a.fileProvider.fileDelete( testAppPath );
-        return null;
-      })
-
-      options.process.stdout.on( 'data', ( data ) =>
-      {
-        console.log( 'DATA: ', data.toString() );
-      } )
-
-      return returned;
+      a.fileProvider.fileDelete( testAppPath );
+      return null;
 
     });
 
@@ -19136,8 +19195,9 @@ function startOptionStreamSizeLimit( test )
 
   function testApp()
   {
-    process.send( 'data1data2data3data4data5data6' );
+    // process.send( 'data1data2data3data4data5data6' );
     // console.log( 'data1data2data3data4data5data6' );
+    console.log( 'data1' );
   }
 }
 
