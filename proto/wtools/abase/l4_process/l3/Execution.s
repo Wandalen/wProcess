@@ -1261,8 +1261,10 @@ function startMinimal_body( o )
   function handleStreamErr( data )
   {
 
-    if( _.bufferAnyIs( data ) )
-    data = _.bufferToStr( data ); /* qqq for Yevhen : use more optimal condition and routine to convert buffer here and in other places .*/
+    // if( _.bufferAnyIs( data ) )
+    // data = _.bufferToStr( data ); /* qqq for Yevhen : use more optimal condition and routine to convert buffer here and in other places | aaa : Done .*/
+    if( _.bufferNodeIs( data ) )
+    data = data.toString( 'utf8' );
     if( o.outputGraying )
     data = StripAnsi( data );
 
@@ -1290,8 +1292,10 @@ function startMinimal_body( o )
   function handleStreamOut( data )
   {
 
-    if( _.bufferAnyIs( data ) )
-    data = _.bufferToStr( data );
+    // if( _.bufferAnyIs( data ) )
+    // data = _.bufferToStr( data );
+    if( _.bufferNodeIs( data ) )
+    data = data.toString( 'utf8' );
     if( o.outputGraying )
     data = StripAnsi( data );
 
@@ -1966,8 +1970,10 @@ function start_body( o )
 
   function handleStreamOut( data )
   {
-    if( _.bufferAnyIs( data ) )
-    data = _.bufferToStr( data );
+    // if( _.bufferAnyIs( data ) )
+    // data = _.bufferToStr( data );
+    if( _.bufferNodeIs( data ) )
+    data = data.toString( 'utf8' );
     if( o.outputGraying )
     data = StripAnsi( data );
     if( o.outputCollecting )
