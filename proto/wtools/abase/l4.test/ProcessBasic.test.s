@@ -19085,7 +19085,7 @@ function startOptionStreamSizeLimit( test )
 
     ready.then( () =>
     {
-      test.case = 'data < StreamSizeLimit';
+      test.case = 'data > streamSizeLimit';
 
       let testAppPath = a.path.nativize( a.program( testApp ) );
 
@@ -19093,6 +19093,8 @@ function startOptionStreamSizeLimit( test )
       {
         execPath : mode  === 'fork' ? testAppPath : 'node ' + testAppPath,
         mode,
+        streamSizeLimit : 4,
+        outputCollecting : 1
       }
 
       return _.process.start( options )
@@ -19100,6 +19102,7 @@ function startOptionStreamSizeLimit( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
+        test.identical( op.output, 'da\n' )
 
         a.fileProvider.fileDelete( testAppPath );
         return null;
