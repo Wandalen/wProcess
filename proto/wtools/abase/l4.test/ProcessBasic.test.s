@@ -9725,6 +9725,7 @@ function startChronology( test )
       args : [ testAppPath ],
       mode,
       sync,
+      deasync : 0, /* xxx : vary */
       ready : new _.Consequence().take( null ),
       conStart : new _.Consequence(),
       conDisconnect : new _.Consequence(),
@@ -9743,16 +9744,16 @@ function startChronology( test )
       test.identical( err, undefined );
       test.identical( op, o );
 
-      test.identical( o.ready.resourcesCount(), 0 );
+      test.identical( o.ready.argumentsCount(), 0 );
       test.identical( o.ready.errorsCount(), 0 );
       test.identical( o.ready.competitorsCount(), 0 );
-      test.identical( o.conStart.resourcesCount(), 1 );
+      test.identical( o.conStart.argumentsCount(), 1 );
       test.identical( o.conStart.errorsCount(), 0 );
       test.identical( o.conStart.competitorsCount(), 0 );
-      test.identical( o.conDisconnect.resourcesCount(), 0 );
+      test.identical( o.conDisconnect.argumentsCount(), 0 );
       test.identical( o.conDisconnect.errorsCount(), 0 );
       test.identical( o.conDisconnect.competitorsCount(), 0 );
-      test.identical( o.conTerminate.resourcesCount(), 0 );
+      test.identical( o.conTerminate.argumentsCount(), 0 );
       test.identical( o.conTerminate.errorsCount(), 0 );
       test.identical( o.conTerminate.competitorsCount(), 1 );
       test.identical( o.ended, false );
@@ -9780,16 +9781,16 @@ function startChronology( test )
       test.identical( err, undefined );
       test.identical( op, o );
 
-      test.identical( o.ready.resourcesCount(), 0 );
+      test.identical( o.ready.argumentsCount(), 0 );
       test.identical( o.ready.errorsCount(), 0 );
       test.identical( o.ready.competitorsCount(), sync ? 0 : 1 );
-      test.identical( o.conStart.resourcesCount(), 1 );
+      test.identical( o.conStart.argumentsCount(), 1 );
       test.identical( o.conStart.errorsCount(), 0 );
       test.identical( o.conStart.competitorsCount(), 0 );
-      test.identical( o.conDisconnect.resourcesCount(), 0 );
+      test.identical( o.conDisconnect.argumentsCount(), 0 );
       test.identical( o.conDisconnect.errorsCount(), 0 );
       test.identical( o.conDisconnect.competitorsCount(), 0 );
-      test.identical( o.conTerminate.resourcesCount(), 1 );
+      test.identical( o.conTerminate.argumentsCount(), 1 );
       test.identical( o.conTerminate.errorsCount(), 0 );
       test.identical( o.conTerminate.competitorsCount(), 0 );
       test.identical( o.ended, true );
@@ -9816,16 +9817,16 @@ function startChronology( test )
     {
       test.identical( track, [ 'conStart', 'conTerminate', 'ready' ] );
 
-      test.identical( o.ready.resourcesCount(), 1 );
+      test.identical( o.ready.argumentsCount(), 1 );
       test.identical( o.ready.errorsCount(), 0 );
       test.identical( o.ready.competitorsCount(), 0 );
-      test.identical( o.conStart.resourcesCount(), 1 );
+      test.identical( o.conStart.argumentsCount(), 1 );
       test.identical( o.conStart.errorsCount(), 0 );
       test.identical( o.conStart.competitorsCount(), 0 );
-      test.identical( o.conDisconnect.resourcesCount(), 0 );
-      test.identical( o.conDisconnect.errorsCount(), 0 );
+      test.identical( o.conDisconnect.argumentsCount(), 0 );
+      test.identical( o.conDisconnect.errorsCount(), 1 );
       test.identical( o.conDisconnect.competitorsCount(), 0 );
-      test.identical( o.conTerminate.resourcesCount(), 1 );
+      test.identical( o.conTerminate.argumentsCount(), 1 );
       test.identical( o.conTerminate.errorsCount(), 0 );
       test.identical( o.conTerminate.competitorsCount(), 0 );
       test.identical( o.ended, true );
@@ -9863,16 +9864,16 @@ function startChronology( test )
     test.is( o.conDisconnect !== o.ready );
     test.is( o.conTerminate !== o.ready );
 
-    test.identical( o.ready.resourcesCount(), sync ? 1 : 0 );
+    test.identical( o.ready.argumentsCount(), sync ? 1 : 0 );
     test.identical( o.ready.errorsCount(), 0 );
     test.identical( o.ready.competitorsCount(), 0 );
-    test.identical( o.conStart.resourcesCount(), 1 );
+    test.identical( o.conStart.argumentsCount(), 1 );
     test.identical( o.conStart.errorsCount(), 0 );
     test.identical( o.conStart.competitorsCount(), 0 );
-    test.identical( o.conDisconnect.resourcesCount(), 0 );
-    test.identical( o.conDisconnect.errorsCount(), 0 );
+    test.identical( o.conDisconnect.argumentsCount(), 0 );
+    test.identical( o.conDisconnect.errorsCount(), o.sync ? 1 : 0 );
     test.identical( o.conDisconnect.competitorsCount(), 0 );
-    test.identical( o.conTerminate.resourcesCount(), sync ? 1 : 0 );
+    test.identical( o.conTerminate.argumentsCount(), sync ? 1 : 0 );
     test.identical( o.conTerminate.errorsCount(), 0 );
     test.identical( o.conTerminate.competitorsCount(), sync ? 0 : 1 );
     test.identical( o.ended, sync ? true : false );
@@ -9894,16 +9895,16 @@ function startChronology( test )
       test.identical( err, undefined );
       test.identical( op, o );
 
-      test.identical( o.ready.resourcesCount(), 1 );
+      test.identical( o.ready.argumentsCount(), 1 );
       test.identical( o.ready.errorsCount(), 0 );
       test.identical( o.ready.competitorsCount(), 0 );
-      test.identical( o.conStart.resourcesCount(), 1 );
+      test.identical( o.conStart.argumentsCount(), 1 );
       test.identical( o.conStart.errorsCount(), 0 );
       test.identical( o.conStart.competitorsCount(), 0 );
-      test.identical( o.conDisconnect.resourcesCount(), 0 );
-      test.identical( o.conDisconnect.errorsCount(), 0 );
+      test.identical( o.conDisconnect.argumentsCount(), 0 );
+      test.identical( o.conDisconnect.errorsCount(), 1 );
       test.identical( o.conDisconnect.competitorsCount(), 0 );
-      test.identical( o.conTerminate.resourcesCount(), 1 );
+      test.identical( o.conTerminate.argumentsCount(), 1 );
       test.identical( o.conTerminate.errorsCount(), 0 );
       test.identical( o.conTerminate.competitorsCount(), 0 );
       test.identical( o.ended, true );
@@ -13178,7 +13179,8 @@ function startDetachingDisconnectedEarly( test )
   let context = this;
   let a = context.assetFor( test, false );
   let programPath = a.path.nativize( a.program( program1 ) );
-  let modes = [ 'fork', 'spawn', 'shell' ];
+  // let modes = [ 'fork', 'spawn', 'shell' ];
+  let modes = [ 'spawn' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
 
@@ -13204,16 +13206,16 @@ function startDetachingDisconnectedEarly( test )
 
       let result = _.process.start( o );
 
-      test.identical( o.ready.resourcesCount(), 0 );
+      test.identical( o.ready.argumentsCount(), 0 );
       test.identical( o.ready.errorsCount(), 0 );
       test.identical( o.ready.competitorsCount(), 0 );
-      test.identical( o.conStart.resourcesCount(), 1 );
+      test.identical( o.conStart.argumentsCount(), 1 );
       test.identical( o.conStart.errorsCount(), 0 );
       test.identical( o.conStart.competitorsCount(), 0 );
-      test.identical( o.conDisconnect.resourcesCount(), 0 );
+      test.identical( o.conDisconnect.argumentsCount(), 0 );
       test.identical( o.conDisconnect.errorsCount(), 0 );
       test.identical( o.conDisconnect.competitorsCount(), 0 );
-      test.identical( o.conTerminate.resourcesCount(), 0 );
+      test.identical( o.conTerminate.argumentsCount(), 0 );
       test.identical( o.conTerminate.errorsCount(), 0 );
       test.identical( o.conTerminate.competitorsCount(), 0 );
 
@@ -13246,7 +13248,7 @@ function startDetachingDisconnectedEarly( test )
       o.conTerminate.finally( ( err, op ) =>
       {
         track.push( 'conTerminate' );
-        test.identical( err, undefined );
+        test.identical( err, _.dont );
         return null;
       })
 
@@ -13254,8 +13256,8 @@ function startDetachingDisconnectedEarly( test )
       {
         test.identical( o.state, 'disconnected' );
         test.identical( o.ended, true );
-        test.identical( track, [ 'conStart', 'conDisconnect' ] );
-        test.is( !_.process.isAlive( o.process.pid ) )
+        test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate' ] );
+        test.is( !_.process.isAlive( o.process.pid ) );
         o.conTerminate.cancel(); /* xxx : remove? */
         return null;
       })
@@ -13324,16 +13326,16 @@ function startDetachingDisconnectedLate( test )
 
       let result = _.process.start( o );
 
-      test.identical( o.ready.resourcesCount(), 0 );
+      test.identical( o.ready.argumentsCount(), 0 );
       test.identical( o.ready.errorsCount(), 0 );
       test.identical( o.ready.competitorsCount(), 0 );
-      test.identical( o.conStart.resourcesCount(), 1 );
+      test.identical( o.conStart.argumentsCount(), 1 );
       test.identical( o.conStart.errorsCount(), 0 );
       test.identical( o.conStart.competitorsCount(), 0 );
-      test.identical( o.conDisconnect.resourcesCount(), 0 );
+      test.identical( o.conDisconnect.argumentsCount(), 0 );
       test.identical( o.conDisconnect.errorsCount(), 0 );
       test.identical( o.conDisconnect.competitorsCount(), 0 );
-      test.identical( o.conTerminate.resourcesCount(), 0 );
+      test.identical( o.conTerminate.argumentsCount(), 0 );
       test.identical( o.conTerminate.errorsCount(), 0 );
       test.identical( o.conTerminate.competitorsCount(), 0 );
 
@@ -13367,18 +13369,17 @@ function startDetachingDisconnectedLate( test )
         return null;
       })
 
-      o.conTerminate.finally( ( err, op ) =>
+      o.conTerminate.tap( ( err, op ) =>
       {
         track.push( 'conTerminate' );
-        test.identical( err, undefined );
-        return null;
+        test.identical( err, _.dont );
       })
 
       result = _.time.out( context.t2, () => /* 5000 */
       {
         test.identical( o.state, 'disconnected' );
         test.identical( o.ended, true );
-        test.identical( track, [ 'conStart', 'conDisconnect' ] );
+        test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate' ] );
         test.is( !_.process.isAlive( o.process.pid ) )
         o.conTerminate.cancel();
         return null;
@@ -14424,7 +14425,7 @@ function startOnTerminate( test )
         test.identical( o.state, 'disconnected' );
         test.identical( o.ended, true );
         test.identical( track, [] );
-        test.identical( o.conTerminate.resourcesCount(), 0 );
+        test.identical( o.conTerminate.argumentsCount(), 0 );
         test.identical( o.conTerminate.errorsCount(), 0 );
         test.identical( o.conTerminate.competitorsCount(), 1 );
         test.is( !_.process.isAlive( o.process.pid ) );
@@ -14509,7 +14510,7 @@ function startOnTerminate( test )
         test.identical( track, [] );
         test.identical( o.state, 'disconnected' );
         test.identical( o.ended, true );
-        test.identical( o.conTerminate.resourcesCount(), 0 );
+        test.identical( o.conTerminate.argumentsCount(), 0 );
         test.identical( o.conTerminate.errorsCount(), 0 );
         test.identical( o.conTerminate.competitorsCount(), 1 );
         test.is( !_.process.isAlive( o.process.pid ) );
@@ -14649,7 +14650,7 @@ function startOnTerminate( test )
         test.identical( o.exitCode, null );
         test.identical( o.exitSignal, null );
 
-        test.identical( o.conTerminate.resourcesCount(), 0 );
+        test.identical( o.conTerminate.argumentsCount(), 0 );
         test.identical( o.conTerminate.errorsCount(), 0 );
         test.identical( o.conTerminate.competitorsCount(), 1 );
         test.is( !_.process.isAlive( o.process.pid ) );
