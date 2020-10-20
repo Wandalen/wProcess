@@ -16798,73 +16798,97 @@ function startNjsOptionInterpreterArgs( test )
   {
     let ready = _.Consequence().take( null );
 
-  //   ready.then( () =>
-  //   {
-  //     test.case = `mode:${mode}, interpreterArgs : '--version'`;
-  //     let con = new _.Consequence().take( null ); 
-
-  //     let options =
-  //     {
-  //       execPath : programPath,
-  //       mode,
-  //       outputCollecting : 1,
-  //       // interpreterArgs : '--v8-options',
-  //       interpreterArgs : '--version',
-  //       stdio : 'pipe'
-  //       // detaching,
-  //       // execPath : programPath,
-  //       // currentPath : a.abs( '.' ),
-  //       // throwingExitCode : 1,
-  //       // inputMirroring : 1,
-  //       // outputCollecting : 1,
-  //       // stdio : 'pipe',
-  //       // sync : 0,
-  //       // deasync : 0,
-  //       // ready : con,
-  //     }
-
-  //     return _.process.startNjs( options )
-  //     .then( ( op ) =>
-  //     {
-  //       // console.log( 'Output: ', op.output )
-  //       if( mode === 'fork' )
-  //       test.identical( op.output, process.version + '\n' );
-  //       else
-  //       test.identical( op.output, 'Log\n' );
-  //       test.identical( op.exitCode, 0 );
-  //       test.identical( op.ended, true );
-  //       return null;
-  //     } )
-  //   })
-
-    /* */
-
     ready.then( () =>
     {
-      test.case = `mode:${mode}, interpreterArgs : `;
-      // let con = new _.Consequence().take( null ); 
+      test.case = `mode:${mode}, interpreterArgs = ''`;
 
       let options =
       {
         execPath : programPath,
         mode,
         outputCollecting : 1,
-        interpreterArgs : '--report-compact',
+        interpreterArgs : '',
         stdio : 'pipe'
       }
 
       return _.process.startNjs( options )
       .then( ( op ) =>
       {
-        console.log( 'Output report: ', op.output )
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, 'Log\n' );
+
+        return null;
+      } )
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode:${mode}, interpreterArgs = '--version'`;
+
+      let options =
+      {
+        execPath : programPath,
+        mode,
+        outputCollecting : 1,
+        interpreterArgs : '--version',
+        stdio : 'pipe'
+      }
+
+      return _.process.startNjs( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
         if( mode === 'fork' )
         test.identical( op.output, process.version + '\n' );
         else
         test.identical( op.output, 'Log\n' );
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
+
         return null;
       } )
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode:${mode}, interpreterArgs = [ '--v8-options' ]`;
+
+      let options =
+      {
+        execPath : programPath,
+        mode,
+        outputCollecting : 1,
+        interpreterArgs : [ '--v8-options' ],
+        stdio : 'pipe'
+      }
+
+      return _.process.startNjs( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        if( mode === 'fork' )
+        {
+          test.is( _.strHas( op.output, 'Synopsis:' ) );
+          test.is( _.strHas( op.output, `The following syntax for options is accepted (both '-' and '--' are ok):` ) );
+          test.is( _.strHas( op.output, '-e        execute a string in V8' ) );
+          test.is( _.strHas( op.output, '--shell   run an interactive JavaScript shell' ) );
+          test.is( _.strHas( op.output, '--module  execute a file as a JavaScript module' ) );
+          test.is( _.strHas( op.output, 'Options:' ) );
+        }
+        else
+        {
+          test.identical( op.output, 'Log\n' );
+        }
+
+        return null;
+      } )
+
+      
     })
 
     return ready;

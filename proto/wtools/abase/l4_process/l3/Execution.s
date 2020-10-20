@@ -2274,7 +2274,7 @@ function startNjs_body( o )
   // let execPath = o.execPath ? _.path.nativizeMinimal( o.execPath ) : '';
   let execPath = o.execPath || '';
 
-  // _.assert( o.interpreterArgs === null || o.interpreterArgs === '', 'not implemented' ); /* qqq for Yevhen : implement and cover. */
+  // _.assert( o.interpreterArgs === null || o.interpreterArgs === '', 'not implemented' ); /* qqq for Yevhen : implement and cover. | aaa : Done ( Have worked without changes, though )*/
 
   /* ORIGINAL */
   // if( o.mode === 'fork' )
@@ -2286,9 +2286,6 @@ function startNjs_body( o )
   {
     if( interpreterArgs )
     {
-      if( _.arrayIsEmpty( o.interpreterArgs ) )
-      o.interpreterArgs = interpreterArgs;
-      else
       o.interpreterArgs = o.interpreterArgs.concat( interpreterArgs );
     }
   }
