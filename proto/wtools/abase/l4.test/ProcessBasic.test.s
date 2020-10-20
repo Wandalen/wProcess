@@ -19062,6 +19062,63 @@ streamJoinExperiment.experimental = 1;
 // other options
 // --
 
+function startOptionStreamSizeLimit( test )
+{
+  let modes = [ 'shell', 'spawn', 'fork' ]
+
+  modes.forEach( ( mode ) =>
+  {
+    a.ready.tap( () => test.open( mode ) )
+    a.ready.then( () => run( mode ) )
+    a.ready.tap( () => test.close( mode ) )
+  })
+
+  return a.ready;
+
+  /* */
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+    // let ready = _.take( null );
+
+    ready.then( () =>
+    {
+      test.case = 'data < StreamSizeLimit';
+
+      let testAppPath = a.path.nativize( a.program( testApp ) );
+
+      let options =
+      {
+        execPath : mode  === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        a.fileProvider.fileDelete( testAppPath );
+        return null;
+      })
+
+    });
+
+    return ready;
+  }
+
+  /* - */
+
+  function testApp()
+  {
+    console.log( 'data' );
+  }
+}
+
+//
+
 function startOptionDry( test )
 {
   let context = this;
@@ -29025,6 +29082,7 @@ var Proto =
 
     // other options
 
+    startOptionStreamSizeLimit,
     startOptionDry, /* qqq for Yevhen : make sure option dry is covered good enough */
     /* qqq for Yevhen : write test routine startOptionDryMultiple */
     startOptionCurrentPath,
