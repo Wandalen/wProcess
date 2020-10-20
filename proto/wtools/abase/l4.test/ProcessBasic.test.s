@@ -1,3 +1,4 @@
+/* eslint-disable */
 const { time } = require('console');
 
 ( function _ProcessBasic_test_s( )
@@ -17499,7 +17500,6 @@ function startOptionOutputPrefixing( test )
       })
       .then( ( op ) =>
       {
-        console.log( 'error NO prefix: ', op.output )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.is( !_.strHas( op.output, 'stderr :' ) );
@@ -17536,7 +17536,6 @@ function startOptionOutputPrefixing( test )
       })
       .then( ( op ) =>
       {
-        console.log( 'error WITH prefix: ', op.output )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.is( _.strHas( op.output, 'stderr :' ) );
@@ -18026,8 +18025,171 @@ function startOptionOutputPiping( test )
 
 //
 
-function startOptionInputMirroring()
+function startOptionInputMirroring( test )
 {
+  let context = this;
+  let a = context.assetFor( test, false );
+
+  /* */
+
+  let modes = [ 'fork', 'spawn', 'shell' ];
+
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+
+  return a.ready;
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, inputMirroring : 0`;
+
+      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+
+      let locals =
+      {
+        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
+        programPath : testAppPath2,
+        mode,
+        inputMirroring : 0,
+        verbosity : 2
+      }
+
+      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.is( !_.strHas( op.output, testAppPath2 ) );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, inputMirroring : 1`;
+
+      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+
+      let locals =
+      {
+        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
+        programPath : testAppPath2,
+        mode,
+        inputMirroring : 1,
+        outputPiping : 1,
+        verbosity : 2
+      }
+
+      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.is( _.strHas( op.output, testAppPath2 ) );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, inputMirroring : 1, verbosity : 0`;
+
+      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+
+      let locals =
+      {
+        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
+        programPath : testAppPath2,
+        mode,
+        inputMirroring : 1,
+        verbosity : 0
+      }
+
+      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.is( !_.strHas( op.output, testAppPath2 ) );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+    })
+
+    return ready;
+  }
+
+  /* - */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    let options =
+    {
+      execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+      mode,
+      inputMirroring,
+      verbosity,
+      outputCollecting : 1,
+      throwingExitCode : 0,
+    }
+
+    return _.process.start( options )
+    .then( ( op ) =>
+    {
+      console.log( op.output );
+      return null;
+    } )
+  }
+
+  function testApp2Error()
+  {
+    throw new Error();
+  }
+
+  function testApp2()
+  {
+    console.log( 'Log' );
+  }
 }
 
 //
