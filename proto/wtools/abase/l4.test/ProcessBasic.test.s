@@ -19109,7 +19109,7 @@ function startOptionStreamSizeLimit( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let modes = [ /*'shell', */'spawn', /*'fork' */]
+  let modes = [ 'shell', 'spawn' /*,'fork'*/ ];
 
   modes.forEach( ( mode ) =>
   {
@@ -19124,23 +19124,20 @@ function startOptionStreamSizeLimit( test )
 
   function run( mode )
   {
-    // let ready = new _.Consequence().take( null );
     let ready = _.take( null );
 
     ready.then( () =>
     {
-      test.case = 'data is less than streamSizeLimit ( default ) ';
+      test.case = `mode : ${ mode }, data is less than streamSizeLimit ( default )`;
 
       let testAppPath = a.path.nativize( a.program( testApp ) );
 
       let options =
       {
-        execPath : mode  === 'fork' ? testAppPath : 'node ' + testAppPath,
+        execPath : 'node ' + testAppPath,
         mode,
         sync : 1,
-        // streamSizeLimit : 10,
         outputCollecting : 1,
-        throwingExitCode :0
       }
 
       let returned =  _.process.start( options );
@@ -19156,48 +19153,47 @@ function startOptionStreamSizeLimit( test )
 
     ready.then( () =>
     {
-      test.case = 'data is equal to the streamSizeLimit';
+      test.case = `mode : ${ mode }, data is less than streamSizeLimit ( 20 )`;
 
       let testAppPath = a.path.nativize( a.program( testApp ) );
 
       let options =
       {
-        execPath : mode  === 'fork' ? testAppPath : 'node ' + testAppPath,
+        execPath : 'node ' + testAppPath,
+        mode,
+        sync : 1,
+        streamSizeLimit : 20,
+        outputCollecting : 1,
+      }
+
+      let returned =  _.process.start( options );
+      test.identical( returned.process.stdout.toString(), 'data1\n' );
+
+      a.fileProvider.fileDelete( testAppPath );
+
+      return returned;
+
+    });
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, data is equal to the streamSizeLimit`;
+
+      let testAppPath = a.path.nativize( a.program( testApp ) );
+
+      let options =
+      {
+        execPath : 'node ' + testAppPath,
         mode,
         sync : 1,
         streamSizeLimit : 10,
         outputCollecting : 1,
-        throwingExitCode :0
       }
 
       let returned =  _.process.start( options );
       test.identical( returned.process.stdout.toString(), 'data1\n' )
-      // console.log( 'process.stdout: ', returned.process.stdout.toString( 'utf-8' ) );
-      // console.log( 'RRR: ', returned )
-      // options.process.stdout.on( 'data', ( data ) =>
-      // {
-      //   data = data.toString();
-      //   console.log( 'DATA: ', data )
-      //   // if( _.strHas( data, 'ready' ))
-      //   // _.process.terminate( o.process );
-      // });
-
-      // returned
-      // .then( ( op ) =>
-      // {
-      //   // console.log( 'OP: ', op.process )
-      //   test.identical( op.exitCode, 0 );
-      //   test.identical( op.ended, true );
-      //   test.identical( op.output, 'da\n' )
-
-      //   a.fileProvider.fileDelete( testAppPath );
-      //   return null;
-      // })
-
-      // options.process.stdout.on( 'data', ( data ) =>
-      // {
-      //   console.log( 'DATA: ', data.toString() );
-      // } )
 
       a.fileProvider.fileDelete( testAppPath );
       return returned;
@@ -19208,23 +19204,26 @@ function startOptionStreamSizeLimit( test )
 
     ready.then( () =>
     {
-      test.case = 'data is bigger than streamSizeLimit';
+      test.case = `mode : ${ mode }, data is bigger than streamSizeLimit`;
 
       let testAppPath = a.path.nativize( a.program( testApp ) );
 
       let options =
       {
-        execPath : mode  === 'fork' ? testAppPath : 'node ' + testAppPath,
+        execPath : 'node ' + testAppPath,
         mode,
         sync : 1,
         streamSizeLimit : 4,
         outputCollecting : 1,
-        // throwingExitCode :0
       }
 
-      test.shouldThrowErrorSync( () => _.process.start( options ) );
-      // let returned =  _.process.start( options );
-      // test.identical( returned.process.stdout.toString(), 'data1\n' );
+      var returned = test.shouldThrowErrorSync( () => _.process.start( options ) )
+
+      test.is( _.errIs( returned ) );
+      test.is( _.strHas( returned.message, `spawnSync ${mode === 'shell' ? 'sh' : 'node' } ENOBUFS` ) )
+      test.is( _.strHas( returned.message, `code : 'ENOBUFS'`) )
+
+      test.notIdentical( options.exitCode, 0 );
 
       a.fileProvider.fileDelete( testAppPath );
       return null;
@@ -19238,8 +19237,6 @@ function startOptionStreamSizeLimit( test )
 
   function testApp()
   {
-    // process.send( 'data1data2data3data4data5data6' );
-    // console.log( 'data1data2data3data4data5data6' );
     console.log( 'data1' );
   }
 }
