@@ -3,7 +3,7 @@
 
 'use strict';
 
-let System, ChildProcess, StripAnsi, WindowsKill, WindowsProcessTree, Stream;
+let System, ChildProcess, StripAnsi, WindowsProcessTree, Stream;
 let _global = _global_;
 let _ = _global_.wTools;
 let Self = _.process = _.process || Object.create( null );
@@ -51,7 +51,11 @@ function startCommon_head( routine, args )
   _.assert( args.length === 1, 'Expects single argument' );
   _.assert( _.longHas( [ 'fork', 'spawn', 'shell' ], o.mode ), `Supports mode::[ 'fork', 'spawn', 'shell' ]. Unknown mode ${o.mode}` );
   _.assert( !!o.args || !!o.execPath, 'Expects {-args-} either {-execPath-}' )
-  _.assert( o.args === null || _.arrayIs( o.args ) || _.strIs( o.args ) );
+  _.assert
+  (
+    o.args === null || _.arrayIs( o.args ) || _.strIs( o.args ) || _.routineIs( o.args )
+    , `If defined option::arg should be either [ string, array, routine ], but it is ${_.strType( o.args )}`
+  );
   _.assert
   (
     o.timeOut === null || _.numberIs( o.timeOut ),
@@ -192,6 +196,7 @@ function startMinimal_body( o )
   runShell,
   end1,
   end2,
+  end3,
 
   handleClose,
   handleExit,
@@ -323,13 +328,14 @@ function startMinimal_body( o )
     /* */
 
     o.disconnect = disconnect;
+    o._end = end3;
     o.state = 'initial'; /* `initial`, `starting`, `started`, `terminating`, `terminated`, `disconnected` */
     o.exitReason = null;
     o.exitCode = null;
     o.exitSignal = null;
     o.error = null;
     o.process = null;
-    o.procedure = null;
+    // o.procedure = null;
     o.fullExecPath = null;
     o.output = o.outputCollecting ? '' : null;
     o.ended = false;
@@ -345,9 +351,12 @@ function startMinimal_body( o )
   function form3()
   {
 
-    if( _.arrayIs( o.args ) )
-    o.args = o.args.slice();
-    o.args = _.arrayAs( o.args );
+    // xxx yyy
+    // if( !o.dry )
+    if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
+    {
+      o.procedure = _.Procedure({ _stack : o.stack });
+    }
 
     if( _.strIs( o.execPath ) )
     {
@@ -360,6 +369,21 @@ function startMinimal_body( o )
       else
       o.execPath = null;
     }
+
+    if( _.routineIs( o.args ) )
+    o.args = o.args( o );
+    if( o.args === null )
+    o.args = [];
+
+    _.assert
+    (
+      /*o.args === null || */_.arrayIs( o.args ) || _.strIs( o.args )
+      , `If defined option::arg should be either [ string, array ], but it is ${_.strType( o.args )}`
+    );
+
+    if( _.arrayIs( o.args ) )
+    o.args = o.args.slice();
+    o.args = _.arrayAs( o.args );
 
     if( o.execPath === null )
     {
@@ -385,18 +409,6 @@ function startMinimal_body( o )
     _.assert( _.numberIs( o.verbosity ) );
     _.assert( _.boolLike( o.outputPiping ) );
     _.assert( _.boolLike( o.outputCollecting ) );
-
-    // if( o.outputCollecting && !o.output )
-    // o.output = ''; /* xxx : test for multiple run? to which o-map does it collect output? */
-    //
-    // /* stdio compatibility check */
-    // if( Config.debug )
-    // if( o.outputPiping || o.outputCollecting )
-    // _.assert
-    // (
-    //   o.stdio === 'pipe' || o.stdio[ 1 ] === 'pipe' || o.stdio[ 2 ] === 'pipe'
-    //   , '"stdout" is not available to collect output or pipe it. Set stdout/stderr channel(s) or option::stdio to "pipe", please'
-    // );
 
     /* passingThrough */
 
@@ -435,6 +447,9 @@ function startMinimal_body( o )
       o.handleProcedureTerminationBegin = handleProcedureTerminationBegin;
     }
 
+    /* if map already has error, running should not start */
+    if( o.error )
+    throw o.error;
   }
 
   /* */
@@ -451,7 +466,6 @@ function startMinimal_body( o )
         o.ready.give( 1 );
         if( readyCallback )
         o.ready.finally( readyCallback );
-
         if( o.when.delay )
         _.time.sleep( o.when.delay );
 
@@ -470,7 +484,7 @@ function startMinimal_body( o )
     else
     {
       if( o.when.delay )
-      o.ready.timeOut( o.when.delay );
+      o.ready.delay( o.when.delay );
 
       o.ready.thenGive( run2 );
 
@@ -536,15 +550,21 @@ function startMinimal_body( o )
 
     /* procedure */
 
-    if( !o.dry )
-    if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
+    // if( !o.dry ) /* xxx yyy */
+    // if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
+    if( o.procedure )
     {
+      let name = 'PID:' + o.process.pid;
       if( Config.debug )
       {
-        let result = _.procedure.find( 'PID:' + o.process.pid );
+        let result = _.procedure.find( name );
         _.assert( result.length === 0, `No procedure expected for child process with pid:${o.process.pid}` );
       }
-      o.procedure = _.procedure.begin({ _name : 'PID:' + o.process.pid, _object : o.process, _stack : o.stack });
+      // o.procedure = _.procedure.begin({ _name : name, _object : o.process, _stack : o.stack });
+      // debugger;
+      o.procedure._object = o.process;
+      o.procedure.name( name );
+      o.procedure.begin();
     }
 
     /* state */
@@ -650,23 +670,6 @@ function startMinimal_body( o )
 
   /* */
 
-  function timeOutForm()
-  {
-
-    if( o.timeOut && !o.dry )
-    if( !o.sync || o.deasync )
-    _.time.begin( o.timeOut, () =>
-    {
-      if( o.state === 'terminated' || o.error )
-      return;
-      o.exitReason = 'time'; /* qqq for Yevhen : cover termination on time out */
-      _.process.terminate({ pnd : o.process, withChildren : 1 });
-    });
-
-  }
-
-  /* */
-
   function end1()
   {
     if( o.deasync )
@@ -680,12 +683,36 @@ function startMinimal_body( o )
 
   /* */
 
-  function end2( err, consequence )
+  function end2( err, consequence ) /* xxx : remove 2-nd argument */
+  {
+
+    if( Config.debug )
+    try
+    {
+      _.assert( o.state === 'terminated' || o.state === 'disconnected' || !!o.error );
+      _.assert( o.ended === false );
+    }
+    catch( err2 )
+    {
+      err = err || err2;
+    }
+
+    if( err )
+    o.error = o.error || err;
+
+    return end3();
+  }
+
+  /* */
+
+  function end3()
   {
 
     if( o.procedure )
     if( o.procedure.isAlive() )
     o.procedure.end();
+    else
+    o.procedure.finit();
 
     if( o.handleProcedureTerminationBegin )
     {
@@ -701,43 +728,40 @@ function startMinimal_body( o )
       o.logger.error( decoratedErrorOutput );
     }
 
-    if( err )
-    o.error = o.error || err;
-
-    if( Config.debug )
-    try
-    {
-      _.assert( o.state === 'terminated' || o.state === 'disconnected' || !!o.error );
-      _.assert( o.ended === false );
-    }
-    catch( err2 )
-    {
-      err = err || err2;
-    }
-
     o.ended = true;
     Object.freeze( o );
 
+    let consequence = o.state === 'disconnected' ? o.conDisconnect : o.conTerminate;
+
     /* `initial`, `starting`, `started`, `terminating`, `terminated`, `disconnected` */
-    if( err )
+    if( o.error )
     {
-      debugger;
       /* yyy xxx : give error to all not-signaled consequences */
 
-      // console.log( `o.state : ${o.state}` );
       if( o.state === 'initial' || o.state === 'starting' )
-      o.conStart.error( err );
-      if( o.state !== 'terminated' && o.state !== 'disconnected' )
-      o.conDisconnect.error( err );
-      consequence.error( err );
-      o.ready.error( err );
+      o.conStart.error( o.error );
+
+      consequence.error( o.error );
+
+      if( o.conTerminate === consequence )
+      o.conDisconnect.error( o.error );
+      else
+      o.conTerminate.error( o.error );
+
+      o.ready.error( o.error );
       if( o.sync && !o.deasync )
-      throw _.err( err );
+      throw _.err( o.error );
     }
     else
     {
       /* xxx : give attended error to all not-signaled consequences? */
       consequence.take( o );
+
+      if( o.conTerminate === consequence )
+      o.conDisconnect.error( _.dont );
+      else
+      o.conTerminate.error( _.dont );
+
       o.ready.take( o );
     }
 
@@ -914,6 +938,8 @@ function startMinimal_body( o )
     if( this.procedure )
     if( this.procedure.isAlive() )
     this.procedure.end();
+    else
+    this.procedure.finit();
 
     if( !this.ended )
     {
@@ -922,6 +948,23 @@ function startMinimal_body( o )
     }
 
     return true;
+  }
+
+  /* */
+
+  function timeOutForm()
+  {
+
+    if( o.timeOut && !o.dry )
+    if( !o.sync || o.deasync )
+    _.time.begin( o.timeOut, () =>
+    {
+      if( o.state === 'terminated' || o.error )
+      return;
+      o.exitReason = 'time'; /* qqq for Yevhen : cover termination on time out */
+      _.process.terminate({ pnd : o.process, withChildren : 1 });
+    });
+
   }
 
   /* */
@@ -1219,7 +1262,7 @@ function startMinimal_body( o )
   {
 
     if( _.bufferAnyIs( data ) )
-    data = _.bufferToStr( data ); /* qqq for Yevhen use more optimal condition and routine to convert buffer here and in other places */
+    data = _.bufferToStr( data ); /* qqq for Yevhen : use more optimal condition and routine to convert buffer here and in other places */
     if( o.outputGraying )
     data = StripAnsi( data );
 
@@ -1563,7 +1606,6 @@ function start_body( o )
     o.exitCode = null;
     o.exitSignal = null;
     o.error = null;
-    o.procedure = null;
     o.output = o.outputCollecting ? '' : null;
     o.ended = false;
 
@@ -1588,10 +1630,15 @@ function start_body( o )
     if( o.stdio[ 1 ] !== 'ignore' || o.stdio[ 2 ] !== 'ignore' )
     formStreams();
 
-    if( !o.dry ) /* xxx : remove dry? */
+    // if( !o.dry ) /* xxx : remove dry? */
     if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
+    o.procedure = _.procedure.begin({ _object : o, _stack : o.stack });
+    else if( o.procedure )
     {
-      o.procedure = _.procedure.begin({ _object : o, _stack : o.stack });
+      /* qqq xxx : cover */
+      debugger;
+      if( !o.procedure.isAlive() )
+      o.procedure.begin();
     }
 
     if( o.sync && !o.deasync )
@@ -1609,7 +1656,8 @@ function start_body( o )
 
   function run2()
   {
-    let prevReady = new _.Consequence().take( null );
+    let firstReady = new _.Consequence().take( null );
+    let prevReady = firstReady;
     let readies = [];
     let conStart = [];
     let conTerminate = [];
@@ -1619,37 +1667,27 @@ function start_body( o )
     for( let p = 0 ; p < execPath.length ; p++ )
     for( let c = 0 ; c < currentPath.length ; c++ )
     {
-
       let currentReady = new _.Consequence();
-      readies.push( currentReady );
-
-      if( o.concurrent ) /* xxx : coverage? */
-      {
-        prevReady.then( currentReady );
-      }
-      else
-      {
-        prevReady.finally( currentReady );
-        prevReady = currentReady;
-      }
-
       let o2 = _.mapExtend( null, o );
       o2.conStart = null;
       o2.conTerminate = null;
       o2.conDisconnect = null;
       o2.execPath = execPath[ p ];
-      o2.args = o.args ? o.args.slice() : o.args;
+      o2.args = _.arrayIs( o.args ) ? o.args.slice() : o.args;
       o2.currentPath = currentPath[ c ];
       o2.ready = currentReady;
       delete o2.runs;
       delete o2.output;
-      delete o2.state;
       delete o2.exitReason;
       delete o2.exitCode;
       delete o2.exitSignal;
       delete o2.error;
       delete o2.ended;
       delete o2.concurrent;
+      delete o2.state;
+
+      if( !!o.procedure )
+      o2.procedure = _.Procedure({ _stack : o.stack });
 
       if( o.deasync )
       {
@@ -1658,34 +1696,77 @@ function start_body( o )
       }
 
       o.runs.push( o2 );
-      _.assertMapHasAll( o2, _.process.startMinimal.defaults );
-      _.process.startMinimal.body.call( _.process, o2 );
+    }
 
+    o.runs.forEach( ( o2, i ) =>
+    {
+
+      if( o.concurrent ) /* xxx : coverage? */
+      {
+        prevReady.then( o2.ready );
+      }
+      else
+      {
+        if( o.sync && !o.deasync )
+        prevReady.finally( o2.ready );
+        else
+        prevReady.then( o2.ready );
+        prevReady = o2.ready;
+      }
+
+      try
+      {
+        _.assertMapHasAll( o2, _.process.startMinimal.defaults );
+        debugger;
+        _.process.startMinimal.body.call( _.process, o2 );
+        debugger;
+      }
+      catch( err )
+      {
+        debugger;
+        o2.ready.error( err );
+      }
+
+      /* xxx : if error consequence could be not here */
       conStart.push( o2.conStart );
       conTerminate.push( o2.conTerminate );
+      readies.push( o2.ready );
 
       if( o.streamOut || o.streamErr )
       processPipe( o2 );
 
-    }
+      if( !o.concurrent )
+      o2.ready.catch( ( err ) =>
+      {
+        o.error = o.error || err;
+        if( o.state !== 'terminated' )
+        serialEnd();
+        throw err;
+      });
 
-    // if( o.concurrent )
-    // _.Consequence.AndKeep( ... conStart ).tap( ( err, arg ) =>
-    // {
-    //   o.conStart.take( err, err ? undefined : o );
-    // });
-    // else
-    // _.Consequence.OrKeep( ... conStart ).tap( ( err, arg ) =>
-    // {
-    //   o.conStart.take( err, err ? undefined : o );
-    // });
-    //
-    // _.Consequence.AndKeep( ... conTerminate ).tap( ( err, arg ) =>
-    // {
-    //   o.conTerminate.take( err, err ? undefined : o );
-    // });
+    });
 
-    return _.Consequence.AndKeep( ... readies );
+    debugger;
+
+    if( o.concurrent )
+    _.Consequence.AndImmediate( ... conStart ).tap( ( err, arg ) =>
+    {
+      o.conStart.take( err, err ? undefined : o );
+    });
+    else
+    _.Consequence.OrKeep( ... conStart ).tap( ( err, arg ) =>
+    {
+      o.conStart.take( err, err ? undefined : o );
+    });
+
+    _.Consequence.AndImmediate( ... conTerminate ).tap( ( err, arg ) =>
+    {
+      o.conTerminate.take( err, err ? undefined : o );
+    });
+
+    let ready = _.Consequence.AndImmediate( ... readies );
+
+    return ready;
   }
 
   /* */
@@ -1705,20 +1786,25 @@ function start_body( o )
 
   function end2( err, arg )
   {
+    // debugger;
+    _.assert( o.state !== 'terminated' ); /* xxx */
     o.state = 'terminated';
     o.ended = true;
 
     if( !o.error && err )
     o.error = err;
 
+    if( o.procedure )
     if( o.procedure.isAlive() )
     o.procedure.end();
+    else
+    o.procedure.finit();
 
-    if( o.exitCode === null && !o.exitSginal )
+    if( o.exitCode === null && o.exitSignal === null )
     for( let a = 0 ; a < o.runs.length ; a++ )
     {
       let o2 = o.runs[ a ];
-      if( o2.exitCode || o2.exitSginal !== null )
+      if( o2.exitCode || o2.exitSignal !== null )
       {
         o.exitCode = o2.exitCode;
         o.exitSignal = o2.exitSignal;
@@ -1734,26 +1820,58 @@ function start_body( o )
       if( o2.error )
       {
         o.error = o2.error;
+        if( !o.exitReason )
         o.exitReason = o2.exitReason;
         break;
       }
     }
 
-    if( 0 ) // xxx yyy
-    if( o.outputCollecting )
-    for( let a = 0 ; a < o.runs.length ; a++ )
-    {
-      let o2 = o.runs[ a ];
-      o.output += o2.output;
-    }
+    if( !o.exitReason )
+    o.exitReason = 'normal';
+
+    // if( 0 ) // xxx yyy
+    // if( o.outputCollecting )
+    // for( let a = 0 ; a < o.runs.length ; a++ )
+    // {
+    //   let o2 = o.runs[ a ];
+    //   o.output += o2.output;
+    // }
 
     if( err && !o.error )
     o.error = err;
 
+    if( err && !o.concurrent )
+    serialEnd();
+
+    Object.freeze( o );
     if( err )
     throw err;
-
     return o;
+  }
+
+  /* */
+
+  function serialEnd()
+  {
+    debugger;
+    o.runs.forEach( ( o2 ) =>
+    {
+      if( o2.ended )
+      return;
+      try
+      {
+        o2.error = o2.error || o.error;
+        if( !o2.state )
+        return;
+        o2._end();
+        _.assert( !!o2.ended );
+      }
+      catch( err2 )
+      {
+        debugger;
+        o.logger.error( _.err( err2 ) );
+      }
+    });
   }
 
   /* */
@@ -1797,9 +1915,11 @@ function start_body( o )
   function processPipe( o2 )
   {
 
-    if( 0 ) // xxx yyy
+    // if( 0 ) // xxx yyy
     o2.conStart.tap( ( err, op2 ) =>
     {
+      if( err )
+      return;
       if( o2.process.stdout )
       streamPipe( o.streamOut, o2.process.stdout );
       if( o2.process.stderr )
@@ -1816,7 +1936,6 @@ function start_body( o )
     if( o.sync && !o.deasync )
     {
       dst.write( src );
-      // handleStreamOut( src );
       /* xxx : need also take care of emitting end in sync case */
       return;
     }
@@ -1828,7 +1947,6 @@ function start_body( o )
     }
 
     _.assert( !!src && !!src.pipe );
-    // dst._pipes.push( src );
     _.arrayAppendOnceStrictly( dst._pipes, src );
     src.pipe( dst, { end : false } );
 
@@ -2508,102 +2626,6 @@ function exitWithBeep()
   return exitCode;
 }
 
-//
-
-_realGlobal_._exitHandlerRepairDone = _realGlobal_._exitHandlerRepairDone || 0;
-_realGlobal_._exitHandlerRepairTerminating = _realGlobal_._exitHandlerRepairTerminating || 0;
-function _exitHandlerRepair()
-{
-
-  _.assert( arguments.length === 0, 'Expects no arguments' );
-
-  if( _realGlobal_._exitHandlerRepairDone )
-  return;
-  _realGlobal_._exitHandlerRepairDone = 1;
-
-  if( !_global.process )
-  return;
-
-  // process.on( 'SIGHUP', handle_functor( 'SIGHUP', 1 ) ); /* xxx : experiment? */
-  process.on( 'SIGQUIT', handle_functor( 'SIGQUIT', 3 ) );
-  process.on( 'SIGINT', handle_functor( 'SIGINT' ), 2 );
-  process.on( 'SIGTERM', handle_functor( 'SIGTERM' ), 15 );
-  process.on( 'SIGUSR1', handle_functor( 'SIGUSR1' ), 16 );
-  process.on( 'SIGUSR2', handle_functor( 'SIGUSR2' ), 17 );
-
-  function handle_functor( signal, signalCode )
-  {
-    return function handle()
-    {
-      console.log( signal );
-      if( _realGlobal_._exitHandlerRepairTerminating )
-      return;
-      _realGlobal_._exitHandlerRepairTerminating = 1;
-      _.time.begin( _.process._sanitareTime, () => /* xxx : experiment to remove delay */
-      {
-        try
-        {
-          process.removeListener( signal, handle );
-          if( !process._exiting )
-          {
-            try
-            {
-              process._exiting = true;
-              process.emit( 'exit', 128 + signalCode );
-            }
-            catch( err )
-            {
-              console.error( _.err( err ) );
-            }
-            process.kill( process.pid, signal );
-          }
-        }
-        catch( err )
-        {
-          console.log( `Error on signal ${signal}` );
-          console.log( err.toString() );
-          console.log( err.stack );
-          process.removeAllListeners( 'exit' );
-          process.exit();
-        }
-      });
-    }
-  }
-
-}
-
-//
-
-function _eventExitSetup()
-{
-
-  _.assert( arguments.length === 0, 'Expects no arguments' );
-
-  if( !_global.process )
-  return;
-
-  if( !_.process._registeredExitHandler )
-  {
-    _global.process.once( 'exit', _.process._eventExitHandle );
-    _.process._registeredExitHandler = _.process._eventExitHandle;
-    // process.once( 'SIGINT', onExitHandler );
-    // process.once( 'SIGTERM', onExitHandler );
-  }
-
-}
-
-//
-
-function _eventExitHandle()
-{
-  let args = arguments;
-  _.process.eventGive({ event : 'exit', args });
-  process.removeListener( 'exit', _.process._registeredExitHandler );
-  // process.removeListener( 'SIGINT', _.process._registeredExitHandler );
-  // process.removeListener( 'SIGTERM', _.process._registeredExitHandler );
-  _.process._ehandler.events.exit.splice( 0, _.process._ehandler.events.exit.length );
-}
-
 // --
 // children
 // --
@@ -3055,10 +3077,6 @@ let Extension =
   exitCode,
   exit,
   exitWithBeep,
-
-  _exitHandlerRepair, /* zzz */
-  _eventExitSetup,
-  _eventExitHandle,
 
   // children
 
