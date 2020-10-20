@@ -17591,6 +17591,163 @@ function startOptionOutputPrefixing( test )
 
 //
 
+function startOptionOutputPiping( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+
+  /* */
+
+  let modes = [ 'fork', 'spawn', 'shell' ];
+
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+
+  return a.ready;
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputPiping : 0, outputCollecting : 1, normal output`
+      // let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+
+      // let locals =
+      // {
+      //   toolsPath : _.path.nativize( _.module.toolsPathGet() ),
+      //   piping : 0,
+      //   programPath : testAppPath2,
+      //   mode,
+      // }
+
+      // let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.path.nativize( a.program( testApp ) );
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+        outputPiping : 0
+      })
+      .then( ( op ) =>
+      {
+        console.log( 'OP1: ', op.output )
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.is( _.strHas( op.output, 'Log' ) );
+        // test.is( _.strHas( op.output, 'null\n' ) );
+        // test.identical( op.output, 'null\n' );
+
+        a.fileProvider.fileDelete( testAppPath );
+        // a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputPiping : 1, outputCollecting : 1, normal output`
+
+      let testAppPath = a.path.nativize( a.program( testApp ) );
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+        outputPiping : 1
+      })
+      .then( ( op ) =>
+      {
+        console.log( 'OP1: ', op.output )
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.is( _.strHas( op.output, 'Log' ) );
+
+        a.fileProvider.fileDelete( testAppPath );
+
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputPiping : 0, outputCollecting : 1, error output`
+      let testAppPath = a.path.nativize( a.program( testAppError ) );
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+        outputPiping : 0,
+        throwingExitCode : 0
+      })
+      .then( ( op ) =>
+      {
+        console.log( 'OP1: ', op.output )
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.is( _.strHas( op.output, 'Log' ) );
+        a.fileProvider.fileDelete( testAppPath );
+
+        return null;
+      })
+
+    })
+
+    return ready;
+  }
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    // let options =
+    // {
+    //   execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+    //   mode,
+    //   inputMirroring : 0,
+    //   outputPiping : piping,
+    //   throwingExitCode : 0
+    // }
+
+    // return _.process.start( options )
+    // .then( ( op ) =>
+    // {
+    //   console.log( op.output );
+    //   return null;
+    // } )
+    console.log( 'Log' )
+  }
+
+  function testAppError()
+  {
+    throw new Error();
+  }
+
+  function testApp2()
+  {
+    console.log( 'Log' );
+  }
+}
+
+//
+
+function startOptionInputMirroring()
+{
+}
+
+//
+
 function startOptionLogger( test )
 {
   let context = this;
@@ -28855,6 +29012,8 @@ var Proto =
     startOptionOutputCollecting,
     startOptionOutputGraying,
     startOptionOutputPrefixing,
+    startOptionOutputPiping,
+    startOptionInputMirroring,
     startOptionLogger,
     startOptionLoggerTransofrmation,
     startOutputOptionsCompatibilityLateCheck,
