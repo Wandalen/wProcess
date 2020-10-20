@@ -447,7 +447,6 @@ function startMinimal_body( o )
     }
 
     /* if map already has error, running should not start */
-    debugger;
     if( o.error )
     throw o.error;
   }
@@ -504,10 +503,20 @@ function startMinimal_body( o )
 
     try
     {
+
       form3();
       run3();
       timeOutForm();
       pipe();
+
+      if( o.sync && !o.deasync )
+      {
+        if( o.process.error )
+        handleError( o.process.error );
+        else
+        handleClose( o.process.status, o.process.signal );
+      }
+
       if( o.dry )
       {
         /* qqq for Yevhen : make sure option dry is covered good enough */
@@ -518,6 +527,7 @@ function startMinimal_body( o )
     }
     catch( err )
     {
+      debugger;
       handleError( err );
     }
 
@@ -552,16 +562,17 @@ function startMinimal_body( o )
     // if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
     if( o.procedure )
     {
-      let name = 'PID:' + o.process.pid;
-      if( Config.debug )
+      if( o.process )
       {
-        let result = _.procedure.find( name );
-        _.assert( result.length === 0, `No procedure expected for child process with pid:${o.process.pid}` );
+        let name = 'PID:' + o.process.pid;
+        if( Config.debug )
+        {
+          let result = _.procedure.find( name );
+          _.assert( result.length === 0, `No procedure expected for child process with pid:${o.process.pid}` );
+        }
+        o.procedure.name( name );
       }
-      // o.procedure = _.procedure.begin({ _name : name, _object : o.process, _stack : o.stack });
-      // debugger;
       o.procedure._object = o.process;
-      o.procedure.name( name );
       o.procedure.begin();
     }
 
@@ -726,6 +737,9 @@ function startMinimal_body( o )
       o.logger.error( decoratedErrorOutput );
     }
 
+    if( o.exitReason === null && o.error )
+    o.exitReason = 'error';
+
     o.ended = true;
     Object.freeze( o );
 
@@ -784,6 +798,12 @@ function startMinimal_body( o )
     if( o.process && o.process.signalCode === undefined )
     o.process.signalCode = exitSignal;
 
+    if( o.error )
+    {
+      debugger; /* xxx : check */
+      throw err;
+    }
+
     if( exitSignal )
     o.exitReason = 'signal';
     else if( exitCode )
@@ -812,7 +832,8 @@ function startMinimal_body( o )
 
       if( o.sync && !o.deasync )
       {
-        throw o.error;
+        end2( o.error/*, o.conTerminate */ );
+        // throw o.error;
       }
       else
       {
@@ -863,7 +884,7 @@ function startMinimal_body( o )
 
     if( o.sync && !o.deasync )
     {
-      throw o.error;
+      throw o.error; /* xxx2 : remove branching? */
     }
     else
     {
@@ -1005,10 +1026,10 @@ function startMinimal_body( o )
 
     if( o.sync && !o.deasync )
     {
-      if( o.process.error )
-      handleError( o.process.error );
-      else
-      handleClose( o.process.status, o.process.signal );
+      // if( o.process.error )
+      // handleError( o.process.error );
+      // else
+      // handleClose( o.process.status, o.process.signal );
     }
     else
     {
@@ -1714,13 +1735,13 @@ function start_body( o )
       try
       {
         _.assertMapHasAll( o2, _.process.startMinimal.defaults );
-        debugger;
+        // debugger;
         _.process.startMinimal.body.call( _.process, o2 );
-        debugger;
+        // debugger;
       }
       catch( err )
       {
-        debugger;
+        // debugger;
         o2.ready.error( err );
       }
 
@@ -1742,8 +1763,6 @@ function start_body( o )
       });
 
     });
-
-    debugger;
 
     if( o.concurrent )
     _.Consequence.AndImmediate( ... conStart ).tap( ( err, arg ) =>
@@ -1772,8 +1791,10 @@ function start_body( o )
   {
     if( readyCallback )
     o.ready.finally( readyCallback );
+    // console.log( 'end1:a' );
     if( o.deasync )
     o.ready.deasync();
+    // console.log( 'end1:b' );
     if( o.sync )
     return o.ready.sync();
     return o.ready;
@@ -1836,18 +1857,7 @@ function start_body( o )
     }
 
     if( !o.exitReason )
-    o.exitReason = 'normal';
-
-    // if( 0 ) // xxx yyy
-    // if( o.outputCollecting )
-    // for( let a = 0 ; a < o.runs.length ; a++ )
-    // {
-    //   let o2 = o.runs[ a ];
-    //   o.output += o2.output;
-    // }
-
-    if( err && !o.error )
-    o.error = err;
+    o.exitReason = o.error ? 'error' : 'normal';
 
     if( err && !o.concurrent )
     serialEnd();
@@ -1862,7 +1872,7 @@ function start_body( o )
 
   function serialEnd()
   {
-    debugger;
+    // debugger;
     o.runs.forEach( ( o2 ) =>
     {
       if( o2.ended )

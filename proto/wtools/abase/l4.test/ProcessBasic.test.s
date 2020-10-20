@@ -14296,7 +14296,7 @@ function startOnStart( test )
         test.is( !_.process.isAlive( o.process.pid ) )
         test.identical( o.exitCode, null );
         test.identical( o.exitSignal, null );
-        test.identical( o.conTerminate.resourcesCount(), 0 );
+        test.identical( o.conTerminate.resourcesCount(), 1 );
         return null;
       })
 
@@ -14426,8 +14426,8 @@ function startOnTerminate( test )
         test.identical( o.ended, true );
         test.identical( track, [] );
         test.identical( o.conTerminate.argumentsCount(), 0 );
-        test.identical( o.conTerminate.errorsCount(), 0 );
-        test.identical( o.conTerminate.competitorsCount(), 1 );
+        test.identical( o.conTerminate.errorsCount(), 1 );
+        test.identical( o.conTerminate.competitorsCount(), 0 );
         test.is( !_.process.isAlive( o.process.pid ) );
         o.conTerminate.cancel();
         return null;
@@ -14892,7 +14892,7 @@ function startOnIsNotConsequence( test )
 
       return _.time.out( context.t2, () =>
       {
-        test.identical( track, [ 'conStart', 'conTerminate', 'ready', 'returned' ] );
+        test.identical( track, [ 'conStart', 'conTerminate', 'conDisconnect', 'ready', 'returned' ] );
       });
     })
 
@@ -14925,7 +14925,7 @@ function startOnIsNotConsequence( test )
       })
       return _.time.out( context.t2, () =>
       {
-        test.identical( track, [ 'conStart', 'conTerminate', 'ready', 'returned' ] );
+        test.identical( track, [ 'conStart', 'conTerminate', 'conDisconnect', 'ready', 'returned' ] );
       });
     })
 
@@ -14956,7 +14956,7 @@ function startOnIsNotConsequence( test )
 
       return _.time.out( context.t2, () =>
       {
-        test.identical( track, [ 'conStart', 'conTerminate', 'ready', 'returned' ] );
+        test.identical( track, [ 'conStart', 'conTerminate', 'conDisconnect', 'ready', 'returned' ] );
       });
     })
 
@@ -14988,7 +14988,7 @@ function startOnIsNotConsequence( test )
 
       return _.time.out( context.t2, () =>
       {
-        test.identical( track, [ 'conStart', 'conDisconnect', 'ready', 'returned' ] );
+        test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate', 'ready', 'returned' ] );
       });
     })
 
@@ -15537,12 +15537,12 @@ function startConcurrentConsequencesMultiple( test )
   }
 
   // xxx
-  let modes = [ 'spawn' ];
-  // let modes = [ 'fork', 'spawn', 'shell' ];
-  // modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
+  // let modes = [ 'spawn' ];
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run( 1, 0, mode ) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => run( 1, 1, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 1, mode ) ) );
   return a.ready;
 
   /* - */
@@ -15552,124 +15552,21 @@ function startConcurrentConsequencesMultiple( test )
     let ready = _.Consequence().take( null );
 
     if( mode === 'fork' && sync && !deasync )
-    return;
-
-    /* */
-
-//     ready.then( function( arg )
-//     {
-//       test.case = `sync:${sync} deasync:${deasync} mode:${mode} concurrent:0 arg arg`;
-//
-//       track = [];
-//       var time1 = _.time.now();
-//       var execPath = mode === `fork` ? `${programPath}` : `node ${programPath}`;
-//       var o2 =
-//       {
-//         execPath : [ execPath, execPath ],
-//         args : ( op ) => [ `id:${op.procedure.id}` ],
-//         conStart : _.Consequence(),
-//         conTerminate : _.Consequence(),
-//         ready : _.Consequence().take( null ),
-//         concurrent : 0,
-//         sync,
-//         deasync,
-//         mode,
-//       }
-//
-//       var options = _.mapSupplement( null, o2, o3 );
-//       var returned = _.process.start( options );
-//
-//       processTrack( options );
-//
-//       options.conStart.tap( ( err, op ) =>
-//       {
-//         op.runs.forEach( ( op2 ) =>
-//         {
-//           processTrack( op2 );
-//         });
-//       });
-//
-//       options.ready.tap( function( err, op )
-//       {
-//         var exp =
-// `
-// ${options.runs[ 0 ].procedure.id}.begin
-// ${options.runs[ 0 ].procedure.id}.end
-// ${options.runs[ 1 ].procedure.id}.begin
-// ${options.runs[ 1 ].procedure.id}.end
-// `
-//         test.equivalent( options.output, exp );
-//         var exp =
-//         [
-//           `${options.procedure.id}.conStart`,
-//           `${options.runs[ 0 ].procedure.id}.conStart`,
-//           `${options.runs[ 0 ].procedure.id}.conTerminate`,
-//           `${options.runs[ 0 ].procedure.id}.conDisconnect.dont`,
-//           `${options.runs[ 1 ].procedure.id}.conStart`,
-//           `${options.runs[ 0 ].procedure.id}.ready`,
-//           `${options.runs[ 1 ].procedure.id}.conTerminate`,
-//           `${options.runs[ 1 ].procedure.id}.conDisconnect.dont`,
-//           `${options.runs[ 1 ].procedure.id}.ready`,
-//           `${options.procedure.id}.conTerminate`,
-//           `${options.procedure.id}.ready`,
-//         ]
-//         if( options.deasync || options.sync )
-//         exp =
-//         [
-//           `${options.procedure.id}.conStart`,
-//           `${options.procedure.id}.conTerminate`,
-//           `${options.procedure.id}.ready`,
-//           `${options.runs[ 0 ].procedure.id}.conStart`,
-//           `${options.runs[ 0 ].procedure.id}.conTerminate`,
-//           `${options.runs[ 0 ].procedure.id}.conDisconnect.dont`,
-//           `${options.runs[ 0 ].procedure.id}.ready`,
-//           `${options.runs[ 1 ].procedure.id}.conStart`,
-//           `${options.runs[ 1 ].procedure.id}.conTerminate`,
-//           `${options.runs[ 1 ].procedure.id}.conDisconnect.dont`,
-//           `${options.runs[ 1 ].procedure.id}.ready`,
-//         ]
-//         test.identical( track, exp );
-//
-//         test.identical( options.exitCode, null );
-//         test.identical( options.ended, true );
-//         test.identical( options.exitReason, 'normal' );
-//         test.identical( options.exitSignal, null );
-//         test.identical( options.state, 'terminated' );
-//         test.identical( options.error, null );
-//
-//         test.identical( options.runs[ 0 ].exitCode, 0 );
-//         test.identical( options.runs[ 0 ].ended, true );
-//         test.identical( options.runs[ 0 ].exitReason, 'normal' );
-//         test.identical( options.runs[ 0 ].exitSignal, null );
-//         test.identical( options.runs[ 0 ].state, 'terminated' );
-//         test.identical( options.error, null );
-//
-//         test.identical( options.runs[ 1 ].exitCode, 0 );
-//         test.identical( options.runs[ 1 ].ended, true );
-//         test.identical( options.runs[ 1 ].exitReason, 'normal' );
-//         test.identical( options.runs[ 1 ].exitSignal, null );
-//         test.identical( options.runs[ 1 ].state, 'terminated' );
-//         test.identical( options.error, null );
-//
-//       })
-//
-//       return returned;
-//     })
+    return null;
 
     /* */
 
     ready.then( function( arg )
     {
-      test.case = `sync:${sync} deasync:${deasync} mode:${mode} concurrent:0 err arg`;
+      test.case = `sync:${sync} deasync:${deasync} mode:${mode} concurrent:0 arg arg`;
 
       track = [];
       var time1 = _.time.now();
-      var counter = 0;
       var execPath = mode === `fork` ? `${programPath}` : `node ${programPath}`;
       var o2 =
       {
         execPath : [ execPath, execPath ],
-        args : ( op ) => [ `id:${op.procedure.id} throwing:${++counter === 1 ? 1 : 0}` ],
+        args : ( op ) => [ `id:${op.procedure.id}` ],
         conStart : _.Consequence(),
         conTerminate : _.Consequence(),
         ready : _.Consequence().take( null ),
@@ -15681,7 +15578,115 @@ function startConcurrentConsequencesMultiple( test )
 
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.start( options );
-      debugger;
+
+      processTrack( options );
+
+      options.conStart.tap( ( err, op ) =>
+      {
+        op.runs.forEach( ( op2 ) =>
+        {
+          processTrack( op2 );
+        });
+      });
+
+      options.ready.tap( function( err, op )
+      {
+        var exp =
+`
+${options.runs[ 0 ].procedure.id}.begin
+${options.runs[ 0 ].procedure.id}.end
+${options.runs[ 1 ].procedure.id}.begin
+${options.runs[ 1 ].procedure.id}.end
+`
+        test.equivalent( options.output, exp );
+        var exp =
+        [
+          `${options.procedure.id}.conStart`,
+          `${options.runs[ 0 ].procedure.id}.conStart`,
+          `${options.runs[ 0 ].procedure.id}.conTerminate`,
+          `${options.runs[ 0 ].procedure.id}.conDisconnect.dont`,
+          `${options.runs[ 1 ].procedure.id}.conStart`,
+          `${options.runs[ 0 ].procedure.id}.ready`,
+          `${options.runs[ 1 ].procedure.id}.conTerminate`,
+          `${options.runs[ 1 ].procedure.id}.conDisconnect.dont`,
+          `${options.runs[ 1 ].procedure.id}.ready`,
+          `${options.procedure.id}.conTerminate`,
+          `${options.procedure.id}.ready`,
+        ]
+        if( options.deasync || options.sync )
+        exp =
+        [
+          `${options.procedure.id}.conStart`,
+          `${options.procedure.id}.conTerminate`,
+          `${options.procedure.id}.ready`,
+          `${options.runs[ 0 ].procedure.id}.conStart`,
+          `${options.runs[ 0 ].procedure.id}.conTerminate`,
+          `${options.runs[ 0 ].procedure.id}.conDisconnect.dont`,
+          `${options.runs[ 0 ].procedure.id}.ready`,
+          `${options.runs[ 1 ].procedure.id}.conStart`,
+          `${options.runs[ 1 ].procedure.id}.conTerminate`,
+          `${options.runs[ 1 ].procedure.id}.conDisconnect.dont`,
+          `${options.runs[ 1 ].procedure.id}.ready`,
+        ]
+        test.identical( track, exp );
+
+        test.identical( options.exitCode, 0 );
+        test.identical( options.ended, true );
+        test.identical( options.exitReason, 'normal' );
+        test.identical( options.exitSignal, null );
+        test.identical( options.state, 'terminated' );
+        test.identical( options.error, null );
+
+        test.identical( options.runs[ 0 ].exitCode, 0 );
+        test.identical( options.runs[ 0 ].ended, true );
+        test.identical( options.runs[ 0 ].exitReason, 'normal' );
+        test.identical( options.runs[ 0 ].exitSignal, null );
+        test.identical( options.runs[ 0 ].state, 'terminated' );
+        test.identical( options.error, null );
+
+        test.identical( options.runs[ 1 ].exitCode, 0 );
+        test.identical( options.runs[ 1 ].ended, true );
+        test.identical( options.runs[ 1 ].exitReason, 'normal' );
+        test.identical( options.runs[ 1 ].exitSignal, null );
+        test.identical( options.runs[ 1 ].state, 'terminated' );
+        test.identical( options.error, null );
+
+      })
+
+      return options.ready;
+    })
+
+    /* */
+
+    ready.then( function( arg )
+    {
+      test.case = `sync:${sync} deasync:${deasync} mode:${mode} concurrent:0 throwingExitCode:1 err arg`;
+
+      track = [];
+      var time1 = _.time.now();
+      var counter = 0;
+      var execPath = mode === `fork` ? `${programPath}` : `node ${programPath}`;
+      var o2 =
+      {
+        execPath : [ execPath, execPath ],
+        args : ( op ) => [ `id:${op.procedure.id} throwing:${++counter === 1 ? 1 : 0}` ],
+        conStart : _.Consequence(), /* add cases dedicated to those options */
+        conTerminate : _.Consequence(),
+        ready : _.Consequence().take( null ),
+        concurrent : 0,
+        throwingExitCode : 1,
+        sync,
+        deasync,
+        mode,
+      }
+
+      var options = _.mapSupplement( null, o2, o3 );
+      var returned = null;
+
+      if( sync )
+      test.shouldThrowErrorSync( () => _.process.start( options ) );
+      else
+      returned = _.process.start( options );
 
       processTrack( options );
 
@@ -15695,6 +15700,7 @@ function startConcurrentConsequencesMultiple( test )
 
       options.ready.finally( function( err, op )
       {
+        debugger;
         test.identical( _.strCount( options.output, 'Error1' ), 1 );
         var exp =
         [
@@ -15710,6 +15716,22 @@ function startConcurrentConsequencesMultiple( test )
           `${options.procedure.id}.conTerminate.err`,
           `${options.procedure.id}.ready.err`,
         ]
+        if( options.deasync || options.sync )
+        exp =
+        [
+          `${options.procedure.id}.conStart`,
+          `${options.procedure.id}.conTerminate.err`,
+          `${options.procedure.id}.ready.err`,
+          `${options.runs[ 0 ].procedure.id}.conStart`,
+          `${options.runs[ 0 ].procedure.id}.conTerminate.err`,
+          `${options.runs[ 0 ].procedure.id}.conDisconnect.err`,
+          `${options.runs[ 0 ].procedure.id}.ready.err`,
+          `${options.runs[ 1 ].procedure.id}.conStart.err`,
+          `${options.runs[ 1 ].procedure.id}.conTerminate.err`,
+          `${options.runs[ 1 ].procedure.id}.conDisconnect.err`,
+          `${options.runs[ 1 ].procedure.id}.ready.err`,
+        ]
+
         test.identical( track, exp );
 
         test.notIdentical( options.exitCode, 0 );
@@ -15729,7 +15751,7 @@ function startConcurrentConsequencesMultiple( test )
 
         test.notIdentical( options.runs[ 1 ].exitCode, 0 );
         test.identical( options.runs[ 1 ].ended, true );
-        test.identical( options.runs[ 1 ].exitReason, null );
+        test.identical( options.runs[ 1 ].exitReason, 'error' );
         test.identical( options.runs[ 1 ].exitSignal, null );
         test.identical( options.runs[ 1 ].state, 'initial' );
         test.is( !!options.runs[ 1 ].error );
@@ -15737,91 +15759,111 @@ function startConcurrentConsequencesMultiple( test )
         return null;
       })
 
-      return returned;
+      return options.ready;
     })
 
     /* */
 
-    // ready.then( function( arg )
-    // {
-    //   test.case = `sync:${sync} deasync:${deasync} mode:${mode} concurrent:0 arg err`;
-    //
-    //   track = [];
-    //   var time1 = _.time.now();
-    //   var counter = 0;
-    //   var execPath = mode === `fork` ? `${programPath}` : `node ${programPath}`;
-    //   var o2 =
-    //   {
-    //     execPath : [ execPath, execPath ],
-    //     args : ( op ) => [ `id:${op.procedure.id} throwing:${++counter === 1 ? 0 : 1}` ],
-    //     conStart : _.Consequence(),
-    //     conTerminate : _.Consequence(),
-    //     ready : _.Consequence().take( null ),
-    //     concurrent : 0,
-    //     sync,
-    //     deasync,
-    //     mode,
-    //   }
-    //
-    //   var options = _.mapSupplement( null, o2, o3 );
-    //   var returned = _.process.start( options );
-    //
-    //   processTrack( options );
-    //
-    //   options.conStart.tap( ( err, op ) =>
-    //   {
-    //     op.runs.forEach( ( op2 ) =>
-    //     {
-    //       processTrack( op2 );
-    //     });
-    //   });
-    //
-    //   options.ready.finally( function( err, op )
-    //   {
-    //     test.identical( _.strCount( options.output, 'Error1' ), 1 );
-    //     var exp =
-    //     [
-    //       `${options.procedure.id}.conStart`,
-    //       `${options.runs[ 0 ].procedure.id}.conStart`,
-    //       `${options.runs[ 0 ].procedure.id}.conTerminate`,
-    //       `${options.runs[ 0 ].procedure.id}.conDisconnect.dont`,
-    //       `${options.runs[ 1 ].procedure.id}.conStart`,
-    //       `${options.runs[ 0 ].procedure.id}.ready`,
-    //       `${options.runs[ 1 ].procedure.id}.conTerminate.err`,
-    //       `${options.runs[ 1 ].procedure.id}.conDisconnect.err`,
-    //       `${options.runs[ 1 ].procedure.id}.ready.err`,
-    //       `${options.procedure.id}.conTerminate.err`,
-    //       `${options.procedure.id}.ready.err`,
-    //     ]
-    //     test.identical( track, exp );
-    //
-    //     test.notIdentical( options.exitCode, 0 );
-    //     test.identical( options.ended, true );
-    //     test.identical( options.exitReason, 'code' );
-    //     test.identical( options.exitSignal, null );
-    //     test.identical( options.state, 'terminated' );
-    //     test.is( !!options.error );
-    //     test.identical( _.strCount( options.error.message, 'Error1' ), 1 );
-    //
-    //     test.identical( options.runs[ 0 ].exitCode, 0 );
-    //     test.identical( options.runs[ 0 ].ended, true );
-    //     test.identical( options.runs[ 0 ].exitReason, 'normal' );
-    //     test.identical( options.runs[ 0 ].exitSignal, null );
-    //     test.identical( options.runs[ 0 ].state, 'terminated' );
-    //     test.is( !options.runs[ 0 ].error );
-    //
-    //     test.notIdentical( options.runs[ 1 ].exitCode, 0 );
-    //     test.identical( options.runs[ 1 ].ended, true );
-    //     test.identical( options.runs[ 1 ].exitReason, 'code' );
-    //     test.identical( options.runs[ 1 ].exitSignal, null );
-    //     test.identical( options.runs[ 1 ].state, 'terminated' );
-    //     test.is( !!options.runs[ 1 ].error );
-    //
-    //     return null;
-    //   })
-    //
-    //   return returned;
-    // })
+    ready.then( function( arg )
+    {
+      test.case = `sync:${sync} deasync:${deasync} mode:${mode} concurrent:0 throwingExitCode:1 arg err`;
+
+      track = [];
+      var time1 = _.time.now();
+      var counter = 0;
+      var execPath = mode === `fork` ? `${programPath}` : `node ${programPath}`;
+      var o2 =
+      {
+        execPath : [ execPath, execPath ],
+        args : ( op ) => [ `id:${op.procedure.id} throwing:${++counter === 1 ? 0 : 1}` ],
+        conStart : _.Consequence(),
+        conTerminate : _.Consequence(),
+        ready : _.Consequence().take( null ),
+        concurrent : 0,
+        sync,
+        deasync,
+        mode,
+      }
+
+      var options = _.mapSupplement( null, o2, o3 );
+      var returned = null;
+
+      if( sync )
+      test.shouldThrowErrorSync( () => _.process.start( options ) );
+      else
+      returned = _.process.start( options );
+
+      processTrack( options );
+
+      options.conStart.tap( ( err, op ) =>
+      {
+        op.runs.forEach( ( op2 ) =>
+        {
+          processTrack( op2 );
+        });
+      });
+
+      options.ready.finally( function( err, op )
+      {
+        test.identical( _.strCount( options.output, 'Error1' ), 1 );
+        var exp =
+        [
+          `${options.procedure.id}.conStart`,
+          `${options.runs[ 0 ].procedure.id}.conStart`,
+          `${options.runs[ 0 ].procedure.id}.conTerminate`,
+          `${options.runs[ 0 ].procedure.id}.conDisconnect.dont`,
+          `${options.runs[ 1 ].procedure.id}.conStart`,
+          `${options.runs[ 0 ].procedure.id}.ready`,
+          `${options.runs[ 1 ].procedure.id}.conTerminate.err`,
+          `${options.runs[ 1 ].procedure.id}.conDisconnect.err`,
+          `${options.runs[ 1 ].procedure.id}.ready.err`,
+          `${options.procedure.id}.conTerminate.err`,
+          `${options.procedure.id}.ready.err`,
+        ]
+        if( options.deasync || options.sync )
+        exp =
+        [
+          `${options.procedure.id}.conStart`,
+          `${options.procedure.id}.conTerminate.err`,
+          `${options.procedure.id}.ready.err`,
+          `${options.runs[ 0 ].procedure.id}.conStart`,
+          `${options.runs[ 0 ].procedure.id}.conTerminate`,
+          `${options.runs[ 0 ].procedure.id}.conDisconnect.dont`,
+          `${options.runs[ 0 ].procedure.id}.ready`,
+          `${options.runs[ 1 ].procedure.id}.conStart`,
+          `${options.runs[ 1 ].procedure.id}.conTerminate.err`,
+          `${options.runs[ 1 ].procedure.id}.conDisconnect.err`,
+          `${options.runs[ 1 ].procedure.id}.ready.err`,
+        ]
+        test.identical( track, exp );
+
+        test.notIdentical( options.exitCode, 0 );
+        test.identical( options.ended, true );
+        test.identical( options.exitReason, 'code' );
+        test.identical( options.exitSignal, null );
+        test.identical( options.state, 'terminated' );
+        test.is( !!options.error );
+        test.identical( _.strCount( options.error.message, 'Error1' ), 1 );
+
+        test.identical( options.runs[ 0 ].exitCode, 0 );
+        test.identical( options.runs[ 0 ].ended, true );
+        test.identical( options.runs[ 0 ].exitReason, 'normal' );
+        test.identical( options.runs[ 0 ].exitSignal, null );
+        test.identical( options.runs[ 0 ].state, 'terminated' );
+        test.is( !options.runs[ 0 ].error );
+
+        test.notIdentical( options.runs[ 1 ].exitCode, 0 );
+        test.identical( options.runs[ 1 ].ended, true );
+        test.identical( options.runs[ 1 ].exitReason, 'code' );
+        test.identical( options.runs[ 1 ].exitSignal, null );
+        test.identical( options.runs[ 1 ].state, 'terminated' );
+        test.is( !!options.runs[ 1 ].error );
+
+        return null;
+      })
+
+      return options.ready;
+    })
 
     /* */
 
@@ -16638,7 +16680,7 @@ function startNjsWithReadyDelayStructural( test )
         test.is( options.conTerminate !== options.ready );
         test.identical( options.ready.exportString(), 'Consequence:: 0 / 1' );
         test.identical( options.conTerminate.exportString(), 'Consequence:: 1 / 0' );
-        test.identical( options.conDisconnect.exportString(), 'Consequence:: 0 / 0' );
+        test.identical( options.conDisconnect.exportString(), 'Consequence:: 1 / 0' );
         test.identical( options.conStart.exportString(), 'Consequence:: 1 / 0' );
 
         return null;
@@ -16698,6 +16740,7 @@ function startNjsWithReadyDelayStructural( test )
         'ended' : false,
         'error' : null,
         'disconnect' : options.disconnect,
+        'end' : options.end,
         'fullExecPath' : null,
         'handleProcedureTerminationBegin' : false,
       }
@@ -25252,7 +25295,7 @@ function terminateFirstChildSpawn( test )
 
   _.process.start( o );
 
-  let program2PID = null;
+  let program2Pid = null;
   let terminate = _.Consequence();
 
   function handleOutput ( output )
@@ -25268,8 +25311,8 @@ function terminateFirstChildSpawn( test )
 
   terminate.then( () =>
   {
-    program2PID = _.fileProvider.fileRead({ filePath : a.abs( 'program2PID' ), encoding : 'json' });
-    program2PID = program2PID.pid;
+    program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
+    program2Pid = program2Pid.pid;
     return _.process.terminate
     ({
       pid : o.process.pid,
@@ -25295,14 +25338,14 @@ function terminateFirstChildSpawn( test )
     test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
     test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
-    test.is( _.process.isAlive( program2PID ) );
+    test.is( _.process.isAlive( program2Pid ) );
 
     return _.time.out( context.t1*15 );
   })
 
   o.conTerminate.then( () =>
   {
-    test.is( !_.process.isAlive( program2PID ) );
+    test.is( !_.process.isAlive( program2Pid ) );
     test.is( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
     return null;
   })
@@ -25346,7 +25389,7 @@ function terminateFirstChildSpawn( test )
 
     _.fileProvider.fileWrite
     ({
-      filePath : _.path.join( __dirname, 'program2PID' ),
+      filePath : _.path.join( __dirname, 'program2Pid' ),
       data : { pid : process.pid },
       encoding : 'json'
     })
@@ -25391,7 +25434,7 @@ function terminateFirstChildFork( test )
 
   _.process.start( o );
 
-  let program2PID = null;
+  let program2Pid = null;
   let terminate = _.Consequence();
 
   function handleOutput ( output )
@@ -25407,8 +25450,8 @@ function terminateFirstChildFork( test )
 
   terminate.then( () =>
   {
-    program2PID = _.fileProvider.fileRead({ filePath : a.abs( 'program2PID' ), encoding : 'json' });
-    program2PID = program2PID.pid;
+    program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
+    program2Pid = program2Pid.pid;
     return _.process.terminate
     ({
       pid : o.process.pid,
@@ -25434,14 +25477,14 @@ function terminateFirstChildFork( test )
     test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
     test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
-    test.is( _.process.isAlive( program2PID ) );
+    test.is( _.process.isAlive( program2Pid ) );
 
     return _.time.out( context.t1*15 );
   })
 
   o.conTerminate.then( () =>
   {
-    test.is( !_.process.isAlive( program2PID ) );
+    test.is( !_.process.isAlive( program2Pid ) );
     test.is( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
     return null;
   })
@@ -25485,7 +25528,7 @@ function terminateFirstChildFork( test )
 
     _.fileProvider.fileWrite
     ({
-      filePath : _.path.join( __dirname, 'program2PID' ),
+      filePath : _.path.join( __dirname, 'program2Pid' ),
       data : { pid : process.pid },
       encoding : 'json'
     })
@@ -25529,7 +25572,7 @@ function terminateFirstChildShell( test )
 
   _.process.start( o );
 
-  let program2PID = null;
+  let program2Pid = null;
   let terminate = _.Consequence();
 
   function handleOutput ( output )
@@ -25545,8 +25588,8 @@ function terminateFirstChildShell( test )
 
   terminate.then( () =>
   {
-    program2PID = _.fileProvider.fileRead({ filePath : a.abs( 'program2PID' ), encoding : 'json' });
-    program2PID = program2PID.pid;
+    program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
+    program2Pid = program2Pid.pid;
     return _.process.terminate
     ({
       pid : o.process.pid,
@@ -25581,11 +25624,11 @@ function terminateFirstChildShell( test )
     {
       test.identical( _.strCount( o.output, 'program2::end' ), 0 );
       test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
-      test.is( _.process.isAlive( program2PID ) );
+      test.is( _.process.isAlive( program2Pid ) );
 
       return _.time.out( context.t1*15, () =>
       {
-        test.is( !_.process.isAlive( program2PID ) );
+        test.is( !_.process.isAlive( program2Pid ) );
         test.is( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
         return null;
       });
@@ -25594,7 +25637,7 @@ function terminateFirstChildShell( test )
     {
       test.identical( _.strCount( o.output, 'program2::end' ), 1 );
       test.is( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
-      test.is( !_.process.isAlive( program2PID ) );
+      test.is( !_.process.isAlive( program2Pid ) );
     }
 
     return null;
@@ -25644,7 +25687,7 @@ function terminateFirstChildShell( test )
 
     _.fileProvider.fileWrite
     ({
-      filePath : _.path.join( __dirname, 'program2PID' ),
+      filePath : _.path.join( __dirname, 'program2Pid' ),
       data : { pid : process.pid },
       encoding : 'json'
     })
@@ -25692,7 +25735,7 @@ function terminateSecondChildSpawn( test )
 
   _.process.start( o );
 
-  let program2PID = null;
+  let program2Pid = null;
   let terminate = _.Consequence();
 
   function handleOutput ( output )
@@ -25708,11 +25751,11 @@ function terminateSecondChildSpawn( test )
 
   terminate.then( () =>
   {
-    program2PID = _.fileProvider.fileRead({ filePath : a.abs( 'program2PID' ), encoding : 'json' });
-    program2PID = program2PID.pid;
+    program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
+    program2Pid = program2Pid.pid;
     return _.process.terminate
     ({
-      pid : program2PID,
+      pid : program2Pid,
       timeOut : context.t1 * 5,
       withChildren : 0
     })
@@ -25724,7 +25767,7 @@ function terminateSecondChildSpawn( test )
     test.identical( o.exitSignal, null );
 
     let program2Op = _.fileProvider.fileRead({ filePath : a.abs( 'program2' ), encoding : 'json' });
-    test.identical( program2Op.pid, program2PID );
+    test.identical( program2Op.pid, program2Pid );
     if( process.platform === 'win32' )
     {
       test.identical( program2Op.exitCode, 1 );
@@ -25799,7 +25842,7 @@ function terminateSecondChildSpawn( test )
 
     _.fileProvider.fileWrite
     ({
-      filePath : _.path.join( __dirname, 'program2PID' ),
+      filePath : _.path.join( __dirname, 'program2Pid' ),
       data : { pid : process.pid },
       encoding : 'json'
     })
@@ -25844,7 +25887,7 @@ function terminateSecondChildFork( test )
 
   _.process.start( o );
 
-  let program2PID = null;
+  let program2Pid = null;
   let terminate = _.Consequence();
 
   function handleOutput ( output )
@@ -25860,11 +25903,11 @@ function terminateSecondChildFork( test )
 
   terminate.then( () =>
   {
-    program2PID = _.fileProvider.fileRead({ filePath : a.abs( 'program2PID' ), encoding : 'json' });
-    program2PID = program2PID.pid;
+    program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
+    program2Pid = program2Pid.pid;
     return _.process.terminate
     ({
-      pid : program2PID,
+      pid : program2Pid,
       timeOut : context.t1 * 5,
       withChildren : 0
     })
@@ -25876,7 +25919,7 @@ function terminateSecondChildFork( test )
     test.identical( o.exitSignal, null );
 
     let program2Op = _.fileProvider.fileRead({ filePath : a.abs( 'program2' ), encoding : 'json' });
-    test.identical( program2Op.pid, program2PID );
+    test.identical( program2Op.pid, program2Pid );
     if( process.platform === 'win32' )
     {
       test.identical( program2Op.exitCode, 1 );
@@ -25951,7 +25994,7 @@ function terminateSecondChildFork( test )
 
     _.fileProvider.fileWrite
     ({
-      filePath : _.path.join( __dirname, 'program2PID' ),
+      filePath : _.path.join( __dirname, 'program2Pid' ),
       data : { pid : process.pid },
       encoding : 'json'
     })
@@ -25996,7 +26039,7 @@ function terminateSecondChildShell( test )
 
   _.process.start( o );
 
-  let program2PID = null;
+  let program2Pid = null;
   let terminate = _.Consequence();
 
   function handleOutput ( output )
@@ -26012,13 +26055,13 @@ function terminateSecondChildShell( test )
 
   terminate.then( () =>
   {
-    program2PID = _.fileProvider.fileRead({ filePath : a.abs( 'program2PID' ), encoding : 'json' });
-    program2PID = program2PID.pid;
+    program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
+    program2Pid = program2Pid.pid;
     return _.process.terminate
     ({
-      pid : program2PID,
+      pid : program2Pid,
       timeOut : context.t1 * 5,
-      withChildren : 0
+      withChildren : 0,
     })
   })
 
@@ -26028,7 +26071,9 @@ function terminateSecondChildShell( test )
     test.identical( o.exitSignal, null );
 
     let program2Op = _.fileProvider.fileRead({ filePath : a.abs( 'program2' ), encoding : 'json' });
-    test.identical( program2Op.pid, program2PID );
+
+    test.identical( program2Op.pid, program2Pid ); /* qqq for Vova : ? */
+
     if( process.platform === 'win32' )
     {
       test.identical( program2Op.exitCode, 1 );
@@ -26103,7 +26148,7 @@ function terminateSecondChildShell( test )
 
     _.fileProvider.fileWrite
     ({
-      filePath : _.path.join( __dirname, 'program2PID' ),
+      filePath : _.path.join( __dirname, 'program2Pid' ),
       data : { pid : process.pid },
       encoding : 'json'
     })
@@ -26148,7 +26193,7 @@ function terminateDetachedFirstChildSpawn( test )
 
   _.process.start( o );
 
-  let program2PID = null;
+  let program2Pid = null;
   let terminate = _.Consequence();
 
   function handleOutput ( output )
@@ -26164,8 +26209,8 @@ function terminateDetachedFirstChildSpawn( test )
 
   terminate.then( () =>
   {
-    program2PID = _.fileProvider.fileRead({ filePath : a.abs( 'program2PID' ), encoding : 'json' });
-    program2PID = program2PID.pid;
+    program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
+    program2Pid = program2Pid.pid;
     return _.process.terminate
     ({
       pid : o.process.pid,
@@ -26190,14 +26235,14 @@ function terminateDetachedFirstChildSpawn( test )
     test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
     test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
-    test.is( _.process.isAlive( program2PID ) );
+    test.is( _.process.isAlive( program2Pid ) );
 
     return _.time.out( context.t1*15 );//qqq for Vova: replace with periodic + timeout + kill
   })
 
   o.conTerminate.then( () =>
   {
-    test.is( !_.process.isAlive( program2PID ) );
+    test.is( !_.process.isAlive( program2Pid ) );
     test.is( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
     return null;
   })
@@ -26240,7 +26285,7 @@ function terminateDetachedFirstChildSpawn( test )
 
     _.fileProvider.fileWrite
     ({
-      filePath : _.path.join( __dirname, 'program2PID' ),
+      filePath : _.path.join( __dirname, 'program2Pid' ),
       data : { pid : process.pid },
       encoding : 'json'
     })
@@ -26289,7 +26334,7 @@ function terminateDetachedFirstChildFork( test )
 
   _.process.start( o );
 
-  let program2PID = null;
+  let program2Pid = null;
   let terminate = _.Consequence();
 
   function handleOutput ( output )
@@ -26305,8 +26350,8 @@ function terminateDetachedFirstChildFork( test )
 
   terminate.then( () =>
   {
-    program2PID = _.fileProvider.fileRead({ filePath : a.abs( 'program2PID' ), encoding : 'json' });
-    program2PID = program2PID.pid;
+    program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
+    program2Pid = program2Pid.pid;
     return _.process.terminate
     ({
       pid : o.process.pid,
@@ -26331,14 +26376,14 @@ function terminateDetachedFirstChildFork( test )
     test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
     test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
-    test.is( _.process.isAlive( program2PID ) );
+    test.is( _.process.isAlive( program2Pid ) );
 
     return _.time.out( context.t1*15 );//qqq for Vova: replace with periodic + timeout + kill
   })
 
   o.conTerminate.then( () =>
   {
-    test.is( !_.process.isAlive( program2PID ) );
+    test.is( !_.process.isAlive( program2Pid ) );
     test.is( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
     return null;
   })
@@ -26381,7 +26426,7 @@ function terminateDetachedFirstChildFork( test )
 
     _.fileProvider.fileWrite
     ({
-      filePath : _.path.join( __dirname, 'program2PID' ),
+      filePath : _.path.join( __dirname, 'program2Pid' ),
       data : { pid : process.pid },
       encoding : 'json'
     })
@@ -26430,7 +26475,7 @@ function terminateDetachedFirstChildShell( test )
 
   _.process.start( o );
 
-  let program2PID = null;
+  let program2Pid = null;
   let terminate = _.Consequence();
 
   function handleOutput ( output )
@@ -26446,8 +26491,8 @@ function terminateDetachedFirstChildShell( test )
 
   terminate.then( () =>
   {
-    program2PID = _.fileProvider.fileRead({ filePath : a.abs( 'program2PID' ), encoding : 'json' });
-    program2PID = program2PID.pid;
+    program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
+    program2Pid = program2Pid.pid;
     return _.process.terminate
     ({
       pid : o.process.pid,
@@ -26472,14 +26517,14 @@ function terminateDetachedFirstChildShell( test )
     test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
     test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
-    test.is( _.process.isAlive( program2PID ) );
+    test.is( _.process.isAlive( program2Pid ) );
 
     return _.time.out( context.t1*15 );//qqq for Vova: replace with periodic + timeout + kill
   })
 
   o.conTerminate.then( () =>
   {
-    test.is( !_.process.isAlive( program2PID ) );
+    test.is( !_.process.isAlive( program2Pid ) );
     test.is( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
     return null;
   })
@@ -26522,7 +26567,7 @@ function terminateDetachedFirstChildShell( test )
 
     _.fileProvider.fileWrite
     ({
-      filePath : _.path.join( __dirname, 'program2PID' ),
+      filePath : _.path.join( __dirname, 'program2Pid' ),
       data : { pid : process.pid },
       encoding : 'json'
     })
@@ -26571,7 +26616,7 @@ function terminateWithDetachedChildSpawn( test )
 
   _.process.start( o );
 
-  let program2PID = null;
+  let program2Pid = null;
   let terminate = _.Consequence();
 
   function handleOutput ( output )
@@ -26587,8 +26632,8 @@ function terminateWithDetachedChildSpawn( test )
 
   terminate.then( () =>
   {
-    program2PID = _.fileProvider.fileRead({ filePath : a.abs( 'program2PID' ), encoding : 'json' });
-    program2PID = program2PID.pid;
+    program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
+    program2Pid = program2Pid.pid;
     return _.process.terminate
     ({
       pid : o.process.pid,
@@ -26613,7 +26658,7 @@ function terminateWithDetachedChildSpawn( test )
     test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
     test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
-    test.is( !_.process.isAlive( program2PID ) );
+    test.is( !_.process.isAlive( program2Pid ) );
     test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
 
     return null;
@@ -26657,7 +26702,7 @@ function terminateWithDetachedChildSpawn( test )
 
     _.fileProvider.fileWrite
     ({
-      filePath : _.path.join( __dirname, 'program2PID' ),
+      filePath : _.path.join( __dirname, 'program2Pid' ),
       data : { pid : process.pid },
       encoding : 'json'
     })
@@ -26705,7 +26750,7 @@ function terminateWithDetachedChildFork( test )
 
   _.process.start( o );
 
-  let program2PID = null;
+  let program2Pid = null;
   let terminate = _.Consequence();
 
   function handleOutput ( output )
@@ -26721,8 +26766,8 @@ function terminateWithDetachedChildFork( test )
 
   terminate.then( () =>
   {
-    program2PID = _.fileProvider.fileRead({ filePath : a.abs( 'program2PID' ), encoding : 'json' });
-    program2PID = program2PID.pid;
+    program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
+    program2Pid = program2Pid.pid;
     return _.process.terminate
     ({
       pid : o.process.pid,
@@ -26747,7 +26792,7 @@ function terminateWithDetachedChildFork( test )
     test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
     test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
-    test.is( !_.process.isAlive( program2PID ) );
+    test.is( !_.process.isAlive( program2Pid ) );
     test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
 
     return null;
@@ -26791,7 +26836,7 @@ function terminateWithDetachedChildFork( test )
 
     _.fileProvider.fileWrite
     ({
-      filePath : _.path.join( __dirname, 'program2PID' ),
+      filePath : _.path.join( __dirname, 'program2Pid' ),
       data : { pid : process.pid },
       encoding : 'json'
     })
@@ -26839,7 +26884,7 @@ function terminateWithDetachedChildShell( test )
 
   _.process.start( o );
 
-  let program2PID = null;
+  let program2Pid = null;
   let terminate = _.Consequence();
 
   function handleOutput ( output )
@@ -26855,8 +26900,8 @@ function terminateWithDetachedChildShell( test )
 
   terminate.then( () =>
   {
-    program2PID = _.fileProvider.fileRead({ filePath : a.abs( 'program2PID' ), encoding : 'json' });
-    program2PID = program2PID.pid;
+    program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
+    program2Pid = program2Pid.pid;
     return _.process.terminate
     ({
       pid : o.process.pid,
@@ -26881,7 +26926,7 @@ function terminateWithDetachedChildShell( test )
     test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
     test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
-    test.is( !_.process.isAlive( program2PID ) );
+    test.is( !_.process.isAlive( program2Pid ) );
     test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
 
     return null;
@@ -26925,7 +26970,7 @@ function terminateWithDetachedChildShell( test )
 
     _.fileProvider.fileWrite
     ({
-      filePath : _.path.join( __dirname, 'program2PID' ),
+      filePath : _.path.join( __dirname, 'program2Pid' ),
       data : { pid : process.pid },
       encoding : 'json'
     })
@@ -26974,7 +27019,7 @@ function terminateSeveralChildren( test )
 
   _.process.start( o );
 
-  let program2PID = null;
+  let program2Pid = null;
   let program3PID = null;
   let c = 0;
   let terminate = _.Consequence();
@@ -26996,8 +27041,8 @@ function terminateSeveralChildren( test )
 
   terminate.then( () =>
   {
-    program2PID = _.fileProvider.fileRead({ filePath : a.abs( 'program2PID' ), encoding : 'json' });
-    program2PID = program2PID.pid;
+    program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
+    program2Pid = program2Pid.pid;
     program3PID = _.fileProvider.fileRead({ filePath : a.abs( 'program3PID' ), encoding : 'json' });
     program3PID = program3PID.pid;
     return _.process.terminate
@@ -27026,7 +27071,7 @@ function terminateSeveralChildren( test )
     test.identical( _.strCount( o.output, 'program3::begin' ), 1 );
     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
     test.identical( _.strCount( o.output, 'program3::end' ), 0 );
-    test.is( !_.process.isAlive( program2PID ) );
+    test.is( !_.process.isAlive( program2Pid ) );
     test.is( !_.process.isAlive( program3PID ) );
     test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
     test.is( !a.fileProvider.fileExists( a.abs( 'program3end' ) ) );
@@ -27073,7 +27118,7 @@ function terminateSeveralChildren( test )
 
     _.fileProvider.fileWrite
     ({
-      filePath : _.path.join( __dirname, 'program2PID' ),
+      filePath : _.path.join( __dirname, 'program2Pid' ),
       data : { pid : process.pid },
       encoding : 'json'
     })
@@ -27146,7 +27191,7 @@ function terminateWithSeveralDetachedChildren( test )
 
   _.process.start( o );
 
-  let program2PID = null;
+  let program2Pid = null;
   let program3PID = null;
   let c = 0;
   let terminate = _.Consequence();
@@ -27168,8 +27213,8 @@ function terminateWithSeveralDetachedChildren( test )
 
   terminate.then( () =>
   {
-    program2PID = _.fileProvider.fileRead({ filePath : a.abs( 'program2PID' ), encoding : 'json' });
-    program2PID = program2PID.pid;
+    program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
+    program2Pid = program2Pid.pid;
     program3PID = _.fileProvider.fileRead({ filePath : a.abs( 'program3PID' ), encoding : 'json' });
     program3PID = program3PID.pid;
     return _.process.terminate
@@ -27198,7 +27243,7 @@ function terminateWithSeveralDetachedChildren( test )
     test.identical( _.strCount( o.output, 'program3::begin' ), 1 );
     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
     test.identical( _.strCount( o.output, 'program3::end' ), 0 );
-    test.is( !_.process.isAlive( program2PID ) );
+    test.is( !_.process.isAlive( program2Pid ) );
     test.is( !_.process.isAlive( program3PID ) );
     test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
     test.is( !a.fileProvider.fileExists( a.abs( 'program3end' ) ) );
@@ -27246,7 +27291,7 @@ function terminateWithSeveralDetachedChildren( test )
 
     _.fileProvider.fileWrite
     ({
-      filePath : _.path.join( __dirname, 'program2PID' ),
+      filePath : _.path.join( __dirname, 'program2Pid' ),
       data : { pid : process.pid },
       encoding : 'json'
     })
