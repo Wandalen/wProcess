@@ -14239,13 +14239,13 @@ function startOnStart( test )
       o.conTerminate.finally( ( err, op ) =>
       {
         track.push( 'conTerminate' );
-        test.identical( err, undefined );
+        test.identical( err, _.dont );
         return null;
       })
 
       let ready = _.time.out( context.t2, () => /* 5000 */
       {
-        test.identical( track, [ 'conStart', 'conDisconnect' ] );
+        test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate' ] );
         o.conTerminate.cancel();
       })
 
@@ -14511,8 +14511,8 @@ function startOnTerminate( test )
         test.identical( o.state, 'disconnected' );
         test.identical( o.ended, true );
         test.identical( o.conTerminate.argumentsCount(), 0 );
-        test.identical( o.conTerminate.errorsCount(), 0 );
-        test.identical( o.conTerminate.competitorsCount(), 1 );
+        test.identical( o.conTerminate.errorsCount(), 1 );
+        test.identical( o.conTerminate.competitorsCount(), 0 );
         test.is( !_.process.isAlive( o.process.pid ) );
         o.conTerminate.cancel();
         return null;
@@ -14649,10 +14649,9 @@ function startOnTerminate( test )
         test.identical( o.error, null );
         test.identical( o.exitCode, null );
         test.identical( o.exitSignal, null );
-
         test.identical( o.conTerminate.argumentsCount(), 0 );
-        test.identical( o.conTerminate.errorsCount(), 0 );
-        test.identical( o.conTerminate.competitorsCount(), 1 );
+        test.identical( o.conTerminate.errorsCount(), 1 );
+        test.identical( o.conTerminate.competitorsCount(), 0 );
         test.is( !_.process.isAlive( o.process.pid ) );
         o.conTerminate.cancel();
         return null;
@@ -29072,7 +29071,7 @@ var Proto =
     // concurrent
 
     startConcurrentMultiple,
-    // startConcurrentConsequencesMultiple, /* xxx */
+    startConcurrentConsequencesMultiple, /* xxx */
     starterConcurrentMultiple,
 
     /* xxx : use routine _.process.startMinimal() where it is possible */

@@ -333,9 +333,8 @@ function startMinimal_body( o )
     o.exitReason = null;
     o.exitCode = null;
     o.exitSignal = null;
-    o.error = null;
+    o.error = o.error || null;
     o.process = null;
-    // o.procedure = null;
     o.fullExecPath = null;
     o.output = o.outputCollecting ? '' : null;
     o.ended = false;
@@ -448,6 +447,7 @@ function startMinimal_body( o )
     }
 
     /* if map already has error, running should not start */
+    debugger;
     if( o.error )
     throw o.error;
   }
@@ -474,7 +474,6 @@ function startMinimal_body( o )
       }
       catch( err )
       {
-        debugger; /* qqq for Yevhen : is covered? */
         end2( err/*, o.conTerminate */ );
       }
       _.assert( o.state === 'terminated' || o.state === 'disconnected' );
@@ -519,7 +518,6 @@ function startMinimal_body( o )
     }
     catch( err )
     {
-      debugger
       handleError( err );
     }
 
@@ -862,7 +860,6 @@ function startMinimal_body( o )
     o.error = err;
     if( o.verbosity )
     log( _.errOnce( o.error ), 1 );
-    debugger;
 
     if( o.sync && !o.deasync )
     {
@@ -1607,7 +1604,7 @@ function start_body( o )
     o.exitReason = null;
     o.exitCode = null;
     o.exitSignal = null;
-    o.error = null;
+    o.error = o.error || null;
     o.output = o.outputCollecting ? '' : null;
     o.ended = false;
 
