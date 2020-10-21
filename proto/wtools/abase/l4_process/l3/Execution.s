@@ -681,16 +681,28 @@ function startMinimal_body( o )
 
   /* */
 
-  function end1()
+  function end1() /* xxx : make similar change in startMinimal() */
   {
+    // yyy xxx2
+    // if( readyCallback )
+    // o.ready.finally( readyCallback );
     if( o.deasync )
-    {
-      o.ready.deasync();
-      if( o.sync )
-      return o.ready.sync();
-    }
+    o.ready.deasync();
+    if( o.sync )
+    return o.ready.sync();
     return o.ready;
   }
+
+  // function end1()
+  // {
+  //   if( o.deasync )
+  //   {
+  //     o.ready.deasync();
+  //     if( o.sync )
+  //     return o.ready.sync();
+  //   }
+  //   return o.ready;
+  // }
 
   /* */
 
@@ -884,14 +896,16 @@ function startMinimal_body( o )
     if( o.verbosity )
     log( _.errOnce( o.error ), 1 );
 
-    if( o.sync && !o.deasync )
-    {
-      throw o.error; /* xxx2 : remove branching? */
-    }
-    else
-    {
-      end2( o.error/*, o.conTerminate */ );
-    }
+    // if( o.sync && !o.deasync )
+    // {
+    //   throw o.error; /* xxx2 : remove branching? */
+    // }
+    // else
+    // {
+    //   end2( o.error/*, o.conTerminate */ );
+    // }
+
+    end2( o.error );
   }
 
   /* */
