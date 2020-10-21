@@ -17590,12 +17590,28 @@ function startOptionOutputColoring( test )
     {
       test.case = `mode : ${ mode }, outputColoring : 0, normal output`;
 
+      let locals =
+      {
+        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
+        currentPath : a.routinePath,
+        mode,
+        outputColoring : 0
+        // options :
+        // {
+        //   execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        //   currentPath : a.routinePath,
+        //   mode,
+        //   outputCollecting : 1,
+        //   outputColoring : 0
+        // }
+      }
+      let testAppPath2 = a.path.nativize( a.program({ routine : testApp2, locals }) )
+
       let options =
       {
-        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        execPath : mode === 'fork' ? testAppPath2 : 'node ' + testAppPath2,
         mode,
         outputCollecting : 1,
-        outputColoring : 0
       }
 
       return _.process.start( options )
@@ -17606,53 +17622,81 @@ function startOptionOutputColoring( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.identical( op.output, 'Log\n' );
-        // test.identical( op.output, _.ct.format( 'Log\n', { fg : 'bright white' } ) );
 
+        a.fileProvider.fileDelete( testAppPath2 );
         return null
       })
     } )
 
     /* */
 
-    ready.then( () =>
-    {
-      test.case = `mode : ${ mode }, outputColoring : 1, normal output`;
+    // ready.then( () =>
+    // {
+    //   test.case = `mode : ${ mode }, outputColoring : 1, normal output`;
 
-      let options =
-      {
-        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
-        mode,
-        outputCollecting : 1,
-        outputColoring : 1
-      }
+    //   let locals =
+    //   {
+    //     toolsPath : _.path.nativize( _.module.toolsPathGet() ),
+    //     options :
+    //     {
+    //       execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+    //       currentPath : a.routinePath,
+    //       mode,
+    //       outputColoring : 0,
+    //       outputCollecting : 1
+    //     }
+    //   }
+    //   let testAppPath2 = a.path.nativize( a.program({ routine : testApp2, locals }) )
 
-      return _.process.start( options )
-      .then( ( op ) =>
-      {
-        // console.log( 'OUT: ', _.ct.format( op.output, { fg : 'bright white' } ) );
-        console.log( 'OUT with color: ', op.output );
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( op.output, 'Log\n' );
-        // test.identical( op.output, _.ct.format( 'Log\n', { fg : 'bright white' } ) );
+    //   let options =
+    //   {
+    //     execPath : mode === 'fork' ? testAppPath2 : 'node ' + testAppPath2,
+    //     mode,
+    //     outputCollecting : 1,
+    //     outputColoring : 1
+    //   }
 
-        return null
-      })
-    } )
+    //   return _.process.start( options )
+    //   .then( ( op ) =>
+    //   {
+    //     // console.log( 'OUT: ', _.ct.format( op.output, { fg : 'bright white' } ) );
+    //     console.log( 'OUT with color: ', op.output );
+    //     test.identical( op.exitCode, 0 );
+    //     test.identical( op.ended, true );
+    //     test.identical( op.output, 'Log\n' );
+    //     // test.identical( op.output, _.ct.format( 'Log\n', { fg : 'bright white' } ) );
+
+    //     a.fileProvider.fileDelete( testAppPath2 );
+    //     return null
+    //   })
+    // } )
 
     return ready;
 
   }
 
-  // function testApp2()
-  // {
-  //   let _ = require( toolsPath );
+  function testApp2()
+  {
+    let _ = require( toolsPath );
 
-  //   _.include( 'wProcess' );
-  //   _.include( 'wStringsExtra' )
+    _.include( 'wProcess' );
+    _.include( 'wStringsExtra' );
 
-  //   return _.process.start( options )
-  // }
+    let options =
+    {
+      execPath : mode === 'fork' ? 'testApp.js' : 'node testApp.js',
+      mode,
+      outputColoring,
+      outputCollecting : 1,
+    }
+
+    return _.process.start( options )
+    .then( ( op ) =>
+    {
+      console.log( op.output );
+      return null;
+    } )
+  }
 
   function testApp()
   {
