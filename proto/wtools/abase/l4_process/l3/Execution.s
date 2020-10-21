@@ -1281,8 +1281,10 @@ function startMinimal_body( o )
   function handleStreamErr( data )
   {
 
-    if( _.bufferAnyIs( data ) )
-    data = _.bufferToStr( data ); /* qqq for Yevhen : use more optimal condition and routine to convert buffer here and in other places */
+    // if( _.bufferAnyIs( data ) )
+    // data = _.bufferToStr( data ); /* qqq for Yevhen : use more optimal condition and routine to convert buffer here and in other places | aaa : Done .*/
+    if( _.bufferNodeIs( data ) )
+    data = data.toString( 'utf8' );
     if( o.outputGraying )
     data = StripAnsi( data );
 
@@ -1310,8 +1312,10 @@ function startMinimal_body( o )
   function handleStreamOut( data )
   {
 
-    if( _.bufferAnyIs( data ) )
-    data = _.bufferToStr( data );
+    // if( _.bufferAnyIs( data ) )
+    // data = _.bufferToStr( data );
+    if( _.bufferNodeIs( data ) )
+    data = data.toString( 'utf8' );
     if( o.outputGraying )
     data = StripAnsi( data );
 
@@ -1547,6 +1551,8 @@ function start_body( o )
 
   _.assert( arguments.length === 1, 'Expects single argument' );
 
+  // let startCounter = 0;
+  let processPipeCounter = 0;
   let readyCallback; /* xxx : cover and implement ready callback for multiple */
 
   form0();
@@ -1737,13 +1743,12 @@ function start_body( o )
       try
       {
         _.assertMapHasAll( o2, _.process.startMinimal.defaults );
-        // debugger;
         _.process.startMinimal.body.call( _.process, o2 );
-        // debugger;
+        // startCounter += 1;
       }
       catch( err )
       {
-        // debugger;
+        // startCounter += 1;
         o2.ready.error( err );
       }
 
@@ -1793,10 +1798,8 @@ function start_body( o )
   {
     if( readyCallback )
     o.ready.finally( readyCallback );
-    // console.log( 'end1:a' );
     if( o.deasync )
     o.ready.deasync();
-    // console.log( 'end1:b' );
     if( o.sync )
     return o.ready.sync();
     return o.ready;
@@ -1858,6 +1861,14 @@ function start_body( o )
       }
     }
 
+    if( o.outputCollecting )
+    if( o.sync && !o.deasync )
+    for( let a = 0 ; a < o.runs.length ; a++ )
+    {
+      let o2 = o.runs[ a ];
+      o.output += o2.output;
+    }
+
     if( !o.exitReason )
     o.exitReason = o.error ? 'error' : 'normal';
 
@@ -1872,9 +1883,12 @@ function start_body( o )
 
   /* */
 
+  /*
+    forward error to the the next process descriptor
+  */
+
   function serialEnd()
   {
-    // debugger;
     o.runs.forEach( ( o2 ) =>
     {
       if( o2.ended )
@@ -1904,6 +1918,7 @@ function start_body( o )
     Stream = require( 'stream' );
 
     if( o.stdio[ 1 ] !== 'ignore' )
+    if( !o.sync || o.deasync )
     {
       o.streamOut = new Stream.PassThrough();
       _.assert( o.streamOut._pipes === undefined );
@@ -1911,6 +1926,7 @@ function start_body( o )
     }
 
     if( o.stdio[ 2 ] !== 'ignore' )
+    if( !o.sync || o.deasync )
     {
       o.streamErr = new Stream.PassThrough();
       _.assert( o.streamErr._pipes === undefined );
@@ -1936,9 +1952,9 @@ function start_body( o )
   function processPipe( o2 )
   {
 
-    // if( 0 ) // xxx yyy
     o2.conStart.tap( ( err, op2 ) =>
     {
+      processPipeCounter += 1;
       if( err )
       return;
       if( o2.process.stdout )
@@ -1975,8 +1991,13 @@ function start_body( o )
     {
       _.arrayRemoveOnceStrictly( dst._pipes, src );
       /* xxx : add checking of statqe here. should be not starting */
-      if( dst._pipes.length === 0 && o.concurrent )
+      // if( dst._pipes.length === 0 && o.concurrent )
+      if( dst._pipes.length === 0 )
+      // if( o.concurrent )
+      if( processPipeCounter === o.runs.length )
       {
+        // console.log( 'processPipeCounter', processPipeCounter );
+        // debugger;
         dst.end();
       }
     });
@@ -1987,8 +2008,10 @@ function start_body( o )
 
   function handleStreamOut( data )
   {
-    if( _.bufferAnyIs( data ) )
-    data = _.bufferToStr( data );
+    // if( _.bufferAnyIs( data ) )
+    // data = _.bufferToStr( data );
+    if( _.bufferNodeIs( data ) )
+    data = data.toString( 'utf8' );
     if( o.outputGraying )
     data = StripAnsi( data );
     if( o.outputCollecting )
