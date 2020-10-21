@@ -17665,15 +17665,96 @@ function startOptionOutputColoring( test )
         
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        console.log( '\u001b[97m\>\u001b[39;0m' )
-        // test.is( _.strHas( op.output, '\u001b[97m > \u001b[39;0m' ) );
-        // test.is( _.strHas( op.output, '\u001b[35mLog\u001b[39;0m\n' ) );
-        // let string = `\u001b[97m > \u001b[39;0mnode ${testAppPath2}\n\u001b[35mLog\u001b[39;0m\n`;
-        let string = `\u001b[97m > \u001b[39;0m${ mode === 'fork' ? '' : 'node ' }${testAppPath2}\n\u001b[35mLog\u001b[39;0m\n`;
-        test.identical( op.output, string )
-        // test.is( _.strHas( op.output, '\u001b[97m>\u001b[39;0m' ) );
-        // test.is( _.strHas( op.output, testAppPath2 ) );
-        // test.is( _.strHas( op.output, '\u001b[35mLog\u001b[39;0m' ) );
+        let expected = `\u001b[97m > \u001b[39;0m${ mode === 'fork' ? '' : 'node ' }${testAppPath2}\n\u001b[35mLog\u001b[39;0m\n`;
+        test.identical( op.output, expected )
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+        return null
+      })
+    } )
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputColoring : 0, error output, inputMirroring : 0`;
+
+      let testAppPath2 = a.program( testApp2Error );
+      let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPath2, outputColoring : 0, inputMirroring : 0, mode };
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      let options =
+      {
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, 'Error output\n' )
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+        return null
+      })
+    } )
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputColoring : 1, error output, inputMirroring : 0`;
+
+      let testAppPath2 = a.program( testApp2Error );
+      let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPath2, outputColoring : 1, inputMirroring : 0, mode };
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      let options =
+      {
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, `\u001b[31mError output\u001b[39;0m\n` )
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+        return null
+      })
+    } )
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputColoring : 1, error output, inputMirroring : 1`;
+
+      let testAppPath2 = a.program( testApp2Error );
+      let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPath2, outputColoring : 1, inputMirroring : 1, mode };
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      let options =
+      {
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        let expected = `\u001b[97m > \u001b[39;0m${ mode === 'fork' ? '' : 'node ' }${testAppPath2}\n\u001b[31mError output\u001b[39;0m\n`;
+        test.identical( op.output, expected )
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -17713,7 +17794,7 @@ function startOptionOutputColoring( test )
 
   function testApp2Error()
   {
-    throw new Error()
+    console.error( 'Error output' );
   }
 }
 
