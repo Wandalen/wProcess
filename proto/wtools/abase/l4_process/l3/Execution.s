@@ -75,15 +75,15 @@ function startCommon_head( routine, args )
   _.assert( o.ready === null || _.routineIs( o.ready ) );
   _.assert( o.mode !== 'fork' || !o.sync || o.deasync, 'Mode::fork is available only if either sync:0 or deasync:1' );
 
-  if( o.outputDecorating === null )
-  o.outputDecorating = 0;
-  if( o.outputDecoratingStdout === null )
-  o.outputDecoratingStdout = o.outputDecorating;
-  if( o.outputDecoratingStderr === null )
-  o.outputDecoratingStderr = o.outputDecorating;
-  _.assert( _.boolLike( o.outputDecorating ) );
-  _.assert( _.boolLike( o.outputDecoratingStdout ) );
-  _.assert( _.boolLike( o.outputDecoratingStderr ) );
+  if( o.outputColoring === null )
+  o.outputColoring = 1;
+  if( o.outputColoringStdout === null )
+  o.outputColoringStdout = o.outputColoring;
+  if( o.outputColoringStderr === null )
+  o.outputColoringStderr = o.outputColoring;
+  _.assert( _.boolLike( o.outputColoring ) );
+  _.assert( _.boolLike( o.outputColoringStdout ) );
+  _.assert( _.boolLike( o.outputColoringStderr ) );
 
   if( !_.numberIs( o.verbosity ) )
   o.verbosity = o.verbosity ? 1 : 0;
@@ -293,9 +293,9 @@ function startMinimal_body( o )
 
     /* */
 
-    _.assert( _.boolLike( o.outputDecorating ) );
-    _.assert( _.boolLike( o.outputDecoratingStdout ) );
-    _.assert( _.boolLike( o.outputDecoratingStderr ) );
+    _.assert( _.boolLike( o.outputColoring ) );
+    _.assert( _.boolLike( o.outputColoringStdout ) );
+    _.assert( _.boolLike( o.outputColoringStderr ) );
     _.assert( _.boolLike( o.outputCollecting ) );
 
     /* ipc */
@@ -427,7 +427,7 @@ function startMinimal_body( o )
     if( !StripAnsi )
     StripAnsi = require( 'strip-ansi' );
 
-    if( !o.outputDecorating && typeof module !== 'undefined' )
+    if( o.outputColoring && typeof module !== 'undefined' )
     try
     {
       _.include( 'wColor' );
@@ -1054,7 +1054,7 @@ function startMinimal_body( o )
       if( o.verbosity >= 3 )
       {
         let output = '   at ';
-        if( !o.outputDecorating )
+        if( o.outputColoring )
         output = _.ct.format( output, { fg : 'bright white' } ) + _.ct.format( o.currentPath, 'path' );
         else
         output = output + o.currentPath
@@ -1064,7 +1064,7 @@ function startMinimal_body( o )
       if( o.verbosity && o.inputMirroring )
       {
         let prefix = ' > ';
-        if( !o.outputDecorating )
+        if( o.outputColoring )
         prefix = _.ct.format( prefix, { fg : 'bright white' } );
         log( prefix + o.fullExecPath );
       }
@@ -1299,7 +1299,7 @@ function startMinimal_body( o )
     if( o.outputPrefixing )
     data = 'stderr :\n' + '  ' + _.strLinesIndentation( data, '  ' );
 
-    if( _.color && !o.outputDecorating && !o.outputDecoratingStderr )
+    if( _.color && o.outputColoring && !o.outputColoringStderr )
     data = _.ct.format( data, 'pipe.negative' );
 
     log( data, 1 );
@@ -1326,7 +1326,7 @@ function startMinimal_body( o )
     if( o.outputPrefixing )
     data = 'stdout :\n' + '  ' + _.strLinesIndentation( data, '  ' );
 
-    if( _.color && !o.outputDecorating && !o.outputDecoratingStdout )
+    if( _.color && o.outputColoring && !o.outputColoringStdout )
     data = _.ct.format( data, 'pipe.neutral' );
 
     log( data );
@@ -1404,9 +1404,9 @@ startMinimal_body.defaults =
   outputPiping : null, /* qqq for Yevhen : cover the option */
   outputCollecting : 0,
   outputAdditive : null, /* qqq for Yevhen : cover the option */
-  outputDecorating : 0, /* qqq for Yevhen : cover the option */
-  outputDecoratingStderr : null, /* qqq for Yevhen : cover the option */
-  outputDecoratingStdout : null, /* qqq for Yevhen : cover the option */
+  outputColoring : 1, /* qqq for Yevhen : cover the option */
+  outputColoringStderr : null, /* qqq for Yevhen : cover the option */
+  outputColoringStdout : null, /* qqq for Yevhen : cover the option */
   outputGraying : 0,
   inputMirroring : 1, /* qqq for Yevhen : cover the option */
 
@@ -1479,9 +1479,9 @@ function start_head( routine, args )
  * @param {Boolean} o.applyingExitCode=0 Applies exit code to parent process.
 
  * @param {Number} o.verbosity=2 Controls amount of output, `0` disables output at all.
- * @param {Boolean} o.outputDecorating=0 Logger prints everything in raw mode, no styles applied.
- * @param {Boolean} o.outputDecoratingStdout=0 Logger prints output from `stdout` in raw mode, no styles applied.
- * @param {Boolean} o.outputDecoratingStderr=0 Logger prints output from `stderr` in raw mode, no styles applied.
+ * @param {Boolean} o.outputColoring=1 Logger prints everything in raw mode, no styles applied.
+ * @param {Boolean} o.outputColoringStdout=1 Logger prints output from `stdout` in raw mode, no styles applied.
+ * @param {Boolean} o.outputColoringStderr=1 Logger prints output from `stderr` in raw mode, no styles applied.
  * @param {Boolean} o.outputPrefixing=0 Add prefix with name of output channel( stderr, stdout ) to each line.
  * @param {Boolean} o.outputPiping=null Handles output from `stdout` and `stderr` channels. Is enabled by default if `o.verbosity` levels is >= 2 and option is not specified explicitly. This option is required by other "output" options that allows output customization.
  * @param {Boolean} o.outputCollecting=0 Enables coullection of output into sinle string. Collects output into `o.output` property if enabled.
@@ -1609,9 +1609,9 @@ function start_body( o )
       o.conTerminate = new _.Consequence({ _procedure : false }).finally( o.conTerminate );
     }
 
-    _.assert( _.boolLike( o.outputDecorating ) );
-    _.assert( _.boolLike( o.outputDecoratingStdout ) );
-    _.assert( _.boolLike( o.outputDecoratingStderr ) );
+    _.assert( _.boolLike( o.outputColoring ) );
+    _.assert( _.boolLike( o.outputColoringStdout ) );
+    _.assert( _.boolLike( o.outputColoringStderr ) );
     _.assert( _.boolLike( o.outputCollecting ) );
 
     if( o.outputAdditive === null )
@@ -3075,6 +3075,8 @@ children.defaults =
 // --
 // declare
 // --
+
+/* xxx qqq for Vova : implement _.process.waitForDeath() */
 
 let Extension =
 {

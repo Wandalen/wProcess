@@ -8307,7 +8307,7 @@ function startDifferentTypesOfPaths( test )
 
   // })
 
-  /* qqq for Vova: fix it*/
+  /* zzz for Vova : fix it? */
 
   // .then( () =>
   // {
@@ -8426,7 +8426,7 @@ function startDifferentTypesOfPaths( test )
 
   })
 
-  /* qqq for Vova : fix it */
+  /* zzz for Vova : fix it */
 
   // .then( () =>
   // {
@@ -8518,7 +8518,7 @@ function startDifferentTypesOfPaths( test )
 
   })
 
-  /* qqq for Vova : fix it */
+  /* zzz for Vova : fix it? */
 
   // .then( () =>
   // {
@@ -10181,12 +10181,12 @@ function startOutputMultiple( test )
   let programPath = a.path.nativize( a.program( program1 ) );
   let track = [];
   // xxx
-  let modes = [ 'fork', 'spawn', 'shell' ];
-  // let modes = [ 'spawn' ];
+  // let modes = [ 'fork', 'spawn', 'shell' ];
+  let modes = [ 'spawn' ];
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, mode }) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, mode }) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, mode }) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, mode }) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, mode }) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, mode }) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, mode }) ) );
   return a.ready;
 
   /* - */
@@ -13614,7 +13614,7 @@ function startDetachingTerminationBegin( test )
 
     ready.then( () =>
     {
-      test.case = `child mode:${mode} stdio:ignore ipc:0, child continues to work after parent death`
+      test.case = `child mode:${mode} stdio:ignore ipc:0`
 
       a.fileProvider.filesDelete( testFilePath );
       a.fileProvider.dirMakeForFile( testFilePath );
@@ -13671,7 +13671,7 @@ function startDetachingTerminationBegin( test )
 
     ready.then( () =>
     {
-      test.case = `child mode:${mode} stdio:ignore ipc:1, child continues to work after parent death`
+      test.case = `child mode:${mode} stdio:ignore ipc:1`
 
       a.fileProvider.filesDelete( testFilePath );
       a.fileProvider.dirMakeForFile( testFilePath );
@@ -13727,7 +13727,7 @@ function startDetachingTerminationBegin( test )
 
     ready.then( () =>
     {
-      test.case = `child mode:${mode} stdio:pipe ipc:0, child continues to work after parent death`
+      test.case = `child mode:${mode} stdio:pipe ipc:0`
       a.fileProvider.filesDelete( testFilePath );
       a.fileProvider.dirMakeForFile( testFilePath );
 
@@ -13782,7 +13782,7 @@ function startDetachingTerminationBegin( test )
 
     ready.then( () =>
     {
-      test.case = `child mode:${mode} stdio:pipe ipc:1, child continues to work after parent death`
+      test.case = `child mode:${mode} stdio:pipe ipc:1`
 
       a.fileProvider.filesDelete( testFilePath );
       a.fileProvider.dirMakeForFile( testFilePath );
@@ -13891,6 +13891,7 @@ startDetachingTerminationBegin.description =
 `
 Checks that detached child process continues to work after parent death.
 Parent spawns child in detached mode with different stdio and ipc.
+Child continues to work after parent death.
 `
 //
 
@@ -16714,9 +16715,9 @@ function startNjsWithReadyDelayStructural( test )
         'outputPrefixing' : 0,
         'outputPiping' : true,
         'outputAdditive' : true,
-        'outputDecorating' : 0,
-        'outputDecoratingStdout' : 0,
-        'outputDecoratingStderr' : 0,
+        'outputColoring' : 1,
+        'outputColoringStdout' : 1,
+        'outputColoringStderr' : 1,
         'uid' : null,
         'gid' : null,
         'streamSizeLimit' : null,
@@ -16881,9 +16882,9 @@ function startNjsWithReadyDelayStructuralMultiple( test )
         'outputPrefixing' : 0,
         'outputPiping' : true,
         'outputAdditive' : true,
-        'outputDecorating' : 0,
-        'outputDecoratingStdout' : 0,
-        'outputDecoratingStderr' : 0,
+        'outputColoring' : 1,
+        'outputColoringStdout' : 1,
+        'outputColoringStderr' : 1,
         'outputGraying' : 0,
         'conStart' : options.conStart,
         'conTerminate' : options.conTerminate,
@@ -16939,155 +16940,6 @@ function startNjsWithReadyDelayStructuralMultiple( test )
   }
 
 }
-
-// {
-//   let context = this;
-//   let a = context.assetFor( test, false );
-//   let programPath = a.program( program1 );
-//
-//   /* */
-//
-//   a.ready.then( () =>
-//   {
-//     test.case = 'basic';
-//     let con = new _.Consequence().take( null );
-//
-//     con.delay( context.t1 ); /* 1000 */
-//
-//     let options =
-//     {
-//       execPath : programPath,
-//       currentPath : [ a.abs( '.' ), a.abs( '.' ) ],
-//       throwingExitCode : 1,
-//       inputMirroring : 1,
-//       outputCollecting : 1,
-//       stdio : 'pipe',
-//       sync : 0,
-//       deasync : 0,
-//       ready : con,
-//     }
-//
-//     let returned = _.process.startNjs( options );
-//
-//     returned.then( ( op ) =>
-//     {
-//       test.identical( op.exitCode, 0 );
-//       test.identical( op.ended, true );
-//       test.identical( op.output, 'program1:begin\n' );
-//
-//       let exp2 = _.mapExtend( null, exp );
-//       exp2.output = 'program1:begin\n';
-//       exp2.exitCode = 0;
-//       exp2.exitSignal = null;
-//       exp2.disconnect = options.disconnect;
-//       exp2.process = options.process;
-//       exp2.stack = options.stack;
-//       exp2.currentPath = _.path.current();
-//       exp2.args = [];
-//       exp2.interpreterArgs = [];
-//       exp2.outputPiping = true;
-//       exp2.outputAdditive = true;
-//       exp2.state = 'terminated';
-//       exp2.exitReason = 'normal';
-//       exp2.fullExecPath = a.path.nativize( programPath );
-//       exp2.ended = true;
-//
-//       test.identical( options, exp2 );
-//       test.identical( options.process, null );
-//       test.is( !!options.procedure );
-//       test.identical( options.disconnect, null );
-//       test.is( options.conTerminate !== options.ready );
-//       test.identical( options.ready.exportString(), 'Consequence:: 0 / 1' );
-//       test.identical( options.conTerminate, null );
-//       test.identical( options.conDisconnect, null );
-//       test.identical( options.conStart, null );
-//
-//       return null;
-//     });
-//
-//     var exp =
-//     {
-//       'execPath' : a.path.nativize( a.abs( 'program1.js' ) ),
-//       'currentPath' : [ a.abs( '.' ), a.abs( '.' ) ],
-//       'throwingExitCode' : 1,
-//       'inputMirroring' : 1,
-//       'outputCollecting' : 1,
-//       'sync' : 0,
-//       'deasync' : 0,
-//       'passingThrough' : 0,
-//       'maximumMemory' : 0,
-//       'applyingExitCode' : 1,
-//       'stdio' : 'pipe',
-//       'mode' : 'fork',
-//       'args' : null,
-//       'interpreterArgs' : '',
-//       'when' : 'instant',
-//       'dry' : 0,
-//       'ipc' : null,
-//       'env' : null,
-//       'detaching' : 0,
-//       'hiding' : 1,
-//       'concurrent' : 0,
-//       'timeOut' : null,
-//       // 'returningOptionsArray' : 1,
-//       'briefExitCode' : 0,
-//       'verbosity' : 2,
-//       'outputPrefixing' : 0,
-//       'outputPiping' : null,
-//       'outputAdditive' : null,
-//       'outputDecorating' : 0,
-//       'outputDecoratingStdout' : 0,
-//       'outputDecoratingStderr' : 0,
-//       'outputGraying' : 0,
-//       'conStart' : null,
-//       'conTerminate' : null,
-//       'conDisconnect' : null,
-//       // 'disconnect' : null,
-//       'ready' : options.ready,
-//       'logger' : options.logger,
-//       'stack' : options.stack,
-//       'procedure' : options.procedure,
-//       // 'process' : null,
-//       'state' : 'initial',
-//       'exitReason' : null,
-//       // 'fullExecPath' : null,
-//       'output' : null,
-//       'exitCode' : null,
-//       'exitSignal' : null,
-//       'ended' : false,
-//       // 'handleProcedureTerminationBegin' : false,
-//       'error' : null
-//     }
-//     test.identical( options, exp );
-//
-//     // test.is( _.routineIs( options.disconnect ) );
-//     test.is( options.disconnect === undefined );
-//     test.is( options.conTerminate !== options.ready );
-//     test.is( !!options.disconnect );
-//     test.identical( options.process, null );
-//     test.is( !!options.procedure );
-//     test.is( !!options.logger );
-//     test.is( !!options.stack );
-//     test.identical( options.ready.exportString(), 'Consequence:: 0 / 2' );
-//     test.identical( options.conDisconnect, null );
-//     test.identical( options.conTerminate, null );
-//     test.identical( options.conStart, null );
-//
-//     return returned;
-//   })
-//
-//   /* */
-//
-//   return a.ready;
-//
-//   /* */
-//
-//   function program1()
-//   {
-//     console.log( 'program1:begin' );
-//   }
-//
-// }
 
 startNjsWithReadyDelayStructuralMultiple.description =
 `
@@ -17815,16 +17667,17 @@ function startOptionLogger( test )
       mode,
       outputCollecting : 1,
       outputPiping : 1,
-      outputDecorating : 1,
+      outputColoring : 0, /* xxx2 */
       logger,
-      ready : a.ready
+      ready : a.ready,
     })
     .then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
-      test.is( _.strHas( op.output, '  One tab' ) )
-      test.is( _.strHas( loggerOutput, '    One tab' ) )
+      test.is( _.strHas( op.output, '  One tab' ) );
+      test.is( _.strHas( loggerOutput, '    One tab' ) );
+      console.log( 'loggerOutput', loggerOutput );
       return null;
     })
 
@@ -18542,7 +18395,7 @@ function startOptionVerbosity( test )
     stdio : 'pipe',
     outputPiping : null,
     outputCollecting : 0,
-    outputDecorating : 1,
+    outputColoring : 0, /* xxx2 */
     logger : captureLogger,
     ready : a.ready
   })
@@ -18567,7 +18420,7 @@ function startOptionVerbosity( test )
     stdio : 'pipe',
     outputPiping : null,
     outputCollecting : 0,
-    outputDecorating : 1,
+    outputColoring : 0,
     logger : captureLogger,
     ready : a.ready
   })
@@ -18592,7 +18445,7 @@ function startOptionVerbosity( test )
     stdio : 'pipe',
     outputPiping : null,
     outputCollecting : 0,
-    outputDecorating : 1,
+    outputColoring : 0,
     logger : captureLogger,
     ready : a.ready
   })
@@ -18618,7 +18471,7 @@ function startOptionVerbosity( test )
     outputPiping : null,
     outputCollecting : 0,
     throwingExitCode : 0,
-    outputDecorating : 1,
+    outputColoring : 0,
     logger : captureLogger,
     ready : a.ready
   })
@@ -18642,7 +18495,7 @@ function startOptionVerbosity( test )
     outputPiping : null,
     outputCollecting : 0,
     throwingExitCode : 0,
-    outputDecorating : 1,
+    outputColoring : 0,
     logger : captureLogger,
     ready : a.ready
   })
@@ -18666,7 +18519,7 @@ function startOptionVerbosity( test )
     outputPiping : null,
     outputCollecting : 0,
     throwingExitCode : 0,
-    outputDecorating : 1,
+    outputColoring : 0,
     logger : captureLogger,
     ready : a.ready
   })
@@ -18690,7 +18543,7 @@ function startOptionVerbosity( test )
     outputPiping : null,
     outputCollecting : 0,
     throwingExitCode : 0,
-    outputDecorating : 1,
+    outputColoring : 0,
     logger : captureLogger,
     ready : a.ready
   })
@@ -18714,7 +18567,7 @@ function startOptionVerbosity( test )
     outputPiping : null,
     outputCollecting : 0,
     throwingExitCode : 0,
-    outputDecorating : 1,
+    outputColoring : 0,
     logger : captureLogger,
     ready : a.ready
   })
@@ -18738,7 +18591,7 @@ function startOptionVerbosity( test )
     outputPiping : null,
     outputCollecting : 0,
     throwingExitCode : 1,
-    outputDecorating : 1,
+    outputColoring : 0,
     logger : captureLogger,
     ready : a.ready
   })
@@ -18763,7 +18616,7 @@ function startOptionVerbosity( test )
     outputPiping : null,
     outputCollecting : 0,
     throwingExitCode : 1,
-    outputDecorating : 1,
+    outputColoring : 0,
     logger : captureLogger,
     ready : a.ready
   })
@@ -24115,7 +23968,7 @@ function terminate( test )
 
   // if( process.platform === 'win32' )
   // {
-  //   // qqq for Vova : windows-kill doesn't work correctrly on node 14
+  //   // zzz for Vova : windows-kill doesn't work correctrly on node 14
   //   // investigate if its possible to use process.kill instead of windows-kill
   //   test.identical( 1, 1 )
   //   return;
@@ -24768,10 +24621,8 @@ function terminate( test )
     {
       data = data.toString();
       if( _.strHas( data, 'ready' ))
-      _.process.terminate({ pnd : o.process, timeOut : 0 }); /* qqq for Vova : should send kill signal! aaa: added test routine terminateZeroTimeOut*/
+      _.process.terminate({ pnd : o.process, timeOut : 0 });
     })
-
-    /* qqq for Vova : add test case with low timeOut aaa:added*/
 
     ready.then( ( op ) =>
     {
@@ -24963,7 +24814,7 @@ function terminateSync( test )
 
   // if( process.platform === 'win32' )
   // {
-  //   // qqq for Vova : windows-kill doesn't work correctrly on node 14
+  //   // яяя for Vova : windows-kill doesn't work correctrly on node 14
   //   // investigate if its possible to use process.kill instead of windows-kill
   //   test.identical( 1, 1 );
   //   return;
@@ -26236,7 +26087,7 @@ function terminateDetachedFirstChildSpawn( test )
     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
     test.is( _.process.isAlive( program2Pid ) );
 
-    return _.time.out( context.t1*15 );//qqq for Vova: replace with periodic + timeout + kill
+    return _.time.out( context.t1*15 ); /* qqq for Vova: replace with periodic + timeout + kill */
   })
 
   o.conTerminate.then( () =>
@@ -26377,7 +26228,7 @@ function terminateDetachedFirstChildFork( test )
     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
     test.is( _.process.isAlive( program2Pid ) );
 
-    return _.time.out( context.t1*15 );//qqq for Vova: replace with periodic + timeout + kill
+    return _.time.out( context.t1*15 ); /* qqq for Vova: replace with periodic + timeout + kill */
   })
 
   o.conTerminate.then( () =>
@@ -26518,7 +26369,7 @@ function terminateDetachedFirstChildShell( test )
     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
     test.is( _.process.isAlive( program2Pid ) );
 
-    return _.time.out( context.t1*15 );//qqq for Vova: replace with periodic + timeout + kill
+    return _.time.out( context.t1*15 ); /* qqq for Vova: replace with periodic + timeout + kill */
   })
 
   o.conTerminate.then( () =>
@@ -28988,10 +28839,10 @@ var Proto =
 
     startReadyDelay,
     startReadyDelayMultiple,
-    // startOutputMultiple, // xxx
+    startOutputMultiple,
     startOptionWhenDelay,
     startOptionWhenTime,
-    startOptionTimeOut, /* qqq for Vova : fix please */
+    startOptionTimeOut,
     // startAfterDeath, /* zzz : fix */
     // startAfterDeathOutput, /* zzz : ? */
 
