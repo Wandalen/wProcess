@@ -16539,7 +16539,198 @@ function startOptionOutputColoring( test )
 
 function startOptionOutputColoringStderr( test )
 {
+  let context = this;
+  let a = context.assetFor( test, false );
 
+  /* */
+
+  let modes = [ 'fork', 'spawn', 'shell' ];
+
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+
+  return a.ready;
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputColoringStderr : 0, inputMirroring : 0, outputColloring : 1`;
+
+      let testAppPath2 = a.program( testApp2Error );
+      let locals = 
+      {
+        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
+        programPath : testAppPath2,
+        outputColoringStderr : 0,
+        outputColoring : 1,
+        inputMirroring : 0,
+        mode
+      };
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      let options =
+      {
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, 'Error output\n' )
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+        return null
+      })
+    } )
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputColoringStderr : 1, inputMirroring : 0, outputColoring : 0,`;
+
+      let testAppPath2 = a.program( testApp2Error );
+      let locals =
+      {
+        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
+        programPath : testAppPath2,
+        outputColoringStderr : 1,
+        outputColoring : 0,
+        inputMirroring : 0,
+        mode
+      };
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      let options =
+      {
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, `Error output\n` )
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+        return null
+      })
+    } )
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputColoringStderr : 1, inputMirroring : 0, outputColoring : 1`;
+
+      let testAppPath2 = a.program( testApp2Error );
+      let locals =
+      {
+        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
+        programPath : testAppPath2,
+        outputColoringStderr : 1,
+        outputColoring : 1,
+        inputMirroring : 0,
+        mode
+      };
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      let options =
+      {
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, `\u001b[31mError output\u001b[39;0m\n` )
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+        return null
+      })
+    } )
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputColoringStderr : 1, inputMirroring : 1, outputColoring : 1,`;
+
+      let testAppPath2 = a.program( testApp2Error );
+      let locals =
+      {
+        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
+        programPath : testAppPath2,
+        outputColoringStderr : 1,
+        inputMirroring : 1,
+        outputColoring : 1,
+        mode
+      };
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      let options =
+      {
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        let expected = `\u001b[97m > \u001b[39;0m${ mode === 'fork' ? '' : 'node ' }${testAppPath2}\n\u001b[31mError output\u001b[39;0m\n`;
+        test.identical( op.output, expected )
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+        return null
+      })
+    } )
+
+    return ready;
+
+  }
+
+  /* - */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    let options =
+    {
+      execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+      throwingExitCode : 0,
+      outputCollecting : 1,
+      mode,
+      inputMirroring,
+      outputColoringStderr,
+      outputColoring
+    }
+
+    return _.process.start( options );
+  }
+
+  function testApp2Error()
+  {
+    console.error( 'Error output' );
+  }
 }
 
 //
