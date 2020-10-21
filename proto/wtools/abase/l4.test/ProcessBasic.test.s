@@ -18090,7 +18090,7 @@ function startOptionStreamSizeLimit( test )
 
 //
 
-function startOptionStreamSizeLimitForbidden( test )
+function startOptionStreamSizeLimitThrowing( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -28448,7 +28448,7 @@ var Proto =
     // other options
 
     startOptionStreamSizeLimit,
-    startOptionStreamSizeLimitForbidden,
+    startOptionStreamSizeLimitThrowing,
     startOptionDry, /* qqq for Yevhen : make sure option dry is covered good enough */
     /* qqq for Yevhen : write test routine startOptionDryMultiple */
     startOptionCurrentPath,
