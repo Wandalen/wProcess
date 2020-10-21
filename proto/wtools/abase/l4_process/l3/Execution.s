@@ -463,8 +463,8 @@ function startMinimal_body( o )
 
         o.ready.deasync();
         o.ready.give( 1 );
-        if( readyCallback )
-        o.ready.finally( readyCallback );
+        // if( readyCallback )
+        // o.ready.finally( readyCallback );
         if( o.when.delay )
         _.time.sleep( o.when.delay );
 
@@ -479,7 +479,9 @@ function startMinimal_body( o )
       }
       _.assert( o.state === 'terminated' || o.state === 'disconnected' );
       end2( undefined/*, o.conTerminate */ );
-      return o;
+
+      return end1();
+      // return o;
     }
     else
     {
@@ -488,10 +490,10 @@ function startMinimal_body( o )
 
       o.ready.thenGive( run2 );
 
-      if( readyCallback )
-      debugger;
-      if( readyCallback )
-      o.ready.finally( readyCallback );
+      // if( readyCallback )
+      // debugger;
+      // if( readyCallback )
+      // o.ready.finally( readyCallback );
 
       return end1();
     }
@@ -681,16 +683,28 @@ function startMinimal_body( o )
 
   /* */
 
-  function end1()
+  function end1() /* xxx : make similar change in startMinimal() */
   {
+    // yyy xxx2
+    if( readyCallback )
+    o.ready.finally( readyCallback );
     if( o.deasync )
-    {
-      o.ready.deasync();
-      if( o.sync )
-      return o.ready.sync();
-    }
+    o.ready.deasync();
+    if( o.sync )
+    return o.ready.sync();
     return o.ready;
   }
+
+  // function end1()
+  // {
+  //   if( o.deasync )
+  //   {
+  //     o.ready.deasync();
+  //     if( o.sync )
+  //     return o.ready.sync();
+  //   }
+  //   return o.ready;
+  // }
 
   /* */
 
@@ -884,14 +898,16 @@ function startMinimal_body( o )
     if( o.verbosity )
     log( _.errOnce( o.error ), 1 );
 
-    if( o.sync && !o.deasync )
-    {
-      throw o.error; /* xxx2 : remove branching? */
-    }
-    else
-    {
-      end2( o.error/*, o.conTerminate */ );
-    }
+    // if( o.sync && !o.deasync )
+    // {
+    //   throw o.error; /* xxx2 : remove branching? */
+    // }
+    // else
+    // {
+    //   end2( o.error/*, o.conTerminate */ );
+    // }
+
+    end2( o.error );
   }
 
   /* */
@@ -1384,6 +1400,7 @@ startMinimal_body.defaults =
   logger : null,
   procedure : null,
   stack : null,
+  sessionId : 0,
 
   ready : null,
   conStart : null,
@@ -1551,7 +1568,6 @@ function start_body( o )
 
   _.assert( arguments.length === 1, 'Expects single argument' );
 
-  // let startCounter = 0;
   let processPipeCounter = 0;
   let readyCallback; /* xxx : cover and implement ready callback for multiple */
 
@@ -1625,7 +1641,7 @@ function start_body( o )
     _.assert( _.boolLike( o.outputAdditive ) );
     o.currentPath = o.currentPath || _.path.current();
 
-    o.runs = [];
+    o.runs = []; /* xxx : rename to sessions */
     // o.disconnect = disconnect; /* xxx */
     o.state = 'initial'; /* `initial`, `starting`, `started`, `terminating`, `terminated`, `disconnected` */
     o.exitReason = null;
@@ -1658,7 +1674,9 @@ function start_body( o )
 
     // if( !o.dry ) /* xxx : remove dry? */
     if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
-    o.procedure = _.procedure.begin({ _object : o, _stack : o.stack });
+    {
+      o.procedure = _.procedure.begin({ _object : o, _stack : o.stack });
+    }
     else if( o.procedure )
     {
       /* qqq xxx : cover */
@@ -1689,11 +1707,13 @@ function start_body( o )
     let conTerminate = [];
     let execPath = _.arrayAs( o.execPath );
     let currentPath = _.arrayAs( o.currentPath );
+    let sessionId = 0;
 
     for( let p = 0 ; p < execPath.length ; p++ )
     for( let c = 0 ; c < currentPath.length ; c++ )
     {
       let currentReady = new _.Consequence();
+      sessionId += 1;
       let o2 = _.mapExtend( null, o );
       o2.conStart = null;
       o2.conTerminate = null;
@@ -1702,6 +1722,7 @@ function start_body( o )
       o2.args = _.arrayIs( o.args ) ? o.args.slice() : o.args;
       o2.currentPath = currentPath[ c ];
       o2.ready = currentReady;
+      o2.sessionId = sessionId;
       delete o2.runs;
       delete o2.output;
       delete o2.exitReason;
@@ -1726,6 +1747,7 @@ function start_body( o )
 
     o.runs.forEach( ( o2, i ) =>
     {
+      let err2;
 
       if( o.concurrent ) /* xxx : coverage? */
       {
@@ -1744,11 +1766,11 @@ function start_body( o )
       {
         _.assertMapHasAll( o2, _.process.startMinimal.defaults );
         _.process.startMinimal.body.call( _.process, o2 );
-        // startCounter += 1;
       }
       catch( err )
       {
-        // startCounter += 1;
+        err2 = err;
+        // o2.error = o2.error || err; // yyy
         o2.ready.error( err );
       }
 
@@ -1768,6 +1790,15 @@ function start_body( o )
         serialEnd();
         throw err;
       });
+
+      // yyy xxx
+      // if( err2 )
+      // if( !o.concurrent )
+      // {
+      //   if( o.state !== 'terminated' )
+      //   serialEnd();
+      //   o2.ready.error( err );
+      // }
 
     });
 
@@ -1796,6 +1827,7 @@ function start_body( o )
 
   function end1() /* xxx : make similar change in startMinimal() */
   {
+    debugger;
     if( readyCallback )
     o.ready.finally( readyCallback );
     if( o.deasync )
@@ -1889,6 +1921,8 @@ function start_body( o )
 
   function serialEnd()
   {
+    // if( o.error )
+    // console.log( `serialEnd ${_.errIsAttended( o.error )}` );
     o.runs.forEach( ( o2 ) =>
     {
       if( o2.ended )
@@ -2025,7 +2059,7 @@ function start_body( o )
 start_body.defaults =
 {
 
-  ... startMinimal.defaults,
+  ... _.mapBut( startMinimal.defaults, [ 'sessionId' ] ),
 
   concurrent : 0,
 
