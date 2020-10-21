@@ -14195,7 +14195,7 @@ function startConcurrentConsequencesMultiple( test )
     outputCollecting : 1,
   }
 
-  // xxx
+  // xxx yyy
   // let consequences = [ 'null' ];
   // let modes = [ 'spawn' ];
 

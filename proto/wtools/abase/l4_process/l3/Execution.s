@@ -1770,7 +1770,7 @@ function start_body( o )
       catch( err )
       {
         err2 = err;
-        o2.error = o2.error || err;
+        // o2.error = o2.error || err; // yyy
         o2.ready.error( err );
       }
 
