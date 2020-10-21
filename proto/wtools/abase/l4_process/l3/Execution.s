@@ -463,8 +463,8 @@ function startMinimal_body( o )
 
         o.ready.deasync();
         o.ready.give( 1 );
-        if( readyCallback )
-        o.ready.finally( readyCallback );
+        // if( readyCallback )
+        // o.ready.finally( readyCallback );
         if( o.when.delay )
         _.time.sleep( o.when.delay );
 
@@ -479,7 +479,9 @@ function startMinimal_body( o )
       }
       _.assert( o.state === 'terminated' || o.state === 'disconnected' );
       end2( undefined/*, o.conTerminate */ );
-      return o;
+
+      return end1();
+      // return o;
     }
     else
     {
@@ -488,10 +490,10 @@ function startMinimal_body( o )
 
       o.ready.thenGive( run2 );
 
-      if( readyCallback )
-      debugger;
-      if( readyCallback )
-      o.ready.finally( readyCallback );
+      // if( readyCallback )
+      // debugger;
+      // if( readyCallback )
+      // o.ready.finally( readyCallback );
 
       return end1();
     }
@@ -684,8 +686,8 @@ function startMinimal_body( o )
   function end1() /* xxx : make similar change in startMinimal() */
   {
     // yyy xxx2
-    // if( readyCallback )
-    // o.ready.finally( readyCallback );
+    if( readyCallback )
+    o.ready.finally( readyCallback );
     if( o.deasync )
     o.ready.deasync();
     if( o.sync )
@@ -1672,7 +1674,9 @@ function start_body( o )
 
     // if( !o.dry ) /* xxx : remove dry? */
     if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
-    o.procedure = _.procedure.begin({ _object : o, _stack : o.stack });
+    {
+      o.procedure = _.procedure.begin({ _object : o, _stack : o.stack });
+    }
     else if( o.procedure )
     {
       /* qqq xxx : cover */

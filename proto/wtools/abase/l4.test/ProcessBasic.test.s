@@ -8511,7 +8511,7 @@ function startProcedureStackMultiple( test )
 
 }
 
-startProcedureStackMultiple.timeOut = 120000;
+startProcedureStackMultiple.timeOut = 500000;
 
 //
 
@@ -14654,7 +14654,7 @@ ${options.runs[ 1 ].procedure.id}.end
 
 }
 
-startConcurrentConsequencesMultiple.timeOut = 600000;
+startConcurrentConsequencesMultiple.timeOut = 500000;
 startConcurrentConsequencesMultiple.description =
 `
   - all consequences are called
@@ -20874,8 +20874,6 @@ function endSignalsBasic( test )
     stdio : 'pipe',
   }
 
-  // xxx
-  // let modes = [ 'fork' ];
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGQUIT' ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGINT' ) ) );
