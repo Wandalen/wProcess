@@ -7837,7 +7837,6 @@ function startProcedureStack( test )
   let a = context.assetFor( test, false );
   let programPath = a.path.nativize( a.program( program1 ) );
   let modes = [ 'fork', 'spawn', 'shell' ];
-  // let modes = [ 'spawn' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run( 1, 0, mode ) ) );
@@ -8075,6 +8074,8 @@ function startProcedureStack( test )
   }
 
 }
+
+startProcedureStack.timeOut = 300000;
 
 startProcedureStack.description =
 `
@@ -8511,7 +8512,7 @@ function startProcedureStackMultiple( test )
 
 }
 
-startProcedureStackMultiple.timeOut = 120000;
+startProcedureStackMultiple.timeOut = 500000;
 
 //
 
@@ -8609,22 +8610,18 @@ function startChronology( test )
   let track;
   let niteration = 0;
 
-  // xxx
-  // var modes = [ 'spawn' ];
-
   var modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run( 1, 0, mode ) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => run( 1, 1, mode ) ) );
-
+  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 1, mode ) ) );
   return a.ready;
 
   /* */
 
   function run( sync, deasync, mode )
   {
-    test.case = `sync:${sync} mode:${mode}`;
+    test.case = `sync:${sync} deasync:${deasync} mode:${mode}`;
 
     if( sync && mode === 'fork' )
     return null;
@@ -8640,7 +8637,7 @@ function startChronology( test )
       args : [ testAppPath ],
       mode,
       sync,
-      deasync, /* xxx : vary */
+      deasync,
       ready : new _.Consequence().take( null ),
       conStart : new _.Consequence(),
       conDisconnect : new _.Consequence(),
@@ -8676,11 +8673,11 @@ function startChronology( test )
       test.identical( o.error, null );
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, null );
-      test.identical( o.process.exitCode, sync ? undefined : null );
-      test.identical( o.process.signalCode, sync ? undefined : null );
-      test.identical( _.Procedure.Counter - ptcounter, sync ? 3 : 2 );
+      test.identical( o.process.exitCode, ( sync && !deasync ) ? undefined : null );
+      test.identical( o.process.signalCode, ( sync && !deasync ) ? undefined : null );
+      test.identical( _.Procedure.Counter - ptcounter, ( sync && !deasync ) ? 3 : 2 );
       ptcounter = _.Procedure.Counter;
-      test.identical( _.Procedure.FindAlive().length - pacounter, sync ? 1 : 2 );
+      test.identical( _.Procedure.FindAlive().length - pacounter, ( sync && !deasync ) ? 1 : 2 );
       pacounter = _.Procedure.FindAlive().length;
     });
 
@@ -8698,7 +8695,7 @@ function startChronology( test )
 
       test.identical( o.ready.argumentsCount(), 0 );
       test.identical( o.ready.errorsCount(), 0 );
-      test.identical( o.ready.competitorsCount(), sync ? 0 : 1 );
+      test.identical( o.ready.competitorsCount(), ( sync && !deasync ) ? 0 : 1 );
       test.identical( o.conStart.argumentsCount(), 1 );
       test.identical( o.conStart.errorsCount(), 0 );
       test.identical( o.conStart.competitorsCount(), 0 );
@@ -8715,9 +8712,9 @@ function startChronology( test )
       test.identical( o.exitSignal, null );
       test.identical( o.process.exitCode, 0 );
       test.identical( o.process.signalCode, null );
-      test.identical( _.Procedure.Counter - ptcounter, sync ? 0 : 1 );
+      test.identical( _.Procedure.Counter - ptcounter, ( sync && !deasync ) ? 0 : 1 );
       ptcounter = _.Procedure.Counter;
-      if( sync )
+      if( sync || deasync )
       test.identical( _.Procedure.FindAlive().length - pacounter, -2 );
       else
       test.identical( _.Procedure.FindAlive().length - pacounter, niteration > 1 ? -2 : 0 );
@@ -8753,7 +8750,7 @@ function startChronology( test )
       test.identical( o.process.signalCode, null );
       test.identical( _.Procedure.Counter - ptcounter, 0 );
       ptcounter = _.Procedure.Counter;
-      if( sync )
+      if( sync || deasync )
       test.identical( _.Procedure.FindAlive().length - pacounter, niteration > 1 ? -3 : -1 );
       else
       test.identical( _.Procedure.FindAlive().length - pacounter, -1 );
@@ -8779,28 +8776,28 @@ function startChronology( test )
     test.is( o.conDisconnect !== o.ready );
     test.is( o.conTerminate !== o.ready );
 
-    test.identical( o.ready.argumentsCount(), sync ? 1 : 0 );
+    test.identical( o.ready.argumentsCount(), ( sync || deasync ) ? 1 : 0 );
     test.identical( o.ready.errorsCount(), 0 );
     test.identical( o.ready.competitorsCount(), 0 );
     test.identical( o.conStart.argumentsCount(), 1 );
     test.identical( o.conStart.errorsCount(), 0 );
     test.identical( o.conStart.competitorsCount(), 0 );
     test.identical( o.conDisconnect.argumentsCount(), 0 );
-    test.identical( o.conDisconnect.errorsCount(), o.sync ? 1 : 0 );
+    test.identical( o.conDisconnect.errorsCount(), ( sync || deasync ) ? 1 : 0 );
     test.identical( o.conDisconnect.competitorsCount(), 0 );
-    test.identical( o.conTerminate.argumentsCount(), sync ? 1 : 0 );
+    test.identical( o.conTerminate.argumentsCount(), ( sync || deasync ) ? 1 : 0 );
     test.identical( o.conTerminate.errorsCount(), 0 );
-    test.identical( o.conTerminate.competitorsCount(), sync ? 0 : 1 );
-    test.identical( o.ended, sync ? true : false );
-    test.identical( o.state, sync ? 'terminated' : 'started' );
+    test.identical( o.conTerminate.competitorsCount(), ( sync || deasync ) ? 0 : 1 );
+    test.identical( o.ended, ( sync || deasync ) ? true : false );
+    test.identical( o.state, ( sync || deasync ) ? 'terminated' : 'started' );
     test.identical( o.error, null );
-    test.identical( o.exitCode, sync ? 0 : null );
+    test.identical( o.exitCode, ( sync || deasync ) ? 0 : null );
     test.identical( o.exitSignal, null );
-    test.identical( o.process.exitCode, sync ? 0 : null );
+    test.identical( o.process.exitCode, ( sync || deasync ) ? 0 : null );
     test.identical( o.process.signalCode, null );
     test.identical( _.Procedure.Counter - ptcounter, 0 );
     ptcounter = _.Procedure.Counter;
-    test.identical( _.Procedure.FindAlive().length - pacounter, sync ? -1 : -2 );
+    test.identical( _.Procedure.FindAlive().length - pacounter, ( sync && !deasync ) ? -1 : -2 );
     pacounter = _.Procedure.FindAlive().length;
 
     o.ready.tap( ( err, op ) =>
@@ -8829,9 +8826,9 @@ function startChronology( test )
       test.identical( o.exitSignal, null );
       test.identical( o.process.exitCode, 0 );
       test.identical( o.process.signalCode, null );
-      test.identical( _.Procedure.Counter - ptcounter, sync ? 1 : 0 );
+      test.identical( _.Procedure.Counter - ptcounter, ( sync || deasync ) ? 1 : 0 );
       ptcounter = _.Procedure.Counter;
-      test.identical( _.Procedure.FindAlive().length - pacounter, sync ? 1 : -1 );
+      test.identical( _.Procedure.FindAlive().length - pacounter, ( sync || deasync ) ? 1 : -1 );
       pacounter = _.Procedure.FindAlive().length;
       return null;
     })
@@ -8848,6 +8845,7 @@ function startChronology( test )
 
 }
 
+startChronology.timeOut = 300000;
 startChronology.description =
 `
   - conTerminate goes before ready
@@ -11918,7 +11916,7 @@ function startDetachingDisconnectedEarly( test )
         test.identical( o.ended, true );
         test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate' ] );
         test.is( !_.process.isAlive( o.process.pid ) );
-        o.conTerminate.cancel(); /* xxx : remove? */
+        // o.conTerminate.cancel(); /* xxx : remove? */
         return null;
       })
 
@@ -12041,7 +12039,7 @@ function startDetachingDisconnectedLate( test )
         test.identical( o.ended, true );
         test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate' ] );
         test.is( !_.process.isAlive( o.process.pid ) )
-        o.conTerminate.cancel();
+        // o.conTerminate.cancel();
         return null;
       })
 
@@ -12907,7 +12905,7 @@ function startOnStart( test )
       let ready = _.time.out( context.t2, () => /* 5000 */
       {
         test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate' ] );
-        o.conTerminate.cancel();
+        // o.conTerminate.cancel();
       })
 
       return _.Consequence.AndTake( o.conStart, o.conDisconnect, ready );
@@ -13090,7 +13088,7 @@ function startOnTerminate( test )
         test.identical( o.conTerminate.errorsCount(), 1 );
         test.identical( o.conTerminate.competitorsCount(), 0 );
         test.is( !_.process.isAlive( o.process.pid ) );
-        o.conTerminate.cancel();
+        // o.conTerminate.cancel();
         return null;
       });
     })
@@ -13175,7 +13173,7 @@ function startOnTerminate( test )
         test.identical( o.conTerminate.errorsCount(), 1 );
         test.identical( o.conTerminate.competitorsCount(), 0 );
         test.is( !_.process.isAlive( o.process.pid ) );
-        o.conTerminate.cancel();
+        // o.conTerminate.cancel();
         return null;
       });
 
@@ -13314,7 +13312,7 @@ function startOnTerminate( test )
         test.identical( o.conTerminate.errorsCount(), 1 );
         test.identical( o.conTerminate.competitorsCount(), 0 );
         test.is( !_.process.isAlive( o.process.pid ) );
-        o.conTerminate.cancel();
+        // o.conTerminate.cancel();
         return null;
       });
     })
@@ -13849,7 +13847,7 @@ function startConcurrentMultiple( test )
 
   let subprocessesOptionsSerial =
   {
-    execPath :  [ 'node ' + testAppPath + ' 1000', 'node ' + testAppPath + ' 10' ], /* xxx : 10 -> 1? */
+    execPath :  [ 'node ' + testAppPath + ' 1000', 'node ' + testAppPath + ' 1' ], /* xxx yyy : 10 -> 1? */
     ready : a.ready,
     outputCollecting : 1,
     verbosity : 3,
@@ -13867,7 +13865,7 @@ function startConcurrentMultiple( test )
 
     test.identical( subprocessesOptionsSerial.exitCode, 0 );
     test.identical( op.runs.length, 2 );
-    test.identical( a.fileProvider.fileRead( filePath ), 'written by 10' );
+    test.identical( a.fileProvider.fileRead( filePath ), 'written by 1' );
     a.fileProvider.fileDelete( filePath );
 
     test.identical( op.runs[ 0 ].exitCode, 0 );
@@ -13875,8 +13873,8 @@ function startConcurrentMultiple( test )
     test.is( _.strHas( op.runs[ 0 ].output, 'end 1000' ) );
 
     test.identical( op.runs[ 1 ].exitCode, 0 );
-    test.is( _.strHas( op.runs[ 1 ].output, 'begin 10' ) );
-    test.is( _.strHas( op.runs[ 1 ].output, 'end 10' ) );
+    test.is( _.strHas( op.runs[ 1 ].output, 'begin 1' ) );
+    test.is( _.strHas( op.runs[ 1 ].output, 'end 1' ) );
 
     counter += 1;
     return null;
@@ -13893,7 +13891,7 @@ function startConcurrentMultiple( test )
 
   let subprocessesError =
   {
-    execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 10' ],
+    execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 1' ],
     ready : a.ready,
     outputCollecting : 1,
     verbosity : 3,
@@ -13930,7 +13928,7 @@ function startConcurrentMultiple( test )
 
   let subprocessesErrorNonThrowing =
   {
-    execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 10' ],
+    execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 1' ],
     ready : a.ready,
     outputCollecting : 1,
     verbosity : 3,
@@ -13950,7 +13948,7 @@ function startConcurrentMultiple( test )
 
     test.identical( subprocessesErrorNonThrowing.exitCode, 1 );
     test.identical( op.runs.length, 2 );
-    test.identical( a.fileProvider.fileRead( filePath ), 'written by 10' );
+    test.identical( a.fileProvider.fileRead( filePath ), 'written by 1' );
     a.fileProvider.fileDelete( filePath );
 
     test.identical( op.runs[ 0 ].exitCode, 1 );
@@ -13959,8 +13957,8 @@ function startConcurrentMultiple( test )
     test.is( _.strHas( op.runs[ 0 ].output, 'Expects number' ) );
 
     test.identical( op.runs[ 1 ].exitCode, 0 );
-    test.is( _.strHas( op.runs[ 1 ].output, 'begin 10' ) );
-    test.is( _.strHas( op.runs[ 1 ].output, 'end 10' ) );
+    test.is( _.strHas( op.runs[ 1 ].output, 'begin 1' ) );
+    test.is( _.strHas( op.runs[ 1 ].output, 'end 1' ) );
 
     counter += 1;
     return null;
@@ -13977,7 +13975,7 @@ function startConcurrentMultiple( test )
 
   let subprocessesErrorConcurrent =
   {
-    execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 10' ],
+    execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 1' ],
     ready : a.ready,
     outputCollecting : 1,
     verbosity : 3,
@@ -13996,7 +13994,7 @@ function startConcurrentMultiple( test )
     test.identical( subprocessesErrorConcurrent.exitCode, 1 );
     test.is( _.errIs( err ) );
     test.is( op === undefined );
-    test.identical( a.fileProvider.fileRead( filePath ), 'written by 10' );
+    test.identical( a.fileProvider.fileRead( filePath ), 'written by 1' );
     a.fileProvider.fileDelete( filePath );
 
     _.errAttend( err );
@@ -14015,7 +14013,7 @@ function startConcurrentMultiple( test )
 
   let subprocessesErrorConcurrentNonThrowing =
   {
-    execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 10' ],
+    execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 1' ],
     ready : a.ready,
     outputCollecting : 1,
     verbosity : 3,
@@ -14035,7 +14033,7 @@ function startConcurrentMultiple( test )
 
     test.identical( subprocessesErrorConcurrentNonThrowing.exitCode, 1 );
     test.identical( op.runs.length, 2 );
-    test.identical( a.fileProvider.fileRead( filePath ), 'written by 10' );
+    test.identical( a.fileProvider.fileRead( filePath ), 'written by 1' );
     a.fileProvider.fileDelete( filePath );
 
     test.identical( op.runs[ 0 ].exitCode, 1 );
@@ -14044,8 +14042,8 @@ function startConcurrentMultiple( test )
     test.is( _.strHas( op.runs[ 0 ].output, 'Expects number' ) );
 
     test.identical( op.runs[ 1 ].exitCode, 0 );
-    test.is( _.strHas( op.runs[ 1 ].output, 'begin 10' ) );
-    test.is( _.strHas( op.runs[ 1 ].output, 'end 10' ) );
+    test.is( _.strHas( op.runs[ 1 ].output, 'begin 1' ) );
+    test.is( _.strHas( op.runs[ 1 ].output, 'end 1' ) );
 
     counter += 1;
     return null;
@@ -14197,8 +14195,8 @@ function startConcurrentConsequencesMultiple( test )
     outputCollecting : 1,
   }
 
-  // xxx
-  // let consequences = [ 'routine' ];
+  // xxx yyy
+  // let consequences = [ 'null' ];
   // let modes = [ 'spawn' ];
 
   let consequences = [ 'null', 'consequence', 'routine' ];
@@ -14421,6 +14419,7 @@ ${options.runs[ 1 ].procedure.id}.end
         if( tops.consequence === 'routine' )
         test.identical( track2, exp );
 
+        test.is( _.errIs( err ) );
         test.notIdentical( options.exitCode, 0 );
         test.identical( options.ended, true );
         test.identical( options.exitReason, 'code' );
@@ -14493,6 +14492,7 @@ ${options.runs[ 1 ].procedure.id}.end
 
       options.ready.finally( function( err, op )
       {
+
         test.identical( _.strCount( options.output, 'Error1' ), 1 );
         var exp =
         [
@@ -14534,6 +14534,7 @@ ${options.runs[ 1 ].procedure.id}.end
         if( tops.consequence === 'routine' )
         test.identical( track2, exp );
 
+        test.is( _.errIs( err ) );
         test.notIdentical( options.exitCode, 0 );
         test.identical( options.ended, true );
         test.identical( options.exitReason, 'code' );
@@ -14561,6 +14562,238 @@ ${options.runs[ 1 ].procedure.id}.end
 
       return options.ready;
     })
+// xxx
+
+    /* */
+
+//     ready.then( function( arg )
+//     {
+//       test.case = `sync:${tops.sync} deasync:${tops.deasync} mode:${tops.mode} concurrent:1 arg arg`;
+//
+//       if( tops.sync && !tops.deasync )
+//       return null;
+//
+//       clear();
+//       var time1 = _.time.now();
+//       var execPath = tops.mode === `fork` ? `${programPath}` : `node ${programPath}`;
+//       var o2 =
+//       {
+//         execPath : [ execPath, execPath ],
+//         args : ( op ) => [ `id:${op.procedure.id}`, `sessionId:${op.sessionId}`, `concurrent:1` ],
+//         conStart : conMake( tops, 'conStart' ),
+//         conDisconnect : conMake( tops, 'conDisconnect' ),
+//         conTerminate : conMake( tops, 'conTerminate' ),
+//         ready : conMake( tops, 'ready' ),
+//         concurrent : 1,
+//         sync : tops.sync,
+//         deasync : tops.deasync,
+//         mode : tops.mode,
+//       }
+//
+//       var options = _.mapSupplement( null, o2, o3 );
+//       var returned = _.process.start( options );
+//
+//       processTrack( options );
+//
+//       options.conStart.tap( ( err, op ) =>
+//       {
+//         op.runs.forEach( ( op2 ) =>
+//         {
+//           processTrack( op2 );
+//         });
+//       });
+//
+//       options.ready.tap( function( err, op )
+//       {
+//         var exp =
+// `
+// ${options.runs[ 0 ].procedure.id}.begin
+// ${options.runs[ 0 ].procedure.id}.end
+// ${options.runs[ 1 ].procedure.id}.begin
+// ${options.runs[ 1 ].procedure.id}.end
+// `
+//
+//         test.equivalent( options.output, exp );
+//         var exp =
+//         [
+//           `${options.procedure.id}.conStart`,
+//           `${options.runs[ 0 ].procedure.id}.conStart`,
+//           `${options.runs[ 1 ].procedure.id}.conStart`,
+//           `${options.runs[ 0 ].procedure.id}.conTerminate`,
+//           `${options.runs[ 0 ].procedure.id}.conDisconnect.dont`,
+//           `${options.runs[ 0 ].procedure.id}.ready`,
+//           `${options.runs[ 1 ].procedure.id}.conTerminate`,
+//           `${options.runs[ 1 ].procedure.id}.conDisconnect.dont`,
+//           `${options.runs[ 1 ].procedure.id}.ready`,
+//           `${options.procedure.id}.conTerminate`,
+//           `${options.procedure.id}.ready`,
+//         ]
+//         if( options.deasync || options.sync )
+//         exp =
+//         [
+//           `${options.procedure.id}.conStart`,
+//           `${options.procedure.id}.conTerminate`,
+//           `${options.procedure.id}.ready`,
+//           `${options.runs[ 0 ].procedure.id}.conStart`,
+//           `${options.runs[ 0 ].procedure.id}.conTerminate`,
+//           `${options.runs[ 0 ].procedure.id}.conDisconnect.dont`,
+//           `${options.runs[ 0 ].procedure.id}.ready`,
+//           `${options.runs[ 1 ].procedure.id}.conStart`,
+//           `${options.runs[ 1 ].procedure.id}.conTerminate`,
+//           `${options.runs[ 1 ].procedure.id}.conDisconnect.dont`,
+//           `${options.runs[ 1 ].procedure.id}.ready`,
+//         ]
+//         test.identical( track, exp );
+//
+//         var exp =
+//         [
+//           'conStart.arg',
+//           'conTerminate.arg',
+//           'ready.arg',
+//         ]
+//         if( tops.consequence === 'routine' )
+//         test.identical( track2, exp );
+//
+//         test.identical( options.exitCode, 0 );
+//         test.identical( options.ended, true );
+//         test.identical( options.exitReason, 'normal' );
+//         test.identical( options.exitSignal, null );
+//         test.identical( options.state, 'terminated' );
+//         test.identical( options.error, null );
+//
+//         test.identical( options.runs[ 0 ].exitCode, 0 );
+//         test.identical( options.runs[ 0 ].ended, true );
+//         test.identical( options.runs[ 0 ].exitReason, 'normal' );
+//         test.identical( options.runs[ 0 ].exitSignal, null );
+//         test.identical( options.runs[ 0 ].state, 'terminated' );
+//         test.identical( options.error, null );
+//
+//         test.identical( options.runs[ 1 ].exitCode, 0 );
+//         test.identical( options.runs[ 1 ].ended, true );
+//         test.identical( options.runs[ 1 ].exitReason, 'normal' );
+//         test.identical( options.runs[ 1 ].exitSignal, null );
+//         test.identical( options.runs[ 1 ].state, 'terminated' );
+//         test.identical( options.error, null );
+//
+//       })
+//
+//       return options.ready;
+//     })
+
+    /* */
+
+    // ready.then( function( arg )
+    // {
+    //   test.case = `sync:${tops.sync} deasync:${tops.deasync} mode:${tops.mode} concurrent:1 throwingExitCode:1 err arg`;
+    //
+    //   clear();
+    //   var time1 = _.time.now();
+    //   var counter = 0;
+    //   var execPath = tops.mode === `fork` ? `${programPath}` : `node ${programPath}`;
+    //   var o2 =
+    //   {
+    //     execPath : [ execPath, execPath ],
+    //     args : ( op ) => [ `id:${op.procedure.id}`, `throwing:${++counter === 1 ? 1 : 0}`, `sessionId:${op.sessionId}`, `concurrent:1` ],
+    //     conStart : conMake( tops, 'conStart' ),
+    //     conDisconnect : conMake( tops, 'conDisconnect' ),
+    //     conTerminate : conMake( tops, 'conTerminate' ),
+    //     ready : conMake( tops, 'ready' ),
+    //     concurrent : 1,
+    //     throwingExitCode : 1,
+    //     sync : tops.sync,
+    //     deasync : tops.deasync,
+    //     mode : tops.mode,
+    //   }
+    //
+    //   var options = _.mapSupplement( null, o2, o3 );
+    //   var returned = null;
+    //
+    //   if( tops.sync )
+    //   test.shouldThrowErrorSync( () => _.process.start( options ) );
+    //   else
+    //   returned = _.process.start( options );
+    //
+    //   processTrack( options );
+    //
+    //   options.conStart.tap( ( err, op ) =>
+    //   {
+    //     op.runs.forEach( ( op2 ) =>
+    //     {
+    //       processTrack( op2 );
+    //     });
+    //   });
+    //
+    //   options.ready.finally( function( err, op )
+    //   {
+    //     test.identical( _.strCount( options.output, 'Error1' ), 1 );
+    //     var exp =
+    //     [
+    //       `${options.procedure.id}.conStart`,
+    //       `${options.runs[ 0 ].procedure.id}.conStart`,
+    //       `${options.runs[ 1 ].procedure.id}.conStart`,
+    //       `${options.runs[ 0 ].procedure.id}.conTerminate.err`,
+    //       `${options.runs[ 0 ].procedure.id}.conDisconnect.err`,
+    //       `${options.runs[ 0 ].procedure.id}.ready.err`,
+    //       `${options.runs[ 1 ].procedure.id}.conTerminate`,
+    //       `${options.runs[ 1 ].procedure.id}.conDisconnect.dont`,
+    //       `${options.runs[ 1 ].procedure.id}.ready`,
+    //       `${options.procedure.id}.conTerminate.err`,
+    //       `${options.procedure.id}.ready.err`,
+    //     ]
+    //     if( options.deasync || options.sync )
+    //     exp =
+    //     [
+    //       `${options.procedure.id}.conStart`,
+    //       `${options.procedure.id}.conTerminate.err`,
+    //       `${options.procedure.id}.ready.err`,
+    //       `${options.runs[ 0 ].procedure.id}.conStart`,
+    //       `${options.runs[ 0 ].procedure.id}.conTerminate.err`,
+    //       `${options.runs[ 0 ].procedure.id}.conDisconnect.err`,
+    //       `${options.runs[ 0 ].procedure.id}.ready.err`,
+    //       `${options.runs[ 1 ].procedure.id}.conStart.err`,
+    //       `${options.runs[ 1 ].procedure.id}.conTerminate.err`,
+    //       `${options.runs[ 1 ].procedure.id}.conDisconnect.err`,
+    //       `${options.runs[ 1 ].procedure.id}.ready.err`,
+    //     ]
+    //
+    //     test.identical( track, exp );
+    //
+    //     var exp =
+    //     [
+    //       'conStart.arg',
+    //       'conTerminate.err',
+    //       'ready.err',
+    //     ]
+    //     if( tops.consequence === 'routine' )
+    //     test.identical( track2, exp );
+    //
+    //     test.notIdentical( options.exitCode, 0 );
+    //     test.identical( options.ended, true );
+    //     test.identical( options.exitReason, 'code' );
+    //     test.identical( options.exitSignal, null );
+    //     test.identical( options.state, 'terminated' );
+    //     test.is( !!options.error );
+    //     test.identical( _.strCount( options.error.message, 'Error1' ), 1 );
+    //
+    //     test.notIdentical( options.runs[ 0 ].exitCode, 0 );
+    //     test.identical( options.runs[ 0 ].ended, true );
+    //     test.identical( options.runs[ 0 ].exitReason, 'code' );
+    //     test.identical( options.runs[ 0 ].exitSignal, null );
+    //     test.identical( options.runs[ 0 ].state, 'terminated' );
+    //     test.is( !!options.runs[ 0 ].error );
+    //
+    //     test.identical( options.runs[ 1 ].exitCode, 0 );
+    //     test.identical( options.runs[ 1 ].ended, true );
+    //     test.identical( options.runs[ 1 ].exitReason, 'normal' );
+    //     test.identical( options.runs[ 1 ].exitSignal, null );
+    //     test.identical( options.runs[ 1 ].state, 'terminated' );
+    //     test.is( !options.runs[ 1 ].error );
+    //
+    //     return null;
+    //   })
+    //
+    //   return options.ready;
+    // })
 
     /* */
 
@@ -14642,10 +14875,15 @@ ${options.runs[ 1 ].procedure.id}.end
   {
     let _ = require( toolsPath );
     _.include( 'wProcess' );
-    let args = _.process.input();
+    let args = _.process.input(); /* xxx : rename */
 
+    let sessionDelay = context.t1*0.5*args.map.sessionId;
+
+    if( args.map.concurrent )
+    setTimeout( () => { console.log( `${args.map.id}.begin` ) }, sessionDelay );
+    else
     console.log( `${args.map.id}.begin` );
-    setTimeout( () => { console.log( `${args.map.id}.end` ) }, context.t1 / 2 );
+    setTimeout( () => { console.log( `${args.map.id}.end` ) }, context.t1 / 2 + sessionDelay );
 
     if( args.map.throwing )
     throw 'Error1';
@@ -14654,7 +14892,7 @@ ${options.runs[ 1 ].procedure.id}.end
 
 }
 
-startConcurrentConsequencesMultiple.timeOut = 600000;
+startConcurrentConsequencesMultiple.timeOut = 500000;
 startConcurrentConsequencesMultiple.description =
 `
   - all consequences are called
@@ -14854,7 +15092,7 @@ function starterConcurrentMultiple( test )
   let subprocessesOptionsSerial2 = {};
   let subprocessesOptionsSerial =
   {
-    execPath :  [ 'node ' + testAppPath + ' 1000', 'node ' + testAppPath + ' 10' ],
+    execPath :  [ 'node ' + testAppPath + ' 1000', 'node ' + testAppPath + ' 1' ],
     ready : a.ready,
     outputCollecting : 1,
     verbosity : 3,
@@ -14874,7 +15112,7 @@ function starterConcurrentMultiple( test )
 
     test.identical( subprocessesOptionsSerial2.exitCode, 0 );
     test.identical( op.runs.length, 2 );
-    test.identical( a.fileProvider.fileRead( filePath ), 'written by 10' );
+    test.identical( a.fileProvider.fileRead( filePath ), 'written by 1' );
     a.fileProvider.fileDelete( filePath );
 
     test.identical( op.runs[ 0 ].exitCode, 0 );
@@ -14882,8 +15120,8 @@ function starterConcurrentMultiple( test )
     test.is( _.strHas( op.runs[ 0 ].output, 'end 1000' ) );
 
     test.identical( op.runs[ 1 ].exitCode, 0 );
-    test.is( _.strHas( op.runs[ 1 ].output, 'begin 10' ) );
-    test.is( _.strHas( op.runs[ 1 ].output, 'end 10' ) );
+    test.is( _.strHas( op.runs[ 1 ].output, 'begin 1' ) );
+    test.is( _.strHas( op.runs[ 1 ].output, 'end 1' ) );
 
     counter += 1;
     return null;
@@ -14901,7 +15139,7 @@ function starterConcurrentMultiple( test )
   let subprocessesError2 = {};
   let subprocessesError =
   {
-    execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 10' ],
+    execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 1' ],
     ready : a.ready,
     outputCollecting : 1,
     verbosity : 3,
@@ -14941,7 +15179,7 @@ function starterConcurrentMultiple( test )
   let subprocessesErrorNonThrowing2 = {};
   let subprocessesErrorNonThrowing =
   {
-    execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 10' ],
+    execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 1' ],
     ready : a.ready,
     outputCollecting : 1,
     verbosity : 3,
@@ -14962,7 +15200,7 @@ function starterConcurrentMultiple( test )
 
     test.identical( subprocessesErrorNonThrowing2.exitCode, 1 );
     test.identical( op.runs.length, 2 );
-    test.identical( a.fileProvider.fileRead( filePath ), 'written by 10' );
+    test.identical( a.fileProvider.fileRead( filePath ), 'written by 1' );
     a.fileProvider.fileDelete( filePath );
 
     test.identical( op.runs[ 0 ].exitCode, 1 );
@@ -14971,8 +15209,8 @@ function starterConcurrentMultiple( test )
     test.is( _.strHas( op.runs[ 0 ].output, 'Expects number' ) );
 
     test.identical( op.runs[ 1 ].exitCode, 0 );
-    test.is( _.strHas( op.runs[ 1 ].output, 'begin 10' ) );
-    test.is( _.strHas( op.runs[ 1 ].output, 'end 10' ) );
+    test.is( _.strHas( op.runs[ 1 ].output, 'begin 1' ) );
+    test.is( _.strHas( op.runs[ 1 ].output, 'end 1' ) );
 
     counter += 1;
     return null;
@@ -14990,7 +15228,7 @@ function starterConcurrentMultiple( test )
   let subprocessesErrorConcurrent2 = {};
   let subprocessesErrorConcurrent =
   {
-    execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 10' ],
+    execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 1' ],
     ready : a.ready,
     outputCollecting : 1,
     verbosity : 3,
@@ -15011,7 +15249,7 @@ function starterConcurrentMultiple( test )
     test.identical( subprocessesErrorConcurrent2.exitCode, 1 );
     test.is( _.errIs( err ) );
     test.is( arg === undefined );
-    test.identical( a.fileProvider.fileRead( filePath ), 'written by 10' );
+    test.identical( a.fileProvider.fileRead( filePath ), 'written by 1' );
     a.fileProvider.fileDelete( filePath );
 
     _.errAttend( err );
@@ -15031,7 +15269,7 @@ function starterConcurrentMultiple( test )
   let subprocessesErrorConcurrentNonThrowing2 = {};
   let subprocessesErrorConcurrentNonThrowing =
   {
-    execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 10' ],
+    execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 1' ],
     ready : a.ready,
     outputCollecting : 1,
     verbosity : 3,
@@ -15052,7 +15290,7 @@ function starterConcurrentMultiple( test )
 
     test.identical( subprocessesErrorConcurrentNonThrowing2.exitCode, 1 );
     test.identical( op.runs.length, 2 );
-    test.identical( a.fileProvider.fileRead( filePath ), 'written by 10' );
+    test.identical( a.fileProvider.fileRead( filePath ), 'written by 1' );
     a.fileProvider.fileDelete( filePath );
 
     test.identical( op.runs[ 0 ].exitCode, 1 );
@@ -15061,8 +15299,8 @@ function starterConcurrentMultiple( test )
     test.is( _.strHas( op.runs[ 0 ].output, 'Expects number' ) );
 
     test.identical( op.runs[ 1 ].exitCode, 0 );
-    test.is( _.strHas( op.runs[ 1 ].output, 'begin 10' ) );
-    test.is( _.strHas( op.runs[ 1 ].output, 'end 10' ) );
+    test.is( _.strHas( op.runs[ 1 ].output, 'begin 1' ) );
+    test.is( _.strHas( op.runs[ 1 ].output, 'end 1' ) );
 
     counter += 1;
     return null;
@@ -19340,7 +19578,7 @@ function startOptionVerbosityLogging( test )
 //
 
 /* xxx : write test routine with option:ingore + multiple */
-/* xxx : cover con*multiple */
+
 function startOutputMultiple( test )
 {
   let context = this;
@@ -19687,10 +19925,10 @@ function startOutputMultiple( test )
     let args = _.process.input();
     let data = { time : _.time.now(), id : args.map.id };
     _.fileProvider.fileWrite({ filePath : _.path.join(__dirname, `${args.map.id}.json` ), data, encoding : 'json' });
-    let individualDelay = context.t1*0.5*args.map.id;
-    setTimeout( () => console.log( `${args.map.id}::begin` ), individualDelay );
-    setTimeout( () => console.log( `${args.map.id}::end` ), context.t1+individualDelay );
-    setTimeout( () => console.error( `${args.map.id}::err` ), context.t1*2+individualDelay );
+    let sessionDelay = context.t1*0.5*args.map.id;
+    setTimeout( () => console.log( `${args.map.id}::begin` ), sessionDelay );
+    setTimeout( () => console.log( `${args.map.id}::end` ), context.t1+sessionDelay );
+    setTimeout( () => console.error( `${args.map.id}::err` ), context.t1*2+sessionDelay );
   }
 
 }
@@ -21012,8 +21250,6 @@ function endSignalsBasic( test )
     stdio : 'pipe',
   }
 
-  // xxx
-  // let modes = [ 'fork' ];
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGQUIT' ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGINT' ) ) );
@@ -22062,7 +22298,7 @@ sleep:begin
         else
         test.identical( options.output, exp1 );
         test.identical( options.exitCode, null );
-        /*xxx:
+        /*
           on linux has two processes( shell + node ), on mac shell has only node
           on linux shell receives SIGTERM and kills node
           on mac node ignores SIGTERM because of sleep option enabled
@@ -22077,7 +22313,7 @@ sleep:begin
         test.identical( options.error, null );
         test.identical( options.process.exitCode, null );
         if( process.platform === 'darwin' )
-        test.identical( options.process.signalCode, 'SIGTERM' );
+        test.identical( options.process.signalCode, 'SIGKILL' );
         else
         test.identical( options.process.signalCode, 'SIGTERM' );
         test.identical( options.process.killed, false );
@@ -22403,7 +22639,7 @@ deasync:end
         if( mode === 'shell' )
         test.is( options.output === exp1 || options.output === exp2 );
         else
-        test.identical( options.output, exp1 ); /* xxx : sometimes only program1:begin */
+        test.identical( options.output, exp1 );
         test.identical( options.exitCode, null );
         test.identical( options.exitSignal, 'SIGKILL' );
         test.identical( options.ended, true );
@@ -22573,7 +22809,7 @@ exit:end
         if( mode === 'shell' )
         test.is( options.output === exp1 || options.output === exp2 );
         else
-        test.identical( options.output, exp1 ); /* xxx : sometimes only program1:begin */
+        test.identical( options.output, exp1 );
         test.identical( options.exitCode, null );
         test.identical( options.exitSignal, signal );
         test.identical( options.ended, true );
@@ -27618,7 +27854,7 @@ function childrenOptionFormatList( test )
       test.identical( op.ended, true );
       return children.then( ( op ) =>
       {
-        if( process.platform === 'win32' ) /* xxx qqq */
+        if( process.platform === 'win32' )
         {
           test.identical( op.runs.length, 5 );
 
@@ -28078,15 +28314,6 @@ var Proto =
     terminateWithDetachedChildFork,
     terminateWithDetachedChildShell,
 
-/* xxx
- = Source code from /pro/builder/proto/wtools/abase/l4_process/l3/Execution.s:2594:17
-      2592 :   if( !_.process.isAlive( o.pid ) )
-      2593 :   {
-    * 2594 :     let err = _.err( '\nTarget process:', _.strQuote( o.pid ), 'does not exist.' );
-      2595 :     return new _.Consequence().error( err );
-      2596 :   }
-*/
-
     terminateSeveralChildren,
     terminateWithSeveralDetachedChildren,
     terminateDeadProcess,
@@ -28112,7 +28339,7 @@ var Proto =
     experiment,
     experiment2,
     experiment3,
-    experimentIpcDeasync, /* xxx : investigate */
+    experimentIpcDeasync, /* xxx qqq for Vova : collect information for different versions and different OSs */
 
   }
 
