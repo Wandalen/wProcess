@@ -16798,14 +16798,6 @@ function startOptionOutputPrefixing( test )
     }
 
     return _.process.start( options )
-    .then( ( op ) =>
-    {
-      if( _.strHas( programPath, 'testApp2Error' ) )
-      console.error( op.output )
-      else
-      console.log( op.output );
-      return null;
-    } )
   }
 
   function testApp2()
@@ -17369,14 +17361,7 @@ function startOptionInputMirroring( test )
     }
 
     return _.process.start( options )
-    .then( ( op ) =>
-    {
-      if( _.strHas( programPath, 'testApp2Error' ) )
-      console.error( op.output );
-      else
-      console.log( op.output );
-      return null;
-    } )
+
   }
 
   function testApp2Error()
