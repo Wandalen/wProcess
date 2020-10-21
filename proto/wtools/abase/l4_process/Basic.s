@@ -147,18 +147,6 @@ on.defaults =
 
 //
 
-// function eventGive()
-// {
-//   return _.event.eventGive( _.process._ehandler, ... arguments );
-// }
-//
-// eventGive.defaults =
-// {
-//   ... _.event.eventGive.defaults,
-// }
-
-//
-
 function _eventAvailableHandle()
 {
   if( !_.process._ehandler.events.available.length )
@@ -178,6 +166,116 @@ function _eventAvailableHandle()
     }
   });
 
+}
+
+//
+
+_realGlobal_._exitHandlerRepairDone = _realGlobal_._exitHandlerRepairDone || 0;
+_realGlobal_._exitHandlerRepairTerminating = _realGlobal_._exitHandlerRepairTerminating || 0;
+function _exitHandlerRepair()
+{
+
+  _.assert( arguments.length === 0, 'Expects no arguments' );
+
+  if( _realGlobal_._exitHandlerRepairDone )
+  return;
+  _realGlobal_._exitHandlerRepairDone = 1;
+
+  if( !_global.process )
+  return;
+
+  // process.on( 'SIGHUP', handle_functor( 'SIGHUP', 1 ) ); /* xxx : experiment? */
+  process.on( 'SIGQUIT', handle_functor( 'SIGQUIT', 3 ) );
+  process.on( 'SIGINT', handle_functor( 'SIGINT' ), 2 );
+  process.on( 'SIGTERM', handle_functor( 'SIGTERM' ), 15 );
+  process.on( 'SIGUSR1', handle_functor( 'SIGUSR1' ), 16 );
+  process.on( 'SIGUSR2', handle_functor( 'SIGUSR2' ), 17 );
+
+  function handle_functor( signal, signalCode )
+  {
+    return function handle()
+    {
+      console.log( signal );
+      if( _realGlobal_._exitHandlerRepairTerminating )
+      return;
+      _realGlobal_._exitHandlerRepairTerminating = 1;
+      _.time._begin( _.process._sanitareTime, () => /* xxx : experiment to remove delay or use _begin */
+      {
+        try
+        {
+          process.removeListener( signal, handle );
+          if( !process._exiting )
+          {
+            try
+            {
+              process._exiting = true;
+              process.emit( 'exit', 128 + signalCode );
+            }
+            catch( err )
+            {
+              console.error( _.err( err ) );
+            }
+            process.kill( process.pid, signal );
+          }
+        }
+        catch( err )
+        {
+          console.log( `Error on signal ${signal}` );
+          console.log( err.toString() );
+          console.log( err.stack );
+          process.removeAllListeners( 'exit' );
+          process.exit();
+        }
+      });
+    }
+  }
+
+}
+
+//
+
+function _eventsSetup()
+{
+
+  _.assert( arguments.length === 0, 'Expects no arguments' );
+
+  if( !_global.process )
+  return;
+
+  if( !_.process._registeredExitHandler )
+  {
+    _global.process.once( 'exit', _.process._eventExitHandle );
+    _.process._registeredExitHandler = _.process._eventExitHandle;
+  }
+
+  if( !_.process._registeredExitBeforeHandler )
+  {
+    _global.process.on( 'beforeExit', _.process._eventExitBeforeHandle );
+    _.process._registeredExitBeforeHandler = _.process._eventExitBeforeHandle;
+  }
+
+}
+
+//
+
+function _eventExitHandle()
+{
+  let args = arguments;
+  process.removeListener( 'exit', _.process._registeredExitHandler );
+  _.process._registeredExitHandler = null;
+  _.process.eventGive({ event : 'exit', args });
+  _.process._ehandler.events.exit.splice( 0, _.process._ehandler.events.exit.length );
+}
+
+//
+
+function _eventExitBeforeHandle()
+{
+  let args = arguments;
+  // process.removeListener( 'beforeExit', _.process._eventExitBeforeHandle );
+  // _.process._eventExitBeforeHandle = null;
+  _.process.eventGive({ event : 'exitBefore', args });
+  // _.process._ehandler.events.exitBefore.splice( 0, _.process._ehandler.events.exitBefore.length );
 }
 
 // --
@@ -258,7 +356,6 @@ function escapeCmd( prog, args )
   return `${prog} ${args.join( ' ' )}`;
 }
 
-
 // --
 // meta
 // --
@@ -270,7 +367,7 @@ function _Setup1()
 
   _.process._eventAvailableHandle();
   _.process._exitHandlerRepair();
-  _.process._eventExitSetup();
+  _.process._eventsSetup();
 
 }
 
@@ -282,6 +379,7 @@ let Events =
 {
   available : [],
   exit : [],
+  exitBefore : [],
 }
 
 let Extension =
@@ -295,8 +393,14 @@ let Extension =
   // eventer
 
   on,
-  // eventGive,
   _eventAvailableHandle,
+
+  // event
+
+  _exitHandlerRepair, /* zzz */
+  _eventsSetup,
+  _eventExitHandle,
+  _eventExitBeforeHandle,
 
   // escape
 
@@ -312,6 +416,7 @@ let Extension =
 
   _tempFiles,
   _registeredExitHandler : null,
+  _registeredExitBeforeHandler : null,
   _initialCurrentPath : null
 
 }
