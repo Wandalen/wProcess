@@ -21937,7 +21937,7 @@ sleep:begin
         test.identical( options.error, null );
         test.identical( options.process.exitCode, null );
         if( process.platform === 'darwin' )
-        test.identical( options.process.signalCode, 'SIGTERM' );
+        test.identical( options.process.signalCode, 'SIGKILL' );
         else
         test.identical( options.process.signalCode, 'SIGTERM' );
         test.identical( options.process.killed, false );
