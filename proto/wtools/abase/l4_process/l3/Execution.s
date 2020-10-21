@@ -137,6 +137,14 @@ function startCommon_head( routine, args )
   o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs });
   _.assert( o.interpreterArgs === null || _.arrayIs( o.interpreterArgs ) );
 
+  _.assert
+  (
+    ( _.numberIs( o.streamSizeLimit ) && o.streamSizeLimit >= 0 ) || o.streamSizeLimit === null, 'Option::streamSizeLimit must be a positive Number which is greater or equal to zero'
+  )
+
+  if( o.streamSizeLimit || o.streamSizeLimit === 0 )
+  _.assert( o.sync && ( mode === 'spawn' || mode === 'shell' ), 'Option::streamSizeLimit is allowed in mode::spawn and mode::shell with sync::1' )
+
   return o;
 }
 
@@ -1225,7 +1233,6 @@ function startMinimal_body( o )
     if( o.timeOut && o.sync )
     o2.timeout = o.timeOut;
     o2.windowsHide = !!o.hiding;
-    if( o.sync )
     o2.maxBuffer = o.streamSizeLimit ? o.streamSizeLimit : 1024 * 1024;
     return o2;
   }
@@ -1245,7 +1252,6 @@ function startMinimal_body( o )
     if( o.currentPath )
     o2.cwd = _.path.nativize( o.currentPath );
 
-    if( o.sync )
     o2.maxBuffer = o.streamSizeLimit ? o.streamSizeLimit : 1024 * 1024;
     return o2;
   }

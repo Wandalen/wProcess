@@ -18090,6 +18090,186 @@ function startOptionStreamSizeLimit( test )
 
 //
 
+function startOptionStreamSizeLimitForbidden( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let modes = [ 'spawn', 'shell' ];
+
+  a.ready.then( () =>
+  {
+    test.case = `mode : 'fork', sync : 1, limit : 100`;
+
+    let testAppPath = a.path.nativize( a.program( testApp ) );
+
+    let options =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'fork',
+      deasync : 1,
+      streamSizeLimit : 100,
+      outputCollecting : 1,
+    }
+
+    let returned = test.shouldThrowErrorSync( () => _.process.start( options ) )
+
+    test.is( _.errIs( returned ) );
+    test.is( _.strHas( returned.message, `Option::streamSizeLimit is allowed in mode::spawn and mode::shell with sync::1` ) )
+
+    test.notIdentical( options.exitCode, 0 );
+
+    a.fileProvider.fileDelete( testAppPath );
+
+    return null;
+  } )
+
+  /* */
+
+  modes.forEach( ( mode ) =>
+  {
+    a.ready.tap( () => test.open( mode ) )
+    a.ready.then( () => run( mode ) )
+    a.ready.tap( () => test.close( mode ) )
+  })
+
+  return a.ready;
+
+  /* */
+
+  function run( mode )
+  {
+    let ready = _.take( null );
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `sync : 1, limit : '100'`;
+
+      let testAppPath = a.path.nativize( a.program( testApp ) );
+
+      let options =
+      {
+        execPath : 'node ' + testAppPath,
+        mode,
+        sync : 1,
+        streamSizeLimit : '100',
+        outputCollecting : 1,
+      }
+
+      let returned = test.shouldThrowErrorSync( () => _.process.start( options ) )
+
+      test.is( _.errIs( returned ) );
+      test.is( _.strHas( returned.message, `Option::streamSizeLimit must be a positive Number which is greater or equal to zero` ) )
+
+      test.notIdentical( options.exitCode, 0 );
+
+      a.fileProvider.fileDelete( testAppPath );
+      return null;
+
+    });
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `sync : 1, limit : -1`;
+
+      let testAppPath = a.path.nativize( a.program( testApp ) );
+
+      let options =
+      {
+        execPath : 'node ' + testAppPath,
+        mode,
+        sync : 1,
+        streamSizeLimit : -1,
+        outputCollecting : 1,
+      }
+
+      let returned = test.shouldThrowErrorSync( () => _.process.start( options ) )
+
+      test.is( _.errIs( returned ) );
+      test.is( _.strHas( returned.message, `Option::streamSizeLimit must be a positive Number which is greater or equal to zero` ) )
+
+      test.notIdentical( options.exitCode, 0 );
+
+      a.fileProvider.fileDelete( testAppPath );
+      return null;
+
+    });
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `sync : 0, limit : 100`;
+
+      let testAppPath = a.path.nativize( a.program( testApp ) );
+
+      let options =
+      {
+        execPath : 'node ' + testAppPath,
+        mode,
+        sync : 0,
+        streamSizeLimit : 100,
+        outputCollecting : 1,
+      }
+
+      let returned = test.shouldThrowErrorSync( () => _.process.start( options ) )
+
+      test.is( _.errIs( returned ) );
+      test.is( _.strHas( returned.message, `Option::streamSizeLimit is allowed in mode::spawn and mode::shell with sync::1` ) )
+
+      test.notIdentical( options.exitCode, 0 );
+
+      a.fileProvider.fileDelete( testAppPath );
+      return null;
+
+    });
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `sync : 0, deasync : 1, limit : 100`;
+
+      let testAppPath = a.path.nativize( a.program( testApp ) );
+
+      let options =
+      {
+        execPath : 'node ' + testAppPath,
+        mode,
+        sync : 0,
+        deasync : 1,
+        streamSizeLimit : 100,
+        outputCollecting : 1,
+      }
+
+      let returned = test.shouldThrowErrorSync( () => _.process.start( options ) )
+
+      test.is( _.errIs( returned ) );
+      test.is( _.strHas( returned.message, `Option::streamSizeLimit is allowed in mode::spawn and mode::shell with sync::1` ) )
+
+      test.notIdentical( options.exitCode, 0 );
+
+      a.fileProvider.fileDelete( testAppPath );
+      return null;
+
+    });
+
+    return ready;
+  }
+
+  /* - */
+
+  function testApp()
+  {
+    console.log( 'data1' );
+  }
+}
+
+//
+
 function startOptionDry( test )
 {
   let context = this;
@@ -28268,6 +28448,7 @@ var Proto =
     // other options
 
     startOptionStreamSizeLimit,
+    startOptionStreamSizeLimitForbidden,
     startOptionDry, /* qqq for Yevhen : make sure option dry is covered good enough */
     /* qqq for Yevhen : write test routine startOptionDryMultiple */
     startOptionCurrentPath,
