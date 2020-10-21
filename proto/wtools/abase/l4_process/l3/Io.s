@@ -30,17 +30,17 @@ _.assert( !!_realGlobal_ );
  *
  * let _ = require('wTools')
  * _.include( 'wProcessBasic' )
- * let result = _.process.args();
+ * let result = _.process.input();
  * console.log( result );
  *
- * @function args
+ * @function input
  * @module Tools/base/ProcessBasic
  * @namespace Tools.process
  */
 
-let _argsCache;
-let _argsInSamFormatDefaults = Object.create( null )
-var defaults = _argsInSamFormatDefaults.defaults = Object.create( null );
+let _inputCache;
+let _inputInSamFormatDefaults = Object.create( null )
+var defaults = _inputInSamFormatDefaults.defaults = Object.create( null );
 
 defaults.keyValDelimeter = ':';
 defaults.commandsDelimeter = ';';
@@ -56,36 +56,36 @@ defaults.scriptArgs = null;
 
 /* xxx : redo caching using _Setup1 */
 
-function _argsInSamFormatNodejs( o )
+function _inputInSamFormatNodejs( o )
 {
 
   _.assert( arguments.length === 0 || arguments.length === 1 );
-  o = _.routineOptions( _argsInSamFormatNodejs, arguments );
+  o = _.routineOptions( _inputInSamFormatNodejs, arguments );
 
   if( _.boolLike( o.keyValDelimeter ) )
   o.keyValDelimeter = !!o.keyValDelimeter;
 
   let isStandardOptions =
-       o.keyValDelimeter === _argsInSamFormatNodejs.defaults.keyValDelimeter
-    && o.commandsDelimeter === _argsInSamFormatNodejs.defaults.commandsDelimeter
-    && o.parsingArrays === _argsInSamFormatNodejs.defaults.parsingArrays
-    && o.interpreterPath === _argsInSamFormatNodejs.defaults.interpreterPath
-    && o.interpreterArgs === _argsInSamFormatNodejs.defaults.interpreterArgs
-    && o.scriptPath === _argsInSamFormatNodejs.defaults.scriptPath
-    && o.scriptArgs === _argsInSamFormatNodejs.defaults.scriptArgs;
+       o.keyValDelimeter === _inputInSamFormatNodejs.defaults.keyValDelimeter
+    && o.commandsDelimeter === _inputInSamFormatNodejs.defaults.commandsDelimeter
+    && o.parsingArrays === _inputInSamFormatNodejs.defaults.parsingArrays
+    && o.interpreterPath === _inputInSamFormatNodejs.defaults.interpreterPath
+    && o.interpreterArgs === _inputInSamFormatNodejs.defaults.interpreterArgs
+    && o.scriptPath === _inputInSamFormatNodejs.defaults.scriptPath
+    && o.scriptArgs === _inputInSamFormatNodejs.defaults.scriptArgs;
 
   if( o.caching )
-  if( _argsCache )
+  if( _inputCache )
   if( isStandardOptions )
-  return _argsCache;
+  return _inputCache;
 
   // let result = Object.create( null );
   let result = o;
 
   if( o.caching )
-  // if( o.keyValDelimeter === _argsInSamFormatNodejs.defaults.keyValDelimeter )
+  // if( o.keyValDelimeter === _inputInSamFormatNodejs.defaults.keyValDelimeter )
   if( isStandardOptions )
-  _argsCache = result;
+  _inputCache = result;
 
   // if( !_global.process )
   // {
@@ -152,33 +152,33 @@ function _argsInSamFormatNodejs( o )
   }
 }
 
-_argsInSamFormatNodejs.defaults = Object.create( _argsInSamFormatDefaults.defaults );
+_inputInSamFormatNodejs.defaults = Object.create( _inputInSamFormatDefaults.defaults );
 
 //
 
-function _argsInSamFormatBrowser( o )
+function _inputInSamFormatBrowser( o )
 {
   // debugger; /* xxx */
 
   _.assert( arguments.length === 0 || arguments.length === 1 );
-  o = _.routineOptions( _argsInSamFormatBrowser, arguments );
+  o = _.routineOptions( _inputInSamFormatBrowser, arguments );
 
   if( o.caching )
-  if( _argsCache && o.keyValDelimeter === _argsCache.keyValDelimeter )
-  return _argsCache;
+  if( _inputCache && o.keyValDelimeter === _inputCache.keyValDelimeter )
+  return _inputCache;
 
   let result = Object.create( null );
 
   result.map =  Object.create( null );
 
   if( o.caching )
-  if( o.keyValDelimeter === _argsInSamFormatBrowser.defaults.keyValDelimeter )
-  _argsCache = result;
+  if( o.keyValDelimeter === _inputInSamFormatBrowser.defaults.keyValDelimeter )
+  _inputCache = result;
 
   return result;
 }
 
-_argsInSamFormatBrowser.defaults = Object.create( _argsInSamFormatDefaults.defaults );
+_inputInSamFormatBrowser.defaults = Object.create( _inputInSamFormatDefaults.defaults );
 
 //
 
@@ -189,28 +189,28 @@ _argsInSamFormatBrowser.defaults = Object.create( _argsInSamFormatDefaults.defau
  *
  * @param {Object} o Options map.
  * @param {Object} o.dst=null Target object.
- * @param {Object} o.propertiesMap=null Map with parsed options. By default routine gets this map using {@link module:Tools/base/ProcessBasic.Tools.process.args args} routine.
+ * @param {Object} o.propertiesMap=null Map with parsed options. By default routine gets this map using {@link module:Tools/base/ProcessBasic.Tools.process.input args} routine.
  * @param {Object} o.namesMap=null Map of expected options.
  * @param {Object} o.removing=1 Removes copied options from result map `o.propertiesMap`.
  * @param {Object} o.only=1 Check if all option are expected. Throws error if not.
  *
  * @return {Object} Returns map with parsed options.
  *
- * @function argsReadTo
+ * @function inputReadTo
  * @module Tools/base/ProcessBasic
  * @namespace Tools.process
  */
 
-function argsReadTo( o )
+function inputReadTo( o )
 {
 
   if( arguments[ 1 ] !== undefined )
   o = { dst : arguments[ 0 ], namesMap : arguments[ 1 ] };
 
-  o = _.routineOptions( argsReadTo, o );
+  o = _.routineOptions( inputReadTo, o );
 
   if( !o.propertiesMap )
-  o.propertiesMap = _.process.args().map;
+  o.propertiesMap = _.process.input().map;
 
   if( _.arrayIs( o.namesMap ) )
   {
@@ -270,7 +270,7 @@ function argsReadTo( o )
 
 }
 
-argsReadTo.defaults =
+inputReadTo.defaults =
 {
   dst : null,
   propertiesMap : null,
@@ -567,12 +567,12 @@ systemEntryAdd.defaults =
 let Extension =
 {
 
-  _argsInSamFormatNodejs,
-  _argsInSamFormatBrowser,
+  _inputInSamFormatNodejs,
+  _inputInSamFormatBrowser,
 
-  argsInSamFormat : Config.interpreter === 'njs' ? _argsInSamFormatNodejs : _argsInSamFormatBrowser,
-  args : Config.interpreter === 'njs' ? _argsInSamFormatNodejs : _argsInSamFormatBrowser,
-  argsReadTo,
+  // argsInSamFormat : Config.interpreter === 'njs' ? _inputInSamFormatNodejs : _inputInSamFormatBrowser,
+  input : Config.interpreter === 'njs' ? _inputInSamFormatNodejs : _inputInSamFormatBrowser,
+  inputReadTo,
   anchor,
 
   realMainFile, /* qqq : rewrite test. start process in test */
