@@ -1,3 +1,4 @@
+/* eslint-disable */
 ( function _ProcessBasic_test_s( )
 {
 
@@ -17572,11 +17573,10 @@ function startOptionOutputColoring( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.path.nativize( a.program( testApp ) );
 
   /* */
 
-  let modes = [ 'fork', 'spawn', 'shell' ];
+  let modes = [ /*'fork', */'spawn', /*'shell'*/ ];
 
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
@@ -17588,41 +17588,26 @@ function startOptionOutputColoring( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${ mode }, outputColoring : 0, normal output`;
+      test.case = `mode : ${ mode }, outputColoring : 0, normal output, inputMirroring : 0`;
 
-      let locals =
-      {
-        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
-        currentPath : a.routinePath,
-        mode,
-        outputColoring : 0
-        // options :
-        // {
-        //   execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
-        //   currentPath : a.routinePath,
-        //   mode,
-        //   outputCollecting : 1,
-        //   outputColoring : 0
-        // }
-      }
-      let testAppPath2 = a.path.nativize( a.program({ routine : testApp2, locals }) )
+      let testAppPath2 = a.program( testApp2 );
+      let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPath2, outputColoring : 0, inputMirroring : 0 };
+      let testAppPath = a.program({ routine : testApp, locals });
 
       let options =
       {
-        execPath : mode === 'fork' ? testAppPath2 : 'node ' + testAppPath2,
-        mode,
+        execPath : 'node ' + testAppPath,
         outputCollecting : 1,
       }
 
       return _.process.start( options )
       .then( ( op ) =>
       {
-        // console.log( 'OUT: ', _.ct.format( op.output, { fg : 'bright white' } ) );
-        console.log( 'OUT without color: ', op.output );
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.identical( op.output, 'Log\n' );
 
+        a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
         return null
       })
@@ -17630,81 +17615,132 @@ function startOptionOutputColoring( test )
 
     /* */
 
-    // ready.then( () =>
-    // {
-    //   test.case = `mode : ${ mode }, outputColoring : 1, normal output`;
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputColoring : 1, normal output, inputMirroring : 0`;
 
-    //   let locals =
-    //   {
-    //     toolsPath : _.path.nativize( _.module.toolsPathGet() ),
-    //     options :
-    //     {
-    //       execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
-    //       currentPath : a.routinePath,
-    //       mode,
-    //       outputColoring : 0,
-    //       outputCollecting : 1
-    //     }
-    //   }
-    //   let testAppPath2 = a.path.nativize( a.program({ routine : testApp2, locals }) )
+      let testAppPath2 = a.program( testApp2 );
+      let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPath2, outputColoring : 1, inputMirroring : 0 };
+      let testAppPath = a.program({ routine : testApp, locals });
 
-    //   let options =
-    //   {
-    //     execPath : mode === 'fork' ? testAppPath2 : 'node ' + testAppPath2,
-    //     mode,
-    //     outputCollecting : 1,
-    //     outputColoring : 1
-    //   }
+      let options =
+      {
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      }
 
-    //   return _.process.start( options )
-    //   .then( ( op ) =>
-    //   {
-    //     // console.log( 'OUT: ', _.ct.format( op.output, { fg : 'bright white' } ) );
-    //     console.log( 'OUT with color: ', op.output );
-    //     test.identical( op.exitCode, 0 );
-    //     test.identical( op.ended, true );
-    //     test.identical( op.output, 'Log\n' );
-    //     // test.identical( op.output, _.ct.format( 'Log\n', { fg : 'bright white' } ) );
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        debugger;
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, '\u001b[35mLog\u001b[39;0m\n' )
 
-    //     a.fileProvider.fileDelete( testAppPath2 );
-    //     return null
-    //   })
-    // } )
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+        return null
+      })
+    } )
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputColoring : 1, normal output, inputMirroring : 1`;
+
+      let testAppPath2 = a.program( testApp2 );
+      let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPath2, outputColoring : 1, inputMirroring : 1 };
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      let options =
+      {
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        console.log( '\u001b[97m\>\u001b[39;0m' )
+        // test.is( _.strHas( op.output, '\u001b[97m > \u001b[39;0m' ) );
+        // test.is( _.strHas( op.output, '\u001b[35mLog\u001b[39;0m\n' ) );
+        // let string = `\u001b[97m > \u001b[39;0mnode ${testAppPath2}\n\u001b[35mLog\u001b[39;0m\n`;
+        let string = `\u001b[97m > \u001b[39;0mnode ${testAppPath2}\n\u001b[35mLog\u001b[39;0m\n`;
+        test.identical( op.output, string )
+        // test.is( _.strHas( op.output, '\u001b[97m>\u001b[39;0m' ) );
+        // test.is( _.strHas( op.output, testAppPath2 ) );
+        // test.is( _.strHas( op.output, '\u001b[35mLog\u001b[39;0m' ) );
+
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+        return null
+      })
+    } )
 
     return ready;
 
   }
 
-  function testApp2()
-  {
-    let _ = require( toolsPath );
-
-    _.include( 'wProcess' );
-    _.include( 'wStringsExtra' );
-
-    let options =
-    {
-      execPath : mode === 'fork' ? 'testApp.js' : 'node testApp.js',
-      mode,
-      outputColoring,
-      outputCollecting : 1,
-    }
-
-    return _.process.start( options )
-    .then( ( op ) =>
-    {
-      console.log( op.output );
-      return null;
-    } )
-  }
+  /* - */
 
   function testApp()
   {
-    // throw new Error()
-    // console.log( _.ct.format( 'Log\n', { fg : 'bright white' } ) );
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    let options =
+    {
+      execPath : 'node ' + programPath,
+      throwingExitCode : 0,
+      outputCollecting : 1,
+      inputMirroring,
+      outputColoring,
+    }
+
+    return _.process.start( options );
+  }
+
+  function testApp2()
+  {
     console.log( 'Log' );
-    // console.log( '\u001b[31m\u001b[43mColored message1\u001b[49;0m\u001b[39;0m' )
-    // console.log( '\u001b[31m\u001b[43mColored message2\u001b[49;0m\u001b[39;0m' )
+  }
+
+  // function testApp()
+  // {
+  //   let _ = require( toolsPath );
+
+  //   _.include( 'wProcess' );
+  //   _.include( 'wStringsExtra' );
+
+  //   let options =
+  //   {
+  //     execPath : 'node ' + programPath,
+  //     outputColoring : 1,
+  //     outputCollecting : 1,
+  //   }
+
+  //   return _.process.start( options )
+  //   .then( ( op ) =>
+  //   {
+  //     console.log( op.output );
+  //     return null;
+  //   } )
+  // }
+
+  // function testApp2()
+  // {
+  //   console.log( 'Log' );
+  // }
+
+  function testApp2Error()
+  {
+    throw new Error()
   }
 }
 
