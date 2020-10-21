@@ -16491,6 +16491,7 @@ function startOptionOutputPrefixing( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.is( !_.strHas( op.output, 'stderr :' ) );
+        test.is( _.strHas( op.output, 'randomText' ) );
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -16527,6 +16528,7 @@ function startOptionOutputPrefixing( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.is( _.strHas( op.output, 'stderr :' ) );
+        test.is( _.strHas( op.output, 'randomText' ) );
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -16811,6 +16813,7 @@ function startOptionOutputPiping( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'stderr :' ), 0 );
         test.identical( _.strCount( op.output, 'Error\n    at' ), 1 );
 
         a.fileProvider.fileDelete( testAppPath );
