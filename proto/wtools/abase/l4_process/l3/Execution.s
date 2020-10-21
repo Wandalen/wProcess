@@ -75,15 +75,15 @@ function startCommon_head( routine, args )
   _.assert( o.ready === null || _.routineIs( o.ready ) );
   _.assert( o.mode !== 'fork' || !o.sync || o.deasync, 'Mode::fork is available only if either sync:0 or deasync:1' );
 
-  if( o.outputDecorating === null )
-  o.outputDecorating = 0;
-  if( o.outputDecoratingStdout === null )
-  o.outputDecoratingStdout = o.outputDecorating;
-  if( o.outputDecoratingStderr === null )
-  o.outputDecoratingStderr = o.outputDecorating;
-  _.assert( _.boolLike( o.outputDecorating ) );
-  _.assert( _.boolLike( o.outputDecoratingStdout ) );
-  _.assert( _.boolLike( o.outputDecoratingStderr ) );
+  if( o.outputColoring === null )
+  o.outputColoring = 1;
+  if( o.outputColoringStdout === null )
+  o.outputColoringStdout = o.outputColoring;
+  if( o.outputColoringStderr === null )
+  o.outputColoringStderr = o.outputColoring;
+  _.assert( _.boolLike( o.outputColoring ) );
+  _.assert( _.boolLike( o.outputColoringStdout ) );
+  _.assert( _.boolLike( o.outputColoringStderr ) );
 
   if( !_.numberIs( o.verbosity ) )
   o.verbosity = o.verbosity ? 1 : 0;
@@ -293,9 +293,9 @@ function startMinimal_body( o )
 
     /* */
 
-    _.assert( _.boolLike( o.outputDecorating ) );
-    _.assert( _.boolLike( o.outputDecoratingStdout ) );
-    _.assert( _.boolLike( o.outputDecoratingStderr ) );
+    _.assert( _.boolLike( o.outputColoring ) );
+    _.assert( _.boolLike( o.outputColoringStdout ) );
+    _.assert( _.boolLike( o.outputColoringStderr ) );
     _.assert( _.boolLike( o.outputCollecting ) );
 
     /* ipc */
@@ -333,9 +333,8 @@ function startMinimal_body( o )
     o.exitReason = null;
     o.exitCode = null;
     o.exitSignal = null;
-    o.error = null;
+    o.error = o.error || null;
     o.process = null;
-    // o.procedure = null;
     o.fullExecPath = null;
     o.output = o.outputCollecting ? '' : null;
     o.ended = false;
@@ -428,7 +427,7 @@ function startMinimal_body( o )
     if( !StripAnsi )
     StripAnsi = require( 'strip-ansi' );
 
-    if( !o.outputDecorating && typeof module !== 'undefined' )
+    if( o.outputColoring && typeof module !== 'undefined' )
     try
     {
       _.include( 'wColor' );
@@ -474,11 +473,12 @@ function startMinimal_body( o )
       }
       catch( err )
       {
-        debugger; /* qqq for Yevhen : is covered? */
-        end2( err, o.conTerminate );
+        if( !o.ended )
+        end2( err/*, o.conTerminate */ );
+        throw err;
       }
       _.assert( o.state === 'terminated' || o.state === 'disconnected' );
-      end2( undefined, o.conTerminate );
+      end2( undefined/*, o.conTerminate */ );
       return o;
     }
     else
@@ -505,21 +505,31 @@ function startMinimal_body( o )
 
     try
     {
+
       form3();
       run3();
       timeOutForm();
       pipe();
+
+      if( o.sync && !o.deasync )
+      {
+        if( o.process.error )
+        handleError( o.process.error );
+        else
+        handleClose( o.process.status, o.process.signal );
+      }
+
       if( o.dry )
       {
         /* qqq for Yevhen : make sure option dry is covered good enough */
         _.assert( o.state === 'started' );
         o.state = 'terminated';
-        end2( undefined, o.conTerminate );
+        end2( undefined/*, o.conTerminate */ );
       }
     }
     catch( err )
     {
-      debugger
+      debugger;
       handleError( err );
     }
 
@@ -554,16 +564,17 @@ function startMinimal_body( o )
     // if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
     if( o.procedure )
     {
-      let name = 'PID:' + o.process.pid;
-      if( Config.debug )
+      if( o.process )
       {
-        let result = _.procedure.find( name );
-        _.assert( result.length === 0, `No procedure expected for child process with pid:${o.process.pid}` );
+        let name = 'PID:' + o.process.pid;
+        if( Config.debug )
+        {
+          let result = _.procedure.find( name );
+          _.assert( result.length === 0, `No procedure expected for child process with pid:${o.process.pid}` );
+        }
+        o.procedure.name( name );
       }
-      // o.procedure = _.procedure.begin({ _name : name, _object : o.process, _stack : o.stack });
-      // debugger;
       o.procedure._object = o.process;
-      o.procedure.name( name );
       o.procedure.begin();
     }
 
@@ -683,7 +694,7 @@ function startMinimal_body( o )
 
   /* */
 
-  function end2( err, consequence ) /* xxx : remove 2-nd argument */
+  function end2( err /*, consequence*/ ) /* xxx : remove 2-nd argument */
   {
 
     if( Config.debug )
@@ -727,6 +738,9 @@ function startMinimal_body( o )
       if( decoratedErrorOutput )
       o.logger.error( decoratedErrorOutput );
     }
+
+    if( o.exitReason === null && o.error )
+    o.exitReason = 'error';
 
     o.ended = true;
     Object.freeze( o );
@@ -786,6 +800,12 @@ function startMinimal_body( o )
     if( o.process && o.process.signalCode === undefined )
     o.process.signalCode = exitSignal;
 
+    if( o.error )
+    {
+      debugger; /* xxx : check */
+      throw err;
+    }
+
     if( exitSignal )
     o.exitReason = 'signal';
     else if( exitCode )
@@ -814,16 +834,17 @@ function startMinimal_body( o )
 
       if( o.sync && !o.deasync )
       {
-        throw o.error;
+        end2( o.error/*, o.conTerminate */ );
+        // throw o.error;
       }
       else
       {
-        end2( o.error, o.conTerminate );
+        end2( o.error/*, o.conTerminate */ );
       }
     }
     else if( !o.sync || o.deasync )
     {
-      end2( undefined, o.conTerminate );
+      end2( undefined/*, o.conTerminate */ );
     }
 
   }
@@ -862,15 +883,14 @@ function startMinimal_body( o )
     o.error = err;
     if( o.verbosity )
     log( _.errOnce( o.error ), 1 );
-    debugger;
 
     if( o.sync && !o.deasync )
     {
-      throw o.error;
+      throw o.error; /* xxx2 : remove branching? */
     }
     else
     {
-      end2( o.error, o.conTerminate );
+      end2( o.error/*, o.conTerminate */ );
     }
   }
 
@@ -896,7 +916,7 @@ function startMinimal_body( o )
         debugger;
         o.state = 'disconnected';
         o.conDisconnect.take( this );
-        end2( undefined, o );
+        end2( undefined );
         throw _.err( 'not tested' );
       }
     });
@@ -935,16 +955,16 @@ function startMinimal_body( o )
 
     this.process.unref();
 
-    if( this.procedure )
-    if( this.procedure.isAlive() )
-    this.procedure.end();
-    else
-    this.procedure.finit();
+    // if( this.procedure )
+    // if( this.procedure.isAlive() )
+    // this.procedure.end();
+    // else
+    // this.procedure.finit();
 
     if( !this.ended )
     {
       this.state = 'disconnected';
-      end2( undefined, o.conDisconnect );
+      end2( undefined /*, o.conDisconnect*/ );
     }
 
     return true;
@@ -1008,10 +1028,10 @@ function startMinimal_body( o )
 
     if( o.sync && !o.deasync )
     {
-      if( o.process.error )
-      handleError( o.process.error );
-      else
-      handleClose( o.process.status, o.process.signal );
+      // if( o.process.error )
+      // handleError( o.process.error );
+      // else
+      // handleClose( o.process.status, o.process.signal );
     }
     else
     {
@@ -1034,7 +1054,7 @@ function startMinimal_body( o )
       if( o.verbosity >= 3 )
       {
         let output = '   at ';
-        if( !o.outputDecorating )
+        if( o.outputColoring )
         output = _.ct.format( output, { fg : 'bright white' } ) + _.ct.format( o.currentPath, 'path' );
         else
         output = output + o.currentPath
@@ -1044,7 +1064,7 @@ function startMinimal_body( o )
       if( o.verbosity && o.inputMirroring )
       {
         let prefix = ' > ';
-        if( !o.outputDecorating )
+        if( o.outputColoring )
         prefix = _.ct.format( prefix, { fg : 'bright white' } );
         log( prefix + o.fullExecPath );
       }
@@ -1261,8 +1281,10 @@ function startMinimal_body( o )
   function handleStreamErr( data )
   {
 
-    if( _.bufferAnyIs( data ) )
-    data = _.bufferToStr( data ); /* qqq for Yevhen : use more optimal condition and routine to convert buffer here and in other places */
+    // if( _.bufferAnyIs( data ) )
+    // data = _.bufferToStr( data ); /* qqq for Yevhen : use more optimal condition and routine to convert buffer here and in other places | aaa : Done .*/
+    if( _.bufferNodeIs( data ) )
+    data = data.toString( 'utf8' );
     if( o.outputGraying )
     data = StripAnsi( data );
 
@@ -1279,7 +1301,7 @@ function startMinimal_body( o )
     if( o.outputPrefixing )
     data = 'stderr :\n' + '  ' + _.strLinesIndentation( data, '  ' );
 
-    if( _.color && !o.outputDecorating && !o.outputDecoratingStderr )
+    if( _.color && o.outputColoring && o.outputColoringStderr )
     data = _.ct.format( data, 'pipe.negative' );
 
     log( data, 1 );
@@ -1290,8 +1312,10 @@ function startMinimal_body( o )
   function handleStreamOut( data )
   {
 
-    if( _.bufferAnyIs( data ) )
-    data = _.bufferToStr( data );
+    // if( _.bufferAnyIs( data ) )
+    // data = _.bufferToStr( data );
+    if( _.bufferNodeIs( data ) )
+    data = data.toString( 'utf8' );
     if( o.outputGraying )
     data = StripAnsi( data );
 
@@ -1306,7 +1330,7 @@ function startMinimal_body( o )
     if( o.outputPrefixing )
     data = 'stdout :\n' + '  ' + _.strLinesIndentation( data, '  ' );
 
-    if( _.color && !o.outputDecorating && !o.outputDecoratingStdout )
+    if( _.color && o.outputColoring && o.outputColoringStdout )
     data = _.ct.format( data, 'pipe.neutral' );
 
     log( data );
@@ -1384,9 +1408,9 @@ startMinimal_body.defaults =
   outputPiping : null, /* qqq for Yevhen : cover the option | aaa : Done */
   outputCollecting : 0,
   outputAdditive : null, /* qqq for Yevhen : cover the option */
-  outputDecorating : 0, /* qqq for Yevhen : cover the option */
-  outputDecoratingStderr : null, /* qqq for Yevhen : cover the option */
-  outputDecoratingStdout : null, /* qqq for Yevhen : cover the option */
+  outputColoring : 1, /* qqq for Yevhen : cover the option */
+  outputColoringStderr : null, /* qqq for Yevhen : cover the option */
+  outputColoringStdout : null, /* qqq for Yevhen : cover the option */
   outputGraying : 0,
   inputMirroring : 1, /* qqq for Yevhen : cover the option | aaa : Done */
 
@@ -1459,9 +1483,9 @@ function start_head( routine, args )
  * @param {Boolean} o.applyingExitCode=0 Applies exit code to parent process.
 
  * @param {Number} o.verbosity=2 Controls amount of output, `0` disables output at all.
- * @param {Boolean} o.outputDecorating=0 Logger prints everything in raw mode, no styles applied.
- * @param {Boolean} o.outputDecoratingStdout=0 Logger prints output from `stdout` in raw mode, no styles applied.
- * @param {Boolean} o.outputDecoratingStderr=0 Logger prints output from `stderr` in raw mode, no styles applied.
+ * @param {Boolean} o.outputColoring=1 Logger prints everything in raw mode, no styles applied.
+ * @param {Boolean} o.outputColoringStdout=1 Logger prints output from `stdout` in raw mode, no styles applied.
+ * @param {Boolean} o.outputColoringStderr=1 Logger prints output from `stderr` in raw mode, no styles applied.
  * @param {Boolean} o.outputPrefixing=0 Add prefix with name of output channel( stderr, stdout ) to each line.
  * @param {Boolean} o.outputPiping=null Handles output from `stdout` and `stderr` channels. Is enabled by default if `o.verbosity` levels is >= 2 and option is not specified explicitly. This option is required by other "output" options that allows output customization.
  * @param {Boolean} o.outputCollecting=0 Enables coullection of output into sinle string. Collects output into `o.output` property if enabled.
@@ -1527,6 +1551,8 @@ function start_body( o )
 
   _.assert( arguments.length === 1, 'Expects single argument' );
 
+  // let startCounter = 0;
+  let processPipeCounter = 0;
   let readyCallback; /* xxx : cover and implement ready callback for multiple */
 
   form0();
@@ -1589,9 +1615,9 @@ function start_body( o )
       o.conTerminate = new _.Consequence({ _procedure : false }).finally( o.conTerminate );
     }
 
-    _.assert( _.boolLike( o.outputDecorating ) );
-    _.assert( _.boolLike( o.outputDecoratingStdout ) );
-    _.assert( _.boolLike( o.outputDecoratingStderr ) );
+    _.assert( _.boolLike( o.outputColoring ) );
+    _.assert( _.boolLike( o.outputColoringStdout ) );
+    _.assert( _.boolLike( o.outputColoringStderr ) );
     _.assert( _.boolLike( o.outputCollecting ) );
 
     if( o.outputAdditive === null )
@@ -1605,7 +1631,7 @@ function start_body( o )
     o.exitReason = null;
     o.exitCode = null;
     o.exitSignal = null;
-    o.error = null;
+    o.error = o.error || null;
     o.output = o.outputCollecting ? '' : null;
     o.ended = false;
 
@@ -1717,13 +1743,12 @@ function start_body( o )
       try
       {
         _.assertMapHasAll( o2, _.process.startMinimal.defaults );
-        debugger;
         _.process.startMinimal.body.call( _.process, o2 );
-        debugger;
+        // startCounter += 1;
       }
       catch( err )
       {
-        debugger;
+        // startCounter += 1;
         o2.ready.error( err );
       }
 
@@ -1745,8 +1770,6 @@ function start_body( o )
       });
 
     });
-
-    debugger;
 
     if( o.concurrent )
     _.Consequence.AndImmediate( ... conStart ).tap( ( err, arg ) =>
@@ -1786,7 +1809,6 @@ function start_body( o )
 
   function end2( err, arg )
   {
-    // debugger;
     _.assert( o.state !== 'terminated' ); /* xxx */
     o.state = 'terminated';
     o.ended = true;
@@ -1804,7 +1826,20 @@ function start_body( o )
     for( let a = 0 ; a < o.runs.length ; a++ )
     {
       let o2 = o.runs[ a ];
-      if( o2.exitCode || o2.exitSignal !== null )
+      if( o2.exitCode || o2.exitSignal )
+      {
+        o.exitCode = o2.exitCode;
+        o.exitSignal = o2.exitSignal;
+        o.exitReason = o2.exitReason;
+        break;
+      }
+    }
+
+    if( o.exitCode === null && o.exitSignal === null )
+    for( let a = 0 ; a < o.runs.length ; a++ )
+    {
+      let o2 = o.runs[ a ];
+      if( o2.exitCode !== null || o2.exitSignal !== null )
       {
         o.exitCode = o2.exitCode;
         o.exitSignal = o2.exitSignal;
@@ -1826,19 +1861,16 @@ function start_body( o )
       }
     }
 
+    if( o.outputCollecting )
+    if( o.sync && !o.deasync )
+    for( let a = 0 ; a < o.runs.length ; a++ )
+    {
+      let o2 = o.runs[ a ];
+      o.output += o2.output;
+    }
+
     if( !o.exitReason )
-    o.exitReason = 'normal';
-
-    // if( 0 ) // xxx yyy
-    // if( o.outputCollecting )
-    // for( let a = 0 ; a < o.runs.length ; a++ )
-    // {
-    //   let o2 = o.runs[ a ];
-    //   o.output += o2.output;
-    // }
-
-    if( err && !o.error )
-    o.error = err;
+    o.exitReason = o.error ? 'error' : 'normal';
 
     if( err && !o.concurrent )
     serialEnd();
@@ -1851,9 +1883,12 @@ function start_body( o )
 
   /* */
 
+  /*
+    forward error to the the next process descriptor
+  */
+
   function serialEnd()
   {
-    debugger;
     o.runs.forEach( ( o2 ) =>
     {
       if( o2.ended )
@@ -1883,6 +1918,7 @@ function start_body( o )
     Stream = require( 'stream' );
 
     if( o.stdio[ 1 ] !== 'ignore' )
+    if( !o.sync || o.deasync )
     {
       o.streamOut = new Stream.PassThrough();
       _.assert( o.streamOut._pipes === undefined );
@@ -1890,6 +1926,7 @@ function start_body( o )
     }
 
     if( o.stdio[ 2 ] !== 'ignore' )
+    if( !o.sync || o.deasync )
     {
       o.streamErr = new Stream.PassThrough();
       _.assert( o.streamErr._pipes === undefined );
@@ -1915,9 +1952,9 @@ function start_body( o )
   function processPipe( o2 )
   {
 
-    // if( 0 ) // xxx yyy
     o2.conStart.tap( ( err, op2 ) =>
     {
+      processPipeCounter += 1;
       if( err )
       return;
       if( o2.process.stdout )
@@ -1954,8 +1991,13 @@ function start_body( o )
     {
       _.arrayRemoveOnceStrictly( dst._pipes, src );
       /* xxx : add checking of statqe here. should be not starting */
-      if( dst._pipes.length === 0 && o.concurrent )
+      // if( dst._pipes.length === 0 && o.concurrent )
+      if( dst._pipes.length === 0 )
+      // if( o.concurrent )
+      if( processPipeCounter === o.runs.length )
       {
+        // console.log( 'processPipeCounter', processPipeCounter );
+        // debugger;
         dst.end();
       }
     });
@@ -1966,8 +2008,10 @@ function start_body( o )
 
   function handleStreamOut( data )
   {
-    if( _.bufferAnyIs( data ) )
-    data = _.bufferToStr( data );
+    // if( _.bufferAnyIs( data ) )
+    // data = _.bufferToStr( data );
+    if( _.bufferNodeIs( data ) )
+    data = data.toString( 'utf8' );
     if( o.outputGraying )
     data = StripAnsi( data );
     if( o.outputCollecting )
@@ -3054,6 +3098,8 @@ children.defaults =
 // --
 // declare
 // --
+
+/* xxx qqq for Vova : implement _.process.waitForDeath() */
 
 let Extension =
 {
