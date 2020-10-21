@@ -1,4 +1,3 @@
-/* eslint-disable */
 ( function _ProcessBasic_test_s( )
 {
 
