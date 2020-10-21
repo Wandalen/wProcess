@@ -19160,6 +19160,10 @@ function startOptionVerbosityLogging( test )
         test.identical( op.exitReason, 'normal' );
         test.identical( op.ended, true );
         test.identical( op.state, 'terminated' );
+        // Windows returns 4294967295 which is -1 to uint32
+        if( process.platform === 'win32' )
+        test.identical( _.strCount( op.output, '< Process returned error code 4294967295' ), 1 );
+        else
         test.identical( _.strCount( op.output, '< Process returned error code 255' ), 1 );
         test.identical( _.strCount( op.output, `Launched as "node ${ testAppPathError }"` ), 1 );
         test.identical( _.strCount( op.output, `Launched at ${ _.strQuote( op.currentPath ) }` ), 1 );
