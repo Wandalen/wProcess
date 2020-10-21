@@ -114,7 +114,7 @@ function processOnExitEvent( test )
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
 
-    var args = _.process.args();
+    var args = _.process.input();
 
     _.process.on( 'exit', ( arg ) =>
     {
@@ -266,7 +266,7 @@ function processOffExitEvent( test )
     _.include( 'wStringsExtra' )
 
     var handlersMap = {};
-    var args = _.process.args();
+    var args = _.process.input();
 
     handlersMap[ 'handler1' ] = handler1;
     handlersMap[ 'handler2' ] = handler2;
@@ -391,7 +391,7 @@ function processArgsBase( test )
     if( process.env.ignoreFirstTwoArgv )
     process.argv = process.argv.slice( 2 );
 
-    var got = _.process.args({ caching : 0 });
+    var got = _.process.input({ caching : 0 });
     _.fileProvider.fileWrite( _.path.join( __dirname, 'got' ), JSON.stringify( got ) )
   }
 }
@@ -640,7 +640,7 @@ function processArgsPropertiesBase( test )
     if( process.env.ignoreFirstTwoArgv )
     process.argv = process.argv.slice( 2 );
 
-    var got = _.process.args({ caching : 0 });
+    var got = _.process.input({ caching : 0 });
     _.fileProvider.fileWrite( _.path.join( __dirname, 'got' ), JSON.stringify( got ) )
   }
 }
@@ -736,7 +736,7 @@ function processArgsMultipleCommands( test )
     if( process.env.ignoreFirstTwoArgv )
     process.argv = process.argv.slice( 2 );
 
-    var got = _.process.args({ caching : 0 });
+    var got = _.process.input({ caching : 0 });
     _.fileProvider.fileWrite( _.path.join( __dirname, 'got' ), JSON.stringify( got ) )
   }
 }
@@ -832,7 +832,7 @@ function processArgsPaths( test )
     if( process.env.ignoreFirstTwoArgv )
     process.argv = process.argv.slice( 2 );
 
-    var got = _.process.args({ caching : 0 });
+    var got = _.process.input({ caching : 0 });
     _.fileProvider.fileWrite( _.path.join( __dirname, 'got' ), JSON.stringify( got ) )
   }
 }
@@ -859,7 +859,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
 
   a.ready.then( () =>
   {
-    /* process.args should quote arguments that contain spaces and are not quoted already */
+    /* process.input should quote arguments that contain spaces and are not quoted already */
     test.description = 'subject + option, option value is quoted and contains space'
     return null;
   })
@@ -887,7 +887,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
 
   a.ready.then( () =>
   {
-    /* process.args should quote arguments that contain spaces and are not quoted already */
+    /* process.input should quote arguments that contain spaces and are not quoted already */
     test.description = 'subject + option, option value is quoted and contains space'
     return null;
   })
@@ -915,7 +915,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
 
   a.ready.then( () =>
   {
-    /* process.args should quote arguments that contain spaces and are not quoted already */
+    /* process.input should quote arguments that contain spaces and are not quoted already */
     test.description = 'subject + option, option value is quoted and contains space'
     return null;
   })
@@ -944,7 +944,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
   a.ready.then( () =>
   {
     test.description = 'subject + option, option value is quoted and contains space'
-    test.will = 'process.args should quote arguments with space'
+    test.will = 'process.input should quote arguments with space'
     return null;
   })
   shell( `subject option : "value with space"` )
@@ -971,7 +971,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
 
   a.ready.then( () =>
   {
-    /* process.args should quote arguments that contain spaces and are not quoted already */
+    /* process.input should quote arguments that contain spaces and are not quoted already */
     test.description = 'subject + option, option value contains space'
     return null;
   })
@@ -999,7 +999,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
 
   a.ready.then( () =>
   {
-    /* process.args should quote arguments that contain spaces and are not quoted already */
+    /* process.input should quote arguments that contain spaces and are not quoted already */
     test.description = 'subject + option, option value is quoted and contains space'
     return null;
   })
@@ -1027,7 +1027,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
 
   a.ready.then( () =>
   {
-    /* process.args should quote arguments that contain spaces and are not quoted already */
+    /* process.input should quote arguments that contain spaces and are not quoted already */
     test.description = 'subject + option, option value is not quoted and contains space'
     return null;
   })
@@ -1055,7 +1055,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
 
   a.ready.then( () =>
   {
-    /* process.args should quote arguments that contain spaces and are not quoted already */
+    /* process.input should quote arguments that contain spaces and are not quoted already */
     test.description = 'subject + option, option value is not quoted and contains space'
     return null;
   })
@@ -1083,7 +1083,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
 
   a.ready.then( () =>
   {
-    /* process.args should quote arguments that contain spaces and are not quoted already */
+    /* process.input should quote arguments that contain spaces and are not quoted already */
     test.description = 'subject + option, option value is not quoted and contains space'
     return null;
   })
@@ -1111,7 +1111,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
 
   a.ready.then( () =>
   {
-    /* process.args should quote arguments that contain spaces and are not quoted already */
+    /* process.input should quote arguments that contain spaces and are not quoted already */
     test.description = 'options only, option value is quoted and contains space'
     return null;
   })
@@ -1139,7 +1139,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
 
   a.ready.then( () =>
   {
-    /* process.args should quote arguments that contain spaces and are not quoted already */
+    /* process.input should quote arguments that contain spaces and are not quoted already */
     test.description = 'options only, option value is quoted and contains space'
     return null;
   })
@@ -1167,7 +1167,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
 
   a.ready.then( () =>
   {
-    /* process.args should quote arguments that contain spaces and are not quoted already */
+    /* process.input should quote arguments that contain spaces and are not quoted already */
     test.description = 'options only, option value is quoted and contains space'
     return null;
   })
@@ -1195,7 +1195,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
 
   a.ready.then( () =>
   {
-    /* process.args should quote arguments that contain spaces and are not quoted already */
+    /* process.input should quote arguments that contain spaces and are not quoted already */
     test.description = 'options only, option value is not quoted and contains space'
     return null;
   })
@@ -1223,7 +1223,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
 
   a.ready.then( () =>
   {
-    /* process.args should quote arguments that contain spaces and are not quoted already */
+    /* process.input should quote arguments that contain spaces and are not quoted already */
     test.description = 'options only, option value is not quoted and contains space'
     return null;
   })
@@ -1251,7 +1251,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
 
   a.ready.then( () =>
   {
-    /* process.args should quote arguments that contain spaces and are not quoted already */
+    /* process.input should quote arguments that contain spaces and are not quoted already */
     test.description = 'options only, option value is not quoted and contains space'
     return test.shouldThrowErrorOfAnyKind( () =>
     {
@@ -1293,7 +1293,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
     if( process.env.ignoreFirstTwoArgv )
     process.argv = process.argv.slice( 2 );
 
-    var got = _.process.args({ caching : 0 });
+    var got = _.process.input({ caching : 0 });
     _.fileProvider.fileWrite( _.path.join( __dirname, 'got' ), JSON.stringify( got ) )
   }
 }
