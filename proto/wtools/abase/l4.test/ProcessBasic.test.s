@@ -16560,6 +16560,9 @@ function startOptionOutputPrefixing( test )
     return _.process.start( options )
     .then( ( op ) =>
     {
+      if( _.strHas( programPath, 'testApp2Error' ) )
+      console.error( op.output )
+      else
       console.log( op.output );
       return null;
     } )
@@ -16585,7 +16588,7 @@ function startOptionOutputPiping( test )
 
   /* */
 
-  let modes = [ 'fork', 'spawn','shell' ];
+  let modes = [ 'fork', 'spawn', 'shell' ];
 
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
@@ -16917,6 +16920,9 @@ function startOptionOutputPiping( test )
     return _.process.start( options )
     .then( ( op ) =>
     {
+      if( _.strHas( programPath, 'testApp2Error' ) )
+      console.error( op.output );
+      else
       console.log( op.output );
       return null;
     } )
@@ -17062,6 +17068,44 @@ function startOptionInputMirroring( test )
       })
     })
 
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, inputMirroring : 1, error output`;
+
+      let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
+
+      let locals =
+      {
+        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
+        programPath : testAppPath2,
+        mode,
+        inputMirroring : 1,
+        verbosity : 2
+      }
+
+      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.is( _.strHas( op.output, testAppPath2 ) );
+        test.is( _.strHas( op.output, 'throw new Error();' ) )
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+    })
+
     return ready;
   }
 
@@ -17086,6 +17130,9 @@ function startOptionInputMirroring( test )
     return _.process.start( options )
     .then( ( op ) =>
     {
+      if( _.strHas( programPath, 'testApp2Error' ) )
+      console.error( op.output );
+      else
       console.log( op.output );
       return null;
     } )
