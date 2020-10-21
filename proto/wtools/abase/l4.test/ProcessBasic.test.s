@@ -20146,23 +20146,21 @@ function kill( test )
 
     ready.then( ( op ) =>
     {
-      // if( process.platform === 'win32' )
-      // {
-      //   test.identical( op.exitCode, 1 );
-      //   test.identical( op.ended, true );
-      //   test.identical( op.exitSignal, null );
-      // }
-      // else
-      // {
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, 1 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, null );
+      }
+      else
+      {
         test.identical( op.exitCode, null );
         test.identical( op.ended, true );
         test.identical( op.exitSignal, 'SIGKILL' );
-      // }
+      }
 
-      // if( process.platform === 'darwin' )
       test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      // else
-      // test.is( _.strHas( op.output, 'Application timeout!' ) );
+
       return null;
     })
 
