@@ -3252,8 +3252,18 @@ function startArgumentsParsing( test )
       test.identical( o.exitCode, 0 );
       let op = JSON.parse( o.output );
       test.identical( op.scriptPath, _.path.normalize( testAppPathNoSpace ) )
-      test.identical( op.map, { secondArg : `1 "third arg" "fourth arg" "fifth" arg` } )
-      test.identical( op.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', 'fourth arg', '"fifth" arg' ] )
+
+      /* Windows cmd supports only double quotes as grouping char, single quotes are treated as regular char*/
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.map, { secondArg : `1 "third arg" 'fourth arg' 'fifth arg'` } )
+        test.identical( op.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', `'fourth`, `arg'`, `'fifth`, `arg'` ] )
+      }
+      else
+      {
+        test.identical( op.map, { secondArg : `1 "third arg" "fourth arg" "fifth" arg` } )
+        test.identical( op.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', 'fourth arg', '"fifth" arg' ] )
+      }
 
       return null;
     })
@@ -3287,8 +3297,17 @@ function startArgumentsParsing( test )
       test.identical( o.exitCode, 0 );
       let op = JSON.parse( o.output );
       test.identical( op.scriptPath, _.path.normalize( testAppPathNoSpace ) )
-      test.identical( op.map, { secondArg : '1 "third arg" "fourth arg" "fifth" arg' } )
-      test.identical( op.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', 'fourth arg', '"fifth" arg' ] )
+      /* Windows cmd supports only double quotes as grouping char, single quotes are treated as regular char*/
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.map, { secondArg : `1 "third arg" 'fourth arg' 'fifth arg'` } )
+        test.identical( op.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', `'fourth`, `arg'`, `'fifth`, `arg'` ] )
+      }
+      else
+      {
+        test.identical( op.map, { secondArg : '1 "third arg" "fourth arg" "fifth" arg' } )
+        test.identical( op.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', 'fourth arg', '"fifth" arg' ] )
+      }
 
       return null;
     })
