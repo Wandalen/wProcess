@@ -20,7 +20,7 @@ submodule :
     path : npm:///wConsequence
     enabled : 0 # submodule
   wwindows-process-tree :
-    path : npm:///wwindows-process-tree#0.2.6
+    path : npm:///wwindows-process-tree#0.3.0
     enabled : 0 # submodule
     criterion :
       optional : 1
