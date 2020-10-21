@@ -1299,7 +1299,7 @@ function startMinimal_body( o )
     if( o.outputPrefixing )
     data = 'stderr :\n' + '  ' + _.strLinesIndentation( data, '  ' );
 
-    if( _.color && o.outputColoring && !o.outputColoringStderr )
+    if( _.color && o.outputColoring && o.outputColoringStderr )
     data = _.ct.format( data, 'pipe.negative' );
 
     log( data, 1 );
@@ -1326,7 +1326,7 @@ function startMinimal_body( o )
     if( o.outputPrefixing )
     data = 'stdout :\n' + '  ' + _.strLinesIndentation( data, '  ' );
 
-    if( _.color && o.outputColoring && !o.outputColoringStdout )
+    if( _.color && o.outputColoring && o.outputColoringStdout )
     data = _.ct.format( data, 'pipe.neutral' );
 
     log( data );
