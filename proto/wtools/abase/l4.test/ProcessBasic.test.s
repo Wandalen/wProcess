@@ -16530,7 +16530,7 @@ function startOptionLoggerTransofrmation( test )
 
 //
 
-/* qqq for Yevhen : describe test cases */
+/* qqq for Yevhen : describe test cases | aaa : Done */
 function startOutputOptionsCompatibilityLateCheck( test )
 {
   let context = this;
@@ -16570,6 +16570,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
 
     .then( () =>
     {
+      test.case = `outputPiping : 0, outputCollecting : 0, stdio : 'ignore'`;
       let o =
       {
         outputPiping : 0,
@@ -16596,6 +16597,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
 
     .then( () =>
     {
+      test.case = `outputPiping : 1, outputCollecting : 0, stdio : 'ignore'`;
       let o =
       {
         outputPiping : 1,
@@ -16611,6 +16613,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
 
     .then( () =>
     {
+      test.case = `outputPiping : 0, outputCollecting : 1, stdio : 'ignore'`;
       let o =
       {
         outputPiping : 0,
@@ -16626,6 +16629,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
 
     .then( () =>
     {
+      test.case = `outputPiping : 1, outputCollecting : 1, stdio : 'ignore'`;
       let o =
       {
         outputPiping : 1,
@@ -16641,6 +16645,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
 
     .then( () =>
     {
+      test.case = `outputPiping : 0, outputCollecting : 0, stdio : 'pipe'`;
       let o =
       {
         outputPiping : 0,
@@ -16667,6 +16672,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
 
     .then( () =>
     {
+      test.case = `outputPiping : 1, outputCollecting : 0, stdio : 'pipe'`;
       let o =
       {
         outputPiping : 1,
@@ -16693,6 +16699,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
 
     .then( () =>
     {
+      test.case = `outputPiping : 0, outputCollecting : 1, stdio : 'pipe'`;
       let o =
       {
         outputPiping : 0,
@@ -16720,6 +16727,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
 
     .then( () =>
     {
+      test.case = `outputPiping : 1, outputCollecting : 1, stdio : 'pipe'`;
       let o =
       {
         outputPiping : 1,
@@ -16747,6 +16755,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
 
     .then( () =>
     {
+      test.case = `outputPiping : 0, outputCollecting : 0, stdio : 'inherit'`;
       let o =
       {
         outputPiping : 0,
@@ -16786,6 +16795,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
 
     .then( () =>
     {
+      test.case = `outputPiping : 1, outputCollecting : 0, stdio : 'inherit'`;
       let o =
       {
         outputPiping : 1,
@@ -16802,6 +16812,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
 
     .then( () =>
     {
+      test.case = `outputPiping : 0, outputCollecting : 1, stdio : 'inherit'`;
       let o =
       {
         outputPiping : 0,
@@ -16818,6 +16829,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
 
     .then( () =>
     {
+      test.case = `outputPiping : 1, outputCollecting : 1, stdio : 'inherit'`;
       let o =
       {
         outputPiping : 1,
@@ -16834,6 +16846,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
 
     .then( () =>
     {
+      test.case = `outputPiping : 1, outputCollecting : 1, stdio : [ 'ignore', 'ignore', 'ignore' ]`;
       let o =
       {
         outputPiping : 1,
@@ -16850,6 +16863,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
 
     .then( () =>
     {
+      test.case = `outputPiping : 1, outputCollecting : 1, stdio : [ 'inherit', 'inherit', 'inherit' ]`;
       let o =
       {
         outputPiping : 1,
@@ -16866,6 +16880,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
 
     .then( () =>
     {
+      test.case = `outputPiping : 1, outputCollecting : 1, stdio : [ 'pipe', 'pipe', 'pipe' ]`;
       let o =
       {
         outputPiping : 1,
@@ -16893,6 +16908,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
 
     .then( () =>
     {
+      test.case = `outputPiping : 1, outputCollecting : 1, stdio : [ 'ignore', 'pipe', 'ignore' ]`;
       let o =
       {
         outputPiping : 1,
@@ -16920,6 +16936,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
 
     .then( () =>
     {
+      test.case = `outputPiping : 1, outputCollecting : 1, stdio : [ 'ignore', 'ignore', 'pipe' ]`;
       let o =
       {
         outputPiping : 1,
@@ -16947,6 +16964,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
 
     .then( () =>
     {
+      test.case = `outputPiping : 1, outputCollecting : 1, stdio : [ 'ignore', 'pipe', 'inherit' ]`;
       let o =
       {
         outputPiping : 1,
@@ -16974,6 +16992,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
 
     .then( () =>
     {
+      test.case = `outputPiping : 1, outputCollecting : 1, stdio : [ 'ignore', 'inherit', 'pipe' ]`;
       let o =
       {
         outputPiping : 1,
@@ -17014,6 +17033,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
 
     .then( () =>
     {
+      test.case = `outputPiping : 1, outputCollecting : 1, stdio : [ 'ignore', 'pipe', 'pipe' ]`;
       let o =
       {
         outputPiping : 1,
