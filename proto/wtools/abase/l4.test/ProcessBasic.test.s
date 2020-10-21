@@ -17576,7 +17576,7 @@ function startOptionOutputColoring( test )
 
   /* */
 
-  let modes = [ /*'fork', */'spawn', /*'shell'*/ ];
+  let modes = [ 'fork', 'spawn', 'shell' ];
 
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
@@ -17591,7 +17591,7 @@ function startOptionOutputColoring( test )
       test.case = `mode : ${ mode }, outputColoring : 0, normal output, inputMirroring : 0`;
 
       let testAppPath2 = a.program( testApp2 );
-      let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPath2, outputColoring : 0, inputMirroring : 0 };
+      let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPath2, outputColoring : 0, inputMirroring : 0, mode };
       let testAppPath = a.program({ routine : testApp, locals });
 
       let options =
@@ -17620,7 +17620,7 @@ function startOptionOutputColoring( test )
       test.case = `mode : ${ mode }, outputColoring : 1, normal output, inputMirroring : 0`;
 
       let testAppPath2 = a.program( testApp2 );
-      let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPath2, outputColoring : 1, inputMirroring : 0 };
+      let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPath2, outputColoring : 1, inputMirroring : 0, mode };
       let testAppPath = a.program({ routine : testApp, locals });
 
       let options =
@@ -17650,7 +17650,7 @@ function startOptionOutputColoring( test )
       test.case = `mode : ${ mode }, outputColoring : 1, normal output, inputMirroring : 1`;
 
       let testAppPath2 = a.program( testApp2 );
-      let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPath2, outputColoring : 1, inputMirroring : 1 };
+      let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPath2, outputColoring : 1, inputMirroring : 1, mode };
       let testAppPath = a.program({ routine : testApp, locals });
 
       let options =
@@ -17669,12 +17669,11 @@ function startOptionOutputColoring( test )
         // test.is( _.strHas( op.output, '\u001b[97m > \u001b[39;0m' ) );
         // test.is( _.strHas( op.output, '\u001b[35mLog\u001b[39;0m\n' ) );
         // let string = `\u001b[97m > \u001b[39;0mnode ${testAppPath2}\n\u001b[35mLog\u001b[39;0m\n`;
-        let string = `\u001b[97m > \u001b[39;0mnode ${testAppPath2}\n\u001b[35mLog\u001b[39;0m\n`;
+        let string = `\u001b[97m > \u001b[39;0m${ mode === 'fork' ? '' : 'node ' }${testAppPath2}\n\u001b[35mLog\u001b[39;0m\n`;
         test.identical( op.output, string )
         // test.is( _.strHas( op.output, '\u001b[97m>\u001b[39;0m' ) );
         // test.is( _.strHas( op.output, testAppPath2 ) );
         // test.is( _.strHas( op.output, '\u001b[35mLog\u001b[39;0m' ) );
-
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -17696,9 +17695,10 @@ function startOptionOutputColoring( test )
 
     let options =
     {
-      execPath : 'node ' + programPath,
+      execPath : mode === 'fork' ? programPath : 'node ' + programPath,
       throwingExitCode : 0,
       outputCollecting : 1,
+      mode,
       inputMirroring,
       outputColoring,
     }
@@ -17710,33 +17710,6 @@ function startOptionOutputColoring( test )
   {
     console.log( 'Log' );
   }
-
-  // function testApp()
-  // {
-  //   let _ = require( toolsPath );
-
-  //   _.include( 'wProcess' );
-  //   _.include( 'wStringsExtra' );
-
-  //   let options =
-  //   {
-  //     execPath : 'node ' + programPath,
-  //     outputColoring : 1,
-  //     outputCollecting : 1,
-  //   }
-
-  //   return _.process.start( options )
-  //   .then( ( op ) =>
-  //   {
-  //     console.log( op.output );
-  //     return null;
-  //   } )
-  // }
-
-  // function testApp2()
-  // {
-  //   console.log( 'Log' );
-  // }
 
   function testApp2Error()
   {
