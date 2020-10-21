@@ -473,7 +473,9 @@ function startMinimal_body( o )
       }
       catch( err )
       {
+        if( !o.ended )
         end2( err/*, o.conTerminate */ );
+        throw err;
       }
       _.assert( o.state === 'terminated' || o.state === 'disconnected' );
       end2( undefined/*, o.conTerminate */ );

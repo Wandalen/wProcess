@@ -1290,7 +1290,6 @@ function startSync( test )
 
   var options = _.mapSupplement( null, o2, o3 );
   _.process.start( options );
-  debugger;
   test.identical( options.exitCode, 0 );
   test.identical( options.output, expectedOutput );
 
