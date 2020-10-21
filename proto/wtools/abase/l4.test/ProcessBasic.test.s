@@ -17718,7 +17718,7 @@ function startOptionStreamSizeLimit( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let modes = [ 'shell', 'spawn' /*,'fork'*/ ];
+  let modes = [ 'spawn', 'shell' ];
 
   modes.forEach( ( mode ) =>
   {
