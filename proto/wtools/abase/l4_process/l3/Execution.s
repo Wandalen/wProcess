@@ -2244,7 +2244,7 @@ function startNjs_body( o )
   _.assert( !o.code );
   _.assert( arguments.length === 1, 'Expects single argument' );
 
-  if( _.strIs( o.interpreterArgs ) )
+  if( _.strIs( o.interpreterArgs ) && o.interpreterArgs !== '' )
   o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs });
 
   o.interpreterArgs = o.interpreterArgs || process.execArgv;
