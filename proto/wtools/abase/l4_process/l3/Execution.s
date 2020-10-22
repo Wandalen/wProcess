@@ -139,10 +139,11 @@ function startCommon_head( routine, args )
 
   _.assert
   (
-    ( _.numberIs( o.streamSizeLimit ) && o.streamSizeLimit >= 0 ) || o.streamSizeLimit === null, 'Option::streamSizeLimit must be a positive Number which is greater or equal to zero'
+    ( _.numberIs( o.streamSizeLimit ) && o.streamSizeLimit > 0 ) || o.streamSizeLimit === null,
+    'Option::streamSizeLimit must be a positive Number which is greater than zero'
   )
 
-  if( o.streamSizeLimit || o.streamSizeLimit === 0 )
+  if( o.streamSizeLimit )
   _.assert( o.sync && ( o.mode === 'spawn' || o.mode === 'shell' ), 'Option::streamSizeLimit is supported in mode::spawn and mode::shell with sync::1' )
 
   return o;

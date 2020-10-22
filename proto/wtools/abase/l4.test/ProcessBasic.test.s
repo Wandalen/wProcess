@@ -18160,7 +18160,7 @@ function startOptionStreamSizeLimitThrowing( test )
       let returned = test.shouldThrowErrorSync( () => _.process.start( options ) )
 
       test.is( _.errIs( returned ) );
-      test.is( _.strHas( returned.message, `Option::streamSizeLimit must be a positive Number which is greater or equal to zero` ) )
+      test.is( _.strHas( returned.message, `Option::streamSizeLimit must be a positive Number which is greater than zero` ) )
 
       test.notIdentical( options.exitCode, 0 );
 
@@ -18189,7 +18189,7 @@ function startOptionStreamSizeLimitThrowing( test )
       let returned = test.shouldThrowErrorSync( () => _.process.start( options ) )
 
       test.is( _.errIs( returned ) );
-      test.is( _.strHas( returned.message, `Option::streamSizeLimit must be a positive Number which is greater or equal to zero` ) )
+      test.is( _.strHas( returned.message, `Option::streamSizeLimit must be a positive Number which is greater than zero` ) )
 
       test.notIdentical( options.exitCode, 0 );
 
