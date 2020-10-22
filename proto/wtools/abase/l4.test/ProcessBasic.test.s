@@ -13525,12 +13525,12 @@ function startOnIsNotConsequence( test )
   let track;
   let a = context.assetFor( test, false );
   let programPath = a.path.nativize( a.program( program1 ) );
-  let modes = [ 'fork', 'spawn', 'shell' ];
+  let modes = [ 'shell' ];
   // let modes = [ 'spawn' ];
-  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 0, mode ) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 1, mode ) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => run( 1, 0, mode ) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => run( 1, 1, mode ) ) );
   return a.ready;
 
   /* - */
@@ -20192,6 +20192,10 @@ function killSync( test )
   let context = this;
   let a = context.assetFor( test, false );
   let testAppPath = a.program( testApp );
+
+  /*
+    xxx : hangs up on Windows with interval 150 if run in sync mode
+  */
 
   /* */
 
