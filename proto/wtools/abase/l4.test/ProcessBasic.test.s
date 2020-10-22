@@ -16564,9 +16564,9 @@ function startOptionOutputColoring( test )
     {
       test.case = `mode : ${ mode }, outputColoring : 0, normal output, inputMirroring : 0`;
 
-      let testAppPath2 = a.program( testApp2 );
+      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
       let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPath2, outputColoring : 0, inputMirroring : 0, mode };
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
 
       let options =
       {
@@ -16593,9 +16593,9 @@ function startOptionOutputColoring( test )
     {
       test.case = `mode : ${ mode }, outputColoring : 1, normal output, inputMirroring : 0`;
 
-      let testAppPath2 = a.program( testApp2 );
+      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
       let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPath2, outputColoring : 1, inputMirroring : 0, mode };
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
 
       let options =
       {
@@ -16623,9 +16623,9 @@ function startOptionOutputColoring( test )
     {
       test.case = `mode : ${ mode }, outputColoring : 1, normal output, inputMirroring : 1`;
 
-      let testAppPath2 = a.program( testApp2 );
+      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
       let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPath2, outputColoring : 1, inputMirroring : 1, mode };
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
 
       let options =
       {
@@ -16654,9 +16654,9 @@ function startOptionOutputColoring( test )
     {
       test.case = `mode : ${ mode }, outputColoring : 0, error output, inputMirroring : 0`;
 
-      let testAppPath2 = a.program( testApp2Error );
+      let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
       let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPath2, outputColoring : 0, inputMirroring : 0, mode };
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
 
       let options =
       {
@@ -16683,9 +16683,9 @@ function startOptionOutputColoring( test )
     {
       test.case = `mode : ${ mode }, outputColoring : 1, error output, inputMirroring : 0`;
 
-      let testAppPath2 = a.program( testApp2Error );
+      let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
       let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPath2, outputColoring : 1, inputMirroring : 0, mode };
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
 
       let options =
       {
@@ -16712,9 +16712,9 @@ function startOptionOutputColoring( test )
     {
       test.case = `mode : ${ mode }, outputColoring : 1, error output, inputMirroring : 1`;
 
-      let testAppPath2 = a.program( testApp2Error );
+      let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
       let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPath2, outputColoring : 1, inputMirroring : 1, mode };
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
 
       let options =
       {
@@ -16795,7 +16795,7 @@ function startOptionOutputColoringStderr( test )
     {
       test.case = `mode : ${ mode }, outputColoringStderr : 0, inputMirroring : 0, outputColloring : 1`;
 
-      let testAppPath2 = a.program( testApp2Error );
+      let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
       let locals = 
       {
         toolsPath : _.path.nativize( _.module.toolsPathGet() ),
@@ -16806,7 +16806,7 @@ function startOptionOutputColoringStderr( test )
         outputColoringStdout : null,
         mode
       };
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
 
       let options =
       {
@@ -16833,7 +16833,7 @@ function startOptionOutputColoringStderr( test )
     {
       test.case = `mode : ${ mode }, outputColoringStderr : 1, inputMirroring : 0, outputColoring : 0`;
 
-      let testAppPath2 = a.program( testApp2Error );
+      let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
       let locals =
       {
         toolsPath : _.path.nativize( _.module.toolsPathGet() ),
@@ -16844,7 +16844,7 @@ function startOptionOutputColoringStderr( test )
         outputColoringStdout : null,
         mode
       };
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
 
       let options =
       {
@@ -16871,7 +16871,7 @@ function startOptionOutputColoringStderr( test )
     {
       test.case = `mode : ${ mode }, outputColoringStderr : 1, inputMirroring : 0, outputColoring : 1`;
 
-      let testAppPath2 = a.program( testApp2Error );
+      let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
       let locals =
       {
         toolsPath : _.path.nativize( _.module.toolsPathGet() ),
@@ -16882,7 +16882,7 @@ function startOptionOutputColoringStderr( test )
         outputColoringStdout : null,
         mode
       };
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
 
       let options =
       {
@@ -16909,7 +16909,7 @@ function startOptionOutputColoringStderr( test )
     {
       test.case = `mode : ${ mode }, outputColoringStderr : 1, inputMirroring : 1, outputColoring : 1`;
 
-      let testAppPath2 = a.program( testApp2Error );
+      let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
       let locals =
       {
         toolsPath : _.path.nativize( _.module.toolsPathGet() ),
@@ -16920,7 +16920,7 @@ function startOptionOutputColoringStderr( test )
         outputColoringStdout : null,
         mode
       };
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
 
       let options =
       {
@@ -16948,7 +16948,7 @@ function startOptionOutputColoringStderr( test )
     {
       test.case = `mode : ${ mode }, outputColoringStderr : 1, outputColoringStdout : 0, inputMirroring : 0, outputColoring : null, normal output`;
 
-      let testAppPath2 = a.program( testApp2 );
+      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
       let locals =
       {
         toolsPath : _.path.nativize( _.module.toolsPathGet() ),
@@ -16959,7 +16959,7 @@ function startOptionOutputColoringStderr( test )
         outputColoring : null,
         mode
       };
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
 
       let options =
       {
@@ -16986,7 +16986,7 @@ function startOptionOutputColoringStderr( test )
     {
       test.case = `mode : ${ mode }, outputColoringStderr : 1, outputColoringStdout : 0, inputMirroring : 0, outputColoring : 1, normal output`;
 
-      let testAppPath2 = a.program( testApp2 );
+      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
       let locals =
       {
         toolsPath : _.path.nativize( _.module.toolsPathGet() ),
@@ -16997,7 +16997,7 @@ function startOptionOutputColoringStderr( test )
         outputColoring : 1,
         mode
       };
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
 
       let options =
       {
@@ -17080,7 +17080,7 @@ function startOptionOutputColoringStdout( test )
     {
       test.case = `mode : ${ mode }, outputColoringStdout : 0, inputMirroring : 0, outputColloring : 1`;
 
-      let testAppPath2 = a.program( testApp2 );
+      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
       let locals =
       {
         toolsPath : _.path.nativize( _.module.toolsPathGet() ),
@@ -17091,7 +17091,7 @@ function startOptionOutputColoringStdout( test )
         outputColoring : 1,
         mode
       };
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
 
       let options =
       {
@@ -17118,7 +17118,7 @@ function startOptionOutputColoringStdout( test )
     {
       test.case = `mode : ${ mode }, outputColoringStdout : 1, inputMirroring : 0, outputColoring : 0`;
 
-      let testAppPath2 = a.program( testApp2 );
+      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
       let locals =
       {
         toolsPath : _.path.nativize( _.module.toolsPathGet() ),
@@ -17129,7 +17129,7 @@ function startOptionOutputColoringStdout( test )
         outputColoring : 0,
         mode
       };
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
 
       let options =
       {
@@ -17157,7 +17157,7 @@ function startOptionOutputColoringStdout( test )
     {
       test.case = `mode : ${ mode }, outputColoringStdout : 1, inputMirroring : 0, outputColoring : 1`;
 
-      let testAppPath2 = a.program( testApp2 );
+      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
       let locals =
       {
         toolsPath : _.path.nativize( _.module.toolsPathGet() ),
@@ -17168,7 +17168,7 @@ function startOptionOutputColoringStdout( test )
         outputColoring : 1,
         mode
       };
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
 
       let options =
       {
@@ -17195,7 +17195,7 @@ function startOptionOutputColoringStdout( test )
     {
       test.case = `mode : ${ mode }, outputColoringStdout : 1, inputMirroring : 1, outputColoring : 1`;
 
-      let testAppPath2 = a.program( testApp2 );
+      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
       let locals =
       {
         toolsPath : _.path.nativize( _.module.toolsPathGet() ),
@@ -17206,7 +17206,7 @@ function startOptionOutputColoringStdout( test )
         outputColoring : 1,
         mode
       };
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
 
       let options =
       {
@@ -17235,7 +17235,7 @@ function startOptionOutputColoringStdout( test )
     {
       test.case = `mode : ${ mode }, outputColoringStdout : 1, outputColoringStderr : 0, inputMirroring : 0, outputColoring : null`;
 
-      let testAppPath2 = a.program( testApp2Error );
+      let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
       let locals =
       {
         toolsPath : _.path.nativize( _.module.toolsPathGet() ),
@@ -17246,7 +17246,7 @@ function startOptionOutputColoringStdout( test )
         outputColoring : null,
         mode
       };
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
 
       let options =
       {
@@ -17274,7 +17274,7 @@ function startOptionOutputColoringStdout( test )
     {
       test.case = `mode : ${ mode }, outputColoringStdout : 1, outputColoringStderr : 0, inputMirroring : 0, outputColoring : 1`;
 
-      let testAppPath2 = a.program( testApp2Error );
+      let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
       let locals =
       {
         toolsPath : _.path.nativize( _.module.toolsPathGet() ),
@@ -17285,7 +17285,7 @@ function startOptionOutputColoringStdout( test )
         outputColoring : 1,
         mode
       };
-      let testAppPath = a.program({ routine : testApp, locals });
+      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
 
       let options =
       {
