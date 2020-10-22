@@ -186,10 +186,10 @@ function _exitHandlerRepair()
 
   // process.on( 'SIGHUP', handle_functor( 'SIGHUP', 1 ) ); /* xxx : experiment? */
   process.on( 'SIGQUIT', handle_functor( 'SIGQUIT', 3 ) );
-  process.on( 'SIGINT', handle_functor( 'SIGINT' ), 2 );
-  process.on( 'SIGTERM', handle_functor( 'SIGTERM' ), 15 );
-  process.on( 'SIGUSR1', handle_functor( 'SIGUSR1' ), 16 );
-  process.on( 'SIGUSR2', handle_functor( 'SIGUSR2' ), 17 );
+  process.on( 'SIGINT', handle_functor( 'SIGINT', 2 ) );
+  process.on( 'SIGTERM', handle_functor( 'SIGTERM', 15 ) );
+  process.on( 'SIGUSR1', handle_functor( 'SIGUSR1', 16 ) );
+  process.on( 'SIGUSR2', handle_functor( 'SIGUSR2', 17 ) );
 
   function handle_functor( signal, signalCode )
   {
