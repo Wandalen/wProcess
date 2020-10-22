@@ -18398,6 +18398,43 @@ function startOptionInputMirroring( test )
 
     ready.then( () =>
     {
+      test.case = `mode : ${ mode }, inputMirroring : 1, verbosity : 1`;
+
+      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+
+      let locals =
+      {
+        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
+        programPath : testAppPath2,
+        mode,
+        inputMirroring : 1,
+        verbosity : 1
+      }
+
+      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.is( _.strHas( op.output, testAppPath2 ) );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
       test.case = `mode : ${ mode }, inputMirroring : 1, error output`;
 
       let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
@@ -18424,6 +18461,44 @@ function startOptionInputMirroring( test )
         test.identical( op.ended, true );
         test.is( _.strHas( op.output, testAppPath2 ) );
         test.is( _.strHas( op.output, 'throw new Error();' ) )
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, inputMirroring : 1, verbosity : 1, error output`;
+
+      let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
+
+      let locals =
+      {
+        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
+        programPath : testAppPath2,
+        mode,
+        inputMirroring : 1,
+        verbosity : 1
+      }
+
+      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.is( _.strHas( op.output, testAppPath2 ) );
+        test.is( !_.strHas( op.output, 'throw new Error();' ) )
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
