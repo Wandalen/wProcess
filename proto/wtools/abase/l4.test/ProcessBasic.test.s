@@ -2838,69 +2838,147 @@ function startArgsOption( test )
   let a = context.assetFor( test, false );
   let programPath = a.path.nativize( a.program( testApp ) );
 
-  /* */
+  let modes = [ 'fork', 'spawn', 'shell' ];
 
-  a.ready.then( () =>
-  {
-    test.case = 'args option as array, source args array should not be changed'
-    var args = [ 'arg1', 'arg2' ];
-    var startOptions =
-    {
-      execPath : 'node ' + programPath,
-      outputCollecting : 1,
-      args,
-      mode : 'spawn',
-    }
-
-    let con = _.process.start( startOptions )
-
-    con.then( ( op ) =>
-    {
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      test.identical( op.args, [ programPath, 'arg1', 'arg2' ] );
-      test.identical( _.strCount( op.output, `[ 'arg1', 'arg2' ]` ), 1 );
-      test.identical( startOptions.args, op.args );
-      test.identical( args, [ 'arg1', 'arg2' ] );
-      return null;
-    })
-
-    return con;
-  })
-
-  /* */
-
-  a.ready.then( () =>
-  {
-    test.case = 'args option as string'
-    var args = 'arg1'
-    var startOptions =
-    {
-      execPath : 'node ' + programPath,
-      outputCollecting : 1,
-      args,
-      mode : 'spawn',
-    }
-
-    let con = _.process.start( startOptions )
-
-    con.then( ( op ) =>
-    {
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      test.identical( op.args, [ programPath, 'arg1' ] );
-      test.identical( _.strCount( op.output, 'arg1' ), 1 );
-      test.identical( startOptions.args, op.args );
-      test.identical( args, 'arg1' );
-      return null;
-    })
-
-    return con;
-  })
-
-  /*  */
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
   return a.ready;
+
+  /* */
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, args option as array, source args array should not be changed`;
+      var args = [ 'arg1', 'arg2' ];
+      var startOptions =
+      {
+        execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+        outputCollecting : 1,
+        args,
+        mode,
+      }
+
+      let con = _.process.start( startOptions )
+
+      con.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        if( mode === 'fork' )
+        test.identical( op.args, [ 'arg1', 'arg2' ] );
+        else
+        test.identical( op.args, [ programPath, 'arg1', 'arg2' ] );
+        test.identical( _.strCount( op.output, `[ 'arg1', 'arg2' ]` ), 1 );
+        test.identical( startOptions.args, op.args );
+        test.identical( args, [ 'arg1', 'arg2' ] );
+        return null;
+      })
+
+      return con;
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, args option as string`;
+      var args = 'arg1'
+      var startOptions =
+      {
+        execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+        outputCollecting : 1,
+        args,
+        mode,
+      }
+
+      let con = _.process.start( startOptions )
+
+      con.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        if( mode === 'fork' )
+        test.identical( op.args, [ 'arg1' ] );
+        else
+        test.identical( op.args, [ programPath, 'arg1' ] );
+        test.identical( _.strCount( op.output, 'arg1' ), 1 );
+        test.identical( startOptions.args, op.args );
+        test.identical( args, 'arg1' );
+        return null;
+      })
+
+      return con;
+    })
+
+    return ready;
+  }
+
+  /* ORIGINAL */
+  // a.ready.then( () =>
+  // {
+  //   test.case = 'args option as array, source args array should not be changed'
+  //   var args = [ 'arg1', 'arg2' ];
+  //   var startOptions =
+  //   {
+  //     execPath : 'node ' + programPath,
+  //     outputCollecting : 1,
+  //     args,
+  //     mode : 'spawn',
+  //   }
+
+  //   let con = _.process.start( startOptions )
+
+  //   con.then( ( op ) =>
+  //   {
+  //     test.identical( op.exitCode, 0 );
+  //     test.identical( op.ended, true );
+  //     test.identical( op.args, [ programPath, 'arg1', 'arg2' ] );
+  //     test.identical( _.strCount( op.output, `[ 'arg1', 'arg2' ]` ), 1 );
+  //     test.identical( startOptions.args, op.args );
+  //     test.identical( args, [ 'arg1', 'arg2' ] );
+  //     return null;
+  //   })
+
+  //   return con;
+  // })
+
+  // /* */
+
+  // a.ready.then( () =>
+  // {
+  //   test.case = 'args option as string'
+  //   var args = 'arg1'
+  //   var startOptions =
+  //   {
+  //     execPath : 'node ' + programPath,
+  //     outputCollecting : 1,
+  //     args,
+  //     mode : 'spawn',
+  //   }
+
+  //   let con = _.process.start( startOptions )
+
+  //   con.then( ( op ) =>
+  //   {
+  //     test.identical( op.exitCode, 0 );
+  //     test.identical( op.ended, true );
+  //     test.identical( op.args, [ programPath, 'arg1' ] );
+  //     test.identical( _.strCount( op.output, 'arg1' ), 1 );
+  //     test.identical( startOptions.args, op.args );
+  //     test.identical( args, 'arg1' );
+  //     return null;
+  //   })
+
+  //   return con;
+  // })
+
+  // /*  */
+
+  // return a.ready;
 
   /* - */
 
