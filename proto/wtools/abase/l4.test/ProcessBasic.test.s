@@ -3252,8 +3252,18 @@ function startArgumentsParsing( test )
       test.identical( o.exitCode, 0 );
       let op = JSON.parse( o.output );
       test.identical( op.scriptPath, _.path.normalize( testAppPathNoSpace ) )
-      test.identical( op.map, { secondArg : `1 "third arg" "fourth arg" "fifth" arg` } )
-      test.identical( op.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', 'fourth arg', '"fifth" arg' ] )
+
+      /* Windows cmd supports only double quotes as grouping char, single quotes are treated as regular char*/
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.map, { secondArg : `1 "third arg" 'fourth arg' 'fifth arg'` } )
+        test.identical( op.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', `'fourth`, `arg'`, `'fifth`, `arg'` ] )
+      }
+      else
+      {
+        test.identical( op.map, { secondArg : `1 "third arg" "fourth arg" "fifth" arg` } )
+        test.identical( op.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', 'fourth arg', '"fifth" arg' ] )
+      }
 
       return null;
     })
@@ -3287,8 +3297,17 @@ function startArgumentsParsing( test )
       test.identical( o.exitCode, 0 );
       let op = JSON.parse( o.output );
       test.identical( op.scriptPath, _.path.normalize( testAppPathNoSpace ) )
-      test.identical( op.map, { secondArg : '1 "third arg" "fourth arg" "fifth" arg' } )
-      test.identical( op.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', 'fourth arg', '"fifth" arg' ] )
+      /* Windows cmd supports only double quotes as grouping char, single quotes are treated as regular char*/
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.map, { secondArg : `1 "third arg" 'fourth arg' 'fifth arg'` } )
+        test.identical( op.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', `'fourth`, `arg'`, `'fifth`, `arg'` ] )
+      }
+      else
+      {
+        test.identical( op.map, { secondArg : '1 "third arg" "fourth arg" "fifth" arg' } )
+        test.identical( op.scriptArgs, [ 'firstArg', 'secondArg:1', 'third arg', 'fourth arg', '"fifth" arg' ] )
+      }
 
       return null;
     })
@@ -19380,6 +19399,10 @@ function startOptionVerbosityLogging( test )
         test.identical( op.exitReason, 'normal' );
         test.identical( op.ended, true );
         test.identical( op.state, 'terminated' );
+        // Windows returns 4294967295 which is -1 to uint32
+        if( process.platform === 'win32' )
+        test.identical( _.strCount( op.output, '< Process returned error code 4294967295' ), 1 );
+        else
         test.identical( _.strCount( op.output, '< Process returned error code 255' ), 1 );
         test.identical( _.strCount( op.output, `Launched as "node ${ testAppPathError }"` ), 1 );
         test.identical( _.strCount( op.output, `Launched at ${ _.strQuote( op.currentPath ) }` ), 1 );
@@ -20124,23 +20147,21 @@ function kill( test )
 
     ready.then( ( op ) =>
     {
-      // if( process.platform === 'win32' )
-      // {
-      //   test.identical( op.exitCode, 1 );
-      //   test.identical( op.ended, true );
-      //   test.identical( op.exitSignal, null );
-      // }
-      // else
-      // {
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, 1 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, null );
+      }
+      else
+      {
         test.identical( op.exitCode, null );
         test.identical( op.ended, true );
         test.identical( op.exitSignal, 'SIGKILL' );
-      // }
+      }
 
-      // if( process.platform === 'darwin' )
       test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      // else
-      // test.is( _.strHas( op.output, 'Application timeout!' ) );
+
       return null;
     })
 
@@ -20172,6 +20193,10 @@ function killSync( test )
   let context = this;
   let a = context.assetFor( test, false );
   let testAppPath = a.program( testApp );
+
+  /*
+    xxx : hangs up on Windows with interval 150 if run in sync mode
+  */
 
   /* */
 
@@ -20368,16 +20393,9 @@ function killSync( test )
 
     ready.then( ( op ) =>
     {
-      if( process.platform === 'win32')
-      {
-        test.identical( op.exitCode, 1 );
-        test.identical( op.exitSignal, null );
-      }
-      else
-      {
-        test.identical( op.exitCode, null );
-        test.identical( op.exitSignal, 'SIGKILL' );
-      }
+      /* Same result on Windows because process was killed using pnd, not pid */
+      test.identical( op.exitCode, null );
+      test.identical( op.exitSignal, 'SIGKILL' );
 
       test.identical( op.ended, true );
       test.is( !_.strHas( op.output, 'Application timeout!' ) );
@@ -23158,6 +23176,144 @@ exit:end
 endSignalsOnExitExit.description =
 `
   - handler of the event "exit" should be called exactly once
+`
+
+//
+
+function endSignalsOnExitExitCode( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let programPath = a.program( program1 );
+  let o3 =
+  {
+    outputPiping : 1,
+    outputCollecting : 1,
+    applyingExitCode : 0,
+    throwingExitCode : 0,
+    stdio : 'pipe',
+  }
+
+  let modes = [ 'fork', 'spawn' ];
+  // modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGQUIT', 128 + 3 ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGINT', 128 + 2 ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGTERM', 128 + 15 ) ) );
+  return a.ready;
+
+  /* --- */
+
+  function signalTerminating( mode, signal, expectedExitCode )
+  {
+    let ready = _.Consequence().take( null );
+
+    /* - */
+
+    ready
+
+    /* - */
+
+    .then( function( arg )
+    {
+      test.case = `mode:${mode}, withExitHandler:1, withTools:1, ${signal}`;
+
+      var time1 = _.time.now();
+      var o2 =
+      {
+        execPath : mode === `fork` ? `${programPath}` : `node ${programPath}`,
+        args : [ 'withExitHandler:1', 'withTools:1' ],
+        mode,
+      }
+
+      var options = _.mapSupplement( null, o2, o3 );
+
+      var returned = _.process.start( options );
+      _.time.out( context.t1, () =>
+      {
+        test.identical( options.process.killed, false );
+        options.process.kill( signal );
+        return null;
+      })
+      returned.finally( function()
+      {
+        var exp1 =
+`program1:begin
+${signal}
+exit:end
+`
+        var exp2 =
+`program1:begin
+`
+        /*
+        Windows doesn't support signals handling, but will exit with signal if process was killed using pnd, exit event will not be emiited
+        On Unix signal will be handled and process will exit with code passed to exit event handler
+        */
+
+        if( process.platform === 'win32' )
+        {
+          test.identical( options.output, exp2 );
+          test.identical( options.exitCode, null );
+          test.identical( options.exitSignal, signal );
+          test.identical( options.exitReason, 'signal' );
+        }
+        else
+        {
+          test.identical( options.output, exp1 );
+          test.identical( options.exitReason, 'normal' );
+          test.identical( options.exitCode, expectedExitCode );
+          test.identical( options.exitSignal, null );
+        }
+
+        test.identical( options.ended, true );
+        test.identical( options.state, 'terminated' );
+        test.identical( options.error, null );
+        test.identical( options.process.killed, true );
+        var dtime = _.time.now() - time1;
+        return null;
+      })
+
+      return returned;
+    })
+
+    /* - */
+
+    return ready;
+  }
+
+  /* -- */
+
+  function program1()
+  {
+
+    console.log( 'program1:begin' );
+
+    let withExitHandler = process.argv.includes( 'withExitHandler:1' );
+    let withTools = process.argv.includes( 'withTools:1' );
+
+    if( withTools )
+    {
+      let _ = require( toolsPath );
+      _.include( 'wProcess' );
+      _.process._exitHandlerRepair();
+    }
+
+    if( withExitHandler )
+    process.once( 'exit', onExit );
+
+    setTimeout( () => { console.log( 'program1:end' ) }, context.t1 );
+
+    function onExit( exitCode )
+    {
+      console.log( 'exit:end' );
+      process.exit( exitCode );
+    }
+
+  }
+
+}
+
+endSignalsOnExitExitCode.description =
+`
+  - handler of the event "exit" should be executed on Unix
 `
 
 //
@@ -28156,6 +28312,8 @@ var Proto =
     endSignalsBasic,
     endSignalsOnExit,
     endSignalsOnExitExit,
+    endSignalsOnExitExitCode,
+
 
     terminate, /* qqq for Vova: review, remove duplicates, check timeouts */
     terminateSync,

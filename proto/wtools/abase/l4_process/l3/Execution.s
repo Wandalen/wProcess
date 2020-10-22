@@ -2795,10 +2795,10 @@ function signal_body( o )
   let isWindows = process.platform === 'win32';
   let ready = _.Consequence().take( null );
   let cons = [];
-  let interval = isWindows ? 150 : 25;
+  let interval = isWindows ? 250 : 25;
   let signal = o.signal;
   /*
-    xxx : hangs up on Windows with interval 25 if run in sync mode. see test routine killSync
+    xxx : hangs up on Windows with interval 150 if run in sync mode. see test routine killSync
   */
 
 /*
