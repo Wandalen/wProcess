@@ -16887,6 +16887,50 @@ function startNjsOptionInterpreterArgs( test )
       } )
     })
 
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode:${mode}, interpreterArgs = [ '--v8-options' ], maximumMemory : 1`;
+
+      let options =
+      {
+        execPath : programPath,
+        mode,
+        outputCollecting : 1,
+        interpreterArgs : [ '--v8-options' ],
+        maximumMemory : 1,
+        stdio : 'pipe'
+      }
+
+      return _.process.startNjs( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        if( mode === 'fork' )
+        {
+          test.is( _.strHas( op.output, 'Synopsis:' ) );
+          test.is( _.strHas( op.output, `The following syntax for options is accepted (both '-' and '--' are ok):` ) );
+          test.is( _.strHas( op.output, '-e        execute a string in V8' ) );
+          test.is( _.strHas( op.output, '--shell   run an interactive JavaScript shell' ) );
+          test.is( _.strHas( op.output, '--module  execute a file as a JavaScript module' ) );
+          test.is( _.strHas( op.output, 'Options:' ) );
+
+          test.identical( op.interpreterArgs, [ '--v8-options', '--expose-gc', '--stack-trace-limit=999', '--max_old_space_size=17179869184' ] );
+
+        }
+        else
+        {
+          test.identical( op.output, 'Log\n' );
+          test.identical( op.interpreterArgs, null );
+
+        }
+
+        return null;
+      } )
+    })
+
     return ready;
 
   }

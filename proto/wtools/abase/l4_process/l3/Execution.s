@@ -2284,6 +2284,10 @@ function startNjs_body( o )
   //   if( interpreterArgs )
   //   o.interpreterArgs = interpreterArgs;
   // }
+  // else
+  // {
+  //   execPath = _.strConcat([ 'node', interpreterArgs, execPath ]);
+  // }
   if( o.mode === 'fork' )
   {
     if( interpreterArgs )
@@ -2293,7 +2297,8 @@ function startNjs_body( o )
   }
   else
   {
-    execPath = _.strConcat([ 'node', interpreterArgs, execPath ]);
+    o.interpreterArgs = null;
+    execPath = _.strConcat([ 'node', execPath ]);
   }
 
   o.execPath = execPath;
