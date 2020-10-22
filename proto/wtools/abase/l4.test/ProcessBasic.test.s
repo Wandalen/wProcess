@@ -18098,7 +18098,7 @@ function startOptionStreamSizeLimitThrowing( test )
 
   a.ready.then( () =>
   {
-    test.case = `mode : 'fork', sync : 1, limit : 100`;
+    test.case = `mode : 'fork', deasync : 1, limit : 100`;
 
     let testAppPath = a.path.nativize( a.program( testApp ) );
 
@@ -18114,7 +18114,7 @@ function startOptionStreamSizeLimitThrowing( test )
     let returned = test.shouldThrowErrorSync( () => _.process.start( options ) )
 
     test.is( _.errIs( returned ) );
-    test.is( _.strHas( returned.message, `Option::streamSizeLimit is allowed in mode::spawn and mode::shell with sync::1` ) )
+    test.is( _.strHas( returned.message, `Option::streamSizeLimit is supported in mode::spawn and mode::shell with sync::1` ) )
 
     test.notIdentical( options.exitCode, 0 );
 
@@ -18218,7 +18218,7 @@ function startOptionStreamSizeLimitThrowing( test )
       let returned = test.shouldThrowErrorSync( () => _.process.start( options ) )
 
       test.is( _.errIs( returned ) );
-      test.is( _.strHas( returned.message, `Option::streamSizeLimit is allowed in mode::spawn and mode::shell with sync::1` ) )
+      test.is( _.strHas( returned.message, `Option::streamSizeLimit is supported in mode::spawn and mode::shell with sync::1` ) )
 
       test.notIdentical( options.exitCode, 0 );
 
@@ -18248,7 +18248,7 @@ function startOptionStreamSizeLimitThrowing( test )
       let returned = test.shouldThrowErrorSync( () => _.process.start( options ) )
 
       test.is( _.errIs( returned ) );
-      test.is( _.strHas( returned.message, `Option::streamSizeLimit is allowed in mode::spawn and mode::shell with sync::1` ) )
+      test.is( _.strHas( returned.message, `Option::streamSizeLimit is supported in mode::spawn and mode::shell with sync::1` ) )
 
       test.notIdentical( options.exitCode, 0 );
 

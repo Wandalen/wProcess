@@ -143,7 +143,7 @@ function startCommon_head( routine, args )
   )
 
   if( o.streamSizeLimit || o.streamSizeLimit === 0 )
-  _.assert( o.sync && ( o.mode === 'spawn' || o.mode === 'shell' ), 'Option::streamSizeLimit is allowed in mode::spawn and mode::shell with sync::1' )
+  _.assert( o.sync && ( o.mode === 'spawn' || o.mode === 'shell' ), 'Option::streamSizeLimit is supported in mode::spawn and mode::shell with sync::1' )
 
   return o;
 }
