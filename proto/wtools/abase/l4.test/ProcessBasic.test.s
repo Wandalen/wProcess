@@ -16803,6 +16803,7 @@ function startOptionOutputColoringStderr( test )
         outputColoringStderr : 0,
         outputColoring : 1,
         inputMirroring : 0,
+        outputColoringStdout : null,
         mode
       };
       let testAppPath = a.program({ routine : testApp, locals });
@@ -16840,6 +16841,7 @@ function startOptionOutputColoringStderr( test )
         outputColoringStderr : 1,
         outputColoring : 0,
         inputMirroring : 0,
+        outputColoringStdout : null,
         mode
       };
       let testAppPath = a.program({ routine : testApp, locals });
@@ -16877,6 +16879,7 @@ function startOptionOutputColoringStderr( test )
         outputColoringStderr : 1,
         outputColoring : 1,
         inputMirroring : 0,
+        outputColoringStdout : null,
         mode
       };
       let testAppPath = a.program({ routine : testApp, locals });
@@ -16914,6 +16917,7 @@ function startOptionOutputColoringStderr( test )
         outputColoringStderr : 1,
         inputMirroring : 1,
         outputColoring : 1,
+        outputColoringStdout : null,
         mode
       };
       let testAppPath = a.program({ routine : testApp, locals });
@@ -16938,6 +16942,83 @@ function startOptionOutputColoringStderr( test )
       })
     } )
 
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputColoringStderr : 1, outputColoringStdout : 0, inputMirroring : 0, outputColoring : null, normal output`;
+
+      let testAppPath2 = a.program( testApp2 );
+      let locals =
+      {
+        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
+        programPath : testAppPath2,
+        outputColoringStderr : 1,
+        outputColoringStdout : 0,
+        inputMirroring : 0,
+        outputColoring : null,
+        mode
+      };
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      let options =
+      {
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, 'Log\n' )
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+        return null
+      })
+    } )
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputColoringStderr : 1, outputColoringStdout : 0, inputMirroring : 0, outputColoring : 1, normal output`;
+
+      let testAppPath2 = a.program( testApp2 );
+      let locals =
+      {
+        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
+        programPath : testAppPath2,
+        outputColoringStderr : 1,
+        outputColoringStdout : 0,
+        inputMirroring : 0,
+        outputColoring : 1,
+        mode
+      };
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      let options =
+      {
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, 'Log\n' )
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+        return null
+      })
+    } )
+
+
     return ready;
 
   }
@@ -16958,6 +17039,7 @@ function startOptionOutputColoringStderr( test )
       mode,
       inputMirroring,
       outputColoringStderr,
+      outputColoringStdout,
       outputColoring
     }
 
@@ -16967,6 +17049,11 @@ function startOptionOutputColoringStderr( test )
   function testApp2Error()
   {
     console.error( 'Error output' );
+  }
+
+  function testApp2()
+  {
+    console.log( 'Log' );
   }
 }
 
@@ -16999,6 +17086,7 @@ function startOptionOutputColoringStdout( test )
         toolsPath : _.path.nativize( _.module.toolsPathGet() ),
         programPath : testAppPath2,
         outputColoringStdout : 0,
+        outputColoringStderr : null,
         inputMirroring : 0,
         outputColoring : 1,
         mode
@@ -17036,6 +17124,7 @@ function startOptionOutputColoringStdout( test )
         toolsPath : _.path.nativize( _.module.toolsPathGet() ),
         programPath : testAppPath2,
         outputColoringStdout : 1,
+        outputColoringStderr : null,
         inputMirroring : 0,
         outputColoring : 0,
         mode
@@ -17074,6 +17163,7 @@ function startOptionOutputColoringStdout( test )
         toolsPath : _.path.nativize( _.module.toolsPathGet() ),
         programPath : testAppPath2,
         outputColoringStdout : 1,
+        outputColoringStderr : null,
         inputMirroring : 0,
         outputColoring : 1,
         mode
@@ -17089,7 +17179,6 @@ function startOptionOutputColoringStdout( test )
       return _.process.start( options )
       .then( ( op ) =>
       {
-        
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.identical( op.output, `\u001b[35mLog\u001b[39;0m\n` )
@@ -17112,6 +17201,7 @@ function startOptionOutputColoringStdout( test )
         toolsPath : _.path.nativize( _.module.toolsPathGet() ),
         programPath : testAppPath2,
         outputColoringStdout : 1,
+        outputColoringStderr : null,
         inputMirroring : 1,
         outputColoring : 1,
         mode
@@ -17127,7 +17217,7 @@ function startOptionOutputColoringStdout( test )
       return _.process.start( options )
       .then( ( op ) =>
       {
-        
+
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         let expected = `\u001b[97m > \u001b[39;0m${ mode === 'fork' ? '' : 'node ' }${testAppPath2}\n\u001b[35mLog\u001b[39;0m\n`;
@@ -17138,6 +17228,85 @@ function startOptionOutputColoringStdout( test )
         return null
       })
     } )
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputColoringStdout : 1, outputColoringStderr : 0, inputMirroring : 0, outputColoring : null`;
+
+      let testAppPath2 = a.program( testApp2Error );
+      let locals =
+      {
+        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
+        programPath : testAppPath2,
+        outputColoringStdout : 1,
+        outputColoringStderr : 0,
+        inputMirroring : 0,
+        outputColoring : null,
+        mode
+      };
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      let options =
+      {
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, 'Error output\n' )
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+        return null
+      })
+    } )
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputColoringStdout : 1, outputColoringStderr : 0, inputMirroring : 0, outputColoring : 1`;
+
+      let testAppPath2 = a.program( testApp2Error );
+      let locals =
+      {
+        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
+        programPath : testAppPath2,
+        outputColoringStdout : 1,
+        outputColoringStderr : 0,
+        inputMirroring : 0,
+        outputColoring : 1,
+        mode
+      };
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      let options =
+      {
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, 'Error output\n' )
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+        return null
+      })
+    } )
+
 
     /* */
 
@@ -17161,6 +17330,7 @@ function startOptionOutputColoringStdout( test )
       mode,
       inputMirroring,
       outputColoringStdout,
+      outputColoringStderr,
       outputColoring
     }
 
@@ -17170,6 +17340,11 @@ function startOptionOutputColoringStdout( test )
   function testApp2()
   {
     console.log( 'Log' );
+  }
+
+  function testApp2Error()
+  {
+    console.error( 'Error output' );
   }
 
 }
