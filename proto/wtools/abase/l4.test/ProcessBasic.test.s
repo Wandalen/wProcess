@@ -15761,6 +15761,7 @@ function startNjsOptionInterpreterArgs( test )
   let context = this;
   let a = context.assetFor( test, false );
   let programPath = a.program( program1 );
+  let totalMem = require( 'os' ).totalmem();
 
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
@@ -15800,6 +15801,32 @@ function startNjsOptionInterpreterArgs( test )
 
     ready.then( () =>
     {
+      test.case = `mode:${mode}, interpreterArgs = []`;
+
+      let options =
+      {
+        execPath : programPath,
+        mode,
+        outputCollecting : 1,
+        interpreterArgs : [],
+        stdio : 'pipe'
+      }
+
+      return _.process.startNjs( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, 'Log\n' );
+
+        return null;
+      } )
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
       test.case = `mode:${mode}, interpreterArgs = '--version'`;
 
       let options =
@@ -15816,10 +15843,42 @@ function startNjsOptionInterpreterArgs( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        if( mode === 'fork' )
         test.identical( op.output, process.version + '\n' );
+        if( mode === 'fork' )
+        test.identical( op.interpreterArgs, [ '--version' ] )
         else
-        test.identical( op.output, 'Log\n' );
+        test.identical( op.args, [ '--version', programPath ] );
+
+        return null;
+      } )
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode:${mode}, interpreterArgs = '--version', maximumMemory : 1`;
+
+      let options =
+      {
+        execPath : programPath,
+        mode,
+        outputCollecting : 1,
+        interpreterArgs : '--version',
+        maximumMemory : 1,
+        stdio : 'pipe'
+      }
+
+      return _.process.startNjs( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, process.version + '\n' );
+        if( mode === 'fork' )
+        test.identical( op.interpreterArgs, [ '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] )
+        else
+        test.identical( op.args, [ '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}`, programPath ] );
 
         return null;
       } )
@@ -15845,19 +15904,16 @@ function startNjsOptionInterpreterArgs( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
+        test.is( _.strHas( op.output, 'Synopsis:' ) );
+        test.is( _.strHas( op.output, `The following syntax for options is accepted (both '-' and '--' are ok):` ) );
+        test.is( _.strHas( op.output, '-e        execute a string in V8' ) );
+        test.is( _.strHas( op.output, '--shell   run an interactive JavaScript shell' ) );
+        test.is( _.strHas( op.output, '--module  execute a file as a JavaScript module' ) );
+        test.is( _.strHas( op.output, 'Options:' ) );
         if( mode === 'fork' )
-        {
-          test.is( _.strHas( op.output, 'Synopsis:' ) );
-          test.is( _.strHas( op.output, `The following syntax for options is accepted (both '-' and '--' are ok):` ) );
-          test.is( _.strHas( op.output, '-e        execute a string in V8' ) );
-          test.is( _.strHas( op.output, '--shell   run an interactive JavaScript shell' ) );
-          test.is( _.strHas( op.output, '--module  execute a file as a JavaScript module' ) );
-          test.is( _.strHas( op.output, 'Options:' ) );
-        }
+        test.identical( op.interpreterArgs, [ '--v8-options' ] )
         else
-        {
-          test.identical( op.output, 'Log\n' );
-        }
+        test.identical( op.args, [ '--v8-options', programPath ] );
 
         return null;
       } )
@@ -15884,28 +15940,59 @@ function startNjsOptionInterpreterArgs( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
+        test.is( _.strHas( op.output, 'Synopsis:' ) );
+        test.is( _.strHas( op.output, `The following syntax for options is accepted (both '-' and '--' are ok):` ) );
+        test.is( _.strHas( op.output, '-e        execute a string in V8' ) );
+        test.is( _.strHas( op.output, '--shell   run an interactive JavaScript shell' ) );
+        test.is( _.strHas( op.output, '--module  execute a file as a JavaScript module' ) );
+        test.is( _.strHas( op.output, 'Options:' ) );
+        if( mode === 'fork' )
+        test.identical( op.interpreterArgs, [ '--v8-options', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] )
+        else
+        test.identical( op.args, [ '--v8-options', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}`, programPath ] );
+
+        return null;
+      } )
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode:${mode}, interpreterArgs = '--version', maximumMemory : 1, args : [ 'arg1', 'arg2' ]`;
+
+      let options =
+      {
+        execPath : programPath,
+        mode,
+        args : [ 'arg1', 'arg2' ],
+        outputCollecting : 1,
+        interpreterArgs : '--version',
+        maximumMemory : 1,
+        stdio : 'pipe'
+      }
+
+      return _.process.startNjs( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, process.version + '\n' );
         if( mode === 'fork' )
         {
-          test.is( _.strHas( op.output, 'Synopsis:' ) );
-          test.is( _.strHas( op.output, `The following syntax for options is accepted (both '-' and '--' are ok):` ) );
-          test.is( _.strHas( op.output, '-e        execute a string in V8' ) );
-          test.is( _.strHas( op.output, '--shell   run an interactive JavaScript shell' ) );
-          test.is( _.strHas( op.output, '--module  execute a file as a JavaScript module' ) );
-          test.is( _.strHas( op.output, 'Options:' ) );
-
-          test.identical( op.interpreterArgs, [ '--v8-options', '--expose-gc', '--stack-trace-limit=999', '--max_old_space_size=17179869184' ] );
-
+          test.identical( op.interpreterArgs, [ '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] )
+          test.identical( op.args, [ 'arg1', 'arg2' ] );
         }
         else
         {
-          test.identical( op.output, 'Log\n' );
-          test.identical( op.interpreterArgs, null );
-
+          test.identical( op.args, [ '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}`, programPath, 'arg1', 'arg2' ] );
         }
 
         return null;
       } )
     })
+
+    /* */
 
     return ready;
 
