@@ -1306,14 +1306,15 @@ function realMainFile( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.path.nativize( a.program( testApp ) );
+  let testAppPath = a.program( testApp );
+  let testAppPathNative = a.path.nativize( testAppPath );
 
   a.ready.then( () =>
   {
     test.case = 'compare with `testAppPath`'
     var o =
     {
-      execPath :  'node ' + testAppPath,
+      execPath :  'node ' + testAppPathNative,
       outputCollecting : 1,
     }
 

@@ -350,8 +350,6 @@ function startMinimal_body( o )
   function form3()
   {
 
-    // xxx yyy
-    // if( !o.dry )
     if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
     {
       o.procedure = _.Procedure({ _stack : o.stack });
@@ -376,7 +374,7 @@ function startMinimal_body( o )
 
     _.assert
     (
-      /*o.args === null || */_.arrayIs( o.args ) || _.strIs( o.args )
+      _.arrayIs( o.args ) || _.strIs( o.args )
       , `If defined option::arg should be either [ string, array ], but it is ${_.strType( o.args )}`
     );
 
@@ -460,41 +458,28 @@ function startMinimal_body( o )
     {
       try
       {
-
         o.ready.deasync();
         o.ready.give( 1 );
-        // if( readyCallback )
-        // o.ready.finally( readyCallback );
         if( o.when.delay )
         _.time.sleep( o.when.delay );
-
         run2();
-
       }
       catch( err )
       {
         if( !o.ended )
-        end2( err/*, o.conTerminate */ );
+        end2( err );
         throw err;
       }
       _.assert( o.state === 'terminated' || o.state === 'disconnected' );
-      end2( undefined/*, o.conTerminate */ );
+      end2( undefined );
 
       return end1();
-      // return o;
     }
     else
     {
       if( o.when.delay )
       o.ready.delay( o.when.delay );
-
       o.ready.thenGive( run2 );
-
-      // if( readyCallback )
-      // debugger;
-      // if( readyCallback )
-      // o.ready.finally( readyCallback );
-
       return end1();
     }
 
@@ -526,7 +511,7 @@ function startMinimal_body( o )
         /* qqq for Yevhen : make sure option dry is covered good enough */
         _.assert( o.state === 'started' );
         o.state = 'terminated';
-        end2( undefined/*, o.conTerminate */ );
+        end2( undefined );
       }
     }
     catch( err )
@@ -562,8 +547,6 @@ function startMinimal_body( o )
 
     /* procedure */
 
-    // if( !o.dry ) /* xxx yyy */
-    // if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
     if( o.procedure )
     {
       if( o.process )
@@ -683,9 +666,8 @@ function startMinimal_body( o )
 
   /* */
 
-  function end1() /* xxx : make similar change in startMinimal() */
+  function end1()
   {
-    // yyy xxx2
     if( readyCallback )
     o.ready.finally( readyCallback );
     if( o.deasync )
@@ -695,20 +677,9 @@ function startMinimal_body( o )
     return o.ready;
   }
 
-  // function end1()
-  // {
-  //   if( o.deasync )
-  //   {
-  //     o.ready.deasync();
-  //     if( o.sync )
-  //     return o.ready.sync();
-  //   }
-  //   return o.ready;
-  // }
-
   /* */
 
-  function end2( err /*, consequence*/ ) /* xxx : remove 2-nd argument */
+  function end2( err )
   {
 
     if( Config.debug )
@@ -764,7 +735,6 @@ function startMinimal_body( o )
     /* `initial`, `starting`, `started`, `terminating`, `terminated`, `disconnected` */
     if( o.error )
     {
-      /* yyy xxx : give error to all not-signaled consequences */
 
       if( o.state === 'initial' || o.state === 'starting' )
       o.conStart.error( o.error );
@@ -782,7 +752,6 @@ function startMinimal_body( o )
     }
     else
     {
-      /* xxx : give attended error to all not-signaled consequences? */
       consequence.take( o );
 
       if( o.conTerminate === consequence )
@@ -846,19 +815,11 @@ function startMinimal_body( o )
       if( o.briefExitCode )
       o.error = _.errBrief( o.error );
 
-      if( o.sync && !o.deasync )
-      {
-        end2( o.error/*, o.conTerminate */ );
-        // throw o.error;
-      }
-      else
-      {
-        end2( o.error/*, o.conTerminate */ );
-      }
+      end2( o.error );
     }
     else if( !o.sync || o.deasync )
     {
-      end2( undefined/*, o.conTerminate */ );
+      end2( undefined );
     }
 
   }
@@ -897,15 +858,6 @@ function startMinimal_body( o )
     o.error = err;
     if( o.verbosity )
     log( _.errOnce( o.error ), 1 );
-
-    // if( o.sync && !o.deasync )
-    // {
-    //   throw o.error; /* xxx2 : remove branching? */
-    // }
-    // else
-    // {
-    //   end2( o.error/*, o.conTerminate */ );
-    // }
 
     end2( o.error );
   }
@@ -971,16 +923,10 @@ function startMinimal_body( o )
 
     this.process.unref();
 
-    // if( this.procedure )
-    // if( this.procedure.isAlive() )
-    // this.procedure.end();
-    // else
-    // this.procedure.finit();
-
     if( !this.ended )
     {
       this.state = 'disconnected';
-      end2( undefined /*, o.conDisconnect*/ );
+      end2( undefined  );
     }
 
     return true;
@@ -997,7 +943,7 @@ function startMinimal_body( o )
     {
       if( o.state === 'terminated' || o.error )
       return;
-      o.exitReason = 'time'; /* qqq for Yevhen : cover termination on time out */
+      o.exitReason = 'time'; /* qqq for Yevhen : cover termination on time out. ask how to */
       _.process.terminate({ pnd : o.process, withChildren : 1 });
     });
 
@@ -1668,11 +1614,9 @@ function start_body( o )
     form1();
     form2();
 
-    // yyy : swich on
     if( o.stdio[ 1 ] !== 'ignore' || o.stdio[ 2 ] !== 'ignore' )
     formStreams();
 
-    // if( !o.dry ) /* xxx : remove dry? */
     if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
     {
       o.procedure = _.procedure.begin({ _object : o, _stack : o.stack });
@@ -2840,15 +2784,12 @@ function signal_body( o )
   let isWindows = process.platform === 'win32';
   let ready = _.Consequence().take( null );
   let cons = [];
-  let interval = isWindows ? 150 : 25;
+  let interval = isWindows ? 250 : 25;
   let signal = o.signal;
-  /*
-    xxx : hangs up on Windows with interval 25 if run in sync mode. see test routine killSync
-  */
 
-/*
-  console.log( 'killing', o.pid );
-*/
+  /*
+    zzz : hangs up on Windows with interval below 150 if run in sync mode. see test routine killSync
+  */
 
   ready.then( () =>
   {
@@ -3171,7 +3112,6 @@ children.defaults =
   process : null,
   pid : null,
   format : 'list',
-  // asList : 0
 }
 
 // --
