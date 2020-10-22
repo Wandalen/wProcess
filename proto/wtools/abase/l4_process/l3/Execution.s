@@ -463,8 +463,8 @@ function startMinimal_body( o )
 
         o.ready.deasync();
         o.ready.give( 1 );
-        if( readyCallback )
-        o.ready.finally( readyCallback );
+        // if( readyCallback )
+        // o.ready.finally( readyCallback );
         if( o.when.delay )
         _.time.sleep( o.when.delay );
 
@@ -479,7 +479,9 @@ function startMinimal_body( o )
       }
       _.assert( o.state === 'terminated' || o.state === 'disconnected' );
       end2( undefined/*, o.conTerminate */ );
-      return o;
+
+      return end1();
+      // return o;
     }
     else
     {
@@ -488,10 +490,10 @@ function startMinimal_body( o )
 
       o.ready.thenGive( run2 );
 
-      if( readyCallback )
-      debugger;
-      if( readyCallback )
-      o.ready.finally( readyCallback );
+      // if( readyCallback )
+      // debugger;
+      // if( readyCallback )
+      // o.ready.finally( readyCallback );
 
       return end1();
     }
@@ -681,16 +683,28 @@ function startMinimal_body( o )
 
   /* */
 
-  function end1()
+  function end1() /* xxx : make similar change in startMinimal() */
   {
+    // yyy xxx2
+    if( readyCallback )
+    o.ready.finally( readyCallback );
     if( o.deasync )
-    {
-      o.ready.deasync();
-      if( o.sync )
-      return o.ready.sync();
-    }
+    o.ready.deasync();
+    if( o.sync )
+    return o.ready.sync();
     return o.ready;
   }
+
+  // function end1()
+  // {
+  //   if( o.deasync )
+  //   {
+  //     o.ready.deasync();
+  //     if( o.sync )
+  //     return o.ready.sync();
+  //   }
+  //   return o.ready;
+  // }
 
   /* */
 
@@ -884,14 +898,16 @@ function startMinimal_body( o )
     if( o.verbosity )
     log( _.errOnce( o.error ), 1 );
 
-    if( o.sync && !o.deasync )
-    {
-      throw o.error; /* xxx2 : remove branching? */
-    }
-    else
-    {
-      end2( o.error/*, o.conTerminate */ );
-    }
+    // if( o.sync && !o.deasync )
+    // {
+    //   throw o.error; /* xxx2 : remove branching? */
+    // }
+    // else
+    // {
+    //   end2( o.error/*, o.conTerminate */ );
+    // }
+
+    end2( o.error );
   }
 
   /* */
@@ -1281,8 +1297,10 @@ function startMinimal_body( o )
   function handleStreamErr( data )
   {
 
-    if( _.bufferAnyIs( data ) )
-    data = _.bufferToStr( data ); /* qqq for Yevhen : use more optimal condition and routine to convert buffer here and in other places */
+    // if( _.bufferAnyIs( data ) )
+    // data = _.bufferToStr( data ); /* qqq for Yevhen : use more optimal condition and routine to convert buffer here and in other places | aaa : Done .*/
+    if( _.bufferNodeIs( data ) )
+    data = data.toString( 'utf8' );
     if( o.outputGraying )
     data = StripAnsi( data );
 
@@ -1310,8 +1328,10 @@ function startMinimal_body( o )
   function handleStreamOut( data )
   {
 
-    if( _.bufferAnyIs( data ) )
-    data = _.bufferToStr( data );
+    // if( _.bufferAnyIs( data ) )
+    // data = _.bufferToStr( data );
+    if( _.bufferNodeIs( data ) )
+    data = data.toString( 'utf8' );
     if( o.outputGraying )
     data = StripAnsi( data );
 
@@ -1380,6 +1400,7 @@ startMinimal_body.defaults =
   logger : null,
   procedure : null,
   stack : null,
+  sessionId : 0,
 
   ready : null,
   conStart : null,
@@ -1547,6 +1568,7 @@ function start_body( o )
 
   _.assert( arguments.length === 1, 'Expects single argument' );
 
+  let processPipeCounter = 0;
   let readyCallback; /* xxx : cover and implement ready callback for multiple */
 
   form0();
@@ -1619,7 +1641,7 @@ function start_body( o )
     _.assert( _.boolLike( o.outputAdditive ) );
     o.currentPath = o.currentPath || _.path.current();
 
-    o.runs = [];
+    o.runs = []; /* xxx : rename to sessions */
     // o.disconnect = disconnect; /* xxx */
     o.state = 'initial'; /* `initial`, `starting`, `started`, `terminating`, `terminated`, `disconnected` */
     o.exitReason = null;
@@ -1652,7 +1674,9 @@ function start_body( o )
 
     // if( !o.dry ) /* xxx : remove dry? */
     if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
-    o.procedure = _.procedure.begin({ _object : o, _stack : o.stack });
+    {
+      o.procedure = _.procedure.begin({ _object : o, _stack : o.stack });
+    }
     else if( o.procedure )
     {
       /* qqq xxx : cover */
@@ -1683,11 +1707,13 @@ function start_body( o )
     let conTerminate = [];
     let execPath = _.arrayAs( o.execPath );
     let currentPath = _.arrayAs( o.currentPath );
+    let sessionId = 0;
 
     for( let p = 0 ; p < execPath.length ; p++ )
     for( let c = 0 ; c < currentPath.length ; c++ )
     {
       let currentReady = new _.Consequence();
+      sessionId += 1;
       let o2 = _.mapExtend( null, o );
       o2.conStart = null;
       o2.conTerminate = null;
@@ -1696,6 +1722,7 @@ function start_body( o )
       o2.args = _.arrayIs( o.args ) ? o.args.slice() : o.args;
       o2.currentPath = currentPath[ c ];
       o2.ready = currentReady;
+      o2.sessionId = sessionId;
       delete o2.runs;
       delete o2.output;
       delete o2.exitReason;
@@ -1720,6 +1747,7 @@ function start_body( o )
 
     o.runs.forEach( ( o2, i ) =>
     {
+      let err2;
 
       if( o.concurrent ) /* xxx : coverage? */
       {
@@ -1737,13 +1765,12 @@ function start_body( o )
       try
       {
         _.assertMapHasAll( o2, _.process.startMinimal.defaults );
-        // debugger;
         _.process.startMinimal.body.call( _.process, o2 );
-        // debugger;
       }
       catch( err )
       {
-        // debugger;
+        err2 = err;
+        // o2.error = o2.error || err; // yyy
         o2.ready.error( err );
       }
 
@@ -1763,6 +1790,15 @@ function start_body( o )
         serialEnd();
         throw err;
       });
+
+      // yyy xxx
+      // if( err2 )
+      // if( !o.concurrent )
+      // {
+      //   if( o.state !== 'terminated' )
+      //   serialEnd();
+      //   o2.ready.error( err );
+      // }
 
     });
 
@@ -1791,12 +1827,11 @@ function start_body( o )
 
   function end1() /* xxx : make similar change in startMinimal() */
   {
+    debugger;
     if( readyCallback )
     o.ready.finally( readyCallback );
-    // console.log( 'end1:a' );
     if( o.deasync )
     o.ready.deasync();
-    // console.log( 'end1:b' );
     if( o.sync )
     return o.ready.sync();
     return o.ready;
@@ -1858,6 +1893,14 @@ function start_body( o )
       }
     }
 
+    if( o.outputCollecting )
+    if( o.sync && !o.deasync )
+    for( let a = 0 ; a < o.runs.length ; a++ )
+    {
+      let o2 = o.runs[ a ];
+      o.output += o2.output;
+    }
+
     if( !o.exitReason )
     o.exitReason = o.error ? 'error' : 'normal';
 
@@ -1872,9 +1915,14 @@ function start_body( o )
 
   /* */
 
+  /*
+    forward error to the the next process descriptor
+  */
+
   function serialEnd()
   {
-    // debugger;
+    // if( o.error )
+    // console.log( `serialEnd ${_.errIsAttended( o.error )}` );
     o.runs.forEach( ( o2 ) =>
     {
       if( o2.ended )
@@ -1904,6 +1952,7 @@ function start_body( o )
     Stream = require( 'stream' );
 
     if( o.stdio[ 1 ] !== 'ignore' )
+    if( !o.sync || o.deasync )
     {
       o.streamOut = new Stream.PassThrough();
       _.assert( o.streamOut._pipes === undefined );
@@ -1911,6 +1960,7 @@ function start_body( o )
     }
 
     if( o.stdio[ 2 ] !== 'ignore' )
+    if( !o.sync || o.deasync )
     {
       o.streamErr = new Stream.PassThrough();
       _.assert( o.streamErr._pipes === undefined );
@@ -1936,9 +1986,9 @@ function start_body( o )
   function processPipe( o2 )
   {
 
-    // if( 0 ) // xxx yyy
     o2.conStart.tap( ( err, op2 ) =>
     {
+      processPipeCounter += 1;
       if( err )
       return;
       if( o2.process.stdout )
@@ -1975,8 +2025,13 @@ function start_body( o )
     {
       _.arrayRemoveOnceStrictly( dst._pipes, src );
       /* xxx : add checking of statqe here. should be not starting */
-      if( dst._pipes.length === 0 && o.concurrent )
+      // if( dst._pipes.length === 0 && o.concurrent )
+      if( dst._pipes.length === 0 )
+      // if( o.concurrent )
+      if( processPipeCounter === o.runs.length )
       {
+        // console.log( 'processPipeCounter', processPipeCounter );
+        // debugger;
         dst.end();
       }
     });
@@ -1987,8 +2042,10 @@ function start_body( o )
 
   function handleStreamOut( data )
   {
-    if( _.bufferAnyIs( data ) )
-    data = _.bufferToStr( data );
+    // if( _.bufferAnyIs( data ) )
+    // data = _.bufferToStr( data );
+    if( _.bufferNodeIs( data ) )
+    data = data.toString( 'utf8' );
     if( o.outputGraying )
     data = StripAnsi( data );
     if( o.outputCollecting )
@@ -2002,7 +2059,7 @@ function start_body( o )
 start_body.defaults =
 {
 
-  ... startMinimal.defaults,
+  ... _.mapBut( startMinimal.defaults, [ 'sessionId' ] ),
 
   concurrent : 0,
 
