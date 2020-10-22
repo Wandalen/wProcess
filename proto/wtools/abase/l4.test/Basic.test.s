@@ -44,82 +44,84 @@ function suiteEnd()
 
 function escapeArg( test )
 {
+  let isWin = process.platform === 'win32';
+
   var src = 'a';
-  var expected = 'a'
+  var expected = isWin ? `^"a^"`: 'a'
   var got = _.process.escapeArg( src )
   test.identical( got, expected );
 
   var src = 'a b';
-  var expected = 'a\\ b'
+  var expected = isWin ? '^"a^ b^"' : 'a\\ b'
   var got = _.process.escapeArg( src )
   test.identical( got, expected );
 
   var src = 'a b';
-  var expected = 'a\\ b'
+  var expected = isWin ?  '^"a^ b^"' : 'a\\ b'
   var got = _.process.escapeArg( src )
   test.identical( got, expected );
 
   var src = '/a/b/';
-  var expected = '\\/a\\/b\\/'
+  var expected = isWin ? '^"/a/b/^"' : '\\/a\\/b\\/'
   var got = _.process.escapeArg( src )
   test.identical( got, expected );
 
   var src = '/a/b c/';
-  var expected = '\\/a\\/b\\ c\\/'
+  var expected = isWin ? '^"/a/b^ c/^"' : '\\/a\\/b\\ c\\/'
   var got = _.process.escapeArg( src )
   test.identical( got, expected );
 
   var src = 'A:\\b\\';
-  var expected = 'A\\:\\\\b\\\\'
+  var expected = isWin ? '^"A:\\b\\^"' : 'A\\:\\\\b\\\\'
   var got = _.process.escapeArg( src )
   test.identical( got, expected );
 
   var src = 'A:\\b c\\';
-  var expected = 'A\\:\\\\b\\ c\\\\'
+  var expected = isWin ? '^"A:\\b^ c\\^"' : 'A\\:\\\\b\\ c\\\\'
   var got = _.process.escapeArg( src )
   test.identical( got, expected );
 
   var src = '"a"';
-  var expected = '\\"a\\"'
+  var expected = isWin ?  '^"\\^"a\\^"^"' : '\\"a\\"'
   var got = _.process.escapeArg( src )
   test.identical( got, expected );
 
   var src = '\\"a\\"';
-  var expected = '\\\\\\"a\\\\\\"'
+  var expected = isWin ?  '^"\\\\^"a\\\\^"^"' : '\\\\\\"a\\\\\\"'
   var got = _.process.escapeArg( src )
   test.identical( got, expected );
 
   var src = '"/a/b/"';
-  var expected = '\\"\\/a\\/b\\/\\"'
+  var expected = isWin ? '^"\\\\^"a\\\\^"^"' : '\\"\\/a\\/b\\/\\"'
   var got = _.process.escapeArg( src )
 
   var src = '"/a/b c/"';
-  var expected = '\\"\\/a\\/b\\ c\\/\\"'
+  var expected = isWin ? '^"\\^"/a/b^ c/\\^"^"' : '\\"\\/a\\/b\\ c\\/\\"'
   var got = _.process.escapeArg( src )
   test.identical( got, expected );
 
   var src = 'option : value';
-  var expected = 'option\\ \\:\\ value'
+  var expected = isWin ? '^"option^ :^ value^"' : 'option\\ \\:\\ value'
   var got = _.process.escapeArg( src )
   test.identical( got, expected );
 
   var src = 'option : 123';
-  var expected = 'option\\ \\:\\ 123'
+  var expected = isWin ? '^"option^ :^ 123^"' : 'option\\ \\:\\ 123'
   var got = _.process.escapeArg( src )
   test.identical( got, expected );
 
   var src = '**';
-  var expected = '\\*\\*'
+  var expected = isWin ?  '^"^*^*^"' : '\\*\\*'
   var got = _.process.escapeArg( src )
   test.identical( got, expected );
 
   var src = '"**"';
-  var expected = '\\"\\*\\*\\"'
+  var expected = isWin ? '^"\\^"^*^*\\^"^"' : '\\"\\*\\*\\"'
   var got = _.process.escapeArg( src )
   test.identical( got, expected );
 
   var src = '&&';
-  var expected = '\\&\\&'
+  var expected = isWin ?  '^"^&^&^"' : '\\&\\&'
   var got = _.process.escapeArg( src )
   test.identical( got, expected );
 }
