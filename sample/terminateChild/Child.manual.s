@@ -1,9 +1,9 @@
 
 console.log( 'Child process start' );
 
-process.on( 'SIGINT', () =>
+process.on( 'SIGTERM', () =>
 {
-  console.log( 'Child process received SIGINT' );
+  console.log( 'Child process received SIGTERM' );
   process.exit( 0 );
 })
 
