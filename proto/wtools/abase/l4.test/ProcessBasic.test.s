@@ -13525,12 +13525,12 @@ function startOnIsNotConsequence( test )
   let track;
   let a = context.assetFor( test, false );
   let programPath = a.path.nativize( a.program( program1 ) );
-  let modes = [ 'shell' ];
+  let modes = [ 'fork', 'spawn', 'shell' ];
   // let modes = [ 'spawn' ];
-  // modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => run( 1, 0, mode ) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => run( 1, 1, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 0, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 1, mode ) ) );
   return a.ready;
 
   /* - */
@@ -23179,6 +23179,144 @@ endSignalsOnExitExit.description =
 
 //
 
+function endSignalsOnExitExitCode( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let programPath = a.program( program1 );
+  let o3 =
+  {
+    outputPiping : 1,
+    outputCollecting : 1,
+    applyingExitCode : 0,
+    throwingExitCode : 0,
+    stdio : 'pipe',
+  }
+
+  let modes = [ 'fork', 'spawn' ];
+  // modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGQUIT', 128 + 3 ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGINT', 128 + 2 ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGTERM', 128 + 15 ) ) );
+  return a.ready;
+
+  /* --- */
+
+  function signalTerminating( mode, signal, expectedExitCode )
+  {
+    let ready = _.Consequence().take( null );
+
+    /* - */
+
+    ready
+
+    /* - */
+
+    .then( function( arg )
+    {
+      test.case = `mode:${mode}, withExitHandler:1, withTools:1, ${signal}`;
+
+      var time1 = _.time.now();
+      var o2 =
+      {
+        execPath : mode === `fork` ? `${programPath}` : `node ${programPath}`,
+        args : [ 'withExitHandler:1', 'withTools:1' ],
+        mode,
+      }
+
+      var options = _.mapSupplement( null, o2, o3 );
+
+      var returned = _.process.start( options );
+      _.time.out( context.t1, () =>
+      {
+        test.identical( options.process.killed, false );
+        options.process.kill( signal );
+        return null;
+      })
+      returned.finally( function()
+      {
+        var exp1 =
+`program1:begin
+${signal}
+exit:end
+`
+        var exp2 =
+`program1:begin
+`
+        /*
+        Windows doesn't support signals handling, but will exit with signal if process was killed using pnd, exit event will not be emiited
+        On Unix signal will be handled and process will exit with code passed to exit event handler
+        */
+
+        if( process.platform === 'win32' )
+        {
+          test.identical( options.output, exp2 );
+          test.identical( options.exitCode, null );
+          test.identical( options.exitSignal, signal );
+          test.identical( options.exitReason, 'signal' );
+        }
+        else
+        {
+          test.identical( options.output, exp1 );
+          test.identical( options.exitReason, 'normal' );
+          test.identical( options.exitCode, expectedExitCode );
+          test.identical( options.exitSignal, null );
+        }
+
+        test.identical( options.ended, true );
+        test.identical( options.state, 'terminated' );
+        test.identical( options.error, null );
+        test.identical( options.process.killed, true );
+        var dtime = _.time.now() - time1;
+        return null;
+      })
+
+      return returned;
+    })
+
+    /* - */
+
+    return ready;
+  }
+
+  /* -- */
+
+  function program1()
+  {
+
+    console.log( 'program1:begin' );
+
+    let withExitHandler = process.argv.includes( 'withExitHandler:1' );
+    let withTools = process.argv.includes( 'withTools:1' );
+
+    if( withTools )
+    {
+      let _ = require( toolsPath );
+      _.include( 'wProcess' );
+      _.process._exitHandlerRepair();
+    }
+
+    if( withExitHandler )
+    process.once( 'exit', onExit );
+
+    setTimeout( () => { console.log( 'program1:end' ) }, context.t1 );
+
+    function onExit( exitCode )
+    {
+      console.log( 'exit:end' );
+      process.exit( exitCode );
+    }
+
+  }
+
+}
+
+endSignalsOnExitExitCode.description =
+`
+  - handler of the event "exit" should be executed on Unix
+`
+
+//
+
 /* qqq for Vova : describe test cases. describe test. this and related */
 function terminate( test )
 {
@@ -28173,6 +28311,8 @@ var Proto =
     endSignalsBasic,
     endSignalsOnExit,
     endSignalsOnExitExit,
+    endSignalsOnExitExitCode,
+
 
     terminate, /* qqq for Vova: review, remove duplicates, check timeouts */
     terminateSync,
