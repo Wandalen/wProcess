@@ -14213,7 +14213,6 @@ function startConcurrentConsequencesMultiple( test )
     outputCollecting : 1,
   }
 
-  // xxx
   // let consequences = [ 'null' ];
   // let modes = [ 'spawn' ];
 
@@ -14919,52 +14918,6 @@ ${options.runs[ 1 ].procedure.id}.end
           ]
           test.identical( track, exp );
         }
-
-       // xxx
-       // at /3
-       //  - got :
-       //    [
-       //      '5030.conStart',
-       //      '5032.conStart',
-       //      '5033.conStart',
-       //      '5033.conTerminate.err',
-       //      '5033.conDisconnect.err',
-       //      '5033.ready.err',
-       //      '5032.conTerminate',
-       //      '5032.conDisconnect.dont',
-       //      '5032.ready',
-       //      '5030.conTerminate.err',
-       //      '5030.ready.err'
-       //    ]
-       //  - expected :
-       //    [
-       //      '5030.conStart',
-       //      '5032.conStart',
-       //      '5033.conStart',
-       //      '5032.conTerminate',
-       //      '5032.conDisconnect.dont',
-       //      '5032.ready',
-       //      '5033.conTerminate.err',
-       //      '5033.conDisconnect.err',
-       //      '5033.ready.err',
-       //      '5030.conTerminate.err',
-       //      '5030.ready.err'
-       //    ]
-       //  - difference :
-       //    [
-       //      '5030.conStart',
-       //      '5032.conStart',
-       //      '5033.conStart',
-       //      '503*
-       //
-       //  /pro/builder/proto/wtools/abase/l4.test/ProcessBasic.test.s:14895:14
-       //    14891 :           `${options.runs[ 1 ].procedure.id}.conTerminate.err`,
-       //    14892 :           `${options.runs[ 1 ].procedure.id}.conDisconnect.err`,
-       //    14893 :           `${options.runs[ 1 ].procedure.id}.ready.err`,
-       //    14894 :         ]
-       //  * 14895 :         test.identical( track, exp );
-       //
-       //  Test check ( TestSuite::Tools.l4.ProcessBasic / TestRoutine::startConcurrentConsequencesMultiple / consequence:routine > sync:0 deasync:0 mode:spawn concurrent:1 throwingExitCode:1 arg err # 2819 ) ... failed
 
         var exp =
         [
