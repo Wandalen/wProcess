@@ -1233,7 +1233,8 @@ function startMinimal_body( o )
     if( o.timeOut && o.sync )
     o2.timeout = o.timeOut;
     o2.windowsHide = !!o.hiding;
-    o2.maxBuffer = o.streamSizeLimit ? o.streamSizeLimit : 1024 * 1024;
+    if( o.streamSizeLimit )
+    o2.maxBuffer = o.streamSizeLimit;
     return o2;
   }
 
@@ -1252,7 +1253,6 @@ function startMinimal_body( o )
     if( o.currentPath )
     o2.cwd = _.path.nativize( o.currentPath );
 
-    o2.maxBuffer = o.streamSizeLimit ? o.streamSizeLimit : 1024 * 1024;
     return o2;
   }
 
