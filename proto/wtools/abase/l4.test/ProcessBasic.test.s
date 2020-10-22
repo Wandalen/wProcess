@@ -14214,7 +14214,6 @@ function startConcurrentConsequencesMultiple( test )
     outputCollecting : 1,
   }
 
-  // xxx yyy
   // let consequences = [ 'null' ];
   // let modes = [ 'spawn' ];
 
@@ -14581,238 +14580,358 @@ ${options.runs[ 1 ].procedure.id}.end
 
       return options.ready;
     })
-// xxx
 
     /* */
 
-//     ready.then( function( arg )
-//     {
-//       test.case = `sync:${tops.sync} deasync:${tops.deasync} mode:${tops.mode} concurrent:1 arg arg`;
-//
-//       if( tops.sync && !tops.deasync )
-//       return null;
-//
-//       clear();
-//       var time1 = _.time.now();
-//       var execPath = tops.mode === `fork` ? `${programPath}` : `node ${programPath}`;
-//       var o2 =
-//       {
-//         execPath : [ execPath, execPath ],
-//         args : ( op ) => [ `id:${op.procedure.id}`, `sessionId:${op.sessionId}`, `concurrent:1` ],
-//         conStart : conMake( tops, 'conStart' ),
-//         conDisconnect : conMake( tops, 'conDisconnect' ),
-//         conTerminate : conMake( tops, 'conTerminate' ),
-//         ready : conMake( tops, 'ready' ),
-//         concurrent : 1,
-//         sync : tops.sync,
-//         deasync : tops.deasync,
-//         mode : tops.mode,
-//       }
-//
-//       var options = _.mapSupplement( null, o2, o3 );
-//       var returned = _.process.start( options );
-//
-//       processTrack( options );
-//
-//       options.conStart.tap( ( err, op ) =>
-//       {
-//         op.runs.forEach( ( op2 ) =>
-//         {
-//           processTrack( op2 );
-//         });
-//       });
-//
-//       options.ready.tap( function( err, op )
-//       {
-//         var exp =
-// `
-// ${options.runs[ 0 ].procedure.id}.begin
-// ${options.runs[ 0 ].procedure.id}.end
-// ${options.runs[ 1 ].procedure.id}.begin
-// ${options.runs[ 1 ].procedure.id}.end
-// `
-//
-//         test.equivalent( options.output, exp );
-//         var exp =
-//         [
-//           `${options.procedure.id}.conStart`,
-//           `${options.runs[ 0 ].procedure.id}.conStart`,
-//           `${options.runs[ 1 ].procedure.id}.conStart`,
-//           `${options.runs[ 0 ].procedure.id}.conTerminate`,
-//           `${options.runs[ 0 ].procedure.id}.conDisconnect.dont`,
-//           `${options.runs[ 0 ].procedure.id}.ready`,
-//           `${options.runs[ 1 ].procedure.id}.conTerminate`,
-//           `${options.runs[ 1 ].procedure.id}.conDisconnect.dont`,
-//           `${options.runs[ 1 ].procedure.id}.ready`,
-//           `${options.procedure.id}.conTerminate`,
-//           `${options.procedure.id}.ready`,
-//         ]
-//         if( options.deasync || options.sync )
-//         exp =
-//         [
-//           `${options.procedure.id}.conStart`,
-//           `${options.procedure.id}.conTerminate`,
-//           `${options.procedure.id}.ready`,
-//           `${options.runs[ 0 ].procedure.id}.conStart`,
-//           `${options.runs[ 0 ].procedure.id}.conTerminate`,
-//           `${options.runs[ 0 ].procedure.id}.conDisconnect.dont`,
-//           `${options.runs[ 0 ].procedure.id}.ready`,
-//           `${options.runs[ 1 ].procedure.id}.conStart`,
-//           `${options.runs[ 1 ].procedure.id}.conTerminate`,
-//           `${options.runs[ 1 ].procedure.id}.conDisconnect.dont`,
-//           `${options.runs[ 1 ].procedure.id}.ready`,
-//         ]
-//         test.identical( track, exp );
-//
-//         var exp =
-//         [
-//           'conStart.arg',
-//           'conTerminate.arg',
-//           'ready.arg',
-//         ]
-//         if( tops.consequence === 'routine' )
-//         test.identical( track2, exp );
-//
-//         test.identical( options.exitCode, 0 );
-//         test.identical( options.ended, true );
-//         test.identical( options.exitReason, 'normal' );
-//         test.identical( options.exitSignal, null );
-//         test.identical( options.state, 'terminated' );
-//         test.identical( options.error, null );
-//
-//         test.identical( options.runs[ 0 ].exitCode, 0 );
-//         test.identical( options.runs[ 0 ].ended, true );
-//         test.identical( options.runs[ 0 ].exitReason, 'normal' );
-//         test.identical( options.runs[ 0 ].exitSignal, null );
-//         test.identical( options.runs[ 0 ].state, 'terminated' );
-//         test.identical( options.error, null );
-//
-//         test.identical( options.runs[ 1 ].exitCode, 0 );
-//         test.identical( options.runs[ 1 ].ended, true );
-//         test.identical( options.runs[ 1 ].exitReason, 'normal' );
-//         test.identical( options.runs[ 1 ].exitSignal, null );
-//         test.identical( options.runs[ 1 ].state, 'terminated' );
-//         test.identical( options.error, null );
-//
-//       })
-//
-//       return options.ready;
-//     })
-    //
-    // /* */
-    //
-    // ready.then( function( arg )
-    // {
-    //   test.case = `sync:${tops.sync} deasync:${tops.deasync} mode:${tops.mode} concurrent:1 throwingExitCode:1 err arg`;
-    //
-    //   clear();
-    //   var time1 = _.time.now();
-    //   var counter = 0;
-    //   var execPath = tops.mode === `fork` ? `${programPath}` : `node ${programPath}`;
-    //   var o2 =
-    //   {
-    //     execPath : [ execPath, execPath ],
-    //     args : ( op ) => [ `id:${op.procedure.id}`, `throwing:${++counter === 1 ? 1 : 0}`, `sessionId:${op.sessionId}`, `concurrent:1` ],
-    //     conStart : conMake( tops, 'conStart' ),
-    //     conDisconnect : conMake( tops, 'conDisconnect' ),
-    //     conTerminate : conMake( tops, 'conTerminate' ),
-    //     ready : conMake( tops, 'ready' ),
-    //     concurrent : 1,
-    //     throwingExitCode : 1,
-    //     sync : tops.sync,
-    //     deasync : tops.deasync,
-    //     mode : tops.mode,
-    //   }
-    //
-    //   var options = _.mapSupplement( null, o2, o3 );
-    //   var returned = null;
-    //
-    //   if( tops.sync )
-    //   test.shouldThrowErrorSync( () => _.process.start( options ) );
-    //   else
-    //   returned = _.process.start( options );
-    //
-    //   processTrack( options );
-    //
-    //   options.conStart.tap( ( err, op ) =>
-    //   {
-    //     op.runs.forEach( ( op2 ) =>
-    //     {
-    //       processTrack( op2 );
-    //     });
-    //   });
-    //
-    //   options.ready.finally( function( err, op )
-    //   {
-    //     test.identical( _.strCount( options.output, 'Error1' ), 1 );
-    //     var exp =
-    //     [
-    //       `${options.procedure.id}.conStart`,
-    //       `${options.runs[ 0 ].procedure.id}.conStart`,
-    //       `${options.runs[ 1 ].procedure.id}.conStart`,
-    //       `${options.runs[ 0 ].procedure.id}.conTerminate.err`,
-    //       `${options.runs[ 0 ].procedure.id}.conDisconnect.err`,
-    //       `${options.runs[ 0 ].procedure.id}.ready.err`,
-    //       `${options.runs[ 1 ].procedure.id}.conTerminate`,
-    //       `${options.runs[ 1 ].procedure.id}.conDisconnect.dont`,
-    //       `${options.runs[ 1 ].procedure.id}.ready`,
-    //       `${options.procedure.id}.conTerminate.err`,
-    //       `${options.procedure.id}.ready.err`,
-    //     ]
-    //     if( options.deasync || options.sync )
-    //     exp =
-    //     [
-    //       `${options.procedure.id}.conStart`,
-    //       `${options.procedure.id}.conTerminate.err`,
-    //       `${options.procedure.id}.ready.err`,
-    //       `${options.runs[ 0 ].procedure.id}.conStart`,
-    //       `${options.runs[ 0 ].procedure.id}.conTerminate.err`,
-    //       `${options.runs[ 0 ].procedure.id}.conDisconnect.err`,
-    //       `${options.runs[ 0 ].procedure.id}.ready.err`,
-    //       `${options.runs[ 1 ].procedure.id}.conStart`,
-    //       `${options.runs[ 1 ].procedure.id}.conTerminate`,
-    //       `${options.runs[ 1 ].procedure.id}.conDisconnect.dont`,
-    //       `${options.runs[ 1 ].procedure.id}.ready`,
-    //     ]
-    //
-    //     test.identical( track, exp );
-    //
-    //     var exp =
-    //     [
-    //       'conStart.arg',
-    //       'conTerminate.err',
-    //       'ready.err',
-    //     ]
-    //     if( tops.consequence === 'routine' )
-    //     test.identical( track2, exp );
-    //
-    //     test.notIdentical( options.exitCode, 0 );
-    //     test.identical( options.ended, true );
-    //     test.identical( options.exitReason, 'code' );
-    //     test.identical( options.exitSignal, null );
-    //     test.identical( options.state, 'terminated' );
-    //     test.is( !!options.error );
-    //     test.identical( _.strCount( options.error.message, 'Error1' ), 1 );
-    //
-    //     test.notIdentical( options.runs[ 0 ].exitCode, 0 );
-    //     test.identical( options.runs[ 0 ].ended, true );
-    //     test.identical( options.runs[ 0 ].exitReason, 'code' );
-    //     test.identical( options.runs[ 0 ].exitSignal, null );
-    //     test.identical( options.runs[ 0 ].state, 'terminated' );
-    //     test.is( !!options.runs[ 0 ].error );
-    //
-    //     test.identical( options.runs[ 1 ].exitCode, 0 );
-    //     test.identical( options.runs[ 1 ].ended, true );
-    //     test.identical( options.runs[ 1 ].exitReason, 'normal' );
-    //     test.identical( options.runs[ 1 ].exitSignal, null );
-    //     test.identical( options.runs[ 1 ].state, 'terminated' );
-    //     test.is( !options.runs[ 1 ].error );
-    //
-    //     return null;
-    //   })
-    //
-    //   return options.ready;
-    // })
+    ready.then( function( arg )
+    {
+      test.case = `sync:${tops.sync} deasync:${tops.deasync} mode:${tops.mode} concurrent:1 arg arg`;
+
+      if( tops.sync && !tops.deasync )
+      return null;
+
+      clear();
+      var time1 = _.time.now();
+      var execPath = tops.mode === `fork` ? `${programPath}` : `node ${programPath}`;
+      var o2 =
+      {
+        execPath : [ execPath, execPath ],
+        args : ( op ) => [ `id:${op.procedure.id}`, `sessionId:${op.sessionId}`, `concurrent:1` ],
+        conStart : conMake( tops, 'conStart' ),
+        conDisconnect : conMake( tops, 'conDisconnect' ),
+        conTerminate : conMake( tops, 'conTerminate' ),
+        ready : conMake( tops, 'ready' ),
+        concurrent : 1,
+        sync : tops.sync,
+        deasync : tops.deasync,
+        mode : tops.mode,
+      }
+
+      var options = _.mapSupplement( null, o2, o3 );
+      var returned = _.process.start( options );
+
+      processTrack( options );
+
+      options.conStart.tap( ( err, op ) =>
+      {
+        op.runs.forEach( ( op2 ) =>
+        {
+          processTrack( op2 );
+        });
+      });
+
+      options.ready.tap( function( err, op )
+      {
+        var exp =
+`
+${options.runs[ 0 ].procedure.id}.begin
+${options.runs[ 1 ].procedure.id}.begin
+${options.runs[ 0 ].procedure.id}.end
+${options.runs[ 1 ].procedure.id}.end
+`
+
+        test.equivalent( options.output, exp );
+        var exp =
+        [
+          `${options.procedure.id}.conStart`,
+          `${options.runs[ 0 ].procedure.id}.conStart`,
+          `${options.runs[ 1 ].procedure.id}.conStart`,
+          `${options.runs[ 0 ].procedure.id}.conTerminate`,
+          `${options.runs[ 0 ].procedure.id}.conDisconnect.dont`,
+          `${options.runs[ 0 ].procedure.id}.ready`,
+          `${options.runs[ 1 ].procedure.id}.conTerminate`,
+          `${options.runs[ 1 ].procedure.id}.conDisconnect.dont`,
+          `${options.runs[ 1 ].procedure.id}.ready`,
+          `${options.procedure.id}.conTerminate`,
+          `${options.procedure.id}.ready`,
+        ]
+        if( options.deasync || options.sync )
+        exp =
+        [
+          `${options.procedure.id}.conStart`,
+          `${options.procedure.id}.conTerminate`,
+          `${options.procedure.id}.ready`,
+          `${options.runs[ 0 ].procedure.id}.conStart`,
+          `${options.runs[ 0 ].procedure.id}.conTerminate`,
+          `${options.runs[ 0 ].procedure.id}.conDisconnect.dont`,
+          `${options.runs[ 0 ].procedure.id}.ready`,
+          `${options.runs[ 1 ].procedure.id}.conStart`,
+          `${options.runs[ 1 ].procedure.id}.conTerminate`,
+          `${options.runs[ 1 ].procedure.id}.conDisconnect.dont`,
+          `${options.runs[ 1 ].procedure.id}.ready`,
+        ]
+        test.identical( track, exp );
+
+        var exp =
+        [
+          'conStart.arg',
+          'conTerminate.arg',
+          'ready.arg',
+        ]
+        if( tops.consequence === 'routine' )
+        test.identical( track2, exp );
+
+        test.identical( options.exitCode, 0 );
+        test.identical( options.ended, true );
+        test.identical( options.exitReason, 'normal' );
+        test.identical( options.exitSignal, null );
+        test.identical( options.state, 'terminated' );
+        test.identical( options.error, null );
+
+        test.identical( options.runs[ 0 ].exitCode, 0 );
+        test.identical( options.runs[ 0 ].ended, true );
+        test.identical( options.runs[ 0 ].exitReason, 'normal' );
+        test.identical( options.runs[ 0 ].exitSignal, null );
+        test.identical( options.runs[ 0 ].state, 'terminated' );
+        test.identical( options.error, null );
+
+        test.identical( options.runs[ 1 ].exitCode, 0 );
+        test.identical( options.runs[ 1 ].ended, true );
+        test.identical( options.runs[ 1 ].exitReason, 'normal' );
+        test.identical( options.runs[ 1 ].exitSignal, null );
+        test.identical( options.runs[ 1 ].state, 'terminated' );
+        test.identical( options.error, null );
+
+      })
+
+      return options.ready;
+    })
+
+    /* */
+
+    ready.then( function( arg )
+    {
+      test.case = `sync:${tops.sync} deasync:${tops.deasync} mode:${tops.mode} concurrent:1 throwingExitCode:1 err arg`;
+
+      if( tops.sync && !tops.deasync )
+      return null;
+
+      clear();
+      var time1 = _.time.now();
+      var counter = 0;
+      var execPath = tops.mode === `fork` ? `${programPath}` : `node ${programPath}`;
+      var o2 =
+      {
+        execPath : [ execPath, execPath ],
+        args : ( op ) => [ `id:${op.procedure.id}`, `throwing:${++counter === 1 ? 1 : 0}`, `sessionId:${op.sessionId}`, `concurrent:1` ],
+        conStart : conMake( tops, 'conStart' ),
+        conDisconnect : conMake( tops, 'conDisconnect' ),
+        conTerminate : conMake( tops, 'conTerminate' ),
+        ready : conMake( tops, 'ready' ),
+        concurrent : 1,
+        throwingExitCode : 1,
+        sync : tops.sync,
+        deasync : tops.deasync,
+        mode : tops.mode,
+      }
+
+      var options = _.mapSupplement( null, o2, o3 );
+      var returned = null;
+
+      if( tops.sync )
+      test.shouldThrowErrorSync( () => _.process.start( options ) );
+      else
+      returned = _.process.start( options );
+
+      processTrack( options );
+
+      options.conStart.tap( ( err, op ) =>
+      {
+        op.runs.forEach( ( op2 ) =>
+        {
+          processTrack( op2 );
+        });
+      });
+
+      options.ready.finally( function( err, op )
+      {
+        test.identical( _.strCount( options.output, 'Error1' ), 1 );
+        var exp =
+        [
+          `${options.procedure.id}.conStart`,
+          `${options.runs[ 0 ].procedure.id}.conStart`,
+          `${options.runs[ 1 ].procedure.id}.conStart`,
+          `${options.runs[ 0 ].procedure.id}.conTerminate.err`,
+          `${options.runs[ 0 ].procedure.id}.conDisconnect.err`,
+          `${options.runs[ 0 ].procedure.id}.ready.err`,
+          `${options.runs[ 1 ].procedure.id}.conTerminate`,
+          `${options.runs[ 1 ].procedure.id}.conDisconnect.dont`,
+          `${options.runs[ 1 ].procedure.id}.ready`,
+          `${options.procedure.id}.conTerminate.err`,
+          `${options.procedure.id}.ready.err`,
+        ]
+        if( options.deasync || options.sync )
+        exp =
+        [
+          `${options.procedure.id}.conStart`,
+          `${options.procedure.id}.conTerminate.err`,
+          `${options.procedure.id}.ready.err`,
+          `${options.runs[ 0 ].procedure.id}.conStart`,
+          `${options.runs[ 0 ].procedure.id}.conTerminate.err`,
+          `${options.runs[ 0 ].procedure.id}.conDisconnect.err`,
+          `${options.runs[ 0 ].procedure.id}.ready.err`,
+          `${options.runs[ 1 ].procedure.id}.conStart`,
+          `${options.runs[ 1 ].procedure.id}.conTerminate`,
+          `${options.runs[ 1 ].procedure.id}.conDisconnect.dont`,
+          `${options.runs[ 1 ].procedure.id}.ready`,
+        ]
+
+        test.identical( track, exp );
+
+        var exp =
+        [
+          'conStart.arg',
+          'conTerminate.err',
+          'ready.err',
+        ]
+        if( tops.consequence === 'routine' )
+        test.identical( track2, exp );
+
+        test.notIdentical( options.exitCode, 0 );
+        test.identical( options.ended, true );
+        test.identical( options.exitReason, 'code' );
+        test.identical( options.exitSignal, null );
+        test.identical( options.state, 'terminated' );
+        test.is( !!options.error );
+        test.identical( _.strCount( options.error.message, 'Error1' ), 1 );
+
+        test.notIdentical( options.runs[ 0 ].exitCode, 0 );
+        test.identical( options.runs[ 0 ].ended, true );
+        test.identical( options.runs[ 0 ].exitReason, 'code' );
+        test.identical( options.runs[ 0 ].exitSignal, null );
+        test.identical( options.runs[ 0 ].state, 'terminated' );
+        test.is( !!options.runs[ 0 ].error );
+
+        test.identical( options.runs[ 1 ].exitCode, 0 );
+        test.identical( options.runs[ 1 ].ended, true );
+        test.identical( options.runs[ 1 ].exitReason, 'normal' );
+        test.identical( options.runs[ 1 ].exitSignal, null );
+        test.identical( options.runs[ 1 ].state, 'terminated' );
+        test.is( !options.runs[ 1 ].error );
+
+        return null;
+      })
+
+      return options.ready;
+    })
+
+    /* */
+
+    ready.then( function( arg )
+    {
+      test.case = `sync:${tops.sync} deasync:${tops.deasync} mode:${tops.mode} concurrent:1 throwingExitCode:1 arg err`;
+
+      if( tops.sync && !tops.deasync )
+      return null;
+
+      clear();
+      var time1 = _.time.now();
+      var counter = 0;
+      var execPath = tops.mode === `fork` ? `${programPath}` : `node ${programPath}`;
+      var o2 =
+      {
+        execPath : [ execPath, execPath ],
+        args : ( op ) => [ `id:${op.procedure.id} throwing:${++counter === 1 ? 0 : 1}` ],
+        conStart : conMake( tops, 'conStart' ),
+        conDisconnect : conMake( tops, 'conDisconnect' ),
+        conTerminate : conMake( tops, 'conTerminate' ),
+        ready : conMake( tops, 'ready' ),
+        concurrent : 1,
+        sync : tops.sync,
+        deasync : tops.deasync,
+        mode : tops.mode,
+      }
+
+      var options = _.mapSupplement( null, o2, o3 );
+      var returned = null;
+
+      if( tops.sync )
+      test.shouldThrowErrorSync( () => _.process.start( options ) );
+      else
+      returned = _.process.start( options );
+
+      processTrack( options );
+
+      options.conStart.tap( ( err, op ) =>
+      {
+        op.runs.forEach( ( op2 ) =>
+        {
+          processTrack( op2 );
+        });
+      });
+
+      options.ready.finally( function( err, op )
+      {
+
+        test.identical( _.strCount( options.output, 'Error1' ), 1 );
+        var exp =
+        [
+          `${options.procedure.id}.conStart`,
+          `${options.runs[ 0 ].procedure.id}.conStart`,
+          `${options.runs[ 1 ].procedure.id}.conStart`,
+          `${options.runs[ 0 ].procedure.id}.conTerminate`,
+          `${options.runs[ 0 ].procedure.id}.conDisconnect.dont`,
+          `${options.runs[ 0 ].procedure.id}.ready`,
+          `${options.runs[ 1 ].procedure.id}.conTerminate.err`,
+          `${options.runs[ 1 ].procedure.id}.conDisconnect.err`,
+          `${options.runs[ 1 ].procedure.id}.ready.err`,
+          `${options.procedure.id}.conTerminate.err`,
+          `${options.procedure.id}.ready.err`,
+        ]
+        if( options.deasync || options.sync )
+        exp =
+        [
+          `${options.procedure.id}.conStart`,
+          `${options.procedure.id}.conTerminate.err`,
+          `${options.procedure.id}.ready.err`,
+          `${options.runs[ 0 ].procedure.id}.conStart`,
+          `${options.runs[ 0 ].procedure.id}.conTerminate`,
+          `${options.runs[ 0 ].procedure.id}.conDisconnect.dont`,
+          `${options.runs[ 0 ].procedure.id}.ready`,
+          `${options.runs[ 1 ].procedure.id}.conStart`,
+          `${options.runs[ 1 ].procedure.id}.conTerminate.err`,
+          `${options.runs[ 1 ].procedure.id}.conDisconnect.err`,
+          `${options.runs[ 1 ].procedure.id}.ready.err`,
+        ]
+        test.identical( track, exp );
+
+        var exp =
+        [
+          'conStart.arg',
+          'conTerminate.err',
+          'ready.err',
+        ]
+        if( tops.consequence === 'routine' )
+        test.identical( track2, exp );
+
+        test.is( _.errIs( err ) );
+        test.notIdentical( options.exitCode, 0 );
+        test.identical( options.ended, true );
+        test.identical( options.exitReason, 'code' );
+        test.identical( options.exitSignal, null );
+        test.identical( options.state, 'terminated' );
+        test.is( !!options.error );
+        test.identical( _.strCount( options.error.message, 'Error1' ), 1 );
+
+        test.identical( options.runs[ 0 ].exitCode, 0 );
+        test.identical( options.runs[ 0 ].ended, true );
+        test.identical( options.runs[ 0 ].exitReason, 'normal' );
+        test.identical( options.runs[ 0 ].exitSignal, null );
+        test.identical( options.runs[ 0 ].state, 'terminated' );
+        test.is( !options.runs[ 0 ].error );
+
+        test.notIdentical( options.runs[ 1 ].exitCode, 0 );
+        test.identical( options.runs[ 1 ].ended, true );
+        test.identical( options.runs[ 1 ].exitReason, 'code' );
+        test.identical( options.runs[ 1 ].exitSignal, null );
+        test.identical( options.runs[ 1 ].state, 'terminated' );
+        test.is( !!options.runs[ 1 ].error );
+
+        return null;
+      })
+
+      return options.ready;
+    })
 
     /* */
 
@@ -14894,7 +15013,7 @@ ${options.runs[ 1 ].procedure.id}.end
   {
     let _ = require( toolsPath );
     _.include( 'wProcess' );
-    let args = _.process.input(); /* xxx : rename */
+    let args = _.process.input();
 
     let sessionDelay = context.t1*0.5*args.map.sessionId;
 
@@ -14902,7 +15021,7 @@ ${options.runs[ 1 ].procedure.id}.end
     setTimeout( () => { console.log( `${args.map.id}.begin` ) }, sessionDelay );
     else
     console.log( `${args.map.id}.begin` );
-    setTimeout( () => { console.log( `${args.map.id}.end` ) }, context.t1 / 2 + sessionDelay );
+    setTimeout( () => { console.log( `${args.map.id}.end` ) }, context.t1 + sessionDelay );
 
     if( args.map.throwing )
     throw 'Error1';
