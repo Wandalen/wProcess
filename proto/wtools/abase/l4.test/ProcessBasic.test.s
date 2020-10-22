@@ -4454,7 +4454,7 @@ function startArgumentsParsingNonTrivial( test )
   let modes = [ 'fork', 'spawn', 'shell' ];
 
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
- 
+
   return a.ready;
 
   /*
