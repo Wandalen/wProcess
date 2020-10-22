@@ -16655,7 +16655,7 @@ function startOptionOutputColoring( test )
       return _.process.start( options )
       .then( ( op ) =>
       {
-        
+
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         let expected = `\u001b[97m > \u001b[39;0m${ mode === 'fork' ? '' : 'node ' }${testAppPath2}\n\u001b[35mLog\u001b[39;0m\n`;
@@ -16815,7 +16815,7 @@ function startOptionOutputColoringStderr( test )
       test.case = `mode : ${ mode }, outputColoringStderr : 0, inputMirroring : 0, outputColloring : 1`;
 
       let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
-      let locals = 
+      let locals =
       {
         toolsPath : _.path.nativize( _.module.toolsPathGet() ),
         programPath : testAppPath2,
@@ -24002,7 +24002,7 @@ function endSignalsOnExitExitCode( test )
   }
 
   let modes = [ 'fork', 'spawn' ];
-  // modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGQUIT', 128 + 3 ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGQUIT', 128 + 3 ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGINT', 128 + 2 ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGTERM', 128 + 15 ) ) );
   return a.ready;
@@ -24065,7 +24065,7 @@ exit:end
         else
         {
           test.identical( options.output, exp1 );
-          test.identical( options.exitReason, 'normal' );
+          test.identical( options.exitReason, 'code' );
           test.identical( options.exitCode, expectedExitCode );
           test.identical( options.exitSignal, null );
         }
@@ -29123,7 +29123,6 @@ var Proto =
     endSignalsOnExit,
     endSignalsOnExitExit,
     endSignalsOnExitExitCode,
-
 
     terminate, /* qqq for Vova: review, remove duplicates, check timeouts */
     terminateSync,
