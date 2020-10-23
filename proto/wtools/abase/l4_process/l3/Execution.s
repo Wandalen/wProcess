@@ -1,5 +1,3 @@
-const { exec } = require('child_process');
-
 ( function _Execution_s_()
 {
 
