@@ -5451,7 +5451,7 @@ function startArgumentsNestedQuotes( test )
 
       let con = new _.Consequence().take( null );
 
-      let args = 
+      let args =
       [
         ` '\'s-s\''  '\"s-d\"'  '\`s-b\`'  `,
         ` "\'d-s\'"  "\"d-d\""  "\`d-b\`"  `,
@@ -23668,15 +23668,18 @@ function endSignalsBasic( test )
     stdio : 'pipe',
   }
 
-  let modes = [ 'fork', 'spawn', 'shell' ];
+  // xxx
+  let modes = [ 'spawn' ];
+
+  // let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGQUIT' ) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGINT' ) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGTERM' ) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGHUP' ) ) ); // xxx
+  // modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGINT' ) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGTERM' ) ) );
+  // // modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGHUP' ) ) ); // xxx
   modes.forEach( ( mode ) => a.ready.then( () => signalKilling( mode, 'SIGKILL' ) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => terminate( mode ) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => terminateShell( mode ) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => kill( mode ) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => terminate( mode ) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => terminateShell( mode ) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => kill( mode ) ) );
   return a.ready;
 
   /* --- */
@@ -23691,228 +23694,229 @@ function endSignalsBasic( test )
 
     /* - */
 
-    .then( function( arg )
-    {
-      test.case = `mode:${mode}, ${signal}`;
+//     .then( function( arg )
+//     {
+//       test.case = `mode:${mode}, ${signal}`;
+//
+//       var time1 = _.time.now();
+//       var o2 =
+//       {
+//         execPath : mode === `fork` ? `${programPath}` : `node ${programPath}`,
+//         args : [],
+//         mode,
+//       }
+//
+//       var options = _.mapSupplement( null, o2, o3 );
+//
+//       var returned = _.process.start( options );
+//       _.time.out( context.t1, () =>
+//       {
+//         test.identical( options.process.killed, false );
+//         options.process.kill( signal );
+//         return null;
+//       })
+//       returned.finally( function()
+//       {
+//         var exp1 =
+// `program1:begin
+// `
+//         var exp2 =
+// `program1:begin
+// program1:end
+// `
+//         if( mode === 'shell' )
+//         test.is( options.output === exp1 || options.output === exp2 );
+//         else
+//         test.identical( options.output, exp1 );
+//         test.identical( options.exitCode, null );
+//         test.identical( options.exitSignal, signal );
+//         test.identical( options.ended, true );
+//         test.identical( options.exitReason, 'signal' );
+//         test.identical( options.state, 'terminated' );
+//         test.identical( options.error, null );
+//         test.identical( options.process.exitCode, null );
+//         test.identical( options.process.signalCode, signal );
+//         test.identical( options.process.killed, true );
+//         var dtime = _.time.now() - time1;
+//         test.le( dtime, context.t1*4 );
+//         return null;
+//       })
+//
+//       return returned;
+//     })
+//
+//     /* */
+//
+//     .then( function( arg )
+//     {
+//       test.case = `mode:${mode}, ${signal}, withTools:1`;
+//
+//       var time1 = _.time.now();
+//       var o2 =
+//       {
+//         execPath : mode === `fork` ? `${programPath}` : `node ${programPath}`,
+//         args : [ `withTools:1` ],
+//         mode,
+//       }
+//
+//       var options = _.mapSupplement( null, o2, o3 );
+//
+//       var returned = _.process.start( options );
+//       _.time.out( context.t1, () =>
+//       {
+//         test.identical( options.process.killed, false );
+//         options.process.kill( signal );
+//         return null;
+//       })
+//       returned.finally( function()
+//       {
+//         var exp1 =
+// `program1:begin
+// ${signal}
+// `
+//         var exp2 =
+// `program1:begin
+// program1:end
+// `
+//         if( mode === 'shell' )
+//         test.is( options.output === exp1 || options.output === exp2 );
+//         else
+//         test.identical( options.output, exp1 );
+//         test.identical( options.exitCode, null );
+//         test.identical( options.exitSignal, signal );
+//         test.identical( options.ended, true );
+//         test.identical( options.exitReason, 'signal' );
+//         test.identical( options.state, 'terminated' );
+//         test.identical( options.error, null );
+//         test.identical( options.process.exitCode, null );
+//         test.identical( options.process.signalCode, signal );
+//         test.identical( options.process.killed, true );
+//         var dtime = _.time.now() - time1;
+//         test.le( dtime, context.t1*4 );
+//         return null;
+//       })
+//
+//       return returned;
+//     })
+//
+//     /* */
+//
+//     .then( function( arg )
+//     {
+//       test.case = `mode:${mode}, ${signal}, withSleep:1`;
+//
+//       var time1 = _.time.now();
+//       var o2 =
+//       {
+//         execPath : mode === `fork` ? `${programPath}` : `node ${programPath}`,
+//         args : [ `withSleep:1` ],
+//         mode,
+//       }
+//
+//       var options = _.mapSupplement( null, o2, o3 );
+//
+//       var returned = _.process.start( options );
+//       _.time.out( context.t1, () =>
+//       {
+//         test.identical( options.process.killed, false );
+//         options.process.kill( signal );
+//         return null;
+//       })
+//       returned.finally( function()
+//       {
+//         var exp1 =
+// `program1:begin
+// sleep:begin
+// `
+//         var exp2 =
+// `program1:begin
+// sleep:begin
+// sleep:end
+// program1:end
+// `
+//         if( mode === 'shell' )
+//         test.is( options.output === exp1 || options.output === exp2 );
+//         else
+//         test.identical( options.output, exp1 );
+//         test.identical( options.exitCode, null );
+//         test.identical( options.exitSignal, signal );
+//         test.identical( options.ended, true );
+//         test.identical( options.exitReason, 'signal' );
+//         test.identical( options.state, 'terminated' );
+//         test.identical( options.error, null );
+//         test.identical( options.process.exitCode, null );
+//         test.identical( options.process.signalCode, signal );
+//         test.identical( options.process.killed, true );
+//         var dtime = _.time.now() - time1;
+//         console.log( `dtime:${dtime}` );
+//         if( mode !== 'shell' )
+//         test.le( dtime, context.t1*4 );
+//         return null;
+//       })
+//
+//       return returned;
+//     })
+//
+//     /* */
 
-      var time1 = _.time.now();
-      var o2 =
-      {
-        execPath : mode === `fork` ? `${programPath}` : `node ${programPath}`,
-        args : [],
-        mode,
-      }
-
-      var options = _.mapSupplement( null, o2, o3 );
-
-      var returned = _.process.start( options );
-      _.time.out( context.t1, () =>
-      {
-        test.identical( options.process.killed, false );
-        options.process.kill( signal );
-        return null;
-      })
-      returned.finally( function()
-      {
-        var exp1 =
-`program1:begin
-`
-        var exp2 =
-`program1:begin
-program1:end
-`
-        if( mode === 'shell' )
-        test.is( options.output === exp1 || options.output === exp2 );
-        else
-        test.identical( options.output, exp1 );
-        test.identical( options.exitCode, null );
-        test.identical( options.exitSignal, signal );
-        test.identical( options.ended, true );
-        test.identical( options.exitReason, 'signal' );
-        test.identical( options.state, 'terminated' );
-        test.identical( options.error, null );
-        test.identical( options.process.exitCode, null );
-        test.identical( options.process.signalCode, signal );
-        test.identical( options.process.killed, true );
-        var dtime = _.time.now() - time1;
-        test.le( dtime, context.t1*4 );
-        return null;
-      })
-
-      return returned;
-    })
-
-    /* */
-
-    .then( function( arg )
-    {
-      test.case = `mode:${mode}, ${signal}, withTools:1`;
-
-      var time1 = _.time.now();
-      var o2 =
-      {
-        execPath : mode === `fork` ? `${programPath}` : `node ${programPath}`,
-        args : [ `withTools:1` ],
-        mode,
-      }
-
-      var options = _.mapSupplement( null, o2, o3 );
-
-      var returned = _.process.start( options );
-      _.time.out( context.t1, () =>
-      {
-        test.identical( options.process.killed, false );
-        options.process.kill( signal );
-        return null;
-      })
-      returned.finally( function()
-      {
-        var exp1 =
-`program1:begin
-${signal}
-`
-        var exp2 =
-`program1:begin
-program1:end
-`
-        if( mode === 'shell' )
-        test.is( options.output === exp1 || options.output === exp2 );
-        else
-        test.identical( options.output, exp1 );
-        test.identical( options.exitCode, null );
-        test.identical( options.exitSignal, signal );
-        test.identical( options.ended, true );
-        test.identical( options.exitReason, 'signal' );
-        test.identical( options.state, 'terminated' );
-        test.identical( options.error, null );
-        test.identical( options.process.exitCode, null );
-        test.identical( options.process.signalCode, signal );
-        test.identical( options.process.killed, true );
-        var dtime = _.time.now() - time1;
-        test.le( dtime, context.t1*4 );
-        return null;
-      })
-
-      return returned;
-    })
-
-    /* */
-
-    .then( function( arg )
-    {
-      test.case = `mode:${mode}, ${signal}, withSleep:1`;
-
-      var time1 = _.time.now();
-      var o2 =
-      {
-        execPath : mode === `fork` ? `${programPath}` : `node ${programPath}`,
-        args : [ `withSleep:1` ],
-        mode,
-      }
-
-      var options = _.mapSupplement( null, o2, o3 );
-
-      var returned = _.process.start( options );
-      _.time.out( context.t1, () =>
-      {
-        test.identical( options.process.killed, false );
-        options.process.kill( signal );
-        return null;
-      })
-      returned.finally( function()
-      {
-        var exp1 =
-`program1:begin
-sleep:begin
-`
-        var exp2 =
-`program1:begin
-sleep:begin
-sleep:end
-program1:end
-`
-        if( mode === 'shell' )
-        test.is( options.output === exp1 || options.output === exp2 );
-        else
-        test.identical( options.output, exp1 );
-        test.identical( options.exitCode, null );
-        test.identical( options.exitSignal, signal );
-        test.identical( options.ended, true );
-        test.identical( options.exitReason, 'signal' );
-        test.identical( options.state, 'terminated' );
-        test.identical( options.error, null );
-        test.identical( options.process.exitCode, null );
-        test.identical( options.process.signalCode, signal );
-        test.identical( options.process.killed, true );
-        var dtime = _.time.now() - time1;
-        console.log( `dtime:${dtime}` );
-        if( mode !== 'shell' )
-        test.le( dtime, context.t1*4 );
-        return null;
-      })
-
-      return returned;
-    })
-
-    /* */
-
-    .then( function( arg )
-    {
-      test.case = `mode:${mode}, ${signal}, withSleep:1 withTools:1`;
-
-      var time1 = _.time.now();
-      var o2 =
-      {
-        execPath : mode === `fork` ? `${programPath}` : `node ${programPath}`,
-        args : [ `withSleep:1`, `withTools:1` ],
-        mode,
-      }
-
-      var options = _.mapSupplement( null, o2, o3 );
-
-      var returned = _.process.start( options );
-      _.time.out( context.t1, () =>
-      {
-        test.identical( options.process.killed, false );
-        options.process.kill( signal );
-        return null;
-      })
-      returned.finally( function()
-      {
-        var exp1 =
-`program1:begin
-sleep:begin
-sleep:end
-program1:end
-${signal}
-`
-        var exp2 =
-`program1:begin
-sleep:begin
-sleep:end
-program1:end
-`
-        if( mode === 'shell' )
-        test.is( options.output === exp1 || options.output === exp2 );
-        else
-        test.identical( options.output, exp1 );
-        test.identical( options.exitCode, null );
-        test.identical( options.exitSignal, signal );
-        test.identical( options.ended, true );
-        test.identical( options.exitReason, 'signal' );
-        test.identical( options.state, 'terminated' );
-        test.identical( options.error, null );
-        test.identical( options.process.exitCode, null );
-        test.identical( options.process.signalCode, signal );
-        test.identical( options.process.killed, true );
-        var dtime = _.time.now() - time1;
-        console.log( `dtime:${dtime}` );
-        test.ge( dtime, context.t1*3 );
-        return null;
-      })
-
-      return returned;
-    })
+//     .then( function( arg )
+//     {
+//       test.case = `mode:${mode}, ${signal}, withSleep:1 withTools:1`;
+//
+//       var time1 = _.time.now();
+//       var o2 =
+//       {
+//         execPath : mode === `fork` ? `${programPath}` : `node ${programPath}`,
+//         args : [ `withSleep:1`, `withTools:1` ],
+//         mode,
+//       }
+//
+//       var options = _.mapSupplement( null, o2, o3 );
+//
+//       var returned = _.process.start( options );
+//       _.time.out( context.t1, () =>
+//       {
+//         test.identical( options.process.killed, false );
+//         options.process.kill( signal );
+//         return null;
+//       })
+//       returned.finally( function()
+//       {
+//         var exp1 =
+// `program1:begin
+// sleep:begin
+// sleep:end
+// program1:end
+// ${signal}
+// `
+//         var exp2 =
+// `program1:begin
+// sleep:begin
+// sleep:end
+// program1:end
+// `
+//         if( mode === 'shell' )
+//         test.is( options.output === exp1 || options.output === exp2 );
+//         else
+//         test.identical( options.output, exp1 );
+//         test.identical( options.exitCode, null );
+//         test.identical( options.exitSignal, signal );
+//         test.identical( options.ended, true );
+//         test.identical( options.exitReason, 'signal' );
+//         test.identical( options.state, 'terminated' );
+//         test.identical( options.error, null );
+//         test.identical( options.process.exitCode, null );
+//         test.identical( options.process.signalCode, signal );
+//         test.identical( options.process.killed, true );
+//         var dtime = _.time.now() - time1;
+//         console.log( `dtime:${dtime}` );
+//         test.ge( dtime, context.t1*3 );
+//         return null;
+//       })
+//
+//       return returned;
+//     })
+// xxx
 
     /* */
 

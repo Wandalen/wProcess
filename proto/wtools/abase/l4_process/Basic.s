@@ -415,7 +415,7 @@ let Extension =
 
   // fields
 
-  _sanitareTime : 1,
+  _sanitareTime : 10,
   _exitReason : null,
 
   _tempFiles,
