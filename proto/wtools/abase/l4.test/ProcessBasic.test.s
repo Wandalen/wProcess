@@ -28227,7 +28227,7 @@ function terminateDetachedFirstChildShell( test )
   {
     execPath : 'node program1.js',
     currentPath : a.routinePath,
-    mode : 'shell',
+    mode : 'spawn',
     outputPiping : 1,
     outputCollecting : 1,
     throwingExitCode : 0
@@ -28276,8 +28276,8 @@ function terminateDetachedFirstChildShell( test )
 
     test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
     test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
-    test.identical( _.strCount( o.output, 'program2::end' ), 0 ); /* qqq for Vova : it fails on Mint */
-    test.is( _.process.isAlive( program2Pid ) ); /* qqq for Vova : it fails on Mint */
+    test.identical( _.strCount( o.output, 'program2::end' ), 0 ); /* qqq for Vova : it fails on Mint aaa:fixed, program1 should be spawned in mode:spawn to keep this test simple */
+    test.is( _.process.isAlive( program2Pid ) ); /* qqq for Vova : it fails on Mint aaa:fixed */
 
     return _.time.out( context.t1*15 ); /* qqq for Vova: replace with periodic + timeout + kill */
   })
@@ -30938,7 +30938,7 @@ var Proto =
 
     terminateDetachedFirstChildSpawn,
     terminateDetachedFirstChildFork,
-    terminateDetachedFirstChildShell, /* qqq for Vova : it fails on Mint */
+    terminateDetachedFirstChildShell, /* qqq for Vova : it fails on Mint aaa:fixed */
 
     terminateWithDetachedChildSpawn,
     terminateWithDetachedChildFork,
