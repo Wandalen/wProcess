@@ -29371,7 +29371,7 @@ var Proto =
 
     // other options
 
-    startOptionDry, /* qqq for Yevhen : make sure option dry is covered good enough */
+    startOptionDry, /* qqq for Yevhen : make sure option dry is covered good enough. */
     /* qqq for Yevhen : write test routine startOptionDryMultiple */
     startOptionCurrentPath,
     startOptionCurrentPaths,
