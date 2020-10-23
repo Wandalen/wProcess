@@ -18994,6 +18994,25 @@ function startOptionDryMultiple( test )
 
   function testApp()
   {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    let options =
+    {
+      execPath : 'node ' + programPath,
+      dry : 1,
+      outputCollecting : 1,
+      // throwingExitCode : 0,
+      // outputPiping : 0,
+      // verbosity
+    }
+
+    return _.process.start( options );
+  }
+
+  function testApp2()
+  {
     console.log( 'Not printed' );
   }
 }
