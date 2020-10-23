@@ -1424,6 +1424,7 @@ function startSync( test )
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
 
+    process.removeAllListeners( 'SIGHUP' );
     process.removeAllListeners( 'SIGINT' );
     process.removeAllListeners( 'SIGTERM' );
     process.removeAllListeners( 'exit' );
@@ -1633,6 +1634,7 @@ function startSyncDeasync( test )
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
 
+    process.removeAllListeners( 'SIGHUP' );
     process.removeAllListeners( 'SIGINT' );
     process.removeAllListeners( 'SIGTERM' );
     process.removeAllListeners( 'exit' );
@@ -15054,7 +15056,7 @@ ${options.runs[ 1 ].procedure.id}.end
 
 }
 
-startConcurrentConsequencesMultiple.timeOut = 500000;
+startConcurrentConsequencesMultiple.timeOut = 2e6;
 startConcurrentConsequencesMultiple.description =
 `
   - all consequences are called
@@ -15746,27 +15748,36 @@ startNjs.timeOut = 20000;
 
 //
 
-/* qqq for Yevhen : subroutine for modes */
 function startNjsWithReadyDelayStructural( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
   let programPath = a.program( program1 );
 
+  /* qqq for Yevhen : add varying `sync` and `deasync`
+    do not combine `detaching` with `dry`
+    do not combine `detaching` with `sync` and `deasync`
+    */
+  /* qqq for Yevhen : add varying `sync` and `deasync` and `dry` for test routine startNjsWithReadyDelayStructuralMultiple */
+
   let modes = [ 'fork', 'spawn', 'shell' ];
-  modes.forEach( ( mode ) => a.ready.then( () => run( 0, mode ) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run( 1, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 0, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
   return a.ready;
 
   /* */
 
-  function run( detaching, mode )
+  function run( detaching, dry, mode ) /* qqq for Yevhen : put parameters in map `tops` */
+  // function run( tops )
   {
     let ready = _.Consequence().take( null );
 
     ready.then( () =>
     {
-      // zzz for Vova: output piping doesn't work as expected in mode "shell" on windows
+      /* qqq for Vova : output piping doesn't work as expected in mode "shell" on windows
+      does not?
+      */
       test.case = `mode:${mode} detaching:${detaching}`;
       let con = new _.Consequence().take( null ).delay( context.t1 ); /* 1000 */
 
@@ -15774,6 +15785,7 @@ function startNjsWithReadyDelayStructural( test )
       {
         mode,
         detaching,
+        dry,
         execPath : programPath,
         currentPath : a.abs( '.' ),
         throwingExitCode : 1,
@@ -15789,14 +15801,15 @@ function startNjsWithReadyDelayStructural( test )
 
       returned.then( ( op ) =>
       {
-        test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.identical( op.output, 'program1:begin\n' );
+
+        if( !dry )
+        {
+          test.identical( op.exitCode, 0 );
+          test.identical( op.output, 'program1:begin\n' );
+        }
 
         let exp2 = _.mapExtend( null, exp );
-        exp2.output = 'program1:begin\n';
-        exp2.exitCode = 0;
-        exp2.exitSignal = null;
         exp2.process = options.process;
         exp2.procedure = options.procedure;
         exp2.streamOut = options.streamOut;
@@ -15805,15 +15818,21 @@ function startNjsWithReadyDelayStructural( test )
         exp2.args = mode === 'fork' ? [] : [ programPath ];
         exp2.fullExecPath = ( mode === 'fork' ? '' : 'node ' ) + programPath;
         exp2.state = 'terminated';
-        exp2.exitReason = 'normal';
         exp2.ended = true;
+        if( !dry )
+        {
+          exp2.output = 'program1:begin\n';
+          exp2.exitCode = 0;
+          exp2.exitSignal = null;
+          exp2.exitReason = 'normal';
+        }
 
         test.identical( options, exp2 );
-        test.identical( !!options.process, true );
+        test.identical( !!options.process, !dry );
         test.is( _.routineIs( options.disconnect ) );
-        test.is( _.streamIs( options.streamOut ) );
-        test.is( _.streamIs( options.streamErr ) );
-        test.is( options.streamOut !== options.streamErr );
+        test.identical( _.streamIs( options.streamOut ), !dry );
+        test.identical( _.streamIs( options.streamErr ), !dry );
+        test.identical( options.streamOut !== options.streamErr, !dry );
         test.is( options.conTerminate !== options.ready );
         test.identical( options.ready.exportString(), 'Consequence:: 0 / 1' );
         test.identical( options.conTerminate.exportString(), 'Consequence:: 1 / 0' );
@@ -15827,6 +15846,7 @@ function startNjsWithReadyDelayStructural( test )
       {
         mode,
         detaching,
+        dry,
         'execPath' : ( mode === 'fork' ? '' : 'node ' ) + programPath,
         'currentPath' : a.abs( '.' ),
         'throwingExitCode' : 1,
@@ -15841,7 +15861,6 @@ function startNjsWithReadyDelayStructural( test )
         'args' : null,
         'interpreterArgs' : null,
         'when' : 'instant',
-        'dry' : 0,
         'ipc' : mode === 'fork' ? true : false,
         'env' : null,
         'hiding' : 1,
@@ -21217,7 +21236,7 @@ function killSync( test )
   let testAppPath = a.program( testApp );
 
   /*
-    xxx : hangs up on Windows with interval 150 if run in sync mode
+    zzz : hangs up on Windows with interval below 150 if run in sync mode
   */
 
   /* */
@@ -22157,6 +22176,7 @@ function endSignalsBasic( test )
   modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGQUIT' ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGINT' ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGTERM' ) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGHUP' ) ) ); // xxx
   modes.forEach( ( mode ) => a.ready.then( () => signalKilling( mode, 'SIGKILL' ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => terminate( mode ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => terminateShell( mode ) ) );
@@ -23621,6 +23641,7 @@ deasync:end
 
     function handlersRemove()
     {
+      process.removeAllListeners( 'SIGHUP' );
       process.removeAllListeners( 'SIGINT' );
       process.removeAllListeners( 'SIGQUIT' );
       process.removeAllListeners( 'SIGTERM' );
@@ -23631,7 +23652,7 @@ deasync:end
 
 }
 
-endSignalsBasic.timeOut = 300000;
+endSignalsBasic.timeOut = 1e6;
 endSignalsBasic.description =
 `
   - signals terminate or kill started process
@@ -23659,6 +23680,7 @@ function endSignalsOnExit( test )
   modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGQUIT' ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGINT' ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGTERM' ) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGHUP' ) ) ); // xxx
   modes.forEach( ( mode ) => a.ready.then( () => signalKilling( mode, 'SIGKILL' ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => terminate( mode ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => kill( mode ) ) );
@@ -29246,7 +29268,7 @@ var Proto =
 
     startSync,
     startSyncDeasync,
-    startSpawnSyncDeasync,
+    startSpawnSyncDeasync, /* qqq xxx */
     startSpawnSyncDeasyncThrowing,
     startShellSyncDeasync,
     startShellSyncDeasyncThrowing,

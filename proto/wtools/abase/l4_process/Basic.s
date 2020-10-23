@@ -23,6 +23,7 @@ if( typeof module !== 'undefined' )
   _.include( 'wPathBasic' );
   _.include( 'wGdf' );
   _.include( 'wConsequence' );
+  _.include( 'wFiles' );
 
   require( './l3/Execution.s' );
   require( './l3/Io.s' );
@@ -184,7 +185,7 @@ function _exitHandlerRepair()
   if( !_global.process )
   return;
 
-  // process.on( 'SIGHUP', handle_functor( 'SIGHUP', 1 ) ); /* xxx : experiment? */
+  // process.on( 'SIGHUP', handle_functor( 'SIGHUP', 1 ) ); /* xxx yyy : experiment? */
   process.on( 'SIGQUIT', handle_functor( 'SIGQUIT', 3 ) );
   process.on( 'SIGINT', handle_functor( 'SIGINT', 2 ) );
   process.on( 'SIGTERM', handle_functor( 'SIGTERM', 15 ) );
@@ -199,7 +200,7 @@ function _exitHandlerRepair()
       if( _realGlobal_._exitHandlerRepairTerminating )
       return;
       _realGlobal_._exitHandlerRepairTerminating = 1;
-      _.time._begin( _.process._sanitareTime, () => /* xxx : experiment to remove delay or use _begin */
+      _.time._begin( _.process._sanitareTime, () =>
       {
         try
         {
@@ -413,6 +414,9 @@ let Extension =
   _Setup1,
 
   // fields
+
+  _sanitareTime : 1,
+  _exitReason : null,
 
   _tempFiles,
   _registeredExitHandler : null,
