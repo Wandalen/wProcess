@@ -30938,7 +30938,7 @@ var Proto =
 
     terminateDetachedFirstChildSpawn,
     terminateDetachedFirstChildFork,
-    // terminateDetachedFirstChildShell, /* qqq for Vova : it fails on Mint */
+    terminateDetachedFirstChildShell, /* qqq for Vova : it fails on Mint */
 
     terminateWithDetachedChildSpawn,
     terminateWithDetachedChildFork,
