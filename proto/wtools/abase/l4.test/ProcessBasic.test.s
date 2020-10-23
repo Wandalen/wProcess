@@ -18885,32 +18885,40 @@ function startMinimalOptionDry( test )
 
       _.process.start( options )
 
-      options.conStart.then( () =>
+      options.conStart.tap( ( err, op ) =>
       {
         track.push( 'conStart' );
+        test.identical( err, undefined );
+        test.identical( op, options );
         test.identical( options.process, null );
         return null;
       })
 
-      options.conDisconnect.then( () =>
+      options.conDisconnect.tap( ( err, op ) =>
       {
         track.push( 'conDisconnect' );
+        test.identical( err, Symbol.for( 'dont' ) );
+        test.identical( op, undefined );
         test.identical( options.process, null );
         return null;
       })
 
-      options.conTerminate.then( () =>
+      options.conTerminate.tap( ( err, op ) =>
       {
         track.push( 'conTerminate' );
+        test.identical( err, undefined );
+        test.identical( op, options );
         test.identical( options.process, null );
         return null;
       })
 
-      options.ready.then( ()=>
+      options.ready.tap( ( err, op ) =>
       {
         track.push( 'ready' );
         test.identical( options.process, null );
-        test.identical( track, [ 'conStart', 'conTerminate', 'ready' ] );
+        test.identical( err, undefined );
+        test.identical( op, options );
+        test.identical( track, [ 'conStart', 'conDisconnect' ,'conTerminate', 'ready' ] );
         return null;
       } )
 
