@@ -1,3 +1,5 @@
+const { platform } = require('os');
+
 ( function _ProcessBasic_test_s( )
 {
 
@@ -4690,7 +4692,10 @@ function startArgumentsParsingNonTrivial( test )
         else
         {
           test.ni( op.exitCode, 0 );
+          if( process.platform === 'darwin' )
           test.is( _.strHas( op.output, 'first arg: command not found' ) );
+          else
+          test.is( _.strHas( op.output, '"first arg"' ) );
           test.identical( o.execPath, mode === 'shell' ? '"first arg"' : 'first arg' );
           test.identical( o.args, [] );
         }
@@ -4734,7 +4739,10 @@ function startArgumentsParsingNonTrivial( test )
         else
         {
           test.ni( op.exitCode, 0 );
+          if( process.platform === 'darwin' )
           test.is( _.strHas( op.output, 'first: command not found' ) );
+          else
+          test.is( _.strHas( op.output, 'first' ) );
         }
         test.identical( o.execPath, 'first arg' );
         test.identical( o.args, [ 'second arg' ] );
@@ -4772,10 +4780,18 @@ function startArgumentsParsingNonTrivial( test )
           test.is( !!err );
           test.is( _.strHas( err.message, '"' ) )
         }
-        else
+        else if( mode === 'fork' )
         {
           test.ni( op.exitCode, 0 );
           test.is( _.strHas( op.output, ': command not found' ) );
+        }
+        else
+        {
+          test.ni( op.exitCode, 0 );
+          if( process.platform === 'darwin' )
+          test.is( _.strHas( op.output, ': command not found' ) );
+          else
+          test.is( _.strHas( op.output, '" first arg "' ) );
         }
 
         test.identical( o.execPath, '"' );
@@ -4814,10 +4830,18 @@ function startArgumentsParsingNonTrivial( test )
           test.is( !!err );
           test.identical( o.execPath, '' );
         }
-        else
+        else if( mode === 'fork' )
         {
           test.ni( op.exitCode, 0 );
           test.is( _.strHas( op.output, 'unexpected EOF while looking for matching' ) );
+        }
+        else
+        {
+          test.ni( op.exitCode, 0 );
+          if( process.platform === 'darwin' )
+          test.is( _.strHas( op.output, 'unexpected EOF while looking for matching' ) );
+          else
+          test.is( _.strHas( op.output, 'first' ) );
         }
 
         test.identical( o.args, [ 'first', 'arg', '"' ] );
@@ -4855,11 +4879,18 @@ function startArgumentsParsingNonTrivial( test )
           test.is( !!err );
           test.is( _.strHas( err.message, `spawn " ENOENT` ) );
         }
+        else if( mode === 'fork' )
+        {
+          test.ni( op.exitCode, 0 );
+          test.is( _.strHas( op.output, 'unexpected EOF while looking for matching' ) );
+        }
         else
         {
-          test.ni( o.exitCode, 0 );
-          console.log( 'OP', o.output )
-          test.is( _.strHas( o.output, 'unexpected EOF while looking for matching' ) );
+          test.ni( op.exitCode, 0 );
+          if( process.platform === 'darwin' )
+          test.is( _.strHas( op.output, 'unexpected EOF while looking for matching' ) );
+          else
+          test.is( _.strHas( op.output, '" "' ) );
         }
 
         test.identical( o.execPath, '"' );
@@ -4919,6 +4950,9 @@ function startArgumentsParsingNonTrivial( test )
         {
           test.identical( o.execPath, 'node' );
           test.identical( o.args, [ _.strQuote( testAppPathSpace ), `"path/key3":'val3'` ] );
+          if( process.platform === 'win32' )
+          test.identical( op.scriptArgs, [ `path/key3:'val3'` ] )
+          else
           test.identical( op.scriptArgs, [ 'path/key3:val3' ] )
         }
         else if( mode === 'spawn' )
