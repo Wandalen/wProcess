@@ -1,3 +1,5 @@
+const { exec } = require('child_process');
+
 ( function _Execution_s_()
 {
 
@@ -2276,7 +2278,6 @@ function startNjs_body( o )
 
   // let execPath = o.execPath ? _.path.nativizeMinimal( o.execPath ) : '';
   let execPath = o.execPath || '';
-  let args = [];
   // _.assert( o.interpreterArgs === null || o.interpreterArgs === '', 'not implemented' ); /* qqq for Yevhen : implement and cover. | aaa : Done ( Have worked without changes, though )*/
 
   /* ORIGINAL */
@@ -2304,28 +2305,14 @@ function startNjs_body( o )
     if( !interpreterArgs )
     interpreterArgs = [];
 
-    /*
-      Using o.args doesn't work
-      Command has a wrong structure and options are skipped : node [ script.js ] [ options ] [ V8 options ] [ arguments ]
-      Example node /Users/jackiejo/Temp/ProcessBasic-2020-10-22-22-19-50-754-25e8.tmp/startNjsOptionInterpreterArgs/program1.js --version --expose-gc --stack-trace-limit=999 --max_old_space_size=17179869184
-      As a hack can be used :
-      args = [ options ] and [ V8 options ]
-      o.execPath : _.strConcat([ 'node', args, execPath ]);
-      than o.args if any will be appended in `start` routine.
-    */
+    if( o.args === null )
+    o.args = o.interpreterArgs.concat( interpreterArgs, execPath );
+    else if( _.routineIs( o.args ) )
+    o.args = o.interpreterArgs.concat( interpreterArgs, execPath, _.arrayAs( o.args( o ) ) );
+    else
+    o.args = o.interpreterArgs.concat( interpreterArgs, execPath, o.args );
 
-    // if( o.args === null )
-    // o.args = o.interpreterArgs.concat( interpreterArgs );
-    // else if( _.arrayIs( o.args ) )
-    // o.args = o.interpreterArgs.concat( interpreterArgs, o.args );
-    // else if( _.strIs( o.args ) )
-    // o.args = o.interpreterArgs.concat( interpreterArgs, _.strSplitNonPreserving({ src : o.args }) );
-    // else if( _.routineIs( o.args ) )
-    // o.args = o.interpreterArgs.concat( interpreterArgs, _.arrayAs( o.args( o ) ) );
-
-    args = o.interpreterArgs.concat( interpreterArgs ).join( ' ' );
-
-    execPath = _.strConcat([ 'node', args, execPath ]);
+    execPath = 'node';
   }
 
   o.execPath = execPath;
