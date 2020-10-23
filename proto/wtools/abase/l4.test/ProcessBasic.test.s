@@ -18717,53 +18717,81 @@ function startOptionDry( test )
   let a = context.assetFor( test, false );
   let programPath = a.program( testApp );
 
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'trivial'
-    let o =
-    {
-      execPath : 'node ' + programPath + ` arg1 "arg 2" "'arg3'"`,
-      mode : 'spawn',
-      args : [ 'arg0' ],
-      sync : 0,
-      dry : 1,
-      deasync : 0,
-      outputPiping : 1,
-      outputCollecting : 1,
-      throwingExitCode : 1,
-      applyingExitCode : 1,
-      timeOut : 100,
-      ipc : 1,
-      when : { delay : 1000 }
-    }
-    var t1 = _.time.now();
-    var returned = _.process.start( o );
-    test.is( _.consequenceIs( returned ) );
-    returned.then( function( op )
-    {
-      var t2 = _.time.now();
-      test.ge( t2 - t1, 1000 )
-
-      test.identical( op.exitCode, null );
-      test.identical( op.ended, true );
-      test.identical( op.exitSignal, null );
-      test.identical( op.process, null );
-      test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
-      test.identical( op.fullExecPath, `node ${programPath} arg1 arg 2 'arg3' arg0` );
-      test.identical( op.output, '' );
-
-      test.is( !a.fileProvider.fileExists( a.path.join( a.routinePath, 'file' ) ) )
-
-      return op;
-    })
-    return returned;
-  })
-
-  /*  */
-
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, trivial`
+      let o =
+      { //spawn
+        execPath : mode === 'fork' ? programPath + ` arg1 "arg 2" "'arg3'"` : 'node ' + programPath + ` arg1 "arg 2" "'arg3'"`,
+        mode,
+        args : [ 'arg0' ],
+        sync : 0,
+        dry : 1,
+        deasync : 0,
+        outputPiping : 1,
+        outputCollecting : 1,
+        throwingExitCode : 1,
+        applyingExitCode : 1,
+        timeOut : 100,
+        ipc : mode === 'shell' ? 0 : 1,
+        when : { delay : 1000 }
+      }
+      var t1 = _.time.now();
+      var returned = _.process.start( o );
+      test.is( _.consequenceIs( returned ) );
+      returned.then( function( op )
+      {
+        var t2 = _.time.now();
+        test.ge( t2 - t1, 1000 )
+        test.identical( op.procedure._name, null );
+        test.identical( op.procedure._object, null );
+        test.identical( op.state, 'terminated' );
+        test.identical( op.exitReason, null );
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, null );
+        test.identical( op.error, null );
+        test.identical( op.process, null );
+        test.identical( op.output, '' );
+        test.identical( op.ended, true );
+        test.identical( op.streamOut, null );
+        test.identical( op.streamErr, null );
+        if( mode === 'fork' )
+        {
+          test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
+          test.identical( op.fullExecPath, `${programPath} arg1 arg 2 'arg3' arg0` );
+        }
+        else if ( mode === 'shell' )
+        {
+          test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe' ] );
+          if( process.platform === 'win32' )
+          test.identical( op.fullExecPath, `node ${programPath} arg1 "arg 2" "'arg3'" "arg0"` );
+          else
+          test.identical( op.fullExecPath, `node ${programPath} arg1 "arg 2" "'arg3'" "arg0"` );
+        }
+        else
+        {
+          test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
+          test.identical( op.fullExecPath, `node ${programPath} arg1 arg 2 'arg3' arg0` );
+        }
+
+        test.is( !a.fileProvider.fileExists( a.path.join( a.routinePath, 'file' ) ) )
+
+        return op;
+      })
+
+      return returned;
+    })
+
+    return ready;
+  }
 
   /* - */
 
@@ -18781,6 +18809,75 @@ startOptionDry.description =
 Simulates run of routine start with all possible options.
 After execution checks fields of run descriptor.
 `
+
+//
+
+function startMinimalOptionDry( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let programPath = a.program( testApp );
+
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, outputCollecting : 1`;
+
+      let options =
+      {
+        execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+        mode,
+        outputCollecting : 1,
+        dry : 1
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.procedure._name, null );
+        test.identical( op.procedure._object, null );
+        test.identical( op.state, 'terminated' );
+        test.identical( op.exitReason, null );
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, null );
+        test.identical( op.error, null );
+        test.identical( op.process, null );
+        test.identical( op.output, '' );
+        test.identical( op.ended, true );
+        test.identical( op.streamOut, null );
+        test.identical( op.streamErr, null );
+        if( mode === 'fork' )
+        {
+          test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
+          test.identical( op.fullExecPath, programPath );
+        }
+        else
+        {
+          test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe' ] );
+          test.identical( op.fullExecPath, `node ${programPath}` );
+        }
+
+        return null;
+      } )
+    })
+
+    return ready;
+  }
+
+  /* - */
+
+  function testApp()
+  {
+    console.log( 'Not printed' );
+  }
+}
 
 //
 
@@ -29373,6 +29470,7 @@ var Proto =
 
     startOptionDry, /* qqq for Yevhen : make sure option dry is covered good enough. */
     /* qqq for Yevhen : write test routine startOptionDryMultiple */
+    startMinimalOptionDry,
     startOptionCurrentPath,
     startOptionCurrentPaths,
     startOptionPassingThrough, /* qqq for Yevhen : extend please | aaa : Done. Yevhen S. */
