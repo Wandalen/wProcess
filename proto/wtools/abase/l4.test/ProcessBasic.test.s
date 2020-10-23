@@ -1,3 +1,4 @@
+/* eslint-disable */
 ( function _ProcessBasic_test_s( )
 {
 
@@ -18729,7 +18730,7 @@ function startOptionDry( test )
     {
       test.case = `mode : ${mode}, trivial`
       let o =
-      { //spawn
+      {
         execPath : mode === 'fork' ? programPath + ` arg1 "arg 2" "'arg3'"` : 'node ' + programPath + ` arg1 "arg 2" "'arg3'"`,
         mode,
         args : [ 'arg0' ],
@@ -18813,6 +18814,124 @@ After execution checks fields of run descriptor.
 //
 
 function startMinimalOptionDry( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let programPath = a.program( testApp );
+
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, outputCollecting : 1`;
+
+      let options =
+      {
+        execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+        mode,
+        outputCollecting : 1,
+        dry : 1
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.procedure._name, null );
+        test.identical( op.procedure._object, null );
+        test.identical( op.state, 'terminated' );
+        test.identical( op.exitReason, null );
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, null );
+        test.identical( op.error, null );
+        test.identical( op.process, null );
+        test.identical( op.output, '' );
+        test.identical( op.ended, true );
+        test.identical( op.streamOut, null );
+        test.identical( op.streamErr, null );
+        if( mode === 'fork' )
+        {
+          test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
+          test.identical( op.fullExecPath, programPath );
+        }
+        else
+        {
+          test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe' ] );
+          test.identical( op.fullExecPath, `node ${programPath}` );
+        }
+
+        return null;
+      } )
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, outputCollecting : 1, con* checks`;
+      let track = [];
+      let options =
+      {
+        execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+        mode,
+        outputCollecting : 1,
+        dry : 1
+      }
+
+      _.process.start( options )
+
+      options.conStart.then( () =>
+      {
+        track.push( 'conStart' );
+        test.identical( options.process, null );
+        return null;
+      })
+
+      options.conDisconnect.then( () =>
+      {
+        track.push( 'conDisconnect' );
+        test.identical( options.process, null );
+        return null;
+      })
+
+      options.conTerminate.then( () =>
+      {
+        track.push( 'conTerminate' );
+        test.identical( options.process, null );
+        return null;
+      })
+
+      options.ready.then( ()=>
+      {
+        track.push( 'ready' );
+        test.identical( options.process, null );
+        test.identical( track, [ 'conStart', 'conTerminate', 'ready' ] );
+        return null;
+      } )
+
+      return options.ready;
+
+    })
+
+    return ready;
+  }
+
+  /* - */
+
+  function testApp()
+  {
+    console.log( 'Not printed' );
+  }
+}
+
+//
+
+function startOptionDryMultiple( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -29471,6 +29590,7 @@ var Proto =
     startOptionDry, /* qqq for Yevhen : make sure option dry is covered good enough. */
     /* qqq for Yevhen : write test routine startOptionDryMultiple */
     startMinimalOptionDry,
+    startOptionDryMultiple,
     startOptionCurrentPath,
     startOptionCurrentPaths,
     startOptionPassingThrough, /* qqq for Yevhen : extend please | aaa : Done. Yevhen S. */
