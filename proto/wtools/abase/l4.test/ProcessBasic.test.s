@@ -20344,7 +20344,7 @@ function startMinimalOptionDry( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${mode}, outputCollecting : 1`;
+      test.case = `mode : ${mode}, basic`;
 
       let options =
       {
@@ -20388,7 +20388,7 @@ function startMinimalOptionDry( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${mode}, outputCollecting : 1, con* checks`;
+      test.case = `mode : ${mode}, con* checks`;
       let track = [];
       let options =
       {
@@ -20412,7 +20412,7 @@ function startMinimalOptionDry( test )
       options.conDisconnect.tap( ( err, op ) =>
       {
         track.push( 'conDisconnect' );
-        test.identical( err, Symbol.for( 'dont' ) );
+        test.identical( err, _.dont );
         test.identical( op, undefined );
         test.identical( options.process, null );
         return null;
@@ -20440,6 +20440,8 @@ function startMinimalOptionDry( test )
       return options.ready;
 
     })
+
+    /* Add error cases */
 
     return ready;
   }
