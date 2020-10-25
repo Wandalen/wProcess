@@ -4695,7 +4695,8 @@ function startArgumentsParsingNonTrivial( test )
           if( process.platform === 'darwin' )
           test.is( _.strHas( op.output, 'first arg: command not found' ) );
           else
-          test.is( _.strHas( op.output, '"first arg"' ) );
+          test.identical( op.output, 'a' );
+          // test.is( _.strHas( op.output, '"first arg"' ) );
           test.identical( o.execPath, mode === 'shell' ? '"first arg"' : 'first arg' );
           test.identical( o.args, [] );
         }
@@ -4791,7 +4792,8 @@ function startArgumentsParsingNonTrivial( test )
           if( process.platform === 'darwin' )
           test.is( _.strHas( op.output, ': command not found' ) );
           else
-          test.is( _.strHas( op.output, '" first arg "' ) );
+          test.identical( op.output, 'a' );
+          // test.is( _.strHas( op.output, '" first arg "' ) );
         }
 
         test.identical( o.execPath, '"' );
@@ -4841,7 +4843,8 @@ function startArgumentsParsingNonTrivial( test )
           if( process.platform === 'darwin' )
           test.is( _.strHas( op.output, 'unexpected EOF while looking for matching' ) );
           else
-          test.is( _.strHas( op.output, 'first' ) );
+          test.identical( op.output, 'a' );
+          // test.is( _.strHas( op.output, 'first' ) );
         }
 
         test.identical( o.args, [ 'first', 'arg', '"' ] );
@@ -4890,7 +4893,8 @@ function startArgumentsParsingNonTrivial( test )
           if( process.platform === 'darwin' )
           test.is( _.strHas( op.output, 'unexpected EOF while looking for matching' ) );
           else
-          test.is( _.strHas( op.output, '" "' ) );
+          test.identical( op.output, 'a' );
+          // test.is( _.strHas( op.output, '" "' ) );
         }
 
         test.identical( o.execPath, '"' );
