@@ -1357,15 +1357,15 @@ startMinimal_body.defaults =
   briefExitCode : 0,
 
   verbosity : 2, /* qqq for Yevhen : cover the option */
-  outputPrefixing : 0, /* qqq for Yevhen : cover the option */
-  outputPiping : null, /* qqq for Yevhen : cover the option */
+  outputPrefixing : 0, /* qqq for Yevhen : cover the option | aaa : Done */
+  outputPiping : null, /* qqq for Yevhen : cover the option | aaa : Done */
   outputCollecting : 0,
   outputAdditive : null, /* qqq for Yevhen : cover the option */
   outputColoring : 1, /* qqq for Yevhen : cover the option */
   outputColoringStderr : null, /* qqq for Yevhen : cover the option */
   outputColoringStdout : null, /* qqq for Yevhen : cover the option */
   outputGraying : 0,
-  inputMirroring : 1, /* qqq for Yevhen : cover the option */
+  inputMirroring : 1, /* qqq for Yevhen : cover the option | aaa : Done */
 
 }
 
@@ -2825,7 +2825,8 @@ function signal_body( o )
     ready.finally( ( err, arg ) =>
     {
       if( !err || err.reason !== 'time out' )
-      timeOutError.take( _.dont );
+      timeOutError.error( _.dont );
+      // timeOutError.take( _.dont );
 
       if( !err )
       return arg;
