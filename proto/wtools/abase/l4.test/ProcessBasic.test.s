@@ -4695,7 +4695,12 @@ function startArgumentsParsingNonTrivial( test )
           if( process.platform === 'darwin' )
           test.is( _.strHas( op.output, 'first arg: command not found' ) );
           else if( process.platform === 'win32' )
-          test.identical( op.output, `'"first arg"' is not recognized as an internal or external command, operable program or batch file.\n` );
+          test.identical
+          (
+            op.output,
+            `'"first arg"' is not recognized as an internal or external command,
+           operable program or batch file.\n`
+          );
           else
           test.identical( op.output, 'sh: 1: first arg: not found\n' )
           // test.is( _.strHas( op.output, '"first arg"' ) );
@@ -4745,10 +4750,14 @@ function startArgumentsParsingNonTrivial( test )
           if( process.platform === 'darwin' )
           test.is( _.strHas( op.output, 'first: command not found' ) );
           else if( process.platform === 'win32' )
-          test.identical( op.output, `'"first arg"' is not recognized as an internal or external command, operable program or batch file.\n` );
+          test.identical
+          (
+            op.output,
+            `'first arg' is not recognized as an internal or external command, 
+          operable program or batch file.\n`
+          );
           else
-          test.identical( op.output, 'sh: 1: first arg: not found\n' )
-          // test.identical( 'sh: 1:  first arg : not found\n' );
+          test.identical( op.output, 'sh: 1: first: not found\n' )
         }
         test.identical( o.execPath, 'first arg' );
         test.identical( o.args, [ 'second arg' ] );
@@ -4797,7 +4806,12 @@ function startArgumentsParsingNonTrivial( test )
           if( process.platform === 'darwin' )
           test.is( _.strHas( op.output, ': command not found' ) );
           else if( process.platform === 'win32' )
-          test.identical( op.output, `'"first arg"' is not recognized as an internal or external command, operable program or batch file.\n` );
+          test.identical
+          (
+            op.output,
+            `'" first arg "' is not recognized as an internal or external command, 
+          operable program or batch file.\n`
+          );
           else
           test.identical( op.output, 'sh: 1:  first arg : not found\n' );
           // test.is( _.strHas( op.output, '" first arg "' ) );
@@ -4850,7 +4864,12 @@ function startArgumentsParsingNonTrivial( test )
           if( process.platform === 'darwin' )
           test.is( _.strHas( op.output, 'unexpected EOF while looking for matching' ) );
           else if( process.platform === 'win32' )
-          test.identical( op.output, `'first arg' is not recognized as an internal or external command, operable program or batch file.\n` );
+          test.identical
+          (
+            op.output,
+            `'first' is not recognized as an internal or external command, 
+          operable program or batch file.\n`
+          );
           else
           test.identical( op.output, 'sh: 1: Syntax error: Unterminated quoted string\n' );
           // test.is( _.strHas( op.output, 'first' ) );
@@ -4870,7 +4889,7 @@ function startArgumentsParsingNonTrivial( test )
     {
       test.case = `mode : ${mode}, args in execPath and args options`
 
-      if( mode === 'fork' ) return null;
+      if( mode === 'fork' )return null;
 
       let con = new _.Consequence().take( null );
       let o =
@@ -4902,7 +4921,12 @@ function startArgumentsParsingNonTrivial( test )
           if( process.platform === 'darwin' )
           test.is( _.strHas( op.output, 'unexpected EOF while looking for matching' ) );
           else if( process.platform === 'win32' )
-          test.identical( op.output, `'" "' is not recognized as an internal or external command, operable program or batch file.\n` );
+          test.identical
+          (
+            op.output,
+            `'" "' is not recognized as an internal or external command, 
+          operable program or batch file.\n`
+          );
           else
           test.identical( op.output, 'sh: 1: Syntax error: Unterminated quoted string\n' );
           // test.is( _.strHas( op.output, '" "' ) );
