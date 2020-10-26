@@ -10239,7 +10239,7 @@ function startChronology( test )
       if( sync || deasync )
       test.identical( _.Procedure.FindAlive().length - pacounter, -2 );
       else
-      test.identical( _.Procedure.FindAlive().length - pacounter, niteration > 1 ? -2 : 0 );
+      test.identical( _.Procedure.FindAlive().length - pacounter, niteration > 1 ? -1 : 0 );
       pacounter = _.Procedure.FindAlive().length;
       /*
       2 extra procedures dies here on non-first iteration
@@ -10273,7 +10273,7 @@ function startChronology( test )
       test.identical( _.Procedure.Counter - ptcounter, 0 );
       ptcounter = _.Procedure.Counter;
       if( sync || deasync )
-      test.identical( _.Procedure.FindAlive().length - pacounter, niteration > 1 ? -3 : -1 );
+      test.identical( _.Procedure.FindAlive().length - pacounter, niteration > 1 ? -2 : -1 );
       else
       test.identical( _.Procedure.FindAlive().length - pacounter, -1 );
       pacounter = _.Procedure.FindAlive().length;
