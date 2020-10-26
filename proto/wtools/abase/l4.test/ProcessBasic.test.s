@@ -21187,6 +21187,324 @@ function appTempApplication( test )
 // other options
 // --
 
+function startOptionStreamSizeLimit( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let modes = [ 'spawn', 'shell' ];
+
+  modes.forEach( ( mode ) =>
+  {
+    a.ready.tap( () => test.open( mode ) )
+    a.ready.then( () => run( mode ) )
+    a.ready.tap( () => test.close( mode ) )
+  })
+
+  return a.ready;
+
+  /* */
+
+  function run( mode )
+  {
+    let ready = _.take( null );
+
+    ready.then( () =>
+    {
+      test.case = `data is less than streamSizeLimit ( default )`;
+
+      let testAppPath = a.path.nativize( a.program( testApp ) );
+
+      let options =
+      {
+        execPath : 'node ' + testAppPath,
+        mode,
+        sync : 1,
+        outputCollecting : 1,
+      }
+
+      let returned =  _.process.start( options );
+      test.identical( returned.process.stdout.toString(), 'data1\n' );
+
+      a.fileProvider.fileDelete( testAppPath );
+
+      return returned;
+
+    });
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `data is less than streamSizeLimit ( 20 )`;
+
+      let testAppPath = a.path.nativize( a.program( testApp ) );
+
+      let options =
+      {
+        execPath : 'node ' + testAppPath,
+        mode,
+        sync : 1,
+        streamSizeLimit : 20,
+        outputCollecting : 1,
+      }
+
+      let returned =  _.process.start( options );
+      test.identical( returned.process.stdout.toString(), 'data1\n' );
+
+      a.fileProvider.fileDelete( testAppPath );
+
+      return returned;
+
+    });
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `data is equal to the streamSizeLimit`;
+
+      let testAppPath = a.path.nativize( a.program( testApp ) );
+
+      let options =
+      {
+        execPath : 'node ' + testAppPath,
+        mode,
+        sync : 1,
+        streamSizeLimit : 10,
+        outputCollecting : 1,
+      }
+
+      let returned =  _.process.start( options );
+      test.identical( returned.process.stdout.toString(), 'data1\n' )
+
+      a.fileProvider.fileDelete( testAppPath );
+      return returned;
+
+    });
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `data is bigger than streamSizeLimit`;
+
+      let testAppPath = a.path.nativize( a.program( testApp ) );
+
+      let options =
+      {
+        execPath : 'node ' + testAppPath,
+        mode,
+        sync : 1,
+        streamSizeLimit : 4,
+        outputCollecting : 1,
+      }
+
+      let returned = test.shouldThrowErrorSync( () => _.process.start( options ) )
+
+      test.is( _.errIs( returned ) );
+      test.is( _.strHas( returned.message, `spawnSync ${mode === 'shell' ? 'sh' : 'node' } ENOBUFS` ) )
+      test.is( _.strHas( returned.message, `code : 'ENOBUFS'`) )
+
+      test.notIdentical( options.exitCode, 0 );
+
+      a.fileProvider.fileDelete( testAppPath );
+      return null;
+
+    });
+
+    return ready;
+  }
+
+  /* - */
+
+  function testApp()
+  {
+    console.log( 'data1' );
+  }
+}
+
+//
+
+function startOptionStreamSizeLimitThrowing( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let modes = [ 'spawn', 'shell' ];
+
+  a.ready.then( () =>
+  {
+    test.case = `mode : 'fork', deasync : 1, limit : 100`;
+
+    let testAppPath = a.path.nativize( a.program( testApp ) );
+
+    let options =
+    {
+      execPath : 'node ' + testAppPath,
+      mode : 'fork',
+      deasync : 1,
+      streamSizeLimit : 100,
+      outputCollecting : 1,
+    }
+
+    let returned = test.shouldThrowErrorSync( () => _.process.start( options ) )
+
+    test.is( _.errIs( returned ) );
+    test.is( _.strHas( returned.message, `Option::streamSizeLimit is supported in mode::spawn and mode::shell with sync::1` ) )
+
+    test.notIdentical( options.exitCode, 0 );
+
+    a.fileProvider.fileDelete( testAppPath );
+
+    return null;
+  } )
+
+  /* */
+
+  modes.forEach( ( mode ) =>
+  {
+    a.ready.tap( () => test.open( mode ) )
+    a.ready.then( () => run( mode ) )
+    a.ready.tap( () => test.close( mode ) )
+  })
+
+  return a.ready;
+
+  /* */
+
+  function run( mode )
+  {
+    let ready = _.take( null );
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `sync : 1, limit : '100'`;
+
+      let testAppPath = a.path.nativize( a.program( testApp ) );
+
+      let options =
+      {
+        execPath : 'node ' + testAppPath,
+        mode,
+        sync : 1,
+        streamSizeLimit : '100',
+        outputCollecting : 1,
+      }
+
+      let returned = test.shouldThrowErrorSync( () => _.process.start( options ) )
+
+      test.is( _.errIs( returned ) );
+      test.is( _.strHas( returned.message, `Option::streamSizeLimit must be a positive Number which is greater than zero` ) )
+
+      test.notIdentical( options.exitCode, 0 );
+
+      a.fileProvider.fileDelete( testAppPath );
+      return null;
+
+    });
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `sync : 1, limit : -1`;
+
+      let testAppPath = a.path.nativize( a.program( testApp ) );
+
+      let options =
+      {
+        execPath : 'node ' + testAppPath,
+        mode,
+        sync : 1,
+        streamSizeLimit : -1,
+        outputCollecting : 1,
+      }
+
+      let returned = test.shouldThrowErrorSync( () => _.process.start( options ) )
+
+      test.is( _.errIs( returned ) );
+      test.is( _.strHas( returned.message, `Option::streamSizeLimit must be a positive Number which is greater than zero` ) )
+
+      test.notIdentical( options.exitCode, 0 );
+
+      a.fileProvider.fileDelete( testAppPath );
+      return null;
+
+    });
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `sync : 0, limit : 100`;
+
+      let testAppPath = a.path.nativize( a.program( testApp ) );
+
+      let options =
+      {
+        execPath : 'node ' + testAppPath,
+        mode,
+        sync : 0,
+        streamSizeLimit : 100,
+        outputCollecting : 1,
+      }
+
+      let returned = test.shouldThrowErrorSync( () => _.process.start( options ) )
+
+      test.is( _.errIs( returned ) );
+      test.is( _.strHas( returned.message, `Option::streamSizeLimit is supported in mode::spawn and mode::shell with sync::1` ) )
+
+      test.notIdentical( options.exitCode, 0 );
+
+      a.fileProvider.fileDelete( testAppPath );
+      return null;
+
+    });
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `sync : 0, deasync : 1, limit : 100`;
+
+      let testAppPath = a.path.nativize( a.program( testApp ) );
+
+      let options =
+      {
+        execPath : 'node ' + testAppPath,
+        mode,
+        sync : 0,
+        deasync : 1,
+        streamSizeLimit : 100,
+        outputCollecting : 1,
+      }
+
+      let returned = test.shouldThrowErrorSync( () => _.process.start( options ) )
+
+      test.is( _.errIs( returned ) );
+      test.is( _.strHas( returned.message, `Option::streamSizeLimit is supported in mode::spawn and mode::shell with sync::1` ) )
+
+      test.notIdentical( options.exitCode, 0 );
+
+      a.fileProvider.fileDelete( testAppPath );
+      return null;
+
+    });
+
+    return ready;
+  }
+
+  /* - */
+
+  function testApp()
+  {
+    console.log( 'data1' );
+  }
+}
+
+//
+
 function startOptionDry( test )
 {
   let context = this;
@@ -31857,6 +32175,8 @@ var Proto =
 
     // other options
 
+    startOptionStreamSizeLimit,
+    startOptionStreamSizeLimitThrowing,
     startOptionDry, /* qqq for Yevhen : make sure option dry is covered good enough */
     /* qqq for Yevhen : write test routine startOptionDryMultiple */
     startOptionCurrentPath,
