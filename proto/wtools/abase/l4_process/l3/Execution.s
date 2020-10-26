@@ -143,7 +143,7 @@ function startCommon_head( routine, args )
     'Option::streamSizeLimit must be a positive Number which is greater than zero'
   )
 
-  if( o.streamSizeLimit )
+  if( o.streamSizeLimit !== null )
   _.assert
   (
     o.sync && ( o.mode === 'spawn' || o.mode === 'shell' ),
