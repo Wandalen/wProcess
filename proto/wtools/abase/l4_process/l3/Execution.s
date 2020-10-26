@@ -2824,7 +2824,8 @@ function signal_body( o )
     ready.finally( ( err, arg ) =>
     {
       if( !err || err.reason !== 'time out' )
-      timeOutError.take( _.dont );
+      timeOutError.error( _.dont );
+      // timeOutError.take( _.dont );
 
       if( !err )
       return arg;
