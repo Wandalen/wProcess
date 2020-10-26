@@ -438,6 +438,9 @@ function startMinimal_body( o )
     if( !StripAnsi )
     StripAnsi = require( 'strip-ansi' );
 
+    // if( !_.fileProvider )
+    // _.include( 'wFiles' );
+
     if( o.outputColoring && typeof module !== 'undefined' )
     try
     {
@@ -485,17 +488,15 @@ function startMinimal_body( o )
       }
       _.assert( o.state === 'terminated' || o.state === 'disconnected' );
       end2( undefined );
-
-      return end1();
     }
     else
     {
       if( o.when.delay )
       o.ready.delay( o.when.delay );
       o.ready.thenGive( run2 );
-      return end1();
     }
 
+    return end1();
   }
 
   /* */
@@ -600,6 +601,7 @@ function startMinimal_body( o )
     return;
 
     o.process = ChildProcess.fork( execPath, o.args, o2 );
+    /* xxx : rename */
 
   }
 
@@ -797,10 +799,7 @@ function startMinimal_body( o )
     o.process.signalCode = exitSignal;
 
     if( o.error )
-    {
-      debugger; /* xxx : check */
-      throw err;
-    }
+    throw err;
 
     if( exitSignal )
     o.exitReason = 'signal';
@@ -811,9 +810,9 @@ function startMinimal_body( o )
 
     if( o.verbosity >= 5 )
     {
-      log( ` < Process returned error code ${exitCode}` ); /* qqq for Yevhen : is covered? | aaa : Yes. */
+      log( ` < Process returned error code ${exitCode}` );
       if( exitCode )
-      log( infoGet() ); /* qqq for Yevhen : is covered? | aaa : Yes. */
+      log( infoGet() );
     }
 
     if( ( exitSignal || exitCode !== 0 ) && o.throwingExitCode )
@@ -839,12 +838,13 @@ function startMinimal_body( o )
 
   /* */
 
-  function handleExit( a, b, c )
+  function handleExit( exitCode, exitSignal )
   {
     /* xxx : use handleExit */
     /*
     console.log( 'handleExit', _.process.realMainFile(), o.ended, ... arguments ); debugger;
     */
+    // handleClose( exitCode, exitSignal );
   }
 
   /* */
@@ -1001,14 +1001,7 @@ function startMinimal_body( o )
 
     /* handling */
 
-    if( o.sync && !o.deasync )
-    {
-      // if( o.process.error )
-      // handleError( o.process.error );
-      // else
-      // handleClose( o.process.status, o.process.signal );
-    }
-    else
+    if( !o.sync || o.deasync )
     {
       o.process.on( 'error', handleError );
       o.process.on( 'close', handleClose );
@@ -1151,7 +1144,7 @@ function startMinimal_body( o )
       })
       args[ i ] = _.strQuote( args[ i ] );
 
-      // args[ i ] = _.process.escapeArg( args[ i ]  ); //zzz for Vova: use this routine, review fails
+      // args[ i ] = _.process.escapeArg( args[ i ]  ); /* zzz for Vova : use this routine, review fails */
     }
 
     return args.join( ' ' );
@@ -1259,8 +1252,6 @@ function startMinimal_body( o )
   function handleStreamErr( data )
   {
 
-    // if( _.bufferAnyIs( data ) )
-    // data = _.bufferToStr( data ); /* qqq for Yevhen : use more optimal condition and routine to convert buffer here and in other places | aaa : Done .*/
     if( _.bufferNodeIs( data ) )
     data = data.toString( 'utf8' );
     if( o.outputGraying )
@@ -1277,7 +1268,7 @@ function startMinimal_body( o )
     data = _.strRemoveEnd( data, '\n' );
 
     if( o.outputPrefixing )
-    data = 'stderr :\n' + '  ' + _.strLinesIndentation( data, '  ' );
+    data = 'stderr :\n' + '  ' + _.strLinesIndentation( data, '  ' ); /* qqq for Yevgen : change how option outputPrefixing works. discuss */
 
     if( _.color && o.outputColoring && o.outputColoringStderr )
     data = _.ct.format( data, 'pipe.negative' );
@@ -1290,8 +1281,6 @@ function startMinimal_body( o )
   function handleStreamOut( data )
   {
 
-    // if( _.bufferAnyIs( data ) )
-    // data = _.bufferToStr( data );
     if( _.bufferNodeIs( data ) )
     data = data.toString( 'utf8' );
     if( o.outputGraying )
@@ -1306,7 +1295,7 @@ function startMinimal_body( o )
     data = _.strRemoveEnd( data, '\n' );
 
     if( o.outputPrefixing )
-    data = 'stdout :\n' + '  ' + _.strLinesIndentation( data, '  ' );
+    data = 'stdout :\n' + '  ' + _.strLinesIndentation( data, '  ' ); /* qqq for Yevgen : change how option outputPrefixing works. discuss */
 
     if( _.color && o.outputColoring && o.outputColoringStdout )
     data = _.ct.format( data, 'pipe.neutral' );
@@ -1383,19 +1372,19 @@ startMinimal_body.defaults =
   briefExitCode : 0,
 
   verbosity : 2, /* qqq for Yevhen : cover the option */
-  outputPrefixing : 0, /* qqq for Yevhen : cover the option */
-  outputPiping : null, /* qqq for Yevhen : cover the option */
+  outputPrefixing : 0, /* qqq for Yevhen : cover the option | aaa : Done */
+  outputPiping : null, /* qqq for Yevhen : cover the option | aaa : Done */
   outputCollecting : 0,
   outputAdditive : null, /* qqq for Yevhen : cover the option */
   outputColoring : 1, /* qqq for Yevhen : cover the option */
   outputColoringStderr : null, /* qqq for Yevhen : cover the option */
   outputColoringStdout : null, /* qqq for Yevhen : cover the option */
   outputGraying : 0,
-  inputMirroring : 1, /* qqq for Yevhen : cover the option */
+  inputMirroring : 1, /* qqq for Yevhen : cover the option | aaa : Done */
 
 }
 
-/* xxx : move advanced options to _.process.start() */
+/* xxx : move advanced options to _.process.startSingle() */
 
 let startMinimal = _.routineUnite( startMinimal_head, startMinimal_body );
 
@@ -1531,7 +1520,7 @@ function start_body( o )
   _.assert( arguments.length === 1, 'Expects single argument' );
 
   let processPipeCounter = 0;
-  let readyCallback; /* xxx : cover and implement ready callback for multiple */
+  let readyCallback;
 
   form0();
 
@@ -1604,7 +1593,6 @@ function start_body( o )
     o.currentPath = o.currentPath || _.path.current();
 
     o.runs = []; /* xxx : rename to sessions */
-    // o.disconnect = disconnect; /* xxx */
     o.state = 'initial'; /* `initial`, `starting`, `started`, `terminating`, `terminated`, `disconnected` */
     o.exitReason = null;
     o.exitCode = null;
@@ -1625,28 +1613,38 @@ function start_body( o )
   function run1()
   {
 
-    /* xxx : add try catch block */
+    /* yyy : add try catch block */
 
-    form1();
-    form2();
-
-    if( o.stdio[ 1 ] !== 'ignore' || o.stdio[ 2 ] !== 'ignore' )
-    formStreams();
-
-    if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
+    try
     {
-      o.procedure = _.procedure.begin({ _object : o, _stack : o.stack });
-    }
-    else if( o.procedure )
-    {
-      /* qqq xxx : cover */
-      debugger;
-      if( !o.procedure.isAlive() )
-      o.procedure.begin();
-    }
 
-    if( o.sync && !o.deasync )
-    o.ready.deasync();
+      form1();
+      form2();
+
+      if( o.stdio[ 1 ] !== 'ignore' || o.stdio[ 2 ] !== 'ignore' )
+      formStreams();
+
+      if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
+      {
+        o.procedure = _.procedure.begin({ _object : o, _stack : o.stack });
+      }
+      else if( o.procedure )
+      {
+        /* qqq for Yevhen : cover option procedure. take into account all branches
+        */
+        if( !o.procedure.isAlive() )
+        o.procedure.begin();
+      }
+
+      if( o.sync && !o.deasync )
+      o.ready.deasync();
+
+    }
+    catch( err )
+    {
+      err = _.err( err );
+      end2( err, undefined );
+    }
 
     o.ready
     .then( run2 )
@@ -1730,11 +1728,9 @@ function start_body( o )
       catch( err )
       {
         err2 = err;
-        // o2.error = o2.error || err; // yyy
         o2.ready.error( err );
       }
 
-      /* xxx : if error consequence could be not here */
       conStart.push( o2.conStart );
       conTerminate.push( o2.conTerminate );
       readies.push( o2.ready );
@@ -1750,15 +1746,6 @@ function start_body( o )
         serialEnd();
         throw err;
       });
-
-      // yyy xxx
-      // if( err2 )
-      // if( !o.concurrent )
-      // {
-      //   if( o.state !== 'terminated' )
-      //   serialEnd();
-      //   o2.ready.error( err );
-      // }
 
     });
 
@@ -1785,9 +1772,8 @@ function start_body( o )
 
   /* */
 
-  function end1() /* xxx : make similar change in startMinimal() */
+  function end1()
   {
-    debugger;
     if( readyCallback )
     o.ready.finally( readyCallback );
     if( o.deasync )
@@ -1967,7 +1953,12 @@ function start_body( o )
     if( o.sync && !o.deasync )
     {
       dst.write( src );
-      /* xxx : need also take care of emitting end in sync case */
+      if( processPipeCounter === o.runs.length )
+      {
+        debugger; xxx
+        dst.end();
+        /* xxx : need also take care of emitting end in sync case */
+      }
       return;
     }
 
@@ -1984,14 +1975,9 @@ function start_body( o )
     src.on( 'end', () =>
     {
       _.arrayRemoveOnceStrictly( dst._pipes, src );
-      /* xxx : add checking of statqe here. should be not starting */
-      // if( dst._pipes.length === 0 && o.concurrent )
       if( dst._pipes.length === 0 )
-      // if( o.concurrent )
       if( processPipeCounter === o.runs.length )
       {
-        // console.log( 'processPipeCounter', processPipeCounter );
-        // debugger;
         dst.end();
       }
     });
@@ -2024,8 +2010,6 @@ start_body.defaults =
   concurrent : 0,
 
 }
-
-/* xxx : implement test with throwing error in the first process / second process */
 
 let start = _.routineUnite( start_head, start_body );
 
@@ -2253,10 +2237,6 @@ function startNjs_body( o )
 
   if( !System )
   System = require( 'os' );
-
-  /* xxx qqq : remove? */
-  _.include( 'wPathBasic' );
-  _.include( 'wFiles' );
 
   _.assertRoutineOptions( startNjs_body, o );
   _.assert( _.strIs( o.execPath ) );
@@ -2860,7 +2840,8 @@ function signal_body( o )
     ready.finally( ( err, arg ) =>
     {
       if( !err || err.reason !== 'time out' )
-      timeOutError.take( _.dont );
+      timeOutError.error( _.dont );
+      // timeOutError.take( _.dont );
 
       if( !err )
       return arg;
@@ -3125,9 +3106,6 @@ let Extension =
   children,
 
   // fields
-
-  _sanitareTime : 1,
-  _exitReason : null,
 
 }
 
