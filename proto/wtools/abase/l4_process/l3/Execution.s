@@ -2227,11 +2227,12 @@ function startNjs_body( o )
   _.assert( !o.code );
   _.assert( arguments.length === 1, 'Expects single argument' );
 
+  /* == Added == */
   if( _.strIs( o.interpreterArgs ) && o.interpreterArgs !== '' )
   o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs });
 
-  // o.interpreterArgs = o.interpreterArgs || process.execArgv;
   _.assert( _.arrayIs( o.interpreterArgs ) || o.interpreterArgs === null );
+  /* == == */
 
   /*
   1024*1024 for megabytes
@@ -2269,6 +2270,7 @@ function startNjs_body( o )
   //   execPath = _.strConcat([ 'node', interpreterArgs, execPath ]);
   // }
 
+  /* == Rewritten == */
   if( !interpreterArgs )
   interpreterArgs = [];
 
@@ -2295,6 +2297,7 @@ function startNjs_body( o )
 
   if( o.interpreterArgs.length === 0 )
   o.interpreterArgs = null;
+  /* == == */
 
   o.execPath = execPath;
 
