@@ -2230,8 +2230,8 @@ function startNjs_body( o )
   if( _.strIs( o.interpreterArgs ) && o.interpreterArgs !== '' )
   o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs });
 
-  o.interpreterArgs = o.interpreterArgs || process.execArgv;
-  _.assert( _.arrayIs( o.interpreterArgs ) );
+  // o.interpreterArgs = o.interpreterArgs || process.execArgv;
+  _.assert( _.arrayIs( o.interpreterArgs ) || o.interpreterArgs === null );
 
   /*
   1024*1024 for megabytes
@@ -2269,28 +2269,29 @@ function startNjs_body( o )
   //   execPath = _.strConcat([ 'node', interpreterArgs, execPath ]);
   // }
 
+  if( !interpreterArgs )
+  interpreterArgs = [];
+
   /* Correct order : node [options] [V8 options] [script.js | -e "script" | -] [--] [arguments] */
   if( o.mode === 'fork' )
   {
-    if( interpreterArgs )
-    {
-      o.interpreterArgs = o.interpreterArgs.concat( interpreterArgs );
-    }
+    if( interpreterArgs.length > 0 )
+    o.interpreterArgs = o.interpreterArgs === null ? interpreterArgs : o.interpreterArgs.concat( interpreterArgs );
   }
   else
   {
+    if( interpreterArgs.length > 0 )
+    {
+      if( o.args === null )
+      o.args = o.interpreterArgs === null ? interpreterArgs.concat( execPath ) : o.interpreterArgs.concat( interpreterArgs, execPath );
+      else if( _.routineIs( o.args ) )
+      o.args = o.interpreterArgs === null ? interpreterArgs.concat( execPath, _.arrayAs( o.args( o ) ) ) : o.interpreterArgs.concat( interpreterArgs, execPath, _.arrayAs( o.args( o ) ) );
+      else
+      o.args = o.interpreterArgs === null ? interpreterArgs.concat( execPath, o.args ) : o.interpreterArgs.concat( interpreterArgs, execPath, o.args );
 
-    if( !interpreterArgs )
-    interpreterArgs = [];
+      execPath = 'node';
+    }
 
-    if( o.args === null )
-    o.args = o.interpreterArgs.concat( interpreterArgs, execPath );
-    else if( _.routineIs( o.args ) )
-    o.args = o.interpreterArgs.concat( interpreterArgs, execPath, _.arrayAs( o.args( o ) ) );
-    else
-    o.args = o.interpreterArgs.concat( interpreterArgs, execPath, o.args );
-
-    execPath = 'node';
   }
 
   o.execPath = execPath;
