@@ -4698,7 +4698,7 @@ function startArgumentsParsingNonTrivial( test )
           test.identical
           (
             op.output,
-            `'"first arg"' is not recognized as an internal or external command, \noperable program or batch file.\n`
+            `'"first arg"' is not recognized as an internal or external command,\noperable program or batch file.\n`
           );
           else
           test.identical( op.output, 'sh: 1: first arg: not found\n' )
@@ -4752,7 +4752,7 @@ function startArgumentsParsingNonTrivial( test )
           test.identical
           (
             op.output,
-            `'first' is not recognized as an internal or external command, \noperable program or batch file.\n`
+            `'first' is not recognized as an internal or external command,\noperable program or batch file.\n`
           );
           else
           test.identical( op.output, 'sh: 1: first: not found\n' )
@@ -4807,7 +4807,7 @@ function startArgumentsParsingNonTrivial( test )
           test.identical
           (
             op.output,
-            `'" first arg "' is not recognized as an internal or external command, \noperable program or batch file.\n`
+            `'" first arg "' is not recognized as an internal or external command,\noperable program or batch file.\n`
           );
           else
           test.identical( op.output, 'sh: 1:  first arg : not found\n' );
@@ -4864,7 +4864,7 @@ function startArgumentsParsingNonTrivial( test )
           test.identical
           (
             op.output,
-            `'first' is not recognized as an internal or external command, \noperable program or batch file.\n`
+            `'first' is not recognized as an internal or external command,\noperable program or batch file.\n`
           );
           else
           test.identical( op.output, 'sh: 1: Syntax error: Unterminated quoted string\n' );
@@ -4920,7 +4920,7 @@ function startArgumentsParsingNonTrivial( test )
           test.identical
           (
             op.output,
-            `'" "' is not recognized as an internal or external command, \noperable program or batch file.\n`
+            `'" "' is not recognized as an internal or external command,\noperable program or batch file.\n`
           );
           else
           test.identical( op.output, 'sh: 1: Syntax error: Unterminated quoted string\n' );
