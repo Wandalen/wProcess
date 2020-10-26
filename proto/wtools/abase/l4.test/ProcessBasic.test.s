@@ -20572,11 +20572,10 @@ function startOptionDryMultiple( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${mode}, outputCollecting : 1`;
-
+      test.case = `mode : ${mode}, basic`;
       let options =
       {
-        execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+        execPath : [ mode === 'fork' ? programPath + ' id:1' : 'node ' + programPath + ' id:1', mode === 'fork' ? programPath + ' id:2' : 'node ' + programPath + ' id:2' ],
         mode,
         outputCollecting : 1,
         dry : 1
@@ -20585,32 +20584,223 @@ function startOptionDryMultiple( test )
       return _.process.start( options )
       .then( ( op ) =>
       {
+        console.log( `mode : ${mode}; OPPPPPP: `, op );
         test.identical( op.procedure._name, null );
-        test.identical( op.procedure._object, null );
+        // test.identical( op.procedure._object, null );
         test.identical( op.state, 'terminated' );
-        test.identical( op.exitReason, null );
+        // test.identical( op.exitReason, null );
+        test.identical( op.exitReason, 'normal' );
         test.identical( op.exitCode, null );
         test.identical( op.exitSignal, null );
         test.identical( op.error, null );
-        test.identical( op.process, null );
+        // test.identical( op.process, null );
         test.identical( op.output, '' );
         test.identical( op.ended, true );
-        test.identical( op.streamOut, null );
-        test.identical( op.streamErr, null );
+        // test.identical( op.streamOut, null );
+        // test.identical( op.streamErr, null );
         if( mode === 'fork' )
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
-          test.identical( op.fullExecPath, programPath );
+          // test.identical( op.fullExecPath, programPath );
         }
         else
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe' ] );
-          test.identical( op.fullExecPath, `node ${programPath}` );
+          // test.identical( op.fullExecPath, `node ${programPath}` );
         }
+
+        op.runs.forEach( ( op2, counter ) =>
+        {
+          // console.log( `mode : ${mode}, OPOPPOPOPO#${counter} : `, op2 )
+          test.identical( op2.procedure._name, null );
+          test.identical( op2.procedure._object, null );
+          test.identical( op2.state, 'terminated' );
+          test.identical( op2.exitReason, null );
+          test.identical( op2.exitReason, null );
+          test.identical( op2.exitCode, null );
+          test.identical( op2.exitSignal, null );
+          test.identical( op2.error, null );
+          test.identical( op2.process, null );
+          test.identical( op2.output, '' );
+          test.identical( op2.ended, true );
+          test.identical( op2.streamOut, null );
+          test.identical( op2.streamErr, null );
+          if( mode === 'fork' )
+          {
+            test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
+            // test.identical( op.fullExecPath, programPath + `id:${counter}` );
+          }
+          else
+          {
+            test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe' ] );
+            test.identical( op.execPath, `node ${programPath} id:${counter}` );
+            test.identical( op.execPath, `node ${programPath} id:${counter}` );
+          }
+        });
 
         return null;
       } )
+
     })
+
+    /* */
+
+    // ready.then( () =>
+    // {
+    //   test.case = `mode : ${mode}, con* checks`;
+    //   let track = [];
+    //   let options =
+    //   {
+    //     execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+    //     mode,
+    //     outputCollecting : 1,
+    //     dry : 1
+    //   }
+
+    //   _.process.start( options )
+
+    //   options.conStart.tap( ( err, op ) =>
+    //   {
+    //     track.push( 'conStart' );
+    //     test.identical( err, undefined );
+    //     test.identical( op, options );
+    //     test.identical( options.process, null );
+    //     return null;
+    //   })
+
+    //   options.conDisconnect.tap( ( err, op ) =>
+    //   {
+    //     track.push( 'conDisconnect' );
+    //     test.identical( err, _.dont );
+    //     test.identical( op, undefined );
+    //     test.identical( options.process, null );
+    //     return null;
+    //   })
+
+    //   options.conTerminate.tap( ( err, op ) =>
+    //   {
+    //     track.push( 'conTerminate' );
+    //     test.identical( err, undefined );
+    //     test.identical( op, options );
+    //     test.identical( options.process, null );
+    //     return null;
+    //   })
+
+    //   options.ready.tap( ( err, op ) =>
+    //   {
+    //     track.push( 'ready' );
+    //     test.identical( options.process, null );
+    //     test.identical( err, undefined );
+    //     test.identical( op, options );
+    //     test.identical( track, [ 'conStart', 'conDisconnect' ,'conTerminate', 'ready' ] );
+    //     return null;
+    //   } )
+
+    //   return options.ready;
+
+    // })
+
+    // /* */
+
+    // ready.then( () =>
+    // {
+    //   test.case = `mode : ${mode}, error in options map`;
+
+    //   let options =
+    //   {
+    //     execPath : 'err' + programPath,
+    //     mode,
+    //     outputCollecting : 1,
+    //     dry : 1
+    //   }
+
+    //   return _.process.start( options )
+    //   .then( ( op ) =>
+    //   {
+    //     test.identical( op.procedure._name, null );
+    //     test.identical( op.procedure._object, null );
+    //     test.identical( op.state, 'terminated' );
+    //     test.identical( op.exitReason, null );
+    //     test.identical( op.exitCode, null );
+    //     test.identical( op.exitSignal, null );
+    //     test.identical( op.error, null );
+    //     test.identical( op.process, null );
+    //     test.identical( op.output, '' );
+    //     test.identical( op.ended, true );
+    //     test.identical( op.streamOut, null );
+    //     test.identical( op.streamErr, null );
+    //     test.identical( op.fullExecPath, 'err' + programPath );
+    //     if( mode === 'fork' )
+    //     {
+    //       test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
+    //     }
+    //     else
+    //     {
+    //       test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe' ] );
+    //     }
+
+    //     return null;
+    //   } )
+    // })
+
+    // /* */
+
+    // ready.then( () =>
+    // {
+    //   test.case = `mode : ${mode}, error in options map, con* checks`;
+
+    //   let track = [];
+
+    //   let options =
+    //   {
+    //     execPath : 'err' + programPath,
+    //     mode,
+    //     outputCollecting : 1,
+    //     dry : 1
+    //   }
+
+    //   _.process.start( options )
+
+    //   options.conStart.tap( ( err, op ) =>
+    //   {
+    //     track.push( 'conStart' );
+    //     test.identical( err, undefined );
+    //     test.identical( op, options );
+    //     test.identical( options.process, null );
+    //     return null;
+    //   })
+
+    //   options.conDisconnect.tap( ( err, op ) =>
+    //   {
+    //     track.push( 'conDisconnect' );
+    //     test.identical( err, _.dont );
+    //     test.identical( op, undefined );
+    //     test.identical( options.process, null );
+    //     return null;
+    //   })
+
+    //   options.conTerminate.tap( ( err, op ) =>
+    //   {
+    //     track.push( 'conTerminate' );
+    //     test.identical( err, undefined );
+    //     test.identical( op, options );
+    //     test.identical( options.process, null );
+    //     return null;
+    //   })
+
+    //   options.ready.tap( ( err, op ) =>
+    //   {
+    //     track.push( 'ready' );
+    //     test.identical( options.process, null );
+    //     test.identical( err, undefined );
+    //     test.identical( op, options );
+    //     test.identical( track, [ 'conStart', 'conDisconnect' ,'conTerminate', 'ready' ] );
+    //     return null;
+    //   } )
+
+    //   return options.ready;
+
+    // })
 
     return ready;
   }
@@ -20618,25 +20808,6 @@ function startOptionDryMultiple( test )
   /* - */
 
   function testApp()
-  {
-    let _ = require( toolsPath );
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-
-    let options =
-    {
-      execPath : 'node ' + programPath,
-      dry : 1,
-      outputCollecting : 1,
-      // throwingExitCode : 0,
-      // outputPiping : 0,
-      // verbosity
-    }
-
-    return _.process.start( options );
-  }
-
-  function testApp2()
   {
     console.log( 'Not printed' );
   }

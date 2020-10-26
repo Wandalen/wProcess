@@ -1922,9 +1922,9 @@ function start_body( o )
       processPipeCounter += 1;
       if( err )
       return;
-      if( o2.process.stdout )
+      if( o2.process?.stdout )
       streamPipe( o.streamOut, o2.process.stdout );
-      if( o2.process.stderr )
+      if( o2.process?.stderr )
       streamPipe( o.streamErr, o2.process.stderr );
     });
 
