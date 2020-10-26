@@ -577,7 +577,6 @@ function startBasic2( test ) /* qqq for Evhen : merge with test routine startBas
     return _.process.start( options )
     .then( function()
     {
-      console.log( 'OO: ', options )
       test.identical( options.exitCode, 0 );
       test.identical( options.output, o2.args.join( ' ' ) + '\n' );
       return null;
