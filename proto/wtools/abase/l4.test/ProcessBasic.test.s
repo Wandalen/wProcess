@@ -20633,8 +20633,8 @@ function startOptionDryMultiple( test )
           else
           {
             test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe' ] );
-            test.identical( op.execPath, `node ${programPath} id:${counter}` );
-            test.identical( op.execPath, `node ${programPath} id:${counter}` );
+            // test.identical( op.execPath, `node ${programPath} id:${counter}` );
+            // test.identical( op.execPath, `node ${programPath} id:${counter}` );
           }
         });
 
