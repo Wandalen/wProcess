@@ -1196,7 +1196,6 @@ function startMinimal_body( o )
     }
     if( o.currentPath )
     o2.cwd = _.path.nativize( o.currentPath );
-
     return o2;
   }
 
