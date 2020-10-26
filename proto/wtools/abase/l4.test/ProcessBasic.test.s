@@ -20332,7 +20332,7 @@ function startMinimalOptionDry( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( testApp );
+  let programPath = a.path.nativize( a.program( testApp ) );
 
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
@@ -20441,7 +20441,107 @@ function startMinimalOptionDry( test )
 
     })
 
-    /* Add error cases */
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, error in options map`;
+
+      let options =
+      {
+        execPath : 'err' + programPath,
+        mode,
+        outputCollecting : 1,
+        dry : 1
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.procedure._name, null );
+        test.identical( op.procedure._object, null );
+        test.identical( op.state, 'terminated' );
+        test.identical( op.exitReason, null );
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, null );
+        test.identical( op.error, null );
+        test.identical( op.process, null );
+        test.identical( op.output, '' );
+        test.identical( op.ended, true );
+        test.identical( op.streamOut, null );
+        test.identical( op.streamErr, null );
+        test.identical( op.fullExecPath, 'err' + programPath );
+        if( mode === 'fork' )
+        {
+          test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
+        }
+        else
+        {
+          test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe' ] );
+        }
+
+        return null;
+      } )
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, error in options map, con* checks`;
+
+      let track = [];
+
+      let options =
+      {
+        execPath : 'err' + programPath,
+        mode,
+        outputCollecting : 1,
+        dry : 1
+      }
+
+      _.process.start( options )
+
+      options.conStart.tap( ( err, op ) =>
+      {
+        track.push( 'conStart' );
+        test.identical( err, undefined );
+        test.identical( op, options );
+        test.identical( options.process, null );
+        return null;
+      })
+
+      options.conDisconnect.tap( ( err, op ) =>
+      {
+        track.push( 'conDisconnect' );
+        test.identical( err, _.dont );
+        test.identical( op, undefined );
+        test.identical( options.process, null );
+        return null;
+      })
+
+      options.conTerminate.tap( ( err, op ) =>
+      {
+        track.push( 'conTerminate' );
+        test.identical( err, undefined );
+        test.identical( op, options );
+        test.identical( options.process, null );
+        return null;
+      })
+
+      options.ready.tap( ( err, op ) =>
+      {
+        track.push( 'ready' );
+        test.identical( options.process, null );
+        test.identical( err, undefined );
+        test.identical( op, options );
+        test.identical( track, [ 'conStart', 'conDisconnect' ,'conTerminate', 'ready' ] );
+        return null;
+      } )
+
+      return options.ready;
+
+    })
 
     return ready;
   }
