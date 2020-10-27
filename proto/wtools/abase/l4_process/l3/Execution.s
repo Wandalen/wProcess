@@ -615,7 +615,6 @@ function startMinimal_body( o )
 
     let o2 = optionsForSpawn();
 
-    /* if( interpreterArgs ) */
     o.fullExecPath = _.strConcat( _.arrayAppendArray( [ execPath ], o.args ) );
     inputMirror();
 
