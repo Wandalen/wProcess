@@ -21890,6 +21890,7 @@ function startOptionDryMultiple( test )
   let context = this;
   let a = context.assetFor( test, false );
   let programPath = a.program( testApp );
+  let track = [];
 
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
@@ -21901,7 +21902,7 @@ function startOptionDryMultiple( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${mode}, basic`;
+      test.case = `mode : ${mode}, without error, con* checks`;
       let options =
       {
         execPath : [ mode === 'fork' ? programPath + ' id:1' : 'node ' + programPath + ' id:1', mode === 'fork' ? programPath + ' id:2' : 'node ' + programPath + ' id:2' ],
@@ -21936,29 +21937,68 @@ function startOptionDryMultiple( test )
 
         op.runs.forEach( ( op2, counter ) =>
         {
-          test.identical( op2.procedure._name, null );
-          test.identical( op2.procedure._object, null );
-          test.identical( op2.state, 'terminated' );
-          test.identical( op2.exitReason, null );
-          test.identical( op2.exitReason, null );
-          test.identical( op2.exitCode, null );
-          test.identical( op2.exitSignal, null );
-          test.identical( op2.error, null );
-          test.identical( op2.process, null );
-          test.identical( op2.output, '' );
-          test.identical( op2.ended, true );
-          test.identical( op2.streamOut, null );
-          test.identical( op2.streamErr, null );
-          if( mode === 'fork' )
+          op2.conStart.tap( ( err, op ) =>
           {
-            test.identical( op2.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
-            test.identical( op2.fullExecPath, programPath + ` id:${counter + 1}` );
-          }
-          else
+            track.push( 'conStart' );
+            test.identical( err, undefined );
+            test.identical( op, op2 );
+            test.identical( op2.process, null );
+            return null;
+          })
+
+          op2.conDisconnect.tap( ( err, op ) =>
           {
-            test.identical( op2.stdio, [ 'pipe', 'pipe', 'pipe' ] );
-            test.identical( op2.fullExecPath, `node ${programPath} id:${counter + 1}` );
+            track.push( 'conDisconnect' );
+            test.identical( err, _.dont );
+            test.identical( op, undefined );
+            test.identical( op2.process, null );
+            return null;
+          })
+
+          op2.conTerminate.tap( ( err, op ) =>
+          {
+            track.push( 'conTerminate' );
+            test.identical( err, undefined );
+            test.identical( op, op2 );
+            test.identical( op2.process, null );
+            return null;
+          })
+
+          op2.ready.tap( ( err, op ) =>
+          {
+            track.push( 'ready' );
+            test.identical( op2.process, null );
+            test.identical( err, undefined );
+            test.identical( op, op2 );
+            test.identical( op2.procedure._name, null );
+            test.identical( op2.procedure._object, null );
+            test.identical( op2.state, 'terminated' );
+            test.identical( op2.exitReason, null );
+            test.identical( op2.exitReason, null );
+            test.identical( op2.exitCode, null );
+            test.identical( op2.exitSignal, null );
+            test.identical( op2.error, null );
+            test.identical( op2.process, null );
+            test.identical( op2.output, '' );
+            test.identical( op2.ended, true );
+            test.identical( op2.streamOut, null );
+            test.identical( op2.streamErr, null );
+            if( mode === 'fork' )
+            {
+              test.identical( op2.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
+              test.identical( op2.fullExecPath, programPath + ` id:${counter + 1}` );
+            }
+            else
+            {
+              test.identical( op2.stdio, [ 'pipe', 'pipe', 'pipe' ] );
+              test.identical( op2.fullExecPath, `node ${programPath} id:${counter + 1}` );
           }
+            test.identical( track, [ 'conStart', 'conDisconnect' ,'conTerminate', 'ready' ] );
+            track = [];
+            return null;
+          } )
+
+          return options.ready;
         });
 
         return null;
