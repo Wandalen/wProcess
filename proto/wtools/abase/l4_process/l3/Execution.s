@@ -2248,9 +2248,6 @@ function startNjs_body( o )
   _.assert( !o.code );
   _.assert( arguments.length === 1, 'Expects single argument' );
 
-  if( _.strIs( o.interpreterArgs ) && o.interpreterArgs !== '' )
-  o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs });
-
   _.assert( _.arrayIs( o.interpreterArgs ) || o.interpreterArgs === null );
 
   /*
