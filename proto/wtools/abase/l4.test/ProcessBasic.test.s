@@ -17530,7 +17530,7 @@ function startNjsOptionInterpreterArgs( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.program( program1 );
+  let programPath = a.path.nativize( a.program( program1 ) );
   let totalMem = require( 'os' ).totalmem();
 
   let modes = [ 'fork', 'spawn', 'shell' ];
