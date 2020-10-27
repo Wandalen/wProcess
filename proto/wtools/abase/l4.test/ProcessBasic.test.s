@@ -32749,7 +32749,7 @@ var Proto =
 
     startOptionStreamSizeLimit,
     startOptionStreamSizeLimitThrowing,
-    startOptionDry, /* qqq for Yevhen : make sure option dry is covered good enough | aaa : Done. */
+    startOptionDry, /* qqq for Yevhen : make sure option dry is covered good enough */
     /* qqq for Yevhen : write test routine startOptionDryMultiple | aaa : Done. */
     startMinimalOptionDry,
     startOptionDryMultiple,
