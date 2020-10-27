@@ -137,6 +137,19 @@ function startCommon_head( routine, args )
   o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs });
   _.assert( o.interpreterArgs === null || _.arrayIs( o.interpreterArgs ) );
 
+  _.assert
+  (
+    ( _.numberIs( o.streamSizeLimit ) && o.streamSizeLimit > 0 ) || o.streamSizeLimit === null,
+    'Option::streamSizeLimit must be a positive Number which is greater than zero'
+  )
+
+  if( o.streamSizeLimit !== null )
+  _.assert
+  (
+    o.sync && ( o.mode === 'spawn' || o.mode === 'shell' ),
+    'Option::streamSizeLimit is supported in mode::spawn and mode::shell with sync::1'
+  )
+
   return o;
 }
 
@@ -1164,6 +1177,8 @@ function startMinimal_body( o )
     if( o.timeOut && o.sync )
     o2.timeout = o.timeOut;
     o2.windowsHide = !!o.hiding;
+    if( o.streamSizeLimit )
+    o2.maxBuffer = o.streamSizeLimit;
     return o2;
   }
 
@@ -1347,7 +1362,7 @@ startMinimal_body.defaults =
   hiding : 1,
   uid : null, /* qqq for Yevhen : implement and cover the option */
   gid : null, /* qqq for Yevhen : implement and cover the option */
-  streamSizeLimit : null, /* qqq for Yevhen : implement and cover the option. look option maxBuffer of spawn */
+  streamSizeLimit : null, /* qqq for Yevhen : implement and cover the option. look option maxBuffer of spawn | aaa : Done */
   passingThrough : 0,
   timeOut : null,
 
@@ -1356,15 +1371,15 @@ startMinimal_body.defaults =
   briefExitCode : 0,
 
   verbosity : 2, /* qqq for Yevhen : cover the option */
-  outputPrefixing : 0, /* qqq for Yevhen : cover the option */
-  outputPiping : null, /* qqq for Yevhen : cover the option */
+  outputPrefixing : 0, /* qqq for Yevhen : cover the option | aaa : Done */
+  outputPiping : null, /* qqq for Yevhen : cover the option | aaa : Done */
   outputCollecting : 0,
   outputAdditive : null, /* qqq for Yevhen : cover the option */
   outputColoring : 1, /* qqq for Yevhen : cover the option */
   outputColoringStderr : null, /* qqq for Yevhen : cover the option */
   outputColoringStdout : null, /* qqq for Yevhen : cover the option */
   outputGraying : 0,
-  inputMirroring : 1, /* qqq for Yevhen : cover the option */
+  inputMirroring : 1, /* qqq for Yevhen : cover the option | aaa : Done */
 
 }
 
