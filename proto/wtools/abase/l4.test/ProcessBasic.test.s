@@ -17642,6 +17642,7 @@ function startNjsOptionInterpreterArgs( test )
       return _.process.startNjs( options )
       .then( ( op ) =>
       {
+        if( mode === 'shell' ) console.log( 'SHELL OP: ', op )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.identical( op.output, process.version + '\n' );

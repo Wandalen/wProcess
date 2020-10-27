@@ -621,6 +621,9 @@ function startMinimal_body( o )
     if( o.dry )
     return;
 
+    if( o.interpreterArgs )
+    o.args = o.interpreterArgs.concat( o.args )
+
     if( o.sync && !o.deasync )
     o.process = ChildProcess.spawnSync( execPath, o.args, o2 );
     else
@@ -653,6 +656,9 @@ function startMinimal_body( o )
    */
 
     o2.windowsVerbatimArguments = true;
+
+    if( o.interpreterArgs )
+    o.args = o.interpreterArgs.concat( o.args )
 
     if( o.args.length )
     arg2 = arg2 + ' ' + argsJoin( o.args.slice() );
@@ -2242,12 +2248,10 @@ function startNjs_body( o )
   _.assert( !o.code );
   _.assert( arguments.length === 1, 'Expects single argument' );
 
-  /* == Added == */
   if( _.strIs( o.interpreterArgs ) && o.interpreterArgs !== '' )
   o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs });
 
   _.assert( _.arrayIs( o.interpreterArgs ) || o.interpreterArgs === null );
-  /* == == */
 
   /*
   1024*1024 for megabytes
@@ -2286,32 +2290,11 @@ function startNjs_body( o )
   // }
 
   /* == Rewritten == */
-  if( !interpreterArgs )
-  interpreterArgs = [];
+  if( interpreterArgs !== '' )
+  o.interpreterArgs = o.interpreterArgs === null ? interpreterArgs : o.interpreterArgs.concat( interpreterArgs );
 
-  if( !o.interpreterArgs )
-  o.interpreterArgs = [];
-
-  /* Correct order : node [options] [V8 options] [script.js | -e "script" | -] [--] [arguments] */
-  if( o.mode === 'fork' )
-  {
-    if( interpreterArgs.length > 0 )
-    o.interpreterArgs = o.interpreterArgs.concat( interpreterArgs );
-  }
-  else
-  {
-    if( o.args === null )
-    o.args = o.interpreterArgs.concat( interpreterArgs, execPath );
-    else if( _.routineIs( o.args ) )
-    o.args = o.interpreterArgs.concat( interpreterArgs, execPath, _.arrayAs( o.args( o ) ) );
-    else
-    o.args = o.interpreterArgs.concat( interpreterArgs, execPath, o.args );
-
-    execPath = 'node';
-  }
-
-  if( o.interpreterArgs.length === 0 )
-  o.interpreterArgs = null;
+  if( o.mode === 'spawn' || o.mode === 'shell' )
+  execPath = _.strConcat([ 'node', execPath ]);
   /* == == */
 
   o.execPath = execPath;
