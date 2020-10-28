@@ -24,7 +24,7 @@
     "wpathbasic" : "",
     "wgdf" : "",
     "wConsequence" : "",
-    "deasync" : "0.1.20",
+    "wdeasync" : "",
     "strip-ansi" : "6.0.0"
   },
   "optionalDependencies" : { "wwindows-process-tree" : "0.3.0" },
