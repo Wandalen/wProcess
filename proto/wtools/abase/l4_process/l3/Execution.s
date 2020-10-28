@@ -66,7 +66,7 @@ function startCommon_head( routine, args )
   _.assert
   (
     !o.detaching || !_.longHas( _.arrayAs( o.stdio ), 'inherit' ),
-    `Unsupported stdio: ${o.stdio} for process detaching. Parent will wait for child process.` /* xxx : check */
+    `Unsupported stdio: ${o.stdio} for process detaching. Parent will wait for child process.` /* zzz : check */
   );
   _.assert( !o.detaching || _.longHas( [ 'fork', 'spawn', 'shell' ], o.mode ), `Unsupported mode: ${o.mode} for process detaching` );
   _.assert( o.conStart === null || _.routineIs( o.conStart ) );
@@ -600,8 +600,7 @@ function startMinimal_body( o )
     if( o.dry )
     return;
 
-    o.process = ChildProcess.fork( execPath, o.args, o2 );
-    /* xxx : rename */
+    o.process = ChildProcess.fork( execPath, o.args, o2 ); /* xxx : rename to pnd? */
 
   }
 
@@ -1752,16 +1751,22 @@ function start_body( o )
     if( o.concurrent )
     _.Consequence.AndImmediate( ... conStart ).tap( ( err, arg ) =>
     {
+      if( !o.ended )
+      o.state = 'started'; /* qqq for Yevhen : cover states of multiple run by test routine ( each state, but single test routine ) */
       o.conStart.take( err, err ? undefined : o );
     });
     else
     _.Consequence.OrKeep( ... conStart ).tap( ( err, arg ) =>
     {
+      if( !o.ended )
+      o.state = 'starting';
       o.conStart.take( err, err ? undefined : o );
     });
 
     _.Consequence.AndImmediate( ... conTerminate ).tap( ( err, arg ) =>
     {
+      if( !o.ended )
+      o.state = 'terminating';
       o.conTerminate.take( err, err ? undefined : o );
     });
 
@@ -1787,7 +1792,6 @@ function start_body( o )
 
   function end2( err, arg )
   {
-    _.assert( o.state !== 'terminated' ); /* xxx */
     o.state = 'terminated';
     o.ended = true;
 
@@ -1950,17 +1954,7 @@ function start_body( o )
   function streamPipe( dst, src )
   {
 
-    if( o.sync && !o.deasync )
-    {
-      dst.write( src );
-      if( processPipeCounter === o.runs.length )
-      {
-        debugger; xxx
-        dst.end();
-        /* xxx : need also take care of emitting end in sync case */
-      }
-      return;
-    }
+    _.assert( !o.sync || o.deasync );
 
     if( _.longHas( dst._pipes, src ) )
     {
@@ -2012,177 +2006,6 @@ start_body.defaults =
 }
 
 let start = _.routineUnite( start_head, start_body );
-
-//
-
-function _streamsJoin( o )
-{
-  let streams2 = [];
-  let joining = false;
-  let pipesCount;
-
-  if( _.longIs( o ) )
-  o = { streams : o }
-
-  _.routineOptions( _streamsJoin );
-
-  if( o.highWaterMark == null )
-  o.highWaterMark = 1 << 18;
-
-  if( Config.debug )
-  {
-    _.assert( _.intIs( o.highWaterMark ) );
-    _.assert( _.longIs( o.streams ) );
-    _.assert( o.streams.every( ( stream ) => _.streamIs( stream ) ), 'Expects array of streams' );
-  }
-
-  let o2 =
-  {
-    objectMode : o.objectMode ? true : false,
-    highWaterMark : o.highWaterMark,
-  }
-
-  let resultStream = Stream.PassThrough( o2 );
-  resultStream.joined = o;
-  resultStream.setMaxListeners( 0 )
-  resultStream.add = join1
-  resultStream.on( 'unpipe', handleUnpipe );
-
-  join1( ... o.streams )
-
-  return resultStream;
-
-  /* */
-
-  function join1()
-  {
-    for( let i = 0, len = arguments.length; i < len; i++ )
-    streams2.push( streamPause( arguments[ i ] ) )
-    join2();
-    return this;
-  }
-
-  /* */
-
-  function join2()
-  {
-    if( joining )
-    return;
-
-    joining = true;
-
-    let streams = streams2.shift();
-    if( !streams )
-    {
-      _.time.begin( 0, end );
-      return
-    }
-
-    streams = _.arrayAs( streams );
-    pipesCount = streams.length + 1;
-
-    for( let i = 0; i < streams.length; i++ )
-    pipe( streams[ i ] )
-
-    next()
-  }
-
-  /* */
-
-  function next()
-  {
-    if( --pipesCount > 0 )
-    return;
-    joining = false;
-    join2();
-  }
-
-  /* */
-
-  function pipe( stream )
-  {
-    if( stream._readableState.endEmitted )
-    return next();
-
-    stream.on( 'unpipe2', handleEnd );
-    stream.on( 'end', handleEnd );
-
-    if( o.pipingError )
-    stream.on( 'error', handleError );
-
-    stream.pipe( resultStream, { end : false } );
-    stream.resume();
-  }
-
-  /* */
-
-  function handleUnpipe( stream )
-  {
-    _.assert( 0, 'not tested' );
-    for( let i = 0 ; i < o.streams.length ; i++ )
-    {
-      stream = o.streams[ i ];
-      stream.emit( 'unpipe2' );
-    }
-  }
-
-  /* */
-
-  function handleEnd()
-  {
-    debugger;
-    _.assert( 0, 'not tested' );
-    stream.removeListener( 'unpipe2', handleEnd );
-    stream.removeListener( 'end', handleEnd );
-    if( o.pipingError )
-    stream.removeListener( 'error', handleError );
-    next();
-  }
-
-  /* */
-
-  function handleError( err )
-  {
-    debugger;
-    _.assert( 0, 'not tested' );
-    resultStream.emit( 'error', err )
-  }
-
-  /* */
-
-  function end()
-  {
-    joining = false;
-    resultStream.emit( 'end2' )
-    if( o.ending )
-    resultStream.end()
-  }
-
-  /* */
-
-  function streamPause( stream )
-  {
-    _.assert( _.streamIs( stream ) );
-    if( !stream._readableState && stream.pipe )
-    stream = stream.pipe( PassThrough( o2 ) );
-    if( !stream._readableState || !stream.pause || !stream.pipe )
-    throw _.err( 'Cant join stream which is not readable.' )
-    stream.pause();
-    return stream;
-  }
-
-  /* */
-
-}
-
-_streamsJoin.defaults =
-{
-  streams : null,
-  ending : 1,
-  pipingError : 1,
-  highWaterMark : null,
-  objectMode : 1,
-}
 
 //
 
@@ -3079,8 +2902,6 @@ let Extension =
 
   startMinimal,
   start,
-
-  _streamsJoin,
 
   startPassingThrough,
   startNjs,
