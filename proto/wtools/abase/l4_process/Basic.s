@@ -200,7 +200,7 @@ function _exitHandlerRepair()
       if( _realGlobal_._exitHandlerRepairTerminating )
       return;
       _realGlobal_._exitHandlerRepairTerminating = 1;
-      _.time._begin( _.process._sanitareTime, () =>
+      _.time._begin( _.process._sanitareTime, () => /* xxx : experiment to comment out */
       {
         try
         {

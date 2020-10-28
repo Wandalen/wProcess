@@ -9706,8 +9706,8 @@ function startProcedureStackMultiple( test )
   let context = this;
   let a = context.assetFor( test, false );
   let programPath = a.path.nativize( a.program( program1 ) );
+
   let modes = [ 'fork', 'spawn', 'shell' ];
-  // let modes = [ 'spawn' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run( 1, 0, mode ) ) );
@@ -9755,7 +9755,7 @@ function startProcedureStackMultiple( test )
         test.identical( o.exitSignal, null );
         test.identical( o.exitReason, null );
         test.identical( o.ended, false );
-        test.identical( o.state, 'initial' );
+        test.identical( o.state, 'starting' );
       }
 
       test.identical( _.strCount( o.procedure._stack, 'case1' ), 1 );
@@ -9821,7 +9821,7 @@ function startProcedureStackMultiple( test )
         test.identical( o.exitSignal, null );
         test.identical( o.exitReason, null );
         test.identical( o.ended, false );
-        test.identical( o.state, 'initial' );
+        test.identical( o.state, 'starting' );
       }
 
       test.identical( _.strCount( o.procedure._stack, 'case1' ), 1 );
@@ -9887,7 +9887,7 @@ function startProcedureStackMultiple( test )
         test.identical( o.exitSignal, null );
         test.identical( o.exitReason, null );
         test.identical( o.ended, false );
-        test.identical( o.state, 'initial' );
+        test.identical( o.state, 'starting' );
       }
 
       test.identical( _.strCount( o.procedure._stack, 'case1' ), 1 );
@@ -9953,7 +9953,7 @@ function startProcedureStackMultiple( test )
         test.identical( o.exitSignal, null );
         test.identical( o.exitReason, null );
         test.identical( o.ended, false );
-        test.identical( o.state, 'initial' );
+        test.identical( o.state, 'starting' );
       }
 
       test.identical( _.strCount( o.procedure._stack, 'case1' ), 1 );
@@ -10016,7 +10016,7 @@ function startProcedureStackMultiple( test )
         test.identical( o.exitSignal, null );
         test.identical( o.exitReason, null );
         test.identical( o.ended, false );
-        test.identical( o.state, 'initial' );
+        test.identical( o.state, 'starting' );
       }
 
       test.identical( o.procedure._stack, '' );
@@ -10080,7 +10080,7 @@ function startProcedureStackMultiple( test )
         test.identical( o.exitSignal, null );
         test.identical( o.exitReason, null );
         test.identical( o.ended, false );
-        test.identical( o.state, 'initial' );
+        test.identical( o.state, 'starting' );
       }
 
       test.identical( o.procedure._stack, 'abc' );
@@ -25038,9 +25038,6 @@ function endSignalsBasic( test )
     stdio : 'pipe',
   }
 
-  // xxx
-  // let modes = [ 'fork', 'spawn' ];
-
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGQUIT' ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGINT' ) ) );
@@ -25163,6 +25160,8 @@ program1:end
         test.identical( options.process.killed, true );
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
+        /* if shell then parent process may ignore the signal */
+        if( mode !== 'shell' )
         test.le( dtime, context.t1 * 2 );
         return null;
       })
@@ -25276,7 +25275,7 @@ program1:end
         test.identical( options.process.killed, true );
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
-        test.ge( dtime, context.t1 * 10 ); /* xxx2 */
+        test.ge( dtime, context.t1 * 10 );
         return null;
       })
 
@@ -26468,7 +26467,7 @@ deasync:end
       let now = Date.now();
       while( ( Date.now() - now ) < delay )
       {
-        let x = Number( '123' ); /* xxx2 */
+        let x = Number( '123' );
       }
       console.log( 'sleep:end' );
     }
@@ -26704,6 +26703,7 @@ SIGTERM
 exit:end
 `
         test.identical( options.output, exp1 );
+        test.identical( _.strCount( options.output, 'exit:' ), 1 );
         test.identical( options.exitCode, null );
         test.identical( options.exitSignal, 'SIGTERM' );
         test.identical( options.ended, true );
@@ -26750,6 +26750,7 @@ SIGTERM
 exit:end
 `
         test.identical( options.output, exp1 );
+        test.identical( _.strCount( options.output, 'exit:' ), 1 );
         test.identical( options.exitCode, null );
         test.identical( options.exitSignal, 'SIGTERM' );
         test.identical( options.ended, true );
@@ -26909,7 +26910,7 @@ Killed
     if( withExitHandler )
     process.once( 'exit', onExit );
 
-    setTimeout( () => { console.log( 'program1:end' ) }, context.t1 * 4 );
+    setTimeout( () => { console.log( 'program1:end' ) }, context.t1 * 8 );
 
     function onTime()
     {
@@ -26925,14 +26926,16 @@ Killed
 
 }
 
+endSignalsOnExit.timeOut = 1e6;
 endSignalsOnExit.description =
 `
   - handler of the event "exit" should be called, despite of signal, unless signal is SIGKILL
+  - handler of the event "exit" should be called exactly once
 `
 
 //
 
-function endSignalsOnExitExit( test )
+function endSignalsOnExitExitAgain( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -26947,14 +26950,14 @@ function endSignalsOnExitExit( test )
   }
 
   let modes = [ 'fork', 'spawn' ];
-  modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGQUIT' ) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGINT' ) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGTERM' ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGINT', 128 + 2 ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGQUIT', 128 + 3 ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGTERM', 128 + 15 ) ) );
   return a.ready;
 
   /* --- */
 
-  function signalTerminating( mode, signal )
+  function signalTerminating( mode, signal, exitCode )
   {
     let ready = _.Consequence().take( null );
 
@@ -26966,17 +26969,17 @@ function endSignalsOnExitExit( test )
 
     .then( function( arg )
     {
-      test.case = `mode:${mode}, withExitHandler:1, withTools:1, ${signal}`;
+      test.case = `mode:${mode}, withExitHandler:1, withTools:1, withCode:0, ${signal}`;
       var o2 =
       {
         execPath : mode === `fork` ? `${programPath}` : `node ${programPath}`,
-        args : [ 'withExitHandler:1', 'withTools:1' ],
+        args : [ 'withExitHandler:1', 'withTools:1', 'withCode:0' ],
         mode,
       }
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.start( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 3, () =>
       {
         test.identical( options.process.killed, false );
         time1 = _.time.now();
@@ -26988,24 +26991,25 @@ function endSignalsOnExitExit( test )
         var exp1 =
 `program1:begin
 ${signal}
-exit:end
+exit:${exitCode}
 `
         var exp2 =
 `program1:begin
 program1:end
-exit:end
+exit:${exitCode}
 `
         if( mode === 'shell' )
         test.is( options.output === exp1 || options.output === exp2 );
         else
         test.identical( options.output, exp1 );
-        test.identical( options.exitCode, 0 );
+        test.identical( _.strCount( options.output, 'exit:' ), 1 );
+        test.identical( options.exitCode, exitCode );
         test.identical( options.exitSignal, null );
         test.identical( options.ended, true );
-        test.identical( options.exitReason, 'normal' );
+        test.identical( options.exitReason, 'code' );
         test.identical( options.state, 'terminated' );
         test.identical( options.error, null );
-        test.identical( options.process.exitCode, 0 );
+        test.identical( options.process.exitCode, exitCode );
         test.identical( options.process.signalCode, null );
         test.identical( options.process.killed, true );
         var dtime = _.time.now() - time1;
@@ -27018,93 +27022,19 @@ exit:end
 
     /* - */
 
-    return ready;
-  }
-
-  /* -- */
-
-  function program1()
-  {
-
-    console.log( 'program1:begin' );
-
-    let withExitHandler = process.argv.includes( 'withExitHandler:1' );
-    let withTools = process.argv.includes( 'withTools:1' );
-
-    if( withTools )
-    {
-      let _ = require( toolsPath );
-      _.include( 'wProcess' );
-      _.process._exitHandlerRepair();
-    }
-
-    if( withExitHandler )
-    process.once( 'exit', onExit );
-
-    setTimeout( () => { console.log( 'program1:end' ) }, context.t1 * 4 );
-
-    function onExit()
-    {
-      console.log( 'exit:end' );
-      process.exit();
-    }
-
-  }
-
-}
-
-endSignalsOnExitExit.description =
-`
-  - handler of the event "exit" should be called exactly once
-`
-
-//
-
-function endSignalsOnExitExitCode( test )
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-  let programPath = a.program( program1 );
-  let o3 =
-  {
-    outputPiping : 1,
-    outputCollecting : 1,
-    applyingExitCode : 0,
-    throwingExitCode : 0,
-    stdio : 'pipe',
-  }
-
-  let modes = [ 'fork', 'spawn' ];
-  modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGQUIT', 128 + 3 ) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGINT', 128 + 2 ) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGTERM', 128 + 15 ) ) );
-  return a.ready;
-
-  /* --- */
-
-  function signalTerminating( mode, signal, expectedExitCode )
-  {
-    let ready = _.Consequence().take( null );
-
-    /* - */
-
-    ready
-
-    /* - */
-
     .then( function( arg )
     {
-      test.case = `mode:${mode}, withExitHandler:1, withTools:1, ${signal}`;
+      test.case = `mode:${mode}, withExitHandler:1, withTools:1, withCode:1, ${signal}`;
       var o2 =
       {
         execPath : mode === `fork` ? `${programPath}` : `node ${programPath}`,
-        args : [ 'withExitHandler:1', 'withTools:1' ],
+        args : [ 'withExitHandler:1', 'withTools:1', 'withCode:1' ],
         mode,
       }
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.start( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 3, () =>
       {
         test.identical( options.process.killed, false );
         time1 = _.time.now();
@@ -27116,7 +27046,7 @@ function endSignalsOnExitExitCode( test )
         var exp1 =
 `program1:begin
 ${signal}
-exit:end
+exit:${exitCode}
 `
         var exp2 =
 `program1:begin
@@ -27137,10 +27067,11 @@ exit:end
         {
           test.identical( options.output, exp1 );
           test.identical( options.exitReason, 'code' );
-          test.identical( options.exitCode, expectedExitCode );
+          test.identical( options.exitCode, exitCode );
           test.identical( options.exitSignal, null );
         }
 
+        test.identical( _.strCount( options.output, 'exit:' ), 1 );
         test.identical( options.ended, true );
         test.identical( options.state, 'terminated' );
         test.identical( options.error, null );
@@ -27166,6 +27097,7 @@ exit:end
     console.log( 'program1:begin' );
 
     let withExitHandler = process.argv.includes( 'withExitHandler:1' );
+    let withCode = process.argv.includes( 'withCode:1' );
     let withTools = process.argv.includes( 'withTools:1' );
 
     if( withTools )
@@ -27176,22 +27108,36 @@ exit:end
     }
 
     if( withExitHandler )
-    process.once( 'exit', onExit );
+    {
+      process.on( 'exit', onExit );
+      process.on( 'exit', onExit2 );
+    }
 
-    setTimeout( () => { console.log( 'program1:end' ) }, context.t1 * 4 );
+    setTimeout( () => { console.log( 'program1:end' ) }, context.t1 * 6 );
+
+    function onExit2( exitCode )
+    {
+      console.log( `exit2:${exitCode}` );
+    }
 
     function onExit( exitCode )
     {
-      console.log( 'exit:end' );
+      console.log( `exit:${exitCode}` );
+      /* explicit call of process.exit() in exit handler cause problem with termination reason */
+      if( withCode )
       process.exit( exitCode );
+      else
+      process.exit();
     }
 
   }
 
 }
 
-endSignalsOnExitExitCode.description =
+endSignalsOnExitExitAgain.description =
 `
+  - trait : explicit call of process.exit() in exit handler cause problem with termination reason
+  - trait : explicit call of process.exit() in exit handler does not allow to call other exit handler
   - handler of the event "exit" should be executed on Unix
 `
 
@@ -32333,8 +32279,7 @@ var Proto =
 
     endSignalsBasic,
     endSignalsOnExit,
-    endSignalsOnExitExit,
-    endSignalsOnExitExitCode,
+    endSignalsOnExitExitAgain,
 
     terminate, /* qqq for Vova: review, remove duplicates, check timeouts */
     terminateSync,
