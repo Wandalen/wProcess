@@ -21615,7 +21615,7 @@ function startSingleOptionDry( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${mode}, trivial, no error `
+      test.case = `mode : ${mode}, dry : 1, no error`
       let o =
       {
         execPath : mode === 'fork' ? programPath + ` arg1 "arg 2" "'arg3'"` : 'node ' + programPath + ` arg1 "arg 2" "'arg3'"`,
@@ -21716,7 +21716,7 @@ function startSingleOptionDry( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${mode}, execPath : 'err' + programPath + args`
+      test.case = `mode : ${mode}, dry : 1, execPath : 'err' + programPath + \` arg1 "arg 2" "'arg3'"\``
       let o =
       {
         execPath : 'err' + programPath + ` arg1 "arg 2" "'arg3'"`,
@@ -21852,7 +21852,7 @@ function startOptionDryMultiple( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${mode}, without error, con* checks`;
+      test.case = `mode : ${mode}, dry : 1, without error, con* checks`;
       let options =
       {
         execPath : [ mode === 'fork' ? programPath + ' id:1' : 'node ' + programPath + ' id:1', mode === 'fork' ? programPath + ' id:2' : 'node ' + programPath + ' id:2' ],
@@ -21956,7 +21956,7 @@ function startOptionDryMultiple( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${mode}, error in execPath, con* checks`;
+      test.case = `mode : ${mode}, dry : 1, error in execPath, con* checks`;
       let options =
       {
         execPath : [ 'err' + programPath + ' id:1', 'err' + programPath + ' id:2' ],
