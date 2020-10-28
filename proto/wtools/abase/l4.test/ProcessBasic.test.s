@@ -9690,7 +9690,7 @@ function startProcedureStack( test )
 
 }
 
-startProcedureStack.timeOut = 300000;
+startProcedureStack.timeOut = 5e5;
 
 startProcedureStack.description =
 `
@@ -10460,7 +10460,7 @@ function startChronology( test )
 
 }
 
-startChronology.timeOut = 300000;
+startChronology.timeOut = 5e5;
 startChronology.description =
 `
   - conTerminate goes before ready
@@ -10543,7 +10543,7 @@ function startReadyDelay( test )
 
 }
 
-startReadyDelay.timeOut = 300000;
+startReadyDelay.timeOut = 5e5;
 startReadyDelay.description =
 `
   - delay in consequence ready delay starting of the process
@@ -10693,7 +10693,7 @@ function startReadyDelayMultiple( test )
 
 }
 
-startReadyDelayMultiple.timeOut = 300000;
+startReadyDelayMultiple.timeOut = 5e5;
 startReadyDelayMultiple.description =
 `
   - delay in consequence ready delay starting of 2 processes
@@ -10771,7 +10771,7 @@ function startOptionWhenDelay( test )
 
 }
 
-startOptionWhenDelay.timeOut = 300000;
+startOptionWhenDelay.timeOut = 5e5;
 
 //
 
@@ -10844,7 +10844,7 @@ function startOptionWhenTime( test )
   }
 }
 
-startOptionWhenTime.timeOut = 300000;
+startOptionWhenTime.timeOut = 5e5;
 
 //
 
@@ -11122,7 +11122,7 @@ function startOptionTimeOut( test )
 
 }
 
-startOptionTimeOut.timeOut = 300000;
+startOptionTimeOut.timeOut = 5e5;
 
 //
 
@@ -13028,7 +13028,7 @@ function startEventClose( test )
   }
 }
 
-startEventClose.timeOut = 300000;
+startEventClose.timeOut = 5e5;
 startEventClose.description =
 `
 Check if close event is called.
@@ -13192,7 +13192,7 @@ function startEventExit( test )
   }
 }
 
-startEventExit.timeOut = 300000;
+startEventExit.timeOut = 5e5;
 startEventExit.description =
 `
 Check if exit event is called.
@@ -13846,7 +13846,6 @@ o.ended is true when conTerminate callback is executed.
 
 //
 
-/* qqq for Vova : remove negligence. name test cases carefully aaa:adjusted names*/
 function startDetachingTerminationBegin( test )
 {
   let context = this;
@@ -14951,7 +14950,7 @@ function startOnTerminate( test )
   }
 }
 
-startOnTerminate.timeOut = 120000;
+startOnTerminate.timeOut = 3e5;
 
 //
 
@@ -15306,7 +15305,7 @@ function startOnIsNotConsequence( test )
 
 }
 
-startOnIsNotConsequence.timeOut = 300000;
+startOnIsNotConsequence.timeOut = 5e5;
 
 //
 
@@ -17358,14 +17357,14 @@ function startNjsWithReadyDelayStructural( test )
   /* */
 
   function run( detaching, dry, mode ) /* qqq for Yevhen : put parameters in map `tops` */
-  // function run( tops )
+  // function run( tops ) /* qqq for Yevhen : use map tops */
   {
     let ready = _.Consequence().take( null );
 
     ready.then( () =>
     {
-      /* qqq for Vova : output piping doesn't work as expected in mode "shell" on windows
-      does not?
+      /*
+      output piping doesn't work as expected in mode "shell" on windows
       */
       test.case = `mode:${mode} detaching:${detaching}`;
       let con = new _.Consequence().take( null ).delay( context.t1 ); /* 1000 */
@@ -19872,6 +19871,8 @@ function startOptionOutputPiping( test )
     console.log( 'Log' );
   }
 }
+
+startOptionOutputPiping.timeOut = 3e5;
 
 //
 
@@ -22552,7 +22553,7 @@ function startOptionPassingThrough( test )
   }
 }
 
-startOptionPassingThrough.timeOut = 300000;
+startOptionPassingThrough.timeOut = 5e5;
 
 // --
 // pid
@@ -23715,7 +23716,7 @@ function startOutputMultiple( test )
 
 }
 
-startOutputMultiple.timeOut = 300000;
+startOutputMultiple.timeOut = 5e5;
 startOutputMultiple.description =
 `
   - callback of event exit of each stream is called
@@ -23855,7 +23856,7 @@ function startOptionStdioIgnoreMultiple( test )
 
 }
 
-startOptionStdioIgnoreMultiple.timeOut = 300000;
+startOptionStdioIgnoreMultiple.timeOut = 1e6;
 startOptionStdioIgnoreMultiple.description =
 `
   - no problems in stdio:ignore mode
@@ -24385,7 +24386,7 @@ function killSync( test )
   }
 }
 
-killSync.timeOut = 300000;
+killSync.timeOut = 5e5;
 
 //
 
@@ -25038,9 +25039,9 @@ function endSignalsBasic( test )
   }
 
   // xxx
-  let modes = [ 'fork', 'spawn' ];
+  // let modes = [ 'fork', 'spawn' ];
 
-  // let modes = [ 'fork', 'spawn', 'shell' ];
+  let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGQUIT' ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGINT' ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGTERM' ) ) );
@@ -25077,7 +25078,7 @@ function endSignalsBasic( test )
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.start( options );
       var time1;
-      _.time.out( context.t1*2, () =>
+      _.time.out( context.t1 * 4, () =>
       {
         test.identical( options.process.killed, false );
         time1 = _.time.now();
@@ -25109,7 +25110,7 @@ program1:end
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
         if( mode !== 'shell' )
-        test.le( dtime, context.t1 * 1 );
+        test.le( dtime, context.t1 * 2 );
         return null;
       })
 
@@ -25130,7 +25131,7 @@ program1:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.start( options );
       var time1;
-      _.time.out( context.t1*2, () =>
+      _.time.out( context.t1 * 4, () =>
       {
         test.identical( options.process.killed, false );
         time1 = _.time.now();
@@ -25162,7 +25163,7 @@ program1:end
         test.identical( options.process.killed, true );
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
-        test.le( dtime, context.t1 * 1 );
+        test.le( dtime, context.t1 * 2 );
         return null;
       })
 
@@ -25183,7 +25184,7 @@ program1:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.start( options );
       var time1;
-      _.time.out( context.t1*2, () =>
+      _.time.out( context.t1 * 4, () =>
       {
         test.identical( options.process.killed, false );
         time1 = _.time.now();
@@ -25218,7 +25219,7 @@ program1:end
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
         if( mode !== 'shell' )
-        test.le( dtime, context.t1 * 1 );
+        test.le( dtime, context.t1 * 2 );
         return null;
       })
 
@@ -25237,12 +25238,11 @@ program1:end
         mode,
       }
       var options = _.mapSupplement( null, o2, o3 );
+      var time1 = _.time.now();
       var returned = _.process.start( options );
-      var time1;
-      _.time.out( context.t1*2, () =>
+      _.time.out( context.t1 * 4, () =>
       {
         test.identical( options.process.killed, false );
-        time1 = _.time.now();
         options.process.kill( signal );
         return null;
       })
@@ -25276,7 +25276,7 @@ program1:end
         test.identical( options.process.killed, true );
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
-        test.ge( dtime, context.t1*9 );
+        test.ge( dtime, context.t1 * 10 ); /* xxx2 */
         return null;
       })
 
@@ -25297,7 +25297,7 @@ program1:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.start( options );
       var time1;
-      _.time.out( context.t1*2, () =>
+      _.time.out( context.t1 * 4, () =>
       {
         test.identical( options.process.killed, false );
         time1 = _.time.now();
@@ -25333,7 +25333,7 @@ deasync:end
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
         if( mode !== 'shell' )
-        test.le( dtime, context.t1 * 1 );
+        test.le( dtime, context.t1 * 2 );
         return null;
       })
 
@@ -25369,7 +25369,7 @@ deasync:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.start( options );
       var time1;
-      _.time.out( context.t1*2, () =>
+      _.time.out( context.t1 * 4, () =>
       {
         test.identical( options.process.killed, false );
         time1 = _.time.now();
@@ -25400,7 +25400,7 @@ program1:end
         test.identical( options.process.killed, true );
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
-        test.le( dtime, context.t1 * 1 );
+        test.le( dtime, context.t1 * 2 );
         return null;
       })
 
@@ -25421,7 +25421,7 @@ program1:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.start( options );
       var time1;
-      _.time.out( context.t1*2, () =>
+      _.time.out( context.t1 * 4, () =>
       {
         test.identical( options.process.killed, false );
         time1 = _.time.now();
@@ -25452,7 +25452,7 @@ program1:end
         test.identical( options.process.killed, true );
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
-        test.le( dtime, context.t1 * 1 );
+        test.le( dtime, context.t1 * 2 );
         return null;
       })
 
@@ -25473,7 +25473,7 @@ program1:end
       var options = _.mapSupplement( null, o2, o3 );
       var time1;
       var returned = _.process.start( options );
-      _.time.out( context.t1*2, () =>
+      _.time.out( context.t1 * 4, () =>
       {
         time1 = _.time.now();
         test.identical( options.process.killed, false );
@@ -25508,7 +25508,7 @@ program1:end
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
         if( mode !== 'shell' )
-        test.le( dtime, context.t1 * 1 );
+        test.le( dtime, context.t1 * 2 );
         return null;
       })
 
@@ -25529,7 +25529,7 @@ program1:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.start( options );
       var time1;
-      _.time.out( context.t1*2, () =>
+      _.time.out( context.t1 * 4, () =>
       {
         test.identical( options.process.killed, false );
         time1 = _.time.now();
@@ -25564,7 +25564,7 @@ program1:end
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
         if( mode !== 'shell' )
-        test.le( dtime, context.t1 * 1 );
+        test.le( dtime, context.t1 * 2 );
         return null;
       })
 
@@ -25585,7 +25585,7 @@ program1:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.start( options );
       var time1;
-      _.time.out( context.t1*2, () =>
+      _.time.out( context.t1 * 4, () =>
       {
         test.identical( options.process.killed, false );
         time1 = _.time.now();
@@ -25620,7 +25620,7 @@ deasync:end
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
         if( mode !== 'shell' )
-        test.le( dtime, context.t1 * 1 );
+        test.le( dtime, context.t1 * 2 );
         return null;
       })
 
@@ -25660,7 +25660,7 @@ deasync:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.start( options );
       var time1;
-      _.time.out( context.t1*2, () =>
+      _.time.out( context.t1 * 4, () =>
       {
         test.identical( options.process.killed, false );
         time1 = _.time.now();
@@ -25684,7 +25684,7 @@ deasync:end
         test.identical( options.process.killed, false );
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
-        test.le( dtime, context.t1 * 1 );
+        test.le( dtime, context.t1 * 2 );
         return null;
       })
 
@@ -25705,7 +25705,7 @@ deasync:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.start( options );
       var time1;
-      _.time.out( context.t1*2, () =>
+      _.time.out( context.t1 * 4, () =>
       {
         test.identical( options.process.killed, false );
         time1 = _.time.now();
@@ -25730,7 +25730,7 @@ SIGTERM
         test.identical( options.process.killed, false );
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
-        test.le( dtime, context.t1 * 1 );
+        test.le( dtime, context.t1 * 2 );
         return null;
       })
 
@@ -25751,7 +25751,7 @@ SIGTERM
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.start( options );
       var time1;
-      _.time.out( context.t1*2, () =>
+      _.time.out( context.t1 * 4, () =>
       {
         test.identical( options.process.killed, false );
         time1 = _.time.now();
@@ -25776,7 +25776,7 @@ sleep:begin
         test.identical( options.process.killed, false );
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
-        test.le( dtime, context.t1 * 1 );
+        test.le( dtime, context.t1 * 2 );
         return null;
       })
 
@@ -25797,11 +25797,11 @@ sleep:begin
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.start( options );
       var time1;
-      _.time.out( context.t1*2, () =>
+      _.time.out( context.t1 * 4, () =>
       {
         test.identical( options.process.killed, false );
         time1 = _.time.now();
-        _.process.terminate({ pid : options.process.pid, withChildren : 1, timeOut : context.t1*4 });
+        _.process.terminate({ pid : options.process.pid, withChildren : 1, timeOut : context.t1 * 4 });
         return null;
       })
       returned.finally( function()
@@ -25843,7 +25843,7 @@ sleep:begin
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.start( options );
       var time1;
-      _.time.out( context.t1*2, () =>
+      _.time.out( context.t1 * 4, () =>
       {
         test.identical( options.process.killed, false );
         time1 = _.time.now();
@@ -25869,7 +25869,7 @@ SIGTERM
         test.identical( options.process.killed, false );
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
-        test.le( dtime, context.t1 * 1 );
+        test.le( dtime, context.t1 * 2 );
         return null;
       })
 
@@ -25908,7 +25908,7 @@ SIGTERM
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.start( options );
       var time1;
-      _.time.out( context.t1*2, () =>
+      _.time.out( context.t1 * 4, () =>
       {
         test.identical( options.process.killed, false );
         time1 = _.time.now();
@@ -25932,7 +25932,7 @@ SIGTERM
         test.identical( options.process.killed, false );
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
-        test.le( dtime, context.t1 * 1 );
+        test.le( dtime, context.t1 * 2 );
         return null;
       })
 
@@ -25953,7 +25953,7 @@ SIGTERM
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.start( options );
       var time1;
-      _.time.out( context.t1*2, () =>
+      _.time.out( context.t1 * 4, () =>
       {
         test.identical( options.process.killed, false );
         time1 = _.time.now();
@@ -25978,7 +25978,7 @@ SIGTERM
         test.identical( options.process.killed, false );
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
-        test.le( dtime, context.t1 * 1 );
+        test.le( dtime, context.t1 * 2 );
         return null;
       })
 
@@ -25999,7 +25999,7 @@ SIGTERM
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.start( options );
       var time1;
-      _.time.out( context.t1*2, () =>
+      _.time.out( context.t1 * 4, () =>
       {
         test.identical( options.process.killed, false );
         time1 = _.time.now();
@@ -26024,7 +26024,7 @@ sleep:begin
         test.identical( options.process.killed, false );
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
-        test.le( dtime, context.t1 * 1 );
+        test.le( dtime, context.t1 * 2 );
         return null;
       })
 
@@ -26045,7 +26045,7 @@ sleep:begin
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.start( options );
       var time1;
-      _.time.out( context.t1*2, () =>
+      _.time.out( context.t1 * 4, () =>
       {
         test.identical( options.process.killed, false );
         time1 = _.time.now();
@@ -26091,7 +26091,7 @@ sleep:begin
         test.identical( options.process.killed, false );
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
-        test.le( dtime, context.t1 * 1 );
+        test.le( dtime, context.t1 * 2 );
         return null;
       })
 
@@ -26112,7 +26112,7 @@ sleep:begin
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.start( options );
       var time1;
-      _.time.out( context.t1*2, () =>
+      _.time.out( context.t1 * 4, () =>
       {
         test.identical( options.process.killed, false );
         time1 = _.time.now();
@@ -26138,7 +26138,7 @@ SIGTERM
         test.identical( options.process.killed, false );
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
-        test.le( dtime, context.t1 * 1 );
+        test.le( dtime, context.t1 * 2 );
         return null;
       })
 
@@ -26174,7 +26174,7 @@ SIGTERM
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.start( options );
       var time1;
-      _.time.out( context.t1*2, () =>
+      _.time.out( context.t1 * 4, () =>
       {
         test.identical( options.process.killed, false );
         time1 = _.time.now();
@@ -26198,7 +26198,7 @@ SIGTERM
         test.identical( options.process.killed, false );
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
-        test.le( dtime, context.t1 * 1 );
+        test.le( dtime, context.t1 * 2 );
         return null;
       })
 
@@ -26219,7 +26219,7 @@ SIGTERM
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.start( options );
       var time1;
-      _.time.out( context.t1*2, () =>
+      _.time.out( context.t1 * 4, () =>
       {
         test.identical( options.process.killed, false );
         time1 = _.time.now();
@@ -26250,7 +26250,7 @@ program1:end
         test.identical( options.process.killed, false );
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
-        test.le( dtime, context.t1 * 1 );
+        test.le( dtime, context.t1 * 2 );
         return null;
       })
 
@@ -26271,7 +26271,7 @@ program1:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.start( options );
       var time1;
-      _.time.out( context.t1*2, () =>
+      _.time.out( context.t1 * 4, () =>
       {
         test.identical( options.process.killed, false );
         time1 = _.time.now();
@@ -26306,7 +26306,7 @@ program1:end
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
         if( mode !== 'shell' )
-        test.le( dtime, context.t1 * 1 );
+        test.le( dtime, context.t1 * 2 );
         return null;
       })
 
@@ -26327,7 +26327,7 @@ program1:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.start( options );
       var time1;
-      _.time.out( context.t1*2, () =>
+      _.time.out( context.t1 * 4, () =>
       {
         test.identical( options.process.killed, false );
         time1 = _.time.now();
@@ -26362,7 +26362,7 @@ program1:end
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
         if( mode !== 'shell' )
-        test.le( dtime, context.t1 * 1 );
+        test.le( dtime, context.t1 * 2 );
         return null;
       })
 
@@ -26383,7 +26383,7 @@ program1:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.start( options );
       var time1;
-      _.time.out( context.t1*2, () =>
+      _.time.out( context.t1 * 4, () =>
       {
         test.identical( options.process.killed, false );
         time1 = _.time.now();
@@ -26418,7 +26418,7 @@ deasync:end
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
         if( mode !== 'shell' )
-        test.le( dtime, context.t1 * 1 );
+        test.le( dtime, context.t1 * 2 );
         return null;
       })
 
@@ -26449,13 +26449,13 @@ deasync:end
       _.process._exitHandlerRepair();
     }
 
-    setTimeout( () => { console.log( 'program1:end' ) }, context.t1*4 );
+    setTimeout( () => { console.log( 'program1:end' ) }, context.t1 * 8 );
 
     if( withSleep )
-    sleep( context.t1*10 );
+    sleep( context.t1 * 10 );
 
     if( withDeasync )
-    deasync( context.t1*10 );
+    deasync( context.t1 * 10 );
 
     function onTime()
     {
@@ -26468,6 +26468,7 @@ deasync:end
       let now = Date.now();
       while( ( Date.now() - now ) < delay )
       {
+        let x = Number( '123' ); /* xxx2 */
       }
       console.log( 'sleep:end' );
     }
@@ -26518,16 +26519,14 @@ function endSignalsOnExit( test )
     stdio : 'pipe',
   }
 
-  // xxx
-  let modes = [ 'spawn' ];
-  // let modes = [ 'fork', 'spawn', 'shell' ];
-  // modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGQUIT' ) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGINT' ) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGTERM' ) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGHUP' ) ) ); // xxx
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGQUIT' ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGINT' ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGTERM' ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGHUP' ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => signalKilling( mode, 'SIGKILL' ) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => terminate( mode ) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => kill( mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => terminate( mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => kill( mode ) ) );
   return a.ready;
 
   /* --- */
@@ -26554,7 +26553,7 @@ function endSignalsOnExit( test )
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.start( options );
       var time1;
-      _.time.out( context.t1*2, () =>
+      _.time.out( context.t1 * 4, () =>
       {
         test.identical( options.process.killed, false );
         time1 = _.time.now();
@@ -26623,7 +26622,7 @@ exit:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.start( options );
       var time1;
-      _.time.out( context.t1*2, () =>
+      _.time.out( context.t1 * 4, () =>
       {
         test.identical( options.process.killed, false );
         time1 = _.time.now();
@@ -26690,7 +26689,7 @@ exit:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.start( options );
       var time1;
-      _.time.out( context.t1*2, () =>
+      _.time.out( context.t1 * 4, () =>
       {
         test.identical( options.process.killed, false );
         time1 = _.time.now();
@@ -26736,7 +26735,7 @@ exit:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.start( options );
       var time1;
-      _.time.out( context.t1*2, () =>
+      _.time.out( context.t1 * 4, () =>
       {
         test.identical( options.process.killed, false );
         time1 = _.time.now();
@@ -26797,7 +26796,7 @@ exit:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.start( options );
       var time1;
-      _.time.out( context.t1*2, () =>
+      _.time.out( context.t1 * 4, () =>
       {
         test.identical( options.process.killed, false );
         time1 = _.time.now();
@@ -26848,7 +26847,7 @@ Killed
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.start( options );
       var time1;
-      _.time.out( context.t1*2, () =>
+      _.time.out( context.t1 * 4, () =>
       {
         test.identical( options.process.killed, false );
         time1 = _.time.now();
@@ -26910,7 +26909,7 @@ Killed
     if( withExitHandler )
     process.once( 'exit', onExit );
 
-    setTimeout( () => { console.log( 'program1:end' ) }, context.t1*2 );
+    setTimeout( () => { console.log( 'program1:end' ) }, context.t1 * 4 );
 
     function onTime()
     {
@@ -26977,7 +26976,7 @@ function endSignalsOnExitExit( test )
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.start( options );
       var time1;
-      _.time.out( context.t1*2, () =>
+      _.time.out( context.t1 * 4, () =>
       {
         test.identical( options.process.killed, false );
         time1 = _.time.now();
@@ -27042,7 +27041,7 @@ exit:end
     if( withExitHandler )
     process.once( 'exit', onExit );
 
-    setTimeout( () => { console.log( 'program1:end' ) }, context.t1*2 );
+    setTimeout( () => { console.log( 'program1:end' ) }, context.t1 * 4 );
 
     function onExit()
     {
@@ -27105,7 +27104,7 @@ function endSignalsOnExitExitCode( test )
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.start( options );
       var time1;
-      _.time.out( context.t1*2, () =>
+      _.time.out( context.t1 * 4, () =>
       {
         test.identical( options.process.killed, false );
         time1 = _.time.now();
@@ -27179,7 +27178,7 @@ exit:end
     if( withExitHandler )
     process.once( 'exit', onExit );
 
-    setTimeout( () => { console.log( 'program1:end' ) }, context.t1*2 );
+    setTimeout( () => { console.log( 'program1:end' ) }, context.t1 * 4 );
 
     function onExit( exitCode )
     {
@@ -28361,7 +28360,7 @@ function terminateSync( test )
   }
 }
 
-terminateSync.timeOut = 300000;
+terminateSync.timeOut = 5e5;
 
 //
 
@@ -28642,6 +28641,8 @@ terminate first child
 first child with signal SIGTERM on unix and exit code 1 on win
 `
 
+//
+
 function terminateFirstChildShell( test )
 {
   let context = this;
@@ -28793,7 +28794,7 @@ function terminateFirstChildShell( test )
 
 }
 
-terminateFirstChildShell.timeOut = 40000;
+terminateFirstChildShell.timeOut = 3e5;
 terminateFirstChildShell.description =
 `
 mode : shell
@@ -29612,8 +29613,8 @@ function terminateDetachedFirstChildShell( test )
 
     test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
     test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
-    test.identical( _.strCount( o.output, 'program2::end' ), 0 ); /* qqq for Vova : it fails on Mint aaa:fixed, program1 should be spawned in mode:spawn to keep this test simple */
-    test.is( _.process.isAlive( program2Pid ) ); /* qqq for Vova : it fails on Mint aaa:fixed */
+    test.identical( _.strCount( o.output, 'program2::end' ), 0 );
+    test.is( _.process.isAlive( program2Pid ) );
 
     return _.time.out( context.t1*15 ); /* qqq for Vova: replace with periodic + timeout + kill */
   })
@@ -32348,7 +32349,7 @@ var Proto =
 
     terminateDetachedFirstChildSpawn,
     terminateDetachedFirstChildFork,
-    terminateDetachedFirstChildShell, /* qqq for Vova : it fails on Mint aaa:fixed */
+    terminateDetachedFirstChildShell,
 
     terminateWithDetachedChildSpawn,
     terminateWithDetachedChildFork,
