@@ -2273,7 +2273,7 @@ function startNjs_body( o )
 
   // let execPath = o.execPath ? _.path.nativizeMinimal( o.execPath ) : '';
   let execPath = o.execPath || '';
-  // _.assert( o.interpreterArgs === null || o.interpreterArgs === '', 'not implemented' ); /* qqq for Yevhen : implement and cover. | aaa : Done ( Have worked without changes, though )*/
+  // _.assert( o.interpreterArgs === null || o.interpreterArgs === '', 'not implemented' ); /* qqq for Yevhen : implement and cover. | aaa : Done */
 
   /* ORIGINAL */
   // if( o.mode === 'fork' )
