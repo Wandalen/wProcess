@@ -2805,7 +2805,7 @@ function children( o )
     {
       try
       {
-        WindowsProcessTree = require( 'wwindows-process-tree' );
+        WindowsProcessTree = require( 'w.process.tree.windows' );
       }
       catch( err )
       {
