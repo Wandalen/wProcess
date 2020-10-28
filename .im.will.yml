@@ -7,8 +7,8 @@ submodule :
   wPathBasic :
     path : npm:///wpathbasic
     enabled : 0 # submodule
-  deasync :
-    path : npm:///deasync#0.1.20
+  wdeasync :
+    path : npm:///wdeasync
     enabled : 0 # submodule
   strip-ansi :
     path : npm:///strip-ansi#6.0.0
@@ -19,8 +19,8 @@ submodule :
   wConsequence :
     path : npm:///wConsequence
     enabled : 0 # submodule
-  wwindows-process-tree :
-    path : npm:///wwindows-process-tree#0.3.0
+  wProcessTreeWindows :
+    path : npm:///w.process.tree.windows
     enabled : 0 # submodule
     criterion :
       optional : 1

@@ -1,6 +1,6 @@
 {
   "name" : "wprocess",
-  "version" : "0.3.397",
+  "version" : "0.3.400",
   "description" : "Collection of cross-platform routines to execute system commands, run shell, batches, launch external processes from JavaScript application. Module Process leverages not only outputting data from an application but also inputting, makes application arguments parsing and accounting easier. Use the module to get uniform experience from interaction with an external processes on different platforms and operating systems.",
   "license" : "MIT",
   "author" : "Kostiantyn Wandalen <wanalen@01.school>",
@@ -20,14 +20,14 @@
   },
   "dependencies" :
   {
-    "deasync" : "0.1.20",
     "strip-ansi" : "6.0.0",
     "wTools" : "alpha",
     "wpathbasic" : "alpha",
     "wgdf" : "alpha",
-    "wConsequence" : "alpha"
+    "wConsequence" : "alpha",
+    "wdeasync" : "alpha"
   },
-  "optionalDependencies" : { "wwindows-process-tree" : "0.3.0" },
+  "optionalDependencies" : { "w.process.tree.windows" : "0.3.5" },
   "devDependencies" : { "wprocess" : "file:.", "eslint" : "7.1.0", "wTesting" : "alpha" },
   "keywords" : [ "wTools", "exec file", "shell script", "run program" ]
 }
