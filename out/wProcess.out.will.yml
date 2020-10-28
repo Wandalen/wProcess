@@ -6,8 +6,8 @@ consistency:
     hash: ad280127a9f801a3bf1cdd9b30cb663b
     size: 2161
   ../.im.will.yml: &ref_1
-    hash: f87331e421bffd8af863d4912786839d
-    size: 5547
+    hash: 988fa6395516604e68452fcc99f54185
+    size: 5540
 module:
   wProcess.out:
     about:
@@ -206,8 +206,8 @@ module:
         path: 'npm:///wConsequence'
         autoExporting: 0
         enabled: 0
-      wwindows-process-tree:
-        path: 'npm:///wwindows-process-tree#0.3.0'
+      wProcessTreeWindows:
+        path: 'npm:///w.process.tree.windows'
         autoExporting: 0
         enabled: 0
         criterion:
@@ -980,8 +980,8 @@ module:
         path: 'npm:///wConsequence'
         autoExporting: 0
         enabled: 0
-      wwindows-process-tree:
-        path: 'npm:///wwindows-process-tree#0.3.0'
+      wProcessTreeWindows:
+        path: 'npm:///w.process.tree.windows'
         autoExporting: 0
         enabled: 0
         criterion:
@@ -1539,5 +1539,5 @@ module:
         hash: ad280127a9f801a3bf1cdd9b30cb663b
         size: 2161
       ../.im.will.yml:
-        hash: f87331e421bffd8af863d4912786839d
-        size: 5547
+        hash: 988fa6395516604e68452fcc99f54185
+        size: 5540
