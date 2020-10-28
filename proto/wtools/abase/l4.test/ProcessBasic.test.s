@@ -13929,6 +13929,7 @@ function startDetachingTerminationBegin( test )
         let childPid = a.fileProvider.fileRead( testFilePath );
         childPid = _.numberFrom( childPid );
         console.log(  childPid );
+        /* if shell then could be 2 processes, first - terminal, second application */
         if( mode !== 'shell' )
         test.identical( data.childPid, childPid );
 
@@ -13985,6 +13986,7 @@ function startDetachingTerminationBegin( test )
         test.is( a.fileProvider.fileExists( testFilePath ) );
         let childPid = a.fileProvider.fileRead( testFilePath );
         childPid = _.numberFrom( childPid );
+        /* if shell then could be 2 processes, first - terminal, second application */
         if( mode !== 'shell' )
         test.identical( data.childPid, childPid );
 
@@ -14040,6 +14042,7 @@ function startDetachingTerminationBegin( test )
         test.is( a.fileProvider.fileExists( testFilePath ) );
         let childPid = a.fileProvider.fileRead( testFilePath );
         childPid = _.numberFrom( childPid );
+        /* if shell then could be 2 processes, first - terminal, second application */
         if( mode !== 'shell' )
         test.identical( data.childPid, childPid )
 
@@ -14096,6 +14099,7 @@ function startDetachingTerminationBegin( test )
         test.is( a.fileProvider.fileExists( testFilePath ) );
         let childPid = a.fileProvider.fileRead( testFilePath );
         childPid = _.numberFrom( childPid );
+        /* if shell then could be 2 processes, first - terminal, second application */
         if( mode !== 'shell' )
         test.identical( data.childPid, childPid )
 
@@ -22641,6 +22645,7 @@ function startDiffPid( test )
         let childPid = a.fileProvider.fileRead( testFilePath );
         childPid = _.numberFrom( childPid );
         console.log(  childPid );
+        /* if shell then could be 2 processes, first - terminal, second application */
         if( mode !== 'shell' )
         test.identical( data.childPid, childPid );
         console.log( `${mode} : PID is ${ data.childPid === childPid ? 'same' : 'different' }` );
@@ -25106,6 +25111,7 @@ program1:end
         test.identical( options.process.killed, true );
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
+        /* if shell then parent process may ignore the signal */
         if( mode !== 'shell' )
         test.le( dtime, context.t1 * 2 );
         return null;
@@ -25217,6 +25223,7 @@ program1:end
         test.identical( options.process.killed, true );
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
+        /* if shell then parent process may ignore the signal */
         if( mode !== 'shell' )
         test.le( dtime, context.t1 * 2 );
         return null;
@@ -25331,6 +25338,7 @@ deasync:end
         test.identical( options.process.killed, true );
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
+        /* if shell then parent process may ignore the signal */
         if( mode !== 'shell' )
         test.le( dtime, context.t1 * 2 );
         return null;
@@ -25506,6 +25514,7 @@ program1:end
         test.identical( options.process.killed, true );
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
+        /* if shell then parent process may ignore the signal */
         if( mode !== 'shell' )
         test.le( dtime, context.t1 * 2 );
         return null;
@@ -25562,6 +25571,7 @@ program1:end
         test.identical( options.process.killed, true );
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
+        /* if shell then parent process may ignore the signal */
         if( mode !== 'shell' )
         test.le( dtime, context.t1 * 2 );
         return null;
@@ -25618,6 +25628,7 @@ deasync:end
         test.identical( options.process.killed, true );
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
+        /* if shell then parent process may ignore the signal */
         if( mode !== 'shell' )
         test.le( dtime, context.t1 * 2 );
         return null;
@@ -25886,6 +25897,7 @@ SIGTERM
   {
     let ready = _.Consequence().take( null );
 
+    /* if shell then parent process may ignore the signal */
     if( mode !== 'shell' )
     return ready;
 
@@ -26090,6 +26102,8 @@ sleep:begin
         test.identical( options.process.killed, false );
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
+        /* if shell then parent process may ignore the signal */
+        if( mode !== 'shell' )
         test.le( dtime, context.t1 * 2 );
         return null;
       })
@@ -26304,6 +26318,7 @@ program1:end
         test.identical( options.process.killed, false );
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
+        /* if shell then parent process may ignore the signal */
         if( mode !== 'shell' )
         test.le( dtime, context.t1 * 2 );
         return null;
@@ -26360,6 +26375,7 @@ program1:end
         test.identical( options.process.killed, false );
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
+        /* if shell then parent process may ignore the signal */
         if( mode !== 'shell' )
         test.le( dtime, context.t1 * 2 );
         return null;
@@ -26416,6 +26432,7 @@ deasync:end
         test.identical( options.process.killed, false );
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
+        /* if shell then parent process may ignore the signal */
         if( mode !== 'shell' )
         test.le( dtime, context.t1 * 2 );
         return null;
