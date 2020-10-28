@@ -17458,7 +17458,7 @@ function startNjsWithReadyDelayStructural( test )
         'hiding' : 1,
         'concurrent' : 0,
         'timeOut' : null,
-        'briefExitCode' : 0,
+        // 'briefExitCode' : 0,
         'verbosity' : 2,
         'outputPrefixing' : 0,
         'outputPiping' : true,
@@ -17625,7 +17625,7 @@ function startNjsWithReadyDelayStructuralMultiple( test )
         'hiding' : 1,
         'concurrent' : 0,
         'timeOut' : null,
-        'briefExitCode' : 0,
+        // 'briefExitCode' : 0,
         'verbosity' : 2,
         'outputPrefixing' : 0,
         'outputPiping' : true,
@@ -25407,6 +25407,8 @@ program1:end
         test.identical( options.process.killed, true );
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
+        /* if shell then parent process may ignore the signal */
+        if( mode !== 'shell' )
         test.le( dtime, context.t1 * 2 );
         return null;
       })
@@ -25459,6 +25461,8 @@ program1:end
         test.identical( options.process.killed, true );
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
+        /* if shell then parent process may ignore the signal */
+        if( mode !== 'shell' )
         test.le( dtime, context.t1 * 2 );
         return null;
       })

@@ -36,7 +36,7 @@ _.assert( !!_realGlobal_ );
 
 //
 
-function startCommon_head( routine, args )
+function startMinimalHeadCommon( routine, args )
 {
   let o;
 
@@ -74,6 +74,14 @@ function startCommon_head( routine, args )
   _.assert( o.conDisconnect === null || _.routineIs( o.conDisconnect ) );
   _.assert( o.ready === null || _.routineIs( o.ready ) );
   _.assert( o.mode !== 'fork' || !o.sync || o.deasync, 'Mode::fork is available only if either sync:0 or deasync:1' );
+
+  if( _.boolLike( o.throwingExitCode ) )
+  o.throwingExitCode = o.throwingExitCode ? 'full' : false;
+  _.assert
+  (
+    _.longHasAny( [ false, 'full', 'brief' ], o.throwingExitCode )
+    , `Unknown value of option::throwingExitCode, acceptable : [ false, 'full', 'brief' ]`
+  );
 
   if( o.outputColoring === null )
   o.outputColoring = 1;
@@ -132,6 +140,7 @@ function startCommon_head( routine, args )
   (
     o.timeOut === null || !o.sync || !!o.deasync, `Option::timeOut should not be defined if option::sync:1 and option::deasync:0`
   );
+  /* qqq forYevhen : this condition is wrong. fix it and cover */
 
   if( _.strIs( o.interpreterArgs ) )
   o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs });
@@ -157,7 +166,7 @@ function startCommon_head( routine, args )
 
 function startMinimal_head( routine, args )
 {
-  let o = startCommon_head( routine, args );
+  let o = startMinimalHeadCommon( routine, args );
 
   _.assert( arguments.length === 2 );
 
@@ -438,9 +447,6 @@ function startMinimal_body( o )
     if( !StripAnsi )
     StripAnsi = require( 'strip-ansi' );
 
-    // if( !_.fileProvider )
-    // _.include( 'wFiles' );
-
     if( o.outputColoring && typeof module !== 'undefined' )
     try
     {
@@ -657,7 +663,6 @@ function startMinimal_body( o )
     arg2 = arg2 + ' ' + argsJoin( o.args.slice() );
 
     o.fullExecPath = arg2;
-    inputMirror();
 
     /* Fixes problem with space in path on windows and makes behavior similar to unix
       Examples:
@@ -668,6 +673,8 @@ function startMinimal_body( o )
     */
     if( process.platform === 'win32' )
     arg2 = _.strQuote( arg2 );
+
+    inputMirror();
 
     if( o.dry )
     return;
@@ -744,35 +751,24 @@ function startMinimal_body( o )
     o.ended = true;
     Object.freeze( o );
 
-    let consequence = o.state === 'disconnected' ? o.conDisconnect : o.conTerminate;
+    let consequence1 = o.state === 'disconnected' ? o.conDisconnect : o.conTerminate;
+    let consequence2 = o.state === 'disconnected' ? o.conTerminate : o.conDisconnect;
 
-    /* `initial`, `starting`, `started`, `terminating`, `terminated`, `disconnected` */
+    /* `initial`, `starting`, `started`, `terminating`, `terminated`, `disconnected` */ /* xxx */
     if( o.error )
     {
-
       if( o.state === 'initial' || o.state === 'starting' )
       o.conStart.error( o.error );
-
-      consequence.error( o.error );
-
-      if( o.conTerminate === consequence )
-      o.conDisconnect.error( o.error );
-      else
-      o.conTerminate.error( o.error );
-
+      consequence1.error( o.error );
+      consequence2.error( o.error );
       o.ready.error( o.error );
       if( o.sync && !o.deasync )
       throw _.err( o.error );
     }
     else
     {
-      consequence.take( o );
-
-      if( o.conTerminate === consequence )
-      o.conDisconnect.error( _.dont );
-      else
-      o.conTerminate.error( _.dont );
-
+      consequence1.take( o );
+      consequence2.error( _.dont );
       o.ready.take( o );
     }
 
@@ -823,7 +819,8 @@ function startMinimal_body( o )
       else
       o.error = _._err({ args : [ 'Process was killed by exit signal', exitSignal, '\n', infoGet() ], reason : 'exit signal' });
 
-      if( o.briefExitCode )
+      // if( o.briefExitCode )
+      if( o.throwingExitCode === 'brief' )
       o.error = _.errBrief( o.error );
 
       end2( o.error );
@@ -1018,9 +1015,13 @@ function startMinimal_body( o )
     try
     {
 
+      if( !o.inputMirroring )
+      return;
+
       if( o.verbosity >= 3 )
       {
-        let output = '   at ';
+        // let output = '   at ';
+        let output = ' @ ';
         if( o.outputColoring )
         output = _.ct.format( output, { fg : 'bright white' } ) + _.ct.format( o.currentPath, 'path' );
         else
@@ -1028,7 +1029,7 @@ function startMinimal_body( o )
         log( output );
       }
 
-      if( o.verbosity && o.inputMirroring )
+      if( o.verbosity )
       {
         let prefix = ' > ';
         if( o.outputColoring )
@@ -1124,7 +1125,7 @@ function startMinimal_body( o )
 
   function argsJoin( args )
   {
-    if( !execArgs && !o.passingThrough )
+    if( !execArgs && !o.passingThrough ) /* xxx qqq for Vova : why if passingThrough? hack?? */
     return args.join( ' ' );
 
     let i;
@@ -1365,9 +1366,9 @@ startMinimal_body.defaults =
   passingThrough : 0,
   timeOut : null,
 
-  throwingExitCode : 1, /* must be on by default */
+  throwingExitCode : 'full', /* must be on by default */ /* bool-like, 'full', 'brief' */
   applyingExitCode : 0,
-  briefExitCode : 0,
+  // briefExitCode : 0,
 
   verbosity : 2, /* qqq for Yevhen : cover the option */
   outputPrefixing : 0, /* qqq for Yevhen : cover the option | aaa : Done */
@@ -1388,9 +1389,37 @@ let startMinimal = _.routineUnite( startMinimal_head, startMinimal_body );
 
 //
 
+function startSingle_head( routine, args )
+{
+  let o = startMinimalHeadCommon( routine, args );
+
+  _.assert( arguments.length === 2 );
+
+  return o;
+}
+
+//
+
+function startSingle_body( o )
+{
+  let result = _.process.startMinimal.body.call( _.process, o );
+  return result;
+}
+
+startSingle_body.defaults =
+{
+
+  ... startMinimal.defaults,
+
+}
+
+let startSingle = _.routineUnite( startSingle_head, startSingle_body );
+
+//
+
 function start_head( routine, args )
 {
-  let o = startCommon_head( routine, args );
+  let o = startMinimalHeadCommon( routine, args );
 
   _.assert( arguments.length === 2 );
 
@@ -1444,7 +1473,7 @@ function start_head( routine, args )
  * @param {Boolean} o.concurrent=0 Allows paralel execution of several child processes. By default executes commands one by one.
  * @param {Number} o.timeOut=null Time in milliseconds before execution will be terminated.
 
- * @param {Boolean} o.throwingExitCode=1 Throws an Error if child process returns non-zero exit code. Child returns non-zero exit code if it was terminated by parent, timeOut or when internal error occurs.
+ * @param {Boolean} o.throwingExitCode='full' Throws an Error if child process returns non-zero exit code. Child returns non-zero exit code if it was terminated by parent, timeOut or when internal error occurs.
 
  * @param {Boolean} o.applyingExitCode=0 Applies exit code to parent process.
 
@@ -1498,6 +1527,18 @@ function start_head( routine, args )
 function start_body( o )
 {
 
+  _.assert( arguments.length === 1, 'Expects single argument' );
+
+  let processPipeCounter = 0;
+  let readyCallback;
+
+  form0();
+
+  if( _.arrayIs( o.execPath ) || _.arrayIs( o.currentPath ) )
+  return run1();
+
+  return _.process.startSingle.body.call( this, o );
+
   /* subroutines index :
 
   form0,
@@ -1514,18 +1555,6 @@ function start_body( o )
   handleStreamOut,
 
 */
-
-  _.assert( arguments.length === 1, 'Expects single argument' );
-
-  let processPipeCounter = 0;
-  let readyCallback;
-
-  form0();
-
-  if( _.arrayIs( o.execPath ) || _.arrayIs( o.currentPath ) )
-  return run1();
-
-  return _.process.startMinimal.body.call( this, o );
 
   /* */
 
@@ -1720,8 +1749,8 @@ function start_body( o )
 
       try
       {
-        _.assertMapHasAll( o2, _.process.startMinimal.defaults );
-        _.process.startMinimal.body.call( _.process, o2 );
+        _.assertMapHasAll( o2, _.process.startSingle.defaults );
+        _.process.startSingle.body.call( _.process, o2 );
       }
       catch( err )
       {
@@ -1998,7 +2027,7 @@ function start_body( o )
 start_body.defaults =
 {
 
-  ... _.mapBut( startMinimal.defaults, [ 'sessionId' ] ),
+  ... _.mapBut( startSingle.defaults, [ 'sessionId' ] ),
 
   concurrent : 0,
 
@@ -2900,6 +2929,7 @@ let Extension =
   // start
 
   startMinimal,
+  startSingle,
   start,
 
   startPassingThrough,
