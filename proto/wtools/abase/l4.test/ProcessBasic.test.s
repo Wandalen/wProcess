@@ -19237,7 +19237,7 @@ function startOptionOutputPrefixing( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.is( !_.strHas( op.output, 'stdout :\n  Log' ) );
+        test.is( !_.strHas( op.output, 'out :\n  Log' ) );
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -19273,7 +19273,7 @@ function startOptionOutputPrefixing( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.is( _.strHas( op.output, 'stdout :\n  Log' ) );
+        test.is( _.strHas( op.output, 'out :\n  Log' ) );
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -19309,7 +19309,7 @@ function startOptionOutputPrefixing( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.is( !_.strHas( op.output, 'stderr :' ) );
+        test.is( !_.strHas( op.output, 'err :' ) );
         test.is( _.strHas( op.output, 'randomText' ) );
 
         a.fileProvider.fileDelete( testAppPath );
@@ -19346,7 +19346,7 @@ function startOptionOutputPrefixing( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.is( _.strHas( op.output, 'stderr :' ) );
+        test.is( _.strHas( op.output, 'err :' ) );
         test.is( _.strHas( op.output, 'randomText' ) );
 
         a.fileProvider.fileDelete( testAppPath );
@@ -19515,7 +19515,7 @@ function startOptionOutputPiping( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.identical( _.strCount( op.output, 'stdout :\n  Log' ), 1 );
+        test.identical( _.strCount( op.output, 'out :\n  Log' ), 1 );
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -19553,7 +19553,7 @@ function startOptionOutputPiping( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.identical( _.strCount( op.output, 'stdout :\n  Log' ), 0 );
+        test.identical( _.strCount( op.output, 'out :\n  Log' ), 0 );
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -19591,7 +19591,7 @@ function startOptionOutputPiping( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.identical( _.strCount( op.output, 'stdout :\n  Log' ), 1 );
+        test.identical( _.strCount( op.output, 'out :\n  Log' ), 1 );
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -19629,7 +19629,7 @@ function startOptionOutputPiping( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.identical( _.strCount( op.output, 'stdout :' ), 0 );
+        test.identical( _.strCount( op.output, 'out :' ), 0 );
         test.identical( _.strCount( op.output, 'Log' ), 1 );
 
         a.fileProvider.fileDelete( testAppPath );
@@ -19744,7 +19744,7 @@ function startOptionOutputPiping( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.identical( _.strCount( op.output, 'stderr :' ), 0 );
+        test.identical( _.strCount( op.output, 'err :' ), 0 );
         test.identical( _.strCount( op.output, 'Error\n    at' ), 1 );
 
         a.fileProvider.fileDelete( testAppPath );
@@ -19783,7 +19783,7 @@ function startOptionOutputPiping( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.identical( _.strCount( op.output, 'stderr :' ), 1 );
+        test.identical( _.strCount( op.output, 'err :' ), 1 );
         test.identical( _.strCount( op.output, 'Error\n    at' ), 1 );
 
         a.fileProvider.fileDelete( testAppPath );
@@ -19820,7 +19820,7 @@ function startOptionOutputPiping( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.identical( _.strCount( op.output, 'stderr :' ), 0 );
+        test.identical( _.strCount( op.output, 'err :' ), 0 );
         test.identical( _.strCount( op.output, 'Error\n    at' ), 1 );
 
         a.fileProvider.fileDelete( testAppPath );
@@ -32251,13 +32251,13 @@ var Proto =
     startOptionOutputColoringStderr,
     startOptionOutputColoringStdout,
     startOptionOutputGraying,
-    startOptionOutputPrefixing,
-    startOptionOutputPiping,
+    // startOptionOutputPrefixing, /* qqq2 for Yevhen : rewrote test routine taking into account new cases */
+    // startOptionOutputPiping, /* qqq2 for Yevhen : rewrote test routine taking into account new cases */
     startOptionInputMirroring,
     startOptionLogger,
     startOptionLoggerTransofrmation,
     startOutputOptionsCompatibilityLateCheck,
-    // startOptionVerbosity, /* qqq for Yevhen : rewrote the test routine appropriately */
+    // startOptionVerbosity, /* qqq2 for Yevhen : rewrite the test routine appropriately */
     startOptionVerbosityLogging,
     startOutputMultiple,
     startOptionStdioIgnoreMultiple,

@@ -200,8 +200,8 @@ function _exitHandlerRepair()
       if( _realGlobal_._exitHandlerRepairTerminating )
       return;
       _realGlobal_._exitHandlerRepairTerminating = 1;
-      _.time._begin( _.process._sanitareTime, () => /* xxx : experiment to comment out */
-      {
+      // _.time._begin( _.process._sanitareTime, () => /* xxx : experiment to comment out */
+      // {
         try
         {
           process.removeListener( signal, handle );
@@ -227,7 +227,7 @@ function _exitHandlerRepair()
           process.removeAllListeners( 'exit' );
           process.exit();
         }
-      });
+      // });
     }
   }
 

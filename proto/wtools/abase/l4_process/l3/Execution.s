@@ -1283,7 +1283,7 @@ function startMinimal_body( o )
     data = _.strRemoveEnd( data, '\n' );
 
     if( o.outputPrefixing )
-    data = `${channel} : ` + _.strLinesIndentation( data, `  ${channel}` ); /* qqq for Yevgen : change how option outputPrefixing works. discuss */
+    data = `${channel} : ` + _.strLinesIndentation( data, `  ${channel} : ` ); /* qqq for Yevgen : change how option outputPrefixing works. discuss */
 
     if( channel === 'err' )
     {
@@ -1375,7 +1375,7 @@ function startMinimal_body( o )
     else
     {
       _decoratedOutput += msg + '\n';
-      if( isError )
+      if( channel === 'err' )
       _decoratedErrorOutput += msg + '\n';
     }
 
@@ -1417,7 +1417,7 @@ startMinimal_body.defaults =
   hiding : 1,
   uid : null, /* qqq for Yevhen : implement and cover the option */
   gid : null, /* qqq for Yevhen : implement and cover the option */
-  streamSizeLimit : null, /* qqq for Yevhen : implement and cover the option. look option maxBuffer of spawn | aaa : Done */
+  streamSizeLimit : null,
   passingThrough : 0,
   timeOut : null,
 
@@ -1426,8 +1426,8 @@ startMinimal_body.defaults =
   // briefExitCode : 0,
 
   verbosity : 2, /* qqq for Yevhen : cover the option */
-  outputPrefixing : 0, /* qqq for Yevhen : cover the option | aaa : Done */
-  outputPiping : null, /* qqq for Yevhen : cover the option | aaa : Done */
+  outputPrefixing : 0, /* qqq for Yevhen : extend coverage */
+  outputPiping : null,
   outputCollecting : 0,
   outputAdditive : null, /* qqq for Yevhen : cover the option */
   outputColoring : 1, /* qqq for Yevhen : cover the option */
