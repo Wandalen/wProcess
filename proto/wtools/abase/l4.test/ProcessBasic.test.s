@@ -17441,7 +17441,7 @@ function startNjsWithReadyDelayStructural( test )
         dry,
         'execPath' : ( mode === 'fork' ? '' : 'node ' ) + programPath,
         'currentPath' : a.abs( '.' ),
-        'throwingExitCode' : 1,
+        'throwingExitCode' : 'full',
         'inputMirroring' : 1,
         'outputCollecting' : 1,
         'sync' : 0,
@@ -17490,7 +17490,7 @@ function startNjsWithReadyDelayStructural( test )
         'disconnect' : options.disconnect,
         'end' : options.end,
         'fullExecPath' : null,
-        'handleProcedureTerminationBegin' : false,
+        '_handleProcedureTerminationBegin' : false,
       }
       test.identical( options, exp );
 
@@ -17605,7 +17605,7 @@ function startNjsWithReadyDelayStructuralMultiple( test )
         detaching,
         'execPath' : ( mode === 'fork' ? '' : 'node ' ) + programPath,
         'currentPath' : [ a.abs( '.' ), a.abs( '.' ) ],
-        'throwingExitCode' : 1,
+        'throwingExitCode' : 'full',
         'inputMirroring' : 1,
         'outputCollecting' : 1,
         'sync' : 0,
@@ -17656,7 +17656,7 @@ function startNjsWithReadyDelayStructuralMultiple( test )
         'error' : null
         // 'disconnect' : options.disconnect,
         // 'fullExecPath' : null,
-        // 'handleProcedureTerminationBegin' : false,
+        // '_handleProcedureTerminationBegin' : false,
       }
       test.identical( options, exp );
 
@@ -20874,8 +20874,7 @@ function startOptionVerbosity( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-
-  let capturedOutput = '';
+  let capturedOutput;
   let captureLogger = new _.Logger({ output : null, onTransformEnd, raw : 1 })
 
   /* */
@@ -32258,7 +32257,7 @@ var Proto =
     startOptionLogger,
     startOptionLoggerTransofrmation,
     startOutputOptionsCompatibilityLateCheck,
-    startOptionVerbosity,
+    // startOptionVerbosity, /* qqq for Yevhen : rewrote the test routine appropriately */
     startOptionVerbosityLogging,
     startOutputMultiple,
     startOptionStdioIgnoreMultiple,
