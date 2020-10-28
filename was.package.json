@@ -27,7 +27,7 @@
     "wdeasync" : "",
     "strip-ansi" : "6.0.0"
   },
-  "optionalDependencies" : { "wwindows-process-tree" : "0.3.0" },
+  "optionalDependencies" : { "w.process.tree.windows" : "" },
   "devDependencies" : { "wTesting" : "", "wprocess" : "file:.", "eslint" : "7.1.0" },
   "keywords" : [ "wTools", "exec file", "shell script", "run program" ]
 }
