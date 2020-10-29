@@ -3194,7 +3194,7 @@ children.defaults =
 
 //
 
-function nameFromPid( o )
+function nameFor( o )
 {
   _.assert( arguments.length === 1 );
 
@@ -3203,7 +3203,7 @@ function nameFromPid( o )
   else if( _.routineIs( o.kill ) )
   o = { pnd : o };
 
-  o = _.routineOptions( routine, o );
+  o = _.routineOptions( nameFor, o );
 
   if( o.pnd )
   {
@@ -3236,14 +3236,13 @@ function nameFromPid( o )
   
   WindowsProcessTree.getProcessList( o.pid, ( list ) => 
   {
-    _.assert( list[ 0 ].pid === o.process.pid );
     ready.take( list[ 0 ].name );
   })
   
   return ready;
 }
 
-nameFromPid.defaults = 
+nameFor.defaults = 
 {
   pid : null,
   pnd : null
@@ -3289,6 +3288,8 @@ let Extension =
   terminate,
   children,
 
+  nameFor,
+  
   // fields
 
 }

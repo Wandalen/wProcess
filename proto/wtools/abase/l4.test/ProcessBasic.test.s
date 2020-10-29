@@ -31840,6 +31840,51 @@ function childrenOptionFormatList( test )
   }
 }
 
+//
+
+function nameFor( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( testApp );
+  
+  if( process.platform !== 'win32' )///xxx:implement for linux and osx
+  {
+    test.identical( 1,1 );
+    return;
+  }
+  
+  a.ready
+  
+  /* */
+  
+  .then( () => 
+  {
+    let o = { execPath : a.path.nativize( testAppPath ) };
+    _.process.startNjs( o )
+    
+    o.conStart.then( () => _.process.nameFor( o.process ) )
+    o.conStart.then( ( arg ) =>
+    {
+      test.is( _.strBegins( arg, 'node' ) );
+      return null;
+    })
+    
+    return _.Consequence.And( o.conStart, o.conTerminate );
+  })
+  
+  /* */
+  
+  return a.ready;
+  
+  /* */
+ 
+  function testApp()
+  {
+    setTimeout( () => {}, context.t1 * 5 ) /* 1500 */
+  }
+}
+
 // --
 // experiment
 // --
@@ -32327,6 +32372,8 @@ var Proto =
 
     children,
     childrenOptionFormatList,
+    
+    nameFor,
 
     // experiments
 
