@@ -15794,18 +15794,19 @@ function startConcurrentConsequencesMultiple( test )
     outputCollecting : 1,
   }
 
-  // let consequences = [ 'null' ];
-  // let modes = [ 'spawn' ];
+  // xxx
+  let consequences = [ 'null' ];
+  let modes = [ 'spawn' ];
 
-  let consequences = [ 'null', 'consequence', 'routine' ];
-  let modes = [ 'fork', 'spawn', 'shell' ];
+  // let consequences = [ 'null', 'consequence', 'routine' ];
+  // let modes = [ 'fork', 'spawn', 'shell' ];
   consequences.forEach( ( consequence ) =>
   {
     a.ready.tap( () => test.open( `consequence:${consequence}` ) );
     modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, consequence, mode }) ) );
-    modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, consequence, mode }) ) );
-    modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, consequence, mode }) ) );
-    modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, consequence, mode }) ) );
+    // modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, consequence, mode }) ) );
+    // modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, consequence, mode }) ) );
+    // modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, consequence, mode }) ) );
     a.ready.tap( () => test.close( `consequence:${consequence}` ) );
   });
   return a.ready;
