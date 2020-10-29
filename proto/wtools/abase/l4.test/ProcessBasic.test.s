@@ -19529,7 +19529,7 @@ function startOptionOutputPiping( test )
 
   /* */
 
-  let modes = [ 'fork', 'spawn', 'shell' ];
+  let modes = [ 'fork', /*'spawn', 'shell' */];
 
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
@@ -19640,7 +19640,7 @@ function startOptionOutputPiping( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.identical( _.strCount( op.output, 'out :\n  Log' ), 1 );
+        test.identical( _.strCount( op.output, 'out : Log' ), 1 );
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -19677,7 +19677,7 @@ function startOptionOutputPiping( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.identical( _.strCount( op.output, 'out :\n  Log' ), 0 );
+        test.identical( _.strCount( op.output, 'out : Log' ), 0 );
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -19714,7 +19714,7 @@ function startOptionOutputPiping( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.identical( _.strCount( op.output, 'out :\n  Log' ), 1 );
+        test.identical( _.strCount( op.output, 'out : Log' ), 1 );
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -32462,7 +32462,7 @@ var Proto =
     startOptionOutputColoringStdout,
     startOptionOutputGraying,
     startOptionOutputPrefixing, /* qqq2 for Yevhen : rewrote test routine taking into account new cases | aaa : Done. */
-    // startOptionOutputPiping, /* qqq2 for Yevhen : rewrote test routine taking into account new cases */
+    startOptionOutputPiping, /* qqq2 for Yevhen : rewrote test routine taking into account new cases */
     startOptionInputMirroring,
     startOptionLogger,
     startOptionLoggerTransofrmation,
