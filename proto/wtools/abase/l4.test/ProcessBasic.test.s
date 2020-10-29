@@ -19974,9 +19974,6 @@ function startOptionOutputPiping( test )
     return _.process.start( options )
     .then( ( op ) =>
     {
-      if( _.strHas( programPath, 'testApp2Error' ) ) /* qqq2 for Yevhen : ??? */
-      console.error( op.output );
-      else
       console.log( op.output );
       return null;
     } )
@@ -19990,6 +19987,12 @@ function startOptionOutputPiping( test )
   function testApp2()
   {
     console.log( '\nLog1\nLog2\n' );
+  }
+
+  function testAppNormalError()
+  {
+    console.log( '\nLog1\nLog2\n' );
+    console.error( 'Error output' );
   }
 
   /* qqq2 for Yevhen : poor tests! see no console.error() cases! */
