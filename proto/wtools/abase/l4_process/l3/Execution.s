@@ -2067,7 +2067,7 @@ function startNjs_body( o )
   System = require( 'os' );
 
   _.assertRoutineOptions( startNjs_body, o );
-  _.assert( _.strIs( o.execPath ) );
+  // _.assert( _.strIs( o.execPath ) );
   _.assert( !o.code );
   _.assert( arguments.length === 1, 'Expects single argument' );
 
