@@ -32200,7 +32200,7 @@ var Proto =
     startOptionOutputColoringStderr,
     startOptionOutputColoringStdout,
     startOptionOutputGraying,
-    // startOptionOutputPrefixing, /* qqq2 for Yevhen : rewrote test routine taking into account new cases */
+    startOptionOutputPrefixing, /* qqq2 for Yevhen : rewrote test routine taking into account new cases */
     // startOptionOutputPiping, /* qqq2 for Yevhen : rewrote test routine taking into account new cases */
     startOptionInputMirroring,
     startOptionLogger,
