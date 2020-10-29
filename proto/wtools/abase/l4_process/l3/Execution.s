@@ -192,9 +192,12 @@ function startMinimal_body( o )
 
   _.assert( arguments.length === 1, 'Expects single argument' );
 
+  /* qqq for Dmytro : use buffer instead */
   let _errOutput = '';
-  let _decoratedOutput = '';
-  let _decoratedErrorOutput = '';
+  let _decoratedOutOutput = '';
+  let _decoratedErrOutput = '';
+  let _errPrefix = null;
+  let _outPrefix = null;
   let _readyCallback;
   let execArgs; /* xxx qqq for Vova : remove. no hacks! */
 
@@ -457,8 +460,15 @@ function startMinimal_body( o )
     }
     catch( err )
     {
+      o.outputColoring = 0;
       if( o.verbosity >= 2 )
       log( _.errOnce( err ), 'err' );
+    }
+
+    if( o.outputPrefixing )
+    {
+      _errPrefix = `${ ( o.outputColoring ? _.ct.format( 'err', { fg : 'dark red' } ) : 'err' ) } : `;
+      _outPrefix = `${ ( o.outputColoring ? _.ct.format( 'out', { fg : 'dark white' } ) : 'err' ) } : `;
     }
 
     /* handler of event terminationBegin */
@@ -484,7 +494,8 @@ function startMinimal_body( o )
       try
       {
         o.ready.deasync();
-        o.ready.give( 1 );
+        // o.ready.give( 1 );
+        o.ready.thenGive( 1 ); /* yyy */
         if( o.when.delay )
         _.time.sleep( o.when.delay );
         run2();
@@ -736,16 +747,16 @@ function startMinimal_body( o )
 
     if( o._handleProcedureTerminationBegin )
     {
-      _.procedure.off( 'terminationBegin', _handleProcedureTerminationBegin );
+      _.procedure.off( 'terminationBegin', o._handleProcedureTerminationBegin );
       o._handleProcedureTerminationBegin = false;
     }
 
     if( !o.outputAdditive )
     {
-      if( _decoratedOutput )
-      o.logger.log( _decoratedOutput );
-      if( _decoratedErrorOutput )
-      o.logger.error( _decoratedErrorOutput );
+      if( _decoratedOutOutput )
+      o.logger.log( _decoratedOutOutput );
+      if( _decoratedErrOutput )
+      o.logger.error( _decoratedErrOutput );
     }
 
     if( o.exitReason === null && o.error )
@@ -757,7 +768,6 @@ function startMinimal_body( o )
     let consequence1 = o.state === 'disconnected' ? o.conDisconnect : o.conTerminate;
     let consequence2 = o.state === 'disconnected' ? o.conTerminate : o.conDisconnect;
 
-    /* `initial`, `starting`, `started`, `terminating`, `terminated`, `disconnected` */ /* xxx */
     if( o.error )
     {
       if( o.state === 'initial' || o.state === 'starting' )
@@ -813,7 +823,8 @@ function startMinimal_body( o )
       log( infoGet(), 'out' );
     }
 
-    if( ( exitSignal || exitCode !== 0 ) && o.throwingExitCode )
+    if( !o.error && o.throwingExitCode )
+    if( exitSignal || exitCode !== 0 )
     {
       if( _.numberIs( exitCode ) )
       o.error = _._err({ args : [ 'Process returned exit code', exitCode, '\n', infoGet() ], reason : 'exit code' });
@@ -821,11 +832,12 @@ function startMinimal_body( o )
       o.error = _._err({ args : [ 'Process timed out, killed by exit signal', exitSignal, '\n', infoGet() ], reason : 'time out' });
       else
       o.error = _._err({ args : [ 'Process was killed by exit signal', exitSignal, '\n', infoGet() ], reason : 'exit signal' });
-
-      // if( o.briefExitCode )
       if( o.throwingExitCode === 'brief' )
       o.error = _.errBrief( o.error );
+    }
 
+    if( o.error )
+    {
       end2( o.error );
     }
     else if( !o.sync || o.deasync )
@@ -1272,6 +1284,7 @@ function startMinimal_body( o )
     if( o.outputGraying )
     data = StripAnsi( data );
 
+    if( channel === 'err' )
     _errOutput += data;
 
     if( o.outputCollecting )
@@ -1282,17 +1295,21 @@ function startMinimal_body( o )
 
     data = _.strRemoveEnd( data, '\n' );
 
+    /* qqq for Yevgen : changed how option outputPrefixing works */
     if( o.outputPrefixing )
-    data = `${channel} : ` + _.strLinesIndentation( data, `  ${channel} : ` ); /* qqq for Yevgen : change how option outputPrefixing works. discuss */
+    {
+      let prefix = channel === 'err' ? _errPrefix : _outPrefix;
+      data = prefix + _.strLinesIndentation( data, prefix );
+    }
 
     if( channel === 'err' )
     {
-      if( _.color && o.outputColoring && o.outputColoringStderr )
+      if( o.outputColoring && o.outputColoringStderr )
       data = _.ct.format( data, 'pipe.negative' );
     }
     else
     {
-      if( _.color && o.outputColoring && o.outputColoringStdout )
+      if( o.outputColoring && o.outputColoringStdout )
       data = _.ct.format( data, 'pipe.neutral' );
     }
 
@@ -1374,9 +1391,9 @@ function startMinimal_body( o )
     }
     else
     {
-      _decoratedOutput += msg + '\n';
+      _decoratedOutOutput += msg + '\n';
       if( channel === 'err' )
-      _decoratedErrorOutput += msg + '\n';
+      _decoratedErrOutput += msg + '\n';
     }
 
   }
@@ -1457,14 +1474,218 @@ function startSingle_head( routine, args )
 
 function startSingle_body( o )
 {
+  let _readyCallback;
   let result = _.process.startMinimal.body.call( _.process, o );
   return result;
+
+  /* subroutines :
+
+  form1,
+  form2,
+  run1,
+  run2,
+  end1,
+
+*/
+
+  function form1()
+  {
+
+    if( o.ready === null )
+    {
+      o.ready = new _.Consequence().take( null );
+    }
+    else if( !_.consequenceIs( o.ready ) )
+    {
+      _readyCallback = o.ready;
+      _.assert( _.routineIs( _readyCallback ) );
+      o.ready = new _.Consequence().take( null );
+    }
+
+    _.assert( !_.consequenceIs( o.ready ) || o.ready.resourcesCount() <= 1 );
+
+    // o.logger = o.logger || _global.logger;
+
+  }
+
+  /* */
+
+  function form2()
+  {
+
+    /* procedure */
+
+    if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
+    o.stack = _.Procedure.Stack( o.stack, 3 );
+
+    /* */
+
+    if( o.conStart === null )
+    {
+      o.conStart = new _.Consequence();
+    }
+    else if( !_.consequenceIs( o.conStart ) )
+    {
+      o.conStart = new _.Consequence().finally( o.conStart );
+    }
+
+    if( o.conTerminate === null )
+    {
+      o.conTerminate = new _.Consequence();
+    }
+    else if( !_.consequenceIs( o.conTerminate ) )
+    {
+      o.conTerminate = new _.Consequence({ _procedure : false }).finally( o.conTerminate );
+    }
+
+    if( o.conDisconnect === null )
+    {
+      o.conDisconnect = new _.Consequence();
+    }
+    else if( !_.consequenceIs( o.conDisconnect ) )
+    {
+      o.conDisconnect = new _.Consequence({ _procedure : false }).finally( o.conDisconnect );
+    }
+
+    /* consequences */
+
+    _.assert( o.conStart !== o.conTerminate );
+    _.assert( o.conStart !== o.conDisconnect );
+    _.assert( o.conTerminate !== o.conDisconnect );
+    _.assert( o.ready !== o.conStart && o.ready !== o.conDisconnect && o.ready !== o.conTerminate );
+    _.assert( o.conStart.resourcesCount() === 0 );
+    _.assert( o.conDisconnect.resourcesCount() === 0 );
+    _.assert( o.conTerminate.resourcesCount() === 0 );
+
+    /* output */
+
+    _.assert( _.boolLike( o.outputColoring ) );
+    _.assert( _.boolLike( o.outputColoringStdout ) );
+    _.assert( _.boolLike( o.outputColoringStderr ) );
+    _.assert( _.boolLike( o.outputCollecting ) );
+
+    // /* ipc */
+    //
+    // _.assert( _.boolLike( o.ipc ) );
+    // _.assert( _.longIs( o.stdio ) );
+    // _.assert( !o.ipc || _.longHas( [ 'fork', 'spawn' ], o.mode ), `Mode::${o.mode} doesn't support inter process communication.` );
+    // _.assert( o.mode !== 'fork' || !!o.ipc, `In mode::fork option::ipc must be true. Such subprocess can not have no ipc.` );
+    //
+    // /* etc */
+    //
+    // _.assert( !_.arrayIs( o.execPath ) && !_.arrayIs( o.currentPath ) );
+
+    /* */
+
+    if( !_.strIs( o.when ) )
+    {
+      if( Config.debug )
+      {
+        let keys = _.mapKeys( o.when );
+        _.assert( _.mapIs( o.when ) );
+        _.assert( keys.length === 1 && _.longHas( [ 'time', 'delay' ], keys[ 0 ] ) );
+        _.assert( _.numberIs( o.when.delay ) || _.numberIs( o.when.time ) )
+      }
+      if( o.when.time !== undefined )
+      o.when.delay = Math.max( 0, o.when.time - _.time.now() );
+      _.assert
+      (
+        o.when.delay >= 0,
+        `Wrong value of {-o.when.delay } or {-o.when.time-}. Starting delay should be >= 0, current : ${o.when.delay}`
+      );
+    }
+
+    /* */
+
+    // o.disconnect = disconnect;
+    // o._end = end3;
+    // o.state = 'initial'; /* `initial`, `starting`, `started`, `terminating`, `terminated`, `disconnected` */
+    // o.exitReason = null;
+    // o.exitCode = null;
+    // o.exitSignal = null;
+    // o.error = o.error || null;
+    // o.process = null;
+    // o.fullExecPath = null;
+    // o.output = o.outputCollecting ? '' : null; /* xxx */
+    // o.ended = false;
+    // o._handleProcedureTerminationBegin = false;
+    // o.streamOut = null;
+    // o.streamErr = null;
+    // Object.preventExtensions( o );
+  }
+
+  /* */
+
+  function run1()
+  {
+
+    if( o.sync && !o.deasync )
+    {
+      try
+      {
+        o.ready.deasync();
+        // o.ready.give( 1 );
+        o.ready.thenGive( 1 ); /* yyy */
+        if( o.when.delay )
+        _.time.sleep( o.when.delay );
+        run2();
+      }
+      catch( err )
+      {
+        err = _.err( err );
+        if( !o.ended )
+        {
+          o.error = o.error || err;
+          o._end();
+        }
+        throw err;
+      }
+      _.assert( o.state === 'terminated' || o.state === 'disconnected' );
+      o._end();
+    }
+    else
+    {
+      if( o.when.delay )
+      o.ready.delay( o.when.delay );
+      o.ready.thenGive( run2 );
+    }
+
+    return end1();
+  }
+
+  /* */
+
+  function run2()
+  {
+    return _.process.startMinimal.body.call( _.process, o );
+  }
+
+  /* */
+
+  function end1()
+  {
+    if( _readyCallback )
+    o.ready.finally( _readyCallback );
+    if( o.deasync )
+    o.ready.deasync();
+    if( o.sync )
+    return o.ready.sync();
+    return o.ready;
+  }
+
 }
 
 startSingle_body.defaults =
 {
 
-  ... startMinimal.defaults,
+  ... _.mapBut( startMinimal.defaults, [ 'onStart', 'onTerminate', 'onDisconnect' ] ),
+
+  when : 'instant',
+
+  ready : null,
+  conStart : null,
+  conTerminate : null,
+  conDisconnect : null,
 
 }
 
@@ -1695,8 +1916,6 @@ function start_body( o )
   function run1()
   {
 
-    /* yyy : add try catch block */
-
     try
     {
 
@@ -1712,8 +1931,7 @@ function start_body( o )
       }
       else if( o.procedure )
       {
-        /* qqq for Yevhen : cover option procedure. take into account all branches
-        */
+        /* qqq for Yevhen : cover option procedure. take into account all branches */
         if( !o.procedure.isAlive() )
         o.procedure.begin();
       }

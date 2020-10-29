@@ -7724,7 +7724,6 @@ function startImportantExecPathPassingThrough( test )
 
     let locals =
     {
-      toolsPath : a.path.nativize( _.module.toolsPathGet() ),
       routinePath : a.routinePath,
       options : { execPath : 'echo', args : null, passingThrough : 1 }
     }
@@ -7758,7 +7757,6 @@ function startImportantExecPathPassingThrough( test )
 
     let locals =
     {
-      toolsPath : a.path.nativize( _.module.toolsPathGet() ),
       routinePath : a.routinePath,
       options : { execPath : null, args : [ 'echo' ], passingThrough : 1 }
     }
@@ -7792,7 +7790,6 @@ function startImportantExecPathPassingThrough( test )
 
     let locals =
     {
-      toolsPath : a.path.nativize( _.module.toolsPathGet() ),
       routinePath : a.routinePath,
       options : { execPath : 'echo *', args : [ '*' ], passingThrough : 1 }
     }
@@ -7853,7 +7850,6 @@ function startImportantExecPathPassingThrough( test )
 
     let locals =
     {
-      toolsPath : a.path.nativize( _.module.toolsPathGet() ),
       routinePath : a.routinePath,
       options : { execPath : 'echo', args : null, passingThrough : 1 }
     }
@@ -7901,7 +7897,6 @@ function startImportantExecPathPassingThrough( test )
 
     let locals =
     {
-      toolsPath : a.path.nativize( _.module.toolsPathGet() ),
       routinePath : a.routinePath,
       options : { execPath : null, args : [ 'echo' ], passingThrough : 1 }
     }
@@ -7956,7 +7951,6 @@ function startImportantExecPathPassingThrough( test )
 
     let locals =
     {
-      toolsPath : a.path.nativize( _.module.toolsPathGet() ),
       routinePath : a.routinePath,
       options : { execPath : 'echo *', args : [ '*' ], passingThrough : 1 }
     }
@@ -8003,7 +7997,6 @@ function startImportantExecPathPassingThrough( test )
 
     let locals =
     {
-      toolsPath : a.path.nativize( _.module.toolsPathGet() ),
       routinePath : a.routinePath,
       options : { execPath : 'echo', args : null, passingThrough : 1 }
     }
@@ -8038,7 +8031,6 @@ function startImportantExecPathPassingThrough( test )
 
     let locals =
     {
-      toolsPath : a.path.nativize( _.module.toolsPathGet() ),
       routinePath : a.routinePath,
       options : { execPath : null, args : [ 'echo' ], passingThrough : 1 }
     }
@@ -8073,7 +8065,6 @@ function startImportantExecPathPassingThrough( test )
 
     let locals =
     {
-      toolsPath : a.path.nativize( _.module.toolsPathGet() ),
       routinePath : a.routinePath,
       options : { execPath : 'echo *', args : [ '*' ], passingThrough : 1 }
     }
@@ -13858,11 +13849,7 @@ function startDetachingTerminationBegin( test )
     a.ready.then( () =>
     {
       a.fileProvider.filesDelete( a.routinePath );
-      let locals =
-      {
-        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
-        mode,
-      }
+      let locals = { mode }
       a.path.nativize( a.program({ routine : testAppParent, locals }) );
       a.path.nativize( a.program( testAppChild ) );
       return null;
@@ -18320,25 +18307,24 @@ function startOptionOutputColoring( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
 
   /* */
-
-  let modes = [ 'fork', 'spawn', 'shell' ];
-
-  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
-
-  return a.ready;
 
   function run( mode )
   {
     let ready = new _.Consequence().take( null );
+
+    /* */
 
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, outputColoring : 0, normal output, inputMirroring : 0`;
 
       let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
-      let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPath2, outputColoring : 0, inputMirroring : 0, mode };
+      let locals = { programPath : testAppPath2, outputColoring : 0, inputMirroring : 0, mode };
       let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
 
       let options =
@@ -18367,7 +18353,7 @@ function startOptionOutputColoring( test )
       test.case = `mode : ${ mode }, outputColoring : 1, normal output, inputMirroring : 0`;
 
       let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
-      let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPath2, outputColoring : 1, inputMirroring : 0, mode };
+      let locals = { programPath : testAppPath2, outputColoring : 1, inputMirroring : 0, mode };
       let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
 
       let options =
@@ -18388,7 +18374,7 @@ function startOptionOutputColoring( test )
         a.fileProvider.fileDelete( testAppPath2 );
         return null
       })
-    } )
+    })
 
     /* */
 
@@ -18397,7 +18383,7 @@ function startOptionOutputColoring( test )
       test.case = `mode : ${ mode }, outputColoring : 1, normal output, inputMirroring : 1`;
 
       let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
-      let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPath2, outputColoring : 1, inputMirroring : 1, mode };
+      let locals = { programPath : testAppPath2, outputColoring : 1, inputMirroring : 1, mode };
       let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
 
       let options =
@@ -18419,7 +18405,7 @@ function startOptionOutputColoring( test )
         a.fileProvider.fileDelete( testAppPath2 );
         return null
       })
-    } )
+    })
 
     /* */
 
@@ -18428,7 +18414,7 @@ function startOptionOutputColoring( test )
       test.case = `mode : ${ mode }, outputColoring : 0, error output, inputMirroring : 0`;
 
       let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
-      let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPath2, outputColoring : 0, inputMirroring : 0, mode };
+      let locals = { programPath : testAppPath2, outputColoring : 0, inputMirroring : 0, mode };
       let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
 
       let options =
@@ -18448,7 +18434,7 @@ function startOptionOutputColoring( test )
         a.fileProvider.fileDelete( testAppPath2 );
         return null
       })
-    } )
+    })
 
     /* */
 
@@ -18457,7 +18443,7 @@ function startOptionOutputColoring( test )
       test.case = `mode : ${ mode }, outputColoring : 1, error output, inputMirroring : 0`;
 
       let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
-      let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPath2, outputColoring : 1, inputMirroring : 0, mode };
+      let locals = { programPath : testAppPath2, outputColoring : 1, inputMirroring : 0, mode };
       let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
 
       let options =
@@ -18477,7 +18463,7 @@ function startOptionOutputColoring( test )
         a.fileProvider.fileDelete( testAppPath2 );
         return null
       })
-    } )
+    })
 
     /* */
 
@@ -18486,7 +18472,7 @@ function startOptionOutputColoring( test )
       test.case = `mode : ${ mode }, outputColoring : 1, error output, inputMirroring : 1`;
 
       let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
-      let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPath2, outputColoring : 1, inputMirroring : 1, mode };
+      let locals = { programPath : testAppPath2, outputColoring : 1, inputMirroring : 1, mode };
       let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
 
       let options =
@@ -18507,10 +18493,11 @@ function startOptionOutputColoring( test )
         a.fileProvider.fileDelete( testAppPath2 );
         return null
       })
-    } )
+    })
+
+    /* */
 
     return ready;
-
   }
 
   /* - */
@@ -18571,13 +18558,12 @@ function startOptionOutputColoringStderr( test )
       let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
       let locals =
       {
-        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
         programPath : testAppPath2,
         outputColoringStderr : 0,
         outputColoring : 1,
         inputMirroring : 0,
         outputColoringStdout : null,
-        mode
+        mode,
       };
       let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
 
@@ -18609,7 +18595,6 @@ function startOptionOutputColoringStderr( test )
       let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
       let locals =
       {
-        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
         programPath : testAppPath2,
         outputColoringStderr : 1,
         outputColoring : 0,
@@ -18647,7 +18632,6 @@ function startOptionOutputColoringStderr( test )
       let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
       let locals =
       {
-        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
         programPath : testAppPath2,
         outputColoringStderr : 1,
         outputColoring : 1,
@@ -18685,7 +18669,6 @@ function startOptionOutputColoringStderr( test )
       let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
       let locals =
       {
-        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
         programPath : testAppPath2,
         outputColoringStderr : 1,
         inputMirroring : 1,
@@ -18724,7 +18707,6 @@ function startOptionOutputColoringStderr( test )
       let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
       let locals =
       {
-        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
         programPath : testAppPath2,
         outputColoringStderr : 1,
         outputColoringStdout : 0,
@@ -18762,7 +18744,6 @@ function startOptionOutputColoringStderr( test )
       let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
       let locals =
       {
-        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
         programPath : testAppPath2,
         outputColoringStderr : 1,
         outputColoringStdout : 0,
@@ -18856,7 +18837,6 @@ function startOptionOutputColoringStdout( test )
       let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
       let locals =
       {
-        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
         programPath : testAppPath2,
         outputColoringStdout : 0,
         outputColoringStderr : null,
@@ -18894,7 +18874,6 @@ function startOptionOutputColoringStdout( test )
       let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
       let locals =
       {
-        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
         programPath : testAppPath2,
         outputColoringStdout : 1,
         outputColoringStderr : null,
@@ -18933,7 +18912,6 @@ function startOptionOutputColoringStdout( test )
       let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
       let locals =
       {
-        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
         programPath : testAppPath2,
         outputColoringStdout : 1,
         outputColoringStderr : null,
@@ -18971,7 +18949,6 @@ function startOptionOutputColoringStdout( test )
       let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
       let locals =
       {
-        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
         programPath : testAppPath2,
         outputColoringStdout : 1,
         outputColoringStderr : null,
@@ -19011,7 +18988,6 @@ function startOptionOutputColoringStdout( test )
       let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
       let locals =
       {
-        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
         programPath : testAppPath2,
         outputColoringStdout : 1,
         outputColoringStderr : 0,
@@ -19050,7 +19026,6 @@ function startOptionOutputColoringStdout( test )
       let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
       let locals =
       {
-        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
         programPath : testAppPath2,
         outputColoringStdout : 1,
         outputColoringStderr : 0,
@@ -19220,7 +19195,6 @@ function startOptionOutputPrefixing( test )
 
       let locals =
       {
-        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
         prefixing : 0,
         programPath : testAppPath2,
         mode
@@ -19256,7 +19230,6 @@ function startOptionOutputPrefixing( test )
 
       let locals =
       {
-        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
         prefixing : 1,
         programPath : testAppPath2,
         mode
@@ -19292,7 +19265,6 @@ function startOptionOutputPrefixing( test )
 
       let locals =
       {
-        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
         prefixing : 0,
         programPath : testAppPath2,
         mode,
@@ -19329,7 +19301,6 @@ function startOptionOutputPrefixing( test )
 
       let locals =
       {
-        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
         prefixing : 1,
         programPath : testAppPath2,
         mode
@@ -19420,7 +19391,6 @@ function startOptionOutputPiping( test )
 
       let locals =
       {
-        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
         piping : 1,
         programPath : testAppPath2,
         mode,
@@ -19458,7 +19428,6 @@ function startOptionOutputPiping( test )
 
       let locals =
       {
-        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
         piping : 0,
         programPath : testAppPath2,
         mode,
@@ -19496,7 +19465,6 @@ function startOptionOutputPiping( test )
 
       let locals =
       {
-        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
         piping : 1,
         prefixing : 1,
         programPath : testAppPath2,
@@ -19534,7 +19502,6 @@ function startOptionOutputPiping( test )
 
       let locals =
       {
-        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
         piping : null,
         verbosity : 1,
         prefixing : 1,
@@ -19572,7 +19539,6 @@ function startOptionOutputPiping( test )
 
       let locals =
       {
-        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
         piping : 1,
         verbosity : 1,
         prefixing : 1,
@@ -19610,7 +19576,6 @@ function startOptionOutputPiping( test )
 
       let locals =
       {
-        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
         piping : 0,
         prefixing : 1,
         programPath : testAppPath2,
@@ -19649,7 +19614,6 @@ function startOptionOutputPiping( test )
 
       let locals =
       {
-        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
         piping : 1,
         programPath : testAppPath2,
         mode,
@@ -19687,7 +19651,6 @@ function startOptionOutputPiping( test )
 
       let locals =
       {
-        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
         piping : 1,
         programPath : testAppPath2,
         mode,
@@ -19725,7 +19688,6 @@ function startOptionOutputPiping( test )
 
       let locals =
       {
-        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
         piping : 0,
         programPath : testAppPath2,
         mode,
@@ -19764,7 +19726,6 @@ function startOptionOutputPiping( test )
 
       let locals =
       {
-        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
         piping : 1,
         prefixing : 1,
         programPath : testAppPath2,
@@ -19801,7 +19762,6 @@ function startOptionOutputPiping( test )
 
       let locals =
       {
-        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
         piping : 0,
         prefixing : 1,
         programPath : testAppPath2,
@@ -19857,7 +19817,7 @@ function startOptionOutputPiping( test )
     return _.process.start( options )
     .then( ( op ) =>
     {
-      if( _.strHas( programPath, 'testApp2Error' ) )
+      if( _.strHas( programPath, 'testApp2Error' ) ) /* qqq2 for Yevhen : ??? */
       console.error( op.output );
       else
       console.log( op.output );
@@ -19872,8 +19832,11 @@ function startOptionOutputPiping( test )
 
   function testApp2()
   {
-    console.log( 'Log' );
+    console.log( '\nLog1\nLog2\n' );
   }
+
+  /* qqq2 for Yevhen : poor tests! see no console.error() cases! */
+  /* qqq2 for Yevhen : poor tests! see no multiline output! */
 }
 
 startOptionOutputPiping.timeOut = 3e5;
@@ -19905,7 +19868,6 @@ function startOptionInputMirroring( test )
 
       let locals =
       {
-        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
         programPath : testAppPath2,
         mode,
         inputMirroring : 0,
@@ -19942,7 +19904,6 @@ function startOptionInputMirroring( test )
 
       let locals =
       {
-        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
         programPath : testAppPath2,
         mode,
         inputMirroring : 1,
@@ -19980,7 +19941,6 @@ function startOptionInputMirroring( test )
 
       let locals =
       {
-        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
         programPath : testAppPath2,
         mode,
         inputMirroring : 1,
@@ -20017,7 +19977,6 @@ function startOptionInputMirroring( test )
 
       let locals =
       {
-        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
         programPath : testAppPath2,
         mode,
         inputMirroring : 1,
@@ -20054,7 +20013,6 @@ function startOptionInputMirroring( test )
 
       let locals =
       {
-        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
         programPath : testAppPath2,
         mode,
         inputMirroring : 1,
@@ -20092,7 +20050,6 @@ function startOptionInputMirroring( test )
 
       let locals =
       {
-        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
         programPath : testAppPath2,
         mode,
         inputMirroring : 1,
@@ -21684,10 +21641,8 @@ function startOptionCurrentPath( test )
   let context = this;
   let a = context.assetFor( test, false );
   let testFilePath = a.path.join( a.routinePath, 'program1TestFile' );
-  // let locals = { toolsPath : context.toolsPath, testFilePath };
   let locals = { testFilePath };
   let programPath = a.program({ routine : program1, locals });
-  // let programPath = a.path.nativize( a.program({ routine : program1, locals }) );
   let modes = [ 'shell', 'spawn', 'fork' ]
 
   modes.forEach( ( mode ) =>
@@ -22576,7 +22531,6 @@ function startDiffPid( test )
       a.fileProvider.filesDelete( a.routinePath );
       let locals =
       {
-        toolsPath : _.path.nativize( _.module.toolsPathGet() ),
         mode,
       }
       a.path.nativize( a.program({ routine : testAppParent, locals }) );
@@ -22887,7 +22841,6 @@ function exitCode( test )
       test.case = 'initial value';
       let locals =
       {
-        toolsPath : a.path.nativize( _.module.toolsPathGet() ),
         code : null
       }
       let programPath = a.program({ routine : testAppExitCode, locals });
@@ -22915,7 +22868,6 @@ function exitCode( test )
       test.case = 'set code';
       let locals =
       {
-        toolsPath : a.path.nativize( _.module.toolsPathGet() ),
         code : 1
       }
       let programPath = a.program({ routine : testAppExitCode, locals});
@@ -22943,7 +22895,6 @@ function exitCode( test )
       test.case = 'update reason';
       let locals =
       {
-        toolsPath : a.path.nativize( _.module.toolsPathGet() ),
         code : 2
       }
       let programPath = a.program({ routine : testAppExitCode, locals});
@@ -23014,7 +22965,7 @@ function exitCode( test )
     ready.then( () =>
     {
       test.case = 'error in subprocess';
-      let programPath = a.program({ routine : testApp, locals : { toolsPath : a.path.nativize( _.module.toolsPathGet() ), options : null } })
+      let programPath = a.program({ routine : testApp, locals : { options : null } })
       let options =
       {
         execPath : mode === 'fork' ? a.path.nativize( programPath ) : 'node ' + a.path.nativize( programPath ),
@@ -23042,7 +22993,6 @@ function exitCode( test )
       test.case = 'no error in subprocess';
       let locals =
       {
-        toolsPath : a.path.nativize( _.module.toolsPathGet() ),
         options : { execPath : 'echo' }
       }
       let programPath = a.program({ routine : testApp, locals });
@@ -23070,7 +23020,6 @@ function exitCode( test )
       test.case = 'explicitly exit with code : 100';
       let locals =
       {
-        toolsPath : a.path.nativize( _.module.toolsPathGet() ),
         code : 100
       }
       let programPath = a.program({ routine : testAppExit, locals});
@@ -23164,7 +23113,7 @@ function startOptionVerbosityLogging( test )
     {
       test.case = `logging without error; mode : ${mode}; verbosity : 4`;
       let testAppPath2 = a.program( testApp2 );
-      let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPath2, verbosity : 4 };
+      let locals = { programPath : testAppPath2, verbosity : 4 };
       let testAppPath = a.program( { routine : testApp, locals } );
 
       let options =
@@ -23203,7 +23152,7 @@ function startOptionVerbosityLogging( test )
     {
       test.case = `logging with error; mode : ${mode}; verbosity : 4`;
       let testAppPathError = a.program( testAppError );
-      let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPathError, verbosity : 4 };
+      let locals = { programPath : testAppPathError, verbosity : 4 };
       let testAppPath = a.program( { routine : testApp, locals } );
 
       let options =
@@ -23247,7 +23196,7 @@ function startOptionVerbosityLogging( test )
     {
       test.case = `logging without error; mode : ${mode}; verbosity : 5`;
       let testAppPath2 = a.program( testApp2 );
-      let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPath2, verbosity : 5 };
+      let locals = { programPath : testAppPath2, verbosity : 5 };
       let testAppPath = a.program( { routine : testApp, locals } );
 
       let options =
@@ -23286,7 +23235,7 @@ function startOptionVerbosityLogging( test )
     {
       test.case = `logging with error; mode : ${mode}; verbosity : 5`;
       let testAppPathError = a.program( testAppError );
-      let locals = { toolsPath : _.path.nativize( _.module.toolsPathGet() ), programPath : testAppPathError, verbosity : 5 };
+      let locals = { programPath : testAppPathError, verbosity : 5 };
       let testAppPath = a.program( { routine : testApp, locals } );
 
       let options =
