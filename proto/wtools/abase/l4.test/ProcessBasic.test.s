@@ -1,3 +1,4 @@
+/* eslint-disable */
 ( function _ProcessBasic_test_s( )
 {
 
@@ -19189,13 +19190,14 @@ function startOptionOutputPrefixing( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${ mode }, outputPrefixing : 0, normal output`;
+      test.case = `mode : ${ mode }, outputPrefixing : 0, coloring : 0, normal output`;
 
       let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
 
       let locals =
       {
         prefixing : 0,
+        coloring : 0,
         programPath : testAppPath2,
         mode
       }
@@ -19211,7 +19213,7 @@ function startOptionOutputPrefixing( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.is( !_.strHas( op.output, 'out :\n  Log' ) );
+        test.identical( op.output, 'Log\n' );
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -19224,13 +19226,14 @@ function startOptionOutputPrefixing( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${ mode }, outputPrefixing : 1, normal output`;
+      test.case = `mode : ${ mode }, outputPrefixing : 1, coloring : 0, normal output`;
 
       let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
 
       let locals =
       {
         prefixing : 1,
+        coloring : 0,
         programPath : testAppPath2,
         mode
       }
@@ -19246,7 +19249,7 @@ function startOptionOutputPrefixing( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.is( _.strHas( op.output, 'out :\n  Log' ) );
+        test.identical( op.output, 'out : Log\n' );
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -19259,13 +19262,14 @@ function startOptionOutputPrefixing( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${ mode }, outputPrefixing : 0, error output`;
+      test.case = `mode : ${ mode }, outputPrefixing : 0, coloring : 0, error output`;
 
       let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
 
       let locals =
       {
         prefixing : 0,
+        coloring : 0,
         programPath : testAppPath2,
         mode,
       }
@@ -19295,13 +19299,14 @@ function startOptionOutputPrefixing( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${ mode }, outputPrefixing : 1, error output`;
+      test.case = `mode : ${ mode }, outputPrefixing : 1, coloring : 0, error output`;
 
       let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
 
       let locals =
       {
         prefixing : 1,
+        coloring : 0,
         programPath : testAppPath2,
         mode
       }
@@ -19319,6 +19324,157 @@ function startOptionOutputPrefixing( test )
         test.identical( op.ended, true );
         test.is( _.strHas( op.output, 'err :' ) );
         test.is( _.strHas( op.output, 'randomText' ) );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputPrefixing : 0, coloring : 1, normal output`;
+
+      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+
+      let locals =
+      {
+        prefixing : 0,
+        coloring : 1,
+        programPath : testAppPath2,
+        mode
+      }
+
+      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, '\u001b[35mLog\u001b[39;0m\n' );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputPrefixing : 1, coloring : 1, normal output`;
+
+      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+
+      let locals =
+      {
+        prefixing : 1,
+        coloring : 1,
+        programPath : testAppPath2,
+        mode
+      }
+
+      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, '\u001b[37mout\u001b[39;0m\u001b[35m : Log\u001b[39;0m\n' );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+    })
+
+    /* - */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputPrefixing : 0, coloring : 1, error output`;
+
+      let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
+
+      let locals =
+      {
+        prefixing : 0,
+        coloring : 1,
+        programPath : testAppPath2,
+        mode,
+      }
+
+      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        let exp = `\u001b[31merr\u001b[39;0m\u001b[31m :`
+        test.is( !_.strHas( op.output, exp ) );
+        // debugger;
+        let exp2 = `\u001b[31mrandomText\u001b[39;0m`.slice( 5, 15 );
+        test.is( _.strHas( op.output, exp2 ) );
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+    })
+
+    // /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputPrefixing : 1, coloring : 1, error output`;
+
+      let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
+
+      let locals =
+      {
+        prefixing : 1,
+        coloring : 1,
+        programPath : testAppPath2,
+        mode
+      }
+
+      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        // let exp = `\u001b[31merr :\u001b[39;0m`.slice( 5, 8 )
+        let exp = `\u001b[31merr\u001b[39;0m\u001b[31m :`
+        test.is( _.strHas( op.output, exp ) );
+        let exp2 = `\u001b[31mrandomText\u001b[39;0m`.slice( 5, 15 );
+        test.is( _.strHas( op.output, exp2 ) );
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -19346,7 +19502,8 @@ function startOptionOutputPrefixing( test )
       outputPrefixing : prefixing,
       inputMirroring : 0,
       outputPiping : 1,
-      throwingExitCode : 0
+      throwingExitCode : 0,
+      outputColoring : coloring,
     }
 
     return _.process.start( options )
