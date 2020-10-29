@@ -22817,11 +22817,9 @@ function exitReason( test )
 function exitCode( test )
 {
   let context = this;
-  let a = test.assetFor( false );
+  let a = context.assetFor( test, false );
   let modes = [ 'fork', 'spawn', 'shell' ];
-
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
-
   return a.ready;
 
   /* */
@@ -24674,11 +24672,52 @@ function startErrorAfterTerminationWithSend( test )
       test.identical( o.exitCode, 0 );
 
       test.description = 'Attempt to send data when ipc channel is closed';
-      o.process.send( 1 );
+      try
+      {
+        o.process.send( 1 );
+      }
+      catch( err )
+      {
+        console.log( err );
+      }
+
+/* happens on servers
+--------------- uncaught error --------------->
+
+ = Message of error#387
+    Channel closed
+    code : 'ERR_IPC_CHANNEL_CLOSED'
+    Error starting the process
+    Exec path : /Users/runner/Temp/ProcessBasic-2020-10-29-8-0-2-841-ad4.tmp/startErrorAfterTerminationWithSend/testApp.js
+    Current path : /Users/runner/work/wProcess/wProcess
+
+ = Beautified calls stack
+    at ChildProcess.target.send (internal/child_process.js:705:16)
+    at wConsequence.<anonymous> (/Users/runner/work/wProcess/wProcess/proto/wtools/abase/l4.test/ProcessBasic.test.s:24677:17) *
+    at wConsequence.take (/Users/runner/work/wProcess/wProcess/node_modules/wConsequence/proto/wtools/abase/l9/consequence/Consequence.s:2669:8)
+    at end3 (/Users/runner/work/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:783:20)
+    at end2 (/Users/runner/work/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:734:12)
+    at ChildProcess.handleClose (/Users/runner/work/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:845:7)
+    at ChildProcess.emit (events.js:327:22)
+    at maybeClose (internal/child_process.js:1048:16)
+    at Process.ChildProcess._handle.onexit (internal/child_process.js:288:5)
+
+    at Object.<anonymous> (/Users/runner/work/wProcess/wProcess/node_modules/wTesting/proto/wtools/atop/tester/entry/Exec:11:11)
+
+ = Throws stack
+    thrown at ChildProcess.handleError @ /Users/runner/work/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:865:13
+    thrown at errRefine @ /Users/runner/work/wProcess/wProcess/node_modules/wTools/proto/wtools/abase/l0/l5/fErr.s:120:16
+
+ = Process
+    Current path : /Users/runner/work/wProcess/wProcess
+    Exec path : /Users/runner/hostedtoolcache/node/14.14.0/x64/bin/node /Users/runner/work/wProcess/wProcess/node_modules/wTesting/proto/wtools/atop/tester/entry/Exec .run proto/** rapidity:-3
+
+--------------- uncaught error ---------------<
+*/
 
       return null;
     })
-
+                                              /* qqq for Yevhen : dont use // for comments when /* is possible to use. replace in all similar places */
     return _.time.out( context.t2 * 2, () => //10000
     {
       test.identical( track, [ 'conStart', 'conTerminate', 'uncaughtError' ] );
