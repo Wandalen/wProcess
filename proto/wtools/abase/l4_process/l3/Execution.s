@@ -2861,12 +2861,7 @@ function signal_body( o )
   let isWindows = process.platform === 'win32';
   let ready = _.Consequence().take( null );
   let cons = [];
-  let interval = isWindows ? 250 : 25;
   let signal = o.signal;
-
-  /*
-    zzz : hangs up on Windows with interval below 150 if run in sync mode. see test routine killSync
-  */
 
   ready.then( () =>
   {
@@ -2951,38 +2946,16 @@ function signal_body( o )
     if( timeOut === 0 )
     return _.process.kill({ pid : p.pid, pnd : p.pnd, withChildren : 0 });
 
-    let ready = _.Consequence();
-    let timer = _.time.periodic( interval, () =>
+    let ready = _.process.waitForTermination({ pid : p.pid, timeOut }) 
+    
+    ready.catch( ( err ) => 
     {
-      if( _.process.isAlive( p.pid ) )
-      return false;
-      ready.take( true );
-    });
-
-    let timeOutError = _.time.outError( timeOut )
-
-    ready.orKeeping( [ timeOutError ] );
-
-    ready.finally( ( err, arg ) =>
-    {
-      if( !err || err.reason !== 'time out' )
-      timeOutError.error( _.dont );
-      // timeOutError.take( _.dont );
-
-      if( !err )
-      return arg;
-
-      /*
-        qqq for Vova : write a test where kill is called after timeout on all platfroms and modes
-        run some sync code in program that will freeze the process
-      */
-      timer.cancel();
       _.errAttend( err );
-
+      
       if( err.reason === 'time out' )
       {
         if( signal === 'SIGKILL' )
-        err = _.err( err, `\nTarget process: ${_.strQuote( p.pid )} is still alive after kill. Waited for ${o.timeOut} ms.` );
+        err = _.err( `\nTarget process: ${_.strQuote( p.pid )} is still alive after kill. Waited for ${o.timeOut} ms.` );
         else
         return _.process.kill({ pid : p.pid, pnd : p.pnd, withChildren : 0 });
       }
@@ -3043,6 +3016,10 @@ function waitForTermination_body( o )
   _.assert( _.numberIs( o.timeOut ) );
   
   let interval = process.platform === 'win32' ? 250 : 25;
+  
+  /*
+    zzz : hangs up on Windows with interval below 150 if run in sync mode. see test routine killSync
+  */
   
   let ready = _.Consequence();
   let timer = _.time.periodic( interval, () =>
