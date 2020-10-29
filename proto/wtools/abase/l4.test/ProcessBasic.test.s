@@ -21082,7 +21082,7 @@ function startOptionVerbosity( test )
     test.identical( op.ended, true );
     test.identical( _.strCount( capturedOutput, `node -e console.log('message')` ), 1 );
     test.identical( _.strCount( capturedOutput, 'message' ), 2 );
-    test.identical( _.strCount( capturedOutput, 'at ' + _.path.current() ), 1 );
+    test.identical( _.strCount( capturedOutput, '@ ' + _.path.current() ), 1 );
     return true;
   })
 
@@ -21107,7 +21107,7 @@ function startOptionVerbosity( test )
     test.identical( op.ended, true );
     test.identical( _.strCount( capturedOutput, `node -e console.log('message')` ), 1 );
     test.identical( _.strCount( capturedOutput, 'message' ), 2 );
-    test.identical( _.strCount( capturedOutput, 'at ' + _.path.current() ), 1 );
+    test.identical( _.strCount( capturedOutput, '@ ' + _.path.current() ), 1 );
     return true;
   })
 
@@ -32467,8 +32467,8 @@ var Proto =
     startOptionLogger,
     startOptionLoggerTransofrmation,
     startOutputOptionsCompatibilityLateCheck,
-    // startOptionVerbosity, /* qqq2 for Yevhen : rewrite the test routine appropriately */
-    startOptionVerbosityLogging,
+    startOptionVerbosity, /* qqq2 for Yevhen : rewrite the test routine appropriately */
+    // startOptionVerbosityLogging,
     startOutputMultiple,
     startOptionStdioIgnoreMultiple,
 
