@@ -2900,7 +2900,7 @@ function signal_body( o )
     pnd.kill( o.signal );
     else
     process.kill( p.pid, o.signal );
-
+    
     let con = waitForTermination( p );
     cons.push( con );
   }
@@ -2956,14 +2956,32 @@ function signal_body( o )
       {
         if( signal === 'SIGKILL' )
         err = _.err( `\nTarget process: ${_.strQuote( p.pid )} is still alive after kill. Waited for ${o.timeOut} ms.` );
-        else
-        return _.process.kill({ pid : p.pid, pnd : p.pnd, withChildren : 0 });
+        else 
+        return killMaybe( p );
       }
 
       throw err;
     })
 
     return ready;
+  }
+  
+  /* - */
+
+  function killMaybe( p )
+  {
+    let killOptions = { pid : p.pid, pnd : p.pnd, withChildren : 0 };
+    
+    if( process.platform !== 'win32' )
+    return _.process.kill( killOptions );
+    
+    return _.process.nameFor({ pid : p.pid })
+    .then( ( processName ) => 
+    {
+      if( p.name !== processName )
+      return null;
+      return _.process.kill( killOptions );
+    })
   }
 
   /* - */
