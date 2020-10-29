@@ -3043,6 +3043,9 @@ function waitForTermination_body( o )
   
   ready.then( _waitForTermination );
   
+  if( o.sync )
+  ready.deasync();
+  
   return ready;
   
   /* */
@@ -3103,7 +3106,8 @@ waitForTermination_body.defaults =
 {
   pid : null,
   pnd : null,
-  timeOut : 5000
+  timeOut : 5000,
+  sync : 0
 }
 
 let waitForTermination = _.routineUnite( signal_head, waitForTermination_body )
