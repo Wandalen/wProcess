@@ -200,7 +200,11 @@ function _exitHandlerRepair()
       if( _realGlobal_._exitHandlerRepairTerminating )
       return;
       _realGlobal_._exitHandlerRepairTerminating = 1;
-      _.time._begin( _.process._sanitareTime, () => /* xxx : experiment to comment out */
+      /*
+       short delay is required to set exit reason of the process
+       otherwise reason will be exit code, not exit signal
+      */
+      _.time._begin( _.process._sanitareTime, () =>
       {
         try
         {
@@ -225,7 +229,7 @@ function _exitHandlerRepair()
           console.log( err.toString() );
           console.log( err.stack );
           process.removeAllListeners( 'exit' );
-          process.exit();
+          process.exit( -1 );
         }
       });
     }
@@ -415,7 +419,7 @@ let Extension =
 
   // fields
 
-  _sanitareTime : 10,
+  _sanitareTime : 1,
   _exitReason : null,
 
   _tempFiles,
