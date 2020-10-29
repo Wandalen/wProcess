@@ -1,5 +1,3 @@
-const { platform } = require('os');
-
 ( function _Execution_s_()
 {
 
