@@ -32461,14 +32461,14 @@ var Proto =
     startOptionOutputColoringStderr,
     startOptionOutputColoringStdout,
     startOptionOutputGraying,
-    startOptionOutputPrefixing, /* qqq2 for Yevhen : rewrote test routine taking into account new cases */
+    startOptionOutputPrefixing, /* qqq2 for Yevhen : rewrote test routine taking into account new cases | aaa : Done. */
     // startOptionOutputPiping, /* qqq2 for Yevhen : rewrote test routine taking into account new cases */
     startOptionInputMirroring,
     startOptionLogger,
     startOptionLoggerTransofrmation,
     startOutputOptionsCompatibilityLateCheck,
-    startOptionVerbosity, /* qqq2 for Yevhen : rewrite the test routine appropriately */
-    // startOptionVerbosityLogging,
+    startOptionVerbosity, /* qqq2 for Yevhen : rewrite the test routine appropriately | aaa : Done. */
+    startOptionVerbosityLogging,
     startOutputMultiple,
     startOptionStdioIgnoreMultiple,
 
