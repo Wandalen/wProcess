@@ -2971,7 +2971,7 @@ function signal_body( o )
     if( process.platform !== 'win32' )
     return _.process.kill( killOptions );
     
-    return _.process.nameFor({ pid : p.pid })
+    return _.process.cmdLineFor({ pid : p.pid })
     .then( ( processName ) => 
     {
       if( p.name !== processName )
@@ -3039,7 +3039,7 @@ function waitForTermination_body( o )
   let ready = _.Consequence().take( null );
   
   if( isWindows )
-  ready.then( () => _.process.nameFor({ pid : o.pid, throwing : 0 }) ) 
+  ready.then( () => _.process.cmdLineFor({ pid : o.pid, throwing : 0 }) ) 
   
   ready.then( _waitForTermination );
   
@@ -3050,7 +3050,7 @@ function waitForTermination_body( o )
   
   /* */
   
-  function _waitForTermination( processName )
+  function _waitForTermination( commandLine )
   {
     let ready = _.Consequence();
     let timer = _.time.periodic( interval, () =>
@@ -3080,7 +3080,13 @@ function waitForTermination_body( o )
         err = _.err( err, `\nTarget process: ${_.strQuote( o.pid )} is still alive. Waited for ${o.timeOut} ms.` );
         
         if( isWindows )
-        return throwMaybe( processName, err );
+        return _.process.cmdLineFor({ pid : o.pid })
+        .then( ( arg ) => 
+        {
+          if( commandLine != arg )
+          return null;
+          throw err;
+        })
       }
 
       throw err;
@@ -3088,18 +3094,6 @@ function waitForTermination_body( o )
 
     return ready;
   }
-  
-  function throwMaybe( processName, err )
-  {
-    return _.process.nameFor({ pid : o.pid })
-    .then( ( arg ) => 
-    {
-      if( processName != arg )
-      return null;
-      throw err;
-    })
-  }
-  
 }
 
 waitForTermination_body.defaults =
@@ -3272,7 +3266,7 @@ children.defaults =
 
 //
 
-function nameFor( o )
+function cmdLineFor( o )
 {
   _.assert( arguments.length === 1 );
 
@@ -3281,7 +3275,7 @@ function nameFor( o )
   else if( _.routineIs( o.kill ) )
   o = { pnd : o };
 
-  o = _.routineOptions( nameFor, o );
+  o = _.routineOptions( cmdLineFor, o );
 
   if( o.pnd )
   {
@@ -3315,15 +3309,17 @@ function nameFor( o )
     }
   }
   
+  let commandLineFlag = 2;
+  
   WindowsProcessTree.getProcessList( o.pid, ( list ) => 
   {
-    ready.take( list[ 0 ].name );
-  })
+    ready.take( list[ 0 ].commandLine );
+  }, commandLineFlag )
   
   return ready;
 }
 
-nameFor.defaults = 
+cmdLineFor.defaults = 
 {
   pid : null,
   pnd : null,
@@ -3371,7 +3367,7 @@ let Extension =
   terminate,
   children,
 
-  nameFor,
+  cmdLineFor,
   
   // fields
 

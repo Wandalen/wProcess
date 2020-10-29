@@ -31988,7 +31988,7 @@ function waitForTermination( test )
 
 //
 
-function nameFor( test )
+function cmdLineFor( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -32009,10 +32009,10 @@ function nameFor( test )
     let o = { execPath : a.path.nativize( testAppPath ) };
     _.process.startNjs( o )
     
-    o.conStart.then( () => _.process.nameFor( o.process ) )
+    o.conStart.then( () => _.process.cmdLineFor( o.process ) )
     o.conStart.then( ( arg ) =>
     {
-      test.is( _.strBegins( arg, 'node' ) );
+      test.is( _.strHas( arg, o.execPath ) );
       return null;
     })
     
@@ -32519,7 +32519,7 @@ var Proto =
     children,
     childrenOptionFormatList,
     
-    nameFor,
+    cmdLineFor,
     waitForTermination,
 
     // experiments
