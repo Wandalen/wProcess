@@ -1,3 +1,5 @@
+const { platform } = require('os');
+
 ( function _Execution_s_()
 {
 
@@ -3189,6 +3191,65 @@ children.defaults =
   pid : null,
   format : 'list',
 }
+
+//
+
+function nameFromPid( o )
+{
+  _.assert( arguments.length === 1 );
+
+  if( _.numberIs( o ) )
+  o = { pid : o };
+  else if( _.routineIs( o.kill ) )
+  o = { pnd : o };
+
+  o = _.routineOptions( routine, o );
+
+  if( o.pnd )
+  {
+    _.assert( o.pid === o.pnd.pid || o.pid === null );
+    o.pid = o.pnd.pid;
+    _.assert( _.intIs( o.pid ) );
+  }
+  
+  _.assert( process.platform === 'win32', 'Implemented only for Windows' );
+  
+  if( !_.process.isAlive( o.pid ) )
+  {
+    let err = _.err( `\nTarget process: ${_.strQuote( o.pid )} does not exist.` );
+    return new _.Consequence().error( err );
+  }
+  
+  if( !WindowsProcessTree )
+  {
+    try
+    {
+      WindowsProcessTree = require( 'w.process.tree.windows' );
+    }
+    catch( err )
+    {
+      return new _.Consequence().error( _.err( 'Failed to get process name.\n', err ) );
+    }
+  }
+  
+  let ready = _.Consequence()
+  
+  WindowsProcessTree.getProcessList( o.pid, ( list ) => 
+  {
+    _.assert( list[ 0 ].pid === o.process.pid );
+    ready.take( list[ 0 ].name );
+  })
+  
+  return ready;
+}
+
+nameFromPid.defaults = 
+{
+  pid : null,
+  pnd : null
+}
+
+
 
 // --
 // declare
