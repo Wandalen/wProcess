@@ -23379,30 +23379,58 @@ function startOutputMultiple( test )
       {
         track.push( 'ready' );
 
-        var exp =
-        [
-          'conStart',
-          '0.out:1::begin',
-          '0.out:1::end',
-          '0.err:1::err',
-          '0.out:2::begin',
-          '0.out:2::end',
-          '0.err:2::err',
-          '0.err.finish',
-          '0.err.end',
-          '0.out.finish',
-          '0.out.end',
-          'conTerminate',
-          'ready',
-        ]
         if( tops.sync || tops.deasync )
-        exp =
-        [
-          'conStart',
-          'conTerminate',
-          'ready',
-        ]
-        test.identical( track, exp );
+        {
+          varexp =
+          [
+            'conStart',
+            'conTerminate',
+            'ready',
+          ]
+          test.identical( track, exp );
+        }
+        else
+        {
+          /* xxx : double check later
+          on older version of nodejs event finish goes before event end
+          */
+          var exp1 =
+          [
+            'conStart',
+            '0.out:1::begin',
+            '0.out:1::end',
+            '0.err:1::err',
+            '0.out:2::begin',
+            '0.out:2::end',
+            '0.err:2::err',
+            '0.err.finish',
+            '0.err.end',
+            '0.out.finish',
+            '0.out.end',
+            'conTerminate',
+            'ready',
+          ]
+          var exp2 =
+          [
+            'conStart',
+            '0.out:1::begin',
+            '0.out:1::end',
+            '0.err:1::err',
+            '0.out:2::begin',
+            '0.out:2::end',
+            '0.err:2::err',
+            '0.err.end',
+            '0.err.finish',
+            '0.out.end',
+            '0.out.finish',
+            'conTerminate',
+            'ready',
+          ]
+          if( _.identical( track, exp1 ) )
+          test.identical( track, exp1 );
+          else
+          test.identical( track, exp2 );
+        }
 
         var exp =
 `
@@ -23512,41 +23540,78 @@ function startOutputMultiple( test )
       {
         track.push( 'ready' );
 
-        var exp =
-        [
-          'conStart',
-          '0.out:1::begin',
-          '1.out:1::begin',
-          '0.out:2::begin',
-          '2.out:2::begin',
-          '0.out:1::end',
-          '1.out:1::end',
-          '0.out:2::end',
-          '2.out:2::end',
-          '0.err:1::err',
-          '1.err:1::err',
-          '1.err.end',
-          '1.out.end',
-          '0.err:2::err',
-          '2.err:2::err',
-          '0.err.finish',
-          '2.err.end',
-          '0.err.end',
-          '0.out.finish',
-          '2.out.end',
-          '0.out.end',
-          'conTerminate',
-          'ready'
-        ]
         if( tops.sync || tops.deasync )
-        exp =
-        [
-          'conStart',
-          'conTerminate',
-          'ready',
-        ]
-        test.identical( track, exp );
-
+        {
+          var exp =
+          [
+            'conStart',
+            'conTerminate',
+            'ready',
+          ]
+          test.identical( track, exp );
+        }
+        else
+        {
+          /* xxx : double check later
+          on older version of nodejs event finish goes before event end
+          */
+          var exp1 =
+          [
+            'conStart',
+            '0.out:1::begin',
+            '1.out:1::begin',
+            '0.out:2::begin',
+            '2.out:2::begin',
+            '0.out:1::end',
+            '1.out:1::end',
+            '0.out:2::end',
+            '2.out:2::end',
+            '0.err:1::err',
+            '1.err:1::err',
+            '1.err.end',
+            '1.out.end',
+            '0.err:2::err',
+            '2.err:2::err',
+            '0.err.finish',
+            '2.err.end',
+            '0.err.end',
+            '0.out.finish',
+            '2.out.end',
+            '0.out.end',
+            'conTerminate',
+            'ready'
+          ]
+          let exp2 =
+          [
+            'conStart',
+            '0.out:1::begin',
+            '1.out:1::begin',
+            '0.out:2::begin',
+            '2.out:2::begin',
+            '0.out:1::end',
+            '1.out:1::end',
+            '0.out:2::end',
+            '2.out:2::end',
+            '0.err:1::err',
+            '1.err:1::err',
+            '1.err.end',
+            '1.out.end',
+            '0.err:2::err',
+            '2.err:2::err',
+            '2.err.end',
+            '0.err.end',
+            '0.err.finish',
+            '2.out.end',
+            '0.out.end',
+            '0.out.finish',
+            'conTerminate',
+            'ready'
+          ]
+          if( _.identical( track, exp1 ) )
+          test.identical( track, exp1 );
+          else
+          test.identical( track, exp2 );
+        }
         var exp =
 `
 1::begin
