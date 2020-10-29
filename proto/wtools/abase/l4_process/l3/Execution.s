@@ -2859,12 +2859,7 @@ function signal_body( o )
   let isWindows = process.platform === 'win32';
   let ready = _.Consequence().take( null );
   let cons = [];
-  let interval = isWindows ? 250 : 25;
   let signal = o.signal;
-
-  /*
-    zzz : hangs up on Windows with interval below 150 if run in sync mode. see test routine killSync
-  */
 
   ready.then( () =>
   {
@@ -2903,7 +2898,7 @@ function signal_body( o )
     pnd.kill( o.signal );
     else
     process.kill( p.pid, o.signal );
-
+    
     let con = waitForTermination( p );
     cons.push( con );
   }
@@ -2949,39 +2944,17 @@ function signal_body( o )
     if( timeOut === 0 )
     return _.process.kill({ pid : p.pid, pnd : p.pnd, withChildren : 0 });
 
-    let ready = _.Consequence();
-    let timer = _.time.periodic( interval, () =>
+    let ready = _.process.waitForTermination({ pid : p.pid, timeOut }) 
+    
+    ready.catch( ( err ) => 
     {
-      if( _.process.isAlive( p.pid ) )
-      return false;
-      ready.take( true );
-    });
-
-    let timeOutError = _.time.outError( timeOut )
-
-    ready.orKeeping( [ timeOutError ] );
-
-    ready.finally( ( err, arg ) =>
-    {
-      if( !err || err.reason !== 'time out' )
-      timeOutError.error( _.dont );
-      // timeOutError.take( _.dont );
-
-      if( !err )
-      return arg;
-
-      /*
-        qqq for Vova : write a test where kill is called after timeout on all platfroms and modes
-        run some sync code in program that will freeze the process
-      */
-      timer.cancel();
       _.errAttend( err );
-
+      
       if( err.reason === 'time out' )
       {
         if( signal === 'SIGKILL' )
-        err = _.err( err, `\nTarget process: ${_.strQuote( p.pid )} is still alive after kill. Waited for ${o.timeOut} ms.` );
-        else
+        err = _.err( `\nTarget process: ${_.strQuote( p.pid )} is still alive after kill. Waited for ${o.timeOut} ms.` );
+        else 
         return _.process.kill({ pid : p.pid, pnd : p.pnd, withChildren : 0 });
       }
 
@@ -2989,6 +2962,22 @@ function signal_body( o )
     })
 
     return ready;
+  }
+  
+  /* - */
+
+  function killMaybe( p )
+  {
+    if( process.platform !== 'win32' )
+    return _.process.kill( killOptions );
+    
+    return _.process.cmdLineFor({ pid : p.pid })
+    .then( ( processName ) => 
+    {
+      if( p.name !== processName )
+      return null;
+      return _.process.kill( killOptions );
+    })
   }
 
   /* - */
@@ -3031,6 +3020,91 @@ signal_body.defaults =
 }
 
 let signal = _.routineUnite( signal_head, signal_body );
+
+//
+
+function waitForTermination_body( o )
+{
+  _.assert( arguments.length === 1 );
+  _.assert( _.numberIs( o.pid ) );
+  _.assert( _.numberIs( o.timeOut ) );
+  
+  let isWindows = process.platform === 'win32';
+  let interval = isWindows ? 250 : 25;
+  
+  /*
+    zzz : hangs up on Windows with interval below 150 if run in sync mode. see test routine killSync
+  */
+ 
+  let ready = _.Consequence().take( null );
+  
+  if( isWindows )
+  ready.then( () => _.process.cmdLineFor({ pid : o.pid, throwing : 0 }) ) 
+  
+  ready.then( _waitForTermination );
+  
+  if( o.sync )
+  ready.deasync();
+  
+  return ready;
+  
+  /* */
+  
+  function _waitForTermination( commandLine )
+  {
+    let ready = _.Consequence();
+    let timer = _.time.periodic( interval, () =>
+    {
+      if( _.process.isAlive( o.pid ) )
+      return false;
+      ready.take( true );
+    });
+
+    let timeOutError = _.time.outError( o.timeOut )
+
+    ready.orKeeping( [ timeOutError ] );
+
+    ready.finally( ( err, arg ) =>
+    {
+      if( !err || err.reason !== 'time out' )
+      timeOutError.error( _.dont );
+
+      if( !err )
+      return arg;
+
+      timer.cancel();
+      _.errAttend( err );
+
+      if( err.reason === 'time out' )
+      {
+        err = _.err( err, `\nTarget process: ${_.strQuote( o.pid )} is still alive. Waited for ${o.timeOut} ms.` );
+        
+        if( isWindows )
+        return _.process.cmdLineFor({ pid : o.pid })
+        .then( ( arg ) => 
+        {
+          if( commandLine != arg )
+          return null;
+          throw err;
+        })
+      }
+
+      throw err;
+    })
+
+    return ready;
+  }
+}
+
+waitForTermination_body.defaults =
+{
+  pid : null,
+  pnd : null,
+  timeOut : 5000,
+  sync : 0
+}
+
+let waitForTermination = _.routineUnite( signal_head, waitForTermination_body )
 
 //
 
@@ -3190,6 +3264,70 @@ children.defaults =
   format : 'list',
 }
 
+//
+
+function cmdLineFor( o )
+{
+  _.assert( arguments.length === 1 );
+
+  if( _.numberIs( o ) )
+  o = { pid : o };
+  else if( _.routineIs( o.kill ) )
+  o = { pnd : o };
+
+  o = _.routineOptions( cmdLineFor, o );
+
+  if( o.pnd )
+  {
+    _.assert( o.pid === o.pnd.pid || o.pid === null );
+    o.pid = o.pnd.pid;
+    _.assert( _.intIs( o.pid ) );
+  }
+  
+  _.assert( process.platform === 'win32', 'Implemented only for Windows' );
+  
+  let ready = _.Consequence()
+  
+  if( !_.process.isAlive( o.pid ) )
+  {
+    if( !o.throwing )
+    return ready.take( null )
+    
+    let err = _.err( `\nTarget process: ${_.strQuote( o.pid )} does not exist.` );
+    return ready.error( err );
+  }
+  
+  if( !WindowsProcessTree )
+  {
+    try
+    {
+      WindowsProcessTree = require( 'w.process.tree.windows' );
+    }
+    catch( err )
+    {
+      return ready.error( _.err( 'Failed to get process name.\n', err ) );
+    }
+  }
+  
+  let commandLineFlag = 2;
+  
+  WindowsProcessTree.getProcessList( o.pid, ( list ) => 
+  {
+    ready.take( list[ 0 ].commandLine );
+  }, commandLineFlag )
+  
+  return ready;
+}
+
+cmdLineFor.defaults = 
+{
+  pid : null,
+  pnd : null,
+  throwing : 1
+}
+
+
+
 // --
 // declare
 // --
@@ -3224,10 +3362,13 @@ let Extension =
   pidFrom,
   statusOf,
   signal,
+  waitForTermination,
   kill,
   terminate,
   children,
 
+  cmdLineFor,
+  
   // fields
 
 }
