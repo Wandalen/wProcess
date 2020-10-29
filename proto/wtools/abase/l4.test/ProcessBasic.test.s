@@ -21882,12 +21882,27 @@ function startOptionDryMultiple( test )
   let track = [];
 
   let modes = [ 'fork', 'spawn', 'shell' ];
-  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode, 0, 0 ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode, 0, 1 ) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => run( mode, 1, 0 ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode, 1, 1 ) ) );
   return a.ready;
 
-  function run( mode )
+  function run( mode, sync, deasync )
   {
     let ready = new _.Consequence().take( null );
+
+    if( sync && !deasync && mode === 'fork' )
+    return test.shouldThrowErrorSync( () =>
+    {
+      _.process.start
+      ({
+        execPath : [ programPath + ` arg1 "arg 2" "'arg3'"`, programPath + ` arg1 "arg 2" "'arg3'"` ],
+        mode,
+        sync,
+        deasync
+      })
+    });
 
     ready.then( () =>
     {
