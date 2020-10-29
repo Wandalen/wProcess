@@ -2955,7 +2955,7 @@ function signal_body( o )
         if( signal === 'SIGKILL' )
         err = _.err( `\nTarget process: ${_.strQuote( p.pid )} is still alive after kill. Waited for ${o.timeOut} ms.` );
         else 
-        return killMaybe( p );
+        return _.process.kill({ pid : p.pid, pnd : p.pnd, withChildren : 0 });
       }
 
       throw err;
@@ -2968,8 +2968,6 @@ function signal_body( o )
 
   function killMaybe( p )
   {
-    let killOptions = { pid : p.pid, pnd : p.pnd, withChildren : 0 };
-    
     if( process.platform !== 'win32' )
     return _.process.kill( killOptions );
     
@@ -3031,42 +3029,74 @@ function waitForTermination_body( o )
   _.assert( _.numberIs( o.pid ) );
   _.assert( _.numberIs( o.timeOut ) );
   
-  let interval = process.platform === 'win32' ? 250 : 25;
+  let isWindows = process.platform === 'win32';
+  let interval = isWindows ? 250 : 25;
   
   /*
     zzz : hangs up on Windows with interval below 150 if run in sync mode. see test routine killSync
   */
+ 
+  let ready = _.Consequence().take( null );
   
-  let ready = _.Consequence();
-  let timer = _.time.periodic( interval, () =>
-  {
-    if( _.process.isAlive( o.pid ) )
-    return false;
-    ready.take( true );
-  });
-
-  let timeOutError = _.time.outError( o.timeOut )
-
-  ready.orKeeping( [ timeOutError ] );
-
-  ready.finally( ( err, arg ) =>
-  {
-    if( !err || err.reason !== 'time out' )
-    timeOutError.error( _.dont );
-
-    if( !err )
-    return arg;
-
-    timer.cancel();
-    _.errAttend( err );
-
-    if( err.reason === 'time out' )
-    err = _.err( err, `\nTarget process: ${_.strQuote( o.pid )} is still alive. Waited for ${o.timeOut} ms.` );
-
-    throw err;
-  })
-
+  if( isWindows )
+  ready.then( () => _.process.nameFor({ pid : o.pid, throwing : 0 }) ) 
+  
+  ready.then( _waitForTermination );
+  
   return ready;
+  
+  /* */
+  
+  function _waitForTermination( processName )
+  {
+    let ready = _.Consequence();
+    let timer = _.time.periodic( interval, () =>
+    {
+      if( _.process.isAlive( o.pid ) )
+      return false;
+      ready.take( true );
+    });
+
+    let timeOutError = _.time.outError( o.timeOut )
+
+    ready.orKeeping( [ timeOutError ] );
+
+    ready.finally( ( err, arg ) =>
+    {
+      if( !err || err.reason !== 'time out' )
+      timeOutError.error( _.dont );
+
+      if( !err )
+      return arg;
+
+      timer.cancel();
+      _.errAttend( err );
+
+      if( err.reason === 'time out' )
+      {
+        err = _.err( err, `\nTarget process: ${_.strQuote( o.pid )} is still alive. Waited for ${o.timeOut} ms.` );
+        
+        if( isWindows )
+        return throwMaybe( processName, err );
+      }
+
+      throw err;
+    })
+
+    return ready;
+  }
+  
+  function throwMaybe( processName, err )
+  {
+    return _.process.nameFor({ pid : o.pid })
+    .then( ( arg ) => 
+    {
+      if( processName != arg )
+      return null;
+      throw err;
+    })
+  }
+  
 }
 
 waitForTermination_body.defaults =
@@ -3258,10 +3288,15 @@ function nameFor( o )
   
   _.assert( process.platform === 'win32', 'Implemented only for Windows' );
   
+  let ready = _.Consequence()
+  
   if( !_.process.isAlive( o.pid ) )
   {
+    if( !o.throwing )
+    return ready.take( null )
+    
     let err = _.err( `\nTarget process: ${_.strQuote( o.pid )} does not exist.` );
-    return new _.Consequence().error( err );
+    return ready.error( err );
   }
   
   if( !WindowsProcessTree )
@@ -3272,11 +3307,9 @@ function nameFor( o )
     }
     catch( err )
     {
-      return new _.Consequence().error( _.err( 'Failed to get process name.\n', err ) );
+      return ready.error( _.err( 'Failed to get process name.\n', err ) );
     }
   }
-  
-  let ready = _.Consequence()
   
   WindowsProcessTree.getProcessList( o.pid, ( list ) => 
   {
@@ -3289,7 +3322,8 @@ function nameFor( o )
 nameFor.defaults = 
 {
   pid : null,
-  pnd : null
+  pnd : null,
+  throwing : 1
 }
 
 
