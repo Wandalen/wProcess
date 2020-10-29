@@ -22790,26 +22790,28 @@ function statusOf( test )
   return ready;
 }
 
-function exitReason( test )
-{
-  test.case = 'initial value'
-  var got = _.process.exitReason();
-  test.identical( got, null );
+//
 
-  /* */
-
-  test.case = 'set reason'
-  _.process.exitReason( 'reason' );
-  var got = _.process.exitReason();
-  test.identical( got, 'reason' );
-
-  /* */
-
-  test.case = 'update reason'
-  _.process.exitReason( 'reason2' );
-  var got = _.process.exitReason();
-  test.identical( got, 'reason2' );
-}
+// function exitReason( test )
+// {
+//   test.case = 'initial value'
+//   var got = _.process.exitReason();
+//   test.identical( got, null );
+//
+//   /* */
+//
+//   test.case = 'set reason'
+//   _.process.exitReason( 'reason' );
+//   var got = _.process.exitReason();
+//   test.identical( got, 'reason' );
+//
+//   /* */
+//
+//   test.case = 'update reason'
+//   _.process.exitReason( 'reason2' );
+//   var got = _.process.exitReason();
+//   test.identical( got, 'reason2' );
+// }
 
 //
 
@@ -23381,7 +23383,7 @@ function startOutputMultiple( test )
 
         if( tops.sync || tops.deasync )
         {
-          varexp =
+          var exp =
           [
             'conStart',
             'conTerminate',
@@ -32337,7 +32339,7 @@ var Proto =
     isAlive,
     statusOf,
 
-    exitReason,
+    // exitReason, /* qqq2 for Yevhen : it should be in subprocess */
     exitCode, /* qqq for Yevhen : check order of test routines. it's messed up */
 
     // termination
