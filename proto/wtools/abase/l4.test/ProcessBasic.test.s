@@ -19258,7 +19258,7 @@ function startOptionOutputPrefixing( test )
       })
     })
 
-    /* - */
+    /* */
 
     ready.then( () =>
     {
@@ -19404,7 +19404,7 @@ function startOptionOutputPrefixing( test )
       })
     })
 
-    /* - */
+    /* */
 
     ready.then( () =>
     {
@@ -19443,7 +19443,7 @@ function startOptionOutputPrefixing( test )
       })
     })
 
-    // /* */
+    /* */
 
     ready.then( () =>
     {
