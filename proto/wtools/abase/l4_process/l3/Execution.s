@@ -3036,6 +3036,57 @@ let signal = _.routineUnite( signal_head, signal_body );
 
 //
 
+function waitForTermination_body( o )
+{
+  _.assert( arguments.length === 1 );
+  _.assert( _.numberIs( o.pid ) );
+  _.assert( _.numberIs( o.timeOut ) );
+  
+  let interval = process.platform === 'win32' ? 250 : 25;
+  
+  let ready = _.Consequence();
+  let timer = _.time.periodic( interval, () =>
+  {
+    if( _.process.isAlive( o.pid ) )
+    return false;
+    ready.take( true );
+  });
+
+  let timeOutError = _.time.outError( o.timeOut )
+
+  ready.orKeeping( [ timeOutError ] );
+
+  ready.finally( ( err, arg ) =>
+  {
+    if( !err || err.reason !== 'time out' )
+    timeOutError.error( _.dont );
+
+    if( !err )
+    return arg;
+
+    timer.cancel();
+    _.errAttend( err );
+
+    if( err.reason === 'time out' )
+    err = _.err( err, `\nTarget process: ${_.strQuote( o.pid )} is still alive. Waited for ${o.timeOut} ms.` );
+
+    throw err;
+  })
+
+  return ready;
+}
+
+waitForTermination_body.defaults =
+{
+  pid : null,
+  pnd : null,
+  timeOut : 5000
+}
+
+let waitForTermination = _.routineUnite( signal_head, waitForTermination_body )
+
+//
+
 function kill_body( o )
 {
   _.assert( arguments.length === 1 );
@@ -3284,6 +3335,7 @@ let Extension =
   pidFrom,
   statusOf,
   signal,
+  waitForTermination,
   kill,
   terminate,
   children,
