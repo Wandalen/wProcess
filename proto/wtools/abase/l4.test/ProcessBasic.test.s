@@ -17604,7 +17604,7 @@ function startNjsOptionInterpreterArgs( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.identical( op.output.trim(), process.version );
+        test.equivalent( op.output, process.version );
         if( mode === 'fork' )
         test.identical( op.interpreterArgs, [ '--version' ] )
         else
@@ -17634,7 +17634,7 @@ function startNjsOptionInterpreterArgs( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.identical( op.output.trim(), process.version );
+        test.equivalent( op.output, process.version );
         if( mode === 'fork' )
         {
           test.identical( op.args, [] );
@@ -17670,7 +17670,7 @@ function startNjsOptionInterpreterArgs( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.identical( op.output.trim(), process.version );
+        test.equivalent( op.output, process.version );
         if( mode === 'fork' )
         {
           test.identical( op.args, [] )
@@ -17707,7 +17707,7 @@ function startNjsOptionInterpreterArgs( test )
         if( mode === 'shell' ) console.log( 'SHELL OP: ', op )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.identical( op.output.trim(), process.version );
+        test.equivalent( op.output, process.version );
         if( mode === 'fork' )
         test.identical( op.interpreterArgs, [ '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] )
         else
@@ -17800,7 +17800,7 @@ function startNjsOptionInterpreterArgs( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.identical( op.output.trim(), process.version );
+        test.equivalent( op.output, process.version );
         if( mode === 'fork' )
         {
           test.identical( op.interpreterArgs, [ '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] )
@@ -17837,7 +17837,7 @@ function startNjsOptionInterpreterArgs( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.identical( op.output.trim(), process.version );
+        test.equivalent( op.output, process.version );
         if( mode === 'fork' )
         {
           test.identical( op.interpreterArgs, [ '--trace-warnings', '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] )
@@ -17874,7 +17874,7 @@ function startNjsOptionInterpreterArgs( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.identical( op.output.trim(), process.version );
+        test.equivalent( op.output, process.version );
         if( mode === 'fork' )
         {
           test.identical( op.interpreterArgs, [ '--trace-warnings', '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] )
@@ -17911,7 +17911,7 @@ function startNjsOptionInterpreterArgs( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.identical( op.output.trim(), process.version );
+        test.equivalent( op.output, process.version );
         if( mode === 'fork' )
         {
           test.identical( op.interpreterArgs, [ '--version', '--v8-options', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] )
@@ -17948,7 +17948,7 @@ function startNjsOptionInterpreterArgs( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.identical( op.output.trim(), process.version );
+        test.equivalent( op.output, process.version );
         if( mode === 'fork' )
         {
           test.identical( op.interpreterArgs, [ '--version', '--v8-options', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] )
