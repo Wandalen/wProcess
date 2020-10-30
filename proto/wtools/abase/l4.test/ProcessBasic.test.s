@@ -4821,17 +4821,7 @@ function startArgumentsParsingNonTrivial( test )
         else
         {
           test.ni( op.exitCode, 0 );
-          if( process.platform === 'darwin' )
-          test.is( _.strHas( op.output, ': command not found' ) );
-          // else if( process.platform === 'win32' )
-          // test.identical
-          // (
-          //   op.output,
-          //   `'" first arg "' is not recognized as an internal or external command,\noperable program or batch file.\n`
-          // );
-          else
-          test.identical( op.output, 'sh: 1:  first arg : not found\n' );
-          // test.is( _.strHas( op.output, '" first arg "' ) );
+          test.is( _.strHas( op.output, 'unexpected EOF' ) || _.strHas( op.output, 'Unterminated quoted string' ) );
         }
 
         test.identical( o.execPath, '"' );
@@ -4882,16 +4872,7 @@ function startArgumentsParsingNonTrivial( test )
         else
         {
           test.ni( op.exitCode, 0 );
-          if( process.platform === 'darwin' )
-          test.is( _.strHas( op.output, 'unexpected EOF while looking for matching' ) );
-          // else if( process.platform === 'win32' )
-          // test.identical
-          // (
-          //   op.output,
-          //   `'first' is not recognized as an internal or external command,\noperable program or batch file.\n`
-          // );
-          else
-          test.identical( op.output, 'sh: 1: Syntax error: Unterminated quoted string\n' );
+          test.is( _.strHas( op.output, 'not found' ) );
         }
 
         test.identical( o.args, [ 'first', 'arg', '"' ] );
@@ -6942,7 +6923,7 @@ function startExecPathNonTrivialModeShell( test )
   {
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
-    test.identical( _.strCount( op.output, process.version ), 2 );
+    test.identical( _.strCount( op.output, process.version ), 1 );
     return null;
   })
 
@@ -6951,7 +6932,7 @@ function startExecPathNonTrivialModeShell( test )
   {
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
-    test.identical( _.strCount( op.output, process.version ), 2 );
+    test.identical( _.strCount( op.output, process.version ), 1 );
     return null;
   })
 
@@ -6960,7 +6941,7 @@ function startExecPathNonTrivialModeShell( test )
   {
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
-    test.identical( _.strCount( op.output, process.version ), 2 );
+    test.identical( _.strCount( op.output, process.version ), 1 );
     return null;
   })
 
@@ -7449,7 +7430,7 @@ function startImportantExecPath( test )
   {
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
-    test.identical( _.strCount( op.output, process.version ), 2 );
+    test.identical( _.strCount( op.output, process.version ), 1 );
     return null;
   })
 
@@ -7532,10 +7513,7 @@ function startImportantExecPath( test )
   {
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
-    if( process.platform === 'win32' )
     test.identical( _.strCount( op.output, '*' ), 1 );
-    else
-    test.identical( _.strCount( op.output, 'file' ), 1 );
     return null;
   })
 
@@ -7582,7 +7560,7 @@ function startImportantExecPath( test )
   {
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
-    test.is( _.strHas( op.output, `[ 'a', 'b' ]` ) );
+    test.is( _.strHas( op.output, `[ 'a b' ]` ) );
     return null;
   })
 
@@ -9185,27 +9163,23 @@ function startNjsPassingThroughExecPathWithSpace( test )
   a.ready.then( () =>
   {
     test.case = 'execPath contains unquoted path with space'
-    return null;
-  })
-
-  _.process.startNjsPassingThrough
-  ({
-    execPath : execPathWithSpace,
-    ready : a.ready,
-    stdio : 'pipe',
-    outputCollecting : 1,
-    outputPiping : 1,
-    throwingExitCode : 0,
-    applyingExitCode : 0,
-  });
-
-  a.ready.then( ( op ) =>
-  {
-    test.notIdentical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    test.is( a.fileProvider.fileExists( testAppPath ) );
-    test.is( _.strHas( op.output, `Error: Cannot find module` ) );
-    return null;
+    return _.process.startNjsPassingThrough
+    ({
+      execPath : execPathWithSpace,
+      stdio : 'pipe',
+      outputCollecting : 1,
+      outputPiping : 1,
+      throwingExitCode : 0,
+      applyingExitCode : 0,
+    })
+    .then( ( op ) =>
+    {
+      test.notIdentical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.is( a.fileProvider.fileExists( testAppPath ) );
+      test.is( _.strHas( op.output, `Error: Cannot find module` ) );
+      return null;
+    })
   })
 
   /* - */
@@ -9213,11 +9187,7 @@ function startNjsPassingThroughExecPathWithSpace( test )
   a.ready.then( () =>
   {
     test.case = 'args: string that contains unquoted path with space'
-    return null;
-  })
-
-  test.shouldThrowErrorSync( () =>
-  {
+   
     return _.process.startNjsPassingThrough
     ({
       args : execPathWithSpace,
@@ -9226,7 +9196,15 @@ function startNjsPassingThroughExecPathWithSpace( test )
       outputPiping : 1,
       throwingExitCode : 0,
       applyingExitCode : 0,
-    });
+    })
+    .then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.is( a.fileProvider.fileExists( testAppPath ) );
+      test.is( _.strHas( op.output, op.process.pid.toString() ) );
+      return null;
+    })
   })
 
   /* - */
