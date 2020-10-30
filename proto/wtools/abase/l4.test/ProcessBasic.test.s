@@ -17348,7 +17348,7 @@ function startNjsWithReadyDelayStructural( test )
 
   /* */
 
-  function run( detaching, dry, mode ) /* qqq for Yevhen : put parameters in map `tops` */
+  function run( detaching, dry, mode ) /* qqq for Yevhen : put parameters in map `tops` |*/
   // function run( tops ) /* qqq for Yevhen : use map tops */
   {
     let ready = _.Consequence().take( null );
