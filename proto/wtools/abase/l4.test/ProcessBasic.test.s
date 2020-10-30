@@ -20128,7 +20128,7 @@ function startOptionOutputPiping( test )
 
   /* */
 
-  let modes = [ 'fork', /*'spawn', 'shell' */];
+  let modes = [ 'fork', 'spawn', 'shell' ];
 
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
@@ -20140,84 +20140,158 @@ function startOptionOutputPiping( test )
 
     /* */
 
-    // ready.then( () =>
-    // {
-    //   test.case = `mode : ${ mode } outputPiping : 1, normal output`
-    //   let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode } outputPiping : 1, normal output`
+      let testAppPath2 = a.program( { routine : testApp2, locals : { string : 'Log' } } );
 
-    //   let locals =
-    //   {
-    //     piping : 1,
-    //     programPath : testAppPath2,
-    //     mode,
-    //     verbosity : 2,
-    //     prefixing : 0
-    //   }
+      let locals =
+      {
+        piping : 1,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+        prefixing : 0
+      }
 
-    //   let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
-    //   return _.process.start
-    //   ({
-    //     execPath : 'node ' + testAppPath,
-    //     outputCollecting : 1,
-    //   })
-    //   .then( ( op ) =>
-    //   {
-    //     test.identical( op.exitCode, 0 );
-    //     test.identical( op.ended, true );
-    //     test.identical( _.strCount( op.output, 'Log' ), 2 );
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'Log' ), 2 );
 
-    //     a.fileProvider.fileDelete( testAppPath );
-    //     a.fileProvider.fileDelete( testAppPath2 );
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
 
-    //     return null;
-    //   })
+        return null;
+      })
 
-    // })
+    })
 
-    // /* */
+    /* */
 
-    // ready.then( () =>
-    // {
-    //   test.case = `mode : ${ mode }, outputPiping : 0, normal output`
-    //   let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputPiping : 0, normal output`
+      let testAppPath2 = a.program( { routine : testApp2, locals : { string : 'Log' } } );
 
-    //   let locals =
-    //   {
-    //     piping : 0,
-    //     programPath : testAppPath2,
-    //     mode,
-    //     verbosity : 2,
-    //     prefixing : 0
-    //   }
+      let locals =
+      {
+        piping : 0,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+        prefixing : 0
+      }
 
-    //   let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
-    //   return _.process.start
-    //   ({
-    //     execPath : 'node ' + testAppPath,
-    //     outputCollecting : 1,
-    //   })
-    //   .then( ( op ) =>
-    //   {
-    //     test.identical( op.exitCode, 0 );
-    //     test.identical( op.ended, true );
-    //     test.identical( _.strCount( op.output, 'Log' ), 1 );
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'Log' ), 1 );
 
-    //     a.fileProvider.fileDelete( testAppPath );
-    //     a.fileProvider.fileDelete( testAppPath2 );
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
 
-    //     return null;
-    //   })
+        return null;
+      })
 
-    // })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, empty string, outputPiping : 1, outputPrefixing : 0, normal output`
+      let testAppPath2 = a.program({ routine : testApp2, locals : { string : '' } });
+      
+      let locals =
+      {
+        piping : 1,
+        prefixing : 0,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, '' );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, empty string, outputPiping : 1, outputPrefixing : 1, normal output`
+      let testAppPath2 = a.program({ routine : testApp2, locals : { string : '' } });
+      
+      let locals =
+      {
+        piping : 1,
+        prefixing : 1,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, 'out :' );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
 
     /* */
 
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, single line, outputPiping : 1, outputPrefixing : 1, normal output`
-      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+      let testAppPath2 = a.program({ routine : testApp2, locals : { string : 'Log' } });
       
       let locals =
       {
@@ -20228,7 +20302,7 @@ function startOptionOutputPiping( test )
         verbosity : 2,
       }
 
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       return _.process.start
       ({
@@ -20239,7 +20313,8 @@ function startOptionOutputPiping( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.identical( op.output, 'out : Log' );
+        test.identical( _.strCount( op.output, 'out :' ), 1 );
+        test.identical( _.strCount( op.output, 'Log' ), 2 );
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -20253,8 +20328,8 @@ function startOptionOutputPiping( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${ mode }, single line output, outputPiping : 1, outputPrefixing : 1, normal output`
-      let testAppPath2 = a.path.nativize( a.program({ routine : testApp2, locals : { string : 'Log' } }) );
+      test.case = `mode : ${ mode }, 2 line output ( 1 with text ), outputPiping : 1, outputPrefixing : 1, normal output`
+      let testAppPath2 = a.program({ routine : testApp2, locals : { string : '\nLog' } });
       
       let locals =
       {
@@ -20265,7 +20340,7 @@ function startOptionOutputPiping( test )
         verbosity : 2,
       }
 
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       return _.process.start
       ({
@@ -20276,8 +20351,8 @@ function startOptionOutputPiping( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        // test.identical( op.output, 'out :\nout : Log1\nout : Log2\nout :\nnull\n' );
-        test.identical( _.strCount( op.output, 'out :' ), 4 );
+        test.identical( _.strCount( op.output, 'out :' ), 2 );
+        test.identical( _.strCount( op.output, 'Log' ), 2 );
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -20289,301 +20364,1011 @@ function startOptionOutputPiping( test )
 
     /* */
 
-    // ready.then( () =>
-    // {
-    //   test.case = `mode : ${ mode }, outputPiping : null, outputPrefixing : 1, verbosity : 1, normal output`
-    //   let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, 4 line output ( 2 with text ), outputPiping : 1, outputPrefixing : 1, normal output`
+      let testAppPath2 = a.program({ routine : testApp2, locals : { string : '\nLog\nLog2\n' } });
+      
+      let locals =
+      {
+        piping : 1,
+        prefixing : 1,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+      }
 
-    //   let locals =
-    //   {
-    //     piping : null,
-    //     verbosity : 1,
-    //     prefixing : 1,
-    //     programPath : testAppPath2,
-    //     mode,
-    //   }
+      let testAppPath = a.program({ routine : testApp, locals });
 
-    //   let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'out :' ), 4 );
+        test.identical( _.strCount( op.output, 'Log' ), 4 );
+        test.identical( _.strCount( op.output, 'Log2' ), 2 );
 
-    //   return _.process.start
-    //   ({
-    //     execPath : 'node ' + testAppPath,
-    //     outputCollecting : 1,
-    //   })
-    //   .then( ( op ) =>
-    //   {
-    //     test.identical( op.exitCode, 0 );
-    //     test.identical( op.ended, true );
-    //     test.identical( _.strCount( op.output, 'out : Log' ), 0 );
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
 
-    //     a.fileProvider.fileDelete( testAppPath );
-    //     a.fileProvider.fileDelete( testAppPath2 );
+        return null;
+      })
 
-    //     return null;
-    //   })
+    })
 
-    // })
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, 4 line output ( all with text ), outputPiping : 1, outputPrefixing : 1, normal output`
+      let testAppPath2 = a.program({ routine : testApp2, locals : { string : 'Log1\nLog2\nLog3\nLog4' } });
+      
+      let locals =
+      {
+        piping : 1,
+        prefixing : 1,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+      }
 
-    // /* */
+      let testAppPath = a.program({ routine : testApp, locals });
 
-    // ready.then( () =>
-    // {
-    //   test.case = `mode : ${ mode }, outputPiping : 1, outputPrefixing : 1, verbosity : 1, normal output`
-    //   let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'out :' ), 4 );
+        test.identical( _.strCount( op.output, 'Log1' ), 2 );
+        test.identical( _.strCount( op.output, 'Log2' ), 2 );
+        test.identical( _.strCount( op.output, 'Log3' ), 2 );
+        test.identical( _.strCount( op.output, 'Log4' ), 2 );
 
-    //   let locals =
-    //   {
-    //     piping : 1,
-    //     verbosity : 1,
-    //     prefixing : 1,
-    //     programPath : testAppPath2,
-    //     mode,
-    //   }
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
 
-    //   let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+        return null;
+      })
 
-    //   return _.process.start
-    //   ({
-    //     execPath : 'node ' + testAppPath,
-    //     outputCollecting : 1,
-    //   })
-    //   .then( ( op ) =>
-    //   {
-    //     test.identical( op.exitCode, 0 );
-    //     test.identical( op.ended, true );
-    //     test.identical( _.strCount( op.output, 'out : Log' ), 1 );
+    })
 
-    //     a.fileProvider.fileDelete( testAppPath );
-    //     a.fileProvider.fileDelete( testAppPath2 );
+    /* */
 
-    //     return null;
-    //   })
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, 4 line output ( all with text ), outputPiping : 1, outputPrefixing : 0, normal output`
+      let testAppPath2 = a.program({ routine : testApp2, locals : { string : 'Log1\nLog2\nLog3\nLog4' } });
+      
+      let locals =
+      {
+        piping : 1,
+        prefixing : 0,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+      }
 
-    // })
+      let testAppPath = a.program({ routine : testApp, locals });
 
-    // /* */
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'out :' ), 0 );
+        test.identical( _.strCount( op.output, 'Log1' ), 2 );
+        test.identical( _.strCount( op.output, 'Log2' ), 2 );
+        test.identical( _.strCount( op.output, 'Log3' ), 2 );
+        test.identical( _.strCount( op.output, 'Log4' ), 2 );
 
-    // ready.then( () =>
-    // {
-    //   test.case = `mode : ${ mode }, outputPiping : 0, outputPrefixing : 1 , normal output`
-    //   let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
 
-    //   let locals =
-    //   {
-    //     piping : 0,
-    //     prefixing : 1,
-    //     programPath : testAppPath2,
-    //     mode,
-    //     verbosity : 2,
-    //   }
+        return null;
+      })
 
-    //   let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+    })
 
-    //   return _.process.start
-    //   ({
-    //     execPath : 'node ' + testAppPath,
-    //     outputCollecting : 1,
-    //   })
-    //   .then( ( op ) =>
-    //   {
-    //     test.identical( op.exitCode, 0 );
-    //     test.identical( op.ended, true );
-    //     test.identical( _.strCount( op.output, 'out :' ), 0 );
-    //     test.identical( _.strCount( op.output, 'Log' ), 1 );
+    /* */
 
-    //     a.fileProvider.fileDelete( testAppPath );
-    //     a.fileProvider.fileDelete( testAppPath2 );
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, 4 line output ( all with text ), outputPiping : 0, outputPrefixing : 1, normal output`
+      let testAppPath2 = a.program({ routine : testApp2, locals : { string : 'Log1\nLog2\nLog3\nLog4' } });
+      
+      let locals =
+      {
+        piping : 0,
+        prefixing : 1,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+      }
 
-    //     return null;
-    //   })
+      let testAppPath = a.program({ routine : testApp, locals });
 
-    // })
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'out :' ), 0 );
+        test.identical( _.strCount( op.output, 'Log1' ), 1 );
+        test.identical( _.strCount( op.output, 'Log2' ), 1 );
+        test.identical( _.strCount( op.output, 'Log3' ), 1 );
+        test.identical( _.strCount( op.output, 'Log4' ), 1 );
 
-    // /* */
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
 
-    // ready.then( () =>
-    // {
-    //   test.case = `mode : ${ mode }, outputPiping : 1, error output`
-    //   let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
+        return null;
+      })
 
-    //   let locals =
-    //   {
-    //     piping : 1,
-    //     programPath : testAppPath2,
-    //     mode,
-    //     verbosity : 2,
-    //     prefixing : 0
-    //   }
+    })
 
-    //   let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+    /* */
 
-    //   return _.process.start
-    //   ({
-    //     execPath : 'node ' + testAppPath,
-    //     outputCollecting : 1,
-    //   })
-    //   .then( ( op ) =>
-    //   {
-    //     test.identical( op.exitCode, 0 );
-    //     test.identical( op.ended, true );
-    //     test.identical( _.strCount( op.output, 'Error\n    at' ), 2 );
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, 4 line output ( all with text ), outputPiping : null, outputPrefixing : 1, verbosity : 1, normal output`
+      let testAppPath2 = a.program({ routine : testApp2, locals : { string : 'Log1\nLog2\nLog3\nLog4' } });
+      
+      let locals =
+      {
+        piping : null,
+        prefixing : 1,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 1,
+      }
 
-    //     a.fileProvider.fileDelete( testAppPath );
-    //     a.fileProvider.fileDelete( testAppPath2 );
+      let testAppPath = a.program({ routine : testApp, locals });
 
-    //     return null;
-    //   })
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'out :' ), 0 );
+        test.identical( _.strCount( op.output, 'Log1' ), 1 );
+        test.identical( _.strCount( op.output, 'Log2' ), 1 );
+        test.identical( _.strCount( op.output, 'Log3' ), 1 );
+        test.identical( _.strCount( op.output, 'Log4' ), 1 );
 
-    // })
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
 
-    // /* */
+        return null;
+      })
 
-    // ready.then( () =>
-    // {
-    //   test.case = `mode : ${ mode }, outputPiping : 1, verbosity : 1, error output`
-    //   let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
+    })
 
-    //   let locals =
-    //   {
-    //     piping : 1,
-    //     programPath : testAppPath2,
-    //     mode,
-    //     verbosity : 1,
-    //     prefixing : 0
-    //   }
+    /* */
 
-    //   let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputPiping : null, outputPrefixing : 1, verbosity : 1, normal output`
+      let testAppPath2 = a.program( { routine : testApp2, locals : { string : 'Log' } } );
 
-    //   return _.process.start
-    //   ({
-    //     execPath : 'node ' + testAppPath,
-    //     outputCollecting : 1,
-    //   })
-    //   .then( ( op ) =>
-    //   {
-    //     test.identical( op.exitCode, 0 );
-    //     test.identical( op.ended, true );
-    //     test.identical( _.strCount( op.output, 'Error\n    at' ), 2 );
+      let locals =
+      {
+        piping : null,
+        verbosity : 1,
+        prefixing : 1,
+        programPath : testAppPath2,
+        mode,
+      }
 
-    //     a.fileProvider.fileDelete( testAppPath );
-    //     a.fileProvider.fileDelete( testAppPath2 );
+      let testAppPath = a.program({ routine : testApp, locals });
 
-    //     return null;
-    //   })
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'out : Log' ), 0 );
 
-    // })
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
 
-    // /* */
+        return null;
+      })
 
-    // ready.then( () =>
-    // {
-    //   test.case = `mode : ${ mode }, outputPiping : 0, error output`
-    //   let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
+    })
 
-    //   let locals =
-    //   {
-    //     piping : 0,
-    //     programPath : testAppPath2,
-    //     mode,
-    //     verbosity : 2,
-    //     prefixing : 0
-    //   }
+    /* */
 
-    //   let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputPiping : 1, outputPrefixing : 1, verbosity : 1, normal output`
+      let testAppPath2 = a.program( { routine : testApp2, locals : { string : 'Log' } } );
 
-    //   return _.process.start
-    //   ({
-    //     execPath : 'node ' + testAppPath,
-    //     outputCollecting : 1,
-    //   })
-    //   .then( ( op ) =>
-    //   {
-    //     test.identical( op.exitCode, 0 );
-    //     test.identical( op.ended, true );
-    //     test.identical( _.strCount( op.output, 'err :' ), 0 );
-    //     test.identical( _.strCount( op.output, 'Error\n    at' ), 1 );
+      let locals =
+      {
+        piping : 1,
+        verbosity : 1,
+        prefixing : 1,
+        programPath : testAppPath2,
+        mode,
+      }
 
-    //     a.fileProvider.fileDelete( testAppPath );
-    //     a.fileProvider.fileDelete( testAppPath2 );
+      let testAppPath = a.program({ routine : testApp, locals });
 
-    //     return null;
-    //   })
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'out : Log' ), 1 );
 
-    // })
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
 
-    // /* */
+        return null;
+      })
 
-    // ready.then( () =>
-    // {
-    //   test.case = `mode : ${ mode }, outputPiping : 1, outputPrefixing : 1 , error output`
-    //   let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
+    })
 
-    //   let locals =
-    //   {
-    //     piping : 1,
-    //     prefixing : 1,
-    //     programPath : testAppPath2,
-    //     mode,
-    //     verbosity : 2,
-    //   }
+    /* */
 
-    //   let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputPiping : 0, outputPrefixing : 1 , normal output`
+      let testAppPath2 = a.program( { routine : testApp2, locals : { string : 'Log' } } );
 
-    //   return _.process.start
-    //   ({
-    //     execPath : 'node ' + testAppPath,
-    //     outputCollecting : 1,
-    //   })
-    //   .then( ( op ) =>
-    //   {
-    //     test.identical( op.exitCode, 0 );
-    //     test.identical( op.ended, true );
-    //     test.identical( _.strCount( op.output, 'err :' ), 1 );
-    //     test.identical( _.strCount( op.output, 'Error\n    at' ), 1 );
+      let locals =
+      {
+        piping : 0,
+        prefixing : 1,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+      }
 
-    //     a.fileProvider.fileDelete( testAppPath );
-    //     a.fileProvider.fileDelete( testAppPath2 );
+      let testAppPath = a.program({ routine : testApp, locals });
 
-    //     return null;
-    //   })
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'out :' ), 0 );
+        test.identical( _.strCount( op.output, 'Log' ), 1 );
 
-    // })
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
 
-    // ready.then( () =>
-    // {
-    //   test.case = `mode : ${ mode }, outputPiping : 0, outputPrefixing : 1 , error output`
-    //   let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
+        return null;
+      })
 
-    //   let locals =
-    //   {
-    //     piping : 0,
-    //     prefixing : 1,
-    //     programPath : testAppPath2,
-    //     mode,
-    //     verbosity : 2,
-    //   }
+    })
 
-    //   let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+    /* */
 
-    //   return _.process.start
-    //   ({
-    //     execPath : 'node ' + testAppPath,
-    //     outputCollecting : 1,
-    //   })
-    //   .then( ( op ) =>
-    //   {
-    //     test.identical( op.exitCode, 0 );
-    //     test.identical( op.ended, true );
-    //     test.identical( _.strCount( op.output, 'err :' ), 0 );
-    //     test.identical( _.strCount( op.output, 'Error\n    at' ), 1 );
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputPiping : 1, error output`
+      let testAppPath2 = a.program( testApp2Error2 );
 
-    //     a.fileProvider.fileDelete( testAppPath );
-    //     a.fileProvider.fileDelete( testAppPath2 );
+      let locals =
+      {
+        piping : 1,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+        prefixing : 0
+      }
 
-    //     return null;
-    //   })
+      let testAppPath = a.program({ routine : testApp, locals });
 
-    // })
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'Error\n    at' ), 2 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputPiping : 1, verbosity : 1, error output`
+      let testAppPath2 = a.program( testApp2Error2 );
+
+      let locals =
+      {
+        piping : 1,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 1,
+        prefixing : 0
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'Error\n    at' ), 2 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputPiping : 0, error output`
+      let testAppPath2 = a.program( testApp2Error2 );
+
+      let locals =
+      {
+        piping : 0,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+        prefixing : 0
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'err :' ), 0 );
+        test.identical( _.strCount( op.output, 'Error\n    at' ), 1 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputPiping : 1, outputPrefixing : 1 , error output`
+      let testAppPath2 = a.program( testApp2Error2 );
+
+      let locals =
+      {
+        piping : 1,
+        prefixing : 1,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.is( _.strCount( op.output, 'err :' ) > 1 );
+        test.identical( _.strCount( op.output, 'Error\n    at' ), 1 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputPiping : 0, outputPrefixing : 1 , error output`
+      let testAppPath2 = a.program( testApp2Error2 );
+
+      let locals =
+      {
+        piping : 0,
+        prefixing : 1,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'err :' ), 0 );
+        test.identical( _.strCount( op.output, 'Error\n    at' ), 1 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, empty string, outputPiping : 1, outputPrefixing : 0, error output`
+      let testAppPath2 = a.program({ routine : testApp2Error, locals : { string : '' } });
+      
+      let locals =
+      {
+        piping : 1,
+        prefixing : 0,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, '' );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, empty string, outputPiping : 1, outputPrefixing : 1, error output`
+      let testAppPath2 = a.program({ routine : testApp2Error, locals : { string : '' } });
+      
+      let locals =
+      {
+        piping : 1,
+        prefixing : 1,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, 'err :' );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, single line, outputPiping : 1, outputPrefixing : 1, error output`
+      let testAppPath2 = a.program({ routine : testApp2Error, locals : { string : 'Log' } });
+      
+      let locals =
+      {
+        piping : 1,
+        prefixing : 1,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'err :' ), 1 );
+        test.identical( _.strCount( op.output, 'Log' ), 2 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, 2 line output ( 1 with text ), outputPiping : 1, outputPrefixing : 1, error output`
+      let testAppPath2 = a.program({ routine : testApp2Error, locals : { string : '\nLog' } });
+      
+      let locals =
+      {
+        piping : 1,
+        prefixing : 1,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'err :' ), 2 );
+        test.identical( _.strCount( op.output, 'Log' ), 2 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, 4 line output ( 2 with text ), outputPiping : 1, outputPrefixing : 1, error output`
+      let testAppPath2 = a.program({ routine : testApp2Error, locals : { string : '\nLog\nLog2\n' } });
+      
+      let locals =
+      {
+        piping : 1,
+        prefixing : 1,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'err :' ), 4 );
+        test.identical( _.strCount( op.output, 'Log' ), 4 );
+        test.identical( _.strCount( op.output, 'Log2' ), 2 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, 4 line output ( all with text ), outputPiping : 1, outputPrefixing : 1, error output`
+      let testAppPath2 = a.program({ routine : testApp2Error, locals : { string : 'Log1\nLog2\nLog3\nLog4' } });
+      
+      let locals =
+      {
+        piping : 1,
+        prefixing : 1,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'err :' ), 4 );
+        test.identical( _.strCount( op.output, 'Log1' ), 2 );
+        test.identical( _.strCount( op.output, 'Log2' ), 2 );
+        test.identical( _.strCount( op.output, 'Log3' ), 2 );
+        test.identical( _.strCount( op.output, 'Log4' ), 2 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, 4 line output ( all with text ), outputPiping : 1, outputPrefixing : 0, error output`
+      let testAppPath2 = a.program({ routine : testApp2Error, locals : { string : 'Log1\nLog2\nLog3\nLog4' } });
+      
+      let locals =
+      {
+        piping : 1,
+        prefixing : 0,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'err :' ), 0 );
+        test.identical( _.strCount( op.output, 'Log1' ), 2 );
+        test.identical( _.strCount( op.output, 'Log2' ), 2 );
+        test.identical( _.strCount( op.output, 'Log3' ), 2 );
+        test.identical( _.strCount( op.output, 'Log4' ), 2 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, 4 line output ( all with text ), outputPiping : 0, outputPrefixing : 1, error output`
+      let testAppPath2 = a.program({ routine : testApp2Error, locals : { string : 'Log1\nLog2\nLog3\nLog4' } });
+      
+      let locals =
+      {
+        piping : 0,
+        prefixing : 1,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'err :' ), 0 );
+        test.identical( _.strCount( op.output, 'Log1' ), 1 );
+        test.identical( _.strCount( op.output, 'Log2' ), 1 );
+        test.identical( _.strCount( op.output, 'Log3' ), 1 );
+        test.identical( _.strCount( op.output, 'Log4' ), 1 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, 4 line output ( all with text ), outputPiping : null, outputPrefixing : 1, verbosity : 1, error output`
+      let testAppPath2 = a.program({ routine : testApp2Error, locals : { string : 'Log1\nLog2\nLog3\nLog4' } });
+      
+      let locals =
+      {
+        piping : null,
+        prefixing : 1,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 1,
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'err :' ), 0 );
+        test.identical( _.strCount( op.output, 'Log1' ), 1 );
+        test.identical( _.strCount( op.output, 'Log2' ), 1 );
+        test.identical( _.strCount( op.output, 'Log3' ), 1 );
+        test.identical( _.strCount( op.output, 'Log4' ), 1 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputPiping : 1, outputPrefixing : 1, thrown error output`
+      let testAppPath2 = a.program( testApp2Error2 );
+      
+      let locals =
+      {
+        piping : 1,
+        prefixing : 1,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.is( _.strCount( op.output, 'err :' ) > 1 );
+        test.identical( _.strCount( op.output, 'throw new Error();' ), 2 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputPiping : 0, outputPrefixing : 1, thrown error output`
+      let testAppPath2 = a.program( testApp2Error2 );
+      
+      let locals =
+      {
+        piping : 0,
+        prefixing : 1,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'err :' ), 0 );
+        test.identical( _.strCount( op.output, 'throw new Error();' ), 1 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputPiping : 1, outputPrefixing : 1, error and normal output`
+      let testAppPath2 = a.program({ routine : testAppNormalAndError, locals : { string : 'Log1\nLog2\nLog3\nLog4' } });
+      
+      let locals =
+      {
+        piping : 1,
+        prefixing : 1,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'err :' ), 1 );
+        test.identical( _.strCount( op.output, 'out :' ), 4 );
+        test.identical( _.strCount( op.output, 'Log1' ), 2 );
+        test.identical( _.strCount( op.output, 'Log2' ), 2 );
+        test.identical( _.strCount( op.output, 'Error output' ), 2 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputPiping : 0, outputPrefixing : 1, error and normal output`
+      let testAppPath2 = a.program({ routine : testAppNormalAndError, locals : { string : 'Log1\nLog2\nLog3\nLog4' } });
+      
+      let locals =
+      {
+        piping : 0,
+        prefixing : 1,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'err :' ), 0 );
+        test.identical( _.strCount( op.output, 'out :' ), 0 );
+        test.identical( _.strCount( op.output, 'Log1' ), 1 );
+        test.identical( _.strCount( op.output, 'Log2' ), 1 );
+        test.identical( _.strCount( op.output, 'Error output' ), 1 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
 
     return ready;
   }
@@ -20617,39 +21402,29 @@ function startOptionOutputPiping( test )
     } )
   }
 
-  function testApp2Error()
+  function testApp2Error2()
   {
     throw new Error();
   }
 
-  function testApp2Error2()
+  function testApp2Error()
   {
-    console.error( 'Error output' );
+    console.error( string );
   }
-
-  // function testApp2Multiline()
-  // {
-  //   console.log( '\nLog1\nLog2\n' );
-  // }
 
   function testApp2()
   {
     console.log( string );
   }
 
-  // function testApp2()
-  // {
-  //   console.log( '\nLog1\nLog2\n' );
-  // }
-
-  function testAppNormalError()
+  function testAppNormalAndError()
   {
     console.log( '\nLog1\nLog2\n' );
     console.error( 'Error output' );
   }
 
-  /* qqq2 for Yevhen : poor tests! see no console.error() cases! */
-  /* qqq2 for Yevhen : poor tests! see no multiline output! */
+  /* qqq2 for Yevhen : poor tests! see no console.error() cases! | aaa : Fixed. */
+  /* qqq2 for Yevhen : poor tests! see no multiline output! | aaa : Fixed. */
 }
 
 startOptionOutputPiping.timeOut = 3e5;
