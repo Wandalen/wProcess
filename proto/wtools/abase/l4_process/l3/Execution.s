@@ -200,7 +200,7 @@ function startMinimal_body( o )
   let _outPrefix = null;
   let _readyCallback;
   /* xxx qqq for Vova : remove. no hacks! aaa:removed execArgs*/
-  let _oargsLength = 0;
+  let _argsLength = 0;
 
   form1();
   form2();
@@ -383,7 +383,7 @@ function startMinimal_body( o )
     {
       o.procedure = _.Procedure({ _stack : o.stack });
     }
-    
+
     if( _.routineIs( o.args ) )
     o.args = o.args( o );
     if( o.args === null )
@@ -395,11 +395,11 @@ function startMinimal_body( o )
       , `If defined option::arg should be either [ string, array ], but it is ${_.strType( o.args )}`
     );
 
-    if( _.arrayIs( o.args ) )
+    if( _.arrayIs( o.args ) ) /* xxx yyy */
     o.args = o.args.slice();
     o.args = _.arrayAs( o.args );
-    
-    _oargsLength = o.args.length;
+
+    _argsLength = o.args.length;
 
     if( _.strIs( o.execPath ) )
     {
@@ -407,9 +407,7 @@ function startMinimal_body( o )
       let execArgs = execPathParse( o.execPath );
       if( o.mode !== 'shell' )
       execArgs = argsUnqoute( execArgs );
-      
       o.execPath = null;
-      
       if( execArgs.length )
       {
         o.execPath = execArgs.shift();
@@ -420,18 +418,17 @@ function startMinimal_body( o )
     if( o.execPath === null )
     {
       _.assert( o.args.length, 'Expects {-args-} to have at least one argument if {-execPath-} is not defined' );
-      
+
       o.execPath = o.args.shift();
       o.fullExecPath = o.execPath;
-      _oargsLength = o.args.length;
+      _argsLength = o.args.length;
 
       let begin = _.strBeginOf( o.execPath, [ '"', `'`, '`' ] );
       let end = _.strEndOf( o.execPath, [ '"', `'`, '`' ] );
-
       if( begin && begin === end )
       o.execPath = _.strInsideOf( o.execPath, begin, end );
     }
-    
+
     o.currentPath = _.path.resolve( o.currentPath || '.' );
 
     _.assert( o.interpreterArgs === null || _.arrayIs( o.interpreterArgs ) );
@@ -444,9 +441,9 @@ function startMinimal_body( o )
 
     if( o.passingThrough )
     {
-      let argumentsManual = process.argv.slice( 2 );
-      if( argumentsManual.length )
-      o.args = _.arrayAppendArray( o.args || [], argumentsManual );
+      let argumentsOwn = process.argv.slice( 2 );
+      if( argumentsOwn.length )
+      o.args = _.arrayAppendArray( o.args || [], argumentsOwn );
     }
 
     /* dependencies */
@@ -470,6 +467,8 @@ function startMinimal_body( o )
       log( _.errOnce( err ), 'err' );
     }
 
+    /* prefixing */
+
     if( o.outputPrefixing )
     {
       _errPrefix = `${ ( o.outputColoring ? _.ct.format( 'err', { fg : 'dark red' } ) : 'err' ) } : `;
@@ -484,7 +483,7 @@ function startMinimal_body( o )
       o._handleProcedureTerminationBegin = _handleProcedureTerminationBegin;
     }
 
-    /* if map already has error, running should not start */
+    /* if session already has error, running should not start */
     if( o.error )
     throw o.error;
   }
@@ -1123,15 +1122,12 @@ function startMinimal_body( o )
       quotes.forEach( ( quote ) =>
       {
         let found = _.strFindAll( args[ i ], quote );
-
         if( found.length % 2 === 0 )
         return;
-
-        for( let k = 0; k < found.length; k += 1 )
+        for( let k = 0 ; k < found.length ; k += 1 )
         {
           let pos = found[ k ].charsRangeLeft[ 0 ];
-
-          for( let j = 0; j < r.ranges.length; j += 2 )
+          for( let j = 0 ; j < r.ranges.length ; j += 2 )
           if( pos >= r.ranges[ j ] && pos <= r.ranges[ j + 1 ] )
           break;
           throw _.err( `Arguments string in execPath: ${src} has not closed quoting in argument: ${args[ i ]}` );
@@ -1165,15 +1161,15 @@ function startMinimal_body( o )
   function argsJoin( args )
   {
     /* xxx qqq for Vova : why if passingThrough? no hacks! aaa:removed execArgs*/
-    
+
     /* Escapes and quotes:
       - Original args provided via o.args
       - Arguments of parent process if o.passingThrough is enabled
       Skips arguments parsed from o.execPath.
     */
-    
+
     let appendedArgs = o.passingThrough ? process.argv.length - 2 : 0;
-    let prependedArgs = args.length - ( _oargsLength + appendedArgs );
+    let prependedArgs = args.length - ( _argsLength + appendedArgs );
 
     for( let i = prependedArgs; i < args.length; i++ )
     {
@@ -1183,7 +1179,6 @@ function startMinimal_body( o )
         args[ i ] = argEscape( args[ i ], quote );
       })
       args[ i ] = _.strQuote( args[ i ] );
-      
       // args[ i ] = _.process.escapeArg( args[ i ]  ); /* zzz for Vova : use this routine, review fails */
     }
 
@@ -1452,7 +1447,6 @@ startMinimal_body.defaults =
 
   throwingExitCode : 'full', /* must be on by default */ /* bool-like, 'full', 'brief' */
   applyingExitCode : 0,
-  // briefExitCode : 0,
 
   verbosity : 2, /* qqq for Yevhen : cover the option */
   outputPrefixing : 0, /* qqq for Yevhen : extend coverage */
@@ -1464,6 +1458,8 @@ startMinimal_body.defaults =
   outputColoringStdout : null, /* qqq for Yevhen : cover the option */
   outputGraying : 0,
   inputMirroring : 1, /* qqq for Yevhen : cover the option | aaa : Done */
+
+  /* qqq for Yevhen : remove option::outputColoringStderr and option::outputColoringStdout. extend outputColoring */
 
 }
 
