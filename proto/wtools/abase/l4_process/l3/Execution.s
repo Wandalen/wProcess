@@ -640,6 +640,9 @@ function startMinimal_body( o )
     if( o.dry )
     return;
 
+    if( o.interpreterArgs )
+    o.args = o.interpreterArgs.concat( o.args )
+
     if( o.sync && !o.deasync )
     o.process = ChildProcess.spawnSync( execPath, o.args, o2 );
     else
@@ -672,6 +675,9 @@ function startMinimal_body( o )
    */
 
     o2.windowsVerbatimArguments = true;
+
+    if( o.interpreterArgs )
+    o.args = o.interpreterArgs.concat( o.args )
 
     if( o.args.length )
     arg2 = arg2 + ' ' + argsJoin( o.args.slice() );
@@ -2363,9 +2369,11 @@ function startNjs_body( o )
   System = require( 'os' );
 
   _.assertRoutineOptions( startNjs_body, o );
-  _.assert( _.strIs( o.execPath ) );
+  // _.assert( _.strIs( o.execPath ) );
   _.assert( !o.code );
   _.assert( arguments.length === 1, 'Expects single argument' );
+
+  _.assert( _.arrayIs( o.interpreterArgs ) || o.interpreterArgs === null );
 
   /*
   1024*1024 for megabytes
@@ -2390,18 +2398,26 @@ function startNjs_body( o )
 
   // let execPath = o.execPath ? _.path.nativizeMinimal( o.execPath ) : '';
   let execPath = o.execPath || '';
+  // _.assert( o.interpreterArgs === null || o.interpreterArgs === '', 'not implemented' ); /* qqq for Yevhen : implement and cover. | aaa : Done */
 
-  _.assert( o.interpreterArgs === null || o.interpreterArgs === '', 'not implemented' ); /* qqq for Yevhen : implement and cover */
+  /* ORIGINAL */
+  // if( o.mode === 'fork' )
+  // {
+  //   if( interpreterArgs )
+  //   o.interpreterArgs = interpreterArgs;
+  // }
+  // else
+  // {
+  //   execPath = _.strConcat([ 'node', interpreterArgs, execPath ]);
+  // }
 
-  if( o.mode === 'fork' )
-  {
-    if( interpreterArgs )
-    o.interpreterArgs = interpreterArgs;
-  }
-  else
-  {
-    execPath = _.strConcat([ 'node', interpreterArgs, execPath ]);
-  }
+  /* == Rewritten == */
+  if( interpreterArgs !== '' )
+  o.interpreterArgs = o.interpreterArgs === null ? interpreterArgs : o.interpreterArgs.concat( interpreterArgs );
+
+  if( o.mode === 'spawn' || o.mode === 'shell' )
+  execPath = _.strConcat([ 'node', execPath ]);
+  /* == == */
 
   o.execPath = execPath;
 
