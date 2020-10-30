@@ -32997,7 +32997,7 @@ var Proto =
     isAlive,
     statusOf,
 
-    // exitReason, /* qqq2 for Yevhen : it should be in subprocess */
+    exitReason, /* qqq2 for Yevhen : it should be in subprocess */
     exitCode, /* qqq for Yevhen : check order of test routines. it's messed up */
 
     // termination
