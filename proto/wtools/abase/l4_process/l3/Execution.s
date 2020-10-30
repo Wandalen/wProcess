@@ -199,7 +199,8 @@ function startMinimal_body( o )
   let _errPrefix = null;
   let _outPrefix = null;
   let _readyCallback;
-  let execArgs; /* xxx qqq for Vova : remove. no hacks! */
+  /* xxx qqq for Vova : remove. no hacks! aaa:removed execArgs*/
+  let _oargsLength = 0;
 
   form1();
   form2();
@@ -382,19 +383,7 @@ function startMinimal_body( o )
     {
       o.procedure = _.Procedure({ _stack : o.stack });
     }
-
-    if( _.strIs( o.execPath ) )
-    {
-      o.fullExecPath = o.execPath;
-      execArgs = execPathParse( o.execPath );
-      if( o.mode !== 'shell' )
-      execArgs = argsUnqoute( execArgs );
-      if( execArgs.length )
-      o.execPath = execArgs.shift();
-      else
-      o.execPath = null;
-    }
-
+    
     if( _.routineIs( o.args ) )
     o.args = o.args( o );
     if( o.args === null )
@@ -409,13 +398,32 @@ function startMinimal_body( o )
     if( _.arrayIs( o.args ) )
     o.args = o.args.slice();
     o.args = _.arrayAs( o.args );
+    
+    _oargsLength = o.args.length;
+
+    if( _.strIs( o.execPath ) )
+    {
+      o.fullExecPath = o.execPath;
+      let execArgs = execPathParse( o.execPath );
+      if( o.mode !== 'shell' )
+      execArgs = argsUnqoute( execArgs );
+      
+      o.execPath = null;
+      
+      if( execArgs.length )
+      {
+        o.execPath = execArgs.shift();
+        o.args = _.arrayPrependArray( o.args || [], execArgs );
+      }
+    }
 
     if( o.execPath === null )
     {
       _.assert( o.args.length, 'Expects {-args-} to have at least one argument if {-execPath-} is not defined' );
-
+      
       o.execPath = o.args.shift();
       o.fullExecPath = o.execPath;
+      _oargsLength = o.args.length;
 
       let begin = _.strBeginOf( o.execPath, [ '"', `'`, '`' ] );
       let end = _.strEndOf( o.execPath, [ '"', `'`, '`' ] );
@@ -423,10 +431,7 @@ function startMinimal_body( o )
       if( begin && begin === end )
       o.execPath = _.strInsideOf( o.execPath, begin, end );
     }
-
-    if( execArgs && execArgs.length )
-    o.args = _.arrayPrependArray( o.args || [], execArgs );
-
+    
     o.currentPath = _.path.resolve( o.currentPath || '.' );
 
     _.assert( o.interpreterArgs === null || _.arrayIs( o.interpreterArgs ) );
@@ -1159,17 +1164,18 @@ function startMinimal_body( o )
 
   function argsJoin( args )
   {
-    if( !execArgs && !o.passingThrough ) /* xxx qqq for Vova : why if passingThrough? no hacks! */
-    return args.join( ' ' );
+    /* xxx qqq for Vova : why if passingThrough? no hacks! aaa:removed execArgs*/
+    
+    /* Escapes and quotes:
+      - Original args provided via o.args
+      - Arguments of parent process if o.passingThrough is enabled
+      Skips arguments parsed from o.execPath.
+    */
+    
+    let appendedArgs = o.passingThrough ? process.argv.length - 2 : 0;
+    let prependedArgs = args.length - ( _oargsLength + appendedArgs );
 
-    let i;
-
-    if( execArgs )
-    i = execArgs.length;
-    else
-    i = args.length - ( process.argv.length - 2 );
-
-    for( ; i < args.length; i++ )
+    for( let i = prependedArgs; i < args.length; i++ )
     {
       let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', '`' ]
       _.each( quotesToEscape, ( quote ) =>
@@ -1177,7 +1183,7 @@ function startMinimal_body( o )
         args[ i ] = argEscape( args[ i ], quote );
       })
       args[ i ] = _.strQuote( args[ i ] );
-
+      
       // args[ i ] = _.process.escapeArg( args[ i ]  ); /* zzz for Vova : use this routine, review fails */
     }
 
