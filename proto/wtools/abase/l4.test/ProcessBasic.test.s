@@ -7692,8 +7692,7 @@ function startImportantExecPath( test )
     return null;
   })
 
-  /* qqq for Yevhen : separate test routine startImportantExecPathPassingThrough and run it from separate process */
-  /* zzz */
+  /* */
 
   return a.ready;
 }
@@ -8199,7 +8198,6 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
 }
 
 //
-
 
 function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subroutine for modes */
 {
@@ -20740,7 +20738,6 @@ function startOptionLoggerTransofrmation( test )
 
 //
 
-/* qqq for Yevhen : describe test cases | aaa : Done */
 function startOutputOptionsCompatibilityLateCheck( test )
 {
   let context = this;
@@ -22102,10 +22099,6 @@ After execution checks fields of run descriptor.
 `
 
 //
-
-/* qqq for Yevhen : split by modes | aaa : Done. Yevhen S.
-qqq for Yevhen : not really
-*/
 
 function startOptionCurrentPath( test )
 {
