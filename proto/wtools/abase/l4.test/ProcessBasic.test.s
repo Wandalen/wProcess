@@ -21954,7 +21954,6 @@ function startOptionStreamSizeLimit( test )
       let returned = test.shouldThrowErrorSync( () => _.process.start( options ) )
 
       test.is( _.errIs( returned ) );
-      test.is( _.strHas( returned.message, `spawnSync ${mode === 'shell' ? 'sh' : 'node' } ENOBUFS` ) )
       test.is( _.strHas( returned.message, `code : 'ENOBUFS'`) )
 
       test.notIdentical( options.exitCode, 0 );
