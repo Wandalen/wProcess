@@ -32819,7 +32819,7 @@ var Proto =
 
     startSync,
     startSyncDeasync,
-    startSpawnSyncDeasync, /* qqq for Yevhen : join with subroutine */
+    startSpawnSyncDeasync, /* qqq for Yevhen : join with subroutine | */
     startSpawnSyncDeasyncThrowing,
     startShellSyncDeasync, /* qqq for Yevhen : join with subroutine */
     startShellSyncDeasyncThrowing,
