@@ -2135,7 +2135,7 @@ function startSyncDeasync2( test )
   }
 }
 
-startSyncDeasync2.timeOut = 15000;
+startSyncDeasync2.timeOut = 45000;
 
 //
 
@@ -2202,7 +2202,7 @@ function startSyncDeasyncThrowing( test )
 
 }
 
-startSyncDeasyncThrowing.timeOut = 15000;
+startSyncDeasyncThrowing.timeOut = 45000;
 
 //
 
