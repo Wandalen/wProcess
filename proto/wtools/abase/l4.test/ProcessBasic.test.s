@@ -17562,7 +17562,7 @@ function startNjsOptionInterpreterArgs( test )
 
     ready.then( () =>
     {
-      test.case = `mode:${mode}, interpreterArgs = []`;
+      test.case = `mode:${mode}, interpreterArgs = [ ]`;
 
       let options =
       {
