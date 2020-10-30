@@ -25256,7 +25256,7 @@ function startErrorAfterTerminationWithSend( test )
       return null;
     })
                                               /* qqq for Yevhen : dont use // for comments when /* is possible to use. replace in all similar places */
-    return _.time.out( context.t2 * 2, () => //10000
+    return _.time.out( context.t2 * 2, () => /* 10000 */
     {
       test.identical( track, [ 'conStart', 'conTerminate', 'uncaughtError' ] );
       test.identical( o.ended, true );
