@@ -2052,102 +2052,80 @@ function startSyncDeasync( test )
 
 //
 
-function startSpawnSyncDeasync( test )
+function startSyncDeasync2( test )
 {
+
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.path.nativize( a.program( testApp ) );
+  let programPath = a.program( testApp );
+  let modes = [  'fork', 'spawn', 'shell' ];
 
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync:0,desync:0'
-    let o =
-    {
-      execPath : 'node ' + programPath,
-      mode : 'spawn',
-      sync : 0,
-      deasync : 0
-    }
-    var returned = _.process.start( o );
-    test.is( _.consequenceIs( returned ) );
-    test.identical( returned.resourcesCount(), 0 );
-    returned.then( function( op )
-    {
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      return op;
-    })
-    return returned;
-  })
-
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync:1,desync:0'
-    let o =
-    {
-      execPath : 'node ' + programPath,
-      mode : 'spawn',
-      sync : 1,
-      deasync : 0
-    }
-    var returned = _.process.start( o );
-    test.is( !_.consequenceIs( returned ) );
-    test.is( returned === o );
-    test.identical( returned, o );
-    test.identical( o.exitCode, 0 );
-
-    return returned;
-  })
-
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync:0,desync:1'
-    let o =
-    {
-      execPath : 'node ' + programPath,
-      mode : 'spawn',
-      sync : 0,
-      deasync : 1
-    }
-    var returned = _.process.start( o );
-    test.is( _.consequenceIs( returned ) );
-    test.identical( returned.resourcesCount(), 1 );
-    returned.then( function( op )
-    {
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      return op;
-    })
-    return returned;
-  })
-
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync:1,desync:1'
-    let o =
-    {
-      execPath : 'node ' + programPath,
-      mode : 'spawn',
-      sync : 1,
-      deasync : 1
-    }
-    var returned = _.process.start( o );
-    test.is( !_.consequenceIs( returned ) );
-    test.is( returned === o );
-    test.identical( returned, o );
-    test.identical( o.exitCode, 0 );
-    return returned;
-  })
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, mode }) ) );
 
   return a.ready;
+
+  /* - */
+
+  function run( tops )
+  {
+    let ready = new _.Consequence().take( null );
+
+    if( tops.sync && !tops.deasync && tops.mode === 'fork' )
+    return test.shouldThrowErrorSync( () =>
+    {
+      _.process.start
+      ({
+        execPath : programPath,
+        mode : tops.mode,
+        sync : tops.sync,
+        deasync : tops.deasync
+      })
+    });
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}`
+      let o =
+      {
+        execPath : tops.mode === 'fork' ? programPath : 'node ' + programPath,
+        mode : tops.mode,
+        sync : tops.sync,
+        deasync : tops.deasync
+      }
+      var returned = _.process.start( o );
+
+      if( tops.sync )
+      {
+        test.is( !_.consequenceIs( returned ) );
+        test.is( returned === o );
+        test.identical( returned, o );
+        test.identical( o.exitCode, 0 );
+        return returned;
+      }
+      else
+      {
+        test.is( _.consequenceIs( returned ) );
+        if( tops.deasync )
+        test.identical( returned.resourcesCount(), 1 );
+        else
+        test.identical( returned.resourcesCount(), 0 );
+        returned.then( function( op )
+        {
+          test.identical( op.exitCode, 0 );
+          test.identical( op.ended, true );
+          return op;
+        })
+        return returned;
+      }
+    })
+
+    return ready;
+  }
 
   /* - */
 
@@ -2157,288 +2135,63 @@ function startSpawnSyncDeasync( test )
   }
 }
 
-startSpawnSyncDeasync.timeOut = 15000;
+startSyncDeasync2.timeOut = 45000;
 
 //
 
-function startSpawnSyncDeasyncThrowing( test )
+function startSyncDeasyncThrowing( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
   let programPath = a.program( testApp );
+  let modes = [  'fork', 'spawn', 'shell' ];
+
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, mode }) ) );
+
+  return a.ready;
 
   /* */
 
-  a.ready.then( () =>
+  function run( tops )
   {
-    test.case = 'sync:0,desync:0'
-    let o =
+    test.case = `mode : ${ tops.mode }; sync : ${ tops.sync }; deasync : ${ tops.deasync }`;
+
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
     {
-      execPath : 'node ' + programPath,
-      mode : 'spawn',
-      sync : 0,
-      deasync : 0
-    }
-    var returned = _.process.start( o );
-    test.is( _.consequenceIs( returned ) );
-    test.identical( returned.resourcesCount(), 0 );
-    return test.shouldThrowErrorAsync( returned );
-  })
+      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}`
+      let o =
+      {
+        execPath : 'node ' + programPath,
+        mode : tops.mode,
+        sync : tops.sync,
+        deasync : tops.deasync
+      }
 
-  /*  */
+      if( tops.sync )
+      {
+        test.shouldThrowErrorSync( () =>  _.process.start( o ) );
+        return null;
+      }
+      else
+      {
+        var returned = _.process.start( o );
 
-  a.ready.then( () =>
-  {
-    test.case = 'sync:1,desync:0'
-    let o =
-    {
-      execPath : 'node ' + programPath,
-      mode : 'spawn',
-      sync : 1,
-      deasync : 0
-    }
-    test.shouldThrowErrorSync( () =>  _.process.start( o ) );
-    return null;
-  })
-
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync:0,desync:1'
-    let o =
-    {
-      execPath : 'node ' + programPath,
-      mode : 'spawn',
-      sync : 0,
-      deasync : 1
-    }
-    var returned = _.process.start( o );
-    test.is( _.consequenceIs( returned ) );
-    test.identical( returned.resourcesCount(), 1 );
-    return test.shouldThrowErrorAsync( returned );
-  })
-
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync:1,desync:1'
-    let o =
-    {
-      execPath : 'node ' + programPath,
-      mode : 'spawn',
-      sync : 1,
-      deasync : 1
-    }
-    test.shouldThrowErrorSync( () =>  _.process.start( o ) );
-    return null;
-  })
-
-  /*  */
-
-  return a.ready;
-
-  /* - */
-
-  function testApp()
-  {
-    throw new Error( 'Test error' );
-  }
-}
-
-startSpawnSyncDeasyncThrowing.timeOut = 15000;
-
-//
-
-function startShellSyncDeasync( test )
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-  let programPath = a.path.nativize( a.program( testApp ) );
-
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync:0,desync:0'
-    let o =
-    {
-      execPath : 'node ' + programPath,
-      mode : 'shell',
-      sync : 0,
-      deasync : 0
-    }
-    var returned = _.process.start( o );
-    test.is( _.consequenceIs( returned ) );
-    test.identical( returned.resourcesCount(), 0 );
-    returned.then( function( op )
-    {
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      return op;
+        test.is( _.consequenceIs( returned ) );
+        if( tops.deasync )
+        test.identical( returned.resourcesCount(), 1 );
+        else
+        test.identical( returned.resourcesCount(), 0 );
+        return test.shouldThrowErrorAsync( returned );
+      }
     })
-    return returned;
-  })
 
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync:1,desync:0'
-    let o =
-    {
-      execPath : 'node ' + programPath,
-      mode : 'shell',
-      sync : 1,
-      deasync : 0
-    }
-    var returned = _.process.start( o );
-    test.is( !_.consequenceIs( returned ) );
-    test.is( returned === o );
-    test.identical( returned, o );
-    test.identical( o.exitCode, 0 );
-
-    return returned;
-  })
-
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync:0,desync:1'
-    let o =
-    {
-      execPath : 'node ' + programPath,
-      mode : 'shell',
-      sync : 0,
-      deasync : 1
-    }
-    var returned = _.process.start( o );
-    test.is( _.consequenceIs( returned ) );
-    test.identical( returned.resourcesCount(), 1 );
-    returned.then( function( op )
-    {
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      return op;
-    })
-    return returned;
-  })
-
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync:1,desync:1'
-    let o =
-    {
-      execPath : 'node ' + programPath,
-      mode : 'shell',
-      sync : 1,
-      deasync : 1
-    }
-    var returned = _.process.start( o );
-    test.is( !_.consequenceIs( returned ) );
-    test.is( returned === o );
-    test.identical( returned, o );
-    test.identical( o.exitCode, 0 );
-    return returned;
-  })
-
-  /*  */
-
-  return a.ready;
-
-  /* - */
-
-  function testApp()
-  {
-    console.log( process.argv.slice( 2 ) );
+    return ready;
   }
-}
-
-startShellSyncDeasync.timeOut = 15000;
-
-//
-
-function startShellSyncDeasyncThrowing( test )
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-  let programPath = a.program( testApp );
-
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync:0,desync:0'
-    let o =
-    {
-      execPath : 'node ' + programPath,
-      mode : 'shell',
-      sync : 0,
-      deasync : 0
-    }
-    var returned = _.process.start( o );
-    test.is( _.consequenceIs( returned ) );
-    test.identical( returned.resourcesCount(), 0 );
-    return test.shouldThrowErrorAsync( returned );
-  })
-
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync:1,desync:0'
-    let o =
-    {
-      execPath : 'node ' + programPath,
-      mode : 'shell',
-      sync : 1,
-      deasync : 0
-    }
-    test.shouldThrowErrorSync( () =>  _.process.start( o ) );
-    return null;
-  })
-
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync:0,desync:1'
-    let o =
-    {
-      execPath : 'node ' + programPath,
-      mode : 'shell',
-      sync : 0,
-      deasync : 1
-    }
-    var returned = _.process.start( o );
-    test.is( _.consequenceIs( returned ) );
-    test.identical( returned.resourcesCount(), 1 );
-    return test.shouldThrowErrorAsync( returned );
-  })
-
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'sync:1,desync:1'
-    let o =
-    {
-      execPath : 'node ' + programPath,
-      mode : 'shell',
-      sync : 1,
-      deasync : 1
-    }
-    test.shouldThrowErrorSync( () =>  _.process.start( o ) );
-    return null;
-  })
-
-  /*  */
-
-  return a.ready;
 
   /* - */
 
@@ -2449,202 +2202,603 @@ function startShellSyncDeasyncThrowing( test )
 
 }
 
-startShellSyncDeasyncThrowing.timeOut = 15000;
+startSyncDeasyncThrowing.timeOut = 45000;
 
 //
 
-function startForkSyncDeasync( test )
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-  let programPath = a.program( testApp );
+// function startSpawnSyncDeasync( test )
+// {
+//   let context = this;
+//   let a = context.assetFor( test, false );
+//   let programPath = a.path.nativize( a.program( testApp ) );
 
-  /*  */
+//   /*  */
 
-  a.ready.then( () =>
-  {
-    test.case = 'sync:0,desync:0'
-    let o =
-    {
-      execPath : programPath,
-      mode : 'fork',
-      sync : 0,
-      deasync : 0
-    }
-    var returned = _.process.start( o );
-    test.is( _.consequenceIs( returned ) );
-    test.identical( returned.resourcesCount(), 0 );
-    returned.then( function( op )
-    {
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      return op;
-    })
-    return returned;
-  })
+//   a.ready.then( () =>
+//   {
+//     test.case = 'sync:0,desync:0'
+//     let o =
+//     {
+//       execPath : 'node ' + programPath,
+//       mode : 'spawn',
+//       sync : 0,
+//       deasync : 0
+//     }
+//     var returned = _.process.start( o );
+//     test.is( _.consequenceIs( returned ) );
+//     test.identical( returned.resourcesCount(), 0 );
+//     returned.then( function( op )
+//     {
+//       test.identical( op.exitCode, 0 );
+//       test.identical( op.ended, true );
+//       return op;
+//     })
+//     return returned;
+//   })
 
-  /*  */
+//   /*  */
 
-  if( Config.debug )
-  a.ready.then( () =>
-  {
-    test.case = 'sync:1,desync:0'
-    let o =
-    {
-      execPath : programPath,
-      mode : 'fork',
-      sync : 1,
-      deasync : 0
-    }
-    test.shouldThrowErrorSync( () => _.process.start( o ) )
-    return null;
-  })
+//   a.ready.then( () =>
+//   {
+//     test.case = 'sync:1,desync:0'
+//     let o =
+//     {
+//       execPath : 'node ' + programPath,
+//       mode : 'spawn',
+//       sync : 1,
+//       deasync : 0
+//     }
+//     var returned = _.process.start( o );
+//     test.is( !_.consequenceIs( returned ) );
+//     test.is( returned === o );
+//     test.identical( returned, o );
+//     test.identical( o.exitCode, 0 );
 
-  /*  */
+//     return returned;
+//   })
 
-  a.ready.then( () =>
-  {
-    test.case = 'sync:0,desync:1'
-    let o =
-    {
-      execPath : programPath,
-      mode : 'fork',
-      sync : 0,
-      deasync : 1
-    }
-    var returned = _.process.start( o );
-    test.is( _.consequenceIs( returned ) );
-    test.identical( returned.resourcesCount(), 1 );
-    returned.then( function( op )
-    {
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      return op;
-    })
-    return returned;
-  })
+//   /*  */
 
-  /*  */
+//   a.ready.then( () =>
+//   {
+//     test.case = 'sync:0,desync:1'
+//     let o =
+//     {
+//       execPath : 'node ' + programPath,
+//       mode : 'spawn',
+//       sync : 0,
+//       deasync : 1
+//     }
+//     var returned = _.process.start( o );
+//     test.is( _.consequenceIs( returned ) );
+//     test.identical( returned.resourcesCount(), 1 );
+//     returned.then( function( op )
+//     {
+//       test.identical( op.exitCode, 0 );
+//       test.identical( op.ended, true );
+//       return op;
+//     })
+//     return returned;
+//   })
 
-  a.ready.then( () =>
-  {
-    test.case = 'sync:1,desync:1'
-    let o =
-    {
-      execPath : programPath,
-      mode : 'fork',
-      sync : 1,
-      deasync : 1
-    }
-    var returned = _.process.start( o );
-    test.is( !_.consequenceIs( returned ) );
-    test.is( returned === o );
-    test.identical( returned, o );
-    test.identical( o.exitCode, 0 );
-    return returned;
-  })
+//   /*  */
 
-  /*  */
+//   a.ready.then( () =>
+//   {
+//     test.case = 'sync:1,desync:1'
+//     let o =
+//     {
+//       execPath : 'node ' + programPath,
+//       mode : 'spawn',
+//       sync : 1,
+//       deasync : 1
+//     }
+//     var returned = _.process.start( o );
+//     test.is( !_.consequenceIs( returned ) );
+//     test.is( returned === o );
+//     test.identical( returned, o );
+//     test.identical( o.exitCode, 0 );
+//     return returned;
+//   })
 
-  return a.ready;
+//   return a.ready;
 
-  /* - */
+//   /* - */
 
-  function testApp()
-  {
-    console.log( process.argv.slice( 2 ) );
-  }
-}
+//   function testApp()
+//   {
+//     console.log( process.argv.slice( 2 ) );
+//   }
+// }
 
-startForkSyncDeasync.timeOut = 15000;
+// startSpawnSyncDeasync.timeOut = 15000;
 
 //
 
-function startForkSyncDeasyncThrowing( test )
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-  let programPath = a.program( testApp );
+// function startSpawnSyncDeasyncThrowing( test )
+// {
+//   let context = this;
+//   let a = context.assetFor( test, false );
+//   let programPath = a.program( testApp );
+
+//   /* */
+
+//   a.ready.then( () =>
+//   {
+//     test.case = 'sync:0,desync:0'
+//     let o =
+//     {
+//       execPath : 'node ' + programPath,
+//       mode : 'spawn',
+//       sync : 0,
+//       deasync : 0
+//     }
+//     var returned = _.process.start( o );
+//     test.is( _.consequenceIs( returned ) );
+//     test.identical( returned.resourcesCount(), 0 );
+//     return test.shouldThrowErrorAsync( returned );
+//   })
+
+//   /*  */
+
+//   a.ready.then( () =>
+//   {
+//     test.case = 'sync:1,desync:0'
+//     let o =
+//     {
+//       execPath : 'node ' + programPath,
+//       mode : 'spawn',
+//       sync : 1,
+//       deasync : 0
+//     }
+//     test.shouldThrowErrorSync( () =>  _.process.start( o ) );
+//     return null;
+//   })
+
+//   /*  */
+
+//   a.ready.then( () =>
+//   {
+//     test.case = 'sync:0,desync:1'
+//     let o =
+//     {
+//       execPath : 'node ' + programPath,
+//       mode : 'spawn',
+//       sync : 0,
+//       deasync : 1
+//     }
+//     var returned = _.process.start( o );
+//     test.is( _.consequenceIs( returned ) );
+//     test.identical( returned.resourcesCount(), 1 );
+//     return test.shouldThrowErrorAsync( returned );
+//   })
+
+//   /*  */
+
+//   a.ready.then( () =>
+//   {
+//     test.case = 'sync:1,desync:1'
+//     let o =
+//     {
+//       execPath : 'node ' + programPath,
+//       mode : 'spawn',
+//       sync : 1,
+//       deasync : 1
+//     }
+//     test.shouldThrowErrorSync( () =>  _.process.start( o ) );
+//     return null;
+//   })
+
+//   /*  */
+
+//   return a.ready;
+
+//   /* - */
+
+//   function testApp()
+//   {
+//     throw new Error( 'Test error' );
+//   }
+// }
+
+// startSpawnSyncDeasyncThrowing.timeOut = 15000;
+
+//
+
+// function startShellSyncDeasync( test )
+// {
+//   let context = this;
+//   let a = context.assetFor( test, false );
+//   let programPath = a.path.nativize( a.program( testApp ) );
+
+//   /*  */
+
+//   a.ready.then( () =>
+//   {
+//     test.case = 'sync:0,desync:0'
+//     let o =
+//     {
+//       execPath : 'node ' + programPath,
+//       mode : 'shell',
+//       sync : 0,
+//       deasync : 0
+//     }
+//     var returned = _.process.start( o );
+//     test.is( _.consequenceIs( returned ) );
+//     test.identical( returned.resourcesCount(), 0 );
+//     returned.then( function( op )
+//     {
+//       test.identical( op.exitCode, 0 );
+//       test.identical( op.ended, true );
+//       return op;
+//     })
+//     return returned;
+//   })
+
+//   /*  */
+
+//   a.ready.then( () =>
+//   {
+//     test.case = 'sync:1,desync:0'
+//     let o =
+//     {
+//       execPath : 'node ' + programPath,
+//       mode : 'shell',
+//       sync : 1,
+//       deasync : 0
+//     }
+//     var returned = _.process.start( o );
+//     test.is( !_.consequenceIs( returned ) );
+//     test.is( returned === o );
+//     test.identical( returned, o );
+//     test.identical( o.exitCode, 0 );
+
+//     return returned;
+//   })
+
+//   /*  */
+
+//   a.ready.then( () =>
+//   {
+//     test.case = 'sync:0,desync:1'
+//     let o =
+//     {
+//       execPath : 'node ' + programPath,
+//       mode : 'shell',
+//       sync : 0,
+//       deasync : 1
+//     }
+//     var returned = _.process.start( o );
+//     test.is( _.consequenceIs( returned ) );
+//     test.identical( returned.resourcesCount(), 1 );
+//     returned.then( function( op )
+//     {
+//       test.identical( op.exitCode, 0 );
+//       test.identical( op.ended, true );
+//       return op;
+//     })
+//     return returned;
+//   })
+
+//   /*  */
+
+//   a.ready.then( () =>
+//   {
+//     test.case = 'sync:1,desync:1'
+//     let o =
+//     {
+//       execPath : 'node ' + programPath,
+//       mode : 'shell',
+//       sync : 1,
+//       deasync : 1
+//     }
+//     var returned = _.process.start( o );
+//     test.is( !_.consequenceIs( returned ) );
+//     test.is( returned === o );
+//     test.identical( returned, o );
+//     test.identical( o.exitCode, 0 );
+//     return returned;
+//   })
+
+//   /*  */
+
+//   return a.ready;
+
+//   /* - */
+
+//   function testApp()
+//   {
+//     console.log( process.argv.slice( 2 ) );
+//   }
+// }
+
+// startShellSyncDeasync.timeOut = 15000;
+
+//
+
+// function startShellSyncDeasyncThrowing( test )
+// {
+//   let context = this;
+//   let a = context.assetFor( test, false );
+//   let programPath = a.program( testApp );
 
   /*  */
 
-  a.ready.then( () =>
-  {
-    test.case = 'sync:0,desync:0'
-    let o =
-    {
-      execPath : programPath,
-      mode : 'fork',
-      sync : 0,
-      deasync : 0
-    }
-    var returned = _.process.start( o );
-    test.is( _.consequenceIs( returned ) );
-    test.identical( returned.resourcesCount(), 0 );
-    return test.shouldThrowErrorAsync( returned );
-  })
+//   a.ready.then( () =>
+//   {
+//     test.case = 'sync:0,desync:0'
+//     let o =
+//     {
+//       execPath : 'node ' + programPath,
+//       mode : 'shell',
+//       sync : 0,
+//       deasync : 0
+//     }
+//     var returned = _.process.start( o );
+//     test.is( _.consequenceIs( returned ) );
+//     test.identical( returned.resourcesCount(), 0 );
+//     return test.shouldThrowErrorAsync( returned );
+//   })
+
+//   /*  */
+
+//   a.ready.then( () =>
+//   {
+//     test.case = 'sync:1,desync:0'
+//     let o =
+//     {
+//       execPath : 'node ' + programPath,
+//       mode : 'shell',
+//       sync : 1,
+//       deasync : 0
+//     }
+//     test.shouldThrowErrorSync( () =>  _.process.start( o ) );
+//     return null;
+//   })
+
+//   /*  */
+
+//   a.ready.then( () =>
+//   {
+//     test.case = 'sync:0,desync:1'
+//     let o =
+//     {
+//       execPath : 'node ' + programPath,
+//       mode : 'shell',
+//       sync : 0,
+//       deasync : 1
+//     }
+//     var returned = _.process.start( o );
+//     test.is( _.consequenceIs( returned ) );
+//     test.identical( returned.resourcesCount(), 1 );
+//     return test.shouldThrowErrorAsync( returned );
+//   })
+
+//   /*  */
+
+//   a.ready.then( () =>
+//   {
+//     test.case = 'sync:1,desync:1'
+//     let o =
+//     {
+//       execPath : 'node ' + programPath,
+//       mode : 'shell',
+//       sync : 1,
+//       deasync : 1
+//     }
+//     test.shouldThrowErrorSync( () =>  _.process.start( o ) );
+//     return null;
+//   })
+
+//   /*  */
+
+//   return a.ready;
+
+//   /* - */
+
+//   function testApp()
+//   {
+//     throw new Error( 'Test error' );
+//   }
+
+// }
+
+// startShellSyncDeasyncThrowing.timeOut = 15000;
+
+//
+
+// function startForkSyncDeasync( test )
+// {
+//   let context = this;
+//   let a = context.assetFor( test, false );
+//   let programPath = a.program( testApp );
+
+//   /*  */
+
+//   a.ready.then( () =>
+//   {
+//     test.case = 'sync:0,desync:0'
+//     let o =
+//     {
+//       execPath : programPath,
+//       mode : 'fork',
+//       sync : 0,
+//       deasync : 0
+//     }
+//     var returned = _.process.start( o );
+//     test.is( _.consequenceIs( returned ) );
+//     test.identical( returned.resourcesCount(), 0 );
+//     returned.then( function( op )
+//     {
+//       test.identical( op.exitCode, 0 );
+//       test.identical( op.ended, true );
+//       return op;
+//     })
+//     return returned;
+//   })
+
+//   /*  */
+
+//   if( Config.debug )
+//   a.ready.then( () =>
+//   {
+//     test.case = 'sync:1,desync:0'
+//     let o =
+//     {
+//       execPath : programPath,
+//       mode : 'fork',
+//       sync : 1,
+//       deasync : 0
+//     }
+//     test.shouldThrowErrorSync( () => _.process.start( o ) )
+//     return null;
+//   })
+
+//   /*  */
+
+//   a.ready.then( () =>
+//   {
+//     test.case = 'sync:0,desync:1'
+//     let o =
+//     {
+//       execPath : programPath,
+//       mode : 'fork',
+//       sync : 0,
+//       deasync : 1
+//     }
+//     var returned = _.process.start( o );
+//     test.is( _.consequenceIs( returned ) );
+//     test.identical( returned.resourcesCount(), 1 );
+//     returned.then( function( op )
+//     {
+//       test.identical( op.exitCode, 0 );
+//       test.identical( op.ended, true );
+//       return op;
+//     })
+//     return returned;
+//   })
+
+//   /*  */
+
+//   a.ready.then( () =>
+//   {
+//     test.case = 'sync:1,desync:1'
+//     let o =
+//     {
+//       execPath : programPath,
+//       mode : 'fork',
+//       sync : 1,
+//       deasync : 1
+//     }
+//     var returned = _.process.start( o );
+//     test.is( !_.consequenceIs( returned ) );
+//     test.is( returned === o );
+//     test.identical( returned, o );
+//     test.identical( o.exitCode, 0 );
+//     return returned;
+//   })
+
+//   /*  */
+
+//   return a.ready;
+
+//   /* - */
+
+//   function testApp()
+//   {
+//     console.log( process.argv.slice( 2 ) );
+//   }
+// }
+
+// startForkSyncDeasync.timeOut = 15000;
+
+//
+
+// function startForkSyncDeasyncThrowing( test )
+// {
+//   let context = this;
+//   let a = context.assetFor( test, false );
+//   let programPath = a.program( testApp );
 
   /*  */
 
-  a.ready.then( () =>
-  {
-    test.case = 'sync:1,desync:0'
-    let o =
-    {
-      execPath : programPath,
-      mode : 'fork',
-      sync : 1,
-      deasync : 0
-    }
-    test.shouldThrowErrorSync( () =>  _.process.start( o ) );
-    return null;
-  })
+//   a.ready.then( () =>
+//   {
+//     test.case = 'sync:0,desync:0'
+//     let o =
+//     {
+//       execPath : programPath,
+//       mode : 'fork',
+//       sync : 0,
+//       deasync : 0
+//     }
+//     var returned = _.process.start( o );
+//     test.is( _.consequenceIs( returned ) );
+//     test.identical( returned.resourcesCount(), 0 );
+//     return test.shouldThrowErrorAsync( returned );
+//   })
 
-  /*  */
+//   /*  */
 
-  a.ready.then( () =>
-  {
-    test.case = 'sync:0,desync:1'
-    let o =
-    {
-      execPath : programPath,
-      mode : 'fork',
-      sync : 0,
-      deasync : 1
-    }
-    var returned = _.process.start( o );
-    test.is( _.consequenceIs( returned ) );
-    test.identical( returned.resourcesCount(), 1 );
-    return test.shouldThrowErrorAsync( returned );
-  })
+//   a.ready.then( () =>
+//   {
+//     test.case = 'sync:1,desync:0'
+//     let o =
+//     {
+//       execPath : programPath,
+//       mode : 'fork',
+//       sync : 1,
+//       deasync : 0
+//     }
+//     test.shouldThrowErrorSync( () =>  _.process.start( o ) );
+//     return null;
+//   })
 
-  /*  */
+//   /*  */
 
-  a.ready.then( () =>
-  {
-    test.case = 'sync:1,desync:1'
-    let o =
-    {
-      execPath : programPath,
-      mode : 'fork',
-      sync : 1,
-      deasync : 1
-    }
-    test.shouldThrowErrorSync( () =>  _.process.start( o ) );
-    return null;
-  })
+//   a.ready.then( () =>
+//   {
+//     test.case = 'sync:0,desync:1'
+//     let o =
+//     {
+//       execPath : programPath,
+//       mode : 'fork',
+//       sync : 0,
+//       deasync : 1
+//     }
+//     var returned = _.process.start( o );
+//     test.is( _.consequenceIs( returned ) );
+//     test.identical( returned.resourcesCount(), 1 );
+//     return test.shouldThrowErrorAsync( returned );
+//   })
 
-  /*  */
+//   /*  */
 
-  return a.ready;
+//   a.ready.then( () =>
+//   {
+//     test.case = 'sync:1,desync:1'
+//     let o =
+//     {
+//       execPath : programPath,
+//       mode : 'fork',
+//       sync : 1,
+//       deasync : 1
+//     }
+//     test.shouldThrowErrorSync( () =>  _.process.start( o ) );
+//     return null;
+//   })
 
-  function testApp()
-  {
-    throw new Error( 'Test error' );
-  }
-}
+//   /*  */
 
-startForkSyncDeasyncThrowing.timeOut = 15000;
+//   return a.ready;
+
+//   function testApp()
+//   {
+//     throw new Error( 'Test error' );
+//   }
+// }
+
+// startForkSyncDeasyncThrowing.timeOut = 15000;
 
 //
 
@@ -6863,7 +7017,7 @@ function startExecPathNonTrivialModeShell( test )
     return null;
   })
 
-  //Vova: same behaviour on win and linux now
+  /* Vova: same behaviour on win and linux now */
   shell({ execPath : '"node -v && node -v"', throwingExitCode : 0 })
   .then( ( op ) =>
   {
@@ -12279,8 +12433,10 @@ function startDetachedOutputStdioPipe( test )
     {
       test.identical( o.exitCode, 0 )
 
-      // zzz for Vova: output piping doesn't work as expected in mode "shell" on windows
-      // investigate if its fixed in never verions of node or implement alternative solution
+      /*
+      zzz for Vova: output piping doesn't work as expected in mode "shell" on windows
+      investigate if its fixed in never verions of node or implement alternative solution
+      */
 
       if( process.platform === 'win32' )
       return null;
@@ -15776,7 +15932,7 @@ function startConcurrentConsequencesMultiple( test )
     outputCollecting : 1,
   }
 
-  // xxx
+  /* xxx */
   let consequences = [ 'null' ];
   let modes = [ 'spawn' ];
 
@@ -17323,15 +17479,15 @@ function startNjsWithReadyDelayStructural( test )
   /* qqq for Yevhen : add varying `sync` and `deasync` and `dry` for test routine startNjsWithReadyDelayStructuralMultiple */
 
   let modes = [ 'fork', 'spawn', 'shell' ];
-  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 0, mode ) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ detaching : 0, dry : 0, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ detaching : 1, dry : 0, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ detaching : 0, dry : 1, mode }) ) );
   return a.ready;
 
   /* */
 
-  function run( detaching, dry, mode ) /* qqq for Yevhen : put parameters in map `tops` */
-  // function run( tops ) /* qqq for Yevhen : use map tops */
+  // function run( detaching, dry, mode ) /* qqq for Yevhen : put parameters in map `tops` | aaa : Done .*/
+  function run( tops ) /* qqq for Yevhen : use map tops | aaa : Done. */
   {
     let ready = _.Consequence().take( null );
 
@@ -17340,14 +17496,14 @@ function startNjsWithReadyDelayStructural( test )
       /*
       output piping doesn't work as expected in mode "shell" on windows
       */
-      test.case = `mode:${mode} detaching:${detaching}`;
+      test.case = `mode:${tops.mode} detaching:${tops.detaching}`;
       let con = new _.Consequence().take( null ).delay( context.t1 ); /* 1000 */
 
       let options =
       {
-        mode,
-        detaching,
-        dry,
+        mode : tops.mode,
+        detaching : tops.detaching,
+        dry : tops.dry,
         execPath : programPath,
         currentPath : a.abs( '.' ),
         throwingExitCode : 1,
@@ -17365,7 +17521,7 @@ function startNjsWithReadyDelayStructural( test )
       {
         test.identical( op.ended, true );
 
-        if( !dry )
+        if( !tops.dry )
         {
           test.identical( op.exitCode, 0 );
           test.identical( op.output, 'program1:begin\n' );
@@ -17376,12 +17532,12 @@ function startNjsWithReadyDelayStructural( test )
         exp2.procedure = options.procedure;
         exp2.streamOut = options.streamOut;
         exp2.streamErr = options.streamErr;
-        exp2.execPath = mode === 'fork' ? programPath : 'node';
-        exp2.args = mode === 'fork' ? [] : [ programPath ];
-        exp2.fullExecPath = ( mode === 'fork' ? '' : 'node ' ) + programPath;
+        exp2.execPath = tops.mode === 'fork' ? programPath : 'node';
+        exp2.args = tops.mode === 'fork' ? [] : [ programPath ];
+        exp2.fullExecPath = ( tops.mode === 'fork' ? '' : 'node ' ) + programPath;
         exp2.state = 'terminated';
         exp2.ended = true;
-        if( !dry )
+        if( !tops.dry )
         {
           exp2.output = 'program1:begin\n';
           exp2.exitCode = 0;
@@ -17390,11 +17546,11 @@ function startNjsWithReadyDelayStructural( test )
         }
 
         test.identical( options, exp2 );
-        test.identical( !!options.process, !dry );
+        test.identical( !!options.process, !tops.dry );
         test.is( _.routineIs( options.disconnect ) );
-        test.identical( _.streamIs( options.streamOut ), !dry );
-        test.identical( _.streamIs( options.streamErr ), !dry );
-        test.identical( options.streamOut !== options.streamErr, !dry );
+        test.identical( _.streamIs( options.streamOut ), !tops.dry );
+        test.identical( _.streamIs( options.streamErr ), !tops.dry );
+        test.identical( options.streamOut !== options.streamErr, !tops.dry );
         test.is( options.conTerminate !== options.ready );
         test.identical( options.ready.exportString(), 'Consequence:: 0 / 1' );
         test.identical( options.conTerminate.exportString(), 'Consequence:: 1 / 0' );
@@ -17406,10 +17562,10 @@ function startNjsWithReadyDelayStructural( test )
 
       var exp =
       {
-        mode,
-        detaching,
-        dry,
-        'execPath' : ( mode === 'fork' ? '' : 'node ' ) + programPath,
+        'mode' : tops.mode,
+        'detaching' : tops.detaching,
+        'dry' : tops.dry,
+        'execPath' : ( tops.mode === 'fork' ? '' : 'node ' ) + programPath,
         'currentPath' : a.abs( '.' ),
         'throwingExitCode' : 'full',
         'inputMirroring' : 1,
@@ -17419,11 +17575,11 @@ function startNjsWithReadyDelayStructural( test )
         'passingThrough' : 0,
         'maximumMemory' : 0,
         'applyingExitCode' : 1,
-        'stdio' : mode === 'fork' ? [ 'pipe', 'pipe', 'pipe', 'ipc' ] : [ 'pipe', 'pipe', 'pipe' ],
+        'stdio' : tops.mode === 'fork' ? [ 'pipe', 'pipe', 'pipe', 'ipc' ] : [ 'pipe', 'pipe', 'pipe' ],
         'args' : null,
         'interpreterArgs' : null,
         'when' : 'instant',
-        'ipc' : mode === 'fork' ? true : false,
+        'ipc' : tops.mode === 'fork' ? true : false,
         'env' : null,
         'hiding' : 1,
         'concurrent' : 0,
@@ -23414,7 +23570,7 @@ function exitCode( test )
       .then( ( op ) =>
       {
         if( process.platform === 'win32' )
-        test.notIdentical( op.exitCode, 0 )// returns 4294967295 which is -1 to uint32
+        test.notIdentical( op.exitCode, 0 )/* returns 4294967295 which is -1 to uint32 */
         else
         test.identical( op.exitCode, 255 );
         test.identical( op.ended, true );
@@ -23692,7 +23848,7 @@ function startOptionVerbosityLogging( test )
         test.identical( op.exitReason, 'normal' );
         test.identical( op.ended, true );
         test.identical( op.state, 'terminated' );
-        // Windows returns 4294967295 which is -1 to uint32
+        /* Windows returns 4294967295 which is -1 to uint32 */
         if( process.platform === 'win32' )
         test.identical( _.strCount( op.output, '< Process returned error code 4294967295' ), 1 );
         else
@@ -24533,7 +24689,7 @@ function kill( test )
     return ready;
   })
 
-  // zzz for Vova : find how to simulate EPERM error using process.kill and write test case
+  /* zzz for Vova : find how to simulate EPERM error using process.kill and write test case */
 
   /* */
 
@@ -25224,8 +25380,8 @@ function startErrorAfterTerminationWithSend( test )
 
       return null;
     })
-                                              /* qqq for Yevhen : dont use // for comments when /* is possible to use. replace in all similar places */
-    return _.time.out( context.t2 * 2, () => //10000
+                                              /* qqq for Yevhen : dont use // for comments when /* is possible to use. replace in all similar places | aaa : Done. */
+    return _.time.out( context.t2 * 2, () => /* 10000 */
     {
       test.identical( track, [ 'conStart', 'conTerminate', 'uncaughtError' ] );
       test.identical( o.ended, true );
@@ -25282,8 +25438,9 @@ function startTerminateHangedWithExitHandler( test )
 
   // if( process.platform === 'win32' )
   // {
-  //   // zzz: windows-kill doesn't work correctrly on node 14
-  //   // investigate if its possible to use process.kill instead of windows-kill
+  /* zzz : windows-kill doesn't work correctrly on node 14
+  investigate if its possible to use process.kill instead of windows-kill
+  */
   //   test.identical( 1, 1 )
   //   return;
   // }
@@ -25400,8 +25557,9 @@ function startTerminateAfterLoopRelease( test )
 
   // if( process.platform === 'win32' )
   // {
-  //   // zzz: windows-kill doesn't work correctrly on node 14
-  //   // investigate if its possible to use process.kill instead of windows-kill
+  /* zzz: windows-kill doesn't work correctrly on node 14
+  investigate if its possible to use process.kill instead of windows-kill
+  */
   //   test.identical( 1, 1 )
   //   return;
   // }
@@ -27666,8 +27824,9 @@ function terminate( test )
 
   // if( process.platform === 'win32' )
   // {
-  //   // zzz for Vova : windows-kill doesn't work correctrly on node 14
-  //   // investigate if its possible to use process.kill instead of windows-kill
+  /* zzz for Vova : windows-kill doesn't work correctrly on node 14
+  investigate if its possible to use process.kill instead of windows-kill
+  */
   //   test.identical( 1, 1 )
   //   return;
   // }
@@ -27741,7 +27900,7 @@ function terminate( test )
     {
       if( process.platform === 'win32' )
       {
-        test.identical( op.exitCode, 1 );//1 because process was killed using pid
+        test.identical( op.exitCode, 1 );/* 1 because process was killed using pid */
         test.identical( op.exitSignal, null );
         test.identical( op.ended, true );
         test.is( !_.strHas( op.output, 'SIGTERM' ) );
@@ -27965,7 +28124,7 @@ function terminate( test )
     {
       if( process.platform === 'win32' )
       {
-        test.identical( op.exitCode, 1 );//1 because process was killed using pid
+        test.identical( op.exitCode, 1 );/* 1 because process was killed using pid */
         test.identical( op.exitSignal, null );
         test.identical( op.ended, true );
         test.is( !_.strHas( op.output, 'SIGTERM' ) );
@@ -28234,7 +28393,7 @@ function terminate( test )
     {
       if( process.platform === 'win32' )
       {
-        test.identical( op.exitCode, null );// null because process was killed using pnd
+        test.identical( op.exitCode, null );/* null because process was killed using pnd */
         test.identical( op.ended, true );
         test.identical( op.exitSignal, 'SIGTERM' );
         test.is( !_.strHas( op.output, 'SIGTERM' ) );
@@ -28326,7 +28485,7 @@ function terminate( test )
     {
       if( process.platform === 'win32' )
       {
-        test.identical( op.exitCode, null );// null because process was killed using pnd
+        test.identical( op.exitCode, null );/* null because process was killed using pnd */
         test.identical( op.ended, true );
         test.identical( op.exitSignal, 'SIGKILL' );
         test.is( !_.strHas( op.output, 'SIGTERM' ) );
@@ -28512,8 +28671,9 @@ function terminateSync( test )
 
   // if( process.platform === 'win32' )
   // {
-  //   // яяя for Vova : windows-kill doesn't work correctrly on node 14
-  //   // investigate if its possible to use process.kill instead of windows-kill
+  /* zzz for Vova : windows-kill doesn't work correctrly on node 14
+  investigate if its possible to use process.kill instead of windows-kill
+  */
   //   test.identical( 1, 1 );
   //   return;
   // }
@@ -32827,12 +32987,14 @@ var Proto =
 
     startSync,
     startSyncDeasync,
-    startSpawnSyncDeasync, /* qqq for Yevhen : join with subroutine */
-    startSpawnSyncDeasyncThrowing,
-    startShellSyncDeasync, /* qqq for Yevhen : join with subroutine */
-    startShellSyncDeasyncThrowing,
-    startForkSyncDeasync, /* qqq for Yevhen : join with subroutine */
-    startForkSyncDeasyncThrowing,
+    startSyncDeasync2,
+    startSyncDeasyncThrowing,
+    // startSpawnSyncDeasync, /* qqq for Yevhen : join with subroutine | aaa : Done. */
+    // startSpawnSyncDeasyncThrowing,
+    // startShellSyncDeasync, /* qqq for Yevhen : join with subroutine | aaa : Done. */
+    // startShellSyncDeasyncThrowing,
+    // startForkSyncDeasync, /* qqq for Yevhen : join with subroutine | aaa : Done. */
+    // startForkSyncDeasyncThrowing,
     startSyncDeasyncMultiple,
 
     // arguments
