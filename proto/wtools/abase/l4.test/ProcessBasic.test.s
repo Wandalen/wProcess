@@ -9163,27 +9163,23 @@ function startNjsPassingThroughExecPathWithSpace( test )
   a.ready.then( () =>
   {
     test.case = 'execPath contains unquoted path with space'
-    return null;
-  })
-
-  _.process.startNjsPassingThrough
-  ({
-    execPath : execPathWithSpace,
-    ready : a.ready,
-    stdio : 'pipe',
-    outputCollecting : 1,
-    outputPiping : 1,
-    throwingExitCode : 0,
-    applyingExitCode : 0,
-  });
-
-  a.ready.then( ( op ) =>
-  {
-    test.notIdentical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    test.is( a.fileProvider.fileExists( testAppPath ) );
-    test.is( _.strHas( op.output, `Error: Cannot find module` ) );
-    return null;
+    return _.process.startNjsPassingThrough
+    ({
+      execPath : execPathWithSpace,
+      stdio : 'pipe',
+      outputCollecting : 1,
+      outputPiping : 1,
+      throwingExitCode : 0,
+      applyingExitCode : 0,
+    })
+    .then( ( op ) =>
+    {
+      test.notIdentical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.is( a.fileProvider.fileExists( testAppPath ) );
+      test.is( _.strHas( op.output, `Error: Cannot find module` ) );
+      return null;
+    })
   })
 
   /* - */
@@ -9191,11 +9187,7 @@ function startNjsPassingThroughExecPathWithSpace( test )
   a.ready.then( () =>
   {
     test.case = 'args: string that contains unquoted path with space'
-    return null;
-  })
-
-  test.shouldThrowErrorSync( () =>
-  {
+   
     return _.process.startNjsPassingThrough
     ({
       args : execPathWithSpace,
@@ -9204,7 +9196,15 @@ function startNjsPassingThroughExecPathWithSpace( test )
       outputPiping : 1,
       throwingExitCode : 0,
       applyingExitCode : 0,
-    });
+    })
+    .then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.is( a.fileProvider.fileExists( testAppPath ) );
+      test.is( _.strHas( op.output, op.process.pid.toString() ) );
+      return null;
+    })
   })
 
   /* - */
