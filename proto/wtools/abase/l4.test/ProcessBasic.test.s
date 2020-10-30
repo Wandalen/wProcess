@@ -6863,7 +6863,7 @@ function startExecPathNonTrivialModeShell( test )
     return null;
   })
 
-  //Vova: same behaviour on win and linux now
+  /* Vova: same behaviour on win and linux now */
   shell({ execPath : '"node -v && node -v"', throwingExitCode : 0 })
   .then( ( op ) =>
   {
@@ -12276,8 +12276,10 @@ function startDetachedOutputStdioPipe( test )
     {
       test.identical( o.exitCode, 0 )
 
-      // zzz for Vova: output piping doesn't work as expected in mode "shell" on windows
-      // investigate if its fixed in never verions of node or implement alternative solution
+      /*
+      zzz for Vova: output piping doesn't work as expected in mode "shell" on windows
+      investigate if its fixed in never verions of node or implement alternative solution
+      */
 
       if( process.platform === 'win32' )
       return null;
@@ -15770,7 +15772,7 @@ function startConcurrentConsequencesMultiple( test )
     outputCollecting : 1,
   }
 
-  // xxx
+  /* xxx */
   let consequences = [ 'null' ];
   let modes = [ 'spawn' ];
 
@@ -17317,15 +17319,15 @@ function startNjsWithReadyDelayStructural( test )
   /* qqq for Yevhen : add varying `sync` and `deasync` and `dry` for test routine startNjsWithReadyDelayStructuralMultiple */
 
   let modes = [ 'fork', 'spawn', 'shell' ];
-  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 0, mode ) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ detaching : 0, dry : 0, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ detaching : 1, dry : 0, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ detaching : 0, dry : 1, mode }) ) );
   return a.ready;
 
   /* */
 
-  function run( detaching, dry, mode ) /* qqq for Yevhen : put parameters in map `tops` */
-  // function run( tops ) /* qqq for Yevhen : use map tops */
+  // function run( detaching, dry, mode ) /* qqq for Yevhen : put parameters in map `tops` | aaa : Done .*/
+  function run( tops ) /* qqq for Yevhen : use map tops | aaa : Done. */
   {
     let ready = _.Consequence().take( null );
 
@@ -17334,14 +17336,14 @@ function startNjsWithReadyDelayStructural( test )
       /*
       output piping doesn't work as expected in mode "shell" on windows
       */
-      test.case = `mode:${mode} detaching:${detaching}`;
+      test.case = `mode:${tops.mode} detaching:${tops.detaching}`;
       let con = new _.Consequence().take( null ).delay( context.t1 ); /* 1000 */
 
       let options =
       {
-        mode,
-        detaching,
-        dry,
+        mode : tops.mode,
+        detaching : tops.detaching,
+        dry : tops.dry,
         execPath : programPath,
         currentPath : a.abs( '.' ),
         throwingExitCode : 1,
@@ -17359,7 +17361,7 @@ function startNjsWithReadyDelayStructural( test )
       {
         test.identical( op.ended, true );
 
-        if( !dry )
+        if( !tops.dry )
         {
           test.identical( op.exitCode, 0 );
           test.identical( op.output, 'program1:begin\n' );
@@ -17370,12 +17372,12 @@ function startNjsWithReadyDelayStructural( test )
         exp2.procedure = options.procedure;
         exp2.streamOut = options.streamOut;
         exp2.streamErr = options.streamErr;
-        exp2.execPath = mode === 'fork' ? programPath : 'node';
-        exp2.args = mode === 'fork' ? [] : [ programPath ];
-        exp2.fullExecPath = ( mode === 'fork' ? '' : 'node ' ) + programPath;
+        exp2.execPath = tops.mode === 'fork' ? programPath : 'node';
+        exp2.args = tops.mode === 'fork' ? [] : [ programPath ];
+        exp2.fullExecPath = ( tops.mode === 'fork' ? '' : 'node ' ) + programPath;
         exp2.state = 'terminated';
         exp2.ended = true;
-        if( !dry )
+        if( !tops.dry )
         {
           exp2.output = 'program1:begin\n';
           exp2.exitCode = 0;
@@ -17384,11 +17386,11 @@ function startNjsWithReadyDelayStructural( test )
         }
 
         test.identical( options, exp2 );
-        test.identical( !!options.process, !dry );
+        test.identical( !!options.process, !tops.dry );
         test.is( _.routineIs( options.disconnect ) );
-        test.identical( _.streamIs( options.streamOut ), !dry );
-        test.identical( _.streamIs( options.streamErr ), !dry );
-        test.identical( options.streamOut !== options.streamErr, !dry );
+        test.identical( _.streamIs( options.streamOut ), !tops.dry );
+        test.identical( _.streamIs( options.streamErr ), !tops.dry );
+        test.identical( options.streamOut !== options.streamErr, !tops.dry );
         test.is( options.conTerminate !== options.ready );
         test.identical( options.ready.exportString(), 'Consequence:: 0 / 1' );
         test.identical( options.conTerminate.exportString(), 'Consequence:: 1 / 0' );
@@ -17400,10 +17402,10 @@ function startNjsWithReadyDelayStructural( test )
 
       var exp =
       {
-        mode,
-        detaching,
-        dry,
-        'execPath' : ( mode === 'fork' ? '' : 'node ' ) + programPath,
+        'mode' : tops.mode,
+        'detaching' : tops.detaching,
+        'dry' : tops.dry,
+        'execPath' : ( tops.mode === 'fork' ? '' : 'node ' ) + programPath,
         'currentPath' : a.abs( '.' ),
         'throwingExitCode' : 'full',
         'inputMirroring' : 1,
@@ -17413,11 +17415,11 @@ function startNjsWithReadyDelayStructural( test )
         'passingThrough' : 0,
         'maximumMemory' : 0,
         'applyingExitCode' : 1,
-        'stdio' : mode === 'fork' ? [ 'pipe', 'pipe', 'pipe', 'ipc' ] : [ 'pipe', 'pipe', 'pipe' ],
+        'stdio' : tops.mode === 'fork' ? [ 'pipe', 'pipe', 'pipe', 'ipc' ] : [ 'pipe', 'pipe', 'pipe' ],
         'args' : null,
         'interpreterArgs' : null,
         'when' : 'instant',
-        'ipc' : mode === 'fork' ? true : false,
+        'ipc' : tops.mode === 'fork' ? true : false,
         'env' : null,
         'hiding' : 1,
         'concurrent' : 0,
@@ -23408,7 +23410,7 @@ function exitCode( test )
       .then( ( op ) =>
       {
         if( process.platform === 'win32' )
-        test.notIdentical( op.exitCode, 0 )// returns 4294967295 which is -1 to uint32
+        test.notIdentical( op.exitCode, 0 )/* returns 4294967295 which is -1 to uint32 */
         else
         test.identical( op.exitCode, 255 );
         test.identical( op.ended, true );
@@ -23686,7 +23688,7 @@ function startOptionVerbosityLogging( test )
         test.identical( op.exitReason, 'normal' );
         test.identical( op.ended, true );
         test.identical( op.state, 'terminated' );
-        // Windows returns 4294967295 which is -1 to uint32
+        /* Windows returns 4294967295 which is -1 to uint32 */
         if( process.platform === 'win32' )
         test.identical( _.strCount( op.output, '< Process returned error code 4294967295' ), 1 );
         else
@@ -24525,7 +24527,7 @@ function kill( test )
     return ready;
   })
 
-  // zzz for Vova : find how to simulate EPERM error using process.kill and write test case
+  /* zzz for Vova : find how to simulate EPERM error using process.kill and write test case */
 
   /* */
 
@@ -25216,8 +25218,8 @@ function startErrorAfterTerminationWithSend( test )
 
       return null;
     })
-                                              /* qqq for Yevhen : dont use // for comments when /* is possible to use. replace in all similar places */
-    return _.time.out( context.t2 * 2, () => //10000
+                                              /* qqq for Yevhen : dont use // for comments when /* is possible to use. replace in all similar places | aaa : Done. */
+    return _.time.out( context.t2 * 2, () => /* 10000 */
     {
       test.identical( track, [ 'conStart', 'conTerminate', 'uncaughtError' ] );
       test.identical( o.ended, true );
@@ -25274,8 +25276,9 @@ function startTerminateHangedWithExitHandler( test )
 
   // if( process.platform === 'win32' )
   // {
-  //   // zzz: windows-kill doesn't work correctrly on node 14
-  //   // investigate if its possible to use process.kill instead of windows-kill
+  /* zzz : windows-kill doesn't work correctrly on node 14
+  investigate if its possible to use process.kill instead of windows-kill
+  */
   //   test.identical( 1, 1 )
   //   return;
   // }
@@ -25392,8 +25395,9 @@ function startTerminateAfterLoopRelease( test )
 
   // if( process.platform === 'win32' )
   // {
-  //   // zzz: windows-kill doesn't work correctrly on node 14
-  //   // investigate if its possible to use process.kill instead of windows-kill
+  /* zzz: windows-kill doesn't work correctrly on node 14
+  investigate if its possible to use process.kill instead of windows-kill
+  */
   //   test.identical( 1, 1 )
   //   return;
   // }
@@ -27652,8 +27656,9 @@ function terminate( test )
 
   // if( process.platform === 'win32' )
   // {
-  //   // zzz for Vova : windows-kill doesn't work correctrly on node 14
-  //   // investigate if its possible to use process.kill instead of windows-kill
+  /* zzz for Vova : windows-kill doesn't work correctrly on node 14
+  investigate if its possible to use process.kill instead of windows-kill
+  */
   //   test.identical( 1, 1 )
   //   return;
   // }
@@ -27727,7 +27732,7 @@ function terminate( test )
     {
       if( process.platform === 'win32' )
       {
-        test.identical( op.exitCode, 1 );//1 because process was killed using pid
+        test.identical( op.exitCode, 1 );/* 1 because process was killed using pid */
         test.identical( op.exitSignal, null );
         test.identical( op.ended, true );
         test.is( !_.strHas( op.output, 'SIGTERM' ) );
@@ -27951,7 +27956,7 @@ function terminate( test )
     {
       if( process.platform === 'win32' )
       {
-        test.identical( op.exitCode, 1 );//1 because process was killed using pid
+        test.identical( op.exitCode, 1 );/* 1 because process was killed using pid */
         test.identical( op.exitSignal, null );
         test.identical( op.ended, true );
         test.is( !_.strHas( op.output, 'SIGTERM' ) );
@@ -28220,7 +28225,7 @@ function terminate( test )
     {
       if( process.platform === 'win32' )
       {
-        test.identical( op.exitCode, null );// null because process was killed using pnd
+        test.identical( op.exitCode, null );/* null because process was killed using pnd */
         test.identical( op.ended, true );
         test.identical( op.exitSignal, 'SIGTERM' );
         test.is( !_.strHas( op.output, 'SIGTERM' ) );
@@ -28312,7 +28317,7 @@ function terminate( test )
     {
       if( process.platform === 'win32' )
       {
-        test.identical( op.exitCode, null );// null because process was killed using pnd
+        test.identical( op.exitCode, null );/* null because process was killed using pnd */
         test.identical( op.ended, true );
         test.identical( op.exitSignal, 'SIGKILL' );
         test.is( !_.strHas( op.output, 'SIGTERM' ) );
@@ -28498,8 +28503,9 @@ function terminateSync( test )
 
   // if( process.platform === 'win32' )
   // {
-  //   // яяя for Vova : windows-kill doesn't work correctrly on node 14
-  //   // investigate if its possible to use process.kill instead of windows-kill
+  /* zzz for Vova : windows-kill doesn't work correctrly on node 14
+  investigate if its possible to use process.kill instead of windows-kill
+  */
   //   test.identical( 1, 1 );
   //   return;
   // }
