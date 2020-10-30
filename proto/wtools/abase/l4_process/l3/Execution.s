@@ -399,6 +399,8 @@ function startMinimal_body( o )
     o.args = o.args.slice();
     o.args = _.arrayAs( o.args );
 
+    /* */
+
     _argsLength = o.args.length;
 
     if( _.strIs( o.execPath ) )
@@ -428,6 +430,8 @@ function startMinimal_body( o )
       if( begin && begin === end )
       o.execPath = _.strInsideOf( o.execPath, begin, end );
     }
+
+    /* */
 
     o.currentPath = _.path.resolve( o.currentPath || '.' );
 
