@@ -2887,11 +2887,19 @@ function signal_body( o )
 /*
     console.log( o.signal, p.pid );
 */
-
-    if( pnd )
-    pnd.kill( o.signal );
-    else
-    process.kill( p.pid, o.signal );
+    try
+    {
+      if( pnd )
+      pnd.kill( o.signal );
+      else
+      process.kill( p.pid, o.signal );
+    }
+    catch( err )
+    {
+      if( err.code === 'ESRCH' )
+      return;
+      throw err;
+    }
 
     let con = waitForDeath( p );
     cons.push( con );
