@@ -2896,7 +2896,7 @@ function signal_body( o )
     }
     catch( err )
     {
-      if( err.code === 'EPERM' )
+      if( err.code === 'ESRCH' )
       return;
       throw err;
     }
