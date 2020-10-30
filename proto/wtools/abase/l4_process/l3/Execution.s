@@ -199,7 +199,8 @@ function startMinimal_body( o )
   let _errPrefix = null;
   let _outPrefix = null;
   let _readyCallback;
-  let execArgs; /* xxx qqq for Vova : remove. no hacks! */
+  /* xxx qqq for Vova : remove. no hacks! aaa:removed execArgs*/
+  let _argsLength = 0;
 
   form1();
   form2();
@@ -383,18 +384,6 @@ function startMinimal_body( o )
       o.procedure = _.Procedure({ _stack : o.stack });
     }
 
-    if( _.strIs( o.execPath ) )
-    {
-      o.fullExecPath = o.execPath;
-      execArgs = execPathParse( o.execPath );
-      if( o.mode !== 'shell' )
-      execArgs = argsUnqoute( execArgs );
-      if( execArgs.length )
-      o.execPath = execArgs.shift();
-      else
-      o.execPath = null;
-    }
-
     if( _.routineIs( o.args ) )
     o.args = o.args( o );
     if( o.args === null )
@@ -406,9 +395,27 @@ function startMinimal_body( o )
       , `If defined option::arg should be either [ string, array ], but it is ${_.strType( o.args )}`
     );
 
-    if( _.arrayIs( o.args ) )
+    if( _.arrayIs( o.args ) ) /* xxx yyy */
     o.args = o.args.slice();
     o.args = _.arrayAs( o.args );
+
+    /* */
+
+    _argsLength = o.args.length;
+
+    if( _.strIs( o.execPath ) )
+    {
+      o.fullExecPath = o.execPath;
+      let execArgs = execPathParse( o.execPath );
+      if( o.mode !== 'shell' )
+      execArgs = argsUnqoute( execArgs );
+      o.execPath = null;
+      if( execArgs.length )
+      {
+        o.execPath = execArgs.shift();
+        o.args = _.arrayPrependArray( o.args || [], execArgs );
+      }
+    }
 
     if( o.execPath === null )
     {
@@ -416,16 +423,15 @@ function startMinimal_body( o )
 
       o.execPath = o.args.shift();
       o.fullExecPath = o.execPath;
+      _argsLength = o.args.length;
 
       let begin = _.strBeginOf( o.execPath, [ '"', `'`, '`' ] );
       let end = _.strEndOf( o.execPath, [ '"', `'`, '`' ] );
-
       if( begin && begin === end )
       o.execPath = _.strInsideOf( o.execPath, begin, end );
     }
 
-    if( execArgs && execArgs.length )
-    o.args = _.arrayPrependArray( o.args || [], execArgs );
+    /* */
 
     o.currentPath = _.path.resolve( o.currentPath || '.' );
 
@@ -439,9 +445,9 @@ function startMinimal_body( o )
 
     if( o.passingThrough )
     {
-      let argumentsManual = process.argv.slice( 2 );
-      if( argumentsManual.length )
-      o.args = _.arrayAppendArray( o.args || [], argumentsManual );
+      let argumentsOwn = process.argv.slice( 2 );
+      if( argumentsOwn.length )
+      o.args = _.arrayAppendArray( o.args || [], argumentsOwn );
     }
 
     /* dependencies */
@@ -465,6 +471,8 @@ function startMinimal_body( o )
       log( _.errOnce( err ), 'err' );
     }
 
+    /* prefixing */
+
     if( o.outputPrefixing )
     {
       _errPrefix = `${ ( o.outputColoring ? _.ct.format( 'err', { fg : 'dark red' } ) : 'err' ) } : `;
@@ -479,7 +487,7 @@ function startMinimal_body( o )
       o._handleProcedureTerminationBegin = _handleProcedureTerminationBegin;
     }
 
-    /* if map already has error, running should not start */
+    /* if session already has error, running should not start */
     if( o.error )
     throw o.error;
   }
@@ -640,6 +648,9 @@ function startMinimal_body( o )
     if( o.dry )
     return;
 
+    if( o.interpreterArgs )
+    o.args = o.interpreterArgs.concat( o.args )
+
     if( o.sync && !o.deasync )
     o.process = ChildProcess.spawnSync( execPath, o.args, o2 );
     else
@@ -672,6 +683,9 @@ function startMinimal_body( o )
    */
 
     o2.windowsVerbatimArguments = true;
+
+    if( o.interpreterArgs )
+    o.args = o.interpreterArgs.concat( o.args )
 
     if( o.args.length )
     arg2 = arg2 + ' ' + argsJoin( o.args.slice() );
@@ -1112,15 +1126,12 @@ function startMinimal_body( o )
       quotes.forEach( ( quote ) =>
       {
         let found = _.strFindAll( args[ i ], quote );
-
         if( found.length % 2 === 0 )
         return;
-
-        for( let k = 0; k < found.length; k += 1 )
+        for( let k = 0 ; k < found.length ; k += 1 )
         {
           let pos = found[ k ].charsRangeLeft[ 0 ];
-
-          for( let j = 0; j < r.ranges.length; j += 2 )
+          for( let j = 0 ; j < r.ranges.length ; j += 2 )
           if( pos >= r.ranges[ j ] && pos <= r.ranges[ j + 1 ] )
           break;
           throw _.err( `Arguments string in execPath: ${src} has not closed quoting in argument: ${args[ i ]}` );
@@ -1153,17 +1164,18 @@ function startMinimal_body( o )
 
   function argsJoin( args )
   {
-    if( !execArgs && !o.passingThrough ) /* xxx qqq for Vova : why if passingThrough? no hacks! */
-    return args.join( ' ' );
+    /* xxx qqq for Vova : why if passingThrough? no hacks! aaa:removed execArgs*/
 
-    let i;
+    /* Escapes and quotes:
+      - Original args provided via o.args
+      - Arguments of parent process if o.passingThrough is enabled
+      Skips arguments parsed from o.execPath.
+    */
 
-    if( execArgs )
-    i = execArgs.length;
-    else
-    i = args.length - ( process.argv.length - 2 );
+    let appendedArgs = o.passingThrough ? process.argv.length - 2 : 0;
+    let prependedArgs = args.length - ( _argsLength + appendedArgs );
 
-    for( ; i < args.length; i++ )
+    for( let i = prependedArgs; i < args.length; i++ )
     {
       let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', '`' ]
       _.each( quotesToEscape, ( quote ) =>
@@ -1171,7 +1183,6 @@ function startMinimal_body( o )
         args[ i ] = argEscape( args[ i ], quote );
       })
       args[ i ] = _.strQuote( args[ i ] );
-
       // args[ i ] = _.process.escapeArg( args[ i ]  ); /* zzz for Vova : use this routine, review fails */
     }
 
@@ -1440,7 +1451,6 @@ startMinimal_body.defaults =
 
   throwingExitCode : 'full', /* must be on by default */ /* bool-like, 'full', 'brief' */
   applyingExitCode : 0,
-  // briefExitCode : 0,
 
   verbosity : 2, /* qqq for Yevhen : cover the option */
   outputPrefixing : 0, /* qqq for Yevhen : extend coverage */
@@ -1452,6 +1462,8 @@ startMinimal_body.defaults =
   outputColoringStdout : null, /* qqq for Yevhen : cover the option */
   outputGraying : 0,
   inputMirroring : 1, /* qqq for Yevhen : cover the option | aaa : Done */
+
+  /* qqq for Yevhen : remove option::outputColoringStderr and option::outputColoringStdout. extend outputColoring */
 
 }
 
@@ -2364,9 +2376,11 @@ function startNjs_body( o )
   System = require( 'os' );
 
   _.assertRoutineOptions( startNjs_body, o );
-  _.assert( _.strIs( o.execPath ) );
+  // _.assert( _.strIs( o.execPath ) );
   _.assert( !o.code );
   _.assert( arguments.length === 1, 'Expects single argument' );
+
+  _.assert( _.arrayIs( o.interpreterArgs ) || o.interpreterArgs === null );
 
   /*
   1024*1024 for megabytes
@@ -2391,18 +2405,26 @@ function startNjs_body( o )
 
   // let execPath = o.execPath ? _.path.nativizeMinimal( o.execPath ) : '';
   let execPath = o.execPath || '';
+  // _.assert( o.interpreterArgs === null || o.interpreterArgs === '', 'not implemented' ); /* qqq for Yevhen : implement and cover. | aaa : Done */
 
-  _.assert( o.interpreterArgs === null || o.interpreterArgs === '', 'not implemented' ); /* qqq for Yevhen : implement and cover */
+  /* ORIGINAL */
+  // if( o.mode === 'fork' )
+  // {
+  //   if( interpreterArgs )
+  //   o.interpreterArgs = interpreterArgs;
+  // }
+  // else
+  // {
+  //   execPath = _.strConcat([ 'node', interpreterArgs, execPath ]);
+  // }
 
-  if( o.mode === 'fork' )
-  {
-    if( interpreterArgs )
-    o.interpreterArgs = interpreterArgs;
-  }
-  else
-  {
-    execPath = _.strConcat([ 'node', interpreterArgs, execPath ]);
-  }
+  /* == Rewritten == */
+  if( interpreterArgs !== '' )
+  o.interpreterArgs = o.interpreterArgs === null ? interpreterArgs : o.interpreterArgs.concat( interpreterArgs );
+
+  if( o.mode === 'spawn' || o.mode === 'shell' )
+  execPath = _.strConcat([ 'node', execPath ]);
+  /* == == */
 
   o.execPath = execPath;
 
@@ -2792,30 +2814,6 @@ function isAlive( src )
 
 //
 
-function pidFrom( src )
-{
-  _.assert( arguments.length === 1 );
-
-  if( !ChildProcess )
-  ChildProcess = require( 'child_process' );
-
-  if( _.numberIs( src ) )
-  return src;
-  if( _.objectIs( src ) )
-  {
-    if( src.process )
-    src = src.process;
-    if( src.pnd )
-    src = src.pnd;
-    _.assert( src instanceof ChildProcess.ChildProcess );
-    return src.pid;
-  }
-
-  _.assert( 0, `Unexpected source:${src}` );
-}
-
-//
-
 function statusOf( src )
 {
   _.assert( arguments.length === 1 );
@@ -2833,7 +2831,7 @@ function signal_head( routine, args )
 
   if( _.numberIs( o ) )
   o = { pid : o };
-  else if( _.routineIs( o.kill ) )
+  else if( _.process.isNativeDescriptor( o ) )
   o = { pnd : o };
 
   o = _.routineOptions( routine, o );
@@ -2894,13 +2892,21 @@ function signal_body( o )
 /*
     console.log( o.signal, p.pid );
 */
+    try
+    {
+      if( pnd )
+      pnd.kill( o.signal );
+      else
+      process.kill( p.pid, o.signal );
+    }
+    catch( err )
+    {
+      if( err.code === 'ESRCH' )
+      return;
+      throw err;
+    }
 
-    if( pnd )
-    pnd.kill( o.signal );
-    else
-    process.kill( p.pid, o.signal );
-    
-    let con = waitForTermination( p );
+    let con = waitForDeath( p );
     cons.push( con );
   }
 
@@ -2938,24 +2944,24 @@ function signal_body( o )
 
   /* - */
 
-  function waitForTermination( p )
+  function waitForDeath( p )
   {
     let timeOut = signal === 'SIGKILL' ? 5000 : o.timeOut;
 
     if( timeOut === 0 )
     return _.process.kill({ pid : p.pid, pnd : p.pnd, withChildren : 0 });
 
-    let ready = _.process.waitForTermination({ pid : p.pid, timeOut }) 
-    
-    ready.catch( ( err ) => 
+    let ready = _.process.waitForDeath({ pid : p.pid, timeOut })
+
+    ready.catch( ( err ) =>
     {
       _.errAttend( err );
-      
+
       if( err.reason === 'time out' )
       {
         if( signal === 'SIGKILL' )
         err = _.err( `\nTarget process: ${_.strQuote( p.pid )} is still alive after kill. Waited for ${o.timeOut} ms.` );
-        else 
+        else
         return _.process.kill({ pid : p.pid, pnd : p.pnd, withChildren : 0 });
       }
 
@@ -2964,16 +2970,16 @@ function signal_body( o )
 
     return ready;
   }
-  
+
   /* - */
 
   function killMaybe( p )
   {
     if( process.platform !== 'win32' )
     return _.process.kill( killOptions );
-    
-    return _.process.cmdLineFor({ pid : p.pid })
-    .then( ( processName ) => 
+
+    return _.process.execPathOf({ pid : p.pid })
+    .then( ( processName ) =>
     {
       if( p.name !== processName )
       return null;
@@ -3020,38 +3026,38 @@ signal_body.defaults =
   sync : 0,
 }
 
-let signal = _.routineUnite( signal_head, signal_body );
+let _signal = _.routineUnite( signal_head, signal_body );
 
 //
 
-function waitForTermination_body( o )
+function waitForDeath_body( o )
 {
   _.assert( arguments.length === 1 );
   _.assert( _.numberIs( o.pid ) );
   _.assert( _.numberIs( o.timeOut ) );
-  
+
   let isWindows = process.platform === 'win32';
   let interval = isWindows ? 250 : 25;
-  
+
   /*
     zzz : hangs up on Windows with interval below 150 if run in sync mode. see test routine killSync
   */
- 
+
   let ready = _.Consequence().take( null );
-  
+
   if( isWindows )
-  ready.then( () => _.process.cmdLineFor({ pid : o.pid, throwing : 0 }) ) 
-  
-  ready.then( _waitForTermination );
-  
+  ready.then( () => _.process.execPathOf({ pid : o.pid, throwing : 0 }) )
+
+  ready.then( _waitForDeath );
+
   if( o.sync )
   ready.deasync();
-  
+
   return ready;
-  
+
   /* */
-  
-  function _waitForTermination( commandLine )
+
+  function _waitForDeath( commandLine )
   {
     let ready = _.Consequence();
     let timer = _.time.periodic( interval, () =>
@@ -3079,10 +3085,10 @@ function waitForTermination_body( o )
       if( err.reason === 'time out' )
       {
         err = _.err( err, `\nTarget process: ${_.strQuote( o.pid )} is still alive. Waited for ${o.timeOut} ms.` );
-        
+
         if( isWindows )
-        return _.process.cmdLineFor({ pid : o.pid })
-        .then( ( arg ) => 
+        return _.process.execPathOf({ pid : o.pid })
+        .then( ( arg ) =>
         {
           if( commandLine != arg )
           return null;
@@ -3097,7 +3103,7 @@ function waitForTermination_body( o )
   }
 }
 
-waitForTermination_body.defaults =
+waitForDeath_body.defaults =
 {
   pid : null,
   pnd : null,
@@ -3105,7 +3111,7 @@ waitForTermination_body.defaults =
   sync : 0
 }
 
-let waitForTermination = _.routineUnite( signal_head, waitForTermination_body )
+let waitForDeath = _.routineUnite( signal_head, waitForDeath_body )
 
 //
 
@@ -3115,12 +3121,12 @@ function kill_body( o )
   let o2 = _.mapExtend( null, o );
   o2.signal = 'SIGKILL';
   o2.timeOut = 5000;
-  return _.process.signal.body( o2 );
+  return _.process._signal.body( o2 );
 }
 
 kill_body.defaults =
 {
-  ... _.mapBut( signal.defaults, [ 'signal', 'timeOut' ] ),
+  ... _.mapBut( _signal.defaults, [ 'signal', 'timeOut' ] ),
 }
 
 let kill = _.routineUnite( signal_head, kill_body );
@@ -3137,13 +3143,13 @@ function terminate_body( o )
 {
   _.assert( arguments.length === 1 );
   o.signal = o.timeOut ? 'SIGTERM' : 'SIGKILL';
-  let ready = _.process.signal.body( o );
+  let ready = _.process._signal.body( o );
   return ready;
 }
 
 terminate_body.defaults =
 {
-  ... _.mapBut( signal.defaults, [ 'signal' ] ),
+  ... _.mapBut( _signal.defaults, [ 'signal' ] ),
 }
 
 let terminate = _.routineUnite( signal_head, terminate_body );
@@ -3154,7 +3160,7 @@ function children( o )
 {
   if( _.numberIs( o ) )
   o = { pid : o };
-  else if( _.routineIs( o.kill ) )
+  else if( _.process.isNativeDescriptor( o ) )
   o = { process : o }
 
   _.routineOptions( children, o )
@@ -3267,16 +3273,16 @@ children.defaults =
 
 //
 
-function cmdLineFor( o )
+function execPathOf( o )
 {
   _.assert( arguments.length === 1 );
 
   if( _.numberIs( o ) )
   o = { pid : o };
-  else if( _.routineIs( o.kill ) )
+  else if( _.process.isNativeDescriptor( o ) )
   o = { pnd : o };
 
-  o = _.routineOptions( cmdLineFor, o );
+  o = _.routineOptions( execPathOf, o );
 
   if( o.pnd )
   {
@@ -3284,20 +3290,20 @@ function cmdLineFor( o )
     o.pid = o.pnd.pid;
     _.assert( _.intIs( o.pid ) );
   }
-  
+
   _.assert( process.platform === 'win32', 'Implemented only for Windows' );
-  
+
   let ready = _.Consequence()
-  
+
   if( !_.process.isAlive( o.pid ) )
   {
     if( !o.throwing )
     return ready.take( null )
-    
+
     let err = _.err( `\nTarget process: ${_.strQuote( o.pid )} does not exist.` );
     return ready.error( err );
   }
-  
+
   if( !WindowsProcessTree )
   {
     try
@@ -3309,31 +3315,27 @@ function cmdLineFor( o )
       return ready.error( _.err( 'Failed to get process name.\n', err ) );
     }
   }
-  
+
   let commandLineFlag = 2;
-  
-  WindowsProcessTree.getProcessList( o.pid, ( list ) => 
+
+  WindowsProcessTree.getProcessList( o.pid, ( list ) =>
   {
     ready.take( list[ 0 ].commandLine );
   }, commandLineFlag )
-  
+
   return ready;
 }
 
-cmdLineFor.defaults = 
+execPathOf.defaults =
 {
   pid : null,
   pnd : null,
   throwing : 1
 }
 
-
-
 // --
 // declare
 // --
-
-/* xxx qqq for Vova : implement _.process.waitForDeath() */
 
 let Extension =
 {
@@ -3360,16 +3362,15 @@ let Extension =
   // children
 
   isAlive,
-  pidFrom,
   statusOf,
-  signal,
-  waitForTermination,
+
+  _signal,
+  waitForDeath,
   kill,
   terminate,
   children,
+  execPathOf,
 
-  cmdLineFor,
-  
   // fields
 
 }
