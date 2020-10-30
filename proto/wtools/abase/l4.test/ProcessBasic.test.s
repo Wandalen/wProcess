@@ -20253,8 +20253,8 @@ function startOptionOutputPiping( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${ mode }, single line, outputPiping : 1, outputPrefixing : 1, normal output`
-      let testAppPath2 = a.path.nativize( a.program( testApp2Multiline ) );
+      test.case = `mode : ${ mode }, single line output, outputPiping : 1, outputPrefixing : 1, normal output`
+      let testAppPath2 = a.path.nativize( a.program({ routine : testApp2, locals : { string : 'Log' } }) );
       
       let locals =
       {
@@ -20627,14 +20627,14 @@ function startOptionOutputPiping( test )
     console.error( 'Error output' );
   }
 
-  function testApp2Multiline()
-  {
-    console.log( '\nLog1\nLog2\n' );
-  }
+  // function testApp2Multiline()
+  // {
+  //   console.log( '\nLog1\nLog2\n' );
+  // }
 
   function testApp2()
   {
-    console.log( 'Log' );
+    console.log( string );
   }
 
   // function testApp2()
