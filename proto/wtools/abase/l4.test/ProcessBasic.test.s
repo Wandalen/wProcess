@@ -9185,7 +9185,7 @@ function startNjsPassingThroughExecPathWithSpace( test )
   a.ready.then( () =>
   {
     test.case = 'args: string that contains unquoted path with space'
-   
+
     return _.process.startNjsPassingThrough
     ({
       args : execPathWithSpace,
@@ -10427,6 +10427,7 @@ function startChronology( test )
 
 }
 
+startChronology.rapidity = -1;
 startChronology.timeOut = 5e5;
 startChronology.description =
 `
@@ -10510,6 +10511,7 @@ function startReadyDelay( test )
 
 }
 
+startReadyDelay.rapidity = -1;
 startReadyDelay.timeOut = 5e5;
 startReadyDelay.description =
 `
@@ -10660,6 +10662,7 @@ function startReadyDelayMultiple( test )
 
 }
 
+startReadyDelayMultiple.rapidity = -1;
 startReadyDelayMultiple.timeOut = 5e5;
 startReadyDelayMultiple.description =
 `
@@ -13159,6 +13162,7 @@ function startEventExit( test )
   }
 }
 
+startEventExit.rapidity = -1;
 startEventExit.timeOut = 5e5;
 startEventExit.description =
 `
@@ -14124,7 +14128,8 @@ function startDetachingTerminationBegin( test )
   }
 }
 
-startDetachingTerminationBegin.timeOut = 180000;
+startDetachingTerminationBegin.rapidity = -1;
+startDetachingTerminationBegin.timeOut = 3e5;
 startDetachingTerminationBegin.description =
 `
 Checks that detached child process continues to work after parent death.
@@ -15272,6 +15277,7 @@ function startOnIsNotConsequence( test )
 
 }
 
+startOnIsNotConsequence.rapidity = -1;
 startOnIsNotConsequence.timeOut = 5e5;
 
 //
@@ -24166,6 +24172,7 @@ function startOutputMultiple( test )
 
 }
 
+startOutputMultiple.rapidity = -1;
 startOutputMultiple.timeOut = 5e5;
 startOutputMultiple.description =
 `
@@ -24306,6 +24313,7 @@ function startOptionStdioIgnoreMultiple( test )
 
 }
 
+startOptionStdioIgnoreMultiple.rapidity = -1;
 startOptionStdioIgnoreMultiple.timeOut = 1e6;
 startOptionStdioIgnoreMultiple.description =
 `
@@ -25538,6 +25546,10 @@ function endSignalsBasic( test )
   function signalTerminating( mode, signal )
   {
     let ready = _.Consequence().take( null );
+
+    /* signal SIGQUIT is not supported on Windows */
+    if( process.platform === 'win32' && signal === 'SIGQUIT' )
+    return ready;
 
     /* - */
 
@@ -26994,6 +27006,7 @@ deasync:end
 
 }
 
+endSignalsBasic.rapidity = -1 /* make it -2 later */
 endSignalsBasic.timeOut = 1e6;
 endSignalsBasic.description =
 `
@@ -27426,6 +27439,7 @@ Killed
 
 }
 
+endSignalsOnExit.rapidity = -1;
 endSignalsOnExit.timeOut = 1e6;
 endSignalsOnExit.description =
 `
