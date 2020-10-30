@@ -4821,7 +4821,7 @@ function startArgumentsParsingNonTrivial( test )
         else
         {
           test.ni( op.exitCode, 0 );
-          test.is( _.strHas( op.output, 'unexpected EOF' ) );
+          test.is( _.strHas( op.output, 'unexpected EOF' ) || _.strHas( op.output, 'Unterminated quoted string' ) );
         }
 
         test.identical( o.execPath, '"' );
@@ -4872,7 +4872,7 @@ function startArgumentsParsingNonTrivial( test )
         else
         {
           test.ni( op.exitCode, 0 );
-          test.is( _.strHas( op.output, 'command not found' ) );
+          test.is( _.strHas( op.output, 'not found' ) );
         }
 
         test.identical( o.args, [ 'first', 'arg', '"' ] );
