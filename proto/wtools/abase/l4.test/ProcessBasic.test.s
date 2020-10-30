@@ -19790,7 +19790,7 @@ function startOptionOutputPrefixing( test )
     {
       test.case = `mode : ${ mode }, outputPrefixing : 0, coloring : 0, normal output`;
 
-      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+      let testAppPath2 = a.program( testApp2 );
 
       let locals =
       {
@@ -19800,7 +19800,7 @@ function startOptionOutputPrefixing( test )
         mode
       }
 
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       return _.process.start
       ({
@@ -19826,7 +19826,7 @@ function startOptionOutputPrefixing( test )
     {
       test.case = `mode : ${ mode }, outputPrefixing : 1, coloring : 0, normal output`;
 
-      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+      let testAppPath2 = a.program( testApp2 );
 
       let locals =
       {
@@ -19836,7 +19836,7 @@ function startOptionOutputPrefixing( test )
         mode
       }
 
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       return _.process.start
       ({
@@ -19862,7 +19862,7 @@ function startOptionOutputPrefixing( test )
     {
       test.case = `mode : ${ mode }, outputPrefixing : 0, coloring : 0, error output`;
 
-      let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
+      let testAppPath2 = a.program( testApp2Error );
 
       let locals =
       {
@@ -19872,7 +19872,7 @@ function startOptionOutputPrefixing( test )
         mode,
       }
 
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       return _.process.start
       ({
@@ -19899,7 +19899,7 @@ function startOptionOutputPrefixing( test )
     {
       test.case = `mode : ${ mode }, outputPrefixing : 1, coloring : 0, error output`;
 
-      let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
+      let testAppPath2 = a.program( testApp2Error );
 
       let locals =
       {
@@ -19909,7 +19909,7 @@ function startOptionOutputPrefixing( test )
         mode
       }
 
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       return _.process.start
       ({
@@ -19936,7 +19936,7 @@ function startOptionOutputPrefixing( test )
     {
       test.case = `mode : ${ mode }, outputPrefixing : 0, coloring : 1, normal output`;
 
-      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+      let testAppPath2 = a.program( testApp2 );
 
       let locals =
       {
@@ -19946,7 +19946,7 @@ function startOptionOutputPrefixing( test )
         mode
       }
 
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       return _.process.start
       ({
@@ -19972,7 +19972,7 @@ function startOptionOutputPrefixing( test )
     {
       test.case = `mode : ${ mode }, outputPrefixing : 1, coloring : 1, normal output`;
 
-      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+      let testAppPath2 = a.program( testApp2 );
 
       let locals =
       {
@@ -19982,7 +19982,7 @@ function startOptionOutputPrefixing( test )
         mode
       }
 
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       return _.process.start
       ({
@@ -20008,7 +20008,7 @@ function startOptionOutputPrefixing( test )
     {
       test.case = `mode : ${ mode }, outputPrefixing : 0, coloring : 1, error output`;
 
-      let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
+      let testAppPath2 = a.program( testApp2Error );
 
       let locals =
       {
@@ -20018,7 +20018,7 @@ function startOptionOutputPrefixing( test )
         mode,
       }
 
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       return _.process.start
       ({
@@ -20047,7 +20047,7 @@ function startOptionOutputPrefixing( test )
     {
       test.case = `mode : ${ mode }, outputPrefixing : 1, coloring : 1, error output`;
 
-      let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
+      let testAppPath2 = a.program( testApp2Error );
 
       let locals =
       {
@@ -20057,7 +20057,7 @@ function startOptionOutputPrefixing( test )
         mode
       }
 
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       return _.process.start
       ({
