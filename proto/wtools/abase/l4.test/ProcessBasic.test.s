@@ -17604,9 +17604,6 @@ function startNjsOptionInterpreterArgs( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        // if( process.platform === 'win32' )
-        // test.is( _.strHas( op.output, process.version ) );
-        // else
         test.identical( op.output.trim(), process.version );
         if( mode === 'fork' )
         test.identical( op.interpreterArgs, [ '--version' ] )
@@ -17637,10 +17634,6 @@ function startNjsOptionInterpreterArgs( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        // if( process.platform === 'win32' )
-        // test.is( _.strHas( op.output, process.version ) );
-        // else
-        // test.identical( op.output, process.version + '\n' );
         test.identical( op.output.trim(), process.version );
         if( mode === 'fork' )
         {
@@ -17677,10 +17670,6 @@ function startNjsOptionInterpreterArgs( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        // if( process.platform === 'win32' )
-        // test.is( _.strHas( op.output, process.version ) );
-        // else
-        // test.identical( op.output, process.version + '\n' );
         test.identical( op.output.trim(), process.version );
         if( mode === 'fork' )
         {
@@ -17718,10 +17707,6 @@ function startNjsOptionInterpreterArgs( test )
         if( mode === 'shell' ) console.log( 'SHELL OP: ', op )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        // if( process.platform === 'win32' )
-        // test.is( _.strHas( op.output, process.version ) );
-        // else
-        // test.identical( op.output, process.version + '\n' );
         test.identical( op.output.trim(), process.version );
         if( mode === 'fork' )
         test.identical( op.interpreterArgs, [ '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] )
@@ -17815,10 +17800,6 @@ function startNjsOptionInterpreterArgs( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        // if( process.platform === 'win32' )
-        // test.is( _.strHas( op.output, process.version ) );
-        // else
-        // test.identical( op.output, process.version + '\n' );
         test.identical( op.output.trim(), process.version );
         if( mode === 'fork' )
         {
@@ -17856,10 +17837,6 @@ function startNjsOptionInterpreterArgs( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        // if( process.platform === 'win32' )
-        // test.is( _.strHas( op.output, process.version ) );
-        // else
-        // test.identical( op.output, process.version + '\n' );
         test.identical( op.output.trim(), process.version );
         if( mode === 'fork' )
         {
@@ -17897,10 +17874,6 @@ function startNjsOptionInterpreterArgs( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        // if( process.platform === 'win32' )
-        // test.is( _.strHas( op.output, process.version ) );
-        // else
-        // test.identical( op.output, process.version + '\n' );
         test.identical( op.output.trim(), process.version );
         if( mode === 'fork' )
         {
@@ -17938,10 +17911,6 @@ function startNjsOptionInterpreterArgs( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        // if( process.platform === 'win32' )
-        // test.is( _.strHas( op.output, process.version ) );
-        // else
-        // test.identical( op.output, process.version + '\n' );
         test.identical( op.output.trim(), process.version );
         if( mode === 'fork' )
         {
@@ -17979,10 +17948,6 @@ function startNjsOptionInterpreterArgs( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        // if( process.platform === 'win32' )
-        // test.is( _.strHas( op.output, process.version ) );
-        // else
-        // test.identical( op.output, process.version + '\n' );
         test.identical( op.output.trim(), process.version );
         if( mode === 'fork' )
         {
