@@ -22164,10 +22164,10 @@ function startSingleOptionDry( test )
   let programPath = a.program( testApp );
   let track = [];
 
-  let modes = [ /*'fork',*/ 'spawn', /*'shell' */];
+  let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode, 0, 0 ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run( mode, 0, 1 ) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => run( mode, 1, 0 ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode, 1, 0 ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run( mode, 1, 1 ) ) );
   return a.ready;
 
@@ -22208,17 +22208,50 @@ function startSingleOptionDry( test )
       }
       var t1 = _.time.now();
       var returned = _.process.start( o );
-      test.is( _.consequenceIs( returned ) );
 
       if( sync )
       {
         test.is( !_.consequenceIs( returned ) );
         test.is( returned === o );
+        test.identical( o.process, null );
+        test.identical( returned, o );
+        test.identical( o.procedure._name, null );
+        test.identical( o.procedure._object, null );
+        test.identical( o.state, 'terminated' );
+        test.identical( o.exitReason, null );
+        test.identical( o.exitCode, null );
+        test.identical( o.exitSignal, null );
+        test.identical( o.error, null );
+        test.identical( o.process, null );
+        test.identical( o.output, '' );
+        test.identical( o.ended, true );
+        test.identical( o.streamOut, null );
+        test.identical( o.streamErr, null );
+        if( mode === 'fork' )
+        {
+          test.identical( o.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
+          test.identical( o.fullExecPath, `${programPath} arg1 arg 2 'arg3' arg0` );
+        }
+        else if ( mode === 'shell' )
+        {
+          test.identical( o.stdio, [ 'pipe', 'pipe', 'pipe' ] );
+          if( process.platform === 'win32' )
+          test.identical( o.fullExecPath, `node ${programPath} arg1 "arg 2" "'arg3'" "arg0"` );
+          else
+          test.identical( o.fullExecPath, `node ${programPath} arg1 "arg 2" "'arg3'" "arg0"` );
+        }
+        else
+        {
+          test.identical( o.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
+          test.identical( o.fullExecPath, `node ${programPath} arg1 arg 2 'arg3' arg0` );
+        }
+
+        test.is( !a.fileProvider.fileExists( a.path.join( a.routinePath, 'file' ) ) )
         return returned;
       }
       else
       {
-        // test.is( _.consequenceIs( returned ) );
+        test.is( _.consequenceIs( returned ) );
 
         if( deasync )
         test.identical( returned.resourcesCount(), 1 );
@@ -22292,16 +22325,15 @@ function startSingleOptionDry( test )
           }
   
           test.is( !a.fileProvider.fileExists( a.path.join( a.routinePath, 'file' ) ) )
-          // console.log( `${mode} sync : ${sync} deasync : ${deasync}, TRACK : ${track}` )
           if( deasync )
           test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate', 'ready' ] );
+          else
+          test.identical( track, [ 'conStart', 'conTerminate', 'conDisconnect', 'ready' ] );
           track = [];
-  
+          return null;
         })
-        return null;
       }
-
-      return returned;
+      return null;
     })
 
 

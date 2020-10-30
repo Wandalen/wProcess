@@ -542,6 +542,7 @@ function startMinimal_body( o )
 
       if( o.sync && !o.deasync )
       {
+        /* When dry : 1, o.process = null */
         if( o.process.error )
         handleError( o.process.error );
         else
