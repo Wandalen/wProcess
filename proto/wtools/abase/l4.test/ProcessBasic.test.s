@@ -25276,7 +25276,7 @@ function startTerminateHangedWithExitHandler( test )
 
   // if( process.platform === 'win32' )
   // {
-  /*zzz : windows-kill doesn't work correctrly on node 14
+  /* zzz : windows-kill doesn't work correctrly on node 14
   investigate if its possible to use process.kill instead of windows-kill
   */
   //   test.identical( 1, 1 )
@@ -27656,7 +27656,7 @@ function terminate( test )
 
   // if( process.platform === 'win32' )
   // {
-  /*zzz for Vova : windows-kill doesn't work correctrly on node 14
+  /* zzz for Vova : windows-kill doesn't work correctrly on node 14
   investigate if its possible to use process.kill instead of windows-kill
   */
   //   test.identical( 1, 1 )
@@ -28503,7 +28503,7 @@ function terminateSync( test )
 
   // if( process.platform === 'win32' )
   // {
-  /*zzz for Vova : windows-kill doesn't work correctrly on node 14
+  /* zzz for Vova : windows-kill doesn't work correctrly on node 14
   investigate if its possible to use process.kill instead of windows-kill
   */
   //   test.identical( 1, 1 );
