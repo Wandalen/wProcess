@@ -38,6 +38,49 @@ let Self = _.process = _.process || Object.create( null );
 _.assert( !!_realGlobal_ );
 
 // --
+// checker
+// --
+
+function isNativeDescriptor( src )
+{
+  if( !src )
+  return false;
+  if( !ChildProcess )
+  ChildProcess = require( 'child_process' );
+  return src instanceof ChildProcess.ChildProcess;
+}
+
+//
+
+function isSession( src )
+{
+  if( !_.objectIs( src ) )
+  return false;
+  return src.ipc !== undefined && src.procedure !== undefined && src.process !== undefined;
+}
+
+//
+
+function pidFrom( src )
+{
+  _.assert( arguments.length === 1 );
+
+  if( _.numberIs( src ) )
+  return src;
+  if( _.objectIs( src ) )
+  {
+    if( src.process )
+    src = src.process;
+    if( src.pnd )
+    src = src.pnd;
+    _.assert( src instanceof ChildProcess.ChildProcess );
+    return src.pid;
+  }
+
+  _.assert( 0, `Unknown type : ${_.strType( src )}` );
+}
+
+// --
 // temp
 // --
 
@@ -390,6 +433,12 @@ let Events =
 let Extension =
 {
 
+  // etc
+
+  isNativeDescriptor,
+  isSession,
+  pidFrom,
+  
   // temp
 
   tempOpen,

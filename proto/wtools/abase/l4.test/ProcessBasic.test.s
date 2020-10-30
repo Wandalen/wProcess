@@ -15795,18 +15795,19 @@ function startConcurrentConsequencesMultiple( test )
     outputCollecting : 1,
   }
 
-  // let consequences = [ 'null' ];
-  // let modes = [ 'spawn' ];
+  // xxx
+  let consequences = [ 'null' ];
+  let modes = [ 'spawn' ];
 
-  let consequences = [ 'null', 'consequence', 'routine' ];
-  let modes = [ 'fork', 'spawn', 'shell' ];
+  // let consequences = [ 'null', 'consequence', 'routine' ];
+  // let modes = [ 'fork', 'spawn', 'shell' ];
   consequences.forEach( ( consequence ) =>
   {
     a.ready.tap( () => test.open( `consequence:${consequence}` ) );
     modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, consequence, mode }) ) );
-    modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, consequence, mode }) ) );
-    modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, consequence, mode }) ) );
-    modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, consequence, mode }) ) );
+    // modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, consequence, mode }) ) );
+    // modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, consequence, mode }) ) );
+    // modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, consequence, mode }) ) );
     a.ready.tap( () => test.close( `consequence:${consequence}` ) );
   });
   return a.ready;
@@ -17517,6 +17518,476 @@ startNjsWithReadyDelayStructural.description =
 
 //
 
+function startNjsOptionInterpreterArgs( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let programPath = a.path.nativize( a.program( program1 ) );
+  let totalMem = require( 'os' ).totalmem();
+
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
+
+  /* */
+
+  function run( mode )
+  {
+    let ready = _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode:${mode}, interpreterArgs = ''`;
+
+      let options =
+      {
+        execPath : programPath,
+        mode,
+        outputCollecting : 1,
+        interpreterArgs : '',
+        stdio : 'pipe'
+      }
+
+      return _.process.startNjs( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, 'Log\n' );
+
+        return null;
+      } )
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode:${mode}, interpreterArgs = []`;
+
+      let options =
+      {
+        execPath : programPath,
+        mode,
+        outputCollecting : 1,
+        interpreterArgs : [],
+        stdio : 'pipe'
+      }
+
+      return _.process.startNjs( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, 'Log\n' );
+
+        return null;
+      } )
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode:${mode}, interpreterArgs = '--version'`;
+
+      let options =
+      {
+        execPath : programPath,
+        mode,
+        outputCollecting : 1,
+        interpreterArgs : '--version',
+        stdio : 'pipe'
+      }
+
+      return _.process.startNjs( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, process.version + '\n' );
+        if( mode === 'fork' )
+        test.identical( op.interpreterArgs, [ '--version' ] )
+        else
+        test.identical( op.args, [ '--version', programPath ] );
+
+        return null;
+      } )
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode:${mode}, execPath : null, args : programPath, interpreterArgs = '--version'`;
+
+      let options =
+      {
+        args : programPath,
+        mode,
+        outputCollecting : 1,
+        interpreterArgs : '--version',
+        stdio : 'pipe'
+      }
+
+      return _.process.startNjs( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, process.version + '\n' );
+        if( mode === 'fork' )
+        {
+          test.identical( op.args, [] );
+          test.identical( op.interpreterArgs, [ '--version' ] )
+        }
+        else
+        {
+          test.identical( op.args, [ '--version', programPath ] );
+        }
+
+        return null;
+      } )
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode:${mode}, execPath : '', args : 'arg1', interpreterArgs = '--version'`;
+
+      let options =
+      {
+        execPath : '',
+        args : 'arg1',
+        mode,
+        outputCollecting : 1,
+        interpreterArgs : '--version',
+        stdio : 'pipe'
+      }
+
+      return _.process.startNjs( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, process.version + '\n' );
+        if( mode === 'fork' )
+        {
+          test.identical( op.args, [] )
+          test.identical( op.interpreterArgs, [ '--version' ] )
+        }
+        else
+        {
+          test.identical( op.args, [ '--version', 'arg1' ] );
+        }
+
+        return null;
+      } )
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode:${mode}, interpreterArgs = '--version', maximumMemory : 1`;
+
+      let options =
+      {
+        execPath : programPath,
+        mode,
+        outputCollecting : 1,
+        interpreterArgs : '--version',
+        maximumMemory : 1,
+        stdio : 'pipe'
+      }
+
+      return _.process.startNjs( options )
+      .then( ( op ) =>
+      {
+        if( mode === 'shell' ) console.log( 'SHELL OP: ', op )
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, process.version + '\n' );
+        if( mode === 'fork' )
+        test.identical( op.interpreterArgs, [ '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] )
+        else
+        test.identical( op.args, [ '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}`, programPath ] );
+
+        return null;
+      } )
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode:${mode}, interpreterArgs = [ '--v8-options' ]`;
+
+      let options =
+      {
+        execPath : programPath,
+        mode,
+        outputCollecting : 1,
+        interpreterArgs : [ '--v8-options' ],
+        stdio : 'pipe'
+      }
+
+      return _.process.startNjs( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.is( _.strHas( op.output, 'Synopsis:' ) );
+        test.is( _.strHas( op.output, `The following syntax for options is accepted (both '-' and '--' are ok):` ) );
+        test.is( _.strHas( op.output, '-e        execute a string in V8' ) );
+        test.is( _.strHas( op.output, '--shell   run an interactive JavaScript shell' ) );
+        test.is( _.strHas( op.output, '--module  execute a file as a JavaScript module' ) );
+        test.is( _.strHas( op.output, 'Options:' ) );
+        if( mode === 'fork' )
+        test.identical( op.interpreterArgs, [ '--v8-options' ] )
+        else
+        test.identical( op.args, [ '--v8-options', programPath ] );
+
+        return null;
+      } )
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode:${mode}, interpreterArgs = [ '--v8-options' ], maximumMemory : 1`;
+
+      let options =
+      {
+        execPath : programPath,
+        mode,
+        outputCollecting : 1,
+        interpreterArgs : [ '--v8-options' ],
+        maximumMemory : 1,
+        stdio : 'pipe'
+      }
+
+      return _.process.startNjs( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.is( _.strHas( op.output, 'Synopsis:' ) );
+        test.is( _.strHas( op.output, `The following syntax for options is accepted (both '-' and '--' are ok):` ) );
+        test.is( _.strHas( op.output, '-e        execute a string in V8' ) );
+        test.is( _.strHas( op.output, '--shell   run an interactive JavaScript shell' ) );
+        test.is( _.strHas( op.output, '--module  execute a file as a JavaScript module' ) );
+        test.is( _.strHas( op.output, 'Options:' ) );
+        if( mode === 'fork' )
+        test.identical( op.interpreterArgs, [ '--v8-options', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] )
+        else
+        test.identical( op.args, [ '--v8-options', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}`, programPath ] );
+
+        return null;
+      } )
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode:${mode}, interpreterArgs = '--version', maximumMemory : 1, args : [ 'arg1', 'arg2' ]`;
+
+      let options =
+      {
+        execPath : programPath,
+        mode,
+        args : [ 'arg1', 'arg2' ],
+        outputCollecting : 1,
+        interpreterArgs : '--version',
+        maximumMemory : 1,
+        stdio : 'pipe'
+      }
+
+      return _.process.startNjs( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, process.version + '\n' );
+        if( mode === 'fork' )
+        {
+          test.identical( op.interpreterArgs, [ '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] )
+          test.identical( op.args, [ 'arg1', 'arg2' ] );
+        }
+        else
+        {
+          test.identical( op.args, [ '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}`, programPath, 'arg1', 'arg2' ] );
+        }
+
+        return null;
+      } )
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode:${mode}, interpreterArgs = '--trace-warnings --version', maximumMemory : 1, args : [ 'arg1', 'arg2' ]`;
+
+      let options =
+      {
+        execPath : programPath,
+        mode,
+        args : [ 'arg1', 'arg2' ],
+        outputCollecting : 1,
+        interpreterArgs : '--trace-warnings --version',
+        maximumMemory : 1,
+        stdio : 'pipe'
+      }
+
+      return _.process.startNjs( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, process.version + '\n' );
+        if( mode === 'fork' )
+        {
+          test.identical( op.interpreterArgs, [ '--trace-warnings', '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] )
+          test.identical( op.args, [ 'arg1', 'arg2' ] );
+        }
+        else
+        {
+          test.identical( op.args, [ '--trace-warnings', '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}`, programPath, 'arg1', 'arg2' ] );
+        }
+
+        return null;
+      } )
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode:${mode}, interpreterArgs = [ '--trace-warnings', '--version' ], maximumMemory : 1, args : [ 'arg1', 'arg2' ]`;
+
+      let options =
+      {
+        execPath : programPath,
+        mode,
+        args : [ 'arg1', 'arg2' ],
+        outputCollecting : 1,
+        interpreterArgs : [ '--trace-warnings', '--version' ],
+        maximumMemory : 1,
+        stdio : 'pipe'
+      }
+
+      return _.process.startNjs( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, process.version + '\n' );
+        if( mode === 'fork' )
+        {
+          test.identical( op.interpreterArgs, [ '--trace-warnings', '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] )
+          test.identical( op.args, [ 'arg1', 'arg2' ] );
+        }
+        else
+        {
+          test.identical( op.args, [ '--trace-warnings', '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}`, programPath, 'arg1', 'arg2' ] );
+        }
+
+        return null;
+      } )
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode:${mode}, interpreterArgs = [ '--version', '--v8-options' ], maximumMemory : 1, args : [ 'arg1', 'arg2' ]`;
+
+      let options =
+      {
+        execPath : programPath,
+        mode,
+        args : [ 'arg1', 'arg2' ],
+        outputCollecting : 1,
+        interpreterArgs : [ '--version', '--v8-options' ],
+        maximumMemory : 1,
+        stdio : 'pipe'
+      }
+
+      return _.process.startNjs( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, process.version + '\n' );
+        if( mode === 'fork' )
+        {
+          test.identical( op.interpreterArgs, [ '--version', '--v8-options', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] )
+          test.identical( op.args, [ 'arg1', 'arg2' ] );
+        }
+        else
+        {
+          test.identical( op.args, [ '--version', '--v8-options', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}`, programPath, 'arg1', 'arg2' ] );
+        }
+
+        return null;
+      } )
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode:${mode}, execPath : null, interpreterArgs = [ '--version', '--v8-options' ], maximumMemory : 1, args : [ programPath,  'arg1', 'arg2' ]`;
+
+      let options =
+      {
+        execPath : null,
+        mode,
+        args : [ programPath, 'arg1', 'arg2' ],
+        outputCollecting : 1,
+        interpreterArgs : [ '--version', '--v8-options' ],
+        maximumMemory : 1,
+        stdio : 'pipe'
+      }
+
+      return _.process.startNjs( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, process.version + '\n' );
+        if( mode === 'fork' )
+        {
+          test.identical( op.interpreterArgs, [ '--version', '--v8-options', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] )
+          test.identical( op.args, [ 'arg1', 'arg2' ] );
+        }
+        else
+        {
+          test.identical( op.args, [ '--version', '--v8-options', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}`, programPath, 'arg1', 'arg2' ] );
+        }
+
+        return null;
+      } )
+    })
+
+    return ready;
+
+  }
+
+  /* - */
+
+  function program1()
+  {
+    console.log( 'Log' );
+  }
+}
+
+//
+
 function startNjsWithReadyDelayStructuralMultiple( test )
 {
   let context = this;
@@ -17685,10 +18156,10 @@ startNjsWithReadyDelayStructuralMultiple.description =
 `
 
 // --
-// sheller
+// starter
 // --
 
-function sheller( test )
+function starter( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -17958,7 +18429,7 @@ function sheller( test )
 
 //
 
-function shellerArgs( test )
+function starterArgs( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -17967,7 +18438,7 @@ function shellerArgs( test )
   /* */
 
 
-  let shellerOptions =
+  let starterOptions =
   {
     outputCollecting : 1,
     args : [ 'arg1', 'arg2' ],
@@ -17975,7 +18446,7 @@ function shellerArgs( test )
     ready : a.ready
   }
 
-  let shell = _.process.starter( shellerOptions )
+  let shell = _.process.starter( starterOptions )
 
   /* */
 
@@ -17989,7 +18460,7 @@ function shellerArgs( test )
     test.identical( op.ended, true );
     test.identical( op.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
     test.identical( _.strCount( op.output, `[ 'arg3', 'arg1', 'arg2' ]` ), 1 );
-    test.identical( shellerOptions.args, [ 'arg1', 'arg2' ] );
+    test.identical( starterOptions.args, [ 'arg1', 'arg2' ] );
     return null;
   })
 
@@ -18004,7 +18475,7 @@ function shellerArgs( test )
     test.identical( op.ended, true );
     test.identical( op.args, [ testAppPath, 'arg3' ] );
     test.identical( _.strCount( op.output, `[ 'arg3' ]` ), 1 );
-    test.identical( shellerOptions.args, [ 'arg1', 'arg2' ] );
+    test.identical( starterOptions.args, [ 'arg1', 'arg2' ] );
     return null;
   })
 
@@ -18019,7 +18490,7 @@ function shellerArgs( test )
     test.identical( op.ended, true );
     test.identical( op.args, [ testAppPath, 'arg3' ] );
     test.identical( _.strCount( op.output, `[ 'arg3' ]` ), 1 );
-    test.identical( shellerOptions.args, [ 'arg1', 'arg2' ] );
+    test.identical( starterOptions.args, [ 'arg1', 'arg2' ] );
     return null;
   })
 
@@ -18037,7 +18508,7 @@ function shellerArgs( test )
 
 //
 
-function shellerFields( test )
+function starterFields( test )
 {
 
   test.case = 'defaults';
@@ -23004,26 +23475,28 @@ function statusOf( test )
   return ready;
 }
 
-function exitReason( test )
-{
-  test.case = 'initial value'
-  var got = _.process.exitReason();
-  test.identical( got, null );
+//
 
-  /* */
-
-  test.case = 'set reason'
-  _.process.exitReason( 'reason' );
-  var got = _.process.exitReason();
-  test.identical( got, 'reason' );
-
-  /* */
-
-  test.case = 'update reason'
-  _.process.exitReason( 'reason2' );
-  var got = _.process.exitReason();
-  test.identical( got, 'reason2' );
-}
+// function exitReason( test )
+// {
+//   test.case = 'initial value'
+//   var got = _.process.exitReason();
+//   test.identical( got, null );
+//
+//   /* */
+//
+//   test.case = 'set reason'
+//   _.process.exitReason( 'reason' );
+//   var got = _.process.exitReason();
+//   test.identical( got, 'reason' );
+//
+//   /* */
+//
+//   test.case = 'update reason'
+//   _.process.exitReason( 'reason2' );
+//   var got = _.process.exitReason();
+//   test.identical( got, 'reason2' );
+// }
 
 //
 
@@ -23595,7 +24068,7 @@ function startOutputMultiple( test )
 
         if( tops.sync || tops.deasync )
         {
-          varexp =
+          var exp =
           [
             'conStart',
             'conTerminate',
@@ -25028,14 +25501,7 @@ function startErrorAfterTerminationWithSend( test )
   `
       if( process.platform === 'darwin' )
       exp += `code : 'ERR_IPC_CHANNEL_CLOSED'`
-
-      exp +=
-`
-  Error starting the process
-      Exec path : ${ mode === 'fork' ? '' : 'node ' }${a.abs( 'testApp.js' )}
-      Current path : ${a.path.current()}
-`
-      test.equivalent( e.err.originalMessage, exp )
+      test.identical( _.strCount( e.err.originalMessage, 'Error starting the process' ), 1 );
       _.errAttend( e.err );
       track.push( 'uncaughtError' );
       _.process.off( 'uncaughtError', uncaughtError );
@@ -29137,7 +29603,7 @@ function terminateSecondChildSpawn( test )
 
     o.conTerminate.thenGive( () =>
     {
-      timer.take( _.dont );
+      timer.error( _.dont );
 
       let data =
       {
@@ -29289,7 +29755,7 @@ function terminateSecondChildFork( test )
 
     o.conTerminate.thenGive( () =>
     {
-      timer.take( _.dont );
+      timer.error( _.dont );
 
       let data =
       {
@@ -29450,7 +29916,7 @@ function terminateSecondChildShell( test )
 
     o.conTerminate.thenGive( () =>
     {
-      timer.take( _.dont );
+      timer.error( _.dont );
 
       let data =
       {
@@ -31755,6 +32221,200 @@ function killComplex( test )
 
 //
 
+function execPathOf( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( testApp );
+
+  /* zzz : implement for linux and osx */
+  if( process.platform !== 'win32' )
+  {
+    test.identical( 1,1 );
+    return;
+  }
+
+  a.ready
+
+  /* */
+
+  .then( () =>
+  {
+    let o = { execPath : a.path.nativize( testAppPath ) };
+    _.process.startNjs( o )
+
+    o.conStart.then( () => _.process.execPathOf( o.process ) )
+    o.conStart.then( ( arg ) =>
+    {
+      test.is( _.strHas( arg, o.execPath ) );
+      return null;
+    })
+
+    return _.Consequence.And( o.conStart, o.conTerminate );
+  })
+
+  /* */
+
+  return a.ready;
+
+  /* */
+
+  function testApp()
+  {
+    setTimeout( () => {}, context.t1 * 5 ) /* 5000 */
+  }
+}
+
+//
+
+function waitForDeath( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( testApp );
+
+  a.ready
+
+  /* */
+
+  .then( () =>
+  {
+    test.case = 'child process terminates by its own, wait for termination using pnd'
+    let o =
+    {
+      execPath : 'node ' + a.path.nativize( testAppPath ),
+      throwingExitCode : 0,
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputPiping : 1,
+      outputCollecting : 1
+    };
+    _.process.start( o )
+
+    let terminated = _.process.waitForDeath({ pnd : o.process, timeOut : context.t1 * 10 })
+    .then( () =>
+    {
+      test.identical( _.strCount( o.output, 'program::end' ), 1 );
+      test.identical( o.state, 'terminated' );
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      return null;
+    })
+
+    return _.Consequence.And( terminated, o.conTerminate );
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    test.case = 'child process terminates by its own, wait for termination using pid'
+    let o =
+    {
+      execPath : 'node ' + a.path.nativize( testAppPath ),
+      throwingExitCode : 0,
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputPiping : 1,
+      outputCollecting : 1
+    };
+    _.process.start( o )
+
+    let terminated = _.process.waitForDeath({ pid : o.process.pid, timeOut : context.t1 * 10 })
+    .then( () =>
+    {
+      test.identical( _.strCount( o.output, 'program::end' ), 1 );
+      test.identical( o.state, 'terminated' );
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      return null;
+    })
+
+    return _.Consequence.And( terminated, o.conTerminate );
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    test.case = 'child process is terminated by SIGTERM'
+    let o =
+    {
+      execPath : 'node ' + a.path.nativize( testAppPath ),
+      throwingExitCode : 0,
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputPiping : 1,
+      outputCollecting : 1
+    };
+    _.process.start( o )
+
+    o.conStart.thenGive( () => o.process.kill( 'SIGTERM' ) )
+
+    let terminated = _.process.waitForDeath({ pnd : o.process, timeOut : context.t1 * 10 })
+    .then( () =>
+    {
+      test.identical( _.strCount( o.output, 'program::end' ), 0 );
+      test.identical( o.state, 'terminated' );
+      test.notIdentical( o.exitCode, 0 );
+      test.notIdentical( o.exitSignal, null );
+      return null;
+    })
+
+    return _.Consequence.And( terminated, o.conTerminate );
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    test.case = 'process is still alive after timeOut'
+    let o =
+    {
+      execPath : 'node ' + a.path.nativize( testAppPath ),
+      throwingExitCode : 0,
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputPiping : 1,
+      outputCollecting : 1
+    };
+    _.process.start( o )
+
+    let terminated = _.process.waitForDeath({ pnd : o.process, timeOut : 1000 })
+    terminated = test.shouldThrowErrorAsync( terminated );
+
+    o.conTerminate.then( () =>
+    {
+      test.identical( _.strCount( o.output, 'program::end' ), 1 );
+      test.identical( o.state, 'terminated' );
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      return null;
+    })
+
+    return _.Consequence.And( terminated, o.conTerminate );
+  })
+
+  /* */
+
+  return a.ready;
+
+  /* */
+
+  function testApp()
+  {
+    console.log( 'program::start' );
+    setTimeout( () =>
+    {
+      console.log( 'program::end' );
+    }, context.t1 * 5 ) /* 1500 */
+  }
+}
+
+// --
+// children
+// --
+
 function children( test )
 {
   let context = this;
@@ -32099,16 +32759,15 @@ function childrenOptionFormatList( test )
   {
     let _ = require( toolsPath );
     _.include( 'wProcess' );
-    _.include( 'wFiles' );
     var o =
     {
       execPath : 'node testApp2.js',
       currentPath : __dirname,
       mode : 'spawn',
-      inputMirroring : 0
+      inputMirroring : 0,
     }
     _.process.start( o );
-    process.send( o.process.pid )
+    process.send( o.process.pid );
   }
 
   function testApp2()
@@ -32503,13 +33162,14 @@ var Proto =
 
     startNjs,
     startNjsWithReadyDelayStructural,
+    startNjsOptionInterpreterArgs,
     startNjsWithReadyDelayStructuralMultiple,
 
-    // sheller
+    // starter
 
-    sheller,
-    shellerArgs,
-    shellerFields,
+    starter,
+    starterArgs,
+    starterFields,
 
     // output
 
@@ -32551,7 +33211,7 @@ var Proto =
     isAlive,
     statusOf,
 
-    exitReason,
+    // exitReason, /* qqq2 for Yevhen : it should be in subprocess */
     exitCode, /* qqq for Yevhen : check order of test routines. it's messed up */
 
     // termination
@@ -32601,6 +33261,8 @@ var Proto =
     terminateDifferentStdio, /* qqq for Vova: rewrite, don't use timeout to run terminate */
 
     killComplex,
+    execPathOf,
+    waitForDeath,
 
     // children
 
