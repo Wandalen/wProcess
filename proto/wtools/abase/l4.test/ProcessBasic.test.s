@@ -7430,7 +7430,7 @@ function startImportantExecPath( test )
   {
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
-    test.identical( _.strCount( op.output, process.version ), 2 );
+    test.identical( _.strCount( op.output, process.version ), 1 );
     return null;
   })
 
@@ -7513,10 +7513,7 @@ function startImportantExecPath( test )
   {
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
-    if( process.platform === 'win32' )
     test.identical( _.strCount( op.output, '*' ), 1 );
-    else
-    test.identical( _.strCount( op.output, 'file' ), 1 );
     return null;
   })
 
@@ -7563,7 +7560,7 @@ function startImportantExecPath( test )
   {
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
-    test.is( _.strHas( op.output, `[ 'a', 'b' ]` ) );
+    test.is( _.strHas( op.output, `[ 'a b' ]` ) );
     return null;
   })
 
