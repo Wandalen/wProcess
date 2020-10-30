@@ -6942,7 +6942,7 @@ function startExecPathNonTrivialModeShell( test )
   {
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
-    test.identical( _.strCount( op.output, process.version ), 2 );
+    test.identical( _.strCount( op.output, process.version ), 1 );
     return null;
   })
 
@@ -6951,7 +6951,7 @@ function startExecPathNonTrivialModeShell( test )
   {
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
-    test.identical( _.strCount( op.output, process.version ), 2 );
+    test.identical( _.strCount( op.output, process.version ), 1 );
     return null;
   })
 
@@ -6960,7 +6960,7 @@ function startExecPathNonTrivialModeShell( test )
   {
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
-    test.identical( _.strCount( op.output, process.version ), 2 );
+    test.identical( _.strCount( op.output, process.version ), 1 );
     return null;
   })
 
