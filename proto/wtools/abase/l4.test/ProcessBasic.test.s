@@ -22166,51 +22166,51 @@ function startSingleOptionDry( test )
   let track = [];
 
   let modes = [ 'fork', 'spawn', 'shell' ];
-  modes.forEach( ( mode ) => a.ready.then( () => run( mode, 0, 0 ) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run( mode, 0, 1 ) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run( mode, 1, 0 ) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run( mode, 1, 1 ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ mode, sync : 0, deasync : 0 }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ mode, sync : 0, deasync : 1 }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ mode, sync : 1, deasync : 0 }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ mode, sync : 1, deasync : 1 }) ) );
   return a.ready;
 
-  function run( mode, sync, deasync )
+  function run( tops )
   {
     let ready = new _.Consequence().take( null );
 
-    if( sync && !deasync && mode === 'fork' )
+    if( tops.sync && !tops.deasync && tops.mode === 'fork' )
     return test.shouldThrowErrorSync( () =>
     {
       _.process.start
       ({
         execPath : programPath + ` arg1 "arg 2" "'arg3'"`,
-        mode,
-        sync,
-        deasync
+        mode : tops.mode,
+        sync : tops.sync,
+        deasync : tops.deasync
       })
     });
 
     ready.then( () =>
     {
-      test.case = `mode : ${mode}, sync : ${sync}, deasync : ${deasync}, dry : 1, no error`
+      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, dry : 1, no error`
       let o =
       {
-        execPath : mode === 'fork' ? programPath + ` arg1 "arg 2" "'arg3'"` : 'node ' + programPath + ` arg1 "arg 2" "'arg3'"`,
-        mode,
-        sync,
-        deasync,
+        execPath : tops.mode === 'fork' ? programPath + ` arg1 "arg 2" "'arg3'"` : 'node ' + programPath + ` arg1 "arg 2" "'arg3'"`,
+        mode : tops.mode,
+        sync : tops.sync,
+        deasync : tops.deasync,
         args : [ 'arg0' ],
         dry : 1,
         outputPiping : 1,
         outputCollecting : 1,
         throwingExitCode : 1,
         applyingExitCode : 1,
-        timeOut : sync || !deasync ? null : 100,
-        ipc : mode === 'shell' ? 0 : 1,
+        timeOut : tops.sync || !tops.deasync ? null : 100,
+        ipc : tops.mode === 'shell' ? 0 : 1,
         when : { delay : 1000 }
       }
       var t1 = _.time.now();
       var returned = _.process.start( o );
 
-      if( sync )
+      if( tops.sync )
       {
         test.is( !_.consequenceIs( returned ) );
         test.is( returned === o );
@@ -22218,7 +22218,7 @@ function startSingleOptionDry( test )
       else
       {
         test.is( _.consequenceIs( returned ) );
-        if( deasync )
+        if( tops.deasync )
         test.identical( returned.resourcesCount(), 1 );
         else
         test.identical( returned.resourcesCount(), 0 );
@@ -22271,12 +22271,12 @@ function startSingleOptionDry( test )
         test.identical( op.ended, true );
         test.identical( op.streamOut, null );
         test.identical( op.streamErr, null );
-        if( mode === 'fork' )
+        if( tops.mode === 'fork' )
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
           test.identical( op.fullExecPath, `${programPath} arg1 arg 2 'arg3' arg0` );
         }
-        else if ( mode === 'shell' )
+        else if ( tops.mode === 'shell' )
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe' ] );
           if( process.platform === 'win32' )
@@ -22291,7 +22291,7 @@ function startSingleOptionDry( test )
         }
 
         test.is( !a.fileProvider.fileExists( a.path.join( a.routinePath, 'file' ) ) )
-        if( deasync )
+        if( tops.deasync )
         test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate', 'ready' ] );
         else
         test.identical( track, [ 'conStart', 'conTerminate', 'conDisconnect', 'ready' ] );
@@ -22307,27 +22307,27 @@ function startSingleOptionDry( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${mode}, sync : ${sync}, deasync : ${deasync}, dry : 1, execPath : 'err' + programPath + \` arg1 "arg 2" "'arg3'"\``
+      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, dry : 1, execPath : 'err' + programPath + \` arg1 "arg 2" "'arg3'"\``
       let o =
       {
         execPath : 'err ' + programPath + ` arg1 "arg 2" "'arg3'"`,
-        mode,
-        sync,
-        deasync,
+        mode : tops.mode,
+        sync : tops.sync,
+        deasync : tops.deasync,
         args : [ 'arg0' ],
         dry : 1,
         outputPiping : 1,
         outputCollecting : 1,
         throwingExitCode : 1,
         applyingExitCode : 1,
-        timeOut : sync || !deasync ? null : 100,
-        ipc : mode === 'shell' ? 0 : 1,
+        timeOut : tops.sync || !tops.deasync ? null : 100,
+        ipc : tops.mode === 'shell' ? 0 : 1,
         when : { delay : 1000 }
       }
       var t1 = _.time.now();
       var returned = _.process.start( o );
 
-      if( sync )
+      if( tops.sync )
       {
         test.is( !_.consequenceIs( returned ) );
         test.is( returned === o );
@@ -22335,7 +22335,7 @@ function startSingleOptionDry( test )
       else
       {
         test.is( _.consequenceIs( returned ) );
-        if( deasync )
+        if( tops.deasync )
         test.identical( returned.resourcesCount(), 1 );
         else
         test.identical( returned.resourcesCount(), 0 );
@@ -22388,7 +22388,7 @@ function startSingleOptionDry( test )
         test.identical( op.ended, true );
         test.identical( op.streamOut, null );
         test.identical( op.streamErr, null );
-        if ( mode === 'shell' )
+        if ( tops.mode === 'shell' )
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe' ] );
           if( process.platform === 'win32' )
@@ -22403,7 +22403,7 @@ function startSingleOptionDry( test )
         }
 
         test.is( !a.fileProvider.fileExists( a.path.join( a.routinePath, 'file' ) ) )
-        if( deasync )
+        if( tops.deasync )
         test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate', 'ready' ] );
         else
         test.identical( track, [ 'conStart', 'conTerminate', 'conDisconnect', 'ready' ] );
@@ -22444,242 +22444,233 @@ function startOptionDryMultiple( test )
   let track = [];
 
   let modes = [ 'fork', 'spawn', 'shell' ];
-  modes.forEach( ( mode ) => a.ready.then( () => run( mode, 0, 0 ) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run( mode, 0, 1 ) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => run( mode, 1, 0 ) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run( mode, 1, 1 ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ mode, sync : 0, deasync : 0 }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ mode, sync : 0, deasync : 1 }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ mode, sync : 1, deasync : 0 }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ mode, sync : 1, deasync : 1 }) ) );
   return a.ready;
 
-  function run( mode, sync, deasync )
+  function run( tops )
   {
     let ready = new _.Consequence().take( null );
 
-    if( sync && !deasync && mode === 'fork' )
+    if( tops.sync && !tops.deasync && tops.mode === 'fork' )
     return test.shouldThrowErrorSync( () =>
     {
       _.process.start
       ({
         execPath : [ programPath + ` arg1 "arg 2" "'arg3'"`, programPath + ` arg1 "arg 2" "'arg3'"` ],
-        mode,
-        sync,
-        deasync
+        mode : tops.mode,
+        sync : tops.sync,
+        deasync : tops.deasync
       })
     });
 
     ready.then( () =>
     {
-      test.case = `mode : ${mode}, dry : 1, without error, con* checks`;
+      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync :${tops.deasync}, dry : 1, without error, con* checks`;
 
       let options =
       {
-        execPath : [ mode === 'fork' ? programPath + ' id:1' : 'node ' + programPath + ' id:1', mode === 'fork' ? programPath + ' id:2' : 'node ' + programPath + ' id:2' ],
-        mode,
+        execPath : [ tops.mode === 'fork' ? programPath + ' id:1' : 'node ' + programPath + ' id:1', tops.mode === 'fork' ? programPath + ' id:2' : 'node ' + programPath + ' id:2' ],
+        mode : tops.mode,
+        sync : tops.sync,
+        deasync : tops.deasync,
         outputCollecting : 1,
         dry : 1
       }
 
       let returned = _.process.start( options )
 
-      if( sync )
+      test.identical( options.procedure._name, null );
+      test.identical( options.state, 'terminated' );
+      test.identical( options.exitReason, 'normal' );
+      test.identical( options.exitCode, null );
+      test.identical( options.exitSignal, null );
+      test.identical( options.error, null );
+      test.identical( options.process, undefined );
+      test.identical( options.output, '' );
+      test.identical( options.ended, true );
+      test.is( _.streamIs( options.streamOut ) );
+      test.is( _.streamIs( options.streamErr ) );
+      if( tops.mode === 'fork' )
       {
-
+        test.identical( options.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
       }
       else
       {
-
+        test.identical( options.stdio, [ 'pipe', 'pipe', 'pipe' ] );
       }
-      returned.then( ( op ) =>
+
+      options.runs.forEach( ( op2, counter ) =>
       {
-        test.identical( op.procedure._name, null );
-        test.identical( op.procedure._object, options );
-        test.identical( op.state, 'terminated' );
-        test.identical( op.exitReason, 'normal' );
-        test.identical( op.exitCode, null );
-        test.identical( op.exitSignal, null );
-        test.identical( op.error, null );
-        test.identical( op.process, undefined );
-        test.identical( op.output, '' );
-        test.identical( op.ended, true );
-        test.is( _.streamIs( op.streamOut ) );
-        test.is( _.streamIs( op.streamErr ) );
-        if( mode === 'fork' )
+        op2.conStart.tap( ( err, op ) =>
         {
-          test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
-        }
-        else
+          track.push( 'conStart' );
+          test.identical( err, undefined );
+          test.identical( op, op2 );
+          test.identical( op2.process, null );
+          return null;
+        })
+
+        op2.conDisconnect.tap( ( err, op ) =>
         {
-          test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe' ] );
-        }
+          track.push( 'conDisconnect' );
+          test.identical( err, _.dont );
+          test.identical( op, undefined );
+          test.identical( op2.process, null );
+          return null;
+        })
 
-        op.runs.forEach( ( op2, counter ) =>
+        op2.conTerminate.tap( ( err, op ) =>
         {
-          op2.conStart.tap( ( err, op ) =>
-          {
-            track.push( 'conStart' );
-            test.identical( err, undefined );
-            test.identical( op, op2 );
-            test.identical( op2.process, null );
-            return null;
-          })
+          track.push( 'conTerminate' );
+          test.identical( err, undefined );
+          test.identical( op, op2 );
+          test.identical( op2.process, null );
+          return null;
+        })
 
-          op2.conDisconnect.tap( ( err, op ) =>
+        op2.ready.tap( ( err, op ) =>
+        {
+          track.push( 'ready' );
+          test.identical( op2.process, null );
+          test.identical( err, undefined );
+          test.identical( op, op2 );
+          test.identical( op2.procedure._name, null );
+          test.identical( op2.procedure._object, null );
+          test.identical( op2.state, 'terminated' );
+          test.identical( op2.exitReason, null );
+          test.identical( op2.exitReason, null );
+          test.identical( op2.exitCode, null );
+          test.identical( op2.exitSignal, null );
+          test.identical( op2.error, null );
+          test.identical( op2.process, null );
+          test.identical( op2.output, '' );
+          test.identical( op2.ended, true );
+          test.identical( op2.streamOut, null );
+          test.identical( op2.streamErr, null );
+          if( tops.mode === 'fork' )
           {
-            track.push( 'conDisconnect' );
-            test.identical( err, _.dont );
-            test.identical( op, undefined );
-            test.identical( op2.process, null );
-            return null;
-          })
-
-          op2.conTerminate.tap( ( err, op ) =>
+            test.identical( op2.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
+            test.identical( op2.fullExecPath, programPath + ` id:${counter + 1}` );
+          }
+          else
           {
-            track.push( 'conTerminate' );
-            test.identical( err, undefined );
-            test.identical( op, op2 );
-            test.identical( op2.process, null );
-            return null;
-          })
-
-          op2.ready.tap( ( err, op ) =>
-          {
-            track.push( 'ready' );
-            test.identical( op2.process, null );
-            test.identical( err, undefined );
-            test.identical( op, op2 );
-            test.identical( op2.procedure._name, null );
-            test.identical( op2.procedure._object, null );
-            test.identical( op2.state, 'terminated' );
-            test.identical( op2.exitReason, null );
-            test.identical( op2.exitReason, null );
-            test.identical( op2.exitCode, null );
-            test.identical( op2.exitSignal, null );
-            test.identical( op2.error, null );
-            test.identical( op2.process, null );
-            test.identical( op2.output, '' );
-            test.identical( op2.ended, true );
-            test.identical( op2.streamOut, null );
-            test.identical( op2.streamErr, null );
-            if( mode === 'fork' )
-            {
-              test.identical( op2.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
-              test.identical( op2.fullExecPath, programPath + ` id:${counter + 1}` );
-            }
-            else
-            {
-              test.identical( op2.stdio, [ 'pipe', 'pipe', 'pipe' ] );
-              test.identical( op2.fullExecPath, `node ${programPath} id:${counter + 1}` );
-            }
-            test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate', 'ready' ] );
-            track = [];
-            return null;
-          })
-        });
-        return null;
-      })
+            test.identical( op2.stdio, [ 'pipe', 'pipe', 'pipe' ] );
+            test.identical( op2.fullExecPath, `node ${programPath} id:${counter + 1}` );
+          }
+          test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate', 'ready' ] );
+          track = [];
+          return null;
+        })
+      });
+      return null;
     })
 
     /* */
 
-    // ready.then( () =>
-    // {
-    //   test.case = `mode : ${mode}, dry : 1, error in execPath, con* checks`;
-    //   let options =
-    //   {
-    //     execPath : [ 'err' + programPath + ' id:1', 'err' + programPath + ' id:2' ],
-    //     mode,
-    //     outputCollecting : 1,
-    //     dry : 1
-    //   }
+    ready.then( () =>
+    {
+      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync :${tops.deasync}, dry : 1, without error, con* checks`;
 
-    //   return _.process.start( options )
-    //   .then( ( op ) =>
-    //   {
-    //     test.identical( op.procedure._name, null );
-    //     test.identical( op.procedure._object, options );
-    //     test.identical( op.state, 'terminated' );
-    //     test.identical( op.exitReason, 'normal' );
-    //     test.identical( op.exitCode, null );
-    //     test.identical( op.exitSignal, null );
-    //     test.identical( op.error, null );
-    //     test.identical( op.process, undefined );
-    //     test.identical( op.output, '' );
-    //     test.identical( op.ended, true );
-    //     test.is( _.streamIs( op.streamOut ) );
-    //     test.is( _.streamIs( op.streamErr ) );
-    //     if( mode === 'fork' )
-    //     {
-    //       test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
-    //     }
-    //     else
-    //     {
-    //       test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe' ] );
-    //     }
+      let options =
+      {
+        execPath : [ 'err ' + programPath + ' id:1', 'err ' + programPath + ' id:2' ],
+        mode : tops.mode,
+        sync : tops.sync,
+        deasync : tops.deasync,
+        outputCollecting : 1,
+        dry : 1
+      }
 
-    //     op.runs.forEach( ( op2, counter ) =>
-    //     {
-    //       op2.conStart.tap( ( err, op ) =>
-    //       {
-    //         track.push( 'conStart' );
-    //         test.identical( err, undefined );
-    //         test.identical( op, op2 );
-    //         test.identical( op2.process, null );
-    //         return null;
-    //       })
+      let returned = _.process.start( options )
 
-    //       op2.conDisconnect.tap( ( err, op ) =>
-    //       {
-    //         track.push( 'conDisconnect' );
-    //         test.identical( err, _.dont );
-    //         test.identical( op, undefined );
-    //         test.identical( op2.process, null );
-    //         return null;
-    //       })
+      test.identical( options.procedure._name, null );
+      test.identical( options.state, 'terminated' );
+      test.identical( options.exitReason, 'normal' );
+      test.identical( options.exitCode, null );
+      test.identical( options.exitSignal, null );
+      test.identical( options.error, null );
+      test.identical( options.process, undefined );
+      test.identical( options.output, '' );
+      test.identical( options.ended, true );
+      test.is( _.streamIs( options.streamOut ) );
+      test.is( _.streamIs( options.streamErr ) );
+      if( tops.mode === 'fork' )
+      {
+        test.identical( options.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
+      }
+      else
+      {
+        test.identical( options.stdio, [ 'pipe', 'pipe', 'pipe' ] );
+      }
 
-    //       op2.conTerminate.tap( ( err, op ) =>
-    //       {
-    //         track.push( 'conTerminate' );
-    //         test.identical( err, undefined );
-    //         test.identical( op, op2 );
-    //         test.identical( op2.process, null );
-    //         return null;
-    //       })
+      options.runs.forEach( ( op2, counter ) =>
+      {
+        op2.conStart.tap( ( err, op ) =>
+        {
+          track.push( 'conStart' );
+          test.identical( err, undefined );
+          test.identical( op, op2 );
+          test.identical( op2.process, null );
+          return null;
+        })
 
-    //       op2.ready.tap( ( err, op ) =>
-    //       {
-    //         track.push( 'ready' );
-    //         test.identical( op2.process, null );
-    //         test.identical( err, undefined );
-    //         test.identical( op, op2 );
-    //         test.identical( op2.procedure._name, null );
-    //         test.identical( op2.procedure._object, null );
-    //         test.identical( op2.state, 'terminated' );
-    //         test.identical( op2.exitReason, null );
-    //         test.identical( op2.exitReason, null );
-    //         test.identical( op2.exitCode, null );
-    //         test.identical( op2.exitSignal, null );
-    //         test.identical( op2.error, null );
-    //         test.identical( op2.process, null );
-    //         test.identical( op2.output, '' );
-    //         test.identical( op2.ended, true );
-    //         test.identical( op2.streamOut, null );
-    //         test.identical( op2.streamErr, null );
-    //         if( mode === 'fork' )
-    //         {
-    //           test.identical( op2.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
-    //         }
-    //         else
-    //         {
-    //           test.identical( op2.stdio, [ 'pipe', 'pipe', 'pipe' ] );
-    //         }
-    //         test.identical( op2.fullExecPath, `err${programPath} id:${counter + 1}` );
-    //         test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate', 'ready' ] );
-    //         track = [];
-    //         return null;
-    //       })
-    //     });
-    //     return null;
-    //   })
-    // })
+        op2.conDisconnect.tap( ( err, op ) =>
+        {
+          track.push( 'conDisconnect' );
+          test.identical( err, _.dont );
+          test.identical( op, undefined );
+          test.identical( op2.process, null );
+          return null;
+        })
+
+        op2.conTerminate.tap( ( err, op ) =>
+        {
+          track.push( 'conTerminate' );
+          test.identical( err, undefined );
+          test.identical( op, op2 );
+          test.identical( op2.process, null );
+          return null;
+        })
+
+        op2.ready.tap( ( err, op ) =>
+        {
+          track.push( 'ready' );
+          test.identical( op2.process, null );
+          test.identical( err, undefined );
+          test.identical( op, op2 );
+          test.identical( op2.procedure._name, null );
+          test.identical( op2.procedure._object, null );
+          test.identical( op2.state, 'terminated' );
+          test.identical( op2.exitReason, null );
+          test.identical( op2.exitReason, null );
+          test.identical( op2.exitCode, null );
+          test.identical( op2.exitSignal, null );
+          test.identical( op2.error, null );
+          test.identical( op2.process, null );
+          test.identical( op2.output, '' );
+          test.identical( op2.ended, true );
+          test.identical( op2.streamOut, null );
+          test.identical( op2.streamErr, null );
+          if( tops.mode === 'fork' )
+          {
+            test.identical( op2.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
+            test.identical( op2.fullExecPath, 'err ' + programPath + ` id:${counter + 1}` );
+          }
+          else
+          {
+            test.identical( op2.stdio, [ 'pipe', 'pipe', 'pipe' ] );
+            test.identical( op2.fullExecPath, `err ${programPath} id:${counter + 1}` );
+          }
+          test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate', 'ready' ] );
+          track = [];
+          return null;
+        })
+      });
+      return null;
+    })
 
     return ready;
   }
