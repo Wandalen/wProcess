@@ -1,3 +1,4 @@
+/* eslint-disable */
 ( function _ProcessBasic_test_s( )
 {
 
@@ -23263,26 +23264,145 @@ function statusOf( test )
 
 //
 
-// function exitReason( test )
-// {
-//   test.case = 'initial value'
-//   var got = _.process.exitReason();
-//   test.identical( got, null );
-//
-//   /* */
-//
-//   test.case = 'set reason'
-//   _.process.exitReason( 'reason' );
-//   var got = _.process.exitReason();
-//   test.identical( got, 'reason' );
-//
-//   /* */
-//
-//   test.case = 'update reason'
-//   _.process.exitReason( 'reason2' );
-//   var got = _.process.exitReason();
-//   test.identical( got, 'reason2' );
-// }
+function exitReason( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
+
+  /* */
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, initial value`;
+
+      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals : { reason : null } }) )
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+        mode,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.output, 'null\n' );
+        a.fileProvider.fileDelete( testAppPath )
+        return null;
+      } )
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, reason : 'reason'`;
+
+      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals : { reason : 'reason' } }) )
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+        mode,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.output, 'reason\n' );
+        a.fileProvider.fileDelete( testAppPath )
+        return null;
+      } )
+    })
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, initial, set, update reason`;
+
+      let testAppPath = a.path.nativize( a.program({ routine : testApp2, locals : { reason1 : 'reason1', reason2 : 'reason2' } }) )
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+        mode,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.output, 'null reason1 reason2\n' );
+        a.fileProvider.fileDelete( testAppPath )
+        return null;
+      } )
+    })
+
+    return ready;
+  }
+
+
+  /* - */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+
+    if( reason )
+    _.process.exitReason( reason );
+
+    console.log( _.process.exitReason() )
+  }
+
+  function testApp2()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+
+    let reason00 = _.process.exitReason()
+    _.process.exitReason( reason1 )
+
+    let reason01 = _.process.exitReason()
+    _.process.exitReason( reason2 )
+
+    let reason02 = _.process.exitReason()
+
+    console.log( `${reason00} ${reason01} ${reason02}` )
+
+  }
+
+  /* ORIGINAL */
+  // /* */
+
+  // test.case = 'initial value'
+  // var got = _.process.exitReason();
+  // test.identical( got, null );
+
+  // /* */
+
+  // test.case = 'set reason'
+  // _.process.exitReason( 'reason' );
+  // var got = _.process.exitReason();
+  // test.identical( got, 'reason' );
+
+  // /* */
+
+  // test.case = 'update reason'
+  // _.process.exitReason( 'reason2' );
+  // var got = _.process.exitReason();
+  // test.identical( got, 'reason2' );
+}
 
 //
 
