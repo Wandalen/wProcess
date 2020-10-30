@@ -200,6 +200,7 @@ function startMinimal_body( o )
   let _outPrefix = null;
   let _readyCallback;
   let execArgs; /* xxx qqq for Vova : remove. no hacks! */
+  let _oargsLength = 0;
 
   form1();
   form2();
@@ -423,6 +424,8 @@ function startMinimal_body( o )
       if( begin && begin === end )
       o.execPath = _.strInsideOf( o.execPath, begin, end );
     }
+    
+    _oargsLength = o.args.length;
 
     if( execArgs && execArgs.length )
     o.args = _.arrayPrependArray( o.args || [], execArgs );
@@ -1159,17 +1162,13 @@ function startMinimal_body( o )
 
   function argsJoin( args )
   {
-    if( !execArgs && !o.passingThrough ) /* xxx qqq for Vova : why if passingThrough? no hacks! */
-    return args.join( ' ' );
+    // if( !execArgs && !o.passingThrough ) /* xxx qqq for Vova : why if passingThrough? no hacks! */
+    // return args.join( ' ' );
+    
+    let appendedArgs = o.passingThrough ? process.argv.length - 2 : 0;
+    let prependedArgs = args.length - ( _oargsLength + appendedArgs );
 
-    let i;
-
-    if( execArgs )
-    i = execArgs.length;
-    else
-    i = args.length - ( process.argv.length - 2 );
-
-    for( ; i < args.length; i++ )
+    for( let i = prependedArgs; i < args.length; i++ )
     {
       let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', '`' ]
       _.each( quotesToEscape, ( quote ) =>
@@ -1177,7 +1176,7 @@ function startMinimal_body( o )
         args[ i ] = argEscape( args[ i ], quote );
       })
       args[ i ] = _.strQuote( args[ i ] );
-
+      
       // args[ i ] = _.process.escapeArg( args[ i ]  ); /* zzz for Vova : use this routine, review fails */
     }
 
