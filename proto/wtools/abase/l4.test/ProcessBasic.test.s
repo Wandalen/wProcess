@@ -17685,10 +17685,10 @@ startNjsWithReadyDelayStructuralMultiple.description =
 `
 
 // --
-// sheller
+// starter
 // --
 
-function sheller( test )
+function starter( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -17958,7 +17958,7 @@ function sheller( test )
 
 //
 
-function shellerArgs( test )
+function starterArgs( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -17967,7 +17967,7 @@ function shellerArgs( test )
   /* */
 
 
-  let shellerOptions =
+  let starterOptions =
   {
     outputCollecting : 1,
     args : [ 'arg1', 'arg2' ],
@@ -17975,7 +17975,7 @@ function shellerArgs( test )
     ready : a.ready
   }
 
-  let shell = _.process.starter( shellerOptions )
+  let shell = _.process.starter( starterOptions )
 
   /* */
 
@@ -17989,7 +17989,7 @@ function shellerArgs( test )
     test.identical( op.ended, true );
     test.identical( op.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
     test.identical( _.strCount( op.output, `[ 'arg3', 'arg1', 'arg2' ]` ), 1 );
-    test.identical( shellerOptions.args, [ 'arg1', 'arg2' ] );
+    test.identical( starterOptions.args, [ 'arg1', 'arg2' ] );
     return null;
   })
 
@@ -18004,7 +18004,7 @@ function shellerArgs( test )
     test.identical( op.ended, true );
     test.identical( op.args, [ testAppPath, 'arg3' ] );
     test.identical( _.strCount( op.output, `[ 'arg3' ]` ), 1 );
-    test.identical( shellerOptions.args, [ 'arg1', 'arg2' ] );
+    test.identical( starterOptions.args, [ 'arg1', 'arg2' ] );
     return null;
   })
 
@@ -18019,7 +18019,7 @@ function shellerArgs( test )
     test.identical( op.ended, true );
     test.identical( op.args, [ testAppPath, 'arg3' ] );
     test.identical( _.strCount( op.output, `[ 'arg3' ]` ), 1 );
-    test.identical( shellerOptions.args, [ 'arg1', 'arg2' ] );
+    test.identical( starterOptions.args, [ 'arg1', 'arg2' ] );
     return null;
   })
 
@@ -18037,7 +18037,7 @@ function shellerArgs( test )
 
 //
 
-function shellerFields( test )
+function starterFields( test )
 {
 
   test.case = 'defaults';
@@ -24817,14 +24817,7 @@ function startErrorAfterTerminationWithSend( test )
   `
       if( process.platform === 'darwin' )
       exp += `code : 'ERR_IPC_CHANNEL_CLOSED'`
-
-      exp +=
-`
-  Error starting the process
-      Exec path : ${ mode === 'fork' ? '' : 'node ' }${a.abs( 'testApp.js' )}
-      Current path : ${a.path.current()}
-`
-      test.equivalent( e.err.originalMessage, exp )
+      test.identical( _.strCount( e.err.originalMessage, 'Error starting the process' ), 1 );
       _.errAttend( e.err );
       track.push( 'uncaughtError' );
       _.process.off( 'uncaughtError', uncaughtError );
@@ -28926,7 +28919,7 @@ function terminateSecondChildSpawn( test )
 
     o.conTerminate.thenGive( () =>
     {
-      timer.take( _.dont );
+      timer.error( _.dont );
 
       let data =
       {
@@ -29078,7 +29071,7 @@ function terminateSecondChildFork( test )
 
     o.conTerminate.thenGive( () =>
     {
-      timer.take( _.dont );
+      timer.error( _.dont );
 
       let data =
       {
@@ -29239,7 +29232,7 @@ function terminateSecondChildShell( test )
 
     o.conTerminate.thenGive( () =>
     {
-      timer.take( _.dont );
+      timer.error( _.dont );
 
       let data =
       {
@@ -31544,6 +31537,200 @@ function killComplex( test )
 
 //
 
+function execPathOf( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( testApp );
+
+  /* zzz : implement for linux and osx */
+  if( process.platform !== 'win32' )
+  {
+    test.identical( 1,1 );
+    return;
+  }
+
+  a.ready
+
+  /* */
+
+  .then( () =>
+  {
+    let o = { execPath : a.path.nativize( testAppPath ) };
+    _.process.startNjs( o )
+
+    o.conStart.then( () => _.process.execPathOf( o.process ) )
+    o.conStart.then( ( arg ) =>
+    {
+      test.is( _.strHas( arg, o.execPath ) );
+      return null;
+    })
+
+    return _.Consequence.And( o.conStart, o.conTerminate );
+  })
+
+  /* */
+
+  return a.ready;
+
+  /* */
+
+  function testApp()
+  {
+    setTimeout( () => {}, context.t1 * 5 ) /* 5000 */
+  }
+}
+
+//
+
+function waitForDeath( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( testApp );
+
+  a.ready
+
+  /* */
+
+  .then( () =>
+  {
+    test.case = 'child process terminates by its own, wait for termination using pnd'
+    let o =
+    {
+      execPath : 'node ' + a.path.nativize( testAppPath ),
+      throwingExitCode : 0,
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputPiping : 1,
+      outputCollecting : 1
+    };
+    _.process.start( o )
+
+    let terminated = _.process.waitForDeath({ pnd : o.process, timeOut : context.t1 * 10 })
+    .then( () =>
+    {
+      test.identical( _.strCount( o.output, 'program::end' ), 1 );
+      test.identical( o.state, 'terminated' );
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      return null;
+    })
+
+    return _.Consequence.And( terminated, o.conTerminate );
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    test.case = 'child process terminates by its own, wait for termination using pid'
+    let o =
+    {
+      execPath : 'node ' + a.path.nativize( testAppPath ),
+      throwingExitCode : 0,
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputPiping : 1,
+      outputCollecting : 1
+    };
+    _.process.start( o )
+
+    let terminated = _.process.waitForDeath({ pid : o.process.pid, timeOut : context.t1 * 10 })
+    .then( () =>
+    {
+      test.identical( _.strCount( o.output, 'program::end' ), 1 );
+      test.identical( o.state, 'terminated' );
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      return null;
+    })
+
+    return _.Consequence.And( terminated, o.conTerminate );
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    test.case = 'child process is terminated by SIGTERM'
+    let o =
+    {
+      execPath : 'node ' + a.path.nativize( testAppPath ),
+      throwingExitCode : 0,
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputPiping : 1,
+      outputCollecting : 1
+    };
+    _.process.start( o )
+
+    o.conStart.thenGive( () => o.process.kill( 'SIGTERM' ) )
+
+    let terminated = _.process.waitForDeath({ pnd : o.process, timeOut : context.t1 * 10 })
+    .then( () =>
+    {
+      test.identical( _.strCount( o.output, 'program::end' ), 0 );
+      test.identical( o.state, 'terminated' );
+      test.notIdentical( o.exitCode, 0 );
+      test.notIdentical( o.exitSignal, null );
+      return null;
+    })
+
+    return _.Consequence.And( terminated, o.conTerminate );
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    test.case = 'process is still alive after timeOut'
+    let o =
+    {
+      execPath : 'node ' + a.path.nativize( testAppPath ),
+      throwingExitCode : 0,
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputPiping : 1,
+      outputCollecting : 1
+    };
+    _.process.start( o )
+
+    let terminated = _.process.waitForDeath({ pnd : o.process, timeOut : 1000 })
+    terminated = test.shouldThrowErrorAsync( terminated );
+
+    o.conTerminate.then( () =>
+    {
+      test.identical( _.strCount( o.output, 'program::end' ), 1 );
+      test.identical( o.state, 'terminated' );
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      return null;
+    })
+
+    return _.Consequence.And( terminated, o.conTerminate );
+  })
+
+  /* */
+
+  return a.ready;
+
+  /* */
+
+  function testApp()
+  {
+    console.log( 'program::start' );
+    setTimeout( () =>
+    {
+      console.log( 'program::end' );
+    }, context.t1 * 5 ) /* 1500 */
+  }
+}
+
+// --
+// children
+// --
+
 function children( test )
 {
   let context = this;
@@ -31888,16 +32075,15 @@ function childrenOptionFormatList( test )
   {
     let _ = require( toolsPath );
     _.include( 'wProcess' );
-    _.include( 'wFiles' );
     var o =
     {
       execPath : 'node testApp2.js',
       currentPath : __dirname,
       mode : 'spawn',
-      inputMirroring : 0
+      inputMirroring : 0,
     }
     _.process.start( o );
-    process.send( o.process.pid )
+    process.send( o.process.pid );
   }
 
   function testApp2()
@@ -31905,197 +32091,6 @@ function childrenOptionFormatList( test )
     if( process.send )
     process.send( process.pid );
     setTimeout( () => {}, context.t0 * 15 ) /* 1500 */
-  }
-}
-
-//
-
-function waitForTermination( test )
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
-  
-  a.ready
-  
-  /* */
-  
-  .then( () => 
-  {
-    test.case = 'child process terminates by its own, wait for termination using pnd'
-    let o = 
-    { 
-      execPath : 'node ' + a.path.nativize( testAppPath ), 
-      throwingExitCode : 0, 
-      mode : 'spawn',
-      stdio : 'pipe',
-      outputPiping : 1,
-      outputCollecting : 1 
-    };
-    _.process.start( o )
-    
-    let terminated = _.process.waitForTermination({ pnd : o.process, timeOut : context.t1 * 10 })
-    .then( () => 
-    {
-      test.identical( _.strCount( o.output, 'program::end' ), 1 );
-      test.identical( o.state, 'terminated' );
-      test.identical( o.exitCode, 0 );
-      test.identical( o.exitSignal, null );
-      return null;
-    })
-    
-    return _.Consequence.And( terminated, o.conTerminate );
-  })
-  
-  /* */
-  
-  .then( () => 
-  {
-    test.case = 'child process terminates by its own, wait for termination using pid'
-    let o = 
-    { 
-      execPath : 'node ' + a.path.nativize( testAppPath ), 
-      throwingExitCode : 0, 
-      mode : 'spawn',
-      stdio : 'pipe',
-      outputPiping : 1,
-      outputCollecting : 1 
-    };
-    _.process.start( o )
-    
-    let terminated = _.process.waitForTermination({ pid : o.process.pid, timeOut : context.t1 * 10 })
-    .then( () => 
-    {
-      test.identical( _.strCount( o.output, 'program::end' ), 1 );
-      test.identical( o.state, 'terminated' );
-      test.identical( o.exitCode, 0 );
-      test.identical( o.exitSignal, null );
-      return null;
-    })
-    
-    return _.Consequence.And( terminated, o.conTerminate );
-  })
-  
-  /* */
-  
-  .then( () => 
-  {
-    test.case = 'child process is terminated by SIGTERM'
-    let o = 
-    { 
-      execPath : 'node ' + a.path.nativize( testAppPath ), 
-      throwingExitCode : 0, 
-      mode : 'spawn',
-      stdio : 'pipe',
-      outputPiping : 1,
-      outputCollecting : 1 
-    };
-    _.process.start( o )
-    
-    o.conStart.thenGive( () => o.process.kill( 'SIGTERM' ) )
-    
-    let terminated = _.process.waitForTermination({ pnd : o.process, timeOut : context.t1 * 10 })
-    .then( () => 
-    {
-      test.identical( _.strCount( o.output, 'program::end' ), 0 );
-      test.identical( o.state, 'terminated' );
-      test.notIdentical( o.exitCode, 0 );
-      test.notIdentical( o.exitSignal, null );
-      return null;
-    })
-    
-    return _.Consequence.And( terminated, o.conTerminate );
-  })
-  
-  /* */
-  
-  .then( () => 
-  {
-    test.case = 'process is still alive after timeOut'
-    let o = 
-    { 
-      execPath : 'node ' + a.path.nativize( testAppPath ), 
-      throwingExitCode : 0, 
-      mode : 'spawn',
-      stdio : 'pipe',
-      outputPiping : 1,
-      outputCollecting : 1 
-    };
-    _.process.start( o )
-    
-    let terminated = _.process.waitForTermination({ pnd : o.process, timeOut : 1000 })
-    terminated = test.shouldThrowErrorAsync( terminated );
-    
-    o.conTerminate.then( () => 
-    {
-      test.identical( _.strCount( o.output, 'program::end' ), 1 );
-      test.identical( o.state, 'terminated' );
-      test.identical( o.exitCode, 0 );
-      test.identical( o.exitSignal, null );
-      return null;
-    })
-    
-    return _.Consequence.And( terminated, o.conTerminate );
-  })
-  
-  /* */
-  
-  return a.ready;
-  
-  /* */
- 
-  function testApp()
-  {
-    console.log( 'program::start' );
-    setTimeout( () => 
-    {
-      console.log( 'program::end' );
-    }, context.t1 * 5 ) /* 1500 */
-  }
-}
-
-//
-
-function cmdLineFor( test )
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
-  
-  if( process.platform !== 'win32' )///xxx:implement for linux and osx
-  {
-    test.identical( 1,1 );
-    return;
-  }
-  
-  a.ready
-  
-  /* */
-  
-  .then( () => 
-  {
-    let o = { execPath : a.path.nativize( testAppPath ) };
-    _.process.startNjs( o )
-    
-    o.conStart.then( () => _.process.cmdLineFor( o.process ) )
-    o.conStart.then( ( arg ) =>
-    {
-      test.is( _.strHas( arg, o.execPath ) );
-      return null;
-    })
-    
-    return _.Consequence.And( o.conStart, o.conTerminate );
-  })
-  
-  /* */
-  
-  return a.ready;
-  
-  /* */
- 
-  function testApp()
-  {
-    setTimeout( () => {}, context.t1 * 5 ) /* 1500 */
   }
 }
 
@@ -32485,11 +32480,11 @@ var Proto =
     startNjsWithReadyDelayStructural,
     startNjsWithReadyDelayStructuralMultiple,
 
-    // sheller
+    // starter
 
-    sheller,
-    shellerArgs,
-    shellerFields,
+    starter,
+    starterArgs,
+    starterFields,
 
     // output
 
@@ -32581,14 +32576,13 @@ var Proto =
     terminateDifferentStdio, /* qqq for Vova: rewrite, don't use timeout to run terminate */
 
     killComplex,
+    execPathOf,
+    waitForDeath,
 
     // children
 
     children,
     childrenOptionFormatList,
-    
-    cmdLineFor,
-    waitForTermination,
 
     // experiments
 
