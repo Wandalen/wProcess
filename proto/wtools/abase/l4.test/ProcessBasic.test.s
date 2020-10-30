@@ -2052,6 +2052,93 @@ function startSyncDeasync( test )
 
 //
 
+function startSyncDeasync2( test )
+{
+
+  let context = this;
+  let a = context.assetFor( test, false );
+  let programPath = a.program( testApp );
+  let modes = [  'fork', 'spawn', 'shell' ];
+
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, mode }) ) );
+
+  return a.ready;
+
+  /* - */
+
+  function run( tops )
+  {
+    test.case = `mode : ${ tops.mode }; sync : ${ tops.sync }; deasync : ${ tops.deasync }`;
+
+    let ready = new _.Consequence().take( null );
+
+    if( tops.sync && !tops.deasync && tops.mode === 'fork' )
+    return test.shouldThrowErrorSync( () =>
+    {
+      _.process.start
+      ({
+        execPath : programPath,
+        mode : tops.mode,
+        sync : tops.sync,
+        deasync : tops.deasync
+      })
+    });
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}`
+      let o =
+      {
+        execPath : tops.mode === 'fork' ? programPath : 'node ' + programPath,
+        mode : tops.mode,
+        sync : tops.sync,
+        deasync : tops.deasync
+      }
+      var returned = _.process.start( o );
+
+      if( tops.sync )
+      {
+        test.is( !_.consequenceIs( returned ) );
+        test.is( returned === o );
+        test.identical( returned, o );
+        test.identical( o.exitCode, 0 );
+        return returned;
+      }
+      else
+      {
+        test.is( _.consequenceIs( returned ) );
+        if( tops.deasync )
+        test.identical( returned.resourcesCount(), 1 );
+        else
+        test.identical( returned.resourcesCount(), 0 );
+        returned.then( function( op )
+        {
+          test.identical( op.exitCode, 0 );
+          test.identical( op.ended, true );
+          return op;
+        })
+        return returned;
+      }
+    })
+
+    return ready;
+  }
+
+  /* - */
+
+  function testApp()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+}
+
+//
+
 function startSpawnSyncDeasync( test )
 {
   let context = this;
@@ -32819,6 +32906,7 @@ var Proto =
 
     startSync,
     startSyncDeasync,
+    startSyncDeasync2,
     startSpawnSyncDeasync, /* qqq for Yevhen : join with subroutine | */
     startSpawnSyncDeasyncThrowing,
     startShellSyncDeasync, /* qqq for Yevhen : join with subroutine */
