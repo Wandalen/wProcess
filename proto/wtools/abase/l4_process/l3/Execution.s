@@ -2878,7 +2878,7 @@ function signal_body( o )
     _.assert( _.intIs( p.pid ) );
 
     if( !_.process.isAlive( p.pid ) )
-    return;
+    return true;
 
     let pnd = p.pnd;
     if( !pnd && o.pnd && o.pnd.pid === p.pid )
@@ -2897,7 +2897,7 @@ function signal_body( o )
     catch( err )
     {
       if( err.code === 'ESRCH' )
-      return;
+      return true;
       throw err;
     }
 
