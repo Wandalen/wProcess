@@ -30447,19 +30447,10 @@ function terminateFirstChildSpawn( test )
     throwingExitCode : 0
   }
 
-  _.process.start( o );
+  _.process.start( o ); /* xxx */
 
   let program2Pid = null;
   let terminate = _.Consequence();
-
-  function handleOutput ( output )
-  {
-    output = output.toString();
-    if( !_.strHas( output, 'program2::begin' ) )
-    return;
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
 
   o.process.stdout.on( 'data', handleOutput );
 
@@ -30505,6 +30496,17 @@ function terminateFirstChildSpawn( test )
   })
 
   return _.Consequence.AndKeep( terminate, o.conTerminate );
+
+  /* - */
+
+  function handleOutput( output ) /* qqq for Vova : what is it for? */
+  {
+    output = output.toString();
+    if( !_.strHas( output, 'program2::begin' ) )
+    return;
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
 
   /* - */
 
@@ -30552,7 +30554,7 @@ function terminateFirstChildSpawn( test )
     {
       console.log( 'program2::end' );
       _.fileProvider.fileWrite( _.path.join( __dirname, 'program2end' ), 'end' );
-    }, context.t1*15 )
+    }, context.t1*10 )
 
     console.log( 'program2::begin' );
 
@@ -30568,6 +30570,8 @@ terminate first child withChildren:0
 first child with signal SIGTERM on unix and exit code 1 on win
 second child continues to work
 `
+
+//
 
 function terminateFirstChildFork( test )
 {
@@ -30590,15 +30594,6 @@ function terminateFirstChildFork( test )
 
   let program2Pid = null;
   let terminate = _.Consequence();
-
-  function handleOutput ( output )
-  {
-    output = output.toString();
-    if( !_.strHas( output, 'program2::begin' ) )
-    return;
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
 
   o.process.stdout.on( 'data', handleOutput );
 
@@ -30647,6 +30642,17 @@ function terminateFirstChildFork( test )
 
   /* - */
 
+  function handleOutput( output )
+  {
+    output = output.toString();
+    if( !_.strHas( output, 'program2::begin' ) )
+    return;
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
+
+  /* - */
+
   function program1()
   {
     let _ = require( toolsPath );
@@ -30691,7 +30697,7 @@ function terminateFirstChildFork( test )
     {
       console.log( 'program2::end' );
       _.fileProvider.fileWrite( _.path.join( __dirname, 'program2end' ), 'end' );
-    }, context.t1*15 )
+    }, context.t1*10 )
 
     console.log( 'program2::begin' );
 
@@ -30730,15 +30736,6 @@ function terminateFirstChildShell( test )
 
   let program2Pid = null;
   let terminate = _.Consequence();
-
-  function handleOutput ( output )
-  {
-    output = output.toString();
-    if( !_.strHas( output, 'program2::begin' ) )
-    return;
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
 
   o.process.stdout.on( 'data', handleOutput );
 
@@ -30803,6 +30800,17 @@ function terminateFirstChildShell( test )
 
   /* - */
 
+  function handleOutput( output )
+  {
+    output = output.toString();
+    if( !_.strHas( output, 'program2::begin' ) )
+    return;
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
+
+  /* - */
+
   function program1()
   {
     let _ = require( toolsPath );
@@ -30852,7 +30860,7 @@ function terminateFirstChildShell( test )
     {
       console.log( 'program2::end' );
       _.fileProvider.fileWrite( _.path.join( __dirname, 'program2end' ), 'end' );
-    }, context.t1*15 )
+    }, context.t1*10 )
 
     console.log( 'program2::begin' );
 
@@ -30894,15 +30902,6 @@ function terminateSecondChildSpawn( test )
   let program2Pid = null;
   let terminate = _.Consequence();
 
-  function handleOutput ( output )
-  {
-    output = output.toString();
-    if( !_.strHas( output, 'program2::begin' ) )
-    return;
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
-
   o.process.stdout.on( 'data', handleOutput );
 
   terminate.then( () =>
@@ -30943,6 +30942,17 @@ function terminateSecondChildSpawn( test )
   })
 
   return _.Consequence.AndKeep( terminate, o.conTerminate );
+
+  /* - */
+
+  function handleOutput( output )
+  {
+    output = output.toString();
+    if( !_.strHas( output, 'program2::begin' ) )
+    return;
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
 
   /* - */
 
@@ -31006,7 +31016,7 @@ function terminateSecondChildSpawn( test )
     setTimeout( () =>
     {
       console.log( 'program2::end' );
-    }, context.t1*15 )
+    }, context.t1*10 )
 
     console.log( 'program2::begin' );
 
@@ -31045,15 +31055,6 @@ function terminateSecondChildFork( test )
 
   let program2Pid = null;
   let terminate = _.Consequence();
-
-  function handleOutput ( output )
-  {
-    output = output.toString();
-    if( !_.strHas( output, 'program2::begin' ) )
-    return;
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
 
   o.process.stdout.on( 'data', handleOutput );
 
@@ -31095,6 +31096,17 @@ function terminateSecondChildFork( test )
   })
 
   return _.Consequence.AndKeep( terminate, o.conTerminate );
+
+  /* - */
+
+  function handleOutput( output )
+  {
+    output = output.toString();
+    if( !_.strHas( output, 'program2::begin' ) )
+    return;
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
 
   /* - */
 
@@ -31158,7 +31170,7 @@ function terminateSecondChildFork( test )
     setTimeout( () =>
     {
       console.log( 'program2::end' );
-    }, context.t1*15 )
+    }, context.t1*10 )
 
     console.log( 'program2::begin' );
 
@@ -31197,15 +31209,6 @@ function terminateSecondChildShell( test )
 
   let program2Pid = null;
   let terminate = _.Consequence();
-
-  function handleOutput ( output )
-  {
-    output = output.toString();
-    if( !_.strHas( output, 'program2::begin' ) )
-    return;
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
 
   o.process.stdout.on( 'data', handleOutput );
 
@@ -31259,6 +31262,17 @@ function terminateSecondChildShell( test )
 
   /* - */
 
+  function handleOutput( output )
+  {
+    output = output.toString();
+    if( !_.strHas( output, 'program2::begin' ) )
+    return;
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
+
+  /* - */
+
   function program1()
   {
     let _ = require( toolsPath );
@@ -31319,7 +31333,7 @@ function terminateSecondChildShell( test )
     setTimeout( () =>
     {
       console.log( 'program2::end' );
-    }, context.t1*15 )
+    }, context.t1*10 )
 
     console.log( 'program2::begin' );
 
@@ -31358,15 +31372,6 @@ function terminateDetachedFirstChildSpawn( test )
 
   let program2Pid = null;
   let terminate = _.Consequence();
-
-  function handleOutput ( output )
-  {
-    output = output.toString();
-    if( !_.strHas( output, 'program2::begin' ) )
-    return;
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
 
   o.process.stdout.on( 'data', handleOutput );
 
@@ -31411,6 +31416,19 @@ function terminateDetachedFirstChildSpawn( test )
   })
 
   return _.Consequence.AndKeep( terminate, o.conTerminate );
+
+  /* - */
+
+  function handleOutput( output )
+  {
+    output = output.toString();
+    if( !_.strHas( output, 'program2::begin' ) )
+    return;
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
+
+  /* - */
 
   function program1()
   {
@@ -31461,7 +31479,7 @@ function terminateDetachedFirstChildSpawn( test )
         filePath : _.path.join( __dirname, 'program2end' ),
         data : 'end'
       })
-    }, context.t1*15 )
+    }, context.t1*10 )
 
     console.log( 'program2::begin' );
 
@@ -31499,15 +31517,6 @@ function terminateDetachedFirstChildFork( test )
 
   let program2Pid = null;
   let terminate = _.Consequence();
-
-  function handleOutput ( output )
-  {
-    output = output.toString();
-    if( !_.strHas( output, 'program2::begin' ) )
-    return;
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
 
   o.process.stdout.on( 'data', handleOutput );
 
@@ -31580,6 +31589,17 @@ function terminateDetachedFirstChildFork( test )
 
   /* - */
 
+  function handleOutput( output )
+  {
+    output = output.toString();
+    if( !_.strHas( output, 'program2::begin' ) )
+    return;
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
+
+  /* - */
+
   function program2()
   {
     let _ = require( toolsPath );
@@ -31602,7 +31622,7 @@ function terminateDetachedFirstChildFork( test )
         filePath : _.path.join( __dirname, 'program2end' ),
         data : 'end'
       })
-    }, context.t1*15 )
+    }, context.t1*10 )
 
     console.log( 'program2::begin' );
 
@@ -31640,15 +31660,6 @@ function terminateDetachedFirstChildShell( test )
 
   let program2Pid = null;
   let terminate = _.Consequence();
-
-  function handleOutput ( output )
-  {
-    output = output.toString();
-    if( !_.strHas( output, 'program2::begin' ) )
-    return;
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
 
   o.process.stdout.on( 'data', handleOutput );
 
@@ -31693,6 +31704,19 @@ function terminateDetachedFirstChildShell( test )
   })
 
   return _.Consequence.AndKeep( terminate, o.conTerminate );
+
+  /* - */
+
+  function handleOutput( output )
+  {
+    output = output.toString();
+    if( !_.strHas( output, 'program2::begin' ) )
+    return;
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
+
+  /* - */
 
   function program1()
   {
@@ -31743,7 +31767,7 @@ function terminateDetachedFirstChildShell( test )
         filePath : _.path.join( __dirname, 'program2end' ),
         data : 'end'
       })
-    }, context.t1*15 )
+    }, context.t1*10 )
 
     console.log( 'program2::begin' );
 
@@ -31782,15 +31806,6 @@ function terminateWithDetachedChildSpawn( test )
   let program2Pid = null;
   let terminate = _.Consequence();
 
-  function handleOutput ( output )
-  {
-    output = output.toString();
-    if( !_.strHas( output, 'program2::begin' ) )
-    return;
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
-
   o.process.stdout.on( 'data', handleOutput );
 
   terminate.then( () =>
@@ -31828,6 +31843,19 @@ function terminateWithDetachedChildSpawn( test )
   })
 
   return _.Consequence.AndKeep( terminate, o.conTerminate );
+
+  /* - */
+
+  function handleOutput( output )
+  {
+    output = output.toString();
+    if( !_.strHas( output, 'program2::begin' ) )
+    return;
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
+
+  /* - */
 
   function program1()
   {
@@ -31878,7 +31906,7 @@ function terminateWithDetachedChildSpawn( test )
         filePath : _.path.join( __dirname, 'program2end' ),
         data : 'end'
       })
-    }, context.t1*15 )
+    }, context.t1*10 )
 
     console.log( 'program2::begin' );
 
@@ -32023,6 +32051,8 @@ function terminateWithDetachedChildFork( test )
 
   return _.Consequence.AndKeep( terminate, o.conTerminate );
 
+  /* - */
+
   function handleOutput( output )
   {
     output = output.toString();
@@ -32031,6 +32061,8 @@ function terminateWithDetachedChildFork( test )
     o.process.stdout.removeListener( 'data', handleOutput );
     terminate.take( null );
   }
+
+  /* - */
 
   function program1()
   {
@@ -32081,7 +32113,7 @@ function terminateWithDetachedChildFork( test )
         filePath : _.path.join( __dirname, 'program2end' ),
         data : 'end'
       })
-    }, context.t1*15 )
+    }, context.t1*10 )
 
     console.log( 'program2::begin' );
   }
@@ -32118,15 +32150,6 @@ function terminateWithDetachedChildShell( test )
 
   let program2Pid = null;
   let terminate = _.Consequence();
-
-  function handleOutput ( output )
-  {
-    output = output.toString();
-    if( !_.strHas( output, 'program2::begin' ) )
-    return;
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
 
   o.process.stdout.on( 'data', handleOutput );
 
@@ -32165,6 +32188,19 @@ function terminateWithDetachedChildShell( test )
   })
 
   return _.Consequence.AndKeep( terminate, o.conTerminate );
+
+  /* - */
+
+  function handleOutput( output )
+  {
+    output = output.toString();
+    if( !_.strHas( output, 'program2::begin' ) )
+    return;
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
+
+  /* - */
 
   function program1()
   {
@@ -32215,7 +32251,7 @@ function terminateWithDetachedChildShell( test )
         filePath : _.path.join( __dirname, 'program2end' ),
         data : 'end'
       })
-    }, context.t1*15 )
+    }, context.t1*10 )
 
     console.log( 'program2::begin' );
 
@@ -32255,19 +32291,6 @@ function terminateSeveralChildren( test )
   let program3PID = null;
   let c = 0;
   let terminate = _.Consequence();
-
-  function handleOutput ( output )
-  {
-    output = output.toString();
-    if( _.strHas( output, 'program2::begin' ) || _.strHas( output, 'program3::begin' ) )
-    c += 1;
-
-    if( c !== 2 )
-    return;
-
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
 
   o.process.stdout.on( 'data', handleOutput );
 
@@ -32313,6 +32336,22 @@ function terminateSeveralChildren( test )
 
   return _.Consequence.AndKeep( terminate, o.conTerminate );
 
+  /* - */
+
+  function handleOutput( output )
+  {
+    output = output.toString();
+    if( _.strHas( output, 'program2::begin' ) || _.strHas( output, 'program3::begin' ) )
+    c += 1;
+
+    if( c !== 2 )
+    return;
+
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
+
+  /* - */
 
   function program1()
   {
@@ -32363,7 +32402,7 @@ function terminateSeveralChildren( test )
         filePath : _.path.join( __dirname, 'program2end' ),
         data : 'end'
       })
-    }, context.t1*15 )
+    }, context.t1*10 )
 
     console.log( 'program2::begin' );
 
@@ -32393,7 +32432,7 @@ function terminateSeveralChildren( test )
         filePath : _.path.join( __dirname, 'program3end' ),
         data : 'end'
       })
-    }, context.t1*15 )
+    }, context.t1*10 )
 
     console.log( 'program3::begin' );
 
@@ -32427,19 +32466,6 @@ function terminateWithSeveralDetachedChildren( test )
   let program3PID = null;
   let c = 0;
   let terminate = _.Consequence();
-
-  function handleOutput ( output )
-  {
-    output = output.toString();
-    if( _.strHas( output, 'program2::begin' ) || _.strHas( output, 'program3::begin' ) )
-    c += 1;
-
-    if( c !== 2 )
-    return;
-
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
 
   o.process.stdout.on( 'data', handleOutput );
 
@@ -32485,6 +32511,22 @@ function terminateWithSeveralDetachedChildren( test )
 
   return _.Consequence.AndKeep( terminate, o.conTerminate );
 
+  /* - */
+
+  function handleOutput( output )
+  {
+    output = output.toString();
+    if( _.strHas( output, 'program2::begin' ) || _.strHas( output, 'program3::begin' ) )
+    c += 1;
+
+    if( c !== 2 )
+    return;
+
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
+
+  /* - */
 
   function program1()
   {
@@ -32536,7 +32578,7 @@ function terminateWithSeveralDetachedChildren( test )
         filePath : _.path.join( __dirname, 'program2end' ),
         data : 'end'
       })
-    }, context.t1*15 )
+    }, context.t1*10 )
 
     console.log( 'program2::begin' );
 
@@ -32566,7 +32608,7 @@ function terminateWithSeveralDetachedChildren( test )
         filePath : _.path.join( __dirname, 'program3end' ),
         data : 'end'
       })
-    }, context.t1*15 )
+    }, context.t1*10 )
 
     console.log( 'program3::begin' );
 
@@ -32658,15 +32700,6 @@ function terminateTimeOutNoHandler( test )
   _.process.start( o )
   let terminate = _.Consequence();
 
-  function handleOutput ( output )
-  {
-    output = output.toString();
-    if( !_.strHas( output, 'program1::begin' ) )
-    return;
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
-
   o.process.stdout.on( 'data', handleOutput );
 
   terminate.then( () =>
@@ -32702,6 +32735,17 @@ function terminateTimeOutNoHandler( test )
   })
 
   return _.Consequence.AndKeep( terminate, o.conTerminate );
+
+  /* - */
+
+  function handleOutput( output )
+  {
+    output = output.toString();
+    if( !_.strHas( output, 'program1::begin' ) )
+    return;
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
 
   /* - */
 
@@ -32744,15 +32788,6 @@ function terminateTimeOutIgnoreSignal( test )
   _.process.start( o )
   let terminate = _.Consequence();
 
-  function handleOutput ( output )
-  {
-    output = output.toString();
-    if( !_.strHas( output, 'program1::begin' ) )
-    return;
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
-
   o.process.stdout.on( 'data', handleOutput );
 
   terminate.then( () =>
@@ -32789,6 +32824,17 @@ function terminateTimeOutIgnoreSignal( test )
   })
 
   return _.Consequence.AndKeep( terminate, o.conTerminate );
+
+  /* - */
+
+  function handleOutput( output )
+  {
+    output = output.toString();
+    if( !_.strHas( output, 'program1::begin' ) )
+    return;
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
 
   /* - */
 
@@ -32837,15 +32883,6 @@ function terminateZeroTimeOutSpawn( test )
   _.process.start( o )
   let terminate = _.Consequence();
 
-  function handleOutput ( output )
-  {
-    output = output.toString();
-    if( !_.strHas( output, 'program1::begin' ) )
-    return;
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
-
   o.process.stdout.on( 'data', handleOutput );
 
   terminate.then( () =>
@@ -32881,6 +32918,17 @@ function terminateZeroTimeOutSpawn( test )
   })
 
   return _.Consequence.AndKeep( terminate, o.conTerminate );
+
+  /* - */
+
+  function handleOutput( output )
+  {
+    output = output.toString();
+    if( !_.strHas( output, 'program1::begin' ) )
+    return;
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
 
   /* - */
 
@@ -32930,15 +32978,6 @@ function terminateZeroTimeOutFork( test )
   _.process.start( o )
   let terminate = _.Consequence();
 
-  function handleOutput ( output )
-  {
-    output = output.toString();
-    if( !_.strHas( output, 'program1::begin' ) )
-    return;
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
-
   o.process.stdout.on( 'data', handleOutput );
 
   terminate.then( () =>
@@ -32974,6 +33013,17 @@ function terminateZeroTimeOutFork( test )
   })
 
   return _.Consequence.AndKeep( terminate, o.conTerminate );
+
+  /* - */
+
+  function handleOutput( output )
+  {
+    output = output.toString();
+    if( !_.strHas( output, 'program1::begin' ) )
+    return;
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
 
   /* - */
 
@@ -33023,15 +33073,6 @@ function terminateZeroTimeOutWithoutChildrenShell( test )
   _.process.start( o )
   let terminate = _.Consequence();
 
-  function handleOutput ( output )
-  {
-    output = output.toString();
-    if( !_.strHas( output, 'program1::begin' ) )
-    return;
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
-
   o.process.stdout.on( 'data', handleOutput );
 
   terminate.then( () =>
@@ -33075,6 +33116,17 @@ function terminateZeroTimeOutWithoutChildrenShell( test )
   })
 
   return _.Consequence.AndKeep( terminate, o.conTerminate );
+
+  /* - */
+
+  function handleOutput( output )
+  {
+    output = output.toString();
+    if( !_.strHas( output, 'program1::begin' ) )
+    return;
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
 
   /* - */
 
@@ -33124,15 +33176,6 @@ function terminateZeroTimeOutWithtChildrenShell( test )
   _.process.start( o )
   let terminate = _.Consequence();
 
-  function handleOutput ( output )
-  {
-    output = output.toString();
-    if( !_.strHas( output, 'program1::begin' ) )
-    return;
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
-
   o.process.stdout.on( 'data', handleOutput );
 
   terminate.then( () =>
@@ -33168,6 +33211,17 @@ function terminateZeroTimeOutWithtChildrenShell( test )
   })
 
   return _.Consequence.AndKeep( terminate, o.conTerminate );
+
+  /* - */
+
+  function handleOutput( output )
+  {
+    output = output.toString();
+    if( !_.strHas( output, 'program1::begin' ) )
+    return;
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
 
   /* - */
 
