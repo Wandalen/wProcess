@@ -542,6 +542,7 @@ function startMinimal_body( o )
 
       if( o.sync && !o.deasync )
       {
+        /* When dry : 1, o.process = null */
         if( o.process.error )
         handleError( o.process.error );
         else
@@ -2047,6 +2048,7 @@ function start_body( o )
       conTerminate.push( o2.conTerminate );
       readies.push( o2.ready );
 
+      if( !o.dry )
       if( o.streamOut || o.streamErr )
       processPipe( o2 );
 
