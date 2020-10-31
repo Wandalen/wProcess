@@ -23151,11 +23151,10 @@ function startSingleOptionDry( test )
   let a = context.assetFor( test, false );
   let programPath = a.program( testApp );
   let track = [];
-
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run({ mode, sync : 0, deasync : 0 }) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run({ mode, sync : 0, deasync : 1 }) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run({ mode, sync : 1, deasync : 0 }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ mode, sync : 1, deasync : 0 }) ) ); /* qqq2 for Yevhen : was broken! */
   modes.forEach( ( mode ) => a.ready.then( () => run({ mode, sync : 1, deasync : 1 }) ) );
   return a.ready;
 
@@ -23180,6 +23179,7 @@ function startSingleOptionDry( test )
       test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, dry : 1, no error`
       let o =
       {
+        /* qqq for Yevhen : ? */
         execPath : tops.mode === 'fork' ? programPath + ` arg1 "arg 2" "'arg3'"` : 'node ' + programPath + ` arg1 "arg 2" "'arg3'"`,
         mode : tops.mode,
         sync : tops.sync,
@@ -23278,7 +23278,7 @@ function startSingleOptionDry( test )
         }
 
         test.is( !a.fileProvider.fileExists( a.path.join( a.routinePath, 'file' ) ) )
-        if( tops.deasync )
+        if( tops.deasync || tops.sync )
         test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate', 'ready' ] );
         else
         test.identical( track, [ 'conStart', 'conTerminate', 'conDisconnect', 'ready' ] );
@@ -23390,7 +23390,7 @@ function startSingleOptionDry( test )
         }
 
         test.is( !a.fileProvider.fileExists( a.path.join( a.routinePath, 'file' ) ) )
-        if( tops.deasync )
+        if( tops.deasync || tops.sync )
         test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate', 'ready' ] );
         else
         test.identical( track, [ 'conStart', 'conTerminate', 'conDisconnect', 'ready' ] );

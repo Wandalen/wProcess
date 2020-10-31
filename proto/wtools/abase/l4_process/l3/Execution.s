@@ -541,22 +541,35 @@ function startMinimal_body( o )
       timeOutForm();
       pipe();
 
-      if( o.sync && !o.deasync )
-      {
-        /* When dry : 1, o.process = null */
-        if( o.process.error )
-        handleError( o.process.error );
-        else
-        handleClose( o.process.status, o.process.signal );
-      }
-
       if( o.dry )
       {
-        /* qqq for Yevhen : make sure option dry is covered good enough */
-        _.assert( o.state === 'started' );
-        o.state = 'terminated';
-        end2( undefined );
+        // _.assert( o.state === 'started' );
+        // o.state = 'terminated';
+        // end2( undefined );
+        if( o.error )
+        handleError( o.error );
+        else
+        handleClose( null, null );
       }
+      else
+      {
+        if( o.sync && !o.deasync )
+        {
+          if( o.process.error )
+          handleError( o.process.error );
+          else
+          handleClose( o.process.status, o.process.signal );
+        }
+      }
+
+      // if( o.dry )
+      // {
+      //   /* qqq for Yevhen : make sure option dry is covered good enough */
+      //   _.assert( o.state === 'started' );
+      //   o.state = 'terminated';
+      //   end2( undefined );
+      // }
+
     }
     catch( err )
     {
@@ -829,7 +842,7 @@ function startMinimal_body( o )
     o.exitReason = 'signal';
     else if( exitCode )
     o.exitReason = 'code';
-    else
+    else if( exitCode === 0 )
     o.exitReason = 'normal';
 
     if( o.verbosity >= 5 && o.inputMirroring ) /* qqq for Yevhen : cover */
@@ -840,7 +853,7 @@ function startMinimal_body( o )
     }
 
     if( !o.error && o.throwingExitCode )
-    if( exitSignal || exitCode !== 0 )
+    if( exitSignal || exitCode ) /* should be not strict condition to handle properly value null */
     {
       if( _.numberIs( exitCode ) )
       o.error = _._err({ args : [ 'Process returned exit code', exitCode, '\n', infoGet() ], reason : 'exit code' });
@@ -1271,6 +1284,8 @@ function startMinimal_body( o )
     console.log( _.process.realMainFile(), 'exitCodeSet', exitCode );
     */
     if( o.exitCode )
+    return;
+    if( exitCode === null )
     return;
     o.exitCode = exitCode;
     if( o.process && o.process.exitCode === undefined )
