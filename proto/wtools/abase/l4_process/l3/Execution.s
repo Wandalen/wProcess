@@ -232,7 +232,7 @@ function startMinimal_body( o )
   inputMirror,
   execPathParse,
   argsUnqoute,
-  argsJoin,
+  argsEscape,
   argEscape,
   optionsForSpawn,
   optionsForFork,
@@ -425,10 +425,20 @@ function startMinimal_body( o )
       o.fullExecPath = o.execPath;
       _argsLength = o.args.length;
 
-      let begin = _.strBeginOf( o.execPath, [ '"', `'`, '`' ] );
-      let end = _.strEndOf( o.execPath, [ '"', `'`, '`' ] );
-      if( begin && begin === end )
-      o.execPath = _.strInsideOf( o.execPath, begin, end );
+      o.execPath = argUnqoute( o.execPath );
+      // let begin = _.strBeginOf( o.execPath, [ '"', `'`, '`' ] );
+      // let end = _.strEndOf( o.execPath, [ '"', `'`, '`' ] );
+      // if( begin && begin === end )
+      // o.execPath = _.strInsideOf( o.execPath, begin, end );
+    }
+
+    /* passingThrough */
+
+    if( o.passingThrough )
+    {
+      let argumentsOwn = process.argv.slice( 2 );
+      if( argumentsOwn.length )
+      o.args = _.arrayAppendArray( o.args || [], argumentsOwn );
     }
 
     /* */
@@ -440,15 +450,6 @@ function startMinimal_body( o )
     _.assert( _.numberIs( o.verbosity ) );
     _.assert( _.boolLike( o.outputPiping ) );
     _.assert( _.boolLike( o.outputCollecting ) );
-
-    /* passingThrough */
-
-    if( o.passingThrough )
-    {
-      let argumentsOwn = process.argv.slice( 2 );
-      if( argumentsOwn.length )
-      o.args = _.arrayAppendArray( o.args || [], argumentsOwn );
-    }
 
     /* dependencies */
 
@@ -689,7 +690,7 @@ function startMinimal_body( o )
     o.args = o.interpreterArgs.concat( o.args )
 
     if( o.args.length )
-    arg2 = arg2 + ' ' + argsJoin( o.args.slice() );
+    arg2 = arg2 + ' ' + argsEscape( o.args.slice() ).join( ' ' );
 
     o.fullExecPath = arg2;
 
@@ -1110,9 +1111,7 @@ function startMinimal_body( o )
     {
       let begin = _.strBeginOf( args[ i ], quotes );
       let end = _.strEndOf( args[ i ], quotes );
-
-      if( begin && end )
-      if( begin === end )
+      if( begin && end && begin === end )
       continue;
 
       if( _.longHas( quotes, args[ i ] ) )
@@ -1148,22 +1147,27 @@ function startMinimal_body( o )
   function argsUnqoute( args )
   {
     let quotes = [ '"', `'`, '`' ];
-
     for( let i = 0; i < args.length; i++ )
-    {
-      let begin = _.strBeginOf( args[ i ], quotes );
-      let end = _.strEndOf( args[ i ], quotes );
-      if( begin )
-      if( begin && begin === end )
-      args[ i ] = _.strInsideOf( args[ i ], begin, end );
-    }
-
+    args[ i ] = argUnqoute( args[ i ] );
     return args;
   }
 
   /* */
 
-  function argsJoin( args )
+  function argUnqoute( arg )
+  {
+    let quotes = [ '"', `'`, '`' ];
+    let begin = _.strBeginOf( arg, quotes );
+    let end = _.strEndOf( arg, quotes );
+    if( begin )
+    if( begin && begin === end )
+    arg = _.strInsideOf( arg, begin, end );
+    return arg;
+  }
+
+  /* */
+
+  function argsEscape( args )
   {
     /* xxx qqq for Vova : why if passingThrough? no hacks! aaa:removed execArgs*/
 
@@ -1187,7 +1191,8 @@ function startMinimal_body( o )
       // args[ i ] = _.process.escapeArg( args[ i ]  ); /* zzz for Vova : use this routine, review fails */
     }
 
-    return args.join( ' ' );
+    return args;
+    // return args.join( ' ' );
   }
 
   /* */
@@ -1243,11 +1248,12 @@ function startMinimal_body( o )
 
   function execPathForFork( execPath )
   {
-    let quotes = [ '"', `'`, '`' ];
-    let begin = _.strBeginOf( execPath, quotes );
-    if( begin )
-    execPath = _.strInsideOf( execPath, begin, begin );
-    return execPath;
+    return argUnqoute( execPath );
+    // let quotes = [ '"', `'`, '`' ];
+    // let begin = _.strBeginOf( execPath, quotes );
+    // if( begin )
+    // execPath = _.strInsideOf( execPath, begin, begin );
+    // return execPath;
   }
 
   /* */

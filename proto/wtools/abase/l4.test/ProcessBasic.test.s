@@ -25433,7 +25433,7 @@ function startOutputMultiple( test )
         }
         else
         {
-          /* xxx : double check later
+          /*
           on older version of nodejs event finish goes before event end
           */
           var exp1 =
@@ -25594,7 +25594,7 @@ function startOutputMultiple( test )
         }
         else
         {
-          /* xxx : double check later
+          /*
           on older version of nodejs event finish goes before event end
           */
           var exp1 =
