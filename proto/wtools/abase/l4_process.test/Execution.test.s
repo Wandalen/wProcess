@@ -23188,10 +23188,21 @@ function exitReason( test )
       {
         test.notIdentical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        if( process.platform === 'darwin' )
-        test.identical( op.exitReason, 'signal' );
+        if( process.platform === 'win32' )
+        {
+          test.equivalent( op.exitReason, 'code' );
+        }
+        else if( process.platform === 'darwin' )
+        {
+          test.equivalent( op.exitReason, 'signal' );
+        }
         else
-        test.identical( op.exitReason, 'code' )
+        {
+          if( mode === 'shell' )
+          test.equivalent( op.exitReason, 'code' );
+          else
+          test.equivalent( op.exitReason, 'signal' );
+        }
         a.fileProvider.fileDelete( testAppPath );
         return null;
       } )
@@ -23355,7 +23366,7 @@ function exitReason( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${ mode }, exitReason : 'signal'`;
+      test.case = `mode : ${ mode }, exitReason : 'signal' or 'code'`;
       let testAppPath2 = a.program({ routine : testAppExitCodeSignal, locals : { code : null } });
       let locals =
       {
@@ -23374,10 +23385,22 @@ function exitReason( test )
       return _.process.start( options )
       .then( ( op ) =>
       {
-        if( process.platform === 'darwin' )
-        test.equivalent( op.output, 'signal' );
+        if( process.platform === 'win32' )
+        {
+          test.equivalent( op.output, 'code' );
+        }
+        else if( process.platform === 'darwin' )
+        {
+          test.equivalent( op.output, 'signal' );
+        }
         else
-        test.equivalent( op.output, 'code' )
+        {
+          if( mode === 'shell' )
+          test.equivalent( op.output, 'code' );
+          else
+          test.equivalent( op.output, 'signal' );
+        }
+
         a.fileProvider.fileDelete( testAppPath )
         a.fileProvider.fileDelete( testAppPath2 )
         return null;
@@ -23484,6 +23507,8 @@ function exitReason( test )
   // var got = _.process.exitReason();
   // test.identical( got, 'reason2' );
 }
+
+exitReason.timeOut = 120000;
 
 //
 
