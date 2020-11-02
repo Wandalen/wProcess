@@ -232,7 +232,7 @@ function startMinimal_body( o )
   inputMirror,
   execPathParse,
   argsUnqoute,
-  argsJoin,
+  argsEscape,
   argEscape,
   optionsForSpawn,
   optionsForFork,
@@ -399,6 +399,8 @@ function startMinimal_body( o )
     o.args = o.args.slice();
     o.args = _.arrayAs( o.args );
 
+    /* */
+
     _argsLength = o.args.length;
 
     if( _.strIs( o.execPath ) )
@@ -423,19 +425,12 @@ function startMinimal_body( o )
       o.fullExecPath = o.execPath;
       _argsLength = o.args.length;
 
-      let begin = _.strBeginOf( o.execPath, [ '"', `'`, '`' ] );
-      let end = _.strEndOf( o.execPath, [ '"', `'`, '`' ] );
-      if( begin && begin === end )
-      o.execPath = _.strInsideOf( o.execPath, begin, end );
+      o.execPath = argUnqoute( o.execPath );
+      // let begin = _.strBeginOf( o.execPath, [ '"', `'`, '`' ] );
+      // let end = _.strEndOf( o.execPath, [ '"', `'`, '`' ] );
+      // if( begin && begin === end )
+      // o.execPath = _.strInsideOf( o.execPath, begin, end );
     }
-
-    o.currentPath = _.path.resolve( o.currentPath || '.' );
-
-    _.assert( o.interpreterArgs === null || _.arrayIs( o.interpreterArgs ) );
-    _.assert( _.boolLike( o.outputAdditive ) );
-    _.assert( _.numberIs( o.verbosity ) );
-    _.assert( _.boolLike( o.outputPiping ) );
-    _.assert( _.boolLike( o.outputCollecting ) );
 
     /* passingThrough */
 
@@ -445,6 +440,16 @@ function startMinimal_body( o )
       if( argumentsOwn.length )
       o.args = _.arrayAppendArray( o.args || [], argumentsOwn );
     }
+
+    /* */
+
+    o.currentPath = _.path.resolve( o.currentPath || '.' );
+
+    _.assert( o.interpreterArgs === null || _.arrayIs( o.interpreterArgs ) );
+    _.assert( _.boolLike( o.outputAdditive ) );
+    _.assert( _.numberIs( o.verbosity ) );
+    _.assert( _.boolLike( o.outputPiping ) );
+    _.assert( _.boolLike( o.outputCollecting ) );
 
     /* dependencies */
 
@@ -472,7 +477,7 @@ function startMinimal_body( o )
     if( o.outputPrefixing )
     {
       _errPrefix = `${ ( o.outputColoring ? _.ct.format( 'err', { fg : 'dark red' } ) : 'err' ) } : `;
-      _outPrefix = `${ ( o.outputColoring ? _.ct.format( 'out', { fg : 'dark white' } ) : 'err' ) } : `;
+      _outPrefix = `${ ( o.outputColoring ? _.ct.format( 'out', { fg : 'dark white' } ) : 'out' ) } : `;
     }
 
     /* handler of event terminationBegin */
@@ -536,21 +541,35 @@ function startMinimal_body( o )
       timeOutForm();
       pipe();
 
-      if( o.sync && !o.deasync )
-      {
-        if( o.process.error )
-        handleError( o.process.error );
-        else
-        handleClose( o.process.status, o.process.signal );
-      }
-
       if( o.dry )
       {
-        /* qqq for Yevhen : make sure option dry is covered good enough */
-        _.assert( o.state === 'started' );
-        o.state = 'terminated';
-        end2( undefined );
+        // _.assert( o.state === 'started' );
+        // o.state = 'terminated';
+        // end2( undefined );
+        if( o.error )
+        handleError( o.error );
+        else
+        handleClose( null, null );
       }
+      else
+      {
+        if( o.sync && !o.deasync )
+        {
+          if( o.process.error )
+          handleError( o.process.error );
+          else
+          handleClose( o.process.status, o.process.signal );
+        }
+      }
+
+      // if( o.dry )
+      // {
+      //   /* qqq for Yevhen : make sure option dry is covered good enough */
+      //   _.assert( o.state === 'started' );
+      //   o.state = 'terminated';
+      //   end2( undefined );
+      // }
+
     }
     catch( err )
     {
@@ -684,7 +703,7 @@ function startMinimal_body( o )
     o.args = o.interpreterArgs.concat( o.args )
 
     if( o.args.length )
-    arg2 = arg2 + ' ' + argsJoin( o.args.slice() );
+    arg2 = arg2 + ' ' + argsEscape( o.args.slice() ).join( ' ' );
 
     o.fullExecPath = arg2;
 
@@ -823,7 +842,7 @@ function startMinimal_body( o )
     o.exitReason = 'signal';
     else if( exitCode )
     o.exitReason = 'code';
-    else
+    else if( exitCode === 0 )
     o.exitReason = 'normal';
 
     if( o.verbosity >= 5 && o.inputMirroring ) /* qqq for Yevhen : cover */
@@ -834,7 +853,7 @@ function startMinimal_body( o )
     }
 
     if( !o.error && o.throwingExitCode )
-    if( exitSignal || exitCode !== 0 )
+    if( exitSignal || exitCode ) /* should be not strict condition to handle properly value null */
     {
       if( _.numberIs( exitCode ) )
       o.error = _._err({ args : [ 'Process returned exit code', exitCode, '\n', infoGet() ], reason : 'exit code' });
@@ -1105,9 +1124,7 @@ function startMinimal_body( o )
     {
       let begin = _.strBeginOf( args[ i ], quotes );
       let end = _.strEndOf( args[ i ], quotes );
-
-      if( begin && end )
-      if( begin === end )
+      if( begin && end && begin === end )
       continue;
 
       if( _.longHas( quotes, args[ i ] ) )
@@ -1143,22 +1160,27 @@ function startMinimal_body( o )
   function argsUnqoute( args )
   {
     let quotes = [ '"', `'`, '`' ];
-
     for( let i = 0; i < args.length; i++ )
-    {
-      let begin = _.strBeginOf( args[ i ], quotes );
-      let end = _.strEndOf( args[ i ], quotes );
-      if( begin )
-      if( begin && begin === end )
-      args[ i ] = _.strInsideOf( args[ i ], begin, end );
-    }
-
+    args[ i ] = argUnqoute( args[ i ] );
     return args;
   }
 
   /* */
 
-  function argsJoin( args )
+  function argUnqoute( arg )
+  {
+    let quotes = [ '"', `'`, '`' ];
+    let begin = _.strBeginOf( arg, quotes );
+    let end = _.strEndOf( arg, quotes );
+    if( begin )
+    if( begin && begin === end )
+    arg = _.strInsideOf( arg, begin, end );
+    return arg;
+  }
+
+  /* */
+
+  function argsEscape( args )
   {
     /* xxx qqq for Vova : why if passingThrough? no hacks! aaa:removed execArgs*/
 
@@ -1182,7 +1204,8 @@ function startMinimal_body( o )
       // args[ i ] = _.process.escapeArg( args[ i ]  ); /* zzz for Vova : use this routine, review fails */
     }
 
-    return args.join( ' ' );
+    return args;
+    // return args.join( ' ' );
   }
 
   /* */
@@ -1238,11 +1261,12 @@ function startMinimal_body( o )
 
   function execPathForFork( execPath )
   {
-    let quotes = [ '"', `'`, '`' ];
-    let begin = _.strBeginOf( execPath, quotes );
-    if( begin )
-    execPath = _.strInsideOf( execPath, begin, begin );
-    return execPath;
+    return argUnqoute( execPath );
+    // let quotes = [ '"', `'`, '`' ];
+    // let begin = _.strBeginOf( execPath, quotes );
+    // if( begin )
+    // execPath = _.strInsideOf( execPath, begin, begin );
+    // return execPath;
   }
 
   /* */
@@ -1260,6 +1284,8 @@ function startMinimal_body( o )
     console.log( _.process.realMainFile(), 'exitCodeSet', exitCode );
     */
     if( o.exitCode )
+    return;
+    if( exitCode === null )
     return;
     o.exitCode = exitCode;
     if( o.process && o.process.exitCode === undefined )
@@ -2043,6 +2069,7 @@ function start_body( o )
       conTerminate.push( o2.conTerminate );
       readies.push( o2.ready );
 
+      if( !o.dry )
       if( o.streamOut || o.streamErr )
       processPipe( o2 );
 

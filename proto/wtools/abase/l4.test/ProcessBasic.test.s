@@ -1,3 +1,4 @@
+/* eslint-disable */
 ( function _ProcessBasic_test_s( )
 {
 
@@ -19788,18 +19789,19 @@ function startOptionOutputPrefixing( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${ mode }, outputPrefixing : 0, normal output`;
+      test.case = `mode : ${ mode }, outputPrefixing : 0, coloring : 0, normal output`;
 
-      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+      let testAppPath2 = a.program( testApp2 );
 
       let locals =
       {
         prefixing : 0,
+        coloring : 0,
         programPath : testAppPath2,
         mode
       }
 
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       return _.process.start
       ({
@@ -19810,7 +19812,7 @@ function startOptionOutputPrefixing( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.is( !_.strHas( op.output, 'out :\n  Log' ) );
+        test.identical( op.output, 'Log\n' );
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -19823,18 +19825,19 @@ function startOptionOutputPrefixing( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${ mode }, outputPrefixing : 1, normal output`;
+      test.case = `mode : ${ mode }, outputPrefixing : 1, coloring : 0, normal output`;
 
-      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+      let testAppPath2 = a.program( testApp2 );
 
       let locals =
       {
         prefixing : 1,
+        coloring : 0,
         programPath : testAppPath2,
         mode
       }
 
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       return _.process.start
       ({
@@ -19845,7 +19848,7 @@ function startOptionOutputPrefixing( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.is( _.strHas( op.output, 'out :\n  Log' ) );
+        test.identical( op.output, 'out : Log\n' );
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -19854,22 +19857,23 @@ function startOptionOutputPrefixing( test )
       })
     })
 
-    /* - */
+    /* */
 
     ready.then( () =>
     {
-      test.case = `mode : ${ mode }, outputPrefixing : 0, error output`;
+      test.case = `mode : ${ mode }, outputPrefixing : 0, coloring : 0, error output`;
 
-      let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
+      let testAppPath2 = a.program( testApp2Error );
 
       let locals =
       {
         prefixing : 0,
+        coloring : 0,
         programPath : testAppPath2,
         mode,
       }
 
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       return _.process.start
       ({
@@ -19894,18 +19898,19 @@ function startOptionOutputPrefixing( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${ mode }, outputPrefixing : 1, error output`;
+      test.case = `mode : ${ mode }, outputPrefixing : 1, coloring : 0, error output`;
 
-      let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
+      let testAppPath2 = a.program( testApp2Error );
 
       let locals =
       {
         prefixing : 1,
+        coloring : 0,
         programPath : testAppPath2,
         mode
       }
 
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       return _.process.start
       ({
@@ -19918,6 +19923,157 @@ function startOptionOutputPrefixing( test )
         test.identical( op.ended, true );
         test.is( _.strHas( op.output, 'err :' ) );
         test.is( _.strHas( op.output, 'randomText' ) );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputPrefixing : 0, coloring : 1, normal output`;
+
+      let testAppPath2 = a.program( testApp2 );
+
+      let locals =
+      {
+        prefixing : 0,
+        coloring : 1,
+        programPath : testAppPath2,
+        mode
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, '\u001b[35mLog\u001b[39;0m\n' );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputPrefixing : 1, coloring : 1, normal output`;
+
+      let testAppPath2 = a.program( testApp2 );
+
+      let locals =
+      {
+        prefixing : 1,
+        coloring : 1,
+        programPath : testAppPath2,
+        mode
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, '\u001b[37mout\u001b[39;0m\u001b[35m : Log\u001b[39;0m\n' );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputPrefixing : 0, coloring : 1, error output`;
+
+      let testAppPath2 = a.program( testApp2Error );
+
+      let locals =
+      {
+        prefixing : 0,
+        coloring : 1,
+        programPath : testAppPath2,
+        mode,
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        let exp = `\u001b[31merr\u001b[39;0m\u001b[31m :`
+        test.is( !_.strHas( op.output, exp ) );
+        // debugger;
+        let exp2 = `\u001b[31mrandomText\u001b[39;0m`.slice( 5, 15 );
+        test.is( _.strHas( op.output, exp2 ) );
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputPrefixing : 1, coloring : 1, error output`;
+
+      let testAppPath2 = a.program( testApp2Error );
+
+      let locals =
+      {
+        prefixing : 1,
+        coloring : 1,
+        programPath : testAppPath2,
+        mode
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        // let exp = `\u001b[31merr :\u001b[39;0m`.slice( 5, 8 )
+        let exp = `\u001b[31merr\u001b[39;0m\u001b[31m :`
+        test.is( _.strHas( op.output, exp ) );
+        let exp2 = `\u001b[31mrandomText\u001b[39;0m`.slice( 5, 15 );
+        test.is( _.strHas( op.output, exp2 ) );
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -19945,7 +20101,8 @@ function startOptionOutputPrefixing( test )
       outputPrefixing : prefixing,
       inputMirroring : 0,
       outputPiping : 1,
-      throwingExitCode : 0
+      throwingExitCode : 0,
+      outputColoring : coloring,
     }
 
     return _.process.start( options )
@@ -19986,7 +20143,7 @@ function startOptionOutputPiping( test )
     ready.then( () =>
     {
       test.case = `mode : ${ mode } outputPiping : 1, normal output`
-      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+      let testAppPath2 = a.program( { routine : testApp2, locals : { string : 'Log' } } );
 
       let locals =
       {
@@ -19997,7 +20154,7 @@ function startOptionOutputPiping( test )
         prefixing : 0
       }
 
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       return _.process.start
       ({
@@ -20023,7 +20180,7 @@ function startOptionOutputPiping( test )
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, outputPiping : 0, normal output`
-      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+      let testAppPath2 = a.program( { routine : testApp2, locals : { string : 'Log' } } );
 
       let locals =
       {
@@ -20034,7 +20191,7 @@ function startOptionOutputPiping( test )
         prefixing : 0
       }
 
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       return _.process.start
       ({
@@ -20059,19 +20216,19 @@ function startOptionOutputPiping( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${ mode }, outputPiping : 1, outputPrefixing : 1 , normal output`
-      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+      test.case = `mode : ${ mode }, empty string, outputPiping : 1, outputPrefixing : 0, normal output`
+      let testAppPath2 = a.program({ routine : testApp2, locals : { string : '' } });
 
       let locals =
       {
         piping : 1,
-        prefixing : 1,
+        prefixing : 0,
         programPath : testAppPath2,
         mode,
         verbosity : 2,
       }
 
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       return _.process.start
       ({
@@ -20082,7 +20239,321 @@ function startOptionOutputPiping( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.identical( _.strCount( op.output, 'out :\n  Log' ), 1 );
+        test.equivalent( op.output, '' );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, empty string, outputPiping : 1, outputPrefixing : 1, normal output`
+      let testAppPath2 = a.program({ routine : testApp2, locals : { string : '' } });
+
+      let locals =
+      {
+        piping : 1,
+        prefixing : 1,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, 'out :' );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, single line, outputPiping : 1, outputPrefixing : 1, normal output`
+      let testAppPath2 = a.program({ routine : testApp2, locals : { string : 'Log' } });
+
+      let locals =
+      {
+        piping : 1,
+        prefixing : 1,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'out :' ), 1 );
+        test.identical( _.strCount( op.output, 'Log' ), 2 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, 2 line output ( 1 with text ), outputPiping : 1, outputPrefixing : 1, normal output`
+      let testAppPath2 = a.program({ routine : testApp2, locals : { string : '\nLog' } });
+
+      let locals =
+      {
+        piping : 1,
+        prefixing : 1,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'out :' ), 2 );
+        test.identical( _.strCount( op.output, 'Log' ), 2 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, 4 line output ( 2 with text ), outputPiping : 1, outputPrefixing : 1, normal output`
+      let testAppPath2 = a.program({ routine : testApp2, locals : { string : '\nLog\nLog2\n' } });
+
+      let locals =
+      {
+        piping : 1,
+        prefixing : 1,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'out :' ), 4 );
+        test.identical( _.strCount( op.output, 'Log' ), 4 );
+        test.identical( _.strCount( op.output, 'Log2' ), 2 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, 4 line output ( all with text ), outputPiping : 1, outputPrefixing : 1, normal output`
+      let testAppPath2 = a.program({ routine : testApp2, locals : { string : 'Log1\nLog2\nLog3\nLog4' } });
+
+      let locals =
+      {
+        piping : 1,
+        prefixing : 1,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'out :' ), 4 );
+        test.identical( _.strCount( op.output, 'Log1' ), 2 );
+        test.identical( _.strCount( op.output, 'Log2' ), 2 );
+        test.identical( _.strCount( op.output, 'Log3' ), 2 );
+        test.identical( _.strCount( op.output, 'Log4' ), 2 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, 4 line output ( all with text ), outputPiping : 1, outputPrefixing : 0, normal output`
+      let testAppPath2 = a.program({ routine : testApp2, locals : { string : 'Log1\nLog2\nLog3\nLog4' } });
+
+      let locals =
+      {
+        piping : 1,
+        prefixing : 0,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'out :' ), 0 );
+        test.identical( _.strCount( op.output, 'Log1' ), 2 );
+        test.identical( _.strCount( op.output, 'Log2' ), 2 );
+        test.identical( _.strCount( op.output, 'Log3' ), 2 );
+        test.identical( _.strCount( op.output, 'Log4' ), 2 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, 4 line output ( all with text ), outputPiping : 0, outputPrefixing : 1, normal output`
+      let testAppPath2 = a.program({ routine : testApp2, locals : { string : 'Log1\nLog2\nLog3\nLog4' } });
+
+      let locals =
+      {
+        piping : 0,
+        prefixing : 1,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'out :' ), 0 );
+        test.identical( _.strCount( op.output, 'Log1' ), 1 );
+        test.identical( _.strCount( op.output, 'Log2' ), 1 );
+        test.identical( _.strCount( op.output, 'Log3' ), 1 );
+        test.identical( _.strCount( op.output, 'Log4' ), 1 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, 4 line output ( all with text ), outputPiping : null, outputPrefixing : 1, verbosity : 1, normal output`
+      let testAppPath2 = a.program({ routine : testApp2, locals : { string : 'Log1\nLog2\nLog3\nLog4' } });
+
+      let locals =
+      {
+        piping : null,
+        prefixing : 1,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 1,
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'out :' ), 0 );
+        test.identical( _.strCount( op.output, 'Log1' ), 1 );
+        test.identical( _.strCount( op.output, 'Log2' ), 1 );
+        test.identical( _.strCount( op.output, 'Log3' ), 1 );
+        test.identical( _.strCount( op.output, 'Log4' ), 1 );
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -20097,7 +20568,7 @@ function startOptionOutputPiping( test )
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, outputPiping : null, outputPrefixing : 1, verbosity : 1, normal output`
-      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+      let testAppPath2 = a.program( { routine : testApp2, locals : { string : 'Log' } } );
 
       let locals =
       {
@@ -20108,7 +20579,7 @@ function startOptionOutputPiping( test )
         mode,
       }
 
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       return _.process.start
       ({
@@ -20119,7 +20590,7 @@ function startOptionOutputPiping( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.identical( _.strCount( op.output, 'out :\n  Log' ), 0 );
+        test.identical( _.strCount( op.output, 'out : Log' ), 0 );
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -20134,7 +20605,7 @@ function startOptionOutputPiping( test )
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, outputPiping : 1, outputPrefixing : 1, verbosity : 1, normal output`
-      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+      let testAppPath2 = a.program( { routine : testApp2, locals : { string : 'Log' } } );
 
       let locals =
       {
@@ -20145,7 +20616,7 @@ function startOptionOutputPiping( test )
         mode,
       }
 
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       return _.process.start
       ({
@@ -20156,7 +20627,7 @@ function startOptionOutputPiping( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.identical( _.strCount( op.output, 'out :\n  Log' ), 1 );
+        test.identical( _.strCount( op.output, 'out : Log' ), 1 );
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -20171,7 +20642,7 @@ function startOptionOutputPiping( test )
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, outputPiping : 0, outputPrefixing : 1 , normal output`
-      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+      let testAppPath2 = a.program( { routine : testApp2, locals : { string : 'Log' } } );
 
       let locals =
       {
@@ -20182,7 +20653,7 @@ function startOptionOutputPiping( test )
         verbosity : 2,
       }
 
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       return _.process.start
       ({
@@ -20209,7 +20680,7 @@ function startOptionOutputPiping( test )
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, outputPiping : 1, error output`
-      let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
+      let testAppPath2 = a.program( testApp2Error2 );
 
       let locals =
       {
@@ -20220,7 +20691,7 @@ function startOptionOutputPiping( test )
         prefixing : 0
       }
 
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       return _.process.start
       ({
@@ -20231,7 +20702,7 @@ function startOptionOutputPiping( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.identical( _.strCount( op.output, 'Error\n    at' ), 2 );
+        test.identical( _.strCount( op.output, 'throw new Error()' ), 2 );
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -20246,7 +20717,7 @@ function startOptionOutputPiping( test )
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, outputPiping : 1, verbosity : 1, error output`
-      let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
+      let testAppPath2 = a.program( testApp2Error2 );
 
       let locals =
       {
@@ -20257,7 +20728,7 @@ function startOptionOutputPiping( test )
         prefixing : 0
       }
 
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       return _.process.start
       ({
@@ -20268,7 +20739,7 @@ function startOptionOutputPiping( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.identical( _.strCount( op.output, 'Error\n    at' ), 2 );
+        test.identical( _.strCount( op.output, 'throw new Error()' ), 2 );
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -20283,7 +20754,7 @@ function startOptionOutputPiping( test )
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, outputPiping : 0, error output`
-      let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
+      let testAppPath2 = a.program( testApp2Error2 );
 
       let locals =
       {
@@ -20294,7 +20765,7 @@ function startOptionOutputPiping( test )
         prefixing : 0
       }
 
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       return _.process.start
       ({
@@ -20306,7 +20777,7 @@ function startOptionOutputPiping( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.identical( _.strCount( op.output, 'err :' ), 0 );
-        test.identical( _.strCount( op.output, 'Error\n    at' ), 1 );
+        test.identical( _.strCount( op.output, 'throw new Error()' ), 1 );
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -20321,7 +20792,7 @@ function startOptionOutputPiping( test )
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, outputPiping : 1, outputPrefixing : 1 , error output`
-      let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
+      let testAppPath2 = a.program( testApp2Error2 );
 
       let locals =
       {
@@ -20332,7 +20803,7 @@ function startOptionOutputPiping( test )
         verbosity : 2,
       }
 
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       return _.process.start
       ({
@@ -20343,8 +20814,8 @@ function startOptionOutputPiping( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.identical( _.strCount( op.output, 'err :' ), 1 );
-        test.identical( _.strCount( op.output, 'Error\n    at' ), 1 );
+        test.is( _.strCount( op.output, 'err :' ) > 1 );
+        test.identical( _.strCount( op.output, 'throw new Error()' ), 2 );
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -20357,7 +20828,7 @@ function startOptionOutputPiping( test )
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, outputPiping : 0, outputPrefixing : 1 , error output`
-      let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
+      let testAppPath2 = a.program( testApp2Error2 );
 
       let locals =
       {
@@ -20368,7 +20839,7 @@ function startOptionOutputPiping( test )
         verbosity : 2,
       }
 
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       return _.process.start
       ({
@@ -20380,7 +20851,516 @@ function startOptionOutputPiping( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.identical( _.strCount( op.output, 'err :' ), 0 );
-        test.identical( _.strCount( op.output, 'Error\n    at' ), 1 );
+        test.identical( _.strCount( op.output, 'throw new Error()' ), 1 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, empty string, outputPiping : 1, outputPrefixing : 0, error output`
+      let testAppPath2 = a.program({ routine : testApp2Error, locals : { string : '' } });
+
+      let locals =
+      {
+        piping : 1,
+        prefixing : 0,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, '' );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, empty string, outputPiping : 1, outputPrefixing : 1, error output`
+      let testAppPath2 = a.program({ routine : testApp2Error, locals : { string : '' } });
+
+      let locals =
+      {
+        piping : 1,
+        prefixing : 1,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, 'err :' );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, single line, outputPiping : 1, outputPrefixing : 1, error output`
+      let testAppPath2 = a.program({ routine : testApp2Error, locals : { string : 'Log' } });
+
+      let locals =
+      {
+        piping : 1,
+        prefixing : 1,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'err :' ), 1 );
+        test.identical( _.strCount( op.output, 'Log' ), 2 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, 2 line output ( 1 with text ), outputPiping : 1, outputPrefixing : 1, error output`
+      let testAppPath2 = a.program({ routine : testApp2Error, locals : { string : '\nLog' } });
+
+      let locals =
+      {
+        piping : 1,
+        prefixing : 1,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'err :' ), 2 );
+        test.identical( _.strCount( op.output, 'Log' ), 2 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, 4 line output ( 2 with text ), outputPiping : 1, outputPrefixing : 1, error output`
+      let testAppPath2 = a.program({ routine : testApp2Error, locals : { string : '\nLog\nLog2\n' } });
+
+      let locals =
+      {
+        piping : 1,
+        prefixing : 1,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'err :' ), 4 );
+        test.identical( _.strCount( op.output, 'Log' ), 4 );
+        test.identical( _.strCount( op.output, 'Log2' ), 2 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, 4 line output ( all with text ), outputPiping : 1, outputPrefixing : 1, error output`
+      let testAppPath2 = a.program({ routine : testApp2Error, locals : { string : 'Log1\nLog2\nLog3\nLog4' } });
+
+      let locals =
+      {
+        piping : 1,
+        prefixing : 1,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'err :' ), 4 );
+        test.identical( _.strCount( op.output, 'Log1' ), 2 );
+        test.identical( _.strCount( op.output, 'Log2' ), 2 );
+        test.identical( _.strCount( op.output, 'Log3' ), 2 );
+        test.identical( _.strCount( op.output, 'Log4' ), 2 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, 4 line output ( all with text ), outputPiping : 1, outputPrefixing : 0, error output`
+      let testAppPath2 = a.program({ routine : testApp2Error, locals : { string : 'Log1\nLog2\nLog3\nLog4' } });
+
+      let locals =
+      {
+        piping : 1,
+        prefixing : 0,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'err :' ), 0 );
+        test.identical( _.strCount( op.output, 'Log1' ), 2 );
+        test.identical( _.strCount( op.output, 'Log2' ), 2 );
+        test.identical( _.strCount( op.output, 'Log3' ), 2 );
+        test.identical( _.strCount( op.output, 'Log4' ), 2 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, 4 line output ( all with text ), outputPiping : 0, outputPrefixing : 1, error output`
+      let testAppPath2 = a.program({ routine : testApp2Error, locals : { string : 'Log1\nLog2\nLog3\nLog4' } });
+
+      let locals =
+      {
+        piping : 0,
+        prefixing : 1,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'err :' ), 0 );
+        test.identical( _.strCount( op.output, 'Log1' ), 1 );
+        test.identical( _.strCount( op.output, 'Log2' ), 1 );
+        test.identical( _.strCount( op.output, 'Log3' ), 1 );
+        test.identical( _.strCount( op.output, 'Log4' ), 1 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, 4 line output ( all with text ), outputPiping : null, outputPrefixing : 1, verbosity : 1, error output`
+      let testAppPath2 = a.program({ routine : testApp2Error, locals : { string : 'Log1\nLog2\nLog3\nLog4' } });
+
+      let locals =
+      {
+        piping : null,
+        prefixing : 1,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 1,
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'err :' ), 0 );
+        test.identical( _.strCount( op.output, 'Log1' ), 1 );
+        test.identical( _.strCount( op.output, 'Log2' ), 1 );
+        test.identical( _.strCount( op.output, 'Log3' ), 1 );
+        test.identical( _.strCount( op.output, 'Log4' ), 1 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputPiping : 1, outputPrefixing : 1, thrown error output`
+      let testAppPath2 = a.program( testApp2Error2 );
+
+      let locals =
+      {
+        piping : 1,
+        prefixing : 1,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.is( _.strCount( op.output, 'err :' ) > 1 );
+        test.identical( _.strCount( op.output, 'throw new Error();' ), 2 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputPiping : 0, outputPrefixing : 1, thrown error output`
+      let testAppPath2 = a.program( testApp2Error2 );
+
+      let locals =
+      {
+        piping : 0,
+        prefixing : 1,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'err :' ), 0 );
+        test.identical( _.strCount( op.output, 'throw new Error();' ), 1 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputPiping : 1, outputPrefixing : 1, error and normal output`
+      let testAppPath2 = a.program({ routine : testAppNormalAndError, locals : { string : 'Log1\nLog2\nLog3\nLog4' } });
+
+      let locals =
+      {
+        piping : 1,
+        prefixing : 1,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'err :' ), 1 );
+        test.identical( _.strCount( op.output, 'out :' ), 4 );
+        test.identical( _.strCount( op.output, 'Log1' ), 2 );
+        test.identical( _.strCount( op.output, 'Log2' ), 2 );
+        test.identical( _.strCount( op.output, 'Error output' ), 2 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, outputPiping : 0, outputPrefixing : 1, error and normal output`
+      let testAppPath2 = a.program({ routine : testAppNormalAndError, locals : { string : 'Log1\nLog2\nLog3\nLog4' } });
+
+      let locals =
+      {
+        piping : 0,
+        prefixing : 1,
+        programPath : testAppPath2,
+        mode,
+        verbosity : 2,
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.start
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'err :' ), 0 );
+        test.identical( _.strCount( op.output, 'out :' ), 0 );
+        test.identical( _.strCount( op.output, 'Log1' ), 1 );
+        test.identical( _.strCount( op.output, 'Log2' ), 1 );
+        test.identical( _.strCount( op.output, 'Error output' ), 1 );
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -20410,32 +21390,41 @@ function startOptionOutputPiping( test )
       verbosity,
       outputCollecting : 1,
       throwingExitCode : 0,
+      outputColoring : 0,
       outputPrefixing : prefixing
     }
 
     return _.process.start( options )
     .then( ( op ) =>
     {
-      if( _.strHas( programPath, 'testApp2Error' ) ) /* qqq2 for Yevhen : ??? */
-      console.error( op.output );
-      else
       console.log( op.output );
       return null;
     } )
   }
 
-  function testApp2Error()
+  function testApp2Error2()
   {
     throw new Error();
   }
 
-  function testApp2()
+  function testApp2Error()
   {
-    console.log( '\nLog1\nLog2\n' );
+    console.error( string );
   }
 
-  /* qqq2 for Yevhen : poor tests! see no console.error() cases! */
-  /* qqq2 for Yevhen : poor tests! see no multiline output! */
+  function testApp2()
+  {
+    console.log( string );
+  }
+
+  function testAppNormalAndError()
+  {
+    console.log( '\nLog1\nLog2\n' );
+    console.error( 'Error output' );
+  }
+
+  /* qqq2 for Yevhen : poor tests! see no console.error() cases! | aaa : Fixed. */
+  /* qqq2 for Yevhen : poor tests! see no multiline output! | aaa : Fixed. */
 }
 
 startOptionOutputPiping.timeOut = 3e5;
@@ -21523,7 +22512,7 @@ function startOptionVerbosity( test )
     test.identical( op.ended, true );
     test.identical( _.strCount( capturedOutput, `node -e console.log('message')` ), 1 );
     test.identical( _.strCount( capturedOutput, 'message' ), 2 );
-    test.identical( _.strCount( capturedOutput, 'at ' + _.path.current() ), 1 );
+    test.identical( _.strCount( capturedOutput, '@ ' + _.path.current() ), 1 );
     return true;
   })
 
@@ -21548,7 +22537,7 @@ function startOptionVerbosity( test )
     test.identical( op.ended, true );
     test.identical( _.strCount( capturedOutput, `node -e console.log('message')` ), 1 );
     test.identical( _.strCount( capturedOutput, 'message' ), 2 );
-    test.identical( _.strCount( capturedOutput, 'at ' + _.path.current() ), 1 );
+    test.identical( _.strCount( capturedOutput, '@ ' + _.path.current() ), 1 );
     return true;
   })
 
@@ -21954,7 +22943,6 @@ function startOptionStreamSizeLimit( test )
       let returned = test.shouldThrowErrorSync( () => _.process.start( options ) )
 
       test.is( _.errIs( returned ) );
-      test.is( _.strHas( returned.message, `spawnSync ${mode === 'shell' ? 'sh' : 'node' } ENOBUFS` ) )
       test.is( _.strHas( returned.message, `code : 'ENOBUFS'`) )
 
       test.notIdentical( options.exitCode, 0 );
@@ -22157,59 +23145,264 @@ function startOptionStreamSizeLimitThrowing( test )
 
 //
 
-function startOptionDry( test )
+function startSingleOptionDry( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
   let programPath = a.program( testApp );
-
-  /*  */
-
-  a.ready.then( () =>
-  {
-    test.case = 'trivial'
-    let o =
-    {
-      execPath : 'node ' + programPath + ` arg1 "arg 2" "'arg3'"`,
-      mode : 'spawn',
-      args : [ 'arg0' ],
-      sync : 0,
-      dry : 1,
-      deasync : 0,
-      outputPiping : 1,
-      outputCollecting : 1,
-      throwingExitCode : 1,
-      applyingExitCode : 1,
-      timeOut : 100,
-      ipc : 1,
-      when : { delay : 1000 }
-    }
-    var t1 = _.time.now();
-    var returned = _.process.start( o );
-    test.is( _.consequenceIs( returned ) );
-    returned.then( function( op )
-    {
-      var t2 = _.time.now();
-      test.ge( t2 - t1, 1000 )
-
-      test.identical( op.exitCode, null );
-      test.identical( op.ended, true );
-      test.identical( op.exitSignal, null );
-      test.identical( op.process, null );
-      test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
-      test.identical( op.fullExecPath, `node ${programPath} arg1 arg 2 'arg3' arg0` );
-      test.identical( op.output, '' );
-
-      test.is( !a.fileProvider.fileExists( a.path.join( a.routinePath, 'file' ) ) )
-
-      return op;
-    })
-    return returned;
-  })
-
-  /*  */
-
+  let track = [];
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run({ mode, sync : 0, deasync : 0 }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ mode, sync : 0, deasync : 1 }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ mode, sync : 1, deasync : 0 }) ) ); /* qqq2 for Yevhen : was broken! */
+  modes.forEach( ( mode ) => a.ready.then( () => run({ mode, sync : 1, deasync : 1 }) ) );
   return a.ready;
+
+  function run( tops )
+  {
+    let ready = new _.Consequence().take( null );
+
+    if( tops.sync && !tops.deasync && tops.mode === 'fork' )
+    return test.shouldThrowErrorSync( () =>
+    {
+      _.process.start
+      ({
+        execPath : programPath + ` arg1 "arg 2" "'arg3'"`,
+        mode : tops.mode,
+        sync : tops.sync,
+        deasync : tops.deasync
+      })
+    });
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, dry : 1, no error`
+      let o =
+      {
+        /* qqq for Yevhen : ? */
+        execPath : tops.mode === 'fork' ? programPath + ` arg1 "arg 2" "'arg3'"` : 'node ' + programPath + ` arg1 "arg 2" "'arg3'"`,
+        mode : tops.mode,
+        sync : tops.sync,
+        deasync : tops.deasync,
+        args : [ 'arg0' ],
+        dry : 1,
+        outputPiping : 1,
+        outputCollecting : 1,
+        throwingExitCode : 1,
+        applyingExitCode : 1,
+        timeOut : tops.sync || !tops.deasync ? null : 100,
+        ipc : tops.mode === 'shell' ? 0 : 1,
+        when : { delay : 1000 }
+      }
+      var t1 = _.time.now();
+      var returned = _.process.start( o );
+
+      if( tops.sync )
+      {
+        test.is( !_.consequenceIs( returned ) );
+        test.is( returned === o );
+      }
+      else
+      {
+        test.is( _.consequenceIs( returned ) );
+        if( tops.deasync )
+        test.identical( returned.resourcesCount(), 1 );
+        else
+        test.identical( returned.resourcesCount(), 0 );
+      }
+
+      o.conStart.tap( ( err, op ) =>
+      {
+        track.push( 'conStart' );
+        test.identical( err, undefined );
+        test.identical( op, o );
+        test.identical( o.process, null );
+        return null;
+      })
+
+      o.conDisconnect.tap( ( err, op ) =>
+      {
+        track.push( 'conDisconnect' );
+        test.identical( err, _.dont );
+        test.identical( op, undefined );
+        test.identical( o.process, null );
+        return null;
+      })
+
+      o.conTerminate.tap( ( err, op ) =>
+      {
+        track.push( 'conTerminate' );
+        test.identical( err, undefined );
+        test.identical( op, o );
+        test.identical( o.process, null );
+        return null;
+      })
+
+      o.ready.tap( ( err, op ) =>
+      {
+        var t2 = _.time.now();
+        test.ge( t2 - t1, 1000 )
+        track.push( 'ready' );
+        test.identical( o.process, null );
+        test.identical( err, undefined );
+        test.identical( op, o );
+        test.identical( op.procedure._name, null );
+        test.identical( op.procedure._object, null );
+        test.identical( op.state, 'terminated' );
+        test.identical( op.exitReason, null );
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, null );
+        test.identical( op.error, null );
+        test.identical( op.process, null );
+        test.identical( op.output, '' );
+        test.identical( op.ended, true );
+        test.identical( op.streamOut, null );
+        test.identical( op.streamErr, null );
+        if( tops.mode === 'fork' )
+        {
+          test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
+          test.identical( op.fullExecPath, `${programPath} arg1 arg 2 'arg3' arg0` );
+        }
+        else if ( tops.mode === 'shell' )
+        {
+          test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe' ] );
+          if( process.platform === 'win32' )
+          test.identical( op.fullExecPath, `node ${programPath} arg1 "arg 2" "'arg3'" "arg0"` );
+          else
+          test.identical( op.fullExecPath, `node ${programPath} arg1 "arg 2" "'arg3'" "arg0"` );
+        }
+        else
+        {
+          test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
+          test.identical( op.fullExecPath, `node ${programPath} arg1 arg 2 'arg3' arg0` );
+        }
+
+        test.is( !a.fileProvider.fileExists( a.path.join( a.routinePath, 'file' ) ) )
+        if( tops.deasync || tops.sync )
+        test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate', 'ready' ] );
+        else
+        test.identical( track, [ 'conStart', 'conTerminate', 'conDisconnect', 'ready' ] );
+        track = [];
+        return null;
+      })
+
+      return null;
+    })
+
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, dry : 1, execPath : 'err' + programPath + \` arg1 "arg 2" "'arg3'"\``
+      let o =
+      {
+        execPath : 'err ' + programPath + ` arg1 "arg 2" "'arg3'"`,
+        mode : tops.mode,
+        sync : tops.sync,
+        deasync : tops.deasync,
+        args : [ 'arg0' ],
+        dry : 1,
+        outputPiping : 1,
+        outputCollecting : 1,
+        throwingExitCode : 1,
+        applyingExitCode : 1,
+        timeOut : tops.sync || !tops.deasync ? null : 100,
+        ipc : tops.mode === 'shell' ? 0 : 1,
+        when : { delay : 1000 }
+      }
+      var t1 = _.time.now();
+      var returned = _.process.start( o );
+
+      if( tops.sync )
+      {
+        test.is( !_.consequenceIs( returned ) );
+        test.is( returned === o );
+      }
+      else
+      {
+        test.is( _.consequenceIs( returned ) );
+        if( tops.deasync )
+        test.identical( returned.resourcesCount(), 1 );
+        else
+        test.identical( returned.resourcesCount(), 0 );
+      }
+
+      o.conStart.tap( ( err, op ) =>
+      {
+        track.push( 'conStart' );
+        test.identical( err, undefined );
+        test.identical( op, o );
+        test.identical( o.process, null );
+        return null;
+      })
+
+      o.conDisconnect.tap( ( err, op ) =>
+      {
+        track.push( 'conDisconnect' );
+        test.identical( err, _.dont );
+        test.identical( op, undefined );
+        test.identical( o.process, null );
+        return null;
+      })
+
+      o.conTerminate.tap( ( err, op ) =>
+      {
+        track.push( 'conTerminate' );
+        test.identical( err, undefined );
+        test.identical( op, o );
+        test.identical( o.process, null );
+        return null;
+      })
+
+      o.ready.tap( ( err, op ) =>
+      {
+        var t2 = _.time.now();
+        test.ge( t2 - t1, 1000 )
+        track.push( 'ready' );
+        test.identical( o.process, null );
+        test.identical( err, undefined );
+        test.identical( op, o );
+        test.identical( op.procedure._name, null );
+        test.identical( op.procedure._object, null );
+        test.identical( op.state, 'terminated' );
+        test.identical( op.exitReason, null );
+        test.identical( op.exitCode, null );
+        test.identical( op.exitSignal, null );
+        test.identical( op.error, null );
+        test.identical( op.process, null );
+        test.identical( op.output, '' );
+        test.identical( op.ended, true );
+        test.identical( op.streamOut, null );
+        test.identical( op.streamErr, null );
+        if ( tops.mode === 'shell' )
+        {
+          test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe' ] );
+          if( process.platform === 'win32' )
+          test.identical( op.fullExecPath, `err ${programPath} arg1 "arg 2" "'arg3'" "arg0"` );
+          else
+          test.identical( op.fullExecPath, `err ${programPath} arg1 "arg 2" "'arg3'" "arg0"` );
+        }
+        else
+        {
+          test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
+          test.identical( op.fullExecPath, `err ${programPath} arg1 arg 2 'arg3' arg0` );
+        }
+
+        test.is( !a.fileProvider.fileExists( a.path.join( a.routinePath, 'file' ) ) )
+        if( tops.deasync || tops.sync )
+        test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate', 'ready' ] );
+        else
+        test.identical( track, [ 'conStart', 'conTerminate', 'conDisconnect', 'ready' ] );
+        track = [];
+        return null;
+      })
+
+      return null;
+    })
+
+    return ready;
+  }
 
   /* - */
 
@@ -22222,13 +23415,266 @@ function startOptionDry( test )
   }
 }
 
-startOptionDry.description =
+startSingleOptionDry.description =
 `
 Simulates run of routine start with all possible options.
 After execution checks fields of run descriptor.
 `
 
 //
+
+function startOptionDryMultiple( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let programPath = a.path.nativize( a.program( testApp ) );
+  let track = [];
+
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run({ mode, sync : 0, deasync : 0 }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ mode, sync : 0, deasync : 1 }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ mode, sync : 1, deasync : 0 }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ mode, sync : 1, deasync : 1 }) ) );
+  return a.ready;
+
+  function run( tops )
+  {
+    let ready = new _.Consequence().take( null );
+
+    if( tops.sync && !tops.deasync && tops.mode === 'fork' )
+    return test.shouldThrowErrorSync( () =>
+    {
+      _.process.start
+      ({
+        execPath : [ programPath + ` arg1 "arg 2" "'arg3'"`, programPath + ` arg1 "arg 2" "'arg3'"` ],
+        mode : tops.mode,
+        sync : tops.sync,
+        deasync : tops.deasync
+      })
+    });
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync :${tops.deasync}, dry : 1, without error, con* checks`;
+
+      let options =
+      {
+        execPath : [ tops.mode === 'fork' ? programPath + ' id:1' : 'node ' + programPath + ' id:1', tops.mode === 'fork' ? programPath + ' id:2' : 'node ' + programPath + ' id:2' ],
+        mode : tops.mode,
+        sync : tops.sync,
+        deasync : tops.deasync,
+        outputCollecting : 1,
+        dry : 1
+      }
+
+      let returned = _.process.start( options )
+
+      test.identical( options.procedure._name, null );
+      test.identical( options.state, 'terminated' );
+      test.identical( options.exitReason, 'normal' );
+      test.identical( options.exitCode, null );
+      test.identical( options.exitSignal, null );
+      test.identical( options.error, null );
+      test.identical( options.process, undefined );
+      test.identical( options.output, '' );
+      test.identical( options.ended, true );
+      test.is( _.streamIs( options.streamOut ) );
+      test.is( _.streamIs( options.streamErr ) );
+      if( tops.mode === 'fork' )
+      {
+        test.identical( options.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
+      }
+      else
+      {
+        test.identical( options.stdio, [ 'pipe', 'pipe', 'pipe' ] );
+      }
+
+      options.runs.forEach( ( op2, counter ) =>
+      {
+        op2.conStart.tap( ( err, op ) =>
+        {
+          track.push( 'conStart' );
+          test.identical( err, undefined );
+          test.identical( op, op2 );
+          test.identical( op2.process, null );
+          return null;
+        })
+
+        op2.conDisconnect.tap( ( err, op ) =>
+        {
+          track.push( 'conDisconnect' );
+          test.identical( err, _.dont );
+          test.identical( op, undefined );
+          test.identical( op2.process, null );
+          return null;
+        })
+
+        op2.conTerminate.tap( ( err, op ) =>
+        {
+          track.push( 'conTerminate' );
+          test.identical( err, undefined );
+          test.identical( op, op2 );
+          test.identical( op2.process, null );
+          return null;
+        })
+
+        op2.ready.tap( ( err, op ) =>
+        {
+          track.push( 'ready' );
+          test.identical( op2.process, null );
+          test.identical( err, undefined );
+          test.identical( op, op2 );
+          test.identical( op2.procedure._name, null );
+          test.identical( op2.procedure._object, null );
+          test.identical( op2.state, 'terminated' );
+          test.identical( op2.exitReason, null );
+          test.identical( op2.exitReason, null );
+          test.identical( op2.exitCode, null );
+          test.identical( op2.exitSignal, null );
+          test.identical( op2.error, null );
+          test.identical( op2.process, null );
+          test.identical( op2.output, '' );
+          test.identical( op2.ended, true );
+          test.identical( op2.streamOut, null );
+          test.identical( op2.streamErr, null );
+          if( tops.mode === 'fork' )
+          {
+            test.identical( op2.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
+            test.identical( op2.fullExecPath, programPath + ` id:${counter + 1}` );
+          }
+          else
+          {
+            test.identical( op2.stdio, [ 'pipe', 'pipe', 'pipe' ] );
+            test.identical( op2.fullExecPath, `node ${programPath} id:${counter + 1}` );
+          }
+          test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate', 'ready' ] );
+          track = [];
+          return null;
+        })
+      });
+      return null;
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync :${tops.deasync}, dry : 1, without error, con* checks`;
+
+      let options =
+      {
+        execPath : [ 'err ' + programPath + ' id:1', 'err ' + programPath + ' id:2' ],
+        mode : tops.mode,
+        sync : tops.sync,
+        deasync : tops.deasync,
+        outputCollecting : 1,
+        dry : 1
+      }
+
+      let returned = _.process.start( options )
+
+      test.identical( options.procedure._name, null );
+      test.identical( options.state, 'terminated' );
+      test.identical( options.exitReason, 'normal' );
+      test.identical( options.exitCode, null );
+      test.identical( options.exitSignal, null );
+      test.identical( options.error, null );
+      test.identical( options.process, undefined );
+      test.identical( options.output, '' );
+      test.identical( options.ended, true );
+      test.is( _.streamIs( options.streamOut ) );
+      test.is( _.streamIs( options.streamErr ) );
+      if( tops.mode === 'fork' )
+      {
+        test.identical( options.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
+      }
+      else
+      {
+        test.identical( options.stdio, [ 'pipe', 'pipe', 'pipe' ] );
+      }
+
+      options.runs.forEach( ( op2, counter ) =>
+      {
+        op2.conStart.tap( ( err, op ) =>
+        {
+          track.push( 'conStart' );
+          test.identical( err, undefined );
+          test.identical( op, op2 );
+          test.identical( op2.process, null );
+          return null;
+        })
+
+        op2.conDisconnect.tap( ( err, op ) =>
+        {
+          track.push( 'conDisconnect' );
+          test.identical( err, _.dont );
+          test.identical( op, undefined );
+          test.identical( op2.process, null );
+          return null;
+        })
+
+        op2.conTerminate.tap( ( err, op ) =>
+        {
+          track.push( 'conTerminate' );
+          test.identical( err, undefined );
+          test.identical( op, op2 );
+          test.identical( op2.process, null );
+          return null;
+        })
+
+        op2.ready.tap( ( err, op ) =>
+        {
+          track.push( 'ready' );
+          test.identical( op2.process, null );
+          test.identical( err, undefined );
+          test.identical( op, op2 );
+          test.identical( op2.procedure._name, null );
+          test.identical( op2.procedure._object, null );
+          test.identical( op2.state, 'terminated' );
+          test.identical( op2.exitReason, null );
+          test.identical( op2.exitReason, null );
+          test.identical( op2.exitCode, null );
+          test.identical( op2.exitSignal, null );
+          test.identical( op2.error, null );
+          test.identical( op2.process, null );
+          test.identical( op2.output, '' );
+          test.identical( op2.ended, true );
+          test.identical( op2.streamOut, null );
+          test.identical( op2.streamErr, null );
+          if( tops.mode === 'fork' )
+          {
+            test.identical( op2.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
+            test.identical( op2.fullExecPath, 'err ' + programPath + ` id:${counter + 1}` );
+          }
+          else
+          {
+            test.identical( op2.stdio, [ 'pipe', 'pipe', 'pipe' ] );
+            test.identical( op2.fullExecPath, `err ${programPath} id:${counter + 1}` );
+          }
+          test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate', 'ready' ] );
+          track = [];
+          return null;
+        })
+      });
+      return null;
+    })
+
+    return ready;
+  }
+
+  /* - */
+
+  function testApp()
+  {
+    console.log( 'Not printed' );
+  }
+}
+
+//
+
+/* qqq for Yevhen : split by modes | aaa : Done. Yevhen S.
+qqq for Yevhen : not really
+*/
 
 function startOptionCurrentPath( test )
 {
@@ -23987,7 +25433,7 @@ function startOutputMultiple( test )
         }
         else
         {
-          /* xxx : double check later
+          /*
           on older version of nodejs event finish goes before event end
           */
           var exp1 =
@@ -24148,7 +25594,7 @@ function startOutputMultiple( test )
         }
         else
         {
-          /* xxx : double check later
+          /*
           on older version of nodejs event finish goes before event end
           */
           var exp1 =
@@ -29001,19 +30447,10 @@ function terminateFirstChildSpawn( test )
     throwingExitCode : 0
   }
 
-  _.process.start( o );
+  _.process.start( o ); /* xxx */
 
   let program2Pid = null;
   let terminate = _.Consequence();
-
-  function handleOutput ( output )
-  {
-    output = output.toString();
-    if( !_.strHas( output, 'program2::begin' ) )
-    return;
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
 
   o.process.stdout.on( 'data', handleOutput );
 
@@ -29059,6 +30496,17 @@ function terminateFirstChildSpawn( test )
   })
 
   return _.Consequence.AndKeep( terminate, o.conTerminate );
+
+  /* - */
+
+  function handleOutput( output ) /* qqq for Vova : what is it for? */
+  {
+    output = output.toString();
+    if( !_.strHas( output, 'program2::begin' ) )
+    return;
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
 
   /* - */
 
@@ -29106,7 +30554,7 @@ function terminateFirstChildSpawn( test )
     {
       console.log( 'program2::end' );
       _.fileProvider.fileWrite( _.path.join( __dirname, 'program2end' ), 'end' );
-    }, context.t1*15 )
+    }, context.t1*10 )
 
     console.log( 'program2::begin' );
 
@@ -29122,6 +30570,8 @@ terminate first child withChildren:0
 first child with signal SIGTERM on unix and exit code 1 on win
 second child continues to work
 `
+
+//
 
 function terminateFirstChildFork( test )
 {
@@ -29144,15 +30594,6 @@ function terminateFirstChildFork( test )
 
   let program2Pid = null;
   let terminate = _.Consequence();
-
-  function handleOutput ( output )
-  {
-    output = output.toString();
-    if( !_.strHas( output, 'program2::begin' ) )
-    return;
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
 
   o.process.stdout.on( 'data', handleOutput );
 
@@ -29201,6 +30642,17 @@ function terminateFirstChildFork( test )
 
   /* - */
 
+  function handleOutput( output )
+  {
+    output = output.toString();
+    if( !_.strHas( output, 'program2::begin' ) )
+    return;
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
+
+  /* - */
+
   function program1()
   {
     let _ = require( toolsPath );
@@ -29245,7 +30697,7 @@ function terminateFirstChildFork( test )
     {
       console.log( 'program2::end' );
       _.fileProvider.fileWrite( _.path.join( __dirname, 'program2end' ), 'end' );
-    }, context.t1*15 )
+    }, context.t1*10 )
 
     console.log( 'program2::begin' );
 
@@ -29284,15 +30736,6 @@ function terminateFirstChildShell( test )
 
   let program2Pid = null;
   let terminate = _.Consequence();
-
-  function handleOutput ( output )
-  {
-    output = output.toString();
-    if( !_.strHas( output, 'program2::begin' ) )
-    return;
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
 
   o.process.stdout.on( 'data', handleOutput );
 
@@ -29357,6 +30800,17 @@ function terminateFirstChildShell( test )
 
   /* - */
 
+  function handleOutput( output )
+  {
+    output = output.toString();
+    if( !_.strHas( output, 'program2::begin' ) )
+    return;
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
+
+  /* - */
+
   function program1()
   {
     let _ = require( toolsPath );
@@ -29406,7 +30860,7 @@ function terminateFirstChildShell( test )
     {
       console.log( 'program2::end' );
       _.fileProvider.fileWrite( _.path.join( __dirname, 'program2end' ), 'end' );
-    }, context.t1*15 )
+    }, context.t1*10 )
 
     console.log( 'program2::begin' );
 
@@ -29448,15 +30902,6 @@ function terminateSecondChildSpawn( test )
   let program2Pid = null;
   let terminate = _.Consequence();
 
-  function handleOutput ( output )
-  {
-    output = output.toString();
-    if( !_.strHas( output, 'program2::begin' ) )
-    return;
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
-
   o.process.stdout.on( 'data', handleOutput );
 
   terminate.then( () =>
@@ -29497,6 +30942,17 @@ function terminateSecondChildSpawn( test )
   })
 
   return _.Consequence.AndKeep( terminate, o.conTerminate );
+
+  /* - */
+
+  function handleOutput( output )
+  {
+    output = output.toString();
+    if( !_.strHas( output, 'program2::begin' ) )
+    return;
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
 
   /* - */
 
@@ -29560,7 +31016,7 @@ function terminateSecondChildSpawn( test )
     setTimeout( () =>
     {
       console.log( 'program2::end' );
-    }, context.t1*15 )
+    }, context.t1*10 )
 
     console.log( 'program2::begin' );
 
@@ -29599,15 +31055,6 @@ function terminateSecondChildFork( test )
 
   let program2Pid = null;
   let terminate = _.Consequence();
-
-  function handleOutput ( output )
-  {
-    output = output.toString();
-    if( !_.strHas( output, 'program2::begin' ) )
-    return;
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
 
   o.process.stdout.on( 'data', handleOutput );
 
@@ -29649,6 +31096,17 @@ function terminateSecondChildFork( test )
   })
 
   return _.Consequence.AndKeep( terminate, o.conTerminate );
+
+  /* - */
+
+  function handleOutput( output )
+  {
+    output = output.toString();
+    if( !_.strHas( output, 'program2::begin' ) )
+    return;
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
 
   /* - */
 
@@ -29712,7 +31170,7 @@ function terminateSecondChildFork( test )
     setTimeout( () =>
     {
       console.log( 'program2::end' );
-    }, context.t1*15 )
+    }, context.t1*10 )
 
     console.log( 'program2::begin' );
 
@@ -29751,15 +31209,6 @@ function terminateSecondChildShell( test )
 
   let program2Pid = null;
   let terminate = _.Consequence();
-
-  function handleOutput ( output )
-  {
-    output = output.toString();
-    if( !_.strHas( output, 'program2::begin' ) )
-    return;
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
 
   o.process.stdout.on( 'data', handleOutput );
 
@@ -29813,6 +31262,17 @@ function terminateSecondChildShell( test )
 
   /* - */
 
+  function handleOutput( output )
+  {
+    output = output.toString();
+    if( !_.strHas( output, 'program2::begin' ) )
+    return;
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
+
+  /* - */
+
   function program1()
   {
     let _ = require( toolsPath );
@@ -29873,7 +31333,7 @@ function terminateSecondChildShell( test )
     setTimeout( () =>
     {
       console.log( 'program2::end' );
-    }, context.t1*15 )
+    }, context.t1*10 )
 
     console.log( 'program2::begin' );
 
@@ -29912,15 +31372,6 @@ function terminateDetachedFirstChildSpawn( test )
 
   let program2Pid = null;
   let terminate = _.Consequence();
-
-  function handleOutput ( output )
-  {
-    output = output.toString();
-    if( !_.strHas( output, 'program2::begin' ) )
-    return;
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
 
   o.process.stdout.on( 'data', handleOutput );
 
@@ -29965,6 +31416,19 @@ function terminateDetachedFirstChildSpawn( test )
   })
 
   return _.Consequence.AndKeep( terminate, o.conTerminate );
+
+  /* - */
+
+  function handleOutput( output )
+  {
+    output = output.toString();
+    if( !_.strHas( output, 'program2::begin' ) )
+    return;
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
+
+  /* - */
 
   function program1()
   {
@@ -30015,7 +31479,7 @@ function terminateDetachedFirstChildSpawn( test )
         filePath : _.path.join( __dirname, 'program2end' ),
         data : 'end'
       })
-    }, context.t1*15 )
+    }, context.t1*10 )
 
     console.log( 'program2::begin' );
 
@@ -30053,15 +31517,6 @@ function terminateDetachedFirstChildFork( test )
 
   let program2Pid = null;
   let terminate = _.Consequence();
-
-  function handleOutput ( output )
-  {
-    output = output.toString();
-    if( !_.strHas( output, 'program2::begin' ) )
-    return;
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
 
   o.process.stdout.on( 'data', handleOutput );
 
@@ -30134,6 +31589,17 @@ function terminateDetachedFirstChildFork( test )
 
   /* - */
 
+  function handleOutput( output )
+  {
+    output = output.toString();
+    if( !_.strHas( output, 'program2::begin' ) )
+    return;
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
+
+  /* - */
+
   function program2()
   {
     let _ = require( toolsPath );
@@ -30156,7 +31622,7 @@ function terminateDetachedFirstChildFork( test )
         filePath : _.path.join( __dirname, 'program2end' ),
         data : 'end'
       })
-    }, context.t1*15 )
+    }, context.t1*10 )
 
     console.log( 'program2::begin' );
 
@@ -30194,15 +31660,6 @@ function terminateDetachedFirstChildShell( test )
 
   let program2Pid = null;
   let terminate = _.Consequence();
-
-  function handleOutput ( output )
-  {
-    output = output.toString();
-    if( !_.strHas( output, 'program2::begin' ) )
-    return;
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
 
   o.process.stdout.on( 'data', handleOutput );
 
@@ -30247,6 +31704,19 @@ function terminateDetachedFirstChildShell( test )
   })
 
   return _.Consequence.AndKeep( terminate, o.conTerminate );
+
+  /* - */
+
+  function handleOutput( output )
+  {
+    output = output.toString();
+    if( !_.strHas( output, 'program2::begin' ) )
+    return;
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
+
+  /* - */
 
   function program1()
   {
@@ -30297,7 +31767,7 @@ function terminateDetachedFirstChildShell( test )
         filePath : _.path.join( __dirname, 'program2end' ),
         data : 'end'
       })
-    }, context.t1*15 )
+    }, context.t1*10 )
 
     console.log( 'program2::begin' );
 
@@ -30336,15 +31806,6 @@ function terminateWithDetachedChildSpawn( test )
   let program2Pid = null;
   let terminate = _.Consequence();
 
-  function handleOutput ( output )
-  {
-    output = output.toString();
-    if( !_.strHas( output, 'program2::begin' ) )
-    return;
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
-
   o.process.stdout.on( 'data', handleOutput );
 
   terminate.then( () =>
@@ -30382,6 +31843,19 @@ function terminateWithDetachedChildSpawn( test )
   })
 
   return _.Consequence.AndKeep( terminate, o.conTerminate );
+
+  /* - */
+
+  function handleOutput( output )
+  {
+    output = output.toString();
+    if( !_.strHas( output, 'program2::begin' ) )
+    return;
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
+
+  /* - */
 
   function program1()
   {
@@ -30432,7 +31906,7 @@ function terminateWithDetachedChildSpawn( test )
         filePath : _.path.join( __dirname, 'program2end' ),
         data : 'end'
       })
-    }, context.t1*15 )
+    }, context.t1*10 )
 
     console.log( 'program2::begin' );
 
@@ -30577,6 +32051,8 @@ function terminateWithDetachedChildFork( test )
 
   return _.Consequence.AndKeep( terminate, o.conTerminate );
 
+  /* - */
+
   function handleOutput( output )
   {
     output = output.toString();
@@ -30585,6 +32061,8 @@ function terminateWithDetachedChildFork( test )
     o.process.stdout.removeListener( 'data', handleOutput );
     terminate.take( null );
   }
+
+  /* - */
 
   function program1()
   {
@@ -30635,7 +32113,7 @@ function terminateWithDetachedChildFork( test )
         filePath : _.path.join( __dirname, 'program2end' ),
         data : 'end'
       })
-    }, context.t1*15 )
+    }, context.t1*10 )
 
     console.log( 'program2::begin' );
   }
@@ -30672,15 +32150,6 @@ function terminateWithDetachedChildShell( test )
 
   let program2Pid = null;
   let terminate = _.Consequence();
-
-  function handleOutput ( output )
-  {
-    output = output.toString();
-    if( !_.strHas( output, 'program2::begin' ) )
-    return;
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
 
   o.process.stdout.on( 'data', handleOutput );
 
@@ -30719,6 +32188,19 @@ function terminateWithDetachedChildShell( test )
   })
 
   return _.Consequence.AndKeep( terminate, o.conTerminate );
+
+  /* - */
+
+  function handleOutput( output )
+  {
+    output = output.toString();
+    if( !_.strHas( output, 'program2::begin' ) )
+    return;
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
+
+  /* - */
 
   function program1()
   {
@@ -30769,7 +32251,7 @@ function terminateWithDetachedChildShell( test )
         filePath : _.path.join( __dirname, 'program2end' ),
         data : 'end'
       })
-    }, context.t1*15 )
+    }, context.t1*10 )
 
     console.log( 'program2::begin' );
 
@@ -30809,19 +32291,6 @@ function terminateSeveralChildren( test )
   let program3PID = null;
   let c = 0;
   let terminate = _.Consequence();
-
-  function handleOutput ( output )
-  {
-    output = output.toString();
-    if( _.strHas( output, 'program2::begin' ) || _.strHas( output, 'program3::begin' ) )
-    c += 1;
-
-    if( c !== 2 )
-    return;
-
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
 
   o.process.stdout.on( 'data', handleOutput );
 
@@ -30867,6 +32336,22 @@ function terminateSeveralChildren( test )
 
   return _.Consequence.AndKeep( terminate, o.conTerminate );
 
+  /* - */
+
+  function handleOutput( output )
+  {
+    output = output.toString();
+    if( _.strHas( output, 'program2::begin' ) || _.strHas( output, 'program3::begin' ) )
+    c += 1;
+
+    if( c !== 2 )
+    return;
+
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
+
+  /* - */
 
   function program1()
   {
@@ -30917,7 +32402,7 @@ function terminateSeveralChildren( test )
         filePath : _.path.join( __dirname, 'program2end' ),
         data : 'end'
       })
-    }, context.t1*15 )
+    }, context.t1*10 )
 
     console.log( 'program2::begin' );
 
@@ -30947,7 +32432,7 @@ function terminateSeveralChildren( test )
         filePath : _.path.join( __dirname, 'program3end' ),
         data : 'end'
       })
-    }, context.t1*15 )
+    }, context.t1*10 )
 
     console.log( 'program3::begin' );
 
@@ -30981,19 +32466,6 @@ function terminateWithSeveralDetachedChildren( test )
   let program3PID = null;
   let c = 0;
   let terminate = _.Consequence();
-
-  function handleOutput ( output )
-  {
-    output = output.toString();
-    if( _.strHas( output, 'program2::begin' ) || _.strHas( output, 'program3::begin' ) )
-    c += 1;
-
-    if( c !== 2 )
-    return;
-
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
 
   o.process.stdout.on( 'data', handleOutput );
 
@@ -31039,6 +32511,22 @@ function terminateWithSeveralDetachedChildren( test )
 
   return _.Consequence.AndKeep( terminate, o.conTerminate );
 
+  /* - */
+
+  function handleOutput( output )
+  {
+    output = output.toString();
+    if( _.strHas( output, 'program2::begin' ) || _.strHas( output, 'program3::begin' ) )
+    c += 1;
+
+    if( c !== 2 )
+    return;
+
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
+
+  /* - */
 
   function program1()
   {
@@ -31090,7 +32578,7 @@ function terminateWithSeveralDetachedChildren( test )
         filePath : _.path.join( __dirname, 'program2end' ),
         data : 'end'
       })
-    }, context.t1*15 )
+    }, context.t1*10 )
 
     console.log( 'program2::begin' );
 
@@ -31120,7 +32608,7 @@ function terminateWithSeveralDetachedChildren( test )
         filePath : _.path.join( __dirname, 'program3end' ),
         data : 'end'
       })
-    }, context.t1*15 )
+    }, context.t1*10 )
 
     console.log( 'program3::begin' );
 
@@ -31212,15 +32700,6 @@ function terminateTimeOutNoHandler( test )
   _.process.start( o )
   let terminate = _.Consequence();
 
-  function handleOutput ( output )
-  {
-    output = output.toString();
-    if( !_.strHas( output, 'program1::begin' ) )
-    return;
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
-
   o.process.stdout.on( 'data', handleOutput );
 
   terminate.then( () =>
@@ -31256,6 +32735,17 @@ function terminateTimeOutNoHandler( test )
   })
 
   return _.Consequence.AndKeep( terminate, o.conTerminate );
+
+  /* - */
+
+  function handleOutput( output )
+  {
+    output = output.toString();
+    if( !_.strHas( output, 'program1::begin' ) )
+    return;
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
 
   /* - */
 
@@ -31298,15 +32788,6 @@ function terminateTimeOutIgnoreSignal( test )
   _.process.start( o )
   let terminate = _.Consequence();
 
-  function handleOutput ( output )
-  {
-    output = output.toString();
-    if( !_.strHas( output, 'program1::begin' ) )
-    return;
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
-
   o.process.stdout.on( 'data', handleOutput );
 
   terminate.then( () =>
@@ -31343,6 +32824,17 @@ function terminateTimeOutIgnoreSignal( test )
   })
 
   return _.Consequence.AndKeep( terminate, o.conTerminate );
+
+  /* - */
+
+  function handleOutput( output )
+  {
+    output = output.toString();
+    if( !_.strHas( output, 'program1::begin' ) )
+    return;
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
 
   /* - */
 
@@ -31391,15 +32883,6 @@ function terminateZeroTimeOutSpawn( test )
   _.process.start( o )
   let terminate = _.Consequence();
 
-  function handleOutput ( output )
-  {
-    output = output.toString();
-    if( !_.strHas( output, 'program1::begin' ) )
-    return;
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
-
   o.process.stdout.on( 'data', handleOutput );
 
   terminate.then( () =>
@@ -31435,6 +32918,17 @@ function terminateZeroTimeOutSpawn( test )
   })
 
   return _.Consequence.AndKeep( terminate, o.conTerminate );
+
+  /* - */
+
+  function handleOutput( output )
+  {
+    output = output.toString();
+    if( !_.strHas( output, 'program1::begin' ) )
+    return;
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
 
   /* - */
 
@@ -31484,15 +32978,6 @@ function terminateZeroTimeOutFork( test )
   _.process.start( o )
   let terminate = _.Consequence();
 
-  function handleOutput ( output )
-  {
-    output = output.toString();
-    if( !_.strHas( output, 'program1::begin' ) )
-    return;
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
-
   o.process.stdout.on( 'data', handleOutput );
 
   terminate.then( () =>
@@ -31528,6 +33013,17 @@ function terminateZeroTimeOutFork( test )
   })
 
   return _.Consequence.AndKeep( terminate, o.conTerminate );
+
+  /* - */
+
+  function handleOutput( output )
+  {
+    output = output.toString();
+    if( !_.strHas( output, 'program1::begin' ) )
+    return;
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
 
   /* - */
 
@@ -31577,15 +33073,6 @@ function terminateZeroTimeOutWithoutChildrenShell( test )
   _.process.start( o )
   let terminate = _.Consequence();
 
-  function handleOutput ( output )
-  {
-    output = output.toString();
-    if( !_.strHas( output, 'program1::begin' ) )
-    return;
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
-
   o.process.stdout.on( 'data', handleOutput );
 
   terminate.then( () =>
@@ -31629,6 +33116,17 @@ function terminateZeroTimeOutWithoutChildrenShell( test )
   })
 
   return _.Consequence.AndKeep( terminate, o.conTerminate );
+
+  /* - */
+
+  function handleOutput( output )
+  {
+    output = output.toString();
+    if( !_.strHas( output, 'program1::begin' ) )
+    return;
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
 
   /* - */
 
@@ -31678,15 +33176,6 @@ function terminateZeroTimeOutWithtChildrenShell( test )
   _.process.start( o )
   let terminate = _.Consequence();
 
-  function handleOutput ( output )
-  {
-    output = output.toString();
-    if( !_.strHas( output, 'program1::begin' ) )
-    return;
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
-
   o.process.stdout.on( 'data', handleOutput );
 
   terminate.then( () =>
@@ -31722,6 +33211,17 @@ function terminateZeroTimeOutWithtChildrenShell( test )
   })
 
   return _.Consequence.AndKeep( terminate, o.conTerminate );
+
+  /* - */
+
+  function handleOutput( output )
+  {
+    output = output.toString();
+    if( !_.strHas( output, 'program1::begin' ) )
+    return;
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
 
   /* - */
 
@@ -33101,13 +34601,13 @@ var Proto =
     startOptionOutputColoringStderr,
     startOptionOutputColoringStdout,
     startOptionOutputGraying,
-    // startOptionOutputPrefixing, /* qqq2 for Yevhen : rewrote test routine taking into account new cases */
-    // startOptionOutputPiping, /* qqq2 for Yevhen : rewrote test routine taking into account new cases */
+    startOptionOutputPrefixing, /* qqq2 for Yevhen : rewrote test routine taking into account new cases | aaa : Done. */
+    startOptionOutputPiping, /* qqq2 for Yevhen : rewrote test routine taking into account new cases */
     startOptionInputMirroring,
     startOptionLogger,
     startOptionLoggerTransofrmation,
     startOutputOptionsCompatibilityLateCheck,
-    // startOptionVerbosity, /* qqq2 for Yevhen : rewrite the test routine appropriately */
+    startOptionVerbosity, /* qqq2 for Yevhen : rewrite the test routine appropriately | aaa : Done. */
     startOptionVerbosityLogging,
     startOutputMultiple,
     startOptionStdioIgnoreMultiple,
@@ -33120,8 +34620,9 @@ var Proto =
 
     startOptionStreamSizeLimit,
     startOptionStreamSizeLimitThrowing,
-    startOptionDry, /* qqq for Yevhen : make sure option dry is covered good enough */
-    /* qqq for Yevhen : write test routine startOptionDryMultiple */
+    startSingleOptionDry, /* qqq for Yevhen : make sure option dry is covered good enough | aaa : Done */
+    /* qqq for Yevhen : write test routine startOptionDryMultiple | aaa : Done. */
+    startOptionDryMultiple,
     startOptionCurrentPath,
     startOptionCurrentPaths,
     startOptionPassingThrough, /* qqq for Yevhen : extend please | aaa : Done. Yevhen S. */
