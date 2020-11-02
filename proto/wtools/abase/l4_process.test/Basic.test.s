@@ -263,7 +263,7 @@ function escapeCmd( test )
 var Proto =
 {
 
-  name : 'Tools.l4.Basic',
+  name : 'Tools.l4.process.Basic',
   silencing : 1,
   routineTimeOut : 60000,
   onSuiteBegin : suiteBegin,
