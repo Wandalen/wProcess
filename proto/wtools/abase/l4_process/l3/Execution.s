@@ -199,7 +199,8 @@ function startMinimal_body( o )
   let _errPrefix = null;
   let _outPrefix = null;
   let _readyCallback;
-  let execArgs; /* xxx qqq for Vova : remove. no hacks! */
+  /* xxx qqq for Vova : remove. no hacks! aaa:removed execArgs*/
+  let _argsLength = 0;
 
   form1();
   form2();
@@ -231,7 +232,7 @@ function startMinimal_body( o )
   inputMirror,
   execPathParse,
   argsUnqoute,
-  argsJoin,
+  argsEscape,
   argEscape,
   optionsForSpawn,
   optionsForFork,
@@ -383,18 +384,6 @@ function startMinimal_body( o )
       o.procedure = _.Procedure({ _stack : o.stack });
     }
 
-    if( _.strIs( o.execPath ) )
-    {
-      o.fullExecPath = o.execPath;
-      execArgs = execPathParse( o.execPath );
-      if( o.mode !== 'shell' )
-      execArgs = argsUnqoute( execArgs );
-      if( execArgs.length )
-      o.execPath = execArgs.shift();
-      else
-      o.execPath = null;
-    }
-
     if( _.routineIs( o.args ) )
     o.args = o.args( o );
     if( o.args === null )
@@ -406,9 +395,27 @@ function startMinimal_body( o )
       , `If defined option::arg should be either [ string, array ], but it is ${_.strType( o.args )}`
     );
 
-    if( _.arrayIs( o.args ) )
+    if( _.arrayIs( o.args ) ) /* xxx yyy */
     o.args = o.args.slice();
     o.args = _.arrayAs( o.args );
+
+    /* */
+
+    _argsLength = o.args.length;
+
+    if( _.strIs( o.execPath ) )
+    {
+      o.fullExecPath = o.execPath;
+      let execArgs = execPathParse( o.execPath );
+      if( o.mode !== 'shell' )
+      execArgs = argsUnqoute( execArgs );
+      o.execPath = null;
+      if( execArgs.length )
+      {
+        o.execPath = execArgs.shift();
+        o.args = _.arrayPrependArray( o.args || [], execArgs );
+      }
+    }
 
     if( o.execPath === null )
     {
@@ -416,16 +423,25 @@ function startMinimal_body( o )
 
       o.execPath = o.args.shift();
       o.fullExecPath = o.execPath;
+      _argsLength = o.args.length;
 
-      let begin = _.strBeginOf( o.execPath, [ '"', `'`, '`' ] );
-      let end = _.strEndOf( o.execPath, [ '"', `'`, '`' ] );
-
-      if( begin && begin === end )
-      o.execPath = _.strInsideOf( o.execPath, begin, end );
+      o.execPath = argUnqoute( o.execPath );
+      // let begin = _.strBeginOf( o.execPath, [ '"', `'`, '`' ] );
+      // let end = _.strEndOf( o.execPath, [ '"', `'`, '`' ] );
+      // if( begin && begin === end )
+      // o.execPath = _.strInsideOf( o.execPath, begin, end );
     }
 
-    if( execArgs && execArgs.length )
-    o.args = _.arrayPrependArray( o.args || [], execArgs );
+    /* passingThrough */
+
+    if( o.passingThrough )
+    {
+      let argumentsOwn = process.argv.slice( 2 );
+      if( argumentsOwn.length )
+      o.args = _.arrayAppendArray( o.args || [], argumentsOwn );
+    }
+
+    /* */
 
     o.currentPath = _.path.resolve( o.currentPath || '.' );
 
@@ -434,15 +450,6 @@ function startMinimal_body( o )
     _.assert( _.numberIs( o.verbosity ) );
     _.assert( _.boolLike( o.outputPiping ) );
     _.assert( _.boolLike( o.outputCollecting ) );
-
-    /* passingThrough */
-
-    if( o.passingThrough )
-    {
-      let argumentsManual = process.argv.slice( 2 );
-      if( argumentsManual.length )
-      o.args = _.arrayAppendArray( o.args || [], argumentsManual );
-    }
 
     /* dependencies */
 
@@ -465,10 +472,12 @@ function startMinimal_body( o )
       log( _.errOnce( err ), 'err' );
     }
 
+    /* prefixing */
+
     if( o.outputPrefixing )
     {
       _errPrefix = `${ ( o.outputColoring ? _.ct.format( 'err', { fg : 'dark red' } ) : 'err' ) } : `;
-      _outPrefix = `${ ( o.outputColoring ? _.ct.format( 'out', { fg : 'dark white' } ) : 'err' ) } : `;
+      _outPrefix = `${ ( o.outputColoring ? _.ct.format( 'out', { fg : 'dark white' } ) : 'out' ) } : `;
     }
 
     /* handler of event terminationBegin */
@@ -479,7 +488,7 @@ function startMinimal_body( o )
       o._handleProcedureTerminationBegin = _handleProcedureTerminationBegin;
     }
 
-    /* if map already has error, running should not start */
+    /* if session already has error, running should not start */
     if( o.error )
     throw o.error;
   }
@@ -532,21 +541,35 @@ function startMinimal_body( o )
       timeOutForm();
       pipe();
 
-      if( o.sync && !o.deasync )
-      {
-        if( o.process.error )
-        handleError( o.process.error );
-        else
-        handleClose( o.process.status, o.process.signal );
-      }
-
       if( o.dry )
       {
-        /* qqq for Yevhen : make sure option dry is covered good enough */
-        _.assert( o.state === 'started' );
-        o.state = 'terminated';
-        end2( undefined );
+        // _.assert( o.state === 'started' );
+        // o.state = 'terminated';
+        // end2( undefined );
+        if( o.error )
+        handleError( o.error );
+        else
+        handleClose( null, null );
       }
+      else
+      {
+        if( o.sync && !o.deasync )
+        {
+          if( o.process.error )
+          handleError( o.process.error );
+          else
+          handleClose( o.process.status, o.process.signal );
+        }
+      }
+
+      // if( o.dry )
+      // {
+      //   /* qqq for Yevhen : make sure option dry is covered good enough */
+      //   _.assert( o.state === 'started' );
+      //   o.state = 'terminated';
+      //   end2( undefined );
+      // }
+
     }
     catch( err )
     {
@@ -680,7 +703,7 @@ function startMinimal_body( o )
     o.args = o.interpreterArgs.concat( o.args )
 
     if( o.args.length )
-    arg2 = arg2 + ' ' + argsJoin( o.args.slice() );
+    arg2 = arg2 + ' ' + argsEscape( o.args.slice() ).join( ' ' );
 
     o.fullExecPath = arg2;
 
@@ -819,7 +842,7 @@ function startMinimal_body( o )
     o.exitReason = 'signal';
     else if( exitCode )
     o.exitReason = 'code';
-    else
+    else if( exitCode === 0 )
     o.exitReason = 'normal';
 
     if( o.verbosity >= 5 && o.inputMirroring ) /* qqq for Yevhen : cover */
@@ -830,7 +853,7 @@ function startMinimal_body( o )
     }
 
     if( !o.error && o.throwingExitCode )
-    if( exitSignal || exitCode !== 0 )
+    if( exitSignal || exitCode ) /* should be not strict condition to handle properly value null */
     {
       if( _.numberIs( exitCode ) )
       o.error = _._err({ args : [ 'Process returned exit code', exitCode, '\n', infoGet() ], reason : 'exit code' });
@@ -1101,9 +1124,7 @@ function startMinimal_body( o )
     {
       let begin = _.strBeginOf( args[ i ], quotes );
       let end = _.strEndOf( args[ i ], quotes );
-
-      if( begin && end )
-      if( begin === end )
+      if( begin && end && begin === end )
       continue;
 
       if( _.longHas( quotes, args[ i ] ) )
@@ -1118,15 +1139,12 @@ function startMinimal_body( o )
       quotes.forEach( ( quote ) =>
       {
         let found = _.strFindAll( args[ i ], quote );
-
         if( found.length % 2 === 0 )
         return;
-
-        for( let k = 0; k < found.length; k += 1 )
+        for( let k = 0 ; k < found.length ; k += 1 )
         {
           let pos = found[ k ].charsRangeLeft[ 0 ];
-
-          for( let j = 0; j < r.ranges.length; j += 2 )
+          for( let j = 0 ; j < r.ranges.length ; j += 2 )
           if( pos >= r.ranges[ j ] && pos <= r.ranges[ j + 1 ] )
           break;
           throw _.err( `Arguments string in execPath: ${src} has not closed quoting in argument: ${args[ i ]}` );
@@ -1142,34 +1160,40 @@ function startMinimal_body( o )
   function argsUnqoute( args )
   {
     let quotes = [ '"', `'`, '`' ];
-
     for( let i = 0; i < args.length; i++ )
-    {
-      let begin = _.strBeginOf( args[ i ], quotes );
-      let end = _.strEndOf( args[ i ], quotes );
-      if( begin )
-      if( begin && begin === end )
-      args[ i ] = _.strInsideOf( args[ i ], begin, end );
-    }
-
+    args[ i ] = argUnqoute( args[ i ] );
     return args;
   }
 
   /* */
 
-  function argsJoin( args )
+  function argUnqoute( arg )
   {
-    if( !execArgs && !o.passingThrough ) /* xxx qqq for Vova : why if passingThrough? no hacks! */
-    return args.join( ' ' );
+    let quotes = [ '"', `'`, '`' ];
+    let begin = _.strBeginOf( arg, quotes );
+    let end = _.strEndOf( arg, quotes );
+    if( begin )
+    if( begin && begin === end )
+    arg = _.strInsideOf( arg, begin, end );
+    return arg;
+  }
 
-    let i;
+  /* */
 
-    if( execArgs )
-    i = execArgs.length;
-    else
-    i = args.length - ( process.argv.length - 2 );
+  function argsEscape( args )
+  {
+    /* xxx qqq for Vova : why if passingThrough? no hacks! aaa:removed execArgs*/
 
-    for( ; i < args.length; i++ )
+    /* Escapes and quotes:
+      - Original args provided via o.args
+      - Arguments of parent process if o.passingThrough is enabled
+      Skips arguments parsed from o.execPath.
+    */
+
+    let appendedArgs = o.passingThrough ? process.argv.length - 2 : 0;
+    let prependedArgs = args.length - ( _argsLength + appendedArgs );
+
+    for( let i = prependedArgs; i < args.length; i++ )
     {
       let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', '`' ]
       _.each( quotesToEscape, ( quote ) =>
@@ -1177,11 +1201,11 @@ function startMinimal_body( o )
         args[ i ] = argEscape( args[ i ], quote );
       })
       args[ i ] = _.strQuote( args[ i ] );
-
       // args[ i ] = _.process.escapeArg( args[ i ]  ); /* zzz for Vova : use this routine, review fails */
     }
 
-    return args.join( ' ' );
+    return args;
+    // return args.join( ' ' );
   }
 
   /* */
@@ -1237,11 +1261,12 @@ function startMinimal_body( o )
 
   function execPathForFork( execPath )
   {
-    let quotes = [ '"', `'`, '`' ];
-    let begin = _.strBeginOf( execPath, quotes );
-    if( begin )
-    execPath = _.strInsideOf( execPath, begin, begin );
-    return execPath;
+    return argUnqoute( execPath );
+    // let quotes = [ '"', `'`, '`' ];
+    // let begin = _.strBeginOf( execPath, quotes );
+    // if( begin )
+    // execPath = _.strInsideOf( execPath, begin, begin );
+    // return execPath;
   }
 
   /* */
@@ -1259,6 +1284,8 @@ function startMinimal_body( o )
     console.log( _.process.realMainFile(), 'exitCodeSet', exitCode );
     */
     if( o.exitCode )
+    return;
+    if( exitCode === null )
     return;
     o.exitCode = exitCode;
     if( o.process && o.process.exitCode === undefined )
@@ -1446,7 +1473,6 @@ startMinimal_body.defaults =
 
   throwingExitCode : 'full', /* must be on by default */ /* bool-like, 'full', 'brief' */
   applyingExitCode : 0,
-  // briefExitCode : 0,
 
   verbosity : 2, /* qqq for Yevhen : cover the option */
   outputPrefixing : 0, /* qqq for Yevhen : extend coverage */
@@ -1458,6 +1484,8 @@ startMinimal_body.defaults =
   outputColoringStdout : null, /* qqq for Yevhen : cover the option */
   outputGraying : 0,
   inputMirroring : 1, /* qqq for Yevhen : cover the option | aaa : Done */
+
+  /* qqq for Yevhen : remove option::outputColoringStderr and option::outputColoringStdout. extend outputColoring */
 
 }
 
@@ -2041,6 +2069,7 @@ function start_body( o )
       conTerminate.push( o2.conTerminate );
       readies.push( o2.ready );
 
+      if( !o.dry )
       if( o.streamOut || o.streamErr )
       processPipe( o2 );
 
@@ -2885,11 +2914,19 @@ function signal_body( o )
 /*
     console.log( o.signal, p.pid );
 */
-
-    if( pnd )
-    pnd.kill( o.signal );
-    else
-    process.kill( p.pid, o.signal );
+    try
+    {
+      if( pnd )
+      pnd.kill( o.signal );
+      else
+      process.kill( p.pid, o.signal );
+    }
+    catch( err )
+    {
+      if( err.code === 'ESRCH' )
+      return;
+      throw err;
+    }
 
     let con = waitForDeath( p );
     cons.push( con );

@@ -1575,7 +1575,7 @@ function systemEntryAddOptionForcing( test )
 var Proto =
 {
 
-  name : 'Tools.l3.Io',
+  name : 'Tools.l3.process.Io',
   silencing : 1,
   routineTimeOut : 60000,
   onSuiteBegin : suiteBegin,
