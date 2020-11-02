@@ -2905,7 +2905,7 @@ function signal_body( o )
     _.assert( _.intIs( p.pid ) );
 
     if( !_.process.isAlive( p.pid ) )
-    return;
+    return true;
 
     let pnd = p.pnd;
     if( !pnd && o.pnd && o.pnd.pid === p.pid )
@@ -2923,8 +2923,10 @@ function signal_body( o )
     }
     catch( err )
     {
-      if( err.code === 'ESRCH' )
-      return;
+      if( o.ignoringErrorEsrch && err.code === 'ESRCH' )
+      return true;
+      if( o.ignoringErrorPerm && err.code === 'EPERM' )
+      return true;
       throw err;
     }
 
@@ -2995,22 +2997,6 @@ function signal_body( o )
 
   /* - */
 
-  function killMaybe( p )
-  {
-    if( process.platform !== 'win32' )
-    return _.process.kill( killOptions );
-
-    return _.process.execPathOf({ pid : p.pid })
-    .then( ( processName ) =>
-    {
-      if( p.name !== processName )
-      return null;
-      return _.process.kill( killOptions );
-    })
-  }
-
-  /* - */
-
   function handleError( err )
   {
     // if( err.code === 'EINVAL' )
@@ -3045,6 +3031,8 @@ signal_body.defaults =
   withChildren : 1,
   timeOut : 5000,
   signal : null,
+  ignoringErrorPerm : 0,
+  ignoringErrorEsrch : 1,
   sync : 0,
 }
 
