@@ -29591,7 +29591,7 @@ function terminateDetachedFirstChildSpawn( test )
     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
     test.is( _.process.isAlive( program2Pid ) );
 
-    return _.time.out( context.t1*15 ); /* qqq for Vova: replace with periodic + timeout + kill */
+    return _.process.waitForDeath({ pid : program2Pid, timeOut : context.t1*15 });
   })
 
   o.conTerminate.then( () =>
@@ -29736,7 +29736,7 @@ function terminateDetachedFirstChildFork( test )
     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
     test.is( _.process.isAlive( program2Pid ) );
 
-    return _.time.out( context.t1*15 ); /* qqq for Vova: replace with periodic + timeout + kill */
+    return _.process.waitForDeath({ pid : program2Pid, timeOut : context.t1*15 });
   })
 
   o.conTerminate.then( () =>
@@ -29879,7 +29879,7 @@ function terminateDetachedFirstChildShell( test )
     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
     test.is( _.process.isAlive( program2Pid ) );
 
-    return _.time.out( context.t1*15 ); /* qqq for Vova: replace with periodic + timeout + kill */
+    return _.process.waitForDeath({ pid : program2Pid, timeOut : context.t1*15 });
   })
 
   o.conTerminate.then( () =>
