@@ -1,4 +1,4 @@
-( function _ProcessBasic_test_s( )
+( function _Execution_test_s( )
 {
 
 'use strict';
@@ -25,21 +25,21 @@ let Self = {};
 
 reset && RET=0
 until [ ${RET} -ne 0 ]; do
-    node wtools/abase/l4.test/ProcessBasic.test.s n:1 v:5 s:0 r:terminateDetachedComplex
+    node wtools/abase/l4.test/Execution.test.s n:1 v:5 s:0 r:terminateDetachedComplex
     RET=$?
     sleep 1
 done
 
 reset && RET=0
 until [ ${RET} -ne 0 ]; do
-    node wtools/abase/l4.test/ProcessBasic.test.s n:1 v:5 s:0 r:terminateWithChildren
+    node wtools/abase/l4.test/Execution.test.s n:1 v:5 s:0 r:terminateWithChildren
     RET=$?
     sleep 1
 done
 
 reset && RET=0
 until [ ${RET} -ne 0 ]; do
-    node wtools/abase/l4.test/ProcessBasic.test.s n:1 v:5 s:0 r:endSignalsBasic
+    node wtools/abase/l4.test/Execution.test.s n:1 v:5 s:0 r:endSignalsBasic
     RET=$?
     sleep 1
 done
@@ -9606,14 +9606,14 @@ function startProcedureStack( test )
 
       _.process.start( o );
 
-      test.identical( _.strCount( o.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
+      test.identical( _.strCount( o.procedure._sourcePath, 'Execution.test.s' ), 1 );
       test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
 
       o.ready.then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.identical( _.strCount( op.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
+        test.identical( _.strCount( op.procedure._sourcePath, 'Execution.test.s' ), 1 );
         test.identical( _.strCount( op.procedure._sourcePath, 'case1' ), 1 );
         return null;
       })
@@ -9640,14 +9640,14 @@ function startProcedureStack( test )
 
       _.process.start( o );
 
-      test.identical( _.strCount( o.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
+      test.identical( _.strCount( o.procedure._sourcePath, 'Execution.test.s' ), 1 );
       test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
 
       o.ready.then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.identical( _.strCount( op.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
+        test.identical( _.strCount( op.procedure._sourcePath, 'Execution.test.s' ), 1 );
         test.identical( _.strCount( op.procedure._sourcePath, 'case1' ), 1 );
         return null;
       })
@@ -9675,7 +9675,7 @@ function startProcedureStack( test )
       _.process.start( o );
 
       test.identical( _.strCount( o.procedure._stack, 'case1' ), 1 );
-      test.identical( _.strCount( o.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
+      test.identical( _.strCount( o.procedure._sourcePath, 'Execution.test.s' ), 1 );
       test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
 
       o.ready.then( ( op ) =>
@@ -9683,7 +9683,7 @@ function startProcedureStack( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.identical( _.strCount( o.procedure._stack, 'case1' ), 1 );
-        test.identical( _.strCount( op.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
+        test.identical( _.strCount( op.procedure._sourcePath, 'Execution.test.s' ), 1 );
         test.identical( _.strCount( op.procedure._sourcePath, 'case1' ), 1 );
         return null;
       })
@@ -9880,7 +9880,7 @@ function startProcedureStackMultiple( test )
       }
 
       test.identical( _.strCount( o.procedure._stack, 'case1' ), 1 );
-      test.identical( _.strCount( o.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
+      test.identical( _.strCount( o.procedure._sourcePath, 'Execution.test.s' ), 1 );
       test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
 
       o.ready.then( ( op ) =>
@@ -9892,13 +9892,13 @@ function startProcedureStackMultiple( test )
         test.identical( o.ended, true );
         test.identical( o.state, 'terminated' );
         test.identical( _.strCount( o.procedure._stack, 'case1' ), 1 );
-        test.identical( _.strCount( o.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
+        test.identical( _.strCount( o.procedure._sourcePath, 'Execution.test.s' ), 1 );
         test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
 
         o.runs.forEach( ( op2 ) =>
         {
           test.identical( _.strCount( op2.procedure._stack, 'case1' ), 1 );
-          test.identical( _.strCount( op2.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
+          test.identical( _.strCount( op2.procedure._sourcePath, 'Execution.test.s' ), 1 );
           test.identical( _.strCount( op2.procedure._sourcePath, 'case1' ), 1 );
           test.is( o.procedure !== op2.procedure );
         });
@@ -9946,7 +9946,7 @@ function startProcedureStackMultiple( test )
       }
 
       test.identical( _.strCount( o.procedure._stack, 'case1' ), 1 );
-      test.identical( _.strCount( o.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
+      test.identical( _.strCount( o.procedure._sourcePath, 'Execution.test.s' ), 1 );
       test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
 
       o.ready.then( ( op ) =>
@@ -9958,13 +9958,13 @@ function startProcedureStackMultiple( test )
         test.identical( o.ended, true );
         test.identical( o.state, 'terminated' );
         test.identical( _.strCount( o.procedure._stack, 'case1' ), 1 );
-        test.identical( _.strCount( o.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
+        test.identical( _.strCount( o.procedure._sourcePath, 'Execution.test.s' ), 1 );
         test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
 
         o.runs.forEach( ( op2 ) =>
         {
           test.identical( _.strCount( op2.procedure._stack, 'case1' ), 1 );
-          test.identical( _.strCount( op2.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
+          test.identical( _.strCount( op2.procedure._sourcePath, 'Execution.test.s' ), 1 );
           test.identical( _.strCount( op2.procedure._sourcePath, 'case1' ), 1 );
           test.is( o.procedure !== op2.procedure );
         });
@@ -10012,7 +10012,7 @@ function startProcedureStackMultiple( test )
       }
 
       test.identical( _.strCount( o.procedure._stack, 'case1' ), 1 );
-      test.identical( _.strCount( o.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
+      test.identical( _.strCount( o.procedure._sourcePath, 'Execution.test.s' ), 1 );
       test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
 
       o.ready.then( ( op ) =>
@@ -10024,13 +10024,13 @@ function startProcedureStackMultiple( test )
         test.identical( o.ended, true );
         test.identical( o.state, 'terminated' );
         test.identical( _.strCount( o.procedure._stack, 'case1' ), 1 );
-        test.identical( _.strCount( o.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
+        test.identical( _.strCount( o.procedure._sourcePath, 'Execution.test.s' ), 1 );
         test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
 
         o.runs.forEach( ( op2 ) =>
         {
           test.identical( _.strCount( op2.procedure._stack, 'case1' ), 1 );
-          test.identical( _.strCount( op2.procedure._sourcePath, 'ProcessBasic.test.s' ), 1 );
+          test.identical( _.strCount( op2.procedure._sourcePath, 'Execution.test.s' ), 1 );
           test.identical( _.strCount( op2.procedure._sourcePath, 'case1' ), 1 );
           test.is( o.procedure !== op2.procedure );
         });
@@ -23393,7 +23393,7 @@ function startSingleOptionDry( test )
         test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate', 'ready' ] );
         else
         test.identical( track, [ 'conStart', 'conTerminate', 'conDisconnect', 'ready' ] );
-        track = [];
+        track = []; /* qqq for Yevhen : should be on beginning of test case */
         return null;
       })
 
@@ -23414,6 +23414,8 @@ function startSingleOptionDry( test )
   }
 }
 
+startSingleOptionDry.rapidity = -1;
+startSingleOptionDry.timeOut = 3e5;
 startSingleOptionDry.description =
 `
 Simulates run of routine start with all possible options.
@@ -23477,8 +23479,16 @@ function startOptionDryMultiple( test )
       test.identical( options.process, undefined );
       test.identical( options.output, '' );
       test.identical( options.ended, true );
-      test.is( _.streamIs( options.streamOut ) );
-      test.is( _.streamIs( options.streamErr ) );
+      if( tops.sync && !tops.deasync )
+      {
+        test.is( !_.streamIs( options.streamOut ) );
+        test.is( !_.streamIs( options.streamErr ) );
+      }
+      else
+      {
+        test.is( _.streamIs( options.streamOut ) );
+        test.is( _.streamIs( options.streamErr ) );
+      }
       if( tops.mode === 'fork' )
       {
         test.identical( options.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
@@ -23581,8 +23591,16 @@ function startOptionDryMultiple( test )
       test.identical( options.process, undefined );
       test.identical( options.output, '' );
       test.identical( options.ended, true );
-      test.is( _.streamIs( options.streamOut ) );
-      test.is( _.streamIs( options.streamErr ) );
+      if( tops.sync && !tops.deasync )
+      {
+        test.is( !_.streamIs( options.streamOut ) );
+        test.is( !_.streamIs( options.streamErr ) );
+      }
+      else
+      {
+        test.is( _.streamIs( options.streamOut ) );
+        test.is( _.streamIs( options.streamErr ) );
+      }
       if( tops.mode === 'fork' )
       {
         test.identical( options.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
@@ -26801,7 +26819,7 @@ function startErrorAfterTerminationWithSend( test )
 
  = Beautified calls stack
     at ChildProcess.target.send (internal/child_process.js:705:16)
-    at wConsequence.<anonymous> (/Users/runner/work/wProcess/wProcess/proto/wtools/abase/l4.test/ProcessBasic.test.s:24677:17) *
+    at wConsequence.<anonymous> (/Users/runner/work/wProcess/wProcess/proto/wtools/abase/l4.test/Execution.test.s:24677:17) *
     at wConsequence.take (/Users/runner/work/wProcess/wProcess/node_modules/wConsequence/proto/wtools/abase/l9/consequence/Consequence.s:2669:8)
     at end3 (/Users/runner/work/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:783:20)
     at end2 (/Users/runner/work/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:734:12)
@@ -31959,7 +31977,7 @@ SIGTERM
         - difference :
           *
 
-        /wtools/abase/l4.test/ProcessBasic.test.s:29900:12
+        /wtools/abase/l4.test/Execution.test.s:29900:12
           29896 :       test.identical( o.exitSignal, null );
           29897 :     }
           29898 :     else
@@ -31974,7 +31992,7 @@ SIGTERM
         - difference :
           *
 
-        /wtools/abase/l4.test/ProcessBasic.test.s:29901:12
+        /wtools/abase/l4.test/Execution.test.s:29901:12
           29897 :     }
           29898 :     else
           29899 :     {
@@ -34453,7 +34471,7 @@ Shows that timeOut kills the child process and handleClose is called
 var Proto =
 {
 
-  name : 'Tools.l4.ProcessBasic',
+  name : 'Tools.l4.porocess.Execution',
   silencing : 1,
   routineTimeOut : 60000,
   onSuiteBegin : suiteBegin,
@@ -34619,12 +34637,11 @@ var Proto =
 
     startOptionStreamSizeLimit,
     startOptionStreamSizeLimitThrowing,
-    startSingleOptionDry, /* qqq for Yevhen : make sure option dry is covered good enough | aaa : Done */
-    /* qqq for Yevhen : write test routine startOptionDryMultiple | aaa : Done. */
+    startSingleOptionDry,
     startOptionDryMultiple,
     startOptionCurrentPath,
     startOptionCurrentPaths,
-    startOptionPassingThrough, /* qqq for Yevhen : extend please | aaa : Done. Yevhen S. */
+    startOptionPassingThrough,
 
     // pid / status / exit
 

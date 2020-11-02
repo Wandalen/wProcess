@@ -168,20 +168,22 @@ module:
           - ../proto/wtools
           - ../proto/wtools/Tools.s
           - ../proto/wtools/abase
-          - ../proto/wtools/abase/l4.test
-          - ../proto/wtools/abase/l4.test/Basic.test.s
-          - ../proto/wtools/abase/l4.test/Io.test.s
-          - ../proto/wtools/abase/l4.test/ProcessBasic.test.s
-          - ../proto/wtools/abase/l4.test/_asset
-          - ../proto/wtools/abase/l4.test/_asset/systemEntry
-          - ../proto/wtools/abase/l4.test/_asset/systemEntry/dir
-          - ../proto/wtools/abase/l4.test/_asset/systemEntry/dir/file.txt
-          - ../proto/wtools/abase/l4.test/_asset/systemEntry/dir/Index.js
           - ../proto/wtools/abase/l4_process
           - ../proto/wtools/abase/l4_process/Basic.s
           - ../proto/wtools/abase/l4_process/l3
           - ../proto/wtools/abase/l4_process/l3/Execution.s
           - ../proto/wtools/abase/l4_process/l3/Io.s
+          - ../proto/wtools/abase/l4_process.test
+          - ../proto/wtools/abase/l4_process.test/Basic.test.s
+          - ../proto/wtools/abase/l4_process.test/Execution.test.s
+          - ../proto/wtools/abase/l4_process.test/Io.test.s
+          - ../proto/wtools/abase/l4_process.test/_asset
+          - ../proto/wtools/abase/l4_process.test/_asset/systemEntry
+          - ../proto/wtools/abase/l4_process.test/_asset/systemEntry/dir
+          - >-
+            ../proto/wtools/abase/l4_process.test/_asset/systemEntry/dir/file.txt
+          - >-
+            ../proto/wtools/abase/l4_process.test/_asset/systemEntry/dir/Index.js
           - ../proto/wtools/amid
           - ../proto/wtools/atop
     submodule:
