@@ -2904,7 +2904,7 @@ function startArgumentsParsing( test )
     return ready;
   }
 
-  /* ORIGINAL */ /* xxx */
+  /* ORIGINAL */ /* zzz */
 
   /* - */
 
@@ -8109,8 +8109,8 @@ function startProcedureStack( test )
 
 }
 
+startProcedureStack.rapidity = -1;
 startProcedureStack.timeOut = 5e5;
-
 startProcedureStack.description =
 `
   - option stack used to get stack
@@ -8546,6 +8546,7 @@ function startProcedureStackMultiple( test )
 
 }
 
+startProcedureStackMultiple.rapidity = -1;
 startProcedureStackMultiple.timeOut = 500000;
 
 //
@@ -9194,6 +9195,7 @@ function startOptionWhenDelay( test )
 }
 
 startOptionWhenDelay.timeOut = 5e5;
+startOptionWhenDelay.rapidity = -1;
 
 //
 
@@ -9267,6 +9269,7 @@ function startOptionWhenTime( test )
 }
 
 startOptionWhenTime.timeOut = 5e5;
+startOptionWhenTime.rapidity = -1;
 
 //
 
@@ -9545,6 +9548,7 @@ function startOptionTimeOut( test )
 }
 
 startOptionTimeOut.timeOut = 5e5;
+startOptionTimeOut.rapidity = -1;
 
 //
 
@@ -13026,7 +13030,8 @@ function startOnStart( test )
 
 }
 
-startOnStart.timeOut = 120000;
+startOnStart.timeOut = 3e5;
+startOnStart.rapidity = -1;
 
 //
 
@@ -13376,7 +13381,8 @@ function startOnTerminate( test )
   }
 }
 
-startOnTerminate.timeOut = 3e5;
+startOnTerminate.timeOut = 5e5;
+startOnTerminate.rapidity = -1;
 
 //
 
@@ -15072,6 +15078,7 @@ ${options.runs[ 1 ].procedure.id}.end
 
 }
 
+startConcurrentConsequencesMultiple.rapidity = -1;
 startConcurrentConsequencesMultiple.timeOut = 2e6;
 startConcurrentConsequencesMultiple.description =
 `
@@ -21710,7 +21717,7 @@ function startSingleOptionDry( test )
 }
 
 startSingleOptionDry.rapidity = -1;
-startSingleOptionDry.timeOut = 3e5;
+startSingleOptionDry.timeOut = 5e6;
 startSingleOptionDry.description =
 `
 Simulates run of routine start with all possible options.
@@ -22742,6 +22749,7 @@ function startOptionPassingThrough( test )
 }
 
 startOptionPassingThrough.timeOut = 5e5;
+startOptionPassingThrough.rapidity = -1;
 
 // --
 // pid
@@ -32664,7 +32672,7 @@ var Proto =
 
     // basic
 
-    startBasic,
+    startBasic, /* qqq for Yevhen : merge startBasic2 in */
     startBasic2,
     startFork,
     startErrorHandling,
