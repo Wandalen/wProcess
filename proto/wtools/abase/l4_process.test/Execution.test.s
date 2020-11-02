@@ -218,7 +218,7 @@ function startBasic( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.path.nativize( a.program( program1 ) );
+  let programPath = a.program( program1 );
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -550,7 +550,7 @@ function startBasic2( test ) /* qqq for Evhen : merge with test routine startBas
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.path.nativize( a.program( testApp ) );
+  let programPath = a.program( testApp );
 
   let o3 =
   {
@@ -1430,7 +1430,7 @@ function startSync( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.path.nativize( a.program( program1 ) );
+  let programPath = a.program( program1 );
 
   let modes = [ 'spawn', 'shell' ];
 
@@ -1746,7 +1746,7 @@ function startSyncDeasync( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.path.nativize( a.program( program1 ) );
+  let programPath = a.program( program1 );
 
   let modes = [ 'fork', 'spawn', 'shell' ];
 
@@ -2034,7 +2034,7 @@ function startSyncDeasyncMultiple( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.path.nativize( a.program( testApp ) );
+  let programPath = a.program( testApp );
   let modes = [ 'fork', 'spawn', 'shell' ];
 
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
@@ -2157,7 +2157,7 @@ function startWithoutExecPath( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.path.nativize( a.program( testApp ) );
+  let programPath = a.program( testApp );
   let counter = 0;
   let time = 0;
   let filePath = a.path.nativize( a.abs( a.routinePath, 'file.txt' ) );
@@ -2232,7 +2232,7 @@ function startArgsOption( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.path.nativize( a.program( testApp ) );
+  let programPath = a.program( testApp );
 
   let modes = [ 'fork', 'spawn', 'shell' ];
 
@@ -2394,8 +2394,8 @@ function startArgumentsParsing( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPathNoSpace = a.path.nativize( a.program({ routine : testApp, dirPath : a.abs( 'noSpace' ) }) );
-  let testAppPathSpace = a.path.nativize( a.program({ routine : testApp, dirPath : a.abs( 'with space' ) }) );
+  let testAppPathNoSpace = a.program({ routine : testApp, dirPath : a.abs( 'noSpace' ) });
+  let testAppPathSpace = a.program({ routine : testApp, dirPath : a.abs( 'with space' ) });
 
   /* for combination:
       path to exe file : [ with space, without space ]
@@ -2932,8 +2932,8 @@ function startArgumentsParsingNonTrivial( test )
 
   let a = context.assetFor( test, false );
 
-  let testAppPathNoSpace = a.path.nativize( a.program({ routine : testApp, dirPath : a.abs( 'noSpace' ) }) );
-  let testAppPathSpace = a.path.nativize( a.program({ routine : testApp, dirPath : a.abs( 'with space' ) }) );
+  let testAppPathNoSpace = a.program({ routine : testApp, dirPath : a.abs( 'noSpace' ) });
+  let testAppPathSpace = a.program({ routine : testApp, dirPath : a.abs( 'with space' ) });
 
   let modes = [ 'fork', 'spawn', 'shell' ];
 
@@ -3955,7 +3955,7 @@ function startArgumentsNestedQuotes( test )
 
   let a = context.assetFor( test, false );
 
-  let testAppPathSpace = a.path.nativize( a.program({ routine : testApp, dirPath : a.abs( 'with space' ) }) );
+  let testAppPathSpace = a.program({ routine : testApp, dirPath : a.abs( 'with space' ) });
 
   let modes = [ 'fork', 'spawn', 'shell' ];
 
@@ -6157,7 +6157,7 @@ function startImportantExecPathPassingThrough( test )
       options : { execPath : 'echo', args : null, passingThrough : 1 }
     }
 
-    let programPath = a.path.nativize( a.program({ routine : testAppParent, locals }) );
+    let programPath = a.program({ routine : testAppParent, locals });
 
     let options =
     {
@@ -6190,7 +6190,7 @@ function startImportantExecPathPassingThrough( test )
       options : { execPath : null, args : [ 'echo' ], passingThrough : 1 }
     }
 
-    let programPath = a.path.nativize( a.program({ routine : testAppParent, locals }) );
+    let programPath = a.program({ routine : testAppParent, locals });
 
     let options =
     {
@@ -6223,7 +6223,7 @@ function startImportantExecPathPassingThrough( test )
       options : { execPath : 'echo *', args : [ '*' ], passingThrough : 1 }
     }
 
-    let programPath = a.path.nativize( a.program({ routine : testAppParent, locals }) );
+    let programPath = a.program({ routine : testAppParent, locals });
 
     let options =
     {
@@ -6283,7 +6283,7 @@ function startImportantExecPathPassingThrough( test )
       options : { execPath : 'echo', args : null, passingThrough : 1 }
     }
 
-    let programPath = a.path.nativize( a.program({ routine : testAppParent, locals }) );
+    let programPath = a.program({ routine : testAppParent, locals });
 
     let options =
     {
@@ -6330,7 +6330,7 @@ function startImportantExecPathPassingThrough( test )
       options : { execPath : null, args : [ 'echo' ], passingThrough : 1 }
     }
 
-    let programPath = a.path.nativize( a.program({ routine : testAppParent, locals }) );
+    let programPath = a.program({ routine : testAppParent, locals });
 
     let options =
     {
@@ -6384,7 +6384,7 @@ function startImportantExecPathPassingThrough( test )
       options : { execPath : 'echo *', args : [ '*' ], passingThrough : 1 }
     }
 
-    let programPath = a.path.nativize( a.program({ routine : testAppParent, locals }) );
+    let programPath = a.program({ routine : testAppParent, locals });
 
     let options =
     {
@@ -6430,7 +6430,7 @@ function startImportantExecPathPassingThrough( test )
       options : { execPath : 'echo', args : null, passingThrough : 1 }
     }
 
-    let programPath = a.path.nativize( a.program({ routine : testAppParent, locals }) );
+    let programPath = a.program({ routine : testAppParent, locals });
 
     let options =
     {
@@ -6464,7 +6464,7 @@ function startImportantExecPathPassingThrough( test )
       options : { execPath : null, args : [ 'echo' ], passingThrough : 1 }
     }
 
-    let programPath = a.path.nativize( a.program({ routine : testAppParent, locals }) );
+    let programPath = a.program({ routine : testAppParent, locals });
 
     let options =
     {
@@ -6498,7 +6498,7 @@ function startImportantExecPathPassingThrough( test )
       options : { execPath : 'echo *', args : [ '*' ], passingThrough : 1 }
     }
 
-    let programPath = a.path.nativize( a.program({ routine : testAppParent, locals }) );
+    let programPath = a.program({ routine : testAppParent, locals });
 
     let options =
     {
@@ -7680,7 +7680,7 @@ function startProcedureTrivial( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.path.nativize( a.program( testApp ) );
+  let testAppPath = a.program( testApp );
 
   let start = _.process.starter
   ({
@@ -7788,7 +7788,7 @@ function startProcedureExists( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.path.nativize( a.program( program1 ) );
+  let testAppPath = a.program( program1 );
 
   let start = _.process.starter
   ({
@@ -7869,7 +7869,7 @@ function startProcedureStack( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.path.nativize( a.program( program1 ) );
+  let programPath = a.program( program1 );
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
@@ -8124,7 +8124,7 @@ function startProcedureStackMultiple( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.path.nativize( a.program( program1 ) );
+  let programPath = a.program( program1 );
 
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
@@ -8555,7 +8555,7 @@ function startOnTerminateSeveralCallbacksChronology( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.path.nativize( a.program( program1 ) );
+  let programPath = a.program( program1 );
   let track = [];
 
   /* */
@@ -8640,7 +8640,7 @@ function startChronology( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.path.nativize( a.program( testApp ) );
+  let testAppPath = a.program( testApp );
   let track;
   let niteration = 0;
 
@@ -8897,7 +8897,7 @@ function startReadyDelay( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.path.nativize( a.program( program1 ) );
+  let programPath = a.program( program1 );
   let modes = [ 'fork', 'spawn', 'shell' ];
   // let modes = [ 'spawn' ];
   modes.forEach( ( mode ) => a.ready.then( () => single( 0, 0, mode ) ) );
@@ -8976,7 +8976,7 @@ function startReadyDelayMultiple( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.path.nativize( a.program( program1 ) );
+  let programPath = a.program( program1 );
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, mode }) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, mode }) ) );
@@ -9128,7 +9128,7 @@ function startOptionWhenDelay( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.path.nativize( a.program( program1 ) );
+  let programPath = a.program( program1 );
   let modes = [ 'fork', 'spawn', 'shell' ];
   // let modes = [ 'spawn' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
@@ -9201,7 +9201,7 @@ function startOptionWhenTime( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.path.nativize( a.program( program1 ) );
+  let programPath = a.program( program1 );
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
@@ -11630,8 +11630,8 @@ function startDetachingChildExitsAfterParent( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppParentPath = a.path.nativize( a.program( testAppParent ) );
-  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
+  let testAppParentPath = a.program( testAppParent );
+  let testAppChildPath = a.program( testAppChild );
   let testFilePath = a.abs( a.routinePath, 'testFile' );
 
   /* */
@@ -11743,8 +11743,8 @@ function startDetachingChildExitsBeforeParent( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppParentPath = a.path.nativize( a.program( testAppParent ) );
-  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
+  let testAppParentPath = a.program( testAppParent );
+  let testAppChildPath = a.program( testAppChild );
 
   let testFilePath = a.abs( a.routinePath, 'testFile' );
 
@@ -11876,7 +11876,7 @@ function startDetachingDisconnectedEarly( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.path.nativize( a.program( program1 ) );
+  let programPath = a.program( program1 );
   // let modes = [ 'fork', 'spawn', 'shell' ];
   let modes = [ 'spawn' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
@@ -11996,7 +11996,7 @@ function startDetachingDisconnectedLate( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.path.nativize( a.program( program1 ) );
+  let programPath = a.program( program1 );
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -12119,7 +12119,7 @@ function startDetachingChildExistsBeforeParentWaitForTermination( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
+  let testAppChildPath = a.program( testAppChild );
 
   a.ready
 
@@ -12284,8 +12284,8 @@ function startDetachingTerminationBegin( test )
     {
       a.fileProvider.filesDelete( a.routinePath );
       let locals = { mode }
-      a.path.nativize( a.program({ routine : testAppParent, locals }) );
-      a.path.nativize( a.program( testAppChild ) );
+      a.program({ routine : testAppParent, locals });
+      a.program( testAppChild );
       return null;
     })
 
@@ -12719,7 +12719,7 @@ function startOnStart( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
+  let testAppChildPath = a.program( testAppChild );
   let track = [];
 
   let modes = [ 'fork', 'spawn', 'shell' ];
@@ -13034,7 +13034,7 @@ function startOnTerminate( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppChildPath = a.path.nativize( a.program( testAppChild ) );
+  let testAppChildPath = a.program( testAppChild );
   let modes = [ 'fork', 'spawn', 'shell' ];
 
   modes.forEach( ( mode ) =>
@@ -13452,7 +13452,7 @@ function startWithDelayOnReady( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.path.nativize( a.program( program1 ) );
+  let programPath = a.program( program1 );
   let time1 = _.time.now();
 
   a.ready.delay( 1000 );
@@ -13539,7 +13539,7 @@ function startOnIsNotConsequence( test )
   let context = this;
   let track;
   let a = context.assetFor( test, false );
-  let programPath = a.path.nativize( a.program( program1 ) );
+  let programPath = a.program( program1 );
   let modes = [ 'fork', 'spawn', 'shell' ];
   // let modes = [ 'spawn' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
@@ -13740,7 +13740,7 @@ function startConcurrentMultiple( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.path.nativize( a.program( program1 ) );
+  let testAppPath = a.program( program1 );
   let counter = 0;
   let time = 0;
   let filePath = a.path.nativize( a.abs( a.routinePath, 'file.txt' ) );
@@ -15085,7 +15085,7 @@ function starterConcurrentMultiple( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.path.nativize( a.program( program1 ) );
+  let testAppPath = a.program( program1 );
   let counter = 0;
   let time = 0;
   let filePath = a.path.nativize( a.abs( a.routinePath, 'file.txt' ) );
@@ -15956,7 +15956,7 @@ function startNjsOptionInterpreterArgs( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.path.nativize( a.program( program1 ) );
+  let programPath = a.program( program1 );
   let totalMem = require( 'os' ).totalmem();
 
   let modes = [ 'fork', 'spawn', 'shell' ];
@@ -16587,7 +16587,7 @@ function starter( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.path.nativize( a.program( testApp ) );
+  let testAppPath = a.program( testApp );
 
   /* */
 
@@ -16857,7 +16857,7 @@ function starterArgs( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.path.nativize( a.program( testApp ) );
+  let testAppPath = a.program( testApp );
 
   /* */
 
@@ -16979,7 +16979,7 @@ function startOptionOutputCollecting( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.path.nativize( a.program( program1 ) );
+  let programPath = a.program( program1 );
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => single( mode ) ) );
   return a.ready;
@@ -17219,9 +17219,9 @@ function startOptionOutputColoring( test )
     {
       test.case = `mode : ${ mode }, outputColoring : 0, normal output, inputMirroring : 0`;
 
-      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+      let testAppPath2 = a.program( testApp2 );
       let locals = { programPath : testAppPath2, outputColoring : 0, inputMirroring : 0, mode };
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       let options =
       {
@@ -17248,9 +17248,9 @@ function startOptionOutputColoring( test )
     {
       test.case = `mode : ${ mode }, outputColoring : 1, normal output, inputMirroring : 0`;
 
-      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+      let testAppPath2 = a.program( testApp2 );
       let locals = { programPath : testAppPath2, outputColoring : 1, inputMirroring : 0, mode };
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       let options =
       {
@@ -17278,9 +17278,9 @@ function startOptionOutputColoring( test )
     {
       test.case = `mode : ${ mode }, outputColoring : 1, normal output, inputMirroring : 1`;
 
-      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+      let testAppPath2 = a.program( testApp2 );
       let locals = { programPath : testAppPath2, outputColoring : 1, inputMirroring : 1, mode };
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       let options =
       {
@@ -17309,9 +17309,9 @@ function startOptionOutputColoring( test )
     {
       test.case = `mode : ${ mode }, outputColoring : 0, error output, inputMirroring : 0`;
 
-      let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
+      let testAppPath2 = a.program( testApp2Error );
       let locals = { programPath : testAppPath2, outputColoring : 0, inputMirroring : 0, mode };
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       let options =
       {
@@ -17338,9 +17338,9 @@ function startOptionOutputColoring( test )
     {
       test.case = `mode : ${ mode }, outputColoring : 1, error output, inputMirroring : 0`;
 
-      let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
+      let testAppPath2 = a.program( testApp2Error );
       let locals = { programPath : testAppPath2, outputColoring : 1, inputMirroring : 0, mode };
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       let options =
       {
@@ -17367,9 +17367,9 @@ function startOptionOutputColoring( test )
     {
       test.case = `mode : ${ mode }, outputColoring : 1, error output, inputMirroring : 1`;
 
-      let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
+      let testAppPath2 = a.program( testApp2Error );
       let locals = { programPath : testAppPath2, outputColoring : 1, inputMirroring : 1, mode };
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       let options =
       {
@@ -17451,7 +17451,7 @@ function startOptionOutputColoringStderr( test )
     {
       test.case = `mode : ${ mode }, outputColoringStderr : 0, inputMirroring : 0, outputColloring : 1`;
 
-      let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
+      let testAppPath2 = a.program( testApp2Error );
       let locals =
       {
         programPath : testAppPath2,
@@ -17461,7 +17461,7 @@ function startOptionOutputColoringStderr( test )
         outputColoringStdout : null,
         mode,
       };
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       let options =
       {
@@ -17488,7 +17488,7 @@ function startOptionOutputColoringStderr( test )
     {
       test.case = `mode : ${ mode }, outputColoringStderr : 1, inputMirroring : 0, outputColoring : 0`;
 
-      let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
+      let testAppPath2 = a.program( testApp2Error );
       let locals =
       {
         programPath : testAppPath2,
@@ -17498,7 +17498,7 @@ function startOptionOutputColoringStderr( test )
         outputColoringStdout : null,
         mode
       };
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       let options =
       {
@@ -17525,7 +17525,7 @@ function startOptionOutputColoringStderr( test )
     {
       test.case = `mode : ${ mode }, outputColoringStderr : 1, inputMirroring : 0, outputColoring : 1`;
 
-      let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
+      let testAppPath2 = a.program( testApp2Error );
       let locals =
       {
         programPath : testAppPath2,
@@ -17535,7 +17535,7 @@ function startOptionOutputColoringStderr( test )
         outputColoringStdout : null,
         mode
       };
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       let options =
       {
@@ -17562,7 +17562,7 @@ function startOptionOutputColoringStderr( test )
     {
       test.case = `mode : ${ mode }, outputColoringStderr : 1, inputMirroring : 1, outputColoring : 1`;
 
-      let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
+      let testAppPath2 = a.program( testApp2Error );
       let locals =
       {
         programPath : testAppPath2,
@@ -17572,7 +17572,7 @@ function startOptionOutputColoringStderr( test )
         outputColoringStdout : null,
         mode
       };
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       let options =
       {
@@ -17600,7 +17600,7 @@ function startOptionOutputColoringStderr( test )
     {
       test.case = `mode : ${ mode }, outputColoringStderr : 1, outputColoringStdout : 0, inputMirroring : 0, outputColoring : null, normal output`;
 
-      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+      let testAppPath2 = a.program( testApp2 );
       let locals =
       {
         programPath : testAppPath2,
@@ -17610,7 +17610,7 @@ function startOptionOutputColoringStderr( test )
         outputColoring : null,
         mode
       };
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       let options =
       {
@@ -17637,7 +17637,7 @@ function startOptionOutputColoringStderr( test )
     {
       test.case = `mode : ${ mode }, outputColoringStderr : 1, outputColoringStdout : 0, inputMirroring : 0, outputColoring : 1, normal output`;
 
-      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+      let testAppPath2 = a.program( testApp2 );
       let locals =
       {
         programPath : testAppPath2,
@@ -17647,7 +17647,7 @@ function startOptionOutputColoringStderr( test )
         outputColoring : 1,
         mode
       };
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       let options =
       {
@@ -17730,7 +17730,7 @@ function startOptionOutputColoringStdout( test )
     {
       test.case = `mode : ${ mode }, outputColoringStdout : 0, inputMirroring : 0, outputColloring : 1`;
 
-      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+      let testAppPath2 = a.program( testApp2 );
       let locals =
       {
         programPath : testAppPath2,
@@ -17740,7 +17740,7 @@ function startOptionOutputColoringStdout( test )
         outputColoring : 1,
         mode
       };
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       let options =
       {
@@ -17767,7 +17767,7 @@ function startOptionOutputColoringStdout( test )
     {
       test.case = `mode : ${ mode }, outputColoringStdout : 1, inputMirroring : 0, outputColoring : 0`;
 
-      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+      let testAppPath2 = a.program( testApp2 );
       let locals =
       {
         programPath : testAppPath2,
@@ -17777,7 +17777,7 @@ function startOptionOutputColoringStdout( test )
         outputColoring : 0,
         mode
       };
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       let options =
       {
@@ -17805,7 +17805,7 @@ function startOptionOutputColoringStdout( test )
     {
       test.case = `mode : ${ mode }, outputColoringStdout : 1, inputMirroring : 0, outputColoring : 1`;
 
-      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+      let testAppPath2 = a.program( testApp2 );
       let locals =
       {
         programPath : testAppPath2,
@@ -17815,7 +17815,7 @@ function startOptionOutputColoringStdout( test )
         outputColoring : 1,
         mode
       };
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       let options =
       {
@@ -17842,7 +17842,7 @@ function startOptionOutputColoringStdout( test )
     {
       test.case = `mode : ${ mode }, outputColoringStdout : 1, inputMirroring : 1, outputColoring : 1`;
 
-      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+      let testAppPath2 = a.program( testApp2 );
       let locals =
       {
         programPath : testAppPath2,
@@ -17852,7 +17852,7 @@ function startOptionOutputColoringStdout( test )
         outputColoring : 1,
         mode
       };
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       let options =
       {
@@ -17881,7 +17881,7 @@ function startOptionOutputColoringStdout( test )
     {
       test.case = `mode : ${ mode }, outputColoringStdout : 1, outputColoringStderr : 0, inputMirroring : 0, outputColoring : null`;
 
-      let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
+      let testAppPath2 = a.program( testApp2Error );
       let locals =
       {
         programPath : testAppPath2,
@@ -17891,7 +17891,7 @@ function startOptionOutputColoringStdout( test )
         outputColoring : null,
         mode
       };
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       let options =
       {
@@ -17919,7 +17919,7 @@ function startOptionOutputColoringStdout( test )
     {
       test.case = `mode : ${ mode }, outputColoringStdout : 1, outputColoringStderr : 0, inputMirroring : 0, outputColoring : 1`;
 
-      let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
+      let testAppPath2 = a.program( testApp2Error );
       let locals =
       {
         programPath : testAppPath2,
@@ -17929,7 +17929,7 @@ function startOptionOutputColoringStdout( test )
         outputColoring : 1,
         mode
       };
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       let options =
       {
@@ -17999,7 +17999,7 @@ function startOptionOutputGraying( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.path.nativize( a.program( testApp ) );
+  let testAppPath = a.program( testApp );
 
   /* */
 
@@ -19746,7 +19746,7 @@ function startOptionInputMirroring( test )
     {
       test.case = `mode : ${ mode }, inputMirroring : 0`;
 
-      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+      let testAppPath2 = a.program( testApp2 );
 
       let locals =
       {
@@ -19756,7 +19756,7 @@ function startOptionInputMirroring( test )
         verbosity : 2
       }
 
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       return _.process.start
       ({
@@ -19782,7 +19782,7 @@ function startOptionInputMirroring( test )
     {
       test.case = `mode : ${ mode }, inputMirroring : 1`;
 
-      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+      let testAppPath2 = a.program( testApp2 );
 
       let locals =
       {
@@ -19793,7 +19793,7 @@ function startOptionInputMirroring( test )
         verbosity : 2
       }
 
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       return _.process.start
       ({
@@ -19819,7 +19819,7 @@ function startOptionInputMirroring( test )
     {
       test.case = `mode : ${ mode }, inputMirroring : 1, verbosity : 0`;
 
-      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+      let testAppPath2 = a.program( testApp2 );
 
       let locals =
       {
@@ -19829,7 +19829,7 @@ function startOptionInputMirroring( test )
         verbosity : 0
       }
 
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       return _.process.start
       ({
@@ -19855,7 +19855,7 @@ function startOptionInputMirroring( test )
     {
       test.case = `mode : ${ mode }, inputMirroring : 1, verbosity : 1`;
 
-      let testAppPath2 = a.path.nativize( a.program( testApp2 ) );
+      let testAppPath2 = a.program( testApp2 );
 
       let locals =
       {
@@ -19865,7 +19865,7 @@ function startOptionInputMirroring( test )
         verbosity : 1
       }
 
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       return _.process.start
       ({
@@ -19891,7 +19891,7 @@ function startOptionInputMirroring( test )
     {
       test.case = `mode : ${ mode }, inputMirroring : 1, error output`;
 
-      let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
+      let testAppPath2 = a.program( testApp2Error );
 
       let locals =
       {
@@ -19901,7 +19901,7 @@ function startOptionInputMirroring( test )
         verbosity : 2
       }
 
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       return _.process.start
       ({
@@ -19928,7 +19928,7 @@ function startOptionInputMirroring( test )
     {
       test.case = `mode : ${ mode }, inputMirroring : 1, verbosity : 1, error output`;
 
-      let testAppPath2 = a.path.nativize( a.program( testApp2Error ) );
+      let testAppPath2 = a.program( testApp2Error );
 
       let locals =
       {
@@ -19938,7 +19938,7 @@ function startOptionInputMirroring( test )
         verbosity : 1
       }
 
-      let testAppPath = a.path.nativize( a.program({ routine : testApp, locals }) );
+      let testAppPath = a.program({ routine : testApp, locals });
 
       return _.process.start
       ({
@@ -20001,7 +20001,7 @@ function startOptionLogger( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.path.nativize( a.program( testApp ) );
+  let testAppPath = a.program( testApp );
   let modes = [ 'fork', 'spawn', 'shell' ];
 
   /* */
@@ -20065,7 +20065,7 @@ function startOptionLoggerTransofrmation( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.path.nativize( a.program( testApp ) );
+  let testAppPath = a.program( testApp );
 
   /* */
 
@@ -20155,8 +20155,8 @@ function startOutputOptionsCompatibilityLateCheck( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.path.nativize( a.program( testApp ) );
-  let testAppPathParent = a.path.nativize( a.program( testAppParent ) );
+  let testAppPath = a.program( testApp );
+  let testAppPathParent = a.program( testAppParent );
 
   if( !Config.debug )
   {
@@ -21147,7 +21147,7 @@ function startOptionStreamSizeLimit( test )
     {
       test.case = `data is less than streamSizeLimit ( default )`;
 
-      let testAppPath = a.path.nativize( a.program( testApp ) );
+      let testAppPath = a.program( testApp );
 
       let options =
       {
@@ -21172,7 +21172,7 @@ function startOptionStreamSizeLimit( test )
     {
       test.case = `data is less than streamSizeLimit ( 20 )`;
 
-      let testAppPath = a.path.nativize( a.program( testApp ) );
+      let testAppPath = a.program( testApp );
 
       let options =
       {
@@ -21198,7 +21198,7 @@ function startOptionStreamSizeLimit( test )
     {
       test.case = `data is equal to the streamSizeLimit`;
 
-      let testAppPath = a.path.nativize( a.program( testApp ) );
+      let testAppPath = a.program( testApp );
 
       let options =
       {
@@ -21223,7 +21223,7 @@ function startOptionStreamSizeLimit( test )
     {
       test.case = `data is bigger than streamSizeLimit`;
 
-      let testAppPath = a.path.nativize( a.program( testApp ) );
+      let testAppPath = a.program( testApp );
 
       let options =
       {
@@ -21269,7 +21269,7 @@ function startOptionStreamSizeLimitThrowing( test )
   {
     test.case = `mode : 'fork', deasync : 1, limit : 100`;
 
-    let testAppPath = a.path.nativize( a.program( testApp ) );
+    let testAppPath = a.program( testApp );
 
     let options =
     {
@@ -21315,7 +21315,7 @@ function startOptionStreamSizeLimitThrowing( test )
     {
       test.case = `sync : 1, limit : '100'`;
 
-      let testAppPath = a.path.nativize( a.program( testApp ) );
+      let testAppPath = a.program( testApp );
 
       let options =
       {
@@ -21344,7 +21344,7 @@ function startOptionStreamSizeLimitThrowing( test )
     {
       test.case = `sync : 1, limit : -1`;
 
-      let testAppPath = a.path.nativize( a.program( testApp ) );
+      let testAppPath = a.program( testApp );
 
       let options =
       {
@@ -21373,7 +21373,7 @@ function startOptionStreamSizeLimitThrowing( test )
     {
       test.case = `sync : 0, limit : 100`;
 
-      let testAppPath = a.path.nativize( a.program( testApp ) );
+      let testAppPath = a.program( testApp );
 
       let options =
       {
@@ -21402,7 +21402,7 @@ function startOptionStreamSizeLimitThrowing( test )
     {
       test.case = `sync : 0, deasync : 1, limit : 100`;
 
-      let testAppPath = a.path.nativize( a.program( testApp ) );
+      let testAppPath = a.program( testApp );
 
       let options =
       {
@@ -21723,7 +21723,7 @@ function startOptionDryMultiple( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.path.nativize( a.program( testApp ) );
+  let programPath = a.program( testApp );
   let track = [];
 
   let modes = [ 'fork', 'spawn', 'shell' ];
@@ -22134,7 +22134,7 @@ function startOptionCurrentPaths( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.path.nativize( a.program( testApp ) );
+  let programPath = a.program( testApp );
 
   let o2 =
   {
@@ -22241,8 +22241,8 @@ function startOptionPassingThrough( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath1 = a.path.nativize( a.program( program1 ) );
-  let testAppPath2 = a.path.nativize( a.program( program2 ) );
+  let testAppPath1 = a.program( program1 );
+  let testAppPath2 = a.program( program2 );
 
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
@@ -22763,8 +22763,8 @@ function startDiffPid( test )
       {
         mode,
       }
-      a.path.nativize( a.program({ routine : testAppParent, locals }) );
-      a.path.nativize( a.program( testAppChild ) );
+      a.program({ routine : testAppParent, locals });
+      a.program( testAppChild );
       return null;
     })
 
@@ -23548,7 +23548,7 @@ function startOutputMultiple( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.path.nativize( a.program( program1 ) );
+  let programPath = a.program( program1 );
   let track = [];
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, mode }) ) );
@@ -23975,7 +23975,7 @@ function startOptionStdioIgnoreMultiple( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.path.nativize( a.program( program1 ) );
+  let programPath = a.program( program1 );
   let track = [];
 
   let modes = [ 'fork', 'spawn', 'shell' ];
@@ -24928,7 +24928,7 @@ function startErrorAfterTerminationWithSend( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.path.nativize( a.program( testApp ) );
+  let testAppPath = a.program( testApp );
   let track;
 
   let modes = [ 'fork', 'spawn' ];
@@ -32581,7 +32581,7 @@ function experiment2( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.path.nativize( a.program( testApp ) );
+  let testAppPath = a.program( testApp );
   let track;
 
   var o =
