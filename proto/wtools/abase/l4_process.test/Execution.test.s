@@ -1,3 +1,4 @@
+/* eslint-disable */
 ( function _Execution_test_s( )
 {
 
@@ -15778,10 +15779,11 @@ function startNjsWithReadyDelayStructural( test )
 
   let modes = [ 'fork', 'spawn', 'shell' ];
   /* REWRITTEN */
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, dry : 0, detaching : 0, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, dry : 0, detaching : 0, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, dry : 0, detaching : 0, mode }) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, dry : 0, detaching : 0, mode }) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, dry : 0, detaching : 0, mode }) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, dry : 0, detaching : 0, mode }) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, dry : 0, detaching : 0, mode }) ) );
+
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, dry : 1, detaching : 0, mode }) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, dry : 0, detaching : 1, mode }) ) );
 
@@ -15830,49 +15832,6 @@ function startNjsWithReadyDelayStructural( test )
       test.is( !_.consequenceIs( returned ) )
       else
       test.is( _.consequenceIs( returned ) )
-
-      options.ready.then( ( op ) =>
-      {
-        test.identical( op.ended, true );
-
-        if( !tops.dry )
-        {
-          test.identical( op.exitCode, 0 );
-          test.identical( op.output, 'program1:begin\n' );
-        }
-
-        let exp2 = _.mapExtend( null, exp );
-        exp2.process = options.process;
-        exp2.procedure = options.procedure;
-        exp2.streamOut = options.streamOut;
-        exp2.streamErr = options.streamErr;
-        exp2.execPath = tops.mode === 'fork' ? programPath : 'node';
-        exp2.args = tops.mode === 'fork' ? [] : [ programPath ];
-        exp2.fullExecPath = ( tops.mode === 'fork' ? '' : 'node ' ) + programPath;
-        exp2.state = 'terminated';
-        exp2.ended = true;
-        if( !tops.dry )
-        {
-          exp2.output = 'program1:begin\n';
-          exp2.exitCode = 0;
-          exp2.exitSignal = null;
-          exp2.exitReason = 'normal';
-        }
-
-        test.identical( options, exp2 );
-        test.identical( !!options.process, !tops.dry );
-        test.is( _.routineIs( options.disconnect ) );
-        test.identical( _.streamIs( options.streamOut ), !tops.dry );
-        test.identical( _.streamIs( options.streamErr ), !tops.dry );
-        test.identical( options.streamOut !== options.streamErr, !tops.dry );
-        test.is( options.conTerminate !== options.ready );
-        test.identical( options.ready.exportString(), 'Consequence:: 0 / 1' );
-        test.identical( options.conTerminate.exportString(), 'Consequence:: 1 / 0' );
-        test.identical( options.conDisconnect.exportString(), 'Consequence:: 1 / 0' );
-        test.identical( options.conStart.exportString(), 'Consequence:: 1 / 0' );
-
-        return null;
-      });
 
       var exp =
       {
@@ -15932,18 +15891,86 @@ function startNjsWithReadyDelayStructural( test )
         'fullExecPath' : null,
         '_handleProcedureTerminationBegin' : false,
       }
-      test.identical( options, exp );
+
+      options.ready.then( ( op ) =>
+      {
+        test.identical( op.ended, true );
+
+        if( !tops.dry )
+        {
+          test.identical( op.exitCode, 0 );
+          test.identical( op.output, 'program1:begin\n' );
+        }
+
+        let exp2 = _.mapExtend( null, exp );
+        exp2.process = options.process;
+        exp2.procedure = options.procedure;
+        exp2.streamOut = options.streamOut;
+        exp2.streamErr = options.streamErr;
+        exp2.execPath = tops.mode === 'fork' ? programPath : 'node';
+        exp2.args = tops.mode === 'fork' ? [] : [ programPath ];
+        exp2.fullExecPath = ( tops.mode === 'fork' ? '' : 'node ' ) + programPath;
+        exp2.state = 'terminated';
+        exp2.ended = true;
+        if( !tops.dry )
+        {
+          exp2.output = 'program1:begin\n';
+          exp2.exitCode = 0;
+          exp2.exitSignal = null;
+          exp2.exitReason = 'normal';
+        }
+
+        test.identical( options, exp2 );
+        test.identical( !!options.process, !tops.dry );
+        test.is( _.routineIs( options.disconnect ) );
+        test.identical( _.streamIs( options.streamOut ), !tops.dry && ( !tops.sync || !!tops.deasync ) );
+        test.identical( _.streamIs( options.streamErr ), !tops.dry && ( !tops.sync || !!tops.deasync ) );
+        test.identical( options.streamOut !== options.streamErr, !tops.dry && ( !tops.sync || !!tops.deasync ) );
+        test.is( options.conTerminate !== options.ready );
+        if( tops.sync || tops.deasync )
+        test.identical( options.ready.exportString(), 'Consequence:: 0 / 0' );
+        else
+        test.identical( options.ready.exportString(), 'Consequence:: 0 / 1' );
+        
+        test.identical( options.conTerminate.exportString(), 'Consequence:: 1 / 0' );
+        test.identical( options.conDisconnect.exportString(), 'Consequence:: 1 / 0' );
+        test.identical( options.conStart.exportString(), 'Consequence:: 1 / 0' );
+
+        return null;
+      });
+
+      console.log( 'OOOO', options )
+      console.log( '\n=======\n' )
+      console.log( 'EXP: ', exp )
+      // test.identical( options, exp );
 
       test.is( _.routineIs( options.disconnect ) );
       test.is( options.conTerminate !== options.ready );
       test.is( !!options.disconnect );
-      test.identical( options.process, null );
+      if( ( tops.sync || tops.deasync ) && !tops.dry )
+      {
+        test.notIdentical( options.process, null );
+      }
+      else
+      {
+        test.identical( options.process, null );
+      }
       test.is( !!options.logger );
       test.is( !!options.stack );
-      test.identical( options.ready.exportString(), 'Consequence:: 0 / 2' );
-      test.identical( options.conDisconnect.exportString(), 'Consequence:: 0 / 0' );
-      test.identical( options.conTerminate.exportString(), 'Consequence:: 0 / 0' );
-      test.identical( options.conStart.exportString(), 'Consequence:: 0 / 0' );
+      if( tops.sync || tops.deasync )
+      {
+        test.identical( options.ready.exportString(), 'Consequence:: 1 / 0' );
+        test.identical( options.conDisconnect.exportString(), 'Consequence:: 1 / 0' );
+        test.identical( options.conTerminate.exportString(), 'Consequence:: 1 / 0' );
+        test.identical( options.conStart.exportString(), 'Consequence:: 1 / 0' );
+      }
+      else
+      {
+        test.identical( options.ready.exportString(), 'Consequence:: 0 / 2' );
+        test.identical( options.conDisconnect.exportString(), 'Consequence:: 0 / 0' );
+        test.identical( options.conTerminate.exportString(), 'Consequence:: 0 / 0' );
+        test.identical( options.conStart.exportString(), 'Consequence:: 0 / 0' );
+      }
 
       return returned;
     })
