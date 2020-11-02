@@ -15943,7 +15943,7 @@ function startNjsWithReadyDelayStructural( test )
       console.log( '\n=======\n' )
       console.log( 'EXP: ', exp )
       /* Write proper `exp` for sync : 1 or deasync : 1 */
-      if( !tops.sync && tops.deasync )
+      if( !tops.sync && !tops.deasync )
       test.identical( options, exp );
 
       test.is( _.routineIs( options.disconnect ) );
