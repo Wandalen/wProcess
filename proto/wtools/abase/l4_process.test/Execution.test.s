@@ -15777,9 +15777,18 @@ function startNjsWithReadyDelayStructural( test )
   /* qqq for Yevhen : add varying `sync` and `deasync` and `dry` for test routine startNjsWithReadyDelayStructuralMultiple */
 
   let modes = [ 'fork', 'spawn', 'shell' ];
-  modes.forEach( ( mode ) => a.ready.then( () => run({ detaching : 0, dry : 0, mode }) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run({ detaching : 1, dry : 0, mode }) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run({ detaching : 0, dry : 1, mode }) ) );
+  /* REWRITTEN */
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, dry : 0, detaching : 0, mode }) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, dry : 0, detaching : 0, mode }) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, dry : 0, detaching : 0, mode }) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, dry : 0, detaching : 0, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, dry : 1, detaching : 0, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, dry : 0, detaching : 1, mode }) ) );
+
+  /* ORIGINAL */
+  // modes.forEach( ( mode ) => a.ready.then( () => run({ detaching : 0, dry : 0, mode }) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => run({ detaching : 1, dry : 0, mode }) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => run({ detaching : 0, dry : 1, mode }) ) );
   return a.ready;
 
   /* */
@@ -15788,12 +15797,15 @@ function startNjsWithReadyDelayStructural( test )
   {
     let ready = _.Consequence().take( null );
 
+    if( tops.sync && !tops.deasync && tops.mode === 'fork' )
+    return null;
+
     ready.then( () =>
     {
       /*
       output piping doesn't work as expected in mode "shell" on windows
       */
-      test.case = `mode:${tops.mode} detaching:${tops.detaching}`;
+      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, dry : ${tops.dry}, detaching : ${tops.detaching}`;
       let con = new _.Consequence().take( null ).delay( context.t1 ); /* 1000 */
 
       let options =
@@ -15807,14 +15819,19 @@ function startNjsWithReadyDelayStructural( test )
         inputMirroring : 1,
         outputCollecting : 1,
         stdio : 'pipe',
-        sync : 0,
-        deasync : 0,
+        sync : tops.sync,
+        deasync : tops.deasync,
         ready : con,
       }
 
       let returned = _.process.startNjs( options );
 
-      returned.then( ( op ) =>
+      if( tops.sync )
+      test.is( !_.consequenceIs( returned ) )
+      else
+      test.is( _.consequenceIs( returned ) )
+
+      options.ready.then( ( op ) =>
       {
         test.identical( op.ended, true );
 
@@ -15867,8 +15884,8 @@ function startNjsWithReadyDelayStructural( test )
         'throwingExitCode' : 'full',
         'inputMirroring' : 1,
         'outputCollecting' : 1,
-        'sync' : 0,
-        'deasync' : 0,
+        'sync' : tops.sync,
+        'deasync' : tops.deasync,
         'passingThrough' : 0,
         'maximumMemory' : 0,
         'applyingExitCode' : 1,
