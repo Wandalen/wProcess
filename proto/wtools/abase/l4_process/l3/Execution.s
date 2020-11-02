@@ -3421,6 +3421,7 @@ let Extension =
   terminate,
   children,
   execPathOf,
+  spawnTimeOf
 
   // fields
 
