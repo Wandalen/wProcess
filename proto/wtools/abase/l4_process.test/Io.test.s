@@ -36,7 +36,7 @@ function suiteBegin()
 function suiteEnd()
 {
   let context = this;
-  _.assert( _.strHas( context.suiteTempPath, '/Io' ) )
+  _.assert( _.strHas( context.suiteTempPath, '/Io' ), `context.suiteTempPath : ${context.suiteTempPath}` );
   _.path.tempClose( context.suiteTempPath );
 }
 
