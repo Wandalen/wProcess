@@ -21444,7 +21444,6 @@ function startSingleOptionDry( test )
   let context = this;
   let a = context.assetFor( test, false );
   let programPath = a.program( testApp );
-  let track = [];
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run({ mode, sync : 0, deasync : 0 }) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run({ mode, sync : 0, deasync : 1 }) ) );
@@ -21461,7 +21460,7 @@ function startSingleOptionDry( test )
     {
       _.process.start
       ({
-        execPath : programPath + ` arg1 "arg 2" "'arg3'"`,
+        execPath : programPath + ` arg1`,
         mode : tops.mode,
         sync : tops.sync,
         deasync : tops.deasync
@@ -21473,8 +21472,8 @@ function startSingleOptionDry( test )
       test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, dry : 1, no error`
       let o =
       {
-        /* qqq for Yevhen : ? */
-        execPath : tops.mode === 'fork' ? programPath + ` arg1 "arg 2" "'arg3'"` : 'node ' + programPath + ` arg1 "arg 2" "'arg3'"`,
+        /* qqq for Yevhen : ? | aaa : Simplified. */
+        execPath : tops.mode === 'fork' ? programPath + ` arg1` : 'node ' + programPath + ` arg1`,
         mode : tops.mode,
         sync : tops.sync,
         deasync : tops.deasync,
@@ -21488,6 +21487,7 @@ function startSingleOptionDry( test )
         ipc : tops.mode === 'shell' ? 0 : 1,
         when : { delay : 1000 }
       }
+      let track = [];
       var t1 = _.time.now();
       var returned = _.process.start( o );
 
@@ -21555,20 +21555,17 @@ function startSingleOptionDry( test )
         if( tops.mode === 'fork' )
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
-          test.identical( op.fullExecPath, `${programPath} arg1 arg 2 'arg3' arg0` );
+          test.identical( op.fullExecPath, `${programPath} arg1 arg0` );
         }
         else if ( tops.mode === 'shell' )
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe' ] );
-          if( process.platform === 'win32' )
-          test.identical( op.fullExecPath, `node ${programPath} arg1 "arg 2" "'arg3'" "arg0"` );
-          else
-          test.identical( op.fullExecPath, `node ${programPath} arg1 "arg 2" "'arg3'" "arg0"` );
+          test.identical( op.fullExecPath, `node ${programPath} arg1 "arg0"` );
         }
         else
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
-          test.identical( op.fullExecPath, `node ${programPath} arg1 arg 2 'arg3' arg0` );
+          test.identical( op.fullExecPath, `node ${programPath} arg1 arg0` );
         }
 
         test.is( !a.fileProvider.fileExists( a.path.join( a.routinePath, 'file' ) ) )
@@ -21576,7 +21573,6 @@ function startSingleOptionDry( test )
         test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate', 'ready' ] );
         else
         test.identical( track, [ 'conStart', 'conTerminate', 'conDisconnect', 'ready' ] );
-        track = [];
         return null;
       })
 
@@ -21591,7 +21587,7 @@ function startSingleOptionDry( test )
       test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, dry : 1, execPath : 'err' + programPath + \` arg1 "arg 2" "'arg3'"\``
       let o =
       {
-        execPath : 'err ' + programPath + ` arg1 "arg 2" "'arg3'"`,
+        execPath : 'err ' + programPath + ` arg1`,
         mode : tops.mode,
         sync : tops.sync,
         deasync : tops.deasync,
@@ -21605,6 +21601,7 @@ function startSingleOptionDry( test )
         ipc : tops.mode === 'shell' ? 0 : 1,
         when : { delay : 1000 }
       }
+      let track = []; /* qqq for Yevhen : should be on beginning of test case | aaa : Moved. */
       var t1 = _.time.now();
       var returned = _.process.start( o );
 
@@ -21672,15 +21669,12 @@ function startSingleOptionDry( test )
         if ( tops.mode === 'shell' )
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe' ] );
-          if( process.platform === 'win32' )
-          test.identical( op.fullExecPath, `err ${programPath} arg1 "arg 2" "'arg3'" "arg0"` );
-          else
-          test.identical( op.fullExecPath, `err ${programPath} arg1 "arg 2" "'arg3'" "arg0"` );
+          test.identical( op.fullExecPath, `err ${programPath} arg1 "arg0"` );
         }
         else
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
-          test.identical( op.fullExecPath, `err ${programPath} arg1 arg 2 'arg3' arg0` );
+          test.identical( op.fullExecPath, `err ${programPath} arg1 arg0` );
         }
 
         test.is( !a.fileProvider.fileExists( a.path.join( a.routinePath, 'file' ) ) )
@@ -21688,7 +21682,6 @@ function startSingleOptionDry( test )
         test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate', 'ready' ] );
         else
         test.identical( track, [ 'conStart', 'conTerminate', 'conDisconnect', 'ready' ] );
-        track = []; /* qqq for Yevhen : should be on beginning of test case */
         return null;
       })
 
@@ -21742,7 +21735,7 @@ function startOptionDryMultiple( test )
     {
       _.process.start
       ({
-        execPath : [ programPath + ` arg1 "arg 2" "'arg3'"`, programPath + ` arg1 "arg 2" "'arg3'"` ],
+        execPath : [ programPath + ` id:1`, programPath + ` id:2` ],
         mode : tops.mode,
         sync : tops.sync,
         deasync : tops.deasync
