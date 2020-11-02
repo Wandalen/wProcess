@@ -23123,7 +23123,7 @@ function exitReason( test )
     {
       test.case = `mode : ${ mode }, exitReason : 'normal'`;
 
-      let testAppPath = a.program({ routine : testAppExitCode, locals : { code : 0 } });
+      let testAppPath = a.program({ routine : testAppExitCodeSignal, locals : { code : 0 } });
 
       let options =
       {
@@ -23148,7 +23148,7 @@ function exitReason( test )
     {
       test.case = `mode : ${ mode }, exitReason : 'code'`;
 
-      let testAppPath = a.program({ routine : testAppExitCode, locals : { code : 1 } });
+      let testAppPath = a.program({ routine : testAppExitCodeSignal, locals : { code : 1 } });
 
       let options =
       {
@@ -23164,6 +23164,31 @@ function exitReason( test )
         test.identical( op.exitCode, 1 );
         test.identical( op.ended, true );
         test.identical( op.exitReason, 'code' );
+        a.fileProvider.fileDelete( testAppPath );
+        return null;
+      } )
+    })
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, exitReason : 'signal'`;
+
+      let testAppPath = a.program({ routine : testAppExitCodeSignal, locals : { code : null } });
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+        throwingExitCode : 0,
+        mode,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.identical( op.exitReason, 'signal' );
         a.fileProvider.fileDelete( testAppPath );
         return null;
       } )
@@ -23191,6 +23216,7 @@ function exitReason( test )
       {
         execPath : mode === 'fork' ? testAppPath2 : 'node ' + testAppPath2,
         mode,
+        out : 1
       }
       let testAppPath = a.program({ routine : testAppParent, locals });
 
@@ -23220,6 +23246,7 @@ function exitReason( test )
       {
         execPath : mode === 'fork' ? testAppPath2 : 'node ' + testAppPath2,
         mode,
+        out : 1
       }
       let testAppPath = a.program({ routine : testAppParent, locals });
 
@@ -23247,6 +23274,7 @@ function exitReason( test )
       {
         execPath : mode === 'fork' ? testAppPath2 : 'node ' + testAppPath2,
         mode,
+        out : 1
       }
       let testAppPath = a.program({ routine : testAppParent, locals });
 
@@ -23269,13 +23297,14 @@ function exitReason( test )
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, exitReason : 'normal'`;
-      let testAppPath2 = a.program({ routine : testAppExitCode, locals : { code : 0 } });
+      let testAppPath2 = a.program({ routine : testAppExitCodeSignal, locals : { code : 0 } });
       let locals =
       {
         execPath : mode === 'fork' ? testAppPath2 : 'node ' + testAppPath2,
         mode,
+        out : 0
       }
-      let testAppPath = a.program({ routine : testAppParent2, locals });
+      let testAppPath = a.program({ routine : testAppParent, locals });
 
       let options =
       {
@@ -23296,13 +23325,14 @@ function exitReason( test )
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, exitReason : 'code'`;
-      let testAppPath2 = a.program({ routine : testAppExitCode, locals : { code : 1 } });
+      let testAppPath2 = a.program({ routine : testAppExitCodeSignal, locals : { code : 1 } });
       let locals =
       {
         execPath : mode === 'fork' ? testAppPath2 : 'node ' + testAppPath2,
         mode,
+        out : 0
       }
-      let testAppPath = a.program({ routine : testAppParent2, locals });
+      let testAppPath = a.program({ routine : testAppParent, locals });
 
       let options =
       {
@@ -23314,6 +23344,34 @@ function exitReason( test )
       .then( ( op ) =>
       {
         test.equivalent( op.output, 'code' );
+        a.fileProvider.fileDelete( testAppPath )
+        a.fileProvider.fileDelete( testAppPath2 )
+        return null;
+      } )
+    })
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, exitReason : 'signal'`;
+      let testAppPath2 = a.program({ routine : testAppExitCodeSignal, locals : { code : null } });
+      let locals =
+      {
+        execPath : mode === 'fork' ? testAppPath2 : 'node ' + testAppPath2,
+        mode,
+        out : 0
+      }
+      let testAppPath = a.program({ routine : testAppParent, locals });
+
+      let options =
+      {
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.equivalent( op.output, 'signal' );
         a.fileProvider.fileDelete( testAppPath )
         a.fileProvider.fileDelete( testAppPath2 )
         return null;
@@ -23349,32 +23407,13 @@ function exitReason( test )
     _.process.start( options )
     .then( ( op ) =>
     {
+      if( out )
       console.log( op.output );
-      return null;
-    } )
-  }
-
-  function testAppParent2()
-  {
-    let _ = require( toolsPath );
-    _.include( 'wProcess' );
-
-    let options =
-    {
-      execPath,
-      mode,
-      outputCollecting : 1,
-      throwingExitCode : 0,
-      inputMirroring : 0,
-      outputPiping : 0
-    }
-
-    _.process.start( options )
-    .then( ( op ) =>
-    {
+      else
       console.log( op.exitReason );
       return null;
     } )
+
   }
 
   function testApp()
@@ -23407,14 +23446,15 @@ function exitReason( test )
 
   }
 
-  function testAppExitCode()
+  function testAppExitCodeSignal()
   {
     let _ = require( toolsPath );
     _.include( 'wProcess' );
-    _.include( 'wFiles' );
 
+    if( code !== null )
     _.process.exitCode( code );
-
+    else
+    _.process.kill( process.pid );
   }
 
   /* ORIGINAL */
