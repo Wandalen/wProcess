@@ -1,3 +1,4 @@
+/* eslint-disable */
 ( function _Execution_test_s( )
 {
 
@@ -23040,6 +23041,12 @@ function exitReason( test )
 
     ready.then( () =>
     {
+      test.open( 'Tester and child processes' );
+      return null
+    } )
+
+    ready.then( () =>
+    {
       test.case = `mode : ${ mode }, initial value`;
 
       let testAppPath = a.program({ routine : testApp, locals : { reason : null } });
@@ -23164,46 +23171,211 @@ function exitReason( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${ mode }, exitReason : 'signal'`;
+      test.close( 'Tester and child processes' );
+      return null
+    } )
 
-      let testAppPath = a.program({ routine : testAppSignal, locals : { code : 1 } });
+    /* - */
+
+    ready.then( () =>
+    {
+      test.open( 'Tester, parent and child processes' );
+      return null
+    } )
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, initial value`;
+      let testAppPath2 = a.program({ routine : testApp, locals : { reason : null } });
+      let locals =
+      {
+        execPath : mode === 'fork' ? testAppPath2 : 'node ' + testAppPath2,
+        mode,
+      }
+      let testAppPath = a.program({ routine : testAppParent, locals });
 
       let options =
       {
-        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        execPath : 'node ' + testAppPath,
         outputCollecting : 1,
-        throwingExitCode : 0,
-        mode,
       }
 
       return _.process.start( options )
       .then( ( op ) =>
       {
-        // test.identical( op.exitCode, 1 )
-        console.log( 'PP', op.process );
-        console.log( 'PP', op.process.signal );
-        test.identical( op.exitReason, 'signal' );
-        a.fileProvider.fileDelete( testAppPath );
+        test.equivalent( op.output, 'null' );
+        a.fileProvider.fileDelete( testAppPath )
+        a.fileProvider.fileDelete( testAppPath2 )
         return null;
       } )
     })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, reason : 'reason'`;
+      let testAppPath2 = a.program({ routine : testApp, locals : { reason : 'reason' } });
+      let locals =
+      {
+        execPath : mode === 'fork' ? testAppPath2 : 'node ' + testAppPath2,
+        mode,
+      }
+      let testAppPath = a.program({ routine : testAppParent, locals });
+
+      let options =
+      {
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.equivalent( op.output, 'reason' );
+        a.fileProvider.fileDelete( testAppPath )
+        a.fileProvider.fileDelete( testAppPath2 )
+        return null;
+      } )
+    })
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, initial, set, update reason`;
+      let testAppPath2 = a.program({ routine : testApp, locals : { reason : [ 'reason1', 'reason2' ] } });
+      let locals =
+      {
+        execPath : mode === 'fork' ? testAppPath2 : 'node ' + testAppPath2,
+        mode,
+      }
+      let testAppPath = a.program({ routine : testAppParent, locals });
+
+      let options =
+      {
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.equivalent( op.output, 'null reason1 reason2' );
+        a.fileProvider.fileDelete( testAppPath )
+        a.fileProvider.fileDelete( testAppPath2 )
+        return null;
+      } )
+    })
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, exitReason : 'normal'`;
+      let testAppPath2 = a.program({ routine : testAppExitCode, locals : { code : 0 } });
+      let locals =
+      {
+        execPath : mode === 'fork' ? testAppPath2 : 'node ' + testAppPath2,
+        mode,
+      }
+      let testAppPath = a.program({ routine : testAppParent2, locals });
+
+      let options =
+      {
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.equivalent( op.output, 'normal' );
+        a.fileProvider.fileDelete( testAppPath )
+        a.fileProvider.fileDelete( testAppPath2 )
+        return null;
+      } )
+    })
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, exitReason : 'code'`;
+      let testAppPath2 = a.program({ routine : testAppExitCode, locals : { code : 1 } });
+      let locals =
+      {
+        execPath : mode === 'fork' ? testAppPath2 : 'node ' + testAppPath2,
+        mode,
+      }
+      let testAppPath = a.program({ routine : testAppParent2, locals });
+
+      let options =
+      {
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.equivalent( op.output, 'code' );
+        a.fileProvider.fileDelete( testAppPath )
+        a.fileProvider.fileDelete( testAppPath2 )
+        return null;
+      } )
+    })
+
+    ready.then( () =>
+    {
+      test.close( 'Tester, parent and child processes' );
+      return null
+    } )
 
     return ready;
   }
 
   /* - */
 
-  // function parentApp()
-  // {
-  //   let _ = require( toolsPath );
-  //   _.include( 'wProcess' );
+  function testAppParent()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
 
-  //   _.process.start( options )
-  //   .then( ( op ) =>
-  //   {
-  //     console.log( op.output )
-  //   } )
-  // }
+    let options =
+    {
+      execPath,
+      mode,
+      outputCollecting : 1,
+      throwingExitCode : 0,
+      inputMirroring : 0,
+      outputPiping : 0
+    }
+
+    _.process.start( options )
+    .then( ( op ) =>
+    {
+      console.log( op.output );
+      return null;
+    } )
+  }
+
+  function testAppParent2()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+
+    let options =
+    {
+      execPath,
+      mode,
+      outputCollecting : 1,
+      throwingExitCode : 0,
+      inputMirroring : 0,
+      outputPiping : 0
+    }
+
+    _.process.start( options )
+    .then( ( op ) =>
+    {
+      console.log( op.exitReason );
+      return null;
+    } )
+  }
 
   function testApp()
   {
@@ -23212,7 +23384,7 @@ function exitReason( test )
 
     if( !reason )
     {
-      console.log( _.process.exitReason() )  /* null, normal, error, signal, code, time */
+      console.log( _.process.exitReason() )
       return
     }
 
@@ -23241,20 +23413,9 @@ function exitReason( test )
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
-    return _.process.exitCode( code );
+    _.process.exitCode( code );
 
   }
-
-  function testAppSignal()
-  {
-    let _ = require( toolsPath );
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-
-    return _.process.kill( process.pid );
-
-  }
-
 
   /* ORIGINAL */
   // /* */
