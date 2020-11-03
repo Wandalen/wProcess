@@ -30209,7 +30209,7 @@ SIGTERM
 
 */
 
-/* qqq for Vova : join routines, use subroutine for mode varying */
+/* qqq for Vova : join routines, use subroutine for mode varying aaa: this will make the routine too complicated, that is the reason why I splitted the old routine*/
 function terminateWithDetachedChildFork( test )
 {
   let context = this;
