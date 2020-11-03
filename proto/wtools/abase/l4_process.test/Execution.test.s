@@ -22770,6 +22770,152 @@ function startOptionPassingThrough( test )
 startOptionPassingThrough.timeOut = 5e5;
 startOptionPassingThrough.rapidity = -1;
 
+//
+
+function startOptionUid( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+
+  return a.ready;
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }`;
+
+      // let locals =
+      // {
+      //   toolsPath : _.path.nativize( _.module.toolsPathGet() ),
+      //   routinePath : a.routinePath,
+      //   mode
+      // }
+      // let programPath = a.path.nativize( a.program({ routine : program1, locals }) );
+      // let programPath2 = a.path.nativize( a.program( program2 ) );
+      let programPath = a.path.nativize( a.program( program1 ) );
+
+      let options =
+      {
+        execPath : mode === 'fork' ? a.path.nativize( programPath ) : 'node ' + a.path.nativize( programPath ),
+        throwingExitCode : 0,
+        outputCollecting : 1,
+        mode,
+        uid : 11
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, '11\n' );
+
+        a.fileProvider.filesDelete( programPath );
+        return null;
+      } )
+
+
+    } )
+
+    return ready;
+  }
+
+  /* - */
+
+  function program1()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wFiles' );
+    _.include( 'wProcess' );
+
+    // let options =
+    // {
+    //   execPath : mode === 'fork' ? 'sudo program2.js' : 'sudo node program2.js',
+    //   currentPath : routinePath,
+    //   mode,
+    //   throwingExitCode : 0,
+    //   outputCollecting : 1,
+    //   uid : 11
+    // }
+
+    // return _.process.start( options )
+    // .then( ( op ) =>
+    // {
+    //   console.log( op.output );
+    //   return null;
+    // })
+
+    console.log( process.getuid() );
+  }
+
+  // function program2()
+  // {
+  //   console.log( process.getuid() );
+  // }
+}
+
+//
+
+function startOptionGid( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+
+  return a.ready;
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }`;
+
+      let programPath = a.path.nativize( a.program( program1 ) );
+
+      let options =
+      {
+        execPath : mode === 'fork' ? a.path.nativize( programPath ) : 'node ' + a.path.nativize( programPath ),
+        throwingExitCode : 0,
+        outputCollecting : 1,
+        mode,
+        gid : 15
+      }
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, '15\n' );
+
+        a.fileProvider.filesDelete( programPath );
+        return null;
+      } )
+
+    } )
+
+    return ready;
+  }
+
+  /* - */
+
+  function program1()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wFiles' );
+    _.include( 'wProcess' );
+
+    console.log( process.getgid() );
+  }
+}
+
 // --
 // pid
 // --
@@ -32866,6 +33012,8 @@ var Proto =
     startOptionCurrentPath,
     startOptionCurrentPaths,
     startOptionPassingThrough,
+    startOptionUid,
+    startOptionGid,
 
     // pid / status / exit
 
