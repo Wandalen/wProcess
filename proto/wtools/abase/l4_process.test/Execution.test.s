@@ -28711,7 +28711,7 @@ function terminateFirstChildSpawn( test )
 
   /* - */
 
-  function handleOutput( output ) /* qqq for Vova : what is it for? */
+  function handleOutput( output ) /* qqq for Vova : what is it for? aaa:to detect when child process of program1 is ready and we can call terminate*/
   {
     output = output.toString();
     if( !_.strHas( output, 'program2::begin' ) )
