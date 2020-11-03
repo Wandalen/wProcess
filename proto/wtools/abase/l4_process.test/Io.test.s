@@ -36,7 +36,7 @@ function suiteBegin()
 function suiteEnd()
 {
   let context = this;
-  _.assert( _.strHas( context.suiteTempPath, '/Io' ) )
+  _.assert( _.strHas( context.suiteTempPath, '/Io' ), `context.suiteTempPath : ${context.suiteTempPath}` );
   _.path.tempClose( context.suiteTempPath );
 }
 
@@ -1306,14 +1306,15 @@ function realMainFile( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let testAppPath = a.path.nativize( a.program( testApp ) );
+  let testAppPath = a.program( testApp );
+  let testAppPathNative = a.path.nativize( testAppPath );
 
   a.ready.then( () =>
   {
     test.case = 'compare with `testAppPath`'
     var o =
     {
-      execPath :  'node ' + testAppPath,
+      execPath :  'node ' + testAppPathNative,
       outputCollecting : 1,
     }
 
@@ -1574,7 +1575,7 @@ function systemEntryAddOptionForcing( test )
 var Proto =
 {
 
-  name : 'Tools.l3.Io',
+  name : 'Tools.l3.process.Io',
   silencing : 1,
   routineTimeOut : 60000,
   onSuiteBegin : suiteBegin,

@@ -23,6 +23,7 @@ if( typeof module !== 'undefined' )
   _.include( 'wPathBasic' );
   _.include( 'wGdf' );
   _.include( 'wConsequence' );
+  _.include( 'wFiles' );
 
   require( './l3/Execution.s' );
   require( './l3/Io.s' );
@@ -35,6 +36,49 @@ let _ = _global_.wTools;
 let Self = _.process = _.process || Object.create( null );
 
 _.assert( !!_realGlobal_ );
+
+// --
+// checker
+// --
+
+function isNativeDescriptor( src )
+{
+  if( !src )
+  return false;
+  if( !ChildProcess )
+  ChildProcess = require( 'child_process' );
+  return src instanceof ChildProcess.ChildProcess;
+}
+
+//
+
+function isSession( src )
+{
+  if( !_.objectIs( src ) )
+  return false;
+  return src.ipc !== undefined && src.procedure !== undefined && src.process !== undefined;
+}
+
+//
+
+function pidFrom( src )
+{
+  _.assert( arguments.length === 1 );
+
+  if( _.numberIs( src ) )
+  return src;
+  if( _.objectIs( src ) )
+  {
+    if( src.process )
+    src = src.process;
+    if( src.pnd )
+    src = src.pnd;
+    _.assert( src instanceof ChildProcess.ChildProcess );
+    return src.pid;
+  }
+
+  _.assert( 0, `Unknown type : ${_.strType( src )}` );
+}
 
 // --
 // temp
@@ -65,7 +109,7 @@ function tempOpen_body( o )
   _.assert( arguments.length === 1, 'Expects single argument' );
   _.assert( _.strIs( o.sourceCode ) || _.bufferRawIs( o.sourceCode ), 'Expects string or buffer raw {-o.sourceCode-}, but got', _.strType( o.sourceCode ) );
 
-  let tempDirPath = _.path.tempOpen( _.path.current() );
+  let tempDirPath = _.path.tempOpen( _.path.realMainDir(), 'ProcessTempOpen' );
   let filePath = _.path.join( tempDirPath, _.idWithDateAndTime() + '.ss' );
   _tempFiles.push( filePath );
   _.fileProvider.fileWrite( filePath, o.sourceCode );
@@ -184,12 +228,12 @@ function _exitHandlerRepair()
   if( !_global.process )
   return;
 
-  // process.on( 'SIGHUP', handle_functor( 'SIGHUP', 1 ) ); /* xxx : experiment? */
+  process.on( 'SIGHUP', handle_functor( 'SIGHUP', 1 ) ); /* yyy : experiment */
   process.on( 'SIGQUIT', handle_functor( 'SIGQUIT', 3 ) );
-  process.on( 'SIGINT', handle_functor( 'SIGINT' ), 2 );
-  process.on( 'SIGTERM', handle_functor( 'SIGTERM' ), 15 );
-  process.on( 'SIGUSR1', handle_functor( 'SIGUSR1' ), 16 );
-  process.on( 'SIGUSR2', handle_functor( 'SIGUSR2' ), 17 );
+  process.on( 'SIGINT', handle_functor( 'SIGINT', 2 ) );
+  process.on( 'SIGTERM', handle_functor( 'SIGTERM', 15 ) );
+  process.on( 'SIGUSR1', handle_functor( 'SIGUSR1', 16 ) );
+  process.on( 'SIGUSR2', handle_functor( 'SIGUSR2', 17 ) );
 
   function handle_functor( signal, signalCode )
   {
@@ -199,7 +243,11 @@ function _exitHandlerRepair()
       if( _realGlobal_._exitHandlerRepairTerminating )
       return;
       _realGlobal_._exitHandlerRepairTerminating = 1;
-      _.time._begin( _.process._sanitareTime, () => /* xxx : experiment to remove delay or use _begin */
+      /*
+       short delay is required to set exit reason of the process
+       otherwise reason will be exit code, not exit signal
+      */
+      _.time._begin( _.process._sanitareTime, () =>
       {
         try
         {
@@ -224,7 +272,7 @@ function _exitHandlerRepair()
           console.log( err.toString() );
           console.log( err.stack );
           process.removeAllListeners( 'exit' );
-          process.exit();
+          process.exit( -1 );
         }
       });
     }
@@ -385,6 +433,12 @@ let Events =
 let Extension =
 {
 
+  // etc
+
+  isNativeDescriptor,
+  isSession,
+  pidFrom,
+  
   // temp
 
   tempOpen,
@@ -413,6 +467,9 @@ let Extension =
   _Setup1,
 
   // fields
+
+  _sanitareTime : 1,
+  _exitReason : null,
 
   _tempFiles,
   _registeredExitHandler : null,

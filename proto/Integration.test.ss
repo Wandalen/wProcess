@@ -56,7 +56,7 @@ function samples( test )
 
   for( let i = 0 ; i < found.length ; i++ )
   {
-    if( _.longHas( found[ i ].exts, 'browser' ) )
+    if( _.longHasAny( found[ i ].exts, [ 'browser', 'manual', 'experiment' ] ) )
     continue;
 
     let startTime;
@@ -200,7 +200,7 @@ let Self =
   tests :
   {
     samples,
-    // eslint,
+    eslint,
   },
 
 }
