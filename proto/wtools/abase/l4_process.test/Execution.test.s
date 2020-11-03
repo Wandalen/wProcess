@@ -21,6 +21,33 @@ let _global = _global_;
 let _ = _global_.wTools;
 let Self = {};
 
+/* 
+experimentIpcDeasync:
+
+| Node |     Windows     |  Linux   |     Mac     |
+| ---- | --------------- | -------- | ----------- |
+| 10   | Routine timeout | No error | Libuv error |
+| 12   | Routine timeout | No error | Libuv error |
+| 13   | Routine timeout | No error | Libuv error |
+| 14   | Routine timeout | No error | Libuv error |
+| 15   | Routine timeout | No error | Libuv error |
+
+Windows - execution hangs and test routine ends with timeout
+Linux - test finishes without any errors
+Mac - tests ends with libuv error on first or next attempt
+
+Windows:  
+> node -e process.send(1);setTimeout(()=>{},500)
+Failed ( test routine time limit ) TestSuite::Tools.l4.porocess.Execution / TestRoutine::experimentIpcDeasync in 60.527s
+
+Libuv error for v10:
+/Users/runner/work/_temp/a1bfa3ef-959c-477d-8436-8dc969ebdc61.sh: line 1:  1091 Segmentation fault: 11  node proto/wtools/abase/l4_process.test/Execution.test.s r:experimentIpcDeasync v:10
+
+Libuv error for v12-15:
+Assertion failed: (handle->type == UV_TCP || handle->type == UV_TTY || handle->type == UV_NAMED_PIPE), function uv___stream_fd, file ../deps/uv/src/unix/stream.c, line 1622.
+/Users/runner/work/_temp/a3028c88-f26a-43fa-8306-d78bcc207e60.sh: line 1:  1459 Abort trap: 6           node proto/wtools/abase/l4_process.test/Execution.test.s r:experimentIpcDeasync v:10
+*/
+
 /*
 
 reset && RET=0
@@ -596,14 +623,13 @@ function startBasic2( test ) /* qqq for Evhen : merge with test routine startBas
 
   a.ready.then( function()
   {
-    test.case = 'mode : spawn, passingThrough : true, incorrect usage of o.path in spawn mode';
+    test.case = 'mode : spawn, incorrect usage of o.path in spawn mode';
 
     o2 =
     {
       execPath :  'node ' + testApp,
       args : [ 'staging' ],
       mode : 'spawn',
-      passingThrough : 1,
       stdio : 'pipe'
     }
     return null;
@@ -3241,7 +3267,7 @@ function startArgumentsParsingNonTrivial( test )
     {
       test.case = `mode : ${mode}, args in execPath and args options`
 
-      /* qqq for Vova : investigate. can conditions be removed? */
+      /* qqq for Vova : investigate. can conditions be removed? aaa: I removed redundant os conditions after fix of arguments processing for shell mode*/
       if( mode === 'shell' && process.platform === 'win32' )
       return null;
       if( mode === 'fork' )
@@ -21453,7 +21479,6 @@ function startSingleOptionDry( test )
   let context = this;
   let a = context.assetFor( test, false );
   let programPath = a.program( testApp );
-  let track = [];
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run({ mode, sync : 0, deasync : 0 }) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run({ mode, sync : 0, deasync : 1 }) ) );
@@ -21470,7 +21495,7 @@ function startSingleOptionDry( test )
     {
       _.process.start
       ({
-        execPath : programPath + ` arg1 "arg 2" "'arg3'"`,
+        execPath : programPath + ` arg1`,
         mode : tops.mode,
         sync : tops.sync,
         deasync : tops.deasync
@@ -21482,8 +21507,8 @@ function startSingleOptionDry( test )
       test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, dry : 1, no error`
       let o =
       {
-        /* qqq for Yevhen : ? */
-        execPath : tops.mode === 'fork' ? programPath + ` arg1 "arg 2" "'arg3'"` : 'node ' + programPath + ` arg1 "arg 2" "'arg3'"`,
+        /* qqq for Yevhen : ? | aaa : Simplified. */
+        execPath : tops.mode === 'fork' ? programPath + ` arg1` : 'node ' + programPath + ` arg1`,
         mode : tops.mode,
         sync : tops.sync,
         deasync : tops.deasync,
@@ -21497,6 +21522,7 @@ function startSingleOptionDry( test )
         ipc : tops.mode === 'shell' ? 0 : 1,
         when : { delay : 1000 }
       }
+      let track = [];
       var t1 = _.time.now();
       var returned = _.process.start( o );
 
@@ -21564,20 +21590,17 @@ function startSingleOptionDry( test )
         if( tops.mode === 'fork' )
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
-          test.identical( op.fullExecPath, `${programPath} arg1 arg 2 'arg3' arg0` );
+          test.identical( op.fullExecPath, `${programPath} arg1 arg0` );
         }
         else if ( tops.mode === 'shell' )
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe' ] );
-          if( process.platform === 'win32' )
-          test.identical( op.fullExecPath, `node ${programPath} arg1 "arg 2" "'arg3'" "arg0"` );
-          else
-          test.identical( op.fullExecPath, `node ${programPath} arg1 "arg 2" "'arg3'" "arg0"` );
+          test.identical( op.fullExecPath, `node ${programPath} arg1 "arg0"` );
         }
         else
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
-          test.identical( op.fullExecPath, `node ${programPath} arg1 arg 2 'arg3' arg0` );
+          test.identical( op.fullExecPath, `node ${programPath} arg1 arg0` );
         }
 
         test.is( !a.fileProvider.fileExists( a.path.join( a.routinePath, 'file' ) ) )
@@ -21585,7 +21608,6 @@ function startSingleOptionDry( test )
         test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate', 'ready' ] );
         else
         test.identical( track, [ 'conStart', 'conTerminate', 'conDisconnect', 'ready' ] );
-        track = [];
         return null;
       })
 
@@ -21600,7 +21622,7 @@ function startSingleOptionDry( test )
       test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, dry : 1, execPath : 'err' + programPath + \` arg1 "arg 2" "'arg3'"\``
       let o =
       {
-        execPath : 'err ' + programPath + ` arg1 "arg 2" "'arg3'"`,
+        execPath : 'err ' + programPath + ` arg1`,
         mode : tops.mode,
         sync : tops.sync,
         deasync : tops.deasync,
@@ -21614,6 +21636,7 @@ function startSingleOptionDry( test )
         ipc : tops.mode === 'shell' ? 0 : 1,
         when : { delay : 1000 }
       }
+      let track = []; /* qqq for Yevhen : should be on beginning of test case | aaa : Moved. */
       var t1 = _.time.now();
       var returned = _.process.start( o );
 
@@ -21681,15 +21704,12 @@ function startSingleOptionDry( test )
         if ( tops.mode === 'shell' )
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe' ] );
-          if( process.platform === 'win32' )
-          test.identical( op.fullExecPath, `err ${programPath} arg1 "arg 2" "'arg3'" "arg0"` );
-          else
-          test.identical( op.fullExecPath, `err ${programPath} arg1 "arg 2" "'arg3'" "arg0"` );
+          test.identical( op.fullExecPath, `err ${programPath} arg1 "arg0"` );
         }
         else
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
-          test.identical( op.fullExecPath, `err ${programPath} arg1 arg 2 'arg3' arg0` );
+          test.identical( op.fullExecPath, `err ${programPath} arg1 arg0` );
         }
 
         test.is( !a.fileProvider.fileExists( a.path.join( a.routinePath, 'file' ) ) )
@@ -21697,7 +21717,6 @@ function startSingleOptionDry( test )
         test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate', 'ready' ] );
         else
         test.identical( track, [ 'conStart', 'conTerminate', 'conDisconnect', 'ready' ] );
-        track = []; /* qqq for Yevhen : should be on beginning of test case */
         return null;
       })
 
@@ -21751,7 +21770,7 @@ function startOptionDryMultiple( test )
     {
       _.process.start
       ({
-        execPath : [ programPath + ` arg1 "arg 2" "'arg3'"`, programPath + ` arg1 "arg 2" "'arg3'"` ],
+        execPath : [ programPath + ` id:1`, programPath + ` id:2` ],
         mode : tops.mode,
         sync : tops.sync,
         deasync : tops.deasync
@@ -27457,7 +27476,7 @@ endSignalsOnExitExitAgain.description =
 
 //
 
-/* qqq for Vova : describe test cases. describe test. this and related */
+/* qqq for Vova : describe test cases. describe test. this and related aaa:done*/
 function terminate( test )
 {
   let context = this;
@@ -28303,6 +28322,15 @@ function terminate( test )
   }
 }
 
+terminate.description = 
+`
+Checks termination of the child process spawned with different modes.
+- Terminates process using descriptor( pnd )
+- Terminates process using pid
+- Terminates process using zero timeout
+- Terminates process using low timeout
+`
+
 //
 
 function terminateSync( test )
@@ -28623,6 +28651,15 @@ function terminateSync( test )
 }
 
 terminateSync.timeOut = 5e5;
+terminateSync.description =
+`
+Checks termination of the child process spawned with different modes.
+Terminate routine works in sync mode.
+- Terminates process using descriptor( pnd )
+- Terminates process using pid
+- Terminates process using zero timeout
+- Terminates process using low timeout
+`
 
 //
 
@@ -28695,7 +28732,7 @@ function terminateFirstChildSpawn( test )
 
   /* - */
 
-  function handleOutput( output ) /* qqq for Vova : what is it for? */
+  function handleOutput( output ) /* qqq for Vova : what is it for? aaa:to detect when child process of program1 is ready and we can call terminate*/
   {
     output = output.toString();
     if( !_.strHas( output, 'program2::begin' ) )
@@ -30180,7 +30217,7 @@ SIGTERM
 
 */
 
-/* qqq for Vova : join routines, use subroutine for mode varying */
+/* qqq for Vova : join routines, use subroutine for mode varying aaa: this will make the routine too complicated, that is the reason why I splitted the old routine*/
 function terminateWithDetachedChildFork( test )
 {
   let context = this;
@@ -31465,19 +31502,22 @@ function terminateDifferentStdio( test )
       execPath :  'node ' + testAppPath,
       mode : 'spawn',
       stdio : 'inherit',
+      ipc : 1,
       outputPiping : 0,
       outputCollecting : 0,
       throwingExitCode : 0
     }
 
-    let ready = _.process.start( o )
-
-    _.time.out( context.t0 * 15, () => /* 1500 */
+    _.process.start( o )
+    
+    let ready = _.Consequence();
+    
+    o.process.on( 'message', () => 
     {
-      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
+      ready.take( _.process.terminate( o.process.pid ) )
     })
-
-    ready.then( ( op ) =>
+    
+    o.conTerminate.then( ( op ) =>
     {
       if( process.platform === 'win32' )
       {
@@ -31496,7 +31536,7 @@ function terminateDifferentStdio( test )
       return null;
     })
 
-    return ready;
+    return _.Consequence.And( ready, o.conTerminate );
   })
 
   /* - */
@@ -31508,19 +31548,22 @@ function terminateDifferentStdio( test )
       execPath :  'node ' + testAppPath,
       mode : 'spawn',
       stdio : 'ignore',
+      ipc : 1,
       outputPiping : 0,
       outputCollecting : 0,
       throwingExitCode : 0
     }
 
-    let ready = _.process.start( o )
+    _.process.start( o )
 
-    _.time.out( context.t0 * 15, () => /* 1500 */
+    let ready = _.Consequence();
+    
+    o.process.on( 'message', () => 
     {
-      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
+      ready.take( _.process.terminate( o.process.pid ) )
     })
 
-    ready.then( ( op ) =>
+    o.conTerminate.then( ( op ) =>
     {
       if( process.platform === 'win32' )
       {
@@ -31539,48 +31582,7 @@ function terminateDifferentStdio( test )
       return null;
     })
 
-    return ready;
-  })
-
-  /* - */
-
-  .then( () =>
-  {
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'spawn',
-      stdio : 'pipe',
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    _.time.out( context.t0 * 15, () => /* 1500 */
-    {
-      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
-    })
-
-    ready.then( ( op ) =>
-    {
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, 1 );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, null );
-        test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
-      }
-      else
-      {
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, null );
-        test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
-      }
-      return null;
-    })
-
-    return ready;
+    return _.Consequence.And( ready, o.conTerminate );
   })
 
   /* - */
@@ -31596,14 +31598,16 @@ function terminateDifferentStdio( test )
       throwingExitCode : 0
     }
 
-    let ready = _.process.start( o )
+    _.process.start( o )
 
-    _.time.out( context.t0 * 15, () => /* 1500 */
+    let ready = _.Consequence();
+    
+    o.process.on( 'message', () => 
     {
-      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
+      ready.take( _.process.terminate( o.process.pid ) )
     })
 
-    ready.then( ( op ) =>
+    o.conTerminate.then( ( op ) =>
     {
       if( process.platform === 'win32' )
       {
@@ -31622,7 +31626,51 @@ function terminateDifferentStdio( test )
       return null;
     })
 
-    return ready;
+    return _.Consequence.And( ready, o.conTerminate );
+  })
+
+  /* - */
+
+  .then( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'spawn',
+      stdio : 'pipe',
+      ipc : 1,
+      throwingExitCode : 0
+    }
+
+    _.process.start( o )
+
+    let ready = _.Consequence();
+    
+    o.process.on( 'message', () => 
+    {
+      ready.take( _.process.terminate( o.process.pid ) )
+    })
+
+    o.conTerminate.then( ( op ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, 1 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, null );
+        test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, null );
+        test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+      }
+      return null;
+    })
+
+    return _.Consequence.And( ready, o.conTerminate );
   })
 
   /* - */
@@ -31640,14 +31688,16 @@ function terminateDifferentStdio( test )
       throwingExitCode : 0
     }
 
-    let ready = _.process.start( o )
+    _.process.start( o )
 
-    _.time.out( context.t0 * 15, () => /* 1500 */
+    let ready = _.Consequence();
+    
+    o.process.on( 'message', () => 
     {
-      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
+      ready.take( _.process.terminate( o.process.pid ) )
     })
 
-    ready.then( ( op ) =>
+    o.conTerminate.then( ( op ) =>
     {
       if( process.platform === 'win32' )
       {
@@ -31666,7 +31716,7 @@ function terminateDifferentStdio( test )
       return null;
     })
 
-    return ready;
+    return _.Consequence.And( ready, o.conTerminate );
   })
 
   /* - */
@@ -31684,14 +31734,16 @@ function terminateDifferentStdio( test )
       throwingExitCode : 0
     }
 
-    let ready = _.process.start( o )
+    _.process.start( o )
 
-    _.time.out( context.t0 * 15, () => /* 1500 */
+    let ready = _.Consequence();
+    
+    o.process.on( 'message', () => 
     {
-      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
+      ready.take( _.process.terminate( o.process.pid ) )
     })
 
-    ready.then( ( op ) =>
+    o.conTerminate.then( ( op ) =>
     {
       if( process.platform === 'win32' )
       {
@@ -31711,7 +31763,7 @@ function terminateDifferentStdio( test )
       return null;
     })
 
-    return ready;
+    return _.Consequence.And( ready, o.conTerminate );
   })
 
   /* */
@@ -31733,6 +31785,7 @@ function terminateDifferentStdio( test )
     {
       process.exit( -1 );
     }, context.t2 ) /* 5000 */
+    process.send( 'ready' );
   }
 }
 
@@ -32844,19 +32897,19 @@ var Proto =
     terminate, /* qqq for Vova: review, remove duplicates, check timeouts */
     terminateSync,
 
-    terminateFirstChildSpawn,
+    terminateFirstChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine */
     terminateFirstChildFork,
     terminateFirstChildShell,
 
-    terminateSecondChildSpawn,
+    terminateSecondChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine */
     terminateSecondChildFork,
     terminateSecondChildShell,
 
-    terminateDetachedFirstChildSpawn,
+    terminateDetachedFirstChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine */
     terminateDetachedFirstChildFork,
     terminateDetachedFirstChildShell,
 
-    terminateWithDetachedChildSpawn,
+    terminateWithDetachedChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine */
     terminateWithDetachedChildFork,
     terminateWithDetachedChildShell,
 
@@ -32871,7 +32924,7 @@ var Proto =
     terminateZeroTimeOutWithoutChildrenShell,
     terminateZeroTimeOutWithtChildrenShell,
 
-    terminateDifferentStdio, /* qqq for Vova: rewrite, don't use timeout to run terminate */
+    terminateDifferentStdio, /* qqq for Vova: rewrite, don't use timeout to run terminate aaa:done*/
 
     killComplex,
     execPathOf,
@@ -32884,7 +32937,7 @@ var Proto =
 
     // experiments
 
-    experimentIpcDeasync, /* qqq for Vova : collect information for different versions and different OSs */
+    experimentIpcDeasync, /* qqq for Vova : collect information for different versions and different OSs aaa:added at the beginning of the file*/
     streamJoinExperiment,
     experiment,
     experiment2,
