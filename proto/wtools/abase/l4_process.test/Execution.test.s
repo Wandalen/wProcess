@@ -24,14 +24,28 @@ let Self = {};
 /* 
 experimentIpcDeasync:
 
-| Node | Windows |  Linux   |     Mac     |
-| ------- | ------- | -------- | ----------- |
-| 10      | Hangs   | No error | Libuv error |
-| 11      | Hangs   | No error | Libuv error |
-| 12      | Hangs   | No error | Libuv error |
-| 13      | Hangs   | No error | Libuv error |
-| 14      | Hangs   | No error | Libuv error |
-| 15      | Hangs   | No error | Libuv error |
+| Node |     Windows     |  Linux   |     Mac     |
+| ---- | --------------- | -------- | ----------- |
+| 10   | Routine timeout | No error | Libuv error |
+| 12   | Routine timeout | No error | Libuv error |
+| 13   | Routine timeout | No error | Libuv error |
+| 14   | Routine timeout | No error | Libuv error |
+| 15   | Routine timeout | No error | Libuv error |
+
+Windows - execution hangs and test routine ends with timeout
+Linux - test finishes without any errors
+Mac - tests ends with libuv error on first or next attempt
+
+Windows:  
+> node -e process.send(1);setTimeout(()=>{},500)
+Failed ( test routine time limit ) TestSuite::Tools.l4.porocess.Execution / TestRoutine::experimentIpcDeasync in 60.527s
+
+Libuv error for v10:
+/Users/runner/work/_temp/a1bfa3ef-959c-477d-8436-8dc969ebdc61.sh: line 1:  1091 Segmentation fault: 11  node proto/wtools/abase/l4_process.test/Execution.test.s r:experimentIpcDeasync v:10
+
+Libuv error for v12-15:
+Assertion failed: (handle->type == UV_TCP || handle->type == UV_TTY || handle->type == UV_NAMED_PIPE), function uv___stream_fd, file ../deps/uv/src/unix/stream.c, line 1622.
+/Users/runner/work/_temp/a3028c88-f26a-43fa-8306-d78bcc207e60.sh: line 1:  1459 Abort trap: 6           node proto/wtools/abase/l4_process.test/Execution.test.s r:experimentIpcDeasync v:10
 */
 
 /*
