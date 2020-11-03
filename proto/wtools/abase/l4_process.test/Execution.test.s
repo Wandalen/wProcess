@@ -7944,7 +7944,7 @@ function startNjsPassingThroughExecPathWithSpace( test )
   function testApp()
   {
     console.log( process.argv.slice( 2 ) );
-    console.log( 'pid:', process.pid )
+    console.log( process.pid )
     setTimeout( () => {}, context.t1 * 2 ) /* 2000 */
   }
 }
