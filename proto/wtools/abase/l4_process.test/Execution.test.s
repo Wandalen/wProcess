@@ -3239,7 +3239,7 @@ function startArgumentsParsingNonTrivial( test )
     {
       test.case = `mode : ${mode}, args in execPath and args options`
 
-      /* qqq for Vova : investigate. can conditions be removed? */
+      /* qqq for Vova : investigate. can conditions be removed? aaa: I removed redundant os conditions after fix of arguments processing for shell mode*/
       if( mode === 'shell' && process.platform === 'win32' )
       return null;
       if( mode === 'fork' )
@@ -27455,7 +27455,7 @@ endSignalsOnExitExitAgain.description =
 
 //
 
-/* qqq for Vova : describe test cases. describe test. this and related */
+/* qqq for Vova : describe test cases. describe test. this and related aaa:done*/
 function terminate( test )
 {
   let context = this;
@@ -28301,6 +28301,15 @@ function terminate( test )
   }
 }
 
+terminate.description = 
+`
+Checks termination of the child process spawned with different modes.
+- Terminates process using descriptor( pnd )
+- Terminates process using pid
+- Terminates process using zero timeout
+- Terminates process using low timeout
+`
+
 //
 
 function terminateSync( test )
@@ -28621,6 +28630,15 @@ function terminateSync( test )
 }
 
 terminateSync.timeOut = 5e5;
+terminateSync.description =
+`
+Checks termination of the child process spawned with different modes.
+Terminate routine works in sync mode.
+- Terminates process using descriptor( pnd )
+- Terminates process using pid
+- Terminates process using zero timeout
+- Terminates process using low timeout
+`
 
 //
 
