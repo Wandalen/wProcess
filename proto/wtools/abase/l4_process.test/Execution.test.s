@@ -21,6 +21,19 @@ let _global = _global_;
 let _ = _global_.wTools;
 let Self = {};
 
+/* 
+experimentIpcDeasync:
+
+| Node | Windows |  Linux   |     Mac     |
+| ------- | ------- | -------- | ----------- |
+| 10      | Hangs   | No error | Libuv error |
+| 11      | Hangs   | No error | Libuv error |
+| 12      | Hangs   | No error | Libuv error |
+| 13      | Hangs   | No error | Libuv error |
+| 14      | Hangs   | No error | Libuv error |
+| 15      | Hangs   | No error | Libuv error |
+*/
+
 /*
 
 reset && RET=0
@@ -32916,7 +32929,7 @@ var Proto =
 
     // experiments
 
-    experimentIpcDeasync, /* qqq for Vova : collect information for different versions and different OSs */
+    experimentIpcDeasync, /* qqq for Vova : collect information for different versions and different OSs aaa:added at the beginning of the file*/
     streamJoinExperiment,
     experiment,
     experiment2,
