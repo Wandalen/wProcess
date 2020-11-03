@@ -31463,19 +31463,22 @@ function terminateDifferentStdio( test )
       execPath :  'node ' + testAppPath,
       mode : 'spawn',
       stdio : 'inherit',
+      ipc : 1,
       outputPiping : 0,
       outputCollecting : 0,
       throwingExitCode : 0
     }
 
-    let ready = _.process.start( o )
-
-    _.time.out( context.t0 * 15, () => /* 1500 */
+    _.process.start( o )
+    
+    let ready = _.Consequence();
+    
+    o.process.on( 'message', () => 
     {
-      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
+      ready.take( _.process.terminate( o.process.pid ) )
     })
-
-    ready.then( ( op ) =>
+    
+    o.conTerminate.then( ( op ) =>
     {
       if( process.platform === 'win32' )
       {
@@ -31494,7 +31497,7 @@ function terminateDifferentStdio( test )
       return null;
     })
 
-    return ready;
+    return _.Consequence.And( ready, o.conTerminate );
   })
 
   /* - */
@@ -31506,19 +31509,22 @@ function terminateDifferentStdio( test )
       execPath :  'node ' + testAppPath,
       mode : 'spawn',
       stdio : 'ignore',
+      ipc : 1,
       outputPiping : 0,
       outputCollecting : 0,
       throwingExitCode : 0
     }
 
-    let ready = _.process.start( o )
+    _.process.start( o )
 
-    _.time.out( context.t0 * 15, () => /* 1500 */
+    let ready = _.Consequence();
+    
+    o.process.on( 'message', () => 
     {
-      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
+      ready.take( _.process.terminate( o.process.pid ) )
     })
 
-    ready.then( ( op ) =>
+    o.conTerminate.then( ( op ) =>
     {
       if( process.platform === 'win32' )
       {
@@ -31537,48 +31543,7 @@ function terminateDifferentStdio( test )
       return null;
     })
 
-    return ready;
-  })
-
-  /* - */
-
-  .then( () =>
-  {
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'spawn',
-      stdio : 'pipe',
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    _.time.out( context.t0 * 15, () => /* 1500 */
-    {
-      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
-    })
-
-    ready.then( ( op ) =>
-    {
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, 1 );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, null );
-        test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
-      }
-      else
-      {
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, null );
-        test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
-      }
-      return null;
-    })
-
-    return ready;
+    return _.Consequence.And( ready, o.conTerminate );
   })
 
   /* - */
@@ -31594,14 +31559,16 @@ function terminateDifferentStdio( test )
       throwingExitCode : 0
     }
 
-    let ready = _.process.start( o )
+    _.process.start( o )
 
-    _.time.out( context.t0 * 15, () => /* 1500 */
+    let ready = _.Consequence();
+    
+    o.process.on( 'message', () => 
     {
-      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
+      ready.take( _.process.terminate( o.process.pid ) )
     })
 
-    ready.then( ( op ) =>
+    o.conTerminate.then( ( op ) =>
     {
       if( process.platform === 'win32' )
       {
@@ -31620,7 +31587,51 @@ function terminateDifferentStdio( test )
       return null;
     })
 
-    return ready;
+    return _.Consequence.And( ready, o.conTerminate );
+  })
+
+  /* - */
+
+  .then( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'spawn',
+      stdio : 'pipe',
+      ipc : 1,
+      throwingExitCode : 0
+    }
+
+    _.process.start( o )
+
+    let ready = _.Consequence();
+    
+    o.process.on( 'message', () => 
+    {
+      ready.take( _.process.terminate( o.process.pid ) )
+    })
+
+    o.conTerminate.then( ( op ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, 1 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, null );
+        test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, null );
+        test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+      }
+      return null;
+    })
+
+    return _.Consequence.And( ready, o.conTerminate );
   })
 
   /* - */
@@ -31638,14 +31649,16 @@ function terminateDifferentStdio( test )
       throwingExitCode : 0
     }
 
-    let ready = _.process.start( o )
+    _.process.start( o )
 
-    _.time.out( context.t0 * 15, () => /* 1500 */
+    let ready = _.Consequence();
+    
+    o.process.on( 'message', () => 
     {
-      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
+      ready.take( _.process.terminate( o.process.pid ) )
     })
 
-    ready.then( ( op ) =>
+    o.conTerminate.then( ( op ) =>
     {
       if( process.platform === 'win32' )
       {
@@ -31664,7 +31677,7 @@ function terminateDifferentStdio( test )
       return null;
     })
 
-    return ready;
+    return _.Consequence.And( ready, o.conTerminate );
   })
 
   /* - */
@@ -31682,14 +31695,16 @@ function terminateDifferentStdio( test )
       throwingExitCode : 0
     }
 
-    let ready = _.process.start( o )
+    _.process.start( o )
 
-    _.time.out( context.t0 * 15, () => /* 1500 */
+    let ready = _.Consequence();
+    
+    o.process.on( 'message', () => 
     {
-      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
+      ready.take( _.process.terminate( o.process.pid ) )
     })
 
-    ready.then( ( op ) =>
+    o.conTerminate.then( ( op ) =>
     {
       if( process.platform === 'win32' )
       {
@@ -31709,7 +31724,7 @@ function terminateDifferentStdio( test )
       return null;
     })
 
-    return ready;
+    return _.Consequence.And( ready, o.conTerminate );
   })
 
   /* */
@@ -31731,6 +31746,7 @@ function terminateDifferentStdio( test )
     {
       process.exit( -1 );
     }, context.t2 ) /* 5000 */
+    process.send( 'ready' );
   }
 }
 
@@ -32869,7 +32885,7 @@ var Proto =
     terminateZeroTimeOutWithoutChildrenShell,
     terminateZeroTimeOutWithtChildrenShell,
 
-    terminateDifferentStdio, /* qqq for Vova: rewrite, don't use timeout to run terminate */
+    terminateDifferentStdio, /* qqq for Vova: rewrite, don't use timeout to run terminate aaa:done*/
 
     killComplex,
     execPathOf,
