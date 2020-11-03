@@ -6668,6 +6668,84 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
       // })
     })
 
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, execute simple js program with normalized path, parent args : [ 'arg' ]`
+  
+      let execPath = _.path.normalize( testAppPath );
+      let o =
+      {
+        execPath : mode === 'fork' ? _.strQuote( execPath ) : 'node ' + _.strQuote( execPath ),
+        mode,
+        args : [ 'arg' ],
+        stdio : 'pipe',
+        outputCollecting : 1,
+        outputPiping : 1,
+        outputColoring : 0,
+        throwingExitCode : 0,
+        applyingExitCode : 0,
+      };
+      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' })
+  
+      let o2 =
+      {
+        execPath : 'node ' + testAppPathParent,
+        mode : 'spawn',
+        outputCollecting : 1,
+      }
+
+      return _.process.start( o2 )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, `[ 'arg' ]` );
+        test.is( a.fileProvider.fileExists( testAppPath ) );
+        return null;
+      } )
+  
+    });
+  
+    /* */
+  
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, execute simple js program with nativized path, parent args : [ 'arg' ]`
+  
+      let execPath = _.path.nativize( testAppPath );
+      let o =
+      {
+        execPath : mode === 'fork' ? _.strQuote( execPath ) : 'node ' + _.strQuote( execPath ),
+        mode,
+        args : [ 'arg' ],
+        stdio : 'pipe',
+        outputCollecting : 1,
+        outputPiping : 1,
+        outputColoring : 0,
+        throwingExitCode : 0,
+        applyingExitCode : 0,
+      };
+
+      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' })
+  
+      let o2 =
+      {
+        execPath : 'node ' + testAppPathParent,
+        mode : 'spawn',
+        outputCollecting : 1,
+      }
+
+      return _.process.start( o2 )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, `[ 'arg' ]` );
+        test.is( a.fileProvider.fileExists( testAppPath ) );
+        return null;
+      } )
+    })
+
     return ready;
   }
 
