@@ -22835,7 +22835,7 @@ function startOptionGid( test ) /* Runs only through `sudo` ( i.e. with superuse
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let programPath = a.path.nativize( a.program( program1 ) );
+  let programPath = a.program( program1 );
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
