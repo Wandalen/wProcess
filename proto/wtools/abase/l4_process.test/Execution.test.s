@@ -15771,7 +15771,7 @@ function startNjsWithReadyDelayStructural( test )
   let a = context.assetFor( test, false );
   let programPath = a.program( program1 );
 
-  /* qqq for Yevhen : add varying `sync` and `deasync`
+  /* qqq for Yevhen : add varying `sync` and `deasync | aaa : Done. `
     do not combine `detaching` with `dry`
     do not combine `detaching` with `sync` and `deasync`
     */
@@ -15939,12 +15939,30 @@ function startNjsWithReadyDelayStructural( test )
         return null;
       });
 
-      console.log( 'OOOO', options )
-      console.log( '\n=======\n' )
-      console.log( 'EXP: ', exp )
-      /* Write proper `exp` for sync : 1 or deasync : 1 */
       if( !tops.sync && !tops.deasync )
       test.identical( options, exp );
+      else
+      {
+        let exp2 = _.mapExtend( null, exp );
+        exp2.execPath = tops.mode === 'fork' ? exp2.execPath : 'node';
+        exp2.args = tops.mode === 'fork' ? [] : [ programPath ];
+        exp2.fullExecPath = tops.mode === 'fork' ? programPath : 'node ' + programPath;
+        exp2.streamOut = options.streamOut;
+        exp2.streamErr = options.streamErr;
+        exp2.procedure = options.procedure;
+        exp2._end = options._end;
+        exp2.state = 'terminated';
+        exp2.exitCode = 0;
+        exp2.exitReason = 'normal';
+        exp2.ended = true;
+        exp2.output = 'program1:begin\n';
+        delete exp2.end;
+
+        test.identical( options, exp2 )
+        // console.log( 'OOOO', options )
+        // console.log( '\n=======\n' )
+        // console.log( 'EXP: ', exp )
+      }
 
       test.is( _.routineIs( options.disconnect ) );
       test.is( options.conTerminate !== options.ready );
