@@ -594,14 +594,13 @@ function startBasic2( test ) /* qqq for Evhen : merge with test routine startBas
 
   a.ready.then( function()
   {
-    test.case = 'mode : spawn, passingThrough : true, incorrect usage of o.path in spawn mode';
+    test.case = 'mode : spawn, incorrect usage of o.path in spawn mode';
 
     o2 =
     {
       execPath :  'node ' + testApp,
       args : [ 'staging' ],
       mode : 'spawn',
-      passingThrough : 1,
       stdio : 'pipe'
     }
     return null;
@@ -32842,19 +32841,19 @@ var Proto =
     terminate, /* qqq for Vova: review, remove duplicates, check timeouts */
     terminateSync,
 
-    terminateFirstChildSpawn,
+    terminateFirstChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine */
     terminateFirstChildFork,
     terminateFirstChildShell,
 
-    terminateSecondChildSpawn,
+    terminateSecondChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine */
     terminateSecondChildFork,
     terminateSecondChildShell,
 
-    terminateDetachedFirstChildSpawn,
+    terminateDetachedFirstChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine */
     terminateDetachedFirstChildFork,
     terminateDetachedFirstChildShell,
 
-    terminateWithDetachedChildSpawn,
+    terminateWithDetachedChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine */
     terminateWithDetachedChildFork,
     terminateWithDetachedChildShell,
 
