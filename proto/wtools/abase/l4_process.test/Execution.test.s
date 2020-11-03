@@ -6556,71 +6556,133 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
 {
   let context = this;
   let a = context.assetFor( test, 'basic' );
+  let testAppPathParent = a.program( testAppParent );
   let testAppPath = a.program( testApp );
-
-  /* */
-
-  a.ready.then( () =>
-  {
-    test.case = 'execute simple js program with normalized path'
-
-    let execPath = _.path.normalize( testAppPath );
-    let o =
-    {
-      execPath : _.strQuote( execPath ),
-      stdio : 'pipe',
-      outputCollecting : 1,
-      outputPiping : 1,
-      throwingExitCode : 0,
-      applyingExitCode : 0,
-    };
-
-    return _.process.startNjsPassingThrough( o )
-    .then( ( op ) =>
-    {
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      test.is( a.fileProvider.fileExists( testAppPath ) );
-      test.is( !_.strHas( op.output, `Error: Cannot find module` ) );
-      return null;
-    })
-
-  });
-
-  /* */
-
-  a.ready.then( () =>
-  {
-    test.case = 'execute simple js program with nativized path'
-
-    let execPath = _.path.nativize( testAppPath );
-    let o =
-    {
-      execPath : _.strQuote( execPath ),
-      stdio : 'pipe',
-      outputCollecting : 1,
-      outputPiping : 1,
-      throwingExitCode : 0,
-      applyingExitCode : 0,
-    };
-
-    return _.process.startNjsPassingThrough( o )
-    .then( ( op ) =>
-    {
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      test.is( a.fileProvider.fileExists( testAppPath ) );
-      test.is( !_.strHas( op.output, `Error: Cannot find module` ) );
-      return null;
-    })
-
-  })
-
-  /* */
+  
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
   return a.ready;
 
   /* */
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, execute simple js program with normalized path`
+  
+      let execPath = _.path.normalize( testAppPath );
+      let o =
+      {
+        execPath : mode === 'fork' ? _.strQuote( execPath ) : 'node ' + _.strQuote( execPath ),
+        mode,
+        stdio : 'pipe',
+        outputCollecting : 1,
+        outputPiping : 1,
+        outputColoring : 0,
+        throwingExitCode : 0,
+        applyingExitCode : 0,
+      };
+      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' })
+  
+      let o2 =
+      {
+        execPath : 'node ' + testAppPathParent,
+        mode : 'spawn',
+        outputCollecting : 1,
+      }
+  
+      /* ORIGINAL */
+      // return _.process.startNjsPassingThrough( o )
+      // .then( ( op ) =>
+      // {
+      //   test.identical( op.exitCode, 0 );
+      //   test.identical( op.ended, true );
+      //   test.is( a.fileProvider.fileExists( testAppPath ) );
+      //   test.is( !_.strHas( op.output, `Error: Cannot find module` ) );
+      //   return null;
+      // })
+
+      return _.process.start( o2 )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, '[]' );
+        test.is( a.fileProvider.fileExists( testAppPath ) );
+        return null;
+      } )
+  
+    });
+  
+    /* */
+  
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, execute simple js program with nativized path`
+  
+      let execPath = _.path.nativize( testAppPath );
+      let o =
+      {
+        execPath : mode === 'fork' ? _.strQuote( execPath ) : 'node ' + _.strQuote( execPath ),
+        mode,
+        stdio : 'pipe',
+        outputCollecting : 1,
+        outputPiping : 1,
+        outputColoring : 0,
+        throwingExitCode : 0,
+        applyingExitCode : 0,
+      };
+
+      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' })
+  
+      let o2 =
+      {
+        execPath : 'node ' + testAppPathParent,
+        mode : 'spawn',
+        outputCollecting : 1,
+      }
+
+      return _.process.start( o2 )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, '[]' );
+        test.is( a.fileProvider.fileExists( testAppPath ) );
+        return null;
+      } )
+  
+      /* ORIGINAL */
+      // return _.process.startNjsPassingThrough( o )
+      // .then( ( op ) =>
+      // {
+      //   test.identical( op.exitCode, 0 );
+      //   test.identical( op.ended, true );
+      //   test.is( a.fileProvider.fileExists( testAppPath ) );
+      //   test.is( !_.strHas( op.output, `Error: Cannot find module` ) );
+      //   return null;
+      // })
+    })
+
+    return ready;
+  }
+
+  /* - */
+
+  function testAppParent()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wFiles' );
+    _.include( 'wProcess' );
+
+    let o = _.fileProvider.fileRead({ filePath : _.path.join( __dirname, 'op.json' ), encoding : 'json' });
+    o.currentPath = __dirname;
+    _.process.startPassingThrough( o );
+  }
 
   function testApp()
   {
