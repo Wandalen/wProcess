@@ -3056,7 +3056,7 @@ function waitForDeath_body( o )
   let ready = _.Consequence().take( null );
 
   if( isWindows )
-  ready.then( () => _.process.execPathOf({ pid : o.pid, throwing : 0 }) )
+  ready.then( () => _.process.spawnTimeOf({ pid : o.pid }) )
 
   ready.then( _waitForDeath );
 
@@ -3067,7 +3067,7 @@ function waitForDeath_body( o )
 
   /* */
 
-  function _waitForDeath( commandLine )
+  function _waitForDeath( spawnTime )
   {
     let ready = _.Consequence();
     let timer = _.time.periodic( interval, () =>
@@ -3097,13 +3097,11 @@ function waitForDeath_body( o )
         err = _.err( err, `\nTarget process: ${_.strQuote( o.pid )} is still alive. Waited for ${o.timeOut} ms.` );
 
         if( isWindows )
-        return _.process.execPathOf({ pid : o.pid })
-        .then( ( arg ) =>
         {
-          if( commandLine != arg )
+          let spawnTime2 = _.process.spawnTimeOf({ pid : o.pid })
+          if( spawnTime != spawnTime2 )
           return null;
-          throw err;
-        })
+        }
       }
 
       throw err;
@@ -3343,6 +3341,49 @@ execPathOf.defaults =
   throwing : 1
 }
 
+//
+
+function spawnTimeOf( o )
+{
+  _.assert( arguments.length === 1 );
+
+  if( _.numberIs( o ) )
+  o = { pid : o };
+  else if( _.process.isNativeDescriptor( o ) )
+  o = { pnd : o };
+
+  o = _.routineOptions( spawnTimeOf, o );
+
+  if( o.pnd )
+  {
+    _.assert( o.pid === o.pnd.pid || o.pid === null );
+    o.pid = o.pnd.pid;
+    _.assert( _.intIs( o.pid ) );
+  }
+
+  _.assert( process.platform === 'win32', 'Implemented only for Windows' );
+
+  if( !WindowsProcessTree )
+  {
+    try
+    {
+      WindowsProcessTree = require( 'w.process.tree.windows' );
+    }
+    catch( err )
+    {
+      throw _.err( 'Failed to get process name.\n', err );
+    }
+  }
+
+  return WindowsProcessTree.getProcessCreationTime( o.pid );
+}
+
+spawnTimeOf.defaults =
+{
+  pid : null,
+  pnd : null
+}
+
 // --
 // declare
 // --
@@ -3380,6 +3421,7 @@ let Extension =
   terminate,
   children,
   execPathOf,
+  spawnTimeOf
 
   // fields
 
