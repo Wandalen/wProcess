@@ -22776,6 +22776,7 @@ function startOptionUid( test ) /* Runs only through `sudo` ( i.e. with superuse
 {
   let context = this;
   let a = context.assetFor( test, false );
+  let programPath = a.program( program1 );
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
@@ -22788,8 +22789,6 @@ function startOptionUid( test ) /* Runs only through `sudo` ( i.e. with superuse
     ready.then( () =>
     {
       test.case = `mode : ${ mode }`;
-
-      let programPath = a.program( program1 );
 
       let options =
       {
@@ -22807,7 +22806,6 @@ function startOptionUid( test ) /* Runs only through `sudo` ( i.e. with superuse
         test.identical( op.ended, true );
         test.identical( op.output, '11\n' );
 
-        a.fileProvider.filesDelete( programPath );
         return null;
       } )
 
@@ -22837,6 +22835,7 @@ function startOptionGid( test ) /* Runs only through `sudo` ( i.e. with superuse
 {
   let context = this;
   let a = context.assetFor( test, false );
+  let programPath = a.path.nativize( a.program( program1 ) );
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
@@ -22849,8 +22848,6 @@ function startOptionGid( test ) /* Runs only through `sudo` ( i.e. with superuse
     ready.then( () =>
     {
       test.case = `mode : ${ mode }`;
-
-      let programPath = a.path.nativize( a.program( program1 ) );
 
       let options =
       {
@@ -22867,7 +22864,6 @@ function startOptionGid( test ) /* Runs only through `sudo` ( i.e. with superuse
         test.identical( op.ended, true );
         test.identical( op.output, '15\n' );
 
-        a.fileProvider.filesDelete( programPath );
         return null;
       } )
 
