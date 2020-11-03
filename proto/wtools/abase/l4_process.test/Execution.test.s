@@ -4407,7 +4407,7 @@ function startExecPathQuotesClosing( test )
 
   let a = context.assetFor( test, false );
 
-  let testAppPathSpace = a.path.nativize( a.path.normalize( a.program({ routine : testApp, dirPath : a.abs( 'with space' ) }) ) );
+  let testAppPathSpace = a.path.normalize( a.program({ routine : testApp, dirPath : a.abs( 'with space' ) }) );
 
   /* */
 
@@ -5315,7 +5315,7 @@ function startExecPathNonTrivialModeShell( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.path.nativize( a.path.normalize( a.program( app ) ) );
+  let testAppPath = a.path.normalize( a.program( app ) );
 
   let shell = _.process.starter
   ({
@@ -6662,7 +6662,7 @@ function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subrou
   let context = this;
   let a = context.assetFor( test, false );
   let testAppPath = a.program({ routine : testApp, dirPath : 'path with space' });
-  let execPathWithSpace = 'node ' + _.path.nativize( testAppPath );
+  let execPathWithSpace = 'node ' + testAppPath;
 
   /* - */
 
@@ -6732,7 +6732,7 @@ function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subrou
 
   _.process.startPassingThrough
   ({
-    execPath : a.path.nativize( testAppPath ),
+    execPath : testAppPath,
     ready : a.ready,
     outputCollecting : 1,
     outputPiping : 1,
@@ -6819,7 +6819,7 @@ function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subrou
 
   _.process.startPassingThrough
   ({
-    args : a.path.nativize( testAppPath ),
+    args : testAppPath,
     ready : a.ready,
     outputCollecting : 1,
     outputPiping : 1,
@@ -6846,7 +6846,7 @@ function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subrou
 
   _.process.startPassingThrough
   ({
-    args : a.path.nativize( testAppPath ) + ' arg',
+    args : testAppPath + ' arg',
     ready : a.ready,
     outputCollecting : 1,
     outputPiping : 1,
@@ -6882,7 +6882,7 @@ function startNormalizedExecPath( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.path.nativize( a.path.normalize( a.program( testApp ) ) );
+  let testAppPath = a.path.normalize( a.program( testApp ) );
 
   /* */
 
@@ -7073,7 +7073,7 @@ function startExecPathWithSpace( test )
 
   _.process.start
   ({
-    execPath : a.path.nativize( testAppPath ),
+    execPath : testAppPath,
     ready : a.ready,
     outputCollecting : 1,
     outputPiping : 1,
@@ -7154,7 +7154,7 @@ function startExecPathWithSpace( test )
 
   _.process.start
   ({
-    args : a.path.nativize( testAppPath ),
+    args : testAppPath,
     ready : a.ready,
     outputCollecting : 1,
     outputPiping : 1,
@@ -7179,7 +7179,7 @@ function startExecPathWithSpace( test )
 
   _.process.start
   ({
-    args : a.path.nativize( testAppPath ) + ' arg',
+    args : testAppPath + ' arg',
     ready : a.ready,
     outputCollecting : 1,
     outputPiping : 1,
@@ -23105,7 +23105,7 @@ function exitCode( test )
       let programPath = a.program({ routine : testAppExitCode, locals });
       let options =
       {
-        execPath : mode === 'fork' ? a.path.nativize( programPath ) : 'node ' + a.path.nativize( programPath ),
+        execPath : mode === 'fork' ? programPath : 'node ' + programPath,
         throwingExitCode : 0,
         mode
       }
@@ -23132,7 +23132,7 @@ function exitCode( test )
       let programPath = a.program({ routine : testAppExitCode, locals});
       let options =
       {
-        execPath : mode === 'fork' ? a.path.nativize( programPath ) : 'node ' + a.path.nativize( programPath ),
+        execPath : mode === 'fork' ? programPath : 'node ' + programPath,
         throwingExitCode : 0,
         mode
       }
@@ -23159,7 +23159,7 @@ function exitCode( test )
       let programPath = a.program({ routine : testAppExitCode, locals});
       let options =
       {
-        execPath : mode === 'fork' ? a.path.nativize( programPath ) : 'node ' + a.path.nativize( programPath ),
+        execPath : mode === 'fork' ? programPath : 'node ' + programPath,
         throwingExitCode : 0,
         mode
       }
@@ -23200,7 +23200,7 @@ function exitCode( test )
       let programPath = a.program( testAppError );
       let options =
       {
-        execPath : mode === 'fork' ? a.path.nativize( programPath ) : 'node ' + a.path.nativize( programPath ),
+        execPath : mode === 'fork' ? programPath : 'node ' + programPath,
         throwingExitCode : 0,
         mode
       }
@@ -23223,7 +23223,7 @@ function exitCode( test )
       let programPath = a.program({ routine : testApp, locals : { options : null } })
       let options =
       {
-        execPath : mode === 'fork' ? a.path.nativize( programPath ) : 'node ' + a.path.nativize( programPath ),
+        execPath : mode === 'fork' ? programPath : 'node ' + programPath,
         throwingExitCode : 0,
         mode
       }
@@ -23253,7 +23253,7 @@ function exitCode( test )
       let programPath = a.program({ routine : testApp, locals });
       let options =
       {
-        execPath : mode === 'fork' ? a.path.nativize( programPath ) : 'node ' + a.path.nativize( programPath ),
+        execPath : mode === 'fork' ? programPath : 'node ' + programPath,
         throwingExitCode : 0,
         mode
       }
@@ -23280,7 +23280,7 @@ function exitCode( test )
       let programPath = a.program({ routine : testAppExit, locals});
       let options =
       {
-        execPath : mode === 'fork' ? a.path.nativize( programPath ) : 'node ' + a.path.nativize( programPath ),
+        execPath : mode === 'fork' ? programPath : 'node ' + programPath,
         throwingExitCode : 0,
         mode
       }
@@ -31910,7 +31910,7 @@ function execPathOf( test )
 
   .then( () =>
   {
-    let o = { execPath : a.path.nativize( testAppPath ) };
+    let o = { execPath : testAppPath };
     _.process.startNjs( o )
 
     o.conStart.then( () => _.process.execPathOf( o.process ) )
@@ -31952,7 +31952,7 @@ function waitForDeath( test )
     test.case = 'child process terminates by its own, wait for termination using pnd'
     let o =
     {
-      execPath : 'node ' + a.path.nativize( testAppPath ),
+      execPath : 'node ' + testAppPath,
       throwingExitCode : 0,
       mode : 'spawn',
       stdio : 'pipe',
@@ -31981,7 +31981,7 @@ function waitForDeath( test )
     test.case = 'child process terminates by its own, wait for termination using pid'
     let o =
     {
-      execPath : 'node ' + a.path.nativize( testAppPath ),
+      execPath : 'node ' + testAppPath,
       throwingExitCode : 0,
       mode : 'spawn',
       stdio : 'pipe',
@@ -32010,7 +32010,7 @@ function waitForDeath( test )
     test.case = 'child process is terminated by SIGTERM'
     let o =
     {
-      execPath : 'node ' + a.path.nativize( testAppPath ),
+      execPath : 'node ' + testAppPath,
       throwingExitCode : 0,
       mode : 'spawn',
       stdio : 'pipe',
@@ -32041,7 +32041,7 @@ function waitForDeath( test )
     test.case = 'process is still alive after timeOut'
     let o =
     {
-      execPath : 'node ' + a.path.nativize( testAppPath ),
+      execPath : 'node ' + testAppPath,
       throwingExitCode : 0,
       mode : 'spawn',
       stdio : 'pipe',
