@@ -23069,7 +23069,7 @@ function exitReason( test )
     {
       test.case = `mode : ${ mode }, initial value`;
 
-      let testAppPath = a.program({ routine : testApp, locals : { reason : null, reset : 0 } });
+      let testAppPath = a.program({ routine : testApp, locals : { reasons : null, reset : 0 } });
 
       let options =
       {
@@ -23095,7 +23095,7 @@ function exitReason( test )
     {
       test.case = `mode : ${ mode }, reason : 'reason'`;
 
-      let testAppPath = a.program({ routine : testApp, locals : { reason : 'reason', reset : 0 } });
+      let testAppPath = a.program({ routine : testApp, locals : { reasons : [ 'reason' ], reset : 0 } });
 
       let options =
       {
@@ -23109,7 +23109,7 @@ function exitReason( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.equivalent( op.output, 'reason' );
+        test.equivalent( op.output, `[ null, 'reason' ]` );
         a.fileProvider.fileDelete( testAppPath )
         return null;
       } )
@@ -23119,7 +23119,7 @@ function exitReason( test )
     {
       test.case = `mode : ${ mode }, initial, set, update reason`;
 
-      let testAppPath = a.program({ routine : testApp, locals : { reason : [ 'reason1', 'reason2' ], reset : 0 } });
+      let testAppPath = a.program({ routine : testApp, locals : { reasons : [ 'reason1', 'reason2' ], reset : 0 } });
 
       let options =
       {
@@ -23133,7 +23133,7 @@ function exitReason( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.equivalent( op.output, 'null reason1 reason2' );
+        test.equivalent( op.output, `[ null, 'reason1', 'reason2' ]` );
         a.fileProvider.fileDelete( testAppPath );
         return null;
       } )
@@ -23143,7 +23143,7 @@ function exitReason( test )
     {
       test.case = `mode : ${ mode }, initial, set, update, reset reason`;
 
-      let testAppPath = a.program({ routine : testApp, locals : { reason : [ 'reason1', 'reason2' ], reset : 1 } });
+      let testAppPath = a.program({ routine : testApp, locals : { reasons : [ 'reason1', 'reason2' ], reset : 1 } });
 
       let options =
       {
@@ -23157,7 +23157,7 @@ function exitReason( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.equivalent( op.output, 'null reason1 reason2 null' );
+        test.equivalent( op.output, `[ null, 'reason1', 'reason2', null ]` );
         a.fileProvider.fileDelete( testAppPath );
         return null;
       } )
@@ -23172,37 +23172,29 @@ function exitReason( test )
   {
     let _ = require( toolsPath );
     _.include( 'wProcess' );
+    let result = [];
 
-    if( !reason )
+    if( !reasons )
     {
-      console.log( _.process.exitReason() )
-      return
-    }
-
-    if( _.strIs( reason ) )
-    {
-      _.process.exitReason( reason );
-      console.log( _.process.exitReason() )
+      console.log( _.process.exitReason() );
       return;
     }
 
-    let reason00 = _.process.exitReason()
+    result.push( _.process.exitReason() );
 
-    _.process.exitReason( reason[ 0 ] )
-    let reason01 = _.process.exitReason()
-
-    _.process.exitReason( reason[ 1 ] )
-    let reason02 = _.process.exitReason()
+    reasons.forEach( ( reason ) =>
+    {
+      _.process.exitReason( reason );
+      result.push( _.process.exitReason() );
+    })
 
     if( reset )
     {
-      _.process.exitReason( null )
-      let reason03 = _.process.exitReason()
-      console.log( `${reason00} ${reason01} ${reason02} ${reason03}` )
-      return
+      _.process.exitReason( null );
+      result.push( _.process.exitReason() );
     }
 
-    console.log( `${reason00} ${reason01} ${reason02}` )
+    console.log( result );
 
   }
 
