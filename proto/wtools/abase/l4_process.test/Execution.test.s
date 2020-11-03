@@ -23067,36 +23067,6 @@ function exitReason( test )
 
     ready.then( () =>
     {
-      test.case = 'initial value'
-      var got = _.process.exitReason();
-      test.identical( got, null );
-
-      /* */
-
-      test.case = 'set reason'
-      _.process.exitReason( 'reason' );
-      var got = _.process.exitReason();
-      test.identical( got, 'reason' );
-
-      /* */
-
-      test.case = 'update reason'
-      _.process.exitReason( 'reason2' );
-      var got = _.process.exitReason();
-      test.identical( got, 'reason2' );
-
-      /* */
-
-      test.case = 'reset to null'
-      _.process.exitReason( null );
-      var got = _.process.exitReason();
-      test.identical( got, null );
-
-      return null;
-    } )
-
-    ready.then( () =>
-    {
       test.case = `mode : ${ mode }, initial value`;
 
       let testAppPath = a.program({ routine : testApp, locals : { reason : null, reset : 0 } });
@@ -23193,94 +23163,6 @@ function exitReason( test )
       } )
     })
 
-    ready.then( () =>
-    {
-      test.case = `mode : ${ mode }, exitReason : 'normal'`;
-
-      let testAppPath = a.program({ routine : testAppExitCodeSignal, locals : { code : 0 } });
-
-      let options =
-      {
-        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
-        outputCollecting : 1,
-        throwingExitCode : 0,
-        mode,
-      }
-
-      return _.process.start( options )
-      .then( ( op ) =>
-      {
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( op.exitReason, 'normal' );
-        a.fileProvider.fileDelete( testAppPath );
-        return null;
-      } )
-    })
-
-    ready.then( () =>
-    {
-      test.case = `mode : ${ mode }, exitReason : 'code'`;
-
-      let testAppPath = a.program({ routine : testAppExitCodeSignal, locals : { code : 1 } });
-
-      let options =
-      {
-        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
-        outputCollecting : 1,
-        throwingExitCode : 0,
-        mode,
-      }
-
-      return _.process.start( options )
-      .then( ( op ) =>
-      {
-        test.identical( op.exitCode, 1 );
-        test.identical( op.ended, true );
-        test.identical( op.exitReason, 'code' );
-        a.fileProvider.fileDelete( testAppPath );
-        return null;
-      } )
-    })
-
-    ready.then( () =>
-    {
-      test.case = `mode : ${ mode }, exitReason : 'signal' or 'code'`;
-
-      let testAppPath = a.program({ routine : testAppExitCodeSignal, locals : { code : null } });
-
-      let options =
-      {
-        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
-        outputCollecting : 1,
-        throwingExitCode : 0,
-        mode,
-      }
-
-      return _.process.start( options )
-      .then( ( op ) =>
-      {
-        test.notIdentical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        if( process.platform === 'win32' )
-        {
-          test.equivalent( op.exitReason, 'code' );
-        }
-        else if( process.platform === 'darwin' )
-        {
-          test.equivalent( op.exitReason, 'signal' );
-        }
-        else
-        {
-          if( mode === 'shell' )
-          test.equivalent( op.exitReason, 'code' );
-          else
-          test.equivalent( op.exitReason, 'signal' );
-        }
-        a.fileProvider.fileDelete( testAppPath );
-        return null;
-      } )
-    })
     return ready;
   }
 
@@ -23324,17 +23206,24 @@ function exitReason( test )
 
   }
 
-  function testAppExitCodeSignal()
-  {
-    let _ = require( toolsPath );
-    _.include( 'wProcess' );
+  /* ORIGINAL */
+  // test.case = 'initial value'
+  // var got = _.process.exitReason();
+  // test.identical( got, null );
 
-    if( code !== null )
-    _.process.exitCode( code );
-    else
-    _.process.kill( process.pid );
-  }
+  // /* */
 
+  // test.case = 'set reason'
+  // _.process.exitReason( 'reason' );
+  // var got = _.process.exitReason();
+  // test.identical( got, 'reason' );
+
+  // /* */
+
+  // test.case = 'update reason'
+  // _.process.exitReason( 'reason2' );
+  // var got = _.process.exitReason();
+  // test.identical( got, 'reason2' );
 }
 
 exitReason.timeOut = 120000;
