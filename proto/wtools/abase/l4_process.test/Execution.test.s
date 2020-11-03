@@ -23226,8 +23226,6 @@ function exitReason( test )
   // test.identical( got, 'reason2' );
 }
 
-exitReason.timeOut = 120000;
-
 //
 
 /* qqq for Yevhen : poor tests, please extend it | aaa : Done */
