@@ -21515,7 +21515,7 @@ function startSingleOptionDry( test )
         outputCollecting : 1,
         throwingExitCode : 1,
         applyingExitCode : 1,
-        timeOut : tops.sync || !tops.deasync ? null : 100,
+        // timeOut : tops.sync || !tops.deasync ? null : 100, /* xxx */
         ipc : tops.mode === 'shell' ? 0 : 1,
         when : { delay : 2000 },
       }
@@ -21618,6 +21618,7 @@ function startSingleOptionDry( test )
 
     ready.then( () =>
     {
+      /* qqq for Yevhen : bad description! */
       test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, dry : 1, execPath : 'err' + programPath + \` arg1 "arg 2" "'arg3'"\``
       let o =
       {
@@ -21631,7 +21632,7 @@ function startSingleOptionDry( test )
         outputCollecting : 1,
         throwingExitCode : 1,
         applyingExitCode : 1,
-        timeOut : tops.sync || !tops.deasync ? null : 100,
+        // timeOut : tops.sync || !tops.deasync ? null : 100,
         ipc : tops.mode === 'shell' ? 0 : 1,
         when : { delay : 2000 }
       }
