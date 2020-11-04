@@ -16626,8 +16626,9 @@ function startNjsWithReadyDelayStructuralMultiple( test )
   let a = context.assetFor( test, false );
   let programPath = a.program( program1 );
 
-  let modes = [ 'fork', /*'spawn', 'shell' */];
+  let modes = [ 'fork', /*'spawn', 'shell'*/ ];
 
+  /* Add dry combinations */
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, dry : 0, detaching : 0, mode }) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, dry : 0, detaching : 0, mode }) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, dry : 0, detaching : 0, mode }) ) );
@@ -16667,6 +16668,7 @@ function startNjsWithReadyDelayStructuralMultiple( test )
         stdio : 'pipe',
         sync : tops.sync,
         deasync : tops.deasync,
+        dry : tops.dry,
         ready : con,
       }
 
@@ -16697,7 +16699,7 @@ function startNjsWithReadyDelayStructuralMultiple( test )
         'args' : null,
         'interpreterArgs' : null,
         'when' : 'instant',
-        'dry' : 0,
+        'dry' : tops.dry,
         'ipc' : tops.mode === 'fork' ? true : false,
         'env' : null,
         'hiding' : 1,
@@ -16727,7 +16729,7 @@ function startNjsWithReadyDelayStructuralMultiple( test )
         'runs' : [],
         'state' : 'initial',
         'exitReason' : null,
-        'output' : '',
+        'output' : tops.dry ? '' : 'program1:begin\nprogram1:begin\n',
         'exitCode' : null,
         'exitSignal' : null,
         'ended' : false,
@@ -16740,30 +16742,46 @@ function startNjsWithReadyDelayStructuralMultiple( test )
       options.ready.then( ( op ) =>
       {
         // test.identical( op.exitCode, 0 );
-        // test.identical( op.ended, true );
+        test.identical( op.ended, true );
         // test.identical( op.output, 'program1:begin\nprogram1:begin\n' );
 
         let exp2 = _.mapExtend( null, exp );
-        // if( tops.sync || tops.deasync )
-        // {
-        exp2.exitCode = 0;
+
+        exp2.exitCode = tops.dry ? null : 0;
         exp2.exitSignal = null;
         exp2.runs = options.runs;
         exp2.state = 'terminated';
         exp2.exitReason = 'normal';
-        exp2.output = 'program1:begin\nprogram1:begin\n';
         exp2.ended = true;
-        // }
 
-        /* NEW */
         test.identical( options, exp2 );
         test.is( !options.process );
         test.is( !options.disconnect );
-        test.is( _.streamIs( options.streamOut ) );
-        test.is( _.streamIs( options.streamErr ) );
-        test.is( options.streamOut !== options.streamErr );
+        test.identical( _.streamIs( options.streamOut ), !tops.sync || ( !!tops.sync && !!tops.deasync ) );
+        test.identical( _.streamIs( options.streamErr ), !tops.sync || ( !!tops.sync && !!tops.deasync ) );
+        test.identical( options.streamOut !== options.streamErr, !tops.sync || ( !!tops.sync && !!tops.deasync ) );
         test.is( options.conTerminate !== options.ready );
         test.is( _.arrayIs( options.runs ) );
+
+        /* Added each run checks */
+        op.runs.forEach( ( run ) =>
+        {
+          if( tops.dry )
+          console.log( 'R: ', run )
+          test.identical( !!run.process, !tops.dry );
+          test.is( _.routineIs( run.disconnect ) );
+          test.identical( _.streamIs( run.streamOut ), !tops.dry && ( !tops.sync || !!tops.deasync ) );
+          test.identical( _.streamIs( run.streamErr ), !tops.dry && ( !tops.sync || !!tops.deasync ) );
+          test.identical( run.streamOut !== run.streamErr, !tops.dry && ( !tops.sync || !!tops.deasync ) );
+          test.is( run.conTerminate !== run.ready );
+
+          test.identical( run.ready.exportString(), 'Consequence:: 1 / 0' );
+          test.identical( run.conTerminate.exportString(), 'Consequence:: 1 / 0' );
+          test.identical( run.conDisconnect.exportString(), 'Consequence:: 1 / 0' );
+          test.identical( run.conStart.exportString(), 'Consequence:: 1 / 0' );
+
+        } )
+
         if( tops.sync || tops.deasync )
         {
           test.identical( options.ready.exportString(), 'Consequence:: 0 / 0' );
@@ -16779,19 +16797,6 @@ function startNjsWithReadyDelayStructuralMultiple( test )
           test.identical( options.ready.exportString(), 'Consequence:: 0 / 1' );
         }
 
-        // test.identical( options, exp2 );
-        // test.is( !options.process );
-        // test.is( _.streamIs( options.streamOut ) );
-        // test.is( _.streamIs( options.streamErr ) );
-        // test.is( options.streamOut !== options.streamErr );
-        // test.is( ! options.disconnect );
-        // test.is( options.conTerminate !== options.ready );
-        // test.is( _.arrayIs( options.runs ) );
-        // test.identical( options.ready.exportString(), 'Consequence:: 0 / 1' );
-        // test.identical( options.conTerminate.exportString(), 'Consequence:: 1 / 0' );
-        // test.identical( options.conDisconnect, null );
-        // test.identical( options.conStart.exportString(), 'Consequence:: 1 / 0' );
-
         return null;
       });
 
@@ -16802,8 +16807,12 @@ function startNjsWithReadyDelayStructuralMultiple( test )
         exp3.exitCode = 0;
         exp3.state = 'terminated';
         exp3.exitReason = 'normal';
-        exp3.output = 'program1:begin\nprogram1:begin\n';
+        exp3.output = tops.dry ? '' : 'program1:begin\nprogram1:begin\n';
         exp3.runs = options.runs;
+      }
+      else
+      {
+        exp3.output = '';
       }
 
       test.identical( options, exp3 );
@@ -16814,12 +16823,11 @@ function startNjsWithReadyDelayStructuralMultiple( test )
       test.is( !!options.procedure );
       test.is( !!options.logger );
       test.is( !!options.stack );
-      test.is( _.streamIs( options.streamOut ) );
-      test.is( _.streamIs( options.streamErr ) );
-      test.is( options.streamOut !== options.streamErr );
+      test.identical( _.streamIs( options.streamOut ), !tops.sync || ( !!tops.sync && !!tops.deasync ) );
+      test.identical( _.streamIs( options.streamErr ), !tops.sync || ( !!tops.sync && !!tops.deasync ) );
+      test.identical( options.streamOut !== options.streamErr, !tops.sync || ( !!tops.sync && !!tops.deasync ) );
       test.identical( options.conDisconnect, null );
-
-      if( tops.sync || tops.deasync)
+      if( tops.sync || tops.deasync )
       {
         test.identical( options.ready.exportString(), 'Consequence:: 1 / 0' );
         test.identical( options.conTerminate.exportString(), 'Consequence:: 1 / 0' );
