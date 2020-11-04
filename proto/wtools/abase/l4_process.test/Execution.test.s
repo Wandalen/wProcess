@@ -22776,6 +22776,122 @@ function startOptionPassingThrough( test )
 startOptionPassingThrough.timeOut = 5e5;
 startOptionPassingThrough.rapidity = -1;
 
+//
+
+function startOptionUid( test ) /* Runs only through `sudo` ( i.e. with superuser/root provileges ) */
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let programPath = a.program( program1 );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+
+  return a.ready;
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }`;
+
+      let options =
+      {
+        execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+        throwingExitCode : 0,
+        outputCollecting : 1,
+        mode,
+        uid : 11
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, '11\n' );
+
+        return null;
+      } )
+
+
+    } )
+
+    return ready;
+  }
+
+  /* - */
+
+  function program1()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wFiles' );
+    _.include( 'wProcess' );
+
+    console.log( process.getuid() );
+  }
+}
+
+startOptionUid.experimental = true;
+
+//
+
+function startOptionGid( test ) /* Runs only through `sudo` ( i.e. with superuser/root provileges ) */
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let programPath = a.program( program1 );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+
+  return a.ready;
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }`;
+
+      let options =
+      {
+        execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+        throwingExitCode : 0,
+        outputCollecting : 1,
+        mode,
+        gid : 15
+      }
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, '15\n' );
+
+        return null;
+      } )
+
+    } )
+
+    return ready;
+  }
+
+  /* - */
+
+  function program1()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wFiles' );
+    _.include( 'wProcess' );
+
+    console.log( process.getgid() );
+  }
+}
+
+startOptionGid.experimental = true;
+
 // --
 // pid
 // --
@@ -33020,6 +33136,8 @@ var Proto =
     startOptionCurrentPath,
     startOptionCurrentPaths,
     startOptionPassingThrough,
+    startOptionUid,
+    startOptionGid,
 
     // pid / status / exit
 
