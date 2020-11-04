@@ -6822,7 +6822,7 @@ function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subrou
 
     ready.then( () =>
     {
-      test.case = 'execPath contains unquoted path with space, spawn'
+      test.case = `mode : ${mode}, execPath contains unquoted path with space`
 
       let o =
       {
@@ -6862,7 +6862,7 @@ function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subrou
   
     ready.then( () =>
     {
-      test.case = 'args is a string with unquoted path with space, spawn'
+      test.case = `mode : ${mode}, args is a string with unquoted path with space`
 
       let o =
       {
@@ -6887,61 +6887,84 @@ function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subrou
         stdio : 'pipe',
       }
 
-      return _.process.start( o2 )
-      .then( ( op ) =>
+      _.process.start( o2 )
+
+      o2.ready.then( ( op ) =>
       {
         test.identical( op.ended, true );
-        console.log( `mode : ${mode}, OUTPUT: `, '+' + op.output + '+' )
+        test.is( a.fileProvider.fileExists( testAppPath ) );
         let out = JSON.parse( op.output );
-        // console.log( `mode : ${mode}, OUT: `, out )
-        if( mode === 'fork' )
+        if( mode === 'spawn' )
         {
-          test.is( !!out.output );
-          test.is( !out.err )
-        }
-        else if( mode === 'shell' )
-        {
-          test.is( _.strHas( out.output, `Cannot find module` ) );
+          test.is( !!out.err );
+          test.is( a.fileProvider.fileExists( testAppPath ) );
+          test.identical( out.err.code, 'ENOENT' );
         }
         else
         {
-          _.errAttend( out.err );
-          test.is( !!out.err );
-          test.is( a.fileProvider.fileExists( testAppPath ) );
-          test.is( _.strHas( out.err.message, `ENOENT` ) );
+          test.is( !out.err )
+          if( mode === 'fork' )
+          test.is( !_.strHas( out.output, `Cannot find module` ) );
+          else
+          test.is( _.strHas( out.output, `Cannot find module` ) );
         }
         return null;
       })
+
+      return o2.ready;
     })
 
     /* */
 
-    // ready.then( () =>
-    // {
-    //   test.case = 'args is a string with unquoted path with space and argument, fork'
-    //   return null;
-    // })
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, args is a string with unquoted path with space and argument`
 
-    // _.process.startPassingThrough
-    // ({
-    //   args : a.path.nativize( testAppPath ) + ' arg',
-    //   ready : ready,
-    //   outputCollecting : 1,
-    //   outputPiping : 1,
-    //   mode : 'fork',
-    //   throwingExitCode : 0,
-    //   applyingExitCode : 0,
-    //   stdio : 'pipe'
-    // });
+      let o =
+      {
+        args : mode === 'fork' ? testAppPath + ' arg' : 'node ' + testAppPath + ' arg',
+        mode,
+        outputCollecting : 1,
+        outputPiping : 0,
+        throwingExitCode : 0,
+        applyingExitCode : 0,
+        stdio : 'pipe'
+      }
 
-    // ready.then( ( op ) =>
-    // {
-    //   test.notIdentical( op.exitCode, 0 );
-    //   test.identical( op.ended, true );
-    //   test.is( a.fileProvider.fileExists( testAppPath ) );
-    //   test.is( _.strHas( op.output, `Cannot find module` ) );
-    //   return null;
-    // })
+      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' })
+
+      let o2 =
+      {
+        execPath : 'node ' + testAppPathParent,
+        mode : 'spawn',
+        outputCollecting : 1,
+        throwingExitCode : 0,
+        stdio : 'pipe',
+      }
+
+      _.process.start( o2 )
+
+      o2.ready.then( ( op ) =>
+      {
+        let out = JSON.parse( op.output );
+        test.identical( op.ended, true );
+        test.is( a.fileProvider.fileExists( testAppPath ) );
+        if( mode === 'spawn' )
+        {
+          test.is( !!out.err );
+          test.is( a.fileProvider.fileExists( testAppPath ) );
+          test.identical( out.err.code, 'ENOENT' );
+        }
+        else
+        {
+          test.is( !out.err )
+          test.is( _.strHas( out.output, `Cannot find module` ) );
+        }
+        return null;
+      })
+
+      return o2.ready;
+    })
 
     return ready;
 
@@ -7161,8 +7184,7 @@ function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subrou
     _.process.startPassingThrough( o )
     .finally( ( err, op ) =>
     {
-      console.log( JSON.stringify({ output : op.output, err }) );
-
+      console.log( JSON.stringify({ output : op?.output ? op.output : null, err : err ? _.errAttend( err ) : null }) );
       return null;
     } )
   }
