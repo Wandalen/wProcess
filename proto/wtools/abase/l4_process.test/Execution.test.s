@@ -6599,7 +6599,7 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
     {
       test.case = `mode : ${mode}, execute simple js program with normalized path`
   
-      let execPath = _.path.normalize( testAppPath );
+      let execPath = a.path.nativize( a.path.normalize( testAppPath ) );
       let o =
       {
         execPath : mode === 'fork' ? _.strQuote( execPath ) : 'node ' + _.strQuote( execPath ),
@@ -6649,10 +6649,9 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
     {
       test.case = `mode : ${mode}, execute simple js program with nativized path`
   
-      let execPath = _.path.nativize( testAppPath );
       let o =
       {
-        execPath : mode === 'fork' ? _.strQuote( execPath ) : 'node ' + _.strQuote( execPath ),
+        execPath : mode === 'fork' ? _.strQuote( testAppPath ) : 'node ' + _.strQuote( testAppPath ),
         mode,
         stdio : 'pipe',
         outputCollecting : 1,
@@ -6697,7 +6696,7 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
     {
       test.case = `mode : ${mode}, execute simple js program with normalized path, parent args : [ 'arg' ]`
   
-      let execPath = _.path.normalize( testAppPath );
+      let execPath = a.path.nativize( a.path.normalize( testAppPath ) );
       let o =
       {
         execPath : mode === 'fork' ? _.strQuote( execPath ) : 'node ' + _.strQuote( execPath ),
@@ -6737,10 +6736,9 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
     {
       test.case = `mode : ${mode}, execute simple js program with nativized path, parent args : [ 'arg' ]`
   
-      let execPath = _.path.nativize( testAppPath );
       let o =
       {
-        execPath : mode === 'fork' ? _.strQuote( execPath ) : 'node ' + _.strQuote( execPath ),
+        execPath : mode === 'fork' ? _.strQuote( testAppPath ) : 'node ' + _.strQuote( testAppPath ),
         mode,
         args : [ 'arg' ],
         stdio : 'pipe',
@@ -8053,8 +8051,9 @@ function startNjsPassingThroughExecPathWithSpace( test )
         let out = JSON.parse( op.output );
         test.identical( op.ended, true );
         test.is( a.fileProvider.fileExists( testAppPath ) );
-        test.is( _.strHas( out.output, out.pid.toString() ) );
-        test.is( _.strHas( out.output, `[]` ) );
+        test.equivalent( out.output, '[]\n' + out.pid.toString() )
+        // test.is( _.strHas( out.output, out.pid.toString() ) );
+        // test.is( _.strHas( out.output, `[]` ) );
         return null;
       })
 
@@ -8113,8 +8112,9 @@ function startNjsPassingThroughExecPathWithSpace( test )
         let out = JSON.parse( op.output );
         test.identical( op.ended, true );
         test.is( a.fileProvider.fileExists( testAppPath ) );
-        test.is( _.strHas( out.output, out.pid.toString() ) );
-        test.is( _.strHas( out.output, `[ 'arg' ]` ) );
+        test.equivalent( out.output, `[ 'arg' ]\n` + out.pid.toString() )
+        // test.is( _.strHas( out.output, out.pid.toString() ) );
+        // test.is( _.strHas( out.output, `[ 'arg' ]` ) );
         return null;
       })
     })
