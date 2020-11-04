@@ -46,6 +46,12 @@ Libuv error for v10:
 Libuv error for v12-15:
 Assertion failed: (handle->type == UV_TCP || handle->type == UV_TTY || handle->type == UV_NAMED_PIPE), function uv___stream_fd, file ../deps/uv/src/unix/stream.c, line 1622.
 /Users/runner/work/_temp/a3028c88-f26a-43fa-8306-d78bcc207e60.sh: line 1:  1459 Abort trap: 6           node proto/wtools/abase/l4_process.test/Execution.test.s r:experimentIpcDeasync v:10
+
+Related links:
+https://github.com/jochemstoel/nodejs-system-sleep/issues/4
+https://github.com/abbr/deasync/issues/55#issuecomment-538129355
+http://docs.libuv.org/en/v1.x/loop.html#c.uv_run 
+uv_run() is not reentrant. It must not be called from a callback.
 */
 
 /*
@@ -22771,6 +22777,122 @@ function startOptionPassingThrough( test )
 startOptionPassingThrough.timeOut = 5e5;
 startOptionPassingThrough.rapidity = -1;
 
+//
+
+function startOptionUid( test ) /* Runs only through `sudo` ( i.e. with superuser/root provileges ) */
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let programPath = a.program( program1 );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+
+  return a.ready;
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }`;
+
+      let options =
+      {
+        execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+        throwingExitCode : 0,
+        outputCollecting : 1,
+        mode,
+        uid : 11
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, '11\n' );
+
+        return null;
+      } )
+
+
+    } )
+
+    return ready;
+  }
+
+  /* - */
+
+  function program1()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wFiles' );
+    _.include( 'wProcess' );
+
+    console.log( process.getuid() );
+  }
+}
+
+startOptionUid.experimental = true;
+
+//
+
+function startOptionGid( test ) /* Runs only through `sudo` ( i.e. with superuser/root provileges ) */
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let programPath = a.program( program1 );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+
+  return a.ready;
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }`;
+
+      let options =
+      {
+        execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+        throwingExitCode : 0,
+        outputCollecting : 1,
+        mode,
+        gid : 15
+      }
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, '15\n' );
+
+        return null;
+      } )
+
+    } )
+
+    return ready;
+  }
+
+  /* - */
+
+  function program1()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wFiles' );
+    _.include( 'wProcess' );
+
+    console.log( process.getgid() );
+  }
+}
+
+startOptionGid.experimental = true;
+
 // --
 // pid
 // --
@@ -23050,26 +23172,174 @@ function statusOf( test )
 
 //
 
-// function exitReason( test )
-// {
-//   test.case = 'initial value'
-//   var got = _.process.exitReason();
-//   test.identical( got, null );
-//
-//   /* */
-//
-//   test.case = 'set reason'
-//   _.process.exitReason( 'reason' );
-//   var got = _.process.exitReason();
-//   test.identical( got, 'reason' );
-//
-//   /* */
-//
-//   test.case = 'update reason'
-//   _.process.exitReason( 'reason2' );
-//   var got = _.process.exitReason();
-//   test.identical( got, 'reason2' );
-// }
+function exitReason( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
+
+  /* */
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, initial value`;
+
+      let testAppPath = a.program({ routine : testApp, locals : { reasons : null, reset : 0 } });
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+        mode,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, 'null' );
+        a.fileProvider.fileDelete( testAppPath )
+        return null;
+      } )
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, reason : 'reason'`;
+
+      let testAppPath = a.program({ routine : testApp, locals : { reasons : [ 'reason' ], reset : 0 } });
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+        mode,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, `[ null, 'reason' ]` );
+        a.fileProvider.fileDelete( testAppPath )
+        return null;
+      } )
+    })
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, initial, set, update reason`;
+
+      let testAppPath = a.program({ routine : testApp, locals : { reasons : [ 'reason1', 'reason2' ], reset : 0 } });
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+        mode,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, `[ null, 'reason1', 'reason2' ]` );
+        a.fileProvider.fileDelete( testAppPath );
+        return null;
+      } )
+    })
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, initial, set, update, reset reason`;
+
+      let testAppPath = a.program({ routine : testApp, locals : { reasons : [ 'reason1', 'reason2' ], reset : 1 } });
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+        mode,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, `[ null, 'reason1', 'reason2', null ]` );
+        a.fileProvider.fileDelete( testAppPath );
+        return null;
+      } )
+    })
+
+    return ready;
+  }
+
+  /* - */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    let result = [];
+
+    if( !reasons )
+    {
+      console.log( _.process.exitReason() );
+      return;
+    }
+
+    result.push( _.process.exitReason() );
+
+    reasons.forEach( ( reason ) =>
+    {
+      _.process.exitReason( reason );
+      result.push( _.process.exitReason() );
+    })
+
+    if( reset )
+    {
+      _.process.exitReason( null );
+      result.push( _.process.exitReason() );
+    }
+
+    console.log( result );
+
+  }
+
+  /* ORIGINAL */
+  // test.case = 'initial value'
+  // var got = _.process.exitReason();
+  // test.identical( got, null );
+
+  // /* */
+
+  // test.case = 'set reason'
+  // _.process.exitReason( 'reason' );
+  // var got = _.process.exitReason();
+  // test.identical( got, 'reason' );
+
+  // /* */
+
+  // test.case = 'update reason'
+  // _.process.exitReason( 'reason2' );
+  // var got = _.process.exitReason();
+  // test.identical( got, 'reason2' );
+}
 
 //
 
@@ -32867,6 +33137,8 @@ var Proto =
     startOptionCurrentPath,
     startOptionCurrentPaths,
     startOptionPassingThrough,
+    startOptionUid,
+    startOptionGid,
 
     // pid / status / exit
 
@@ -32876,7 +33148,7 @@ var Proto =
     isAlive,
     statusOf,
 
-    // exitReason, /* qqq2 for Yevhen : it should be in subprocess */
+    exitReason, /* qqq2 for Yevhen : it should be in subprocess | aaa : Done. */
     exitCode, /* qqq for Yevhen : check order of test routines. it's messed up */
 
     // termination
