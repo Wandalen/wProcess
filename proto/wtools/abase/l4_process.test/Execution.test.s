@@ -46,6 +46,12 @@ Libuv error for v10:
 Libuv error for v12-15:
 Assertion failed: (handle->type == UV_TCP || handle->type == UV_TTY || handle->type == UV_NAMED_PIPE), function uv___stream_fd, file ../deps/uv/src/unix/stream.c, line 1622.
 /Users/runner/work/_temp/a3028c88-f26a-43fa-8306-d78bcc207e60.sh: line 1:  1459 Abort trap: 6           node proto/wtools/abase/l4_process.test/Execution.test.s r:experimentIpcDeasync v:10
+
+Related links:
+https://github.com/jochemstoel/nodejs-system-sleep/issues/4
+https://github.com/abbr/deasync/issues/55#issuecomment-538129355
+http://docs.libuv.org/en/v1.x/loop.html#c.uv_run 
+uv_run() is not reentrant. It must not be called from a callback.
 */
 
 /*
