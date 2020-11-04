@@ -33,7 +33,6 @@ _.assert( !!_realGlobal_ );
   | sync:1 deasync:0 | -                        | +                  | -           |
 */
 
-
 //
 
 function startMinimalHeadCommon( routine, args )

@@ -25361,27 +25361,19 @@ function startTerminateHangedWithExitHandler( test )
   let a = context.assetFor( test, false );
   let testAppPath = a.program( testApp );
 
-  // if( process.platform === 'win32' )
-  // {
-  /* zzz : windows-kill doesn't work correctrly on node 14
-  investigate if its possible to use process.kill instead of windows-kill
-  */
-  //   test.identical( 1, 1 )
-  //   return;
-  // }
-
   /* */
 
   a.ready
 
   .then( () =>
   {
+    let time = _.time.now();
     let o =
     {
       execPath : 'node ' + testAppPath,
       mode : 'spawn',
       throwingExitCode : 0,
-      outputPiping : 0,
+      outputPiping : 1,
       ipc : 1,
       outputCollecting : 1,
     }
@@ -25398,7 +25390,7 @@ function startTerminateHangedWithExitHandler( test )
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGKILL' );
       test.is( !_.strHas( o.output, 'SIGTERM' ) );
-
+      console.log( `time : ${_.time.spent( time )}` );
       return null;
     })
 
@@ -25431,12 +25423,13 @@ function startTerminateHangedWithExitHandler( test )
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGKILL' );
       test.is( !_.strHas( o.output, 'SIGTERM' ) );
-
       return null;
     })
 
     return con;
   })
+
+  /*  */
 
   return a.ready;
 
@@ -25445,20 +25438,21 @@ function startTerminateHangedWithExitHandler( test )
   function testApp()
   {
     let _ = require( toolsPath );
-
     _.include( 'wProcess' );
     _.process._exitHandlerRepair();
     process.send( process.pid )
+    let x = 0;
     while( 1 )
     {
-      console.log( _.time.now() )
+      x += Math.cos( Math.random() );
+      // console.log( _.time.now() );
     }
   }
 }
 
 startTerminateHangedWithExitHandler.timeOut = 20000;
 
-/* startTerminateHangedWithExitHandler.description =
+startTerminateHangedWithExitHandler.description =
 `
   Test app - code that blocks event loop and appExitHandlerRepair called at start
 
@@ -25470,7 +25464,7 @@ startTerminateHangedWithExitHandler.timeOut = 20000;
     - For SIGINT: Child was terminated with exitCode : 0, exitSignal : null
     - For SIGKILL: Child was terminated with exitCode : null, exitSignal : SIGKILL
     - No time out message in output
-` */
+`
 
 //
 

@@ -309,6 +309,7 @@ function _eventsSetup()
 function _eventExitHandle()
 {
   let args = arguments;
+  console.log( _.introspector.stack() );
   process.removeListener( 'exit', _.process._registeredExitHandler );
   _.process._registeredExitHandler = null;
   _.process.eventGive({ event : 'exit', args });
@@ -320,10 +321,7 @@ function _eventExitHandle()
 function _eventExitBeforeHandle()
 {
   let args = arguments;
-  // process.removeListener( 'beforeExit', _.process._eventExitBeforeHandle );
-  // _.process._eventExitBeforeHandle = null;
   _.process.eventGive({ event : 'exitBefore', args });
-  // _.process._ehandler.events.exitBefore.splice( 0, _.process._ehandler.events.exitBefore.length );
 }
 
 // --
@@ -438,7 +436,7 @@ let Extension =
   isNativeDescriptor,
   isSession,
   pidFrom,
-  
+
   // temp
 
   tempOpen,
