@@ -109,7 +109,7 @@ function tempOpen_body( o )
   _.assert( arguments.length === 1, 'Expects single argument' );
   _.assert( _.strIs( o.sourceCode ) || _.bufferRawIs( o.sourceCode ), 'Expects string or buffer raw {-o.sourceCode-}, but got', _.strType( o.sourceCode ) );
 
-  let tempDirPath = _.path.tempOpen( _.path.current() );
+  let tempDirPath = _.path.tempOpen( _.path.realMainDir(), 'ProcessTempOpen' );
   let filePath = _.path.join( tempDirPath, _.idWithDateAndTime() + '.ss' );
   _tempFiles.push( filePath );
   _.fileProvider.fileWrite( filePath, o.sourceCode );

@@ -1237,6 +1237,11 @@ function startMinimal_body( o )
     o2.windowsHide = !!o.hiding;
     if( o.streamSizeLimit )
     o2.maxBuffer = o.streamSizeLimit;
+    if( process.platform !== 'win32' )
+    {
+      o2.uid = o.uid;
+      o2.gid = o.gid;
+    }
     return o2;
   }
 
@@ -1254,6 +1259,11 @@ function startMinimal_body( o )
     }
     if( o.currentPath )
     o2.cwd = _.path.nativize( o.currentPath );
+    if( process.platform !== 'win32' )
+    {
+      o2.uid = o.uid;
+      o2.gid = o.gid;
+    }
     return o2;
   }
 
