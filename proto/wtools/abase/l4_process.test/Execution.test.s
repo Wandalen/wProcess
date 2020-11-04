@@ -9777,7 +9777,7 @@ function startOptionTimeOut( test )
         execPath : mode === 'fork' ? 'program1.js' : `node program1.js`,
         mode,
         currentPath : a.routinePath,
-        timeOut : context.t1*2,
+        timeOut : context.t1*3,
       }
 
       _.process.start( o );
@@ -9805,7 +9805,7 @@ function startOptionTimeOut( test )
         execPath : mode === 'fork' ? 'program2.js' : `node program2.js`,
         mode,
         currentPath : a.routinePath,
-        timeOut : context.t1*2,
+        timeOut : context.t1*3,
       }
 
       _.process.start( o );
@@ -9850,7 +9850,7 @@ function startOptionTimeOut( test )
         args : 'program1.js',
         mode,
         currentPath : a.routinePath,
-        timeOut : context.t1*2,
+        timeOut : context.t1*3,
         outputPiping : 1,
         outputCollecting : 1
       }
@@ -9890,7 +9890,7 @@ function startOptionTimeOut( test )
         args : 'program2.js',
         mode,
         currentPath : a.routinePath,
-        timeOut : context.t1*2,
+        timeOut : context.t1*3,
         outputPiping : 1,
         outputCollecting : 1
       }
@@ -9937,7 +9937,7 @@ function startOptionTimeOut( test )
     setTimeout( () =>
     {
       console.log( 'program1::end' )
-    }, context.t1*4 )
+    }, context.t1*6 )
   }
 
   /* */
@@ -9948,7 +9948,7 @@ function startOptionTimeOut( test )
     setTimeout( () =>
     {
       console.log( 'program2::end' )
-    }, context.t1*8 )
+    }, context.t1*12 )
 
     process.on( 'SIGTERM', () =>
     {
@@ -21925,6 +21925,7 @@ function startOptionStreamSizeLimitThrowing( test )
 
 //
 
+/* qqq for Yevhen : paramtetrizing time delays is not complete! */
 function startSingleOptionDry( test )
 {
   let context = this;
@@ -21958,7 +21959,6 @@ function startSingleOptionDry( test )
       test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, dry : 1, no error`
       let o =
       {
-        /* qqq for Yevhen : ? | aaa : Simplified. */
         execPath : tops.mode === 'fork' ? programPath + ` arg1` : 'node ' + programPath + ` arg1`,
         mode : tops.mode,
         sync : tops.sync,
@@ -21971,7 +21971,7 @@ function startSingleOptionDry( test )
         applyingExitCode : 1,
         timeOut : tops.sync || !tops.deasync ? null : 100,
         ipc : tops.mode === 'shell' ? 0 : 1,
-        when : { delay : 1000 }
+        when : { delay : 2000 },
       }
       let track = [];
       var t1 = _.time.now();
@@ -22021,7 +22021,7 @@ function startSingleOptionDry( test )
       o.ready.tap( ( err, op ) =>
       {
         var t2 = _.time.now();
-        test.ge( t2 - t1, 1000 )
+        test.ge( t2 - t1, 2000 )
         track.push( 'ready' );
         test.identical( o.process, null );
         test.identical( err, undefined );
@@ -22038,6 +22038,8 @@ function startSingleOptionDry( test )
         test.identical( op.ended, true );
         test.identical( op.streamOut, null );
         test.identical( op.streamErr, null );
+
+        /* qqq for Yevhen : bad */
         if( tops.mode === 'fork' )
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
@@ -22085,7 +22087,7 @@ function startSingleOptionDry( test )
         applyingExitCode : 1,
         timeOut : tops.sync || !tops.deasync ? null : 100,
         ipc : tops.mode === 'shell' ? 0 : 1,
-        when : { delay : 1000 }
+        when : { delay : 2000 }
       }
       let track = []; /* qqq for Yevhen : should be on beginning of test case | aaa : Moved. */
       var t1 = _.time.now();
@@ -22135,7 +22137,7 @@ function startSingleOptionDry( test )
       o.ready.tap( ( err, op ) =>
       {
         var t2 = _.time.now();
-        test.ge( t2 - t1, 1000 )
+        test.ge( t2 - t1, 2000 );
         track.push( 'ready' );
         test.identical( o.process, null );
         test.identical( err, undefined );
