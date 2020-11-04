@@ -7215,6 +7215,7 @@ function startDifferentTypesOfPaths( test )
   let execPath = a.program({ routine : testApp });
   let execPathWithSpace = a.program({ routine : testApp, dirPath : 'path with space' });
   execPathWithSpace = a.fileProvider.path.normalize( execPathWithSpace );
+  let execPathWithSpaceNative = a.fileProvider.path.nativize( execPathWithSpace );
   let nodeWithSpace = a.abs( 'path with space', _.path.name({ path : process.argv[ 0 ], full : 1 }) );
   a.fileProvider.softLink( nodeWithSpace, process.argv[ 0 ] );
 
@@ -7435,7 +7436,7 @@ function startDifferentTypesOfPaths( test )
     test.case = 'mode : spawn, path to node with space, path to program with space'
     let o =
     {
-      execPath : _.strQuote( nodeWithSpace ) + ' ' + _.strQuote( execPathWithSpace ),
+      execPath : _.strQuote( nodeWithSpace ) + ' ' + _.strQuote( execPathWithSpaceNative ),
       mode : 'spawn',
       stdio : 'pipe',
       outputCollecting : 1,
@@ -7466,7 +7467,7 @@ function startDifferentTypesOfPaths( test )
     let o =
     {
       execPath : _.strQuote( nodeWithSpace ),
-      args : [ execPathWithSpace ],
+      args : [ execPathWithSpaceNative ],
       mode : 'spawn',
       stdio : 'pipe',
       outputCollecting : 1,
@@ -7558,7 +7559,7 @@ function startDifferentTypesOfPaths( test )
     let o =
     {
       execPath : _.strQuote( nodeWithSpace ),
-      args : [ execPathWithSpace ],
+      args : [ execPathWithSpaceNative ],
       mode : 'shell',
       stdio : 'pipe',
       outputCollecting : 1,
@@ -7588,7 +7589,7 @@ function startDifferentTypesOfPaths( test )
     test.case = 'mode : shell, path to node with space, program path with space'
     let o =
     {
-      execPath : _.strQuote( nodeWithSpace ) + ' ' + _.strQuote( execPathWithSpace ),
+      execPath : _.strQuote( nodeWithSpace ) + ' ' + _.strQuote( execPathWithSpaceNative ),
       mode : 'shell',
       stdio : 'pipe',
       outputCollecting : 1,
