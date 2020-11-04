@@ -627,14 +627,13 @@ function startBasic2( test ) /* qqq for Evhen : merge with test routine startBas
 
   a.ready.then( function()
   {
-    test.case = 'mode : spawn, passingThrough : true, incorrect usage of o.path in spawn mode';
+    test.case = 'mode : spawn, incorrect usage of o.path in spawn mode';
 
     o2 =
     {
       execPath :  'node ' + testApp,
       args : [ 'staging' ],
       mode : 'spawn',
-      passingThrough : 1,
       stdio : 'pipe'
     }
     return null;
@@ -21484,7 +21483,6 @@ function startSingleOptionDry( test )
   let context = this;
   let a = context.assetFor( test, false );
   let programPath = a.program( testApp );
-  let track = [];
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run({ mode, sync : 0, deasync : 0 }) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run({ mode, sync : 0, deasync : 1 }) ) );
@@ -21501,7 +21499,7 @@ function startSingleOptionDry( test )
     {
       _.process.start
       ({
-        execPath : programPath + ` arg1 "arg 2" "'arg3'"`,
+        execPath : programPath + ` arg1`,
         mode : tops.mode,
         sync : tops.sync,
         deasync : tops.deasync
@@ -21513,8 +21511,8 @@ function startSingleOptionDry( test )
       test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, dry : 1, no error`
       let o =
       {
-        /* qqq for Yevhen : ? */
-        execPath : tops.mode === 'fork' ? programPath + ` arg1 "arg 2" "'arg3'"` : 'node ' + programPath + ` arg1 "arg 2" "'arg3'"`,
+        /* qqq for Yevhen : ? | aaa : Simplified. */
+        execPath : tops.mode === 'fork' ? programPath + ` arg1` : 'node ' + programPath + ` arg1`,
         mode : tops.mode,
         sync : tops.sync,
         deasync : tops.deasync,
@@ -21528,6 +21526,7 @@ function startSingleOptionDry( test )
         ipc : tops.mode === 'shell' ? 0 : 1,
         when : { delay : 1000 }
       }
+      let track = [];
       var t1 = _.time.now();
       var returned = _.process.start( o );
 
@@ -21595,20 +21594,17 @@ function startSingleOptionDry( test )
         if( tops.mode === 'fork' )
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
-          test.identical( op.fullExecPath, `${programPath} arg1 arg 2 'arg3' arg0` );
+          test.identical( op.fullExecPath, `${programPath} arg1 arg0` );
         }
         else if ( tops.mode === 'shell' )
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe' ] );
-          if( process.platform === 'win32' )
-          test.identical( op.fullExecPath, `node ${programPath} arg1 "arg 2" "'arg3'" "arg0"` );
-          else
-          test.identical( op.fullExecPath, `node ${programPath} arg1 "arg 2" "'arg3'" "arg0"` );
+          test.identical( op.fullExecPath, `node ${programPath} arg1 "arg0"` );
         }
         else
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
-          test.identical( op.fullExecPath, `node ${programPath} arg1 arg 2 'arg3' arg0` );
+          test.identical( op.fullExecPath, `node ${programPath} arg1 arg0` );
         }
 
         test.is( !a.fileProvider.fileExists( a.path.join( a.routinePath, 'file' ) ) )
@@ -21616,7 +21612,6 @@ function startSingleOptionDry( test )
         test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate', 'ready' ] );
         else
         test.identical( track, [ 'conStart', 'conTerminate', 'conDisconnect', 'ready' ] );
-        track = [];
         return null;
       })
 
@@ -21631,7 +21626,7 @@ function startSingleOptionDry( test )
       test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, dry : 1, execPath : 'err' + programPath + \` arg1 "arg 2" "'arg3'"\``
       let o =
       {
-        execPath : 'err ' + programPath + ` arg1 "arg 2" "'arg3'"`,
+        execPath : 'err ' + programPath + ` arg1`,
         mode : tops.mode,
         sync : tops.sync,
         deasync : tops.deasync,
@@ -21645,6 +21640,7 @@ function startSingleOptionDry( test )
         ipc : tops.mode === 'shell' ? 0 : 1,
         when : { delay : 1000 }
       }
+      let track = []; /* qqq for Yevhen : should be on beginning of test case | aaa : Moved. */
       var t1 = _.time.now();
       var returned = _.process.start( o );
 
@@ -21712,15 +21708,12 @@ function startSingleOptionDry( test )
         if ( tops.mode === 'shell' )
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe' ] );
-          if( process.platform === 'win32' )
-          test.identical( op.fullExecPath, `err ${programPath} arg1 "arg 2" "'arg3'" "arg0"` );
-          else
-          test.identical( op.fullExecPath, `err ${programPath} arg1 "arg 2" "'arg3'" "arg0"` );
+          test.identical( op.fullExecPath, `err ${programPath} arg1 "arg0"` );
         }
         else
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
-          test.identical( op.fullExecPath, `err ${programPath} arg1 arg 2 'arg3' arg0` );
+          test.identical( op.fullExecPath, `err ${programPath} arg1 arg0` );
         }
 
         test.is( !a.fileProvider.fileExists( a.path.join( a.routinePath, 'file' ) ) )
@@ -21728,7 +21721,6 @@ function startSingleOptionDry( test )
         test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate', 'ready' ] );
         else
         test.identical( track, [ 'conStart', 'conTerminate', 'conDisconnect', 'ready' ] );
-        track = []; /* qqq for Yevhen : should be on beginning of test case */
         return null;
       })
 
@@ -21782,7 +21774,7 @@ function startOptionDryMultiple( test )
     {
       _.process.start
       ({
-        execPath : [ programPath + ` arg1 "arg 2" "'arg3'"`, programPath + ` arg1 "arg 2" "'arg3'"` ],
+        execPath : [ programPath + ` id:1`, programPath + ` id:2` ],
         mode : tops.mode,
         sync : tops.sync,
         deasync : tops.deasync
@@ -22784,6 +22776,122 @@ function startOptionPassingThrough( test )
 startOptionPassingThrough.timeOut = 5e5;
 startOptionPassingThrough.rapidity = -1;
 
+//
+
+function startOptionUid( test ) /* Runs only through `sudo` ( i.e. with superuser/root provileges ) */
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let programPath = a.program( program1 );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+
+  return a.ready;
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }`;
+
+      let options =
+      {
+        execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+        throwingExitCode : 0,
+        outputCollecting : 1,
+        mode,
+        uid : 11
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, '11\n' );
+
+        return null;
+      } )
+
+
+    } )
+
+    return ready;
+  }
+
+  /* - */
+
+  function program1()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wFiles' );
+    _.include( 'wProcess' );
+
+    console.log( process.getuid() );
+  }
+}
+
+startOptionUid.experimental = true;
+
+//
+
+function startOptionGid( test ) /* Runs only through `sudo` ( i.e. with superuser/root provileges ) */
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let programPath = a.program( program1 );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+
+  return a.ready;
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }`;
+
+      let options =
+      {
+        execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+        throwingExitCode : 0,
+        outputCollecting : 1,
+        mode,
+        gid : 15
+      }
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, '15\n' );
+
+        return null;
+      } )
+
+    } )
+
+    return ready;
+  }
+
+  /* - */
+
+  function program1()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wFiles' );
+    _.include( 'wProcess' );
+
+    console.log( process.getgid() );
+  }
+}
+
+startOptionGid.experimental = true;
+
 // --
 // pid
 // --
@@ -23063,26 +23171,174 @@ function statusOf( test )
 
 //
 
-// function exitReason( test )
-// {
-//   test.case = 'initial value'
-//   var got = _.process.exitReason();
-//   test.identical( got, null );
-//
-//   /* */
-//
-//   test.case = 'set reason'
-//   _.process.exitReason( 'reason' );
-//   var got = _.process.exitReason();
-//   test.identical( got, 'reason' );
-//
-//   /* */
-//
-//   test.case = 'update reason'
-//   _.process.exitReason( 'reason2' );
-//   var got = _.process.exitReason();
-//   test.identical( got, 'reason2' );
-// }
+function exitReason( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
+
+  /* */
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, initial value`;
+
+      let testAppPath = a.program({ routine : testApp, locals : { reasons : null, reset : 0 } });
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+        mode,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, 'null' );
+        a.fileProvider.fileDelete( testAppPath )
+        return null;
+      } )
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, reason : 'reason'`;
+
+      let testAppPath = a.program({ routine : testApp, locals : { reasons : [ 'reason' ], reset : 0 } });
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+        mode,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, `[ null, 'reason' ]` );
+        a.fileProvider.fileDelete( testAppPath )
+        return null;
+      } )
+    })
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, initial, set, update reason`;
+
+      let testAppPath = a.program({ routine : testApp, locals : { reasons : [ 'reason1', 'reason2' ], reset : 0 } });
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+        mode,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, `[ null, 'reason1', 'reason2' ]` );
+        a.fileProvider.fileDelete( testAppPath );
+        return null;
+      } )
+    })
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, initial, set, update, reset reason`;
+
+      let testAppPath = a.program({ routine : testApp, locals : { reasons : [ 'reason1', 'reason2' ], reset : 1 } });
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+        mode,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, `[ null, 'reason1', 'reason2', null ]` );
+        a.fileProvider.fileDelete( testAppPath );
+        return null;
+      } )
+    })
+
+    return ready;
+  }
+
+  /* - */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    let result = [];
+
+    if( !reasons )
+    {
+      console.log( _.process.exitReason() );
+      return;
+    }
+
+    result.push( _.process.exitReason() );
+
+    reasons.forEach( ( reason ) =>
+    {
+      _.process.exitReason( reason );
+      result.push( _.process.exitReason() );
+    })
+
+    if( reset )
+    {
+      _.process.exitReason( null );
+      result.push( _.process.exitReason() );
+    }
+
+    console.log( result );
+
+  }
+
+  /* ORIGINAL */
+  // test.case = 'initial value'
+  // var got = _.process.exitReason();
+  // test.identical( got, null );
+
+  // /* */
+
+  // test.case = 'set reason'
+  // _.process.exitReason( 'reason' );
+  // var got = _.process.exitReason();
+  // test.identical( got, 'reason' );
+
+  // /* */
+
+  // test.case = 'update reason'
+  // _.process.exitReason( 'reason2' );
+  // var got = _.process.exitReason();
+  // test.identical( got, 'reason2' );
+}
 
 //
 
@@ -32880,6 +33136,8 @@ var Proto =
     startOptionCurrentPath,
     startOptionCurrentPaths,
     startOptionPassingThrough,
+    startOptionUid,
+    startOptionGid,
 
     // pid / status / exit
 
@@ -32889,7 +33147,7 @@ var Proto =
     isAlive,
     statusOf,
 
-    // exitReason, /* qqq2 for Yevhen : it should be in subprocess */
+    exitReason, /* qqq2 for Yevhen : it should be in subprocess | aaa : Done. */
     exitCode, /* qqq for Yevhen : check order of test routines. it's messed up */
 
     // termination
@@ -32909,19 +33167,19 @@ var Proto =
     terminate, /* qqq for Vova: review, remove duplicates, check timeouts */
     terminateSync,
 
-    terminateFirstChildSpawn,
+    terminateFirstChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine */
     terminateFirstChildFork,
     terminateFirstChildShell,
 
-    terminateSecondChildSpawn,
+    terminateSecondChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine */
     terminateSecondChildFork,
     terminateSecondChildShell,
 
-    terminateDetachedFirstChildSpawn,
+    terminateDetachedFirstChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine */
     terminateDetachedFirstChildFork,
     terminateDetachedFirstChildShell,
 
-    terminateWithDetachedChildSpawn,
+    terminateWithDetachedChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine */
     terminateWithDetachedChildFork,
     terminateWithDetachedChildShell,
 
