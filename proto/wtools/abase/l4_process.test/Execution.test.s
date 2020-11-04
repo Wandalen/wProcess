@@ -25367,7 +25367,7 @@ function startTerminateHangedWithExitHandler( test )
 
   .then( () =>
   {
-    let time = _.time.now();
+    let time;
     let o =
     {
       execPath : 'node ' + testAppPath,
@@ -25382,7 +25382,8 @@ function startTerminateHangedWithExitHandler( test )
 
     o.process.on( 'message', () =>
     {
-      _.process.terminate({ pnd : o.process, timeOut : 5000 });
+      time = _.time.now();
+      _.process.terminate({ pnd : o.process, timeOut : context.t1*5 });
     })
 
     con.then( () =>
@@ -25390,6 +25391,7 @@ function startTerminateHangedWithExitHandler( test )
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGKILL' );
       test.is( !_.strHas( o.output, 'SIGTERM' ) );
+      test.ge( _.time.now() - time, context.t1*5 );
       console.log( `time : ${_.time.spent( time )}` );
       return null;
     })
@@ -25401,6 +25403,7 @@ function startTerminateHangedWithExitHandler( test )
 
   .then( () =>
   {
+    let time;
     let o =
     {
       execPath : testAppPath,
@@ -25415,7 +25418,8 @@ function startTerminateHangedWithExitHandler( test )
 
     o.process.on( 'message', () =>
     {
-      _.process.terminate({ pnd : o.process, timeOut : 5000 });
+      time = _.time.now();
+      _.process.terminate({ pnd : o.process, timeOut : context.t1*5 });
     })
 
     con.then( () =>
@@ -25423,6 +25427,8 @@ function startTerminateHangedWithExitHandler( test )
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGKILL' );
       test.is( !_.strHas( o.output, 'SIGTERM' ) );
+      test.ge( _.time.now() - time, context.t1*5 );
+      console.log( `time : ${_.time.spent( time )}` );
       return null;
     })
 
