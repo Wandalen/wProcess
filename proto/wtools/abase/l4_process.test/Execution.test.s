@@ -21,7 +21,7 @@ let _global = _global_;
 let _ = _global_.wTools;
 let Self = {};
 
-/* 
+/*
 experimentIpcDeasync:
 
 | Node |     Windows     |  Linux   |     Mac     |
@@ -36,7 +36,7 @@ Windows - execution hangs and test routine ends with timeout
 Linux - test finishes without any errors
 Mac - tests ends with libuv error on first or next attempt
 
-Windows:  
+Windows:
 > node -e process.send(1);setTimeout(()=>{},500)
 Failed ( test routine time limit ) TestSuite::Tools.l4.porocess.Execution / TestRoutine::experimentIpcDeasync in 60.527s
 
@@ -50,29 +50,22 @@ Assertion failed: (handle->type == UV_TCP || handle->type == UV_TTY || handle->t
 Related links:
 https://github.com/jochemstoel/nodejs-system-sleep/issues/4
 https://github.com/abbr/deasync/issues/55#issuecomment-538129355
-http://docs.libuv.org/en/v1.x/loop.html#c.uv_run 
+http://docs.libuv.org/en/v1.x/loop.html#c.uv_run
 uv_run() is not reentrant. It must not be called from a callback.
 */
 
-/*
+/* to run iteratively
 
 reset && RET=0
 until [ ${RET} -ne 0 ]; do
-    node wtools/abase/l4.test/Execution.test.s n:1 v:5 s:0 r:terminateDetachedComplex
+    node wtools/abase/l4_process.test/Execution.test.s n:1 v:5 s:0 r:terminateSeveralChildren
     RET=$?
     sleep 1
 done
 
 reset && RET=0
 until [ ${RET} -ne 0 ]; do
-    node wtools/abase/l4.test/Execution.test.s n:1 v:5 s:0 r:terminateWithChildren
-    RET=$?
-    sleep 1
-done
-
-reset && RET=0
-until [ ${RET} -ne 0 ]; do
-    node wtools/abase/l4.test/Execution.test.s n:1 v:5 s:0 r:endSignalsBasic
+    node wtools/abase/l4_process.test/Execution.test.s n:1 v:5 s:0 r:endSignalsBasic
     RET=$?
     sleep 1
 done
@@ -25285,7 +25278,7 @@ function startErrorAfterTerminationWithSend( test )
 
  = Beautified calls stack
     at ChildProcess.target.send (internal/child_process.js:705:16)
-    at wConsequence.<anonymous> (/Users/runner/work/wProcess/wProcess/proto/wtools/abase/l4.test/Execution.test.s:24677:17) *
+    at wConsequence.<anonymous> (/Users/runner/work/wProcess/wProcess/proto/wtools/abase/l4_process.test/Execution.test.s:24677:17) *
     at wConsequence.take (/Users/runner/work/wProcess/wProcess/node_modules/wConsequence/proto/wtools/abase/l9/consequence/Consequence.s:2669:8)
     at end3 (/Users/runner/work/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:783:20)
     at end2 (/Users/runner/work/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:734:12)
@@ -28590,7 +28583,7 @@ function terminate( test )
   }
 }
 
-terminate.description = 
+terminate.description =
 `
 Checks termination of the child process spawned with different modes.
 - Terminates process using descriptor( pnd )
@@ -30461,7 +30454,7 @@ SIGTERM
         - difference :
           *
 
-        /wtools/abase/l4.test/Execution.test.s:29900:12
+        /wtools/abase/l4_process.test/Execution.test.s:29900:12
           29896 :       test.identical( o.exitSignal, null );
           29897 :     }
           29898 :     else
@@ -30476,7 +30469,7 @@ SIGTERM
         - difference :
           *
 
-        /wtools/abase/l4.test/Execution.test.s:29901:12
+        /wtools/abase/l4_process.test/Execution.test.s:29901:12
           29897 :     }
           29898 :     else
           29899 :     {
@@ -30804,7 +30797,7 @@ function terminateSeveralChildren( test )
     return _.process.terminate
     ({
       pid : o.process.pid,
-      timeOut : context.t1 * 5,
+      timeOut : context.t1 * 8,
       withChildren : 1
     })
   })
@@ -30836,6 +30829,87 @@ function terminateSeveralChildren( test )
   })
 
   return _.Consequence.AndKeep( terminate, o.conTerminate );
+
+/*
+
+       - got :
+          255
+        - expected :
+          null
+        - difference :
+          *
+
+        /pro/builder/proto/wtools/abase/l4_process.test/Execution.test.s:30821:12
+          30817 :       test.identical( o.exitSignal, null );
+          30818 :     }
+          30819 :     else
+          30820 :     {
+        * 30821 :       test.identical( o.exitCode, null );
+
+        Test check ( TestSuite::Tools.l4.porocess.Execution / TestRoutine::terminateSeveralChildren /  # 1 ) ... failed
+        - got :
+          null
+        - expected :
+          'SIGTERM'
+        - difference :
+          *
+
+        /pro/builder/proto/wtools/abase/l4_process.test/Execution.test.s:30822:12
+          30818 :     }
+          30819 :     else
+          30820 :     {
+          30821 :       test.identical( o.exitCode, null );
+        * 30822 :       test.identical( o.exitSignal, 'SIGTERM' );
+
+        Test check ( TestSuite::Tools.l4.porocess.Execution / TestRoutine::terminateSeveralChildren /  # 2 ) ... failed
+        - got :
+          2
+        - expected :
+          1
+        - difference :
+          *
+
+        /pro/builder/proto/wtools/abase/l4_process.test/Execution.test.s:30825:10
+          30821 :       test.identical( o.exitCode, null );
+          30822 :       test.identical( o.exitSignal, 'SIGTERM' );
+          30823 :     }
+          30824 :
+        * 30825 :     test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
+
+        Test check ( TestSuite::Tools.l4.porocess.Execution / TestRoutine::terminateSeveralChildren /  # 3 ) ... failed
+        - got :
+          1
+        - expected :
+          0
+        - difference :
+          *
+
+        /pro/builder/proto/wtools/abase/l4_process.test/Execution.test.s:30828:10
+          30824 :
+          30825 :     test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
+          30826 :     test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
+          30827 :     test.identical( _.strCount( o.output, 'program3::begin' ), 1 );
+        * 30828 :     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
+
+        Test check ( TestSuite::Tools.l4.porocess.Execution / TestRoutine::terminateSeveralChildren /  # 6 ) ... failed
+        - got :
+          1
+        - expected :
+          0
+        - difference :
+          *
+
+        /pro/builder/proto/wtools/abase/l4_process.test/Execution.test.s:30829:10
+          30825 :     test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
+          30826 :     test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
+          30827 :     test.identical( _.strCount( o.output, 'program3::begin' ), 1 );
+          30828 :     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
+        * 30829 :     test.identical( _.strCount( o.output, 'program3::end' ), 0 );
+
+        Test check ( TestSuite::Tools.l4.porocess.Execution / TestRoutine::terminateSeveralChildren /  # 7 ) ... failed
+      Failed ( test routine time limit ) TestSuite::Tools.l4.porocess.Execution / TestRoutine::terminateSeveralChildren in 60.555s
+
+*/
 
   /* - */
 
@@ -30874,7 +30948,7 @@ function terminateSeveralChildren( test )
     _.process.start( _.mapExtend( null, o, { execPath : 'node program2.js' }));
     _.process.start( _.mapExtend( null, o, { execPath : 'node program3.js' }));
 
-    let timer = _.time.outError( context.t1*25 );
+    let timer = _.time.outError( context.t1*32 );
 
     console.log( 'program1::begin' );
   }
@@ -30903,7 +30977,7 @@ function terminateSeveralChildren( test )
         filePath : _.path.join( __dirname, 'program2end' ),
         data : 'end'
       })
-    }, context.t1*10 )
+    }, context.t1*16 )
 
     console.log( 'program2::begin' );
 
@@ -30933,7 +31007,7 @@ function terminateSeveralChildren( test )
         filePath : _.path.join( __dirname, 'program3end' ),
         data : 'end'
       })
-    }, context.t1*10 )
+    }, context.t1*16 )
 
     console.log( 'program3::begin' );
 
@@ -31777,14 +31851,14 @@ function terminateDifferentStdio( test )
     }
 
     _.process.start( o )
-    
+
     let ready = _.Consequence();
-    
-    o.process.on( 'message', () => 
+
+    o.process.on( 'message', () =>
     {
       ready.take( _.process.terminate( o.process.pid ) )
     })
-    
+
     o.conTerminate.then( ( op ) =>
     {
       if( process.platform === 'win32' )
@@ -31825,8 +31899,8 @@ function terminateDifferentStdio( test )
     _.process.start( o )
 
     let ready = _.Consequence();
-    
-    o.process.on( 'message', () => 
+
+    o.process.on( 'message', () =>
     {
       ready.take( _.process.terminate( o.process.pid ) )
     })
@@ -31869,8 +31943,8 @@ function terminateDifferentStdio( test )
     _.process.start( o )
 
     let ready = _.Consequence();
-    
-    o.process.on( 'message', () => 
+
+    o.process.on( 'message', () =>
     {
       ready.take( _.process.terminate( o.process.pid ) )
     })
@@ -31913,8 +31987,8 @@ function terminateDifferentStdio( test )
     _.process.start( o )
 
     let ready = _.Consequence();
-    
-    o.process.on( 'message', () => 
+
+    o.process.on( 'message', () =>
     {
       ready.take( _.process.terminate( o.process.pid ) )
     })
@@ -31959,8 +32033,8 @@ function terminateDifferentStdio( test )
     _.process.start( o )
 
     let ready = _.Consequence();
-    
-    o.process.on( 'message', () => 
+
+    o.process.on( 'message', () =>
     {
       ready.take( _.process.terminate( o.process.pid ) )
     })
@@ -32005,8 +32079,8 @@ function terminateDifferentStdio( test )
     _.process.start( o )
 
     let ready = _.Consequence();
-    
-    o.process.on( 'message', () => 
+
+    o.process.on( 'message', () =>
     {
       ready.take( _.process.terminate( o.process.pid ) )
     })
