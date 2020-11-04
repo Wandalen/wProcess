@@ -309,7 +309,6 @@ function _eventsSetup()
 function _eventExitHandle()
 {
   let args = arguments;
-  console.log( _.introspector.stack() );
   process.removeListener( 'exit', _.process._registeredExitHandler );
   _.process._registeredExitHandler = null;
   _.process.eventGive({ event : 'exit', args });
