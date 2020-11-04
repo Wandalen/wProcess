@@ -25355,11 +25355,16 @@ startErrorAfterTerminationWithSend.description =
 
 //
 
+/* qqq for Yevhen : subroutine */
 function startTerminateHangedWithExitHandler( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
   let testAppPath = a.program( testApp );
+
+  /* signal handler of njs on Windows is defective */
+  if( process.platform === 'win32' )
+  return test.is( true );
 
   /* */
 
@@ -25399,7 +25404,7 @@ function startTerminateHangedWithExitHandler( test )
     return con;
   })
 
-  /*  */
+  /* */
 
   .then( () =>
   {
@@ -25409,7 +25414,7 @@ function startTerminateHangedWithExitHandler( test )
       execPath : testAppPath,
       mode : 'fork',
       throwingExitCode : 0,
-      outputPiping : 0,
+      outputPiping : 1,
       ipc : 1,
       outputCollecting : 1,
     }
