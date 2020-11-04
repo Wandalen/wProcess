@@ -23055,26 +23055,174 @@ function statusOf( test )
 
 //
 
-// function exitReason( test )
-// {
-//   test.case = 'initial value'
-//   var got = _.process.exitReason();
-//   test.identical( got, null );
-//
-//   /* */
-//
-//   test.case = 'set reason'
-//   _.process.exitReason( 'reason' );
-//   var got = _.process.exitReason();
-//   test.identical( got, 'reason' );
-//
-//   /* */
-//
-//   test.case = 'update reason'
-//   _.process.exitReason( 'reason2' );
-//   var got = _.process.exitReason();
-//   test.identical( got, 'reason2' );
-// }
+function exitReason( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
+
+  /* */
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, initial value`;
+
+      let testAppPath = a.program({ routine : testApp, locals : { reasons : null, reset : 0 } });
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+        mode,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, 'null' );
+        a.fileProvider.fileDelete( testAppPath )
+        return null;
+      } )
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, reason : 'reason'`;
+
+      let testAppPath = a.program({ routine : testApp, locals : { reasons : [ 'reason' ], reset : 0 } });
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+        mode,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, `[ null, 'reason' ]` );
+        a.fileProvider.fileDelete( testAppPath )
+        return null;
+      } )
+    })
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, initial, set, update reason`;
+
+      let testAppPath = a.program({ routine : testApp, locals : { reasons : [ 'reason1', 'reason2' ], reset : 0 } });
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+        mode,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, `[ null, 'reason1', 'reason2' ]` );
+        a.fileProvider.fileDelete( testAppPath );
+        return null;
+      } )
+    })
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, initial, set, update, reset reason`;
+
+      let testAppPath = a.program({ routine : testApp, locals : { reasons : [ 'reason1', 'reason2' ], reset : 1 } });
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+        mode,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, `[ null, 'reason1', 'reason2', null ]` );
+        a.fileProvider.fileDelete( testAppPath );
+        return null;
+      } )
+    })
+
+    return ready;
+  }
+
+  /* - */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    let result = [];
+
+    if( !reasons )
+    {
+      console.log( _.process.exitReason() );
+      return;
+    }
+
+    result.push( _.process.exitReason() );
+
+    reasons.forEach( ( reason ) =>
+    {
+      _.process.exitReason( reason );
+      result.push( _.process.exitReason() );
+    })
+
+    if( reset )
+    {
+      _.process.exitReason( null );
+      result.push( _.process.exitReason() );
+    }
+
+    console.log( result );
+
+  }
+
+  /* ORIGINAL */
+  // test.case = 'initial value'
+  // var got = _.process.exitReason();
+  // test.identical( got, null );
+
+  // /* */
+
+  // test.case = 'set reason'
+  // _.process.exitReason( 'reason' );
+  // var got = _.process.exitReason();
+  // test.identical( got, 'reason' );
+
+  // /* */
+
+  // test.case = 'update reason'
+  // _.process.exitReason( 'reason2' );
+  // var got = _.process.exitReason();
+  // test.identical( got, 'reason2' );
+}
 
 //
 
@@ -32881,7 +33029,7 @@ var Proto =
     isAlive,
     statusOf,
 
-    // exitReason, /* qqq2 for Yevhen : it should be in subprocess */
+    exitReason, /* qqq2 for Yevhen : it should be in subprocess | aaa : Done. */
     exitCode, /* qqq for Yevhen : check order of test routines. it's messed up */
 
     // termination
