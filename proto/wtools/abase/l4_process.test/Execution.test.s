@@ -15946,6 +15946,65 @@ function startNjsWithReadyDelayStructural( test )
         exp2.fullExecPath = ( tops.mode === 'fork' ? '' : 'node ' ) + programPath;
         exp2.state = 'terminated';
         exp2.ended = true;
+
+        /* NEW CODE */
+        // returned.then( ( op ) =>
+        // {
+        //   test.identical( op.ended, true );
+
+        //   let exp2 = _.mapExtend( null, exp );
+        //   exp2.process = options.process;
+        //   exp2.procedure = options.procedure;
+        //   exp2.streamOut = options.streamOut;
+        //   exp2.streamErr = options.streamErr;
+        //   exp2.execPath = tops.mode === 'fork' ? programPath : 'node';
+        //   exp2.args = tops.mode === 'fork' ? [] : [ programPath ];
+        //   exp2.fullExecPath = ( tops.mode === 'fork' ? '' : 'node ' ) + programPath;
+        //   exp2.state = 'terminated';
+        //   exp2.ended = true;
+
+        //   if( tops.dry )
+        //   {
+        //     test.identical( op.output, '' );
+        //     test.identical( op.exitCode, null );
+        //     test.identical( op.exitSignal, null );
+        //     test.identical( op.exitReason, null );
+        //   }
+        //   else
+        //   {
+        //     /* exception in njs on Windows :
+        //       no output from detached process in mode::shell
+        //     */
+        //     if( tops.mode !== 'shell' || process.platform !== 'win32' || !tops.detaching )
+        //     test.identical( op.output, 'program1:begin\n' );
+        //     test.identical( op.exitCode, 0 );
+        //     test.identical( op.exitSignal, null );
+        //     test.identical( op.exitReason, 'normal' );
+        //     /* exception in njs on Windows :
+        //       no output from detached process in mode::shell
+        //     */
+        //     if( tops.mode !== 'shell' || process.platform !== 'win32' || !tops.detaching )
+        //     exp2.output = 'program1:begin\n';
+        //     exp2.exitCode = 0;
+        //     exp2.exitSignal = null;
+        //     exp2.exitReason = 'normal';
+        //   }
+
+        //   test.identical( options, exp2 );
+        //   test.identical( !!options.process, !tops.dry );
+        //   test.is( _.routineIs( options.disconnect ) );
+        //   test.identical( _.streamIs( options.streamOut ), !tops.dry );
+        //   test.identical( _.streamIs( options.streamErr ), !tops.dry );
+        //   test.identical( options.streamOut !== options.streamErr, !tops.dry );
+        //   test.is( options.conTerminate !== options.ready );
+        //   test.identical( options.ready.exportString(), 'Consequence:: 0 / 1' );
+        //   test.identical( options.conTerminate.exportString(), 'Consequence:: 1 / 0' );
+        //   test.identical( options.conDisconnect.exportString(), 'Consequence:: 1 / 0' );
+        //   test.identical( options.conStart.exportString(), 'Consequence:: 1 / 0' );
+
+        //   return null;
+        // });
+
         if( !tops.dry )
         {
           exp2.output = 'program1:begin\n';
@@ -16829,6 +16888,48 @@ function startNjsWithReadyDelayStructuralMultiple( test )
           test.identical( options.conStart.exportString(), 'Consequence:: 1 / 0' );
           test.identical( options.ready.exportString(), 'Consequence:: 0 / 1' );
         }
+
+        /* NEW CODE */
+        // returned.then( ( op ) =>
+        // {
+        //   let exp2 = _.mapExtend( null, exp );
+        //   exp2.runs = options.runs;
+        //   exp2.state = 'terminated';
+        //   exp2.ended = true;
+
+        //   /* exception in njs on Windows :
+        //     no output from detached process in mode::shell
+        //   */
+        //   if( mode !== 'shell' || process.platform !== 'win32' || !detaching )
+        //   test.identical( op.output, 'program1:begin\nprogram1:begin\n' );
+        //   test.identical( op.exitCode, 0 );
+        //   test.identical( op.ended, true );
+        //   test.identical( op.exitSignal, null );
+        //   test.identical( op.exitReason, 'normal' );
+        //   /* exception in njs on Windows :
+        //     no output from detached process in mode::shell
+        //   */
+        //   if( mode !== 'shell' || process.platform !== 'win32' || !detaching )
+        //   exp2.output = 'program1:begin\nprogram1:begin\n';
+        //   exp2.exitCode = 0;
+        //   exp2.exitSignal = null;
+        //   exp2.exitReason = 'normal';
+
+        //   test.identical( options, exp2 );
+        //   test.is( !options.process );
+        //   test.is( _.streamIs( options.streamOut ) );
+        //   test.is( _.streamIs( options.streamErr ) );
+        //   test.is( options.streamOut !== options.streamErr );
+        //   test.is( ! options.disconnect );
+        //   test.is( options.conTerminate !== options.ready );
+        //   test.is( _.arrayIs( options.runs ) );
+        //   test.identical( options.ready.exportString(), 'Consequence:: 0 / 1' );
+        //   test.identical( options.conTerminate.exportString(), 'Consequence:: 1 / 0' );
+        //   test.identical( options.conDisconnect, null );
+        //   test.identical( options.conStart.exportString(), 'Consequence:: 1 / 0' );
+
+        //   return null;
+        // });
 
         return null;
       });
@@ -31700,9 +31801,11 @@ function terminateSeveralChildren( test )
 
   /* - */
 
+  /* qqq for Vova : bad */
   function handleOutput( output )
   {
     output = output.toString();
+    console.log( output );
     if( _.strHas( output, 'program2::begin' ) || _.strHas( output, 'program3::begin' ) )
     c += 1;
 
@@ -31875,8 +31978,10 @@ function terminateWithSeveralDetachedChildren( test )
 
   /* - */
 
+  /* qqq for Vova : bad */
   function handleOutput( output )
   {
+    console.log( output );
     output = output.toString();
     if( _.strHas( output, 'program2::begin' ) || _.strHas( output, 'program3::begin' ) )
     c += 1;
