@@ -26483,9 +26483,9 @@ sleep:begin
         else
         {
           test.identical( options.exitCode, null );
-          test.identical( options.exitSignal, 'SIGTERM' );
+          test.identical( options.exitSignal, 'SIGKILL' );
           test.identical( options.exitReason, 'signal' );
-          test.identical( options.process.signalCode, 'SIGTERM' );
+          test.identical( options.process.signalCode, 'SIGKILL' );
           test.identical( options.process.exitCode, null );
         }
 
@@ -26970,9 +26970,9 @@ deasync:begin
         else
         {
           test.identical( options.exitCode, null );
-          test.identical( options.exitSignal, 'SIGTERM' );
+          test.identical( options.exitSignal, 'SIGKILL' );
           test.identical( options.exitReason, 'signal' );
-          test.identical( options.process.signalCode, 'SIGTERM' );
+          test.identical( options.process.signalCode, 'SIGKILL' );
           test.identical( options.process.exitCode, null );
         }
 
@@ -27036,9 +27036,9 @@ program1:end
         else
         {
           test.identical( options.exitCode, null );
-          test.identical( options.exitSignal, 'SIGTERM' );
+          test.identical( options.exitSignal, 'SIGKILL' );
           test.identical( options.exitReason, 'signal' );
-          test.identical( options.process.signalCode, 'SIGTERM' );
+          test.identical( options.process.signalCode, 'SIGKILL' );
           test.identical( options.process.exitCode, null );
         }
 
@@ -27105,9 +27105,9 @@ program1:end
         else
         {
           test.identical( options.exitCode, null );
-          test.identical( options.exitSignal, 'SIGTERM' );
+          test.identical( options.exitSignal, 'SIGKILL' );
           test.identical( options.exitReason, 'signal' );
-          test.identical( options.process.signalCode, 'SIGTERM' );
+          test.identical( options.process.signalCode, 'SIGKILL' );
           test.identical( options.process.exitCode, null );
         }
 
@@ -27176,9 +27176,9 @@ program1:end
         else
         {
           test.identical( options.exitCode, null );
-          test.identical( options.exitSignal, 'SIGTERM' );
+          test.identical( options.exitSignal, 'SIGKILL' );
           test.identical( options.exitReason, 'signal' );
-          test.identical( options.process.signalCode, 'SIGTERM' );
+          test.identical( options.process.signalCode, 'SIGKILL' );
           test.identical( options.process.exitCode, null );
         }
 
@@ -27247,9 +27247,9 @@ deasync:end
         else
         {
           test.identical( options.exitCode, null );
-          test.identical( options.exitSignal, 'SIGTERM' );
+          test.identical( options.exitSignal, 'SIGKILL' );
           test.identical( options.exitReason, 'signal' );
-          test.identical( options.process.signalCode, 'SIGTERM' );
+          test.identical( options.process.signalCode, 'SIGKILL' );
           test.identical( options.process.exitCode, null );
         }
 
