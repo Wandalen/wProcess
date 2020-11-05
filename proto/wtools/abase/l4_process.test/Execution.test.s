@@ -31292,9 +31292,11 @@ function terminateSeveralChildren( test )
 
   /* - */
 
+  /* qqq for Vova : bad */
   function handleOutput( output )
   {
     output = output.toString();
+    console.log( output );
     if( _.strHas( output, 'program2::begin' ) || _.strHas( output, 'program3::begin' ) )
     c += 1;
 
@@ -31467,8 +31469,10 @@ function terminateWithSeveralDetachedChildren( test )
 
   /* - */
 
+  /* qqq for Vova : bad */
   function handleOutput( output )
   {
+    console.log( output );
     output = output.toString();
     if( _.strHas( output, 'program2::begin' ) || _.strHas( output, 'program3::begin' ) )
     c += 1;
