@@ -29987,72 +29987,116 @@ On win/linux program1 waits for termination of program2 because only shell was t
 
 //
 
-function terminateSecondChildSpawn( test )
+function terminateSecondChild( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( program1 );
   let testAppPath2 = a.program( program2 );
-
-  let o =
-  {
-    execPath : 'node program1.js',
-    currentPath : a.routinePath,
-    mode : 'spawn',
-    outputPiping : 1,
-    outputCollecting : 1,
-    throwingExitCode : 0
-  }
-
-  _.process.start( o );
-
-  let program2Pid = null;
-  let terminate = _.Consequence();
-
-  o.process.stdout.on( 'data', handleOutput );
-
-  terminate.then( () =>
-  {
-    program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
-    program2Pid = program2Pid.pid;
-    return _.process.terminate
-    ({
-      pid : program2Pid,
-      timeOut : context.t1 * 5,
-      withChildren : 0
-    })
-  })
-
-  o.conTerminate.then( () =>
-  {
-    test.identical( o.exitCode, 0 );
-    test.identical( o.exitSignal, null );
-
-    let program2Op = _.fileProvider.fileRead({ filePath : a.abs( 'program2' ), encoding : 'json' });
-    test.identical( program2Op.pid, program2Pid );
-    if( process.platform === 'win32' )
-    {
-      test.identical( program2Op.exitCode, 1 );
-      test.identical( program2Op.exitSignal, null );
-    }
-    else
-    {
-      test.identical( program2Op.exitCode, null );
-      test.identical( program2Op.exitSignal, 'SIGTERM' );
-    }
-
-    test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
-    test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
-    test.identical( _.strCount( o.output, 'program2::end' ), 0 );
-
-    return null;
-  })
-
-  return _.Consequence.AndKeep( terminate, o.conTerminate );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
 
   /* - */
 
-  function handleOutput( output )
+  function run( mode )
+  {
+    let ready = _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}`;
+
+      let testAppPath = a.program({ routine : program1, locals : { mode } });
+
+      let o =
+      {
+        execPath : mode === 'fork' ? 'program1.js' : 'node program1.js',
+        currentPath : a.routinePath,
+        mode,
+        outputPiping : 1,
+        outputCollecting : 1,
+        throwingExitCode : 0
+      }
+
+      _.process.start( o );
+
+      let program2Pid = null;
+      let terminate = _.Consequence();
+
+      o.process.stdout.on( 'data', _.routineJoin( null, handleOutput, [ o, terminate ] ) );
+
+      terminate.then( () =>
+      {
+        program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
+        program2Pid = program2Pid.pid;
+        return _.process.terminate
+        ({
+          pid : program2Pid,
+          timeOut : context.t1 * 5,
+          withChildren : 0
+        })
+      })
+
+      o.conTerminate.then( () =>
+      {
+        test.identical( o.exitCode, 0 );
+        test.identical( o.exitSignal, null );
+
+        let program2Op = _.fileProvider.fileRead({ filePath : a.abs( 'program2' ), encoding : 'json' });
+
+        if( mode === 'shell')
+        {
+          if( process.platform !== 'linux' )
+          test.identical( program2Op.pid, program2Pid );
+        }
+        else
+        {
+          test.identical( program2Op.pid, program2Pid );
+        }
+        
+
+        if( process.platform === 'win32' )
+        {
+          test.identical( program2Op.exitCode, 1 );
+          test.identical( program2Op.exitSignal, null );
+        }
+        else
+        {
+          if( mode === 'shell' )
+          {
+            /*
+            if spawn does create second process then those checks are not relevant
+            */
+            if( !program2Op.exitCode )
+            {
+              test.identical( program2Op.exitCode, null );
+              test.identical( program2Op.exitSignal, 'SIGTERM' );
+            }
+          }
+          else
+          {
+            test.identical( program2Op.exitCode, null );
+            test.identical( program2Op.exitSignal, 'SIGTERM' );
+          }
+        }
+
+        test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
+        test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
+        test.identical( _.strCount( o.output, 'program2::end' ), 0 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        return null;
+      })
+    
+      return _.Consequence.AndKeep( terminate, o.conTerminate );
+    })
+
+    return ready;
+  }
+
+  /* - */
+
+  function handleOutput( o, terminate, output )
   {
     output = output.toString();
     if( !_.strHas( output, 'program2::begin' ) )
@@ -30070,9 +30114,9 @@ function terminateSecondChildSpawn( test )
     _.include( 'wFiles' );
     var o =
     {
-      execPath : 'node program2.js',
+      execPath : mode === 'fork' ? 'program2.js' : 'node program2.js',
       currentPath : __dirname,
-      mode : 'spawn',
+      mode,
       stdio : 'inherit',
       inputMirroring : 0,
       outputPiping : 0,
@@ -30131,8 +30175,8 @@ function terminateSecondChildSpawn( test )
 
 }
 
-terminateSecondChildSpawn.timeOut = 40000;
-terminateSecondChildSpawn.description =
+terminateSecondChild.timeOut = 120000;
+terminateSecondChild.description =
 `
 terminate second child
 first child exits as normal
@@ -30141,320 +30185,474 @@ second exits with signal SIGTERM on unix and exit code 1 on win
 
 //
 
-function terminateSecondChildFork( test )
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-  let testAppPath = a.program( program1 );
-  let testAppPath2 = a.program( program2 );
+// function terminateSecondChildSpawn( test )
+// {
+//   let context = this;
+//   let a = context.assetFor( test, false );
+//   let testAppPath = a.program( program1 );
+//   let testAppPath2 = a.program( program2 );
 
-  let o =
-  {
-    execPath : 'program1.js',
-    currentPath : a.routinePath,
-    mode : 'fork',
-    outputPiping : 1,
-    outputCollecting : 1,
-    throwingExitCode : 0
-  }
+//   let o =
+//   {
+//     execPath : 'node program1.js',
+//     currentPath : a.routinePath,
+//     mode : 'spawn',
+//     outputPiping : 1,
+//     outputCollecting : 1,
+//     throwingExitCode : 0
+//   }
 
-  _.process.start( o );
+//   _.process.start( o );
 
-  let program2Pid = null;
-  let terminate = _.Consequence();
+//   let program2Pid = null;
+//   let terminate = _.Consequence();
 
-  o.process.stdout.on( 'data', handleOutput );
+//   o.process.stdout.on( 'data', handleOutput );
 
-  terminate.then( () =>
-  {
-    program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
-    program2Pid = program2Pid.pid;
-    return _.process.terminate
-    ({
-      pid : program2Pid,
-      timeOut : context.t1 * 5,
-      withChildren : 0
-    })
-  })
+//   terminate.then( () =>
+//   {
+//     program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
+//     program2Pid = program2Pid.pid;
+//     return _.process.terminate
+//     ({
+//       pid : program2Pid,
+//       timeOut : context.t1 * 5,
+//       withChildren : 0
+//     })
+//   })
 
-  o.conTerminate.then( () =>
-  {
-    test.identical( o.exitCode, 0 );
-    test.identical( o.exitSignal, null );
+//   o.conTerminate.then( () =>
+//   {
+//     test.identical( o.exitCode, 0 );
+//     test.identical( o.exitSignal, null );
 
-    let program2Op = _.fileProvider.fileRead({ filePath : a.abs( 'program2' ), encoding : 'json' });
-    test.identical( program2Op.pid, program2Pid );
-    if( process.platform === 'win32' )
-    {
-      test.identical( program2Op.exitCode, 1 );
-      test.identical( program2Op.exitSignal, null );
-    }
-    else
-    {
-      test.identical( program2Op.exitCode, null );
-      test.identical( program2Op.exitSignal, 'SIGTERM' );
-    }
+//     let program2Op = _.fileProvider.fileRead({ filePath : a.abs( 'program2' ), encoding : 'json' });
+//     test.identical( program2Op.pid, program2Pid );
+//     if( process.platform === 'win32' )
+//     {
+//       test.identical( program2Op.exitCode, 1 );
+//       test.identical( program2Op.exitSignal, null );
+//     }
+//     else
+//     {
+//       test.identical( program2Op.exitCode, null );
+//       test.identical( program2Op.exitSignal, 'SIGTERM' );
+//     }
 
-    test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
-    test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
-    test.identical( _.strCount( o.output, 'program2::end' ), 0 );
+//     test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
+//     test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
+//     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
 
-    return null;
-  })
+//     return null;
+//   })
 
-  return _.Consequence.AndKeep( terminate, o.conTerminate );
+//   return _.Consequence.AndKeep( terminate, o.conTerminate );
 
-  /* - */
+//   /* - */
 
-  function handleOutput( output )
-  {
-    output = output.toString();
-    if( !_.strHas( output, 'program2::begin' ) )
-    return;
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
+//   function handleOutput( output )
+//   {
+//     output = output.toString();
+//     if( !_.strHas( output, 'program2::begin' ) )
+//     return;
+//     o.process.stdout.removeListener( 'data', handleOutput );
+//     terminate.take( null );
+//   }
 
-  /* - */
+//   /* - */
 
-  function program1()
-  {
-    let _ = require( toolsPath );
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-    var o =
-    {
-      execPath : 'program2.js',
-      currentPath : __dirname,
-      mode : 'fork',
-      stdio : 'inherit',
-      inputMirroring : 0,
-      outputPiping : 0,
-      outputCollecting : 0,
-      throwingExitCode : 0,
-    }
-    _.process.start( o );
+//   function program1()
+//   {
+//     let _ = require( toolsPath );
+//     _.include( 'wProcess' );
+//     _.include( 'wFiles' );
+//     var o =
+//     {
+//       execPath : 'node program2.js',
+//       currentPath : __dirname,
+//       mode : 'spawn',
+//       stdio : 'inherit',
+//       inputMirroring : 0,
+//       outputPiping : 0,
+//       outputCollecting : 0,
+//       throwingExitCode : 0,
+//     }
+//     _.process.start( o );
 
-    let timer = _.time.outError( context.t1*25 );
+//     let timer = _.time.outError( context.t1*25 );
 
-    console.log( 'program1::begin' );
+//     console.log( 'program1::begin' );
 
-    o.conTerminate.thenGive( () =>
-    {
-      timer.error( _.dont );
+//     o.conTerminate.thenGive( () =>
+//     {
+//       timer.error( _.dont );
 
-      let data =
-      {
-        pid : o.process.pid,
-        exitCode : o.exitCode,
-        exitSignal : o.exitSignal
-      }
-      _.fileProvider.fileWrite
-      ({
-        filePath : _.path.join( __dirname, 'program2' ),
-        data,
-        encoding : 'json'
-      })
-    })
-  }
+//       let data =
+//       {
+//         pid : o.process.pid,
+//         exitCode : o.exitCode,
+//         exitSignal : o.exitSignal
+//       }
+//       _.fileProvider.fileWrite
+//       ({
+//         filePath : _.path.join( __dirname, 'program2' ),
+//         data,
+//         encoding : 'json'
+//       })
+//     })
+//   }
 
-  /* - */
+//   /* - */
 
-  function program2()
-  {
-    let _ = require( toolsPath );
-    _.include( 'wFiles' );
+//   function program2()
+//   {
+//     let _ = require( toolsPath );
+//     _.include( 'wFiles' );
 
-    process.removeAllListeners( 'SIGTERM' )
+//     process.removeAllListeners( 'SIGTERM' )
 
-    _.fileProvider.fileWrite
-    ({
-      filePath : _.path.join( __dirname, 'program2Pid' ),
-      data : { pid : process.pid },
-      encoding : 'json'
-    })
+//     _.fileProvider.fileWrite
+//     ({
+//       filePath : _.path.join( __dirname, 'program2Pid' ),
+//       data : { pid : process.pid },
+//       encoding : 'json'
+//     })
 
-    setTimeout( () =>
-    {
-      console.log( 'program2::end' );
-    }, context.t1*10 )
+//     setTimeout( () =>
+//     {
+//       console.log( 'program2::end' );
+//     }, context.t1*10 )
 
-    console.log( 'program2::begin' );
+//     console.log( 'program2::begin' );
 
-  }
+//   }
 
-}
+// }
 
-terminateSecondChildFork.timeOut = 40000;
-terminateSecondChildFork.description =
-`
-terminate second child
-first child exits as normal
-second exits with signal SIGTERM on unix and exit code 1 on win
-`
+// terminateSecondChildSpawn.timeOut = 40000;
+// terminateSecondChildSpawn.description =
+// `
+// terminate second child
+// first child exits as normal
+// second exits with signal SIGTERM on unix and exit code 1 on win
+// `
 
 //
 
-function terminateSecondChildShell( test )
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-  let testAppPath = a.program( program1 );
-  let testAppPath2 = a.program( program2 );
+// function terminateSecondChildFork( test )
+// {
+//   let context = this;
+//   let a = context.assetFor( test, false );
+//   let testAppPath = a.program( program1 );
+//   let testAppPath2 = a.program( program2 );
 
-  let o =
-  {
-    execPath : 'node program1.js',
-    currentPath : a.routinePath,
-    mode : 'shell',
-    outputPiping : 1,
-    outputCollecting : 1,
-    throwingExitCode : 0
-  }
+//   let o =
+//   {
+//     execPath : 'program1.js',
+//     currentPath : a.routinePath,
+//     mode : 'fork',
+//     outputPiping : 1,
+//     outputCollecting : 1,
+//     throwingExitCode : 0
+//   }
 
-  _.process.start( o );
+//   _.process.start( o );
 
-  let program2Pid = null;
-  let terminate = _.Consequence();
+//   let program2Pid = null;
+//   let terminate = _.Consequence();
 
-  o.process.stdout.on( 'data', handleOutput );
+//   o.process.stdout.on( 'data', handleOutput );
 
-  terminate.then( () =>
-  {
-    program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
-    program2Pid = program2Pid.pid;
-    return _.process.terminate
-    ({
-      pid : program2Pid,
-      timeOut : context.t1 * 5,
-      withChildren : 0,
-    })
-  })
+//   terminate.then( () =>
+//   {
+//     program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
+//     program2Pid = program2Pid.pid;
+//     return _.process.terminate
+//     ({
+//       pid : program2Pid,
+//       timeOut : context.t1 * 5,
+//       withChildren : 0
+//     })
+//   })
 
-  o.conTerminate.then( () =>
-  {
-    test.identical( o.exitCode, 0 );
-    test.identical( o.exitSignal, null );
+//   o.conTerminate.then( () =>
+//   {
+//     test.identical( o.exitCode, 0 );
+//     test.identical( o.exitSignal, null );
 
-    let program2Op = _.fileProvider.fileRead({ filePath : a.abs( 'program2' ), encoding : 'json' });
+//     let program2Op = _.fileProvider.fileRead({ filePath : a.abs( 'program2' ), encoding : 'json' });
+//     test.identical( program2Op.pid, program2Pid );
+//     if( process.platform === 'win32' )
+//     {
+//       test.identical( program2Op.exitCode, 1 );
+//       test.identical( program2Op.exitSignal, null );
+//     }
+//     else
+//     {
+//       test.identical( program2Op.exitCode, null );
+//       test.identical( program2Op.exitSignal, 'SIGTERM' );
+//     }
 
-    if( process.platform !== 'linux' )
-    test.identical( program2Op.pid, program2Pid );
+//     test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
+//     test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
+//     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
 
-    if( process.platform === 'win32' )
-    {
-      test.identical( program2Op.exitCode, 1 );
-      test.identical( program2Op.exitSignal, null );
-    }
-    else
-    {
-      /*
-      if spawn does create second process then those checks are not relvenat
-      */
-      if( !program2Op.exitCode )
-      {
-        test.identical( program2Op.exitCode, null );
-        test.identical( program2Op.exitSignal, 'SIGTERM' );
-      }
-    }
+//     return null;
+//   })
 
-    test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
-    test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
-    test.identical( _.strCount( o.output, 'program2::end' ), 0 );
+//   return _.Consequence.AndKeep( terminate, o.conTerminate );
 
-    return null;
-  })
+//   /* - */
 
-  return _.Consequence.AndKeep( terminate, o.conTerminate );
+//   function handleOutput( output )
+//   {
+//     output = output.toString();
+//     if( !_.strHas( output, 'program2::begin' ) )
+//     return;
+//     o.process.stdout.removeListener( 'data', handleOutput );
+//     terminate.take( null );
+//   }
 
-  /* - */
+//   /* - */
 
-  function handleOutput( output )
-  {
-    output = output.toString();
-    if( !_.strHas( output, 'program2::begin' ) )
-    return;
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
+//   function program1()
+//   {
+//     let _ = require( toolsPath );
+//     _.include( 'wProcess' );
+//     _.include( 'wFiles' );
+//     var o =
+//     {
+//       execPath : 'program2.js',
+//       currentPath : __dirname,
+//       mode : 'fork',
+//       stdio : 'inherit',
+//       inputMirroring : 0,
+//       outputPiping : 0,
+//       outputCollecting : 0,
+//       throwingExitCode : 0,
+//     }
+//     _.process.start( o );
 
-  /* - */
+//     let timer = _.time.outError( context.t1*25 );
 
-  function program1()
-  {
-    let _ = require( toolsPath );
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-    var o =
-    {
-      execPath : 'node program2.js',
-      currentPath : __dirname,
-      mode : 'shell',
-      stdio : 'inherit',
-      inputMirroring : 0,
-      outputPiping : 0,
-      outputCollecting : 0,
-      throwingExitCode : 0,
-    }
-    _.process.start( o );
+//     console.log( 'program1::begin' );
 
-    let timer = _.time.outError( context.t1*25 );
+//     o.conTerminate.thenGive( () =>
+//     {
+//       timer.error( _.dont );
 
-    console.log( 'program1::begin' );
+//       let data =
+//       {
+//         pid : o.process.pid,
+//         exitCode : o.exitCode,
+//         exitSignal : o.exitSignal
+//       }
+//       _.fileProvider.fileWrite
+//       ({
+//         filePath : _.path.join( __dirname, 'program2' ),
+//         data,
+//         encoding : 'json'
+//       })
+//     })
+//   }
 
-    o.conTerminate.thenGive( () =>
-    {
-      timer.error( _.dont );
+//   /* - */
 
-      let data =
-      {
-        pid : o.process.pid,
-        exitCode : o.exitCode,
-        exitSignal : o.exitSignal
-      }
-      _.fileProvider.fileWrite
-      ({
-        filePath : _.path.join( __dirname, 'program2' ),
-        data,
-        encoding : 'json'
-      })
-    })
-  }
+//   function program2()
+//   {
+//     let _ = require( toolsPath );
+//     _.include( 'wFiles' );
 
-  /* - */
+//     process.removeAllListeners( 'SIGTERM' )
 
-  function program2()
-  {
-    let _ = require( toolsPath );
-    _.include( 'wFiles' );
+//     _.fileProvider.fileWrite
+//     ({
+//       filePath : _.path.join( __dirname, 'program2Pid' ),
+//       data : { pid : process.pid },
+//       encoding : 'json'
+//     })
 
-    process.removeAllListeners( 'SIGTERM' )
+//     setTimeout( () =>
+//     {
+//       console.log( 'program2::end' );
+//     }, context.t1*10 )
 
-    _.fileProvider.fileWrite
-    ({
-      filePath : _.path.join( __dirname, 'program2Pid' ),
-      data : { pid : process.pid },
-      encoding : 'json'
-    })
+//     console.log( 'program2::begin' );
 
-    setTimeout( () =>
-    {
-      console.log( 'program2::end' );
-    }, context.t1*10 )
+//   }
 
-    console.log( 'program2::begin' );
+// }
 
-  }
+// terminateSecondChildFork.timeOut = 40000;
+// terminateSecondChildFork.description =
+// `
+// terminate second child
+// first child exits as normal
+// second exits with signal SIGTERM on unix and exit code 1 on win
+// `
 
-}
+//
 
-terminateSecondChildShell.timeOut = 40000;
-terminateSecondChildShell.description =
-`
-terminate second child
-first child exits as normal
-second exits with signal SIGTERM on unix and exit code 1 on win
-`
+// function terminateSecondChildShell( test )
+// {
+//   let context = this;
+//   let a = context.assetFor( test, false );
+//   let testAppPath = a.program( program1 );
+//   let testAppPath2 = a.program( program2 );
+
+//   let o =
+//   {
+//     execPath : 'node program1.js',
+//     currentPath : a.routinePath,
+//     mode : 'shell',
+//     outputPiping : 1,
+//     outputCollecting : 1,
+//     throwingExitCode : 0
+//   }
+
+//   _.process.start( o );
+
+//   let program2Pid = null;
+//   let terminate = _.Consequence();
+
+//   o.process.stdout.on( 'data', handleOutput );
+
+//   terminate.then( () =>
+//   {
+//     program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
+//     program2Pid = program2Pid.pid;
+//     return _.process.terminate
+//     ({
+//       pid : program2Pid,
+//       timeOut : context.t1 * 5,
+//       withChildren : 0,
+//     })
+//   })
+
+//   o.conTerminate.then( () =>
+//   {
+//     test.identical( o.exitCode, 0 );
+//     test.identical( o.exitSignal, null );
+
+//     let program2Op = _.fileProvider.fileRead({ filePath : a.abs( 'program2' ), encoding : 'json' });
+
+//     if( process.platform !== 'linux' )
+//     test.identical( program2Op.pid, program2Pid );
+
+//     if( process.platform === 'win32' )
+//     {
+//       test.identical( program2Op.exitCode, 1 );
+//       test.identical( program2Op.exitSignal, null );
+//     }
+//     else
+//     {
+//       /*
+//       if spawn does create second process then those checks are not relvenat
+//       */
+//       if( !program2Op.exitCode )
+//       {
+//         test.identical( program2Op.exitCode, null );
+//         test.identical( program2Op.exitSignal, 'SIGTERM' );
+//       }
+//     }
+
+//     test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
+//     test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
+//     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
+
+//     return null;
+//   })
+
+//   return _.Consequence.AndKeep( terminate, o.conTerminate );
+
+//   /* - */
+
+//   function handleOutput( output )
+//   {
+//     output = output.toString();
+//     if( !_.strHas( output, 'program2::begin' ) )
+//     return;
+//     o.process.stdout.removeListener( 'data', handleOutput );
+//     terminate.take( null );
+//   }
+
+//   /* - */
+
+//   function program1()
+//   {
+//     let _ = require( toolsPath );
+//     _.include( 'wProcess' );
+//     _.include( 'wFiles' );
+//     var o =
+//     {
+//       execPath : 'node program2.js',
+//       currentPath : __dirname,
+//       mode : 'shell',
+//       stdio : 'inherit',
+//       inputMirroring : 0,
+//       outputPiping : 0,
+//       outputCollecting : 0,
+//       throwingExitCode : 0,
+//     }
+//     _.process.start( o );
+
+//     let timer = _.time.outError( context.t1*25 );
+
+//     console.log( 'program1::begin' );
+
+//     o.conTerminate.thenGive( () =>
+//     {
+//       timer.error( _.dont );
+
+//       let data =
+//       {
+//         pid : o.process.pid,
+//         exitCode : o.exitCode,
+//         exitSignal : o.exitSignal
+//       }
+//       _.fileProvider.fileWrite
+//       ({
+//         filePath : _.path.join( __dirname, 'program2' ),
+//         data,
+//         encoding : 'json'
+//       })
+//     })
+//   }
+
+//   /* - */
+
+//   function program2()
+//   {
+//     let _ = require( toolsPath );
+//     _.include( 'wFiles' );
+
+//     process.removeAllListeners( 'SIGTERM' )
+
+//     _.fileProvider.fileWrite
+//     ({
+//       filePath : _.path.join( __dirname, 'program2Pid' ),
+//       data : { pid : process.pid },
+//       encoding : 'json'
+//     })
+
+//     setTimeout( () =>
+//     {
+//       console.log( 'program2::end' );
+//     }, context.t1*10 )
+
+//     console.log( 'program2::begin' );
+
+//   }
+
+// }
+
+// terminateSecondChildShell.timeOut = 40000;
+// terminateSecondChildShell.description =
+// `
+// terminate second child
+// first child exits as normal
+// second exits with signal SIGTERM on unix and exit code 1 on win
+// `
 
 //
 
@@ -33863,9 +34061,10 @@ var Proto =
     // terminateFirstChildFork,
     // terminateFirstChildShell,
 
-    terminateSecondChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine */
-    terminateSecondChildFork,
-    terminateSecondChildShell,
+    terminateSecondChild,
+    // terminateSecondChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine | aaa : Done. */
+    // terminateSecondChildFork,
+    // terminateSecondChildShell,
 
     terminateDetachedFirstChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine */
     terminateDetachedFirstChildFork,
