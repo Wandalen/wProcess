@@ -15849,12 +15849,6 @@ function startNjsWithReadyDelayStructural( test )
       {
         test.identical( op.ended, true );
 
-        if( !tops.dry )
-        {
-          test.identical( op.exitCode, 0 );
-          test.identical( op.output, 'program1:begin\n' );
-        }
-
         let exp2 = _.mapExtend( null, exp );
         exp2.process = options.process;
         exp2.procedure = options.procedure;
@@ -15865,8 +15859,24 @@ function startNjsWithReadyDelayStructural( test )
         exp2.fullExecPath = ( tops.mode === 'fork' ? '' : 'node ' ) + programPath;
         exp2.state = 'terminated';
         exp2.ended = true;
-        if( !tops.dry )
+
+        if( tops.dry )
         {
+          test.identical( op.output, '' );
+          test.identical( op.exitCode, null );
+          test.identical( op.exitSignal, null );
+          test.identical( op.exitReason, null );
+        }
+        else
+        {
+          /* exception in njs on Windows, no output from detached process */
+          if( tops.mode !== 'shell' || process.platform !== 'win32' || !tops.detaching )
+          test.identical( op.output, 'program1:begin\n' );
+          test.identical( op.exitCode, 0 );
+          test.identical( op.exitSignal, null );
+          test.identical( op.exitReason, 'normal' );
+          /* exception in njs on Windows, no output from detached process */
+          if( tops.mode !== 'shell' || process.platform !== 'win32' || !tops.detaching )
           exp2.output = 'program1:begin\n';
           exp2.exitCode = 0;
           exp2.exitSignal = null;
