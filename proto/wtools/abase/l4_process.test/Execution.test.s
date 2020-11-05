@@ -8051,9 +8051,10 @@ function startNjsPassingThroughExecPathWithSpace( test )
         let out = JSON.parse( op.output );
         test.identical( op.ended, true );
         test.is( a.fileProvider.fileExists( testAppPath ) );
+        if( mode === 'shell' )
+        test.is( _.strHas( out.output, '[]' ) )
+        else
         test.equivalent( out.output, '[]\n' + out.pid.toString() )
-        // test.is( _.strHas( out.output, out.pid.toString() ) );
-        // test.is( _.strHas( out.output, `[]` ) );
         return null;
       })
 
@@ -8112,9 +8113,10 @@ function startNjsPassingThroughExecPathWithSpace( test )
         let out = JSON.parse( op.output );
         test.identical( op.ended, true );
         test.is( a.fileProvider.fileExists( testAppPath ) );
+        if( mode === 'shell' )
+        test.is( _.strHas( out.output, `[ 'arg' ]` ) )
+        else
         test.equivalent( out.output, `[ 'arg' ]\n` + out.pid.toString() )
-        // test.is( _.strHas( out.output, out.pid.toString() ) );
-        // test.is( _.strHas( out.output, `[ 'arg' ]` ) );
         return null;
       })
     })
