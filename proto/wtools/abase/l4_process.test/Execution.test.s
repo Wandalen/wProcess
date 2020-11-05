@@ -16780,7 +16780,7 @@ function startNjsWithReadyDelayStructuralMultiple( test )
         'runs' : [],
         'state' : 'initial',
         'exitReason' : null,
-        'output' : tops.dry ? '' : 'program1:begin\nprogram1:begin\n',
+        'output' : '',
         'exitCode' : null,
         'exitSignal' : null,
         'ended' : false,
@@ -16792,16 +16792,40 @@ function startNjsWithReadyDelayStructuralMultiple( test )
 
       options.ready.then( ( op ) =>
       {
-        test.identical( op.ended, true );
-
         let exp2 = _.mapExtend( null, exp );
 
-        exp2.exitCode = tops.dry ? null : 0;
-        exp2.exitSignal = null;
         exp2.runs = options.runs;
         exp2.state = 'terminated';
         exp2.exitReason = 'normal';
         exp2.ended = true;
+
+        if( tops.dry )
+        {
+          test.identical( op.output, '' );
+          test.identical( op.exitCode, null );
+          test.identical( op.exitSignal, null );
+          test.identical( op.exitReason, 'normal' );
+        }
+        else
+        {
+          /* exception in njs on Windows :
+            no output from detached process in mode::shell
+          */
+          if( tops.mode !== 'shell' || process.platform !== 'win32' || !tops.detaching )
+          test.identical( op.output, 'program1:begin\nprogram1:begin\n' );
+          test.identical( op.exitCode, 0 );
+          test.identical( op.ended, true );
+          test.identical( op.exitSignal, null );
+          test.identical( op.exitReason, 'normal' );
+          /* exception in njs on Windows :
+            no output from detached process in mode::shell
+          */
+          if( tops.mode !== 'shell' || process.platform !== 'win32' || !tops.detaching )
+          exp2.output = 'program1:begin\nprogram1:begin\n';
+          exp2.exitCode = 0;
+          exp2.exitSignal = null;
+          exp2.exitReason = 'normal';
+        }
 
         test.identical( options, exp2 );
         test.is( !options.process );
@@ -16811,22 +16835,6 @@ function startNjsWithReadyDelayStructuralMultiple( test )
         test.identical( options.streamOut !== options.streamErr, !tops.sync || ( !!tops.sync && !!tops.deasync ) );
         test.is( options.conTerminate !== options.ready );
         test.is( _.arrayIs( options.runs ) );
-
-        op.runs.forEach( ( run ) =>
-        {
-          test.identical( !!run.process, !tops.dry );
-          test.is( _.routineIs( run.disconnect ) );
-          test.identical( _.streamIs( run.streamOut ), !tops.dry && ( !tops.sync || !!tops.deasync ) );
-          test.identical( _.streamIs( run.streamErr ), !tops.dry && ( !tops.sync || !!tops.deasync ) );
-          test.identical( run.streamOut !== run.streamErr, !tops.dry && ( !tops.sync || !!tops.deasync ) );
-          test.is( run.conTerminate !== run.ready );
-
-          test.identical( run.ready.exportString(), 'Consequence:: 1 / 0' );
-          test.identical( run.conTerminate.exportString(), 'Consequence:: 1 / 0' );
-          test.identical( run.conDisconnect.exportString(), 'Consequence:: 1 / 0' );
-          test.identical( run.conStart.exportString(), 'Consequence:: 1 / 0' );
-
-        } )
 
         if( tops.sync || tops.deasync )
         {
@@ -16843,47 +16851,35 @@ function startNjsWithReadyDelayStructuralMultiple( test )
           test.identical( options.ready.exportString(), 'Consequence:: 0 / 1' );
         }
 
-        /* NEW CODE */
-        // returned.then( ( op ) =>
-        // {
-        //   let exp2 = _.mapExtend( null, exp );
-        //   exp2.runs = options.runs;
-        //   exp2.state = 'terminated';
-        //   exp2.ended = true;
+        /* Added runs' checks */
+        op.runs.forEach( ( run ) =>
+        {
+          if( tops.dry )
+          {
+            test.identical( run.output, '' );
+            test.identical( run.exitCode, null );
+            test.identical( run.exitReason, null );
+          }
+          else
+          {
+            test.identical( run.output, 'program1:begin\n' );
+            test.identical( run.exitCode, 0 );
+            test.identical( run.exitReason, 'normal' );
+          }
+          test.identical( run.exitSignal, null );
+          test.identical( !!run.process, !tops.dry );
+          test.is( _.routineIs( run.disconnect ) );
+          test.identical( _.streamIs( run.streamOut ), !tops.dry && ( !tops.sync || !!tops.deasync ) );
+          test.identical( _.streamIs( run.streamErr ), !tops.dry && ( !tops.sync || !!tops.deasync ) );
+          test.identical( run.streamOut !== run.streamErr, !tops.dry && ( !tops.sync || !!tops.deasync ) );
+          test.is( run.conTerminate !== run.ready );
 
-        //   /* exception in njs on Windows :
-        //     no output from detached process in mode::shell
-        //   */
-        //   if( mode !== 'shell' || process.platform !== 'win32' || !detaching )
-        //   test.identical( op.output, 'program1:begin\nprogram1:begin\n' );
-        //   test.identical( op.exitCode, 0 );
-        //   test.identical( op.ended, true );
-        //   test.identical( op.exitSignal, null );
-        //   test.identical( op.exitReason, 'normal' );
-        //   /* exception in njs on Windows :
-        //     no output from detached process in mode::shell
-        //   */
-        //   if( mode !== 'shell' || process.platform !== 'win32' || !detaching )
-        //   exp2.output = 'program1:begin\nprogram1:begin\n';
-        //   exp2.exitCode = 0;
-        //   exp2.exitSignal = null;
-        //   exp2.exitReason = 'normal';
+          test.identical( run.ready.exportString(), 'Consequence:: 1 / 0' );
+          test.identical( run.conTerminate.exportString(), 'Consequence:: 1 / 0' );
+          test.identical( run.conDisconnect.exportString(), 'Consequence:: 1 / 0' );
+          test.identical( run.conStart.exportString(), 'Consequence:: 1 / 0' );
 
-        //   test.identical( options, exp2 );
-        //   test.is( !options.process );
-        //   test.is( _.streamIs( options.streamOut ) );
-        //   test.is( _.streamIs( options.streamErr ) );
-        //   test.is( options.streamOut !== options.streamErr );
-        //   test.is( ! options.disconnect );
-        //   test.is( options.conTerminate !== options.ready );
-        //   test.is( _.arrayIs( options.runs ) );
-        //   test.identical( options.ready.exportString(), 'Consequence:: 0 / 1' );
-        //   test.identical( options.conTerminate.exportString(), 'Consequence:: 1 / 0' );
-        //   test.identical( options.conDisconnect, null );
-        //   test.identical( options.conStart.exportString(), 'Consequence:: 1 / 0' );
-
-        //   return null;
-        // });
+        })
 
         return null;
       });
