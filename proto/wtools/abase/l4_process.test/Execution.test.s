@@ -16861,7 +16861,13 @@ function startNjsWithReadyDelayStructuralMultiple( test )
           }
           else
           {
+            /* exception in njs on Windows :
+              no output from detached process in mode::shell
+            */
+            if( tops.mode !== 'shell' || process.platform !== 'win32' || !tops.detaching )
             test.identical( run.output, 'program1:begin\n' );
+            else
+            test.identical( run.output, '' );
             test.identical( run.exitCode, 0 );
             test.identical( run.exitReason, 'normal' );
           }
