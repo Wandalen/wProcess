@@ -15775,13 +15775,16 @@ function startNjsWithReadyDelayStructural( test )
     do not combine `detaching` with `dry`
     do not combine `detaching` with `sync` and `deasync`
     */
-  /* qqq for Yevhen : add varying `sync` and `deasync` and `dry` for test routine startNjsWithReadyDelayStructuralMultiple */
+  /* qqq for Yevhen : add varying `sync` and `deasync` and `dry` for test routine startNjsWithReadyDelayStructuralMultiple | aaa : Done. */
 
   let modes = [ 'fork', 'spawn', 'shell' ];
-  /* REWRITTEN */
+
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, dry : 0, detaching : 0, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, dry : 1, detaching : 0, mode }) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, dry : 0, detaching : 0, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, dry : 1, detaching : 0, mode }) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, dry : 0, detaching : 0, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, dry : 1, detaching : 0, mode }) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, dry : 0, detaching : 0, mode }) ) );
 
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, dry : 1, detaching : 0, mode }) ) );
@@ -15940,7 +15943,9 @@ function startNjsWithReadyDelayStructural( test )
       });
 
       if( !tops.sync && !tops.deasync )
-      test.identical( options, exp );
+      {
+        test.identical( options, exp );
+      }
       else
       {
         let exp2 = _.mapExtend( null, exp );
@@ -15952,10 +15957,10 @@ function startNjsWithReadyDelayStructural( test )
         exp2.procedure = options.procedure;
         exp2._end = options._end;
         exp2.state = 'terminated';
-        exp2.exitCode = 0;
-        exp2.exitReason = 'normal';
+        exp2.exitCode = tops.dry ? null : 0;
+        exp2.exitReason =  tops.dry ? null : 'normal';
         exp2.ended = true;
-        exp2.output = 'program1:begin\n';
+        exp2.output = tops.dry ? '' :'program1:begin\n';
         delete exp2.end;
 
         test.identical( options, exp2 )
@@ -15963,7 +15968,6 @@ function startNjsWithReadyDelayStructural( test )
 
       test.is( _.routineIs( options.disconnect ) );
       test.is( options.conTerminate !== options.ready );
-      test.is( !!options.disconnect );
       if( ( tops.sync || tops.deasync ) && !tops.dry )
       {
         test.notIdentical( options.process, null );
@@ -16151,6 +16155,7 @@ function startNjsWithReadyDelayStructural( test )
 
 }
 
+startNjsWithReadyDelayStructural.timeOut = 120000;
 startNjsWithReadyDelayStructural.description =
 `
  - ready has delay
@@ -16626,18 +16631,20 @@ function startNjsWithReadyDelayStructuralMultiple( test )
   let a = context.assetFor( test, false );
   let programPath = a.program( program1 );
 
-  let modes = [ 'fork', /*'spawn', 'shell'*/ ];
+  let modes = [ 'fork', 'spawn', 'shell' ];
 
-  /* Add dry combinations */
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, dry : 0, detaching : 0, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, dry : 1, detaching : 0, mode }) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, dry : 0, detaching : 0, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, dry : 1, detaching : 0, mode }) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, dry : 0, detaching : 0, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, dry : 1, detaching : 0, mode }) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, dry : 0, detaching : 0, mode }) ) );
 
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, dry : 1, detaching : 0, mode }) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, dry : 0, detaching : 1, mode }) ) );
 
-  /* ORIGINAL */
+  /* ORIGINAL ( detaching, mode ) */
   // modes.forEach( ( mode ) => a.ready.then( () => run( 0, mode ) ) );
   // modes.forEach( ( mode ) => a.ready.then( () => run( 1, mode ) ) );
   return a.ready;
@@ -16741,9 +16748,7 @@ function startNjsWithReadyDelayStructuralMultiple( test )
 
       options.ready.then( ( op ) =>
       {
-        // test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        // test.identical( op.output, 'program1:begin\nprogram1:begin\n' );
 
         let exp2 = _.mapExtend( null, exp );
 
@@ -16763,11 +16768,8 @@ function startNjsWithReadyDelayStructuralMultiple( test )
         test.is( options.conTerminate !== options.ready );
         test.is( _.arrayIs( options.runs ) );
 
-        /* Added each run checks */
         op.runs.forEach( ( run ) =>
         {
-          if( tops.dry )
-          console.log( 'R: ', run )
           test.identical( !!run.process, !tops.dry );
           test.is( _.routineIs( run.disconnect ) );
           test.identical( _.streamIs( run.streamOut ), !tops.dry && ( !tops.sync || !!tops.deasync ) );
@@ -16804,7 +16806,7 @@ function startNjsWithReadyDelayStructuralMultiple( test )
       if( tops.sync || tops.deasync )
       {
         exp3.ended = true;
-        exp3.exitCode = 0;
+        exp3.exitCode = tops.dry ? null : 0;
         exp3.state = 'terminated';
         exp3.exitReason = 'normal';
         exp3.output = tops.dry ? '' : 'program1:begin\nprogram1:begin\n';
@@ -16987,6 +16989,7 @@ function startNjsWithReadyDelayStructuralMultiple( test )
 
 }
 
+startNjsWithReadyDelayStructuralMultiple.timeOut = 120000;
 startNjsWithReadyDelayStructuralMultiple.description =
 `
  - ready has delay
