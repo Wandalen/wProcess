@@ -16502,11 +16502,8 @@ function startNjsWithReadyDelayStructuralMultiple( test )
         test.identical( op.ended, true );
 
         let exp2 = _.mapExtend( null, exp );
-        exp2.exitCode = 0;
-        exp2.exitSignal = null;
         exp2.runs = options.runs;
         exp2.state = 'terminated';
-        exp2.exitReason = 'normal';
         exp2.ended = true;
 
         /* exception in njs on Windows :
@@ -16522,6 +16519,9 @@ function startNjsWithReadyDelayStructuralMultiple( test )
         */
         if( mode !== 'shell' || process.platform !== 'win32' || !detaching )
         exp2.output = 'program1:begin\nprogram1:begin\n';
+        exp2.exitCode = 0;
+        exp2.exitSignal = null;
+        exp2.exitReason = 'normal';
 
         test.identical( options, exp2 );
         test.is( !options.process );
