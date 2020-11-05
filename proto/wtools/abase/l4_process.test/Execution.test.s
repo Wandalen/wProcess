@@ -16304,12 +16304,6 @@ function startNjsWithReadyDelayStructural( test )
       {
         test.identical( op.ended, true );
 
-        if( !tops.dry )
-        {
-          test.identical( op.exitCode, 0 );
-          test.identical( op.output, 'program1:begin\n' );
-        }
-
         let exp2 = _.mapExtend( null, exp );
         exp2.process = options.process;
         exp2.procedure = options.procedure;
@@ -16320,8 +16314,28 @@ function startNjsWithReadyDelayStructural( test )
         exp2.fullExecPath = ( tops.mode === 'fork' ? '' : 'node ' ) + programPath;
         exp2.state = 'terminated';
         exp2.ended = true;
-        if( !tops.dry )
+
+        if( tops.dry )
         {
+          test.identical( op.output, '' );
+          test.identical( op.exitCode, null );
+          test.identical( op.exitSignal, null );
+          test.identical( op.exitReason, null );
+        }
+        else
+        {
+          /* exception in njs on Windows :
+            no output from detached process in mode::shell
+          */
+          if( tops.mode !== 'shell' || process.platform !== 'win32' || !tops.detaching )
+          test.identical( op.output, 'program1:begin\n' );
+          test.identical( op.exitCode, 0 );
+          test.identical( op.exitSignal, null );
+          test.identical( op.exitReason, 'normal' );
+          /* exception in njs on Windows :
+            no output from detached process in mode::shell
+          */
+          if( tops.mode !== 'shell' || process.platform !== 'win32' || !tops.detaching )
           exp2.output = 'program1:begin\n';
           exp2.exitCode = 0;
           exp2.exitSignal = null;
@@ -16939,18 +16953,28 @@ function startNjsWithReadyDelayStructuralMultiple( test )
 
       returned.then( ( op ) =>
       {
+        let exp2 = _.mapExtend( null, exp );
+        exp2.runs = options.runs;
+        exp2.state = 'terminated';
+        exp2.ended = true;
+
+        /* exception in njs on Windows :
+          no output from detached process in mode::shell
+        */
+        if( mode !== 'shell' || process.platform !== 'win32' || !detaching )
+        test.identical( op.output, 'program1:begin\nprogram1:begin\n' );
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.identical( op.output, 'program1:begin\nprogram1:begin\n' );
-
-        let exp2 = _.mapExtend( null, exp );
+        test.identical( op.exitSignal, null );
+        test.identical( op.exitReason, 'normal' );
+        /* exception in njs on Windows :
+          no output from detached process in mode::shell
+        */
+        if( mode !== 'shell' || process.platform !== 'win32' || !detaching )
         exp2.output = 'program1:begin\nprogram1:begin\n';
         exp2.exitCode = 0;
         exp2.exitSignal = null;
-        exp2.runs = options.runs;
-        exp2.state = 'terminated';
         exp2.exitReason = 'normal';
-        exp2.ended = true;
 
         test.identical( options, exp2 );
         test.is( !options.process );
@@ -31737,9 +31761,11 @@ function terminateSeveralChildren( test )
 
   /* - */
 
+  /* qqq for Vova : bad */
   function handleOutput( output )
   {
     output = output.toString();
+    console.log( output );
     if( _.strHas( output, 'program2::begin' ) || _.strHas( output, 'program3::begin' ) )
     c += 1;
 
@@ -31912,8 +31938,10 @@ function terminateWithSeveralDetachedChildren( test )
 
   /* - */
 
+  /* qqq for Vova : bad */
   function handleOutput( output )
   {
+    console.log( output );
     output = output.toString();
     if( _.strHas( output, 'program2::begin' ) || _.strHas( output, 'program3::begin' ) )
     c += 1;
