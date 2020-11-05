@@ -31257,6 +31257,164 @@ program2 should continue to work
 
 //
 
+function terminateWithDetachedChild( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath2 = a.program( program2 );
+  let modes = [ /*'fork', */'spawn', /*'shell' */];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
+
+  /* - */
+
+  function run( mode )
+  {
+    let ready = _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}`;
+
+      let testAppPath = a.program({ routine : program1, locals : { mode } });
+
+      let o =
+      {
+        execPath : mode === 'fork' ? 'program1.js' : 'node program1.js',
+        currentPath : a.routinePath,
+        mode,
+        outputPiping : 1,
+        outputCollecting : 1,
+        throwingExitCode : 0
+      }
+    
+      _.process.start( o );
+    
+      let program2Pid = null;
+      let terminate = _.Consequence();
+    
+      o.process.stdout.on( 'data', _.routineJoin( null, handleOutput, [ o, terminate ] ) );
+    
+      terminate.then( () =>
+      {
+        program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
+        program2Pid = program2Pid.pid;
+        return _.process.terminate
+        ({
+          pid : o.process.pid,
+          timeOut : context.t1 * 5,
+          withChildren : 1
+        })
+      })
+    
+      o.conTerminate.then( () =>
+      {
+        if( process.platform === 'win32' )
+        {
+          test.identical( o.exitCode, 1 );
+          test.identical( o.exitSignal, null );
+        }
+        else
+        {
+          test.identical( o.exitCode, null );
+          test.identical( o.exitSignal, 'SIGTERM' );
+        }
+    
+        test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
+        test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
+        test.identical( _.strCount( o.output, 'program2::end' ), 0 );
+        test.is( !_.process.isAlive( program2Pid ) );
+        test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+    
+        a.fileProvider.fileDelete( testAppPath )
+        return null;
+      })
+    
+      return _.Consequence.AndKeep( terminate, o.conTerminate );
+    })
+
+    return ready;
+  }
+
+
+  /* - */
+
+  function handleOutput( o, terminate, output )
+  {
+    output = output.toString();
+    if( !_.strHas( output, 'program2::begin' ) )
+    return;
+    o.process.stdout.removeListener( 'data', handleOutput );
+    terminate.take( null );
+  }
+
+  /* - */
+
+  function program1()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+    var o =
+    {
+      execPath : mode === 'fork' ? 'program2.js' : 'node program2.js',
+      currentPath : __dirname,
+      mode,
+      stdio : 'pipe',
+      detaching : 1,
+      inputMirroring : 0,
+      outputPiping : 1,
+      outputCollecting : 0,
+      throwingExitCode : 0,
+    }
+    _.process.start( o );
+
+    let timer = _.time.outError( context.t1*25 );
+
+    console.log( 'program1::begin' );
+
+  }
+
+  /* - */
+
+  function program2()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wFiles' );
+
+    process.removeAllListeners( 'SIGTERM' )
+
+    _.fileProvider.fileWrite
+    ({
+      filePath : _.path.join( __dirname, 'program2Pid' ),
+      data : { pid : process.pid },
+      encoding : 'json'
+    })
+
+    setTimeout( () =>
+    {
+      console.log( 'program2::end' );
+      _.fileProvider.fileWrite
+      ({
+        filePath : _.path.join( __dirname, 'program2end' ),
+        data : 'end'
+      })
+    }, context.t1*10 )
+
+    console.log( 'program2::begin' );
+
+  }
+}
+
+terminateWithDetachedChild.timeOut = 180000;
+terminateWithDetachedChild.description =
+`program1 starts program2 in detached mode
+tester terminates program1 with option withChildren : 1
+program1 and program2 should be terminated
+`
+
+//
+
 function terminateWithDetachedChildSpawn( test )
 {
   let context = this;
@@ -34239,6 +34397,7 @@ var Proto =
     // terminateDetachedFirstChildFork,
     // terminateDetachedFirstChildShell,
 
+    terminateWithDetachedChild,
     terminateWithDetachedChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine */
     terminateWithDetachedChildFork,
     terminateWithDetachedChildShell,
