@@ -16894,10 +16894,6 @@ function startNjsWithReadyDelayStructuralMultiple( test )
         exp3.output = tops.dry ? '' : 'program1:begin\nprogram1:begin\n';
         exp3.runs = options.runs;
       }
-      else
-      {
-        exp3.output = '';
-      }
 
       test.identical( options, exp3 );
 
