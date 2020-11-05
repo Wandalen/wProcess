@@ -33614,7 +33614,7 @@ var Proto =
     terminate, /* qqq for Vova: review, remove duplicates, check timeouts */
     terminateSync,
 
-    terminateFirstChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine */
+    terminateFirstChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine | */
     terminateFirstChildFork,
     terminateFirstChildShell,
 
