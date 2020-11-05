@@ -23,24 +23,50 @@ let _ = _global_.wTools;
 let Self = {};
 
 /*
+experimentIpcDeasync:
+
+| Node |     Windows     |  Linux   |     Mac     |
+| ---- | --------------- | -------- | ----------- |
+| 10   | Routine timeout | No error | Libuv error |
+| 12   | Routine timeout | No error | Libuv error |
+| 13   | Routine timeout | No error | Libuv error |
+| 14   | Routine timeout | No error | Libuv error |
+| 15   | Routine timeout | No error | Libuv error |
+
+Windows - execution hangs and test routine ends with timeout
+Linux - test finishes without any errors
+Mac - tests ends with libuv error on first or next attempt
+
+Windows:
+> node -e process.send(1);setTimeout(()=>{},500)
+Failed ( test routine time limit ) TestSuite::Tools.l4.porocess.Execution / TestRoutine::experimentIpcDeasync in 60.527s
+
+Libuv error for v10:
+/Users/runner/work/_temp/a1bfa3ef-959c-477d-8436-8dc969ebdc61.sh: line 1:  1091 Segmentation fault: 11  node proto/wtools/abase/l4_process.test/Execution.test.s r:experimentIpcDeasync v:10
+
+Libuv error for v12-15:
+Assertion failed: (handle->type == UV_TCP || handle->type == UV_TTY || handle->type == UV_NAMED_PIPE), function uv___stream_fd, file ../deps/uv/src/unix/stream.c, line 1622.
+/Users/runner/work/_temp/a3028c88-f26a-43fa-8306-d78bcc207e60.sh: line 1:  1459 Abort trap: 6           node proto/wtools/abase/l4_process.test/Execution.test.s r:experimentIpcDeasync v:10
+
+Related links:
+https://github.com/jochemstoel/nodejs-system-sleep/issues/4
+https://github.com/abbr/deasync/issues/55#issuecomment-538129355
+http://docs.libuv.org/en/v1.x/loop.html#c.uv_run
+uv_run() is not reentrant. It must not be called from a callback.
+*/
+
+/* to run iteratively
 
 reset && RET=0
 until [ ${RET} -ne 0 ]; do
-    node wtools/abase/l4.test/Execution.test.s n:1 v:5 s:0 r:terminateDetachedComplex
+    node wtools/abase/l4_process.test/Execution.test.s n:1 v:5 s:0 r:terminateSeveralChildren
     RET=$?
     sleep 1
 done
 
 reset && RET=0
 until [ ${RET} -ne 0 ]; do
-    node wtools/abase/l4.test/Execution.test.s n:1 v:5 s:0 r:terminateWithChildren
-    RET=$?
-    sleep 1
-done
-
-reset && RET=0
-until [ ${RET} -ne 0 ]; do
-    node wtools/abase/l4.test/Execution.test.s n:1 v:5 s:0 r:endSignalsBasic
+    node wtools/abase/l4_process.test/Execution.test.s n:1 v:5 s:0 r:endSignalsBasic
     RET=$?
     sleep 1
 done
@@ -595,14 +621,13 @@ function startBasic2( test ) /* qqq for Evhen : merge with test routine startBas
 
   a.ready.then( function()
   {
-    test.case = 'mode : spawn, passingThrough : true, incorrect usage of o.path in spawn mode';
+    test.case = 'mode : spawn, incorrect usage of o.path in spawn mode';
 
     o2 =
     {
       execPath :  'node ' + testApp,
       args : [ 'staging' ],
       mode : 'spawn',
-      passingThrough : 1,
       stdio : 'pipe'
     }
     return null;
@@ -2856,7 +2881,6 @@ function startArgumentsParsing( test )
     {
       test.case = `mode : ${ mode }, 'path to exec : with space' 'execPATH : only path' 'args: willbe args'`
 
-      debugger;
       let con = new _.Consequence().take( null );
       let o =
       {
@@ -2905,7 +2929,7 @@ function startArgumentsParsing( test )
     return ready;
   }
 
-  /* ORIGINAL */ /* xxx */
+  /* ORIGINAL */ /* zzz */
 
   /* - */
 
@@ -3240,7 +3264,7 @@ function startArgumentsParsingNonTrivial( test )
     {
       test.case = `mode : ${mode}, args in execPath and args options`
 
-      /* qqq for Vova : investigate. can conditions be removed? */
+      /* qqq for Vova : investigate. can conditions be removed? aaa: I removed redundant os conditions after fix of arguments processing for shell mode*/
       if( mode === 'shell' && process.platform === 'win32' )
       return null;
       if( mode === 'fork' )
@@ -8110,8 +8134,8 @@ function startProcedureStack( test )
 
 }
 
+startProcedureStack.rapidity = -1;
 startProcedureStack.timeOut = 5e5;
-
 startProcedureStack.description =
 `
   - option stack used to get stack
@@ -8547,6 +8571,7 @@ function startProcedureStackMultiple( test )
 
 }
 
+startProcedureStackMultiple.rapidity = -1;
 startProcedureStackMultiple.timeOut = 500000;
 
 //
@@ -9195,6 +9220,7 @@ function startOptionWhenDelay( test )
 }
 
 startOptionWhenDelay.timeOut = 5e5;
+startOptionWhenDelay.rapidity = -1;
 
 //
 
@@ -9268,6 +9294,7 @@ function startOptionWhenTime( test )
 }
 
 startOptionWhenTime.timeOut = 5e5;
+startOptionWhenTime.rapidity = -1;
 
 //
 
@@ -9296,7 +9323,7 @@ function startOptionTimeOut( test )
         execPath : mode === 'fork' ? 'program1.js' : `node program1.js`,
         mode,
         currentPath : a.routinePath,
-        timeOut : context.t1*2,
+        timeOut : context.t1*3,
       }
 
       _.process.start( o );
@@ -9324,7 +9351,7 @@ function startOptionTimeOut( test )
         execPath : mode === 'fork' ? 'program2.js' : `node program2.js`,
         mode,
         currentPath : a.routinePath,
-        timeOut : context.t1*2,
+        timeOut : context.t1*3,
       }
 
       _.process.start( o );
@@ -9369,7 +9396,7 @@ function startOptionTimeOut( test )
         args : 'program1.js',
         mode,
         currentPath : a.routinePath,
-        timeOut : context.t1*2,
+        timeOut : context.t1*3,
         outputPiping : 1,
         outputCollecting : 1
       }
@@ -9409,7 +9436,7 @@ function startOptionTimeOut( test )
         args : 'program2.js',
         mode,
         currentPath : a.routinePath,
-        timeOut : context.t1*2,
+        timeOut : context.t1*3,
         outputPiping : 1,
         outputCollecting : 1
       }
@@ -9456,7 +9483,7 @@ function startOptionTimeOut( test )
     setTimeout( () =>
     {
       console.log( 'program1::end' )
-    }, context.t1*4 )
+    }, context.t1*6 )
   }
 
   /* */
@@ -9467,7 +9494,7 @@ function startOptionTimeOut( test )
     setTimeout( () =>
     {
       console.log( 'program2::end' )
-    }, context.t1*8 )
+    }, context.t1*12 )
 
     process.on( 'SIGTERM', () =>
     {
@@ -9546,6 +9573,7 @@ function startOptionTimeOut( test )
 }
 
 startOptionTimeOut.timeOut = 5e5;
+startOptionTimeOut.rapidity = -1;
 
 //
 
@@ -13027,7 +13055,8 @@ function startOnStart( test )
 
 }
 
-startOnStart.timeOut = 120000;
+startOnStart.timeOut = 3e5;
+startOnStart.rapidity = -1;
 
 //
 
@@ -13377,7 +13406,8 @@ function startOnTerminate( test )
   }
 }
 
-startOnTerminate.timeOut = 3e5;
+startOnTerminate.timeOut = 5e5;
+startOnTerminate.rapidity = -1;
 
 //
 
@@ -15073,6 +15103,7 @@ ${options.runs[ 1 ].procedure.id}.end
 
 }
 
+startConcurrentConsequencesMultiple.rapidity = -1;
 startConcurrentConsequencesMultiple.timeOut = 2e6;
 startConcurrentConsequencesMultiple.description =
 `
@@ -21857,12 +21888,12 @@ function startOptionStreamSizeLimitThrowing( test )
 
 //
 
+/* qqq for Yevhen : paramtetrizing time delays is not complete! */
 function startSingleOptionDry( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
   let programPath = a.program( testApp );
-  let track = [];
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run({ mode, sync : 0, deasync : 0 }) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run({ mode, sync : 0, deasync : 1 }) ) );
@@ -21879,7 +21910,7 @@ function startSingleOptionDry( test )
     {
       _.process.start
       ({
-        execPath : programPath + ` arg1 "arg 2" "'arg3'"`,
+        execPath : programPath + ` arg1`,
         mode : tops.mode,
         sync : tops.sync,
         deasync : tops.deasync
@@ -21891,8 +21922,7 @@ function startSingleOptionDry( test )
       test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, dry : 1, no error`
       let o =
       {
-        /* qqq for Yevhen : ? */
-        execPath : tops.mode === 'fork' ? programPath + ` arg1 "arg 2" "'arg3'"` : 'node ' + programPath + ` arg1 "arg 2" "'arg3'"`,
+        execPath : tops.mode === 'fork' ? programPath + ` arg1` : 'node ' + programPath + ` arg1`,
         mode : tops.mode,
         sync : tops.sync,
         deasync : tops.deasync,
@@ -21902,10 +21932,11 @@ function startSingleOptionDry( test )
         outputCollecting : 1,
         throwingExitCode : 1,
         applyingExitCode : 1,
-        timeOut : tops.sync || !tops.deasync ? null : 100,
+        // timeOut : tops.sync || !tops.deasync ? null : 100, /* xxx */
         ipc : tops.mode === 'shell' ? 0 : 1,
-        when : { delay : 1000 }
+        when : { delay : 2000 },
       }
+      let track = [];
       var t1 = _.time.now();
       var returned = _.process.start( o );
 
@@ -21953,7 +21984,7 @@ function startSingleOptionDry( test )
       o.ready.tap( ( err, op ) =>
       {
         var t2 = _.time.now();
-        test.ge( t2 - t1, 1000 )
+        test.ge( t2 - t1, 2000 )
         track.push( 'ready' );
         test.identical( o.process, null );
         test.identical( err, undefined );
@@ -21970,23 +22001,22 @@ function startSingleOptionDry( test )
         test.identical( op.ended, true );
         test.identical( op.streamOut, null );
         test.identical( op.streamErr, null );
+
+        /* qqq for Yevhen : bad */
         if( tops.mode === 'fork' )
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
-          test.identical( op.fullExecPath, `${programPath} arg1 arg 2 'arg3' arg0` );
+          test.identical( op.fullExecPath, `${programPath} arg1 arg0` );
         }
         else if ( tops.mode === 'shell' )
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe' ] );
-          if( process.platform === 'win32' )
-          test.identical( op.fullExecPath, `node ${programPath} arg1 "arg 2" "'arg3'" "arg0"` );
-          else
-          test.identical( op.fullExecPath, `node ${programPath} arg1 "arg 2" "'arg3'" "arg0"` );
+          test.identical( op.fullExecPath, `node ${programPath} arg1 "arg0"` );
         }
         else
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
-          test.identical( op.fullExecPath, `node ${programPath} arg1 arg 2 'arg3' arg0` );
+          test.identical( op.fullExecPath, `node ${programPath} arg1 arg0` );
         }
 
         test.is( !a.fileProvider.fileExists( a.path.join( a.routinePath, 'file' ) ) )
@@ -21994,7 +22024,6 @@ function startSingleOptionDry( test )
         test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate', 'ready' ] );
         else
         test.identical( track, [ 'conStart', 'conTerminate', 'conDisconnect', 'ready' ] );
-        track = [];
         return null;
       })
 
@@ -22006,10 +22035,11 @@ function startSingleOptionDry( test )
 
     ready.then( () =>
     {
+      /* qqq for Yevhen : bad description! */
       test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, dry : 1, execPath : 'err' + programPath + \` arg1 "arg 2" "'arg3'"\``
       let o =
       {
-        execPath : 'err ' + programPath + ` arg1 "arg 2" "'arg3'"`,
+        execPath : 'err ' + programPath + ` arg1`,
         mode : tops.mode,
         sync : tops.sync,
         deasync : tops.deasync,
@@ -22019,10 +22049,11 @@ function startSingleOptionDry( test )
         outputCollecting : 1,
         throwingExitCode : 1,
         applyingExitCode : 1,
-        timeOut : tops.sync || !tops.deasync ? null : 100,
+        // timeOut : tops.sync || !tops.deasync ? null : 100,
         ipc : tops.mode === 'shell' ? 0 : 1,
-        when : { delay : 1000 }
+        when : { delay : 2000 }
       }
+      let track = []; /* qqq for Yevhen : should be on beginning of test case | aaa : Moved. */
       var t1 = _.time.now();
       var returned = _.process.start( o );
 
@@ -22070,7 +22101,7 @@ function startSingleOptionDry( test )
       o.ready.tap( ( err, op ) =>
       {
         var t2 = _.time.now();
-        test.ge( t2 - t1, 1000 )
+        test.ge( t2 - t1, 2000 );
         track.push( 'ready' );
         test.identical( o.process, null );
         test.identical( err, undefined );
@@ -22090,15 +22121,12 @@ function startSingleOptionDry( test )
         if ( tops.mode === 'shell' )
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe' ] );
-          if( process.platform === 'win32' )
-          test.identical( op.fullExecPath, `err ${programPath} arg1 "arg 2" "'arg3'" "arg0"` );
-          else
-          test.identical( op.fullExecPath, `err ${programPath} arg1 "arg 2" "'arg3'" "arg0"` );
+          test.identical( op.fullExecPath, `err ${programPath} arg1 "arg0"` );
         }
         else
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
-          test.identical( op.fullExecPath, `err ${programPath} arg1 arg 2 'arg3' arg0` );
+          test.identical( op.fullExecPath, `err ${programPath} arg1 arg0` );
         }
 
         test.is( !a.fileProvider.fileExists( a.path.join( a.routinePath, 'file' ) ) )
@@ -22106,7 +22134,6 @@ function startSingleOptionDry( test )
         test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate', 'ready' ] );
         else
         test.identical( track, [ 'conStart', 'conTerminate', 'conDisconnect', 'ready' ] );
-        track = []; /* qqq for Yevhen : should be on beginning of test case */
         return null;
       })
 
@@ -22128,7 +22155,7 @@ function startSingleOptionDry( test )
 }
 
 startSingleOptionDry.rapidity = -1;
-startSingleOptionDry.timeOut = 3e5;
+startSingleOptionDry.timeOut = 5e6;
 startSingleOptionDry.description =
 `
 Simulates run of routine start with all possible options.
@@ -22160,7 +22187,7 @@ function startOptionDryMultiple( test )
     {
       _.process.start
       ({
-        execPath : [ programPath + ` arg1 "arg 2" "'arg3'"`, programPath + ` arg1 "arg 2" "'arg3'"` ],
+        execPath : [ programPath + ` id:1`, programPath + ` id:2` ],
         mode : tops.mode,
         sync : tops.sync,
         deasync : tops.deasync
@@ -23160,6 +23187,123 @@ function startOptionPassingThrough( test )
 }
 
 startOptionPassingThrough.timeOut = 5e5;
+startOptionPassingThrough.rapidity = -1;
+
+//
+
+function startOptionUid( test ) /* Runs only through `sudo` ( i.e. with superuser/root provileges ) */
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let programPath = a.program( program1 );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+
+  return a.ready;
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }`;
+
+      let options =
+      {
+        execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+        throwingExitCode : 0,
+        outputCollecting : 1,
+        mode,
+        uid : 11
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, '11\n' );
+
+        return null;
+      } )
+
+
+    } )
+
+    return ready;
+  }
+
+  /* - */
+
+  function program1()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wFiles' );
+    _.include( 'wProcess' );
+
+    console.log( process.getuid() );
+  }
+}
+
+startOptionUid.experimental = true;
+
+//
+
+function startOptionGid( test ) /* Runs only through `sudo` ( i.e. with superuser/root provileges ) */
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let programPath = a.program( program1 );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+
+  return a.ready;
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }`;
+
+      let options =
+      {
+        execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+        throwingExitCode : 0,
+        outputCollecting : 1,
+        mode,
+        gid : 15
+      }
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, '15\n' );
+
+        return null;
+      } )
+
+    } )
+
+    return ready;
+  }
+
+  /* - */
+
+  function program1()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wFiles' );
+    _.include( 'wProcess' );
+
+    console.log( process.getgid() );
+  }
+}
+
+startOptionGid.experimental = true;
 
 // --
 // pid
@@ -23440,26 +23584,174 @@ function statusOf( test )
 
 //
 
-// function exitReason( test )
-// {
-//   test.case = 'initial value'
-//   var got = _.process.exitReason();
-//   test.identical( got, null );
-//
-//   /* */
-//
-//   test.case = 'set reason'
-//   _.process.exitReason( 'reason' );
-//   var got = _.process.exitReason();
-//   test.identical( got, 'reason' );
-//
-//   /* */
-//
-//   test.case = 'update reason'
-//   _.process.exitReason( 'reason2' );
-//   var got = _.process.exitReason();
-//   test.identical( got, 'reason2' );
-// }
+function exitReason( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
+
+  /* */
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, initial value`;
+
+      let testAppPath = a.program({ routine : testApp, locals : { reasons : null, reset : 0 } });
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+        mode,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, 'null' );
+        a.fileProvider.fileDelete( testAppPath )
+        return null;
+      } )
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, reason : 'reason'`;
+
+      let testAppPath = a.program({ routine : testApp, locals : { reasons : [ 'reason' ], reset : 0 } });
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+        mode,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, `[ null, 'reason' ]` );
+        a.fileProvider.fileDelete( testAppPath )
+        return null;
+      } )
+    })
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, initial, set, update reason`;
+
+      let testAppPath = a.program({ routine : testApp, locals : { reasons : [ 'reason1', 'reason2' ], reset : 0 } });
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+        mode,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, `[ null, 'reason1', 'reason2' ]` );
+        a.fileProvider.fileDelete( testAppPath );
+        return null;
+      } )
+    })
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, initial, set, update, reset reason`;
+
+      let testAppPath = a.program({ routine : testApp, locals : { reasons : [ 'reason1', 'reason2' ], reset : 1 } });
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+        mode,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, `[ null, 'reason1', 'reason2', null ]` );
+        a.fileProvider.fileDelete( testAppPath );
+        return null;
+      } )
+    })
+
+    return ready;
+  }
+
+  /* - */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    let result = [];
+
+    if( !reasons )
+    {
+      console.log( _.process.exitReason() );
+      return;
+    }
+
+    result.push( _.process.exitReason() );
+
+    reasons.forEach( ( reason ) =>
+    {
+      _.process.exitReason( reason );
+      result.push( _.process.exitReason() );
+    })
+
+    if( reset )
+    {
+      _.process.exitReason( null );
+      result.push( _.process.exitReason() );
+    }
+
+    console.log( result );
+
+  }
+
+  /* ORIGINAL */
+  // test.case = 'initial value'
+  // var got = _.process.exitReason();
+  // test.identical( got, null );
+
+  // /* */
+
+  // test.case = 'set reason'
+  // _.process.exitReason( 'reason' );
+  // var got = _.process.exitReason();
+  // test.identical( got, 'reason' );
+
+  // /* */
+
+  // test.case = 'update reason'
+  // _.process.exitReason( 'reason2' );
+  // var got = _.process.exitReason();
+  // test.identical( got, 'reason2' );
+}
 
 //
 
@@ -25406,7 +25698,7 @@ function startErrorAfterTerminationWithSend( test )
 
  = Beautified calls stack
     at ChildProcess.target.send (internal/child_process.js:705:16)
-    at wConsequence.<anonymous> (/Users/runner/work/wProcess/wProcess/proto/wtools/abase/l4.test/Execution.test.s:24677:17) *
+    at wConsequence.<anonymous> (/Users/runner/work/wProcess/wProcess/proto/wtools/abase/l4_process.test/Execution.test.s:24677:17) *
     at wConsequence.take (/Users/runner/work/wProcess/wProcess/node_modules/wConsequence/proto/wtools/abase/l9/consequence/Consequence.s:2669:8)
     at end3 (/Users/runner/work/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:783:20)
     at end2 (/Users/runner/work/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:734:12)
@@ -25480,20 +25772,16 @@ startErrorAfterTerminationWithSend.description =
 
 //
 
+/* qqq for Yevhen : subroutine */
 function startTerminateHangedWithExitHandler( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
   let testAppPath = a.program( testApp );
 
-  // if( process.platform === 'win32' )
-  // {
-  /* zzz : windows-kill doesn't work correctrly on node 14
-  investigate if its possible to use process.kill instead of windows-kill
-  */
-  //   test.identical( 1, 1 )
-  //   return;
-  // }
+  /* signal handler of njs on Windows is defective */
+  if( process.platform === 'win32' )
+  return test.is( true );
 
   /* */
 
@@ -25501,12 +25789,13 @@ function startTerminateHangedWithExitHandler( test )
 
   .then( () =>
   {
+    let time;
     let o =
     {
       execPath : 'node ' + testAppPath,
       mode : 'spawn',
       throwingExitCode : 0,
-      outputPiping : 0,
+      outputPiping : 1,
       ipc : 1,
       outputCollecting : 1,
     }
@@ -25515,7 +25804,8 @@ function startTerminateHangedWithExitHandler( test )
 
     o.process.on( 'message', () =>
     {
-      _.process.terminate({ pnd : o.process, timeOut : 5000 });
+      time = _.time.now();
+      _.process.terminate({ pnd : o.process, timeOut : context.t1*5 });
     })
 
     con.then( () =>
@@ -25523,7 +25813,44 @@ function startTerminateHangedWithExitHandler( test )
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGKILL' );
       test.is( !_.strHas( o.output, 'SIGTERM' ) );
+      test.ge( _.time.now() - time, context.t1*5 );
+      console.log( `time : ${_.time.spent( time )}` );
+      return null;
+    })
 
+    return con;
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    let time;
+    let o =
+    {
+      execPath : testAppPath,
+      mode : 'fork',
+      throwingExitCode : 0,
+      outputPiping : 1,
+      ipc : 1,
+      outputCollecting : 1,
+    }
+
+    let con = _.process.start( o );
+
+    o.process.on( 'message', () =>
+    {
+      time = _.time.now();
+      _.process.terminate({ pnd : o.process, timeOut : context.t1*5 });
+    })
+
+    con.then( () =>
+    {
+      test.identical( o.exitCode, null );
+      test.identical( o.exitSignal, 'SIGKILL' );
+      test.is( !_.strHas( o.output, 'SIGTERM' ) );
+      test.ge( _.time.now() - time, context.t1*5 );
+      console.log( `time : ${_.time.spent( time )}` );
       return null;
     })
 
@@ -25532,37 +25859,6 @@ function startTerminateHangedWithExitHandler( test )
 
   /*  */
 
-  .then( () =>
-  {
-    let o =
-    {
-      execPath : testAppPath,
-      mode : 'fork',
-      throwingExitCode : 0,
-      outputPiping : 0,
-      ipc : 1,
-      outputCollecting : 1,
-    }
-
-    let con = _.process.start( o );
-
-    o.process.on( 'message', () =>
-    {
-      _.process.terminate({ pnd : o.process, timeOut : 5000 });
-    })
-
-    con.then( () =>
-    {
-      test.identical( o.exitCode, null );
-      test.identical( o.exitSignal, 'SIGKILL' );
-      test.is( !_.strHas( o.output, 'SIGTERM' ) );
-
-      return null;
-    })
-
-    return con;
-  })
-
   return a.ready;
 
   /* - */
@@ -25570,20 +25866,21 @@ function startTerminateHangedWithExitHandler( test )
   function testApp()
   {
     let _ = require( toolsPath );
-
     _.include( 'wProcess' );
     _.process._exitHandlerRepair();
     process.send( process.pid )
+    let x = 0;
     while( 1 )
     {
-      console.log( _.time.now() )
+      x += Math.cos( Math.random() );
+      // console.log( _.time.now() );
     }
   }
 }
 
 startTerminateHangedWithExitHandler.timeOut = 20000;
 
-/* startTerminateHangedWithExitHandler.description =
+startTerminateHangedWithExitHandler.description =
 `
   Test app - code that blocks event loop and appExitHandlerRepair called at start
 
@@ -25595,7 +25892,7 @@ startTerminateHangedWithExitHandler.timeOut = 20000;
     - For SIGINT: Child was terminated with exitCode : 0, exitSignal : null
     - For SIGKILL: Child was terminated with exitCode : null, exitSignal : SIGKILL
     - No time out message in output
-` */
+`
 
 //
 
@@ -25738,6 +26035,10 @@ function endSignalsBasic( test )
     stdio : 'pipe',
   }
 
+  // xxx
+  // let modes = [ 'fork' ];
+  // let modes = [ 'shell' ];
+
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGQUIT' ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGINT' ) ) );
@@ -25755,8 +26056,9 @@ function endSignalsBasic( test )
   {
     let ready = _.Consequence().take( null );
 
-    /* signal SIGQUIT is not supported on Windows */
-    if( process.platform === 'win32' && signal === 'SIGQUIT' )
+    /* signals SIGHUP and SIGQUIT is not supported by njs on Windows */
+    if( process.platform === 'win32' )
+    if( signal === 'SIGHUP' || signal === 'SIGQUIT' )
     return ready;
 
     /* - */
@@ -25844,8 +26146,10 @@ program1:end
       {
         var exp1 =
 `program1:begin
-${signal}
 `
+        if( process.platform !== 'win32' )
+        exp1 += `${signal}\n`
+
         var exp2 =
 `program1:begin
 program1:end
@@ -25958,8 +26262,17 @@ program1:end
 sleep:begin
 sleep:end
 program1:end
-${signal}
 `
+
+        /* njs on Windows does killing */
+        if( process.platform === 'win32' )
+        exp1 =
+`program1:begin
+sleep:begin
+`
+        else
+        exp1 += `${signal}\n`
+
         var exp2 =
 `program1:begin
 sleep:begin
@@ -25981,6 +26294,7 @@ program1:end
         test.identical( options.process.killed, true );
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
+        if( process.platform !== 'win32' )
         test.ge( dtime, context.t1 * 10 );
         return null;
       })
@@ -26014,8 +26328,10 @@ program1:end
         var exp1 =
 `program1:begin
 deasync:begin
-${signal}
 `
+        if( process.platform !== 'win32' )
+        exp1 += `${signal}\n`
+
         var exp2 =
 `program1:begin
 deasync:begin
@@ -26386,15 +26702,29 @@ deasync:end
 `program1:begin
 `
         test.identical( options.output, exp1 );
-        test.identical( options.exitCode, null );
-        test.identical( options.exitSignal, 'SIGTERM' );
         test.identical( options.ended, true );
-        test.identical( options.exitReason, 'signal' );
         test.identical( options.state, 'terminated' );
         test.identical( options.error, null );
-        test.identical( options.process.exitCode, null );
-        test.identical( options.process.signalCode, 'SIGTERM' );
         test.identical( options.process.killed, false );
+
+        /* poor implementation of signals in njs on Windows */
+        if( process.platform === 'win32' )
+        {
+          test.identical( options.exitCode, 1 );
+          test.identical( options.exitSignal, null );
+          test.identical( options.exitReason, 'code' );
+          test.identical( options.process.signalCode, null );
+          test.identical( options.process.exitCode, 1 );
+        }
+        else
+        {
+          test.identical( options.exitCode, null );
+          test.identical( options.exitSignal, 'SIGTERM' );
+          test.identical( options.exitReason, 'signal' );
+          test.identical( options.process.signalCode, 'SIGTERM' );
+          test.identical( options.process.exitCode, null );
+        }
+
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
         test.le( dtime, context.t1 * 2 );
@@ -26429,18 +26759,34 @@ deasync:end
       {
         var exp1 =
 `program1:begin
-SIGTERM
 `
+        /* poor implementation of signals in njs on Windows */
+        if( process.platform !== 'win32' )
+        exp1 += `SIGTERM\n`;
         test.identical( options.output, exp1 );
-        test.identical( options.exitCode, null );
-        test.identical( options.exitSignal, 'SIGTERM' );
         test.identical( options.ended, true );
-        test.identical( options.exitReason, 'signal' );
         test.identical( options.state, 'terminated' );
         test.identical( options.error, null );
-        test.identical( options.process.exitCode, null );
-        test.identical( options.process.signalCode, 'SIGTERM' );
         test.identical( options.process.killed, false );
+
+        /* poor implementation of signals in njs on Windows */
+        if( process.platform === 'win32' )
+        {
+          test.identical( options.exitCode, 1 );
+          test.identical( options.exitSignal, null );
+          test.identical( options.exitReason, 'code' );
+          test.identical( options.process.signalCode, null );
+          test.identical( options.process.exitCode, 1 );
+        }
+        else
+        {
+          test.identical( options.exitCode, null );
+          test.identical( options.exitSignal, 'SIGTERM' );
+          test.identical( options.exitReason, 'signal' );
+          test.identical( options.process.signalCode, 'SIGTERM' );
+          test.identical( options.process.exitCode, null );
+        }
+
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
         test.le( dtime, context.t1 * 2 );
@@ -26478,15 +26824,29 @@ SIGTERM
 sleep:begin
 `
         test.identical( options.output, exp1 );
-        test.identical( options.exitCode, null );
-        test.identical( options.exitSignal, 'SIGTERM' );
         test.identical( options.ended, true );
-        test.identical( options.exitReason, 'signal' );
         test.identical( options.state, 'terminated' );
         test.identical( options.error, null );
-        test.identical( options.process.exitCode, null );
-        test.identical( options.process.signalCode, 'SIGTERM' );
         test.identical( options.process.killed, false );
+
+        /* poor implementation of signals in njs on Windows */
+        if( process.platform === 'win32' )
+        {
+          test.identical( options.exitCode, 1 );
+          test.identical( options.exitSignal, null );
+          test.identical( options.exitReason, 'code' );
+          test.identical( options.process.signalCode, null );
+          test.identical( options.process.exitCode, 1 );
+        }
+        else
+        {
+          test.identical( options.exitCode, null );
+          test.identical( options.exitSignal, 'SIGTERM' );
+          test.identical( options.exitReason, 'signal' );
+          test.identical( options.process.signalCode, 'SIGTERM' );
+          test.identical( options.process.exitCode, null );
+        }
+
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
         test.le( dtime, context.t1 * 2 );
@@ -26524,17 +26884,33 @@ sleep:begin
 sleep:begin
 `
         test.identical( options.output, exp1 );
-        test.identical( options.exitCode, null );
-        test.identical( options.exitSignal, 'SIGKILL' );
         test.identical( options.ended, true );
-        test.identical( options.exitReason, 'signal' );
         test.identical( options.state, 'terminated' );
         test.identical( options.error, null );
-        test.identical( options.process.exitCode, null );
-        test.identical( options.process.signalCode, 'SIGKILL' );
         test.identical( options.process.killed, false );
+
+        /* poor implementation of signals in njs on Windows */
+        if( process.platform === 'win32' )
+        {
+          test.identical( options.exitCode, 1 );
+          test.identical( options.exitSignal, null );
+          test.identical( options.exitReason, 'code' );
+          test.identical( options.process.signalCode, null );
+          test.identical( options.process.exitCode, 1 );
+        }
+        else
+        {
+          test.identical( options.exitCode, null );
+          test.identical( options.exitSignal, 'SIGTERM' );
+          test.identical( options.exitReason, 'signal' );
+          test.identical( options.process.signalCode, 'SIGTERM' );
+          test.identical( options.process.exitCode, null );
+        }
+
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
+        /* kill without waiting in njs on Windows */
+        if( process.platform !== 'win32' )
         test.ge( dtime, context.t1 * 4 );
         return null;
       })
@@ -26568,18 +26944,35 @@ sleep:begin
         var exp1 =
 `program1:begin
 deasync:begin
-SIGTERM
 `
+        /* poor implementation of signals in njs on Windows */
+        if( process.platform !== 'win32' )
+        exp1 += `SIGTERM\n`;
+
         test.identical( options.output, exp1 );
-        test.identical( options.exitCode, null );
-        test.identical( options.exitSignal, 'SIGTERM' );
         test.identical( options.ended, true );
-        test.identical( options.exitReason, 'signal' );
         test.identical( options.state, 'terminated' );
         test.identical( options.error, null );
-        test.identical( options.process.exitCode, null );
-        test.identical( options.process.signalCode, 'SIGTERM' );
         test.identical( options.process.killed, false );
+
+        /* poor implementation of signals in njs on Windows */
+        if( process.platform === 'win32' )
+        {
+          test.identical( options.exitCode, 1 );
+          test.identical( options.exitSignal, null );
+          test.identical( options.exitReason, 'code' );
+          test.identical( options.process.signalCode, null );
+          test.identical( options.process.exitCode, 1 );
+        }
+        else
+        {
+          test.identical( options.exitCode, null );
+          test.identical( options.exitSignal, 'SIGTERM' );
+          test.identical( options.exitReason, 'signal' );
+          test.identical( options.process.signalCode, 'SIGTERM' );
+          test.identical( options.process.exitCode, null );
+        }
+
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
         test.le( dtime, context.t1 * 2 );
@@ -26635,15 +27028,29 @@ SIGTERM
 `program1:begin
 `
         test.identical( options.output, exp1 );
-        test.identical( options.exitCode, null );
-        test.identical( options.exitSignal, 'SIGTERM' );
         test.identical( options.ended, true );
-        test.identical( options.exitReason, 'signal' );
         test.identical( options.state, 'terminated' );
         test.identical( options.error, null );
-        test.identical( options.process.exitCode, null );
-        test.identical( options.process.signalCode, 'SIGTERM' );
         test.identical( options.process.killed, false );
+
+        /* poor implementation of signals in njs on Windows */
+        if( process.platform === 'win32' )
+        {
+          test.identical( options.exitCode, 1 );
+          test.identical( options.exitSignal, null );
+          test.identical( options.exitReason, 'code' );
+          test.identical( options.process.signalCode, null );
+          test.identical( options.process.exitCode, 1 );
+        }
+        else
+        {
+          test.identical( options.exitCode, null );
+          test.identical( options.exitSignal, 'SIGTERM' );
+          test.identical( options.exitReason, 'signal' );
+          test.identical( options.process.signalCode, 'SIGTERM' );
+          test.identical( options.process.exitCode, null );
+        }
+
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
         test.le( dtime, context.t1 * 2 );
@@ -26678,18 +27085,35 @@ SIGTERM
       {
         var exp1 =
 `program1:begin
-SIGTERM
 `
+        /* poor implementation of signals in njs on Windows */
+        if( process.platform !== 'win32' )
+        exp1 += `SIGTERM\n`;
+
         test.identical( options.output, exp1 );
-        test.identical( options.exitCode, null );
-        test.identical( options.exitSignal, 'SIGTERM' );
         test.identical( options.ended, true );
-        test.identical( options.exitReason, 'signal' );
         test.identical( options.state, 'terminated' );
         test.identical( options.error, null );
-        test.identical( options.process.exitCode, null );
-        test.identical( options.process.signalCode, 'SIGTERM' );
         test.identical( options.process.killed, false );
+
+        /* poor implementation of signals in njs on Windows */
+        if( process.platform === 'win32' )
+        {
+          test.identical( options.exitCode, 1 );
+          test.identical( options.exitSignal, null );
+          test.identical( options.exitReason, 'code' );
+          test.identical( options.process.signalCode, null );
+          test.identical( options.process.exitCode, 1 );
+        }
+        else
+        {
+          test.identical( options.exitCode, null );
+          test.identical( options.exitSignal, 'SIGTERM' );
+          test.identical( options.exitReason, 'signal' );
+          test.identical( options.process.signalCode, 'SIGTERM' );
+          test.identical( options.process.exitCode, null );
+        }
+
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
         test.le( dtime, context.t1 * 2 );
@@ -26727,15 +27151,29 @@ SIGTERM
 sleep:begin
 `
         test.identical( options.output, exp1 );
-        test.identical( options.exitCode, null );
-        test.identical( options.exitSignal, 'SIGTERM' );
         test.identical( options.ended, true );
-        test.identical( options.exitReason, 'signal' );
         test.identical( options.state, 'terminated' );
         test.identical( options.error, null );
-        test.identical( options.process.exitCode, null );
-        test.identical( options.process.signalCode, 'SIGTERM' );
         test.identical( options.process.killed, false );
+
+        /* poor implementation of signals in njs on Windows */
+        if( process.platform === 'win32' )
+        {
+          test.identical( options.exitCode, 1 );
+          test.identical( options.exitSignal, null );
+          test.identical( options.exitReason, 'code' );
+          test.identical( options.process.signalCode, null );
+          test.identical( options.process.exitCode, 1 );
+        }
+        else
+        {
+          test.identical( options.exitCode, null );
+          test.identical( options.exitSignal, 'SIGTERM' );
+          test.identical( options.exitReason, 'signal' );
+          test.identical( options.process.signalCode, 'SIGTERM' );
+          test.identical( options.process.exitCode, null );
+        }
+
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
         test.le( dtime, context.t1 * 2 );
@@ -26783,26 +27221,40 @@ sleep:begin
         test.is( options.output === exp1 || options.output === exp2 );
         else
         test.identical( options.output, exp1 );
-        test.identical( options.exitCode, null );
-        /*
-          on linux has two processes( shell + node ), on mac shell has only node
-          on linux shell receives SIGTERM and kills node
-          on mac node ignores SIGTERM because of sleep option enabled
-        */
-        if( process.platform === 'darwin' )
-        test.identical( options.exitSignal, 'SIGKILL' );
-        else
-        test.identical( options.exitSignal, 'SIGTERM' );
         test.identical( options.ended, true );
-        test.identical( options.exitReason, 'signal' );
         test.identical( options.state, 'terminated' );
         test.identical( options.error, null );
-        test.identical( options.process.exitCode, null );
-        if( process.platform === 'darwin' )
-        test.identical( options.process.signalCode, 'SIGKILL' );
-        else
-        test.identical( options.process.signalCode, 'SIGTERM' );
         test.identical( options.process.killed, false );
+
+        /* poor implementation of signals in njs on Windows */
+        if( process.platform === 'win32' )
+        {
+          test.identical( options.exitCode, 1 );
+          test.identical( options.exitSignal, null );
+          test.identical( options.exitReason, 'code' );
+          test.identical( options.process.signalCode, null );
+          test.identical( options.process.exitCode, 1 );
+        }
+        else
+        {
+          test.identical( options.exitCode, null );
+          /*
+            on linux might be two processes( shell + node ), on mac shell has only node
+            on linux might shell receives SIGTERM and kills node
+            on mac node ignores SIGTERM because of sleep option enabled
+          */
+          if( process.platform === 'darwin' )
+          test.identical( options.exitSignal, 'SIGKILL' );
+          else
+          test.identical( options.exitSignal, 'SIGTERM' );
+          test.identical( options.exitReason, 'signal' );
+          test.identical( options.process.exitCode, null );
+          if( process.platform === 'darwin' )
+          test.identical( options.process.signalCode, 'SIGKILL' );
+          else
+          test.identical( options.process.signalCode, 'SIGTERM' );
+        }
+
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
         /* if shell then parent process may ignore the signal */
@@ -26840,18 +27292,34 @@ sleep:begin
         var exp1 =
 `program1:begin
 deasync:begin
-SIGTERM
 `
+        /* poor implementation of signals in njs on Windows */
+        if( process.platform !== 'win32' )
+        exp1 += `SIGTERM\n`;
         test.identical( options.output, exp1 );
-        test.identical( options.exitCode, null );
-        test.identical( options.exitSignal, 'SIGTERM' );
         test.identical( options.ended, true );
-        test.identical( options.exitReason, 'signal' );
         test.identical( options.state, 'terminated' );
         test.identical( options.error, null );
-        test.identical( options.process.exitCode, null );
-        test.identical( options.process.signalCode, 'SIGTERM' );
         test.identical( options.process.killed, false );
+
+        /* poor implementation of signals in njs on Windows */
+        if( process.platform === 'win32' )
+        {
+          test.identical( options.exitCode, 1 );
+          test.identical( options.exitSignal, null );
+          test.identical( options.exitReason, 'code' );
+          test.identical( options.process.signalCode, null );
+          test.identical( options.process.exitCode, 1 );
+        }
+        else
+        {
+          test.identical( options.exitCode, null );
+          test.identical( options.exitSignal, 'SIGTERM' );
+          test.identical( options.exitReason, 'signal' );
+          test.identical( options.process.signalCode, 'SIGTERM' );
+          test.identical( options.process.exitCode, null );
+        }
+
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
         test.le( dtime, context.t1 * 2 );
@@ -26903,15 +27371,29 @@ SIGTERM
 `program1:begin
 `
         test.identical( options.output, exp1 );
-        test.identical( options.exitCode, null );
-        test.identical( options.exitSignal, 'SIGKILL' );
         test.identical( options.ended, true );
-        test.identical( options.exitReason, 'signal' );
         test.identical( options.state, 'terminated' );
         test.identical( options.error, null );
-        test.identical( options.process.exitCode, null );
-        test.identical( options.process.signalCode, 'SIGKILL' );
         test.identical( options.process.killed, false );
+
+        /* poor implementation of signals in njs on Windows */
+        if( process.platform === 'win32' )
+        {
+          test.identical( options.exitCode, 1 );
+          test.identical( options.exitSignal, null );
+          test.identical( options.exitReason, 'code' );
+          test.identical( options.process.signalCode, null );
+          test.identical( options.process.exitCode, 1 );
+        }
+        else
+        {
+          test.identical( options.exitCode, null );
+          test.identical( options.exitSignal, 'SIGTERM' );
+          test.identical( options.exitReason, 'signal' );
+          test.identical( options.process.signalCode, 'SIGTERM' );
+          test.identical( options.process.exitCode, null );
+        }
+
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
         test.le( dtime, context.t1 * 2 );
@@ -26955,15 +27437,29 @@ program1:end
         test.is( options.output === exp1 || options.output === exp2 );
         else
         test.identical( options.output, exp1 );
-        test.identical( options.exitCode, null );
-        test.identical( options.exitSignal, 'SIGKILL' );
         test.identical( options.ended, true );
-        test.identical( options.exitReason, 'signal' );
         test.identical( options.state, 'terminated' );
         test.identical( options.error, null );
-        test.identical( options.process.exitCode, null );
-        test.identical( options.process.signalCode, 'SIGKILL' );
         test.identical( options.process.killed, false );
+
+        /* poor implementation of signals in njs on Windows */
+        if( process.platform === 'win32' )
+        {
+          test.identical( options.exitCode, 1 );
+          test.identical( options.exitSignal, null );
+          test.identical( options.exitReason, 'code' );
+          test.identical( options.process.signalCode, null );
+          test.identical( options.process.exitCode, 1 );
+        }
+        else
+        {
+          test.identical( options.exitCode, null );
+          test.identical( options.exitSignal, 'SIGTERM' );
+          test.identical( options.exitReason, 'signal' );
+          test.identical( options.process.signalCode, 'SIGTERM' );
+          test.identical( options.process.exitCode, null );
+        }
+
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
         test.le( dtime, context.t1 * 2 );
@@ -27010,15 +27506,29 @@ program1:end
         test.is( options.output === exp1 || options.output === exp2 );
         else
         test.identical( options.output, exp1 );
-        test.identical( options.exitCode, null );
-        test.identical( options.exitSignal, 'SIGKILL' );
         test.identical( options.ended, true );
-        test.identical( options.exitReason, 'signal' );
         test.identical( options.state, 'terminated' );
         test.identical( options.error, null );
-        test.identical( options.process.exitCode, null );
-        test.identical( options.process.signalCode, 'SIGKILL' );
         test.identical( options.process.killed, false );
+
+        /* poor implementation of signals in njs on Windows */
+        if( process.platform === 'win32' )
+        {
+          test.identical( options.exitCode, 1 );
+          test.identical( options.exitSignal, null );
+          test.identical( options.exitReason, 'code' );
+          test.identical( options.process.signalCode, null );
+          test.identical( options.process.exitCode, 1 );
+        }
+        else
+        {
+          test.identical( options.exitCode, null );
+          test.identical( options.exitSignal, 'SIGTERM' );
+          test.identical( options.exitReason, 'signal' );
+          test.identical( options.process.signalCode, 'SIGTERM' );
+          test.identical( options.process.exitCode, null );
+        }
+
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
         /* if shell then parent process may ignore the signal */
@@ -27067,15 +27577,29 @@ program1:end
         test.is( options.output === exp1 || options.output === exp2 );
         else
         test.identical( options.output, exp1 );
-        test.identical( options.exitCode, null );
-        test.identical( options.exitSignal, 'SIGKILL' );
         test.identical( options.ended, true );
-        test.identical( options.exitReason, 'signal' );
         test.identical( options.state, 'terminated' );
         test.identical( options.error, null );
-        test.identical( options.process.exitCode, null );
-        test.identical( options.process.signalCode, 'SIGKILL' );
         test.identical( options.process.killed, false );
+
+        /* poor implementation of signals in njs on Windows */
+        if( process.platform === 'win32' )
+        {
+          test.identical( options.exitCode, 1 );
+          test.identical( options.exitSignal, null );
+          test.identical( options.exitReason, 'code' );
+          test.identical( options.process.signalCode, null );
+          test.identical( options.process.exitCode, 1 );
+        }
+        else
+        {
+          test.identical( options.exitCode, null );
+          test.identical( options.exitSignal, 'SIGTERM' );
+          test.identical( options.exitReason, 'signal' );
+          test.identical( options.process.signalCode, 'SIGTERM' );
+          test.identical( options.process.exitCode, null );
+        }
+
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
         /* if shell then parent process may ignore the signal */
@@ -27124,15 +27648,29 @@ deasync:end
         test.is( options.output === exp1 || options.output === exp2 );
         else
         test.identical( options.output, exp1 );
-        test.identical( options.exitCode, null );
-        test.identical( options.exitSignal, 'SIGKILL' );
         test.identical( options.ended, true );
-        test.identical( options.exitReason, 'signal' );
         test.identical( options.state, 'terminated' );
         test.identical( options.error, null );
-        test.identical( options.process.exitCode, null );
-        test.identical( options.process.signalCode, 'SIGKILL' );
         test.identical( options.process.killed, false );
+
+        /* poor implementation of signals in njs on Windows */
+        if( process.platform === 'win32' )
+        {
+          test.identical( options.exitCode, 1 );
+          test.identical( options.exitSignal, null );
+          test.identical( options.exitReason, 'code' );
+          test.identical( options.process.signalCode, null );
+          test.identical( options.process.exitCode, 1 );
+        }
+        else
+        {
+          test.identical( options.exitCode, null );
+          test.identical( options.exitSignal, 'SIGTERM' );
+          test.identical( options.exitReason, 'signal' );
+          test.identical( options.process.signalCode, 'SIGTERM' );
+          test.identical( options.process.exitCode, null );
+        }
+
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
         /* if shell then parent process may ignore the signal */
@@ -27255,6 +27793,11 @@ function endSignalsOnExit( test )
   {
     let ready = _.Consequence().take( null );
 
+    /* signals SIGHUP and SIGQUIT is not supported by njs on Windows */
+    if( process.platform === 'win32' )
+    if( signal === 'SIGHUP' || signal === 'SIGQUIT' )
+    return ready;
+
     /* - */
 
     ready
@@ -27286,6 +27829,11 @@ function endSignalsOnExit( test )
 `program1:begin
 ${signal}
 exit:end
+`
+        /* poor implementation of signals in njs on Windows */
+        if( process.platform === 'win32' )
+        exp1 =
+`program1:begin
 `
         var exp2 =
 `program1:begin
@@ -27423,17 +27971,37 @@ exit:end
 SIGTERM
 exit:end
 `
+        /* poor implementation of signals in njs on Windows */
+        if( process.platform === 'win32' )
+        exp1 =
+`program1:begin
+`
+
         test.identical( options.output, exp1 );
-        test.identical( _.strCount( options.output, 'exit:' ), 1 );
-        test.identical( options.exitCode, null );
-        test.identical( options.exitSignal, 'SIGTERM' );
+        test.identical( _.strCount( options.output, 'exit:' ), process.platform === 'win32' ? 0 : 1 );
         test.identical( options.ended, true );
-        test.identical( options.exitReason, 'signal' );
         test.identical( options.state, 'terminated' );
         test.identical( options.error, null );
-        test.identical( options.process.exitCode, null );
-        test.identical( options.process.signalCode, 'SIGTERM' );
         test.identical( options.process.killed, false );
+
+        /* poor implementation of signals in njs on Windows */
+        if( process.platform === 'win32' )
+        {
+          test.identical( options.exitCode, 1 );
+          test.identical( options.exitSignal, null );
+          test.identical( options.exitReason, 'code' );
+          test.identical( options.process.signalCode, null );
+          test.identical( options.process.exitCode, 1 );
+        }
+        else
+        {
+          test.identical( options.exitCode, null );
+          test.identical( options.exitSignal, 'SIGTERM' );
+          test.identical( options.exitReason, 'signal' );
+          test.identical( options.process.signalCode, 'SIGTERM' );
+          test.identical( options.process.exitCode, null );
+        }
+
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
         return null;
@@ -27465,22 +28033,42 @@ exit:end
       })
       returned.finally( function()
       {
-        var exp1 =
+        var exp =
 `program1:begin
 SIGTERM
 exit:end
 `
-        test.identical( options.output, exp1 );
-        test.identical( _.strCount( options.output, 'exit:' ), 1 );
-        test.identical( options.exitCode, null );
-        test.identical( options.exitSignal, 'SIGTERM' );
+        if( process.platform === 'win32' )
+        exp =
+`program1:begin
+`
+
+        test.identical( options.output, exp );
+        test.identical( _.strCount( options.output, 'exit:' ), process.platform === 'win32' ? 0 : 1 );
         test.identical( options.ended, true );
-        test.identical( options.exitReason, 'signal' );
         test.identical( options.state, 'terminated' );
         test.identical( options.error, null );
-        test.identical( options.process.exitCode, null );
-        test.identical( options.process.signalCode, 'SIGTERM' );
         test.identical( options.process.killed, true );
+
+        // xxx
+        // /* poor implementation of signals in njs on Windows */
+        // if( process.platform === 'win32' )
+        // {
+        //   test.identical( options.exitCode, 1 );
+        //   test.identical( options.exitSignal, null );
+        //   test.identical( options.exitReason, 'code' );
+        //   test.identical( options.process.signalCode, null );
+        //   test.identical( options.process.exitCode, 1 );
+        // }
+        // else
+        // {
+          test.identical( options.exitCode, null );
+          test.identical( options.exitSignal, 'SIGTERM' );
+          test.identical( options.exitReason, 'signal' );
+          test.identical( options.process.signalCode, 'SIGTERM' );
+          test.identical( options.process.exitCode, null );
+        // }
+
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
         return null;
@@ -27538,15 +28126,29 @@ Killed
         test.is( options.output === exp1 || options.output === exp2 );
         else
         test.identical( options.output, exp1 );
-        test.identical( options.exitCode, null );
-        test.identical( options.exitSignal, 'SIGKILL' );
         test.identical( options.ended, true );
-        test.identical( options.exitReason, 'signal' );
         test.identical( options.state, 'terminated' );
         test.identical( options.error, null );
-        test.identical( options.process.exitCode, null );
-        test.identical( options.process.signalCode, 'SIGKILL' );
         test.identical( options.process.killed, false );
+
+        /* poor implementation of signals in njs on Windows */
+        if( process.platform === 'win32' )
+        {
+          test.identical( options.exitCode, 1 );
+          test.identical( options.exitSignal, null );
+          test.identical( options.exitReason, 'code' );
+          test.identical( options.process.signalCode, null );
+          test.identical( options.process.exitCode, 1 );
+        }
+        else
+        {
+          test.identical( options.exitCode, null );
+          test.identical( options.exitSignal, 'SIGKILL' );
+          test.identical( options.exitReason, 'signal' );
+          test.identical( options.process.signalCode, 'SIGKILL' );
+          test.identical( options.process.exitCode, null );
+        }
+
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
         return null;
@@ -27589,15 +28191,30 @@ Killed
         test.is( options.output === exp1 || options.output === exp2 );
         else
         test.identical( options.output, exp1 );
-        test.identical( options.exitCode, null );
-        test.identical( options.exitSignal, 'SIGKILL' );
         test.identical( options.ended, true );
-        test.identical( options.exitReason, 'signal' );
         test.identical( options.state, 'terminated' );
         test.identical( options.error, null );
-        test.identical( options.process.exitCode, null );
-        test.identical( options.process.signalCode, 'SIGKILL' );
         test.identical( options.process.killed, true );
+
+        // xxx
+        // /* poor implementation of signals in njs on Windows */
+        // if( process.platform === 'win32' )
+        // {
+        //   test.identical( options.exitCode, 1 );
+        //   test.identical( options.exitSignal, null );
+        //   test.identical( options.exitReason, 'code' );
+        //   test.identical( options.process.signalCode, null );
+        //   test.identical( options.process.exitCode, 1 );
+        // }
+        // else
+        // {
+          test.identical( options.exitCode, null );
+          test.identical( options.exitSignal, 'SIGKILL' );
+          test.identical( options.exitReason, 'signal' );
+          test.identical( options.process.signalCode, 'SIGKILL' );
+          test.identical( options.process.exitCode, null );
+        // }
+
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
         return null;
@@ -27683,6 +28300,11 @@ function endSignalsOnExitExitAgain( test )
   {
     let ready = _.Consequence().take( null );
 
+    /* signals SIGHUP and SIGQUIT is not supported by njs on Windows */
+    if( process.platform === 'win32' )
+    if( signal === 'SIGHUP' || signal === 'SIGQUIT' )
+    return ready;
+
     /* - */
 
     ready
@@ -27715,6 +28337,11 @@ function endSignalsOnExitExitAgain( test )
 ${signal}
 exit:${exitCode}
 `
+        /* poor implementation of signals in njs on Windows */
+        if( process.platform === 'win32' )
+        exp1 =
+`program1:begin
+`
         var exp2 =
 `program1:begin
 program1:end
@@ -27724,16 +28351,29 @@ exit:${exitCode}
         test.is( options.output === exp1 || options.output === exp2 );
         else
         test.identical( options.output, exp1 );
-        test.identical( _.strCount( options.output, 'exit:' ), 1 );
-        test.identical( options.exitCode, exitCode );
-        test.identical( options.exitSignal, null );
+        test.identical( _.strCount( options.output, 'exit:' ), process.platform === 'win32' ? 0 : 1 );
         test.identical( options.ended, true );
-        test.identical( options.exitReason, 'code' );
         test.identical( options.state, 'terminated' );
         test.identical( options.error, null );
-        test.identical( options.process.exitCode, exitCode );
-        test.identical( options.process.signalCode, null );
         test.identical( options.process.killed, true );
+
+        if( process.platform === 'win32' )
+        {
+          test.identical( options.exitCode, null );
+          test.identical( options.exitSignal, signal );
+          test.identical( options.exitReason, 'signal' );
+          test.identical( options.process.signalCode, signal );
+          test.identical( options.process.exitCode, null );
+        }
+        else
+        {
+          test.identical( options.exitCode, exitCode );
+          test.identical( options.exitSignal, null );
+          test.identical( options.exitReason, 'code' );
+          test.identical( options.process.signalCode, null );
+          test.identical( options.process.exitCode, exitCode );
+        }
+
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
         return null;
@@ -27765,14 +28405,17 @@ exit:${exitCode}
       })
       returned.finally( function()
       {
-        var exp1 =
+        var exp =
 `program1:begin
 ${signal}
 exit:${exitCode}
 `
-        var exp2 =
+        if( process.platform === 'win32' )
+        exp =
 `program1:begin
 `
+        test.identical( options.output, exp );
+
         /*
         Windows doesn't support signals handling, but will exit with signal if process was killed using pnd, exit event will not be emiited
         On Unix signal will be handled and process will exit with code passed to exit event handler
@@ -27780,20 +28423,36 @@ exit:${exitCode}
 
         if( process.platform === 'win32' )
         {
-          test.identical( options.output, exp2 );
           test.identical( options.exitCode, null );
           test.identical( options.exitSignal, signal );
           test.identical( options.exitReason, 'signal' );
+          test.identical( options.process.signalCode, signal );
+          test.identical( options.process.exitCode, null );
         }
         else
         {
-          test.identical( options.output, exp1 );
-          test.identical( options.exitReason, 'code' );
           test.identical( options.exitCode, exitCode );
           test.identical( options.exitSignal, null );
+          test.identical( options.exitReason, 'code' );
+          test.identical( options.process.signalCode, null );
+          test.identical( options.process.exitCode, exitCode );
         }
 
-        test.identical( _.strCount( options.output, 'exit:' ), 1 );
+        // xxx
+        // if( process.platform === 'win32' )
+        // {
+        //   test.identical( options.exitCode, null );
+        //   test.identical( options.exitSignal, signal );
+        //   test.identical( options.exitReason, 'signal' );
+        // }
+        // else
+        // {
+        //   test.identical( options.exitReason, 'code' );
+        //   test.identical( options.exitCode, exitCode );
+        //   test.identical( options.exitSignal, null );
+        // }
+
+        test.identical( _.strCount( options.output, 'exit:' ),  process.platform === 'win32' ? 0 : 1 );
         test.identical( options.ended, true );
         test.identical( options.state, 'terminated' );
         test.identical( options.error, null );
@@ -27865,7 +28524,7 @@ endSignalsOnExitExitAgain.description =
 
 //
 
-/* qqq for Vova : describe test cases. describe test. this and related */
+/* qqq for Vova : describe test cases. describe test. this and related aaa:done*/
 function terminate( test )
 {
   let context = this;
@@ -28711,6 +29370,15 @@ function terminate( test )
   }
 }
 
+terminate.description =
+`
+Checks termination of the child process spawned with different modes.
+- Terminates process using descriptor( pnd )
+- Terminates process using pid
+- Terminates process using zero timeout
+- Terminates process using low timeout
+`
+
 //
 
 function terminateSync( test )
@@ -29031,6 +29699,15 @@ function terminateSync( test )
 }
 
 terminateSync.timeOut = 5e5;
+terminateSync.description =
+`
+Checks termination of the child process spawned with different modes.
+Terminate routine works in sync mode.
+- Terminates process using descriptor( pnd )
+- Terminates process using pid
+- Terminates process using zero timeout
+- Terminates process using low timeout
+`
 
 //
 
@@ -29103,7 +29780,7 @@ function terminateFirstChildSpawn( test )
 
   /* - */
 
-  function handleOutput( output ) /* qqq for Vova : what is it for? */
+  function handleOutput( output ) /* qqq for Vova : what is it for? aaa:to detect when child process of program1 is ready and we can call terminate*/
   {
     output = output.toString();
     if( !_.strHas( output, 'program2::begin' ) )
@@ -30009,7 +30686,7 @@ function terminateDetachedFirstChildSpawn( test )
     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
     test.is( _.process.isAlive( program2Pid ) );
 
-    return _.time.out( context.t1*15 ); /* qqq for Vova: replace with periodic + timeout + kill */
+    return _.process.waitForDeath({ pid : program2Pid, timeOut : context.t1*15 });
   })
 
   o.conTerminate.then( () =>
@@ -30154,7 +30831,7 @@ function terminateDetachedFirstChildFork( test )
     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
     test.is( _.process.isAlive( program2Pid ) );
 
-    return _.time.out( context.t1*15 ); /* qqq for Vova: replace with periodic + timeout + kill */
+    return _.process.waitForDeath({ pid : program2Pid, timeOut : context.t1*15 });
   })
 
   o.conTerminate.then( () =>
@@ -30297,7 +30974,7 @@ function terminateDetachedFirstChildShell( test )
     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
     test.is( _.process.isAlive( program2Pid ) );
 
-    return _.time.out( context.t1*15 ); /* qqq for Vova: replace with periodic + timeout + kill */
+    return _.process.waitForDeath({ pid : program2Pid, timeOut : context.t1*15 });
   })
 
   o.conTerminate.then( () =>
@@ -30564,7 +31241,7 @@ SIGTERM
         - difference :
           *
 
-        /wtools/abase/l4.test/Execution.test.s:29900:12
+        /wtools/abase/l4_process.test/Execution.test.s:29900:12
           29896 :       test.identical( o.exitSignal, null );
           29897 :     }
           29898 :     else
@@ -30579,7 +31256,7 @@ SIGTERM
         - difference :
           *
 
-        /wtools/abase/l4.test/Execution.test.s:29901:12
+        /wtools/abase/l4_process.test/Execution.test.s:29901:12
           29897 :     }
           29898 :     else
           29899 :     {
@@ -30588,7 +31265,7 @@ SIGTERM
 
 */
 
-/* qqq for Vova : join routines, use subroutine for mode varying */
+/* qqq for Vova : join routines, use subroutine for mode varying aaa: this will make the routine too complicated, that is the reason why I splitted the old routine*/
 function terminateWithDetachedChildFork( test )
 {
   let context = this;
@@ -30907,7 +31584,7 @@ function terminateSeveralChildren( test )
     return _.process.terminate
     ({
       pid : o.process.pid,
-      timeOut : context.t1 * 5,
+      timeOut : context.t1 * 8,
       withChildren : 1
     })
   })
@@ -30939,6 +31616,87 @@ function terminateSeveralChildren( test )
   })
 
   return _.Consequence.AndKeep( terminate, o.conTerminate );
+
+/*
+
+       - got :
+          255
+        - expected :
+          null
+        - difference :
+          *
+
+        /pro/builder/proto/wtools/abase/l4_process.test/Execution.test.s:30821:12
+          30817 :       test.identical( o.exitSignal, null );
+          30818 :     }
+          30819 :     else
+          30820 :     {
+        * 30821 :       test.identical( o.exitCode, null );
+
+        Test check ( TestSuite::Tools.l4.porocess.Execution / TestRoutine::terminateSeveralChildren /  # 1 ) ... failed
+        - got :
+          null
+        - expected :
+          'SIGTERM'
+        - difference :
+          *
+
+        /pro/builder/proto/wtools/abase/l4_process.test/Execution.test.s:30822:12
+          30818 :     }
+          30819 :     else
+          30820 :     {
+          30821 :       test.identical( o.exitCode, null );
+        * 30822 :       test.identical( o.exitSignal, 'SIGTERM' );
+
+        Test check ( TestSuite::Tools.l4.porocess.Execution / TestRoutine::terminateSeveralChildren /  # 2 ) ... failed
+        - got :
+          2
+        - expected :
+          1
+        - difference :
+          *
+
+        /pro/builder/proto/wtools/abase/l4_process.test/Execution.test.s:30825:10
+          30821 :       test.identical( o.exitCode, null );
+          30822 :       test.identical( o.exitSignal, 'SIGTERM' );
+          30823 :     }
+          30824 :
+        * 30825 :     test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
+
+        Test check ( TestSuite::Tools.l4.porocess.Execution / TestRoutine::terminateSeveralChildren /  # 3 ) ... failed
+        - got :
+          1
+        - expected :
+          0
+        - difference :
+          *
+
+        /pro/builder/proto/wtools/abase/l4_process.test/Execution.test.s:30828:10
+          30824 :
+          30825 :     test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
+          30826 :     test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
+          30827 :     test.identical( _.strCount( o.output, 'program3::begin' ), 1 );
+        * 30828 :     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
+
+        Test check ( TestSuite::Tools.l4.porocess.Execution / TestRoutine::terminateSeveralChildren /  # 6 ) ... failed
+        - got :
+          1
+        - expected :
+          0
+        - difference :
+          *
+
+        /pro/builder/proto/wtools/abase/l4_process.test/Execution.test.s:30829:10
+          30825 :     test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
+          30826 :     test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
+          30827 :     test.identical( _.strCount( o.output, 'program3::begin' ), 1 );
+          30828 :     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
+        * 30829 :     test.identical( _.strCount( o.output, 'program3::end' ), 0 );
+
+        Test check ( TestSuite::Tools.l4.porocess.Execution / TestRoutine::terminateSeveralChildren /  # 7 ) ... failed
+      Failed ( test routine time limit ) TestSuite::Tools.l4.porocess.Execution / TestRoutine::terminateSeveralChildren in 60.555s
+
+*/
 
   /* - */
 
@@ -30977,7 +31735,7 @@ function terminateSeveralChildren( test )
     _.process.start( _.mapExtend( null, o, { execPath : 'node program2.js' }));
     _.process.start( _.mapExtend( null, o, { execPath : 'node program3.js' }));
 
-    let timer = _.time.outError( context.t1*25 );
+    let timer = _.time.outError( context.t1*32 );
 
     console.log( 'program1::begin' );
   }
@@ -31006,7 +31764,7 @@ function terminateSeveralChildren( test )
         filePath : _.path.join( __dirname, 'program2end' ),
         data : 'end'
       })
-    }, context.t1*10 )
+    }, context.t1*16 )
 
     console.log( 'program2::begin' );
 
@@ -31036,7 +31794,7 @@ function terminateSeveralChildren( test )
         filePath : _.path.join( __dirname, 'program3end' ),
         data : 'end'
       })
-    }, context.t1*10 )
+    }, context.t1*16 )
 
     console.log( 'program3::begin' );
 
@@ -31873,19 +32631,22 @@ function terminateDifferentStdio( test )
       execPath :  'node ' + testAppPath,
       mode : 'spawn',
       stdio : 'inherit',
+      ipc : 1,
       outputPiping : 0,
       outputCollecting : 0,
       throwingExitCode : 0
     }
 
-    let ready = _.process.start( o )
+    _.process.start( o )
 
-    _.time.out( context.t0 * 15, () => /* 1500 */
+    let ready = _.Consequence();
+
+    o.process.on( 'message', () =>
     {
-      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
+      ready.take( _.process.terminate( o.process.pid ) )
     })
 
-    ready.then( ( op ) =>
+    o.conTerminate.then( ( op ) =>
     {
       if( process.platform === 'win32' )
       {
@@ -31904,7 +32665,7 @@ function terminateDifferentStdio( test )
       return null;
     })
 
-    return ready;
+    return _.Consequence.And( ready, o.conTerminate );
   })
 
   /* - */
@@ -31916,19 +32677,22 @@ function terminateDifferentStdio( test )
       execPath :  'node ' + testAppPath,
       mode : 'spawn',
       stdio : 'ignore',
+      ipc : 1,
       outputPiping : 0,
       outputCollecting : 0,
       throwingExitCode : 0
     }
 
-    let ready = _.process.start( o )
+    _.process.start( o )
 
-    _.time.out( context.t0 * 15, () => /* 1500 */
+    let ready = _.Consequence();
+
+    o.process.on( 'message', () =>
     {
-      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
+      ready.take( _.process.terminate( o.process.pid ) )
     })
 
-    ready.then( ( op ) =>
+    o.conTerminate.then( ( op ) =>
     {
       if( process.platform === 'win32' )
       {
@@ -31947,48 +32711,7 @@ function terminateDifferentStdio( test )
       return null;
     })
 
-    return ready;
-  })
-
-  /* - */
-
-  .then( () =>
-  {
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'spawn',
-      stdio : 'pipe',
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    _.time.out( context.t0 * 15, () => /* 1500 */
-    {
-      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
-    })
-
-    ready.then( ( op ) =>
-    {
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, 1 );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, null );
-        test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
-      }
-      else
-      {
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, null );
-        test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
-      }
-      return null;
-    })
-
-    return ready;
+    return _.Consequence.And( ready, o.conTerminate );
   })
 
   /* - */
@@ -32004,14 +32727,16 @@ function terminateDifferentStdio( test )
       throwingExitCode : 0
     }
 
-    let ready = _.process.start( o )
+    _.process.start( o )
 
-    _.time.out( context.t0 * 15, () => /* 1500 */
+    let ready = _.Consequence();
+
+    o.process.on( 'message', () =>
     {
-      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
+      ready.take( _.process.terminate( o.process.pid ) )
     })
 
-    ready.then( ( op ) =>
+    o.conTerminate.then( ( op ) =>
     {
       if( process.platform === 'win32' )
       {
@@ -32030,7 +32755,51 @@ function terminateDifferentStdio( test )
       return null;
     })
 
-    return ready;
+    return _.Consequence.And( ready, o.conTerminate );
+  })
+
+  /* - */
+
+  .then( () =>
+  {
+    var o =
+    {
+      execPath :  'node ' + testAppPath,
+      mode : 'spawn',
+      stdio : 'pipe',
+      ipc : 1,
+      throwingExitCode : 0
+    }
+
+    _.process.start( o )
+
+    let ready = _.Consequence();
+
+    o.process.on( 'message', () =>
+    {
+      ready.take( _.process.terminate( o.process.pid ) )
+    })
+
+    o.conTerminate.then( ( op ) =>
+    {
+      if( process.platform === 'win32' )
+      {
+        test.identical( op.exitCode, 1 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, null );
+        test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+      }
+      else
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, null );
+        test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+      }
+      return null;
+    })
+
+    return _.Consequence.And( ready, o.conTerminate );
   })
 
   /* - */
@@ -32048,14 +32817,16 @@ function terminateDifferentStdio( test )
       throwingExitCode : 0
     }
 
-    let ready = _.process.start( o )
+    _.process.start( o )
 
-    _.time.out( context.t0 * 15, () => /* 1500 */
+    let ready = _.Consequence();
+
+    o.process.on( 'message', () =>
     {
-      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
+      ready.take( _.process.terminate( o.process.pid ) )
     })
 
-    ready.then( ( op ) =>
+    o.conTerminate.then( ( op ) =>
     {
       if( process.platform === 'win32' )
       {
@@ -32074,7 +32845,7 @@ function terminateDifferentStdio( test )
       return null;
     })
 
-    return ready;
+    return _.Consequence.And( ready, o.conTerminate );
   })
 
   /* - */
@@ -32092,14 +32863,16 @@ function terminateDifferentStdio( test )
       throwingExitCode : 0
     }
 
-    let ready = _.process.start( o )
+    _.process.start( o )
 
-    _.time.out( context.t0 * 15, () => /* 1500 */
+    let ready = _.Consequence();
+
+    o.process.on( 'message', () =>
     {
-      return test.mustNotThrowError( () => _.process.terminate( o.process.pid ) )
+      ready.take( _.process.terminate( o.process.pid ) )
     })
 
-    ready.then( ( op ) =>
+    o.conTerminate.then( ( op ) =>
     {
       if( process.platform === 'win32' )
       {
@@ -32119,7 +32892,7 @@ function terminateDifferentStdio( test )
       return null;
     })
 
-    return ready;
+    return _.Consequence.And( ready, o.conTerminate );
   })
 
   /* */
@@ -32141,6 +32914,7 @@ function terminateDifferentStdio( test )
     {
       process.exit( -1 );
     }, context.t2 ) /* 5000 */
+    process.send( 'ready' );
   }
 }
 
@@ -33082,7 +33856,7 @@ var Proto =
 
     // basic
 
-    startBasic,
+    startBasic, /* qqq for Yevhen : merge startBasic2 in */
     startBasic2,
     startFork,
     startErrorHandling,
@@ -33223,6 +33997,8 @@ var Proto =
     startOptionCurrentPath,
     startOptionCurrentPaths,
     startOptionPassingThrough,
+    startOptionUid,
+    startOptionGid,
 
     // pid / status / exit
 
@@ -33232,7 +34008,7 @@ var Proto =
     isAlive,
     statusOf,
 
-    // exitReason, /* qqq2 for Yevhen : it should be in subprocess */
+    exitReason, /* qqq2 for Yevhen : it should be in subprocess | aaa : Done. */
     exitCode, /* qqq for Yevhen : check order of test routines. it's messed up */
 
     // termination
@@ -33252,19 +34028,19 @@ var Proto =
     terminate, /* qqq for Vova: review, remove duplicates, check timeouts */
     terminateSync,
 
-    terminateFirstChildSpawn,
+    terminateFirstChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine */
     terminateFirstChildFork,
     terminateFirstChildShell,
 
-    terminateSecondChildSpawn,
+    terminateSecondChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine */
     terminateSecondChildFork,
     terminateSecondChildShell,
 
-    terminateDetachedFirstChildSpawn,
+    terminateDetachedFirstChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine */
     terminateDetachedFirstChildFork,
     terminateDetachedFirstChildShell,
 
-    terminateWithDetachedChildSpawn,
+    terminateWithDetachedChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine */
     terminateWithDetachedChildFork,
     terminateWithDetachedChildShell,
 
@@ -33279,7 +34055,7 @@ var Proto =
     terminateZeroTimeOutWithoutChildrenShell,
     terminateZeroTimeOutWithtChildrenShell,
 
-    terminateDifferentStdio, /* qqq for Vova: rewrite, don't use timeout to run terminate */
+    terminateDifferentStdio, /* qqq for Vova: rewrite, don't use timeout to run terminate aaa:done*/
 
     killComplex,
     execPathOf,
@@ -33292,7 +34068,7 @@ var Proto =
 
     // experiments
 
-    experimentIpcDeasync, /* qqq for Vova : collect information for different versions and different OSs */
+    experimentIpcDeasync, /* qqq for Vova : collect information for different versions and different OSs aaa:added at the beginning of the file*/
     streamJoinExperiment,
     experiment,
     experiment2,

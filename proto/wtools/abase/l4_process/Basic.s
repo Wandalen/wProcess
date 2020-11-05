@@ -109,7 +109,7 @@ function tempOpen_body( o )
   _.assert( arguments.length === 1, 'Expects single argument' );
   _.assert( _.strIs( o.sourceCode ) || _.bufferRawIs( o.sourceCode ), 'Expects string or buffer raw {-o.sourceCode-}, but got', _.strType( o.sourceCode ) );
 
-  let tempDirPath = _.path.tempOpen( _.path.current() );
+  let tempDirPath = _.path.tempOpen( _.path.realMainDir(), 'ProcessTempOpen' );
   let filePath = _.path.join( tempDirPath, _.idWithDateAndTime() + '.ss' );
   _tempFiles.push( filePath );
   _.fileProvider.fileWrite( filePath, o.sourceCode );
@@ -239,6 +239,7 @@ function _exitHandlerRepair()
   {
     return function handle()
     {
+      if( _.process._verbosity )
       console.log( signal );
       if( _realGlobal_._exitHandlerRepairTerminating )
       return;
@@ -320,10 +321,7 @@ function _eventExitHandle()
 function _eventExitBeforeHandle()
 {
   let args = arguments;
-  // process.removeListener( 'beforeExit', _.process._eventExitBeforeHandle );
-  // _.process._eventExitBeforeHandle = null;
   _.process.eventGive({ event : 'exitBefore', args });
-  // _.process._ehandler.events.exitBefore.splice( 0, _.process._ehandler.events.exitBefore.length );
 }
 
 // --
@@ -438,7 +436,7 @@ let Extension =
   isNativeDescriptor,
   isSession,
   pidFrom,
-  
+
   // temp
 
   tempOpen,
@@ -468,6 +466,7 @@ let Extension =
 
   // fields
 
+  _verbosity : 1,
   _sanitareTime : 1,
   _exitReason : null,
 
