@@ -12,7 +12,7 @@
   ],
   "main" : "proto/wtools/abase/l4_process/Basic.s",
   "files" : [ "proto/wtools/abase/l4_process", "proto/wtools/Tools.s", "out" ],
-  "scripts" : { "test" : "wtest .run 'proto/**' rapidity:-1", "docgen" : "wdocgen proto" },
+  "scripts" : { "test" : "wtest .run 'proto/**' rapidity:-1 verbosity:5", "docgen" : "wdocgen proto" },
   "repository" : { "type" : "git", "url" : "https://github.com/Wandalen/wProcess.git" },
   "bugs" :
   {
