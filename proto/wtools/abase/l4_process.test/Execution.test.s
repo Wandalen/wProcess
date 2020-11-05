@@ -16498,18 +16498,28 @@ function startNjsWithReadyDelayStructuralMultiple( test )
 
       returned.then( ( op ) =>
       {
+        let exp2 = _.mapExtend( null, exp );
+        exp2.runs = options.runs;
+        exp2.state = 'terminated';
+        exp2.ended = true;
+
+        /* exception in njs on Windows :
+          no output from detached process in mode::shell
+        */
+        if( mode !== 'shell' || process.platform !== 'win32' || !detaching )
+        test.identical( op.output, 'program1:begin\nprogram1:begin\n' );
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.identical( op.output, 'program1:begin\nprogram1:begin\n' );
-
-        let exp2 = _.mapExtend( null, exp );
+        test.identical( op.exitSignal, null );
+        test.identical( op.exitReason, 'normal' );
+        /* exception in njs on Windows :
+          no output from detached process in mode::shell
+        */
+        if( mode !== 'shell' || process.platform !== 'win32' || !detaching )
         exp2.output = 'program1:begin\nprogram1:begin\n';
         exp2.exitCode = 0;
         exp2.exitSignal = null;
-        exp2.runs = options.runs;
-        exp2.state = 'terminated';
         exp2.exitReason = 'normal';
-        exp2.ended = true;
 
         test.identical( options, exp2 );
         test.is( !options.process );
