@@ -6581,7 +6581,7 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
   let a = context.assetFor( test, 'basic' );
   let testAppPathParent = a.program( testAppParent );
   let testAppPath = a.program( testApp );
-  
+
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
@@ -6596,7 +6596,7 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}, execute simple js program with normalized path`
-  
+
       let execPath = a.path.nativize( a.path.normalize( testAppPath ) );
       let o =
       {
@@ -6610,14 +6610,24 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
         applyingExitCode : 0,
       };
       a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' })
-  
+
       let o2 =
       {
         execPath : 'node ' + testAppPathParent,
         mode : 'spawn',
         outputCollecting : 1,
       }
-  
+
+      return _.process.start( o2 )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, '[]' );
+        test.is( a.fileProvider.fileExists( testAppPath ) );
+        return null;
+      } )
+
       /* ORIGINAL */
       // return _.process.startNjsPassingThrough( o )
       // .then( ( op ) =>
@@ -6629,24 +6639,14 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
       //   return null;
       // })
 
-      return _.process.start( o2 )
-      .then( ( op ) =>
-      {
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.equivalent( op.output, '[]' );
-        test.is( a.fileProvider.fileExists( testAppPath ) );
-        return null;
-      } )
-  
     });
-  
+
     /* */
-  
+
     ready.then( () =>
     {
       test.case = `mode : ${mode}, execute simple js program with nativized path`
-  
+
       let o =
       {
         execPath : mode === 'fork' ? _.strQuote( testAppPath ) : 'node ' + _.strQuote( testAppPath ),
@@ -6660,7 +6660,7 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
       };
 
       a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' })
-  
+
       let o2 =
       {
         execPath : 'node ' + testAppPathParent,
@@ -6677,7 +6677,7 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
         test.is( a.fileProvider.fileExists( testAppPath ) );
         return null;
       } )
-  
+
       /* ORIGINAL */
       // return _.process.startNjsPassingThrough( o )
       // .then( ( op ) =>
@@ -6693,7 +6693,7 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}, execute simple js program with normalized path, parent args : [ 'arg' ]`
-  
+
       let execPath = a.path.nativize( a.path.normalize( testAppPath ) );
       let o =
       {
@@ -6708,7 +6708,7 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
         applyingExitCode : 0,
       };
       a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' })
-  
+
       let o2 =
       {
         execPath : 'node ' + testAppPathParent,
@@ -6725,15 +6725,15 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
         test.is( a.fileProvider.fileExists( testAppPath ) );
         return null;
       } )
-  
+
     });
-  
+
     /* */
-  
+
     ready.then( () =>
     {
       test.case = `mode : ${mode}, execute simple js program with nativized path, parent args : [ 'arg' ]`
-  
+
       let o =
       {
         execPath : mode === 'fork' ? _.strQuote( testAppPath ) : 'node ' + _.strQuote( testAppPath ),
@@ -6748,7 +6748,7 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
       };
 
       a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' })
-  
+
       let o2 =
       {
         execPath : 'node ' + testAppPathParent,
@@ -6834,7 +6834,7 @@ function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subrou
         throwingExitCode : 0,
         stdio : 'pipe',
       }
-    
+
       return _.process.start( o2 )
       .then( ( op ) =>
       {
@@ -6848,7 +6848,7 @@ function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subrou
     })
 
     /* */
-  
+
     ready.then( () =>
     {
       test.case = `mode : ${mode}, args is a string with unquoted path with space`
