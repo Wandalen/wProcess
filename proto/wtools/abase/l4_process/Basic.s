@@ -239,6 +239,7 @@ function _exitHandlerRepair()
   {
     return function handle()
     {
+      if( _.process._verbosity )
       console.log( signal );
       if( _realGlobal_._exitHandlerRepairTerminating )
       return;
@@ -320,10 +321,7 @@ function _eventExitHandle()
 function _eventExitBeforeHandle()
 {
   let args = arguments;
-  // process.removeListener( 'beforeExit', _.process._eventExitBeforeHandle );
-  // _.process._eventExitBeforeHandle = null;
   _.process.eventGive({ event : 'exitBefore', args });
-  // _.process._ehandler.events.exitBefore.splice( 0, _.process._ehandler.events.exitBefore.length );
 }
 
 // --
@@ -438,7 +436,7 @@ let Extension =
   isNativeDescriptor,
   isSession,
   pidFrom,
-  
+
   // temp
 
   tempOpen,
@@ -468,6 +466,7 @@ let Extension =
 
   // fields
 
+  _verbosity : 1,
   _sanitareTime : 1,
   _exitReason : null,
 
