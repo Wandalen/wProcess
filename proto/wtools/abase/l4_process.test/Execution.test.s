@@ -16498,7 +16498,6 @@ function startNjsWithReadyDelayStructuralMultiple( test )
 
       returned.then( ( op ) =>
       {
-        test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
 
         let exp2 = _.mapExtend( null, exp );
