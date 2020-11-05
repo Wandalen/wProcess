@@ -15869,13 +15869,17 @@ function startNjsWithReadyDelayStructural( test )
         }
         else
         {
-          /* exception in njs on Windows, no output from detached process */
+          /* exception in njs on Windows :
+            no output from detached process in mode::shell
+          */
           if( tops.mode !== 'shell' || process.platform !== 'win32' || !tops.detaching )
           test.identical( op.output, 'program1:begin\n' );
           test.identical( op.exitCode, 0 );
           test.identical( op.exitSignal, null );
           test.identical( op.exitReason, 'normal' );
-          /* exception in njs on Windows, no output from detached process */
+          /* exception in njs on Windows :
+            no output from detached process in mode::shell
+          */
           if( tops.mode !== 'shell' || process.platform !== 'win32' || !tops.detaching )
           exp2.output = 'program1:begin\n';
           exp2.exitCode = 0;
