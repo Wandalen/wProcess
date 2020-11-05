@@ -239,6 +239,7 @@ function _exitHandlerRepair()
   {
     return function handle()
     {
+      if( _.process._verbosity )
       console.log( signal );
       if( _realGlobal_._exitHandlerRepairTerminating )
       return;
@@ -465,6 +466,7 @@ let Extension =
 
   // fields
 
+  _verbosity : 1,
   _sanitareTime : 1,
   _exitReason : null,
 

@@ -1297,7 +1297,8 @@ function startMinimal_body( o )
     if( exitCode === null )
     return;
     o.exitCode = exitCode;
-    if( o.process && o.process.exitCode === undefined )
+    if( o.process )
+    if( o.process.exitCode === undefined || o.process.exitCode === null )
     o.process.exitCode = exitCode;
     exitCode = _.numberIs( exitCode ) ? exitCode : -1;
     if( o.applyingExitCode )
