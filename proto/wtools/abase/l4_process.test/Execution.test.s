@@ -29790,6 +29790,17 @@ function terminateFirstChild( test )
 
     ready.then( () =>
     {
+      if( a.fileProvider.fileExists( a.abs( 'program2end' ) ) )
+      a.fileProvider.fileDelete( a.abs( 'program2end' ) );
+
+      if( a.fileProvider.fileExists( a.abs( 'program1.js' ) ) )
+      a.fileProvider.fileDelete( a.abs( 'program1.js' ) );
+
+      return null;
+    } )
+
+    ready.then( () =>
+    {
       test.case = `mode : ${mode}`;
 
       let testAppPath = a.program({ routine : program1, locals : { mode } });
@@ -29871,8 +29882,8 @@ function terminateFirstChild( test )
             test.is( !_.process.isAlive( program2Pid ) );
           }
 
-          a.fileProvider.fileDelete( a.abs( 'program2end' ) );
-          a.fileProvider.fileDelete( testAppPath );
+          // a.fileProvider.fileDelete( a.abs( 'program2end' ) );
+          // a.fileProvider.fileDelete( testAppPath );
           return null;
         }
         else
@@ -29892,8 +29903,8 @@ function terminateFirstChild( test )
           test.is( !_.process.isAlive( program2Pid ) );
           test.is( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
     
-          a.fileProvider.fileDelete( a.abs( 'program2end' ) );
-          a.fileProvider.fileDelete( testAppPath );
+          // a.fileProvider.fileDelete( a.abs( 'program2end' ) );
+          // a.fileProvider.fileDelete( testAppPath );
           return null;
         })
       }
