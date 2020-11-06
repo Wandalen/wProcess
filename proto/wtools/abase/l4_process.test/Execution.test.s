@@ -6844,7 +6844,7 @@ function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subrou
         test.is( !out.err );
         test.is( _.strHas( out.output, `Error: Cannot find module` ) );
         return null;
-      }) 
+      })
     })
 
     /* */
@@ -8013,13 +8013,13 @@ function startNjsPassingThroughExecPathWithSpace( test )
       //   return null;
       // })
     })
-  
+
     /* - */
-  
+
     ready.then( () =>
     {
       test.case = `mode : ${mode}, args: string that contains unquoted path with space`;
-  
+
       let o =
       {
         execPath : mode === 'fork' ? null : 'node',
@@ -8081,7 +8081,7 @@ function startNjsPassingThroughExecPathWithSpace( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}, args: string that contains unquoted path with space and 'arg'`;
-  
+
       let o =
       {
         execPath : mode === 'fork' ? null : 'node',
