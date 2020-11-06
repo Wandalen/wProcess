@@ -7527,68 +7527,71 @@ function startDifferentTypesOfPaths( test )
   let execPathWithSpace = a.program({ routine : testApp, dirPath : 'path with space' });
   execPathWithSpace = a.fileProvider.path.normalize( execPathWithSpace );
   let execPathWithSpaceNative = a.fileProvider.path.nativize( execPathWithSpace );
-  let nodeWithSpace = a.abs( 'path with space', _.path.name({ path : process.argv[ 0 ], full : 1 }) );
+  
+  let tempPath = _.path.tempOpen( _.path.normalize( process.argv[ 0 ] ) );
+  let nodeWithSpace = a.path.join( tempPath, 'node.exe' );
+  
   a.fileProvider.softLink( nodeWithSpace, process.argv[ 0 ] );
 
   /* - */
 
   a.ready
 
-  // .then( () =>
-  // {
-  //   test.case = 'mode : fork, path with space'
-  //   let o =
-  //   {
-  //     args : execPathWithSpace,
-  //     mode : 'fork',
-  //     stdio : 'pipe',
-  //     outputCollecting : 1,
-  //     outputPiping : 1,
-  //     throwingExitCode : 0,
-  //     applyingExitCode : 0,
-  //   }
+  .then( () =>
+  {
+    test.case = 'mode : fork, path with space'
+    let o =
+    {
+      args : execPathWithSpace,
+      mode : 'fork',
+      stdio : 'pipe',
+      outputCollecting : 1,
+      outputPiping : 1,
+      throwingExitCode : 0,
+      applyingExitCode : 0,
+    }
 
-  //   _.process.start( o );
+    _.process.start( o );
 
-  //   o.conTerminate.then( ( op ) =>
-  //   {
-  //     test.identical( op.exitCode, 0 );
-  //     test.identical( op.ended, true );
-  //     test.is( _.strHas( op.output, execPathWithSpace ) );
-  //     return null;
-  //   })
+    o.conTerminate.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.is( _.strHas( op.output, execPathWithSpace ) );
+      return null;
+    })
 
-  //   return o.conTerminate;
+    return o.conTerminate;
 
-  // })
+  })
 
-  // .then( () =>
-  // {
-  //   test.case = 'mode : fork, quoted path with space'
-  //   let o =
-  //   {
-  //     execPath : _.strQuote( execPathWithSpace ),
-  //     mode : 'fork',
-  //     stdio : 'pipe',
-  //     outputCollecting : 1,
-  //     outputPiping : 1,
-  //     throwingExitCode : 0,
-  //     applyingExitCode : 0,
-  //   }
+  .then( () =>
+  {
+    test.case = 'mode : fork, quoted path with space'
+    let o =
+    {
+      execPath : _.strQuote( execPathWithSpace ),
+      mode : 'fork',
+      stdio : 'pipe',
+      outputCollecting : 1,
+      outputPiping : 1,
+      throwingExitCode : 0,
+      applyingExitCode : 0,
+    }
 
-  //   _.process.start( o );
+    _.process.start( o );
 
-  //   o.conTerminate.then( ( op ) =>
-  //   {
-  //     test.identical( op.exitCode, 0 );
-  //     test.identical( op.ended, true );
-  //     test.is( _.strHas( op.output, execPathWithSpace ) );
-  //     return null;
-  //   })
+    o.conTerminate.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.is( _.strHas( op.output, execPathWithSpace ) );
+      return null;
+    })
 
-  //   return o.conTerminate;
+    return o.conTerminate;
 
-  // })
+  })
 
   /* zzz for Vova : fix it? */
 
@@ -7636,6 +7639,7 @@ function startDifferentTypesOfPaths( test )
       applyingExitCode : 0,
     }
 
+    debugger
     _.process.start( o );
 
     o.conTerminate.then( ( op ) =>
@@ -7922,8 +7926,14 @@ function startDifferentTypesOfPaths( test )
     return o.conTerminate;
 
   })
-
+  
   /* - */
+  
+  a.ready.tap( () => 
+  {
+    _.path.tempClose( tempPath );
+  })
+
 
   return a.ready;
 
@@ -29847,11 +29857,9 @@ function terminateFirstChildSpawn( test )
 
   /* - */
 
-  function handleOutput( output ) /* qqq for Vova : what is it for? aaa:to detect when child process of program1 is ready and we can call terminate*/
+  function handleOutput()/* qqq for Vova : what is it for? aaa:to detect when child process of program1 is ready and we can call terminate*/
   {
-    output = output.toString();
-    // console.log( output );
-    if( !_.strHas( output, 'program2::begin' ) )
+    if( !_.strHas( o.output, 'program2::begin' ) )
     return;
     o.process.stdout.removeListener( 'data', handleOutput );
     terminate.take( null );
@@ -29999,11 +30007,10 @@ function terminateFirstChildFork( test )
   return _.Consequence.AndKeep( terminate, o.conTerminate );
 
   /* - */
-
-  function handleOutput( output )
+  
+  function handleOutput()
   {
-    output = output.toString();
-    if( !_.strHas( output, 'program2::begin' ) )
+    if( !_.strHas( o.output, 'program2::begin' ) )
     return;
     o.process.stdout.removeListener( 'data', handleOutput );
     terminate.take( null );
@@ -30158,10 +30165,9 @@ function terminateFirstChildShell( test )
 
   /* - */
 
-  function handleOutput( output )
+  function handleOutput()
   {
-    output = output.toString();
-    if( !_.strHas( output, 'program2::begin' ) )
+    if( !_.strHas( o.output, 'program2::begin' ) )
     return;
     o.process.stdout.removeListener( 'data', handleOutput );
     terminate.take( null );
@@ -30303,10 +30309,9 @@ function terminateSecondChildSpawn( test )
 
   /* - */
 
-  function handleOutput( output )
+  function handleOutput()
   {
-    output = output.toString();
-    if( !_.strHas( output, 'program2::begin' ) )
+    if( !_.strHas( o.output, 'program2::begin' ) )
     return;
     o.process.stdout.removeListener( 'data', handleOutput );
     terminate.take( null );
@@ -30457,10 +30462,9 @@ function terminateSecondChildFork( test )
 
   /* - */
 
-  function handleOutput( output )
+   function handleOutput()
   {
-    output = output.toString();
-    if( !_.strHas( output, 'program2::begin' ) )
+    if( !_.strHas( o.output, 'program2::begin' ) )
     return;
     o.process.stdout.removeListener( 'data', handleOutput );
     terminate.take( null );
@@ -30620,10 +30624,9 @@ function terminateSecondChildShell( test )
 
   /* - */
 
-  function handleOutput( output )
+   function handleOutput()
   {
-    output = output.toString();
-    if( !_.strHas( output, 'program2::begin' ) )
+    if( !_.strHas( o.output, 'program2::begin' ) )
     return;
     o.process.stdout.removeListener( 'data', handleOutput );
     terminate.take( null );
@@ -30777,10 +30780,9 @@ function terminateDetachedFirstChildSpawn( test )
 
   /* - */
 
-  function handleOutput( output )
+   function handleOutput()
   {
-    output = output.toString();
-    if( !_.strHas( output, 'program2::begin' ) )
+    if( !_.strHas( o.output, 'program2::begin' ) )
     return;
     o.process.stdout.removeListener( 'data', handleOutput );
     terminate.take( null );
@@ -30947,10 +30949,9 @@ function terminateDetachedFirstChildFork( test )
 
   /* - */
 
-  function handleOutput( output )
+   function handleOutput()
   {
-    output = output.toString();
-    if( !_.strHas( output, 'program2::begin' ) )
+    if( !_.strHas( o.output, 'program2::begin' ) )
     return;
     o.process.stdout.removeListener( 'data', handleOutput );
     terminate.take( null );
@@ -31065,10 +31066,9 @@ function terminateDetachedFirstChildShell( test )
 
   /* - */
 
-  function handleOutput( output )
+   function handleOutput()
   {
-    output = output.toString();
-    if( !_.strHas( output, 'program2::begin' ) )
+    if( !_.strHas( o.output, 'program2::begin' ) )
     return;
     o.process.stdout.removeListener( 'data', handleOutput );
     terminate.take( null );
@@ -31204,10 +31204,9 @@ function terminateWithDetachedChildSpawn( test )
 
   /* - */
 
-  function handleOutput( output )
+   function handleOutput()
   {
-    output = output.toString();
-    if( !_.strHas( output, 'program2::begin' ) )
+    if( !_.strHas( o.output, 'program2::begin' ) )
     return;
     o.process.stdout.removeListener( 'data', handleOutput );
     terminate.take( null );
@@ -31411,10 +31410,9 @@ function terminateWithDetachedChildFork( test )
 
   /* - */
 
-  function handleOutput( output )
+   function handleOutput()
   {
-    output = output.toString();
-    if( !_.strHas( output, 'program2::begin' ) )
+    if( !_.strHas( o.output, 'program2::begin' ) )
     return;
     o.process.stdout.removeListener( 'data', handleOutput );
     terminate.take( null );
@@ -31549,10 +31547,9 @@ function terminateWithDetachedChildShell( test )
 
   /* - */
 
-  function handleOutput( output )
+   function handleOutput()
   {
-    output = output.toString();
-    if( !_.strHas( output, 'program2::begin' ) )
+    if( !_.strHas( o.output, 'program2::begin' ) )
     return;
     o.process.stdout.removeListener( 'data', handleOutput );
     terminate.take( null );
@@ -31777,17 +31774,15 @@ function terminateSeveralChildren( test )
 
   /* - */
 
-  /* qqq for Vova : bad */
-  function handleOutput( output )
+  /* qqq for Vova : bad aaa:fixed*/
+  function handleOutput()
   {
-    output = output.toString();
-    console.log( output );
-    if( _.strHas( output, 'program2::begin' ) || _.strHas( output, 'program3::begin' ) )
+    if( !_.strHas( o.output, 'program2::begin' ) || _.strHas( o.output, 'program3::begin' ) )
     c += 1;
 
     if( c !== 2 )
     return;
-
+    
     o.process.stdout.removeListener( 'data', handleOutput );
     terminate.take( null );
   }
@@ -31954,17 +31949,15 @@ function terminateWithSeveralDetachedChildren( test )
 
   /* - */
 
-  /* qqq for Vova : bad */
-  function handleOutput( output )
+  /* qqq for Vova : bad aaa:fixed*/
+  function handleOutput()
   {
-    console.log( output );
-    output = output.toString();
-    if( _.strHas( output, 'program2::begin' ) || _.strHas( output, 'program3::begin' ) )
+    if( !_.strHas( o.output, 'program2::begin' ) || _.strHas( o.output, 'program3::begin' ) )
     c += 1;
 
     if( c !== 2 )
     return;
-
+    
     o.process.stdout.removeListener( 'data', handleOutput );
     terminate.take( null );
   }
@@ -32181,10 +32174,9 @@ function terminateTimeOutNoHandler( test )
 
   /* - */
 
-  function handleOutput( output )
+  function handleOutput()
   {
-    output = output.toString();
-    if( !_.strHas( output, 'program1::begin' ) )
+    if( !_.strHas( o.output, 'program1::begin' ) )
     return;
     o.process.stdout.removeListener( 'data', handleOutput );
     terminate.take( null );
@@ -32270,10 +32262,9 @@ function terminateTimeOutIgnoreSignal( test )
 
   /* - */
 
-  function handleOutput( output )
+  function handleOutput()
   {
-    output = output.toString();
-    if( !_.strHas( output, 'program1::begin' ) )
+    if( !_.strHas( o.output, 'program1::begin' ) )
     return;
     o.process.stdout.removeListener( 'data', handleOutput );
     terminate.take( null );
@@ -32364,10 +32355,9 @@ function terminateZeroTimeOutSpawn( test )
 
   /* - */
 
-  function handleOutput( output )
+  function handleOutput()
   {
-    output = output.toString();
-    if( !_.strHas( output, 'program1::begin' ) )
+    if( !_.strHas( o.output, 'program1::begin' ) )
     return;
     o.process.stdout.removeListener( 'data', handleOutput );
     terminate.take( null );
@@ -32459,10 +32449,9 @@ function terminateZeroTimeOutFork( test )
 
   /* - */
 
-  function handleOutput( output )
+  function handleOutput()
   {
-    output = output.toString();
-    if( !_.strHas( output, 'program1::begin' ) )
+    if( !_.strHas( o.output, 'program1::begin' ) )
     return;
     o.process.stdout.removeListener( 'data', handleOutput );
     terminate.take( null );
@@ -32562,10 +32551,9 @@ function terminateZeroTimeOutWithoutChildrenShell( test )
 
   /* - */
 
-  function handleOutput( output )
+  function handleOutput()
   {
-    output = output.toString();
-    if( !_.strHas( output, 'program1::begin' ) )
+    if( !_.strHas( o.output, 'program1::begin' ) )
     return;
     o.process.stdout.removeListener( 'data', handleOutput );
     terminate.take( null );
@@ -32657,10 +32645,9 @@ function terminateZeroTimeOutWithtChildrenShell( test )
 
   /* - */
 
-  function handleOutput( output )
+  function handleOutput()
   {
-    output = output.toString();
-    if( !_.strHas( output, 'program1::begin' ) )
+    if( !_.strHas( o.output, 'program1::begin' ) )
     return;
     o.process.stdout.removeListener( 'data', handleOutput );
     terminate.take( null );
