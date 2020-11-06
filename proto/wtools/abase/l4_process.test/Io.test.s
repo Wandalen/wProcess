@@ -388,7 +388,7 @@ function processArgsBase( test )
     _.include( 'wStringsExtra' )
     _.include( 'wFiles' )
 
-    if( process.env.ignoreFirstTwoArgv )
+    if( process.env.ignoringFirstTwoArgv )
     process.argv = process.argv.slice( 2 );
 
     var got = _.process.input({ caching : 0 });
@@ -568,7 +568,7 @@ function processArgsPropertiesBase( test )
   shell
   ({
     args : [ 'interpreter', 'main.js', 'v:"10"' ],
-    env : { ignoreFirstTwoArgv : true, PATH : process.env.PATH }
+    env : { ignoringFirstTwoArgv : true, PATH : process.env.PATH }
   })
   .then( ( o ) =>
   {
@@ -601,7 +601,7 @@ function processArgsPropertiesBase( test )
   shell
   ({
     args : [ 'interpreter', 'main.js', 'str:"abc"' ],
-    env : { ignoreFirstTwoArgv : true, PATH : process.env.PATH }
+    env : { ignoringFirstTwoArgv : true, PATH : process.env.PATH }
   })
   .then( ( o ) =>
   {
@@ -637,7 +637,7 @@ function processArgsPropertiesBase( test )
     _.include( 'wStringsExtra' )
     _.include( 'wFiles' )
 
-    if( process.env.ignoreFirstTwoArgv )
+    if( process.env.ignoringFirstTwoArgv )
     process.argv = process.argv.slice( 2 );
 
     var got = _.process.input({ caching : 0 });
@@ -668,7 +668,7 @@ function processArgsMultipleCommands( test )
   shell
   ({
     args : [ 'interpreter', 'main.js', '.set', 'v:5', ';', '.build', 'debug:1', ';', '.export' ],
-    env : { ignoreFirstTwoArgv : true, PATH : process.env.PATH },
+    env : { ignoringFirstTwoArgv : true, PATH : process.env.PATH },
   })
   .then( ( o ) =>
   {
@@ -697,7 +697,7 @@ function processArgsMultipleCommands( test )
   shell
   ({
     args : [ 'interpreter', 'main.js', '.set', 'v', ':', '[', 1, 2, 3, ']', ';', '.build', 'debug:1', ';', '.export' ],
-    env : { ignoreFirstTwoArgv : true, PATH : process.env.PATH }
+    env : { ignoringFirstTwoArgv : true, PATH : process.env.PATH }
   })
   .then( ( o ) =>
   {
@@ -733,7 +733,7 @@ function processArgsMultipleCommands( test )
     _.include( 'wStringsExtra' )
     _.include( 'wFiles' )
 
-    if( process.env.ignoreFirstTwoArgv )
+    if( process.env.ignoringFirstTwoArgv )
     process.argv = process.argv.slice( 2 );
 
     var got = _.process.input({ caching : 0 });
@@ -764,7 +764,7 @@ function processArgsPaths( test )
   shell
   ({
     args : [ 'interpreter', 'main.js', 'path:D:\\path\\to\\file' ],
-    env : { ignoreFirstTwoArgv : true, PATH : process.env.PATH }
+    env : { ignoringFirstTwoArgv : true, PATH : process.env.PATH }
   })
   .then( ( o ) =>
   {
@@ -793,7 +793,7 @@ function processArgsPaths( test )
   shell
   ({
     args : [ 'interpreter', 'main.js', 'path:"D:\\path\\to\\file"' ],
-    env : { ignoreFirstTwoArgv : true, PATH : process.env.PATH }
+    env : { ignoringFirstTwoArgv : true, PATH : process.env.PATH }
   })
   .then( ( o ) =>
   {
@@ -817,6 +817,8 @@ function processArgsPaths( test )
     return null;
   })
 
+  /* */
+
   return a.ready;
 
   /* - */
@@ -829,7 +831,7 @@ function processArgsPaths( test )
     _.include( 'wStringsExtra' )
     _.include( 'wFiles' )
 
-    if( process.env.ignoreFirstTwoArgv )
+    if( process.env.ignoringFirstTwoArgv )
     process.argv = process.argv.slice( 2 );
 
     var got = _.process.input({ caching : 0 });
@@ -1290,7 +1292,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
     _.include( 'wStringsExtra' )
     _.include( 'wFiles' )
 
-    if( process.env.ignoreFirstTwoArgv )
+    if( process.env.ignoringFirstTwoArgv )
     process.argv = process.argv.slice( 2 );
 
     var got = _.process.input({ caching : 0 });
