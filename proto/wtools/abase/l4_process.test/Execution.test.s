@@ -21950,7 +21950,7 @@ function startOptionStreamSizeLimitThrowing( test )
 
 //
 
-/* qqq for Yevhen : paramtetrizing time delays is not complete! */
+/* qqq for Yevhen : paramtetrizing time delays is not complete! | aaa : Fixed. */
 function startSingleOptionDry( test )
 {
   let context = this;
@@ -21996,7 +21996,7 @@ function startSingleOptionDry( test )
         applyingExitCode : 1,
         // timeOut : tops.sync || !tops.deasync ? null : 100, /* xxx */
         ipc : tops.mode === 'shell' ? 0 : 1,
-        when : { delay : 2000 },
+        when : { delay : context.t1 * 2 }, /* 2000 */
       }
       let track = [];
       var t1 = _.time.now();
@@ -22046,7 +22046,7 @@ function startSingleOptionDry( test )
       o.ready.tap( ( err, op ) =>
       {
         var t2 = _.time.now();
-        test.ge( t2 - t1, 2000 )
+        test.ge( t2 - t1, context.t1 * 2 ); /* 2000 */
         track.push( 'ready' );
         test.identical( o.process, null );
         test.identical( err, undefined );
@@ -22064,13 +22064,8 @@ function startSingleOptionDry( test )
         test.identical( op.streamOut, null );
         test.identical( op.streamErr, null );
 
-        /* qqq for Yevhen : bad */
-        if( tops.mode === 'fork' )
-        {
-          test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
-          test.identical( op.fullExecPath, `${programPath} arg1 arg0` );
-        }
-        else if ( tops.mode === 'shell' )
+        /* qqq for Yevhen : bad | aaa : Fixed. */
+        if ( tops.mode === 'shell' )
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe' ] );
           test.identical( op.fullExecPath, `node ${programPath} arg1 "arg0"` );
@@ -22078,6 +22073,9 @@ function startSingleOptionDry( test )
         else
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
+          if( tops.mode === 'fork' )
+          test.identical( op.fullExecPath, `${programPath} arg1 arg0` );
+          else
           test.identical( op.fullExecPath, `node ${programPath} arg1 arg0` );
         }
 
@@ -22097,11 +22095,11 @@ function startSingleOptionDry( test )
 
     ready.then( () =>
     {
-      /* qqq for Yevhen : bad description! */
-      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, dry : 1, execPath : 'err' + programPath + \` arg1 "arg 2" "'arg3'"\``
+      /* qqq for Yevhen : bad description! | aaa : Fixed. */
+      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, dry : 1, wrong execPath`;
       let o =
       {
-        execPath : 'err ' + programPath + ` arg1`,
+        execPath : 'err ' + programPath + ' arg1',
         mode : tops.mode,
         sync : tops.sync,
         deasync : tops.deasync,
@@ -22113,7 +22111,7 @@ function startSingleOptionDry( test )
         applyingExitCode : 1,
         // timeOut : tops.sync || !tops.deasync ? null : 100,
         ipc : tops.mode === 'shell' ? 0 : 1,
-        when : { delay : 2000 }
+        when : { delay : context.t1 * 2 }, /* 2000 */
       }
       let track = []; /* qqq for Yevhen : should be on beginning of test case | aaa : Moved. */
       var t1 = _.time.now();
@@ -22163,7 +22161,7 @@ function startSingleOptionDry( test )
       o.ready.tap( ( err, op ) =>
       {
         var t2 = _.time.now();
-        test.ge( t2 - t1, 2000 );
+        test.ge( t2 - t1, context.t1 * 2 ); /* 2000 */
         track.push( 'ready' );
         test.identical( o.process, null );
         test.identical( err, undefined );
@@ -22461,15 +22459,10 @@ function startOptionDryMultiple( test )
           test.identical( op2.streamOut, null );
           test.identical( op2.streamErr, null );
           if( tops.mode === 'fork' )
-          {
-            test.identical( op2.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
-            test.identical( op2.fullExecPath, 'err ' + programPath + ` id:${counter + 1}` );
-          }
+          test.identical( op2.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
           else
-          {
-            test.identical( op2.stdio, [ 'pipe', 'pipe', 'pipe' ] );
-            test.identical( op2.fullExecPath, `err ${programPath} id:${counter + 1}` );
-          }
+          test.identical( op2.stdio, [ 'pipe', 'pipe', 'pipe' ] );
+          test.identical( op2.fullExecPath, `err ${programPath} id:${counter + 1}` );
           test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate', 'ready' ] );
           track = [];
           return null;
