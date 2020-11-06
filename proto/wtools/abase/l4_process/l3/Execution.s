@@ -2926,6 +2926,7 @@ function signal_body( o )
 */
     try
     {
+      console.log( `signalSend ${o.signal} ${p.pid}` );
       if( pnd )
       pnd.kill( o.signal );
       else
@@ -2989,10 +2990,10 @@ function signal_body( o )
 
     ready.catch( ( err ) =>
     {
-      _.errAttend( err );
 
       if( err.reason === 'time out' )
       {
+        _.errAttend( err );
         if( signal === 'SIGKILL' )
         err = _.err( `\nTarget process: ${_.strQuote( p.pid )} is still alive after kill. Waited for ${o.timeOut} ms.` );
         else

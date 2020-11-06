@@ -6846,7 +6846,7 @@ function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subrou
         test.is( !out.err );
         test.is( _.strHas( out.output, `Error: Cannot find module` ) );
         return null;
-      }) 
+      })
     })
 
     /* */
@@ -8014,13 +8014,13 @@ function startNjsPassingThroughExecPathWithSpace( test )
       //   return null;
       // })
     })
-  
+
     /* - */
-  
+
     ready.then( () =>
     {
       test.case = `mode : ${mode}, args: string that contains unquoted path with space`;
-  
+
       let o =
       {
         execPath : mode === 'fork' ? null : 'node',
@@ -8082,7 +8082,7 @@ function startNjsPassingThroughExecPathWithSpace( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}, args: string that contains unquoted path with space and 'arg'`;
-  
+
       let o =
       {
         execPath : mode === 'fork' ? null : 'node',
@@ -29801,11 +29801,16 @@ function terminateFirstChildSpawn( test )
   {
     program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
     program2Pid = program2Pid.pid;
+    console.log( `parentPid : ${o.process.pid}` );
+    console.log( `childPid : ${program2Pid}` );
+    test.is( _.process.isAlive( o.process.pid ) );
+    test.is( _.process.isAlive( program2Pid ) );
+    // return null;
     return _.process.terminate
     ({
       pid : o.process.pid,
       timeOut : context.t1 * 5,
-      withChildren : 0
+      withChildren : 0,
     })
   })
 
@@ -29845,6 +29850,7 @@ function terminateFirstChildSpawn( test )
   function handleOutput( output ) /* qqq for Vova : what is it for? aaa:to detect when child process of program1 is ready and we can call terminate*/
   {
     output = output.toString();
+    // console.log( output );
     if( !_.strHas( output, 'program2::begin' ) )
     return;
     o.process.stdout.removeListener( 'data', handleOutput );
@@ -29858,6 +29864,8 @@ function terminateFirstChildSpawn( test )
     let _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
+
+    console.log( `parentPid : ${process.pid}` );
 
     var o =
     {
@@ -29884,7 +29892,9 @@ function terminateFirstChildSpawn( test )
     let _ = require( toolsPath );
     _.include( 'wFiles' );
 
-    process.removeAllListeners( 'SIGTERM' )
+    console.log( `childPid : ${process.pid}` );
+
+    process.removeAllListeners( 'SIGTERM' ) /* xxx : check on linux */
 
     _.fileProvider.fileWrite
     ({
@@ -29898,6 +29908,11 @@ function terminateFirstChildSpawn( test )
       console.log( 'program2::end' );
       _.fileProvider.fileWrite( _.path.join( __dirname, 'program2end' ), 'end' );
     }, context.t1*10 )
+
+    process.on( 'exit', () =>
+    {
+      console.log( 'program2::end' );
+    })
 
     console.log( 'program2::begin' );
 
@@ -33712,10 +33727,43 @@ function experimentIpcDeasync( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
+  let AsyncHooks = require( 'async_hooks' );
+
+  debugger;
+  console.log( `experimentIpcDeasync . executionAsyncId:${AsyncHooks.executionAsyncId()}` );
+  debugger;
+
+  // AsyncHooks.createHook
+  // ({
+  //   init( asyncId, type, triggerAsyncId )
+  //   {
+  //     console.log( `init . executionAsyncId:${AsyncHooks.executionAsyncId()}` );
+  //     console.log( `init . asyncId:${asyncId} type:${type} triggerAsyncId:${triggerAsyncId}` );
+  //     debugger;
+  //   },
+  //   before( asyncId )
+  //   {
+  //     // console.log( `before . asyncId:${asyncId}` );
+  //   },
+  //   after( asyncId )
+  //   {
+  //     // console.log( `after . asyncId:${asyncId}`);
+  //   },
+  //   destroy( asyncId )
+  //   {
+  //     console.log( `destroy . asyncId:${asyncId}` );
+  //   },
+  // }).enable();
+
+  require('net').createServer(() => {}).listen(8080, () => {
+    // Let's wait 10ms before logging the server started.
+    setTimeout(() => {
+      // console.log('>>>', AsyncHooks.executionAsyncId());
+    }, 10);
+  });
 
   for( let i = 0 ; i < 10; i++ )
   a.ready.then( run )
-
   return a.ready;
 
   function run( )
@@ -33730,20 +33778,29 @@ function experimentIpcDeasync( test )
     }
     _.process.start( o );
 
+    var time = _.time.now();
     var ready = _.Consequence();
 
     o.process.on( 'message', () =>
     {
       let interval = setInterval( () =>
       {
-        if( _.process.isAlive( o.process.pid ) )
-        return false;
-        ready.take( true );
-        clearInterval( interval );
+        try
+        {
+          console.log( `setInterval . executionAsyncId:${AsyncHooks.executionAsyncId()}` );
+          console.log( 'process.isAlive', _.time.now() - time );
+          if( _.process.isAlive( o.process.pid ) )
+          return false;
+          ready.take( true );
+          clearInterval( interval );
+        }
+        catch( err )
+        {
+          // console.log( err );
+        }
       })
       ready.deasync();
     })
-
 
     return _.Consequence.AndKeep( o.conTerminate, ready );
   }
