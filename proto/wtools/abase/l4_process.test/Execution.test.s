@@ -16649,11 +16649,12 @@ function startNjsWithReadyDelayStructural( test )
   //   })
 
   //   return ready;
-// }
+ // }
 
 }
 
-startNjsWithReadyDelayStructural.timeOut = 18e4; /* was 60000 for 3 runs */
+startNjsWithReadyDelayStructural.timeOut = 10e4; /* Locally : 32.486s */
+startNjsWithReadyDelayStructural.rapidity = -1;
 startNjsWithReadyDelayStructural.description =
 `
  - ready has delay
@@ -17527,7 +17528,8 @@ function startNjsWithReadyDelayStructuralMultiple( test )
 
 }
 
-startNjsWithReadyDelayStructuralMultiple.timeOut = 18e4;
+startNjsWithReadyDelayStructuralMultiple.timeOut = 12e4; /* Locally : 37.799s */
+startNjsWithReadyDelayStructuralMultiple.rapidity = -1;
 startNjsWithReadyDelayStructuralMultiple.description =
 `
  - ready has delay
