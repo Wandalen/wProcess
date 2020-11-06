@@ -7025,7 +7025,7 @@ function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subrou
 
     // _.process.startPassingThrough
     // ({
-    //   execPath : a.path.nativize( testAppPath ),
+    //   execPath : testAppPath,
     //   ready : a.ready,
     //   outputCollecting : 1,
     //   outputPiping : 1,
@@ -7112,7 +7112,7 @@ function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subrou
 
     // _.process.startPassingThrough
     // ({
-    //   args : a.path.nativize( testAppPath ),
+    //   args : testAppPath,
     //   ready : a.ready,
     //   outputCollecting : 1,
     //   outputPiping : 1,
@@ -7139,7 +7139,7 @@ function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subrou
 
     // _.process.startPassingThrough
     // ({
-    //   args : a.path.nativize( testAppPath ) + ' arg',
+    //   args : testAppPath + ' arg',
     //   ready : a.ready,
     //   outputCollecting : 1,
     //   outputPiping : 1,
