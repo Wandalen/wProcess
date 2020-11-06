@@ -4743,7 +4743,7 @@ function startExecPathQuotesClosing( test )
     //   let op = JSON.parse( o.output );
     //   test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
     //   test.identical( op.map, {} )
-    //   test.identical( op.scriptArgs, [ 'arg"' ] );
+    //   test.identical( op.scriptArgs, [ 'arg"' ] )
 
     //   return null;
     // })
