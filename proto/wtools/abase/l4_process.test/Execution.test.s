@@ -29799,6 +29799,7 @@ function terminateFirstChildSpawn( test )
 
   terminate.then( () =>
   {
+    console.log( 'PPP:', a.abs( 'program2Pid' ) )
     program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
     program2Pid = program2Pid.pid;
     return _.process.terminate
