@@ -166,7 +166,7 @@ Event 'exit' is aways called. Options `stdio` and `detaching` also don't affect 
 
 /* qqq for Yevhen : find all tests with passingThrough:1, separate them from the rest of the test
 and rewrite to run process which run process to avoid influence of arguments of tester on testing
-qqq2 : not done
+qqq2 : not done | aaa : Done.
 */
 
 /*
@@ -6580,71 +6580,209 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
 {
   let context = this;
   let a = context.assetFor( test, 'basic' );
+  let testAppPathParent = a.program( testAppParent );
   let testAppPath = a.program( testApp );
 
-  /* */
-
-  a.ready.then( () =>
-  {
-    test.case = 'execute simple js program with normalized path'
-
-    let execPath = _.path.normalize( testAppPath );
-    let o =
-    {
-      execPath : _.strQuote( execPath ),
-      stdio : 'pipe',
-      outputCollecting : 1,
-      outputPiping : 1,
-      throwingExitCode : 0,
-      applyingExitCode : 0,
-    };
-
-    return _.process.startNjsPassingThrough( o )
-    .then( ( op ) =>
-    {
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      test.is( a.fileProvider.fileExists( testAppPath ) );
-      test.is( !_.strHas( op.output, `Error: Cannot find module` ) );
-      return null;
-    })
-
-  });
-
-  /* */
-
-  a.ready.then( () =>
-  {
-    test.case = 'execute simple js program with nativized path'
-
-    let execPath = _.path.nativize( testAppPath );
-    let o =
-    {
-      execPath : _.strQuote( execPath ),
-      stdio : 'pipe',
-      outputCollecting : 1,
-      outputPiping : 1,
-      throwingExitCode : 0,
-      applyingExitCode : 0,
-    };
-
-    return _.process.startNjsPassingThrough( o )
-    .then( ( op ) =>
-    {
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      test.is( a.fileProvider.fileExists( testAppPath ) );
-      test.is( !_.strHas( op.output, `Error: Cannot find module` ) );
-      return null;
-    })
-
-  })
-
-  /* */
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
   return a.ready;
 
   /* */
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, execute simple js program with normalized path`
+
+      let execPath = a.path.nativize( a.path.normalize( testAppPath ) );
+      let o =
+      {
+        execPath : mode === 'fork' ? _.strQuote( execPath ) : 'node ' + _.strQuote( execPath ),
+        mode,
+        stdio : 'pipe',
+        outputCollecting : 1,
+        outputPiping : 1,
+        outputColoring : 0,
+        throwingExitCode : 0,
+        applyingExitCode : 0,
+      };
+      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' })
+
+      let o2 =
+      {
+        execPath : 'node ' + testAppPathParent,
+        mode : 'spawn',
+        outputCollecting : 1,
+      }
+
+      return _.process.start( o2 )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, '[]' );
+        test.is( a.fileProvider.fileExists( testAppPath ) );
+        return null;
+      } )
+
+      /* ORIGINAL */
+      // return _.process.startNjsPassingThrough( o )
+      // .then( ( op ) =>
+      // {
+      //   test.identical( op.exitCode, 0 );
+      //   test.identical( op.ended, true );
+      //   test.is( a.fileProvider.fileExists( testAppPath ) );
+      //   test.is( !_.strHas( op.output, `Error: Cannot find module` ) );
+      //   return null;
+      // })
+
+    });
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, execute simple js program with nativized path`
+
+      let o =
+      {
+        execPath : mode === 'fork' ? _.strQuote( testAppPath ) : 'node ' + _.strQuote( testAppPath ),
+        mode,
+        stdio : 'pipe',
+        outputCollecting : 1,
+        outputPiping : 1,
+        outputColoring : 0,
+        throwingExitCode : 0,
+        applyingExitCode : 0,
+      };
+
+      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' })
+
+      let o2 =
+      {
+        execPath : 'node ' + testAppPathParent,
+        mode : 'spawn',
+        outputCollecting : 1,
+      }
+
+      return _.process.start( o2 )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, '[]' );
+        test.is( a.fileProvider.fileExists( testAppPath ) );
+        return null;
+      } )
+
+      /* ORIGINAL */
+      // return _.process.startNjsPassingThrough( o )
+      // .then( ( op ) =>
+      // {
+      //   test.identical( op.exitCode, 0 );
+      //   test.identical( op.ended, true );
+      //   test.is( a.fileProvider.fileExists( testAppPath ) );
+      //   test.is( !_.strHas( op.output, `Error: Cannot find module` ) );
+      //   return null;
+      // })
+    })
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, execute simple js program with normalized path, parent args : [ 'arg' ]`
+
+      let execPath = a.path.nativize( a.path.normalize( testAppPath ) );
+      let o =
+      {
+        execPath : mode === 'fork' ? _.strQuote( execPath ) : 'node ' + _.strQuote( execPath ),
+        mode,
+        args : [ 'arg' ],
+        stdio : 'pipe',
+        outputCollecting : 1,
+        outputPiping : 1,
+        outputColoring : 0,
+        throwingExitCode : 0,
+        applyingExitCode : 0,
+      };
+      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' })
+
+      let o2 =
+      {
+        execPath : 'node ' + testAppPathParent,
+        mode : 'spawn',
+        outputCollecting : 1,
+      }
+
+      return _.process.start( o2 )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, `[ 'arg' ]` );
+        test.is( a.fileProvider.fileExists( testAppPath ) );
+        return null;
+      } )
+
+    });
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, execute simple js program with nativized path, parent args : [ 'arg' ]`
+
+      let o =
+      {
+        execPath : mode === 'fork' ? _.strQuote( testAppPath ) : 'node ' + _.strQuote( testAppPath ),
+        mode,
+        args : [ 'arg' ],
+        stdio : 'pipe',
+        outputCollecting : 1,
+        outputPiping : 1,
+        outputColoring : 0,
+        throwingExitCode : 0,
+        applyingExitCode : 0,
+      };
+
+      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' })
+
+      let o2 =
+      {
+        execPath : 'node ' + testAppPathParent,
+        mode : 'spawn',
+        outputCollecting : 1,
+      }
+
+      return _.process.start( o2 )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, `[ 'arg' ]` );
+        test.is( a.fileProvider.fileExists( testAppPath ) );
+        return null;
+      } )
+    })
+
+    return ready;
+  }
+
+  /* - */
+
+  function testAppParent()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wFiles' );
+    _.include( 'wProcess' );
+
+    let o = _.fileProvider.fileRead({ filePath : _.path.join( __dirname, 'op.json' ), encoding : 'json' });
+    o.currentPath = __dirname;
+    _.process.startPassingThrough( o );
+  }
 
   function testApp()
   {
@@ -6654,217 +6792,392 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
 
 //
 
-function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subroutine for modes */
+function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subroutine for modes | aaa : Done. */
 {
   let context = this;
   let a = context.assetFor( test, false );
   let testAppPath = a.program({ routine : testApp, dirPath : 'path with space' });
-  let execPathWithSpace = 'node ' + _.path.nativize( testAppPath );
-
-  /* - */
-
-  a.ready.then( () =>
-  {
-    test.case = 'execPath contains unquoted path with space, spawn'
-    return null;
-  })
-
-  _.process.startPassingThrough
-  ({
-    execPath : execPathWithSpace,
-    ready : a.ready,
-    outputCollecting : 1,
-    outputPiping : 1,
-    mode : 'spawn',
-    throwingExitCode : 0,
-    applyingExitCode : 0,
-    stdio : 'pipe'
-  });
-
-  a.ready.then( ( op ) =>
-  {
-    test.notIdentical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    test.is( a.fileProvider.fileExists( testAppPath ) );
-    test.is( _.strHas( op.output, `Error: Cannot find module` ) );
-    return null;
-  })
-
-  /* - */
-
-  a.ready.then( () =>
-  {
-    test.case = 'execPath contains unquoted path with space, shell'
-    return null;
-  })
-
-  _.process.startPassingThrough
-  ({
-    execPath : execPathWithSpace,
-    ready : a.ready,
-    outputCollecting : 1,
-    outputPiping : 1,
-    mode : 'shell',
-    throwingExitCode : 0,
-    applyingExitCode : 0,
-    stdio : 'pipe'
-  });
-
-  a.ready.then( ( op ) =>
-  {
-    test.notIdentical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    test.is( a.fileProvider.fileExists( testAppPath ) );
-    test.is( _.strHas( op.output, `Error: Cannot find module` ) );
-    return null;
-  })
-
-  /* - */
-
-  a.ready.then( () =>
-  {
-    test.case = 'execPath contains unquoted path with space, fork'
-    return null;
-  })
-
-  _.process.startPassingThrough
-  ({
-    execPath : a.path.nativize( testAppPath ),
-    ready : a.ready,
-    outputCollecting : 1,
-    outputPiping : 1,
-    mode : 'spawn',
-    throwingExitCode : 0,
-    applyingExitCode : 0,
-    stdio : 'pipe'
-  });
-
-  a.ready.then( ( op ) =>
-  {
-    test.notIdentical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    test.is( a.fileProvider.fileExists( testAppPath ) );
-    test.is( _.strHas( op.output, `Error: Cannot find module` ) );
-    return null;
-  })
-
-  /* - */
-
-  a.ready.then( () =>
-  {
-    test.case = 'args is a string with unquoted path with space, spawn'
-    return null;
-  })
-
-  _.process.startPassingThrough
-  ({
-    args : execPathWithSpace,
-    ready : a.ready,
-    outputCollecting : 1,
-    outputPiping : 1,
-    mode : 'spawn',
-    throwingExitCode : 0,
-    applyingExitCode : 0,
-    stdio : 'pipe'
-  });
-
-  a.ready.finally( ( err, op ) =>
-  {
-    _.errAttend( err );
-    test.is( !!err );
-    test.is( a.fileProvider.fileExists( testAppPath ) );
-    test.is( _.strHas( err.message, `ENOENT` ) );
-    return null;
-  })
-
-  /* - */
-
-  a.ready.then( () =>
-  {
-    test.case = 'args is a string with unquoted path with space, shell'
-    return null;
-  })
-
-  _.process.startPassingThrough
-  ({
-    args : execPathWithSpace,
-    ready : a.ready,
-    outputCollecting : 1,
-    outputPiping : 1,
-    mode : 'shell',
-    throwingExitCode : 0,
-    applyingExitCode : 0,
-    stdio : 'pipe'
-  });
-
-  a.ready.then( ( op ) =>
-  {
-    test.notIdentical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    test.is( a.fileProvider.fileExists( testAppPath ) );
-    test.is( _.strHas( op.output, `Cannot find module` ) );
-    return null;
-  })
-
-  /* - */
-
-  a.ready.then( () =>
-  {
-    test.case = 'args is a string with unquoted path with space, fork'
-    return null;
-  })
-
-  _.process.startPassingThrough
-  ({
-    args : a.path.nativize( testAppPath ),
-    ready : a.ready,
-    outputCollecting : 1,
-    outputPiping : 1,
-    mode : 'fork',
-    throwingExitCode : 0,
-    applyingExitCode : 0,
-    stdio : 'pipe'
-  });
-
-  a.ready.then( ( op ) =>
-  {
-    test.identical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    return null;
-  })
-
-  /* - */
-
-  a.ready.then( () =>
-  {
-    test.case = 'args is a string with unquoted path with space and argument, fork'
-    return null;
-  })
-
-  _.process.startPassingThrough
-  ({
-    args : a.path.nativize( testAppPath ) + ' arg',
-    ready : a.ready,
-    outputCollecting : 1,
-    outputPiping : 1,
-    mode : 'fork',
-    throwingExitCode : 0,
-    applyingExitCode : 0,
-    stdio : 'pipe'
-  });
-
-  a.ready.then( ( op ) =>
-  {
-    test.notIdentical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    test.is( a.fileProvider.fileExists( testAppPath ) );
-    test.is( _.strHas( op.output, `Cannot find module` ) );
-    return null;
-  })
+  let testAppPathParent = a.program( testAppParent );
+  // let execPathWithSpace = 'node ' + testAppPath;
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
   return a.ready;
 
+  /* */
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, execPath contains unquoted path with space`
+
+      let o =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+        outputPiping : 0,
+        mode,
+        throwingExitCode : 0,
+        applyingExitCode : 0,
+        stdio : 'pipe'
+      }
+
+      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' })
+
+      let o2 =
+      {
+        execPath : 'node ' + testAppPathParent,
+        mode : 'spawn',
+        outputCollecting : 1,
+        throwingExitCode : 0,
+        stdio : 'pipe',
+      }
+
+      return _.process.start( o2 )
+      .then( ( op ) =>
+      {
+        let out = JSON.parse( op.output );
+        test.identical( op.ended, true );
+        test.is( a.fileProvider.fileExists( testAppPath ) );
+        test.is( !out.err );
+        test.is( _.strHas( out.output, `Error: Cannot find module` ) );
+        return null;
+      }) 
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, args is a string with unquoted path with space`
+
+      let o =
+      {
+        args : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+        outputCollecting : 1,
+        outputPiping : 0,
+        mode,
+        throwingExitCode : 0,
+        applyingExitCode : 0,
+        stdio : 'pipe'
+      }
+
+      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' })
+
+      let o2 =
+      {
+        execPath : 'node ' + testAppPathParent,
+        mode : 'spawn',
+        outputCollecting : 1,
+        throwingExitCode : 0,
+        stdio : 'pipe',
+      }
+
+      _.process.start( o2 )
+
+      o2.ready.then( ( op ) =>
+      {
+        test.identical( op.ended, true );
+        test.is( a.fileProvider.fileExists( testAppPath ) );
+        let out = JSON.parse( op.output );
+        if( mode === 'spawn' )
+        {
+          test.is( !!out.err );
+          test.is( a.fileProvider.fileExists( testAppPath ) );
+          test.identical( out.err.code, 'ENOENT' );
+        }
+        else
+        {
+          test.is( !out.err )
+          if( mode === 'fork' )
+          test.is( !_.strHas( out.output, `Cannot find module` ) );
+          else
+          test.is( _.strHas( out.output, `Cannot find module` ) );
+        }
+        return null;
+      })
+
+      return o2.ready;
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, args is a string with unquoted path with space and argument`
+
+      let o =
+      {
+        args : mode === 'fork' ? testAppPath + ' arg' : 'node ' + testAppPath + ' arg',
+        mode,
+        outputCollecting : 1,
+        outputPiping : 0,
+        throwingExitCode : 0,
+        applyingExitCode : 0,
+        stdio : 'pipe'
+      }
+
+      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' })
+
+      let o2 =
+      {
+        execPath : 'node ' + testAppPathParent,
+        mode : 'spawn',
+        outputCollecting : 1,
+        throwingExitCode : 0,
+        stdio : 'pipe',
+      }
+
+      _.process.start( o2 )
+
+      o2.ready.then( ( op ) =>
+      {
+        let out = JSON.parse( op.output );
+        test.identical( op.ended, true );
+        test.is( a.fileProvider.fileExists( testAppPath ) );
+        if( mode === 'spawn' )
+        {
+          test.is( !!out.err );
+          test.is( a.fileProvider.fileExists( testAppPath ) );
+          test.identical( out.err.code, 'ENOENT' );
+        }
+        else
+        {
+          test.is( !out.err )
+          test.is( _.strHas( out.output, `Cannot find module` ) );
+        }
+        return null;
+      })
+
+      return o2.ready;
+    })
+
+    return ready;
+
+    /* ORIGINAL */
+    // a.ready.then( () =>
+    // {
+    //   test.case = 'execPath contains unquoted path with space, spawn'
+    //   return null;
+    // })
+
+    // _.process.startPassingThrough
+    // ({
+    //   execPath : execPathWithSpace,
+    //   ready : a.ready,
+    //   outputCollecting : 1,
+    //   outputPiping : 1,
+    //   mode : 'spawn',
+    //   throwingExitCode : 0,
+    //   applyingExitCode : 0,
+    //   stdio : 'pipe'
+    // });
+
+    // a.ready.then( ( op ) =>
+    // {
+    //   test.notIdentical( op.exitCode, 0 );
+    //   test.identical( op.ended, true );
+    //   test.is( a.fileProvider.fileExists( testAppPath ) );
+    //   test.is( _.strHas( op.output, `Error: Cannot find module` ) );
+    //   return null;
+    // })
+
+    // /* - */
+
+    // a.ready.then( () =>
+    // {
+    //   test.case = 'execPath contains unquoted path with space, shell'
+    //   return null;
+    // })
+
+    // _.process.startPassingThrough
+    // ({
+    //   execPath : execPathWithSpace,
+    //   ready : a.ready,
+    //   outputCollecting : 1,
+    //   outputPiping : 1,
+    //   mode : 'shell',
+    //   throwingExitCode : 0,
+    //   applyingExitCode : 0,
+    //   stdio : 'pipe'
+    // });
+
+    // a.ready.then( ( op ) =>
+    // {
+    //   test.notIdentical( op.exitCode, 0 );
+    //   test.identical( op.ended, true );
+    //   test.is( a.fileProvider.fileExists( testAppPath ) );
+    //   test.is( _.strHas( op.output, `Error: Cannot find module` ) );
+    //   return null;
+    // })
+
+    // /* - */
+
+    // a.ready.then( () =>
+    // {
+    //   test.case = 'execPath contains unquoted path with space, fork'
+    //   return null;
+    // })
+
+    // _.process.startPassingThrough
+    // ({
+    //   execPath : a.path.nativize( testAppPath ),
+    //   ready : a.ready,
+    //   outputCollecting : 1,
+    //   outputPiping : 1,
+    //   mode : 'spawn',
+    //   throwingExitCode : 0,
+    //   applyingExitCode : 0,
+    //   stdio : 'pipe'
+    // });
+
+    // a.ready.then( ( op ) =>
+    // {
+    //   test.notIdentical( op.exitCode, 0 );
+    //   test.identical( op.ended, true );
+    //   test.is( a.fileProvider.fileExists( testAppPath ) );
+    //   test.is( _.strHas( op.output, `Error: Cannot find module` ) );
+    //   return null;
+    // })
+
+    // /* - */
+
+    // a.ready.then( () =>
+    // {
+    //   test.case = 'args is a string with unquoted path with space, spawn'
+    //   return null;
+    // })
+
+    // _.process.startPassingThrough
+    // ({
+    //   args : execPathWithSpace,
+    //   ready : a.ready,
+    //   outputCollecting : 1,
+    //   outputPiping : 1,
+    //   mode : 'spawn',
+    //   throwingExitCode : 0,
+    //   applyingExitCode : 0,
+    //   stdio : 'pipe'
+    // });
+
+    // a.ready.finally( ( err, op ) =>
+    // {
+    //   _.errAttend( err );
+    //   test.is( !!err );
+    //   test.is( a.fileProvider.fileExists( testAppPath ) );
+    //   test.is( _.strHas( err.message, `ENOENT` ) );
+    //   return null;
+    // })
+
+    // /* - */
+
+    // a.ready.then( () =>
+    // {
+    //   test.case = 'args is a string with unquoted path with space, shell'
+    //   return null;
+    // })
+
+    // _.process.startPassingThrough
+    // ({
+    //   args : execPathWithSpace,
+    //   ready : a.ready,
+    //   outputCollecting : 1,
+    //   outputPiping : 1,
+    //   mode : 'shell',
+    //   throwingExitCode : 0,
+    //   applyingExitCode : 0,
+    //   stdio : 'pipe'
+    // });
+
+    // a.ready.then( ( op ) =>
+    // {
+    //   test.notIdentical( op.exitCode, 0 );
+    //   test.identical( op.ended, true );
+    //   test.is( a.fileProvider.fileExists( testAppPath ) );
+    //   test.is( _.strHas( op.output, `Cannot find module` ) );
+    //   return null;
+    // })
+
+    // /* - */
+
+    // a.ready.then( () =>
+    // {
+    //   test.case = 'args is a string with unquoted path with space, fork'
+    //   return null;
+    // })
+
+    // _.process.startPassingThrough
+    // ({
+    //   args : a.path.nativize( testAppPath ),
+    //   ready : a.ready,
+    //   outputCollecting : 1,
+    //   outputPiping : 1,
+    //   mode : 'fork',
+    //   throwingExitCode : 0,
+    //   applyingExitCode : 0,
+    //   stdio : 'pipe'
+    // });
+
+    // a.ready.then( ( op ) =>
+    // {
+    //   test.identical( op.exitCode, 0 );
+    //   test.identical( op.ended, true );
+    //   return null;
+    // })
+
+    // /* - */
+
+    // a.ready.then( () =>
+    // {
+    //   test.case = 'args is a string with unquoted path with space and argument, fork'
+    //   return null;
+    // })
+
+    // _.process.startPassingThrough
+    // ({
+    //   args : a.path.nativize( testAppPath ) + ' arg',
+    //   ready : a.ready,
+    //   outputCollecting : 1,
+    //   outputPiping : 1,
+    //   mode : 'fork',
+    //   throwingExitCode : 0,
+    //   applyingExitCode : 0,
+    //   stdio : 'pipe'
+    // });
+
+    // a.ready.then( ( op ) =>
+    // {
+    //   test.notIdentical( op.exitCode, 0 );
+    //   test.identical( op.ended, true );
+    //   test.is( a.fileProvider.fileExists( testAppPath ) );
+    //   test.is( _.strHas( op.output, `Cannot find module` ) );
+    //   return null;
+    // })
+
+  }
+
+
   /* - */
+
+  function testAppParent()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wFiles' );
+    _.include( 'wProcess' );
+
+    let o = _.fileProvider.fileRead({ filePath : _.path.join( __dirname, 'op.json' ), encoding : 'json' });
+    o.currentPath = __dirname;
+    _.process.startPassingThrough( o )
+    .finally( ( err, op ) =>
+    {
+      console.log( JSON.stringify({ output : op?.output ? op.output : null, err : err ? _.errAttend( err ) : null }) );
+      return null;
+    } )
+  }
 
   function testApp()
   {
@@ -7630,66 +7943,208 @@ function startNjsPassingThroughExecPathWithSpace( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
+  let testAppPathParent = a.program( testAppParent );
   let testAppPath = a.program({ routine : testApp, dirPath : 'path with space' });
   let execPathWithSpace = testAppPath;
 
-  /* - */
-
-  a.ready.then( () =>
-  {
-    test.case = 'execPath contains unquoted path with space'
-    return _.process.startNjsPassingThrough
-    ({
-      execPath : execPathWithSpace,
-      stdio : 'pipe',
-      outputCollecting : 1,
-      outputPiping : 1,
-      throwingExitCode : 0,
-      applyingExitCode : 0,
-    })
-    .then( ( op ) =>
-    {
-      test.notIdentical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      test.is( a.fileProvider.fileExists( testAppPath ) );
-      test.is( _.strHas( op.output, `Error: Cannot find module` ) );
-      return null;
-    })
-  })
-
-  /* - */
-
-  a.ready.then( () =>
-  {
-    test.case = 'args: string that contains unquoted path with space'
-
-    return _.process.startNjsPassingThrough
-    ({
-      args : execPathWithSpace,
-      stdio : 'pipe',
-      outputCollecting : 1,
-      outputPiping : 1,
-      throwingExitCode : 0,
-      applyingExitCode : 0,
-    })
-    .then( ( op ) =>
-    {
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      test.is( a.fileProvider.fileExists( testAppPath ) );
-      test.is( _.strHas( op.output, op.process.pid.toString() ) );
-      return null;
-    })
-  })
-
-  /* - */
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
   return a.ready;
 
+  /* */
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, execPath contains unquoted path with space`;
+
+      let o =
+      {
+        execPath : mode === 'fork' ? execPathWithSpace : 'node ' + execPathWithSpace,
+        mode,
+        stdio : 'pipe',
+        outputCollecting : 1,
+        outputPiping : 1,
+        outputColoring : 0,
+        throwingExitCode : 0,
+        applyingExitCode : 0,
+      }
+
+      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' })
+
+      let o2 =
+      {
+        execPath : 'node ' + testAppPathParent,
+        mode : 'spawn',
+        outputCollecting : 1,
+        throwingExitCode : 0,
+        stdio : 'pipe',
+      }
+
+      return _.process.start( o2 )
+      .then( ( op ) =>
+      {
+        test.identical( op.ended, true );
+        test.is( a.fileProvider.fileExists( testAppPath ) );
+        test.is( _.strHas( op.output, `Error: Cannot find module` ) );
+        return null;
+      })
+
+      /* ORIGINAL */
+      // test.case = 'execPath contains unquoted path with space'
+      // return _.process.startNjsPassingThrough
+      // ({
+      //   execPath : execPathWithSpace,
+      //   stdio : 'pipe',
+      //   outputCollecting : 1,
+      //   outputPiping : 1,
+      //   throwingExitCode : 0,
+      //   applyingExitCode : 0,
+      // })
+      // .then( ( op ) =>
+      // {
+      //   test.notIdentical( op.exitCode, 0 );
+      //   test.identical( op.ended, true );
+      //   test.is( a.fileProvider.fileExists( testAppPath ) );
+      //   test.is( _.strHas( op.output, `Error: Cannot find module` ) );
+      //   return null;
+      // })
+    })
+  
+    /* - */
+  
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, args: string that contains unquoted path with space`;
+  
+      let o =
+      {
+        execPath : mode === 'fork' ? null : 'node',
+        args : execPathWithSpace,
+        mode,
+        stdio : 'pipe',
+        outputCollecting : 1,
+        outputPiping : 0,
+        outputColoring : 0,
+        throwingExitCode : 0,
+        applyingExitCode : 0,
+      }
+
+      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' })
+
+      let o2 =
+      {
+        execPath : 'node ' + testAppPathParent,
+        mode : 'spawn',
+        outputCollecting : 1,
+        stdio : 'pipe',
+      }
+
+      return _.process.start( o2 )
+      .then( ( op ) =>
+      {
+        let out = JSON.parse( op.output );
+        test.identical( op.ended, true );
+        test.is( a.fileProvider.fileExists( testAppPath ) );
+        if( mode === 'shell' )
+        test.is( _.strHas( out.output, '[]' ) )
+        else
+        test.equivalent( out.output, '[]\n' + out.pid.toString() )
+        return null;
+      })
+
+      /* ORIGINAL */
+      // test.case = 'args: string that contains unquoted path with space'
+
+      // return _.process.startNjsPassingThrough
+      // ({
+      //   args : execPathWithSpace,
+      //   stdio : 'pipe',
+      //   outputCollecting : 1,
+      //   outputPiping : 1,
+      //   throwingExitCode : 0,
+      //   applyingExitCode : 0,
+      // })
+      // .then( ( op ) =>
+      // {
+      //   test.identical( op.exitCode, 0 );
+      //   test.identical( op.ended, true );
+      //   test.is( a.fileProvider.fileExists( testAppPath ) );
+      //   test.is( _.strHas( op.output, op.process.pid.toString() ) );
+      //   return null;
+      // })
+    })
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, args: string that contains unquoted path with space and 'arg'`;
+  
+      let o =
+      {
+        execPath : mode === 'fork' ? null : 'node',
+        args : [ execPathWithSpace, 'arg' ],
+        mode,
+        stdio : 'pipe',
+        outputCollecting : 1,
+        outputPiping : 0,
+        outputColoring : 0,
+        throwingExitCode : 0,
+        applyingExitCode : 0,
+      }
+
+      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' })
+
+      let o2 =
+      {
+        execPath : 'node ' + testAppPathParent,
+        mode : 'spawn',
+        outputCollecting : 1,
+        stdio : 'pipe',
+      }
+
+      return _.process.start( o2 )
+      .then( ( op ) =>
+      {
+        let out = JSON.parse( op.output );
+        test.identical( op.ended, true );
+        test.is( a.fileProvider.fileExists( testAppPath ) );
+        if( mode === 'shell' )
+        test.is( _.strHas( out.output, `[ 'arg' ]` ) )
+        else
+        test.equivalent( out.output, `[ 'arg' ]\n` + out.pid.toString() )
+        return null;
+      })
+    })
+
+    return ready;
+  }
+
+
   /* - */
+
+  function testAppParent()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wFiles' );
+    _.include( 'wProcess' );
+
+    let o = _.fileProvider.fileRead({ filePath : _.path.join( __dirname, 'op.json' ), encoding : 'json' });
+    o.currentPath = __dirname;
+    _.process.startPassingThrough( o )
+    .then( ( op ) =>
+    {
+      console.log( JSON.stringify({ pid : op.process.pid, output : op.output }) )
+      return null;
+    } );
+  }
 
   function testApp()
   {
+    console.log( process.argv.slice( 2 ) );
     console.log( process.pid )
     setTimeout( () => {}, context.t1 * 2 ) /* 2000 */
   }
