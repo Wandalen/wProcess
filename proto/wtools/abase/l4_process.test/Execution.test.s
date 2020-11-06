@@ -29840,7 +29840,7 @@ function terminateFirstChild( test )
         test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
         if( mode === 'shell' )
         test.identical( _.strCount( o.output, 'Time out!' ), 0 );
-        else
+        // else
         test.identical( _.strCount( o.output, 'program2::end' ), 0 );
 
         if( mode === 'shell' )
@@ -29875,11 +29875,14 @@ function terminateFirstChild( test )
           a.fileProvider.fileDelete( testAppPath );
           return null;
         }
+        else
+        {
+          test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+          test.is( _.process.isAlive( program2Pid ) );
+    
+          return _.time.out( context.t1*15 );
+        }
 
-        test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
-        test.is( _.process.isAlive( program2Pid ) );
-  
-        return _.time.out( context.t1*15 );
       })
   
       if( mode !== 'shell' )
@@ -29976,7 +29979,7 @@ function terminateFirstChild( test )
 
 }
 
-terminateFirstChild.timeOut = 120000;
+terminateFirstChild.timeOut = 15e4; /* Locally : 52.406s */
 terminateFirstChild.description =
 `
 modes : spawn, fork
