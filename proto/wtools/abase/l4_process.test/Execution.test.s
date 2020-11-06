@@ -15977,7 +15977,7 @@ function startNjsWithReadyDelayStructural( test )
         test.identical( options.ready.exportString(), 'Consequence:: 0 / 0' );
         else
         test.identical( options.ready.exportString(), 'Consequence:: 0 / 1' );
-        
+
         test.identical( options.conTerminate.exportString(), 'Consequence:: 1 / 0' );
         test.identical( options.conDisconnect.exportString(), 'Consequence:: 1 / 0' );
         test.identical( options.conStart.exportString(), 'Consequence:: 1 / 0' );
@@ -16198,7 +16198,7 @@ function startNjsWithReadyDelayStructural( test )
 
 }
 
-startNjsWithReadyDelayStructural.timeOut = 120000;
+startNjsWithReadyDelayStructural.timeOut = 18e4; /* was 60000 for 3 runs */
 startNjsWithReadyDelayStructural.description =
 `
  - ready has delay
@@ -17072,7 +17072,7 @@ function startNjsWithReadyDelayStructuralMultiple( test )
 
 }
 
-startNjsWithReadyDelayStructuralMultiple.timeOut = 120000;
+startNjsWithReadyDelayStructuralMultiple.timeOut = 18e4;
 startNjsWithReadyDelayStructuralMultiple.description =
 `
  - ready has delay
