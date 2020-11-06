@@ -31257,12 +31257,76 @@ program2 should continue to work
 
 //
 
+
+/* FOR MODE : FORK */
+/* qqq for Vova : have a ( fast! ) look, please */
+
+/*
+
+ > program1.js
+program1::begin
+program2::begin
+SIGTERM
+--------------- uncaught error --------------->
+
+ = Message of error#1
+    IPC channel is already disconnected
+    Error starting the process
+        Exec path : program2.js
+        Current path : /pro/Temp/ProcessBasic-2020-10-26-22-32-51-515-e694.tmp/terminateWithDetachedChildFork
+
+ = Beautified calls stack
+    at ChildProcess.target.disconnect (internal/child_process.js:832:26)
+    at Pipe.channel.onread (internal/child_process.js:582:14)
+
+ = Throws stack
+    thrown at ChildProcess.handleError @ /wtools/abase/l4_process/l3/Execution.s:854:13
+    thrown at errRefine @ /wtools/abase/l0/l5/fErr.s:120:16
+
+ = Process
+    Current path : /pro/Temp/ProcessBasic-2020-10-26-22-32-51-515-e694.tmp/terminateWithDetachedChildFork
+    Exec path : /home/kos/.nvm/versions/node/v12.9.1/bin/node /pro/Temp/ProcessBasic-2020-10-26-22-32-51-515-e694.tmp/terminateWithDetachedChildFork/program1.js
+
+
+--------------- uncaught error ---------------<
+
+        - got :
+          255
+        - expected :
+          null
+        - difference :
+          *
+
+        /wtools/abase/l4_process.test/Execution.test.s:29900:12
+          29896 :       test.identical( o.exitSignal, null );
+          29897 :     }
+          29898 :     else
+          29899 :     {
+        * 29900 :       test.identical( o.exitCode, null );
+
+        Test check ( TestSuite::Tools.l4.ProcessBasic / TestRoutine::terminateWithDetachedChildFork /  # 1 ) ... failed
+        - got :
+          null
+        - expected :
+          'SIGTERM'
+        - difference :
+          *
+
+        /wtools/abase/l4_process.test/Execution.test.s:29901:12
+          29897 :     }
+          29898 :     else
+          29899 :     {
+          29900 :       test.identical( o.exitCode, null );
+        * 29901 :       test.identical( o.exitSignal, 'SIGTERM' );
+
+*/
+/* qqq for Vova : join routines, use subroutine for mode varying aaa: this will make the routine too complicated, that is the reason why I splitted the old routine*/
 function terminateWithDetachedChild( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
   let testAppPath2 = a.program( program2 );
-  let modes = [ /*'fork', */'spawn', /*'shell' */];
+  let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
 
@@ -31309,16 +31373,39 @@ function terminateWithDetachedChild( test )
     
       o.conTerminate.then( () =>
       {
-        if( process.platform === 'win32' )
+
+        if( mode === 'fork' )
         {
-          test.identical( o.exitCode, 1 );
-          test.identical( o.exitSignal, null );
+          /*
+          if both processes dies simultinously uncaught njs error can be thrown by the parent process:
+          "IPC channel is already disconnected"
+          */
+
+          if( o.exitCode )
+          {
+            test.notIdentical( o.exitCode, 0 );
+            test.identical( o.exitSignal, null );
+          }
+          else
+          {
+            test.identical( o.exitCode, null );
+            test.identical( o.exitSignal, 'SIGTERM' );
+          }
         }
         else
         {
-          test.identical( o.exitCode, null );
-          test.identical( o.exitSignal, 'SIGTERM' );
+          if( process.platform === 'win32' )
+          {
+            test.identical( o.exitCode, 1 );
+            test.identical( o.exitSignal, null );
+          }
+          else
+          {
+            test.identical( o.exitCode, null );
+            test.identical( o.exitSignal, 'SIGTERM' );
+          }
         }
+
     
         test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
         test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
@@ -31415,141 +31502,141 @@ program1 and program2 should be terminated
 
 //
 
-function terminateWithDetachedChildSpawn( test )
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-  let testAppPath = a.program( program1 );
-  let testAppPath2 = a.program( program2 );
+// function terminateWithDetachedChildSpawn( test )
+// {
+//   let context = this;
+//   let a = context.assetFor( test, false );
+//   let testAppPath = a.program( program1 );
+//   let testAppPath2 = a.program( program2 );
 
-  let o =
-  {
-    execPath : 'node program1.js',
-    currentPath : a.routinePath,
-    mode : 'spawn',
-    outputPiping : 1,
-    outputCollecting : 1,
-    throwingExitCode : 0
-  }
+//   let o =
+//   {
+//     execPath : 'node program1.js',
+//     currentPath : a.routinePath,
+//     mode : 'spawn',
+//     outputPiping : 1,
+//     outputCollecting : 1,
+//     throwingExitCode : 0
+//   }
 
-  _.process.start( o );
+//   _.process.start( o );
 
-  let program2Pid = null;
-  let terminate = _.Consequence();
+//   let program2Pid = null;
+//   let terminate = _.Consequence();
 
-  o.process.stdout.on( 'data', handleOutput );
+//   o.process.stdout.on( 'data', handleOutput );
 
-  terminate.then( () =>
-  {
-    program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
-    program2Pid = program2Pid.pid;
-    return _.process.terminate
-    ({
-      pid : o.process.pid,
-      timeOut : context.t1 * 5,
-      withChildren : 1
-    })
-  })
+//   terminate.then( () =>
+//   {
+//     program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
+//     program2Pid = program2Pid.pid;
+//     return _.process.terminate
+//     ({
+//       pid : o.process.pid,
+//       timeOut : context.t1 * 5,
+//       withChildren : 1
+//     })
+//   })
 
-  o.conTerminate.then( () =>
-  {
-    if( process.platform === 'win32' )
-    {
-      test.identical( o.exitCode, 1 );
-      test.identical( o.exitSignal, null );
-    }
-    else
-    {
-      test.identical( o.exitCode, null );
-      test.identical( o.exitSignal, 'SIGTERM' );
-    }
+//   o.conTerminate.then( () =>
+//   {
+//     if( process.platform === 'win32' )
+//     {
+//       test.identical( o.exitCode, 1 );
+//       test.identical( o.exitSignal, null );
+//     }
+//     else
+//     {
+//       test.identical( o.exitCode, null );
+//       test.identical( o.exitSignal, 'SIGTERM' );
+//     }
 
-    test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
-    test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
-    test.identical( _.strCount( o.output, 'program2::end' ), 0 );
-    test.is( !_.process.isAlive( program2Pid ) );
-    test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+//     test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
+//     test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
+//     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
+//     test.is( !_.process.isAlive( program2Pid ) );
+//     test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
 
-    return null;
-  })
+//     return null;
+//   })
 
-  return _.Consequence.AndKeep( terminate, o.conTerminate );
+//   return _.Consequence.AndKeep( terminate, o.conTerminate );
 
-  /* - */
+//   /* - */
 
-  function handleOutput( output )
-  {
-    output = output.toString();
-    if( !_.strHas( output, 'program2::begin' ) )
-    return;
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
+//   function handleOutput( output )
+//   {
+//     output = output.toString();
+//     if( !_.strHas( output, 'program2::begin' ) )
+//     return;
+//     o.process.stdout.removeListener( 'data', handleOutput );
+//     terminate.take( null );
+//   }
 
-  /* - */
+//   /* - */
 
-  function program1()
-  {
-    let _ = require( toolsPath );
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-    var o =
-    {
-      execPath : 'node program2.js',
-      currentPath : __dirname,
-      mode : 'spawn',
-      stdio : 'pipe',
-      detaching : 1,
-      inputMirroring : 0,
-      outputPiping : 1,
-      outputCollecting : 0,
-      throwingExitCode : 0,
-    }
-    _.process.start( o );
+//   function program1()
+//   {
+//     let _ = require( toolsPath );
+//     _.include( 'wProcess' );
+//     _.include( 'wFiles' );
+//     var o =
+//     {
+//       execPath : 'node program2.js',
+//       currentPath : __dirname,
+//       mode : 'spawn',
+//       stdio : 'pipe',
+//       detaching : 1,
+//       inputMirroring : 0,
+//       outputPiping : 1,
+//       outputCollecting : 0,
+//       throwingExitCode : 0,
+//     }
+//     _.process.start( o );
 
-    let timer = _.time.outError( context.t1*25 );
+//     let timer = _.time.outError( context.t1*25 );
 
-    console.log( 'program1::begin' );
+//     console.log( 'program1::begin' );
 
-  }
+//   }
 
-  /* - */
+//   /* - */
 
-  function program2()
-  {
-    let _ = require( toolsPath );
-    _.include( 'wFiles' );
+//   function program2()
+//   {
+//     let _ = require( toolsPath );
+//     _.include( 'wFiles' );
 
-    process.removeAllListeners( 'SIGTERM' )
+//     process.removeAllListeners( 'SIGTERM' )
 
-    _.fileProvider.fileWrite
-    ({
-      filePath : _.path.join( __dirname, 'program2Pid' ),
-      data : { pid : process.pid },
-      encoding : 'json'
-    })
+//     _.fileProvider.fileWrite
+//     ({
+//       filePath : _.path.join( __dirname, 'program2Pid' ),
+//       data : { pid : process.pid },
+//       encoding : 'json'
+//     })
 
-    setTimeout( () =>
-    {
-      console.log( 'program2::end' );
-      _.fileProvider.fileWrite
-      ({
-        filePath : _.path.join( __dirname, 'program2end' ),
-        data : 'end'
-      })
-    }, context.t1*10 )
+//     setTimeout( () =>
+//     {
+//       console.log( 'program2::end' );
+//       _.fileProvider.fileWrite
+//       ({
+//         filePath : _.path.join( __dirname, 'program2end' ),
+//         data : 'end'
+//       })
+//     }, context.t1*10 )
 
-    console.log( 'program2::begin' );
+//     console.log( 'program2::begin' );
 
-  }
-}
+//   }
+// }
 
-terminateWithDetachedChildSpawn.timeOut = 60000;
-terminateWithDetachedChildSpawn.description =
-`program1 starts program2 in detached mode
-tester terminates program1 with option withChildren : 1
-program1 and program2 should be terminated
-`
+// terminateWithDetachedChildSpawn.timeOut = 60000;
+// terminateWithDetachedChildSpawn.description =
+// `program1 starts program2 in detached mode
+// tester terminates program1 with option withChildren : 1
+// program1 and program2 should be terminated
+// `
 
 //
 
@@ -31616,285 +31703,285 @@ SIGTERM
 */
 
 /* qqq for Vova : join routines, use subroutine for mode varying aaa: this will make the routine too complicated, that is the reason why I splitted the old routine*/
-function terminateWithDetachedChildFork( test )
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-  let testAppPath = a.program( program1 );
-  let testAppPath2 = a.program( program2 );
+// function terminateWithDetachedChildFork( test )
+// {
+//   let context = this;
+//   let a = context.assetFor( test, false );
+//   let testAppPath = a.program( program1 );
+//   let testAppPath2 = a.program( program2 );
 
-  let o =
-  {
-    execPath : 'program1.js',
-    currentPath : a.routinePath,
-    mode : 'fork',
-    outputPiping : 1,
-    outputCollecting : 1,
-    throwingExitCode : 0
-  }
+//   let o =
+//   {
+//     execPath : 'program1.js',
+//     currentPath : a.routinePath,
+//     mode : 'fork',
+//     outputPiping : 1,
+//     outputCollecting : 1,
+//     throwingExitCode : 0
+//   }
 
-  _.process.start( o );
+//   _.process.start( o );
 
-  let program2Pid = null;
-  let terminate = _.Consequence();
+//   let program2Pid = null;
+//   let terminate = _.Consequence();
 
-  o.process.stdout.on( 'data', handleOutput );
+//   o.process.stdout.on( 'data', handleOutput );
 
-  terminate.then( () =>
-  {
-    program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
-    program2Pid = program2Pid.pid;
-    return _.process.terminate
-    ({
-      pid : o.process.pid,
-      timeOut : context.t1 * 5,
-      withChildren : 1
-    })
-  })
+//   terminate.then( () =>
+//   {
+//     program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
+//     program2Pid = program2Pid.pid;
+//     return _.process.terminate
+//     ({
+//       pid : o.process.pid,
+//       timeOut : context.t1 * 5,
+//       withChildren : 1
+//     })
+//   })
 
-  o.conTerminate.then( () =>
-  {
+//   o.conTerminate.then( () =>
+//   {
 
-    /*
-    if both processes dies simultinously uncaught njs error can be thrown by the parent process:
-    "IPC channel is already disconnected"
-    */
+//     /*
+//     if both processes dies simultinously uncaught njs error can be thrown by the parent process:
+//     "IPC channel is already disconnected"
+//     */
 
-    if( o.exitCode )
-    {
-      test.notIdentical( o.exitCode, 0 );
-      test.identical( o.exitSignal, null );
-    }
-    else
-    {
-      test.identical( o.exitCode, null );
-      test.identical( o.exitSignal, 'SIGTERM' );
-    }
+//     if( o.exitCode )
+//     {
+//       test.notIdentical( o.exitCode, 0 );
+//       test.identical( o.exitSignal, null );
+//     }
+//     else
+//     {
+//       test.identical( o.exitCode, null );
+//       test.identical( o.exitSignal, 'SIGTERM' );
+//     }
 
-    test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
-    test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
-    test.identical( _.strCount( o.output, 'program2::end' ), 0 );
-    test.is( !_.process.isAlive( program2Pid ) );
-    test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+//     test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
+//     test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
+//     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
+//     test.is( !_.process.isAlive( program2Pid ) );
+//     test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
 
-    return null;
-  })
+//     return null;
+//   })
 
-  return _.Consequence.AndKeep( terminate, o.conTerminate );
+//   return _.Consequence.AndKeep( terminate, o.conTerminate );
 
-  /* - */
+//   /* - */
 
-  function handleOutput( output )
-  {
-    output = output.toString();
-    if( !_.strHas( output, 'program2::begin' ) )
-    return;
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
+//   function handleOutput( output )
+//   {
+//     output = output.toString();
+//     if( !_.strHas( output, 'program2::begin' ) )
+//     return;
+//     o.process.stdout.removeListener( 'data', handleOutput );
+//     terminate.take( null );
+//   }
 
-  /* - */
+//   /* - */
 
-  function program1()
-  {
-    let _ = require( toolsPath );
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-    var o =
-    {
-      execPath : 'program2.js',
-      currentPath : __dirname,
-      mode : 'fork',
-      stdio : 'pipe',
-      detaching : 1,
-      inputMirroring : 0,
-      outputPiping : 1,
-      outputCollecting : 0,
-      throwingExitCode : 0,
-    }
-    _.process.start( o );
+//   function program1()
+//   {
+//     let _ = require( toolsPath );
+//     _.include( 'wProcess' );
+//     _.include( 'wFiles' );
+//     var o =
+//     {
+//       execPath : 'program2.js',
+//       currentPath : __dirname,
+//       mode : 'fork',
+//       stdio : 'pipe',
+//       detaching : 1,
+//       inputMirroring : 0,
+//       outputPiping : 1,
+//       outputCollecting : 0,
+//       throwingExitCode : 0,
+//     }
+//     _.process.start( o );
 
-    let timer = _.time.outError( context.t1*25 );
+//     let timer = _.time.outError( context.t1*25 );
 
-    console.log( 'program1::begin' );
+//     console.log( 'program1::begin' );
 
-  }
+//   }
 
-  /* - */
+//   /* - */
 
-  function program2()
-  {
-    let _ = require( toolsPath );
-    _.include( 'wFiles' );
+//   function program2()
+//   {
+//     let _ = require( toolsPath );
+//     _.include( 'wFiles' );
 
-    process.removeAllListeners( 'SIGTERM' )
+//     process.removeAllListeners( 'SIGTERM' )
 
-    _.fileProvider.fileWrite
-    ({
-      filePath : _.path.join( __dirname, 'program2Pid' ),
-      data : { pid : process.pid },
-      encoding : 'json'
-    })
+//     _.fileProvider.fileWrite
+//     ({
+//       filePath : _.path.join( __dirname, 'program2Pid' ),
+//       data : { pid : process.pid },
+//       encoding : 'json'
+//     })
 
-    setTimeout( () =>
-    {
-      console.log( 'program2::end' );
-      _.fileProvider.fileWrite
-      ({
-        filePath : _.path.join( __dirname, 'program2end' ),
-        data : 'end'
-      })
-    }, context.t1*10 )
+//     setTimeout( () =>
+//     {
+//       console.log( 'program2::end' );
+//       _.fileProvider.fileWrite
+//       ({
+//         filePath : _.path.join( __dirname, 'program2end' ),
+//         data : 'end'
+//       })
+//     }, context.t1*10 )
 
-    console.log( 'program2::begin' );
-  }
+//     console.log( 'program2::begin' );
+//   }
 
-}
+// }
 
-terminateWithDetachedChildFork.timeOut = 60000;
-terminateWithDetachedChildFork.description =
-`program1 starts program2 in detached mode
-tester terminates program1 with option withChildren : 1
-program1 and program2 should be terminated
-`
+// terminateWithDetachedChildFork.timeOut = 60000;
+// terminateWithDetachedChildFork.description =
+// `program1 starts program2 in detached mode
+// tester terminates program1 with option withChildren : 1
+// program1 and program2 should be terminated
+// `
 
 //
 
-function terminateWithDetachedChildShell( test )
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-  let testAppPath = a.program( program1 );
-  let testAppPath2 = a.program( program2 );
+// function terminateWithDetachedChildShell( test )
+// {
+//   let context = this;
+//   let a = context.assetFor( test, false );
+//   let testAppPath = a.program( program1 );
+//   let testAppPath2 = a.program( program2 );
 
-  let o =
-  {
-    execPath : 'node program1.js',
-    currentPath : a.routinePath,
-    mode : 'shell',
-    outputPiping : 1,
-    outputCollecting : 1,
-    throwingExitCode : 0
-  }
+//   let o =
+//   {
+//     execPath : 'node program1.js',
+//     currentPath : a.routinePath,
+//     mode : 'shell',
+//     outputPiping : 1,
+//     outputCollecting : 1,
+//     throwingExitCode : 0
+//   }
 
-  _.process.start( o );
+//   _.process.start( o );
 
-  let program2Pid = null;
-  let terminate = _.Consequence();
+//   let program2Pid = null;
+//   let terminate = _.Consequence();
 
-  o.process.stdout.on( 'data', handleOutput );
+//   o.process.stdout.on( 'data', handleOutput );
 
-  terminate.then( () =>
-  {
-    program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
-    program2Pid = program2Pid.pid;
-    return _.process.terminate
-    ({
-      pid : o.process.pid,
-      timeOut : context.t1 * 5,
-      withChildren : 1
-    })
-  })
+//   terminate.then( () =>
+//   {
+//     program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
+//     program2Pid = program2Pid.pid;
+//     return _.process.terminate
+//     ({
+//       pid : o.process.pid,
+//       timeOut : context.t1 * 5,
+//       withChildren : 1
+//     })
+//   })
 
-  o.conTerminate.then( () =>
-  {
-    if( process.platform === 'win32' )
-    {
-      test.identical( o.exitCode, 1 );
-      test.identical( o.exitSignal, null );
-    }
-    else
-    {
-      test.identical( o.exitCode, null );
-      test.identical( o.exitSignal, 'SIGTERM' );
-    }
+//   o.conTerminate.then( () =>
+//   {
+//     if( process.platform === 'win32' )
+//     {
+//       test.identical( o.exitCode, 1 );
+//       test.identical( o.exitSignal, null );
+//     }
+//     else
+//     {
+//       test.identical( o.exitCode, null );
+//       test.identical( o.exitSignal, 'SIGTERM' );
+//     }
 
-    test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
-    test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
-    test.identical( _.strCount( o.output, 'program2::end' ), 0 );
-    test.is( !_.process.isAlive( program2Pid ) );
-    test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+//     test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
+//     test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
+//     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
+//     test.is( !_.process.isAlive( program2Pid ) );
+//     test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
 
-    return null;
-  })
+//     return null;
+//   })
 
-  return _.Consequence.AndKeep( terminate, o.conTerminate );
+//   return _.Consequence.AndKeep( terminate, o.conTerminate );
 
-  /* - */
+//   /* - */
 
-  function handleOutput( output )
-  {
-    output = output.toString();
-    if( !_.strHas( output, 'program2::begin' ) )
-    return;
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
+//   function handleOutput( output )
+//   {
+//     output = output.toString();
+//     if( !_.strHas( output, 'program2::begin' ) )
+//     return;
+//     o.process.stdout.removeListener( 'data', handleOutput );
+//     terminate.take( null );
+//   }
 
-  /* - */
+//   /* - */
 
-  function program1()
-  {
-    let _ = require( toolsPath );
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-    var o =
-    {
-      execPath : 'node program2.js',
-      currentPath : __dirname,
-      mode : 'shell',
-      stdio : 'pipe',
-      detaching : 1,
-      inputMirroring : 0,
-      outputPiping : 1,
-      outputCollecting : 0,
-      throwingExitCode : 0,
-    }
-    _.process.start( o );
+//   function program1()
+//   {
+//     let _ = require( toolsPath );
+//     _.include( 'wProcess' );
+//     _.include( 'wFiles' );
+//     var o =
+//     {
+//       execPath : 'node program2.js',
+//       currentPath : __dirname,
+//       mode : 'shell',
+//       stdio : 'pipe',
+//       detaching : 1,
+//       inputMirroring : 0,
+//       outputPiping : 1,
+//       outputCollecting : 0,
+//       throwingExitCode : 0,
+//     }
+//     _.process.start( o );
 
-    let timer = _.time.outError( context.t1*25 );
+//     let timer = _.time.outError( context.t1*25 );
 
-    console.log( 'program1::begin' );
+//     console.log( 'program1::begin' );
 
-  }
+//   }
 
-  /* - */
+//   /* - */
 
-  function program2()
-  {
-    let _ = require( toolsPath );
-    _.include( 'wFiles' );
+//   function program2()
+//   {
+//     let _ = require( toolsPath );
+//     _.include( 'wFiles' );
 
-    process.removeAllListeners( 'SIGTERM' )
+//     process.removeAllListeners( 'SIGTERM' )
 
-    _.fileProvider.fileWrite
-    ({
-      filePath : _.path.join( __dirname, 'program2Pid' ),
-      data : { pid : process.pid },
-      encoding : 'json'
-    })
+//     _.fileProvider.fileWrite
+//     ({
+//       filePath : _.path.join( __dirname, 'program2Pid' ),
+//       data : { pid : process.pid },
+//       encoding : 'json'
+//     })
 
-    setTimeout( () =>
-    {
-      console.log( 'program2::end' );
-      _.fileProvider.fileWrite
-      ({
-        filePath : _.path.join( __dirname, 'program2end' ),
-        data : 'end'
-      })
-    }, context.t1*10 )
+//     setTimeout( () =>
+//     {
+//       console.log( 'program2::end' );
+//       _.fileProvider.fileWrite
+//       ({
+//         filePath : _.path.join( __dirname, 'program2end' ),
+//         data : 'end'
+//       })
+//     }, context.t1*10 )
 
-    console.log( 'program2::begin' );
+//     console.log( 'program2::begin' );
 
-  }
-}
+//   }
+// }
 
-terminateWithDetachedChildShell.timeOut = 60000;
-terminateWithDetachedChildShell.description =
-`program1 starts program2 in detached mode
-tester terminates program1 with option withChildren : 1
-program1 and program2 should be terminated
-`
+// terminateWithDetachedChildShell.timeOut = 60000;
+// terminateWithDetachedChildShell.description =
+// `program1 starts program2 in detached mode
+// tester terminates program1 with option withChildren : 1
+// program1 and program2 should be terminated
+// `
 
 //
 
@@ -34398,9 +34485,9 @@ var Proto =
     // terminateDetachedFirstChildShell,
 
     terminateWithDetachedChild,
-    terminateWithDetachedChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine */
-    terminateWithDetachedChildFork,
-    terminateWithDetachedChildShell,
+    // terminateWithDetachedChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine | aaa : Done. */
+    // terminateWithDetachedChildFork,
+    // terminateWithDetachedChildShell,
 
     terminateSeveralChildren,
     terminateWithSeveralDetachedChildren,
