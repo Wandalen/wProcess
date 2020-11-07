@@ -30425,6 +30425,10 @@ function terminateFirstChildFork( test )
   {
     program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
     program2Pid = program2Pid.pid;
+    console.log( `parentPid : ${o.process.pid}` );
+    console.log( `childPid : ${program2Pid}` );
+    test.is( _.process.isAlive( o.process.pid ) );
+    test.is( _.process.isAlive( program2Pid ) );
     return _.process.terminate
     ({
       pid : o.process.pid,
@@ -30450,6 +30454,11 @@ function terminateFirstChildFork( test )
     test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
     test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+
+    /* platform::windows killls children processes, in contrast other platforms politely termonate children processes */
+    if( process.platform === 'win32' )
+    test.is( !_.process.isAlive( program2Pid ) );
+    else
     test.is( _.process.isAlive( program2Pid ) );
 
     return _.time.out( context.t1*15 );
@@ -30458,7 +30467,13 @@ function terminateFirstChildFork( test )
   o.conTerminate.then( () =>
   {
     test.is( !_.process.isAlive( program2Pid ) );
+
+    /* platform::windows killls children processes, in contrast other platforms politely termonate children processes */
+    if( process.platform === 'win32' )
+    test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+    else
     test.is( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+
     return null;
   })
 
@@ -31051,7 +31066,8 @@ function terminateSecondChildShell( test )
 
     let program2Op = _.fileProvider.fileRead({ filePath : a.abs( 'program2' ), encoding : 'json' });
 
-    if( process.platform !== 'linux' )
+    /* on windows and linux intermediate process could be created */
+    if( process.platform !== 'linux' && process.platform !== 'win32' )
     test.identical( program2Op.pid, program2Pid );
 
     if( process.platform === 'win32' )
@@ -31943,7 +31959,7 @@ program1 and program2 should be terminated
 
 //
 
-function terminateWithDetachedChildShell( test )
+function terminateWithDetachedChildShell( test ) /* qqq for Vova : fix on Windows */
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -31995,6 +32011,8 @@ function terminateWithDetachedChildShell( test )
     test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
     test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
+    test.identical( _.strCount( o.output, 'error' ), 0 );
+    test.identical( _.strCount( o.output, 'Error' ), 0 );
     test.is( !_.process.isAlive( program2Pid ) );
     test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
 
@@ -32005,8 +32023,9 @@ function terminateWithDetachedChildShell( test )
 
   /* - */
 
-   function handleOutput()
+  function handleOutput()
   {
+    console.log( 'handleOutput', o.output );
     if( !_.strHas( o.output, 'program2::begin' ) )
     return;
     o.process.stdout.removeListener( 'data', handleOutput );
