@@ -2903,16 +2903,27 @@ function signal_body( o )
   ready.then( handleResult );
   ready.catch( handleError );
 
-  if( o.sync )
-  ready.deasync();
-
-  return ready;
+  return end();
 
   /* - */
+
+  function end()
+  {
+    if( o.sync )
+    {
+      ready.deasync();
+      return ready.sync();
+    }
+    return ready;
+  }
+
+  /* */
 
   function signalSend( p )
   {
     _.assert( _.intIs( p.pid ) );
+
+    // console.log( `signalSend : ${p.pid} ${_.process.isAlive( p.pid )}` );
 
     if( !_.process.isAlive( p.pid ) )
     return true;
@@ -2955,12 +2966,17 @@ function signal_body( o )
       otherwise more fails appear in shell mode for OS spawing extra process for applications
     */
 
+    // console.log( `processKill withChildren:${o.withChildren} ${processes.length}` );
+
     if( o.withChildren )
     for( let i = 0 ; i < processes.length ; i++ )
     {
-      if( isWindows && i && processes[ i ].name === 'conhost.exe' )
-      continue;
-      signalSend( processes[ i ] );
+      let process = processes[ i ];
+      // console.log( `process.name:${process.name}` );
+      /* qqq for Vova : why? */
+      // if( isWindows && i && process.name === 'conhost.exe' )
+      // continue;
+      signalSend( process );
     }
     else
     {
@@ -2978,6 +2994,8 @@ function signal_body( o )
   function waitForDeath( p )
   {
     let timeOut = signal === 'SIGKILL' ? 5000 : o.timeOut;
+
+    // console.log( `waitForDeath pid:${p.pid} timeOut:${timeOut}` );
 
     if( timeOut === 0 )
     return _.process.kill({ pid : p.pid, pnd : p.pnd, withChildren : 0 });
@@ -2999,6 +3017,8 @@ function signal_body( o )
       throw err;
     })
 
+    // ready.delay( 1000 )
+
     return ready;
   }
 
@@ -3018,6 +3038,7 @@ function signal_body( o )
   function handleResult( result )
   {
     result = _.arrayAs( result );
+    // console.log( `handleResult ${result}` );
     for( let i = 0 ; i < result.length ; i++ )
     {
       if( result[ i ] !== true )
@@ -3044,6 +3065,46 @@ let _signal = _.routineUnite( signal_head, signal_body );
 
 //
 
+function kill_body( o )
+{
+  _.assert( arguments.length === 1 );
+  let o2 = _.mapExtend( null, o );
+  o2.signal = 'SIGKILL';
+  o2.timeOut = 5000;
+  return _.process._signal.body( o2 );
+}
+
+kill_body.defaults =
+{
+  ... _.mapBut( _signal.defaults, [ 'signal', 'timeOut' ] ),
+}
+
+let kill = _.routineUnite( signal_head, kill_body );
+
+
+//
+
+/*
+  zzz for Vova: shell mode have different behaviour on Windows, OSX and Linux
+  look for solution that allow to have same behaviour on each mode
+*/
+
+function terminate_body( o )
+{
+  _.assert( arguments.length === 1 );
+  o.signal = o.timeOut ? 'SIGTERM' : 'SIGKILL';
+  return _.process._signal.body( o );
+}
+
+terminate_body.defaults =
+{
+  ... _.mapBut( _signal.defaults, [ 'signal' ] ),
+}
+
+let terminate = _.routineUnite( signal_head, terminate_body );
+
+//
+
 function waitForDeath_body( o )
 {
   _.assert( arguments.length === 1 );
@@ -3057,7 +3118,9 @@ function waitForDeath_body( o )
     zzz : hangs up on Windows with interval below 150 if run in sync mode. see test routine killSync
   */
 
-  let ready = _.Consequence().take( null );
+  let ready = _.Consequence().take( true );
+
+  // console.log( `waitForDeath ${o.pid} ${_.process.isAlive( o.pid )}` );
 
   if( !_.process.isAlive( o.pid ) )
   return end();
@@ -3137,47 +3200,6 @@ waitForDeath_body.defaults =
 }
 
 let waitForDeath = _.routineUnite( signal_head, waitForDeath_body )
-
-//
-
-function kill_body( o )
-{
-  _.assert( arguments.length === 1 );
-  let o2 = _.mapExtend( null, o );
-  o2.signal = 'SIGKILL';
-  o2.timeOut = 5000;
-  return _.process._signal.body( o2 );
-}
-
-kill_body.defaults =
-{
-  ... _.mapBut( _signal.defaults, [ 'signal', 'timeOut' ] ),
-}
-
-let kill = _.routineUnite( signal_head, kill_body );
-
-
-//
-
-/*
-  zzz for Vova: shell mode have different behaviour on Windows, OSX and Linux
-  look for solution that allow to have same behaviour on each mode
-*/
-
-function terminate_body( o )
-{
-  _.assert( arguments.length === 1 );
-  o.signal = o.timeOut ? 'SIGTERM' : 'SIGKILL';
-  let ready = _.process._signal.body( o );
-  return ready;
-}
-
-terminate_body.defaults =
-{
-  ... _.mapBut( _signal.defaults, [ 'signal' ] ),
-}
-
-let terminate = _.routineUnite( signal_head, terminate_body );
 
 //
 
@@ -3442,9 +3464,10 @@ let Extension =
   statusOf,
 
   _signal,
-  waitForDeath,
   kill,
   terminate,
+  waitForDeath,
+
   children,
   execPathOf,
   spawnTimeOf

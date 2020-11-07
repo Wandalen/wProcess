@@ -1884,6 +1884,7 @@ function startSyncDeasync( test )
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
 
+    process.removeAllListeners( 'SIGHUP' );
     process.removeAllListeners( 'SIGINT' );
     process.removeAllListeners( 'SIGTERM' );
     process.removeAllListeners( 'exit' );
@@ -9975,7 +9976,10 @@ function startOptionTimeOut( test )
     _.include( 'wFiles' );
     _.include( 'wProcess' );
 
-    process.removeAllListeners( 'SIGTERM' ); /* clear listeners defined in wProcess */
+    process.removeAllListeners( 'SIGHUP' );
+    process.removeAllListeners( 'SIGINT' );
+    process.removeAllListeners( 'SIGTERM' );
+    // process.removeAllListeners( 'SIGTERM' ); /* clear listeners defined in wProcess */
 
     let o =
     {
@@ -9994,6 +9998,8 @@ function startOptionTimeOut( test )
       o.conTerminate.catch( ( err ) =>
       {
         _.errLogOnce( err );
+        process.removeAllListeners( 'SIGHUP' );
+        process.removeAllListeners( 'SIGINT' );
         process.removeAllListeners( 'SIGTERM' );
         process.kill( process.pid, 'SIGTERM' );
         return null;
@@ -10009,7 +10015,9 @@ function startOptionTimeOut( test )
     _.include( 'wFiles' );
     _.include( 'wProcess' );
 
-    process.removeAllListeners( 'SIGTERM' ); /* clear listeners defined in wProcess */
+    process.removeAllListeners( 'SIGHUP' );
+    process.removeAllListeners( 'SIGINT' );
+    process.removeAllListeners( 'SIGTERM' );
 
     let o =
     {
@@ -22452,7 +22460,6 @@ function startSingleOptionDry( test )
         outputCollecting : 1,
         throwingExitCode : 1,
         applyingExitCode : 1,
-        // timeOut : tops.sync || !tops.deasync ? null : 100, /* xxx */
         ipc : tops.mode === 'shell' ? 0 : 1,
         when : { delay : 2000 },
       }
@@ -24780,6 +24787,7 @@ function startOutputMultiple( test )
   let a = context.assetFor( test, false );
   let programPath = a.program( program1 );
   let track = [];
+
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, mode }) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, mode }) ) );
@@ -24852,7 +24860,7 @@ function startOutputMultiple( test )
           /*
           on older version of nodejs event finish goes before event end
           */
-          var exp1 =
+          var exp =
           [
             'conStart',
             '0.out:1::begin',
@@ -24868,26 +24876,19 @@ function startOutputMultiple( test )
             'conTerminate',
             'ready',
           ]
-          var exp2 =
-          [
-            'conStart',
-            '0.out:1::begin',
-            '0.out:1::end',
-            '0.err:1::err',
-            '0.out:2::begin',
-            '0.out:2::end',
-            '0.err:2::err',
-            '0.err.end',
-            '0.err.finish',
-            '0.out.end',
-            '0.out.finish',
-            'conTerminate',
-            'ready',
-          ]
-          if( _.identical( track, exp1 ) )
-          test.identical( track, exp1 );
-          else
-          test.identical( track, exp2 );
+
+          test.identical( new Set( ... track ), new Set( ... exp ) );
+
+          test.lt( track.indexOf( '0.out:1::end' ), track.indexOf( '0.out:2::begin' ) );
+          test.lt( track.indexOf( '0.out:1::begin' ), track.indexOf( '0.out:1::end' ) );
+          test.lt( track.indexOf( '0.out:1::end' ), track.indexOf( '0.err:1::err' ) );
+          test.lt( track.indexOf( '0.out:2::begin' ), track.indexOf( '0.out:2::end' ) );
+          test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.err:2::err' ) );
+          test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.err.finish' ) );
+          test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.err.end' ) );
+          test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.out.finish' ) );
+          test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.out.end' ) );
+
         }
 
         var exp =
@@ -25010,10 +25011,12 @@ function startOutputMultiple( test )
         }
         else
         {
+
           /*
           on older version of nodejs event finish goes before event end
           */
-          var exp1 =
+/*
+          var exp =
           [
             'conStart',
             '0.out:1::begin',
@@ -25065,10 +25068,52 @@ function startOutputMultiple( test )
             'conTerminate',
             'ready'
           ]
-          if( _.identical( track, exp1 ) )
-          test.identical( track, exp1 );
-          else
-          test.identical( track, exp2 );
+*/
+          var exp =
+          [
+            'conStart',
+            '0.out:1::begin',
+            '1.out:1::begin',
+            '0.out:2::begin',
+            '2.out:2::begin',
+            '0.out:1::end',
+            '1.out:1::end',
+            '0.out:2::end',
+            '2.out:2::end',
+            '0.err:1::err',
+            '1.err:1::err',
+            '1.out.end',
+            '1.err.end',
+            '0.err:2::err',
+            '2.err:2::err',
+            '2.out.end',
+            '0.out.end',
+            '0.out.finish',
+            '2.err.end',
+            '0.err.end',
+            '0.err.finish',
+            'conTerminate',
+            'ready'
+          ]
+
+          test.identical( new Set( ... track ), new Set( ... exp ) );
+
+          test.lt( track.indexOf( '0.out:1::begin' ), track.indexOf( '0.out:1::end' ) );
+          test.lt( track.indexOf( '1.out:1::begin' ), track.indexOf( '0.out:1::end' ) );
+          test.lt( track.indexOf( '0.out:2::begin' ), track.indexOf( '0.out:1::end' ) );
+          test.lt( track.indexOf( '2.out:2::begin' ), track.indexOf( '0.out:1::end' ) );
+
+          test.lt( track.indexOf( '0.out:1::end' ), track.indexOf( '0.err:1::err' ) );
+          test.lt( track.indexOf( '1.out:1::end' ), track.indexOf( '0.err:1::err' ) );
+          test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.err:1::err' ) );
+          test.lt( track.indexOf( '2.out:2::end' ), track.indexOf( '0.err:1::err' ) );
+
+          test.lt( track.indexOf( '0.err:1::err' ), track.indexOf( '1.out.end' ) );
+          test.lt( track.indexOf( '1.err:1::err' ), track.indexOf( '1.out.end' ) );
+
+          test.lt( track.indexOf( '1.out.end' ), track.indexOf( '0.err:2::err' ) );
+          test.lt( track.indexOf( '1.err.end' ), track.indexOf( '0.err:2::err' ) );
+
         }
         var exp =
 `
@@ -25595,11 +25640,10 @@ function killSync( test )
       throwingExitCode : 0
     }
 
-    let ready = _.process.start( o );
+    let ready1 = _.process.start( o );
 
-    ready.then( ( op ) =>
+    ready1.then( ( op ) =>
     {
-
       test.identical( op.exitCode, null );
       test.identical( op.exitSignal, 'SIGKILL' );
       test.identical( op.ended, true );
@@ -25607,20 +25651,15 @@ function killSync( test )
       return null;
     })
 
-    return _.time.out( context.t1*2, () =>
+    let ready2 = _.time.out( context.t1*2, () =>
     {
       let result = _.process.kill({ pnd : o.process, sync : 1 });
-      test.identical( result.resourcesCount(), 1 );
       test.is( !_.process.isAlive( o.process.pid ) );
-
-      result.then( ( arg ) =>
-      {
-        test.identical( arg, true );
-        return ready;
-      })
-
+      test.identical( result, true );
       return result;
     });
+
+    return _.Consequence.And( ready1, ready2 );
   })
 
   /* */
@@ -25635,9 +25674,9 @@ function killSync( test )
       throwingExitCode : 0
     }
 
-    let ready = _.process.start( o )
+    let ready1 = _.process.start( o )
 
-    ready.then( ( op ) =>
+    ready1.then( ( op ) =>
     {
       if( process.platform === 'win32' )
       {
@@ -25655,20 +25694,15 @@ function killSync( test )
       return null;
     })
 
-    return _.time.out( context.t1*2, () =>
+    let ready2 = _.time.out( context.t1*2, () =>
     {
       let result = _.process.kill({ pid : o.process.pid, sync : 1 });
-      test.identical( result.resourcesCount(), 1 );
       test.is( !_.process.isAlive( o.process.pid ) );
-
-      result.then( ( arg ) =>
-      {
-        test.identical( arg, true );
-        return ready;
-      })
-
+      test.identical( result, true );
       return result;
     })
+
+    return _.Consequence.And( ready1, ready2 );
   })
 
   /* fork */
@@ -25683,9 +25717,9 @@ function killSync( test )
       throwingExitCode : 0
     }
 
-    let ready = _.process.start( o )
+    let ready1 = _.process.start( o )
 
-    ready.then( ( op ) =>
+    ready1.then( ( op ) =>
     {
       test.identical( op.exitCode, null );
       test.identical( op.exitSignal, 'SIGKILL' );
@@ -25694,21 +25728,15 @@ function killSync( test )
       return null;
     })
 
-    return _.time.out( context.t1*2, () =>
+    let ready2 = _.time.out( context.t1*2, () =>
     {
       let result = _.process.kill({ pnd : o.process, sync : 1 });
-      test.identical( result.resourcesCount(), 1 );
       test.is( !_.process.isAlive( o.process.pid ) );
-
-      result.then( ( arg ) =>
-      {
-        test.identical( arg, true );
-        return ready;
-      })
-
+      test.identical( result, true );
       return result;
     })
 
+    return _.Consequence.And( ready1, ready2 );
   })
 
   /* */
@@ -25723,9 +25751,9 @@ function killSync( test )
       throwingExitCode : 0
     }
 
-    let ready = _.process.start( o )
+    let ready1 = _.process.start( o )
 
-    ready.then( ( op ) =>
+    ready1.then( ( op ) =>
     {
       if( process.platform === 'win32' )
       {
@@ -25743,21 +25771,15 @@ function killSync( test )
       return null;
     })
 
-    return _.time.out( context.t1*2, () =>
+    let ready2 = _.time.out( context.t1*2, () =>
     {
       let result = _.process.kill({ pid : o.process.pid, sync : 1 });
-      test.identical( result.resourcesCount(), 1 );
       test.is( !_.process.isAlive( o.process.pid ) );
-
-      result.then( ( arg ) =>
-      {
-        test.identical( arg, true );
-        return ready;
-      })
-
+      test.identical( result, true );
       return result;
     })
 
+    return _.Consequence.And( ready1, ready2 );
   })
 
   /* shell */
@@ -25772,33 +25794,27 @@ function killSync( test )
       throwingExitCode : 0
     }
 
-    let ready = _.process.start( o )
+    let ready1 = _.process.start( o )
 
-    ready.then( ( op ) =>
+    ready1.then( ( op ) =>
     {
       /* Same result on Windows because process was killed using pnd, not pid */
       test.identical( op.exitCode, null );
       test.identical( op.exitSignal, 'SIGKILL' );
-
       test.identical( op.ended, true );
       test.is( !_.strHas( op.output, 'Application timeout!' ) );
       return null;
     })
 
-    return _.time.out( context.t1*2, () =>
+    let ready2 = _.time.out( context.t1*2, () =>
     {
       let result = _.process.kill({ pnd : o.process, sync : 1 });
-      test.identical( result.resourcesCount(), 1 );
       test.is( !_.process.isAlive( o.process.pid ) );
-
-      result.then( ( arg ) =>
-      {
-        test.identical( arg, true );
-        return ready;
-      })
-
+      test.identical( result, true );
       return result;
     })
+
+    return _.Consequence.And( ready1, ready2 );
   })
 
   /* */
@@ -25813,9 +25829,9 @@ function killSync( test )
       throwingExitCode : 0
     }
 
-    let ready = _.process.start( o )
+    let ready1 = _.process.start( o )
 
-    ready.then( ( op ) =>
+    ready1.then( ( op ) =>
     {
       if( process.platform === 'win32' )
       {
@@ -25834,20 +25850,15 @@ function killSync( test )
       return null;
     })
 
-    return _.time.out( context.t1*2, () =>
+    let ready2 = _.time.out( context.t1*2, () =>
     {
       let result = _.process.kill({ pid : o.process.pid, sync : 1 });
-      test.identical( result.resourcesCount(), 1 );
       test.is( !_.process.isAlive( o.process.pid ) );
-
-      result.then( ( arg ) =>
-      {
-        test.identical( arg, true );
-        return ready;
-      })
-
+      test.identical( result, true );
       return result;
     })
+
+    return _.Consequence.And( ready1, ready2 );
   })
 
   /* */
@@ -25862,7 +25873,7 @@ function killSync( test )
   }
 }
 
-killSync.timeOut = 5e5;
+killSync.timeOut = 5e5; /* qqq for Vova : test cases descriptions?? */
 
 //
 
@@ -26457,6 +26468,10 @@ function startTerminateAfterLoopRelease( test )
     con.then( () =>
     {
       test.identical( o.exitCode, null );
+      /* njs on Windows does not let to set custom signal handler properly */
+      if( process.platform === 'win32' )
+      test.identical( o.exitSignal, 'SIGTERM' );
+      else
       test.identical( o.exitSignal, 'SIGKILL' );
       test.is( !_.strHas( o.output, 'SIGTERM' ) );
       test.is( !_.strHas( o.output, 'Exit after release' ) );
@@ -26491,6 +26506,10 @@ function startTerminateAfterLoopRelease( test )
     con.then( () =>
     {
       test.identical( o.exitCode, null );
+      /* njs on Windows does not let to set custom signal handler properly */
+      if( process.platform === 'win32' )
+      test.identical( o.exitSignal, 'SIGTERM' );
+      else
       test.identical( o.exitSignal, 'SIGKILL' );
       test.is( !_.strHas( o.output, 'SIGTERM' ) );
       test.is( !_.strHas( o.output, 'Exit after release' ) );
@@ -26554,10 +26573,6 @@ function endSignalsBasic( test )
     throwingExitCode : 0,
     stdio : 'pipe',
   }
-
-  // xxx
-  // let modes = [ 'fork' ];
-  // let modes = [ 'shell' ];
 
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGQUIT' ) ) );
@@ -29574,6 +29589,10 @@ function terminate( test )
       {
         test.identical( op.exitCode, null );
         test.identical( op.ended, true );
+        /* njs on Windows does not let to set custom signal handler */
+        if( process.platform === 'win32' )
+        test.identical( op.exitSignal, 'SIGTERM' );
+        else
         test.identical( op.exitSignal, 'SIGKILL' );
         test.is( !_.strHas( op.output, 'SIGTERM' ) );
         test.is( !_.strHas( op.output, 'Application timeout!' ) );
@@ -29955,9 +29974,7 @@ function terminateSync( test )
     return _.time.out( context.t1*2, () =>
     {
       let result = _.process.terminate({ pnd : o.process, sync : 1 });
-      test.identical( result.resourcesCount(), 1 );
-      let got = result.sync();
-      test.identical( got, true );
+      test.identical( result, true );
       return o.conTerminate;
     })
   })
@@ -30001,9 +30018,7 @@ function terminateSync( test )
     return _.time.out( context.t1*2, () =>
     {
       let result = _.process.terminate({ pid : o.process.pid, sync : 1  });
-      test.identical( result.resourcesCount(), 1 );
-      let got = result.sync();
-      test.identical( got, true );
+      test.identical( result, true );
       return o.conTerminate;
     })
   })
@@ -30048,9 +30063,7 @@ function terminateSync( test )
     return _.time.out( context.t1*2, () =>
     {
       let result = _.process.terminate({ pid : o.process.pid, sync : 1  });
-      test.identical( result.resourcesCount(), 1 );
-      let got = result.sync();
-      test.identical( got, true );
+      test.identical( result, true );
       return o.conTerminate;
     })
   })
@@ -30090,16 +30103,13 @@ function terminateSync( test )
         test.is( _.strHas( op.output, 'SIGTERM' ) );
         test.is( !_.strHas( op.output, 'Application timeout!' ) );
       }
-
       return null;
     })
 
     return _.time.out( context.t1*2, () =>
     {
       let result = _.process.terminate({ pnd : o.process, sync : 1  });
-      test.identical( result.resourcesCount(), 1 );
-      let got = result.sync();
-      test.identical( got, true );
+      test.identical( result, true );
       return o.conTerminate;
     })
   })
@@ -30138,9 +30148,7 @@ function terminateSync( test )
     return _.time.out( context.t1*2, () =>
     {
       let result = _.process.terminate({ pnd : o.process, timeOut : 0, sync : 1  });
-      test.identical( result.resourcesCount(), 1 );
-      let got = result.sync();
-      test.identical( got, true );
+      test.identical( result, true );
       return o.conTerminate;
     })
   })
@@ -30184,9 +30192,7 @@ function terminateSync( test )
     return _.time.out( context.t1*2, () =>
     {
       let result = _.process.terminate({ pid : o.process.pid, timeOut : 0, sync : 1 });
-      test.identical( result.resourcesCount(), 1 );
-      let got = result.sync();
-      test.identical( got, true );
+      test.identical( result, true );
       return o.conTerminate;
     })
   })
@@ -30249,7 +30255,7 @@ function terminateFirstChildSpawn( test )
     throwingExitCode : 0
   }
 
-  _.process.start( o ); /* xxx */
+  _.process.start( o );
 
   let program2Pid = null;
   let terminate = _.Consequence();
@@ -30360,7 +30366,7 @@ function terminateFirstChildSpawn( test )
 
     console.log( `childPid : ${process.pid}` );
 
-    process.removeAllListeners( 'SIGTERM' ) /* xxx : check on linux */
+    // process.removeAllListeners( 'SIGTERM' ); /* xxx : remove? */
 
     _.fileProvider.fileWrite
     ({
@@ -30522,7 +30528,7 @@ function terminateFirstChildFork( test )
     let _ = require( toolsPath );
     _.include( 'wFiles' );
 
-    process.removeAllListeners( 'SIGTERM' )
+    // process.removeAllListeners( 'SIGTERM' )
 
     _.fileProvider.fileWrite
     ({
@@ -30684,7 +30690,7 @@ function terminateFirstChildShell( test )
     let _ = require( toolsPath );
     _.include( 'wFiles' );
 
-    process.removeAllListeners( 'SIGTERM' )
+    // process.removeAllListeners( 'SIGTERM' )
 
     _.fileProvider.fileWrite
     ({
@@ -30840,7 +30846,7 @@ function terminateSecondChildSpawn( test )
     let _ = require( toolsPath );
     _.include( 'wFiles' );
 
-    process.removeAllListeners( 'SIGTERM' )
+    // process.removeAllListeners( 'SIGTERM' )
 
     _.fileProvider.fileWrite
     ({
@@ -30993,7 +30999,7 @@ function terminateSecondChildFork( test )
     let _ = require( toolsPath );
     _.include( 'wFiles' );
 
-    process.removeAllListeners( 'SIGTERM' )
+    // process.removeAllListeners( 'SIGTERM' )
 
     _.fileProvider.fileWrite
     ({
@@ -31156,7 +31162,7 @@ function terminateSecondChildShell( test )
     let _ = require( toolsPath );
     _.include( 'wFiles' );
 
-    process.removeAllListeners( 'SIGTERM' )
+    // process.removeAllListeners( 'SIGTERM' )
 
     _.fileProvider.fileWrite
     ({
@@ -31296,7 +31302,7 @@ function terminateDetachedFirstChildSpawn( test )
     let _ = require( toolsPath );
     _.include( 'wFiles' );
 
-    process.removeAllListeners( 'SIGTERM' )
+    // process.removeAllListeners( 'SIGTERM' )
 
     _.fileProvider.fileWrite
     ({
@@ -31438,7 +31444,7 @@ function terminateDetachedFirstChildFork( test )
     let _ = require( toolsPath );
     _.include( 'wFiles' );
 
-    process.removeAllListeners( 'SIGTERM' )
+    // process.removeAllListeners( 'SIGTERM' )
 
     _.fileProvider.fileWrite
     ({
@@ -31582,7 +31588,7 @@ function terminateDetachedFirstChildShell( test )
     let _ = require( toolsPath );
     _.include( 'wFiles' );
 
-    process.removeAllListeners( 'SIGTERM' )
+    // process.removeAllListeners( 'SIGTERM' )
 
     _.fileProvider.fileWrite
     ({
@@ -31720,7 +31726,7 @@ function terminateWithDetachedChildSpawn( test )
     let _ = require( toolsPath );
     _.include( 'wFiles' );
 
-    process.removeAllListeners( 'SIGTERM' )
+    // process.removeAllListeners( 'SIGTERM' )
 
     _.fileProvider.fileWrite
     ({
@@ -31926,7 +31932,7 @@ function terminateWithDetachedChildFork( test )
     let _ = require( toolsPath );
     _.include( 'wFiles' );
 
-    process.removeAllListeners( 'SIGTERM' )
+    // process.removeAllListeners( 'SIGTERM' )
 
     _.fileProvider.fileWrite
     ({
@@ -32066,7 +32072,7 @@ function terminateWithDetachedChildShell( test ) /* qqq for Vova : fix on Window
     let _ = require( toolsPath );
     _.include( 'wFiles' );
 
-    process.removeAllListeners( 'SIGTERM' )
+    // process.removeAllListeners( 'SIGTERM' )
 
     _.fileProvider.fileWrite
     ({
@@ -32298,7 +32304,7 @@ function terminateSeveralChildren( test )
     let _ = require( toolsPath );
     _.include( 'wFiles' );
 
-    process.removeAllListeners( 'SIGTERM' )
+    // process.removeAllListeners( 'SIGTERM' )
 
     _.fileProvider.fileWrite
     ({
@@ -32328,7 +32334,7 @@ function terminateSeveralChildren( test )
     let _ = require( toolsPath );
     _.include( 'wFiles' );
 
-    process.removeAllListeners( 'SIGTERM' )
+    // process.removeAllListeners( 'SIGTERM' )
 
     _.fileProvider.fileWrite
     ({
@@ -32474,7 +32480,7 @@ function terminateWithSeveralDetachedChildren( test )
     let _ = require( toolsPath );
     _.include( 'wFiles' );
 
-    process.removeAllListeners( 'SIGTERM' )
+    // process.removeAllListeners( 'SIGTERM' )
 
     _.fileProvider.fileWrite
     ({
@@ -32504,7 +32510,7 @@ function terminateWithSeveralDetachedChildren( test )
     let _ = require( toolsPath );
     _.include( 'wFiles' );
 
-    process.removeAllListeners( 'SIGTERM' )
+    // process.removeAllListeners( 'SIGTERM' )
 
     _.fileProvider.fileWrite
     ({
