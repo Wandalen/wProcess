@@ -32610,10 +32610,12 @@ function terminateTimeOutNoHandler( test )
   {
     test.identical( op.ended, true );
 
+    /* qqq for Yevhen : add comments explaining why `if process.platform` to all such ifs */
+    /* interpreter::njs on platform::Windows does not suppport signals, but has its own non-standard implementation */
     if( process.platform === 'win32' )
     {
       test.identical( op.exitCode, 1 );
-      test.identical( op.exitSignal, 0 );
+      test.identical( op.exitSignal, null );
     }
     else
     {
@@ -32700,7 +32702,7 @@ function terminateTimeOutIgnoreSignal( test )
     if( process.platform === 'win32' )
     {
       test.identical( op.exitCode, 1 );
-      test.identical( op.exitSignal, 0 );
+      test.identical( op.exitSignal, null );
       test.identical( _.strCount( op.output, 'program1::SIGTERM' ), 0 );
     }
     else
@@ -32794,7 +32796,7 @@ function terminateZeroTimeOutSpawn( test )
     if( process.platform === 'win32' )
     {
       test.identical( op.exitCode, 1 );
-      test.identical( op.exitSignal, 0 );
+      test.identical( op.exitSignal, null );
     }
     else
     {
@@ -32888,7 +32890,7 @@ function terminateZeroTimeOutFork( test )
     if( process.platform === 'win32' )
     {
       test.identical( op.exitCode, 1 );
-      test.identical( op.exitSignal, 0 );
+      test.identical( op.exitSignal, null );
     }
     else
     {
@@ -32982,7 +32984,7 @@ function terminateZeroTimeOutWithoutChildrenShell( test )
     if( process.platform === 'win32' )
     {
       test.identical( op.exitCode, 1 );
-      test.identical( op.exitSignal, 0 );
+      test.identical( op.exitSignal, null );
     }
     else
     {
@@ -33084,7 +33086,7 @@ function terminateZeroTimeOutWithtChildrenShell( test )
     if( process.platform === 'win32' )
     {
       test.identical( op.exitCode, 1 );
-      test.identical( op.exitSignal, 0 );
+      test.identical( op.exitSignal, null );
     }
     else
     {
@@ -34039,23 +34041,22 @@ function childrenOptionFormatList( test )
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
-      return children.then( ( op ) =>
+      return children.then( ( prcocesses ) =>
       {
         if( process.platform === 'win32' )
         {
-          test.identical( op.runs.length, 5 );
+          test.identical( prcocesses.length, 5 );
 
-          test.identical( op.runs[ 0 ].pid, process.pid );
-          test.identical( op.runs[ 1 ].pid, o.process.pid );
+          test.identical( prcocesses[ 0 ].pid, process.pid );
+          test.identical( prcocesses[ 1 ].pid, o.process.pid );
 
-          test.is( _.numberIs( op.runs[ 2 ].pid ) );
-          test.identical( op.runs[ 2 ].name, 'conhost.exe' );
+          test.is( _.numberIs( prcocesses[ 2 ].pid ) );
+          test.identical( prcocesses[ 2 ].name, 'conhost.exe' );
 
-          test.identical( op.runs[ 3 ].pid, lastChildPid );
+          test.identical( prcocesses[ 3 ].pid, lastChildPid );
 
-          test.is( _.numberIs( op.runs[ 4 ].pid ) );
-          test.identical( op.runs[ 4 ].name, 'conhost.exe' );
-
+          test.is( _.numberIs( prcocesses[ 4 ].pid ) );
+          test.identical( prcocesses[ 4 ].name, 'conhost.exe' );
         }
         else
         {
