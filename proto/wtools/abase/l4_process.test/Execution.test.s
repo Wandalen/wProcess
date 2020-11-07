@@ -7174,7 +7174,7 @@ function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subrou
     _.process.startPassingThrough( o )
     .finally( ( err, op ) =>
     {
-      console.log( JSON.stringify({ output : op?.output ? op.output : null, err : err ? _.errAttend( err ) : null }) );
+      console.log( JSON.stringify({ output : op ? op.output : null, err : err ? _.errAttend( err ) : null }) );
       return null;
     } )
   }
