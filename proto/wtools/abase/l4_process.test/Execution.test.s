@@ -545,6 +545,61 @@ ${programPath}:end
       });
     })
 
+    .then( function()
+    {
+      test.case = `mode : ${mode}`;
+      let programPath = a.program( program2 );
+
+      o2 =
+      {
+        execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+        args : [ 'staging', 'debug' ],
+        mode,
+        stdio : 'pipe'
+      }
+      return null;
+    })
+    .then( function( arg )
+    {
+      /* mode : shell, stdio : pipe */
+
+      var options = _.mapSupplement( null, o2, o3 );
+
+      return _.process.start( options )
+      .then( function()
+      {
+        test.identical( options.exitCode, 0 );
+        test.identical( options.output, o2.args.join( ' ' ) + '\n' );
+
+        a.fileProvider.fileDelete( programPath );
+        return null;
+      })
+    })
+
+    /* */
+
+    .then( function()
+    {
+      test.case = 'mode : spawn, incorrect usage of o.path in spawn mode';
+      let programPath = a.program( program2 );
+
+      o2 =
+      {
+        execPath : mode === 'fork' ? programPath :  'node ' + programPath,
+        args : [ 'staging' ],
+        mode,
+        stdio : 'pipe'
+      }
+      return null;
+    })
+    .then( function( arg )
+    {
+      var options = _.mapSupplement( null, o2, o3 );
+
+      a.fileProvider.fileDelete( programPath );
+      return test.shouldThrowErrorAsync( _.process.start( options ) );
+    })
+
     /* - */
 
     return ready;
@@ -569,6 +624,11 @@ ${programPath}:end
     _.time.out( context.t2 ); /* 5000 */
 
     console.log( `${__filename}:end` );
+  }
+
+  function program2()
+  {
+    console.log( process.argv.slice( 2 ).join( ' ' ) );
   }
 }
 
