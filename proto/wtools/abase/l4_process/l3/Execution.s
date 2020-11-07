@@ -2921,12 +2921,8 @@ function signal_body( o )
     if( !pnd && o.pnd && o.pnd.pid === p.pid )
     pnd = o.pnd;
 
-/*
-    console.log( o.signal, p.pid );
-*/
     try
     {
-      console.log( `signalSend ${o.signal} ${p.pid}` );
       if( pnd )
       pnd.kill( o.signal );
       else
@@ -3021,15 +3017,12 @@ function signal_body( o )
 
   function handleResult( result )
   {
-
     result = _.arrayAs( result );
-
     for( let i = 0 ; i < result.length ; i++ )
     {
       if( result[ i ] !== true )
       return result[ i ];
     }
-
     return true;
   }
 

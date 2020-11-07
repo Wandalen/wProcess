@@ -7527,10 +7527,10 @@ function startDifferentTypesOfPaths( test )
   let execPathWithSpace = a.program({ routine : testApp, dirPath : 'path with space' });
   execPathWithSpace = a.fileProvider.path.normalize( execPathWithSpace );
   let execPathWithSpaceNative = a.fileProvider.path.nativize( execPathWithSpace );
-  
+
   let tempPath = _.path.tempOpen( _.path.normalize( process.argv[ 0 ] ) );
   let nodeWithSpace = a.path.join( tempPath, 'node.exe' );
-  
+
   a.fileProvider.softLink( nodeWithSpace, process.argv[ 0 ] );
 
   /* - */
@@ -7926,10 +7926,10 @@ function startDifferentTypesOfPaths( test )
     return o.conTerminate;
 
   })
-  
+
   /* - */
-  
-  a.ready.tap( () => 
+
+  a.ready.tap( () =>
   {
     _.path.tempClose( tempPath );
   })
@@ -30237,12 +30237,13 @@ function terminateFirstChildSpawn( test )
   let a = context.assetFor( test, false );
   let testAppPath = a.program( program1 );
   let testAppPath2 = a.program( program2 );
+  let mode = 'spawn';
 
   let o =
   {
-    execPath : 'node program1.js',
+    execPath : mode === `fork` ? `${testAppPath}` : `node ${testAppPath}`,
     currentPath : a.routinePath,
-    mode : 'spawn',
+    mode,
     outputPiping : 1,
     outputCollecting : 1,
     throwingExitCode : 0
@@ -30263,7 +30264,6 @@ function terminateFirstChildSpawn( test )
     console.log( `childPid : ${program2Pid}` );
     test.is( _.process.isAlive( o.process.pid ) );
     test.is( _.process.isAlive( program2Pid ) );
-    // return null;
     return _.process.terminate
     ({
       pid : o.process.pid,
@@ -30289,6 +30289,11 @@ function terminateFirstChildSpawn( test )
     test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
     test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+
+    /* platform::windows killls children processes, in contrast other platforms politely termonate children processes */
+    if( process.platform === 'win32' )
+    test.is( !_.process.isAlive( program2Pid ) );
+    else
     test.is( _.process.isAlive( program2Pid ) );
 
     return _.time.out( context.t1*15 );
@@ -30297,7 +30302,12 @@ function terminateFirstChildSpawn( test )
   o.conTerminate.then( () =>
   {
     test.is( !_.process.isAlive( program2Pid ) );
+    /* platform::windows killls children processes, in contrast other platforms politely termonate children processes */
+    if( process.platform === 'win32' )
+    test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+    else
     test.is( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+    test.identical( _.strCount( o.output, 'exit' ), 0 );
     return null;
   })
 
@@ -30305,7 +30315,7 @@ function terminateFirstChildSpawn( test )
 
   /* - */
 
-  function handleOutput()/* qqq for Vova : what is it for? aaa:to detect when child process of program1 is ready and we can call terminate*/
+  function handleOutput()
   {
     if( !_.strHas( o.output, 'program2::begin' ) )
     return;
@@ -30367,7 +30377,7 @@ function terminateFirstChildSpawn( test )
 
     process.on( 'exit', () =>
     {
-      console.log( 'program2::end' );
+      console.log( 'program2::exit' );
     })
 
     console.log( 'program2::begin' );
@@ -30455,7 +30465,7 @@ function terminateFirstChildFork( test )
   return _.Consequence.AndKeep( terminate, o.conTerminate );
 
   /* - */
-  
+
   function handleOutput()
   {
     if( !_.strHas( o.output, 'program2::begin' ) )
@@ -32230,7 +32240,7 @@ function terminateSeveralChildren( test )
 
     if( c !== 2 )
     return;
-    
+
     o.process.stdout.removeListener( 'data', handleOutput );
     terminate.take( null );
   }
@@ -32405,7 +32415,7 @@ function terminateWithSeveralDetachedChildren( test )
 
     if( c !== 2 )
     return;
-    
+
     o.process.stdout.removeListener( 'data', handleOutput );
     terminate.take( null );
   }
