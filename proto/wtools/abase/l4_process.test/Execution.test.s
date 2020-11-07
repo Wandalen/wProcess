@@ -7587,10 +7587,10 @@ function startDifferentTypesOfPaths( test )
   let execPathWithSpace = a.program({ routine : testApp, dirPath : 'path with space' });
   execPathWithSpace = a.fileProvider.path.normalize( execPathWithSpace );
   let execPathWithSpaceNative = a.fileProvider.path.nativize( execPathWithSpace );
-  
+
   let tempPath = _.path.tempOpen( _.path.normalize( process.argv[ 0 ] ) );
   let nodeWithSpace = a.path.join( tempPath, 'node.exe' );
-  
+
   a.fileProvider.softLink( nodeWithSpace, process.argv[ 0 ] );
 
   /* - */
@@ -7986,10 +7986,10 @@ function startDifferentTypesOfPaths( test )
     return o.conTerminate;
 
   })
-  
+
   /* - */
-  
-  a.ready.tap( () => 
+
+  a.ready.tap( () =>
   {
     _.path.tempClose( tempPath );
   })
@@ -30297,12 +30297,13 @@ function terminateFirstChildSpawn( test )
   let a = context.assetFor( test, false );
   let testAppPath = a.program( program1 );
   let testAppPath2 = a.program( program2 );
+  let mode = 'spawn';
 
   let o =
   {
-    execPath : 'node program1.js',
+    execPath : mode === `fork` ? `${testAppPath}` : `node ${testAppPath}`,
     currentPath : a.routinePath,
-    mode : 'spawn',
+    mode,
     outputPiping : 1,
     outputCollecting : 1,
     throwingExitCode : 0
@@ -30323,7 +30324,6 @@ function terminateFirstChildSpawn( test )
     console.log( `childPid : ${program2Pid}` );
     test.is( _.process.isAlive( o.process.pid ) );
     test.is( _.process.isAlive( program2Pid ) );
-    // return null;
     return _.process.terminate
     ({
       pid : o.process.pid,
@@ -30349,6 +30349,11 @@ function terminateFirstChildSpawn( test )
     test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
     test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+
+    /* platform::windows killls children processes, in contrast other platforms politely termonate children processes */
+    if( process.platform === 'win32' )
+    test.is( !_.process.isAlive( program2Pid ) );
+    else
     test.is( _.process.isAlive( program2Pid ) );
 
     return _.time.out( context.t1*15 );
@@ -30357,7 +30362,12 @@ function terminateFirstChildSpawn( test )
   o.conTerminate.then( () =>
   {
     test.is( !_.process.isAlive( program2Pid ) );
+    /* platform::windows killls children processes, in contrast other platforms politely termonate children processes */
+    if( process.platform === 'win32' )
+    test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+    else
     test.is( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+    test.identical( _.strCount( o.output, 'exit' ), 0 );
     return null;
   })
 
@@ -30365,7 +30375,7 @@ function terminateFirstChildSpawn( test )
 
   /* - */
 
-  function handleOutput()/* qqq for Vova : what is it for? aaa:to detect when child process of program1 is ready and we can call terminate*/
+  function handleOutput()
   {
     if( !_.strHas( o.output, 'program2::begin' ) )
     return;
@@ -30427,7 +30437,7 @@ function terminateFirstChildSpawn( test )
 
     process.on( 'exit', () =>
     {
-      console.log( 'program2::end' );
+      console.log( 'program2::exit' );
     })
 
     console.log( 'program2::begin' );
@@ -30475,6 +30485,10 @@ function terminateFirstChildFork( test )
   {
     program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
     program2Pid = program2Pid.pid;
+    console.log( `parentPid : ${o.process.pid}` );
+    console.log( `childPid : ${program2Pid}` );
+    test.is( _.process.isAlive( o.process.pid ) );
+    test.is( _.process.isAlive( program2Pid ) );
     return _.process.terminate
     ({
       pid : o.process.pid,
@@ -30500,6 +30514,11 @@ function terminateFirstChildFork( test )
     test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
     test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+
+    /* platform::windows killls children processes, in contrast other platforms politely termonate children processes */
+    if( process.platform === 'win32' )
+    test.is( !_.process.isAlive( program2Pid ) );
+    else
     test.is( _.process.isAlive( program2Pid ) );
 
     return _.time.out( context.t1*15 );
@@ -30508,14 +30527,20 @@ function terminateFirstChildFork( test )
   o.conTerminate.then( () =>
   {
     test.is( !_.process.isAlive( program2Pid ) );
+
+    /* platform::windows killls children processes, in contrast other platforms politely termonate children processes */
+    if( process.platform === 'win32' )
+    test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+    else
     test.is( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+
     return null;
   })
 
   return _.Consequence.AndKeep( terminate, o.conTerminate );
 
   /* - */
-  
+
   function handleOutput()
   {
     if( !_.strHas( o.output, 'program2::begin' ) )
@@ -31101,7 +31126,8 @@ function terminateSecondChildShell( test )
 
     let program2Op = _.fileProvider.fileRead({ filePath : a.abs( 'program2' ), encoding : 'json' });
 
-    if( process.platform !== 'linux' )
+    /* on windows and linux intermediate process could be created */
+    if( process.platform !== 'linux' && process.platform !== 'win32' )
     test.identical( program2Op.pid, program2Pid );
 
     if( process.platform === 'win32' )
@@ -31993,7 +32019,7 @@ program1 and program2 should be terminated
 
 //
 
-function terminateWithDetachedChildShell( test )
+function terminateWithDetachedChildShell( test ) /* qqq for Vova : fix on Windows */
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -32045,6 +32071,8 @@ function terminateWithDetachedChildShell( test )
     test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
     test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
+    test.identical( _.strCount( o.output, 'error' ), 0 );
+    test.identical( _.strCount( o.output, 'Error' ), 0 );
     test.is( !_.process.isAlive( program2Pid ) );
     test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
 
@@ -32055,8 +32083,9 @@ function terminateWithDetachedChildShell( test )
 
   /* - */
 
-   function handleOutput()
+  function handleOutput()
   {
+    console.log( 'handleOutput', o.output );
     if( !_.strHas( o.output, 'program2::begin' ) )
     return;
     o.process.stdout.removeListener( 'data', handleOutput );
@@ -32290,7 +32319,7 @@ function terminateSeveralChildren( test )
 
     if( c !== 2 )
     return;
-    
+
     o.process.stdout.removeListener( 'data', handleOutput );
     terminate.take( null );
   }
@@ -32465,7 +32494,7 @@ function terminateWithSeveralDetachedChildren( test )
 
     if( c !== 2 )
     return;
-    
+
     o.process.stdout.removeListener( 'data', handleOutput );
     terminate.take( null );
   }
@@ -32660,10 +32689,12 @@ function terminateTimeOutNoHandler( test )
   {
     test.identical( op.ended, true );
 
+    /* qqq for Yevhen : add comments explaining why `if process.platform` to all such ifs */
+    /* interpreter::njs on platform::Windows does not suppport signals, but has its own non-standard implementation */
     if( process.platform === 'win32' )
     {
       test.identical( op.exitCode, 1 );
-      test.identical( op.exitSignal, 0 );
+      test.identical( op.exitSignal, null );
     }
     else
     {
@@ -32750,7 +32781,7 @@ function terminateTimeOutIgnoreSignal( test )
     if( process.platform === 'win32' )
     {
       test.identical( op.exitCode, 1 );
-      test.identical( op.exitSignal, 0 );
+      test.identical( op.exitSignal, null );
       test.identical( _.strCount( op.output, 'program1::SIGTERM' ), 0 );
     }
     else
@@ -32844,7 +32875,7 @@ function terminateZeroTimeOutSpawn( test )
     if( process.platform === 'win32' )
     {
       test.identical( op.exitCode, 1 );
-      test.identical( op.exitSignal, 0 );
+      test.identical( op.exitSignal, null );
     }
     else
     {
@@ -32938,7 +32969,7 @@ function terminateZeroTimeOutFork( test )
     if( process.platform === 'win32' )
     {
       test.identical( op.exitCode, 1 );
-      test.identical( op.exitSignal, 0 );
+      test.identical( op.exitSignal, null );
     }
     else
     {
@@ -33032,7 +33063,7 @@ function terminateZeroTimeOutWithoutChildrenShell( test )
     if( process.platform === 'win32' )
     {
       test.identical( op.exitCode, 1 );
-      test.identical( op.exitSignal, 0 );
+      test.identical( op.exitSignal, null );
     }
     else
     {
@@ -33134,7 +33165,7 @@ function terminateZeroTimeOutWithtChildrenShell( test )
     if( process.platform === 'win32' )
     {
       test.identical( op.exitCode, 1 );
-      test.identical( op.exitSignal, 0 );
+      test.identical( op.exitSignal, null );
     }
     else
     {
@@ -33724,8 +33755,6 @@ function waitForDeath( test )
     };
     _.process.start( o )
 
-    o.conStart.thenGive( () => o.process.kill( 'SIGTERM' ) )
-
     let terminated = _.process.waitForDeath({ pnd : o.process, timeOut : context.t1 * 10 })
     .then( () =>
     {
@@ -33735,6 +33764,9 @@ function waitForDeath( test )
       test.notIdentical( o.exitSignal, null );
       return null;
     })
+
+    /* njs on Windows kills child proecess instantly, without any delay */
+    o.conStart.thenGive( () => o.process.kill( 'SIGTERM' ) )
 
     return _.Consequence.And( terminated, o.conTerminate );
   })
@@ -33756,7 +33788,11 @@ function waitForDeath( test )
     _.process.start( o )
 
     let terminated = _.process.waitForDeath({ pnd : o.process, timeOut : 1000 })
-    terminated = test.shouldThrowErrorAsync( terminated );
+    terminated = test.shouldThrowErrorAsync( terminated, ( err ) =>
+    {
+      test.is( _.errIs( err ) );
+      test.identical( err.reason, 'time out' );
+    });
 
     o.conTerminate.then( () =>
     {
@@ -34089,23 +34125,22 @@ function childrenOptionFormatList( test )
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
-      return children.then( ( op ) =>
+      return children.then( ( prcocesses ) =>
       {
         if( process.platform === 'win32' )
         {
-          test.identical( op.runs.length, 5 );
+          test.identical( prcocesses.length, 5 );
 
-          test.identical( op.runs[ 0 ].pid, process.pid );
-          test.identical( op.runs[ 1 ].pid, o.process.pid );
+          test.identical( prcocesses[ 0 ].pid, process.pid );
+          test.identical( prcocesses[ 1 ].pid, o.process.pid );
 
-          test.is( _.numberIs( op.runs[ 2 ].pid ) );
-          test.identical( op.runs[ 2 ].name, 'conhost.exe' );
+          test.is( _.numberIs( prcocesses[ 2 ].pid ) );
+          test.identical( prcocesses[ 2 ].name, 'conhost.exe' );
 
-          test.identical( op.runs[ 3 ].pid, lastChildPid );
+          test.identical( prcocesses[ 3 ].pid, lastChildPid );
 
-          test.is( _.numberIs( op.runs[ 4 ].pid ) );
-          test.identical( op.runs[ 4 ].name, 'conhost.exe' );
-
+          test.is( _.numberIs( prcocesses[ 4 ].pid ) );
+          test.identical( prcocesses[ 4 ].name, 'conhost.exe' );
         }
         else
         {
@@ -34673,7 +34708,7 @@ var Proto =
     terminateZeroTimeOutWithoutChildrenShell,
     terminateZeroTimeOutWithtChildrenShell,
 
-    terminateDifferentStdio, /* qqq for Vova: rewrite, don't use timeout to run terminate aaa:done*/
+    terminateDifferentStdio,
 
     killComplex,
     execPathOf,
@@ -34686,7 +34721,7 @@ var Proto =
 
     // experiments
 
-    experimentIpcDeasync, /* qqq for Vova : collect information for different versions and different OSs aaa:added at the beginning of the file*/
+    experimentIpcDeasync,
     streamJoinExperiment,
     experiment,
     experiment2,

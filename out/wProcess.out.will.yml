@@ -184,8 +184,6 @@ module:
             ../proto/wtools/abase/l4_process.test/_asset/systemEntry/dir/file.txt
           - >-
             ../proto/wtools/abase/l4_process.test/_asset/systemEntry/dir/Index.js
-          - ../proto/wtools/amid
-          - ../proto/wtools/atop
     submodule:
       wTools:
         path: 'npm:///wTools'

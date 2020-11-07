@@ -2921,12 +2921,8 @@ function signal_body( o )
     if( !pnd && o.pnd && o.pnd.pid === p.pid )
     pnd = o.pnd;
 
-/*
-    console.log( o.signal, p.pid );
-*/
     try
     {
-      console.log( `signalSend ${o.signal} ${p.pid}` );
       if( pnd )
       pnd.kill( o.signal );
       else
@@ -3021,15 +3017,12 @@ function signal_body( o )
 
   function handleResult( result )
   {
-
     result = _.arrayAs( result );
-
     for( let i = 0 ; i < result.length ; i++ )
     {
       if( result[ i ] !== true )
       return result[ i ];
     }
-
     return true;
   }
 
@@ -3066,15 +3059,27 @@ function waitForDeath_body( o )
 
   let ready = _.Consequence().take( null );
 
+  if( !_.process.isAlive( o.pid ) )
+  return end();
+
   if( isWindows )
   ready.then( () => _.process.spawnTimeOf({ pid : o.pid }) )
 
   ready.then( _waitForDeath );
 
-  if( o.sync )
-  ready.deasync();
+  return end();
 
-  return ready;
+  /* */
+
+  function end()
+  {
+    if( o.sync )
+    {
+      ready.deasync();
+      return ready.sync();
+    }
+    return ready;
+  }
 
   /* */
 
@@ -3084,13 +3089,13 @@ function waitForDeath_body( o )
     let timer = _.time.periodic( interval, () =>
     {
       if( _.process.isAlive( o.pid ) )
-      return false;
+      return true;
       ready.take( true );
     });
 
     let timeOutError = _.time.outError( o.timeOut )
 
-    ready.orKeeping( [ timeOutError ] );
+    ready.orKeeping( [ timeOutError ] ); /* xxx : implement orCanceling? */
 
     ready.finally( ( err, arg ) =>
     {
@@ -3101,17 +3106,18 @@ function waitForDeath_body( o )
       return arg;
 
       timer.cancel();
-      _.errAttend( err );
 
       if( err.reason === 'time out' )
       {
-        err = _.err( err, `\nTarget process: ${_.strQuote( o.pid )} is still alive. Waited for ${o.timeOut} ms.` );
-
+        err = _.err( err, `\nTarget process: ${_.strQuote( o.pid )} is still alive. Waited ${o.timeOut} ms.` );
         if( isWindows )
         {
           let spawnTime2 = _.process.spawnTimeOf({ pid : o.pid })
           if( spawnTime != spawnTime2 )
-          return null;
+          {
+            _.errAttend( err );
+            return null;
+          }
         }
       }
 
@@ -3211,7 +3217,7 @@ function children( o )
       }
       catch( err )
       {
-        throw _.err( 'Failed to get child process list.\n', err );
+        throw _.err( err, '\nFailed to get child process list.' );
       }
     }
 
@@ -3317,9 +3323,10 @@ function execPathOf( o )
   if( !_.process.isAlive( o.pid ) )
   {
     if( !o.throwing )
-    return ready.take( null )
-
+    return ready.take( null );
     let err = _.err( `\nTarget process: ${_.strQuote( o.pid )} does not exist.` );
+    if( o.sync )
+    throw err;
     return ready.error( err );
   }
 
@@ -3331,17 +3338,24 @@ function execPathOf( o )
     }
     catch( err )
     {
-      return ready.error( _.err( 'Failed to get process name.\n', err ) );
+      err = _.err( err, '\nFailed to get process name.' );
+      if( o.sync )
+      throw err;
+      return ready.error( err );
     }
   }
 
-  let commandLineFlag = 2;
-
+  let commandLineFlag = 2; /* qqq for Vova : use constant, no hardcoding */
   WindowsProcessTree.getProcessList( o.pid, ( list ) =>
   {
     ready.take( list[ 0 ].commandLine );
   }, commandLineFlag )
 
+  if( o.sync )
+  {
+    ready.deasync();
+    return ready.sync();
+  }
   return ready;
 }
 
@@ -3349,7 +3363,8 @@ execPathOf.defaults =
 {
   pid : null,
   pnd : null,
-  throwing : 1
+  throwing : 1,
+  sync : 1,
 }
 
 //
@@ -3382,7 +3397,7 @@ function spawnTimeOf( o )
     }
     catch( err )
     {
-      throw _.err( 'Failed to get process name.\n', err );
+      throw _.err( err, '\nFailed to get process name.' );
     }
   }
 
