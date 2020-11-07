@@ -33604,62 +33604,61 @@ function waitForDeath( test )
 
   /* */
 
-  // .then( () =>
-  // {
-  //   test.case = 'child process terminates by its own, wait for termination using pnd'
-  //   let o =
-  //   {
-  //     execPath : 'node ' + testAppPath,
-  //     throwingExitCode : 0,
-  //     mode : 'spawn',
-  //     stdio : 'pipe',
-  //     outputPiping : 1,
-  //     outputCollecting : 1
-  //   };
-  //   _.process.start( o )
-  //
-  //   let terminated = _.process.waitForDeath({ pnd : o.process, timeOut : context.t1 * 10 })
-  //   .then( () =>
-  //   {
-  //     test.identical( _.strCount( o.output, 'program::end' ), 1 );
-  //     test.identical( o.state, 'terminated' );
-  //     test.identical( o.exitCode, 0 );
-  //     test.identical( o.exitSignal, null );
-  //     return null;
-  //   })
-  //
-  //   return _.Consequence.And( terminated, o.conTerminate );
-  // })
-  //
-  // /* */
-  //
-  // .then( () =>
-  // {
-  //   test.case = 'child process terminates by its own, wait for termination using pid'
-  //   let o =
-  //   {
-  //     execPath : 'node ' + testAppPath,
-  //     throwingExitCode : 0,
-  //     mode : 'spawn',
-  //     stdio : 'pipe',
-  //     outputPiping : 1,
-  //     outputCollecting : 1
-  //   };
-  //   _.process.start( o )
-  //
-  //   let terminated = _.process.waitForDeath({ pid : o.process.pid, timeOut : context.t1 * 10 })
-  //   .then( () =>
-  //   {
-  //     test.identical( _.strCount( o.output, 'program::end' ), 1 );
-  //     test.identical( o.state, 'terminated' );
-  //     test.identical( o.exitCode, 0 );
-  //     test.identical( o.exitSignal, null );
-  //     return null;
-  //   })
-  //
-  //   return _.Consequence.And( terminated, o.conTerminate );
-  // })
-  // xxx
+  .then( () =>
+  {
+    test.case = 'child process terminates by its own, wait for termination using pnd'
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      throwingExitCode : 0,
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputPiping : 1,
+      outputCollecting : 1
+    };
+    _.process.start( o )
+
+    let terminated = _.process.waitForDeath({ pnd : o.process, timeOut : context.t1 * 10 })
+    .then( () =>
+    {
+      test.identical( _.strCount( o.output, 'program::end' ), 1 );
+      test.identical( o.state, 'terminated' );
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      return null;
+    })
+
+    return _.Consequence.And( terminated, o.conTerminate );
+  })
+
+  /* */
+
+  .then( () =>
+  {
+    test.case = 'child process terminates by its own, wait for termination using pid'
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      throwingExitCode : 0,
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputPiping : 1,
+      outputCollecting : 1
+    };
+    _.process.start( o )
+
+    let terminated = _.process.waitForDeath({ pid : o.process.pid, timeOut : context.t1 * 10 })
+    .then( () =>
+    {
+      test.identical( _.strCount( o.output, 'program::end' ), 1 );
+      test.identical( o.state, 'terminated' );
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      return null;
+    })
+
+    return _.Consequence.And( terminated, o.conTerminate );
+  })
 
   /* */
 
@@ -33695,34 +33694,38 @@ function waitForDeath( test )
 
   /* */
 
-  // .then( () =>
-  // {
-  //   test.case = 'process is still alive after timeOut'
-  //   let o =
-  //   {
-  //     execPath : 'node ' + testAppPath,
-  //     throwingExitCode : 0,
-  //     mode : 'spawn',
-  //     stdio : 'pipe',
-  //     outputPiping : 1,
-  //     outputCollecting : 1
-  //   };
-  //   _.process.start( o )
-  //
-  //   let terminated = _.process.waitForDeath({ pnd : o.process, timeOut : 1000 })
-  //   terminated = test.shouldThrowErrorAsync( terminated );
-  //
-  //   o.conTerminate.then( () =>
-  //   {
-  //     test.identical( _.strCount( o.output, 'program::end' ), 1 );
-  //     test.identical( o.state, 'terminated' );
-  //     test.identical( o.exitCode, 0 );
-  //     test.identical( o.exitSignal, null );
-  //     return null;
-  //   })
-  //
-  //   return _.Consequence.And( terminated, o.conTerminate );
-  // })
+  .then( () =>
+  {
+    test.case = 'process is still alive after timeOut'
+    let o =
+    {
+      execPath : 'node ' + testAppPath,
+      throwingExitCode : 0,
+      mode : 'spawn',
+      stdio : 'pipe',
+      outputPiping : 1,
+      outputCollecting : 1
+    };
+    _.process.start( o )
+
+    let terminated = _.process.waitForDeath({ pnd : o.process, timeOut : 1000 })
+    terminated = test.shouldThrowErrorAsync( terminated, ( err ) =>
+    {
+      test.is( _.errIs( err ) );
+      test.identical( err.reason, 'time out' );
+    });
+
+    o.conTerminate.then( () =>
+    {
+      test.identical( _.strCount( o.output, 'program::end' ), 1 );
+      test.identical( o.state, 'terminated' );
+      test.identical( o.exitCode, 0 );
+      test.identical( o.exitSignal, null );
+      return null;
+    })
+
+    return _.Consequence.And( terminated, o.conTerminate );
+  })
 
   /* */
 
@@ -34626,7 +34629,7 @@ var Proto =
     terminateZeroTimeOutWithoutChildrenShell,
     terminateZeroTimeOutWithtChildrenShell,
 
-    terminateDifferentStdio, /* qqq for Vova: rewrite, don't use timeout to run terminate aaa:done*/
+    terminateDifferentStdio,
 
     killComplex,
     execPathOf,
@@ -34639,7 +34642,7 @@ var Proto =
 
     // experiments
 
-    experimentIpcDeasync, /* qqq for Vova : collect information for different versions and different OSs aaa:added at the beginning of the file*/
+    experimentIpcDeasync,
     streamJoinExperiment,
     experiment,
     experiment2,

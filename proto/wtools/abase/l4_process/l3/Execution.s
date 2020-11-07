@@ -3059,8 +3059,6 @@ function waitForDeath_body( o )
 
   let ready = _.Consequence().take( null );
 
-  console.log( `waitForDeath ${_.process.isAlive( o.pid )}` );
-
   if( !_.process.isAlive( o.pid ) )
   return end();
 
@@ -3090,7 +3088,6 @@ function waitForDeath_body( o )
     let ready = _.Consequence();
     let timer = _.time.periodic( interval, () =>
     {
-      console.log( `periodic ${_.process.isAlive( o.pid )}` );
       if( _.process.isAlive( o.pid ) )
       return true;
       ready.take( true );
@@ -3403,15 +3400,6 @@ function spawnTimeOf( o )
       throw _.err( err, '\nFailed to get process name.' );
     }
   }
-
-  if( _.process.isAlive( o.pid ) )
-  {
-    debugger;
-    // let execPath = _.process.execPathOf( o.pid );
-    // console.log( 'execPath', execPath );
-    debugger;
-  }
-  debugger;
 
   return WindowsProcessTree.getProcessCreationTime( o.pid );
 }
