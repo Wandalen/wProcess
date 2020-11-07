@@ -33677,8 +33677,6 @@ function waitForDeath( test )
     };
     _.process.start( o )
 
-    o.conStart.thenGive( () => o.process.kill( 'SIGTERM' ) )
-
     let terminated = _.process.waitForDeath({ pnd : o.process, timeOut : context.t1 * 10 })
     .then( () =>
     {
@@ -33688,6 +33686,9 @@ function waitForDeath( test )
       test.notIdentical( o.exitSignal, null );
       return null;
     })
+
+    /* njs on Windows kills child proecess instantly, without any delay */
+    o.conStart.thenGive( () => o.process.kill( 'SIGTERM' ) )
 
     return _.Consequence.And( terminated, o.conTerminate );
   })
