@@ -3059,6 +3059,8 @@ function waitForDeath_body( o )
 
   let ready = _.Consequence().take( null );
 
+  console.log( `waitForDeath ${_.process.isAlive( o.pid )}` );
+
   if( !_.process.isAlive( o.pid ) )
   return end();
 
@@ -3088,6 +3090,7 @@ function waitForDeath_body( o )
     let ready = _.Consequence();
     let timer = _.time.periodic( interval, () =>
     {
+      console.log( `periodic ${_.process.isAlive( o.pid )}` );
       if( _.process.isAlive( o.pid ) )
       return true;
       ready.take( true );
@@ -3109,7 +3112,7 @@ function waitForDeath_body( o )
 
       if( err.reason === 'time out' )
       {
-        err = _.err( err, `\nTarget process: ${_.strQuote( o.pid )} is still alive. Waited for ${o.timeOut} ms.` );
+        err = _.err( err, `\nTarget process: ${_.strQuote( o.pid )} is still alive. Waited ${o.timeOut} ms.` );
         if( isWindows )
         {
           let spawnTime2 = _.process.spawnTimeOf({ pid : o.pid })
@@ -3325,6 +3328,8 @@ function execPathOf( o )
     if( !o.throwing )
     return ready.take( null );
     let err = _.err( `\nTarget process: ${_.strQuote( o.pid )} does not exist.` );
+    if( o.sync )
+    throw err;
     return ready.error( err );
   }
 
@@ -3401,10 +3406,9 @@ function spawnTimeOf( o )
 
   if( _.process.isAlive( o.pid ) )
   {
-    xxx
     debugger;
-    let execPath = _.process.execPathOf( o.pid );
-    console.log( 'execPath', execPath );
+    // let execPath = _.process.execPathOf( o.pid );
+    // console.log( 'execPath', execPath );
     debugger;
   }
   debugger;
