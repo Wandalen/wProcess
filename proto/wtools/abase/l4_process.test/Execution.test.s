@@ -247,6 +247,7 @@ function startBasic( test )
   let context = this;
   let a = context.assetFor( test, false );
   let programPath = a.program( program1 );
+  let programPath2 = a.program( program2 );
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -419,7 +420,7 @@ ${programPath}:end
 
     .then( function( arg )
     {
-      test.case = 'mode : shell, stdio : ignore';
+      test.case = `mode : ${mode}, stdio : ignore`;
 
       o2 =
       {
@@ -446,7 +447,7 @@ ${programPath}:end
 
     .then( function( arg )
     {
-      test.case = 'shell, return good code';
+      test.case = `mode : ${mode}, return good code`;
 
       o2 =
       {
@@ -478,7 +479,7 @@ ${programPath}:end
 
     .then( function( arg )
     {
-      test.case = 'shell, return good code';
+      test.case = `mode : ${mode}, return bad code`;
 
       o2 =
       {
@@ -515,7 +516,7 @@ ${programPath}:end
 
     .then( function( arg )
     {
-      test.case = 'bad args';
+      test.case = `mode : ${mode}, bad args`;
 
       o2 =
       {
@@ -547,12 +548,11 @@ ${programPath}:end
 
     .then( function()
     {
-      test.case = `mode : ${mode}`;
-      let programPath = a.program( program2 );
+      test.case = `mode : ${mode}, stdio : pipe, args : [ 'staging', 'debug' ]`;
 
       o2 =
       {
-        execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+        execPath : mode === 'fork' ? programPath2 : 'node ' + programPath2,
         args : [ 'staging', 'debug' ],
         mode,
         stdio : 'pipe'
@@ -561,7 +561,6 @@ ${programPath}:end
     })
     .then( function( arg )
     {
-      /* mode : shell, stdio : pipe */
 
       var options = _.mapSupplement( null, o2, o3 );
 
@@ -571,7 +570,6 @@ ${programPath}:end
         test.identical( options.exitCode, 0 );
         test.identical( options.output, o2.args.join( ' ' ) + '\n' );
 
-        a.fileProvider.fileDelete( programPath );
         return null;
       })
     })
@@ -580,24 +578,22 @@ ${programPath}:end
 
     .then( function()
     {
-      test.case = 'mode : spawn, incorrect usage of o.path in spawn mode';
-      let programPath = a.program( program2 );
+      test.case = `mode : ${mode}, incorrect usage of o.execPath`;
 
       o2 =
       {
-        execPath : mode === 'fork' ? programPath :  'node ' + programPath,
+        execPath : mode === 'fork' ? program2 :  'node ' + program2,
         args : [ 'staging' ],
         mode,
         stdio : 'pipe'
       }
-      return null;
-    })
-    .then( function( arg )
-    {
+
       var options = _.mapSupplement( null, o2, o3 );
 
-      a.fileProvider.fileDelete( programPath );
-      return test.shouldThrowErrorAsync( _.process.start( options ) );
+      if( mode === 'fork' ) /* Error in assert 'Expects string or strings {-o.execPath-}, but got Function' */
+      return test.shouldThrowErrorSync( () => _.process.start( options ) );
+      else /* Error after launching a process */
+      return test.shouldThrowErrorAsync( () => _.process.start( options ) );
     })
 
     /* - */
@@ -634,82 +630,82 @@ ${programPath}:end
 
 //
 
-function startBasic2( test ) /* qqq for Evhen : merge with test routine startBasic */
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-  let programPath = a.program( testApp );
+// function startBasic2( test ) /* qqq for Evhen : merge with test routine startBasic | aaa : Done */
+// {
+//   let context = this;
+//   let a = context.assetFor( test, false );
+//   let programPath = a.program( testApp );
 
-  let o3 =
-  {
-    outputPiping : 1,
-    outputCollecting : 1,
-    applyingExitCode : 0,
-    throwingExitCode : 1
-  }
+//   let o3 =
+//   {
+//     outputPiping : 1,
+//     outputCollecting : 1,
+//     applyingExitCode : 0,
+//     throwingExitCode : 1
+//   }
 
-  let o2;
+//   let o2;
 
-  a.ready.then( function()
-  {
-    test.case = 'mode : shell';
+//   a.ready.then( function()
+//   {
+//     test.case = 'mode : shell';
 
-    o2 =
-    {
-      execPath :  'node ' + programPath,
-      args : [ 'staging', 'debug' ],
-      mode : 'shell',
-      stdio : 'pipe'
-    }
-    return null;
-  })
-  .then( function( arg )
-  {
-    /* mode : shell, stdio : pipe */
+//     o2 =
+//     {
+//       execPath :  'node ' + programPath,
+//       args : [ 'staging', 'debug' ],
+//       mode : 'shell',
+//       stdio : 'pipe'
+//     }
+//     return null;
+//   })
+//   .then( function( arg )
+//   {
+//     /* mode : shell, stdio : pipe */
 
-    var options = _.mapSupplement( null, o2, o3 );
+//     var options = _.mapSupplement( null, o2, o3 );
 
-    return _.process.start( options )
-    .then( function()
-    {
-      test.identical( options.exitCode, 0 );
-      test.identical( options.output, o2.args.join( ' ' ) + '\n' );
-      return null;
-    })
-  })
+//     return _.process.start( options )
+//     .then( function()
+//     {
+//       test.identical( options.exitCode, 0 );
+//       test.identical( options.output, o2.args.join( ' ' ) + '\n' );
+//       return null;
+//     })
+//   })
 
-  /* */
+//   /* */
 
-  a.ready.then( function()
-  {
-    test.case = 'mode : spawn, incorrect usage of o.path in spawn mode';
+//   a.ready.then( function()
+//   {
+//     test.case = 'mode : spawn, incorrect usage of o.path in spawn mode';
 
-    o2 =
-    {
-      execPath :  'node ' + testApp,
-      args : [ 'staging' ],
-      mode : 'spawn',
-      stdio : 'pipe'
-    }
-    return null;
-  })
-  .then( function( arg )
-  {
-    var options = _.mapSupplement( null, o2, o3 );
-    return test.shouldThrowErrorAsync( _.process.start( options ) );
-  })
+//     o2 =
+//     {
+//       execPath :  'node ' + testApp,
+//       args : [ 'staging' ],
+//       mode : 'spawn',
+//       stdio : 'pipe'
+//     }
+//     return null;
+//   })
+//   .then( function( arg )
+//   {
+//     var options = _.mapSupplement( null, o2, o3 );
+//     return test.shouldThrowErrorAsync( _.process.start( options ) );
+//   })
 
-  /* */
+//   /* */
 
-  return a.ready;
+//   return a.ready;
 
-  /* - */
+//   /* - */
 
-  function testApp()
-  {
-    console.log( process.argv.slice( 2 ).join( ' ' ) );
-  }
-}
+//   function testApp()
+//   {
+//     console.log( process.argv.slice( 2 ).join( ' ' ) );
+//   }
+// }
 
 //
 
@@ -34509,8 +34505,8 @@ var Proto =
 
     // basic
 
-    startBasic, /* qqq for Yevhen : merge startBasic2 in */
-    startBasic2,
+    startBasic, /* qqq for Yevhen : merge startBasic2 in | aaa : Done. */
+    // startBasic2,
     startFork,
     startErrorHandling,
 
