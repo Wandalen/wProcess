@@ -2051,7 +2051,7 @@ function start_body( o )
     {
       let err2;
 
-      if( o.concurrent ) /* xxx : coverage? */
+      if( o.concurrent ) /* xxx : use abstract algorithm of consequence */
       {
         prevReady.then( o2.ready );
       }
@@ -3158,7 +3158,7 @@ function waitForDeath_body( o )
 
     let timeOutError = _.time.outError( o.timeOut )
 
-    ready.orKeeping( [ timeOutError ] ); /* xxx : implement orCanceling? */
+    ready.orKeeping( [ timeOutError ] ); /* xxx : implement orCanceling for consequence? */
 
     ready.finally( ( err, arg ) =>
     {

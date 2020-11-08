@@ -9979,7 +9979,6 @@ function startOptionTimeOut( test )
     process.removeAllListeners( 'SIGHUP' );
     process.removeAllListeners( 'SIGINT' );
     process.removeAllListeners( 'SIGTERM' );
-    // process.removeAllListeners( 'SIGTERM' ); /* clear listeners defined in wProcess */
 
     let o =
     {
@@ -14734,19 +14733,19 @@ function startConcurrentConsequencesMultiple( test )
     outputCollecting : 1,
   }
 
-  /* xxx */
-  let consequences = [ 'null' ];
-  let modes = [ 'spawn' ];
+  // /* xxx */
+  // let consequences = [ 'null' ];
+  // let modes = [ 'spawn' ];
 
-  // let consequences = [ 'null', 'consequence', 'routine' ];
-  // let modes = [ 'fork', 'spawn', 'shell' ];
+  let consequences = [ 'null', 'consequence', 'routine' ];
+  let modes = [ 'fork', 'spawn', 'shell' ];
   consequences.forEach( ( consequence ) =>
   {
     a.ready.tap( () => test.open( `consequence:${consequence}` ) );
     modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, consequence, mode }) ) );
-    // modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, consequence, mode }) ) );
-    // modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, consequence, mode }) ) );
-    // modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, consequence, mode }) ) );
+    modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, consequence, mode }) ) );
+    modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, consequence, mode }) ) );
+    modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, consequence, mode }) ) );
     a.ready.tap( () => test.close( `consequence:${consequence}` ) );
   });
   return a.ready;
@@ -28585,24 +28584,11 @@ exit:end
         test.identical( options.error, null );
         test.identical( options.process.killed, true );
 
-        // xxx
-        // /* poor implementation of signals in njs on Windows */
-        // if( process.platform === 'win32' )
-        // {
-        //   test.identical( options.exitCode, 1 );
-        //   test.identical( options.exitSignal, null );
-        //   test.identical( options.exitReason, 'code' );
-        //   test.identical( options.process.signalCode, null );
-        //   test.identical( options.process.exitCode, 1 );
-        // }
-        // else
-        // {
-          test.identical( options.exitCode, null );
-          test.identical( options.exitSignal, 'SIGTERM' );
-          test.identical( options.exitReason, 'signal' );
-          test.identical( options.process.signalCode, 'SIGTERM' );
-          test.identical( options.process.exitCode, null );
-        // }
+        test.identical( options.exitCode, null );
+        test.identical( options.exitSignal, 'SIGTERM' );
+        test.identical( options.exitReason, 'signal' );
+        test.identical( options.process.signalCode, 'SIGTERM' );
+        test.identical( options.process.exitCode, null );
 
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
@@ -28731,24 +28717,11 @@ Killed
         test.identical( options.error, null );
         test.identical( options.process.killed, true );
 
-        // xxx
-        // /* poor implementation of signals in njs on Windows */
-        // if( process.platform === 'win32' )
-        // {
-        //   test.identical( options.exitCode, 1 );
-        //   test.identical( options.exitSignal, null );
-        //   test.identical( options.exitReason, 'code' );
-        //   test.identical( options.process.signalCode, null );
-        //   test.identical( options.process.exitCode, 1 );
-        // }
-        // else
-        // {
-          test.identical( options.exitCode, null );
-          test.identical( options.exitSignal, 'SIGKILL' );
-          test.identical( options.exitReason, 'signal' );
-          test.identical( options.process.signalCode, 'SIGKILL' );
-          test.identical( options.process.exitCode, null );
-        // }
+        test.identical( options.exitCode, null );
+        test.identical( options.exitSignal, 'SIGKILL' );
+        test.identical( options.exitReason, 'signal' );
+        test.identical( options.process.signalCode, 'SIGKILL' );
+        test.identical( options.process.exitCode, null );
 
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
@@ -28972,20 +28945,6 @@ exit:${exitCode}
           test.identical( options.process.signalCode, null );
           test.identical( options.process.exitCode, exitCode );
         }
-
-        // xxx
-        // if( process.platform === 'win32' )
-        // {
-        //   test.identical( options.exitCode, null );
-        //   test.identical( options.exitSignal, signal );
-        //   test.identical( options.exitReason, 'signal' );
-        // }
-        // else
-        // {
-        //   test.identical( options.exitReason, 'code' );
-        //   test.identical( options.exitCode, exitCode );
-        //   test.identical( options.exitSignal, null );
-        // }
 
         test.identical( _.strCount( options.output, 'exit:' ),  process.platform === 'win32' ? 0 : 1 );
         test.identical( options.ended, true );
@@ -30366,8 +30325,6 @@ function terminateFirstChildSpawn( test )
 
     console.log( `childPid : ${process.pid}` );
 
-    // process.removeAllListeners( 'SIGTERM' ); /* xxx : remove? */
-
     _.fileProvider.fileWrite
     ({
       filePath : _.path.join( __dirname, 'program2Pid' ),
@@ -30527,8 +30484,6 @@ function terminateFirstChildFork( test )
   {
     let _ = require( toolsPath );
     _.include( 'wFiles' );
-
-    // process.removeAllListeners( 'SIGTERM' )
 
     _.fileProvider.fileWrite
     ({
@@ -30690,8 +30645,6 @@ function terminateFirstChildShell( test )
     let _ = require( toolsPath );
     _.include( 'wFiles' );
 
-    // process.removeAllListeners( 'SIGTERM' )
-
     _.fileProvider.fileWrite
     ({
       filePath : _.path.join( __dirname, 'program2Pid' ),
@@ -30846,8 +30799,6 @@ function terminateSecondChildSpawn( test )
     let _ = require( toolsPath );
     _.include( 'wFiles' );
 
-    // process.removeAllListeners( 'SIGTERM' )
-
     _.fileProvider.fileWrite
     ({
       filePath : _.path.join( __dirname, 'program2Pid' ),
@@ -30998,8 +30949,6 @@ function terminateSecondChildFork( test )
   {
     let _ = require( toolsPath );
     _.include( 'wFiles' );
-
-    // process.removeAllListeners( 'SIGTERM' )
 
     _.fileProvider.fileWrite
     ({
@@ -31162,8 +31111,6 @@ function terminateSecondChildShell( test )
     let _ = require( toolsPath );
     _.include( 'wFiles' );
 
-    // process.removeAllListeners( 'SIGTERM' )
-
     _.fileProvider.fileWrite
     ({
       filePath : _.path.join( __dirname, 'program2Pid' ),
@@ -31301,8 +31248,6 @@ function terminateDetachedFirstChildSpawn( test )
   {
     let _ = require( toolsPath );
     _.include( 'wFiles' );
-
-    // process.removeAllListeners( 'SIGTERM' )
 
     _.fileProvider.fileWrite
     ({
@@ -31443,8 +31388,6 @@ function terminateDetachedFirstChildFork( test )
   {
     let _ = require( toolsPath );
     _.include( 'wFiles' );
-
-    // process.removeAllListeners( 'SIGTERM' )
 
     _.fileProvider.fileWrite
     ({
@@ -31588,8 +31531,6 @@ function terminateDetachedFirstChildShell( test )
     let _ = require( toolsPath );
     _.include( 'wFiles' );
 
-    // process.removeAllListeners( 'SIGTERM' )
-
     _.fileProvider.fileWrite
     ({
       filePath : _.path.join( __dirname, 'program2Pid' ),
@@ -31725,8 +31666,6 @@ function terminateWithDetachedChildSpawn( test )
   {
     let _ = require( toolsPath );
     _.include( 'wFiles' );
-
-    // process.removeAllListeners( 'SIGTERM' )
 
     _.fileProvider.fileWrite
     ({
@@ -31932,8 +31871,6 @@ function terminateWithDetachedChildFork( test )
     let _ = require( toolsPath );
     _.include( 'wFiles' );
 
-    // process.removeAllListeners( 'SIGTERM' )
-
     _.fileProvider.fileWrite
     ({
       filePath : _.path.join( __dirname, 'program2Pid' ),
@@ -32072,8 +32009,6 @@ function terminateWithDetachedChildShell( test ) /* qqq for Vova : fix on Window
     let _ = require( toolsPath );
     _.include( 'wFiles' );
 
-    // process.removeAllListeners( 'SIGTERM' )
-
     _.fileProvider.fileWrite
     ({
       filePath : _.path.join( __dirname, 'program2Pid' ),
@@ -32163,7 +32098,7 @@ function terminateSeveralChildren( test )
     test.identical( _.strCount( o.output, 'program3::begin' ), 1 );
     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
     test.identical( _.strCount( o.output, 'program3::end' ), 0 );
-    test.is( !_.process.isAlive( program2Pid ) ); /* xxx */
+    test.is( !_.process.isAlive( program2Pid ) );
     test.is( !_.process.isAlive( program3Pid ) );
     test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
     test.is( !a.fileProvider.fileExists( a.abs( 'program3end' ) ) );
@@ -32313,8 +32248,6 @@ function terminateSeveralChildren( test )
     let _ = require( toolsPath );
     _.include( 'wFiles' );
 
-    // process.removeAllListeners( 'SIGTERM' )
-
     _.fileProvider.fileWrite
     ({
       filePath : _.path.join( __dirname, 'program2Pid' ),
@@ -32342,8 +32275,6 @@ function terminateSeveralChildren( test )
   {
     let _ = require( toolsPath );
     _.include( 'wFiles' );
-
-    // process.removeAllListeners( 'SIGTERM' )
 
     _.fileProvider.fileWrite
     ({
@@ -32433,7 +32364,7 @@ function terminateSeveralDetachedChildren( test )
     test.identical( _.strCount( o.output, 'program3::begin' ), 1 );
     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
     test.identical( _.strCount( o.output, 'program3::end' ), 0 );
-    test.is( !_.process.isAlive( program2Pid ) ); /* xxx */
+    test.is( !_.process.isAlive( program2Pid ) );
     test.is( !_.process.isAlive( program3Pid ) );
     test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
     test.is( !a.fileProvider.fileExists( a.abs( 'program3end' ) ) );
@@ -32489,8 +32420,6 @@ function terminateSeveralDetachedChildren( test )
     let _ = require( toolsPath );
     _.include( 'wFiles' );
 
-    // process.removeAllListeners( 'SIGTERM' )
-
     _.fileProvider.fileWrite
     ({
       filePath : _.path.join( __dirname, 'program2Pid' ),
@@ -32518,8 +32447,6 @@ function terminateSeveralDetachedChildren( test )
   {
     let _ = require( toolsPath );
     _.include( 'wFiles' );
-
-    // process.removeAllListeners( 'SIGTERM' )
 
     _.fileProvider.fileWrite
     ({
