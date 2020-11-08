@@ -30941,7 +30941,7 @@ function terminateSecondChildFork( test )
 
   /* - */
 
-   function handleOutput()
+  function handleOutput()
   {
     if( !_.strHas( o.output, 'program2::begin' ) )
     return;
@@ -31104,7 +31104,7 @@ function terminateSecondChildShell( test )
 
   /* - */
 
-   function handleOutput()
+  function handleOutput()
   {
     if( !_.strHas( o.output, 'program2::begin' ) )
     return;
@@ -31260,7 +31260,7 @@ function terminateDetachedFirstChildSpawn( test )
 
   /* - */
 
-   function handleOutput()
+  function handleOutput()
   {
     if( !_.strHas( o.output, 'program2::begin' ) )
     return;
@@ -31429,7 +31429,7 @@ function terminateDetachedFirstChildFork( test )
 
   /* - */
 
-   function handleOutput()
+  function handleOutput()
   {
     if( !_.strHas( o.output, 'program2::begin' ) )
     return;
@@ -31546,7 +31546,7 @@ function terminateDetachedFirstChildShell( test )
 
   /* - */
 
-   function handleOutput()
+  function handleOutput()
   {
     if( !_.strHas( o.output, 'program2::begin' ) )
     return;
@@ -31684,7 +31684,7 @@ function terminateWithDetachedChildSpawn( test )
 
   /* - */
 
-   function handleOutput()
+  function handleOutput()
   {
     if( !_.strHas( o.output, 'program2::begin' ) )
     return;
@@ -31890,7 +31890,7 @@ function terminateWithDetachedChildFork( test )
 
   /* - */
 
-   function handleOutput()
+  function handleOutput()
   {
     if( !_.strHas( o.output, 'program2::begin' ) )
     return;
@@ -32127,7 +32127,6 @@ function terminateSeveralChildren( test )
 
   let program2Pid = null;
   let program3Pid = null;
-  let c = 0;
   let terminate = _.Consequence();
 
   o.process.stdout.on( 'data', handleOutput );
@@ -32257,13 +32256,23 @@ function terminateSeveralChildren( test )
 
   /* - */
 
-  /* qqq for Vova : bad aaa:fixed*/
+  /* qqq for Vova : bad aaa:fixed */
+  /* qqq for Vova : bad! */
+  // function handleOutput()
+  // {
+  //   if( !_.strHas( o.output, 'program2::begin' ) || _.strHas( o.output, 'program3::begin' ) )
+  //   c += 1;
+  //
+  //   if( c !== 2 )
+  //   return;
+  //
+  //   o.process.stdout.removeListener( 'data', handleOutput );
+  //   terminate.take( null );
+  // }
+
   function handleOutput()
   {
-    if( !_.strHas( o.output, 'program2::begin' ) || _.strHas( o.output, 'program3::begin' ) )
-    c += 1;
-
-    if( c !== 2 )
+    if( !_.strHas( o.output, 'program2::begin' ) || !_.strHas( o.output, 'program3::begin' ) )
     return;
 
     o.process.stdout.removeListener( 'data', handleOutput );
@@ -32383,7 +32392,6 @@ function terminateSeveralDetachedChildren( test )
 
   let program2Pid = null;
   let program3Pid = null;
-  let c = 0;
   let terminate = _.Consequence();
 
   o.process.stdout.on( 'data', handleOutput );
@@ -32440,12 +32448,8 @@ function terminateSeveralDetachedChildren( test )
   /* qqq for Vova : bad aaa:fixed*/
   function handleOutput()
   {
-    if( !_.strHas( o.output, 'program2::begin' ) || _.strHas( o.output, 'program3::begin' ) )
-    c += 1;
-
-    if( c !== 2 )
+    if( !_.strHas( o.output, 'program2::begin' ) || !_.strHas( o.output, 'program3::begin' ) )
     return;
-
     o.process.stdout.removeListener( 'data', handleOutput );
     terminate.take( null );
   }
