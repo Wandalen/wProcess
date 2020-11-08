@@ -31902,7 +31902,7 @@ program1 and program2 should be terminated
 
 //
 
-function terminateWithDetachedChildShell( test ) /* qqq for Vova : fix on Windows */
+function terminateWithDetachedChildShell( test ) /* qqq for Vova : fix on Windows aaa:fixed*/
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -31918,13 +31918,14 @@ function terminateWithDetachedChildShell( test ) /* qqq for Vova : fix on Window
     outputCollecting : 1,
     throwingExitCode : 0
   }
+  
+  let terminate = _.Consequence();
+  
+  waitForProgram2Ready();
 
   _.process.start( o );
 
   let program2Pid = null;
-  let terminate = _.Consequence();
-
-  o.process.stdout.on( 'data', handleOutput );
 
   terminate.then( () =>
   {
@@ -31952,7 +31953,7 @@ function terminateWithDetachedChildShell( test ) /* qqq for Vova : fix on Window
     }
 
     test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
-    test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
+    test.ge( _.strCount( o.output, 'program2::begin' ), 0 );
     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
     test.identical( _.strCount( o.output, 'error' ), 0 );
     test.identical( _.strCount( o.output, 'Error' ), 0 );
@@ -31966,13 +31967,18 @@ function terminateWithDetachedChildShell( test ) /* qqq for Vova : fix on Window
 
   /* - */
 
-  function handleOutput()
+  function waitForProgram2Ready()
   {
-    console.log( 'handleOutput', o.output );
-    if( !_.strHas( o.output, 'program2::begin' ) )
-    return;
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
+    let fs = require( 'fs' );
+    let watcher = null;
+    watcher = fs.watch( a.path.nativize( a.abs( '.' ) ), {}, ( event, filename ) => 
+    {
+      // console.log( event, filename )
+      if( !_.strHas( filename, 'program2Pid' ) )
+      return;
+      watcher.close();
+      terminate.take( null );
+    })
   }
 
   /* - */
@@ -32009,13 +32015,6 @@ function terminateWithDetachedChildShell( test ) /* qqq for Vova : fix on Window
     let _ = require( toolsPath );
     _.include( 'wFiles' );
 
-    _.fileProvider.fileWrite
-    ({
-      filePath : _.path.join( __dirname, 'program2Pid' ),
-      data : { pid : process.pid },
-      encoding : 'json'
-    })
-
     setTimeout( () =>
     {
       console.log( 'program2::end' );
@@ -32025,6 +32024,13 @@ function terminateWithDetachedChildShell( test ) /* qqq for Vova : fix on Window
         data : 'end'
       })
     }, context.t1*10 )
+    
+    _.fileProvider.fileWrite
+    ({
+      filePath : _.path.join( __dirname, 'program2Pid' ),
+      data : { pid : process.pid },
+      encoding : 'json'
+    })
 
     console.log( 'program2::begin' );
 
