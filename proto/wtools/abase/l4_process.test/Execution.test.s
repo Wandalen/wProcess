@@ -32126,7 +32126,7 @@ function terminateSeveralChildren( test )
   _.process.start( o );
 
   let program2Pid = null;
-  let program3PID = null;
+  let program3Pid = null;
   let c = 0;
   let terminate = _.Consequence();
 
@@ -32136,8 +32136,8 @@ function terminateSeveralChildren( test )
   {
     program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
     program2Pid = program2Pid.pid;
-    program3PID = _.fileProvider.fileRead({ filePath : a.abs( 'program3PID' ), encoding : 'json' });
-    program3PID = program3PID.pid;
+    program3Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program3Pid' ), encoding : 'json' });
+    program3Pid = program3Pid.pid;
     return _.process.terminate
     ({
       pid : o.process.pid,
@@ -32164,8 +32164,8 @@ function terminateSeveralChildren( test )
     test.identical( _.strCount( o.output, 'program3::begin' ), 1 );
     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
     test.identical( _.strCount( o.output, 'program3::end' ), 0 );
-    test.is( !_.process.isAlive( program2Pid ) );
-    test.is( !_.process.isAlive( program3PID ) );
+    test.is( !_.process.isAlive( program2Pid ) ); /* xxx */
+    test.is( !_.process.isAlive( program3Pid ) );
     test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
     test.is( !a.fileProvider.fileExists( a.abs( 'program3end' ) ) );
 
@@ -32338,7 +32338,7 @@ function terminateSeveralChildren( test )
 
     _.fileProvider.fileWrite
     ({
-      filePath : _.path.join( __dirname, 'program3PID' ),
+      filePath : _.path.join( __dirname, 'program3Pid' ),
       data : { pid : process.pid },
       encoding : 'json'
     })
@@ -32361,7 +32361,7 @@ function terminateSeveralChildren( test )
 
 //
 
-function terminateWithSeveralDetachedChildren( test )
+function terminateSeveralDetachedChildren( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -32382,7 +32382,7 @@ function terminateWithSeveralDetachedChildren( test )
   _.process.start( o );
 
   let program2Pid = null;
-  let program3PID = null;
+  let program3Pid = null;
   let c = 0;
   let terminate = _.Consequence();
 
@@ -32390,10 +32390,13 @@ function terminateWithSeveralDetachedChildren( test )
 
   terminate.then( () =>
   {
+    console.log( 'terminate' );
     program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
+    console.log( 'program2Pid', program2Pid );
     program2Pid = program2Pid.pid;
-    program3PID = _.fileProvider.fileRead({ filePath : a.abs( 'program3PID' ), encoding : 'json' });
-    program3PID = program3PID.pid;
+    program3Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program3Pid' ), encoding : 'json' });
+    console.log( 'program3Pid', program3Pid );
+    program3Pid = program3Pid.pid;
     return _.process.terminate
     ({
       pid : o.process.pid,
@@ -32404,6 +32407,8 @@ function terminateWithSeveralDetachedChildren( test )
 
   o.conTerminate.then( () =>
   {
+    console.log( 'conTerminate' );
+
     if( process.platform === 'win32' )
     {
       test.identical( o.exitCode, 1 );
@@ -32420,8 +32425,8 @@ function terminateWithSeveralDetachedChildren( test )
     test.identical( _.strCount( o.output, 'program3::begin' ), 1 );
     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
     test.identical( _.strCount( o.output, 'program3::end' ), 0 );
-    test.is( !_.process.isAlive( program2Pid ) );
-    test.is( !_.process.isAlive( program3PID ) );
+    test.is( !_.process.isAlive( program2Pid ) ); /* xxx */
+    test.is( !_.process.isAlive( program3Pid ) );
     test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
     test.is( !a.fileProvider.fileExists( a.abs( 'program3end' ) ) );
 
@@ -32514,7 +32519,7 @@ function terminateWithSeveralDetachedChildren( test )
 
     _.fileProvider.fileWrite
     ({
-      filePath : _.path.join( __dirname, 'program3PID' ),
+      filePath : _.path.join( __dirname, 'program3Pid' ),
       data : { pid : process.pid },
       encoding : 'json'
     })
@@ -32535,7 +32540,7 @@ function terminateWithSeveralDetachedChildren( test )
 
 }
 
-terminateWithSeveralDetachedChildren.description =
+terminateSeveralDetachedChildren.description =
 `
 Program1 spawns two detached children.
 Tester terminates Program1 with option withChildren:1
@@ -34644,7 +34649,7 @@ var Proto =
     terminateWithDetachedChildShell,
 
     terminateSeveralChildren,
-    terminateWithSeveralDetachedChildren,
+    terminateSeveralDetachedChildren,
     terminateDeadProcess,
 
     terminateTimeOutNoHandler,
