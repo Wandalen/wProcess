@@ -231,6 +231,7 @@ function startMinimal_body( o )
   inputMirror,
   execPathParse,
   argsUnqoute,
+  argUnqoute,
   argsEscape,
   argEscape,
   optionsForSpawn,
@@ -419,16 +420,10 @@ function startMinimal_body( o )
     if( o.execPath === null )
     {
       _.assert( o.args.length, 'Expects {-args-} to have at least one argument if {-execPath-} is not defined' );
-
       o.execPath = o.args.shift();
       o.fullExecPath = o.execPath;
       _argsLength = o.args.length;
-
       o.execPath = argUnqoute( o.execPath );
-      // let begin = _.strBeginOf( o.execPath, [ '"', `'`, '`' ] );
-      // let end = _.strEndOf( o.execPath, [ '"', `'`, '`' ] );
-      // if( begin && begin === end )
-      // o.execPath = _.strInsideOf( o.execPath, begin, end );
     }
 
     /* passingThrough */
@@ -663,7 +658,7 @@ function startMinimal_body( o )
     return;
 
     if( o.interpreterArgs )
-    o.args = o.interpreterArgs.concat( o.args )
+    o.args = o.interpreterArgs.concat( o.args ); /* xxx */
 
     if( o.sync && !o.deasync )
     o.process = ChildProcess.spawnSync( execPath, o.args, o2 );
@@ -1158,7 +1153,6 @@ function startMinimal_body( o )
 
   function argsUnqoute( args )
   {
-    let quotes = [ '"', `'`, '`' ];
     for( let i = 0; i < args.length; i++ )
     args[ i ] = argUnqoute( args[ i ] );
     return args;
@@ -1169,11 +1163,22 @@ function startMinimal_body( o )
   function argUnqoute( arg )
   {
     let quotes = [ '"', `'`, '`' ];
-    let begin = _.strBeginOf( arg, quotes );
-    let end = _.strEndOf( arg, quotes );
-    if( begin )
-    if( begin && begin === end )
-    arg = _.strInsideOf( arg, begin, end );
+    // yyy
+    // let begin = _.strBeginOf( arg, quotes );
+    // let end = _.strEndOf( arg, quotes );
+    // if( begin )
+    // if( begin && begin === end )
+    // arg = _.strInsideOf( arg, begin, end );
+    // return arg;
+    let result = _.strInsideOf
+    ({
+      src : arg,
+      begin : quotes,
+      end : quotes,
+      pairing : 1,
+    })
+    if( result )
+    return result;
     return arg;
   }
 
@@ -1181,7 +1186,7 @@ function startMinimal_body( o )
 
   function argsEscape( args )
   {
-    /* xxx qqq for Vova : why if passingThrough? no hacks! aaa:removed execArgs*/
+    /* xxx */
 
     /* Escapes and quotes:
       - Original args provided via o.args
@@ -1194,17 +1199,18 @@ function startMinimal_body( o )
 
     for( let i = prependedArgs; i < args.length; i++ )
     {
-      let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', '`' ]
+      let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', '`' ];
+      // args[ i ] = argEscape( args[ i ], quotesToEscape ); /* xxx : uncomment later */
       _.each( quotesToEscape, ( quote ) =>
       {
         args[ i ] = argEscape( args[ i ], quote );
       })
       args[ i ] = _.strQuote( args[ i ] );
+
       // args[ i ] = _.process.escapeArg( args[ i ]  ); /* zzz for Vova : use this routine, review fails */
     }
 
     return args;
-    // return args.join( ' ' );
   }
 
   /* */
@@ -1271,11 +1277,6 @@ function startMinimal_body( o )
   function execPathForFork( execPath )
   {
     return argUnqoute( execPath );
-    // let quotes = [ '"', `'`, '`' ];
-    // let begin = _.strBeginOf( execPath, quotes );
-    // if( begin )
-    // execPath = _.strInsideOf( execPath, begin, begin );
-    // return execPath;
   }
 
   /* */
