@@ -34101,7 +34101,7 @@ function childrenOptionFormatList( test )
             { pid : o.process.pid },
             { pid : lastChildPid }
           ]
-          test.contains( op, expected );
+          test.contains( prcocesses, expected );
         }
         return null;
       })
