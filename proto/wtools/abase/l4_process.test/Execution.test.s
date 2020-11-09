@@ -23831,6 +23831,13 @@ function startOptionGid( test ) /* Runs only through `sudo` ( i.e. with superuse
 
 startOptionGid.experimental = true;
 
+//
+
+function startOptionProcedureMultiple( test )
+{
+
+}
+
 // --
 // pid
 // --
@@ -34534,6 +34541,7 @@ var Proto =
     startOptionPassingThrough,
     startOptionUid,
     startOptionGid,
+    startOptionProcedureMultiple,
 
     // pid / status / exit
 
