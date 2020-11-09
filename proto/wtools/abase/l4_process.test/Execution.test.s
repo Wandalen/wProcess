@@ -1,3 +1,4 @@
+/* eslint-disable */
 ( function _Execution_test_s( )
 {
 
@@ -23833,9 +23834,166 @@ startOptionGid.experimental = true;
 
 //
 
-function startOptionProcedureMultiple( test )
+function startOptionProcedureSingle( test )
 {
+  let context = this;
+  let a = context.assetFor( test, false );
+  let programPath = a.program( program1 );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
+  return a.ready;
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, procedure : null`;
+
+      let options =
+      {
+        execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+        args : 'a',
+        mode,
+        throwingExitCode : 0,
+        outputCollecting : 1,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, `[ 'a' ]` );
+        test.is( _.strHas( op.procedure._name, 'PID:') );
+        test.is( _.objectIs( op.procedure._object ) );
+        return null;
+      } )
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, procedure : false`;
+
+      let options =
+      {
+        execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+        mode,
+        args : 'a',
+        throwingExitCode : 0,
+        procedure : false,
+        outputCollecting : 1,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, `[ 'a' ]` );
+        test.identical( op.procedure, false );
+        return null;
+      } )
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, procedure : 1`;
+
+      let options =
+      {
+        execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+        mode,
+        args : 'a',
+        procedure : true,
+        throwingExitCode : 0,
+        outputCollecting : 1,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, `[ 'a' ]` );
+        test.is( _.strHas( op.procedure._name, 'PID:') );
+        test.is( _.objectIs( op.procedure._object ) );
+        return null;
+      } )
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, procedure : _.Procedure()`;
+
+      let options =
+      {
+        execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+        mode,
+        args : 'a',
+        throwingExitCode : 0,
+        procedure : _.Procedure(),
+        outputCollecting : 1,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, `[ 'a' ]` );
+        test.is( _.strHas( op.procedure._name, 'PID:') );
+        test.is( _.objectIs( op.procedure._object ) );
+        return null;
+      } )
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, procedure : _.Procedure({ _name : 'name', _object : 'object', _stack : 'stack' })`;
+
+      let options =
+      {
+        execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+        mode,
+        args : 'a',
+        throwingExitCode : 0,
+        procedure : _.Procedure({ _name : 'name', _object : 'object', _stack : 'stack' }),
+        outputCollecting : 1,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, `[ 'a' ]` );
+        test.is( _.strHas( op.procedure._name, 'PID:') );
+        test.is( _.objectIs( op.procedure._object ) );
+        test.identical( op.procedure._stack, 'stack' );
+        return null;
+      } )
+    })
+
+    return ready;
+  }
+
+  /* - */
+
+  function program1()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
 }
 
 // --
@@ -34541,7 +34699,7 @@ var Proto =
     startOptionPassingThrough,
     startOptionUid,
     startOptionGid,
-    startOptionProcedureMultiple,
+    startOptionProcedureSingle,
 
     // pid / status / exit
 
