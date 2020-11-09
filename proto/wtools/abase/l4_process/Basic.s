@@ -77,7 +77,7 @@ function pidFrom( src )
     return src.pid;
   }
 
-  _.assert( 0, `Unknown type : ${_.strType( src )}` );
+  _.assert( 0, `Cant get PID from ${_.strType( src )}` );
 }
 
 // --

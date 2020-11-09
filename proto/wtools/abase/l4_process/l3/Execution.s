@@ -231,6 +231,7 @@ function startMinimal_body( o )
   inputMirror,
   execPathParse,
   argsUnqoute,
+  argUnqoute,
   argsEscape,
   argEscape,
   optionsForSpawn,
@@ -419,16 +420,10 @@ function startMinimal_body( o )
     if( o.execPath === null )
     {
       _.assert( o.args.length, 'Expects {-args-} to have at least one argument if {-execPath-} is not defined' );
-
       o.execPath = o.args.shift();
       o.fullExecPath = o.execPath;
       _argsLength = o.args.length;
-
       o.execPath = argUnqoute( o.execPath );
-      // let begin = _.strBeginOf( o.execPath, [ '"', `'`, '`' ] );
-      // let end = _.strEndOf( o.execPath, [ '"', `'`, '`' ] );
-      // if( begin && begin === end )
-      // o.execPath = _.strInsideOf( o.execPath, begin, end );
     }
 
     /* passingThrough */
@@ -663,7 +658,7 @@ function startMinimal_body( o )
     return;
 
     if( o.interpreterArgs )
-    o.args = o.interpreterArgs.concat( o.args )
+    o.args = o.interpreterArgs.concat( o.args ); /* xxx */
 
     if( o.sync && !o.deasync )
     o.process = ChildProcess.spawnSync( execPath, o.args, o2 );
@@ -1158,7 +1153,6 @@ function startMinimal_body( o )
 
   function argsUnqoute( args )
   {
-    let quotes = [ '"', `'`, '`' ];
     for( let i = 0; i < args.length; i++ )
     args[ i ] = argUnqoute( args[ i ] );
     return args;
@@ -1169,11 +1163,22 @@ function startMinimal_body( o )
   function argUnqoute( arg )
   {
     let quotes = [ '"', `'`, '`' ];
-    let begin = _.strBeginOf( arg, quotes );
-    let end = _.strEndOf( arg, quotes );
-    if( begin )
-    if( begin && begin === end )
-    arg = _.strInsideOf( arg, begin, end );
+    // yyy
+    // let begin = _.strBeginOf( arg, quotes );
+    // let end = _.strEndOf( arg, quotes );
+    // if( begin )
+    // if( begin && begin === end )
+    // arg = _.strInsideOf( arg, begin, end );
+    // return arg;
+    let result = _.strInsideOf
+    ({
+      src : arg,
+      begin : quotes,
+      end : quotes,
+      pairing : 1,
+    })
+    if( result )
+    return result;
     return arg;
   }
 
@@ -1181,7 +1186,7 @@ function startMinimal_body( o )
 
   function argsEscape( args )
   {
-    /* xxx qqq for Vova : why if passingThrough? no hacks! aaa:removed execArgs*/
+    /* xxx */
 
     /* Escapes and quotes:
       - Original args provided via o.args
@@ -1194,17 +1199,18 @@ function startMinimal_body( o )
 
     for( let i = prependedArgs; i < args.length; i++ )
     {
-      let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', '`' ]
+      let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', '`' ];
+      // args[ i ] = argEscape( args[ i ], quotesToEscape ); /* xxx : uncomment later */
       _.each( quotesToEscape, ( quote ) =>
       {
         args[ i ] = argEscape( args[ i ], quote );
       })
       args[ i ] = _.strQuote( args[ i ] );
+
       // args[ i ] = _.process.escapeArg( args[ i ]  ); /* zzz for Vova : use this routine, review fails */
     }
 
     return args;
-    // return args.join( ' ' );
   }
 
   /* */
@@ -1271,11 +1277,6 @@ function startMinimal_body( o )
   function execPathForFork( execPath )
   {
     return argUnqoute( execPath );
-    // let quotes = [ '"', `'`, '`' ];
-    // let begin = _.strBeginOf( execPath, quotes );
-    // if( begin )
-    // execPath = _.strInsideOf( execPath, begin, begin );
-    // return execPath;
   }
 
   /* */
@@ -2051,7 +2052,7 @@ function start_body( o )
     {
       let err2;
 
-      if( o.concurrent ) /* xxx : coverage? */
+      if( o.concurrent ) /* xxx : use abstract algorithm of consequence */
       {
         prevReady.then( o2.ready );
       }
@@ -2903,16 +2904,27 @@ function signal_body( o )
   ready.then( handleResult );
   ready.catch( handleError );
 
-  if( o.sync )
-  ready.deasync();
-
-  return ready;
+  return end();
 
   /* - */
+
+  function end()
+  {
+    if( o.sync )
+    {
+      ready.deasync();
+      return ready.sync();
+    }
+    return ready;
+  }
+
+  /* */
 
   function signalSend( p )
   {
     _.assert( _.intIs( p.pid ) );
+
+    // console.log( `signalSend : ${p.pid} ${_.process.isAlive( p.pid )}` );
 
     if( !_.process.isAlive( p.pid ) )
     return true;
@@ -2921,12 +2933,8 @@ function signal_body( o )
     if( !pnd && o.pnd && o.pnd.pid === p.pid )
     pnd = o.pnd;
 
-/*
-    console.log( o.signal, p.pid );
-*/
     try
     {
-      console.log( `signalSend ${o.signal} ${p.pid}` );
       if( pnd )
       pnd.kill( o.signal );
       else
@@ -2959,12 +2967,17 @@ function signal_body( o )
       otherwise more fails appear in shell mode for OS spawing extra process for applications
     */
 
+    // console.log( `processKill withChildren:${o.withChildren} ${processes.length}` );
+
     if( o.withChildren )
     for( let i = 0 ; i < processes.length ; i++ )
     {
-      if( isWindows && i && processes[ i ].name === 'conhost.exe' )
-      continue;
-      signalSend( processes[ i ] );
+      let process = processes[ i ];
+      // console.log( `process.name:${process.name}` );
+      /* qqq for Vova : why? */
+      // if( isWindows && i && process.name === 'conhost.exe' )
+      // continue;
+      signalSend( process );
     }
     else
     {
@@ -2982,6 +2995,8 @@ function signal_body( o )
   function waitForDeath( p )
   {
     let timeOut = signal === 'SIGKILL' ? 5000 : o.timeOut;
+
+    // console.log( `waitForDeath pid:${p.pid} timeOut:${timeOut}` );
 
     if( timeOut === 0 )
     return _.process.kill({ pid : p.pid, pnd : p.pnd, withChildren : 0 });
@@ -3003,6 +3018,8 @@ function signal_body( o )
       throw err;
     })
 
+    // ready.delay( 1000 )
+
     return ready;
   }
 
@@ -3021,15 +3038,13 @@ function signal_body( o )
 
   function handleResult( result )
   {
-
     result = _.arrayAs( result );
-
+    // console.log( `handleResult ${result}` );
     for( let i = 0 ; i < result.length ; i++ )
     {
       if( result[ i ] !== true )
       return result[ i ];
     }
-
     return true;
   }
 
@@ -3048,89 +3063,6 @@ signal_body.defaults =
 }
 
 let _signal = _.routineUnite( signal_head, signal_body );
-
-//
-
-function waitForDeath_body( o )
-{
-  _.assert( arguments.length === 1 );
-  _.assert( _.numberIs( o.pid ) );
-  _.assert( _.numberIs( o.timeOut ) );
-
-  let isWindows = process.platform === 'win32';
-  let interval = isWindows ? 250 : 25;
-
-  /*
-    zzz : hangs up on Windows with interval below 150 if run in sync mode. see test routine killSync
-  */
-
-  let ready = _.Consequence().take( null );
-
-  if( isWindows )
-  ready.then( () => _.process.spawnTimeOf({ pid : o.pid }) )
-
-  ready.then( _waitForDeath );
-
-  if( o.sync )
-  ready.deasync();
-
-  return ready;
-
-  /* */
-
-  function _waitForDeath( spawnTime )
-  {
-    let ready = _.Consequence();
-    let timer = _.time.periodic( interval, () =>
-    {
-      if( _.process.isAlive( o.pid ) )
-      return false;
-      ready.take( true );
-    });
-
-    let timeOutError = _.time.outError( o.timeOut )
-
-    ready.orKeeping( [ timeOutError ] );
-
-    ready.finally( ( err, arg ) =>
-    {
-      if( !err || err.reason !== 'time out' )
-      timeOutError.error( _.dont );
-
-      if( !err )
-      return arg;
-
-      timer.cancel();
-      _.errAttend( err );
-
-      if( err.reason === 'time out' )
-      {
-        err = _.err( err, `\nTarget process: ${_.strQuote( o.pid )} is still alive. Waited for ${o.timeOut} ms.` );
-
-        if( isWindows )
-        {
-          let spawnTime2 = _.process.spawnTimeOf({ pid : o.pid })
-          if( spawnTime != spawnTime2 )
-          return null;
-        }
-      }
-
-      throw err;
-    })
-
-    return ready;
-  }
-}
-
-waitForDeath_body.defaults =
-{
-  pid : null,
-  pnd : null,
-  timeOut : 5000,
-  sync : 0
-}
-
-let waitForDeath = _.routineUnite( signal_head, waitForDeath_body )
 
 //
 
@@ -3162,8 +3094,7 @@ function terminate_body( o )
 {
   _.assert( arguments.length === 1 );
   o.signal = o.timeOut ? 'SIGTERM' : 'SIGKILL';
-  let ready = _.process._signal.body( o );
-  return ready;
+  return _.process._signal.body( o );
 }
 
 terminate_body.defaults =
@@ -3172,6 +3103,104 @@ terminate_body.defaults =
 }
 
 let terminate = _.routineUnite( signal_head, terminate_body );
+
+//
+
+function waitForDeath_body( o )
+{
+  _.assert( arguments.length === 1 );
+  _.assert( _.numberIs( o.pid ) );
+  _.assert( _.numberIs( o.timeOut ) );
+
+  let isWindows = process.platform === 'win32';
+  let interval = isWindows ? 250 : 25;
+
+  /*
+    zzz : hangs up on Windows with interval below 150 if run in sync mode. see test routine killSync
+  */
+
+  let ready = _.Consequence().take( true );
+
+  // console.log( `waitForDeath ${o.pid} ${_.process.isAlive( o.pid )}` );
+
+  if( !_.process.isAlive( o.pid ) )
+  return end();
+
+  if( isWindows )
+  ready.then( () => _.process.spawnTimeOf({ pid : o.pid }) )
+
+  ready.then( _waitForDeath );
+
+  return end();
+
+  /* */
+
+  function end()
+  {
+    if( o.sync )
+    {
+      ready.deasync();
+      return ready.sync();
+    }
+    return ready;
+  }
+
+  /* */
+
+  function _waitForDeath( spawnTime )
+  {
+    let ready = _.Consequence();
+    let timer = _.time.periodic( interval, () =>
+    {
+      if( _.process.isAlive( o.pid ) )
+      return true;
+      ready.take( true );
+    });
+
+    let timeOutError = _.time.outError( o.timeOut )
+
+    ready.orKeeping( [ timeOutError ] ); /* xxx : implement orCanceling for consequence? */
+
+    ready.finally( ( err, arg ) =>
+    {
+      if( !err || err.reason !== 'time out' )
+      timeOutError.error( _.dont );
+
+      if( !err )
+      return arg;
+
+      timer.cancel();
+
+      if( err.reason === 'time out' )
+      {
+        err = _.err( err, `\nTarget process: ${_.strQuote( o.pid )} is still alive. Waited ${o.timeOut} ms.` );
+        if( isWindows )
+        {
+          let spawnTime2 = _.process.spawnTimeOf({ pid : o.pid })
+          if( spawnTime != spawnTime2 )
+          {
+            _.errAttend( err );
+            return null;
+          }
+        }
+      }
+
+      throw err;
+    })
+
+    return ready;
+  }
+}
+
+waitForDeath_body.defaults =
+{
+  pid : null,
+  pnd : null,
+  timeOut : 5000,
+  sync : 0
+}
+
+let waitForDeath = _.routineUnite( signal_head, waitForDeath_body )
 
 //
 
@@ -3211,7 +3240,7 @@ function children( o )
       }
       catch( err )
       {
-        throw _.err( 'Failed to get child process list.\n', err );
+        throw _.err( err, '\nFailed to get child process list.' );
       }
     }
 
@@ -3317,9 +3346,10 @@ function execPathOf( o )
   if( !_.process.isAlive( o.pid ) )
   {
     if( !o.throwing )
-    return ready.take( null )
-
+    return ready.take( null );
     let err = _.err( `\nTarget process: ${_.strQuote( o.pid )} does not exist.` );
+    if( o.sync )
+    throw err;
     return ready.error( err );
   }
 
@@ -3331,17 +3361,24 @@ function execPathOf( o )
     }
     catch( err )
     {
-      return ready.error( _.err( 'Failed to get process name.\n', err ) );
+      err = _.err( err, '\nFailed to get process name.' );
+      if( o.sync )
+      throw err;
+      return ready.error( err );
     }
   }
 
-  let commandLineFlag = 2;
-
+  let commandLineFlag = 2; /* qqq for Vova : use constant, no hardcoding */
   WindowsProcessTree.getProcessList( o.pid, ( list ) =>
   {
     ready.take( list[ 0 ].commandLine );
   }, commandLineFlag )
 
+  if( o.sync )
+  {
+    ready.deasync();
+    return ready.sync();
+  }
   return ready;
 }
 
@@ -3349,7 +3386,8 @@ execPathOf.defaults =
 {
   pid : null,
   pnd : null,
-  throwing : 1
+  throwing : 1,
+  sync : 1,
 }
 
 //
@@ -3382,7 +3420,7 @@ function spawnTimeOf( o )
     }
     catch( err )
     {
-      throw _.err( 'Failed to get process name.\n', err );
+      throw _.err( err, '\nFailed to get process name.' );
     }
   }
 
@@ -3427,9 +3465,10 @@ let Extension =
   statusOf,
 
   _signal,
-  waitForDeath,
   kill,
   terminate,
+  waitForDeath,
+
   children,
   execPathOf,
   spawnTimeOf

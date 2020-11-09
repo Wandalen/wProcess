@@ -1884,6 +1884,7 @@ function startSyncDeasync( test )
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
 
+    process.removeAllListeners( 'SIGHUP' );
     process.removeAllListeners( 'SIGINT' );
     process.removeAllListeners( 'SIGTERM' );
     process.removeAllListeners( 'exit' );
@@ -7527,10 +7528,10 @@ function startDifferentTypesOfPaths( test )
   let execPathWithSpace = a.program({ routine : testApp, dirPath : 'path with space' });
   execPathWithSpace = a.fileProvider.path.normalize( execPathWithSpace );
   let execPathWithSpaceNative = a.fileProvider.path.nativize( execPathWithSpace );
-  
+
   let tempPath = _.path.tempOpen( _.path.normalize( process.argv[ 0 ] ) );
   let nodeWithSpace = a.path.join( tempPath, 'node.exe' );
-  
+
   a.fileProvider.softLink( nodeWithSpace, process.argv[ 0 ] );
 
   /* - */
@@ -7926,10 +7927,10 @@ function startDifferentTypesOfPaths( test )
     return o.conTerminate;
 
   })
-  
+
   /* - */
-  
-  a.ready.tap( () => 
+
+  a.ready.tap( () =>
   {
     _.path.tempClose( tempPath );
   })
@@ -9975,7 +9976,9 @@ function startOptionTimeOut( test )
     _.include( 'wFiles' );
     _.include( 'wProcess' );
 
-    process.removeAllListeners( 'SIGTERM' ); /* clear listeners defined in wProcess */
+    process.removeAllListeners( 'SIGHUP' );
+    process.removeAllListeners( 'SIGINT' );
+    process.removeAllListeners( 'SIGTERM' );
 
     let o =
     {
@@ -9994,6 +9997,8 @@ function startOptionTimeOut( test )
       o.conTerminate.catch( ( err ) =>
       {
         _.errLogOnce( err );
+        process.removeAllListeners( 'SIGHUP' );
+        process.removeAllListeners( 'SIGINT' );
         process.removeAllListeners( 'SIGTERM' );
         process.kill( process.pid, 'SIGTERM' );
         return null;
@@ -10009,7 +10014,9 @@ function startOptionTimeOut( test )
     _.include( 'wFiles' );
     _.include( 'wProcess' );
 
-    process.removeAllListeners( 'SIGTERM' ); /* clear listeners defined in wProcess */
+    process.removeAllListeners( 'SIGHUP' );
+    process.removeAllListeners( 'SIGINT' );
+    process.removeAllListeners( 'SIGTERM' );
 
     let o =
     {
@@ -14726,19 +14733,19 @@ function startConcurrentConsequencesMultiple( test )
     outputCollecting : 1,
   }
 
-  /* xxx */
-  let consequences = [ 'null' ];
-  let modes = [ 'spawn' ];
+  // /* xxx */
+  // let consequences = [ 'null' ];
+  // let modes = [ 'spawn' ];
 
-  // let consequences = [ 'null', 'consequence', 'routine' ];
-  // let modes = [ 'fork', 'spawn', 'shell' ];
+  let consequences = [ 'null', 'consequence', 'routine' ];
+  let modes = [ 'fork', 'spawn', 'shell' ];
   consequences.forEach( ( consequence ) =>
   {
     a.ready.tap( () => test.open( `consequence:${consequence}` ) );
     modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, consequence, mode }) ) );
-    // modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, consequence, mode }) ) );
-    // modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, consequence, mode }) ) );
-    // modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, consequence, mode }) ) );
+    modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, consequence, mode }) ) );
+    modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, consequence, mode }) ) );
+    modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, consequence, mode }) ) );
     a.ready.tap( () => test.close( `consequence:${consequence}` ) );
   });
   return a.ready;
@@ -22452,7 +22459,6 @@ function startSingleOptionDry( test )
         outputCollecting : 1,
         throwingExitCode : 1,
         applyingExitCode : 1,
-        // timeOut : tops.sync || !tops.deasync ? null : 100, /* xxx */
         ipc : tops.mode === 'shell' ? 0 : 1,
         when : { delay : context.t1 * 2 }, /* 2000 */
       }
@@ -24773,6 +24779,7 @@ function startOutputMultiple( test )
   let a = context.assetFor( test, false );
   let programPath = a.program( program1 );
   let track = [];
+
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, mode }) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, mode }) ) );
@@ -24845,7 +24852,7 @@ function startOutputMultiple( test )
           /*
           on older version of nodejs event finish goes before event end
           */
-          var exp1 =
+          var exp =
           [
             'conStart',
             '0.out:1::begin',
@@ -24861,26 +24868,19 @@ function startOutputMultiple( test )
             'conTerminate',
             'ready',
           ]
-          var exp2 =
-          [
-            'conStart',
-            '0.out:1::begin',
-            '0.out:1::end',
-            '0.err:1::err',
-            '0.out:2::begin',
-            '0.out:2::end',
-            '0.err:2::err',
-            '0.err.end',
-            '0.err.finish',
-            '0.out.end',
-            '0.out.finish',
-            'conTerminate',
-            'ready',
-          ]
-          if( _.identical( track, exp1 ) )
-          test.identical( track, exp1 );
-          else
-          test.identical( track, exp2 );
+
+          test.identical( new Set( ... track ), new Set( ... exp ) );
+
+          test.lt( track.indexOf( '0.out:1::end' ), track.indexOf( '0.out:2::begin' ) );
+          test.lt( track.indexOf( '0.out:1::begin' ), track.indexOf( '0.out:1::end' ) );
+          test.lt( track.indexOf( '0.out:1::end' ), track.indexOf( '0.err:1::err' ) );
+          test.lt( track.indexOf( '0.out:2::begin' ), track.indexOf( '0.out:2::end' ) );
+          test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.err:2::err' ) );
+          test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.err.finish' ) );
+          test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.err.end' ) );
+          test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.out.finish' ) );
+          test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.out.end' ) );
+
         }
 
         var exp =
@@ -25003,10 +25003,12 @@ function startOutputMultiple( test )
         }
         else
         {
+
           /*
           on older version of nodejs event finish goes before event end
           */
-          var exp1 =
+/*
+          var exp =
           [
             'conStart',
             '0.out:1::begin',
@@ -25058,10 +25060,52 @@ function startOutputMultiple( test )
             'conTerminate',
             'ready'
           ]
-          if( _.identical( track, exp1 ) )
-          test.identical( track, exp1 );
-          else
-          test.identical( track, exp2 );
+*/
+          var exp =
+          [
+            'conStart',
+            '0.out:1::begin',
+            '1.out:1::begin',
+            '0.out:2::begin',
+            '2.out:2::begin',
+            '0.out:1::end',
+            '1.out:1::end',
+            '0.out:2::end',
+            '2.out:2::end',
+            '0.err:1::err',
+            '1.err:1::err',
+            '1.out.end',
+            '1.err.end',
+            '0.err:2::err',
+            '2.err:2::err',
+            '2.out.end',
+            '0.out.end',
+            '0.out.finish',
+            '2.err.end',
+            '0.err.end',
+            '0.err.finish',
+            'conTerminate',
+            'ready'
+          ]
+
+          test.identical( new Set( ... track ), new Set( ... exp ) );
+
+          test.lt( track.indexOf( '0.out:1::begin' ), track.indexOf( '0.out:1::end' ) );
+          test.lt( track.indexOf( '1.out:1::begin' ), track.indexOf( '0.out:1::end' ) );
+          test.lt( track.indexOf( '0.out:2::begin' ), track.indexOf( '0.out:1::end' ) );
+          test.lt( track.indexOf( '2.out:2::begin' ), track.indexOf( '0.out:1::end' ) );
+
+          test.lt( track.indexOf( '0.out:1::end' ), track.indexOf( '0.err:1::err' ) );
+          test.lt( track.indexOf( '1.out:1::end' ), track.indexOf( '0.err:1::err' ) );
+          test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.err:1::err' ) );
+          test.lt( track.indexOf( '2.out:2::end' ), track.indexOf( '0.err:1::err' ) );
+
+          test.lt( track.indexOf( '0.err:1::err' ), track.indexOf( '1.out.end' ) );
+          test.lt( track.indexOf( '1.err:1::err' ), track.indexOf( '1.out.end' ) );
+
+          test.lt( track.indexOf( '1.out.end' ), track.indexOf( '0.err:2::err' ) );
+          test.lt( track.indexOf( '1.err.end' ), track.indexOf( '0.err:2::err' ) );
+
         }
         var exp =
 `
@@ -25588,11 +25632,10 @@ function killSync( test )
       throwingExitCode : 0
     }
 
-    let ready = _.process.start( o );
+    let ready1 = _.process.start( o );
 
-    ready.then( ( op ) =>
+    ready1.then( ( op ) =>
     {
-
       test.identical( op.exitCode, null );
       test.identical( op.exitSignal, 'SIGKILL' );
       test.identical( op.ended, true );
@@ -25600,20 +25643,15 @@ function killSync( test )
       return null;
     })
 
-    return _.time.out( context.t1*2, () =>
+    let ready2 = _.time.out( context.t1*2, () =>
     {
       let result = _.process.kill({ pnd : o.process, sync : 1 });
-      test.identical( result.resourcesCount(), 1 );
       test.is( !_.process.isAlive( o.process.pid ) );
-
-      result.then( ( arg ) =>
-      {
-        test.identical( arg, true );
-        return ready;
-      })
-
+      test.identical( result, true );
       return result;
     });
+
+    return _.Consequence.And( ready1, ready2 );
   })
 
   /* */
@@ -25628,9 +25666,9 @@ function killSync( test )
       throwingExitCode : 0
     }
 
-    let ready = _.process.start( o )
+    let ready1 = _.process.start( o )
 
-    ready.then( ( op ) =>
+    ready1.then( ( op ) =>
     {
       if( process.platform === 'win32' )
       {
@@ -25648,20 +25686,15 @@ function killSync( test )
       return null;
     })
 
-    return _.time.out( context.t1*2, () =>
+    let ready2 = _.time.out( context.t1*2, () =>
     {
       let result = _.process.kill({ pid : o.process.pid, sync : 1 });
-      test.identical( result.resourcesCount(), 1 );
       test.is( !_.process.isAlive( o.process.pid ) );
-
-      result.then( ( arg ) =>
-      {
-        test.identical( arg, true );
-        return ready;
-      })
-
+      test.identical( result, true );
       return result;
     })
+
+    return _.Consequence.And( ready1, ready2 );
   })
 
   /* fork */
@@ -25676,9 +25709,9 @@ function killSync( test )
       throwingExitCode : 0
     }
 
-    let ready = _.process.start( o )
+    let ready1 = _.process.start( o )
 
-    ready.then( ( op ) =>
+    ready1.then( ( op ) =>
     {
       test.identical( op.exitCode, null );
       test.identical( op.exitSignal, 'SIGKILL' );
@@ -25687,21 +25720,15 @@ function killSync( test )
       return null;
     })
 
-    return _.time.out( context.t1*2, () =>
+    let ready2 = _.time.out( context.t1*2, () =>
     {
       let result = _.process.kill({ pnd : o.process, sync : 1 });
-      test.identical( result.resourcesCount(), 1 );
       test.is( !_.process.isAlive( o.process.pid ) );
-
-      result.then( ( arg ) =>
-      {
-        test.identical( arg, true );
-        return ready;
-      })
-
+      test.identical( result, true );
       return result;
     })
 
+    return _.Consequence.And( ready1, ready2 );
   })
 
   /* */
@@ -25716,9 +25743,9 @@ function killSync( test )
       throwingExitCode : 0
     }
 
-    let ready = _.process.start( o )
+    let ready1 = _.process.start( o )
 
-    ready.then( ( op ) =>
+    ready1.then( ( op ) =>
     {
       if( process.platform === 'win32' )
       {
@@ -25736,21 +25763,15 @@ function killSync( test )
       return null;
     })
 
-    return _.time.out( context.t1*2, () =>
+    let ready2 = _.time.out( context.t1*2, () =>
     {
       let result = _.process.kill({ pid : o.process.pid, sync : 1 });
-      test.identical( result.resourcesCount(), 1 );
       test.is( !_.process.isAlive( o.process.pid ) );
-
-      result.then( ( arg ) =>
-      {
-        test.identical( arg, true );
-        return ready;
-      })
-
+      test.identical( result, true );
       return result;
     })
 
+    return _.Consequence.And( ready1, ready2 );
   })
 
   /* shell */
@@ -25765,33 +25786,27 @@ function killSync( test )
       throwingExitCode : 0
     }
 
-    let ready = _.process.start( o )
+    let ready1 = _.process.start( o )
 
-    ready.then( ( op ) =>
+    ready1.then( ( op ) =>
     {
       /* Same result on Windows because process was killed using pnd, not pid */
       test.identical( op.exitCode, null );
       test.identical( op.exitSignal, 'SIGKILL' );
-
       test.identical( op.ended, true );
       test.is( !_.strHas( op.output, 'Application timeout!' ) );
       return null;
     })
 
-    return _.time.out( context.t1*2, () =>
+    let ready2 = _.time.out( context.t1*2, () =>
     {
       let result = _.process.kill({ pnd : o.process, sync : 1 });
-      test.identical( result.resourcesCount(), 1 );
       test.is( !_.process.isAlive( o.process.pid ) );
-
-      result.then( ( arg ) =>
-      {
-        test.identical( arg, true );
-        return ready;
-      })
-
+      test.identical( result, true );
       return result;
     })
+
+    return _.Consequence.And( ready1, ready2 );
   })
 
   /* */
@@ -25806,9 +25821,9 @@ function killSync( test )
       throwingExitCode : 0
     }
 
-    let ready = _.process.start( o )
+    let ready1 = _.process.start( o )
 
-    ready.then( ( op ) =>
+    ready1.then( ( op ) =>
     {
       if( process.platform === 'win32' )
       {
@@ -25827,20 +25842,15 @@ function killSync( test )
       return null;
     })
 
-    return _.time.out( context.t1*2, () =>
+    let ready2 = _.time.out( context.t1*2, () =>
     {
       let result = _.process.kill({ pid : o.process.pid, sync : 1 });
-      test.identical( result.resourcesCount(), 1 );
       test.is( !_.process.isAlive( o.process.pid ) );
-
-      result.then( ( arg ) =>
-      {
-        test.identical( arg, true );
-        return ready;
-      })
-
+      test.identical( result, true );
       return result;
     })
+
+    return _.Consequence.And( ready1, ready2 );
   })
 
   /* */
@@ -25855,7 +25865,7 @@ function killSync( test )
   }
 }
 
-killSync.timeOut = 5e5;
+killSync.timeOut = 5e5; /* qqq for Vova : test cases descriptions?? */
 
 //
 
@@ -26450,6 +26460,10 @@ function startTerminateAfterLoopRelease( test )
     con.then( () =>
     {
       test.identical( o.exitCode, null );
+      /* njs on Windows does not let to set custom signal handler properly */
+      if( process.platform === 'win32' )
+      test.identical( o.exitSignal, 'SIGTERM' );
+      else
       test.identical( o.exitSignal, 'SIGKILL' );
       test.is( !_.strHas( o.output, 'SIGTERM' ) );
       test.is( !_.strHas( o.output, 'Exit after release' ) );
@@ -26484,6 +26498,10 @@ function startTerminateAfterLoopRelease( test )
     con.then( () =>
     {
       test.identical( o.exitCode, null );
+      /* njs on Windows does not let to set custom signal handler properly */
+      if( process.platform === 'win32' )
+      test.identical( o.exitSignal, 'SIGTERM' );
+      else
       test.identical( o.exitSignal, 'SIGKILL' );
       test.is( !_.strHas( o.output, 'SIGTERM' ) );
       test.is( !_.strHas( o.output, 'Exit after release' ) );
@@ -26547,10 +26565,6 @@ function endSignalsBasic( test )
     throwingExitCode : 0,
     stdio : 'pipe',
   }
-
-  // xxx
-  // let modes = [ 'fork' ];
-  // let modes = [ 'shell' ];
 
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGQUIT' ) ) );
@@ -28563,24 +28577,11 @@ exit:end
         test.identical( options.error, null );
         test.identical( options.process.killed, true );
 
-        // xxx
-        // /* poor implementation of signals in njs on Windows */
-        // if( process.platform === 'win32' )
-        // {
-        //   test.identical( options.exitCode, 1 );
-        //   test.identical( options.exitSignal, null );
-        //   test.identical( options.exitReason, 'code' );
-        //   test.identical( options.process.signalCode, null );
-        //   test.identical( options.process.exitCode, 1 );
-        // }
-        // else
-        // {
-          test.identical( options.exitCode, null );
-          test.identical( options.exitSignal, 'SIGTERM' );
-          test.identical( options.exitReason, 'signal' );
-          test.identical( options.process.signalCode, 'SIGTERM' );
-          test.identical( options.process.exitCode, null );
-        // }
+        test.identical( options.exitCode, null );
+        test.identical( options.exitSignal, 'SIGTERM' );
+        test.identical( options.exitReason, 'signal' );
+        test.identical( options.process.signalCode, 'SIGTERM' );
+        test.identical( options.process.exitCode, null );
 
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
@@ -28709,24 +28710,11 @@ Killed
         test.identical( options.error, null );
         test.identical( options.process.killed, true );
 
-        // xxx
-        // /* poor implementation of signals in njs on Windows */
-        // if( process.platform === 'win32' )
-        // {
-        //   test.identical( options.exitCode, 1 );
-        //   test.identical( options.exitSignal, null );
-        //   test.identical( options.exitReason, 'code' );
-        //   test.identical( options.process.signalCode, null );
-        //   test.identical( options.process.exitCode, 1 );
-        // }
-        // else
-        // {
-          test.identical( options.exitCode, null );
-          test.identical( options.exitSignal, 'SIGKILL' );
-          test.identical( options.exitReason, 'signal' );
-          test.identical( options.process.signalCode, 'SIGKILL' );
-          test.identical( options.process.exitCode, null );
-        // }
+        test.identical( options.exitCode, null );
+        test.identical( options.exitSignal, 'SIGKILL' );
+        test.identical( options.exitReason, 'signal' );
+        test.identical( options.process.signalCode, 'SIGKILL' );
+        test.identical( options.process.exitCode, null );
 
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
@@ -28950,20 +28938,6 @@ exit:${exitCode}
           test.identical( options.process.signalCode, null );
           test.identical( options.process.exitCode, exitCode );
         }
-
-        // xxx
-        // if( process.platform === 'win32' )
-        // {
-        //   test.identical( options.exitCode, null );
-        //   test.identical( options.exitSignal, signal );
-        //   test.identical( options.exitReason, 'signal' );
-        // }
-        // else
-        // {
-        //   test.identical( options.exitReason, 'code' );
-        //   test.identical( options.exitCode, exitCode );
-        //   test.identical( options.exitSignal, null );
-        // }
 
         test.identical( _.strCount( options.output, 'exit:' ),  process.platform === 'win32' ? 0 : 1 );
         test.identical( options.ended, true );
@@ -29567,6 +29541,10 @@ function terminate( test )
       {
         test.identical( op.exitCode, null );
         test.identical( op.ended, true );
+        /* njs on Windows does not let to set custom signal handler */
+        if( process.platform === 'win32' )
+        test.identical( op.exitSignal, 'SIGTERM' );
+        else
         test.identical( op.exitSignal, 'SIGKILL' );
         test.is( !_.strHas( op.output, 'SIGTERM' ) );
         test.is( !_.strHas( op.output, 'Application timeout!' ) );
@@ -29948,9 +29926,7 @@ function terminateSync( test )
     return _.time.out( context.t1*2, () =>
     {
       let result = _.process.terminate({ pnd : o.process, sync : 1 });
-      test.identical( result.resourcesCount(), 1 );
-      let got = result.sync();
-      test.identical( got, true );
+      test.identical( result, true );
       return o.conTerminate;
     })
   })
@@ -29994,9 +29970,7 @@ function terminateSync( test )
     return _.time.out( context.t1*2, () =>
     {
       let result = _.process.terminate({ pid : o.process.pid, sync : 1  });
-      test.identical( result.resourcesCount(), 1 );
-      let got = result.sync();
-      test.identical( got, true );
+      test.identical( result, true );
       return o.conTerminate;
     })
   })
@@ -30041,9 +30015,7 @@ function terminateSync( test )
     return _.time.out( context.t1*2, () =>
     {
       let result = _.process.terminate({ pid : o.process.pid, sync : 1  });
-      test.identical( result.resourcesCount(), 1 );
-      let got = result.sync();
-      test.identical( got, true );
+      test.identical( result, true );
       return o.conTerminate;
     })
   })
@@ -30083,16 +30055,13 @@ function terminateSync( test )
         test.is( _.strHas( op.output, 'SIGTERM' ) );
         test.is( !_.strHas( op.output, 'Application timeout!' ) );
       }
-
       return null;
     })
 
     return _.time.out( context.t1*2, () =>
     {
       let result = _.process.terminate({ pnd : o.process, sync : 1  });
-      test.identical( result.resourcesCount(), 1 );
-      let got = result.sync();
-      test.identical( got, true );
+      test.identical( result, true );
       return o.conTerminate;
     })
   })
@@ -30131,9 +30100,7 @@ function terminateSync( test )
     return _.time.out( context.t1*2, () =>
     {
       let result = _.process.terminate({ pnd : o.process, timeOut : 0, sync : 1  });
-      test.identical( result.resourcesCount(), 1 );
-      let got = result.sync();
-      test.identical( got, true );
+      test.identical( result, true );
       return o.conTerminate;
     })
   })
@@ -30177,9 +30144,7 @@ function terminateSync( test )
     return _.time.out( context.t1*2, () =>
     {
       let result = _.process.terminate({ pid : o.process.pid, timeOut : 0, sync : 1 });
-      test.identical( result.resourcesCount(), 1 );
-      let got = result.sync();
-      test.identical( got, true );
+      test.identical( result, true );
       return o.conTerminate;
     })
   })
@@ -30230,18 +30195,19 @@ function terminateFirstChildSpawn( test )
   let a = context.assetFor( test, false );
   let testAppPath = a.program( program1 );
   let testAppPath2 = a.program( program2 );
+  let mode = 'spawn';
 
   let o =
   {
-    execPath : 'node program1.js',
+    execPath : mode === `fork` ? `${testAppPath}` : `node ${testAppPath}`,
     currentPath : a.routinePath,
-    mode : 'spawn',
+    mode,
     outputPiping : 1,
     outputCollecting : 1,
     throwingExitCode : 0
   }
 
-  _.process.start( o ); /* xxx */
+  _.process.start( o );
 
   let program2Pid = null;
   let terminate = _.Consequence();
@@ -30256,7 +30222,6 @@ function terminateFirstChildSpawn( test )
     console.log( `childPid : ${program2Pid}` );
     test.is( _.process.isAlive( o.process.pid ) );
     test.is( _.process.isAlive( program2Pid ) );
-    // return null;
     return _.process.terminate
     ({
       pid : o.process.pid,
@@ -30282,6 +30247,11 @@ function terminateFirstChildSpawn( test )
     test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
     test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+
+    /* platform::windows killls children processes, in contrast other platforms politely termonate children processes */
+    if( process.platform === 'win32' )
+    test.is( !_.process.isAlive( program2Pid ) );
+    else
     test.is( _.process.isAlive( program2Pid ) );
 
     return _.time.out( context.t1*15 );
@@ -30290,7 +30260,12 @@ function terminateFirstChildSpawn( test )
   o.conTerminate.then( () =>
   {
     test.is( !_.process.isAlive( program2Pid ) );
+    /* platform::windows killls children processes, in contrast other platforms politely termonate children processes */
+    if( process.platform === 'win32' )
+    test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+    else
     test.is( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+    test.identical( _.strCount( o.output, 'exit' ), 0 );
     return null;
   })
 
@@ -30298,7 +30273,7 @@ function terminateFirstChildSpawn( test )
 
   /* - */
 
-  function handleOutput()/* qqq for Vova : what is it for? aaa:to detect when child process of program1 is ready and we can call terminate*/
+  function handleOutput()
   {
     if( !_.strHas( o.output, 'program2::begin' ) )
     return;
@@ -30343,8 +30318,6 @@ function terminateFirstChildSpawn( test )
 
     console.log( `childPid : ${process.pid}` );
 
-    process.removeAllListeners( 'SIGTERM' ) /* xxx : check on linux */
-
     _.fileProvider.fileWrite
     ({
       filePath : _.path.join( __dirname, 'program2Pid' ),
@@ -30360,7 +30333,7 @@ function terminateFirstChildSpawn( test )
 
     process.on( 'exit', () =>
     {
-      console.log( 'program2::end' );
+      console.log( 'program2::exit' );
     })
 
     console.log( 'program2::begin' );
@@ -30408,6 +30381,10 @@ function terminateFirstChildFork( test )
   {
     program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
     program2Pid = program2Pid.pid;
+    console.log( `parentPid : ${o.process.pid}` );
+    console.log( `childPid : ${program2Pid}` );
+    test.is( _.process.isAlive( o.process.pid ) );
+    test.is( _.process.isAlive( program2Pid ) );
     return _.process.terminate
     ({
       pid : o.process.pid,
@@ -30433,6 +30410,11 @@ function terminateFirstChildFork( test )
     test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
     test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+
+    /* platform::windows killls children processes, in contrast other platforms politely termonate children processes */
+    if( process.platform === 'win32' )
+    test.is( !_.process.isAlive( program2Pid ) );
+    else
     test.is( _.process.isAlive( program2Pid ) );
 
     return _.time.out( context.t1*15 );
@@ -30441,14 +30423,20 @@ function terminateFirstChildFork( test )
   o.conTerminate.then( () =>
   {
     test.is( !_.process.isAlive( program2Pid ) );
+
+    /* platform::windows killls children processes, in contrast other platforms politely termonate children processes */
+    if( process.platform === 'win32' )
+    test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+    else
     test.is( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+
     return null;
   })
 
   return _.Consequence.AndKeep( terminate, o.conTerminate );
 
   /* - */
-  
+
   function handleOutput()
   {
     if( !_.strHas( o.output, 'program2::begin' ) )
@@ -30489,8 +30477,6 @@ function terminateFirstChildFork( test )
   {
     let _ = require( toolsPath );
     _.include( 'wFiles' );
-
-    process.removeAllListeners( 'SIGTERM' )
 
     _.fileProvider.fileWrite
     ({
@@ -30652,8 +30638,6 @@ function terminateFirstChildShell( test )
     let _ = require( toolsPath );
     _.include( 'wFiles' );
 
-    process.removeAllListeners( 'SIGTERM' )
-
     _.fileProvider.fileWrite
     ({
       filePath : _.path.join( __dirname, 'program2Pid' ),
@@ -30808,8 +30792,6 @@ function terminateSecondChildSpawn( test )
     let _ = require( toolsPath );
     _.include( 'wFiles' );
 
-    process.removeAllListeners( 'SIGTERM' )
-
     _.fileProvider.fileWrite
     ({
       filePath : _.path.join( __dirname, 'program2Pid' ),
@@ -30903,7 +30885,7 @@ function terminateSecondChildFork( test )
 
   /* - */
 
-   function handleOutput()
+  function handleOutput()
   {
     if( !_.strHas( o.output, 'program2::begin' ) )
     return;
@@ -30960,8 +30942,6 @@ function terminateSecondChildFork( test )
   {
     let _ = require( toolsPath );
     _.include( 'wFiles' );
-
-    process.removeAllListeners( 'SIGTERM' )
 
     _.fileProvider.fileWrite
     ({
@@ -31034,7 +31014,8 @@ function terminateSecondChildShell( test )
 
     let program2Op = _.fileProvider.fileRead({ filePath : a.abs( 'program2' ), encoding : 'json' });
 
-    if( process.platform !== 'linux' )
+    /* on windows and linux intermediate process could be created */
+    if( process.platform !== 'linux' && process.platform !== 'win32' )
     test.identical( program2Op.pid, program2Pid );
 
     if( process.platform === 'win32' )
@@ -31065,7 +31046,7 @@ function terminateSecondChildShell( test )
 
   /* - */
 
-   function handleOutput()
+  function handleOutput()
   {
     if( !_.strHas( o.output, 'program2::begin' ) )
     return;
@@ -31122,8 +31103,6 @@ function terminateSecondChildShell( test )
   {
     let _ = require( toolsPath );
     _.include( 'wFiles' );
-
-    process.removeAllListeners( 'SIGTERM' )
 
     _.fileProvider.fileWrite
     ({
@@ -31221,7 +31200,7 @@ function terminateDetachedFirstChildSpawn( test )
 
   /* - */
 
-   function handleOutput()
+  function handleOutput()
   {
     if( !_.strHas( o.output, 'program2::begin' ) )
     return;
@@ -31262,8 +31241,6 @@ function terminateDetachedFirstChildSpawn( test )
   {
     let _ = require( toolsPath );
     _.include( 'wFiles' );
-
-    process.removeAllListeners( 'SIGTERM' )
 
     _.fileProvider.fileWrite
     ({
@@ -31390,7 +31367,7 @@ function terminateDetachedFirstChildFork( test )
 
   /* - */
 
-   function handleOutput()
+  function handleOutput()
   {
     if( !_.strHas( o.output, 'program2::begin' ) )
     return;
@@ -31404,8 +31381,6 @@ function terminateDetachedFirstChildFork( test )
   {
     let _ = require( toolsPath );
     _.include( 'wFiles' );
-
-    process.removeAllListeners( 'SIGTERM' )
 
     _.fileProvider.fileWrite
     ({
@@ -31507,7 +31482,7 @@ function terminateDetachedFirstChildShell( test )
 
   /* - */
 
-   function handleOutput()
+  function handleOutput()
   {
     if( !_.strHas( o.output, 'program2::begin' ) )
     return;
@@ -31548,8 +31523,6 @@ function terminateDetachedFirstChildShell( test )
   {
     let _ = require( toolsPath );
     _.include( 'wFiles' );
-
-    process.removeAllListeners( 'SIGTERM' )
 
     _.fileProvider.fileWrite
     ({
@@ -31645,7 +31618,7 @@ function terminateWithDetachedChildSpawn( test )
 
   /* - */
 
-   function handleOutput()
+  function handleOutput()
   {
     if( !_.strHas( o.output, 'program2::begin' ) )
     return;
@@ -31686,8 +31659,6 @@ function terminateWithDetachedChildSpawn( test )
   {
     let _ = require( toolsPath );
     _.include( 'wFiles' );
-
-    process.removeAllListeners( 'SIGTERM' )
 
     _.fileProvider.fileWrite
     ({
@@ -31851,7 +31822,7 @@ function terminateWithDetachedChildFork( test )
 
   /* - */
 
-   function handleOutput()
+  function handleOutput()
   {
     if( !_.strHas( o.output, 'program2::begin' ) )
     return;
@@ -31893,8 +31864,6 @@ function terminateWithDetachedChildFork( test )
     let _ = require( toolsPath );
     _.include( 'wFiles' );
 
-    process.removeAllListeners( 'SIGTERM' )
-
     _.fileProvider.fileWrite
     ({
       filePath : _.path.join( __dirname, 'program2Pid' ),
@@ -31926,7 +31895,7 @@ program1 and program2 should be terminated
 
 //
 
-function terminateWithDetachedChildShell( test )
+function terminateWithDetachedChildShell( test ) /* qqq for Vova : fix on Windows */
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -31978,6 +31947,8 @@ function terminateWithDetachedChildShell( test )
     test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
     test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
+    test.identical( _.strCount( o.output, 'error' ), 0 );
+    test.identical( _.strCount( o.output, 'Error' ), 0 );
     test.is( !_.process.isAlive( program2Pid ) );
     test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
 
@@ -31988,8 +31959,9 @@ function terminateWithDetachedChildShell( test )
 
   /* - */
 
-   function handleOutput()
+  function handleOutput()
   {
+    console.log( 'handleOutput', o.output );
     if( !_.strHas( o.output, 'program2::begin' ) )
     return;
     o.process.stdout.removeListener( 'data', handleOutput );
@@ -32029,8 +32001,6 @@ function terminateWithDetachedChildShell( test )
   {
     let _ = require( toolsPath );
     _.include( 'wFiles' );
-
-    process.removeAllListeners( 'SIGTERM' )
 
     _.fileProvider.fileWrite
     ({
@@ -32084,8 +32054,7 @@ function terminateSeveralChildren( test )
   _.process.start( o );
 
   let program2Pid = null;
-  let program3PID = null;
-  let c = 0;
+  let program3Pid = null;
   let terminate = _.Consequence();
 
   o.process.stdout.on( 'data', handleOutput );
@@ -32094,8 +32063,8 @@ function terminateSeveralChildren( test )
   {
     program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
     program2Pid = program2Pid.pid;
-    program3PID = _.fileProvider.fileRead({ filePath : a.abs( 'program3PID' ), encoding : 'json' });
-    program3PID = program3PID.pid;
+    program3Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program3Pid' ), encoding : 'json' });
+    program3Pid = program3Pid.pid;
     return _.process.terminate
     ({
       pid : o.process.pid,
@@ -32123,7 +32092,7 @@ function terminateSeveralChildren( test )
     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
     test.identical( _.strCount( o.output, 'program3::end' ), 0 );
     test.is( !_.process.isAlive( program2Pid ) );
-    test.is( !_.process.isAlive( program3PID ) );
+    test.is( !_.process.isAlive( program3Pid ) );
     test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
     test.is( !a.fileProvider.fileExists( a.abs( 'program3end' ) ) );
 
@@ -32215,15 +32184,25 @@ function terminateSeveralChildren( test )
 
   /* - */
 
-  /* qqq for Vova : bad aaa:fixed*/
+  /* qqq for Vova : bad aaa:fixed */
+  /* qqq for Vova : bad! */
+  // function handleOutput()
+  // {
+  //   if( !_.strHas( o.output, 'program2::begin' ) || _.strHas( o.output, 'program3::begin' ) )
+  //   c += 1;
+  //
+  //   if( c !== 2 )
+  //   return;
+  //
+  //   o.process.stdout.removeListener( 'data', handleOutput );
+  //   terminate.take( null );
+  // }
+
   function handleOutput()
   {
-    if( !_.strHas( o.output, 'program2::begin' ) || _.strHas( o.output, 'program3::begin' ) )
-    c += 1;
-
-    if( c !== 2 )
+    if( !_.strHas( o.output, 'program2::begin' ) || !_.strHas( o.output, 'program3::begin' ) )
     return;
-    
+
     o.process.stdout.removeListener( 'data', handleOutput );
     terminate.take( null );
   }
@@ -32262,8 +32241,6 @@ function terminateSeveralChildren( test )
     let _ = require( toolsPath );
     _.include( 'wFiles' );
 
-    process.removeAllListeners( 'SIGTERM' )
-
     _.fileProvider.fileWrite
     ({
       filePath : _.path.join( __dirname, 'program2Pid' ),
@@ -32292,11 +32269,9 @@ function terminateSeveralChildren( test )
     let _ = require( toolsPath );
     _.include( 'wFiles' );
 
-    process.removeAllListeners( 'SIGTERM' )
-
     _.fileProvider.fileWrite
     ({
-      filePath : _.path.join( __dirname, 'program3PID' ),
+      filePath : _.path.join( __dirname, 'program3Pid' ),
       data : { pid : process.pid },
       encoding : 'json'
     })
@@ -32319,7 +32294,7 @@ function terminateSeveralChildren( test )
 
 //
 
-function terminateWithSeveralDetachedChildren( test )
+function terminateSeveralDetachedChildren( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -32340,18 +32315,20 @@ function terminateWithSeveralDetachedChildren( test )
   _.process.start( o );
 
   let program2Pid = null;
-  let program3PID = null;
-  let c = 0;
+  let program3Pid = null;
   let terminate = _.Consequence();
 
   o.process.stdout.on( 'data', handleOutput );
 
   terminate.then( () =>
   {
+    console.log( 'terminate' );
     program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
+    console.log( 'program2Pid', program2Pid );
     program2Pid = program2Pid.pid;
-    program3PID = _.fileProvider.fileRead({ filePath : a.abs( 'program3PID' ), encoding : 'json' });
-    program3PID = program3PID.pid;
+    program3Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program3Pid' ), encoding : 'json' });
+    console.log( 'program3Pid', program3Pid );
+    program3Pid = program3Pid.pid;
     return _.process.terminate
     ({
       pid : o.process.pid,
@@ -32362,6 +32339,8 @@ function terminateWithSeveralDetachedChildren( test )
 
   o.conTerminate.then( () =>
   {
+    console.log( 'conTerminate' );
+
     if( process.platform === 'win32' )
     {
       test.identical( o.exitCode, 1 );
@@ -32379,7 +32358,7 @@ function terminateWithSeveralDetachedChildren( test )
     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
     test.identical( _.strCount( o.output, 'program3::end' ), 0 );
     test.is( !_.process.isAlive( program2Pid ) );
-    test.is( !_.process.isAlive( program3PID ) );
+    test.is( !_.process.isAlive( program3Pid ) );
     test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
     test.is( !a.fileProvider.fileExists( a.abs( 'program3end' ) ) );
 
@@ -32393,12 +32372,8 @@ function terminateWithSeveralDetachedChildren( test )
   /* qqq for Vova : bad aaa:fixed*/
   function handleOutput()
   {
-    if( !_.strHas( o.output, 'program2::begin' ) || _.strHas( o.output, 'program3::begin' ) )
-    c += 1;
-
-    if( c !== 2 )
+    if( !_.strHas( o.output, 'program2::begin' ) || !_.strHas( o.output, 'program3::begin' ) )
     return;
-    
     o.process.stdout.removeListener( 'data', handleOutput );
     terminate.take( null );
   }
@@ -32438,8 +32413,6 @@ function terminateWithSeveralDetachedChildren( test )
     let _ = require( toolsPath );
     _.include( 'wFiles' );
 
-    process.removeAllListeners( 'SIGTERM' )
-
     _.fileProvider.fileWrite
     ({
       filePath : _.path.join( __dirname, 'program2Pid' ),
@@ -32468,11 +32441,9 @@ function terminateWithSeveralDetachedChildren( test )
     let _ = require( toolsPath );
     _.include( 'wFiles' );
 
-    process.removeAllListeners( 'SIGTERM' )
-
     _.fileProvider.fileWrite
     ({
-      filePath : _.path.join( __dirname, 'program3PID' ),
+      filePath : _.path.join( __dirname, 'program3Pid' ),
       data : { pid : process.pid },
       encoding : 'json'
     })
@@ -32493,7 +32464,7 @@ function terminateWithSeveralDetachedChildren( test )
 
 }
 
-terminateWithSeveralDetachedChildren.description =
+terminateSeveralDetachedChildren.description =
 `
 Program1 spawns two detached children.
 Tester terminates Program1 with option withChildren:1
@@ -32593,10 +32564,12 @@ function terminateTimeOutNoHandler( test )
   {
     test.identical( op.ended, true );
 
+    /* qqq for Yevhen : add comments explaining why `if process.platform` to all such ifs */
+    /* interpreter::njs on platform::Windows does not suppport signals, but has its own non-standard implementation */
     if( process.platform === 'win32' )
     {
       test.identical( op.exitCode, 1 );
-      test.identical( op.exitSignal, 0 );
+      test.identical( op.exitSignal, null );
     }
     else
     {
@@ -32683,7 +32656,7 @@ function terminateTimeOutIgnoreSignal( test )
     if( process.platform === 'win32' )
     {
       test.identical( op.exitCode, 1 );
-      test.identical( op.exitSignal, 0 );
+      test.identical( op.exitSignal, null );
       test.identical( _.strCount( op.output, 'program1::SIGTERM' ), 0 );
     }
     else
@@ -32777,7 +32750,7 @@ function terminateZeroTimeOutSpawn( test )
     if( process.platform === 'win32' )
     {
       test.identical( op.exitCode, 1 );
-      test.identical( op.exitSignal, 0 );
+      test.identical( op.exitSignal, null );
     }
     else
     {
@@ -32871,7 +32844,7 @@ function terminateZeroTimeOutFork( test )
     if( process.platform === 'win32' )
     {
       test.identical( op.exitCode, 1 );
-      test.identical( op.exitSignal, 0 );
+      test.identical( op.exitSignal, null );
     }
     else
     {
@@ -32965,7 +32938,7 @@ function terminateZeroTimeOutWithoutChildrenShell( test )
     if( process.platform === 'win32' )
     {
       test.identical( op.exitCode, 1 );
-      test.identical( op.exitSignal, 0 );
+      test.identical( op.exitSignal, null );
     }
     else
     {
@@ -33067,7 +33040,7 @@ function terminateZeroTimeOutWithtChildrenShell( test )
     if( process.platform === 'win32' )
     {
       test.identical( op.exitCode, 1 );
-      test.identical( op.exitSignal, 0 );
+      test.identical( op.exitSignal, null );
     }
     else
     {
@@ -33657,8 +33630,6 @@ function waitForDeath( test )
     };
     _.process.start( o )
 
-    o.conStart.thenGive( () => o.process.kill( 'SIGTERM' ) )
-
     let terminated = _.process.waitForDeath({ pnd : o.process, timeOut : context.t1 * 10 })
     .then( () =>
     {
@@ -33668,6 +33639,9 @@ function waitForDeath( test )
       test.notIdentical( o.exitSignal, null );
       return null;
     })
+
+    /* njs on Windows kills child proecess instantly, without any delay */
+    o.conStart.thenGive( () => o.process.kill( 'SIGTERM' ) )
 
     return _.Consequence.And( terminated, o.conTerminate );
   })
@@ -33689,7 +33663,11 @@ function waitForDeath( test )
     _.process.start( o )
 
     let terminated = _.process.waitForDeath({ pnd : o.process, timeOut : context.t1 }) /* 1000 */
-    terminated = test.shouldThrowErrorAsync( terminated );
+    terminated = test.shouldThrowErrorAsync( terminated, ( err ) =>
+    {
+      test.is( _.errIs( err ) );
+      test.identical( err.reason, 'time out' );
+    });
 
     o.conTerminate.then( () =>
     {
@@ -34022,23 +34000,22 @@ function childrenOptionFormatList( test )
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
-      return children.then( ( op ) =>
+      return children.then( ( prcocesses ) =>
       {
         if( process.platform === 'win32' )
         {
-          test.identical( op.runs.length, 5 );
+          test.identical( prcocesses.length, 5 );
 
-          test.identical( op.runs[ 0 ].pid, process.pid );
-          test.identical( op.runs[ 1 ].pid, o.process.pid );
+          test.identical( prcocesses[ 0 ].pid, process.pid );
+          test.identical( prcocesses[ 1 ].pid, o.process.pid );
 
-          test.is( _.numberIs( op.runs[ 2 ].pid ) );
-          test.identical( op.runs[ 2 ].name, 'conhost.exe' );
+          test.is( _.numberIs( prcocesses[ 2 ].pid ) );
+          test.identical( prcocesses[ 2 ].name, 'conhost.exe' );
 
-          test.identical( op.runs[ 3 ].pid, lastChildPid );
+          test.identical( prcocesses[ 3 ].pid, lastChildPid );
 
-          test.is( _.numberIs( op.runs[ 4 ].pid ) );
-          test.identical( op.runs[ 4 ].name, 'conhost.exe' );
-
+          test.is( _.numberIs( prcocesses[ 4 ].pid ) );
+          test.identical( prcocesses[ 4 ].name, 'conhost.exe' );
         }
         else
         {
@@ -34048,7 +34025,7 @@ function childrenOptionFormatList( test )
             { pid : o.process.pid },
             { pid : lastChildPid }
           ]
-          test.contains( op, expected );
+          test.contains( prcocesses, expected );
         }
         return null;
       })
@@ -34596,7 +34573,7 @@ var Proto =
     terminateWithDetachedChildShell,
 
     terminateSeveralChildren,
-    terminateWithSeveralDetachedChildren,
+    terminateSeveralDetachedChildren,
     terminateDeadProcess,
 
     terminateTimeOutNoHandler,
@@ -34606,7 +34583,7 @@ var Proto =
     terminateZeroTimeOutWithoutChildrenShell,
     terminateZeroTimeOutWithtChildrenShell,
 
-    terminateDifferentStdio, /* qqq for Vova: rewrite, don't use timeout to run terminate aaa:done*/
+    terminateDifferentStdio,
 
     killComplex,
     execPathOf,
@@ -34619,7 +34596,7 @@ var Proto =
 
     // experiments
 
-    experimentIpcDeasync, /* qqq for Vova : collect information for different versions and different OSs aaa:added at the beginning of the file*/
+    experimentIpcDeasync,
     streamJoinExperiment,
     experiment,
     experiment2,
