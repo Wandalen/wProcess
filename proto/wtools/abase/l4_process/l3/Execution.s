@@ -3368,11 +3368,11 @@ function execPathOf( o )
     }
   }
 
-  let commandLineFlag = 2; /* qqq for Vova : use constant, no hardcoding */
+  let commandLineFlag = 2; /* qqq for Vova : use constant, no hardcoding aaa:done*/
   WindowsProcessTree.getProcessList( o.pid, ( list ) =>
   {
     ready.take( list[ 0 ].commandLine );
-  }, commandLineFlag )
+  }, WindowsProcessTree.ProcessDataFlag.CommandLine )
 
   if( o.sync )
   {
