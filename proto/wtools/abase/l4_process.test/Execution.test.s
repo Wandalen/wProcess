@@ -33777,7 +33777,7 @@ function childrenOptionFormatList( test )
     o.process.on( 'message', ( e ) =>
     {
       lastChildPid = _.numberFrom( e );
-      children = _.process.children({ pid : process.pid, format : 'list' })
+      children = _.process.children({ pid : o.process.pid, format : 'list' })
     })
 
     ready.then( ( op ) =>
@@ -33788,24 +33788,19 @@ function childrenOptionFormatList( test )
       {
         if( process.platform === 'win32' )
         {
-          test.identical( prcocesses.length, 5 );
+          test.identical( prcocesses.length, 4 );
 
-          test.identical( prcocesses[ 0 ].pid, process.pid );
-          test.identical( prcocesses[ 1 ].pid, o.process.pid );
-
-          test.is( _.numberIs( prcocesses[ 2 ].pid ) );
-          test.identical( prcocesses[ 2 ].name, 'conhost.exe' );
-
-          test.identical( prcocesses[ 3 ].pid, lastChildPid );
-
-          test.is( _.numberIs( prcocesses[ 4 ].pid ) );
-          test.identical( prcocesses[ 4 ].name, 'conhost.exe' );
+          test.identical( prcocesses[ 0 ].pid, o.process.pid );
+          test.is( _.numberIs( prcocesses[ 1 ].pid ) );
+          test.identical( prcocesses[ 1 ].name, 'conhost.exe' );
+          test.identical( prcocesses[ 2 ].pid, lastChildPid );
+          test.identical( prcocesses[ 3 ].name, 'conhost.exe' );
+          test.is( _.numberIs( prcocesses[ 3 ].pid ) );
         }
         else
         {
           var expected =
           [
-            { pid : process.pid },
             { pid : o.process.pid },
             { pid : lastChildPid }
           ]
@@ -33836,13 +33831,15 @@ function childrenOptionFormatList( test )
       inputMirroring : 0,
     }
     _.process.start( o );
-    process.send( o.process.pid );
+    
+    o.conStart.thenGive( () => 
+    {
+      process.send( o.process.pid );
+    })
   }
 
   function testApp2()
   {
-    if( process.send )
-    process.send( process.pid );
     setTimeout( () => {}, context.t0 * 15 ) /* 1500 */
   }
 }
