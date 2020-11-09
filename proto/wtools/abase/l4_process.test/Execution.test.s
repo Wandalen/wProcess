@@ -34399,7 +34399,7 @@ var Proto =
     // sync
 
     startSync,
-    startSyncDeasync, /* qqq for Yevhen : merge with startSyncDeasync2 */
+    startSyncDeasync, /* qqq for Yevhen : merge with startSyncDeasync2 | */
     startSyncDeasync2,
     startSyncDeasyncThrowing,
     startSyncDeasyncMultiple,
