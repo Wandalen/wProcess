@@ -228,7 +228,7 @@ function _exitHandlerRepair()
   if( !_global.process )
   return;
 
-  process.on( 'SIGHUP', handle_functor( 'SIGHUP', 1 ) ); /* yyy : experiment */
+  process.on( 'SIGHUP', handle_functor( 'SIGHUP', 1 ) );
   process.on( 'SIGQUIT', handle_functor( 'SIGQUIT', 3 ) );
   process.on( 'SIGINT', handle_functor( 'SIGINT', 2 ) );
   process.on( 'SIGTERM', handle_functor( 'SIGTERM', 15 ) );
@@ -449,7 +449,7 @@ let Extension =
 
   // event
 
-  _exitHandlerRepair, /* zzz */
+  _exitHandlerRepair,
   _eventsSetup,
   _eventExitHandle,
   _eventExitBeforeHandle,

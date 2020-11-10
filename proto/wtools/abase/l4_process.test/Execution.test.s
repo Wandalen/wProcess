@@ -56,16 +56,9 @@ uv_run() is not reentrant. It must not be called from a callback.
 
 /* to run iteratively
 
-reset && RET=0
-until [ ${RET} -ne 0 ]; do
-    node wtools/abase/l4_process.test/Execution.test.s n:1 v:5 s:0 r:terminateSeveralChildren
-    RET=$?
-    sleep 1
-done
-
-reset && RET=0
-until [ ${RET} -ne 0 ]; do
-    node wtools/abase/l4_process.test/Execution.test.s n:1 v:5 s:0 r:endSignalsBasic
+RET=0; until [ ${RET} -ne 0 ]; do
+    reset
+    taskset 0x1 node wtools/abase/l4_process.test/Execution.test.s n:1 v:5 s:0 r:terminateSync
     RET=$?
     sleep 1
 done
@@ -14789,10 +14782,6 @@ function startConcurrentConsequencesMultiple( test )
     outputCollecting : 1,
   }
 
-  // /* xxx */
-  // let consequences = [ 'null' ];
-  // let modes = [ 'spawn' ];
-
   let consequences = [ 'null', 'consequence', 'routine' ];
   let modes = [ 'fork', 'spawn', 'shell' ];
   consequences.forEach( ( consequence ) =>
@@ -14860,6 +14849,7 @@ ${options.runs[ 1 ].procedure.id}.begin
 ${options.runs[ 1 ].procedure.id}.end
 `
         test.equivalent( options.output, exp );
+
         var exp =
         [
           `${options.procedure.id}.conStart`,
@@ -24943,6 +24933,11 @@ function startOutputMultiple( test )
           test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.err.end' ) );
           test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.out.finish' ) );
           test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.out.end' ) );
+          test.lt( track.indexOf( '0.err.finish' ), track.indexOf( 'conTerminate' ) );
+          test.lt( track.indexOf( '0.err.end' ), track.indexOf( 'conTerminate' ) );
+          test.lt( track.indexOf( '0.out.finish' ), track.indexOf( 'conTerminate' ) );
+          test.lt( track.indexOf( '0.out.end' ), track.indexOf( 'conTerminate' ) );
+          test.lt( track.indexOf( 'conTerminate' ), track.indexOf( 'ready' ) );
 
         }
 
@@ -25157,17 +25152,25 @@ function startOutputMultiple( test )
           test.lt( track.indexOf( '1.out:1::begin' ), track.indexOf( '0.out:1::end' ) );
           test.lt( track.indexOf( '0.out:2::begin' ), track.indexOf( '0.out:1::end' ) );
           test.lt( track.indexOf( '2.out:2::begin' ), track.indexOf( '0.out:1::end' ) );
-
           test.lt( track.indexOf( '0.out:1::end' ), track.indexOf( '0.err:1::err' ) );
           test.lt( track.indexOf( '1.out:1::end' ), track.indexOf( '0.err:1::err' ) );
           test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.err:1::err' ) );
           test.lt( track.indexOf( '2.out:2::end' ), track.indexOf( '0.err:1::err' ) );
-
           test.lt( track.indexOf( '0.err:1::err' ), track.indexOf( '1.out.end' ) );
           test.lt( track.indexOf( '1.err:1::err' ), track.indexOf( '1.out.end' ) );
-
           test.lt( track.indexOf( '1.out.end' ), track.indexOf( '0.err:2::err' ) );
           test.lt( track.indexOf( '1.err.end' ), track.indexOf( '0.err:2::err' ) );
+          test.lt( track.indexOf( '1.out.end' ), track.indexOf( 'conTerminate' ) );
+          test.lt( track.indexOf( '1.err.end' ), track.indexOf( 'conTerminate' ) );
+          test.lt( track.indexOf( '0.err:2::err' ), track.indexOf( 'conTerminate' ) );
+          test.lt( track.indexOf( '2.err:2::err' ), track.indexOf( 'conTerminate' ) );
+          test.lt( track.indexOf( '2.out.end' ), track.indexOf( 'conTerminate' ) );
+          test.lt( track.indexOf( '0.out.end' ), track.indexOf( 'conTerminate' ) );
+          test.lt( track.indexOf( '0.out.finish' ), track.indexOf( 'conTerminate' ) );
+          test.lt( track.indexOf( '2.err.end' ), track.indexOf( 'conTerminate' ) );
+          test.lt( track.indexOf( '0.err.end' ), track.indexOf( 'conTerminate' ) );
+          test.lt( track.indexOf( '0.err.finish' ), track.indexOf( 'conTerminate' ) );
+          test.lt( track.indexOf( 'conTerminate' ), track.indexOf( 'ready' ) );
 
         }
         var exp =
@@ -25622,7 +25625,7 @@ function kill( test )
   .then( () =>
   {
     test.case = `mode:shell, kill child process using process id`
-    
+
     var o =
     {
       execPath :  'node ' + testAppPath,
@@ -25809,7 +25812,7 @@ function killSync( test )
   .then( () =>
   {
     test.case = `mode:fork, kill child process using process id`
-    
+
     var o =
     {
       execPath : testAppPath,
@@ -25854,7 +25857,7 @@ function killSync( test )
   .then( () =>
   {
     test.case = `mode:shell, kill child process using process descriptor`
-    
+
     var o =
     {
       execPath :  'node ' + testAppPath,
@@ -25891,7 +25894,7 @@ function killSync( test )
   .then( () =>
   {
     test.case = `mode:shell, kill child process using process id`
-    
+
     var o =
     {
       execPath :  'node ' + testAppPath,
@@ -29106,11 +29109,11 @@ function terminate( test )
   return a.ready;
 
   /* - */
-  
+
   function terminateCommon( mode )
   {
     let ready = new _.Consequence().take( null )
-    
+
     .then( () =>
     {
       test.case = `mode:${mode}, terminate process using descriptor( pnd )`
@@ -29205,7 +29208,7 @@ function terminate( test )
     .then( () =>
     {
       test.case = `mode:${mode}, terminate process using pid, zero time out`
-      
+
       var o =
       {
         execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
@@ -29384,12 +29387,12 @@ function terminate( test )
 
       return ready;
     })
-    
+
     /* */
-    
+
     return ready;
   }
-  
+
   function terminateShell()
   {
     let ready = new _.Consequence().take( null )
@@ -29666,7 +29669,7 @@ function terminate( test )
 
       return ready;
     })
-    
+
     return ready;
   }
 
@@ -29697,22 +29700,16 @@ Checks termination of the child process spawned with different modes.
 
 //
 
+/* qqq for Yevhen : subroutine for modes */
 function terminateSync( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
   let testAppPath = a.program( testApp );
 
-  // if( process.platform === 'win32' )
-  // {
-  /* zzz for Vova : windows-kill doesn't work correctrly on node 14
-  investigate if its possible to use process.kill instead of windows-kill
-  */
-  //   test.identical( 1, 1 );
-  //   return;
-  // }
-
   a.ready
+
+  /* */
 
   .then( () =>
   {
@@ -29742,13 +29739,12 @@ function terminateSync( test )
         test.identical( op.ended, true );
         test.identical( op.exitCode, null );
         test.identical( op.exitSignal, 'SIGTERM' );
-        test.is( _.strHas( op.output, 'SIGTERM' ) );
         test.is( !_.strHas( op.output, 'Application timeout!' ) );
       }
       return null;
     })
 
-    return _.time.out( context.t1*2, () =>
+    return _.time.out( context.t1*4, () =>
     {
       let result = _.process.terminate({ pnd : o.process, sync : 1 });
       test.identical( result, true );
@@ -29786,15 +29782,14 @@ function terminateSync( test )
         test.identical( op.ended, true );
         test.identical( op.exitCode, null );
         test.identical( op.exitSignal, 'SIGTERM' );
-        test.is( _.strHas( op.output, 'SIGTERM' ) );
         test.is( !_.strHas( op.output, 'Application timeout!' ) );
       }
       return null;
     })
 
-    return _.time.out( context.t1*2, () =>
+    return _.time.out( context.t1*4, () =>
     {
-      let result = _.process.terminate({ pid : o.process.pid, sync : 1  });
+      let result = _.process.terminate({ pid : o.process.pid, sync : 1 });
       test.identical( result, true );
       return o.conTerminate;
     })
@@ -29831,15 +29826,14 @@ function terminateSync( test )
         test.identical( op.ended, true );
         test.identical( op.exitCode, null );
         test.identical( op.exitSignal, 'SIGTERM' );
-        test.is( _.strHas( op.output, 'SIGTERM' ) );
         test.is( !_.strHas( op.output, 'Application timeout!' ) );
       }
       return null;
     })
 
-    return _.time.out( context.t1*2, () =>
+    return _.time.out( context.t1*4, () =>
     {
-      let result = _.process.terminate({ pid : o.process.pid, sync : 1  });
+      let result = _.process.terminate({ pid : o.process.pid, sync : 1 });
       test.identical( result, true );
       return o.conTerminate;
     })
@@ -29877,15 +29871,14 @@ function terminateSync( test )
         test.identical( op.ended, true );
         test.identical( op.exitCode, null );
         test.identical( op.exitSignal, 'SIGTERM' );
-        test.is( _.strHas( op.output, 'SIGTERM' ) );
         test.is( !_.strHas( op.output, 'Application timeout!' ) );
       }
       return null;
     })
 
-    return _.time.out( context.t1*2, () =>
+    return _.time.out( context.t1*4, () =>
     {
-      let result = _.process.terminate({ pnd : o.process, sync : 1  });
+      let result = _.process.terminate({ pnd : o.process, sync : 1 });
       test.identical( result, true );
       return o.conTerminate;
     })
@@ -29918,13 +29911,12 @@ function terminateSync( test )
       test.identical( op.exitSignal, 'SIGKILL' );
       test.is( !_.strHas( op.output, 'SIGTERM' ) );
       test.is( !_.strHas( op.output, 'Application timeout!' ) );
-
       return null;
     })
 
-    return _.time.out( context.t1*2, () =>
+    return _.time.out( context.t1*4, () =>
     {
-      let result = _.process.terminate({ pnd : o.process, timeOut : 0, sync : 1  });
+      let result = _.process.terminate({ pnd : o.process, timeOut : 0, sync : 1 });
       test.identical( result, true );
       return o.conTerminate;
     })
@@ -29966,18 +29958,13 @@ function terminateSync( test )
       return null;
     })
 
-    return _.time.out( context.t1*2, () =>
+    return _.time.out( context.t1*4, () =>
     {
       let result = _.process.terminate({ pid : o.process.pid, timeOut : 0, sync : 1 });
       test.identical( result, true );
       return o.conTerminate;
     })
   })
-
-  /*
-    zzz Vova: shell,exec modes have different behaviour on Windows,OSX and Linux
-    look for solution that allow to have same behaviour on each mode
-  */
 
   /* */
 
@@ -29997,7 +29984,7 @@ function terminateSync( test )
     setTimeout( () =>
     {
       console.log( 'Application timeout!' )
-    }, context.t2 ) /* 5000 */
+    }, context.t1*15 ) /* 5000 */
   }
 }
 
@@ -31255,7 +31242,7 @@ function terminateDetachedFirstChildShell( test )
     outputCollecting : 1,
     throwingExitCode : 0
   }
-  
+
   let terminate = _.Consequence();
   let timerIsRunning = true;
   let timer = waitForProgram2Ready();
@@ -31280,7 +31267,7 @@ function terminateDetachedFirstChildShell( test )
   {
     if( timerIsRunning )
     timer.cancel();
-    
+
     if( process.platform === 'win32' )
     {
       test.identical( o.exitCode, 1 );
@@ -31314,7 +31301,7 @@ function terminateDetachedFirstChildShell( test )
   function waitForProgram2Ready()
   {
     let filePath = a.abs( 'program2Pid' );
-    return _.time.periodic( 500, () => 
+    return _.time.periodic( 500, () =>
     {
       if( !a.fileProvider.fileExists( filePath ) )
       return true;
@@ -31366,7 +31353,7 @@ function terminateDetachedFirstChildShell( test )
         data : 'end'
       })
     }, context.t1*10 )
-    
+
     _.fileProvider.fileWrite
     ({
       filePath : _.path.join( __dirname, 'program2Pid' ),
@@ -31744,7 +31731,7 @@ function terminateWithDetachedChildShell( test ) /* qqq for Vova : fix on Window
     outputCollecting : 1,
     throwingExitCode : 0
   }
-  
+
   let terminate = _.Consequence();
   let timerIsRunning = true;
   let timer = waitForProgram2Ready();
@@ -31769,7 +31756,7 @@ function terminateWithDetachedChildShell( test ) /* qqq for Vova : fix on Window
   {
     if( timerIsRunning )
     timer.cancel();
-    
+
     if( process.platform === 'win32' )
     {
       test.identical( o.exitCode, 1 );
@@ -31799,7 +31786,7 @@ function terminateWithDetachedChildShell( test ) /* qqq for Vova : fix on Window
   function waitForProgram2Ready()
   {
     let filePath = a.abs( 'program2Pid' );
-    return _.time.periodic( 500, () => 
+    return _.time.periodic( 500, () =>
     {
       if( !a.fileProvider.fileExists( filePath ) )
       return true;
@@ -31851,7 +31838,7 @@ function terminateWithDetachedChildShell( test ) /* qqq for Vova : fix on Window
         data : 'end'
       })
     }, context.t1*10 )
-    
+
     _.fileProvider.fileWrite
     ({
       filePath : _.path.join( __dirname, 'program2Pid' ),
@@ -33887,8 +33874,8 @@ function childrenOptionFormatList( test )
       inputMirroring : 0,
     }
     _.process.start( o );
-    
-    o.conStart.thenGive( () => 
+
+    o.conStart.thenGive( () =>
     {
       process.send( o.process.pid );
     })
@@ -34271,8 +34258,8 @@ var Proto =
     startOptionWhenDelay,
     startOptionWhenTime,
     startOptionTimeOut,
-    // startAfterDeath, /* zzz : fix */
-    // startAfterDeathOutput, /* zzz : ? */
+    // startAfterDeath, /* qqq for Vova : fix */
+    // startAfterDeathOutput, /* qqq for Vova : fix */
 
     // detaching
 
