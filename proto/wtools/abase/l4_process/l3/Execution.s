@@ -191,15 +191,14 @@ function startMinimal_body( o )
 
   _.assert( arguments.length === 1, 'Expects single argument' );
 
-  /* qqq for Dmytro : use buffer instead */
+  /* qqq for Yevhen : use buffer instead */
   let _errOutput = '';
   let _decoratedOutOutput = '';
   let _decoratedErrOutput = '';
   let _errPrefix = null;
   let _outPrefix = null;
   let _readyCallback;
-  /* xxx qqq for Vova : remove. no hacks! aaa:removed execArgs*/
-  let _argsLength = 0;
+  let _argsLength = 0; /* xxx */
 
   form1();
   form2();
@@ -277,7 +276,7 @@ function startMinimal_body( o )
     if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
     o.stack = _.Procedure.Stack( o.stack, 3 );
 
-    /* */
+    /* consequences */
 
     if( o.conStart === null )
     {
@@ -305,8 +304,6 @@ function startMinimal_body( o )
     {
       o.conDisconnect = new _.Consequence({ _procedure : false }).finally( o.conDisconnect );
     }
-
-    /* consequences */
 
     _.assert( o.conStart !== o.conTerminate );
     _.assert( o.conStart !== o.conDisconnect );
@@ -498,7 +495,7 @@ function startMinimal_body( o )
       {
         o.ready.deasync();
         // o.ready.give( 1 );
-        o.ready.thenGive( 1 ); /* yyy */
+        o.ready.thenGive( 1 ); /* yyy xxx : check test multiple run */
         if( o.when.delay )
         _.time.sleep( o.when.delay );
         run2();
@@ -537,9 +534,6 @@ function startMinimal_body( o )
 
       if( o.dry )
       {
-        // _.assert( o.state === 'started' );
-        // o.state = 'terminated';
-        // end2( undefined );
         if( o.error )
         handleError( o.error );
         else
@@ -555,14 +549,6 @@ function startMinimal_body( o )
           handleClose( o.process.status, o.process.signal );
         }
       }
-
-      // if( o.dry )
-      // {
-      //   /* qqq for Yevhen : make sure option dry is covered good enough */
-      //   _.assert( o.state === 'started' );
-      //   o.state = 'terminated';
-      //   end2( undefined );
-      // }
 
     }
     catch( err )
@@ -594,7 +580,7 @@ function startMinimal_body( o )
     runSpawn();
     else if( o.mode === 'shell' )
     runShell();
-    else _.assert( 0, 'Unknown mode', _.strQuote( o.mode ), 'to start process at path', _.strQuote( o.currentPath ) );
+    else _.assert( 0, 'Unknown mode', _.strQuote( o.mode ), 'to start process at path', _.strQuote( o.currentPath ) ); /* qqq for Yevhen : problem with template-string is not complete! */
 
     /* procedure */
 
@@ -708,6 +694,7 @@ function startMinimal_body( o )
       both: shell({ execPath : 'node -v && node -v', throwingExitCode : 0 }) - prints version twice
       both: shell({ execPath : '"node -v && node -v"', throwingExitCode : 0 }) - expected error about unknown command
     */
+
     if( process.platform === 'win32' )
     arg2 = _.strQuote( arg2 );
 
@@ -770,7 +757,7 @@ function startMinimal_body( o )
 
     if( o._handleProcedureTerminationBegin )
     {
-      _.procedure.off( 'terminationBegin', o._handleProcedureTerminationBegin );
+      _.procedure.off( 'terminationBegin', o._handleProcedureTerminationBegin ); /* qqq for Dmytro : extend _.procedure.on / _.procedure.off */
       o._handleProcedureTerminationBegin = false;
     }
 
@@ -990,7 +977,7 @@ function startMinimal_body( o )
     {
       if( o.state === 'terminated' || o.error )
       return;
-      o.exitReason = 'time'; /* qqq for Yevhen : cover termination on time out. ask how to */
+      o.exitReason = 'time';
       _.process.terminate({ pnd : o.process, withChildren : 1 });
     });
 
@@ -1024,13 +1011,6 @@ function startMinimal_body( o )
     else
     o.process.stdout.on( 'data', ( data ) => handleStreamOutput( data, 'out' ) );
 
-    // if( o.outputPiping || o.outputCollecting )
-    // if( o.process.stdout )
-    // if( o.sync && !o.deasync )
-    // handleStreamOut( o.process.stdout );
-    // else
-    // o.process.stdout.on( 'data', handleStreamOut );
-
     /* piping error channel */
 
     /* there is no if options here because algorithm should collect error output in _errOutput anyway */
@@ -1039,12 +1019,6 @@ function startMinimal_body( o )
     handleStreamOutput( o.process.stderr, 'err' );
     else
     o.process.stderr.on( 'data', ( data ) => handleStreamOutput( data, 'err' ) );
-
-    // if( o.process.stderr )
-    // if( o.sync && !o.deasync )
-    // handleStreamErr( o.process.stderr );
-    // else
-    // o.process.stderr.on( 'data', handleStreamErr );
 
     /* handling */
 
@@ -1071,7 +1045,6 @@ function startMinimal_body( o )
 
       if( o.verbosity >= 3 )
       {
-        // let output = '   at ';
         let output = ' @ ';
         if( o.outputColoring )
         output = _.ct.format( output, { fg : 'bright white' } ) + _.ct.format( o.currentPath, 'path' );
@@ -1163,13 +1136,6 @@ function startMinimal_body( o )
   function argUnqoute( arg )
   {
     let quotes = [ '"', `'`, '`' ];
-    // yyy
-    // let begin = _.strBeginOf( arg, quotes );
-    // let end = _.strEndOf( arg, quotes );
-    // if( begin )
-    // if( begin && begin === end )
-    // arg = _.strInsideOf( arg, begin, end );
-    // return arg;
     let result = _.strInsideOf
     ({
       src : arg,
@@ -1200,13 +1166,12 @@ function startMinimal_body( o )
     for( let i = prependedArgs; i < args.length; i++ )
     {
       let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', '`' ];
-      // args[ i ] = argEscape( args[ i ], quotesToEscape ); /* xxx : uncomment later */
+      // args[ i ] = argEscape( args[ i ], quotesToEscape ); /* xxx : uncomment later */ /* qqq for Dmytro */
       _.each( quotesToEscape, ( quote ) =>
       {
         args[ i ] = argEscape( args[ i ], quote );
       })
       args[ i ] = _.strQuote( args[ i ] );
-
       // args[ i ] = _.process.escapeArg( args[ i ]  ); /* zzz for Vova : use this routine, review fails */
     }
 
@@ -1359,62 +1324,6 @@ function startMinimal_body( o )
 
     log( data, channel );
   }
-
-  /* */
-
-  // function handleStreamErr( data )
-  // {
-  //
-  //   if( _.bufferNodeIs( data ) )
-  //   data = data.toString( 'utf8' );
-  //   if( o.outputGraying )
-  //   data = StripAnsi( data );
-  //
-  //   _errOutput += data;
-  //
-  //   if( o.outputCollecting )
-  //   o.output += data;
-  //
-  //   if( !o.outputPiping )
-  //   return;
-  //
-  //   data = _.strRemoveEnd( data, '\n' );
-  //
-  //   if( o.outputPrefixing )
-  //   data = 'stderr :\n' + '  ' + _.strLinesIndentation( data, '  ' ); /* qqq for Yevgen : change how option outputPrefixing works. discuss */
-  //
-  //   if( _.color && o.outputColoring && o.outputColoringStderr )
-  //   data = _.ct.format( data, 'pipe.negative' );
-  //
-  //   log( data, 1 );
-  // }
-  //
-  // /* */
-  //
-  // function handleStreamOut( data )
-  // {
-  //
-  //   if( _.bufferNodeIs( data ) )
-  //   data = data.toString( 'utf8' );
-  //   if( o.outputGraying )
-  //   data = StripAnsi( data );
-  //
-  //   if( o.outputCollecting )
-  //   o.output += data;
-  //
-  //   if( !o.outputPiping )
-  //   return;
-  //
-  //   data = _.strRemoveEnd( data, '\n' );
-  //
-  //   if( o.outputPrefixing )
-  //   data = 'stdout :\n' + '  ' + _.strLinesIndentation( data, '  ' ); /* qqq for Yevgen : change how option outputPrefixing works. discuss */
-  //
-  //   if( _.color && o.outputColoring && o.outputColoringStdout )
-  //   data = _.ct.format( data, 'pipe.neutral' );
-  //
-  //   log( data );
-  // }
 
   /* */
 
@@ -2967,14 +2876,10 @@ function signal_body( o )
       otherwise more fails appear in shell mode for OS spawing extra process for applications
     */
 
-    // console.log( `processKill withChildren:${o.withChildren} ${processes.length}` );
-
     if( o.withChildren )
     for( let i = 0 ; i < processes.length ; i++ )
     {
       let process = processes[ i ];
-      // console.log( `process.name:${process.name}` );
-      /* qqq for Vova : why? */
       // if( isWindows && i && process.name === 'conhost.exe' )
       // continue;
       signalSend( process );
@@ -2995,8 +2900,6 @@ function signal_body( o )
   function waitForDeath( p )
   {
     let timeOut = signal === 'SIGKILL' ? 5000 : o.timeOut;
-
-    // console.log( `waitForDeath pid:${p.pid} timeOut:${timeOut}` );
 
     if( timeOut === 0 )
     return _.process.kill({ pid : p.pid, pnd : p.pnd, withChildren : 0 });
@@ -3368,11 +3271,10 @@ function execPathOf( o )
     }
   }
 
-  let commandLineFlag = 2; /* qqq for Vova : use constant, no hardcoding */
   WindowsProcessTree.getProcessList( o.pid, ( list ) =>
   {
     ready.take( list[ 0 ].commandLine );
-  }, commandLineFlag )
+  }, WindowsProcessTree.ProcessDataFlag.CommandLine )
 
   if( o.sync )
   {
