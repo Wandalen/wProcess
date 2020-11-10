@@ -82,15 +82,29 @@ function startMinimalHeadCommon( routine, args )
     , `Unknown value of option::throwingExitCode, acceptable : [ false, 'full', 'brief' ]`
   );
 
-  if( o.outputColoring === null )
-  o.outputColoring = 1;
-  if( o.outputColoringStdout === null )
-  o.outputColoringStdout = o.outputColoring;
-  if( o.outputColoringStderr === null )
-  o.outputColoringStderr = o.outputColoring;
-  _.assert( _.boolLike( o.outputColoring ) );
-  _.assert( _.boolLike( o.outputColoringStdout ) );
-  _.assert( _.boolLike( o.outputColoringStderr ) );
+  // if( o.outputColoring === null )
+  // o.outputColoring = 1;
+  // if( o.outputColoringStdout === null )
+  // o.outputColoringStdout = o.outputColoring;
+  // if( o.outputColoringStderr === null )
+  // o.outputColoringStderr = o.outputColoring;
+  // _.assert( _.boolLike( o.outputColoring ) );
+
+  if( o.outputColoring === null || _.boolLikeTrue( o.outputColoring ) )
+  o.outputColoring = { out : 1, err : 1 };
+  if( _.boolLikeFalse( o.outputColoring ) )
+  o.outputColoring = { out : 0, err : 0 };
+  _.assert( _.objectIs( o.outputColoring ) );
+  _.assert
+  (
+    _.boolLike( o.outputColoring.out ),
+    `o.outputColoring.out supports values:[ 1, 0, true, false ], but got ${o.outputColoring.out}`
+  );
+  _.assert
+  (
+    _.boolLike( o.outputColoring.err ),
+    `o.outputColoring.err supports values:[ 1, 0, true, false ], but got ${o.outputColoring.err}`
+  );
 
   if( !_.numberIs( o.verbosity ) )
   o.verbosity = o.verbosity ? 1 : 0;
@@ -315,9 +329,10 @@ function startMinimal_body( o )
 
     /* output */
 
-    _.assert( _.boolLike( o.outputColoring ) );
-    _.assert( _.boolLike( o.outputColoringStdout ) );
-    _.assert( _.boolLike( o.outputColoringStderr ) );
+    // _.assert( _.boolLike( o.outputColoring ) );
+    // _.assert( _.boolLike( o.outputColoringStdout ) );
+    // _.assert( _.boolLike( o.outputColoringStderr ) );
+    _.assert( _.objectIs( o.outputColoring ) );
     _.assert( _.boolLike( o.outputCollecting ) );
 
     /* ipc */
@@ -451,14 +466,17 @@ function startMinimal_body( o )
     if( !StripAnsi )
     StripAnsi = require( 'strip-ansi' );
 
-    if( o.outputColoring && typeof module !== 'undefined' )
+    // if( o.outputColoring && typeof module !== 'undefined' )
+    if( o.outputColoring.err || o.outputColoring.out && typeof module !== 'undefined' )
     try
     {
       _.include( 'wColor' );
     }
     catch( err )
     {
-      o.outputColoring = 0;
+      // o.outputColoring = 0;
+      o.outputColoring.err = 0;
+      o.outputColoring.out = 0;
       if( o.verbosity >= 2 )
       log( _.errOnce( err ), 'err' );
     }
@@ -467,8 +485,10 @@ function startMinimal_body( o )
 
     if( o.outputPrefixing )
     {
-      _errPrefix = `${ ( o.outputColoring ? _.ct.format( 'err', { fg : 'dark red' } ) : 'err' ) } : `;
-      _outPrefix = `${ ( o.outputColoring ? _.ct.format( 'out', { fg : 'dark white' } ) : 'out' ) } : `;
+      // _errPrefix = `${ ( o.outputColoring ? _.ct.format( 'err', { fg : 'dark red' } ) : 'err' ) } : `;
+      // _outPrefix = `${ ( o.outputColoring ? _.ct.format( 'out', { fg : 'dark white' } ) : 'out' ) } : `;
+      _errPrefix = `${ ( o.outputColoring.err ? _.ct.format( 'err', { fg : 'dark red' } ) : 'err' ) } : `;
+      _outPrefix = `${ ( o.outputColoring.out ? _.ct.format( 'out', { fg : 'dark white' } ) : 'out' ) } : `;
     }
 
     /* handler of event terminationBegin */
@@ -1046,7 +1066,8 @@ function startMinimal_body( o )
       if( o.verbosity >= 3 )
       {
         let output = ' @ ';
-        if( o.outputColoring )
+        // if( o.outputColoring ) /* ??? */
+        if( o.outputColoring.out || o.outputColoring.err )
         output = _.ct.format( output, { fg : 'bright white' } ) + _.ct.format( o.currentPath, 'path' );
         else
         output = output + o.currentPath
@@ -1056,7 +1077,8 @@ function startMinimal_body( o )
       if( o.verbosity )
       {
         let prefix = ' > ';
-        if( o.outputColoring )
+        // if( o.outputColoring ) /* ??? */
+        if( o.outputColoring.out || o.outputColoring.err )
         prefix = _.ct.format( prefix, { fg : 'bright white' } );
         log( prefix + o.fullExecPath, 'out' );
       }
@@ -1313,12 +1335,14 @@ function startMinimal_body( o )
 
     if( channel === 'err' )
     {
-      if( o.outputColoring && o.outputColoringStderr )
+      // if( o.outputColoring && o.outputColoringStderr )
+      if( o.outputColoring.err )
       data = _.ct.format( data, 'pipe.negative' );
     }
     else
     {
-      if( o.outputColoring && o.outputColoringStdout )
+      // if( o.outputColoring && o.outputColoringStdout )
+      if( o.outputColoring.out )
       data = _.ct.format( data, 'pipe.neutral' );
     }
 
@@ -1400,8 +1424,8 @@ startMinimal_body.defaults =
   outputCollecting : 0,
   outputAdditive : null, /* qqq for Yevhen : cover the option */
   outputColoring : 1, /* qqq for Yevhen : cover the option */
-  outputColoringStderr : null, /* qqq for Yevhen : cover the option */
-  outputColoringStdout : null, /* qqq for Yevhen : cover the option */
+  // outputColoringStderr : null, /* qqq for Yevhen : cover the option */
+  // outputColoringStdout : null, /* qqq for Yevhen : cover the option */
   outputGraying : 0,
   inputMirroring : 1, /* qqq for Yevhen : cover the option | aaa : Done */
 
@@ -1513,9 +1537,10 @@ function startSingle_body( o )
 
     /* output */
 
-    _.assert( _.boolLike( o.outputColoring ) );
-    _.assert( _.boolLike( o.outputColoringStdout ) );
-    _.assert( _.boolLike( o.outputColoringStderr ) );
+    // _.assert( _.boolLike( o.outputColoring ) );
+    // _.assert( _.boolLike( o.outputColoringStdout ) );
+    // _.assert( _.boolLike( o.outputColoringStderr ) );
+    _.assert( _.objectIs( o.outputColoring ) );
     _.assert( _.boolLike( o.outputCollecting ) );
 
     // /* ipc */
@@ -1708,9 +1733,11 @@ function startMultiple_head( routine, args )
  * @param {Boolean} o.applyingExitCode=0 Applies exit code to parent process.
 
  * @param {Number} o.verbosity=2 Controls amount of output, `0` disables output at all.
- * @param {Boolean} o.outputColoring=1 Logger prints everything in raw mode, no styles applied.
- * @param {Boolean} o.outputColoringStdout=1 Logger prints output from `stdout` in raw mode, no styles applied.
- * @param {Boolean} o.outputColoringStderr=1 Logger prints output from `stderr` in raw mode, no styles applied.
+ * @param {Boolean|Object} o.outputColoring=1 Logger prints with styles applied for both channels.
+ *  Option can be specified more precisely via map of the form { out : 1, err : 0 }
+ *  Coloring is applied to a corresponding channel.
+//  * @param {Boolean} o.outputColoringStdout=1 Logger prints output from `stdout` in raw mode, no styles applied.
+//  * @param {Boolean} o.outputColoringStderr=1 Logger prints output from `stderr` in raw mode, no styles applied.
  * @param {Boolean} o.outputPrefixing=0 Add prefix with name of output channel( stderr, stdout ) to each line.
  * @param {Boolean} o.outputPiping=null Handles output from `stdout` and `stderr` channels. Is enabled by default if `o.verbosity` levels is >= 2 and option is not specified explicitly. This option is required by other "output" options that allows output customization.
  * @param {Boolean} o.outputCollecting=0 Enables coullection of output into sinle string. Collects output into `o.output` property if enabled.
@@ -1839,9 +1866,10 @@ function startMultiple_body( o )
       o.conTerminate = new _.Consequence({ _procedure : false }).finally( o.conTerminate );
     }
 
-    _.assert( _.boolLike( o.outputColoring ) );
-    _.assert( _.boolLike( o.outputColoringStdout ) );
-    _.assert( _.boolLike( o.outputColoringStderr ) );
+    // _.assert( _.boolLike( o.outputColoring ) );
+    // _.assert( _.boolLike( o.outputColoringStdout ) );
+    // _.assert( _.boolLike( o.outputColoringStderr ) );
+    _.assert( _.boolLike( o.outputColoring ) || _.objectIs( o.outputColoring ) );
     _.assert( _.boolLike( o.outputCollecting ) );
 
     if( o.outputAdditive === null )
