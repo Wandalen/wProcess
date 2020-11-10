@@ -10331,6 +10331,11 @@ function startAfterDeathOutput( test )
   }
 }
 
+startAfterDeathOutput.description = 
+`
+Fakes death of program1 and checks output of program2
+`
+
 // --
 // detaching
 // --
