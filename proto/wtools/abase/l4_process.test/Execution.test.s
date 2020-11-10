@@ -25823,6 +25823,8 @@ function startOutputMultiple( test )
 
         }
 
+        /*
+        Fails on windows:
         /* xxx : fails on windows :
         - got :
           '1::begin
