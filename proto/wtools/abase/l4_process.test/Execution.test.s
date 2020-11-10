@@ -1,4 +1,3 @@
-/* eslint-disable */
 ( function _Execution_test_s( )
 {
 
@@ -1893,7 +1892,7 @@ function startSyncDeasync( test )
         mode : tops.mode,
         stdio : 'pipe'
       }
-  
+
       var options = _.mapSupplement( {}, o2, o3 );
       var returned = _.process.start( options );
 
@@ -1926,7 +1925,7 @@ function startSyncDeasync( test )
 
           return op;
         })
-  
+
         return returned;
       }
 
@@ -1946,7 +1945,7 @@ function startSyncDeasync( test )
         outputCollecting : 0,
         outputPiping : 0
       }
-  
+
       var options = _.mapSupplement( {}, o2, o3 );
       var returned = _.process.start( options );
 
@@ -1979,7 +1978,7 @@ function startSyncDeasync( test )
 
           return op;
         })
-  
+
         return returned;
       }
     });
@@ -1997,7 +1996,7 @@ function startSyncDeasync( test )
         stdio : 'pipe',
         timeOut : 2*context.t1,
       }
-  
+
       var options = _.mapSupplement( {}, o2, o3 );
 
       if( tops.sync )
@@ -2017,7 +2016,7 @@ function startSyncDeasync( test )
         mode : tops.mode,
         stdio : 'pipe'
       }
-  
+
       var options = _.mapSupplement( {}, o2, o3 );
       var returned = _.process.start( options );
 
@@ -2050,7 +2049,7 @@ function startSyncDeasync( test )
 
           return op;
         })
-  
+
         return returned;
       }
 
@@ -2067,7 +2066,7 @@ function startSyncDeasync( test )
         mode : tops.mode,
         stdio : 'pipe'
       }
-  
+
       var options = _.mapSupplement( {}, o2, o3 );
 
       if( tops.sync )
@@ -2123,7 +2122,7 @@ function startSyncDeasync( test )
 
 }
 
-startSyncDeasync.timeOut = 16e4; /* Locally : 53.717s */
+startSyncDeasync.timeOut = 57e4; /* Locally : 56.549s */
 startSyncDeasync.rapidity = -1;
 
 //
