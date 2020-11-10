@@ -915,7 +915,7 @@ function startFork( test )
       setTimeout( () =>
       {
         console.log( 'timeOut' );
-      }, context.t2 ) /* 5000 */
+      }, context.t1 * 5 ) /* 5000 */
     }
 
     let programPath = a.program( testApp5 );
@@ -950,7 +950,7 @@ function startFork( test )
       setTimeout( () =>
       {
         console.log( 'timeOut' );
-      }, context.t2 ) /* 5000 */
+      }, context.t1 * 5 ) /* 5000 */
     }
 
     let programPath = a.program( testApp6 );
@@ -12573,7 +12573,7 @@ function startDetachingDisconnectedLate( test )
         test.identical( err, _.dont );
       })
 
-      result = _.time.out( context.t2, () => /* 5000 */
+      result = _.time.out( context.t1 * 5, () => /* 5000 */
       {
         test.identical( o.state, 'disconnected' );
         test.identical( o.ended, true );
@@ -14025,7 +14025,7 @@ function startWithDelayOnReady( test )
   {
     let _ = require( toolsPath );
     console.log( 'program1:begin' );
-    setTimeout( () => { console.log( 'program1:end' ) }, context.t3 ); /* 15000 */
+    setTimeout( () => { console.log( 'program1:end' ) }, context.t1 * 15 ); /* 15000 */
   }
 
 }
@@ -14399,7 +14399,7 @@ function startConcurrentMultiple( test )
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, context.t1 ); /* 1000 */
-    test.le( spent, context.t2 ); /* 5000 */
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesOptionsSerial.exitCode, 0 );
     test.identical( op.runs.length, 2 );
@@ -14443,7 +14443,7 @@ function startConcurrentMultiple( test )
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 0 );
-    test.le( spent, context.t2 ); /* 5000 */
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesError.exitCode, 1 );
     test.is( _.errIs( err ) );
@@ -14482,7 +14482,7 @@ function startConcurrentMultiple( test )
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 0 );
-    test.le( spent, context.t2 ); /* 5000 */
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesErrorNonThrowing.exitCode, 1 );
     test.identical( op.runs.length, 2 );
@@ -14527,7 +14527,7 @@ function startConcurrentMultiple( test )
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 0 );
-    test.le( spent, context.t2 ); /* 5000 */
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesErrorConcurrent.exitCode, 1 );
     test.is( _.errIs( err ) );
@@ -14567,7 +14567,7 @@ function startConcurrentMultiple( test )
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 0 );
-    test.le( spent, context.t2 ); /* 5000 */
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesErrorConcurrentNonThrowing.exitCode, 1 );
     test.identical( op.runs.length, 2 );
@@ -14612,7 +14612,7 @@ function startConcurrentMultiple( test )
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent )
     test.gt( spent, context.t1 ); /* 1000 */
-    test.le( spent, context.t2 ); /* 5000 */
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( suprocessesConcurrentOptions.exitCode, 0 );
     test.identical( op.runs.length, 2 );
@@ -14656,7 +14656,7 @@ function startConcurrentMultiple( test )
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent )
     test.gt( spent, context.t1 ); /* 1000 */
-    test.le( spent, context.t2 ); /* 5000 */
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( suprocessesConcurrentArgumentsOptions.exitCode, 0 );
     test.identical( op.runs.length, 2 );
