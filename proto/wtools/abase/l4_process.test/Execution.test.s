@@ -64,6 +64,13 @@ RET=0; until [ ${RET} -ne 0 ]; do
     sleep 1
 done
 
+RET=0; until [ ${RET} -ne 0 ]; do
+    reset
+    taskset 0x1 node wtools/abase/l4_process.test/Execution.test.s n:1 v:5 s:0 r:terminateDifferentStdio
+    RET=$?
+    sleep 1
+done
+
 :repeat
 reset && node wtools/abase/l4_process.test/Execution.test.s v:5 s:0 r:endSignalsBasic && goto :repeat
 echo %errorlevel%
@@ -25817,8 +25824,12 @@ function startOutputMultiple( test )
 
         }
 
+<<<<<<< HEAD
         /*
         Fails on windows:
+=======
+        /* xxx : fails on windows :
+>>>>>>> dbada277143f9fdca935a7ca5ec33d8cc025f350
         - got :
           '1::begin
           1::end
@@ -25838,6 +25849,7 @@ function startOutputMultiple( test )
           *
         with accuracy 1e-7
         */
+
         var exp =
 `
 1::begin
@@ -30024,7 +30036,8 @@ function terminate( test )
 
       o.process.on( 'message', () =>
       {
-        _.process.terminate({ pnd : o.process, timeOut : 1 });
+        _.process.terminate({ pnd : o.process, timeOut : context.t1*4 });
+        // _.process.terminate({ pnd : o.process, timeOut : 1 }); /* yyy */
       })
 
       ready.then( ( op ) =>
@@ -30040,7 +30053,7 @@ function terminate( test )
         else
         {
           test.identical( op.exitCode, null );
-          test.identical( op.exitSignal, 'SIGTERM' );
+          test.identical( op.exitSignal, 'SIGTERM' ); /* yyy xxx : sometimes SIGKILL */
           test.identical( op.ended, true );
           test.is( _.strHas( op.output, 'SIGTERM' ) );
           test.is( !_.strHas( op.output, 'Application timeout!' ) );
@@ -30057,13 +30070,11 @@ function terminate( test )
     return ready;
   }
 
+  /* - */
+
   function terminateShell()
   {
     let ready = new _.Consequence().take( null )
-    /*
-      zzz Vova: shell,exec modes have different behaviour on Windows,OSX and Linux
-      look for solution that allow to have same behaviour on each mode
-    */
 
     .then( () =>
     {
@@ -33685,9 +33696,12 @@ function terminateDifferentStdio( test )
     o.process.on( 'message', () =>
     {
       ready.take( _.process.terminate( o.process.pid ) )
-      /* Possible solution for phantom problem on Windows*/
+      /* xxx : possible solution for phantom problem on Windows*/
       // ready.take( _.process.terminate({ pid : o.process.pid, ignoringErrorPerm : 1 }) )
+<<<<<<< HEAD
+=======
 
+>>>>>>> dbada277143f9fdca935a7ca5ec33d8cc025f350
     })
 
     o.conTerminate.then( ( op ) =>
