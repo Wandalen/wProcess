@@ -25205,12 +25205,9 @@ function startOutputMultiple( test )
 
         }
 
-<<<<<<< HEAD
         /*
         Fails on windows:
-=======
         /* xxx : fails on windows :
->>>>>>> dbada277143f9fdca935a7ca5ec33d8cc025f350
         - got :
           '1::begin
           1::end
@@ -33079,10 +33076,6 @@ function terminateDifferentStdio( test )
       ready.take( _.process.terminate( o.process.pid ) )
       /* xxx : possible solution for phantom problem on Windows*/
       // ready.take( _.process.terminate({ pid : o.process.pid, ignoringErrorPerm : 1 }) )
-<<<<<<< HEAD
-=======
-
->>>>>>> dbada277143f9fdca935a7ca5ec33d8cc025f350
     })
 
     o.conTerminate.then( ( op ) =>
