@@ -3325,7 +3325,6 @@ function startArgumentsParsingNonTrivial( test )
     {
       test.case = `mode : ${mode}, args in execPath and args options`
 
-      /* qqq for Vova : investigate. can conditions be removed? aaa: I removed redundant os conditions after fix of arguments processing for shell mode*/
       if( mode === 'shell' && process.platform === 'win32' )
       return null;
       if( mode === 'fork' )
@@ -10113,12 +10112,12 @@ function startAfterDeath( test )
   let context = this;
   let a = context.assetFor( test, false );
   let stack = [];
-  let testAppParentPath = a.program( testAppParent );
-  let testAppChildPath = a.program( testAppChild );
+  let program1Path = a.program( program1 );
+  let program2Path = a.program( program2 );
 
   /* */
 
-  let testFilePath = a.abs( a.routinePath, 'testFile' );
+  let program2PidPath = a.abs( a.routinePath, 'program2Pid' );
 
   a.ready
 
@@ -10126,53 +10125,59 @@ function startAfterDeath( test )
   {
     let o =
     {
-      execPath : 'node testAppParent.js',
+      execPath : 'node program1.js',
       mode : 'spawn',
       outputCollecting : 1,
       outputPiping : 1,
       currentPath : a.routinePath,
       ipc : 1,
     }
-    debugger;
-    let con = _.process.start( o );
-    let childPid;
-    debugger;
+    // debugger;
+    _.process.start( o );
+    let secondaryPid;
+    // debugger;
 
     o.process.on( 'message', ( e ) =>
     {
-      childPid = _.numberFrom( e );
+      secondaryPid = _.numberFrom( e );
     })
 
     o.conTerminate.then( () =>
     {
-      stack.push( 'conTerminate' );
+      stack.push( 'conTerminate1' );
+      
+      test.will = 'program1 terminated'
       test.identical( o.exitCode, 0 );
-      test.case = 'secondary process is alive'
-      test.is( _.process.isAlive( childPid ) );
-      test.case = 'child of secondary process does not exit yet'
-      test.is( !a.fileProvider.fileExists( testFilePath ) );
+      
+      test.will = 'secondary process is alive'
+      test.is( _.process.isAlive( secondaryPid ) );
+      
+      test.will = 'child of secondary process is still alive'
+      test.is( !a.fileProvider.fileExists( program2PidPath ) );
+      
       return _.time.out( context.t2 * 2 ); /* 10000 */
     })
 
     o.conTerminate.then( () =>
     {
-      stack.push( 'conTerminate' );
-      test.identical( stack, [ 'conTerminate', 'conTerminate' ] );
-      test.case = 'secondary process is dead'
-      test.is( !_.process.isAlive( childPid ) );
+      stack.push( 'conTerminate2' );
+      test.identical( stack, [ 'conTerminate1', 'conTerminate2' ] );
+      
+      test.case = 'secondary process is terminated'
+      test.is( !_.process.isAlive( secondaryPid ) );
 
-      test.case = 'child of secondary process is executed'
-      test.is( a.fileProvider.fileExists( testFilePath ) );
-      let childPid2 = a.fileProvider.fileRead( testFilePath );
-      childPid2 = _.numberFrom( childPid2 );
+      test.case = 'child of secondary process is terminated'
+      test.is( a.fileProvider.fileExists( program2PidPath ) );
+      let program2Pid = a.fileProvider.fileRead( program2PidPath );
+      program2Pid = _.numberFrom( program2Pid );
 
       test.case = 'secondary process and child are not same'
-      test.is( !_.process.isAlive( childPid2 ) );
-      test.notIdentical( childPid, childPid2 );
+      test.is( !_.process.isAlive( program2Pid ) );
+      test.notIdentical( secondaryPid, program2Pid );
       return null;
     })
 
-    return con;
+    return o.conTerminate;
   })
 
   /*  */
@@ -10181,7 +10186,7 @@ function startAfterDeath( test )
 
   /* - */
 
-  function testAppParent()
+  function program1()
   {
     let _ = require( toolsPath );
 
@@ -10190,7 +10195,7 @@ function startAfterDeath( test )
 
     let o =
     {
-      execPath : 'node testAppChild.js',
+      execPath : 'node program2.js',
       outputCollecting : 1,
       mode : 'spawn',
     }
@@ -10204,7 +10209,7 @@ function startAfterDeath( test )
 
     _.time.out( context.t2, () => /* 5000 */
     {
-      console.log( 'parent termination begin' );
+      console.log( 'program1::termination begin' );
       _.procedure.terminationBegin();
       return null;
     })
@@ -10212,7 +10217,7 @@ function startAfterDeath( test )
 
   /* */
 
-  function testAppChild()
+  function program2()
   {
     let _ = require( toolsPath );
 
@@ -10221,101 +10226,115 @@ function startAfterDeath( test )
 
     _.time.out( context.t2, () => /* 5000 */
     {
-      let filePath = _.path.join( __dirname, 'testFile' );
+      let filePath = _.path.join( __dirname, 'program2Pid' );
       _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
     })
   }
 
 }
 
+startAfterDeath.description = 
+`
+Spawns program1 as "main" process.
+Program1 starts program2 with mode:'afterdeath'
+Program2 is spawned after death of program1
+Program2 exits normally after short timeout
+`
+
 //
 
-// function startAfterDeathOutput( test )
-// {
-//   let context = this;
-//   var routinePath = _.path.join( context.suiteTempPath, test.name );
+function startAfterDeathOutput( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let program1Path = a.program( program1 );
+  let program2Path = a.program( program2 );
 
-//   function testAppParent()
-//   {
-//     _.include( 'wProcess' );
-//     _.include( 'wFiles' );
+  a.ready
 
-//     let o =
-//     {
-//       execPath : 'node testAppChild.js',
-//       outputCollecting : 1,
-//       stdio : 'inherit',
-//       mode : 'spawn',
-//       when : 'afterdeath'
-//     }
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : 'node program1.js',
+      mode : 'spawn',
+      outputCollecting : 1,
+      currentPath : a.routinePath,
+      ipc : 1,
+    }
+    let con = _.process.start( o );
 
-//     _.process.start( o );
+    con.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.identical( _.strCount( op.output, 'program1::begin' ), 1 )
+      test.identical( _.strCount( op.output, 'program1::end' ), 1 )
+      test.identical( _.strCount( op.output, 'program2::begin' ), 1 )
+      test.identical( _.strCount( op.output, 'program2::end' ), 1 )
 
-//     _.time.out( 4000, () =>
-//     {
-//       console.log( 'Parent process exit' )
-//       process.disconnect();
-//       return null;
-//     })
-//   }
+      return null;
+    })
 
-//   function testAppChild()
-//   {
-//     _.include( 'wProcess' );
-//     _.include( 'wFiles' );
+    return con;
+  })
+  
+  return a.ready;
 
-//     console.log( 'Child process start' )
+  /* - */
+  
+  function program1()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+    
+    console.log( 'program1::begin' );
 
-//     _.time.out( 5000, () =>
-//     {
-//       console.log( 'Child process end' )
-//     })
-//   }
+    let o =
+    {
+      execPath : 'node program2.js',
+      mode : 'spawn',
+      currentPath : __dirname,
+      stdio : 'inherit'
+    }
 
-//   /* */
+    _.process.startAfterDeath( o );
+    
+    o.process.on( 'exit', () => //zzz for Vova: remove after enabling exit handler in start
+    {
+      _.procedure.terminationBegin();
+    })
 
-//   var testAppParentPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppParent.js' ) );
-//   var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
-//   var testAppParentCode = context.toolsPathInclude + testAppParent.toString() + '\ntestAppParent();';
-//   var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
-//   _.fileProvider.fileWrite( testAppParentPath, testAppParentCode );
-//   _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
-//   testAppParentPath = _.strQuote( testAppParentPath );
-//   var ready = new _.Consequence().take( null );
+    _.time.out( context.t2, () =>
+    {
+      console.log( 'program1::end' );
+      o.process.disconnect();
+      return null;
+    })
+  }
+  
+  /* - */
 
-//   ready
+  function program2()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
 
-//   .then( () =>
-//   {
-//     let o =
-//     {
-//       execPath : 'node testAppParent.js',
-//       mode : 'spawn',
-//       outputCollecting : 1,
-//       currentPath : routinePath,
-//       ipc : 1,
-//     }
-//     let con = _.process.start( o );
+    console.log( 'program2::begin' );
 
-//     con.then( ( op ) =>
-//     {
-//       test.identical( op.exitCode, 0 );
-//       test.identical( op.ended, true );
-//       test.is( _.strHas( op.output, 'Parent process exit' ) )
-//       test.is( _.strHas( op.output, 'Secondary: starting child process...' ) )
-//       test.is( _.strHas( op.output, 'Child process start' ) )
-//       test.is( _.strHas( op.output, 'Child process end' ) )
+    _.time.out( context.t2, () =>
+    {
+      console.log( 'program2::end' );
+    })
+  }
+}
 
-//       return null;
-//     })
-
-//     return con;
-//   })
-
-//   /*  */
-
-//   return ready;
-// }
+startAfterDeathOutput.description = 
+`
+Fakes death of program1 and checks output of program2
+`
 
 // --
 // detaching
@@ -25183,6 +25202,28 @@ function startOutputMultiple( test )
           test.lt( track.indexOf( 'conTerminate' ), track.indexOf( 'ready' ) );
 
         }
+        
+        /* 
+        Fails on windows:
+        - got :
+          '1::begin
+          1::end
+          2::begin
+          1::err
+          2::end
+          2::err'
+        - expected :
+          '1::begin
+          2::begin
+          1::end
+          2::end
+          1::err
+          2::err'
+        - difference :
+          '1::begin
+          *
+        with accuracy 1e-7
+        */
         var exp =
 `
 1::begin
@@ -25957,7 +25998,7 @@ function killSync( test )
   }
 }
 
-killSync.timeOut = 5e5; /* qqq for Vova : test cases descriptions?? aaa: added*/
+killSync.timeOut = 5e5;
 
 //
 
@@ -28372,7 +28413,7 @@ deasync:end
 }
 
 endSignalsBasic.rapidity = -1 /* make it -2 later */
-endSignalsBasic.timeOut = 1e6;
+endSignalsBasic.timeOut = 1e7;
 endSignalsBasic.description =
 `
   - signals terminate or kill started process
@@ -28858,7 +28899,7 @@ Killed
 }
 
 endSignalsOnExit.rapidity = -1;
-endSignalsOnExit.timeOut = 1e6;
+endSignalsOnExit.timeOut = 1e7;
 endSignalsOnExit.description =
 `
   - handler of the event "exit" should be called, despite of signal, unless signal is SIGKILL
@@ -29103,7 +29144,6 @@ endSignalsOnExitExitAgain.description =
 
 //
 
-/* qqq for Vova : describe test cases. describe test. this and related aaa:done*/
 function terminate( test )
 {
   let context = this;
@@ -31583,7 +31623,6 @@ SIGTERM
 
 */
 
-/* qqq for Vova : join routines, use subroutine for mode varying aaa: this will make the routine too complicated, that is the reason why I splitted the old routine*/
 function terminateWithDetachedChildFork( test )
 {
   let context = this;
@@ -31725,7 +31764,7 @@ program1 and program2 should be terminated
 
 //
 
-function terminateWithDetachedChildShell( test ) /* qqq for Vova : fix on Windows aaa:fixed*/
+function terminateWithDetachedChildShell( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -32021,20 +32060,6 @@ function terminateSeveralChildren( test )
 
   /* - */
 
-  /* qqq for Vova : bad aaa:fixed */
-  /* qqq for Vova : bad! */
-  // function handleOutput()
-  // {
-  //   if( !_.strHas( o.output, 'program2::begin' ) || _.strHas( o.output, 'program3::begin' ) )
-  //   c += 1;
-  //
-  //   if( c !== 2 )
-  //   return;
-  //
-  //   o.process.stdout.removeListener( 'data', handleOutput );
-  //   terminate.take( null );
-  // }
-
   function handleOutput()
   {
     if( !_.strHas( o.output, 'program2::begin' ) || !_.strHas( o.output, 'program3::begin' ) )
@@ -32206,7 +32231,6 @@ function terminateSeveralDetachedChildren( test )
 
   /* - */
 
-  /* qqq for Vova : bad aaa:fixed*/
   function handleOutput()
   {
     if( !_.strHas( o.output, 'program2::begin' ) || !_.strHas( o.output, 'program3::begin' ) )
@@ -34268,8 +34292,8 @@ var Proto =
     startOptionWhenDelay,
     startOptionWhenTime,
     startOptionTimeOut,
-    // startAfterDeath, /* qqq for Vova : fix */
-    // startAfterDeathOutput, /* qqq for Vova : fix */
+    startAfterDeath, /* qqq for Vova : fix aaa:fixed*/
+    startAfterDeathOutput, /* qqq for Vova : fix aaa:fixed*/
 
     // detaching
 
@@ -34387,7 +34411,7 @@ var Proto =
     endSignalsOnExit,
     endSignalsOnExitExitAgain,
 
-    terminate, /* qqq for Vova: review, remove duplicates, check timeouts aaa:done*/
+    terminate,
     terminateSync,
 
     terminateFirstChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine */
