@@ -974,7 +974,7 @@ function startFork( test )
       setTimeout( () =>
       {
         console.log( 'timeOut' );
-      }, context.t2 ) /* 5000 */
+      }, context.t1 * 5 ) /* 5000 */
     }
 
     let programPath = a.program( testApp5 );
@@ -987,7 +987,7 @@ function startFork( test )
       outputCollecting : 1,
       outputPiping : 1,
       throwingExitCode : 1,
-      timeOut : 1000,
+      timeOut : context.t1, /* 1000 */
     }
 
     return test.shouldThrowErrorAsync( _.process.start( o ) )
@@ -1009,7 +1009,7 @@ function startFork( test )
       setTimeout( () =>
       {
         console.log( 'timeOut' );
-      }, context.t2 ) /* 5000 */
+      }, context.t1 * 5 ) /* 5000 */
     }
 
     let programPath = a.program( testApp6 );
@@ -1022,7 +1022,7 @@ function startFork( test )
       outputCollecting : 1,
       outputPiping : 1,
       throwingExitCode : 0,
-      timeOut : 1000,
+      timeOut : context.t1, /* 1000 */
     }
 
     return _.process.start( o )
@@ -9774,7 +9774,7 @@ function startOptionWhenTime( test )
       test.case = `sync:${sync} deasync:${deasync} mode:${mode}`;
 
       let t1 = _.time.now();
-      let delay = 5000;
+      let delay = context.t2; /* 5000 */
       let when = { time : _.time.now() + delay };
       let o =
       {
@@ -12617,7 +12617,7 @@ function startDetachingDisconnectedLate( test )
 
       test.identical( o.state, 'started' );
 
-      _.time.begin( 1000, () =>
+      _.time.begin( context.t1, () => /* 1000 */
       {
         test.identical( o.state, 'started' );
         o.disconnect();
@@ -12651,7 +12651,7 @@ function startDetachingDisconnectedLate( test )
         test.identical( err, _.dont );
       })
 
-      result = _.time.out( context.t2, () => /* 5000 */
+      result = _.time.out( context.t1 * 5, () => /* 5000 */
       {
         test.identical( o.state, 'disconnected' );
         test.identical( o.ended, true );
@@ -14010,7 +14010,7 @@ function startNoEndBug1( test )
   {
     _.include( 'wProcess' );
     var args = _.process.input();
-    _.time.out( 2000, () =>
+    _.time.out( context.t1 * 2, () => /* 2000 */
     {
       console.log( 'Child process end' )
       return null;
@@ -14036,7 +14036,7 @@ function startWithDelayOnReady( test )
   let programPath = a.program( program1 );
   let time1 = _.time.now();
 
-  a.ready.delay( 1000 );
+  a.ready.delay( context.t1 ); /* 1000 */
 
   /* */
 
@@ -14103,7 +14103,7 @@ function startWithDelayOnReady( test )
   {
     let _ = require( toolsPath );
     console.log( 'program1:begin' );
-    setTimeout( () => { console.log( 'program1:end' ) }, context.t3 ); /* 15000 */
+    setTimeout( () => { console.log( 'program1:end' ) }, context.t1 * 15 ); /* 15000 */
   }
 
 }
@@ -14476,8 +14476,8 @@ function startConcurrentMultiple( test )
 
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
-    test.gt( spent, 1000 );
-    test.le( spent, 5000 );
+    test.gt( spent, context.t1 ); /* 1000 */
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesOptionsSerial.exitCode, 0 );
     test.identical( op.runs.length, 2 );
@@ -14521,7 +14521,7 @@ function startConcurrentMultiple( test )
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 0 );
-    test.le( spent, 5000 );
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesError.exitCode, 1 );
     test.is( _.errIs( err ) );
@@ -14560,7 +14560,7 @@ function startConcurrentMultiple( test )
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 0 );
-    test.le( spent, 5000 );
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesErrorNonThrowing.exitCode, 1 );
     test.identical( op.runs.length, 2 );
@@ -14605,7 +14605,7 @@ function startConcurrentMultiple( test )
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 0 );
-    test.le( spent, 5000 );
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesErrorConcurrent.exitCode, 1 );
     test.is( _.errIs( err ) );
@@ -14645,7 +14645,7 @@ function startConcurrentMultiple( test )
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 0 );
-    test.le( spent, 5000 );
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesErrorConcurrentNonThrowing.exitCode, 1 );
     test.identical( op.runs.length, 2 );
@@ -14689,8 +14689,8 @@ function startConcurrentMultiple( test )
 
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent )
-    test.gt( spent, 1000 );
-    test.le( spent, 5000 );
+    test.gt( spent, context.t1 ); /* 1000 */
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( suprocessesConcurrentOptions.exitCode, 0 );
     test.identical( op.runs.length, 2 );
@@ -14733,8 +14733,8 @@ function startConcurrentMultiple( test )
   {
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent )
-    test.gt( spent, 1000 );
-    test.le( spent, 5000 );
+    test.gt( spent, context.t1 ); /* 1000 */
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( suprocessesConcurrentArgumentsOptions.exitCode, 0 );
     test.identical( op.runs.length, 2 );
@@ -14782,12 +14782,12 @@ function startConcurrentMultiple( test )
       console.log( 'end', process.argv.slice( 2 ).join( ', ' ) );
     }
 
-    setTimeout( periodic, context.t0 / 2 ); /* 50 */
+    setTimeout( periodic, context.t1 / 20 ); /* 50 */
     function periodic()
     {
       console.log( 'tick', process.argv.slice( 2 ).join( ', ' ) );
       if( !ended )
-      setTimeout( periodic, context.t0 / 2 ); /* 50 */
+      setTimeout( periodic, context.t1 / 20 ); /* 50 */
     }
   }
 
@@ -15866,8 +15866,8 @@ function starterConcurrentMultiple( test )
 
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
-    test.gt( spent, 1000 );
-    test.le( spent, 5000 );
+    test.gt( spent, context.t1 ); /* 1000 */
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesOptionsSerial2.exitCode, 0 );
     test.identical( op.runs.length, 2 );
@@ -15914,7 +15914,7 @@ function starterConcurrentMultiple( test )
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 0 );
-    test.le( spent, 5000 );
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesError2.exitCode, 1 );
     test.is( _.errIs( err ) );
@@ -15955,7 +15955,7 @@ function starterConcurrentMultiple( test )
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 0 );
-    test.le( spent, 5000 );
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesErrorNonThrowing2.exitCode, 1 );
     test.identical( op.runs.length, 2 );
@@ -16003,7 +16003,7 @@ function starterConcurrentMultiple( test )
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 0 );
-    test.le( spent, 5000 );
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesErrorConcurrent2.exitCode, 1 );
     test.is( _.errIs( err ) );
@@ -16045,7 +16045,7 @@ function starterConcurrentMultiple( test )
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 0 );
-    test.le( spent, 5000 );
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesErrorConcurrentNonThrowing2.exitCode, 1 );
     test.identical( op.runs.length, 2 );
@@ -16092,8 +16092,8 @@ function starterConcurrentMultiple( test )
 
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent )
-    test.gt( spent, 1000 );
-    test.le( spent, 5000 );
+    test.gt( spent, context.t1 ); /* 1000 */
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesConcurrentOptions2.exitCode, 0 );
     test.identical( op.runs.length, 2 );
@@ -16140,8 +16140,8 @@ function starterConcurrentMultiple( test )
 
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent )
-    test.gt( spent, 1000 );
-    test.le( spent, 5000 );
+    test.gt( spent, context.t1 ); /* 1000 */
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesConcurrentArgumentsOptions2.exitCode, 0 );
     test.identical( op.runs.length, 2 );
@@ -16192,12 +16192,12 @@ function starterConcurrentMultiple( test )
       console.log( 'end', process.argv.slice( 2 ).join( ', ' ) );
     }
 
-    setTimeout( periodic, context.t0 / 2 ); /* 50 */
+    setTimeout( periodic, context.t1 / 20 ); /* 50 */
     function periodic()
     {
       console.log( 'tick', process.argv.slice( 2 ).join( ', ' ) );
       if( !ended )
-      setTimeout( periodic, context.t0 / 2 ); /* 50 */
+      setTimeout( periodic, context.t1 / 20 ); /* 50 */
     }
   }
 }
@@ -22490,7 +22490,7 @@ function startOptionStreamSizeLimitThrowing( test )
 
 //
 
-/* qqq for Yevhen : paramtetrizing time delays is not complete! */
+/* qqq for Yevhen : paramtetrizing time delays is not complete! | aaa : Fixed. */
 function startSingleOptionDry( test )
 {
   let context = this;
@@ -22535,7 +22535,7 @@ function startSingleOptionDry( test )
         throwingExitCode : 1,
         applyingExitCode : 1,
         ipc : tops.mode === 'shell' ? 0 : 1,
-        when : { delay : 2000 },
+        when : { delay : context.t1 * 2 }, /* 2000 */
       }
       let track = [];
       var t1 = _.time.now();
@@ -22585,7 +22585,7 @@ function startSingleOptionDry( test )
       o.ready.tap( ( err, op ) =>
       {
         var t2 = _.time.now();
-        test.ge( t2 - t1, 2000 )
+        test.ge( t2 - t1, context.t1 * 2 ); /* 2000 */
         track.push( 'ready' );
         test.identical( o.process, null );
         test.identical( err, undefined );
@@ -22603,13 +22603,8 @@ function startSingleOptionDry( test )
         test.identical( op.streamOut, null );
         test.identical( op.streamErr, null );
 
-        /* qqq for Yevhen : bad */
-        if( tops.mode === 'fork' )
-        {
-          test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
-          test.identical( op.fullExecPath, `${programPath} arg1 arg0` );
-        }
-        else if ( tops.mode === 'shell' )
+        /* qqq for Yevhen : bad | aaa : Fixed. */
+        if ( tops.mode === 'shell' )
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe' ] );
           test.identical( op.fullExecPath, `node ${programPath} arg1 "arg0"` );
@@ -22617,6 +22612,9 @@ function startSingleOptionDry( test )
         else
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
+          if( tops.mode === 'fork' )
+          test.identical( op.fullExecPath, `${programPath} arg1 arg0` );
+          else
           test.identical( op.fullExecPath, `node ${programPath} arg1 arg0` );
         }
 
@@ -22636,11 +22634,11 @@ function startSingleOptionDry( test )
 
     ready.then( () =>
     {
-      /* qqq for Yevhen : bad description! */
-      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, dry : 1, execPath : 'err' + programPath + \` arg1 "arg 2" "'arg3'"\``
+      /* qqq for Yevhen : bad description! | aaa : Fixed. */
+      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, dry : 1, wrong execPath`;
       let o =
       {
-        execPath : 'err ' + programPath + ` arg1`,
+        execPath : 'err ' + programPath + ' arg1',
         mode : tops.mode,
         sync : tops.sync,
         deasync : tops.deasync,
@@ -22652,7 +22650,7 @@ function startSingleOptionDry( test )
         applyingExitCode : 1,
         // timeOut : tops.sync || !tops.deasync ? null : 100,
         ipc : tops.mode === 'shell' ? 0 : 1,
-        when : { delay : 2000 }
+        when : { delay : context.t1 * 2 }, /* 2000 */
       }
       let track = []; /* qqq for Yevhen : should be on beginning of test case | aaa : Moved. */
       var t1 = _.time.now();
@@ -22702,7 +22700,7 @@ function startSingleOptionDry( test )
       o.ready.tap( ( err, op ) =>
       {
         var t2 = _.time.now();
-        test.ge( t2 - t1, 2000 );
+        test.ge( t2 - t1, context.t1 * 2 ); /* 2000 */
         track.push( 'ready' );
         test.identical( o.process, null );
         test.identical( err, undefined );
@@ -23000,15 +22998,10 @@ function startOptionDryMultiple( test )
           test.identical( op2.streamOut, null );
           test.identical( op2.streamErr, null );
           if( tops.mode === 'fork' )
-          {
-            test.identical( op2.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
-            test.identical( op2.fullExecPath, 'err ' + programPath + ` id:${counter + 1}` );
-          }
+          test.identical( op2.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
           else
-          {
-            test.identical( op2.stdio, [ 'pipe', 'pipe', 'pipe' ] );
-            test.identical( op2.fullExecPath, `err ${programPath} id:${counter + 1}` );
-          }
+          test.identical( op2.stdio, [ 'pipe', 'pipe', 'pipe' ] );
+          test.identical( op2.fullExecPath, `err ${programPath} id:${counter + 1}` );
           test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate', 'ready' ] );
           track = [];
           return null;
@@ -26587,7 +26580,7 @@ function startTerminateAfterLoopRelease( test )
 
     o.process.on( 'message', () =>
     {
-      _.process.terminate({ pnd : o.process, timeOut : 10000 });
+      _.process.terminate({ pnd : o.process, timeOut : context.t2 * 2 }); /* 10000 */
     })
 
     con.then( () =>
@@ -26625,7 +26618,7 @@ function startTerminateAfterLoopRelease( test )
 
     o.process.on( 'message', () =>
     {
-      _.process.terminate({ pnd : o.process, timeOut : 10000 });
+      _.process.terminate({ pnd : o.process, timeOut : context.t2 * 2 }); /* 10000 */
     })
 
     con.then( () =>
@@ -33523,7 +33516,7 @@ function waitForDeath( test )
     };
     _.process.start( o )
 
-    let terminated = _.process.waitForDeath({ pnd : o.process, timeOut : 1000 })
+    let terminated = _.process.waitForDeath({ pnd : o.process, timeOut : context.t1 }) /* 1000 */
     terminated = test.shouldThrowErrorAsync( terminated, ( err ) =>
     {
       test.is( _.errIs( err ) );
@@ -34187,7 +34180,7 @@ function experiment3( test )
     execPath : 'node -e "console.log(setTimeout(()=>{},10000))"',
     mode : 'spawn',
     stdio : 'pipe',
-    timeOut : 2000,
+    timeOut : context.t1 * 2, /* 2000 */
     throwingExitCode : 0
   }
   _.process.start( o );
