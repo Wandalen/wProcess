@@ -34293,7 +34293,7 @@ var Proto =
     startOptionWhenTime,
     startOptionTimeOut,
     startAfterDeath, /* qqq for Vova : fix aaa:fixed*/
-    startAfterDeathOutput, /* qqq for Vova : fix */
+    startAfterDeathOutput, /* qqq for Vova : fix aaa:fixed*/
 
     // detaching
 
