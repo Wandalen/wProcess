@@ -33008,6 +33008,44 @@ function terminateDifferentStdio( test )
 
   .then( () =>
   {
+    
+    /* 
+      Phantom fail on Windows:
+      
+      Fail #1:
+      signalSend : 544 name: node.exe
+      signalSend : 552 name: csrss.exe
+      ...
+        = Message of error#1
+          kill EPERM
+          errno : 'EPERM'
+          code : 'EPERM'
+          syscall : 'kill'
+          Current process does not have permission to kill target process 544
+
+        = Beautified calls stack
+          at process.kill (internal/process/per_thread.js:189:13)
+          at signalSend (C:\Work\modules\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2851:15)
+      ...
+      
+      Fail#2
+      signalSend : 5164 name: node.exe
+      signalSend : 544 name: conhost.exe
+      signalSend : 552 name: csrss.exe
+      ...
+      = Message of error#1
+        kill EPERM
+        errno : 'EPERM'
+        code : 'EPERM'
+        syscall : 'kill'
+        Current process does not have permission to kill target process 5164
+
+      = Beautified calls stack
+        at process.kill (internal/process/per_thread.js:189:13)
+        at signalSend (C:\Work\modules\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2851:15)
+      ...
+    */
+   
     var o =
     {
       execPath :  'node ' + testAppPath,
@@ -33026,6 +33064,9 @@ function terminateDifferentStdio( test )
     o.process.on( 'message', () =>
     {
       ready.take( _.process.terminate( o.process.pid ) )
+      /* Possible solution for phantom problem on Windows*/
+      // ready.take( _.process.terminate({ pid : o.process.pid, ignoringErrorPerm : 1 }) )
+      
     })
 
     o.conTerminate.then( ( op ) =>
