@@ -31422,6 +31422,9 @@ function terminateDetachedFirstChild( test ) /* SHELL NOT READY */
       if( a.fileProvider.fileExists( a.abs( 'program1.js' ) ) )
       a.fileProvider.fileDelete( a.abs( 'program1.js' ) );
 
+      if( a.fileProvider.fileExists( a.abs( 'program2Pid.json' ) ) )
+      a.fileProvider.fileDelete( a.abs( 'program2Pid.json' ) );
+
       return null;
     } )
 
@@ -31445,8 +31448,19 @@ function terminateDetachedFirstChild( test ) /* SHELL NOT READY */
     
       let program2Pid = null;
       let terminate = _.Consequence();
-    
+      /* For mode::shell */
+      // let timerIsRunning;
+      // let timer;
+
+      // if( mode === 'shell' )
+      // {
+      //   timerIsRunning = { isRunning : true };
+      //   timer = waitForProgram2Ready( terminate, timerIsRunning );
+      // }
+      // else
+      // {
       o.process.stdout.on( 'data', _.routineJoin( null, handleOutput, [ o, terminate ] ) );
+      // }
     
       terminate.then( () =>
       {
@@ -31462,6 +31476,12 @@ function terminateDetachedFirstChild( test ) /* SHELL NOT READY */
     
       o.conTerminate.then( () =>
       {
+        // if( mode === 'shell' )
+        // {
+        //   if( timerIsRunning.isRunning )
+        //   timer.cancel();
+        // }
+
         if( process.platform === 'win32' )
         {
           test.identical( o.exitCode, 1 );
@@ -31474,6 +31494,9 @@ function terminateDetachedFirstChild( test ) /* SHELL NOT READY */
         }
     
         test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
+        if( mode === 'shell' )
+        test.ge( _.strCount( o.output, 'program2::begin' ), 0 );
+        else
         test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
         test.identical( _.strCount( o.output, 'program2::end' ), 0 );
         test.is( _.process.isAlive( program2Pid ) );
@@ -31504,6 +31527,20 @@ function terminateDetachedFirstChild( test ) /* SHELL NOT READY */
     o.process.stdout.removeListener( 'data', handleOutput );
     terminate.take( null );
   }
+
+  /* - */
+
+  // function waitForProgram2Ready( terminate, timerIsRunning )
+  // {
+  //   let filePath = a.abs( 'program2Pid' );
+  //   return _.time.periodic( context.t0 * 5, () => /* 500 */
+  //   {
+  //     if( !a.fileProvider.fileExists( filePath ) )
+  //     return true;
+  //     timerIsRunning.isRunning = false;
+  //     terminate.take( true );
+  //   })
+  // }
 
   /* - */
 
@@ -31561,7 +31598,8 @@ function terminateDetachedFirstChild( test ) /* SHELL NOT READY */
   }
 }
 
-terminateDetachedFirstChild.timeOut = 120000;
+terminateDetachedFirstChild.timeOut = 12e4; /* Locally : 38.066s */
+terminateDetachedFirstChild.rapidity = -1;
 terminateDetachedFirstChild.description =
 `
 program1 starts program2 in detached mode
