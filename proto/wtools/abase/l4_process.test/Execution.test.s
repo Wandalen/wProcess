@@ -1900,13 +1900,13 @@ function startSyncDeasync( test )
       if( tops.sync )
       {
         test.is( !_.consequenceIs( returned ) );
+        test.identical( returned.exitCode, 0 );
         test.is( returned === options );
         test.identical( returned, options );
         if( tops.deasync )
         test.identical( returned.process.constructor.name, 'ChildProcess' );
         else
         test.identical( returned.process.constructor.name, 'Object' );
-        test.identical( returned.exitCode, 0 );
         return returned;
       }
       else
@@ -1922,7 +1922,6 @@ function startSyncDeasync( test )
           test.identical( op.ended, true );
           test.is( op === options );
           test.identical( op.process.constructor.name, 'ChildProcess' );
-          test.identical( op.exitCode, 0 );
           test.identical( op.output, expectedOutput );
 
           return op;
@@ -1954,13 +1953,13 @@ function startSyncDeasync( test )
       if( tops.sync )
       {
         test.is( !_.consequenceIs( returned ) );
+        test.identical( returned.exitCode, 0 );
         test.is( returned === options );
         test.identical( returned, options );
         if( tops.deasync )
         test.identical( returned.process.constructor.name, 'ChildProcess' );
         else
         test.identical( returned.process.constructor.name, 'Object' );
-        test.identical( returned.exitCode, 0 );
         return returned;
       }
       else
@@ -1976,7 +1975,6 @@ function startSyncDeasync( test )
           test.identical( op.ended, true );
           test.is( op === options );
           test.identical( op.process.constructor.name, 'ChildProcess' );
-          test.identical( op.exitCode, 0 );
           test.identical( op.output, null );
 
           return op;
@@ -2026,13 +2024,13 @@ function startSyncDeasync( test )
       if( tops.sync )
       {
         test.is( !_.consequenceIs( returned ) );
+        test.identical( returned.exitCode, 0 );
         test.is( returned === options );
         test.identical( returned, options );
         if( tops.deasync )
         test.identical( returned.process.constructor.name, 'ChildProcess' );
         else
         test.identical( returned.process.constructor.name, 'Object' );
-        test.identical( returned.exitCode, 0 );
         return returned;
       }
       else
@@ -2048,7 +2046,6 @@ function startSyncDeasync( test )
           test.identical( op.ended, true );
           test.is( op === options );
           test.identical( op.process.constructor.name, 'ChildProcess' );
-          test.identical( op.exitCode, 0 );
           test.identical( op.output, expectedOutput );
 
           return op;
