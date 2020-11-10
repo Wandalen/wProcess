@@ -3315,7 +3315,6 @@ function startArgumentsParsingNonTrivial( test )
     {
       test.case = `mode : ${mode}, args in execPath and args options`
 
-      /* qqq for Vova : investigate. can conditions be removed? aaa: I removed redundant os conditions after fix of arguments processing for shell mode*/
       if( mode === 'shell' && process.platform === 'win32' )
       return null;
       if( mode === 'fork' )
@@ -25947,7 +25946,7 @@ function killSync( test )
   }
 }
 
-killSync.timeOut = 5e5; /* qqq for Vova : test cases descriptions?? aaa: added*/
+killSync.timeOut = 5e5;
 
 //
 
@@ -29093,7 +29092,6 @@ endSignalsOnExitExitAgain.description =
 
 //
 
-/* qqq for Vova : describe test cases. describe test. this and related aaa:done*/
 function terminate( test )
 {
   let context = this;
@@ -31573,7 +31571,6 @@ SIGTERM
 
 */
 
-/* qqq for Vova : join routines, use subroutine for mode varying aaa: this will make the routine too complicated, that is the reason why I splitted the old routine*/
 function terminateWithDetachedChildFork( test )
 {
   let context = this;
@@ -31715,7 +31712,7 @@ program1 and program2 should be terminated
 
 //
 
-function terminateWithDetachedChildShell( test ) /* qqq for Vova : fix on Windows aaa:fixed*/
+function terminateWithDetachedChildShell( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -32011,20 +32008,6 @@ function terminateSeveralChildren( test )
 
   /* - */
 
-  /* qqq for Vova : bad aaa:fixed */
-  /* qqq for Vova : bad! */
-  // function handleOutput()
-  // {
-  //   if( !_.strHas( o.output, 'program2::begin' ) || _.strHas( o.output, 'program3::begin' ) )
-  //   c += 1;
-  //
-  //   if( c !== 2 )
-  //   return;
-  //
-  //   o.process.stdout.removeListener( 'data', handleOutput );
-  //   terminate.take( null );
-  // }
-
   function handleOutput()
   {
     if( !_.strHas( o.output, 'program2::begin' ) || !_.strHas( o.output, 'program3::begin' ) )
@@ -32196,7 +32179,6 @@ function terminateSeveralDetachedChildren( test )
 
   /* - */
 
-  /* qqq for Vova : bad aaa:fixed*/
   function handleOutput()
   {
     if( !_.strHas( o.output, 'program2::begin' ) || !_.strHas( o.output, 'program3::begin' ) )
@@ -34377,7 +34359,7 @@ var Proto =
     endSignalsOnExit,
     endSignalsOnExitExitAgain,
 
-    terminate, /* qqq for Vova: review, remove duplicates, check timeouts aaa:done*/
+    terminate,
     terminateSync,
 
     terminateFirstChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine */

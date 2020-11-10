@@ -198,8 +198,7 @@ function startMinimal_body( o )
   let _errPrefix = null;
   let _outPrefix = null;
   let _readyCallback;
-  /* xxx qqq for Vova : remove. no hacks! aaa:removed execArgs*/
-  let _argsLength = 0;
+  let _argsLength = 0; /* xxx */
 
   form1();
   form2();
@@ -2877,14 +2876,10 @@ function signal_body( o )
       otherwise more fails appear in shell mode for OS spawing extra process for applications
     */
 
-    // console.log( `processKill withChildren:${o.withChildren} ${processes.length}` );
-
     if( o.withChildren )
     for( let i = 0 ; i < processes.length ; i++ )
     {
       let process = processes[ i ];
-      // console.log( `process.name:${process.name}` );
-      /* qqq for Vova : why? */
       // if( isWindows && i && process.name === 'conhost.exe' )
       // continue;
       signalSend( process );
@@ -2905,8 +2900,6 @@ function signal_body( o )
   function waitForDeath( p )
   {
     let timeOut = signal === 'SIGKILL' ? 5000 : o.timeOut;
-
-    // console.log( `waitForDeath pid:${p.pid} timeOut:${timeOut}` );
 
     if( timeOut === 0 )
     return _.process.kill({ pid : p.pid, pnd : p.pnd, withChildren : 0 });
@@ -3278,7 +3271,6 @@ function execPathOf( o )
     }
   }
 
-  let commandLineFlag = 2; /* qqq for Vova : use constant, no hardcoding aaa:done*/
   WindowsProcessTree.getProcessList( o.pid, ( list ) =>
   {
     ready.take( list[ 0 ].commandLine );
