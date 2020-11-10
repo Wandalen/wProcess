@@ -24524,7 +24524,7 @@ function startOptionProcedureMultiple( test )
   }
 }
 
-startOptionProcedureMultiple.timeOut = 14e4; /* 14.083s */
+startOptionProcedureMultiple.timeOut = 18e4; /* 17.983s */
 
 // --
 // pid
