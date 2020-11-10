@@ -29405,7 +29405,8 @@ function terminate( test )
 
       o.process.on( 'message', () =>
       {
-        _.process.terminate({ pnd : o.process, timeOut : 1 });
+        _.process.terminate({ pnd : o.process, timeOut : context.t1*4 });
+        // _.process.terminate({ pnd : o.process, timeOut : 1 }); /* yyy */
       })
 
       ready.then( ( op ) =>
@@ -29421,7 +29422,7 @@ function terminate( test )
         else
         {
           test.identical( op.exitCode, null );
-          test.identical( op.exitSignal, 'SIGTERM' );
+          test.identical( op.exitSignal, 'SIGTERM' ); /* yyy xxx : sometimes SIGKILL */
           test.identical( op.ended, true );
           test.is( _.strHas( op.output, 'SIGTERM' ) );
           test.is( !_.strHas( op.output, 'Application timeout!' ) );
@@ -29438,13 +29439,11 @@ function terminate( test )
     return ready;
   }
 
+  /* - */
+
   function terminateShell()
   {
     let ready = new _.Consequence().take( null )
-    /*
-      zzz Vova: shell,exec modes have different behaviour on Windows,OSX and Linux
-      look for solution that allow to have same behaviour on each mode
-    */
 
     .then( () =>
     {
