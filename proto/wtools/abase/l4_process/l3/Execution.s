@@ -1405,7 +1405,7 @@ startMinimal_body.defaults =
   outputGraying : 0,
   inputMirroring : 1, /* qqq for Yevhen : cover the option | aaa : Done */
 
-  /* qqq for Yevhen : remove option::outputColoringStderr and option::outputColoringStdout. extend outputColoring */
+  /* qqq for Yevhen : remove option::outputColoringStderr and option::outputColoringStdout. extend outputColoring. */
 
 }
 
