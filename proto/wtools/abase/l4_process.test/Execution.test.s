@@ -25182,6 +25182,28 @@ function startOutputMultiple( test )
           test.lt( track.indexOf( 'conTerminate' ), track.indexOf( 'ready' ) );
 
         }
+        
+        /* 
+        Fails on windows:
+        - got :
+          '1::begin
+          1::end
+          2::begin
+          1::err
+          2::end
+          2::err'
+        - expected :
+          '1::begin
+          2::begin
+          1::end
+          2::end
+          1::err
+          2::err'
+        - difference :
+          '1::begin
+          *
+        with accuracy 1e-7
+        */
         var exp =
 `
 1::begin
