@@ -2123,7 +2123,6 @@ function startSyncDeasync( test )
 }
 
 startSyncDeasync.timeOut = 57e4; /* Locally : 56.549s */
-startSyncDeasync.rapidity = -1;
 
 //
 
