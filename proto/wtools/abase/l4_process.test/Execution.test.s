@@ -23896,11 +23896,14 @@ function startOptionProcedureSingle( test )
   let a = context.assetFor( test, false );
   let programPath = a.program( program1 );
   let modes = [ 'fork', 'spawn', 'shell' ];
-  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, mode }) ) );
 
   return a.ready;
 
-  function run( mode )
+  function run( tops )
   {
     let ready = new _.Consequence().take( null );
 
@@ -23912,21 +23915,48 @@ function startOptionProcedureSingle( test )
       {
         execPath : mode === 'fork' ? programPath : 'node ' + programPath,
         args : 'a',
-        mode,
+        mode : tops.mode,
+        sync : tops.sync,
+        deasync : tops.deasync,
         throwingExitCode : 0,
         outputCollecting : 1,
       }
 
-      return _.process.start( options )
-      .then( ( op ) =>
+      let returned = _.process.start( options );
+
+      if( tops.sync )
       {
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.equivalent( op.output, `[ 'a' ]` );
-        test.is( _.strHas( op.procedure._name, 'PID:') );
-        test.is( _.objectIs( op.procedure._object ) );
-        return null;
-      } )
+        test.is( !_.consequenceIs( returned ) );
+        test.is( returned === options );
+        test.identical( returned, options );
+        test.identical( returned.exitCode, 0 );
+        return returned;
+      }
+      else
+      {
+        test.is( _.consequenceIs( returned ) );
+        if( tops.deasync )
+        test.identical( returned.resourcesCount(), 1 );
+        else
+        test.identical( returned.resourcesCount(), 0 );
+        returned.then( ( op ) =>
+        {
+          test.identical( op.exitCode, 0 );
+          test.identical( op.ended, true );
+          test.is( op === options );
+          test.identical( op.output, expectedOutput );
+        })
+      }
+
+      // options.ready.then( ( op ) =>
+      // {
+      //   test.identical( op.exitCode, 0 );
+      //   test.identical( op.ended, true );
+      //   test.equivalent( op.output, `[ 'a' ]` );
+      //   test.is( _.strHas( op.procedure._name, 'PID:') );
+      //   test.is( _.objectIs( op.procedure._object ) );
+      //   return null;
+      // } )
     })
 
     /* */
