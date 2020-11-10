@@ -73,7 +73,12 @@ function pidFrom( src )
     src = src.process;
     if( src.pnd )
     src = src.pnd;
-    _.assert( src instanceof ChildProcess.ChildProcess );
+    if( Config.debug )
+    {
+      if( !ChildProcess )
+      ChildProcess = require( 'child_process' );
+      _.assert( src instanceof ChildProcess.ChildProcess );
+    }
     return src.pid;
   }
 

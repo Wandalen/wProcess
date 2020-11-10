@@ -63,6 +63,16 @@ RET=0; until [ ${RET} -ne 0 ]; do
     sleep 1
 done
 
+:repeat
+reset && node wtools/abase/l4_process.test/Execution.test.s v:5 s:0 r:endSignalsBasic && goto :repeat
+echo %errorlevel%
+
+:Loop
+ping -n 1 www.google.com | find "TTL="
+if %errorlevel% equ 0 goto :Loop
+echo %errorlevel%
+echo Connection established
+
 */
 
 /*
