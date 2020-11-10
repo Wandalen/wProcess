@@ -25198,8 +25198,7 @@ function startOutputMultiple( test )
 
         }
 
-        /*
-        Fails on windows:
+        /* xxx : fails on windows :
         - got :
           '1::begin
           1::end
@@ -25219,6 +25218,7 @@ function startOutputMultiple( test )
           *
         with accuracy 1e-7
         */
+
         var exp =
 `
 1::begin
