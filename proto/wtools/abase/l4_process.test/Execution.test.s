@@ -10250,7 +10250,7 @@ function startAfterDeath( test )
 
 //     _.process.start( o );
 
-//     _.time.out( context.t2 - context.t1, () => /* 4000 */
+//     _.time.out( context.t1 * 4, () => /* 4000 */
 //     {
 //       console.log( 'Parent process exit' )
 //       process.disconnect();
@@ -10265,7 +10265,7 @@ function startAfterDeath( test )
 
 //     console.log( 'Child process start' )
 
-//     _.time.out( context.t2, () => /* 5000 */
+//     _.time.out( context.t1 * 5, () => /* 5000 */
 //     {
 //       console.log( 'Child process end' )
 //     })
