@@ -28371,7 +28371,7 @@ deasync:end
 }
 
 endSignalsBasic.rapidity = -1 /* make it -2 later */
-endSignalsBasic.timeOut = 1e6;
+endSignalsBasic.timeOut = 1e7;
 endSignalsBasic.description =
 `
   - signals terminate or kill started process
@@ -28857,7 +28857,7 @@ Killed
 }
 
 endSignalsOnExit.rapidity = -1;
-endSignalsOnExit.timeOut = 1e6;
+endSignalsOnExit.timeOut = 1e7;
 endSignalsOnExit.description =
 `
   - handler of the event "exit" should be called, despite of signal, unless signal is SIGKILL

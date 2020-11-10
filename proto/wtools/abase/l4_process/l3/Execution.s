@@ -1647,7 +1647,7 @@ let startSingle = _.routineUnite( startSingle_head, startSingle_body );
 
 //
 
-function start_head( routine, args )
+function startMultiple_head( routine, args )
 {
   let o = startMinimalHeadCommon( routine, args );
 
@@ -1726,7 +1726,7 @@ function start_head( routine, args )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
  *
- * let con = _.process.start( 'node -v' );
+ * let con = _.process.startMultiple( 'node -v' );
  *
  * con.then( ( op ) =>
  * {
@@ -1741,7 +1741,7 @@ function start_head( routine, args )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
  *
- * let con = _.process.start({ execPath : 'node', args : [ '-v' ] });
+ * let con = _.process.startMultiple({ execPath : 'node', args : [ '-v' ] });
  *
  * con.then( ( op ) =>
  * {
@@ -1749,12 +1749,12 @@ function start_head( routine, args )
  *  return op;
  * })
  *
- * @function shell
+ * @function startMultiple
  * @module Tools/base/ProcessBasic
  * @namespace Tools.process
  */
 
-function start_body( o )
+function startMultiple_body( o )
 {
 
   _.assert( arguments.length === 1, 'Expects single argument' );
@@ -2252,7 +2252,7 @@ function start_body( o )
 
 }
 
-start_body.defaults =
+startMultiple_body.defaults =
 {
 
   ... _.mapBut( startSingle.defaults, [ 'sessionId' ] ),
@@ -2261,11 +2261,11 @@ start_body.defaults =
 
 }
 
-let start = _.routineUnite( start_head, start_body );
+let startMultiple = _.routineUnite( startMultiple_head, startMultiple_body );
 
 //
 
-let startPassingThrough = _.routineUnite( start_head, start_body );
+let startPassingThrough = _.routineUnite( startMultiple_head, startMultiple_body );
 
 var defaults = startPassingThrough.defaults;
 
@@ -2370,12 +2370,12 @@ function startNjs_body( o )
 
   o.execPath = execPath;
 
-  let result = _.process.start.body.call( _.process, o );
+  let result = _.process.startMultiple.body.call( _.process, o );
 
   return result;
 }
 
-var defaults = startNjs_body.defaults = Object.create( start.defaults );
+var defaults = startNjs_body.defaults = Object.create( startMultiple.defaults );
 
 defaults.passingThrough = 0;
 defaults.maximumMemory = 0;
@@ -2383,7 +2383,7 @@ defaults.applyingExitCode = 1;
 defaults.stdio = 'inherit';
 defaults.mode = 'fork';
 
-let startNjs = _.routineUnite( start_head, startNjs_body );
+let startNjs = _.routineUnite( startMultiple_head, startNjs_body );
 
 //
 
@@ -2419,7 +2419,7 @@ let startNjs = _.routineUnite( start_head, startNjs_body );
  * @namespace Tools.process
  */
 
-let startNjsPassingThrough = _.routineUnite( start_head, startNjs.body );
+let startNjsPassingThrough = _.routineUnite( startMultiple_head, startNjs.body );
 
 var defaults = startNjsPassingThrough.defaults;
 
@@ -2451,7 +2451,7 @@ function startAfterDeath_body( o )
   o.outputPiping = 1;
   o.stdio = 'pipe';
 
-  let result = _.process.start( o );
+  let result = _.process.startMultiple( o );
 
   o.conStart.give( function( err, op )
   {
@@ -2472,15 +2472,15 @@ function startAfterDeath_body( o )
 
     process.on( 'message', () =>
     {
-      process.on( 'disconnect', () => _.process.start( o ) )
+      process.on( 'disconnect', () => _.process.startMultiple( o ) )
     })
   }
 
 }
 
-var defaults = startAfterDeath_body.defaults = Object.create( start.defaults );
+var defaults = startAfterDeath_body.defaults = Object.create( startMultiple.defaults );
 
-let startAfterDeath = _.routineUnite( start_head, startAfterDeath_body );
+let startAfterDeath = _.routineUnite( startMultiple_head, startAfterDeath_body );
 
 //
 
@@ -2567,7 +2567,7 @@ function starter( o0 )
   o0 = _.routineOptions( starter, o0 );
   o0.ready = o0.ready || new _.Consequence().take( null );
 
-  _.routineExtend( er, _.process.start );
+  _.routineExtend( er, _.process.startMultiple );
   er.predefined = o0;
 
   return er;
@@ -2586,7 +2586,7 @@ function starter( o0 )
       _.mapExtend( o, o1 );
     }
 
-    return _.process.start( o );
+    return _.process.startMultiple( o );
   }
 
   function optionsFrom( options )
@@ -2633,7 +2633,7 @@ function starter( o0 )
 
 }
 
-starter.defaults = Object.create( start.defaults );
+starter.defaults = Object.create( startMultiple.defaults );
 
 // --
 // exit
@@ -3181,7 +3181,7 @@ function children( o )
 
   function childrenOf( command, pid, _result )
   {
-    return _.process.start
+    return _.process.startSingle
     ({
       execPath : command + ' ' + pid,
       outputCollecting : 1,
@@ -3346,7 +3346,8 @@ let Extension =
 
   startMinimal,
   startSingle,
-  start,
+  startMultiple,
+  start : startMultiple,
 
   startPassingThrough,
   startNjs,
