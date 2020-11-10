@@ -2443,8 +2443,10 @@ function startAfterDeath_body( o )
   let secondaryProcessRoutine = _.program.preform({ routine : afterDeathSecondaryProcess, locals })
   let secondaryFilePath = _.process.tempOpen({ sourceCode : secondaryProcessRoutine.sourceCode });
 
+  // debugger
   o.execPath = _.path.nativize( secondaryFilePath );
   o.mode = 'fork';
+  o.ipc = true;
   o.args = [];
   o.detaching = true;
   o.inputMirroring = 0;
