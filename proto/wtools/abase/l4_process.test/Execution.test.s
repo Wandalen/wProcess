@@ -30239,7 +30239,11 @@ function terminateFirstChild( test )
     }
     _.process.start( o );
 
-    let timer = _.time.outError( context.t1*25 );
+    let timer;
+    if( mode === 'shell' )
+    timer = _.time.out( context.t1*25 );
+    else
+    timer = _.time.outError( context.t1*25 );
 
     console.log( 'program1::begin' );
   }
@@ -30971,7 +30975,6 @@ function terminateSecondChild( test )
 
 }
 
-/* No timeout, run locally : 7.136s */
 terminateSecondChild.description =
 `
 terminate second child
@@ -31444,7 +31447,7 @@ second exits with signal SIGTERM on unix and exit code 1 on win
 
 //
 
-function terminateDetachedFirstChild( test ) /* SHELL NOT READY */
+function terminateDetachedFirstChild( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -31494,18 +31497,18 @@ function terminateDetachedFirstChild( test ) /* SHELL NOT READY */
       let program2Pid = null;
       let terminate = _.Consequence();
       /* For mode::shell */
-      // let timerIsRunning;
-      // let timer;
+      let timerIsRunning;
+      let timer;
 
-      // if( mode === 'shell' )
-      // {
-      //   timerIsRunning = { isRunning : true };
-      //   timer = waitForProgram2Ready( terminate, timerIsRunning );
-      // }
-      // else
-      // {
-      o.process.stdout.on( 'data', _.routineJoin( null, handleOutput, [ o, terminate ] ) );
-      // }
+      if( mode === 'shell' )
+      {
+        timerIsRunning = { isRunning : true };
+        timer = waitForProgram2Ready( terminate, timerIsRunning );
+      }
+      else
+      {
+        o.process.stdout.on( 'data', _.routineJoin( null, handleOutput, [ o, terminate ] ) );
+      }
     
       terminate.then( () =>
       {
@@ -31521,11 +31524,11 @@ function terminateDetachedFirstChild( test ) /* SHELL NOT READY */
     
       o.conTerminate.then( () =>
       {
-        // if( mode === 'shell' )
-        // {
-        //   if( timerIsRunning.isRunning )
-        //   timer.cancel();
-        // }
+        if( mode === 'shell' )
+        {
+          if( timerIsRunning.isRunning )
+          timer.cancel();
+        }
 
         if( process.platform === 'win32' )
         {
@@ -31575,17 +31578,17 @@ function terminateDetachedFirstChild( test ) /* SHELL NOT READY */
 
   /* - */
 
-  // function waitForProgram2Ready( terminate, timerIsRunning )
-  // {
-  //   let filePath = a.abs( 'program2Pid' );
-  //   return _.time.periodic( context.t0 * 5, () => /* 500 */
-  //   {
-  //     if( !a.fileProvider.fileExists( filePath ) )
-  //     return true;
-  //     timerIsRunning.isRunning = false;
-  //     terminate.take( true );
-  //   })
-  // }
+  function waitForProgram2Ready( terminate, timerIsRunning )
+  {
+    let filePath = a.abs( 'program2Pid' );
+    return _.time.periodic( context.t0 * 5, () => /* 500 */
+    {
+      if( !a.fileProvider.fileExists( filePath ) )
+      return true;
+      timerIsRunning.isRunning = false;
+      terminate.take( true );
+    })
+  }
 
   /* - */
 
