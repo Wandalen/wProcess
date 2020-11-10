@@ -3010,6 +3010,8 @@ function startArgumentsParsing( test )
 
 }
 
+startArgumentsParsing.timeOut = 1e5;
+
 //
 
 function startArgumentsParsingNonTrivial( test )
@@ -10145,16 +10147,16 @@ function startAfterDeath( test )
     o.conTerminate.then( () =>
     {
       stack.push( 'conTerminate1' );
-      
+
       test.will = 'program1 terminated'
       test.identical( o.exitCode, 0 );
-      
+
       test.will = 'secondary process is alive'
       test.is( _.process.isAlive( secondaryPid ) );
-      
+
       test.will = 'child of secondary process is still alive'
       test.is( !a.fileProvider.fileExists( program2PidPath ) );
-      
+
       return _.time.out( context.t2 * 2 ); /* 10000 */
     })
 
@@ -10162,7 +10164,7 @@ function startAfterDeath( test )
     {
       stack.push( 'conTerminate2' );
       test.identical( stack, [ 'conTerminate1', 'conTerminate2' ] );
-      
+
       test.case = 'secondary process is terminated'
       test.is( !_.process.isAlive( secondaryPid ) );
 
@@ -10233,7 +10235,7 @@ function startAfterDeath( test )
 
 }
 
-startAfterDeath.description = 
+startAfterDeath.description =
 `
 Spawns program1 as "main" process.
 Program1 starts program2 with mode:'afterdeath'
@@ -10278,17 +10280,17 @@ function startAfterDeathOutput( test )
 
     return con;
   })
-  
+
   return a.ready;
 
   /* - */
-  
+
   function program1()
   {
     let _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
-    
+
     console.log( 'program1::begin' );
 
     let o =
@@ -10300,7 +10302,7 @@ function startAfterDeathOutput( test )
     }
 
     _.process.startAfterDeath( o );
-    
+
     o.process.on( 'exit', () => //zzz for Vova: remove after enabling exit handler in start
     {
       _.procedure.terminationBegin();
@@ -10313,7 +10315,7 @@ function startAfterDeathOutput( test )
       return null;
     })
   }
-  
+
   /* - */
 
   function program2()
@@ -10331,7 +10333,7 @@ function startAfterDeathOutput( test )
   }
 }
 
-startAfterDeathOutput.description = 
+startAfterDeathOutput.description =
 `
 Fakes death of program1 and checks output of program2
 `
@@ -25195,8 +25197,8 @@ function startOutputMultiple( test )
           test.lt( track.indexOf( 'conTerminate' ), track.indexOf( 'ready' ) );
 
         }
-        
-        /* 
+
+        /*
         Fails on windows:
         - got :
           '1::begin
@@ -33008,10 +33010,10 @@ function terminateDifferentStdio( test )
 
   .then( () =>
   {
-    
-    /* 
+
+    /*
       Phantom fail on Windows:
-      
+
       Fail #1:
       signalSend : 544 name: node.exe
       signalSend : 552 name: csrss.exe
@@ -33027,7 +33029,7 @@ function terminateDifferentStdio( test )
           at process.kill (internal/process/per_thread.js:189:13)
           at signalSend (C:\Work\modules\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2851:15)
       ...
-      
+
       Fail#2
       signalSend : 5164 name: node.exe
       signalSend : 544 name: conhost.exe
@@ -33045,7 +33047,7 @@ function terminateDifferentStdio( test )
         at signalSend (C:\Work\modules\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2851:15)
       ...
     */
-   
+
     var o =
     {
       execPath :  'node ' + testAppPath,
@@ -33066,7 +33068,7 @@ function terminateDifferentStdio( test )
       ready.take( _.process.terminate( o.process.pid ) )
       /* Possible solution for phantom problem on Windows*/
       // ready.take( _.process.terminate({ pid : o.process.pid, ignoringErrorPerm : 1 }) )
-      
+
     })
 
     o.conTerminate.then( ( op ) =>
