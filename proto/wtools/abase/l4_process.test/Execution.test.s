@@ -64,6 +64,13 @@ RET=0; until [ ${RET} -ne 0 ]; do
     sleep 1
 done
 
+RET=0; until [ ${RET} -ne 0 ]; do
+    reset
+    taskset 0x1 node wtools/abase/l4_process.test/Execution.test.s n:1 v:5 s:0 r:terminateDifferentStdio
+    RET=$?
+    sleep 1
+done
+
 :repeat
 reset && node wtools/abase/l4_process.test/Execution.test.s v:5 s:0 r:endSignalsBasic && goto :repeat
 echo %errorlevel%
@@ -975,7 +982,7 @@ function startFork( test )
       setTimeout( () =>
       {
         console.log( 'timeOut' );
-      }, context.t2 ) /* 5000 */
+      }, context.t1 * 5 ) /* 5000 */
     }
 
     let programPath = a.program( testApp5 );
@@ -988,7 +995,7 @@ function startFork( test )
       outputCollecting : 1,
       outputPiping : 1,
       throwingExitCode : 1,
-      timeOut : 1000,
+      timeOut : context.t1, /* 1000 */
     }
 
     return test.shouldThrowErrorAsync( _.process.start( o ) )
@@ -1010,7 +1017,7 @@ function startFork( test )
       setTimeout( () =>
       {
         console.log( 'timeOut' );
-      }, context.t2 ) /* 5000 */
+      }, context.t1 * 5 ) /* 5000 */
     }
 
     let programPath = a.program( testApp6 );
@@ -1023,7 +1030,7 @@ function startFork( test )
       outputCollecting : 1,
       outputPiping : 1,
       throwingExitCode : 0,
-      timeOut : 1000,
+      timeOut : context.t1, /* 1000 */
     }
 
     return _.process.start( o )
@@ -3010,6 +3017,8 @@ function startArgumentsParsing( test )
   }
 
 }
+
+startArgumentsParsing.timeOut = 1e5;
 
 //
 
@@ -9775,7 +9784,7 @@ function startOptionWhenTime( test )
       test.case = `sync:${sync} deasync:${deasync} mode:${mode}`;
 
       let t1 = _.time.now();
-      let delay = 5000;
+      let delay = context.t2; /* 5000 */
       let when = { time : _.time.now() + delay };
       let o =
       {
@@ -10113,12 +10122,12 @@ function startAfterDeath( test )
   let context = this;
   let a = context.assetFor( test, false );
   let stack = [];
-  let testAppParentPath = a.program( testAppParent );
-  let testAppChildPath = a.program( testAppChild );
+  let program1Path = a.program( program1 );
+  let program2Path = a.program( program2 );
 
   /* */
 
-  let testFilePath = a.abs( a.routinePath, 'testFile' );
+  let program2PidPath = a.abs( a.routinePath, 'program2Pid' );
 
   a.ready
 
@@ -10126,53 +10135,59 @@ function startAfterDeath( test )
   {
     let o =
     {
-      execPath : 'node testAppParent.js',
+      execPath : 'node program1.js',
       mode : 'spawn',
       outputCollecting : 1,
       outputPiping : 1,
       currentPath : a.routinePath,
       ipc : 1,
     }
-    debugger;
-    let con = _.process.start( o );
-    let childPid;
-    debugger;
+    // debugger;
+    _.process.start( o );
+    let secondaryPid;
+    // debugger;
 
     o.process.on( 'message', ( e ) =>
     {
-      childPid = _.numberFrom( e );
+      secondaryPid = _.numberFrom( e );
     })
 
     o.conTerminate.then( () =>
     {
-      stack.push( 'conTerminate' );
+      stack.push( 'conTerminate1' );
+
+      test.will = 'program1 terminated'
       test.identical( o.exitCode, 0 );
-      test.case = 'secondary process is alive'
-      test.is( _.process.isAlive( childPid ) );
-      test.case = 'child of secondary process does not exit yet'
-      test.is( !a.fileProvider.fileExists( testFilePath ) );
+
+      test.will = 'secondary process is alive'
+      test.is( _.process.isAlive( secondaryPid ) );
+
+      test.will = 'child of secondary process is still alive'
+      test.is( !a.fileProvider.fileExists( program2PidPath ) );
+
       return _.time.out( context.t2 * 2 ); /* 10000 */
     })
 
     o.conTerminate.then( () =>
     {
-      stack.push( 'conTerminate' );
-      test.identical( stack, [ 'conTerminate', 'conTerminate' ] );
-      test.case = 'secondary process is dead'
-      test.is( !_.process.isAlive( childPid ) );
+      stack.push( 'conTerminate2' );
+      test.identical( stack, [ 'conTerminate1', 'conTerminate2' ] );
 
-      test.case = 'child of secondary process is executed'
-      test.is( a.fileProvider.fileExists( testFilePath ) );
-      let childPid2 = a.fileProvider.fileRead( testFilePath );
-      childPid2 = _.numberFrom( childPid2 );
+      test.case = 'secondary process is terminated'
+      test.is( !_.process.isAlive( secondaryPid ) );
+
+      test.case = 'child of secondary process is terminated'
+      test.is( a.fileProvider.fileExists( program2PidPath ) );
+      let program2Pid = a.fileProvider.fileRead( program2PidPath );
+      program2Pid = _.numberFrom( program2Pid );
 
       test.case = 'secondary process and child are not same'
-      test.is( !_.process.isAlive( childPid2 ) );
-      test.notIdentical( childPid, childPid2 );
+      test.is( !_.process.isAlive( program2Pid ) );
+      test.notIdentical( secondaryPid, program2Pid );
       return null;
     })
 
-    return con;
+    return o.conTerminate;
   })
 
   /*  */
@@ -10181,7 +10196,7 @@ function startAfterDeath( test )
 
   /* - */
 
-  function testAppParent()
+  function program1()
   {
     let _ = require( toolsPath );
 
@@ -10190,7 +10205,7 @@ function startAfterDeath( test )
 
     let o =
     {
-      execPath : 'node testAppChild.js',
+      execPath : 'node program2.js',
       outputCollecting : 1,
       mode : 'spawn',
     }
@@ -10204,7 +10219,7 @@ function startAfterDeath( test )
 
     _.time.out( context.t2, () => /* 5000 */
     {
-      console.log( 'parent termination begin' );
+      console.log( 'program1::termination begin' );
       _.procedure.terminationBegin();
       return null;
     })
@@ -10212,7 +10227,7 @@ function startAfterDeath( test )
 
   /* */
 
-  function testAppChild()
+  function program2()
   {
     let _ = require( toolsPath );
 
@@ -10221,101 +10236,115 @@ function startAfterDeath( test )
 
     _.time.out( context.t2, () => /* 5000 */
     {
-      let filePath = _.path.join( __dirname, 'testFile' );
+      let filePath = _.path.join( __dirname, 'program2Pid' );
       _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
     })
   }
 
 }
 
+startAfterDeath.description =
+`
+Spawns program1 as "main" process.
+Program1 starts program2 with mode:'afterdeath'
+Program2 is spawned after death of program1
+Program2 exits normally after short timeout
+`
+
 //
 
-// function startAfterDeathOutput( test )
-// {
-//   let context = this;
-//   var routinePath = _.path.join( context.suiteTempPath, test.name );
+function startAfterDeathOutput( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let program1Path = a.program( program1 );
+  let program2Path = a.program( program2 );
 
-//   function testAppParent()
-//   {
-//     _.include( 'wProcess' );
-//     _.include( 'wFiles' );
+  a.ready
 
-//     let o =
-//     {
-//       execPath : 'node testAppChild.js',
-//       outputCollecting : 1,
-//       stdio : 'inherit',
-//       mode : 'spawn',
-//       when : 'afterdeath'
-//     }
+  .then( () =>
+  {
+    let o =
+    {
+      execPath : 'node program1.js',
+      mode : 'spawn',
+      outputCollecting : 1,
+      currentPath : a.routinePath,
+      ipc : 1,
+    }
+    let con = _.process.start( o );
 
-//     _.process.start( o );
+    con.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      test.identical( _.strCount( op.output, 'program1::begin' ), 1 )
+      test.identical( _.strCount( op.output, 'program1::end' ), 1 )
+      test.identical( _.strCount( op.output, 'program2::begin' ), 1 )
+      test.identical( _.strCount( op.output, 'program2::end' ), 1 )
 
-//     _.time.out( 4000, () =>
-//     {
-//       console.log( 'Parent process exit' )
-//       process.disconnect();
-//       return null;
-//     })
-//   }
+      return null;
+    })
 
-//   function testAppChild()
-//   {
-//     _.include( 'wProcess' );
-//     _.include( 'wFiles' );
+    return con;
+  })
 
-//     console.log( 'Child process start' )
+  return a.ready;
 
-//     _.time.out( 5000, () =>
-//     {
-//       console.log( 'Child process end' )
-//     })
-//   }
+  /* - */
 
-//   /* */
+  function program1()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
 
-//   var testAppParentPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppParent.js' ) );
-//   var testAppChildPath = _.fileProvider.path.nativize( _.path.join( routinePath, 'testAppChild.js' ) );
-//   var testAppParentCode = context.toolsPathInclude + testAppParent.toString() + '\ntestAppParent();';
-//   var testAppChildCode = context.toolsPathInclude + testAppChild.toString() + '\ntestAppChild();';
-//   _.fileProvider.fileWrite( testAppParentPath, testAppParentCode );
-//   _.fileProvider.fileWrite( testAppChildPath, testAppChildCode );
-//   testAppParentPath = _.strQuote( testAppParentPath );
-//   var ready = new _.Consequence().take( null );
+    console.log( 'program1::begin' );
 
-//   ready
+    let o =
+    {
+      execPath : 'node program2.js',
+      mode : 'spawn',
+      currentPath : __dirname,
+      stdio : 'inherit'
+    }
 
-//   .then( () =>
-//   {
-//     let o =
-//     {
-//       execPath : 'node testAppParent.js',
-//       mode : 'spawn',
-//       outputCollecting : 1,
-//       currentPath : routinePath,
-//       ipc : 1,
-//     }
-//     let con = _.process.start( o );
+    _.process.startAfterDeath( o );
 
-//     con.then( ( op ) =>
-//     {
-//       test.identical( op.exitCode, 0 );
-//       test.identical( op.ended, true );
-//       test.is( _.strHas( op.output, 'Parent process exit' ) )
-//       test.is( _.strHas( op.output, 'Secondary: starting child process...' ) )
-//       test.is( _.strHas( op.output, 'Child process start' ) )
-//       test.is( _.strHas( op.output, 'Child process end' ) )
+    o.process.on( 'exit', () => //zzz for Vova: remove after enabling exit handler in start
+    {
+      _.procedure.terminationBegin();
+    })
 
-//       return null;
-//     })
+    _.time.out( context.t2, () =>
+    {
+      console.log( 'program1::end' );
+      o.process.disconnect();
+      return null;
+    })
+  }
 
-//     return con;
-//   })
+  /* - */
 
-//   /*  */
+  function program2()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
 
-//   return ready;
-// }
+    console.log( 'program2::begin' );
+
+    _.time.out( context.t2, () =>
+    {
+      console.log( 'program2::end' );
+    })
+  }
+}
+
+startAfterDeathOutput.description =
+`
+Fakes death of program1 and checks output of program2
+`
 
 // --
 // detaching
@@ -12598,7 +12627,7 @@ function startDetachingDisconnectedLate( test )
 
       test.identical( o.state, 'started' );
 
-      _.time.begin( 1000, () =>
+      _.time.begin( context.t1, () => /* 1000 */
       {
         test.identical( o.state, 'started' );
         o.disconnect();
@@ -12632,7 +12661,7 @@ function startDetachingDisconnectedLate( test )
         test.identical( err, _.dont );
       })
 
-      result = _.time.out( context.t2, () => /* 5000 */
+      result = _.time.out( context.t1 * 5, () => /* 5000 */
       {
         test.identical( o.state, 'disconnected' );
         test.identical( o.ended, true );
@@ -13991,7 +14020,7 @@ function startNoEndBug1( test )
   {
     _.include( 'wProcess' );
     var args = _.process.input();
-    _.time.out( 2000, () =>
+    _.time.out( context.t1 * 2, () => /* 2000 */
     {
       console.log( 'Child process end' )
       return null;
@@ -14017,7 +14046,7 @@ function startWithDelayOnReady( test )
   let programPath = a.program( program1 );
   let time1 = _.time.now();
 
-  a.ready.delay( 1000 );
+  a.ready.delay( context.t1 ); /* 1000 */
 
   /* */
 
@@ -14084,7 +14113,7 @@ function startWithDelayOnReady( test )
   {
     let _ = require( toolsPath );
     console.log( 'program1:begin' );
-    setTimeout( () => { console.log( 'program1:end' ) }, context.t3 ); /* 15000 */
+    setTimeout( () => { console.log( 'program1:end' ) }, context.t1 * 15 ); /* 15000 */
   }
 
 }
@@ -14457,8 +14486,8 @@ function startConcurrentMultiple( test )
 
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
-    test.gt( spent, 1000 );
-    test.le( spent, 5000 );
+    test.gt( spent, context.t1 ); /* 1000 */
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesOptionsSerial.exitCode, 0 );
     test.identical( op.runs.length, 2 );
@@ -14502,7 +14531,7 @@ function startConcurrentMultiple( test )
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 0 );
-    test.le( spent, 5000 );
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesError.exitCode, 1 );
     test.is( _.errIs( err ) );
@@ -14541,7 +14570,7 @@ function startConcurrentMultiple( test )
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 0 );
-    test.le( spent, 5000 );
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesErrorNonThrowing.exitCode, 1 );
     test.identical( op.runs.length, 2 );
@@ -14586,7 +14615,7 @@ function startConcurrentMultiple( test )
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 0 );
-    test.le( spent, 5000 );
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesErrorConcurrent.exitCode, 1 );
     test.is( _.errIs( err ) );
@@ -14626,7 +14655,7 @@ function startConcurrentMultiple( test )
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 0 );
-    test.le( spent, 5000 );
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesErrorConcurrentNonThrowing.exitCode, 1 );
     test.identical( op.runs.length, 2 );
@@ -14670,8 +14699,8 @@ function startConcurrentMultiple( test )
 
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent )
-    test.gt( spent, 1000 );
-    test.le( spent, 5000 );
+    test.gt( spent, context.t1 ); /* 1000 */
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( suprocessesConcurrentOptions.exitCode, 0 );
     test.identical( op.runs.length, 2 );
@@ -14714,8 +14743,8 @@ function startConcurrentMultiple( test )
   {
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent )
-    test.gt( spent, 1000 );
-    test.le( spent, 5000 );
+    test.gt( spent, context.t1 ); /* 1000 */
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( suprocessesConcurrentArgumentsOptions.exitCode, 0 );
     test.identical( op.runs.length, 2 );
@@ -14763,12 +14792,12 @@ function startConcurrentMultiple( test )
       console.log( 'end', process.argv.slice( 2 ).join( ', ' ) );
     }
 
-    setTimeout( periodic, context.t0 / 2 ); /* 50 */
+    setTimeout( periodic, context.t1 / 20 ); /* 50 */
     function periodic()
     {
       console.log( 'tick', process.argv.slice( 2 ).join( ', ' ) );
       if( !ended )
-      setTimeout( periodic, context.t0 / 2 ); /* 50 */
+      setTimeout( periodic, context.t1 / 20 ); /* 50 */
     }
   }
 
@@ -15632,7 +15661,7 @@ ${options.runs[ 1 ].procedure.id}.end
 }
 
 startConcurrentConsequencesMultiple.rapidity = -1;
-startConcurrentConsequencesMultiple.timeOut = 2e6;
+startConcurrentConsequencesMultiple.timeOut = 1e8;
 startConcurrentConsequencesMultiple.description =
 `
   - all consequences are called
@@ -15847,8 +15876,8 @@ function starterConcurrentMultiple( test )
 
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
-    test.gt( spent, 1000 );
-    test.le( spent, 5000 );
+    test.gt( spent, context.t1 ); /* 1000 */
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesOptionsSerial2.exitCode, 0 );
     test.identical( op.runs.length, 2 );
@@ -15895,7 +15924,7 @@ function starterConcurrentMultiple( test )
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 0 );
-    test.le( spent, 5000 );
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesError2.exitCode, 1 );
     test.is( _.errIs( err ) );
@@ -15936,7 +15965,7 @@ function starterConcurrentMultiple( test )
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 0 );
-    test.le( spent, 5000 );
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesErrorNonThrowing2.exitCode, 1 );
     test.identical( op.runs.length, 2 );
@@ -15984,7 +16013,7 @@ function starterConcurrentMultiple( test )
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 0 );
-    test.le( spent, 5000 );
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesErrorConcurrent2.exitCode, 1 );
     test.is( _.errIs( err ) );
@@ -16026,7 +16055,7 @@ function starterConcurrentMultiple( test )
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 0 );
-    test.le( spent, 5000 );
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesErrorConcurrentNonThrowing2.exitCode, 1 );
     test.identical( op.runs.length, 2 );
@@ -16073,8 +16102,8 @@ function starterConcurrentMultiple( test )
 
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent )
-    test.gt( spent, 1000 );
-    test.le( spent, 5000 );
+    test.gt( spent, context.t1 ); /* 1000 */
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesConcurrentOptions2.exitCode, 0 );
     test.identical( op.runs.length, 2 );
@@ -16121,8 +16150,8 @@ function starterConcurrentMultiple( test )
 
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent )
-    test.gt( spent, 1000 );
-    test.le( spent, 5000 );
+    test.gt( spent, context.t1 ); /* 1000 */
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesConcurrentArgumentsOptions2.exitCode, 0 );
     test.identical( op.runs.length, 2 );
@@ -16173,12 +16202,12 @@ function starterConcurrentMultiple( test )
       console.log( 'end', process.argv.slice( 2 ).join( ', ' ) );
     }
 
-    setTimeout( periodic, context.t0 / 2 ); /* 50 */
+    setTimeout( periodic, context.t1 / 20 ); /* 50 */
     function periodic()
     {
       console.log( 'tick', process.argv.slice( 2 ).join( ', ' ) );
       if( !ended )
-      setTimeout( periodic, context.t0 / 2 ); /* 50 */
+      setTimeout( periodic, context.t1 / 20 ); /* 50 */
     }
   }
 }
@@ -22471,7 +22500,7 @@ function startOptionStreamSizeLimitThrowing( test )
 
 //
 
-/* qqq for Yevhen : paramtetrizing time delays is not complete! */
+/* qqq for Yevhen : paramtetrizing time delays is not complete! | aaa : Fixed. */
 function startSingleOptionDry( test )
 {
   let context = this;
@@ -22516,7 +22545,7 @@ function startSingleOptionDry( test )
         throwingExitCode : 1,
         applyingExitCode : 1,
         ipc : tops.mode === 'shell' ? 0 : 1,
-        when : { delay : 2000 },
+        when : { delay : context.t1 * 2 }, /* 2000 */
       }
       let track = [];
       var t1 = _.time.now();
@@ -22566,7 +22595,7 @@ function startSingleOptionDry( test )
       o.ready.tap( ( err, op ) =>
       {
         var t2 = _.time.now();
-        test.ge( t2 - t1, 2000 )
+        test.ge( t2 - t1, context.t1 * 2 ); /* 2000 */
         track.push( 'ready' );
         test.identical( o.process, null );
         test.identical( err, undefined );
@@ -22584,13 +22613,8 @@ function startSingleOptionDry( test )
         test.identical( op.streamOut, null );
         test.identical( op.streamErr, null );
 
-        /* qqq for Yevhen : bad */
-        if( tops.mode === 'fork' )
-        {
-          test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
-          test.identical( op.fullExecPath, `${programPath} arg1 arg0` );
-        }
-        else if ( tops.mode === 'shell' )
+        /* qqq for Yevhen : bad | aaa : Fixed. */
+        if ( tops.mode === 'shell' )
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe' ] );
           test.identical( op.fullExecPath, `node ${programPath} arg1 "arg0"` );
@@ -22598,6 +22622,9 @@ function startSingleOptionDry( test )
         else
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
+          if( tops.mode === 'fork' )
+          test.identical( op.fullExecPath, `${programPath} arg1 arg0` );
+          else
           test.identical( op.fullExecPath, `node ${programPath} arg1 arg0` );
         }
 
@@ -22617,11 +22644,11 @@ function startSingleOptionDry( test )
 
     ready.then( () =>
     {
-      /* qqq for Yevhen : bad description! */
-      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, dry : 1, execPath : 'err' + programPath + \` arg1 "arg 2" "'arg3'"\``
+      /* qqq for Yevhen : bad description! | aaa : Fixed. */
+      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, dry : 1, wrong execPath`;
       let o =
       {
-        execPath : 'err ' + programPath + ` arg1`,
+        execPath : 'err ' + programPath + ' arg1',
         mode : tops.mode,
         sync : tops.sync,
         deasync : tops.deasync,
@@ -22633,7 +22660,7 @@ function startSingleOptionDry( test )
         applyingExitCode : 1,
         // timeOut : tops.sync || !tops.deasync ? null : 100,
         ipc : tops.mode === 'shell' ? 0 : 1,
-        when : { delay : 2000 }
+        when : { delay : context.t1 * 2 }, /* 2000 */
       }
       let track = []; /* qqq for Yevhen : should be on beginning of test case | aaa : Moved. */
       var t1 = _.time.now();
@@ -22683,7 +22710,7 @@ function startSingleOptionDry( test )
       o.ready.tap( ( err, op ) =>
       {
         var t2 = _.time.now();
-        test.ge( t2 - t1, 2000 );
+        test.ge( t2 - t1, context.t1 * 2 ); /* 2000 */
         track.push( 'ready' );
         test.identical( o.process, null );
         test.identical( err, undefined );
@@ -22981,15 +23008,10 @@ function startOptionDryMultiple( test )
           test.identical( op2.streamOut, null );
           test.identical( op2.streamErr, null );
           if( tops.mode === 'fork' )
-          {
-            test.identical( op2.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
-            test.identical( op2.fullExecPath, 'err ' + programPath + ` id:${counter + 1}` );
-          }
+          test.identical( op2.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
           else
-          {
-            test.identical( op2.stdio, [ 'pipe', 'pipe', 'pipe' ] );
-            test.identical( op2.fullExecPath, `err ${programPath} id:${counter + 1}` );
-          }
+          test.identical( op2.stdio, [ 'pipe', 'pipe', 'pipe' ] );
+          test.identical( op2.fullExecPath, `err ${programPath} id:${counter + 1}` );
           test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate', 'ready' ] );
           track = [];
           return null;
@@ -25183,6 +25205,30 @@ function startOutputMultiple( test )
           test.lt( track.indexOf( 'conTerminate' ), track.indexOf( 'ready' ) );
 
         }
+
+        /*
+        Fails on windows:
+        /* xxx : fails on windows :
+        - got :
+          '1::begin
+          1::end
+          2::begin
+          1::err
+          2::end
+          2::err'
+        - expected :
+          '1::begin
+          2::begin
+          1::end
+          2::end
+          1::err
+          2::err'
+        - difference :
+          '1::begin
+          *
+        with accuracy 1e-7
+        */
+
         var exp =
 `
 1::begin
@@ -26546,7 +26592,7 @@ function startTerminateAfterLoopRelease( test )
 
     o.process.on( 'message', () =>
     {
-      _.process.terminate({ pnd : o.process, timeOut : 10000 });
+      _.process.terminate({ pnd : o.process, timeOut : context.t2 * 2 }); /* 10000 */
     })
 
     con.then( () =>
@@ -26584,7 +26630,7 @@ function startTerminateAfterLoopRelease( test )
 
     o.process.on( 'message', () =>
     {
-      _.process.terminate({ pnd : o.process, timeOut : 10000 });
+      _.process.terminate({ pnd : o.process, timeOut : context.t2 * 2 }); /* 10000 */
     })
 
     con.then( () =>
@@ -28372,7 +28418,7 @@ deasync:end
 }
 
 endSignalsBasic.rapidity = -1 /* make it -2 later */
-endSignalsBasic.timeOut = 1e6;
+endSignalsBasic.timeOut = 1e7;
 endSignalsBasic.description =
 `
   - signals terminate or kill started process
@@ -28858,7 +28904,7 @@ Killed
 }
 
 endSignalsOnExit.rapidity = -1;
-endSignalsOnExit.timeOut = 1e6;
+endSignalsOnExit.timeOut = 1e7;
 endSignalsOnExit.description =
 `
   - handler of the event "exit" should be called, despite of signal, unless signal is SIGKILL
@@ -29369,7 +29415,8 @@ function terminate( test )
 
       o.process.on( 'message', () =>
       {
-        _.process.terminate({ pnd : o.process, timeOut : 1 });
+        _.process.terminate({ pnd : o.process, timeOut : context.t1*4 });
+        // _.process.terminate({ pnd : o.process, timeOut : 1 }); /* yyy */
       })
 
       ready.then( ( op ) =>
@@ -29385,7 +29432,7 @@ function terminate( test )
         else
         {
           test.identical( op.exitCode, null );
-          test.identical( op.exitSignal, 'SIGTERM' );
+          test.identical( op.exitSignal, 'SIGTERM' ); /* yyy xxx : sometimes SIGKILL */
           test.identical( op.ended, true );
           test.is( _.strHas( op.output, 'SIGTERM' ) );
           test.is( !_.strHas( op.output, 'Application timeout!' ) );
@@ -29402,13 +29449,11 @@ function terminate( test )
     return ready;
   }
 
+  /* - */
+
   function terminateShell()
   {
     let ready = new _.Consequence().take( null )
-    /*
-      zzz Vova: shell,exec modes have different behaviour on Windows,OSX and Linux
-      look for solution that allow to have same behaviour on each mode
-    */
 
     .then( () =>
     {
@@ -33869,6 +33914,44 @@ function terminateDifferentStdio( test )
 
   .then( () =>
   {
+
+    /*
+      Phantom fail on Windows:
+
+      Fail #1:
+      signalSend : 544 name: node.exe
+      signalSend : 552 name: csrss.exe
+      ...
+        = Message of error#1
+          kill EPERM
+          errno : 'EPERM'
+          code : 'EPERM'
+          syscall : 'kill'
+          Current process does not have permission to kill target process 544
+
+        = Beautified calls stack
+          at process.kill (internal/process/per_thread.js:189:13)
+          at signalSend (C:\Work\modules\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2851:15)
+      ...
+
+      Fail#2
+      signalSend : 5164 name: node.exe
+      signalSend : 544 name: conhost.exe
+      signalSend : 552 name: csrss.exe
+      ...
+      = Message of error#1
+        kill EPERM
+        errno : 'EPERM'
+        code : 'EPERM'
+        syscall : 'kill'
+        Current process does not have permission to kill target process 5164
+
+      = Beautified calls stack
+        at process.kill (internal/process/per_thread.js:189:13)
+        at signalSend (C:\Work\modules\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2851:15)
+      ...
+    */
+
     var o =
     {
       execPath :  'node ' + testAppPath,
@@ -33887,6 +33970,8 @@ function terminateDifferentStdio( test )
     o.process.on( 'message', () =>
     {
       ready.take( _.process.terminate( o.process.pid ) )
+      /* xxx : possible solution for phantom problem on Windows*/
+      // ready.take( _.process.terminate({ pid : o.process.pid, ignoringErrorPerm : 1 }) )
     })
 
     o.conTerminate.then( ( op ) =>
@@ -34377,7 +34462,7 @@ function waitForDeath( test )
     };
     _.process.start( o )
 
-    let terminated = _.process.waitForDeath({ pnd : o.process, timeOut : 1000 })
+    let terminated = _.process.waitForDeath({ pnd : o.process, timeOut : context.t1 }) /* 1000 */
     terminated = test.shouldThrowErrorAsync( terminated, ( err ) =>
     {
       test.is( _.errIs( err ) );
@@ -35041,7 +35126,7 @@ function experiment3( test )
     execPath : 'node -e "console.log(setTimeout(()=>{},10000))"',
     mode : 'spawn',
     stdio : 'pipe',
-    timeOut : 2000,
+    timeOut : context.t1 * 2, /* 2000 */
     throwingExitCode : 0
   }
   _.process.start( o );
@@ -35146,8 +35231,8 @@ var Proto =
     startOptionWhenDelay,
     startOptionWhenTime,
     startOptionTimeOut,
-    // startAfterDeath, /* qqq for Vova : fix */
-    // startAfterDeathOutput, /* qqq for Vova : fix */
+    startAfterDeath, /* qqq for Vova : fix aaa:fixed*/
+    startAfterDeathOutput, /* qqq for Vova : fix aaa:fixed*/
 
     // detaching
 
