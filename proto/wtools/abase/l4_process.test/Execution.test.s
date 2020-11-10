@@ -14762,12 +14762,12 @@ function startConcurrentMultiple( test )
       console.log( 'end', process.argv.slice( 2 ).join( ', ' ) );
     }
 
-    setTimeout( periodic, context.t0 / 2 ); /* 50 */
+    setTimeout( periodic, context.t1 / 20 ); /* 50 */
     function periodic()
     {
       console.log( 'tick', process.argv.slice( 2 ).join( ', ' ) );
       if( !ended )
-      setTimeout( periodic, context.t0 / 2 ); /* 50 */
+      setTimeout( periodic, context.t1 / 20 ); /* 50 */
     }
   }
 
@@ -16172,12 +16172,12 @@ function starterConcurrentMultiple( test )
       console.log( 'end', process.argv.slice( 2 ).join( ', ' ) );
     }
 
-    setTimeout( periodic, context.t0 / 2 ); /* 50 */
+    setTimeout( periodic, context.t1 / 20 ); /* 50 */
     function periodic()
     {
       console.log( 'tick', process.argv.slice( 2 ).join( ', ' ) );
       if( !ended )
-      setTimeout( periodic, context.t0 / 2 ); /* 50 */
+      setTimeout( periodic, context.t1 / 20 ); /* 50 */
     }
   }
 }
