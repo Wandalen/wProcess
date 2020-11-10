@@ -76,6 +76,15 @@ echo Connection established
 */
 
 /*
+@echo off
+cls
+:Loop_start
+node proto/wtools/abase/l4_process.test/Execution.test.s n:1 v:10 s:0 r:terminateDifferentStdio
+IF %errorlevel% EQU 0 GOTO Loop_start
+:Loop_end
+*/
+
+/*
 ### Modes in which child process terminates after signal:
 
 | Signal  |  Windows   |   Linux    |       Mac        |
