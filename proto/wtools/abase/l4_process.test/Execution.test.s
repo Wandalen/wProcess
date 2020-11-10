@@ -15792,7 +15792,7 @@ function starterConcurrentMultiple( test )
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, context.t1 ); /* 1000 */
-    test.le( spent, context.t2 ); /* 5000 */
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesOptionsSerial2.exitCode, 0 );
     test.identical( op.runs.length, 2 );
@@ -15839,7 +15839,7 @@ function starterConcurrentMultiple( test )
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 0 );
-    test.le( spent, context.t2 ); /* 5000 */
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesError2.exitCode, 1 );
     test.is( _.errIs( err ) );
@@ -15880,7 +15880,7 @@ function starterConcurrentMultiple( test )
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 0 );
-    test.le( spent, context.t2 ); /* 5000 */
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesErrorNonThrowing2.exitCode, 1 );
     test.identical( op.runs.length, 2 );
@@ -15928,7 +15928,7 @@ function starterConcurrentMultiple( test )
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 0 );
-    test.le( spent, context.t2 ); /* 5000 */
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesErrorConcurrent2.exitCode, 1 );
     test.is( _.errIs( err ) );
@@ -15970,7 +15970,7 @@ function starterConcurrentMultiple( test )
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 0 );
-    test.le( spent, context.t2 ); /* 5000 */
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesErrorConcurrentNonThrowing2.exitCode, 1 );
     test.identical( op.runs.length, 2 );
@@ -16018,7 +16018,7 @@ function starterConcurrentMultiple( test )
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent )
     test.gt( spent, context.t1 ); /* 1000 */
-    test.le( spent, context.t2 ); /* 5000 */
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesConcurrentOptions2.exitCode, 0 );
     test.identical( op.runs.length, 2 );
@@ -16066,7 +16066,7 @@ function starterConcurrentMultiple( test )
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent )
     test.gt( spent, context.t1 ); /* 1000 */
-    test.le( spent, context.t2 ); /* 5000 */
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesConcurrentArgumentsOptions2.exitCode, 0 );
     test.identical( op.runs.length, 2 );
