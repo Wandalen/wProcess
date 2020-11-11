@@ -239,7 +239,7 @@ function inputReadTo( o )
     let but = Object.keys( _.mapBut( o.propertiesMap, o.namesMap ) );
     if( but.length )
     {
-      throw _.err( 'Unknown application arguments : ' + _.strQuote( but ).join( ', ' ) );
+      throw _.err( `Unknown application arguments : ${but.join( ', ' )}` );
     }
   }
 
@@ -250,7 +250,7 @@ function inputReadTo( o )
   function set( k, v )
   {
     let dstValue = o.dst[ k ]
-    _.assert( dstValue !== undefined, () => 'Entry ' + _.strQuote( k ) + ' is not defined' );
+    _.assert( dstValue !== undefined, () => `Entry ${k} is not defined` );
     if( _.numberIs( dstValue ) )
     {
       v = Number( v );
@@ -403,10 +403,10 @@ function effectiveMainFile() /* qqq2 : move to process, review */
   {
     //xxx : review
     debugger;
-    console.error( 'process.argv :', process.argv.join( ', ' ) );
-    console.error( 'currentAtBegin :', this._initialCurrentPath );
-    console.error( 'effectiveMainFile.raw :', this.join( this._initialCurrentPath, process.argv[ 1 ] || process.argv[ 0 ] ) );
-    console.error( 'effectiveMainFile :', _effectiveMainFilePath );
+    console.error( `process.argv : ${process.argv.join( ', ' )}` );
+    console.error( `currentAtBegin : ${this._initialCurrentPath}` );
+    console.error( `effectiveMainFile.raw : ${this.join( this._initialCurrentPath, process.argv[ 1 ] || process.argv[ 0 ] )}` );
+    console.error( `effectiveMainFile : ${_effectiveMainFilePath}` );
     _effectiveMainFilePath = this.realMainFile();
   }
 
