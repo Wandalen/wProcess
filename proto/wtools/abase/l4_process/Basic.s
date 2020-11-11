@@ -165,7 +165,7 @@ function tempClose_body( o )
   else
   {
     let i = _.longLeftIndex( _tempFiles, o.filePath );
-    _.assert( i !== -1, 'Requested {-o.filePath-}', o.filePath, 'is not a path of temp application.' )
+    _.assert( i !== -1, `Requested {-o.filePath-} ${o.filePath} is not a path of temp application.` )
     _.fileProvider.fileDelete( o.filePath );
     _tempFiles.splice( i, 1 );
   }
