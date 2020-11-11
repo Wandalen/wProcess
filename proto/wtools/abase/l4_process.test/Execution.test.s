@@ -72,7 +72,7 @@ done
 
 @echo off
 :Loop_start
-start /wait /b /affinity 1 node proto/wtools/abase/l4_process.test/Execution.test.s n:1 v:10 s:0 r:terminateDifferentStdio
+start /wait /b /affinity 1 node wtools/abase/l4_process.test/Execution.test.s n:1 v:10 s:0 r:terminateDifferentStdio
 IF %errorlevel% EQU 0 GOTO Loop_start
 :Loop_end
 
