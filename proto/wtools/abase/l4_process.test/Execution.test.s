@@ -63,6 +63,13 @@ RET=0; until [ ${RET} -ne 0 ]; do
     sleep 1
 done
 
+RET=0; until [ ${RET} -ne 0 ]; do
+    reset
+    taskset 0x1 node wtools/abase/l4_process.test/Execution.test.s n:1 v:5 s:0 r:terminateDifferentStdio
+    RET=$?
+    sleep 1
+done
+
 :repeat
 reset && node wtools/abase/l4_process.test/Execution.test.s v:5 s:0 r:endSignalsBasic && goto :repeat
 echo %errorlevel%
@@ -983,7 +990,7 @@ function startFork( test )
       setTimeout( () =>
       {
         console.log( 'timeOut' );
-      }, context.t2 ) /* 5000 */
+      }, context.t1 * 5 ) /* 5000 */
     }
 
     let programPath = a.program( testApp5 );
@@ -996,7 +1003,7 @@ function startFork( test )
       outputCollecting : 1,
       outputPiping : 1,
       throwingExitCode : 1,
-      timeOut : 1000,
+      timeOut : context.t1, /* 1000 */
     }
 
     return test.shouldThrowErrorAsync( _.process.start( o ) )
@@ -1018,7 +1025,7 @@ function startFork( test )
       setTimeout( () =>
       {
         console.log( 'timeOut' );
-      }, context.t2 ) /* 5000 */
+      }, context.t1 * 5 ) /* 5000 */
     }
 
     let programPath = a.program( testApp6 );
@@ -1031,7 +1038,7 @@ function startFork( test )
       outputCollecting : 1,
       outputPiping : 1,
       throwingExitCode : 0,
-      timeOut : 1000,
+      timeOut : context.t1, /* 1000 */
     }
 
     return _.process.start( o )
@@ -1845,101 +1852,262 @@ function startSyncDeasync( test )
 
   let modes = [ 'fork', 'spawn', 'shell' ];
 
-  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, mode }) ) );
+
+  /* ORIGINAL */
+  // modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
   return a.ready;
 
   /* */
 
-  function run( mode )
+  function run( tops )
   {
-    let o3 =
+    let ready = new _.Consequence().take( null );
+
+    if( tops.sync && !tops.deasync && tops.mode === 'fork' )
+    return test.shouldThrowErrorSync( () =>
     {
-      outputPiping : 1,
-      outputCollecting : 1,
-      applyingExitCode : 0,
-      throwingExitCode : 1,
-      sync : 1,
-      deasync : 1
-    }
-    let expectedOutput = programPath + '\n';
-    let o2;
+      _.process.start
+      ({
+        execPath : programPath,
+        mode : tops.mode,
+        sync : tops.sync,
+        deasync : tops.deasync
+      })
+    });
 
-    /* - */
+    let o3, o2, expectedOutput;
 
-    test.case = `mode : ${ mode }`;
-    o2 =
+    ready.then( () =>
     {
-      execPath : mode === 'fork' ? programPath : 'node ' + programPath,
-      mode,
-      stdio : 'pipe'
-    }
+      o3 =
+      {
+        outputPiping : 1,
+        outputCollecting : 1,
+        applyingExitCode : 0,
+        throwingExitCode : 1,
+        sync : tops.sync,
+        deasync : tops.deasync
+      }
 
-    /* stdio : pipe */
+      expectedOutput = programPath + '\n'
 
-    var options = _.mapSupplement( {}, o2, o3 );
-    var returned = _.process.start( options );
-    test.is( returned === options );
-    test.identical( returned.process.constructor.name, 'ChildProcess' );
-    test.identical( options.exitCode, 0 );
-    test.identical( options.output, expectedOutput );
+      return null;
+    } )
 
-    /* stdio : ignore */
+    ready.then( () =>
+    {
+      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, stdio : pipe`;
+      o2 =
+      {
+        execPath : tops.mode === 'fork' ? programPath : 'node ' + programPath,
+        mode : tops.mode,
+        stdio : 'pipe'
+      }
 
-    o2.stdio = 'ignore';
-    o2.outputCollecting = 0;
-    o2.outputPiping = 0;
+      var options = _.mapSupplement( {}, o2, o3 );
+      var returned = _.process.start( options );
 
-    var options = _.mapSupplement( {}, o2, o3 );
-    var returned = _.process.start( options );
-    test.is( returned === options );
-    test.identical( returned.process.constructor.name, 'ChildProcess' );
-    test.identical( options.exitCode, 0 );
-    test.identical( options.output, null );
+      if( tops.sync )
+      {
+        test.is( !_.consequenceIs( returned ) );
+        test.identical( returned.exitCode, 0 );
+        test.is( returned === options );
+        test.identical( returned, options );
+        if( tops.deasync )
+        test.identical( returned.process.constructor.name, 'ChildProcess' );
+        else
+        test.identical( returned.process.constructor.name, 'Object' );
+        return returned;
+      }
+      else
+      {
+        test.is( _.consequenceIs( returned ) );
+        if( tops.deasync )
+        test.identical( returned.resourcesCount(), 1 );
+        else
+        test.identical( returned.resourcesCount(), 0 );
+        returned.then( ( op ) =>
+        {
+          test.identical( op.exitCode, 0 );
+          test.identical( op.ended, true );
+          test.is( op === options );
+          test.identical( op.process.constructor.name, 'ChildProcess' );
+          test.identical( op.output, expectedOutput );
+
+          return op;
+        })
+
+        return returned;
+      }
+
+    } )
 
     /* */
 
-    test.case = `mode : ${ mode }, timeOut`;
-    o2 =
+    ready.then( () =>
     {
-      execPath : mode === 'fork' ? programPath + ' loop : 1' : 'node ' + programPath + ' loop : 1',
-      mode,
-      stdio : 'pipe',
-      timeOut : 2*context.t1,
-    }
+      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, stdio : ignore`;
 
-    var options = _.mapSupplement( {}, o2, o3 );
-    test.shouldThrowErrorSync( () => _.process.start( options ) );
+      o2 =
+      {
+        execPath : tops.mode === 'fork' ? programPath : 'node ' + programPath,
+        mode : tops.mode,
+        stdio : 'ignore',
+        outputCollecting : 0,
+        outputPiping : 0
+      }
+
+      var options = _.mapSupplement( {}, o2, o3 );
+      var returned = _.process.start( options );
+
+      if( tops.sync )
+      {
+        test.is( !_.consequenceIs( returned ) );
+        test.identical( returned.exitCode, 0 );
+        test.is( returned === options );
+        test.identical( returned, options );
+        if( tops.deasync )
+        test.identical( returned.process.constructor.name, 'ChildProcess' );
+        else
+        test.identical( returned.process.constructor.name, 'Object' );
+        return returned;
+      }
+      else
+      {
+        test.is( _.consequenceIs( returned ) );
+        if( tops.deasync )
+        test.identical( returned.resourcesCount(), 1 );
+        else
+        test.identical( returned.resourcesCount(), 0 );
+        returned.then( ( op ) =>
+        {
+          test.identical( op.exitCode, 0 );
+          test.identical( op.ended, true );
+          test.is( op === options );
+          test.identical( op.process.constructor.name, 'ChildProcess' );
+          test.identical( op.output, null );
+
+          return op;
+        })
+
+        return returned;
+      }
+    });
 
     /* */
 
-    test.case = `mode : ${ mode }, return good code`;
-    o2 =
+    ready.then( () =>
     {
-      execPath : mode === 'fork' ? programPath + ' exitWithCode : 0' : 'node ' + programPath + ' exitWithCode : 0',
-      mode,
-      stdio : 'pipe'
-    }
-    var options = _.mapSupplement( {}, o2, o3 );
-    var returned = _.process.start( options );
-    test.is( returned === options );
-    test.identical( returned.process.constructor.name, 'ChildProcess' );
-    test.identical( options.exitCode, 0 );
+      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, timeOut`;
+
+      o2 =
+      {
+        execPath : tops.mode === 'fork' ? programPath + ' loop : 1' : 'node ' + programPath + ' loop : 1',
+        mode : tops.mode,
+        stdio : 'pipe',
+        timeOut : 2*context.t1,
+      }
+
+      var options = _.mapSupplement( {}, o2, o3 );
+
+      if( tops.sync )
+      return test.shouldThrowErrorSync( () => _.process.start( options ) );
+      else
+      return test.shouldThrowErrorAsync( () => _.process.start( options ) );
+    });
 
     /* */
 
-    test.case = `mode : ${ mode }, return bad code`;
-    o2 =
+    ready.then( () =>
     {
-      execPath : mode === 'fork' ? programPath + ' exitWithCode : 1' : 'node ' + programPath + ' exitWithCode : 1',
-      mode,
-      stdio : 'pipe'
-    }
-    var options = _.mapSupplement( {}, o2, o3 );
-    test.shouldThrowErrorSync( () => _.process.start( options ) )
-    test.identical( options.exitCode, 1 );
+      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, return good code`;
+      o2 =
+      {
+        execPath : tops.mode === 'fork' ? programPath + ' exitWithCode : 0' : 'node ' + programPath + ' exitWithCode : 0',
+        mode : tops.mode,
+        stdio : 'pipe'
+      }
 
-    return null;
+      var options = _.mapSupplement( {}, o2, o3 );
+      var returned = _.process.start( options );
+
+      if( tops.sync )
+      {
+        test.is( !_.consequenceIs( returned ) );
+        test.identical( returned.exitCode, 0 );
+        test.is( returned === options );
+        test.identical( returned, options );
+        if( tops.deasync )
+        test.identical( returned.process.constructor.name, 'ChildProcess' );
+        else
+        test.identical( returned.process.constructor.name, 'Object' );
+        return returned;
+      }
+      else
+      {
+        test.is( _.consequenceIs( returned ) );
+        if( tops.deasync )
+        test.identical( returned.resourcesCount(), 1 );
+        else
+        test.identical( returned.resourcesCount(), 0 );
+        returned.then( ( op ) =>
+        {
+          test.identical( op.exitCode, 0 );
+          test.identical( op.ended, true );
+          test.is( op === options );
+          test.identical( op.process.constructor.name, 'ChildProcess' );
+          test.identical( op.output, expectedOutput );
+
+          return op;
+        })
+
+        return returned;
+      }
+
+    } )
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, return good code`;
+      o2 =
+      {
+        execPath : tops.mode === 'fork' ? programPath + ' exitWithCode : 1' : 'node ' + programPath + ' exitWithCode : 1',
+        mode : tops.mode,
+        stdio : 'pipe'
+      }
+
+      var options = _.mapSupplement( {}, o2, o3 );
+
+      if( tops.sync )
+      {
+        test.shouldThrowErrorSync( () => _.process.start( options ) );
+        test.identical( options.exitCode, 1 )
+
+        return options;
+      }
+      else
+      {
+        return test.shouldThrowErrorAsync( () => _.process.start( options ) )
+        .then( ( op ) =>
+        {
+          test.is( _.errIs( op ) );
+          test.identical( options.exitCode, 1 );
+
+          return null;
+        } );
+
+      }
+
+    } )
+
+    return ready;
   }
 
   /* - */
@@ -1963,99 +2131,102 @@ function startSyncDeasync( test )
     process.exit( args.map.exitWithCode )
 
     if( args.map.loop )
-    _.time.out( context.t2 ) /* 5000 */
+    _.time.out( context.t1 * 5 ) /* 5000 */
 
     console.log( __filename );
   }
 
 }
 
+startSyncDeasync.timeOut = 57e4; /* Locally : 56.549s */
+
 //
 
-function startSyncDeasync2( test )
-{
+/* REDUNDANT AFTER MODIFYING `startSyncDeasync` */
+// function startSyncDeasync2( test )
+// {
 
-  let context = this;
-  let a = context.assetFor( test, false );
-  let programPath = a.program( testApp );
-  let modes = [  'fork', 'spawn', 'shell' ];
+//   let context = this;
+//   let a = context.assetFor( test, false );
+//   let programPath = a.program( testApp );
+//   let modes = [  'fork', 'spawn', 'shell' ];
 
-  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, mode }) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, mode }) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, mode }) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, mode }) ) );
+//   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, mode }) ) );
+//   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, mode }) ) );
+//   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, mode }) ) );
+//   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, mode }) ) );
 
-  return a.ready;
+//   return a.ready;
 
-  /* - */
+//   /* - */
 
-  function run( tops )
-  {
-    let ready = new _.Consequence().take( null );
+//   function run( tops )
+//   {
+//     let ready = new _.Consequence().take( null );
 
-    if( tops.sync && !tops.deasync && tops.mode === 'fork' )
-    return test.shouldThrowErrorSync( () =>
-    {
-      _.process.start
-      ({
-        execPath : programPath,
-        mode : tops.mode,
-        sync : tops.sync,
-        deasync : tops.deasync
-      })
-    });
+//     if( tops.sync && !tops.deasync && tops.mode === 'fork' )
+//     return test.shouldThrowErrorSync( () =>
+//     {
+//       _.process.start
+//       ({
+//         execPath : programPath,
+//         mode : tops.mode,
+//         sync : tops.sync,
+//         deasync : tops.deasync
+//       })
+//     });
 
-    /* */
+//     /* */
 
-    ready.then( () =>
-    {
-      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}`
-      let o =
-      {
-        execPath : tops.mode === 'fork' ? programPath : 'node ' + programPath,
-        mode : tops.mode,
-        sync : tops.sync,
-        deasync : tops.deasync
-      }
-      var returned = _.process.start( o );
+//     ready.then( () =>
+//     {
+//       test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}`
+//       let o =
+//       {
+//         execPath : tops.mode === 'fork' ? programPath : 'node ' + programPath,
+//         mode : tops.mode,
+//         sync : tops.sync,
+//         deasync : tops.deasync
+//       }
+//       var returned = _.process.start( o );
 
-      if( tops.sync )
-      {
-        test.is( !_.consequenceIs( returned ) );
-        test.is( returned === o );
-        test.identical( returned, o );
-        test.identical( o.exitCode, 0 );
-        return returned;
-      }
-      else
-      {
-        test.is( _.consequenceIs( returned ) );
-        if( tops.deasync )
-        test.identical( returned.resourcesCount(), 1 );
-        else
-        test.identical( returned.resourcesCount(), 0 );
-        returned.then( function( op )
-        {
-          test.identical( op.exitCode, 0 );
-          test.identical( op.ended, true );
-          return op;
-        })
-        return returned;
-      }
-    })
+//       if( tops.sync )
+//       {
+//         test.is( !_.consequenceIs( returned ) );
+//         test.is( returned === o );
+//         test.identical( returned, o );
+//         test.identical( o.exitCode, 0 );
+//         return returned;
+//       }
+//       else
+//       {
+//         test.is( _.consequenceIs( returned ) );
+//         if( tops.deasync )
+//         test.identical( returned.resourcesCount(), 1 );
+//         else
+//         test.identical( returned.resourcesCount(), 0 );
+//         returned.then( function( op )
+//         {
+//           test.identical( op.exitCode, 0 );
+//           test.identical( op.ended, true );
+//           return op;
+//         })
+//         return returned;
+//       }
+//     })
 
-    return ready;
-  }
+//     return ready;
+//   }
 
-  /* - */
+//   /* - */
 
-  function testApp()
-  {
-    console.log( process.argv.slice( 2 ) );
-  }
-}
+//   function testApp()
+//   {
+//     console.log( process.argv.slice( 2 ) );
+//   }
+// }
 
-startSyncDeasync2.timeOut = 45000;
+// startSyncDeasync2.timeOut = 45000;
 
 //
 
@@ -3018,6 +3189,8 @@ function startArgumentsParsing( test )
   }
 
 }
+
+startArgumentsParsing.timeOut = 1e5;
 
 //
 
@@ -9783,7 +9956,7 @@ function startOptionWhenTime( test )
       test.case = `sync:${sync} deasync:${deasync} mode:${mode}`;
 
       let t1 = _.time.now();
-      let delay = 5000;
+      let delay = context.t2; /* 5000 */
       let when = { time : _.time.now() + delay };
       let o =
       {
@@ -10154,16 +10327,16 @@ function startAfterDeath( test )
     o.conTerminate.then( () =>
     {
       stack.push( 'conTerminate1' );
-      
+
       test.will = 'program1 terminated'
       test.identical( o.exitCode, 0 );
-      
+
       test.will = 'secondary process is alive'
       test.is( _.process.isAlive( secondaryPid ) );
-      
+
       test.will = 'child of secondary process is still alive'
       test.is( !a.fileProvider.fileExists( program2PidPath ) );
-      
+
       return _.time.out( context.t2 * 2 ); /* 10000 */
     })
 
@@ -10171,7 +10344,7 @@ function startAfterDeath( test )
     {
       stack.push( 'conTerminate2' );
       test.identical( stack, [ 'conTerminate1', 'conTerminate2' ] );
-      
+
       test.case = 'secondary process is terminated'
       test.is( !_.process.isAlive( secondaryPid ) );
 
@@ -10242,7 +10415,7 @@ function startAfterDeath( test )
 
 }
 
-startAfterDeath.description = 
+startAfterDeath.description =
 `
 Spawns program1 as "main" process.
 Program1 starts program2 with mode:'afterdeath'
@@ -10287,17 +10460,17 @@ function startAfterDeathOutput( test )
 
     return con;
   })
-  
+
   return a.ready;
 
   /* - */
-  
+
   function program1()
   {
     let _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
-    
+
     console.log( 'program1::begin' );
 
     let o =
@@ -10309,7 +10482,7 @@ function startAfterDeathOutput( test )
     }
 
     _.process.startAfterDeath( o );
-    
+
     o.process.on( 'exit', () => //zzz for Vova: remove after enabling exit handler in start
     {
       _.procedure.terminationBegin();
@@ -10322,7 +10495,7 @@ function startAfterDeathOutput( test )
       return null;
     })
   }
-  
+
   /* - */
 
   function program2()
@@ -10340,7 +10513,7 @@ function startAfterDeathOutput( test )
   }
 }
 
-startAfterDeathOutput.description = 
+startAfterDeathOutput.description =
 `
 Fakes death of program1 and checks output of program2
 `
@@ -12626,7 +12799,7 @@ function startDetachingDisconnectedLate( test )
 
       test.identical( o.state, 'started' );
 
-      _.time.begin( 1000, () =>
+      _.time.begin( context.t1, () => /* 1000 */
       {
         test.identical( o.state, 'started' );
         o.disconnect();
@@ -12660,7 +12833,7 @@ function startDetachingDisconnectedLate( test )
         test.identical( err, _.dont );
       })
 
-      result = _.time.out( context.t2, () => /* 5000 */
+      result = _.time.out( context.t1 * 5, () => /* 5000 */
       {
         test.identical( o.state, 'disconnected' );
         test.identical( o.ended, true );
@@ -14019,7 +14192,7 @@ function startNoEndBug1( test )
   {
     _.include( 'wProcess' );
     var args = _.process.input();
-    _.time.out( 2000, () =>
+    _.time.out( context.t1 * 2, () => /* 2000 */
     {
       console.log( 'Child process end' )
       return null;
@@ -14045,7 +14218,7 @@ function startWithDelayOnReady( test )
   let programPath = a.program( program1 );
   let time1 = _.time.now();
 
-  a.ready.delay( 1000 );
+  a.ready.delay( context.t1 ); /* 1000 */
 
   /* */
 
@@ -14112,7 +14285,7 @@ function startWithDelayOnReady( test )
   {
     let _ = require( toolsPath );
     console.log( 'program1:begin' );
-    setTimeout( () => { console.log( 'program1:end' ) }, context.t3 ); /* 15000 */
+    setTimeout( () => { console.log( 'program1:end' ) }, context.t1 * 15 ); /* 15000 */
   }
 
 }
@@ -14485,8 +14658,8 @@ function startConcurrentMultiple( test )
 
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
-    test.gt( spent, 1000 );
-    test.le( spent, 5000 );
+    test.gt( spent, context.t1 ); /* 1000 */
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesOptionsSerial.exitCode, 0 );
     test.identical( op.runs.length, 2 );
@@ -14530,7 +14703,7 @@ function startConcurrentMultiple( test )
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 0 );
-    test.le( spent, 5000 );
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesError.exitCode, 1 );
     test.is( _.errIs( err ) );
@@ -14569,7 +14742,7 @@ function startConcurrentMultiple( test )
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 0 );
-    test.le( spent, 5000 );
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesErrorNonThrowing.exitCode, 1 );
     test.identical( op.runs.length, 2 );
@@ -14614,7 +14787,7 @@ function startConcurrentMultiple( test )
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 0 );
-    test.le( spent, 5000 );
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesErrorConcurrent.exitCode, 1 );
     test.is( _.errIs( err ) );
@@ -14654,7 +14827,7 @@ function startConcurrentMultiple( test )
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 0 );
-    test.le( spent, 5000 );
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesErrorConcurrentNonThrowing.exitCode, 1 );
     test.identical( op.runs.length, 2 );
@@ -14698,8 +14871,8 @@ function startConcurrentMultiple( test )
 
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent )
-    test.gt( spent, 1000 );
-    test.le( spent, 5000 );
+    test.gt( spent, context.t1 ); /* 1000 */
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( suprocessesConcurrentOptions.exitCode, 0 );
     test.identical( op.runs.length, 2 );
@@ -14742,8 +14915,8 @@ function startConcurrentMultiple( test )
   {
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent )
-    test.gt( spent, 1000 );
-    test.le( spent, 5000 );
+    test.gt( spent, context.t1 ); /* 1000 */
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( suprocessesConcurrentArgumentsOptions.exitCode, 0 );
     test.identical( op.runs.length, 2 );
@@ -14791,12 +14964,12 @@ function startConcurrentMultiple( test )
       console.log( 'end', process.argv.slice( 2 ).join( ', ' ) );
     }
 
-    setTimeout( periodic, context.t0 / 2 ); /* 50 */
+    setTimeout( periodic, context.t1 / 20 ); /* 50 */
     function periodic()
     {
       console.log( 'tick', process.argv.slice( 2 ).join( ', ' ) );
       if( !ended )
-      setTimeout( periodic, context.t0 / 2 ); /* 50 */
+      setTimeout( periodic, context.t1 / 20 ); /* 50 */
     }
   }
 
@@ -15660,7 +15833,7 @@ ${options.runs[ 1 ].procedure.id}.end
 }
 
 startConcurrentConsequencesMultiple.rapidity = -1;
-startConcurrentConsequencesMultiple.timeOut = 2e6;
+startConcurrentConsequencesMultiple.timeOut = 1e8;
 startConcurrentConsequencesMultiple.description =
 `
   - all consequences are called
@@ -15875,8 +16048,8 @@ function starterConcurrentMultiple( test )
 
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
-    test.gt( spent, 1000 );
-    test.le( spent, 5000 );
+    test.gt( spent, context.t1 ); /* 1000 */
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesOptionsSerial2.exitCode, 0 );
     test.identical( op.runs.length, 2 );
@@ -15923,7 +16096,7 @@ function starterConcurrentMultiple( test )
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 0 );
-    test.le( spent, 5000 );
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesError2.exitCode, 1 );
     test.is( _.errIs( err ) );
@@ -15964,7 +16137,7 @@ function starterConcurrentMultiple( test )
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 0 );
-    test.le( spent, 5000 );
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesErrorNonThrowing2.exitCode, 1 );
     test.identical( op.runs.length, 2 );
@@ -16012,7 +16185,7 @@ function starterConcurrentMultiple( test )
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 0 );
-    test.le( spent, 5000 );
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesErrorConcurrent2.exitCode, 1 );
     test.is( _.errIs( err ) );
@@ -16054,7 +16227,7 @@ function starterConcurrentMultiple( test )
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
     test.gt( spent, 0 );
-    test.le( spent, 5000 );
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesErrorConcurrentNonThrowing2.exitCode, 1 );
     test.identical( op.runs.length, 2 );
@@ -16101,8 +16274,8 @@ function starterConcurrentMultiple( test )
 
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent )
-    test.gt( spent, 1000 );
-    test.le( spent, 5000 );
+    test.gt( spent, context.t1 ); /* 1000 */
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesConcurrentOptions2.exitCode, 0 );
     test.identical( op.runs.length, 2 );
@@ -16149,8 +16322,8 @@ function starterConcurrentMultiple( test )
 
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent )
-    test.gt( spent, 1000 );
-    test.le( spent, 5000 );
+    test.gt( spent, context.t1 ); /* 1000 */
+    test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesConcurrentArgumentsOptions2.exitCode, 0 );
     test.identical( op.runs.length, 2 );
@@ -16201,12 +16374,12 @@ function starterConcurrentMultiple( test )
       console.log( 'end', process.argv.slice( 2 ).join( ', ' ) );
     }
 
-    setTimeout( periodic, context.t0 / 2 ); /* 50 */
+    setTimeout( periodic, context.t1 / 20 ); /* 50 */
     function periodic()
     {
       console.log( 'tick', process.argv.slice( 2 ).join( ', ' ) );
       if( !ended )
-      setTimeout( periodic, context.t0 / 2 ); /* 50 */
+      setTimeout( periodic, context.t1 / 20 ); /* 50 */
     }
   }
 }
@@ -22499,7 +22672,7 @@ function startOptionStreamSizeLimitThrowing( test )
 
 //
 
-/* qqq for Yevhen : paramtetrizing time delays is not complete! */
+/* qqq for Yevhen : paramtetrizing time delays is not complete! | aaa : Fixed. */
 function startSingleOptionDry( test )
 {
   let context = this;
@@ -22544,7 +22717,7 @@ function startSingleOptionDry( test )
         throwingExitCode : 1,
         applyingExitCode : 1,
         ipc : tops.mode === 'shell' ? 0 : 1,
-        when : { delay : 2000 },
+        when : { delay : context.t1 * 2 }, /* 2000 */
       }
       let track = [];
       var t1 = _.time.now();
@@ -22594,7 +22767,7 @@ function startSingleOptionDry( test )
       o.ready.tap( ( err, op ) =>
       {
         var t2 = _.time.now();
-        test.ge( t2 - t1, 2000 )
+        test.ge( t2 - t1, context.t1 * 2 ); /* 2000 */
         track.push( 'ready' );
         test.identical( o.process, null );
         test.identical( err, undefined );
@@ -22612,13 +22785,8 @@ function startSingleOptionDry( test )
         test.identical( op.streamOut, null );
         test.identical( op.streamErr, null );
 
-        /* qqq for Yevhen : bad */
-        if( tops.mode === 'fork' )
-        {
-          test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
-          test.identical( op.fullExecPath, `${programPath} arg1 arg0` );
-        }
-        else if ( tops.mode === 'shell' )
+        /* qqq for Yevhen : bad | aaa : Fixed. */
+        if ( tops.mode === 'shell' )
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe' ] );
           test.identical( op.fullExecPath, `node ${programPath} arg1 "arg0"` );
@@ -22626,6 +22794,9 @@ function startSingleOptionDry( test )
         else
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
+          if( tops.mode === 'fork' )
+          test.identical( op.fullExecPath, `${programPath} arg1 arg0` );
+          else
           test.identical( op.fullExecPath, `node ${programPath} arg1 arg0` );
         }
 
@@ -22645,11 +22816,11 @@ function startSingleOptionDry( test )
 
     ready.then( () =>
     {
-      /* qqq for Yevhen : bad description! */
-      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, dry : 1, execPath : 'err' + programPath + \` arg1 "arg 2" "'arg3'"\``
+      /* qqq for Yevhen : bad description! | aaa : Fixed. */
+      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, dry : 1, wrong execPath`;
       let o =
       {
-        execPath : 'err ' + programPath + ` arg1`,
+        execPath : 'err ' + programPath + ' arg1',
         mode : tops.mode,
         sync : tops.sync,
         deasync : tops.deasync,
@@ -22661,7 +22832,7 @@ function startSingleOptionDry( test )
         applyingExitCode : 1,
         // timeOut : tops.sync || !tops.deasync ? null : 100,
         ipc : tops.mode === 'shell' ? 0 : 1,
-        when : { delay : 2000 }
+        when : { delay : context.t1 * 2 }, /* 2000 */
       }
       let track = []; /* qqq for Yevhen : should be on beginning of test case | aaa : Moved. */
       var t1 = _.time.now();
@@ -22711,7 +22882,7 @@ function startSingleOptionDry( test )
       o.ready.tap( ( err, op ) =>
       {
         var t2 = _.time.now();
-        test.ge( t2 - t1, 2000 );
+        test.ge( t2 - t1, context.t1 * 2 ); /* 2000 */
         track.push( 'ready' );
         test.identical( o.process, null );
         test.identical( err, undefined );
@@ -23009,15 +23180,10 @@ function startOptionDryMultiple( test )
           test.identical( op2.streamOut, null );
           test.identical( op2.streamErr, null );
           if( tops.mode === 'fork' )
-          {
-            test.identical( op2.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
-            test.identical( op2.fullExecPath, 'err ' + programPath + ` id:${counter + 1}` );
-          }
+          test.identical( op2.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
           else
-          {
-            test.identical( op2.stdio, [ 'pipe', 'pipe', 'pipe' ] );
-            test.identical( op2.fullExecPath, `err ${programPath} id:${counter + 1}` );
-          }
+          test.identical( op2.stdio, [ 'pipe', 'pipe', 'pipe' ] );
+          test.identical( op2.fullExecPath, `err ${programPath} id:${counter + 1}` );
           test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate', 'ready' ] );
           track = [];
           return null;
@@ -23914,6 +24080,624 @@ function startOptionGid( test ) /* Runs only through `sudo` ( i.e. with superuse
 }
 
 startOptionGid.experimental = true;
+
+//
+
+function startOptionProcedureSingle( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let programPath = a.program( program1 );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, mode }) ) );
+
+  return a.ready;
+
+  function run( tops )
+  {
+    let ready = new _.Consequence().take( null );
+
+    if( tops.sync && !tops.deasync && tops.mode === 'fork' )
+    return test.shouldThrowErrorSync( () =>
+    {
+      _.process.start
+      ({
+        execPath : programPath,
+        mode : tops.mode,
+        sync : tops.sync,
+        deasync : tops.deasync
+      })
+    });
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, procedure : null`;
+
+      let options =
+      {
+        execPath : tops.mode === 'fork' ? programPath : 'node ' + programPath,
+        args : 'a',
+        mode : tops.mode,
+        sync : tops.sync,
+        deasync : tops.deasync,
+        throwingExitCode : 0,
+        outputCollecting : 1,
+      }
+
+      let returned = _.process.start( options );
+
+      if( tops.sync )
+      {
+        test.is( !_.consequenceIs( returned ) );
+      }
+      else
+      {
+        test.is( _.consequenceIs( returned ) );
+        if( tops.deasync )
+        test.identical( returned.resourcesCount(), 1 );
+        else
+        test.identical( returned.resourcesCount(), 0 );
+      }
+
+      options.ready.then( ( op ) => 
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.is( op === options );
+        test.equivalent( op.output, `[ 'a' ]` );
+        test.is( _.strHas( op.procedure._name, 'PID:') );
+        test.is( _.objectIs( op.procedure._object ) );
+
+        return null;
+      })
+
+      return options.ready;
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, procedure : false`;
+
+      let options =
+      {
+        execPath : tops.mode === 'fork' ? programPath : 'node ' + programPath,
+        mode : tops.mode,
+        sync : tops.sync,
+        deasync : tops.deasync,
+        args : 'a',
+        throwingExitCode : 0,
+        procedure : false,
+        outputCollecting : 1,
+      }
+
+      let returned =  _.process.start( options )
+      
+      if( tops.sync )
+      {
+        test.is( !_.consequenceIs( returned ) );
+      }
+      else
+      {
+        test.is( _.consequenceIs( returned ) );
+        if( tops.deasync )
+        test.identical( returned.resourcesCount(), 1 );
+        else
+        test.identical( returned.resourcesCount(), 0 );
+      }
+
+      options.ready.then( ( op ) => 
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.is( op === options );
+        test.equivalent( op.output, `[ 'a' ]` );
+        test.identical( op.procedure, false );
+
+        return null;
+      })
+
+      return options.ready;
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, procedure : true`;
+
+      let options =
+      {
+        execPath : tops.mode === 'fork' ? programPath : 'node ' + programPath,
+        mode : tops.mode,
+        sync : tops.sync,
+        deasync : tops.deasync,
+        args : 'a',
+        procedure : true,
+        throwingExitCode : 0,
+        outputCollecting : 1,
+      }
+
+      let returned = _.process.start( options );
+
+      if( tops.sync )
+      {
+        test.is( !_.consequenceIs( returned ) );
+      }
+      else
+      {
+        test.is( _.consequenceIs( returned ) );
+        if( tops.deasync )
+        test.identical( returned.resourcesCount(), 1 );
+        else
+        test.identical( returned.resourcesCount(), 0 );
+      }
+
+      options.ready.then( ( op ) => 
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.is( op === options );
+        test.equivalent( op.output, `[ 'a' ]` );
+        test.is( _.strHas( op.procedure._name, 'PID:') );
+        test.is( _.objectIs( op.procedure._object ) );
+
+        return null;
+      })
+
+      return options.ready;
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, procedure : _.Procedure()`;
+
+      let options =
+      {
+        execPath : tops.mode === 'fork' ? programPath : 'node ' + programPath,
+        mode : tops.mode,
+        sync : tops.sync,
+        deasync : tops.deasync,
+        args : 'a',
+        throwingExitCode : 0,
+        procedure : _.Procedure(),
+        outputCollecting : 1,
+      }
+
+      let returned =  _.process.start( options );
+
+      if( tops.sync )
+      {
+        test.is( !_.consequenceIs( returned ) );
+      }
+      else
+      {
+        test.is( _.consequenceIs( returned ) );
+        if( tops.deasync )
+        test.identical( returned.resourcesCount(), 1 );
+        else
+        test.identical( returned.resourcesCount(), 0 );
+      }
+
+      options.ready.then( ( op ) => 
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.is( op === options );
+        test.equivalent( op.output, `[ 'a' ]` );
+        test.is( _.strHas( op.procedure._name, 'PID:') );
+        test.is( _.objectIs( op.procedure._object ) );
+
+        return null;
+      })
+
+      return options.ready;
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, procedure : _.Procedure({ _name : 'name', _object : 'object', _stack : 'stack' })`;
+
+      let options =
+      {
+        execPath : tops.mode === 'fork' ? programPath : 'node ' + programPath,
+        mode : tops.mode,
+        sync : tops.sync,
+        deasync : tops.deasync,
+        args : 'a',
+        throwingExitCode : 0,
+        procedure : _.Procedure({ _name : 'name', _object : 'object', _stack : 'stack' }),
+        outputCollecting : 1,
+      }
+
+      let returned = _.process.start( options );
+
+      if( tops.sync )
+      {
+        test.is( !_.consequenceIs( returned ) );
+      }
+      else
+      {
+        test.is( _.consequenceIs( returned ) );
+        if( tops.deasync )
+        test.identical( returned.resourcesCount(), 1 );
+        else
+        test.identical( returned.resourcesCount(), 0 );
+      }
+
+      options.ready.then( ( op ) => 
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.is( op === options );
+        test.equivalent( op.output, `[ 'a' ]` );
+        test.is( _.strHas( op.procedure._name, 'PID:') );
+        test.is( _.objectIs( op.procedure._object ) );
+        test.identical( op.procedure._stack, 'stack' );
+
+        return null;
+      })
+
+      return options.ready;
+    })
+
+    return ready;
+  }
+
+  /* - */
+
+  function program1()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+}
+
+startOptionProcedureSingle.timeOut = 9e4; /* Locally : 8.406s */
+
+//
+
+function startOptionProcedureMultiple( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let programPath = a.program( program1 );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, mode }) ) );
+
+  return a.ready;
+
+  function run( tops )
+  {
+    let ready = new _.Consequence().take( null );
+
+    if( tops.sync && !tops.deasync && tops.mode === 'fork' )
+    return test.shouldThrowErrorSync( () =>
+    {
+      _.process.start
+      ({
+        execPath : [ programPath, programPath ],
+        mode : tops.mode,
+        sync : tops.sync,
+        deasync : tops.deasync
+      })
+    });
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, procedure : null`;
+
+      let options =
+      {
+        execPath : tops.mode === 'fork' ? [ programPath, programPath ] : [ 'node ' + programPath, 'node ' + programPath ],
+        args : 'a',
+        mode : tops.mode,
+        sync : tops.sync,
+        deasync : tops.deasync,
+        throwingExitCode : 0,
+        outputCollecting : 1,
+      }
+
+      let returned =  _.process.start( options );
+
+      if( tops.sync )
+      {
+        test.is( !_.consequenceIs( returned ) );
+      }
+      else
+      {
+        test.is( _.consequenceIs( returned ) );
+        if( tops.deasync )
+        test.identical( returned.resourcesCount(), 1 );
+        else
+        test.identical( returned.resourcesCount(), 0 );
+      }
+
+      options.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op, options );
+        test.equivalent( op.output, `[ 'a' ]\n[ 'a' ]` );
+        test.identical( op.procedure._name, null );
+        test.is( _.objectIs( op.procedure._object ) );
+        test.identical( op.procedure._object.execPath, [ `${tops.mode === 'fork' ? programPath : 'node ' + programPath}`, `${tops.mode === 'fork' ? programPath : 'node ' + programPath}` ] );
+
+        op.runs.forEach( ( run ) =>
+        {
+          test.identical( run.exitCode, 0 );
+          test.identical( run.ended, true );
+          test.equivalent( run.output, `[ 'a' ]` );
+          test.is( _.strHas( run.procedure._name, 'PID:') );
+          test.is( _.objectIs( run.procedure._object ) );
+          test.identical( run.procedure._object.exitCode, 0 );
+        } )
+
+        return null;
+      } )
+
+      return options.ready;
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, procedure : false`;
+
+      let options =
+      {
+        execPath : tops.mode === 'fork' ? [ programPath, programPath ] : [ 'node ' + programPath, 'node ' + programPath ],
+        mode : tops.mode,
+        sync : tops.sync,
+        deasync : tops.deasync,
+        args : 'a',
+        throwingExitCode : 0,
+        procedure : false,
+        outputCollecting : 1,
+      }
+
+      let returned = _.process.start( options );
+
+      if( tops.sync )
+      {
+        test.is( !_.consequenceIs( returned ) );
+      }
+      else
+      {
+        test.is( _.consequenceIs( returned ) );
+        if( tops.deasync )
+        test.identical( returned.resourcesCount(), 1 );
+        else
+        test.identical( returned.resourcesCount(), 0 );
+      }
+
+      options.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op, options );
+        test.equivalent( op.output, `[ 'a' ]\n[ 'a' ]` );
+        test.identical( op.procedure, false );
+        op.runs.forEach( ( run ) =>
+        {
+          test.identical( run.exitCode, 0 );
+          test.identical( run.ended, true );
+          test.equivalent( run.output, `[ 'a' ]` );
+          test.identical( run.procedure, false );
+        } )
+
+        return null;
+      } )
+
+      return options.ready;
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, procedure : true`;
+
+      let options =
+      {
+        execPath : tops.mode === 'fork' ? [ programPath, programPath ] : [ 'node ' + programPath, 'node ' + programPath ],
+        mode : tops.mode,
+        sync : tops.sync,
+        deasync : tops.deasync,
+        args : 'a',
+        procedure : true,
+        throwingExitCode : 0,
+        outputCollecting : 1,
+      }
+
+      let returned =  _.process.start( options );
+
+      if( tops.sync )
+      {
+        test.is( !_.consequenceIs( returned ) );
+      }
+      else
+      {
+        test.is( _.consequenceIs( returned ) );
+        if( tops.deasync )
+        test.identical( returned.resourcesCount(), 1 );
+        else
+        test.identical( returned.resourcesCount(), 0 );
+      }
+
+      options.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op, options );
+        test.equivalent( op.output, `[ 'a' ]\n[ 'a' ]` );
+        test.identical( op.procedure._name, null );
+        test.is( _.objectIs( op.procedure._object ) );
+        test.identical( op.procedure._object.execPath, [ `${tops.mode === 'fork' ? programPath : 'node ' + programPath}`, `${tops.mode === 'fork' ? programPath : 'node ' + programPath}` ] );
+
+        op.runs.forEach( ( run ) =>
+        {
+          test.identical( run.exitCode, 0 );
+          test.identical( run.ended, true );
+          test.equivalent( run.output, `[ 'a' ]` );
+          test.is( _.strHas( run.procedure._name, 'PID:') );
+          test.is( _.objectIs( run.procedure._object ) );
+          test.identical( run.procedure._object.exitCode, 0 );
+        } )
+
+        return null;
+      } )
+
+      return options.ready;
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync} procedure : _.Procedure()`;
+
+      let options =
+      {
+        execPath : tops.mode === 'fork' ? [ programPath, programPath ] : [ 'node ' + programPath, 'node ' + programPath ],
+        mode : tops.mode,
+        sync : tops.sync,
+        deasync : tops.deasync,
+        args : 'a',
+        throwingExitCode : 0,
+        procedure : _.Procedure(),
+        outputCollecting : 1,
+      }
+
+      let returned =  _.process.start( options );
+
+      if( tops.sync )
+      {
+        test.is( !_.consequenceIs( returned ) );
+      }
+      else
+      {
+        test.is( _.consequenceIs( returned ) );
+        if( tops.deasync )
+        test.identical( returned.resourcesCount(), 1 );
+        else
+        test.identical( returned.resourcesCount(), 0 );
+      }
+
+      options.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op, options );
+        test.equivalent( op.output, `[ 'a' ]\n[ 'a' ]` );
+        test.identical( op.procedure._name, null );
+        test.identical( op.procedure._object, null );
+
+        op.runs.forEach( ( run ) =>
+        {
+          test.identical( run.exitCode, 0 );
+          test.identical( run.ended, true );
+          test.equivalent( run.output, `[ 'a' ]` );
+          test.is( _.strHas( run.procedure._name, 'PID:') );
+          test.is( _.objectIs( run.procedure._object ) );
+          test.identical( run.procedure._object.exitCode, 0 );
+        } )
+
+        return null;
+      } )
+
+      return options.ready;
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, procedure : _.Procedure({ _name : 'name', _object : 'object', _stack : 'stack' })`;
+
+      let options =
+      {
+        execPath : tops.mode === 'fork' ? [ programPath, programPath ] : [ 'node ' + programPath, 'node ' + programPath ],
+        mode : tops.mode,
+        sync : tops.sync,
+        deasync : tops.deasync,
+        args : 'a',
+        throwingExitCode : 0,
+        procedure : _.Procedure({ _name : 'name', _object : 'object', _stack : 'stack' }),
+        outputCollecting : 1,
+      }
+
+      let returned =  _.process.start( options );
+
+      if( tops.sync )
+      {
+        test.is( !_.consequenceIs( returned ) );
+      }
+      else
+      {
+        test.is( _.consequenceIs( returned ) );
+        if( tops.deasync )
+        test.identical( returned.resourcesCount(), 1 );
+        else
+        test.identical( returned.resourcesCount(), 0 );
+      }
+
+      options.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op, options );
+        test.equivalent( op.output, `[ 'a' ]\n[ 'a' ]` );
+        test.identical( op.procedure._name, 'name' );
+        test.identical( op.procedure._object, 'object' );
+        test.identical( op.procedure._stack, 'stack' );
+
+        op.runs.forEach( ( run ) =>
+        {
+          test.identical( run.exitCode, 0 );
+          test.identical( run.ended, true );
+          test.equivalent( run.output, `[ 'a' ]` );
+          test.is( _.strHas( run.procedure._name, 'PID:') );
+          test.is( _.objectIs( run.procedure._object ) );
+          test.identical( run.procedure._object.exitCode, 0 );
+          test.notIdentical( run.procedure._stack, 'stack' );
+        } )
+
+        return null;
+      } )
+
+      return options.ready;
+    })
+
+    return ready;
+  }
+
+  /* - */
+
+  function program1()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+}
+
+startOptionProcedureMultiple.timeOut = 18e4; /* 17.983s */
 
 // --
 // pid
@@ -25211,9 +25995,10 @@ function startOutputMultiple( test )
           test.lt( track.indexOf( 'conTerminate' ), track.indexOf( 'ready' ) );
 
         }
-        
-        /* 
+
+        /*
         Fails on windows:
+        /* xxx : fails on windows :
         - got :
           '1::begin
           1::end
@@ -25233,6 +26018,7 @@ function startOutputMultiple( test )
           *
         with accuracy 1e-7
         */
+
         var exp =
 `
 1::begin
@@ -26596,7 +27382,7 @@ function startTerminateAfterLoopRelease( test )
 
     o.process.on( 'message', () =>
     {
-      _.process.terminate({ pnd : o.process, timeOut : 10000 });
+      _.process.terminate({ pnd : o.process, timeOut : context.t2 * 2 }); /* 10000 */
     })
 
     con.then( () =>
@@ -26634,7 +27420,7 @@ function startTerminateAfterLoopRelease( test )
 
     o.process.on( 'message', () =>
     {
-      _.process.terminate({ pnd : o.process, timeOut : 10000 });
+      _.process.terminate({ pnd : o.process, timeOut : context.t2 * 2 }); /* 10000 */
     })
 
     con.then( () =>
@@ -28422,7 +29208,7 @@ deasync:end
 }
 
 endSignalsBasic.rapidity = -1 /* make it -2 later */
-endSignalsBasic.timeOut = 1e6;
+endSignalsBasic.timeOut = 1e7;
 endSignalsBasic.description =
 `
   - signals terminate or kill started process
@@ -28908,7 +29694,7 @@ Killed
 }
 
 endSignalsOnExit.rapidity = -1;
-endSignalsOnExit.timeOut = 1e6;
+endSignalsOnExit.timeOut = 1e7;
 endSignalsOnExit.description =
 `
   - handler of the event "exit" should be called, despite of signal, unless signal is SIGKILL
@@ -29419,7 +30205,8 @@ function terminate( test )
 
       o.process.on( 'message', () =>
       {
-        _.process.terminate({ pnd : o.process, timeOut : 1 });
+        _.process.terminate({ pnd : o.process, timeOut : context.t1*4 });
+        // _.process.terminate({ pnd : o.process, timeOut : 1 }); /* yyy */
       })
 
       ready.then( ( op ) =>
@@ -29435,7 +30222,7 @@ function terminate( test )
         else
         {
           test.identical( op.exitCode, null );
-          test.identical( op.exitSignal, 'SIGTERM' );
+          test.identical( op.exitSignal, 'SIGTERM' ); /* yyy xxx : sometimes SIGKILL */
           test.identical( op.ended, true );
           test.is( _.strHas( op.output, 'SIGTERM' ) );
           test.is( !_.strHas( op.output, 'Application timeout!' ) );
@@ -29452,13 +30239,11 @@ function terminate( test )
     return ready;
   }
 
+  /* - */
+
   function terminateShell()
   {
     let ready = new _.Consequence().take( null )
-    /*
-      zzz Vova: shell,exec modes have different behaviour on Windows,OSX and Linux
-      look for solution that allow to have same behaviour on each mode
-    */
 
     .then( () =>
     {
@@ -33024,10 +33809,10 @@ function terminateDifferentStdio( test )
 
   .then( () =>
   {
-    
-    /* 
+
+    /*
       Phantom fail on Windows:
-      
+
       Fail #1:
       signalSend : 544 name: node.exe
       signalSend : 552 name: csrss.exe
@@ -33043,7 +33828,7 @@ function terminateDifferentStdio( test )
           at process.kill (internal/process/per_thread.js:189:13)
           at signalSend (C:\Work\modules\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2851:15)
       ...
-      
+
       Fail#2
       signalSend : 5164 name: node.exe
       signalSend : 544 name: conhost.exe
@@ -33061,7 +33846,7 @@ function terminateDifferentStdio( test )
         at signalSend (C:\Work\modules\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2851:15)
       ...
     */
-   
+
     var o =
     {
       execPath :  'node ' + testAppPath,
@@ -33080,9 +33865,8 @@ function terminateDifferentStdio( test )
     o.process.on( 'message', () =>
     {
       ready.take( _.process.terminate( o.process.pid ) )
-      /* Possible solution for phantom problem on Windows*/
+      /* xxx : possible solution for phantom problem on Windows*/
       // ready.take( _.process.terminate({ pid : o.process.pid, ignoringErrorPerm : 1 }) )
-      
     })
 
     o.conTerminate.then( ( op ) =>
@@ -33573,7 +34357,7 @@ function waitForDeath( test )
     };
     _.process.start( o )
 
-    let terminated = _.process.waitForDeath({ pnd : o.process, timeOut : 1000 })
+    let terminated = _.process.waitForDeath({ pnd : o.process, timeOut : context.t1 }) /* 1000 */
     terminated = test.shouldThrowErrorAsync( terminated, ( err ) =>
     {
       test.is( _.errIs( err ) );
@@ -34068,11 +34852,12 @@ function experimentIpcDeasync( test )
   //   },
   // }).enable();
 
-  require('net').createServer(() => {}).listen(8080, () => {
+  require('net').createServer(() => {}).listen( 8080, () => {
     // Let's wait 10ms before logging the server started.
-    setTimeout(() => {
+    setTimeout( () =>
+    {
       // console.log('>>>', AsyncHooks.executionAsyncId());
-    }, 10);
+    }, 10 );
   });
 
   for( let i = 0 ; i < 10; i++ )
@@ -34237,7 +35022,7 @@ function experiment3( test )
     execPath : 'node -e "console.log(setTimeout(()=>{},10000))"',
     mode : 'spawn',
     stdio : 'pipe',
-    timeOut : 2000,
+    timeOut : context.t1 * 2, /* 2000 */
     throwingExitCode : 0
   }
   _.process.start( o );
@@ -34300,8 +35085,8 @@ var Proto =
     // sync
 
     startSync,
-    startSyncDeasync, /* qqq for Yevhen : merge with startSyncDeasync2 */
-    startSyncDeasync2,
+    startSyncDeasync, /* qqq for Yevhen : merge with startSyncDeasync2 | aaa : Changed, startSyncDeasync2 is redundant */
+    // startSyncDeasync2,
     startSyncDeasyncThrowing,
     startSyncDeasyncMultiple,
 
@@ -34435,6 +35220,8 @@ var Proto =
     startOptionPassingThrough,
     startOptionUid,
     startOptionGid,
+    startOptionProcedureSingle,
+    startOptionProcedureMultiple,
 
     // pid / status / exit
 
