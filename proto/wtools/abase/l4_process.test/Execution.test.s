@@ -9612,6 +9612,15 @@ startChronology.description =
   - no extra procedures generated
 `
 
+function startState( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( testApp );
+
+  
+}
+
 // --
 // delay
 // --
@@ -35110,7 +35119,7 @@ var Proto =
     startProcedureStackMultiple,
     startOnTerminateSeveralCallbacksChronology,
     startChronology,
-    // startState,
+    startState,
 
     // delay
 
