@@ -1,4 +1,3 @@
-/* eslint-disable */
 ( function _Execution_test_s( )
 {
 
@@ -32248,9 +32247,9 @@ function terminateDetachedFirstChild( test )
 
       let o =
       {
-        execPath : mode === 'fork' ? 'program1.js' : 'node program1.js',
+        execPath : 'node program1.js',
         currentPath : a.routinePath,
-        mode,
+        mode : 'spawn',
         outputPiping : 1,
         outputCollecting : 1,
         throwingExitCode : 0
