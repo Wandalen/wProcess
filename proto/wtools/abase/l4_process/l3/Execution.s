@@ -1067,7 +1067,7 @@ function startMinimal_body( o )
       {
         let output = ' @ ';
         // if( o.outputColoring ) /* ??? */
-        if( o.outputColoring.out || o.outputColoring.err )
+        if( o.outputColoring.out )
         output = _.ct.format( output, { fg : 'bright white' } ) + _.ct.format( o.currentPath, 'path' );
         else
         output = output + o.currentPath
@@ -1078,7 +1078,7 @@ function startMinimal_body( o )
       {
         let prefix = ' > ';
         // if( o.outputColoring ) /* ??? */
-        if( o.outputColoring.out || o.outputColoring.err )
+        if( o.outputColoring.out )
         prefix = _.ct.format( prefix, { fg : 'bright white' } );
         log( prefix + o.fullExecPath, 'out' );
       }
