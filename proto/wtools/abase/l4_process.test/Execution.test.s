@@ -9612,13 +9612,158 @@ startChronology.description =
   - no extra procedures generated
 `
 
-function startState( test )
+function startStateMultiple( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
   let testAppPath = a.program( testApp );
+  var modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
 
-  
+  /* */
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+    let states; /* `initial`, `starting`, `started`, `terminating`, `terminated`, `disconnected` */
+
+    ready.then( ( op ) =>
+    {
+      test.case = `mode:${mode}, concurrent : 0, without disconnect, normal run`;
+      states = [];
+
+      let options =
+      {
+        execPath : mode === 'fork' ? [ testAppPath, testAppPath ] : [ 'node ' + testAppPath, 'node ' + testAppPath ],
+        mode,
+        concurrent : 0
+      }
+
+      let returned = _.process.start( options );
+
+      options.conStart.then( ( op ) =>
+      {
+        states.push( op.state );
+        return null;
+      } )
+
+      options.conTerminate.then( ( op ) =>
+      {
+        states.push( op.state );
+        return null;
+      } )
+
+      options.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 )
+        test.identical( op.ended, true )
+        states.push( op.state );
+        test.identical( states, [ 'starting', 'terminating', 'terminated' ] )
+        return null;
+      } )
+
+      return returned;
+
+    } )
+
+    /* */
+
+    ready.then( ( op ) =>
+    {
+      test.case = `mode:${mode}, concurrent : 1, without disconnect, normal run`;
+      states = [];
+
+      let options =
+      {
+        execPath : mode === 'fork' ? [ testAppPath, testAppPath ] : [ 'node ' + testAppPath, 'node ' + testAppPath ],
+        mode,
+        concurrent : 1
+      }
+
+      let returned = _.process.start( options );
+
+      options.conStart.then( ( op ) =>
+      {
+        states.push( op.state );
+        return null;
+      } )
+
+      options.conTerminate.then( ( op ) =>
+      {
+        states.push( op.state );
+        return null;
+      } )
+
+      options.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 )
+        test.identical( op.ended, true )
+        states.push( op.state );
+        test.identical( states, [ 'started', 'terminating', 'terminated' ] )
+        return null;
+      } )
+
+      return returned;
+
+    } )
+
+    /* */
+
+    // ready.then( ( op ) =>
+    // {
+    //   test.case = `mode:${mode}, concurrent : 1, without disconnect, normal run`;
+    //   states = [];
+
+    //   let options =
+    //   {
+    //     execPath : mode === 'fork' ? [ testAppPath, testAppPath ] : [ 'node ' + testAppPath, 'node ' + testAppPath ],
+    //     mode,
+    //     concurrent : 1
+    //   }
+
+    //   let returned = _.process.start( options );
+
+    //   options.conStart.then( ( op ) =>
+    //   {
+    //     states.push( op.state );
+    //     return null;
+    //   } )
+
+    //   options.conTerminate.then( ( op ) =>
+    //   {
+    //     states.push( op.state );
+    //     return null;
+    //   } )
+
+    //   // options.conDisconnect.then( ( op ) =>
+    //   // {
+    //   //   console.log( 'conDisconnect: ', op.state  )
+    //   //   states.push( op.state );
+    //   //   return null;
+    //   // } )
+
+    //   options.ready.then( ( op ) =>
+    //   {
+    //     test.identical( op.exitCode, 0 )
+    //     test.identical( op.ended, true )
+    //     states.push( op.state );
+    //     test.identical( states, [ 'started', 'terminating', 'terminated' ] )
+    //     return null;
+    //   } )
+
+    //   return returned;
+
+    // } )
+
+
+    return ready;
+  }
+
+  function testApp()
+  {
+    console.log( 'Log' );
+  }
 }
 
 // --
@@ -35119,7 +35264,7 @@ var Proto =
     startProcedureStackMultiple,
     startOnTerminateSeveralCallbacksChronology,
     startChronology,
-    startState,
+    startStateMultiple,
 
     // delay
 
