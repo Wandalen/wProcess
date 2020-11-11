@@ -70,15 +70,11 @@ RET=0; until [ ${RET} -ne 0 ]; do
     sleep 1
 done
 
-:repeat
-reset && node wtools/abase/l4_process.test/Execution.test.s v:5 s:0 r:endSignalsBasic && goto :repeat
-echo %errorlevel%
-
-:Loop
-ping -n 1 www.google.com | find "TTL="
-if %errorlevel% equ 0 goto :Loop
-echo %errorlevel%
-echo Connection established
+@echo off
+:Loop_start
+start /wait /b /affinity 1 node proto/wtools/abase/l4_process.test/Execution.test.s n:1 v:10 s:0 r:terminateDifferentStdio
+IF %errorlevel% EQU 0 GOTO Loop_start
+:Loop_end
 
 */
 
@@ -203,7 +199,9 @@ setTimeout
 function suiteBegin()
 {
   let context = this;
+  debugger;
   context.suiteTempPath = _.path.tempOpen( _.path.join( __dirname, '../..' ), 'ProcessBasic' );
+  debugger;
 }
 
 //
@@ -22927,7 +22925,7 @@ function startSingleOptionDry( test )
 }
 
 startSingleOptionDry.rapidity = -1;
-startSingleOptionDry.timeOut = 5e6;
+startSingleOptionDry.timeOut = 5e5;
 startSingleOptionDry.description =
 `
 Simulates run of routine start with all possible options.
@@ -24133,7 +24131,7 @@ function startOptionProcedureSingle( test )
         test.identical( returned.resourcesCount(), 0 );
       }
 
-      options.ready.then( ( op ) => 
+      options.ready.then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
@@ -24167,7 +24165,7 @@ function startOptionProcedureSingle( test )
       }
 
       let returned =  _.process.start( options )
-      
+
       if( tops.sync )
       {
         test.is( !_.consequenceIs( returned ) );
@@ -24181,7 +24179,7 @@ function startOptionProcedureSingle( test )
         test.identical( returned.resourcesCount(), 0 );
       }
 
-      options.ready.then( ( op ) => 
+      options.ready.then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
@@ -24228,7 +24226,7 @@ function startOptionProcedureSingle( test )
         test.identical( returned.resourcesCount(), 0 );
       }
 
-      options.ready.then( ( op ) => 
+      options.ready.then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
@@ -24277,7 +24275,7 @@ function startOptionProcedureSingle( test )
         test.identical( returned.resourcesCount(), 0 );
       }
 
-      options.ready.then( ( op ) => 
+      options.ready.then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
@@ -24326,7 +24324,7 @@ function startOptionProcedureSingle( test )
         test.identical( returned.resourcesCount(), 0 );
       }
 
-      options.ready.then( ( op ) => 
+      options.ready.then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
@@ -27485,8 +27483,9 @@ function endSignalsBasic( test )
     stdio : 'pipe',
   }
 
+  // xxx
   let modes = [ 'fork', 'spawn', 'shell' ];
-  modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGQUIT' ) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGQUIT' ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGINT' ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGTERM' ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGHUP' ) ) );
