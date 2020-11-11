@@ -31452,7 +31452,7 @@ function terminateDetachedFirstChild( test )
   let context = this;
   let a = context.assetFor( test, false );
   let testAppPath2 = a.program( program2 );
-  let modes = [ 'fork', 'spawn', 'shell' ];
+  let modes = [ 'fork', /*'spawn', 'shell' */];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
 
@@ -31464,6 +31464,7 @@ function terminateDetachedFirstChild( test )
 
     ready.then( () =>
     {
+      // a.reflect();
       if( a.fileProvider.fileExists( a.abs( 'program2end' ) ) )
       a.fileProvider.fileDelete( a.abs( 'program2end' ) );
 
