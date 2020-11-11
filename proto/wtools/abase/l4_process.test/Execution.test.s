@@ -9615,6 +9615,7 @@ function startStateMultiple( test )
   let context = this;
   let a = context.assetFor( test, false );
   let testAppPath = a.program( testApp );
+  let testAppErrorPath = a.program( testAppError );
   var modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -9624,11 +9625,16 @@ function startStateMultiple( test )
   function run( mode )
   {
     let ready = new _.Consequence().take( null );
-    let states; /* `initial`, `starting`, `started`, `terminating`, `terminated`, `disconnected` */
+    /* 
+    Possible states: `initial`, `starting`, `started`, `terminating`, `terminated`, `disconnected`
+    Possible to check : `starting`, `started`, `terminating`, `terminated`
+    */
+    let states;
+
 
     ready.then( ( op ) =>
     {
-      test.case = `mode:${mode}, concurrent : 0, without disconnect, normal run`;
+      test.case = `mode:${mode}, concurrent : 0, normal run`;
       states = [];
 
       let options =
@@ -9640,20 +9646,23 @@ function startStateMultiple( test )
 
       let returned = _.process.start( options );
 
-      options.conStart.then( ( op ) =>
+      options.conStart.tap( ( err, op ) =>
       {
+        test.is( !err );
         states.push( op.state );
         return null;
       } )
 
-      options.conTerminate.then( ( op ) =>
+      options.conTerminate.tap( ( err, op ) =>
       {
+        test.is( !err );
         states.push( op.state );
         return null;
       } )
 
-      options.ready.then( ( op ) =>
+      options.ready.tap( ( err, op ) =>
       {
+        test.is( !err );
         test.identical( op.exitCode, 0 )
         test.identical( op.ended, true )
         states.push( op.state );
@@ -9669,7 +9678,7 @@ function startStateMultiple( test )
 
     ready.then( ( op ) =>
     {
-      test.case = `mode:${mode}, concurrent : 1, without disconnect, normal run`;
+      test.case = `mode:${mode}, concurrent : 1, normal run`;
       states = [];
 
       let options =
@@ -9681,20 +9690,23 @@ function startStateMultiple( test )
 
       let returned = _.process.start( options );
 
-      options.conStart.then( ( op ) =>
+      options.conStart.tap( ( err, op ) =>
       {
+        test.is( !err );
         states.push( op.state );
         return null;
       } )
 
-      options.conTerminate.then( ( op ) =>
+      options.conTerminate.tap( ( err, op ) =>
       {
+        test.is( !err );
         states.push( op.state );
         return null;
       } )
 
-      options.ready.then( ( op ) =>
+      options.ready.tap( ( err, op ) =>
       {
+        test.is( !err );
         test.identical( op.exitCode, 0 )
         test.identical( op.ended, true )
         states.push( op.state );
@@ -9708,51 +9720,57 @@ function startStateMultiple( test )
 
     /* */
 
-    // ready.then( ( op ) =>
-    // {
-    //   test.case = `mode:${mode}, concurrent : 1, without disconnect, normal run`;
-    //   states = [];
+    ready.then( ( op ) =>
+    {
+      test.case = `mode:${mode}, concurrent : 0, error`;
+      states = [];
 
-    //   let options =
-    //   {
-    //     execPath : mode === 'fork' ? [ testAppPath, testAppPath ] : [ 'node ' + testAppPath, 'node ' + testAppPath ],
-    //     mode,
-    //     concurrent : 1
-    //   }
+      let options =
+      {
+        execPath : mode === 'fork' ? [ testAppErrorPath, testAppErrorPath ] : [ 'node ' + testAppErrorPath, 'node ' + testAppErrorPath ],
+        mode,
+        concurrent : 0,
+        throwingExitCode : 0
+      }
 
-    //   let returned = _.process.start( options );
+      let returned = _.process.start( options );
 
-    //   options.conStart.then( ( op ) =>
-    //   {
-    //     states.push( op.state );
-    //     return null;
-    //   } )
+      options.conStart.tap( ( err, op ) =>
+      {
+        test.is( !err );
+        states.push( op.state );
+        return null;
+      } )
 
-    //   options.conTerminate.then( ( op ) =>
-    //   {
-    //     states.push( op.state );
-    //     return null;
-    //   } )
+      // options.conTerminate.tap( ( err, op ) =>
+      // {
+      //   test.is( _.errIs( err ) );
+      //   test.identical( op, undefined )
+      //   return null;
+      // } )
 
-    //   // options.conDisconnect.then( ( op ) =>
-    //   // {
-    //   //   console.log( 'conDisconnect: ', op.state  )
-    //   //   states.push( op.state );
-    //   //   return null;
-    //   // } )
+      options.conTerminate.then( ( op ) =>
+      {
+        console.log( 'TERMOP: ', op )
+        // test.is( _.errIs( err ) );
+        // test.identical( op, undefined )
+        return null;
+      } )
 
-    //   options.ready.then( ( op ) =>
-    //   {
-    //     test.identical( op.exitCode, 0 )
-    //     test.identical( op.ended, true )
-    //     states.push( op.state );
-    //     test.identical( states, [ 'started', 'terminating', 'terminated' ] )
-    //     return null;
-    //   } )
+      options.ready.then( ( op ) =>
+      {
+        // console.log( 'OOO: ', op )
+        // test.is( _.errIs( err ) );
+        test.notIdentical( op.exitCode, 0 )
+        test.identical( op.ended, true )
+        states.push( op.state );
+        test.identical( states, [ 'starting', 'terminating', 'terminated' ] )
+        return null;
+      } )
 
-    //   return returned;
+      return returned;
 
-    // } )
+    } )
 
 
     return ready;
@@ -9761,6 +9779,11 @@ function startStateMultiple( test )
   function testApp()
   {
     console.log( 'Log' );
+  }
+
+  function testAppError()
+  {
+    randomText
   }
 }
 
