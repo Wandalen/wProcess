@@ -580,7 +580,7 @@ function startMinimal_body( o )
     runSpawn();
     else if( o.mode === 'shell' )
     runShell();
-    else _.assert( 0, 'Unknown mode', _.strQuote( o.mode ), 'to start process at path', _.strQuote( o.currentPath ) ); /* qqq for Yevhen : problem with template-string is not complete! */
+    else _.assert( 0, `Unknown mode ${o.mode} to start process at path ${o.currentPath}` ); /* qqq for Yevhen : problem with template-string is not complete! | aaa : Fixed. */
 
     /* procedure */
 
