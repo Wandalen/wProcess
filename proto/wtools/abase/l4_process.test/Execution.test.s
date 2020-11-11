@@ -25985,8 +25985,6 @@ function startOutputMultiple( test )
 
         }
 
-        /*
-        Fails on windows:
         /* xxx : fails on windows :
         - got :
           '1::begin
@@ -34842,12 +34840,13 @@ function experimentIpcDeasync( test )
   //   },
   // }).enable();
 
-  require('net').createServer(() => {}).listen( 8080, () => {
+  require( 'net' ).createServer( () => {} ).listen( 8080, () =>
+  {
     // Let's wait 10ms before logging the server started.
     setTimeout( () =>
     {
-      // console.log('>>>', AsyncHooks.executionAsyncId());
-    }, 10 );
+      // console.log( AsyncHooks.executionAsyncId() );
+    }, 10);
   });
 
   for( let i = 0 ; i < 10; i++ )
