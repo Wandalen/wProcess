@@ -1913,7 +1913,7 @@ function startMultiple_body( o )
       }
       else if( o.procedure )
       {
-        /* qqq for Yevhen : cover option procedure. take into account all branches */
+        /* qqq for Yevhen : cover option procedure. take into account all branches | aaa : Done. */
         if( !o.procedure.isAlive() )
         o.procedure.begin();
       }
