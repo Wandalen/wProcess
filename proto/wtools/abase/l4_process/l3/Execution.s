@@ -1066,7 +1066,6 @@ function startMinimal_body( o )
       if( o.verbosity >= 3 )
       {
         let output = ' @ ';
-        // if( o.outputColoring ) /* ??? */
         if( o.outputColoring.out )
         output = _.ct.format( output, { fg : 'bright white' } ) + _.ct.format( o.currentPath, 'path' );
         else
@@ -1077,7 +1076,6 @@ function startMinimal_body( o )
       if( o.verbosity )
       {
         let prefix = ' > ';
-        // if( o.outputColoring ) /* ??? */
         if( o.outputColoring.out )
         prefix = _.ct.format( prefix, { fg : 'bright white' } );
         log( prefix + o.fullExecPath, 'out' );

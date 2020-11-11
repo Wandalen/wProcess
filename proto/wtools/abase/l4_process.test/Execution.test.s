@@ -1,4 +1,3 @@
-/* eslint-disable */
 ( function _Execution_test_s( )
 {
 
@@ -18807,7 +18806,7 @@ function startOptionOutputColoringStderr( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        let expected = `\u001b[97m > \u001b[39;0m${ mode === 'fork' ? '' : 'node ' }${testAppPath2}\n\u001b[31mError output\u001b[39;0m\n`;
+        let expected = ` > ${ mode === 'fork' ? '' : 'node ' }${testAppPath2}\n\u001b[31mError output\u001b[39;0m\n`;
         test.identical( op.output, expected )
 
         a.fileProvider.fileDelete( testAppPath );
@@ -19084,7 +19083,6 @@ function startOptionOutputColoringStdout( test )
 
     /* */
 
-    /* SPECIAL inputMirroring : 1, outputColoring : { out : 0, err : 1 } => input is colored, but output is not */
     ready.then( () =>
     {
       test.case = `mode : ${ mode }, inputMirroring : 1, outputColoring : { out : 0, err : 1 }, normal output`;
@@ -19111,7 +19109,7 @@ function startOptionOutputColoringStdout( test )
 
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        let expected = `\u001b[97m > \u001b[39;0m${ mode === 'fork' ? '' : 'node ' }${testAppPath2}\nLog\n`;
+        let expected = ` > ${ mode === 'fork' ? '' : 'node ' }${testAppPath2}\nLog\n`;
         test.identical( op.output, expected )
 
         a.fileProvider.fileDelete( testAppPath );
