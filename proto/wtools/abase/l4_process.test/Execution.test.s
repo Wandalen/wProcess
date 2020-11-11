@@ -30060,7 +30060,6 @@ function terminateFirstChild( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath2 = a.program( program2 );
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -30073,12 +30072,7 @@ function terminateFirstChild( test )
 
     ready.then( () =>
     {
-      if( a.fileProvider.fileExists( a.abs( 'program2end' ) ) )
-      a.fileProvider.fileDelete( a.abs( 'program2end' ) );
-
-      if( a.fileProvider.fileExists( a.abs( 'program1.js' ) ) )
-      a.fileProvider.fileDelete( a.abs( 'program1.js' ) );
-
+      a.reflect();
       return null;
     } )
 
@@ -30087,6 +30081,7 @@ function terminateFirstChild( test )
       test.case = `mode : ${mode}`;
 
       let testAppPath = a.program({ routine : program1, locals : { mode } });
+      let testAppPath2 = a.program( program2 );
 
       let o =
       {
@@ -30281,8 +30276,7 @@ function terminateFirstChild( test )
 
 }
 
-terminateFirstChild.timeOut = 16e4; /* Locally : 52.720s */
-terminateFirstChild.rapidity = -1;
+terminateFirstChild.timeOut = 53e4; /* Locally : 52.720s */
 terminateFirstChild.description =
 `
 modes : spawn, fork
@@ -30784,7 +30778,6 @@ function terminateSecondChild( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath2 = a.program( program2 );
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -30797,12 +30790,7 @@ function terminateSecondChild( test )
 
     ready.then( () =>
     {
-      if( a.fileProvider.fileExists( a.abs( 'program2end' ) ) )
-      a.fileProvider.fileDelete( a.abs( 'program2end' ) );
-
-      if( a.fileProvider.fileExists( a.abs( 'program1.js' ) ) )
-      a.fileProvider.fileDelete( a.abs( 'program1.js' ) );
-
+      a.reflect();
       return null;
     } )
 
@@ -30811,6 +30799,7 @@ function terminateSecondChild( test )
       test.case = `mode : ${mode}`;
 
       let testAppPath = a.program({ routine : program1, locals : { mode } });
+      let testAppPath2 = a.program( program2 );
 
       let o =
       {
@@ -30975,6 +30964,7 @@ function terminateSecondChild( test )
 
 }
 
+terminateSecondChild.timeOut = 8e4; /* Locally : 7.309s */
 terminateSecondChild.description =
 `
 terminate second child
@@ -31451,8 +31441,7 @@ function terminateDetachedFirstChild( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath2 = a.program( program2 );
-  let modes = [ 'fork', /*'spawn', 'shell' */];
+  let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
 
@@ -31464,16 +31453,7 @@ function terminateDetachedFirstChild( test )
 
     ready.then( () =>
     {
-      // a.reflect();
-      if( a.fileProvider.fileExists( a.abs( 'program2end' ) ) )
-      a.fileProvider.fileDelete( a.abs( 'program2end' ) );
-
-      if( a.fileProvider.fileExists( a.abs( 'program1.js' ) ) )
-      a.fileProvider.fileDelete( a.abs( 'program1.js' ) );
-
-      if( a.fileProvider.fileExists( a.abs( 'program2Pid.json' ) ) )
-      a.fileProvider.fileDelete( a.abs( 'program2Pid.json' ) );
-
+      a.reflect();
       return null;
     } )
 
@@ -31482,6 +31462,7 @@ function terminateDetachedFirstChild( test )
       test.case = `mode : ${mode}`;
 
       let testAppPath = a.program({ routine : program1, locals : { mode } });
+      let testAppPath2 = a.program( program2 );
 
       let o =
       {
@@ -31582,7 +31563,7 @@ function terminateDetachedFirstChild( test )
   function waitForProgram2Ready( terminate, timerIsRunning )
   {
     let filePath = a.abs( 'program2Pid' );
-    return _.time.periodic( context.t0 * 5, () => /* 500 */
+    return _.time.periodic( context.t1 / 2, () => /* 500 */
     {
       if( !a.fileProvider.fileExists( filePath ) )
       return true;
@@ -31647,8 +31628,7 @@ function terminateDetachedFirstChild( test )
   }
 }
 
-terminateDetachedFirstChild.timeOut = 12e4; /* Locally : 38.066s */
-terminateDetachedFirstChild.rapidity = -1;
+terminateDetachedFirstChild.timeOut = 38e4; /* Locally : 37.294s */
 terminateDetachedFirstChild.description =
 `
 program1 starts program2 in detached mode
@@ -32144,8 +32124,6 @@ function terminateWithDetachedChild( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath2 = a.program( program2 );
-
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -32158,12 +32136,7 @@ function terminateWithDetachedChild( test )
 
     ready.then( () =>
     {
-      if( a.fileProvider.fileExists( a.abs( 'program2end' ) ) )
-      a.fileProvider.fileDelete( a.abs( 'program2end' ) );
-
-      if( a.fileProvider.fileExists( a.abs( 'program1.js' ) ) )
-      a.fileProvider.fileDelete( a.abs( 'program1.js' ) );
-
+      a.reflect();
       return null;
     } )
 
@@ -32172,6 +32145,7 @@ function terminateWithDetachedChild( test )
       test.case = `mode : ${mode}`;
 
       let testAppPath = a.program({ routine : program1, locals : { mode } });
+      let testAppPath2 = a.program( program2 );
 
       let o =
       {
@@ -32187,8 +32161,19 @@ function terminateWithDetachedChild( test )
     
       let program2Pid = null;
       let terminate = _.Consequence();
-    
-      o.process.stdout.on( 'data', _.routineJoin( null, handleOutput, [ o, terminate ] ) );
+      /* For mode::shell */
+      let timerIsRunning;
+      let timer;
+
+      if( mode === 'shell' )
+      {
+        timerIsRunning = { isRunning : true };
+        timer = waitForProgram2Ready( terminate, timerIsRunning );
+      }
+      else
+      {
+        o.process.stdout.on( 'data', _.routineJoin( null, handleOutput, [ o, terminate ] ) );
+      }
     
       terminate.then( () =>
       {
@@ -32204,6 +32189,11 @@ function terminateWithDetachedChild( test )
     
       o.conTerminate.then( () =>
       {
+        if( mode === 'shell' )
+        {
+          if( timerIsRunning.isRunning )
+          timer.cancel();
+        }
 
         if( mode === 'fork' )
         {
@@ -32238,8 +32228,13 @@ function terminateWithDetachedChild( test )
         }
     
         test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
+        if( mode === 'shell' )
+        test.ge( _.strCount( o.output, 'program2::begin' ), 0 );
+        else
         test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
         test.identical( _.strCount( o.output, 'program2::end' ), 0 );
+        test.identical( _.strCount( o.output, 'error' ), 0 );
+        test.identical( _.strCount( o.output, 'Error' ), 0 );
         test.is( !_.process.isAlive( program2Pid ) );
         test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
     
@@ -32253,7 +32248,6 @@ function terminateWithDetachedChild( test )
 
   }
 
-
   /* - */
 
   function handleOutput( o, terminate, output )
@@ -32262,6 +32256,20 @@ function terminateWithDetachedChild( test )
     return;
     o.process.stdout.removeListener( 'data', handleOutput );
     terminate.take( null );
+  }
+
+  /* - */
+
+  function waitForProgram2Ready( terminate, timerIsRunning )
+  {
+    let filePath = a.abs( 'program2Pid' );
+    return _.time.periodic( context.t1 / 2, () => /* 500 */
+    {
+      if( !a.fileProvider.fileExists( filePath ) )
+      return true;
+      timerIsRunning.isRunning = false;
+      terminate.take( true );
+    })
   }
 
   /* - */
@@ -32320,7 +32328,7 @@ function terminateWithDetachedChild( test )
   }
 }
 
-/* No timeout, local run in 7.937s */
+terminateWithDetachedChild.timeOut = 9e4; /* Locally : 8.060s */
 terminateWithDetachedChild.description =
 `program1 starts program2 in detached mode
 tester terminates program1 with option withChildren : 1
