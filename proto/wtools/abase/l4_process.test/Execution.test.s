@@ -18652,6 +18652,8 @@ function startOptionOutputColoring( test )
   }
 }
 
+startOptionOutputColoring.timeOut = 20e4; /* Locally : 19.079s */
+
 //
 
 function startOptionOutputColoringStderr( test )
@@ -18885,6 +18887,8 @@ function startOptionOutputColoringStderr( test )
     console.log( 'Log' );
   }
 }
+
+startOptionOutputColoringStderr.timeOut = 17e4; /* Locally : 16.099s */
 
 //
 
@@ -19154,6 +19158,8 @@ function startOptionOutputColoringStdout( test )
   }
 
 }
+
+startOptionOutputColoringStdout.timeOut = 19e4; /* Locally : 18.513s */
 
 //
 
