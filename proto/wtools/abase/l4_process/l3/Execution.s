@@ -1895,7 +1895,7 @@ function startMultiple_body( o )
     // _.assert( _.boolLike( o.outputColoring ) );
     // _.assert( _.boolLike( o.outputColoringStdout ) );
     // _.assert( _.boolLike( o.outputColoringStderr ) );
-    _.assert( _.boolLike( o.outputColoring ) || _.objectIs( o.outputColoring ) );
+    _.assert( _.objectIs( o.outputColoring ) );
     _.assert( _.boolLike( o.outputCollecting ) );
 
     if( o.outputAdditive === null )
