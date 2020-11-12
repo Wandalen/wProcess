@@ -8948,6 +8948,7 @@ function startOnTerminateSeveralCallbacksChronology( test )
 
 }
 
+startOnTerminateSeveralCallbacksChronology.timeOut = 4e5; /* Locally : 36.424s */
 startOnTerminateSeveralCallbacksChronology.description =
 `
 - second onTerminal callbacks called after ready callback
