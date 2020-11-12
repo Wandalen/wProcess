@@ -11118,8 +11118,9 @@ function startDetachedOutputStdioPipe( test )
     })
   }
 
-
 }
+
+startDetachedOutputStdioPipe.timeOut = 22e4; /* Locally : 22.906s */
 
 //
 
