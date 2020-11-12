@@ -16134,6 +16134,7 @@ function startNjsWithReadyDelayStructural( test )
         'applyingExitCode' : 1,
         'stdio' : tops.mode === 'fork' ? [ 'pipe', 'pipe', 'pipe', 'ipc' ] : [ 'pipe', 'pipe', 'pipe' ],
         'args' : null,
+        'args2' : null,
         'interpreterArgs' : null,
         'when' : 'instant',
         'ipc' : tops.mode === 'fork' ? true : false,
@@ -16146,9 +16147,7 @@ function startNjsWithReadyDelayStructural( test )
         'outputPrefixing' : 0,
         'outputPiping' : true,
         'outputAdditive' : true,
-        'outputColoring' : 1,
-        'outputColoringStdout' : 1,
-        'outputColoringStderr' : 1,
+        'outputColoring' : { err : 1, out : 1 },
         'uid' : null,
         'gid' : null,
         'streamSizeLimit' : null,
@@ -16185,6 +16184,7 @@ function startNjsWithReadyDelayStructural( test )
         exp2.streamErr = options.streamErr;
         exp2.execPath = tops.mode === 'fork' ? programPath : 'node';
         exp2.args = tops.mode === 'fork' ? [] : [ programPath ];
+        exp2.args2 = tops.mode === 'fork' ? [] : [ programPath ];
         exp2.fullExecPath = ( tops.mode === 'fork' ? '' : 'node ' ) + programPath;
         exp2.state = 'terminated';
         exp2.ended = true;
@@ -16245,6 +16245,7 @@ function startNjsWithReadyDelayStructural( test )
         let exp2 = _.mapExtend( null, exp );
         exp2.execPath = tops.mode === 'fork' ? exp2.execPath : 'node';
         exp2.args = tops.mode === 'fork' ? [] : [ programPath ];
+        exp2.args2 = tops.mode === 'fork' ? [] : [ programPath ];
         exp2.fullExecPath = tops.mode === 'fork' ? programPath : 'node ' + programPath;
         exp2.streamOut = options.streamOut;
         exp2.streamErr = options.streamErr;
@@ -16966,7 +16967,7 @@ function startNjsOptionInterpreterArgs( test )
         test.equivalent( op.output, process.version );
 
         test.identical( op.interpreterArgs, [ '--trace-warnings', '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] );
-        
+
         if( mode === 'shell' )
         {
           test.identical( op.args, [ programPath, 'arg1', 'arg2' ] );
@@ -17234,8 +17235,6 @@ function startNjsWithReadyDelayStructuralMultiple( test )
         'maximumMemory' : 0,
         'applyingExitCode' : 1,
         'stdio' : tops.mode === 'fork' ? [ 'pipe', 'pipe', 'pipe', 'ipc' ] : [ 'pipe', 'pipe', 'pipe' ],
-        'streamOut' : null,
-        'streamErr' : null,
         'args' : null,
         'interpreterArgs' : null,
         'when' : 'instant',
@@ -17250,9 +17249,7 @@ function startNjsWithReadyDelayStructuralMultiple( test )
         'outputPrefixing' : 0,
         'outputPiping' : true,
         'outputAdditive' : true,
-        'outputColoring' : 1,
-        'outputColoringStdout' : 1,
-        'outputColoringStderr' : 1,
+        'outputColoring' : { err : 1, out : 1 },
         'outputGraying' : 0,
         'conStart' : options.conStart,
         'conTerminate' : options.conTerminate,
