@@ -98,12 +98,12 @@ function startMinimalHeadCommon( routine, args )
   _.assert
   (
     _.boolLike( o.outputColoring.out ),
-    `o.outputColoring.out supports values::[ 1, 0, true, false ], but got ${o.outputColoring.out}`
+    `o.outputColoring.out expects BoolLike, but got ${o.outputColoring.out}`
   );
   _.assert
   (
     _.boolLike( o.outputColoring.err ),
-    `o.outputColoring.err supports values::[ 1, 0, true, false ], but got ${o.outputColoring.err}`
+    `o.outputColoring.err expects BoolLike, but got ${o.outputColoring.err}`
   );
 
   if( !_.numberIs( o.verbosity ) )
@@ -1421,7 +1421,7 @@ startMinimal_body.defaults =
   outputPiping : null,
   outputCollecting : 0,
   outputAdditive : null, /* qqq for Yevhen : cover the option */
-  outputColoring : 1, /* qqq for Yevhen : cover the option */
+  outputColoring : 1, /* qqq for Yevhen : cover the option | aaa : Done. */
   // outputColoringStderr : null, /* qqq for Yevhen : cover the option */
   // outputColoringStdout : null, /* qqq for Yevhen : cover the option */
   outputGraying : 0,
