@@ -16692,6 +16692,7 @@ function startNjsWithReadyDelayStructural( test )
 }
 
 startNjsWithReadyDelayStructural.timeOut = 33e4; /* Locally : 32.486s */
+startNjsWithReadyDelayStructural.rapidity = -1;
 startNjsWithReadyDelayStructural.description =
 `
  - ready has delay
@@ -17800,6 +17801,7 @@ function startNjsWithReadyDelayStructuralMultiple( test )
 }
 
 startNjsWithReadyDelayStructuralMultiple.timeOut = 38e4; /* Locally : 37.799s */
+startNjsWithReadyDelayStructuralMultiple.rapidity = -1;
 startNjsWithReadyDelayStructuralMultiple.description =
 `
  - ready has delay
