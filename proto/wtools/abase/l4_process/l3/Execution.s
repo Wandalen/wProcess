@@ -360,6 +360,7 @@ function startMinimal_body( o )
     o.exitCode = null;
     o.exitSignal = null;
     o.error = o.error || null;
+    o.args2 = null;
     o.process = null;
     o.fullExecPath = null;
     o.output = o.outputCollecting ? '' : null;
@@ -392,12 +393,9 @@ function startMinimal_body( o )
       , `If defined option::arg should be either [ string, array ], but it is ${_.strType( o.args )}`
     );
 
-    if( _.arrayIs( o.args ) ) /* xxx yyy */
-    o.args = o.args.slice();
+    /* xxx yyy */
+
     o.args = _.arrayAs( o.args );
-
-    /* */
-
     _argsLength = o.args.length;
 
     if( _.strIs( o.execPath ) )
@@ -423,20 +421,36 @@ function startMinimal_body( o )
       o.execPath = argUnqoute( o.execPath );
     }
 
+    o.args2 = o.args.slice();
+
     /* passingThrough */
 
     if( o.passingThrough )
     {
       let argumentsOwn = process.argv.slice( 2 );
       if( argumentsOwn.length )
-      o.args = _.arrayAppendArray( o.args || [], argumentsOwn );
+      o.args2 = _.arrayAppendArray( o.args2 || [], argumentsOwn );
     }
+
+    _.assert( o.interpreterArgs === null || _.arrayIs( o.interpreterArgs ) );
+    if( o.interpreterArgs && o.mode !== 'fork' )
+    o.args2 = _.arrayAppendArray( o.args2, o.interpreterArgs );
+
+/*
+    let appendedArgs = o.passingThrough ? process.argv.length - 2 : 0;
+    let prependedArgs = args.length - ( _argsLength + appendedArgs );
+    // xxx yyy
+    for( let i = prependedArgs; i < args.length; i++ )
+    {
+      args[ i ] = _.process._argEscape( args[ i ] );
+      args[ i ] = _.strQuote( args[ i ] );
+    }
+*/
 
     /* */
 
     o.currentPath = _.path.resolve( o.currentPath || '.' );
 
-    _.assert( o.interpreterArgs === null || _.arrayIs( o.interpreterArgs ) );
     _.assert( _.boolLike( o.outputAdditive ) );
     _.assert( _.numberIs( o.verbosity ) );
     _.assert( _.boolLike( o.outputPiping ) );
@@ -617,13 +631,13 @@ function startMinimal_body( o )
 
     execPath = _.path.nativize( execPath );
 
-    o.fullExecPath = _.strConcat( _.arrayAppendArray( [ execPath ], o.args ) );
+    o.fullExecPath = _.strConcat([ execPath, ... o.args2 ]);
     inputMirror();
 
     if( o.dry )
     return;
 
-    o.process = ChildProcess.fork( execPath, o.args, o2 ); /* xxx : rename to pnd? */
+    o.process = ChildProcess.fork( execPath, o.args2, o2 ); /* xxx : rename to pnd? */
 
   }
 
@@ -637,19 +651,21 @@ function startMinimal_body( o )
 
     let o2 = optionsForSpawn();
 
-    o.fullExecPath = _.strConcat( _.arrayAppendArray( [ execPath ], o.args ) );
+    o.fullExecPath = _.strConcat([ execPath, ... o.args2 ]);
     inputMirror();
 
     if( o.dry )
     return;
 
-    if( o.interpreterArgs )
-    o.args = o.interpreterArgs.concat( o.args ); /* xxx */
+    // if( o.interpreterArgs )
+    // o.args2 = _.arrayAppendArray( o.args2, o.interpreterArgs );
+    // if( o.interpreterArgs )
+    // o.args2 = o.interpreterArgs.concat( o.args2 ); /* xxx */ /* qqq2 for Yevhen : use routine _.arrayAppendArray() */
 
     if( o.sync && !o.deasync )
-    o.process = ChildProcess.spawnSync( execPath, o.args, o2 );
+    o.process = ChildProcess.spawnSync( execPath, o.args2, o2 );
     else
-    o.process = ChildProcess.spawn( execPath, o.args, o2 );
+    o.process = ChildProcess.spawn( execPath, o.args2, o2 );
 
   }
 
@@ -660,7 +676,7 @@ function startMinimal_body( o )
     let execPath = o.execPath;
 
     execPath = _.path.nativizeEscaping( execPath );
-    // execPath = _.process.escapeProg( execPath ); /* zzz for Vova: use this routine, review fails */
+    // execPath = _.process._argProgEscape( execPath ); /* zzz for Vova: use this routine, review fails */
 
     let shellPath = process.platform === 'win32' ? 'cmd' : 'sh';
     let arg1 = process.platform === 'win32' ? '/c' : '-c';
@@ -679,11 +695,17 @@ function startMinimal_body( o )
 
     o2.windowsVerbatimArguments = true;
 
-    if( o.interpreterArgs )
-    o.args = o.interpreterArgs.concat( o.args )
+    // if( o.interpreterArgs )
+    // o.args2 = o.interpreterArgs.concat( o.args2 )
+    // if( o.interpreterArgs )
+    // o.args2 = _.arrayAppendArray( o.args2, o.interpreterArgs );
 
-    if( o.args.length )
-    arg2 = arg2 + ' ' + argsEscape( o.args.slice() ).join( ' ' );
+    debugger;
+    if( o.args2.length )
+    // arg2 = arg2 + ' ' + o.args2.join( ' ' );
+    // arg2 = arg2 + ' ' + argsEscape( o.args2.slice() ).join( ' ' );
+    arg2 = arg2 + ' ' + argsEscape( o.args2 ).join( ' ' );
+    debugger;
 
     o.fullExecPath = arg2;
 
@@ -1163,32 +1185,39 @@ function startMinimal_body( o )
     let appendedArgs = o.passingThrough ? process.argv.length - 2 : 0;
     let prependedArgs = args.length - ( _argsLength + appendedArgs );
 
+    // xxx yyy
     for( let i = prependedArgs; i < args.length; i++ )
     {
-      let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', '`' ];
-      // args[ i ] = argEscape( args[ i ], quotesToEscape ); /* xxx : uncomment later */ /* qqq for Dmytro */
-      _.each( quotesToEscape, ( quote ) =>
-      {
-        args[ i ] = argEscape( args[ i ], quote );
-      })
+      args[ i ] = _.process._argEscape( args[ i ] );
       args[ i ] = _.strQuote( args[ i ] );
-      // args[ i ] = _.process.escapeArg( args[ i ]  ); /* zzz for Vova : use this routine, review fails */
     }
+
+    // for( let i = prependedArgs; i < args.length; i++ )
+    // {
+    //   let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', '`' ];
+    //   // args[ i ] = argEscape( args[ i ], quotesToEscape ); /* xxx : uncomment later */ /* qqq for Dmytro */
+    //   _.each( quotesToEscape, ( quote ) =>
+    //   {
+    //     args[ i ] = argEscape( args[ i ], quote );
+    //   })
+    //   args[ i ] = _.strQuote( args[ i ] );
+    //   // args[ i ] = _.process._argEscape2( args[ i ]  ); /* zzz for Vova : use this routine, review fails */
+    // }
 
     return args;
   }
 
   /* */
 
-  function argEscape( arg, quote )
-  {
-    return _.strReplaceAll( arg, quote, ( match, it ) =>
-    {
-      if( it.input[ it.charsRangeLeft[ 0 ] - 1 ] === '\\' )
-      return match;
-      return '\\' + match;
-    });
-  }
+  // function argEscape( arg, quote )
+  // {
+  //   return _.strReplaceAll( arg, quote, ( match, it ) =>
+  //   {
+  //     if( it.input[ it.charsRangeLeft[ 0 ] - 1 ] === '\\' )
+  //     return match;
+  //     return '\\' + match;
+  //   });
+  // }
 
   /* */
 
@@ -1219,13 +1248,12 @@ function startMinimal_body( o )
 
   function optionsForFork()
   {
-    let interpreterArgs = o.interpreterArgs || process.execArgv;
     let o2 =
     {
       detached : !!o.detaching,
       env : o.env,
       stdio : o.stdio,
-      execArgv : interpreterArgs,
+      execArgv : o.interpreterArgs || process.execArgv,
     }
     if( o.currentPath )
     o2.cwd = _.path.nativize( o.currentPath );
@@ -2348,6 +2376,8 @@ function startNjs_body( o )
   // let execPath = o.execPath ? _.path.nativizeMinimal( o.execPath ) : '';
   let execPath = o.execPath || '';
   // _.assert( o.interpreterArgs === null || o.interpreterArgs === '', 'not implemented' ); /* qqq for Yevhen : implement and cover. | aaa : Done */
+
+  /* xxx */
 
   /* ORIGINAL */
   // if( o.mode === 'fork' )

@@ -199,9 +199,7 @@ setTimeout
 function suiteBegin()
 {
   let context = this;
-  debugger;
   context.suiteTempPath = _.path.tempOpen( _.path.join( __dirname, '../..' ), 'ProcessBasic' );
-  debugger;
 }
 
 //
@@ -256,6 +254,7 @@ function startBasic( test )
   let a = context.assetFor( test, false );
   let programPath = a.program( program1 );
   let programPath2 = a.program( program2 );
+
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -534,10 +533,11 @@ ${programPath}:end
         mode,
       }
 
+      /* qqq2 for Yevhen : what original test case was? */
+
       var options = _.mapSupplement( null, o2, o3 );
 
-      return test.shouldThrowErrorAsync( _.process.start( options ),
-      ( err, arg ) =>
+      return test.shouldThrowErrorAsync( _.process.start( options ), ( err, arg ) =>
       {
         test.is( _.errIs( err ) );
         test.identical( err.reason, 'exit code' );
@@ -553,6 +553,8 @@ ${programPath}:end
         return null;
       });
     })
+
+    /* */
 
     .then( function()
     {
@@ -2520,10 +2522,13 @@ function startArgsOption( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        if( mode === 'fork' )
         test.identical( op.args, [ 'arg1', 'arg2' ] );
-        else
-        test.identical( op.args, [ programPath, 'arg1', 'arg2' ] );
+        if( mode === 'fork' )
+        test.identical( op.args2, [ 'arg1', 'arg2' ] );
+        else if( mode === 'spawn' )
+        test.identical( op.args2, [ programPath, 'arg1', 'arg2' ] );
+        else if( mode === 'shell' )
+        test.identical( op.args2, [ programPath, '"arg1"', '"arg2"' ] );
         test.identical( _.strCount( op.output, `[ 'arg1', 'arg2' ]` ), 1 );
         test.identical( startOptions.args, op.args );
         test.identical( args, [ 'arg1', 'arg2' ] );
@@ -2553,10 +2558,13 @@ function startArgsOption( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
+        test.identical( op.args, 'arg1' );
         if( mode === 'fork' )
-        test.identical( op.args, [ 'arg1' ] );
-        else
-        test.identical( op.args, [ programPath, 'arg1' ] );
+        test.identical( op.args2, [ 'arg1' ] );
+        else if( mode === 'spawn' )
+        test.identical( op.args2, [ programPath, 'arg1' ] );
+        else if( mode === 'shell' )
+        test.identical( op.args2, [ programPath, '"arg1"' ] );
         test.identical( _.strCount( op.output, 'arg1' ), 1 );
         test.identical( startOptions.args, op.args );
         test.identical( args, 'arg1' );
@@ -2568,69 +2576,6 @@ function startArgsOption( test )
 
     return ready;
   }
-
-  /* ORIGINAL */
-  // a.ready.then( () =>
-  // {
-  //   test.case = 'args option as array, source args array should not be changed'
-  //   var args = [ 'arg1', 'arg2' ];
-  //   var startOptions =
-  //   {
-  //     execPath : 'node ' + programPath,
-  //     outputCollecting : 1,
-  //     args,
-  //     mode : 'spawn',
-  //   }
-
-  //   let con = _.process.start( startOptions )
-
-  //   con.then( ( op ) =>
-  //   {
-  //     test.identical( op.exitCode, 0 );
-  //     test.identical( op.ended, true );
-  //     test.identical( op.args, [ programPath, 'arg1', 'arg2' ] );
-  //     test.identical( _.strCount( op.output, `[ 'arg1', 'arg2' ]` ), 1 );
-  //     test.identical( startOptions.args, op.args );
-  //     test.identical( args, [ 'arg1', 'arg2' ] );
-  //     return null;
-  //   })
-
-  //   return con;
-  // })
-
-  // /* */
-
-  // a.ready.then( () =>
-  // {
-  //   test.case = 'args option as string'
-  //   var args = 'arg1'
-  //   var startOptions =
-  //   {
-  //     execPath : 'node ' + programPath,
-  //     outputCollecting : 1,
-  //     args,
-  //     mode : 'spawn',
-  //   }
-
-  //   let con = _.process.start( startOptions )
-
-  //   con.then( ( op ) =>
-  //   {
-  //     test.identical( op.exitCode, 0 );
-  //     test.identical( op.ended, true );
-  //     test.identical( op.args, [ programPath, 'arg1' ] );
-  //     test.identical( _.strCount( op.output, 'arg1' ), 1 );
-  //     test.identical( startOptions.args, op.args );
-  //     test.identical( args, 'arg1' );
-  //     return null;
-  //   })
-
-  //   return con;
-  // })
-
-  // /*  */
-
-  // return a.ready;
 
   /* - */
 
@@ -3285,20 +3230,21 @@ function startArgumentsParsingNonTrivial( test )
       con.then( () =>
       {
         test.identical( o.exitCode, 0 );
+        test.identical( o.args, [ 'firstArg secondArg ":" 1', 'third arg', 'fourth arg', '"fifth" arg', '"some arg"' ] );
         if( mode === 'fork' )
         {
           test.identical( o.execPath, testAppPathSpace );
-          test.identical( o.args, [ 'firstArg secondArg ":" 1', 'third arg', 'fourth arg', '"fifth" arg', '"some arg"' ] );
+          test.identical( o.args2, [ 'firstArg secondArg ":" 1', 'third arg', 'fourth arg', '"fifth" arg', '"some arg"' ] );
         }
         else if( mode === 'shell' )
         {
           test.identical( o.execPath, 'node' );
-          test.identical( o.args, [ _.strQuote( testAppPathSpace ), `'firstArg secondArg \":\" 1'`, `"third arg"`, `'fourth arg'`, `'\"fifth\" arg'`, '"some arg"' ] );
+          test.identical( o.args2, [ _.strQuote( testAppPathSpace ), `'firstArg secondArg \":\" 1'`, `"third arg"`, `'fourth arg'`, `'\"fifth\" arg'`, '"some arg"' ] );
         }
         else
         {
           test.identical( o.execPath, 'node' );
-          test.identical( o.args, [ testAppPathSpace, 'firstArg secondArg ":" 1', 'third arg', 'fourth arg', '"fifth" arg', '"some arg"' ] );
+          test.identical( o.args2, [ testAppPathSpace, 'firstArg secondArg ":" 1', 'third arg', 'fourth arg', '"fifth" arg', '"some arg"' ] );
         }
         let op = JSON.parse( o.output );
         test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
@@ -3343,19 +3289,20 @@ function startArgumentsParsingNonTrivial( test )
       con.then( () =>
       {
         test.identical( o.exitCode, 0 );
+        test.identical( o.args, [ 'firstArg', 'secondArg:1', '"third arg"' ] );
         if( mode === 'fork' )
         {
           test.identical( o.execPath, testAppPathSpace );
-          test.identical( o.args, [ 'firstArg', 'secondArg:1', '"third arg"' ] );
+          test.identical( o.args2, [ 'firstArg', 'secondArg:1', '"third arg"' ] );
         }
         else if ( mode === 'shell' )
         {
           test.identical( o.execPath, 'node' );
-          test.identical( o.args, [ _.strQuote( testAppPathSpace ), 'firstArg', 'secondArg:1', '"third arg"' ] );
+          test.identical( o.args2, [ _.strQuote( testAppPathSpace ), 'firstArg', 'secondArg:1', '"third arg"' ] );
         }
         else
         {
-          test.identical( o.args, [ testAppPathSpace, 'firstArg', 'secondArg:1', '"third arg"' ] );
+          test.identical( o.args2, [ testAppPathSpace, 'firstArg', 'secondArg:1', '"third arg"' ] );
           test.identical( o.execPath, 'node' );
         }
 
@@ -3401,6 +3348,7 @@ function startArgumentsParsingNonTrivial( test )
           test.is( _.strHas( err.message, 'first arg' ) )
           test.identical( o.execPath, 'first arg' );
           test.identical( o.args, [] );
+          test.identical( o.args2, [] );
         }
         else if( mode === 'fork' )
         {
@@ -3408,6 +3356,7 @@ function startArgumentsParsingNonTrivial( test )
           test.is( _.strHas( op.output, 'Error: Cannot find module' ) );
           test.identical( o.execPath, mode === 'shell' ? '"first arg"' : 'first arg' );
           test.identical( o.args, [] );
+          test.identical( o.args2, [] );
         }
         else
         {
@@ -3426,6 +3375,7 @@ function startArgumentsParsingNonTrivial( test )
         }
         test.identical( o.execPath, mode === 'shell' ? '"first arg"' : 'first arg' );
         test.identical( o.args, [] );
+        test.identical( o.args2, [] );
 
         return null;
       })
@@ -3483,6 +3433,7 @@ function startArgumentsParsingNonTrivial( test )
         }
         test.identical( o.execPath, 'first arg' );
         test.identical( o.args, [ 'second arg' ] );
+        test.identical( o.args2, [ 'second arg' ] );
 
         return null;
       })
@@ -3534,6 +3485,7 @@ function startArgumentsParsingNonTrivial( test )
 
         test.identical( o.execPath, '"' );
         test.identical( o.args, [ 'first', 'arg', '"' ] );
+        test.identical( o.args2, [ 'first', 'arg', '"' ] );
 
         return null;
       })
@@ -3584,6 +3536,7 @@ function startArgumentsParsingNonTrivial( test )
         }
 
         test.identical( o.args, [ 'first', 'arg', '"' ] );
+        test.identical( o.args2, [ 'first', 'arg', '"' ] );
 
         return null;
       })
@@ -3645,6 +3598,7 @@ function startArgumentsParsingNonTrivial( test )
 
         test.identical( o.execPath, '"' );
         test.identical( o.args, [ '"', 'first', 'arg', '"' ] );
+        test.identical( o.args2, [ '"', 'first', 'arg', '"' ] );
 
         return null;
       })
@@ -3696,10 +3650,12 @@ function startArgumentsParsingNonTrivial( test )
       {
         test.identical( o.exitCode, 0 );
         let op = JSON.parse( o.output );
+        test.identical( o.args, [ _.strQuote( testAppPathSpace ), `"path/key3":'val3'` ] );
         if( mode === 'shell' )
         {
           test.identical( o.execPath, 'node' );
-          test.identical( o.args, [ _.strQuote( testAppPathSpace ), `"path/key3":'val3'` ] );
+          // test.identical( o.args, [ _.strQuote( testAppPathSpace ), `"path/key3":'val3'` ] );
+          test.identical( o.args2, [ _.strQuote( testAppPathSpace ), `"path/key3":'val3'` ] );
           if( process.platform === 'win32' )
           test.identical( op.scriptArgs, [ `path/key3:'val3'` ] )
           else
@@ -3708,13 +3664,13 @@ function startArgumentsParsingNonTrivial( test )
         else if( mode === 'spawn' )
         {
           test.identical( o.execPath, 'node' );
-          test.identical( o.args, [ testAppPathSpace, `"path/key3":'val3'` ] );
+          test.identical( o.args2, [ testAppPathSpace, `"path/key3":'val3'` ] );
           test.identical( op.scriptArgs, [ `"path/key3":'val3'` ] )
         }
         else
         {
           test.identical( o.execPath, testAppPathSpace );
-          test.identical( o.args, [ `"path/key3":'val3'` ] );
+          test.identical( o.args2, [ `"path/key3":'val3'` ] );
           test.identical( op.scriptArgs, [ `"path/key3":'val3'` ] )
         }
         test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
@@ -3732,465 +3688,7 @@ function startArgumentsParsingNonTrivial( test )
     return ready;
   }
 
-
-  /* ORIGINAL */
-  // a.ready
-
-  // .then( () =>
-  // {
-  //   test.case = 'args in execPath and args options'
-
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' `firstArg secondArg ":" 1` "third arg" \'fourth arg\'  `"fifth" arg`',
-  //     args : '"some arg"',
-  //     mode : 'spawn',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     test.identical( o.execPath, 'node' );
-  //     test.identical( o.args, [ testAppPathSpace, 'firstArg secondArg ":" 1', 'third arg', 'fourth arg', '"fifth" arg', '"some arg"' ] );
-  //     let op = JSON.parse( o.output );
-  //     test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
-  //     test.identical( op.map, {} )
-  //     test.identical( op.scriptArgs, [ 'firstArg secondArg ":" 1', 'third arg', 'fourth arg', '"fifth" arg', '"some arg"' ] )
-
-  //     return null;
-  //   })
-
-  //   return con;
-  // })
-
-  // /* */
-
-  // .then( () =>
-  // {
-  //   test.case = 'args in execPath and args options'
-
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathSpace ) + ` 'firstArg secondArg \":\" 1' "third arg" 'fourth arg'  '\"fifth\" arg'`,
-  //     args : '"some arg"',
-  //     mode : 'shell',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     test.identical( o.execPath, 'node' );
-  //     test.identical( o.args, [ _.strQuote( testAppPathSpace ), `'firstArg secondArg \":\" 1'`, `"third arg"`, `'fourth arg'`, `'\"fifth\" arg'`, '"some arg"' ] );
-  //     let op = JSON.parse( o.output );
-  //     test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
-  //     test.identical( op.map, {} )
-  //     if( process.platform === 'win32' )
-  //     test.identical( op.scriptArgs, [ `'firstArg`, `secondArg`, ':', `1'`, 'third arg', `'fourth`, `arg'`, `'fifth`, `arg'`, '"some arg"' ] )
-  //     else
-  //     test.identical( op.scriptArgs, [ 'firstArg secondArg ":" 1', 'third arg', 'fourth arg', '"fifth" arg', '"some arg"' ] )
-
-  //     return null;
-  //   })
-
-  //   return con;
-  // })
-
-  // /* */
-
-  // .then( () =>
-  // {
-  //   test.case = 'args in execPath and args options'
-
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : _.strQuote( testAppPathSpace ) + ' `firstArg secondArg ":" 1` "third arg" \'fourth arg\'  `"fifth" arg`',
-  //     args : '"some arg"',
-  //     mode : 'fork',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     test.identical( o.execPath, testAppPathSpace );
-  //     test.identical( o.args, [ 'firstArg secondArg ":" 1', 'third arg', 'fourth arg', '"fifth" arg', '"some arg"' ] );
-  //     let op = JSON.parse( o.output );
-  //     test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
-  //     test.identical( op.map, {} )
-  //     test.identical( op.scriptArgs, [ 'firstArg secondArg ":" 1', 'third arg', 'fourth arg', '"fifth" arg', '"some arg"' ] )
-
-  //     return null;
-  //   })
-
-  //   return con;
-  // })
-
-  // /*  */
-
-  // .then( () =>
-  // {
-  //   test.case = 'args in execPath and args options'
-
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' firstArg secondArg:1',
-  //     args : '"third arg"',
-  //     mode : 'spawn',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     test.identical( o.execPath, 'node' );
-  //     test.identical( o.args, [ testAppPathSpace, 'firstArg', 'secondArg:1', '"third arg"' ] );
-  //     let op = JSON.parse( o.output );
-  //     test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
-  //     test.identical( op.map, { secondArg : '1 "third arg"' } )
-  //     test.identical( op.subject, 'firstArg' )
-  //     test.identical( op.scriptArgs, [ 'firstArg', 'secondArg:1', '"third arg"' ] )
-
-  //     return null;
-  //   })
-
-  //   return con;
-  // })
-
-  // /* */
-
-  // .then( () =>
-  // {
-  //   test.case = 'args in execPath and args options'
-
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' firstArg secondArg:1',
-  //     args : '"third arg"',
-  //     mode : 'shell',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     test.identical( o.execPath, 'node' );
-  //     test.identical( o.args, [ _.strQuote( testAppPathSpace ), 'firstArg', 'secondArg:1', '"third arg"' ] );
-  //     let op = JSON.parse( o.output );
-  //     test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
-  //     test.identical( op.map, { secondArg : '1 "third arg"' } )
-  //     test.identical( op.subject, 'firstArg' )
-  //     test.identical( op.scriptArgs, [ 'firstArg', 'secondArg:1', '"third arg"' ] )
-
-  //     return null;
-  //   })
-
-  //   return con;
-  // })
-
-  // /* */
-
-  // .then( () =>
-  // {
-  //   test.case = 'args in execPath and args options'
-
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : _.strQuote( testAppPathSpace ) + ' firstArg secondArg:1',
-  //     args : '"third arg"',
-  //     mode : 'fork',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     test.identical( o.execPath, testAppPathSpace );
-  //     test.identical( o.args, [ 'firstArg', 'secondArg:1', '"third arg"' ] );
-  //     let op = JSON.parse( o.output );
-  //     test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
-  //     test.identical( op.map, { secondArg : '1 "third arg"' } )
-  //     test.identical( op.subject, 'firstArg' )
-  //     test.identical( op.scriptArgs, [ 'firstArg', 'secondArg:1', '"third arg"' ] )
-
-  //     return null;
-  //   })
-
-  //   return con;
-  // })
-
-  // /* */
-
-  // .then( () =>
-  // {
-  //   test.case = 'args in execPath and args options'
-
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : '"first arg"',
-  //     mode : 'spawn',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     throwingExitCode : 0,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-
-  //   con.finally( ( err, op ) =>
-  //   {
-  //     test.is( !!err );
-  //     test.is( _.strHas( err.message, 'first arg' ) )
-  //     test.identical( o.execPath, 'first arg' );
-  //     test.identical( o.args, [] );
-
-  //     return null;
-  //   })
-
-  //   return con;
-  // })
-
-  // /* */
-
-  // .then( () =>
-  // {
-  //   test.case = 'args in execPath and args options'
-
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     args : '"first arg"',
-  //     mode : 'spawn',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     throwingExitCode : 0,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-
-  //   con.finally( ( err, op ) =>
-  //   {
-  //     test.is( !!err );
-  //     test.is( _.strHas( err.message, 'first arg' ) )
-  //     test.identical( o.execPath, 'first arg' );
-  //     test.identical( o.args, [] );
-
-  //     return null;
-  //   })
-
-  //   return con;
-  // })
-
-  // /* */
-
-  // .then( () =>
-  // {
-  //   test.case = 'args in execPath and args options'
-
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     args : [ '"first arg"', 'second arg' ],
-  //     mode : 'spawn',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     throwingExitCode : 0,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-
-  //   con.finally( ( err, op ) =>
-  //   {
-  //     test.is( !!err );
-  //     test.is( _.strHas( err.message, 'first arg' ) )
-  //     test.identical( o.execPath, 'first arg' );
-  //     test.identical( o.args, [ 'second arg' ] );
-
-  //     return null;
-  //   })
-
-  //   return con;
-  // })
-
-  // /* */
-
-  // .then( () =>
-  // {
-  //   test.case = 'args in execPath and args options'
-
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     args : [ '"', 'first', 'arg', '"' ],
-  //     mode : 'spawn',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     throwingExitCode : 0,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-
-  //   con.finally( ( err, op ) =>
-  //   {
-  //     test.is( !!err );
-  //     test.is( _.strHas( err.message, '"' ) )
-  //     test.identical( o.execPath, '"' );
-  //     test.identical( o.args, [ 'first', 'arg', '"' ] );
-
-  //     return null;
-  //   })
-
-  //   return con;
-  // })
-
-  // /* */
-
-  // .then( () =>
-  // {
-  //   test.case = 'args in execPath and args options'
-
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     args : [ '', 'first', 'arg', '"' ],
-  //     mode : 'spawn',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     throwingExitCode : 0,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-
-  //   con.finally( ( err, op ) =>
-  //   {
-  //     test.is( !!err );
-  //     test.identical( o.execPath, '' );
-  //     test.identical( o.args, [ 'first', 'arg', '"' ] );
-
-  //     return null;
-  //   })
-
-  //   return con;
-  // })
-
-  // /* */
-
-  // .then( () =>
-  // {
-  //   test.case = 'args in execPath and args options'
-
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     args : [ '"', '"', 'first', 'arg', '"' ],
-  //     mode : 'spawn',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     throwingExitCode : 0,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-
-  //   con.finally( ( err, op ) =>
-  //   {
-  //     test.is( !!err );
-  //     test.is( _.strHas( err.message, `spawn " ENOENT` ) );
-  //     test.identical( o.execPath, '"' );
-  //     test.identical( o.args, [ '"', 'first', 'arg', '"' ] );
-  //     return null;
-  //   })
-
-  //   return con;
-  // })
-
-  // /* */
-
-  // .then( () =>
-  // {
-  //   test.case = 'no execPath, empty args'
-
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     args : [],
-  //     mode : 'spawn',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     throwingExitCode : 0,
-  //     ready : con
-  //   }
-
-  //   _.process.start( o );
-
-  //   return test.shouldThrowErrorAsync( con );
-  // })
-
-  // /*  */
-
-  // .then( () =>
-  // {
-  //   test.case = 'args in execPath and args options'
-
-  //   let con = new _.Consequence().take( null );
-  //   let o =
-  //   {
-  //     execPath : _.strQuote( testAppPathSpace ) + ` "path/key3":'val3'`,
-  //     args : [],
-  //     mode : 'fork',
-  //     outputPiping : 1,
-  //     outputCollecting : 1,
-  //     ready : con
-  //   }
-  //   _.process.start( o );
-
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 );
-  //     test.identical( o.execPath, testAppPathSpace );
-  //     test.identical( o.args, [ `"path/key3":'val3'` ] );
-  //     let op = JSON.parse( o.output );
-  //     test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
-  //     test.identical( op.map, { 'path/key3' : 'val3' } )
-  //     test.identical( op.subject, '' )
-  //     test.identical( op.scriptArgs, [ `"path/key3":'val3'` ] )
-
-  //     return null;
-  //   })
-
-  //   return con;
-  // })
-
-  // /*  */
-
-  // return a.ready;
-
-
-  /**/
+  /* */
 
   function testApp()
   {
@@ -4661,6 +4159,7 @@ function startExecPathQuotesClosing( test )
       test.identical( o.exitCode, 0 );
       test.identical( o.fullExecPath, testAppPathSpace + ' arg' );
       test.identical( o.args, [ 'arg' ] );
+      test.identical( o.args2, [ 'arg' ] );
       let op = JSON.parse( o.output );
       test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
       test.identical( op.map, {} )
@@ -4690,6 +4189,7 @@ function startExecPathQuotesClosing( test )
       test.identical( o.exitCode, 0 );
       test.identical( o.fullExecPath, 'node ' + testAppPathSpace + ' arg' );
       test.identical( o.args, [ testAppPathSpace, 'arg' ] );
+      test.identical( o.args2, [ testAppPathSpace, 'arg' ] );
       let op = JSON.parse( o.output );
       test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
       test.identical( op.map, {} )
@@ -4719,6 +4219,7 @@ function startExecPathQuotesClosing( test )
       test.identical( o.exitCode, 0 );
       test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"' );
       test.identical( o.args, [ _.strQuote( testAppPathSpace ), '"arg"' ] );
+      test.identical( o.args2, [ _.strQuote( testAppPathSpace ), '"arg"' ] );
       let op = JSON.parse( o.output );
       test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
       test.identical( op.map, {} )
@@ -4752,6 +4253,7 @@ function startExecPathQuotesClosing( test )
       test.identical( o.exitCode, 0 );
       test.identical( o.fullExecPath, testAppPathSpace + ' arg' );
       test.identical( o.args, [ 'arg' ] );
+      test.identical( o.args2, [ 'arg' ] );
       let op = JSON.parse( o.output );
       test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
       test.identical( op.map, {} )
@@ -4781,6 +4283,7 @@ function startExecPathQuotesClosing( test )
       test.identical( o.exitCode, 0 );
       test.identical( o.fullExecPath, 'node ' + testAppPathSpace + ' arg' );
       test.identical( o.args, [ testAppPathSpace, 'arg' ] );
+      test.identical( o.args2, [ testAppPathSpace, 'arg' ] );
       let op = JSON.parse( o.output );
       test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
       test.identical( op.map, {} )
@@ -4810,6 +4313,7 @@ function startExecPathQuotesClosing( test )
       test.identical( o.exitCode, 0 );
       test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' arg' );
       test.identical( o.args, [ _.strQuote( testAppPathSpace ), 'arg' ] );
+      test.identical( o.args2, [ _.strQuote( testAppPathSpace ), 'arg' ] );
       let op = JSON.parse( o.output );
       test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
       test.identical( op.map, {} )
@@ -4843,6 +4347,7 @@ function startExecPathQuotesClosing( test )
       test.identical( o.exitCode, 0 );
       test.identical( o.fullExecPath, testAppPathSpace + ' " arg' );
       test.identical( o.args, [ '"', 'arg' ] );
+      test.identical( o.args2, [ '"', 'arg' ] );
       let op = JSON.parse( o.output );
       test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
       test.identical( op.map, {} )
@@ -4876,6 +4381,7 @@ function startExecPathQuotesClosing( test )
       test.identical( o.exitCode, 0 );
       test.identical( o.fullExecPath, testAppPathSpace+ ' " arg' );
       test.identical( o.args, [ '"', 'arg' ] );
+      test.identical( o.args2, [ '"', 'arg' ] );
       let op = JSON.parse( o.output );
       test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
       test.identical( op.map, {} )
@@ -4905,6 +4411,7 @@ function startExecPathQuotesClosing( test )
       test.identical( o.exitCode, 0 );
       test.identical( o.fullExecPath, testAppPathSpace + ' arg "' );
       test.identical( o.args, [ 'arg', '"' ] );
+      test.identical( o.args2, [ 'arg', '"' ] );
       let op = JSON.parse( o.output );
       test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
       test.identical( op.map, {} )
@@ -4963,20 +4470,6 @@ function startExecPathQuotesClosing( test )
       outputCollecting : 1,
       ready : con
     }
-    // _.process.start( o )
-
-    // con.then( () =>
-    // {
-    //   test.identical( o.exitCode, 0 );
-    //   test.identical( o.fullExecPath, testAppPathSpace + ' arg"' );
-    //   test.identical( o.args, [ 'arg"' ] );
-    //   let op = JSON.parse( o.output );
-    //   test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
-    //   test.identical( op.map, {} )
-    //   test.identical( op.scriptArgs, [ 'arg"' ] )
-
-    //   return null;
-    // })
 
     return test.shouldThrowErrorAsync( _.process.start( o ) );
   })
@@ -4999,6 +4492,7 @@ function startExecPathQuotesClosing( test )
       test.identical( o.exitCode, 0 );
       test.identical( o.fullExecPath, testAppPathSpace + ' arg"arg"' );
       test.identical( o.args, [ 'arg"arg"' ] );
+      test.identical( o.args2, [ 'arg"arg"' ] );
       let op = JSON.parse( o.output );
       test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
       test.identical( op.map, {} )
@@ -5043,20 +4537,6 @@ function startExecPathQuotesClosing( test )
       outputCollecting : 1,
       ready : con
     }
-    // _.process.start( o );
-
-    // con.then( () =>
-    // {
-    //   test.identical( o.exitCode, 0 );
-    //   test.identical( o.fullExecPath, testAppPathSpace + ' arg"arg' );
-    //   test.identical( o.args, [ 'arg"arg' ] );
-    //   let op = JSON.parse( o.output );
-    //   test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
-    //   test.identical( op.map, {} )
-    //   test.identical( op.scriptArgs, [ 'arg"arg' ] )
-
-    //   return null;
-    // })
 
     return test.shouldThrowErrorAsync( _.process.start( o ) );
   })
@@ -5079,6 +4559,7 @@ function startExecPathQuotesClosing( test )
       test.identical( o.exitCode, 0 );
       test.identical( o.fullExecPath, testAppPathSpace + ' arg"arg' );
       test.identical( o.args, [ 'arg"arg' ] );
+      test.identical( o.args2, [ 'arg"arg' ] );
       let op = JSON.parse( o.output );
       test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
       test.identical( op.map, {} )
@@ -5112,6 +4593,7 @@ function startExecPathQuotesClosing( test )
       test.identical( o.exitCode, 0 );
       test.identical( o.fullExecPath, testAppPathSpace + ' option : value' );
       test.identical( o.args, [ 'option', ':', 'value' ] );
+      test.identical( o.args2, [ 'option', ':', 'value' ] );
       let op = JSON.parse( o.output );
       test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
       test.identical( op.map, { option : 'value' } )
@@ -5141,6 +4623,7 @@ function startExecPathQuotesClosing( test )
       test.identical( o.exitCode, 0 );
       test.identical( o.fullExecPath, testAppPathSpace + ' option:"value with space"' );
       test.identical( o.args, [ 'option:"value with space"' ] );
+      test.identical( o.args2, [ 'option:"value with space"' ] );
       let op = JSON.parse( o.output );
       test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
       test.identical( op.map, { option : 'value with space' } )
@@ -5170,6 +4653,7 @@ function startExecPathQuotesClosing( test )
       test.identical( o.exitCode, 0 );
       test.identical( o.fullExecPath, testAppPathSpace + ' option : value with space' );
       test.identical( o.args, [ 'option', ':', 'value with space' ] );
+      test.identical( o.args2, [ 'option', ':', 'value with space' ] );
       let op = JSON.parse( o.output );
       test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
       test.identical( op.map, { option : 'value with space' } )
@@ -5214,6 +4698,7 @@ function startExecPathQuotesClosing( test )
       test.identical( o.exitCode, 0 );
       test.identical( o.fullExecPath, testAppPathSpace + ' option: "value"' );
       test.identical( o.args, [ 'option: "value"' ] );
+      test.identical( o.args2, [ 'option: "value"' ] );
       let op = JSON.parse( o.output );
       test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
       test.identical( op.map, { option : 'value' } )
@@ -5260,6 +4745,7 @@ function startExecPathQuotesClosing( test )
       test.identical( o.exitCode, 0 );
       test.identical( o.fullExecPath, testAppPathSpace + ' "option: "value with space""' );
       test.identical( o.args, [ '"option: "value', 'with', 'space""' ] );
+      test.identical( o.args2, [ '"option: "value', 'with', 'space""' ] );
       let op = JSON.parse( o.output );
       test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
       test.identical( op.map, { option : 'value with space' } )
@@ -5293,6 +4779,7 @@ function startExecPathQuotesClosing( test )
       test.identical( o.exitCode, 0 );
       test.identical( o.fullExecPath, testAppPathSpace + ' option: "value with space"' );
       test.identical( o.args, [ 'option: "value with space"' ] );
+      test.identical( o.args2, [ 'option: "value with space"' ] );
       let op = JSON.parse( o.output );
       test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
       test.identical( op.map, { option : 'value with space' } )
@@ -5326,6 +4813,7 @@ function startExecPathQuotesClosing( test )
       test.identical( o.exitCode, 0 );
       test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' option: \\"value with space\\"' );
       test.identical( o.args, [ _.strQuote( testAppPathSpace ), 'option:', '\\"value with space\\"' ] );
+      test.identical( o.args2, [ _.strQuote( testAppPathSpace ), 'option:', '\\"value with space\\"' ] );
       let op = JSON.parse( o.output );
       test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
       test.identical( op.map, { option : 'value with space' } )
@@ -5539,6 +5027,7 @@ function startExecPathSeveralCommands( test )
 
 //
 
+/* qqq for Yevhen : name and split cases */
 function startExecPathNonTrivialModeShell( test )
 {
   let context = this;
@@ -5571,22 +5060,12 @@ function startExecPathNonTrivialModeShell( test )
     return null;
   })
 
-  /* Vova: same behaviour on win and linux now */
   shell({ execPath : '"node -v && node -v"', throwingExitCode : 0 })
   .then( ( op ) =>
   {
-    // if( process.platform ==='win32' )
-    // {
-    //   test.identical( op.exitCode, 0 );
-    //   test.identical( op.ended, true );
-    //   test.identical( _.strCount( op.output, process.version ), 2 );
-    // }
-    // else
-    // {
-      test.notIdentical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      test.identical( _.strCount( op.output, process.version ), 0 );
-    // }
+    test.notIdentical( op.exitCode, 0 );
+    test.identical( op.ended, true );
+    test.identical( _.strCount( op.output, process.version ), 0 );
     return null;
   })
 
@@ -5720,7 +5199,6 @@ function startExecPathNonTrivialModeShell( test )
   {
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
-    // test.identical( _.strCount( op.output, `[ "'quoted arg with space'" ]` ), 1 );
     let args = a.fileProvider.fileRead({ filePath : a.abs( a.routinePath, 'args' ), encoding : 'json' });
     if( process.platform === 'win32' )
     test.identical( args, [ '\\`\'quoted', 'arg', 'with', 'space\'\\`' ] );
@@ -5779,7 +5257,6 @@ function startExecPathNonTrivialModeShell( test )
   {
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
-    // test.identical( _.strCount( op.output, `[ 'arg1', 'arg2', 'arg 3', "'arg4'" ]` ), 1 );
     let args = a.fileProvider.fileRead({ filePath : a.abs( a.routinePath, 'args' ), encoding : 'json' });
     test.identical( args, [ 'arg1', 'arg2', 'arg 3', `'arg4'` ] );
     return null;
@@ -5790,7 +5267,6 @@ function startExecPathNonTrivialModeShell( test )
   {
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
-    // test.identical( _.strCount( op.output, '[ `arg1 "arg2" "arg 3" "\'arg4\'"` ]' ), 1 );
     let args = a.fileProvider.fileRead({ filePath : a.abs( a.routinePath, 'args' ), encoding : 'json' });
     test.identical( args, [ `arg1 "arg2" "arg 3" "\'arg4\'"` ] );
     return null;
@@ -5801,7 +5277,6 @@ function startExecPathNonTrivialModeShell( test )
   {
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
-    // test.identical( _.strCount( op.output, `[ 'arg1', '"arg2"', 'arg 3', "'arg4'" ]` ), 1 );
     let args = a.fileProvider.fileRead({ filePath : a.abs( a.routinePath, 'args' ), encoding : 'json' });
     test.identical( args, [ 'arg1', '"arg2"', 'arg 3', `'arg4'` ] );
     return null;
@@ -5825,7 +5300,8 @@ function startExecPathNonTrivialModeShell( test )
     else
     test.is( _.strHas( op.output, `a b * c` ) );
     test.identical( op.execPath, 'echo' )
-    test.identical( op.args, [ 'a b', '*', 'c' ] )
+    test.identical( op.args, [ 'a b', '*', 'c' ] );
+    test.identical( op.args2, [ 'a b', '*', 'c' ] );
     test.identical( op.fullExecPath, 'echo "a b" "*" "c"' )
     return null;
   })
@@ -5874,9 +5350,10 @@ function startArgumentsHandlingTrivial( test )
     test.is( _.strHas( op.output, `*` ) );
     else
     test.is( _.strHas( op.output, `file` ) );
-    test.identical( op.execPath, 'echo' )
-    test.identical( op.args, [ '*' ] )
-    test.identical( op.fullExecPath, 'echo *' )
+    test.identical( op.execPath, 'echo' );
+    test.identical( op.args, [ '*' ] );
+    test.identical( op.args2, [ '*' ] );
+    test.identical( op.fullExecPath, 'echo *' );
     return null;
   })
 
@@ -5917,9 +5394,10 @@ function startArgumentsHandling( test )
     test.is( _.strHas( op.output, `*` ) );
     else
     test.is( _.strHas( op.output, `file` ) );
-    test.identical( op.execPath, 'echo' )
-    test.identical( op.args, [ '*' ] )
-    test.identical( op.fullExecPath, 'echo *' )
+    test.identical( op.execPath, 'echo' );
+    test.identical( op.args, [ '*' ] );
+    test.identical( op.args2, [ '*' ] );
+    test.identical( op.fullExecPath, 'echo *' );
     return null;
   })
 
@@ -5931,9 +5409,10 @@ function startArgumentsHandling( test )
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     test.is( _.strHas( op.output, `*` ) );
-    test.identical( op.execPath, 'echo' )
-    test.identical( op.args, [ '*' ] )
-    test.identical( op.fullExecPath, 'echo "*"' )
+    test.identical( op.execPath, 'echo' );
+    test.identical( op.args, [ '*' ] );
+    test.identical( op.args2, [ '*' ] );
+    test.identical( op.fullExecPath, 'echo "*"' );
     return null;
   })
 
@@ -5945,9 +5424,10 @@ function startArgumentsHandling( test )
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     test.is( _.strHas( op.output, `*` ) );
-    test.identical( op.execPath, 'echo' )
-    test.identical( op.args, [ '"*"' ] )
-    test.identical( op.fullExecPath, 'echo "*"' )
+    test.identical( op.execPath, 'echo' );
+    test.identical( op.args, [ '"*"' ] );
+    test.identical( op.args2, [ '"*"' ] );
+    test.identical( op.fullExecPath, 'echo "*"' );
 
     return null;
   })
@@ -5963,9 +5443,10 @@ function startArgumentsHandling( test )
     test.is( _.strHas( op.output, `"a b" "*" c` ) );
     else
     test.is( _.strHas( op.output, `a b * c` ) );
-    test.identical( op.execPath, 'echo' )
-    test.identical( op.args, [ '"a b"', '"*"', 'c' ] )
-    test.identical( op.fullExecPath, 'echo "a b" "*" c' )
+    test.identical( op.execPath, 'echo' );
+    test.identical( op.args, [ '"a b"', '"*"', 'c' ] );
+    test.identical( op.args2, [ '"a b"', '"*"', 'c' ] );
+    test.identical( op.fullExecPath, 'echo "a b" "*" c' );
     return null;
   })
 
@@ -5980,9 +5461,10 @@ function startArgumentsHandling( test )
     test.is( _.strHas( op.output, `"a b" "*" "c"` ) );
     else
     test.is( _.strHas( op.output, `a b * c` ) );
-    test.identical( op.execPath, 'echo' )
-    test.identical( op.args, [ 'a b', '*', 'c' ] )
-    test.identical( op.fullExecPath, 'echo "a b" "*" "c"' )
+    test.identical( op.execPath, 'echo' );
+    test.identical( op.args, [ 'a b', '*', 'c' ] );
+    test.identical( op.args2, [ 'a b', '*', 'c' ] );
+    test.identical( op.fullExecPath, 'echo "a b" "*" "c"' );
     return null;
   })
 
@@ -5994,9 +5476,10 @@ function startArgumentsHandling( test )
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     test.identical( _.strCount( op.output, '"*"' ), 1 );
-    test.identical( op.execPath, 'echo' )
-    test.identical( op.args, [ `'"*"'` ] )
-    test.identical( op.fullExecPath, `echo '"*"'` )
+    test.identical( op.execPath, 'echo' );
+    test.identical( op.args, [ `'"*"'` ] );
+    test.identical( op.args2, [ `'"*"'` ] );
+    test.identical( op.fullExecPath, `echo '"*"'` );
     return null;
   })
 
@@ -6011,9 +5494,10 @@ function startArgumentsHandling( test )
     test.identical( _.strCount( op.output, `"'\\"*\\"'"` ), 1 );
     else
     test.identical( _.strCount( op.output, '"*"' ), 1 );
-    test.identical( op.execPath, 'echo' )
-    test.identical( op.args, [ `'"*"'` ] )
-    test.identical( op.fullExecPath, `echo "'\\"*\\"'"` )
+    test.identical( op.execPath, 'echo' );
+    test.identical( op.args, [ `'"*"'` ] );
+    test.identical( op.args2, [ `'"*"'` ] );
+    test.identical( op.fullExecPath, `echo "'\\"*\\"'"` );
     return null;
   })
 
@@ -6025,9 +5509,10 @@ function startArgumentsHandling( test )
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     test.identical( _.strCount( op.output, `'*'` ), 1 );
-    test.identical( op.execPath, 'echo' )
-    test.identical( op.args, [ `"'*'"` ] )
-    test.identical( op.fullExecPath, `echo "'*'"` )
+    test.identical( op.execPath, 'echo' );
+    test.identical( op.args, [ `"'*'"` ] );
+    test.identical( op.args2, [ `"'*'"` ] );
+    test.identical( op.fullExecPath, `echo "'*'"` );
     return null;
   })
 
@@ -6039,9 +5524,10 @@ function startArgumentsHandling( test )
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     test.identical( _.strCount( op.output, `'*'` ), 1 );
-    test.identical( op.execPath, 'echo' )
-    test.identical( op.args, [ `"'*'"` ] )
-    test.identical( op.fullExecPath, `echo "\\"'*'\\""` )
+    test.identical( op.execPath, 'echo' );
+    test.identical( op.args, [ `"'*'"` ] );
+    test.identical( op.args2, [ `"'*'"` ] );
+    test.identical( op.fullExecPath, `echo "\\"'*'\\""` );
     return null;
   })
 
@@ -6056,9 +5542,10 @@ function startArgumentsHandling( test )
     test.identical( _.strCount( op.output, '`*`' ), 1 );
     else
     test.identical( _.strCount( op.output, 'Usage:' ), 1 );
-    test.identical( op.execPath, 'echo' )
-    test.identical( op.args, [ '`*`' ] )
-    test.identical( op.fullExecPath, 'echo `*`' )
+    test.identical( op.execPath, 'echo' );
+    test.identical( op.args, [ '`*`' ] );
+    test.identical( op.args2, [ '`*`' ] );
+    test.identical( op.fullExecPath, 'echo `*`' );
     return null;
   })
 
@@ -6070,8 +5557,9 @@ function startArgumentsHandling( test )
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     test.identical( _.strCount( op.output, '`*`' ), 1 );
-    test.identical( op.execPath, 'echo' )
-    test.identical( op.args, [ '`*`' ] )
+    test.identical( op.execPath, 'echo' );
+    test.identical( op.args, [ '`*`' ] );
+    test.identical( op.args2, [ '`*`' ] );
     if( process.platform === 'win32' )
     test.identical( op.fullExecPath, 'echo "`*`"' )
     else
@@ -6098,9 +5586,10 @@ function startArgumentsHandling( test )
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     test.is( _.strHas( op.output, `"a b c"` ) );
-    test.identical( op.execPath, 'node' )
-    test.identical( op.args, [ '-e', '"console.log( process.argv.slice( 1 ) )"', '"a b c"' ] )
-    test.identical( op.fullExecPath, 'node -e "console.log( process.argv.slice( 1 ) )" "\\"a b c\\""' )
+    test.identical( op.execPath, 'node' );
+    test.identical( op.args, [ '-e', '"console.log( process.argv.slice( 1 ) )"', '"a b c"' ] );
+    test.identical( op.args2, [ '-e', '"console.log( process.argv.slice( 1 ) )"', '"a b c"' ] );
+    test.identical( op.fullExecPath, 'node -e "console.log( process.argv.slice( 1 ) )" "\\"a b c\\""' );
     return null;
   })
 
@@ -16403,6 +15892,7 @@ function startNjs( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
       test.identical( op.args, [ 'arg' ] );
+      test.identical( op.args2, [ 'arg' ] );
       console.log( op.output )
       test.is( _.strHas( op.output, `[ 'arg' ]` ) );
       return null
@@ -17016,10 +16506,19 @@ function startNjsOptionInterpreterArgs( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.equivalent( op.output, process.version );
-        if( mode === 'fork' )
-        test.identical( op.interpreterArgs, [ '--version' ] )
-        else
+
+        // qqq for Yevhen : bad
+        // if( mode === 'fork' )
+        // test.identical( op.interpreterArgs, [ '--version' ] )
+        // else
+        // test.identical( op.args, [ '--version', programPath ] );
+
+        test.identical( op.interpreterArgs, [ '--version' ] );
         test.identical( op.args, [ '--version', programPath ] );
+        if( mode === 'fork' )
+        test.identical( op.args2, [ '--version', programPath ] );
+        else
+        test.identical( op.args2, [ '--version', programPath ] );
 
         return null;
       } )
@@ -17046,15 +16545,23 @@ function startNjsOptionInterpreterArgs( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.equivalent( op.output, process.version );
+
+        // if( mode === 'fork' )
+        // {
+        //   test.identical( op.args, [] );
+        //   test.identical( op.interpreterArgs, [ '--version' ] )
+        // }
+        // else
+        // {
+        //   test.identical( op.args, [ '--version', programPath ] );
+        // }
+
+        test.identical( op.interpreterArgs, [ '--version' ] );
+        test.identical( op.args, [ '--version', programPath ] );
         if( mode === 'fork' )
-        {
-          test.identical( op.args, [] );
-          test.identical( op.interpreterArgs, [ '--version' ] )
-        }
+        test.identical( op.args2, [ '--version', programPath ] );
         else
-        {
-          test.identical( op.args, [ '--version', programPath ] );
-        }
+        test.identical( op.args2, [ '--version', programPath ] );
 
         return null;
       } )
@@ -17082,15 +16589,23 @@ function startNjsOptionInterpreterArgs( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.equivalent( op.output, process.version );
+
+        test.identical( op.interpreterArgs, [ '--version' ] );
+        test.identical( op.args, [ '--version', programPath ] );
         if( mode === 'fork' )
-        {
-          test.identical( op.args, [] )
-          test.identical( op.interpreterArgs, [ '--version' ] )
-        }
+        test.identical( op.args2, [ '--version', programPath ] );
         else
-        {
-          test.identical( op.args, [ '--version', 'arg1' ] );
-        }
+        test.identical( op.args2, [ '--version', programPath ] );
+
+        // if( mode === 'fork' )
+        // {
+        //   test.identical( op.args, [] )
+        //   test.identical( op.interpreterArgs, [ '--version' ] )
+        // }
+        // else
+        // {
+        //   test.identical( op.args, [ '--version', 'arg1' ] );
+        // }
 
         return null;
       } )
@@ -17119,10 +16634,18 @@ function startNjsOptionInterpreterArgs( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.equivalent( op.output, process.version );
+
+        test.identical( op.interpreterArgs, [ '--version' ] );
+        test.identical( op.args, [ '--version', programPath ] );
         if( mode === 'fork' )
-        test.identical( op.interpreterArgs, [ '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] )
+        test.identical( op.args2, [ '--version', programPath ] );
         else
-        test.identical( op.args, [ '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}`, programPath ] );
+        test.identical( op.args2, [ '--version', programPath ] );
+
+        // if( mode === 'fork' )
+        // test.identical( op.interpreterArgs, [ '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] )
+        // else
+        // test.identical( op.args, [ '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}`, programPath ] );
 
         return null;
       } )
@@ -17149,10 +16672,18 @@ function startNjsOptionInterpreterArgs( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.is( _.strHas( op.output, 'Options:' ) );
+
+        test.identical( op.interpreterArgs, [ '--version' ] );
+        test.identical( op.args, [ '--version', programPath ] );
         if( mode === 'fork' )
-        test.identical( op.interpreterArgs, [ '--v8-options' ] )
+        test.identical( op.args2, [ '--version', programPath ] );
         else
-        test.identical( op.args, [ '--v8-options', programPath ] );
+        test.identical( op.args2, [ '--version', programPath ] );
+
+        // if( mode === 'fork' )
+        // test.identical( op.interpreterArgs, [ '--v8-options' ] )
+        // else
+        // test.identical( op.args, [ '--v8-options', programPath ] );
 
         return null;
       } )
@@ -17180,10 +16711,18 @@ function startNjsOptionInterpreterArgs( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.is( _.strHas( op.output, 'Options:' ) );
+
+        test.identical( op.interpreterArgs, [ '--version' ] );
+        test.identical( op.args, [ '--version', programPath ] );
         if( mode === 'fork' )
-        test.identical( op.interpreterArgs, [ '--v8-options', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] )
+        test.identical( op.args2, [ '--version', programPath ] );
         else
-        test.identical( op.args, [ '--v8-options', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}`, programPath ] );
+        test.identical( op.args2, [ '--version', programPath ] );
+
+        // if( mode === 'fork' )
+        // test.identical( op.interpreterArgs, [ '--v8-options', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] )
+        // else
+        // test.identical( op.args, [ '--v8-options', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}`, programPath ] );
 
         return null;
       } )
@@ -17212,15 +16751,23 @@ function startNjsOptionInterpreterArgs( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.equivalent( op.output, process.version );
+
+        test.identical( op.interpreterArgs, [ '--version' ] );
+        test.identical( op.args, [ '--version', programPath ] );
         if( mode === 'fork' )
-        {
-          test.identical( op.interpreterArgs, [ '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] )
-          test.identical( op.args, [ 'arg1', 'arg2' ] );
-        }
+        test.identical( op.args2, [ '--version', programPath ] );
         else
-        {
-          test.identical( op.args, [ '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}`, programPath, 'arg1', 'arg2' ] );
-        }
+        test.identical( op.args2, [ '--version', programPath ] );
+
+        // if( mode === 'fork' )
+        // {
+        //   test.identical( op.interpreterArgs, [ '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] )
+        //   test.identical( op.args, [ 'arg1', 'arg2' ] );
+        // }
+        // else
+        // {
+        //   test.identical( op.args, [ '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}`, programPath, 'arg1', 'arg2' ] );
+        // }
 
         return null;
       } )
@@ -17249,18 +16796,26 @@ function startNjsOptionInterpreterArgs( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.equivalent( op.output, process.version );
+
+        test.identical( op.interpreterArgs, [ '--version' ] );
+        test.identical( op.args, [ '--version', programPath ] );
         if( mode === 'fork' )
-        {
-          test.identical( op.interpreterArgs, [ '--trace-warnings', '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] )
-          test.identical( op.args, [ 'arg1', 'arg2' ] );
-        }
+        test.identical( op.args2, [ '--version', programPath ] );
         else
-        {
-          test.identical( op.args, [ '--trace-warnings', '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}`, programPath, 'arg1', 'arg2' ] );
-        }
+        test.identical( op.args2, [ '--version', programPath ] );
+
+        // if( mode === 'fork' )
+        // {
+        //   test.identical( op.interpreterArgs, [ '--trace-warnings', '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] )
+        //   test.identical( op.args, [ 'arg1', 'arg2' ] );
+        // }
+        // else
+        // {
+        //   test.identical( op.args, [ '--trace-warnings', '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}`, programPath, 'arg1', 'arg2' ] );
+        // }
 
         return null;
-      } )
+      } ) /* qqq for Yevhen : bad! */
     })
 
     /* */
@@ -17286,15 +16841,23 @@ function startNjsOptionInterpreterArgs( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.equivalent( op.output, process.version );
+
+        test.identical( op.interpreterArgs, [ '--version' ] );
+        test.identical( op.args, [ '--version', programPath ] );
         if( mode === 'fork' )
-        {
-          test.identical( op.interpreterArgs, [ '--trace-warnings', '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] )
-          test.identical( op.args, [ 'arg1', 'arg2' ] );
-        }
+        test.identical( op.args2, [ '--version', programPath ] );
         else
-        {
-          test.identical( op.args, [ '--trace-warnings', '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}`, programPath, 'arg1', 'arg2' ] );
-        }
+        test.identical( op.args2, [ '--version', programPath ] );
+
+        // if( mode === 'fork' )
+        // {
+        //   test.identical( op.interpreterArgs, [ '--trace-warnings', '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] )
+        //   test.identical( op.args, [ 'arg1', 'arg2' ] );
+        // }
+        // else
+        // {
+        //   test.identical( op.args, [ '--trace-warnings', '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}`, programPath, 'arg1', 'arg2' ] );
+        // }
 
         return null;
       } )
@@ -17323,15 +16886,23 @@ function startNjsOptionInterpreterArgs( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.equivalent( op.output, process.version );
+
+        test.identical( op.interpreterArgs, [ '--version' ] );
+        test.identical( op.args, [ '--version', programPath ] );
         if( mode === 'fork' )
-        {
-          test.identical( op.interpreterArgs, [ '--version', '--v8-options', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] )
-          test.identical( op.args, [ 'arg1', 'arg2' ] );
-        }
+        test.identical( op.args2, [ '--version', programPath ] );
         else
-        {
-          test.identical( op.args, [ '--version', '--v8-options', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}`, programPath, 'arg1', 'arg2' ] );
-        }
+        test.identical( op.args2, [ '--version', programPath ] );
+
+        // if( mode === 'fork' )
+        // {
+        //   test.identical( op.interpreterArgs, [ '--version', '--v8-options', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] )
+        //   test.identical( op.args, [ 'arg1', 'arg2' ] );
+        // }
+        // else
+        // {
+        //   test.identical( op.args, [ '--version', '--v8-options', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}`, programPath, 'arg1', 'arg2' ] );
+        // }
 
         return null;
       } )
@@ -17360,15 +16931,23 @@ function startNjsOptionInterpreterArgs( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.equivalent( op.output, process.version );
+
+        test.identical( op.interpreterArgs, [ '--version' ] );
+        test.identical( op.args, [ '--version', programPath ] );
         if( mode === 'fork' )
-        {
-          test.identical( op.interpreterArgs, [ '--version', '--v8-options', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] )
-          test.identical( op.args, [ 'arg1', 'arg2' ] );
-        }
+        test.identical( op.args2, [ '--version', programPath ] );
         else
-        {
-          test.identical( op.args, [ '--version', '--v8-options', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}`, programPath, 'arg1', 'arg2' ] );
-        }
+        test.identical( op.args2, [ '--version', programPath ] );
+
+        // if( mode === 'fork' )
+        // {
+        //   test.identical( op.interpreterArgs, [ '--version', '--v8-options', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] )
+        //   test.identical( op.args, [ 'arg1', 'arg2' ] );
+        // }
+        // else
+        // {
+        //   test.identical( op.args, [ '--version', '--v8-options', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}`, programPath, 'arg1', 'arg2' ] );
+        // }
 
         return null;
       } )
@@ -18105,8 +17684,10 @@ function starterArgs( test )
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     test.identical( op.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
+    test.identical( op.args2, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
     test.identical( _.strCount( op.output, `[ 'arg3', 'arg1', 'arg2' ]` ), 1 );
     test.identical( starterOptions.args, [ 'arg1', 'arg2' ] );
+    test.identical( starterOptions.args2, [ 'arg1', 'arg2' ] );
     return null;
   })
 
@@ -18120,8 +17701,10 @@ function starterArgs( test )
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     test.identical( op.args, [ testAppPath, 'arg3' ] );
+    test.identical( op.args2, [ testAppPath, 'arg3' ] );
     test.identical( _.strCount( op.output, `[ 'arg3' ]` ), 1 );
     test.identical( starterOptions.args, [ 'arg1', 'arg2' ] );
+    test.identical( starterOptions.args2, [ 'arg1', 'arg2' ] );
     return null;
   })
 
@@ -18135,8 +17718,10 @@ function starterArgs( test )
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     test.identical( op.args, [ testAppPath, 'arg3' ] );
+    test.identical( op.args2, [ testAppPath, 'arg3' ] );
     test.identical( _.strCount( op.output, `[ 'arg3' ]` ), 1 );
     test.identical( starterOptions.args, [ 'arg1', 'arg2' ] );
+    test.identical( starterOptions.args2, [ 'arg1', 'arg2' ] );
     return null;
   })
 
@@ -27481,9 +27066,8 @@ function endSignalsBasic( test )
     stdio : 'pipe',
   }
 
-  // xxx
   let modes = [ 'fork', 'spawn', 'shell' ];
-  // modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGQUIT' ) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGQUIT' ) ) ); // xxx
   modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGINT' ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGTERM' ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGHUP' ) ) );
