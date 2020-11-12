@@ -153,7 +153,7 @@ function startMinimalHeadCommon( routine, args )
   (
     o.timeOut === null || !o.sync || !!o.deasync, `Option::timeOut should not be defined if option::sync:1 and option::deasync:0`
   );
-  /* qqq forYevhen : this condition is wrong. fix it and cover */
+  /* xxx qqq forYevhen : this condition is wrong. fix it and cover */
 
   if( _.strIs( o.interpreterArgs ) )
   o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs });
