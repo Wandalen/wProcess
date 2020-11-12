@@ -9141,6 +9141,247 @@ startChronology.description =
   - no extra procedures generated
 `
 
+function startStateMultiple( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( testApp );
+  let testAppErrorPath = a.program( testAppError );
+  var modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
+
+  /* */
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+    /*
+    Possible states: `initial`, `starting`, `started`, `terminating`, `terminated`, `disconnected`
+    Possible to check : `starting`, `started`, `terminating`, `terminated`
+    */
+    let states;
+
+    ready.then( ( op ) =>
+    {
+      test.case = `mode:${mode}, concurrent : 0, normal run`;
+      states = [];
+
+      let options =
+      {
+        execPath : mode === 'fork' ? [ testAppPath, testAppPath ] : [ 'node ' + testAppPath, 'node ' + testAppPath ],
+        mode,
+        concurrent : 0,
+        outputCollecting : 1
+      }
+
+      let returned = _.process.start( options );
+
+      options.conStart.finally( ( err, op ) =>
+      {
+        test.identical( err, undefined );
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, false );
+        test.identical( op.output, '' );
+        states.push( op.state );
+        return null;
+      } )
+
+      options.conTerminate.finally( ( err, op ) =>
+      {
+        test.identical( err, undefined );
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, false );
+        test.equivalent( op.output, 'Log\nLog' );
+        states.push( op.state );
+        return null;
+      } )
+
+      options.ready.finally( ( err, op ) =>
+      {
+        test.identical( err, undefined );
+        test.identical( op.exitCode, 0 )
+        test.identical( op.ended, true )
+        test.equivalent( op.output, 'Log\nLog' );
+        states.push( op.state );
+        test.identical( states, [ 'starting', 'terminating', 'terminated' ] )
+        return null;
+      } )
+
+      return returned;
+
+    } )
+
+    /* */
+
+    ready.then( ( op ) =>
+    {
+      test.case = `mode:${mode}, concurrent : 1, normal run`;
+      states = [];
+
+      let options =
+      {
+        execPath : mode === 'fork' ? [ testAppPath, testAppPath ] : [ 'node ' + testAppPath, 'node ' + testAppPath ],
+        mode,
+        concurrent : 1,
+        outputCollecting : 1
+      }
+
+      let returned = _.process.start( options );
+
+      options.conStart.finally( ( err, op ) =>
+      {
+        test.identical( err, undefined );
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, false );
+        test.identical( op.output, '' );
+        states.push( op.state );
+        return null;
+      } )
+
+      options.conTerminate.finally( ( err, op ) =>
+      {
+        test.identical( err, undefined );
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, false );
+        test.equivalent( op.output, 'Log\nLog' );
+        states.push( op.state );
+        return null;
+      } )
+
+      options.ready.finally( ( err, op ) =>
+      {
+        test.identical( err, undefined );
+        test.identical( op.exitCode, 0 )
+        test.identical( op.ended, true )
+        test.equivalent( op.output, 'Log\nLog' );
+        states.push( op.state );
+        test.identical( states, [ 'started', 'terminating', 'terminated' ] )
+        return null;
+      } )
+
+      return returned;
+
+    } )
+
+    /* */
+
+    ready.then( ( op ) =>
+    {
+      test.case = `mode:${mode}, concurrent : 0, error`;
+      states = [];
+
+      let options =
+      {
+        execPath : mode === 'fork' ? [ testAppErrorPath, testAppErrorPath ] : [ 'node ' + testAppErrorPath, 'node ' + testAppErrorPath ],
+        mode,
+        concurrent : 0,
+        throwingExitCode : 0,
+        outputCollecting : 1
+      }
+
+      let returned = _.process.start( options );
+
+      options.conStart.finally( ( err, op ) =>
+      {
+        test.identical( err, undefined );
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, false );
+        test.identical( op.output, '' );
+        states.push( op.state );
+        return null;
+      } )
+
+      options.conTerminate.finally( ( err, op ) =>
+      {
+        test.identical( err, undefined );
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, false );
+        test.is( _.strHas( op.output, 'randomText is not defined' ) );
+        states.push( op.state );
+        return null;
+      } )
+
+      options.ready.finally( ( err, op ) =>
+      {
+        test.identical( err, undefined );
+        test.notIdentical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.is( _.strHas( op.output, 'randomText is not defined' ) );
+        states.push( op.state );
+        test.identical( states, [ 'starting', 'terminating', 'terminated' ] );
+        return null;
+      } )
+
+      return returned;
+    } )
+
+    /* */
+
+    ready.then( ( op ) =>
+    {
+      test.case = `mode:${mode}, concurrent : 1, error`;
+      states = [];
+
+      let options =
+      {
+        execPath : mode === 'fork' ? [ testAppErrorPath, testAppErrorPath ] : [ 'node ' + testAppErrorPath, 'node ' + testAppErrorPath ],
+        mode,
+        concurrent : 1,
+        throwingExitCode : 0,
+        outputCollecting : 1
+      }
+
+      let returned = _.process.start( options );
+
+      options.conStart.finally( ( err, op ) =>
+      {
+        test.identical( err, undefined );
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, false );
+        test.identical( op.output, '' );
+        states.push( op.state );
+        return null;
+      } )
+
+      options.conTerminate.finally( ( err, op ) =>
+      {
+        test.identical( err, undefined );
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, false );
+        test.is( _.strHas( op.output, 'randomText is not defined' ) );
+        states.push( op.state );
+        return null;
+      } )
+
+      options.ready.finally( ( err, op ) =>
+      {
+        test.identical( err, undefined );
+        test.notIdentical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.is( _.strHas( op.output, 'randomText is not defined' ) );
+        states.push( op.state );
+        test.identical( states, [ 'started', 'terminating', 'terminated' ] );
+        return null;
+      } )
+
+      return returned;
+    } )
+
+    return ready;
+  }
+
+  function testApp()
+  {
+    console.log( 'Log' );
+  }
+
+  function testAppError()
+  {
+    randomText
+  }
+}
+
 // --
 // delay
 // --
@@ -18460,6 +18701,8 @@ function startOptionOutputColoring( test )
   }
 }
 
+startOptionOutputColoring.timeOut = 20e4; /* Locally : 19.079s */
+
 //
 
 function startOptionOutputColoringStderr( test )
@@ -18481,14 +18724,13 @@ function startOptionOutputColoringStderr( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${ mode }, outputColoringStderr : 0, inputMirroring : 0, outputColloring : 1`;
+      test.case = `mode : ${ mode }, inputMirroring : 0, outputColloring : { err : 0, out : 1 }, error output`;
 
       let testAppPath2 = a.program( testApp2Error );
       let locals =
       {
         programPath : testAppPath2,
-        outputColoringStderr : 0,
-        outputColoring : 1,
+        outputColoring : { err : 0, out : 1 },
         inputMirroring : 0,
         outputColoringStdout : null,
         mode,
@@ -18518,51 +18760,13 @@ function startOptionOutputColoringStderr( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${ mode }, outputColoringStderr : 1, inputMirroring : 0, outputColoring : 0`;
+      test.case = `mode : ${ mode }, inputMirroring : 0, outputColoring : { err : 1, out : 1 }, error output`;
 
       let testAppPath2 = a.program( testApp2Error );
       let locals =
       {
         programPath : testAppPath2,
-        outputColoringStderr : 1,
-        outputColoring : 0,
-        inputMirroring : 0,
-        outputColoringStdout : null,
-        mode
-      };
-      let testAppPath = a.program({ routine : testApp, locals });
-
-      let options =
-      {
-        execPath : 'node ' + testAppPath,
-        outputCollecting : 1,
-      }
-
-      return _.process.start( options )
-      .then( ( op ) =>
-      {
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( op.output, `Error output\n` )
-
-        a.fileProvider.fileDelete( testAppPath );
-        a.fileProvider.fileDelete( testAppPath2 );
-        return null
-      })
-    } )
-
-    /* */
-
-    ready.then( () =>
-    {
-      test.case = `mode : ${ mode }, outputColoringStderr : 1, inputMirroring : 0, outputColoring : 1`;
-
-      let testAppPath2 = a.program( testApp2Error );
-      let locals =
-      {
-        programPath : testAppPath2,
-        outputColoringStderr : 1,
-        outputColoring : 1,
+        outputColoring : { err : 1, out : 1 },
         inputMirroring : 0,
         outputColoringStdout : null,
         mode
@@ -18592,15 +18796,14 @@ function startOptionOutputColoringStderr( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${ mode }, outputColoringStderr : 1, inputMirroring : 1, outputColoring : 1`;
+      test.case = `mode : ${ mode }, inputMirroring : 1, outputColoring : { err : 1, out : 1 }, error output`;
 
       let testAppPath2 = a.program( testApp2Error );
       let locals =
       {
         programPath : testAppPath2,
-        outputColoringStderr : 1,
         inputMirroring : 1,
-        outputColoring : 1,
+        outputColoring : { err : 1, out : 1 },
         outputColoringStdout : null,
         mode
       };
@@ -18630,16 +18833,15 @@ function startOptionOutputColoringStderr( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${ mode }, outputColoringStderr : 1, outputColoringStdout : 0, inputMirroring : 0, outputColoring : null, normal output`;
+      test.case = `mode : ${ mode }, inputMirroring : 1, outputColoring : { err : 1, out : 0 }, error output`;
 
-      let testAppPath2 = a.program( testApp2 );
+      let testAppPath2 = a.program( testApp2Error );
       let locals =
       {
         programPath : testAppPath2,
-        outputColoringStderr : 1,
-        outputColoringStdout : 0,
-        inputMirroring : 0,
-        outputColoring : null,
+        inputMirroring : 1,
+        outputColoring : { err : 1, out : 0 },
+        outputColoringStdout : null,
         mode
       };
       let testAppPath = a.program({ routine : testApp, locals });
@@ -18655,7 +18857,8 @@ function startOptionOutputColoringStderr( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.identical( op.output, 'Log\n' )
+        let expected = ` > ${ mode === 'fork' ? '' : 'node ' }${testAppPath2}\n\u001b[31mError output\u001b[39;0m\n`;
+        test.identical( op.output, expected )
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -18667,16 +18870,14 @@ function startOptionOutputColoringStderr( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${ mode }, outputColoringStderr : 1, outputColoringStdout : 0, inputMirroring : 0, outputColoring : 1, normal output`;
+      test.case = `mode : ${ mode }, inputMirroring : 0, outputColoring : { err : 1, out : 0 }, normal output`;
 
       let testAppPath2 = a.program( testApp2 );
       let locals =
       {
         programPath : testAppPath2,
-        outputColoringStderr : 1,
-        outputColoringStdout : 0,
         inputMirroring : 0,
-        outputColoring : 1,
+        outputColoring : { err : 1, out : 0 },
         mode
       };
       let testAppPath = a.program({ routine : testApp, locals });
@@ -18699,7 +18900,6 @@ function startOptionOutputColoringStderr( test )
         return null
       })
     } )
-
 
     return ready;
 
@@ -18720,8 +18920,6 @@ function startOptionOutputColoringStderr( test )
       outputCollecting : 1,
       mode,
       inputMirroring,
-      outputColoringStderr,
-      outputColoringStdout,
       outputColoring
     }
 
@@ -18738,6 +18936,8 @@ function startOptionOutputColoringStderr( test )
     console.log( 'Log' );
   }
 }
+
+startOptionOutputColoringStderr.timeOut = 17e4; /* Locally : 16.099s */
 
 //
 
@@ -18760,16 +18960,14 @@ function startOptionOutputColoringStdout( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${ mode }, outputColoringStdout : 0, inputMirroring : 0, outputColloring : 1`;
+      test.case = `mode : ${ mode }, inputMirroring : 0, outputColloring : { out : 0, err : 1 }, normal output`;
 
       let testAppPath2 = a.program( testApp2 );
       let locals =
       {
         programPath : testAppPath2,
-        outputColoringStdout : 0,
-        outputColoringStderr : null,
         inputMirroring : 0,
-        outputColoring : 1,
+        outputColoring : { out : 0, err : 1 },
         mode
       };
       let testAppPath = a.program({ routine : testApp, locals });
@@ -18797,54 +18995,14 @@ function startOptionOutputColoringStdout( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${ mode }, outputColoringStdout : 1, inputMirroring : 0, outputColoring : 0`;
+      test.case = `mode : ${ mode }, inputMirroring : 0, outputColoring : { out : 1, err : 0 }, normal output`;
 
       let testAppPath2 = a.program( testApp2 );
       let locals =
       {
         programPath : testAppPath2,
-        outputColoringStdout : 1,
-        outputColoringStderr : null,
         inputMirroring : 0,
-        outputColoring : 0,
-        mode
-      };
-      let testAppPath = a.program({ routine : testApp, locals });
-
-      let options =
-      {
-        execPath : 'node ' + testAppPath,
-        outputCollecting : 1,
-      }
-
-      return _.process.start( options )
-      .then( ( op ) =>
-      {
-        debugger;
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( op.output, 'Log\n' )
-
-        a.fileProvider.fileDelete( testAppPath );
-        a.fileProvider.fileDelete( testAppPath2 );
-        return null
-      })
-    } )
-
-    /* */
-
-    ready.then( () =>
-    {
-      test.case = `mode : ${ mode }, outputColoringStdout : 1, inputMirroring : 0, outputColoring : 1`;
-
-      let testAppPath2 = a.program( testApp2 );
-      let locals =
-      {
-        programPath : testAppPath2,
-        outputColoringStdout : 1,
-        outputColoringStderr : null,
-        inputMirroring : 0,
-        outputColoring : 1,
+        outputColoring : { out : 1, err : 0 },
         mode
       };
       let testAppPath = a.program({ routine : testApp, locals });
@@ -18872,16 +19030,49 @@ function startOptionOutputColoringStdout( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${ mode }, outputColoringStdout : 1, inputMirroring : 1, outputColoring : 1`;
+      test.case = `mode : ${ mode }, inputMirroring : 0, outputColoring : { out : 1, err : 1 }, normal output`;
 
       let testAppPath2 = a.program( testApp2 );
       let locals =
       {
         programPath : testAppPath2,
-        outputColoringStdout : 1,
-        outputColoringStderr : null,
+        inputMirroring : 0,
+        outputColoring : { out : 1, err : 1 },
+        mode
+      };
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      let options =
+      {
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      }
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, `\u001b[35mLog\u001b[39;0m\n` )
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+        return null
+      })
+    } )
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, inputMirroring : 1, outputColoring : { out : 1, err : 0 }, normal output`;
+
+      let testAppPath2 = a.program( testApp2 );
+      let locals =
+      {
+        programPath : testAppPath2,
         inputMirroring : 1,
-        outputColoring : 1,
+        outputColoring : { out : 1, err : 0 },
         mode
       };
       let testAppPath = a.program({ routine : testApp, locals });
@@ -18911,16 +19102,14 @@ function startOptionOutputColoringStdout( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${ mode }, outputColoringStdout : 1, outputColoringStderr : 0, inputMirroring : 0, outputColoring : null`;
+      test.case = `mode : ${ mode }, inputMirroring : 0, outputColoring : { out : 1, err : 0 }, error output`;
 
       let testAppPath2 = a.program( testApp2Error );
       let locals =
       {
         programPath : testAppPath2,
-        outputColoringStdout : 1,
-        outputColoringStderr : 0,
         inputMirroring : 0,
-        outputColoring : null,
+        outputColoring : { out : 1, err : 0 },
         mode
       };
       let testAppPath = a.program({ routine : testApp, locals });
@@ -18949,16 +19138,14 @@ function startOptionOutputColoringStdout( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${ mode }, outputColoringStdout : 1, outputColoringStderr : 0, inputMirroring : 0, outputColoring : 1`;
+      test.case = `mode : ${ mode }, inputMirroring : 1, outputColoring : { out : 0, err : 1 }, normal output`;
 
-      let testAppPath2 = a.program( testApp2Error );
+      let testAppPath2 = a.program( testApp2 );
       let locals =
       {
         programPath : testAppPath2,
-        outputColoringStdout : 1,
-        outputColoringStderr : 0,
-        inputMirroring : 0,
-        outputColoring : 1,
+        inputMirroring : 1,
+        outputColoring : { out : 0, err : 1 },
         mode
       };
       let testAppPath = a.program({ routine : testApp, locals });
@@ -18975,16 +19162,14 @@ function startOptionOutputColoringStdout( test )
 
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.identical( op.output, 'Error output\n' )
+        let expected = ` > ${ mode === 'fork' ? '' : 'node ' }${testAppPath2}\nLog\n`;
+        test.identical( op.output, expected )
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
         return null
       })
     } )
-
-
-    /* */
 
     return ready;
 
@@ -19005,8 +19190,6 @@ function startOptionOutputColoringStdout( test )
       outputCollecting : 1,
       mode,
       inputMirroring,
-      outputColoringStdout,
-      outputColoringStderr,
       outputColoring
     }
 
@@ -19024,6 +19207,8 @@ function startOptionOutputColoringStdout( test )
   }
 
 }
+
+startOptionOutputColoringStdout.timeOut = 19e4; /* Locally : 18.513s */
 
 //
 
@@ -35823,6 +36008,7 @@ var Proto =
     startProcedureStackMultiple,
     startOnTerminateSeveralCallbacksChronology,
     startChronology,
+    startStateMultiple,
 
     // delay
 
