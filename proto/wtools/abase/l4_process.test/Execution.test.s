@@ -5351,7 +5351,7 @@ function startExecPathNonTrivialModeShell( test )
     test.is( _.strHas( op.output, `a b * c` ) );
     test.identical( op.execPath, 'echo' )
     test.identical( op.args, [ 'a b', '*', 'c' ] );
-    test.identical( op.args2, [ 'a b', '*', 'c' ] );
+    test.identical( op.args2, [ '"a b"', '"*"', '"c"' ] );
     test.identical( op.fullExecPath, 'echo "a b" "*" "c"' )
     return null;
   })
