@@ -207,7 +207,8 @@ function _eventAvailableHandle()
     try
     {
       _.arrayRemoveOnceStrictly( _.process._ehandler.events.available, callback );
-      callback.call( _.process );
+      callback.call( _.process._ehandler ); /* Dmytro : module Tools implements model where ehandler executes its own callbacks */
+      // callback.call( _.process );
     }
     catch( err )
     {
