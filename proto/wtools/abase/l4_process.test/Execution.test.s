@@ -2535,16 +2535,23 @@ function startArgsOption( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.identical( op.args, [ 'arg1', 'arg2' ] );
         if( mode === 'fork' )
-        test.identical( op.args2, [ 'arg1', 'arg2' ] );
-        else if( mode === 'spawn' )
-        test.identical( op.args2, [ programPath, 'arg1', 'arg2' ] );
-        else if( mode === 'shell' )
-        test.identical( op.args2, [ programPath, '"arg1"', '"arg2"' ] );
+        {
+          test.identical( op.args, [ 'arg1', 'arg2' ] );
+          test.identical( op.args2, [ 'arg1', 'arg2' ] );
+        }
+        else
+        {
+          test.identical( op.args, [ programPath, 'arg1', 'arg2' ] );
+          if( mode === 'shell' )
+          test.identical( op.args2, [ programPath, '"arg1"', '"arg2"' ] );
+          else
+          test.identical( op.args2, [ programPath, 'arg1', 'arg2' ] );
+        }
+
         test.identical( _.strCount( op.output, `[ 'arg1', 'arg2' ]` ), 1 );
         test.identical( startOptions.args, op.args );
-        test.identical( args, [ 'arg1', 'arg2' ] );
+        test.identical( args, mode === 'fork' ? [ 'arg1', 'arg2' ] : [ programPath, 'arg1', 'arg2' ] );
         return null;
       })
 
@@ -2571,13 +2578,21 @@ function startArgsOption( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.identical( op.args, 'arg1' );
+
         if( mode === 'fork' )
-        test.identical( op.args2, [ 'arg1' ] );
-        else if( mode === 'spawn' )
-        test.identical( op.args2, [ programPath, 'arg1' ] );
-        else if( mode === 'shell' )
-        test.identical( op.args2, [ programPath, '"arg1"' ] );
+        {
+          test.identical( op.args, [ 'arg1' ] );
+          test.identical( op.args2, [ 'arg1' ] );
+        }
+        else
+        {
+          test.identical( op.args, [ programPath, 'arg1' ] );
+          if( mode === 'shell' )
+          test.identical( op.args2, [ programPath, '"arg1"' ] );
+          else
+          test.identical( op.args2, [ programPath, 'arg1' ] );
+        }
+
         test.identical( _.strCount( op.output, 'arg1' ), 1 );
         test.identical( startOptions.args, op.args );
         test.identical( args, 'arg1' );
