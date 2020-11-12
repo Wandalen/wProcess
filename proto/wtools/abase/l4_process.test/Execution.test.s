@@ -16499,9 +16499,20 @@ function startNjsOptionInterpreterArgs( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.identical( op.output, 'Log\n' );
+        test.identical( op.interpreterArgs, [] );
+        if( mode === 'fork' )
+        {
+          test.identical( op.args, [] );
+          test.identical( op.args2, [] );
+        }
+        else
+        {
+          test.identical( op.args, [ programPath ] );
+          test.identical( op.args2, [ programPath ] );
+        }
 
         return null;
-      } )
+      })
     })
 
     /* */
@@ -16525,9 +16536,20 @@ function startNjsOptionInterpreterArgs( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.identical( op.output, 'Log\n' );
+        test.identical( op.interpreterArgs, [] );
+        if( mode === 'fork' )
+        {
+          test.identical( op.args, [] );
+          test.identical( op.args2, [] );
+        }
+        else
+        {
+          test.identical( op.args, [ programPath ] );
+          test.identical( op.args2, [ programPath ] );
+        }
 
         return null;
-      } )
+      })
     })
 
     /* */
@@ -16552,21 +16574,21 @@ function startNjsOptionInterpreterArgs( test )
         test.identical( op.ended, true );
         test.equivalent( op.output, process.version );
 
-        // qqq for Yevhen : bad
-        // if( mode === 'fork' )
-        // test.identical( op.interpreterArgs, [ '--version' ] )
-        // else
-        // test.identical( op.args, [ '--version', programPath ] );
-
+        // qqq for Yevhen : bad | aaa : Fixed.
         test.identical( op.interpreterArgs, [ '--version' ] );
-        test.identical( op.args, [ '--version', programPath ] );
         if( mode === 'fork' )
-        test.identical( op.args2, [ '--version', programPath ] );
+        {
+          test.identical( op.args, [] );
+          test.identical( op.args2, [] );
+        }
         else
-        test.identical( op.args2, [ '--version', programPath ] );
+        {
+          test.identical( op.args, [ programPath ] );
+          test.identical( op.args2, [ '--version', programPath ] );
+        }
 
         return null;
-      } )
+      })
     })
 
     /* */
@@ -16591,25 +16613,25 @@ function startNjsOptionInterpreterArgs( test )
         test.identical( op.ended, true );
         test.equivalent( op.output, process.version );
 
-        // if( mode === 'fork' )
-        // {
-        //   test.identical( op.args, [] );
-        //   test.identical( op.interpreterArgs, [ '--version' ] )
-        // }
-        // else
-        // {
-        //   test.identical( op.args, [ '--version', programPath ] );
-        // }
-
         test.identical( op.interpreterArgs, [ '--version' ] );
-        test.identical( op.args, [ '--version', programPath ] );
         if( mode === 'fork' )
-        test.identical( op.args2, [ '--version', programPath ] );
+        {
+          test.identical( op.args, [] );
+          test.identical( op.args2, [] );
+        }
+        else if( mode === 'spawn' )
+        {
+          test.identical( op.args, [ programPath ] );
+          test.identical( op.args2, [ '--version', programPath ] );
+        }
         else
-        test.identical( op.args2, [ '--version', programPath ] );
+        {
+          test.identical( op.args, [ programPath ] );
+          test.identical( op.args2, [ '--version', _.strQuote( programPath ) ] );
+        }
 
         return null;
-      } )
+      })
     })
 
     /* */
@@ -16636,24 +16658,24 @@ function startNjsOptionInterpreterArgs( test )
         test.equivalent( op.output, process.version );
 
         test.identical( op.interpreterArgs, [ '--version' ] );
-        test.identical( op.args, [ '--version', programPath ] );
-        if( mode === 'fork' )
-        test.identical( op.args2, [ '--version', programPath ] );
+        if( mode === 'shell' )
+        {
+          test.identical( op.args, [ 'arg1' ] );
+          test.identical( op.args2, [ '--version', '"arg1"' ] );
+        }
+        else if( mode === 'spawn' )
+        {
+          test.identical( op.args, [ 'arg1' ] );
+          test.identical( op.args2, [ '--version', 'arg1' ] );
+        }
         else
-        test.identical( op.args2, [ '--version', programPath ] );
-
-        // if( mode === 'fork' )
-        // {
-        //   test.identical( op.args, [] )
-        //   test.identical( op.interpreterArgs, [ '--version' ] )
-        // }
-        // else
-        // {
-        //   test.identical( op.args, [ '--version', 'arg1' ] );
-        // }
+        {
+          test.identical( op.args, [] );
+          test.identical( op.args2, [] );
+        }
 
         return null;
-      } )
+      })
     })
 
     /* */
@@ -16680,20 +16702,28 @@ function startNjsOptionInterpreterArgs( test )
         test.identical( op.ended, true );
         test.equivalent( op.output, process.version );
 
-        test.identical( op.interpreterArgs, [ '--version' ] );
-        test.identical( op.args, [ '--version', programPath ] );
+        test.identical( op.interpreterArgs, [ '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] );
         if( mode === 'fork' )
-        test.identical( op.args2, [ '--version', programPath ] );
+        {
+          test.identical( op.args, [] );
+          test.identical( op.args2, [] );
+        }
         else
-        test.identical( op.args2, [ '--version', programPath ] );
-
-        // if( mode === 'fork' )
-        // test.identical( op.interpreterArgs, [ '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] )
-        // else
-        // test.identical( op.args, [ '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}`, programPath ] );
+        {
+          test.identical( op.args, [ programPath ] );
+          let exp =
+          [
+            '--version',
+            '--expose-gc',
+            '--stack-trace-limit=999',
+            `--max_old_space_size=${totalMem}`,
+            programPath,
+          ]
+          test.identical( op.args2, exp );
+        }
 
         return null;
-      } )
+      })
     })
 
     /* */
@@ -16718,20 +16748,20 @@ function startNjsOptionInterpreterArgs( test )
         test.identical( op.ended, true );
         test.is( _.strHas( op.output, 'Options:' ) );
 
-        test.identical( op.interpreterArgs, [ '--version' ] );
-        test.identical( op.args, [ '--version', programPath ] );
+        test.identical( op.interpreterArgs, [ '--v8-options' ] );
         if( mode === 'fork' )
-        test.identical( op.args2, [ '--version', programPath ] );
+        {
+          test.identical( op.args, [] );
+          test.identical( op.args2, [] );
+        }
         else
-        test.identical( op.args2, [ '--version', programPath ] );
-
-        // if( mode === 'fork' )
-        // test.identical( op.interpreterArgs, [ '--v8-options' ] )
-        // else
-        // test.identical( op.args, [ '--v8-options', programPath ] );
+        {
+          test.identical( op.args, [ programPath ] );
+          test.identical( op.args2, [ '--v8-options', programPath ] );
+        }
 
         return null;
-      } )
+      })
     })
 
     /* */
@@ -16757,20 +16787,28 @@ function startNjsOptionInterpreterArgs( test )
         test.identical( op.ended, true );
         test.is( _.strHas( op.output, 'Options:' ) );
 
-        test.identical( op.interpreterArgs, [ '--version' ] );
-        test.identical( op.args, [ '--version', programPath ] );
+        test.identical( op.interpreterArgs, [ '--v8-options', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] );
         if( mode === 'fork' )
-        test.identical( op.args2, [ '--version', programPath ] );
+        {
+          test.identical( op.args, [] );
+          test.identical( op.args2, [] );
+        }
         else
-        test.identical( op.args2, [ '--version', programPath ] );
-
-        // if( mode === 'fork' )
-        // test.identical( op.interpreterArgs, [ '--v8-options', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] )
-        // else
-        // test.identical( op.args, [ '--v8-options', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}`, programPath ] );
+        {
+          test.identical( op.args, [ programPath ] );
+          let exp =
+          [
+            '--v8-options',
+            '--expose-gc',
+            '--stack-trace-limit=999',
+            `--max_old_space_size=${totalMem}`,
+            programPath,
+          ]
+          test.identical( op.args2, exp );
+        }
 
         return null;
-      } )
+      })
     })
 
     /* */
@@ -16797,25 +16835,46 @@ function startNjsOptionInterpreterArgs( test )
         test.identical( op.ended, true );
         test.equivalent( op.output, process.version );
 
-        test.identical( op.interpreterArgs, [ '--version' ] );
-        test.identical( op.args, [ '--version', programPath ] );
-        if( mode === 'fork' )
-        test.identical( op.args2, [ '--version', programPath ] );
-        else
-        test.identical( op.args2, [ '--version', programPath ] );
+        test.identical( op.interpreterArgs, [ '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] );
 
-        // if( mode === 'fork' )
-        // {
-        //   test.identical( op.interpreterArgs, [ '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] )
-        //   test.identical( op.args, [ 'arg1', 'arg2' ] );
-        // }
-        // else
-        // {
-        //   test.identical( op.args, [ '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}`, programPath, 'arg1', 'arg2' ] );
-        // }
+        if( mode === 'shell' )
+        {
+          test.identical( op.args, [ programPath, 'arg1', 'arg2' ] );
+          let exp =
+          [
+            '--version',
+            '--expose-gc',
+            '--stack-trace-limit=999',
+            `--max_old_space_size=${totalMem}`,
+            programPath,
+            '"arg1"',
+            '"arg2"'
+          ]
+          test.identical( op.args2, exp );
+        }
+        else if( mode === 'spawn' )
+        {
+          test.identical( op.args, [ programPath, 'arg1', 'arg2' ] );
+          let exp =
+          [
+            '--version',
+            '--expose-gc',
+            '--stack-trace-limit=999',
+            `--max_old_space_size=${totalMem}`,
+            programPath,
+            'arg1',
+            'arg2'
+          ]
+          test.identical( op.args2, exp );
+        }
+        else
+        {
+          test.identical( op.args, [ 'arg1', 'arg2' ] );
+          test.identical( op.args2, [ 'arg1', 'arg2' ] );
+        }
 
         return null;
-      } )
+      })
     })
 
     /* */
@@ -16841,26 +16900,48 @@ function startNjsOptionInterpreterArgs( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.equivalent( op.output, process.version );
+        test.identical( op.interpreterArgs, [ '--trace-warnings', '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] );
 
-        test.identical( op.interpreterArgs, [ '--version' ] );
-        test.identical( op.args, [ '--version', programPath ] );
-        if( mode === 'fork' )
-        test.identical( op.args2, [ '--version', programPath ] );
+        if( mode === 'shell' )
+        {
+          test.identical( op.args, [ programPath, 'arg1', 'arg2' ] );
+          let exp =
+          [
+            '--trace-warnings',
+            '--version',
+            '--expose-gc',
+            '--stack-trace-limit=999',
+            `--max_old_space_size=${totalMem}`,
+            programPath,
+            '"arg1"',
+            '"arg2"'
+          ]
+          test.identical( op.args2, exp );
+        }
+        else if( mode === 'spawn' )
+        {
+          test.identical( op.args, [ programPath, 'arg1', 'arg2' ] );
+          let exp =
+          [
+            '--trace-warnings',
+            '--version',
+            '--expose-gc',
+            '--stack-trace-limit=999',
+            `--max_old_space_size=${totalMem}`,
+            programPath,
+            'arg1',
+            'arg2'
+          ]
+          test.identical( op.args2, exp );
+        }
         else
-        test.identical( op.args2, [ '--version', programPath ] );
-
-        // if( mode === 'fork' )
-        // {
-        //   test.identical( op.interpreterArgs, [ '--trace-warnings', '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] )
-        //   test.identical( op.args, [ 'arg1', 'arg2' ] );
-        // }
-        // else
-        // {
-        //   test.identical( op.args, [ '--trace-warnings', '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}`, programPath, 'arg1', 'arg2' ] );
-        // }
+        {
+          test.identical( op.args, [ 'arg1', 'arg2' ] );
+          test.identical( op.args2, [ 'arg1', 'arg2' ] );
+        }
 
         return null;
-      } ) /* qqq for Yevhen : bad! */
+      }) /* qqq for Yevhen : bad! | aaa : Fixed. */
     })
 
     /* */
@@ -16887,25 +16968,48 @@ function startNjsOptionInterpreterArgs( test )
         test.identical( op.ended, true );
         test.equivalent( op.output, process.version );
 
-        test.identical( op.interpreterArgs, [ '--version' ] );
-        test.identical( op.args, [ '--version', programPath ] );
-        if( mode === 'fork' )
-        test.identical( op.args2, [ '--version', programPath ] );
+        test.identical( op.interpreterArgs, [ '--trace-warnings', '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] );
+        
+        if( mode === 'shell' )
+        {
+          test.identical( op.args, [ programPath, 'arg1', 'arg2' ] );
+          let exp =
+          [
+            '--trace-warnings',
+            '--version',
+            '--expose-gc',
+            '--stack-trace-limit=999',
+            `--max_old_space_size=${totalMem}`,
+            programPath,
+            '"arg1"',
+            '"arg2"'
+          ]
+          test.identical( op.args2, exp );
+        }
+        else if( mode === 'spawn' )
+        {
+          test.identical( op.args, [ programPath, 'arg1', 'arg2' ] );
+          let exp =
+          [
+            '--trace-warnings',
+            '--version',
+            '--expose-gc',
+            '--stack-trace-limit=999',
+            `--max_old_space_size=${totalMem}`,
+            programPath,
+            'arg1',
+            'arg2'
+          ]
+          test.identical( op.args2, exp );
+        }
         else
-        test.identical( op.args2, [ '--version', programPath ] );
-
-        // if( mode === 'fork' )
-        // {
-        //   test.identical( op.interpreterArgs, [ '--trace-warnings', '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] )
-        //   test.identical( op.args, [ 'arg1', 'arg2' ] );
-        // }
-        // else
-        // {
-        //   test.identical( op.args, [ '--trace-warnings', '--version', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}`, programPath, 'arg1', 'arg2' ] );
-        // }
+        {
+          test.identical( op.args, [ 'arg1', 'arg2' ] );
+          test.identical( op.args2, [ 'arg1', 'arg2' ] );
+        }
 
         return null;
-      } )
+      })
     })
 
     /* */
@@ -16931,26 +17035,48 @@ function startNjsOptionInterpreterArgs( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.equivalent( op.output, process.version );
+        test.identical( op.interpreterArgs, [ '--version', '--v8-options', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] );
 
-        test.identical( op.interpreterArgs, [ '--version' ] );
-        test.identical( op.args, [ '--version', programPath ] );
-        if( mode === 'fork' )
-        test.identical( op.args2, [ '--version', programPath ] );
+        if( mode === 'shell' )
+        {
+          test.identical( op.args, [ programPath, 'arg1', 'arg2' ] );
+          let exp =
+          [
+            '--version', 
+            '--v8-options', 
+            '--expose-gc', 
+            '--stack-trace-limit=999', 
+            `--max_old_space_size=${totalMem}`, 
+            programPath, 
+            '"arg1"', 
+            '"arg2"'
+          ]
+          test.identical( op.args2, exp );
+        }
+        else if( mode === 'spawn' )
+        {
+          test.identical( op.args, [ programPath, 'arg1', 'arg2' ] );
+          let exp =
+          [
+            '--version', 
+            '--v8-options', 
+            '--expose-gc', 
+            '--stack-trace-limit=999', 
+            `--max_old_space_size=${totalMem}`, 
+            programPath,
+            'arg1', 
+            'arg2'
+          ]
+          test.identical( op.args2, exp );
+        }
         else
-        test.identical( op.args2, [ '--version', programPath ] );
-
-        // if( mode === 'fork' )
-        // {
-        //   test.identical( op.interpreterArgs, [ '--version', '--v8-options', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] )
-        //   test.identical( op.args, [ 'arg1', 'arg2' ] );
-        // }
-        // else
-        // {
-        //   test.identical( op.args, [ '--version', '--v8-options', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}`, programPath, 'arg1', 'arg2' ] );
-        // }
+        {
+          test.identical( op.args, [ 'arg1', 'arg2' ] );
+          test.identical( op.args2, [ 'arg1', 'arg2' ] );
+        }
 
         return null;
-      } )
+      })
     })
 
     /* */
@@ -16977,25 +17103,48 @@ function startNjsOptionInterpreterArgs( test )
         test.identical( op.ended, true );
         test.equivalent( op.output, process.version );
 
-        test.identical( op.interpreterArgs, [ '--version' ] );
-        test.identical( op.args, [ '--version', programPath ] );
-        if( mode === 'fork' )
-        test.identical( op.args2, [ '--version', programPath ] );
-        else
-        test.identical( op.args2, [ '--version', programPath ] );
+        test.identical( op.interpreterArgs, [ '--version', '--v8-options', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] );
 
-        // if( mode === 'fork' )
-        // {
-        //   test.identical( op.interpreterArgs, [ '--version', '--v8-options', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] )
-        //   test.identical( op.args, [ 'arg1', 'arg2' ] );
-        // }
-        // else
-        // {
-        //   test.identical( op.args, [ '--version', '--v8-options', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}`, programPath, 'arg1', 'arg2' ] );
-        // }
+        if( mode === 'shell' )
+        {
+          test.identical( op.args, [ programPath, 'arg1', 'arg2' ] );
+          let exp =
+          [
+            '--version', 
+            '--v8-options', 
+            '--expose-gc', 
+            '--stack-trace-limit=999', 
+            `--max_old_space_size=${totalMem}`, 
+            _.strQuote( programPath ), 
+            '"arg1"', 
+            '"arg2"'
+          ]
+          test.identical( op.args2, exp );
+        }
+        else if( mode === 'spawn' )
+        {
+          test.identical( op.args, [ programPath, 'arg1', 'arg2' ] );
+          let exp =
+          [
+            '--version', 
+            '--v8-options', 
+            '--expose-gc', 
+            '--stack-trace-limit=999', 
+            `--max_old_space_size=${totalMem}`, 
+            programPath,
+            'arg1', 
+            'arg2'
+          ]
+          test.identical( op.args2, exp );
+        }
+        else
+        {
+          test.identical( op.args, [ 'arg1', 'arg2' ] );
+          test.identical( op.args2, [ 'arg1', 'arg2' ] );
+        }
 
         return null;
-      } )
+      })
     })
 
     return ready;
