@@ -22354,7 +22354,7 @@ function startSingleOptionDry( test )
         test.identical( op.streamOut, null );
         test.identical( op.streamErr, null );
 
-        /* qqq for Yevhen : bad | aaa : Fixed. */
+        /* qqq for Yevhen : bad */
         if ( tops.mode === 'shell' )
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe' ] );
