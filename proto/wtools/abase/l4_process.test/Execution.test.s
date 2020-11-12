@@ -8802,74 +8802,141 @@ startProcedureStackMultiple.timeOut = 500000;
 
 //
 
-/* qqq for Yevhen : implement for other modes */
+/* qqq for Yevhen : implement for other modes | aaa : Done. */
 function startOnTerminateSeveralCallbacksChronology( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
   let programPath = a.program( program1 );
-  let track = [];
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
 
-  /* */
-
-  a.ready
-
-  .then( () =>
+  function run( mode )
   {
-    test.case = 'parent disconnects detached child process and exits, child contiues to work'
-    let o =
-    {
-      execPath : 'node program1.js',
-      mode : 'spawn',
-      stdio : 'pipe',
-      outputPiping : 1,
-      outputCollecting : 1,
-      currentPath : a.routinePath,
-      detaching : 0,
-      ipc : 1,
-    }
-    let con = _.process.start( o );
+    let ready = _.Consequence().take( null );
+    let track = [];
 
-    o.conTerminate.then( ( op ) =>
+    ready
+
+    .then( () =>
     {
-      track.push( 'conTerminate.1' );
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      test.identical( op.state, 'terminated' );
-      return null;
+      test.case = `mode : ${mode}, parent disconnects detached child process and exits, child contiues to work`
+      let o =
+      {
+        execPath : mode === 'fork' ? 'program1.js' : 'node program1.js',
+        mode,
+        stdio : 'pipe',
+        outputPiping : 1,
+        outputCollecting : 1,
+        currentPath : a.routinePath,
+        detaching : 0,
+        ipc : mode === 'shell' ? 0 : 1,
+      }
+      let con = _.process.start( o );
+
+      o.conTerminate.then( ( op ) =>
+      {
+        track.push( 'conTerminate.1' );
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.state, 'terminated' );
+        return null;
+      })
+
+      o.conTerminate.then( () =>
+      {
+        track.push( 'conTerminate.2' );
+        test.identical( o.exitCode, 0 );
+        test.identical( o.state, 'terminated' );
+        return _.time.out( context.t1 * 6 ); /* 1000 + context.t2 */
+      })
+
+      o.conTerminate.then( () =>
+      {
+        track.push( 'conTerminate.3' );
+        test.identical( o.exitCode, 0 );
+        test.identical( o.state, 'terminated' );
+        return null;
+      })
+
+      track.push( 'end' );
+      return con;
     })
 
-    o.conTerminate.then( () =>
+    .tap( () =>
     {
-      track.push( 'conTerminate.2' );
-      test.identical( o.exitCode, 0 );
-      test.identical( o.state, 'terminated' );
-      return _.time.out( context.t1 * 6 ); /* 1000 + context.t2 */
+      track.push( 'ready' );
     })
 
-    o.conTerminate.then( () =>
+    /*  */
+
+    return _.time.out( context.t1 * 11, () => /* 1000 + context.t2 + context.t2 */
     {
-      track.push( 'conTerminate.3' );
-      test.identical( o.exitCode, 0 );
-      test.identical( o.state, 'terminated' );
-      return null;
-    })
+      test.identical( track, [ 'end', 'conTerminate.1', 'conTerminate.2', 'ready', 'conTerminate.3' ] );
+    });
+  }
 
-    track.push( 'end' );
-    return con;
-  })
+  /* ORIGINAL */
+  // a.ready
 
-  .tap( () =>
-  {
-    track.push( 'ready' );
-  })
+  //   .then( () =>
+  //   {
+  //     test.case = 'parent disconnects detached child process and exits, child contiues to work'
+  //     let o =
+  //     {
+  //       execPath : 'node program1.js',
+  //       mode : 'spawn',
+  //       stdio : 'pipe',
+  //       outputPiping : 1,
+  //       outputCollecting : 1,
+  //       currentPath : a.routinePath,
+  //       detaching : 0,
+  //       ipc : 1,
+  //     }
+  //     let con = _.process.start( o );
 
-  /*  */
+  //     o.conTerminate.then( ( op ) =>
+  //     {
+  //       track.push( 'conTerminate.1' );
+  //       test.identical( op.exitCode, 0 );
+  //       test.identical( op.ended, true );
+  //       test.identical( op.state, 'terminated' );
+  //       return null;
+  //     })
 
-  return _.time.out( context.t1 * 11, () => /* 1000 + context.t2 + context.t2 */
-  {
-    test.identical( track, [ 'end', 'conTerminate.1', 'conTerminate.2', 'ready', 'conTerminate.3' ] );
-  });
+  //     o.conTerminate.then( () =>
+  //     {
+  //       track.push( 'conTerminate.2' );
+  //       test.identical( o.exitCode, 0 );
+  //       test.identical( o.state, 'terminated' );
+  //       return _.time.out( context.t1 * 6 ); /* 1000 + context.t2 */
+  //     })
+
+  //     o.conTerminate.then( () =>
+  //     {
+  //       track.push( 'conTerminate.3' );
+  //       test.identical( o.exitCode, 0 );
+  //       test.identical( o.state, 'terminated' );
+  //       return null;
+  //     })
+
+  //     track.push( 'end' );
+  //     return con;
+  //   })
+
+  //   .tap( () =>
+  //   {
+  //     track.push( 'ready' );
+  //   })
+
+  //   /*  */
+
+  //   return _.time.out( context.t1 * 11, () => /* 1000 + context.t2 + context.t2 */
+  //   {
+  //     test.identical( track, [ 'end', 'conTerminate.1', 'conTerminate.2', 'ready', 'conTerminate.3' ] );
+  //   });
+
 
   /* - */
 
