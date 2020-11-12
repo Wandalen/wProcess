@@ -17883,6 +17883,7 @@ function starterArgs( test )
     // test.identical( starterOptions.args, [ 'arg1', 'arg2' ] );
     // test.identical( starterOptions.args2, [ 'arg1', 'arg2' ] );
     test.identical( starterOptions.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
+    test.identical( starterOptions.args2, undefined );
     return null;
   })
 
@@ -17901,6 +17902,7 @@ function starterArgs( test )
     // test.identical( starterOptions.args, [ 'arg1', 'arg2' ] );
     // test.identical( starterOptions.args2, [ 'arg1', 'arg2' ] );
     test.identical( starterOptions.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
+    test.identical( starterOptions.args2, undefined );
     return null;
   })
 
@@ -17919,6 +17921,7 @@ function starterArgs( test )
     // test.identical( starterOptions.args, [ 'arg1', 'arg2' ] );
     // test.identical( starterOptions.args2, [ 'arg1', 'arg2' ] );
     test.identical( starterOptions.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
+    test.identical( starterOptions.args2, undefined );
     return null;
   })
 
