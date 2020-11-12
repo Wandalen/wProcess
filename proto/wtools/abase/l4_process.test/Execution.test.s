@@ -2538,12 +2538,14 @@ function startArgsOption( test )
           test.identical( op.args, [ 'arg1', 'arg2' ] );
           test.identical( op.args2, [ 'arg1', 'arg2' ] );
         }
+        else if( mode === 'shell' )
+        {
+          test.identical( op.args, [ programPath, 'arg1', 'arg2' ] );
+          test.identical( op.args2, [ programPath, '"arg1"', '"arg2"' ] );
+        }
         else
         {
           test.identical( op.args, [ programPath, 'arg1', 'arg2' ] );
-          if( mode === 'shell' )
-          test.identical( op.args2, [ programPath, '"arg1"', '"arg2"' ] );
-          else
           test.identical( op.args2, [ programPath, 'arg1', 'arg2' ] );
         }
 
@@ -2582,12 +2584,14 @@ function startArgsOption( test )
           test.identical( op.args, [ 'arg1' ] );
           test.identical( op.args2, [ 'arg1' ] );
         }
+        else if( mode === 'shell' )
+        {
+          test.identical( op.args, [ programPath, 'arg1' ] );
+          test.identical( op.args2, [ programPath, '"arg1"' ] );
+        }
         else
         {
           test.identical( op.args, [ programPath, 'arg1' ] );
-          if( mode === 'shell' )
-          test.identical( op.args2, [ programPath, '"arg1"' ] );
-          else
           test.identical( op.args2, [ programPath, 'arg1' ] );
         }
 
