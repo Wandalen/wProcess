@@ -3266,19 +3266,17 @@ function startArgumentsParsingNonTrivial( test )
           test.identical( o.args, [ 'firstArg secondArg ":" 1', 'third arg', 'fourth arg', '"fifth" arg', '"some arg"' ] );
           test.identical( o.args2, [ 'firstArg secondArg ":" 1', 'third arg', 'fourth arg', '"fifth" arg', '"some arg"' ] );
         }
+        else if( mode === 'shell' )
+        {
+          test.identical( o.execPath, 'node' );
+          test.identical( o.args, [ _.strQuote( testAppPathSpace ), `'firstArg secondArg \":\" 1'`, `"third arg"`, `'fourth arg'`, `'\"fifth\" arg'`, '\"some arg\"' ] );
+          test.identical( o.args2, [ _.strQuote( testAppPathSpace ), `'firstArg secondArg \":\" 1'`, `"third arg"`, `'fourth arg'`, `'\"fifth\" arg'`, '"\\"some arg\\""' ] );
+        }
         else
         {
           test.identical( o.execPath, 'node' );
-          if( mode === 'shell' )
-          {
-            test.identical( o.args, [ _.strQuote( testAppPathSpace ), `'firstArg secondArg \":\" 1'`, `"third arg"`, `'fourth arg'`, `'\"fifth\" arg'`, '\"some arg\"' ] );
-            test.identical( o.args2, [ _.strQuote( testAppPathSpace ), `'firstArg secondArg \":\" 1'`, `"third arg"`, `'fourth arg'`, `'\"fifth\" arg'`, '"\\"some arg\\""' ] );
-          }
-          else
-          {
-            test.identical( o.args, [ testAppPathSpace, 'firstArg secondArg ":" 1', 'third arg', 'fourth arg', '"fifth" arg', '"some arg"' ] );
-            test.identical( o.args2, [ testAppPathSpace, 'firstArg secondArg ":" 1', 'third arg', 'fourth arg', '"fifth" arg', '"some arg"' ] );
-          }
+          test.identical( o.args, [ testAppPathSpace, 'firstArg secondArg ":" 1', 'third arg', 'fourth arg', '"fifth" arg', '"some arg"' ] );
+          test.identical( o.args2, [ testAppPathSpace, 'firstArg secondArg ":" 1', 'third arg', 'fourth arg', '"fifth" arg', '"some arg"' ] );
         }
         let op = JSON.parse( o.output );
         test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
@@ -3329,19 +3327,17 @@ function startArgumentsParsingNonTrivial( test )
           test.identical( o.args, [ 'firstArg', 'secondArg:1', '"third arg"' ] );
           test.identical( o.args2, [ 'firstArg', 'secondArg:1', '"third arg"' ] );
         }
+        else if( mode === 'shell' )
+        {
+          test.identical( o.execPath, 'node' );
+          test.identical( o.args, [ _.strQuote( testAppPathSpace ), 'firstArg', 'secondArg:1', '"third arg"' ] );
+          test.identical( o.args2, [ _.strQuote( testAppPathSpace ), 'firstArg', 'secondArg:1', '"\\"third arg\\""' ] );
+        }
         else
         {
           test.identical( o.execPath, 'node' );
-          if( mode === 'shell' )
-          {
-            test.identical( o.args, [ _.strQuote( testAppPathSpace ), 'firstArg', 'secondArg:1', '"third arg"' ] );
-            test.identical( o.args2, [ _.strQuote( testAppPathSpace ), 'firstArg', 'secondArg:1', '"\\"third arg\\""' ] );
-          }
-          else
-          {
-            test.identical( o.args, [ testAppPathSpace, 'firstArg', 'secondArg:1', '"third arg"' ] );
-            test.identical( o.args2, [ testAppPathSpace, 'firstArg', 'secondArg:1', '"third arg"' ] );
-          }
+          test.identical( o.args, [ testAppPathSpace, 'firstArg', 'secondArg:1', '"third arg"' ] );
+          test.identical( o.args2, [ testAppPathSpace, 'firstArg', 'secondArg:1', '"third arg"' ] );
         }
 
         let op = JSON.parse( o.output );
@@ -3506,7 +3502,6 @@ function startArgumentsParsingNonTrivial( test )
 
       con.finally( ( err, op ) =>
       {
-
         if( mode === 'spawn' )
         {
           test.is( !!err );
@@ -3613,7 +3608,6 @@ function startArgumentsParsingNonTrivial( test )
 
       con.finally( ( err, op ) =>
       {
-
         if( mode === 'spawn' )
         {
           test.is( !!err );
@@ -3704,24 +3698,22 @@ function startArgumentsParsingNonTrivial( test )
           test.identical( o.args2, [ `"path/key3":'val3'` ] );
           test.identical( op.scriptArgs, [ `"path/key3":'val3'` ] )
         }
+        else if( mode === 'shell' )
+        {
+          test.identical( o.execPath, 'node' );
+          test.identical( o.args, [ _.strQuote( testAppPathSpace ), `"path/key3":'val3'` ] );
+          test.identical( o.args2, [ _.strQuote( testAppPathSpace ), `"path/key3":'val3'` ] );
+          if( process.platform === 'win32' )
+          test.identical( op.scriptArgs, [ `path/key3:'val3'` ] )
+          else
+          test.identical( op.scriptArgs, [ 'path/key3:val3' ] )
+        }
         else
         {
           test.identical( o.execPath, 'node' );
-          if( mode === 'shell' )
-          {
-            test.identical( o.args, [ _.strQuote( testAppPathSpace ), `"path/key3":'val3'` ] );
-            test.identical( o.args2, [ _.strQuote( testAppPathSpace ), `"path/key3":'val3'` ] );
-            if( process.platform === 'win32' )
-            test.identical( op.scriptArgs, [ `path/key3:'val3'` ] )
-            else
-            test.identical( op.scriptArgs, [ 'path/key3:val3' ] )
-          }
-          else
-          {
-            test.identical( o.args, [ testAppPathSpace, `"path/key3":'val3'` ] );
-            test.identical( o.args2, [ testAppPathSpace, `"path/key3":'val3'` ] )
-            test.identical( op.scriptArgs, [ `"path/key3":'val3'` ] )
-          }
+          test.identical( o.args, [ testAppPathSpace, `"path/key3":'val3'` ] );
+          test.identical( o.args2, [ testAppPathSpace, `"path/key3":'val3'` ] )
+          test.identical( op.scriptArgs, [ `"path/key3":'val3'` ] )
         }
 
         test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
