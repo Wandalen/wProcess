@@ -580,12 +580,14 @@ ${programPath}:end
           test.identical( options.output, o2.args.join( ' ' ) + '\n' );
           test.identical( options.args2, [ 'staging', 'debug' ] )
         }
+        else if( mode === 'shell' )
+        {
+          test.identical( `${programPath2} ` + options.output, o2.args.join( ' ' ) + '\n' );
+          test.identical( options.args2, [ programPath2, '"staging"', '"debug"' ] )
+        }
         else
         {
           test.identical( `${programPath2} ` + options.output, o2.args.join( ' ' ) + '\n' );
-          if( mode === 'shell' )
-          test.identical( options.args2, [ programPath2, '"staging"', '"debug"' ] )
-          else
           test.identical( options.args2, [ programPath2, 'staging', 'debug' ] )
         }
 
