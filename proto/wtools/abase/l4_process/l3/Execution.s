@@ -434,7 +434,7 @@ function startMinimal_body( o )
 
     _.assert( o.interpreterArgs === null || _.arrayIs( o.interpreterArgs ) );
     if( o.interpreterArgs && o.mode !== 'fork' )
-    o.args2 = _.arrayAppendArray( o.args2, o.interpreterArgs );
+    o.args2 = _.arrayPrependArray( o.args2, o.interpreterArgs );
 
 /*
     let appendedArgs = o.passingThrough ? process.argv.length - 2 : 0;
@@ -660,7 +660,7 @@ function startMinimal_body( o )
     // if( o.interpreterArgs )
     // o.args2 = _.arrayAppendArray( o.args2, o.interpreterArgs );
     // if( o.interpreterArgs )
-    // o.args2 = o.interpreterArgs.concat( o.args2 ); /* xxx */ /* qqq2 for Yevhen : use routine _.arrayAppendArray() */
+    // o.args2 = o.interpreterArgs.concat( o.args2 ); /* xxx */ /* qqq2 for Yevhen : bad. use routine _.arrayAppendArray() */
 
     if( o.sync && !o.deasync )
     o.process = ChildProcess.spawnSync( execPath, o.args2, o2 );
