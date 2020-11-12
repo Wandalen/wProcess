@@ -9141,6 +9141,247 @@ startChronology.description =
   - no extra procedures generated
 `
 
+function startStateMultiple( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( testApp );
+  let testAppErrorPath = a.program( testAppError );
+  var modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
+
+  /* */
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+    /*
+    Possible states: `initial`, `starting`, `started`, `terminating`, `terminated`, `disconnected`
+    Possible to check : `starting`, `started`, `terminating`, `terminated`
+    */
+    let states;
+
+    ready.then( ( op ) =>
+    {
+      test.case = `mode:${mode}, concurrent : 0, normal run`;
+      states = [];
+
+      let options =
+      {
+        execPath : mode === 'fork' ? [ testAppPath, testAppPath ] : [ 'node ' + testAppPath, 'node ' + testAppPath ],
+        mode,
+        concurrent : 0,
+        outputCollecting : 1
+      }
+
+      let returned = _.process.start( options );
+
+      options.conStart.finally( ( err, op ) =>
+      {
+        test.identical( err, undefined );
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, false );
+        test.identical( op.output, '' );
+        states.push( op.state );
+        return null;
+      } )
+
+      options.conTerminate.finally( ( err, op ) =>
+      {
+        test.identical( err, undefined );
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, false );
+        test.equivalent( op.output, 'Log\nLog' );
+        states.push( op.state );
+        return null;
+      } )
+
+      options.ready.finally( ( err, op ) =>
+      {
+        test.identical( err, undefined );
+        test.identical( op.exitCode, 0 )
+        test.identical( op.ended, true )
+        test.equivalent( op.output, 'Log\nLog' );
+        states.push( op.state );
+        test.identical( states, [ 'starting', 'terminating', 'terminated' ] )
+        return null;
+      } )
+
+      return returned;
+
+    } )
+
+    /* */
+
+    ready.then( ( op ) =>
+    {
+      test.case = `mode:${mode}, concurrent : 1, normal run`;
+      states = [];
+
+      let options =
+      {
+        execPath : mode === 'fork' ? [ testAppPath, testAppPath ] : [ 'node ' + testAppPath, 'node ' + testAppPath ],
+        mode,
+        concurrent : 1,
+        outputCollecting : 1
+      }
+
+      let returned = _.process.start( options );
+
+      options.conStart.finally( ( err, op ) =>
+      {
+        test.identical( err, undefined );
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, false );
+        test.identical( op.output, '' );
+        states.push( op.state );
+        return null;
+      } )
+
+      options.conTerminate.finally( ( err, op ) =>
+      {
+        test.identical( err, undefined );
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, false );
+        test.equivalent( op.output, 'Log\nLog' );
+        states.push( op.state );
+        return null;
+      } )
+
+      options.ready.finally( ( err, op ) =>
+      {
+        test.identical( err, undefined );
+        test.identical( op.exitCode, 0 )
+        test.identical( op.ended, true )
+        test.equivalent( op.output, 'Log\nLog' );
+        states.push( op.state );
+        test.identical( states, [ 'started', 'terminating', 'terminated' ] )
+        return null;
+      } )
+
+      return returned;
+
+    } )
+
+    /* */
+
+    ready.then( ( op ) =>
+    {
+      test.case = `mode:${mode}, concurrent : 0, error`;
+      states = [];
+
+      let options =
+      {
+        execPath : mode === 'fork' ? [ testAppErrorPath, testAppErrorPath ] : [ 'node ' + testAppErrorPath, 'node ' + testAppErrorPath ],
+        mode,
+        concurrent : 0,
+        throwingExitCode : 0,
+        outputCollecting : 1
+      }
+
+      let returned = _.process.start( options );
+
+      options.conStart.finally( ( err, op ) =>
+      {
+        test.identical( err, undefined );
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, false );
+        test.identical( op.output, '' );
+        states.push( op.state );
+        return null;
+      } )
+
+      options.conTerminate.finally( ( err, op ) =>
+      {
+        test.identical( err, undefined );
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, false );
+        test.is( _.strHas( op.output, 'randomText is not defined' ) );
+        states.push( op.state );
+        return null;
+      } )
+
+      options.ready.finally( ( err, op ) =>
+      {
+        test.identical( err, undefined );
+        test.notIdentical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.is( _.strHas( op.output, 'randomText is not defined' ) );
+        states.push( op.state );
+        test.identical( states, [ 'starting', 'terminating', 'terminated' ] );
+        return null;
+      } )
+
+      return returned;
+    } )
+
+    /* */
+
+    ready.then( ( op ) =>
+    {
+      test.case = `mode:${mode}, concurrent : 1, error`;
+      states = [];
+
+      let options =
+      {
+        execPath : mode === 'fork' ? [ testAppErrorPath, testAppErrorPath ] : [ 'node ' + testAppErrorPath, 'node ' + testAppErrorPath ],
+        mode,
+        concurrent : 1,
+        throwingExitCode : 0,
+        outputCollecting : 1
+      }
+
+      let returned = _.process.start( options );
+
+      options.conStart.finally( ( err, op ) =>
+      {
+        test.identical( err, undefined );
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, false );
+        test.identical( op.output, '' );
+        states.push( op.state );
+        return null;
+      } )
+
+      options.conTerminate.finally( ( err, op ) =>
+      {
+        test.identical( err, undefined );
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, false );
+        test.is( _.strHas( op.output, 'randomText is not defined' ) );
+        states.push( op.state );
+        return null;
+      } )
+
+      options.ready.finally( ( err, op ) =>
+      {
+        test.identical( err, undefined );
+        test.notIdentical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.is( _.strHas( op.output, 'randomText is not defined' ) );
+        states.push( op.state );
+        test.identical( states, [ 'started', 'terminating', 'terminated' ] );
+        return null;
+      } )
+
+      return returned;
+    } )
+
+    return ready;
+  }
+
+  function testApp()
+  {
+    console.log( 'Log' );
+  }
+
+  function testAppError()
+  {
+    randomText
+  }
+}
+
 // --
 // delay
 // --
@@ -35795,6 +36036,7 @@ var Proto =
     startProcedureStackMultiple,
     startOnTerminateSeveralCallbacksChronology,
     startChronology,
+    startStateMultiple,
 
     // delay
 
