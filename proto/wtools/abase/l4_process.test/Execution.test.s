@@ -10931,106 +10931,151 @@ function startDetachedOutputStdioIgnore( test )
 
 //
 
-/* qqq for Yevhen : implement for other modes */
+/* qqq for Yevhen : implement for other modes | aaa : Done. */
 function startDetachedOutputStdioPipe( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
   let testAppParentPath = a.program( testAppParent );
   let testAppChildPath = a.program( testAppChild );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
+
+  function run( mode )
+  {
+    let ready = _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, stdio : pipe`;
+
+      let o =
+      {
+        execPath : `node testAppParent.js mode : ${mode} stdio : pipe`,
+        mode : 'spawn',
+        outputCollecting : 1,
+        currentPath : a.routinePath,
+      }
+      let con = _.process.start( o );
+
+      con.then( () =>
+      {
+        test.identical( o.exitCode, 0 );
+
+        /*
+        zzz for Vova: output piping doesn't work as expected in mode "shell" on windows
+        investigate if its fixed in never verions of node or implement alternative solution
+        */
+
+        if( process.platform === 'win32' && mode === 'shell' )
+        return null;
+
+        test.is( _.strHas( o.output, 'Child process start' ) )
+        test.is( _.strHas( o.output, 'Child process end' ) )
+        return null;
+      })
+
+      return con;
+    })
+
+    return ready;
+
+  }
 
   /* */
 
-  a.ready
+  /* ORIGINAL */
+  // a.ready
 
-  .then( () =>
-  {
-    test.case = 'mode : spawn, stdio : pipe';
+  // .then( () =>
+  // {
+  //   test.case = 'mode : spawn, stdio : pipe';
 
-    let o =
-    {
-      execPath : 'node testAppParent.js mode : spawn stdio : pipe',
-      mode : 'spawn',
-      outputCollecting : 1,
-      currentPath : a.routinePath,
-    }
-    let con = _.process.start( o );
+  //   let o =
+  //   {
+  //     execPath : 'node testAppParent.js mode : spawn stdio : pipe',
+  //     mode : 'spawn',
+  //     outputCollecting : 1,
+  //     currentPath : a.routinePath,
+  //   }
+  //   let con = _.process.start( o );
 
-    con.then( () =>
-    {
-      test.identical( o.exitCode, 0 )
-      test.is( _.strHas( o.output, 'Child process start' ) )
-      test.is( _.strHas( o.output, 'Child process end' ) )
-      return null;
-    })
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, 0 )
+  //     test.is( _.strHas( o.output, 'Child process start' ) )
+  //     test.is( _.strHas( o.output, 'Child process end' ) )
+  //     return null;
+  //   })
 
-    return con;
-  })
+  //   return con;
+  // })
 
-  /*  */
+  // /*  */
 
-  .then( () =>
-  {
-    test.case = 'mode : fork, stdio : pipe';
+  // .then( () =>
+  // {
+  //   test.case = 'mode : fork, stdio : pipe';
 
-    let o =
-    {
-      execPath : 'node testAppParent.js mode : fork stdio : pipe',
-      mode : 'spawn',
-      outputCollecting : 1,
-      currentPath : a.routinePath,
-    }
-    let con = _.process.start( o );
+  //   let o =
+  //   {
+  //     execPath : 'node testAppParent.js mode : fork stdio : pipe',
+  //     mode : 'spawn',
+  //     outputCollecting : 1,
+  //     currentPath : a.routinePath,
+  //   }
+  //   let con = _.process.start( o );
 
-    con.then( () =>
-    {
-      test.identical( o.exitCode, 0 )
-      test.is( _.strHas( o.output, 'Child process start' ) )
-      test.is( _.strHas( o.output, 'Child process end' ) )
-      return null;
-    })
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, 0 )
+  //     test.is( _.strHas( o.output, 'Child process start' ) )
+  //     test.is( _.strHas( o.output, 'Child process end' ) )
+  //     return null;
+  //   })
 
-    return con;
-  })
+  //   return con;
+  // })
 
-  /*  */
+  // /*  */
 
-  .then( () =>
-  {
-    test.case = 'mode : shell, stdio : pipe';
+  // .then( () =>
+  // {
+  //   test.case = 'mode : shell, stdio : pipe';
 
-    let o =
-    {
-      execPath : 'node testAppParent.js mode : shell stdio : pipe',
-      mode : 'spawn',
-      outputCollecting : 1,
-      currentPath : a.routinePath,
-    }
-    let con = _.process.start( o );
+  //   let o =
+  //   {
+  //     execPath : 'node testAppParent.js mode : shell stdio : pipe',
+  //     mode : 'spawn',
+  //     outputCollecting : 1,
+  //     currentPath : a.routinePath,
+  //   }
+  //   let con = _.process.start( o );
 
-    con.then( () =>
-    {
-      test.identical( o.exitCode, 0 )
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, 0 )
 
-      /*
-      zzz for Vova: output piping doesn't work as expected in mode "shell" on windows
-      investigate if its fixed in never verions of node or implement alternative solution
-      */
+  //     /*
+  //     zzz for Vova: output piping doesn't work as expected in mode "shell" on windows
+  //     investigate if its fixed in never verions of node or implement alternative solution
+  //     */
 
-      if( process.platform === 'win32' )
-      return null;
+  //     if( process.platform === 'win32' )
+  //     return null;
 
-      test.is( _.strHas( o.output, 'Child process start' ) )
-      test.is( _.strHas( o.output, 'Child process end' ) )
-      return null;
-    })
+  //     test.is( _.strHas( o.output, 'Child process start' ) )
+  //     test.is( _.strHas( o.output, 'Child process end' ) )
+  //     return null;
+  //   })
 
-    return con;
-  })
+  //   return con;
+  // })
 
-  /*  */
+  // /*  */
 
-  return a.ready;
+  // return a.ready;
 
   /* - */
 
