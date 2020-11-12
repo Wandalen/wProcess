@@ -11078,7 +11078,7 @@ function startDetachedOutputStdioPipe( test )
 
 //
 
-/* qqq for Yevhen : implement for other modes */
+/* qqq for Yevhen : implement for other modes |*/
 function startDetachedOutputStdioInherit( test )
 {
   let context = this;
