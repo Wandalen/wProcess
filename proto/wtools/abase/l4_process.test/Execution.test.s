@@ -170,11 +170,6 @@ This section shows when event `exit` of child process is called. The behavior is
 Event 'exit' is aways called. Options `stdio` and `detaching` also don't affect `exit` event.
 */
 
-/* qqq for Yevhen : find all tests with passingThrough:1, separate them from the rest of the test
-and rewrite to run process which run process to avoid influence of arguments of tester on testing
-qqq2 : not done | aaa : Done.
-*/
-
 /*
 qqq for Yevhen : remove all
 `... a.path.nativize( a.program ...` -> `... a.program ...`
@@ -22440,7 +22435,6 @@ function startSingleOptionDry( test )
 
     ready.then( () =>
     {
-      /* qqq for Yevhen : bad description! | aaa : Fixed. */
       test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, dry : 1, wrong execPath`;
       let o =
       {
@@ -34854,7 +34848,7 @@ var Proto =
     isAlive,
     statusOf,
 
-    exitReason, /* qqq2 for Yevhen : it should be in subprocess | aaa : Done. */
+    exitReason,
     exitCode, /* qqq for Yevhen : check order of test routines. it's messed up */
 
     // termination
