@@ -11078,7 +11078,7 @@ function startDetachedOutputStdioPipe( test )
 
 //
 
-/* qqq for Yevhen : implement for other modes |*/
+/* qqq for Yevhen : implement for other modes | aaa : Done. */
 function startDetachedOutputStdioInherit( test )
 {
   let context = this;
@@ -11092,57 +11092,85 @@ function startDetachedOutputStdioInherit( test )
   if( !Config.debug )
   return a.ready;
 
-  a.ready
-
-  .then( () =>
-  {
-    test.case = 'mode : spawn, stdio : inherit';
-    let o =
-    {
-      execPath : 'node testAppChild.js',
-      mode : 'spawn',
-      stdio : 'inherit',
-      detaching : 1,
-      currentPath : a.routinePath,
-    }
-    return test.shouldThrowErrorSync( () => _.process.start( o ) );
-  })
-
-  /*  */
-
-  .then( () =>
-  {
-    test.case = 'mode : fork, stdio : inherit';
-    let o =
-    {
-      execPath : 'testAppChild.js',
-      mode : 'fork',
-      stdio : 'inherit',
-      detaching : 1,
-      currentPath : a.routinePath,
-    }
-    return test.shouldThrowErrorSync( () => _.process.start( o ) );
-  })
-
-  /*  */
-
-  .then( () =>
-  {
-    test.case = 'mode : shell, stdio : inherit';
-    let o =
-    {
-      execPath : 'node testAppChild.js',
-      mode : 'shell',
-      stdio : 'inherit',
-      detaching : 1,
-      currentPath : a.routinePath,
-    }
-    return test.shouldThrowErrorSync( () => _.process.start( o ) );
-  })
-
-  /*  */
-
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
+
+  /* */
+
+  function run( mode )
+  {
+    let ready = _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, stdio : inherit`;
+      let o =
+      {
+        execPath : mode === 'fork' ? 'testAppChild.js' : 'node testAppChild.js',
+        mode,
+        stdio : 'inherit',
+        detaching : 1,
+        currentPath : a.routinePath,
+      }
+      return test.shouldThrowErrorSync( () => _.process.start( o ) );
+    })
+
+    return ready;
+  }
+
+  /* ORIGINAL */
+  // a.ready
+
+  // .then( () =>
+  // {
+  //   test.case = 'mode : spawn, stdio : inherit';
+  //   let o =
+  //   {
+  //     execPath : 'node testAppChild.js',
+  //     mode : 'spawn',
+  //     stdio : 'inherit',
+  //     detaching : 1,
+  //     currentPath : a.routinePath,
+  //   }
+  //   return test.shouldThrowErrorSync( () => _.process.start( o ) );
+  // })
+
+  // /*  */
+
+  // .then( () =>
+  // {
+  //   test.case = 'mode : fork, stdio : inherit';
+  //   let o =
+  //   {
+  //     execPath : 'testAppChild.js',
+  //     mode : 'fork',
+  //     stdio : 'inherit',
+  //     detaching : 1,
+  //     currentPath : a.routinePath,
+  //   }
+  //   return test.shouldThrowErrorSync( () => _.process.start( o ) );
+  // })
+
+  // /*  */
+
+  // .then( () =>
+  // {
+  //   test.case = 'mode : shell, stdio : inherit';
+  //   let o =
+  //   {
+  //     execPath : 'node testAppChild.js',
+  //     mode : 'shell',
+  //     stdio : 'inherit',
+  //     detaching : 1,
+  //     currentPath : a.routinePath,
+  //   }
+  //   return test.shouldThrowErrorSync( () => _.process.start( o ) );
+  // })
+
+  // /*  */
+
+  // return a.ready;
 
   /* - */
 
