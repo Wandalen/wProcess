@@ -5461,7 +5461,7 @@ function startArgumentsHandling( test )
     test.is( _.strHas( op.output, `*` ) );
     test.identical( op.execPath, 'echo' );
     test.identical( op.args, [ '*' ] );
-    test.identical( op.args2, [ '*' ] );
+    test.identical( op.args2, [ '"*"' ] );
     test.identical( op.fullExecPath, 'echo "*"' );
     return null;
   })
@@ -5513,7 +5513,7 @@ function startArgumentsHandling( test )
     test.is( _.strHas( op.output, `a b * c` ) );
     test.identical( op.execPath, 'echo' );
     test.identical( op.args, [ 'a b', '*', 'c' ] );
-    test.identical( op.args2, [ 'a b', '*', 'c' ] );
+    test.identical( op.args2, [ '"a b"', '"*"', '"c"' ] );
     test.identical( op.fullExecPath, 'echo "a b" "*" "c"' );
     return null;
   })
@@ -5546,7 +5546,7 @@ function startArgumentsHandling( test )
     test.identical( _.strCount( op.output, '"*"' ), 1 );
     test.identical( op.execPath, 'echo' );
     test.identical( op.args, [ `'"*"'` ] );
-    test.identical( op.args2, [ `'"*"'` ] );
+    test.identical( op.args2, [ `"'\\"*\\"'"` ] );
     test.identical( op.fullExecPath, `echo "'\\"*\\"'"` );
     return null;
   })
@@ -5576,7 +5576,7 @@ function startArgumentsHandling( test )
     test.identical( _.strCount( op.output, `'*'` ), 1 );
     test.identical( op.execPath, 'echo' );
     test.identical( op.args, [ `"'*'"` ] );
-    test.identical( op.args2, [ `"'*'"` ] );
+    test.identical( op.args2, [ `"\\"'*'\\""` ] );
     test.identical( op.fullExecPath, `echo "\\"'*'\\""` );
     return null;
   })
@@ -5609,7 +5609,7 @@ function startArgumentsHandling( test )
     test.identical( _.strCount( op.output, '`*`' ), 1 );
     test.identical( op.execPath, 'echo' );
     test.identical( op.args, [ '`*`' ] );
-    test.identical( op.args2, [ '`*`' ] );
+    test.identical( op.args2, [ '"\\`*\\`"' ] );
     if( process.platform === 'win32' )
     test.identical( op.fullExecPath, 'echo "`*`"' )
     else
@@ -5638,7 +5638,7 @@ function startArgumentsHandling( test )
     test.is( _.strHas( op.output, `"a b c"` ) );
     test.identical( op.execPath, 'node' );
     test.identical( op.args, [ '-e', '"console.log( process.argv.slice( 1 ) )"', '"a b c"' ] );
-    test.identical( op.args2, [ '-e', '"console.log( process.argv.slice( 1 ) )"', '"a b c"' ] );
+    test.identical( op.args2, [ '-e', '"console.log( process.argv.slice( 1 ) )"', '"\\"a b c\\""' ] );
     test.identical( op.fullExecPath, 'node -e "console.log( process.argv.slice( 1 ) )" "\\"a b c\\""' );
     return null;
   })
