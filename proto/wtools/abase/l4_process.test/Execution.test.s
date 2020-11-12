@@ -10793,100 +10793,131 @@ function startDetachingModeShellNoTerminationBegin( test )
 
 //
 
-/* qqq for Yevhen : implement for other modes */
+/* qqq for Yevhen : implement for other modes | aaa : Done. */
 function startDetachedOutputStdioIgnore( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
   let testAppParentPath = a.program( testAppParent );
   let testAppChildPath = a.program( testAppChild );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
 
   /* */
 
-  a.ready
-
-  .then( () =>
+  function run( mode )
   {
-    test.case = 'mode : spawn, stdio : ignore, no output from detached child';
+    let ready = _.Consequence().take( null );
 
-    let o =
+    ready.then( () =>
     {
-      execPath : 'node testAppParent.js mode : spawn stdio : ignore',
-      mode : 'spawn',
-      outputCollecting : 1,
-      currentPath : a.routinePath,
-    }
-    let con = _.process.start( o );
+      test.case = `mode : ${mode}, stdio : ignore, no output from detached child`;
 
-    con.then( () =>
-    {
-      test.identical( o.exitCode, 0 )
-      test.is( !_.strHas( o.output, 'Child process start' ) )
-      test.is( !_.strHas( o.output, 'Child process end' ) )
-      return null;
+      let o =
+      {
+        execPath : `node testAppParent.js mode : ${mode} stdio : ignore`,
+        mode : 'spawn',
+        outputCollecting : 1,
+        currentPath : a.routinePath,
+      }
+      let con = _.process.start( o );
+
+      con.then( () =>
+      {
+        test.identical( o.exitCode, 0 )
+        test.is( !_.strHas( o.output, 'Child process start' ) )
+        test.is( !_.strHas( o.output, 'Child process end' ) )
+        return null;
+      })
+
+      return con;
     })
 
-    return con;
-  })
+    return ready;
 
-  /*  */
+  }
 
-  .then( () =>
-  {
-    test.case = 'mode : fork, stdio : ignore, no output from detached child';
+  /* ORIGINAL */
+  // a.ready
 
-    let o =
-    {
-      execPath : 'node testAppParent.js mode : fork stdio : ignore',
-      mode : 'spawn',
-      outputCollecting : 1,
-      currentPath : a.routinePath,
-    }
-    let con = _.process.start( o );
+  // .then( () =>
+  // {
+  //   test.case = 'mode : spawn, stdio : ignore, no output from detached child';
 
-    con.then( () =>
-    {
-      test.identical( o.exitCode, 0 )
-      test.is( !_.strHas( o.output, 'Child process start' ) )
-      test.is( !_.strHas( o.output, 'Child process end' ) )
-      return null;
-    })
+  //   let o =
+  //   {
+  //     execPath : 'node testAppParent.js mode : spawn stdio : ignore',
+  //     mode : 'spawn',
+  //     outputCollecting : 1,
+  //     currentPath : a.routinePath,
+  //   }
+  //   let con = _.process.start( o );
 
-    return con;
-  })
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, 0 )
+  //     test.is( !_.strHas( o.output, 'Child process start' ) )
+  //     test.is( !_.strHas( o.output, 'Child process end' ) )
+  //     return null;
+  //   })
 
-  /*  */
+  //   return con;
+  // })
 
-  .then( () =>
-  {
-    test.case = 'mode : shell, stdio : ignore, no output from detached child';
+  // /*  */
 
-    let o =
-    {
-      execPath : 'node testAppParent.js mode : shell stdio : ignore',
-      mode : 'spawn',
-      outputCollecting : 1,
-      currentPath : a.routinePath,
-    }
-    let con = _.process.start( o );
+  // .then( () =>
+  // {
+  //   test.case = 'mode : fork, stdio : ignore, no output from detached child';
 
-    con.then( () =>
-    {
-      test.identical( o.exitCode, 0 )
-      test.is( !_.strHas( o.output, 'Child process start' ) )
-      test.is( !_.strHas( o.output, 'Child process end' ) )
-      return null;
-    })
+  //   let o =
+  //   {
+  //     execPath : 'node testAppParent.js mode : fork stdio : ignore',
+  //     mode : 'spawn',
+  //     outputCollecting : 1,
+  //     currentPath : a.routinePath,
+  //   }
+  //   let con = _.process.start( o );
 
-    return con;
-  })
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, 0 )
+  //     test.is( !_.strHas( o.output, 'Child process start' ) )
+  //     test.is( !_.strHas( o.output, 'Child process end' ) )
+  //     return null;
+  //   })
 
-  /*  */
+  //   return con;
+  // })
 
-  return a.ready;
+  // /*  */
+
+  // .then( () =>
+  // {
+  //   test.case = 'mode : shell, stdio : ignore, no output from detached child';
+
+  //   let o =
+  //   {
+  //     execPath : 'node testAppParent.js mode : shell stdio : ignore',
+  //     mode : 'spawn',
+  //     outputCollecting : 1,
+  //     currentPath : a.routinePath,
+  //   }
+  //   let con = _.process.start( o );
+
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, 0 )
+  //     test.is( !_.strHas( o.output, 'Child process start' ) )
+  //     test.is( !_.strHas( o.output, 'Child process end' ) )
+  //     return null;
+  //   })
+
+  //   return con;
+  // })
 
   /* - */
-
 
   function testAppParent()
   {
@@ -10928,6 +10959,8 @@ function startDetachedOutputStdioIgnore( test )
   }
 
 }
+
+startDetachedOutputStdioIgnore.timeOut = 23e4; /* Locally : 22.959s */
 
 //
 
