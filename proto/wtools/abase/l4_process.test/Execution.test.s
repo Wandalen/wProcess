@@ -17514,13 +17514,13 @@ function startNjsOptionInterpreterArgs( test )
           test.identical( op.args, [ programPath, 'arg1', 'arg2' ] );
           let exp =
           [
-            '--version', 
-            '--v8-options', 
-            '--expose-gc', 
-            '--stack-trace-limit=999', 
-            `--max_old_space_size=${totalMem}`, 
-            programPath, 
-            '"arg1"', 
+            '--version',
+            '--v8-options',
+            '--expose-gc',
+            '--stack-trace-limit=999',
+            `--max_old_space_size=${totalMem}`,
+            programPath,
+            '"arg1"',
             '"arg2"'
           ]
           test.identical( op.args2, exp );
@@ -17530,13 +17530,13 @@ function startNjsOptionInterpreterArgs( test )
           test.identical( op.args, [ programPath, 'arg1', 'arg2' ] );
           let exp =
           [
-            '--version', 
-            '--v8-options', 
-            '--expose-gc', 
-            '--stack-trace-limit=999', 
-            `--max_old_space_size=${totalMem}`, 
+            '--version',
+            '--v8-options',
+            '--expose-gc',
+            '--stack-trace-limit=999',
+            `--max_old_space_size=${totalMem}`,
             programPath,
-            'arg1', 
+            'arg1',
             'arg2'
           ]
           test.identical( op.args2, exp );
@@ -17582,13 +17582,13 @@ function startNjsOptionInterpreterArgs( test )
           test.identical( op.args, [ programPath, 'arg1', 'arg2' ] );
           let exp =
           [
-            '--version', 
-            '--v8-options', 
-            '--expose-gc', 
-            '--stack-trace-limit=999', 
-            `--max_old_space_size=${totalMem}`, 
-            _.strQuote( programPath ), 
-            '"arg1"', 
+            '--version',
+            '--v8-options',
+            '--expose-gc',
+            '--stack-trace-limit=999',
+            `--max_old_space_size=${totalMem}`,
+            _.strQuote( programPath ),
+            '"arg1"',
             '"arg2"'
           ]
           test.identical( op.args2, exp );
@@ -17598,13 +17598,13 @@ function startNjsOptionInterpreterArgs( test )
           test.identical( op.args, [ programPath, 'arg1', 'arg2' ] );
           let exp =
           [
-            '--version', 
-            '--v8-options', 
-            '--expose-gc', 
-            '--stack-trace-limit=999', 
-            `--max_old_space_size=${totalMem}`, 
+            '--version',
+            '--v8-options',
+            '--expose-gc',
+            '--stack-trace-limit=999',
+            `--max_old_space_size=${totalMem}`,
             programPath,
-            'arg1', 
+            'arg1',
             'arg2'
           ]
           test.identical( op.args2, exp );
@@ -31136,14 +31136,14 @@ function terminateFirstChild( test )
         outputCollecting : 1,
         throwingExitCode : 0
       }
-    
+
       _.process.start( o );
-    
+
       let program2Pid = null;
       let terminate = _.Consequence();
-    
+
       o.process.stdout.on( 'data', _.routineJoin( null, handleOutput, [ o, terminate ] ) );
-    
+
       terminate.then( () =>
       {
         program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
@@ -31159,7 +31159,7 @@ function terminateFirstChild( test )
           withChildren : 0,
         })
       })
-    
+
       o.conTerminate.then( () =>
       {
         if( process.platform === 'win32' )
@@ -31172,7 +31172,7 @@ function terminateFirstChild( test )
           test.identical( o.exitCode, null );
           test.identical( o.exitSignal, 'SIGTERM' );
         }
-    
+
         test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
         test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
 
@@ -31216,13 +31216,13 @@ function terminateFirstChild( test )
           test.is( !_.process.isAlive( program2Pid ) );
           else
           test.is( _.process.isAlive( program2Pid ) );
-      
+
           return _.time.out( context.t1*15 );
         }
-    
-        
+
+
       })
-    
+
       if( mode !== 'shell' )
       {
         o.conTerminate.then( () =>
@@ -31236,7 +31236,7 @@ function terminateFirstChild( test )
           test.identical( _.strCount( o.output, 'exit' ), 0 );
           return null;
         })
-      
+
       }
       return _.Consequence.AndKeep( terminate, o.conTerminate );
     })
@@ -31854,14 +31854,14 @@ function terminateSecondChild( test )
         outputCollecting : 1,
         throwingExitCode : 0
       }
-    
+
       _.process.start( o );
-    
+
       let program2Pid = null;
       let terminate = _.Consequence();
-    
+
       o.process.stdout.on( 'data', _.routineJoin( null, handleOutput, [ o, terminate ] ) );
-    
+
       terminate.then( () =>
       {
         program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
@@ -31873,14 +31873,14 @@ function terminateSecondChild( test )
           withChildren : 0
         })
       })
-    
+
       o.conTerminate.then( () =>
       {
         test.identical( o.exitCode, 0 );
         test.identical( o.exitSignal, null );
-    
+
         let program2Op = _.fileProvider.fileRead({ filePath : a.abs( 'program2' ), encoding : 'json' });
-        
+
         if( mode === 'shell' )
         {
           /* on windows and linux in mode::shell intermediate process could be created */
@@ -31916,20 +31916,20 @@ function terminateSecondChild( test )
             test.identical( program2Op.exitSignal, 'SIGTERM' );
           }
         }
-    
+
         test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
         test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
         test.identical( _.strCount( o.output, 'program2::end' ), 0 );
-    
+
         return null;
       })
-    
+
       return _.Consequence.AndKeep( terminate, o.conTerminate );
     })
 
     return ready;
   }
-  
+
   /* - */
 
   function handleOutput( o, terminate, output )
@@ -32517,9 +32517,9 @@ function terminateDetachedFirstChild( test )
         outputCollecting : 1,
         throwingExitCode : 0
       }
-    
+
       _.process.start( o );
-    
+
       let program2Pid = null;
       let terminate = _.Consequence();
       /* For mode::shell */
@@ -32535,7 +32535,7 @@ function terminateDetachedFirstChild( test )
       {
         o.process.stdout.on( 'data', _.routineJoin( null, handleOutput, [ o, terminate ] ) );
       }
-    
+
       terminate.then( () =>
       {
         program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
@@ -32547,7 +32547,7 @@ function terminateDetachedFirstChild( test )
           withChildren : 0
         })
       })
-    
+
       o.conTerminate.then( () =>
       {
         if( mode === 'shell' )
@@ -32566,7 +32566,7 @@ function terminateDetachedFirstChild( test )
           test.identical( o.exitCode, null );
           test.identical( o.exitSignal, 'SIGTERM' );
         }
-    
+
         test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
         if( mode === 'shell' )
         test.ge( _.strCount( o.output, 'program2::begin' ), 0 );
@@ -32574,17 +32574,17 @@ function terminateDetachedFirstChild( test )
         test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
         test.identical( _.strCount( o.output, 'program2::end' ), 0 );
         test.is( _.process.isAlive( program2Pid ) );
-    
+
         return _.process.waitForDeath({ pid : program2Pid, timeOut : context.t1*15 });
       })
-    
+
       o.conTerminate.then( () =>
       {
         test.is( !_.process.isAlive( program2Pid ) );
         test.is( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
         return null;
       })
-    
+
       return _.Consequence.AndKeep( terminate, o.conTerminate );
     })
 
@@ -33200,9 +33200,9 @@ function terminateWithDetachedChild( test )
         outputCollecting : 1,
         throwingExitCode : 0
       }
-    
+
       _.process.start( o );
-    
+
       let program2Pid = null;
       let terminate = _.Consequence();
       /* For mode::shell */
@@ -33218,7 +33218,7 @@ function terminateWithDetachedChild( test )
       {
         o.process.stdout.on( 'data', _.routineJoin( null, handleOutput, [ o, terminate ] ) );
       }
-    
+
       terminate.then( () =>
       {
         program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
@@ -33230,7 +33230,7 @@ function terminateWithDetachedChild( test )
           withChildren : 1
         })
       })
-    
+
       o.conTerminate.then( () =>
       {
         if( mode === 'shell' )
@@ -33270,7 +33270,7 @@ function terminateWithDetachedChild( test )
             test.identical( o.exitSignal, 'SIGTERM' );
           }
         }
-    
+
         test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
         if( mode === 'shell' )
         test.ge( _.strCount( o.output, 'program2::begin' ), 0 );
@@ -33281,10 +33281,10 @@ function terminateWithDetachedChild( test )
         test.identical( _.strCount( o.output, 'Error' ), 0 );
         test.is( !_.process.isAlive( program2Pid ) );
         test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
-    
+
         return null;
       })
-    
+
       return _.Consequence.AndKeep( terminate, o.conTerminate );
     })
 
