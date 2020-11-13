@@ -27494,7 +27494,7 @@ function startTerminateHangedWithExitHandler( test )
 
   function run( mode )
   {
-    test.case = `mode : ${mode}, stdio : ignore`;
+    test.case = `mode : ${mode}`;
     let ready = _.Consequence().take( null );
 
     /* mode::shell doesn't support ipc */
