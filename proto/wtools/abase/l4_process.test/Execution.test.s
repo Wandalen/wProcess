@@ -27612,10 +27612,6 @@ function startTerminateHangedWithExitHandler( test )
   //   return con;
   // })
 
-  // /*  */
-
-  // return a.ready;
-
   /* - */
 
   function testApp()
