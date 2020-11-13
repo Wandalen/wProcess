@@ -26780,264 +26780,351 @@ function kill( test )
 
 //
 
-/* qqq for Yevhen : subroutine for modes */
+/* qqq for Yevhen : subroutine for modes | aaa : Done. */
 function killSync( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
   let testAppPath = a.program( testApp );
-
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
   /*
     zzz : hangs up on Windows with interval below 150 if run in sync mode
   */
 
-  /* */
-
-  a.ready
-
-  .then( () =>
+  function run( mode )
   {
-    test.case = `mode:spawn, kill child process using process descriptor`
-    var o =
+    let ready = new _.Consequence().take( null );
+
+    ready
+    .then( () =>
     {
-      execPath :  'node ' + testAppPath,
-      mode : 'spawn',
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready1 = _.process.start( o );
-
-    ready1.then( ( op ) =>
-    {
-      test.identical( op.exitCode, null );
-      test.identical( op.exitSignal, 'SIGKILL' );
-      test.identical( op.ended, true );
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      return null;
-    })
-
-    let ready2 = _.time.out( context.t1*2, () =>
-    {
-      let result = _.process.kill({ pnd : o.process, sync : 1 });
-      test.is( !_.process.isAlive( o.process.pid ) );
-      test.identical( result, true );
-      return result;
-    });
-
-    return _.Consequence.And( ready1, ready2 );
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    test.case = `mode:spawn, kill child process using process id`
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'spawn',
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready1 = _.process.start( o )
-
-    ready1.then( ( op ) =>
-    {
-      if( process.platform === 'win32' )
+      test.case = `mode : ${mode}, kill child process using process descriptor`
+      var o =
       {
-        test.identical( op.exitCode, 1 );
-        test.identical( op.exitSignal, null );
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+        outputCollecting : 1,
+        throwingExitCode : 0
       }
-      else
+
+      let ready1 = _.process.start( o );
+
+      ready1.then( ( op ) =>
       {
+        /* Same result on Windows because process was killed using pnd, not pid */
         test.identical( op.exitCode, null );
         test.identical( op.exitSignal, 'SIGKILL' );
+        test.identical( op.ended, true );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+        return null;
+      })
+
+      let ready2 = _.time.out( context.t1*2, () =>
+      {
+        let result = _.process.kill({ pnd : o.process, sync : 1 });
+        test.is( !_.process.isAlive( o.process.pid ) );
+        test.identical( result, true );
+        return result;
+      });
+
+      return _.Consequence.And( ready1, ready2 );
+    })
+
+    /* */
+
+    .then( () =>
+    {
+      test.case = `mode : ${mode}, kill child process using process id`
+      var o =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+        outputCollecting : 1,
+        throwingExitCode : 0
       }
 
-      test.identical( op.ended, true );
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      return null;
+      let ready1 = _.process.start( o )
+
+      ready1.then( ( op ) =>
+      {
+        if( process.platform === 'win32' )
+        {
+          test.identical( op.exitCode, 1 );
+          test.identical( op.exitSignal, null );
+        }
+        else
+        {
+          test.identical( op.exitCode, null );
+          test.identical( op.exitSignal, 'SIGKILL' );
+        }
+
+        test.identical( op.ended, true );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+        return null;
+      })
+
+      let ready2 = _.time.out( context.t1*2, () =>
+      {
+        let result = _.process.kill({ pid : o.process.pid, sync : 1 });
+        test.is( !_.process.isAlive( o.process.pid ) );
+        test.identical( result, true );
+        return result;
+      })
+
+      return _.Consequence.And( ready1, ready2 );
     })
 
-    let ready2 = _.time.out( context.t1*2, () =>
-    {
-      let result = _.process.kill({ pid : o.process.pid, sync : 1 });
-      test.is( !_.process.isAlive( o.process.pid ) );
-      test.identical( result, true );
-      return result;
-    })
+    return ready;
+  }
 
-    return _.Consequence.And( ready1, ready2 );
-  })
+  /* ORIGINAL */
+  // a.ready
 
-  /* fork */
+  // .then( () =>
+  // {
+  //   test.case = `mode:spawn, kill child process using process descriptor`
+  //   var o =
+  //   {
+  //     execPath :  'node ' + testAppPath,
+  //     mode : 'spawn',
+  //     outputCollecting : 1,
+  //     throwingExitCode : 0
+  //   }
 
-  .then( () =>
-  {
-    test.case = `mode:fork, kill child process using process descriptor`
-    var o =
-    {
-      execPath : testAppPath,
-      mode : 'fork',
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
+  //   let ready1 = _.process.start( o );
 
-    let ready1 = _.process.start( o )
+  //   ready1.then( ( op ) =>
+  //   {
+  //     test.identical( op.exitCode, null );
+  //     test.identical( op.exitSignal, 'SIGKILL' );
+  //     test.identical( op.ended, true );
+  //     test.is( !_.strHas( op.output, 'Application timeout!' ) );
+  //     return null;
+  //   })
 
-    ready1.then( ( op ) =>
-    {
-      test.identical( op.exitCode, null );
-      test.identical( op.exitSignal, 'SIGKILL' );
-      test.identical( op.ended, true );
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      return null;
-    })
+  //   let ready2 = _.time.out( context.t1*2, () =>
+  //   {
+  //     let result = _.process.kill({ pnd : o.process, sync : 1 });
+  //     test.is( !_.process.isAlive( o.process.pid ) );
+  //     test.identical( result, true );
+  //     return result;
+  //   });
 
-    let ready2 = _.time.out( context.t1*2, () =>
-    {
-      let result = _.process.kill({ pnd : o.process, sync : 1 });
-      test.is( !_.process.isAlive( o.process.pid ) );
-      test.identical( result, true );
-      return result;
-    })
+  //   return _.Consequence.And( ready1, ready2 );
+  // })
 
-    return _.Consequence.And( ready1, ready2 );
-  })
+  // /* */
+
+  // .then( () =>
+  // {
+  //   test.case = `mode:spawn, kill child process using process id`
+  //   var o =
+  //   {
+  //     execPath :  'node ' + testAppPath,
+  //     mode : 'spawn',
+  //     outputCollecting : 1,
+  //     throwingExitCode : 0
+  //   }
+
+  //   let ready1 = _.process.start( o )
+
+  //   ready1.then( ( op ) =>
+  //   {
+  //     if( process.platform === 'win32' )
+  //     {
+  //       test.identical( op.exitCode, 1 );
+  //       test.identical( op.exitSignal, null );
+  //     }
+  //     else
+  //     {
+  //       test.identical( op.exitCode, null );
+  //       test.identical( op.exitSignal, 'SIGKILL' );
+  //     }
+
+  //     test.identical( op.ended, true );
+  //     test.is( !_.strHas( op.output, 'Application timeout!' ) );
+  //     return null;
+  //   })
+
+  //   let ready2 = _.time.out( context.t1*2, () =>
+  //   {
+  //     let result = _.process.kill({ pid : o.process.pid, sync : 1 });
+  //     test.is( !_.process.isAlive( o.process.pid ) );
+  //     test.identical( result, true );
+  //     return result;
+  //   })
+
+  //   return _.Consequence.And( ready1, ready2 );
+  // })
+
+  // /* fork */
+
+  // .then( () =>
+  // {
+  //   test.case = `mode:fork, kill child process using process descriptor`
+  //   var o =
+  //   {
+  //     execPath : testAppPath,
+  //     mode : 'fork',
+  //     outputCollecting : 1,
+  //     throwingExitCode : 0
+  //   }
+
+  //   let ready1 = _.process.start( o )
+
+  //   ready1.then( ( op ) =>
+  //   {
+  //     test.identical( op.exitCode, null );
+  //     test.identical( op.exitSignal, 'SIGKILL' );
+  //     test.identical( op.ended, true );
+  //     test.is( !_.strHas( op.output, 'Application timeout!' ) );
+  //     return null;
+  //   })
+
+  //   let ready2 = _.time.out( context.t1*2, () =>
+  //   {
+  //     let result = _.process.kill({ pnd : o.process, sync : 1 });
+  //     test.is( !_.process.isAlive( o.process.pid ) );
+  //     test.identical( result, true );
+  //     return result;
+  //   })
+
+  //   return _.Consequence.And( ready1, ready2 );
+  // })
+
+  // /* */
+
+  // .then( () =>
+  // {
+  //   test.case = `mode:fork, kill child process using process id`
+
+  //   var o =
+  //   {
+  //     execPath : testAppPath,
+  //     mode : 'fork',
+  //     outputCollecting : 1,
+  //     throwingExitCode : 0
+  //   }
+
+  //   let ready1 = _.process.start( o )
+
+  //   ready1.then( ( op ) =>
+  //   {
+  //     if( process.platform === 'win32' )
+  //     {
+  //       test.identical( op.exitCode, 1 );
+  //       test.identical( op.exitSignal, null );
+  //     }
+  //     else
+  //     {
+  //       test.identical( op.exitCode, null );
+  //       test.identical( op.exitSignal, 'SIGKILL' );
+  //     }
+
+  //     test.identical( op.ended, true );
+  //     test.is( !_.strHas( op.output, 'Application timeout!' ) );
+  //     return null;
+  //   })
+
+  //   let ready2 = _.time.out( context.t1*2, () =>
+  //   {
+  //     let result = _.process.kill({ pid : o.process.pid, sync : 1 });
+  //     test.is( !_.process.isAlive( o.process.pid ) );
+  //     test.identical( result, true );
+  //     return result;
+  //   })
+
+  //   return _.Consequence.And( ready1, ready2 );
+  // })
+
+  // /* shell */
+
+  // .then( () =>
+  // {
+  //   test.case = `mode:shell, kill child process using process descriptor`
+
+  //   var o =
+  //   {
+  //     execPath :  'node ' + testAppPath,
+  //     mode : 'shell',
+  //     outputCollecting : 1,
+  //     throwingExitCode : 0
+  //   }
+
+  //   let ready1 = _.process.start( o )
+
+  //   ready1.then( ( op ) =>
+  //   {
+  //     /* Same result on Windows because process was killed using pnd, not pid */
+  //     test.identical( op.exitCode, null );
+  //     test.identical( op.exitSignal, 'SIGKILL' );
+  //     test.identical( op.ended, true );
+  //     test.is( !_.strHas( op.output, 'Application timeout!' ) );
+  //     return null;
+  //   })
+
+  //   let ready2 = _.time.out( context.t1*2, () =>
+  //   {
+  //     let result = _.process.kill({ pnd : o.process, sync : 1 });
+  //     test.is( !_.process.isAlive( o.process.pid ) );
+  //     test.identical( result, true );
+  //     return result;
+  //   })
+
+  //   return _.Consequence.And( ready1, ready2 );
+  // })
+
+  // /* */
+
+  // .then( () =>
+  // {
+  //   test.case = `mode:shell, kill child process using process id`
+
+  //   var o =
+  //   {
+  //     execPath :  'node ' + testAppPath,
+  //     mode : 'shell',
+  //     outputCollecting : 1,
+  //     throwingExitCode : 0
+  //   }
+
+  //   let ready1 = _.process.start( o )
+
+  //   ready1.then( ( op ) =>
+  //   {
+  //     if( process.platform === 'win32' )
+  //     {
+  //       test.identical( op.exitCode, 1 );
+  //       test.identical( op.exitSignal, null );
+  //     }
+  //     else
+  //     {
+  //       test.identical( op.exitCode, null );
+  //       test.identical( op.exitSignal, 'SIGKILL' );
+  //     }
+
+  //     test.identical( op.ended, true );
+  //     test.is( !_.strHas( op.output, 'Application timeout!' ) );
+
+  //     return null;
+  //   })
+
+  //   let ready2 = _.time.out( context.t1*2, () =>
+  //   {
+  //     let result = _.process.kill({ pid : o.process.pid, sync : 1 });
+  //     test.is( !_.process.isAlive( o.process.pid ) );
+  //     test.identical( result, true );
+  //     return result;
+  //   })
+
+  //   return _.Consequence.And( ready1, ready2 );
+  // })
 
   /* */
 
-  .then( () =>
-  {
-    test.case = `mode:fork, kill child process using process id`
-
-    var o =
-    {
-      execPath : testAppPath,
-      mode : 'fork',
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready1 = _.process.start( o )
-
-    ready1.then( ( op ) =>
-    {
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, 1 );
-        test.identical( op.exitSignal, null );
-      }
-      else
-      {
-        test.identical( op.exitCode, null );
-        test.identical( op.exitSignal, 'SIGKILL' );
-      }
-
-      test.identical( op.ended, true );
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      return null;
-    })
-
-    let ready2 = _.time.out( context.t1*2, () =>
-    {
-      let result = _.process.kill({ pid : o.process.pid, sync : 1 });
-      test.is( !_.process.isAlive( o.process.pid ) );
-      test.identical( result, true );
-      return result;
-    })
-
-    return _.Consequence.And( ready1, ready2 );
-  })
-
-  /* shell */
-
-  .then( () =>
-  {
-    test.case = `mode:shell, kill child process using process descriptor`
-
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'shell',
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready1 = _.process.start( o )
-
-    ready1.then( ( op ) =>
-    {
-      /* Same result on Windows because process was killed using pnd, not pid */
-      test.identical( op.exitCode, null );
-      test.identical( op.exitSignal, 'SIGKILL' );
-      test.identical( op.ended, true );
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      return null;
-    })
-
-    let ready2 = _.time.out( context.t1*2, () =>
-    {
-      let result = _.process.kill({ pnd : o.process, sync : 1 });
-      test.is( !_.process.isAlive( o.process.pid ) );
-      test.identical( result, true );
-      return result;
-    })
-
-    return _.Consequence.And( ready1, ready2 );
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    test.case = `mode:shell, kill child process using process id`
-
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'shell',
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready1 = _.process.start( o )
-
-    ready1.then( ( op ) =>
-    {
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, 1 );
-        test.identical( op.exitSignal, null );
-      }
-      else
-      {
-        test.identical( op.exitCode, null );
-        test.identical( op.exitSignal, 'SIGKILL' );
-      }
-
-      test.identical( op.ended, true );
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
-
-      return null;
-    })
-
-    let ready2 = _.time.out( context.t1*2, () =>
-    {
-      let result = _.process.kill({ pid : o.process.pid, sync : 1 });
-      test.is( !_.process.isAlive( o.process.pid ) );
-      test.identical( result, true );
-      return result;
-    })
-
-    return _.Consequence.And( ready1, ready2 );
-  })
-
-  /* */
-
-  return a.ready;
+  // return a.ready;
 
   /* - */
 
