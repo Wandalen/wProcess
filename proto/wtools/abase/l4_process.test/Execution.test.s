@@ -11618,110 +11618,122 @@ function startDetachedOutputStdioInherit( test )
 
 //
 
-/* qqq for Yevhen : implement for other modes */
-function startDetachingModeSpawnIpc( test )
+/* qqq for Yevhen : implement for other modes | aaa : Done. */
+function startDetachingIpc( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let track = [];
   let testAppChildPath = a.program( testAppChild );
-
-  /* */
-
-  a.ready
-
-  .then( () =>
-  {
-    test.case = 'mode : spawn, stdio : ignore';
-
-    let o =
-    {
-      execPath : 'node testAppChild.js',
-      mode : 'spawn',
-      outputPiping : 0,
-      outputCollecting : 0,
-      stdio : 'ignore',
-      currentPath : a.routinePath,
-      detaching : 1,
-      ipc : 1,
-    }
-    _.process.start( o );
-
-    let message;
-
-    o.process.on( 'message', ( e ) =>
-    {
-      message = e;
-    })
-
-    o.conStart.thenGive( () =>
-    {
-      track.push( 'conStart' );
-      o.process.send( 'child' );
-    })
-
-    o.conTerminate.then( ( op ) =>
-    {
-      track.push( 'conTerminate' );
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      test.identical( message, 'child' );
-      test.identical( track, [ 'conStart', 'conTerminate' ] );
-      track = [];
-      return null;
-    })
-
-    return o.conTerminate;
-  })
-
-  /*  */
-
-  .then( () =>
-  {
-    test.case = 'mode : spawn, stdio : pipe';
-
-    let o =
-    {
-      execPath : 'node testAppChild.js',
-      mode : 'spawn',
-      outputCollecting : 1,
-      stdio : 'pipe',
-      currentPath : a.routinePath,
-      detaching : 1,
-      ipc : 1,
-    }
-    _.process.start( o );
-
-    let message;
-
-    o.process.on( 'message', ( e ) =>
-    {
-      message = e;
-    })
-
-    o.conStart.thenGive( () =>
-    {
-      track.push( 'conStart' );
-      o.process.send( 'child' );
-    })
-
-    o.conTerminate.then( ( op ) =>
-    {
-      track.push( 'conTerminate' );
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      test.identical( message, 'child' );
-      test.identical( track, [ 'conStart', 'conTerminate' ] );
-      track = [];
-      return null;
-    })
-
-    return o.conTerminate;
-  })
-
-  /*  */
-
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
+
+  function run( mode )
+  {
+    let ready = _.Consequence().take( null );
+    let track = [];
+
+    ready
+    .then( () =>
+    {
+      test.case = `mode : ${mode}, stdio : ignore`;
+
+      let o =
+      {
+        execPath : mode === 'fork' ? 'testAppChild.js' : 'node testAppChild.js',
+        mode,
+        outputPiping : 0,
+        outputCollecting : 0,
+        stdio : 'ignore',
+        currentPath : a.routinePath,
+        detaching : 1,
+        ipc : 1,
+      }
+
+      if( mode === 'shell' )
+      return test.shouldThrowErrorSync( () => _.process.start( o ) );
+
+      _.process.start( o );
+
+      let message;
+
+      o.process.on( 'message', ( e ) =>
+      {
+        message = e;
+      })
+
+      o.conStart.thenGive( () =>
+      {
+        track.push( 'conStart' );
+        o.process.send( 'child' );
+      })
+
+      o.conTerminate.then( ( op ) =>
+      {
+        track.push( 'conTerminate' );
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( message, 'child' );
+        test.identical( track, [ 'conStart', 'conTerminate' ] );
+        track = [];
+        return null;
+      })
+
+      return o.conTerminate;
+    })
+
+    /*  */
+
+    .then( () =>
+    {
+      test.case = `mode : ${mode}, stdio : pipe`;
+
+      let o =
+      {
+        execPath : mode === 'fork' ? 'testAppChild.js' : 'node testAppChild.js',
+        mode,
+        outputCollecting : 1,
+        stdio : 'pipe',
+        currentPath : a.routinePath,
+        detaching : 1,
+        ipc : 1,
+      }
+
+      if( mode === 'shell' )
+      return test.shouldThrowErrorSync( () => _.process.start( o ) );
+
+      _.process.start( o );
+
+      let message;
+
+      o.process.on( 'message', ( e ) =>
+      {
+        message = e;
+      })
+
+      o.conStart.thenGive( () =>
+      {
+        track.push( 'conStart' );
+        o.process.send( 'child' );
+      })
+
+      o.conTerminate.then( ( op ) =>
+      {
+        track.push( 'conTerminate' );
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( message, 'child' );
+        test.identical( track, [ 'conStart', 'conTerminate' ] );
+        track = [];
+        return null;
+      })
+
+      return o.conTerminate;
+    })
+
+    return ready;
+
+  }
 
   /* - */
 
@@ -11743,201 +11755,325 @@ function startDetachingModeSpawnIpc( test )
 //
 
 /* qqq for Yevhen : implement for other modes */
-function startDetachingModeForkIpc( test )
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-  let track = [];
-  let testAppChildPath = a.program( testAppChild );
+// function startDetachingModeSpawnIpc( test )
+// {
+//   let context = this;
+//   let a = context.assetFor( test, false );
+//   let track = [];
+//   let testAppChildPath = a.program( testAppChild );
 
-  /* */
+//   /* */
 
-  a.ready
+//   a.ready
 
-  .then( () =>
-  {
-    test.case = 'mode : fork, stdio : ignore';
+//   .then( () =>
+//   {
+//     test.case = 'mode : spawn, stdio : ignore';
 
-    let o =
-    {
-      execPath : 'testAppChild.js',
-      mode : 'fork',
-      outputPiping : 0,
-      outputCollecting : 0,
-      stdio : 'ignore',
-      currentPath : a.routinePath,
-      detaching : 1,
-      ipc : 1,
-    }
-    _.process.start( o );
+//     let o =
+//     {
+//       execPath : 'node testAppChild.js',
+//       mode : 'spawn',
+//       outputPiping : 0,
+//       outputCollecting : 0,
+//       stdio : 'ignore',
+//       currentPath : a.routinePath,
+//       detaching : 1,
+//       ipc : 1,
+//     }
+//     _.process.start( o );
 
-    let message;
+//     let message;
 
-    o.process.on( 'message', ( e ) =>
-    {
-      message = e;
-    })
+//     o.process.on( 'message', ( e ) =>
+//     {
+//       message = e;
+//     })
 
-    o.conStart.thenGive( () =>
-    {
-      track.push( 'conStart' );
-      o.process.send( 'child' );
-    })
+//     o.conStart.thenGive( () =>
+//     {
+//       track.push( 'conStart' );
+//       o.process.send( 'child' );
+//     })
 
-    o.conTerminate.then( ( op ) =>
-    {
-      track.push( 'conTerminate' );
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      test.identical( message, 'child' );
-      test.identical( track, [ 'conStart', 'conTerminate' ] );
-      track = [];
-      return null;
-    })
+//     o.conTerminate.then( ( op ) =>
+//     {
+//       track.push( 'conTerminate' );
+//       test.identical( op.exitCode, 0 );
+//       test.identical( op.ended, true );
+//       test.identical( message, 'child' );
+//       test.identical( track, [ 'conStart', 'conTerminate' ] );
+//       track = [];
+//       return null;
+//     })
 
-    return o.conTerminate;
-  })
+//     return o.conTerminate;
+//   })
 
-  /*  */
+//   /*  */
 
-  .then( () =>
-  {
-    test.case = 'mode : fork, stdio : pipe';
+//   .then( () =>
+//   {
+//     test.case = 'mode : spawn, stdio : pipe';
 
-    let o =
-    {
-      execPath : 'testAppChild.js',
-      mode : 'fork',
-      outputCollecting : 1,
-      stdio : 'pipe',
-      currentPath : a.routinePath,
-      detaching : 1,
-      ipc : 1,
-    }
-    _.process.start( o );
+//     let o =
+//     {
+//       execPath : 'node testAppChild.js',
+//       mode : 'spawn',
+//       outputCollecting : 1,
+//       stdio : 'pipe',
+//       currentPath : a.routinePath,
+//       detaching : 1,
+//       ipc : 1,
+//     }
+//     _.process.start( o );
 
-    let message;
+//     let message;
 
-    o.process.on( 'message', ( e ) =>
-    {
-      message = e;
-    })
+//     o.process.on( 'message', ( e ) =>
+//     {
+//       message = e;
+//     })
 
-    o.conStart.thenGive( () =>
-    {
-      track.push( 'conStart' );
-      o.process.send( 'child' );
-    })
+//     o.conStart.thenGive( () =>
+//     {
+//       track.push( 'conStart' );
+//       o.process.send( 'child' );
+//     })
 
-    o.conTerminate.then( ( op ) =>
-    {
-      track.push( 'conTerminate' );
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      test.identical( message, 'child' );
-      test.identical( track, [ 'conStart', 'conTerminate' ] );
-      track = [];
-      return null;
-    })
+//     o.conTerminate.then( ( op ) =>
+//     {
+//       track.push( 'conTerminate' );
+//       test.identical( op.exitCode, 0 );
+//       test.identical( op.ended, true );
+//       test.identical( message, 'child' );
+//       test.identical( track, [ 'conStart', 'conTerminate' ] );
+//       track = [];
+//       return null;
+//     })
 
-    return o.conTerminate;
-  })
+//     return o.conTerminate;
+//   })
 
-  /*  */
+//   /*  */
 
-  return a.ready;
+//   return a.ready;
 
-  /* - */
+//   /* - */
 
-  function testAppChild()
-  {
-    let _ = require( toolsPath );
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
+//   function testAppChild()
+//   {
+//     let _ = require( toolsPath );
+//     _.include( 'wProcess' );
+//     _.include( 'wFiles' );
 
-    process.on( 'message', ( data ) =>
-    {
-      process.send( data );
-      process.exit();
-    })
+//     process.on( 'message', ( data ) =>
+//     {
+//       process.send( data );
+//       process.exit();
+//     })
 
-  }
-}
+//   }
+// }
 
 //
 
 /* qqq for Yevhen : implement for other modes */
-function startDetachingModeShellIpc( test )
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-  let testAppChildPath = a.program( testAppChild );
+// function startDetachingModeForkIpc( test )
+// {
+//   let context = this;
+//   let a = context.assetFor( test, false );
+//   let track = [];
+//   let testAppChildPath = a.program( testAppChild );
 
-  /* */
+//   /* */
 
-  test.is( true );
+//   a.ready
 
-  if( !Config.debug )
-  return a.ready;
+//   .then( () =>
+//   {
+//     test.case = 'mode : fork, stdio : ignore';
 
-  a.ready
+//     let o =
+//     {
+//       execPath : 'testAppChild.js',
+//       mode : 'fork',
+//       outputPiping : 0,
+//       outputCollecting : 0,
+//       stdio : 'ignore',
+//       currentPath : a.routinePath,
+//       detaching : 1,
+//       ipc : 1,
+//     }
+//     _.process.start( o );
 
-  .then( () =>
-  {
-    test.case = 'mode : shell, stdio : ignore';
+//     let message;
 
-    let o =
-    {
-      execPath : 'node testAppChild.js',
-      mode : 'shell',
-      outputCollecting : 1,
-      stdio : 'ignore',
-      currentPath : a.routinePath,
-      detaching : 1,
-      ipc : 1,
-    }
-    return test.shouldThrowErrorSync( () => _.process.start( o ) );
-  })
+//     o.process.on( 'message', ( e ) =>
+//     {
+//       message = e;
+//     })
 
-  /*  */
+//     o.conStart.thenGive( () =>
+//     {
+//       track.push( 'conStart' );
+//       o.process.send( 'child' );
+//     })
 
-  .then( () =>
-  {
-    test.case = 'mode : shell, stdio : pipe';
+//     o.conTerminate.then( ( op ) =>
+//     {
+//       track.push( 'conTerminate' );
+//       test.identical( op.exitCode, 0 );
+//       test.identical( op.ended, true );
+//       test.identical( message, 'child' );
+//       test.identical( track, [ 'conStart', 'conTerminate' ] );
+//       track = [];
+//       return null;
+//     })
 
-    let o =
-    {
-      execPath : 'node testAppChild.js',
-      mode : 'shell',
-      outputCollecting : 1,
-      stdio : 'pipe',
-      currentPath : a.routinePath,
-      detaching : 1,
-      ipc : 1,
-    }
-    return test.shouldThrowErrorSync( () => _.process.start( o ) );
-  })
+//     return o.conTerminate;
+//   })
 
-  /*  */
+//   /*  */
 
-  return a.ready;
+//   .then( () =>
+//   {
+//     test.case = 'mode : fork, stdio : pipe';
 
-  /* - */
+//     let o =
+//     {
+//       execPath : 'testAppChild.js',
+//       mode : 'fork',
+//       outputCollecting : 1,
+//       stdio : 'pipe',
+//       currentPath : a.routinePath,
+//       detaching : 1,
+//       ipc : 1,
+//     }
+//     _.process.start( o );
 
-  function testAppChild()
-  {
-    let _ = require( toolsPath );
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
+//     let message;
 
-    process.on( 'message', ( data ) =>
-    {
-      process.send( data );
-      process.exit();
-    })
+//     o.process.on( 'message', ( e ) =>
+//     {
+//       message = e;
+//     })
 
-  }
-}
+//     o.conStart.thenGive( () =>
+//     {
+//       track.push( 'conStart' );
+//       o.process.send( 'child' );
+//     })
+
+//     o.conTerminate.then( ( op ) =>
+//     {
+//       track.push( 'conTerminate' );
+//       test.identical( op.exitCode, 0 );
+//       test.identical( op.ended, true );
+//       test.identical( message, 'child' );
+//       test.identical( track, [ 'conStart', 'conTerminate' ] );
+//       track = [];
+//       return null;
+//     })
+
+//     return o.conTerminate;
+//   })
+
+//   /*  */
+
+//   return a.ready;
+
+//   /* - */
+
+//   function testAppChild()
+//   {
+//     let _ = require( toolsPath );
+//     _.include( 'wProcess' );
+//     _.include( 'wFiles' );
+
+//     process.on( 'message', ( data ) =>
+//     {
+//       process.send( data );
+//       process.exit();
+//     })
+
+//   }
+// }
+
+//
+
+/* qqq for Yevhen : implement for other modes */
+// function startDetachingModeShellIpc( test )
+// {
+//   let context = this;
+//   let a = context.assetFor( test, false );
+//   let testAppChildPath = a.program( testAppChild );
+
+//   /* */
+
+//   test.is( true );
+
+//   if( !Config.debug )
+//   return a.ready;
+
+//   a.ready
+
+//   .then( () =>
+//   {
+//     test.case = 'mode : shell, stdio : ignore';
+
+//     let o =
+//     {
+//       execPath : 'node testAppChild.js',
+//       mode : 'shell',
+//       outputCollecting : 1,
+//       stdio : 'ignore',
+//       currentPath : a.routinePath,
+//       detaching : 1,
+//       ipc : 1,
+//     }
+//     return test.shouldThrowErrorSync( () => _.process.start( o ) );
+//   })
+
+//   /*  */
+
+//   .then( () =>
+//   {
+//     test.case = 'mode : shell, stdio : pipe';
+
+//     let o =
+//     {
+//       execPath : 'node testAppChild.js',
+//       mode : 'shell',
+//       outputCollecting : 1,
+//       stdio : 'pipe',
+//       currentPath : a.routinePath,
+//       detaching : 1,
+//       ipc : 1,
+//     }
+//     return test.shouldThrowErrorSync( () => _.process.start( o ) );
+//   })
+
+//   /*  */
+
+//   return a.ready;
+
+//   /* - */
+
+//   function testAppChild()
+//   {
+//     let _ = require( toolsPath );
+//     _.include( 'wProcess' );
+//     _.include( 'wFiles' );
+
+//     process.on( 'message', ( data ) =>
+//     {
+//       process.send( data );
+//       process.exit();
+//     })
+
+//   }
+// }
 
 //
 
@@ -36304,9 +36440,10 @@ var Proto =
     startDetachedOutputStdioIgnore,
     startDetachedOutputStdioPipe,
     startDetachedOutputStdioInherit,
-    startDetachingModeSpawnIpc,
-    startDetachingModeForkIpc,
-    startDetachingModeShellIpc,
+    startDetachingIpc,
+    // startDetachingModeSpawnIpc,
+    // startDetachingModeForkIpc,
+    // startDetachingModeShellIpc,
 
     startDetachingTrivial,
     startDetachingChildExitsAfterParent,
