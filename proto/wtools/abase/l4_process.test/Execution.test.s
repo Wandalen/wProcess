@@ -13325,7 +13325,7 @@ Child continues to work after parent death.
 `
 //
 
-/* qqq for Yevhen : implement for other modes */
+/* qqq for Yevhen : implement for other modes | aaa : Done. */
 function startDetachingThrowing( test )
 {
   let context = this;
@@ -13339,39 +13339,61 @@ function startDetachingThrowing( test )
   if( !Config.debug )
   return;
 
-  var o =
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
+
+  function run( mode )
   {
-    execPath : 'node testAppChild.js',
-    mode : 'spawn',
-    stdio : 'inherit',
-    currentPath : a.routinePath,
-    detaching : 1
+    test.case = `mode : ${mode}`;
+
+    var o =
+    {
+      execPath : mode === 'fork' ? 'testAppChild.js' : 'node testAppChild.js',
+      mode,
+      stdio : 'inherit',
+      currentPath : a.routinePath,
+      detaching : 1
+    }
+
+    return test.shouldThrowErrorSync( () => _.process.start( o ) )
+
   }
-  test.shouldThrowErrorSync( () => _.process.start( o ) )
 
-  /* */
+  /* ORIGINAL */
+  // var o =
+  // {
+  //   execPath : 'node testAppChild.js',
+  //   mode : 'spawn',
+  //   stdio : 'inherit',
+  //   currentPath : a.routinePath,
+  //   detaching : 1
+  // }
+  // test.shouldThrowErrorSync( () => _.process.start( o ) )
 
-  var o =
-  {
-    execPath : 'node testAppChild.js',
-    mode : 'shell',
-    stdio : 'inherit',
-    currentPath : a.routinePath,
-    detaching : 1
-  }
-  test.shouldThrowErrorSync( () => _.process.start( o ) )
+  // /* */
 
-  /* */
+  // var o =
+  // {
+  //   execPath : 'node testAppChild.js',
+  //   mode : 'shell',
+  //   stdio : 'inherit',
+  //   currentPath : a.routinePath,
+  //   detaching : 1
+  // }
+  // test.shouldThrowErrorSync( () => _.process.start( o ) )
 
-  var o =
-  {
-    execPath : 'testAppChild.js',
-    mode : 'fork',
-    stdio : 'inherit',
-    currentPath : a.routinePath,
-    detaching : 1
-  }
-  test.shouldThrowErrorSync( () => _.process.start( o ) )
+  // /* */
+
+  // var o =
+  // {
+  //   execPath : 'testAppChild.js',
+  //   mode : 'fork',
+  //   stdio : 'inherit',
+  //   currentPath : a.routinePath,
+  //   detaching : 1
+  // }
+  // test.shouldThrowErrorSync( () => _.process.start( o ) )
 
   function testAppChild()
   {
