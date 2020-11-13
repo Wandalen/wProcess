@@ -528,7 +528,38 @@ ${programPath}:end
         mode,
       }
 
-      /* qqq2 for Yevhen : what original test case was? */
+      /* qqq2 for Yevhen : what original test case was? | aaa : Addded. */
+      // .then( function( arg )
+      // {
+      //   test.case = 'bad args';
+
+      //   o2 =
+      //   {
+      //     execPath : mode === `fork` ? null : `node`,
+      //     args : `${programPath} exitWithCode : 0`,
+      //     outputCollecting : 1,
+      //     mode,
+      //   }
+
+      //   var options = _.mapSupplement( {}, o2, o3 );
+
+      //   return test.shouldThrowErrorAsync( _.process.start( options ),
+      //   ( err, arg ) =>
+      //   {
+      //     test.is( _.errIs( err ) );
+      //     test.identical( err.reason, 'exit code' );
+      //   })
+      //   .then( () =>
+      //   {
+      //     test.is( !!options.error );
+      //     test.identical( options.exitCode, 1 );
+      //     test.identical( options.exitSignal, null );
+      //     test.identical( options.state, 'terminated' );
+      //     test.identical( _.strCount( options.output, ':begin' ), 0 );
+      //     test.identical( _.strCount( options.output, ':end' ), 0 );
+      //     return null;
+      //   });
+      // })
 
       var options = _.mapSupplement( null, o2, o3 );
 
