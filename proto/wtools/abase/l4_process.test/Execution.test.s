@@ -5603,8 +5603,8 @@ function startArgumentsHandling( test )
     test.identical( op.args, [ '`*`' ] );
     if( process.platform === 'win32' )
     {
-      test.identical( op.fullExecPath, 'echo "`*`"' )
       test.identical( op.args2, [ '"`*`"' ] );
+      test.identical( op.fullExecPath, 'echo "`*`"' )
     }
     else
     {
