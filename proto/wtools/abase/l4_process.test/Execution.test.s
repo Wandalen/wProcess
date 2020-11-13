@@ -5601,11 +5601,16 @@ function startArgumentsHandling( test )
     test.identical( _.strCount( op.output, '`*`' ), 1 );
     test.identical( op.execPath, 'echo' );
     test.identical( op.args, [ '`*`' ] );
-    test.identical( op.args2, [ '"\\`*\\`"' ] );
     if( process.platform === 'win32' )
-    test.identical( op.fullExecPath, 'echo "`*`"' )
+    {
+      test.identical( op.fullExecPath, 'echo "`*`"' )
+      test.identical( op.args2, [ '"`*`"' ] );
+    }
     else
-    test.identical( op.fullExecPath, 'echo "\\`*\\`"' )
+    {
+      test.identical( op.args2, [ '"\\`*\\`"' ] );
+      test.identical( op.fullExecPath, 'echo "\\`*\\`"' )
+    }
     return null;
   })
 
