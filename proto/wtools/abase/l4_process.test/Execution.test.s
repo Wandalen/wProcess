@@ -11946,62 +11946,139 @@ function startDetachingTrivial( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let track = [];
-  let testAppParentPath = a.program( testAppParent );
-  let testAppChildPath = a.program( testAppChild );
-  let testFilePath = a.abs( a.routinePath, 'testFile' );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
+
+  function run( mode )
+  {
+    let ready = _.Consequence().take( null );
+    let track = [];
+
+    if( mode === 'shell' ) /* mode::shell doesn't support ipc */
+    return test.is( true );
+
+    ready.then( () =>
+    {
+      a.reflect();
+      return null;
+    } )
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, trivial use case`;
+
+      let testFilePath = a.abs( a.routinePath, 'testFile' );
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode } });
+      let testAppChildPath = a.program( testAppChild );
+
+      let o =
+      {
+        execPath : 'testAppParent.js',
+        outputCollecting : 1,
+        mode : 'fork',
+        stdio : 'pipe',
+        detaching : 0,
+        throwingExitCode : 0,
+        currentPath : a.routinePath,
+      }
+
+      _.process.start( o );
+
+      var childPid;
+      o.process.on( 'message', ( e ) =>
+      {
+        childPid = _.numberFrom( e );
+      })
+
+      o.conTerminate.then( ( op ) =>
+      {
+        track.push( 'conTerminate' );
+        test.is( _.process.isAlive( childPid ) );
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.is( _.strHas( op.output, 'Child process start' ) );
+        test.is( _.strHas( op.output, 'from parent: data' ) );
+        test.is( !_.strHas( op.output, 'Child process end' ) );
+        test.identical( o.exitCode, op.exitCode );
+        test.identical( o.output, op.output );
+        return _.time.out( context.t2 * 2 ); /* 10000 */
+      })
+
+      o.conTerminate.then( () =>
+      {
+        track.push( 'conTerminate' );
+        test.is( !_.process.isAlive( childPid ) );
+
+        let childPidFromFile = a.fileProvider.fileRead( testFilePath );
+        childPidFromFile = _.numberFrom( childPidFromFile )
+        test.is( !_.process.isAlive( childPidFromFile ) );
+        test.identical( childPid, childPidFromFile )
+        test.identical( track, [ 'conTerminate', 'conTerminate' ] );
+
+        // a.fileProvider.fileDelete( testAppParentPath );
+        return null;
+      })
+
+      return o.conTerminate;
+    })
+
+    return ready;
+
+  }
 
   /* */
 
-  test.case = 'trivial use case';
+  /* ORIGINAL */
+  // test.case = 'trivial use case';
 
-  let o =
-  {
-    execPath : 'testAppParent.js',
-    outputCollecting : 1,
-    mode : 'fork',
-    stdio : 'pipe',
-    detaching : 0,
-    throwingExitCode : 0,
-    currentPath : a.routinePath,
-  }
+  // let o =
+  // {
+  //   execPath : 'testAppParent.js',
+  //   outputCollecting : 1,
+  //   mode : 'fork',
+  //   stdio : 'pipe',
+  //   detaching : 0,
+  //   throwingExitCode : 0,
+  //   currentPath : a.routinePath,
+  // }
 
-  _.process.start( o );
+  // _.process.start( o );
 
-  var childPid;
-  o.process.on( 'message', ( e ) =>
-  {
-    childPid = _.numberFrom( e );
-  })
+  // var childPid;
+  // o.process.on( 'message', ( e ) =>
+  // {
+  //   childPid = _.numberFrom( e );
+  // })
 
-  o.conTerminate.then( ( op ) =>
-  {
-    track.push( 'conTerminate' );
-    test.is( _.process.isAlive( childPid ) );
-    test.identical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    test.is( _.strHas( op.output, 'Child process start' ) );
-    test.is( _.strHas( op.output, 'from parent: data' ) );
-    test.is( !_.strHas( op.output, 'Child process end' ) );
-    test.identical( o.exitCode, op.exitCode );
-    test.identical( o.output, op.output );
-    return _.time.out( context.t2 * 2 ); /* 10000 */
-  })
+  // o.conTerminate.then( ( op ) =>
+  // {
+  //   track.push( 'conTerminate' );
+  //   test.is( _.process.isAlive( childPid ) );
+  //   test.identical( op.exitCode, 0 );
+  //   test.identical( op.ended, true );
+  //   test.is( _.strHas( op.output, 'Child process start' ) );
+  //   test.is( _.strHas( op.output, 'from parent: data' ) );
+  //   test.is( !_.strHas( op.output, 'Child process end' ) );
+  //   test.identical( o.exitCode, op.exitCode );
+  //   test.identical( o.output, op.output );
+  //   return _.time.out( context.t2 * 2 ); /* 10000 */
+  // })
 
-  o.conTerminate.then( () =>
-  {
-    track.push( 'conTerminate' );
-    test.is( !_.process.isAlive( childPid ) );
+  // o.conTerminate.then( () =>
+  // {
+  //   track.push( 'conTerminate' );
+  //   test.is( !_.process.isAlive( childPid ) );
 
-    let childPidFromFile = a.fileProvider.fileRead( testFilePath );
-    childPidFromFile = _.numberFrom( childPidFromFile )
-    test.is( !_.process.isAlive( childPidFromFile ) );
-    test.identical( childPid, childPidFromFile )
-    test.identical( track, [ 'conTerminate', 'conTerminate' ] );
-    return null;
-  })
+  //   let childPidFromFile = a.fileProvider.fileRead( testFilePath );
+  //   childPidFromFile = _.numberFrom( childPidFromFile )
+  //   test.is( !_.process.isAlive( childPidFromFile ) );
+  //   test.identical( childPid, childPidFromFile )
+  //   test.identical( track, [ 'conTerminate', 'conTerminate' ] );
+  //   return null;
+  // })
 
-  return o.conTerminate;
+  // return o.conTerminate;
 
   /* - */
 
@@ -12013,12 +12090,14 @@ function startDetachingTrivial( test )
     let o =
     {
       execPath : 'testAppChild.js',
+      mode,
       outputCollecting : 1,
       stdio : 'pipe',
       detaching : 1,
       applyingExitCode : 0,
       throwingExitCode : 0,
       outputPiping : 1,
+      ipc : 1,
     }
     _.process.startNjs( o );
 
