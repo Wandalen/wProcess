@@ -23535,103 +23535,174 @@ function startOptionCurrentPath( test )
 
 //
 
-/* qqq for Yevhen : try to introduce subroutine for modes */
+/* qqq for Yevhen : try to introduce subroutine for modes | aaa : Done. */
 function startOptionCurrentPaths( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
   let programPath = a.program( testApp );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
 
-  let o2 =
+  function run( mode )
   {
-    execPath : 'node ' + programPath,
-    ready : a.ready,
-    currentPath : [ a.routinePath, __dirname ],
-    stdio : 'pipe',
-    outputCollecting : 1
+    let ready = new _.Consequence().take( null );
+    let o2 =
+    {
+      execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+      currentPath : [ a.routinePath, __dirname ],
+      stdio : 'pipe',
+      outputCollecting : 1
+    }
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, execPath : single, currentPath : multiple`;
+
+      let returned = _.process.start( _.mapSupplement( { mode : `${mode}` }, o2 ) );
+
+      returned.then( ( op ) =>
+      {
+        let o1 = op.runs[ 0 ];
+        let o2 = op.runs[ 1 ];
+
+        test.is( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
+        test.identical( o1.exitCode, 0 );
+
+        test.is( _.strHas( o2.output, __dirname ) );
+        test.identical( o2.exitCode, 0 );
+
+        return op;
+      })
+
+      return returned;
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, execPath : multiple, currentPath : multiple`;
+      let returned = _.process.start( _.mapSupplement( { mode : `${mode}`, execPath : [ mode === 'fork' ? programPath : 'node ' + programPath, mode === 'fork' ? programPath : 'node ' + programPath ] }, o2 ) );
+
+      returned.then( ( op ) =>
+      {
+        let o1 = op.runs[ 0 ];
+        let o2 = op.runs[ 1 ];
+        let o3 = op.runs[ 2 ];
+        let o4 = op.runs[ 3 ];
+
+        test.is( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
+        test.identical( o1.exitCode, 0 );
+
+        test.is( _.strHas( o2.output, __dirname ) );
+        test.identical( o2.exitCode, 0 );
+
+        test.is( _.strHas( o3.output, a.path.nativize( a.routinePath ) ) );
+        test.identical( o3.exitCode, 0 );
+
+        test.is( _.strHas( o4.output, __dirname ) );
+        test.identical( o4.exitCode, 0 );
+
+        return op;
+      })
+
+      return returned;
+    })
+
+    return ready;
   }
 
-  /* */
+  /* ORIGINAL */
+  // let o2 =
+  // {
+  //   execPath : 'node ' + programPath,
+  //   ready : a.ready,
+  //   currentPath : [ a.routinePath, __dirname ],
+  //   stdio : 'pipe',
+  //   outputCollecting : 1
+  // }
 
-  _.process.start( _.mapSupplement( { mode : 'shell' }, o2 ) );
+  // /* */
 
-  a.ready.then( ( op ) =>
-  {
-    let o1 = op.runs[ 0 ];
-    let o2 = op.runs[ 1 ];
+  // _.process.start( _.mapSupplement( { mode : 'shell' }, o2 ) );
 
-    test.is( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
-    test.identical( o1.exitCode, 0 );
+  // a.ready.then( ( op ) =>
+  // {
+  //   let o1 = op.runs[ 0 ];
+  //   let o2 = op.runs[ 1 ];
 
-    test.is( _.strHas( o2.output, __dirname ) );
-    test.identical( o2.exitCode, 0 );
+  //   test.is( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
+  //   test.identical( o1.exitCode, 0 );
 
-    return op;
-  })
+  //   test.is( _.strHas( o2.output, __dirname ) );
+  //   test.identical( o2.exitCode, 0 );
 
-  /* */
+  //   return op;
+  // })
 
-  _.process.start( _.mapSupplement( { mode : 'spawn' }, o2 ) );
+  // /* */
 
-  a.ready.then( ( op ) =>
-  {
-    let o1 = op.runs[ 0 ];
-    let o2 = op.runs[ 1 ];
+  // _.process.start( _.mapSupplement( { mode : 'spawn' }, o2 ) );
 
-    test.is( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
-    test.identical( o1.exitCode, 0 );
+  // a.ready.then( ( op ) =>
+  // {
+  //   let o1 = op.runs[ 0 ];
+  //   let o2 = op.runs[ 1 ];
 
-    test.is( _.strHas( o2.output, __dirname ) );
-    test.identical( o2.exitCode, 0 );
+  //   test.is( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
+  //   test.identical( o1.exitCode, 0 );
 
-    return op;
-  })
+  //   test.is( _.strHas( o2.output, __dirname ) );
+  //   test.identical( o2.exitCode, 0 );
 
-  /* */
+  //   return op;
+  // })
 
-  _.process.start( _.mapSupplement( { mode : 'fork', execPath : programPath }, o2 ) );
+  // /* */
 
-  a.ready.then( ( op ) =>
-  {
-    let o1 = op.runs[ 0 ];
-    let o2 = op.runs[ 1 ];
+  // _.process.start( _.mapSupplement( { mode : 'fork', execPath : programPath }, o2 ) );
 
-    test.is( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
-    test.identical( o1.exitCode, 0 );
+  // a.ready.then( ( op ) =>
+  // {
+  //   let o1 = op.runs[ 0 ];
+  //   let o2 = op.runs[ 1 ];
 
-    test.is( _.strHas( o2.output, __dirname ) );
-    test.identical( o2.exitCode, 0 );
+  //   test.is( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
+  //   test.identical( o1.exitCode, 0 );
 
-    return op;
-  })
+  //   test.is( _.strHas( o2.output, __dirname ) );
+  //   test.identical( o2.exitCode, 0 );
 
-  /*  */
+  //   return op;
+  // })
 
-  _.process.start( _.mapSupplement( { mode : 'spawn', execPath : [ 'node ' + programPath, 'node ' + programPath ] }, o2 ) );
+  // /*  */
 
-  a.ready.then( ( op ) =>
-  {
-    let o1 = op.runs[ 0 ];
-    let o2 = op.runs[ 1 ];
-    let o3 = op.runs[ 2 ];
-    let o4 = op.runs[ 3 ];
+  // _.process.start( _.mapSupplement( { mode : 'spawn', execPath : [ 'node ' + programPath, 'node ' + programPath ] }, o2 ) );
 
-    test.is( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
-    test.identical( o1.exitCode, 0 );
+  // a.ready.then( ( op ) =>
+  // {
+  //   let o1 = op.runs[ 0 ];
+  //   let o2 = op.runs[ 1 ];
+  //   let o3 = op.runs[ 2 ];
+  //   let o4 = op.runs[ 3 ];
 
-    test.is( _.strHas( o2.output, __dirname ) );
-    test.identical( o2.exitCode, 0 );
+  //   test.is( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
+  //   test.identical( o1.exitCode, 0 );
 
-    test.is( _.strHas( o3.output, a.path.nativize( a.routinePath ) ) );
-    test.identical( o3.exitCode, 0 );
+  //   test.is( _.strHas( o2.output, __dirname ) );
+  //   test.identical( o2.exitCode, 0 );
 
-    test.is( _.strHas( o4.output, __dirname ) );
-    test.identical( o4.exitCode, 0 );
+  //   test.is( _.strHas( o3.output, a.path.nativize( a.routinePath ) ) );
+  //   test.identical( o3.exitCode, 0 );
 
-    return op;
-  })
+  //   test.is( _.strHas( o4.output, __dirname ) );
+  //   test.identical( o4.exitCode, 0 );
 
-  return a.ready;
+  //   return op;
+  // })
 
   /* - */
 
