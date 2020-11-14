@@ -11941,7 +11941,7 @@ function startDetachingModeShellIpc( test )
 
 //
 
-/* qqq for Yevhen : implement for other modes */
+/* qqq for Yevhen : implement for other modes | aaa : Done. */
 function startDetachingTrivial( test )
 {
   let context = this;
@@ -12016,7 +12016,6 @@ function startDetachingTrivial( test )
         test.identical( childPid, childPidFromFile )
         test.identical( track, [ 'conTerminate', 'conTerminate' ] );
 
-        // a.fileProvider.fileDelete( testAppParentPath );
         return null;
       })
 
@@ -12136,6 +12135,8 @@ function startDetachingTrivial( test )
 
   }
 }
+
+startDetachingTrivial.timeOut = 26e4; /* Locally : 25.972s */
 
 //
 
