@@ -4949,7 +4949,7 @@ function startExecPathSeveralCommands( test )
       let o =
       {
         execPath : mode === 'fork' ? '"app.js arg1 && app.js arg2"' : '"node app.js arg1 && node app.js arg2"',
-        mode : 'shell',
+        mode,
         currentPath : a.routinePath,
         outputPiping : 1,
         outputCollecting : 1,
