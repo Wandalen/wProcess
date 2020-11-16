@@ -12607,7 +12607,7 @@ After 5 seconds child process creates test file in working directory and exits.
 
 //
 
-/* qqq for Yevhen : implement for other modes | aaa : Done.  */
+/* qqq for Yevhen : implement for other modes | aaa : Done. */
 function startDetachingChildExitsBeforeParent( test )
 {
   let context = this;
