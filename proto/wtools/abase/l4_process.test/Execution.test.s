@@ -4545,7 +4545,7 @@ function startExecPathQuotesClosing( test )
         let op = JSON.parse( o.output );
         if( mode === 'shell' )
         {
-          test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + '"arg"arg"' );
+          test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"arg"' );
           test.identical( o.args, [ _.strQuote( testAppPathSpace ), '"arg"arg"' ] );
           test.identical( o.args2, [ _.strQuote( testAppPathSpace ), '"arg"arg"' ] );
           test.identical( op.scriptArgs, [ 'argarg' ] )
