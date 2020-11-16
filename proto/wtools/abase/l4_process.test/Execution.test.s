@@ -12678,6 +12678,7 @@ function startDetachingChildExitsBeforeParent( test )
         childPid = _.numberFrom( childPid )
         test.is( !_.process.isAlive( childPid ) );
 
+        if( process.platform === 'darwin' || mode !== 'shell' ) /* On Windows and Linux intermidiate process is created in mode::shell */
         test.identical( child.pid, childPid );
 
         return null;
