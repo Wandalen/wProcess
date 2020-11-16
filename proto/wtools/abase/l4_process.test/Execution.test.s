@@ -12607,78 +12607,150 @@ After 5 seconds child process creates test file in working directory and exits.
 
 //
 
-/* qqq for Yevhen : implement for other modes */
+/* qqq for Yevhen : implement for other modes | aaa : Done.  */
 function startDetachingChildExitsBeforeParent( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppParentPath = a.program( testAppParent );
-  let testAppChildPath = a.program( testAppChild );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
 
-  let testFilePath = a.abs( a.routinePath, 'testFile' );
+  function run( mode )
+  {
+    let ready = _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      a.reflect();
+      return null;
+    })
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, parent disconnects detached child process and exits, child contiues to work`;
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode } });
+      let testAppChildPath = a.program( testAppChild );
+      let testFilePath = a.abs( a.routinePath, 'testFile' );
+
+      let o =
+      {
+        execPath : 'node testAppParent.js',
+        mode : 'spawn',
+        outputCollecting : 1,
+        currentPath : a.routinePath,
+        ipc : 1,
+      }
+      _.process.start( o );
+
+      let child;
+      let onChildTerminate = new _.Consequence();
+
+      o.process.on( 'message', ( e ) =>
+      {
+        child = e;
+        onChildTerminate.take( e );
+      })
+
+      onChildTerminate.then( () =>
+      {
+        let childPid = a.fileProvider.fileRead( testFilePath );
+        test.is( _.process.isAlive( o.process.pid ) );
+        test.is( !_.process.isAlive( _.numberFrom( childPid ) ) );
+        return null;
+      })
+
+      o.conTerminate.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        test.will = 'parent and chid are dead';
+
+        test.identical( child.err, undefined );
+        test.identical( child.exitCode, 0 );
+
+        test.is( !_.process.isAlive( o.process.pid ) );
+        test.is( !_.process.isAlive( child.pid ) );
+
+        test.is( a.fileProvider.fileExists( testFilePath ) );
+        let childPid = a.fileProvider.fileRead( testFilePath );
+        childPid = _.numberFrom( childPid )
+        test.is( !_.process.isAlive( childPid ) );
+
+        test.identical( child.pid, childPid );
+
+        return null;
+      })
+
+      return _.Consequence.AndKeep( onChildTerminate, o.conTerminate );
+    })
+
+    return ready;
+  }
 
   /* */
 
-  a.ready
+  /* ORIGINAL */
+  // a.ready
+  // .then( () =>
+  // {
+  //   let o =
+  //   {
+  //     execPath : 'node testAppParent.js',
+  //     mode : 'spawn',
+  //     outputCollecting : 1,
+  //     currentPath : a.routinePath,
+  //     ipc : 1,
+  //   }
+  //   _.process.start( o );
 
-  .then( () =>
-  {
-    let o =
-    {
-      execPath : 'node testAppParent.js',
-      mode : 'spawn',
-      outputCollecting : 1,
-      currentPath : a.routinePath,
-      ipc : 1,
-    }
-    _.process.start( o );
+  //   let child;
+  //   let onChildTerminate = new _.Consequence();
 
-    let child;
-    let onChildTerminate = new _.Consequence();
+  //   o.process.on( 'message', ( e ) =>
+  //   {
+  //     child = e;
+  //     onChildTerminate.take( e );
+  //   })
 
-    o.process.on( 'message', ( e ) =>
-    {
-      child = e;
-      onChildTerminate.take( e );
-    })
+  //   onChildTerminate.then( () =>
+  //   {
+  //     let childPid = a.fileProvider.fileRead( testFilePath );
+  //     test.is( _.process.isAlive( o.process.pid ) );
+  //     test.is( !_.process.isAlive( _.numberFrom( childPid ) ) );
+  //     return null;
+  //   })
 
-    onChildTerminate.then( () =>
-    {
-      let childPid = a.fileProvider.fileRead( testFilePath );
-      test.is( _.process.isAlive( o.process.pid ) );
-      test.is( !_.process.isAlive( _.numberFrom( childPid ) ) );
-      return null;
-    })
+  //   o.conTerminate.then( ( op ) =>
+  //   {
+  //     test.identical( op.exitCode, 0 );
+  //     test.identical( op.ended, true );
 
-    o.conTerminate.then( ( op ) =>
-    {
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
+  //     test.will = 'parent and chid are dead';
 
-      test.will = 'parent and chid are dead';
+  //     test.identical( child.err, undefined );
+  //     test.identical( child.exitCode, 0 );
 
-      test.identical( child.err, undefined );
-      test.identical( child.exitCode, 0 );
+  //     test.is( !_.process.isAlive( o.process.pid ) );
+  //     test.is( !_.process.isAlive( child.pid ) );
 
-      test.is( !_.process.isAlive( o.process.pid ) );
-      test.is( !_.process.isAlive( child.pid ) );
+  //     test.is( a.fileProvider.fileExists( testFilePath ) );
+  //     let childPid = a.fileProvider.fileRead( testFilePath );
+  //     childPid = _.numberFrom( childPid )
+  //     test.is( !_.process.isAlive( childPid ) );
 
-      test.is( a.fileProvider.fileExists( testFilePath ) );
-      let childPid = a.fileProvider.fileRead( testFilePath );
-      childPid = _.numberFrom( childPid )
-      test.is( !_.process.isAlive( childPid ) );
+  //     test.identical( child.pid, childPid );
 
-      test.identical( child.pid, childPid );
+  //     return null;
+  //   })
 
-      return null;
-    })
+  //   return _.Consequence.AndKeep( onChildTerminate, o.conTerminate );
+  // })
 
-    return _.Consequence.AndKeep( onChildTerminate, o.conTerminate );
-  })
+  // /*  */
 
-  /*  */
-
-  return a.ready;
+  // return a.ready;
 
   /* - */
 
@@ -12690,12 +12762,12 @@ function startDetachingChildExitsBeforeParent( test )
 
     let o =
     {
-      execPath : 'node testAppChild.js',
+      execPath : mode === 'fork' ? 'testAppChild.js' : 'node testAppChild.js',
       stdio : 'ignore',
       outputPiping : 0,
       outputCollecting : 0,
       detaching : true,
-      mode : 'spawn',
+      mode,
 
     }
 
@@ -12707,7 +12779,7 @@ function startDetachingChildExitsBeforeParent( test )
       return null;
     })
 
-    _.time.out( context.t2, () => /* 5000 */
+    _.time.out( context.t1 * 5, () => /* 5000 */
     {
       console.log( 'Parent process end' )
     });
@@ -12732,6 +12804,7 @@ function startDetachingChildExitsBeforeParent( test )
 
 }
 
+startDetachingChildExitsBeforeParent.timeOut = 21e4; /* Locally : 20.817s */
 startDetachingChildExitsBeforeParent.description =
 `
 Parent starts child process in detached mode and registers callback to wait for child process.
