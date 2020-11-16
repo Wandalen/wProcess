@@ -12555,7 +12555,8 @@ function startDetachingChildExitsAfterParent( test )
         let childPid2 = a.fileProvider.fileRead( testFilePath );
         childPid2 = _.numberFrom( childPid2 )
         test.is( !_.process.isAlive( childPid2 ) );
-        test.identical( childPid, childPid2 )
+        if( process.platform === 'darwin' || mode !== 'shell' ) /* On Windows and Linux intermidiate process is created in mode::shell */
+        test.identical( childPid, childPid2 );
 
         return null;
       })
