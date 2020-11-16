@@ -4932,165 +4932,229 @@ function startExecPathSeveralCommands( test )
   let context = this;
   let a = context.assetFor( test, false );
   let testAppPath = a.program( app );
-
-  a.ready
-
-  testcase( 'quoted, mode:shell' )
-
-  .then( () =>
-  {
-    let con = new _.Consequence().take( null );
-    let o =
-    {
-      execPath : 'node app.js arg1 && node app.js arg2',
-      mode : 'shell',
-      currentPath : a.routinePath,
-      outputPiping : 1,
-      outputCollecting : 1,
-      ready : con
-    }
-    _.process.start( o );
-
-    con.then( ( op ) =>
-    {
-      test.identical( o.exitCode, 0 );
-      test.identical( _.strCount( op.output, `[ 'arg1' ]` ), 1 );
-      test.identical( _.strCount( op.output, `[ 'arg2' ]` ), 1 );
-      return null;
-    })
-
-    return con;
-  })
-
-  /* - */
-
-  testcase( 'quoted, mode:spawn' )
-
-  .then( () =>
-  {
-    let con = new _.Consequence().take( null );
-    let o =
-    {
-      execPath : '"node app.js arg1 && node app.js arg2"',
-      mode : 'spawn',
-      currentPath : a.routinePath,
-      outputPiping : 1,
-      outputCollecting : 1,
-      ready : con
-    }
-    return test.shouldThrowErrorAsync( _.process.start( o ) )
-  })
-
-  /* - */
-
-  testcase( 'quoted, mode:fork' )
-
-  .then( () =>
-  {
-    let con = new _.Consequence().take( null );
-    let o =
-    {
-      execPath : '"node app.js arg1 && node app.js arg2"',
-      mode : 'fork',
-      currentPath : a.routinePath,
-      outputPiping : 1,
-      outputCollecting : 1,
-      ready : con
-    }
-    return test.shouldThrowErrorAsync( _.process.start( o ) )
-  })
-
-  /* -- */
-
-  testcase( 'no quotes, mode:shell' )
-
-  .then( () =>
-  {
-    let con = new _.Consequence().take( null );
-    let o =
-    {
-      execPath : 'node app.js arg1 && node app.js arg2',
-      mode : 'shell',
-      currentPath : a.routinePath,
-      outputPiping : 1,
-      outputCollecting : 1,
-      ready : con
-    }
-    _.process.start( o );
-
-    con.then( ( op ) =>
-    {
-      test.identical( o.exitCode, 0 );
-      test.identical( _.strCount( op.output, `[ 'arg1' ]` ), 1 );
-      test.identical( _.strCount( op.output, `[ 'arg2' ]` ), 1 );
-      return null;
-    })
-
-    return con;
-  })
-
-  /* - */
-
-  testcase( 'no quotes, mode:spawn' )
-
-  .then( () =>
-  {
-    let con = new _.Consequence().take( null );
-    let o =
-    {
-      execPath : 'node app.js arg1 && node app.js arg2',
-      mode : 'spawn',
-      currentPath : a.routinePath,
-      outputPiping : 1,
-      outputCollecting : 1,
-      ready : con
-    }
-    _.process.start( o );
-
-    con.then( ( op ) =>
-    {
-      test.identical( o.exitCode, 0 );
-      test.identical( _.strCount( op.output, `[ 'arg1', '&&', 'node', 'app.js', 'arg2' ]` ), 1 );
-      return null;
-    })
-
-    return con;
-  })
-
-  /* - */
-
-  testcase( 'no quotes, mode:fork' )
-
-  .then( () =>
-  {
-    let con = new _.Consequence().take( null );
-    let o =
-    {
-      execPath : 'node app.js arg1 && node app.js arg2',
-      mode : 'fork',
-      currentPath : a.routinePath,
-      outputPiping : 1,
-      outputCollecting : 1,
-      ready : con
-    }
-    return test.shouldThrowErrorAsync( _.process.start( o ) );
-  })
-
-  /*  */
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
   return a.ready;
 
-  /*  */
+  /* */
 
-  function testcase( src )
+  function run( mode )
   {
-    a.ready.then( () =>
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
     {
-      test.case = src;
-      return null;
+      test.case = `mode : ${mode}, quoted`;
+      let o =
+      {
+        execPath : mode === 'fork' ? '"app.js arg1 && app.js arg2"' : '"node app.js arg1 && node app.js arg2"',
+        mode : 'shell',
+        currentPath : a.routinePath,
+        outputPiping : 1,
+        outputCollecting : 1,
+      }
+
+      return test.shouldThrowErrorAsync( _.process.start( o ) );
+
     })
-    return a.ready;
+
+    /* */
+
+    .then( () =>
+    {
+      test.case = `mode : ${mode}, no quotes`;
+      let o =
+      {
+        execPath : mode === 'fork' ? 'app.js arg1 && app.js arg2' : 'node app.js arg1 && node app.js arg2',
+        mode,
+        currentPath : a.routinePath,
+        outputPiping : 1,
+        outputCollecting : 1,
+      }
+      return _.process.start( o )
+      .then( ( op ) =>
+      {
+        test.identical( o.exitCode, 0 );
+        if( mode === 'shell' )
+        {
+          test.identical( _.strCount( op.output, `[ 'arg1' ]` ), 1 );
+          test.identical( _.strCount( op.output, `[ 'arg2' ]` ), 1 );
+        }
+        else if( mode === 'spawn' )
+        {
+          test.identical( _.strCount( op.output, `[ 'arg1', '&&', 'node', 'app.js', 'arg2' ]` ), 1 );
+        }
+        else
+        {
+          test.identical( _.strCount( op.output, `[ 'arg1', '&&', 'app.js', 'arg2' ]` ), 1 );
+        }
+        return null;
+      })
+    })
+
+    return ready;
   }
+
+  /* ORIGINAL */
+  // a.ready
+
+  // testcase( 'quoted, mode:shell' )
+
+  // .then( () =>
+  // {
+  //   let con = new _.Consequence().take( null );
+  //   let o =
+  //   {
+  //     execPath : 'node app.js arg1 && node app.js arg2',
+  //     mode : 'shell',
+  //     currentPath : a.routinePath,
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   _.process.start( o );
+
+  //   con.then( ( op ) =>
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( _.strCount( op.output, `[ 'arg1' ]` ), 1 );
+  //     test.identical( _.strCount( op.output, `[ 'arg2' ]` ), 1 );
+  //     return null;
+  //   })
+
+  //   return con;
+  // })
+
+  // /* - */
+
+  // testcase( 'quoted, mode:spawn' )
+
+  // .then( () =>
+  // {
+  //   let con = new _.Consequence().take( null );
+  //   let o =
+  //   {
+  //     execPath : '"node app.js arg1 && node app.js arg2"',
+  //     mode : 'spawn',
+  //     currentPath : a.routinePath,
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   return test.shouldThrowErrorAsync( _.process.start( o ) )
+  // })
+
+  // /* - */
+
+  // testcase( 'quoted, mode:fork' )
+
+  // .then( () =>
+  // {
+  //   let con = new _.Consequence().take( null );
+  //   let o =
+  //   {
+  //     execPath : '"node app.js arg1 && node app.js arg2"',
+  //     mode : 'fork',
+  //     currentPath : a.routinePath,
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   return test.shouldThrowErrorAsync( _.process.start( o ) )
+  // })
+
+  // /* -- */
+
+  // testcase( 'no quotes, mode:shell' )
+
+  // .then( () =>
+  // {
+  //   let con = new _.Consequence().take( null );
+  //   let o =
+  //   {
+  //     execPath : 'node app.js arg1 && node app.js arg2',
+  //     mode : 'shell',
+  //     currentPath : a.routinePath,
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   _.process.start( o );
+
+  //   con.then( ( op ) =>
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( _.strCount( op.output, `[ 'arg1' ]` ), 1 );
+  //     test.identical( _.strCount( op.output, `[ 'arg2' ]` ), 1 );
+  //     return null;
+  //   })
+
+  //   return con;
+  // })
+
+  // /* - */
+
+  // testcase( 'no quotes, mode:spawn' )
+
+  // .then( () =>
+  // {
+  //   let con = new _.Consequence().take( null );
+  //   let o =
+  //   {
+  //     execPath : 'node app.js arg1 && node app.js arg2',
+  //     mode : 'spawn',
+  //     currentPath : a.routinePath,
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   _.process.start( o );
+
+  //   con.then( ( op ) =>
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( _.strCount( op.output, `[ 'arg1', '&&', 'node', 'app.js', 'arg2' ]` ), 1 );
+  //     return null;
+  //   })
+
+  //   return con;
+  // })
+
+  // /* - */
+
+  // testcase( 'no quotes, mode:fork' )
+
+  // .then( () =>
+  // {
+  //   let con = new _.Consequence().take( null );
+  //   let o =
+  //   {
+  //     execPath : 'node app.js arg1 && node app.js arg2',
+  //     mode : 'fork',
+  //     currentPath : a.routinePath,
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   return test.shouldThrowErrorAsync( _.process.start( o ) );
+  // })
+
+  // /*  */
+
+  // return a.ready;
+
+  // /*  */
+
+  // function testcase( src )
+  // {
+  //   a.ready.then( () =>
+  //   {
+  //     test.case = src;
+  //     return null;
+  //   })
+  //   return a.ready;
+  // }
 
   function app()
   {
