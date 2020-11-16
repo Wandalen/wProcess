@@ -13052,63 +13052,119 @@ Test routine waits until o.conTerminate resolves message about termination of th
 
 //
 
-/* qqq for Yevhen : implement for other modes */
+/* qqq for Yevhen : implement for other modes | aaa : Done. */
 function startDetachingEndCompetitorIsExecuted( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let track = [];
   let testAppChildPath = a.program( testAppChild );
-
-  a.ready
-
-  .then( () =>
-  {
-    test.case = 'detaching on, disconnected forked child'
-    let o =
-    {
-      execPath : 'testAppChild.js',
-      mode : 'fork',
-      stdio : 'ignore',
-      outputPiping : 0,
-      outputCollecting : 0,
-      currentPath : a.routinePath,
-      detaching : 1
-    }
-
-    let result = _.process.start( o );
-
-    test.is( o.conStart !== result );
-    test.is( _.consequenceIs( o.conStart ) )
-    test.is( _.consequenceIs( o.conTerminate ) )
-
-    o.conStart.finally( ( err, op ) =>
-    {
-      track.push( 'conStart' );
-      test.identical( o.ended, false );
-      test.identical( err, undefined );
-      test.identical( op, o );
-      test.is( _.process.isAlive( o.process.pid ) );
-      return null;
-    })
-
-    o.conTerminate.finally( ( err, op ) =>
-    {
-      track.push( 'conTerminate' );
-      test.identical( o.ended, true );
-      test.identical( err, undefined );
-      test.identical( op, o );
-      test.identical( track, [ 'conStart', 'conTerminate' ] )
-      test.is( !_.process.isAlive( o.process.pid ) )
-      return null;
-    })
-
-    return _.Consequence.AndTake( o.conStart, o.conTerminate );
-  })
-
-  /* */
-
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
+
+  function run( mode )
+  {
+    let ready = _.Consequence().take( null );
+    let track = [];
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, detaching on, disconnected child`;
+
+      let o =
+      {
+        execPath : mode === 'fork' ?  'testAppChild.js' : 'node testAppChild.js',
+        mode,
+        stdio : 'ignore',
+        outputPiping : 0,
+        outputCollecting : 0,
+        currentPath : a.routinePath,
+        detaching : 1
+      }
+
+      let result = _.process.start( o );
+
+      test.is( o.conStart !== result );
+      test.is( _.consequenceIs( o.conStart ) )
+      test.is( _.consequenceIs( o.conTerminate ) )
+
+      o.conStart.finally( ( err, op ) =>
+      {
+        track.push( 'conStart' );
+        test.identical( o.ended, false );
+        test.identical( err, undefined );
+        test.identical( op, o );
+        test.is( _.process.isAlive( o.process.pid ) );
+        return null;
+      })
+
+      o.conTerminate.finally( ( err, op ) =>
+      {
+        track.push( 'conTerminate' );
+        test.identical( o.ended, true );
+        test.identical( err, undefined );
+        test.identical( op, o );
+        test.identical( track, [ 'conStart', 'conTerminate' ] )
+        test.is( !_.process.isAlive( o.process.pid ) )
+        return null;
+      })
+
+      return _.Consequence.AndTake( o.conStart, o.conTerminate );
+    })
+
+    return ready;
+  }
+
+  /* ORIGINAL */
+  // a.ready
+
+  // .then( () =>
+  // {
+  //   test.case = 'detaching on, disconnected forked child'
+  //   let o =
+  //   {
+  //     execPath : 'testAppChild.js',
+  //     mode : 'fork',
+  //     stdio : 'ignore',
+  //     outputPiping : 0,
+  //     outputCollecting : 0,
+  //     currentPath : a.routinePath,
+  //     detaching : 1
+  //   }
+
+  //   let result = _.process.start( o );
+
+  //   test.is( o.conStart !== result );
+  //   test.is( _.consequenceIs( o.conStart ) )
+  //   test.is( _.consequenceIs( o.conTerminate ) )
+
+  //   o.conStart.finally( ( err, op ) =>
+  //   {
+  //     track.push( 'conStart' );
+  //     test.identical( o.ended, false );
+  //     test.identical( err, undefined );
+  //     test.identical( op, o );
+  //     test.is( _.process.isAlive( o.process.pid ) );
+  //     return null;
+  //   })
+
+  //   o.conTerminate.finally( ( err, op ) =>
+  //   {
+  //     track.push( 'conTerminate' );
+  //     test.identical( o.ended, true );
+  //     test.identical( err, undefined );
+  //     test.identical( op, o );
+  //     test.identical( track, [ 'conStart', 'conTerminate' ] )
+  //     test.is( !_.process.isAlive( o.process.pid ) )
+  //     return null;
+  //   })
+
+  //   return _.Consequence.AndTake( o.conStart, o.conTerminate );
+  // })
+
+  // /* */
+
+  // return a.ready;
 
   /* - */
 
@@ -13129,6 +13185,7 @@ function startDetachingEndCompetitorIsExecuted( test )
 
 }
 
+startDetachingEndCompetitorIsExecuted.timeOut = 12e4; /* Locally : 11.249s */
 startDetachingEndCompetitorIsExecuted.description =
 
 `Parent starts child process in detached mode.
