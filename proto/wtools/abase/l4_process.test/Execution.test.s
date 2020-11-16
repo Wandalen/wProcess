@@ -4320,28 +4320,30 @@ function startExecPathQuotesClosing( test )
       .then( () =>
       {
         test.identical( o.exitCode, 0 );
+        let op = JSON.parse( o.output );
         if( mode === 'shell' )
         {
           test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' " arg' );
           test.identical( o.args, [ _.strQuote( testAppPathSpace ), '"', 'arg' ] );
           test.identical( o.args2, [ _.strQuote( testAppPathSpace ), '"', 'arg' ] );
+          test.identical( op.scriptArgs, [ ' arg' ] )
         }
         else if( mode === 'spawn' )
         {
           test.identical( o.fullExecPath, 'node ' + testAppPathSpace + ' " arg' );
           test.identical( o.args, [ testAppPathSpace, '"', 'arg' ] );
           test.identical( o.args2, [ testAppPathSpace, '"', 'arg' ] );
+          test.identical( op.scriptArgs, [ '"', 'arg' ] )
         }
         else
         {
           test.identical( o.fullExecPath, testAppPathSpace + ' " arg' );
           test.identical( o.args, [ '"', 'arg' ] );
           test.identical( o.args2, [ '"', 'arg' ] );
+          test.identical( op.scriptArgs, [ '"', 'arg' ] )
         }
-        let op = JSON.parse( o.output );
         test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
         test.identical( op.map, {} )
-        test.identical( op.scriptArgs, [ '"', 'arg' ] )
 
         return null;
       })
@@ -4367,28 +4369,30 @@ function startExecPathQuotesClosing( test )
       .then( () =>
       {
         test.identical( o.exitCode, 0 );
+        let op = JSON.parse( o.output );
         if( mode === 'shell' )
         {
           test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' arg "' );
           test.identical( o.args, [ _.strQuote( testAppPathSpace ), 'arg', '"' ] );
           test.identical( o.args2, [ _.strQuote( testAppPathSpace ), 'arg', '"' ] );
+          test.identical( op.scriptArgs, [ 'arg', '' ] )
         }
         else if( mode === 'spawn' )
         {
           test.identical( o.fullExecPath, 'node ' + testAppPathSpace + ' arg "' );
           test.identical( o.args, [ testAppPathSpace, 'arg', '"' ] );
           test.identical( o.args2, [ testAppPathSpace, 'arg', '"' ] );
+          test.identical( op.scriptArgs, [ 'arg', '"' ] )
         }
         else
         {
           test.identical( o.fullExecPath, testAppPathSpace + ' arg "' );
           test.identical( o.args, [ 'arg', '"' ] );
           test.identical( o.args2, [ 'arg', '"' ] );
+          test.identical( op.scriptArgs, [ 'arg', '"' ] )
         }
-        let op = JSON.parse( o.output );
         test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
         test.identical( op.map, {} )
-        test.identical( op.scriptArgs, [ 'arg', '"' ] )
 
         return null;
       })
@@ -4538,29 +4542,31 @@ function startExecPathQuotesClosing( test )
       .then( () =>
       {
         test.identical( o.exitCode, 0 );
+        let op = JSON.parse( o.output );
         if( mode === 'shell' )
         {
-          test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' arg"arg' );
-          test.identical( o.args, [ _.strQuote( testAppPathSpace ), 'arg"arg' ] );
-          test.identical( o.args2, [ _.strQuote( testAppPathSpace ), 'arg"arg' ] );
+          test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + '"arg"arg"' );
+          test.identical( o.args, [ _.strQuote( testAppPathSpace ), '"arg"arg"' ] );
+          test.identical( o.args2, [ _.strQuote( testAppPathSpace ), '"arg"arg"' ] );
+          test.identical( op.scriptArgs, [ 'argarg' ] )
         }
         else if( mode === 'spawn' )
         {
           test.identical( o.fullExecPath, 'node ' + testAppPathSpace + ' arg"arg' );
           test.identical( o.args, [ testAppPathSpace, 'arg"arg' ] );
           test.identical( o.args2, [ testAppPathSpace, 'arg"arg' ] );
+          test.identical( op.scriptArgs, [ 'arg"arg' ] )
         }
         else
         {
           test.identical( o.fullExecPath, testAppPathSpace + ' arg"arg' );
           test.identical( o.args, [ 'arg"arg' ] );
           test.identical( o.args2, [ 'arg"arg' ] );
+          test.identical( op.scriptArgs, [ 'arg"arg' ] )
         }
 
-        let op = JSON.parse( o.output );
         test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
         test.identical( op.map, {} )
-        test.identical( op.scriptArgs, [ 'arg"arg' ] )
 
         return null;
       })
