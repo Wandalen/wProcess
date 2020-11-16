@@ -1,3 +1,4 @@
+/* eslint-disable */
 ( function _Execution_test_s( )
 {
 
@@ -4203,234 +4204,148 @@ function startArgumentsNestedQuotes( test )
 function startExecPathQuotesClosing( test )
 {
   let context = this;
-
   let a = context.assetFor( test, false );
-
   let testAppPathSpace = a.path.nativize( a.path.normalize( a.program({ routine : testApp, dirPath : a.abs( 'with space' ) }) ) );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+
+  return a.ready;
 
   /* */
 
-  a.ready
-
-  testcase( 'quoted arg' )
-
-  .then( () =>
+  function run( mode )
   {
-    let con = new _.Consequence().take( null );
-    let o =
-    {
-      execPath : _.strQuote( testAppPathSpace ) + ' "arg"',
-      mode : 'fork',
-      outputPiping : 1,
-      outputCollecting : 1,
-      ready : con
-    }
-    _.process.start( o );
+    let ready = new _.Consequence().take( null );
 
-    con.then( () =>
+    ready.then( () =>
     {
-      test.identical( o.exitCode, 0 );
-      test.identical( o.fullExecPath, testAppPathSpace + ' arg' );
-      test.identical( o.args, [ 'arg' ] );
-      test.identical( o.args2, [ 'arg' ] );
-      let op = JSON.parse( o.output );
-      test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
-      test.identical( op.map, {} )
-      test.identical( op.scriptArgs, [ 'arg' ] )
+      test.case = `mode : ${mode}, quoted arg`;
+      let o =
+      {
+        execPath : mode === 'fork' ? _.strQuote( testAppPathSpace ) + ' "arg"' : 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"',
+        mode,
+        outputPiping : 1,
+        outputCollecting : 1,
+      }
+      return _.process.start( o )
+      .then( () =>
+      {
+        test.identical( o.exitCode, 0 );
+        if( mode === 'shell' )
+        {
+          test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"' );
+          test.identical( o.args, [ _.strQuote( testAppPathSpace ), '"arg"' ] );
+          test.identical( o.args2, [ _.strQuote( testAppPathSpace ), '"arg"' ] );
+        }
+        else if( mode === 'spawn' )
+        {
+          test.identical( o.fullExecPath, 'node ' + testAppPathSpace + ' arg' );
+          test.identical( o.args, [ testAppPathSpace, 'arg' ] );
+          test.identical( o.args2, [ testAppPathSpace, 'arg' ] );
+        }
+        else
+        {
+          test.identical( o.fullExecPath, testAppPathSpace + ' arg' );
+          test.identical( o.args, [ 'arg' ] );
+          test.identical( o.args2, [ 'arg' ] );
+        }
+        let op = JSON.parse( o.output );
+        test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
+        test.identical( op.map, {} )
+        test.identical( op.scriptArgs, [ 'arg' ] )
 
-      return null;
+        return null;
+      })
     })
 
-    return con;
-  })
+    /* */
 
-  .then( () =>
-  {
-    let con = new _.Consequence().take( null );
-    let o =
+    ready.then( () =>
     {
-      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"',
-      mode : 'spawn',
-      outputPiping : 1,
-      outputCollecting : 1,
-      ready : con
-    }
-    _.process.start( o );
+      test.case = `mode : ${mode}, unquoted arg`;
+      let o =
+      {
+        execPath : mode === 'fork' ? _.strQuote( testAppPathSpace ) + ' arg' : 'node ' + _.strQuote( testAppPathSpace ) + ' arg',
+        mode,
+        outputPiping : 1,
+        outputCollecting : 1,
+      }
+      return _.process.start( o )
+      .then( () =>
+      {
+        test.identical( o.exitCode, 0 );
+        if( mode === 'shell' )
+        {
+          test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' arg' );
+          test.identical( o.args, [ _.strQuote( testAppPathSpace ), 'arg' ] );
+          test.identical( o.args2, [ _.strQuote( testAppPathSpace ), 'arg' ] );
+        }
+        else if( mode === 'spawn' )
+        {
+          test.identical( o.fullExecPath, 'node ' + testAppPathSpace + ' arg' );
+          test.identical( o.args, [ testAppPathSpace, 'arg' ] );
+          test.identical( o.args2, [ testAppPathSpace, 'arg' ] );
+        }
+        else
+        {
+          test.identical( o.fullExecPath, testAppPathSpace + ' arg' );
+          test.identical( o.args, [ 'arg' ] );
+          test.identical( o.args2, [ 'arg' ] );
+        }
+        let op = JSON.parse( o.output );
+        test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
+        test.identical( op.map, {} )
+        test.identical( op.scriptArgs, [ 'arg' ] )
 
-    con.then( () =>
-    {
-      test.identical( o.exitCode, 0 );
-      test.identical( o.fullExecPath, 'node ' + testAppPathSpace + ' arg' );
-      test.identical( o.args, [ testAppPathSpace, 'arg' ] );
-      test.identical( o.args2, [ testAppPathSpace, 'arg' ] );
-      let op = JSON.parse( o.output );
-      test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
-      test.identical( op.map, {} )
-      test.identical( op.scriptArgs, [ 'arg' ] )
-
-      return null;
+        return null;
+      })
     })
 
-    return con;
-  })
+    /* */
 
-  .then( () =>
-  {
-    let con = new _.Consequence().take( null );
-    let o =
-    {
-      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"',
-      mode : 'shell',
-      outputPiping : 1,
-      outputCollecting : 1,
-      ready : con
-    }
-    _.process.start( o );
+    // ready.then( () =>
+    // {
+    //   test.case = `mode : ${mode}, single quote`;
+    //   let o =
+    //   {
+    //     execPath : mode === 'fork' ? _.strQuote( testAppPathSpace ) + ' " arg' : 'node ' + _.strQuote( testAppPathSpace ) + ' " arg',
+    //     mode,
+    //     outputPiping : 1,
+    //     outputCollecting : 1,
+    //   }
+    //   return _.process.start( o )
+    //   .then( () =>
+    //   {
+    //     test.identical( o.exitCode, 0 );
+    //     if( mode === 'shell' )
+    //     {
+    //       test.identical( o.fullExecPath, 'node ' + testAppPathSpace + ' " arg' );
+    //       test.identical( o.args, [ _.strQuote( testAppPathSpace ), '"', 'arg' ] );
+    //       test.identical( o.args2, [ _.strQuote( testAppPathSpace ), '"', 'arg' ] );
+    //     }
+    //     else if( mode === 'spawn' )
+    //     {
+    //       test.identical( o.fullExecPath, 'node ' + testAppPathSpace + ' " arg' );
+    //       test.identical( o.args, [ testAppPathSpace, '"', 'arg' ] );
+    //       test.identical( o.args2, [ testAppPathSpace, '"', 'arg' ] );
+    //     }
+    //     else
+    //     {
+    //       test.identical( o.fullExecPath, testAppPathSpace + ' " arg' );
+    //       test.identical( o.args, [ '"', 'arg' ] );
+    //       test.identical( o.args2, [ '"', 'arg' ] );
+    //     }
+    //     let op = JSON.parse( o.output );
+    //     test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
+    //     test.identical( op.map, {} )
+    //     test.identical( op.scriptArgs, [ '"', 'arg' ] )
 
-    con.then( () =>
-    {
-      test.identical( o.exitCode, 0 );
-      test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"' );
-      test.identical( o.args, [ _.strQuote( testAppPathSpace ), '"arg"' ] );
-      test.identical( o.args2, [ _.strQuote( testAppPathSpace ), '"arg"' ] );
-      let op = JSON.parse( o.output );
-      test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
-      test.identical( op.map, {} )
-      test.identical( op.scriptArgs, [ 'arg' ] )
+    //     return null;
+    //   })
+    // })
 
-      return null;
-    })
-
-    return con;
-  })
-
-  /* */
-
-  testcase( 'unquoted arg' )
-
-  .then( () =>
-  {
-    let con = new _.Consequence().take( null );
-    let o =
-    {
-      execPath : _.strQuote( testAppPathSpace ) + ' arg',
-      mode : 'fork',
-      outputPiping : 1,
-      outputCollecting : 1,
-      ready : con
-    }
-    _.process.start( o );
-
-    con.then( () =>
-    {
-      test.identical( o.exitCode, 0 );
-      test.identical( o.fullExecPath, testAppPathSpace + ' arg' );
-      test.identical( o.args, [ 'arg' ] );
-      test.identical( o.args2, [ 'arg' ] );
-      let op = JSON.parse( o.output );
-      test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
-      test.identical( op.map, {} )
-      test.identical( op.scriptArgs, [ 'arg' ] )
-
-      return null;
-    })
-
-    return con;
-  })
-
-  .then( () =>
-  {
-    let con = new _.Consequence().take( null );
-    let o =
-    {
-      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' arg',
-      mode : 'spawn',
-      outputPiping : 1,
-      outputCollecting : 1,
-      ready : con
-    }
-    _.process.start( o );
-
-    con.then( () =>
-    {
-      test.identical( o.exitCode, 0 );
-      test.identical( o.fullExecPath, 'node ' + testAppPathSpace + ' arg' );
-      test.identical( o.args, [ testAppPathSpace, 'arg' ] );
-      test.identical( o.args2, [ testAppPathSpace, 'arg' ] );
-      let op = JSON.parse( o.output );
-      test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
-      test.identical( op.map, {} )
-      test.identical( op.scriptArgs, [ 'arg' ] )
-
-      return null;
-    })
-
-    return con;
-  })
-
-  .then( () =>
-  {
-    let con = new _.Consequence().take( null );
-    let o =
-    {
-      execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' arg',
-      mode : 'shell',
-      outputPiping : 1,
-      outputCollecting : 1,
-      ready : con
-    }
-    _.process.start( o );
-
-    con.then( () =>
-    {
-      test.identical( o.exitCode, 0 );
-      test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' arg' );
-      test.identical( o.args, [ _.strQuote( testAppPathSpace ), 'arg' ] );
-      test.identical( o.args2, [ _.strQuote( testAppPathSpace ), 'arg' ] );
-      let op = JSON.parse( o.output );
-      test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
-      test.identical( op.map, {} )
-      test.identical( op.scriptArgs, [ 'arg' ] )
-
-      return null;
-    })
-
-    return con;
-  })
-
-  /*  */
-
-  testcase( 'single quote' )
-
-  .then( () =>
-  {
-    let con = new _.Consequence().take( null );
-    let o =
-    {
-      execPath : _.strQuote( testAppPathSpace ) + ' " arg',
-      mode : 'fork',
-      outputPiping : 1,
-      outputCollecting : 1,
-      ready : con
-    }
-    _.process.start( o );
-
-    con.then( () =>
-    {
-      test.identical( o.exitCode, 0 );
-      test.identical( o.fullExecPath, testAppPathSpace + ' " arg' );
-      test.identical( o.args, [ '"', 'arg' ] );
-      test.identical( o.args2, [ '"', 'arg' ] );
-      let op = JSON.parse( o.output );
-      test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
-      test.identical( op.map, {} )
-      test.identical( op.scriptArgs, [ '"', 'arg' ] )
-
-      return null;
-    })
-
-    return con;
-  })
+    return ready;
+  }
 
   /*  */
 
@@ -4901,6 +4816,700 @@ function startExecPathQuotesClosing( test )
   /*  */
 
   return a.ready;
+
+
+  /* ORIGINAL */
+  // a.ready
+
+  // testcase( 'quoted arg' )
+
+  // .then( () =>
+  // {
+  //   let con = new _.Consequence().take( null );
+  //   let o =
+  //   {
+  //     execPath : _.strQuote( testAppPathSpace ) + ' "arg"',
+  //     mode : 'fork',
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   _.process.start( o );
+
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( o.fullExecPath, testAppPathSpace + ' arg' );
+  //     test.identical( o.args, [ 'arg' ] );
+  //     test.identical( o.args2, [ 'arg' ] );
+  //     let op = JSON.parse( o.output );
+  //     test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
+  //     test.identical( op.map, {} )
+  //     test.identical( op.scriptArgs, [ 'arg' ] )
+
+  //     return null;
+  //   })
+
+  //   return con;
+  // })
+
+  // .then( () =>
+  // {
+  //   let con = new _.Consequence().take( null );
+  //   let o =
+  //   {
+  //     execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"',
+  //     mode : 'spawn',
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   _.process.start( o );
+
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( o.fullExecPath, 'node ' + testAppPathSpace + ' arg' );
+  //     test.identical( o.args, [ testAppPathSpace, 'arg' ] );
+  //     test.identical( o.args2, [ testAppPathSpace, 'arg' ] );
+  //     let op = JSON.parse( o.output );
+  //     test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
+  //     test.identical( op.map, {} )
+  //     test.identical( op.scriptArgs, [ 'arg' ] )
+
+  //     return null;
+  //   })
+
+  //   return con;
+  // })
+
+  // .then( () =>
+  // {
+  //   let con = new _.Consequence().take( null );
+  //   let o =
+  //   {
+  //     execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"',
+  //     mode : 'shell',
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   _.process.start( o );
+
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"' );
+  //     test.identical( o.args, [ _.strQuote( testAppPathSpace ), '"arg"' ] );
+  //     test.identical( o.args2, [ _.strQuote( testAppPathSpace ), '"arg"' ] );
+  //     let op = JSON.parse( o.output );
+  //     test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
+  //     test.identical( op.map, {} )
+  //     test.identical( op.scriptArgs, [ 'arg' ] )
+
+  //     return null;
+  //   })
+
+  //   return con;
+  // })
+
+  // /* */
+
+  // testcase( 'unquoted arg' )
+
+  // .then( () =>
+  // {
+  //   let con = new _.Consequence().take( null );
+  //   let o =
+  //   {
+  //     execPath : _.strQuote( testAppPathSpace ) + ' arg',
+  //     mode : 'fork',
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   _.process.start( o );
+
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( o.fullExecPath, testAppPathSpace + ' arg' );
+  //     test.identical( o.args, [ 'arg' ] );
+  //     test.identical( o.args2, [ 'arg' ] );
+  //     let op = JSON.parse( o.output );
+  //     test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
+  //     test.identical( op.map, {} )
+  //     test.identical( op.scriptArgs, [ 'arg' ] )
+
+  //     return null;
+  //   })
+
+  //   return con;
+  // })
+
+  // .then( () =>
+  // {
+  //   let con = new _.Consequence().take( null );
+  //   let o =
+  //   {
+  //     execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' arg',
+  //     mode : 'spawn',
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   _.process.start( o );
+
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( o.fullExecPath, 'node ' + testAppPathSpace + ' arg' );
+  //     test.identical( o.args, [ testAppPathSpace, 'arg' ] );
+  //     test.identical( o.args2, [ testAppPathSpace, 'arg' ] );
+  //     let op = JSON.parse( o.output );
+  //     test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
+  //     test.identical( op.map, {} )
+  //     test.identical( op.scriptArgs, [ 'arg' ] )
+
+  //     return null;
+  //   })
+
+  //   return con;
+  // })
+
+  // .then( () =>
+  // {
+  //   let con = new _.Consequence().take( null );
+  //   let o =
+  //   {
+  //     execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' arg',
+  //     mode : 'shell',
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   _.process.start( o );
+
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' arg' );
+  //     test.identical( o.args, [ _.strQuote( testAppPathSpace ), 'arg' ] );
+  //     test.identical( o.args2, [ _.strQuote( testAppPathSpace ), 'arg' ] );
+  //     let op = JSON.parse( o.output );
+  //     test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
+  //     test.identical( op.map, {} )
+  //     test.identical( op.scriptArgs, [ 'arg' ] )
+
+  //     return null;
+  //   })
+
+  //   return con;
+  // })
+
+  // /*  */
+
+  // testcase( 'single quote' )
+
+  // .then( () =>
+  // {
+  //   let con = new _.Consequence().take( null );
+  //   let o =
+  //   {
+  //     execPath : _.strQuote( testAppPathSpace ) + ' " arg',
+  //     mode : 'fork',
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   _.process.start( o );
+
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( o.fullExecPath, testAppPathSpace + ' " arg' );
+  //     test.identical( o.args, [ '"', 'arg' ] );
+  //     test.identical( o.args2, [ '"', 'arg' ] );
+  //     let op = JSON.parse( o.output );
+  //     test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
+  //     test.identical( op.map, {} )
+  //     test.identical( op.scriptArgs, [ '"', 'arg' ] )
+
+  //     return null;
+  //   })
+
+  //   return con;
+  // })
+
+  // /*  */
+
+  // testcase( 'single quote' )
+
+  // .then( () =>
+  // {
+  //   let con = new _.Consequence().take( null );
+  //   let o =
+  //   {
+  //     execPath : _.strQuote( testAppPathSpace ) + ' " arg',
+  //     mode : 'fork',
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   _.process.start( o );
+
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( o.fullExecPath, testAppPathSpace+ ' " arg' );
+  //     test.identical( o.args, [ '"', 'arg' ] );
+  //     test.identical( o.args2, [ '"', 'arg' ] );
+  //     let op = JSON.parse( o.output );
+  //     test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
+  //     test.identical( op.map, {} )
+  //     test.identical( op.scriptArgs, [ '"', 'arg' ] )
+
+  //     return null;
+  //   })
+
+  //   return con;
+  // })
+
+  // .then( () =>
+  // {
+  //   let con = new _.Consequence().take( null );
+  //   let o =
+  //   {
+  //     execPath : _.strQuote( testAppPathSpace ) + ' arg "',
+  //     mode : 'fork',
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   _.process.start( o );
+
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( o.fullExecPath, testAppPathSpace + ' arg "' );
+  //     test.identical( o.args, [ 'arg', '"' ] );
+  //     test.identical( o.args2, [ 'arg', '"' ] );
+  //     let op = JSON.parse( o.output );
+  //     test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
+  //     test.identical( op.map, {} )
+  //     test.identical( op.scriptArgs, [ 'arg', '"' ] )
+
+  //     return null;
+  //   })
+
+  //   return con;
+  // })
+
+  // /* */
+
+  // testcase( 'arg starts with quote' )
+
+  // .then( () =>
+  // {
+  //   let con = new _.Consequence().take( null );
+  //   let o =
+  //   {
+  //     execPath : _.strQuote( testAppPathSpace ) + ' "arg',
+  //     mode : 'fork',
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   return test.shouldThrowErrorAsync( _.process.start( o ) );
+  // })
+
+  // .then( () =>
+  // {
+  //   let con = new _.Consequence().take( null );
+  //   let o =
+  //   {
+  //     execPath : _.strQuote( testAppPathSpace ) + ' "arg"arg',
+  //     mode : 'fork',
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   return test.mustNotThrowError( _.process.start( o ) );
+  // })
+
+  // /* */
+
+  // testcase( 'arg ends with quote' )
+
+  // .then( () =>
+  // {
+  //   let con = new _.Consequence().take( null );
+  //   let o =
+  //   {
+  //     execPath : _.strQuote( testAppPathSpace ) + ' arg"',
+  //     mode : 'fork',
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+
+  //   return test.shouldThrowErrorAsync( _.process.start( o ) );
+  // })
+
+  // .then( () =>
+  // {
+  //   let con = new _.Consequence().take( null );
+  //   let o =
+  //   {
+  //     execPath : _.strQuote( testAppPathSpace ) + ' arg"arg"',
+  //     mode : 'fork',
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   _.process.start( o )
+
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( o.fullExecPath, testAppPathSpace + ' arg"arg"' );
+  //     test.identical( o.args, [ 'arg"arg"' ] );
+  //     test.identical( o.args2, [ 'arg"arg"' ] );
+  //     let op = JSON.parse( o.output );
+  //     test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
+  //     test.identical( op.map, {} )
+  //     test.identical( op.scriptArgs, [ 'arg"arg"' ] )
+
+  //     return null;
+  //   })
+
+  //   return con;
+  // })
+
+  // /* */
+
+  // testcase( 'quoted with different symbols' )
+
+  // .then( () =>
+  // {
+  //   let con = new _.Consequence().take( null );
+  //   let o =
+  //   {
+  //     execPath : _.strQuote( testAppPathSpace ) + ` "arg'`,
+  //     mode : 'fork',
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   return test.shouldThrowErrorAsync( _.process.start( o ) );
+  // })
+
+  // /* */
+
+  // testcase( 'quote as part of arg' )
+
+  // .then( () =>
+  // {
+  //   let con = new _.Consequence().take( null );
+  //   let o =
+  //   {
+  //     execPath : _.strQuote( testAppPathSpace ) + ' arg"arg',
+  //     mode : 'fork',
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+
+  //   return test.shouldThrowErrorAsync( _.process.start( o ) );
+  // })
+
+  // .then( () =>
+  // {
+  //   let con = new _.Consequence().take( null );
+  //   let o =
+  //   {
+  //     execPath : _.strQuote( testAppPathSpace ) + ' "arg"arg"',
+  //     mode : 'fork',
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   _.process.start( o );
+
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( o.fullExecPath, testAppPathSpace + ' arg"arg' );
+  //     test.identical( o.args, [ 'arg"arg' ] );
+  //     test.identical( o.args2, [ 'arg"arg' ] );
+  //     let op = JSON.parse( o.output );
+  //     test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
+  //     test.identical( op.map, {} )
+  //     test.identical( op.scriptArgs, [ 'arg"arg' ] )
+
+  //     return null;
+  //   })
+
+  //   return con;
+  // })
+
+  // /* */
+
+  // testcase( 'option arg with quoted value' )
+
+  // .then( () =>
+  // {
+  //   let con = new _.Consequence().take( null );
+  //   let o =
+  //   {
+  //     execPath : _.strQuote( testAppPathSpace ) + ' option : "value"',
+  //     mode : 'fork',
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   _.process.start( o );
+
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( o.fullExecPath, testAppPathSpace + ' option : value' );
+  //     test.identical( o.args, [ 'option', ':', 'value' ] );
+  //     test.identical( o.args2, [ 'option', ':', 'value' ] );
+  //     let op = JSON.parse( o.output );
+  //     test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
+  //     test.identical( op.map, { option : 'value' } )
+  //     test.identical( op.scriptArgs, [ 'option', ':', 'value' ] )
+
+  //     return null;
+  //   })
+
+  //   return con;
+  // })
+
+  // .then( () =>
+  // {
+  //   let con = new _.Consequence().take( null );
+  //   let o =
+  //   {
+  //     execPath : _.strQuote( testAppPathSpace ) + ' option:"value with space"',
+  //     mode : 'fork',
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   _.process.start( o );
+
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( o.fullExecPath, testAppPathSpace + ' option:"value with space"' );
+  //     test.identical( o.args, [ 'option:"value with space"' ] );
+  //     test.identical( o.args2, [ 'option:"value with space"' ] );
+  //     let op = JSON.parse( o.output );
+  //     test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
+  //     test.identical( op.map, { option : 'value with space' } )
+  //     test.identical( op.scriptArgs, [ 'option:"value with space"' ] )
+
+  //     return null;
+  //   })
+
+  //   return con;
+  // })
+
+  // .then( () =>
+  // {
+  //   let con = new _.Consequence().take( null );
+  //   let o =
+  //   {
+  //     execPath : _.strQuote( testAppPathSpace ) + ' option : "value with space"',
+  //     mode : 'fork',
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   _.process.start( o );
+
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( o.fullExecPath, testAppPathSpace + ' option : value with space' );
+  //     test.identical( o.args, [ 'option', ':', 'value with space' ] );
+  //     test.identical( o.args2, [ 'option', ':', 'value with space' ] );
+  //     let op = JSON.parse( o.output );
+  //     test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
+  //     test.identical( op.map, { option : 'value with space' } )
+  //     test.identical( op.scriptArgs, [ 'option', ':', 'value with space' ] )
+
+  //     return null;
+  //   })
+
+  //   return con;
+  // })
+
+  // .then( () =>
+  // {
+  //   let con = new _.Consequence().take( null );
+  //   let o =
+  //   {
+  //     execPath : _.strQuote( testAppPathSpace ) + ' option:"value',
+  //     mode : 'fork',
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+
+  //   return test.shouldThrowErrorAsync( _.process.start( o ) );
+  // })
+
+  // .then( () =>
+  // {
+  //   let con = new _.Consequence().take( null );
+  //   let o =
+  //   {
+  //     execPath : _.strQuote( testAppPathSpace ) + ' "option: "value""',
+  //     mode : 'fork',
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   _.process.start( o );
+
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( o.fullExecPath, testAppPathSpace + ' option: "value"' );
+  //     test.identical( o.args, [ 'option: "value"' ] );
+  //     test.identical( o.args2, [ 'option: "value"' ] );
+  //     let op = JSON.parse( o.output );
+  //     test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
+  //     test.identical( op.map, { option : 'value' } )
+  //     test.identical( op.scriptArgs, [ 'option: "value"' ] )
+  //     return null;
+  //   })
+
+  //   return con;
+  // })
+
+  // .then( () =>
+  // {
+  //   let con = new _.Consequence().take( null );
+  //   let o =
+  //   {
+  //     execPath : _.strQuote( testAppPathSpace ) + ' option : "value',
+  //     mode : 'fork',
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   return test.shouldThrowErrorAsync( _.process.start( o ) );
+  // })
+
+  // /* */
+
+  // testcase( 'double quoted with space inside, same quotes' )
+
+  // .then( () =>
+  // {
+  //   let con = new _.Consequence().take( null );
+  //   let o =
+  //   {
+  //     execPath : _.strQuote( testAppPathSpace ) + ' "option: "value with space""',
+  //     mode : 'fork',
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   _.process.start( o );
+
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( o.fullExecPath, testAppPathSpace + ' "option: "value with space""' );
+  //     test.identical( o.args, [ '"option: "value', 'with', 'space""' ] );
+  //     test.identical( o.args2, [ '"option: "value', 'with', 'space""' ] );
+  //     let op = JSON.parse( o.output );
+  //     test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
+  //     test.identical( op.map, { option : 'value with space' } )
+  //     test.identical( op.scriptArgs,  [ '"option: "value', 'with', 'space""' ] )
+
+  //     return null;
+  //   })
+
+  //   return con
+  // })
+
+  // /* */
+
+  // testcase( 'double quoted with space inside, diff quotes' )
+
+  // .then( () =>
+  // {
+  //   let con = new _.Consequence().take( null );
+  //   let o =
+  //   {
+  //     execPath : _.strQuote( testAppPathSpace ) + ' `option: "value with space"`',
+  //     mode : 'fork',
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   _.process.start( o );
+
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( o.fullExecPath, testAppPathSpace + ' option: "value with space"' );
+  //     test.identical( o.args, [ 'option: "value with space"' ] );
+  //     test.identical( o.args2, [ 'option: "value with space"' ] );
+  //     let op = JSON.parse( o.output );
+  //     test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
+  //     test.identical( op.map, { option : 'value with space' } )
+  //     test.identical( op.scriptArgs, [ 'option: "value with space"' ] )
+
+  //     return null;
+  //   })
+
+  //   return con;
+  // })
+
+  // /* */
+
+  // testcase( 'escaped quotes, mode shell' )
+
+  // .then( () =>
+  // {
+  //   let con = new _.Consequence().take( null );
+  //   let o =
+  //   {
+  //     execPath : 'node ' + _.strQuote( testAppPathSpace ) + ' option: \\"value with space\\"',
+  //     mode : 'shell',
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     ready : con
+  //   }
+  //   _.process.start( o );
+
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' option: \\"value with space\\"' );
+  //     test.identical( o.args, [ _.strQuote( testAppPathSpace ), 'option:', '\\"value with space\\"' ] );
+  //     test.identical( o.args2, [ _.strQuote( testAppPathSpace ), 'option:', '\\"value with space\\"' ] );
+  //     let op = JSON.parse( o.output );
+  //     test.identical( op.scriptPath, _.path.normalize( testAppPathSpace ) )
+  //     test.identical( op.map, { option : 'value with space' } )
+  //     test.identical( op.scriptArgs, [ 'option:', '"value', 'with', 'space"' ] )
+
+  //     return null;
+  //   })
+
+  //   return con;
+  // })
+
+  // /*  */
+
+  // return a.ready;
 
   /*  */
 
