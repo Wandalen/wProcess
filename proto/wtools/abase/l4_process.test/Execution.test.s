@@ -4961,7 +4961,7 @@ function startExecPathSeveralCommands( test )
 
     /* */
 
-    .then( () =>
+    ready.then( () =>
     {
       test.case = `mode : ${mode}, no quotes`;
       let o =
