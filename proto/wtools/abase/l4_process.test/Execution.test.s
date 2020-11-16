@@ -4313,14 +4313,20 @@ function startExecPathQuotesClosing( test )
         outputCollecting : 1,
       }
 
-      if( mode === 'shell' ) /* unexpected EOF while looking for a matching bracket */
+      if( mode === 'shell' && process.platform !== 'win32' ) /* unexpected EOF while looking for a matching bracket on mac and linux. On windows no error */
       return test.shouldThrowErrorAsync( _.process.start( o ) )
 
       return _.process.start( o )
       .then( () =>
       {
         test.identical( o.exitCode, 0 );
-        if( mode === 'spawn' )
+        if( mode === 'shell' )
+        {
+          test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' " arg' );
+          test.identical( o.args, [ _.strQuote( testAppPathSpace ), '"', 'arg' ] );
+          test.identical( o.args2, [ _.strQuote( testAppPathSpace ), '"', 'arg' ] );
+        }
+        else if( mode === 'spawn' )
         {
           test.identical( o.fullExecPath, 'node ' + testAppPathSpace + ' " arg' );
           test.identical( o.args, [ testAppPathSpace, '"', 'arg' ] );
@@ -4354,14 +4360,20 @@ function startExecPathQuotesClosing( test )
         outputCollecting : 1,
       }
 
-      if( mode === 'shell' ) /* unexpected EOF while looking for a matching bracket in mode::shell */
+      if( mode === 'shell' && process.platform !== 'win32' ) /* unexpected EOF while looking for a matching bracket on mac and linux. On windows no error */
       return test.shouldThrowErrorAsync( _.process.start( o ) )
 
       return _.process.start( o )
       .then( () =>
       {
         test.identical( o.exitCode, 0 );
-        if( mode === 'spawn' )
+        if( mode === 'shell' )
+        {
+          test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' arg "' );
+          test.identical( o.args, [ _.strQuote( testAppPathSpace ), 'arg', '"' ] );
+          test.identical( o.args2, [ _.strQuote( testAppPathSpace ), 'arg', '"' ] );
+        }
+        else if( mode === 'spawn' )
         {
           test.identical( o.fullExecPath, 'node ' + testAppPathSpace + ' arg "' );
           test.identical( o.args, [ testAppPathSpace, 'arg', '"' ] );
@@ -4425,7 +4437,7 @@ function startExecPathQuotesClosing( test )
         outputPiping : 1,
         outputCollecting : 1,
       }
-  
+
       return test.shouldThrowErrorAsync( _.process.start( o ) );
     })
 
@@ -4441,7 +4453,7 @@ function startExecPathQuotesClosing( test )
         outputPiping : 1,
         outputCollecting : 1,
       }
-  
+
       return _.process.start( o )
       .then( () =>
       {
@@ -4519,14 +4531,20 @@ function startExecPathQuotesClosing( test )
         outputCollecting : 1,
       }
 
-      if( mode === 'shell' ) /* unexpected EOF while looking for a matching bracket in mode::shell */
-      return test.shouldThrowErrorAsync( _.process.start( o ) );
+      if( mode === 'shell' && process.platform !== 'win32' ) /* unexpected EOF while looking for a matching bracket on mac and linux. On windows no error */
+      return test.shouldThrowErrorAsync( _.process.start( o ) )
 
       return _.process.start( o )
       .then( () =>
       {
         test.identical( o.exitCode, 0 );
-        if( mode === 'spawn' )
+        if( mode === 'shell' )
+        {
+          test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' arg"arg' );
+          test.identical( o.args, [ _.strQuote( testAppPathSpace ), 'arg"arg' ] );
+          test.identical( o.args2, [ _.strQuote( testAppPathSpace ), 'arg"arg' ] );
+        }
+        else if( mode === 'spawn' )
         {
           test.identical( o.fullExecPath, 'node ' + testAppPathSpace + ' arg"arg' );
           test.identical( o.args, [ testAppPathSpace, 'arg"arg' ] );
@@ -5616,6 +5634,8 @@ function startExecPathQuotesClosing( test )
     console.log( JSON.stringify( args ) );
   }
 }
+
+startExecPathQuotesClosing.timeOut = 34e4; /* Locally : 33.996s */
 
 //
 
