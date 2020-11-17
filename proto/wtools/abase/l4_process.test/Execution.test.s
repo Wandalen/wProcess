@@ -14634,446 +14634,892 @@ function startConcurrentMultiple( test )
   let context = this;
   let a = context.assetFor( test, false );
   let testAppPath = a.program( program1 );
-  let counter = 0;
   let time = 0;
   let filePath = a.path.nativize( a.abs( a.routinePath, 'file.txt' ) );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
 
-  /* - */
+  /* */
 
-  a.ready.then( ( arg ) =>
+  function run( mode )
   {
-    test.case = 'single';
-    time = _.time.now();
-    return null;
-  })
+    let ready = _.Consequence().take( null );
+    let counter = 0;
 
-  let singleOption =
-  {
-    execPath : 'node ' + testAppPath + ' 1000',
-    ready : a.ready,
-    verbosity : 3,
-    outputCollecting : 1,
+    ready.then( ( arg ) =>
+    {
+      test.case = `mode : ${mode}, single`;
+      time = _.time.now();
+
+      let singleOption =
+      {
+        execPath : mode === 'fork' ? testAppPath + ' 1000' : 'node ' + testAppPath + ' 1000',
+        mode,
+        verbosity : 3,
+        outputCollecting : 1,
+      }
+
+      return _.process.start( singleOption )
+      .then( ( arg ) =>
+      {
+
+        test.identical( arg.exitCode, 0 );
+        test.is( singleOption === arg );
+        test.is( _.strHas( arg.output, 'begin 1000' ) );
+        test.is( _.strHas( arg.output, 'end 1000' ) );
+        test.identical( a.fileProvider.fileRead( filePath ), 'written by 1000' );
+        a.fileProvider.fileDelete( filePath );
+        counter += 1;
+        return null;
+      });
+    })
+
+    /* */
+
+    ready.then( ( arg ) =>
+    {
+      test.case = `mode : ${mode}, single, execPath in array`;
+      time = _.time.now();
+
+      let singleExecPathInArrayOptions =
+      {
+        execPath : mode === 'fork' ? [ testAppPath + ' 1000' ] : [ 'node ' + testAppPath + ' 1000' ],
+        mode,
+        verbosity : 3,
+        outputCollecting : 1,
+      }
+
+      return _.process.start( singleExecPathInArrayOptions )
+      .then( ( op ) =>
+      {
+
+        test.identical( op.runs.length, 1 );
+        test.identical( op.runs[ 0 ].exitCode, 0 );
+        test.is( singleExecPathInArrayOptions !== op.runs[ 0 ] );
+        test.is( _.strHas( op.runs[ 0 ].output, 'begin 1000' ) );
+        test.is( _.strHas( op.runs[ 0 ].output, 'end 1000' ) );
+        test.identical( a.fileProvider.fileRead( filePath ), 'written by 1000' );
+        a.fileProvider.fileDelete( filePath );
+        counter += 1;
+        return null;
+      });
+    })
+
+    /* */
+
+    ready.then( ( arg ) =>
+    {
+      test.case = `mode : ${mode}, single, error in ready`;
+
+      let con = _.Consequence().take( null );
+      con.then( () =>
+      {
+        time = _.time.now();
+        throw _.err( 'Error!' );
+      })
+
+      let singleErrorBeforeScalar =
+      {
+        execPath : mode === 'fork' ? testAppPath + ' 1000' : 'node ' + testAppPath + ' 1000',
+        mode,
+        ready : con,
+        verbosity : 3,
+        outputCollecting : 1,
+      }
+
+      return _.process.start( singleErrorBeforeScalar )
+      .finally( ( err, arg ) =>
+      {
+        test.is( arg === undefined );
+        test.is( _.errIs( err ) );
+        test.identical( singleErrorBeforeScalar.exitCode, null );
+        test.identical( singleErrorBeforeScalar.output, '' );
+        test.is( !a.fileProvider.fileExists( filePath ) );
+        _.errAttend( err );
+        counter += 1;
+        return null;
+      });
+    })
+
+    /* */
+
+    ready.then( ( arg ) =>
+    {
+      test.case = `mode : ${mode}, single, array execPath, error in ready`;
+
+      let con = _.Consequence().take( null );
+      con.then( () =>
+      {
+        time = _.time.now();
+        throw _.err( 'Error!' );
+      })
+
+      let singleErrorBefore =
+      {
+        execPath : mode === 'fork' ? [ testAppPath + ' 1000' ] : [ 'node ' + testAppPath + ' 1000' ],
+        mode,
+        ready : con,
+        verbosity : 3,
+        outputCollecting : 1,
+      }
+
+      return _.process.start( singleErrorBefore )
+      .finally( ( err, arg ) =>
+      {
+        test.is( arg === undefined );
+        test.is( _.errIs( err ) );
+        test.identical( singleErrorBefore.exitCode, null );
+        test.identical( singleErrorBefore.output, '' );
+        test.is( !a.fileProvider.fileExists( filePath ) );
+        _.errAttend( err );
+        counter += 1;
+        return null;
+      });
+    })
+
+    /* */
+
+    ready.then( ( arg ) =>
+    {
+      test.case = `mode : ${mode}, subprocesses, serial`;
+      time = _.time.now();
+
+      let subprocessesOptionsSerial =
+      {
+        execPath : mode === 'fork' ? [  testAppPath + ' 1000', testAppPath + ' 1' ] : [ 'node ' + testAppPath + ' 1000', 'node ' + testAppPath + ' 1' ],
+        mode,
+        outputCollecting : 1,
+        verbosity : 3,
+        concurrent : 0,
+      }
+
+      return _.process.start( subprocessesOptionsSerial )
+      .then( ( op ) =>
+      {
+
+        var spent = _.time.now() - time;
+        logger.log( 'Spent', spent );
+        test.gt( spent, context.t1 ); /* 1000 */
+        test.le( spent, context.t1 * 5 ); /* 5000 */
+
+        test.identical( subprocessesOptionsSerial.exitCode, 0 );
+        test.identical( op.runs.length, 2 );
+        test.identical( a.fileProvider.fileRead( filePath ), 'written by 1' );
+        a.fileProvider.fileDelete( filePath );
+
+        test.identical( op.runs[ 0 ].exitCode, 0 );
+        test.is( _.strHas( op.runs[ 0 ].output, 'begin 1000' ) );
+        test.is( _.strHas( op.runs[ 0 ].output, 'end 1000' ) );
+
+        test.identical( op.runs[ 1 ].exitCode, 0 );
+        test.is( _.strHas( op.runs[ 1 ].output, 'begin 1' ) );
+        test.is( _.strHas( op.runs[ 1 ].output, 'end 1' ) );
+
+        counter += 1;
+        return null;
+      });
+    })
+
+    /* */
+
+    ready.then( ( arg ) =>
+    {
+      test.case = `mode : ${mode}, subprocesses, serial, error, throwingExitCode : 1`;
+      time = _.time.now();
+
+      let subprocessesError =
+      {
+        execPath : mode === 'fork' ? [ testAppPath + ' x', testAppPath + ' 1' ] : [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 1' ],
+        mode,
+        outputCollecting : 1,
+        verbosity : 3,
+        concurrent : 0,
+      }
+
+      return _.process.start( subprocessesError )
+      .finally( ( err, op ) =>
+      {
+
+        var spent = _.time.now() - time;
+        logger.log( 'Spent', spent );
+        test.gt( spent, 0 );
+        test.le( spent, context.t1 * 5 ); /* 5000 */
+
+        test.identical( subprocessesError.exitCode, 1 );
+        test.is( _.errIs( err ) );
+        test.is( op === undefined );
+        test.is( !a.fileProvider.fileExists( filePath ) );
+
+        _.errAttend( err );
+        counter += 1;
+        return null;
+      });
+    })
+
+    /* */
+
+    ready.then( ( arg ) =>
+    {
+      test.case = `mode : ${mode}, subprocesses, serial, error, throwingExitCode : 0`;
+      time = _.time.now();
+
+      let subprocessesErrorNonThrowing =
+      {
+        execPath : mode === 'fork' ? [ testAppPath + ' x', testAppPath + ' 1' ] : [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 1' ],
+        mode,
+        outputCollecting : 1,
+        verbosity : 3,
+        concurrent : 0,
+        throwingExitCode : 0,
+      }
+
+      return _.process.start( subprocessesErrorNonThrowing )
+      .finally( ( err, op ) =>
+      {
+        test.is( !err );
+
+        var spent = _.time.now() - time;
+        logger.log( 'Spent', spent );
+        test.gt( spent, 0 );
+        test.le( spent, context.t1 * 5 ); /* 5000 */
+
+        test.identical( subprocessesErrorNonThrowing.exitCode, 1 );
+        test.identical( op.runs.length, 2 );
+        test.identical( a.fileProvider.fileRead( filePath ), 'written by 1' );
+        a.fileProvider.fileDelete( filePath );
+
+        test.identical( op.runs[ 0 ].exitCode, 1 );
+        test.is( _.strHas( op.runs[ 0 ].output, 'begin x' ) );
+        test.is( !_.strHas( op.runs[ 0 ].output, 'end x' ) );
+        test.is( _.strHas( op.runs[ 0 ].output, 'Expects number' ) );
+
+        test.identical( op.runs[ 1 ].exitCode, 0 );
+        test.is( _.strHas( op.runs[ 1 ].output, 'begin 1' ) );
+        test.is( _.strHas( op.runs[ 1 ].output, 'end 1' ) );
+
+        counter += 1;
+        return null;
+      });
+    });
+
+    /* */
+
+    ready.then( ( arg ) =>
+    {
+      test.case = `mode : ${mode}, subprocesses, concurrent : 1, error, throwingExitCode : 1`;
+      time = _.time.now();
+
+      let subprocessesErrorConcurrent =
+      {
+        execPath : mode === 'fork' ? [ testAppPath + ' x', testAppPath + ' 1' ] : [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 1' ],
+        mode,
+        outputCollecting : 1,
+        verbosity : 3,
+        concurrent : 1,
+      }
+
+      return _.process.start( subprocessesErrorConcurrent )
+      .finally( ( err, op ) =>
+      {
+
+        var spent = _.time.now() - time;
+        logger.log( 'Spent', spent );
+        test.gt( spent, 0 );
+        test.le( spent, context.t1 * 5 ); /* 5000 */
+
+        test.identical( subprocessesErrorConcurrent.exitCode, 1 );
+        test.is( _.errIs( err ) );
+        test.is( op === undefined );
+        test.identical( a.fileProvider.fileRead( filePath ), 'written by 1' );
+        a.fileProvider.fileDelete( filePath );
+
+        _.errAttend( err );
+        counter += 1;
+        return null;
+      });
+    });
+
+    /* */
+
+    ready.then( ( arg ) =>
+    {
+      test.case = `mode : ${mode}, subprocesses, concurrent : 1, error, throwingExitCode : 0`;
+      time = _.time.now();
+
+      let subprocessesErrorConcurrentNonThrowing =
+      {
+        execPath : mode === 'fork' ? [ testAppPath + ' x', testAppPath + ' 1' ] : [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 1' ],
+        mode,
+        outputCollecting : 1,
+        verbosity : 3,
+        concurrent : 1,
+        throwingExitCode : 0,
+      }
+
+      return _.process.start( subprocessesErrorConcurrentNonThrowing )
+      .finally( ( err, op ) =>
+      {
+        test.is( !err );
+
+        var spent = _.time.now() - time;
+        logger.log( 'Spent', spent );
+        test.gt( spent, 0 );
+        test.le( spent, context.t1 * 5 ); /* 5000 */
+
+        test.identical( subprocessesErrorConcurrentNonThrowing.exitCode, 1 );
+        test.identical( op.runs.length, 2 );
+        test.identical( a.fileProvider.fileRead( filePath ), 'written by 1' );
+        a.fileProvider.fileDelete( filePath );
+
+        test.identical( op.runs[ 0 ].exitCode, 1 );
+        test.is( _.strHas( op.runs[ 0 ].output, 'begin x' ) );
+        test.is( !_.strHas( op.runs[ 0 ].output, 'end x' ) );
+        test.is( _.strHas( op.runs[ 0 ].output, 'Expects number' ) );
+
+        test.identical( op.runs[ 1 ].exitCode, 0 );
+        test.is( _.strHas( op.runs[ 1 ].output, 'begin 1' ) );
+        test.is( _.strHas( op.runs[ 1 ].output, 'end 1' ) );
+
+        counter += 1;
+        return null;
+      });
+    })
+
+    /* */
+
+    ready.then( ( arg ) =>
+    {
+      test.case = `mode : ${mode}, subprocesses, concurrent : 1`;
+      time = _.time.now();
+
+      let suprocessesConcurrentOptions =
+      {
+        execPath : mode === 'fork' ? [ testAppPath + ' 1000', testAppPath + ' 100' ] : [ 'node ' + testAppPath + ' 1000', 'node ' + testAppPath + ' 100' ],
+        mode,
+        outputCollecting : 1,
+        verbosity : 3,
+        concurrent : 1,
+      }
+
+      return _.process.start( suprocessesConcurrentOptions )
+      .then( ( op ) =>
+      {
+
+        var spent = _.time.now() - time;
+        logger.log( 'Spent', spent )
+        test.gt( spent, context.t1 ); /* 1000 */
+        test.le( spent, context.t1 * 5 ); /* 5000 */
+
+        test.identical( suprocessesConcurrentOptions.exitCode, 0 );
+        test.identical( op.runs.length, 2 );
+        test.identical( a.fileProvider.fileRead( filePath ), 'written by 1000' );
+        a.fileProvider.fileDelete( filePath );
+
+        test.identical( op.runs[ 0 ].exitCode, 0 );
+        test.is( _.strHas( op.runs[ 0 ].output, 'begin 1000' ) );
+        test.is( _.strHas( op.runs[ 0 ].output, 'end 1000' ) );
+
+        test.identical( op.runs[ 1 ].exitCode, 0 );
+        test.is( _.strHas( op.runs[ 1 ].output, 'begin 100' ) );
+        test.is( _.strHas( op.runs[ 1 ].output, 'end 100' ) );
+
+        counter += 1;
+        return null;
+      });
+    })
+
+    /* */
+
+    ready.then( ( arg ) =>
+    {
+      test.case = `mode : ${mode}, args`;
+      time = _.time.now();
+
+      let suprocessesConcurrentArgumentsOptions =
+      {
+        execPath : mode === 'fork' ? [ testAppPath + ' 1000', testAppPath + ' 100' ] : [ 'node ' + testAppPath + ' 1000', 'node ' + testAppPath + ' 100' ],
+        args : [ 'second', 'argument' ],
+        mode,
+        outputCollecting : 1,
+        verbosity : 3,
+        concurrent : 1,
+      }
+
+      return _.process.start( suprocessesConcurrentArgumentsOptions )
+      .then( ( op ) =>
+      {
+        var spent = _.time.now() - time;
+        logger.log( 'Spent', spent )
+        test.gt( spent, context.t1 ); /* 1000 */
+        test.le( spent, context.t1 * 5 ); /* 5000 */
+
+        test.identical( suprocessesConcurrentArgumentsOptions.exitCode, 0 );
+        test.identical( op.runs.length, 2 );
+        test.identical( a.fileProvider.fileRead( filePath ), 'written by 1000' );
+        a.fileProvider.fileDelete( filePath );
+
+        test.identical( op.runs[ 0 ].exitCode, 0 );
+        test.is( _.strHas( op.runs[ 0 ].output, 'begin 1000, second, argument' ) );
+        test.is( _.strHas( op.runs[ 0 ].output, 'end 1000, second, argument' ) );
+
+        test.identical( op.runs[ 1 ].exitCode, 0 );
+        test.is( _.strHas( op.runs[ 1 ].output, 'begin 100, second, argument' ) );
+        test.is( _.strHas( op.runs[ 1 ].output, 'end 100, second, argument' ) );
+
+        counter += 1;
+        return null;
+      });
+    });
+
+    /* */
+
+    return ready.finally( ( err, arg ) =>
+    {
+      test.identical( counter, 11 );
+      if( err )
+      throw err;
+      return arg;
+    });
   }
 
-  _.process.start( singleOption )
-  .then( ( arg ) =>
-  {
+  /* ORIGINAL */
+  // a.ready.then( ( arg ) =>
+  // {
+  //   test.case = 'single';
+  //   time = _.time.now();
+  //   return null;
+  // })
 
-    test.identical( arg.exitCode, 0 );
-    test.is( singleOption === arg );
-    test.is( _.strHas( arg.output, 'begin 1000' ) );
-    test.is( _.strHas( arg.output, 'end 1000' ) );
-    test.identical( a.fileProvider.fileRead( filePath ), 'written by 1000' );
-    a.fileProvider.fileDelete( filePath );
-    counter += 1;
-    return null;
-  });
+  // let singleOption =
+  // {
+  //   execPath : 'node ' + testAppPath + ' 1000',
+  //   ready : a.ready,
+  //   verbosity : 3,
+  //   outputCollecting : 1,
+  // }
+
+  // _.process.start( singleOption )
+  // .then( ( arg ) =>
+  // {
+
+  //   test.identical( arg.exitCode, 0 );
+  //   test.is( singleOption === arg );
+  //   test.is( _.strHas( arg.output, 'begin 1000' ) );
+  //   test.is( _.strHas( arg.output, 'end 1000' ) );
+  //   test.identical( a.fileProvider.fileRead( filePath ), 'written by 1000' );
+  //   a.fileProvider.fileDelete( filePath );
+  //   counter += 1;
+  //   return null;
+  // });
+
+  // /* - */
+
+  // a.ready.then( ( arg ) =>
+  // {
+  //   test.case = 'single, execPath in array';
+  //   time = _.time.now();
+  //   return null;
+  // })
+
+  // let singleExecPathInArrayOptions =
+  // {
+  //   execPath : [ 'node ' + testAppPath + ' 1000' ],
+  //   ready : a.ready,
+  //   verbosity : 3,
+  //   outputCollecting : 1,
+  // }
+
+  // _.process.start( singleExecPathInArrayOptions )
+  // .then( ( op ) =>
+  // {
+
+  //   test.identical( op.runs.length, 1 );
+  //   test.identical( op.runs[ 0 ].exitCode, 0 );
+  //   test.is( singleExecPathInArrayOptions !== op.runs[ 0 ] );
+  //   test.is( _.strHas( op.runs[ 0 ].output, 'begin 1000' ) );
+  //   test.is( _.strHas( op.runs[ 0 ].output, 'end 1000' ) );
+  //   test.identical( a.fileProvider.fileRead( filePath ), 'written by 1000' );
+  //   a.fileProvider.fileDelete( filePath );
+
+  //   counter += 1;
+  //   return null;
+  // });
+
+  // /* - */
+
+  // a.ready.then( ( arg ) =>
+  // {
+  //   test.case = 'single, error in ready';
+  //   time = _.time.now();
+  //   throw _.err( 'Error!' );
+  // })
+
+  // let singleErrorBeforeScalar =
+  // {
+  //   execPath : 'node ' + testAppPath + ' 1000',
+  //   ready : a.ready,
+  //   verbosity : 3,
+  //   outputCollecting : 1,
+  // }
+
+  // _.process.start( singleErrorBeforeScalar )
+  // .finally( ( err, arg ) =>
+  // {
+  //   test.is( arg === undefined );
+  //   test.is( _.errIs( err ) );
+  //   test.identical( singleErrorBeforeScalar.exitCode, null );
+  //   test.identical( singleErrorBeforeScalar.output, '' );
+  //   test.is( !a.fileProvider.fileExists( filePath ) );
+  //   _.errAttend( err );
+  //   counter += 1;
+  //   return null;
+  // });
+
+  // /* - */
+
+  // a.ready.then( ( arg ) =>
+  // {
+  //   test.case = 'single, error in ready';
+  //   time = _.time.now();
+  //   throw _.err( 'Error!' );
+  // })
+
+  // let singleErrorBefore =
+  // {
+  //   execPath : [ 'node ' + testAppPath + ' 1000' ],
+  //   ready : a.ready,
+  //   verbosity : 3,
+  //   outputCollecting : 1,
+  // }
+
+  // _.process.start( singleErrorBefore )
+  // .finally( ( err, arg ) =>
+  // {
+
+  //   test.is( arg === undefined );
+  //   test.is( _.errIs( err ) );
+  //   test.identical( singleErrorBefore.exitCode, null );
+  //   test.identical( singleErrorBefore.output, '' );
+  //   test.is( !a.fileProvider.fileExists( filePath ) );
+
+  //   _.errAttend( err );
+  //   counter += 1;
+  //   return null;
+  // });
+
+  // /* - */
+
+  // a.ready.then( ( arg ) =>
+  // {
+  //   test.case = 'subprocesses, serial';
+  //   time = _.time.now();
+  //   return null;
+  // })
+
+  // let subprocessesOptionsSerial =
+  // {
+  //   execPath :  [ 'node ' + testAppPath + ' 1000', 'node ' + testAppPath + ' 1' ],
+  //   ready : a.ready,
+  //   outputCollecting : 1,
+  //   verbosity : 3,
+  //   concurrent : 0,
+  // }
+
+  // _.process.start( subprocessesOptionsSerial )
+  // .then( ( op ) =>
+  // {
+
+  //   var spent = _.time.now() - time;
+  //   logger.log( 'Spent', spent );
+  //   test.gt( spent, context.t1 ); /* 1000 */
+  //   test.le( spent, context.t1 * 5 ); /* 5000 */
+
+  //   test.identical( subprocessesOptionsSerial.exitCode, 0 );
+  //   test.identical( op.runs.length, 2 );
+  //   test.identical( a.fileProvider.fileRead( filePath ), 'written by 1' );
+  //   a.fileProvider.fileDelete( filePath );
+
+  //   test.identical( op.runs[ 0 ].exitCode, 0 );
+  //   test.is( _.strHas( op.runs[ 0 ].output, 'begin 1000' ) );
+  //   test.is( _.strHas( op.runs[ 0 ].output, 'end 1000' ) );
+
+  //   test.identical( op.runs[ 1 ].exitCode, 0 );
+  //   test.is( _.strHas( op.runs[ 1 ].output, 'begin 1' ) );
+  //   test.is( _.strHas( op.runs[ 1 ].output, 'end 1' ) );
+
+  //   counter += 1;
+  //   return null;
+  // });
+
+  // /* - */
+
+  // a.ready.then( ( arg ) =>
+  // {
+  //   test.case = 'subprocesses, serial, error, throwingExitCode : 1';
+  //   time = _.time.now();
+  //   return null;
+  // })
+
+  // let subprocessesError =
+  // {
+  //   execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 1' ],
+  //   ready : a.ready,
+  //   outputCollecting : 1,
+  //   verbosity : 3,
+  //   concurrent : 0,
+  // }
+
+  // _.process.start( subprocessesError )
+  // .finally( ( err, op ) =>
+  // {
+
+  //   var spent = _.time.now() - time;
+  //   logger.log( 'Spent', spent );
+  //   test.gt( spent, 0 );
+  //   test.le( spent, context.t1 * 5 ); /* 5000 */
+
+  //   test.identical( subprocessesError.exitCode, 1 );
+  //   test.is( _.errIs( err ) );
+  //   test.is( op === undefined );
+  //   test.is( !a.fileProvider.fileExists( filePath ) );
+
+  //   _.errAttend( err );
+  //   counter += 1;
+  //   return null;
+  // });
+
+  // /* - */
+
+  // a.ready.then( ( arg ) =>
+  // {
+  //   test.case = 'subprocesses, serial, error, throwingExitCode : 0';
+  //   time = _.time.now();
+  //   return null;
+  // })
+
+  // let subprocessesErrorNonThrowing =
+  // {
+  //   execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 1' ],
+  //   ready : a.ready,
+  //   outputCollecting : 1,
+  //   verbosity : 3,
+  //   concurrent : 0,
+  //   throwingExitCode : 0,
+  // }
+
+  // _.process.start( subprocessesErrorNonThrowing )
+  // .finally( ( err, op ) =>
+  // {
+  //   test.is( !err );
+
+  //   var spent = _.time.now() - time;
+  //   logger.log( 'Spent', spent );
+  //   test.gt( spent, 0 );
+  //   test.le( spent, context.t1 * 5 ); /* 5000 */
+
+  //   test.identical( subprocessesErrorNonThrowing.exitCode, 1 );
+  //   test.identical( op.runs.length, 2 );
+  //   test.identical( a.fileProvider.fileRead( filePath ), 'written by 1' );
+  //   a.fileProvider.fileDelete( filePath );
+
+  //   test.identical( op.runs[ 0 ].exitCode, 1 );
+  //   test.is( _.strHas( op.runs[ 0 ].output, 'begin x' ) );
+  //   test.is( !_.strHas( op.runs[ 0 ].output, 'end x' ) );
+  //   test.is( _.strHas( op.runs[ 0 ].output, 'Expects number' ) );
+
+  //   test.identical( op.runs[ 1 ].exitCode, 0 );
+  //   test.is( _.strHas( op.runs[ 1 ].output, 'begin 1' ) );
+  //   test.is( _.strHas( op.runs[ 1 ].output, 'end 1' ) );
+
+  //   counter += 1;
+  //   return null;
+  // });
+
+  // /* - */
+
+  // a.ready.then( ( arg ) =>
+  // {
+  //   test.case = 'subprocesses, concurrent : 1, error, throwingExitCode : 1';
+  //   time = _.time.now();
+  //   return null;
+  // })
+
+  // let subprocessesErrorConcurrent =
+  // {
+  //   execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 1' ],
+  //   ready : a.ready,
+  //   outputCollecting : 1,
+  //   verbosity : 3,
+  //   concurrent : 1,
+  // }
+
+  // _.process.start( subprocessesErrorConcurrent )
+  // .finally( ( err, op ) =>
+  // {
+
+  //   var spent = _.time.now() - time;
+  //   logger.log( 'Spent', spent );
+  //   test.gt( spent, 0 );
+  //   test.le( spent, context.t1 * 5 ); /* 5000 */
+
+  //   test.identical( subprocessesErrorConcurrent.exitCode, 1 );
+  //   test.is( _.errIs( err ) );
+  //   test.is( op === undefined );
+  //   test.identical( a.fileProvider.fileRead( filePath ), 'written by 1' );
+  //   a.fileProvider.fileDelete( filePath );
+
+  //   _.errAttend( err );
+  //   counter += 1;
+  //   return null;
+  // });
+
+  // /* - */
+
+  // a.ready.then( ( arg ) =>
+  // {
+  //   test.case = 'subprocesses, concurrent : 1, error, throwingExitCode : 0';
+  //   time = _.time.now();
+  //   return null;
+  // })
+
+  // let subprocessesErrorConcurrentNonThrowing =
+  // {
+  //   execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 1' ],
+  //   ready : a.ready,
+  //   outputCollecting : 1,
+  //   verbosity : 3,
+  //   concurrent : 1,
+  //   throwingExitCode : 0,
+  // }
+
+  // _.process.start( subprocessesErrorConcurrentNonThrowing )
+  // .finally( ( err, op ) =>
+  // {
+  //   test.is( !err );
+
+  //   var spent = _.time.now() - time;
+  //   logger.log( 'Spent', spent );
+  //   test.gt( spent, 0 );
+  //   test.le( spent, context.t1 * 5 ); /* 5000 */
+
+  //   test.identical( subprocessesErrorConcurrentNonThrowing.exitCode, 1 );
+  //   test.identical( op.runs.length, 2 );
+  //   test.identical( a.fileProvider.fileRead( filePath ), 'written by 1' );
+  //   a.fileProvider.fileDelete( filePath );
+
+  //   test.identical( op.runs[ 0 ].exitCode, 1 );
+  //   test.is( _.strHas( op.runs[ 0 ].output, 'begin x' ) );
+  //   test.is( !_.strHas( op.runs[ 0 ].output, 'end x' ) );
+  //   test.is( _.strHas( op.runs[ 0 ].output, 'Expects number' ) );
+
+  //   test.identical( op.runs[ 1 ].exitCode, 0 );
+  //   test.is( _.strHas( op.runs[ 1 ].output, 'begin 1' ) );
+  //   test.is( _.strHas( op.runs[ 1 ].output, 'end 1' ) );
+
+  //   counter += 1;
+  //   return null;
+  // });
+
+  // /* - */
+
+  // a.ready.then( ( arg ) =>
+  // {
+  //   test.case = 'subprocesses, concurrent : 1';
+  //   time = _.time.now();
+  //   return null;
+  // })
+
+  // let suprocessesConcurrentOptions =
+  // {
+  //   execPath :  [ 'node ' + testAppPath + ' 1000', 'node ' + testAppPath + ' 100' ],
+  //   ready : a.ready,
+  //   outputCollecting : 1,
+  //   verbosity : 3,
+  //   concurrent : 1,
+  // }
+
+  // _.process.start( suprocessesConcurrentOptions )
+  // .then( ( op ) =>
+  // {
+
+  //   var spent = _.time.now() - time;
+  //   logger.log( 'Spent', spent )
+  //   test.gt( spent, context.t1 ); /* 1000 */
+  //   test.le( spent, context.t1 * 5 ); /* 5000 */
+
+  //   test.identical( suprocessesConcurrentOptions.exitCode, 0 );
+  //   test.identical( op.runs.length, 2 );
+  //   test.identical( a.fileProvider.fileRead( filePath ), 'written by 1000' );
+  //   a.fileProvider.fileDelete( filePath );
+
+  //   test.identical( op.runs[ 0 ].exitCode, 0 );
+  //   test.is( _.strHas( op.runs[ 0 ].output, 'begin 1000' ) );
+  //   test.is( _.strHas( op.runs[ 0 ].output, 'end 1000' ) );
+
+  //   test.identical( op.runs[ 1 ].exitCode, 0 );
+  //   test.is( _.strHas( op.runs[ 1 ].output, 'begin 100' ) );
+  //   test.is( _.strHas( op.runs[ 1 ].output, 'end 100' ) );
+
+  //   counter += 1;
+  //   return null;
+  // });
+
+  // /* - */
+
+  // a.ready.then( ( arg ) =>
+  // {
+  //   test.case = 'args';
+  //   time = _.time.now();
+  //   return null;
+  // })
+
+  // let suprocessesConcurrentArgumentsOptions =
+  // {
+  //   execPath :  [ 'node ' + testAppPath + ' 1000', 'node ' + testAppPath + ' 100' ],
+  //   args : [ 'second', 'argument' ],
+  //   ready : a.ready,
+  //   outputCollecting : 1,
+  //   verbosity : 3,
+  //   concurrent : 1,
+  // }
+
+  // _.process.start( suprocessesConcurrentArgumentsOptions )
+  // .then( ( op ) =>
+  // {
+  //   var spent = _.time.now() - time;
+  //   logger.log( 'Spent', spent )
+  //   test.gt( spent, context.t1 ); /* 1000 */
+  //   test.le( spent, context.t1 * 5 ); /* 5000 */
+
+  //   test.identical( suprocessesConcurrentArgumentsOptions.exitCode, 0 );
+  //   test.identical( op.runs.length, 2 );
+  //   test.identical( a.fileProvider.fileRead( filePath ), 'written by 1000' );
+  //   a.fileProvider.fileDelete( filePath );
+
+  //   test.identical( op.runs[ 0 ].exitCode, 0 );
+  //   test.is( _.strHas( op.runs[ 0 ].output, 'begin 1000, second, argument' ) );
+  //   test.is( _.strHas( op.runs[ 0 ].output, 'end 1000, second, argument' ) );
+
+  //   test.identical( op.runs[ 1 ].exitCode, 0 );
+  //   test.is( _.strHas( op.runs[ 1 ].output, 'begin 100, second, argument' ) );
+  //   test.is( _.strHas( op.runs[ 1 ].output, 'end 100, second, argument' ) );
+
+  //   counter += 1;
+  //   return null;
+  // });
+
+  // /* - */
+
+  // return a.ready.finally( ( err, arg ) =>
+  // {
+  //   test.identical( counter, 11 );
+  //   if( err )
+  //   throw err;
+  //   return arg;
+  // });
 
   /* - */
-
-  a.ready.then( ( arg ) =>
-  {
-    test.case = 'single, execPath in array';
-    time = _.time.now();
-    return null;
-  })
-
-  let singleExecPathInArrayOptions =
-  {
-    execPath : [ 'node ' + testAppPath + ' 1000' ],
-    ready : a.ready,
-    verbosity : 3,
-    outputCollecting : 1,
-  }
-
-  _.process.start( singleExecPathInArrayOptions )
-  .then( ( op ) =>
-  {
-
-    test.identical( op.runs.length, 1 );
-    test.identical( op.runs[ 0 ].exitCode, 0 );
-    test.is( singleExecPathInArrayOptions !== op.runs[ 0 ] );
-    test.is( _.strHas( op.runs[ 0 ].output, 'begin 1000' ) );
-    test.is( _.strHas( op.runs[ 0 ].output, 'end 1000' ) );
-    test.identical( a.fileProvider.fileRead( filePath ), 'written by 1000' );
-    a.fileProvider.fileDelete( filePath );
-
-    counter += 1;
-    return null;
-  });
-
-  /* - */
-
-  a.ready.then( ( arg ) =>
-  {
-    test.case = 'single, error in ready';
-    time = _.time.now();
-    throw _.err( 'Error!' );
-  })
-
-  let singleErrorBeforeScalar =
-  {
-    execPath : 'node ' + testAppPath + ' 1000',
-    ready : a.ready,
-    verbosity : 3,
-    outputCollecting : 1,
-  }
-
-  _.process.start( singleErrorBeforeScalar )
-  .finally( ( err, arg ) =>
-  {
-    test.is( arg === undefined );
-    test.is( _.errIs( err ) );
-    test.identical( singleErrorBeforeScalar.exitCode, null );
-    test.identical( singleErrorBeforeScalar.output, '' );
-    test.is( !a.fileProvider.fileExists( filePath ) );
-    _.errAttend( err );
-    counter += 1;
-    return null;
-  });
-
-  /* - */
-
-  a.ready.then( ( arg ) =>
-  {
-    test.case = 'single, error in ready';
-    time = _.time.now();
-    throw _.err( 'Error!' );
-  })
-
-  let singleErrorBefore =
-  {
-    execPath : [ 'node ' + testAppPath + ' 1000' ],
-    ready : a.ready,
-    verbosity : 3,
-    outputCollecting : 1,
-  }
-
-  _.process.start( singleErrorBefore )
-  .finally( ( err, arg ) =>
-  {
-
-    test.is( arg === undefined );
-    test.is( _.errIs( err ) );
-    test.identical( singleErrorBefore.exitCode, null );
-    test.identical( singleErrorBefore.output, '' );
-    test.is( !a.fileProvider.fileExists( filePath ) );
-
-    _.errAttend( err );
-    counter += 1;
-    return null;
-  });
-
-  /* - */
-
-  a.ready.then( ( arg ) =>
-  {
-    test.case = 'subprocesses, serial';
-    time = _.time.now();
-    return null;
-  })
-
-  let subprocessesOptionsSerial =
-  {
-    execPath :  [ 'node ' + testAppPath + ' 1000', 'node ' + testAppPath + ' 1' ],
-    ready : a.ready,
-    outputCollecting : 1,
-    verbosity : 3,
-    concurrent : 0,
-  }
-
-  _.process.start( subprocessesOptionsSerial )
-  .then( ( op ) =>
-  {
-
-    var spent = _.time.now() - time;
-    logger.log( 'Spent', spent );
-    test.gt( spent, context.t1 ); /* 1000 */
-    test.le( spent, context.t1 * 5 ); /* 5000 */
-
-    test.identical( subprocessesOptionsSerial.exitCode, 0 );
-    test.identical( op.runs.length, 2 );
-    test.identical( a.fileProvider.fileRead( filePath ), 'written by 1' );
-    a.fileProvider.fileDelete( filePath );
-
-    test.identical( op.runs[ 0 ].exitCode, 0 );
-    test.is( _.strHas( op.runs[ 0 ].output, 'begin 1000' ) );
-    test.is( _.strHas( op.runs[ 0 ].output, 'end 1000' ) );
-
-    test.identical( op.runs[ 1 ].exitCode, 0 );
-    test.is( _.strHas( op.runs[ 1 ].output, 'begin 1' ) );
-    test.is( _.strHas( op.runs[ 1 ].output, 'end 1' ) );
-
-    counter += 1;
-    return null;
-  });
-
-  /* - */
-
-  a.ready.then( ( arg ) =>
-  {
-    test.case = 'subprocesses, serial, error, throwingExitCode : 1';
-    time = _.time.now();
-    return null;
-  })
-
-  let subprocessesError =
-  {
-    execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 1' ],
-    ready : a.ready,
-    outputCollecting : 1,
-    verbosity : 3,
-    concurrent : 0,
-  }
-
-  _.process.start( subprocessesError )
-  .finally( ( err, op ) =>
-  {
-
-    var spent = _.time.now() - time;
-    logger.log( 'Spent', spent );
-    test.gt( spent, 0 );
-    test.le( spent, context.t1 * 5 ); /* 5000 */
-
-    test.identical( subprocessesError.exitCode, 1 );
-    test.is( _.errIs( err ) );
-    test.is( op === undefined );
-    test.is( !a.fileProvider.fileExists( filePath ) );
-
-    _.errAttend( err );
-    counter += 1;
-    return null;
-  });
-
-  /* - */
-
-  a.ready.then( ( arg ) =>
-  {
-    test.case = 'subprocesses, serial, error, throwingExitCode : 0';
-    time = _.time.now();
-    return null;
-  })
-
-  let subprocessesErrorNonThrowing =
-  {
-    execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 1' ],
-    ready : a.ready,
-    outputCollecting : 1,
-    verbosity : 3,
-    concurrent : 0,
-    throwingExitCode : 0,
-  }
-
-  _.process.start( subprocessesErrorNonThrowing )
-  .finally( ( err, op ) =>
-  {
-    test.is( !err );
-
-    var spent = _.time.now() - time;
-    logger.log( 'Spent', spent );
-    test.gt( spent, 0 );
-    test.le( spent, context.t1 * 5 ); /* 5000 */
-
-    test.identical( subprocessesErrorNonThrowing.exitCode, 1 );
-    test.identical( op.runs.length, 2 );
-    test.identical( a.fileProvider.fileRead( filePath ), 'written by 1' );
-    a.fileProvider.fileDelete( filePath );
-
-    test.identical( op.runs[ 0 ].exitCode, 1 );
-    test.is( _.strHas( op.runs[ 0 ].output, 'begin x' ) );
-    test.is( !_.strHas( op.runs[ 0 ].output, 'end x' ) );
-    test.is( _.strHas( op.runs[ 0 ].output, 'Expects number' ) );
-
-    test.identical( op.runs[ 1 ].exitCode, 0 );
-    test.is( _.strHas( op.runs[ 1 ].output, 'begin 1' ) );
-    test.is( _.strHas( op.runs[ 1 ].output, 'end 1' ) );
-
-    counter += 1;
-    return null;
-  });
-
-  /* - */
-
-  a.ready.then( ( arg ) =>
-  {
-    test.case = 'subprocesses, concurrent : 1, error, throwingExitCode : 1';
-    time = _.time.now();
-    return null;
-  })
-
-  let subprocessesErrorConcurrent =
-  {
-    execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 1' ],
-    ready : a.ready,
-    outputCollecting : 1,
-    verbosity : 3,
-    concurrent : 1,
-  }
-
-  _.process.start( subprocessesErrorConcurrent )
-  .finally( ( err, op ) =>
-  {
-
-    var spent = _.time.now() - time;
-    logger.log( 'Spent', spent );
-    test.gt( spent, 0 );
-    test.le( spent, context.t1 * 5 ); /* 5000 */
-
-    test.identical( subprocessesErrorConcurrent.exitCode, 1 );
-    test.is( _.errIs( err ) );
-    test.is( op === undefined );
-    test.identical( a.fileProvider.fileRead( filePath ), 'written by 1' );
-    a.fileProvider.fileDelete( filePath );
-
-    _.errAttend( err );
-    counter += 1;
-    return null;
-  });
-
-  /* - */
-
-  a.ready.then( ( arg ) =>
-  {
-    test.case = 'subprocesses, concurrent : 1, error, throwingExitCode : 0';
-    time = _.time.now();
-    return null;
-  })
-
-  let subprocessesErrorConcurrentNonThrowing =
-  {
-    execPath :  [ 'node ' + testAppPath + ' x', 'node ' + testAppPath + ' 1' ],
-    ready : a.ready,
-    outputCollecting : 1,
-    verbosity : 3,
-    concurrent : 1,
-    throwingExitCode : 0,
-  }
-
-  _.process.start( subprocessesErrorConcurrentNonThrowing )
-  .finally( ( err, op ) =>
-  {
-    test.is( !err );
-
-    var spent = _.time.now() - time;
-    logger.log( 'Spent', spent );
-    test.gt( spent, 0 );
-    test.le( spent, context.t1 * 5 ); /* 5000 */
-
-    test.identical( subprocessesErrorConcurrentNonThrowing.exitCode, 1 );
-    test.identical( op.runs.length, 2 );
-    test.identical( a.fileProvider.fileRead( filePath ), 'written by 1' );
-    a.fileProvider.fileDelete( filePath );
-
-    test.identical( op.runs[ 0 ].exitCode, 1 );
-    test.is( _.strHas( op.runs[ 0 ].output, 'begin x' ) );
-    test.is( !_.strHas( op.runs[ 0 ].output, 'end x' ) );
-    test.is( _.strHas( op.runs[ 0 ].output, 'Expects number' ) );
-
-    test.identical( op.runs[ 1 ].exitCode, 0 );
-    test.is( _.strHas( op.runs[ 1 ].output, 'begin 1' ) );
-    test.is( _.strHas( op.runs[ 1 ].output, 'end 1' ) );
-
-    counter += 1;
-    return null;
-  });
-
-  /* - */
-
-  a.ready.then( ( arg ) =>
-  {
-    test.case = 'subprocesses, concurrent : 1';
-    time = _.time.now();
-    return null;
-  })
-
-  let suprocessesConcurrentOptions =
-  {
-    execPath :  [ 'node ' + testAppPath + ' 1000', 'node ' + testAppPath + ' 100' ],
-    ready : a.ready,
-    outputCollecting : 1,
-    verbosity : 3,
-    concurrent : 1,
-  }
-
-  _.process.start( suprocessesConcurrentOptions )
-  .then( ( op ) =>
-  {
-
-    var spent = _.time.now() - time;
-    logger.log( 'Spent', spent )
-    test.gt( spent, context.t1 ); /* 1000 */
-    test.le( spent, context.t1 * 5 ); /* 5000 */
-
-    test.identical( suprocessesConcurrentOptions.exitCode, 0 );
-    test.identical( op.runs.length, 2 );
-    test.identical( a.fileProvider.fileRead( filePath ), 'written by 1000' );
-    a.fileProvider.fileDelete( filePath );
-
-    test.identical( op.runs[ 0 ].exitCode, 0 );
-    test.is( _.strHas( op.runs[ 0 ].output, 'begin 1000' ) );
-    test.is( _.strHas( op.runs[ 0 ].output, 'end 1000' ) );
-
-    test.identical( op.runs[ 1 ].exitCode, 0 );
-    test.is( _.strHas( op.runs[ 1 ].output, 'begin 100' ) );
-    test.is( _.strHas( op.runs[ 1 ].output, 'end 100' ) );
-
-    counter += 1;
-    return null;
-  });
-
-  /* - */
-
-  a.ready.then( ( arg ) =>
-  {
-    test.case = 'args';
-    time = _.time.now();
-    return null;
-  })
-
-  let suprocessesConcurrentArgumentsOptions =
-  {
-    execPath :  [ 'node ' + testAppPath + ' 1000', 'node ' + testAppPath + ' 100' ],
-    args : [ 'second', 'argument' ],
-    ready : a.ready,
-    outputCollecting : 1,
-    verbosity : 3,
-    concurrent : 1,
-  }
-
-  _.process.start( suprocessesConcurrentArgumentsOptions )
-  .then( ( op ) =>
-  {
-    var spent = _.time.now() - time;
-    logger.log( 'Spent', spent )
-    test.gt( spent, context.t1 ); /* 1000 */
-    test.le( spent, context.t1 * 5 ); /* 5000 */
-
-    test.identical( suprocessesConcurrentArgumentsOptions.exitCode, 0 );
-    test.identical( op.runs.length, 2 );
-    test.identical( a.fileProvider.fileRead( filePath ), 'written by 1000' );
-    a.fileProvider.fileDelete( filePath );
-
-    test.identical( op.runs[ 0 ].exitCode, 0 );
-    test.is( _.strHas( op.runs[ 0 ].output, 'begin 1000, second, argument' ) );
-    test.is( _.strHas( op.runs[ 0 ].output, 'end 1000, second, argument' ) );
-
-    test.identical( op.runs[ 1 ].exitCode, 0 );
-    test.is( _.strHas( op.runs[ 1 ].output, 'begin 100, second, argument' ) );
-    test.is( _.strHas( op.runs[ 1 ].output, 'end 100, second, argument' ) );
-
-    counter += 1;
-    return null;
-  });
-
-  /* - */
-
-  return a.ready.finally( ( err, arg ) =>
-  {
-    test.identical( counter, 11 );
-    if( err )
-    throw err;
-    return arg;
-  });
 
   function program1()
   {
@@ -15105,7 +15551,7 @@ function startConcurrentMultiple( test )
 
 }
 
-startConcurrentMultiple.timeOut = 100000;
+startConcurrentMultiple.timeOut = 23e4; /* Locally : 22.686s */
 
 //
 
