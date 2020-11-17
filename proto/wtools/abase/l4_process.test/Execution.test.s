@@ -7985,6 +7985,7 @@ function startProcedureTrivial( test )
 
     ready.then( () =>
     {
+      test.case = `mode : ${mode}`
       var o = { execPath : `${mode === 'fork' ? '' : 'node ' }` + testAppPath, mode }
       var con = start( o );
       var procedure = _.procedure.find( 'PID:' + o.process.pid );
