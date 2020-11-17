@@ -10296,37 +10296,81 @@ function startAfterDeathOutput( test )
   let a = context.assetFor( test, false );
   let program1Path = a.program( program1 );
   let program2Path = a.program( program2 );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
 
-  a.ready
+  /* */
 
-  .then( () =>
+  function run( mode )
   {
-    let o =
-    {
-      execPath : 'node program1.js',
-      mode : 'spawn',
-      outputCollecting : 1,
-      currentPath : a.routinePath,
-      ipc : 1,
-    }
-    let con = _.process.start( o );
+    let ready = _.Consequence().take( null );
 
-    con.then( ( op ) =>
+    ready.then( () =>
     {
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      test.identical( _.strCount( op.output, 'program1::begin' ), 1 )
-      test.identical( _.strCount( op.output, 'program1::end' ), 1 )
-      test.identical( _.strCount( op.output, 'program2::begin' ), 1 )
-      test.identical( _.strCount( op.output, 'program2::end' ), 1 )
+      let o =
+      {
+        execPath : mode === 'fork' ? 'program1.js' : 'node program1.js',
+        mode,
+        outputCollecting : 1,
+        currentPath : a.routinePath,
+        ipc : 1,
+      }
 
-      return null;
+      if( mode === 'shell' ) /* mode::shell doesn't support ipc */
+      return test.shouldThrowErrorSync( () => _.process.start( o ) );
+
+      let con = _.process.start( o );
+
+      con.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.output, 'program1::begin' ), 1 )
+        test.identical( _.strCount( op.output, 'program1::end' ), 1 )
+        test.identical( _.strCount( op.output, 'program2::begin' ), 1 )
+        test.identical( _.strCount( op.output, 'program2::end' ), 1 )
+
+        return null;
+      })
+
+      return con;
     })
 
-    return con;
-  })
+    return ready;
+  }
 
-  return a.ready;
+  /* ORIGINAL */
+  // a.ready
+
+  // .then( () =>
+  // {
+  //   let o =
+  //   {
+  //     execPath : 'node program1.js',
+  //     mode : 'spawn',
+  //     outputCollecting : 1,
+  //     currentPath : a.routinePath,
+  //     ipc : 1,
+  //   }
+  //   let con = _.process.start( o );
+
+  //   con.then( ( op ) =>
+  //   {
+  //     test.identical( op.exitCode, 0 );
+  //     test.identical( op.ended, true );
+  //     test.identical( _.strCount( op.output, 'program1::begin' ), 1 )
+  //     test.identical( _.strCount( op.output, 'program1::end' ), 1 )
+  //     test.identical( _.strCount( op.output, 'program2::begin' ), 1 )
+  //     test.identical( _.strCount( op.output, 'program2::end' ), 1 )
+
+  //     return null;
+  //   })
+
+  //   return con;
+  // })
+
+  // return a.ready;
 
   /* - */
 
@@ -10378,6 +10422,7 @@ function startAfterDeathOutput( test )
   }
 }
 
+startAfterDeathOutput.timeOut = 27e4; /* Locally : 26.485s */
 startAfterDeathOutput.description =
 `
 Fakes death of program1 and checks output of program2
