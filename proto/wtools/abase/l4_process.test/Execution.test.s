@@ -10665,7 +10665,10 @@ function startDetachingNoTerminationBegin( test )
         test.is( a.fileProvider.fileExists( testFilePath ) );
         let childPid = a.fileProvider.fileRead( testFilePath );
         childPid = _.numberFrom( childPid );
-        test.identical( data.childPid, childPid )
+        if( mode === 'shell' && process.platform !== 'darwin' ) /* process in mode::shell on windows and linux has 2 processes: terminal and application */
+        test.is( !_.process.isAlive( childPid ) );
+        else
+        test.identical( data.childPid, childPid );
 
         a.fileProvider.fileDelete( testAppParentPath );
         a.fileProvider.fileDelete( testAppChildPath );
@@ -10764,7 +10767,10 @@ function startDetachingNoTerminationBegin( test )
         test.is( a.fileProvider.fileExists( testFilePath ) );
         let childPid = a.fileProvider.fileRead( testFilePath );
         childPid = _.numberFrom( childPid );
-        test.identical( data.childPid, childPid )
+        if( mode === 'shell' && process.platform !== 'darwin' ) /* process in mode::shell on windows and linux has 2 processes: terminal and application */
+        test.is( !_.process.isAlive( childPid ) );
+        else
+        test.identical( data.childPid, childPid );
 
         a.fileProvider.fileDelete( testAppParentPath );
         a.fileProvider.fileDelete( testAppChildPath );
