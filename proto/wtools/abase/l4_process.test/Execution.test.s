@@ -13592,7 +13592,7 @@ function startNjsDetachingChildThrowing( test )
         test.notIdentical( op.exitCode, 0 );
         test.identical( op.ended, true );
         if( mode === 'shell' && process.platform === 'win32' ) /* on platform Windows in mode::shell no output from error.message */
-        test.is( _.strHas( op.output, '' ) );
+        test.identical( op.output, '' );
         else
         test.is( _.strHas( op.output, 'Child process error' ) );
         test.identical( o.exitCode, op.exitCode );
