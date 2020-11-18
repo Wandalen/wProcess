@@ -34261,11 +34261,9 @@ function terminateSeveralChildren( test )
 
       let program2Pid = null;
       let program3Pid = null;
-      let terminate = _.Consequence();
+      let terminate = _.Consequence({ capacity : 0 });
 
       o.process.stdout.on( 'data', _.routineJoin( null, handleOutput, [ o, terminate ] ) );
-      // o.process.stdout.on( 'data', handleOutput.bind( null, o, terminate ) );
-      // o.process.stdout.on( 'data', handleOutput );
 
       terminate.then( () =>
       {
@@ -34308,18 +34306,7 @@ function terminateSeveralChildren( test )
       })
 
       return _.Consequence.AndKeep( terminate, o.conTerminate );
-
     })
-
-    // function handleOutput()
-    // {
-    //   console.log( 'OO:', o.output )
-    //   if( !_.strHas( o.output, 'program2::begin' ) || !_.strHas( o.output, 'program3::begin' ) )
-    //   return;
-
-    //   o.process.stdout.removeListener( 'data', handleOutput );
-    //   terminate.take( null );
-    // }
 
     return ready;
   }
@@ -34468,20 +34455,8 @@ function terminateSeveralChildren( test )
 
   /* - */
 
-  // function handleOutput( o, terminate, output )
-  // {
-  //   console.log( 'outtostr: ', output.toString() )
-  //   if( !_.strHas( output.toString(), 'program2::begin' ) || !_.strHas( output.toString(), 'program3::begin' ) )
-  //   return;
-
-  //   o.process.stdout.removeListener( 'data', handleOutput );
-  //   terminate.take( null );
-  // }
-
-  function handleOutput( o, terminate, out )
+  function handleOutput( o, terminate )
   {
-    // console.log( 'OO:', o.output )
-    let a = out;
     if( !_.strHas( o.output, 'program2::begin' ) || !_.strHas( o.output, 'program3::begin' ) )
     return;
 
@@ -34573,6 +34548,8 @@ function terminateSeveralChildren( test )
   }
 
 }
+
+terminateSeveralChildren.timeOut = 9e4; /* Locally : 8.680s */
 
 //
 
