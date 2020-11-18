@@ -34650,34 +34650,77 @@ function terminateDeadProcess( test )
   let context = this;
   let a = context.assetFor( test, false );
   let testAppPath = a.program( program1 );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
 
-  let o =
+  function run( mode )
   {
-    execPath : 'node program1.js',
-    currentPath : a.routinePath,
-    mode : 'spawn',
-    outputPiping : 1,
-    outputCollecting : 1,
-    throwingExitCode : 0
+    let ready = _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}`;
+      let o =
+      {
+        execPath : mode === 'fork' ? 'program1.js' : 'node program1.js',
+        currentPath : a.routinePath,
+        mode,
+        outputPiping : 1,
+        outputCollecting : 1,
+        throwingExitCode : 0
+      }
+
+      _.process.start( o );
+
+      o.conTerminate.then( () =>
+      {
+        test.identical( o.exitCode, 0 )
+        test.identical( o.exitSignal, null );
+        return _.process.terminate({ pid : o.process.pid, withChildren : 0 });
+      })
+
+      o.conTerminate.then( ( got ) =>
+      {
+        test.identical( got, true );
+        let con = _.process.terminate({ pid : o.process.pid, withChildren : 1 });
+        return test.shouldThrowErrorAsync( con );
+      })
+
+      return o.conTerminate;
+    })
+
+    return ready;
   }
 
-  _.process.start( o );
+  /* ORIGINAL */
+  // let o =
+  // {
+  //   execPath : 'node program1.js',
+  //   currentPath : a.routinePath,
+  //   mode : 'spawn',
+  //   outputPiping : 1,
+  //   outputCollecting : 1,
+  //   throwingExitCode : 0
+  // }
 
-  o.conTerminate.then( () =>
-  {
-    test.identical( o.exitCode, 0 )
-    test.identical( o.exitSignal, null );
-    return _.process.terminate({ pid : o.process.pid, withChildren : 0 });
-  })
+  // _.process.start( o );
 
-  o.conTerminate.then( ( got ) =>
-  {
-    test.identical( got, true );
-    let con = _.process.terminate({ pid : o.process.pid, withChildren : 1 });
-    return test.shouldThrowErrorAsync( con );
-  })
+  // o.conTerminate.then( () =>
+  // {
+  //   test.identical( o.exitCode, 0 )
+  //   test.identical( o.exitSignal, null );
+  //   return _.process.terminate({ pid : o.process.pid, withChildren : 0 });
+  // })
 
-  return o.conTerminate;
+  // o.conTerminate.then( ( got ) =>
+  // {
+  //   test.identical( got, true );
+  //   let con = _.process.terminate({ pid : o.process.pid, withChildren : 1 });
+  //   return test.shouldThrowErrorAsync( con );
+  // })
+
+  // return o.conTerminate;
 
   /* - */
 
