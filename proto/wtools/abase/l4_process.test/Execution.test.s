@@ -26684,224 +26684,302 @@ function kill( test )
   let context = this;
   let a = context.assetFor( test, false );
   let testAppPath = a.program( testApp );
-
-  /* */
-
   var expectedOutput = testAppPath + '\n';
-
-  /* */
-
-  a.ready
-
-  .then( () =>
-  {
-    test.case = `mode:spawn, kill child process using process descriptor`
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'spawn',
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    _.time.out( context.t1*2, () => _.process.kill( o.process ) ) /* 1000 */
-
-    ready.then( ( op ) =>
-    {
-      test.identical( op.exitCode, null );
-      test.identical( op.ended, true );
-      test.identical( op.exitSignal, 'SIGKILL' );
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      return null;
-    })
-
-    return ready;
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    test.case = `mode:spawn, kill child process using process id`
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'spawn',
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    _.time.out( context.t1*2, () => _.process.kill( o.process.pid ) ) /* 1000 */
-
-    ready.then( ( op ) =>
-    {
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, 1 );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, null );
-      }
-      else
-      {
-        test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGKILL' );
-      }
-
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      return null;
-    })
-
-    return ready;
-  })
-
-  /* fork */
-
-  .then( () =>
-  {
-    test.case = `mode:fork, kill child process using process descriptor`
-    var o =
-    {
-      execPath : testAppPath,
-      mode : 'fork',
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    _.time.out( context.t1*2, () => _.process.kill( o.process ) ) /* 1000 */
-
-    ready.then( ( op ) =>
-    {
-      test.identical( op.exitCode, null );
-      test.identical( op.ended, true );
-      test.identical( op.exitSignal, 'SIGKILL' );
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      return null;
-    })
-
-    return ready;
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    test.case = `mode:fork, kill child process using process id`
-    var o =
-    {
-      execPath : testAppPath,
-      mode : 'fork',
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    _.time.out( context.t1*2, () => _.process.kill( o.process.pid ) ) /* 1000 */
-
-    ready.then( ( op ) =>
-    {
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, 1 );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, null );
-      }
-      else
-      {
-        test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGKILL' );
-      }
-
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      return null;
-    })
-
-    return ready;
-  })
-
-  /* shell */
-
-  .then( () =>
-  {
-    test.case = `mode:shell, kill child process using process descriptor`
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'shell',
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    _.time.out( context.t1*2, () => _.process.kill( o.process ) ) /* 1000 */
-
-    ready.then( ( op ) =>
-    {
-      test.identical( op.exitCode, null );
-      test.identical( op.ended, true );
-      test.identical( op.exitSignal, 'SIGKILL' );
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
-      return null;
-    })
-
-    return ready;
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    test.case = `mode:shell, kill child process using process id`
-
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'shell',
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o )
-
-    _.time.out( context.t1*2, () => _.process.kill( o.process.pid ) ) /* 1000 */
-
-    ready.then( ( op ) =>
-    {
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, 1 );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, null );
-      }
-      else
-      {
-        test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGKILL' );
-      }
-
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
-
-      return null;
-    })
-
-    return ready;
-  })
-
-  /* zzz for Vova : find how to simulate EPERM error using process.kill and write test case */
-
-  /* */
-
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
+
+  /* */
+
+  function run( mode )
+  {
+    let ready = _.Consequence().take( null );
+
+    ready
+
+    .then( () =>
+    {
+      test.case = `mode : ${mode}, kill child process using process descriptor`
+      var o =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+        outputCollecting : 1,
+        throwingExitCode : 0
+      }
+
+      let returned = _.process.start( o )
+
+      _.time.out( context.t1*2, () => _.process.kill( o.process ) ) /* 1000 */
+
+      returned.then( ( op ) =>
+      {
+        test.identical( op.exitCode, null );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGKILL' );
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+        return null;
+      })
+
+      return returned;
+    })
+
+    /* */
+
+    .then( () =>
+    {
+      test.case = `mode : ${mode}, kill child process using process id`
+      var o =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+        outputCollecting : 1,
+        throwingExitCode : 0
+      }
+
+      let returned = _.process.start( o )
+
+      _.time.out( context.t1*2, () => _.process.kill( o.process.pid ) ) /* 1000 */
+
+      returned.then( ( op ) =>
+      {
+        if( process.platform === 'win32' )
+        {
+          test.identical( op.exitCode, 1 );
+          test.identical( op.ended, true );
+          test.identical( op.exitSignal, null );
+        }
+        else
+        {
+          test.identical( op.exitCode, null );
+          test.identical( op.ended, true );
+          test.identical( op.exitSignal, 'SIGKILL' );
+        }
+
+        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+        return null;
+      })
+
+      return returned;
+    })
+
+    /* zzz for Vova : find how to simulate EPERM error using process.kill and write test case */
+
+    return ready;
+  }
+
+  /* ORIGINAL */
+  // a.ready
+
+  // .then( () =>
+  // {
+  //   test.case = `mode:spawn, kill child process using process descriptor`
+  //   var o =
+  //   {
+  //     execPath :  'node ' + testAppPath,
+  //     mode : 'spawn',
+  //     outputCollecting : 1,
+  //     throwingExitCode : 0
+  //   }
+
+  //   let ready = _.process.start( o )
+
+  //   _.time.out( context.t1*2, () => _.process.kill( o.process ) ) /* 1000 */
+
+  //   ready.then( ( op ) =>
+  //   {
+  //     test.identical( op.exitCode, null );
+  //     test.identical( op.ended, true );
+  //     test.identical( op.exitSignal, 'SIGKILL' );
+  //     test.is( !_.strHas( op.output, 'Application timeout!' ) );
+  //     return null;
+  //   })
+
+  //   return ready;
+  // })
+
+  // /* */
+
+  // .then( () =>
+  // {
+  //   test.case = `mode:spawn, kill child process using process id`
+  //   var o =
+  //   {
+  //     execPath :  'node ' + testAppPath,
+  //     mode : 'spawn',
+  //     outputCollecting : 1,
+  //     throwingExitCode : 0
+  //   }
+
+  //   let ready = _.process.start( o )
+
+  //   _.time.out( context.t1*2, () => _.process.kill( o.process.pid ) ) /* 1000 */
+
+  //   ready.then( ( op ) =>
+  //   {
+  //     if( process.platform === 'win32' )
+  //     {
+  //       test.identical( op.exitCode, 1 );
+  //       test.identical( op.ended, true );
+  //       test.identical( op.exitSignal, null );
+  //     }
+  //     else
+  //     {
+  //       test.identical( op.exitCode, null );
+  //       test.identical( op.ended, true );
+  //       test.identical( op.exitSignal, 'SIGKILL' );
+  //     }
+
+  //     test.is( !_.strHas( op.output, 'Application timeout!' ) );
+  //     return null;
+  //   })
+
+  //   return ready;
+  // })
+
+  // /* fork */
+
+  // .then( () =>
+  // {
+  //   test.case = `mode:fork, kill child process using process descriptor`
+  //   var o =
+  //   {
+  //     execPath : testAppPath,
+  //     mode : 'fork',
+  //     outputCollecting : 1,
+  //     throwingExitCode : 0
+  //   }
+
+  //   let ready = _.process.start( o )
+
+  //   _.time.out( context.t1*2, () => _.process.kill( o.process ) ) /* 1000 */
+
+  //   ready.then( ( op ) =>
+  //   {
+  //     test.identical( op.exitCode, null );
+  //     test.identical( op.ended, true );
+  //     test.identical( op.exitSignal, 'SIGKILL' );
+  //     test.is( !_.strHas( op.output, 'Application timeout!' ) );
+  //     return null;
+  //   })
+
+  //   return ready;
+  // })
+
+  // /* */
+
+  // .then( () =>
+  // {
+  //   test.case = `mode:fork, kill child process using process id`
+  //   var o =
+  //   {
+  //     execPath : testAppPath,
+  //     mode : 'fork',
+  //     outputCollecting : 1,
+  //     throwingExitCode : 0
+  //   }
+
+  //   let ready = _.process.start( o )
+
+  //   _.time.out( context.t1*2, () => _.process.kill( o.process.pid ) ) /* 1000 */
+
+  //   ready.then( ( op ) =>
+  //   {
+  //     if( process.platform === 'win32' )
+  //     {
+  //       test.identical( op.exitCode, 1 );
+  //       test.identical( op.ended, true );
+  //       test.identical( op.exitSignal, null );
+  //     }
+  //     else
+  //     {
+  //       test.identical( op.exitCode, null );
+  //       test.identical( op.ended, true );
+  //       test.identical( op.exitSignal, 'SIGKILL' );
+  //     }
+
+  //     test.is( !_.strHas( op.output, 'Application timeout!' ) );
+  //     return null;
+  //   })
+
+  //   return ready;
+  // })
+
+  // /* shell */
+
+  // .then( () =>
+  // {
+  //   test.case = `mode:shell, kill child process using process descriptor`
+  //   var o =
+  //   {
+  //     execPath :  'node ' + testAppPath,
+  //     mode : 'shell',
+  //     outputCollecting : 1,
+  //     throwingExitCode : 0
+  //   }
+
+  //   let ready = _.process.start( o )
+
+  //   _.time.out( context.t1*2, () => _.process.kill( o.process ) ) /* 1000 */
+
+  //   ready.then( ( op ) =>
+  //   {
+  //     test.identical( op.exitCode, null );
+  //     test.identical( op.ended, true );
+  //     test.identical( op.exitSignal, 'SIGKILL' );
+  //     test.is( !_.strHas( op.output, 'Application timeout!' ) );
+  //     return null;
+  //   })
+
+  //   return ready;
+  // })
+
+  // /* */
+
+  // .then( () =>
+  // {
+  //   test.case = `mode:shell, kill child process using process id`
+
+  //   var o =
+  //   {
+  //     execPath :  'node ' + testAppPath,
+  //     mode : 'shell',
+  //     outputCollecting : 1,
+  //     throwingExitCode : 0
+  //   }
+
+  //   let ready = _.process.start( o )
+
+  //   _.time.out( context.t1*2, () => _.process.kill( o.process.pid ) ) /* 1000 */
+
+  //   ready.then( ( op ) =>
+  //   {
+  //     if( process.platform === 'win32' )
+  //     {
+  //       test.identical( op.exitCode, 1 );
+  //       test.identical( op.ended, true );
+  //       test.identical( op.exitSignal, null );
+  //     }
+  //     else
+  //     {
+  //       test.identical( op.exitCode, null );
+  //       test.identical( op.ended, true );
+  //       test.identical( op.exitSignal, 'SIGKILL' );
+  //     }
+
+  //     test.is( !_.strHas( op.output, 'Application timeout!' ) );
+
+  //     return null;
+  //   })
+
+  //   return ready;
+  // })
+
+  // /* zzz for Vova : find how to simulate EPERM error using process.kill and write test case */
+
+  // /* */
+
+  // return a.ready;
 
   /* - */
 
