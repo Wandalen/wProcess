@@ -27862,7 +27862,7 @@ function startTerminateAfterLoopRelease( test )
         outputCollecting : 1,
       }
 
-      if( mode === 'shell' ) /* Mode::shell doesn't support inter process communication. */
+      if( mode === 'shell' ) /* Mode::shell doesn't support inter process communication */
       return test.shouldThrowErrorSync( () => _.process.start( o ) );
 
       let con = _.process.start( o );
