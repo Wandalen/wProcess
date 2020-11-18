@@ -26992,6 +26992,8 @@ function kill( test )
   }
 }
 
+kill.timeOut = 16e4; /* Locally : 15.661s */
+
 //
 
 /* qqq for Yevhen : subroutine for modes | aaa : Done. */
