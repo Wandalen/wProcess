@@ -22638,13 +22638,13 @@ function startOptionVerbosity( test )
         logger : captureLogger,
       }
 
-      /* in mode::shell
+      /* in mode::shell on Linux and iOS
         -> Stderr
           -  sh: c: command not found
           -  [eval]:1
           -  console.log( 'a', b,  )
       */
-      if( mode === 'shell' )
+      if( mode === 'shell' && process.platform !== 'win32' )
       return test.shouldThrowErrorAsync( () => _.process.start( options ) );
 
       return _.process.start( options )
@@ -22652,15 +22652,20 @@ function startOptionVerbosity( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        if( mode === 'spawn' )
+        if( mode === 'fork' )
+        {
+          test.identical( op.fullExecPath, `-e console.log( '"a"', "'b'", \`"c"\` )` );
+          test.identical( _.strCount( capturedOutput, `-e console.log( '"a"', "'b'", \`"c"\` )` ), 1 );
+        }
+        else if( mode === 'spawn' )
         {
           test.identical( op.fullExecPath, `node -e console.log( '"a"', "'b'", \`"c"\` )` );
           test.identical( _.strCount( capturedOutput, `node -e console.log( '"a"', "'b'", \`"c"\` )` ), 1 );
         }
         else
         {
-          test.identical( op.fullExecPath, `-e console.log( '"a"', "'b'", \`"c"\` )` );
-          test.identical( _.strCount( capturedOutput, `-e console.log( '"a"', "'b'", \`"c"\` )` ), 1 );
+          test.identical( op.fullExecPath, `node -e "console.log( '"a"', "'b'", \`"c"\` )"` );
+          test.identical( _.strCount( capturedOutput, `node -e "console.log( '"a"', "'b'", \`"c"\` )"` ), 1 );
         }
         return true;
       })
