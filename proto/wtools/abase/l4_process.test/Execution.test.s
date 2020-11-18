@@ -18187,260 +18187,627 @@ function starter( test )
   let context = this;
   let a = context.assetFor( test, false );
   let testAppPath = a.program( testApp );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
 
   /* */
 
-  a.ready
-
-  .then( () =>
+  function run( mode )
   {
-    var shell = _.process.starter
-    ({
-      execPath :  'node ' + testAppPath,
-      outputCollecting : 1,
-      outputPiping : 1
-    })
+    let ready = _.Consequence().take( null );
 
-    debugger;
-    return shell({ execPath :  [ 'arg1', 'arg2' ] })
-    .then( ( op ) =>
+    ready
+
+    .then( () =>
     {
+      test.case = `mode : ${mode}, execPath : path, run with execPath : array of args`;
+
+      var shell = _.process.starter
+      ({
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+        outputCollecting : 1,
+        outputPiping : 1
+      })
+
       debugger;
-      test.identical( op.runs.length, 2 );
+      return shell({ execPath : [ 'arg1', 'arg2' ] })
+      .then( ( op ) =>
+      {
+        debugger;
+        test.identical( op.runs.length, 2 );
 
-      let o1 = op.runs[ 0 ];
-      let o2 = op.runs[ 1 ];
+        let o1 = op.runs[ 0 ];
+        let o2 = op.runs[ 1 ];
 
-      test.identical( o1.execPath, 'node' );
-      test.identical( o2.execPath, 'node' );
-      test.is( _.strHas( o1.output, `[ 'arg1' ]` ) );
-      test.is( _.strHas( o2.output, `[ 'arg2' ]` ) );
+        if( mode === 'fork' )
+        {
+          test.identical( o1.execPath, testAppPath );
+          test.identical( o2.execPath, testAppPath );
+        }
+        else
+        {
+          test.identical( o1.execPath, 'node' );
+          test.identical( o2.execPath, 'node' );
+        }
+        test.is( _.strHas( o1.output, `[ 'arg1' ]` ) );
+        test.is( _.strHas( o2.output, `[ 'arg2' ]` ) );
 
-      return op;
+        return op;
+      })
     })
-  })
 
-  .then( () =>
-  {
-    var shell = _.process.starter
-    ({
-      execPath :  'node ' + testAppPath + ' arg0',
-      outputCollecting : 1,
-      outputPiping : 1
-    })
+    /* */
 
-    return shell({ execPath :  [ 'arg1', 'arg2' ] })
-    .then( ( op ) =>
+    .then( () =>
     {
-      test.identical( op.runs.length, 2 );
+      test.case = `mode : ${mode}, execPath : path and 'arg0', run with execPath : array of args`;
 
-      let o1 = op.runs[ 0 ];
-      let o2 = op.runs[ 1 ];
+      var shell = _.process.starter
+      ({
+        execPath : mode === 'fork' ? testAppPath + ' arg0' : 'node ' + testAppPath + ' arg0',
+        mode,
+        outputCollecting : 1,
+        outputPiping : 1
+      })
 
-      test.identical( o1.execPath, 'node' );
-      test.identical( o2.execPath, 'node' );
-      test.is( _.strHas( o1.output, `[ 'arg0', 'arg1' ]` ) );
-      test.is( _.strHas( o2.output, `[ 'arg0', 'arg2' ]` ) );
+      return shell({ execPath : [ 'arg1', 'arg2' ] })
+      .then( ( op ) =>
+      {
+        test.identical( op.runs.length, 2 );
 
-      return op;
+        let o1 = op.runs[ 0 ];
+        let o2 = op.runs[ 1 ];
+
+        if( mode === 'fork' )
+        {
+          test.identical( o1.execPath, testAppPath );
+          test.identical( o2.execPath, testAppPath );
+        }
+        else
+        {
+          test.identical( o1.execPath, 'node' );
+          test.identical( o2.execPath, 'node' );
+        }
+        test.is( _.strHas( o1.output, `[ 'arg0', 'arg1' ]` ) );
+        test.is( _.strHas( o2.output, `[ 'arg0', 'arg2' ]` ) );
+
+        return op;
+      })
     })
-  })
 
+    /* */
 
-  .then( () =>
-  {
-    var shell = _.process.starter
-    ({
-      execPath :  'node ' + testAppPath,
-      outputCollecting : 1,
-      outputPiping : 1
-    })
-
-    return shell({ execPath :  [ 'arg1', 'arg2' ], args : [ 'arg3' ] })
-    .then( ( op ) =>
+    .then( () =>
     {
-      test.identical( op.runs.length, 2 );
+      test.case = `mode : ${mode}, execPath : path, run with execPath : array of args, args : array with 1 arg`;
+      var shell = _.process.starter
+      ({
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+        outputCollecting : 1,
+        outputPiping : 1
+      })
 
-      let o1 = op.runs[ 0 ];
-      let o2 = op.runs[ 1 ];
+      return shell({ execPath : [ 'arg1', 'arg2' ], args : [ 'arg3' ] })
+      .then( ( op ) =>
+      {
+        test.identical( op.runs.length, 2 );
 
-      test.identical( o1.execPath, 'node' );
-      test.identical( o2.execPath, 'node' );
-      test.identical( o1.args, [ testAppPath, 'arg1', 'arg3' ] );
-      test.identical( o2.args, [ testAppPath, 'arg2', 'arg3' ] );
-      test.is( _.strHas( o1.output, `[ 'arg1', 'arg3' ]` ) );
-      test.is( _.strHas( o2.output, `[ 'arg2', 'arg3' ]` ) );
+        let o1 = op.runs[ 0 ];
+        let o2 = op.runs[ 1 ];
 
-      return op;
+        if( mode === 'fork' )
+        {
+          test.identical( o1.execPath, testAppPath );
+          test.identical( o2.execPath, testAppPath );
+          test.identical( o1.args, [ 'arg1', 'arg3' ] );
+          test.identical( o2.args, [ 'arg2', 'arg3' ] );
+        }
+        else
+        {
+          test.identical( o1.execPath, 'node' );
+          test.identical( o2.execPath, 'node' );
+          test.identical( o1.args, [ testAppPath, 'arg1', 'arg3' ] );
+          test.identical( o2.args, [ testAppPath, 'arg2', 'arg3' ] );
+        }
+
+        test.is( _.strHas( o1.output, `[ 'arg1', 'arg3' ]` ) );
+        test.is( _.strHas( o2.output, `[ 'arg2', 'arg3' ]` ) );
+
+        return op;
+      })
     })
-  })
 
-  .then( () =>
-  {
-    var shell = _.process.starter
-    ({
-      execPath :  'node ' + testAppPath,
-      outputCollecting : 1,
-      outputPiping : 1
-    })
+    /* */
 
-    return shell({ execPath :  'arg1' })
-    .then( ( op ) =>
+    .then( () =>
     {
-      test.identical( op.execPath, 'node' );
-      test.is( _.strHas( op.output, `[ 'arg1' ]` ) );
+      test.case = `mode : ${mode}, execPath : path, run with execPath : 'arg1'`;
+      var shell = _.process.starter
+      ({
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+        outputCollecting : 1,
+        outputPiping : 1
+      })
 
-      return op;
+      return shell({ execPath : 'arg1' })
+      .then( ( op ) =>
+      {
+        
+        if( mode === 'fork' )
+        test.identical( op.execPath, testAppPath );
+        else
+        test.identical( op.execPath, 'node' );
+        test.is( _.strHas( op.output, `[ 'arg1' ]` ) );
+
+        return op;
+      })
     })
-  })
 
-  .then( () =>
-  {
-    var shell = _.process.starter
-    ({
-      execPath :
-      [
-        'node ' + testAppPath,
-        'node ' + testAppPath
-      ],
-      outputCollecting : 1,
-      outputPiping : 1
-    })
+    /* */
 
-    return shell({ execPath :  'arg1' })
-    .then( ( op ) =>
+    .then( () =>
     {
-      test.identical( op.runs.length, 2 );
+      test.case = `mode : ${mode}, execPath : array of paths, run with execPath : 'arg1'`;
 
-      let o1 = op.runs[ 0 ];
-      let o2 = op.runs[ 1 ];
+      var shell = _.process.starter
+      ({
+        execPath :
+        [
+          `${mode === 'fork' ? '' : 'node '}` + testAppPath,
+          `${mode === 'fork' ? '' : 'node '}` + testAppPath,
+        ],
+        mode,
+        outputCollecting : 1,
+        outputPiping : 1
+      })
 
-      test.identical( o1.execPath, 'node' );
-      test.identical( o2.execPath, 'node' );
-      test.is( _.strHas( o1.output, `[ 'arg1' ]` ) );
-      test.is( _.strHas( o2.output, `[ 'arg1' ]` ) );
+      return shell({ execPath : 'arg1' })
+      .then( ( op ) =>
+      {
+        test.identical( op.runs.length, 2 );
 
-      return op;
+        let o1 = op.runs[ 0 ];
+        let o2 = op.runs[ 1 ];
+
+        if( mode === 'fork' )
+        {
+          test.identical( o1.execPath, testAppPath );
+          test.identical( o2.execPath, testAppPath );
+        }
+        else
+        {
+          test.identical( o1.execPath, 'node' );
+          test.identical( o2.execPath, 'node' );
+        }
+        test.is( _.strHas( o1.output, `[ 'arg1' ]` ) );
+        test.is( _.strHas( o2.output, `[ 'arg1' ]` ) );
+
+        return op;
+      })
     })
-  })
 
-  .then( () =>
-  {
-    var shell = _.process.starter
-    ({
-      execPath :
-      [
-        'node ' + testAppPath,
-        'node ' + testAppPath
-      ],
-      outputCollecting : 1,
-      outputPiping : 1
-    })
+    /* */
 
-    return shell({ execPath :  [ 'arg1', 'arg2' ] })
-    .then( ( op ) =>
+    .then( () =>
     {
-      test.identical( op.runs.length, 4 );
+      test.case = `mode : ${mode}, execPath : array of paths, run with execPath : array of args`;
 
-      let o1 = op.runs[ 0 ];
-      let o2 = op.runs[ 1 ];
-      let o3 = op.runs[ 2 ];
-      let o4 = op.runs[ 3 ];
+      var shell = _.process.starter
+      ({
+        execPath :
+        [
+          `${mode === 'fork' ? '' : 'node '}` + testAppPath,
+          `${mode === 'fork' ? '' : 'node '}` + testAppPath,
+        ],
+        mode,
+        outputCollecting : 1,
+        outputPiping : 1
+      })
 
-      test.identical( o1.execPath, 'node' );
-      test.identical( o2.execPath, 'node' );
-      test.identical( o3.execPath, 'node' );
-      test.identical( o4.execPath, 'node' );
-      test.is( _.strHas( o1.output, `[ 'arg1' ]` ) );
-      test.is( _.strHas( o2.output, `[ 'arg1' ]` ) );
-      test.is( _.strHas( o3.output, `[ 'arg2' ]` ) );
-      test.is( _.strHas( o4.output, `[ 'arg2' ]` ) );
+      return shell({ execPath : [ 'arg1', 'arg2' ] })
+      .then( ( op ) =>
+      {
+        test.identical( op.runs.length, 4 );
 
-      return op;
+        let o1 = op.runs[ 0 ];
+        let o2 = op.runs[ 1 ];
+        let o3 = op.runs[ 2 ];
+        let o4 = op.runs[ 3 ];
+
+        if( mode === 'fork' )
+        {
+          test.identical( o1.execPath, testAppPath );
+          test.identical( o2.execPath, testAppPath );
+          test.identical( o3.execPath, testAppPath );
+          test.identical( o4.execPath, testAppPath );
+        }
+        else
+        {
+          test.identical( o1.execPath, 'node' );
+          test.identical( o2.execPath, 'node' );
+          test.identical( o3.execPath, 'node' );
+          test.identical( o4.execPath, 'node' );
+        }
+
+        test.is( _.strHas( o1.output, `[ 'arg1' ]` ) );
+        test.is( _.strHas( o2.output, `[ 'arg1' ]` ) );
+        test.is( _.strHas( o3.output, `[ 'arg2' ]` ) );
+        test.is( _.strHas( o4.output, `[ 'arg2' ]` ) );
+
+        return op;
+      })
     })
-  })
 
-  .then( () =>
-  {
-    var shell = _.process.starter
-    ({
-      execPath : 'node',
-      args : 'arg1',
-      outputCollecting : 1,
-      outputPiping : 1
-    })
+    /* */
 
-    return shell({ execPath : testAppPath })
-    .then( ( op ) =>
+    .then( () =>
     {
-      test.identical( op.execPath, 'node' );
-      test.is( _.strHas( op.output, `[ 'arg1' ]` ) );
+      test.case = `mode : ${mode}, execPath : 'node', run with execPath : path`;
 
-      return op;
+      var shell = _.process.starter
+      ({
+        execPath : mode === 'fork' ? '' : 'node',
+        mode,
+        args : 'arg1',
+        outputCollecting : 1,
+        outputPiping : 1
+      })
+
+      return shell({ execPath : testAppPath })
+      .then( ( op ) =>
+      {
+        if( mode === 'fork' )
+        test.identical( op.execPath, testAppPath );
+        else
+        test.identical( op.execPath, 'node' );
+        test.is( _.strHas( op.output, `[ 'arg1' ]` ) );
+
+        return op;
+      })
     })
-  })
 
-  .then( () =>
-  {
-    var shell = _.process.starter
-    ({
-      execPath : 'node',
-      args : 'arg1',
-      outputCollecting : 1,
-      outputPiping : 1
-    })
+    /* */
 
-    return shell({ execPath : testAppPath, args : 'arg2' })
-    .then( ( op ) =>
+    .then( () =>
     {
-      test.identical( op.execPath, 'node' );
-      test.is( _.strHas( op.output, `[ 'arg2' ]` ) );
+      test.case = `mode : ${mode}, execPath : 'node', args : 'arg1'; run with execPath : path, args : 'arg2'`;
 
-      return op;
+      var shell = _.process.starter
+      ({
+        execPath : mode === 'fork' ? '' : 'node',
+        mode,
+        args : 'arg1',
+        outputCollecting : 1,
+        outputPiping : 1
+      })
+
+      return shell({ execPath : testAppPath, args : 'arg2' })
+      .then( ( op ) =>
+      {
+        if( mode === 'fork' )
+        test.identical( op.execPath, testAppPath );
+        else
+        test.identical( op.execPath, 'node' );
+        test.is( _.strHas( op.output, `[ 'arg2' ]` ) );
+
+        return op;
+      })
     })
-  })
 
-  .then( () =>
-  {
-    var shell = _.process.starter
-    ({
-      execPath : 'node',
-      args : [ 'arg1', 'arg2' ],
-      outputCollecting : 1,
-      outputPiping : 1
-    })
+    /* */
 
-    return shell({ execPath : testAppPath, args : 'arg3' })
-    .then( ( op ) =>
+    .then( () =>
     {
-      test.identical( op.execPath, 'node' );
-      test.is( _.strHas( op.output, `[ 'arg3' ]` ) );
+      test.case = `mode : ${mode}, execPath : 'node', args : array of args; run with execPath : path, args : 'arg2'`;
 
-      return op;
+      var shell = _.process.starter
+      ({
+        execPath : mode === 'fork' ? '' : 'node',
+        mode,
+        args : [ 'arg1', 'arg2' ],
+        outputCollecting : 1,
+        outputPiping : 1
+      })
+
+      return shell({ execPath : testAppPath, args : 'arg3' })
+      .then( ( op ) =>
+      {
+        if( mode === 'fork' )
+        test.identical( op.execPath, testAppPath );
+        else
+        test.identical( op.execPath, 'node' );
+        test.is( _.strHas( op.output, `[ 'arg3' ]` ) );
+
+        return op;
+      })
     })
-  })
 
-  .then( () =>
-  {
-    var shell = _.process.starter
-    ({
-      execPath : 'node',
-      args : 'arg1',
-      outputCollecting : 1,
-      outputPiping : 1
-    })
+    /* */
 
-    return shell({ execPath : testAppPath, args : [ 'arg2', 'arg3' ] })
-    .then( ( op ) =>
+    .then( () =>
     {
-      test.identical( op.execPath, 'node' );
-      test.is( _.strHas( op.output, `[ 'arg2', 'arg3' ]` ) );
+      test.case = `mode : ${mode}, execPath : 'node', args : 'arg1'; run with execPath : path, args : array of args`;
+      var shell = _.process.starter
+      ({
+        execPath : mode === 'fork' ? '' : 'node',
+        mode,
+        args : 'arg1',
+        outputCollecting : 1,
+        outputPiping : 1
+      })
 
-      return op;
+      return shell({ execPath : testAppPath, args : [ 'arg2', 'arg3' ] })
+      .then( ( op ) =>
+      {
+        if( mode === 'fork' )
+        test.identical( op.execPath, testAppPath );
+        else
+        test.identical( op.execPath, 'node' );
+        test.is( _.strHas( op.output, `[ 'arg2', 'arg3' ]` ) );
+
+        return op;
+      })
     })
-  })
 
-  return a.ready;
+    return ready;
+  }
+
+  /* ORIGINAL */
+  // a.ready
+
+  // .then( () =>
+  // {
+  //   var shell = _.process.starter
+  //   ({
+  //     execPath :  'node ' + testAppPath,
+  //     outputCollecting : 1,
+  //     outputPiping : 1
+  //   })
+
+  //   debugger;
+  //   return shell({ execPath :  [ 'arg1', 'arg2' ] })
+  //   .then( ( op ) =>
+  //   {
+  //     debugger;
+  //     test.identical( op.runs.length, 2 );
+
+  //     let o1 = op.runs[ 0 ];
+  //     let o2 = op.runs[ 1 ];
+
+  //     test.identical( o1.execPath, 'node' );
+  //     test.identical( o2.execPath, 'node' );
+  //     test.is( _.strHas( o1.output, `[ 'arg1' ]` ) );
+  //     test.is( _.strHas( o2.output, `[ 'arg2' ]` ) );
+
+  //     return op;
+  //   })
+  // })
+
+  // .then( () =>
+  // {
+  //   var shell = _.process.starter
+  //   ({
+  //     execPath :  'node ' + testAppPath + ' arg0',
+  //     outputCollecting : 1,
+  //     outputPiping : 1
+  //   })
+
+  //   return shell({ execPath :  [ 'arg1', 'arg2' ] })
+  //   .then( ( op ) =>
+  //   {
+  //     test.identical( op.runs.length, 2 );
+
+  //     let o1 = op.runs[ 0 ];
+  //     let o2 = op.runs[ 1 ];
+
+  //     test.identical( o1.execPath, 'node' );
+  //     test.identical( o2.execPath, 'node' );
+  //     test.is( _.strHas( o1.output, `[ 'arg0', 'arg1' ]` ) );
+  //     test.is( _.strHas( o2.output, `[ 'arg0', 'arg2' ]` ) );
+
+  //     return op;
+  //   })
+  // })
+
+
+  // .then( () =>
+  // {
+  //   var shell = _.process.starter
+  //   ({
+  //     execPath :  'node ' + testAppPath,
+  //     outputCollecting : 1,
+  //     outputPiping : 1
+  //   })
+
+  //   return shell({ execPath :  [ 'arg1', 'arg2' ], args : [ 'arg3' ] })
+  //   .then( ( op ) =>
+  //   {
+  //     test.identical( op.runs.length, 2 );
+
+  //     let o1 = op.runs[ 0 ];
+  //     let o2 = op.runs[ 1 ];
+
+  //     test.identical( o1.execPath, 'node' );
+  //     test.identical( o2.execPath, 'node' );
+  //     test.identical( o1.args, [ testAppPath, 'arg1', 'arg3' ] );
+  //     test.identical( o2.args, [ testAppPath, 'arg2', 'arg3' ] );
+  //     test.is( _.strHas( o1.output, `[ 'arg1', 'arg3' ]` ) );
+  //     test.is( _.strHas( o2.output, `[ 'arg2', 'arg3' ]` ) );
+
+  //     return op;
+  //   })
+  // })
+
+  // .then( () =>
+  // {
+  //   var shell = _.process.starter
+  //   ({
+  //     execPath :  'node ' + testAppPath,
+  //     outputCollecting : 1,
+  //     outputPiping : 1
+  //   })
+
+  //   return shell({ execPath :  'arg1' })
+  //   .then( ( op ) =>
+  //   {
+  //     test.identical( op.execPath, 'node' );
+  //     test.is( _.strHas( op.output, `[ 'arg1' ]` ) );
+
+  //     return op;
+  //   })
+  // })
+
+  // .then( () =>
+  // {
+  //   var shell = _.process.starter
+  //   ({
+  //     execPath :
+  //     [
+  //       'node ' + testAppPath,
+  //       'node ' + testAppPath
+  //     ],
+  //     outputCollecting : 1,
+  //     outputPiping : 1
+  //   })
+
+  //   return shell({ execPath :  'arg1' })
+  //   .then( ( op ) =>
+  //   {
+  //     test.identical( op.runs.length, 2 );
+
+  //     let o1 = op.runs[ 0 ];
+  //     let o2 = op.runs[ 1 ];
+
+  //     test.identical( o1.execPath, 'node' );
+  //     test.identical( o2.execPath, 'node' );
+  //     test.is( _.strHas( o1.output, `[ 'arg1' ]` ) );
+  //     test.is( _.strHas( o2.output, `[ 'arg1' ]` ) );
+
+  //     return op;
+  //   })
+  // })
+
+  // .then( () =>
+  // {
+  //   var shell = _.process.starter
+  //   ({
+  //     execPath :
+  //     [
+  //       'node ' + testAppPath,
+  //       'node ' + testAppPath
+  //     ],
+  //     outputCollecting : 1,
+  //     outputPiping : 1
+  //   })
+
+  //   return shell({ execPath :  [ 'arg1', 'arg2' ] })
+  //   .then( ( op ) =>
+  //   {
+  //     test.identical( op.runs.length, 4 );
+
+  //     let o1 = op.runs[ 0 ];
+  //     let o2 = op.runs[ 1 ];
+  //     let o3 = op.runs[ 2 ];
+  //     let o4 = op.runs[ 3 ];
+
+  //     test.identical( o1.execPath, 'node' );
+  //     test.identical( o2.execPath, 'node' );
+  //     test.identical( o3.execPath, 'node' );
+  //     test.identical( o4.execPath, 'node' );
+  //     test.is( _.strHas( o1.output, `[ 'arg1' ]` ) );
+  //     test.is( _.strHas( o2.output, `[ 'arg1' ]` ) );
+  //     test.is( _.strHas( o3.output, `[ 'arg2' ]` ) );
+  //     test.is( _.strHas( o4.output, `[ 'arg2' ]` ) );
+
+  //     return op;
+  //   })
+  // })
+
+  // .then( () =>
+  // {
+  //   var shell = _.process.starter
+  //   ({
+  //     execPath : 'node',
+  //     args : 'arg1',
+  //     outputCollecting : 1,
+  //     outputPiping : 1
+  //   })
+
+  //   return shell({ execPath : testAppPath })
+  //   .then( ( op ) =>
+  //   {
+  //     test.identical( op.execPath, 'node' );
+  //     test.is( _.strHas( op.output, `[ 'arg1' ]` ) );
+
+  //     return op;
+  //   })
+  // })
+
+  // .then( () =>
+  // {
+  //   var shell = _.process.starter
+  //   ({
+  //     execPath : 'node',
+  //     args : 'arg1',
+  //     outputCollecting : 1,
+  //     outputPiping : 1
+  //   })
+
+  //   return shell({ execPath : testAppPath, args : 'arg2' })
+  //   .then( ( op ) =>
+  //   {
+  //     test.identical( op.execPath, 'node' );
+  //     test.is( _.strHas( op.output, `[ 'arg2' ]` ) );
+
+  //     return op;
+  //   })
+  // })
+
+  // .then( () =>
+  // {
+  //   var shell = _.process.starter
+  //   ({
+  //     execPath : 'node',
+  //     args : [ 'arg1', 'arg2' ],
+  //     outputCollecting : 1,
+  //     outputPiping : 1
+  //   })
+
+  //   return shell({ execPath : testAppPath, args : 'arg3' })
+  //   .then( ( op ) =>
+  //   {
+  //     test.identical( op.execPath, 'node' );
+  //     test.is( _.strHas( op.output, `[ 'arg3' ]` ) );
+
+  //     return op;
+  //   })
+  // })
+
+  // .then( () =>
+  // {
+  //   var shell = _.process.starter
+  //   ({
+  //     execPath : 'node',
+  //     args : 'arg1',
+  //     outputCollecting : 1,
+  //     outputPiping : 1
+  //   })
+
+  //   return shell({ execPath : testAppPath, args : [ 'arg2', 'arg3' ] })
+  //   .then( ( op ) =>
+  //   {
+  //     test.identical( op.execPath, 'node' );
+  //     test.is( _.strHas( op.output, `[ 'arg2', 'arg3' ]` ) );
+
+  //     return op;
+  //   })
+  // })
+
+  // return a.ready;
 
   /* - */
 
