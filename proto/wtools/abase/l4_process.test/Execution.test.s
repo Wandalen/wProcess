@@ -34823,9 +34823,9 @@ function terminateTimeOutNoHandler( test )
 
   /* - */
 
-  function handleOutput( o, terminate )
+  function handleOutput( o, terminate, output )
   {
-    if( !_.strHas( o.output, 'program1::begin' ) )
+    if( !_.strHas( output.toString(), 'program1::begin' ) )
     return;
     o.process.stdout.removeListener( 'data', handleOutput );
     terminate.take( null );
