@@ -34736,7 +34736,7 @@ function terminateTimeOutNoHandler( test )
         ({
           pid : o.process.pid,
           timeOut : context.t1 * 5,
-          withChildren : ( mode === 'shell' && process.platfrom !== 'darwin' ) ? 1 : 0 /* in mode::shell on Linux and Windows additional process is created */
+          withChildren : 0
         })
       })
 
@@ -34759,7 +34759,14 @@ function terminateTimeOutNoHandler( test )
 
         test.identical( _.strCount( op.output, 'SIGTERM' ), 0 );
         test.identical( _.strCount( op.output, 'program1::begin' ), 1 );
-        test.identical( _.strCount( op.output, 'program1::end' ), 0 ); /* if withChildren : 0 in mode::shell on win or linux, 'program1::end' is printed */
+        /*
+          Single process on darwin, Two processes on linux and windows
+          Child continues to work on linux/windows
+        */
+        if( process.platform === 'darwin' )
+        test.identical( _.strCount( op.output, 'program1::end' ), 0 );
+        else
+        test.identical( _.strCount( op.output, 'program1::end' ), 1 );
 
         return null;
       })
