@@ -34826,7 +34826,7 @@ function terminateTimeOutIgnoreSignal( test )
         ({
           pid : o.process.pid,
           timeOut : context.t1 * 5,
-          withChildren : 0
+          withChildren : ( mode === 'shell' && process.platfrom !== 'darwin' ) ? 1 : 0 /* in mode::shell on Linux and Windows additional process is created */
         })
       })
 
@@ -34848,7 +34848,7 @@ function terminateTimeOutIgnoreSignal( test )
         }
 
         test.identical( _.strCount( op.output, 'program1::begin' ), 1 );
-        test.identical( _.strCount( op.output, 'program1::end' ), 0 );
+        test.identical( _.strCount( op.output, 'program1::end' ), 0 ); /* if withChildren : 0 in mode::shell on win or linux, 'program1::end' is printed */
 
         return null;
       })
