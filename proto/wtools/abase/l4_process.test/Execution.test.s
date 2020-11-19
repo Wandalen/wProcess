@@ -34533,7 +34533,7 @@ function terminateSeveralDetachedChildren( test )
 
         if( process.platform === 'win32' )
         {
-          test.notIdentical( op.exitCode, 0 ) /* returns 4294967295 which is -1 to uint32 */
+          test.notIdentical( o.exitCode, 0 ) /* returns 4294967295 which is -1 to uint32 */
           test.identical( o.exitSignal, null );
         }
         else
