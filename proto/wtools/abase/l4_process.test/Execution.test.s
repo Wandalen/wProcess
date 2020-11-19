@@ -34883,67 +34883,86 @@ Windows doesn't support signals
 
 //
 
-function terminateZeroTimeOutSpawn( test )
+function terminateZeroTimeOut( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
   let testAppPath = a.program( program1 );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
 
-  /* - */
-
-  var o =
+  function run( mode )
   {
-    execPath :  'node ' + testAppPath,
-    mode : 'spawn',
-    outputPiping : 1,
-    outputCollecting : 1,
-    throwingExitCode : 0
+    let ready = _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}`;
+      var o =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+        outputPiping : 1,
+        outputCollecting : 1,
+        throwingExitCode : 0
+      }
+
+      _.process.start( o )
+      let terminate = _.Consequence();
+
+      o.process.stdout.on( 'data', _.routineJoin( null, handleOutput, [ o, terminate ] ) );
+
+      terminate.then( () =>
+      {
+        return _.process.terminate
+        ({
+          pid : o.process.pid,
+          timeOut : 0,
+          withChildren : 0
+        })
+      })
+
+      o.conTerminate.then( ( op ) =>
+      {
+        test.identical( op.ended, true );
+
+        if( process.platform === 'win32' )
+        {
+          test.identical( op.exitCode, 1 );
+          test.identical( op.exitSignal, null );
+        }
+        else
+        {
+          test.identical( op.exitCode, null );
+          test.identical( op.exitSignal, 'SIGKILL' );
+        }
+
+        test.identical( _.strCount( op.output, 'program1::SIGTERM' ), 0 );
+        test.identical( _.strCount( op.output, 'program1::begin' ), 1 );
+        /*
+          Single process on darwin, Two processes on linux and windows
+          Child continues to work on linux/windows
+        */
+        if( process.platform === 'darwin' )
+        test.identical( _.strCount( op.output, 'program1::end' ), 0 );
+        else
+        test.identical( _.strCount( op.output, 'program1::end' ), 1 );
+
+        return null;
+      })
+
+      return _.Consequence.AndKeep( terminate, o.conTerminate );
+    })
+
+    return ready;
   }
 
-  _.process.start( o )
-  let terminate = _.Consequence();
-
-  o.process.stdout.on( 'data', handleOutput );
-
-  terminate.then( () =>
-  {
-    return _.process.terminate
-    ({
-      pid : o.process.pid,
-      timeOut : 0,
-      withChildren : 0
-    })
-  })
-
-  o.conTerminate.then( ( op ) =>
-  {
-    test.identical( op.ended, true );
-
-    if( process.platform === 'win32' )
-    {
-      test.identical( op.exitCode, 1 );
-      test.identical( op.exitSignal, null );
-    }
-    else
-    {
-      test.identical( op.exitCode, null );
-      test.identical( op.exitSignal, 'SIGKILL' );
-    }
-
-    test.identical( _.strCount( op.output, 'program1::SIGTERM' ), 0 );
-    test.identical( _.strCount( op.output, 'program1::begin' ), 1 );
-    test.identical( _.strCount( op.output, 'program1::end' ), 0 );
-
-    return null;
-  })
-
-  return _.Consequence.AndKeep( terminate, o.conTerminate );
-
   /* - */
 
-  function handleOutput()
+  function handleOutput( o, terminate, output )
   {
-    if( !_.strHas( o.output, 'program1::begin' ) )
+    if( !_.strHas( output.toString(), 'program1::begin' ) )
     return;
     o.process.stdout.removeListener( 'data', handleOutput );
     terminate.take( null );
@@ -34967,7 +34986,7 @@ function terminateZeroTimeOutSpawn( test )
   }
 }
 
-terminateZeroTimeOutSpawn.description =
+terminateZeroTimeOut.description =
 `
 Program1 has SIGTERM handler that ignores signal.
 Should terminate right after call with SIGKILL on unix and exit code 1 on win
@@ -34976,97 +34995,190 @@ Signal handler should not be executed
 
 //
 
-function terminateZeroTimeOutFork( test )
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-  let testAppPath = a.program( program1 );
+// function terminateZeroTimeOutSpawn( test )
+// {
+//   let context = this;
+//   let a = context.assetFor( test, false );
+//   let testAppPath = a.program( program1 );
 
-  /* - */
+//   /* - */
 
-  var o =
-  {
-    execPath : 'program1',
-    currentPath : a.routinePath,
-    mode : 'fork',
-    outputPiping : 1,
-    outputCollecting : 1,
-    throwingExitCode : 0
-  }
+//   var o =
+//   {
+//     execPath :  'node ' + testAppPath,
+//     mode : 'spawn',
+//     outputPiping : 1,
+//     outputCollecting : 1,
+//     throwingExitCode : 0
+//   }
 
-  _.process.start( o )
-  let terminate = _.Consequence();
+//   _.process.start( o )
+//   let terminate = _.Consequence();
 
-  o.process.stdout.on( 'data', handleOutput );
+//   o.process.stdout.on( 'data', handleOutput );
 
-  terminate.then( () =>
-  {
-    return _.process.terminate
-    ({
-      pid : o.process.pid,
-      timeOut : 0,
-      withChildren : 0
-    })
-  })
+//   terminate.then( () =>
+//   {
+//     return _.process.terminate
+//     ({
+//       pid : o.process.pid,
+//       timeOut : 0,
+//       withChildren : 0
+//     })
+//   })
 
-  o.conTerminate.then( ( op ) =>
-  {
-    test.identical( op.ended, true );
+//   o.conTerminate.then( ( op ) =>
+//   {
+//     test.identical( op.ended, true );
 
-    if( process.platform === 'win32' )
-    {
-      test.identical( op.exitCode, 1 );
-      test.identical( op.exitSignal, null );
-    }
-    else
-    {
-      test.identical( op.exitCode, null );
-      test.identical( op.exitSignal, 'SIGKILL' );
-    }
+//     if( process.platform === 'win32' )
+//     {
+//       test.identical( op.exitCode, 1 );
+//       test.identical( op.exitSignal, null );
+//     }
+//     else
+//     {
+//       test.identical( op.exitCode, null );
+//       test.identical( op.exitSignal, 'SIGKILL' );
+//     }
 
-    test.identical( _.strCount( op.output, 'program1::SIGTERM' ), 0 );
-    test.identical( _.strCount( op.output, 'program1::begin' ), 1 );
-    test.identical( _.strCount( op.output, 'program1::end' ), 0 );
+//     test.identical( _.strCount( op.output, 'program1::SIGTERM' ), 0 );
+//     test.identical( _.strCount( op.output, 'program1::begin' ), 1 );
+//     test.identical( _.strCount( op.output, 'program1::end' ), 0 );
 
-    return null;
-  })
+//     return null;
+//   })
 
-  return _.Consequence.AndKeep( terminate, o.conTerminate );
+//   return _.Consequence.AndKeep( terminate, o.conTerminate );
 
-  /* - */
+//   /* - */
 
-  function handleOutput()
-  {
-    if( !_.strHas( o.output, 'program1::begin' ) )
-    return;
-    o.process.stdout.removeListener( 'data', handleOutput );
-    terminate.take( null );
-  }
+//   function handleOutput()
+//   {
+//     if( !_.strHas( o.output, 'program1::begin' ) )
+//     return;
+//     o.process.stdout.removeListener( 'data', handleOutput );
+//     terminate.take( null );
+//   }
 
-  /* - */
+//   /* - */
 
-  function program1()
-  {
-    process.on( 'SIGTERM', () =>
-    {
-      console.log( 'program1::SIGTERM' )
-    })
+//   function program1()
+//   {
+//     process.on( 'SIGTERM', () =>
+//     {
+//       console.log( 'program1::SIGTERM' )
+//     })
 
-    setTimeout( () =>
-    {
-      console.log( 'program1::end' );
-    }, context.t1 * 15 );
+//     setTimeout( () =>
+//     {
+//       console.log( 'program1::end' );
+//     }, context.t1 * 15 );
 
-    console.log( 'program1::begin' );
-  }
-}
+//     console.log( 'program1::begin' );
+//   }
+// }
 
-terminateZeroTimeOutFork.description =
-`
-Program1 has SIGTERM handler that ignores signal.
-Should terminate right after call with SIGKILL on unix and exit code 1 on win
-Signal handler should not be executed
-`
+// terminateZeroTimeOutSpawn.description =
+// `
+// Program1 has SIGTERM handler that ignores signal.
+// Should terminate right after call with SIGKILL on unix and exit code 1 on win
+// Signal handler should not be executed
+// `
+
+//
+
+// function terminateZeroTimeOutFork( test )
+// {
+//   let context = this;
+//   let a = context.assetFor( test, false );
+//   let testAppPath = a.program( program1 );
+
+//   /* - */
+
+//   var o =
+//   {
+//     execPath : 'program1',
+//     currentPath : a.routinePath,
+//     mode : 'fork',
+//     outputPiping : 1,
+//     outputCollecting : 1,
+//     throwingExitCode : 0
+//   }
+
+//   _.process.start( o )
+//   let terminate = _.Consequence();
+
+//   o.process.stdout.on( 'data', handleOutput );
+
+//   terminate.then( () =>
+//   {
+//     return _.process.terminate
+//     ({
+//       pid : o.process.pid,
+//       timeOut : 0,
+//       withChildren : 0
+//     })
+//   })
+
+//   o.conTerminate.then( ( op ) =>
+//   {
+//     test.identical( op.ended, true );
+
+//     if( process.platform === 'win32' )
+//     {
+//       test.identical( op.exitCode, 1 );
+//       test.identical( op.exitSignal, null );
+//     }
+//     else
+//     {
+//       test.identical( op.exitCode, null );
+//       test.identical( op.exitSignal, 'SIGKILL' );
+//     }
+
+//     test.identical( _.strCount( op.output, 'program1::SIGTERM' ), 0 );
+//     test.identical( _.strCount( op.output, 'program1::begin' ), 1 );
+//     test.identical( _.strCount( op.output, 'program1::end' ), 0 );
+
+//     return null;
+//   })
+
+//   return _.Consequence.AndKeep( terminate, o.conTerminate );
+
+//   /* - */
+
+//   function handleOutput()
+//   {
+//     if( !_.strHas( o.output, 'program1::begin' ) )
+//     return;
+//     o.process.stdout.removeListener( 'data', handleOutput );
+//     terminate.take( null );
+//   }
+
+//   /* - */
+
+//   function program1()
+//   {
+//     process.on( 'SIGTERM', () =>
+//     {
+//       console.log( 'program1::SIGTERM' )
+//     })
+
+//     setTimeout( () =>
+//     {
+//       console.log( 'program1::end' );
+//     }, context.t1 * 15 );
+
+//     console.log( 'program1::begin' );
+//   }
+// }
+
+// terminateZeroTimeOutFork.description =
+// `
+// Program1 has SIGTERM handler that ignores signal.
+// Should terminate right after call with SIGKILL on unix and exit code 1 on win
+// Signal handler should not be executed
+// `
 
 //
 
@@ -36797,8 +36909,9 @@ var Proto =
 
     terminateTimeOutNoHandler,
     terminateTimeOutIgnoreSignal,
-    terminateZeroTimeOutSpawn,
-    terminateZeroTimeOutFork,
+    terminateZeroTimeOut,
+    // terminateZeroTimeOutSpawn,
+    // terminateZeroTimeOutFork,
     terminateZeroTimeOutWithoutChildrenShell,
     terminateZeroTimeOutWithChildrenShell,
 
