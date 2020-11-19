@@ -35273,325 +35273,665 @@ function terminateDifferentStdio( test )
   let context = this;
   let a = context.assetFor( test, false );
   let testAppPath = a.program( testApp );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
 
   /* */
 
-  a.ready
-
-  .then( () =>
+  function run( mode )
   {
-    var o =
+    let ready = _.Consequence().take( null );
+
+    ready
+
+    .then( () =>
     {
-      execPath :  'node ' + testAppPath,
-      mode : 'spawn',
-      stdio : 'inherit',
-      ipc : 1,
-      outputPiping : 0,
-      outputCollecting : 0,
-      throwingExitCode : 0
-    }
+      test.case = `mode : ${mode}, inherit`;
+      var o =
+      {
+        execPath : mode === 'fork' ? testAppPath :  'node ' + testAppPath,
+        mode,
+        stdio : 'inherit',
+        ipc : 1,
+        outputPiping : 0,
+        outputCollecting : 0,
+        throwingExitCode : 0
+      }
 
-    _.process.start( o )
+      if( mode === 'shell' ) /* Mode::shell doesn't support inter process communication. */
+      return test.shouldThrowErrorSync( () => _.process.start( o ) )
 
-    let ready = _.Consequence();
+      _.process.start( o )
 
-    o.process.on( 'message', () =>
-    {
-      ready.take( _.process.terminate( o.process.pid ) )
+      let ready = _.Consequence();
+
+      o.process.on( 'message', () =>
+      {
+        ready.take( _.process.terminate( o.process.pid ) )
+      })
+
+      o.conTerminate.then( ( op ) =>
+      {
+        if( process.platform === 'win32' )
+        {
+          test.identical( op.exitCode, 1 );
+          test.identical( op.ended, true );
+          test.identical( op.exitSignal, null );
+          test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+        }
+        else
+        {
+          test.identical( op.exitCode, 0 );
+          test.identical( op.ended, true );
+          test.identical( op.exitSignal, null );
+          test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+        }
+        return null;
+      })
+
+      return _.Consequence.And( ready, o.conTerminate );
     })
 
-    o.conTerminate.then( ( op ) =>
+    /* - */
+
+    .then( () =>
     {
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, 1 );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, null );
-        test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
-      }
-      else
-      {
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, null );
-        test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
-      }
-      return null;
-    })
+      test.case = `mode : ${mode}, ignore`;
+      /*
+        Phantom fail on Windows:
 
-    return _.Consequence.And( ready, o.conTerminate );
-  })
+        Fail #1:
+        signalSend : 544 name: node.exe
+        signalSend : 552 name: csrss.exe
+        ...
+          = Message of error#1
+            kill EPERM
+            errno : 'EPERM'
+            code : 'EPERM'
+            syscall : 'kill'
+            Current process does not have permission to kill target process 544
 
-  /* - */
+          = Beautified calls stack
+            at process.kill (internal/process/per_thread.js:189:13)
+            at signalSend (C:\Work\modules\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2851:15)
+        ...
 
-  .then( () =>
-  {
-
-    /*
-      Phantom fail on Windows:
-
-      Fail #1:
-      signalSend : 544 name: node.exe
-      signalSend : 552 name: csrss.exe
-      ...
+        Fail#2
+        signalSend : 5164 name: node.exe
+        signalSend : 544 name: conhost.exe
+        signalSend : 552 name: csrss.exe
+        ...
         = Message of error#1
           kill EPERM
           errno : 'EPERM'
           code : 'EPERM'
           syscall : 'kill'
-          Current process does not have permission to kill target process 544
+          Current process does not have permission to kill target process 5164
 
         = Beautified calls stack
           at process.kill (internal/process/per_thread.js:189:13)
           at signalSend (C:\Work\modules\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2851:15)
-      ...
+        ...
+      */
 
-      Fail#2
-      signalSend : 5164 name: node.exe
-      signalSend : 544 name: conhost.exe
-      signalSend : 552 name: csrss.exe
-      ...
-      = Message of error#1
-        kill EPERM
-        errno : 'EPERM'
-        code : 'EPERM'
-        syscall : 'kill'
-        Current process does not have permission to kill target process 5164
-
-      = Beautified calls stack
-        at process.kill (internal/process/per_thread.js:189:13)
-        at signalSend (C:\Work\modules\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2851:15)
-      ...
-    */
-
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'spawn',
-      stdio : 'ignore',
-      ipc : 1,
-      outputPiping : 0,
-      outputCollecting : 0,
-      throwingExitCode : 0
-    }
-
-    _.process.start( o )
-
-    let ready = _.Consequence();
-
-    o.process.on( 'message', () =>
-    {
-      ready.take( _.process.terminate( o.process.pid ) )
-      /* xxx : possible solution for phantom problem on Windows*/
-      // ready.take( _.process.terminate({ pid : o.process.pid, ignoringErrorPerm : 1 }) )
-    })
-
-    o.conTerminate.then( ( op ) =>
-    {
-      if( process.platform === 'win32' )
+      var o =
       {
-        test.identical( op.exitCode, 1 );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, null );
-        test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
-      }
-      else
-      {
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, null );
-        test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
-      }
-      return null;
-    })
-
-    return _.Consequence.And( ready, o.conTerminate );
-  })
-
-  /* - */
-
-  .then( () =>
-  {
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'spawn',
-      stdio : 'pipe',
-      ipc : 1,
-      throwingExitCode : 0
-    }
-
-    _.process.start( o )
-
-    let ready = _.Consequence();
-
-    o.process.on( 'message', () =>
-    {
-      ready.take( _.process.terminate( o.process.pid ) )
-    })
-
-    o.conTerminate.then( ( op ) =>
-    {
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, 1 );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, null );
-        test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
-      }
-      else
-      {
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, null );
-        test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
-      }
-      return null;
-    })
-
-    return _.Consequence.And( ready, o.conTerminate );
-  })
-
-  /* - */
-
-  .then( () =>
-  {
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'spawn',
-      stdio : 'pipe',
-      ipc : 1,
-      throwingExitCode : 0
-    }
-
-    _.process.start( o )
-
-    let ready = _.Consequence();
-
-    o.process.on( 'message', () =>
-    {
-      ready.take( _.process.terminate( o.process.pid ) )
-    })
-
-    o.conTerminate.then( ( op ) =>
-    {
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, 1 );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, null );
-        test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
-      }
-      else
-      {
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, null );
-        test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
-      }
-      return null;
-    })
-
-    return _.Consequence.And( ready, o.conTerminate );
-  })
-
-  /* - */
-
-  .then( () =>
-  {
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'spawn',
-      stdio : 'inherit',
-      outputPiping : 0,
-      outputCollecting : 0,
-      ipc : 1,
-      throwingExitCode : 0
-    }
-
-    _.process.start( o )
-
-    let ready = _.Consequence();
-
-    o.process.on( 'message', () =>
-    {
-      ready.take( _.process.terminate( o.process.pid ) )
-    })
-
-    o.conTerminate.then( ( op ) =>
-    {
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, 1 );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, null );
-        test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
-      }
-      else
-      {
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, null );
-        test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
-      }
-      return null;
-    })
-
-    return _.Consequence.And( ready, o.conTerminate );
-  })
-
-  /* - */
-
-  .then( () =>
-  {
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'spawn',
-      stdio : 'ignore',
-      outputPiping : 0,
-      outputCollecting : 0,
-      ipc : 1,
-      throwingExitCode : 0
-    }
-
-    _.process.start( o )
-
-    let ready = _.Consequence();
-
-    o.process.on( 'message', () =>
-    {
-      ready.take( _.process.terminate( o.process.pid ) )
-    })
-
-    o.conTerminate.then( ( op ) =>
-    {
-      if( process.platform === 'win32' )
-      {
-        test.identical( op.exitCode, 1 );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, null );
-        test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
-      }
-      else
-      {
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, null );
-        test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+        execPath : mode === 'fork' ? testAppPath :  'node ' + testAppPath,
+        mode,
+        stdio : 'ignore',
+        ipc : 1,
+        outputPiping : 0,
+        outputCollecting : 0,
+        throwingExitCode : 0
       }
 
-      return null;
+      if( mode === 'shell' ) /* Mode::shell doesn't support inter process communication. */
+      return test.shouldThrowErrorSync( () => _.process.start( o ) )
+
+      _.process.start( o )
+
+      let ready = _.Consequence();
+
+      o.process.on( 'message', () =>
+      {
+        ready.take( _.process.terminate( o.process.pid ) )
+        /* xxx : possible solution for phantom problem on Windows*/
+        // ready.take( _.process.terminate({ pid : o.process.pid, ignoringErrorPerm : 1 }) )
+      })
+
+      o.conTerminate.then( ( op ) =>
+      {
+        if( process.platform === 'win32' )
+        {
+          test.identical( op.exitCode, 1 );
+          test.identical( op.ended, true );
+          test.identical( op.exitSignal, null );
+          test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+        }
+        else
+        {
+          test.identical( op.exitCode, 0 );
+          test.identical( op.ended, true );
+          test.identical( op.exitSignal, null );
+          test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+        }
+        return null;
+      })
+
+      return _.Consequence.And( ready, o.conTerminate );
     })
 
-    return _.Consequence.And( ready, o.conTerminate );
-  })
+    /* - */
 
-  /* */
+    .then( () =>
+    {
+      test.case = `mode : ${mode}, pipe`;
+      var o =
+      {
+        execPath : mode === 'fork' ? testAppPath :  'node ' + testAppPath,
+        mode,
+        stdio : 'pipe',
+        ipc : 1,
+        throwingExitCode : 0
+      }
 
-  return a.ready;
+      if( mode === 'shell' ) /* Mode::shell doesn't support inter process communication. */
+      return test.shouldThrowErrorSync( () => _.process.start( o ) )
+
+      _.process.start( o )
+
+      let ready = _.Consequence();
+
+      o.process.on( 'message', () =>
+      {
+        ready.take( _.process.terminate( o.process.pid ) )
+      })
+
+      o.conTerminate.then( ( op ) =>
+      {
+        if( process.platform === 'win32' )
+        {
+          test.identical( op.exitCode, 1 );
+          test.identical( op.ended, true );
+          test.identical( op.exitSignal, null );
+          test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+        }
+        else
+        {
+          test.identical( op.exitCode, 0 );
+          test.identical( op.ended, true );
+          test.identical( op.exitSignal, null );
+          test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+        }
+        return null;
+      })
+
+      return _.Consequence.And( ready, o.conTerminate );
+    })
+
+    /* - */
+
+    /* REDUNDANT */
+    // .then( () =>
+    // {
+    //   var o =
+    //   {
+    //     execPath : mode === 'fork' ? testAppPath :  'node ' + testAppPath,
+    //     mode,
+    //     stdio : 'pipe',
+    //     ipc : 1,
+    //     throwingExitCode : 0
+    //   }
+
+    //   _.process.start( o )
+
+    //   let ready = _.Consequence();
+
+    //   o.process.on( 'message', () =>
+    //   {
+    //     ready.take( _.process.terminate( o.process.pid ) )
+    //   })
+
+    //   o.conTerminate.then( ( op ) =>
+    //   {
+    //     if( process.platform === 'win32' )
+    //     {
+    //       test.identical( op.exitCode, 1 );
+    //       test.identical( op.ended, true );
+    //       test.identical( op.exitSignal, null );
+    //       test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+    //     }
+    //     else
+    //     {
+    //       test.identical( op.exitCode, 0 );
+    //       test.identical( op.ended, true );
+    //       test.identical( op.exitSignal, null );
+    //       test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+    //     }
+    //     return null;
+    //   })
+
+    //   return _.Consequence.And( ready, o.conTerminate );
+    // })
+
+    /* - */
+
+    /* REDUNDANT */
+    // .then( () =>
+    // {
+    //   var o =
+    //   {
+    //     execPath :  'node ' + testAppPath,
+    //     mode : 'spawn',
+    //     stdio : 'inherit',
+    //     outputPiping : 0,
+    //     outputCollecting : 0,
+    //     ipc : 1,
+    //     throwingExitCode : 0
+    //   }
+
+    //   _.process.start( o )
+
+    //   let ready = _.Consequence();
+
+    //   o.process.on( 'message', () =>
+    //   {
+    //     ready.take( _.process.terminate( o.process.pid ) )
+    //   })
+
+    //   o.conTerminate.then( ( op ) =>
+    //   {
+    //     if( process.platform === 'win32' )
+    //     {
+    //       test.identical( op.exitCode, 1 );
+    //       test.identical( op.ended, true );
+    //       test.identical( op.exitSignal, null );
+    //       test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+    //     }
+    //     else
+    //     {
+    //       test.identical( op.exitCode, 0 );
+    //       test.identical( op.ended, true );
+    //       test.identical( op.exitSignal, null );
+    //       test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+    //     }
+    //     return null;
+    //   })
+
+    //   return _.Consequence.And( ready, o.conTerminate );
+    // })
+
+    /* - */
+
+    /* REDUNDANT */
+    // .then( () =>
+    // {
+    //   var o =
+    //   {
+    //     execPath : mode === 'fork' ? testAppPath :  'node ' + testAppPath,
+    //     mode,
+    //     stdio : 'ignore',
+    //     outputPiping : 0,
+    //     outputCollecting : 0,
+    //     ipc : 1,
+    //     throwingExitCode : 0
+    //   }
+
+    //   _.process.start( o )
+
+    //   let ready = _.Consequence();
+
+    //   o.process.on( 'message', () =>
+    //   {
+    //     ready.take( _.process.terminate( o.process.pid ) )
+    //   })
+
+    //   o.conTerminate.then( ( op ) =>
+    //   {
+    //     if( process.platform === 'win32' )
+    //     {
+    //       test.identical( op.exitCode, 1 );
+    //       test.identical( op.ended, true );
+    //       test.identical( op.exitSignal, null );
+    //       test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+    //     }
+    //     else
+    //     {
+    //       test.identical( op.exitCode, 0 );
+    //       test.identical( op.ended, true );
+    //       test.identical( op.exitSignal, null );
+    //       test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+    //     }
+
+    //     return null;
+    //   })
+
+    //   return _.Consequence.And( ready, o.conTerminate );
+    // })
+
+    /* */
+
+    return ready;
+  }
+
+  /* ORIGINAL */
+  // a.ready
+
+  // .then( () =>
+  // {
+  //   var o =
+  //   {
+  //     execPath :  'node ' + testAppPath,
+  //     mode : 'spawn',
+  //     stdio : 'inherit',
+  //     ipc : 1,
+  //     outputPiping : 0,
+  //     outputCollecting : 0,
+  //     throwingExitCode : 0
+  //   }
+
+  //   _.process.start( o )
+
+  //   let ready = _.Consequence();
+
+  //   o.process.on( 'message', () =>
+  //   {
+  //     ready.take( _.process.terminate( o.process.pid ) )
+  //   })
+
+  //   o.conTerminate.then( ( op ) =>
+  //   {
+  //     if( process.platform === 'win32' )
+  //     {
+  //       test.identical( op.exitCode, 1 );
+  //       test.identical( op.ended, true );
+  //       test.identical( op.exitSignal, null );
+  //       test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+  //     }
+  //     else
+  //     {
+  //       test.identical( op.exitCode, 0 );
+  //       test.identical( op.ended, true );
+  //       test.identical( op.exitSignal, null );
+  //       test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+  //     }
+  //     return null;
+  //   })
+
+  //   return _.Consequence.And( ready, o.conTerminate );
+  // })
+
+  // /* - */
+
+  // .then( () =>
+  // {
+
+  //   /*
+  //     Phantom fail on Windows:
+
+  //     Fail #1:
+  //     signalSend : 544 name: node.exe
+  //     signalSend : 552 name: csrss.exe
+  //     ...
+  //       = Message of error#1
+  //         kill EPERM
+  //         errno : 'EPERM'
+  //         code : 'EPERM'
+  //         syscall : 'kill'
+  //         Current process does not have permission to kill target process 544
+
+  //       = Beautified calls stack
+  //         at process.kill (internal/process/per_thread.js:189:13)
+  //         at signalSend (C:\Work\modules\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2851:15)
+  //     ...
+
+  //     Fail#2
+  //     signalSend : 5164 name: node.exe
+  //     signalSend : 544 name: conhost.exe
+  //     signalSend : 552 name: csrss.exe
+  //     ...
+  //     = Message of error#1
+  //       kill EPERM
+  //       errno : 'EPERM'
+  //       code : 'EPERM'
+  //       syscall : 'kill'
+  //       Current process does not have permission to kill target process 5164
+
+  //     = Beautified calls stack
+  //       at process.kill (internal/process/per_thread.js:189:13)
+  //       at signalSend (C:\Work\modules\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2851:15)
+  //     ...
+  //   */
+
+  //   var o =
+  //   {
+  //     execPath :  'node ' + testAppPath,
+  //     mode : 'spawn',
+  //     stdio : 'ignore',
+  //     ipc : 1,
+  //     outputPiping : 0,
+  //     outputCollecting : 0,
+  //     throwingExitCode : 0
+  //   }
+
+  //   _.process.start( o )
+
+  //   let ready = _.Consequence();
+
+  //   o.process.on( 'message', () =>
+  //   {
+  //     ready.take( _.process.terminate( o.process.pid ) )
+  //     /* xxx : possible solution for phantom problem on Windows*/
+  //     // ready.take( _.process.terminate({ pid : o.process.pid, ignoringErrorPerm : 1 }) )
+  //   })
+
+  //   o.conTerminate.then( ( op ) =>
+  //   {
+  //     if( process.platform === 'win32' )
+  //     {
+  //       test.identical( op.exitCode, 1 );
+  //       test.identical( op.ended, true );
+  //       test.identical( op.exitSignal, null );
+  //       test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+  //     }
+  //     else
+  //     {
+  //       test.identical( op.exitCode, 0 );
+  //       test.identical( op.ended, true );
+  //       test.identical( op.exitSignal, null );
+  //       test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+  //     }
+  //     return null;
+  //   })
+
+  //   return _.Consequence.And( ready, o.conTerminate );
+  // })
+
+  // /* - */
+
+  // .then( () =>
+  // {
+  //   var o =
+  //   {
+  //     execPath :  'node ' + testAppPath,
+  //     mode : 'spawn',
+  //     stdio : 'pipe',
+  //     ipc : 1,
+  //     throwingExitCode : 0
+  //   }
+
+  //   _.process.start( o )
+
+  //   let ready = _.Consequence();
+
+  //   o.process.on( 'message', () =>
+  //   {
+  //     ready.take( _.process.terminate( o.process.pid ) )
+  //   })
+
+  //   o.conTerminate.then( ( op ) =>
+  //   {
+  //     if( process.platform === 'win32' )
+  //     {
+  //       test.identical( op.exitCode, 1 );
+  //       test.identical( op.ended, true );
+  //       test.identical( op.exitSignal, null );
+  //       test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+  //     }
+  //     else
+  //     {
+  //       test.identical( op.exitCode, 0 );
+  //       test.identical( op.ended, true );
+  //       test.identical( op.exitSignal, null );
+  //       test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+  //     }
+  //     return null;
+  //   })
+
+  //   return _.Consequence.And( ready, o.conTerminate );
+  // })
+
+  // /* - */
+
+  // .then( () =>
+  // {
+  //   var o =
+  //   {
+  //     execPath :  'node ' + testAppPath,
+  //     mode : 'spawn',
+  //     stdio : 'pipe',
+  //     ipc : 1,
+  //     throwingExitCode : 0
+  //   }
+
+  //   _.process.start( o )
+
+  //   let ready = _.Consequence();
+
+  //   o.process.on( 'message', () =>
+  //   {
+  //     ready.take( _.process.terminate( o.process.pid ) )
+  //   })
+
+  //   o.conTerminate.then( ( op ) =>
+  //   {
+  //     if( process.platform === 'win32' )
+  //     {
+  //       test.identical( op.exitCode, 1 );
+  //       test.identical( op.ended, true );
+  //       test.identical( op.exitSignal, null );
+  //       test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+  //     }
+  //     else
+  //     {
+  //       test.identical( op.exitCode, 0 );
+  //       test.identical( op.ended, true );
+  //       test.identical( op.exitSignal, null );
+  //       test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+  //     }
+  //     return null;
+  //   })
+
+  //   return _.Consequence.And( ready, o.conTerminate );
+  // })
+
+  // /* - */
+
+  // .then( () =>
+  // {
+  //   var o =
+  //   {
+  //     execPath :  'node ' + testAppPath,
+  //     mode : 'spawn',
+  //     stdio : 'inherit',
+  //     outputPiping : 0,
+  //     outputCollecting : 0,
+  //     ipc : 1,
+  //     throwingExitCode : 0
+  //   }
+
+  //   _.process.start( o )
+
+  //   let ready = _.Consequence();
+
+  //   o.process.on( 'message', () =>
+  //   {
+  //     ready.take( _.process.terminate( o.process.pid ) )
+  //   })
+
+  //   o.conTerminate.then( ( op ) =>
+  //   {
+  //     if( process.platform === 'win32' )
+  //     {
+  //       test.identical( op.exitCode, 1 );
+  //       test.identical( op.ended, true );
+  //       test.identical( op.exitSignal, null );
+  //       test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+  //     }
+  //     else
+  //     {
+  //       test.identical( op.exitCode, 0 );
+  //       test.identical( op.ended, true );
+  //       test.identical( op.exitSignal, null );
+  //       test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+  //     }
+  //     return null;
+  //   })
+
+  //   return _.Consequence.And( ready, o.conTerminate );
+  // })
+
+  // /* - */
+
+  // .then( () =>
+  // {
+  //   var o =
+  //   {
+  //     execPath :  'node ' + testAppPath,
+  //     mode : 'spawn',
+  //     stdio : 'ignore',
+  //     outputPiping : 0,
+  //     outputCollecting : 0,
+  //     ipc : 1,
+  //     throwingExitCode : 0
+  //   }
+
+  //   _.process.start( o )
+
+  //   let ready = _.Consequence();
+
+  //   o.process.on( 'message', () =>
+  //   {
+  //     ready.take( _.process.terminate( o.process.pid ) )
+  //   })
+
+  //   o.conTerminate.then( ( op ) =>
+  //   {
+  //     if( process.platform === 'win32' )
+  //     {
+  //       test.identical( op.exitCode, 1 );
+  //       test.identical( op.ended, true );
+  //       test.identical( op.exitSignal, null );
+  //       test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+  //     }
+  //     else
+  //     {
+  //       test.identical( op.exitCode, 0 );
+  //       test.identical( op.ended, true );
+  //       test.identical( op.exitSignal, null );
+  //       test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+  //     }
+
+  //     return null;
+  //   })
+
+  //   return _.Consequence.And( ready, o.conTerminate );
+  // })
+
+  // /* */
+
+  // return a.ready;
 
   /* - */
 
