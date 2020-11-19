@@ -34243,15 +34243,15 @@ function terminateSeveralChildren( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}`;
-      let testAppPath = a.program({ routine : program1, locals : { mode } });
+      let testAppPath = a.program( program1 );
       let testAppPath2 = a.program( program2 );
       let testAppPath3 = a.program( program3 );
 
       let o =
       {
-        execPath : 'node program1.js',
+        execPath : mode === 'fork' ? 'program1.js' : 'node program1.js',
         currentPath : a.routinePath,
-        mode : 'spawn',
+        mode,
         outputPiping : 1,
         outputCollecting : 1,
         throwingExitCode : 0
@@ -34475,7 +34475,6 @@ function terminateSeveralChildren( test )
     var o =
     {
       currentPath : __dirname,
-      mode,
       stdio : 'inherit',
       inputMirroring : 0,
       outputPiping : 0,
@@ -34483,8 +34482,8 @@ function terminateSeveralChildren( test )
       throwingExitCode : 0,
     }
 
-    _.process.start( _.mapExtend( null, o, { execPath : mode === 'fork' ? 'program2.js' : 'node program2.js' }));
-    _.process.start( _.mapExtend( null, o, { execPath : mode === 'fork' ? 'program3.js' : 'node program3.js' }));
+    _.process.start( _.mapExtend( null, o, { execPath : 'node program2.js', mode : 'spawn' }));
+    _.process.start( _.mapExtend( null, o, { execPath : 'node program3.js', mode : 'spawn' }));
 
     let timer = _.time.outError( context.t1*32 );
 
