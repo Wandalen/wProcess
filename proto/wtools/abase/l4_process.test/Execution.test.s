@@ -34759,14 +34759,23 @@ function terminateTimeOutNoHandler( test )
 
         test.identical( _.strCount( op.output, 'SIGTERM' ), 0 );
         test.identical( _.strCount( op.output, 'program1::begin' ), 1 );
+
         /*
+          mode::shell
           Single process on darwin, Two processes on linux and windows
           Child continues to work on linux/windows
         */
-        if( process.platform === 'darwin' )
-        test.identical( _.strCount( op.output, 'program1::end' ), 0 );
+        if( mode === 'shell' )
+        {
+          if( process.platform === 'darwin' )
+          test.identical( _.strCount( op.output, 'program1::end' ), 0 );
+          else
+          test.identical( _.strCount( op.output, 'program1::end' ), 1 );
+        }
         else
-        test.identical( _.strCount( op.output, 'program1::end' ), 1 );
+        {
+          test.identical( _.strCount( op.output, 'program1::end' ), 0 );
+        }
 
         return null;
       })
