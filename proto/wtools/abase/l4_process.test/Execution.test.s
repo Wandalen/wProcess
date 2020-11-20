@@ -34826,8 +34826,7 @@ function terminateTimeOutIgnoreSignal( test )
         return _.process.terminate
         ({
           pid : o.process.pid,
-          // timeOut : context.t1 * 5,
-          timeOut : 1,
+          timeOut : context.t1 * 5,
           withChildren : 0
         })
       })
@@ -34845,6 +34844,9 @@ function terminateTimeOutIgnoreSignal( test )
         else
         {
           test.identical( op.exitCode, null );
+          if( process.platform === 'linux' && mode === 'shell' ) /* On linux in mode::shell, process exits with SIGTERM instead of SIGKILL*/
+          test.identical( op.exitSignal, 'SIGTERM' );
+          else
           test.identical( op.exitSignal, 'SIGKILL' );
           test.identical( _.strCount( op.output, 'program1::SIGTERM' ), 1 );
         }
