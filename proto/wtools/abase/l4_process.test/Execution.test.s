@@ -34826,7 +34826,8 @@ function terminateTimeOutIgnoreSignal( test )
         return _.process.terminate
         ({
           pid : o.process.pid,
-          timeOut : context.t1 * 5,
+          // timeOut : context.t1 * 5,
+          timeOut : 1,
           withChildren : 0
         })
       })
