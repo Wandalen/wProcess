@@ -10257,7 +10257,7 @@ function startAfterDeath( test )
       mode : 'spawn',
     }
 
-    _.process.startSingle( o );
+    _.process.start( o );
 
     o.conStart.thenGive( () =>
     {
@@ -10357,7 +10357,7 @@ function startAfterDeathOutput( test )
       stdio : 'inherit'
     }
 
-    _.process.startSingle( o );
+    _.process.start( o );
 
     o.process.on( 'exit', () => //zzz for Vova: remove after enabling exit handler in start
     {
