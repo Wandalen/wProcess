@@ -464,7 +464,7 @@ ${programPath}:end
       return test.mustNotThrowError( _.process.start( options ) )
       .then( () =>
       {
-        test.is( !options.error );
+        test.true( !options.error );
         test.identical( options.process.killed, false );
         test.identical( options.exitCode, 0 );
         test.identical( options.exitSignal, null );
@@ -496,12 +496,12 @@ ${programPath}:end
       return test.shouldThrowErrorAsync( _.process.start( options ),
       ( err, arg ) =>
       {
-        test.is( _.errIs( err ) );
+        test.true( _.errIs( err ) );
         test.identical( err.reason, 'exit code' );
       })
       .then( () =>
       {
-        test.is( !!options.error );
+        test.true( !!options.error );
         test.identical( options.process.killed, false );
         test.identical( options.exitCode, 1 );
         test.identical( options.exitSignal, null );
@@ -546,12 +546,12 @@ ${programPath}:end
       //   return test.shouldThrowErrorAsync( _.process.start( options ),
       //   ( err, arg ) =>
       //   {
-      //     test.is( _.errIs( err ) );
+      //     test.true( _.errIs( err ) );
       //     test.identical( err.reason, 'exit code' );
       //   })
       //   .then( () =>
       //   {
-      //     test.is( !!options.error );
+      //     test.true( !!options.error );
       //     test.identical( options.exitCode, 1 );
       //     test.identical( options.exitSignal, null );
       //     test.identical( options.state, 'terminated' );
@@ -565,12 +565,12 @@ ${programPath}:end
 
       return test.shouldThrowErrorAsync( _.process.start( options ), ( err, arg ) =>
       {
-        test.is( _.errIs( err ) );
+        test.true( _.errIs( err ) );
         test.identical( err.reason, 'exit code' );
       })
       .then( () =>
       {
-        test.is( !!options.error );
+        test.true( !!options.error );
         test.identical( options.exitCode, 1 );
         test.identical( options.exitSignal, null );
         test.identical( options.state, 'terminated' );
@@ -807,7 +807,7 @@ function startFork( test )
     .then( function( op )
     {
       test.identical( o.exitCode, 0 );
-      test.is( _.strHas( o.output, '[]' ) );
+      test.true( _.strHas( o.output, '[]' ) );
       return null;
     })
   })
@@ -831,7 +831,7 @@ function startFork( test )
     .then( function( op )
     {
       test.identical( o.exitCode, 0 );
-      test.is( _.strHas( o.output,  `[ 'arg1', 'arg2' ]` ) );
+      test.true( _.strHas( o.output,  `[ 'arg1', 'arg2' ]` ) );
       return null;
     })
   })
@@ -893,10 +893,10 @@ function startFork( test )
     .then( function( op )
     {
       test.identical( o.exitCode, 0 );
-      test.is( _.strHas( o.output,  `[ 'arg1', 'arg2' ]` ) );
-      test.is( _.strHas( o.output,  `key1: 'val'` ) );
-      test.is( _.strHas( o.output,  a.path.nativize( a.routinePath ) ) );
-      test.is( _.strHas( o.output,  `[ '--no-warnings' ]` ) );
+      test.true( _.strHas( o.output,  `[ 'arg1', 'arg2' ]` ) );
+      test.true( _.strHas( o.output,  `key1: 'val'` ) );
+      test.true( _.strHas( o.output,  a.path.nativize( a.routinePath ) ) );
+      test.true( _.strHas( o.output,  `[ '--no-warnings' ]` ) );
 
       return null;
     })
@@ -936,10 +936,10 @@ function startFork( test )
     _.process.start( o );
     debugger
     test.identical( o.exitCode, 0 );
-    test.is( _.strHas( o.output,  `[ 'arg1', 'arg2' ]` ) );
-    test.is( _.strHas( o.output,  `key1: 'val'` ) );
-    test.is( _.strHas( o.output,  a.path.nativize( a.routinePath ) ) );
-    test.is( _.strHas( o.output,  `[ '--no-warnings' ]` ) );
+    test.true( _.strHas( o.output,  `[ 'arg1', 'arg2' ]` ) );
+    test.true( _.strHas( o.output,  `key1: 'val'` ) );
+    test.true( _.strHas( o.output,  a.path.nativize( a.routinePath ) ) );
+    test.true( _.strHas( o.output,  `[ '--no-warnings' ]` ) );
 
     return null;
   })
@@ -1006,7 +1006,7 @@ function startFork( test )
     .then( function( op )
     {
       test.identical( o.exitCode, 0 );
-      test.is( _.strHas( o.output,  `[ 'arg0' ]` ) );
+      test.true( _.strHas( o.output,  `[ 'arg0' ]` ) );
       return null;
     })
   })
@@ -1129,11 +1129,11 @@ function startErrorHandling( test )
       return test.shouldThrowErrorAsync( _.process.start( o ) )
       .then( function( op )
       {
-        test.is( _.errIs( op ) );
-        test.is( _.strHas( op.message, 'Process returned exit code' ) )
-        test.is( _.strHas( op.message, 'Launched as' ) )
-        test.is( _.strHas( op.message, 'Stderr' ) )
-        test.is( _.strHas( op.message, 'Error message from child' ) )
+        test.true( _.errIs( op ) );
+        test.true( _.strHas( op.message, 'Process returned exit code' ) )
+        test.true( _.strHas( op.message, 'Launched as' ) )
+        test.true( _.strHas( op.message, 'Stderr' ) )
+        test.true( _.strHas( op.message, 'Error message from child' ) )
 
         test.notIdentical( o.exitCode, 0 );
 
@@ -1161,11 +1161,11 @@ function startErrorHandling( test )
       }
       var returned = test.shouldThrowErrorSync( () => _.process.start( o ) )
 
-      test.is( _.errIs( returned ) );
-      test.is( _.strHas( returned.message, 'Process returned exit code' ) )
-      test.is( _.strHas( returned.message, 'Launched as' ) )
-      test.is( _.strHas( returned.message, 'Stderr' ) )
-      test.is( _.strHas( returned.message, 'Error message from child' ) )
+      test.true( _.errIs( returned ) );
+      test.true( _.strHas( returned.message, 'Process returned exit code' ) )
+      test.true( _.strHas( returned.message, 'Launched as' ) )
+      test.true( _.strHas( returned.message, 'Stderr' ) )
+      test.true( _.strHas( returned.message, 'Error message from child' ) )
 
       test.notIdentical( o.exitCode, 0 );
 
@@ -1192,11 +1192,11 @@ function startErrorHandling( test )
       }
       var returned = test.shouldThrowErrorSync( () => _.process.start( o ) )
 
-      test.is( _.errIs( returned ) );
-      test.is( _.strHas( returned.message, 'Process returned exit code' ) )
-      test.is( _.strHas( returned.message, 'Launched as' ) )
-      test.is( !_.strHas( returned.message, 'Stderr' ) )
-      test.is( !_.strHas( returned.message, 'Error message from child' ) )
+      test.true( _.errIs( returned ) );
+      test.true( _.strHas( returned.message, 'Process returned exit code' ) )
+      test.true( _.strHas( returned.message, 'Launched as' ) )
+      test.true( !_.strHas( returned.message, 'Stderr' ) )
+      test.true( !_.strHas( returned.message, 'Error message from child' ) )
 
       test.notIdentical( o.exitCode, 0 );
 
@@ -1238,16 +1238,16 @@ function startErrorHandling( test )
       }
       var returned = test.shouldThrowErrorSync( () => _.process.start( o2 ) )
 
-      test.is( _.errIs( returned ) );
-      test.is( _.strHas( returned.message, 'Process returned exit code' ) )
-      test.is( _.strHas( returned.message, 'Launched as' ) )
-      test.is( _.strHas( returned.message, 'Stderr' ) )
-      test.is( _.strHas( returned.message, 'Error message from child' ) )
+      test.true( _.errIs( returned ) );
+      test.true( _.strHas( returned.message, 'Process returned exit code' ) )
+      test.true( _.strHas( returned.message, 'Launched as' ) )
+      test.true( _.strHas( returned.message, 'Stderr' ) )
+      test.true( _.strHas( returned.message, 'Error message from child' ) )
 
-      test.is( _.strHas( o2.output, 'Process returned exit code' ) )
-      test.is( _.strHas( o2.output, 'Launched as' ) )
-      test.is( !_.strHas( o2.output, 'Stderr' ) )
-      test.is( _.strHas( o2.output, 'Error message from child' ) )
+      test.true( _.strHas( o2.output, 'Process returned exit code' ) )
+      test.true( _.strHas( o2.output, 'Launched as' ) )
+      test.true( !_.strHas( o2.output, 'Stderr' ) )
+      test.true( _.strHas( o2.output, 'Error message from child' ) )
 
       test.notIdentical( o2.exitCode, 0 );
 
@@ -1277,11 +1277,11 @@ function startErrorHandling( test )
   //   return test.shouldThrowErrorAsync( _.process.start( o ) )
   //   .then( function( op )
   //   {
-  //     test.is( _.errIs( op ) );
-  //     test.is( _.strHas( op.message, 'Process returned exit code' ) )
-  //     test.is( _.strHas( op.message, 'Launched as' ) )
-  //     test.is( _.strHas( op.message, 'Stderr' ) )
-  //     test.is( _.strHas( op.message, 'Error message from child' ) )
+  //     test.true( _.errIs( op ) );
+  //     test.true( _.strHas( op.message, 'Process returned exit code' ) )
+  //     test.true( _.strHas( op.message, 'Launched as' ) )
+  //     test.true( _.strHas( op.message, 'Stderr' ) )
+  //     test.true( _.strHas( op.message, 'Error message from child' ) )
 
   //     test.notIdentical( o.exitCode, 0 );
 
@@ -1308,11 +1308,11 @@ function startErrorHandling( test )
   //   return test.shouldThrowErrorAsync( _.process.start( o ) )
   //   .then( function( op )
   //   {
-  //     test.is( _.errIs( op ) );
-  //     test.is( _.strHas( op.message, 'Process returned exit code' ) )
-  //     test.is( _.strHas( op.message, 'Launched as' ) )
-  //     test.is( _.strHas( op.message, 'Stderr' ) )
-  //     test.is( _.strHas( op.message, 'Error message from child' ) )
+  //     test.true( _.errIs( op ) );
+  //     test.true( _.strHas( op.message, 'Process returned exit code' ) )
+  //     test.true( _.strHas( op.message, 'Launched as' ) )
+  //     test.true( _.strHas( op.message, 'Stderr' ) )
+  //     test.true( _.strHas( op.message, 'Error message from child' ) )
 
   //     test.notIdentical( o.exitCode, 0 );
 
@@ -1339,11 +1339,11 @@ function startErrorHandling( test )
   //   return test.shouldThrowErrorAsync( _.process.start( o ) )
   //   .then( function( op )
   //   {
-  //     test.is( _.errIs( op ) );
-  //     test.is( _.strHas( op.message, 'Process returned exit code' ) )
-  //     test.is( _.strHas( op.message, 'Launched as' ) )
-  //     test.is( _.strHas( op.message, 'Stderr' ) )
-  //     test.is( _.strHas( op.message, 'Error message from child' ) )
+  //     test.true( _.errIs( op ) );
+  //     test.true( _.strHas( op.message, 'Process returned exit code' ) )
+  //     test.true( _.strHas( op.message, 'Launched as' ) )
+  //     test.true( _.strHas( op.message, 'Stderr' ) )
+  //     test.true( _.strHas( op.message, 'Error message from child' ) )
 
   //     test.notIdentical( o.exitCode, 0 );
 
@@ -1371,11 +1371,11 @@ function startErrorHandling( test )
   //   }
   //   var returned = test.shouldThrowErrorSync( () => _.process.start( o ) )
 
-  //   test.is( _.errIs( returned ) );
-  //   test.is( _.strHas( returned.message, 'Process returned exit code' ) )
-  //   test.is( _.strHas( returned.message, 'Launched as' ) )
-  //   test.is( _.strHas( returned.message, 'Stderr' ) )
-  //   test.is( _.strHas( returned.message, 'Error message from child' ) )
+  //   test.true( _.errIs( returned ) );
+  //   test.true( _.strHas( returned.message, 'Process returned exit code' ) )
+  //   test.true( _.strHas( returned.message, 'Launched as' ) )
+  //   test.true( _.strHas( returned.message, 'Stderr' ) )
+  //   test.true( _.strHas( returned.message, 'Error message from child' ) )
 
   //   test.notIdentical( o.exitCode, 0 );
 
@@ -1402,11 +1402,11 @@ function startErrorHandling( test )
   //   }
   //   var returned = test.shouldThrowErrorSync( () => _.process.start( o ) )
 
-  //   test.is( _.errIs( returned ) );
-  //   test.is( _.strHas( returned.message, 'Process returned exit code' ) )
-  //   test.is( _.strHas( returned.message, 'Launched as' ) )
-  //   test.is( _.strHas( returned.message, 'Stderr' ) )
-  //   test.is( _.strHas( returned.message, 'Error message from child' ) )
+  //   test.true( _.errIs( returned ) );
+  //   test.true( _.strHas( returned.message, 'Process returned exit code' ) )
+  //   test.true( _.strHas( returned.message, 'Launched as' ) )
+  //   test.true( _.strHas( returned.message, 'Stderr' ) )
+  //   test.true( _.strHas( returned.message, 'Error message from child' ) )
 
   //   test.notIdentical( o.exitCode, 0 );
 
@@ -1433,11 +1433,11 @@ function startErrorHandling( test )
   //   }
   //   var returned = test.shouldThrowErrorSync( () => _.process.start( o ) )
 
-  //   test.is( _.errIs( returned ) );
-  //   test.is( _.strHas( returned.message, 'Process returned exit code' ) )
-  //   test.is( _.strHas( returned.message, 'Launched as' ) )
-  //   test.is( _.strHas( returned.message, 'Stderr' ) )
-  //   test.is( _.strHas( returned.message, 'Error message from child' ) )
+  //   test.true( _.errIs( returned ) );
+  //   test.true( _.strHas( returned.message, 'Process returned exit code' ) )
+  //   test.true( _.strHas( returned.message, 'Launched as' ) )
+  //   test.true( _.strHas( returned.message, 'Stderr' ) )
+  //   test.true( _.strHas( returned.message, 'Error message from child' ) )
 
   //   test.notIdentical( o.exitCode, 0 );
 
@@ -1464,11 +1464,11 @@ function startErrorHandling( test )
   //   }
   //   var returned = test.shouldThrowErrorSync( () => _.process.start( o ) )
 
-  //   test.is( _.errIs( returned ) );
-  //   test.is( _.strHas( returned.message, 'Process returned exit code' ) )
-  //   test.is( _.strHas( returned.message, 'Launched as' ) )
-  //   test.is( !_.strHas( returned.message, 'Stderr' ) )
-  //   test.is( !_.strHas( returned.message, 'Error message from child' ) )
+  //   test.true( _.errIs( returned ) );
+  //   test.true( _.strHas( returned.message, 'Process returned exit code' ) )
+  //   test.true( _.strHas( returned.message, 'Launched as' ) )
+  //   test.true( !_.strHas( returned.message, 'Stderr' ) )
+  //   test.true( !_.strHas( returned.message, 'Error message from child' ) )
 
   //   test.notIdentical( o.exitCode, 0 );
 
@@ -1510,16 +1510,16 @@ function startErrorHandling( test )
   //   }
   //   var returned = test.shouldThrowErrorSync( () => _.process.start( o2 ) )
 
-  //   test.is( _.errIs( returned ) );
-  //   test.is( _.strHas( returned.message, 'Process returned exit code' ) )
-  //   test.is( _.strHas( returned.message, 'Launched as' ) )
-  //   test.is( _.strHas( returned.message, 'Stderr' ) )
-  //   test.is( _.strHas( returned.message, 'Error message from child' ) )
+  //   test.true( _.errIs( returned ) );
+  //   test.true( _.strHas( returned.message, 'Process returned exit code' ) )
+  //   test.true( _.strHas( returned.message, 'Launched as' ) )
+  //   test.true( _.strHas( returned.message, 'Stderr' ) )
+  //   test.true( _.strHas( returned.message, 'Error message from child' ) )
 
-  //   test.is( _.strHas( o2.output, 'Process returned exit code' ) )
-  //   test.is( _.strHas( o2.output, 'Launched as' ) )
-  //   test.is( !_.strHas( o2.output, 'Stderr' ) )
-  //   test.is( _.strHas( o2.output, 'Error message from child' ) )
+  //   test.true( _.strHas( o2.output, 'Process returned exit code' ) )
+  //   test.true( _.strHas( o2.output, 'Launched as' ) )
+  //   test.true( !_.strHas( o2.output, 'Stderr' ) )
+  //   test.true( _.strHas( o2.output, 'Error message from child' ) )
 
   //   test.notIdentical( o2.exitCode, 0 );
 
@@ -1946,9 +1946,9 @@ function startSyncDeasync( test )
 
       if( tops.sync )
       {
-        test.is( !_.consequenceIs( returned ) );
+        test.true( !_.consequenceIs( returned ) );
         test.identical( returned.exitCode, 0 );
-        test.is( returned === options );
+        test.true( returned === options );
         test.identical( returned, options );
         if( tops.deasync )
         test.identical( returned.process.constructor.name, 'ChildProcess' );
@@ -1958,7 +1958,7 @@ function startSyncDeasync( test )
       }
       else
       {
-        test.is( _.consequenceIs( returned ) );
+        test.true( _.consequenceIs( returned ) );
         if( tops.deasync )
         test.identical( returned.resourcesCount(), 1 );
         else
@@ -1967,7 +1967,7 @@ function startSyncDeasync( test )
         {
           test.identical( op.exitCode, 0 );
           test.identical( op.ended, true );
-          test.is( op === options );
+          test.true( op === options );
           test.identical( op.process.constructor.name, 'ChildProcess' );
           test.identical( op.output, expectedOutput );
 
@@ -1999,9 +1999,9 @@ function startSyncDeasync( test )
 
       if( tops.sync )
       {
-        test.is( !_.consequenceIs( returned ) );
+        test.true( !_.consequenceIs( returned ) );
         test.identical( returned.exitCode, 0 );
-        test.is( returned === options );
+        test.true( returned === options );
         test.identical( returned, options );
         if( tops.deasync )
         test.identical( returned.process.constructor.name, 'ChildProcess' );
@@ -2011,7 +2011,7 @@ function startSyncDeasync( test )
       }
       else
       {
-        test.is( _.consequenceIs( returned ) );
+        test.true( _.consequenceIs( returned ) );
         if( tops.deasync )
         test.identical( returned.resourcesCount(), 1 );
         else
@@ -2020,7 +2020,7 @@ function startSyncDeasync( test )
         {
           test.identical( op.exitCode, 0 );
           test.identical( op.ended, true );
-          test.is( op === options );
+          test.true( op === options );
           test.identical( op.process.constructor.name, 'ChildProcess' );
           test.identical( op.output, null );
 
@@ -2070,9 +2070,9 @@ function startSyncDeasync( test )
 
       if( tops.sync )
       {
-        test.is( !_.consequenceIs( returned ) );
+        test.true( !_.consequenceIs( returned ) );
         test.identical( returned.exitCode, 0 );
-        test.is( returned === options );
+        test.true( returned === options );
         test.identical( returned, options );
         if( tops.deasync )
         test.identical( returned.process.constructor.name, 'ChildProcess' );
@@ -2082,7 +2082,7 @@ function startSyncDeasync( test )
       }
       else
       {
-        test.is( _.consequenceIs( returned ) );
+        test.true( _.consequenceIs( returned ) );
         if( tops.deasync )
         test.identical( returned.resourcesCount(), 1 );
         else
@@ -2091,7 +2091,7 @@ function startSyncDeasync( test )
         {
           test.identical( op.exitCode, 0 );
           test.identical( op.ended, true );
-          test.is( op === options );
+          test.true( op === options );
           test.identical( op.process.constructor.name, 'ChildProcess' );
           test.identical( op.output, expectedOutput );
 
@@ -2129,7 +2129,7 @@ function startSyncDeasync( test )
         return test.shouldThrowErrorAsync( () => _.process.start( options ) )
         .then( ( op ) =>
         {
-          test.is( _.errIs( op ) );
+          test.true( _.errIs( op ) );
           test.identical( options.exitCode, 1 );
 
           return null;
@@ -2224,15 +2224,15 @@ startSyncDeasync.timeOut = 57e4; /* Locally : 56.549s */
 
 //       if( tops.sync )
 //       {
-//         test.is( !_.consequenceIs( returned ) );
-//         test.is( returned === o );
+//         test.true( !_.consequenceIs( returned ) );
+//         test.true( returned === o );
 //         test.identical( returned, o );
 //         test.identical( o.exitCode, 0 );
 //         return returned;
 //       }
 //       else
 //       {
-//         test.is( _.consequenceIs( returned ) );
+//         test.true( _.consequenceIs( returned ) );
 //         if( tops.deasync )
 //         test.identical( returned.resourcesCount(), 1 );
 //         else
@@ -2304,7 +2304,7 @@ function startSyncDeasyncThrowing( test )
       {
         var returned = _.process.start( o );
 
-        test.is( _.consequenceIs( returned ) );
+        test.true( _.consequenceIs( returned ) );
         if( tops.deasync )
         test.identical( returned.resourcesCount(), 1 );
         else
@@ -2376,8 +2376,8 @@ function startSyncDeasyncMultiple( test )
 
       if( sync )
       {
-        test.is( !_.consequenceIs( returned ) );
-        test.is( returned === o );
+        test.true( !_.consequenceIs( returned ) );
+        test.true( returned === o );
         test.identical( returned.runs.length, 2 );
         test.identical( o.runs[ 0 ].exitCode, 0 );
         test.identical( o.runs[ 0 ].exitSignal, null );
@@ -2401,7 +2401,7 @@ function startSyncDeasyncMultiple( test )
       }
       else
       {
-        test.is( _.consequenceIs( returned ) );
+        test.true( _.consequenceIs( returned ) );
 
         if( deasync )
         test.identical( returned.resourcesCount(), 1 );
@@ -2411,7 +2411,7 @@ function startSyncDeasyncMultiple( test )
         returned.then( function( result )
         {
           // debugger;
-          test.is( result === o );
+          test.true( result === o );
           test.identical( o.runs.length, 2 );
           test.identical( o.runs[ 0 ].exitCode, 0 );
           test.identical( o.runs[ 0 ].exitSignal, null );
@@ -2482,9 +2482,9 @@ function startWithoutExecPath( test )
   .then( ( arg ) =>
   {
     test.identical( arg.exitCode, 0 );
-    test.is( singleOption === arg );
-    test.is( _.strHas( arg.output, 'begin 1000' ) );
-    test.is( _.strHas( arg.output, 'end 1000' ) );
+    test.true( singleOption === arg );
+    test.true( _.strHas( arg.output, 'begin 1000' ) );
+    test.true( _.strHas( arg.output, 'end 1000' ) );
     test.identical( a.fileProvider.fileRead( filePath ), 'written by 1000' );
     a.fileProvider.fileDelete( filePath );
     counter += 1;
@@ -3408,8 +3408,8 @@ function startArgumentsParsingNonTrivial( test )
 
         if( mode === 'spawn' )
         {
-          test.is( !!err );
-          test.is( _.strHas( err.message, 'first arg' ) )
+          test.true( !!err );
+          test.true( _.strHas( err.message, 'first arg' ) )
           test.identical( o.execPath, 'first arg' );
           test.identical( o.args, [] );
           test.identical( o.args2, [] );
@@ -3417,7 +3417,7 @@ function startArgumentsParsingNonTrivial( test )
         else if( mode === 'fork' )
         {
           test.ni( op.exitCode, 0 );
-          test.is( _.strHas( op.output, 'Error: Cannot find module' ) );
+          test.true( _.strHas( op.output, 'Error: Cannot find module' ) );
           test.identical( o.execPath, mode === 'shell' ? '"first arg"' : 'first arg' );
           test.identical( o.args, [] );
           test.identical( o.args2, [] );
@@ -3426,14 +3426,14 @@ function startArgumentsParsingNonTrivial( test )
         {
           test.ni( op.exitCode, 0 );
           if( process.platform === 'darwin' )
-          test.is( _.strHas( op.output, 'first arg: command not found' ) );
+          test.true( _.strHas( op.output, 'first arg: command not found' ) );
           // else if( process.platform === 'win32' )
           // test.identical
           // (
           //   op.output,
           //   `'"first arg"' is not recognized as an internal or external command,\noperable program or batch file.\n`
           // );
-          // test.is( _.strHas( op.output, '"first arg"' ) );
+          // test.true( _.strHas( op.output, '"first arg"' ) );
           else
           test.identical( op.output, 'sh: 1: first arg: not found\n' )
         }
@@ -3473,21 +3473,21 @@ function startArgumentsParsingNonTrivial( test )
 
         if( mode === 'spawn' )
         {
-          test.is( !!err );
-          test.is( _.strHas( err.message, 'first arg' ) )
+          test.true( !!err );
+          test.true( _.strHas( err.message, 'first arg' ) )
           test.identical( o.args2, [ 'second arg' ] );
         }
         else if( mode === 'fork' )
         {
           test.ni( op.exitCode, 0 );
-          test.is( _.strHas( op.output, 'Error: Cannot find module' ) );
+          test.true( _.strHas( op.output, 'Error: Cannot find module' ) );
           test.identical( o.args2, [ 'second arg' ] );
         }
         else
         {
           test.ni( op.exitCode, 0 );
           if( process.platform === 'darwin' )
-          test.is( _.strHas( op.output, 'first: command not found' ) );
+          test.true( _.strHas( op.output, 'first: command not found' ) );
           // else if( process.platform === 'win32' )
           // test.identical
           // (
@@ -3534,20 +3534,20 @@ function startArgumentsParsingNonTrivial( test )
       {
         if( mode === 'spawn' )
         {
-          test.is( !!err );
-          test.is( _.strHas( err.message, '"' ) )
+          test.true( !!err );
+          test.true( _.strHas( err.message, '"' ) )
           test.identical( o.args2, [ 'first', 'arg', '"' ] );
         }
         else if( mode === 'fork' )
         {
           test.ni( op.exitCode, 0 );
-          test.is( _.strHas( op.output, ': command not found' ) );
+          test.true( _.strHas( op.output, ': command not found' ) );
           test.identical( o.args2, [ 'first', 'arg', '"' ] );
         }
         else
         {
           test.ni( op.exitCode, 0 );
-          test.is( _.strHas( op.output, 'unexpected EOF' ) || _.strHas( op.output, 'Unterminated quoted string' ) );
+          test.true( _.strHas( op.output, 'unexpected EOF' ) || _.strHas( op.output, 'Unterminated quoted string' ) );
           test.identical( o.args2, [ '"first"', '"arg"', '"\\""' ] );
         }
 
@@ -3588,20 +3588,20 @@ function startArgumentsParsingNonTrivial( test )
 
         if( mode === 'spawn' )
         {
-          test.is( !!err );
+          test.true( !!err );
           test.identical( o.execPath, '' );
           test.identical( o.args2, [ 'first', 'arg', '"' ] );
         }
         else if( mode === 'fork' )
         {
           test.ni( op.exitCode, 0 );
-          test.is( _.strHas( op.output, 'unexpected EOF while looking for matching' ) );
+          test.true( _.strHas( op.output, 'unexpected EOF while looking for matching' ) );
           test.identical( o.args2, [ 'first', 'arg', '"' ] );
         }
         else
         {
           test.ni( op.exitCode, 0 );
-          test.is( _.strHas( op.output, 'not found' ) );
+          test.true( _.strHas( op.output, 'not found' ) );
           test.identical( o.args2, [ '"first"', '"arg"', '"\\""' ] );
         }
 
@@ -3640,21 +3640,21 @@ function startArgumentsParsingNonTrivial( test )
       {
         if( mode === 'spawn' )
         {
-          test.is( !!err );
-          test.is( _.strHas( err.message, `spawn " ENOENT` ) );
+          test.true( !!err );
+          test.true( _.strHas( err.message, `spawn " ENOENT` ) );
           test.identical( o.args2, [ '"', 'first', 'arg', '"' ] );
         }
         else if( mode === 'fork' )
         {
           test.ni( op.exitCode, 0 );
-          test.is( _.strHas( op.output, 'unexpected EOF while looking for matching' ) );
+          test.true( _.strHas( op.output, 'unexpected EOF while looking for matching' ) );
           test.identical( o.args2, [ '"', 'first', 'arg', '"' ] );
         }
         else
         {
           test.ni( op.exitCode, 0 );
           if( process.platform === 'darwin' )
-          test.is( _.strHas( op.output, 'unexpected EOF while looking for matching' ) );
+          test.true( _.strHas( op.output, 'unexpected EOF while looking for matching' ) );
           // else if( process.platform === 'win32' )
           // test.identical
           // (
@@ -3664,7 +3664,7 @@ function startArgumentsParsingNonTrivial( test )
           else
           test.identical( op.output, 'sh: 1: Syntax error: Unterminated quoted string\n' );
           test.identical( o.args2, [ '"\\""', '"first"', '"arg"', '"\\""' ] );
-          // test.is( _.strHas( op.output, '" "' ) );
+          // test.true( _.strHas( op.output, '" "' ) );
         }
 
         test.identical( o.execPath, '"' );
@@ -5433,9 +5433,9 @@ function startExecPathNonTrivialModeShell( test )
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     if( process.platform === 'win32' )
-    test.is( _.strHas( op.output, `"a b" "*" "c"` ) );
+    test.true( _.strHas( op.output, `"a b" "*" "c"` ) );
     else
-    test.is( _.strHas( op.output, `a b * c` ) );
+    test.true( _.strHas( op.output, `a b * c` ) );
     test.identical( op.execPath, 'echo' )
     test.identical( op.args, [ 'a b', '*', 'c' ] );
     test.identical( op.args2, [ '"a b"', '"*"', '"c"' ] );
@@ -5484,9 +5484,9 @@ function startArgumentsHandlingTrivial( test )
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     if( process.platform === 'win32' )
-    test.is( _.strHas( op.output, `*` ) );
+    test.true( _.strHas( op.output, `*` ) );
     else
-    test.is( _.strHas( op.output, `file` ) );
+    test.true( _.strHas( op.output, `file` ) );
     test.identical( op.execPath, 'echo' );
     test.identical( op.args, [ '*' ] );
     test.identical( op.args2, [ '*' ] );
@@ -5528,9 +5528,9 @@ function startArgumentsHandling( test )
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     if( process.platform === 'win32' )
-    test.is( _.strHas( op.output, `*` ) );
+    test.true( _.strHas( op.output, `*` ) );
     else
-    test.is( _.strHas( op.output, `file` ) );
+    test.true( _.strHas( op.output, `file` ) );
     test.identical( op.execPath, 'echo' );
     test.identical( op.args, [ '*' ] );
     test.identical( op.args2, [ '*' ] );
@@ -5545,7 +5545,7 @@ function startArgumentsHandling( test )
   {
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
-    test.is( _.strHas( op.output, `*` ) );
+    test.true( _.strHas( op.output, `*` ) );
     test.identical( op.execPath, 'echo' );
     test.identical( op.args, [ '*' ] );
     test.identical( op.args2, [ '"*"' ] );
@@ -5560,7 +5560,7 @@ function startArgumentsHandling( test )
   {
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
-    test.is( _.strHas( op.output, `*` ) );
+    test.true( _.strHas( op.output, `*` ) );
     test.identical( op.execPath, 'echo' );
     test.identical( op.args, [ '"*"' ] );
     test.identical( op.args2, [ '"*"' ] );
@@ -5577,9 +5577,9 @@ function startArgumentsHandling( test )
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     if( process.platform === 'win32' )
-    test.is( _.strHas( op.output, `"a b" "*" c` ) );
+    test.true( _.strHas( op.output, `"a b" "*" c` ) );
     else
-    test.is( _.strHas( op.output, `a b * c` ) );
+    test.true( _.strHas( op.output, `a b * c` ) );
     test.identical( op.execPath, 'echo' );
     test.identical( op.args, [ '"a b"', '"*"', 'c' ] );
     test.identical( op.args2, [ '"a b"', '"*"', 'c' ] );
@@ -5595,9 +5595,9 @@ function startArgumentsHandling( test )
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     if( process.platform === 'win32' )
-    test.is( _.strHas( op.output, `"a b" "*" "c"` ) );
+    test.true( _.strHas( op.output, `"a b" "*" "c"` ) );
     else
-    test.is( _.strHas( op.output, `a b * c` ) );
+    test.true( _.strHas( op.output, `a b * c` ) );
     test.identical( op.execPath, 'echo' );
     test.identical( op.args, [ 'a b', '*', 'c' ] );
     test.identical( op.args2, [ '"a b"', '"*"', '"c"' ] );
@@ -5716,7 +5716,7 @@ function startArgumentsHandling( test )
   {
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
-    test.is( _.strHas( op.output, `a b c` ) );
+    test.true( _.strHas( op.output, `a b c` ) );
     return null;
   })
 
@@ -5727,7 +5727,7 @@ function startArgumentsHandling( test )
   {
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
-    test.is( _.strHas( op.output, `"a b c"` ) );
+    test.true( _.strHas( op.output, `"a b c"` ) );
     test.identical( op.execPath, 'node' );
     test.identical( op.args, [ '-e', '"console.log( process.argv.slice( 1 ) )"', '"a b c"' ] );
     test.identical( op.args2, [ '-e', '"console.log( process.argv.slice( 1 ) )"', '"\\"a b c\\""' ] );
@@ -5791,7 +5791,7 @@ function startImportantExecPath( test )
   {
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
-    test.is( _.strHas( op.output, `[ 'a', '&&', 'node', 'b' ]` ) )
+    test.true( _.strHas( op.output, `[ 'a', '&&', 'node', 'b' ]` ) )
     return null;
   })
 
@@ -5803,9 +5803,9 @@ function startImportantExecPath( test )
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     if( process.platform === 'win32' )
-    test.is( _.strHas( op.output, '"-v" "&&" "echo" "-v"' ) )
+    test.true( _.strHas( op.output, '"-v" "&&" "echo" "-v"' ) )
     else
-    test.is( _.strHas( op.output, '-v && echo -v' ) )
+    test.true( _.strHas( op.output, '-v && echo -v' ) )
     return null;
   })
 
@@ -5839,9 +5839,9 @@ function startImportantExecPath( test )
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     if( process.platform === 'win32' )
-    test.is( _.strHas( op.output, '-v "&&" node -v'  ) );
+    test.true( _.strHas( op.output, '-v "&&" node -v'  ) );
     else
-    test.is( _.strHas( op.output, '-v && node -v'  ) );
+    test.true( _.strHas( op.output, '-v && node -v'  ) );
     return null;
   })
 
@@ -5899,7 +5899,7 @@ function startImportantExecPath( test )
   {
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
-    test.is( _.strHas( op.output, `[ 'a b' ]` ) );
+    test.true( _.strHas( op.output, `[ 'a b' ]` ) );
     return null;
   })
 
@@ -5910,7 +5910,7 @@ function startImportantExecPath( test )
   {
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
-    test.is( _.strHas( op.output, `[ 'a b' ]` ) );
+    test.true( _.strHas( op.output, `[ 'a b' ]` ) );
     return null;
   })
 
@@ -5921,7 +5921,7 @@ function startImportantExecPath( test )
   {
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
-    test.is( _.strHas( op.output, `[ 'a', 'b' ]` ) );
+    test.true( _.strHas( op.output, `[ 'a', 'b' ]` ) );
     return null;
   })
 
@@ -5932,7 +5932,7 @@ function startImportantExecPath( test )
   {
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
-    test.is( _.strHas( op.output, `[ 'a b' ]` ) );
+    test.true( _.strHas( op.output, `[ 'a b' ]` ) );
     return null;
   })
 
@@ -5943,7 +5943,7 @@ function startImportantExecPath( test )
   {
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
-    test.is( _.strHas( op.output, '*' ) );
+    test.true( _.strHas( op.output, '*' ) );
     return null;
   })
 
@@ -5955,9 +5955,9 @@ function startImportantExecPath( test )
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     if( process.platform === 'win32' )
-    test.is( _.strHas( op.output, '\\"*\\"' ) );
+    test.true( _.strHas( op.output, '\\"*\\"' ) );
     else
-    test.is( _.strHas( op.output, '"*"' ) );
+    test.true( _.strHas( op.output, '"*"' ) );
     return null;
   })
 
@@ -5969,9 +5969,9 @@ function startImportantExecPath( test )
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     if( process.platform === 'win32' )
-    test.is( _.strHas( op.output, '\\"*\\"' ) );
+    test.true( _.strHas( op.output, '\\"*\\"' ) );
     else
-    test.is( _.strHas( op.output, '"*"' ) );
+    test.true( _.strHas( op.output, '"*"' ) );
     return null;
   })
 
@@ -5983,9 +5983,9 @@ function startImportantExecPath( test )
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     if( process.platform === 'win32' )
-    test.is( _.strHas( op.output, '"\\"*\\"' ) );
+    test.true( _.strHas( op.output, '"\\"*\\"' ) );
     else
-    test.is( _.strHas( op.output, '"*"' ) );
+    test.true( _.strHas( op.output, '"*"' ) );
     return null;
   })
 
@@ -5998,13 +5998,13 @@ function startImportantExecPath( test )
     test.identical( op.ended, true );
     if( process.platform === 'win32' )
     {
-      test.is( _.strHas( op.output, '*' ) );
-      test.is( _.strHas( op.output, '"*"' ) );
+      test.true( _.strHas( op.output, '*' ) );
+      test.true( _.strHas( op.output, '"*"' ) );
     }
     else
     {
-      test.is( _.strHas( op.output, 'file' ) );
-      test.is( _.strHas( op.output, '*' ) );
+      test.true( _.strHas( op.output, 'file' ) );
+      test.true( _.strHas( op.output, '*' ) );
     }
     return null;
   })
@@ -6057,7 +6057,7 @@ function startImportantExecPathPassingThrough( test )
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
-      test.is( _.strHas( op.output, 'echo\n' ) );
+      test.true( _.strHas( op.output, 'echo\n' ) );
 
       a.fileProvider.fileDelete( programPath );
       return null;
@@ -6090,7 +6090,7 @@ function startImportantExecPathPassingThrough( test )
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
-      test.is( _.strHas( op.output, 'echo\n' ) );
+      test.true( _.strHas( op.output, 'echo\n' ) );
 
       a.fileProvider.fileDelete( programPath );
       return null;
@@ -6123,7 +6123,7 @@ function startImportantExecPathPassingThrough( test )
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
-      test.is( _.strHas( op.output, 'echo * "*"\n' ) );
+      test.true( _.strHas( op.output, 'echo * "*"\n' ) );
 
       a.fileProvider.fileDelete( programPath );
       return null;
@@ -6152,9 +6152,9 @@ function startImportantExecPathPassingThrough( test )
   //   test.identical( op.exitCode, 0 );
   //   test.identical( op.ended, true );
   //   if( process.platform === 'win32' )
-  //   test.is( _.strHas( op.output, '"' + process.argv.slice( 2 ).join( '" "' ) + '"' ) );
+  //   test.true( _.strHas( op.output, '"' + process.argv.slice( 2 ).join( '" "' ) + '"' ) );
   //   else
-  //   test.is( _.strHas( op.output, process.argv.slice( 2 ).join( ' ') ) );
+  //   test.true( _.strHas( op.output, process.argv.slice( 2 ).join( ' ') ) );
   //   return null;
   // })
 
@@ -6184,7 +6184,7 @@ function startImportantExecPathPassingThrough( test )
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
-      test.is( _.strHas( op.output, 'echo "argFromParent"\n' ) );
+      test.true( _.strHas( op.output, 'echo "argFromParent"\n' ) );
 
       a.fileProvider.fileDelete( programPath );
       return null;
@@ -6199,9 +6199,9 @@ function startImportantExecPathPassingThrough( test )
   //   test.identical( op.exitCode, 0 );
   //   test.identical( op.ended, true );
   //   if( process.platform === 'win32' )
-  //   test.is( _.strHas( op.output, '"' + process.argv.slice( 2 ).join( '" "' ) + '"' ) );
+  //   test.true( _.strHas( op.output, '"' + process.argv.slice( 2 ).join( '" "' ) + '"' ) );
   //   else
-  //   test.is( _.strHas( op.output, process.argv.slice( 2 ).join( ' ') ) );
+  //   test.true( _.strHas( op.output, process.argv.slice( 2 ).join( ' ') ) );
   //   return null;
   // })
 
@@ -6231,7 +6231,7 @@ function startImportantExecPathPassingThrough( test )
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
-      test.is( _.strHas( op.output, 'echo "argFromParent"\n' ) );
+      test.true( _.strHas( op.output, 'echo "argFromParent"\n' ) );
 
       a.fileProvider.fileDelete( programPath );
       return null;
@@ -6247,15 +6247,15 @@ function startImportantExecPathPassingThrough( test )
   //   test.identical( op.ended, true );
   //   if( process.platform === 'win32' )
   //   {
-  //     test.is( _.strHas( op.output, '*' ) );
-  //     test.is( _.strHas( op.output, '"*"' ) );
-  //     test.is( _.strHas( op.output, '"' + process.argv.slice( 2 ).join( '" "' ) + '"' ) );
+  //     test.true( _.strHas( op.output, '*' ) );
+  //     test.true( _.strHas( op.output, '"*"' ) );
+  //     test.true( _.strHas( op.output, '"' + process.argv.slice( 2 ).join( '" "' ) + '"' ) );
   //   }
   //   else
   //   {
-  //     test.is( _.strHas( op.output, 'file' ) );
-  //     test.is( _.strHas( op.output, '*' ) );
-  //     test.is( _.strHas( op.output, process.argv.slice( 2 ).join( ' ') ) );
+  //     test.true( _.strHas( op.output, 'file' ) );
+  //     test.true( _.strHas( op.output, '*' ) );
+  //     test.true( _.strHas( op.output, process.argv.slice( 2 ).join( ' ') ) );
   //   }
   //   return null;
   // })
@@ -6285,7 +6285,7 @@ function startImportantExecPathPassingThrough( test )
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
-      test.is( _.strHas( op.output, 'echo * "*" "argFromParent"\n' ) );
+      test.true( _.strHas( op.output, 'echo * "*" "argFromParent"\n' ) );
 
       a.fileProvider.fileDelete( programPath );
       return null;
@@ -6331,7 +6331,7 @@ function startImportantExecPathPassingThrough( test )
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
-      test.is( _.strHas( op.output, 'echo "argFromParent1" "argFromParent2"\n' ) );
+      test.true( _.strHas( op.output, 'echo "argFromParent1" "argFromParent2"\n' ) );
 
       a.fileProvider.fileDelete( programPath );
       return null;
@@ -6365,7 +6365,7 @@ function startImportantExecPathPassingThrough( test )
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
-      test.is( _.strHas( op.output, 'echo "argFromParent1" "argFromParent2"\n' ) );
+      test.true( _.strHas( op.output, 'echo "argFromParent1" "argFromParent2"\n' ) );
 
       a.fileProvider.fileDelete( programPath );
       return null;
@@ -6399,7 +6399,7 @@ function startImportantExecPathPassingThrough( test )
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
-      test.is( _.strHas( op.output, 'echo * "*" "argFromParent1" "argFromParent2"\n' ) );
+      test.true( _.strHas( op.output, 'echo * "*" "argFromParent1" "argFromParent2"\n' ) );
 
       a.fileProvider.fileDelete( programPath );
       return null;
@@ -6487,7 +6487,7 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.equivalent( op.output, '[]' );
-        test.is( a.fileProvider.fileExists( testAppPath ) );
+        test.true( a.fileProvider.fileExists( testAppPath ) );
         return null;
       } )
 
@@ -6497,8 +6497,8 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
       // {
       //   test.identical( op.exitCode, 0 );
       //   test.identical( op.ended, true );
-      //   test.is( a.fileProvider.fileExists( testAppPath ) );
-      //   test.is( !_.strHas( op.output, `Error: Cannot find module` ) );
+      //   test.true( a.fileProvider.fileExists( testAppPath ) );
+      //   test.true( !_.strHas( op.output, `Error: Cannot find module` ) );
       //   return null;
       // })
 
@@ -6537,7 +6537,7 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.equivalent( op.output, '[]' );
-        test.is( a.fileProvider.fileExists( testAppPath ) );
+        test.true( a.fileProvider.fileExists( testAppPath ) );
         return null;
       } )
 
@@ -6547,8 +6547,8 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
       // {
       //   test.identical( op.exitCode, 0 );
       //   test.identical( op.ended, true );
-      //   test.is( a.fileProvider.fileExists( testAppPath ) );
-      //   test.is( !_.strHas( op.output, `Error: Cannot find module` ) );
+      //   test.true( a.fileProvider.fileExists( testAppPath ) );
+      //   test.true( !_.strHas( op.output, `Error: Cannot find module` ) );
       //   return null;
       // })
     })
@@ -6585,7 +6585,7 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.equivalent( op.output, `[ 'arg' ]` );
-        test.is( a.fileProvider.fileExists( testAppPath ) );
+        test.true( a.fileProvider.fileExists( testAppPath ) );
         return null;
       } )
 
@@ -6625,7 +6625,7 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.equivalent( op.output, `[ 'arg' ]` );
-        test.is( a.fileProvider.fileExists( testAppPath ) );
+        test.true( a.fileProvider.fileExists( testAppPath ) );
         return null;
       } )
     })
@@ -6703,9 +6703,9 @@ function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subrou
       {
         let out = JSON.parse( op.output );
         test.identical( op.ended, true );
-        test.is( a.fileProvider.fileExists( testAppPath ) );
-        test.is( !out.err );
-        test.is( _.strHas( out.output, `Error: Cannot find module` ) );
+        test.true( a.fileProvider.fileExists( testAppPath ) );
+        test.true( !out.err );
+        test.true( _.strHas( out.output, `Error: Cannot find module` ) );
         return null;
       })
     })
@@ -6743,21 +6743,21 @@ function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subrou
       o2.ready.then( ( op ) =>
       {
         test.identical( op.ended, true );
-        test.is( a.fileProvider.fileExists( testAppPath ) );
+        test.true( a.fileProvider.fileExists( testAppPath ) );
         let out = JSON.parse( op.output );
         if( mode === 'spawn' )
         {
-          test.is( !!out.err );
-          test.is( a.fileProvider.fileExists( testAppPath ) );
+          test.true( !!out.err );
+          test.true( a.fileProvider.fileExists( testAppPath ) );
           test.identical( out.err.code, 'ENOENT' );
         }
         else
         {
-          test.is( !out.err )
+          test.true( !out.err )
           if( mode === 'fork' )
-          test.is( !_.strHas( out.output, `Cannot find module` ) );
+          test.true( !_.strHas( out.output, `Cannot find module` ) );
           else
-          test.is( _.strHas( out.output, `Cannot find module` ) );
+          test.true( _.strHas( out.output, `Cannot find module` ) );
         }
         return null;
       })
@@ -6799,17 +6799,17 @@ function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subrou
       {
         let out = JSON.parse( op.output );
         test.identical( op.ended, true );
-        test.is( a.fileProvider.fileExists( testAppPath ) );
+        test.true( a.fileProvider.fileExists( testAppPath ) );
         if( mode === 'spawn' )
         {
-          test.is( !!out.err );
-          test.is( a.fileProvider.fileExists( testAppPath ) );
+          test.true( !!out.err );
+          test.true( a.fileProvider.fileExists( testAppPath ) );
           test.identical( out.err.code, 'ENOENT' );
         }
         else
         {
-          test.is( !out.err )
-          test.is( _.strHas( out.output, `Cannot find module` ) );
+          test.true( !out.err )
+          test.true( _.strHas( out.output, `Cannot find module` ) );
         }
         return null;
       })
@@ -6842,8 +6842,8 @@ function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subrou
     // {
     //   test.notIdentical( op.exitCode, 0 );
     //   test.identical( op.ended, true );
-    //   test.is( a.fileProvider.fileExists( testAppPath ) );
-    //   test.is( _.strHas( op.output, `Error: Cannot find module` ) );
+    //   test.true( a.fileProvider.fileExists( testAppPath ) );
+    //   test.true( _.strHas( op.output, `Error: Cannot find module` ) );
     //   return null;
     // })
 
@@ -6871,8 +6871,8 @@ function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subrou
     // {
     //   test.notIdentical( op.exitCode, 0 );
     //   test.identical( op.ended, true );
-    //   test.is( a.fileProvider.fileExists( testAppPath ) );
-    //   test.is( _.strHas( op.output, `Error: Cannot find module` ) );
+    //   test.true( a.fileProvider.fileExists( testAppPath ) );
+    //   test.true( _.strHas( op.output, `Error: Cannot find module` ) );
     //   return null;
     // })
 
@@ -6900,8 +6900,8 @@ function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subrou
     // {
     //   test.notIdentical( op.exitCode, 0 );
     //   test.identical( op.ended, true );
-    //   test.is( a.fileProvider.fileExists( testAppPath ) );
-    //   test.is( _.strHas( op.output, `Error: Cannot find module` ) );
+    //   test.true( a.fileProvider.fileExists( testAppPath ) );
+    //   test.true( _.strHas( op.output, `Error: Cannot find module` ) );
     //   return null;
     // })
 
@@ -6928,9 +6928,9 @@ function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subrou
     // a.ready.finally( ( err, op ) =>
     // {
     //   _.errAttend( err );
-    //   test.is( !!err );
-    //   test.is( a.fileProvider.fileExists( testAppPath ) );
-    //   test.is( _.strHas( err.message, `ENOENT` ) );
+    //   test.true( !!err );
+    //   test.true( a.fileProvider.fileExists( testAppPath ) );
+    //   test.true( _.strHas( err.message, `ENOENT` ) );
     //   return null;
     // })
 
@@ -6958,8 +6958,8 @@ function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subrou
     // {
     //   test.notIdentical( op.exitCode, 0 );
     //   test.identical( op.ended, true );
-    //   test.is( a.fileProvider.fileExists( testAppPath ) );
-    //   test.is( _.strHas( op.output, `Cannot find module` ) );
+    //   test.true( a.fileProvider.fileExists( testAppPath ) );
+    //   test.true( _.strHas( op.output, `Cannot find module` ) );
     //   return null;
     // })
 
@@ -7014,8 +7014,8 @@ function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subrou
     // {
     //   test.notIdentical( op.exitCode, 0 );
     //   test.identical( op.ended, true );
-    //   test.is( a.fileProvider.fileExists( testAppPath ) );
-    //   test.is( _.strHas( op.output, `Cannot find module` ) );
+    //   test.true( a.fileProvider.fileExists( testAppPath ) );
+    //   test.true( _.strHas( op.output, `Cannot find module` ) );
     //   return null;
     // })
 
@@ -7202,8 +7202,8 @@ function startExecPathWithSpace( test )
   {
     test.notIdentical( op.exitCode, 0 );
     test.identical( op.ended, true );
-    test.is( a.fileProvider.fileExists( testAppPath ) );
-    test.is( _.strHas( op.output, `Error: Cannot find module` ) );
+    test.true( a.fileProvider.fileExists( testAppPath ) );
+    test.true( _.strHas( op.output, `Error: Cannot find module` ) );
     return null;
   })
 
@@ -7229,8 +7229,8 @@ function startExecPathWithSpace( test )
   {
     test.notIdentical( op.exitCode, 0 );
     test.identical( op.ended, true );
-    test.is( a.fileProvider.fileExists( testAppPath ) );
-    test.is( _.strHas( op.output, `Error: Cannot find module` ) );
+    test.true( a.fileProvider.fileExists( testAppPath ) );
+    test.true( _.strHas( op.output, `Error: Cannot find module` ) );
     return null;
   })
 
@@ -7256,8 +7256,8 @@ function startExecPathWithSpace( test )
   {
     test.notIdentical( op.exitCode, 0 );
     test.identical( op.ended, true );
-    test.is( a.fileProvider.fileExists( testAppPath ) );
-    test.is( _.strHas( op.output, `Error: Cannot find module` ) );
+    test.true( a.fileProvider.fileExists( testAppPath ) );
+    test.true( _.strHas( op.output, `Error: Cannot find module` ) );
     return null;
   })
 
@@ -7282,9 +7282,9 @@ function startExecPathWithSpace( test )
   a.ready.finally( ( err, op ) =>
   {
     _.errAttend( err );
-    test.is( !!err );
-    test.is( a.fileProvider.fileExists( testAppPath ) );
-    test.is( _.strHas( err.message, `ENOENT` ) );
+    test.true( !!err );
+    test.true( a.fileProvider.fileExists( testAppPath ) );
+    test.true( _.strHas( err.message, `ENOENT` ) );
     return null;
   })
 
@@ -7310,8 +7310,8 @@ function startExecPathWithSpace( test )
   {
     test.notIdentical( op.exitCode, 0 );
     test.identical( op.ended, true );
-    test.is( a.fileProvider.fileExists( testAppPath ) );
-    test.is( _.strHas( op.output, `Cannot find module` ) );
+    test.true( a.fileProvider.fileExists( testAppPath ) );
+    test.true( _.strHas( op.output, `Cannot find module` ) );
     return null;
   })
 
@@ -7362,8 +7362,8 @@ function startExecPathWithSpace( test )
   {
     test.notIdentical( op.exitCode, 0 );
     test.identical( op.ended, true );
-    test.is( a.fileProvider.fileExists( testAppPath ) );
-    test.is( _.strHas( op.output, `Cannot find module` ) );
+    test.true( a.fileProvider.fileExists( testAppPath ) );
+    test.true( _.strHas( op.output, `Cannot find module` ) );
     return null;
   })
 
@@ -7418,7 +7418,7 @@ function startDifferentTypesOfPaths( test )
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
-      test.is( _.strHas( op.output, execPathWithSpace ) );
+      test.true( _.strHas( op.output, execPathWithSpace ) );
       return null;
     })
 
@@ -7446,7 +7446,7 @@ function startDifferentTypesOfPaths( test )
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
-      test.is( _.strHas( op.output, execPathWithSpace ) );
+      test.true( _.strHas( op.output, execPathWithSpace ) );
       return null;
     })
 
@@ -7476,7 +7476,7 @@ function startDifferentTypesOfPaths( test )
   //   {
   //     test.identical( op.exitCode, 0 );
   //     test.identical( op.ended, true );
-  //     test.is( _.strHas( op.output, execPathWithSpace ) );
+  //     test.true( _.strHas( op.output, execPathWithSpace ) );
   //     return null;
   //   })
 
@@ -7507,7 +7507,7 @@ function startDifferentTypesOfPaths( test )
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
-      test.is( _.strHas( op.output, process.version ) );
+      test.true( _.strHas( op.output, process.version ) );
       return null;
     })
 
@@ -7535,7 +7535,7 @@ function startDifferentTypesOfPaths( test )
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
-      test.is( _.strHas( op.output, process.version ) );
+      test.true( _.strHas( op.output, process.version ) );
       return null;
     })
 
@@ -7566,7 +7566,7 @@ function startDifferentTypesOfPaths( test )
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
-      test.is( _.strHas( op.output, process.version ) );
+      test.true( _.strHas( op.output, process.version ) );
       return null;
     })
 
@@ -7597,7 +7597,7 @@ function startDifferentTypesOfPaths( test )
   //   {
   //     test.identical( op.exitCode, 0 );
   //     test.identical( op.ended, true );
-  //     test.is( _.strHas( op.output, process.version ) );
+  //     test.true( _.strHas( op.output, process.version ) );
   //     return null;
   //   })
 
@@ -7627,7 +7627,7 @@ function startDifferentTypesOfPaths( test )
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
-      test.is( _.strHas( op.output, execPathWithSpace ) );
+      test.true( _.strHas( op.output, execPathWithSpace ) );
       return null;
     })
 
@@ -7658,7 +7658,7 @@ function startDifferentTypesOfPaths( test )
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
-      test.is( _.strHas( op.output, execPathWithSpace ) );
+      test.true( _.strHas( op.output, execPathWithSpace ) );
       return null;
     })
 
@@ -7688,7 +7688,7 @@ function startDifferentTypesOfPaths( test )
   //   {
   //     test.identical( op.exitCode, 0 );
   //     test.identical( op.ended, true );
-  //     test.is( _.strHas( op.output, process.version ) );
+  //     test.true( _.strHas( op.output, process.version ) );
   //     return null;
   //   })
 
@@ -7719,7 +7719,7 @@ function startDifferentTypesOfPaths( test )
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
-      test.is( _.strHas( op.output, process.version ) );
+      test.true( _.strHas( op.output, process.version ) );
       return null;
     })
 
@@ -7750,7 +7750,7 @@ function startDifferentTypesOfPaths( test )
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
-      test.is( _.strHas( op.output, execPathWithSpace ) );
+      test.true( _.strHas( op.output, execPathWithSpace ) );
       return null;
     })
 
@@ -7780,7 +7780,7 @@ function startDifferentTypesOfPaths( test )
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
-      test.is( _.strHas( op.output, execPathWithSpace ) );
+      test.true( _.strHas( op.output, execPathWithSpace ) );
       return null;
     })
 
@@ -7860,8 +7860,8 @@ function startNjsPassingThroughExecPathWithSpace( test )
       .then( ( op ) =>
       {
         test.identical( op.ended, true );
-        test.is( a.fileProvider.fileExists( testAppPath ) );
-        test.is( _.strHas( op.output, `Error: Cannot find module` ) );
+        test.true( a.fileProvider.fileExists( testAppPath ) );
+        test.true( _.strHas( op.output, `Error: Cannot find module` ) );
         return null;
       })
 
@@ -7880,8 +7880,8 @@ function startNjsPassingThroughExecPathWithSpace( test )
       // {
       //   test.notIdentical( op.exitCode, 0 );
       //   test.identical( op.ended, true );
-      //   test.is( a.fileProvider.fileExists( testAppPath ) );
-      //   test.is( _.strHas( op.output, `Error: Cannot find module` ) );
+      //   test.true( a.fileProvider.fileExists( testAppPath ) );
+      //   test.true( _.strHas( op.output, `Error: Cannot find module` ) );
       //   return null;
       // })
     })
@@ -7920,9 +7920,9 @@ function startNjsPassingThroughExecPathWithSpace( test )
       {
         let out = JSON.parse( op.output );
         test.identical( op.ended, true );
-        test.is( a.fileProvider.fileExists( testAppPath ) );
+        test.true( a.fileProvider.fileExists( testAppPath ) );
         if( mode === 'shell' )
-        test.is( _.strHas( out.output, '[]' ) )
+        test.true( _.strHas( out.output, '[]' ) )
         else
         test.equivalent( out.output, '[]\n' + out.pid.toString() )
         return null;
@@ -7944,8 +7944,8 @@ function startNjsPassingThroughExecPathWithSpace( test )
       // {
       //   test.identical( op.exitCode, 0 );
       //   test.identical( op.ended, true );
-      //   test.is( a.fileProvider.fileExists( testAppPath ) );
-      //   test.is( _.strHas( op.output, op.process.pid.toString() ) );
+      //   test.true( a.fileProvider.fileExists( testAppPath ) );
+      //   test.true( _.strHas( op.output, op.process.pid.toString() ) );
       //   return null;
       // })
     })
@@ -7982,9 +7982,9 @@ function startNjsPassingThroughExecPathWithSpace( test )
       {
         let out = JSON.parse( op.output );
         test.identical( op.ended, true );
-        test.is( a.fileProvider.fileExists( testAppPath ) );
+        test.true( a.fileProvider.fileExists( testAppPath ) );
         if( mode === 'shell' )
-        test.is( _.strHas( out.output, `[ 'arg' ]` ) )
+        test.true( _.strHas( out.output, `[ 'arg' ]` ) )
         else
         test.equivalent( out.output, `[ 'arg' ]\n` + out.pid.toString() )
         return null;
@@ -8061,7 +8061,7 @@ function startProcedureTrivial( test )
       test.identical( procedure[ 0 ].isAlive(), false );
       test.identical( o.procedure, procedure[ 0 ] );
       test.identical( procedure[ 0 ].object(), o.process );
-      test.is( _.strHas( o.procedure._sourcePath, 'Execution.s' ) ); debugger;
+      test.true( _.strHas( o.procedure._sourcePath, 'Execution.s' ) ); debugger;
       return null;
     })
   })
@@ -8085,7 +8085,7 @@ function startProcedureTrivial( test )
       test.identical( procedure[ 0 ].isAlive(), false );
       test.identical( o.procedure, procedure[ 0 ] );
       test.identical( procedure[ 0 ].object(), o.process );
-      test.is( _.strHas( o.procedure._sourcePath, 'Execution.s' ) );
+      test.true( _.strHas( o.procedure._sourcePath, 'Execution.s' ) );
       return null;
     })
   })
@@ -8109,7 +8109,7 @@ function startProcedureTrivial( test )
       test.identical( procedure[ 0 ].isAlive(), false );
       test.identical( o.procedure, procedure[ 0 ] );
       test.identical( procedure[ 0 ].object(), o.process );
-      test.is( _.strHas( o.procedure._sourcePath, 'Execution.s' ) );
+      test.true( _.strHas( o.procedure._sourcePath, 'Execution.s' ) );
       return null;
     })
   })
@@ -8190,7 +8190,7 @@ function startProcedureExists( test )
         test.identical( procedure[ 0 ].object(), o.process );
         test.identical( o.procedure, procedure[ 0 ] );
         debugger
-        test.is( _.strHas( o.procedure._sourcePath, 'Execution.s' ) );
+        test.true( _.strHas( o.procedure._sourcePath, 'Execution.s' ) );
         return null;
       })
     })
@@ -8534,7 +8534,7 @@ function startProcedureStackMultiple( test )
 
       o.ready.then( ( op ) =>
       {
-        test.is( op === o );
+        test.true( op === o );
         test.identical( o.exitCode, 0 );
         test.identical( o.exitSignal, null );
         test.identical( o.exitReason, 'normal' );
@@ -8549,7 +8549,7 @@ function startProcedureStackMultiple( test )
           test.identical( _.strCount( op2.procedure._stack, 'case1' ), 1 );
           test.identical( _.strCount( op2.procedure._sourcePath, 'Execution.test.s' ), 1 );
           test.identical( _.strCount( op2.procedure._sourcePath, 'case1' ), 1 );
-          test.is( o.procedure !== op2.procedure );
+          test.true( o.procedure !== op2.procedure );
         });
 
         return null;
@@ -8600,7 +8600,7 @@ function startProcedureStackMultiple( test )
 
       o.ready.then( ( op ) =>
       {
-        test.is( op === o );
+        test.true( op === o );
         test.identical( o.exitCode, 0 );
         test.identical( o.exitSignal, null );
         test.identical( o.exitReason, 'normal' );
@@ -8615,7 +8615,7 @@ function startProcedureStackMultiple( test )
           test.identical( _.strCount( op2.procedure._stack, 'case1' ), 1 );
           test.identical( _.strCount( op2.procedure._sourcePath, 'Execution.test.s' ), 1 );
           test.identical( _.strCount( op2.procedure._sourcePath, 'case1' ), 1 );
-          test.is( o.procedure !== op2.procedure );
+          test.true( o.procedure !== op2.procedure );
         });
 
         return null;
@@ -8666,7 +8666,7 @@ function startProcedureStackMultiple( test )
 
       o.ready.then( ( op ) =>
       {
-        test.is( op === o );
+        test.true( op === o );
         test.identical( o.exitCode, 0 );
         test.identical( o.exitSignal, null );
         test.identical( o.exitReason, 'normal' );
@@ -8681,7 +8681,7 @@ function startProcedureStackMultiple( test )
           test.identical( _.strCount( op2.procedure._stack, 'case1' ), 1 );
           test.identical( _.strCount( op2.procedure._sourcePath, 'Execution.test.s' ), 1 );
           test.identical( _.strCount( op2.procedure._sourcePath, 'case1' ), 1 );
-          test.is( o.procedure !== op2.procedure );
+          test.true( o.procedure !== op2.procedure );
         });
 
         return null;
@@ -8731,7 +8731,7 @@ function startProcedureStackMultiple( test )
 
       o.ready.then( ( op ) =>
       {
-        test.is( op === o );
+        test.true( op === o );
         test.identical( o.exitCode, 0 );
         test.identical( o.exitSignal, null );
         test.identical( o.exitReason, 'normal' );
@@ -8744,7 +8744,7 @@ function startProcedureStackMultiple( test )
         {
           test.identical( _.strCount( op2.procedure._stack, 'case1' ), 1 );
           test.identical( _.strCount( op2.procedure._sourcePath, 'start' ), 1 );
-          test.is( o.procedure !== op2.procedure );
+          test.true( o.procedure !== op2.procedure );
         });
 
         return null;
@@ -8795,7 +8795,7 @@ function startProcedureStackMultiple( test )
 
       o.ready.then( ( op ) =>
       {
-        test.is( op === o );
+        test.true( op === o );
         test.identical( o.exitCode, 0 );
         test.identical( o.exitSignal, null );
         test.identical( o.exitReason, 'normal' );
@@ -8808,7 +8808,7 @@ function startProcedureStackMultiple( test )
         {
           test.identical( op2.procedure._stack, '' );
           test.identical( op2.procedure._sourcePath, '' );
-          test.is( o.procedure !== op2.procedure );
+          test.true( o.procedure !== op2.procedure );
         });
 
         return null;
@@ -8859,7 +8859,7 @@ function startProcedureStackMultiple( test )
 
       o.ready.then( ( op ) =>
       {
-        test.is( op === o );
+        test.true( op === o );
         test.identical( o.exitCode, 0 );
         test.identical( o.exitSignal, null );
         test.identical( o.exitReason, 'normal' );
@@ -8872,7 +8872,7 @@ function startProcedureStackMultiple( test )
         {
           test.identical( op2.procedure._stack, 'abc' );
           test.identical( op2.procedure._sourcePath, 'abc' );
-          test.is( o.procedure !== op2.procedure );
+          test.true( o.procedure !== op2.procedure );
         });
 
         return null;
@@ -9223,12 +9223,12 @@ function startChronology( test )
     let returned = _.process.start( o );
 
     if( sync )
-    test.is( returned === o );
+    test.true( returned === o );
     else
-    test.is( returned === o.ready );
-    test.is( o.conStart !== o.ready );
-    test.is( o.conDisconnect !== o.ready );
-    test.is( o.conTerminate !== o.ready );
+    test.true( returned === o.ready );
+    test.true( o.conStart !== o.ready );
+    test.true( o.conDisconnect !== o.ready );
+    test.true( o.conTerminate !== o.ready );
 
     test.identical( o.ready.argumentsCount(), ( sync || deasync ) ? 1 : 0 );
     test.identical( o.ready.errorsCount(), 0 );
@@ -9465,7 +9465,7 @@ function startStateMultiple( test )
         test.identical( err, undefined );
         test.identical( op.exitCode, null );
         test.identical( op.ended, false );
-        test.is( _.strHas( op.output, 'randomText is not defined' ) );
+        test.true( _.strHas( op.output, 'randomText is not defined' ) );
         states.push( op.state );
         return null;
       } )
@@ -9475,7 +9475,7 @@ function startStateMultiple( test )
         test.identical( err, undefined );
         test.notIdentical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.is( _.strHas( op.output, 'randomText is not defined' ) );
+        test.true( _.strHas( op.output, 'randomText is not defined' ) );
         states.push( op.state );
         test.identical( states, [ 'starting', 'terminating', 'terminated' ] );
         return null;
@@ -9517,7 +9517,7 @@ function startStateMultiple( test )
         test.identical( err, undefined );
         test.identical( op.exitCode, null );
         test.identical( op.ended, false );
-        test.is( _.strHas( op.output, 'randomText is not defined' ) );
+        test.true( _.strHas( op.output, 'randomText is not defined' ) );
         states.push( op.state );
         return null;
       } )
@@ -9527,7 +9527,7 @@ function startStateMultiple( test )
         test.identical( err, undefined );
         test.notIdentical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.is( _.strHas( op.output, 'randomText is not defined' ) );
+        test.true( _.strHas( op.output, 'randomText is not defined' ) );
         states.push( op.state );
         test.identical( states, [ 'started', 'terminating', 'terminated' ] );
         return null;
@@ -9679,7 +9679,7 @@ function startReadyDelayMultiple( test )
 
       o.ready.then( ( op ) =>
       {
-        test.is( op === o );
+        test.true( op === o );
         test.identical( op.exitCode, 0 );
         test.identical( op.exitSignal, null );
         test.identical( op.exitReason, 'normal' );
@@ -9731,7 +9731,7 @@ function startReadyDelayMultiple( test )
 
       o.ready.then( ( op ) =>
       {
-        test.is( op === o );
+        test.true( op === o );
         test.identical( op.exitCode, 0 );
         test.identical( op.exitSignal, null );
         test.identical( op.exitReason, 'normal' );
@@ -10046,14 +10046,14 @@ function startOptionTimeOut( test )
           test.identical( o.exitCode, null );
           test.identical( o.ended, true );
           test.identical( o.exitSignal, 'SIGTERM' );
-          test.is( !_.strHas( o.output, 'Process was killed by exit signal SIGTERM' ) );
+          test.true( !_.strHas( o.output, 'Process was killed by exit signal SIGTERM' ) );
         }
         else
         {
           test.identical( o.exitCode, null );
           test.identical( o.ended, true );
           test.identical( o.exitSignal, 'SIGTERM' );
-          test.is( _.strHas( o.output, 'Process was killed by exit signal SIGTERM' ) );
+          test.true( _.strHas( o.output, 'Process was killed by exit signal SIGTERM' ) );
         }
         return null;
       })
@@ -10261,10 +10261,10 @@ function startAfterDeath( test )
       test.identical( o.exitCode, 0 );
 
       test.will = 'secondary process is alive'
-      test.is( _.process.isAlive( secondaryPid ) );
+      test.true( _.process.isAlive( secondaryPid ) );
 
       test.will = 'child of secondary process is still alive'
-      test.is( !a.fileProvider.fileExists( program2PidPath ) );
+      test.true( !a.fileProvider.fileExists( program2PidPath ) );
 
       return _.time.out( context.t2 * 2 ); /* 10000 */
     })
@@ -10275,15 +10275,15 @@ function startAfterDeath( test )
       test.identical( stack, [ 'conTerminate1', 'conTerminate2' ] );
 
       test.case = 'secondary process is terminated'
-      test.is( !_.process.isAlive( secondaryPid ) );
+      test.true( !_.process.isAlive( secondaryPid ) );
 
       test.case = 'child of secondary process is terminated'
-      test.is( a.fileProvider.fileExists( program2PidPath ) );
+      test.true( a.fileProvider.fileExists( program2PidPath ) );
       let program2Pid = a.fileProvider.fileRead( program2PidPath );
       program2Pid = _.numberFrom( program2Pid );
 
       test.case = 'secondary process and child are not same'
-      test.is( !_.process.isAlive( program2Pid ) );
+      test.true( !_.process.isAlive( program2Pid ) );
       test.notIdentical( secondaryPid, program2Pid );
       return null;
     })
@@ -10476,15 +10476,15 @@ function startDetachingModeSpawnResourceReady( test )
     }
     let result = _.process.start( o );
 
-    test.is( result !== o.conStart );
-    test.is( result !== o.conTerminate );
+    test.true( result !== o.conStart );
+    test.true( result !== o.conTerminate );
 
     o.conStart.then( ( op ) =>
     {
       track.push( 'conStart' );
-      test.is( _.mapIs( op ) );
+      test.true( _.mapIs( op ) );
       test.identical( op, o );
-      test.is( _.process.isAlive( o.process.pid ) );
+      test.true( _.process.isAlive( o.process.pid ) );
       o.process.kill();
       return null;
     })
@@ -10552,15 +10552,15 @@ function startDetachingModeForkResourceReady( test )
     }
     let result = _.process.start( o );
 
-    test.is( result !== o.conStart );
-    test.is( result !== o.conTerminate );
+    test.true( result !== o.conStart );
+    test.true( result !== o.conTerminate );
 
     o.conStart.thenGive( ( op ) =>
     {
       track.push( 'conStart' );
-      test.is( _.mapIs( op ) );
+      test.true( _.mapIs( op ) );
       test.identical( op, o );
-      test.is( _.process.isAlive( o.process.pid ) );
+      test.true( _.process.isAlive( o.process.pid ) );
       o.process.kill();
     })
 
@@ -10627,15 +10627,15 @@ function startDetachingModeShellResourceReady( test )
     }
     let result = _.process.start( o );
 
-    test.is( result !== o.conStart );
-    test.is( result !== o.conTerminate );
+    test.true( result !== o.conStart );
+    test.true( result !== o.conTerminate );
 
     o.conStart.thenGive( ( op ) =>
     {
       track.push( 'conStart' );
-      test.is( _.mapIs( op ) );
+      test.true( _.mapIs( op ) );
       test.identical( op, o );
-      test.is( _.process.isAlive( o.process.pid ) );
+      test.true( _.process.isAlive( o.process.pid ) );
       o.process.kill();
     })
 
@@ -10712,10 +10712,10 @@ function startDetachingModeSpawnNoTerminationBegin( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
       test.will = 'parent and child are dead';
-      test.is( !_.process.isAlive( o.process.pid ) );
-      test.is( !_.process.isAlive( data.childPid ) );
+      test.true( !_.process.isAlive( o.process.pid ) );
+      test.true( !_.process.isAlive( data.childPid ) );
 
-      test.is( a.fileProvider.fileExists( testFilePath ) );
+      test.true( a.fileProvider.fileExists( testFilePath ) );
       let childPid = a.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
       test.identical( data.childPid, childPid )
@@ -10755,10 +10755,10 @@ function startDetachingModeSpawnNoTerminationBegin( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
       test.will = 'parent and child are dead';
-      test.is( !_.process.isAlive( o.process.pid ) );
-      test.is( !_.process.isAlive( data.childPid ) );
+      test.true( !_.process.isAlive( o.process.pid ) );
+      test.true( !_.process.isAlive( data.childPid ) );
 
-      test.is( a.fileProvider.fileExists( testFilePath ) );
+      test.true( a.fileProvider.fileExists( testFilePath ) );
       let childPid = a.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
       test.identical( data.childPid, childPid )
@@ -10798,10 +10798,10 @@ function startDetachingModeSpawnNoTerminationBegin( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
       test.will = 'parent and child are dead';
-      test.is( !_.process.isAlive( o.process.pid ) );
-      test.is( !_.process.isAlive( data.childPid ) );
+      test.true( !_.process.isAlive( o.process.pid ) );
+      test.true( !_.process.isAlive( data.childPid ) );
 
-      test.is( a.fileProvider.fileExists( testFilePath ) );
+      test.true( a.fileProvider.fileExists( testFilePath ) );
       let childPid = a.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
       test.identical( data.childPid, childPid )
@@ -10841,10 +10841,10 @@ function startDetachingModeSpawnNoTerminationBegin( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
       test.will = 'parent and child are dead';
-      test.is( !_.process.isAlive( o.process.pid ) );
-      test.is( !_.process.isAlive( data.childPid ) );
+      test.true( !_.process.isAlive( o.process.pid ) );
+      test.true( !_.process.isAlive( data.childPid ) );
 
-      test.is( a.fileProvider.fileExists( testFilePath ) );
+      test.true( a.fileProvider.fileExists( testFilePath ) );
       let childPid = a.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
       test.identical( data.childPid, childPid )
@@ -10948,10 +10948,10 @@ function startDetachingModeForkNoTerminationBegin( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
       test.will = 'parent and child are dead';
-      test.is( !_.process.isAlive( o.process.pid ) );
-      test.is( !_.process.isAlive( data.childPid ) );
+      test.true( !_.process.isAlive( o.process.pid ) );
+      test.true( !_.process.isAlive( data.childPid ) );
 
-      test.is( a.fileProvider.fileExists( testFilePath ) );
+      test.true( a.fileProvider.fileExists( testFilePath ) );
       let childPid = a.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
       test.identical( data.childPid, childPid )
@@ -10991,10 +10991,10 @@ function startDetachingModeForkNoTerminationBegin( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
       test.will = 'parent and child are dead';
-      test.is( !_.process.isAlive( o.process.pid ) );
-      test.is( !_.process.isAlive( data.childPid ) );
+      test.true( !_.process.isAlive( o.process.pid ) );
+      test.true( !_.process.isAlive( data.childPid ) );
 
-      test.is( a.fileProvider.fileExists( testFilePath ) );
+      test.true( a.fileProvider.fileExists( testFilePath ) );
       let childPid = a.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
       test.identical( data.childPid, childPid )
@@ -11094,13 +11094,13 @@ function startDetachingModeShellNoTerminationBegin( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
       test.will = 'parent and child are dead';
-      test.is( !_.process.isAlive( o.process.pid ) );
-      test.is( !_.process.isAlive( data.childPid ) );
+      test.true( !_.process.isAlive( o.process.pid ) );
+      test.true( !_.process.isAlive( data.childPid ) );
 
-      test.is( a.fileProvider.fileExists( testFilePath ) );
+      test.true( a.fileProvider.fileExists( testFilePath ) );
       let childPid = a.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
-      test.is( !_.process.isAlive( childPid ) );
+      test.true( !_.process.isAlive( childPid ) );
 
       return null;
     })
@@ -11137,13 +11137,13 @@ function startDetachingModeShellNoTerminationBegin( test )
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
       test.will = 'parent and child are dead';
-      test.is( !_.process.isAlive( o.process.pid ) );
-      test.is( !_.process.isAlive( data.childPid ) );
+      test.true( !_.process.isAlive( o.process.pid ) );
+      test.true( !_.process.isAlive( data.childPid ) );
 
-      test.is( a.fileProvider.fileExists( testFilePath ) );
+      test.true( a.fileProvider.fileExists( testFilePath ) );
       let childPid = a.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid );
-      test.is( !_.process.isAlive( childPid ) );
+      test.true( !_.process.isAlive( childPid ) );
 
       return null;
     })
@@ -11235,8 +11235,8 @@ function startDetachedOutputStdioIgnore( test )
       con.then( () =>
       {
         test.identical( o.exitCode, 0 )
-        test.is( !_.strHas( o.output, 'Child process start' ) )
-        test.is( !_.strHas( o.output, 'Child process end' ) )
+        test.true( !_.strHas( o.output, 'Child process start' ) )
+        test.true( !_.strHas( o.output, 'Child process end' ) )
         return null;
       })
 
@@ -11266,8 +11266,8 @@ function startDetachedOutputStdioIgnore( test )
   //   con.then( () =>
   //   {
   //     test.identical( o.exitCode, 0 )
-  //     test.is( !_.strHas( o.output, 'Child process start' ) )
-  //     test.is( !_.strHas( o.output, 'Child process end' ) )
+  //     test.true( !_.strHas( o.output, 'Child process start' ) )
+  //     test.true( !_.strHas( o.output, 'Child process end' ) )
   //     return null;
   //   })
 
@@ -11292,8 +11292,8 @@ function startDetachedOutputStdioIgnore( test )
   //   con.then( () =>
   //   {
   //     test.identical( o.exitCode, 0 )
-  //     test.is( !_.strHas( o.output, 'Child process start' ) )
-  //     test.is( !_.strHas( o.output, 'Child process end' ) )
+  //     test.true( !_.strHas( o.output, 'Child process start' ) )
+  //     test.true( !_.strHas( o.output, 'Child process end' ) )
   //     return null;
   //   })
 
@@ -11318,8 +11318,8 @@ function startDetachedOutputStdioIgnore( test )
   //   con.then( () =>
   //   {
   //     test.identical( o.exitCode, 0 )
-  //     test.is( !_.strHas( o.output, 'Child process start' ) )
-  //     test.is( !_.strHas( o.output, 'Child process end' ) )
+  //     test.true( !_.strHas( o.output, 'Child process start' ) )
+  //     test.true( !_.strHas( o.output, 'Child process end' ) )
   //     return null;
   //   })
 
@@ -11413,8 +11413,8 @@ function startDetachedOutputStdioPipe( test )
         if( process.platform === 'win32' && mode === 'shell' )
         return null;
 
-        test.is( _.strHas( o.output, 'Child process start' ) )
-        test.is( _.strHas( o.output, 'Child process end' ) )
+        test.true( _.strHas( o.output, 'Child process start' ) )
+        test.true( _.strHas( o.output, 'Child process end' ) )
         return null;
       })
 
@@ -11446,8 +11446,8 @@ function startDetachedOutputStdioPipe( test )
   //   con.then( () =>
   //   {
   //     test.identical( o.exitCode, 0 )
-  //     test.is( _.strHas( o.output, 'Child process start' ) )
-  //     test.is( _.strHas( o.output, 'Child process end' ) )
+  //     test.true( _.strHas( o.output, 'Child process start' ) )
+  //     test.true( _.strHas( o.output, 'Child process end' ) )
   //     return null;
   //   })
 
@@ -11472,8 +11472,8 @@ function startDetachedOutputStdioPipe( test )
   //   con.then( () =>
   //   {
   //     test.identical( o.exitCode, 0 )
-  //     test.is( _.strHas( o.output, 'Child process start' ) )
-  //     test.is( _.strHas( o.output, 'Child process end' ) )
+  //     test.true( _.strHas( o.output, 'Child process start' ) )
+  //     test.true( _.strHas( o.output, 'Child process end' ) )
   //     return null;
   //   })
 
@@ -11507,8 +11507,8 @@ function startDetachedOutputStdioPipe( test )
   //     if( process.platform === 'win32' )
   //     return null;
 
-  //     test.is( _.strHas( o.output, 'Child process start' ) )
-  //     test.is( _.strHas( o.output, 'Child process end' ) )
+  //     test.true( _.strHas( o.output, 'Child process start' ) )
+  //     test.true( _.strHas( o.output, 'Child process end' ) )
   //     return null;
   //   })
 
@@ -11575,7 +11575,7 @@ function startDetachedOutputStdioInherit( test )
 
   /* */
 
-  test.is( true );
+  test.true( true );
 
   if( !Config.debug )
   return a.ready;
@@ -12075,7 +12075,7 @@ function startDetachingIpc( test )
 
 //   /* */
 
-//   test.is( true );
+//   test.true( true );
 
 //   if( !Config.debug )
 //   return a.ready;
@@ -12177,12 +12177,12 @@ function startDetachingTrivial( test )
   o.conTerminate.then( ( op ) =>
   {
     track.push( 'conTerminate' );
-    test.is( _.process.isAlive( childPid ) );
+    test.true( _.process.isAlive( childPid ) );
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
-    test.is( _.strHas( op.output, 'Child process start' ) );
-    test.is( _.strHas( op.output, 'from parent: data' ) );
-    test.is( !_.strHas( op.output, 'Child process end' ) );
+    test.true( _.strHas( op.output, 'Child process start' ) );
+    test.true( _.strHas( op.output, 'from parent: data' ) );
+    test.true( !_.strHas( op.output, 'Child process end' ) );
     test.identical( o.exitCode, op.exitCode );
     test.identical( o.output, op.output );
     return _.time.out( context.t2 * 2 ); /* 10000 */
@@ -12191,11 +12191,11 @@ function startDetachingTrivial( test )
   o.conTerminate.then( () =>
   {
     track.push( 'conTerminate' );
-    test.is( !_.process.isAlive( childPid ) );
+    test.true( !_.process.isAlive( childPid ) );
 
     let childPidFromFile = a.fileProvider.fileRead( testFilePath );
     childPidFromFile = _.numberFrom( childPidFromFile )
-    test.is( !_.process.isAlive( childPidFromFile ) );
+    test.true( !_.process.isAlive( childPidFromFile ) );
     test.identical( childPid, childPidFromFile )
     test.identical( track, [ 'conTerminate', 'conTerminate' ] );
     return null;
@@ -12353,7 +12353,7 @@ function startEventClose( test )
 
       return _.time.out( context.t1 * 3, () =>
       {
-        test.is( !_.process.isAlive( o.process.pid ) );
+        test.true( !_.process.isAlive( o.process.pid ) );
 
         if( mode === 'shell' )
         test.identical( result[ 3 ], true )
@@ -12531,7 +12531,7 @@ function startEventExit( test )
 
       return _.time.out( context.t1 * 3, () =>
       {
-        test.is( !_.process.isAlive( o.process.pid ) );
+        test.true( !_.process.isAlive( o.process.pid ) );
         test.identical( result[ 5 ], true );
         data.push.apply( data, result );
         return null;
@@ -12599,8 +12599,8 @@ function startDetachingChildExitsAfterParent( test )
       test.will = 'parent is dead, detached child is still running'
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
-      test.is( !_.process.isAlive( o.process.pid ) );
-      test.is( _.process.isAlive( childPid ) );
+      test.true( !_.process.isAlive( o.process.pid ) );
+      test.true( _.process.isAlive( childPid ) );
       return _.time.out( context.t2 * 2 ); /* 10000 */ /* zzz */
     })
 
@@ -12608,7 +12608,7 @@ function startDetachingChildExitsAfterParent( test )
     {
       let childPid2 = a.fileProvider.fileRead( testFilePath );
       childPid2 = _.numberFrom( childPid2 )
-      test.is( !_.process.isAlive( childPid2 ) );
+      test.true( !_.process.isAlive( childPid2 ) );
       test.identical( childPid, childPid2 )
       return null;
     })
@@ -12709,8 +12709,8 @@ function startDetachingChildExitsBeforeParent( test )
     onChildTerminate.then( () =>
     {
       let childPid = a.fileProvider.fileRead( testFilePath );
-      test.is( _.process.isAlive( o.process.pid ) );
-      test.is( !_.process.isAlive( _.numberFrom( childPid ) ) );
+      test.true( _.process.isAlive( o.process.pid ) );
+      test.true( !_.process.isAlive( _.numberFrom( childPid ) ) );
       return null;
     })
 
@@ -12724,13 +12724,13 @@ function startDetachingChildExitsBeforeParent( test )
       test.identical( child.err, undefined );
       test.identical( child.exitCode, 0 );
 
-      test.is( !_.process.isAlive( o.process.pid ) );
-      test.is( !_.process.isAlive( child.pid ) );
+      test.true( !_.process.isAlive( o.process.pid ) );
+      test.true( !_.process.isAlive( child.pid ) );
 
-      test.is( a.fileProvider.fileExists( testFilePath ) );
+      test.true( a.fileProvider.fileExists( testFilePath ) );
       let childPid = a.fileProvider.fileRead( testFilePath );
       childPid = _.numberFrom( childPid )
-      test.is( !_.process.isAlive( childPid ) );
+      test.true( !_.process.isAlive( childPid ) );
 
       test.identical( child.pid, childPid );
 
@@ -12851,8 +12851,8 @@ function startDetachingDisconnectedEarly( test )
       test.identical( o.conTerminate.competitorsCount(), 0 );
 
       test.identical( o.state, 'started' );
-      test.is( o.conStart !== result );
-      test.is( _.consequenceIs( o.conStart ) )
+      test.true( o.conStart !== result );
+      test.true( _.consequenceIs( o.conStart ) )
 
       test.identical( o.state, 'started' );
       o.disconnect();
@@ -12863,7 +12863,7 @@ function startDetachingDisconnectedEarly( test )
         track.push( 'conStart' );
         test.identical( err, undefined );
         test.identical( op, o );
-        test.is( _.process.isAlive( o.process.pid ) );
+        test.true( _.process.isAlive( o.process.pid ) );
         return null;
       })
 
@@ -12872,7 +12872,7 @@ function startDetachingDisconnectedEarly( test )
         track.push( 'conDisconnect' );
         test.identical( err, undefined );
         test.identical( op, o );
-        test.is( _.process.isAlive( o.process.pid ) )
+        test.true( _.process.isAlive( o.process.pid ) )
         return null;
       })
 
@@ -12888,7 +12888,7 @@ function startDetachingDisconnectedEarly( test )
         test.identical( o.state, 'disconnected' );
         test.identical( o.ended, true );
         test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate' ] );
-        test.is( !_.process.isAlive( o.process.pid ) );
+        test.true( !_.process.isAlive( o.process.pid ) );
         return null;
       })
 
@@ -12978,15 +12978,15 @@ function startDetachingDisconnectedLate( test )
         test.identical( o.state, 'disconnected' );
       });
 
-      test.is( o.conStart !== result );
-      test.is( _.consequenceIs( o.conStart ) )
+      test.true( o.conStart !== result );
+      test.true( _.consequenceIs( o.conStart ) )
 
       o.conStart.finally( ( err, op ) =>
       {
         track.push( 'conStart' );
         test.identical( err, undefined );
         test.identical( op, o );
-        test.is( _.process.isAlive( o.process.pid ) )
+        test.true( _.process.isAlive( o.process.pid ) )
         return null;
       })
 
@@ -12995,7 +12995,7 @@ function startDetachingDisconnectedLate( test )
         track.push( 'conDisconnect' );
         test.identical( err, undefined );
         test.identical( op, o );
-        test.is( _.process.isAlive( o.process.pid ) )
+        test.true( _.process.isAlive( o.process.pid ) )
         return null;
       })
 
@@ -13010,7 +13010,7 @@ function startDetachingDisconnectedLate( test )
         test.identical( o.state, 'disconnected' );
         test.identical( o.ended, true );
         test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate' ] );
-        test.is( !_.process.isAlive( o.process.pid ) )
+        test.true( !_.process.isAlive( o.process.pid ) )
         return null;
       })
 
@@ -13076,7 +13076,7 @@ function startDetachingChildExistsBeforeParentWaitForTermination( test )
     {
       test.identical( err, undefined );
       test.identical( op, o );
-      test.is( !_.process.isAlive( o.process.pid ) )
+      test.true( !_.process.isAlive( o.process.pid ) )
       return null;
     })
 
@@ -13142,9 +13142,9 @@ function startDetachingEndCompetitorIsExecuted( test )
 
     let result = _.process.start( o );
 
-    test.is( o.conStart !== result );
-    test.is( _.consequenceIs( o.conStart ) )
-    test.is( _.consequenceIs( o.conTerminate ) )
+    test.true( o.conStart !== result );
+    test.true( _.consequenceIs( o.conStart ) )
+    test.true( _.consequenceIs( o.conTerminate ) )
 
     o.conStart.finally( ( err, op ) =>
     {
@@ -13152,7 +13152,7 @@ function startDetachingEndCompetitorIsExecuted( test )
       test.identical( o.ended, false );
       test.identical( err, undefined );
       test.identical( op, o );
-      test.is( _.process.isAlive( o.process.pid ) );
+      test.true( _.process.isAlive( o.process.pid ) );
       return null;
     })
 
@@ -13163,7 +13163,7 @@ function startDetachingEndCompetitorIsExecuted( test )
       test.identical( err, undefined );
       test.identical( op, o );
       test.identical( track, [ 'conStart', 'conTerminate' ] )
-      test.is( !_.process.isAlive( o.process.pid ) )
+      test.true( !_.process.isAlive( o.process.pid ) )
       return null;
     })
 
@@ -13267,8 +13267,8 @@ function startDetachingTerminationBegin( test )
         test.will = 'parent is dead, child is still alive';
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.is( !_.process.isAlive( op.process.pid ) );
-        test.is( _.process.isAlive( data.childPid ) );
+        test.true( !_.process.isAlive( op.process.pid ) );
+        test.true( _.process.isAlive( data.childPid ) );
         return _.time.out( context.t2 * 2 );
       })
 
@@ -13276,10 +13276,10 @@ function startDetachingTerminationBegin( test )
       {
         test.will = 'both dead';
 
-        test.is( !_.process.isAlive( o.process.pid ) );
-        test.is( !_.process.isAlive( data.childPid ) );
+        test.true( !_.process.isAlive( o.process.pid ) );
+        test.true( !_.process.isAlive( data.childPid ) );
 
-        test.is( a.fileProvider.fileExists( testFilePath ) );
+        test.true( a.fileProvider.fileExists( testFilePath ) );
         let childPid = a.fileProvider.fileRead( testFilePath );
         childPid = _.numberFrom( childPid );
         console.log(  childPid );
@@ -13325,8 +13325,8 @@ function startDetachingTerminationBegin( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.will = 'parent is dead, child is still alive';
-        test.is( !_.process.isAlive( op.process.pid ) );
-        test.is( _.process.isAlive( data.childPid ) );
+        test.true( !_.process.isAlive( op.process.pid ) );
+        test.true( _.process.isAlive( data.childPid ) );
         return _.time.out( context.t2 * 2 );
       })
 
@@ -13334,10 +13334,10 @@ function startDetachingTerminationBegin( test )
       {
         test.will = 'both dead';
 
-        test.is( !_.process.isAlive( o.process.pid ) );
-        test.is( !_.process.isAlive( data.childPid ) );
+        test.true( !_.process.isAlive( o.process.pid ) );
+        test.true( !_.process.isAlive( data.childPid ) );
 
-        test.is( a.fileProvider.fileExists( testFilePath ) );
+        test.true( a.fileProvider.fileExists( testFilePath ) );
         let childPid = a.fileProvider.fileRead( testFilePath );
         childPid = _.numberFrom( childPid );
         /* if shell then could be 2 processes, first - terminal, second application */
@@ -13381,8 +13381,8 @@ function startDetachingTerminationBegin( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.will = 'parent is dead, child is still alive';
-        test.is( !_.process.isAlive( op.process.pid ) );
-        test.is( _.process.isAlive( data.childPid ) );
+        test.true( !_.process.isAlive( op.process.pid ) );
+        test.true( _.process.isAlive( data.childPid ) );
         return _.time.out( context.t2 * 2 );
       })
 
@@ -13390,10 +13390,10 @@ function startDetachingTerminationBegin( test )
       {
         test.will = 'both dead';
 
-        test.is( !_.process.isAlive( o.process.pid ) );
-        test.is( !_.process.isAlive( data.childPid ) );
+        test.true( !_.process.isAlive( o.process.pid ) );
+        test.true( !_.process.isAlive( data.childPid ) );
 
-        test.is( a.fileProvider.fileExists( testFilePath ) );
+        test.true( a.fileProvider.fileExists( testFilePath ) );
         let childPid = a.fileProvider.fileRead( testFilePath );
         childPid = _.numberFrom( childPid );
         /* if shell then could be 2 processes, first - terminal, second application */
@@ -13438,8 +13438,8 @@ function startDetachingTerminationBegin( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.will = 'parent is dead, child is still alive';
-        test.is( !_.process.isAlive( op.process.pid ) );
-        test.is( _.process.isAlive( data.childPid ) );
+        test.true( !_.process.isAlive( op.process.pid ) );
+        test.true( _.process.isAlive( data.childPid ) );
         return _.time.out( context.t2 * 2 );
       })
 
@@ -13447,10 +13447,10 @@ function startDetachingTerminationBegin( test )
       {
         test.will = 'both dead';
 
-        test.is( !_.process.isAlive( o.process.pid ) );
-        test.is( !_.process.isAlive( data.childPid ) );
+        test.true( !_.process.isAlive( o.process.pid ) );
+        test.true( !_.process.isAlive( data.childPid ) );
 
-        test.is( a.fileProvider.fileExists( testFilePath ) );
+        test.true( a.fileProvider.fileExists( testFilePath ) );
         let childPid = a.fileProvider.fileRead( testFilePath );
         childPid = _.numberFrom( childPid );
         /* if shell then could be 2 processes, first - terminal, second application */
@@ -13534,7 +13534,7 @@ function startDetachingThrowing( test )
 
   /* */
 
-  test.is( true );
+  test.true( true );
 
   if( !Config.debug )
   return;
@@ -13645,7 +13645,7 @@ function startNjsDetachingChildThrowing( test )
     track.push( 'conTerminate' );
     test.notIdentical( op.exitCode, 0 );
     test.identical( op.ended, true );
-    test.is( _.strHas( op.output, 'Child process error' ) );
+    test.true( _.strHas( op.output, 'Child process error' ) );
     test.identical( o.exitCode, op.exitCode );
     test.identical( o.output, op.output );
     test.identical( track, [ 'conTerminate' ] )
@@ -13714,13 +13714,13 @@ function startOnStart( test )
       let result = _.process.start( o );
 
       test.notIdentical( o.conStart, result );
-      test.is( _.consequenceIs( o.conStart ) )
+      test.true( _.consequenceIs( o.conStart ) )
 
       o.conStart.finally( ( err, op ) =>
       {
         test.identical( err, undefined );
         test.identical( op, o );
-        test.is( _.process.isAlive( o.process.pid ) );
+        test.true( _.process.isAlive( o.process.pid ) );
         return null;
       })
 
@@ -13753,7 +13753,7 @@ function startOnStart( test )
       let result = _.process.start( o );
 
       test.notIdentical( o.conStart, result );
-      test.is( _.consequenceIs( o.conStart ) )
+      test.true( _.consequenceIs( o.conStart ) )
 
       return test.shouldThrowErrorAsync( o.conTerminate );
     })
@@ -13775,7 +13775,7 @@ function startOnStart( test )
       let result = _.process.start( o );
 
       test.notIdentical( o.conStart, result );
-      test.is( _.consequenceIs( o.conStart ) )
+      test.true( _.consequenceIs( o.conStart ) )
 
       return test.shouldThrowErrorAsync( o.conTerminate );
     })
@@ -13798,8 +13798,8 @@ function startOnStart( test )
 
       let result = _.process.start( o );
 
-      test.is( o.conStart !== result );
-      test.is( _.consequenceIs( o.conStart ) )
+      test.true( o.conStart !== result );
+      test.true( _.consequenceIs( o.conStart ) )
 
       o.conStart.then( ( op ) =>
       {
@@ -13831,8 +13831,8 @@ function startOnStart( test )
 
       let result = _.process.start( o );
 
-      test.is( o.conStart !== result );
-      test.is( _.consequenceIs( o.conStart ) )
+      test.true( o.conStart !== result );
+      test.true( _.consequenceIs( o.conStart ) )
 
       result = test.shouldThrowErrorAsync( o.conTerminate );
 
@@ -13865,14 +13865,14 @@ function startOnStart( test )
 
       let result = _.process.start( o );
 
-      test.is( o.conStart !== result );
+      test.true( o.conStart !== result );
 
       o.conStart.finally( ( err, op ) =>
       {
         track.push( 'conStart' );
         test.identical( err, undefined );
         test.identical( op, o );
-        test.is( _.process.isAlive( o.process.pid ) )
+        test.true( _.process.isAlive( o.process.pid ) )
         test.identical( o.state, 'started' );
         o.disconnect();
         return null;
@@ -13884,7 +13884,7 @@ function startOnStart( test )
         test.identical( err, undefined );
         test.identical( op, o );
         test.identical( o.state, 'disconnected' );
-        test.is( _.process.isAlive( o.process.pid ) );
+        test.true( _.process.isAlive( o.process.pid ) );
         return null;
       })
 
@@ -13921,14 +13921,14 @@ function startOnStart( test )
 
       let result = _.process.start( o );
 
-      test.is( o.conStart !== result );
+      test.true( o.conStart !== result );
 
       o.conStart.finally( ( err, op ) =>
       {
         test.identical( err, undefined );
         test.identical( op, o );
         test.identical( o.state, 'started' )
-        test.is( _.process.isAlive( o.process.pid ) )
+        test.true( _.process.isAlive( o.process.pid ) )
         o.disconnect();
         return null;
       })
@@ -13938,13 +13938,13 @@ function startOnStart( test )
         test.identical( err, undefined );
         test.identical( op, o );
         test.identical( o.state, 'disconnected' )
-        test.is( _.process.isAlive( o.process.pid ) )
+        test.true( _.process.isAlive( o.process.pid ) )
         return null;
       })
 
       result = _.time.out( context.t1 * 7, () => /* 2000 + context.t2 */
       {
-        test.is( !_.process.isAlive( o.process.pid ) )
+        test.true( !_.process.isAlive( o.process.pid ) )
         test.identical( o.exitCode, null );
         test.identical( o.exitSignal, null );
         test.identical( o.conTerminate.resourcesCount(), 1 );
@@ -14024,7 +14024,7 @@ function startOnTerminate( test )
 
       let result = _.process.start( o );
 
-      test.is( o.conTerminate !== result );
+      test.true( o.conTerminate !== result );
 
       result.then( ( op ) =>
       {
@@ -14060,7 +14060,7 @@ function startOnTerminate( test )
 
       o.disconnect();
 
-      test.is( o.conTerminate !== result );
+      test.true( o.conTerminate !== result );
 
       o.conTerminate.then( ( op ) =>
       {
@@ -14080,7 +14080,7 @@ function startOnTerminate( test )
         test.identical( o.conTerminate.argumentsCount(), 0 );
         test.identical( o.conTerminate.errorsCount(), 1 );
         test.identical( o.conTerminate.competitorsCount(), 0 );
-        test.is( !_.process.isAlive( o.process.pid ) );
+        test.true( !_.process.isAlive( o.process.pid ) );
         return null;
       });
     })
@@ -14105,7 +14105,7 @@ function startOnTerminate( test )
 
       let result = _.process.start( o );
 
-      test.is( result !== o.conStart );
+      test.true( result !== o.conStart );
       test.notIdentical( conTerminate, result );
       test.identical( conTerminate, o.conTerminate );
 
@@ -14140,8 +14140,8 @@ function startOnTerminate( test )
       let track = [];
 
       let result = _.process.start( o );
-      test.is( result !== o.conStart );
-      test.is( result !== o.conTerminate );
+      test.true( result !== o.conStart );
+      test.true( result !== o.conTerminate );
       test.identical( conTerminate, o.conTerminate );
 
       _.time.out( context.t1, () => o.disconnect() );
@@ -14164,7 +14164,7 @@ function startOnTerminate( test )
         test.identical( o.conTerminate.argumentsCount(), 0 );
         test.identical( o.conTerminate.errorsCount(), 1 );
         test.identical( o.conTerminate.competitorsCount(), 0 );
-        test.is( !_.process.isAlive( o.process.pid ) );
+        test.true( !_.process.isAlive( o.process.pid ) );
         return null;
       });
 
@@ -14190,8 +14190,8 @@ function startOnTerminate( test )
 
       let result = _.process.start( o );
 
-      test.is( result !== o.conStart );
-      test.is( result !== o.conTerminate )
+      test.true( result !== o.conStart );
+      test.true( result !== o.conTerminate )
       test.identical( conTerminate, o.conTerminate )
 
       conTerminate.then( ( op ) =>
@@ -14238,8 +14238,8 @@ function startOnTerminate( test )
 
       let result = _.process.start( o );
 
-      test.is( result !== o.conStart );
-      test.is( result !== o.conTerminate );
+      test.true( result !== o.conStart );
+      test.true( result !== o.conTerminate );
       test.identical( conTerminate, o.conTerminate );
 
       conTerminate.then( ( op ) =>
@@ -14279,8 +14279,8 @@ function startOnTerminate( test )
 
       let result = _.process.start( o );
 
-      test.is( result !== o.conStart );
-      test.is( result !== o.conTerminate );
+      test.true( result !== o.conStart );
+      test.true( result !== o.conTerminate );
       test.identical( conTerminate, o.conTerminate );
 
       o.disconnect();
@@ -14302,7 +14302,7 @@ function startOnTerminate( test )
         test.identical( o.conTerminate.argumentsCount(), 0 );
         test.identical( o.conTerminate.errorsCount(), 1 );
         test.identical( o.conTerminate.competitorsCount(), 0 );
-        test.is( !_.process.isAlive( o.process.pid ) );
+        test.true( !_.process.isAlive( o.process.pid ) );
         return null;
       });
     })
@@ -14361,8 +14361,8 @@ function startNoEndBug1( test )
 
     let result = _.process.start( o );
 
-    test.is( o.conStart !== result );
-    test.is( _.consequenceIs( o.conStart ) )
+    test.true( o.conStart !== result );
+    test.true( _.consequenceIs( o.conStart ) )
 
     result = test.shouldThrowErrorAsync( o.conTerminate );
 
@@ -14433,18 +14433,18 @@ function startWithDelayOnReady( test )
 
   _.process.start( options );
 
-  test.is( _.consequenceIs( options.conStart ) );
-  test.is( _.consequenceIs( options.conDisconnect ) );
-  test.is( _.consequenceIs( options.conTerminate ) );
-  test.is( _.consequenceIs( options.ready ) );
-  test.is( options.conStart !== options.ready );
-  test.is( options.conDisconnect !== options.ready );
-  test.is( options.conTerminate !== options.ready );
+  test.true( _.consequenceIs( options.conStart ) );
+  test.true( _.consequenceIs( options.conDisconnect ) );
+  test.true( _.consequenceIs( options.conTerminate ) );
+  test.true( _.consequenceIs( options.ready ) );
+  test.true( options.conStart !== options.ready );
+  test.true( options.conDisconnect !== options.ready );
+  test.true( options.conTerminate !== options.ready );
 
   options.conStart
   .then( ( op ) =>
   {
-    test.is( options === op );
+    test.true( options === op );
     test.identical( options.output, '' );
     test.identical( options.exitCode, null );
     test.identical( options.exitSignal, null );
@@ -14452,7 +14452,7 @@ function startWithDelayOnReady( test )
     test.identical( options.process.signalCode, null );
     test.identical( options.ended, false );
     test.identical( options.exitReason, null );
-    test.is( !!options.process );
+    test.true( !!options.process );
     return null;
   });
 
@@ -14566,7 +14566,7 @@ function startOnIsNotConsequence( test )
       o.ready.finally( function( err, op )
       {
         track.push( 'returned' );
-        test.is( _.errIs( err ) );
+        test.true( _.errIs( err ) );
         test.identical( op, undefined );
         test.notIdentical( o.exitCode, 0 );
         test.identical( o.ended, true );
@@ -14724,9 +14724,9 @@ function startConcurrentMultiple( test )
   {
 
     test.identical( arg.exitCode, 0 );
-    test.is( singleOption === arg );
-    test.is( _.strHas( arg.output, 'begin 1000' ) );
-    test.is( _.strHas( arg.output, 'end 1000' ) );
+    test.true( singleOption === arg );
+    test.true( _.strHas( arg.output, 'begin 1000' ) );
+    test.true( _.strHas( arg.output, 'end 1000' ) );
     test.identical( a.fileProvider.fileRead( filePath ), 'written by 1000' );
     a.fileProvider.fileDelete( filePath );
     counter += 1;
@@ -14756,9 +14756,9 @@ function startConcurrentMultiple( test )
 
     test.identical( op.runs.length, 1 );
     test.identical( op.runs[ 0 ].exitCode, 0 );
-    test.is( singleExecPathInArrayOptions !== op.runs[ 0 ] );
-    test.is( _.strHas( op.runs[ 0 ].output, 'begin 1000' ) );
-    test.is( _.strHas( op.runs[ 0 ].output, 'end 1000' ) );
+    test.true( singleExecPathInArrayOptions !== op.runs[ 0 ] );
+    test.true( _.strHas( op.runs[ 0 ].output, 'begin 1000' ) );
+    test.true( _.strHas( op.runs[ 0 ].output, 'end 1000' ) );
     test.identical( a.fileProvider.fileRead( filePath ), 'written by 1000' );
     a.fileProvider.fileDelete( filePath );
 
@@ -14786,11 +14786,11 @@ function startConcurrentMultiple( test )
   _.process.start( singleErrorBeforeScalar )
   .finally( ( err, arg ) =>
   {
-    test.is( arg === undefined );
-    test.is( _.errIs( err ) );
+    test.true( arg === undefined );
+    test.true( _.errIs( err ) );
     test.identical( singleErrorBeforeScalar.exitCode, null );
     test.identical( singleErrorBeforeScalar.output, '' );
-    test.is( !a.fileProvider.fileExists( filePath ) );
+    test.true( !a.fileProvider.fileExists( filePath ) );
     _.errAttend( err );
     counter += 1;
     return null;
@@ -14817,11 +14817,11 @@ function startConcurrentMultiple( test )
   .finally( ( err, arg ) =>
   {
 
-    test.is( arg === undefined );
-    test.is( _.errIs( err ) );
+    test.true( arg === undefined );
+    test.true( _.errIs( err ) );
     test.identical( singleErrorBefore.exitCode, null );
     test.identical( singleErrorBefore.output, '' );
-    test.is( !a.fileProvider.fileExists( filePath ) );
+    test.true( !a.fileProvider.fileExists( filePath ) );
 
     _.errAttend( err );
     counter += 1;
@@ -14861,12 +14861,12 @@ function startConcurrentMultiple( test )
     a.fileProvider.fileDelete( filePath );
 
     test.identical( op.runs[ 0 ].exitCode, 0 );
-    test.is( _.strHas( op.runs[ 0 ].output, 'begin 1000' ) );
-    test.is( _.strHas( op.runs[ 0 ].output, 'end 1000' ) );
+    test.true( _.strHas( op.runs[ 0 ].output, 'begin 1000' ) );
+    test.true( _.strHas( op.runs[ 0 ].output, 'end 1000' ) );
 
     test.identical( op.runs[ 1 ].exitCode, 0 );
-    test.is( _.strHas( op.runs[ 1 ].output, 'begin 1' ) );
-    test.is( _.strHas( op.runs[ 1 ].output, 'end 1' ) );
+    test.true( _.strHas( op.runs[ 1 ].output, 'begin 1' ) );
+    test.true( _.strHas( op.runs[ 1 ].output, 'end 1' ) );
 
     counter += 1;
     return null;
@@ -14900,9 +14900,9 @@ function startConcurrentMultiple( test )
     test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesError.exitCode, 1 );
-    test.is( _.errIs( err ) );
-    test.is( op === undefined );
-    test.is( !a.fileProvider.fileExists( filePath ) );
+    test.true( _.errIs( err ) );
+    test.true( op === undefined );
+    test.true( !a.fileProvider.fileExists( filePath ) );
 
     _.errAttend( err );
     counter += 1;
@@ -14931,7 +14931,7 @@ function startConcurrentMultiple( test )
   _.process.start( subprocessesErrorNonThrowing )
   .finally( ( err, op ) =>
   {
-    test.is( !err );
+    test.true( !err );
 
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
@@ -14944,13 +14944,13 @@ function startConcurrentMultiple( test )
     a.fileProvider.fileDelete( filePath );
 
     test.identical( op.runs[ 0 ].exitCode, 1 );
-    test.is( _.strHas( op.runs[ 0 ].output, 'begin x' ) );
-    test.is( !_.strHas( op.runs[ 0 ].output, 'end x' ) );
-    test.is( _.strHas( op.runs[ 0 ].output, 'Expects number' ) );
+    test.true( _.strHas( op.runs[ 0 ].output, 'begin x' ) );
+    test.true( !_.strHas( op.runs[ 0 ].output, 'end x' ) );
+    test.true( _.strHas( op.runs[ 0 ].output, 'Expects number' ) );
 
     test.identical( op.runs[ 1 ].exitCode, 0 );
-    test.is( _.strHas( op.runs[ 1 ].output, 'begin 1' ) );
-    test.is( _.strHas( op.runs[ 1 ].output, 'end 1' ) );
+    test.true( _.strHas( op.runs[ 1 ].output, 'begin 1' ) );
+    test.true( _.strHas( op.runs[ 1 ].output, 'end 1' ) );
 
     counter += 1;
     return null;
@@ -14984,8 +14984,8 @@ function startConcurrentMultiple( test )
     test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesErrorConcurrent.exitCode, 1 );
-    test.is( _.errIs( err ) );
-    test.is( op === undefined );
+    test.true( _.errIs( err ) );
+    test.true( op === undefined );
     test.identical( a.fileProvider.fileRead( filePath ), 'written by 1' );
     a.fileProvider.fileDelete( filePath );
 
@@ -15016,7 +15016,7 @@ function startConcurrentMultiple( test )
   _.process.start( subprocessesErrorConcurrentNonThrowing )
   .finally( ( err, op ) =>
   {
-    test.is( !err );
+    test.true( !err );
 
     var spent = _.time.now() - time;
     logger.log( 'Spent', spent );
@@ -15029,13 +15029,13 @@ function startConcurrentMultiple( test )
     a.fileProvider.fileDelete( filePath );
 
     test.identical( op.runs[ 0 ].exitCode, 1 );
-    test.is( _.strHas( op.runs[ 0 ].output, 'begin x' ) );
-    test.is( !_.strHas( op.runs[ 0 ].output, 'end x' ) );
-    test.is( _.strHas( op.runs[ 0 ].output, 'Expects number' ) );
+    test.true( _.strHas( op.runs[ 0 ].output, 'begin x' ) );
+    test.true( !_.strHas( op.runs[ 0 ].output, 'end x' ) );
+    test.true( _.strHas( op.runs[ 0 ].output, 'Expects number' ) );
 
     test.identical( op.runs[ 1 ].exitCode, 0 );
-    test.is( _.strHas( op.runs[ 1 ].output, 'begin 1' ) );
-    test.is( _.strHas( op.runs[ 1 ].output, 'end 1' ) );
+    test.true( _.strHas( op.runs[ 1 ].output, 'begin 1' ) );
+    test.true( _.strHas( op.runs[ 1 ].output, 'end 1' ) );
 
     counter += 1;
     return null;
@@ -15074,12 +15074,12 @@ function startConcurrentMultiple( test )
     a.fileProvider.fileDelete( filePath );
 
     test.identical( op.runs[ 0 ].exitCode, 0 );
-    test.is( _.strHas( op.runs[ 0 ].output, 'begin 1000' ) );
-    test.is( _.strHas( op.runs[ 0 ].output, 'end 1000' ) );
+    test.true( _.strHas( op.runs[ 0 ].output, 'begin 1000' ) );
+    test.true( _.strHas( op.runs[ 0 ].output, 'end 1000' ) );
 
     test.identical( op.runs[ 1 ].exitCode, 0 );
-    test.is( _.strHas( op.runs[ 1 ].output, 'begin 100' ) );
-    test.is( _.strHas( op.runs[ 1 ].output, 'end 100' ) );
+    test.true( _.strHas( op.runs[ 1 ].output, 'begin 100' ) );
+    test.true( _.strHas( op.runs[ 1 ].output, 'end 100' ) );
 
     counter += 1;
     return null;
@@ -15118,12 +15118,12 @@ function startConcurrentMultiple( test )
     a.fileProvider.fileDelete( filePath );
 
     test.identical( op.runs[ 0 ].exitCode, 0 );
-    test.is( _.strHas( op.runs[ 0 ].output, 'begin 1000, second, argument' ) );
-    test.is( _.strHas( op.runs[ 0 ].output, 'end 1000, second, argument' ) );
+    test.true( _.strHas( op.runs[ 0 ].output, 'begin 1000, second, argument' ) );
+    test.true( _.strHas( op.runs[ 0 ].output, 'end 1000, second, argument' ) );
 
     test.identical( op.runs[ 1 ].exitCode, 0 );
-    test.is( _.strHas( op.runs[ 1 ].output, 'begin 100, second, argument' ) );
-    test.is( _.strHas( op.runs[ 1 ].output, 'end 100, second, argument' ) );
+    test.true( _.strHas( op.runs[ 1 ].output, 'begin 100, second, argument' ) );
+    test.true( _.strHas( op.runs[ 1 ].output, 'end 100, second, argument' ) );
 
     counter += 1;
     return null;
@@ -15408,13 +15408,13 @@ ${options.runs[ 1 ].procedure.id}.end
         if( tops.consequence === 'routine' )
         test.identical( track2, exp );
 
-        test.is( _.errIs( err ) );
+        test.true( _.errIs( err ) );
         test.notIdentical( options.exitCode, 0 );
         test.identical( options.ended, true );
         test.identical( options.exitReason, 'code' );
         test.identical( options.exitSignal, null );
         test.identical( options.state, 'terminated' );
-        test.is( !!options.error );
+        test.true( !!options.error );
         test.identical( _.strCount( options.error.message, 'Error1' ), 1 );
 
         test.notIdentical( options.runs[ 0 ].exitCode, 0 );
@@ -15422,14 +15422,14 @@ ${options.runs[ 1 ].procedure.id}.end
         test.identical( options.runs[ 0 ].exitReason, 'code' );
         test.identical( options.runs[ 0 ].exitSignal, null );
         test.identical( options.runs[ 0 ].state, 'terminated' );
-        test.is( !!options.runs[ 0 ].error );
+        test.true( !!options.runs[ 0 ].error );
 
         test.notIdentical( options.runs[ 1 ].exitCode, 0 );
         test.identical( options.runs[ 1 ].ended, true );
         test.identical( options.runs[ 1 ].exitReason, 'error' );
         test.identical( options.runs[ 1 ].exitSignal, null );
         test.identical( options.runs[ 1 ].state, 'initial' );
-        test.is( !!options.runs[ 1 ].error );
+        test.true( !!options.runs[ 1 ].error );
 
         return null;
       })
@@ -15523,13 +15523,13 @@ ${options.runs[ 1 ].procedure.id}.end
         if( tops.consequence === 'routine' )
         test.identical( track2, exp );
 
-        test.is( _.errIs( err ) );
+        test.true( _.errIs( err ) );
         test.notIdentical( options.exitCode, 0 );
         test.identical( options.ended, true );
         test.identical( options.exitReason, 'code' );
         test.identical( options.exitSignal, null );
         test.identical( options.state, 'terminated' );
-        test.is( !!options.error );
+        test.true( !!options.error );
         test.identical( _.strCount( options.error.message, 'Error1' ), 1 );
 
         test.identical( options.runs[ 0 ].exitCode, 0 );
@@ -15537,14 +15537,14 @@ ${options.runs[ 1 ].procedure.id}.end
         test.identical( options.runs[ 0 ].exitReason, 'normal' );
         test.identical( options.runs[ 0 ].exitSignal, null );
         test.identical( options.runs[ 0 ].state, 'terminated' );
-        test.is( !options.runs[ 0 ].error );
+        test.true( !options.runs[ 0 ].error );
 
         test.notIdentical( options.runs[ 1 ].exitCode, 0 );
         test.identical( options.runs[ 1 ].ended, true );
         test.identical( options.runs[ 1 ].exitReason, 'code' );
         test.identical( options.runs[ 1 ].exitSignal, null );
         test.identical( options.runs[ 1 ].state, 'terminated' );
-        test.is( !!options.runs[ 1 ].error );
+        test.true( !!options.runs[ 1 ].error );
 
         return null;
       })
@@ -15763,7 +15763,7 @@ ${options.runs[ 1 ].procedure.id}.end
         test.identical( options.exitReason, 'code' );
         test.identical( options.exitSignal, null );
         test.identical( options.state, 'terminated' );
-        test.is( !!options.error );
+        test.true( !!options.error );
         test.identical( _.strCount( options.error.message, 'Error1' ), 1 );
 
         test.notIdentical( options.runs[ 0 ].exitCode, 0 );
@@ -15771,14 +15771,14 @@ ${options.runs[ 1 ].procedure.id}.end
         test.identical( options.runs[ 0 ].exitReason, 'code' );
         test.identical( options.runs[ 0 ].exitSignal, null );
         test.identical( options.runs[ 0 ].state, 'terminated' );
-        test.is( !!options.runs[ 0 ].error );
+        test.true( !!options.runs[ 0 ].error );
 
         test.identical( options.runs[ 1 ].exitCode, 0 );
         test.identical( options.runs[ 1 ].ended, true );
         test.identical( options.runs[ 1 ].exitReason, 'normal' );
         test.identical( options.runs[ 1 ].exitSignal, null );
         test.identical( options.runs[ 1 ].state, 'terminated' );
-        test.is( !options.runs[ 1 ].error );
+        test.true( !options.runs[ 1 ].error );
 
         return null;
       })
@@ -15900,13 +15900,13 @@ ${options.runs[ 1 ].procedure.id}.end
         if( tops.consequence === 'routine' )
         test.identical( track2, exp );
 
-        test.is( _.errIs( err ) );
+        test.true( _.errIs( err ) );
         test.notIdentical( options.exitCode, 0 );
         test.identical( options.ended, true );
         test.identical( options.exitReason, 'code' );
         test.identical( options.exitSignal, null );
         test.identical( options.state, 'terminated' );
-        test.is( !!options.error );
+        test.true( !!options.error );
         test.identical( _.strCount( options.error.message, 'Error1' ), 1 );
 
         test.identical( options.runs[ 0 ].exitCode, 0 );
@@ -15914,14 +15914,14 @@ ${options.runs[ 1 ].procedure.id}.end
         test.identical( options.runs[ 0 ].exitReason, 'normal' );
         test.identical( options.runs[ 0 ].exitSignal, null );
         test.identical( options.runs[ 0 ].state, 'terminated' );
-        test.is( !options.runs[ 0 ].error );
+        test.true( !options.runs[ 0 ].error );
 
         test.notIdentical( options.runs[ 1 ].exitCode, 0 );
         test.identical( options.runs[ 1 ].ended, true );
         test.identical( options.runs[ 1 ].exitReason, 'code' );
         test.identical( options.runs[ 1 ].exitSignal, null );
         test.identical( options.runs[ 1 ].state, 'terminated' );
-        test.is( !!options.runs[ 1 ].error );
+        test.true( !!options.runs[ 1 ].error );
 
         return null;
       })
@@ -16069,10 +16069,10 @@ function starterConcurrentMultiple( test )
   .then( ( arg ) =>
   {
     test.identical( arg.exitCode, 0 );
-    test.is( singleOption !== arg );
-    test.is( singleOption2 === arg );
-    test.is( _.strHas( arg.output, 'begin 1000' ) );
-    test.is( _.strHas( arg.output, 'end 1000' ) );
+    test.true( singleOption !== arg );
+    test.true( singleOption2 === arg );
+    test.true( _.strHas( arg.output, 'begin 1000' ) );
+    test.true( _.strHas( arg.output, 'end 1000' ) );
     test.identical( a.fileProvider.fileRead( filePath ), 'written by 1000' );
     a.fileProvider.fileDelete( filePath );
     counter += 1;
@@ -16103,9 +16103,9 @@ function starterConcurrentMultiple( test )
   {
 
     test.identical( arg.exitCode, 0 );
-    test.is( singleOptionWithoutSecond !== arg );
-    test.is( _.strHas( arg.output, 'begin 1000' ) );
-    test.is( _.strHas( arg.output, 'end 1000' ) );
+    test.true( singleOptionWithoutSecond !== arg );
+    test.true( _.strHas( arg.output, 'begin 1000' ) );
+    test.true( _.strHas( arg.output, 'end 1000' ) );
     test.identical( a.fileProvider.fileRead( filePath ), 'written by 1000' );
     a.fileProvider.fileDelete( filePath );
     counter += 1;
@@ -16136,9 +16136,9 @@ function starterConcurrentMultiple( test )
   .then( ( arg ) =>
   {
     test.identical( arg.exitCode, 0 );
-    test.is( singleExecPathInArrayOptions2 === arg );
-    test.is( _.strHas( arg.output, 'begin 1000' ) );
-    test.is( _.strHas( arg.output, 'end 1000' ) );
+    test.true( singleExecPathInArrayOptions2 === arg );
+    test.true( _.strHas( arg.output, 'begin 1000' ) );
+    test.true( _.strHas( arg.output, 'end 1000' ) );
     test.identical( a.fileProvider.fileRead( filePath ), 'written by 1000' );
     a.fileProvider.fileDelete( filePath );
     counter += 1;
@@ -16169,11 +16169,11 @@ function starterConcurrentMultiple( test )
   .finally( ( err, arg ) =>
   {
 
-    test.is( arg === undefined );
-    test.is( _.errIs( err ) );
+    test.true( arg === undefined );
+    test.true( _.errIs( err ) );
     test.identical( singleErrorBeforeScalar.exitCode, undefined );
     test.identical( singleErrorBeforeScalar.output, undefined );
-    test.is( !a.fileProvider.fileExists( filePath ) );
+    test.true( !a.fileProvider.fileExists( filePath ) );
 
     _.errAttend( err );
     counter += 1;
@@ -16204,11 +16204,11 @@ function starterConcurrentMultiple( test )
   .finally( ( err, arg ) =>
   {
 
-    test.is( arg === undefined );
-    test.is( _.errIs( err ) );
+    test.true( arg === undefined );
+    test.true( _.errIs( err ) );
     test.identical( singleErrorBefore.exitCode, undefined );
     test.identical( singleErrorBefore.output, undefined );
-    test.is( !a.fileProvider.fileExists( filePath ) );
+    test.true( !a.fileProvider.fileExists( filePath ) );
 
     _.errAttend( err );
     counter += 1;
@@ -16251,12 +16251,12 @@ function starterConcurrentMultiple( test )
     a.fileProvider.fileDelete( filePath );
 
     test.identical( op.runs[ 0 ].exitCode, 0 );
-    test.is( _.strHas( op.runs[ 0 ].output, 'begin 1000' ) );
-    test.is( _.strHas( op.runs[ 0 ].output, 'end 1000' ) );
+    test.true( _.strHas( op.runs[ 0 ].output, 'begin 1000' ) );
+    test.true( _.strHas( op.runs[ 0 ].output, 'end 1000' ) );
 
     test.identical( op.runs[ 1 ].exitCode, 0 );
-    test.is( _.strHas( op.runs[ 1 ].output, 'begin 1' ) );
-    test.is( _.strHas( op.runs[ 1 ].output, 'end 1' ) );
+    test.true( _.strHas( op.runs[ 1 ].output, 'begin 1' ) );
+    test.true( _.strHas( op.runs[ 1 ].output, 'end 1' ) );
 
     counter += 1;
     return null;
@@ -16293,9 +16293,9 @@ function starterConcurrentMultiple( test )
     test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesError2.exitCode, 1 );
-    test.is( _.errIs( err ) );
-    test.is( arg === undefined );
-    test.is( !a.fileProvider.fileExists( filePath ) );
+    test.true( _.errIs( err ) );
+    test.true( arg === undefined );
+    test.true( !a.fileProvider.fileExists( filePath ) );
 
     _.errAttend( err );
     counter += 1;
@@ -16339,13 +16339,13 @@ function starterConcurrentMultiple( test )
     a.fileProvider.fileDelete( filePath );
 
     test.identical( op.runs[ 0 ].exitCode, 1 );
-    test.is( _.strHas( op.runs[ 0 ].output, 'begin x' ) );
-    test.is( !_.strHas( op.runs[ 0 ].output, 'end x' ) );
-    test.is( _.strHas( op.runs[ 0 ].output, 'Expects number' ) );
+    test.true( _.strHas( op.runs[ 0 ].output, 'begin x' ) );
+    test.true( !_.strHas( op.runs[ 0 ].output, 'end x' ) );
+    test.true( _.strHas( op.runs[ 0 ].output, 'Expects number' ) );
 
     test.identical( op.runs[ 1 ].exitCode, 0 );
-    test.is( _.strHas( op.runs[ 1 ].output, 'begin 1' ) );
-    test.is( _.strHas( op.runs[ 1 ].output, 'end 1' ) );
+    test.true( _.strHas( op.runs[ 1 ].output, 'begin 1' ) );
+    test.true( _.strHas( op.runs[ 1 ].output, 'end 1' ) );
 
     counter += 1;
     return null;
@@ -16382,8 +16382,8 @@ function starterConcurrentMultiple( test )
     test.le( spent, context.t1 * 5 ); /* 5000 */
 
     test.identical( subprocessesErrorConcurrent2.exitCode, 1 );
-    test.is( _.errIs( err ) );
-    test.is( arg === undefined );
+    test.true( _.errIs( err ) );
+    test.true( arg === undefined );
     test.identical( a.fileProvider.fileRead( filePath ), 'written by 1' );
     a.fileProvider.fileDelete( filePath );
 
@@ -16429,13 +16429,13 @@ function starterConcurrentMultiple( test )
     a.fileProvider.fileDelete( filePath );
 
     test.identical( op.runs[ 0 ].exitCode, 1 );
-    test.is( _.strHas( op.runs[ 0 ].output, 'begin x' ) );
-    test.is( !_.strHas( op.runs[ 0 ].output, 'end x' ) );
-    test.is( _.strHas( op.runs[ 0 ].output, 'Expects number' ) );
+    test.true( _.strHas( op.runs[ 0 ].output, 'begin x' ) );
+    test.true( !_.strHas( op.runs[ 0 ].output, 'end x' ) );
+    test.true( _.strHas( op.runs[ 0 ].output, 'Expects number' ) );
 
     test.identical( op.runs[ 1 ].exitCode, 0 );
-    test.is( _.strHas( op.runs[ 1 ].output, 'begin 1' ) );
-    test.is( _.strHas( op.runs[ 1 ].output, 'end 1' ) );
+    test.true( _.strHas( op.runs[ 1 ].output, 'begin 1' ) );
+    test.true( _.strHas( op.runs[ 1 ].output, 'end 1' ) );
 
     counter += 1;
     return null;
@@ -16477,12 +16477,12 @@ function starterConcurrentMultiple( test )
     a.fileProvider.fileDelete( filePath );
 
     test.identical( op.runs[ 0 ].exitCode, 0 );
-    test.is( _.strHas( op.runs[ 0 ].output, 'begin 1000' ) );
-    test.is( _.strHas( op.runs[ 0 ].output, 'end 1000' ) );
+    test.true( _.strHas( op.runs[ 0 ].output, 'begin 1000' ) );
+    test.true( _.strHas( op.runs[ 0 ].output, 'end 1000' ) );
 
     test.identical( op.runs[ 1 ].exitCode, 0 );
-    test.is( _.strHas( op.runs[ 1 ].output, 'begin 100' ) );
-    test.is( _.strHas( op.runs[ 1 ].output, 'end 100' ) );
+    test.true( _.strHas( op.runs[ 1 ].output, 'begin 100' ) );
+    test.true( _.strHas( op.runs[ 1 ].output, 'end 100' ) );
 
     counter += 1;
     return null;
@@ -16525,12 +16525,12 @@ function starterConcurrentMultiple( test )
     a.fileProvider.fileDelete( filePath );
 
     test.identical( op.runs[ 0 ].exitCode, 0 );
-    test.is( _.strHas( op.runs[ 0 ].output, 'begin 1000, second, argument' ) );
-    test.is( _.strHas( op.runs[ 0 ].output, 'end 1000, second, argument' ) );
+    test.true( _.strHas( op.runs[ 0 ].output, 'begin 1000, second, argument' ) );
+    test.true( _.strHas( op.runs[ 0 ].output, 'end 1000, second, argument' ) );
 
     test.identical( op.runs[ 1 ].exitCode, 0 );
-    test.is( _.strHas( op.runs[ 1 ].output, 'begin 100, second, argument' ) );
-    test.is( _.strHas( op.runs[ 1 ].output, 'end 100, second, argument' ) );
+    test.true( _.strHas( op.runs[ 1 ].output, 'begin 100, second, argument' ) );
+    test.true( _.strHas( op.runs[ 1 ].output, 'end 100, second, argument' ) );
 
     counter += 1;
     return null;
@@ -16610,7 +16610,7 @@ function startNjs( test )
       test.identical( op.args, [ 'arg' ] );
       test.identical( op.args2, [ 'arg' ] );
       console.log( op.output )
-      test.is( _.strHas( op.output, `[ 'arg' ]` ) );
+      test.true( _.strHas( op.output, `[ 'arg' ]` ) );
       return null
     })
   })
@@ -16647,7 +16647,7 @@ function startNjs( test )
         test.identical( o.exitCode, 1 );
         test.identical( process.exitCode, 1 );
         process.exitCode = 0;
-        test.is( !_.errIs( err ) );
+        test.true( !_.errIs( err ) );
         return true;
       })
     })
@@ -16677,7 +16677,7 @@ function startNjs( test )
       {
         test.identical( o.exitCode, 1 );
         test.identical( process.exitCode, 0 );
-        test.is( !_.errIs( err ) );
+        test.true( !_.errIs( err ) );
         return true;
       })
     })
@@ -16693,8 +16693,8 @@ function startNjs( test )
         test.identical( o.exitCode, 1 );
         test.identical( process.exitCode, 0 );
         let spawnArgs = _.toStr( o.process.spawnargs, { levels : 99 } );
-        test.is( _.strHasAll( spawnArgs, [ '--expose-gc',  '--stack-trace-limit=999', '--max_old_space_size=' ] ) )
-        test.is( !_.errIs( err ) );
+        test.true( _.strHasAll( spawnArgs, [ '--expose-gc',  '--stack-trace-limit=999', '--max_old_space_size=' ] ) )
+        test.true( !_.errIs( err ) );
         return true;
       })
     })
@@ -16787,9 +16787,9 @@ function startNjsWithReadyDelayStructural( test )
       let returned = _.process.startNjs( options );
 
       if( tops.sync )
-      test.is( !_.consequenceIs( returned ) )
+      test.true( !_.consequenceIs( returned ) )
       else
-      test.is( _.consequenceIs( returned ) )
+      test.true( _.consequenceIs( returned ) )
 
       var exp =
       {
@@ -16893,11 +16893,11 @@ function startNjsWithReadyDelayStructural( test )
 
         test.identical( options, exp2 );
         test.identical( !!options.process, !tops.dry );
-        test.is( _.routineIs( options.disconnect ) );
+        test.true( _.routineIs( options.disconnect ) );
         test.identical( _.streamIs( options.streamOut ), !tops.dry && ( !tops.sync || !!tops.deasync ) );
         test.identical( _.streamIs( options.streamErr ), !tops.dry && ( !tops.sync || !!tops.deasync ) );
         test.identical( options.streamOut !== options.streamErr, !tops.dry && ( !tops.sync || !!tops.deasync ) );
-        test.is( options.conTerminate !== options.ready );
+        test.true( options.conTerminate !== options.ready );
         if( tops.sync || tops.deasync )
         test.identical( options.ready.exportString(), 'Consequence:: 0 / 0' );
         else
@@ -16935,8 +16935,8 @@ function startNjsWithReadyDelayStructural( test )
         test.identical( options, exp2 )
       }
 
-      test.is( _.routineIs( options.disconnect ) );
-      test.is( options.conTerminate !== options.ready );
+      test.true( _.routineIs( options.disconnect ) );
+      test.true( options.conTerminate !== options.ready );
       if( ( tops.sync || tops.deasync ) && !tops.dry )
       {
         test.notIdentical( options.process, null );
@@ -16945,8 +16945,8 @@ function startNjsWithReadyDelayStructural( test )
       {
         test.identical( options.process, null );
       }
-      test.is( !!options.logger );
-      test.is( !!options.stack );
+      test.true( !!options.logger );
+      test.true( !!options.stack );
       if( tops.sync || tops.deasync )
       {
         test.identical( options.ready.exportString(), 'Consequence:: 1 / 0' );
@@ -17032,11 +17032,11 @@ function startNjsWithReadyDelayStructural( test )
 
   //       test.identical( options, exp2 );
   //       test.identical( !!options.process, !tops.dry );
-  //       test.is( _.routineIs( options.disconnect ) );
+  //       test.true( _.routineIs( options.disconnect ) );
   //       test.identical( _.streamIs( options.streamOut ), !tops.dry );
   //       test.identical( _.streamIs( options.streamErr ), !tops.dry );
   //       test.identical( options.streamOut !== options.streamErr, !tops.dry );
-  //       test.is( options.conTerminate !== options.ready );
+  //       test.true( options.conTerminate !== options.ready );
   //       test.identical( options.ready.exportString(), 'Consequence:: 0 / 1' );
   //       test.identical( options.conTerminate.exportString(), 'Consequence:: 1 / 0' );
   //       test.identical( options.conDisconnect.exportString(), 'Consequence:: 1 / 0' );
@@ -17105,12 +17105,12 @@ function startNjsWithReadyDelayStructural( test )
   //     }
   //     test.identical( options, exp );
 
-  //     test.is( _.routineIs( options.disconnect ) );
-  //     test.is( options.conTerminate !== options.ready );
-  //     test.is( !!options.disconnect );
+  //     test.true( _.routineIs( options.disconnect ) );
+  //     test.true( options.conTerminate !== options.ready );
+  //     test.true( !!options.disconnect );
   //     test.identical( options.process, null );
-  //     test.is( !!options.logger );
-  //     test.is( !!options.stack );
+  //     test.true( !!options.logger );
+  //     test.true( !!options.stack );
   //     test.identical( options.ready.exportString(), 'Consequence:: 0 / 2' );
   //     test.identical( options.conDisconnect.exportString(), 'Consequence:: 0 / 0' );
   //     test.identical( options.conTerminate.exportString(), 'Consequence:: 0 / 0' );
@@ -17418,7 +17418,7 @@ function startNjsOptionInterpreterArgs( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.is( _.strHas( op.output, 'Options:' ) );
+        test.true( _.strHas( op.output, 'Options:' ) );
 
         test.identical( op.interpreterArgs, [ '--v8-options' ] );
         if( mode === 'fork' )
@@ -17457,7 +17457,7 @@ function startNjsOptionInterpreterArgs( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.is( _.strHas( op.output, 'Options:' ) );
+        test.true( _.strHas( op.output, 'Options:' ) );
 
         test.identical( op.interpreterArgs, [ '--v8-options', '--expose-gc', '--stack-trace-limit=999', `--max_old_space_size=${totalMem}` ] );
         if( mode === 'fork' )
@@ -17890,9 +17890,9 @@ function startNjsWithReadyDelayStructuralMultiple( test )
       let returned = _.process.startNjs( options );
 
       if( tops.sync )
-      test.is( !_.consequenceIs( returned ) )
+      test.true( !_.consequenceIs( returned ) )
       else
-      test.is( _.consequenceIs( returned ) )
+      test.true( _.consequenceIs( returned ) )
 
       var exp =
       {
@@ -17988,13 +17988,13 @@ function startNjsWithReadyDelayStructuralMultiple( test )
         }
 
         test.identical( options, exp2 );
-        test.is( !options.process );
-        test.is( !options.disconnect );
+        test.true( !options.process );
+        test.true( !options.disconnect );
         test.identical( _.streamIs( options.streamOut ), !tops.sync || ( !!tops.sync && !!tops.deasync ) );
         test.identical( _.streamIs( options.streamErr ), !tops.sync || ( !!tops.sync && !!tops.deasync ) );
         test.identical( options.streamOut !== options.streamErr, !tops.sync || ( !!tops.sync && !!tops.deasync ) );
-        test.is( options.conTerminate !== options.ready );
-        test.is( _.arrayIs( options.runs ) );
+        test.true( options.conTerminate !== options.ready );
+        test.true( _.arrayIs( options.runs ) );
 
         if( tops.sync || tops.deasync )
         {
@@ -18034,11 +18034,11 @@ function startNjsWithReadyDelayStructuralMultiple( test )
           }
           test.identical( run.exitSignal, null );
           test.identical( !!run.process, !tops.dry );
-          test.is( _.routineIs( run.disconnect ) );
+          test.true( _.routineIs( run.disconnect ) );
           test.identical( _.streamIs( run.streamOut ), !tops.dry && ( !tops.sync || !!tops.deasync ) );
           test.identical( _.streamIs( run.streamErr ), !tops.dry && ( !tops.sync || !!tops.deasync ) );
           test.identical( run.streamOut !== run.streamErr, !tops.dry && ( !tops.sync || !!tops.deasync ) );
-          test.is( run.conTerminate !== run.ready );
+          test.true( run.conTerminate !== run.ready );
 
           test.identical( run.ready.exportString(), 'Consequence:: 1 / 0' );
           test.identical( run.conTerminate.exportString(), 'Consequence:: 1 / 0' );
@@ -18063,12 +18063,12 @@ function startNjsWithReadyDelayStructuralMultiple( test )
 
       test.identical( options, exp3 );
 
-      test.is( options.conTerminate !== options.ready );
-      test.is( !options.disconnect );
-      test.is( !options.process );
-      test.is( !!options.procedure );
-      test.is( !!options.logger );
-      test.is( !!options.stack );
+      test.true( options.conTerminate !== options.ready );
+      test.true( !options.disconnect );
+      test.true( !options.process );
+      test.true( !!options.procedure );
+      test.true( !!options.logger );
+      test.true( !!options.stack );
       test.identical( _.streamIs( options.streamOut ), !tops.sync || ( !!tops.sync && !!tops.deasync ) );
       test.identical( _.streamIs( options.streamErr ), !tops.sync || ( !!tops.sync && !!tops.deasync ) );
       test.identical( options.streamOut !== options.streamErr, !tops.sync || ( !!tops.sync && !!tops.deasync ) );
@@ -18138,13 +18138,13 @@ function startNjsWithReadyDelayStructuralMultiple( test )
   //     exp2.ended = true;
 
   //     test.identical( options, exp2 );
-  //     test.is( !options.process );
-  //     test.is( _.streamIs( options.streamOut ) );
-  //     test.is( _.streamIs( options.streamErr ) );
-  //     test.is( options.streamOut !== options.streamErr );
-  //     test.is( ! options.disconnect );
-  //     test.is( options.conTerminate !== options.ready );
-  //     test.is( _.arrayIs( options.runs ) );
+  //     test.true( !options.process );
+  //     test.true( _.streamIs( options.streamOut ) );
+  //     test.true( _.streamIs( options.streamErr ) );
+  //     test.true( options.streamOut !== options.streamErr );
+  //     test.true( ! options.disconnect );
+  //     test.true( options.conTerminate !== options.ready );
+  //     test.true( _.arrayIs( options.runs ) );
   //     test.identical( options.ready.exportString(), 'Consequence:: 0 / 1' );
   //     test.identical( options.conTerminate.exportString(), 'Consequence:: 1 / 0' );
   //     test.identical( options.conDisconnect, null );
@@ -18214,15 +18214,15 @@ function startNjsWithReadyDelayStructuralMultiple( test )
   //   }
   //   test.identical( options, exp );
 
-  //   test.is( options.conTerminate !== options.ready );
-  //   test.is( !options.disconnect );
-  //   test.is( !options.process );
-  //   test.is( !!options.procedure );
-  //   test.is( !!options.logger );
-  //   test.is( !!options.stack );
-  //   test.is( _.streamIs( options.streamOut ) );
-  //   test.is( _.streamIs( options.streamErr ) );
-  //   test.is( options.streamOut !== options.streamErr );
+  //   test.true( options.conTerminate !== options.ready );
+  //   test.true( !options.disconnect );
+  //   test.true( !options.process );
+  //   test.true( !!options.procedure );
+  //   test.true( !!options.logger );
+  //   test.true( !!options.stack );
+  //   test.true( _.streamIs( options.streamOut ) );
+  //   test.true( _.streamIs( options.streamErr ) );
+  //   test.true( options.streamOut !== options.streamErr );
   //   test.identical( options.ready.exportString(), 'Consequence:: 0 / 3' );
   //   test.identical( options.conTerminate.exportString(), 'Consequence:: 0 / 0' );
   //   test.identical( options.conDisconnect, null );
@@ -18277,8 +18277,8 @@ function starter( test )
 
       test.identical( o1.execPath, 'node' );
       test.identical( o2.execPath, 'node' );
-      test.is( _.strHas( o1.output, `[ 'arg1' ]` ) );
-      test.is( _.strHas( o2.output, `[ 'arg2' ]` ) );
+      test.true( _.strHas( o1.output, `[ 'arg1' ]` ) );
+      test.true( _.strHas( o2.output, `[ 'arg2' ]` ) );
 
       return op;
     })
@@ -18303,8 +18303,8 @@ function starter( test )
 
       test.identical( o1.execPath, 'node' );
       test.identical( o2.execPath, 'node' );
-      test.is( _.strHas( o1.output, `[ 'arg0', 'arg1' ]` ) );
-      test.is( _.strHas( o2.output, `[ 'arg0', 'arg2' ]` ) );
+      test.true( _.strHas( o1.output, `[ 'arg0', 'arg1' ]` ) );
+      test.true( _.strHas( o2.output, `[ 'arg0', 'arg2' ]` ) );
 
       return op;
     })
@@ -18332,8 +18332,8 @@ function starter( test )
       test.identical( o2.execPath, 'node' );
       test.identical( o1.args, [ testAppPath, 'arg1', 'arg3' ] );
       test.identical( o2.args, [ testAppPath, 'arg2', 'arg3' ] );
-      test.is( _.strHas( o1.output, `[ 'arg1', 'arg3' ]` ) );
-      test.is( _.strHas( o2.output, `[ 'arg2', 'arg3' ]` ) );
+      test.true( _.strHas( o1.output, `[ 'arg1', 'arg3' ]` ) );
+      test.true( _.strHas( o2.output, `[ 'arg2', 'arg3' ]` ) );
 
       return op;
     })
@@ -18352,7 +18352,7 @@ function starter( test )
     .then( ( op ) =>
     {
       test.identical( op.execPath, 'node' );
-      test.is( _.strHas( op.output, `[ 'arg1' ]` ) );
+      test.true( _.strHas( op.output, `[ 'arg1' ]` ) );
 
       return op;
     })
@@ -18381,8 +18381,8 @@ function starter( test )
 
       test.identical( o1.execPath, 'node' );
       test.identical( o2.execPath, 'node' );
-      test.is( _.strHas( o1.output, `[ 'arg1' ]` ) );
-      test.is( _.strHas( o2.output, `[ 'arg1' ]` ) );
+      test.true( _.strHas( o1.output, `[ 'arg1' ]` ) );
+      test.true( _.strHas( o2.output, `[ 'arg1' ]` ) );
 
       return op;
     })
@@ -18415,10 +18415,10 @@ function starter( test )
       test.identical( o2.execPath, 'node' );
       test.identical( o3.execPath, 'node' );
       test.identical( o4.execPath, 'node' );
-      test.is( _.strHas( o1.output, `[ 'arg1' ]` ) );
-      test.is( _.strHas( o2.output, `[ 'arg1' ]` ) );
-      test.is( _.strHas( o3.output, `[ 'arg2' ]` ) );
-      test.is( _.strHas( o4.output, `[ 'arg2' ]` ) );
+      test.true( _.strHas( o1.output, `[ 'arg1' ]` ) );
+      test.true( _.strHas( o2.output, `[ 'arg1' ]` ) );
+      test.true( _.strHas( o3.output, `[ 'arg2' ]` ) );
+      test.true( _.strHas( o4.output, `[ 'arg2' ]` ) );
 
       return op;
     })
@@ -18438,7 +18438,7 @@ function starter( test )
     .then( ( op ) =>
     {
       test.identical( op.execPath, 'node' );
-      test.is( _.strHas( op.output, `[ 'arg1' ]` ) );
+      test.true( _.strHas( op.output, `[ 'arg1' ]` ) );
 
       return op;
     })
@@ -18458,7 +18458,7 @@ function starter( test )
     .then( ( op ) =>
     {
       test.identical( op.execPath, 'node' );
-      test.is( _.strHas( op.output, `[ 'arg2' ]` ) );
+      test.true( _.strHas( op.output, `[ 'arg2' ]` ) );
 
       return op;
     })
@@ -18478,7 +18478,7 @@ function starter( test )
     .then( ( op ) =>
     {
       test.identical( op.execPath, 'node' );
-      test.is( _.strHas( op.output, `[ 'arg3' ]` ) );
+      test.true( _.strHas( op.output, `[ 'arg3' ]` ) );
 
       return op;
     })
@@ -18498,7 +18498,7 @@ function starter( test )
     .then( ( op ) =>
     {
       test.identical( op.execPath, 'node' );
-      test.is( _.strHas( op.output, `[ 'arg2', 'arg3' ]` ) );
+      test.true( _.strHas( op.output, `[ 'arg2', 'arg3' ]` ) );
 
       return op;
     })
@@ -18640,7 +18640,7 @@ function starterFields( test )
   test.identical( _.mapKeys( start.defaults ), _.mapKeys( _.process.start.body.defaults ) );
   test.identical( start.head, _.process.start.head );
   test.identical( start.body, _.process.start.body );
-  test.is( _.arraySetIdentical( _.mapKeys( start.predefined ), _.mapKeys( _.process.start.body.defaults ) ) );
+  test.true( _.arraySetIdentical( _.mapKeys( start.predefined ), _.mapKeys( _.process.start.body.defaults ) ) );
   test.identical( start.predefined.execPath, 'node -v' );
   test.identical( start.predefined.args, [ 'arg1', 'arg2' ] );
   test.identical( start.predefined.ready, ready  );
@@ -19799,8 +19799,8 @@ function startOptionOutputPrefixing( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.is( !_.strHas( op.output, 'err :' ) );
-        test.is( _.strHas( op.output, 'randomText' ) );
+        test.true( !_.strHas( op.output, 'err :' ) );
+        test.true( _.strHas( op.output, 'randomText' ) );
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -19836,8 +19836,8 @@ function startOptionOutputPrefixing( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.is( _.strHas( op.output, 'err :' ) );
-        test.is( _.strHas( op.output, 'randomText' ) );
+        test.true( _.strHas( op.output, 'err :' ) );
+        test.true( _.strHas( op.output, 'randomText' ) );
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -19946,10 +19946,10 @@ function startOptionOutputPrefixing( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         let exp = `\u001b[31merr\u001b[39;0m\u001b[31m :`
-        test.is( !_.strHas( op.output, exp ) );
+        test.true( !_.strHas( op.output, exp ) );
         // debugger;
         let exp2 = `\u001b[31mrandomText\u001b[39;0m`.slice( 5, 15 );
-        test.is( _.strHas( op.output, exp2 ) );
+        test.true( _.strHas( op.output, exp2 ) );
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
 
@@ -19986,9 +19986,9 @@ function startOptionOutputPrefixing( test )
         test.identical( op.ended, true );
         // let exp = `\u001b[31merr :\u001b[39;0m`.slice( 5, 8 )
         let exp = `\u001b[31merr\u001b[39;0m\u001b[31m :`
-        test.is( _.strHas( op.output, exp ) );
+        test.true( _.strHas( op.output, exp ) );
         let exp2 = `\u001b[31mrandomText\u001b[39;0m`.slice( 5, 15 );
-        test.is( _.strHas( op.output, exp2 ) );
+        test.true( _.strHas( op.output, exp2 ) );
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -20729,7 +20729,7 @@ function startOptionOutputPiping( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.is( _.strCount( op.output, 'err :' ) > 1 );
+        test.true( _.strCount( op.output, 'err :' ) > 1 );
         test.identical( _.strCount( op.output, 'throw new Error()' ), 2 );
 
         a.fileProvider.fileDelete( testAppPath );
@@ -21154,7 +21154,7 @@ function startOptionOutputPiping( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.is( _.strCount( op.output, 'err :' ) > 1 );
+        test.true( _.strCount( op.output, 'err :' ) > 1 );
         test.identical( _.strCount( op.output, 'throw new Error();' ), 2 );
 
         a.fileProvider.fileDelete( testAppPath );
@@ -21386,7 +21386,7 @@ function startOptionInputMirroring( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.is( !_.strHas( op.output, testAppPath2 ) );
+        test.true( !_.strHas( op.output, testAppPath2 ) );
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -21423,7 +21423,7 @@ function startOptionInputMirroring( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.is( _.strHas( op.output, testAppPath2 ) );
+        test.true( _.strHas( op.output, testAppPath2 ) );
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -21459,7 +21459,7 @@ function startOptionInputMirroring( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.is( !_.strHas( op.output, testAppPath2 ) );
+        test.true( !_.strHas( op.output, testAppPath2 ) );
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -21495,7 +21495,7 @@ function startOptionInputMirroring( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.is( _.strHas( op.output, testAppPath2 ) );
+        test.true( _.strHas( op.output, testAppPath2 ) );
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -21531,8 +21531,8 @@ function startOptionInputMirroring( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.is( _.strHas( op.output, testAppPath2 ) );
-        test.is( _.strHas( op.output, 'throw new Error();' ) )
+        test.true( _.strHas( op.output, testAppPath2 ) );
+        test.true( _.strHas( op.output, 'throw new Error();' ) )
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -21568,8 +21568,8 @@ function startOptionInputMirroring( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.is( _.strHas( op.output, testAppPath2 ) );
-        test.is( !_.strHas( op.output, 'throw new Error();' ) )
+        test.true( _.strHas( op.output, testAppPath2 ) );
+        test.true( !_.strHas( op.output, 'throw new Error();' ) )
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -21652,8 +21652,8 @@ function startOptionLogger( test )
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
-      test.is( _.strHas( op.output, '  One tab' ) );
-      test.is( _.strHas( loggerOutput, '    One tab' ) );
+      test.true( _.strHas( op.output, '  One tab' ) );
+      test.true( _.strHas( loggerOutput, '    One tab' ) );
       console.log( 'loggerOutput', loggerOutput );
       return null;
     })
@@ -21709,7 +21709,7 @@ function startOptionLoggerTransofrmation( test )
       .then( () =>
       {
         test.identical( o.output, null );
-        test.is( !_.strHas( loggerOutput, 'testApp-output') );
+        test.true( !_.strHas( loggerOutput, 'testApp-output') );
         console.log( loggerOutput )
         return true;
       })
@@ -21723,7 +21723,7 @@ function startOptionLoggerTransofrmation( test )
       .then( () =>
       {
         test.identical( o.output, null );
-        test.is( _.strHas( loggerOutput, 'testApp-output') );
+        test.true( _.strHas( loggerOutput, 'testApp-output') );
         return true;
       })
     })
@@ -21736,7 +21736,7 @@ function startOptionLoggerTransofrmation( test )
       .then( () =>
       {
         test.identical( o.output, 'testApp-output\n\n' );
-        test.is( !_.strHas( loggerOutput, 'testApp-output') );
+        test.true( !_.strHas( loggerOutput, 'testApp-output') );
         return true;
       })
     })
@@ -21749,7 +21749,7 @@ function startOptionLoggerTransofrmation( test )
       .then( () =>
       {
         test.identical( o.output, 'testApp-output\n\n' );
-        test.is( _.strHas( loggerOutput, 'testApp-output') );
+        test.true( _.strHas( loggerOutput, 'testApp-output') );
         return true;
       })
     })
@@ -21955,7 +21955,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
-        test.is( _.strHas( op.output, 'Test output' ) );
+        test.true( _.strHas( op.output, 'Test output' ) );
         return null;
       })
 
@@ -21983,7 +21983,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
-        test.is( _.strHas( op.output, 'Test output' ) );
+        test.true( _.strHas( op.output, 'Test output' ) );
         return null;
       })
 
@@ -22136,7 +22136,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
-        test.is( _.strHas( op.output, 'Test output' ) );
+        test.true( _.strHas( op.output, 'Test output' ) );
         return null;
       })
 
@@ -22164,7 +22164,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
-        test.is( _.strHas( op.output, 'Test output' ) );
+        test.true( _.strHas( op.output, 'Test output' ) );
         return null;
       })
 
@@ -22192,7 +22192,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
-        test.is( !_.strHas( op.output, 'Test output' ) );
+        test.true( !_.strHas( op.output, 'Test output' ) );
         return null;
       })
 
@@ -22220,7 +22220,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
-        test.is( _.strHas( op.output, 'Test output' ) );
+        test.true( _.strHas( op.output, 'Test output' ) );
         return null;
       })
 
@@ -22261,7 +22261,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
-        test.is( _.strHas( op.output, 'Test output' ) );
+        test.true( _.strHas( op.output, 'Test output' ) );
         return null;
       })
 
@@ -22289,7 +22289,7 @@ function startOutputOptionsCompatibilityLateCheck( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
-        test.is( _.strHas( op.output, 'Test output' ) );
+        test.true( _.strHas( op.output, 'Test output' ) );
         return null;
       })
 
@@ -22668,7 +22668,7 @@ function appTempApplication( test )
   var read = _.fileProvider.fileRead( returned );
   test.identical( read, testAppCode );
   _.process.tempClose( returned );
-  test.is( !_.fileProvider.fileExists( returned ) );
+  test.true( !_.fileProvider.fileExists( returned ) );
 
   /* */
 
@@ -22677,7 +22677,7 @@ function appTempApplication( test )
   var read = _.fileProvider.fileRead( returned );
   test.identical( read, testAppCode );
   _.process.tempClose( returned );
-  test.is( !_.fileProvider.fileExists( returned ) );
+  test.true( !_.fileProvider.fileExists( returned ) );
 
   /* */
 
@@ -22686,7 +22686,7 @@ function appTempApplication( test )
   var read = _.fileProvider.fileRead( returned );
   test.identical( read, testAppCode );
   _.process.tempClose( returned );
-  test.is( !_.fileProvider.fileExists( returned ) );
+  test.true( !_.fileProvider.fileExists( returned ) );
 
   /* */
 
@@ -22695,18 +22695,18 @@ function appTempApplication( test )
   var read = _.fileProvider.fileRead( returned );
   test.identical( read, testAppCode );
   _.process.tempClose( returned );
-  test.is( !_.fileProvider.fileExists( returned ) );
+  test.true( !_.fileProvider.fileExists( returned ) );
 
   /* */
 
   test.case = 'remove all';
   var returned1 = _.process.tempOpen( testAppCode );
   var returned2 = _.process.tempOpen( testAppCode );
-  test.is( _.fileProvider.fileExists( returned1 ) );
-  test.is( _.fileProvider.fileExists( returned2 ) );
+  test.true( _.fileProvider.fileExists( returned1 ) );
+  test.true( _.fileProvider.fileExists( returned2 ) );
   _.process.tempClose();
-  test.is( !_.fileProvider.fileExists( returned1 ) );
-  test.is( !_.fileProvider.fileExists( returned2 ) );
+  test.true( !_.fileProvider.fileExists( returned1 ) );
+  test.true( !_.fileProvider.fileExists( returned2 ) );
   test.mustNotThrowError( () => _.process.tempClose() )
 
   if( !Config.debug )
@@ -22855,8 +22855,8 @@ function startOptionStreamSizeLimit( test )
 
       let returned = test.shouldThrowErrorSync( () => _.process.start( options ) )
 
-      test.is( _.errIs( returned ) );
-      test.is( _.strHas( returned.message, `code : 'ENOBUFS'`) )
+      test.true( _.errIs( returned ) );
+      test.true( _.strHas( returned.message, `code : 'ENOBUFS'`) )
 
       test.notIdentical( options.exitCode, 0 );
 
@@ -22901,8 +22901,8 @@ function startOptionStreamSizeLimitThrowing( test )
 
     let returned = test.shouldThrowErrorSync( () => _.process.start( options ) )
 
-    test.is( _.errIs( returned ) );
-    test.is( _.strHas( returned.message, `Option::streamSizeLimit is supported in mode::spawn and mode::shell with sync::1` ) )
+    test.true( _.errIs( returned ) );
+    test.true( _.strHas( returned.message, `Option::streamSizeLimit is supported in mode::spawn and mode::shell with sync::1` ) )
 
     test.notIdentical( options.exitCode, 0 );
 
@@ -22947,8 +22947,8 @@ function startOptionStreamSizeLimitThrowing( test )
 
       let returned = test.shouldThrowErrorSync( () => _.process.start( options ) )
 
-      test.is( _.errIs( returned ) );
-      test.is( _.strHas( returned.message, `Option::streamSizeLimit must be a positive Number which is greater than zero` ) )
+      test.true( _.errIs( returned ) );
+      test.true( _.strHas( returned.message, `Option::streamSizeLimit must be a positive Number which is greater than zero` ) )
 
       test.notIdentical( options.exitCode, 0 );
 
@@ -22976,8 +22976,8 @@ function startOptionStreamSizeLimitThrowing( test )
 
       let returned = test.shouldThrowErrorSync( () => _.process.start( options ) )
 
-      test.is( _.errIs( returned ) );
-      test.is( _.strHas( returned.message, `Option::streamSizeLimit must be a positive Number which is greater than zero` ) )
+      test.true( _.errIs( returned ) );
+      test.true( _.strHas( returned.message, `Option::streamSizeLimit must be a positive Number which is greater than zero` ) )
 
       test.notIdentical( options.exitCode, 0 );
 
@@ -23005,8 +23005,8 @@ function startOptionStreamSizeLimitThrowing( test )
 
       let returned = test.shouldThrowErrorSync( () => _.process.start( options ) )
 
-      test.is( _.errIs( returned ) );
-      test.is( _.strHas( returned.message, `Option::streamSizeLimit is supported in mode::spawn and mode::shell with sync::1` ) )
+      test.true( _.errIs( returned ) );
+      test.true( _.strHas( returned.message, `Option::streamSizeLimit is supported in mode::spawn and mode::shell with sync::1` ) )
 
       test.notIdentical( options.exitCode, 0 );
 
@@ -23035,8 +23035,8 @@ function startOptionStreamSizeLimitThrowing( test )
 
       let returned = test.shouldThrowErrorSync( () => _.process.start( options ) )
 
-      test.is( _.errIs( returned ) );
-      test.is( _.strHas( returned.message, `Option::streamSizeLimit is supported in mode::spawn and mode::shell with sync::1` ) )
+      test.true( _.errIs( returned ) );
+      test.true( _.strHas( returned.message, `Option::streamSizeLimit is supported in mode::spawn and mode::shell with sync::1` ) )
 
       test.notIdentical( options.exitCode, 0 );
 
@@ -23111,12 +23111,12 @@ function startSingleOptionDry( test )
 
       if( tops.sync )
       {
-        test.is( !_.consequenceIs( returned ) );
-        test.is( returned === o );
+        test.true( !_.consequenceIs( returned ) );
+        test.true( returned === o );
       }
       else
       {
-        test.is( _.consequenceIs( returned ) );
+        test.true( _.consequenceIs( returned ) );
         if( tops.deasync )
         test.identical( returned.resourcesCount(), 1 );
         else
@@ -23186,7 +23186,7 @@ function startSingleOptionDry( test )
           test.identical( op.fullExecPath, `node ${programPath} arg1 arg0` );
         }
 
-        test.is( !a.fileProvider.fileExists( a.path.join( a.routinePath, 'file' ) ) )
+        test.true( !a.fileProvider.fileExists( a.path.join( a.routinePath, 'file' ) ) )
         if( tops.deasync || tops.sync )
         test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate', 'ready' ] );
         else
@@ -23225,12 +23225,12 @@ function startSingleOptionDry( test )
 
       if( tops.sync )
       {
-        test.is( !_.consequenceIs( returned ) );
-        test.is( returned === o );
+        test.true( !_.consequenceIs( returned ) );
+        test.true( returned === o );
       }
       else
       {
-        test.is( _.consequenceIs( returned ) );
+        test.true( _.consequenceIs( returned ) );
         if( tops.deasync )
         test.identical( returned.resourcesCount(), 1 );
         else
@@ -23295,7 +23295,7 @@ function startSingleOptionDry( test )
           test.identical( op.fullExecPath, `err ${programPath} arg1 arg0` );
         }
 
-        test.is( !a.fileProvider.fileExists( a.path.join( a.routinePath, 'file' ) ) )
+        test.true( !a.fileProvider.fileExists( a.path.join( a.routinePath, 'file' ) ) )
         if( tops.deasync || tops.sync )
         test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate', 'ready' ] );
         else
@@ -23387,13 +23387,13 @@ function startOptionDryMultiple( test )
       test.identical( options.ended, true );
       if( tops.sync && !tops.deasync )
       {
-        test.is( !_.streamIs( options.streamOut ) );
-        test.is( !_.streamIs( options.streamErr ) );
+        test.true( !_.streamIs( options.streamOut ) );
+        test.true( !_.streamIs( options.streamErr ) );
       }
       else
       {
-        test.is( _.streamIs( options.streamOut ) );
-        test.is( _.streamIs( options.streamErr ) );
+        test.true( _.streamIs( options.streamOut ) );
+        test.true( _.streamIs( options.streamErr ) );
       }
       if( tops.mode === 'fork' )
       {
@@ -23499,13 +23499,13 @@ function startOptionDryMultiple( test )
       test.identical( options.ended, true );
       if( tops.sync && !tops.deasync )
       {
-        test.is( !_.streamIs( options.streamOut ) );
-        test.is( !_.streamIs( options.streamErr ) );
+        test.true( !_.streamIs( options.streamOut ) );
+        test.true( !_.streamIs( options.streamErr ) );
       }
       else
       {
-        test.is( _.streamIs( options.streamOut ) );
-        test.is( _.streamIs( options.streamErr ) );
+        test.true( _.streamIs( options.streamOut ) );
+        test.true( _.streamIs( options.streamErr ) );
       }
       if( tops.mode === 'fork' )
       {
@@ -23767,10 +23767,10 @@ function startOptionCurrentPaths( test )
         let o1 = op.runs[ 0 ];
         let o2 = op.runs[ 1 ];
 
-        test.is( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
+        test.true( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
         test.identical( o1.exitCode, 0 );
 
-        test.is( _.strHas( o2.output, __dirname ) );
+        test.true( _.strHas( o2.output, __dirname ) );
         test.identical( o2.exitCode, 0 );
 
         return op;
@@ -23793,16 +23793,16 @@ function startOptionCurrentPaths( test )
         let o3 = op.runs[ 2 ];
         let o4 = op.runs[ 3 ];
 
-        test.is( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
+        test.true( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
         test.identical( o1.exitCode, 0 );
 
-        test.is( _.strHas( o2.output, __dirname ) );
+        test.true( _.strHas( o2.output, __dirname ) );
         test.identical( o2.exitCode, 0 );
 
-        test.is( _.strHas( o3.output, a.path.nativize( a.routinePath ) ) );
+        test.true( _.strHas( o3.output, a.path.nativize( a.routinePath ) ) );
         test.identical( o3.exitCode, 0 );
 
-        test.is( _.strHas( o4.output, __dirname ) );
+        test.true( _.strHas( o4.output, __dirname ) );
         test.identical( o4.exitCode, 0 );
 
         return op;
@@ -23833,10 +23833,10 @@ function startOptionCurrentPaths( test )
   //   let o1 = op.runs[ 0 ];
   //   let o2 = op.runs[ 1 ];
 
-  //   test.is( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
+  //   test.true( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
   //   test.identical( o1.exitCode, 0 );
 
-  //   test.is( _.strHas( o2.output, __dirname ) );
+  //   test.true( _.strHas( o2.output, __dirname ) );
   //   test.identical( o2.exitCode, 0 );
 
   //   return op;
@@ -23851,10 +23851,10 @@ function startOptionCurrentPaths( test )
   //   let o1 = op.runs[ 0 ];
   //   let o2 = op.runs[ 1 ];
 
-  //   test.is( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
+  //   test.true( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
   //   test.identical( o1.exitCode, 0 );
 
-  //   test.is( _.strHas( o2.output, __dirname ) );
+  //   test.true( _.strHas( o2.output, __dirname ) );
   //   test.identical( o2.exitCode, 0 );
 
   //   return op;
@@ -23869,10 +23869,10 @@ function startOptionCurrentPaths( test )
   //   let o1 = op.runs[ 0 ];
   //   let o2 = op.runs[ 1 ];
 
-  //   test.is( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
+  //   test.true( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
   //   test.identical( o1.exitCode, 0 );
 
-  //   test.is( _.strHas( o2.output, __dirname ) );
+  //   test.true( _.strHas( o2.output, __dirname ) );
   //   test.identical( o2.exitCode, 0 );
 
   //   return op;
@@ -23889,16 +23889,16 @@ function startOptionCurrentPaths( test )
   //   let o3 = op.runs[ 2 ];
   //   let o4 = op.runs[ 3 ];
 
-  //   test.is( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
+  //   test.true( _.strHas( o1.output, a.path.nativize( a.routinePath ) ) );
   //   test.identical( o1.exitCode, 0 );
 
-  //   test.is( _.strHas( o2.output, __dirname ) );
+  //   test.true( _.strHas( o2.output, __dirname ) );
   //   test.identical( o2.exitCode, 0 );
 
-  //   test.is( _.strHas( o3.output, a.path.nativize( a.routinePath ) ) );
+  //   test.true( _.strHas( o3.output, a.path.nativize( a.routinePath ) ) );
   //   test.identical( o3.exitCode, 0 );
 
-  //   test.is( _.strHas( o4.output, __dirname ) );
+  //   test.true( _.strHas( o4.output, __dirname ) );
   //   test.identical( o4.exitCode, 0 );
 
   //   return op;
@@ -24587,11 +24587,11 @@ function startOptionProcedureSingle( test )
 
       if( tops.sync )
       {
-        test.is( !_.consequenceIs( returned ) );
+        test.true( !_.consequenceIs( returned ) );
       }
       else
       {
-        test.is( _.consequenceIs( returned ) );
+        test.true( _.consequenceIs( returned ) );
         if( tops.deasync )
         test.identical( returned.resourcesCount(), 1 );
         else
@@ -24602,10 +24602,10 @@ function startOptionProcedureSingle( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.is( op === options );
+        test.true( op === options );
         test.equivalent( op.output, `[ 'a' ]` );
-        test.is( _.strHas( op.procedure._name, 'PID:') );
-        test.is( _.objectIs( op.procedure._object ) );
+        test.true( _.strHas( op.procedure._name, 'PID:') );
+        test.true( _.objectIs( op.procedure._object ) );
 
         return null;
       })
@@ -24635,11 +24635,11 @@ function startOptionProcedureSingle( test )
 
       if( tops.sync )
       {
-        test.is( !_.consequenceIs( returned ) );
+        test.true( !_.consequenceIs( returned ) );
       }
       else
       {
-        test.is( _.consequenceIs( returned ) );
+        test.true( _.consequenceIs( returned ) );
         if( tops.deasync )
         test.identical( returned.resourcesCount(), 1 );
         else
@@ -24650,7 +24650,7 @@ function startOptionProcedureSingle( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.is( op === options );
+        test.true( op === options );
         test.equivalent( op.output, `[ 'a' ]` );
         test.identical( op.procedure, false );
 
@@ -24682,11 +24682,11 @@ function startOptionProcedureSingle( test )
 
       if( tops.sync )
       {
-        test.is( !_.consequenceIs( returned ) );
+        test.true( !_.consequenceIs( returned ) );
       }
       else
       {
-        test.is( _.consequenceIs( returned ) );
+        test.true( _.consequenceIs( returned ) );
         if( tops.deasync )
         test.identical( returned.resourcesCount(), 1 );
         else
@@ -24697,10 +24697,10 @@ function startOptionProcedureSingle( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.is( op === options );
+        test.true( op === options );
         test.equivalent( op.output, `[ 'a' ]` );
-        test.is( _.strHas( op.procedure._name, 'PID:') );
-        test.is( _.objectIs( op.procedure._object ) );
+        test.true( _.strHas( op.procedure._name, 'PID:') );
+        test.true( _.objectIs( op.procedure._object ) );
 
         return null;
       })
@@ -24731,11 +24731,11 @@ function startOptionProcedureSingle( test )
 
       if( tops.sync )
       {
-        test.is( !_.consequenceIs( returned ) );
+        test.true( !_.consequenceIs( returned ) );
       }
       else
       {
-        test.is( _.consequenceIs( returned ) );
+        test.true( _.consequenceIs( returned ) );
         if( tops.deasync )
         test.identical( returned.resourcesCount(), 1 );
         else
@@ -24746,10 +24746,10 @@ function startOptionProcedureSingle( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.is( op === options );
+        test.true( op === options );
         test.equivalent( op.output, `[ 'a' ]` );
-        test.is( _.strHas( op.procedure._name, 'PID:') );
-        test.is( _.objectIs( op.procedure._object ) );
+        test.true( _.strHas( op.procedure._name, 'PID:') );
+        test.true( _.objectIs( op.procedure._object ) );
 
         return null;
       })
@@ -24780,11 +24780,11 @@ function startOptionProcedureSingle( test )
 
       if( tops.sync )
       {
-        test.is( !_.consequenceIs( returned ) );
+        test.true( !_.consequenceIs( returned ) );
       }
       else
       {
-        test.is( _.consequenceIs( returned ) );
+        test.true( _.consequenceIs( returned ) );
         if( tops.deasync )
         test.identical( returned.resourcesCount(), 1 );
         else
@@ -24795,10 +24795,10 @@ function startOptionProcedureSingle( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.is( op === options );
+        test.true( op === options );
         test.equivalent( op.output, `[ 'a' ]` );
-        test.is( _.strHas( op.procedure._name, 'PID:') );
-        test.is( _.objectIs( op.procedure._object ) );
+        test.true( _.strHas( op.procedure._name, 'PID:') );
+        test.true( _.objectIs( op.procedure._object ) );
         test.identical( op.procedure._stack, 'stack' );
 
         return null;
@@ -24871,11 +24871,11 @@ function startOptionProcedureMultiple( test )
 
       if( tops.sync )
       {
-        test.is( !_.consequenceIs( returned ) );
+        test.true( !_.consequenceIs( returned ) );
       }
       else
       {
-        test.is( _.consequenceIs( returned ) );
+        test.true( _.consequenceIs( returned ) );
         if( tops.deasync )
         test.identical( returned.resourcesCount(), 1 );
         else
@@ -24889,7 +24889,7 @@ function startOptionProcedureMultiple( test )
         test.identical( op, options );
         test.equivalent( op.output, `[ 'a' ]\n[ 'a' ]` );
         test.identical( op.procedure._name, null );
-        test.is( _.objectIs( op.procedure._object ) );
+        test.true( _.objectIs( op.procedure._object ) );
         test.identical( op.procedure._object.execPath, [ `${tops.mode === 'fork' ? programPath : 'node ' + programPath}`, `${tops.mode === 'fork' ? programPath : 'node ' + programPath}` ] );
 
         op.runs.forEach( ( run ) =>
@@ -24897,8 +24897,8 @@ function startOptionProcedureMultiple( test )
           test.identical( run.exitCode, 0 );
           test.identical( run.ended, true );
           test.equivalent( run.output, `[ 'a' ]` );
-          test.is( _.strHas( run.procedure._name, 'PID:') );
-          test.is( _.objectIs( run.procedure._object ) );
+          test.true( _.strHas( run.procedure._name, 'PID:') );
+          test.true( _.objectIs( run.procedure._object ) );
           test.identical( run.procedure._object.exitCode, 0 );
         } )
 
@@ -24931,11 +24931,11 @@ function startOptionProcedureMultiple( test )
 
       if( tops.sync )
       {
-        test.is( !_.consequenceIs( returned ) );
+        test.true( !_.consequenceIs( returned ) );
       }
       else
       {
-        test.is( _.consequenceIs( returned ) );
+        test.true( _.consequenceIs( returned ) );
         if( tops.deasync )
         test.identical( returned.resourcesCount(), 1 );
         else
@@ -24986,11 +24986,11 @@ function startOptionProcedureMultiple( test )
 
       if( tops.sync )
       {
-        test.is( !_.consequenceIs( returned ) );
+        test.true( !_.consequenceIs( returned ) );
       }
       else
       {
-        test.is( _.consequenceIs( returned ) );
+        test.true( _.consequenceIs( returned ) );
         if( tops.deasync )
         test.identical( returned.resourcesCount(), 1 );
         else
@@ -25004,7 +25004,7 @@ function startOptionProcedureMultiple( test )
         test.identical( op, options );
         test.equivalent( op.output, `[ 'a' ]\n[ 'a' ]` );
         test.identical( op.procedure._name, null );
-        test.is( _.objectIs( op.procedure._object ) );
+        test.true( _.objectIs( op.procedure._object ) );
         test.identical( op.procedure._object.execPath, [ `${tops.mode === 'fork' ? programPath : 'node ' + programPath}`, `${tops.mode === 'fork' ? programPath : 'node ' + programPath}` ] );
 
         op.runs.forEach( ( run ) =>
@@ -25012,8 +25012,8 @@ function startOptionProcedureMultiple( test )
           test.identical( run.exitCode, 0 );
           test.identical( run.ended, true );
           test.equivalent( run.output, `[ 'a' ]` );
-          test.is( _.strHas( run.procedure._name, 'PID:') );
-          test.is( _.objectIs( run.procedure._object ) );
+          test.true( _.strHas( run.procedure._name, 'PID:') );
+          test.true( _.objectIs( run.procedure._object ) );
           test.identical( run.procedure._object.exitCode, 0 );
         } )
 
@@ -25045,11 +25045,11 @@ function startOptionProcedureMultiple( test )
 
       if( tops.sync )
       {
-        test.is( !_.consequenceIs( returned ) );
+        test.true( !_.consequenceIs( returned ) );
       }
       else
       {
-        test.is( _.consequenceIs( returned ) );
+        test.true( _.consequenceIs( returned ) );
         if( tops.deasync )
         test.identical( returned.resourcesCount(), 1 );
         else
@@ -25070,8 +25070,8 @@ function startOptionProcedureMultiple( test )
           test.identical( run.exitCode, 0 );
           test.identical( run.ended, true );
           test.equivalent( run.output, `[ 'a' ]` );
-          test.is( _.strHas( run.procedure._name, 'PID:') );
-          test.is( _.objectIs( run.procedure._object ) );
+          test.true( _.strHas( run.procedure._name, 'PID:') );
+          test.true( _.objectIs( run.procedure._object ) );
           test.identical( run.procedure._object.exitCode, 0 );
         } )
 
@@ -25104,11 +25104,11 @@ function startOptionProcedureMultiple( test )
 
       if( tops.sync )
       {
-        test.is( !_.consequenceIs( returned ) );
+        test.true( !_.consequenceIs( returned ) );
       }
       else
       {
-        test.is( _.consequenceIs( returned ) );
+        test.true( _.consequenceIs( returned ) );
         if( tops.deasync )
         test.identical( returned.resourcesCount(), 1 );
         else
@@ -25130,8 +25130,8 @@ function startOptionProcedureMultiple( test )
           test.identical( run.exitCode, 0 );
           test.identical( run.ended, true );
           test.equivalent( run.output, `[ 'a' ]` );
-          test.is( _.strHas( run.procedure._name, 'PID:') );
-          test.is( _.objectIs( run.procedure._object ) );
+          test.true( _.strHas( run.procedure._name, 'PID:') );
+          test.true( _.objectIs( run.procedure._object ) );
           test.identical( run.procedure._object.exitCode, 0 );
           test.notIdentical( run.procedure._stack, 'stack' );
         } )
@@ -25224,8 +25224,8 @@ function startDiffPid( test )
         test.will = 'parent is dead, child is still alive';
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.is( !_.process.isAlive( op.process.pid ) );
-        test.is( _.process.isAlive( data.childPid ) );
+        test.true( !_.process.isAlive( op.process.pid ) );
+        test.true( _.process.isAlive( data.childPid ) );
         return _.time.out( context.t2 * 2 );
       })
 
@@ -25233,10 +25233,10 @@ function startDiffPid( test )
       {
         test.will = 'both dead';
 
-        test.is( !_.process.isAlive( o.process.pid ) );
-        test.is( !_.process.isAlive( data.childPid ) );
+        test.true( !_.process.isAlive( o.process.pid ) );
+        test.true( !_.process.isAlive( data.childPid ) );
 
-        test.is( a.fileProvider.fileExists( testFilePath ) );
+        test.true( a.fileProvider.fileExists( testFilePath ) );
         let childPid = a.fileProvider.fileRead( testFilePath );
         childPid = _.numberFrom( childPid );
         console.log(  childPid );
@@ -25961,11 +25961,11 @@ function startOptionVerbosityLogging( test )
         test.identical( _.strCount( op.output, `Launched as "node ${ testAppPathError }"` ), 0 );
         test.identical( _.strCount( op.output, `Launched at ${ _.strQuote( op.currentPath ) }` ), 0 );
         test.identical( _.strCount( op.output, '-> Stderr' ), 0 );
-        test.is( !_.strHas( op.output, '= Message of error' ) );
-        test.is( !_.strHas( op.output, '= Beautified calls stack' ) );
-        test.is( !_.strHas( op.output, '= Throws stack' ) );
-        test.is( !_.strHas( op.output, '= Process' ) );
-        test.is( !_.strHas( op.output, 'Source code from' ) );
+        test.true( !_.strHas( op.output, '= Message of error' ) );
+        test.true( !_.strHas( op.output, '= Beautified calls stack' ) );
+        test.true( !_.strHas( op.output, '= Throws stack' ) );
+        test.true( !_.strHas( op.output, '= Process' ) );
+        test.true( !_.strHas( op.output, 'Source code from' ) );
         test.identical( _.strCount( op.output, '-< Stderr' ), 0 );
 
         a.fileProvider.fileDelete( testAppPath );
@@ -26048,11 +26048,11 @@ function startOptionVerbosityLogging( test )
         test.identical( _.strCount( op.output, `Launched as "node ${ testAppPathError }"` ), 1 );
         test.identical( _.strCount( op.output, `Launched at ${ _.strQuote( op.currentPath ) }` ), 1 );
         test.identical( _.strCount( op.output, '-> Stderr' ), 1 );
-        test.is( _.strHas( op.output, '= Message of error' ) );
-        test.is( _.strHas( op.output, '= Beautified calls stack' ) );
-        test.is( _.strHas( op.output, '= Throws stack' ) );
-        test.is( _.strHas( op.output, '= Process' ) );
-        test.is( _.strHas( op.output, 'Source code from' ) );
+        test.true( _.strHas( op.output, '= Message of error' ) );
+        test.true( _.strHas( op.output, '= Beautified calls stack' ) );
+        test.true( _.strHas( op.output, '= Throws stack' ) );
+        test.true( _.strHas( op.output, '= Process' ) );
+        test.true( _.strHas( op.output, 'Source code from' ) );
         test.identical( _.strCount( op.output, '-< Stderr' ), 1 );
 
         a.fileProvider.fileDelete( testAppPath );
@@ -26154,14 +26154,14 @@ function startOutputMultiple( test )
       o.conStart.tap( ( err, op ) =>
       {
         track.push( 'conStart' );
-        test.is( op === o );
+        test.true( op === o );
         processPipe( o, 0 );
       });
 
       o.conTerminate.tap( ( err, op ) =>
       {
         track.push( 'conTerminate' );
-        test.is( op === o );
+        test.true( op === o );
       });
 
       o.ready.then( ( op ) =>
@@ -26233,12 +26233,12 @@ function startOutputMultiple( test )
         test.identical( op.exitSignal, null );
         test.identical( op.exitReason, 'normal' );
         test.identical( op.ended, true );
-        test.is( op === o );
+        test.true( op === o );
 
         if( !tops.sync && !tops.deasync )
-        test.is( _.longHas( track, '0.out.end' ) );
-        test.is( !_.longHas( track, '1.out.end' ) );
-        test.is( !_.longHas( track, '2.out.end' ) );
+        test.true( _.longHas( track, '0.out.end' ) );
+        test.true( !_.longHas( track, '1.out.end' ) );
+        test.true( !_.longHas( track, '2.out.end' ) );
 
         if( !tops.sync || tops.deasync )
         {
@@ -26249,8 +26249,8 @@ function startOutputMultiple( test )
         }
         else
         {
-          test.is( op.streamOut === null );
-          test.is( op.streamErr === null );
+          test.true( op.streamOut === null );
+          test.true( op.streamErr === null );
         }
 
         op.runs.forEach( ( op2, counter ) =>
@@ -26271,8 +26271,8 @@ function startOutputMultiple( test )
           }
           else
           {
-            test.is( op2.streamOut === null );
-            test.is( op2.streamErr === null );
+            test.true( op2.streamOut === null );
+            test.true( op2.streamErr === null );
           }
 
         });
@@ -26311,7 +26311,7 @@ function startOutputMultiple( test )
       o.conStart.tap( ( err, op ) =>
       {
         track.push( 'conStart' );
-        test.is( op === o );
+        test.true( op === o );
         processPipe( o, 0 );
         processPipe( o.runs[ 0 ], 1 );
         processPipe( o.runs[ 1 ], 2 );
@@ -26320,7 +26320,7 @@ function startOutputMultiple( test )
       o.conTerminate.tap( ( err, op ) =>
       {
         track.push( 'conTerminate' );
-        test.is( op === o );
+        test.true( op === o );
       });
 
       o.ready.then( ( op ) =>
@@ -26488,13 +26488,13 @@ function startOutputMultiple( test )
         test.identical( op.exitSignal, null );
         test.identical( op.exitReason, 'normal' );
         test.identical( op.ended, true );
-        test.is( op === o );
+        test.true( op === o );
 
         if( !tops.sync && !tops.deasync )
         {
-          test.is( _.longHas( track, '0.out.end' ) );
-          test.is( _.longHas( track, '1.out.end' ) );
-          test.is( _.longHas( track, '2.out.end' ) );
+          test.true( _.longHas( track, '0.out.end' ) );
+          test.true( _.longHas( track, '1.out.end' ) );
+          test.true( _.longHas( track, '2.out.end' ) );
         }
 
         if( !tops.sync || tops.deasync )
@@ -26506,8 +26506,8 @@ function startOutputMultiple( test )
         }
         else
         {
-          test.is( op.streamOut === null );
-          test.is( op.streamErr === null );
+          test.true( op.streamOut === null );
+          test.true( op.streamErr === null );
         }
 
         op.runs.forEach( ( op2, counter ) =>
@@ -26528,8 +26528,8 @@ function startOutputMultiple( test )
           }
           else
           {
-            test.is( op2.streamOut === null );
-            test.is( op2.streamErr === null );
+            test.true( op2.streamOut === null );
+            test.true( op2.streamErr === null );
           }
 
         });
@@ -26661,13 +26661,13 @@ function startOptionStdioIgnoreMultiple( test )
       o.conStart.tap( ( err, op ) =>
       {
         track.push( 'conStart' );
-        test.is( op === o );
+        test.true( op === o );
       });
 
       o.conTerminate.tap( ( err, op ) =>
       {
         track.push( 'conTerminate' );
-        test.is( op === o );
+        test.true( op === o );
       });
 
       o.ready.then( ( op ) =>
@@ -26687,9 +26687,9 @@ function startOptionStdioIgnoreMultiple( test )
         test.identical( op.exitSignal, null );
         test.identical( op.exitReason, 'normal' );
         test.identical( op.ended, true );
-        test.is( op === o );
-        test.is( op.streamOut === null );
-        test.is( op.streamErr === null );
+        test.true( op === o );
+        test.true( op.streamOut === null );
+        test.true( op.streamErr === null );
 
         op.runs.forEach( ( op2, counter ) =>
         {
@@ -26700,10 +26700,10 @@ function startOptionStdioIgnoreMultiple( test )
           test.identical( op2.output, null );
           let parsed = a.fileProvider.fileRead({ filePath : a.abs( `${counter+1}.json` ), encoding : 'json' });
           test.identical( parsed.id, counter+1 );
-          test.is( op2.streamOut === null );
-          test.is( op2.streamErr === null );
-          test.is( op2.process.stdout === null );
-          test.is( op2.process.stderr === null );
+          test.true( op2.streamOut === null );
+          test.true( op2.streamErr === null );
+          test.true( op2.process.stdout === null );
+          test.true( op2.process.stderr === null );
         });
         return null;
       })
@@ -26777,7 +26777,7 @@ function kill( test )
       test.identical( op.exitCode, null );
       test.identical( op.ended, true );
       test.identical( op.exitSignal, 'SIGKILL' );
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      test.true( !_.strHas( op.output, 'Application timeout!' ) );
       return null;
     })
 
@@ -26816,7 +26816,7 @@ function kill( test )
         test.identical( op.exitSignal, 'SIGKILL' );
       }
 
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      test.true( !_.strHas( op.output, 'Application timeout!' ) );
       return null;
     })
 
@@ -26845,7 +26845,7 @@ function kill( test )
       test.identical( op.exitCode, null );
       test.identical( op.ended, true );
       test.identical( op.exitSignal, 'SIGKILL' );
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      test.true( !_.strHas( op.output, 'Application timeout!' ) );
       return null;
     })
 
@@ -26884,7 +26884,7 @@ function kill( test )
         test.identical( op.exitSignal, 'SIGKILL' );
       }
 
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      test.true( !_.strHas( op.output, 'Application timeout!' ) );
       return null;
     })
 
@@ -26913,7 +26913,7 @@ function kill( test )
       test.identical( op.exitCode, null );
       test.identical( op.ended, true );
       test.identical( op.exitSignal, 'SIGKILL' );
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      test.true( !_.strHas( op.output, 'Application timeout!' ) );
       return null;
     })
 
@@ -26953,7 +26953,7 @@ function kill( test )
         test.identical( op.exitSignal, 'SIGKILL' );
       }
 
-      test.is( !_.strHas( op.output, 'Application timeout!' ) );
+      test.true( !_.strHas( op.output, 'Application timeout!' ) );
 
       return null;
     })
@@ -27017,14 +27017,14 @@ function killSync( test )
         test.identical( op.exitCode, null );
         test.identical( op.exitSignal, 'SIGKILL' );
         test.identical( op.ended, true );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+        test.true( !_.strHas( op.output, 'Application timeout!' ) );
         return null;
       })
 
       let ready2 = _.time.out( context.t1*2, () =>
       {
         let result = _.process.kill({ pnd : o.process, sync : 1 });
-        test.is( !_.process.isAlive( o.process.pid ) );
+        test.true( !_.process.isAlive( o.process.pid ) );
         test.identical( result, true );
         return result;
       });
@@ -27061,14 +27061,14 @@ function killSync( test )
         }
 
         test.identical( op.ended, true );
-        test.is( !_.strHas( op.output, 'Application timeout!' ) );
+        test.true( !_.strHas( op.output, 'Application timeout!' ) );
         return null;
       })
 
       let ready2 = _.time.out( context.t1*2, () =>
       {
         let result = _.process.kill({ pid : o.process.pid, sync : 1 });
-        test.is( !_.process.isAlive( o.process.pid ) );
+        test.true( !_.process.isAlive( o.process.pid ) );
         test.identical( result, true );
         return result;
       })
@@ -27100,14 +27100,14 @@ function killSync( test )
   //     test.identical( op.exitCode, null );
   //     test.identical( op.exitSignal, 'SIGKILL' );
   //     test.identical( op.ended, true );
-  //     test.is( !_.strHas( op.output, 'Application timeout!' ) );
+  //     test.true( !_.strHas( op.output, 'Application timeout!' ) );
   //     return null;
   //   })
 
   //   let ready2 = _.time.out( context.t1*2, () =>
   //   {
   //     let result = _.process.kill({ pnd : o.process, sync : 1 });
-  //     test.is( !_.process.isAlive( o.process.pid ) );
+  //     test.true( !_.process.isAlive( o.process.pid ) );
   //     test.identical( result, true );
   //     return result;
   //   });
@@ -27144,14 +27144,14 @@ function killSync( test )
   //     }
 
   //     test.identical( op.ended, true );
-  //     test.is( !_.strHas( op.output, 'Application timeout!' ) );
+  //     test.true( !_.strHas( op.output, 'Application timeout!' ) );
   //     return null;
   //   })
 
   //   let ready2 = _.time.out( context.t1*2, () =>
   //   {
   //     let result = _.process.kill({ pid : o.process.pid, sync : 1 });
-  //     test.is( !_.process.isAlive( o.process.pid ) );
+  //     test.true( !_.process.isAlive( o.process.pid ) );
   //     test.identical( result, true );
   //     return result;
   //   })
@@ -27179,14 +27179,14 @@ function killSync( test )
   //     test.identical( op.exitCode, null );
   //     test.identical( op.exitSignal, 'SIGKILL' );
   //     test.identical( op.ended, true );
-  //     test.is( !_.strHas( op.output, 'Application timeout!' ) );
+  //     test.true( !_.strHas( op.output, 'Application timeout!' ) );
   //     return null;
   //   })
 
   //   let ready2 = _.time.out( context.t1*2, () =>
   //   {
   //     let result = _.process.kill({ pnd : o.process, sync : 1 });
-  //     test.is( !_.process.isAlive( o.process.pid ) );
+  //     test.true( !_.process.isAlive( o.process.pid ) );
   //     test.identical( result, true );
   //     return result;
   //   })
@@ -27224,14 +27224,14 @@ function killSync( test )
   //     }
 
   //     test.identical( op.ended, true );
-  //     test.is( !_.strHas( op.output, 'Application timeout!' ) );
+  //     test.true( !_.strHas( op.output, 'Application timeout!' ) );
   //     return null;
   //   })
 
   //   let ready2 = _.time.out( context.t1*2, () =>
   //   {
   //     let result = _.process.kill({ pid : o.process.pid, sync : 1 });
-  //     test.is( !_.process.isAlive( o.process.pid ) );
+  //     test.true( !_.process.isAlive( o.process.pid ) );
   //     test.identical( result, true );
   //     return result;
   //   })
@@ -27261,14 +27261,14 @@ function killSync( test )
   //     test.identical( op.exitCode, null );
   //     test.identical( op.exitSignal, 'SIGKILL' );
   //     test.identical( op.ended, true );
-  //     test.is( !_.strHas( op.output, 'Application timeout!' ) );
+  //     test.true( !_.strHas( op.output, 'Application timeout!' ) );
   //     return null;
   //   })
 
   //   let ready2 = _.time.out( context.t1*2, () =>
   //   {
   //     let result = _.process.kill({ pnd : o.process, sync : 1 });
-  //     test.is( !_.process.isAlive( o.process.pid ) );
+  //     test.true( !_.process.isAlive( o.process.pid ) );
   //     test.identical( result, true );
   //     return result;
   //   })
@@ -27306,7 +27306,7 @@ function killSync( test )
   //     }
 
   //     test.identical( op.ended, true );
-  //     test.is( !_.strHas( op.output, 'Application timeout!' ) );
+  //     test.true( !_.strHas( op.output, 'Application timeout!' ) );
 
   //     return null;
   //   })
@@ -27314,7 +27314,7 @@ function killSync( test )
   //   let ready2 = _.time.out( context.t1*2, () =>
   //   {
   //     let result = _.process.kill({ pid : o.process.pid, sync : 1 });
-  //     test.is( !_.process.isAlive( o.process.pid ) );
+  //     test.true( !_.process.isAlive( o.process.pid ) );
   //     test.identical( result, true );
   //     return result;
   //   })
@@ -27388,8 +27388,8 @@ function killOptionWithChildren( test )
           test.identical( op.exitSignal, 'SIGKILL' );
         }
         test.identical( _.strCount( op.output, 'Application timeout' ), 0 );
-        test.is( !_.process.isAlive( o.process.pid ) );
-        test.is( !_.process.isAlive( lastChildPid ) );
+        test.true( !_.process.isAlive( o.process.pid ) );
+        test.true( !_.process.isAlive( lastChildPid ) );
         return null;
       })
     })
@@ -27428,8 +27428,8 @@ function killOptionWithChildren( test )
         test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
         test.identical( _.strCount( op.output, 'Application timeout' ), 0 );
-        test.is( !_.process.isAlive( o.process.pid ) );
-        test.is( !_.process.isAlive( lastChildPid ) );
+        test.true( !_.process.isAlive( o.process.pid ) );
+        test.true( !_.process.isAlive( lastChildPid ) );
         return null;
       })
     })
@@ -27477,9 +27477,9 @@ function killOptionWithChildren( test )
           test.identical( op.exitSignal, 'SIGKILL' );
         }
         test.identical( _.strCount( op.output, 'Application timeout' ), 0 );
-        test.is( !_.process.isAlive( o.process.pid ) );
-        test.is( !_.process.isAlive( children[ 0 ] ) )
-        test.is( !_.process.isAlive( children[ 1 ] ) );
+        test.true( !_.process.isAlive( o.process.pid ) );
+        test.true( !_.process.isAlive( children[ 0 ] ) )
+        test.true( !_.process.isAlive( children[ 1 ] ) );
         return null;
       })
     })
@@ -27526,9 +27526,9 @@ function killOptionWithChildren( test )
           test.identical( op.exitSignal, 'SIGKILL' );
         }
         test.identical( _.strCount( op.output, 'Application timeout' ), 0 );
-        test.is( !_.process.isAlive( o.process.pid ) );
-        test.is( !_.process.isAlive( children[ 0 ] ) )
-        test.is( !_.process.isAlive( children[ 1 ] ) );
+        test.true( !_.process.isAlive( o.process.pid ) );
+        test.true( !_.process.isAlive( children[ 0 ] ) )
+        test.true( !_.process.isAlive( children[ 1 ] ) );
         return null;
       })
     })
@@ -27699,7 +27699,7 @@ function startErrorAfterTerminationWithSend( test )
     at maybeClose (internal/child_process.js:1048:16)
     at Process.ChildProcess._handle.onexit (internal/child_process.js:288:5)
 
-    at Object.<anonymous> (/Users/runner/work/wProcess/wProcess/node_modules/wTesting/proto/wtools/atop/tester/entry/Exec:11:11)
+    at Object.<anonymous> (/Users/runner/work/wProcess/wProcess/node_modules/wTesting/proto/wtools/atop/testing/entry/Exec:11:11)
 
  = Throws stack
     thrown at ChildProcess.handleError @ /Users/runner/work/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:865:13
@@ -27707,7 +27707,7 @@ function startErrorAfterTerminationWithSend( test )
 
  = Process
     Current path : /Users/runner/work/wProcess/wProcess
-    Exec path : /Users/runner/hostedtoolcache/node/14.14.0/x64/bin/node /Users/runner/work/wProcess/wProcess/node_modules/wTesting/proto/wtools/atop/tester/entry/Exec .run proto/** rapidity:-3
+    Exec path : /Users/runner/hostedtoolcache/node/14.14.0/x64/bin/node /Users/runner/work/wProcess/wProcess/node_modules/wTesting/proto/wtools/atop/testing/entry/Exec .run proto/** rapidity:-3
 
 --------------- uncaught error ---------------<
 */
@@ -27773,7 +27773,7 @@ function startTerminateHangedWithExitHandler( test )
 
   /* signal handler of njs on Windows is defective */
   if( process.platform === 'win32' )
-  return test.is( true );
+  return test.true( true );
 
   /* */
 
@@ -27804,7 +27804,7 @@ function startTerminateHangedWithExitHandler( test )
     {
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGKILL' );
-      test.is( !_.strHas( o.output, 'SIGTERM' ) );
+      test.true( !_.strHas( o.output, 'SIGTERM' ) );
       test.ge( _.time.now() - time, context.t1*5 );
       console.log( `time : ${_.time.spent( time )}` );
       return null;
@@ -27840,7 +27840,7 @@ function startTerminateHangedWithExitHandler( test )
     {
       test.identical( o.exitCode, null );
       test.identical( o.exitSignal, 'SIGKILL' );
-      test.is( !_.strHas( o.output, 'SIGTERM' ) );
+      test.true( !_.strHas( o.output, 'SIGTERM' ) );
       test.ge( _.time.now() - time, context.t1*5 );
       console.log( `time : ${_.time.spent( time )}` );
       return null;
@@ -27934,8 +27934,8 @@ function startTerminateAfterLoopRelease( test )
       test.identical( o.exitSignal, 'SIGTERM' );
       else
       test.identical( o.exitSignal, 'SIGKILL' );
-      test.is( !_.strHas( o.output, 'SIGTERM' ) );
-      test.is( !_.strHas( o.output, 'Exit after release' ) );
+      test.true( !_.strHas( o.output, 'SIGTERM' ) );
+      test.true( !_.strHas( o.output, 'Exit after release' ) );
 
       return null;
     })
@@ -27972,8 +27972,8 @@ function startTerminateAfterLoopRelease( test )
       test.identical( o.exitSignal, 'SIGTERM' );
       else
       test.identical( o.exitSignal, 'SIGKILL' );
-      test.is( !_.strHas( o.output, 'SIGTERM' ) );
-      test.is( !_.strHas( o.output, 'Exit after release' ) );
+      test.true( !_.strHas( o.output, 'SIGTERM' ) );
+      test.true( !_.strHas( o.output, 'Exit after release' ) );
 
       return null;
     })
@@ -28036,7 +28036,7 @@ function endSignalsBasic( test )
   }
 
   let modes = [ 'fork', 'spawn', 'shell' ];
-  // modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGQUIT' ) ) ); // xxx
+  modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGQUIT' ) ) ); /* xxx */
   modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGINT' ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGTERM' ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGHUP' ) ) );
@@ -28094,7 +28094,7 @@ function endSignalsBasic( test )
 program1:end
 `
         if( mode === 'shell' )
-        test.is( options.output === exp1 || options.output === exp2 );
+        test.true( options.output === exp1 || options.output === exp2 );
         else
         test.identical( options.output, exp1 );
         test.identical( options.exitCode, null );
@@ -28151,7 +28151,7 @@ program1:end
 program1:end
 `
         if( mode === 'shell' )
-        test.is( options.output === exp1 || options.output === exp2 );
+        test.true( options.output === exp1 || options.output === exp2 );
         else
         test.identical( options.output, exp1 );
         test.identical( options.exitCode, null );
@@ -28208,7 +28208,7 @@ sleep:end
 program1:end
 `
         if( mode === 'shell' )
-        test.is( options.output === exp1 || options.output === exp2 );
+        test.true( options.output === exp1 || options.output === exp2 );
         else
         test.identical( options.output, exp1 );
         test.identical( options.exitCode, null );
@@ -28276,7 +28276,7 @@ sleep:end
 program1:end
 `
         if( mode === 'shell' )
-        test.is( options.output === exp1 || options.output === exp2 );
+        test.true( options.output === exp1 || options.output === exp2 );
         else
         test.identical( options.output, exp1 );
         test.identical( options.exitCode, null );
@@ -28335,7 +28335,7 @@ program1:end
 deasync:end
 `
         if( mode === 'shell' )
-        test.is( options.output === exp1 || options.output === exp2 );
+        test.true( options.output === exp1 || options.output === exp2 );
         else
         test.identical( options.output, exp1 );
         test.identical( options.exitCode, null );
@@ -28404,7 +28404,7 @@ deasync:end
 program1:end
 `
         if( mode === 'shell' )
-        test.is( options.output === exp1 || options.output === exp2 );
+        test.true( options.output === exp1 || options.output === exp2 );
         else
         test.identical( options.output, exp1 );
         test.identical( options.exitCode, null );
@@ -28458,7 +28458,7 @@ program1:end
 program1:end
 `
         if( mode === 'shell' )
-        test.is( options.output === exp1 || options.output === exp2 );
+        test.true( options.output === exp1 || options.output === exp2 );
         else
         test.identical( options.output, exp1 );
         test.identical( options.exitCode, null );
@@ -28515,7 +28515,7 @@ sleep:end
 program1:end
 `
         if( mode === 'shell' )
-        test.is( options.output === exp1 || options.output === exp2 );
+        test.true( options.output === exp1 || options.output === exp2 );
         else
         test.identical( options.output, exp1 );
         test.identical( options.exitCode, null );
@@ -28572,7 +28572,7 @@ sleep:end
 program1:end
 `
         if( mode === 'shell' )
-        test.is( options.output === exp1 || options.output === exp2 );
+        test.true( options.output === exp1 || options.output === exp2 );
         else
         test.identical( options.output, exp1 );
         test.identical( options.exitCode, null );
@@ -28629,7 +28629,7 @@ program1:end
 deasync:end
 `
         if( mode === 'shell' )
-        test.is( options.output === exp1 || options.output === exp2 );
+        test.true( options.output === exp1 || options.output === exp2 );
         else
         test.identical( options.output, exp1 );
         test.identical( options.exitCode, null );
@@ -29214,7 +29214,7 @@ SIGTERM
 sleep:begin
 `
         if( mode === 'shell' )
-        test.is( options.output === exp1 || options.output === exp2 );
+        test.true( options.output === exp1 || options.output === exp2 );
         else
         test.identical( options.output, exp1 );
         test.identical( options.ended, true );
@@ -29430,7 +29430,7 @@ deasync:begin
 program1:end
 `
         if( mode === 'shell' )
-        test.is( options.output === exp1 || options.output === exp2 );
+        test.true( options.output === exp1 || options.output === exp2 );
         else
         test.identical( options.output, exp1 );
         test.identical( options.ended, true );
@@ -29499,7 +29499,7 @@ sleep:end
 program1:end
 `
         if( mode === 'shell' )
-        test.is( options.output === exp1 || options.output === exp2 );
+        test.true( options.output === exp1 || options.output === exp2 );
         else
         test.identical( options.output, exp1 );
         test.identical( options.ended, true );
@@ -29570,7 +29570,7 @@ sleep:end
 program1:end
 `
         if( mode === 'shell' )
-        test.is( options.output === exp1 || options.output === exp2 );
+        test.true( options.output === exp1 || options.output === exp2 );
         else
         test.identical( options.output, exp1 );
         test.identical( options.ended, true );
@@ -29641,7 +29641,7 @@ program1:end
 deasync:end
 `
         if( mode === 'shell' )
-        test.is( options.output === exp1 || options.output === exp2 );
+        test.true( options.output === exp1 || options.output === exp2 );
         else
         test.identical( options.output, exp1 );
         test.identical( options.ended, true );
@@ -29837,7 +29837,7 @@ program1:end
 exit:end
 `
         if( mode === 'shell' )
-        test.is( options.output === exp1 || options.output === exp2 );
+        test.true( options.output === exp1 || options.output === exp2 );
         else
         test.identical( options.output, exp1 );
         test.identical( options.exitCode, null );
@@ -29904,7 +29904,7 @@ program1:end
 exit:end
 `
         if( mode === 'shell' )
-        test.is( options.output === exp1 || options.output === exp2 );
+        test.true( options.output === exp1 || options.output === exp2 );
         else
         test.identical( options.output, exp1 );
         test.identical( options.exitCode, null );
@@ -30106,7 +30106,7 @@ exit:end
 Killed
 `
         if( mode === 'shell' )
-        test.is( options.output === exp1 || options.output === exp2 );
+        test.true( options.output === exp1 || options.output === exp2 );
         else
         test.identical( options.output, exp1 );
         test.identical( options.ended, true );
@@ -30171,7 +30171,7 @@ Killed
 Killed
 `
         if( mode === 'shell' )
-        test.is( options.output === exp1 || options.output === exp2 );
+        test.true( options.output === exp1 || options.output === exp2 );
         else
         test.identical( options.output, exp1 );
         test.identical( options.ended, true );
@@ -30318,7 +30318,7 @@ program1:end
 exit:${exitCode}
 `
         if( mode === 'shell' )
-        test.is( options.output === exp1 || options.output === exp2 );
+        test.true( options.output === exp1 || options.output === exp2 );
         else
         test.identical( options.output, exp1 );
         test.identical( _.strCount( options.output, 'exit:' ), process.platform === 'win32' ? 0 : 1 );
@@ -30526,16 +30526,16 @@ function terminate( test )
           test.identical( op.exitCode, null );
           test.identical( op.exitSignal, 'SIGTERM' );
           test.identical( op.ended, true );
-          test.is( !_.strHas( op.output, 'SIGTERM' ) );
-          test.is( !_.strHas( op.output, 'Application timeout!' ) );
+          test.true( !_.strHas( op.output, 'SIGTERM' ) );
+          test.true( !_.strHas( op.output, 'Application timeout!' ) );
         }
         else
         {
           test.identical( op.exitCode, null );
           test.identical( op.exitSignal, 'SIGTERM' );
           test.identical( op.ended, true );
-          test.is( _.strHas( op.output, 'SIGTERM' ) );
-          test.is( !_.strHas( op.output, 'Application timeout!' ) );
+          test.true( _.strHas( op.output, 'SIGTERM' ) );
+          test.true( !_.strHas( op.output, 'Application timeout!' ) );
         }
 
         return null;
@@ -30572,16 +30572,16 @@ function terminate( test )
           test.identical( op.exitCode, 1 );/* 1 because process was killed using pid */
           test.identical( op.exitSignal, null );
           test.identical( op.ended, true );
-          test.is( !_.strHas( op.output, 'SIGTERM' ) );
-          test.is( !_.strHas( op.output, 'Application timeout!' ) );
+          test.true( !_.strHas( op.output, 'SIGTERM' ) );
+          test.true( !_.strHas( op.output, 'Application timeout!' ) );
         }
         else
         {
           test.identical( op.exitCode, null );
           test.identical( op.exitSignal, 'SIGTERM' );
           test.identical( op.ended, true );
-          test.is( _.strHas( op.output, 'SIGTERM' ) );
-          test.is( !_.strHas( op.output, 'Application timeout!' ) );
+          test.true( _.strHas( op.output, 'SIGTERM' ) );
+          test.true( !_.strHas( op.output, 'Application timeout!' ) );
         }
         return null;
       })
@@ -30618,16 +30618,16 @@ function terminate( test )
           test.identical( op.exitCode, 1 );
           test.identical( op.ended, true );
           test.identical( op.exitSignal, null );
-          test.is( !_.strHas( op.output, 'SIGTERM' ) );
-          test.is( !_.strHas( op.output, 'Application timeout!' ) );
+          test.true( !_.strHas( op.output, 'SIGTERM' ) );
+          test.true( !_.strHas( op.output, 'Application timeout!' ) );
         }
         else
         {
           test.identical( op.exitCode, null );
           test.identical( op.ended, true );
           test.identical( op.exitSignal, 'SIGKILL' );
-          test.is( !_.strHas( op.output, 'SIGTERM' ) );
-          test.is( !_.strHas( op.output, 'Application timeout!' ) );
+          test.true( !_.strHas( op.output, 'SIGTERM' ) );
+          test.true( !_.strHas( op.output, 'Application timeout!' ) );
         }
 
         return null;
@@ -30664,16 +30664,16 @@ function terminate( test )
           test.identical( op.exitCode, 1 );
           test.identical( op.exitSignal, null );
           test.identical( op.ended, true );
-          test.is( !_.strHas( op.output, 'SIGTERM' ) );
-          test.is( !_.strHas( op.output, 'Application timeout!' ) );
+          test.true( !_.strHas( op.output, 'SIGTERM' ) );
+          test.true( !_.strHas( op.output, 'Application timeout!' ) );
         }
         else
         {
           test.identical( op.exitCode, null );
-          test.is( op.exitSignal === 'SIGKILL' || op.exitSignal === 'SIGTERM' );
+          test.true( op.exitSignal === 'SIGKILL' || op.exitSignal === 'SIGTERM' );
           test.identical( op.ended, true );
-          test.is( _.strHas( op.output, 'SIGTERM' ) );
-          test.is( !_.strHas( op.output, 'Application timeout!' ) );
+          test.true( _.strHas( op.output, 'SIGTERM' ) );
+          test.true( !_.strHas( op.output, 'Application timeout!' ) );
         }
 
         return null;
@@ -30710,16 +30710,16 @@ function terminate( test )
           test.identical( op.exitCode, null );
           test.identical( op.ended, true );
           test.identical( op.exitSignal, 'SIGKILL' );
-          test.is( !_.strHas( op.output, 'SIGTERM' ) );
-          test.is( !_.strHas( op.output, 'Application timeout!' ) );
+          test.true( !_.strHas( op.output, 'SIGTERM' ) );
+          test.true( !_.strHas( op.output, 'Application timeout!' ) );
         }
         else
         {
           test.identical( op.exitCode, null );
           test.identical( op.ended, true );
           test.identical( op.exitSignal, 'SIGKILL' );
-          test.is( !_.strHas( op.output, 'SIGTERM' ) );
-          test.is( !_.strHas( op.output, 'Application timeout!' ) );
+          test.true( !_.strHas( op.output, 'SIGTERM' ) );
+          test.true( !_.strHas( op.output, 'Application timeout!' ) );
         }
 
         return null;
@@ -30757,16 +30757,16 @@ function terminate( test )
           test.identical( op.exitCode, null );
           test.identical( op.exitSignal, 'SIGTERM' );
           test.identical( op.ended, true );
-          test.is( !_.strHas( op.output, 'SIGTERM' ) );
-          test.is( !_.strHas( op.output, 'Application timeout!' ) );
+          test.true( !_.strHas( op.output, 'SIGTERM' ) );
+          test.true( !_.strHas( op.output, 'Application timeout!' ) );
         }
         else
         {
           test.identical( op.exitCode, null );
           test.identical( op.exitSignal, 'SIGTERM' ); /* yyy xxx : sometimes SIGKILL */
           test.identical( op.ended, true );
-          test.is( _.strHas( op.output, 'SIGTERM' ) );
-          test.is( !_.strHas( op.output, 'Application timeout!' ) );
+          test.true( _.strHas( op.output, 'SIGTERM' ) );
+          test.true( !_.strHas( op.output, 'Application timeout!' ) );
         }
 
         return null;
@@ -30812,16 +30812,16 @@ function terminate( test )
           test.identical( op.exitCode, null );/* null because process was killed using pnd */
           test.identical( op.ended, true );
           test.identical( op.exitSignal, 'SIGTERM' );
-          test.is( !_.strHas( op.output, 'SIGTERM' ) );
-          test.is( !_.strHas( op.output, 'Application timeout!' ) );
+          test.true( !_.strHas( op.output, 'SIGTERM' ) );
+          test.true( !_.strHas( op.output, 'Application timeout!' ) );
         }
         else
         {
           test.identical( op.exitCode, null );
           test.identical( op.ended, true );
           test.identical( op.exitSignal, 'SIGTERM' );
-          test.is( _.strHas( op.output, 'SIGTERM' ) );
-          test.is( !_.strHas( op.output, 'Application timeout!' ) );
+          test.true( _.strHas( op.output, 'SIGTERM' ) );
+          test.true( !_.strHas( op.output, 'Application timeout!' ) );
         }
 
         return null;
@@ -30858,16 +30858,16 @@ function terminate( test )
           test.identical( op.exitCode, 1 );
           test.identical( op.ended, true );
           test.identical( op.exitSignal, null );
-          test.is( !_.strHas( op.output, 'SIGTERM' ) );
-          test.is( !_.strHas( op.output, 'Application timeout!' ) );
+          test.true( !_.strHas( op.output, 'SIGTERM' ) );
+          test.true( !_.strHas( op.output, 'Application timeout!' ) );
         }
         else
         {
           test.identical( op.exitCode, null );
           test.identical( op.ended, true );
           test.identical( op.exitSignal, 'SIGTERM' );
-          test.is( _.strHas( op.output, 'SIGTERM' ) );
-          test.is( !_.strHas( op.output, 'Application timeout!' ) );
+          test.true( _.strHas( op.output, 'SIGTERM' ) );
+          test.true( !_.strHas( op.output, 'Application timeout!' ) );
         }
 
         return null;
@@ -30904,16 +30904,16 @@ function terminate( test )
           test.identical( op.exitCode, null );/* null because process was killed using pnd */
           test.identical( op.ended, true );
           test.identical( op.exitSignal, 'SIGKILL' );
-          test.is( !_.strHas( op.output, 'SIGTERM' ) );
-          test.is( !_.strHas( op.output, 'Application timeout!' ) );
+          test.true( !_.strHas( op.output, 'SIGTERM' ) );
+          test.true( !_.strHas( op.output, 'Application timeout!' ) );
         }
         else
         {
           test.identical( op.exitCode, null );
           test.identical( op.ended, true );
           test.identical( op.exitSignal, 'SIGKILL' );
-          test.is( !_.strHas( op.output, 'SIGTERM' ) );
-          test.is( !_.strHas( op.output, 'Application timeout!' ) );
+          test.true( !_.strHas( op.output, 'SIGTERM' ) );
+          test.true( !_.strHas( op.output, 'Application timeout!' ) );
         }
 
         return null;
@@ -30950,16 +30950,16 @@ function terminate( test )
           test.identical( op.exitCode, 1 );
           test.identical( op.ended, true );
           test.identical( op.exitSignal, null );
-          test.is( !_.strHas( op.output, 'SIGTERM' ) );
-          test.is( !_.strHas( op.output, 'Application timeout!' ) );
+          test.true( !_.strHas( op.output, 'SIGTERM' ) );
+          test.true( !_.strHas( op.output, 'Application timeout!' ) );
         }
         else
         {
           test.identical( op.exitCode, null );
           test.identical( op.ended, true );
           test.identical( op.exitSignal, 'SIGKILL' );
-          test.is( !_.strHas( op.output, 'SIGTERM' ) );
-          test.is( !_.strHas( op.output, 'Application timeout!' ) );
+          test.true( !_.strHas( op.output, 'SIGTERM' ) );
+          test.true( !_.strHas( op.output, 'Application timeout!' ) );
         }
         return null;
       })
@@ -30993,16 +30993,16 @@ function terminate( test )
           test.identical( op.exitCode, null );
           test.identical( op.ended, true );
           test.identical( op.exitSignal, 'SIGTERM' );
-          test.is( !_.strHas( op.output, 'SIGTERM' ) );
-          test.is( !_.strHas( op.output, 'Application timeout!' ) );
+          test.true( !_.strHas( op.output, 'SIGTERM' ) );
+          test.true( !_.strHas( op.output, 'Application timeout!' ) );
         }
         else
         {
           test.identical( op.exitCode, null );
           test.identical( op.ended, true );
           test.identical( op.exitSignal, 'SIGTERM' );
-          test.is( _.strHas( op.output, 'SIGTERM' ) );
-          test.is( !_.strHas( op.output, 'Application timeout!' ) );
+          test.true( _.strHas( op.output, 'SIGTERM' ) );
+          test.true( !_.strHas( op.output, 'Application timeout!' ) );
         }
         return null;
       })
@@ -31038,16 +31038,16 @@ function terminate( test )
           test.identical( op.exitCode, 1 );
           test.identical( op.ended, true );
           test.identical( op.exitSignal, null );
-          test.is( !_.strHas( op.output, 'SIGTERM' ) );
-          test.is( !_.strHas( op.output, 'Application timeout!' ) );
+          test.true( !_.strHas( op.output, 'SIGTERM' ) );
+          test.true( !_.strHas( op.output, 'Application timeout!' ) );
         }
         else
         {
           test.identical( op.exitCode, null );
           test.identical( op.ended, true );
           test.identical( op.exitSignal, 'SIGTERM' );
-          test.is( _.strHas( op.output, 'SIGTERM' ) );
-          test.is( !_.strHas( op.output, 'Application timeout!' ) );
+          test.true( _.strHas( op.output, 'SIGTERM' ) );
+          test.true( !_.strHas( op.output, 'Application timeout!' ) );
         }
         return null;
       })
@@ -31129,8 +31129,8 @@ function terminateSync( test )
           test.identical( op.exitCode, null );
           test.identical( op.ended, true );
           test.identical( op.exitSignal, 'SIGKILL' );
-          test.is( !_.strHas( op.output, 'SIGTERM' ) );
-          test.is( !_.strHas( op.output, 'Application timeout!' ) );
+          test.true( !_.strHas( op.output, 'SIGTERM' ) );
+          test.true( !_.strHas( op.output, 'Application timeout!' ) );
           return null;
         }
         else
@@ -31140,15 +31140,15 @@ function terminateSync( test )
             test.identical( op.ended, true );
             test.identical( op.exitCode, null );
             test.identical( op.exitSignal, 'SIGTERM' );
-            test.is( !_.strHas( op.output, 'SIGTERM' ) );
-            test.is( !_.strHas( op.output, 'Application timeout!' ) );
+            test.true( !_.strHas( op.output, 'SIGTERM' ) );
+            test.true( !_.strHas( op.output, 'Application timeout!' ) );
           }
           else
           {
             test.identical( op.ended, true );
             test.identical( op.exitCode, null );
             test.identical( op.exitSignal, 'SIGTERM' );
-            test.is( !_.strHas( op.output, 'Application timeout!' ) );
+            test.true( !_.strHas( op.output, 'Application timeout!' ) );
           }
           return null;
         }
@@ -31191,8 +31191,8 @@ function terminateSync( test )
           test.identical( op.ended, true );
           test.identical( op.exitCode, 1 );
           test.identical( op.exitSignal, null );
-          test.is( !_.strHas( op.output, 'SIGTERM' ) );
-          test.is( !_.strHas( op.output, 'Application timeout!' ) );
+          test.true( !_.strHas( op.output, 'SIGTERM' ) );
+          test.true( !_.strHas( op.output, 'Application timeout!' ) );
         }
         else
         {
@@ -31202,7 +31202,7 @@ function terminateSync( test )
           test.identical( op.exitSignal, 'SIGKILL' );
           else
           test.identical( op.exitSignal, 'SIGTERM' );
-          test.is( !_.strHas( op.output, 'Application timeout!' ) );
+          test.true( !_.strHas( op.output, 'Application timeout!' ) );
         }
         return null;
       })
@@ -31249,15 +31249,15 @@ function terminateSync( test )
   //       test.identical( op.ended, true );
   //       test.identical( op.exitCode, null );
   //       test.identical( op.exitSignal, 'SIGTERM' );
-  //       test.is( !_.strHas( op.output, 'SIGTERM' ) );
-  //       test.is( !_.strHas( op.output, 'Application timeout!' ) );
+  //       test.true( !_.strHas( op.output, 'SIGTERM' ) );
+  //       test.true( !_.strHas( op.output, 'Application timeout!' ) );
   //     }
   //     else
   //     {
   //       test.identical( op.ended, true );
   //       test.identical( op.exitCode, null );
   //       test.identical( op.exitSignal, 'SIGTERM' );
-  //       test.is( !_.strHas( op.output, 'Application timeout!' ) );
+  //       test.true( !_.strHas( op.output, 'Application timeout!' ) );
   //     }
   //     return null;
   //   })
@@ -31292,15 +31292,15 @@ function terminateSync( test )
   //       test.identical( op.ended, true );
   //       test.identical( op.exitCode, 1 );
   //       test.identical( op.exitSignal, null );
-  //       test.is( !_.strHas( op.output, 'SIGTERM' ) );
-  //       test.is( !_.strHas( op.output, 'Application timeout!' ) );
+  //       test.true( !_.strHas( op.output, 'SIGTERM' ) );
+  //       test.true( !_.strHas( op.output, 'Application timeout!' ) );
   //     }
   //     else
   //     {
   //       test.identical( op.ended, true );
   //       test.identical( op.exitCode, null );
   //       test.identical( op.exitSignal, 'SIGTERM' );
-  //       test.is( !_.strHas( op.output, 'Application timeout!' ) );
+  //       test.true( !_.strHas( op.output, 'Application timeout!' ) );
   //     }
   //     return null;
   //   })
@@ -31336,15 +31336,15 @@ function terminateSync( test )
   //       test.identical( op.ended, true );
   //       test.identical( op.exitCode, 1 );
   //       test.identical( op.exitSignal, null );
-  //       test.is( !_.strHas( op.output, 'SIGTERM' ) );
-  //       test.is( !_.strHas( op.output, 'Application timeout!' ) );
+  //       test.true( !_.strHas( op.output, 'SIGTERM' ) );
+  //       test.true( !_.strHas( op.output, 'Application timeout!' ) );
   //     }
   //     else
   //     {
   //       test.identical( op.ended, true );
   //       test.identical( op.exitCode, null );
   //       test.identical( op.exitSignal, 'SIGTERM' );
-  //       test.is( !_.strHas( op.output, 'Application timeout!' ) );
+  //       test.true( !_.strHas( op.output, 'Application timeout!' ) );
   //     }
   //     return null;
   //   })
@@ -31381,15 +31381,15 @@ function terminateSync( test )
   //       test.identical( op.ended, true );
   //       test.identical( op.exitCode, null );
   //       test.identical( op.exitSignal, 'SIGTERM' );
-  //       test.is( !_.strHas( op.output, 'SIGTERM' ) );
-  //       test.is( !_.strHas( op.output, 'Application timeout!' ) );
+  //       test.true( !_.strHas( op.output, 'SIGTERM' ) );
+  //       test.true( !_.strHas( op.output, 'Application timeout!' ) );
   //     }
   //     else
   //     {
   //       test.identical( op.ended, true );
   //       test.identical( op.exitCode, null );
   //       test.identical( op.exitSignal, 'SIGTERM' );
-  //       test.is( !_.strHas( op.output, 'Application timeout!' ) );
+  //       test.true( !_.strHas( op.output, 'Application timeout!' ) );
   //     }
   //     return null;
   //   })
@@ -31427,8 +31427,8 @@ function terminateSync( test )
   //     test.identical( op.exitCode, null );
   //     test.identical( op.ended, true );
   //     test.identical( op.exitSignal, 'SIGKILL' );
-  //     test.is( !_.strHas( op.output, 'SIGTERM' ) );
-  //     test.is( !_.strHas( op.output, 'Application timeout!' ) );
+  //     test.true( !_.strHas( op.output, 'SIGTERM' ) );
+  //     test.true( !_.strHas( op.output, 'Application timeout!' ) );
   //     return null;
   //   })
 
@@ -31462,16 +31462,16 @@ function terminateSync( test )
   //       test.identical( op.exitCode, 1 );
   //       test.identical( op.ended, true );
   //       test.identical( op.exitSignal, null );
-  //       test.is( !_.strHas( op.output, 'SIGTERM' ) );
-  //       test.is( !_.strHas( op.output, 'Application timeout!' ) );
+  //       test.true( !_.strHas( op.output, 'SIGTERM' ) );
+  //       test.true( !_.strHas( op.output, 'Application timeout!' ) );
   //     }
   //     else
   //     {
   //       test.identical( op.exitCode, null );
   //       test.identical( op.ended, true );
   //       test.identical( op.exitSignal, 'SIGKILL' );
-  //       test.is( !_.strHas( op.output, 'SIGTERM' ) );
-  //       test.is( !_.strHas( op.output, 'Application timeout!' ) );
+  //       test.true( !_.strHas( op.output, 'SIGTERM' ) );
+  //       test.true( !_.strHas( op.output, 'Application timeout!' ) );
   //     }
   //     return null;
   //   })
@@ -31570,8 +31570,8 @@ function terminateFirstChild( test )
         program2Pid = program2Pid.pid;
         console.log( `parentPid : ${o.process.pid}` );
         console.log( `childPid : ${program2Pid}` );
-        test.is( _.process.isAlive( o.process.pid ) );
-        test.is( _.process.isAlive( program2Pid ) );
+        test.true( _.process.isAlive( o.process.pid ) );
+        test.true( _.process.isAlive( program2Pid ) );
         return _.process.terminate
         ({
           pid : o.process.pid,
@@ -31607,21 +31607,21 @@ function terminateFirstChild( test )
           if( process.platform === 'darwin' )
           {
             test.identical( _.strCount( o.output, 'program2::end' ), 0 );
-            test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
-            test.is( _.process.isAlive( program2Pid ) );
+            test.true( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+            test.true( _.process.isAlive( program2Pid ) );
 
             return _.time.out( context.t1*15, () =>
             {
-              test.is( !_.process.isAlive( program2Pid ) );
-              test.is( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+              test.true( !_.process.isAlive( program2Pid ) );
+              test.true( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
               return null;
             });
           }
           else
           {
             test.identical( _.strCount( o.output, 'program2::end' ), 1 );
-            test.is( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
-            test.is( !_.process.isAlive( program2Pid ) );
+            test.true( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+            test.true( !_.process.isAlive( program2Pid ) );
           }
 
           return null;
@@ -31629,13 +31629,13 @@ function terminateFirstChild( test )
         else
         {
           test.identical( _.strCount( o.output, 'program2::end' ), 0 );
-          test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+          test.true( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
 
           /* platform::windows killls children processes, in contrast other platforms politely termonate children processes */
           if( process.platform === 'win32' )
-          test.is( !_.process.isAlive( program2Pid ) );
+          test.true( !_.process.isAlive( program2Pid ) );
           else
-          test.is( _.process.isAlive( program2Pid ) );
+          test.true( _.process.isAlive( program2Pid ) );
 
           return _.time.out( context.t1*15 );
         }
@@ -31647,12 +31647,12 @@ function terminateFirstChild( test )
       {
         o.conTerminate.then( () =>
         {
-          test.is( !_.process.isAlive( program2Pid ) );
+          test.true( !_.process.isAlive( program2Pid ) );
           /* platform::windows killls children processes, in contrast other platforms politely termonate children processes */
           if( process.platform === 'win32' )
-          test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+          test.true( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
           else
-          test.is( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+          test.true( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
           test.identical( _.strCount( o.output, 'exit' ), 0 );
           return null;
         })
@@ -31788,8 +31788,8 @@ On win/linux program1 waits for termination of program2 because only shell was t
 //     program2Pid = program2Pid.pid;
 //     console.log( `parentPid : ${o.process.pid}` );
 //     console.log( `childPid : ${program2Pid}` );
-//     test.is( _.process.isAlive( o.process.pid ) );
-//     test.is( _.process.isAlive( program2Pid ) );
+//     test.true( _.process.isAlive( o.process.pid ) );
+//     test.true( _.process.isAlive( program2Pid ) );
 //     return _.process.terminate
 //     ({
 //       pid : o.process.pid,
@@ -31814,25 +31814,25 @@ On win/linux program1 waits for termination of program2 because only shell was t
 //     test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
 //     test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
 //     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
-//     test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+//     test.true( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
 
 //     /* platform::windows killls children processes, in contrast other platforms politely termonate children processes */
 //     if( process.platform === 'win32' )
-//     test.is( !_.process.isAlive( program2Pid ) );
+//     test.true( !_.process.isAlive( program2Pid ) );
 //     else
-//     test.is( _.process.isAlive( program2Pid ) );
+//     test.true( _.process.isAlive( program2Pid ) );
 
 //     return _.time.out( context.t1*15 );
 //   })
 
 //   o.conTerminate.then( () =>
 //   {
-//     test.is( !_.process.isAlive( program2Pid ) );
+//     test.true( !_.process.isAlive( program2Pid ) );
 //     /* platform::windows killls children processes, in contrast other platforms politely termonate children processes */
 //     if( process.platform === 'win32' )
-//     test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+//     test.true( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
 //     else
-//     test.is( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+//     test.true( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
 //     test.identical( _.strCount( o.output, 'exit' ), 0 );
 //     return null;
 //   })
@@ -31951,8 +31951,8 @@ On win/linux program1 waits for termination of program2 because only shell was t
 //     program2Pid = program2Pid.pid;
 //     console.log( `parentPid : ${o.process.pid}` );
 //     console.log( `childPid : ${program2Pid}` );
-//     test.is( _.process.isAlive( o.process.pid ) );
-//     test.is( _.process.isAlive( program2Pid ) );
+//     test.true( _.process.isAlive( o.process.pid ) );
+//     test.true( _.process.isAlive( program2Pid ) );
 //     return _.process.terminate
 //     ({
 //       pid : o.process.pid,
@@ -31977,26 +31977,26 @@ On win/linux program1 waits for termination of program2 because only shell was t
 //     test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
 //     test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
 //     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
-//     test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+//     test.true( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
 
 //     /* platform::windows killls children processes, in contrast other platforms politely termonate children processes */
 //     if( process.platform === 'win32' )
-//     test.is( !_.process.isAlive( program2Pid ) );
+//     test.true( !_.process.isAlive( program2Pid ) );
 //     else
-//     test.is( _.process.isAlive( program2Pid ) );
+//     test.true( _.process.isAlive( program2Pid ) );
 
 //     return _.time.out( context.t1*15 );
 //   })
 
 //   o.conTerminate.then( () =>
 //   {
-//     test.is( !_.process.isAlive( program2Pid ) );
+//     test.true( !_.process.isAlive( program2Pid ) );
 
 //     /* platform::windows killls children processes, in contrast other platforms politely termonate children processes */
 //     if( process.platform === 'win32' )
-//     test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+//     test.true( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
 //     else
-//     test.is( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+//     test.true( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
 
 //     return null;
 //   })
@@ -32136,21 +32136,21 @@ On win/linux program1 waits for termination of program2 because only shell was t
 //     if( process.platform === 'darwin' )
 //     {
 //       test.identical( _.strCount( o.output, 'program2::end' ), 0 );
-//       test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
-//       test.is( _.process.isAlive( program2Pid ) );
+//       test.true( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+//       test.true( _.process.isAlive( program2Pid ) );
 
 //       return _.time.out( context.t1*15, () =>
 //       {
-//         test.is( !_.process.isAlive( program2Pid ) );
-//         test.is( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+//         test.true( !_.process.isAlive( program2Pid ) );
+//         test.true( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
 //         return null;
 //       });
 //     }
 //     else
 //     {
 //       test.identical( _.strCount( o.output, 'program2::end' ), 1 );
-//       test.is( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
-//       test.is( !_.process.isAlive( program2Pid ) );
+//       test.true( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+//       test.true( !_.process.isAlive( program2Pid ) );
 //     }
 
 //     return null;
@@ -32993,15 +32993,15 @@ function terminateDetachedFirstChild( test )
         else
         test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
         test.identical( _.strCount( o.output, 'program2::end' ), 0 );
-        test.is( _.process.isAlive( program2Pid ) );
+        test.true( _.process.isAlive( program2Pid ) );
 
         return _.process.waitForDeath({ pid : program2Pid, timeOut : context.t1*15 });
       })
 
       o.conTerminate.then( () =>
       {
-        test.is( !_.process.isAlive( program2Pid ) );
-        test.is( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+        test.true( !_.process.isAlive( program2Pid ) );
+        test.true( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
         return null;
       })
 
@@ -33154,15 +33154,15 @@ program2 should continue to work
 //     test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
 //     test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
 //     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
-//     test.is( _.process.isAlive( program2Pid ) );
+//     test.true( _.process.isAlive( program2Pid ) );
 
 //     return _.process.waitForDeath({ pid : program2Pid, timeOut : context.t1*15 });
 //   })
 
 //   o.conTerminate.then( () =>
 //   {
-//     test.is( !_.process.isAlive( program2Pid ) );
-//     test.is( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+//     test.true( !_.process.isAlive( program2Pid ) );
+//     test.true( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
 //     return null;
 //   })
 
@@ -33296,15 +33296,15 @@ program2 should continue to work
 //     test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
 //     test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
 //     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
-//     test.is( _.process.isAlive( program2Pid ) );
+//     test.true( _.process.isAlive( program2Pid ) );
 
 //     return _.process.waitForDeath({ pid : program2Pid, timeOut : context.t1*15 });
 //   })
 
 //   o.conTerminate.then( () =>
 //   {
-//     test.is( !_.process.isAlive( program2Pid ) );
-//     test.is( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+//     test.true( !_.process.isAlive( program2Pid ) );
+//     test.true( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
 //     return null;
 //   })
 
@@ -33440,15 +33440,15 @@ program2 should continue to work
 //     test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
 //     test.ge( _.strCount( o.output, 'program2::begin' ), 0 );
 //     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
-//     test.is( _.process.isAlive( program2Pid ) );
+//     test.true( _.process.isAlive( program2Pid ) );
 
 //     return _.process.waitForDeath({ pid : program2Pid, timeOut : context.t1*15 });
 //   })
 
 //   o.conTerminate.then( () =>
 //   {
-//     test.is( !_.process.isAlive( program2Pid ) );
-//     test.is( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+//     test.true( !_.process.isAlive( program2Pid ) );
+//     test.true( a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
 //     return null;
 //   })
 
@@ -33699,8 +33699,8 @@ function terminateWithDetachedChild( test )
         test.identical( _.strCount( o.output, 'program2::end' ), 0 );
         test.identical( _.strCount( o.output, 'error' ), 0 );
         test.identical( _.strCount( o.output, 'Error' ), 0 );
-        test.is( !_.process.isAlive( program2Pid ) );
-        test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+        test.true( !_.process.isAlive( program2Pid ) );
+        test.true( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
 
         return null;
       })
@@ -33853,8 +33853,8 @@ program1 and program2 should be terminated
 //     test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
 //     test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
 //     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
-//     test.is( !_.process.isAlive( program2Pid ) );
-//     test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+//     test.true( !_.process.isAlive( program2Pid ) );
+//     test.true( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
 
 //     return null;
 //   })
@@ -34056,8 +34056,8 @@ SIGTERM
 //     test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
 //     test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
 //     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
-//     test.is( !_.process.isAlive( program2Pid ) );
-//     test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+//     test.true( !_.process.isAlive( program2Pid ) );
+//     test.true( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
 
 //     return null;
 //   })
@@ -34197,8 +34197,8 @@ SIGTERM
 //     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
 //     test.identical( _.strCount( o.output, 'error' ), 0 );
 //     test.identical( _.strCount( o.output, 'Error' ), 0 );
-//     test.is( !_.process.isAlive( program2Pid ) );
-//     test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+//     test.true( !_.process.isAlive( program2Pid ) );
+//     test.true( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
 
 //     return null;
 //   })
@@ -34342,10 +34342,10 @@ function terminateSeveralChildren( test )
     test.identical( _.strCount( o.output, 'program3::begin' ), 1 );
     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
     test.identical( _.strCount( o.output, 'program3::end' ), 0 );
-    test.is( !_.process.isAlive( program2Pid ) );
-    test.is( !_.process.isAlive( program3Pid ) );
-    test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
-    test.is( !a.fileProvider.fileExists( a.abs( 'program3end' ) ) );
+    test.true( !_.process.isAlive( program2Pid ) );
+    test.true( !_.process.isAlive( program3Pid ) );
+    test.true( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+    test.true( !a.fileProvider.fileExists( a.abs( 'program3end' ) ) );
 
     return null;
   })
@@ -34594,10 +34594,10 @@ function terminateSeveralDetachedChildren( test )
     test.identical( _.strCount( o.output, 'program3::begin' ), 1 );
     test.identical( _.strCount( o.output, 'program2::end' ), 0 );
     test.identical( _.strCount( o.output, 'program3::end' ), 0 );
-    test.is( !_.process.isAlive( program2Pid ) );
-    test.is( !_.process.isAlive( program3Pid ) );
-    test.is( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
-    test.is( !a.fileProvider.fileExists( a.abs( 'program3end' ) ) );
+    test.true( !_.process.isAlive( program2Pid ) );
+    test.true( !_.process.isAlive( program3Pid ) );
+    test.true( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+    test.true( !a.fileProvider.fileExists( a.abs( 'program3end' ) ) );
 
     return null;
   })
@@ -35371,14 +35371,14 @@ function terminateDifferentStdio( test )
         test.identical( op.exitCode, 1 );
         test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
-        test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+        test.true( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
       }
       else
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
-        test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+        test.true( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
       }
       return null;
     })
@@ -35457,14 +35457,14 @@ function terminateDifferentStdio( test )
         test.identical( op.exitCode, 1 );
         test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
-        test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+        test.true( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
       }
       else
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
-        test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+        test.true( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
       }
       return null;
     })
@@ -35501,14 +35501,14 @@ function terminateDifferentStdio( test )
         test.identical( op.exitCode, 1 );
         test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
-        test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+        test.true( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
       }
       else
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
-        test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+        test.true( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
       }
       return null;
     })
@@ -35545,14 +35545,14 @@ function terminateDifferentStdio( test )
         test.identical( op.exitCode, 1 );
         test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
-        test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+        test.true( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
       }
       else
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
-        test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+        test.true( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
       }
       return null;
     })
@@ -35591,14 +35591,14 @@ function terminateDifferentStdio( test )
         test.identical( op.exitCode, 1 );
         test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
-        test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+        test.true( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
       }
       else
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
-        test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+        test.true( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
       }
       return null;
     })
@@ -35637,14 +35637,14 @@ function terminateDifferentStdio( test )
         test.identical( op.exitCode, 1 );
         test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
-        test.is( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+        test.true( !a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
       }
       else
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.identical( op.exitSignal, null );
-        test.is( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
+        test.true( a.fileProvider.fileExists( a.abs( a.routinePath, o.process.pid.toString() ) ) );
       }
 
       return null;
@@ -35803,7 +35803,7 @@ function execPathOf( test )
     o.conStart.then( () => _.process.execPathOf( o.process ) )
     o.conStart.then( ( arg ) =>
     {
-      test.is( _.strHas( arg, o.execPath ) );
+      test.true( _.strHas( arg, o.execPath ) );
       return null;
     })
 
@@ -35941,7 +35941,7 @@ function waitForDeath( test )
     let terminated = _.process.waitForDeath({ pnd : o.process, timeOut : context.t1 }) /* 1000 */
     terminated = test.shouldThrowErrorAsync( terminated, ( err ) =>
     {
-      test.is( _.errIs( err ) );
+      test.true( _.errIs( err ) );
       test.identical( err.reason, 'time out' );
     });
 
@@ -36283,11 +36283,11 @@ function childrenOptionFormatList( test )
           test.identical( prcocesses.length, 4 );
 
           test.identical( prcocesses[ 0 ].pid, o.process.pid );
-          test.is( _.numberIs( prcocesses[ 1 ].pid ) );
+          test.true( _.numberIs( prcocesses[ 1 ].pid ) );
           test.identical( prcocesses[ 1 ].name, 'conhost.exe' );
           test.identical( prcocesses[ 2 ].pid, lastChildPid );
           test.identical( prcocesses[ 3 ].name, 'conhost.exe' );
-          test.is( _.numberIs( prcocesses[ 3 ].pid ) );
+          test.true( _.numberIs( prcocesses[ 3 ].pid ) );
         }
         else
         {
@@ -36535,7 +36535,7 @@ function experiment( test )
     .then( function()
     {
       test.identical( options.exitCode, 0 );
-      test.is( _.strHas( options.output, `[ '*' ]` ) );
+      test.true( _.strHas( options.output, `[ '*' ]` ) );
       return null;
     })
   })
@@ -36615,7 +36615,7 @@ function experiment3( test )
     test.identical( op.exitReason, 'signal' );
     test.identical( op.exitCode, null );
     test.identical( op.exitSignal, 'SIGTERM' );
-    test.is( !_.process.isAlive( op.process.pid ) );
+    test.true( !_.process.isAlive( op.process.pid ) );
     return null;
   })
 
