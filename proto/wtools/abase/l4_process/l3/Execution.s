@@ -82,15 +82,29 @@ function startMinimalHeadCommon( routine, args )
     , `Unknown value of option::throwingExitCode, acceptable : [ false, 'full', 'brief' ]`
   );
 
-  if( o.outputColoring === null )
-  o.outputColoring = 1;
-  if( o.outputColoringStdout === null )
-  o.outputColoringStdout = o.outputColoring;
-  if( o.outputColoringStderr === null )
-  o.outputColoringStderr = o.outputColoring;
-  _.assert( _.boolLike( o.outputColoring ) );
-  _.assert( _.boolLike( o.outputColoringStdout ) );
-  _.assert( _.boolLike( o.outputColoringStderr ) );
+  // if( o.outputColoring === null )
+  // o.outputColoring = 1;
+  // if( o.outputColoringStdout === null )
+  // o.outputColoringStdout = o.outputColoring;
+  // if( o.outputColoringStderr === null )
+  // o.outputColoringStderr = o.outputColoring;
+  // _.assert( _.boolLike( o.outputColoring ) );
+
+  if( o.outputColoring === null || _.boolLikeTrue( o.outputColoring ) )
+  o.outputColoring = { out : 1, err : 1 };
+  if( _.boolLikeFalse( o.outputColoring ) )
+  o.outputColoring = { out : 0, err : 0 };
+  _.assert( _.objectIs( o.outputColoring ) );
+  _.assert
+  (
+    _.boolLike( o.outputColoring.out ),
+    `o.outputColoring.out expects BoolLike, but got ${o.outputColoring.out}`
+  );
+  _.assert
+  (
+    _.boolLike( o.outputColoring.err ),
+    `o.outputColoring.err expects BoolLike, but got ${o.outputColoring.err}`
+  );
 
   if( !_.numberIs( o.verbosity ) )
   o.verbosity = o.verbosity ? 1 : 0;
@@ -139,7 +153,7 @@ function startMinimalHeadCommon( routine, args )
   (
     o.timeOut === null || !o.sync || !!o.deasync, `Option::timeOut should not be defined if option::sync:1 and option::deasync:0`
   );
-  /* qqq forYevhen : this condition is wrong. fix it and cover */
+  /* xxx qqq forYevhen : this condition is wrong. fix it and cover */
 
   if( _.strIs( o.interpreterArgs ) )
   o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs });
@@ -315,9 +329,10 @@ function startMinimal_body( o )
 
     /* output */
 
-    _.assert( _.boolLike( o.outputColoring ) );
-    _.assert( _.boolLike( o.outputColoringStdout ) );
-    _.assert( _.boolLike( o.outputColoringStderr ) );
+    // _.assert( _.boolLike( o.outputColoring ) );
+    // _.assert( _.boolLike( o.outputColoringStdout ) );
+    // _.assert( _.boolLike( o.outputColoringStderr ) );
+    _.assert( _.objectIs( o.outputColoring ) );
     _.assert( _.boolLike( o.outputCollecting ) );
 
     /* ipc */
@@ -360,6 +375,7 @@ function startMinimal_body( o )
     o.exitCode = null;
     o.exitSignal = null;
     o.error = o.error || null;
+    o.args2 = null;
     o.process = null;
     o.fullExecPath = null;
     o.output = o.outputCollecting ? '' : null;
@@ -392,12 +408,9 @@ function startMinimal_body( o )
       , `If defined option::arg should be either [ string, array ], but it is ${_.strType( o.args )}`
     );
 
-    if( _.arrayIs( o.args ) ) /* xxx yyy */
-    o.args = o.args.slice();
+    /* xxx yyy */
+
     o.args = _.arrayAs( o.args );
-
-    /* */
-
     _argsLength = o.args.length;
 
     if( _.strIs( o.execPath ) )
@@ -423,20 +436,36 @@ function startMinimal_body( o )
       o.execPath = argUnqoute( o.execPath );
     }
 
+    o.args2 = o.args.slice();
+
     /* passingThrough */
 
     if( o.passingThrough )
     {
       let argumentsOwn = process.argv.slice( 2 );
       if( argumentsOwn.length )
-      o.args = _.arrayAppendArray( o.args || [], argumentsOwn );
+      o.args2 = _.arrayAppendArray( o.args2 || [], argumentsOwn );
     }
+
+    _.assert( o.interpreterArgs === null || _.arrayIs( o.interpreterArgs ) );
+    if( o.interpreterArgs && o.mode !== 'fork' )
+    o.args2 = _.arrayPrependArray( o.args2, o.interpreterArgs );
+
+/*
+    let appendedArgs = o.passingThrough ? process.argv.length - 2 : 0;
+    let prependedArgs = args.length - ( _argsLength + appendedArgs );
+    // xxx yyy
+    for( let i = prependedArgs; i < args.length; i++ )
+    {
+      args[ i ] = _.process._argEscape( args[ i ] );
+      args[ i ] = _.strQuote( args[ i ] );
+    }
+*/
 
     /* */
 
     o.currentPath = _.path.resolve( o.currentPath || '.' );
 
-    _.assert( o.interpreterArgs === null || _.arrayIs( o.interpreterArgs ) );
     _.assert( _.boolLike( o.outputAdditive ) );
     _.assert( _.numberIs( o.verbosity ) );
     _.assert( _.boolLike( o.outputPiping ) );
@@ -451,14 +480,17 @@ function startMinimal_body( o )
     if( !StripAnsi )
     StripAnsi = require( 'strip-ansi' );
 
-    if( o.outputColoring && typeof module !== 'undefined' )
+    // if( o.outputColoring && typeof module !== 'undefined' )
+    if( o.outputColoring.err || o.outputColoring.out && typeof module !== 'undefined' )
     try
     {
       _.include( 'wColor' );
     }
     catch( err )
     {
-      o.outputColoring = 0;
+      // o.outputColoring = 0;
+      o.outputColoring.err = 0;
+      o.outputColoring.out = 0;
       if( o.verbosity >= 2 )
       log( _.errOnce( err ), 'err' );
     }
@@ -467,8 +499,10 @@ function startMinimal_body( o )
 
     if( o.outputPrefixing )
     {
-      _errPrefix = `${ ( o.outputColoring ? _.ct.format( 'err', { fg : 'dark red' } ) : 'err' ) } : `;
-      _outPrefix = `${ ( o.outputColoring ? _.ct.format( 'out', { fg : 'dark white' } ) : 'out' ) } : `;
+      // _errPrefix = `${ ( o.outputColoring ? _.ct.format( 'err', { fg : 'dark red' } ) : 'err' ) } : `;
+      // _outPrefix = `${ ( o.outputColoring ? _.ct.format( 'out', { fg : 'dark white' } ) : 'out' ) } : `;
+      _errPrefix = `${ ( o.outputColoring.err ? _.ct.format( 'err', { fg : 'dark red' } ) : 'err' ) } : `;
+      _outPrefix = `${ ( o.outputColoring.out ? _.ct.format( 'out', { fg : 'dark white' } ) : 'out' ) } : `;
     }
 
     /* handler of event terminationBegin */
@@ -580,7 +614,7 @@ function startMinimal_body( o )
     runSpawn();
     else if( o.mode === 'shell' )
     runShell();
-    else _.assert( 0, 'Unknown mode', _.strQuote( o.mode ), 'to start process at path', _.strQuote( o.currentPath ) ); /* qqq for Yevhen : problem with template-string is not complete! */
+    else _.assert( 0, `Unknown mode ${o.mode} to start process at path ${o.currentPath}` ); /* qqq for Yevhen : problem with template-string is not complete! | aaa : Fixed. */
 
     /* procedure */
 
@@ -617,13 +651,13 @@ function startMinimal_body( o )
 
     execPath = _.path.nativize( execPath );
 
-    o.fullExecPath = _.strConcat( _.arrayAppendArray( [ execPath ], o.args ) );
+    o.fullExecPath = _.strConcat([ execPath, ... o.args2 ]);
     inputMirror();
 
     if( o.dry )
     return;
 
-    o.process = ChildProcess.fork( execPath, o.args, o2 ); /* xxx : rename to pnd? */
+    o.process = ChildProcess.fork( execPath, o.args2, o2 ); /* xxx : rename to pnd? */
 
   }
 
@@ -637,19 +671,21 @@ function startMinimal_body( o )
 
     let o2 = optionsForSpawn();
 
-    o.fullExecPath = _.strConcat( _.arrayAppendArray( [ execPath ], o.args ) );
+    o.fullExecPath = _.strConcat([ execPath, ... o.args2 ]);
     inputMirror();
 
     if( o.dry )
     return;
 
-    if( o.interpreterArgs )
-    o.args = o.interpreterArgs.concat( o.args ); /* xxx */
+    // if( o.interpreterArgs )
+    // o.args2 = _.arrayAppendArray( o.args2, o.interpreterArgs );
+    // if( o.interpreterArgs )
+    // o.args2 = o.interpreterArgs.concat( o.args2 ); /* xxx */ /* qqq2 for Yevhen : bad. use routine _.arrayAppendArray() */
 
     if( o.sync && !o.deasync )
-    o.process = ChildProcess.spawnSync( execPath, o.args, o2 );
+    o.process = ChildProcess.spawnSync( execPath, o.args2, o2 );
     else
-    o.process = ChildProcess.spawn( execPath, o.args, o2 );
+    o.process = ChildProcess.spawn( execPath, o.args2, o2 );
 
   }
 
@@ -660,7 +696,7 @@ function startMinimal_body( o )
     let execPath = o.execPath;
 
     execPath = _.path.nativizeEscaping( execPath );
-    // execPath = _.process.escapeProg( execPath ); /* zzz for Vova: use this routine, review fails */
+    // execPath = _.process._argProgEscape( execPath ); /* zzz for Vova: use this routine, review fails */
 
     let shellPath = process.platform === 'win32' ? 'cmd' : 'sh';
     let arg1 = process.platform === 'win32' ? '/c' : '-c';
@@ -679,11 +715,17 @@ function startMinimal_body( o )
 
     o2.windowsVerbatimArguments = true;
 
-    if( o.interpreterArgs )
-    o.args = o.interpreterArgs.concat( o.args )
+    // if( o.interpreterArgs )
+    // o.args2 = o.interpreterArgs.concat( o.args2 )
+    // if( o.interpreterArgs )
+    // o.args2 = _.arrayAppendArray( o.args2, o.interpreterArgs );
 
-    if( o.args.length )
-    arg2 = arg2 + ' ' + argsEscape( o.args.slice() ).join( ' ' );
+    debugger;
+    if( o.args2.length )
+    // arg2 = arg2 + ' ' + o.args2.join( ' ' );
+    // arg2 = arg2 + ' ' + argsEscape( o.args2.slice() ).join( ' ' );
+    arg2 = arg2 + ' ' + argsEscape( o.args2 ).join( ' ' );
+    debugger;
 
     o.fullExecPath = arg2;
 
@@ -1046,7 +1088,7 @@ function startMinimal_body( o )
       if( o.verbosity >= 3 )
       {
         let output = ' @ ';
-        if( o.outputColoring )
+        if( o.outputColoring.out )
         output = _.ct.format( output, { fg : 'bright white' } ) + _.ct.format( o.currentPath, 'path' );
         else
         output = output + o.currentPath
@@ -1056,7 +1098,7 @@ function startMinimal_body( o )
       if( o.verbosity )
       {
         let prefix = ' > ';
-        if( o.outputColoring )
+        if( o.outputColoring.out )
         prefix = _.ct.format( prefix, { fg : 'bright white' } );
         log( prefix + o.fullExecPath, 'out' );
       }
@@ -1163,32 +1205,39 @@ function startMinimal_body( o )
     let appendedArgs = o.passingThrough ? process.argv.length - 2 : 0;
     let prependedArgs = args.length - ( _argsLength + appendedArgs );
 
+    // xxx yyy
     for( let i = prependedArgs; i < args.length; i++ )
     {
-      let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', '`' ];
-      // args[ i ] = argEscape( args[ i ], quotesToEscape ); /* xxx : uncomment later */ /* qqq for Dmytro */
-      _.each( quotesToEscape, ( quote ) =>
-      {
-        args[ i ] = argEscape( args[ i ], quote );
-      })
+      args[ i ] = _.process._argEscape( args[ i ] );
       args[ i ] = _.strQuote( args[ i ] );
-      // args[ i ] = _.process.escapeArg( args[ i ]  ); /* zzz for Vova : use this routine, review fails */
     }
+
+    // for( let i = prependedArgs; i < args.length; i++ )
+    // {
+    //   let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', '`' ];
+    //   // args[ i ] = argEscape( args[ i ], quotesToEscape ); /* xxx : uncomment later */ /* qqq for Dmytro */
+    //   _.each( quotesToEscape, ( quote ) =>
+    //   {
+    //     args[ i ] = argEscape( args[ i ], quote );
+    //   })
+    //   args[ i ] = _.strQuote( args[ i ] );
+    //   // args[ i ] = _.process._argEscape2( args[ i ]  ); /* zzz for Vova : use this routine, review fails */
+    // }
 
     return args;
   }
 
   /* */
 
-  function argEscape( arg, quote )
-  {
-    return _.strReplaceAll( arg, quote, ( match, it ) =>
-    {
-      if( it.input[ it.charsRangeLeft[ 0 ] - 1 ] === '\\' )
-      return match;
-      return '\\' + match;
-    });
-  }
+  // function argEscape( arg, quote )
+  // {
+  //   return _.strReplaceAll( arg, quote, ( match, it ) =>
+  //   {
+  //     if( it.input[ it.charsRangeLeft[ 0 ] - 1 ] === '\\' )
+  //     return match;
+  //     return '\\' + match;
+  //   });
+  // }
 
   /* */
 
@@ -1219,13 +1268,12 @@ function startMinimal_body( o )
 
   function optionsForFork()
   {
-    let interpreterArgs = o.interpreterArgs || process.execArgv;
     let o2 =
     {
       detached : !!o.detaching,
       env : o.env,
       stdio : o.stdio,
-      execArgv : interpreterArgs,
+      execArgv : o.interpreterArgs || process.execArgv,
     }
     if( o.currentPath )
     o2.cwd = _.path.nativize( o.currentPath );
@@ -1313,12 +1361,14 @@ function startMinimal_body( o )
 
     if( channel === 'err' )
     {
-      if( o.outputColoring && o.outputColoringStderr )
+      // if( o.outputColoring && o.outputColoringStderr )
+      if( o.outputColoring.err )
       data = _.ct.format( data, 'pipe.negative' );
     }
     else
     {
-      if( o.outputColoring && o.outputColoringStdout )
+      // if( o.outputColoring && o.outputColoringStdout )
+      if( o.outputColoring.out )
       data = _.ct.format( data, 'pipe.neutral' );
     }
 
@@ -1399,13 +1449,13 @@ startMinimal_body.defaults =
   outputPiping : null,
   outputCollecting : 0,
   outputAdditive : null, /* qqq for Yevhen : cover the option */
-  outputColoring : 1, /* qqq for Yevhen : cover the option */
-  outputColoringStderr : null, /* qqq for Yevhen : cover the option */
-  outputColoringStdout : null, /* qqq for Yevhen : cover the option */
+  outputColoring : 1, /* qqq for Yevhen : cover the option | aaa : Done. */
+  // outputColoringStderr : null, /* qqq for Yevhen : cover the option */
+  // outputColoringStdout : null, /* qqq for Yevhen : cover the option */
   outputGraying : 0,
   inputMirroring : 1, /* qqq for Yevhen : cover the option | aaa : Done */
 
-  /* qqq for Yevhen : remove option::outputColoringStderr and option::outputColoringStdout. extend outputColoring */
+  /* qqq for Yevhen : remove option::outputColoringStderr and option::outputColoringStdout. extend outputColoring | aaa : Done.  */
 
 }
 
@@ -1513,9 +1563,10 @@ function startSingle_body( o )
 
     /* output */
 
-    _.assert( _.boolLike( o.outputColoring ) );
-    _.assert( _.boolLike( o.outputColoringStdout ) );
-    _.assert( _.boolLike( o.outputColoringStderr ) );
+    // _.assert( _.boolLike( o.outputColoring ) );
+    // _.assert( _.boolLike( o.outputColoringStdout ) );
+    // _.assert( _.boolLike( o.outputColoringStderr ) );
+    _.assert( _.objectIs( o.outputColoring ) );
     _.assert( _.boolLike( o.outputCollecting ) );
 
     // /* ipc */
@@ -1708,9 +1759,11 @@ function startMultiple_head( routine, args )
  * @param {Boolean} o.applyingExitCode=0 Applies exit code to parent process.
 
  * @param {Number} o.verbosity=2 Controls amount of output, `0` disables output at all.
- * @param {Boolean} o.outputColoring=1 Logger prints everything in raw mode, no styles applied.
- * @param {Boolean} o.outputColoringStdout=1 Logger prints output from `stdout` in raw mode, no styles applied.
- * @param {Boolean} o.outputColoringStderr=1 Logger prints output from `stderr` in raw mode, no styles applied.
+ * @param {Boolean|Object} o.outputColoring=1 Logger prints with styles applied for both channels.
+ *  Option can be specified more precisely via map of the form { out : 1, err : 0 }
+ *  Coloring is applied to a corresponding channel.
+//  * @param {Boolean} o.outputColoringStdout=1 Logger prints output from `stdout` in raw mode, no styles applied.
+//  * @param {Boolean} o.outputColoringStderr=1 Logger prints output from `stderr` in raw mode, no styles applied.
  * @param {Boolean} o.outputPrefixing=0 Add prefix with name of output channel( stderr, stdout ) to each line.
  * @param {Boolean} o.outputPiping=null Handles output from `stdout` and `stderr` channels. Is enabled by default if `o.verbosity` levels is >= 2 and option is not specified explicitly. This option is required by other "output" options that allows output customization.
  * @param {Boolean} o.outputCollecting=0 Enables coullection of output into sinle string. Collects output into `o.output` property if enabled.
@@ -1839,9 +1892,10 @@ function startMultiple_body( o )
       o.conTerminate = new _.Consequence({ _procedure : false }).finally( o.conTerminate );
     }
 
-    _.assert( _.boolLike( o.outputColoring ) );
-    _.assert( _.boolLike( o.outputColoringStdout ) );
-    _.assert( _.boolLike( o.outputColoringStderr ) );
+    // _.assert( _.boolLike( o.outputColoring ) );
+    // _.assert( _.boolLike( o.outputColoringStdout ) );
+    // _.assert( _.boolLike( o.outputColoringStderr ) );
+    _.assert( _.objectIs( o.outputColoring ) );
     _.assert( _.boolLike( o.outputCollecting ) );
 
     if( o.outputAdditive === null )
@@ -2349,6 +2403,8 @@ function startNjs_body( o )
   let execPath = o.execPath || '';
   // _.assert( o.interpreterArgs === null || o.interpreterArgs === '', 'not implemented' ); /* qqq for Yevhen : implement and cover. | aaa : Done */
 
+  /* xxx */
+
   /* ORIGINAL */
   // if( o.mode === 'fork' )
   // {
@@ -2636,104 +2692,6 @@ function starter( o0 )
 }
 
 starter.defaults = Object.create( startMultiple.defaults );
-
-// --
-// exit
-// --
-
-/**
- * @summary Allows to set/get exit reason of current process.
- * @description Saves exit reason if argument `reason` was provided, otherwise returns current exit reason value.
- * Returns `null` if reason was not defined yet.
- * @function exitReason
- * @module Tools/base/ProcessBasic
- * @namespace Tools.process
- */
-
-function exitReason( reason )
-{
-  if( !_realGlobal_.wTools )
-  _realGlobal_.wTools = Object.create( null );
-  if( !_realGlobal_.wTools.process )
-  _realGlobal_.wTools.process = Object.create( null );
-  if( _realGlobal_.wTools.process._exitReason === undefined )
-  _realGlobal_.wTools.process._exitReason = null;
-  if( reason === undefined )
-  return _realGlobal_.wTools.process._exitReason;
-  _realGlobal_.wTools.process._exitReason = reason;
-  return _realGlobal_.wTools.process._exitReason;
-}
-
-//
-
-/**
- * @summary Allows to set/get exit code of current process.
- * @description Updates exit code if argument `status` was provided and returns previous exit code. Returns current exit code if no argument provided.
- * Returns `0` if exit code was not defined yet.
- * @function exitCode
- * @module Tools/base/ProcessBasic
- * @namespace Tools.process
- */
-
-function exitCode( status )
-{
-  let result;
-
-  _.assert( arguments.length === 0 || arguments.length === 1 );
-  _.assert( status === undefined || _.numberIs( status ) );
-
-  if( _global.process )
-  {
-    result = process.exitCode || 0;
-    if( status !== undefined )
-    process.exitCode = status;
-  }
-
-  return result;
-}
-
-//
-
-function exit( exitCode )
-{
-
-  exitCode = exitCode !== undefined ? exitCode : _.process.exitCode();
-
-  _.assert( arguments.length === 0 || arguments.length === 1 );
-  _.assert( exitCode === undefined || _.numberIs( exitCode ) );
-
-  if( _global.process )
-  {
-    process.exit( exitCode );
-  }
-  else
-  {
-    /*debugger;*/
-  }
-
-}
-
-//
-
-// function exitWithBeep( exitCode )
-function exitWithBeep()
-{
-  let exitCode = _.process.exitCode();
-
-  // exitCode = exitCode !== undefined ? exitCode : _.process.exitCode();
-  // _.assert( arguments.length === 0 || arguments.length === 1 );
-  _.assert( arguments.length === 0, 'Expects no arguments' );
-  _.assert( exitCode === undefined || _.numberIs( exitCode ) );
-
-  _.diagnosticBeep();
-
-  if( exitCode )
-  _.diagnosticBeep();
-
-  _.process.exit( exitCode );
-
-  return exitCode;
-}
 
 // --
 // children
@@ -3356,13 +3314,6 @@ let Extension =
   startNjsPassingThrough,
   startAfterDeath,
   starter,
-
-  // exit
-
-  exitReason,
-  exitCode,
-  exit,
-  exitWithBeep,
 
   // children
 
