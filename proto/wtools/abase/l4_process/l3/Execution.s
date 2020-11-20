@@ -61,7 +61,6 @@ function startMinimalHeadCommon( routine, args )
     `Expects null or number {-o.timeOut-}, but got ${_.strType( o.timeOut )}`
   );
   _.assert( _.longHas( [ 'instant', 'afterdeath' ], o.when ) || _.objectIs( o.when ), `Unsupported starting mode: ${o.when}` );
-  // _.assert( o.when !== 'afterdeath', `Starting mode:'afterdeath' is moved to separate routine _.process.startAfterDeath` );
   _.assert
   (
     !o.detaching || !_.longHas( _.arrayAs( o.stdio ), 'inherit' ),
@@ -1745,7 +1744,7 @@ let startSingle = _.routineUnite( startSingle_head, startSingle_body );
 
 function startMultiple_head( routine, args )
 {
-  let o = startMinimalHeadCommon( routine, args );
+  let o = startSingle_head( routine, args );
 
   _.assert( arguments.length === 2 );
 
@@ -2533,60 +2532,6 @@ defaults.mode = 'fork';
 
 //
 
-// function startAfterDeath_body( o )
-// {
-//   _.assertRoutineOptions( startAfterDeath_body, o );
-//   _.assert( _.strIs( o.execPath ) );
-//   _.assert( arguments.length === 1, 'Expects single argument' );
-
-//   let toolsPath = _.path.nativize( _.path.join( __dirname, '../../../../wtools/Tools.s' ) );
-//   let locals = { toolsPath, o };
-//   let secondaryProcessRoutine = _.program.preform({ routine : afterDeathSecondaryProcess, locals })
-//   let secondaryFilePath = _.process.tempOpen({ sourceCode : secondaryProcessRoutine.sourceCode });
-
-//   // debugger
-//   o.execPath = _.path.nativize( secondaryFilePath );
-//   o.mode = 'fork';
-//   o.ipc = true;
-//   o.args = [];
-//   o.detaching = true;
-//   o.inputMirroring = 0;
-//   o.outputPiping = 1;
-//   o.stdio = 'pipe';
-
-//   let result = _.process.startMultiple( o );
-
-//   o.conStart.give( function( err, op )
-//   {
-//     if( !err )
-//     o.process.send( true );
-//     this.take( err, op );
-//   })
-
-//   return result;
-
-//   /* */
-
-//   function afterDeathSecondaryProcess()
-//   {
-//     let _ = require( toolsPath );
-//     _.include( 'wProcess' );
-//     _.include( 'wFiles' );
-
-//     process.on( 'message', () =>
-//     {
-//       process.on( 'disconnect', () => _.process.startMultiple( o ) )
-//     })
-//   }
-
-// }
-
-// var defaults = startAfterDeath_body.defaults = Object.create( startMultiple.defaults );
-
-// let startAfterDeath = _.routineUnite( startMultiple_head, startAfterDeath_body );
-
-//
-
 /**
  * @summary Generates start routine that reuses provided option on each call.
  * @description
@@ -3357,7 +3302,6 @@ let Extension =
   startPassingThrough,
   startNjs,
   startNjsPassingThrough,
-  // startAfterDeath,
   starter,
 
   // children
