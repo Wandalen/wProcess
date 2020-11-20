@@ -34806,6 +34806,7 @@ function terminateTimeOutIgnoreSignal( test )
 
     ready.then( () =>
     {
+      test.case = `mode : ${mode}`;
       var o =
       {
         execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
@@ -34854,17 +34855,17 @@ function terminateTimeOutIgnoreSignal( test )
           Single process on darwin, Two processes on linux and windows
           Child continues to work on linux/windows
         */
-       if( mode === 'shell' )
-       {
-         if( process.platform === 'darwin' )
-         test.identical( _.strCount( op.output, 'program1::end' ), 0 );
-         else
-         test.identical( _.strCount( op.output, 'program1::end' ), 1 );
-       }
-       else
-       {
-         test.identical( _.strCount( op.output, 'program1::end' ), 0 );
-       }
+        if( mode === 'shell' )
+        {
+          if( process.platform === 'darwin' )
+          test.identical( _.strCount( op.output, 'program1::end' ), 0 );
+          else
+          test.identical( _.strCount( op.output, 'program1::end' ), 1 );
+        }
+        else
+        {
+          test.identical( _.strCount( op.output, 'program1::end' ), 0 );
+        }
 
         return null;
       })
