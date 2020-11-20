@@ -10569,31 +10569,17 @@ function startDetachingResourceReady( test )
 //     }
 //     let result = _.process.start( o );
 
-<<<<<<< HEAD
-//     test.is( result !== o.conStart );
-//     test.is( result !== o.conTerminate );
+//     test.true( result !== o.conStart );
+//     test.true( result !== o.conTerminate );
 
 //     o.conStart.thenGive( ( op ) =>
 //     {
 //       track.push( 'conStart' );
-//       test.is( _.mapIs( op ) );
+//       test.true( _.mapIs( op ) );
 //       test.identical( op, o );
-//       test.is( _.process.isAlive( o.process.pid ) );
+//       test.true( _.process.isAlive( o.process.pid ) );
 //       o.process.kill();
 //     })
-=======
-    test.true( result !== o.conStart );
-    test.true( result !== o.conTerminate );
-
-    o.conStart.thenGive( ( op ) =>
-    {
-      track.push( 'conStart' );
-      test.true( _.mapIs( op ) );
-      test.identical( op, o );
-      test.true( _.process.isAlive( o.process.pid ) );
-      o.process.kill();
-    })
->>>>>>> 3f3e64c5aa6106ab9e3d2cd31a5945c024392a59
 
 //     o.conTerminate.then( ( op ) =>
 //     {
@@ -10658,31 +10644,17 @@ function startDetachingResourceReady( test )
 //     }
 //     let result = _.process.start( o );
 
-<<<<<<< HEAD
-//     test.is( result !== o.conStart );
-//     test.is( result !== o.conTerminate );
+//     test.true( result !== o.conStart );
+//     test.true( result !== o.conTerminate );
 
 //     o.conStart.thenGive( ( op ) =>
 //     {
 //       track.push( 'conStart' );
-//       test.is( _.mapIs( op ) );
+//       test.true( _.mapIs( op ) );
 //       test.identical( op, o );
-//       test.is( _.process.isAlive( o.process.pid ) );
+//       test.true( _.process.isAlive( o.process.pid ) );
 //       o.process.kill();
 //     })
-=======
-    test.true( result !== o.conStart );
-    test.true( result !== o.conTerminate );
-
-    o.conStart.thenGive( ( op ) =>
-    {
-      track.push( 'conStart' );
-      test.true( _.mapIs( op ) );
-      test.identical( op, o );
-      test.true( _.process.isAlive( o.process.pid ) );
-      o.process.kill();
-    })
->>>>>>> 3f3e64c5aa6106ab9e3d2cd31a5945c024392a59
 
 //     o.conTerminate.then( ( op ) =>
 //     {
