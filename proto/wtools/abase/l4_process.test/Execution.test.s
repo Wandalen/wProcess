@@ -34844,11 +34844,20 @@ function terminateTimeOutIgnoreSignal( test )
         else
         {
           test.identical( op.exitCode, null );
-          if( process.platform === 'linux' && mode === 'shell' ) /* On linux in mode::shell, process exits with SIGTERM instead of SIGKILL*/
-          test.identical( op.exitSignal, 'SIGTERM' );
+          /*
+            On linux in mode::shell, process exits with SIGTERM instead of SIGKILL
+            SIGTERM handler is not executed
+          */
+          if( process.platform === 'linux' && mode === 'shell' )
+          {
+            test.identical( op.exitSignal, 'SIGTERM' );
+            test.identical( _.strCount( op.output, 'program1::SIGTERM' ), 0 );
+          }
           else
-          test.identical( op.exitSignal, 'SIGKILL' );
-          test.identical( _.strCount( op.output, 'program1::SIGTERM' ), 1 );
+          {
+            test.identical( op.exitSignal, 'SIGKILL' );
+            test.identical( _.strCount( op.output, 'program1::SIGTERM' ), 1 );
+          }
         }
 
         test.identical( _.strCount( op.output, 'program1::begin' ), 1 );
