@@ -2694,104 +2694,6 @@ function starter( o0 )
 starter.defaults = Object.create( startMultiple.defaults );
 
 // --
-// exit
-// --
-
-/**
- * @summary Allows to set/get exit reason of current process.
- * @description Saves exit reason if argument `reason` was provided, otherwise returns current exit reason value.
- * Returns `null` if reason was not defined yet.
- * @function exitReason
- * @module Tools/base/ProcessBasic
- * @namespace Tools.process
- */
-
-function exitReason( reason )
-{
-  if( !_realGlobal_.wTools )
-  _realGlobal_.wTools = Object.create( null );
-  if( !_realGlobal_.wTools.process )
-  _realGlobal_.wTools.process = Object.create( null );
-  if( _realGlobal_.wTools.process._exitReason === undefined )
-  _realGlobal_.wTools.process._exitReason = null;
-  if( reason === undefined )
-  return _realGlobal_.wTools.process._exitReason;
-  _realGlobal_.wTools.process._exitReason = reason;
-  return _realGlobal_.wTools.process._exitReason;
-}
-
-//
-
-/**
- * @summary Allows to set/get exit code of current process.
- * @description Updates exit code if argument `status` was provided and returns previous exit code. Returns current exit code if no argument provided.
- * Returns `0` if exit code was not defined yet.
- * @function exitCode
- * @module Tools/base/ProcessBasic
- * @namespace Tools.process
- */
-
-function exitCode( status )
-{
-  let result;
-
-  _.assert( arguments.length === 0 || arguments.length === 1 );
-  _.assert( status === undefined || _.numberIs( status ) );
-
-  if( _global.process )
-  {
-    result = process.exitCode || 0;
-    if( status !== undefined )
-    process.exitCode = status;
-  }
-
-  return result;
-}
-
-//
-
-function exit( exitCode )
-{
-
-  exitCode = exitCode !== undefined ? exitCode : _.process.exitCode();
-
-  _.assert( arguments.length === 0 || arguments.length === 1 );
-  _.assert( exitCode === undefined || _.numberIs( exitCode ) );
-
-  if( _global.process )
-  {
-    process.exit( exitCode );
-  }
-  else
-  {
-    /*debugger;*/
-  }
-
-}
-
-//
-
-// function exitWithBeep( exitCode )
-function exitWithBeep()
-{
-  let exitCode = _.process.exitCode();
-
-  // exitCode = exitCode !== undefined ? exitCode : _.process.exitCode();
-  // _.assert( arguments.length === 0 || arguments.length === 1 );
-  _.assert( arguments.length === 0, 'Expects no arguments' );
-  _.assert( exitCode === undefined || _.numberIs( exitCode ) );
-
-  _.diagnosticBeep();
-
-  if( exitCode )
-  _.diagnosticBeep();
-
-  _.process.exit( exitCode );
-
-  return exitCode;
-}
-
-// --
 // children
 // --
 
@@ -3412,13 +3314,6 @@ let Extension =
   startNjsPassingThrough,
   startAfterDeath,
   starter,
-
-  // exit
-
-  exitReason,
-  exitCode,
-  exit,
-  exitWithBeep,
 
   // children
 
