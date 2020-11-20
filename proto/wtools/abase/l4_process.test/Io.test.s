@@ -68,10 +68,10 @@ function processOnExitEvent( test )
     return _.process.start( o )
     .then( ( op ) =>
     {
-      test.is( op.exitCode === 0 );
+      test.true( op.exitCode === 0 );
       test.identical( op.ended, true );
-      test.is( _.strHas( op.output, 'timeOut handler executed' ) )
-      test.is( _.strHas( op.output, 'processOnExit: 0' ) );
+      test.true( _.strHas( op.output, 'timeOut handler executed' ) )
+      test.true( _.strHas( op.output, 'processOnExit: 0' ) );
       return null;
     })
 
@@ -94,11 +94,11 @@ function processOnExitEvent( test )
     return _.process.start( o )
     .then( ( op ) =>
     {
-      test.is( op.exitCode === 0 );
+      test.true( op.exitCode === 0 );
       test.identical( op.ended, true );
-      test.is( !_.strHas( op.output, 'timeOut handler executed' ) )
-      test.is( !_.strHas( op.output, 'processOnExit: 0' ) );
-      test.is( _.strHas( op.output, 'processOnExit: SIGINT' ) );
+      test.true( !_.strHas( op.output, 'timeOut handler executed' ) )
+      test.true( !_.strHas( op.output, 'processOnExit: 0' ) );
+      test.true( _.strHas( op.output, 'processOnExit: SIGINT' ) );
       return null;
     });
   })
@@ -1410,10 +1410,10 @@ function pathsRead( test )
 {
   test.case = 'arrayIs';
   var got = _.process.pathsRead();
-  test.is( _.arrayIs( got ) );
+  test.true( _.arrayIs( got ) );
 
   test.case = 'paths are normalized'
-  got.forEach( ( path ) => test.is( _.path.isNormalized( path ) ) )
+  got.forEach( ( path ) => test.true( _.path.isNormalized( path ) ) )
 
 }
 
@@ -1438,8 +1438,8 @@ function systemEntryAddBasic( test )
     var exp = 1;
     var got = _.process.systemEntryAdd( src );
     test.il( got, exp );
-    test.is( a.fileProvider.fileExistsAct( a.abs( 'dir/Index.js' ) ) )
-    test.is( _.objectIs( a.fileProvider.filesRead( a.abs( 'dir/Index.js' ) ) ) )
+    test.true( a.fileProvider.fileExistsAct( a.abs( 'dir/Index.js' ) ) )
+    test.true( _.objectIs( a.fileProvider.filesRead( a.abs( 'dir/Index.js' ) ) ) )
 
     return null;
   } );
@@ -1482,8 +1482,8 @@ function systemEntryAddOptionAllowingMissed( test )
     var expFilePath = process.platform === 'win32' ? a.abs( 'dir' ) + '/fileNotExists.bat' : a.abs( 'dir' ) + '/fileNotExists';
     var got = _.process.systemEntryAdd( src );
     test.il( got, exp );
-    test.is( a.fileProvider.fileExistsAct( expFilePath ) )
-    test.is( _.objectIs( a.fileProvider.filesRead( expFilePath ) ) )
+    test.true( a.fileProvider.fileExistsAct( expFilePath ) )
+    test.true( _.objectIs( a.fileProvider.filesRead( expFilePath ) ) )
 
     return null;
   } );
@@ -1513,8 +1513,8 @@ function systemEntryAddOptionAllowingNotInPath( test )
     var expFilePath = process.platform === 'win32' ? a.abs( 'dir' ) + '/file.bat' : a.abs( 'dir' ) + '/file';
     var got = _.process.systemEntryAdd( src );
     test.il( got, exp );
-    test.is( a.fileProvider.fileExistsAct( expFilePath ) )
-    test.is( _.objectIs( a.fileProvider.filesRead( expFilePath ) ) )
+    test.true( a.fileProvider.fileExistsAct( expFilePath ) )
+    test.true( _.objectIs( a.fileProvider.filesRead( expFilePath ) ) )
 
     return null;
   } );
@@ -1544,8 +1544,8 @@ function systemEntryAddOptionForcing( test )
     var expFilePath = process.platform === 'win32' ? a.abs( 'dir' ) + '/file.bat' : a.abs( 'dir' ) + '/file';
     var got = _.process.systemEntryAdd( src );
     test.il( got, exp );
-    test.is( a.fileProvider.fileExistsAct( expFilePath ) )
-    test.is( _.objectIs( a.fileProvider.filesRead( expFilePath ) ) )
+    test.true( a.fileProvider.fileExistsAct( expFilePath ) )
+    test.true( _.objectIs( a.fileProvider.filesRead( expFilePath ) ) )
 
     return null;
   } );
@@ -1563,8 +1563,8 @@ function systemEntryAddOptionForcing( test )
     var expFilePath = process.platform === 'win32' ? a.abs( 'dir' ) + '/fileNotExists.bat' : a.abs( 'dir' ) + '/fileNotExists';
     var got = _.process.systemEntryAdd( src );
     test.il( got, exp );
-    test.is( a.fileProvider.fileExistsAct( expFilePath ) )
-    test.is( _.objectIs( a.fileProvider.filesRead( expFilePath ) ) )
+    test.true( a.fileProvider.fileExistsAct( expFilePath ) )
+    test.true( _.objectIs( a.fileProvider.filesRead( expFilePath ) ) )
 
     return null;
   } );
