@@ -10253,10 +10253,11 @@ function startAfterDeath( test )
     {
       execPath : 'node program2.js',
       outputCollecting : 1,
+      when : 'afterdeath',
       mode : 'spawn',
     }
 
-    _.process.startAfterDeath( o );
+    _.process.startSingle( o );
 
     o.conStart.thenGive( () =>
     {
@@ -10352,10 +10353,11 @@ function startAfterDeathOutput( test )
       execPath : 'node program2.js',
       mode : 'spawn',
       currentPath : __dirname,
+      when : 'afterdeath',
       stdio : 'inherit'
     }
 
-    _.process.startAfterDeath( o );
+    _.process.startSingle( o );
 
     o.process.on( 'exit', () => //zzz for Vova: remove after enabling exit handler in start
     {
