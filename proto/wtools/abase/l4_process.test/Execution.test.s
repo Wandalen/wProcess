@@ -38019,7 +38019,7 @@ Shows that timeOut kills the child process and handleClose is called
 var Proto =
 {
 
-  name : 'Tools.l4.porocess.Execution',
+  name : 'Tools.l4.process.Execution',
   silencing : 1,
   routineTimeOut : 60000,
   onSuiteBegin : suiteBegin,
