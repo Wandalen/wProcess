@@ -38186,78 +38186,166 @@ function terminateSeveralDetachedChildren( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( program1 );
-  let testAppPath2 = a.program( program2 );
-  let testAppPath3 = a.program( program3 );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
 
-  let o =
+  function run( mode )
   {
-    execPath : 'node program1.js',
-    currentPath : a.routinePath,
-    mode : 'spawn',
-    outputPiping : 1,
-    outputCollecting : 1,
-    throwingExitCode : 0
+    let ready = _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      a.reflect();
+      return null;
+    })
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}`;
+      let testAppPath = a.program( program1 );
+      let testAppPath2 = a.program( program2 );
+      let testAppPath3 = a.program( program3 );
+
+      let o =
+      {
+        execPath : mode === 'fork' ? 'program1.js' : 'node program1.js',
+        currentPath : a.routinePath,
+        mode,
+        outputPiping : 1,
+        outputCollecting : 1,
+        throwingExitCode : 0
+      }
+
+      _.process.start( o );
+
+      let program2Pid = null;
+      let program3Pid = null;
+      let terminate = _.Consequence({ capacity : 0 });
+
+      o.process.stdout.on( 'data', _.routineJoin( null, handleOutput, [ o, terminate ] ) );
+
+      terminate.then( () =>
+      {
+        console.log( 'terminate' );
+        program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
+        console.log( 'program2Pid', program2Pid );
+        program2Pid = program2Pid.pid;
+        program3Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program3Pid' ), encoding : 'json' });
+        console.log( 'program3Pid', program3Pid );
+        program3Pid = program3Pid.pid;
+        return _.process.terminate
+        ({
+          pid : o.process.pid,
+          timeOut : context.t1 * 5,
+          withChildren : 1
+        })
+      })
+
+      o.conTerminate.then( () =>
+      {
+        console.log( 'conTerminate' );
+
+        if( process.platform === 'win32' )
+        {
+          test.notIdentical( o.exitCode, 0 ) /* returns 4294967295 which is -1 to uint32. */
+          test.identical( o.exitSignal, null );
+        }
+        else
+        {
+          test.identical( o.exitCode, null );
+          test.identical( o.exitSignal, 'SIGTERM' );
+        }
+
+        test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
+        test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
+        test.identical( _.strCount( o.output, 'program3::begin' ), 1 );
+        test.identical( _.strCount( o.output, 'program2::end' ), 0 );
+        test.identical( _.strCount( o.output, 'program3::end' ), 0 );
+        test.true( !_.process.isAlive( program2Pid ) );
+        test.true( !_.process.isAlive( program3Pid ) );
+        test.true( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+        test.true( !a.fileProvider.fileExists( a.abs( 'program3end' ) ) );
+
+        return null;
+      })
+
+      return _.Consequence.AndKeep( terminate, o.conTerminate );
+    })
+
+    return ready;
+
   }
 
-  _.process.start( o );
+  /* ORIGINAL */
+  // let o =
+  // {
+  //   execPath : 'node program1.js',
+  //   currentPath : a.routinePath,
+  //   mode : 'spawn',
+  //   outputPiping : 1,
+  //   outputCollecting : 1,
+  //   throwingExitCode : 0
+  // }
 
-  let program2Pid = null;
-  let program3Pid = null;
-  let terminate = _.Consequence();
+  // _.process.start( o );
 
-  o.process.stdout.on( 'data', handleOutput );
+  // let program2Pid = null;
+  // let program3Pid = null;
+  // let terminate = _.Consequence();
 
-  terminate.then( () =>
-  {
-    console.log( 'terminate' );
-    program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
-    console.log( 'program2Pid', program2Pid );
-    program2Pid = program2Pid.pid;
-    program3Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program3Pid' ), encoding : 'json' });
-    console.log( 'program3Pid', program3Pid );
-    program3Pid = program3Pid.pid;
-    return _.process.terminate
-    ({
-      pid : o.process.pid,
-      timeOut : context.t1 * 5,
-      withChildren : 1
-    })
-  })
+  // o.process.stdout.on( 'data', handleOutput );
 
-  o.conTerminate.then( () =>
-  {
-    console.log( 'conTerminate' );
+  // terminate.then( () =>
+  // {
+  //   console.log( 'terminate' );
+  //   program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
+  //   console.log( 'program2Pid', program2Pid );
+  //   program2Pid = program2Pid.pid;
+  //   program3Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program3Pid' ), encoding : 'json' });
+  //   console.log( 'program3Pid', program3Pid );
+  //   program3Pid = program3Pid.pid;
+  //   return _.process.terminate
+  //   ({
+  //     pid : o.process.pid,
+  //     timeOut : context.t1 * 5,
+  //     withChildren : 1
+  //   })
+  // })
 
-    if( process.platform === 'win32' )
-    {
-      test.identical( o.exitCode, 1 );
-      test.identical( o.exitSignal, null );
-    }
-    else
-    {
-      test.identical( o.exitCode, null );
-      test.identical( o.exitSignal, 'SIGTERM' );
-    }
+  // o.conTerminate.then( () =>
+  // {
+  //   console.log( 'conTerminate' );
 
-    test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
-    test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
-    test.identical( _.strCount( o.output, 'program3::begin' ), 1 );
-    test.identical( _.strCount( o.output, 'program2::end' ), 0 );
-    test.identical( _.strCount( o.output, 'program3::end' ), 0 );
-    test.true( !_.process.isAlive( program2Pid ) );
-    test.true( !_.process.isAlive( program3Pid ) );
-    test.true( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
-    test.true( !a.fileProvider.fileExists( a.abs( 'program3end' ) ) );
+  //   if( process.platform === 'win32' )
+  //   {
+  //     test.identical( o.exitCode, 1 );
+  //     test.identical( o.exitSignal, null );
+  //   }
+  //   else
+  //   {
+  //     test.identical( o.exitCode, null );
+  //     test.identical( o.exitSignal, 'SIGTERM' );
+  //   }
 
-    return null;
-  })
+  //   test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
+  //   test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
+  //   test.identical( _.strCount( o.output, 'program3::begin' ), 1 );
+  //   test.identical( _.strCount( o.output, 'program2::end' ), 0 );
+  //   test.identical( _.strCount( o.output, 'program3::end' ), 0 );
+  //   test.true( !_.process.isAlive( program2Pid ) );
+  //   test.true( !_.process.isAlive( program3Pid ) );
+  //   test.true( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
+  //   test.true( !a.fileProvider.fileExists( a.abs( 'program3end' ) ) );
 
-  return _.Consequence.AndKeep( terminate, o.conTerminate );
+  //   return null;
+  // })
+
+  // return _.Consequence.AndKeep( terminate, o.conTerminate );
 
   /* - */
 
-  function handleOutput()
+  function handleOutput( o, terminate )
   {
     if( !_.strHas( o.output, 'program2::begin' ) || !_.strHas( o.output, 'program3::begin' ) )
     return;
@@ -38276,7 +38364,6 @@ function terminateSeveralDetachedChildren( test )
     var o =
     {
       currentPath : __dirname,
-      mode : 'spawn',
       stdio : 'pipe',
       inputMirroring : 0,
       outputPiping : 1,
@@ -38285,8 +38372,8 @@ function terminateSeveralDetachedChildren( test )
       throwingExitCode : 0,
     }
 
-    _.process.start( _.mapExtend( null, o, { execPath : 'node program2.js' }));
-    _.process.start( _.mapExtend( null, o, { execPath : 'node program3.js' }));
+    _.process.start( _.mapExtend( null, o, { execPath : 'node program2.js', mode : 'spawn' }));
+    _.process.start( _.mapExtend( null, o, { execPath : 'node program3.js', mode : 'spawn' }));
 
     let timer = _.time.outError( context.t1*25 );
 
@@ -38351,6 +38438,7 @@ function terminateSeveralDetachedChildren( test )
 
 }
 
+terminateSeveralDetachedChildren.timeOut = 8e4; /* Locally : 7.407s */
 terminateSeveralDetachedChildren.description =
 `
 Program1 spawns two detached children.
