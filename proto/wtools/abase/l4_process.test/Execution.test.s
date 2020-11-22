@@ -18457,81 +18457,216 @@ function starterArgs( test )
   let context = this;
   let a = context.assetFor( test, false );
   let testAppPath = a.program( testApp );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
 
   /* */
 
-
-  let starterOptions =
+  function run( mode )
   {
-    outputCollecting : 1,
-    args : [ 'arg1', 'arg2' ],
-    mode : 'spawn',
-    ready : a.ready
+    let ready = _.Consequence().take( null );
+
+    let starterOptions =
+    {
+      outputCollecting : 1,
+      args : [ 'arg1', 'arg2' ],
+      mode,
+    }
+
+    let shell = _.process.starter( starterOptions )
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, execPath : path + ' arg3'`;
+
+      return shell
+      ({
+        execPath : mode === 'fork' ? testAppPath + ' arg3' : 'node ' + testAppPath + ' arg3',
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        if( mode === 'shell' )
+        {
+          test.identical( op.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
+          test.identical( op.args2, [ testAppPath, 'arg3', '"arg1"', '"arg2"' ] );
+          test.identical( starterOptions.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
+        }
+        else if( mode === 'spawn' )
+        {
+          test.identical( op.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
+          test.identical( op.args2, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
+          test.identical( starterOptions.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
+        }
+        else
+        {
+          test.identical( op.args, [ 'arg3', 'arg1', 'arg2' ] );
+          test.identical( op.args2, [ 'arg3', 'arg1', 'arg2' ] );
+          test.identical( starterOptions.args, [ 'arg3', 'arg1', 'arg2' ] );
+        }
+        test.identical( _.strCount( op.output, `[ 'arg3', 'arg1', 'arg2' ]` ), 1 );
+        test.identical( starterOptions.args2, undefined );
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, execPath : path, args : [ ' arg3' ]`;
+
+      return shell
+      ({
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        args : [ 'arg3' ]
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        if( mode === 'shell' )
+        {
+          test.identical( op.args, [ testAppPath, 'arg3' ] );
+          test.identical( op.args2, [ testAppPath, '"arg3"' ] );
+          test.identical( starterOptions.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
+        }
+        else if( mode === 'spawn' )
+        {
+          test.identical( op.args, [ testAppPath, 'arg3' ] );
+          test.identical( op.args2, [ testAppPath, 'arg3' ] );
+          test.identical( starterOptions.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
+        }
+        else
+        {
+          test.identical( op.args, [ 'arg3' ] );
+          test.identical( op.args2, [ 'arg3' ] );
+          test.identical( starterOptions.args, [ 'arg3', 'arg1', 'arg2' ] );
+        }
+
+        test.identical( _.strCount( op.output, `[ 'arg3' ]` ), 1 );
+        test.identical( starterOptions.args2, undefined );
+        return null;
+      })
+    });
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, execPath : 'node', args : [ testAppPath, 'arg3' ]`;
+
+      return shell
+      ({
+        execPath : mode === 'fork' ? '' : 'node',
+        args : [ testAppPath, 'arg3' ]
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        if( mode === 'shell' )
+        {
+          test.identical( op.args, [ testAppPath, 'arg3' ] );
+          test.identical( op.args2, [ _.strQuote( testAppPath ), '"arg3"' ] );
+          test.identical( starterOptions.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
+        }
+        else if( mode === 'spawn' )
+        {
+          test.identical( op.args, [ testAppPath, 'arg3' ] );
+          test.identical( op.args2, [ testAppPath, 'arg3' ] );
+          test.identical( starterOptions.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
+        }
+        else
+        {
+          test.identical( op.args, [ 'arg3' ] );
+          test.identical( op.args2, [ 'arg3' ] );
+          test.identical( starterOptions.args, [ 'arg3', 'arg1', 'arg2' ] );
+        }
+
+        test.identical( _.strCount( op.output, `[ 'arg3' ]` ), 1 );
+        test.identical( starterOptions.args2, undefined );
+        return null;
+      })
+    })
+
+    return ready;
   }
 
-  let shell = _.process.starter( starterOptions )
+  /* ORIGINAL */
+  // let starterOptions =
+  // {
+  //   outputCollecting : 1,
+  //   args : [ 'arg1', 'arg2' ],
+  //   mode : 'spawn',
+  //   ready : a.ready
+  // }
 
-  /* */
+  // let shell = _.process.starter( starterOptions )
 
-  shell
-  ({
-    execPath : 'node ' + testAppPath + ' arg3',
-  })
-  .then( ( op ) =>
-  {
-    test.identical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    test.identical( op.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
-    test.identical( op.args2, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
-    test.identical( _.strCount( op.output, `[ 'arg3', 'arg1', 'arg2' ]` ), 1 );
-    // test.identical( starterOptions.args, [ 'arg1', 'arg2' ] );
-    // test.identical( starterOptions.args2, [ 'arg1', 'arg2' ] );
-    test.identical( starterOptions.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
-    test.identical( starterOptions.args2, undefined );
-    return null;
-  })
+  // /* */
 
-  shell
-  ({
-    execPath : 'node ' + testAppPath,
-    args : [ 'arg3' ]
-  })
-  .then( ( op ) =>
-  {
-    test.identical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    test.identical( op.args, [ testAppPath, 'arg3' ] );
-    test.identical( op.args2, [ testAppPath, 'arg3' ] );
-    test.identical( _.strCount( op.output, `[ 'arg3' ]` ), 1 );
-    // test.identical( starterOptions.args, [ 'arg1', 'arg2' ] );
-    // test.identical( starterOptions.args2, [ 'arg1', 'arg2' ] );
-    test.identical( starterOptions.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
-    test.identical( starterOptions.args2, undefined );
-    return null;
-  })
+  // shell
+  // ({
+  //   execPath : 'node ' + testAppPath + ' arg3',
+  // })
+  // .then( ( op ) =>
+  // {
+  //   test.identical( op.exitCode, 0 );
+  //   test.identical( op.ended, true );
+  //   test.identical( op.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
+  //   test.identical( op.args2, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
+  //   test.identical( _.strCount( op.output, `[ 'arg3', 'arg1', 'arg2' ]` ), 1 );
+  //   // test.identical( starterOptions.args, [ 'arg1', 'arg2' ] );
+  //   // test.identical( starterOptions.args2, [ 'arg1', 'arg2' ] );
+  //   test.identical( starterOptions.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
+  //   test.identical( starterOptions.args2, undefined );
+  //   return null;
+  // })
 
-  shell
-  ({
-    execPath : 'node',
-    args : [ testAppPath, 'arg3' ]
-  })
-  .then( ( op ) =>
-  {
-    test.identical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    test.identical( op.args, [ testAppPath, 'arg3' ] );
-    test.identical( op.args2, [ testAppPath, 'arg3' ] );
-    test.identical( _.strCount( op.output, `[ 'arg3' ]` ), 1 );
-    // test.identical( starterOptions.args, [ 'arg1', 'arg2' ] );
-    // test.identical( starterOptions.args2, [ 'arg1', 'arg2' ] );
-    test.identical( starterOptions.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
-    test.identical( starterOptions.args2, undefined );
-    return null;
-  })
+  // shell
+  // ({
+  //   execPath : 'node ' + testAppPath,
+  //   args : [ 'arg3' ]
+  // })
+  // .then( ( op ) =>
+  // {
+  //   test.identical( op.exitCode, 0 );
+  //   test.identical( op.ended, true );
+  //   test.identical( op.args, [ testAppPath, 'arg3' ] );
+  //   test.identical( op.args2, [ testAppPath, 'arg3' ] );
+  //   test.identical( _.strCount( op.output, `[ 'arg3' ]` ), 1 );
+  //   // test.identical( starterOptions.args, [ 'arg1', 'arg2' ] );
+  //   // test.identical( starterOptions.args2, [ 'arg1', 'arg2' ] );
+  //   test.identical( starterOptions.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
+  //   test.identical( starterOptions.args2, undefined );
+  //   return null;
+  // })
 
-  /* */
+  // shell
+  // ({
+  //   execPath : 'node',
+  //   args : [ testAppPath, 'arg3' ]
+  // })
+  // .then( ( op ) =>
+  // {
+  //   test.identical( op.exitCode, 0 );
+  //   test.identical( op.ended, true );
+  //   test.identical( op.args, [ testAppPath, 'arg3' ] );
+  //   test.identical( op.args2, [ testAppPath, 'arg3' ] );
+  //   test.identical( _.strCount( op.output, `[ 'arg3' ]` ), 1 );
+  //   // test.identical( starterOptions.args, [ 'arg1', 'arg2' ] );
+  //   // test.identical( starterOptions.args2, [ 'arg1', 'arg2' ] );
+  //   test.identical( starterOptions.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
+  //   test.identical( starterOptions.args2, undefined );
+  //   return null;
+  // })
 
-  return a.ready;
+  // /* */
+
+  // return a.ready;
 
   /* - */
 
