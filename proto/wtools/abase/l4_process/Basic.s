@@ -325,6 +325,7 @@ function _eventsSetup()
 function _eventExitHandle()
 {
   let args = arguments;
+  _.process.exiting = true;
   process.removeListener( 'exit', _.process._registeredExitHandler );
   _.process._registeredExitHandler = null;
   _.process.eventGive({ event : 'exit', args });
@@ -637,6 +638,7 @@ let Extension =
   _verbosity : 1,
   _sanitareTime : 1,
   _exitReason : null,
+  exiting : false,
 
   _tempFiles,
   _registeredExitHandler : null,
