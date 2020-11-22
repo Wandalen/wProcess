@@ -2460,38 +2460,81 @@ function startWithoutExecPath( test )
   let counter = 0;
   let time = 0;
   let filePath = a.path.nativize( a.abs( a.routinePath, 'file.txt' ) );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
 
-  /* - */
-
-  a.ready.then( ( arg ) =>
+  function run( mode )
   {
-    test.case = 'single';
-    time = _.time.now();
-    return null;
-  })
+    let ready = _.Consequence().take( null );
 
-  let singleOption =
-  {
-    args : [ 'node', programPath, '1000' ],
-    ready : a.ready,
-    verbosity : 3,
-    outputCollecting : 1,
+    ready.then( ( arg ) =>
+    {
+      test.case = `mode : ${mode}, single`;
+      time = _.time.now();
+      counter = 0;
+
+      return null;
+    })
+
+    ready.then( () =>
+    {
+      let singleOption =
+      {
+        args : mode === 'fork' ? [ programPath, '1000' ] : [ 'node', programPath, '1000' ],
+        mode,
+        verbosity : 3,
+        outputCollecting : 1,
+      }
+
+      return _.process.start( singleOption )
+      .then( ( arg ) =>
+      {
+        test.identical( arg.exitCode, 0 );
+        test.true( singleOption === arg );
+        test.true( _.strHas( arg.output, 'begin 1000' ) );
+        test.true( _.strHas( arg.output, 'end 1000' ) );
+        test.identical( a.fileProvider.fileRead( filePath ), 'written by 1000' );
+        a.fileProvider.fileDelete( filePath );
+        counter += 1;
+        return null;
+      });
+    })
+
+    return ready;
+
   }
 
-  _.process.start( singleOption )
-  .then( ( arg ) =>
-  {
-    test.identical( arg.exitCode, 0 );
-    test.true( singleOption === arg );
-    test.true( _.strHas( arg.output, 'begin 1000' ) );
-    test.true( _.strHas( arg.output, 'end 1000' ) );
-    test.identical( a.fileProvider.fileRead( filePath ), 'written by 1000' );
-    a.fileProvider.fileDelete( filePath );
-    counter += 1;
-    return null;
-  });
+  /* ORIGINAL */
+  // a.ready.then( ( arg ) =>
+  // {
+  //   test.case = 'single';
+  //   time = _.time.now();
+  //   return null;
+  // })
 
-  return a.ready;
+  // let singleOption =
+  // {
+  //   args : [ 'node', programPath, '1000' ],
+  //   ready : a.ready,
+  //   verbosity : 3,
+  //   outputCollecting : 1,
+  // }
+
+  // _.process.start( singleOption )
+  // .then( ( arg ) =>
+  // {
+  //   test.identical( arg.exitCode, 0 );
+  //   test.true( singleOption === arg );
+  //   test.true( _.strHas( arg.output, 'begin 1000' ) );
+  //   test.true( _.strHas( arg.output, 'end 1000' ) );
+  //   test.identical( a.fileProvider.fileRead( filePath ), 'written by 1000' );
+  //   a.fileProvider.fileDelete( filePath );
+  //   counter += 1;
+  //   return null;
+  // });
+
+  // return a.ready;
 
   /* - */
 
@@ -2524,6 +2567,8 @@ function startWithoutExecPath( test )
     }
   }
 }
+
+startWithoutExecPath.timeOut = 7e4; /* Locally : 6.705s */
 
 //
 
