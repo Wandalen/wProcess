@@ -35621,67 +35621,134 @@ function killComplex( test )
   let context = this;
   let a = context.assetFor( test, false );
   let testAppPath = a.program( testApp );
-  let testAppPath2 = a.program( testApp2 );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
 
   /* */
 
-  a.ready
-
-  .then( () =>
+  function run( mode )
   {
-    test.case = 'Kill child of child process'
-    var o =
-    {
-      execPath :  'node ' + testAppPath2,
-      mode : 'spawn',
-      ipc : 1,
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
+    let ready = _.Consequence().take( null );
+    let testAppPath2 = a.program({ routine : testApp2, locals : { mode } });
 
-    let ready = _.process.start( o );
+    ready
 
-    let pid = null;
-    let childOfChild = null;
-    o.process.on( 'message', ( e ) =>
+    .then( () =>
     {
-      if( !pid )
+      test.case = `mode : ${mode}, Kill child of child process`;
+      var o =
       {
-        pid = _.numberFrom( e )
-        _.process.kill( pid );
+        execPath : 'node ' + testAppPath2,
+        mode : 'spawn',
+        ipc : 1,
+        outputCollecting : 1,
+        throwingExitCode : 0
       }
-      else
+
+      let ready = _.process.start( o );
+
+      let pid = null;
+      let childOfChild = null;
+      o.process.on( 'message', ( e ) =>
       {
-        childOfChild = e;
-      }
+        if( !pid )
+        {
+          pid = _.numberFrom( e )
+          _.process.kill( pid );
+        }
+        else
+        {
+          childOfChild = e;
+        }
+      })
+
+      ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, null );
+        test.identical( childOfChild.pid, pid );
+        if( process.platform === 'win32' )
+        {
+          test.identical( childOfChild.exitCode, 1 );
+          test.identical( childOfChild.exitSignal, null );
+        }
+        else
+        {
+          test.identical( childOfChild.exitCode, null );
+          test.identical( childOfChild.exitSignal, 'SIGKILL' );
+        }
+
+        a.fileProvider.fileDelete( testAppPath2 );
+        return null;
+      })
+
+      return ready;
     })
 
-    ready.then( ( op ) =>
-    {
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      test.identical( op.exitSignal, null );
-      test.identical( childOfChild.pid, pid );
-      if( process.platform === 'win32' )
-      {
-        test.identical( childOfChild.exitCode, 1 );
-        test.identical( childOfChild.exitSignal, null );
-      }
-      else
-      {
-        test.identical( childOfChild.exitCode, null );
-        test.identical( childOfChild.exitSignal, 'SIGKILL' );
-      }
-
-      return null;
-    })
+    /* */
 
     return ready;
-  })
+  }
 
-  /* */
+  /* ORIGINAL */
+  // a.ready
+  // .then( () =>
+  // {
+  //   test.case = 'Kill child of child process'
+  //   var o =
+  //   {
+  //     execPath :  'node ' + testAppPath2,
+  //     mode : 'spawn',
+  //     ipc : 1,
+  //     outputCollecting : 1,
+  //     throwingExitCode : 0
+  //   }
 
-  return a.ready;
+  //   let ready = _.process.start( o );
+
+  //   let pid = null;
+  //   let childOfChild = null;
+  //   o.process.on( 'message', ( e ) =>
+  //   {
+  //     if( !pid )
+  //     {
+  //       pid = _.numberFrom( e )
+  //       _.process.kill( pid );
+  //     }
+  //     else
+  //     {
+  //       childOfChild = e;
+  //     }
+  //   })
+
+  //   ready.then( ( op ) =>
+  //   {
+  //     test.identical( op.exitCode, 0 );
+  //     test.identical( op.ended, true );
+  //     test.identical( op.exitSignal, null );
+  //     test.identical( childOfChild.pid, pid );
+  //     if( process.platform === 'win32' )
+  //     {
+  //       test.identical( childOfChild.exitCode, 1 );
+  //       test.identical( childOfChild.exitSignal, null );
+  //     }
+  //     else
+  //     {
+  //       test.identical( childOfChild.exitCode, null );
+  //       test.identical( childOfChild.exitSignal, 'SIGKILL' );
+  //     }
+
+  //     return null;
+  //   })
+
+  //   return ready;
+  // })
+
+  // /* */
+
+  // return a.ready;
 
   /* - */
 
@@ -35699,7 +35766,7 @@ function killComplex( test )
     _.include( 'wProcess' );
     _.include( 'wFiles' );
     var testAppPath = _.fileProvider.path.nativize( _.path.join( __dirname, 'testApp.js' ) );
-    var o = { execPath : 'node ' + testAppPath, throwingExitCode : 0  }
+    var o = { execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath, mode, throwingExitCode : 0 }
     var ready = _.process.start( o )
     process.send( o.process.pid );
     ready.then( ( op ) =>
