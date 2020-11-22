@@ -12983,47 +12983,80 @@ ProcessWatched should not throw any error.
 
 //
 
-/* qqq for Yevhen : implement for other modes */
+/* qqq for Yevhen : implement for other modes | aaa : Done. */
 function startDetachingChildExistsBeforeParentWaitForTermination( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
   let testAppChildPath = a.program( testAppChild );
-
-  a.ready
-
-  .then( () =>
-  {
-    test.case = 'detaching on, disconnected forked child'
-    let o =
-    {
-      execPath : 'testAppChild.js',
-      mode : 'fork',
-      stdio : 'ignore',
-      outputPiping : 0,
-      outputCollecting : 0,
-      currentPath : a.routinePath,
-      detaching : 1
-    }
-
-    _.process.start( o );
-
-    o.conTerminate.finally( ( err, op ) =>
-    {
-      test.identical( err, undefined );
-      test.identical( op, o );
-      test.true( !_.process.isAlive( o.process.pid ) )
-      return null;
-    })
-
-    return o.conTerminate;
-  })
-
-  /* */
-
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
 
-  /* */
+  function run( mode )
+  {
+    let ready = _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, detaching on, disconnected child`
+      let o =
+      {
+        execPath : mode === 'fork' ? 'testAppChild.js' : 'node testAppChild.js',
+        mode,
+        stdio : 'ignore',
+        outputPiping : 0,
+        outputCollecting : 0,
+        currentPath : a.routinePath,
+        detaching : 1
+      }
+
+      _.process.start( o );
+
+      o.conTerminate.finally( ( err, op ) =>
+      {
+        test.identical( err, undefined );
+        test.identical( op, o );
+        test.true( !_.process.isAlive( o.process.pid ) )
+        return null;
+      })
+
+      return o.conTerminate;
+    })
+
+    return ready;
+  }
+  /* ORIGINAL */
+  // .then( () =>
+  // {
+  //   test.case = 'detaching on, disconnected forked child'
+  //   let o =
+  //   {
+  //     execPath : 'testAppChild.js',
+  //     mode : 'fork',
+  //     stdio : 'ignore',
+  //     outputPiping : 0,
+  //     outputCollecting : 0,
+  //     currentPath : a.routinePath,
+  //     detaching : 1
+  //   }
+
+  //   _.process.start( o );
+
+  //   o.conTerminate.finally( ( err, op ) =>
+  //   {
+  //     test.identical( err, undefined );
+  //     test.identical( op, o );
+  //     test.true( !_.process.isAlive( o.process.pid ) )
+  //     return null;
+  //   })
+
+  //   return o.conTerminate;
+  // })
+
+  // return a.ready;
+
+  /* - */
 
   function testAppChild()
   {
@@ -13042,8 +13075,7 @@ function startDetachingChildExistsBeforeParentWaitForTermination( test )
 
 }
 
-//
-
+startDetachingChildExistsBeforeParentWaitForTermination.timeOut = 12e4; /* Locally : 11.380s */
 startDetachingChildExistsBeforeParentWaitForTermination.description =
 `
 Parent starts child process in detached mode.
