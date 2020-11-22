@@ -12494,67 +12494,131 @@ Check if exit event is called.
 
 //
 
-/* qqq for Yevhen : implement for other modes */
+/* qqq for Yevhen : implement for other modes | aaa : Done. */
 function startDetachingChildExitsAfterParent( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppParentPath = a.program( testAppParent );
-  let testAppChildPath = a.program( testAppChild );
-  let testFilePath = a.abs( a.routinePath, 'testFile' );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
 
-  /* */
-
-  a.ready
-
-  .then( () =>
+  function run( mode )
   {
-    test.case = 'parent disconnects detached child process and exits, child contiues to work'
-    let o =
-    {
-      execPath : 'node testAppParent.js',
-      mode : 'spawn',
-      stdio : 'pipe',
-      outputPiping : 1,
-      outputCollecting : 1,
-      currentPath : a.routinePath,
-      detaching : 0,
-      ipc : 1,
-    }
-    let con = _.process.start( o );
+    let ready = _.Consequence().take( null );
 
-    let childPid;
-
-    o.process.on( 'message', ( e ) =>
+    ready.then( () =>
     {
-      childPid = _.numberFrom( e );
-    })
-
-    o.conTerminate.then( ( op ) =>
-    {
-      test.will = 'parent is dead, detached child is still running'
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      test.true( !_.process.isAlive( o.process.pid ) );
-      test.true( _.process.isAlive( childPid ) );
-      return _.time.out( context.t2 * 2 ); /* 10000 */ /* zzz */
-    })
-
-    o.conTerminate.then( () =>
-    {
-      let childPid2 = a.fileProvider.fileRead( testFilePath );
-      childPid2 = _.numberFrom( childPid2 )
-      test.true( !_.process.isAlive( childPid2 ) );
-      test.identical( childPid, childPid2 )
+      a.reflect();
       return null;
     })
 
-    return o.conTerminate;
-  })
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, parent disconnects detached child process and exits, child contiues to work`;
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode } });
+      let testAppChildPath = a.program( testAppChild );
+      let testFilePath = a.abs( a.routinePath, 'testFile' );
 
-  /*  */
+      let o =
+      {
+        execPath : 'node testAppParent.js',
+        mode : 'spawn',
+        stdio : 'pipe',
+        outputPiping : 1,
+        outputCollecting : 1,
+        currentPath : a.routinePath,
+        detaching : 0,
+        ipc : 1,
+      }
+      let con = _.process.start( o );
 
-  return a.ready;
+      let childPid;
+
+      o.process.on( 'message', ( e ) =>
+      {
+        childPid = _.numberFrom( e );
+      })
+
+      o.conTerminate.then( ( op ) =>
+      {
+        test.will = 'parent is dead, detached child is still running'
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.true( !_.process.isAlive( o.process.pid ) );
+        test.true( _.process.isAlive( childPid ) );
+        return _.time.out( context.t1 * 10 ); /* 10000 */ /* zzz */
+      })
+
+      o.conTerminate.then( () =>
+      {
+        let childPid2 = a.fileProvider.fileRead( testFilePath );
+        childPid2 = _.numberFrom( childPid2 )
+        test.true( !_.process.isAlive( childPid2 ) );
+        if( process.platform === 'darwin' || mode !== 'shell' ) /* On Windows and Linux intermidiate process is created in mode::shell */
+        test.identical( childPid, childPid2 );
+
+        return null;
+      })
+
+      return o.conTerminate;
+    })
+
+    return ready;
+
+  }
+
+  /* ORIGINAL */
+  // a.ready
+
+  // .then( () =>
+  // {
+  //   test.case = 'parent disconnects detached child process and exits, child contiues to work'
+  //   let o =
+  //   {
+  //     execPath : 'node testAppParent.js',
+  //     mode : 'spawn',
+  //     stdio : 'pipe',
+  //     outputPiping : 1,
+  //     outputCollecting : 1,
+  //     currentPath : a.routinePath,
+  //     detaching : 0,
+  //     ipc : 1,
+  //   }
+  //   let con = _.process.start( o );
+
+  //   let childPid;
+
+  //   o.process.on( 'message', ( e ) =>
+  //   {
+  //     childPid = _.numberFrom( e );
+  //   })
+
+  //   o.conTerminate.then( ( op ) =>
+  //   {
+  //     test.will = 'parent is dead, detached child is still running'
+  //     test.identical( op.exitCode, 0 );
+  //     test.identical( op.ended, true );
+  //     test.true( !_.process.isAlive( o.process.pid ) );
+  //     test.true( _.process.isAlive( childPid ) );
+  //     return _.time.out( context.t2 * 2 ); /* 10000 */ /* zzz */
+  //   })
+
+  //   o.conTerminate.then( () =>
+  //   {
+  //     let childPid2 = a.fileProvider.fileRead( testFilePath );
+  //     childPid2 = _.numberFrom( childPid2 )
+  //     test.true( !_.process.isAlive( childPid2 ) );
+  //     test.identical( childPid, childPid2 )
+  //     return null;
+  //   })
+
+  //   return o.conTerminate;
+  // })
+
+  // /*  */
+
+  // return a.ready;
 
   /* - */
 
@@ -12566,12 +12630,12 @@ function startDetachingChildExitsAfterParent( test )
 
     let o =
     {
-      execPath : 'node testAppChild.js',
+      execPath : mode === 'fork' ? 'testAppChild.js' : 'node testAppChild.js',
       stdio : 'ignore',
       outputPiping : 0,
       outputCollecting : 0,
       detaching : true,
-      mode : 'spawn',
+      mode,
     }
 
     _.process.start( o );
@@ -12589,7 +12653,7 @@ function startDetachingChildExitsAfterParent( test )
 
     console.log( 'Child process start' );
 
-    _.time.out( context.t2, () => /* 5000 */
+    _.time.out( context.t1 * 5, () => /* 5000 */
     {
       let filePath = _.path.join( __dirname, 'testFile' );
       _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
@@ -12598,6 +12662,7 @@ function startDetachingChildExitsAfterParent( test )
   }
 }
 
+startDetachingChildExitsAfterParent.timeOut = 36e4; /* Locally : 35.792s */
 startDetachingChildExitsAfterParent.description =
 `
 Parent starts child process in detached mode and disconnects it.
