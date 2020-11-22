@@ -10158,78 +10158,156 @@ function startAfterDeath( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let stack = [];
   let program1Path = a.program( program1 );
   let program2Path = a.program( program2 );
+  let program2PidPath = a.abs( a.routinePath, 'program2Pid' );
+
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
 
   /* */
 
-  let program2PidPath = a.abs( a.routinePath, 'program2Pid' );
-
-  a.ready
-
-  .then( () =>
+  function run( mode )
   {
-    let o =
-    {
-      execPath : 'node program1.js',
-      mode : 'spawn',
-      outputCollecting : 1,
-      outputPiping : 1,
-      currentPath : a.routinePath,
-      ipc : 1,
-    }
-    // debugger;
-    _.process.start( o );
-    let secondaryPid;
-    // debugger;
+    let ready = _.Consequence().take( null );
 
-    o.process.on( 'message', ( e ) =>
+    ready.then( () =>
     {
-      secondaryPid = _.numberFrom( e );
+      test.case = `mode : ${mode}`;
+      let stack = [];
+      let o =
+      {
+        execPath : mode === 'fork' ? 'program1.js' : 'node program1.js',
+        mode,
+        outputCollecting : 1,
+        outputPiping : 1,
+        currentPath : a.routinePath,
+        ipc : 1,
+      }
+
+      if( mode === 'shell' ) /* mode::shell doesn't support ipc */
+      return test.shouldThrowErrorSync( () => _.process.start( o ) )
+
+      // debugger;
+      _.process.start( o );
+      let secondaryPid;
+      // debugger;
+
+      o.process.on( 'message', ( e ) =>
+      {
+        secondaryPid = _.numberFrom( e );
+      })
+
+      o.conTerminate.then( () =>
+      {
+        stack.push( 'conTerminate1' );
+
+        test.will = 'program1 terminated'
+        test.identical( o.exitCode, 0 );
+
+        test.will = 'secondary process is alive'
+        test.true( _.process.isAlive( secondaryPid ) );
+
+        test.will = 'child of secondary process is still alive'
+        test.true( !a.fileProvider.fileExists( program2PidPath ) );
+
+        return _.time.out( context.t2 * 2 ); /* 10000 */
+      })
+
+      o.conTerminate.then( () =>
+      {
+        stack.push( 'conTerminate2' );
+        test.identical( stack, [ 'conTerminate1', 'conTerminate2' ] );
+
+        test.case = 'secondary process is terminated'
+        test.true( !_.process.isAlive( secondaryPid ) );
+
+        test.case = 'child of secondary process is terminated'
+        test.true( a.fileProvider.fileExists( program2PidPath ) );
+        let program2Pid = a.fileProvider.fileRead( program2PidPath );
+        program2Pid = _.numberFrom( program2Pid );
+
+        test.case = 'secondary process and child are not same'
+        test.true( !_.process.isAlive( program2Pid ) );
+        test.notIdentical( secondaryPid, program2Pid );
+
+        a.fileProvider.fileDelete( program2PidPath );
+        return null;
+      })
+
+      return o.conTerminate;
     })
 
-    o.conTerminate.then( () =>
-    {
-      stack.push( 'conTerminate1' );
+    return ready;
 
-      test.will = 'program1 terminated'
-      test.identical( o.exitCode, 0 );
+  }
 
-      test.will = 'secondary process is alive'
-      test.true( _.process.isAlive( secondaryPid ) );
+  /* ORIGINAL */
+  // a.ready
 
-      test.will = 'child of secondary process is still alive'
-      test.true( !a.fileProvider.fileExists( program2PidPath ) );
+  // .then( () =>
+  // {
+  //   let o =
+  //   {
+  //     execPath : 'node program1.js',
+  //     mode : 'spawn',
+  //     outputCollecting : 1,
+  //     outputPiping : 1,
+  //     currentPath : a.routinePath,
+  //     ipc : 1,
+  //   }
+  //   // debugger;
+  //   _.process.start( o );
+  //   let secondaryPid;
+  //   // debugger;
 
-      return _.time.out( context.t2 * 2 ); /* 10000 */
-    })
+  //   o.process.on( 'message', ( e ) =>
+  //   {
+  //     secondaryPid = _.numberFrom( e );
+  //   })
 
-    o.conTerminate.then( () =>
-    {
-      stack.push( 'conTerminate2' );
-      test.identical( stack, [ 'conTerminate1', 'conTerminate2' ] );
+  //   o.conTerminate.then( () =>
+  //   {
+  //     stack.push( 'conTerminate1' );
 
-      test.case = 'secondary process is terminated'
-      test.true( !_.process.isAlive( secondaryPid ) );
+  //     test.will = 'program1 terminated'
+  //     test.identical( o.exitCode, 0 );
 
-      test.case = 'child of secondary process is terminated'
-      test.true( a.fileProvider.fileExists( program2PidPath ) );
-      let program2Pid = a.fileProvider.fileRead( program2PidPath );
-      program2Pid = _.numberFrom( program2Pid );
+  //     test.will = 'secondary process is alive'
+  //     test.true( _.process.isAlive( secondaryPid ) );
 
-      test.case = 'secondary process and child are not same'
-      test.true( !_.process.isAlive( program2Pid ) );
-      test.notIdentical( secondaryPid, program2Pid );
-      return null;
-    })
+  //     test.will = 'child of secondary process is still alive'
+  //     test.true( !a.fileProvider.fileExists( program2PidPath ) );
 
-    return o.conTerminate;
-  })
+  //     return _.time.out( context.t2 * 2 ); /* 10000 */
+  //   })
 
-  /*  */
+  //   o.conTerminate.then( () =>
+  //   {
+  //     stack.push( 'conTerminate2' );
+  //     test.identical( stack, [ 'conTerminate1', 'conTerminate2' ] );
 
-  return a.ready;
+  //     test.case = 'secondary process is terminated'
+  //     test.true( !_.process.isAlive( secondaryPid ) );
+
+  //     test.case = 'child of secondary process is terminated'
+  //     test.true( a.fileProvider.fileExists( program2PidPath ) );
+  //     let program2Pid = a.fileProvider.fileRead( program2PidPath );
+  //     program2Pid = _.numberFrom( program2Pid );
+
+  //     test.case = 'secondary process and child are not same'
+  //     test.true( !_.process.isAlive( program2Pid ) );
+  //     test.notIdentical( secondaryPid, program2Pid );
+  //     return null;
+  //   })
+
+  //   return o.conTerminate;
+  // })
+
+  // /*  */
+
+  // return a.ready;
 
   /* - */
 
@@ -10280,6 +10358,7 @@ function startAfterDeath( test )
 
 }
 
+startAfterDeath.timeOut = 35e4; /* Locally : 34.737s */
 startAfterDeath.description =
 `
 Spawns program1 as "main" process.
