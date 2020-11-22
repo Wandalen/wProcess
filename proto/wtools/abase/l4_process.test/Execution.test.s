@@ -14656,66 +14656,141 @@ function startWithDelayOnReady( test )
   let programPath = a.program( program1 );
   let time1 = _.time.now();
 
-  a.ready.delay( context.t1 ); /* 1000 */
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
 
   /* */
 
-  let options =
+  function run( mode )
   {
-    execPath : 'node',
-    args : programPath,
-    currentPath : a.abs( '.' ),
-    throwingExitCode : 1,
-    applyingExitCode : 0,
-    inputMirroring : 1,
-    outputCollecting : 1,
-    stdio : 'pipe',
-    sync : 0,
-    deasync : 0,
-    ready : a.ready,
+    let ready = _.Consequence().take( null );
+    let con = _.Consequence().take( null );
+    con.delay( context.t1 ); /* 1000 */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}`;
+      let options =
+      {
+        execPath : mode === 'fork' ? '' : 'node',
+        mode,
+        args : programPath,
+        currentPath : a.abs( '.' ),
+        throwingExitCode : 1,
+        applyingExitCode : 0,
+        inputMirroring : 1,
+        outputCollecting : 1,
+        stdio : 'pipe',
+        sync : 0,
+        deasync : 0,
+        ready : con,
+      }
+
+      _.process.start( options );
+
+      test.true( _.consequenceIs( options.conStart ) );
+      test.true( _.consequenceIs( options.conDisconnect ) );
+      test.true( _.consequenceIs( options.conTerminate ) );
+      test.true( _.consequenceIs( options.ready ) );
+      test.true( options.conStart !== options.ready );
+      test.true( options.conDisconnect !== options.ready );
+      test.true( options.conTerminate !== options.ready );
+
+      options.conStart
+      .then( ( op ) =>
+      {
+        test.true( options === op );
+        test.identical( options.output, '' );
+        test.identical( options.exitCode, null );
+        test.identical( options.exitSignal, null );
+        test.identical( options.process.exitCode, null );
+        test.identical( options.process.signalCode, null );
+        test.identical( options.ended, false );
+        test.identical( options.exitReason, null );
+        test.true( !!options.process );
+        return null;
+      });
+
+      options.conTerminate
+      .finally( ( err, op ) =>
+      {
+        test.identical( err, undefined );
+        debugger;
+        test.identical( op.output, 'program1:begin\nprogram1:end\n' );
+        test.identical( op.exitCode, 0 );
+        test.identical( op.exitSignal, null );
+        test.identical( op.ended, true );
+        test.identical( op.exitReason, 'normal' );
+        return null;
+      });
+
+      /* */
+
+      return options.conTerminate;
+    })
+
+    return ready;
   }
 
-  _.process.start( options );
 
-  test.true( _.consequenceIs( options.conStart ) );
-  test.true( _.consequenceIs( options.conDisconnect ) );
-  test.true( _.consequenceIs( options.conTerminate ) );
-  test.true( _.consequenceIs( options.ready ) );
-  test.true( options.conStart !== options.ready );
-  test.true( options.conDisconnect !== options.ready );
-  test.true( options.conTerminate !== options.ready );
+  /* ORIGINAL */
+  // let options =
+  // {
+  //   execPath : 'node',
+  //   args : programPath,
+  //   currentPath : a.abs( '.' ),
+  //   throwingExitCode : 1,
+  //   applyingExitCode : 0,
+  //   inputMirroring : 1,
+  //   outputCollecting : 1,
+  //   stdio : 'pipe',
+  //   sync : 0,
+  //   deasync : 0,
+  //   ready : a.ready,
+  // }
 
-  options.conStart
-  .then( ( op ) =>
-  {
-    test.true( options === op );
-    test.identical( options.output, '' );
-    test.identical( options.exitCode, null );
-    test.identical( options.exitSignal, null );
-    test.identical( options.process.exitCode, null );
-    test.identical( options.process.signalCode, null );
-    test.identical( options.ended, false );
-    test.identical( options.exitReason, null );
-    test.true( !!options.process );
-    return null;
-  });
+  // _.process.start( options );
 
-  options.conTerminate
-  .finally( ( err, op ) =>
-  {
-    test.identical( err, undefined );
-    debugger;
-    test.identical( op.output, 'program1:begin\nprogram1:end\n' );
-    test.identical( op.exitCode, 0 );
-    test.identical( op.exitSignal, null );
-    test.identical( op.ended, true );
-    test.identical( op.exitReason, 'normal' );
-    return null;
-  });
+  // test.true( _.consequenceIs( options.conStart ) );
+  // test.true( _.consequenceIs( options.conDisconnect ) );
+  // test.true( _.consequenceIs( options.conTerminate ) );
+  // test.true( _.consequenceIs( options.ready ) );
+  // test.true( options.conStart !== options.ready );
+  // test.true( options.conDisconnect !== options.ready );
+  // test.true( options.conTerminate !== options.ready );
 
-  /* */
+  // options.conStart
+  // .then( ( op ) =>
+  // {
+  //   test.true( options === op );
+  //   test.identical( options.output, '' );
+  //   test.identical( options.exitCode, null );
+  //   test.identical( options.exitSignal, null );
+  //   test.identical( options.process.exitCode, null );
+  //   test.identical( options.process.signalCode, null );
+  //   test.identical( options.ended, false );
+  //   test.identical( options.exitReason, null );
+  //   test.true( !!options.process );
+  //   return null;
+  // });
 
-  return a.ready;
+  // options.conTerminate
+  // .finally( ( err, op ) =>
+  // {
+  //   test.identical( err, undefined );
+  //   debugger;
+  //   test.identical( op.output, 'program1:begin\nprogram1:end\n' );
+  //   test.identical( op.exitCode, 0 );
+  //   test.identical( op.exitSignal, null );
+  //   test.identical( op.ended, true );
+  //   test.identical( op.exitReason, 'normal' );
+  //   return null;
+  // });
+
+  // /* */
+
+  // return a.ready;
 
   /* */
 
@@ -14728,6 +14803,7 @@ function startWithDelayOnReady( test )
 
 }
 
+startWithDelayOnReady.timeOut = 52e4; /* Locally : 51.614s */
 startWithDelayOnReady.description =
 `
   - consequence conStart has delay
