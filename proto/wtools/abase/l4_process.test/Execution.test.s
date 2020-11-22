@@ -28206,227 +28206,458 @@ function killOptionWithChildren( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
   let testAppPath2 = a.program( testApp2 );
-  let testAppPath3 = a.program( testApp3 );
-
-  /* */
-
-  a.ready
-
-  .then( () =>
-  {
-    test.case = 'child -> child, kill first child'
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'spawn',
-      ipc : 1,
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o );
-    let lastChildPid, killed;
-
-    o.process.on( 'message', ( e ) =>
-    {
-      lastChildPid = _.numberFrom( e );
-      killed = _.process.kill({ pid : o.process.pid, withChildren : 1 });
-    })
-
-    a.ready.then( ( op ) =>
-    {
-      return killed.then( () =>
-      {
-        if( process.platform === 'win32' )
-        {
-          test.identical( op.exitCode, 1 );
-          test.identical( op.ended, true );
-          test.identical( op.exitSignal, null );
-        }
-        else
-        {
-          test.identical( op.exitCode, null );
-          test.identical( op.ended, true );
-          test.identical( op.exitSignal, 'SIGKILL' );
-        }
-        test.identical( _.strCount( op.output, 'Application timeout' ), 0 );
-        test.true( !_.process.isAlive( o.process.pid ) );
-        test.true( !_.process.isAlive( lastChildPid ) );
-        return null;
-      })
-    })
-
-    return ready;
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    test.case = 'child -> child, kill last child'
-    var o =
-    {
-      execPath :  'node ' + testAppPath,
-      mode : 'spawn',
-      ipc : 1,
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o );
-    let lastChildPid, killed;
-
-    o.process.on( 'message', ( e ) =>
-    {
-      lastChildPid = _.numberFrom( e );
-      killed = _.process.kill({ pid : lastChildPid, withChildren : 1 });
-    })
-
-    ready.then( ( op ) =>
-    {
-      return killed.then( () =>
-      {
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, null );
-        test.identical( _.strCount( op.output, 'Application timeout' ), 0 );
-        test.true( !_.process.isAlive( o.process.pid ) );
-        test.true( !_.process.isAlive( lastChildPid ) );
-        return null;
-      })
-    })
-
-    return ready;
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    test.case = 'parent -> child*'
-    var o =
-    {
-      execPath : 'node ' + testAppPath3,
-      mode : 'spawn',
-      ipc : 1,
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o );
-    let children, killed;
-
-    o.process.on( 'message', ( e ) =>
-    {
-      children = e.map( ( src ) => _.numberFrom( src ) )
-      killed = _.process.kill({ pid : o.process.pid, withChildren : 1 });
-    })
-
-    ready.then( ( op ) =>
-    {
-      return killed.then( () =>
-      {
-        if( process.platform === 'win32' )
-        {
-          test.identical( op.exitCode, 1 );
-          test.identical( op.ended, true );
-          test.identical( op.exitSignal, null );
-        }
-        else
-        {
-          test.identical( op.exitCode, null );
-          test.identical( op.ended, true );
-          test.identical( op.exitSignal, 'SIGKILL' );
-        }
-        test.identical( _.strCount( op.output, 'Application timeout' ), 0 );
-        test.true( !_.process.isAlive( o.process.pid ) );
-        test.true( !_.process.isAlive( children[ 0 ] ) )
-        test.true( !_.process.isAlive( children[ 1 ] ) );
-        return null;
-      })
-    })
-
-    return ready;
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    test.case = 'parent -> detached'
-    var o =
-    {
-      execPath : 'node ' + testAppPath3 + ' detached',
-      mode : 'spawn',
-      ipc : 1,
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    let ready = _.process.start( o );
-    let children, killed;
-    o.process.on( 'message', ( e ) =>
-    {
-      children = e.map( ( src ) => _.numberFrom( src ) )
-      killed = _.process.kill({ pid : o.process.pid, withChildren : 1 });
-    })
-
-    ready.then( ( op ) =>
-    {
-      return killed.then( () =>
-      {
-        if( process.platform === 'win32' )
-        {
-          test.identical( op.exitCode, 1 );
-          test.identical( op.ended, true );
-          test.identical( op.exitSignal, null );
-        }
-        else
-        {
-          test.identical( op.exitCode, null );
-          test.identical( op.ended, true );
-          test.identical( op.exitSignal, 'SIGKILL' );
-        }
-        test.identical( _.strCount( op.output, 'Application timeout' ), 0 );
-        test.true( !_.process.isAlive( o.process.pid ) );
-        test.true( !_.process.isAlive( children[ 0 ] ) )
-        test.true( !_.process.isAlive( children[ 1 ] ) );
-        return null;
-      })
-    })
-
-    return ready;
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    test.case = 'process is not running';
-    var o =
-    {
-      execPath : 'node ' + testAppPath2,
-      mode : 'spawn',
-      outputCollecting : 1,
-      throwingExitCode : 0
-    }
-
-    _.process.start( o );
-    o.process.kill('SIGKILL');
-
-    return o.ready.then( () =>
-    {
-      let ready = _.process.kill({ pid : o.process.pid, withChildren : 1 });
-      return test.shouldThrowErrorAsync( ready );
-    })
-
-  })
-
-  /* */
-
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
+
+  function run( mode )
+  {
+    let ready = _.Consequence().take( null );
+
+    ready
+
+    .then( () =>
+    {
+      test.case = `mode : ${mode}, child -> child, kill first child`;
+      let testAppPath = a.program({ routine : testApp, locals : { mode } });
+      var o =
+      {
+        execPath :  'node ' + testAppPath,
+        mode : 'spawn',
+        ipc : 1,
+        outputCollecting : 1,
+        throwingExitCode : 0
+      }
+
+      let returned = _.process.start( o );
+      let lastChildPid, killed;
+
+      o.process.on( 'message', ( e ) =>
+      {
+        lastChildPid = _.numberFrom( e );
+        killed = _.process.kill({ pid : o.process.pid, withChildren : 1 });
+      })
+
+      returned.then( ( op ) =>
+      {
+        return killed.then( () =>
+        {
+          if( process.platform === 'win32' )
+          {
+            test.identical( op.exitCode, 1 );
+            test.identical( op.ended, true );
+            test.identical( op.exitSignal, null );
+          }
+          else
+          {
+            test.identical( op.exitCode, null );
+            test.identical( op.ended, true );
+            test.identical( op.exitSignal, 'SIGKILL' );
+          }
+          test.identical( _.strCount( op.output, 'Application timeout' ), 0 );
+          test.true( !_.process.isAlive( o.process.pid ) );
+          test.true( !_.process.isAlive( lastChildPid ) );
+
+          a.fileProvider.fileDelete( testAppPath );
+          return null;
+        })
+      })
+
+      return returned;
+    })
+
+    /* */
+
+    .then( () =>
+    {
+      test.case = `mode : ${mode}, child -> child, kill last child`;
+      let testAppPath = a.program({ routine : testApp, locals : { mode } });
+      var o =
+      {
+        execPath :  'node ' + testAppPath,
+        mode : 'spawn',
+        ipc : 1,
+        outputCollecting : 1,
+        throwingExitCode : 0
+      }
+
+      let returned = _.process.start( o );
+      let lastChildPid, killed;
+
+      o.process.on( 'message', ( e ) =>
+      {
+        lastChildPid = _.numberFrom( e );
+        killed = _.process.kill({ pid : lastChildPid, withChildren : 1 });
+      })
+
+      returned.then( ( op ) =>
+      {
+        return killed.then( () =>
+        {
+          test.identical( op.exitCode, 0 );
+          test.identical( op.ended, true );
+          test.identical( op.exitSignal, null );
+          test.identical( _.strCount( op.output, 'Application timeout' ), 0 );
+          test.true( !_.process.isAlive( o.process.pid ) );
+          test.true( !_.process.isAlive( lastChildPid ) );
+
+          a.fileProvider.fileDelete( testAppPath );
+          return null;
+        })
+      })
+
+      return returned;
+    })
+
+    /* */
+
+    .then( () =>
+    {
+      test.case = `mode : ${mode}, parent -> child*`;
+      let testAppPath3 = a.program({ routine : testApp3, locals : { mode } });
+      var o =
+      {
+        execPath : 'node ' + testAppPath3,
+        mode : 'spawn',
+        ipc : 1,
+        outputCollecting : 1,
+        throwingExitCode : 0
+      }
+
+      let returned = _.process.start( o );
+      let children, killed;
+
+      o.process.on( 'message', ( e ) =>
+      {
+        children = e.map( ( src ) => _.numberFrom( src ) )
+        killed = _.process.kill({ pid : o.process.pid, withChildren : 1 });
+      })
+
+      returned.then( ( op ) =>
+      {
+        return killed.then( () =>
+        {
+          if( process.platform === 'win32' )
+          {
+            test.identical( op.exitCode, 1 );
+            test.identical( op.ended, true );
+            test.identical( op.exitSignal, null );
+          }
+          else
+          {
+            test.identical( op.exitCode, null );
+            test.identical( op.ended, true );
+            test.identical( op.exitSignal, 'SIGKILL' );
+          }
+          test.identical( _.strCount( op.output, 'Application timeout' ), 0 );
+          test.true( !_.process.isAlive( o.process.pid ) );
+          test.true( !_.process.isAlive( children[ 0 ] ) )
+          test.true( !_.process.isAlive( children[ 1 ] ) );
+
+          a.fileProvider.fileDelete( testAppPath3 );
+          return null;
+        })
+      })
+
+      return returned;
+    })
+
+    /* */
+
+    .then( () =>
+    {
+      test.case = `mode : ${mode}, parent -> detached`;
+      let testAppPath3 = a.program({ routine : testApp3, locals : { mode } });
+      var o =
+      {
+        execPath : 'node ' + testAppPath3 + ' detached',
+        mode : 'spawn',
+        ipc : 1,
+        outputCollecting : 1,
+        throwingExitCode : 0
+      }
+
+      let returned = _.process.start( o );
+      let children, killed;
+      o.process.on( 'message', ( e ) =>
+      {
+        children = e.map( ( src ) => _.numberFrom( src ) )
+        killed = _.process.kill({ pid : o.process.pid, withChildren : 1 });
+      })
+
+      returned.then( ( op ) =>
+      {
+        return killed.then( () =>
+        {
+          if( process.platform === 'win32' )
+          {
+            test.identical( op.exitCode, 1 );
+            test.identical( op.ended, true );
+            test.identical( op.exitSignal, null );
+          }
+          else
+          {
+            test.identical( op.exitCode, null );
+            test.identical( op.ended, true );
+            test.identical( op.exitSignal, 'SIGKILL' );
+          }
+          test.identical( _.strCount( op.output, 'Application timeout' ), 0 );
+          test.true( !_.process.isAlive( o.process.pid ) );
+          test.true( !_.process.isAlive( children[ 0 ] ) )
+          test.true( !_.process.isAlive( children[ 1 ] ) );
+
+          a.fileProvider.fileDelete( testAppPath3 );
+          return null;
+        })
+      })
+
+      return returned;
+    })
+
+    /* */
+
+    .then( () =>
+    {
+      test.case = `mode : ${mode}, process is not running`;
+      var o =
+      {
+        execPath : mode === 'fork' ? testAppPath2 : 'node ' + testAppPath2,
+        mode,
+        outputCollecting : 1,
+        throwingExitCode : 0
+      }
+
+      _.process.start( o );
+      o.process.kill('SIGKILL');
+
+      return o.ready.then( () =>
+      {
+        let ready = _.process.kill({ pid : o.process.pid, withChildren : 1 });
+        return test.shouldThrowErrorAsync( ready );
+      })
+
+    })
+
+    return ready;
+  }
+
+  /* ORIGINAL */
+  // a.ready
+
+  // .then( () =>
+  // {
+  //   test.case = 'child -> child, kill first child'
+  //   var o =
+  //   {
+  //     execPath :  'node ' + testAppPath,
+  //     mode : 'spawn',
+  //     ipc : 1,
+  //     outputCollecting : 1,
+  //     throwingExitCode : 0
+  //   }
+
+  //   let ready = _.process.start( o );
+  //   let lastChildPid, killed;
+
+  //   o.process.on( 'message', ( e ) =>
+  //   {
+  //     lastChildPid = _.numberFrom( e );
+  //     killed = _.process.kill({ pid : o.process.pid, withChildren : 1 });
+  //   })
+
+  //   a.ready.then( ( op ) =>
+  //   {
+  //     return killed.then( () =>
+  //     {
+  //       if( process.platform === 'win32' )
+  //       {
+  //         test.identical( op.exitCode, 1 );
+  //         test.identical( op.ended, true );
+  //         test.identical( op.exitSignal, null );
+  //       }
+  //       else
+  //       {
+  //         test.identical( op.exitCode, null );
+  //         test.identical( op.ended, true );
+  //         test.identical( op.exitSignal, 'SIGKILL' );
+  //       }
+  //       test.identical( _.strCount( op.output, 'Application timeout' ), 0 );
+  //       test.true( !_.process.isAlive( o.process.pid ) );
+  //       test.true( !_.process.isAlive( lastChildPid ) );
+  //       return null;
+  //     })
+  //   })
+
+  //   return ready;
+  // })
+
+  // /* */
+
+  // .then( () =>
+  // {
+  //   test.case = 'child -> child, kill last child'
+  //   var o =
+  //   {
+  //     execPath :  'node ' + testAppPath,
+  //     mode : 'spawn',
+  //     ipc : 1,
+  //     outputCollecting : 1,
+  //     throwingExitCode : 0
+  //   }
+
+  //   let ready = _.process.start( o );
+  //   let lastChildPid, killed;
+
+  //   o.process.on( 'message', ( e ) =>
+  //   {
+  //     lastChildPid = _.numberFrom( e );
+  //     killed = _.process.kill({ pid : lastChildPid, withChildren : 1 });
+  //   })
+
+  //   ready.then( ( op ) =>
+  //   {
+  //     return killed.then( () =>
+  //     {
+  //       test.identical( op.exitCode, 0 );
+  //       test.identical( op.ended, true );
+  //       test.identical( op.exitSignal, null );
+  //       test.identical( _.strCount( op.output, 'Application timeout' ), 0 );
+  //       test.true( !_.process.isAlive( o.process.pid ) );
+  //       test.true( !_.process.isAlive( lastChildPid ) );
+  //       return null;
+  //     })
+  //   })
+
+  //   return ready;
+  // })
+
+  // /* */
+
+  // .then( () =>
+  // {
+  //   test.case = 'parent -> child*'
+  //   var o =
+  //   {
+  //     execPath : 'node ' + testAppPath3,
+  //     mode : 'spawn',
+  //     ipc : 1,
+  //     outputCollecting : 1,
+  //     throwingExitCode : 0
+  //   }
+
+  //   let ready = _.process.start( o );
+  //   let children, killed;
+
+  //   o.process.on( 'message', ( e ) =>
+  //   {
+  //     children = e.map( ( src ) => _.numberFrom( src ) )
+  //     killed = _.process.kill({ pid : o.process.pid, withChildren : 1 });
+  //   })
+
+  //   ready.then( ( op ) =>
+  //   {
+  //     return killed.then( () =>
+  //     {
+  //       if( process.platform === 'win32' )
+  //       {
+  //         test.identical( op.exitCode, 1 );
+  //         test.identical( op.ended, true );
+  //         test.identical( op.exitSignal, null );
+  //       }
+  //       else
+  //       {
+  //         test.identical( op.exitCode, null );
+  //         test.identical( op.ended, true );
+  //         test.identical( op.exitSignal, 'SIGKILL' );
+  //       }
+  //       test.identical( _.strCount( op.output, 'Application timeout' ), 0 );
+  //       test.true( !_.process.isAlive( o.process.pid ) );
+  //       test.true( !_.process.isAlive( children[ 0 ] ) )
+  //       test.true( !_.process.isAlive( children[ 1 ] ) );
+  //       return null;
+  //     })
+  //   })
+
+  //   return ready;
+  // })
+
+  // /* */
+
+  // .then( () =>
+  // {
+  //   test.case = 'parent -> detached'
+  //   var o =
+  //   {
+  //     execPath : 'node ' + testAppPath3 + ' detached',
+  //     mode : 'spawn',
+  //     ipc : 1,
+  //     outputCollecting : 1,
+  //     throwingExitCode : 0
+  //   }
+
+  //   let ready = _.process.start( o );
+  //   let children, killed;
+  //   o.process.on( 'message', ( e ) =>
+  //   {
+  //     children = e.map( ( src ) => _.numberFrom( src ) )
+  //     killed = _.process.kill({ pid : o.process.pid, withChildren : 1 });
+  //   })
+
+  //   ready.then( ( op ) =>
+  //   {
+  //     return killed.then( () =>
+  //     {
+  //       if( process.platform === 'win32' )
+  //       {
+  //         test.identical( op.exitCode, 1 );
+  //         test.identical( op.ended, true );
+  //         test.identical( op.exitSignal, null );
+  //       }
+  //       else
+  //       {
+  //         test.identical( op.exitCode, null );
+  //         test.identical( op.ended, true );
+  //         test.identical( op.exitSignal, 'SIGKILL' );
+  //       }
+  //       test.identical( _.strCount( op.output, 'Application timeout' ), 0 );
+  //       test.true( !_.process.isAlive( o.process.pid ) );
+  //       test.true( !_.process.isAlive( children[ 0 ] ) )
+  //       test.true( !_.process.isAlive( children[ 1 ] ) );
+  //       return null;
+  //     })
+  //   })
+
+  //   return ready;
+  // })
+
+  // /* */
+
+  // .then( () =>
+  // {
+  //   test.case = 'process is not running';
+  //   var o =
+  //   {
+  //     execPath : 'node ' + testAppPath2,
+  //     mode : 'spawn',
+  //     outputCollecting : 1,
+  //     throwingExitCode : 0
+  //   }
+
+  //   _.process.start( o );
+  //   o.process.kill('SIGKILL');
+
+  //   return o.ready.then( () =>
+  //   {
+  //     let ready = _.process.kill({ pid : o.process.pid, withChildren : 1 });
+  //     return test.shouldThrowErrorAsync( ready );
+  //   })
+
+  // })
+
+  // /* */
+
+  // return a.ready;
 
   /* - */
 
@@ -28437,9 +28668,9 @@ function killOptionWithChildren( test )
     _.include( 'wFiles' );
     var o =
     {
-      execPath : 'node testApp2.js',
+      execPath : mode === 'fork' ? 'testApp2.js' : 'node testApp2.js',
       currentPath : __dirname,
-      mode : 'spawn',
+      mode,
       stdio : 'inherit',
       outputPiping : 0,
       outputCollecting : 0,
@@ -28465,9 +28696,9 @@ function killOptionWithChildren( test )
     let detaching = process.argv[ 2 ] === 'detached';
     var o1 =
     {
-      execPath : 'node testApp2.js',
+      execPath : mode === 'fork' ? 'testApp2.js' : 'node testApp2.js',
       currentPath : __dirname,
-      mode : 'spawn',
+      mode,
       detaching,
       inputMirroring : 0,
       throwingExitCode : 0
@@ -28475,9 +28706,9 @@ function killOptionWithChildren( test )
     _.process.start( o1 );
     var o2 =
     {
-      execPath : 'node testApp2.js',
+      execPath : mode === 'fork' ? 'testApp2.js' : 'node testApp2.js',
       currentPath : __dirname,
-      mode : 'spawn',
+      mode,
       detaching,
       inputMirroring : 0,
       throwingExitCode : 0
@@ -28487,6 +28718,8 @@ function killOptionWithChildren( test )
   }
 
 }
+
+killOptionWithChildren.timeOut = 13e4; /* Locally : 12.669s */
 
 //
 
