@@ -34705,64 +34705,143 @@ function terminateTimeOutNoHandler( test )
   let context = this;
   let a = context.assetFor( test, false );
   let testAppPath = a.program( program1 );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
 
-  /* - */
-
-  var o =
+  function run( mode )
   {
-    execPath :  'node ' + testAppPath,
-    mode : 'spawn',
-    outputPiping : 1,
-    outputCollecting : 1,
-    throwingExitCode : 0
+    let ready = _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}`;
+      var o =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+        outputPiping : 1,
+        outputCollecting : 1,
+        throwingExitCode : 0
+      }
+
+      _.process.start( o )
+      let terminate = _.Consequence();
+
+      o.process.stdout.on( 'data', _.routineJoin( null, handleOutput, [ o, terminate ] ) );
+
+      terminate.then( () =>
+      {
+        return _.process.terminate
+        ({
+          pid : o.process.pid,
+          timeOut : context.t1 * 5,
+          withChildren : 0
+        })
+      })
+
+      o.conTerminate.then( ( op ) =>
+      {
+        test.identical( op.ended, true );
+
+        /* qqq for Yevhen : add comments explaining why `if process.platform` to all such ifs */
+        /* interpreter::njs on platform::Windows does not suppport signals, but has its own non-standard implementation */
+        if( process.platform === 'win32' )
+        {
+          test.identical( op.exitCode, 1 );
+          test.identical( op.exitSignal, null );
+        }
+        else
+        {
+          test.identical( op.exitCode, null );
+          test.identical( op.exitSignal, 'SIGTERM' );
+        }
+
+        test.identical( _.strCount( op.output, 'SIGTERM' ), 0 );
+        test.identical( _.strCount( op.output, 'program1::begin' ), 1 );
+
+        /*
+          mode::shell
+          Single process on darwin, Two processes on linux and windows
+          Child continues to work on linux/windows
+        */
+        if( mode === 'shell' )
+        {
+          if( process.platform === 'darwin' )
+          test.identical( _.strCount( op.output, 'program1::end' ), 0 );
+          else
+          test.identical( _.strCount( op.output, 'program1::end' ), 1 );
+        }
+        else
+        {
+          test.identical( _.strCount( op.output, 'program1::end' ), 0 );
+        }
+
+        return null;
+      })
+
+      return _.Consequence.AndKeep( terminate, o.conTerminate );
+    })
+
+    return ready;
   }
 
-  _.process.start( o )
-  let terminate = _.Consequence();
+  /* ORIGINAL */
+  // var o =
+  // {
+  //   execPath :  'node ' + testAppPath,
+  //   mode : 'spawn',
+  //   outputPiping : 1,
+  //   outputCollecting : 1,
+  //   throwingExitCode : 0
+  // }
 
-  o.process.stdout.on( 'data', handleOutput );
+  // _.process.start( o )
+  // let terminate = _.Consequence();
 
-  terminate.then( () =>
-  {
-    return _.process.terminate
-    ({
-      pid : o.process.pid,
-      timeOut : context.t1 * 5,
-      withChildren : 0
-    })
-  })
+  // o.process.stdout.on( 'data', handleOutput );
 
-  o.conTerminate.then( ( op ) =>
-  {
-    test.identical( op.ended, true );
+  // terminate.then( () =>
+  // {
+  //   return _.process.terminate
+  //   ({
+  //     pid : o.process.pid,
+  //     timeOut : context.t1 * 5,
+  //     withChildren : 0
+  //   })
+  // })
 
-    /* qqq for Yevhen : add comments explaining why `if process.platform` to all such ifs */
-    /* interpreter::njs on platform::Windows does not suppport signals, but has its own non-standard implementation */
-    if( process.platform === 'win32' )
-    {
-      test.identical( op.exitCode, 1 );
-      test.identical( op.exitSignal, null );
-    }
-    else
-    {
-      test.identical( op.exitCode, null );
-      test.identical( op.exitSignal, 'SIGTERM' );
-    }
+  // o.conTerminate.then( ( op ) =>
+  // {
+  //   test.identical( op.ended, true );
 
-    test.identical( _.strCount( op.output, 'SIGTERM' ), 0 );
-    test.identical( _.strCount( op.output, 'program1::begin' ), 1 );
-    test.identical( _.strCount( op.output, 'program1::end' ), 0 );
+  //   /* qqq for Yevhen : add comments explaining why `if process.platform` to all such ifs */
+  //   /* interpreter::njs on platform::Windows does not suppport signals, but has its own non-standard implementation */
+  //   if( process.platform === 'win32' )
+  //   {
+  //     test.identical( op.exitCode, 1 );
+  //     test.identical( op.exitSignal, null );
+  //   }
+  //   else
+  //   {
+  //     test.identical( op.exitCode, null );
+  //     test.identical( op.exitSignal, 'SIGTERM' );
+  //   }
 
-    return null;
-  })
+  //   test.identical( _.strCount( op.output, 'SIGTERM' ), 0 );
+  //   test.identical( _.strCount( op.output, 'program1::begin' ), 1 );
+  //   test.identical( _.strCount( op.output, 'program1::end' ), 0 );
 
-  return _.Consequence.AndKeep( terminate, o.conTerminate );
+  //   return null;
+  // })
+
+  // return _.Consequence.AndKeep( terminate, o.conTerminate );
 
   /* - */
 
-  function handleOutput()
+  function handleOutput( o, terminate, output )
   {
-    if( !_.strHas( o.output, 'program1::begin' ) )
+    if( !_.strHas( output.toString(), 'program1::begin' ) )
     return;
     o.process.stdout.removeListener( 'data', handleOutput );
     terminate.take( null );
