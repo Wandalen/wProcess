@@ -22269,315 +22269,720 @@ function startOptionVerbosity( test )
   let a = context.assetFor( test, false );
   let capturedOutput;
   let captureLogger = new _.Logger({ output : null, onTransformEnd, raw : 1 })
-
-  /* */
-
-  testCase( 'verbosity : 0' )
-  _.process.start
-  ({
-    execPath : `node -e "console.log('message')"`,
-    mode : 'spawn',
-    verbosity : 0,
-    outputPiping : null,
-    outputCollecting : 0,
-    logger : captureLogger,
-    ready : a.ready
-  })
-  .then( ( op ) =>
-  {
-    test.identical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    test.identical( capturedOutput, '' );
-    return true;
-  })
-
-  /* */
-
-  testCase( 'verbosity : 1' )
-  _.process.start
-  ({
-    execPath : `node -e "console.log('message')"`,
-    mode : 'spawn',
-    verbosity : 1,
-    outputPiping : null,
-    outputCollecting : 0,
-    logger : captureLogger,
-    ready : a.ready
-  })
-  .then( ( op ) =>
-  {
-    test.identical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    console.log( capturedOutput )
-    test.identical( _.strCount( capturedOutput, `node -e console.log('message')`), 1 );
-    test.identical( _.strCount( capturedOutput, 'message' ), 1 );
-    test.identical( _.strCount( capturedOutput, 'at ' + _.path.current() ), 0 );
-    return true;
-  })
-
-  /* */
-
-  testCase( 'verbosity : 2' )
-  _.process.start
-  ({
-    execPath : `node -e "console.log('message')"`,
-    mode : 'spawn',
-    verbosity : 2,
-    stdio : 'pipe',
-    outputPiping : null,
-    outputCollecting : 0,
-    outputColoring : 0,
-    logger : captureLogger,
-    ready : a.ready
-  })
-  .then( ( op ) =>
-  {
-    test.identical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    test.identical( _.strCount( capturedOutput, `node -e console.log('message')` ), 1 );
-    test.identical( _.strCount( capturedOutput, 'message' ), 2 );
-    test.identical( _.strCount( capturedOutput, 'at ' + _.path.current() ), 0 );
-    return true;
-  })
-
-  /* */
-
-  testCase( 'verbosity : 3' )
-  _.process.start
-  ({
-    execPath : `node -e "console.log('message')"`,
-    mode : 'spawn',
-    verbosity : 3,
-    stdio : 'pipe',
-    outputPiping : null,
-    outputCollecting : 0,
-    outputColoring : 0,
-    logger : captureLogger,
-    ready : a.ready
-  })
-  .then( ( op ) =>
-  {
-    test.identical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    test.identical( _.strCount( capturedOutput, `node -e console.log('message')` ), 1 );
-    test.identical( _.strCount( capturedOutput, 'message' ), 2 );
-    test.identical( _.strCount( capturedOutput, '@ ' + _.path.current() ), 1 );
-    return true;
-  })
-
-  /* */
-
-  testCase( 'verbosity : 5' )
-  _.process.start
-  ({
-    execPath : `node -e "console.log('message')"`,
-    mode : 'spawn',
-    verbosity : 5,
-    stdio : 'pipe',
-    outputPiping : null,
-    outputCollecting : 0,
-    outputColoring : 0,
-    logger : captureLogger,
-    ready : a.ready
-  })
-  .then( ( op ) =>
-  {
-    test.identical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    test.identical( _.strCount( capturedOutput, `node -e console.log('message')` ), 1 );
-    test.identical( _.strCount( capturedOutput, 'message' ), 2 );
-    test.identical( _.strCount( capturedOutput, '@ ' + _.path.current() ), 1 );
-    return true;
-  })
-
-  /* */
-
-  testCase( 'error, verbosity : 0' )
-  _.process.start
-  ({
-    execPath : `node -e "process.exit(1)"`,
-    mode : 'spawn',
-    verbosity : 0,
-    stdio : 'pipe',
-    outputPiping : null,
-    outputCollecting : 0,
-    throwingExitCode : 0,
-    outputColoring : 0,
-    logger : captureLogger,
-    ready : a.ready
-  })
-  .then( ( op ) =>
-  {
-    test.identical( op.exitCode, 1 );
-    test.identical( op.ended, true );
-    test.identical( _.strCount( capturedOutput, 'Process returned error code ' + op.exitCode ), 0 );
-    return true;
-  })
-
-  /* */
-
-  testCase( 'error, verbosity : 1' )
-  _.process.start
-  ({
-    execPath : `node -e "process.exit(1)"`,
-    mode : 'spawn',
-    verbosity : 1,
-    stdio : 'pipe',
-    outputPiping : null,
-    outputCollecting : 0,
-    throwingExitCode : 0,
-    outputColoring : 0,
-    logger : captureLogger,
-    ready : a.ready
-  })
-  .then( ( op ) =>
-  {
-    test.identical( op.exitCode, 1 );
-    test.identical( op.ended, true );
-    test.identical( _.strCount( capturedOutput, 'Process returned error code ' + op.exitCode ), 0 );
-    return true;
-  })
-
-  /* */
-
-  testCase( 'error, verbosity : 2' )
-  _.process.start
-  ({
-    execPath : `node -e "process.exit(1)"`,
-    mode : 'spawn',
-    verbosity : 2,
-    stdio : 'pipe',
-    outputPiping : null,
-    outputCollecting : 0,
-    throwingExitCode : 0,
-    outputColoring : 0,
-    logger : captureLogger,
-    ready : a.ready
-  })
-  .then( ( op ) =>
-  {
-    test.identical( op.exitCode, 1 );
-    test.identical( op.ended, true );
-    test.identical( _.strCount( capturedOutput, 'Process returned error code ' + op.exitCode ), 0 );
-    return true;
-  })
-
-  /* */
-
-  testCase( 'error, verbosity : 3' )
-  _.process.start
-  ({
-    execPath : `node -e "process.exit(1)"`,
-    mode : 'spawn',
-    verbosity : 3,
-    stdio : 'pipe',
-    outputPiping : null,
-    outputCollecting : 0,
-    throwingExitCode : 0,
-    outputColoring : 0,
-    logger : captureLogger,
-    ready : a.ready
-  })
-  .then( ( op ) =>
-  {
-    test.identical( op.exitCode, 1 );
-    test.identical( op.ended, true );
-    test.identical( _.strCount( capturedOutput, 'Process returned error code ' + op.exitCode ), 0 );
-    return true;
-  })
-
-  /* */
-
-  testCase( 'error, verbosity : 5' )
-  _.process.start
-  ({
-    execPath : `node -e "process.exit(1)"`,
-    mode : 'spawn',
-    verbosity : 5,
-    stdio : 'pipe',
-    outputPiping : null,
-    outputCollecting : 0,
-    throwingExitCode : 0,
-    outputColoring : 0,
-    logger : captureLogger,
-    ready : a.ready
-  })
-  .then( ( op ) =>
-  {
-    test.identical( op.exitCode, 1 );
-    test.identical( op.ended, true );
-    test.identical( _.strCount( capturedOutput, 'Process returned error code ' + op.exitCode ), 1 );
-    return true;
-  })
-
-  /* */
-
-  testCase( 'execPath has quotes, verbosity : 1' )
-  _.process.start
-  ({
-    execPath : `node -e "console.log( \"a\", 'b', \`c\` )"`,
-    mode : 'spawn',
-    verbosity : 5,
-    stdio : 'pipe',
-    outputPiping : null,
-    outputCollecting : 0,
-    throwingExitCode : 1,
-    outputColoring : 0,
-    logger : captureLogger,
-    ready : a.ready
-  })
-  .then( ( op ) =>
-  {
-    test.identical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    test.identical( op.fullExecPath, `node -e console.log( \"a\", 'b', \`c\` )` );
-    test.identical( _.strCount( capturedOutput, `node -e console.log( \"a\", 'b', \`c\` )` ), 1 );
-    return true;
-  })
-
-  /* */
-
-  testCase( 'execPath has double quotes, verbosity : 1' )
-  _.process.start
-  ({
-    execPath : `node -e "console.log( '"a"', "'b'", \`"c"\` )"`,
-    mode : 'spawn',
-    verbosity : 5,
-    stdio : 'pipe',
-    outputPiping : null,
-    outputCollecting : 0,
-    throwingExitCode : 1,
-    outputColoring : 0,
-    logger : captureLogger,
-    ready : a.ready
-  })
-  .then( ( op ) =>
-  {
-    test.identical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    test.identical( op.fullExecPath, `node -e console.log( '"a"', "'b'", \`"c"\` )` );
-    test.identical( _.strCount( capturedOutput, `node -e console.log( '"a"', "'b'", \`"c"\` )` ), 1 );
-    return true;
-  })
-
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
 
-  /*  */
+  /* */
 
-  function testCase( src )
+  function run( mode )
   {
-    a.ready.then( () =>
+    let ready = _.Consequence().take( null );
+
+    ready.then( () =>
     {
+      test.case = `mode : ${mode}, verbosity : 0`;
       capturedOutput = '';
-      test.case = src;
-      return null
-    });
+
+      return _.process.start
+      ({
+        execPath : `${mode === 'fork' ? '' : 'node' } -e "console.log('message')"`,
+        mode,
+        verbosity : 0,
+        outputPiping : null,
+        outputCollecting : 0,
+        logger : captureLogger,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( capturedOutput, '' );
+        return true;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, verbosity : 1`;
+      capturedOutput = '';
+
+      return _.process.start
+      ({
+        execPath : `${mode === 'fork' ? '' : 'node' } -e "console.log('message')"`,
+        mode,
+        verbosity : 1,
+        outputPiping : null,
+        outputCollecting : 0,
+        logger : captureLogger,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        if( mode === 'shell' )
+        test.identical( _.strCount( capturedOutput, `node -e "console.log('message')"`), 1 );
+        else if( mode === 'spawn' )
+        test.identical( _.strCount( capturedOutput, `node -e console.log('message')`), 1 );
+        else
+        test.identical( _.strCount( capturedOutput, `-e console.log('message')`), 1 );
+        test.identical( _.strCount( capturedOutput, 'message' ), 1 );
+        test.identical( _.strCount( capturedOutput, '@ ' + _.path.current() ), 0 );
+        return true;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, verbosity : 2`;
+      capturedOutput = '';
+
+      return _.process.start
+      ({
+        execPath : `${mode === 'fork' ? '' : 'node' } -e "console.log('message')"`,
+        mode,
+        verbosity : 2,
+        stdio : 'pipe',
+        outputPiping : null,
+        outputCollecting : 0,
+        outputColoring : 0,
+        logger : captureLogger,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        if( mode === 'shell' )
+        test.identical( _.strCount( capturedOutput, `node -e "console.log('message')"`), 1 );
+        else if( mode === 'spawn' )
+        test.identical( _.strCount( capturedOutput, `node -e console.log('message')`), 1 );
+        else
+        test.identical( _.strCount( capturedOutput, `-e console.log('message')`), 1 );
+        test.identical( _.strCount( capturedOutput, 'message' ), 2 );
+        test.identical( _.strCount( capturedOutput, '@ ' + _.path.current() ), 0 );
+        return true;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, verbosity : 3`;
+      capturedOutput = '';
+
+      return _.process.start
+      ({
+        execPath : `${mode === 'fork' ? '' : 'node' } -e "console.log('message')"`,
+        mode,
+        verbosity : 3,
+        stdio : 'pipe',
+        outputPiping : null,
+        outputCollecting : 0,
+        outputColoring : 0,
+        logger : captureLogger,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        if( mode === 'shell' )
+        test.identical( _.strCount( capturedOutput, `node -e "console.log('message')"`), 1 );
+        else if( mode === 'spawn' )
+        test.identical( _.strCount( capturedOutput, `node -e console.log('message')`), 1 );
+        else
+        test.identical( _.strCount( capturedOutput, `-e console.log('message')`), 1 );
+        test.identical( _.strCount( capturedOutput, 'message' ), 2 );
+        test.identical( _.strCount( capturedOutput, '@ ' + _.path.current() ), 1 );
+        return true;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, verbosity : 5`;
+      capturedOutput = '';
+
+      return _.process.start
+      ({
+        execPath : `${mode === 'fork' ? '' : 'node' } -e "console.log('message')"`,
+        mode,
+        verbosity : 5,
+        stdio : 'pipe',
+        outputPiping : null,
+        outputCollecting : 0,
+        outputColoring : 0,
+        logger : captureLogger,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        if( mode === 'shell' )
+        test.identical( _.strCount( capturedOutput, `node -e "console.log('message')"`), 1 );
+        else if( mode === 'spawn' )
+        test.identical( _.strCount( capturedOutput, `node -e console.log('message')`), 1 );
+        else
+        test.identical( _.strCount( capturedOutput, `-e console.log('message')`), 1 );
+        test.identical( _.strCount( capturedOutput, 'message' ), 2 );
+        test.identical( _.strCount( capturedOutput, '@ ' + _.path.current() ), 1 );
+        return true;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, error, verbosity : 0`;
+      capturedOutput = '';
+
+      return _.process.start
+      ({
+        execPath : `${mode === 'fork' ? '' : 'node' } -e "process.exit(1)"`,
+        mode,
+        verbosity : 0,
+        stdio : 'pipe',
+        outputPiping : null,
+        outputCollecting : 0,
+        outputColoring : 0,
+        throwingExitCode : 0,
+        logger : captureLogger,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 1 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( capturedOutput, 'Process returned error code ' + op.exitCode ), 0 );
+        return true;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, error, verbosity : 1`;
+      capturedOutput = '';
+
+      return _.process.start
+      ({
+        execPath : `${mode === 'fork' ? '' : 'node' } -e "process.exit(1)"`,
+        mode,
+        verbosity : 1,
+        stdio : 'pipe',
+        outputPiping : null,
+        outputCollecting : 0,
+        outputColoring : 0,
+        throwingExitCode : 0,
+        logger : captureLogger,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 1 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( capturedOutput, 'Process returned error code ' + op.exitCode ), 0 );
+        return true;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, error, verbosity : 2`;
+      capturedOutput = '';
+
+      return _.process.start
+      ({
+        execPath : `${mode === 'fork' ? '' : 'node' } -e "process.exit(1)"`,
+        mode,
+        verbosity : 2,
+        stdio : 'pipe',
+        outputPiping : null,
+        outputCollecting : 0,
+        outputColoring : 0,
+        throwingExitCode : 0,
+        logger : captureLogger,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 1 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( capturedOutput, 'Process returned error code ' + op.exitCode ), 0 );
+        return true;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, error, verbosity : 3`;
+      capturedOutput = '';
+
+      return _.process.start
+      ({
+        execPath : `${mode === 'fork' ? '' : 'node' } -e "process.exit(1)"`,
+        mode,
+        verbosity : 3,
+        stdio : 'pipe',
+        outputPiping : null,
+        outputCollecting : 0,
+        outputColoring : 0,
+        throwingExitCode : 0,
+        logger : captureLogger,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 1 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( capturedOutput, 'Process returned error code ' + op.exitCode ), 0 );
+        return true;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, error, verbosity : 5`;
+      capturedOutput = '';
+
+      return _.process.start
+      ({
+        execPath : `${mode === 'fork' ? '' : 'node' } -e "process.exit(1)"`,
+        mode,
+        verbosity : 5,
+        stdio : 'pipe',
+        outputPiping : null,
+        outputCollecting : 0,
+        outputColoring : 0,
+        throwingExitCode : 0,
+        logger : captureLogger,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 1 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( capturedOutput, 'Process returned error code ' + op.exitCode ), 1 );
+        return true;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, execPath has quotes, verbosity : 1`;
+      capturedOutput = '';
+
+      return _.process.start
+      ({
+        execPath : `${mode === 'fork' ? '' : 'node' } -e "console.log( 'a', 'b', \`c\` )"`,
+        mode,
+        verbosity : 1,
+        stdio : 'pipe',
+        outputPiping : null,
+        outputCollecting : 0,
+        outputColoring : 0,
+        throwingExitCode : 1,
+        logger : captureLogger,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        if( mode === 'shell' )
+        {
+          test.identical( op.fullExecPath, `node -e "console.log( 'a', 'b', \`c\` )"` );
+          test.identical( _.strCount( capturedOutput, `node -e "console.log( 'a', 'b', \`c\` )"` ), 1 );
+        }
+        else if( mode === 'spawn' )
+        {
+          test.identical( op.fullExecPath, `node -e console.log( 'a', 'b', \`c\` )` );
+          test.identical( _.strCount( capturedOutput, `node -e console.log( 'a', 'b', \`c\` )` ), 1 );
+        }
+        else
+        {
+          test.identical( op.fullExecPath, `-e console.log( 'a', 'b', \`c\` )` );
+          test.identical( _.strCount( capturedOutput, `-e console.log( 'a', 'b', \`c\` )` ), 1 );
+        }
+        return true;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, execPath has double quotes, verbosity : 1`;
+      capturedOutput = '';
+
+      let options = 
+      {
+        execPath : `${mode === 'fork' ? '' : 'node' } -e "console.log( '"a"', "'b'", \`"c"\` )"`,
+        mode,
+        verbosity : 1,
+        stdio : 'pipe',
+        outputPiping : null,
+        outputCollecting : 0,
+        outputColoring : 0,
+        throwingExitCode : 1,
+        logger : captureLogger,
+      }
+
+      /* in mode::shell on Linux and iOS
+        -> Stderr
+          -  sh: c: command not found
+          -  [eval]:1
+          -  console.log( 'a', b,  )
+      */
+      if( mode === 'shell' && process.platform !== 'win32' )
+      return test.shouldThrowErrorAsync( () => _.process.start( options ) );
+
+      return _.process.start( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        if( mode === 'fork' )
+        {
+          test.identical( op.fullExecPath, `-e console.log( '"a"', "'b'", \`"c"\` )` );
+          test.identical( _.strCount( capturedOutput, `-e console.log( '"a"', "'b'", \`"c"\` )` ), 1 );
+        }
+        else if( mode === 'spawn' )
+        {
+          test.identical( op.fullExecPath, `node -e console.log( '"a"', "'b'", \`"c"\` )` );
+          test.identical( _.strCount( capturedOutput, `node -e console.log( '"a"', "'b'", \`"c"\` )` ), 1 );
+        }
+        else
+        {
+          test.identical( op.fullExecPath, `node -e "console.log( '"a"', "'b'", \`"c"\` )"` );
+          test.identical( _.strCount( capturedOutput, `node -e "console.log( '"a"', "'b'", \`"c"\` )"` ), 1 );
+        }
+        return true;
+      })
+    })
+
+    return ready;
+
   }
+
+  /* ORIGINAL */
+  // testCase( 'verbosity : 0' )
+  // _.process.start
+  // ({
+  //   execPath : `node -e "console.log('message')"`,
+  //   mode : 'spawn',
+  //   verbosity : 0,
+  //   outputPiping : null,
+  //   outputCollecting : 0,
+  //   logger : captureLogger,
+  //   ready : a.ready
+  // })
+  // .then( ( op ) =>
+  // {
+  //   test.identical( op.exitCode, 0 );
+  //   test.identical( op.ended, true );
+  //   test.identical( capturedOutput, '' );
+  //   return true;
+  // })
+
+  // /* */
+
+  // testCase( 'verbosity : 1' )
+  // _.process.start
+  // ({
+  //   execPath : `node -e "console.log('message')"`,
+  //   mode : 'spawn',
+  //   verbosity : 1,
+  //   outputPiping : null,
+  //   outputCollecting : 0,
+  //   logger : captureLogger,
+  //   ready : a.ready
+  // })
+  // .then( ( op ) =>
+  // {
+  //   test.identical( op.exitCode, 0 );
+  //   test.identical( op.ended, true );
+  //   console.log( capturedOutput )
+  //   test.identical( _.strCount( capturedOutput, `node -e console.log('message')`), 1 );
+  //   test.identical( _.strCount( capturedOutput, 'message' ), 1 );
+  //   test.identical( _.strCount( capturedOutput, 'at ' + _.path.current() ), 0 );
+  //   return true;
+  // })
+
+  // /* */
+
+  // testCase( 'verbosity : 2' )
+  // _.process.start
+  // ({
+  //   execPath : `node -e "console.log('message')"`,
+  //   mode : 'spawn',
+  //   verbosity : 2,
+  //   stdio : 'pipe',
+  //   outputPiping : null,
+  //   outputCollecting : 0,
+  //   outputColoring : 0,
+  //   logger : captureLogger,
+  //   ready : a.ready
+  // })
+  // .then( ( op ) =>
+  // {
+  //   test.identical( op.exitCode, 0 );
+  //   test.identical( op.ended, true );
+  //   test.identical( _.strCount( capturedOutput, `node -e console.log('message')` ), 1 );
+  //   test.identical( _.strCount( capturedOutput, 'message' ), 2 );
+  //   test.identical( _.strCount( capturedOutput, 'at ' + _.path.current() ), 0 );
+  //   return true;
+  // })
+
+  // /* */
+
+  // testCase( 'verbosity : 3' )
+  // _.process.start
+  // ({
+  //   execPath : `node -e "console.log('message')"`,
+  //   mode : 'spawn',
+  //   verbosity : 3,
+  //   stdio : 'pipe',
+  //   outputPiping : null,
+  //   outputCollecting : 0,
+  //   outputColoring : 0,
+  //   logger : captureLogger,
+  //   ready : a.ready
+  // })
+  // .then( ( op ) =>
+  // {
+  //   test.identical( op.exitCode, 0 );
+  //   test.identical( op.ended, true );
+  //   test.identical( _.strCount( capturedOutput, `node -e console.log('message')` ), 1 );
+  //   test.identical( _.strCount( capturedOutput, 'message' ), 2 );
+  //   test.identical( _.strCount( capturedOutput, '@ ' + _.path.current() ), 1 );
+  //   return true;
+  // })
+
+  // /* */
+
+  // testCase( 'verbosity : 5' )
+  // _.process.start
+  // ({
+  //   execPath : `node -e "console.log('message')"`,
+  //   mode : 'spawn',
+  //   verbosity : 5,
+  //   stdio : 'pipe',
+  //   outputPiping : null,
+  //   outputCollecting : 0,
+  //   outputColoring : 0,
+  //   logger : captureLogger,
+  //   ready : a.ready
+  // })
+  // .then( ( op ) =>
+  // {
+  //   test.identical( op.exitCode, 0 );
+  //   test.identical( op.ended, true );
+  //   test.identical( _.strCount( capturedOutput, `node -e console.log('message')` ), 1 );
+  //   test.identical( _.strCount( capturedOutput, 'message' ), 2 );
+  //   test.identical( _.strCount( capturedOutput, '@ ' + _.path.current() ), 1 );
+  //   return true;
+  // })
+
+  // /* */
+
+  // testCase( 'error, verbosity : 0' )
+  // _.process.start
+  // ({
+  //   execPath : `node -e "process.exit(1)"`,
+  //   mode : 'spawn',
+  //   verbosity : 0,
+  //   stdio : 'pipe',
+  //   outputPiping : null,
+  //   outputCollecting : 0,
+  //   throwingExitCode : 0,
+  //   outputColoring : 0,
+  //   logger : captureLogger,
+  //   ready : a.ready
+  // })
+  // .then( ( op ) =>
+  // {
+  //   test.identical( op.exitCode, 1 );
+  //   test.identical( op.ended, true );
+  //   test.identical( _.strCount( capturedOutput, 'Process returned error code ' + op.exitCode ), 0 );
+  //   return true;
+  // })
+
+  // /* */
+
+  // testCase( 'error, verbosity : 1' )
+  // _.process.start
+  // ({
+  //   execPath : `node -e "process.exit(1)"`,
+  //   mode : 'spawn',
+  //   verbosity : 1,
+  //   stdio : 'pipe',
+  //   outputPiping : null,
+  //   outputCollecting : 0,
+  //   throwingExitCode : 0,
+  //   outputColoring : 0,
+  //   logger : captureLogger,
+  //   ready : a.ready
+  // })
+  // .then( ( op ) =>
+  // {
+  //   test.identical( op.exitCode, 1 );
+  //   test.identical( op.ended, true );
+  //   test.identical( _.strCount( capturedOutput, 'Process returned error code ' + op.exitCode ), 0 );
+  //   return true;
+  // })
+
+  // /* */
+
+  // testCase( 'error, verbosity : 2' )
+  // _.process.start
+  // ({
+  //   execPath : `node -e "process.exit(1)"`,
+  //   mode : 'spawn',
+  //   verbosity : 2,
+  //   stdio : 'pipe',
+  //   outputPiping : null,
+  //   outputCollecting : 0,
+  //   throwingExitCode : 0,
+  //   outputColoring : 0,
+  //   logger : captureLogger,
+  //   ready : a.ready
+  // })
+  // .then( ( op ) =>
+  // {
+  //   test.identical( op.exitCode, 1 );
+  //   test.identical( op.ended, true );
+  //   test.identical( _.strCount( capturedOutput, 'Process returned error code ' + op.exitCode ), 0 );
+  //   return true;
+  // })
+
+  // /* */
+
+  // testCase( 'error, verbosity : 3' )
+  // _.process.start
+  // ({
+  //   execPath : `node -e "process.exit(1)"`,
+  //   mode : 'spawn',
+  //   verbosity : 3,
+  //   stdio : 'pipe',
+  //   outputPiping : null,
+  //   outputCollecting : 0,
+  //   throwingExitCode : 0,
+  //   outputColoring : 0,
+  //   logger : captureLogger,
+  //   ready : a.ready
+  // })
+  // .then( ( op ) =>
+  // {
+  //   test.identical( op.exitCode, 1 );
+  //   test.identical( op.ended, true );
+  //   test.identical( _.strCount( capturedOutput, 'Process returned error code ' + op.exitCode ), 0 );
+  //   return true;
+  // })
+
+  // /* */
+
+  // testCase( 'error, verbosity : 5' )
+  // _.process.start
+  // ({
+  //   execPath : `node -e "process.exit(1)"`,
+  //   mode : 'spawn',
+  //   verbosity : 5,
+  //   stdio : 'pipe',
+  //   outputPiping : null,
+  //   outputCollecting : 0,
+  //   throwingExitCode : 0,
+  //   outputColoring : 0,
+  //   logger : captureLogger,
+  //   ready : a.ready
+  // })
+  // .then( ( op ) =>
+  // {
+  //   test.identical( op.exitCode, 1 );
+  //   test.identical( op.ended, true );
+  //   test.identical( _.strCount( capturedOutput, 'Process returned error code ' + op.exitCode ), 1 );
+  //   return true;
+  // })
+
+  // /* */
+
+  // testCase( 'execPath has quotes, verbosity : 1' )
+  // _.process.start
+  // ({
+  //   execPath : `node -e "console.log( \"a\", 'b', \`c\` )"`,
+  //   mode : 'spawn',
+  //   verbosity : 5,
+  //   stdio : 'pipe',
+  //   outputPiping : null,
+  //   outputCollecting : 0,
+  //   throwingExitCode : 1,
+  //   outputColoring : 0,
+  //   logger : captureLogger,
+  //   ready : a.ready
+  // })
+  // .then( ( op ) =>
+  // {
+  //   test.identical( op.exitCode, 0 );
+  //   test.identical( op.ended, true );
+  //   test.identical( op.fullExecPath, `node -e console.log( \"a\", 'b', \`c\` )` );
+  //   test.identical( _.strCount( capturedOutput, `node -e console.log( \"a\", 'b', \`c\` )` ), 1 );
+  //   return true;
+  // })
+
+  // /* */
+
+  // testCase( 'execPath has double quotes, verbosity : 1' )
+  // _.process.start
+  // ({
+  //   execPath : `node -e "console.log( '"a"', "'b'", \`"c"\` )"`,
+  //   mode : 'spawn',
+  //   verbosity : 5,
+  //   stdio : 'pipe',
+  //   outputPiping : null,
+  //   outputCollecting : 0,
+  //   throwingExitCode : 1,
+  //   outputColoring : 0,
+  //   logger : captureLogger,
+  //   ready : a.ready
+  // })
+  // .then( ( op ) =>
+  // {
+  //   test.identical( op.exitCode, 0 );
+  //   test.identical( op.ended, true );
+  //   test.identical( op.fullExecPath, `node -e console.log( '"a"', "'b'", \`"c"\` )` );
+  //   test.identical( _.strCount( capturedOutput, `node -e console.log( '"a"', "'b'", \`"c"\` )` ), 1 );
+  //   return true;
+  // })
+
+  // return a.ready;
+
+  // /*  */
+
+  // function testCase( src )
+  // {
+  //   a.ready.then( () =>
+  //   {
+  //     capturedOutput = '';
+  //     test.case = src;
+  //     return null
+  //   });
+  // }
 
   function onTransformEnd( o )
   {
     capturedOutput += o.outputForPrinter[ 0 ] + '\n';
   }
+
 }
 
 // --
