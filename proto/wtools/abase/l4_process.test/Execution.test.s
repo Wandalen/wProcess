@@ -14586,43 +14586,86 @@ function startNoEndBug1( test )
   let context = this;
   let a = context.assetFor( test, false );
   let testAppChildPath = a.program( testAppChild );
-
-  a.ready
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
 
   /* */
 
-  .then( () =>
+  function run( mode )
   {
-    test.case = 'detaching on, error on spawn'
-    let o =
+    let ready = _.Consequence().take( null );
+
+    ready.then( () =>
     {
-      execPath : 'testAppChild.js',
-      mode : 'fork',
-      stdio : [ 'ignore', 'ignore', 'ignore', null ],
-      currentPath : a.routinePath,
-      detaching : 1
-    }
+      test.case = `mode : ${mode}, detaching on, error`;
+      let o =
+      {
+        execPath : mode === 'fork' ? 'testAppChild.js' : 'node testAppChild.js',
+        mode,
+        stdio : [ 'ignore', 'ignore', 'ignore', null ],
+        currentPath : a.routinePath,
+        detaching : 1
+      }
 
-    let result = _.process.start( o );
+      let result = _.process.start( o );
 
-    test.true( o.conStart !== result );
-    test.true( _.consequenceIs( o.conStart ) )
+      test.true( o.conStart !== result );
+      test.true( _.consequenceIs( o.conStart ) )
 
-    result = test.shouldThrowErrorAsync( o.conTerminate );
+      result = test.shouldThrowErrorAsync( o.conTerminate );
 
-    result.then( () => _.time.out( context.t1 * 2 ) ) /* 2000 */
-    result.then( () =>
-    {
-      test.identical( o.conTerminate.resourcesCount(), 0 );
-      return null;
+      result.then( () => _.time.out( context.t1 * 2 ) ) /* 2000 */
+      result.then( () =>
+      {
+        test.identical( o.conTerminate.resourcesCount(), 0 );
+        return null;
+      })
+
+      return result;
     })
 
-    return result;
-  })
+    return ready;
 
-  /* */
+  }
 
-  return a.ready;
+  /* ORIGINAL */
+  // a.ready
+
+  // /* */
+
+  // .then( () =>
+  // {
+  //   test.case = 'detaching on, error on spawn'
+  //   let o =
+  //   {
+  //     execPath : 'testAppChild.js',
+  //     mode : 'fork',
+  //     stdio : [ 'ignore', 'ignore', 'ignore', null ],
+  //     currentPath : a.routinePath,
+  //     detaching : 1
+  //   }
+
+  //   let result = _.process.start( o );
+
+  //   test.true( o.conStart !== result );
+  //   test.true( _.consequenceIs( o.conStart ) )
+
+  //   result = test.shouldThrowErrorAsync( o.conTerminate );
+
+  //   result.then( () => _.time.out( context.t1 * 2 ) ) /* 2000 */
+  //   result.then( () =>
+  //   {
+  //     test.identical( o.conTerminate.resourcesCount(), 0 );
+  //     return null;
+  //   })
+
+  //   return result;
+  // })
+
+  // /* */
+
+  // return a.ready;
 
   /* */
 
@@ -14639,10 +14682,11 @@ function startNoEndBug1( test )
 
 }
 
+startNoEndBug1.timeOut = 1e5; /* Locally : 9.551s */
 startNoEndBug1.description =
 `
 Parent starts child process in detached mode.
-ChildProcess throws an error on spawn.
+ChildProcess throws an error.
 conStart receives error message.
 Parent should not try to disconnect the child.
 `
