@@ -13863,40 +13863,89 @@ function startNjsDetachingChildThrowing( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let track = [];
   let testAppChildPath = a.program( testAppChild );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
 
   /* */
 
-  test.case = 'detached child throws error, conTerminate receives resource with error';
-
-  let o =
+  function run( mode )
   {
-    execPath : 'testAppChild.js',
-    outputCollecting : 1,
-    stdio : 'pipe',
-    detaching : 1,
-    applyingExitCode : 0,
-    throwingExitCode : 0,
-    outputPiping : 0,
-    currentPath : a.routinePath,
+    let ready = _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, detached child throws error, conTerminate receives resource with error`;
+      let track = [];
+
+      let o =
+      {
+        execPath : 'testAppChild.js',
+        mode,
+        outputCollecting : 1,
+        stdio : 'pipe',
+        detaching : 1,
+        applyingExitCode : 0,
+        throwingExitCode : 0,
+        outputPiping : 0,
+        currentPath : a.routinePath,
+      }
+
+      _.process.startNjs( o );
+
+      o.conTerminate.then( ( op ) =>
+      {
+        track.push( 'conTerminate' );
+        test.notIdentical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        if( mode === 'shell' && process.platform === 'win32' ) /* on platform Windows in mode::shell no output from error.message */
+        test.identical( op.output, '' );
+        else
+        test.true( _.strHas( op.output, 'Child process error' ) );
+        test.identical( o.exitCode, op.exitCode );
+        test.identical( o.output, op.output );
+        test.identical( track, [ 'conTerminate' ] )
+        return null;
+      })
+
+      return o.conTerminate;
+    })
+
+    return ready;
+
   }
 
-  _.process.startNjs( o );
+  /* ORIGINAL */
+  // test.case = 'detached child throws error, conTerminate receives resource with error';
 
-  o.conTerminate.then( ( op ) =>
-  {
-    track.push( 'conTerminate' );
-    test.notIdentical( op.exitCode, 0 );
-    test.identical( op.ended, true );
-    test.true( _.strHas( op.output, 'Child process error' ) );
-    test.identical( o.exitCode, op.exitCode );
-    test.identical( o.output, op.output );
-    test.identical( track, [ 'conTerminate' ] )
-    return null;
-  })
+  // let o =
+  // {
+  //   execPath : 'testAppChild.js',
+  //   outputCollecting : 1,
+  //   stdio : 'pipe',
+  //   detaching : 1,
+  //   applyingExitCode : 0,
+  //   throwingExitCode : 0,
+  //   outputPiping : 0,
+  //   currentPath : a.routinePath,
+  // }
 
-  return o.conTerminate;
+  // _.process.startNjs( o );
+
+  // o.conTerminate.then( ( op ) =>
+  // {
+  //   track.push( 'conTerminate' );
+  //   test.notIdentical( op.exitCode, 0 );
+  //   test.identical( op.ended, true );
+  //   test.true( _.strHas( op.output, 'Child process error' ) );
+  //   test.identical( o.exitCode, op.exitCode );
+  //   test.identical( o.output, op.output );
+  //   test.identical( track, [ 'conTerminate' ] )
+  //   return null;
+  // })
+
+  // return o.conTerminate;
 
   /* - */
 
