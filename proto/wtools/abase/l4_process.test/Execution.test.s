@@ -28803,6 +28803,9 @@ function startTerminateAfterLoopRelease( test )
   let context = this;
   let a = context.assetFor( test, false );
   let testAppPath = a.program( testApp );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
 
   // if( process.platform === 'win32' )
   // {
@@ -28815,85 +28818,134 @@ function startTerminateAfterLoopRelease( test )
 
   /* */
 
-  a.ready
-
-  .then( () =>
+  function run( mode )
   {
-    let o =
-    {
-      execPath : 'node ' + testAppPath,
-      mode : 'spawn',
-      throwingExitCode : 0,
-      outputPiping : 0,
-      ipc : 1,
-      outputCollecting : 1,
-    }
+    let ready = _.Consequence().take( null );
 
-    let con = _.process.start( o );
-
-    o.process.on( 'message', () =>
+    ready.then( () =>
     {
-      _.process.terminate({ pnd : o.process, timeOut : context.t2 * 2 }); /* 10000 */
+      test.case = `mode : ${mode}`;
+
+      let o =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+        throwingExitCode : 0,
+        outputPiping : 0,
+        ipc : 1,
+        outputCollecting : 1,
+      }
+
+      if( mode === 'shell' ) /* Mode::shell doesn't support inter process communication */
+      return test.shouldThrowErrorSync( () => _.process.start( o ) );
+
+      let con = _.process.start( o );
+
+      o.process.on( 'message', () =>
+      {
+        _.process.terminate({ pnd : o.process, timeOut : context.t2 * 2 }); /* 10000 */
+      })
+
+      con.then( () =>
+      {
+        test.identical( o.exitCode, null );
+        /* njs on Windows does not let to set custom signal handler properly */
+        if( process.platform === 'win32' )
+        test.identical( o.exitSignal, 'SIGTERM' );
+        else
+        test.identical( o.exitSignal, 'SIGKILL' );
+        test.true( !_.strHas( o.output, 'SIGTERM' ) );
+        test.true( !_.strHas( o.output, 'Exit after release' ) );
+
+        return null;
+      })
+
+      return con;
     })
 
-    con.then( () =>
-    {
-      test.identical( o.exitCode, null );
-      /* njs on Windows does not let to set custom signal handler properly */
-      if( process.platform === 'win32' )
-      test.identical( o.exitSignal, 'SIGTERM' );
-      else
-      test.identical( o.exitSignal, 'SIGKILL' );
-      test.true( !_.strHas( o.output, 'SIGTERM' ) );
-      test.true( !_.strHas( o.output, 'Exit after release' ) );
+    return ready;
+  }
 
-      return null;
-    })
+  /* ORIGINAL */
+  // a.ready
 
-    return con;
-  })
+  // .then( () =>
+  // {
+  //   let o =
+  //   {
+  //     execPath : 'node ' + testAppPath,
+  //     mode : 'spawn',
+  //     throwingExitCode : 0,
+  //     outputPiping : 0,
+  //     ipc : 1,
+  //     outputCollecting : 1,
+  //   }
 
-  /*  */
+  //   let con = _.process.start( o );
 
-  .then( () =>
-  {
-    let o =
-    {
-      execPath : testAppPath,
-      mode : 'fork',
-      throwingExitCode : 0,
-      outputPiping : 0,
-      ipc : 1,
-      outputCollecting : 1,
-    }
+  //   o.process.on( 'message', () =>
+  //   {
+  //     _.process.terminate({ pnd : o.process, timeOut : context.t2 * 2 }); /* 10000 */
+  //   })
 
-    let con = _.process.start( o );
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, null );
+  //     /* njs on Windows does not let to set custom signal handler properly */
+  //     if( process.platform === 'win32' )
+  //     test.identical( o.exitSignal, 'SIGTERM' );
+  //     else
+  //     test.identical( o.exitSignal, 'SIGKILL' );
+  //     test.true( !_.strHas( o.output, 'SIGTERM' ) );
+  //     test.true( !_.strHas( o.output, 'Exit after release' ) );
 
-    o.process.on( 'message', () =>
-    {
-      _.process.terminate({ pnd : o.process, timeOut : context.t2 * 2 }); /* 10000 */
-    })
+  //     return null;
+  //   })
 
-    con.then( () =>
-    {
-      test.identical( o.exitCode, null );
-      /* njs on Windows does not let to set custom signal handler properly */
-      if( process.platform === 'win32' )
-      test.identical( o.exitSignal, 'SIGTERM' );
-      else
-      test.identical( o.exitSignal, 'SIGKILL' );
-      test.true( !_.strHas( o.output, 'SIGTERM' ) );
-      test.true( !_.strHas( o.output, 'Exit after release' ) );
+  //   return con;
+  // })
 
-      return null;
-    })
+  // /*  */
 
-    return con;
-  })
+  // .then( () =>
+  // {
+  //   let o =
+  //   {
+  //     execPath : testAppPath,
+  //     mode : 'fork',
+  //     throwingExitCode : 0,
+  //     outputPiping : 0,
+  //     ipc : 1,
+  //     outputCollecting : 1,
+  //   }
 
-  /*  */
+  //   let con = _.process.start( o );
 
-  return a.ready;
+  //   o.process.on( 'message', () =>
+  //   {
+  //     _.process.terminate({ pnd : o.process, timeOut : context.t2 * 2 }); /* 10000 */
+  //   })
+
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, null );
+  //     /* njs on Windows does not let to set custom signal handler properly */
+  //     if( process.platform === 'win32' )
+  //     test.identical( o.exitSignal, 'SIGTERM' );
+  //     else
+  //     test.identical( o.exitSignal, 'SIGKILL' );
+  //     test.true( !_.strHas( o.output, 'SIGTERM' ) );
+  //     test.true( !_.strHas( o.output, 'Exit after release' ) );
+
+  //     return null;
+  //   })
+
+  //   return con;
+  // })
+
+  // /*  */
+
+  // return a.ready;
 
   /* - */
 
@@ -28917,6 +28969,7 @@ function startTerminateAfterLoopRelease( test )
   }
 }
 
+startTerminateAfterLoopRelease.timeOut = 25e4; /* Locally : 24.941s */
 startTerminateAfterLoopRelease.description =
 `
   Test app - code that blocks event loop for short period of time and appExitHandlerRepair called at start
