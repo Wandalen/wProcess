@@ -28628,7 +28628,7 @@ startErrorAfterTerminationWithSend.description =
 
 //
 
-/* qqq for Yevhen : subroutine */
+/* qqq for Yevhen : subroutine | aaa : Done. */
 function startTerminateHangedWithExitHandler( test )
 {
   let context = this;
@@ -28639,83 +28639,129 @@ function startTerminateHangedWithExitHandler( test )
   if( process.platform === 'win32' )
   return test.true( true );
 
-  /* */
-
-  a.ready
-
-  .then( () =>
-  {
-    let time;
-    let o =
-    {
-      execPath : 'node ' + testAppPath,
-      mode : 'spawn',
-      throwingExitCode : 0,
-      outputPiping : 1,
-      ipc : 1,
-      outputCollecting : 1,
-    }
-
-    let con = _.process.start( o );
-
-    o.process.on( 'message', () =>
-    {
-      time = _.time.now();
-      _.process.terminate({ pnd : o.process, timeOut : context.t1*5 });
-    })
-
-    con.then( () =>
-    {
-      test.identical( o.exitCode, null );
-      test.identical( o.exitSignal, 'SIGKILL' );
-      test.true( !_.strHas( o.output, 'SIGTERM' ) );
-      test.ge( _.time.now() - time, context.t1*5 );
-      console.log( `time : ${_.time.spent( time )}` );
-      return null;
-    })
-
-    return con;
-  })
-
-  /* */
-
-  .then( () =>
-  {
-    let time;
-    let o =
-    {
-      execPath : testAppPath,
-      mode : 'fork',
-      throwingExitCode : 0,
-      outputPiping : 1,
-      ipc : 1,
-      outputCollecting : 1,
-    }
-
-    let con = _.process.start( o );
-
-    o.process.on( 'message', () =>
-    {
-      time = _.time.now();
-      _.process.terminate({ pnd : o.process, timeOut : context.t1*5 });
-    })
-
-    con.then( () =>
-    {
-      test.identical( o.exitCode, null );
-      test.identical( o.exitSignal, 'SIGKILL' );
-      test.true( !_.strHas( o.output, 'SIGTERM' ) );
-      test.ge( _.time.now() - time, context.t1*5 );
-      console.log( `time : ${_.time.spent( time )}` );
-      return null;
-    })
-
-    return con;
-  })
-
-  /*  */
-
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
+
+  function run( mode )
+  {
+    test.case = `mode : ${mode}`;
+    let ready = _.Consequence().take( null );
+
+    /* mode::shell doesn't support ipc */
+    if( mode === 'shell' )
+    return test.true( true );
+
+    ready
+    .then( () =>
+    {
+      let time;
+      let o =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+        throwingExitCode : 0,
+        outputPiping : 1,
+        ipc : 1,
+        outputCollecting : 1,
+      }
+
+      let con = _.process.start( o );
+
+      o.process.on( 'message', () =>
+      {
+        time = _.time.now();
+        _.process.terminate({ pnd : o.process, timeOut : context.t1*5 });
+      })
+
+      con.then( () =>
+      {
+        test.identical( o.exitCode, null );
+        test.identical( o.exitSignal, 'SIGKILL' );
+        test.true( !_.strHas( o.output, 'SIGTERM' ) );
+        test.ge( _.time.now() - time, context.t1*5 );
+        console.log( `time : ${_.time.spent( time )}` );
+        return null;
+      })
+
+      return con;
+    })
+
+    return ready;
+  }
+
+  /* ORIGINAL */
+  // a.ready
+
+  // .then( () =>
+  // {
+  //   let time;
+  //   let o =
+  //   {
+  //     execPath : 'node ' + testAppPath,
+  //     mode : 'spawn',
+  //     throwingExitCode : 0,
+  //     outputPiping : 1,
+  //     ipc : 1,
+  //     outputCollecting : 1,
+  //   }
+
+  //   let con = _.process.start( o );
+
+  //   o.process.on( 'message', () =>
+  //   {
+  //     time = _.time.now();
+  //     _.process.terminate({ pnd : o.process, timeOut : context.t1*5 });
+  //   })
+
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, null );
+  //     test.identical( o.exitSignal, 'SIGKILL' );
+  //     test.true( !_.strHas( o.output, 'SIGTERM' ) );
+  //     test.ge( _.time.now() - time, context.t1*5 );
+  //     console.log( `time : ${_.time.spent( time )}` );
+  //     return null;
+  //   })
+
+  //   return con;
+  // })
+
+  // /* */
+
+  // .then( () =>
+  // {
+  //   let time;
+  //   let o =
+  //   {
+  //     execPath : testAppPath,
+  //     mode : 'fork',
+  //     throwingExitCode : 0,
+  //     outputPiping : 1,
+  //     ipc : 1,
+  //     outputCollecting : 1,
+  //   }
+
+  //   let con = _.process.start( o );
+
+  //   o.process.on( 'message', () =>
+  //   {
+  //     time = _.time.now();
+  //     _.process.terminate({ pnd : o.process, timeOut : context.t1*5 });
+  //   })
+
+  //   con.then( () =>
+  //   {
+  //     test.identical( o.exitCode, null );
+  //     test.identical( o.exitSignal, 'SIGKILL' );
+  //     test.is( !_.strHas( o.output, 'SIGTERM' ) );
+  //     test.ge( _.time.now() - time, context.t1*5 );
+  //     console.log( `time : ${_.time.spent( time )}` );
+  //     return null;
+  //   })
+
+  //   return con;
+  // })
 
   /* - */
 
@@ -28734,7 +28780,7 @@ function startTerminateHangedWithExitHandler( test )
   }
 }
 
-startTerminateHangedWithExitHandler.timeOut = 20000;
+startTerminateHangedWithExitHandler.timeOut = 15e4; /* Locally : 14.622s */
 
 startTerminateHangedWithExitHandler.description =
 `
