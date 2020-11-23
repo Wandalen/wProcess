@@ -1716,6 +1716,8 @@ function startSingle_body( o )
     o.inputMirroring = 0;
     o.outputPiping = 1;
 
+    /* */
+
     function afterDeathSecondaryProcess()
     {
       let _ = require( toolsPath );
