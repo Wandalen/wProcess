@@ -1715,7 +1715,21 @@ function startSingle_body( o )
     o.stdio.push( 'ipc' );
     o.inputMirroring = 0;
     o.outputPiping = 1;
+
+    function afterDeathSecondaryProcess()
+    {
+      let _ = require( toolsPath );
+      _.include( 'wProcess' );
+      _.include( 'wFiles' );
+
+      process.on( 'message', () =>
+      {
+        process.on( 'disconnect', () => _.process.startMultiple( o ) )
+      })
+    }
   }
+
+  /* */
 
   function runAfterDeath()
   {
@@ -1724,18 +1738,6 @@ function startSingle_body( o )
       if( !err )
       o.process.send( true );
       this.take( err, op );
-    })
-  }
-
-  function afterDeathSecondaryProcess()
-  {
-    let _ = require( toolsPath );
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-
-    process.on( 'message', () =>
-    {
-      process.on( 'disconnect', () => _.process.startMultiple( o ) )
     })
   }
 
