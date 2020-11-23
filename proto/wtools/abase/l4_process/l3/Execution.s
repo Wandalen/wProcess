@@ -1466,47 +1466,11 @@ let startMinimal = _.routineUnite( startMinimal_head, startMinimal_body );
 
 function startSingle_head( routine, args )
 {
-  let o = args[ 0 ];
-
-  //
-
-  if( o.when === 'afterdeath' )
-  {
-    let toolsPath = _.path.nativize( _.path.join( __dirname, '../../../../wtools/Tools.s' ) );
-    let o2 = _.mapOnlyPrimitives( o );
-    delete o2.when;
-    let locals = { toolsPath, o : o2 };
-    let secondaryProcessRoutine = _.program.preform({ routine : afterDeathSecondaryProcess, locals })
-    let secondaryFilePath = _.process.tempOpen({ sourceCode : secondaryProcessRoutine.sourceCode });
-
-    o.execPath = _.path.nativize( secondaryFilePath );
-    o.mode = 'fork';
-    o.ipc = true;
-    o.args = [];
-    o.detaching = true;
-    o.stdio = 'pipe'
-    o.inputMirroring = 0;
-  }
-
-  o = startMinimalHeadCommon( routine, args );
+  let o = startMinimalHeadCommon( routine, args );
 
   _.assert( arguments.length === 2 );
 
   return o;
-
-  /* */
-
-  function afterDeathSecondaryProcess()
-  {
-    let _ = require( toolsPath );
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-
-    process.on( 'message', () =>
-    {
-      process.on( 'disconnect', () => _.process.startMultiple( o ) )
-    })
-  }
 }
 
 //
@@ -1514,15 +1478,16 @@ function startSingle_head( routine, args )
 function startSingle_body( o )
 {
   let _readyCallback;
+
+  if( o.when === 'afterdeath' )
+  formAfterDeath();
+
+  /* */
+
   let result = _.process.startMinimal.body.call( _.process, o );
 
   if( o.when === 'afterdeath' )
-  o.conStart.give( function( err, op )
-  {
-    if( !err )
-    o.process.send( true );
-    this.take( err, op );
-  })
+  runAfterDeath();
 
   return result;
 
@@ -1722,6 +1687,58 @@ function startSingle_body( o )
     return o.ready;
   }
 
+  /* */
+
+  function formAfterDeath()
+  {
+    let toolsPath = _.path.nativize( _.path.join( __dirname, '../../../../wtools/Tools.s' ) );
+    let excludeOptions =
+    {
+      ready : null,
+      conStart : null,
+      conTerminate : null,
+      conDisconnect : null,
+      logger : null,
+      procedure : null,
+      when : null
+    }
+    let locals = { toolsPath, o : _.mapBut( o, excludeOptions ) };
+    let secondaryProcessRoutine = _.program.preform({ routine : afterDeathSecondaryProcess, locals })
+    let secondaryFilePath = _.process.tempOpen({ sourceCode : secondaryProcessRoutine.sourceCode });
+
+    o.execPath = _.path.nativize( secondaryFilePath );
+    o.mode = 'fork';
+    o.ipc = true;
+    o.args = [];
+    o.detaching = true;
+    o.stdio = _.dup( 'pipe', 3 );
+    o.stdio.push( 'ipc' );
+    o.inputMirroring = 0;
+    o.outputPiping = 1;
+  }
+
+  function runAfterDeath()
+  {
+    o.conStart.give( function( err, op )
+    {
+      if( !err )
+      o.process.send( true );
+      this.take( err, op );
+    })
+  }
+
+  function afterDeathSecondaryProcess()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    process.on( 'message', () =>
+    {
+      process.on( 'disconnect', () => _.process.startMultiple( o ) )
+    })
+  }
+
 }
 
 startSingle_body.defaults =
@@ -1744,7 +1761,7 @@ let startSingle = _.routineUnite( startSingle_head, startSingle_body );
 
 function startMultiple_head( routine, args )
 {
-  let o = startSingle_head( routine, args );
+  let o = startMinimalHeadCommon( routine, args );
 
   _.assert( arguments.length === 2 );
 
