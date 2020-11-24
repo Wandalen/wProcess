@@ -1,3 +1,4 @@
+/* eslint-disable */
 ( function _Execution_test_s( )
 {
 
@@ -7218,7 +7219,7 @@ function startMinimalImportantExecPathPassingThrough( test )
 
 //
 
-function startMinimalNjsPassingThroughDifferentTypesOfPaths( test )
+function startNjsPassingThroughDifferentTypesOfPaths( test )
 {
   let context = this;
   let a = context.assetFor( test, 'basic' );
@@ -8590,7 +8591,7 @@ function startMinimalDifferentTypesOfPaths( test )
 //
 
 
-function startMinimalNjsPassingThroughExecPathWithSpace( test )
+function startNjsPassingThroughExecPathWithSpace( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -10369,7 +10370,7 @@ function startMultipleState( test )
 // delay
 // --
 
-function startReadyDelay( test )
+function startSingleReadyDelay( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -10407,7 +10408,7 @@ function startReadyDelay( test )
         ready,
       }
 
-      let returned = _.process.start( o );
+      let returned = _.process.startSingle( o );
 
       o.ready.then( ( op ) =>
       {
@@ -10439,16 +10440,16 @@ function startReadyDelay( test )
 
 }
 
-startReadyDelay.rapidity = -1;
-startReadyDelay.timeOut = 5e5;
-startReadyDelay.description =
+startSingleReadyDelay.rapidity = -1;
+startSingleReadyDelay.timeOut = 5e5;
+startSingleReadyDelay.description =
 `
   - delay in consequence ready delay starting of the process
 `
 
 //
 
-function startReadyDelayMultiple( test )
+function startMultipleReadyDelay( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -10490,7 +10491,7 @@ function startReadyDelayMultiple( test )
         ready : ready2,
       }
 
-      let returned = _.process.start( o );
+      let returned = _.process.startMultiple( o );
 
       o.ready.then( ( op ) =>
       {
@@ -10542,7 +10543,7 @@ function startReadyDelayMultiple( test )
         ready : ready2,
       }
 
-      let returned = _.process.start( o );
+      let returned = _.process.startMultiple( o );
 
       o.ready.then( ( op ) =>
       {
@@ -10590,9 +10591,9 @@ function startReadyDelayMultiple( test )
 
 }
 
-startReadyDelayMultiple.rapidity = -1;
-startReadyDelayMultiple.timeOut = 5e5;
-startReadyDelayMultiple.description =
+startMultipleReadyDelay.rapidity = -1;
+startMultipleReadyDelay.timeOut = 5e5;
+startMultipleReadyDelay.description =
 `
   - delay in consequence ready delay starting of 2 processes
   - concurrent starting does not cause problems
@@ -10600,7 +10601,7 @@ startReadyDelayMultiple.description =
 
 //
 
-function startOptionWhenDelay( test )
+function startMinimalOptionWhenDelay( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -10639,7 +10640,7 @@ function startOptionWhenDelay( test )
         deasync,
       }
 
-      let returned = _.process.start( o );
+      let returned = _.process.startMinimal( o );
 
       o.ready.then( ( op ) =>
       {
@@ -10669,12 +10670,12 @@ function startOptionWhenDelay( test )
 
 }
 
-startOptionWhenDelay.timeOut = 5e5;
-startOptionWhenDelay.rapidity = -1;
+startMinimalOptionWhenDelay.timeOut = 5e5;
+startMinimalOptionWhenDelay.rapidity = -1;
 
 //
 
-function startOptionWhenTime( test )
+function startMinimalOptionWhenTime( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -10714,7 +10715,7 @@ function startOptionWhenTime( test )
         deasync,
       }
 
-      let returned = _.process.start( o );
+      let returned = _.process.startMinimal( o );
 
       o.ready.then( ( op ) =>
       {
@@ -10743,12 +10744,12 @@ function startOptionWhenTime( test )
   }
 }
 
-startOptionWhenTime.timeOut = 5e5;
-startOptionWhenTime.rapidity = -1;
+startMinimalOptionWhenTime.timeOut = 5e5;
+startMinimalOptionWhenTime.rapidity = -1;
 
 //
 
-function startOptionTimeOut( test )
+function startMinimalOptionTimeOut( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -10776,7 +10777,7 @@ function startOptionTimeOut( test )
         timeOut : context.t1*3,
       }
 
-      _.process.start( o );
+      _.process.startMinimal( o );
 
       return test.shouldThrowErrorAsync( o.conTerminate )
       .then( () =>
@@ -10804,7 +10805,7 @@ function startOptionTimeOut( test )
         timeOut : context.t1*3,
       }
 
-      _.process.start( o );
+      _.process.startMinimal( o );
 
       return test.shouldThrowErrorAsync( o.conTerminate )
       .then( () =>
@@ -10851,7 +10852,7 @@ function startOptionTimeOut( test )
         outputCollecting : 1
       }
 
-      _.process.start( o );
+      _.process.startMinimal( o );
 
       return test.shouldThrowErrorAsync( o.conTerminate )
       .then( () =>
@@ -10891,7 +10892,7 @@ function startOptionTimeOut( test )
         outputCollecting : 1
       }
 
-      _.process.start( o );
+      _.process.startMinimal( o );
 
       return test.shouldThrowErrorAsync( o.conTerminate )
       .then( () =>
@@ -10973,7 +10974,7 @@ function startOptionTimeOut( test )
       stdio : 'pipe',
       outputPiping : 1,
     }
-    _.process.start( o );
+    _.process.startMinimal( o );
 
     /* ignores SIGTERM until child process will be terminated, then emits SIGTERM by itself */
     process.on( 'SIGTERM', () =>
@@ -11011,7 +11012,7 @@ function startOptionTimeOut( test )
       stdio : 'pipe',
       outputPiping : 1,
     }
-    _.process.start( o );
+    _.process.startMinimal( o );
 
     /* ignores SIGTERM until child process will be terminated */
     process.on( 'SIGTERM', () =>
@@ -11028,12 +11029,12 @@ function startOptionTimeOut( test )
 
 }
 
-startOptionTimeOut.timeOut = 5e5;
-startOptionTimeOut.rapidity = -1;
+startMinimalOptionTimeOut.timeOut = 5e5;
+startMinimalOptionTimeOut.rapidity = -1;
 
 //
 
-function startAfterDeath( test )
+function startMinimalAfterDeath( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -11066,10 +11067,10 @@ function startAfterDeath( test )
       }
 
       if( mode === 'shell' ) /* mode::shell doesn't support ipc */
-      return test.shouldThrowErrorSync( () => _.process.start( o ) )
+      return test.shouldThrowErrorSync( () => _.process.startMinimal( o ) )
 
       // debugger;
-      _.process.start( o );
+      _.process.startMinimal( o );
       let secondaryPid;
       // debugger;
 
@@ -11137,7 +11138,7 @@ function startAfterDeath( test )
   //     ipc : 1,
   //   }
   //   // debugger;
-  //   _.process.start( o );
+  //   _.process.startMinimal( o );
   //   let secondaryPid;
   //   // debugger;
 
@@ -11205,7 +11206,7 @@ function startAfterDeath( test )
       mode : 'spawn',
     }
 
-    _.process.start( o );
+    _.process.startMinimal( o );
 
     o.conStart.thenGive( () =>
     {
@@ -11238,8 +11239,8 @@ function startAfterDeath( test )
 
 }
 
-startAfterDeath.timeOut = 35e4; /* Locally : 34.737s */
-startAfterDeath.description =
+startMinimalAfterDeath.timeOut = 35e4; /* Locally : 34.737s */
+startMinimalAfterDeath.description =
 `
 Spawns program1 as "main" process.
 Program1 starts program2 with mode:'afterdeath'
@@ -11249,7 +11250,7 @@ Program2 exits normally after short timeout
 
 //
 
-function startAfterDeathOutput( test )
+function startMinimalAfterDeathOutput( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -11277,9 +11278,9 @@ function startAfterDeathOutput( test )
       }
 
       if( mode === 'shell' ) /* mode::shell doesn't support ipc */
-      return test.shouldThrowErrorSync( () => _.process.start( o ) );
+      return test.shouldThrowErrorSync( () => _.process.startMinimal( o ) );
 
-      let con = _.process.start( o );
+      let con = _.process.startMinimal( o );
 
       con.then( ( op ) =>
       {
@@ -11312,7 +11313,7 @@ function startAfterDeathOutput( test )
   //     currentPath : a.routinePath,
   //     ipc : 1,
   //   }
-  //   let con = _.process.start( o );
+  //   let con = _.process.startMinimal( o );
 
   //   con.then( ( op ) =>
   //   {
@@ -11350,7 +11351,7 @@ function startAfterDeathOutput( test )
       stdio : 'inherit'
     }
 
-    _.process.start( o );
+    _.process.startMinimal( o );
 
     o.process.on( 'exit', () => //zzz for Vova: remove after enabling exit handler in start
     {
@@ -11382,8 +11383,8 @@ function startAfterDeathOutput( test )
   }
 }
 
-startAfterDeathOutput.timeOut = 27e4; /* Locally : 26.485s */
-startAfterDeathOutput.description =
+startMinimalAfterDeathOutput.timeOut = 27e4; /* Locally : 26.485s */
+startMinimalAfterDeathOutput.description =
 `
 Fakes death of program1 and checks output of program2
 `
@@ -11392,7 +11393,7 @@ Fakes death of program1 and checks output of program2
 // detaching
 // --
 
-function startDetachingResourceReady( test )
+function startMinimalDetachingResourceReady( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -11418,7 +11419,7 @@ function startDetachingResourceReady( test )
         currentPath : a.routinePath,
         throwingExitCode : 0
       }
-      let result = _.process.start( o );
+      let result = _.process.startMinimal( o );
 
       test.true( result !== o.conStart );
       test.true( result !== o.conTerminate );
@@ -11697,7 +11698,7 @@ function startDetachingResourceReady( test )
 
 //
 
-function startDetachingNoTerminationBegin( test )
+function startMinimalDetachingNoTerminationBegin( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -11730,7 +11731,7 @@ function startDetachingNoTerminationBegin( test )
         ipc : 1,
       }
 
-      let con = _.process.start( o );
+      let con = _.process.startMinimal( o );
 
       let data;
 
@@ -11785,7 +11786,7 @@ function startDetachingNoTerminationBegin( test )
         ipc : 1,
       }
 
-      let con = _.process.start( o );
+      let con = _.process.startMinimal( o );
 
       let data;
 
@@ -11832,7 +11833,7 @@ function startDetachingNoTerminationBegin( test )
         currentPath : a.routinePath,
         ipc : 1,
       }
-      let con = _.process.start( o );
+      let con = _.process.startMinimal( o );
 
       let data;
 
@@ -11888,7 +11889,7 @@ function startDetachingNoTerminationBegin( test )
       }
 
 
-      let con = _.process.start( o );
+      let con = _.process.startMinimal( o );
 
       let data;
 
@@ -11944,7 +11945,7 @@ function startDetachingNoTerminationBegin( test )
     if( o.ipc !== undefined )
     o.ipc = _.boolFrom( o.ipc );
 
-    _.process.start( o );
+    _.process.startMinimal( o );
 
     process.send({ childPid : o.process.pid });
   }
@@ -11968,8 +11969,8 @@ function startDetachingNoTerminationBegin( test )
 
 }
 
-startDetachingNoTerminationBegin.rapidity = -1;
-startDetachingNoTerminationBegin.timeOut = 63e4; /* Locally : 62.137s */
+startMinimalDetachingNoTerminationBegin.rapidity = -1;
+startMinimalDetachingNoTerminationBegin.timeOut = 63e4; /* Locally : 62.137s */
 
 //
 
@@ -12501,7 +12502,7 @@ startDetachingNoTerminationBegin.timeOut = 63e4; /* Locally : 62.137s */
 //
 
 /* qqq for Yevhen : implement for other modes | aaa : Done. */
-function startDetachedOutputStdioIgnore( test )
+function startMinimalDetachedOutputStdioIgnore( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -12528,7 +12529,7 @@ function startDetachedOutputStdioIgnore( test )
         outputCollecting : 1,
         currentPath : a.routinePath,
       }
-      let con = _.process.start( o );
+      let con = _.process.startMinimal( o );
 
       con.then( () =>
       {
@@ -12647,7 +12648,7 @@ function startDetachedOutputStdioIgnore( test )
     if( o.mode !== 'fork' )
     o.execPath = 'node ' + o.execPath;
 
-    _.process.start( o );
+    _.process.startMinimal( o );
   }
 
   function testAppChild()
@@ -12667,12 +12668,12 @@ function startDetachedOutputStdioIgnore( test )
 
 }
 
-startDetachedOutputStdioIgnore.timeOut = 23e4; /* Locally : 22.959s */
+startMinimalDetachedOutputStdioIgnore.timeOut = 23e4; /* Locally : 22.959s */
 
 //
 
 /* qqq for Yevhen : implement for other modes | aaa : Done. */
-function startDetachedOutputStdioPipe( test )
+function startMinimalDetachedOutputStdioPipe( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -12697,7 +12698,7 @@ function startDetachedOutputStdioPipe( test )
         outputCollecting : 1,
         currentPath : a.routinePath,
       }
-      let con = _.process.start( o );
+      let con = _.process.startMinimal( o );
 
       con.then( () =>
       {
@@ -12840,7 +12841,7 @@ function startDetachedOutputStdioPipe( test )
     if( o.mode !== 'fork' )
     o.execPath = 'node ' + o.execPath;
 
-    _.process.start( o );
+    _.process.startMinimal( o );
   }
 
   function testAppChild()
@@ -12860,12 +12861,12 @@ function startDetachedOutputStdioPipe( test )
 
 }
 
-startDetachedOutputStdioPipe.timeOut = 22e4; /* Locally : 22.906s */
+startMinimalDetachedOutputStdioPipe.timeOut = 22e4; /* Locally : 22.906s */
 
 //
 
 /* qqq for Yevhen : implement for other modes | aaa : Done. */
-function startDetachedOutputStdioInherit( test )
+function startMinimalDetachedOutputStdioInherit( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -12899,7 +12900,7 @@ function startDetachedOutputStdioInherit( test )
         detaching : 1,
         currentPath : a.routinePath,
       }
-      return test.shouldThrowErrorSync( () => _.process.start( o ) );
+      return test.shouldThrowErrorSync( () => _.process.startMinimal( o ) );
     })
 
     return ready;
@@ -12981,7 +12982,7 @@ function startDetachedOutputStdioInherit( test )
 //
 
 /* qqq for Yevhen : implement for other modes | aaa : Done. */
-function startDetachingIpc( test )
+function startMinimalDetachingIpc( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -13013,7 +13014,7 @@ function startDetachingIpc( test )
       }
 
       if( mode === 'shell' )
-      return test.shouldThrowErrorSync( () => _.process.start( o ) );
+      return test.shouldThrowErrorSync( () => _.process.startMinimal( o ) );
 
       _.process.start( o );
 
@@ -13062,9 +13063,9 @@ function startDetachingIpc( test )
       }
 
       if( mode === 'shell' )
-      return test.shouldThrowErrorSync( () => _.process.start( o ) );
+      return test.shouldThrowErrorSync( () => _.process.startMinimal( o ) );
 
-      _.process.start( o );
+      _.process.startMinimal( o );
 
       let message;
 
@@ -13440,7 +13441,7 @@ function startDetachingIpc( test )
 //
 
 /* qqq for Yevhen : implement for other modes | aaa : Done. */
-function startDetachingTrivial( test )
+function startMinimalDetachingTrivial( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -13481,7 +13482,7 @@ function startDetachingTrivial( test )
         currentPath : a.routinePath,
       }
 
-      _.process.start( o );
+      _.process.startMinimal( o );
 
       var childPid;
       o.process.on( 'message', ( e ) =>
@@ -13634,11 +13635,11 @@ function startDetachingTrivial( test )
   }
 }
 
-startDetachingTrivial.timeOut = 26e4; /* Locally : 25.972s */
+startMinimalDetachingTrivial.timeOut = 26e4; /* Locally : 25.972s */
 
 //
 
-function startEventClose( test )
+function startMinimalEventClose( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -13717,7 +13718,7 @@ function startEventClose( test )
 
       test.case = _.toJs({ mode, ipc, disconnecting });
 
-      _.process.start( o );
+      _.process.startMinimal( o );
 
       o.conStart.thenGive( () =>
       {
@@ -13763,15 +13764,15 @@ function startEventClose( test )
   }
 }
 
-startEventClose.timeOut = 5e5;
-startEventClose.description =
+startMinimalEventClose.timeOut = 5e5;
+startMinimalEventClose.description =
 `
 Check if close event is called.
 `
 
 //
 
-function startEventExit( test )
+function startMinimalEventExit( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -13895,7 +13896,7 @@ function startEventExit( test )
 
       test.case = _.toJs({ mode, stdio, ipc, disconnecting, detaching });
 
-      _.process.start( o );
+      _.process.startMinimal( o );
 
       o.conStart.thenGive( () =>
       {
@@ -13927,9 +13928,9 @@ function startEventExit( test )
   }
 }
 
-startEventExit.rapidity = -1;
-startEventExit.timeOut = 5e5;
-startEventExit.description =
+startMinimalEventExit.rapidity = -1;
+startMinimalEventExit.timeOut = 5e5;
+startMinimalEventExit.description =
 `
 Check if exit event is called.
 `
@@ -13937,7 +13938,7 @@ Check if exit event is called.
 //
 
 /* qqq for Yevhen : implement for other modes | aaa : Done. */
-function startDetachingChildExitsAfterParent( test )
+function startMinimalDetachingChildExitsAfterParent( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -13973,7 +13974,7 @@ function startDetachingChildExitsAfterParent( test )
         detaching : 0,
         ipc : 1,
       }
-      let con = _.process.start( o );
+      let con = _.process.startMinimal( o );
 
       let childPid;
 
@@ -14080,7 +14081,7 @@ function startDetachingChildExitsAfterParent( test )
       mode,
     }
 
-    _.process.start( o );
+    _.process.startMinimal( o );
 
     process.send( o.process.pid );
 
@@ -14104,8 +14105,8 @@ function startDetachingChildExitsAfterParent( test )
   }
 }
 
-startDetachingChildExitsAfterParent.timeOut = 36e4; /* Locally : 35.792s */
-startDetachingChildExitsAfterParent.description =
+startMinimalDetachingChildExitsAfterParent.timeOut = 36e4; /* Locally : 35.792s */
+startMinimalDetachingChildExitsAfterParent.description =
 `
 Parent starts child process in detached mode and disconnects it.
 Child process continues to work for at least 5 seconds after parent exits.
@@ -14115,7 +14116,7 @@ After 5 seconds child process creates test file in working directory and exits.
 //
 
 /* qqq for Yevhen : implement for other modes | aaa : Done. */
-function startDetachingChildExitsBeforeParent( test )
+function startMinimalDetachingChildExitsBeforeParent( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -14148,7 +14149,7 @@ function startDetachingChildExitsBeforeParent( test )
         currentPath : a.routinePath,
         ipc : 1,
       }
-      _.process.start( o );
+      _.process.startMinimal( o );
 
       let child;
       let onChildTerminate = new _.Consequence();
@@ -14279,7 +14280,7 @@ function startDetachingChildExitsBeforeParent( test )
 
     }
 
-    _.process.start( o );
+    _.process.startMinimal( o );
 
     o.conTerminate.finally( ( err, op ) =>
     {
@@ -14312,8 +14313,8 @@ function startDetachingChildExitsBeforeParent( test )
 
 }
 
-startDetachingChildExitsBeforeParent.timeOut = 21e4; /* Locally : 20.817s */
-startDetachingChildExitsBeforeParent.description =
+startMinimalDetachingChildExitsBeforeParent.timeOut = 21e4; /* Locally : 20.817s */
+startMinimalDetachingChildExitsBeforeParent.description =
 `
 Parent starts child process in detached mode and registers callback to wait for child process.
 Child process creates test file after 1 second and exits.
@@ -14322,7 +14323,7 @@ Callback in parent recevies message. Parent exits.
 
 //
 
-function startDetachingDisconnectedEarly( test )
+function startMinimalDetachingDisconnectedEarly( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -14352,7 +14353,7 @@ function startDetachingDisconnectedEarly( test )
         detaching : 1,
       }
 
-      let result = _.process.start( o );
+      let result = _.process.startMinimal( o );
 
       test.identical( o.ready.argumentsCount(), 0 );
       test.identical( o.ready.errorsCount(), 0 );
@@ -14429,7 +14430,7 @@ function startDetachingDisconnectedEarly( test )
   }
 }
 
-startDetachingDisconnectedEarly.description =
+startMinimalDetachingDisconnectedEarly.description =
 `
 Parent starts child process in detached mode and disconnects it right after start.
 Child process creates test file after 2 second and stays alive.
@@ -14442,7 +14443,7 @@ ProcessWatched should not throw any error.
 
 //
 
-function startDetachingDisconnectedLate( test )
+function startMinimalDetachingDisconnectedLate( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -14471,7 +14472,7 @@ function startDetachingDisconnectedLate( test )
         detaching : 1,
       }
 
-      let result = _.process.start( o );
+      let result = _.process.startMinimal( o );
 
       test.identical( o.ready.argumentsCount(), 0 );
       test.identical( o.ready.errorsCount(), 0 );
@@ -14551,7 +14552,7 @@ function startDetachingDisconnectedLate( test )
   }
 }
 
-startDetachingDisconnectedLate.description =
+startMinimalDetachingDisconnectedLate.description =
 `
 Parent starts child process in detached mode and disconnects after short delay.
 Child process creates test file after 2 second and stays alive.
@@ -14565,7 +14566,7 @@ ProcessWatched should not throw any error.
 //
 
 /* qqq for Yevhen : implement for other modes | aaa : Done. */
-function startDetachingChildExistsBeforeParentWaitForTermination( test )
+function startMinimalDetachingChildExistsBeforeParentWaitForTermination( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -14592,7 +14593,7 @@ function startDetachingChildExistsBeforeParentWaitForTermination( test )
         detaching : 1
       }
 
-      _.process.start( o );
+      _.process.startMinimal( o );
 
       o.conTerminate.finally( ( err, op ) =>
       {
@@ -14656,8 +14657,8 @@ function startDetachingChildExistsBeforeParentWaitForTermination( test )
 
 }
 
-startDetachingChildExistsBeforeParentWaitForTermination.timeOut = 12e4; /* Locally : 11.380s */
-startDetachingChildExistsBeforeParentWaitForTermination.description =
+startMinimalDetachingChildExistsBeforeParentWaitForTermination.timeOut = 12e4; /* Locally : 11.380s */
+startMinimalDetachingChildExistsBeforeParentWaitForTermination.description =
 `
 Parent starts child process in detached mode.
 Test routine waits until o.conTerminate resolves message about termination of the child process.
@@ -14666,7 +14667,7 @@ Test routine waits until o.conTerminate resolves message about termination of th
 //
 
 /* qqq for Yevhen : implement for other modes | aaa : Done. */
-function startDetachingEndCompetitorIsExecuted( test )
+function startMinimalDetachingEndCompetitorIsExecuted( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -14695,7 +14696,7 @@ function startDetachingEndCompetitorIsExecuted( test )
         detaching : 1
       }
 
-      let result = _.process.start( o );
+      let result = _.process.startMinimal( o );
 
       test.true( o.conStart !== result );
       test.true( _.consequenceIs( o.conStart ) )
@@ -14798,8 +14799,8 @@ function startDetachingEndCompetitorIsExecuted( test )
 
 }
 
-startDetachingEndCompetitorIsExecuted.timeOut = 12e4; /* Locally : 11.249s */
-startDetachingEndCompetitorIsExecuted.description =
+startMinimalDetachingEndCompetitorIsExecuted.timeOut = 12e4; /* Locally : 11.249s */
+startMinimalDetachingEndCompetitorIsExecuted.description =
 
 `Parent starts child process in detached mode.
 Consequence conStart recevices message when process starts.
@@ -14810,7 +14811,7 @@ o.ended is true when conTerminate callback is executed.
 
 //
 
-function startDetachingTerminationBegin( test )
+function startMinimalDetachingTerminationBegin( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -14858,7 +14859,7 @@ function startDetachingTerminationBegin( test )
         currentPath : a.routinePath,
         ipc : 1,
       }
-      let con = _.process.start( o );
+      let con = _.process.startMinimal( o );
 
       let data;
 
@@ -14916,7 +14917,7 @@ function startDetachingTerminationBegin( test )
         currentPath : a.routinePath,
         ipc : 1,
       }
-      let con = _.process.start( o );
+      let con = _.process.startMinimal( o );
 
       let data;
 
@@ -14972,7 +14973,7 @@ function startDetachingTerminationBegin( test )
         currentPath : a.routinePath,
         ipc : 1,
       }
-      let con = _.process.start( o );
+      let con = _.process.startMinimal( o );
 
       let data;
 
@@ -15029,7 +15030,7 @@ function startDetachingTerminationBegin( test )
         currentPath : a.routinePath,
         ipc : 1,
       }
-      let con = _.process.start( o );
+      let con = _.process.startMinimal( o );
 
       let data;
 
@@ -15093,7 +15094,7 @@ function startDetachingTerminationBegin( test )
     if( o.ipc !== undefined )
     o.ipc = _.boolFrom( o.ipc );
 
-    _.process.start( o );
+    _.process.startMinimal( o );
 
     console.log( o.process.pid )
 
@@ -15121,9 +15122,9 @@ function startDetachingTerminationBegin( test )
   }
 }
 
-startDetachingTerminationBegin.rapidity = -1;
-startDetachingTerminationBegin.timeOut = 3e5;
-startDetachingTerminationBegin.description =
+startMinimalDetachingTerminationBegin.rapidity = -1;
+startMinimalDetachingTerminationBegin.timeOut = 3e5;
+startMinimalDetachingTerminationBegin.description =
 `
 Checks that detached child process continues to work after parent death.
 Parent spawns child in detached mode with different stdio and ipc.
@@ -15132,7 +15133,7 @@ Child continues to work after parent death.
 //
 
 /* qqq for Yevhen : implement for other modes | aaa : Done. */
-function startDetachingThrowing( test )
+function startMinimalDetachingThrowing( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -15162,7 +15163,7 @@ function startDetachingThrowing( test )
       detaching : 1
     }
 
-    return test.shouldThrowErrorSync( () => _.process.start( o ) )
+    return test.shouldThrowErrorSync( () => _.process.startMinimal( o ) )
 
   }
 
@@ -41638,8 +41639,8 @@ var Proto =
     startNormalizedExecPath, /* with `starter` */
     startMinimalExecPathWithSpace,
     startMinimalDifferentTypesOfPaths,
-    startMinimalNjsPassingThroughExecPathWithSpace,
-    startMinimalNjsPassingThroughDifferentTypesOfPaths,
+    startNjsPassingThroughExecPathWithSpace,
+    startNjsPassingThroughDifferentTypesOfPaths,
     startMinimalPassingThroughExecPathWithSpace,
 
     // procedures / chronology / structural
@@ -41654,43 +41655,43 @@ var Proto =
 
     // delay
 
-    startReadyDelay,
-    startReadyDelayMultiple,
-    startOptionWhenDelay,
-    startOptionWhenTime,
-    startOptionTimeOut,
-    startAfterDeath, /* qqq for Vova : fix aaa:fixed*/
-    startAfterDeathOutput, /* qqq for Vova : fix aaa:fixed*/
+    startSingleReadyDelay,
+    startMultipleReadyDelay,
+    startMinimalOptionWhenDelay,
+    startMinimalOptionWhenTime,
+    startMinimalOptionTimeOut,
+    startMinimalAfterDeath, /* qqq for Vova : fix aaa:fixed*/
+    startMinimalAfterDeathOutput, /* qqq for Vova : fix aaa:fixed*/
 
     // detaching
 
-    startDetachingResourceReady,
+    startMinimalDetachingResourceReady,
     // startDetachingModeSpawnResourceReady,
     // startDetachingModeForkResourceReady,
     // startDetachingModeShellResourceReady,
-    startDetachingNoTerminationBegin,
+    startMinimalDetachingNoTerminationBegin,
     // startDetachingModeSpawnNoTerminationBegin,
     // startDetachingModeForkNoTerminationBegin,
     // startDetachingModeShellNoTerminationBegin,
-    startDetachedOutputStdioIgnore,
-    startDetachedOutputStdioPipe,
-    startDetachedOutputStdioInherit,
-    startDetachingIpc,
+    startMinimalDetachedOutputStdioIgnore,
+    startMinimalDetachedOutputStdioPipe,
+    startMinimalDetachedOutputStdioInherit,
+    startMinimalDetachingIpc,
     // startDetachingModeSpawnIpc,
     // startDetachingModeForkIpc,
     // startDetachingModeShellIpc,
 
-    startDetachingTrivial,
-    startDetachingChildExitsAfterParent,
-    startDetachingChildExitsBeforeParent,
-    startDetachingDisconnectedEarly,
-    startDetachingDisconnectedLate,
-    startDetachingChildExistsBeforeParentWaitForTermination,
-    startDetachingEndCompetitorIsExecuted,
-    startDetachingTerminationBegin,
-    startEventClose,
-    startEventExit,
-    startDetachingThrowing,
+    startMinimalDetachingTrivial,
+    startMinimalDetachingChildExitsAfterParent,
+    startMinimalDetachingChildExitsBeforeParent,
+    startMinimalDetachingDisconnectedEarly,
+    startMinimalDetachingDisconnectedLate,
+    startMinimalDetachingChildExistsBeforeParentWaitForTermination,
+    startMinimalDetachingEndCompetitorIsExecuted,
+    startMinimalDetachingTerminationBegin,
+    startMinimalEventClose,
+    startMinimalEventExit,
+    startMinimalDetachingThrowing,
     startNjsDetachingChildThrowing,
 
     // on
