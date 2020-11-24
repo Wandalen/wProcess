@@ -79,6 +79,15 @@ IF %errorlevel% EQU 0 GOTO Loop_start
 */
 
 /*
+@echo off
+cls
+:Loop_start
+node proto/wtools/abase/l4_process.test/Execution.test.s n:1 v:10 s:0 r:terminateDifferentStdio
+IF %errorlevel% EQU 0 GOTO Loop_start
+:Loop_end
+*/
+
+/*
 ### Modes in which child process terminates after signal:
 
 | Signal  |  Windows   |   Linux    |       Mac        |
@@ -11184,10 +11193,11 @@ function startAfterDeath( test )
     {
       execPath : 'node program2.js',
       outputCollecting : 1,
+      when : 'afterdeath',
       mode : 'spawn',
     }
 
-    _.process.startAfterDeath( o );
+    _.process.start( o );
 
     o.conStart.thenGive( () =>
     {
@@ -11328,10 +11338,11 @@ function startAfterDeathOutput( test )
       execPath : 'node program2.js',
       mode : 'spawn',
       currentPath : __dirname,
+      when : 'afterdeath',
       stdio : 'inherit'
     }
 
-    _.process.startAfterDeath( o );
+    _.process.start( o );
 
     o.process.on( 'exit', () => //zzz for Vova: remove after enabling exit handler in start
     {
