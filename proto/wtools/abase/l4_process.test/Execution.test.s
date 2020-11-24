@@ -58,6 +58,13 @@ uv_run() is not reentrant. It must not be called from a callback.
 
 RET=0; until [ ${RET} -ne 0 ]; do
     reset
+    taskset 0x1 node wtools/abase/l4_process.test/Execution.test.s rapidity:-1
+    RET=$?
+    sleep 1
+done
+
+RET=0; until [ ${RET} -ne 0 ]; do
+    reset
     taskset 0x1 node wtools/abase/l4_process.test/Execution.test.s n:1 v:5 s:0 r:terminateSync
     RET=$?
     sleep 1
@@ -21014,7 +21021,7 @@ function starter( test )
       return shell({ execPath : 'arg1' })
       .then( ( op ) =>
       {
-        
+
         if( mode === 'fork' )
         test.identical( op.execPath, testAppPath );
         else
@@ -25805,7 +25812,7 @@ function startOptionVerbosity( test )
       test.case = `mode : ${mode}, execPath has double quotes, verbosity : 1`;
       capturedOutput = '';
 
-      let options = 
+      let options =
       {
         execPath : `${mode === 'fork' ? '' : 'node' } -e "console.log( '"a"', "'b'", \`"c"\` )"`,
         mode,
@@ -41506,235 +41513,236 @@ var Proto =
   tests :
   {
 
-    // basic
+    // // basic
+    //
+    // startBasic, /* qqq for Yevhen : merge startBasic2 in | aaa : Done. */
+    // // startBasic2,
+    // startFork,
+    // startErrorHandling,
+    //
+    // // sync
+    //
+    // startSync,
+    // startSyncDeasync, /* qqq for Yevhen : merge with startSyncDeasync2 | aaa : Changed, startSyncDeasync2 is redundant */
+    // // startSyncDeasync2,
+    // startSyncDeasyncThrowing,
+    // startSyncDeasyncMultiple,
+    //
+    // // arguments
+    //
+    // startWithoutExecPath,
+    // startArgsOption,
+    // startArgumentsParsing,
+    // startArgumentsParsingNonTrivial,
+    // startArgumentsNestedQuotes,
+    // startExecPathQuotesClosing,
+    // startExecPathSeveralCommands,
+    // startExecPathNonTrivialModeShell,
+    // startArgumentsHandlingTrivial,
+    // startArgumentsHandling,
+    // startImportantExecPath,
+    // startImportantExecPathPassingThrough,
+    // startNormalizedExecPath,
+    // startExecPathWithSpace,
+    // startDifferentTypesOfPaths,
+    // startNjsPassingThroughExecPathWithSpace,
+    // startNjsPassingThroughDifferentTypesOfPaths,
+    // startPassingThroughExecPathWithSpace,
+    //
+    // // procedures / chronology / structural
+    //
+    // startProcedureTrivial,
+    // startProcedureExists,
+    // startProcedureStack,
+    // startProcedureStackMultiple,
+    // startOnTerminateSeveralCallbacksChronology,
+    // startChronology,
+    // startStateMultiple,
+    //
+    // // delay
+    //
+    // startReadyDelay,
+    // startReadyDelayMultiple,
+    // startOptionWhenDelay,
+    // startOptionWhenTime,
+    // startOptionTimeOut,
+    // startAfterDeath, /* qqq for Vova : fix aaa:fixed*/
+    // startAfterDeathOutput, /* qqq for Vova : fix aaa:fixed*/
+    //
+    // // detaching
+    //
+    // startDetachingModeSpawnResourceReady,
+    // startDetachingModeForkResourceReady,
+    // startDetachingModeShellResourceReady,
+    // startDetachingNoTerminationBegin,
+    // // startDetachingModeSpawnNoTerminationBegin,
+    // // startDetachingModeForkNoTerminationBegin,
+    // // startDetachingModeShellNoTerminationBegin,
+    // startDetachedOutputStdioIgnore,
+    // startDetachedOutputStdioPipe,
+    // startDetachedOutputStdioInherit,
+    // startDetachingIpc,
+    // // startDetachingModeSpawnIpc,
+    // // startDetachingModeForkIpc,
+    // // startDetachingModeShellIpc,
+    //
+    // startDetachingTrivial,
+    // startDetachingChildExitsAfterParent,
+    // startDetachingChildExitsBeforeParent,
+    // startDetachingDisconnectedEarly,
+    // startDetachingDisconnectedLate,
+    // startDetachingChildExistsBeforeParentWaitForTermination,
+    // startDetachingEndCompetitorIsExecuted,
+    // startDetachingTerminationBegin,
+    // startEventClose,
+    // startEventExit,
+    // startDetachingThrowing,
+    // startNjsDetachingChildThrowing,
+    //
+    // // on
+    //
+    // startOnStart,
+    // startOnTerminate,
+    // startNoEndBug1,
+    // startWithDelayOnReady,
+    // startOnIsNotConsequence,
+    //
+    // // concurrent
+    //
+    // startConcurrentMultiple,
+    // startConcurrentConsequencesMultiple,
+    // starterConcurrentMultiple,
+    //
+    // /* qqq for Yevhen : use routine _.process.startMinimal() where it is possible and make renaming of test routines */
+    //
+    // // helper
+    //
+    // startNjs,
+    // startNjsWithReadyDelayStructural,
+    // startNjsOptionInterpreterArgs,
+    // startNjsWithReadyDelayStructuralMultiple,
+    //
+    // // starter
+    //
+    // starter,
+    // starterArgs,
+    // starterFields,
+    //
+    // // output
+    //
+    // startOptionOutputCollecting,
+    // startOptionOutputColoring,
+    // startOptionOutputColoringStderr,
+    // startOptionOutputColoringStdout,
+    // startOptionOutputGraying,
+    // startOptionOutputPrefixing,
+    // startOptionOutputPiping,
+    // startOptionInputMirroring,
+    // startOptionLogger,
+    // startOptionLoggerTransofrmation,
+    // startOutputOptionsCompatibilityLateCheck,
+    // startOptionVerbosity,
+    // startOptionVerbosityLogging,
+    // startOutputMultiple,
+    // startOptionStdioIgnoreMultiple,
+    //
+    // // etc
+    //
+    // appTempApplication,
+    //
+    // // other options
 
-    startBasic, /* qqq for Yevhen : merge startBasic2 in | aaa : Done. */
-    // startBasic2,
-    startFork,
-    startErrorHandling,
-
-    // sync
-
-    startSync,
-    startSyncDeasync, /* qqq for Yevhen : merge with startSyncDeasync2 | aaa : Changed, startSyncDeasync2 is redundant */
-    // startSyncDeasync2,
-    startSyncDeasyncThrowing,
-    startSyncDeasyncMultiple,
-
-    // arguments
-
-    startWithoutExecPath,
-    startArgsOption,
-    startArgumentsParsing,
-    startArgumentsParsingNonTrivial,
-    startArgumentsNestedQuotes,
-    startExecPathQuotesClosing,
-    startExecPathSeveralCommands,
-    startExecPathNonTrivialModeShell,
-    startArgumentsHandlingTrivial,
-    startArgumentsHandling,
-    startImportantExecPath,
-    startImportantExecPathPassingThrough,
-    startNormalizedExecPath,
-    startExecPathWithSpace,
-    startDifferentTypesOfPaths,
-    startNjsPassingThroughExecPathWithSpace,
-    startNjsPassingThroughDifferentTypesOfPaths,
-    startPassingThroughExecPathWithSpace,
-
-    // procedures / chronology / structural
-
-    startProcedureTrivial,
-    startProcedureExists,
-    startProcedureStack,
-    startProcedureStackMultiple,
-    startOnTerminateSeveralCallbacksChronology,
-    startChronology,
-    startStateMultiple,
-
-    // delay
-
-    startReadyDelay,
-    startReadyDelayMultiple,
-    startOptionWhenDelay,
-    startOptionWhenTime,
-    startOptionTimeOut,
-    startAfterDeath, /* qqq for Vova : fix aaa:fixed*/
-    startAfterDeathOutput, /* qqq for Vova : fix aaa:fixed*/
-
-    // detaching
-
-    startDetachingModeSpawnResourceReady,
-    startDetachingModeForkResourceReady,
-    startDetachingModeShellResourceReady,
-    startDetachingNoTerminationBegin,
-    // startDetachingModeSpawnNoTerminationBegin,
-    // startDetachingModeForkNoTerminationBegin,
-    // startDetachingModeShellNoTerminationBegin,
-    startDetachedOutputStdioIgnore,
-    startDetachedOutputStdioPipe,
-    startDetachedOutputStdioInherit,
-    startDetachingIpc,
-    // startDetachingModeSpawnIpc,
-    // startDetachingModeForkIpc,
-    // startDetachingModeShellIpc,
-
-    startDetachingTrivial,
-    startDetachingChildExitsAfterParent,
-    startDetachingChildExitsBeforeParent,
-    startDetachingDisconnectedEarly,
-    startDetachingDisconnectedLate,
-    startDetachingChildExistsBeforeParentWaitForTermination,
-    startDetachingEndCompetitorIsExecuted,
-    startDetachingTerminationBegin,
-    startEventClose,
-    startEventExit,
-    startDetachingThrowing,
-    startNjsDetachingChildThrowing,
-
-    // on
-
-    startOnStart,
-    startOnTerminate,
-    startNoEndBug1,
-    startWithDelayOnReady,
-    startOnIsNotConsequence,
-
-    // concurrent
-
-    startConcurrentMultiple,
-    startConcurrentConsequencesMultiple,
-    starterConcurrentMultiple,
-
-    /* qqq for Yevhen : use routine _.process.startMinimal() where it is possible and make renaming of test routines */
-
-    // helper
-
-    startNjs,
-    startNjsWithReadyDelayStructural,
-    startNjsOptionInterpreterArgs,
-    startNjsWithReadyDelayStructuralMultiple,
-
-    // starter
-
-    starter,
-    starterArgs,
-    starterFields,
-
-    // output
-
-    startOptionOutputCollecting,
-    startOptionOutputColoring,
-    startOptionOutputColoringStderr,
-    startOptionOutputColoringStdout,
-    startOptionOutputGraying,
-    startOptionOutputPrefixing,
-    startOptionOutputPiping,
-    startOptionInputMirroring,
-    startOptionLogger,
-    startOptionLoggerTransofrmation,
-    startOutputOptionsCompatibilityLateCheck,
-    startOptionVerbosity,
-    startOptionVerbosityLogging,
-    startOutputMultiple,
-    startOptionStdioIgnoreMultiple,
-
-    // etc
-
-    appTempApplication,
-
-    // other options
 
     startOptionStreamSizeLimit,
     startOptionStreamSizeLimitThrowing,
     startSingleOptionDry,
     startOptionDryMultiple,
-    startOptionCurrentPath,
-    startOptionCurrentPaths,
-    startOptionPassingThrough,
-    startOptionUid,
-    startOptionGid,
-    startOptionProcedureSingle,
-    startOptionProcedureMultiple,
-
-    // pid / status / exit
-
-    startDiffPid,
-    pidFrom,
-
-    isAlive,
-    statusOf,
-
-    exitReason,
-    exitCode, /* qqq for Yevhen : check order of test routines. it's messed up */
-
-    // termination
-
-    kill,
-    killSync,
-    killOptionWithChildren,
-
-    startErrorAfterTerminationWithSend,
-    startTerminateHangedWithExitHandler,
-    startTerminateAfterLoopRelease,
-
-    endSignalsBasic,
-    endSignalsOnExit,
-    endSignalsOnExitExitAgain,
-
-    terminate,
-    terminateSync,
-
-    terminateFirstChild,
-    // terminateFirstChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine | aaa : Done. */
-    // terminateFirstChildFork,
-    // terminateFirstChildShell,
-
-    terminateSecondChild,
-    // terminateSecondChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine | aaa : Done. */
-    // terminateSecondChildFork,
-    // terminateSecondChildShell,
-
-    terminateDetachedFirstChild,
-    // terminateDetachedFirstChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine | aaa : Done. */
-    // terminateDetachedFirstChildFork,
-    // terminateDetachedFirstChildShell,
-
-    terminateWithDetachedChild,
-    // terminateWithDetachedChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine | aaa : Done. */
-    // terminateWithDetachedChildFork,
-    // terminateWithDetachedChildShell,
-
-    terminateSeveralChildren,
-    terminateSeveralDetachedChildren,
-    terminateDeadProcess,
-
-    terminateTimeOutNoHandler,
-    terminateTimeOutIgnoreSignal,
-    terminateZeroTimeOut,
-    // terminateZeroTimeOutSpawn,
-    // terminateZeroTimeOutFork,
-    terminateZeroTimeOutWithoutChildrenShell,
-    terminateZeroTimeOutWithChildrenShell,
-
-    terminateDifferentStdio,
-
-    killComplex,
-    execPathOf,
-    waitForDeath,
-
-    // children
-
-    children,
-    childrenOptionFormatList,
-
-    // experiments
-
-    experimentIpcDeasync,
-    streamJoinExperiment,
-    experiment,
-    experiment2,
-    experiment3,
+    // startOptionCurrentPath,
+    // startOptionCurrentPaths,
+    // startOptionPassingThrough,
+    // startOptionUid,
+    // startOptionGid,
+    // startOptionProcedureSingle,
+    // startOptionProcedureMultiple,
+    //
+    // // pid / status / exit
+    //
+    // startDiffPid,
+    // pidFrom,
+    //
+    // isAlive,
+    // statusOf,
+    //
+    // exitReason,
+    // exitCode, /* qqq for Yevhen : check order of test routines. it's messed up */
+    //
+    // // termination
+    //
+    // kill,
+    // killSync,
+    // killOptionWithChildren,
+    //
+    // startErrorAfterTerminationWithSend,
+    // startTerminateHangedWithExitHandler,
+    // startTerminateAfterLoopRelease,
+    //
+    // endSignalsBasic,
+    // endSignalsOnExit,
+    // endSignalsOnExitExitAgain,
+    //
+    // terminate,
+    // terminateSync,
+    //
+    // terminateFirstChild,
+    // // terminateFirstChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine | aaa : Done. */
+    // // terminateFirstChildFork,
+    // // terminateFirstChildShell,
+    //
+    // terminateSecondChild,
+    // // terminateSecondChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine | aaa : Done. */
+    // // terminateSecondChildFork,
+    // // terminateSecondChildShell,
+    //
+    // terminateDetachedFirstChild,
+    // // terminateDetachedFirstChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine | aaa : Done. */
+    // // terminateDetachedFirstChildFork,
+    // // terminateDetachedFirstChildShell,
+    //
+    // terminateWithDetachedChild,
+    // // terminateWithDetachedChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine | aaa : Done. */
+    // // terminateWithDetachedChildFork,
+    // // terminateWithDetachedChildShell,
+    //
+    // terminateSeveralChildren,
+    // terminateSeveralDetachedChildren,
+    // terminateDeadProcess,
+    //
+    // terminateTimeOutNoHandler,
+    // terminateTimeOutIgnoreSignal,
+    // terminateZeroTimeOut,
+    // // terminateZeroTimeOutSpawn,
+    // // terminateZeroTimeOutFork,
+    // terminateZeroTimeOutWithoutChildrenShell,
+    // terminateZeroTimeOutWithChildrenShell,
+    //
+    // terminateDifferentStdio,
+    //
+    // killComplex,
+    // execPathOf,
+    // waitForDeath,
+    //
+    // // children
+    //
+    // children,
+    // childrenOptionFormatList,
+    //
+    // // experiments
+    //
+    // experimentIpcDeasync,
+    // streamJoinExperiment,
+    // experiment,
+    // experiment2,
+    // experiment3,
 
   }
 
