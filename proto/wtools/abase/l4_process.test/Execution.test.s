@@ -2469,7 +2469,7 @@ function startMultipleSyncDeasync( test )
 // arguments
 // --
 
-function startWithoutExecPath( test )
+function startMinimalWithoutExecPath( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -2504,7 +2504,7 @@ function startWithoutExecPath( test )
         outputCollecting : 1,
       }
 
-      return _.process.start( singleOption )
+      return _.process.startMinimal( singleOption )
       .then( ( arg ) =>
       {
         test.identical( arg.exitCode, 0 );
@@ -2538,7 +2538,7 @@ function startWithoutExecPath( test )
   //   outputCollecting : 1,
   // }
 
-  // _.process.start( singleOption )
+  // _.process.startMinimal( singleOption )
   // .then( ( arg ) =>
   // {
   //   test.identical( arg.exitCode, 0 );
@@ -2585,11 +2585,11 @@ function startWithoutExecPath( test )
   }
 }
 
-startWithoutExecPath.timeOut = 7e4; /* Locally : 6.705s */
+startMinimalWithoutExecPath.timeOut = 7e4; /* Locally : 6.705s */
 
 //
 
-function startArgsOption( test )
+function startMinimalArgsOption( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -2619,7 +2619,7 @@ function startArgsOption( test )
         mode,
       }
 
-      let con = _.process.start( startOptions )
+      let con = _.process.startMinimal( startOptions )
 
       con.then( ( op ) =>
       {
@@ -2664,7 +2664,7 @@ function startArgsOption( test )
         mode,
       }
 
-      let con = _.process.start( startOptions )
+      let con = _.process.startMinimal( startOptions )
 
       con.then( ( op ) =>
       {
@@ -2713,7 +2713,7 @@ function startArgsOption( test )
 qqq for Yevhen : split shellArgumentsParsing and similar test routine by mode
 */
 
-function startArgumentsParsing( test )
+function startMinimalArgumentsParsing( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -2757,7 +2757,7 @@ function startArgumentsParsing( test )
         outputCollecting : mode === 'shell' ? 1 : 0,
         ready : con
       }
-      _.process.start( o );
+      _.process.startMinimal( o );
 
       let op;
 
@@ -2808,7 +2808,7 @@ function startArgumentsParsing( test )
         outputCollecting : mode === 'shell' ? 1 : 0,
         ready : con
       }
-      _.process.start( o );
+      _.process.startMinimal( o );
 
       let op;
       if( mode === 'shell' )
@@ -2859,7 +2859,7 @@ function startArgumentsParsing( test )
         outputCollecting : mode === 'shell' ? 1 : 0,
         ready : con
       }
-      _.process.start( o );
+      _.process.startMinimal( o );
 
       let op;
       if( mode === 'shell' )
@@ -2909,7 +2909,7 @@ function startArgumentsParsing( test )
         outputCollecting : mode === 'shell' ? 1 : 0,
         ready : con
       }
-      _.process.start( o );
+      _.process.startMinimal( o );
 
       let op;
       if( mode === 'shell' )
@@ -2963,7 +2963,7 @@ function startArgumentsParsing( test )
         outputCollecting : mode === 'shell' ? 1 : 0,
         ready : con
       }
-      _.process.start( o );
+      _.process.startMinimal( o );
 
       let op;
       if( mode === 'shell' )
@@ -3024,7 +3024,7 @@ function startArgumentsParsing( test )
         outputCollecting : mode === 'shell' ? 1 : 0,
         ready : con
       }
-      _.process.start( o );
+      _.process.startMinimal( o );
 
       let op;
       if( mode === 'shell' )
@@ -3084,7 +3084,7 @@ function startArgumentsParsing( test )
         outputCollecting : mode === 'shell' ? 1 : 0,
         ready : con
       }
-      _.process.start( o );
+      _.process.startMinimal( o );
 
       let op;
       if( mode === 'shell' )
@@ -3135,7 +3135,7 @@ function startArgumentsParsing( test )
         outputCollecting : mode === 'shell' ? 1 : 0,
         ready : con
       }
-      _.process.start( o );
+      _.process.startMinimal( o );
 
       let op;
 
@@ -3188,7 +3188,7 @@ function startArgumentsParsing( test )
         outputCollecting : 1,
         ready : con
       }
-      _.process.start( o );
+      _.process.startMinimal( o );
 
       let op;
       if( mode === 'fork' )
@@ -3246,11 +3246,11 @@ function startArgumentsParsing( test )
 
 }
 
-startArgumentsParsing.timeOut = 1e5;
+startMinimalArgumentsParsing.timeOut = 1e5;
 
 //
 
-function startArgumentsParsingNonTrivial( test )
+function startMinimalArgumentsParsingNonTrivial( test )
 {
   let context = this;
 
@@ -3347,7 +3347,7 @@ function startArgumentsParsingNonTrivial( test )
         outputCollecting : 1,
         ready : con
       }
-      _.process.start( o );
+      _.process.startMinimal( o );
 
       con.then( () =>
       {
@@ -3408,7 +3408,7 @@ function startArgumentsParsingNonTrivial( test )
         outputCollecting : 1,
         ready : con
       }
-      _.process.start( o );
+      _.process.startMinimal( o );
 
       con.then( () =>
       {
@@ -3463,7 +3463,7 @@ function startArgumentsParsingNonTrivial( test )
         throwingExitCode : 0,
         ready : con
       }
-      _.process.start( o );
+      _.process.startMinimal( o );
 
       con.finally( ( err, op ) =>
       {
@@ -3528,7 +3528,7 @@ function startArgumentsParsingNonTrivial( test )
         throwingExitCode : 0,
         ready : con
       }
-      _.process.start( o );
+      _.process.startMinimal( o );
 
       con.finally( ( err, op ) =>
       {
@@ -3590,7 +3590,7 @@ function startArgumentsParsingNonTrivial( test )
         throwingExitCode : 0,
         ready : con
       }
-      _.process.start( o );
+      _.process.startMinimal( o );
 
       con.finally( ( err, op ) =>
       {
@@ -3643,7 +3643,7 @@ function startArgumentsParsingNonTrivial( test )
         throwingExitCode : 0,
         ready : con
       }
-      _.process.start( o );
+      _.process.startMinimal( o );
 
       con.finally( ( err, op ) =>
       {
@@ -3696,7 +3696,7 @@ function startArgumentsParsingNonTrivial( test )
         throwingExitCode : 0,
         ready : con
       }
-      _.process.start( o );
+      _.process.startMinimal( o );
 
       con.finally( ( err, op ) =>
       {
@@ -3755,7 +3755,7 @@ function startArgumentsParsingNonTrivial( test )
         ready : con
       }
 
-      _.process.start( o );
+      _.process.startMinimal( o );
 
       return test.shouldThrowErrorAsync( con );
     })
@@ -3776,7 +3776,7 @@ function startArgumentsParsingNonTrivial( test )
         outputCollecting : 1,
         ready : con
       }
-      _.process.start( o );
+      _.process.startMinimal( o );
 
       con.then( () =>
       {
@@ -3838,7 +3838,7 @@ function startArgumentsParsingNonTrivial( test )
 
 //
 
-function startArgumentsNestedQuotes( test )
+function startMinimalArgumentsNestedQuotes( test )
 {
   let context = this;
 
@@ -3880,7 +3880,7 @@ function startArgumentsNestedQuotes( test )
         outputCollecting : 1,
         ready : con
       }
-      _.process.start( o );
+      _.process.startMinimal( o );
 
       con.then( () =>
       {
@@ -3958,7 +3958,7 @@ function startArgumentsNestedQuotes( test )
         outputCollecting : 1,
         ready : con
       }
-      _.process.start( o );
+      _.process.startMinimal( o );
 
       con.then( () =>
       {
@@ -4001,7 +4001,7 @@ function startArgumentsNestedQuotes( test )
   //     outputCollecting : 1,
   //     ready : con
   //   }
-  //   _.process.start( o );
+  //   _.process.startMinimal( o );
 
   //   con.then( () =>
   //   {
@@ -4045,7 +4045,7 @@ function startArgumentsNestedQuotes( test )
   //     outputCollecting : 1,
   //     ready : con
   //   }
-  //   _.process.start( o );
+  //   _.process.startMinimal( o );
 
   //   con.then( () =>
   //   {
@@ -4082,7 +4082,7 @@ function startArgumentsNestedQuotes( test )
   //     outputCollecting : 1,
   //     ready : con
   //   }
-  //   _.process.start( o );
+  //   _.process.startMinimal( o );
 
   //   con.then( () =>
   //   {
@@ -4127,7 +4127,7 @@ function startArgumentsNestedQuotes( test )
   //     outputCollecting : 1,
   //     ready : con
   //   }
-  //   _.process.start( o );
+  //   _.process.startMinimal( o );
 
   //   con.then( () =>
   //   {
@@ -4170,7 +4170,7 @@ function startArgumentsNestedQuotes( test )
   //     outputCollecting : 1,
   //     ready : con
   //   }
-  //   _.process.start( o );
+  //   _.process.startMinimal( o );
 
   //   con.then( () =>
   //   {
@@ -4227,7 +4227,7 @@ function startArgumentsNestedQuotes( test )
   //     outputCollecting : 1,
   //     ready : con
   //   }
-  //   _.process.start( o );
+  //   _.process.startMinimal( o );
 
   //   con.then( () =>
   //   {
@@ -4262,7 +4262,7 @@ function startArgumentsNestedQuotes( test )
 
 //
 
-function startExecPathQuotesClosing( test )
+function startMinimalExecPathQuotesClosing( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -4288,7 +4288,7 @@ function startExecPathQuotesClosing( test )
         outputPiping : 1,
         outputCollecting : 1,
       }
-      return _.process.start( o )
+      return _.process.startMinimal( o )
       .then( () =>
       {
         test.identical( o.exitCode, 0 );
@@ -4331,7 +4331,7 @@ function startExecPathQuotesClosing( test )
         outputPiping : 1,
         outputCollecting : 1,
       }
-      return _.process.start( o )
+      return _.process.startMinimal( o )
       .then( () =>
       {
         test.identical( o.exitCode, 0 );
@@ -4376,9 +4376,9 @@ function startExecPathQuotesClosing( test )
       }
 
       if( mode === 'shell' && process.platform !== 'win32' ) /* unexpected EOF while looking for a matching bracket on mac and linux. On windows no error */
-      return test.shouldThrowErrorAsync( _.process.start( o ) )
+      return test.shouldThrowErrorAsync( _.process.startMinimal( o ) )
 
-      return _.process.start( o )
+      return _.process.startMinimal( o )
       .then( () =>
       {
         test.identical( o.exitCode, 0 );
@@ -4425,9 +4425,9 @@ function startExecPathQuotesClosing( test )
       }
 
       if( mode === 'shell' && process.platform !== 'win32' ) /* unexpected EOF while looking for a matching bracket on mac and linux. On windows no error */
-      return test.shouldThrowErrorAsync( _.process.start( o ) )
+      return test.shouldThrowErrorAsync( _.process.startMinimal( o ) )
 
-      return _.process.start( o )
+      return _.process.startMinimal( o )
       .then( () =>
       {
         test.identical( o.exitCode, 0 );
@@ -4473,7 +4473,7 @@ function startExecPathQuotesClosing( test )
         outputPiping : 1,
         outputCollecting : 1,
       }
-      return test.shouldThrowErrorAsync( _.process.start( o ) );
+      return test.shouldThrowErrorAsync( _.process.startMinimal( o ) );
     })
 
     /* */
@@ -4488,7 +4488,7 @@ function startExecPathQuotesClosing( test )
         outputPiping : 1,
         outputCollecting : 1,
       }
-      return test.mustNotThrowError( _.process.start( o ) );
+      return test.mustNotThrowError( _.process.startMinimal( o ) );
     })
 
     /* */
@@ -4504,7 +4504,7 @@ function startExecPathQuotesClosing( test )
         outputCollecting : 1,
       }
 
-      return test.shouldThrowErrorAsync( _.process.start( o ) );
+      return test.shouldThrowErrorAsync( _.process.startMinimal( o ) );
     })
 
     /* */
@@ -4520,7 +4520,7 @@ function startExecPathQuotesClosing( test )
         outputCollecting : 1,
       }
 
-      return _.process.start( o )
+      return _.process.startMinimal( o )
       .then( () =>
       {
         test.identical( o.exitCode, 0 );
@@ -4565,7 +4565,7 @@ function startExecPathQuotesClosing( test )
         outputPiping : 1,
         outputCollecting : 1,
       }
-      return test.shouldThrowErrorAsync( _.process.start( o ) );
+      return test.shouldThrowErrorAsync( _.process.startMinimal( o ) );
     })
 
     /* */
@@ -4581,7 +4581,7 @@ function startExecPathQuotesClosing( test )
         outputCollecting : 1,
       }
 
-      return test.shouldThrowErrorAsync( _.process.start( o ) );
+      return test.shouldThrowErrorAsync( _.process.startMinimal( o ) );
     })
 
     /* */
@@ -4598,9 +4598,9 @@ function startExecPathQuotesClosing( test )
       }
 
       if( mode === 'shell' && process.platform !== 'win32' ) /* unexpected EOF while looking for a matching bracket on mac and linux. On windows no error */
-      return test.shouldThrowErrorAsync( _.process.start( o ) )
+      return test.shouldThrowErrorAsync( _.process.startMinimal( o ) )
 
-      return _.process.start( o )
+      return _.process.startMinimal( o )
       .then( () =>
       {
         test.identical( o.exitCode, 0 );
@@ -4646,7 +4646,7 @@ function startExecPathQuotesClosing( test )
         outputPiping : 1,
         outputCollecting : 1,
       }
-      return _.process.start( o )
+      return _.process.startMinimal( o )
       .then( () =>
       {
         test.identical( o.exitCode, 0 );
@@ -4690,7 +4690,7 @@ function startExecPathQuotesClosing( test )
         outputPiping : 1,
         outputCollecting : 1,
       }
-      return _.process.start( o )
+      return _.process.startMinimal( o )
       .then( () =>
       {
         test.identical( o.exitCode, 0 );
@@ -4736,7 +4736,7 @@ function startExecPathQuotesClosing( test )
         outputPiping : 1,
         outputCollecting : 1,
       }
-      return _.process.start( o )
+      return _.process.startMinimal( o )
       .then( () =>
       {
         test.identical( o.exitCode, 0 );
@@ -4780,7 +4780,7 @@ function startExecPathQuotesClosing( test )
         outputCollecting : 1,
       }
 
-      return test.shouldThrowErrorAsync( _.process.start( o ) );
+      return test.shouldThrowErrorAsync( _.process.startMinimal( o ) );
     })
 
     /* */
@@ -4795,7 +4795,7 @@ function startExecPathQuotesClosing( test )
         outputPiping : 1,
         outputCollecting : 1,
       }
-      return _.process.start( o )
+      return _.process.startMinimal( o )
       .then( () =>
       {
         test.identical( o.exitCode, 0 );
@@ -4839,7 +4839,7 @@ function startExecPathQuotesClosing( test )
         outputPiping : 1,
         outputCollecting : 1,
       }
-      return test.shouldThrowErrorAsync( _.process.start( o ) );
+      return test.shouldThrowErrorAsync( _.process.startMinimal( o ) );
     })
 
     /* */
@@ -4855,7 +4855,7 @@ function startExecPathQuotesClosing( test )
         outputCollecting : 1,
       }
 
-      return _.process.start( o )
+      return _.process.startMinimal( o )
       .then( () =>
       {
         test.identical( o.exitCode, 0 );
@@ -4902,7 +4902,7 @@ function startExecPathQuotesClosing( test )
         outputPiping : 1,
         outputCollecting : 1,
       }
-      return _.process.start( o )
+      return _.process.startMinimal( o )
       .then( () =>
       {
         test.identical( o.exitCode, 0 );
@@ -4949,7 +4949,7 @@ function startExecPathQuotesClosing( test )
         outputPiping : 1,
         outputCollecting : 1,
       }
-      return _.process.start( o )
+      return _.process.startMinimal( o )
       .then( () =>
       {
         test.identical( o.exitCode, 0 );
@@ -5003,7 +5003,7 @@ function startExecPathQuotesClosing( test )
   //     outputCollecting : 1,
   //     ready : con
   //   }
-  //   _.process.start( o );
+  //   _.process.startMinimal( o );
 
   //   con.then( () =>
   //   {
@@ -5033,7 +5033,7 @@ function startExecPathQuotesClosing( test )
   //     outputCollecting : 1,
   //     ready : con
   //   }
-  //   _.process.start( o );
+  //   _.process.startMinimal( o );
 
   //   con.then( () =>
   //   {
@@ -5063,7 +5063,7 @@ function startExecPathQuotesClosing( test )
   //     outputCollecting : 1,
   //     ready : con
   //   }
-  //   _.process.start( o );
+  //   _.process.startMinimal( o );
 
   //   con.then( () =>
   //   {
@@ -5097,7 +5097,7 @@ function startExecPathQuotesClosing( test )
   //     outputCollecting : 1,
   //     ready : con
   //   }
-  //   _.process.start( o );
+  //   _.process.startMinimal( o );
 
   //   con.then( () =>
   //   {
@@ -5127,7 +5127,7 @@ function startExecPathQuotesClosing( test )
   //     outputCollecting : 1,
   //     ready : con
   //   }
-  //   _.process.start( o );
+  //   _.process.startMinimal( o );
 
   //   con.then( () =>
   //   {
@@ -5157,7 +5157,7 @@ function startExecPathQuotesClosing( test )
   //     outputCollecting : 1,
   //     ready : con
   //   }
-  //   _.process.start( o );
+  //   _.process.startMinimal( o );
 
   //   con.then( () =>
   //   {
@@ -5191,7 +5191,7 @@ function startExecPathQuotesClosing( test )
   //     outputCollecting : 1,
   //     ready : con
   //   }
-  //   _.process.start( o );
+  //   _.process.startMinimal( o );
 
   //   con.then( () =>
   //   {
@@ -5225,7 +5225,7 @@ function startExecPathQuotesClosing( test )
   //     outputCollecting : 1,
   //     ready : con
   //   }
-  //   _.process.start( o );
+  //   _.process.startMinimal( o );
 
   //   con.then( () =>
   //   {
@@ -5255,7 +5255,7 @@ function startExecPathQuotesClosing( test )
   //     outputCollecting : 1,
   //     ready : con
   //   }
-  //   _.process.start( o );
+  //   _.process.startMinimal( o );
 
   //   con.then( () =>
   //   {
@@ -5289,7 +5289,7 @@ function startExecPathQuotesClosing( test )
   //     outputCollecting : 1,
   //     ready : con
   //   }
-  //   return test.shouldThrowErrorAsync( _.process.start( o ) );
+  //   return test.shouldThrowErrorAsync( _.process.startMinimal( o ) );
   // })
 
   // .then( () =>
@@ -5303,7 +5303,7 @@ function startExecPathQuotesClosing( test )
   //     outputCollecting : 1,
   //     ready : con
   //   }
-  //   return test.mustNotThrowError( _.process.start( o ) );
+  //   return test.mustNotThrowError( _.process.startMinimal( o ) );
   // })
 
   // /* */
@@ -5322,7 +5322,7 @@ function startExecPathQuotesClosing( test )
   //     ready : con
   //   }
 
-  //   return test.shouldThrowErrorAsync( _.process.start( o ) );
+  //   return test.shouldThrowErrorAsync( _.process.startMinimal( o ) );
   // })
 
   // .then( () =>
@@ -5336,7 +5336,7 @@ function startExecPathQuotesClosing( test )
   //     outputCollecting : 1,
   //     ready : con
   //   }
-  //   _.process.start( o )
+  //   _.process.startMinimal( o )
 
   //   con.then( () =>
   //   {
@@ -5370,7 +5370,7 @@ function startExecPathQuotesClosing( test )
   //     outputCollecting : 1,
   //     ready : con
   //   }
-  //   return test.shouldThrowErrorAsync( _.process.start( o ) );
+  //   return test.shouldThrowErrorAsync( _.process.startMinimal( o ) );
   // })
 
   // /* */
@@ -5389,7 +5389,7 @@ function startExecPathQuotesClosing( test )
   //     ready : con
   //   }
 
-  //   return test.shouldThrowErrorAsync( _.process.start( o ) );
+  //   return test.shouldThrowErrorAsync( _.process.startMinimal( o ) );
   // })
 
   // .then( () =>
@@ -5403,7 +5403,7 @@ function startExecPathQuotesClosing( test )
   //     outputCollecting : 1,
   //     ready : con
   //   }
-  //   _.process.start( o );
+  //   _.process.startMinimal( o );
 
   //   con.then( () =>
   //   {
@@ -5437,7 +5437,7 @@ function startExecPathQuotesClosing( test )
   //     outputCollecting : 1,
   //     ready : con
   //   }
-  //   _.process.start( o );
+  //   _.process.startMinimal( o );
 
   //   con.then( () =>
   //   {
@@ -5467,7 +5467,7 @@ function startExecPathQuotesClosing( test )
   //     outputCollecting : 1,
   //     ready : con
   //   }
-  //   _.process.start( o );
+  //   _.process.startMinimal( o );
 
   //   con.then( () =>
   //   {
@@ -5497,7 +5497,7 @@ function startExecPathQuotesClosing( test )
   //     outputCollecting : 1,
   //     ready : con
   //   }
-  //   _.process.start( o );
+  //   _.process.startMinimal( o );
 
   //   con.then( () =>
   //   {
@@ -5528,7 +5528,7 @@ function startExecPathQuotesClosing( test )
   //     ready : con
   //   }
 
-  //   return test.shouldThrowErrorAsync( _.process.start( o ) );
+  //   return test.shouldThrowErrorAsync( _.process.startMinimal( o ) );
   // })
 
   // .then( () =>
@@ -5542,7 +5542,7 @@ function startExecPathQuotesClosing( test )
   //     outputCollecting : 1,
   //     ready : con
   //   }
-  //   _.process.start( o );
+  //   _.process.startMinimal( o );
 
   //   con.then( () =>
   //   {
@@ -5571,7 +5571,7 @@ function startExecPathQuotesClosing( test )
   //     outputCollecting : 1,
   //     ready : con
   //   }
-  //   return test.shouldThrowErrorAsync( _.process.start( o ) );
+  //   return test.shouldThrowErrorAsync( _.process.startMinimal( o ) );
   // })
 
   // /* */
@@ -5589,7 +5589,7 @@ function startExecPathQuotesClosing( test )
   //     outputCollecting : 1,
   //     ready : con
   //   }
-  //   _.process.start( o );
+  //   _.process.startMinimal( o );
 
   //   con.then( () =>
   //   {
@@ -5623,7 +5623,7 @@ function startExecPathQuotesClosing( test )
   //     outputCollecting : 1,
   //     ready : con
   //   }
-  //   _.process.start( o );
+  //   _.process.startMinimal( o );
 
   //   con.then( () =>
   //   {
@@ -5657,7 +5657,7 @@ function startExecPathQuotesClosing( test )
   //     outputCollecting : 1,
   //     ready : con
   //   }
-  //   _.process.start( o );
+  //   _.process.startMinimal( o );
 
   //   con.then( () =>
   //   {
@@ -5703,11 +5703,11 @@ function startExecPathQuotesClosing( test )
   }
 }
 
-startExecPathQuotesClosing.timeOut = 34e4; /* Locally : 33.996s */
+startMinimalExecPathQuotesClosing.timeOut = 34e4; /* Locally : 33.996s */
 
 //
 
-function startExecPathSeveralCommands( test )
+function startMinimalExecPathSeveralCommands( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -5735,7 +5735,7 @@ function startExecPathSeveralCommands( test )
         outputCollecting : 1,
       }
 
-      return test.shouldThrowErrorAsync( _.process.start( o ) );
+      return test.shouldThrowErrorAsync( _.process.startMinimal( o ) );
 
     })
 
@@ -5752,7 +5752,7 @@ function startExecPathSeveralCommands( test )
         outputPiping : 1,
         outputCollecting : 1,
       }
-      return _.process.start( o )
+      return _.process.startMinimal( o )
       .then( ( op ) =>
       {
         test.identical( o.exitCode, 0 );
@@ -5793,7 +5793,7 @@ function startExecPathSeveralCommands( test )
   //     outputCollecting : 1,
   //     ready : con
   //   }
-  //   _.process.start( o );
+  //   _.process.startMinimal( o );
 
   //   con.then( ( op ) =>
   //   {
@@ -5822,7 +5822,7 @@ function startExecPathSeveralCommands( test )
   //     outputCollecting : 1,
   //     ready : con
   //   }
-  //   return test.shouldThrowErrorAsync( _.process.start( o ) )
+  //   return test.shouldThrowErrorAsync( _.process.startMinimal( o ) )
   // })
 
   // /* - */
@@ -5841,7 +5841,7 @@ function startExecPathSeveralCommands( test )
   //     outputCollecting : 1,
   //     ready : con
   //   }
-  //   return test.shouldThrowErrorAsync( _.process.start( o ) )
+  //   return test.shouldThrowErrorAsync( _.process.startMinimal( o ) )
   // })
 
   // /* -- */
@@ -5860,7 +5860,7 @@ function startExecPathSeveralCommands( test )
   //     outputCollecting : 1,
   //     ready : con
   //   }
-  //   _.process.start( o );
+  //   _.process.startMinimal( o );
 
   //   con.then( ( op ) =>
   //   {
@@ -5889,7 +5889,7 @@ function startExecPathSeveralCommands( test )
   //     outputCollecting : 1,
   //     ready : con
   //   }
-  //   _.process.start( o );
+  //   _.process.startMinimal( o );
 
   //   con.then( ( op ) =>
   //   {
@@ -5917,7 +5917,7 @@ function startExecPathSeveralCommands( test )
   //     outputCollecting : 1,
   //     ready : con
   //   }
-  //   return test.shouldThrowErrorAsync( _.process.start( o ) );
+  //   return test.shouldThrowErrorAsync( _.process.startMinimal( o ) );
   // })
 
   // /*  */
@@ -6801,7 +6801,7 @@ exec paths with special chars
 
 //
 
-function startImportantExecPathPassingThrough( test )
+function startMinimalImportantExecPathPassingThrough( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -6832,7 +6832,7 @@ function startImportantExecPathPassingThrough( test )
       outputCollecting : 1,
     }
 
-    return _.process.start( options )
+    return _.process.startMinimal( options )
     .then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
@@ -6865,7 +6865,7 @@ function startImportantExecPathPassingThrough( test )
       outputCollecting : 1,
     }
 
-    return _.process.start( options )
+    return _.process.startMinimal( options )
     .then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
@@ -6898,7 +6898,7 @@ function startImportantExecPathPassingThrough( test )
       outputCollecting : 1,
     }
 
-    return _.process.start( options )
+    return _.process.startMinimal( options )
     .then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
@@ -6959,7 +6959,7 @@ function startImportantExecPathPassingThrough( test )
       args : 'argFromParent',
     }
 
-    return _.process.start( options )
+    return _.process.startMinimal( options )
     .then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
@@ -7006,7 +7006,7 @@ function startImportantExecPathPassingThrough( test )
       args : 'argFromParent',
     }
 
-    return _.process.start( options )
+    return _.process.startMinimal( options )
     .then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
@@ -7060,7 +7060,7 @@ function startImportantExecPathPassingThrough( test )
       args : 'argFromParent',
     }
 
-    return _.process.start( options )
+    return _.process.startMinimal( options )
     .then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
@@ -7106,7 +7106,7 @@ function startImportantExecPathPassingThrough( test )
       args : [ 'argFromParent1', 'argFromParent2' ],
     }
 
-    return _.process.start( options )
+    return _.process.startMinimal( options )
     .then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
@@ -7140,7 +7140,7 @@ function startImportantExecPathPassingThrough( test )
       args : [ 'argFromParent1', 'argFromParent2' ],
     }
 
-    return _.process.start( options )
+    return _.process.startMinimal( options )
     .then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
@@ -7174,7 +7174,7 @@ function startImportantExecPathPassingThrough( test )
       args : [ 'argFromParent1', 'argFromParent2' ],
     }
 
-    return _.process.start( options )
+    return _.process.startMinimal( options )
     .then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
@@ -7218,7 +7218,7 @@ function startImportantExecPathPassingThrough( test )
 
 //
 
-function startNjsPassingThroughDifferentTypesOfPaths( test )
+function startMinimalNjsPassingThroughDifferentTypesOfPaths( test )
 {
   let context = this;
   let a = context.assetFor( test, 'basic' );
@@ -7261,7 +7261,7 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
         outputCollecting : 1,
       }
 
-      return _.process.start( o2 )
+      return _.process.startMinimal( o2 )
       .then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
@@ -7311,7 +7311,7 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
         outputCollecting : 1,
       }
 
-      return _.process.start( o2 )
+      return _.process.startMinimal( o2 )
       .then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
@@ -7359,7 +7359,7 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
         outputCollecting : 1,
       }
 
-      return _.process.start( o2 )
+      return _.process.startMinimal( o2 )
       .then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
@@ -7399,7 +7399,7 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
         outputCollecting : 1,
       }
 
-      return _.process.start( o2 )
+      return _.process.startMinimal( o2 )
       .then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
@@ -7434,7 +7434,7 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
 
 //
 
-function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subroutine for modes | aaa : Done. */
+function startMinimalPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subroutine for modes | aaa : Done. */
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -7478,7 +7478,7 @@ function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subrou
         stdio : 'pipe',
       }
 
-      return _.process.start( o2 )
+      return _.process.startMinimal( o2 )
       .then( ( op ) =>
       {
         let out = JSON.parse( op.output );
@@ -7518,7 +7518,7 @@ function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subrou
         stdio : 'pipe',
       }
 
-      _.process.start( o2 )
+      _.process.startMinimal( o2 )
 
       o2.ready.then( ( op ) =>
       {
@@ -7573,7 +7573,7 @@ function startPassingThroughExecPathWithSpace( test ) /* qqq for Yevhen : subrou
         stdio : 'pipe',
       }
 
-      _.process.start( o2 )
+      _.process.startMinimal( o2 )
 
       o2.ready.then( ( op ) =>
       {
@@ -7952,7 +7952,7 @@ function startNormalizedExecPath( test )
 
 //
 
-function startExecPathWithSpace( test )
+function startMinimalExecPathWithSpace( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -7995,7 +7995,7 @@ function startExecPathWithSpace( test )
     return null;
   })
 
-  _.process.start
+  _.process.startMinimal
   ({
     execPath : execPathWithSpace,
     ready : a.ready,
@@ -8022,7 +8022,7 @@ function startExecPathWithSpace( test )
     return null;
   })
 
-  _.process.start
+  _.process.startMinimal
   ({
     execPath : testAppPath,
     ready : a.ready,
@@ -8049,7 +8049,7 @@ function startExecPathWithSpace( test )
     return null;
   })
 
-  _.process.start
+  _.process.startMinimal
   ({
     args : execPathWithSpace,
     ready : a.ready,
@@ -8076,7 +8076,7 @@ function startExecPathWithSpace( test )
     return null;
   })
 
-  _.process.start
+  _.process.startMinimal
   ({
     args : execPathWithSpace,
     outputCollecting : 1,
@@ -8103,7 +8103,7 @@ function startExecPathWithSpace( test )
     return null;
   })
 
-  _.process.start
+  _.process.startMinimal
   ({
     args : testAppPath,
     ready : a.ready,
@@ -8128,7 +8128,7 @@ function startExecPathWithSpace( test )
     return null;
   })
 
-  _.process.start
+  _.process.startMinimal
   ({
     args : testAppPath + ' arg',
     ready : a.ready,
@@ -8160,7 +8160,7 @@ function startExecPathWithSpace( test )
 
 //
 
-function startDifferentTypesOfPaths( test )
+function startMinimalDifferentTypesOfPaths( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -8192,7 +8192,7 @@ function startDifferentTypesOfPaths( test )
       applyingExitCode : 0,
     }
 
-    _.process.start( o );
+    _.process.startMinimal( o );
 
     o.conTerminate.then( ( op ) =>
     {
@@ -8220,7 +8220,7 @@ function startDifferentTypesOfPaths( test )
       applyingExitCode : 0,
     }
 
-    _.process.start( o );
+    _.process.startMinimal( o );
 
     o.conTerminate.then( ( op ) =>
     {
@@ -8250,7 +8250,7 @@ function startDifferentTypesOfPaths( test )
   //     applyingExitCode : 0,
   //   }
 
-  //   _.process.start( o );
+  //   _.process.startMinimal( o );
 
   //   o.conTerminate.then( ( op ) =>
   //   {
@@ -8281,7 +8281,7 @@ function startDifferentTypesOfPaths( test )
     }
 
     debugger
-    _.process.start( o );
+    _.process.startMinimal( o );
 
     o.conTerminate.then( ( op ) =>
     {
@@ -8309,7 +8309,7 @@ function startDifferentTypesOfPaths( test )
       applyingExitCode : 0,
     }
 
-    _.process.start( o );
+    _.process.startMinimal( o );
 
     o.conTerminate.then( ( op ) =>
     {
@@ -8340,7 +8340,7 @@ function startDifferentTypesOfPaths( test )
       applyingExitCode : 0,
     }
 
-    _.process.start( o );
+    _.process.startMinimal( o );
 
     o.conTerminate.then( ( op ) =>
     {
@@ -8371,7 +8371,7 @@ function startDifferentTypesOfPaths( test )
   //     applyingExitCode : 0,
   //   }
 
-  //   _.process.start( o );
+  //   _.process.startMinimal( o );
 
   //   o.conTerminate.then( ( op ) =>
   //   {
@@ -8401,7 +8401,7 @@ function startDifferentTypesOfPaths( test )
       applyingExitCode : 0,
     }
 
-    _.process.start( o );
+    _.process.startMinimal( o );
 
     o.conTerminate.then( ( op ) =>
     {
@@ -8432,7 +8432,7 @@ function startDifferentTypesOfPaths( test )
       applyingExitCode : 0,
     }
 
-    _.process.start( o );
+    _.process.startMinimal( o );
 
     o.conTerminate.then( ( op ) =>
     {
@@ -8462,7 +8462,7 @@ function startDifferentTypesOfPaths( test )
   //     applyingExitCode : 0,
   //   }
 
-  //   _.process.start( o );
+  //   _.process.startMinimal( o );
 
   //   o.conTerminate.then( ( op ) =>
   //   {
@@ -8493,7 +8493,7 @@ function startDifferentTypesOfPaths( test )
       applyingExitCode : 0,
     }
 
-    _.process.start( o );
+    _.process.startMinimal( o );
 
     o.conTerminate.then( ( op ) =>
     {
@@ -8524,7 +8524,7 @@ function startDifferentTypesOfPaths( test )
       applyingExitCode : 0,
     }
 
-    _.process.start( o );
+    _.process.startMinimal( o );
 
     o.conTerminate.then( ( op ) =>
     {
@@ -8554,7 +8554,7 @@ function startDifferentTypesOfPaths( test )
       applyingExitCode : 0,
     }
 
-    _.process.start( o );
+    _.process.startMinimal( o );
 
     o.conTerminate.then( ( op ) =>
     {
@@ -8590,7 +8590,7 @@ function startDifferentTypesOfPaths( test )
 //
 
 
-function startNjsPassingThroughExecPathWithSpace( test )
+function startMinimalNjsPassingThroughExecPathWithSpace( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -8636,7 +8636,7 @@ function startNjsPassingThroughExecPathWithSpace( test )
         stdio : 'pipe',
       }
 
-      return _.process.start( o2 )
+      return _.process.startMinimal( o2 )
       .then( ( op ) =>
       {
         test.identical( op.ended, true );
@@ -8695,7 +8695,7 @@ function startNjsPassingThroughExecPathWithSpace( test )
         stdio : 'pipe',
       }
 
-      return _.process.start( o2 )
+      return _.process.startMinimal( o2 )
       .then( ( op ) =>
       {
         let out = JSON.parse( op.output );
@@ -8757,7 +8757,7 @@ function startNjsPassingThroughExecPathWithSpace( test )
         stdio : 'pipe',
       }
 
-      return _.process.start( o2 )
+      return _.process.startMinimal( o2 )
       .then( ( op ) =>
       {
         let out = JSON.parse( op.output );
@@ -41623,24 +41623,24 @@ var Proto =
 
     // arguments
 
-    startWithoutExecPath,
-    startArgsOption,
-    startArgumentsParsing,
-    startArgumentsParsingNonTrivial,
-    startArgumentsNestedQuotes,
-    startExecPathQuotesClosing,
-    startExecPathSeveralCommands,
-    startExecPathNonTrivialModeShell,
-    startArgumentsHandlingTrivial,
-    startArgumentsHandling,
-    startImportantExecPath,
-    startImportantExecPathPassingThrough,
-    startNormalizedExecPath,
-    startExecPathWithSpace,
-    startDifferentTypesOfPaths,
-    startNjsPassingThroughExecPathWithSpace,
-    startNjsPassingThroughDifferentTypesOfPaths,
-    startPassingThroughExecPathWithSpace,
+    startMinimalWithoutExecPath,
+    startMinimalArgsOption,
+    startMinimalArgumentsParsing,
+    startMinimalArgumentsParsingNonTrivial,
+    startMinimalArgumentsNestedQuotes,
+    startMinimalExecPathQuotesClosing,
+    startMinimalExecPathSeveralCommands,
+    startExecPathNonTrivialModeShell, /* with `starter` */
+    startArgumentsHandlingTrivial, /* with `starter` */
+    startArgumentsHandling, /* with `starter` */
+    startImportantExecPath, /* with `starter` */
+    startMinimalImportantExecPathPassingThrough,
+    startNormalizedExecPath, /* with `starter` */
+    startMinimalExecPathWithSpace,
+    startMinimalDifferentTypesOfPaths,
+    startMinimalNjsPassingThroughExecPathWithSpace,
+    startMinimalNjsPassingThroughDifferentTypesOfPaths,
+    startMinimalPassingThroughExecPathWithSpace,
 
     // procedures / chronology / structural
 
