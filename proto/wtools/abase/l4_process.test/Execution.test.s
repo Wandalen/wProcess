@@ -86,6 +86,15 @@ IF %errorlevel% EQU 0 GOTO Loop_start
 */
 
 /*
+@echo off
+cls
+:Loop_start
+node proto/wtools/abase/l4_process.test/Execution.test.s n:1 v:10 s:0 r:terminateDifferentStdio
+IF %errorlevel% EQU 0 GOTO Loop_start
+:Loop_end
+*/
+
+/*
 ### Modes in which child process terminates after signal:
 
 | Signal  |  Windows   |   Linux    |       Mac        |
@@ -11191,10 +11200,11 @@ function startAfterDeath( test )
     {
       execPath : 'node program2.js',
       outputCollecting : 1,
+      when : 'afterdeath',
       mode : 'spawn',
     }
 
-    _.process.startAfterDeath( o );
+    _.process.start( o );
 
     o.conStart.thenGive( () =>
     {
@@ -11335,10 +11345,11 @@ function startAfterDeathOutput( test )
       execPath : 'node program2.js',
       mode : 'spawn',
       currentPath : __dirname,
+      when : 'afterdeath',
       stdio : 'inherit'
     }
 
-    _.process.startAfterDeath( o );
+    _.process.start( o );
 
     o.process.on( 'exit', () => //zzz for Vova: remove after enabling exit handler in start
     {
@@ -11380,58 +11391,65 @@ Fakes death of program1 and checks output of program2
 // detaching
 // --
 
-function startDetachingModeSpawnResourceReady( test )
+function startDetachingResourceReady( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let track = [];
   let testAppChildPath = a.program( testAppChild );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
+
+  function run( mode )
+  {
+    let ready = _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, consequence receives resources after child`;
+      let track = [];
+
+      let o =
+      {
+        execPath : mode === 'fork' ? 'testAppChild.js' : 'node testAppChild.js',
+        mode,
+        detaching : 1,
+        currentPath : a.routinePath,
+        throwingExitCode : 0
+      }
+      let result = _.process.start( o );
+
+      test.true( result !== o.conStart );
+      test.true( result !== o.conTerminate );
+
+      o.conStart.thenGive( ( op ) =>
+      {
+        track.push( 'conStart' );
+        test.true( _.mapIs( op ) );
+        test.identical( op, o );
+        test.true( _.process.isAlive( o.process.pid ) );
+        o.process.kill();
+        return null;
+      })
+
+      o.conTerminate.then( ( op ) =>
+      {
+        track.push( 'conTerminate' );
+        test.notIdentical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.identical( track, [ 'conStart', 'conTerminate' ] );
+        return null;
+      })
+
+      return o.conTerminate;
+    })
+
+    return ready;
+  }
 
   /* */
 
-  a.ready
-
-  .then( () =>
-  {
-    test.case = 'consequence receive resources after child spawn';
-
-    let o =
-    {
-      execPath : 'node testAppChild.js',
-      mode : 'spawn',
-      detaching : 1,
-      currentPath : a.routinePath,
-      throwingExitCode : 0
-    }
-    let result = _.process.start( o );
-
-    test.true( result !== o.conStart );
-    test.true( result !== o.conTerminate );
-
-    o.conStart.then( ( op ) =>
-    {
-      track.push( 'conStart' );
-      test.true( _.mapIs( op ) );
-      test.identical( op, o );
-      test.true( _.process.isAlive( o.process.pid ) );
-      o.process.kill();
-      return null;
-    })
-
-    o.conTerminate.then( ( op ) =>
-    {
-      track.push( 'conTerminate' );
-      test.notIdentical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      test.identical( op.exitSignal, 'SIGTERM' );
-      test.identical( track, [ 'conStart', 'conTerminate' ] );
-      return null;
-    })
-
-    return o.conTerminate;
-  })
-
-  return a.ready;
 
   /* - */
 
@@ -11454,153 +11472,227 @@ function startDetachingModeSpawnResourceReady( test )
   }
 }
 
+// function startDetachingModeSpawnResourceReady( test )
+// {
+//   let context = this;
+//   let a = context.assetFor( test, false );
+//   let track = [];
+//   let testAppChildPath = a.program( testAppChild );
+
+//   /* */
+
+//   a.ready
+
+//   .then( () =>
+//   {
+//     test.case = 'consequence receive resources after child spawn';
+
+//     let o =
+//     {
+//       execPath : 'node testAppChild.js',
+//       mode : 'spawn',
+//       detaching : 1,
+//       currentPath : a.routinePath,
+//       throwingExitCode : 0
+//     }
+//     let result = _.process.start( o );
+
+//     test.true( result !== o.conStart );
+//     test.true( result !== o.conTerminate );
+
+//     o.conStart.then( ( op ) =>
+//     {
+//       track.push( 'conStart' );
+//       test.true( _.mapIs( op ) );
+//       test.identical( op, o );
+//       test.true( _.process.isAlive( o.process.pid ) );
+//       o.process.kill();
+//       return null;
+//     })
+
+//     o.conTerminate.then( ( op ) =>
+//     {
+//       track.push( 'conTerminate' );
+//       test.notIdentical( op.exitCode, 0 );
+//       test.identical( op.ended, true );
+//       test.identical( op.exitSignal, 'SIGTERM' );
+//       test.identical( track, [ 'conStart', 'conTerminate' ] );
+//       return null;
+//     })
+
+//     return o.conTerminate;
+//   })
+
+//   return a.ready;
+
+//   /* - */
+
+//   function testAppChild()
+//   {
+//     let _ = require( toolsPath );
+
+//     _.include( 'wProcess' );
+//     _.include( 'wFiles' );
+
+//     console.log( 'Child process start' )
+
+//     _.time.out( context.t2, () => /* 5000 */
+//     {
+//       let filePath = _.path.join( __dirname, 'testFile' );
+//       _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
+//       console.log( 'Child process end' )
+//       return null;
+//     })
+//   }
+// }
+
 //
 
-function startDetachingModeForkResourceReady( test )
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-  let track = [];
-  let testAppChildPath = a.program( testAppChild );
+// function startDetachingModeForkResourceReady( test )
+// {
+//   let context = this;
+//   let a = context.assetFor( test, false );
+//   let track = [];
+//   let testAppChildPath = a.program( testAppChild );
 
-  /* */
+//   /* */
 
-  a.ready
+//   a.ready
 
-  .then( () =>
-  {
-    test.case = 'consequence receives resources after child spawn';
+//   .then( () =>
+//   {
+//     test.case = 'consequence receives resources after child spawn';
 
-    let o =
-    {
-      execPath : 'testAppChild.js',
-      mode : 'fork',
-      detaching : 1,
-      currentPath : a.routinePath,
-      throwingExitCode : 0
-    }
-    let result = _.process.start( o );
+//     let o =
+//     {
+//       execPath : 'testAppChild.js',
+//       mode : 'fork',
+//       detaching : 1,
+//       currentPath : a.routinePath,
+//       throwingExitCode : 0
+//     }
+//     let result = _.process.start( o );
 
-    test.true( result !== o.conStart );
-    test.true( result !== o.conTerminate );
+//     test.true( result !== o.conStart );
+//     test.true( result !== o.conTerminate );
 
-    o.conStart.thenGive( ( op ) =>
-    {
-      track.push( 'conStart' );
-      test.true( _.mapIs( op ) );
-      test.identical( op, o );
-      test.true( _.process.isAlive( o.process.pid ) );
-      o.process.kill();
-    })
+//     o.conStart.thenGive( ( op ) =>
+//     {
+//       track.push( 'conStart' );
+//       test.true( _.mapIs( op ) );
+//       test.identical( op, o );
+//       test.true( _.process.isAlive( o.process.pid ) );
+//       o.process.kill();
+//     })
 
-    o.conTerminate.then( ( op ) =>
-    {
-      track.push( 'conTerminate' );
-      test.notIdentical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      test.identical( op.exitSignal, 'SIGTERM' );
-      test.identical( track, [ 'conStart', 'conTerminate' ] )
-      return null;
-    })
+//     o.conTerminate.then( ( op ) =>
+//     {
+//       track.push( 'conTerminate' );
+//       test.notIdentical( op.exitCode, 0 );
+//       test.identical( op.ended, true );
+//       test.identical( op.exitSignal, 'SIGTERM' );
+//       test.identical( track, [ 'conStart', 'conTerminate' ] )
+//       return null;
+//     })
 
-    return o.conTerminate;
-  })
+//     return o.conTerminate;
+//   })
 
-  return a.ready;
+//   return a.ready;
 
-  /* - */
+//   /* - */
 
-  function testAppChild()
-  {
-    let _ = require( toolsPath );
+//   function testAppChild()
+//   {
+//     let _ = require( toolsPath );
 
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
+//     _.include( 'wProcess' );
+//     _.include( 'wFiles' );
 
-    console.log( 'Child process start' )
+//     console.log( 'Child process start' )
 
-    _.time.out( context.t2, () => /* 5000 */
-    {
-      let filePath = _.path.join( __dirname, 'testFile' );
-      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
-      console.log( 'Child process end' )
-      return null;
-    })
-  }
-}
+//     _.time.out( context.t2, () => /* 5000 */
+//     {
+//       let filePath = _.path.join( __dirname, 'testFile' );
+//       _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
+//       console.log( 'Child process end' )
+//       return null;
+//     })
+//   }
+// }
 
 //
 
-function startDetachingModeShellResourceReady( test )
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-  let track = [];
-  let testAppChildPath = a.program( testAppChild );
+// function startDetachingModeShellResourceReady( test )
+// {
+//   let context = this;
+//   let a = context.assetFor( test, false );
+//   let track = [];
+//   let testAppChildPath = a.program( testAppChild );
 
-  /* */
+//   /* */
 
-  a.ready
+//   a.ready
 
-  .then( () =>
-  {
-    test.case = 'consequence receives resources after child spawn';
+//   .then( () =>
+//   {
+//     test.case = 'consequence receives resources after child spawn';
 
-    let o =
-    {
-      execPath : 'node testAppChild.js',
-      mode : 'shell',
-      detaching : 1,
-      currentPath : a.routinePath,
-      throwingExitCode : 0
-    }
-    let result = _.process.start( o );
+//     let o =
+//     {
+//       execPath : 'node testAppChild.js',
+//       mode : 'shell',
+//       detaching : 1,
+//       currentPath : a.routinePath,
+//       throwingExitCode : 0
+//     }
+//     let result = _.process.start( o );
 
-    test.true( result !== o.conStart );
-    test.true( result !== o.conTerminate );
+//     test.true( result !== o.conStart );
+//     test.true( result !== o.conTerminate );
 
-    o.conStart.thenGive( ( op ) =>
-    {
-      track.push( 'conStart' );
-      test.true( _.mapIs( op ) );
-      test.identical( op, o );
-      test.true( _.process.isAlive( o.process.pid ) );
-      o.process.kill();
-    })
+//     o.conStart.thenGive( ( op ) =>
+//     {
+//       track.push( 'conStart' );
+//       test.true( _.mapIs( op ) );
+//       test.identical( op, o );
+//       test.true( _.process.isAlive( o.process.pid ) );
+//       o.process.kill();
+//     })
 
-    o.conTerminate.then( ( op ) =>
-    {
-      track.push( 'conTerminate' );
-      test.notIdentical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      test.identical( op.exitSignal, 'SIGTERM' );
-      test.identical( track, [ 'conStart', 'conTerminate' ] );
-      return null;
-    })
+//     o.conTerminate.then( ( op ) =>
+//     {
+//       track.push( 'conTerminate' );
+//       test.notIdentical( op.exitCode, 0 );
+//       test.identical( op.ended, true );
+//       test.identical( op.exitSignal, 'SIGTERM' );
+//       test.identical( track, [ 'conStart', 'conTerminate' ] );
+//       return null;
+//     })
 
-    return o.conTerminate;
-  })
+//     return o.conTerminate;
+//   })
 
-  return a.ready;
+//   return a.ready;
 
-  function testAppChild()
-  {
-    let _ = require( toolsPath );
+//   function testAppChild()
+//   {
+//     let _ = require( toolsPath );
 
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
+//     _.include( 'wProcess' );
+//     _.include( 'wFiles' );
 
-    console.log( 'Child process start' )
+//     console.log( 'Child process start' )
 
-    _.time.out( context.t2, () => /* 5000 */
-    {
-      let filePath = _.path.join( __dirname, 'testFile' );
-      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
-      console.log( 'Child process end' )
-      return null;
-    })
-  }
-}
+//     _.time.out( context.t2, () => /* 5000 */
+//     {
+//       let filePath = _.path.join( __dirname, 'testFile' );
+//       _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
+//       console.log( 'Child process end' )
+//       return null;
+//     })
+//   }
+// }
 
 //
 
@@ -41513,236 +41605,236 @@ var Proto =
   tests :
   {
 
-    // // basic
-    //
-    // startBasic, /* qqq for Yevhen : merge startBasic2 in | aaa : Done. */
-    // // startBasic2,
-    // startFork,
-    // startErrorHandling,
-    //
-    // // sync
-    //
-    // startSync,
-    // startSyncDeasync, /* qqq for Yevhen : merge with startSyncDeasync2 | aaa : Changed, startSyncDeasync2 is redundant */
-    // // startSyncDeasync2,
-    // startSyncDeasyncThrowing,
-    // startSyncDeasyncMultiple,
-    //
-    // // arguments
-    //
-    // startWithoutExecPath,
-    // startArgsOption,
-    // startArgumentsParsing,
-    // startArgumentsParsingNonTrivial,
-    // startArgumentsNestedQuotes,
-    // startExecPathQuotesClosing,
-    // startExecPathSeveralCommands,
-    // startExecPathNonTrivialModeShell,
-    // startArgumentsHandlingTrivial,
-    // startArgumentsHandling,
-    // startImportantExecPath,
-    // startImportantExecPathPassingThrough,
-    // startNormalizedExecPath,
-    // startExecPathWithSpace,
-    // startDifferentTypesOfPaths,
-    // startNjsPassingThroughExecPathWithSpace,
-    // startNjsPassingThroughDifferentTypesOfPaths,
-    // startPassingThroughExecPathWithSpace,
-    //
-    // // procedures / chronology / structural
-    //
-    // startProcedureTrivial,
-    // startProcedureExists,
-    // startProcedureStack,
-    // startProcedureStackMultiple,
-    // startOnTerminateSeveralCallbacksChronology,
-    // startChronology,
-    // startStateMultiple,
-    //
-    // // delay
-    //
-    // startReadyDelay,
-    // startReadyDelayMultiple,
-    // startOptionWhenDelay,
-    // startOptionWhenTime,
-    // startOptionTimeOut,
-    // startAfterDeath, /* qqq for Vova : fix aaa:fixed*/
-    // startAfterDeathOutput, /* qqq for Vova : fix aaa:fixed*/
-    //
-    // // detaching
-    //
+    // basic
+
+    startBasic, /* qqq for Yevhen : merge startBasic2 in | aaa : Done. */
+    // startBasic2,
+    startFork,
+    startErrorHandling,
+
+    // sync
+
+    startSync,
+    startSyncDeasync, /* qqq for Yevhen : merge with startSyncDeasync2 | aaa : Changed, startSyncDeasync2 is redundant */
+    // startSyncDeasync2,
+    startSyncDeasyncThrowing,
+    startSyncDeasyncMultiple,
+
+    // arguments
+
+    startWithoutExecPath,
+    startArgsOption,
+    startArgumentsParsing,
+    startArgumentsParsingNonTrivial,
+    startArgumentsNestedQuotes,
+    startExecPathQuotesClosing,
+    startExecPathSeveralCommands,
+    startExecPathNonTrivialModeShell,
+    startArgumentsHandlingTrivial,
+    startArgumentsHandling,
+    startImportantExecPath,
+    startImportantExecPathPassingThrough,
+    startNormalizedExecPath,
+    startExecPathWithSpace,
+    startDifferentTypesOfPaths,
+    startNjsPassingThroughExecPathWithSpace,
+    startNjsPassingThroughDifferentTypesOfPaths,
+    startPassingThroughExecPathWithSpace,
+
+    // procedures / chronology / structural
+
+    startProcedureTrivial,
+    startProcedureExists,
+    startProcedureStack,
+    startProcedureStackMultiple,
+    startOnTerminateSeveralCallbacksChronology,
+    startChronology,
+    startStateMultiple,
+
+    // delay
+
+    startReadyDelay,
+    startReadyDelayMultiple,
+    startOptionWhenDelay,
+    startOptionWhenTime,
+    startOptionTimeOut,
+    startAfterDeath, /* qqq for Vova : fix aaa:fixed*/
+    startAfterDeathOutput, /* qqq for Vova : fix aaa:fixed*/
+
+    // detaching
+
+    startDetachingResourceReady,
     // startDetachingModeSpawnResourceReady,
     // startDetachingModeForkResourceReady,
     // startDetachingModeShellResourceReady,
-    // startDetachingNoTerminationBegin,
-    // // startDetachingModeSpawnNoTerminationBegin,
-    // // startDetachingModeForkNoTerminationBegin,
-    // // startDetachingModeShellNoTerminationBegin,
-    // startDetachedOutputStdioIgnore,
-    // startDetachedOutputStdioPipe,
-    // startDetachedOutputStdioInherit,
-    // startDetachingIpc,
-    // // startDetachingModeSpawnIpc,
-    // // startDetachingModeForkIpc,
-    // // startDetachingModeShellIpc,
-    //
-    // startDetachingTrivial,
-    // startDetachingChildExitsAfterParent,
-    // startDetachingChildExitsBeforeParent,
-    // startDetachingDisconnectedEarly,
-    // startDetachingDisconnectedLate,
-    // startDetachingChildExistsBeforeParentWaitForTermination,
-    // startDetachingEndCompetitorIsExecuted,
-    // startDetachingTerminationBegin,
-    // startEventClose,
-    // startEventExit,
-    // startDetachingThrowing,
-    // startNjsDetachingChildThrowing,
-    //
-    // // on
-    //
-    // startOnStart,
-    // startOnTerminate,
-    // startNoEndBug1,
-    // startWithDelayOnReady,
-    // startOnIsNotConsequence,
-    //
-    // // concurrent
-    //
-    // startConcurrentMultiple,
-    // startConcurrentConsequencesMultiple,
-    // starterConcurrentMultiple,
-    //
-    // /* qqq for Yevhen : use routine _.process.startMinimal() where it is possible and make renaming of test routines */
-    //
-    // // helper
-    //
-    // startNjs,
-    // startNjsWithReadyDelayStructural,
-    // startNjsOptionInterpreterArgs,
-    // startNjsWithReadyDelayStructuralMultiple,
-    //
-    // // starter
-    //
-    // starter,
-    // starterArgs,
-    // starterFields,
-    //
-    // // output
-    //
-    // startOptionOutputCollecting,
-    // startOptionOutputColoring,
-    // startOptionOutputColoringStderr,
-    // startOptionOutputColoringStdout,
-    // startOptionOutputGraying,
-    // startOptionOutputPrefixing,
-    // startOptionOutputPiping,
-    // startOptionInputMirroring,
-    // startOptionLogger,
-    // startOptionLoggerTransofrmation,
-    // startOutputOptionsCompatibilityLateCheck,
-    // startOptionVerbosity,
-    // startOptionVerbosityLogging,
-    // startOutputMultiple,
-    // startOptionStdioIgnoreMultiple,
-    //
-    // // etc
-    //
-    // appTempApplication,
-    //
-    // // other options
+    startDetachingNoTerminationBegin,
+    // startDetachingModeSpawnNoTerminationBegin,
+    // startDetachingModeForkNoTerminationBegin,
+    // startDetachingModeShellNoTerminationBegin,
+    startDetachedOutputStdioIgnore,
+    startDetachedOutputStdioPipe,
+    startDetachedOutputStdioInherit,
+    startDetachingIpc,
+    // startDetachingModeSpawnIpc,
+    // startDetachingModeForkIpc,
+    // startDetachingModeShellIpc,
 
+    startDetachingTrivial,
+    startDetachingChildExitsAfterParent,
+    startDetachingChildExitsBeforeParent,
+    startDetachingDisconnectedEarly,
+    startDetachingDisconnectedLate,
+    startDetachingChildExistsBeforeParentWaitForTermination,
+    startDetachingEndCompetitorIsExecuted,
+    startDetachingTerminationBegin,
+    startEventClose,
+    startEventExit,
+    startDetachingThrowing,
+    startNjsDetachingChildThrowing,
+
+    // on
+
+    startOnStart,
+    startOnTerminate,
+    startNoEndBug1,
+    startWithDelayOnReady,
+    startOnIsNotConsequence,
+
+    // concurrent
+
+    startConcurrentMultiple,
+    startConcurrentConsequencesMultiple,
+    starterConcurrentMultiple,
+
+    /* qqq for Yevhen : use routine _.process.startMinimal() where it is possible and make renaming of test routines */
+
+    // helper
+
+    startNjs,
+    startNjsWithReadyDelayStructural,
+    startNjsOptionInterpreterArgs,
+    startNjsWithReadyDelayStructuralMultiple,
+
+    // starter
+
+    starter,
+    starterArgs,
+    starterFields,
+
+    // output
+
+    startOptionOutputCollecting,
+    startOptionOutputColoring,
+    startOptionOutputColoringStderr,
+    startOptionOutputColoringStdout,
+    startOptionOutputGraying,
+    startOptionOutputPrefixing,
+    startOptionOutputPiping,
+    startOptionInputMirroring,
+    startOptionLogger,
+    startOptionLoggerTransofrmation,
+    startOutputOptionsCompatibilityLateCheck,
+    startOptionVerbosity,
+    startOptionVerbosityLogging,
+    startOutputMultiple,
+    startOptionStdioIgnoreMultiple,
+
+    // etc
+
+    appTempApplication,
+
+    // other options
 
     startOptionStreamSizeLimit,
     startOptionStreamSizeLimitThrowing,
     startSingleOptionDry,
     startOptionDryMultiple,
-    // startOptionCurrentPath,
-    // startOptionCurrentPaths,
-    // startOptionPassingThrough,
-    // startOptionUid,
-    // startOptionGid,
-    // startOptionProcedureSingle,
-    // startOptionProcedureMultiple,
-    //
-    // // pid / status / exit
-    //
-    // startDiffPid,
-    // pidFrom,
-    //
-    // isAlive,
-    // statusOf,
-    //
-    // exitReason,
-    // exitCode, /* qqq for Yevhen : check order of test routines. it's messed up */
-    //
-    // // termination
-    //
-    // kill,
-    // killSync,
-    // killOptionWithChildren,
-    //
-    // startErrorAfterTerminationWithSend,
-    // startTerminateHangedWithExitHandler,
-    // startTerminateAfterLoopRelease,
-    //
-    // endSignalsBasic,
-    // endSignalsOnExit,
-    // endSignalsOnExitExitAgain,
-    //
-    // terminate,
-    // terminateSync,
-    //
-    // terminateFirstChild,
-    // // terminateFirstChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine | aaa : Done. */
-    // // terminateFirstChildFork,
-    // // terminateFirstChildShell,
-    //
-    // terminateSecondChild,
-    // // terminateSecondChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine | aaa : Done. */
-    // // terminateSecondChildFork,
-    // // terminateSecondChildShell,
-    //
-    // terminateDetachedFirstChild,
-    // // terminateDetachedFirstChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine | aaa : Done. */
-    // // terminateDetachedFirstChildFork,
-    // // terminateDetachedFirstChildShell,
-    //
-    // terminateWithDetachedChild,
-    // // terminateWithDetachedChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine | aaa : Done. */
-    // // terminateWithDetachedChildFork,
-    // // terminateWithDetachedChildShell,
-    //
-    // terminateSeveralChildren,
-    // terminateSeveralDetachedChildren,
-    // terminateDeadProcess,
-    //
-    // terminateTimeOutNoHandler,
-    // terminateTimeOutIgnoreSignal,
-    // terminateZeroTimeOut,
-    // // terminateZeroTimeOutSpawn,
-    // // terminateZeroTimeOutFork,
-    // terminateZeroTimeOutWithoutChildrenShell,
-    // terminateZeroTimeOutWithChildrenShell,
-    //
-    // terminateDifferentStdio,
-    //
-    // killComplex,
-    // execPathOf,
-    // waitForDeath,
-    //
-    // // children
-    //
-    // children,
-    // childrenOptionFormatList,
-    //
-    // // experiments
-    //
-    // experimentIpcDeasync,
-    // streamJoinExperiment,
-    // experiment,
-    // experiment2,
-    // experiment3,
+    startOptionCurrentPath,
+    startOptionCurrentPaths,
+    startOptionPassingThrough,
+    startOptionUid,
+    startOptionGid,
+    startOptionProcedureSingle,
+    startOptionProcedureMultiple,
+
+    // pid / status / exit
+
+    startDiffPid,
+    pidFrom,
+
+    isAlive,
+    statusOf,
+
+    exitReason,
+    exitCode, /* qqq for Yevhen : check order of test routines. it's messed up */
+
+    // termination
+
+    kill,
+    killSync,
+    killOptionWithChildren,
+
+    startErrorAfterTerminationWithSend,
+    startTerminateHangedWithExitHandler,
+    startTerminateAfterLoopRelease,
+
+    endSignalsBasic,
+    endSignalsOnExit,
+    endSignalsOnExitExitAgain,
+
+    terminate,
+    terminateSync,
+
+    terminateFirstChild,
+    // terminateFirstChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine | aaa : Done. */
+    // terminateFirstChildFork,
+    // terminateFirstChildShell,
+
+    terminateSecondChild,
+    // terminateSecondChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine | aaa : Done. */
+    // terminateSecondChildFork,
+    // terminateSecondChildShell,
+
+    terminateDetachedFirstChild,
+    // terminateDetachedFirstChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine | aaa : Done. */
+    // terminateDetachedFirstChildFork,
+    // terminateDetachedFirstChildShell,
+
+    terminateWithDetachedChild,
+    // terminateWithDetachedChildSpawn, /* qqq2 for Yevhen : merge those 3 routines into single routine with help of subroutine | aaa : Done. */
+    // terminateWithDetachedChildFork,
+    // terminateWithDetachedChildShell,
+
+    terminateSeveralChildren,
+    terminateSeveralDetachedChildren,
+    terminateDeadProcess,
+
+    terminateTimeOutNoHandler,
+    terminateTimeOutIgnoreSignal,
+    terminateZeroTimeOut,
+    // terminateZeroTimeOutSpawn,
+    // terminateZeroTimeOutFork,
+    terminateZeroTimeOutWithoutChildrenShell,
+    terminateZeroTimeOutWithChildrenShell,
+
+    terminateDifferentStdio,
+
+    killComplex,
+    execPathOf,
+    waitForDeath,
+
+    // children
+
+    children,
+    childrenOptionFormatList,
+
+    // experiments
+
+    experimentIpcDeasync,
+    streamJoinExperiment,
+    experiment,
+    experiment2,
+    experiment3,
 
   }
 
