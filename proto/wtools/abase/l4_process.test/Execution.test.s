@@ -9031,7 +9031,7 @@ startProcedureExists.description =
 
 //
 
-function startProcedureStack( test )
+function startSingleProcedureStack( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -9068,7 +9068,7 @@ function startProcedureStack( test )
         deasync,
       }
 
-      _.process.start( o );
+      _.process.startSingle( o );
 
       test.identical( _.strCount( o.procedure._sourcePath, 'Execution.test.s' ), 1 );
       test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
@@ -9102,7 +9102,7 @@ function startProcedureStack( test )
         deasync,
       }
 
-      _.process.start( o );
+      _.process.startSingle( o );
 
       test.identical( _.strCount( o.procedure._sourcePath, 'Execution.test.s' ), 1 );
       test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
@@ -9136,7 +9136,7 @@ function startProcedureStack( test )
         deasync,
       }
 
-      _.process.start( o );
+      _.process.startSingle( o );
 
       test.identical( _.strCount( o.procedure._stack, 'case1' ), 1 );
       test.identical( _.strCount( o.procedure._sourcePath, 'Execution.test.s' ), 1 );
@@ -9172,7 +9172,7 @@ function startProcedureStack( test )
         deasync,
       }
 
-      _.process.start( o );
+      _.process.startSingle( o );
 
       test.identical( _.strCount( o.procedure._stack, 'case1' ), 1 );
       test.identical( _.strCount( o.procedure._sourcePath, 'start' ), 1 );
@@ -9206,7 +9206,7 @@ function startProcedureStack( test )
         deasync,
       }
 
-      _.process.start( o );
+      _.process.startSingle( o );
 
       test.identical( o.procedure._stack, '' );
       test.identical( o.procedure._sourcePath, '' );
@@ -9240,7 +9240,7 @@ function startProcedureStack( test )
         deasync,
       }
 
-      _.process.start( o );
+      _.process.startSingle( o );
 
       test.identical( o.procedure._stack, 'abc' );
       test.identical( o.procedure._sourcePath, 'abc' );
@@ -9275,9 +9275,9 @@ function startProcedureStack( test )
 
 }
 
-startProcedureStack.rapidity = -1;
-startProcedureStack.timeOut = 5e5;
-startProcedureStack.description =
+startSingleProcedureStack.rapidity = -1;
+startSingleProcedureStack.timeOut = 5e5;
+startSingleProcedureStack.description =
 `
   - option stack used to get stack
   - stack may be defined relatively
@@ -9286,7 +9286,7 @@ startProcedureStack.description =
 
 //
 
-function startProcedureStackMultiple( test )
+function startMultipleProcedureStack( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -9324,7 +9324,7 @@ function startProcedureStackMultiple( test )
         deasync,
       }
 
-      _.process.start( o );
+      _.process.startMultiple( o );
 
       if( sync || deasync )
       {
@@ -9390,7 +9390,7 @@ function startProcedureStackMultiple( test )
         deasync,
       }
 
-      _.process.start( o );
+      _.process.startMultiple( o );
 
       if( sync || deasync )
       {
@@ -9456,7 +9456,7 @@ function startProcedureStackMultiple( test )
         deasync,
       }
 
-      _.process.start( o );
+      _.process.startMultiple( o );
 
       if( sync || deasync )
       {
@@ -9522,7 +9522,7 @@ function startProcedureStackMultiple( test )
         deasync,
       }
 
-      _.process.start( o );
+      _.process.startMultiple( o );
 
       if( sync || deasync )
       {
@@ -9585,7 +9585,7 @@ function startProcedureStackMultiple( test )
         deasync,
       }
 
-      _.process.start( o );
+      _.process.startMultiple( o );
 
       if( sync || deasync )
       {
@@ -9649,7 +9649,7 @@ function startProcedureStackMultiple( test )
         deasync,
       }
 
-      _.process.start( o );
+      _.process.startMultiple( o );
 
       if( sync || deasync )
       {
@@ -9712,13 +9712,13 @@ function startProcedureStackMultiple( test )
 
 }
 
-startProcedureStackMultiple.rapidity = -1;
-startProcedureStackMultiple.timeOut = 500000;
+startMultipleProcedureStack.rapidity = -1;
+startMultipleProcedureStack.timeOut = 500000;
 
 //
 
 /* qqq for Yevhen : implement for other modes | aaa : Done. */
-function startOnTerminateSeveralCallbacksChronology( test )
+function startMinimalOnTerminateSeveralCallbacksChronology( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -9748,7 +9748,7 @@ function startOnTerminateSeveralCallbacksChronology( test )
         detaching : 0,
         ipc : mode === 'shell' ? 0 : 1,
       }
-      let con = _.process.start( o );
+      let con = _.process.startMinimal( o );
 
       o.conTerminate.then( ( op ) =>
       {
@@ -9809,7 +9809,7 @@ function startOnTerminateSeveralCallbacksChronology( test )
   //       detaching : 0,
   //       ipc : 1,
   //     }
-  //     let con = _.process.start( o );
+  //     let con = _.process.startMinimal( o );
 
   //     o.conTerminate.then( ( op ) =>
   //     {
@@ -9863,15 +9863,15 @@ function startOnTerminateSeveralCallbacksChronology( test )
 
 }
 
-startOnTerminateSeveralCallbacksChronology.timeOut = 4e5; /* Locally : 36.424s */
-startOnTerminateSeveralCallbacksChronology.description =
+startMinimalOnTerminateSeveralCallbacksChronology.timeOut = 4e5; /* Locally : 36.424s */
+startMinimalOnTerminateSeveralCallbacksChronology.description =
 `
 - second onTerminal callbacks called after ready callback
 `
 
 //
 
-function startChronology( test )
+function startMinimalChronology( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -10035,7 +10035,7 @@ function startChronology( test )
     test.identical( _.Procedure.FindAlive().length - pacounter, 3 );
     pacounter = _.Procedure.FindAlive().length;
 
-    let returned = _.process.start( o );
+    let returned = _.process.startMinimal( o );
 
     if( sync )
     test.true( returned === o );
@@ -10114,9 +10114,9 @@ function startChronology( test )
 
 }
 
-startChronology.rapidity = -1;
-startChronology.timeOut = 5e5;
-startChronology.description =
+startMinimalChronology.rapidity = -1;
+startMinimalChronology.timeOut = 5e5;
+startMinimalChronology.description =
 `
   - conTerminate goes before ready
   - conStart goes before conTerminate
@@ -10124,7 +10124,7 @@ startChronology.description =
   - no extra procedures generated
 `
 
-function startStateMultiple( test )
+function startMultipleState( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -10158,7 +10158,7 @@ function startStateMultiple( test )
         outputCollecting : 1
       }
 
-      let returned = _.process.start( options );
+      let returned = _.process.startMultiple( options );
 
       options.conStart.finally( ( err, op ) =>
       {
@@ -10210,7 +10210,7 @@ function startStateMultiple( test )
         outputCollecting : 1
       }
 
-      let returned = _.process.start( options );
+      let returned = _.process.startMultiple( options );
 
       options.conStart.finally( ( err, op ) =>
       {
@@ -10263,7 +10263,7 @@ function startStateMultiple( test )
         outputCollecting : 1
       }
 
-      let returned = _.process.start( options );
+      let returned = _.process.startMultiple( options );
 
       options.conStart.finally( ( err, op ) =>
       {
@@ -10315,7 +10315,7 @@ function startStateMultiple( test )
         outputCollecting : 1
       }
 
-      let returned = _.process.start( options );
+      let returned = _.process.startMultiple( options );
 
       options.conStart.finally( ( err, op ) =>
       {
@@ -41644,13 +41644,13 @@ var Proto =
 
     // procedures / chronology / structural
 
-    startProcedureTrivial,
-    startProcedureExists,
-    startProcedureStack,
-    startProcedureStackMultiple,
-    startOnTerminateSeveralCallbacksChronology,
-    startChronology,
-    startStateMultiple,
+    startProcedureTrivial, /* with `starter` */
+    startProcedureExists, /* with `starter` */
+    startSingleProcedureStack,
+    startMultipleProcedureStack,
+    startMinimalOnTerminateSeveralCallbacksChronology,
+    startMinimalChronology,
+    startMultipleState,
 
     // delay
 
