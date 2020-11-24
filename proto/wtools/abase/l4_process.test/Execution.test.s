@@ -259,7 +259,7 @@ function assetFor( test, name )
 // basic
 // --
 
-function startBasic( test )
+function startMinimalBasic( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -304,7 +304,7 @@ ${programPath}:end
 
       var options = _.mapSupplement( null, o2, o3 );
 
-      return _.process.start( options )
+      return _.process.startMinimal( options )
       .then( function()
       {
         test.identical( options.exitCode, 0 );
@@ -328,7 +328,7 @@ ${programPath}:end
 
       var options = _.mapSupplement( null, o2, o3 );
 
-      return _.process.start( options )
+      return _.process.startMinimal( options )
       .then( function()
       {
         test.identical( options.exitCode, 0 );
@@ -352,7 +352,7 @@ ${programPath}:end
 
       var options = _.mapSupplement( null, o2, o3 );
 
-      return _.process.start( options )
+      return _.process.startMinimal( options )
       .then( function()
       {
         test.identical( options.exitCode, 0 );
@@ -376,7 +376,7 @@ ${programPath}:end
 
       var options = _.mapSupplement( null, o2, o3 );
 
-      return _.process.start( options )
+      return _.process.startMinimal( options )
       .then( function()
       {
         test.identical( options.exitCode, 0 );
@@ -400,7 +400,7 @@ ${programPath}:end
 
       var options = _.mapSupplement( null, o2, o3 );
 
-      return _.process.start( options )
+      return _.process.startMinimal( options )
       .then( function()
       {
         test.identical( options.exitCode, 0 );
@@ -425,7 +425,7 @@ ${programPath}:end
 
       var options = _.mapSupplement( null, o2, o3 );
 
-      return _.process.start( options )
+      return _.process.startMinimal( options )
       .then( function()
       {
         test.identical( options.exitCode, 0 );
@@ -452,7 +452,7 @@ ${programPath}:end
 
       var options = _.mapSupplement( null, o2, o3 );
 
-      return _.process.start( options )
+      return _.process.startMinimal( options )
       .then( function()
       {
         test.identical( options.exitCode, 0 );
@@ -477,7 +477,7 @@ ${programPath}:end
 
       var options = _.mapSupplement( null, o2, o3 );
 
-      return test.mustNotThrowError( _.process.start( options ) )
+      return test.mustNotThrowError( _.process.startMinimal( options ) )
       .then( () =>
       {
         test.true( !options.error );
@@ -509,7 +509,7 @@ ${programPath}:end
 
       var options = _.mapSupplement( null, o2, o3 );
 
-      return test.shouldThrowErrorAsync( _.process.start( options ),
+      return test.shouldThrowErrorAsync( _.process.startMinimal( options ),
       ( err, arg ) =>
       {
         test.true( _.errIs( err ) );
@@ -559,7 +559,7 @@ ${programPath}:end
 
       //   var options = _.mapSupplement( {}, o2, o3 );
 
-      //   return test.shouldThrowErrorAsync( _.process.start( options ),
+      //   return test.shouldThrowErrorAsync( _.process.startMinimal( options ),
       //   ( err, arg ) =>
       //   {
       //     test.true( _.errIs( err ) );
@@ -579,7 +579,7 @@ ${programPath}:end
 
       var options = _.mapSupplement( null, o2, o3 );
 
-      return test.shouldThrowErrorAsync( _.process.start( options ), ( err, arg ) =>
+      return test.shouldThrowErrorAsync( _.process.startMinimal( options ), ( err, arg ) =>
       {
         test.true( _.errIs( err ) );
         test.identical( err.reason, 'exit code' );
@@ -616,7 +616,7 @@ ${programPath}:end
 
       var options = _.mapSupplement( null, o2, o3 );
 
-      return _.process.start( options )
+      return _.process.startMinimal( options )
       .then( function()
       {
         test.identical( options.exitCode, 0 );
@@ -658,9 +658,9 @@ ${programPath}:end
       var options = _.mapSupplement( null, o2, o3 );
 
       if( mode === 'fork' ) /* Error in assert 'Expects string or strings {-o.execPath-}, but got Function' */
-      return test.shouldThrowErrorSync( () => _.process.start( options ) );
+      return test.shouldThrowErrorSync( () => _.process.startMinimal( options ) );
       else /* Error after launching a process */
-      return test.shouldThrowErrorAsync( () => _.process.start( options ) );
+      return test.shouldThrowErrorAsync( () => _.process.startMinimal( options ) );
     })
 
     /* - */
@@ -798,7 +798,7 @@ ${programPath}:end
 */
 
 
-function startFork( test )
+function startMinimalFork( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -819,7 +819,7 @@ function startFork( test )
       outputCollecting : 1,
       outputPiping : 1,
     }
-    return _.process.start( o )
+    return _.process.startMinimal( o )
     .then( function( op )
     {
       test.identical( o.exitCode, 0 );
@@ -843,7 +843,7 @@ function startFork( test )
       outputCollecting : 1,
       outputPiping : 1,
     }
-    return _.process.start( o )
+    return _.process.startMinimal( o )
     .then( function( op )
     {
       test.identical( o.exitCode, 0 );
@@ -868,7 +868,7 @@ function startFork( test )
       outputPiping : 0,
     }
 
-    return _.process.start( o )
+    return _.process.startMinimal( o )
     .then( function( op )
     {
       test.identical( o.exitCode, 0 );
@@ -905,7 +905,7 @@ function startFork( test )
       outputCollecting : 1,
       outputPiping : 1,
     }
-    return _.process.start( o )
+    return _.process.startMinimal( o )
     .then( function( op )
     {
       test.identical( o.exitCode, 0 );
@@ -949,7 +949,7 @@ function startFork( test )
       deasync : 1
     }
 
-    _.process.start( o );
+    _.process.startMinimal( o );
     debugger
     test.identical( o.exitCode, 0 );
     test.true( _.strHas( o.output,  `[ 'arg1', 'arg2' ]` ) );
@@ -985,7 +985,7 @@ function startFork( test )
     }
 
     let gotMessage;
-    let con = _.process.start( o );
+    let con = _.process.startMinimal( o );
 
     o.process.send({ message : 'message from parent' });
     o.process.on( 'message', ( e ) =>
@@ -1018,7 +1018,7 @@ function startFork( test )
       outputPiping : 1,
     }
 
-    return _.process.start( o )
+    return _.process.startMinimal( o )
     .then( function( op )
     {
       test.identical( o.exitCode, 0 );
@@ -1054,7 +1054,7 @@ function startFork( test )
       timeOut : context.t1, /* 1000 */
     }
 
-    return test.shouldThrowErrorAsync( _.process.start( o ) )
+    return test.shouldThrowErrorAsync( _.process.startMinimal( o ) )
     .then( function( op )
     {
       test.identical( o.exitCode, null );
@@ -1089,7 +1089,7 @@ function startFork( test )
       timeOut : context.t1, /* 1000 */
     }
 
-    return _.process.start( o )
+    return _.process.startMinimal( o )
     .then( function( op )
     {
       test.identical( o.exitCode, null );
@@ -1110,7 +1110,7 @@ function startFork( test )
 
 //
 
-function startErrorHandling( test )
+function startMinimalErrorHandling( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -1142,7 +1142,7 @@ function startErrorHandling( test )
         outputCollecting : 0,
         outputPiping : 0
       }
-      return test.shouldThrowErrorAsync( _.process.start( o ) )
+      return test.shouldThrowErrorAsync( _.process.startMinimal( o ) )
       .then( function( op )
       {
         test.true( _.errIs( op ) );
@@ -1175,7 +1175,7 @@ function startErrorHandling( test )
         outputCollecting : 0,
         outputPiping : 0
       }
-      var returned = test.shouldThrowErrorSync( () => _.process.start( o ) )
+      var returned = test.shouldThrowErrorSync( () => _.process.startMinimal( o ) )
 
       test.true( _.errIs( returned ) );
       test.true( _.strHas( returned.message, 'Process returned exit code' ) )
@@ -1206,7 +1206,7 @@ function startErrorHandling( test )
         outputCollecting : 0,
         outputPiping : 0
       }
-      var returned = test.shouldThrowErrorSync( () => _.process.start( o ) )
+      var returned = test.shouldThrowErrorSync( () => _.process.startMinimal( o ) )
 
       test.true( _.errIs( returned ) );
       test.true( _.strHas( returned.message, 'Process returned exit code' ) )
@@ -1252,7 +1252,7 @@ function startErrorHandling( test )
         outputPrefixing : 1,
         outputCollecting : 1,
       }
-      var returned = test.shouldThrowErrorSync( () => _.process.start( o2 ) )
+      var returned = test.shouldThrowErrorSync( () => _.process.startMinimal( o2 ) )
 
       test.true( _.errIs( returned ) );
       test.true( _.strHas( returned.message, 'Process returned exit code' ) )
@@ -1290,7 +1290,7 @@ function startErrorHandling( test )
   //     outputCollecting : 0,
   //     outputPiping : 0
   //   }
-  //   return test.shouldThrowErrorAsync( _.process.start( o ) )
+  //   return test.shouldThrowErrorAsync( _.process.startMinimal( o ) )
   //   .then( function( op )
   //   {
   //     test.true( _.errIs( op ) );
@@ -1321,7 +1321,7 @@ function startErrorHandling( test )
   //     outputCollecting : 0,
   //     outputPiping : 0
   //   }
-  //   return test.shouldThrowErrorAsync( _.process.start( o ) )
+  //   return test.shouldThrowErrorAsync( _.process.startMinimal( o ) )
   //   .then( function( op )
   //   {
   //     test.true( _.errIs( op ) );
@@ -1352,7 +1352,7 @@ function startErrorHandling( test )
   //     outputCollecting : 0,
   //     outputPiping : 0
   //   }
-  //   return test.shouldThrowErrorAsync( _.process.start( o ) )
+  //   return test.shouldThrowErrorAsync( _.process.startMinimal( o ) )
   //   .then( function( op )
   //   {
   //     test.true( _.errIs( op ) );
@@ -1385,7 +1385,7 @@ function startErrorHandling( test )
   //     outputCollecting : 0,
   //     outputPiping : 0
   //   }
-  //   var returned = test.shouldThrowErrorSync( () => _.process.start( o ) )
+  //   var returned = test.shouldThrowErrorSync( () => _.process.startMinimal( o ) )
 
   //   test.true( _.errIs( returned ) );
   //   test.true( _.strHas( returned.message, 'Process returned exit code' ) )
@@ -1416,7 +1416,7 @@ function startErrorHandling( test )
   //     outputCollecting : 0,
   //     outputPiping : 0
   //   }
-  //   var returned = test.shouldThrowErrorSync( () => _.process.start( o ) )
+  //   var returned = test.shouldThrowErrorSync( () => _.process.startMinimal( o ) )
 
   //   test.true( _.errIs( returned ) );
   //   test.true( _.strHas( returned.message, 'Process returned exit code' ) )
@@ -1447,7 +1447,7 @@ function startErrorHandling( test )
   //     outputCollecting : 0,
   //     outputPiping : 0
   //   }
-  //   var returned = test.shouldThrowErrorSync( () => _.process.start( o ) )
+  //   var returned = test.shouldThrowErrorSync( () => _.process.startMinimal( o ) )
 
   //   test.true( _.errIs( returned ) );
   //   test.true( _.strHas( returned.message, 'Process returned exit code' ) )
@@ -1478,7 +1478,7 @@ function startErrorHandling( test )
   //     outputCollecting : 0,
   //     outputPiping : 0
   //   }
-  //   var returned = test.shouldThrowErrorSync( () => _.process.start( o ) )
+  //   var returned = test.shouldThrowErrorSync( () => _.process.startMinimal( o ) )
 
   //   test.true( _.errIs( returned ) );
   //   test.true( _.strHas( returned.message, 'Process returned exit code' ) )
@@ -1524,7 +1524,7 @@ function startErrorHandling( test )
   //     outputPrefixing : 1,
   //     outputCollecting : 1,
   //   }
-  //   var returned = test.shouldThrowErrorSync( () => _.process.start( o2 ) )
+  //   var returned = test.shouldThrowErrorSync( () => _.process.startMinimal( o2 ) )
 
   //   test.true( _.errIs( returned ) );
   //   test.true( _.strHas( returned.message, 'Process returned exit code' ) )
@@ -1566,7 +1566,7 @@ function startErrorHandling( test )
       encoding : 'json'
     });
 
-    _.process.start( op );
+    _.process.startMinimal( op );
 
   }
 
@@ -1576,7 +1576,7 @@ function startErrorHandling( test )
 // sync
 // --
 
-function startSync( test )
+function startMinimalSync( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -1617,7 +1617,7 @@ function startSync( test )
     /* stdio : pipe */
 
     var options = _.mapSupplement( {}, o2, o3 );
-    _.process.start( options );
+    _.process.startMinimal( options );
     debugger;
     test.identical( options.exitCode, 0 );
     test.identical( options.output, expectedOutput );
@@ -1629,7 +1629,7 @@ function startSync( test )
     o2.outputPiping = 0;
 
     var options = _.mapSupplement( {}, o2, o3 );
-    _.process.start( options )
+    _.process.startMinimal( options )
     test.identical( options.exitCode, 0 );
     test.identical( options.output, null );
 
@@ -1645,7 +1645,7 @@ function startSync( test )
     }
 
     var options = _.mapSupplement( {}, o2, o3 );
-    test.shouldThrowErrorSync( () => _.process.start( options ) );
+    test.shouldThrowErrorSync( () => _.process.startMinimal( options ) );
 
     /* */
 
@@ -1657,7 +1657,7 @@ function startSync( test )
       stdio : 'pipe'
     }
     var options = _.mapSupplement( {}, o2, o3 );
-    test.mustNotThrowError( () => _.process.start( options ) )
+    test.mustNotThrowError( () => _.process.startMinimal( options ) )
     test.identical( options.exitCode, 0 );
 
     /* */
@@ -1670,7 +1670,7 @@ function startSync( test )
       stdio : 'pipe'
     }
     var options = _.mapSupplement( {}, o2, o3 );
-    test.shouldThrowErrorSync( () => _.process.start( options ) );
+    test.shouldThrowErrorSync( () => _.process.startMinimal( options ) );
     test.identical( options.exitCode, 1 );
 
     /* */
@@ -1683,7 +1683,7 @@ function startSync( test )
       stdio : 'pipe'
     }
     var options = _.mapSupplement( {}, o2, o3 );
-    test.shouldThrowErrorSync( () => _.process.start( options ) );
+    test.shouldThrowErrorSync( () => _.process.startMinimal( options ) );
     test.identical( options.exitCode, 2 );
 
     return null;
@@ -1743,7 +1743,7 @@ function startSync( test )
   // /* mode : spawn, stdio : pipe */
 
   // var options = _.mapSupplement( null, o2, o3 );
-  // _.process.start( options );
+  // _.process.startMinimal( options );
   // test.identical( options.exitCode, 0 );
   // test.identical( options.output, expectedOutput );
 
@@ -1754,7 +1754,7 @@ function startSync( test )
   // o2.outputPiping = 0;
 
   // var options = _.mapSupplement( null, o2, o3 );
-  // _.process.start( options )
+  // _.process.startMinimal( options )
   // test.identical( options.exitCode, 0 );
   // test.identical( options.output, null );
 
@@ -1768,7 +1768,7 @@ function startSync( test )
   //   stdio : 'pipe'
   // }
   // var options = _.mapSupplement( null, o2, o3 );
-  // _.process.start( options )
+  // _.process.startMinimal( options )
   // test.identical( options.exitCode, 0 );
   // test.identical( options.output, expectedOutput );
 
@@ -1779,7 +1779,7 @@ function startSync( test )
   // o2.outputPiping = 0;
 
   // var options = _.mapSupplement( null, o2, o3 );
-  // _.process.start( options )
+  // _.process.startMinimal( options )
   // test.identical( options.exitCode, 0 );
   // test.identical( options.output, null );
 
@@ -1795,7 +1795,7 @@ function startSync( test )
   // }
 
   // var options = _.mapSupplement( null, o2, o3 );
-  // test.shouldThrowErrorSync( () => _.process.start( options ) );
+  // test.shouldThrowErrorSync( () => _.process.startMinimal( options ) );
 
   // /* */
 
@@ -1807,7 +1807,7 @@ function startSync( test )
   //   stdio : 'pipe'
   // }
   // var options = _.mapSupplement( null, o2, o3 );
-  // test.mustNotThrowError( () => _.process.start( options ) )
+  // test.mustNotThrowError( () => _.process.startMinimal( options ) )
   // test.identical( options.exitCode, 0 );
 
   // /* */
@@ -1820,7 +1820,7 @@ function startSync( test )
   //   stdio : 'pipe'
   // }
   // var options = _.mapSupplement( null, o2, o3 );
-  // test.shouldThrowErrorSync( () => _.process.start( options ) );
+  // test.shouldThrowErrorSync( () => _.process.startMinimal( options ) );
   // test.identical( options.exitCode, 1 );
 
   // /* */
@@ -1833,7 +1833,7 @@ function startSync( test )
   //   stdio : 'pipe'
   // }
   // var options = _.mapSupplement( null, o2, o3 );
-  // test.shouldThrowErrorSync( () => _.process.start( options ) );
+  // test.shouldThrowErrorSync( () => _.process.startMinimal( options ) );
   // test.identical( options.exitCode, 2 );
 
   // /* */
@@ -1847,7 +1847,7 @@ function startSync( test )
   // }
 
   // var options = _.mapSupplement( null, o2, o3 );
-  // test.mustNotThrowError( () => _.process.start( options ) )
+  // test.mustNotThrowError( () => _.process.startMinimal( options ) )
   // test.identical( options.exitCode, 0 );
 
   // /* */
@@ -1860,7 +1860,7 @@ function startSync( test )
   //   stdio : 'pipe'
   // }
   // var options = _.mapSupplement( null, o2, o3 );
-  // test.shouldThrowErrorSync( () => _.process.start( options ) )
+  // test.shouldThrowErrorSync( () => _.process.startMinimal( options ) )
   // test.identical( options.exitCode, 1 );
 
   /* - */
@@ -1892,7 +1892,7 @@ function startSync( test )
 
 //
 
-function startSyncDeasync( test )
+function startSingleSyncDeasync( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -1919,7 +1919,7 @@ function startSyncDeasync( test )
     if( tops.sync && !tops.deasync && tops.mode === 'fork' )
     return test.shouldThrowErrorSync( () =>
     {
-      _.process.start
+      _.process.startSingle
       ({
         execPath : programPath,
         mode : tops.mode,
@@ -1958,7 +1958,7 @@ function startSyncDeasync( test )
       }
 
       var options = _.mapSupplement( {}, o2, o3 );
-      var returned = _.process.start( options );
+      var returned = _.process.startSingle( options );
 
       if( tops.sync )
       {
@@ -2011,7 +2011,7 @@ function startSyncDeasync( test )
       }
 
       var options = _.mapSupplement( {}, o2, o3 );
-      var returned = _.process.start( options );
+      var returned = _.process.startSingle( options );
 
       if( tops.sync )
       {
@@ -2064,9 +2064,9 @@ function startSyncDeasync( test )
       var options = _.mapSupplement( {}, o2, o3 );
 
       if( tops.sync )
-      return test.shouldThrowErrorSync( () => _.process.start( options ) );
+      return test.shouldThrowErrorSync( () => _.process.startSingle( options ) );
       else
-      return test.shouldThrowErrorAsync( () => _.process.start( options ) );
+      return test.shouldThrowErrorAsync( () => _.process.startSingle( options ) );
     });
 
     /* */
@@ -2082,7 +2082,7 @@ function startSyncDeasync( test )
       }
 
       var options = _.mapSupplement( {}, o2, o3 );
-      var returned = _.process.start( options );
+      var returned = _.process.startSingle( options );
 
       if( tops.sync )
       {
@@ -2135,14 +2135,14 @@ function startSyncDeasync( test )
 
       if( tops.sync )
       {
-        test.shouldThrowErrorSync( () => _.process.start( options ) );
+        test.shouldThrowErrorSync( () => _.process.startSingle( options ) );
         test.identical( options.exitCode, 1 )
 
         return options;
       }
       else
       {
-        return test.shouldThrowErrorAsync( () => _.process.start( options ) )
+        return test.shouldThrowErrorAsync( () => _.process.startSingle( options ) )
         .then( ( op ) =>
         {
           test.true( _.errIs( op ) );
@@ -2186,7 +2186,7 @@ function startSyncDeasync( test )
 
 }
 
-startSyncDeasync.timeOut = 57e4; /* Locally : 56.549s */
+startSingleSyncDeasync.timeOut = 57e4; /* Locally : 56.549s */
 
 //
 
@@ -2278,7 +2278,7 @@ startSyncDeasync.timeOut = 57e4; /* Locally : 56.549s */
 
 //
 
-function startSyncDeasyncThrowing( test )
+function startMinimalSyncDeasyncThrowing( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -2313,12 +2313,12 @@ function startSyncDeasyncThrowing( test )
 
       if( tops.sync )
       {
-        test.shouldThrowErrorSync( () =>  _.process.start( o ) );
+        test.shouldThrowErrorSync( () =>  _.process.startMinimal( o ) );
         return null;
       }
       else
       {
-        var returned = _.process.start( o );
+        var returned = _.process.startMinimal( o );
 
         test.true( _.consequenceIs( returned ) );
         if( tops.deasync )
@@ -2341,11 +2341,11 @@ function startSyncDeasyncThrowing( test )
 
 }
 
-startSyncDeasyncThrowing.timeOut = 45000;
+startMinimalSyncDeasyncThrowing.timeOut = 45000;
 
 //
 
-function startSyncDeasyncMultiple( test )
+function startMultipleSyncDeasync( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -2370,7 +2370,7 @@ function startSyncDeasyncMultiple( test )
     if( sync && !deasync && mode === 'fork' )
     return test.shouldThrowErrorSync( () =>
     {
-      _.process.start
+      _.process.startMultiple
       ({ execPath : [ programPath, programPath ],
         mode,
         sync,
@@ -2388,7 +2388,7 @@ function startSyncDeasyncMultiple( test )
         sync,
         deasync
       }
-      var returned = _.process.start( o );
+      var returned = _.process.startMultiple( o );
 
       if( sync )
       {
@@ -2462,7 +2462,8 @@ function startSyncDeasyncMultiple( test )
   function testApp()
   {
     console.log( process.argv.slice( 2 ) )
-  }}
+  }
+}
 
 // --
 // arguments
@@ -41607,18 +41608,18 @@ var Proto =
 
     // basic
 
-    startBasic, /* qqq for Yevhen : merge startBasic2 in | aaa : Done. */
+    startMinimalBasic, /* qqq for Yevhen : merge startBasic2 in | aaa : Done. */
     // startBasic2,
-    startFork,
-    startErrorHandling,
+    startMinimalFork,
+    startMinimalErrorHandling,
 
     // sync
 
-    startSync,
-    startSyncDeasync, /* qqq for Yevhen : merge with startSyncDeasync2 | aaa : Changed, startSyncDeasync2 is redundant */
+    startMinimalSync,
+    startSingleSyncDeasync, /* qqq for Yevhen : merge with startSyncDeasync2 | aaa : Changed, startSyncDeasync2 is redundant */
     // startSyncDeasync2,
-    startSyncDeasyncThrowing,
-    startSyncDeasyncMultiple,
+    startMinimalSyncDeasyncThrowing,
+    startMultipleSyncDeasync,
 
     // arguments
 
