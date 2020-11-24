@@ -60,7 +60,6 @@ function startMinimalHeadCommon( routine, args )
     o.timeOut === null || _.numberIs( o.timeOut ),
     `Expects null or number {-o.timeOut-}, but got ${_.strType( o.timeOut )}`
   );
-  _.assert( _.longHas( [ 'instant', 'afterdeath' ], o.when ) || _.objectIs( o.when ), `Unsupported starting mode: ${o.when}` );
   _.assert
   (
     !o.detaching || !_.longHas( _.arrayAs( o.stdio ), 'inherit' ),
@@ -181,6 +180,8 @@ function startMinimal_head( routine, args )
   let o = startMinimalHeadCommon( routine, args );
 
   _.assert( arguments.length === 2 );
+
+  _.assert( _.longHas( [ 'instant' ], o.when ) || _.objectIs( o.when ), `Unsupported starting mode: ${o.when}` );
 
   _.assert
   (
@@ -1470,6 +1471,8 @@ function startSingle_head( routine, args )
 
   _.assert( arguments.length === 2 );
 
+  _.assert( _.longHas( [ 'instant', 'afterdeath' ], o.when ) || _.objectIs( o.when ), `Unsupported starting mode: ${o.when}` );
+
   return o;
 }
 
@@ -1769,6 +1772,7 @@ function startMultiple_head( routine, args )
 
   _.assert( arguments.length === 2 );
 
+  _.assert( _.longHas( [ 'instant', 'afterdeath' ], o.when ) || _.objectIs( o.when ), `Unsupported starting mode: ${o.when}` );
   _.assert
   (
     !o.concurrent || !o.sync || o.deasync
