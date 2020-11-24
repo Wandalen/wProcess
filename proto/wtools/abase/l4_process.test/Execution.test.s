@@ -11384,58 +11384,65 @@ Fakes death of program1 and checks output of program2
 // detaching
 // --
 
-function startDetachingModeSpawnResourceReady( test )
+function startDetachingResourceReady( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let track = [];
   let testAppChildPath = a.program( testAppChild );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
+
+  function run( mode )
+  {
+    let ready = _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, consequence receives resources after child`;
+      let track = [];
+
+      let o =
+      {
+        execPath : mode === 'fork' ? 'testAppChild.js' : 'node testAppChild.js',
+        mode,
+        detaching : 1,
+        currentPath : a.routinePath,
+        throwingExitCode : 0
+      }
+      let result = _.process.start( o );
+
+      test.true( result !== o.conStart );
+      test.true( result !== o.conTerminate );
+
+      o.conStart.thenGive( ( op ) =>
+      {
+        track.push( 'conStart' );
+        test.true( _.mapIs( op ) );
+        test.identical( op, o );
+        test.true( _.process.isAlive( o.process.pid ) );
+        o.process.kill();
+        return null;
+      })
+
+      o.conTerminate.then( ( op ) =>
+      {
+        track.push( 'conTerminate' );
+        test.notIdentical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.exitSignal, 'SIGTERM' );
+        test.identical( track, [ 'conStart', 'conTerminate' ] );
+        return null;
+      })
+
+      return o.conTerminate;
+    })
+
+    return ready;
+  }
 
   /* */
 
-  a.ready
-
-  .then( () =>
-  {
-    test.case = 'consequence receive resources after child spawn';
-
-    let o =
-    {
-      execPath : 'node testAppChild.js',
-      mode : 'spawn',
-      detaching : 1,
-      currentPath : a.routinePath,
-      throwingExitCode : 0
-    }
-    let result = _.process.start( o );
-
-    test.true( result !== o.conStart );
-    test.true( result !== o.conTerminate );
-
-    o.conStart.then( ( op ) =>
-    {
-      track.push( 'conStart' );
-      test.true( _.mapIs( op ) );
-      test.identical( op, o );
-      test.true( _.process.isAlive( o.process.pid ) );
-      o.process.kill();
-      return null;
-    })
-
-    o.conTerminate.then( ( op ) =>
-    {
-      track.push( 'conTerminate' );
-      test.notIdentical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      test.identical( op.exitSignal, 'SIGTERM' );
-      test.identical( track, [ 'conStart', 'conTerminate' ] );
-      return null;
-    })
-
-    return o.conTerminate;
-  })
-
-  return a.ready;
 
   /* - */
 
@@ -11458,153 +11465,227 @@ function startDetachingModeSpawnResourceReady( test )
   }
 }
 
+// function startDetachingModeSpawnResourceReady( test )
+// {
+//   let context = this;
+//   let a = context.assetFor( test, false );
+//   let track = [];
+//   let testAppChildPath = a.program( testAppChild );
+
+//   /* */
+
+//   a.ready
+
+//   .then( () =>
+//   {
+//     test.case = 'consequence receive resources after child spawn';
+
+//     let o =
+//     {
+//       execPath : 'node testAppChild.js',
+//       mode : 'spawn',
+//       detaching : 1,
+//       currentPath : a.routinePath,
+//       throwingExitCode : 0
+//     }
+//     let result = _.process.start( o );
+
+//     test.true( result !== o.conStart );
+//     test.true( result !== o.conTerminate );
+
+//     o.conStart.then( ( op ) =>
+//     {
+//       track.push( 'conStart' );
+//       test.true( _.mapIs( op ) );
+//       test.identical( op, o );
+//       test.true( _.process.isAlive( o.process.pid ) );
+//       o.process.kill();
+//       return null;
+//     })
+
+//     o.conTerminate.then( ( op ) =>
+//     {
+//       track.push( 'conTerminate' );
+//       test.notIdentical( op.exitCode, 0 );
+//       test.identical( op.ended, true );
+//       test.identical( op.exitSignal, 'SIGTERM' );
+//       test.identical( track, [ 'conStart', 'conTerminate' ] );
+//       return null;
+//     })
+
+//     return o.conTerminate;
+//   })
+
+//   return a.ready;
+
+//   /* - */
+
+//   function testAppChild()
+//   {
+//     let _ = require( toolsPath );
+
+//     _.include( 'wProcess' );
+//     _.include( 'wFiles' );
+
+//     console.log( 'Child process start' )
+
+//     _.time.out( context.t2, () => /* 5000 */
+//     {
+//       let filePath = _.path.join( __dirname, 'testFile' );
+//       _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
+//       console.log( 'Child process end' )
+//       return null;
+//     })
+//   }
+// }
+
 //
 
-function startDetachingModeForkResourceReady( test )
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-  let track = [];
-  let testAppChildPath = a.program( testAppChild );
+// function startDetachingModeForkResourceReady( test )
+// {
+//   let context = this;
+//   let a = context.assetFor( test, false );
+//   let track = [];
+//   let testAppChildPath = a.program( testAppChild );
 
-  /* */
+//   /* */
 
-  a.ready
+//   a.ready
 
-  .then( () =>
-  {
-    test.case = 'consequence receives resources after child spawn';
+//   .then( () =>
+//   {
+//     test.case = 'consequence receives resources after child spawn';
 
-    let o =
-    {
-      execPath : 'testAppChild.js',
-      mode : 'fork',
-      detaching : 1,
-      currentPath : a.routinePath,
-      throwingExitCode : 0
-    }
-    let result = _.process.start( o );
+//     let o =
+//     {
+//       execPath : 'testAppChild.js',
+//       mode : 'fork',
+//       detaching : 1,
+//       currentPath : a.routinePath,
+//       throwingExitCode : 0
+//     }
+//     let result = _.process.start( o );
 
-    test.true( result !== o.conStart );
-    test.true( result !== o.conTerminate );
+//     test.true( result !== o.conStart );
+//     test.true( result !== o.conTerminate );
 
-    o.conStart.thenGive( ( op ) =>
-    {
-      track.push( 'conStart' );
-      test.true( _.mapIs( op ) );
-      test.identical( op, o );
-      test.true( _.process.isAlive( o.process.pid ) );
-      o.process.kill();
-    })
+//     o.conStart.thenGive( ( op ) =>
+//     {
+//       track.push( 'conStart' );
+//       test.true( _.mapIs( op ) );
+//       test.identical( op, o );
+//       test.true( _.process.isAlive( o.process.pid ) );
+//       o.process.kill();
+//     })
 
-    o.conTerminate.then( ( op ) =>
-    {
-      track.push( 'conTerminate' );
-      test.notIdentical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      test.identical( op.exitSignal, 'SIGTERM' );
-      test.identical( track, [ 'conStart', 'conTerminate' ] )
-      return null;
-    })
+//     o.conTerminate.then( ( op ) =>
+//     {
+//       track.push( 'conTerminate' );
+//       test.notIdentical( op.exitCode, 0 );
+//       test.identical( op.ended, true );
+//       test.identical( op.exitSignal, 'SIGTERM' );
+//       test.identical( track, [ 'conStart', 'conTerminate' ] )
+//       return null;
+//     })
 
-    return o.conTerminate;
-  })
+//     return o.conTerminate;
+//   })
 
-  return a.ready;
+//   return a.ready;
 
-  /* - */
+//   /* - */
 
-  function testAppChild()
-  {
-    let _ = require( toolsPath );
+//   function testAppChild()
+//   {
+//     let _ = require( toolsPath );
 
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
+//     _.include( 'wProcess' );
+//     _.include( 'wFiles' );
 
-    console.log( 'Child process start' )
+//     console.log( 'Child process start' )
 
-    _.time.out( context.t2, () => /* 5000 */
-    {
-      let filePath = _.path.join( __dirname, 'testFile' );
-      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
-      console.log( 'Child process end' )
-      return null;
-    })
-  }
-}
+//     _.time.out( context.t2, () => /* 5000 */
+//     {
+//       let filePath = _.path.join( __dirname, 'testFile' );
+//       _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
+//       console.log( 'Child process end' )
+//       return null;
+//     })
+//   }
+// }
 
 //
 
-function startDetachingModeShellResourceReady( test )
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-  let track = [];
-  let testAppChildPath = a.program( testAppChild );
+// function startDetachingModeShellResourceReady( test )
+// {
+//   let context = this;
+//   let a = context.assetFor( test, false );
+//   let track = [];
+//   let testAppChildPath = a.program( testAppChild );
 
-  /* */
+//   /* */
 
-  a.ready
+//   a.ready
 
-  .then( () =>
-  {
-    test.case = 'consequence receives resources after child spawn';
+//   .then( () =>
+//   {
+//     test.case = 'consequence receives resources after child spawn';
 
-    let o =
-    {
-      execPath : 'node testAppChild.js',
-      mode : 'shell',
-      detaching : 1,
-      currentPath : a.routinePath,
-      throwingExitCode : 0
-    }
-    let result = _.process.start( o );
+//     let o =
+//     {
+//       execPath : 'node testAppChild.js',
+//       mode : 'shell',
+//       detaching : 1,
+//       currentPath : a.routinePath,
+//       throwingExitCode : 0
+//     }
+//     let result = _.process.start( o );
 
-    test.true( result !== o.conStart );
-    test.true( result !== o.conTerminate );
+//     test.true( result !== o.conStart );
+//     test.true( result !== o.conTerminate );
 
-    o.conStart.thenGive( ( op ) =>
-    {
-      track.push( 'conStart' );
-      test.true( _.mapIs( op ) );
-      test.identical( op, o );
-      test.true( _.process.isAlive( o.process.pid ) );
-      o.process.kill();
-    })
+//     o.conStart.thenGive( ( op ) =>
+//     {
+//       track.push( 'conStart' );
+//       test.true( _.mapIs( op ) );
+//       test.identical( op, o );
+//       test.true( _.process.isAlive( o.process.pid ) );
+//       o.process.kill();
+//     })
 
-    o.conTerminate.then( ( op ) =>
-    {
-      track.push( 'conTerminate' );
-      test.notIdentical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-      test.identical( op.exitSignal, 'SIGTERM' );
-      test.identical( track, [ 'conStart', 'conTerminate' ] );
-      return null;
-    })
+//     o.conTerminate.then( ( op ) =>
+//     {
+//       track.push( 'conTerminate' );
+//       test.notIdentical( op.exitCode, 0 );
+//       test.identical( op.ended, true );
+//       test.identical( op.exitSignal, 'SIGTERM' );
+//       test.identical( track, [ 'conStart', 'conTerminate' ] );
+//       return null;
+//     })
 
-    return o.conTerminate;
-  })
+//     return o.conTerminate;
+//   })
 
-  return a.ready;
+//   return a.ready;
 
-  function testAppChild()
-  {
-    let _ = require( toolsPath );
+//   function testAppChild()
+//   {
+//     let _ = require( toolsPath );
 
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
+//     _.include( 'wProcess' );
+//     _.include( 'wFiles' );
 
-    console.log( 'Child process start' )
+//     console.log( 'Child process start' )
 
-    _.time.out( context.t2, () => /* 5000 */
-    {
-      let filePath = _.path.join( __dirname, 'testFile' );
-      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
-      console.log( 'Child process end' )
-      return null;
-    })
-  }
-}
+//     _.time.out( context.t2, () => /* 5000 */
+//     {
+//       let filePath = _.path.join( __dirname, 'testFile' );
+//       _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
+//       console.log( 'Child process end' )
+//       return null;
+//     })
+//   }
+// }
 
 //
 
@@ -41575,9 +41656,10 @@ var Proto =
 
     // detaching
 
-    startDetachingModeSpawnResourceReady,
-    startDetachingModeForkResourceReady,
-    startDetachingModeShellResourceReady,
+    startDetachingResourceReady,
+    // startDetachingModeSpawnResourceReady,
+    // startDetachingModeForkResourceReady,
+    // startDetachingModeShellResourceReady,
     startDetachingNoTerminationBegin,
     // startDetachingModeSpawnNoTerminationBegin,
     // startDetachingModeForkNoTerminationBegin,
