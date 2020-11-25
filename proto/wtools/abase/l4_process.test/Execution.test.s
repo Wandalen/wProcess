@@ -12645,7 +12645,7 @@ function startMinimalDetachingChildExitsBeforeParent( test )
 Running TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachingChildExitsBeforeParent ..
       Failed (test routine time limit
 */
-startMinimalDetachingChildExitsBeforeParent.timeOut = 4e5; /* Locally : 20.817s */
+startMinimalDetachingChildExitsBeforeParent.timeOut = 4e5; /* was : 21e4 */ /* Locally : 20.817s */
 startMinimalDetachingChildExitsBeforeParent.description =
 `
 Parent starts child process in detached mode and registers callback to wait for child process.
