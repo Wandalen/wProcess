@@ -80,14 +80,6 @@ function startMinimalHeadCommon( routine, args )
     , `Unknown value of option::throwingExitCode, acceptable : [ false, 'full', 'brief' ]`
   );
 
-  // if( o.outputColoring === null )
-  // o.outputColoring = 1;
-  // if( o.outputColoringStdout === null )
-  // o.outputColoringStdout = o.outputColoring;
-  // if( o.outputColoringStderr === null )
-  // o.outputColoringStderr = o.outputColoring;
-  // _.assert( _.boolLike( o.outputColoring ) );
-
   if( o.outputColoring === null || _.boolLikeTrue( o.outputColoring ) )
   o.outputColoring = { out : 1, err : 1 };
   if( _.boolLikeFalse( o.outputColoring ) )
@@ -151,7 +143,6 @@ function startMinimalHeadCommon( routine, args )
   (
     o.timeOut === null || !o.sync || !!o.deasync, `Option::timeOut should not be defined if option::sync:1 and option::deasync:0`
   );
-  /* xxx qqq forYevhen : this condition is wrong. fix it and cover */
 
   if( _.strIs( o.interpreterArgs ) )
   o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs });
@@ -246,7 +237,6 @@ function startMinimal_body( o )
   argsUnqoute,
   argUnqoute,
   argsEscape,
-  argEscape,
   optionsForSpawn,
   optionsForFork,
   execPathForFork,
@@ -329,9 +319,6 @@ function startMinimal_body( o )
 
     /* output */
 
-    // _.assert( _.boolLike( o.outputColoring ) );
-    // _.assert( _.boolLike( o.outputColoringStdout ) );
-    // _.assert( _.boolLike( o.outputColoringStderr ) );
     _.assert( _.objectIs( o.outputColoring ) );
     _.assert( _.boolLike( o.outputCollecting ) );
 
@@ -408,7 +395,7 @@ function startMinimal_body( o )
       , `If defined option::arg should be either [ string, array ], but it is ${_.strType( o.args )}`
     );
 
-    /* xxx yyy */
+    /* xxx */
 
     o.args = _.arrayAs( o.args );
     _argsLength = o.args.length;
@@ -454,13 +441,16 @@ function startMinimal_body( o )
 /*
     let appendedArgs = o.passingThrough ? process.argv.length - 2 : 0;
     let prependedArgs = args.length - ( _argsLength + appendedArgs );
-    // xxx yyy
+    // xxx
     for( let i = prependedArgs; i < args.length; i++ )
     {
       args[ i ] = _.process._argEscape( args[ i ] );
       args[ i ] = _.strQuote( args[ i ] );
     }
 */
+
+    if( o.mode === 'shell' )
+    o.args2 = argsEscape( o.args2 ) /* yyy */
 
     /* */
 
@@ -480,7 +470,6 @@ function startMinimal_body( o )
     if( !StripAnsi )
     StripAnsi = require( 'strip-ansi' );
 
-    // if( o.outputColoring && typeof module !== 'undefined' )
     if( o.outputColoring.err || o.outputColoring.out && typeof module !== 'undefined' )
     try
     {
@@ -488,7 +477,6 @@ function startMinimal_body( o )
     }
     catch( err )
     {
-      // o.outputColoring = 0;
       o.outputColoring.err = 0;
       o.outputColoring.out = 0;
       if( o.verbosity >= 2 )
@@ -499,8 +487,6 @@ function startMinimal_body( o )
 
     if( o.outputPrefixing )
     {
-      // _errPrefix = `${ ( o.outputColoring ? _.ct.format( 'err', { fg : 'dark red' } ) : 'err' ) } : `;
-      // _outPrefix = `${ ( o.outputColoring ? _.ct.format( 'out', { fg : 'dark white' } ) : 'out' ) } : `;
       _errPrefix = `${ ( o.outputColoring.err ? _.ct.format( 'err', { fg : 'dark red' } ) : 'err' ) } : `;
       _outPrefix = `${ ( o.outputColoring.out ? _.ct.format( 'out', { fg : 'dark white' } ) : 'out' ) } : `;
     }
@@ -528,8 +514,7 @@ function startMinimal_body( o )
       try
       {
         o.ready.deasync();
-        // o.ready.give( 1 );
-        o.ready.thenGive( 1 ); /* yyy xxx : check test multiple run */
+        o.ready.thenGive( 1 );
         if( o.when.delay )
         _.time.sleep( o.when.delay );
         run2();
@@ -677,11 +662,6 @@ function startMinimal_body( o )
     if( o.dry )
     return;
 
-    // if( o.interpreterArgs )
-    // o.args2 = _.arrayAppendArray( o.args2, o.interpreterArgs );
-    // if( o.interpreterArgs )
-    // o.args2 = o.interpreterArgs.concat( o.args2 ); /* xxx */ /* qqq2 for Yevhen : bad. use routine _.arrayAppendArray() */
-
     if( o.sync && !o.deasync )
     o.process = ChildProcess.spawnSync( execPath, o.args2, o2 );
     else
@@ -715,21 +695,15 @@ function startMinimal_body( o )
 
     o2.windowsVerbatimArguments = true;
 
-    // if( o.interpreterArgs )
-    // o.args2 = o.interpreterArgs.concat( o.args2 )
-    // if( o.interpreterArgs )
-    // o.args2 = _.arrayAppendArray( o.args2, o.interpreterArgs );
-
     debugger;
     if( o.args2.length )
-    // arg2 = arg2 + ' ' + o.args2.join( ' ' );
-    // arg2 = arg2 + ' ' + argsEscape( o.args2.slice() ).join( ' ' );
-    arg2 = arg2 + ' ' + argsEscape( o.args2 ).join( ' ' );
-    debugger;
+    arg2 = arg2 + ' ' + o.args2.join( ' ' );
+    // arg2 = arg2 + ' ' + argsEscape( o.args2 ).join( ' ' ); /* yyy */
+    // xxx
 
     o.fullExecPath = arg2;
 
-    /* Fixes problem with space in path on windows and makes behavior similar to unix
+    /* qqq for Vova : Fixes problem with space in path on windows and makes behavior similar to unix
       Examples:
       win: shell({ execPath : '"/path/with space/node.exe"', throwingExitCode : 0 }) - works
       unix: shell({ execPath : '"/path/with space/node"', throwingExitCode : 0 }) - works
@@ -1205,39 +1179,15 @@ function startMinimal_body( o )
     let appendedArgs = o.passingThrough ? process.argv.length - 2 : 0;
     let prependedArgs = args.length - ( _argsLength + appendedArgs );
 
-    // xxx yyy
+    // xxx
     for( let i = prependedArgs; i < args.length; i++ )
     {
       args[ i ] = _.process._argEscape( args[ i ] );
       args[ i ] = _.strQuote( args[ i ] );
     }
 
-    // for( let i = prependedArgs; i < args.length; i++ )
-    // {
-    //   let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', '`' ];
-    //   // args[ i ] = argEscape( args[ i ], quotesToEscape ); /* xxx : uncomment later */ /* qqq for Dmytro */
-    //   _.each( quotesToEscape, ( quote ) =>
-    //   {
-    //     args[ i ] = argEscape( args[ i ], quote );
-    //   })
-    //   args[ i ] = _.strQuote( args[ i ] );
-    //   // args[ i ] = _.process._argEscape2( args[ i ]  ); /* zzz for Vova : use this routine, review fails */
-    // }
-
     return args;
   }
-
-  /* */
-
-  // function argEscape( arg, quote )
-  // {
-  //   return _.strReplaceAll( arg, quote, ( match, it ) =>
-  //   {
-  //     if( it.input[ it.charsRangeLeft[ 0 ] - 1 ] === '\\' )
-  //     return match;
-  //     return '\\' + match;
-  //   });
-  // }
 
   /* */
 
@@ -1361,13 +1311,11 @@ function startMinimal_body( o )
 
     if( channel === 'err' )
     {
-      // if( o.outputColoring && o.outputColoringStderr )
       if( o.outputColoring.err )
       data = _.ct.format( data, 'pipe.negative' );
     }
     else
     {
-      // if( o.outputColoring && o.outputColoringStdout )
       if( o.outputColoring.out )
       data = _.ct.format( data, 'pipe.neutral' );
     }
@@ -1450,12 +1398,8 @@ startMinimal_body.defaults =
   outputCollecting : 0,
   outputAdditive : null, /* qqq for Yevhen : cover the option */
   outputColoring : 1, /* qqq for Yevhen : cover the option | aaa : Done. */
-  // outputColoringStderr : null, /* qqq for Yevhen : cover the option */
-  // outputColoringStdout : null, /* qqq for Yevhen : cover the option */
   outputGraying : 0,
   inputMirroring : 1, /* qqq for Yevhen : cover the option | aaa : Done */
-
-  /* qqq for Yevhen : remove option::outputColoringStderr and option::outputColoringStdout. extend outputColoring | aaa : Done.  */
 
 }
 
@@ -1575,9 +1519,6 @@ function startSingle_body( o )
 
     /* output */
 
-    // _.assert( _.boolLike( o.outputColoring ) );
-    // _.assert( _.boolLike( o.outputColoringStdout ) );
-    // _.assert( _.boolLike( o.outputColoringStderr ) );
     _.assert( _.objectIs( o.outputColoring ) );
     _.assert( _.boolLike( o.outputCollecting ) );
 
@@ -1641,8 +1582,7 @@ function startSingle_body( o )
       try
       {
         o.ready.deasync();
-        // o.ready.give( 1 );
-        o.ready.thenGive( 1 ); /* yyy */
+        o.ready.thenGive( 1 );
         if( o.when.delay )
         _.time.sleep( o.when.delay );
         run2();
@@ -1831,8 +1771,6 @@ function startMultiple_head( routine, args )
  * @param {Boolean|Object} o.outputColoring=1 Logger prints with styles applied for both channels.
  *  Option can be specified more precisely via map of the form { out : 1, err : 0 }
  *  Coloring is applied to a corresponding channel.
-//  * @param {Boolean} o.outputColoringStdout=1 Logger prints output from `stdout` in raw mode, no styles applied.
-//  * @param {Boolean} o.outputColoringStderr=1 Logger prints output from `stderr` in raw mode, no styles applied.
  * @param {Boolean} o.outputPrefixing=0 Add prefix with name of output channel( stderr, stdout ) to each line.
  * @param {Boolean} o.outputPiping=null Handles output from `stdout` and `stderr` channels. Is enabled by default if `o.verbosity` levels is >= 2 and option is not specified explicitly. This option is required by other "output" options that allows output customization.
  * @param {Boolean} o.outputCollecting=0 Enables coullection of output into sinle string. Collects output into `o.output` property if enabled.
@@ -1881,7 +1819,7 @@ function startMultiple_body( o )
 
   _.assert( arguments.length === 1, 'Expects single argument' );
 
-  let processPipeCounter = 0;
+  let _processPipeCounter = 0;
   let _readyCallback;
 
   form0();
@@ -1961,9 +1899,6 @@ function startMultiple_body( o )
       o.conTerminate = new _.Consequence({ _procedure : false }).finally( o.conTerminate );
     }
 
-    // _.assert( _.boolLike( o.outputColoring ) );
-    // _.assert( _.boolLike( o.outputColoringStdout ) );
-    // _.assert( _.boolLike( o.outputColoringStderr ) );
     _.assert( _.objectIs( o.outputColoring ) );
     _.assert( _.boolLike( o.outputCollecting ) );
 
@@ -2008,7 +1943,6 @@ function startMultiple_body( o )
       }
       else if( o.procedure )
       {
-        /* qqq for Yevhen : cover option procedure. take into account all branches | aaa : Done. */
         if( !o.procedure.isAlive() )
         o.procedure.begin();
       }
@@ -2090,17 +2024,23 @@ function startMultiple_body( o )
       }
       else
       {
-        if( o.sync && !o.deasync )
+        // if( o.sync && !o.deasync ) /* yyy xxx : ? */
         prevReady.finally( o2.ready );
-        else
-        prevReady.then( o2.ready );
+        // else
+        // prevReady.then( o2.ready );
         prevReady = o2.ready;
       }
 
       try
       {
+
         _.assertMapHasAll( o2, _.process.startSingle.defaults );
         _.process.startSingle.body.call( _.process, o2 );
+
+        if( !o.dry )
+        if( o.streamOut || o.streamErr )
+        processPipe( o2 );
+
       }
       catch( err )
       {
@@ -2112,9 +2052,10 @@ function startMultiple_body( o )
       conTerminate.push( o2.conTerminate );
       readies.push( o2.ready );
 
-      if( !o.dry )
-      if( o.streamOut || o.streamErr )
-      processPipe( o2 );
+      // yyy
+      // if( !o.dry )
+      // if( o.streamOut || o.streamErr )
+      // processPipe( o2 );
 
       if( !o.concurrent )
       o2.ready.catch( ( err ) =>
@@ -2317,7 +2258,7 @@ function startMultiple_body( o )
 
     o2.conStart.tap( ( err, op2 ) =>
     {
-      processPipeCounter += 1;
+      _processPipeCounter += 1;
       if( err )
       return;
       if( o2.process.stdout )
@@ -2349,7 +2290,7 @@ function startMultiple_body( o )
     {
       _.arrayRemoveOnceStrictly( dst._pipes, src );
       if( dst._pipes.length === 0 )
-      if( processPipeCounter === o.runs.length )
+      if( _processPipeCounter === o.runs.length )
       {
         dst.end();
       }
@@ -2385,6 +2326,97 @@ startMultiple_body.defaults =
 }
 
 let startMultiple = _.routineUnite( startMultiple_head, startMultiple_body );
+
+//
+
+function _run()
+{
+  let firstReady = new _.Consequence().take( null );
+  let prevReady = firstReady;
+  let readies = [];
+  let conStart = [];
+  let conTerminate = [];
+
+  o.runs.forEach( ( o2, i ) =>
+  {
+    let err2;
+
+    if( o.concurrent ) /* xxx : use abstract algorithm of consequence */
+    {
+      prevReady.then( o2.ready );
+    }
+    else
+    {
+      if( o.sync && !o.deasync )
+      prevReady.finally( o2.ready );
+      else
+      prevReady.then( o2.ready );
+      prevReady = o2.ready;
+    }
+
+    try
+    {
+      _.assertMapHasAll( o2, _.process.startSingle.defaults );
+      _.process.startSingle.body.call( _.process, o2 );
+    }
+    catch( err )
+    {
+      err2 = err;
+      o2.ready.error( err );
+    }
+
+    conStart.push( o2.conStart );
+    conTerminate.push( o2.conTerminate );
+    readies.push( o2.ready );
+
+    // if( !o.dry )
+    // if( o.streamOut || o.streamErr )
+    // processPipe( o2 );
+
+    if( !o.concurrent )
+    o2.ready.catch( ( err ) =>
+    {
+      o.error = o.error || err;
+      o.onError( err );
+      // if( o.state !== 'terminated' )
+      // serialEnd();
+      throw err;
+    });
+
+  });
+
+  if( o.concurrent )
+  _.Consequence.AndImmediate( ... conStart ).tap( ( err, arg ) =>
+  {
+    if( o.onStart )
+    o.onStart( err, err ? undefined : o );
+    // if( !o.ended )
+    // o.state = 'started';
+    o.conStart.take( err, err ? undefined : o );
+  });
+  else
+  _.Consequence.OrKeep( ... conStart ).tap( ( err, arg ) =>
+  {
+    if( o.onStart )
+    o.onStart( err, err ? undefined : o );
+    // if( !o.ended )
+    // o.state = 'starting';
+    o.conStart.take( err, err ? undefined : o );
+  });
+
+  _.Consequence.AndImmediate( ... conTerminate ).tap( ( err, arg ) =>
+  {
+    if( o.conTerminate )
+    o.conTerminate( err, err ? undefined : o );
+    // if( !o.ended )
+    // o.state = 'terminating';
+    o.conTerminate.take( err, err ? undefined : o );
+  });
+
+  let ready = _.Consequence.AndImmediate( ... readies );
+
+  return ready;
+}
 
 //
 
@@ -2441,7 +2473,6 @@ function startNjs_body( o )
   System = require( 'os' );
 
   _.assertRoutineOptions( startNjs_body, o );
-  // _.assert( _.strIs( o.execPath ) );
   _.assert( !o.code );
   _.assert( arguments.length === 1, 'Expects single argument' );
 
@@ -2468,30 +2499,14 @@ function startNjs_body( o )
     interpreterArgs = _.strSplitNonPreserving({ src : interpreterArgs });
   }
 
-  // let execPath = o.execPath ? _.path.nativizeMinimal( o.execPath ) : '';
   let execPath = o.execPath || '';
-  // _.assert( o.interpreterArgs === null || o.interpreterArgs === '', 'not implemented' ); /* qqq for Yevhen : implement and cover. | aaa : Done */
 
-  /* xxx */
-
-  /* ORIGINAL */
-  // if( o.mode === 'fork' )
-  // {
-  //   if( interpreterArgs )
-  //   o.interpreterArgs = interpreterArgs;
-  // }
-  // else
-  // {
-  //   execPath = _.strConcat([ 'node', interpreterArgs, execPath ]);
-  // }
-
-  /* == Rewritten == */
   if( interpreterArgs !== '' )
-  o.interpreterArgs = o.interpreterArgs === null ? interpreterArgs : o.interpreterArgs.concat( interpreterArgs );
+  o.interpreterArgs = _.arrayAppendArray( o.interpreterArgs, interpreterArgs );
+  // o.interpreterArgs = o.interpreterArgs === null ? interpreterArgs : o.interpreterArgs.concat( interpreterArgs );
 
   if( o.mode === 'spawn' || o.mode === 'shell' )
   execPath = _.strConcat([ 'node', execPath ]);
-  /* == == */
 
   o.execPath = execPath;
 
