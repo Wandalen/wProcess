@@ -13,7 +13,7 @@ if( typeof module !== 'undefined' )
 
 //
 
-let _ = _testerGlobal_.wTools;
+let _ = _globals_.testing.wTools;
 let fileProvider = _.fileProvider;
 let path = fileProvider.path;
 
@@ -120,10 +120,10 @@ function eslint( test )
   let ready = new _.Consequence().take( null );
 
   // if( _.process.insideTestContainer() && process.platform !== 'linux' )
-  // return test.is( true );
+  // return test.true( true );
 
   if( process.platform !== 'linux' )
-  return test.is( true );
+  return test.true( true );
 
   let start = _.process.starter
   ({

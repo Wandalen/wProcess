@@ -42,218 +42,218 @@ function suiteEnd()
 
 //
 
-function escapeArg( test )
+function _argEscape2( test )
 {
   let isWin = process.platform === 'win32';
 
   var src = 'a';
   var expected = isWin ? `^"a^"`: 'a'
-  var got = _.process.escapeArg( src )
+  var got = _.process._argEscape2( src )
   test.identical( got, expected );
 
   var src = 'a b';
   var expected = isWin ? '^"a^ b^"' : 'a\\ b'
-  var got = _.process.escapeArg( src )
+  var got = _.process._argEscape2( src )
   test.identical( got, expected );
 
   var src = '/a/b/';
   var expected = isWin ? '^"/a/b/^"' : '\\/a\\/b\\/'
-  var got = _.process.escapeArg( src )
+  var got = _.process._argEscape2( src )
   test.identical( got, expected );
 
   var src = '/a/b c/';
   var expected = isWin ? '^"/a/b^ c/^"' : '\\/a\\/b\\ c\\/'
-  var got = _.process.escapeArg( src )
+  var got = _.process._argEscape2( src )
   test.identical( got, expected );
 
   var src = 'A:\\b\\';
   var expected = isWin ? '^"A:\\b\\\\^"' : 'A\\:\\\\b\\\\'
-  var got = _.process.escapeArg( src )
+  var got = _.process._argEscape2( src )
   test.identical( got, expected );
 
   var src = 'A:\\b c\\';
   var expected = isWin ? '^"A:\\b^ c\\\\^"' : 'A\\:\\\\b\\ c\\\\'
-  var got = _.process.escapeArg( src )
+  var got = _.process._argEscape2( src )
   test.identical( got, expected );
 
   var src = '"a"';
   var expected = isWin ?  '^"\\^"a\\^"^"' : '\\"a\\"'
-  var got = _.process.escapeArg( src )
+  var got = _.process._argEscape2( src )
   test.identical( got, expected );
 
   var src = '\\"a\\"';
   var expected = isWin ?  '^"\\\\\\^"a\\\\\\^"^"' : '\\\\\\"a\\\\\\"'
-  var got = _.process.escapeArg( src )
+  var got = _.process._argEscape2( src )
   test.identical( got, expected );
 
   var src = '"/a/b/"';
   var expected = isWin ? '^"\\\\^"a\\\\^"^"' : '\\"\\/a\\/b\\/\\"'
-  var got = _.process.escapeArg( src )
+  var got = _.process._argEscape2( src )
 
   var src = '"/a/b c/"';
   var expected = isWin ? '^"\\^"/a/b^ c/\\^"^"' : '\\"\\/a\\/b\\ c\\/\\"'
-  var got = _.process.escapeArg( src )
+  var got = _.process._argEscape2( src )
   test.identical( got, expected );
 
   var src = 'option : value';
   var expected = isWin ? '^"option^ :^ value^"' : 'option\\ \\:\\ value'
-  var got = _.process.escapeArg( src )
+  var got = _.process._argEscape2( src )
   test.identical( got, expected );
 
   var src = 'option : 123';
   var expected = isWin ? '^"option^ :^ 123^"' : 'option\\ \\:\\ 123'
-  var got = _.process.escapeArg( src )
+  var got = _.process._argEscape2( src )
   test.identical( got, expected );
 
   var src = '**';
   var expected = isWin ?  '^"^*^*^"' : '\\*\\*'
-  var got = _.process.escapeArg( src )
+  var got = _.process._argEscape2( src )
   test.identical( got, expected );
 
   var src = '"**"';
   var expected = isWin ? '^"\\^"^*^*\\^"^"' : '\\"\\*\\*\\"'
-  var got = _.process.escapeArg( src )
+  var got = _.process._argEscape2( src )
   test.identical( got, expected );
 
   var src = '&&';
   var expected = isWin ?  '^"^&^&^"' : '\\&\\&'
-  var got = _.process.escapeArg( src )
+  var got = _.process._argEscape2( src )
   test.identical( got, expected );
 }
 
 //
 
-function escapeProg( test )
+function _argProgEscape( test )
 {
   let isWin = process.platform === 'win32';
 
   var src = 'a';
   var expected = 'a'
-  var got = _.process.escapeProg( src )
+  var got = _.process._argProgEscape( src )
   test.identical( got, expected );
 
   var src = 'a b';
   var expected = isWin ? 'a^ b' : 'a\\ b'
-  var got = _.process.escapeProg( src )
+  var got = _.process._argProgEscape( src )
   test.identical( got, expected );
 
   var src = '/a/b/';
   var expected = isWin ? '/a/b/' : '\\/a\\/b\\/'
-  var got = _.process.escapeProg( src )
+  var got = _.process._argProgEscape( src )
   test.identical( got, expected );
 
   var src = '/a/b c/';
   var expected = isWin ? '/a/b^ c/' : '\\/a\\/b\\ c\\/'
-  var got = _.process.escapeProg( src )
+  var got = _.process._argProgEscape( src )
   test.identical( got, expected );
 
   var src = 'A:\\b\\';
   var expected = isWin ? 'A:\\b\\' : 'A\\:\\\\b\\\\'
-  var got = _.process.escapeProg( src )
+  var got = _.process._argProgEscape( src )
   test.identical( got, expected );
 
   var src = 'A:\\b c\\';
   var expected = isWin ? 'A:\\b^ c\\' : 'A\\:\\\\b\\ c\\\\'
-  var got = _.process.escapeProg( src )
+  var got = _.process._argProgEscape( src )
   test.identical( got, expected );
 
   var src = '"a"';
   var expected = isWin ?  '^"a^"' : '\\"a\\"'
-  var got = _.process.escapeProg( src )
+  var got = _.process._argProgEscape( src )
   test.identical( got, expected );
 
   var src = '\\"a\\"';
   var expected = isWin ?  '\\^"a\\^"' : '\\\\\\"a\\\\\\"'
-  var got = _.process.escapeProg( src )
+  var got = _.process._argProgEscape( src )
   test.identical( got, expected );
 
   var src = '"/a/b/"';
   var expected = isWin ? '^"/a/b^ c/^"' : '\\"\\/a\\/b\\/\\"'
-  var got = _.process.escapeProg( src )
+  var got = _.process._argProgEscape( src )
 
   var src = '"/a/b c/"';
   var expected = isWin ? '^"/a/b^ c/^"' : '\\"\\/a\\/b\\ c\\/\\"'
-  var got = _.process.escapeProg( src )
+  var got = _.process._argProgEscape( src )
   test.identical( got, expected );
 
   var src = 'option : value';
   var expected = isWin ? 'option^ :^ value' : 'option\\ \\:\\ value'
-  var got = _.process.escapeProg( src )
+  var got = _.process._argProgEscape( src )
   test.identical( got, expected );
 
   var src = 'option : 123';
   var expected = isWin ? 'option^ :^ 123' : 'option\\ \\:\\ 123'
-  var got = _.process.escapeProg( src )
+  var got = _.process._argProgEscape( src )
   test.identical( got, expected );
 
   var src = '**';
   var expected = isWin ?  '^*^*' : '\\*\\*'
-  var got = _.process.escapeProg( src )
+  var got = _.process._argProgEscape( src )
   test.identical( got, expected );
 
   var src = '"**"';
   var expected = isWin ? '^"^*^*^"' : '\\"\\*\\*\\"'
-  var got = _.process.escapeProg( src )
+  var got = _.process._argProgEscape( src )
   test.identical( got, expected );
 
   var src = '&&';
   var expected = isWin ?  '^&^&' : '\\&\\&'
-  var got = _.process.escapeProg( src )
+  var got = _.process._argProgEscape( src )
   test.identical( got, expected );
 }
 
 //
 
-function escapeCmd( test )
+function _argCmdEscape( test )
 {
   let isWin = process.platform === 'win32';
 
   var prog = 'node'
   var args = [ '-v' ]
   var expected = isWin ? 'node ^"-v^"' : 'node \\-v'
-  var got = _.process.escapeCmd( prog,args )
+  var got = _.process._argCmdEscape( prog,args )
   test.identical( got, expected );
 
   var prog = '/path/to/node'
   var args = [ '-v' ]
   var expected = isWin ? '/path/to/node ^"-v^"' : '\\/path\\/to\\/node \\-v'
-  var got = _.process.escapeCmd( prog,args )
+  var got = _.process._argCmdEscape( prog,args )
   test.identical( got, expected );
 
   var prog = '/path/with space/node'
   var args = [ '-v' ]
   var expected = isWin ? '/path/with^ space/node ^"-v^"' : '\\/path\\/with\\ space\\/node \\-v'
-  var got = _.process.escapeCmd( prog,args )
+  var got = _.process._argCmdEscape( prog,args )
   test.identical( got, expected );
 
   var prog = '"node"'
   var args = [ '-v' ]
   var expected = isWin ? '^"node^" ^"-v^"' : '\\"node\\" \\-v'
-  var got = _.process.escapeCmd( prog,args )
+  var got = _.process._argCmdEscape( prog,args )
   test.identical( got, expected );
 
   var prog = 'node -v'
   var args = []
   var expected = isWin ? 'node^ -v' : 'node\\ \\-v'
-  var got = _.process.escapeCmd( prog,args )
+  var got = _.process._argCmdEscape( prog,args )
   test.identical( got, expected );
 
   var prog = '/path/to/node -v'
   var args = []
   var expected = isWin ? '/path/to/node^ -v' : '\\/path\\/to\\/node\\ \\-v'
-  var got = _.process.escapeCmd( prog,args )
+  var got = _.process._argCmdEscape( prog,args )
   test.identical( got, expected );
 
   var prog = '/path/with space/node -v'
   var args = []
   var expected = isWin ? '/path/with^ space/node^ -v' : '\\/path\\/with\\ space\\/node\\ \\-v'
-  var got = _.process.escapeCmd( prog,args )
+  var got = _.process._argCmdEscape( prog,args )
   test.identical( got, expected );
 
   var prog = 'ls'
   var args = [ '*' ]
   var expected = isWin ? 'ls ^"^*^"' : 'ls \\*'
-  var got = _.process.escapeCmd( prog,args )
+  var got = _.process._argCmdEscape( prog,args )
   test.identical( got, expected );
 
 }
@@ -279,9 +279,9 @@ var Proto =
   tests :
   {
 
-    escapeArg,
-    escapeProg,
-    escapeCmd
+    _argEscape2,
+    _argProgEscape,
+    _argCmdEscape
 
   }
 

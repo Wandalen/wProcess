@@ -249,6 +249,16 @@ function _exitHandlerRepair()
       if( _realGlobal_._exitHandlerRepairTerminating )
       return;
       _realGlobal_._exitHandlerRepairTerminating = 1;
+      if( !_.process.exitReason() )
+      {
+        let err = _._err
+        ({
+          args : [ `Exit signal : ${signal} ( 128+${signalCode} )` ],
+          fields : { exitSignal : signal },
+          reason : 'exit signal',
+        });
+        _.process.exitReason( err );
+      }
       /*
        short delay is required to set exit reason of the process
        otherwise reason will be exit code, not exit signal
@@ -315,6 +325,7 @@ function _eventsSetup()
 function _eventExitHandle()
 {
   let args = arguments;
+  _.process.exiting = true;
   process.removeListener( 'exit', _.process._registeredExitHandler );
   _.process._registeredExitHandler = null;
   _.process.eventGive({ event : 'exit', args });
@@ -330,10 +341,154 @@ function _eventExitBeforeHandle()
 }
 
 // --
+// exit
+// --
+
+/**
+ * @summary Allows to set/get exit reason of current process.
+ * @description Saves exit reason if argument `reason` was provided, otherwise returns current exit reason value.
+ * Returns `null` if reason was not defined yet.
+ * @function exitReason
+ * @module Tools/base/ProcessBasic
+ * @namespace Tools.process
+ */
+
+function exitReason( reason )
+{
+  if( !_realGlobal_.wTools )
+  _realGlobal_.wTools = Object.create( null );
+  if( !_realGlobal_.wTools.process )
+  _realGlobal_.wTools.process = Object.create( null );
+  if( _realGlobal_.wTools.process._exitReason === undefined )
+  _realGlobal_.wTools.process._exitReason = null;
+  if( reason === undefined )
+  return _realGlobal_.wTools.process._exitReason;
+  _realGlobal_.wTools.process._exitReason = reason;
+  return _realGlobal_.wTools.process._exitReason;
+}
+
+//
+
+/**
+ * @summary Allows to set/get exit code of current process.
+ * @description Updates exit code if argument `status` was provided and returns previous exit code. Returns current exit code if no argument provided.
+ * Returns `0` if exit code was not defined yet.
+ * @function exitCode
+ * @module Tools/base/ProcessBasic
+ * @namespace Tools.process
+ */
+
+function exitCode( status )
+{
+  let result;
+
+  _.assert( arguments.length === 0 || arguments.length === 1 );
+  _.assert( status === undefined || _.numberIs( status ) );
+
+  if( _global.process )
+  {
+    result = process.exitCode || 0;
+    if( status !== undefined )
+    process.exitCode = status;
+  }
+
+  return result;
+}
+
+//
+
+function exit( exitCode )
+{
+
+  exitCode = exitCode !== undefined ? exitCode : _.process.exitCode();
+
+  _.assert( arguments.length === 0 || arguments.length === 1 );
+  _.assert( exitCode === undefined || _.numberIs( exitCode ) );
+
+  if( _global.process )
+  {
+    process.exit( exitCode );
+  }
+  else
+  {
+    /*debugger;*/
+  }
+
+}
+
+//
+
+function exitWithBeep()
+{
+  let exitCode = _.process.exitCode();
+
+  _.assert( arguments.length === 0, 'Expects no arguments' );
+  _.assert( exitCode === undefined || _.numberIs( exitCode ) );
+
+  _.diagnosticBeep();
+
+  if( exitCode )
+  _.diagnosticBeep();
+
+  _.process.exit( exitCode );
+
+  return exitCode;
+}
+
+// --
 // escape
 // --
 
-function escapeArg( arg )
+function _argsEscape( args )
+{
+  /* xxx */
+
+  for( let i = 0 ; i < args.length ; i++ )
+  {
+    let quotesToEscape = process.platform === 'win32' ? [ '"' ] : [ '"', '`' ];
+    args[ i ] = _.process._argEscape( args[ i ] );
+    args[ i ] = _.strQuote( args[ i ] );
+    // args[ i ] = _.process._argEscape2( args[ i ]  ); /* zzz for Vova : use this routine, review fails */
+  }
+
+  return args;
+}
+
+//
+
+function _argEscape( arg, quote )
+{
+
+  if( quote === undefined )
+  quote = process.platform === 'win32' ? [ '"' ] : [ '"', '`' ];
+
+  _.assert( _.strIs( arg ) );
+  _.assert( !!quote );
+
+  // xxx : remove this if after fix of strReplaceAll
+  if( _.longIs( quote ) )
+  {
+    quote.forEach( ( quote ) => arg = act( arg, quote ) );
+    return arg;
+  }
+  return act( arg, quote );
+
+  function act( arg, quote )
+  {
+    _.assert( _.strIs( arg ) );
+    _.assert( _.strIs( quote ) );
+    return _.strReplaceAll( arg, quote, ( match, it ) =>
+    {
+      if( it.input[ it.charsRangeLeft[ 0 ] - 1 ] === '\\' )
+      return match;
+      return '\\' + match;
+    });
+  }
+}
+
+//
+
+function _argEscape2( arg )
 {
   _.assert( arguments.length === 1 );
   _.assert( _.strIs( arg ) );
@@ -368,7 +523,7 @@ function escapeArg( arg )
 
 //
 
-function escapeProg( prog )
+function _argProgEscape( prog )
 {
   _.assert( arguments.length === 1 );
   _.assert( _.strIs( prog ) );
@@ -382,7 +537,7 @@ function escapeProg( prog )
   else
   {
     // Unix shells: same procedure as for arguments
-		prog = _.process.escapeArg( prog );
+		prog = _.process._argEscape2( prog );
   }
 
   return prog;
@@ -391,18 +546,18 @@ function escapeProg( prog )
 
 //
 
-function escapeCmd( prog, args )
+function _argCmdEscape( prog, args )
 {
   _.assert( arguments.length === 2 );
   _.assert( _.strIs( prog ) );
   _.assert( _.arrayIs( args ) );
 
-  prog = _.process.escapeProg( prog );
+  prog = _.process._argProgEscape( prog );
 
   if( !args.length )
   return prog;
 
-  args = args.map( ( arg ) => _.process.escapeArg( arg ) );
+  args = args.map( ( arg ) => _.process._argEscape2( arg ) );
 
   return `${prog} ${args.join( ' ' )}`;
 }
@@ -459,11 +614,20 @@ let Extension =
   _eventExitHandle,
   _eventExitBeforeHandle,
 
+  // exit
+
+  exitReason,
+  exitCode,
+  exit,
+  exitWithBeep,
+
   // escape
 
-  escapeArg,
-  escapeProg,
-  escapeCmd,
+  _argsEscape,
+  _argEscape,
+  _argEscape2,
+  _argProgEscape,
+  _argCmdEscape,
 
   // meta
 
@@ -474,6 +638,7 @@ let Extension =
   _verbosity : 1,
   _sanitareTime : 1,
   _exitReason : null,
+  exiting : false,
 
   _tempFiles,
   _registeredExitHandler : null,
