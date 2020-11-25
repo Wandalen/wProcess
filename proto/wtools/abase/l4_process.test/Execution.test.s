@@ -27985,8 +27985,26 @@ function startMultipleOutput( test )
           // test.lt( track.indexOf( 'conTerminate' ), track.indexOf( 'ready' ) );
 
           /* qqq for Yevhen : replace with several calls of _.dissector.dissect() | aaa : Done. */
-          test.true( _.dissector.dissect( '**<conStart>' + '**<0.out:1::begin>**<0.out:1::end>' + '**<0.err:1::err>' + '**<0.err.end>**<0.err.finish>' + '**<0.out.end>**<0.out.finish>' + '**<conTerminate>' + '**<ready>**', track.toString() ).matched );
-          test.true( _.dissector.dissect( '**<conStart>' + '**<0.out:2::begin>**<0.out:2::end>' + '**<0.err:2::err>' + '**<0.err.end>**<0.err.finish>' + '**<0.out.end>**<0.out.finish>' + '**<conTerminate>' + '**<ready>**', track.toString() ).matched );
+          let exp1 =
+          `
+          **<conStart>
+          **<0.out:1::begin>**<0.out:1::end>
+          **<0.err:1::err>
+          **<0.err.end>**<0.err.finish>
+          **<0.out.end>**<0.out.finish>
+          **<conTerminate>**<ready>**
+          `;
+          let exp2 =
+          `
+          **<conStart>
+          **<0.out:2::begin>**<0.out:2::end>
+          **<0.err:2::err>
+          **<0.err.end>**<0.err.finish>
+          **<0.out.end>**<0.out.finish>
+          **<conTerminate>**<ready>**
+          `;
+          test.true( _.dissector.dissect( exp1, track.toString() ).matched );
+          test.true( _.dissector.dissect( exp2, track.toString() ).matched );
 
         }
 
@@ -28222,10 +28240,42 @@ function startMultipleOutput( test )
           // test.lt( track.indexOf( 'conTerminate' ), track.indexOf( 'ready' ) );
 
           /* qqq for Yevhen : replace with several calls of _.dissector.dissect() | aaa : Done. */
-          test.true( _.dissector.dissect( '**<conStart>' + '**<0.out:1::begin>**<0.out:1::end>' + '**<0.err:1::err>**<0.err:2::err>**' + '<0.err.end>**<0.err.finish>' + '**<0.out.end>**<0.out.finish>**' + '<conTerminate>**' + '<ready>**', track.toString() ).matched );
-          test.true( _.dissector.dissect( '**<conStart>' + '**<1.out:1::begin>**<1.out:1::end>' + '**<1.err:1::err>**<1.err.end>**' + '<1.out.end>**' + '<conTerminate>**' + '<ready>**', track.toString() ).matched );
-          test.true( _.dissector.dissect( '**<conStart>' + '**<0.out:2::begin>**<0.out:2::end>' + '**<0.err.end>**<0.err.finish>**' + '<0.out.end>**<0.out.finish>**'  + '<conTerminate>**' + '<ready>**', track.toString() ).matched );
-          test.true( _.dissector.dissect( '**<conStart>' + '**<2.out:2::begin>**<2.out:2::end>' + '**<2.err.end>**<2.out.end>**' + '<conTerminate>**' + '<ready>**', track.toString() ).matched );
+          let exp1 =
+          `
+          **<conStart>
+          **<0.out:1::begin>**<0.out:1::end>
+          **<0.err:1::err>**<0.err:2::err>
+          **<0.err.end>**<0.err.finish>
+          **<0.out.end>**<0.out.finish>
+          **<conTerminate>**<ready>**
+          `;
+          let exp2 =
+          `
+          **<conStart>
+          **<1.out:1::begin>**<1.out:1::end>
+          **<1.err:1::err>**<1.err.end>
+          **<1.out.end>
+          **<conTerminate>**<ready>**
+          `;
+          let exp3 =
+          `
+          **<conStart>
+          **<0.out:2::begin>**<0.out:2::end>
+          **<0.err.end>**<0.err.finish>
+          **<0.out.end>**<0.out.finish>
+          **<conTerminate>**<ready>**
+          `;
+          let exp4 =
+          `
+          **<conStart>
+          **<2.out:2::begin>**<2.out:2::end>
+          **<2.err.end>**<2.out.end>
+          **<conTerminate>**<ready>**
+          `;
+          test.true( _.dissector.dissect( exp1, track.toString() ).matched );
+          test.true( _.dissector.dissect( exp2, track.toString() ).matched );
+          test.true( _.dissector.dissect( exp3, track.toString() ).matched );
+          test.true( _.dissector.dissect( exp4, track.toString() ).matched );
 
         }
 
