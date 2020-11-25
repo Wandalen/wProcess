@@ -543,7 +543,7 @@ function startMinimal_body( o )
     runSpawn();
     else if( o.mode === 'shell' )
     runShell();
-    else _.assert( 0, `Unknown mode ${o.mode} to start process at path ${o.currentPath}` ); /* qqq for Yevhen : problem with template-string is not complete! | aaa : Fixed. */
+    else _.assert( 0, `Unknown mode ${o.mode} to start process at path ${o.currentPath}` );
 
     /* procedure */
 
@@ -644,7 +644,7 @@ function startMinimal_body( o )
 
     o.fullExecPath = arg2;
 
-    /* qqq for Vova : Fixes problem with space in path on windows and makes behavior similar to unix
+    /* zzz for Vova : Fixes problem with space in path on windows and makes behavior similar to unix
       Examples:
       win: shell({ execPath : '"/path/with space/node.exe"', throwingExitCode : 0 }) - works
       unix: shell({ execPath : '"/path/with space/node"', throwingExitCode : 0 }) - works
@@ -714,7 +714,7 @@ function startMinimal_body( o )
 
     if( o._handleProcedureTerminationBegin )
     {
-      _.procedure.off( 'terminationBegin', o._handleProcedureTerminationBegin ); /* qqq for Dmytro : extend _.procedure.on / _.procedure.off */
+      _.procedure.off( 'terminationBegin', o._handleProcedureTerminationBegin ); /* xxx qqq for Dmytro : extend _.procedure.on / _.procedure.off */
       o._handleProcedureTerminationBegin = false;
     }
 
@@ -997,7 +997,7 @@ function startMinimal_body( o )
     try
     {
 
-      if( !o.inputMirroring ) /* qqq for Yevhen : cover | aaa : Done. */
+      if( !o.inputMirroring )
       return;
 
       if( o.verbosity >= 3 )
@@ -1288,7 +1288,7 @@ function startMinimal_body( o )
 
     data = _.strRemoveEnd( data, '\n' );
 
-    /* qqq for Yevgen : changed how option outputPrefixing works */
+    /* qqq for Yevhen : changed how option outputPrefixing works */
     if( o.outputPrefixing )
     {
       let prefix = channel === 'err' ? _errPrefix : _outPrefix;
@@ -1350,7 +1350,7 @@ startMinimal_body.defaults =
   sync : 0,
   deasync : 0,
   when : 'instant', /* instant / afterdeath / time / delay */
-  dry : 0, /* qqq for Yevhen : cover the option. make sure all con* called once. make sure all con* called in correct order | aaa : Done. */
+  dry : 0,
 
   mode : 'shell', /* fork / spawn / shell */
   stdio : 'pipe', /* pipe / ignore / inherit */
@@ -1369,23 +1369,23 @@ startMinimal_body.defaults =
   env : null,
   detaching : 0,
   hiding : 1,
-  uid : null, /* qqq for Yevhen : implement and cover the option | aaa : Done. */
-  gid : null, /* qqq for Yevhen : implement and cover the option | aaa : Done. */
+  uid : null,
+  gid : null,
   streamSizeLimit : null,
   passingThrough : 0,
   timeOut : null,
 
-  throwingExitCode : 'full', /* must be on by default */ /* bool-like, 'full', 'brief' */
+  throwingExitCode : 'full', /* [ bool-like, 'full', 'brief' ] */ /* must be on by default */  /* qqq for Yevhen : cover */
   applyingExitCode : 0,
 
-  verbosity : 2, /* qqq for Yevhen : cover the option | aaa : Done. */
-  outputPrefixing : 0, /* qqq for Yevhen : extend coverage | aaa : Done. */
+  verbosity : 2,
+  outputPrefixing : 0,
   outputPiping : null,
   outputCollecting : 0,
   outputAdditive : null, /* qqq for Yevhen : cover the option */
-  outputColoring : 1, /* qqq for Yevhen : cover the option | aaa : Done. */
+  outputColoring : 1,
   outputGraying : 0,
-  inputMirroring : 1, /* qqq for Yevhen : cover the option | aaa : Done */
+  inputMirroring : 1,
 
 }
 
@@ -2058,7 +2058,7 @@ function startMultiple_body( o )
     _.Consequence.AndImmediate( ... conStart ).tap( ( err, arg ) =>
     {
       if( !o.ended )
-      o.state = 'started'; /* qqq for Yevhen : cover states of multiple run by test routine ( each state, but single test routine ) | aaa : Done. */
+      o.state = 'started';
       o.conStart.take( err, err ? undefined : o );
     });
     else
@@ -2809,8 +2809,6 @@ function signal_body( o )
   {
     _.assert( _.intIs( p.pid ) );
 
-    // console.log( `signalSend : ${p.pid} ${_.process.isAlive( p.pid )}` );
-
     if( !_.process.isAlive( p.pid ) )
     return true;
 
@@ -2856,8 +2854,10 @@ function signal_body( o )
     for( let i = 0 ; i < processes.length ; i++ )
     {
       let process = processes[ i ];
-      // if( isWindows && i && process.name === 'conhost.exe' )
-      // continue;
+/*
+      if( isWindows && i && process.name === 'conhost.exe' )
+      continue;
+*/
       signalSend( process );
     }
     else
@@ -2897,8 +2897,6 @@ function signal_body( o )
       throw err;
     })
 
-    // ready.delay( 1000 )
-
     return ready;
   }
 
@@ -2911,14 +2909,13 @@ function signal_body( o )
     if( err.code === 'EPERM' )
     throw _.err( err, `\nCurrent process does not have permission to kill target process ${o.pid}` );
     if( err.code === 'ESRCH' )
-    throw _.err( err, `\nTarget process: ${_.strQuote( o.pid )} does not exist.` ); /* qqq for Yevhen : rewrite such strings as template-strings | aaa : Done.*/
+    throw _.err( err, `\nTarget process: ${_.strQuote( o.pid )} does not exist.` );
     throw _.err( err );
   }
 
   function handleResult( result )
   {
     result = _.arrayAs( result );
-    // console.log( `handleResult ${result}` );
     for( let i = 0 ; i < result.length ; i++ )
     {
       if( result[ i ] !== true )
