@@ -32664,7 +32664,8 @@ function terminate( test )
 
     .then( () =>
     {
-      /* xxx :
+      /*
+      xxx :
       macos 12x, mode::fork
       2020-11-25T14:04:02.4631420Z [91m        - got :
       2020-11-25T14:04:02.4632320Z           'SIGKILL'
