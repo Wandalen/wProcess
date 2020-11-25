@@ -899,6 +899,25 @@ function startMinimalFork( test )
 
   a.ready.then( function()
   {
+    /*
+    xxx :
+    Windows 15x, mode::fork
+    [39;0m[92m/[39;0m[92m TestRoutine[39;0m[92m:[39;0m[92m:[39;0m[92mstartFork [39;0m[92m/[39;0m[92m test timeOut[39;0m[92m # [39;0m[92m22 [39;0m[92m)[39;0m[92m ... [39;0m[92mok[39;0m
+    2020-11-25T10:55:41.8317809Z --------------- uncaught asynchronous error --------------->
+    2020-11-25T10:55:41.8767341Z 
+    2020-11-25T10:55:41.8768147Z [91m        kill EPERM
+    2020-11-25T10:55:41.8917163Z [91m = Message of error#10
+    2020-11-25T10:55:41.8917977Z           errno : -4048
+    2020-11-25T10:55:41.9119950Z     kill EPERM
+    2020-11-25T10:55:41.9120605Z           code : 'EPERM'
+    2020-11-25T10:55:41.9121766Z       errno : -4048
+    2020-11-25T10:55:41.9122245Z           syscall : 'kill'
+    2020-11-25T10:55:41.9122822Z       code : 'EPERM'
+    2020-11-25T10:55:41.9123516Z         Current process does not have permission to kill target process 592[39;0m
+    2020-11-25T10:55:41.9124438Z       syscall : 'kill'
+    2020-11-25T10:55:41.9125794Z [91m[40m        Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startFork / test timeOut # 23 ) ... failed, throwing error[49;0m[39;0m
+    2020-11-25T10:55:41.9127260Z     Current process does not have permission to kill target process 592
+    */
     test.case = 'test timeOut';
 
     function testApp5()
@@ -9042,6 +9061,17 @@ function startMultipleProcedureStack( test )
 
     ready.then( function case1()
     {
+      /*
+      xxx :
+      Windows 13x, mode::fork
+      [39;0m[92m/[39;0m[92m TestRoutine[39;0m[92m:[39;0m[92m:[39;0m[92mstartProcedureStackMultiple [39;0m[92m/[39;0m[92m sync[39;0m[92m:[39;0m[92m0 deasync[39;0m[92m:[39;0m[92m1 mode[39;0m[92m:[39;0m[92mfork stack[39;0m[92m:[39;0m[92mfalse[39;0m[92m # [39;0m[92m538 [39;0m[92m)[39;0m[92m [39;0m[92m:[39;0m[92m expected true[39;0m[92m ... [39;0m[92mok[39;0m
+      2020-11-25T11:03:36.6940925Z [91m        - got :
+      2020-11-25T11:03:36.6941792Z           4294967295
+      2020-11-25T11:03:36.6942336Z         - expected :
+      2020-11-25T11:03:36.6942850Z           0
+      2020-11-25T11:03:36.6943358Z         - difference :
+      2020-11-25T11:03:36.6943875Z           *[39;0m
+      */
       test.case = `sync:${sync} deasync:${deasync} mode:${mode} stack:false`;
       let t1 = _.time.now();
       let o =
@@ -12641,11 +12671,7 @@ function startMinimalDetachingChildExitsBeforeParent( test )
 
 }
 
-/*
-Running TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachingChildExitsBeforeParent ..
-      Failed (test routine time limit
-*/
-startMinimalDetachingChildExitsBeforeParent.timeOut = 4e5; /* was : 21e4 */ /* Locally : 20.817s */
+startMinimalDetachingChildExitsBeforeParent.timeOut = 21e4; /* Locally : 20.817s */
 startMinimalDetachingChildExitsBeforeParent.description =
 `
 Parent starts child process in detached mode and registers callback to wait for child process.
@@ -32666,7 +32692,7 @@ function terminate( test )
     {
       /*
       xxx :
-      macos 12x, mode::fork
+      macos 10x, 12x, 14x, mode::fork
       2020-11-25T14:04:02.4631420Z [91m        - got :
       2020-11-25T14:04:02.4632320Z           'SIGKILL'
       2020-11-25T14:04:02.4633040Z         - expected :
@@ -36666,6 +36692,24 @@ function childrenOptionFormatList( test )
 
   .then( () =>
   {
+    /*
+    xxx :
+    Windows 12x, mode::
+    [39;0m[92m/[39;0m[92m TestRoutine[39;0m[92m:[39;0m[92m:[39;0m[92mchildrenOptionFormatList [39;0m[92m/[39;0m[92m parent -> child -> child[39;0m[92m # [39;0m[92m2 [39;0m[92m)[39;0m[92m ... [39;0m[92mok[39;0m
+    2020-11-25T12:14:39.0757788Z [91m        - got :
+    2020-11-25T12:14:39.0758588Z           3
+    2020-11-25T12:14:39.0759108Z         - expected :
+    2020-11-25T12:14:39.0759666Z           4
+    2020-11-25T12:14:39.0760172Z         - difference :
+    2020-11-25T12:14:39.0761190Z           *[39;0m
+    2020-11-25T12:14:39.0766588Z [91m         [39;0m[91m 
+    2020-11-25T12:14:39.0767605Z         /D/a/wProcess/wProcess/proto/wtools/abase/l4_process.test/Execution.test.s:40781:16
+    2020-11-25T12:14:39.0768624Z           40777 :       return children.then( ( prcocesses ) =>
+    2020-11-25T12:14:39.0769245Z           40778 :       {
+    2020-11-25T12:14:39.0769900Z           40779 :         if( process.platform === 'win32' )
+    2020-11-25T12:14:39.0770475Z           40780 :         {
+    2020-11-25T12:14:39.0771703Z         * 40781 :           test.identical( prcocesses.length, 4 ); 
+    */
     test.case = 'parent -> child -> child'
     var o =
     {
