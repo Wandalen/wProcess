@@ -26363,7 +26363,7 @@ function appTempApplication( test )
 // other options
 // --
 
-function startOptionStreamSizeLimit( test )
+function startMinimalOptionStreamSizeLimit( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -26398,7 +26398,7 @@ function startOptionStreamSizeLimit( test )
         outputCollecting : 1,
       }
 
-      let returned =  _.process.start( options );
+      let returned =  _.process.startMinimal( options );
       test.identical( returned.process.stdout.toString(), 'data1\n' );
 
       a.fileProvider.fileDelete( testAppPath );
@@ -26424,7 +26424,7 @@ function startOptionStreamSizeLimit( test )
         outputCollecting : 1,
       }
 
-      let returned =  _.process.start( options );
+      let returned =  _.process.startMinimal( options );
       test.identical( returned.process.stdout.toString(), 'data1\n' );
 
       a.fileProvider.fileDelete( testAppPath );
@@ -26450,7 +26450,7 @@ function startOptionStreamSizeLimit( test )
         outputCollecting : 1,
       }
 
-      let returned =  _.process.start( options );
+      let returned =  _.process.startMinimal( options );
       test.identical( returned.process.stdout.toString(), 'data1\n' )
 
       a.fileProvider.fileDelete( testAppPath );
@@ -26475,7 +26475,7 @@ function startOptionStreamSizeLimit( test )
         outputCollecting : 1,
       }
 
-      let returned = test.shouldThrowErrorSync( () => _.process.start( options ) )
+      let returned = test.shouldThrowErrorSync( () => _.process.startMinimal( options ) )
 
       test.true( _.errIs( returned ) );
       test.true( _.strHas( returned.message, `code : 'ENOBUFS'`) )
@@ -26500,7 +26500,7 @@ function startOptionStreamSizeLimit( test )
 
 //
 
-function startOptionStreamSizeLimitThrowing( test )
+function startMinimalOptionStreamSizeLimitThrowing( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -26521,7 +26521,7 @@ function startOptionStreamSizeLimitThrowing( test )
       outputCollecting : 1,
     }
 
-    let returned = test.shouldThrowErrorSync( () => _.process.start( options ) )
+    let returned = test.shouldThrowErrorSync( () => _.process.startMinimal( options ) )
 
     test.true( _.errIs( returned ) );
     test.true( _.strHas( returned.message, `Option::streamSizeLimit is supported in mode::spawn and mode::shell with sync::1` ) )
@@ -26567,7 +26567,7 @@ function startOptionStreamSizeLimitThrowing( test )
         outputCollecting : 1,
       }
 
-      let returned = test.shouldThrowErrorSync( () => _.process.start( options ) )
+      let returned = test.shouldThrowErrorSync( () => _.process.startMinimal( options ) )
 
       test.true( _.errIs( returned ) );
       test.true( _.strHas( returned.message, `Option::streamSizeLimit must be a positive Number which is greater than zero` ) )
@@ -26596,7 +26596,7 @@ function startOptionStreamSizeLimitThrowing( test )
         outputCollecting : 1,
       }
 
-      let returned = test.shouldThrowErrorSync( () => _.process.start( options ) )
+      let returned = test.shouldThrowErrorSync( () => _.process.startMinimal( options ) )
 
       test.true( _.errIs( returned ) );
       test.true( _.strHas( returned.message, `Option::streamSizeLimit must be a positive Number which is greater than zero` ) )
@@ -26625,7 +26625,7 @@ function startOptionStreamSizeLimitThrowing( test )
         outputCollecting : 1,
       }
 
-      let returned = test.shouldThrowErrorSync( () => _.process.start( options ) )
+      let returned = test.shouldThrowErrorSync( () => _.process.startMinimal( options ) )
 
       test.true( _.errIs( returned ) );
       test.true( _.strHas( returned.message, `Option::streamSizeLimit is supported in mode::spawn and mode::shell with sync::1` ) )
@@ -26655,7 +26655,7 @@ function startOptionStreamSizeLimitThrowing( test )
         outputCollecting : 1,
       }
 
-      let returned = test.shouldThrowErrorSync( () => _.process.start( options ) )
+      let returned = test.shouldThrowErrorSync( () => _.process.startMinimal( options ) )
 
       test.true( _.errIs( returned ) );
       test.true( _.strHas( returned.message, `Option::streamSizeLimit is supported in mode::spawn and mode::shell with sync::1` ) )
@@ -26700,7 +26700,7 @@ function startSingleOptionDry( test )
     if( tops.sync && !tops.deasync && tops.mode === 'fork' )
     return test.shouldThrowErrorSync( () =>
     {
-      _.process.start
+      _.process.startSingle
       ({
         execPath : programPath + ` arg1`,
         mode : tops.mode,
@@ -26729,7 +26729,7 @@ function startSingleOptionDry( test )
       }
       let track = [];
       var t1 = _.time.now();
-      var returned = _.process.start( o );
+      var returned = _.process.startSingle( o );
 
       if( tops.sync )
       {
@@ -26843,7 +26843,7 @@ function startSingleOptionDry( test )
       }
       let track = []; /* qqq for Yevhen : should be on beginning of test case | aaa : Moved. */
       var t1 = _.time.now();
-      var returned = _.process.start( o );
+      var returned = _.process.startSingle( o );
 
       if( tops.sync )
       {
@@ -26952,7 +26952,7 @@ After execution checks fields of run descriptor.
 
 //
 
-function startOptionDryMultiple( test )
+function startMultipleOptionDry( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -26973,7 +26973,7 @@ function startOptionDryMultiple( test )
     if( tops.sync && !tops.deasync && tops.mode === 'fork' )
     return test.shouldThrowErrorSync( () =>
     {
-      _.process.start
+      _.process.startMultiple
       ({
         execPath : [ programPath + ` id:1`, programPath + ` id:2` ],
         mode : tops.mode,
@@ -26996,7 +26996,7 @@ function startOptionDryMultiple( test )
         dry : 1
       }
 
-      let returned = _.process.start( options )
+      let returned = _.process.startMultiple( options )
 
       test.identical( options.procedure._name, null );
       test.identical( options.state, 'terminated' );
@@ -27108,7 +27108,7 @@ function startOptionDryMultiple( test )
         dry : 1
       }
 
-      let returned = _.process.start( options )
+      let returned = _.process.startMultiple( options )
 
       test.identical( options.procedure._name, null );
       test.identical( options.state, 'terminated' );
@@ -27212,7 +27212,7 @@ function startOptionDryMultiple( test )
 
 //
 
-function startOptionCurrentPath( test )
+function startMinimalOptionCurrentPath( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -27246,7 +27246,7 @@ function startOptionCurrentPath( test )
         stdio : 'pipe',
         outputCollecting : 1,
       }
-      return _.process.start( o )
+      return _.process.startMinimal( o )
       .then( function( op )
       {
         let got = a.fileProvider.fileRead( testFilePath );
@@ -27273,7 +27273,7 @@ function startOptionCurrentPath( test )
         outputCollecting : 1,
       }
 
-      return _.process.start( o )
+      return _.process.startMinimal( o )
       .then( function( op )
       {
         let got = a.fileProvider.fileRead( testFilePath );
@@ -27300,7 +27300,7 @@ function startOptionCurrentPath( test )
         outputCollecting : 1,
       }
 
-      return _.process.start( o )
+      return _.process.startMinimal( o )
       .then( function( op )
       {
         let got = a.fileProvider.fileRead( testFilePath );
@@ -27330,7 +27330,7 @@ function startOptionCurrentPath( test )
         outputCollecting : 1,
       }
 
-      return _.process.start( o )
+      return _.process.startMinimal( o )
       .then( function( op )
       {
         let got = a.fileProvider.fileRead( testFilePath );
@@ -27358,7 +27358,7 @@ function startOptionCurrentPath( test )
 //
 
 /* qqq for Yevhen : try to introduce subroutine for modes | aaa : Done. */
-function startOptionCurrentPaths( test )
+function startMinimalOptionCurrentPaths( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -27382,7 +27382,7 @@ function startOptionCurrentPaths( test )
     {
       test.case = `mode : ${mode}, execPath : single, currentPath : multiple`;
 
-      let returned = _.process.start( _.mapSupplement( { mode : `${mode}` }, o2 ) );
+      let returned = _.process.startMinimal( _.mapSupplement( { mode : `${mode}` }, o2 ) );
 
       returned.then( ( op ) =>
       {
@@ -27406,7 +27406,7 @@ function startOptionCurrentPaths( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}, execPath : multiple, currentPath : multiple`;
-      let returned = _.process.start( _.mapSupplement( { mode : `${mode}`, execPath : [ mode === 'fork' ? programPath : 'node ' + programPath, mode === 'fork' ? programPath : 'node ' + programPath ] }, o2 ) );
+      let returned = _.process.startMinimal( _.mapSupplement( { mode : `${mode}`, execPath : [ mode === 'fork' ? programPath : 'node ' + programPath, mode === 'fork' ? programPath : 'node ' + programPath ] }, o2 ) );
 
       returned.then( ( op ) =>
       {
@@ -27536,7 +27536,7 @@ function startOptionCurrentPaths( test )
 
 //
 
-function startOptionPassingThrough( test )
+function startPassingThrough( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -27593,7 +27593,7 @@ function startOptionPassingThrough( test )
         outputPiping : 1,
         outputCollecting : 1,
       }
-      _.process.start( o2 );
+      _.process.startMinimal( o2 );
 
       o2.conTerminate.then( () =>
       {
@@ -27630,7 +27630,7 @@ function startOptionPassingThrough( test )
         outputPiping : 1,
         outputCollecting : 1,
       }
-      _.process.start( o2 );
+      _.process.startMinimal( o2 );
 
       o2.conTerminate.then( () =>
       {
@@ -27668,7 +27668,7 @@ function startOptionPassingThrough( test )
         outputPiping : 1,
         outputCollecting : 1,
       }
-      _.process.start( o2 );
+      _.process.startMinimal( o2 );
 
       o2.conTerminate.then( () =>
       {
@@ -27706,7 +27706,7 @@ function startOptionPassingThrough( test )
         outputPiping : 1,
         outputCollecting : 1,
       }
-      _.process.start( o2 );
+      _.process.startMinimal( o2 );
 
       o2.conTerminate.then( () =>
       {
@@ -27743,7 +27743,7 @@ function startOptionPassingThrough( test )
         outputPiping : 1,
         outputCollecting : 1,
       }
-      _.process.start( o2 );
+      _.process.startMinimal( o2 );
 
       o2.conTerminate.then( () =>
       {
@@ -27781,7 +27781,7 @@ function startOptionPassingThrough( test )
         outputPiping : 1,
         outputCollecting : 1,
       }
-      _.process.start( o2 );
+      _.process.startMinimal( o2 );
 
       o2.conTerminate.then( () =>
       {
@@ -27833,7 +27833,7 @@ function startOptionPassingThrough( test )
         outputPiping : 1,
         outputCollecting : 1,
       }
-      _.process.start( o2 );
+      _.process.startMinimal( o2 );
 
       o2.conTerminate.then( () =>
       {
@@ -27872,7 +27872,7 @@ function startOptionPassingThrough( test )
         outputPiping : 1,
         outputCollecting : 1,
       }
-      _.process.start( o2 );
+      _.process.startMinimal( o2 );
 
       o2.conTerminate.then( () =>
       {
@@ -27911,7 +27911,7 @@ function startOptionPassingThrough( test )
         outputPiping : 1,
         outputCollecting : 1,
       }
-      _.process.start( o2 );
+      _.process.startMinimal( o2 );
 
       o2.conTerminate.then( () =>
       {
@@ -27948,7 +27948,7 @@ function startOptionPassingThrough( test )
         outputPiping : 1,
         outputCollecting : 1,
       }
-      _.process.start( o2 );
+      _.process.startMinimal( o2 );
 
       o2.conTerminate.then( () =>
       {
@@ -27987,7 +27987,7 @@ function startOptionPassingThrough( test )
         outputPiping : 1,
         outputCollecting : 1,
       }
-      _.process.start( o2 );
+      _.process.startMinimal( o2 );
 
       o2.conTerminate.then( () =>
       {
@@ -28040,12 +28040,12 @@ function startOptionPassingThrough( test )
   }
 }
 
-startOptionPassingThrough.timeOut = 5e5;
-startOptionPassingThrough.rapidity = -1;
+startPassingThrough.timeOut = 5e5;
+startPassingThrough.rapidity = -1;
 
 //
 
-function startOptionUid( test ) /* Runs only through `sudo` ( i.e. with superuser/root provileges ) */
+function startMinimalOptionUid( test ) /* Runs only through `sudo` ( i.e. with superuser/root provileges ) */
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -28072,7 +28072,7 @@ function startOptionUid( test ) /* Runs only through `sudo` ( i.e. with superuse
         uid : 11
       }
 
-      return _.process.start( options )
+      return _.process.startMinimal( options )
       .then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
@@ -28100,11 +28100,11 @@ function startOptionUid( test ) /* Runs only through `sudo` ( i.e. with superuse
   }
 }
 
-startOptionUid.experimental = true;
+startMinimalOptionUid.experimental = true;
 
 //
 
-function startOptionGid( test ) /* Runs only through `sudo` ( i.e. with superuser/root provileges ) */
+function startMinimalOptionGid( test ) /* Runs only through `sudo` ( i.e. with superuser/root provileges ) */
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -28130,7 +28130,7 @@ function startOptionGid( test ) /* Runs only through `sudo` ( i.e. with superuse
         mode,
         gid : 15
       }
-      return _.process.start( options )
+      return _.process.startMinimal( options )
       .then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
@@ -28157,11 +28157,11 @@ function startOptionGid( test ) /* Runs only through `sudo` ( i.e. with superuse
   }
 }
 
-startOptionGid.experimental = true;
+startMinimalOptionGid.experimental = true;
 
 //
 
-function startOptionProcedureSingle( test )
+function startSingleOptionProcedure( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -28181,7 +28181,7 @@ function startOptionProcedureSingle( test )
     if( tops.sync && !tops.deasync && tops.mode === 'fork' )
     return test.shouldThrowErrorSync( () =>
     {
-      _.process.start
+      _.process.startSingle
       ({
         execPath : programPath,
         mode : tops.mode,
@@ -28205,7 +28205,7 @@ function startOptionProcedureSingle( test )
         outputCollecting : 1,
       }
 
-      let returned = _.process.start( options );
+      let returned = _.process.startSingle( options );
 
       if( tops.sync )
       {
@@ -28253,7 +28253,7 @@ function startOptionProcedureSingle( test )
         outputCollecting : 1,
       }
 
-      let returned =  _.process.start( options )
+      let returned =  _.process.startSingle( options )
 
       if( tops.sync )
       {
@@ -28300,7 +28300,7 @@ function startOptionProcedureSingle( test )
         outputCollecting : 1,
       }
 
-      let returned = _.process.start( options );
+      let returned = _.process.startSingle( options );
 
       if( tops.sync )
       {
@@ -28349,7 +28349,7 @@ function startOptionProcedureSingle( test )
         outputCollecting : 1,
       }
 
-      let returned =  _.process.start( options );
+      let returned =  _.process.startSingle( options );
 
       if( tops.sync )
       {
@@ -28398,7 +28398,7 @@ function startOptionProcedureSingle( test )
         outputCollecting : 1,
       }
 
-      let returned = _.process.start( options );
+      let returned = _.process.startSingle( options );
 
       if( tops.sync )
       {
@@ -28440,11 +28440,11 @@ function startOptionProcedureSingle( test )
   }
 }
 
-startOptionProcedureSingle.timeOut = 9e4; /* Locally : 8.406s */
+startSingleOptionProcedure.timeOut = 9e4; /* Locally : 8.406s */
 
 //
 
-function startOptionProcedureMultiple( test )
+function startMultipleOptionProcedure( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -28465,7 +28465,7 @@ function startOptionProcedureMultiple( test )
     if( tops.sync && !tops.deasync && tops.mode === 'fork' )
     return test.shouldThrowErrorSync( () =>
     {
-      _.process.start
+      _.process.startMultiple
       ({
         execPath : [ programPath, programPath ],
         mode : tops.mode,
@@ -28489,7 +28489,7 @@ function startOptionProcedureMultiple( test )
         outputCollecting : 1,
       }
 
-      let returned =  _.process.start( options );
+      let returned =  _.process.startMultiple( options );
 
       if( tops.sync )
       {
@@ -28549,7 +28549,7 @@ function startOptionProcedureMultiple( test )
         outputCollecting : 1,
       }
 
-      let returned = _.process.start( options );
+      let returned = _.process.startMultiple( options );
 
       if( tops.sync )
       {
@@ -28604,7 +28604,7 @@ function startOptionProcedureMultiple( test )
         outputCollecting : 1,
       }
 
-      let returned =  _.process.start( options );
+      let returned =  _.process.startMultiple( options );
 
       if( tops.sync )
       {
@@ -28663,7 +28663,7 @@ function startOptionProcedureMultiple( test )
         outputCollecting : 1,
       }
 
-      let returned =  _.process.start( options );
+      let returned =  _.process.startMultiple( options );
 
       if( tops.sync )
       {
@@ -28722,7 +28722,7 @@ function startOptionProcedureMultiple( test )
         outputCollecting : 1,
       }
 
-      let returned =  _.process.start( options );
+      let returned =  _.process.startMultiple( options );
 
       if( tops.sync )
       {
@@ -28775,13 +28775,13 @@ function startOptionProcedureMultiple( test )
   }
 }
 
-startOptionProcedureMultiple.timeOut = 18e4; /* 17.983s */
+startMultipleOptionProcedure.timeOut = 18e4; /* 17.983s */
 
 // --
 // pid
 // --
 
-function startDiffPid( test )
+function startMinimalDiffPid( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -28832,7 +28832,7 @@ function startDiffPid( test )
         currentPath : a.routinePath,
         ipc : 1,
       }
-      let con = _.process.start( o );
+      let con = _.process.startMinimal( o );
       let data;
 
       o.process.on( 'message', ( e ) =>
@@ -28899,7 +28899,7 @@ function startDiffPid( test )
     if( o.ipc !== undefined )
     o.ipc = _.boolFrom( o.ipc );
 
-    _.process.start( o );
+    _.process.startMinimal( o );
 
     console.log( o.process.pid )
 
@@ -28927,7 +28927,7 @@ function startDiffPid( test )
   }
 }
 
-startDiffPid.timeOut = 180000;
+startMinimalDiffPid.timeOut = 180000;
 
 //
 
@@ -28937,7 +28937,7 @@ function pidFrom( test )
   {
     execPath : 'node -v',
   }
-  let ready = _.process.start( o );
+  let ready = _.process.startMinimal( o );
   let expected = o.process.pid;
 
   test.identical( _.process.pidFrom( o ), expected )
@@ -28965,7 +28965,7 @@ function isAlive( test )
   {
     execPath : `node -e "setTimeout( () => { console.log( 'child terminate' ) }, 3000 )"`,
   }
-  _.process.start( o );
+  _.process.startMinimal( o );
 
   o.conStart.then( () =>
   {
@@ -29014,7 +29014,7 @@ function statusOf( test )
     execPath : `node -e "setTimeout( () => { console.log( 'child terminate' ) }, 3000 )"`,
   }
   let track = [];
-  _.process.start( o );
+  _.process.startMinimal( o );
 
   o.conStart.then( () =>
   {
@@ -29085,7 +29085,7 @@ function exitReason( test )
         mode,
       }
 
-      return _.process.start( options )
+      return _.process.startMinimal( options )
       .then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
@@ -29111,7 +29111,7 @@ function exitReason( test )
         mode,
       }
 
-      return _.process.start( options )
+      return _.process.startMinimal( options )
       .then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
@@ -29135,7 +29135,7 @@ function exitReason( test )
         mode,
       }
 
-      return _.process.start( options )
+      return _.process.startMinimal( options )
       .then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
@@ -29159,7 +29159,7 @@ function exitReason( test )
         mode,
       }
 
-      return _.process.start( options )
+      return _.process.startMinimal( options )
       .then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
@@ -29262,7 +29262,7 @@ function exitCode( test )
         throwingExitCode : 0,
         mode
       }
-      return _.process.start( options )
+      return _.process.startMinimal( options )
       .then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
@@ -29289,7 +29289,7 @@ function exitCode( test )
         throwingExitCode : 0,
         mode
       }
-      return _.process.start( options )
+      return _.process.startMinimal( options )
       .then( ( op ) =>
       {
         test.identical( op.exitCode, 1 );
@@ -29316,7 +29316,7 @@ function exitCode( test )
         throwingExitCode : 0,
         mode
       }
-      return _.process.start( options )
+      return _.process.startMinimal( options )
       .then( ( op ) =>
       {
         test.identical( op.exitCode, 2 );
@@ -29334,9 +29334,9 @@ function exitCode( test )
       test.case = 'wrong execPath'
 
       if( mode === 'spawn' )
-      return test.shouldThrowErrorAsync( _.process.start({ execPath : '1', throwingExitCode : 0, mode }) );
+      return test.shouldThrowErrorAsync( _.process.startMinimal({ execPath : '1', throwingExitCode : 0, mode }) );
 
-      return _.process.start({ execPath : '1', throwingExitCode : 0, mode })
+      return _.process.startMinimal({ execPath : '1', throwingExitCode : 0, mode })
       .then( ( op ) =>
       {
         test.ni( op.exitCode, 0 )
@@ -29357,7 +29357,7 @@ function exitCode( test )
         throwingExitCode : 0,
         mode
       }
-      return _.process.start( options )
+      return _.process.startMinimal( options )
       .then( ( op ) =>
       {
         test.identical( op.exitCode, 1 );
@@ -29380,7 +29380,7 @@ function exitCode( test )
         throwingExitCode : 0,
         mode
       }
-      return _.process.start( options )
+      return _.process.startMinimal( options )
       .then( ( op ) =>
       {
         if( process.platform === 'win32' )
@@ -29410,7 +29410,7 @@ function exitCode( test )
         throwingExitCode : 0,
         mode
       }
-      return _.process.start( options )
+      return _.process.startMinimal( options )
       .then( ( op ) =>
       {
         test.il( op.exitCode, 0 );
@@ -29437,7 +29437,7 @@ function exitCode( test )
         throwingExitCode : 0,
         mode
       }
-      return _.process.start( options )
+      return _.process.startMinimal( options )
       .then( ( op ) =>
       {
         test.identical( op.exitCode, 100 );
@@ -29467,7 +29467,7 @@ function exitCode( test )
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
-    return _.process.start( options );
+    return _.process.startMinimal( options );
   }
 
   function testAppError()
@@ -30394,7 +30394,7 @@ function kill( test )
         throwingExitCode : 0
       }
 
-      let returned = _.process.start( o )
+      let returned = _.process.startMinimal( o )
 
       _.time.out( context.t1*2, () => _.process.kill( o.process ) ) /* 1000 */
 
@@ -30423,7 +30423,7 @@ function kill( test )
         throwingExitCode : 0
       }
 
-      let returned = _.process.start( o )
+      let returned = _.process.startMinimal( o )
 
       _.time.out( context.t1*2, () => _.process.kill( o.process.pid ) ) /* 1000 */
 
@@ -30711,7 +30711,7 @@ function killSync( test )
         throwingExitCode : 0
       }
 
-      let ready1 = _.process.start( o );
+      let ready1 = _.process.startMinimal( o );
 
       ready1.then( ( op ) =>
       {
@@ -30747,7 +30747,7 @@ function killSync( test )
         throwingExitCode : 0
       }
 
-      let ready1 = _.process.start( o )
+      let ready1 = _.process.startMinimal( o )
 
       ready1.then( ( op ) =>
       {
@@ -31068,7 +31068,7 @@ function killOptionWithChildren( test )
         throwingExitCode : 0
       }
 
-      let returned = _.process.start( o );
+      let returned = _.process.startMinimal( o );
       let lastChildPid, killed;
 
       o.process.on( 'message', ( e ) =>
@@ -31120,7 +31120,7 @@ function killOptionWithChildren( test )
         throwingExitCode : 0
       }
 
-      let returned = _.process.start( o );
+      let returned = _.process.startMinimal( o );
       let lastChildPid, killed;
 
       o.process.on( 'message', ( e ) =>
@@ -31163,7 +31163,7 @@ function killOptionWithChildren( test )
         throwingExitCode : 0
       }
 
-      let returned = _.process.start( o );
+      let returned = _.process.startMinimal( o );
       let children, killed;
 
       o.process.on( 'message', ( e ) =>
@@ -31216,7 +31216,7 @@ function killOptionWithChildren( test )
         throwingExitCode : 0
       }
 
-      let returned = _.process.start( o );
+      let returned = _.process.startMinimal( o );
       let children, killed;
       o.process.on( 'message', ( e ) =>
       {
@@ -31266,7 +31266,7 @@ function killOptionWithChildren( test )
         throwingExitCode : 0
       }
 
-      _.process.start( o );
+      _.process.startMinimal( o );
       o.process.kill('SIGKILL');
 
       return o.ready.then( () =>
@@ -31515,7 +31515,7 @@ function killOptionWithChildren( test )
       inputMirroring : 0,
       throwingExitCode : 0
     }
-    _.process.start( o );
+    _.process.startMinimal( o );
     process.send( o.process.pid )
   }
 
@@ -31541,7 +31541,7 @@ function killOptionWithChildren( test )
       inputMirroring : 0,
       throwingExitCode : 0
     }
-    _.process.start( o1 );
+    _.process.startMinimal( o1 );
     var o2 =
     {
       execPath : mode === 'fork' ? 'testApp2.js' : 'node testApp2.js',
@@ -31551,7 +31551,7 @@ function killOptionWithChildren( test )
       inputMirroring : 0,
       throwingExitCode : 0
     }
-    _.process.start( o2 );
+    _.process.startMinimal( o2 );
     process.send( [ o1.process.pid, o2.process.pid ] )
   }
 
@@ -31561,7 +31561,7 @@ killOptionWithChildren.timeOut = 13e4; /* Locally : 12.669s */
 
 //
 
-function startErrorAfterTerminationWithSend( test )
+function startMinimalErrorAfterTerminationWithSend( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -31588,7 +31588,7 @@ function startErrorAfterTerminationWithSend( test )
 
     _.process.on( 'uncaughtError', uncaughtError_functor( mode ) );
 
-    let result = _.process.start( o );
+    let result = _.process.startMinimal( o );
 
     o.conStart.then( ( arg ) =>
     {
@@ -31690,7 +31690,7 @@ function startErrorAfterTerminationWithSend( test )
 
 }
 
-startErrorAfterTerminationWithSend.description =
+startMinimalErrorAfterTerminationWithSend.description =
 `
   - handleClose receive error after termination of the process
   - error caused by call o.process.send()
@@ -31700,7 +31700,7 @@ startErrorAfterTerminationWithSend.description =
 //
 
 /* qqq for Yevhen : subroutine | aaa : Done. */
-function startTerminateHangedWithExitHandler( test )
+function startMinimalTerminateHangedWithExitHandler( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -31737,7 +31737,7 @@ function startTerminateHangedWithExitHandler( test )
         outputCollecting : 1,
       }
 
-      let con = _.process.start( o );
+      let con = _.process.startMinimal( o );
 
       o.process.on( 'message', () =>
       {
@@ -31851,9 +31851,9 @@ function startTerminateHangedWithExitHandler( test )
   }
 }
 
-startTerminateHangedWithExitHandler.timeOut = 15e4; /* Locally : 14.622s */
+startMinimalTerminateHangedWithExitHandler.timeOut = 15e4; /* Locally : 14.622s */
 
-startTerminateHangedWithExitHandler.description =
+startMinimalTerminateHangedWithExitHandler.description =
 `
   Test app - code that blocks event loop and appExitHandlerRepair called at start
 
@@ -31869,7 +31869,7 @@ startTerminateHangedWithExitHandler.description =
 
 //
 
-function startTerminateAfterLoopRelease( test )
+function startMinimalTerminateAfterLoopRelease( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -31908,9 +31908,9 @@ function startTerminateAfterLoopRelease( test )
       }
 
       if( mode === 'shell' ) /* Mode::shell doesn't support inter process communication */
-      return test.shouldThrowErrorSync( () => _.process.start( o ) );
+      return test.shouldThrowErrorSync( () => _.process.startMinimal( o ) );
 
-      let con = _.process.start( o );
+      let con = _.process.startMinimal( o );
 
       o.process.on( 'message', () =>
       {
@@ -32040,8 +32040,8 @@ function startTerminateAfterLoopRelease( test )
   }
 }
 
-startTerminateAfterLoopRelease.timeOut = 25e4; /* Locally : 24.941s */
-startTerminateAfterLoopRelease.description =
+startMinimalTerminateAfterLoopRelease.timeOut = 25e4; /* Locally : 24.941s */
+startMinimalTerminateAfterLoopRelease.description =
 `
   Test app - code that blocks event loop for short period of time and appExitHandlerRepair called at start
 
@@ -32109,7 +32109,7 @@ function endSignalsBasic( test )
       }
 
       var options = _.mapSupplement( null, o2, o3 );
-      var returned = _.process.start( options );
+      var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 4, () =>
       {
@@ -32163,7 +32163,7 @@ program1:end
         mode,
       }
       var options = _.mapSupplement( null, o2, o3 );
-      var returned = _.process.start( options );
+      var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 4, () =>
       {
@@ -32220,7 +32220,7 @@ program1:end
         mode,
       }
       var options = _.mapSupplement( null, o2, o3 );
-      var returned = _.process.start( options );
+      var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 4, () =>
       {
@@ -32278,7 +32278,7 @@ program1:end
       }
       var options = _.mapSupplement( null, o2, o3 );
       var time1 = _.time.now();
-      var returned = _.process.start( options );
+      var returned = _.process.startMinimal( options );
       _.time.out( context.t1 * 4, () =>
       {
         test.identical( options.process.killed, false );
@@ -32344,7 +32344,7 @@ program1:end
         mode,
       }
       var options = _.mapSupplement( null, o2, o3 );
-      var returned = _.process.start( options );
+      var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 4, () =>
       {
@@ -32419,7 +32419,7 @@ deasync:end
         mode,
       }
       var options = _.mapSupplement( null, o2, o3 );
-      var returned = _.process.start( options );
+      var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 4, () =>
       {
@@ -32473,7 +32473,7 @@ program1:end
         mode,
       }
       var options = _.mapSupplement( null, o2, o3 );
-      var returned = _.process.start( options );
+      var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 4, () =>
       {
@@ -32528,7 +32528,7 @@ program1:end
       }
       var options = _.mapSupplement( null, o2, o3 );
       var time1;
-      var returned = _.process.start( options );
+      var returned = _.process.startMinimal( options );
       _.time.out( context.t1 * 4, () =>
       {
         time1 = _.time.now();
@@ -32584,7 +32584,7 @@ program1:end
         mode,
       }
       var options = _.mapSupplement( null, o2, o3 );
-      var returned = _.process.start( options );
+      var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 4, () =>
       {
@@ -32641,7 +32641,7 @@ program1:end
         mode,
       }
       var options = _.mapSupplement( null, o2, o3 );
-      var returned = _.process.start( options );
+      var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 4, () =>
       {
@@ -32717,7 +32717,7 @@ deasync:end
         mode,
       }
       var options = _.mapSupplement( null, o2, o3 );
-      var returned = _.process.start( options );
+      var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 4, () =>
       {
@@ -32776,7 +32776,7 @@ deasync:end
         mode,
       }
       var options = _.mapSupplement( null, o2, o3 );
-      var returned = _.process.start( options );
+      var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 4, () =>
       {
@@ -32838,7 +32838,7 @@ deasync:end
         mode,
       }
       var options = _.mapSupplement( null, o2, o3 );
-      var returned = _.process.start( options );
+      var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 4, () =>
       {
@@ -32898,7 +32898,7 @@ sleep:begin
         mode,
       }
       var options = _.mapSupplement( null, o2, o3 );
-      var returned = _.process.start( options );
+      var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 4, () =>
       {
@@ -32960,7 +32960,7 @@ sleep:begin
         mode,
       }
       var options = _.mapSupplement( null, o2, o3 );
-      var returned = _.process.start( options );
+      var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 4, () =>
       {
@@ -33043,7 +33043,7 @@ deasync:begin
         mode,
       }
       var options = _.mapSupplement( null, o2, o3 );
-      var returned = _.process.start( options );
+      var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 4, () =>
       {
@@ -33102,7 +33102,7 @@ deasync:begin
         mode,
       }
       var options = _.mapSupplement( null, o2, o3 );
-      var returned = _.process.start( options );
+      var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 4, () =>
       {
@@ -33165,7 +33165,7 @@ deasync:begin
         mode,
       }
       var options = _.mapSupplement( null, o2, o3 );
-      var returned = _.process.start( options );
+      var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 4, () =>
       {
@@ -33225,7 +33225,7 @@ sleep:begin
         mode,
       }
       var options = _.mapSupplement( null, o2, o3 );
-      var returned = _.process.start( options );
+      var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 4, () =>
       {
@@ -33308,7 +33308,7 @@ sleep:begin
         mode,
       }
       var options = _.mapSupplement( null, o2, o3 );
-      var returned = _.process.start( options );
+      var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 4, () =>
       {
@@ -33386,7 +33386,7 @@ deasync:begin
         mode,
       }
       var options = _.mapSupplement( null, o2, o3 );
-      var returned = _.process.start( options );
+      var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 4, () =>
       {
@@ -33445,7 +33445,7 @@ deasync:begin
         mode,
       }
       var options = _.mapSupplement( null, o2, o3 );
-      var returned = _.process.start( options );
+      var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 4, () =>
       {
@@ -33511,7 +33511,7 @@ program1:end
         mode,
       }
       var options = _.mapSupplement( null, o2, o3 );
-      var returned = _.process.start( options );
+      var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 4, () =>
       {
@@ -33582,7 +33582,7 @@ program1:end
         mode,
       }
       var options = _.mapSupplement( null, o2, o3 );
-      var returned = _.process.start( options );
+      var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 4, () =>
       {
@@ -33653,7 +33653,7 @@ program1:end
         mode,
       }
       var options = _.mapSupplement( null, o2, o3 );
-      var returned = _.process.start( options );
+      var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 4, () =>
       {
@@ -33844,7 +33844,7 @@ function endSignalsOnExit( test )
         mode,
       }
       var options = _.mapSupplement( null, o2, o3 );
-      var returned = _.process.start( options );
+      var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 4, () =>
       {
@@ -33918,7 +33918,7 @@ exit:end
         mode,
       }
       var options = _.mapSupplement( null, o2, o3 );
-      var returned = _.process.start( options );
+      var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 4, () =>
       {
@@ -33985,7 +33985,7 @@ exit:end
         mode,
       }
       var options = _.mapSupplement( null, o2, o3 );
-      var returned = _.process.start( options );
+      var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 4, () =>
       {
@@ -34052,7 +34052,7 @@ exit:end
         mode,
       }
       var options = _.mapSupplement( null, o2, o3 );
-      var returned = _.process.start( options );
+      var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 4, () =>
       {
@@ -34121,7 +34121,7 @@ exit:end
         mode,
       }
       var options = _.mapSupplement( null, o2, o3 );
-      var returned = _.process.start( options );
+      var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 4, () =>
       {
@@ -34186,7 +34186,7 @@ Killed
         mode,
       }
       var options = _.mapSupplement( null, o2, o3 );
-      var returned = _.process.start( options );
+      var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 4, () =>
       {
@@ -34325,7 +34325,7 @@ function endSignalsOnExitExitAgain( test )
         mode,
       }
       var options = _.mapSupplement( null, o2, o3 );
-      var returned = _.process.start( options );
+      var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 3, () =>
       {
@@ -34398,7 +34398,7 @@ exit:${exitCode}
         mode,
       }
       var options = _.mapSupplement( null, o2, o3 );
-      var returned = _.process.start( options );
+      var returned = _.process.startMinimal( options );
       var time1;
       _.time.out( context.t1 * 3, () =>
       {
@@ -34546,7 +34546,7 @@ function terminate( test )
         throwingExitCode : 0
       }
 
-      let ready = _.process.start( o )
+      let ready = _.process.startMinimal( o )
 
       o.process.on( 'message', () =>
       {
@@ -34592,7 +34592,7 @@ function terminate( test )
         throwingExitCode : 0
       }
 
-      let ready = _.process.start( o )
+      let ready = _.process.startMinimal( o )
 
       o.process.on( 'message', () =>
       {
@@ -34638,7 +34638,7 @@ function terminate( test )
         throwingExitCode : 0
       }
 
-      let ready = _.process.start( o )
+      let ready = _.process.startMinimal( o )
 
       o.process.on( 'message', () =>
       {
@@ -34684,7 +34684,7 @@ function terminate( test )
         throwingExitCode : 0
       }
 
-      let ready = _.process.start( o )
+      let ready = _.process.startMinimal( o )
 
       o.process.on( 'message', () =>
       {
@@ -34730,7 +34730,7 @@ function terminate( test )
         throwingExitCode : 0
       }
 
-      let ready = _.process.start( o )
+      let ready = _.process.startMinimal( o )
 
       o.process.on( 'message', () =>
       {
@@ -34776,7 +34776,7 @@ function terminate( test )
         throwingExitCode : 0
       }
 
-      let ready = _.process.start( o )
+      let ready = _.process.startMinimal( o )
 
       o.process.on( 'message', () =>
       {
@@ -34830,7 +34830,7 @@ function terminate( test )
         throwingExitCode : 0
       }
 
-      let ready = _.process.start( o )
+      let ready = _.process.startMinimal( o )
 
       o.process.stdout.on( 'data', () =>
       {
@@ -34876,7 +34876,7 @@ function terminate( test )
         throwingExitCode : 0
       }
 
-      let ready = _.process.start( o )
+      let ready = _.process.startMinimal( o )
 
       o.process.stdout.on( 'data', () =>
       {
@@ -34922,7 +34922,7 @@ function terminate( test )
         throwingExitCode : 0
       }
 
-      let ready = _.process.start( o )
+      let ready = _.process.startMinimal( o )
 
       o.process.stdout.on( 'data', () =>
       {
@@ -34968,7 +34968,7 @@ function terminate( test )
         throwingExitCode : 0
       }
 
-      let ready = _.process.start( o )
+      let ready = _.process.startMinimal( o )
 
       o.process.stdout.on( 'data', () =>
       {
@@ -35011,7 +35011,7 @@ function terminate( test )
         throwingExitCode : 0
       }
 
-      let ready = _.process.start( o )
+      let ready = _.process.startMinimal( o )
 
       o.process.stdout.on( 'data', () =>
       {
@@ -35056,7 +35056,7 @@ function terminate( test )
         throwingExitCode : 0
       }
 
-      let ready = _.process.start( o )
+      let ready = _.process.startMinimal( o )
 
       o.process.stdout.on( 'data', () =>
       {
@@ -35154,7 +35154,7 @@ function terminateSync( test )
         throwingExitCode : 0
       }
 
-      _.process.start( o );
+      _.process.startMinimal( o );
 
       o.conTerminate.then( ( op ) =>
       {
@@ -35216,7 +35216,7 @@ function terminateSync( test )
         throwingExitCode : 0
       }
 
-      _.process.start( o );
+      _.process.startMinimal( o );
 
       o.conTerminate.then( ( op ) =>
       {
@@ -35591,7 +35591,7 @@ function terminateFirstChild( test )
         throwingExitCode : 0
       }
 
-      _.process.start( o );
+      _.process.startMinimal( o );
 
       let program2Pid = null;
       let terminate = _.Consequence();
@@ -35730,7 +35730,7 @@ function terminateFirstChild( test )
       outputCollecting : 0,
       throwingExitCode : 0,
     }
-    _.process.start( o );
+    _.process.startMinimal( o );
 
     let timer;
     if( mode === 'shell' )
@@ -36309,7 +36309,7 @@ function terminateSecondChild( test )
         throwingExitCode : 0
       }
 
-      _.process.start( o );
+      _.process.startMinimal( o );
 
       let program2Pid = null;
       let terminate = _.Consequence();
@@ -36412,7 +36412,7 @@ function terminateSecondChild( test )
       outputCollecting : 0,
       throwingExitCode : 0,
     }
-    _.process.start( o );
+    _.process.startMinimal( o );
 
     let timer = _.time.outError( context.t1*25 );
 
@@ -36972,7 +36972,7 @@ function terminateDetachedFirstChild( test )
         throwingExitCode : 0
       }
 
-      _.process.start( o );
+      _.process.startMinimal( o );
 
       let program2Pid = null;
       let terminate = _.Consequence();
@@ -37089,7 +37089,7 @@ function terminateDetachedFirstChild( test )
       outputCollecting : 0,
       throwingExitCode : 0,
     }
-    _.process.start( o );
+    _.process.startMinimal( o );
 
     let timer = _.time.outError( context.t1*25 );
 
@@ -37655,7 +37655,7 @@ function terminateWithDetachedChild( test )
         throwingExitCode : 0
       }
 
-      _.process.start( o );
+      _.process.startMinimal( o );
 
       let program2Pid = null;
       let terminate = _.Consequence();
@@ -37789,7 +37789,7 @@ function terminateWithDetachedChild( test )
       outputCollecting : 0,
       throwingExitCode : 0,
     }
-    _.process.start( o );
+    _.process.startMinimal( o );
 
     let timer = _.time.outError( context.t1*25 );
 
@@ -38355,7 +38355,7 @@ function terminateSeveralChildren( test )
         throwingExitCode : 0
       }
 
-      _.process.start( o );
+      _.process.startMinimal( o );
 
       let program2Pid = null;
       let program3Pid = null;
@@ -38580,8 +38580,8 @@ function terminateSeveralChildren( test )
       throwingExitCode : 0,
     }
 
-    _.process.start( _.mapExtend( null, o, { execPath : 'node program2.js', mode : 'spawn' }));
-    _.process.start( _.mapExtend( null, o, { execPath : 'node program3.js', mode : 'spawn' }));
+    _.process.startMinimal( _.mapExtend( null, o, { execPath : 'node program2.js', mode : 'spawn' }));
+    _.process.startMinimal( _.mapExtend( null, o, { execPath : 'node program3.js', mode : 'spawn' }));
 
     let timer = _.time.outError( context.t1*32 );
 
@@ -38685,7 +38685,7 @@ function terminateSeveralDetachedChildren( test )
         throwingExitCode : 0
       }
 
-      _.process.start( o );
+      _.process.startMinimal( o );
 
       let program2Pid = null;
       let program3Pid = null;
@@ -38840,8 +38840,8 @@ function terminateSeveralDetachedChildren( test )
       throwingExitCode : 0,
     }
 
-    _.process.start( _.mapExtend( null, o, { execPath : 'node program2.js', mode : 'spawn' }));
-    _.process.start( _.mapExtend( null, o, { execPath : 'node program3.js', mode : 'spawn' }));
+    _.process.startMinimal( _.mapExtend( null, o, { execPath : 'node program2.js', mode : 'spawn' }));
+    _.process.startMinimal( _.mapExtend( null, o, { execPath : 'node program3.js', mode : 'spawn' }));
 
     let timer = _.time.outError( context.t1*25 );
 
@@ -38942,7 +38942,7 @@ function terminateDeadProcess( test )
         throwingExitCode : 0
       }
 
-      _.process.start( o );
+      _.process.startMinimal( o );
 
       o.conTerminate.then( () =>
       {
@@ -39039,7 +39039,7 @@ function terminateTimeOutNoHandler( test )
         throwingExitCode : 0
       }
 
-      _.process.start( o )
+      _.process.startMinimal( o )
       let terminate = _.Consequence();
 
       o.process.stdout.on( 'data', _.routineJoin( null, handleOutput, [ o, terminate ] ) );
@@ -39209,7 +39209,7 @@ function terminateTimeOutIgnoreSignal( test )
         throwingExitCode : 0
       }
 
-      _.process.start( o )
+      _.process.startMinimal( o )
       let terminate = _.Consequence();
 
       o.process.stdout.on( 'data', _.routineJoin( null, handleOutput, [ o, terminate ] ) );
@@ -39394,7 +39394,7 @@ function terminateZeroTimeOut( test )
         throwingExitCode : 0
       }
 
-      _.process.start( o )
+      _.process.startMinimal( o )
       let terminate = _.Consequence();
 
       o.process.stdout.on( 'data', _.routineJoin( null, handleOutput, [ o, terminate ] ) );
@@ -39695,7 +39695,7 @@ function terminateZeroTimeOutWithoutChildrenShell( test )
     throwingExitCode : 0
   }
 
-  _.process.start( o )
+  _.process.startMinimal( o )
   let terminate = _.Consequence();
 
   o.process.stdout.on( 'data', handleOutput );
@@ -39797,7 +39797,7 @@ function terminateZeroTimeOutWithChildrenShell( test )
     throwingExitCode : 0
   }
 
-  _.process.start( o )
+  _.process.startMinimal( o )
   let terminate = _.Consequence();
 
   o.process.stdout.on( 'data', handleOutput );
@@ -39907,9 +39907,9 @@ function terminateDifferentStdio( test )
       }
 
       if( mode === 'shell' ) /* Mode::shell doesn't support inter process communication. */
-      return test.shouldThrowErrorSync( () => _.process.start( o ) )
+      return test.shouldThrowErrorSync( () => _.process.startMinimal( o ) )
 
-      _.process.start( o )
+      _.process.startMinimal( o )
 
       let ready = _.Consequence();
 
@@ -39994,9 +39994,9 @@ function terminateDifferentStdio( test )
       }
 
       if( mode === 'shell' ) /* Mode::shell doesn't support inter process communication. */
-      return test.shouldThrowErrorSync( () => _.process.start( o ) )
+      return test.shouldThrowErrorSync( () => _.process.startMinimal( o ) )
 
-      _.process.start( o )
+      _.process.startMinimal( o )
 
       let ready = _.Consequence();
 
@@ -40044,9 +40044,9 @@ function terminateDifferentStdio( test )
       }
 
       if( mode === 'shell' ) /* Mode::shell doesn't support inter process communication. */
-      return test.shouldThrowErrorSync( () => _.process.start( o ) )
+      return test.shouldThrowErrorSync( () => _.process.startMinimal( o ) )
 
-      _.process.start( o )
+      _.process.startMinimal( o )
 
       let ready = _.Consequence();
 
@@ -40593,7 +40593,7 @@ function killComplex( test )
         throwingExitCode : 0
       }
 
-      let ready = _.process.start( o );
+      let ready = _.process.startMinimal( o );
 
       let pid = null;
       let childOfChild = null;
@@ -40714,7 +40714,7 @@ function killComplex( test )
     _.include( 'wFiles' );
     var testAppPath = _.fileProvider.path.nativize( _.path.join( __dirname, 'testApp.js' ) );
     var o = { execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath, mode, throwingExitCode : 0 }
-    var ready = _.process.start( o )
+    var ready = _.process.startMinimal( o )
     process.send( o.process.pid );
     ready.then( ( op ) =>
     {
@@ -40796,7 +40796,7 @@ function waitForDeath( test )
       outputPiping : 1,
       outputCollecting : 1
     };
-    _.process.start( o )
+    _.process.startMinimal( o )
 
     let terminated = _.process.waitForDeath({ pnd : o.process, timeOut : context.t1 * 10 })
     .then( () =>
@@ -40825,7 +40825,7 @@ function waitForDeath( test )
       outputPiping : 1,
       outputCollecting : 1
     };
-    _.process.start( o )
+    _.process.startMinimal( o )
 
     let terminated = _.process.waitForDeath({ pid : o.process.pid, timeOut : context.t1 * 10 })
     .then( () =>
@@ -40854,7 +40854,7 @@ function waitForDeath( test )
       outputPiping : 1,
       outputCollecting : 1
     };
-    _.process.start( o )
+    _.process.startMinimal( o )
 
     let terminated = _.process.waitForDeath({ pnd : o.process, timeOut : context.t1 * 10 })
     .then( () =>
@@ -40886,7 +40886,7 @@ function waitForDeath( test )
       outputPiping : 1,
       outputCollecting : 1
     };
-    _.process.start( o )
+    _.process.startMinimal( o )
 
     let terminated = _.process.waitForDeath({ pnd : o.process, timeOut : context.t1 }) /* 1000 */
     terminated = test.shouldThrowErrorAsync( terminated, ( err ) =>
@@ -40950,7 +40950,7 @@ function children( test )
       throwingExitCode : 0
     }
 
-    let ready = _.process.start( o );
+    let ready = _.process.startMinimal( o );
     let children, lastChildPid;
 
     o.process.on( 'message', ( e ) =>
@@ -40997,7 +40997,7 @@ function children( test )
       throwingExitCode : 0
     }
 
-    let ready = _.process.start( o );
+    let ready = _.process.startMinimal( o );
     let children, lastChildPid;
 
     o.process.on( 'message', ( e ) =>
@@ -41041,7 +41041,7 @@ function children( test )
       throwingExitCode : 0
     }
 
-    let ready = _.process.start( o );
+    let ready = _.process.startMinimal( o );
     let children, lastChildPid;
 
     o.process.on( 'message', ( e ) =>
@@ -41086,8 +41086,8 @@ function children( test )
     let o1 = _.mapExtend( null, o );
     let o2 = _.mapExtend( null, o );
 
-    let r1 = _.process.start( o1 );
-    let r2 = _.process.start( o2 );
+    let r1 = _.process.startMinimal( o1 );
+    let r2 = _.process.startMinimal( o2 );
     let children;
 
     let ready = _.Consequence.AndTake( r1, r2 );
@@ -41146,7 +41146,7 @@ function children( test )
       throwingExitCode : 0
     }
 
-    _.process.start( o );
+    _.process.startMinimal( o );
     o.process.kill('SIGKILL');
 
     return o.ready.then( () =>
@@ -41176,7 +41176,7 @@ function children( test )
       mode : 'spawn',
       inputMirroring : 0
     }
-    _.process.start( o );
+    _.process.startMinimal( o );
     process.send( o.process.pid )
   }
 
@@ -41213,7 +41213,7 @@ function childrenOptionFormatList( test )
       throwingExitCode : 0
     }
 
-    let ready = _.process.start( o );
+    let ready = _.process.startMinimal( o );
     let children, lastChildPid;
 
     o.process.on( 'message', ( e ) =>
@@ -41272,7 +41272,7 @@ function childrenOptionFormatList( test )
       mode : 'spawn',
       inputMirroring : 0,
     }
-    _.process.start( o );
+    _.process.startMinimal( o );
 
     o.conStart.thenGive( () =>
     {
@@ -41747,21 +41747,21 @@ var Proto =
 
     // other options
 
-    startOptionStreamSizeLimit,
-    startOptionStreamSizeLimitThrowing,
+    startMinimalOptionStreamSizeLimit,
+    startMinimalOptionStreamSizeLimitThrowing,
     startSingleOptionDry,
-    startOptionDryMultiple,
-    startOptionCurrentPath,
-    startOptionCurrentPaths,
-    startOptionPassingThrough,
-    startOptionUid,
-    startOptionGid,
-    startOptionProcedureSingle,
-    startOptionProcedureMultiple,
+    startMultipleOptionDry,
+    startMinimalOptionCurrentPath,
+    startMinimalOptionCurrentPaths,
+    startPassingThrough,
+    startMinimalOptionUid,
+    startMinimalOptionGid,
+    startSingleOptionProcedure,
+    startMultipleOptionProcedure,
 
     // pid / status / exit
 
-    startDiffPid,
+    startMinimalDiffPid,
     pidFrom,
 
     isAlive,
@@ -41776,9 +41776,9 @@ var Proto =
     killSync,
     killOptionWithChildren,
 
-    startErrorAfterTerminationWithSend,
-    startTerminateHangedWithExitHandler,
-    startTerminateAfterLoopRelease,
+    startMinimalErrorAfterTerminationWithSend,
+    startMinimalTerminateHangedWithExitHandler,
+    startMinimalTerminateAfterLoopRelease,
 
     endSignalsBasic,
     endSignalsOnExit,
