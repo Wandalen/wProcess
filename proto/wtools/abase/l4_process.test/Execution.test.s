@@ -8523,8 +8523,6 @@ function startSingleProcedureStack( test )
   let context = this;
   let a = context.assetFor( test, false );
   let programPath = a.program( program1 );
-  // let modes = [ 'fork' ];
-  // xxx
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
@@ -17876,7 +17874,6 @@ function startNjsWithReadyDelayStructural( test )
         'hiding' : 1,
         'concurrent' : 0,
         'timeOut' : null,
-        // 'briefExitCode' : 0,
         'verbosity' : 2,
         'outputPrefixing' : 0,
         'outputPiping' : true,
@@ -29951,7 +29948,7 @@ function endSignalsBasic( test )
   }
 
   let modes = [ 'fork', 'spawn', 'shell' ];
-  modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGQUIT' ) ) ); /* xxx */
+  modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGQUIT' ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGINT' ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGTERM' ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGHUP' ) ) );
@@ -32746,7 +32743,7 @@ function terminate( test )
         else
         {
           test.identical( op.exitCode, null );
-          test.identical( op.exitSignal, 'SIGTERM' ); /* yyy xxx : sometimes SIGKILL */
+          test.identical( op.exitSignal, 'SIGTERM' ); /* xxx : sometimes SIGKILL */
           test.identical( op.ended, true );
           test.true( _.strHas( op.output, 'SIGTERM' ) );
           test.true( !_.strHas( op.output, 'Application timeout!' ) );
@@ -35806,8 +35803,7 @@ function terminateDifferentStdio( test )
     .then( () =>
     {
       test.case = `mode : ${mode}, ignore`;
-      /*
-        Phantom fail on Windows:
+      /* xxx Phantom fail on Windows:
 
         Fail #1:
         signalSend : 544 name: node.exe
@@ -37068,7 +37064,7 @@ var Proto =
 
     startProcedureTrivial, /* with routine::starter */
     startProcedureExists, /* with routine::starter */
-    startSingleProcedureStack, /* xxx : passes only when run with `start`, `startMinimal` */
+    startSingleProcedureStack,
     startMultipleProcedureStack,
     startMinimalOnTerminateSeveralCallbacksChronology,
     startMinimalChronology,

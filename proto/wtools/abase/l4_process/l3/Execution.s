@@ -2013,10 +2013,7 @@ function startMultiple_body( o )
       }
       else
       {
-        // if( o.sync && !o.deasync ) /* yyy xxx : ? */
         prevReady.finally( o2.ready );
-        // else
-        // prevReady.then( o2.ready );
         prevReady = o2.ready;
       }
 
@@ -2318,94 +2315,138 @@ let startMultiple = _.routineUnite( startMultiple_head, startMultiple_body );
 
 //
 
-function _run()
+function _sessionsRun_head( routine, args )
+{
+  let o;
+
+  if( _.longIs( args[ 0 ] ) )
+  o = { sessions : args[ 0 ] };
+  else
+  o = args[ 0 ];
+
+  o = _.routineOptions( routine, o );
+
+  _.assert( arguments.length === 2 );
+  _.assert( args.length === 1, 'Expects single argument' );
+  _.assert( _.longIs( o.sessions ) );
+
+  return o;
+}
+
+/* xxx : abstract algorithm for consequence */
+function _sessionsRun_body( o )
 {
   let firstReady = new _.Consequence().take( null );
   let prevReady = firstReady;
   let readies = [];
-  let conStart = [];
-  let conTerminate = [];
+  let begins = [];
+  let ends = [];
+  let readyRoutine = null;
 
-  o.sessions.forEach( ( o2, i ) =>
+  if( !o.ready )
   {
-    let err2;
+    o.ready = _.take( null );
+  }
+  else if( !_.consequenceIs( o.ready ) )
+  {
+    readyRoutine = o.ready;
+    o.ready = _.take( null );
+  }
 
-    if( o.concurrent ) /* xxx : use abstract algorithm of consequence */
-    {
-      prevReady.then( o2.ready );
-    }
-    else
-    {
-      // if( o.sync && !o.deasync )
-      prevReady.finally( o2.ready );
-      // else
-      // prevReady.then( o2.ready );
-      prevReady = o2.ready;
-    }
+  o.ready.then( () =>
+  {
 
-    try
+    o.sessions.forEach( ( session, i ) =>
     {
-      _.assertMapHasAll( o2, _.process.startSingle.defaults );
-      _.process.startSingle.body.call( _.process, o2 );
-    }
-    catch( err )
-    {
-      err2 = err;
-      o2.ready.error( err );
-    }
 
-    conStart.push( o2.conStart );
-    conTerminate.push( o2.conTerminate );
-    readies.push( o2.ready );
+      if( o.concurrent )
+      {
+        prevReady.then( session.ready );
+      }
+      else
+      {
+        prevReady.finally( session.ready );
+        prevReady = session.ready;
+      }
 
-    // if( !o.dry )
-    // if( o.streamOut || o.streamErr )
-    // processPipe( o2 );
+      try
+      {
+        o.onRun( session );
+      }
+      catch( err )
+      {
+        o.error = o.error || err;
+        session.ready.error( err );
+      }
 
-    if( !o.concurrent )
-    o2.ready.catch( ( err ) =>
-    {
-      o.error = o.error || err;
-      o.onError( err );
-      // if( o.state !== 'terminated' )
-      // serialEnd();
-      throw err;
+      _.assert( _.consequenceIs( session[ o.conBeginName ] ) );
+      _.assert( _.consequenceIs( session[ o.conEndName ] ) );
+      _.assert( _.consequenceIs( session[ o.conReadyName ] ) );
+
+      begins.push( session[ o.conBeginName ] );
+      ends.push( session[ o.conEndName ] );
+      readies.push( session[ o.readyName ] );
+
+      if( !o.concurrent )
+      session.ready.catch( ( err ) =>
+      {
+        o.error = o.error || err;
+        if( o.onError )
+        o.onError( err );
+        else
+        throw err;
+      });
+
     });
 
+    let onBegin;
+    if( o.concurrent )
+    onBegin = _.Consequence.AndImmediate( ... begins );
+    else
+    onBegin = _.Consequence.OrKeep( ... begins );
+    let onEnd = _.Consequence.AndImmediate( ... ends );
+    let ready = _.Consequence.AndImmediate( ... readies );
+
+    o.onBegin = direct( onBegin, o.onBegin );
+    o.onEnd = direct( ready, o.onEnd );
+
+    ready.finally( o.ready );
+
   });
 
-  if( o.concurrent )
-  _.Consequence.AndImmediate( ... conStart ).tap( ( err, arg ) =>
+  return o;
+
+  function direct( icon, ocon )
   {
-    if( o.onStart )
-    o.onStart( err, err ? undefined : o );
-    // if( !o.ended )
-    // o.state = 'started';
-    o.conStart.take( err, err ? undefined : o );
-  });
-  else
-  _.Consequence.OrKeep( ... conStart ).tap( ( err, arg ) =>
-  {
-    if( o.onStart )
-    o.onStart( err, err ? undefined : o );
-    // if( !o.ended )
-    // o.state = 'starting';
-    o.conStart.take( err, err ? undefined : o );
-  });
+    if( _.consequenceIs( ocon ) )
+    icon.finally( ocon );
+    else if( ocon )
+    icon.tap( ( err, arg ) =>
+    {
+      ocon( err, err ? undefined : o );
+    });
+    else
+    ocon = icon;
+    return ocon;
+  }
 
-  _.Consequence.AndImmediate( ... conTerminate ).tap( ( err, arg ) =>
-  {
-    if( o.conTerminate )
-    o.conTerminate( err, err ? undefined : o );
-    // if( !o.ended )
-    // o.state = 'terminating';
-    o.conTerminate.take( err, err ? undefined : o );
-  });
-
-  let ready = _.Consequence.AndImmediate( ... readies );
-
-  return ready;
 }
+
+_sessionsRun_body.defaults =
+{
+  concurrent : 1,
+  sessions : null,
+  error : null,
+  conBeginName : 'conBegin',
+  conEndName : 'conEnd',
+  readyName : 'ready',
+  onBegin : null,
+  onEnd : null,
+  onError : null,
+  ready : null,
+}
+
+let _sessionsRun = _.routineUnite( _sessionsRun_head, _sessionsRun_body );
 
 //
 
