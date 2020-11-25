@@ -895,24 +895,24 @@ function startMinimal_body( o )
     console.log( 'disconnect', _.process.realMainFile(), this.ended ); debugger;
     */
 
-    _.assert( !!this.process, 'Process is not started. Cant disconnect.' );
+    _.assert( !!this.pnd, 'Process is not started. Cant disconnect.' );
 
     /*
     close event will not be called for regular/detached process
     */
 
-    if( this.process.stdin )
-    this.process.stdin.end();
-    if( this.process.stdout )
-    this.process.stdout.destroy();
-    if( this.process.stderr )
-    this.process.stderr.destroy();
+    if( this.pnd.stdin )
+    this.pnd.stdin.end();
+    if( this.pnd.stdout )
+    this.pnd.stdout.destroy();
+    if( this.pnd.stderr )
+    this.pnd.stderr.destroy();
 
-    if( this.process.disconnect )
-    if( this.process.connected )
-    this.process.disconnect();
+    if( this.pnd.disconnect )
+    if( this.pnd.connected )
+    this.pnd.disconnect();
 
-    this.process.unref();
+    this.pnd.unref();
 
     if( !this.ended )
     {

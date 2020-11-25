@@ -894,7 +894,6 @@ function startMinimalFork( test )
       test.true( _.strHas( o.output,  `key1: 'val'` ) );
       test.true( _.strHas( o.output,  a.path.nativize( a.routinePath ) ) );
       test.true( _.strHas( o.output,  `[ '--no-warnings' ]` ) );
-
       return null;
     })
   })
