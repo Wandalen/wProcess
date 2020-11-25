@@ -1056,7 +1056,7 @@ function startMinimal_body( o )
     try
     {
 
-      if( !o.inputMirroring ) /* qqq for Yevhen : cover */
+      if( !o.inputMirroring ) /* qqq for Yevhen : cover | aaa : Done. */
       return;
 
       if( o.verbosity >= 3 )
@@ -1364,7 +1364,7 @@ startMinimal_body.defaults =
   sync : 0,
   deasync : 0,
   when : 'instant', /* instant / afterdeath / time / delay */
-  dry : 0, /* qqq for Yevhen : cover the option. make sure all con* called once. make sure all con* called in correct order */
+  dry : 0, /* qqq for Yevhen : cover the option. make sure all con* called once. make sure all con* called in correct order | aaa : Done. */
 
   mode : 'shell', /* fork / spawn / shell */
   stdio : 'pipe', /* pipe / ignore / inherit */
@@ -1383,8 +1383,8 @@ startMinimal_body.defaults =
   env : null,
   detaching : 0,
   hiding : 1,
-  uid : null, /* qqq for Yevhen : implement and cover the option */
-  gid : null, /* qqq for Yevhen : implement and cover the option */
+  uid : null, /* qqq for Yevhen : implement and cover the option | aaa : Done. */
+  gid : null, /* qqq for Yevhen : implement and cover the option | aaa : Done. */
   streamSizeLimit : null,
   passingThrough : 0,
   timeOut : null,
@@ -1392,8 +1392,8 @@ startMinimal_body.defaults =
   throwingExitCode : 'full', /* must be on by default */ /* bool-like, 'full', 'brief' */
   applyingExitCode : 0,
 
-  verbosity : 2, /* qqq for Yevhen : cover the option */
-  outputPrefixing : 0, /* qqq for Yevhen : extend coverage */
+  verbosity : 2, /* qqq for Yevhen : cover the option | aaa : Done. */
+  outputPrefixing : 0, /* qqq for Yevhen : extend coverage | aaa : Done. */
   outputPiping : null,
   outputCollecting : 0,
   outputAdditive : null, /* qqq for Yevhen : cover the option */
@@ -2072,7 +2072,7 @@ function startMultiple_body( o )
     _.Consequence.AndImmediate( ... conStart ).tap( ( err, arg ) =>
     {
       if( !o.ended )
-      o.state = 'started'; /* qqq for Yevhen : cover states of multiple run by test routine ( each state, but single test routine ) */
+      o.state = 'started'; /* qqq for Yevhen : cover states of multiple run by test routine ( each state, but single test routine ) | aaa : Done. */
       o.conStart.take( err, err ? undefined : o );
     });
     else
