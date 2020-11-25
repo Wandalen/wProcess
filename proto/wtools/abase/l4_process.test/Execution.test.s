@@ -9070,7 +9070,7 @@ function startSingleProcedureStack( test )
         deasync,
       }
 
-      _.process.startSingle( o );
+      _.process.start( o );
 
       test.identical( _.strCount( o.procedure._sourcePath, 'Execution.test.s' ), 1 );
       test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
@@ -9104,7 +9104,7 @@ function startSingleProcedureStack( test )
         deasync,
       }
 
-      _.process.startSingle( o );
+      _.process.start( o );
 
       test.identical( _.strCount( o.procedure._sourcePath, 'Execution.test.s' ), 1 );
       test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
@@ -9138,7 +9138,7 @@ function startSingleProcedureStack( test )
         deasync,
       }
 
-      _.process.startSingle( o );
+      _.process.start( o );
 
       test.identical( _.strCount( o.procedure._stack, 'case1' ), 1 );
       test.identical( _.strCount( o.procedure._sourcePath, 'Execution.test.s' ), 1 );
@@ -9174,7 +9174,7 @@ function startSingleProcedureStack( test )
         deasync,
       }
 
-      _.process.startSingle( o );
+      _.process.start( o );
 
       test.identical( _.strCount( o.procedure._stack, 'case1' ), 1 );
       test.identical( _.strCount( o.procedure._sourcePath, 'start' ), 1 );
@@ -9208,7 +9208,7 @@ function startSingleProcedureStack( test )
         deasync,
       }
 
-      _.process.startSingle( o );
+      _.process.start( o );
 
       test.identical( o.procedure._stack, '' );
       test.identical( o.procedure._sourcePath, '' );
@@ -9242,7 +9242,7 @@ function startSingleProcedureStack( test )
         deasync,
       }
 
-      _.process.startSingle( o );
+      _.process.start( o );
 
       test.identical( o.procedure._stack, 'abc' );
       test.identical( o.procedure._sourcePath, 'abc' );
@@ -11035,7 +11035,7 @@ startMinimalOptionTimeOut.rapidity = -1;
 
 //
 
-function startMinimalAfterDeath( test )
+function startAfterDeath( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -11068,10 +11068,10 @@ function startMinimalAfterDeath( test )
       }
 
       if( mode === 'shell' ) /* mode::shell doesn't support ipc */
-      return test.shouldThrowErrorSync( () => _.process.startMinimal( o ) )
+      return test.shouldThrowErrorSync( () => _.process.start( o ) )
 
       // debugger;
-      _.process.startMinimal( o );
+      _.process.start( o );
       let secondaryPid;
       // debugger;
 
@@ -11207,7 +11207,7 @@ function startMinimalAfterDeath( test )
       mode : 'spawn',
     }
 
-    _.process.startMinimal( o );
+    _.process.start( o );
 
     o.conStart.thenGive( () =>
     {
@@ -11240,8 +11240,8 @@ function startMinimalAfterDeath( test )
 
 }
 
-startMinimalAfterDeath.timeOut = 35e4; /* Locally : 34.737s */
-startMinimalAfterDeath.description =
+startAfterDeath.timeOut = 35e4; /* Locally : 34.737s */
+startAfterDeath.description =
 `
 Spawns program1 as "main" process.
 Program1 starts program2 with mode:'afterdeath'
@@ -11251,7 +11251,7 @@ Program2 exits normally after short timeout
 
 //
 
-function startMinimalAfterDeathOutput( test )
+function startAfterDeathOutput( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -11279,9 +11279,9 @@ function startMinimalAfterDeathOutput( test )
       }
 
       if( mode === 'shell' ) /* mode::shell doesn't support ipc */
-      return test.shouldThrowErrorSync( () => _.process.startMinimal( o ) );
+      return test.shouldThrowErrorSync( () => _.process.start( o ) );
 
-      let con = _.process.startMinimal( o );
+      let con = _.process.start( o );
 
       con.then( ( op ) =>
       {
@@ -11352,7 +11352,7 @@ function startMinimalAfterDeathOutput( test )
       stdio : 'inherit'
     }
 
-    _.process.startMinimal( o );
+    _.process.start( o );
 
     o.process.on( 'exit', () => //zzz for Vova: remove after enabling exit handler in start
     {
@@ -11384,8 +11384,8 @@ function startMinimalAfterDeathOutput( test )
   }
 }
 
-startMinimalAfterDeathOutput.timeOut = 27e4; /* Locally : 26.485s */
-startMinimalAfterDeathOutput.description =
+startAfterDeathOutput.timeOut = 27e4; /* Locally : 26.485s */
+startAfterDeathOutput.description =
 `
 Fakes death of program1 and checks output of program2
 `
@@ -27213,7 +27213,7 @@ function startMultipleOptionDry( test )
 
 //
 
-function startMinimalOptionCurrentPath( test )
+function startSingleOptionCurrentPath( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -27247,7 +27247,7 @@ function startMinimalOptionCurrentPath( test )
         stdio : 'pipe',
         outputCollecting : 1,
       }
-      return _.process.startMinimal( o )
+      return _.process.startSingle( o )
       .then( function( op )
       {
         let got = a.fileProvider.fileRead( testFilePath );
@@ -27274,7 +27274,7 @@ function startMinimalOptionCurrentPath( test )
         outputCollecting : 1,
       }
 
-      return _.process.startMinimal( o )
+      return _.process.startSingle( o )
       .then( function( op )
       {
         let got = a.fileProvider.fileRead( testFilePath );
@@ -27301,7 +27301,7 @@ function startMinimalOptionCurrentPath( test )
         outputCollecting : 1,
       }
 
-      return _.process.startMinimal( o )
+      return _.process.startSingle( o )
       .then( function( op )
       {
         let got = a.fileProvider.fileRead( testFilePath );
@@ -27331,7 +27331,7 @@ function startMinimalOptionCurrentPath( test )
         outputCollecting : 1,
       }
 
-      return _.process.startMinimal( o )
+      return _.process.startSingle( o )
       .then( function( op )
       {
         let got = a.fileProvider.fileRead( testFilePath );
@@ -27359,7 +27359,7 @@ function startMinimalOptionCurrentPath( test )
 //
 
 /* qqq for Yevhen : try to introduce subroutine for modes | aaa : Done. */
-function startMinimalOptionCurrentPaths( test )
+function startMultipleOptionCurrentPath( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -27383,7 +27383,7 @@ function startMinimalOptionCurrentPaths( test )
     {
       test.case = `mode : ${mode}, execPath : single, currentPath : multiple`;
 
-      let returned = _.process.startMinimal( _.mapSupplement( { mode : `${mode}` }, o2 ) );
+      let returned = _.process.startMultiple( _.mapSupplement( { mode : `${mode}` }, o2 ) );
 
       returned.then( ( op ) =>
       {
@@ -27407,7 +27407,7 @@ function startMinimalOptionCurrentPaths( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}, execPath : multiple, currentPath : multiple`;
-      let returned = _.process.startMinimal( _.mapSupplement( { mode : `${mode}`, execPath : [ mode === 'fork' ? programPath : 'node ' + programPath, mode === 'fork' ? programPath : 'node ' + programPath ] }, o2 ) );
+      let returned = _.process.startMultiple( _.mapSupplement( { mode : `${mode}`, execPath : [ mode === 'fork' ? programPath : 'node ' + programPath, mode === 'fork' ? programPath : 'node ' + programPath ] }, o2 ) );
 
       returned.then( ( op ) =>
       {
@@ -41651,7 +41651,7 @@ var Proto =
 
     startProcedureTrivial, /* with `starter` */
     startProcedureExists, /* with `starter` */
-    startSingleProcedureStack,
+    startSingleProcedureStack, /* xxx : passes only when run with `start`, `startMinimal` */
     startMultipleProcedureStack,
     startMinimalOnTerminateSeveralCallbacksChronology,
     startMinimalChronology,
@@ -41664,8 +41664,8 @@ var Proto =
     startMinimalOptionWhenDelay,
     startMinimalOptionWhenTime,
     startMinimalOptionTimeOut,
-    startMinimalAfterDeath, /* qqq for Vova : fix aaa:fixed*/
-    startMinimalAfterDeathOutput, /* qqq for Vova : fix aaa:fixed*/
+    startAfterDeath, /* qqq for Vova : fix aaa:fixed*/ /* xxx : passes only when run with `start` */
+    startAfterDeathOutput, /* qqq for Vova : fix aaa:fixed*/ /* xxx  : passes only when run with `start` */
 
     // detaching
 
@@ -41755,8 +41755,8 @@ var Proto =
     startMinimalOptionStreamSizeLimitThrowing,
     startSingleOptionDry,
     startMultipleOptionDry,
-    startMinimalOptionCurrentPath,
-    startMinimalOptionCurrentPaths,
+    startSingleOptionCurrentPath,
+    startMultipleOptionCurrentPath,
     startPassingThrough,
     startMinimalOptionUid,
     startMinimalOptionGid,
