@@ -28168,31 +28168,31 @@ function startMultipleOutput( test )
           //   'conStart',
           //   '0.out:1::begin',//
           //   '1.out:1::begin', ///
-          //   '0.out:2::begin',
+          //   '0.out:2::begin', *
           //   '2.out:2::begin',
           //   '0.out:1::end',//
-          //   '1.out:1::end',
-          //   '0.out:2::end',
+          //   '1.out:1::end', ///
+          //   '0.out:2::end', *
           //   '2.out:2::end',
           //   '0.err:1::err',//
-          //   '1.err:1::err',
-          //   '1.out.end',
-          //   '1.err.end',
+          //   '1.err:1::err', ///
+          //   '1.out.end', ///
+          //   '1.err.end', /// before out
           //   '0.err:2::err',//
           //   '2.err:2::err',
           //   '2.out.end',
-          //   '0.out.end',
-          //   '0.out.finish',
+          //   '0.out.end',// *
+          //   '0.out.finish',// *
           //   '2.err.end',
-          //   '0.err.end',
-          //   '0.err.finish',
+          //   '0.err.end', // *
+          //   '0.err.finish', // * before o.out
           //   'conTerminate',
           //   'ready'
           // ]
 
           // test.identical( new Set( ... track ), new Set( ... exp ) );
 
-          // test.lt( track.indexOf( '0.out:1::begin' ), track.indexOf( '0.out:1::end' ) );
+          // test.lt( track.indexOf( '0.out:1::begin' ), track.indexOf( '0.out:1::end' ) ); //
           // test.lt( track.indexOf( '1.out:1::begin' ), track.indexOf( '0.out:1::end' ) );
           // test.lt( track.indexOf( '0.out:2::begin' ), track.indexOf( '0.out:1::end' ) );
           // test.lt( track.indexOf( '2.out:2::begin' ), track.indexOf( '0.out:1::end' ) );
@@ -28215,12 +28215,11 @@ function startMultipleOutput( test )
           // test.lt( track.indexOf( '0.err.end' ), track.indexOf( 'conTerminate' ) );
           // test.lt( track.indexOf( '0.err.finish' ), track.indexOf( 'conTerminate' ) );
           // test.lt( track.indexOf( 'conTerminate' ), track.indexOf( 'ready' ) );
-          /* qqq for Yevhen : replace with several calls of _.dissector.dissect() */
-          test.true( _.dissector.dissect( '**<0.out:1::begin>**<0.out:1::end>**<0.err:1::err>**<0.err:2::err>**', track.toString() ).matched );
-          // test.true( _.dissector.dissect( '**<0.out:1::begin>**', track.toString() ).matched );
-          test.true( _.dissector.dissect( '**<1.out:1::begin>**', track.toString() ).matched );
-          test.true( _.dissector.dissect( '**<0.out:2::begin>**', track.toString() ).matched );
-          test.true( _.dissector.dissect( '**<2.out:2::begin>**', track.toString() ).matched );
+          /* qqq for Yevhen : replace with several calls of _.dissector.dissect() | aaa : Done. */
+          test.true( _.dissector.dissect( '**<conStart>' + '**<0.out:1::begin>**<0.out:1::end>' + '**<0.err:1::err>**<0.err:2::err>' + '**<0.err.end>**<0.err.finish>' + '**<0.out.end>**<0.out.finish>**' + '<conTerminate>**' + '<ready>**', track.toString() ).matched );
+          test.true( _.dissector.dissect( '**<conStart>' + '**<1.out:1::begin>**<1.out:1::end>' + '**<1.err:1::err>**' + '<1.err.end>**<1.out.end>**' + '<conTerminate>**' + '<ready>**', track.toString() ).matched );
+          test.true( _.dissector.dissect( '**<conStart>' + '**<0.out:2::begin>**<0.out:2::end>' + '**<0.err.end>**<0.err.finish>' + '**<0.out.end>**<0.out.finish>**'  + '<conTerminate>**' + '<ready>**', track.toString() ).matched );
+          test.true( _.dissector.dissect( '**<conStart>' + '**<2.out:2::begin>**'      + '<conTerminate>**' + '<ready>**', track.toString() ).matched );
 
         }
 
