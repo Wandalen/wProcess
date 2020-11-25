@@ -72,7 +72,7 @@ done
 
 RET=0; until [ ${RET} -ne 0 ]; do
     reset
-    taskset 0x1 node wtools/abase/l4_process.test/Execution.test.s n:1 v:5 s:0 r:terminateDifferentStdio
+    taskset 0x1 node wtools/abase/l4_process.test/Execution.test.s n:1 v:5 s:0 r:startSingleOptionDry
     RET=$?
     sleep 1
 done
