@@ -30000,59 +30000,64 @@ function startMultipleOutput( test )
             'ready'
           ]
 */
-          var exp =
-          [
-            'conStart',
-            '0.out:1::begin',
-            '1.out:1::begin',
-            '0.out:2::begin',
-            '2.out:2::begin',
-            '0.out:1::end',
-            '1.out:1::end',
-            '0.out:2::end',
-            '2.out:2::end',
-            '0.err:1::err',
-            '1.err:1::err',
-            '1.out.end',
-            '1.err.end',
-            '0.err:2::err',
-            '2.err:2::err',
-            '2.out.end',
-            '0.out.end',
-            '0.out.finish',
-            '2.err.end',
-            '0.err.end',
-            '0.err.finish',
-            'conTerminate',
-            'ready'
-          ]
+          // var exp =
+          // [
+          //   'conStart',
+          //   '0.out:1::begin',//
+          //   '1.out:1::begin', ///
+          //   '0.out:2::begin',
+          //   '2.out:2::begin',
+          //   '0.out:1::end',//
+          //   '1.out:1::end',
+          //   '0.out:2::end',
+          //   '2.out:2::end',
+          //   '0.err:1::err',//
+          //   '1.err:1::err',
+          //   '1.out.end',
+          //   '1.err.end',
+          //   '0.err:2::err',//
+          //   '2.err:2::err',
+          //   '2.out.end',
+          //   '0.out.end',
+          //   '0.out.finish',
+          //   '2.err.end',
+          //   '0.err.end',
+          //   '0.err.finish',
+          //   'conTerminate',
+          //   'ready'
+          // ]
 
-          test.identical( new Set( ... track ), new Set( ... exp ) );
+          // test.identical( new Set( ... track ), new Set( ... exp ) );
 
-          test.lt( track.indexOf( '0.out:1::begin' ), track.indexOf( '0.out:1::end' ) );
-          test.lt( track.indexOf( '1.out:1::begin' ), track.indexOf( '0.out:1::end' ) );
-          test.lt( track.indexOf( '0.out:2::begin' ), track.indexOf( '0.out:1::end' ) );
-          test.lt( track.indexOf( '2.out:2::begin' ), track.indexOf( '0.out:1::end' ) );
-          test.lt( track.indexOf( '0.out:1::end' ), track.indexOf( '0.err:1::err' ) );
-          test.lt( track.indexOf( '1.out:1::end' ), track.indexOf( '0.err:1::err' ) );
-          test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.err:1::err' ) );
-          test.lt( track.indexOf( '2.out:2::end' ), track.indexOf( '0.err:1::err' ) );
-          test.lt( track.indexOf( '0.err:1::err' ), track.indexOf( '1.out.end' ) );
-          test.lt( track.indexOf( '1.err:1::err' ), track.indexOf( '1.out.end' ) );
-          test.lt( track.indexOf( '1.out.end' ), track.indexOf( '0.err:2::err' ) );
-          test.lt( track.indexOf( '1.err.end' ), track.indexOf( '0.err:2::err' ) );
-          test.lt( track.indexOf( '1.out.end' ), track.indexOf( 'conTerminate' ) );
-          test.lt( track.indexOf( '1.err.end' ), track.indexOf( 'conTerminate' ) );
-          test.lt( track.indexOf( '0.err:2::err' ), track.indexOf( 'conTerminate' ) );
-          test.lt( track.indexOf( '2.err:2::err' ), track.indexOf( 'conTerminate' ) );
-          test.lt( track.indexOf( '2.out.end' ), track.indexOf( 'conTerminate' ) );
-          test.lt( track.indexOf( '0.out.end' ), track.indexOf( 'conTerminate' ) );
-          test.lt( track.indexOf( '0.out.finish' ), track.indexOf( 'conTerminate' ) );
-          test.lt( track.indexOf( '2.err.end' ), track.indexOf( 'conTerminate' ) );
-          test.lt( track.indexOf( '0.err.end' ), track.indexOf( 'conTerminate' ) );
-          test.lt( track.indexOf( '0.err.finish' ), track.indexOf( 'conTerminate' ) );
-          test.lt( track.indexOf( 'conTerminate' ), track.indexOf( 'ready' ) );
+          // test.lt( track.indexOf( '0.out:1::begin' ), track.indexOf( '0.out:1::end' ) );
+          // test.lt( track.indexOf( '1.out:1::begin' ), track.indexOf( '0.out:1::end' ) );
+          // test.lt( track.indexOf( '0.out:2::begin' ), track.indexOf( '0.out:1::end' ) );
+          // test.lt( track.indexOf( '2.out:2::begin' ), track.indexOf( '0.out:1::end' ) );
+          // test.lt( track.indexOf( '0.out:1::end' ), track.indexOf( '0.err:1::err' ) );
+          // test.lt( track.indexOf( '1.out:1::end' ), track.indexOf( '0.err:1::err' ) );
+          // test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.err:1::err' ) );
+          // test.lt( track.indexOf( '2.out:2::end' ), track.indexOf( '0.err:1::err' ) );
+          // test.lt( track.indexOf( '0.err:1::err' ), track.indexOf( '1.out.end' ) );
+          // test.lt( track.indexOf( '1.err:1::err' ), track.indexOf( '1.out.end' ) );
+          // test.lt( track.indexOf( '1.out.end' ), track.indexOf( '0.err:2::err' ) );
+          // test.lt( track.indexOf( '1.err.end' ), track.indexOf( '0.err:2::err' ) );
+          // test.lt( track.indexOf( '1.out.end' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( '1.err.end' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( '0.err:2::err' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( '2.err:2::err' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( '2.out.end' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( '0.out.end' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( '0.out.finish' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( '2.err.end' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( '0.err.end' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( '0.err.finish' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( 'conTerminate' ), track.indexOf( 'ready' ) );
           /* qqq for Yevhen : replace with several calls of _.dissector.dissect() */
+          test.true( _.dissector.dissect( '**<0.out:1::begin>**<0.out:1::end>**<0.err:1::err>**<0.err:2::err>**', track.toString() ).matched );
+          // test.true( _.dissector.dissect( '**<0.out:1::begin>**', track.toString() ).matched );
+          test.true( _.dissector.dissect( '**<1.out:1::begin>**', track.toString() ).matched );
+          test.true( _.dissector.dissect( '**<0.out:2::begin>**', track.toString() ).matched );
+          test.true( _.dissector.dissect( '**<2.out:2::begin>**', track.toString() ).matched );
 
         }
 
