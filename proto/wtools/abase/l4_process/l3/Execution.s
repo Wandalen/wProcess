@@ -203,7 +203,6 @@ function startMinimal_body( o )
   let _errPrefix = null;
   let _outPrefix = null;
   let _readyCallback;
-  let _argsLength = 0; /* xxx */
 
   form1();
   form2();
@@ -236,7 +235,7 @@ function startMinimal_body( o )
   execPathParse,
   argsUnqoute,
   argUnqoute,
-  argsEscape,
+  argsForm,
   optionsForSpawn,
   optionsForFork,
   execPathForFork,
@@ -363,7 +362,7 @@ function startMinimal_body( o )
     o.exitSignal = null;
     o.error = o.error || null;
     o.args2 = null;
-    o.process = null;
+    o.pnd = null;
     o.fullExecPath = null;
     o.output = o.outputCollecting ? '' : null;
     o.ended = false;
@@ -395,62 +394,7 @@ function startMinimal_body( o )
       , `If defined option::arg should be either [ string, array ], but it is ${_.strType( o.args )}`
     );
 
-    /* xxx */
-
-    o.args = _.arrayAs( o.args );
-    _argsLength = o.args.length;
-
-    if( _.strIs( o.execPath ) )
-    {
-      o.fullExecPath = o.execPath;
-      let execArgs = execPathParse( o.execPath );
-      if( o.mode !== 'shell' )
-      execArgs = argsUnqoute( execArgs );
-      o.execPath = null;
-      if( execArgs.length )
-      {
-        o.execPath = execArgs.shift();
-        o.args = _.arrayPrependArray( o.args || [], execArgs );
-      }
-    }
-
-    if( o.execPath === null )
-    {
-      _.assert( o.args.length, 'Expects {-args-} to have at least one argument if {-execPath-} is not defined' );
-      o.execPath = o.args.shift();
-      o.fullExecPath = o.execPath;
-      _argsLength = o.args.length;
-      o.execPath = argUnqoute( o.execPath );
-    }
-
-    o.args2 = o.args.slice();
-
-    /* passingThrough */
-
-    if( o.passingThrough )
-    {
-      let argumentsOwn = process.argv.slice( 2 );
-      if( argumentsOwn.length )
-      o.args2 = _.arrayAppendArray( o.args2 || [], argumentsOwn );
-    }
-
-    _.assert( o.interpreterArgs === null || _.arrayIs( o.interpreterArgs ) );
-    if( o.interpreterArgs && o.mode !== 'fork' )
-    o.args2 = _.arrayPrependArray( o.args2, o.interpreterArgs );
-
-/*
-    let appendedArgs = o.passingThrough ? process.argv.length - 2 : 0;
-    let prependedArgs = args.length - ( _argsLength + appendedArgs );
-    // xxx
-    for( let i = prependedArgs; i < args.length; i++ )
-    {
-      args[ i ] = _.process._argEscape( args[ i ] );
-      args[ i ] = _.strQuote( args[ i ] );
-    }
-*/
-
-    if( o.mode === 'shell' )
-    o.args2 = argsEscape( o.args2 ) /* yyy */
+    argsForm();
 
     /* */
 
@@ -562,10 +506,10 @@ function startMinimal_body( o )
       {
         if( o.sync && !o.deasync )
         {
-          if( o.process.error )
-          handleError( o.process.error );
+          if( o.pnd.error )
+          handleError( o.pnd.error );
           else
-          handleClose( o.process.status, o.process.signal );
+          handleClose( o.pnd.status, o.pnd.signal );
         }
       }
 
@@ -599,23 +543,23 @@ function startMinimal_body( o )
     runSpawn();
     else if( o.mode === 'shell' )
     runShell();
-    else _.assert( 0, `Unknown mode ${o.mode} to start process at path ${o.currentPath}` ); /* qqq for Yevhen : problem with template-string is not complete! | aaa : Fixed. */
+    else _.assert( 0, `Unknown mode ${o.mode} to start process at path ${o.currentPath}` );
 
     /* procedure */
 
     if( o.procedure )
     {
-      if( o.process )
+      if( o.pnd )
       {
-        let name = 'PID:' + o.process.pid;
+        let name = 'PID:' + o.pnd.pid;
         if( Config.debug )
         {
           let result = _.procedure.find( name );
-          _.assert( result.length === 0, `No procedure expected for child process with pid:${o.process.pid}` );
+          _.assert( result.length === 0, `No procedure expected for child process with pid:${o.pnd.pid}` );
         }
         o.procedure.name( name );
       }
-      o.procedure._object = o.process;
+      o.procedure._object = o.pnd;
       o.procedure.begin();
     }
 
@@ -642,7 +586,7 @@ function startMinimal_body( o )
     if( o.dry )
     return;
 
-    o.process = ChildProcess.fork( execPath, o.args2, o2 ); /* xxx : rename to pnd? */
+    o.pnd = ChildProcess.fork( execPath, o.args2, o2 ); /* yyy : rename to pnd? */
 
   }
 
@@ -663,9 +607,9 @@ function startMinimal_body( o )
     return;
 
     if( o.sync && !o.deasync )
-    o.process = ChildProcess.spawnSync( execPath, o.args2, o2 );
+    o.pnd = ChildProcess.spawnSync( execPath, o.args2, o2 );
     else
-    o.process = ChildProcess.spawn( execPath, o.args2, o2 );
+    o.pnd = ChildProcess.spawn( execPath, o.args2, o2 );
 
   }
 
@@ -695,15 +639,12 @@ function startMinimal_body( o )
 
     o2.windowsVerbatimArguments = true;
 
-    debugger;
     if( o.args2.length )
     arg2 = arg2 + ' ' + o.args2.join( ' ' );
-    // arg2 = arg2 + ' ' + argsEscape( o.args2 ).join( ' ' ); /* yyy */
-    // xxx
 
     o.fullExecPath = arg2;
 
-    /* qqq for Vova : Fixes problem with space in path on windows and makes behavior similar to unix
+    /* zzz for Vova : Fixes problem with space in path on windows and makes behavior similar to unix
       Examples:
       win: shell({ execPath : '"/path/with space/node.exe"', throwingExitCode : 0 }) - works
       unix: shell({ execPath : '"/path/with space/node"', throwingExitCode : 0 }) - works
@@ -720,9 +661,9 @@ function startMinimal_body( o )
     return;
 
     if( o.sync && !o.deasync )
-    o.process = ChildProcess.spawnSync( shellPath, [ arg1, arg2 ], o2 );
+    o.pnd = ChildProcess.spawnSync( shellPath, [ arg1, arg2 ], o2 );
     else
-    o.process = ChildProcess.spawn( shellPath, [ arg1, arg2 ], o2 );
+    o.pnd = ChildProcess.spawn( shellPath, [ arg1, arg2 ], o2 );
   }
 
   /* */
@@ -773,7 +714,7 @@ function startMinimal_body( o )
 
     if( o._handleProcedureTerminationBegin )
     {
-      _.procedure.off( 'terminationBegin', o._handleProcedureTerminationBegin ); /* qqq for Dmytro : extend _.procedure.on / _.procedure.off */
+      _.procedure.off( 'terminationBegin', o._handleProcedureTerminationBegin ); /* xxx qqq for Dmytro : extend _.procedure.on / _.procedure.off */
       o._handleProcedureTerminationBegin = false;
     }
 
@@ -829,8 +770,8 @@ function startMinimal_body( o )
 
     exitCodeSet( exitCode );
     o.exitSignal = exitSignal;
-    if( o.process && o.process.signalCode === undefined )
-    o.process.signalCode = exitSignal;
+    if( o.pnd && o.pnd.signalCode === undefined )
+    o.pnd.signalCode = exitSignal;
 
     if( o.error )
     throw err;
@@ -954,24 +895,24 @@ function startMinimal_body( o )
     console.log( 'disconnect', _.process.realMainFile(), this.ended ); debugger;
     */
 
-    _.assert( !!this.process, 'Process is not started. Cant disconnect.' );
+    _.assert( !!this.pnd, 'Process is not started. Cant disconnect.' );
 
     /*
     close event will not be called for regular/detached process
     */
 
-    if( this.process.stdin )
-    this.process.stdin.end();
-    if( this.process.stdout )
-    this.process.stdout.destroy();
-    if( this.process.stderr )
-    this.process.stderr.destroy();
+    if( this.pnd.stdin )
+    this.pnd.stdin.end();
+    if( this.pnd.stdout )
+    this.pnd.stdout.destroy();
+    if( this.pnd.stderr )
+    this.pnd.stderr.destroy();
 
-    if( this.process.disconnect )
-    if( this.process.connected )
-    this.process.disconnect();
+    if( this.pnd.disconnect )
+    if( this.pnd.connected )
+    this.pnd.disconnect();
 
-    this.process.unref();
+    this.pnd.unref();
 
     if( !this.ended )
     {
@@ -994,7 +935,7 @@ function startMinimal_body( o )
       if( o.state === 'terminated' || o.error )
       return;
       o.exitReason = 'time';
-      _.process.terminate({ pnd : o.process, withChildren : 1 });
+      _.process.terminate({ pnd : o.pnd, withChildren : 1 });
     });
 
   }
@@ -1009,41 +950,41 @@ function startMinimal_body( o )
 
     _.assert
     (
-      ( !o.outputPiping && !o.outputCollecting ) || !!o.process.stdout || !!o.process.stderr,
+      ( !o.outputPiping && !o.outputCollecting ) || !!o.pnd.stdout || !!o.pnd.stderr,
       'stdout is not available to collect output or pipe it. Set option::stdio to "pipe"'
     );
 
-    if( _.streamIs( o.process.stdout ) )
-    o.streamOut = o.process.stdout;
-    if( _.streamIs( o.process.stderr ) )
-    o.streamErr = o.process.stderr;
+    if( _.streamIs( o.pnd.stdout ) )
+    o.streamOut = o.pnd.stdout;
+    if( _.streamIs( o.pnd.stderr ) )
+    o.streamErr = o.pnd.stderr;
 
     /* piping out channel */
 
     if( o.outputPiping || o.outputCollecting )
-    if( o.process.stdout )
+    if( o.pnd.stdout )
     if( o.sync && !o.deasync )
-    handleStreamOutput( o.process.stdout, 'out' );
+    handleStreamOutput( o.pnd.stdout, 'out' );
     else
-    o.process.stdout.on( 'data', ( data ) => handleStreamOutput( data, 'out' ) );
+    o.pnd.stdout.on( 'data', ( data ) => handleStreamOutput( data, 'out' ) );
 
     /* piping error channel */
 
     /* there is no if options here because algorithm should collect error output in _errOutput anyway */
-    if( o.process.stderr )
+    if( o.pnd.stderr )
     if( o.sync && !o.deasync )
-    handleStreamOutput( o.process.stderr, 'err' );
+    handleStreamOutput( o.pnd.stderr, 'err' );
     else
-    o.process.stderr.on( 'data', ( data ) => handleStreamOutput( data, 'err' ) );
+    o.pnd.stderr.on( 'data', ( data ) => handleStreamOutput( data, 'err' ) );
 
     /* handling */
 
     if( !o.sync || o.deasync )
     {
-      o.process.on( 'error', handleError );
-      o.process.on( 'close', handleClose );
-      o.process.on( 'exit', handleExit );
-      o.process.on( 'disconnect', handleDisconnect );
+      o.pnd.on( 'error', handleError );
+      o.pnd.on( 'close', handleClose );
+      o.pnd.on( 'exit', handleExit );
+      o.pnd.on( 'disconnect', handleDisconnect );
     }
 
   }
@@ -1056,7 +997,7 @@ function startMinimal_body( o )
     try
     {
 
-      if( !o.inputMirroring ) /* qqq for Yevhen : cover | aaa : Done. */
+      if( !o.inputMirroring )
       return;
 
       if( o.verbosity >= 3 )
@@ -1166,9 +1107,50 @@ function startMinimal_body( o )
 
   /* */
 
-  function argsEscape( args )
+  function argsForm()
   {
-    /* xxx */
+    let _argsLength;
+
+    o.args = _.arrayAs( o.args );
+    _argsLength = o.args.length;
+
+    if( _.strIs( o.execPath ) )
+    {
+      o.fullExecPath = o.execPath;
+      let execArgs = execPathParse( o.execPath );
+      if( o.mode !== 'shell' )
+      execArgs = argsUnqoute( execArgs );
+      o.execPath = null;
+      if( execArgs.length )
+      {
+        o.execPath = execArgs.shift();
+        o.args = _.arrayPrependArray( o.args || [], execArgs );
+      }
+    }
+
+    if( o.execPath === null )
+    {
+      _.assert( o.args.length, 'Expects {-args-} to have at least one argument if {-execPath-} is not defined' );
+      o.execPath = o.args.shift();
+      o.fullExecPath = o.execPath;
+      _argsLength = o.args.length;
+      o.execPath = argUnqoute( o.execPath );
+    }
+
+    o.args2 = o.args.slice();
+
+    /* passingThrough */
+
+    if( o.passingThrough )
+    {
+      let argumentsOwn = process.argv.slice( 2 );
+      if( argumentsOwn.length )
+      o.args2 = _.arrayAppendArray( o.args2 || [], argumentsOwn );
+    }
+
+    _.assert( o.interpreterArgs === null || _.arrayIs( o.interpreterArgs ) );
+    if( o.interpreterArgs && o.mode !== 'fork' )
+    o.args2 = _.arrayPrependArray( o.args2, o.interpreterArgs );
 
     /* Escapes and quotes:
       - Original args provided via o.args
@@ -1176,17 +1158,21 @@ function startMinimal_body( o )
       Skips arguments parsed from o.execPath.
     */
 
-    let appendedArgs = o.passingThrough ? process.argv.length - 2 : 0;
-    let prependedArgs = args.length - ( _argsLength + appendedArgs );
-
-    // xxx
-    for( let i = prependedArgs; i < args.length; i++ )
+    if( o.mode === 'shell' )
     {
-      args[ i ] = _.process._argEscape( args[ i ] );
-      args[ i ] = _.strQuote( args[ i ] );
+      let appendedArgs = o.passingThrough ? process.argv.length - 2 : 0;
+      let prependedArgs = o.args2.length - ( _argsLength + appendedArgs );
+      // yyy
+      for( let i = prependedArgs; i < o.args2.length; i++ )
+      {
+        o.args2[ i ] = _.process._argEscape( o.args2[ i ] );
+        o.args2[ i ] = _.strQuote( o.args2[ i ] );
+      }
     }
 
-    return args;
+    // if( o.mode === 'shell' )
+    // o.args2 = argsEscape( o.args2 ) /* yyy */
+
   }
 
   /* */
@@ -1261,9 +1247,9 @@ function startMinimal_body( o )
     if( exitCode === null )
     return;
     o.exitCode = exitCode;
-    if( o.process )
-    if( o.process.exitCode === undefined || o.process.exitCode === null )
-    o.process.exitCode = exitCode;
+    if( o.pnd )
+    if( o.pnd.exitCode === undefined || o.pnd.exitCode === null )
+    o.pnd.exitCode = exitCode;
     exitCode = _.numberIs( exitCode ) ? exitCode : -1;
     if( o.applyingExitCode )
     _.process.exitCode( exitCode );
@@ -1302,7 +1288,7 @@ function startMinimal_body( o )
 
     data = _.strRemoveEnd( data, '\n' );
 
-    /* qqq for Yevgen : changed how option outputPrefixing works */
+    /* qqq for Yevhen : changed how option outputPrefixing works */
     if( o.outputPrefixing )
     {
       let prefix = channel === 'err' ? _errPrefix : _outPrefix;
@@ -1364,7 +1350,7 @@ startMinimal_body.defaults =
   sync : 0,
   deasync : 0,
   when : 'instant', /* instant / afterdeath / time / delay */
-  dry : 0, /* qqq for Yevhen : cover the option. make sure all con* called once. make sure all con* called in correct order | aaa : Done. */
+  dry : 0,
 
   mode : 'shell', /* fork / spawn / shell */
   stdio : 'pipe', /* pipe / ignore / inherit */
@@ -1383,23 +1369,23 @@ startMinimal_body.defaults =
   env : null,
   detaching : 0,
   hiding : 1,
-  uid : null, /* qqq for Yevhen : implement and cover the option | aaa : Done. */
-  gid : null, /* qqq for Yevhen : implement and cover the option | aaa : Done. */
+  uid : null,
+  gid : null,
   streamSizeLimit : null,
   passingThrough : 0,
   timeOut : null,
 
-  throwingExitCode : 'full', /* must be on by default */ /* bool-like, 'full', 'brief' */
+  throwingExitCode : 'full', /* [ bool-like, 'full', 'brief' ] */ /* must be on by default */  /* qqq for Yevhen : cover */
   applyingExitCode : 0,
 
-  verbosity : 2, /* qqq for Yevhen : cover the option | aaa : Done. */
-  outputPrefixing : 0, /* qqq for Yevhen : extend coverage | aaa : Done. */
+  verbosity : 2,
+  outputPrefixing : 0,
   outputPiping : null,
   outputCollecting : 0,
   outputAdditive : null, /* qqq for Yevhen : cover the option */
-  outputColoring : 1, /* qqq for Yevhen : cover the option | aaa : Done. */
+  outputColoring : 1,
   outputGraying : 0,
-  inputMirroring : 1, /* qqq for Yevhen : cover the option | aaa : Done */
+  inputMirroring : 1,
 
 }
 
@@ -1562,7 +1548,7 @@ function startSingle_body( o )
     // o.exitCode = null;
     // o.exitSignal = null;
     // o.error = o.error || null;
-    // o.process = null;
+    // o.pnd = null;
     // o.fullExecPath = null;
     // o.output = o.outputCollecting ? '' : null; /* xxx */
     // o.ended = false;
@@ -1681,7 +1667,7 @@ function startSingle_body( o )
     o.conStart.give( function( err, op )
     {
       if( !err )
-      o.process.send( true );
+      o.pnd.send( true );
       this.take( err, op );
     })
   }
@@ -1907,7 +1893,7 @@ function startMultiple_body( o )
     _.assert( _.boolLike( o.outputAdditive ) );
     o.currentPath = o.currentPath || _.path.current();
 
-    o.runs = []; /* xxx : rename to sessions */
+    o.sessions = []; /* yyy : rename to sessions */
     o.state = 'initial'; /* `initial`, `starting`, `started`, `terminating`, `terminated`, `disconnected` */
     o.exitReason = null;
     o.exitCode = null;
@@ -1992,7 +1978,7 @@ function startMultiple_body( o )
       o2.currentPath = currentPath[ c ];
       o2.ready = currentReady;
       o2.sessionId = sessionId;
-      delete o2.runs;
+      delete o2.sessions;
       delete o2.output;
       delete o2.exitReason;
       delete o2.exitCode;
@@ -2011,10 +1997,10 @@ function startMultiple_body( o )
         o2.sync = 0;
       }
 
-      o.runs.push( o2 );
+      o.sessions.push( o2 );
     }
 
-    o.runs.forEach( ( o2, i ) =>
+    o.sessions.forEach( ( o2, i ) =>
     {
       let err2;
 
@@ -2072,7 +2058,7 @@ function startMultiple_body( o )
     _.Consequence.AndImmediate( ... conStart ).tap( ( err, arg ) =>
     {
       if( !o.ended )
-      o.state = 'started'; /* qqq for Yevhen : cover states of multiple run by test routine ( each state, but single test routine ) | aaa : Done. */
+      o.state = 'started';
       o.conStart.take( err, err ? undefined : o );
     });
     else
@@ -2125,9 +2111,9 @@ function startMultiple_body( o )
     o.procedure.finit();
 
     if( o.exitCode === null && o.exitSignal === null )
-    for( let a = 0 ; a < o.runs.length ; a++ )
+    for( let a = 0 ; a < o.sessions.length ; a++ )
     {
-      let o2 = o.runs[ a ];
+      let o2 = o.sessions[ a ];
       if( o2.exitCode || o2.exitSignal )
       {
         o.exitCode = o2.exitCode;
@@ -2138,9 +2124,9 @@ function startMultiple_body( o )
     }
 
     if( o.exitCode === null && o.exitSignal === null )
-    for( let a = 0 ; a < o.runs.length ; a++ )
+    for( let a = 0 ; a < o.sessions.length ; a++ )
     {
-      let o2 = o.runs[ a ];
+      let o2 = o.sessions[ a ];
       if( o2.exitCode !== null || o2.exitSignal !== null )
       {
         o.exitCode = o2.exitCode;
@@ -2151,9 +2137,9 @@ function startMultiple_body( o )
     }
 
     if( !o.error )
-    for( let a = 0 ; a < o.runs.length ; a++ )
+    for( let a = 0 ; a < o.sessions.length ; a++ )
     {
-      let o2 = o.runs[ a ];
+      let o2 = o.sessions[ a ];
       if( o2.error )
       {
         o.error = o2.error;
@@ -2165,9 +2151,9 @@ function startMultiple_body( o )
 
     if( o.outputCollecting )
     if( o.sync && !o.deasync )
-    for( let a = 0 ; a < o.runs.length ; a++ )
+    for( let a = 0 ; a < o.sessions.length ; a++ )
     {
-      let o2 = o.runs[ a ];
+      let o2 = o.sessions[ a ];
       o.output += o2.output;
     }
 
@@ -2193,7 +2179,7 @@ function startMultiple_body( o )
   {
     // if( o.error )
     // console.log( `serialEnd ${_.errIsAttended( o.error )}` );
-    o.runs.forEach( ( o2 ) =>
+    o.sessions.forEach( ( o2 ) =>
     {
       if( o2.ended )
       return;
@@ -2261,10 +2247,10 @@ function startMultiple_body( o )
       _processPipeCounter += 1;
       if( err )
       return;
-      if( o2.process.stdout )
-      streamPipe( o.streamOut, o2.process.stdout );
-      if( o2.process.stderr )
-      streamPipe( o.streamErr, o2.process.stderr );
+      if( o2.pnd.stdout )
+      streamPipe( o.streamOut, o2.pnd.stdout );
+      if( o2.pnd.stderr )
+      streamPipe( o.streamErr, o2.pnd.stderr );
     });
 
   }
@@ -2290,7 +2276,7 @@ function startMultiple_body( o )
     {
       _.arrayRemoveOnceStrictly( dst._pipes, src );
       if( dst._pipes.length === 0 )
-      if( _processPipeCounter === o.runs.length )
+      if( _processPipeCounter === o.sessions.length )
       {
         dst.end();
       }
@@ -2337,7 +2323,7 @@ function _run()
   let conStart = [];
   let conTerminate = [];
 
-  o.runs.forEach( ( o2, i ) =>
+  o.sessions.forEach( ( o2, i ) =>
   {
     let err2;
 
@@ -2347,10 +2333,10 @@ function _run()
     }
     else
     {
-      if( o.sync && !o.deasync )
+      // if( o.sync && !o.deasync )
       prevReady.finally( o2.ready );
-      else
-      prevReady.then( o2.ready );
+      // else
+      // prevReady.then( o2.ready );
       prevReady = o2.ready;
     }
 
@@ -2823,8 +2809,6 @@ function signal_body( o )
   {
     _.assert( _.intIs( p.pid ) );
 
-    // console.log( `signalSend : ${p.pid} ${_.process.isAlive( p.pid )}` );
-
     if( !_.process.isAlive( p.pid ) )
     return true;
 
@@ -2870,8 +2854,10 @@ function signal_body( o )
     for( let i = 0 ; i < processes.length ; i++ )
     {
       let process = processes[ i ];
-      // if( isWindows && i && process.name === 'conhost.exe' )
-      // continue;
+/*
+      if( isWindows && i && process.name === 'conhost.exe' )
+      continue;
+*/
       signalSend( process );
     }
     else
@@ -2911,8 +2897,6 @@ function signal_body( o )
       throw err;
     })
 
-    // ready.delay( 1000 )
-
     return ready;
   }
 
@@ -2925,14 +2909,13 @@ function signal_body( o )
     if( err.code === 'EPERM' )
     throw _.err( err, `\nCurrent process does not have permission to kill target process ${o.pid}` );
     if( err.code === 'ESRCH' )
-    throw _.err( err, `\nTarget process: ${_.strQuote( o.pid )} does not exist.` ); /* qqq for Yevhen : rewrite such strings as template-strings | aaa : Done.*/
+    throw _.err( err, `\nTarget process: ${_.strQuote( o.pid )} does not exist.` );
     throw _.err( err );
   }
 
   function handleResult( result )
   {
     result = _.arrayAs( result );
-    // console.log( `handleResult ${result}` );
     for( let i = 0 ; i < result.length ; i++ )
     {
       if( result[ i ] !== true )
@@ -3052,7 +3035,7 @@ function waitForDeath_body( o )
 
     let timeOutError = _.time.outError( o.timeOut )
 
-    ready.orKeeping( [ timeOutError ] ); /* xxx : implement orCanceling for consequence? */
+    ready.orKeeping( [ timeOutError ] ); /* xxx : implement option::cenceling for consequence? */
 
     ready.finally( ( err, arg ) =>
     {
@@ -3109,10 +3092,10 @@ function children( o )
   _.assert( _.numberIs( o.pid ) );
   _.assert( _.longHas( [ 'list', 'tree' ], o.format ) );
 
-  if( o.process )
+  if( o.pnd )
   {
     _.assert( o.pid === null );
-    o.pid = o.process.pid;
+    o.pid = o.pnd.pid;
   }
 
   let result;

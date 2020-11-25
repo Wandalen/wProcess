@@ -27,7 +27,7 @@ var ready = _.process.start( o )
 
 _.time.out( 1000, () =>
 {
-  _.process.terminate({ pnd : o.process });
+  _.process.terminate({ pnd : o.pnd });
 })
 
 ready.then( ( got ) =>
