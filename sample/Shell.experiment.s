@@ -8,4 +8,4 @@ var o =
   stdio : 'inherit'
 }
 _.process.start( o );
-console.log( 'ShellPID:', o.process.pid )
+console.log( 'ShellPID:', o.pnd.pid )
