@@ -8504,6 +8504,8 @@ function startSingleProcedureStack( test )
   let context = this;
   let a = context.assetFor( test, false );
   let programPath = a.program( program1 );
+  // let modes = [ 'fork' ];
+  // xxx
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
@@ -8536,7 +8538,7 @@ function startSingleProcedureStack( test )
         deasync,
       }
 
-      _.process.start( o );
+      _.process.startSingle( o );
 
       test.identical( _.strCount( o.procedure._sourcePath, 'Execution.test.s' ), 1 );
       test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
@@ -8570,7 +8572,7 @@ function startSingleProcedureStack( test )
         deasync,
       }
 
-      _.process.start( o );
+      _.process.startSingle( o );
 
       test.identical( _.strCount( o.procedure._sourcePath, 'Execution.test.s' ), 1 );
       test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
@@ -8604,7 +8606,7 @@ function startSingleProcedureStack( test )
         deasync,
       }
 
-      _.process.start( o );
+      _.process.startSingle( o );
 
       test.identical( _.strCount( o.procedure._stack, 'case1' ), 1 );
       test.identical( _.strCount( o.procedure._sourcePath, 'Execution.test.s' ), 1 );
@@ -8640,7 +8642,7 @@ function startSingleProcedureStack( test )
         deasync,
       }
 
-      _.process.start( o );
+      _.process.startSingle( o );
 
       test.identical( _.strCount( o.procedure._stack, 'case1' ), 1 );
       test.identical( _.strCount( o.procedure._sourcePath, 'start' ), 1 );
@@ -8674,7 +8676,7 @@ function startSingleProcedureStack( test )
         deasync,
       }
 
-      _.process.start( o );
+      _.process.startSingle( o );
 
       test.identical( o.procedure._stack, '' );
       test.identical( o.procedure._sourcePath, '' );
@@ -8708,7 +8710,7 @@ function startSingleProcedureStack( test )
         deasync,
       }
 
-      _.process.start( o );
+      _.process.startSingle( o );
 
       test.identical( o.procedure._stack, 'abc' );
       test.identical( o.procedure._sourcePath, 'abc' );
@@ -25196,7 +25198,7 @@ function startMultipleOptionDry( test )
           track.push( 'conStart' );
           test.identical( err, undefined );
           test.identical( op, op2 );
-          test.identical( op2.process, null );
+          test.identical( op2.pnd, null );
           return null;
         })
 
@@ -25205,7 +25207,7 @@ function startMultipleOptionDry( test )
           track.push( 'conDisconnect' );
           test.identical( err, _.dont );
           test.identical( op, undefined );
-          test.identical( op2.process, null );
+          test.identical( op2.pnd, null );
           return null;
         })
 
@@ -25214,14 +25216,14 @@ function startMultipleOptionDry( test )
           track.push( 'conTerminate' );
           test.identical( err, undefined );
           test.identical( op, op2 );
-          test.identical( op2.process, null );
+          test.identical( op2.pnd, null );
           return null;
         })
 
         op2.ready.tap( ( err, op ) =>
         {
           track.push( 'ready' );
-          test.identical( op2.process, null );
+          test.identical( op2.pnd, null );
           test.identical( err, undefined );
           test.identical( op, op2 );
           test.identical( op2.procedure._name, null );
@@ -25232,7 +25234,7 @@ function startMultipleOptionDry( test )
           test.identical( op2.exitCode, null );
           test.identical( op2.exitSignal, null );
           test.identical( op2.error, null );
-          test.identical( op2.process, null );
+          test.identical( op2.pnd, null );
           test.identical( op2.output, '' );
           test.identical( op2.ended, true );
           test.identical( op2.streamOut, null );
@@ -25308,7 +25310,7 @@ function startMultipleOptionDry( test )
           track.push( 'conStart' );
           test.identical( err, undefined );
           test.identical( op, op2 );
-          test.identical( op2.process, null );
+          test.identical( op2.pnd, null );
           return null;
         })
 
@@ -25317,7 +25319,7 @@ function startMultipleOptionDry( test )
           track.push( 'conDisconnect' );
           test.identical( err, _.dont );
           test.identical( op, undefined );
-          test.identical( op2.process, null );
+          test.identical( op2.pnd, null );
           return null;
         })
 
@@ -25326,14 +25328,14 @@ function startMultipleOptionDry( test )
           track.push( 'conTerminate' );
           test.identical( err, undefined );
           test.identical( op, op2 );
-          test.identical( op2.process, null );
+          test.identical( op2.pnd, null );
           return null;
         })
 
         op2.ready.tap( ( err, op ) =>
         {
           track.push( 'ready' );
-          test.identical( op2.process, null );
+          test.identical( op2.pnd, null );
           test.identical( err, undefined );
           test.identical( op, op2 );
           test.identical( op2.procedure._name, null );
@@ -25344,7 +25346,7 @@ function startMultipleOptionDry( test )
           test.identical( op2.exitCode, null );
           test.identical( op2.exitSignal, null );
           test.identical( op2.error, null );
-          test.identical( op2.process, null );
+          test.identical( op2.pnd, null );
           test.identical( op2.output, '' );
           test.identical( op2.ended, true );
           test.identical( op2.streamOut, null );
@@ -28480,8 +28482,8 @@ function startMultipleOptionStdioIgnore( test )
           test.identical( parsed.id, counter+1 );
           test.true( op2.streamOut === null );
           test.true( op2.streamErr === null );
-          test.true( op2.process.stdout === null );
-          test.true( op2.process.stderr === null );
+          test.true( op2.pnd.stdout === null );
+          test.true( op2.pnd.stderr === null );
         });
         return null;
       })
@@ -29494,7 +29496,7 @@ function killOptionWithChildren( test )
       throwingExitCode : 0
     }
     _.process.startMinimal( o2 );
-    process.send( [ o1.process.pid, o2.pnd.pid ] )
+    process.send( [ o1.pnd.pid, o2.pnd.pid ] )
   }
 
 }
@@ -36479,7 +36481,7 @@ function children( test )
 
     let ready = _.Consequence.AndTake( r1, r2 );
 
-    o1.process.on( 'message', () =>
+    o1.pnd.on( 'message', () =>
     {
       children = _.process.children({ pid : process.pid, format : 'tree' });
     })
@@ -36492,8 +36494,8 @@ function children( test )
       {
         [ process.pid ] :
         {
-          [ op[ 0 ].process.pid ] : {},
-          [ op[ 1 ].process.pid ] : {},
+          [ op[ 0 ].pnd.pid ] : {},
+          [ op[ 1 ].pnd.pid ] : {},
         }
       }
       return children.then( ( op ) =>
@@ -37016,12 +37018,12 @@ var Proto =
     startMinimalArgumentsNestedQuotes,
     startMinimalExecPathQuotesClosing,
     startMinimalExecPathSeveralCommands,
-    startExecPathNonTrivialModeShell, /* with `starter` */
-    startArgumentsHandlingTrivial, /* with `starter` */
-    startArgumentsHandling, /* with `starter` */
-    startImportantExecPath, /* with `starter` */
+    startExecPathNonTrivialModeShell, /* with routine::starter */
+    startArgumentsHandlingTrivial, /* with routine::starter */
+    startArgumentsHandling, /* with routine::starter */
+    startImportantExecPath, /* with routine::starter */
     startMinimalImportantExecPathPassingThrough,
-    startNormalizedExecPath, /* with `starter` */
+    startNormalizedExecPath, /* with routine::starter */
     startMinimalExecPathWithSpace,
     startMinimalDifferentTypesOfPaths,
     startNjsPassingThroughExecPathWithSpace,
@@ -37030,8 +37032,8 @@ var Proto =
 
     // procedures / chronology / structural
 
-    startProcedureTrivial, /* with `starter` */
-    startProcedureExists, /* with `starter` */
+    startProcedureTrivial, /* with routine::starter */
+    startProcedureExists, /* with routine::starter */
     startSingleProcedureStack, /* xxx : passes only when run with `start`, `startMinimal` */
     startMultipleProcedureStack,
     startMinimalOnTerminateSeveralCallbacksChronology,
@@ -37082,7 +37084,7 @@ var Proto =
 
     startMultipleConcurrent,
     startMultipleConcurrentConsequences,
-    starterConcurrentMultiple, /* with `starter` */
+    starterConcurrentMultiple, /* with routine::starter */
 
     // helper
 
