@@ -11027,7 +11027,7 @@ function startOptionTimeOut( test )
 
 }
 
-startOptionTimeOut.timeOut = 5e5;
+startOptionTimeOut.timeOut = 1e6;
 startOptionTimeOut.rapidity = -1;
 
 //
@@ -29506,7 +29506,6 @@ function startOptionVerbosityLogging( test )
   let a = context.assetFor( test, false );
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
-
   return a.ready;
 
   /* */
@@ -29721,6 +29720,8 @@ function startOptionVerbosityLogging( test )
   }
 
 }
+
+startOptionVerbosityLogging.timeOut = 3e5;
 
 //
 
@@ -40556,6 +40557,8 @@ function terminateDifferentStdio( test )
     process.send( 'ready' );
   }
 }
+
+terminateDifferentStdio.timeOut = 3e5;
 
 //
 
