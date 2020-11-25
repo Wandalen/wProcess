@@ -30057,7 +30057,7 @@ function startMultipleOutput( test )
 
         }
 
-        /* xxx : fails on windows :
+        /* aaa : fails on windows :
         - got :
           '1::begin
           1::end
