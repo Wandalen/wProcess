@@ -27869,7 +27869,6 @@ function startMultipleOutput( test )
           // test.lt( track.indexOf( '0.out.end' ), track.indexOf( 'conTerminate' ) );
           // test.lt( track.indexOf( 'conTerminate' ), track.indexOf( 'ready' ) );
 
-          /* qqq for Yevhen : replace with several calls of _.dissector.dissect() | aaa : Done. */
           let exp1 =
           `
           **<conStart>
@@ -28124,7 +28123,6 @@ function startMultipleOutput( test )
           // test.lt( track.indexOf( '0.err.finish' ), track.indexOf( 'conTerminate' ) );
           // test.lt( track.indexOf( 'conTerminate' ), track.indexOf( 'ready' ) );
 
-          /* qqq for Yevhen : replace with several calls of _.dissector.dissect() | aaa : Done. */
           let exp1 =
           `
           **<conStart>
@@ -28164,38 +28162,6 @@ function startMultipleOutput( test )
 
         }
 
-        /* aaa : fails on windows :
-        - got :
-          '1::begin
-          1::end
-          2::begin
-          1::err
-          2::end
-          2::err'
-        - expected :
-          '1::begin
-          2::begin
-          1::end
-          2::end
-          1::err
-          2::err'
-        - difference :
-          '1::begin
-          *
-        with accuracy 1e-7
-        */
-
-// qqq2 for Yevhen : example with dissector | aaa : Done.
-//         var exp =
-// `
-// 1::begin
-// 2::begin
-// 1::end
-// 2::end
-// 1::err
-// 2::err
-// `
-//         test.equivalent( op.output, exp );
         test.true( _.dissector.dissect( '**<1::begin>**<1::end>**<1::err>**', op.output ).matched );
         test.true( _.dissector.dissect( '**<2::begin>**<2::end>**<2::err>**', op.output ).matched );
 
