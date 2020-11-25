@@ -904,7 +904,7 @@ function startMinimalFork( test )
     Windows 15x, mode::fork
     [39;0m[92m/[39;0m[92m TestRoutine[39;0m[92m:[39;0m[92m:[39;0m[92mstartFork [39;0m[92m/[39;0m[92m test timeOut[39;0m[92m # [39;0m[92m22 [39;0m[92m)[39;0m[92m ... [39;0m[92mok[39;0m
     2020-11-25T10:55:41.8317809Z --------------- uncaught asynchronous error --------------->
-    2020-11-25T10:55:41.8767341Z 
+    2020-11-25T10:55:41.8767341Z
     2020-11-25T10:55:41.8768147Z [91m        kill EPERM
     2020-11-25T10:55:41.8917163Z [91m = Message of error#10
     2020-11-25T10:55:41.8917977Z           errno : -4048
@@ -17892,7 +17892,7 @@ function startNjsWithReadyDelayStructural( test )
         'conTerminate' : options.conTerminate,
         'conDisconnect' : options.conDisconnect,
         'ready' : options.ready,
-        'process' : options.pnd,
+        'pnd' : options.pnd,
         'logger' : options.logger,
         'stack' : options.stack,
         'state' : 'initial',
@@ -28078,7 +28078,7 @@ function startMultipleOutput( test )
           // [
           //   'conStart',
           //   '0.out:1::begin',
-          //   '1.out:1::begin', 
+          //   '1.out:1::begin',
           //   '0.out:2::begin',
           //   '2.out:2::begin',
           //   '0.out:1::end',
@@ -32615,7 +32615,7 @@ function terminate( test )
       2020-11-25T14:04:02.4633760Z           'SIGTERM'
       2020-11-25T14:04:02.4634460Z         - difference :
       2020-11-25T14:04:02.4635170Z           'SIG*[39;0m
-      2020-11-25T14:04:02.4638870Z [91m         [39;0m[91m 
+      2020-11-25T14:04:02.4638870Z [91m         [39;0m[91m
       2020-11-25T14:04:02.4639710Z         /Users/runner/work/wProcess/wProcess/proto/wtools/abase/l4_process.test/Execution.test.s:35044:16
       2020-11-25T14:04:02.4640510Z           35040 :         else
       2020-11-25T14:04:02.4640980Z           35041 :         {
@@ -36618,13 +36618,13 @@ function childrenOptionFormatList( test )
     2020-11-25T12:14:39.0759666Z           4
     2020-11-25T12:14:39.0760172Z         - difference :
     2020-11-25T12:14:39.0761190Z           *[39;0m
-    2020-11-25T12:14:39.0766588Z [91m         [39;0m[91m 
+    2020-11-25T12:14:39.0766588Z [91m         [39;0m[91m
     2020-11-25T12:14:39.0767605Z         /D/a/wProcess/wProcess/proto/wtools/abase/l4_process.test/Execution.test.s:40781:16
     2020-11-25T12:14:39.0768624Z           40777 :       return children.then( ( prcocesses ) =>
     2020-11-25T12:14:39.0769245Z           40778 :       {
     2020-11-25T12:14:39.0769900Z           40779 :         if( process.platform === 'win32' )
     2020-11-25T12:14:39.0770475Z           40780 :         {
-    2020-11-25T12:14:39.0771703Z         * 40781 :           test.identical( prcocesses.length, 4 ); 
+    2020-11-25T12:14:39.0771703Z         * 40781 :           test.identical( prcocesses.length, 4 );
     */
     test.case = 'parent -> child -> child'
     var o =
