@@ -1948,9 +1948,9 @@ function startSingleSyncDeasync( test )
         test.true( returned === options );
         test.identical( returned, options );
         if( tops.deasync )
-        test.identical( returned.process.constructor.name, 'ChildProcess' );
+        test.identical( returned.pnd.constructor.name, 'ChildProcess' );
         else
-        test.identical( returned.process.constructor.name, 'Object' );
+        test.identical( returned.pnd.constructor.name, 'Object' );
         return returned;
       }
       else
@@ -2001,9 +2001,9 @@ function startSingleSyncDeasync( test )
         test.true( returned === options );
         test.identical( returned, options );
         if( tops.deasync )
-        test.identical( returned.process.constructor.name, 'ChildProcess' );
+        test.identical( returned.pnd.constructor.name, 'ChildProcess' );
         else
-        test.identical( returned.process.constructor.name, 'Object' );
+        test.identical( returned.pnd.constructor.name, 'Object' );
         return returned;
       }
       else
@@ -2072,9 +2072,9 @@ function startSingleSyncDeasync( test )
         test.true( returned === options );
         test.identical( returned, options );
         if( tops.deasync )
-        test.identical( returned.process.constructor.name, 'ChildProcess' );
+        test.identical( returned.pnd.constructor.name, 'ChildProcess' );
         else
-        test.identical( returned.process.constructor.name, 'Object' );
+        test.identical( returned.pnd.constructor.name, 'Object' );
         return returned;
       }
       else
@@ -26379,7 +26379,7 @@ function startMinimalOptionStreamSizeLimit( test )
       }
 
       let returned =  _.process.startMinimal( options );
-      test.identical( returned.process.stdout.toString(), 'data1\n' );
+      test.identical( returned.pnd.stdout.toString(), 'data1\n' );
 
       a.fileProvider.fileDelete( testAppPath );
 
@@ -26405,7 +26405,7 @@ function startMinimalOptionStreamSizeLimit( test )
       }
 
       let returned =  _.process.startMinimal( options );
-      test.identical( returned.process.stdout.toString(), 'data1\n' );
+      test.identical( returned.pnd.stdout.toString(), 'data1\n' );
 
       a.fileProvider.fileDelete( testAppPath );
 
@@ -26431,7 +26431,7 @@ function startMinimalOptionStreamSizeLimit( test )
       }
 
       let returned =  _.process.startMinimal( options );
-      test.identical( returned.process.stdout.toString(), 'data1\n' )
+      test.identical( returned.pnd.stdout.toString(), 'data1\n' )
 
       a.fileProvider.fileDelete( testAppPath );
       return returned;
