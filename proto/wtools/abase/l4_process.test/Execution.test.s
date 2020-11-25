@@ -27948,40 +27948,43 @@ function startMultipleOutput( test )
           /*
           on older version of nodejs event finish goes before event end
           */
-          var exp =
-          [
-            'conStart',
-            '0.out:1::begin',
-            '0.out:1::end',
-            '0.err:1::err',
-            '0.out:2::begin',
-            '0.out:2::end',
-            '0.err:2::err',
-            '0.err.finish',
-            '0.err.end',
-            '0.out.finish',
-            '0.out.end',
-            'conTerminate',
-            'ready',
-          ]
+          // var exp =
+          // [
+          //   'conStart',
+          //   '0.out:1::begin',
+          //   '0.out:1::end',
+          //   '0.err:1::err',
+          //   '0.out:2::begin',
+          //   '0.out:2::end',
+          //   '0.err:2::err',
+          //   '0.err.finish',
+          //   '0.err.end',
+          //   '0.out.finish',
+          //   '0.out.end',
+          //   'conTerminate',
+          //   'ready',
+          // ]
 
-          test.identical( new Set( ... track ), new Set( ... exp ) );
+          // test.identical( new Set( ... track ), new Set( ... exp ) );
 
-          test.lt( track.indexOf( '0.out:1::end' ), track.indexOf( '0.out:2::begin' ) );
-          test.lt( track.indexOf( '0.out:1::begin' ), track.indexOf( '0.out:1::end' ) );
-          test.lt( track.indexOf( '0.out:1::end' ), track.indexOf( '0.err:1::err' ) );
-          test.lt( track.indexOf( '0.out:2::begin' ), track.indexOf( '0.out:2::end' ) );
-          test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.err:2::err' ) );
-          test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.err.finish' ) );
-          test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.err.end' ) );
-          test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.out.finish' ) );
-          test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.out.end' ) );
-          test.lt( track.indexOf( '0.err.finish' ), track.indexOf( 'conTerminate' ) );
-          test.lt( track.indexOf( '0.err.end' ), track.indexOf( 'conTerminate' ) );
-          test.lt( track.indexOf( '0.out.finish' ), track.indexOf( 'conTerminate' ) );
-          test.lt( track.indexOf( '0.out.end' ), track.indexOf( 'conTerminate' ) );
-          test.lt( track.indexOf( 'conTerminate' ), track.indexOf( 'ready' ) );
-          /* qqq for Yevhen : replace with several calls of _.dissector.dissect() */
+          // test.lt( track.indexOf( '0.out:1::end' ), track.indexOf( '0.out:2::begin' ) );
+          // test.lt( track.indexOf( '0.out:1::begin' ), track.indexOf( '0.out:1::end' ) );
+          // test.lt( track.indexOf( '0.out:1::end' ), track.indexOf( '0.err:1::err' ) );
+          // test.lt( track.indexOf( '0.out:2::begin' ), track.indexOf( '0.out:2::end' ) );
+          // test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.err:2::err' ) );
+          // test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.err.finish' ) );
+          // test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.err.end' ) );
+          // test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.out.finish' ) );
+          // test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.out.end' ) );
+          // test.lt( track.indexOf( '0.err.finish' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( '0.err.end' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( '0.out.finish' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( '0.out.end' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( 'conTerminate' ), track.indexOf( 'ready' ) );
+
+          /* qqq for Yevhen : replace with several calls of _.dissector.dissect() | aaa : Done. */
+          test.true( _.dissector.dissect( '**<conStart>' + '**<0.out:1::begin>**<0.out:1::end>' + '**<0.err:1::err>' + '**<0.err.end>**<0.err.finish>' + '**<0.out.end>**<0.out.finish>' + '**<conTerminate>' + '**<ready>**', track.toString() ).matched );
+          test.true( _.dissector.dissect( '**<conStart>' + '**<0.out:2::begin>**<0.out:2::end>' + '**<0.err:2::err>' + '**<0.err.end>**<0.err.finish>' + '**<0.out.end>**<0.out.finish>' + '**<conTerminate>' + '**<ready>**', track.toString() ).matched );
 
         }
 
@@ -28166,26 +28169,26 @@ function startMultipleOutput( test )
           // var exp =
           // [
           //   'conStart',
-          //   '0.out:1::begin',//
-          //   '1.out:1::begin', ///
-          //   '0.out:2::begin', *
+          //   '0.out:1::begin',
+          //   '1.out:1::begin', 
+          //   '0.out:2::begin',
           //   '2.out:2::begin',
-          //   '0.out:1::end',//
-          //   '1.out:1::end', ///
-          //   '0.out:2::end', *
+          //   '0.out:1::end',
+          //   '1.out:1::end',
+          //   '0.out:2::end',
           //   '2.out:2::end',
-          //   '0.err:1::err',//
-          //   '1.err:1::err', ///
-          //   '1.out.end', ///
-          //   '1.err.end', /// before out
-          //   '0.err:2::err',//
+          //   '0.err:1::err',
+          //   '1.err:1::err',
+          //   '1.out.end',
+          //   '1.err.end',
+          //   '0.err:2::err',
           //   '2.err:2::err',
           //   '2.out.end',
-          //   '0.out.end',// *
-          //   '0.out.finish',// *
+          //   '0.out.end',
+          //   '0.out.finish',
           //   '2.err.end',
-          //   '0.err.end', // *
-          //   '0.err.finish', // * before o.out
+          //   '0.err.end',
+          //   '0.err.finish',
           //   'conTerminate',
           //   'ready'
           // ]
@@ -28215,11 +28218,12 @@ function startMultipleOutput( test )
           // test.lt( track.indexOf( '0.err.end' ), track.indexOf( 'conTerminate' ) );
           // test.lt( track.indexOf( '0.err.finish' ), track.indexOf( 'conTerminate' ) );
           // test.lt( track.indexOf( 'conTerminate' ), track.indexOf( 'ready' ) );
+
           /* qqq for Yevhen : replace with several calls of _.dissector.dissect() | aaa : Done. */
-          test.true( _.dissector.dissect( '**<conStart>' + '**<0.out:1::begin>**<0.out:1::end>' + '**<0.err:1::err>**<0.err:2::err>' + '**<0.err.end>**<0.err.finish>' + '**<0.out.end>**<0.out.finish>**' + '<conTerminate>**' + '<ready>**', track.toString() ).matched );
-          test.true( _.dissector.dissect( '**<conStart>' + '**<1.out:1::begin>**<1.out:1::end>' + '**<1.err:1::err>**' + '<1.err.end>**<1.out.end>**' + '<conTerminate>**' + '<ready>**', track.toString() ).matched );
-          test.true( _.dissector.dissect( '**<conStart>' + '**<0.out:2::begin>**<0.out:2::end>' + '**<0.err.end>**<0.err.finish>' + '**<0.out.end>**<0.out.finish>**'  + '<conTerminate>**' + '<ready>**', track.toString() ).matched );
-          test.true( _.dissector.dissect( '**<conStart>' + '**<2.out:2::begin>**'      + '<conTerminate>**' + '<ready>**', track.toString() ).matched );
+          test.true( _.dissector.dissect( '**<conStart>' + '**<0.out:1::begin>**<0.out:1::end>' + '**<0.err:1::err>**<0.err:2::err>**' + '<0.err.end>**<0.err.finish>' + '**<0.out.end>**<0.out.finish>**' + '<conTerminate>**' + '<ready>**', track.toString() ).matched );
+          test.true( _.dissector.dissect( '**<conStart>' + '**<1.out:1::begin>**<1.out:1::end>' + '**<1.err:1::err>**<1.err.end>**' + '<1.out.end>**' + '<conTerminate>**' + '<ready>**', track.toString() ).matched );
+          test.true( _.dissector.dissect( '**<conStart>' + '**<0.out:2::begin>**<0.out:2::end>' + '**<0.err.end>**<0.err.finish>**' + '<0.out.end>**<0.out.finish>**'  + '<conTerminate>**' + '<ready>**', track.toString() ).matched );
+          test.true( _.dissector.dissect( '**<conStart>' + '**<2.out:2::begin>**<2.out:2::end>' + '**<2.err.end>**<2.out.end>**' + '<conTerminate>**' + '<ready>**', track.toString() ).matched );
 
         }
 
@@ -28244,7 +28248,7 @@ function startMultipleOutput( test )
         with accuracy 1e-7
         */
 
-// qqq2 for Yevhen : example with dissector
+// qqq2 for Yevhen : example with dissector | aaa : Done.
 //         var exp =
 // `
 // 1::begin
