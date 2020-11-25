@@ -12641,7 +12641,11 @@ function startMinimalDetachingChildExitsBeforeParent( test )
 
 }
 
-startMinimalDetachingChildExitsBeforeParent.timeOut = 21e4; /* Locally : 20.817s */
+/*
+Running TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachingChildExitsBeforeParent ..
+      Failed (test routine time limit
+*/
+startMinimalDetachingChildExitsBeforeParent.timeOut = 4e5; /* Locally : 20.817s */
 startMinimalDetachingChildExitsBeforeParent.description =
 `
 Parent starts child process in detached mode and registers callback to wait for child process.
@@ -32471,6 +32475,57 @@ function terminate( test )
 
     .then( () =>
     {
+      /*
+      xxx :
+      Windows 12x, mode::fork
+      2020-11-25T14:08:22.5752316Z --------------- uncaught asynchronous error --------------->
+      2020-11-25T14:08:24.6782448Z
+      2020-11-25T14:08:24.6783063Z [91m = Message of error#354
+      2020-11-25T14:08:24.6783535Z     kill EPERM
+      2020-11-25T14:08:24.6783955Z       errno : 'EPERM'
+      2020-11-25T14:08:24.6784386Z       code : 'EPERM'
+      2020-11-25T14:08:24.6784816Z       syscall : 'kill'
+      2020-11-25T14:08:24.6785616Z     Current process does not have permission to kill target process 588
+      2020-11-25T14:08:24.6786057Z
+      2020-11-25T14:08:24.6786486Z  = Beautified calls stack
+      2020-11-25T14:08:24.6787136Z     at process.kill (internal/process/per_thread.js:198:13)
+      2020-11-25T14:08:24.6788352Z     at signalSend (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2840:15)
+      2020-11-25T14:08:24.6789556Z     at wConsequence.processKill (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2875:7)
+      2020-11-25T14:08:24.6849489Z     at wConsequence.take (D:\a\wProcess\wProcess\node_modules\wConsequence\proto\wtools\abase\l9\consequence\Consequence.s:2698:8)
+      2020-11-25T14:08:24.6860889Z     at Object.callback (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:3143:67)
+      2020-11-25T14:08:24.6869454Z     at D:\a\wProcess\wProcess\node_modules\w.process.tree.windows\lib\index.js:74:19
+      2020-11-25T14:08:24.6880070Z     at Array.forEach (<anonymous>)
+      2020-11-25T14:08:24.6902631Z     at D:\a\wProcess\wProcess\node_modules\w.process.tree.windows\lib\index.js:73:19
+      2020-11-25T14:08:24.6908431Z
+      2020-11-25T14:08:24.6914742Z     at Function.signal_body [as body] (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2802:9)
+      2020-11-25T14:08:24.6929153Z     at Object.terminate_body (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2990:28)
+      2020-11-25T14:08:24.6946621Z     at Object.terminate (D:\a\wProcess\wProcess\node_modules\wTools\proto\wtools\abase\l0\l3\iRoutine.s:1059:23)
+      2020-11-25T14:08:24.6957643Z     at ChildProcess.<anonymous> (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process.test\Execution.test.s:34790:19) *
+      2020-11-25T14:08:24.6965182Z     at ChildProcess.emit (events.js:314:20)
+      2020-11-25T14:08:24.6971340Z     at emit (internal/child_process.js:876:12)
+      2020-11-25T14:08:24.6976940Z     at processTicksAndRejections (internal/process/task_queues.js:85:21)
+      2020-11-25T14:08:24.6980368Z
+      2020-11-25T14:08:24.6983591Z  = Throws stack
+      2020-11-25T14:08:24.6994445Z     thrown at wConsequence.__handleResourceNow @ /D/a/wProcess/wProcess/node_modules/wConsequence/proto/wtools/abase/l9/consequence/Consequence.s:3039:12
+      2020-11-25T14:08:24.7018743Z     thrown at wConsequence.handleError @ /D/a/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:2926:13
+      2020-11-25T14:08:24.7029934Z     thrown at errRefine @ /D/a/wProcess/wProcess/node_modules/wTools/proto/wtools/abase/l0/l5/fErr.s:125:16
+      2020-11-25T14:08:24.7038222Z
+      2020-11-25T14:08:24.7041329Z  = Process
+      2020-11-25T14:08:24.7045318Z     Current path : D:\a\wProcess\wProcess
+      2020-11-25T14:08:24.7063629Z     Exec path : C:\hostedtoolcache\windows\node\12.19.0\x64\node.exe D:\a\wProcess\wProcess\node_modules\wTesting\proto\wtools\atop\testing\entry\Exec .run 'proto/**' rapidity:-1 verbosity:5 fails:1
+      2020-11-25T14:08:24.7064610Z
+      2020-11-25T14:08:24.7065023Z [39;0m
+      2020-11-25T14:08:24.7065651Z --------------- uncaught asynchronous error ---------------<
+      2020-11-25T14:08:24.7066079Z
+      2020-11-25T14:08:24.7067401Z   [91mTest suite "Tools.l4.process.Execution" had zombie process with pid: 5316 ExecPath: D:\Temp\ProcessBasic-2020-11-25-12-55-1-408-61fd.tmp\terminate\testApp.js
+      2020-11-25T14:08:24.7068722Z       CurrentPath: D:\a\wProcess\wProcess
+      2020-11-25T14:08:24.7069240Z       Args:[39;0m
+      2020-11-25T14:08:24.7069677Z [91m        kill EPERM
+      2020-11-25T14:08:24.7070135Z           errno : 'EPERM'
+      2020-11-25T14:08:24.7070789Z           code : 'EPERM'
+      2020-11-25T14:08:24.7071229Z           syscall : 'kill'
+      2020-11-25T14:08:24.7071923Z         Current process does not have permission to kill target process 588[39;0m
+      */
       test.case = `mode:${mode}, terminate process using descriptor( pnd )`
       var o =
       {
@@ -32609,6 +32664,22 @@ function terminate( test )
 
     .then( () =>
     {
+      /* xxx :
+      macos 12x, mode::fork
+      2020-11-25T14:04:02.4631420Z [91m        - got :
+      2020-11-25T14:04:02.4632320Z           'SIGKILL'
+      2020-11-25T14:04:02.4633040Z         - expected :
+      2020-11-25T14:04:02.4633760Z           'SIGTERM'
+      2020-11-25T14:04:02.4634460Z         - difference :
+      2020-11-25T14:04:02.4635170Z           'SIG*[39;0m
+      2020-11-25T14:04:02.4638870Z [91m         [39;0m[91m 
+      2020-11-25T14:04:02.4639710Z         /Users/runner/work/wProcess/wProcess/proto/wtools/abase/l4_process.test/Execution.test.s:35044:16
+      2020-11-25T14:04:02.4640510Z           35040 :         else
+      2020-11-25T14:04:02.4640980Z           35041 :         {
+      2020-11-25T14:04:02.4642140Z           35042 :           test.identical( op.exitCode, null );
+      2020-11-25T14:04:02.4642770Z           35043 :           test.identical( op.ended, true );
+      2020-11-25T14:04:02.4643870Z         * 35044 :           test.identical( op.exitSignal, 'SIGTERM' );
+      */
       test.case = `mode:${mode}, terminate process using pid, low time out`
       var o =
       {
@@ -34788,6 +34859,16 @@ function terminateSeveralDetachedChildren( test )
 
       o.conTerminate.then( () =>
       {
+        /*
+          xxx :
+          Windows 13x, mode::spawn
+          2020-11-25T14:09:36.7487866Z         /D/a/wProcess/wProcess/proto/wtools/abase/l4_process.test/Execution.test.s:38740:18
+          2020-11-25T14:09:36.7489171Z           38736 :         test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
+          2020-11-25T14:09:36.7490087Z           38737 :         test.identical( _.strCount( o.output, 'program3::begin' ), 1 );
+          2020-11-25T14:09:36.7490983Z           38738 :         test.identical( _.strCount( o.output, 'program2::end' ), 0 );
+          2020-11-25T14:09:36.7491871Z           38739 :         test.identical( _.strCount( o.output, 'program3::end' ), 0 );
+          2020-11-25T14:09:36.7493044Z         * 38740 :         test.true( !_.process.isAlive( program2Pid ) );
+        */
         console.log( 'conTerminate' );
 
         if( process.platform === 'win32' )
