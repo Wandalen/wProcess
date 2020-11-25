@@ -17882,7 +17882,7 @@ function startNjsWithReadyDelayStructural( test )
       options.ready.then( ( op ) =>
       {
         let exp2 = _.mapExtend( null, exp );
-        exp2.process = options.pnd;
+        exp2.pnd = options.pnd;
         exp2.procedure = options.procedure;
         exp2.streamOut = options.streamOut;
         exp2.streamErr = options.streamErr;
@@ -18720,7 +18720,6 @@ function startNjsWithReadyDelayStructuralMultiple( test )
   let context = this;
   let a = context.assetFor( test, false );
   let programPath = a.program( program1 );
-
   let modes = [ 'fork', 'spawn', 'shell' ];
 
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, dry : 0, detaching : 0, mode }) ) );
@@ -18730,13 +18729,9 @@ function startNjsWithReadyDelayStructuralMultiple( test )
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, dry : 0, detaching : 0, mode }) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, dry : 1, detaching : 0, mode }) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, dry : 0, detaching : 0, mode }) ) );
-
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, dry : 1, detaching : 0, mode }) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, dry : 0, detaching : 1, mode }) ) );
 
-  /* ORIGINAL ( detaching, mode ) */
-  // modes.forEach( ( mode ) => a.ready.then( () => run( 0, mode ) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => run( 1, mode ) ) );
   return a.ready;
 
   /* */
@@ -18800,7 +18795,6 @@ function startNjsWithReadyDelayStructuralMultiple( test )
         'hiding' : 1,
         'concurrent' : 0,
         'timeOut' : null,
-        // 'briefExitCode' : 0,
         'verbosity' : 2,
         'outputPrefixing' : 0,
         'outputPiping' : true,
@@ -18827,9 +18821,6 @@ function startNjsWithReadyDelayStructuralMultiple( test )
         'exitSignal' : null,
         'ended' : false,
         'error' : null
-        // 'disconnect' : options.disconnect,
-        // 'fullExecPath' : null,
-        // '_handleProcedureTerminationBegin' : false,
       }
 
       options.ready.then( ( op ) =>
@@ -18894,13 +18885,13 @@ function startNjsWithReadyDelayStructuralMultiple( test )
         }
 
         /* Added sessions' checks */
-        op.sessions.forEach( ( run ) =>
+        op.sessions.forEach( ( session ) =>
         {
           if( tops.dry )
           {
-            test.identical( run.output, '' );
-            test.identical( run.exitCode, null );
-            test.identical( run.exitReason, null );
+            test.identical( session.output, '' );
+            test.identical( session.exitCode, null );
+            test.identical( session.exitReason, null );
           }
           else
           {
@@ -18908,24 +18899,24 @@ function startNjsWithReadyDelayStructuralMultiple( test )
               no output from detached process in mode::shell
             */
             if( tops.mode !== 'shell' || process.platform !== 'win32' || !tops.detaching )
-            test.identical( run.output, 'program1:begin\n' );
+            test.identical( session.output, 'program1:begin\n' );
             else
-            test.identical( run.output, '' );
-            test.identical( run.exitCode, 0 );
-            test.identical( run.exitReason, 'normal' );
+            test.identical( session.output, '' );
+            test.identical( session.exitCode, 0 );
+            test.identical( session.exitReason, 'normal' );
           }
-          test.identical( run.exitSignal, null );
-          test.identical( !!run.process, !tops.dry );
-          test.true( _.routineIs( run.disconnect ) );
-          test.identical( _.streamIs( run.streamOut ), !tops.dry && ( !tops.sync || !!tops.deasync ) );
-          test.identical( _.streamIs( run.streamErr ), !tops.dry && ( !tops.sync || !!tops.deasync ) );
-          test.identical( run.streamOut !== run.streamErr, !tops.dry && ( !tops.sync || !!tops.deasync ) );
-          test.true( run.conTerminate !== run.ready );
+          test.identical( session.exitSignal, null );
+          test.identical( !!session.pnd, !tops.dry );
+          test.true( _.routineIs( session.disconnect ) );
+          test.identical( _.streamIs( session.streamOut ), !tops.dry && ( !tops.sync || !!tops.deasync ) );
+          test.identical( _.streamIs( session.streamErr ), !tops.dry && ( !tops.sync || !!tops.deasync ) );
+          test.identical( session.streamOut !== session.streamErr, !tops.dry && ( !tops.sync || !!tops.deasync ) );
+          test.true( session.conTerminate !== session.ready );
 
-          test.identical( run.ready.exportString(), 'Consequence:: 1 / 0' );
-          test.identical( run.conTerminate.exportString(), 'Consequence:: 1 / 0' );
-          test.identical( run.conDisconnect.exportString(), 'Consequence:: 1 / 0' );
-          test.identical( run.conStart.exportString(), 'Consequence:: 1 / 0' );
+          test.identical( session.ready.exportString(), 'Consequence:: 1 / 0' );
+          test.identical( session.conTerminate.exportString(), 'Consequence:: 1 / 0' );
+          test.identical( session.conDisconnect.exportString(), 'Consequence:: 1 / 0' );
+          test.identical( session.conStart.exportString(), 'Consequence:: 1 / 0' );
 
         })
 
@@ -18980,138 +18971,6 @@ function startNjsWithReadyDelayStructuralMultiple( test )
   {
     console.log( 'program1:begin' );
   }
-
-  /* ORIGINAL */
-  // ready.then( () =>
-  // {
-  //   test.case = `mode:${mode} detaching:${detaching}`;
-  //   let con = new _.Consequence().take( null ).delay( context.t1 ); /* 1000 */
-
-  //   let options =
-  //   {
-  //     mode,
-  //     detaching,
-  //     execPath : programPath,
-  //     currentPath : [ a.abs( '.' ), a.abs( '.' ) ],
-  //     throwingExitCode : 1,
-  //     inputMirroring : 1,
-  //     outputCollecting : 1,
-  //     stdio : 'pipe',
-  //     sync : 0,
-  //     deasync : 0,
-  //     ready : con,
-  //   }
-
-  //   let returned = _.process.startNjs( options );
-
-  //   returned.then( ( op ) =>
-  //   {
-  //     test.identical( op.exitCode, 0 );
-  //     test.identical( op.ended, true );
-  //     test.identical( op.output, 'program1:begin\nprogram1:begin\n' );
-
-  //     let exp2 = _.mapExtend( null, exp );
-  //     exp2.output = 'program1:begin\nprogram1:begin\n';
-  //     exp2.exitCode = 0;
-  //     exp2.exitSignal = null;
-  //     exp2.sessions = options.sessions;
-  //     exp2.state = 'terminated';
-  //     exp2.exitReason = 'normal';
-  //     exp2.ended = true;
-
-  //     test.identical( options, exp2 );
-  //     test.true( !options.pnd );
-  //     test.true( _.streamIs( options.streamOut ) );
-  //     test.true( _.streamIs( options.streamErr ) );
-  //     test.true( options.streamOut !== options.streamErr );
-  //     test.true( ! options.disconnect );
-  //     test.true( options.conTerminate !== options.ready );
-  //     test.true( _.arrayIs( options.sessions ) );
-  //     test.identical( options.ready.exportString(), 'Consequence:: 0 / 1' );
-  //     test.identical( options.conTerminate.exportString(), 'Consequence:: 1 / 0' );
-  //     test.identical( options.conDisconnect, null );
-  //     test.identical( options.conStart.exportString(), 'Consequence:: 1 / 0' );
-
-  //     return null;
-  //   });
-
-  //   var exp =
-  //   {
-  //     mode,
-  //     detaching,
-  //     'execPath' : ( mode === 'fork' ? '' : 'node ' ) + programPath,
-  //     'currentPath' : [ a.abs( '.' ), a.abs( '.' ) ],
-  //     'throwingExitCode' : 'full',
-  //     'inputMirroring' : 1,
-  //     'outputCollecting' : 1,
-  //     'sync' : 0,
-  //     'deasync' : 0,
-  //     'passingThrough' : 0,
-  //     'maximumMemory' : 0,
-  //     'applyingExitCode' : 1,
-  //     'stdio' : mode === 'fork' ? [ 'pipe', 'pipe', 'pipe', 'ipc' ] : [ 'pipe', 'pipe', 'pipe' ],
-  //     'streamOut' : null,
-  //     'streamErr' : null,
-  //     'args' : null,
-  //     'interpreterArgs' : null,
-  //     'when' : 'instant',
-  //     'dry' : 0,
-  //     'ipc' : mode === 'fork' ? true : false,
-  //     'env' : null,
-  //     'hiding' : 1,
-  //     'concurrent' : 0,
-  //     'timeOut' : null,
-  //     // 'briefExitCode' : 0,
-  //     'verbosity' : 2,
-  //     'outputPrefixing' : 0,
-  //     'outputPiping' : true,
-  //     'outputAdditive' : true,
-  //     'outputColoring' : 1,
-  //     'outputColoringStdout' : 1,
-  //     'outputColoringStderr' : 1,
-  //     'outputGraying' : 0,
-  //     'conStart' : options.conStart,
-  //     'conTerminate' : options.conTerminate,
-  //     'conDisconnect' : options.conDisconnect,
-  //     'ready' : options.ready,
-  //     'procedure' : options.procedure,
-  //     'logger' : options.logger,
-  //     'stack' : options.stack,
-  //     'streamOut' : options.streamOut,
-  //     'streamErr' : options.streamErr,
-  //     'uid' : null,
-  //     'gid' : null,
-  //     'streamSizeLimit' : null,
-  //     'sessions' : [],
-  //     'state' : 'initial',
-  //     'exitReason' : null,
-  //     'output' : '',
-  //     'exitCode' : null,
-  //     'exitSignal' : null,
-  //     'ended' : false,
-  //     'error' : null
-  //     // 'disconnect' : options.disconnect,
-  //     // 'fullExecPath' : null,
-  //     // '_handleProcedureTerminationBegin' : false,
-  //   }
-  //   test.identical( options, exp );
-
-  //   test.true( options.conTerminate !== options.ready );
-  //   test.true( !options.disconnect );
-  //   test.true( !options.pnd );
-  //   test.true( !!options.procedure );
-  //   test.true( !!options.logger );
-  //   test.true( !!options.stack );
-  //   test.true( _.streamIs( options.streamOut ) );
-  //   test.true( _.streamIs( options.streamErr ) );
-  //   test.true( options.streamOut !== options.streamErr );
-  //   test.identical( options.ready.exportString(), 'Consequence:: 0 / 3' );
-  //   test.identical( options.conTerminate.exportString(), 'Consequence:: 0 / 0' );
-  //   test.identical( options.conDisconnect, null );
-  //   test.identical( options.conStart.exportString(), 'Consequence:: 0 / 0' );
-
-  //   return returned;
-  // })
 
 }
 
@@ -24985,7 +24844,6 @@ function startSingleOptionDry( test )
       return null;
     })
 
-
     /* */
 
     ready.then( () =>
@@ -26678,15 +26536,15 @@ function startMultipleOptionProcedure( test )
         test.true( _.objectIs( op.procedure._object ) );
         test.identical( op.procedure._object.execPath, [ `${tops.mode === 'fork' ? programPath : 'node ' + programPath}`, `${tops.mode === 'fork' ? programPath : 'node ' + programPath}` ] );
 
-        op.sessions.forEach( ( run ) =>
+        op.sessions.forEach( ( session ) =>
         {
-          test.identical( run.exitCode, 0 );
-          test.identical( run.ended, true );
-          test.equivalent( run.output, `[ 'a' ]` );
-          test.true( _.strHas( run.procedure._name, 'PID:') );
-          test.true( _.objectIs( run.procedure._object ) );
-          test.identical( run.procedure._object.exitCode, 0 );
-        } )
+          test.identical( session.exitCode, 0 );
+          test.identical( session.ended, true );
+          test.equivalent( session.output, `[ 'a' ]` );
+          test.true( _.strHas( session.procedure._name, 'PID:') );
+          test.true( _.objectIs( session.procedure._object ) );
+          test.identical( session.procedure._object.exitCode, 0 );
+        } ) /* qqq for Yevhen : ! */
 
         return null;
       } )
@@ -26735,12 +26593,12 @@ function startMultipleOptionProcedure( test )
         test.identical( op, options );
         test.equivalent( op.output, `[ 'a' ]\n[ 'a' ]` );
         test.identical( op.procedure, false );
-        op.sessions.forEach( ( run ) =>
+        op.sessions.forEach( ( session ) =>
         {
-          test.identical( run.exitCode, 0 );
-          test.identical( run.ended, true );
-          test.equivalent( run.output, `[ 'a' ]` );
-          test.identical( run.procedure, false );
+          test.identical( session.exitCode, 0 );
+          test.identical( session.ended, true );
+          test.equivalent( session.output, `[ 'a' ]` );
+          test.identical( session.procedure, false );
         } )
 
         return null;
@@ -26793,14 +26651,14 @@ function startMultipleOptionProcedure( test )
         test.true( _.objectIs( op.procedure._object ) );
         test.identical( op.procedure._object.execPath, [ `${tops.mode === 'fork' ? programPath : 'node ' + programPath}`, `${tops.mode === 'fork' ? programPath : 'node ' + programPath}` ] );
 
-        op.sessions.forEach( ( run ) =>
+        op.sessions.forEach( ( session ) =>
         {
-          test.identical( run.exitCode, 0 );
-          test.identical( run.ended, true );
-          test.equivalent( run.output, `[ 'a' ]` );
-          test.true( _.strHas( run.procedure._name, 'PID:') );
-          test.true( _.objectIs( run.procedure._object ) );
-          test.identical( run.procedure._object.exitCode, 0 );
+          test.identical( session.exitCode, 0 );
+          test.identical( session.ended, true );
+          test.equivalent( session.output, `[ 'a' ]` );
+          test.true( _.strHas( session.procedure._name, 'PID:') );
+          test.true( _.objectIs( session.procedure._object ) );
+          test.identical( session.procedure._object.exitCode, 0 );
         } )
 
         return null;
@@ -26851,14 +26709,14 @@ function startMultipleOptionProcedure( test )
         test.identical( op.procedure._name, null );
         test.identical( op.procedure._object, null );
 
-        op.sessions.forEach( ( run ) =>
+        op.sessions.forEach( ( session ) =>
         {
-          test.identical( run.exitCode, 0 );
-          test.identical( run.ended, true );
-          test.equivalent( run.output, `[ 'a' ]` );
-          test.true( _.strHas( run.procedure._name, 'PID:') );
-          test.true( _.objectIs( run.procedure._object ) );
-          test.identical( run.procedure._object.exitCode, 0 );
+          test.identical( session.exitCode, 0 );
+          test.identical( session.ended, true );
+          test.equivalent( session.output, `[ 'a' ]` );
+          test.true( _.strHas( session.procedure._name, 'PID:') );
+          test.true( _.objectIs( session.procedure._object ) );
+          test.identical( session.procedure._object.exitCode, 0 );
         } )
 
         return null;
@@ -26911,15 +26769,15 @@ function startMultipleOptionProcedure( test )
         test.identical( op.procedure._object, 'object' );
         test.identical( op.procedure._stack, 'stack' );
 
-        op.sessions.forEach( ( run ) =>
+        op.sessions.forEach( ( session ) =>
         {
-          test.identical( run.exitCode, 0 );
-          test.identical( run.ended, true );
-          test.equivalent( run.output, `[ 'a' ]` );
-          test.true( _.strHas( run.procedure._name, 'PID:') );
-          test.true( _.objectIs( run.procedure._object ) );
-          test.identical( run.procedure._object.exitCode, 0 );
-          test.notIdentical( run.procedure._stack, 'stack' );
+          test.identical( session.exitCode, 0 );
+          test.identical( session.ended, true );
+          test.equivalent( session.output, `[ 'a' ]` );
+          test.true( _.strHas( session.procedure._name, 'PID:') );
+          test.true( _.objectIs( session.procedure._object ) );
+          test.identical( session.procedure._object.exitCode, 0 );
+          test.notIdentical( session.procedure._stack, 'stack' );
         } )
 
         return null;
