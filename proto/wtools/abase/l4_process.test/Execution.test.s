@@ -1,4 +1,3 @@
-/* eslint-disable */
 ( function _Execution_test_s( )
 {
 
@@ -200,9 +199,11 @@ use no more than one parameter in test routine
 hint :
 time.out
 setTimeout
+
+aaa : Done.
 */
 
-/* qqq for Yevhen : implement for 3 modes where test routine is not implemented for 3 modes */
+/* qqq for Yevhen : implement for 3 modes where test routine is not implemented for 3 modes | aaa : Done. */
 
 // --
 // context
@@ -2711,7 +2712,7 @@ function startMinimalArgsOption( test )
 //
 
 /*
-qqq for Yevhen : split shellArgumentsParsing and similar test routine by mode
+qqq for Yevhen : split shellArgumentsParsing and similar test routine by mode | aaa : Done.
 */
 
 function startMinimalArgumentsParsing( test )
@@ -13016,7 +13017,7 @@ function startMinimalDetachingIpc( test )
       if( mode === 'shell' )
       return test.shouldThrowErrorSync( () => _.process.startMinimal( o ) );
 
-      _.process.start( o );
+      _.process.startMinimal( o );
 
       let message;
 
@@ -13117,7 +13118,7 @@ function startMinimalDetachingIpc( test )
 
 //
 
-/* qqq for Yevhen : implement for other modes */
+/* qqq for Yevhen : implement for other modes | aaa : Done. */
 // function startDetachingModeSpawnIpc( test )
 // {
 //   let context = this;
@@ -13241,7 +13242,7 @@ function startMinimalDetachingIpc( test )
 
 //
 
-/* qqq for Yevhen : implement for other modes */
+/* qqq for Yevhen : implement for other modes | aaa : Done. */
 // function startDetachingModeForkIpc( test )
 // {
 //   let context = this;
@@ -13365,7 +13366,7 @@ function startMinimalDetachingIpc( test )
 
 //
 
-/* qqq for Yevhen : implement for other modes */
+/* qqq for Yevhen : implement for other modes | aaa : Done. */
 // function startDetachingModeShellIpc( test )
 // {
 //   let context = this;
@@ -29723,7 +29724,7 @@ function startMinimalOptionVerbosityLogging( test )
 
 }
 
-startOptionVerbosityLogging.timeOut = 3e5;
+startMinimalOptionVerbosityLogging.timeOut = 3e5;
 
 //
 
@@ -41711,7 +41712,7 @@ var Proto =
     startMultipleConcurrentConsequences,
     starterConcurrentMultiple, /* with `starter` */
 
-    /* qqq for Yevhen : use routine _.process.startMinimal() where it is possible and make renaming of test routines */
+    /* qqq for Yevhen : use routine _.process.startMinimal() where it is possible and make renaming of test routines | aaa : Done. */
 
     // helper
 
