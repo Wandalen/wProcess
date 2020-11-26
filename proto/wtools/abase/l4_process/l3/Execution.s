@@ -1632,7 +1632,8 @@ function startSingle_body( o )
       conDisconnect : null,
       logger : null,
       procedure : null,
-      when : null
+      when : null,
+      sessionId : null
     }
     let locals = { toolsPath, o : _.mapBut( o, excludeOptions ) };
     let secondaryProcessRoutine = _.program.preform({ routine : afterDeathSecondaryProcess, locals })
