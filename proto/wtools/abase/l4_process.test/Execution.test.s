@@ -24989,18 +24989,20 @@ function startSingleOptionDry( test )
         test.identical( op.streamOut, null );
         test.identical( op.streamErr, null );
 
-        /* qqq for Yevhen : bad */
+        /* qqq for Yevhen : bad | aaa : Fixed. */
         if ( tops.mode === 'shell' )
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe' ] );
           test.identical( op.fullExecPath, `node ${programPath} arg1 "arg0"` );
         }
+        else if( tops.mode === 'fork' )
+        {
+          test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
+          test.identical( op.fullExecPath, `${programPath} arg1 arg0` );
+        }
         else
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
-          if( tops.mode === 'fork' )
-          test.identical( op.fullExecPath, `${programPath} arg1 arg0` );
-          else
           test.identical( op.fullExecPath, `node ${programPath} arg1 arg0` );
         }
 
