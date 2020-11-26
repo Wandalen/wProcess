@@ -10470,7 +10470,7 @@ startMinimalOptionTimeOut.rapidity = -1;
 
 //
 
-function startAfterDeath( test )
+function startSingleAfterDeath( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -10642,7 +10642,7 @@ function startAfterDeath( test )
       mode : 'spawn',
     }
 
-    _.process.start( o );
+    _.process.startSingle( o );
 
     o.conStart.thenGive( () =>
     {
@@ -10675,8 +10675,8 @@ function startAfterDeath( test )
 
 }
 
-startAfterDeath.timeOut = 35e4; /* Locally : 34.737s */
-startAfterDeath.description =
+startSingleAfterDeath.timeOut = 35e4; /* Locally : 34.737s */
+startSingleAfterDeath.description =
 `
 Spawns program1 as "main" process.
 Program1 starts program2 with mode:'afterdeath'
@@ -10686,7 +10686,7 @@ Program2 exits normally after short timeout
 
 //
 
-function startAfterDeathOutput( test )
+function startSingleAfterDeathOutput( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -10787,7 +10787,7 @@ function startAfterDeathOutput( test )
       stdio : 'inherit'
     }
 
-    _.process.start( o );
+    _.process.startSingle( o );
 
     o.pnd.on( 'exit', () => //zzz for Vova: remove after enabling exit handler in start
     {
@@ -10819,8 +10819,8 @@ function startAfterDeathOutput( test )
   }
 }
 
-startAfterDeathOutput.timeOut = 27e4; /* Locally : 26.485s */
-startAfterDeathOutput.description =
+startSingleAfterDeathOutput.timeOut = 27e4; /* Locally : 26.485s */
+startSingleAfterDeathOutput.description =
 `
 Fakes death of program1 and checks output of program2
 `
@@ -32469,7 +32469,7 @@ function terminate( test )
     .then( () =>
     {
       /*
-      qqq for Vova : more information!
+      qqq for Vova : more information! aaa: extended execPathOf and error message of routine signal
       xxx :
       Windows 12x, mode::fork
       2020-11-25T14:08:22.5752316Z --------------- uncaught asynchronous error --------------->
@@ -35795,7 +35795,7 @@ function terminateDifferentStdio( test )
     .then( () =>
     {
       test.case = `mode : ${mode}, ignore`;
-      /* qqq for Vova : should be maximum information about the process and circumstances */
+      /* qqq for Vova : should be maximum information about the process and circumstances aaa: extended execPathOf and error message of routine signal */
       /* xxx Phantom fail on Windows:
 
         Fail #1:
@@ -37071,8 +37071,8 @@ var Proto =
     startMinimalOptionWhenDelay,
     startMinimalOptionWhenTime,
     startMinimalOptionTimeOut,
-    startAfterDeath, /* qqq for Vova : does not work if call is _.process.startSingle() */
-    startAfterDeathOutput, /* qqq for Vova : does not work if call is _.process.startSingle() */
+    startSingleAfterDeath, /* qqq for Vova : does not work if call is _.process.startSingle() aaa:fixed */
+    startSingleAfterDeathOutput, /* qqq for Vova : does not work if call is _.process.startSingle() aaa:fixed*/
 
     // detaching
 
