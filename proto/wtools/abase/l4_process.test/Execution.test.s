@@ -9060,6 +9060,7 @@ function startMultipleProcedureStack( test )
     ready.then( function case1()
     {
       /*
+      qqq for Yevhen : not good enough. output of subprocess??
       xxx :
       Windows 13x, mode::fork
       [39;0m[92m/[39;0m[92m TestRoutine[39;0m[92m:[39;0m[92m:[39;0m[92mstartProcedureStackMultiple [39;0m[92m/[39;0m[92m sync[39;0m[92m:[39;0m[92m0 deasync[39;0m[92m:[39;0m[92m1 mode[39;0m[92m:[39;0m[92mfork stack[39;0m[92m:[39;0m[92mfalse[39;0m[92m # [39;0m[92m538 [39;0m[92m)[39;0m[92m [39;0m[92m:[39;0m[92m expected true[39;0m[92m ... [39;0m[92mok[39;0m
@@ -10469,7 +10470,7 @@ startMinimalOptionTimeOut.rapidity = -1;
 
 //
 
-function startAfterDeath( test )
+function startSingleAfterDeath( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -10641,7 +10642,7 @@ function startAfterDeath( test )
       mode : 'spawn',
     }
 
-    _.process.start( o );
+    _.process.startSingle( o );
 
     o.conStart.thenGive( () =>
     {
@@ -10674,8 +10675,8 @@ function startAfterDeath( test )
 
 }
 
-startAfterDeath.timeOut = 35e4; /* Locally : 34.737s */
-startAfterDeath.description =
+startSingleAfterDeath.timeOut = 35e4; /* Locally : 34.737s */
+startSingleAfterDeath.description =
 `
 Spawns program1 as "main" process.
 Program1 starts program2 with mode:'afterdeath'
@@ -10685,7 +10686,7 @@ Program2 exits normally after short timeout
 
 //
 
-function startAfterDeathOutput( test )
+function startSingleAfterDeathOutput( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -10786,7 +10787,7 @@ function startAfterDeathOutput( test )
       stdio : 'inherit'
     }
 
-    _.process.start( o );
+    _.process.startSingle( o );
 
     o.pnd.on( 'exit', () => //zzz for Vova: remove after enabling exit handler in start
     {
@@ -10818,8 +10819,8 @@ function startAfterDeathOutput( test )
   }
 }
 
-startAfterDeathOutput.timeOut = 27e4; /* Locally : 26.485s */
-startAfterDeathOutput.description =
+startSingleAfterDeathOutput.timeOut = 27e4; /* Locally : 26.485s */
+startSingleAfterDeathOutput.description =
 `
 Fakes death of program1 and checks output of program2
 `
@@ -27871,26 +27872,32 @@ function startMultipleOutput( test )
           // test.lt( track.indexOf( '0.out.end' ), track.indexOf( 'conTerminate' ) );
           // test.lt( track.indexOf( 'conTerminate' ), track.indexOf( 'ready' ) );
 
-          let exp1 =
+          console.log( `track:\n${track.join( '\n' )}` );
+
+          var exp =
           `
           **<conStart>
-          **<0.out:1::begin>**<0.out:1::end>
-          **<0.err:1::err>
-          **<0.err.end>**<0.err.finish>
-          **<0.out.end>**<0.out.finish>
+          **<0.out:1::begin>**<0.out:1::end>**<0.err:1::err>
+          **<0.err.end>
           **<conTerminate>**<ready>**
           `;
-          let exp2 =
+          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
+          var exp =
           `
           **<conStart>
-          **<0.out:2::begin>**<0.out:2::end>
-          **<0.err:2::err>
-          **<0.err.end>**<0.err.finish>
-          **<0.out.end>**<0.out.finish>
+          **<0.out:2::begin>**<0.out:2::end>**<0.err:2::err>
+          **<0.err.end>
           **<conTerminate>**<ready>**
           `;
-          test.true( _.dissector.dissect( exp1, track.toString() ).matched );
-          test.true( _.dissector.dissect( exp2, track.toString() ).matched );
+          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
+          var exp =`**<conStart>**<0.err.end>**<conTerminate>**`;
+          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
+          var exp =`**<conStart>**<0.err.finish>**<conTerminate>**`;
+          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
+          var exp =`**<conStart>**<0.out.end>**<conTerminate>**`;
+          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
+          var exp =`**<conStart>**<0.out.finish>**<conTerminate>**`;
+          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
 
         }
 
@@ -28125,42 +28132,43 @@ function startMultipleOutput( test )
           // test.lt( track.indexOf( '0.err.finish' ), track.indexOf( 'conTerminate' ) );
           // test.lt( track.indexOf( 'conTerminate' ), track.indexOf( 'ready' ) );
 
-          let exp1 =
-          `
-          **<conStart>
-          **<0.out:1::begin>**<0.out:1::end>
-          **<0.err:1::err>**<0.err:2::err>
-          **<0.err.end>**<0.err.finish>
-          **<0.out.end>**<0.out.finish>
-          **<conTerminate>**<ready>**
-          `;
-          let exp2 =
-          `
-          **<conStart>
-          **<1.out:1::begin>**<1.out:1::end>
-          **<1.err:1::err>**<1.err.end>
-          **<1.out.end>
-          **<conTerminate>**<ready>**
-          `;
-          let exp3 =
-          `
-          **<conStart>
-          **<0.out:2::begin>**<0.out:2::end>
-          **<0.err.end>**<0.err.finish>
-          **<0.out.end>**<0.out.finish>
-          **<conTerminate>**<ready>**
-          `;
-          let exp4 =
-          `
-          **<conStart>
-          **<2.out:2::begin>**<2.out:2::end>
-          **<2.err.end>**<2.out.end>
-          **<conTerminate>**<ready>**
-          `;
-          test.true( _.dissector.dissect( exp1, track.toString() ).matched );
-          test.true( _.dissector.dissect( exp2, track.toString() ).matched );
-          test.true( _.dissector.dissect( exp3, track.toString() ).matched );
-          test.true( _.dissector.dissect( exp4, track.toString() ).matched );
+          // let exp1 =
+          // `
+          // **<conStart>
+          // **<0.out:1::begin>**<0.out:1::end>
+          // **<0.err:1::err>**<0.err:2::err>
+          // **<0.err.end>**<0.err.finish>
+          // **<0.out.end>**<0.out.finish>
+          // **<conTerminate>**<ready>**
+          // `;
+          // let exp2 =
+          // `
+          // **<conStart>
+          // **<1.out:1::begin>**<1.out:1::end>
+          // **<1.err:1::err>**<1.err.end>
+          // **<1.out.end>
+          // **<conTerminate>**<ready>**
+          // `;
+          // let exp3 =
+          // `
+          // **<conStart>
+          // **<0.out:2::begin>**<0.out:2::end>
+          // **<0.err.end>**<0.err.finish>
+          // **<0.out.end>**<0.out.finish>
+          // **<conTerminate>**<ready>**
+          // `;
+          // let exp4 =
+          // `
+          // **<conStart>
+          // **<2.out:2::begin>**<2.out:2::end>
+          // **<2.err.end>**<2.out.end>
+          // **<conTerminate>**<ready>**
+          // `;
+          // test.true( _.dissector.dissect( exp1, track.join( '\n' ) ).matched );
+          // test.true( _.dissector.dissect( exp2, track.join( '\n' ) ).matched );
+          // test.true( _.dissector.dissect( exp3, track.join( '\n' ) ).matched );
+          // test.true( _.dissector.dissect( exp4, track.join( '\n' ) ).matched );
+          /* qqq2 for Yevhen : bad! */
 
         }
 
@@ -32383,6 +32391,7 @@ function terminate( test )
     .then( () =>
     {
       /*
+      qqq for Vova : more information! aaa: extended execPathOf and error message of routine signal
       xxx :
       Windows 12x, mode::fork
       2020-11-25T14:08:22.5752316Z --------------- uncaught asynchronous error --------------->
@@ -32572,6 +32581,7 @@ function terminate( test )
     .then( () =>
     {
       /*
+      qqq2 for Yevhen : not good enough. lack of information about the test case! same problem on other places
       xxx :
       macos 10x, 12x, 14x, mode::fork
       2020-11-25T14:04:02.4631420Z [91m        - got :
@@ -32602,7 +32612,7 @@ function terminate( test )
 
       o.pnd.on( 'message', () =>
       {
-        _.process.terminate({ pid : o.pnd.pid, timeOut : 1 });
+        _.process.terminate({ pid : o.pnd.pid, timeOut : context.t1*2 });
       })
 
       ready.then( ( op ) =>
@@ -32711,7 +32721,7 @@ function terminate( test )
         else
         {
           test.identical( op.exitCode, null );
-          test.identical( op.exitSignal, 'SIGTERM' ); /* xxx : sometimes SIGKILL */
+          test.identical( op.exitSignal, 'SIGTERM' ); /* yyy : sometimes SIGKILL */
           test.identical( op.ended, true );
           test.true( _.strHas( op.output, 'SIGTERM' ) );
           test.true( !_.strHas( op.output, 'Application timeout!' ) );
@@ -34781,7 +34791,7 @@ function terminateSeveralDetachedChildren( test )
 
         if( process.platform === 'win32' )
         {
-          test.notIdentical( o.exitCode, 0 ) /* returns 4294967295 which is -1 to uint32. */
+          test.notIdentical( o.exitCode, 0 );
           test.identical( o.exitSignal, null );
         }
         else
@@ -34795,7 +34805,9 @@ function terminateSeveralDetachedChildren( test )
         test.identical( _.strCount( o.output, 'program3::begin' ), 1 );
         test.identical( _.strCount( o.output, 'program2::end' ), 0 );
         test.identical( _.strCount( o.output, 'program3::end' ), 0 );
+        console.log( `_.process.execPathOf( program2Pid ) : ${_.process.execPathOf( program2Pid )}` );
         test.true( !_.process.isAlive( program2Pid ) );
+        console.log( `_.process.execPathOf( program3Pid ) : ${_.process.execPathOf( program3Pid )}` );
         test.true( !_.process.isAlive( program3Pid ) );
         test.true( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
         test.true( !a.fileProvider.fileExists( a.abs( 'program3end' ) ) );
@@ -34809,72 +34821,6 @@ function terminateSeveralDetachedChildren( test )
     return ready;
 
   }
-
-  /* ORIGINAL */
-  // let o =
-  // {
-  //   execPath : 'node program1.js',
-  //   currentPath : a.routinePath,
-  //   mode : 'spawn',
-  //   outputPiping : 1,
-  //   outputCollecting : 1,
-  //   throwingExitCode : 0
-  // }
-
-  // _.process.start( o );
-
-  // let program2Pid = null;
-  // let program3Pid = null;
-  // let terminate = _.Consequence();
-
-  // o.pnd.stdout.on( 'data', handleOutput );
-
-  // terminate.then( () =>
-  // {
-  //   console.log( 'terminate' );
-  //   program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
-  //   console.log( 'program2Pid', program2Pid );
-  //   program2Pid = program2Pid.pid;
-  //   program3Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program3Pid' ), encoding : 'json' });
-  //   console.log( 'program3Pid', program3Pid );
-  //   program3Pid = program3Pid.pid;
-  //   return _.process.terminate
-  //   ({
-  //     pid : o.pnd.pid,
-  //     timeOut : context.t1 * 5,
-  //     withChildren : 1
-  //   })
-  // })
-
-  // o.conTerminate.then( () =>
-  // {
-  //   console.log( 'conTerminate' );
-
-  //   if( process.platform === 'win32' )
-  //   {
-  //     test.identical( o.exitCode, 1 );
-  //     test.identical( o.exitSignal, null );
-  //   }
-  //   else
-  //   {
-  //     test.identical( o.exitCode, null );
-  //     test.identical( o.exitSignal, 'SIGTERM' );
-  //   }
-
-  //   test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
-  //   test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
-  //   test.identical( _.strCount( o.output, 'program3::begin' ), 1 );
-  //   test.identical( _.strCount( o.output, 'program2::end' ), 0 );
-  //   test.identical( _.strCount( o.output, 'program3::end' ), 0 );
-  //   test.true( !_.process.isAlive( program2Pid ) );
-  //   test.true( !_.process.isAlive( program3Pid ) );
-  //   test.true( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
-  //   test.true( !a.fileProvider.fileExists( a.abs( 'program3end' ) ) );
-
-  //   return null;
-  // })
-
-  // return _.Consequence.AndKeep( terminate, o.conTerminate );
 
   /* - */
 
@@ -35771,6 +35717,7 @@ function terminateDifferentStdio( test )
     .then( () =>
     {
       test.case = `mode : ${mode}, ignore`;
+      /* qqq for Vova : should be maximum information about the process and circumstances aaa: extended execPathOf and error message of routine signal */
       /* xxx Phantom fail on Windows:
 
         Fail #1:
@@ -36617,6 +36564,7 @@ function childrenOptionFormatList( test )
       {
         if( process.platform === 'win32' )
         {
+          console.log( `_.select( prcocesses, '*/name' ):\n${_.select( prcocesses, '*/name' ).join( '\n' ) }` );
           test.identical( prcocesses.length, 4 );
 
           test.identical( prcocesses[ 0 ].pid, o.pnd.pid );
@@ -37045,8 +36993,8 @@ var Proto =
     startMinimalOptionWhenDelay,
     startMinimalOptionWhenTime,
     startMinimalOptionTimeOut,
-    startAfterDeath, /* qqq for Vova : does not work if call is _.process.startSingle() */
-    startAfterDeathOutput, /* qqq for Vova : does not work if call is _.process.startSingle() */
+    startSingleAfterDeath, /* qqq for Vova : does not work if call is _.process.startSingle() aaa:fixed */
+    startSingleAfterDeathOutput, /* qqq for Vova : does not work if call is _.process.startSingle() aaa:fixed*/
 
     // detaching
 
