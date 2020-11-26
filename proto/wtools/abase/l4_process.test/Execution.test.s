@@ -24958,7 +24958,7 @@ function startSingleOptionDry( test )
         test.identical( op.ended, true );
         test.identical( op.streamOut, null );
         test.identical( op.streamErr, null );
-        if ( tops.mode === 'shell' )
+        if( tops.mode === 'shell' )
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe' ] );
           test.identical( op.fullExecPath, `err ${programPath} arg1 "arg0"` );
