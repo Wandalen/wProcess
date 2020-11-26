@@ -1632,7 +1632,8 @@ function startSingle_body( o )
       conDisconnect : null,
       logger : null,
       procedure : null,
-      when : null
+      when : null,
+      sessionId : null
     }
     let locals = { toolsPath, o : _.mapBut( o, excludeOptions ) };
     let secondaryProcessRoutine = _.program.preform({ routine : afterDeathSecondaryProcess, locals })
@@ -2862,10 +2863,7 @@ function signal_body( o )
 
     try
     {
-      if( pnd )
-      pnd.kill( o.signal );
-      else
-      process.kill( p.pid, o.signal );
+      process.kill( pnd ? pnd.pid : p.pid, o.signal );
     }
     catch( err )
     {
@@ -2933,7 +2931,7 @@ function signal_body( o )
       {
         _.errAttend( err );
         if( signal === 'SIGKILL' )
-        err = _.err( `\nTarget process: ${_.strQuote( p.pid )} is still alive after kill. Waited for ${o.timeOut} ms.` );
+        err = _.err( `\nTarget process: ${_.strQuote( p.pid )} is still alive after kill. Waited for ${o.timeOut} ms.`, processInfoGet() );
         else
         return _.process.kill({ pid : p.pid, pnd : p.pnd, withChildren : 0 });
       }
@@ -2951,11 +2949,32 @@ function signal_body( o )
     // if( err.code === 'EINVAL' )
     // throw _.err( err, '\nAn invalid signal was specified:', _.strQuote( o.signal ) )
     if( err.code === 'EPERM' )
-    throw _.err( err, `\nCurrent process does not have permission to kill target process ${o.pid}` );
+    throw _.err( err, `\nCurrent process does not have permission to kill target process: ${o.pid}`, processInfoGet() );
     if( err.code === 'ESRCH' )
     throw _.err( err, `\nTarget process: ${_.strQuote( o.pid )} does not exist.` );
     throw _.err( err );
   }
+
+  /* - */
+
+  function processInfoGet()
+  {
+    let info;
+
+    if( o.pnd )
+    {
+      info = `\nTarget exec path: ${o.pnd.spawnfile}\nTarget args: ${o.pnd.spawnargs}`
+    }
+    else
+    {
+      let execPath = _.process.execPathOf({ pid : o.pid, sync : 1, throwing : 0 });
+      info = `\nTarget exec path: ${execPath}`
+    }
+
+    return info;
+  }
+
+  /* - */
 
   function handleResult( result )
   {
@@ -3259,8 +3278,6 @@ function execPathOf( o )
     _.assert( _.intIs( o.pid ) );
   }
 
-  _.assert( process.platform === 'win32', 'Implemented only for Windows' );
-
   let ready = _.Consequence()
 
   if( !_.process.isAlive( o.pid ) )
@@ -3273,25 +3290,58 @@ function execPathOf( o )
     return ready.error( err );
   }
 
-  if( !WindowsProcessTree )
+  if( process.platform === 'win32' )
   {
-    try
+    if( !WindowsProcessTree )
     {
-      WindowsProcessTree = require( 'w.process.tree.windows' );
+      try
+      {
+        WindowsProcessTree = require( 'w.process.tree.windows' );
+      }
+      catch( err )
+      {
+        err = _.err( err, '\nFailed to get process name.' );
+        if( o.sync )
+        throw err;
+        return ready.error( err );
+      }
     }
-    catch( err )
+
+    WindowsProcessTree.getProcessList( o.pid, ( list ) =>
     {
-      err = _.err( err, '\nFailed to get process name.' );
-      if( o.sync )
-      throw err;
-      return ready.error( err );
+      ready.take( list[ 0 ].commandLine );
+    }, WindowsProcessTree.ProcessDataFlag.CommandLine )
+  }
+  else
+  {
+    let op =
+    {
+      execPath : `ps -p ${o.pid} -o command`,
+      mode : 'shell',
+      stdio : 'pipe',
+      outputPiping : 0,
+      outputCollecting : 1,
+      inputMirroring : 0,
+      ready
     }
+
+    _.process.start( op );
+
+    ready.then( ( op ) =>
+    {
+      let lines = _.strSplitNonPreserving({ src : op.output, delimeter : '\n' });
+      return lines[ lines.length - 1 ];
+    })
+
+    ready.catch( ( err ) =>
+    {
+      throw _.err( `Failed to get exec path of process:${o.pid}.`, err );
+    })
+
+    ready.take( null );
   }
 
-  WindowsProcessTree.getProcessList( o.pid, ( list ) =>
-  {
-    ready.take( list[ 0 ].commandLine );
-  }, WindowsProcessTree.ProcessDataFlag.CommandLine )
+
 
   if( o.sync )
   {
