@@ -436,6 +436,300 @@ function exitWithBeep()
 }
 
 // --
+// args
+// --
+
+function _argsForm( o )
+{
+
+  o.args = _.arrayAs( o.args );
+
+  let _argsLength = o.args.length;
+
+  if( _.strIs( o.execPath ) )
+  {
+    o.execPath2 = o.execPath;
+    let execArgs = execPathParse( o.execPath );
+    if( o.mode !== 'shell' )
+    execArgs = _.process._argsUnqoute( execArgs );
+    o.execPath = null;
+    if( execArgs.length )
+    {
+      o.execPath = execArgs.shift();
+      o.args = _.arrayPrependArray( o.args || [], execArgs );
+    }
+  }
+
+  if( o.execPath === null )
+  {
+    _.assert( o.args.length, 'Expects {-args-} to have at least one argument if {-execPath-} is not defined' );
+    o.execPath = o.args.shift();
+    o.execPath2 = o.execPath;
+    _argsLength = o.args.length;
+    o.execPath = _.process._argUnqoute( o.execPath );
+  }
+
+  o.args2 = o.args.slice();
+
+  /* passingThrough */
+
+  if( o.passingThrough )
+  {
+    let argumentsOwn = process.argv.slice( 2 );
+    if( argumentsOwn.length )
+    o.args2 = _.arrayAppendArray( o.args2 || [], argumentsOwn );
+  }
+
+  _.assert( o.interpreterArgs === null || _.arrayIs( o.interpreterArgs ) );
+  if( o.interpreterArgs && o.mode !== 'fork' )
+  o.args2 = _.arrayPrependArray( o.args2, o.interpreterArgs );
+
+  /* Escapes and quotes:
+    - Original args provided via o.args
+    - Arguments of parent process if o.passingThrough is enabled
+    Skips arguments parsed from o.execPath.
+  */
+
+  if( o.mode === 'shell' )
+  {
+    let appendedArgs = o.passingThrough ? process.argv.length - 2 : 0;
+    let prependedArgs = o.args2.length - ( _argsLength + appendedArgs );
+    for( let i = prependedArgs; i < o.args2.length; i++ )
+    {
+      o.args2[ i ] = _.process._argEscape( o.args2[ i ] );
+      o.args2[ i ] = _.strQuote( o.args2[ i ] );
+    }
+  }
+
+  /* */
+
+  function execPathParse( src )
+  {
+    let strOptions =
+    {
+      src,
+      delimeter : [ ' ' ],
+      quoting : 1,
+      quotingPrefixes : [ '"', `'`, '`' ],
+      quotingPostfixes : [ '"', `'`, '`' ],
+      preservingEmpty : 0,
+      preservingQuoting : 1,
+      stripping : 1
+    }
+    let args = _.strSplit( strOptions );
+
+    let quotes = [ '"', `'`, '`' ];
+    for( let i = 0; i < args.length; i++ )
+    {
+      let begin = _.strBeginOf( args[ i ], quotes ); /* xxx */
+      let end = _.strEndOf( args[ i ], quotes );
+      if( begin && end && begin === end )
+      continue;
+
+      if( _.longHas( quotes, args[ i ] ) )
+      continue;
+
+      let r = _.strQuoteAnalyze
+      ({
+        src : args[ i ],
+        quote : strOptions.quotingPrefixes
+      });
+
+      quotes.forEach( ( quote ) =>
+      {
+        let found = _.strFindAll( args[ i ], quote );
+        if( found.length % 2 === 0 )
+        return;
+        for( let k = 0 ; k < found.length ; k += 1 )
+        {
+          let pos = found[ k ].charsRangeLeft[ 0 ];
+          for( let j = 0 ; j < r.ranges.length ; j += 2 )
+          if( pos >= r.ranges[ j ] && pos <= r.ranges[ j + 1 ] )
+          break;
+          throw _.err( `Arguments string in execPath: ${src} has not closed quoting in argument: ${args[ i ]}` );
+        }
+      })
+    }
+
+    return args;
+  }
+
+}
+
+_argsForm.defaults =
+{
+  args : null,
+  args2 : null,
+  execPath : null,
+  execPath2 : null,
+  mode : null,
+  interpreterArgs : null,
+  passingThrough : null,
+}
+
+//
+
+function _argUnqoute( arg )
+{
+  let quotes = [ '"', `'`, '`' ];
+  let result = _.strInsideOf
+  ({
+    src : arg,
+    begin : quotes,
+    end : quotes,
+    pairing : 1,
+  })
+  if( result )
+  return result;
+  return arg;
+}
+
+//
+
+function _argsUnqoute( args )
+{
+  for( let i = 0; i < args.length; i++ )
+  args[ i ] = _.process._argUnqoute( args[ i ] );
+  return args;
+}
+
+//
+
+function _sessionsRun_head( routine, args )
+{
+  let o;
+
+  if( _.longIs( args[ 0 ] ) )
+  o = { sessions : args[ 0 ] };
+  else
+  o = args[ 0 ];
+
+  o = _.routineOptions( routine, o );
+
+  _.assert( arguments.length === 2 );
+  _.assert( args.length === 1, 'Expects single argument' );
+  _.assert( _.longIs( o.sessions ) );
+
+  return o;
+}
+
+/* xxx : abstract algorithm for consequence */
+function _sessionsRun_body( o )
+{
+  let firstReady = new _.Consequence().take( null );
+  let prevReady = firstReady;
+  let readies = [];
+  let begins = [];
+  let ends = [];
+  let readyRoutine = null;
+
+  if( !o.ready )
+  {
+    o.ready = _.take( null );
+  }
+  else if( !_.consequenceIs( o.ready ) )
+  {
+    readyRoutine = o.ready;
+    o.ready = _.take( null );
+  }
+
+  o.ready.thenGive( () =>
+  {
+
+    o.sessions.forEach( ( session, i ) =>
+    {
+
+      if( o.concurrent )
+      {
+        prevReady.then( session.ready );
+      }
+      else
+      {
+        prevReady.finally( session.ready );
+        prevReady = session.ready;
+      }
+
+      try
+      {
+        o.onRun( session );
+      }
+      catch( err )
+      {
+        o.error = o.error || err;
+        session.ready.error( err );
+      }
+
+      _.assert( _.consequenceIs( session[ o.conBeginName ] ) );
+      _.assert( _.consequenceIs( session[ o.conEndName ] ) );
+      _.assert( _.consequenceIs( session[ o.readyName ] ) );
+
+      begins.push( session[ o.conBeginName ] );
+      ends.push( session[ o.conEndName ] );
+      readies.push( session[ o.readyName ] );
+
+      if( !o.concurrent )
+      session.ready.catch( ( err ) =>
+      {
+        o.error = o.error || err;
+        if( o.onError )
+        o.onError( err );
+        else
+        throw err;
+      });
+
+    });
+
+    let onBegin;
+    if( o.concurrent )
+    onBegin = _.Consequence.AndImmediate( ... begins );
+    else
+    onBegin = _.Consequence.OrKeep( ... begins );
+    let onEnd = _.Consequence.AndImmediate( ... ends );
+    let ready = _.Consequence.AndImmediate( ... readies );
+
+    o.onBegin = direct( onBegin, o.onBegin );
+    o.onEnd = direct( onEnd, o.onEnd );
+
+    ready.finally( o.ready );
+
+  });
+
+  return o;
+
+  function direct( icon, ocon )
+  {
+    if( _.consequenceIs( ocon ) )
+    icon.finally( ocon );
+    else if( ocon )
+    icon.tap( ( err, arg ) =>
+    {
+      ocon( err, err ? undefined : o );
+    });
+    else
+    ocon = icon;
+    return ocon;
+  }
+
+}
+
+_sessionsRun_body.defaults =
+{
+  concurrent : 1,
+  sessions : null,
+  error : null,
+  conBeginName : 'conBegin',
+  conEndName : 'conEnd',
+  readyName : 'ready',
+  onRun : null,
+  onBegin : null,
+  onEnd : null,
+  onError : null,
+  ready : null,
+}
+
+let _sessionsRun = _.routineUnite( _sessionsRun_head, _sessionsRun_body );
+
+// --
 // escape
 // --
 
@@ -620,6 +914,13 @@ let Extension =
   exitCode,
   exit,
   exitWithBeep,
+
+  // args
+
+  _argsForm,
+  _argUnqoute,
+  _argsUnqoute,
+  _sessionsRun,
 
   // escape
 
