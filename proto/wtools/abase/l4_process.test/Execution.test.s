@@ -28130,43 +28130,56 @@ function startMultipleOutput( test )
           // test.lt( track.indexOf( '0.err.finish' ), track.indexOf( 'conTerminate' ) );
           // test.lt( track.indexOf( 'conTerminate' ), track.indexOf( 'ready' ) );
 
-          // let exp1 =
-          // `
-          // **<conStart>
-          // **<0.out:1::begin>**<0.out:1::end>
-          // **<0.err:1::err>**<0.err:2::err>
-          // **<0.err.end>**<0.err.finish>
-          // **<0.out.end>**<0.out.finish>
-          // **<conTerminate>**<ready>**
-          // `;
-          // let exp2 =
-          // `
-          // **<conStart>
-          // **<1.out:1::begin>**<1.out:1::end>
-          // **<1.err:1::err>**<1.err.end>
-          // **<1.out.end>
-          // **<conTerminate>**<ready>**
-          // `;
-          // let exp3 =
-          // `
-          // **<conStart>
-          // **<0.out:2::begin>**<0.out:2::end>
-          // **<0.err.end>**<0.err.finish>
-          // **<0.out.end>**<0.out.finish>
-          // **<conTerminate>**<ready>**
-          // `;
-          // let exp4 =
-          // `
-          // **<conStart>
-          // **<2.out:2::begin>**<2.out:2::end>
-          // **<2.err.end>**<2.out.end>
-          // **<conTerminate>**<ready>**
-          // `;
-          // test.true( _.dissector.dissect( exp1, track.join( '\n' ) ).matched );
-          // test.true( _.dissector.dissect( exp2, track.join( '\n' ) ).matched );
-          // test.true( _.dissector.dissect( exp3, track.join( '\n' ) ).matched );
-          // test.true( _.dissector.dissect( exp4, track.join( '\n' ) ).matched );
-          /* qqq2 for Yevhen : bad! */
+          console.log( `track:\n${track.join( '\n' )}` );
+
+          var exp =
+          `
+          **<conStart>
+          **<0.out:1::begin>**<0.out:1::end>**<0.err:1::err>**<0.err:2::err>
+          **<conTerminate>**<ready>**
+          `;
+          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
+          var exp = `**<conStart>**<0.err.end>**<conTerminate>**`;
+          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
+          var exp = `**<conStart>**<0.err.finish>**<conTerminate>**`;
+          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
+          var exp = `**<conStart>**<0.out.end>**<conTerminate>**`;
+          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
+          var exp = `**<conStart>**<0.out.finish>**<conTerminate>**`;
+          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
+
+          var exp =
+          `
+          **<conStart>
+          **<1.out:1::begin>**<1.out:1::end>**<1.err:1::err>
+          **<conTerminate>**<ready>**
+          `;
+          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
+          var exp = `**<conStart>**<1.err.end>**<conTerminate>**`;
+          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
+          var exp = `**<conStart>**<1.out.end>**<conTerminate>**`;
+          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
+
+          var exp =
+          `
+          **<conStart>
+          **<0.out:2::begin>**<0.out:2::end>**<0.err:2::err>
+          **<conTerminate>**<ready>**
+          `;
+          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
+
+          var exp =
+          `
+          **<conStart>
+          **<2.out:2::begin>**<2.out:2::end>**<2.err:2::err>
+          **<conTerminate>**<ready>**
+          `;
+          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
+          var exp = `**<conStart>**<2.err.end>**<conTerminate>**`;
+          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
+          var exp = `**<conStart>**<2.out.end>**<conTerminate>**`;
+          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
+          /* qqq2 for Yevhen : bad! | aaa : Fixed. */
 
         }
 
