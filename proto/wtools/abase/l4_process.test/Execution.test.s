@@ -1684,7 +1684,7 @@ function startSingleSyncDeasync( test )
       expectedOutput = programPath + '\n'
 
       return null;
-    } )
+    })
 
     ready.then( () =>
     {
@@ -1732,7 +1732,7 @@ function startSingleSyncDeasync( test )
         return returned;
       }
 
-    } )
+    })
 
     /* */
 
@@ -1856,7 +1856,7 @@ function startSingleSyncDeasync( test )
         return returned;
       }
 
-    } )
+    })
 
     /* */
 
@@ -1888,11 +1888,11 @@ function startSingleSyncDeasync( test )
           test.identical( options.exitCode, 1 );
 
           return null;
-        } );
+        });
 
       }
 
-    } )
+    })
 
     return ready;
   }
@@ -6299,7 +6299,7 @@ function startMinimalImportantExecPathPassingThrough( test )
   {
     test.open( '0 args to parent' );
     return null;
-  } )
+  })
 
   a.ready.then( function()
   {
@@ -6402,7 +6402,7 @@ function startMinimalImportantExecPathPassingThrough( test )
   {
     test.close( '0 args to parent' );
     return null;
-  } )
+  })
 
   /* - */
 
@@ -6410,7 +6410,7 @@ function startMinimalImportantExecPathPassingThrough( test )
   {
     test.open( '1 arg to parent' );
     return null;
-  } )
+  })
 
   /* ORIGINAL */
   // shell({ execPath : 'echo', args : null, passingThrough : 1 })
@@ -6564,7 +6564,7 @@ function startMinimalImportantExecPathPassingThrough( test )
   {
     test.close( '1 arg to parent' );
     return null;
-  } )
+  })
 
   /* - */
 
@@ -6572,7 +6572,7 @@ function startMinimalImportantExecPathPassingThrough( test )
   {
     test.open( '2 args to parent' );
     return null;
-  } )
+  })
 
   a.ready.then( function()
   {
@@ -6678,7 +6678,7 @@ function startMinimalImportantExecPathPassingThrough( test )
   {
     test.close( '2 args to parent' );
     return null;
-  } )
+  })
 
   return a.ready;
 
@@ -6756,7 +6756,7 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
         test.equivalent( op.output, '[]' );
         test.true( a.fileProvider.fileExists( testAppPath ) );
         return null;
-      } )
+      })
 
       /* ORIGINAL */
       // return _.process.startNjsPassingThrough( o )
@@ -6806,7 +6806,7 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
         test.equivalent( op.output, '[]' );
         test.true( a.fileProvider.fileExists( testAppPath ) );
         return null;
-      } )
+      })
 
       /* ORIGINAL */
       // return _.process.startNjsPassingThrough( o )
@@ -6854,7 +6854,7 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
         test.equivalent( op.output, `[ 'arg' ]` );
         test.true( a.fileProvider.fileExists( testAppPath ) );
         return null;
-      } )
+      })
 
     });
 
@@ -6894,7 +6894,7 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
         test.equivalent( op.output, `[ 'arg' ]` );
         test.true( a.fileProvider.fileExists( testAppPath ) );
         return null;
-      } )
+      })
     })
 
     return ready;
@@ -7304,7 +7304,7 @@ function startMinimalPassingThroughExecPathWithSpace( test )
     {
       console.log( JSON.stringify({ output : op ? op.output : null, err : err ? _.errAttend( err ) : null }) );
       return null;
-    } )
+    })
   }
 
   function testApp()
@@ -9605,7 +9605,7 @@ function startMultipleState( test )
         test.identical( op.output, '' );
         states.push( op.state );
         return null;
-      } )
+      })
 
       options.conTerminate.finally( ( err, op ) =>
       {
@@ -9615,7 +9615,7 @@ function startMultipleState( test )
         test.equivalent( op.output, 'Log\nLog' );
         states.push( op.state );
         return null;
-      } )
+      })
 
       options.ready.finally( ( err, op ) =>
       {
@@ -9626,11 +9626,11 @@ function startMultipleState( test )
         states.push( op.state );
         test.identical( states, [ 'starting', 'terminating', 'terminated' ] )
         return null;
-      } )
+      })
 
       return returned;
 
-    } )
+    })
 
     /* */
 
@@ -9657,7 +9657,7 @@ function startMultipleState( test )
         test.identical( op.output, '' );
         states.push( op.state );
         return null;
-      } )
+      })
 
       options.conTerminate.finally( ( err, op ) =>
       {
@@ -9667,7 +9667,7 @@ function startMultipleState( test )
         test.equivalent( op.output, 'Log\nLog' );
         states.push( op.state );
         return null;
-      } )
+      })
 
       options.ready.finally( ( err, op ) =>
       {
@@ -9678,11 +9678,11 @@ function startMultipleState( test )
         states.push( op.state );
         test.identical( states, [ 'started', 'terminating', 'terminated' ] )
         return null;
-      } )
+      })
 
       return returned;
 
-    } )
+    })
 
     /* */
 
@@ -9710,7 +9710,7 @@ function startMultipleState( test )
         test.identical( op.output, '' );
         states.push( op.state );
         return null;
-      } )
+      })
 
       options.conTerminate.finally( ( err, op ) =>
       {
@@ -9720,7 +9720,7 @@ function startMultipleState( test )
         test.true( _.strHas( op.output, 'randomText is not defined' ) );
         states.push( op.state );
         return null;
-      } )
+      })
 
       options.ready.finally( ( err, op ) =>
       {
@@ -9731,10 +9731,10 @@ function startMultipleState( test )
         states.push( op.state );
         test.identical( states, [ 'starting', 'terminating', 'terminated' ] );
         return null;
-      } )
+      })
 
       return returned;
-    } )
+    })
 
     /* */
 
@@ -9762,7 +9762,7 @@ function startMultipleState( test )
         test.identical( op.output, '' );
         states.push( op.state );
         return null;
-      } )
+      })
 
       options.conTerminate.finally( ( err, op ) =>
       {
@@ -9772,7 +9772,7 @@ function startMultipleState( test )
         test.true( _.strHas( op.output, 'randomText is not defined' ) );
         states.push( op.state );
         return null;
-      } )
+      })
 
       options.ready.finally( ( err, op ) =>
       {
@@ -9783,10 +9783,10 @@ function startMultipleState( test )
         states.push( op.state );
         test.identical( states, [ 'started', 'terminating', 'terminated' ] );
         return null;
-      } )
+      })
 
       return returned;
-    } )
+    })
 
     return ready;
   }
@@ -11820,7 +11820,7 @@ function startMinimalDetachingTrivial( test )
     {
       a.reflect();
       return null;
-    } )
+    })
 
     ready.then( () =>
     {
@@ -20186,7 +20186,7 @@ function startMinimalOptionOutputColoring( test )
         a.fileProvider.fileDelete( testAppPath2 );
         return null
       })
-    } )
+    })
 
     /* */
 
@@ -20427,7 +20427,7 @@ function startMinimalOptionOutputColoringStderr( test )
         a.fileProvider.fileDelete( testAppPath2 );
         return null
       })
-    } )
+    })
 
     /* */
 
@@ -20463,7 +20463,7 @@ function startMinimalOptionOutputColoringStderr( test )
         a.fileProvider.fileDelete( testAppPath2 );
         return null
       })
-    } )
+    })
 
     /* */
 
@@ -20500,7 +20500,7 @@ function startMinimalOptionOutputColoringStderr( test )
         a.fileProvider.fileDelete( testAppPath2 );
         return null
       })
-    } )
+    })
 
     /* */
 
@@ -20537,7 +20537,7 @@ function startMinimalOptionOutputColoringStderr( test )
         a.fileProvider.fileDelete( testAppPath2 );
         return null
       })
-    } )
+    })
 
     /* */
 
@@ -20572,7 +20572,7 @@ function startMinimalOptionOutputColoringStderr( test )
         a.fileProvider.fileDelete( testAppPath2 );
         return null
       })
-    } )
+    })
 
     return ready;
 
@@ -20662,7 +20662,7 @@ function startMinimalOptionOutputColoringStdout( test )
         a.fileProvider.fileDelete( testAppPath2 );
         return null
       })
-    } )
+    })
 
     /* */
 
@@ -20697,7 +20697,7 @@ function startMinimalOptionOutputColoringStdout( test )
         a.fileProvider.fileDelete( testAppPath2 );
         return null
       })
-    } )
+    })
 
     /* */
 
@@ -20732,7 +20732,7 @@ function startMinimalOptionOutputColoringStdout( test )
         a.fileProvider.fileDelete( testAppPath2 );
         return null
       })
-    } )
+    })
 
     /* */
 
@@ -20769,7 +20769,7 @@ function startMinimalOptionOutputColoringStdout( test )
         a.fileProvider.fileDelete( testAppPath2 );
         return null
       })
-    } )
+    })
 
     /* */
 
@@ -20805,7 +20805,7 @@ function startMinimalOptionOutputColoringStdout( test )
         a.fileProvider.fileDelete( testAppPath2 );
         return null
       })
-    } )
+    })
 
     /* */
 
@@ -20842,7 +20842,7 @@ function startMinimalOptionOutputColoringStdout( test )
         a.fileProvider.fileDelete( testAppPath2 );
         return null
       })
-    } )
+    })
 
     return ready;
 
@@ -22585,7 +22585,7 @@ function startMinimalOptionOutputPiping( test )
     {
       console.log( op.output );
       return null;
-    } )
+    })
   }
 
   function testApp2Error2()
@@ -24585,7 +24585,7 @@ function startMinimalOptionStreamSizeLimitThrowing( test )
     a.fileProvider.fileDelete( testAppPath );
 
     return null;
-  } )
+  })
 
   /* */
 
@@ -25848,7 +25848,7 @@ function startPassingThrough( test )
     {
       test.close( '0 args to parent process' );
       return null;
-    } )
+    })
 
     /* - */
 
@@ -26054,7 +26054,7 @@ function startPassingThrough( test )
     {
       test.close( '1 arg to parent process' );
       return null;
-    } )
+    })
 
     /* - */
 
@@ -26130,10 +26130,10 @@ function startMinimalOptionUid( test ) /* Runs only through `sudo` ( i.e. with s
         test.identical( op.output, '11\n' );
 
         return null;
-      } )
+      })
 
 
-    } )
+    })
 
     return ready;
   }
@@ -26188,9 +26188,9 @@ function startMinimalOptionGid( test ) /* Runs only through `sudo` ( i.e. with s
         test.identical( op.output, '15\n' );
 
         return null;
-      } )
+      })
 
-    } )
+    })
 
     return ready;
   }
@@ -26572,10 +26572,10 @@ function startMultipleOptionProcedure( test )
           test.true( _.strHas( session.procedure._name, 'PID:') );
           test.true( _.objectIs( session.procedure._object ) );
           test.identical( session.procedure._object.exitCode, 0 );
-        } ) /* qqq for Yevhen : ! */
+        }) /* qqq for Yevhen : ! | aaa : Done. */
 
         return null;
-      } )
+      })
 
       return options.ready;
 
@@ -26627,10 +26627,10 @@ function startMultipleOptionProcedure( test )
           test.identical( session.ended, true );
           test.equivalent( session.output, `[ 'a' ]` );
           test.identical( session.procedure, false );
-        } )
+        })
 
         return null;
-      } )
+      })
 
       return options.ready;
 
@@ -26687,10 +26687,10 @@ function startMultipleOptionProcedure( test )
           test.true( _.strHas( session.procedure._name, 'PID:') );
           test.true( _.objectIs( session.procedure._object ) );
           test.identical( session.procedure._object.exitCode, 0 );
-        } )
+        })
 
         return null;
-      } )
+      })
 
       return options.ready;
     })
@@ -26745,10 +26745,10 @@ function startMultipleOptionProcedure( test )
           test.true( _.strHas( session.procedure._name, 'PID:') );
           test.true( _.objectIs( session.procedure._object ) );
           test.identical( session.procedure._object.exitCode, 0 );
-        } )
+        })
 
         return null;
-      } )
+      })
 
       return options.ready;
 
@@ -26806,10 +26806,10 @@ function startMultipleOptionProcedure( test )
           test.true( _.objectIs( session.procedure._object ) );
           test.identical( session.procedure._object.exitCode, 0 );
           test.notIdentical( session.procedure._stack, 'stack' );
-        } )
+        })
 
         return null;
-      } )
+      })
 
       return options.ready;
     })
@@ -27143,7 +27143,7 @@ function exitReason( test )
         test.equivalent( op.output, 'null' );
         a.fileProvider.fileDelete( testAppPath )
         return null;
-      } )
+      })
     })
 
     /* */
@@ -27169,7 +27169,7 @@ function exitReason( test )
         test.equivalent( op.output, `[ null, 'reason' ]` );
         a.fileProvider.fileDelete( testAppPath )
         return null;
-      } )
+      })
     })
 
     ready.then( () =>
@@ -27193,7 +27193,7 @@ function exitReason( test )
         test.equivalent( op.output, `[ null, 'reason1', 'reason2' ]` );
         a.fileProvider.fileDelete( testAppPath );
         return null;
-      } )
+      })
     })
 
     ready.then( () =>
@@ -27217,7 +27217,7 @@ function exitReason( test )
         test.equivalent( op.output, `[ null, 'reason1', 'reason2', null ]` );
         a.fileProvider.fileDelete( testAppPath );
         return null;
-      } )
+      })
     })
 
     return ready;
@@ -27300,7 +27300,7 @@ function exitCode( test )
 
         a.fileProvider.fileDelete( programPath );
         return null;
-      } )
+      })
     })
 
     /* */
@@ -27327,7 +27327,7 @@ function exitCode( test )
 
         a.fileProvider.fileDelete( programPath );
         return null;
-      } )
+      })
     })
 
     /* */
@@ -27354,7 +27354,7 @@ function exitCode( test )
 
         a.fileProvider.fileDelete( programPath );
         return null;
-      } )
+      })
     })
 
     /* */
@@ -27372,7 +27372,7 @@ function exitCode( test )
         test.ni( op.exitCode, 0 )
         test.identical( op.ended, true );
         return null;
-      } )
+      })
     })
 
     /* */
@@ -27395,7 +27395,7 @@ function exitCode( test )
 
         a.fileProvider.fileDelete( programPath );
         return null;
-      } )
+      })
     })
 
     /* */
@@ -27421,7 +27421,7 @@ function exitCode( test )
 
         a.fileProvider.fileDelete( programPath );
         return null;
-      } )
+      })
     })
 
     /* */
@@ -27448,7 +27448,7 @@ function exitCode( test )
 
         a.fileProvider.fileDelete( programPath );
         return null;
-      } )
+      })
     })
 
     /* */
@@ -27475,7 +27475,7 @@ function exitCode( test )
 
         a.fileProvider.fileDelete( programPath );
         return null;
-      } )
+      })
     })
 
     /* */
@@ -27484,7 +27484,7 @@ function exitCode( test )
     {
       test.close( `mode : ${ mode }` );
       return null;
-    } )
+    })
 
     return ready;
   }
@@ -27579,7 +27579,7 @@ function startMinimalOptionVerbosityLogging( test )
         a.fileProvider.fileDelete( testAppPath2 );
 
         return null;
-      } )
+      })
 
     })
 
@@ -27623,7 +27623,7 @@ function startMinimalOptionVerbosityLogging( test )
         a.fileProvider.fileDelete( testAppPathError );
 
         return null;
-      } )
+      })
 
     })
 
@@ -27662,7 +27662,7 @@ function startMinimalOptionVerbosityLogging( test )
         a.fileProvider.fileDelete( testAppPath2 );
 
         return null;
-      } )
+      })
 
     })
 
@@ -27710,7 +27710,7 @@ function startMinimalOptionVerbosityLogging( test )
         a.fileProvider.fileDelete( testAppPathError );
 
         return null;
-      } )
+      })
 
     })
 
@@ -33493,7 +33493,7 @@ function terminateFirstChild( test )
     {
       a.reflect();
       return null;
-    } )
+    })
 
     ready.then( () =>
     {
@@ -33731,7 +33731,7 @@ function terminateSecondChild( test )
     {
       a.reflect();
       return null;
-    } )
+    })
 
     ready.then( () =>
     {
@@ -33931,7 +33931,7 @@ function terminateDetachedFirstChild( test )
     {
       a.reflect();
       return null;
-    } )
+    })
 
     ready.then( () =>
     {
@@ -34182,7 +34182,7 @@ function terminateWithDetachedChild( test )
     {
       a.reflect();
       return null;
-    } )
+    })
 
     ready.then( () =>
     {
