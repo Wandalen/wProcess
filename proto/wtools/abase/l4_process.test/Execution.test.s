@@ -843,64 +843,9 @@ function startMinimal( test )
 
     /* */
 
-    /*
-    FAIL on spawn
-    > node /private/var/folders/cw/sbbjfvxj2hnggb61vf0p_w200000gn/T/ProcessBasic-2020-11-26-15-18-21-451-e5d6.tmp/startMinimal/testApp4.js
-        = Message of error#7
-          o.pnd.send is not a function
-
-        = Beautified calls stack
-          at wConsequence.<anonymous> (/Users/jackiejo/main/BFS/wProcess/wProcess/proto/wtools/abase/l4_process.test/Execution.test.s:878:13) *
-          at wConsequence.take (/Users/jackiejo/main/BFS/wProcess/wProcess/node_modules/wConsequence/proto/wtools/abase/l9/consequence/Consequence.s:2698:8)
-          at end3 (/Users/jackiejo/main/BFS/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:752:15)
-          at end2 (/Users/jackiejo/main/BFS/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:701:12)
-          at ChildProcess.handleClose (/Users/jackiejo/main/BFS/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:812:7)
-          at ChildProcess.emit (events.js:326:22)
-          at maybeClose (internal/child_process.js:1051:16)
-          at Socket.<anonymous> (internal/child_process.js:442:11)
-          at Socket.emit (events.js:314:20)
-          at Pipe.<anonymous> (net.js:673:12)
-
-          at run (/Users/jackiejo/main/BFS/wProcess/wProcess/proto/wtools/abase/l4_process.test/Execution.test.s:850:11) *
-          at wConsequence.<anonymous> (/Users/jackiejo/main/BFS/wProcess/wProcess/proto/wtools/abase/l4_process.test/Execution.test.s:677:50) *
-          at wConsequence.thenKeep (/Users/jackiejo/main/BFS/wProcess/wProcess/node_modules/wConsequence/proto/wtools/abase/l9/consequence/Consequence.s:378:8)
-          at /Users/jackiejo/main/BFS/wProcess/wProcess/proto/wtools/abase/l4_process.test/Execution.test.s:677:38 *
-          at Array.forEach (<anonymous>)
-          at Object.startMinimal (/Users/jackiejo/main/BFS/wProcess/wProcess/proto/wtools/abase/l4_process.test/Execution.test.s:677:9) *
-          at Proxy._run (/Users/jackiejo/main/BFS/wProcess/wProcess/node_modules/wTesting/proto/wtools/atop/testing/l5/Routine.s:319:26)
-          at wConsequence.<anonymous> (/Users/jackiejo/main/BFS/wProcess/wProcess/node_modules/wTesting/proto/wtools/atop/testing/l5/Suite.s:1047:20)
-          at wConsequence.thenKeep (/Users/jackiejo/main/BFS/wProcess/wProcess/node_modules/wConsequence/proto/wtools/abase/l9/consequence/Consequence.s:378:8)
-          at wTestSuite._testRoutineRun (/Users/jackiejo/main/BFS/wProcess/wProcess/node_modules/wTesting/proto/wtools/atop/testing/l5/Suite.s:1047:4)
-          at wConsequence.handleRoutine (/Users/jackiejo/main/BFS/wProcess/wProcess/node_modules/wTesting/proto/wtools/atop/testing/l5/Suite.s:540:18)
-          at wConsequence.handleRoutine (/Users/jackiejo/main/BFS/wProcess/wProcess/node_modules/wTools/proto/wtools/abase/l0/l3/iRoutine.s:192:28)
-          at wConsequence.take (/Users/jackiejo/main/BFS/wProcess/wProcess/node_modules/wConsequence/proto/wtools/abase/l9/consequence/Consequence.s:2698:8)
-          at /Users/jackiejo/main/BFS/wProcess/wProcess/node_modules/wConsequence/proto/wtools/abase/l9/consequence/Consequence.s:1481:38
-          at Object._time (/Users/jackiejo/main/BFS/wProcess/wProcess/node_modules/wTools/proto/wtools/abase/l0/l5/fTime.s:61:22)
-          at Object.time [as _time] (/Users/jackiejo/main/BFS/wProcess/wProcess/node_modules/wprocedure/proto/wtools/abase/l8_procedure/Namespace.s:316:20)
-          at Timeout.time [as _onTimeout] (/Users/jackiejo/main/BFS/wProcess/wProcess/node_modules/wTools/proto/wtools/abase/l0/l5/fTime.s:107:11)
-          at listOnTimeout (internal/timers.js:551:17)
-          at processTimers (internal/timers.js:494:7)
-
-        = Throws stack
-          thrown at wConsequence.__handleResourceNow @ /Users/jackiejo/main/BFS/wProcess/wProcess/node_modules/wConsequence/proto/wtools/abase/l9/consequence/Consequence.s:3039:12
-          thrown at Object._err @ /Users/jackiejo/main/BFS/wProcess/wProcess/node_modules/wTools/proto/wtools/abase/l0/l3/iErr.s:573:5
-
-        = Source code from /Users/jackiejo/main/BFS/wProcess/wProcess/proto/wtools/abase/l4_process.test/Execution.test.s:878:13
-            876 :       let con = _.process.startMinimal( o );
-            877 : 
-          * 878 :       o.pnd.send({ message : 'message from parent' });
-            879 :       o.pnd.on( 'message', ( e ) =>
-            880 :       {
-
-      Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimal / mode : spawn, test is ipc works # 17 ) ... failed, throwing error
-    Failed ( throwing error ) TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimal in 0.431s
-    */
     ready.then( function()
     {
       test.case = `mode : ${mode}, test is ipc works`;
-
-      if( mode !== 'fork' ) /* REVIEW & FIX */
-      return true;
 
       function testApp4()
       {
@@ -918,7 +863,11 @@ function startMinimal( test )
         execPath : mode === 'fork' ? programPath : 'node ' + programPath,
         mode,
         stdio : 'pipe',
+        ipc : 1
       }
+
+      if( mode === 'shell' ) /* Mode::shell doesn't support inter process communication. */
+      return test.shouldThrowErrorSync( () => _.process.startMinimal( o ) );
 
       let gotMessage;
       let con = _.process.startMinimal( o );
