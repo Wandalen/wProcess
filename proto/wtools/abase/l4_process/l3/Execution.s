@@ -1689,6 +1689,7 @@ startSingle_body.defaults =
   conStart : null,
   conTerminate : null,
   conDisconnect : null,
+  /* qqq for Yevhen : move consequence from stratMinimal() to startSingle() */
 
 }
 
