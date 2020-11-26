@@ -252,7 +252,7 @@ function startMinimalBasic( test )
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
 
-  /* - */
+  /* */
 
   function run( mode )
   {
