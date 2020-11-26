@@ -1288,7 +1288,7 @@ function startMinimal_body( o )
 
     data = _.strRemoveEnd( data, '\n' );
 
-    /* qqq for Yevhen : changed how option outputPrefixing works */
+    /* qqq for Yevhen : changed how option outputPrefixing works | aaa : Done. */
     if( o.outputPrefixing )
     {
       let prefix = channel === 'err' ? _errPrefix : _outPrefix;
