@@ -904,7 +904,7 @@ function startMinimalFork( test )
     Windows 15x, mode::fork
     [39;0m[92m/[39;0m[92m TestRoutine[39;0m[92m:[39;0m[92m:[39;0m[92mstartFork [39;0m[92m/[39;0m[92m test timeOut[39;0m[92m # [39;0m[92m22 [39;0m[92m)[39;0m[92m ... [39;0m[92mok[39;0m
     2020-11-25T10:55:41.8317809Z --------------- uncaught asynchronous error --------------->
-    2020-11-25T10:55:41.8767341Z 
+    2020-11-25T10:55:41.8767341Z
     2020-11-25T10:55:41.8768147Z [91m        kill EPERM
     2020-11-25T10:55:41.8917163Z [91m = Message of error#10
     2020-11-25T10:55:41.8917977Z           errno : -4048
@@ -8523,8 +8523,6 @@ function startSingleProcedureStack( test )
   let context = this;
   let a = context.assetFor( test, false );
   let programPath = a.program( program1 );
-  // let modes = [ 'fork' ];
-  // xxx
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
@@ -17876,7 +17874,6 @@ function startNjsWithReadyDelayStructural( test )
         'hiding' : 1,
         'concurrent' : 0,
         'timeOut' : null,
-        // 'briefExitCode' : 0,
         'verbosity' : 2,
         'outputPrefixing' : 0,
         'outputPiping' : true,
@@ -17892,7 +17889,7 @@ function startNjsWithReadyDelayStructural( test )
         'conTerminate' : options.conTerminate,
         'conDisconnect' : options.conDisconnect,
         'ready' : options.ready,
-        'process' : options.pnd,
+        'pnd' : options.pnd,
         'logger' : options.logger,
         'stack' : options.stack,
         'state' : 'initial',
@@ -17912,7 +17909,7 @@ function startNjsWithReadyDelayStructural( test )
       options.ready.then( ( op ) =>
       {
         let exp2 = _.mapExtend( null, exp );
-        exp2.process = options.pnd;
+        exp2.pnd = options.pnd;
         exp2.procedure = options.procedure;
         exp2.streamOut = options.streamOut;
         exp2.streamErr = options.streamErr;
@@ -18750,7 +18747,6 @@ function startNjsWithReadyDelayStructuralMultiple( test )
   let context = this;
   let a = context.assetFor( test, false );
   let programPath = a.program( program1 );
-
   let modes = [ 'fork', 'spawn', 'shell' ];
 
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, dry : 0, detaching : 0, mode }) ) );
@@ -18760,13 +18756,9 @@ function startNjsWithReadyDelayStructuralMultiple( test )
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, dry : 0, detaching : 0, mode }) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, dry : 1, detaching : 0, mode }) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, dry : 0, detaching : 0, mode }) ) );
-
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, dry : 1, detaching : 0, mode }) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, dry : 0, detaching : 1, mode }) ) );
 
-  /* ORIGINAL ( detaching, mode ) */
-  // modes.forEach( ( mode ) => a.ready.then( () => run( 0, mode ) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => run( 1, mode ) ) );
   return a.ready;
 
   /* */
@@ -18830,7 +18822,6 @@ function startNjsWithReadyDelayStructuralMultiple( test )
         'hiding' : 1,
         'concurrent' : 0,
         'timeOut' : null,
-        // 'briefExitCode' : 0,
         'verbosity' : 2,
         'outputPrefixing' : 0,
         'outputPiping' : true,
@@ -18857,9 +18848,6 @@ function startNjsWithReadyDelayStructuralMultiple( test )
         'exitSignal' : null,
         'ended' : false,
         'error' : null
-        // 'disconnect' : options.disconnect,
-        // 'fullExecPath' : null,
-        // '_handleProcedureTerminationBegin' : false,
       }
 
       options.ready.then( ( op ) =>
@@ -18924,13 +18912,13 @@ function startNjsWithReadyDelayStructuralMultiple( test )
         }
 
         /* Added sessions' checks */
-        op.sessions.forEach( ( run ) =>
+        op.sessions.forEach( ( session ) =>
         {
           if( tops.dry )
           {
-            test.identical( run.output, '' );
-            test.identical( run.exitCode, null );
-            test.identical( run.exitReason, null );
+            test.identical( session.output, '' );
+            test.identical( session.exitCode, null );
+            test.identical( session.exitReason, null );
           }
           else
           {
@@ -18938,24 +18926,24 @@ function startNjsWithReadyDelayStructuralMultiple( test )
               no output from detached process in mode::shell
             */
             if( tops.mode !== 'shell' || process.platform !== 'win32' || !tops.detaching )
-            test.identical( run.output, 'program1:begin\n' );
+            test.identical( session.output, 'program1:begin\n' );
             else
-            test.identical( run.output, '' );
-            test.identical( run.exitCode, 0 );
-            test.identical( run.exitReason, 'normal' );
+            test.identical( session.output, '' );
+            test.identical( session.exitCode, 0 );
+            test.identical( session.exitReason, 'normal' );
           }
-          test.identical( run.exitSignal, null );
-          test.identical( !!run.process, !tops.dry );
-          test.true( _.routineIs( run.disconnect ) );
-          test.identical( _.streamIs( run.streamOut ), !tops.dry && ( !tops.sync || !!tops.deasync ) );
-          test.identical( _.streamIs( run.streamErr ), !tops.dry && ( !tops.sync || !!tops.deasync ) );
-          test.identical( run.streamOut !== run.streamErr, !tops.dry && ( !tops.sync || !!tops.deasync ) );
-          test.true( run.conTerminate !== run.ready );
+          test.identical( session.exitSignal, null );
+          test.identical( !!session.pnd, !tops.dry );
+          test.true( _.routineIs( session.disconnect ) );
+          test.identical( _.streamIs( session.streamOut ), !tops.dry && ( !tops.sync || !!tops.deasync ) );
+          test.identical( _.streamIs( session.streamErr ), !tops.dry && ( !tops.sync || !!tops.deasync ) );
+          test.identical( session.streamOut !== session.streamErr, !tops.dry && ( !tops.sync || !!tops.deasync ) );
+          test.true( session.conTerminate !== session.ready );
 
-          test.identical( run.ready.exportString(), 'Consequence:: 1 / 0' );
-          test.identical( run.conTerminate.exportString(), 'Consequence:: 1 / 0' );
-          test.identical( run.conDisconnect.exportString(), 'Consequence:: 1 / 0' );
-          test.identical( run.conStart.exportString(), 'Consequence:: 1 / 0' );
+          test.identical( session.ready.exportString(), 'Consequence:: 1 / 0' );
+          test.identical( session.conTerminate.exportString(), 'Consequence:: 1 / 0' );
+          test.identical( session.conDisconnect.exportString(), 'Consequence:: 1 / 0' );
+          test.identical( session.conStart.exportString(), 'Consequence:: 1 / 0' );
 
         })
 
@@ -19010,138 +18998,6 @@ function startNjsWithReadyDelayStructuralMultiple( test )
   {
     console.log( 'program1:begin' );
   }
-
-  /* ORIGINAL */
-  // ready.then( () =>
-  // {
-  //   test.case = `mode:${mode} detaching:${detaching}`;
-  //   let con = new _.Consequence().take( null ).delay( context.t1 ); /* 1000 */
-
-  //   let options =
-  //   {
-  //     mode,
-  //     detaching,
-  //     execPath : programPath,
-  //     currentPath : [ a.abs( '.' ), a.abs( '.' ) ],
-  //     throwingExitCode : 1,
-  //     inputMirroring : 1,
-  //     outputCollecting : 1,
-  //     stdio : 'pipe',
-  //     sync : 0,
-  //     deasync : 0,
-  //     ready : con,
-  //   }
-
-  //   let returned = _.process.startNjs( options );
-
-  //   returned.then( ( op ) =>
-  //   {
-  //     test.identical( op.exitCode, 0 );
-  //     test.identical( op.ended, true );
-  //     test.identical( op.output, 'program1:begin\nprogram1:begin\n' );
-
-  //     let exp2 = _.mapExtend( null, exp );
-  //     exp2.output = 'program1:begin\nprogram1:begin\n';
-  //     exp2.exitCode = 0;
-  //     exp2.exitSignal = null;
-  //     exp2.sessions = options.sessions;
-  //     exp2.state = 'terminated';
-  //     exp2.exitReason = 'normal';
-  //     exp2.ended = true;
-
-  //     test.identical( options, exp2 );
-  //     test.true( !options.pnd );
-  //     test.true( _.streamIs( options.streamOut ) );
-  //     test.true( _.streamIs( options.streamErr ) );
-  //     test.true( options.streamOut !== options.streamErr );
-  //     test.true( ! options.disconnect );
-  //     test.true( options.conTerminate !== options.ready );
-  //     test.true( _.arrayIs( options.sessions ) );
-  //     test.identical( options.ready.exportString(), 'Consequence:: 0 / 1' );
-  //     test.identical( options.conTerminate.exportString(), 'Consequence:: 1 / 0' );
-  //     test.identical( options.conDisconnect, null );
-  //     test.identical( options.conStart.exportString(), 'Consequence:: 1 / 0' );
-
-  //     return null;
-  //   });
-
-  //   var exp =
-  //   {
-  //     mode,
-  //     detaching,
-  //     'execPath' : ( mode === 'fork' ? '' : 'node ' ) + programPath,
-  //     'currentPath' : [ a.abs( '.' ), a.abs( '.' ) ],
-  //     'throwingExitCode' : 'full',
-  //     'inputMirroring' : 1,
-  //     'outputCollecting' : 1,
-  //     'sync' : 0,
-  //     'deasync' : 0,
-  //     'passingThrough' : 0,
-  //     'maximumMemory' : 0,
-  //     'applyingExitCode' : 1,
-  //     'stdio' : mode === 'fork' ? [ 'pipe', 'pipe', 'pipe', 'ipc' ] : [ 'pipe', 'pipe', 'pipe' ],
-  //     'streamOut' : null,
-  //     'streamErr' : null,
-  //     'args' : null,
-  //     'interpreterArgs' : null,
-  //     'when' : 'instant',
-  //     'dry' : 0,
-  //     'ipc' : mode === 'fork' ? true : false,
-  //     'env' : null,
-  //     'hiding' : 1,
-  //     'concurrent' : 0,
-  //     'timeOut' : null,
-  //     // 'briefExitCode' : 0,
-  //     'verbosity' : 2,
-  //     'outputPrefixing' : 0,
-  //     'outputPiping' : true,
-  //     'outputAdditive' : true,
-  //     'outputColoring' : 1,
-  //     'outputColoringStdout' : 1,
-  //     'outputColoringStderr' : 1,
-  //     'outputGraying' : 0,
-  //     'conStart' : options.conStart,
-  //     'conTerminate' : options.conTerminate,
-  //     'conDisconnect' : options.conDisconnect,
-  //     'ready' : options.ready,
-  //     'procedure' : options.procedure,
-  //     'logger' : options.logger,
-  //     'stack' : options.stack,
-  //     'streamOut' : options.streamOut,
-  //     'streamErr' : options.streamErr,
-  //     'uid' : null,
-  //     'gid' : null,
-  //     'streamSizeLimit' : null,
-  //     'sessions' : [],
-  //     'state' : 'initial',
-  //     'exitReason' : null,
-  //     'output' : '',
-  //     'exitCode' : null,
-  //     'exitSignal' : null,
-  //     'ended' : false,
-  //     'error' : null
-  //     // 'disconnect' : options.disconnect,
-  //     // 'fullExecPath' : null,
-  //     // '_handleProcedureTerminationBegin' : false,
-  //   }
-  //   test.identical( options, exp );
-
-  //   test.true( options.conTerminate !== options.ready );
-  //   test.true( !options.disconnect );
-  //   test.true( !options.pnd );
-  //   test.true( !!options.procedure );
-  //   test.true( !!options.logger );
-  //   test.true( !!options.stack );
-  //   test.true( _.streamIs( options.streamOut ) );
-  //   test.true( _.streamIs( options.streamErr ) );
-  //   test.true( options.streamOut !== options.streamErr );
-  //   test.identical( options.ready.exportString(), 'Consequence:: 0 / 3' );
-  //   test.identical( options.conTerminate.exportString(), 'Consequence:: 0 / 0' );
-  //   test.identical( options.conDisconnect, null );
-  //   test.identical( options.conStart.exportString(), 'Consequence:: 0 / 0' );
-
-  //   return returned;
-  // })
 
 }
 
@@ -25017,7 +24873,6 @@ function startSingleOptionDry( test )
       return null;
     })
 
-
     /* */
 
     ready.then( () =>
@@ -26710,15 +26565,15 @@ function startMultipleOptionProcedure( test )
         test.true( _.objectIs( op.procedure._object ) );
         test.identical( op.procedure._object.execPath, [ `${tops.mode === 'fork' ? programPath : 'node ' + programPath}`, `${tops.mode === 'fork' ? programPath : 'node ' + programPath}` ] );
 
-        op.sessions.forEach( ( run ) =>
+        op.sessions.forEach( ( session ) =>
         {
-          test.identical( run.exitCode, 0 );
-          test.identical( run.ended, true );
-          test.equivalent( run.output, `[ 'a' ]` );
-          test.true( _.strHas( run.procedure._name, 'PID:') );
-          test.true( _.objectIs( run.procedure._object ) );
-          test.identical( run.procedure._object.exitCode, 0 );
-        } )
+          test.identical( session.exitCode, 0 );
+          test.identical( session.ended, true );
+          test.equivalent( session.output, `[ 'a' ]` );
+          test.true( _.strHas( session.procedure._name, 'PID:') );
+          test.true( _.objectIs( session.procedure._object ) );
+          test.identical( session.procedure._object.exitCode, 0 );
+        } ) /* qqq for Yevhen : ! */
 
         return null;
       } )
@@ -26767,12 +26622,12 @@ function startMultipleOptionProcedure( test )
         test.identical( op, options );
         test.equivalent( op.output, `[ 'a' ]\n[ 'a' ]` );
         test.identical( op.procedure, false );
-        op.sessions.forEach( ( run ) =>
+        op.sessions.forEach( ( session ) =>
         {
-          test.identical( run.exitCode, 0 );
-          test.identical( run.ended, true );
-          test.equivalent( run.output, `[ 'a' ]` );
-          test.identical( run.procedure, false );
+          test.identical( session.exitCode, 0 );
+          test.identical( session.ended, true );
+          test.equivalent( session.output, `[ 'a' ]` );
+          test.identical( session.procedure, false );
         } )
 
         return null;
@@ -26825,14 +26680,14 @@ function startMultipleOptionProcedure( test )
         test.true( _.objectIs( op.procedure._object ) );
         test.identical( op.procedure._object.execPath, [ `${tops.mode === 'fork' ? programPath : 'node ' + programPath}`, `${tops.mode === 'fork' ? programPath : 'node ' + programPath}` ] );
 
-        op.sessions.forEach( ( run ) =>
+        op.sessions.forEach( ( session ) =>
         {
-          test.identical( run.exitCode, 0 );
-          test.identical( run.ended, true );
-          test.equivalent( run.output, `[ 'a' ]` );
-          test.true( _.strHas( run.procedure._name, 'PID:') );
-          test.true( _.objectIs( run.procedure._object ) );
-          test.identical( run.procedure._object.exitCode, 0 );
+          test.identical( session.exitCode, 0 );
+          test.identical( session.ended, true );
+          test.equivalent( session.output, `[ 'a' ]` );
+          test.true( _.strHas( session.procedure._name, 'PID:') );
+          test.true( _.objectIs( session.procedure._object ) );
+          test.identical( session.procedure._object.exitCode, 0 );
         } )
 
         return null;
@@ -26883,14 +26738,14 @@ function startMultipleOptionProcedure( test )
         test.identical( op.procedure._name, null );
         test.identical( op.procedure._object, null );
 
-        op.sessions.forEach( ( run ) =>
+        op.sessions.forEach( ( session ) =>
         {
-          test.identical( run.exitCode, 0 );
-          test.identical( run.ended, true );
-          test.equivalent( run.output, `[ 'a' ]` );
-          test.true( _.strHas( run.procedure._name, 'PID:') );
-          test.true( _.objectIs( run.procedure._object ) );
-          test.identical( run.procedure._object.exitCode, 0 );
+          test.identical( session.exitCode, 0 );
+          test.identical( session.ended, true );
+          test.equivalent( session.output, `[ 'a' ]` );
+          test.true( _.strHas( session.procedure._name, 'PID:') );
+          test.true( _.objectIs( session.procedure._object ) );
+          test.identical( session.procedure._object.exitCode, 0 );
         } )
 
         return null;
@@ -26943,15 +26798,15 @@ function startMultipleOptionProcedure( test )
         test.identical( op.procedure._object, 'object' );
         test.identical( op.procedure._stack, 'stack' );
 
-        op.sessions.forEach( ( run ) =>
+        op.sessions.forEach( ( session ) =>
         {
-          test.identical( run.exitCode, 0 );
-          test.identical( run.ended, true );
-          test.equivalent( run.output, `[ 'a' ]` );
-          test.true( _.strHas( run.procedure._name, 'PID:') );
-          test.true( _.objectIs( run.procedure._object ) );
-          test.identical( run.procedure._object.exitCode, 0 );
-          test.notIdentical( run.procedure._stack, 'stack' );
+          test.identical( session.exitCode, 0 );
+          test.identical( session.ended, true );
+          test.equivalent( session.output, `[ 'a' ]` );
+          test.true( _.strHas( session.procedure._name, 'PID:') );
+          test.true( _.objectIs( session.procedure._object ) );
+          test.identical( session.procedure._object.exitCode, 0 );
+          test.notIdentical( session.procedure._stack, 'stack' );
         } )
 
         return null;
@@ -27982,40 +27837,60 @@ function startMultipleOutput( test )
           /*
           on older version of nodejs event finish goes before event end
           */
-          var exp =
-          [
-            'conStart',
-            '0.out:1::begin',
-            '0.out:1::end',
-            '0.err:1::err',
-            '0.out:2::begin',
-            '0.out:2::end',
-            '0.err:2::err',
-            '0.err.finish',
-            '0.err.end',
-            '0.out.finish',
-            '0.out.end',
-            'conTerminate',
-            'ready',
-          ]
+          // var exp =
+          // [
+          //   'conStart',
+          //   '0.out:1::begin',
+          //   '0.out:1::end',
+          //   '0.err:1::err',
+          //   '0.out:2::begin',
+          //   '0.out:2::end',
+          //   '0.err:2::err',
+          //   '0.err.finish',
+          //   '0.err.end',
+          //   '0.out.finish',
+          //   '0.out.end',
+          //   'conTerminate',
+          //   'ready',
+          // ]
 
-          test.identical( new Set( ... track ), new Set( ... exp ) );
+          // test.identical( new Set( ... track ), new Set( ... exp ) );
 
-          test.lt( track.indexOf( '0.out:1::end' ), track.indexOf( '0.out:2::begin' ) );
-          test.lt( track.indexOf( '0.out:1::begin' ), track.indexOf( '0.out:1::end' ) );
-          test.lt( track.indexOf( '0.out:1::end' ), track.indexOf( '0.err:1::err' ) );
-          test.lt( track.indexOf( '0.out:2::begin' ), track.indexOf( '0.out:2::end' ) );
-          test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.err:2::err' ) );
-          test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.err.finish' ) );
-          test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.err.end' ) );
-          test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.out.finish' ) );
-          test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.out.end' ) );
-          test.lt( track.indexOf( '0.err.finish' ), track.indexOf( 'conTerminate' ) );
-          test.lt( track.indexOf( '0.err.end' ), track.indexOf( 'conTerminate' ) );
-          test.lt( track.indexOf( '0.out.finish' ), track.indexOf( 'conTerminate' ) );
-          test.lt( track.indexOf( '0.out.end' ), track.indexOf( 'conTerminate' ) );
-          test.lt( track.indexOf( 'conTerminate' ), track.indexOf( 'ready' ) );
-          /* qqq for Yevhen : replace with several calls of _.dissector.dissect() */
+          // test.lt( track.indexOf( '0.out:1::end' ), track.indexOf( '0.out:2::begin' ) );
+          // test.lt( track.indexOf( '0.out:1::begin' ), track.indexOf( '0.out:1::end' ) );
+          // test.lt( track.indexOf( '0.out:1::end' ), track.indexOf( '0.err:1::err' ) );
+          // test.lt( track.indexOf( '0.out:2::begin' ), track.indexOf( '0.out:2::end' ) );
+          // test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.err:2::err' ) );
+          // test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.err.finish' ) );
+          // test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.err.end' ) );
+          // test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.out.finish' ) );
+          // test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.out.end' ) );
+          // test.lt( track.indexOf( '0.err.finish' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( '0.err.end' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( '0.out.finish' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( '0.out.end' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( 'conTerminate' ), track.indexOf( 'ready' ) );
+
+          let exp1 =
+          `
+          **<conStart>
+          **<0.out:1::begin>**<0.out:1::end>
+          **<0.err:1::err>
+          **<0.err.end>**<0.err.finish>
+          **<0.out.end>**<0.out.finish>
+          **<conTerminate>**<ready>**
+          `;
+          let exp2 =
+          `
+          **<conStart>
+          **<0.out:2::begin>**<0.out:2::end>
+          **<0.err:2::err>
+          **<0.err.end>**<0.err.finish>
+          **<0.out.end>**<0.out.finish>
+          **<conTerminate>**<ready>**
+          `;
+          test.true( _.dissector.dissect( exp1, track.toString() ).matched );
+          test.true( _.dissector.dissect( exp2, track.toString() ).matched );
 
         }
 
@@ -28197,94 +28072,98 @@ function startMultipleOutput( test )
             'ready'
           ]
 */
-          var exp =
-          [
-            'conStart',
-            '0.out:1::begin',
-            '1.out:1::begin',
-            '0.out:2::begin',
-            '2.out:2::begin',
-            '0.out:1::end',
-            '1.out:1::end',
-            '0.out:2::end',
-            '2.out:2::end',
-            '0.err:1::err',
-            '1.err:1::err',
-            '1.out.end',
-            '1.err.end',
-            '0.err:2::err',
-            '2.err:2::err',
-            '2.out.end',
-            '0.out.end',
-            '0.out.finish',
-            '2.err.end',
-            '0.err.end',
-            '0.err.finish',
-            'conTerminate',
-            'ready'
-          ]
+          // var exp =
+          // [
+          //   'conStart',
+          //   '0.out:1::begin',
+          //   '1.out:1::begin',
+          //   '0.out:2::begin',
+          //   '2.out:2::begin',
+          //   '0.out:1::end',
+          //   '1.out:1::end',
+          //   '0.out:2::end',
+          //   '2.out:2::end',
+          //   '0.err:1::err',
+          //   '1.err:1::err',
+          //   '1.out.end',
+          //   '1.err.end',
+          //   '0.err:2::err',
+          //   '2.err:2::err',
+          //   '2.out.end',
+          //   '0.out.end',
+          //   '0.out.finish',
+          //   '2.err.end',
+          //   '0.err.end',
+          //   '0.err.finish',
+          //   'conTerminate',
+          //   'ready'
+          // ]
 
-          test.identical( new Set( ... track ), new Set( ... exp ) );
+          // test.identical( new Set( ... track ), new Set( ... exp ) );
 
-          test.lt( track.indexOf( '0.out:1::begin' ), track.indexOf( '0.out:1::end' ) );
-          test.lt( track.indexOf( '1.out:1::begin' ), track.indexOf( '0.out:1::end' ) );
-          test.lt( track.indexOf( '0.out:2::begin' ), track.indexOf( '0.out:1::end' ) );
-          test.lt( track.indexOf( '2.out:2::begin' ), track.indexOf( '0.out:1::end' ) );
-          test.lt( track.indexOf( '0.out:1::end' ), track.indexOf( '0.err:1::err' ) );
-          test.lt( track.indexOf( '1.out:1::end' ), track.indexOf( '0.err:1::err' ) );
-          test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.err:1::err' ) );
-          test.lt( track.indexOf( '2.out:2::end' ), track.indexOf( '0.err:1::err' ) );
-          test.lt( track.indexOf( '0.err:1::err' ), track.indexOf( '1.out.end' ) );
-          test.lt( track.indexOf( '1.err:1::err' ), track.indexOf( '1.out.end' ) );
-          test.lt( track.indexOf( '1.out.end' ), track.indexOf( '0.err:2::err' ) );
-          test.lt( track.indexOf( '1.err.end' ), track.indexOf( '0.err:2::err' ) );
-          test.lt( track.indexOf( '1.out.end' ), track.indexOf( 'conTerminate' ) );
-          test.lt( track.indexOf( '1.err.end' ), track.indexOf( 'conTerminate' ) );
-          test.lt( track.indexOf( '0.err:2::err' ), track.indexOf( 'conTerminate' ) );
-          test.lt( track.indexOf( '2.err:2::err' ), track.indexOf( 'conTerminate' ) );
-          test.lt( track.indexOf( '2.out.end' ), track.indexOf( 'conTerminate' ) );
-          test.lt( track.indexOf( '0.out.end' ), track.indexOf( 'conTerminate' ) );
-          test.lt( track.indexOf( '0.out.finish' ), track.indexOf( 'conTerminate' ) );
-          test.lt( track.indexOf( '2.err.end' ), track.indexOf( 'conTerminate' ) );
-          test.lt( track.indexOf( '0.err.end' ), track.indexOf( 'conTerminate' ) );
-          test.lt( track.indexOf( '0.err.finish' ), track.indexOf( 'conTerminate' ) );
-          test.lt( track.indexOf( 'conTerminate' ), track.indexOf( 'ready' ) );
-          /* qqq for Yevhen : replace with several calls of _.dissector.dissect() */
+          // test.lt( track.indexOf( '0.out:1::begin' ), track.indexOf( '0.out:1::end' ) ); //
+          // test.lt( track.indexOf( '1.out:1::begin' ), track.indexOf( '0.out:1::end' ) );
+          // test.lt( track.indexOf( '0.out:2::begin' ), track.indexOf( '0.out:1::end' ) );
+          // test.lt( track.indexOf( '2.out:2::begin' ), track.indexOf( '0.out:1::end' ) );
+          // test.lt( track.indexOf( '0.out:1::end' ), track.indexOf( '0.err:1::err' ) );
+          // test.lt( track.indexOf( '1.out:1::end' ), track.indexOf( '0.err:1::err' ) );
+          // test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.err:1::err' ) );
+          // test.lt( track.indexOf( '2.out:2::end' ), track.indexOf( '0.err:1::err' ) );
+          // test.lt( track.indexOf( '0.err:1::err' ), track.indexOf( '1.out.end' ) );
+          // test.lt( track.indexOf( '1.err:1::err' ), track.indexOf( '1.out.end' ) );
+          // test.lt( track.indexOf( '1.out.end' ), track.indexOf( '0.err:2::err' ) );
+          // test.lt( track.indexOf( '1.err.end' ), track.indexOf( '0.err:2::err' ) );
+          // test.lt( track.indexOf( '1.out.end' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( '1.err.end' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( '0.err:2::err' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( '2.err:2::err' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( '2.out.end' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( '0.out.end' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( '0.out.finish' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( '2.err.end' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( '0.err.end' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( '0.err.finish' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( 'conTerminate' ), track.indexOf( 'ready' ) );
+
+          let exp1 =
+          `
+          **<conStart>
+          **<0.out:1::begin>**<0.out:1::end>
+          **<0.err:1::err>**<0.err:2::err>
+          **<0.err.end>**<0.err.finish>
+          **<0.out.end>**<0.out.finish>
+          **<conTerminate>**<ready>**
+          `;
+          let exp2 =
+          `
+          **<conStart>
+          **<1.out:1::begin>**<1.out:1::end>
+          **<1.err:1::err>**<1.err.end>
+          **<1.out.end>
+          **<conTerminate>**<ready>**
+          `;
+          let exp3 =
+          `
+          **<conStart>
+          **<0.out:2::begin>**<0.out:2::end>
+          **<0.err.end>**<0.err.finish>
+          **<0.out.end>**<0.out.finish>
+          **<conTerminate>**<ready>**
+          `;
+          let exp4 =
+          `
+          **<conStart>
+          **<2.out:2::begin>**<2.out:2::end>
+          **<2.err.end>**<2.out.end>
+          **<conTerminate>**<ready>**
+          `;
+          test.true( _.dissector.dissect( exp1, track.toString() ).matched );
+          test.true( _.dissector.dissect( exp2, track.toString() ).matched );
+          test.true( _.dissector.dissect( exp3, track.toString() ).matched );
+          test.true( _.dissector.dissect( exp4, track.toString() ).matched );
 
         }
 
-        /* aaa : fails on windows :
-        - got :
-          '1::begin
-          1::end
-          2::begin
-          1::err
-          2::end
-          2::err'
-        - expected :
-          '1::begin
-          2::begin
-          1::end
-          2::end
-          1::err
-          2::err'
-        - difference :
-          '1::begin
-          *
-        with accuracy 1e-7
-        */
-
-// qqq2 for Yevhen : example with dissector
-//         var exp =
-// `
-// 1::begin
-// 2::begin
-// 1::end
-// 2::end
-// 1::err
-// 2::err
-// `
-//         test.equivalent( op.output, exp );
         test.true( _.dissector.dissect( '**<1::begin>**<1::end>**<1::err>**', op.output ).matched );
         test.true( _.dissector.dissect( '**<2::begin>**<2::end>**<2::err>**', op.output ).matched );
 
@@ -30037,7 +29916,7 @@ function endSignalsBasic( test )
   }
 
   let modes = [ 'fork', 'spawn', 'shell' ];
-  modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGQUIT' ) ) ); /* xxx */
+  modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGQUIT' ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGINT' ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGTERM' ) ) );
   modes.forEach( ( mode ) => a.ready.then( () => signalTerminating( mode, 'SIGHUP' ) ) );
@@ -32701,7 +32580,7 @@ function terminate( test )
       2020-11-25T14:04:02.4633760Z           'SIGTERM'
       2020-11-25T14:04:02.4634460Z         - difference :
       2020-11-25T14:04:02.4635170Z           'SIG*[39;0m
-      2020-11-25T14:04:02.4638870Z [91m         [39;0m[91m 
+      2020-11-25T14:04:02.4638870Z [91m         [39;0m[91m
       2020-11-25T14:04:02.4639710Z         /Users/runner/work/wProcess/wProcess/proto/wtools/abase/l4_process.test/Execution.test.s:35044:16
       2020-11-25T14:04:02.4640510Z           35040 :         else
       2020-11-25T14:04:02.4640980Z           35041 :         {
@@ -32832,7 +32711,7 @@ function terminate( test )
         else
         {
           test.identical( op.exitCode, null );
-          test.identical( op.exitSignal, 'SIGTERM' ); /* yyy xxx : sometimes SIGKILL */
+          test.identical( op.exitSignal, 'SIGTERM' ); /* xxx : sometimes SIGKILL */
           test.identical( op.ended, true );
           test.true( _.strHas( op.output, 'SIGTERM' ) );
           test.true( !_.strHas( op.output, 'Application timeout!' ) );
@@ -35892,8 +35771,7 @@ function terminateDifferentStdio( test )
     .then( () =>
     {
       test.case = `mode : ${mode}, ignore`;
-      /*
-        Phantom fail on Windows:
+      /* xxx Phantom fail on Windows:
 
         Fail #1:
         signalSend : 544 name: node.exe
@@ -36704,13 +36582,13 @@ function childrenOptionFormatList( test )
     2020-11-25T12:14:39.0759666Z           4
     2020-11-25T12:14:39.0760172Z         - difference :
     2020-11-25T12:14:39.0761190Z           *[39;0m
-    2020-11-25T12:14:39.0766588Z [91m         [39;0m[91m 
+    2020-11-25T12:14:39.0766588Z [91m         [39;0m[91m
     2020-11-25T12:14:39.0767605Z         /D/a/wProcess/wProcess/proto/wtools/abase/l4_process.test/Execution.test.s:40781:16
     2020-11-25T12:14:39.0768624Z           40777 :       return children.then( ( prcocesses ) =>
     2020-11-25T12:14:39.0769245Z           40778 :       {
     2020-11-25T12:14:39.0769900Z           40779 :         if( process.platform === 'win32' )
     2020-11-25T12:14:39.0770475Z           40780 :         {
-    2020-11-25T12:14:39.0771703Z         * 40781 :           test.identical( prcocesses.length, 4 ); 
+    2020-11-25T12:14:39.0771703Z         * 40781 :           test.identical( prcocesses.length, 4 );
     */
     test.case = 'parent -> child -> child'
     var o =
@@ -37154,7 +37032,7 @@ var Proto =
 
     startProcedureTrivial, /* with routine::starter */
     startProcedureExists, /* with routine::starter */
-    startSingleProcedureStack, /* xxx : passes only when run with `start`, `startMinimal` */
+    startSingleProcedureStack,
     startMultipleProcedureStack,
     startMinimalOnTerminateSeveralCallbacksChronology,
     startMinimalChronology,
