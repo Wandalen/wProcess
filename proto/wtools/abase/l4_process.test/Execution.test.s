@@ -22767,6 +22767,45 @@ function startMinimalOptionInputMirroring( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.true( _.strHas( op.output, testAppPath2 ) );
+        test.true( !_.strHas( op.output, '< Process returned error code 0' ) );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, inputMirroring : 1, verbosity : 5`;
+
+      let testAppPath2 = a.program( testApp2 );
+
+      let locals =
+      {
+        programPath : testAppPath2,
+        mode,
+        inputMirroring : 1,
+        outputColoring : 0,
+        verbosity : 5
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.startMinimal
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.true( _.strHas( op.output, testAppPath2 ) );
+        test.true( _.strHas( op.output, '< Process returned error code 0' ) );
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -22841,6 +22880,47 @@ function startMinimalOptionInputMirroring( test )
         test.identical( op.ended, true );
         test.true( _.strHas( op.output, testAppPath2 ) );
         test.true( !_.strHas( op.output, 'throw new Error();' ) )
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, inputMirroring : 1, verbosity : 5, error output`;
+
+      let testAppPath2 = a.program( testApp2Error );
+
+      let locals =
+      {
+        programPath : testAppPath2,
+        mode,
+        inputMirroring : 1,
+        verbosity : 5,
+        outputColoring : 0
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.startMinimal
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.true( _.strHas( op.output, testAppPath2 ) );
+        test.true( _.strHas( op.output, 'Process returned error code' ) );
+        test.true( _.strHas( op.output, 'throw new Error()' ) );
+        test.true( _.strHas( op.output, 'Launched as' ) )
+        test.true( _.strHas( op.output, '-> Stderr' ) )
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );

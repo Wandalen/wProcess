@@ -783,7 +783,7 @@ function startMinimal_body( o )
     else if( exitCode === 0 )
     o.exitReason = 'normal';
 
-    if( o.verbosity >= 5 && o.inputMirroring ) /* qqq for Yevhen : cover */
+    if( o.verbosity >= 5 && o.inputMirroring ) /* qqq for Yevhen : cover | aaa : Done. */
     {
       log( ` < Process returned error code ${exitCode}`, 'out' );
       if( exitCode )
