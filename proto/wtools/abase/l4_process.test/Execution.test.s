@@ -672,7 +672,7 @@ function startMinimal( test )
   let context = this;
   let a = context.assetFor( test, false );
   let programPath = a.program( program1 );
-  let modes = [ /*'fork', */ 'spawn', /*'shell'*/ ];
+  let modes = [ 'fork', 'spawn', 'shell' ];
 
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
@@ -757,7 +757,6 @@ function startMinimal( test )
 
     /* */
 
-    // FAIL spawn
     ready.then( function()
     {
       test.case = `mode : ${mode}, complex`;
@@ -776,7 +775,7 @@ function startMinimal( test )
       {
         execPath : mode === 'fork' ? programPath : 'node ' + programPath,
         currentPath : a.routinePath,
-        env : { 'key1' : 'val' },
+        env : { 'key1' : 'val', 'PATH' : process.env.PATH }, /* in mode::spawn setting env without PATH will result in error, https://github.com/nodejs/node-v0.x-archive/issues/7358 */
         args : [ 'arg1', 'arg2' ],
         interpreterArgs : [ '--no-warnings' ],
         mode,
@@ -801,99 +800,146 @@ function startMinimal( test )
 
     /* */
 
-    // FAIL spawn
-    // ready.then( function()
-    // {
-    //   test.case = `mode : ${mode}, complex + deasync`;
+    ready.then( function()
+    {
+      test.case = `mode : ${mode}, complex + deasync`;
 
-    //   function testApp3()
-    //   {
-    //     console.log( process.argv.slice( 2 ) );
-    //     console.log( process.env );
-    //     console.log( process.cwd() );
-    //     console.log( process.execArgv );
-    //   }
+      function testApp3()
+      {
+        console.log( process.argv.slice( 2 ) );
+        console.log( process.env );
+        console.log( process.cwd() );
+        console.log( process.execArgv );
+      }
 
-    //   let programPath = a.program( testApp3 );
+      let programPath = a.program( testApp3 );
 
-    //   let o =
-    //   {
-    //     execPath : mode === 'fork' ? programPath : 'node ' + programPath,
-    //     currentPath : a.routinePath,
-    //     env : { 'key1' : 'val' },
-    //     args : [ 'arg1', 'arg2' ],
-    //     interpreterArgs : [ '--no-warnings' ],
-    //     mode,
-    //     stdio : 'pipe',
-    //     outputCollecting : 1,
-    //     outputPiping : 1,
-    //     sync : 1,
-    //     deasync : 1
-    //   }
+      let o =
+      {
+        execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+        currentPath : a.routinePath,
+        env : { 'key1' : 'val', 'PATH' : process.env.PATH }, /* in mode::spawn setting env without PATH will result in error, https://github.com/nodejs/node-v0.x-archive/issues/7358 */
+        args : [ 'arg1', 'arg2' ],
+        interpreterArgs : [ '--no-warnings' ],
+        mode,
+        stdio : 'pipe',
+        outputCollecting : 1,
+        outputPiping : 1,
+        sync : 1,
+        deasync : 1
+      }
 
-    //   _.process.startMinimal( o );
-    //   debugger
-    //   test.identical( o.exitCode, 0 );
-    //   test.true( _.strHas( o.output,  `[ 'arg1', 'arg2' ]` ) );
-    //   test.true( _.strHas( o.output,  `key1: 'val'` ) );
-    //   test.true( _.strHas( o.output,  a.path.nativize( a.routinePath ) ) );
-    //   test.true( _.strHas( o.output,  `[ '--no-warnings' ]` ) );
+      _.process.startMinimal( o );
+      debugger
+      test.identical( o.exitCode, 0 );
+      test.true( _.strHas( o.output,  `[ 'arg1', 'arg2' ]` ) );
+      test.true( _.strHas( o.output,  `key1: 'val'` ) );
+      test.true( _.strHas( o.output,  a.path.nativize( a.routinePath ) ) );
+      test.true( _.strHas( o.output,  `[ '--no-warnings' ]` ) );
 
-    //   a.fileProvider.fileDelete( programPath );
-    //   return null;
-    // })
+      a.fileProvider.fileDelete( programPath );
+      return null;
+    })
 
     /* */
 
-    /* 
+    /*
     FAIL on spawn
-    o.pnd.send is not a function
+    > node /private/var/folders/cw/sbbjfvxj2hnggb61vf0p_w200000gn/T/ProcessBasic-2020-11-26-15-18-21-451-e5d6.tmp/startMinimal/testApp4.js
+        = Message of error#7
+          o.pnd.send is not a function
+
+        = Beautified calls stack
+          at wConsequence.<anonymous> (/Users/jackiejo/main/BFS/wProcess/wProcess/proto/wtools/abase/l4_process.test/Execution.test.s:878:13) *
+          at wConsequence.take (/Users/jackiejo/main/BFS/wProcess/wProcess/node_modules/wConsequence/proto/wtools/abase/l9/consequence/Consequence.s:2698:8)
+          at end3 (/Users/jackiejo/main/BFS/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:752:15)
+          at end2 (/Users/jackiejo/main/BFS/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:701:12)
+          at ChildProcess.handleClose (/Users/jackiejo/main/BFS/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:812:7)
+          at ChildProcess.emit (events.js:326:22)
+          at maybeClose (internal/child_process.js:1051:16)
+          at Socket.<anonymous> (internal/child_process.js:442:11)
+          at Socket.emit (events.js:314:20)
+          at Pipe.<anonymous> (net.js:673:12)
+
+          at run (/Users/jackiejo/main/BFS/wProcess/wProcess/proto/wtools/abase/l4_process.test/Execution.test.s:850:11) *
+          at wConsequence.<anonymous> (/Users/jackiejo/main/BFS/wProcess/wProcess/proto/wtools/abase/l4_process.test/Execution.test.s:677:50) *
+          at wConsequence.thenKeep (/Users/jackiejo/main/BFS/wProcess/wProcess/node_modules/wConsequence/proto/wtools/abase/l9/consequence/Consequence.s:378:8)
+          at /Users/jackiejo/main/BFS/wProcess/wProcess/proto/wtools/abase/l4_process.test/Execution.test.s:677:38 *
+          at Array.forEach (<anonymous>)
+          at Object.startMinimal (/Users/jackiejo/main/BFS/wProcess/wProcess/proto/wtools/abase/l4_process.test/Execution.test.s:677:9) *
+          at Proxy._run (/Users/jackiejo/main/BFS/wProcess/wProcess/node_modules/wTesting/proto/wtools/atop/testing/l5/Routine.s:319:26)
+          at wConsequence.<anonymous> (/Users/jackiejo/main/BFS/wProcess/wProcess/node_modules/wTesting/proto/wtools/atop/testing/l5/Suite.s:1047:20)
+          at wConsequence.thenKeep (/Users/jackiejo/main/BFS/wProcess/wProcess/node_modules/wConsequence/proto/wtools/abase/l9/consequence/Consequence.s:378:8)
+          at wTestSuite._testRoutineRun (/Users/jackiejo/main/BFS/wProcess/wProcess/node_modules/wTesting/proto/wtools/atop/testing/l5/Suite.s:1047:4)
+          at wConsequence.handleRoutine (/Users/jackiejo/main/BFS/wProcess/wProcess/node_modules/wTesting/proto/wtools/atop/testing/l5/Suite.s:540:18)
+          at wConsequence.handleRoutine (/Users/jackiejo/main/BFS/wProcess/wProcess/node_modules/wTools/proto/wtools/abase/l0/l3/iRoutine.s:192:28)
+          at wConsequence.take (/Users/jackiejo/main/BFS/wProcess/wProcess/node_modules/wConsequence/proto/wtools/abase/l9/consequence/Consequence.s:2698:8)
+          at /Users/jackiejo/main/BFS/wProcess/wProcess/node_modules/wConsequence/proto/wtools/abase/l9/consequence/Consequence.s:1481:38
+          at Object._time (/Users/jackiejo/main/BFS/wProcess/wProcess/node_modules/wTools/proto/wtools/abase/l0/l5/fTime.s:61:22)
+          at Object.time [as _time] (/Users/jackiejo/main/BFS/wProcess/wProcess/node_modules/wprocedure/proto/wtools/abase/l8_procedure/Namespace.s:316:20)
+          at Timeout.time [as _onTimeout] (/Users/jackiejo/main/BFS/wProcess/wProcess/node_modules/wTools/proto/wtools/abase/l0/l5/fTime.s:107:11)
+          at listOnTimeout (internal/timers.js:551:17)
+          at processTimers (internal/timers.js:494:7)
+
+        = Throws stack
+          thrown at wConsequence.__handleResourceNow @ /Users/jackiejo/main/BFS/wProcess/wProcess/node_modules/wConsequence/proto/wtools/abase/l9/consequence/Consequence.s:3039:12
+          thrown at Object._err @ /Users/jackiejo/main/BFS/wProcess/wProcess/node_modules/wTools/proto/wtools/abase/l0/l3/iErr.s:573:5
+
+        = Source code from /Users/jackiejo/main/BFS/wProcess/wProcess/proto/wtools/abase/l4_process.test/Execution.test.s:878:13
+            876 :       let con = _.process.startMinimal( o );
+            877 : 
+          * 878 :       o.pnd.send({ message : 'message from parent' });
+            879 :       o.pnd.on( 'message', ( e ) =>
+            880 :       {
+
+      Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimal / mode : spawn, test is ipc works # 17 ) ... failed, throwing error
+    Failed ( throwing error ) TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimal in 0.431s
     */
-    // ready.then( function()
-    // {
-    //   test.case = `mode : ${mode}, test is ipc works`;
+    ready.then( function()
+    {
+      test.case = `mode : ${mode}, test is ipc works`;
 
-    //   function testApp4()
-    //   {
-    //     process.on( 'message', ( e ) =>
-    //     {
-    //       process.send({ message : 'child received ' + e.message })
-    //       process.exit();
-    //     })
-    //   }
+      if( mode !== 'fork' ) /* REVIEW & FIX */
+      return true;
 
-    //   let programPath = a.program( testApp4 );
+      function testApp4()
+      {
+        process.on( 'message', ( e ) =>
+        {
+          process.send({ message : 'child received ' + e.message })
+          process.exit();
+        })
+      }
 
-    //   let o =
-    //   {
-    //     execPath : mode === 'fork' ? programPath : 'node ' + programPath,
-    //     mode,
-    //     stdio : 'pipe',
-    //   }
+      let programPath = a.program( testApp4 );
 
-    //   // if( mode === 'shell' ) /* mode::shell doesn't support ipc */
-    //   // return test.shouldThrowErrorAsync( _.process.startMinimal( o ) );
+      let o =
+      {
+        execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+        mode,
+        stdio : 'pipe',
+      }
 
-    //   let gotMessage;
-    //   let con = _.process.startMinimal( o );
+      let gotMessage;
+      let con = _.process.startMinimal( o );
 
-    //   o.pnd.send({ message : 'message from parent' });
-    //   o.pnd.on( 'message', ( e ) =>
-    //   {
-    //     gotMessage = e.message;
-    //   })
+      o.pnd.send({ message : 'message from parent' });
+      o.pnd.on( 'message', ( e ) =>
+      {
+        gotMessage = e.message;
+      })
 
-    //   con.then( function( op )
-    //   {
-    //     test.identical( gotMessage, 'child received message from parent' )
-    //     test.identical( o.exitCode, 0 );
+      con.then( function( op )
+      {
+        test.identical( gotMessage, 'child received message from parent' )
+        test.identical( o.exitCode, 0 );
 
-    //     a.fileProvider.fileDelete( programPath );
-    //     return null;
-    //   })
+        a.fileProvider.fileDelete( programPath );
+        return null;
+      })
 
-    //   return con;
-    // })
+      return con;
+    })
 
     /* */
 
