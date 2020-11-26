@@ -9060,6 +9060,7 @@ function startMultipleProcedureStack( test )
     ready.then( function case1()
     {
       /*
+      qqq for Yevhen : not good enough. output of subprocess??
       xxx :
       Windows 13x, mode::fork
       [39;0m[92m/[39;0m[92m TestRoutine[39;0m[92m:[39;0m[92m:[39;0m[92mstartProcedureStackMultiple [39;0m[92m/[39;0m[92m sync[39;0m[92m:[39;0m[92m0 deasync[39;0m[92m:[39;0m[92m1 mode[39;0m[92m:[39;0m[92mfork stack[39;0m[92m:[39;0m[92mfalse[39;0m[92m # [39;0m[92m538 [39;0m[92m)[39;0m[92m [39;0m[92m:[39;0m[92m expected true[39;0m[92m ... [39;0m[92mok[39;0m
@@ -32388,6 +32389,7 @@ function terminate( test )
     .then( () =>
     {
       /*
+      qqq for Vova : more information!
       xxx :
       Windows 12x, mode::fork
       2020-11-25T14:08:22.5752316Z --------------- uncaught asynchronous error --------------->
@@ -32577,6 +32579,7 @@ function terminate( test )
     .then( () =>
     {
       /*
+      qqq2 for Yevhen : not good enough. lack of information about the test case! same problem on other places
       xxx :
       macos 10x, 12x, 14x, mode::fork
       2020-11-25T14:04:02.4631420Z [91m        - got :
@@ -32607,7 +32610,7 @@ function terminate( test )
 
       o.pnd.on( 'message', () =>
       {
-        _.process.terminate({ pid : o.pnd.pid, timeOut : 1 });
+        _.process.terminate({ pid : o.pnd.pid, timeOut : context.t1*2 });
       })
 
       ready.then( ( op ) =>
@@ -32716,7 +32719,7 @@ function terminate( test )
         else
         {
           test.identical( op.exitCode, null );
-          test.identical( op.exitSignal, 'SIGTERM' ); /* xxx : sometimes SIGKILL */
+          test.identical( op.exitSignal, 'SIGTERM' ); /* yyy : sometimes SIGKILL */
           test.identical( op.ended, true );
           test.true( _.strHas( op.output, 'SIGTERM' ) );
           test.true( !_.strHas( op.output, 'Application timeout!' ) );
@@ -34786,7 +34789,7 @@ function terminateSeveralDetachedChildren( test )
 
         if( process.platform === 'win32' )
         {
-          test.notIdentical( o.exitCode, 0 ) /* returns 4294967295 which is -1 to uint32. */
+          test.notIdentical( o.exitCode, 0 );
           test.identical( o.exitSignal, null );
         }
         else
@@ -34800,7 +34803,9 @@ function terminateSeveralDetachedChildren( test )
         test.identical( _.strCount( o.output, 'program3::begin' ), 1 );
         test.identical( _.strCount( o.output, 'program2::end' ), 0 );
         test.identical( _.strCount( o.output, 'program3::end' ), 0 );
+        console.log( `_.process.execPathOf( program2Pid ) : ${_.process.execPathOf( program2Pid )}` );
         test.true( !_.process.isAlive( program2Pid ) );
+        console.log( `_.process.execPathOf( program3Pid ) : ${_.process.execPathOf( program3Pid )}` );
         test.true( !_.process.isAlive( program3Pid ) );
         test.true( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
         test.true( !a.fileProvider.fileExists( a.abs( 'program3end' ) ) );
@@ -34814,72 +34819,6 @@ function terminateSeveralDetachedChildren( test )
     return ready;
 
   }
-
-  /* ORIGINAL */
-  // let o =
-  // {
-  //   execPath : 'node program1.js',
-  //   currentPath : a.routinePath,
-  //   mode : 'spawn',
-  //   outputPiping : 1,
-  //   outputCollecting : 1,
-  //   throwingExitCode : 0
-  // }
-
-  // _.process.start( o );
-
-  // let program2Pid = null;
-  // let program3Pid = null;
-  // let terminate = _.Consequence();
-
-  // o.pnd.stdout.on( 'data', handleOutput );
-
-  // terminate.then( () =>
-  // {
-  //   console.log( 'terminate' );
-  //   program2Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program2Pid' ), encoding : 'json' });
-  //   console.log( 'program2Pid', program2Pid );
-  //   program2Pid = program2Pid.pid;
-  //   program3Pid = _.fileProvider.fileRead({ filePath : a.abs( 'program3Pid' ), encoding : 'json' });
-  //   console.log( 'program3Pid', program3Pid );
-  //   program3Pid = program3Pid.pid;
-  //   return _.process.terminate
-  //   ({
-  //     pid : o.pnd.pid,
-  //     timeOut : context.t1 * 5,
-  //     withChildren : 1
-  //   })
-  // })
-
-  // o.conTerminate.then( () =>
-  // {
-  //   console.log( 'conTerminate' );
-
-  //   if( process.platform === 'win32' )
-  //   {
-  //     test.identical( o.exitCode, 1 );
-  //     test.identical( o.exitSignal, null );
-  //   }
-  //   else
-  //   {
-  //     test.identical( o.exitCode, null );
-  //     test.identical( o.exitSignal, 'SIGTERM' );
-  //   }
-
-  //   test.identical( _.strCount( o.output, 'program1::begin' ), 1 );
-  //   test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
-  //   test.identical( _.strCount( o.output, 'program3::begin' ), 1 );
-  //   test.identical( _.strCount( o.output, 'program2::end' ), 0 );
-  //   test.identical( _.strCount( o.output, 'program3::end' ), 0 );
-  //   test.true( !_.process.isAlive( program2Pid ) );
-  //   test.true( !_.process.isAlive( program3Pid ) );
-  //   test.true( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
-  //   test.true( !a.fileProvider.fileExists( a.abs( 'program3end' ) ) );
-
-  //   return null;
-  // })
-
-  // return _.Consequence.AndKeep( terminate, o.conTerminate );
 
   /* - */
 
@@ -35776,6 +35715,7 @@ function terminateDifferentStdio( test )
     .then( () =>
     {
       test.case = `mode : ${mode}, ignore`;
+      /* qqq for Vova : should be maximum information about the process and circumstances */
       /* xxx Phantom fail on Windows:
 
         Fail #1:
@@ -36622,6 +36562,7 @@ function childrenOptionFormatList( test )
       {
         if( process.platform === 'win32' )
         {
+          console.log( `_.select( prcocesses, '*/name' ):\n${_.select( prcocesses, '*/name' ).join( '\n' ) }` );
           test.identical( prcocesses.length, 4 );
 
           test.identical( prcocesses[ 0 ].pid, o.pnd.pid );
