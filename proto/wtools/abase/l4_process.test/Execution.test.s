@@ -5431,7 +5431,7 @@ function startMinimalExecPathSeveralCommands( test )
 
 //
 
-/* qqq for Yevhen : name and split cases */
+/* qqq for Yevhen : name and split cases | aaa : Done. */
 function startExecPathNonTrivialModeShell( test )
 {
   let context = this;
@@ -5455,86 +5455,115 @@ function startExecPathNonTrivialModeShell( test )
     return null;
   })
 
+  /* */
+
   shell( 'node -v && node -v' )
   .then( ( op ) =>
   {
+    test.case = `1 argument : 'node -v && node -v'`;
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     test.identical( _.strCount( op.output, process.version ), 2 );
     return null;
   })
 
+  /* */
+
   shell({ execPath : '"node -v && node -v"', throwingExitCode : 0 })
   .then( ( op ) =>
   {
+    test.case = `execPath : '"node -v && node -v"', throwingExitCode : 0`;
     test.notIdentical( op.exitCode, 0 );
     test.identical( op.ended, true );
     test.identical( _.strCount( op.output, process.version ), 0 );
     return null;
   })
 
+  /* */
+
   shell({ execPath : 'node -v && "node -v"', throwingExitCode : 0 })
   .then( ( op ) =>
   {
+    test.case = `execPath : 'node -v && "node -v"', throwingExitCode : 0`;
     test.notIdentical( op.exitCode, 0 );
     test.identical( op.ended, true );
     test.identical( _.strCount( op.output, process.version ), 1 );
     return null;
   })
 
+  /* */
+
   shell({ args : 'node -v && node -v' })
   .then( ( op ) =>
   {
+    test.case = `args : 'node -v && node -v'`;
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     test.identical( _.strCount( op.output, process.version ), 2 );
     return null;
   })
+
+  /* */
 
   shell({ args : '"node -v && node -v"' })
   .then( ( op ) =>
   {
+    test.case = `args : '"node -v && node -v"'`;
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     test.identical( _.strCount( op.output, process.version ), 2 );
     return null;
   })
+
+  /* */
 
   shell({ args : [ 'node -v && node -v' ] })
   .then( ( op ) =>
   {
+    test.case = `args : [ 'node -v && node -v' ]`;
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     test.identical( _.strCount( op.output, process.version ), 2 );
     return null;
   })
 
+  /* */
+
   shell({ args : [ 'node', '-v', '&&', 'node', '-v' ] })
   .then( ( op ) =>
   {
+    test.case = `args : [ 'node', '-v', '&&', 'node', '-v' ]`;
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     test.identical( _.strCount( op.output, process.version ), 1 );
     return null;
   })
+
+  /* */
 
   shell({ args : [ 'node', '-v', ' && ', 'node', '-v' ] })
   .then( ( op ) =>
   {
+    test.case = `args : [ 'node', '-v', ' && ', 'node', '-v' ]`;
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     test.identical( _.strCount( op.output, process.version ), 1 );
     return null;
   })
 
+  /* */
+
   shell({ args : [ 'node -v', '&&', 'node -v' ] })
   .then( ( op ) =>
   {
+    test.case = `args : [ 'node -v', '&&', 'node -v' ]`;
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     test.identical( _.strCount( op.output, process.version ), 1 );
     return null;
   })
+
+  /* */
 
   a.ready.then( () =>
   {
@@ -5553,42 +5582,55 @@ function startExecPathNonTrivialModeShell( test )
   shell( 'node ' + testAppPath + ' arg with space' )
   .then( ( op ) =>
   {
+    test.case = `1 argument : 'node ' + testAppPath + ' arg with space'`;
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     test.identical( _.strCount( op.output, `[ 'arg', 'with', 'space' ]` ), 1 );
     return null;
   })
 
+  /* */
+
   shell( 'node ' + testAppPath + ' "arg with space"' )
   .then( ( op ) =>
   {
+    test.case = `1 argument : 'node ' + testAppPath + ' "arg with space"'`;
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     test.identical( _.strCount( op.output, `[ 'arg with space' ]` ), 1 );
     return null;
   })
+
+  /* */
 
   shell({ execPath : 'node ' + testAppPath, args : 'arg with space' })
   .then( ( op ) =>
   {
+    test.case = `execPath : 'node ' + testAppPath, args : 'arg with space'`;
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     test.identical( _.strCount( op.output, `[ 'arg with space' ]` ), 1 );
     return null;
   })
+
+  /* */
 
   shell({ execPath : 'node ' + testAppPath, args : [ 'arg with space' ] })
   .then( ( op ) =>
   {
+    test.case = `execPath : 'node ' + testAppPath, args : [ 'arg with space' ]`;
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     test.identical( _.strCount( op.output, `[ 'arg with space' ]` ), 1 );
     return null;
   })
 
+  /* */
+
   shell( 'node ' + testAppPath + ' `"quoted arg with space"`' )
   .then( ( op ) =>
   {
+    test.case = `1 argument : 'node ' + testAppPath + ' \`"quoted arg with space"\`'`;
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     if( process.platform === 'win32' )
@@ -5598,9 +5640,12 @@ function startExecPathNonTrivialModeShell( test )
     return null;
   })
 
+  /* */
+
   shell( 'node ' + testAppPath + ` \\\`'quoted arg with space'\\\`` )
   .then( ( op ) =>
   {
+    test.case = '\'node \' + testAppPath + ` \\\`\'quoted arg with space\'\\\``';
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     let args = a.fileProvider.fileRead({ filePath : a.abs( a.routinePath, 'args' ), encoding : 'json' });
@@ -5611,9 +5656,12 @@ function startExecPathNonTrivialModeShell( test )
     return null;
   })
 
+  /* */
+
   shell( 'node ' + testAppPath + ` '\`quoted arg with space\`'` )
   .then( ( op ) =>
   {
+    test.case = `1 argument : 'node ' + testAppPath + \` '\`quoted arg with space\`'\``;
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     let args = a.fileProvider.fileRead({ filePath : a.abs( a.routinePath, 'args' ), encoding : 'json' });
@@ -5624,23 +5672,31 @@ function startExecPathNonTrivialModeShell( test )
     return null;
   })
 
+  /* */
+
   shell({ execPath : 'node ' + testAppPath, args : '"quoted arg with space"' })
   .then( ( op ) =>
   {
+    test.case = `execPath : 'node ' + testAppPath, args : '"quoted arg with space"'`;
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     test.identical( _.strCount( op.output, `[ '"quoted arg with space"' ]` ), 1 );
     return null;
   })
 
+  /* */
+
   shell({ execPath : 'node ' + testAppPath, args : '`quoted arg with space`' })
   .then( ( op ) =>
   {
+    test.case = `execPath : 'node ' + testAppPath, args : '\`quoted arg with space\`'`;
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     test.identical( _.strCount( op.output, `[ '\`quoted arg with space\`' ]` ), 1 );
     return null;
   })
+
+  /* */
 
   a.ready.then( () =>
   {
@@ -5656,9 +5712,12 @@ function startExecPathNonTrivialModeShell( test )
     return null;
   })
 
+  /* */
+
   shell({ execPath : 'node ' + testAppPath + ` arg1 "arg2" "arg 3" "'arg4'"` })
   .then( ( op ) =>
   {
+    test.case = `execPath : 'node ' + testAppPath + \` arg1 "arg2" "arg 3" "'arg4'"\``;
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     let args = a.fileProvider.fileRead({ filePath : a.abs( a.routinePath, 'args' ), encoding : 'json' });
@@ -5666,9 +5725,12 @@ function startExecPathNonTrivialModeShell( test )
     return null;
   })
 
+  /* */
+
   shell({ execPath : 'node ' + testAppPath, args : `arg1 "arg2" "arg 3" "'arg4'"` })
   .then( ( op ) =>
   {
+    test.case = `execPath : 'node ' + testAppPath, args : \`arg1 "arg2" "arg 3" "'arg4'"\``;
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     let args = a.fileProvider.fileRead({ filePath : a.abs( a.routinePath, 'args' ), encoding : 'json' });
@@ -5676,15 +5738,20 @@ function startExecPathNonTrivialModeShell( test )
     return null;
   })
 
+  /* */
+
   shell({ execPath : 'node ' + testAppPath, args : [ `arg1`, '"arg2"', `arg 3`, `'arg4'` ] })
   .then( ( op ) =>
   {
+    test.case = `execPath : 'node ' + testAppPath, args : [ \`arg1\`, '"arg2"', \`arg 3\`, \`'arg4'\` ]`;
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     let args = a.fileProvider.fileRead({ filePath : a.abs( a.routinePath, 'args' ), encoding : 'json' });
     test.identical( args, [ 'arg1', '"arg2"', 'arg 3', `'arg4'` ] );
     return null;
   })
+
+  /* */
 
   a.ready.then( () =>
   {
@@ -5697,6 +5764,7 @@ function startExecPathNonTrivialModeShell( test )
   shell({ execPath : 'echo', args : [ 'a b', '*', 'c' ] })
   .then( function( op )
   {
+    test.case = `execPath : 'echo', args : [ 'a b', '*', 'c' ]`;
     test.identical( op.exitCode, 0 );
     test.identical( op.ended, true );
     if( process.platform === 'win32' )
@@ -5709,6 +5777,8 @@ function startExecPathNonTrivialModeShell( test )
     test.identical( op.fullExecPath, 'echo "a b" "*" "c"' )
     return null;
   })
+
+  /* */
 
   return a.ready;
 
