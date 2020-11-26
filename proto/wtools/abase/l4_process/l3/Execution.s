@@ -139,7 +139,7 @@ function startMinimalHeadCommon( routine, args )
   _.assert( !o.ipc || _.longHas( [ 'fork', 'spawn' ], o.mode ), `Mode::${o.mode} doesn't support inter process communication.` );
   _.assert( o.mode !== 'fork' || !!o.ipc, `In mode::fork option::ipc must be true. Such subprocess can not have no ipc.` );
 
-  _.assert /* qqq for Yevhen : cover all forbidden combinations of options */
+  _.assert /* qqq for Yevhen : cover all forbidden combinations of options |*/
   (
     o.timeOut === null || !o.sync || !!o.deasync, `Option::timeOut should not be defined if option::sync:1 and option::deasync:0`
   );
