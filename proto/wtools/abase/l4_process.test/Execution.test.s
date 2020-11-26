@@ -32389,7 +32389,7 @@ function terminate( test )
     .then( () =>
     {
       /*
-      qqq for Vova : more information!
+      qqq for Vova : more information! aaa: extended execPathOf and error message of routine signal
       xxx :
       Windows 12x, mode::fork
       2020-11-25T14:08:22.5752316Z --------------- uncaught asynchronous error --------------->
@@ -35715,7 +35715,7 @@ function terminateDifferentStdio( test )
     .then( () =>
     {
       test.case = `mode : ${mode}, ignore`;
-      /* qqq for Vova : should be maximum information about the process and circumstances */
+      /* qqq for Vova : should be maximum information about the process and circumstances aaa: extended execPathOf and error message of routine signal */
       /* xxx Phantom fail on Windows:
 
         Fail #1:
