@@ -24846,7 +24846,7 @@ function startSingleOptionDry( test )
         test.identical( op.streamErr, null );
 
         /* qqq for Yevhen : bad | aaa : Fixed. */
-        if ( tops.mode === 'shell' )
+        if( tops.mode === 'shell' )
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe' ] );
           test.identical( op.fullExecPath, `node ${programPath} arg1 "arg0"` );
