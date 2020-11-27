@@ -37367,7 +37367,7 @@ var Proto =
     // basic
 
     startMinimalBasic,
-    startMinimal, /* qqq for Yevhen : subroutine for modes */
+    startMinimal, /* qqq for Yevhen : subroutine for modes | aaa : Done. */
     startMinimalErrorHandling,
 
     // sync
