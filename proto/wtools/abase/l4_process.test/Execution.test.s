@@ -963,6 +963,9 @@ function startMinimal( test )
       return test.shouldThrowErrorAsync( _.process.startMinimal( o ) )
       .then( function( op )
       {
+        if( process.platform === 'win32' )
+        test.identical( o.exitCode, 1 );
+        else
         test.identical( o.exitCode, null );
 
         a.fileProvider.fileDelete( programPath );
@@ -1000,6 +1003,9 @@ function startMinimal( test )
       return _.process.startMinimal( o )
       .then( function( op )
       {
+        if( process.platform === 'win32' )
+        test.identical( o.exitCode, 1 );
+        else
         test.identical( o.exitCode, null );
 
         a.fileProvider.fileDelete( programPath );
