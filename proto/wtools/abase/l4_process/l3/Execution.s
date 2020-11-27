@@ -1192,6 +1192,7 @@ function startMinimal_body( o )
     o2.windowsHide = !!o.hiding;
     if( o.streamSizeLimit )
     o2.maxBuffer = o.streamSizeLimit;
+    debugger;
     if( process.platform !== 'win32' )
     {
       o2.uid = o.uid;
