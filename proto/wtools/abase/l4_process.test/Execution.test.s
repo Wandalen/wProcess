@@ -2276,20 +2276,20 @@ function startMinimalSyncDeasyncTimeOut( test )
   let context = this;
   let a = context.assetFor( test, false );
   let programPath = a.program( testApp );
-  let modes = [  'fork', 'spawn', 'shell' ];
+  let modes = [ 'fork', 'spawn', 'shell' ];
 
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, timeOut : null, mode }) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, timeOut : 0, mode }) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, timeOut : 1, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, timeOut : 5000, mode }) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, timeOut : null, mode }) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, timeOut : 0, mode }) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, timeOut : 1, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, timeOut : 5000, mode }) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, timeOut : null, mode }) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, timeOut : 0, mode }) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, timeOut : 1, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, timeOut : 5000, mode }) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, timeOut : null, mode }) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, timeOut : 0, mode }) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, timeOut : 1, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, timeOut : 5000, mode }) ) );
 
   return a.ready;
 
