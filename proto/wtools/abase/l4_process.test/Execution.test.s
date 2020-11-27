@@ -25267,12 +25267,12 @@ function startSingleOptionDry( test )
         else if( tops.mode === 'fork' )
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
-          test.identical( op.fullExecPath, `${programPath} arg1 arg0` );
+          test.identical( op.execPath2, `${programPath} arg1 arg0` );
         }
         else
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
-          test.identical( op.fullExecPath, `node ${programPath} arg1 arg0` );
+          test.identical( op.execPath2, `node ${programPath} arg1 arg0` );
         }
 
         test.true( !a.fileProvider.fileExists( a.path.join( a.routinePath, 'file' ) ) )
