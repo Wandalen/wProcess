@@ -27239,6 +27239,168 @@ function startMultipleOptionProcedure( test )
 
 startMultipleOptionProcedure.timeOut = 18e4; /* 17.983s */
 
+//
+
+function startMinimalOptionThrowingExitCode( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( testApp );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  let errFull;
+  let errBrief;
+
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+
+  return a.ready;
+
+  /* - */
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, throwingExitCode : default`;
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+      }
+
+      return test.shouldThrowErrorAsync( () => _.process.startMinimal( options ) )
+      .then( ( err ) =>
+      {
+        test.true( _.errIs( err ) );
+        test.true( _.strHas( err.message, 'Process returned exit code' ) );
+        test.true( _.strHas( err.message, 'Launched as' ) );
+        test.true( _.strHas( err.message, 'Stderr' ) );
+        test.true( _.strHas( err.message, 'randomText is not defined' ) );
+        return null;
+      })
+    })
+
+    // /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, throwingExitCode : full`;
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+        throwingExitCode : 'full'
+      }
+
+      return test.shouldThrowErrorAsync( () => _.process.startMinimal( options ) )
+      .then( ( err ) =>
+      {
+        test.true( _.errIs( err ) );
+        test.true( _.strHas( err.message, 'Process returned exit code' ) );
+        test.true( _.strHas( err.message, 'Launched as' ) );
+        test.true( _.strHas( err.message, 'Stderr' ) );
+        test.true( _.strHas( err.message, 'randomText is not defined' ) );
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, throwingExitCode : 1`;
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+        throwingExitCode : 1
+      }
+
+      return test.shouldThrowErrorAsync( () => _.process.startMinimal( options ) )
+      .then( ( err ) =>
+      {
+        debugger;
+        errFull = err;
+        debugger
+        test.true( _.errIs( err ) );
+        test.true( _.strHas( err.message, 'Process returned exit code' ) );
+        test.true( _.strHas( err.message, 'Launched as' ) );
+        test.true( _.strHas( err.message, 'Stderr' ) );
+        test.true( _.strHas( err.message, 'randomText is not defined' ) );
+        // console.log( 'err FULL: ', '+++' + JSON.stringify( err, [ 'arguments',/* 'type', 'name', 'stack'*/ ] ) + '+++' );
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, throwingExitCode : brief`;
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+        throwingExitCode : 'brief'
+      }
+
+      return test.shouldThrowErrorAsync( () => _.process.startMinimal( options ) )
+      .then( ( err ) =>
+      {
+        debugger;
+        errBrief = err;
+        debugger
+        test.true( _.errIs( err ) );
+        test.true( _.strHas( err.message, 'Process returned exit code' ) );
+        test.true( _.strHas( err.message, 'Launched as' ) );
+        test.true( _.strHas( err.message, 'Stderr' ) );
+
+        /* What is the diff between brief and full errors */
+        test.identical( errBrief.name, errFull.name )
+        test.identical( errBrief.stack, errFull.stack )
+        test.identical( errBrief.arguments, errFull.arguments )
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, throwingExitCode : 0`;
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+        throwingExitCode : 0,
+        outputCollecting : 1
+      }
+
+      return test.mustNotThrowError( () => _.process.startMinimal( options ) )
+      .then( ( op ) =>
+      {
+        test.notIdentical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.true( _.strHas( op.output, 'randomText is not defined' ) );
+        return null;
+      })
+    })
+
+    return ready;
+  }
+
+  function testApp()
+  {
+    randomText
+  }
+}
+
 // --
 // pid
 // --
@@ -37502,6 +37664,7 @@ var Proto =
     startMinimalOptionGid,
     startSingleOptionProcedure,
     startMultipleOptionProcedure,
+    startMinimalOptionThrowingExitCode,
 
     // pid / status / exit
 
