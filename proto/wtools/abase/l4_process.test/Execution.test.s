@@ -29011,9 +29011,19 @@ function killSync( test )
       ready1.then( ( op ) =>
       {
         /* Same result on Windows because process was killed using pnd, not pid */
-        test.identical( op.exitCode, null );
-        test.identical( op.exitSignal, 'SIGKILL' );
-        test.identical( op.ended, true );
+        if( process.platform === 'win32' )
+        {
+          test.identical( op.exitCode, 1 );
+          test.identical( op.exitSignal, null );
+          test.identical( op.ended, true );
+        }
+        else
+        {
+          test.identical( op.exitCode, null );
+          test.identical( op.exitSignal, 'SIGKILL' );
+          test.identical( op.ended, true );
+        }
+        
         test.true( !_.strHas( op.output, 'Application timeout!' ) );
         return null;
       })
