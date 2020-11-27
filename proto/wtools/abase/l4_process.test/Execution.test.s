@@ -252,7 +252,7 @@ function startMinimalBasic( test )
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
 
-  /* - */
+  /* */
 
   function run( mode )
   {
@@ -667,324 +667,666 @@ ${programPath}:end
 
 */
 
-function startMinimalFork( test )
+function startMinimal( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
   let programPath = a.program( program1 );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+
+  return a.ready;
 
   /* */
 
-  a.ready.then( function()
+  function run( mode )
   {
-    test.case = 'no args';
+    let ready = new _.Consequence().take( null );
 
-    let o =
+    ready.then( function()
     {
-      execPath : programPath,
-      args : null,
-      mode : 'fork',
-      stdio : 'pipe',
-      outputCollecting : 1,
-      outputPiping : 1,
-    }
-    return _.process.startMinimal( o )
-    .then( function( op )
-    {
-      test.identical( o.exitCode, 0 );
-      test.true( _.strHas( o.output, '[]' ) );
-      return null;
+      test.case = `mode : ${mode}, no args`;
+
+      let o =
+      {
+        execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+        args : null,
+        mode,
+        stdio : 'pipe',
+        outputCollecting : 1,
+        outputPiping : 1,
+      }
+      return _.process.startMinimal( o )
+      .then( function( op )
+      {
+        test.identical( o.exitCode, 0 );
+        test.true( _.strHas( o.output, '[]' ) );
+        return null;
+      })
     })
-  })
 
-  /* */
+    /* */
 
-  a.ready.then( function()
-  {
-    test.case = 'args';
-
-    let o =
+    ready.then( function()
     {
-      execPath : programPath,
-      args : [ 'arg1', 'arg2' ],
-      mode : 'fork',
-      stdio : 'pipe',
-      outputCollecting : 1,
-      outputPiping : 1,
-    }
-    return _.process.startMinimal( o )
-    .then( function( op )
-    {
-      test.identical( o.exitCode, 0 );
-      test.true( _.strHas( o.output,  `[ 'arg1', 'arg2' ]` ) );
-      return null;
+      test.case = `mode : ${mode}, args`;
+
+      let o =
+      {
+        execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+        args : [ 'arg1', 'arg2' ],
+        mode,
+        stdio : 'pipe',
+        outputCollecting : 1,
+        outputPiping : 1,
+      }
+      return _.process.startMinimal( o )
+      .then( function( op )
+      {
+        test.identical( o.exitCode, 0 );
+        test.true( _.strHas( o.output,  `[ 'arg1', 'arg2' ]` ) );
+        return null;
+      })
     })
-  })
 
-  /* */
+    /* */
 
-  a.ready.then( function()
-  {
-    test.case = 'stdio : ignore';
-
-    let o =
+    ready.then( function()
     {
-      execPath : programPath,
-      args : [ 'arg1', 'arg2' ],
-      mode : 'fork',
-      stdio : 'ignore',
-      outputCollecting : 0,
-      outputPiping : 0,
-    }
+      test.case = `mode : ${mode}, stdio : ignore`;
 
-    return _.process.startMinimal( o )
-    .then( function( op )
-    {
-      test.identical( o.exitCode, 0 );
-      test.identical( o.output, null );
-      return null;
+      let o =
+      {
+        execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+        args : [ 'arg1', 'arg2' ],
+        mode,
+        stdio : 'ignore',
+        outputCollecting : 0,
+        outputPiping : 0,
+      }
+
+      return _.process.startMinimal( o )
+      .then( function( op )
+      {
+        test.identical( o.exitCode, 0 );
+        test.identical( o.output, null );
+        return null;
+      })
     })
-  })
 
-  /* */
+    /* */
 
-  a.ready.then( function()
-  {
-    test.case = 'complex';
-
-    function testApp2()
+    ready.then( function()
     {
-      console.log( process.argv.slice( 2 ) );
-      console.log( process.env );
-      console.log( process.cwd() );
-      console.log( process.execArgv );
-    }
+      test.case = `mode : ${mode}, complex`;
 
-    let programPath = a.program( testApp2 );
+      function testApp2()
+      {
+        console.log( process.argv.slice( 2 ) );
+        console.log( process.env );
+        console.log( process.cwd() );
+        console.log( process.execArgv );
+      }
 
-    let o =
+      let programPath = a.program( testApp2 );
+
+      let o =
+      {
+        execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+        currentPath : a.routinePath,
+        env : { 'key1' : 'val', 'PATH' : process.env.PATH }, /* in mode::spawn setting env without PATH will result in error, https://github.com/nodejs/node-v0.x-archive/issues/7358 */
+        args : [ 'arg1', 'arg2' ],
+        interpreterArgs : [ '--no-warnings' ],
+        mode,
+        stdio : 'pipe',
+        outputCollecting : 1,
+        outputPiping : 1,
+      }
+
+      return _.process.startMinimal( o )
+      .then( function( op )
+      {
+        test.identical( o.exitCode, 0 );
+        test.true( _.strHas( o.output,  `[ 'arg1', 'arg2' ]` ) );
+        test.true( _.strHas( o.output,  `key1: 'val'` ) );
+        test.true( _.strHas( o.output,  a.path.nativize( a.routinePath ) ) );
+        test.true( _.strHas( o.output,  `[ '--no-warnings' ]` ) );
+
+        a.fileProvider.fileDelete( programPath );
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( function()
     {
-      execPath : programPath,
-      currentPath : a.routinePath,
-      env : { 'key1' : 'val' },
-      args : [ 'arg1', 'arg2' ],
-      interpreterArgs : [ '--no-warnings' ],
-      mode : 'fork',
-      stdio : 'pipe',
-      outputCollecting : 1,
-      outputPiping : 1,
-    }
-    return _.process.startMinimal( o )
-    .then( function( op )
-    {
+      test.case = `mode : ${mode}, complex + deasync`;
+
+      function testApp3()
+      {
+        console.log( process.argv.slice( 2 ) );
+        console.log( process.env );
+        console.log( process.cwd() );
+        console.log( process.execArgv );
+      }
+
+      let programPath = a.program( testApp3 );
+
+      let o =
+      {
+        execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+        currentPath : a.routinePath,
+        env : { 'key1' : 'val', 'PATH' : process.env.PATH }, /* in mode::spawn setting env without PATH will result in error, https://github.com/nodejs/node-v0.x-archive/issues/7358 */
+        args : [ 'arg1', 'arg2' ],
+        interpreterArgs : [ '--no-warnings' ],
+        mode,
+        stdio : 'pipe',
+        outputCollecting : 1,
+        outputPiping : 1,
+        sync : 1,
+        deasync : 1
+      }
+
+      _.process.startMinimal( o );
+      debugger
       test.identical( o.exitCode, 0 );
       test.true( _.strHas( o.output,  `[ 'arg1', 'arg2' ]` ) );
       test.true( _.strHas( o.output,  `key1: 'val'` ) );
       test.true( _.strHas( o.output,  a.path.nativize( a.routinePath ) ) );
       test.true( _.strHas( o.output,  `[ '--no-warnings' ]` ) );
+
+      a.fileProvider.fileDelete( programPath );
       return null;
     })
-  })
 
-  /* */
+    /* */
 
-  a.ready.then( function()
-  {
-    test.case = 'complex + deasync';
-
-    function testApp3()
+    ready.then( function()
     {
-      console.log( process.argv.slice( 2 ) );
-      console.log( process.env );
-      console.log( process.cwd() );
-      console.log( process.execArgv );
-    }
+      test.case = `mode : ${mode}, test is ipc works`;
 
-    let programPath = a.program( testApp3 );
-
-    let o =
-    {
-      execPath :   programPath,
-      currentPath : a.routinePath,
-      env : { 'key1' : 'val' },
-      args : [ 'arg1', 'arg2' ],
-      interpreterArgs : [ '--no-warnings' ],
-      mode : 'fork',
-      stdio : 'pipe',
-      outputCollecting : 1,
-      outputPiping : 1,
-      sync : 1,
-      deasync : 1
-    }
-
-    _.process.startMinimal( o );
-    debugger
-    test.identical( o.exitCode, 0 );
-    test.true( _.strHas( o.output,  `[ 'arg1', 'arg2' ]` ) );
-    test.true( _.strHas( o.output,  `key1: 'val'` ) );
-    test.true( _.strHas( o.output,  a.path.nativize( a.routinePath ) ) );
-    test.true( _.strHas( o.output,  `[ '--no-warnings' ]` ) );
-
-    return null;
-  })
-
-  /* */
-
-  a.ready.then( function()
-  {
-    test.case = 'test is ipc works';
-
-    function testApp4()
-    {
-      process.on( 'message', ( e ) =>
+      function testApp4()
       {
-        process.send({ message : 'child received ' + e.message })
-        process.exit();
+        process.on( 'message', ( e ) =>
+        {
+          process.send({ message : 'child received ' + e.message })
+          process.exit();
+        })
+      }
+
+      let programPath = a.program( testApp4 );
+
+      let o =
+      {
+        execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+        mode,
+        stdio : 'pipe',
+        ipc : 1
+      }
+
+      if( mode === 'shell' ) /* Mode::shell doesn't support inter process communication. */
+      return test.shouldThrowErrorSync( () => _.process.startMinimal( o ) );
+
+      let gotMessage;
+      let con = _.process.startMinimal( o );
+
+      o.pnd.send({ message : 'message from parent' });
+      o.pnd.on( 'message', ( e ) =>
+      {
+        gotMessage = e.message;
       })
-    }
 
-    let programPath = a.program( testApp4 );
-
-    let o =
-    {
-      execPath :   programPath,
-      mode : 'fork',
-      stdio : 'pipe',
-    }
-
-    let gotMessage;
-    let con = _.process.startMinimal( o );
-
-    o.pnd.send({ message : 'message from parent' });
-    o.pnd.on( 'message', ( e ) =>
-    {
-      gotMessage = e.message;
-    })
-
-    con.then( function( op )
-    {
-      test.identical( gotMessage, 'child received message from parent' )
-      test.identical( o.exitCode, 0 );
-      return null;
-    })
-
-    return con;
-  })
-
-  /* */
-
-  a.ready.then( function()
-  {
-    test.case = 'execPath can contain path to js file and arguments';
-
-    let o =
-    {
-      execPath :   programPath + ' arg0',
-      mode : 'fork',
-      stdio : 'pipe',
-      outputCollecting : 1,
-      outputPiping : 1,
-    }
-
-    return _.process.startMinimal( o )
-    .then( function( op )
-    {
-      test.identical( o.exitCode, 0 );
-      test.true( _.strHas( o.output,  `[ 'arg0' ]` ) );
-      return null;
-    })
-  })
-
-  /* */
-
-  a.ready.then( function()
-  {
-    /*
-    xxx :
-    Windows 15x, mode::fork
-    [39;0m[92m/[39;0m[92m TestRoutine[39;0m[92m:[39;0m[92m:[39;0m[92mstartFork [39;0m[92m/[39;0m[92m test timeOut[39;0m[92m # [39;0m[92m22 [39;0m[92m)[39;0m[92m ... [39;0m[92mok[39;0m
-    2020-11-25T10:55:41.8317809Z --------------- uncaught asynchronous error --------------->
-    2020-11-25T10:55:41.8767341Z
-    2020-11-25T10:55:41.8768147Z [91m        kill EPERM
-    2020-11-25T10:55:41.8917163Z [91m = Message of error#10
-    2020-11-25T10:55:41.8917977Z           errno : -4048
-    2020-11-25T10:55:41.9119950Z     kill EPERM
-    2020-11-25T10:55:41.9120605Z           code : 'EPERM'
-    2020-11-25T10:55:41.9121766Z       errno : -4048
-    2020-11-25T10:55:41.9122245Z           syscall : 'kill'
-    2020-11-25T10:55:41.9122822Z       code : 'EPERM'
-    2020-11-25T10:55:41.9123516Z         Current process does not have permission to kill target process 592[39;0m
-    2020-11-25T10:55:41.9124438Z       syscall : 'kill'
-    2020-11-25T10:55:41.9125794Z [91m[40m        Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startFork / test timeOut # 23 ) ... failed, throwing error[49;0m[39;0m
-    2020-11-25T10:55:41.9127260Z     Current process does not have permission to kill target process 592
-    */
-    test.case = 'test timeOut';
-
-    function testApp5()
-    {
-      setTimeout( () =>
+      con.then( function( op )
       {
-        console.log( 'timeOut' );
-      }, context.t1 * 5 ) /* 5000 */
-    }
+        test.identical( gotMessage, 'child received message from parent' )
+        test.identical( o.exitCode, 0 );
 
-    let programPath = a.program( testApp5 );
+        a.fileProvider.fileDelete( programPath );
+        return null;
+      })
 
-    let o =
-    {
-      execPath :   programPath,
-      mode : 'fork',
-      stdio : 'pipe',
-      outputCollecting : 1,
-      outputPiping : 1,
-      throwingExitCode : 1,
-      timeOut : context.t1, /* 1000 */
-    }
-
-    return test.shouldThrowErrorAsync( _.process.startMinimal( o ) )
-    .then( function( op )
-    {
-      test.identical( o.exitCode, null );
-      return null;
+      return con;
     })
-  })
 
-  /* */
+    /* */
 
-  a.ready.then( function()
-  {
-    test.case = 'test timeOut';
-
-    function testApp6()
+    ready.then( function()
     {
-      setTimeout( () =>
+      test.case = `mode : ${mode}, execPath can contain path to js file and arguments`;
+
+      let o =
       {
-        console.log( 'timeOut' );
-      }, context.t1 * 5 ) /* 5000 */
-    }
+        execPath : mode === 'fork' ? programPath + ' arg0' : 'node ' + programPath + ' arg0',
+        mode,
+        stdio : 'pipe',
+        outputCollecting : 1,
+        outputPiping : 1,
+      }
 
-    let programPath = a.program( testApp6 );
-
-    let o =
-    {
-      execPath :   programPath,
-      mode : 'fork',
-      stdio : 'pipe',
-      outputCollecting : 1,
-      outputPiping : 1,
-      throwingExitCode : 0,
-      timeOut : context.t1, /* 1000 */
-    }
-
-    return _.process.startMinimal( o )
-    .then( function( op )
-    {
-      test.identical( o.exitCode, null );
-      return null;
+      return _.process.startMinimal( o )
+      .then( function( op )
+      {
+        test.identical( o.exitCode, 0 );
+        test.true( _.strHas( o.output,  `[ 'arg0' ]` ) );
+        return null;
+      })
     })
-  })
 
-  return a.ready;
+    /* */
+
+    ready.then( function()
+    {
+      /*
+      xxx :
+      Windows 15x, mode::fork
+      [39;0m[92m/[39;0m[92m TestRoutine[39;0m[92m:[39;0m[92m:[39;0m[92mstartFork [39;0m[92m/[39;0m[92m test timeOut[39;0m[92m # [39;0m[92m22 [39;0m[92m)[39;0m[92m ... [39;0m[92mok[39;0m
+      2020-11-25T10:55:41.8317809Z --------------- uncaught asynchronous error --------------->
+      2020-11-25T10:55:41.8767341Z
+      2020-11-25T10:55:41.8768147Z [91m        kill EPERM
+      2020-11-25T10:55:41.8917163Z [91m = Message of error#10
+      2020-11-25T10:55:41.8917977Z           errno : -4048
+      2020-11-25T10:55:41.9119950Z     kill EPERM
+      2020-11-25T10:55:41.9120605Z           code : 'EPERM'
+      2020-11-25T10:55:41.9121766Z       errno : -4048
+      2020-11-25T10:55:41.9122245Z           syscall : 'kill'
+      2020-11-25T10:55:41.9122822Z       code : 'EPERM'
+      2020-11-25T10:55:41.9123516Z         Current process does not have permission to kill target process 592[39;0m
+      2020-11-25T10:55:41.9124438Z       syscall : 'kill'
+      2020-11-25T10:55:41.9125794Z [91m[40m        Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startFork / test timeOut # 23 ) ... failed, throwing error[49;0m[39;0m
+      2020-11-25T10:55:41.9127260Z     Current process does not have permission to kill target process 592
+      */
+      test.case = 'test timeOut';
+
+      function testApp5()
+      {
+        setTimeout( () =>
+        {
+          console.log( 'timeOut' );
+        }, context.t1 * 5 ) /* 5000 */
+      }
+
+      let programPath = a.program( testApp5 );
+
+      let o =
+      {
+        execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+        mode,
+        stdio : 'pipe',
+        outputCollecting : 1,
+        outputPiping : 1,
+        throwingExitCode : 1,
+        timeOut : context.t1, /* 1000 */
+      }
+
+      return test.shouldThrowErrorAsync( _.process.startMinimal( o ) )
+      .then( function( op )
+      {
+        if( process.platform === 'win32' )
+        test.identical( o.exitCode, 1 );
+        else
+        test.identical( o.exitCode, null );
+
+        a.fileProvider.fileDelete( programPath );
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( function()
+    {
+      test.case = `mode : ${mode}, test timeOut`;
+
+      function testApp6()
+      {
+        setTimeout( () =>
+        {
+          console.log( 'timeOut' );
+        }, context.t1 * 5 ) /* 5000 */
+      }
+
+      let programPath = a.program( testApp6 );
+
+      let o =
+      {
+        execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+        mode,
+        stdio : 'pipe',
+        outputCollecting : 1,
+        outputPiping : 1,
+        throwingExitCode : 0,
+        timeOut : context.t1, /* 1000 */
+      }
+
+      return _.process.startMinimal( o )
+      .then( function( op )
+      {
+        if( process.platform === 'win32' )
+        test.identical( o.exitCode, 1 );
+        else
+        test.identical( o.exitCode, null );
+
+        a.fileProvider.fileDelete( programPath );
+        return null;
+      })
+    })
+
+    return ready;
+  }
+
+  /* ORIGINAL */
+  // a.ready.then( function()
+  // {
+  //   test.case = 'no args';
+
+  //   let o =
+  //   {
+  //     execPath : programPath,
+  //     args : null,
+  //     mode : 'fork',
+  //     stdio : 'pipe',
+  //     outputCollecting : 1,
+  //     outputPiping : 1,
+  //   }
+  //   return _.process.startMinimal( o )
+  //   .then( function( op )
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     test.true( _.strHas( o.output, '[]' ) );
+  //     return null;
+  //   })
+  // })
+
+  // /* */
+
+  // a.ready.then( function()
+  // {
+  //   test.case = 'args';
+
+  //   let o =
+  //   {
+  //     execPath : programPath,
+  //     args : [ 'arg1', 'arg2' ],
+  //     mode : 'fork',
+  //     stdio : 'pipe',
+  //     outputCollecting : 1,
+  //     outputPiping : 1,
+  //   }
+  //   return _.process.startMinimal( o )
+  //   .then( function( op )
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     test.true( _.strHas( o.output,  `[ 'arg1', 'arg2' ]` ) );
+  //     return null;
+  //   })
+  // })
+
+  // /* */
+
+  // a.ready.then( function()
+  // {
+  //   test.case = 'stdio : ignore';
+
+  //   let o =
+  //   {
+  //     execPath : programPath,
+  //     args : [ 'arg1', 'arg2' ],
+  //     mode : 'fork',
+  //     stdio : 'ignore',
+  //     outputCollecting : 0,
+  //     outputPiping : 0,
+  //   }
+
+  //   return _.process.startMinimal( o )
+  //   .then( function( op )
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     test.identical( o.output, null );
+  //     return null;
+  //   })
+  // })
+
+  // /* */
+
+  // a.ready.then( function()
+  // {
+  //   test.case = 'complex';
+
+  //   function testApp2()
+  //   {
+  //     console.log( process.argv.slice( 2 ) );
+  //     console.log( process.env );
+  //     console.log( process.cwd() );
+  //     console.log( process.execArgv );
+  //   }
+
+  //   let programPath = a.program( testApp2 );
+
+  //   let o =
+  //   {
+  //     execPath : programPath,
+  //     currentPath : a.routinePath,
+  //     env : { 'key1' : 'val' },
+  //     args : [ 'arg1', 'arg2' ],
+  //     interpreterArgs : [ '--no-warnings' ],
+  //     mode : 'fork',
+  //     stdio : 'pipe',
+  //     outputCollecting : 1,
+  //     outputPiping : 1,
+  //   }
+  //   return _.process.startMinimal( o )
+  //   .then( function( op )
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     test.true( _.strHas( o.output,  `[ 'arg1', 'arg2' ]` ) );
+  //     test.true( _.strHas( o.output,  `key1: 'val'` ) );
+  //     test.true( _.strHas( o.output,  a.path.nativize( a.routinePath ) ) );
+  //     test.true( _.strHas( o.output,  `[ '--no-warnings' ]` ) );
+  //     return null;
+  //   })
+  // })
+
+  // /* */
+
+  // a.ready.then( function()
+  // {
+  //   test.case = 'complex + deasync';
+
+  //   function testApp3()
+  //   {
+  //     console.log( process.argv.slice( 2 ) );
+  //     console.log( process.env );
+  //     console.log( process.cwd() );
+  //     console.log( process.execArgv );
+  //   }
+
+  //   let programPath = a.program( testApp3 );
+
+  //   let o =
+  //   {
+  //     execPath :   programPath,
+  //     currentPath : a.routinePath,
+  //     env : { 'key1' : 'val' },
+  //     args : [ 'arg1', 'arg2' ],
+  //     interpreterArgs : [ '--no-warnings' ],
+  //     mode : 'fork',
+  //     stdio : 'pipe',
+  //     outputCollecting : 1,
+  //     outputPiping : 1,
+  //     sync : 1,
+  //     deasync : 1
+  //   }
+
+  //   _.process.startMinimal( o );
+  //   debugger
+  //   test.identical( o.exitCode, 0 );
+  //   test.true( _.strHas( o.output,  `[ 'arg1', 'arg2' ]` ) );
+  //   test.true( _.strHas( o.output,  `key1: 'val'` ) );
+  //   test.true( _.strHas( o.output,  a.path.nativize( a.routinePath ) ) );
+  //   test.true( _.strHas( o.output,  `[ '--no-warnings' ]` ) );
+
+  //   return null;
+  // })
+
+  // /* */
+
+  // a.ready.then( function()
+  // {
+  //   test.case = 'test is ipc works';
+
+  //   function testApp4()
+  //   {
+  //     process.on( 'message', ( e ) =>
+  //     {
+  //       process.send({ message : 'child received ' + e.message })
+  //       process.exit();
+  //     })
+  //   }
+
+  //   let programPath = a.program( testApp4 );
+
+  //   let o =
+  //   {
+  //     execPath :   programPath,
+  //     mode : 'fork',
+  //     stdio : 'pipe',
+  //   }
+
+  //   let gotMessage;
+  //   let con = _.process.startMinimal( o );
+
+  //   o.pnd.send({ message : 'message from parent' });
+  //   o.pnd.on( 'message', ( e ) =>
+  //   {
+  //     gotMessage = e.message;
+  //   })
+
+  //   con.then( function( op )
+  //   {
+  //     test.identical( gotMessage, 'child received message from parent' )
+  //     test.identical( o.exitCode, 0 );
+  //     return null;
+  //   })
+
+  //   return con;
+  // })
+
+  // /* */
+
+  // a.ready.then( function()
+  // {
+  //   test.case = 'execPath can contain path to js file and arguments';
+
+  //   let o =
+  //   {
+  //     execPath :   programPath + ' arg0',
+  //     mode : 'fork',
+  //     stdio : 'pipe',
+  //     outputCollecting : 1,
+  //     outputPiping : 1,
+  //   }
+
+  //   return _.process.startMinimal( o )
+  //   .then( function( op )
+  //   {
+  //     test.identical( o.exitCode, 0 );
+  //     test.true( _.strHas( o.output,  `[ 'arg0' ]` ) );
+  //     return null;
+  //   })
+  // })
+
+  // /* */
+
+  // a.ready.then( function()
+  // {
+  //   /*
+  //   xxx :
+  //   Windows 15x, mode::fork
+  //   [39;0m[92m/[39;0m[92m TestRoutine[39;0m[92m:[39;0m[92m:[39;0m[92mstartFork [39;0m[92m/[39;0m[92m test timeOut[39;0m[92m # [39;0m[92m22 [39;0m[92m)[39;0m[92m ... [39;0m[92mok[39;0m
+  //   2020-11-25T10:55:41.8317809Z --------------- uncaught asynchronous error --------------->
+  //   2020-11-25T10:55:41.8767341Z
+  //   2020-11-25T10:55:41.8768147Z [91m        kill EPERM
+  //   2020-11-25T10:55:41.8917163Z [91m = Message of error#10
+  //   2020-11-25T10:55:41.8917977Z           errno : -4048
+  //   2020-11-25T10:55:41.9119950Z     kill EPERM
+  //   2020-11-25T10:55:41.9120605Z           code : 'EPERM'
+  //   2020-11-25T10:55:41.9121766Z       errno : -4048
+  //   2020-11-25T10:55:41.9122245Z           syscall : 'kill'
+  //   2020-11-25T10:55:41.9122822Z       code : 'EPERM'
+  //   2020-11-25T10:55:41.9123516Z         Current process does not have permission to kill target process 592[39;0m
+  //   2020-11-25T10:55:41.9124438Z       syscall : 'kill'
+  //   2020-11-25T10:55:41.9125794Z [91m[40m        Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startFork / test timeOut # 23 ) ... failed, throwing error[49;0m[39;0m
+  //   2020-11-25T10:55:41.9127260Z     Current process does not have permission to kill target process 592
+  //   */
+  //   test.case = 'test timeOut';
+
+  //   function testApp5()
+  //   {
+  //     setTimeout( () =>
+  //     {
+  //       console.log( 'timeOut' );
+  //     }, context.t1 * 5 ) /* 5000 */
+  //   }
+
+  //   let programPath = a.program( testApp5 );
+
+  //   let o =
+  //   {
+  //     execPath :   programPath,
+  //     mode : 'fork',
+  //     stdio : 'pipe',
+  //     outputCollecting : 1,
+  //     outputPiping : 1,
+  //     throwingExitCode : 1,
+  //     timeOut : context.t1, /* 1000 */
+  //   }
+
+  //   return test.shouldThrowErrorAsync( _.process.startMinimal( o ) )
+  //   .then( function( op )
+  //   {
+  //     test.identical( o.exitCode, null );
+  //     return null;
+  //   })
+  // })
+
+  // /* */
+
+  // a.ready.then( function()
+  // {
+  //   test.case = 'test timeOut';
+
+  //   function testApp6()
+  //   {
+  //     setTimeout( () =>
+  //     {
+  //       console.log( 'timeOut' );
+  //     }, context.t1 * 5 ) /* 5000 */
+  //   }
+
+  //   let programPath = a.program( testApp6 );
+
+  //   let o =
+  //   {
+  //     execPath :   programPath,
+  //     mode : 'fork',
+  //     stdio : 'pipe',
+  //     outputCollecting : 1,
+  //     outputPiping : 1,
+  //     throwingExitCode : 0,
+  //     timeOut : context.t1, /* 1000 */
+  //   }
+
+  //   return _.process.startMinimal( o )
+  //   .then( function( op )
+  //   {
+  //     test.identical( o.exitCode, null );
+  //     return null;
+  //   })
+  // })
+
+  // return a.ready;
 
   /* - */
 
@@ -37097,7 +37439,7 @@ var Proto =
     // basic
 
     startMinimalBasic,
-    startMinimalFork, /* qqq for Yevhen : subroutine for modes */
+    startMinimal, /* qqq for Yevhen : subroutine for modes | aaa : Done. */
     startMinimalErrorHandling,
 
     // sync
