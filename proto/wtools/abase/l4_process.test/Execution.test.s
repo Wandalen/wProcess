@@ -27247,8 +27247,7 @@ function startMinimalOptionThrowingExitCode( test )
   let a = context.assetFor( test, false );
   let testAppPath = a.program( testApp );
   let modes = [ 'fork', 'spawn', 'shell' ];
-  let errFull;
-  let errBrief;
+  let errFull, errBrief;
 
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
@@ -27364,6 +27363,16 @@ function startMinimalOptionThrowingExitCode( test )
         test.identical( errBrief.name, errFull.name )
         test.identical( errBrief.stack, errFull.stack )
         test.identical( errBrief.arguments, errFull.arguments )
+        test.identical( errBrief.asyncCallsStack, errFull.asyncCallsStack )
+        test.identical( errBrief.combinedStack, errFull.combinedStack )
+        test.identical( errBrief.isProcess, errFull.isProcess )
+        test.identical( errBrief.location, errFull.location )
+        test.identical( errBrief.logged, errFull.logged )
+        test.identical( errBrief.reason, errFull.reason )
+        test.identical( errBrief.sections, errFull.sections )
+        test.identical( errBrief.sourceCode, errFull.sourceCode )
+        test.identical( errBrief.throwCallsStack, errFull.throwCallsStack )
+        test.identical( errBrief.throwsStack, errFull.throwsStack )
         return null;
       })
     })
