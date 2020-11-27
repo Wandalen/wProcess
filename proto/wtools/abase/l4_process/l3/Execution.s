@@ -793,7 +793,6 @@ function startMinimal_body( o )
     if( !o.error && o.throwingExitCode )
     if( exitSignal || exitCode ) /* should be not strict condition to handle properly value null */
     {
-      debugger
       if( _.numberIs( exitCode ) )
       o.error = _._err({ args : [ 'Process returned exit code', exitCode, '\n', infoGet() ], reason : 'exit code' });
       else if( o.reason === 'time' )
@@ -802,7 +801,6 @@ function startMinimal_body( o )
       o.error = _._err({ args : [ 'Process was killed by exit signal', exitSignal, '\n', infoGet() ], reason : 'exit signal' });
       if( o.throwingExitCode === 'brief' )
       o.error = _.errBrief( o.error );
-      debugger;
     }
 
     if( o.error )
