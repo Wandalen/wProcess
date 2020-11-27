@@ -10702,10 +10702,18 @@ function startMinimalOptionTimeOut( test )
       return test.shouldThrowErrorAsync( o.conTerminate )
       .then( () =>
       {
-        /* Child process on Windows terminates with 'SIGTERM' because process was terminated using process descriptor*/
-        test.identical( o.exitCode, null );
         test.identical( o.ended, true );
-        test.identical( o.exitSignal, 'SIGTERM' );
+        /* Child process on Windows terminates with 'SIGTERM' because process was terminated using process descriptor */
+        if( process.platform === 'win32' )
+        {
+          test.identical( o.exitCode, 1 );
+          test.identical( o.exitSignal, null );
+        }
+        else
+        {
+          test.identical( o.exitCode, null );
+          test.identical( o.exitSignal, 'SIGTERM' );
+        }
 
         return null;
       })
@@ -10732,9 +10740,9 @@ function startMinimalOptionTimeOut( test )
       {
         if( process.platform === 'win32' )
         {
-          test.identical( o.exitCode, null );
+          test.identical( o.exitCode, 1 );
           test.identical( o.ended, true );
-          test.identical( o.exitSignal, 'SIGTERM' );
+          test.identical( o.exitSignal, null );
         }
         else if( process.platform === 'darwin' )
         {
@@ -10779,9 +10787,9 @@ function startMinimalOptionTimeOut( test )
       {
         if( process.platform === 'win32' )
         {
-          test.identical( o.exitCode, null );
+          test.identical( o.exitCode, 1 );
           test.identical( o.ended, true );
-          test.identical( o.exitSignal, 'SIGTERM' );
+          test.identical( o.exitSignal, null );
           test.true( !_.strHas( o.output, 'Process was killed by exit signal SIGTERM' ) );
         }
         else
@@ -10819,9 +10827,9 @@ function startMinimalOptionTimeOut( test )
       {
         if( process.platform === 'win32' )
         {
-          test.identical( o.exitCode, null );
+          test.identical( o.exitCode, 1 );
           test.identical( o.ended, true );
-          test.identical( o.exitSignal, 'SIGTERM' );
+          test.identical( o.exitSignal, null );
         }
         else if( process.platform === 'darwin' )
         {
@@ -28964,9 +28972,18 @@ function kill( test )
 
       returned.then( ( op ) =>
       {
-        test.identical( op.exitCode, null );
-        test.identical( op.ended, true );
-        test.identical( op.exitSignal, 'SIGKILL' );
+        if( process.platform === 'win32' )
+        {
+          test.identical( op.exitCode, 1 );
+          test.identical( op.ended, true );
+          test.identical( op.exitSignal, null );
+        }
+        else
+        {
+          test.identical( op.exitCode, null );
+          test.identical( op.ended, true );
+          test.identical( op.exitSignal, 'SIGKILL' );
+        }
         test.true( !_.strHas( op.output, 'Application timeout!' ) );
         return null;
       })
@@ -29066,9 +29083,19 @@ function killSync( test )
       ready1.then( ( op ) =>
       {
         /* Same result on Windows because process was killed using pnd, not pid */
-        test.identical( op.exitCode, null );
-        test.identical( op.exitSignal, 'SIGKILL' );
-        test.identical( op.ended, true );
+        if( process.platform === 'win32' )
+        {
+          test.identical( op.exitCode, 1 );
+          test.identical( op.exitSignal, null );
+          test.identical( op.ended, true );
+        }
+        else
+        {
+          test.identical( op.exitCode, null );
+          test.identical( op.exitSignal, 'SIGKILL' );
+          test.identical( op.ended, true );
+        }
+        
         test.true( !_.strHas( op.output, 'Application timeout!' ) );
         return null;
       })
@@ -30268,12 +30295,17 @@ function startMinimalTerminateAfterLoopRelease( test )
 
       con.then( () =>
       {
-        test.identical( o.exitCode, null );
         /* njs on Windows does not let to set custom signal handler properly */
         if( process.platform === 'win32' )
-        test.identical( o.exitSignal, 'SIGTERM' );
+        {
+          test.identical( o.exitCode, 1 );
+          test.identical( o.exitSignal, null );
+        }
         else
-        test.identical( o.exitSignal, 'SIGKILL' );
+        {
+          test.identical( o.exitCode, null );
+          test.identical( o.exitSignal, 'SIGKILL' );
+        }
         test.true( !_.strHas( o.output, 'SIGTERM' ) );
         test.true( !_.strHas( o.output, 'Exit after release' ) );
 
@@ -32429,11 +32461,22 @@ exit:end
         test.identical( options.error, null );
         test.identical( options.pnd.killed, false );
 
-        test.identical( options.exitCode, null );
-        test.identical( options.exitSignal, 'SIGTERM' );
-        test.identical( options.exitReason, 'signal' );
-        test.identical( options.pnd.signalCode, 'SIGTERM' );
-        test.identical( options.pnd.exitCode, null );
+        if( process.platform === 'win32' )
+        {
+          test.identical( options.exitCode, 1 );
+          test.identical( options.exitSignal, null );
+          test.identical( options.exitReason, 'code' );
+          test.identical( options.pnd.signalCode, null );
+          test.identical( options.pnd.exitCode, 1 );
+        }
+        else
+        {
+          test.identical( options.exitCode, null );
+          test.identical( options.exitSignal, 'SIGTERM' );
+          test.identical( options.exitReason, 'signal' );
+          test.identical( options.pnd.signalCode, 'SIGTERM' );
+          test.identical( options.pnd.exitCode, null );
+        }
 
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
@@ -32562,11 +32605,22 @@ Killed
         test.identical( options.error, null );
         test.identical( options.pnd.killed, false );
 
-        test.identical( options.exitCode, null );
-        test.identical( options.exitSignal, 'SIGKILL' );
-        test.identical( options.exitReason, 'signal' );
-        test.identical( options.pnd.signalCode, 'SIGKILL' );
-        test.identical( options.pnd.exitCode, null );
+        if( process.platfrom === 'win32' )
+        {
+          test.identical( options.exitCode, 1 );
+          test.identical( options.exitSignal, null );
+          test.identical( options.exitReason, 'code' );
+          test.identical( options.pnd.signalCode, null );
+          test.identical( options.pnd.exitCode, 1 );
+        }
+        else
+        {
+          test.identical( options.exitCode, null );
+          test.identical( options.exitSignal, 'SIGKILL' );
+          test.identical( options.exitReason, 'signal' );
+          test.identical( options.pnd.signalCode, 'SIGKILL' );
+          test.identical( options.pnd.exitCode, null );
+        }
 
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
@@ -32957,8 +33011,8 @@ function terminate( test )
       {
         if( process.platform === 'win32' )
         {
-          test.identical( op.exitCode, null );
-          test.identical( op.exitSignal, 'SIGTERM' );
+          test.identical( op.exitCode, 1 );
+          test.identical( op.exitSignal, null );
           test.identical( op.ended, true );
           test.true( !_.strHas( op.output, 'SIGTERM' ) );
           test.true( !_.strHas( op.output, 'Application timeout!' ) );
@@ -33159,9 +33213,9 @@ function terminate( test )
       {
         if( process.platform === 'win32' )
         {
-          test.identical( op.exitCode, null );
+          test.identical( op.exitCode, 1 );
           test.identical( op.ended, true );
-          test.identical( op.exitSignal, 'SIGKILL' );
+          test.identical( op.exitSignal, null );
           test.true( !_.strHas( op.output, 'SIGTERM' ) );
           test.true( !_.strHas( op.output, 'Application timeout!' ) );
         }
@@ -33206,8 +33260,8 @@ function terminate( test )
       {
         if( process.platform === 'win32' )
         {
-          test.identical( op.exitCode, null );
-          test.identical( op.exitSignal, 'SIGTERM' );
+          test.identical( op.exitCode, 1 );
+          test.identical( op.exitSignal, null );
           test.identical( op.ended, true );
           test.true( !_.strHas( op.output, 'SIGTERM' ) );
           test.true( !_.strHas( op.output, 'Application timeout!' ) );
@@ -33261,9 +33315,9 @@ function terminate( test )
       {
         if( process.platform === 'win32' )
         {
-          test.identical( op.exitCode, null );/* null because process was killed using pnd */
+          test.identical( op.exitCode, 1 );/* null because process was killed using pnd */
           test.identical( op.ended, true );
-          test.identical( op.exitSignal, 'SIGTERM' );
+          test.identical( op.exitSignal, null );
           test.true( !_.strHas( op.output, 'SIGTERM' ) );
           test.true( !_.strHas( op.output, 'Application timeout!' ) );
         }
@@ -33353,9 +33407,9 @@ function terminate( test )
       {
         if( process.platform === 'win32' )
         {
-          test.identical( op.exitCode, null );/* null because process was killed using pnd */
+          test.identical( op.exitCode, 1 );/* null because process was killed using pnd */
           test.identical( op.ended, true );
-          test.identical( op.exitSignal, 'SIGKILL' );
+          test.identical( op.exitSignal, null );
           test.true( !_.strHas( op.output, 'SIGTERM' ) );
           test.true( !_.strHas( op.output, 'Application timeout!' ) );
         }
@@ -33442,9 +33496,9 @@ function terminate( test )
       {
         if( process.platform === 'win32' )
         {
-          test.identical( op.exitCode, null );
+          test.identical( op.exitCode, 1 );
           test.identical( op.ended, true );
-          test.identical( op.exitSignal, 'SIGTERM' );
+          test.identical( op.exitSignal, null );
           test.true( !_.strHas( op.output, 'SIGTERM' ) );
           test.true( !_.strHas( op.output, 'Application timeout!' ) );
         }
@@ -33575,24 +33629,24 @@ function terminateSync( test )
 
       o.conTerminate.then( ( op ) =>
       {
-        if( mode === 'shell' )
+        if( process.platform === 'win32' )
         {
-          test.identical( op.exitCode, null );
           test.identical( op.ended, true );
-          test.identical( op.exitSignal, 'SIGKILL' );
+          test.identical( op.exitCode, 1 );
+          test.identical( op.exitSignal, null );
           test.true( !_.strHas( op.output, 'SIGTERM' ) );
           test.true( !_.strHas( op.output, 'Application timeout!' ) );
-          return null;
         }
         else
         {
-          if( process.platform === 'win32' )
+          if( mode === 'shell' )
           {
-            test.identical( op.ended, true );
             test.identical( op.exitCode, null );
-            test.identical( op.exitSignal, 'SIGTERM' );
+            test.identical( op.ended, true );
+            test.identical( op.exitSignal, 'SIGKILL' );
             test.true( !_.strHas( op.output, 'SIGTERM' ) );
             test.true( !_.strHas( op.output, 'Application timeout!' ) );
+            return null;
           }
           else
           {
@@ -33601,8 +33655,8 @@ function terminateSync( test )
             test.identical( op.exitSignal, 'SIGTERM' );
             test.true( !_.strHas( op.output, 'Application timeout!' ) );
           }
-          return null;
         }
+        return null;
       })
 
       return _.time.out( context.t1*4, () =>
