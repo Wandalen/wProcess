@@ -27247,7 +27247,6 @@ function startMinimalOptionThrowingExitCode( test )
   let a = context.assetFor( test, false );
   let testAppPath = a.program( testApp );
   let modes = [ 'fork', 'spawn', 'shell' ];
-  let errFull, errBrief;
 
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
@@ -27273,6 +27272,9 @@ function startMinimalOptionThrowingExitCode( test )
       .then( ( err ) =>
       {
         test.true( _.errIs( err ) );
+        /* err.brief = true ?? */
+        // console.log( 'err_brief :', err.brief )
+        // test.true( !_.errIsBrief( err ) );
         test.true( _.strHas( err.message, 'Process returned exit code' ) );
         test.true( _.strHas( err.message, 'Launched as' ) );
         test.true( _.strHas( err.message, 'Stderr' ) );
@@ -27281,7 +27283,7 @@ function startMinimalOptionThrowingExitCode( test )
       })
     })
 
-    // /* */
+    /* */
 
     ready.then( () =>
     {
@@ -27298,6 +27300,9 @@ function startMinimalOptionThrowingExitCode( test )
       .then( ( err ) =>
       {
         test.true( _.errIs( err ) );
+        /* err.brief = true ?? */
+        // console.log( 'err_brief :', err.brief )
+        // test.true( !_.errIsBrief( err ) );
         test.true( _.strHas( err.message, 'Process returned exit code' ) );
         test.true( _.strHas( err.message, 'Launched as' ) );
         test.true( _.strHas( err.message, 'Stderr' ) );
@@ -27322,15 +27327,15 @@ function startMinimalOptionThrowingExitCode( test )
       return test.shouldThrowErrorAsync( () => _.process.startMinimal( options ) )
       .then( ( err ) =>
       {
-        debugger;
-        errFull = err;
         debugger
         test.true( _.errIs( err ) );
+        /* err.brief = true ?? */
+        // console.log( 'err_brief :', err.brief )
+        // test.true( !_.errIsBrief( err ) );
         test.true( _.strHas( err.message, 'Process returned exit code' ) );
         test.true( _.strHas( err.message, 'Launched as' ) );
         test.true( _.strHas( err.message, 'Stderr' ) );
         test.true( _.strHas( err.message, 'randomText is not defined' ) );
-        // console.log( 'err FULL: ', '+++' + JSON.stringify( err, [ 'arguments',/* 'type', 'name', 'stack'*/ ] ) + '+++' );
         return null;
       })
     })
@@ -27351,28 +27356,12 @@ function startMinimalOptionThrowingExitCode( test )
       return test.shouldThrowErrorAsync( () => _.process.startMinimal( options ) )
       .then( ( err ) =>
       {
-        debugger;
-        errBrief = err;
-        debugger
-        test.true( _.errIs( err ) );
+        console.log( 'err_brief :', err.brief )
+        // test.true( _.errIsBrief( err ) );
         test.true( _.strHas( err.message, 'Process returned exit code' ) );
         test.true( _.strHas( err.message, 'Launched as' ) );
         test.true( _.strHas( err.message, 'Stderr' ) );
 
-        /* What is the diff between brief and full errors */
-        test.identical( errBrief.name, errFull.name )
-        test.identical( errBrief.stack, errFull.stack )
-        test.identical( errBrief.arguments, errFull.arguments )
-        test.identical( errBrief.asyncCallsStack, errFull.asyncCallsStack )
-        test.identical( errBrief.combinedStack, errFull.combinedStack )
-        test.identical( errBrief.isProcess, errFull.isProcess )
-        test.identical( errBrief.location, errFull.location )
-        test.identical( errBrief.logged, errFull.logged )
-        test.identical( errBrief.reason, errFull.reason )
-        test.identical( errBrief.sections, errFull.sections )
-        test.identical( errBrief.sourceCode, errFull.sourceCode )
-        test.identical( errBrief.throwCallsStack, errFull.throwCallsStack )
-        test.identical( errBrief.throwsStack, errFull.throwsStack )
         return null;
       })
     })
