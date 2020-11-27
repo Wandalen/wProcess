@@ -10288,10 +10288,18 @@ function startMinimalOptionTimeOut( test )
       return test.shouldThrowErrorAsync( o.conTerminate )
       .then( () =>
       {
-        /* Child process on Windows terminates with 'SIGTERM' because process was terminated using process descriptor*/
-        test.identical( o.exitCode, null );
         test.identical( o.ended, true );
-        test.identical( o.exitSignal, 'SIGTERM' );
+        /* Child process on Windows terminates with 'SIGTERM' because process was terminated using process descriptor */
+        if( process.platform === 'win32' )
+        {
+          test.identical( o.exitCode, 1 );
+          test.identical( o.exitSignal, null );
+        }
+        else
+        {
+          test.identical( o.exitCode, null );
+          test.identical( o.exitSignal, 'SIGTERM' );
+        }
 
         return null;
       })
@@ -10318,9 +10326,9 @@ function startMinimalOptionTimeOut( test )
       {
         if( process.platform === 'win32' )
         {
-          test.identical( o.exitCode, null );
+          test.identical( o.exitCode, 1 );
           test.identical( o.ended, true );
-          test.identical( o.exitSignal, 'SIGTERM' );
+          test.identical( o.exitSignal, null );
         }
         else if( process.platform === 'darwin' )
         {
@@ -10365,9 +10373,9 @@ function startMinimalOptionTimeOut( test )
       {
         if( process.platform === 'win32' )
         {
-          test.identical( o.exitCode, null );
+          test.identical( o.exitCode, 1 );
           test.identical( o.ended, true );
-          test.identical( o.exitSignal, 'SIGTERM' );
+          test.identical( o.exitSignal, null );
           test.true( !_.strHas( o.output, 'Process was killed by exit signal SIGTERM' ) );
         }
         else
@@ -10405,9 +10413,9 @@ function startMinimalOptionTimeOut( test )
       {
         if( process.platform === 'win32' )
         {
-          test.identical( o.exitCode, null );
+          test.identical( o.exitCode, 1 );
           test.identical( o.ended, true );
-          test.identical( o.exitSignal, 'SIGTERM' );
+          test.identical( o.exitSignal, null );
         }
         else if( process.platform === 'darwin' )
         {
