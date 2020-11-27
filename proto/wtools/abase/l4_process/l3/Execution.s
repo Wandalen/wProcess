@@ -1113,66 +1113,6 @@ function startMinimal_body( o )
 
     _.process._argsForm( o );
 
-    // let _argsLength;
-    //
-    // o.args = _.arrayAs( o.args );
-    // _argsLength = o.args.length;
-    //
-    // if( _.strIs( o.execPath ) )
-    // {
-    //   o.execPath2 = o.execPath;
-    //   let execArgs = execPathParse( o.execPath );
-    //   if( o.mode !== 'shell' )
-    //   execArgs = argsUnqoute( execArgs );
-    //   o.execPath = null;
-    //   if( execArgs.length )
-    //   {
-    //     o.execPath = execArgs.shift();
-    //     o.args = _.arrayPrependArray( o.args || [], execArgs );
-    //   }
-    // }
-    //
-    // if( o.execPath === null )
-    // {
-    //   _.assert( o.args.length, 'Expects {-args-} to have at least one argument if {-execPath-} is not defined' );
-    //   o.execPath = o.args.shift();
-    //   o.execPath2 = o.execPath;
-    //   _argsLength = o.args.length;
-    //   o.execPath = argUnqoute( o.execPath );
-    // }
-    //
-    // o.args2 = o.args.slice();
-    //
-    // /* passingThrough */
-    //
-    // if( o.passingThrough )
-    // {
-    //   let argumentsOwn = process.argv.slice( 2 );
-    //   if( argumentsOwn.length )
-    //   o.args2 = _.arrayAppendArray( o.args2 || [], argumentsOwn );
-    // }
-    //
-    // _.assert( o.interpreterArgs === null || _.arrayIs( o.interpreterArgs ) );
-    // if( o.interpreterArgs && o.mode !== 'fork' )
-    // o.args2 = _.arrayPrependArray( o.args2, o.interpreterArgs );
-    //
-    // /* Escapes and quotes:
-    //   - Original args provided via o.args
-    //   - Arguments of parent process if o.passingThrough is enabled
-    //   Skips arguments parsed from o.execPath.
-    // */
-    //
-    // if( o.mode === 'shell' )
-    // {
-    //   let appendedArgs = o.passingThrough ? process.argv.length - 2 : 0;
-    //   let prependedArgs = o.args2.length - ( _argsLength + appendedArgs );
-    //   for( let i = prependedArgs; i < o.args2.length; i++ )
-    //   {
-    //     o.args2[ i ] = _.process._argEscape( o.args2[ i ] );
-    //     o.args2[ i ] = _.strQuote( o.args2[ i ] );
-    //   }
-    // }
-
   }
 
   /* */
@@ -1940,126 +1880,6 @@ function startMultiple_body( o )
     return o2.ready;
   }
 
-  // function run2()
-  // {
-  //   let firstReady = new _.Consequence().take( null );
-  //   let prevReady = firstReady;
-  //   let readies = [];
-  //   let conStart = [];
-  //   let conTerminate = [];
-  //   let execPath = _.arrayAs( o.execPath );
-  //   let currentPath = _.arrayAs( o.currentPath );
-  //   let sessionId = 0;
-  //
-  //   for( let p = 0 ; p < execPath.length ; p++ )
-  //   for( let c = 0 ; c < currentPath.length ; c++ )
-  //   {
-  //     let currentReady = new _.Consequence();
-  //     sessionId += 1;
-  //     let o2 = _.mapExtend( null, o );
-  //     o2.conStart = null;
-  //     o2.conTerminate = null;
-  //     o2.conDisconnect = null;
-  //     o2.execPath = execPath[ p ];
-  //     o2.args = _.arrayIs( o.args ) ? o.args.slice() : o.args;
-  //     o2.currentPath = currentPath[ c ];
-  //     o2.ready = currentReady;
-  //     o2.sessionId = sessionId;
-  //     delete o2.sessions;
-  //     delete o2.output;
-  //     delete o2.exitReason;
-  //     delete o2.exitCode;
-  //     delete o2.exitSignal;
-  //     delete o2.error;
-  //     delete o2.ended;
-  //     delete o2.concurrent;
-  //     delete o2.state;
-  //
-  //     if( !!o.procedure )
-  //     o2.procedure = _.Procedure({ _stack : o.stack });
-  //
-  //     if( o.deasync )
-  //     {
-  //       o2.deasync = 0;
-  //       o2.sync = 0;
-  //     }
-  //
-  //     o.sessions.push( o2 );
-  //   }
-  //
-  //   o.sessions.forEach( ( o2, i ) =>
-  //   {
-  //     let err2;
-  //
-  //     if( o.concurrent ) /* xxx : use abstract algorithm of consequence */
-  //     {
-  //       prevReady.then( o2.ready );
-  //     }
-  //     else
-  //     {
-  //       prevReady.finally( o2.ready );
-  //       prevReady = o2.ready;
-  //     }
-  //
-  //     try
-  //     {
-  //
-  //       _.assertMapHasAll( o2, _.process.startSingle.defaults );
-  //       _.process.startSingle.body.call( _.process, o2 );
-  //
-  //       if( !o.dry )
-  //       if( o.streamOut || o.streamErr )
-  //       processPipe( o2 );
-  //
-  //     }
-  //     catch( err )
-  //     {
-  //       err2 = err;
-  //       o2.ready.error( err );
-  //     }
-  //
-  //     conStart.push( o2.conStart );
-  //     conTerminate.push( o2.conTerminate );
-  //     readies.push( o2.ready );
-  //
-  //     if( !o.concurrent )
-  //     o2.ready.catch( ( err ) =>
-  //     {
-  //       o.error = o.error || err;
-  //       if( o.state !== 'terminated' )
-  //       serialEnd();
-  //       throw err;
-  //     });
-  //
-  //   });
-  //
-  //   if( o.concurrent )
-  //   _.Consequence.AndImmediate( ... conStart ).tap( ( err, arg ) =>
-  //   {
-  //     if( !o.ended )
-  //     o.state = 'started';
-  //     o.conStart.take( err, err ? undefined : o );
-  //   });
-  //   else
-  //   _.Consequence.OrKeep( ... conStart ).tap( ( err, arg ) =>
-  //   {
-  //     if( !o.ended )
-  //     o.state = 'starting';
-  //     o.conStart.take( err, err ? undefined : o );
-  //   });
-  //
-  //   _.Consequence.AndImmediate( ... conTerminate ).tap( ( err, arg ) =>
-  //   {
-  //     if( !o.ended )
-  //     o.state = 'terminating';
-  //     o.conTerminate.take( err, err ? undefined : o );
-  //   });
-  //
-  //   let ready = _.Consequence.AndImmediate( ... readies );
-  //
-  //   return ready;
-  // }
-
   /* */
 
   function end1()
@@ -2156,8 +1976,6 @@ function startMultiple_body( o )
 
   function serialEnd()
   {
-    // if( o.error )
-    // console.log( `serialEnd ${_.errIsAttended( o.error )}` );
     o.sessions.forEach( ( o2 ) =>
     {
       if( o2.ended )
@@ -2267,8 +2085,6 @@ function startMultiple_body( o )
 
   function handleStreamOut( data )
   {
-    // if( _.bufferAnyIs( data ) )
-    // data = _.bufferToStr( data );
     if( _.bufferNodeIs( data ) )
     data = data.toString( 'utf8' );
     if( o.outputGraying )
