@@ -1929,7 +1929,7 @@ startSingleSyncDeasync.timeOut = 57e4; /* Locally : 56.549s */
 
 //
 
-function startMinimalSyncDeasynTimeOut( test )
+function startMinimalSyncDeasyncTimeOut( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -1972,11 +1972,20 @@ function startMinimalSyncDeasynTimeOut( test )
         timeOut : tops.timeOut
       }
 
-      // if( !( tops.timeOut === null || !tops.sync || !!tops.deasync ) ) /* Option::timeOut should not be defined if option::sync:1 and option::deasync:0 */
-      if( tops.sync && !tops.deasync && tops.timeOut !== null )
-      return test.shouldThrowErrorAsync( () => _.process.startMinimal( options ) );
+      if( tops.mode === 'fork' && tops.sync && !tops.deasync ) /* Mode::fork is available only if either sync:0 or deasync:1 */
+      return test.shouldThrowErrorSync( () => _.process.startMinimal( options ) );
+
+      if( !( tops.timeOut === null || !tops.sync || !!tops.deasync ) ) /* Option::timeOut should not be defined if option::sync:1 and option::deasync:0 */
+      {
+        if( tops.sync && !tops.deasync )
+        return test.shouldThrowErrorSync( () => _.process.startMinimal( options ) );
+        else
+        return test.shouldThrowErrorAsync( () => _.process.startMinimal( options ) );
+      }
       else
-      return test.mustNotThrowError( () => _.process.startMinimal( options ) );
+      {
+        return test.mustNotThrowError( () => _.process.startMinimal( options ) );
+      }
     });
 
     return ready;
@@ -37095,7 +37104,7 @@ var Proto =
 
     startMinimalSync,
     startSingleSyncDeasync,
-    startMinimalSyncDeasynTimeOut,
+    startMinimalSyncDeasyncTimeOut,
     startMinimalSyncDeasyncThrowing,
     startMultipleSyncDeasync,
 
