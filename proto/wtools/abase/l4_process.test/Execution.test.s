@@ -4283,19 +4283,19 @@ function startMinimalExecPathQuotesClosing( test )
         test.identical( o.exitCode, 0 );
         if( mode === 'shell' )
         {
-          test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"' );
+          test.identical( o.execPath2, 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"' );
           test.identical( o.args, [ _.strQuote( testAppPathSpace ), '"arg"' ] );
           test.identical( o.args2, [ _.strQuote( testAppPathSpace ), '"arg"' ] );
         }
         else if( mode === 'spawn' )
         {
-          test.identical( o.fullExecPath, 'node ' + testAppPathSpace + ' arg' );
+          test.identical( o.execPath2, 'node ' + testAppPathSpace + ' arg' );
           test.identical( o.args, [ testAppPathSpace, 'arg' ] );
           test.identical( o.args2, [ testAppPathSpace, 'arg' ] );
         }
         else
         {
-          test.identical( o.fullExecPath, testAppPathSpace + ' arg' );
+          test.identical( o.execPath2, testAppPathSpace + ' arg' );
           test.identical( o.args, [ 'arg' ] );
           test.identical( o.args2, [ 'arg' ] );
         }
@@ -4326,19 +4326,19 @@ function startMinimalExecPathQuotesClosing( test )
         test.identical( o.exitCode, 0 );
         if( mode === 'shell' )
         {
-          test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' arg' );
+          test.identical( o.execPath2, 'node ' + _.strQuote( testAppPathSpace ) + ' arg' );
           test.identical( o.args, [ _.strQuote( testAppPathSpace ), 'arg' ] );
           test.identical( o.args2, [ _.strQuote( testAppPathSpace ), 'arg' ] );
         }
         else if( mode === 'spawn' )
         {
-          test.identical( o.fullExecPath, 'node ' + testAppPathSpace + ' arg' );
+          test.identical( o.execPath2, 'node ' + testAppPathSpace + ' arg' );
           test.identical( o.args, [ testAppPathSpace, 'arg' ] );
           test.identical( o.args2, [ testAppPathSpace, 'arg' ] );
         }
         else
         {
-          test.identical( o.fullExecPath, testAppPathSpace + ' arg' );
+          test.identical( o.execPath2, testAppPathSpace + ' arg' );
           test.identical( o.args, [ 'arg' ] );
           test.identical( o.args2, [ 'arg' ] );
         }
@@ -4374,21 +4374,21 @@ function startMinimalExecPathQuotesClosing( test )
         let op = JSON.parse( o.output );
         if( mode === 'shell' )
         {
-          test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' " arg' );
+          test.identical( o.execPath2, 'node ' + _.strQuote( testAppPathSpace ) + ' " arg' );
           test.identical( o.args, [ _.strQuote( testAppPathSpace ), '"', 'arg' ] );
           test.identical( o.args2, [ _.strQuote( testAppPathSpace ), '"', 'arg' ] );
           test.identical( op.scriptArgs, [ ' arg' ] )
         }
         else if( mode === 'spawn' )
         {
-          test.identical( o.fullExecPath, 'node ' + testAppPathSpace + ' " arg' );
+          test.identical( o.execPath2, 'node ' + testAppPathSpace + ' " arg' );
           test.identical( o.args, [ testAppPathSpace, '"', 'arg' ] );
           test.identical( o.args2, [ testAppPathSpace, '"', 'arg' ] );
           test.identical( op.scriptArgs, [ '"', 'arg' ] )
         }
         else
         {
-          test.identical( o.fullExecPath, testAppPathSpace + ' " arg' );
+          test.identical( o.execPath2, testAppPathSpace + ' " arg' );
           test.identical( o.args, [ '"', 'arg' ] );
           test.identical( o.args2, [ '"', 'arg' ] );
           test.identical( op.scriptArgs, [ '"', 'arg' ] )
@@ -4423,21 +4423,21 @@ function startMinimalExecPathQuotesClosing( test )
         let op = JSON.parse( o.output );
         if( mode === 'shell' )
         {
-          test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' arg "' );
+          test.identical( o.execPath2, 'node ' + _.strQuote( testAppPathSpace ) + ' arg "' );
           test.identical( o.args, [ _.strQuote( testAppPathSpace ), 'arg', '"' ] );
           test.identical( o.args2, [ _.strQuote( testAppPathSpace ), 'arg', '"' ] );
           test.identical( op.scriptArgs, [ 'arg', '' ] )
         }
         else if( mode === 'spawn' )
         {
-          test.identical( o.fullExecPath, 'node ' + testAppPathSpace + ' arg "' );
+          test.identical( o.execPath2, 'node ' + testAppPathSpace + ' arg "' );
           test.identical( o.args, [ testAppPathSpace, 'arg', '"' ] );
           test.identical( o.args2, [ testAppPathSpace, 'arg', '"' ] );
           test.identical( op.scriptArgs, [ 'arg', '"' ] )
         }
         else
         {
-          test.identical( o.fullExecPath, testAppPathSpace + ' arg "' );
+          test.identical( o.execPath2, testAppPathSpace + ' arg "' );
           test.identical( o.args, [ 'arg', '"' ] );
           test.identical( o.args2, [ 'arg', '"' ] );
           test.identical( op.scriptArgs, [ 'arg', '"' ] )
@@ -4516,21 +4516,21 @@ function startMinimalExecPathQuotesClosing( test )
         let op = JSON.parse( o.output );
         if( mode === 'shell' )
         {
-          test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' arg"arg"' );
+          test.identical( o.execPath2, 'node ' + _.strQuote( testAppPathSpace ) + ' arg"arg"' );
           test.identical( o.args, [ _.strQuote( testAppPathSpace ), 'arg"arg"' ] );
           test.identical( o.args2, [ _.strQuote( testAppPathSpace ), 'arg"arg"' ] );
           test.identical( op.scriptArgs, [ 'argarg' ] )
         }
         else if( mode === 'spawn' )
         {
-          test.identical( o.fullExecPath, 'node ' + testAppPathSpace + ' arg"arg"' );
+          test.identical( o.execPath2, 'node ' + testAppPathSpace + ' arg"arg"' );
           test.identical( o.args, [ testAppPathSpace, 'arg"arg"' ] );
           test.identical( o.args2, [ testAppPathSpace, 'arg"arg"' ] );
           test.identical( op.scriptArgs, [ 'arg"arg"' ] )
         }
         else
         {
-          test.identical( o.fullExecPath, testAppPathSpace + ' arg"arg"' );
+          test.identical( o.execPath2, testAppPathSpace + ' arg"arg"' );
           test.identical( o.args, [ 'arg"arg"' ] );
           test.identical( o.args2, [ 'arg"arg"' ] );
           test.identical( op.scriptArgs, [ 'arg"arg"' ] )
@@ -4596,21 +4596,21 @@ function startMinimalExecPathQuotesClosing( test )
         let op = JSON.parse( o.output );
         if( mode === 'shell' )
         {
-          test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"arg"' );
+          test.identical( o.execPath2, 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"arg"' );
           test.identical( o.args, [ _.strQuote( testAppPathSpace ), '"arg"arg"' ] );
           test.identical( o.args2, [ _.strQuote( testAppPathSpace ), '"arg"arg"' ] );
           test.identical( op.scriptArgs, [ 'argarg' ] )
         }
         else if( mode === 'spawn' )
         {
-          test.identical( o.fullExecPath, 'node ' + testAppPathSpace + ' arg"arg' );
+          test.identical( o.execPath2, 'node ' + testAppPathSpace + ' arg"arg' );
           test.identical( o.args, [ testAppPathSpace, 'arg"arg' ] );
           test.identical( o.args2, [ testAppPathSpace, 'arg"arg' ] );
           test.identical( op.scriptArgs, [ 'arg"arg' ] )
         }
         else
         {
-          test.identical( o.fullExecPath, testAppPathSpace + ' arg"arg' );
+          test.identical( o.execPath2, testAppPathSpace + ' arg"arg' );
           test.identical( o.args, [ 'arg"arg' ] );
           test.identical( o.args2, [ 'arg"arg' ] );
           test.identical( op.scriptArgs, [ 'arg"arg' ] )
@@ -4641,19 +4641,19 @@ function startMinimalExecPathQuotesClosing( test )
         test.identical( o.exitCode, 0 );
         if( mode === 'shell' )
         {
-          test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' option : "value"' );
+          test.identical( o.execPath2, 'node ' + _.strQuote( testAppPathSpace ) + ' option : "value"' );
           test.identical( o.args, [ _.strQuote( testAppPathSpace ), 'option', ':', '"value"' ] );
           test.identical( o.args2, [ _.strQuote( testAppPathSpace ), 'option', ':', '"value"' ] );
         }
         else if( mode === 'spawn' )
         {
-          test.identical( o.fullExecPath, 'node ' + testAppPathSpace + ' option : value' );
+          test.identical( o.execPath2, 'node ' + testAppPathSpace + ' option : value' );
           test.identical( o.args, [ testAppPathSpace, 'option', ':', 'value' ] );
           test.identical( o.args2, [ testAppPathSpace, 'option', ':', 'value' ] );
         }
         else
         {
-          test.identical( o.fullExecPath, testAppPathSpace + ' option : value' );
+          test.identical( o.execPath2, testAppPathSpace + ' option : value' );
           test.identical( o.args, [ 'option', ':', 'value' ] );
           test.identical( o.args2, [ 'option', ':', 'value' ] );
         }
@@ -4686,21 +4686,21 @@ function startMinimalExecPathQuotesClosing( test )
         let op = JSON.parse( o.output );
         if( mode === 'shell' )
         {
-          test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' option:"value with space"' );
+          test.identical( o.execPath2, 'node ' + _.strQuote( testAppPathSpace ) + ' option:"value with space"' );
           test.identical( o.args, [ _.strQuote( testAppPathSpace ), 'option:"value with space"' ] );
           test.identical( o.args2, [ _.strQuote( testAppPathSpace ), 'option:"value with space"' ] );
           test.identical( op.scriptArgs, [ 'option:value with space' ] );
         }
         else if( mode === 'spawn' )
         {
-          test.identical( o.fullExecPath, 'node ' + testAppPathSpace + ' option:"value with space"' );
+          test.identical( o.execPath2, 'node ' + testAppPathSpace + ' option:"value with space"' );
           test.identical( o.args, [ testAppPathSpace, 'option:"value with space"' ] );
           test.identical( o.args2, [ testAppPathSpace, 'option:"value with space"' ] );
           test.identical( op.scriptArgs, [ 'option:"value with space"' ] );
         }
         else
         {
-          test.identical( o.fullExecPath, testAppPathSpace + ' option:"value with space"' );
+          test.identical( o.execPath2, testAppPathSpace + ' option:"value with space"' );
           test.identical( o.args, [ 'option:"value with space"' ] );
           test.identical( o.args2, [ 'option:"value with space"' ] );
           test.identical( op.scriptArgs, [ 'option:"value with space"' ] );
@@ -4731,19 +4731,19 @@ function startMinimalExecPathQuotesClosing( test )
         test.identical( o.exitCode, 0 );
         if( mode === 'shell' )
         {
-          test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' option : "value with space"' );
+          test.identical( o.execPath2, 'node ' + _.strQuote( testAppPathSpace ) + ' option : "value with space"' );
           test.identical( o.args, [ _.strQuote( testAppPathSpace ), 'option', ':', '"value with space"' ] );
           test.identical( o.args2, [ _.strQuote( testAppPathSpace ), 'option', ':', '"value with space"' ] );
         }
         else if( mode === 'spawn' )
         {
-          test.identical( o.fullExecPath, 'node ' + testAppPathSpace + ' option : value with space' );
+          test.identical( o.execPath2, 'node ' + testAppPathSpace + ' option : value with space' );
           test.identical( o.args, [ testAppPathSpace, 'option', ':', 'value with space' ] );
           test.identical( o.args2, [ testAppPathSpace, 'option', ':', 'value with space' ] );
         }
         else
         {
-          test.identical( o.fullExecPath, testAppPathSpace + ' option : value with space' );
+          test.identical( o.execPath2, testAppPathSpace + ' option : value with space' );
           test.identical( o.args, [ 'option', ':', 'value with space' ] );
           test.identical( o.args2, [ 'option', ':', 'value with space' ] );
         }
@@ -4791,21 +4791,21 @@ function startMinimalExecPathQuotesClosing( test )
         let op = JSON.parse( o.output );
         if( mode === 'shell' )
         {
-          test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' "option: "value""' );
+          test.identical( o.execPath2, 'node ' + _.strQuote( testAppPathSpace ) + ' "option: "value""' );
           test.identical( o.args, [ _.strQuote( testAppPathSpace ), '"option: "value""' ] );
           test.identical( o.args2, [ _.strQuote( testAppPathSpace ), '"option: "value""' ] );
           test.identical( op.scriptArgs, [ 'option: value' ] )
         }
         else if( mode === 'spawn' )
         {
-          test.identical( o.fullExecPath, 'node ' + testAppPathSpace + ' option: "value"' );
+          test.identical( o.execPath2, 'node ' + testAppPathSpace + ' option: "value"' );
           test.identical( o.args, [ testAppPathSpace, 'option: "value"' ] );
           test.identical( o.args2, [ testAppPathSpace, 'option: "value"' ] );
           test.identical( op.scriptArgs, [ 'option: "value"' ] )
         }
         else
         {
-          test.identical( o.fullExecPath, testAppPathSpace + ' option: "value"' );
+          test.identical( o.execPath2, testAppPathSpace + ' option: "value"' );
           test.identical( o.args, [ 'option: "value"' ] );
           test.identical( o.args2, [ 'option: "value"' ] );
           test.identical( op.scriptArgs, [ 'option: "value"' ] )
@@ -4851,7 +4851,7 @@ function startMinimalExecPathQuotesClosing( test )
         let op = JSON.parse( o.output );
         if( mode === 'shell' )
         {
-          test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' "option: "value with space""' );
+          test.identical( o.execPath2, 'node ' + _.strQuote( testAppPathSpace ) + ' "option: "value with space""' );
           test.identical( o.args, [ _.strQuote( testAppPathSpace ), '"option: "value', 'with', 'space""' ] );
           test.identical( o.args2, [ _.strQuote( testAppPathSpace ), '"option: "value', 'with', 'space""' ] );
           test.identical( op.scriptArgs, [ 'option: value', 'with', 'space' ] )
@@ -4859,7 +4859,7 @@ function startMinimalExecPathQuotesClosing( test )
         }
         else if( mode === 'spawn' )
         {
-          test.identical( o.fullExecPath, 'node ' + testAppPathSpace + ' "option: "value with space""' );
+          test.identical( o.execPath2, 'node ' + testAppPathSpace + ' "option: "value with space""' );
           test.identical( o.args, [ testAppPathSpace, '"option: "value', 'with', 'space""' ] );
           test.identical( o.args2, [ testAppPathSpace, '"option: "value', 'with', 'space""' ] );
           test.identical( op.scriptArgs, [ '"option: "value', 'with', 'space""' ] )
@@ -4867,7 +4867,7 @@ function startMinimalExecPathQuotesClosing( test )
         }
         else
         {
-          test.identical( o.fullExecPath, testAppPathSpace + ' "option: "value with space""' );
+          test.identical( o.execPath2, testAppPathSpace + ' "option: "value with space""' );
           test.identical( o.args, [ '"option: "value', 'with', 'space""' ] );
           test.identical( o.args2, [ '"option: "value', 'with', 'space""' ] );
           test.identical( op.scriptArgs, [ '"option: "value', 'with', 'space""' ] )
@@ -4905,19 +4905,19 @@ function startMinimalExecPathQuotesClosing( test )
 
         if( mode === 'shell' )
         {
-          test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' `option: "value with space"`' );
+          test.identical( o.execPath2, 'node ' + _.strQuote( testAppPathSpace ) + ' `option: "value with space"`' );
           test.identical( o.args, [ _.strQuote( testAppPathSpace ), '`option: "value with space"`' ] );
           test.identical( o.args2, [ _.strQuote( testAppPathSpace ), '`option: "value with space"`' ] );
         }
         else if( mode === 'spawn' )
         {
-          test.identical( o.fullExecPath, 'node ' + testAppPathSpace + ' option: "value with space"' );
+          test.identical( o.execPath2, 'node ' + testAppPathSpace + ' option: "value with space"' );
           test.identical( o.args, [ testAppPathSpace, 'option: "value with space"' ] );
           test.identical( o.args2, [ testAppPathSpace, 'option: "value with space"' ] );
         }
         else
         {
-          test.identical( o.fullExecPath, testAppPathSpace + ' option: "value with space"' );
+          test.identical( o.execPath2, testAppPathSpace + ' option: "value with space"' );
           test.identical( o.args, [ 'option: "value with space"' ] );
           test.identical( o.args2, [ 'option: "value with space"' ] );
         }
@@ -4945,7 +4945,7 @@ function startMinimalExecPathQuotesClosing( test )
         let op = JSON.parse( o.output );
         if( mode === 'shell' )
         {
-          test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' option: \\"value with space\\"' );
+          test.identical( o.execPath2, 'node ' + _.strQuote( testAppPathSpace ) + ' option: \\"value with space\\"' );
           test.identical( o.args, [ _.strQuote( testAppPathSpace ), 'option:', '\\"value with space\\"' ] );
           test.identical( o.args2, [ _.strQuote( testAppPathSpace ), 'option:', '\\"value with space\\"' ] );
           test.identical( op.map, { option : 'value with space' } )
@@ -4953,7 +4953,7 @@ function startMinimalExecPathQuotesClosing( test )
         }
         else if( mode === 'spawn' )
         {
-          test.identical( o.fullExecPath, 'node ' + testAppPathSpace + ' option: \\"value with space\\"' );
+          test.identical( o.execPath2, 'node ' + testAppPathSpace + ' option: \\"value with space\\"' );
           test.identical( o.args, [ testAppPathSpace, 'option:', '\\"value with space\\"' ] );
           test.identical( o.args2, [ testAppPathSpace, 'option:', '\\"value with space\\"' ] );
           test.identical( op.map, { option : '\\"value with space\\"' } )
@@ -4961,7 +4961,7 @@ function startMinimalExecPathQuotesClosing( test )
         }
         else
         {
-          test.identical( o.fullExecPath, testAppPathSpace + ' option: \\"value with space\\"' );
+          test.identical( o.execPath2, testAppPathSpace + ' option: \\"value with space\\"' );
           test.identical( o.args, [ 'option:', '\\"value with space\\"' ] );
           test.identical( o.args2, [ 'option:', '\\"value with space\\"' ] );
           test.identical( op.map, { option : '\\"value with space\\"' } )
@@ -4997,7 +4997,7 @@ function startMinimalExecPathQuotesClosing( test )
   //   con.then( () =>
   //   {
   //     test.identical( o.exitCode, 0 );
-  //     test.identical( o.fullExecPath, testAppPathSpace + ' arg' );
+  //     test.identical( o.execPath2, testAppPathSpace + ' arg' );
   //     test.identical( o.args, [ 'arg' ] );
   //     test.identical( o.args2, [ 'arg' ] );
   //     let op = JSON.parse( o.output );
@@ -5027,7 +5027,7 @@ function startMinimalExecPathQuotesClosing( test )
   //   con.then( () =>
   //   {
   //     test.identical( o.exitCode, 0 );
-  //     test.identical( o.fullExecPath, 'node ' + testAppPathSpace + ' arg' );
+  //     test.identical( o.execPath2, 'node ' + testAppPathSpace + ' arg' );
   //     test.identical( o.args, [ testAppPathSpace, 'arg' ] );
   //     test.identical( o.args2, [ testAppPathSpace, 'arg' ] );
   //     let op = JSON.parse( o.output );
@@ -5057,7 +5057,7 @@ function startMinimalExecPathQuotesClosing( test )
   //   con.then( () =>
   //   {
   //     test.identical( o.exitCode, 0 );
-  //     test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"' );
+  //     test.identical( o.execPath2, 'node ' + _.strQuote( testAppPathSpace ) + ' "arg"' );
   //     test.identical( o.args, [ _.strQuote( testAppPathSpace ), '"arg"' ] );
   //     test.identical( o.args2, [ _.strQuote( testAppPathSpace ), '"arg"' ] );
   //     let op = JSON.parse( o.output );
@@ -5091,7 +5091,7 @@ function startMinimalExecPathQuotesClosing( test )
   //   con.then( () =>
   //   {
   //     test.identical( o.exitCode, 0 );
-  //     test.identical( o.fullExecPath, testAppPathSpace + ' arg' );
+  //     test.identical( o.execPath2, testAppPathSpace + ' arg' );
   //     test.identical( o.args, [ 'arg' ] );
   //     test.identical( o.args2, [ 'arg' ] );
   //     let op = JSON.parse( o.output );
@@ -5121,7 +5121,7 @@ function startMinimalExecPathQuotesClosing( test )
   //   con.then( () =>
   //   {
   //     test.identical( o.exitCode, 0 );
-  //     test.identical( o.fullExecPath, 'node ' + testAppPathSpace + ' arg' );
+  //     test.identical( o.execPath2, 'node ' + testAppPathSpace + ' arg' );
   //     test.identical( o.args, [ testAppPathSpace, 'arg' ] );
   //     test.identical( o.args2, [ testAppPathSpace, 'arg' ] );
   //     let op = JSON.parse( o.output );
@@ -5151,7 +5151,7 @@ function startMinimalExecPathQuotesClosing( test )
   //   con.then( () =>
   //   {
   //     test.identical( o.exitCode, 0 );
-  //     test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' arg' );
+  //     test.identical( o.execPath2, 'node ' + _.strQuote( testAppPathSpace ) + ' arg' );
   //     test.identical( o.args, [ _.strQuote( testAppPathSpace ), 'arg' ] );
   //     test.identical( o.args2, [ _.strQuote( testAppPathSpace ), 'arg' ] );
   //     let op = JSON.parse( o.output );
@@ -5185,7 +5185,7 @@ function startMinimalExecPathQuotesClosing( test )
   //   con.then( () =>
   //   {
   //     test.identical( o.exitCode, 0 );
-  //     test.identical( o.fullExecPath, testAppPathSpace + ' " arg' );
+  //     test.identical( o.execPath2, testAppPathSpace + ' " arg' );
   //     test.identical( o.args, [ '"', 'arg' ] );
   //     test.identical( o.args2, [ '"', 'arg' ] );
   //     let op = JSON.parse( o.output );
@@ -5219,7 +5219,7 @@ function startMinimalExecPathQuotesClosing( test )
   //   con.then( () =>
   //   {
   //     test.identical( o.exitCode, 0 );
-  //     test.identical( o.fullExecPath, testAppPathSpace+ ' " arg' );
+  //     test.identical( o.execPath2, testAppPathSpace+ ' " arg' );
   //     test.identical( o.args, [ '"', 'arg' ] );
   //     test.identical( o.args2, [ '"', 'arg' ] );
   //     let op = JSON.parse( o.output );
@@ -5249,7 +5249,7 @@ function startMinimalExecPathQuotesClosing( test )
   //   con.then( () =>
   //   {
   //     test.identical( o.exitCode, 0 );
-  //     test.identical( o.fullExecPath, testAppPathSpace + ' arg "' );
+  //     test.identical( o.execPath2, testAppPathSpace + ' arg "' );
   //     test.identical( o.args, [ 'arg', '"' ] );
   //     test.identical( o.args2, [ 'arg', '"' ] );
   //     let op = JSON.parse( o.output );
@@ -5330,7 +5330,7 @@ function startMinimalExecPathQuotesClosing( test )
   //   con.then( () =>
   //   {
   //     test.identical( o.exitCode, 0 );
-  //     test.identical( o.fullExecPath, testAppPathSpace + ' arg"arg"' );
+  //     test.identical( o.execPath2, testAppPathSpace + ' arg"arg"' );
   //     test.identical( o.args, [ 'arg"arg"' ] );
   //     test.identical( o.args2, [ 'arg"arg"' ] );
   //     let op = JSON.parse( o.output );
@@ -5397,7 +5397,7 @@ function startMinimalExecPathQuotesClosing( test )
   //   con.then( () =>
   //   {
   //     test.identical( o.exitCode, 0 );
-  //     test.identical( o.fullExecPath, testAppPathSpace + ' arg"arg' );
+  //     test.identical( o.execPath2, testAppPathSpace + ' arg"arg' );
   //     test.identical( o.args, [ 'arg"arg' ] );
   //     test.identical( o.args2, [ 'arg"arg' ] );
   //     let op = JSON.parse( o.output );
@@ -5431,7 +5431,7 @@ function startMinimalExecPathQuotesClosing( test )
   //   con.then( () =>
   //   {
   //     test.identical( o.exitCode, 0 );
-  //     test.identical( o.fullExecPath, testAppPathSpace + ' option : value' );
+  //     test.identical( o.execPath2, testAppPathSpace + ' option : value' );
   //     test.identical( o.args, [ 'option', ':', 'value' ] );
   //     test.identical( o.args2, [ 'option', ':', 'value' ] );
   //     let op = JSON.parse( o.output );
@@ -5461,7 +5461,7 @@ function startMinimalExecPathQuotesClosing( test )
   //   con.then( () =>
   //   {
   //     test.identical( o.exitCode, 0 );
-  //     test.identical( o.fullExecPath, testAppPathSpace + ' option:"value with space"' );
+  //     test.identical( o.execPath2, testAppPathSpace + ' option:"value with space"' );
   //     test.identical( o.args, [ 'option:"value with space"' ] );
   //     test.identical( o.args2, [ 'option:"value with space"' ] );
   //     let op = JSON.parse( o.output );
@@ -5491,7 +5491,7 @@ function startMinimalExecPathQuotesClosing( test )
   //   con.then( () =>
   //   {
   //     test.identical( o.exitCode, 0 );
-  //     test.identical( o.fullExecPath, testAppPathSpace + ' option : value with space' );
+  //     test.identical( o.execPath2, testAppPathSpace + ' option : value with space' );
   //     test.identical( o.args, [ 'option', ':', 'value with space' ] );
   //     test.identical( o.args2, [ 'option', ':', 'value with space' ] );
   //     let op = JSON.parse( o.output );
@@ -5536,7 +5536,7 @@ function startMinimalExecPathQuotesClosing( test )
   //   con.then( () =>
   //   {
   //     test.identical( o.exitCode, 0 );
-  //     test.identical( o.fullExecPath, testAppPathSpace + ' option: "value"' );
+  //     test.identical( o.execPath2, testAppPathSpace + ' option: "value"' );
   //     test.identical( o.args, [ 'option: "value"' ] );
   //     test.identical( o.args2, [ 'option: "value"' ] );
   //     let op = JSON.parse( o.output );
@@ -5583,7 +5583,7 @@ function startMinimalExecPathQuotesClosing( test )
   //   con.then( () =>
   //   {
   //     test.identical( o.exitCode, 0 );
-  //     test.identical( o.fullExecPath, testAppPathSpace + ' "option: "value with space""' );
+  //     test.identical( o.execPath2, testAppPathSpace + ' "option: "value with space""' );
   //     test.identical( o.args, [ '"option: "value', 'with', 'space""' ] );
   //     test.identical( o.args2, [ '"option: "value', 'with', 'space""' ] );
   //     let op = JSON.parse( o.output );
@@ -5617,7 +5617,7 @@ function startMinimalExecPathQuotesClosing( test )
   //   con.then( () =>
   //   {
   //     test.identical( o.exitCode, 0 );
-  //     test.identical( o.fullExecPath, testAppPathSpace + ' option: "value with space"' );
+  //     test.identical( o.execPath2, testAppPathSpace + ' option: "value with space"' );
   //     test.identical( o.args, [ 'option: "value with space"' ] );
   //     test.identical( o.args2, [ 'option: "value with space"' ] );
   //     let op = JSON.parse( o.output );
@@ -5651,7 +5651,7 @@ function startMinimalExecPathQuotesClosing( test )
   //   con.then( () =>
   //   {
   //     test.identical( o.exitCode, 0 );
-  //     test.identical( o.fullExecPath, 'node ' + _.strQuote( testAppPathSpace ) + ' option: \\"value with space\\"' );
+  //     test.identical( o.execPath2, 'node ' + _.strQuote( testAppPathSpace ) + ' option: \\"value with space\\"' );
   //     test.identical( o.args, [ _.strQuote( testAppPathSpace ), 'option:', '\\"value with space\\"' ] );
   //     test.identical( o.args2, [ _.strQuote( testAppPathSpace ), 'option:', '\\"value with space\\"' ] );
   //     let op = JSON.parse( o.output );
@@ -6116,7 +6116,7 @@ function startExecPathNonTrivialModeShell( test )
     test.identical( op.execPath, 'echo' )
     test.identical( op.args, [ 'a b', '*', 'c' ] );
     test.identical( op.args2, [ '"a b"', '"*"', '"c"' ] );
-    test.identical( op.fullExecPath, 'echo "a b" "*" "c"' )
+    test.identical( op.execPath2, 'echo "a b" "*" "c"' )
     return null;
   })
 
@@ -6169,7 +6169,7 @@ function startArgumentsHandlingTrivial( test )
     test.identical( op.execPath, 'echo' );
     test.identical( op.args, [ '*' ] );
     test.identical( op.args2, [ '*' ] );
-    test.identical( op.fullExecPath, 'echo *' );
+    test.identical( op.execPath2, 'echo *' );
     return null;
   })
 
@@ -6213,7 +6213,7 @@ function startArgumentsHandling( test )
     test.identical( op.execPath, 'echo' );
     test.identical( op.args, [ '*' ] );
     test.identical( op.args2, [ '*' ] );
-    test.identical( op.fullExecPath, 'echo *' );
+    test.identical( op.execPath2, 'echo *' );
     return null;
   })
 
@@ -6228,7 +6228,7 @@ function startArgumentsHandling( test )
     test.identical( op.execPath, 'echo' );
     test.identical( op.args, [ '*' ] );
     test.identical( op.args2, [ '"*"' ] );
-    test.identical( op.fullExecPath, 'echo "*"' );
+    test.identical( op.execPath2, 'echo "*"' );
     return null;
   })
 
@@ -6243,7 +6243,7 @@ function startArgumentsHandling( test )
     test.identical( op.execPath, 'echo' );
     test.identical( op.args, [ '"*"' ] );
     test.identical( op.args2, [ '"*"' ] );
-    test.identical( op.fullExecPath, 'echo "*"' );
+    test.identical( op.execPath2, 'echo "*"' );
 
     return null;
   })
@@ -6262,7 +6262,7 @@ function startArgumentsHandling( test )
     test.identical( op.execPath, 'echo' );
     test.identical( op.args, [ '"a b"', '"*"', 'c' ] );
     test.identical( op.args2, [ '"a b"', '"*"', 'c' ] );
-    test.identical( op.fullExecPath, 'echo "a b" "*" c' );
+    test.identical( op.execPath2, 'echo "a b" "*" c' );
     return null;
   })
 
@@ -6280,7 +6280,7 @@ function startArgumentsHandling( test )
     test.identical( op.execPath, 'echo' );
     test.identical( op.args, [ 'a b', '*', 'c' ] );
     test.identical( op.args2, [ '"a b"', '"*"', '"c"' ] );
-    test.identical( op.fullExecPath, 'echo "a b" "*" "c"' );
+    test.identical( op.execPath2, 'echo "a b" "*" "c"' );
     return null;
   })
 
@@ -6295,7 +6295,7 @@ function startArgumentsHandling( test )
     test.identical( op.execPath, 'echo' );
     test.identical( op.args, [ `'"*"'` ] );
     test.identical( op.args2, [ `'"*"'` ] );
-    test.identical( op.fullExecPath, `echo '"*"'` );
+    test.identical( op.execPath2, `echo '"*"'` );
     return null;
   })
 
@@ -6313,7 +6313,7 @@ function startArgumentsHandling( test )
     test.identical( op.execPath, 'echo' );
     test.identical( op.args, [ `'"*"'` ] );
     test.identical( op.args2, [ `"'\\"*\\"'"` ] );
-    test.identical( op.fullExecPath, `echo "'\\"*\\"'"` );
+    test.identical( op.execPath2, `echo "'\\"*\\"'"` );
     return null;
   })
 
@@ -6328,7 +6328,7 @@ function startArgumentsHandling( test )
     test.identical( op.execPath, 'echo' );
     test.identical( op.args, [ `"'*'"` ] );
     test.identical( op.args2, [ `"'*'"` ] );
-    test.identical( op.fullExecPath, `echo "'*'"` );
+    test.identical( op.execPath2, `echo "'*'"` );
     return null;
   })
 
@@ -6343,7 +6343,7 @@ function startArgumentsHandling( test )
     test.identical( op.execPath, 'echo' );
     test.identical( op.args, [ `"'*'"` ] );
     test.identical( op.args2, [ `"\\"'*'\\""` ] );
-    test.identical( op.fullExecPath, `echo "\\"'*'\\""` );
+    test.identical( op.execPath2, `echo "\\"'*'\\""` );
     return null;
   })
 
@@ -6361,7 +6361,7 @@ function startArgumentsHandling( test )
     test.identical( op.execPath, 'echo' );
     test.identical( op.args, [ '`*`' ] );
     test.identical( op.args2, [ '`*`' ] );
-    test.identical( op.fullExecPath, 'echo `*`' );
+    test.identical( op.execPath2, 'echo `*`' );
     return null;
   })
 
@@ -6378,12 +6378,12 @@ function startArgumentsHandling( test )
     if( process.platform === 'win32' )
     {
       test.identical( op.args2, [ '"`*`"' ] );
-      test.identical( op.fullExecPath, 'echo "`*`"' )
+      test.identical( op.execPath2, 'echo "`*`"' )
     }
     else
     {
       test.identical( op.args2, [ '"\\`*\\`"' ] );
-      test.identical( op.fullExecPath, 'echo "\\`*\\`"' )
+      test.identical( op.execPath2, 'echo "\\`*\\`"' )
     }
     return null;
   })
@@ -6410,7 +6410,7 @@ function startArgumentsHandling( test )
     test.identical( op.execPath, 'node' );
     test.identical( op.args, [ '-e', '"console.log( process.argv.slice( 1 ) )"', '"a b c"' ] );
     test.identical( op.args2, [ '-e', '"console.log( process.argv.slice( 1 ) )"', '"\\"a b c\\""' ] );
-    test.identical( op.fullExecPath, 'node -e "console.log( process.argv.slice( 1 ) )" "\\"a b c\\""' );
+    test.identical( op.execPath2, 'node -e "console.log( process.argv.slice( 1 ) )" "\\"a b c\\""' );
     return null;
   })
 
@@ -18315,7 +18315,7 @@ function startNjsWithReadyDelayStructural( test )
         'error' : null,
         'disconnect' : options.disconnect,
         'end' : options.end,
-        'fullExecPath' : null,
+        'execPath2' : null,
         '_handleProcedureTerminationBegin' : false,
       }
 
@@ -18329,7 +18329,7 @@ function startNjsWithReadyDelayStructural( test )
         exp2.execPath = tops.mode === 'fork' ? programPath : 'node';
         exp2.args = tops.mode === 'fork' ? [] : [ programPath ];
         exp2.args2 = tops.mode === 'fork' ? [] : [ programPath ];
-        exp2.fullExecPath = ( tops.mode === 'fork' ? '' : 'node ' ) + programPath;
+        exp2.execPath2 = ( tops.mode === 'fork' ? '' : 'node ' ) + programPath;
         exp2.state = 'terminated';
         exp2.ended = true;
 
@@ -18390,7 +18390,7 @@ function startNjsWithReadyDelayStructural( test )
         exp2.execPath = tops.mode === 'fork' ? exp2.execPath : 'node';
         exp2.args = tops.mode === 'fork' ? [] : [ programPath ];
         exp2.args2 = tops.mode === 'fork' ? [] : [ programPath ];
-        exp2.fullExecPath = tops.mode === 'fork' ? programPath : 'node ' + programPath;
+        exp2.execPath2 = tops.mode === 'fork' ? programPath : 'node ' + programPath;
         exp2.streamOut = options.streamOut;
         exp2.streamErr = options.streamErr;
         exp2.procedure = options.procedure;
@@ -24348,17 +24348,17 @@ function startMinimalOptionVerbosity( test )
         test.identical( op.ended, true );
         if( mode === 'shell' )
         {
-          test.identical( op.fullExecPath, `node -e "console.log( 'a', 'b', \`c\` )"` );
+          test.identical( op.execPath2, `node -e "console.log( 'a', 'b', \`c\` )"` );
           test.identical( _.strCount( capturedOutput, `node -e "console.log( 'a', 'b', \`c\` )"` ), 1 );
         }
         else if( mode === 'spawn' )
         {
-          test.identical( op.fullExecPath, `node -e console.log( 'a', 'b', \`c\` )` );
+          test.identical( op.execPath2, `node -e console.log( 'a', 'b', \`c\` )` );
           test.identical( _.strCount( capturedOutput, `node -e console.log( 'a', 'b', \`c\` )` ), 1 );
         }
         else
         {
-          test.identical( op.fullExecPath, `-e console.log( 'a', 'b', \`c\` )` );
+          test.identical( op.execPath2, `-e console.log( 'a', 'b', \`c\` )` );
           test.identical( _.strCount( capturedOutput, `-e console.log( 'a', 'b', \`c\` )` ), 1 );
         }
         return true;
@@ -24401,17 +24401,17 @@ function startMinimalOptionVerbosity( test )
         test.identical( op.ended, true );
         if( mode === 'fork' )
         {
-          test.identical( op.fullExecPath, `-e console.log( '"a"', "'b'", \`"c"\` )` );
+          test.identical( op.execPath2, `-e console.log( '"a"', "'b'", \`"c"\` )` );
           test.identical( _.strCount( capturedOutput, `-e console.log( '"a"', "'b'", \`"c"\` )` ), 1 );
         }
         else if( mode === 'spawn' )
         {
-          test.identical( op.fullExecPath, `node -e console.log( '"a"', "'b'", \`"c"\` )` );
+          test.identical( op.execPath2, `node -e console.log( '"a"', "'b'", \`"c"\` )` );
           test.identical( _.strCount( capturedOutput, `node -e console.log( '"a"', "'b'", \`"c"\` )` ), 1 );
         }
         else
         {
-          test.identical( op.fullExecPath, `node -e "console.log( '"a"', "'b'", \`"c"\` )"` );
+          test.identical( op.execPath2, `node -e "console.log( '"a"', "'b'", \`"c"\` )"` );
           test.identical( _.strCount( capturedOutput, `node -e "console.log( '"a"', "'b'", \`"c"\` )"` ), 1 );
         }
         return true;
@@ -24681,7 +24681,7 @@ function startMinimalOptionVerbosity( test )
   // {
   //   test.identical( op.exitCode, 0 );
   //   test.identical( op.ended, true );
-  //   test.identical( op.fullExecPath, `node -e console.log( \"a\", 'b', \`c\` )` );
+  //   test.identical( op.execPath2, `node -e console.log( \"a\", 'b', \`c\` )` );
   //   test.identical( _.strCount( capturedOutput, `node -e console.log( \"a\", 'b', \`c\` )` ), 1 );
   //   return true;
   // })
@@ -24706,7 +24706,7 @@ function startMinimalOptionVerbosity( test )
   // {
   //   test.identical( op.exitCode, 0 );
   //   test.identical( op.ended, true );
-  //   test.identical( op.fullExecPath, `node -e console.log( '"a"', "'b'", \`"c"\` )` );
+  //   test.identical( op.execPath2, `node -e console.log( '"a"', "'b'", \`"c"\` )` );
   //   test.identical( _.strCount( capturedOutput, `node -e console.log( '"a"', "'b'", \`"c"\` )` ), 1 );
   //   return true;
   // })
@@ -25262,15 +25262,15 @@ function startSingleOptionDry( test )
         if ( tops.mode === 'shell' )
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe' ] );
-          test.identical( op.fullExecPath, `node ${programPath} arg1 "arg0"` );
+          test.identical( op.execPath2, `node ${programPath} arg1 "arg0"` );
         }
         else
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
           if( tops.mode === 'fork' )
-          test.identical( op.fullExecPath, `${programPath} arg1 arg0` );
+          test.identical( op.execPath2, `${programPath} arg1 arg0` );
           else
-          test.identical( op.fullExecPath, `node ${programPath} arg1 arg0` );
+          test.identical( op.execPath2, `node ${programPath} arg1 arg0` );
         }
 
         test.true( !a.fileProvider.fileExists( a.path.join( a.routinePath, 'file' ) ) )
@@ -25372,12 +25372,12 @@ function startSingleOptionDry( test )
         if ( tops.mode === 'shell' )
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe' ] );
-          test.identical( op.fullExecPath, `err ${programPath} arg1 "arg0"` );
+          test.identical( op.execPath2, `err ${programPath} arg1 "arg0"` );
         }
         else
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
-          test.identical( op.fullExecPath, `err ${programPath} arg1 arg0` );
+          test.identical( op.execPath2, `err ${programPath} arg1 arg0` );
         }
 
         test.true( !a.fileProvider.fileExists( a.path.join( a.routinePath, 'file' ) ) )
@@ -25540,12 +25540,12 @@ function startMultipleOptionDry( test )
           if( tops.mode === 'fork' )
           {
             test.identical( op2.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
-            test.identical( op2.fullExecPath, programPath + ` id:${counter + 1}` );
+            test.identical( op2.execPath2, programPath + ` id:${counter + 1}` );
           }
           else
           {
             test.identical( op2.stdio, [ 'pipe', 'pipe', 'pipe' ] );
-            test.identical( op2.fullExecPath, `node ${programPath} id:${counter + 1}` );
+            test.identical( op2.execPath2, `node ${programPath} id:${counter + 1}` );
           }
           test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate', 'ready' ] );
           track = [];
@@ -25653,7 +25653,7 @@ function startMultipleOptionDry( test )
           test.identical( op2.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
           else
           test.identical( op2.stdio, [ 'pipe', 'pipe', 'pipe' ] );
-          test.identical( op2.fullExecPath, `err ${programPath} id:${counter + 1}` );
+          test.identical( op2.execPath2, `err ${programPath} id:${counter + 1}` );
           test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate', 'ready' ] );
           track = [];
           return null;
@@ -32355,7 +32355,7 @@ exit:end
         test.identical( options.ended, true );
         test.identical( options.state, 'terminated' );
         test.identical( options.error, null );
-        test.identical( options.pnd.killed, true );
+        test.identical( options.pnd.killed, false );
 
         test.identical( options.exitCode, null );
         test.identical( options.exitSignal, 'SIGTERM' );
@@ -32488,7 +32488,7 @@ Killed
         test.identical( options.ended, true );
         test.identical( options.state, 'terminated' );
         test.identical( options.error, null );
-        test.identical( options.pnd.killed, true );
+        test.identical( options.pnd.killed, false );
 
         test.identical( options.exitCode, null );
         test.identical( options.exitSignal, 'SIGKILL' );
@@ -32814,7 +32814,6 @@ function terminate( test )
     .then( () =>
     {
       /*
-      qqq for Vova : more information! aaa: extended execPathOf and error message of routine signal
       xxx :
       Windows 12x, mode::fork
       2020-11-25T14:08:22.5752316Z --------------- uncaught asynchronous error --------------->
@@ -35228,9 +35227,9 @@ function terminateSeveralDetachedChildren( test )
         test.identical( _.strCount( o.output, 'program3::begin' ), 1 );
         test.identical( _.strCount( o.output, 'program2::end' ), 0 );
         test.identical( _.strCount( o.output, 'program3::end' ), 0 );
-        console.log( `_.process.execPathOf( program2Pid ) : ${_.process.execPathOf( program2Pid )}` );
+        console.log( `_.process.execPathOf( program2Pid ) : ${_.process.execPathOf({ pid : program2Pid, throwing : 0 })}` );
         test.true( !_.process.isAlive( program2Pid ) );
-        console.log( `_.process.execPathOf( program3Pid ) : ${_.process.execPathOf( program3Pid )}` );
+        console.log( `_.process.execPathOf( program3Pid ) : ${_.process.execPathOf({ pid : program3Pid, throwing : 0 })}` );
         test.true( !_.process.isAlive( program3Pid ) );
         test.true( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
         test.true( !a.fileProvider.fileExists( a.abs( 'program3end' ) ) );
