@@ -32533,11 +32533,22 @@ Killed
         test.identical( options.error, null );
         test.identical( options.pnd.killed, false );
 
-        test.identical( options.exitCode, null );
-        test.identical( options.exitSignal, 'SIGKILL' );
-        test.identical( options.exitReason, 'signal' );
-        test.identical( options.pnd.signalCode, 'SIGKILL' );
-        test.identical( options.pnd.exitCode, null );
+        if( process.platfrom === 'win32' )
+        {
+          test.identical( options.exitCode, 1 );
+          test.identical( options.exitSignal, null );
+          test.identical( options.exitReason, 'code' );
+          test.identical( options.pnd.signalCode, null );
+          test.identical( options.pnd.exitCode, 1 );
+        }
+        else
+        {
+          test.identical( options.exitCode, null );
+          test.identical( options.exitSignal, 'SIGKILL' );
+          test.identical( options.exitReason, 'signal' );
+          test.identical( options.pnd.signalCode, 'SIGKILL' );
+          test.identical( options.pnd.exitCode, null );
+        }
 
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
