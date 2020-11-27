@@ -33546,24 +33546,24 @@ function terminateSync( test )
 
       o.conTerminate.then( ( op ) =>
       {
-        if( mode === 'shell' )
+        if( process.platform === 'win32' )
         {
-          test.identical( op.exitCode, null );
           test.identical( op.ended, true );
-          test.identical( op.exitSignal, 'SIGKILL' );
+          test.identical( op.exitCode, 1 );
+          test.identical( op.exitSignal, null );
           test.true( !_.strHas( op.output, 'SIGTERM' ) );
           test.true( !_.strHas( op.output, 'Application timeout!' ) );
-          return null;
         }
         else
         {
-          if( process.platform === 'win32' )
+          if( mode === 'shell' )
           {
-            test.identical( op.ended, true );
             test.identical( op.exitCode, null );
-            test.identical( op.exitSignal, 'SIGTERM' );
+            test.identical( op.ended, true );
+            test.identical( op.exitSignal, 'SIGKILL' );
             test.true( !_.strHas( op.output, 'SIGTERM' ) );
             test.true( !_.strHas( op.output, 'Application timeout!' ) );
+            return null;
           }
           else
           {
@@ -33572,8 +33572,8 @@ function terminateSync( test )
             test.identical( op.exitSignal, 'SIGTERM' );
             test.true( !_.strHas( op.output, 'Application timeout!' ) );
           }
-          return null;
         }
+        return null;
       })
 
       return _.time.out( context.t1*4, () =>
