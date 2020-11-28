@@ -2271,6 +2271,78 @@ startSingleSyncDeasync.timeOut = 57e4; /* Locally : 56.549s */
 
 //
 
+function startMinimalSyncDeasyncTimeOut( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let programPath = a.program( testApp );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, timeOut : null, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, timeOut : 0, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, timeOut : 5000, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, timeOut : null, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, timeOut : 0, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, timeOut : 5000, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, timeOut : null, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, timeOut : 0, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, timeOut : 5000, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, timeOut : null, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, timeOut : 0, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, timeOut : 5000, mode }) ) );
+
+  return a.ready;
+
+  /* */
+
+  function run( tops )
+  {
+    test.case = `mode : ${ tops.mode }; sync : ${ tops.sync }; deasync : ${ tops.deasync }`;
+
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, timeOut : ${tops.timeOut}`;
+
+      let options =
+      {
+        execPath : tops.mode === 'fork' ? programPath : 'node ' + programPath,
+        mode : tops.mode,
+        sync : tops.sync,
+        deasync : tops.deasync,
+        timeOut : tops.timeOut
+      }
+
+      if( tops.mode === 'fork' && tops.sync && !tops.deasync ) /* Mode::fork is available only if either sync:0 or deasync:1 */
+      return test.shouldThrowErrorSync( () => _.process.startMinimal( options ) );
+
+      if( !( tops.timeOut === null || !tops.sync || !!tops.deasync ) ) /* Option::timeOut should not be defined if option::sync:1 and option::deasync:0 */
+      {
+        if( tops.sync && !tops.deasync )
+        return test.shouldThrowErrorSync( () => _.process.startMinimal( options ) );
+        else
+        return test.shouldThrowErrorAsync( () => _.process.startMinimal( options ) );
+      }
+      else
+      {
+        return test.mustNotThrowError( () => _.process.startMinimal( options ) );
+      }
+    });
+
+    return ready;
+  }
+
+  /* */
+
+  function testApp()
+  {
+    console.log( 'Log' );
+  }
+}
+
+//
+
 function startMinimalSyncDeasyncThrowing( test )
 {
   let context = this;
@@ -37510,6 +37582,7 @@ var Proto =
 
     startMinimalSync,
     startSingleSyncDeasync,
+    startMinimalSyncDeasyncTimeOut,
     startMinimalSyncDeasyncThrowing,
     startMultipleSyncDeasync,
 
