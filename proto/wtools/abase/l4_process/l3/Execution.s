@@ -1760,7 +1760,7 @@ function startMultiple_body( o )
 
     /* xxx : use abstract algorithm of consequence */
 
-    let o2 = _.process._sessionsRun
+    let o2 = _.sessionsRun
     ({
       concurrent : o.concurrent,
       sessions : o.sessions,
@@ -2557,12 +2557,12 @@ function signal_body( o )
 
     if( p.pnd )
     {
-      info = `\nPID : ${p.pnd.pid}\nExecPath : ${p.pnd.spawnfile}\nArgs : ${p.pnd.spawnargs}`
+      info = `\nPID : ${p.pnd.pid}\nExecPath : ${p.pnd.spawnfile}\nArgs : ${p.pnd.spawnargs}`; /* qqq for Yevhen : seems not covered */
     }
     else
     {
       let execPath = _.process.execPathOf({ pid : p.pid, sync : 1, throwing : 0 });
-      info = `\nPID : ${p.pnd.pid}\nExecPath: ${execPath}`;
+      info = `\nPID : ${p.pnd.pid}\nExecPath: ${execPath}`; /* qqq for Yevhen : seems not covered */
     }
 
     return info;
