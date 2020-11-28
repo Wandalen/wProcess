@@ -18141,6 +18141,91 @@ function starterConcurrentMultiple( test )
 
 starterConcurrentMultiple.timeOut = 27e4; /* Locally : 26.982s */
 
+//
+
+function starterConcurrentMultipleOnWindowsExperiment( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let programPath1 = a.path.nativize( a.path.normalize( a.program( program1 ) ) );
+  let programPath2 = a.path.nativize( a.path.normalize( a.program( program2 ) ) );
+
+  /* */
+
+  let start = _.process.starter
+  ({
+    currentPath : a.abs( '.' ),
+    outputCollecting : 1,
+    outputGraying : 1,
+    throwingExitCode : 1,
+    mode : 'fork',
+  });
+
+  let start2 = _.process.starter
+  ({
+    currentPath : a.abs( '.' ),
+    outputCollecting : 1,
+    outputGraying : 1,
+    throwingExitCode : 1,
+    mode : 'fork',
+  });
+
+  let con1 = start( programPath1 )
+  .then( ( op ) =>
+  {
+    test.case = 'run program1';
+    test.identical( op.exitCode, 0 );
+    test.identical( _.strCount( op.output, 'program1' ), 1 );
+    test.identical( _.strCount( op.output, 'program2' ), 0 );
+    return null;
+  });
+
+  let con2 = start2( programPath2 )
+  .then( ( op ) =>
+  {
+    test.case = 'run program2';
+    test.identical( op.exitCode, 0 );
+    test.identical( _.strCount( op.output, 'program1' ), 0 );
+    test.identical( _.strCount( op.output, 'program2' ), 1 );
+    return null;
+  });
+
+  return _.Consequence.AndTake( con1, con2 );
+
+  /* */
+
+  return result;
+
+  /* */
+
+  function program1()
+  {
+    let _ = require( toolsPath );
+
+    _.include( 'wConsequence' );
+    _.include( 'wProcedure' );
+
+    console.log( 'program1' );
+    return _.time.out( 4000 );
+  }
+
+  /* */
+
+  function program2()
+  {
+    let _ = require( toolsPath );
+
+    _.include( 'wConsequence' );
+    _.include( 'wProcedure' );
+
+    console.log( 'program2' );
+    return _.time.out( 6000 );
+  }
+
+}
+
+starterConcurrentMultipleOnWindowsExperiment.experimental = 1;
+
 // --
 // helper
 // --
@@ -37661,7 +37746,8 @@ var Proto =
 
     startMultipleConcurrent,
     startMultipleConcurrentConsequences,
-    starterConcurrentMultiple, /* with routine::starter */
+    starterConcurrentMultiple, /* with `starter` */
+    starterConcurrentMultipleOnWindowsExperiment,
 
     // helper
 
