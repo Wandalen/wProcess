@@ -25266,18 +25266,20 @@ function startSingleOptionDry( test )
         test.identical( op.streamOut, null );
         test.identical( op.streamErr, null );
 
-        /* qqq for Yevhen : bad */
-        if ( tops.mode === 'shell' )
+        /* qqq for Yevhen : bad | aaa : Fixed. */
+        if( tops.mode === 'shell' )
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe' ] );
           test.identical( op.execPath2, `node ${programPath} arg1 "arg0"` );
         }
+        else if( tops.mode === 'fork' )
+        {
+          test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
+          test.identical( op.execPath2, `${programPath} arg1 arg0` );
+        }
         else
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
-          if( tops.mode === 'fork' )
-          test.identical( op.execPath2, `${programPath} arg1 arg0` );
-          else
           test.identical( op.execPath2, `node ${programPath} arg1 arg0` );
         }
 
@@ -25377,7 +25379,7 @@ function startSingleOptionDry( test )
         test.identical( op.ended, true );
         test.identical( op.streamOut, null );
         test.identical( op.streamErr, null );
-        if ( tops.mode === 'shell' )
+        if( tops.mode === 'shell' )
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe' ] );
           test.identical( op.execPath2, `err ${programPath} arg1 "arg0"` );
