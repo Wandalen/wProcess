@@ -32533,7 +32533,7 @@ Killed
         test.identical( options.error, null );
         test.identical( options.pnd.killed, false );
 
-        if( process.platfrom === 'win32' )
+        if( process.platform === 'win32' )
         {
           test.identical( options.exitCode, 1 );
           test.identical( options.exitSignal, null );
