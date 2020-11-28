@@ -935,7 +935,12 @@ function startMinimal_body( o )
       if( o.state === 'terminated' || o.error )
       return;
       o.exitReason = 'time';
-      _.process.terminate({ pnd : o.pnd, withChildren : 1 });
+      _.process.terminate
+      ({
+        pnd : o.pnd,
+        withChildren : 1,
+        ignoringErrorPerm : 1,
+      });
     });
 
   }
@@ -2579,7 +2584,7 @@ function signal_body( o )
     let timeOut = signal === 'SIGKILL' ? 5000 : o.timeOut;
 
     if( timeOut === 0 )
-    return _.process.kill({ pid : p.pid, pnd : p.pnd, withChildren : 0 });
+    return kill( p );
 
     let ready = _.process.waitForDeath({ pid : p.pid, timeOut })
 
@@ -2590,10 +2595,12 @@ function signal_body( o )
       {
         _.errAttend( err );
         if( signal === 'SIGKILL' )
-        err = _.err( `\nTarget process: ${_.strQuote( p.pid )} is still alive after kill. Waited for ${o.timeOut} ms.`, processInfoGet() );
+        err = _.err( `Target process is still alive after kill. Waited for ${o.timeOut} ms.` );
         else
-        return _.process.kill({ pid : p.pid, pnd : p.pnd, withChildren : 0 });
+        return kill( p );
       }
+
+      err = _.err( err, processInfoGet( p ) );
 
       throw err;
     })
@@ -2603,31 +2610,44 @@ function signal_body( o )
 
   /* - */
 
+  function kill( p )
+  {
+    return _.process.kill
+    ({
+      pid : p.pid,
+      pnd : p.pnd,
+      withChildren : 0,
+      // ignoringErrorPerm : 1, /* xxx : enable? */
+    });
+  }
+
+  /* - */
+
   function handleError( err )
   {
     // if( err.code === 'EINVAL' )
     // throw _.err( err, '\nAn invalid signal was specified:', _.strQuote( o.signal ) )
     if( err.code === 'EPERM' )
-    throw _.err( err, `\nCurrent process does not have permission to kill target process: ${o.pid}`, processInfoGet() );
+    throw _.err( err, `\nCurrent process does not have permission to kill target process: ${o.pid}`, processInfoGet( o ) );
     if( err.code === 'ESRCH' )
-    throw _.err( err, `\nTarget process: ${_.strQuote( o.pid )} does not exist.` );
+    throw _.err( err, `\nTarget process does not exist.`, processInfoGet( o ) );
     throw _.err( err );
   }
 
   /* - */
 
-  function processInfoGet()
+  function processInfoGet( p )
   {
     let info;
 
-    if( o.pnd )
+    if( p.pnd )
     {
-      info = `\nTarget exec path: ${o.pnd.spawnfile}\nTarget args: ${o.pnd.spawnargs}`
+      info = `\nPID : ${p.pnd.pid}\nExecPath : ${p.pnd.spawnfile}\nArgs : ${p.pnd.spawnargs}`
     }
     else
     {
-      let execPath = _.process.execPathOf({ pid : o.pid, sync : 1, throwing : 0 });
-      info = `\nTarget exec path: ${execPath}`
+      let execPath = _.process.execPathOf({ pid : p.pid, sync : 1, throwing : 0 });
+      info = `\nPID : ${p.pnd.pid}\nExecPath: ${execPath}`;
     }
 
     return info;
