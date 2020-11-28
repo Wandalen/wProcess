@@ -783,7 +783,7 @@ function startMinimal_body( o )
     else if( exitCode === 0 )
     o.exitReason = 'normal';
 
-    if( o.verbosity >= 5 && o.inputMirroring ) /* qqq for Yevhen : cover */
+    if( o.verbosity >= 5 && o.inputMirroring ) /* qqq for Yevhen : cover | aaa : Done. */
     {
       log( ` < Process returned error code ${exitCode}`, 'out' );
       if( exitCode )
@@ -1229,7 +1229,7 @@ function startMinimal_body( o )
 
     data = _.strRemoveEnd( data, '\n' );
 
-    /* qqq for Yevhen : changed how option outputPrefixing works */
+    /* qqq for Yevhen : changed how option outputPrefixing works | aaa : Done. */
     if( o.outputPrefixing )
     {
       let prefix = channel === 'err' ? _errPrefix : _outPrefix;
