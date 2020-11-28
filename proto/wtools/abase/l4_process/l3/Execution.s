@@ -232,9 +232,6 @@ function startMinimal_body( o )
   timeOutForm,
   pipe,
   inputMirror,
-  execPathParse,
-  argsUnqoute,
-  argUnqoute,
   argsForm,
   optionsForSpawn,
   optionsForFork,
@@ -1031,93 +1028,11 @@ function startMinimal_body( o )
     }
   }
 
-  // /* xxx */
-  //
-  // function execPathParse( src )
-  // {
-  //   let strOptions =
-  //   {
-  //     src,
-  //     delimeter : [ ' ' ],
-  //     quoting : 1,
-  //     quotingPrefixes : [ '"', `'`, '`' ],
-  //     quotingPostfixes : [ '"', `'`, '`' ],
-  //     preservingEmpty : 0,
-  //     preservingQuoting : 1,
-  //     stripping : 1
-  //   }
-  //   let args = _.strSplit( strOptions );
-  //
-  //   let quotes = [ '"', `'`, '`' ];
-  //   for( let i = 0; i < args.length; i++ )
-  //   {
-  //     let begin = _.strBeginOf( args[ i ], quotes );
-  //     let end = _.strEndOf( args[ i ], quotes );
-  //     if( begin && end && begin === end )
-  //     continue;
-  //
-  //     if( _.longHas( quotes, args[ i ] ) )
-  //     continue;
-  //
-  //     let r = _.strQuoteAnalyze
-  //     ({
-  //       src : args[ i ],
-  //       quote : strOptions.quotingPrefixes
-  //     });
-  //
-  //     quotes.forEach( ( quote ) =>
-  //     {
-  //       let found = _.strFindAll( args[ i ], quote );
-  //       if( found.length % 2 === 0 )
-  //       return;
-  //       for( let k = 0 ; k < found.length ; k += 1 )
-  //       {
-  //         let pos = found[ k ].charsRangeLeft[ 0 ];
-  //         for( let j = 0 ; j < r.ranges.length ; j += 2 )
-  //         if( pos >= r.ranges[ j ] && pos <= r.ranges[ j + 1 ] )
-  //         break;
-  //         throw _.err( `Arguments string in execPath: ${src} has not closed quoting in argument: ${args[ i ]}` );
-  //       }
-  //     })
-  //   }
-  //
-  //   return args;
-  // }
-
-  // /* xxx */
-  //
-  // function argsUnqoute( args )
-  // {
-  //   for( let i = 0; i < args.length; i++ )
-  //   args[ i ] = argUnqoute( args[ i ] );
-  //   return args;
-  // }
-
-  /* xxx */
-
-  // function argUnqoute( arg )
-  // {
-  //   let quotes = [ '"', `'`, '`' ];
-  //   let result = _.strInsideOf
-  //   ({
-  //     src : arg,
-  //     begin : quotes,
-  //     end : quotes,
-  //     pairing : 1,
-  //   })
-  //   if( result )
-  //   return result;
-  //   return arg;
-  // }
-
   /* */
 
-  /* xxx : move out? */
   function argsForm()
   {
-
     _.process._argsForm( o );
-
   }
 
   /* */
