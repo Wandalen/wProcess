@@ -1758,7 +1758,7 @@ function startMultiple_body( o )
       o.sessions.push( o2 );
     }
 
-    /* xxx : use abstract algorithm of consequence */
+    /* yyy : use abstract algorithm of consequence */
 
     let o2 = _.sessionsRun
     ({
