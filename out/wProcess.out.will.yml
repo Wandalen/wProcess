@@ -169,10 +169,19 @@ module:
           - ../proto/wtools/Tools.s
           - ../proto/wtools/abase
           - ../proto/wtools/abase/l4_process
-          - ../proto/wtools/abase/l4_process/Basic.s
+          - ../proto/wtools/abase/l4_process/include
+          - ../proto/wtools/abase/l4_process/include/Basic.s
+          - ../proto/wtools/abase/l4_process/include/Mid.s
+          - ../proto/wtools/abase/l4_process/l1
+          - ../proto/wtools/abase/l4_process/l1/Basic.s
+          - ../proto/wtools/abase/l4_process/l2
+          - ../proto/wtools/abase/l4_process/l2/Process.s
           - ../proto/wtools/abase/l4_process/l3
           - ../proto/wtools/abase/l4_process/l3/Execution.s
           - ../proto/wtools/abase/l4_process/l3/Io.s
+          - ../proto/wtools/abase/l4_process/module
+          - ../proto/wtools/abase/l4_process/module/Process.s
+          - ../proto/wtools/abase/l4_process/module/ProcessBasic.s
           - ../proto/wtools/abase/l4_process.test
           - ../proto/wtools/abase/l4_process.test/Basic.test.s
           - ../proto/wtools/abase/l4_process.test/Execution.test.s
