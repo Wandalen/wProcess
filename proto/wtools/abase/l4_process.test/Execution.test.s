@@ -28792,6 +28792,54 @@ startMultipleOptionStdioIgnore.description =
 
 //
 
+function startSingleOptionOutputAdditive( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( testApp );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
+
+  /* - */
+
+  function run( mode )
+  {
+    let ready = _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, outputAdditive default`;
+
+      let o =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode
+      }
+
+      return _.process.startSingle( o )
+      .then( ( op ) =>
+      {
+        test.il( op.exitCode, 0 );
+        test.il( op.ended, true );
+        test.il( op.outputAdditive, true );
+
+        return null;
+      })
+    })
+
+    return ready;
+
+  }
+
+  function testApp()
+  {
+    console.log( 'Output' );
+  }
+}
+
+//
+
 function kill( test )
 {
   let context = this;
@@ -37202,6 +37250,7 @@ var Proto =
     startMinimalOptionVerbosityLogging,
     startMultipleOutput,
     startMultipleOptionStdioIgnore,
+    startSingleOptionOutputAdditive,
 
     // etc
 
