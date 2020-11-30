@@ -28840,6 +28840,94 @@ function startSingleOptionOutputAdditive( test )
 
 //
 
+function startMultipleOptionOutputAdditive( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( testApp );
+  let testAppPath2 = a.program( testApp2 );
+  let modes = [ 'fork', /*'spawn', 'shell'*/ ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
+
+  /* - */
+
+  function run( mode )
+  {
+    let ready = _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, outputAdditive default`;
+
+      let o =
+      {
+        execPath : mode === 'fork' ? [ testAppPath, testAppPath2 ] : [ 'node ' + testAppPath, 'node ' + testAppPath2 ],
+        outputCollecting : 1,
+        mode
+      }
+
+      return _.process.startMultiple( o )
+      .then( ( op ) =>
+      {
+        console.log( `outputAdditive : ${o.outputAdditive}, OP OUT : ${op.output} ` );
+        console.log( 'OP : ', op )
+        test.il( op.exitCode, 0 );
+        test.il( op.ended, true );
+        test.il( op.outputAdditive, true );
+        test.et( op.output, 'Output1\nOutput2' )
+
+        console.log( '=================================' )
+
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, outputAdditive : 0`;
+
+      let o =
+      {
+        execPath : mode === 'fork' ? [ testAppPath, testAppPath2 ] : [ 'node ' + testAppPath, 'node ' + testAppPath2 ],
+        outputCollecting : 1,
+        outputAdditive : 0,
+        mode
+      }
+
+      return _.process.startMultiple( o )
+      .then( ( op ) =>
+      {
+        console.log( `outputAdditive : ${o.outputAdditive}, OP OUT : ${op.output} ` );
+        console.log( 'OP : ', op )
+        test.il( op.exitCode, 0 );
+        test.il( op.ended, true );
+        test.il( op.outputAdditive, false );
+        test.et( op.output, 'Output1\nOutput2' )
+
+        return null;
+      })
+    })
+
+    return ready;
+
+  }
+
+  function testApp()
+  {
+    console.log( 'Output1' );
+  }
+
+  function testApp2()
+  {
+    console.log( 'Output2' );
+  }
+}
+
+//
+
 function kill( test )
 {
   let context = this;
@@ -37251,6 +37339,7 @@ var Proto =
     startMultipleOutput,
     startMultipleOptionStdioIgnore,
     startSingleOptionOutputAdditive,
+    startMultipleOptionOutputAdditive,
 
     // etc
 
