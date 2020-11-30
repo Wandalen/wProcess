@@ -238,15 +238,15 @@ function inputReadTo( o )
       delete o.propertiesMap[ n ];
     }
   }
-//
+
   // for( let n in o.namesMap )
   // {
-    // if( o.propertiesMap[ n ] !== undefined )
-    // {
-      // set( o.namesMap[ n ], o.propertiesMap[ n ] );
-      // if( o.removing )
-      // delete o.propertiesMap[ n ];
-    // }
+  //   if( o.propertiesMap[ n ] !== undefined )
+  //   {
+  //     set( o.namesMap[ n ], o.propertiesMap[ n ] );
+  //     if( o.removing )
+  //     delete o.propertiesMap[ n ];
+  //   }
   // }
 
   if( o.only )
