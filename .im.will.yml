@@ -19,6 +19,9 @@ submodule :
   wConsequence :
     path : npm:///wConsequence
     enabled : 0 # submodule
+  wBlueprint :
+    path : npm:///wblueprint
+    enabled : 0 # submodule
   wProcessTreeWindows :
     path : npm:///w.process.tree.windows
     enabled : 0 # submodule
