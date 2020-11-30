@@ -55,11 +55,19 @@ function startMinimalHeadCommon( routine, args )
     o.args === null || _.arrayIs( o.args ) || _.strIs( o.args ) || _.routineIs( o.args )
     , `If defined option::arg should be either [ string, array, routine ], but it is ${_.strType( o.args )}`
   );
+
+  /* timeOut */
+
   _.assert
   (
     o.timeOut === null || _.numberIs( o.timeOut ),
     `Expects null or number {-o.timeOut-}, but got ${_.strType( o.timeOut )}`
   );
+  _.assert
+  (
+    o.timeOut === null || !o.sync || !!o.deasync, `Option::timeOut should not be defined if option::sync:1 and option::deasync:0`
+  );
+
   _.assert
   (
     !o.detaching || !_.longHas( _.arrayAs( o.stdio ), 'inherit' ),
@@ -138,11 +146,6 @@ function startMinimalHeadCommon( routine, args )
   _.assert( _.longIs( o.stdio ) );
   _.assert( !o.ipc || _.longHas( [ 'fork', 'spawn' ], o.mode ), `Mode::${o.mode} doesn't support inter process communication.` );
   _.assert( o.mode !== 'fork' || !!o.ipc, `In mode::fork option::ipc must be true. Such subprocess can not have no ipc.` );
-
-  _.assert /* qqq for Yevhen : cover all forbidden combinations of options */
-  (
-    o.timeOut === null || !o.sync || !!o.deasync, `Option::timeOut should not be defined if option::sync:1 and option::deasync:0`
-  );
 
   if( _.strIs( o.interpreterArgs ) )
   o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs });
@@ -232,9 +235,6 @@ function startMinimal_body( o )
   timeOutForm,
   pipe,
   inputMirror,
-  execPathParse,
-  argsUnqoute,
-  argUnqoute,
   argsForm,
   optionsForSpawn,
   optionsForFork,
@@ -354,6 +354,13 @@ function startMinimal_body( o )
 
     /* */
 
+    // let o3 = _.Process.Reconstruct( o );
+    // _.assert( o3 === o );
+    // _.assert( !Object.isExtensible( o ) );
+    // debugger;
+
+    /* */
+
     o.disconnect = disconnect;
     o._end = end3;
     o.state = 'initial'; /* `initial`, `starting`, `started`, `terminating`, `terminated`, `disconnected` */
@@ -460,7 +467,7 @@ function startMinimal_body( o )
         o.ready.deasync();
         o.ready.thenGive( 1 );
         if( o.when.delay )
-        _.time.sleep( o.when.delay );
+        _.time._sleep( o.when.delay ); /* xxx : temp experiment */
         run2();
       }
       catch( err )
@@ -620,7 +627,8 @@ function startMinimal_body( o )
     let execPath = o.execPath;
 
     execPath = _.path.nativizeEscaping( execPath );
-    // execPath = _.process._argProgEscape( execPath ); /* zzz for Vova: use this routine, review fails */
+    /* execPath = _.process._argProgEscape( execPath ); */
+    /* zzz for Vova: use this routine, review fails */
 
     let shellPath = process.platform === 'win32' ? 'cmd' : 'sh';
     let arg1 = process.platform === 'win32' ? '/c' : '-c';
@@ -783,7 +791,7 @@ function startMinimal_body( o )
     else if( exitCode === 0 )
     o.exitReason = 'normal';
 
-    if( o.verbosity >= 5 && o.inputMirroring ) /* qqq for Yevhen : cover */
+    if( o.verbosity >= 5 && o.inputMirroring )
     {
       log( ` < Process returned error code ${exitCode}`, 'out' );
       if( exitCode )
@@ -935,7 +943,12 @@ function startMinimal_body( o )
       if( o.state === 'terminated' || o.error )
       return;
       o.exitReason = 'time';
-      _.process.terminate({ pnd : o.pnd, withChildren : 1 });
+      _.process.terminate
+      ({
+        pnd : o.pnd,
+        withChildren : 1,
+        ignoringErrorPerm : 1,
+      });
     });
 
   }
@@ -970,7 +983,9 @@ function startMinimal_body( o )
 
     /* piping error channel */
 
-    /* there is no if options here because algorithm should collect error output in _errOutput anyway */
+    /*
+    there is no if options here because algorithm should collect error output in _errOutput anyway
+    */
     if( o.pnd.stderr )
     if( o.sync && !o.deasync )
     handleStreamOutput( o.pnd.stderr, 'err' );
@@ -1026,93 +1041,11 @@ function startMinimal_body( o )
     }
   }
 
-  // /* xxx */
-  //
-  // function execPathParse( src )
-  // {
-  //   let strOptions =
-  //   {
-  //     src,
-  //     delimeter : [ ' ' ],
-  //     quoting : 1,
-  //     quotingPrefixes : [ '"', `'`, '`' ],
-  //     quotingPostfixes : [ '"', `'`, '`' ],
-  //     preservingEmpty : 0,
-  //     preservingQuoting : 1,
-  //     stripping : 1
-  //   }
-  //   let args = _.strSplit( strOptions );
-  //
-  //   let quotes = [ '"', `'`, '`' ];
-  //   for( let i = 0; i < args.length; i++ )
-  //   {
-  //     let begin = _.strBeginOf( args[ i ], quotes );
-  //     let end = _.strEndOf( args[ i ], quotes );
-  //     if( begin && end && begin === end )
-  //     continue;
-  //
-  //     if( _.longHas( quotes, args[ i ] ) )
-  //     continue;
-  //
-  //     let r = _.strQuoteAnalyze
-  //     ({
-  //       src : args[ i ],
-  //       quote : strOptions.quotingPrefixes
-  //     });
-  //
-  //     quotes.forEach( ( quote ) =>
-  //     {
-  //       let found = _.strFindAll( args[ i ], quote );
-  //       if( found.length % 2 === 0 )
-  //       return;
-  //       for( let k = 0 ; k < found.length ; k += 1 )
-  //       {
-  //         let pos = found[ k ].charsRangeLeft[ 0 ];
-  //         for( let j = 0 ; j < r.ranges.length ; j += 2 )
-  //         if( pos >= r.ranges[ j ] && pos <= r.ranges[ j + 1 ] )
-  //         break;
-  //         throw _.err( `Arguments string in execPath: ${src} has not closed quoting in argument: ${args[ i ]}` );
-  //       }
-  //     })
-  //   }
-  //
-  //   return args;
-  // }
-
-  // /* xxx */
-  //
-  // function argsUnqoute( args )
-  // {
-  //   for( let i = 0; i < args.length; i++ )
-  //   args[ i ] = argUnqoute( args[ i ] );
-  //   return args;
-  // }
-
-  /* xxx */
-
-  // function argUnqoute( arg )
-  // {
-  //   let quotes = [ '"', `'`, '`' ];
-  //   let result = _.strInsideOf
-  //   ({
-  //     src : arg,
-  //     begin : quotes,
-  //     end : quotes,
-  //     pairing : 1,
-  //   })
-  //   if( result )
-  //   return result;
-  //   return arg;
-  // }
-
   /* */
 
-  /* xxx : move out? */
   function argsForm()
   {
-
     _.process._argsForm( o );
-
   }
 
   /* */
@@ -1229,7 +1162,7 @@ function startMinimal_body( o )
 
     data = _.strRemoveEnd( data, '\n' );
 
-    /* qqq for Yevhen : changed how option outputPrefixing works */
+    /* qqq for Yevhen : changed how option outputPrefixing works | aaa : Done. */
     if( o.outputPrefixing )
     {
       let prefix = channel === 'err' ? _errPrefix : _outPrefix;
@@ -1287,6 +1220,7 @@ startMinimal_body.defaults =
   currentPath : null,
   args : null,
   interpreterArgs : null,
+  passingThrough : 0,
 
   sync : 0,
   deasync : 0,
@@ -1313,7 +1247,6 @@ startMinimal_body.defaults =
   uid : null,
   gid : null,
   streamSizeLimit : null,
-  passingThrough : 0,
   timeOut : null,
 
   throwingExitCode : 'full', /* [ bool-like, 'full', 'brief' ] */ /* must be on by default */  /* qqq for Yevhen : cover | aaa : Done. */
@@ -1370,7 +1303,6 @@ function startSingle_body( o )
   /* subroutines :
 
   form1,
-  run1,
   run2,
   end1,
 
@@ -1411,7 +1343,7 @@ function startSingle_body( o )
         o.ready.deasync();
         o.ready.thenGive( 1 );
         if( o.when.delay )
-        _.time.sleep( o.when.delay );
+        _.time._sleep( o.when.delay ); /* xxx : temp experiment */
         run2();
       }
       catch( err )
@@ -1838,9 +1770,10 @@ function startMultiple_body( o )
       o.sessions.push( o2 );
     }
 
-    /* xxx : use abstract algorithm of consequence */
+    /* yyy : use abstract algorithm of consequence */
+    /* xxx : introduce concurrent.limit */
 
-    let o2 = _.process._sessionsRun
+    let o2 = _.sessionsRun
     ({
       concurrent : o.concurrent,
       sessions : o.sessions,
@@ -2579,7 +2512,7 @@ function signal_body( o )
     let timeOut = signal === 'SIGKILL' ? 5000 : o.timeOut;
 
     if( timeOut === 0 )
-    return _.process.kill({ pid : p.pid, pnd : p.pnd, withChildren : 0 });
+    return kill( p );
 
     let ready = _.process.waitForDeath({ pid : p.pid, timeOut })
 
@@ -2590,10 +2523,12 @@ function signal_body( o )
       {
         _.errAttend( err );
         if( signal === 'SIGKILL' )
-        err = _.err( `\nTarget process: ${_.strQuote( p.pid )} is still alive after kill. Waited for ${o.timeOut} ms.`, processInfoGet() );
+        err = _.err( `Target process is still alive after kill. Waited for ${o.timeOut} ms.` );
         else
-        return _.process.kill({ pid : p.pid, pnd : p.pnd, withChildren : 0 });
+        return kill( p );
       }
+
+      err = _.err( err, processInfoGet( p ) );
 
       throw err;
     })
@@ -2603,31 +2538,44 @@ function signal_body( o )
 
   /* - */
 
+  function kill( p )
+  {
+    return _.process.kill
+    ({
+      pid : p.pid,
+      pnd : p.pnd,
+      withChildren : 0,
+      // ignoringErrorPerm : 1, /* xxx : enable? */
+    });
+  }
+
+  /* - */
+
   function handleError( err )
   {
     // if( err.code === 'EINVAL' )
     // throw _.err( err, '\nAn invalid signal was specified:', _.strQuote( o.signal ) )
     if( err.code === 'EPERM' )
-    throw _.err( err, `\nCurrent process does not have permission to kill target process: ${o.pid}`, processInfoGet() );
+    throw _.err( err, `\nCurrent process does not have permission to kill target process: ${o.pid}`, processInfoGet( o ) );
     if( err.code === 'ESRCH' )
-    throw _.err( err, `\nTarget process: ${_.strQuote( o.pid )} does not exist.` );
+    throw _.err( err, `\nTarget process does not exist.`, processInfoGet( o ) );
     throw _.err( err );
   }
 
   /* - */
 
-  function processInfoGet()
+  function processInfoGet( p )
   {
     let info;
 
-    if( o.pnd )
+    if( p.pnd )
     {
-      info = `\nTarget exec path: ${o.pnd.spawnfile}\nTarget args: ${o.pnd.spawnargs}`
+      info = `\nPID : ${p.pnd.pid}\nExecPath : ${p.pnd.spawnfile}\nArgs : ${p.pnd.spawnargs}`; /* qqq for Yevhen : seems not covered */
     }
     else
     {
-      let execPath = _.process.execPathOf({ pid : o.pid, sync : 1, throwing : 0 });
-      info = `\nTarget exec path: ${execPath}`
+      let execPath = _.process.execPathOf({ pid : p.pid, sync : 1, throwing : 0 });
+      info = `\nPID : ${p.pnd.pid}\nExecPath: ${execPath}`; /* qqq for Yevhen : seems not covered */
     }
 
     return info;

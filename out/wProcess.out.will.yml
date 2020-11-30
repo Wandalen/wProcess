@@ -3,14 +3,14 @@ root:
   - wProcess.out
 consistency:
   wProcess.out.will.yml: &ref_0
-    hash: dca093e32711e8aad1d805894d2c0939
-    size: 40861
+    hash: 34b27ddc910ea8b0650971ff7d1281c5
+    size: 41717
   ../.ex.will.yml: &ref_1
     hash: ad280127a9f801a3bf1cdd9b30cb663b
     size: 2161
   ../.im.will.yml: &ref_2
-    hash: 988fa6395516604e68452fcc99f54185
-    size: 5540
+    hash: 2695e7e3238e83acf83a129c70a2641c
+    size: 5630
 module:
   wProcess.out:
     about:
@@ -122,7 +122,7 @@ module:
       entry.proto.no.tests:
         criterion:
           tests: no.tests
-        path: ../proto/wtools/abase/l4_process/Basic.s
+        path: ../proto/wtools/abase/l4_process/module/Process.s
       entry.proto.only.tests:
         criterion:
           tests: only.tests
@@ -132,13 +132,13 @@ module:
           debug: debug
           raw: raw
           content: prime
-        path: '{path::out.*=1}/source/wtools/abase/l4_process/Basic.s'
+        path: '{path::out.*=1}/source/wtools/abase/l4_process/module/Process.s'
       entry.out.raw.debug.release:
         criterion:
           debug: release
           raw: raw
           content: prime
-        path: '{path::out.*=1}/source/wtools/abase/l4_process/Basic.s'
+        path: '{path::out.*=1}/source/wtools/abase/l4_process/module/Process.s'
       entry.out.compiled.debug.debug:
         criterion:
           debug: debug
@@ -169,10 +169,19 @@ module:
           - ../proto/wtools/Tools.s
           - ../proto/wtools/abase
           - ../proto/wtools/abase/l4_process
-          - ../proto/wtools/abase/l4_process/Basic.s
+          - ../proto/wtools/abase/l4_process/include
+          - ../proto/wtools/abase/l4_process/include/Basic.s
+          - ../proto/wtools/abase/l4_process/include/Mid.s
+          - ../proto/wtools/abase/l4_process/l1
+          - ../proto/wtools/abase/l4_process/l1/Basic.s
+          - ../proto/wtools/abase/l4_process/l2
+          - ../proto/wtools/abase/l4_process/l2/Process.s
           - ../proto/wtools/abase/l4_process/l3
           - ../proto/wtools/abase/l4_process/l3/Execution.s
           - ../proto/wtools/abase/l4_process/l3/Io.s
+          - ../proto/wtools/abase/l4_process/module
+          - ../proto/wtools/abase/l4_process/module/Process.s
+          - ../proto/wtools/abase/l4_process/module/ProcessBasic.s
           - ../proto/wtools/abase/l4_process.test
           - ../proto/wtools/abase/l4_process.test/Basic.test.s
           - ../proto/wtools/abase/l4_process.test/Execution.test.s
@@ -209,6 +218,10 @@ module:
         enabled: 0
       wConsequence:
         path: 'npm:///wConsequence'
+        autoExporting: 0
+        enabled: 0
+      wBlueprint:
+        path: 'npm:///wblueprint'
         autoExporting: 0
         enabled: 0
       wProcessTreeWindows:
@@ -961,7 +974,7 @@ module:
       entry.proto.no.tests:
         criterion:
           tests: no.tests
-        path: proto/wtools/abase/l4_process/Basic.s
+        path: proto/wtools/abase/l4_process/module/Process.s
       entry.proto.only.tests:
         criterion:
           tests: only.tests
@@ -971,13 +984,13 @@ module:
           debug: debug
           raw: raw
           content: prime
-        path: '{path::out.*=1}/source/wtools/abase/l4_process/Basic.s'
+        path: '{path::out.*=1}/source/wtools/abase/l4_process/module/Process.s'
       entry.out.raw.debug.release:
         criterion:
           debug: release
           raw: raw
           content: prime
-        path: '{path::out.*=1}/source/wtools/abase/l4_process/Basic.s'
+        path: '{path::out.*=1}/source/wtools/abase/l4_process/module/Process.s'
       entry.out.compiled.debug.debug:
         criterion:
           debug: debug
@@ -1013,6 +1026,10 @@ module:
         enabled: 0
       wConsequence:
         path: 'npm:///wConsequence'
+        autoExporting: 0
+        enabled: 0
+      wBlueprint:
+        path: 'npm:///wblueprint'
         autoExporting: 0
         enabled: 0
       wProcessTreeWindows:
@@ -1574,6 +1591,6 @@ module:
         hash: ad280127a9f801a3bf1cdd9b30cb663b
         size: 2161
       ../.im.will.yml:
-        hash: 988fa6395516604e68452fcc99f54185
-        size: 5540
+        hash: 2695e7e3238e83acf83a129c70a2641c
+        size: 5630
       wProcess.out.will.yml: *ref_0

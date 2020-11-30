@@ -19,6 +19,9 @@ submodule :
   wConsequence :
     path : npm:///wConsequence
     enabled : 0 # submodule
+  wBlueprint :
+    path : npm:///wblueprint
+    enabled : 0 # submodule
   wProcessTreeWindows :
     path : npm:///w.process.tree.windows
     enabled : 0 # submodule
@@ -79,7 +82,7 @@ path :
       content : prime
 
   entry.proto.no.tests :
-    path : proto/wtools/abase/l4_process/Basic.s
+    path : proto/wtools/abase/l4_process/module/Process.s
     criterion :
       tests : 'no.tests'
   entry.proto.only.tests :
@@ -91,7 +94,7 @@ path :
   # npm.files : proto
 
   entry.out.raw.debug :
-    path : '{path::out.*=1}/source/wtools/abase/l4_process/Basic.s'
+    path : '{path::out.*=1}/source/wtools/abase/l4_process/module/Process.s'
     criterion :
       debug : [ debug, release ]
       raw : raw
