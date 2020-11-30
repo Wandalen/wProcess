@@ -11,7 +11,7 @@ if( typeof module !== 'undefined' )
   _.include( 'wFiles' );
   _.include( 'wProcessWatcher' );
 
-  require( '../l4_process/Basic.s' );
+  require( '../l4_process/module/Process.s' );
 
 }
 
@@ -571,7 +571,6 @@ _.mapExtend( Self, Proto );
 //
 
 Self = wTestSuite( Self );
-
 if( typeof module !== 'undefined' && !module.parent )
 wTester.test( Self )
 

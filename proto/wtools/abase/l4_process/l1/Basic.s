@@ -3,33 +3,6 @@
 
 'use strict';
 
-/**
- * Collection of cross-platform routines to execute system commands, run shell, batches, launch external processes from JavaScript application. Module Process leverages not only outputting data from an application but also inputting, makes application arguments parsing and accounting easier. Use the module to get uniform experience from interaction with an external processes on different platforms and operating systems.
-  @module Tools/base/ProcessBasic
-*/
-
-/**
- * Collection of cross-platform routines to execute system commands, run shell, batches, launch external processes from JavaScript application.
-  @namespace Tools.process
-  @extends Tools
-  @module Tools/base/ProcessBasic
-*/
-
-if( typeof module !== 'undefined' )
-{
-
-  let _ = require( '../../../wtools/Tools.s' );
-
-  _.include( 'wPathBasic' );
-  _.include( 'wGdf' );
-  _.include( 'wConsequence' );
-  _.include( 'wFiles' );
-
-  require( './l3/Execution.s' );
-  require( './l3/Io.s' );
-
-}
-
 let System, ChildProcess, StripAnsi, WindowsKill, WindowsProcessTree;
 let _global = _global_;
 let _ = _global_.wTools;
@@ -813,7 +786,8 @@ let Extension =
 
 _.mapExtend( Self, Extension );
 _.mapSupplement( Self._ehandler.events, Events );
-_.assert( _.routineIs( _.process.start ) );
+// _.assert( _.routineIs( _.process.start ) );
+_.assert( !_.process.start );
 _.process._Setup1();
 
 // --

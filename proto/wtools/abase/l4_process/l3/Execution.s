@@ -55,11 +55,19 @@ function startMinimalHeadCommon( routine, args )
     o.args === null || _.arrayIs( o.args ) || _.strIs( o.args ) || _.routineIs( o.args )
     , `If defined option::arg should be either [ string, array, routine ], but it is ${_.strType( o.args )}`
   );
+
+  /* timeOut */
+
   _.assert
   (
     o.timeOut === null || _.numberIs( o.timeOut ),
     `Expects null or number {-o.timeOut-}, but got ${_.strType( o.timeOut )}`
   );
+  _.assert
+  (
+    o.timeOut === null || !o.sync || !!o.deasync, `Option::timeOut should not be defined if option::sync:1 and option::deasync:0`
+  );
+
   _.assert
   (
     !o.detaching || !_.longHas( _.arrayAs( o.stdio ), 'inherit' ),
@@ -138,11 +146,6 @@ function startMinimalHeadCommon( routine, args )
   _.assert( _.longIs( o.stdio ) );
   _.assert( !o.ipc || _.longHas( [ 'fork', 'spawn' ], o.mode ), `Mode::${o.mode} doesn't support inter process communication.` );
   _.assert( o.mode !== 'fork' || !!o.ipc, `In mode::fork option::ipc must be true. Such subprocess can not have no ipc.` );
-
-  _.assert /* qqq for Yevhen : cover all forbidden combinations of options | aaa : Done. */
-  (
-    o.timeOut === null || !o.sync || !!o.deasync, `Option::timeOut should not be defined if option::sync:1 and option::deasync:0`
-  );
 
   if( _.strIs( o.interpreterArgs ) )
   o.interpreterArgs = _.strSplitNonPreserving({ src : o.interpreterArgs });
@@ -351,6 +354,13 @@ function startMinimal_body( o )
 
     /* */
 
+    // let o3 = _.Process.Reconstruct( o );
+    // _.assert( o3 === o );
+    // _.assert( !Object.isExtensible( o ) );
+    // debugger;
+
+    /* */
+
     o.disconnect = disconnect;
     o._end = end3;
     o.state = 'initial'; /* `initial`, `starting`, `started`, `terminating`, `terminated`, `disconnected` */
@@ -457,7 +467,7 @@ function startMinimal_body( o )
         o.ready.deasync();
         o.ready.thenGive( 1 );
         if( o.when.delay )
-        _.time.sleep( o.when.delay );
+        _.time._sleep( o.when.delay ); /* xxx : temp experiment */
         run2();
       }
       catch( err )
@@ -617,7 +627,8 @@ function startMinimal_body( o )
     let execPath = o.execPath;
 
     execPath = _.path.nativizeEscaping( execPath );
-    // execPath = _.process._argProgEscape( execPath ); /* zzz for Vova: use this routine, review fails */
+    /* execPath = _.process._argProgEscape( execPath ); */
+    /* zzz for Vova: use this routine, review fails */
 
     let shellPath = process.platform === 'win32' ? 'cmd' : 'sh';
     let arg1 = process.platform === 'win32' ? '/c' : '-c';
@@ -780,7 +791,7 @@ function startMinimal_body( o )
     else if( exitCode === 0 )
     o.exitReason = 'normal';
 
-    if( o.verbosity >= 5 && o.inputMirroring ) /* qqq for Yevhen : cover | aaa : Done. */
+    if( o.verbosity >= 5 && o.inputMirroring )
     {
       log( ` < Process returned error code ${exitCode}`, 'out' );
       if( exitCode )
@@ -972,7 +983,9 @@ function startMinimal_body( o )
 
     /* piping error channel */
 
-    /* there is no if options here because algorithm should collect error output in _errOutput anyway */
+    /*
+    there is no if options here because algorithm should collect error output in _errOutput anyway
+    */
     if( o.pnd.stderr )
     if( o.sync && !o.deasync )
     handleStreamOutput( o.pnd.stderr, 'err' );
@@ -1207,6 +1220,7 @@ startMinimal_body.defaults =
   currentPath : null,
   args : null,
   interpreterArgs : null,
+  passingThrough : 0,
 
   sync : 0,
   deasync : 0,
@@ -1233,7 +1247,6 @@ startMinimal_body.defaults =
   uid : null,
   gid : null,
   streamSizeLimit : null,
-  passingThrough : 0,
   timeOut : null,
 
   throwingExitCode : 'full', /* [ bool-like, 'full', 'brief' ] */ /* must be on by default */  /* qqq for Yevhen : cover */
@@ -1290,7 +1303,6 @@ function startSingle_body( o )
   /* subroutines :
 
   form1,
-  run1,
   run2,
   end1,
 
@@ -1331,7 +1343,7 @@ function startSingle_body( o )
         o.ready.deasync();
         o.ready.thenGive( 1 );
         if( o.when.delay )
-        _.time.sleep( o.when.delay );
+        _.time._sleep( o.when.delay ); /* xxx : temp experiment */
         run2();
       }
       catch( err )
@@ -1759,6 +1771,7 @@ function startMultiple_body( o )
     }
 
     /* yyy : use abstract algorithm of consequence */
+    /* xxx : introduce concurrent.limit */
 
     let o2 = _.sessionsRun
     ({
