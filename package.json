@@ -10,28 +10,44 @@
     { "name" : "Kostiantyn Wandalen", "email" : "wanalen@01.school" },
     { "name" : "Volodymyr M.", "email" : "volodymyr.migdal@gmail.com" }
   ],
-  "main" : "proto/wtools/abase/l4_process/Basic.s",
-  "files" : [ "proto/wtools/abase/l4_process", "proto/wtools/Tools.s", "out" ],
-  "scripts" :
-  {
-    "test" : "wtest .run 'proto/**' rapidity:-1 verbosity:5 fails:5 s:0",
-    "docgen" : "wdocgen proto"
+  "main": "proto/wtools/abase/l4_process/Basic.s",
+  "files": [
+    "proto/wtools/abase/l4_process",
+    "proto/wtools/Tools.s",
+    "out"
+  ],
+  "scripts": {
+    "test": "wtest .run 'proto/**' rapidity:-1 verbosity:5 fails:5 s:0",
+    "docgen": "wdocgen proto"
   },
-  "repository" : { "type" : "git", "url" : "https://github.com/Wandalen/wProcess.git" },
-  "bugs" :
-  {
-    "url" : "https://github.com/Wandalen/wProcess/issues"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Wandalen/wProcess.git"
   },
-  "dependencies" :
-  {
-    "strip-ansi" : "6.0.0",
-    "wTools" : "alpha",
-    "wpathbasic" : "alpha",
-    "wgdf" : "alpha",
-    "wConsequence" : "alpha",
-    "wdeasync" : "alpha"
+  "bugs": {
+    "url": "https://github.com/Wandalen/wProcess/issues"
   },
-  "optionalDependencies" : { "w.process.tree.windows" : "alpha" },
-  "devDependencies" : { "wprocess" : "file:.", "eslint" : "7.1.0", "wTesting" : "alpha" },
-  "keywords" : [ "wTools", "exec file", "shell script", "run program" ]
+  "dependencies": {
+    "strip-ansi": "6.0.0",
+    "w.process.tree.windows": "alpha",
+    "wConsequence": "alpha",
+    "wdeasync": "alpha",
+    "wgdf": "alpha",
+    "wpathbasic": "alpha",
+    "wTools": "alpha"
+  },
+  "optionalDependencies": {
+    "w.process.tree.windows": "alpha"
+  },
+  "devDependencies": {
+    "eslint": "7.1.0",
+    "wprocess": "file:.",
+    "wTesting": "alpha"
+  },
+  "keywords": [
+    "wTools",
+    "exec file",
+    "shell script",
+    "run program"
+  ]
 }
