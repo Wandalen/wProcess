@@ -1,4 +1,4 @@
-const _ = require('../../proto/wtools/abase/l4_process/Basic.s');
+const _ = require('../../proto/wtools/abase/l4_process/module/Basic.s');
 
 if( typeof module !== 'undefined' )
 require( '../..' );
