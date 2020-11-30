@@ -27207,8 +27207,7 @@ function startMinimalOptionThrowingExitCode( test )
       .then( ( err ) =>
       {
         test.true( _.errIs( err ) );
-        /* err.brief = true ?? */
-        // console.log( 'err_brief :', err.brief )
+        /* always err.brief = true */
         // test.true( !_.errIsBrief( err ) );
         test.true( _.strHas( err.message, 'Process returned exit code' ) );
         test.true( _.strHas( err.message, 'Launched as' ) );
@@ -27235,8 +27234,7 @@ function startMinimalOptionThrowingExitCode( test )
       .then( ( err ) =>
       {
         test.true( _.errIs( err ) );
-        /* err.brief = true ?? */
-        // console.log( 'err_brief :', err.brief )
+        /* always err.brief = true */
         // test.true( !_.errIsBrief( err ) );
         test.true( _.strHas( err.message, 'Process returned exit code' ) );
         test.true( _.strHas( err.message, 'Launched as' ) );
@@ -27259,13 +27257,12 @@ function startMinimalOptionThrowingExitCode( test )
         throwingExitCode : 1
       }
 
-      return test.shouldThrowErrorAsync( () => _.process.startMinimal( options ) )
+      return test.shouldThrowErrorSync( () => _.process.startMinimal( options ) )
       .then( ( err ) =>
       {
         debugger
         test.true( _.errIs( err ) );
-        /* err.brief = true ?? */
-        // console.log( 'err_brief :', err.brief )
+        /* always err.brief = true */
         // test.true( !_.errIsBrief( err ) );
         test.true( _.strHas( err.message, 'Process returned exit code' ) );
         test.true( _.strHas( err.message, 'Launched as' ) );
@@ -27291,8 +27288,8 @@ function startMinimalOptionThrowingExitCode( test )
       return test.shouldThrowErrorAsync( () => _.process.startMinimal( options ) )
       .then( ( err ) =>
       {
-        console.log( 'err_brief :', err.brief )
-        // test.true( _.errIsBrief( err ) );
+        /* always err.brief = true */
+        // test.true( !_.errIsBrief( err ) );
         test.true( _.strHas( err.message, 'Process returned exit code' ) );
         test.true( _.strHas( err.message, 'Launched as' ) );
         test.true( _.strHas( err.message, 'Stderr' ) );
