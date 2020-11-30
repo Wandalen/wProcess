@@ -28846,9 +28846,54 @@ function startMultipleOptionOutputAdditive( test )
   let a = context.assetFor( test, false );
   let testAppPath = a.program( testApp );
   let testAppPath2 = a.program( testApp2 );
-  let modes = [ 'fork', /*'spawn', 'shell'*/ ];
+  let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
+
+  /*
+  outputAdditive : true
+  > node /private/var/folders/cw/sbbjfvxj2hnggb61vf0p_w200000gn/T/ProcessBasic-2020-11-30-18-54-42-251-5b8d.tmp/startMultipleOptionOutputAdditive/testApp.js
+  Output1
+  timeout1
+
+  > node /private/var/folders/cw/sbbjfvxj2hnggb61vf0p_w200000gn/T/ProcessBasic-2020-11-30-18-54-42-251-5b8d.tmp/startMultipleOptionOutputAdditive/testApp2.js
+  Output2
+  timeout2
+
+  //
+
+  op.output :
+  Output1
+  timeout1
+  Output2
+  timeout2
+
+  ----------------------
+
+  outputAdditive : false
+  > node /private/var/folders/cw/sbbjfvxj2hnggb61vf0p_w200000gn/T/ProcessBasic-2020-11-30-18-54-42-251-5b8d.tmp/startMultipleOptionOutputAdditive/testApp.js
+  Output1
+  timeout1
+
+
+
+
+  > node /private/var/folders/cw/sbbjfvxj2hnggb61vf0p_w200000gn/T/ProcessBasic-2020-11-30-18-54-42-251-5b8d.tmp/startMultipleOptionOutputAdditive/testApp2.js
+  Output2
+  timeout2
+
+
+
+
+  //
+
+  op.output :
+  Output1
+  timeout1
+  Output2
+  timeout2
+
+  */
 
   /* - */
 
@@ -28867,32 +28912,17 @@ function startMultipleOptionOutputAdditive( test )
         mode
       }
 
-      _.process.startMultiple( o )
-
-      o.conStart.then( ( op ) =>
+      return _.process.startMultiple( o )
+      .then( ( op ) =>
       {
-        console.log( `outputAdditive : ${o.outputAdditive}, OP OUT START: ${op.output} ` );
-        test.il( op.ended, false )
-        // console.log( 'OP : ', op )
-        // test.il( op.exitCode, 0 );
-        // test.il( op.ended, true );
-        // test.il( op.outputAdditive, true );
-        // test.et( op.output, 'Output1\nOutput2' )
+        console.log( `outputAdditive : ${o.outputAdditive}, OUT : ${op.output} ` );
+        test.il( op.exitCode, 0 );
+        test.il( op.ended, true );
+        test.il( op.outputAdditive, true );
+        test.et( op.output, 'Output1\ntimeout1\nOutput2\ntimeout2' )
 
         return null;
       })
-
-      o.ready.then( ( op ) =>
-      {
-        console.log( `outputAdditive : ${o.outputAdditive}, OP OUT READY: ${op.output} ` );
-        test.et( op.output, 'Output1\nOutput2' )
-
-        console.log( '=================================' )
-
-        return null;
-      })
-
-      return o.ready;
     })
 
     /* */
@@ -28909,31 +28939,17 @@ function startMultipleOptionOutputAdditive( test )
         mode
       }
 
-      _.process.startMultiple( o );
-
-      o.conStart.then( ( op ) =>
+      return _.process.startMultiple( o )
+      .then( ( op ) =>
       {
-        console.log( `outputAdditive : ${o.outputAdditive}, OP OUT START: ${op.output} ` );
-        // console.log( 'OP : ', op )
-        // test.il( op.exitCode, 0 );
-        // test.il( op.ended, true );
-        // test.il( op.outputAdditive, true );
-        // test.et( op.output, 'Output1\nOutput2' )
+        console.log( `outputAdditive : ${o.outputAdditive}, OUT : ${op.output} ` );
+        test.il( op.exitCode, 0 );
+        test.il( op.ended, true );
+        test.il( op.outputAdditive, false );
+        test.et( op.output, 'Output1\ntimeout1\nOutput2\ntimeout2' )
 
         return null;
       })
-
-      o.ready.then( ( op ) =>
-      {
-        console.log( `outputAdditive : ${o.outputAdditive}, OP OUT READY: ${op.output} ` );
-        test.et( op.output, 'Output1\nOutput2' )
-
-        console.log( '=================================' )
-
-        return null;
-      })
-
-      return o.ready;
     })
 
     return ready;
