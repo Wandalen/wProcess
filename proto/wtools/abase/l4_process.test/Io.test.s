@@ -160,6 +160,13 @@ function inputReadToWithArguments( test )
     let o = { dst : {}, namesMap : { a : 'a' }, propertiesMap : { b : 'b' } };
     return _.process.inputReadTo( o );
   });
+
+  test.case = 'dst - map with number, namesMap with valid property, NaN value';
+  test.shouldThrowErrorSync( () =>
+  {
+    let o = { dst : { a : 1 }, namesMap : { a : 'a' }, propertiesMap : { a : 'nan' } };
+    return _.process.inputReadTo( o );
+  });
 }
 
 //
@@ -397,6 +404,57 @@ function inputReadToWithOptionsMap( test )
   test.true( got === propertiesMap );
 
   test.close( 'with propertiesMap' );
+}
+
+//
+
+function inputReadToOptionsOnlyAndRemoving( test )
+{
+  test.open( 'removing - 1' );
+
+  test.case = 'only - 1, namesMap has less options than propertiesMap';
+  var dst = { r : null };
+  var namesMap = { r : 'r' };
+  var propertiesMap = { r : 1, routine : 2 };
+  var got = _.process.inputReadTo({ dst, namesMap, propertiesMap, only : 0, removing : 1 });
+  test.identical( dst, { r : 1 } );
+  test.identical( got, { routine : 2 } );
+  test.true( got === propertiesMap );
+
+  test.case = 'only - 1, namesMap has less options than propertiesMap';
+  test.shouldThrowErrorSync( () =>
+  {
+    var dst = { r : null };
+    var namesMap = { r : 'r' };
+    var propertiesMap = { r : 1, routine : 2 };
+    var got = _.process.inputReadTo({ dst, namesMap, propertiesMap, only : 1, removing : 1 });
+  });
+
+  test.close( 'removing - 1' );
+
+  /* - */
+
+  test.open( 'removing - 0' );
+
+  test.case = 'only - 1, namesMap has less options than propertiesMap';
+  var dst = { r : null };
+  var namesMap = { r : 'r' };
+  var propertiesMap = { r : 1, routine : 2 };
+  var got = _.process.inputReadTo({ dst, namesMap, propertiesMap, only : 0, removing : 0 });
+  test.identical( dst, { r : 1 } );
+  test.identical( got, { r : 1, routine : 2 } );
+  test.true( got === propertiesMap );
+
+  test.case = 'only - 1, namesMap has less options than propertiesMap';
+  test.shouldThrowErrorSync( () =>
+  {
+    var dst = { r : null };
+    var namesMap = { r : 'r' };
+    var propertiesMap = { r : 1, routine : 2 };
+    var got = _.process.inputReadTo({ dst, namesMap, propertiesMap, only : 1, removing : 0 });
+  });
+
+  test.close( 'removing - 0' );
 }
 
 // --
@@ -1954,6 +2012,7 @@ var Proto =
 
     inputReadToWithArguments,
     inputReadToWithOptionsMap,
+    inputReadToOptionsOnlyAndRemoving,
 
     // event
 
