@@ -377,7 +377,7 @@ function inputReadToWithOptionsMap( test )
   var namesMap = { routine : 'r', r : 'r' };
   var propertiesMap = { 'r' : 1, 'routine' : 2 };
   var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
-  test.identical( dst, { r : 1 } );
+  test.identical( dst, { r : 2 } );
   test.identical( got, {} );
   test.true( got !== dst );
   test.true( got === propertiesMap );
@@ -387,7 +387,7 @@ function inputReadToWithOptionsMap( test )
   var namesMap = { routine : 'r', r : 'r' };
   var propertiesMap = { 'r' : 1, 'routine' : 2 };
   var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
-  test.identical( dst, { r : 1 } );
+  test.identical( dst, { r : 2 } );
   test.identical( got, {} );
   test.true( got !== dst );
   test.true( got === propertiesMap );
