@@ -28867,20 +28867,32 @@ function startMultipleOptionOutputAdditive( test )
         mode
       }
 
-      return _.process.startMultiple( o )
-      .then( ( op ) =>
+      _.process.startMultiple( o )
+
+      o.conStart.then( ( op ) =>
       {
-        console.log( `outputAdditive : ${o.outputAdditive}, OP OUT : ${op.output} ` );
-        console.log( 'OP : ', op )
-        test.il( op.exitCode, 0 );
-        test.il( op.ended, true );
-        test.il( op.outputAdditive, true );
+        console.log( `outputAdditive : ${o.outputAdditive}, OP OUT START: ${op.output} ` );
+        test.il( op.ended, false )
+        // console.log( 'OP : ', op )
+        // test.il( op.exitCode, 0 );
+        // test.il( op.ended, true );
+        // test.il( op.outputAdditive, true );
+        // test.et( op.output, 'Output1\nOutput2' )
+
+        return null;
+      })
+
+      o.ready.then( ( op ) =>
+      {
+        console.log( `outputAdditive : ${o.outputAdditive}, OP OUT READY: ${op.output} ` );
         test.et( op.output, 'Output1\nOutput2' )
 
         console.log( '=================================' )
 
         return null;
       })
+
+      return o.ready;
     })
 
     /* */
@@ -28897,32 +28909,129 @@ function startMultipleOptionOutputAdditive( test )
         mode
       }
 
-      return _.process.startMultiple( o )
-      .then( ( op ) =>
+      _.process.startMultiple( o );
+
+      o.conStart.then( ( op ) =>
       {
-        console.log( `outputAdditive : ${o.outputAdditive}, OP OUT : ${op.output} ` );
-        console.log( 'OP : ', op )
-        test.il( op.exitCode, 0 );
-        test.il( op.ended, true );
-        test.il( op.outputAdditive, false );
-        test.et( op.output, 'Output1\nOutput2' )
+        console.log( `outputAdditive : ${o.outputAdditive}, OP OUT START: ${op.output} ` );
+        // console.log( 'OP : ', op )
+        // test.il( op.exitCode, 0 );
+        // test.il( op.ended, true );
+        // test.il( op.outputAdditive, true );
+        // test.et( op.output, 'Output1\nOutput2' )
 
         return null;
       })
+
+      o.ready.then( ( op ) =>
+      {
+        console.log( `outputAdditive : ${o.outputAdditive}, OP OUT READY: ${op.output} ` );
+        test.et( op.output, 'Output1\nOutput2' )
+
+        console.log( '=================================' )
+
+        return null;
+      })
+
+      return o.ready;
     })
 
     return ready;
 
   }
 
+  // ready.then( () =>
+  // {
+  //   test.case = `mode : ${mode}, outputAdditive default`;
+  //   let testAppPathParent = a.program({ routine : testAppParent, locals : { mode, outputAdditive : null, testAppPath, testAppPath2 } });
+
+  //   let o =
+  //   {
+  //     execPath : mode === 'fork' ? testAppPathParent  :'node ' + testAppPathParent,
+  //     outputCollecting : 1,
+  //     mode
+  //   }
+
+  //   return _.process.startMinimal( o )
+  //   .then( ( op ) =>
+  //   {
+  //     console.log( `outputAdditive : ${o.outputAdditive}, OP OUT : ${op.output} ` );
+  //     // console.log( 'OP : ', op )
+  //     test.il( op.exitCode, 0 );
+  //     test.il( op.ended, true );
+  //     test.il( op.outputAdditive, true );
+  //     test.et( op.output, 'Output1\nOutput2' )
+
+  //     console.log( '=================================' )
+
+  //     a.fileProvider.fileDelete( testAppPathParent );
+  //     return null;
+  //   })
+  // })
+
+  // /* */
+
+  // ready.then( () =>
+  // {
+  //   test.case = `mode : ${mode}, outputAdditive : 0`;
+
+  //   let testAppPathParent = a.program({ routine : testAppParent, locals : { mode, outputAdditive : 0, testAppPath, testAppPath2 } });
+
+  //   let o =
+  //   {
+  //     execPath : mode === 'fork' ? testAppPathParent  :'node ' + testAppPathParent,
+  //     outputCollecting : 1,
+  //     outputAdditive : 0,
+  //     mode
+  //   }
+
+  //   return _.process.startMinimal( o )
+  //   .then( ( op ) =>
+  //   {
+  //     console.log( `outputAdditive : ${o.outputAdditive}, OP OUT : ${op.output} ` );
+  //     // console.log( 'OP : ', op )
+  //     test.il( op.exitCode, 0 );
+  //     test.il( op.ended, true );
+  //     test.il( op.outputAdditive, false );
+  //     test.et( op.output, 'Output1\nOutput2' )
+
+  //     a.fileProvider.fileDelete( testAppPathParent );
+  //     return null;
+  //   })
+  // })
+
+  // function testAppParent()
+  // {
+  //   let _ = require( toolsPath );
+  //   _.include( 'wProcess' );
+
+  //   var o =
+  //   {
+  //     execPath : mode === 'fork' ? [ testAppPath, testAppPath2 ] : [ 'node ' + testAppPath, 'node ' + testAppPath2 ],
+  //     currentPath : __dirname,
+  //     mode,
+  //     outputCollecting : 1,
+  //     outputAdditive,
+  //     // stdio : 'inherit',
+  //     // outputPiping : 0,
+  //     // outputCollecting : 1,
+  //     inputMirroring : 0,
+  //     // throwingExitCode : 0
+  //   }
+  //   _.process.startMultiple( o );
+  // }
+
   function testApp()
   {
     console.log( 'Output1' );
+    setTimeout( () => console.log( 'timeout1' ), context.t1 )
   }
 
   function testApp2()
   {
     console.log( 'Output2' );
+
+    setTimeout( () => console.log( 'timeout2' ), context.t2 )
   }
 }
 
