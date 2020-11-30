@@ -11,7 +11,7 @@ if( typeof module !== 'undefined' )
   _.include( 'wFiles' );
   _.include( 'wProcessWatcher' );
 
-  require( '../l4_process/Basic.s' );
+  require( '../l4_process/l1/Basic.s' );
 
 }
 
