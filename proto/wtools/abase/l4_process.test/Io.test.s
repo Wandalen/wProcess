@@ -41,6 +41,128 @@ function suiteEnd()
 }
 
 // --
+//
+// --
+
+function inputReadToWithArguments( test )
+{
+  /* read input to prevent side effect from testing input */
+  _.process.inputReadTo( { r : true }, { r : 'r' } );
+
+  /* */
+
+  test.case = 'dst - empty map';
+  var dst = {};
+  var namesMap = {};
+  var got = _.process.inputReadTo( dst, namesMap );
+  test.identical( dst, {} );
+  test.identical( got, {} );
+  test.true( got !== dst );
+
+  test.case = 'dst - empty map, namesMap - not empty';
+  var dst = {};
+  var namesMap = { routine : 'r' };
+  var got = _.process.inputReadTo( dst, namesMap );
+  test.identical( dst, {} );
+  test.identical( got, {} );
+  test.true( got !== dst );
+
+  /* */
+
+  test.case = 'dst - map with boolean';
+  var dst = { r : true };
+  var namesMap = {};
+  var got = _.process.inputReadTo( dst, namesMap );
+  test.identical( dst, { r : true } );
+  test.identical( got, {} );
+  test.true( got !== dst );
+
+  test.case = 'dst - map with number';
+  var dst = { r : 0 };
+  var namesMap = {};
+  var got = _.process.inputReadTo( dst, namesMap );
+  test.identical( dst, { r : 0 } );
+  test.identical( got, {} );
+  test.true( got !== dst );
+
+  test.case = 'dst - null';
+  var dst = { r : null };
+  var namesMap = {};
+  var got = _.process.inputReadTo( dst, namesMap );
+  test.identical( dst, { r : null } );
+  test.identical( got, {} );
+  test.true( got !== dst );
+
+  /* */
+
+  test.case = 'dst - map with boolean';
+  var dst = { r : true };
+  var namesMap = { routine : 'r' };
+  var got = _.process.inputReadTo( dst, namesMap );
+  test.identical( dst, { r : true } );
+  test.identical( got, {} );
+  test.true( got !== dst );
+
+  test.case = 'dst - map with number';
+  var dst = { r : 0 };
+  var namesMap = { routine : 'r' };
+  var got = _.process.inputReadTo( dst, namesMap );
+  test.identical( dst, { r : 0 } );
+  test.identical( got, {} );
+  test.true( got !== dst );
+
+  test.case = 'dst - null';
+  var dst = { r : null };
+  var namesMap = { routine : 'r' };
+  var got = _.process.inputReadTo( dst, namesMap );
+  test.identical( dst, { r : null } );
+  test.identical( got, {} );
+  test.true( got !== dst );
+
+  /* */
+
+  test.case = 'dst - null, namesMap - array';
+  var dst = { r : null };
+  var namesMap = [ 'r', 'a' ];
+  var got = _.process.inputReadTo( dst, namesMap );
+  test.identical( dst, { r : null } );
+  test.identical( got, {} );
+  test.true( got !== dst );
+
+  /* - */
+
+  if( !Config.debug )
+  return;
+
+  test.case = 'without arguments';
+  test.shouldThrowErrorSync( () => _.process.inputReadTo() );
+
+  test.case = 'extra arguments';
+  test.shouldThrowErrorSync( () => _.process.inputReadTo( { a : 1 }, { a : 'a', b : 'a' }, { extra : 1 } ) );
+
+  test.case = 'wrong type of options map o';
+  test.shouldThrowErrorSync( () => _.process.inputReadTo( 'wrong' ) );
+
+  test.case = 'wrong type of o.dst';
+  test.shouldThrowErrorSync( () => _.process.inputReadTo( 'wrong', { a : 'a', b : 'a' } ) );
+  test.shouldThrowErrorSync( () => _.process.inputReadTo({ dst : 'wrong', namesMap : { a : 'a', b : 'a' } }) );
+
+  test.case = 'wrong type of o.namesMap';
+  test.shouldThrowErrorSync( () => _.process.inputReadTo( {}, 'wrong' ) );
+  test.shouldThrowErrorSync( () => _.process.inputReadTo({ dst : {}, namesMap : 'wrong' }) );
+
+  test.case = 'options map has unknown option';
+  test.shouldThrowErrorSync( () => _.process.inputReadTo({ dst : {}, namesMap : { a : 'a' }, unknown : 1 }) );
+
+  test.case = 'dst - empty map, namesMap has unknown property';
+  test.shouldThrowErrorSync( () =>
+  {
+    let o = { dst : {}, namesMap : { a : 'a' }, propertiesMap : { b : 'b' } };
+    return _.process.inputReadTo( o );
+  });
+}
+
+// --
 // event
 // --
 
@@ -1592,6 +1714,8 @@ var Proto =
 
   tests :
   {
+
+    inputReadToWithArguments,
 
     // event
 
