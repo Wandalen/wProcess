@@ -119,7 +119,7 @@ module:
       entry.proto.no.tests:
         criterion:
           tests: no.tests
-        path: ../proto/wtools/abase/l4_process/module/Basic.s
+        path: ../proto/wtools/abase/l4_process/module/Process.s
       entry.proto.only.tests:
         criterion:
           tests: only.tests
@@ -129,13 +129,13 @@ module:
           debug: debug
           raw: raw
           content: prime
-        path: '{path::out.*=1}/source/wtools/abase/l4_process/module/Basic.s'
+        path: '{path::out.*=1}/source/wtools/abase/l4_process/module/Process.s'
       entry.out.raw.debug.release:
         criterion:
           debug: release
           raw: raw
           content: prime
-        path: '{path::out.*=1}/source/wtools/abase/l4_process/module/Basic.s'
+        path: '{path::out.*=1}/source/wtools/abase/l4_process/module/Process.s'
       entry.out.compiled.debug.debug:
         criterion:
           debug: debug
@@ -937,7 +937,7 @@ module:
       entry.proto.no.tests:
         criterion:
           tests: no.tests
-        path: proto/wtools/abase/l4_process/module/Basic.s
+        path: proto/wtools/abase/l4_process/module/Process.s
       entry.proto.only.tests:
         criterion:
           tests: only.tests
@@ -947,13 +947,13 @@ module:
           debug: debug
           raw: raw
           content: prime
-        path: '{path::out.*=1}/source/wtools/abase/l4_process/module/Basic.s'
+        path: '{path::out.*=1}/source/wtools/abase/l4_process/module/Process.s'
       entry.out.raw.debug.release:
         criterion:
           debug: release
           raw: raw
           content: prime
-        path: '{path::out.*=1}/source/wtools/abase/l4_process/module/Basic.s'
+        path: '{path::out.*=1}/source/wtools/abase/l4_process/module/Process.s'
       entry.out.compiled.debug.debug:
         criterion:
           debug: debug
