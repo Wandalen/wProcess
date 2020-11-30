@@ -13,14 +13,8 @@ _.assert( !!_realGlobal_ );
 // checker
 // --
 
-let Process = _.Blueprint
+let ProcessMinimal = _.Blueprint
 ({
-  typed : _.trait.typed(),
-  // withConstructor : _.trait.typed(),
-  // extendable : _.trait.extendable(),
-
-  // constructor : function constructor1() { _.assert( 0 ) },
-  // Constructor : function constructor2() { _.assert( 0 ) },
 
   execPath : null,
   currentPath : null,
@@ -67,6 +61,12 @@ let Process = _.Blueprint
   outputGraying : 0,
   inputMirroring : 1,
 
+});
+
+let Process = _.Blueprint
+({
+  inherit : _.define.inherit( ProcessMinimal ),
+
   disconnect : null,
   _end : null,
   state : null, /* `initial`, `starting`, `started`, `terminating`, `terminated`, `disconnected` */
@@ -92,6 +92,7 @@ let Process = _.Blueprint
 let ToolsExtension =
 {
 
+  ProcessMinimal,
   Process,
 
 }
