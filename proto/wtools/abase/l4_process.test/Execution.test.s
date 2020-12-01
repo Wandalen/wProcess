@@ -34364,6 +34364,8 @@ function terminateWithDetachedChild( test )
       test.case = `mode : ${mode}`;
 
       /*
+      xxx :
+      Ubuntu 12x, mode::fork
       2020-11-30T18:29:51.9440081Z       Running [94mTestSuite::Tools.l4.process.Execution / TestRoutine::terminateWithDetachedChild[39;0m ..
       2020-11-30T18:29:52.0223160Z  1 : function program1()
       2020-11-30T18:29:52.0224260Z  2 :   {
