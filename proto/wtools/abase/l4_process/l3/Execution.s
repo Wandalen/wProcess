@@ -1256,7 +1256,7 @@ startMinimal_body.defaults =
   outputPrefixing : 0,
   outputPiping : null,
   outputCollecting : 0,
-  outputAdditive : null, /* qqq for Yevhen : cover the option */
+  outputAdditive : null, /* qqq for Yevhen : cover the option | aaa : Done. */
   outputColoring : 1,
   outputGraying : 0,
   inputMirroring : 1,
