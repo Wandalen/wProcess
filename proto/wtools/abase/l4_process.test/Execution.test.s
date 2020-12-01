@@ -27191,6 +27191,7 @@ function startMinimalOptionThrowingExitCode( test )
 
   function run( mode )
   {
+    /* In routine `exceptionReport` all errors become brief. _.errIsBrief( err ) is true for all errors */
     let ready = new _.Consequence().take( null );
 
     ready.then( () =>
