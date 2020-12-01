@@ -21,7 +21,7 @@ about :
   - 'Volodymyr M. <volodymyr.migdal@gmail.com>'
   npm.name : 'wprocess'
   npm.scripts :
-    test : 'wtest .run proto/**'
+    test : "wtest .run 'proto/**' rapidity:-1 fails:5 s:0"
     docgen : 'wdocgen .build proto'
 
 path :
