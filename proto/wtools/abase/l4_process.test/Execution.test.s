@@ -27191,11 +27191,6 @@ function startMinimalOptionThrowingExitCode( test )
 
   function run( mode )
   {
-    /*
-    In routine `exceptionReport` error becomes brief. _.errIsBrief( err ) is true for all errors.
-    if( _.errIsAttended( err ) )
-    _.errBrief( err );
-    */
     let ready = new _.Consequence().take( null );
 
     ready.then( () =>
@@ -27208,18 +27203,22 @@ function startMinimalOptionThrowingExitCode( test )
         mode,
       }
 
-      return test.shouldThrowErrorAsync( () => _.process.startMinimal( options ) )
-      .then( ( err ) =>
+      _.process.startMinimal( options );
+
+      options.conTerminate.catch( ( err ) =>
       {
-        test.true( _.errIs( err ) );
-        /* always err.brief = true */
         test.true( !_.errIsBrief( err ) );
         test.true( _.strHas( err.message, 'Process returned exit code' ) );
         test.true( _.strHas( err.message, 'Launched as' ) );
         test.true( _.strHas( err.message, 'Stderr' ) );
         test.true( _.strHas( err.message, 'randomText is not defined' ) );
+        test.true( _.strHas( err.message, 'stack' ) );
+
+        _.errAttend( err );
         return null;
       })
+
+      return options.conTerminate;
     })
 
     /* */
@@ -27235,18 +27234,22 @@ function startMinimalOptionThrowingExitCode( test )
         throwingExitCode : 'full'
       }
 
-      return test.shouldThrowErrorAsync( () => _.process.startMinimal( options ) )
-      .then( ( err ) =>
+      _.process.startMinimal( options );
+
+      options.conTerminate.catch( ( err ) =>
       {
-        test.true( _.errIs( err ) );
-        /* always err.brief = true */
         test.true( !_.errIsBrief( err ) );
         test.true( _.strHas( err.message, 'Process returned exit code' ) );
         test.true( _.strHas( err.message, 'Launched as' ) );
         test.true( _.strHas( err.message, 'Stderr' ) );
         test.true( _.strHas( err.message, 'randomText is not defined' ) );
+        test.true( _.strHas( err.message, 'stack' ) );
+
+        _.errAttend( err );
         return null;
       })
+
+      return options.conTerminate;
     })
 
     /* */
@@ -27262,19 +27265,22 @@ function startMinimalOptionThrowingExitCode( test )
         throwingExitCode : 1
       }
 
-      return test.shouldThrowErrorAsync( () => _.process.startMinimal( options ) )
-      .then( ( err ) =>
+      _.process.startMinimal( options );
+
+      options.conTerminate.catch( ( err ) =>
       {
-        debugger
-        test.true( _.errIs( err ) );
-        /* always err.brief = true */
         test.true( !_.errIsBrief( err ) );
         test.true( _.strHas( err.message, 'Process returned exit code' ) );
         test.true( _.strHas( err.message, 'Launched as' ) );
         test.true( _.strHas( err.message, 'Stderr' ) );
         test.true( _.strHas( err.message, 'randomText is not defined' ) );
+        test.true( _.strHas( err.message, 'stack' ) );
+
+        _.errAttend( err );
         return null;
       })
+
+      return options.conTerminate;
     })
 
     /* */
@@ -27290,17 +27296,22 @@ function startMinimalOptionThrowingExitCode( test )
         throwingExitCode : 'brief'
       }
 
-      return test.shouldThrowErrorAsync( () => _.process.startMinimal( options ) )
-      .then( ( err ) =>
+      _.process.startMinimal( options );
+
+      options.conTerminate.catch( ( err ) =>
       {
-        /* always err.brief = true */
         test.true( _.errIsBrief( err ) );
         test.true( _.strHas( err.message, 'Process returned exit code' ) );
         test.true( _.strHas( err.message, 'Launched as' ) );
         test.true( _.strHas( err.message, 'Stderr' ) );
+        test.true( _.strHas( err.message, 'randomText is not defined' ) );
+        test.true( !_.strHas( err.message, 'stack' ) );
 
+        _.errAttend( err );
         return null;
       })
+
+      return options.conTerminate;
     })
 
     /* */
@@ -27329,6 +27340,8 @@ function startMinimalOptionThrowingExitCode( test )
 
     return ready;
   }
+
+  /* - */
 
   function testApp()
   {
