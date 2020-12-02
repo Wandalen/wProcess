@@ -807,8 +807,10 @@ function startMinimal_body( o )
       o.error = _._err({ args : [ 'Process timed out, killed by exit signal', exitSignal, '\n', infoGet() ], reason : 'time out' });
       else
       o.error = _._err({ args : [ 'Process was killed by exit signal', exitSignal, '\n', infoGet() ], reason : 'exit signal' });
+      // o.error.attended = false;
       if( o.throwingExitCode === 'brief' )
       o.error = _.errBrief( o.error );
+      // o.error.attended = false;
     }
 
     if( o.error )
