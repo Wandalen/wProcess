@@ -32807,54 +32807,59 @@ function terminate( test )
     {
       /*
       xxx :
-      Windows 12x, mode::fork
-      2020-11-25T14:08:22.5752316Z --------------- uncaught asynchronous error --------------->
-      2020-11-25T14:08:24.6782448Z
-      2020-11-25T14:08:24.6783063Z [91m = Message of error#354
-      2020-11-25T14:08:24.6783535Z     kill EPERM
-      2020-11-25T14:08:24.6783955Z       errno : 'EPERM'
-      2020-11-25T14:08:24.6784386Z       code : 'EPERM'
-      2020-11-25T14:08:24.6784816Z       syscall : 'kill'
-      2020-11-25T14:08:24.6785616Z     Current process does not have permission to kill target process 588
-      2020-11-25T14:08:24.6786057Z
-      2020-11-25T14:08:24.6786486Z  = Beautified calls stack
-      2020-11-25T14:08:24.6787136Z     at process.kill (internal/process/per_thread.js:198:13)
-      2020-11-25T14:08:24.6788352Z     at signalSend (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2840:15)
-      2020-11-25T14:08:24.6789556Z     at wConsequence.processKill (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2875:7)
-      2020-11-25T14:08:24.6849489Z     at wConsequence.take (D:\a\wProcess\wProcess\node_modules\wConsequence\proto\wtools\abase\l9\consequence\Consequence.s:2698:8)
-      2020-11-25T14:08:24.6860889Z     at Object.callback (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:3143:67)
-      2020-11-25T14:08:24.6869454Z     at D:\a\wProcess\wProcess\node_modules\w.process.tree.windows\lib\index.js:74:19
-      2020-11-25T14:08:24.6880070Z     at Array.forEach (<anonymous>)
-      2020-11-25T14:08:24.6902631Z     at D:\a\wProcess\wProcess\node_modules\w.process.tree.windows\lib\index.js:73:19
-      2020-11-25T14:08:24.6908431Z
-      2020-11-25T14:08:24.6914742Z     at Function.signal_body [as body] (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2802:9)
-      2020-11-25T14:08:24.6929153Z     at Object.terminate_body (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2990:28)
-      2020-11-25T14:08:24.6946621Z     at Object.terminate (D:\a\wProcess\wProcess\node_modules\wTools\proto\wtools\abase\l0\l3\iRoutine.s:1059:23)
-      2020-11-25T14:08:24.6957643Z     at ChildProcess.<anonymous> (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process.test\Execution.test.s:34790:19) *
-      2020-11-25T14:08:24.6965182Z     at ChildProcess.emit (events.js:314:20)
-      2020-11-25T14:08:24.6971340Z     at emit (internal/child_process.js:876:12)
-      2020-11-25T14:08:24.6976940Z     at processTicksAndRejections (internal/process/task_queues.js:85:21)
-      2020-11-25T14:08:24.6980368Z
-      2020-11-25T14:08:24.6983591Z  = Throws stack
-      2020-11-25T14:08:24.6994445Z     thrown at wConsequence.__handleResourceNow @ /D/a/wProcess/wProcess/node_modules/wConsequence/proto/wtools/abase/l9/consequence/Consequence.s:3039:12
-      2020-11-25T14:08:24.7018743Z     thrown at wConsequence.handleError @ /D/a/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:2926:13
-      2020-11-25T14:08:24.7029934Z     thrown at errRefine @ /D/a/wProcess/wProcess/node_modules/wTools/proto/wtools/abase/l0/l5/fErr.s:125:16
-      2020-11-25T14:08:24.7038222Z
-      2020-11-25T14:08:24.7041329Z  = Process
-      2020-11-25T14:08:24.7045318Z     Current path : D:\a\wProcess\wProcess
-      2020-11-25T14:08:24.7063629Z     Exec path : C:\hostedtoolcache\windows\node\12.19.0\x64\node.exe D:\a\wProcess\wProcess\node_modules\wTesting\proto\wtools\atop\testing\entry\Exec .run 'proto/**' rapidity:-1 verbosity:5 fails:1
-      2020-11-25T14:08:24.7064610Z
-      2020-11-25T14:08:24.7065023Z [39;0m
-      2020-11-25T14:08:24.7065651Z --------------- uncaught asynchronous error ---------------<
-      2020-11-25T14:08:24.7066079Z
-      2020-11-25T14:08:24.7067401Z   [91mTest suite "Tools.l4.process.Execution" had zombie process with pid: 5316 ExecPath: D:\Temp\ProcessBasic-2020-11-25-12-55-1-408-61fd.tmp\terminate\testApp.js
-      2020-11-25T14:08:24.7068722Z       CurrentPath: D:\a\wProcess\wProcess
-      2020-11-25T14:08:24.7069240Z       Args:[39;0m
-      2020-11-25T14:08:24.7069677Z [91m        kill EPERM
-      2020-11-25T14:08:24.7070135Z           errno : 'EPERM'
-      2020-11-25T14:08:24.7070789Z           code : 'EPERM'
-      2020-11-25T14:08:24.7071229Z           syscall : 'kill'
-      2020-11-25T14:08:24.7071923Z         Current process does not have permission to kill target process 588[39;0m
+      Windows 10x, 12x, mode::fork
+      2020-11-30T15:34:30.0854749Z [97m > [39;0mD:\Temp\ProcessBasic-2020-11-30-14-18-5-376-7be2.tmp\terminate\testApp.js
+      2020-11-30T15:34:30.1164087Z --------------- uncaught asynchronous error --------------->
+      2020-11-30T15:34:30.1170776Z
+      2020-11-30T15:34:30.1171561Z [91m        kill EPERM
+      2020-11-30T15:34:30.1173713Z [91m = Message of error#367
+      2020-11-30T15:34:30.1174175Z           errno : 'EPERM'
+      2020-11-30T15:34:30.1177929Z     kill EPERM
+      2020-11-30T15:34:30.1178315Z           code : 'EPERM'
+      2020-11-30T15:34:30.1187925Z       errno : 'EPERM'
+      2020-11-30T15:34:30.1188366Z           syscall : 'kill'
+      2020-11-30T15:34:30.1190229Z       code : 'EPERM'
+      2020-11-30T15:34:30.1190750Z         Current process does not have permission to kill target process: 508
+      2020-11-30T15:34:30.1192690Z       syscall : 'kill'
+      2020-11-30T15:34:30.1193047Z         PID : 508
+      2020-11-30T15:34:30.2738558Z     Current process does not have permission to kill target process: 508
+      2020-11-30T15:34:30.2739265Z         ExecPath : node
+      2020-11-30T15:34:30.3034891Z     PID : 508
+      2020-11-30T15:34:30.3035956Z         Args : node,D:\Temp\ProcessBasic-2020-11-30-14-18-5-376-7be2.tmp\terminate\testApp.js[39;0m
+      2020-11-30T15:34:30.3164116Z     ExecPath : node
+      2020-11-30T15:34:30.3165600Z [91m[40m        Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::terminate / mode:fork, terminate process using descriptor( pnd ) # 31 ) ... failed, throwing error[49;0m[39;0m
+      2020-11-30T15:34:30.5223290Z     Args : node,D:\Temp\ProcessBasic-2020-11-30-14-18-5-376-7be2.tmp\terminate\testApp.js
+      2020-11-30T15:34:30.5225520Z [91m[40m      Failed [49;0m[39;0m[91m[40m([49;0m[39;0m[91m[40m throwing error [49;0m[39;0m[91m[40m)[49;0m[39;0m[91m[40m TestSuite[49;0m[39;0m[91m[40m:[49;0m[39;0m[91m[40m:[49;0m[39;0m[91m[40mTools.l4.process.Execution [49;0m[39;0m[91m[40m/[49;0m[39;0m[91m[40m TestRoutine[49;0m[39;0m[91m[40m:[49;0m[39;0m[91m[40m:[49;0m[39;0m[91m[40mterminate[49;0m[39;0m[91m[40m in [49;0m[39;0m[91m[40m9.867s[49;0m[39;0m
+      2020-11-30T15:34:30.5727440Z
+      2020-11-30T15:34:30.6043228Z  = Beautified calls stack
+      2020-11-30T15:34:30.7287256Z     at process.kill (internal/process/per_thread.js:198:13)
+      2020-11-30T15:34:30.7422368Z     at signalSend (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2458:15)
+      2020-11-30T15:34:30.7424123Z     at wConsequence.processKill (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2495:7)
+      2020-11-30T15:34:30.7425662Z     at wConsequence.take (D:\a\wProcess\wProcess\node_modules\wConsequence\proto\wtools\abase\l9\consequence\Consequence.s:2701:8)
+      2020-11-30T15:34:30.7427277Z     at Object.WindowsProcessTree.getProcessList [as callback] (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2796:67)
+      2020-11-30T15:34:30.7428783Z     at queue.forEach.r (D:\a\wProcess\wProcess\node_modules\w.process.tree.windows\lib\index.js:74:19)
+      2020-11-30T15:34:30.8190857Z     at Array.forEach (<anonymous>)
+      2020-11-30T15:34:30.8489659Z     at native.getProcessList (D:\a\wProcess\wProcess\node_modules\w.process.tree.windows\lib\index.js:73:19)
+      2020-11-30T15:34:30.9252211Z
+      2020-11-30T15:34:30.9290552Z     at Function.signal_body [as body] (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2425:9)
+      2020-11-30T15:34:31.0096059Z     at Object.terminate_body (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2643:28)
+      2020-11-30T15:34:31.0610451Z     at Object.terminate (D:\a\wProcess\wProcess\node_modules\wTools\proto\wtools\abase\l0\l3\iRoutine.s:1059:23)
+      2020-11-30T15:34:31.1212685Z     at ChildProcess.o.pnd.on (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process.test\Execution.test.s:33110:19) *
+      2020-11-30T15:34:31.1612710Z     at ChildProcess.emit (events.js:198:13)
+      2020-11-30T15:34:31.2216401Z     at emit (internal/child_process.js:832:12)
+      2020-11-30T15:34:31.2217762Z     at process._tickCallback (internal/process/next_tick.js:63:19)
+      2020-11-30T15:34:31.2218408Z
+      2020-11-30T15:34:31.2218835Z  = Throws stack
+      2020-11-30T15:34:31.2219984Z     thrown at wConsequence.__handleResourceNow @ /D/a/wProcess/wProcess/node_modules/wConsequence/proto/wtools/abase/l9/consequence/Consequence.s:3042:12
+      2020-11-30T15:34:31.2221641Z     thrown at wConsequence.handleError @ /D/a/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:2559:13
+      2020-11-30T15:34:31.2222875Z     thrown at errRefine @ /D/a/wProcess/wProcess/node_modules/wTools/proto/wtools/abase/l0/l5/fErr.s:125:16
+      2020-11-30T15:34:31.2223476Z
+      2020-11-30T15:34:31.2223878Z  = Process
+      2020-11-30T15:34:31.2224450Z     Current path : D:\a\wProcess\wProcess
+      2020-11-30T15:34:31.2225701Z     Exec path : C:\hostedtoolcache\windows\node\10.23.0\x64\node.exe D:\a\wProcess\wProcess\node_modules\wTesting\proto\wtools\atop\testing\entry\Exec .run 'proto/**' rapidity:-1 verbosity:5 fails:5 s:0
+      2020-11-30T15:34:31.2226578Z
+      2020-11-30T15:34:31.2227031Z [39;0m
+      2020-11-30T15:34:31.2227684Z --------------- uncaught asynchronous error ---------------<
       */
       test.case = `mode:${mode}, terminate process using descriptor( pnd )`
       var o =
@@ -33104,7 +33109,36 @@ function terminate( test )
 
     .then( () =>
     {
-      test.case = `mode:${mode}, terminate process using pnd, low time out`
+      test.case = `mode:${mode}, terminate process using pnd, low time out`;
+
+      /*
+      xxx :
+      MacOS 14x, mode::fork
+      [39;0m[92m/[39;0m[92m TestRoutine[39;0m[92m:[39;0m[92m:[39;0m[92mterminate [39;0m[92m/[39;0m[92m mode[39;0m[92m:[39;0m[92mfork, terminate process using pnd, low time out[39;0m[92m # [39;0m[92m85 [39;0m[92m)[39;0m[92m [39;0m[92m:[39;0m[92m expected true[39;0m[92m ... [39;0m[92mok[39;0m
+      2020-12-01T01:53:15.2566980Z [97m > [39;0mnode /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/ProcessBasic-2020-12-1-0-42-24-607-ca80.tmp/terminate/testApp.js
+      2020-12-01T01:53:16.2466790Z [35mready[39;0m
+      2020-12-01T01:53:16.3072120Z [35mSIGTERM[39;0m
+      2020-12-01T01:53:16.3357690Z [92m        [39;0m[92mTest check[39;0m[92m [39;0m[92m([39;0m[92m TestSuite[39;0m[92m:[39;0m[92m:[39;0m[92mTools.l4.process.Execution [39;0m[92m/[39;0m[92m TestRoutine[39;0m[92m:[39;0m[92m:[39;0m[92mterminate [39;0m[92m/[39;0m[92m mode[39;0m[92m:[39;0m[92mfork, terminate process using pnd, low time out[39;0m[92m # [39;0m[92m86 [39;0m[92m)[39;0m[92m ... [39;0m[92mok[39;0m
+      2020-12-01T01:53:16.3458120Z [92m        [39;0m[92mTest check[39;0m[92m [39;0m[92m([39;0m[92m TestSuite[39;0m[92m:[39;0m[92m:[39;0m[92mTools.l4.process.Execution [39;0m[92m/[39;0m[92m TestRoutine[39;0m[92m:[39;0m[92m:[39;0m[92mterminate [39;0m[92m/[39;0m[92m mode[39;0m[92m:[39;0m[92mfork, terminate process using pnd, low time out[39;0m[92m # [39;0m[92m87 [39;0m[92m)[39;0m[92m ... [39;0m[92mok[39;0m
+      2020-12-01T01:53:16.3579170Z [91m        - got :
+      2020-12-01T01:53:16.3580260Z           'SIGKILL'
+      2020-12-01T01:53:16.3581020Z         - expected :
+      2020-12-01T01:53:16.3581830Z           'SIGTERM'
+      2020-12-01T01:53:16.3582550Z         - difference :
+      2020-12-01T01:53:16.3583270Z           'SIG*[39;0m
+      2020-12-01T01:53:16.3607930Z [91m         [39;0m[91m
+      2020-12-01T01:53:16.3608820Z         /Users/runner/work/wProcess/wProcess/proto/wtools/abase/l4_process.test/Execution.test.s:33409:16
+      2020-12-01T01:53:16.3609510Z           33405 :         else
+      2020-12-01T01:53:16.3609860Z           33406 :         {
+      2020-12-01T01:53:16.3610360Z           33407 :           test.identical( op.exitCode, null );
+      2020-12-01T01:53:16.3610990Z           33408 :           test.identical( op.ended, true );
+      2020-12-01T01:53:16.3612110Z         * 33409 :           test.identical( op.exitSignal, 'SIGTERM' );
+      2020-12-01T01:53:16.3613000Z          [39;0m[91m [39;0m
+      2020-12-01T01:53:16.3674930Z [91m[40m        [49;0m[39;0m[91m[40mTest check[49;0m[39;0m[91m[40m [49;0m[39;0m[91m[40m([49;0m[39;0m[91m[40m TestSuite[49;0m[39;0m[91m[40m:[49;0m[39;0m[91m[40m:[49;0m[39;0m[91m[40mTools.l4.process.Execution [49;0m[39;0m[91m[40m/[49;0m[39;0m[91m[40m TestRoutine[49;0m[39;0m[91m[40m:[49;0m[39;0m[91m[40m:[49;0m[39;0m[91m[40mterminate [49;0m[39;0m[91m[40m/[49;0m[39;0m[91m[40m mode[49;0m[39;0m[91m[40m:[49;0m[39;0m[91m[40mfork, terminate process using pnd, low time out[49;0m[39;0m[91m[40m # [49;0m[39;0m[91m[40m88 [49;0m[39;0m[91m[40m)[49;0m[39;0m[91m[40m ... [49;0m[39;0m[91m[40mfailed[49;0m[39;0m
+      2020-12-01T01:53:16.3815480Z [91m        Test routine TestSuite::Tools.l4.process.Execution / TestRoutine::terminate was canceled![39;0m
+      2020-12-01T01:53:16.3830630Z [91m[40m        Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::terminate / mode:fork, terminate process using pnd, low time out # 89 ) ... failed, throwing error[49;0m[39;0m
+      */
+
       var o =
       {
         execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
@@ -34339,6 +34373,134 @@ function terminateWithDetachedChild( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}`;
+
+      /*
+      xxx :
+      Ubuntu 12x, mode::fork
+      2020-11-30T18:29:51.9440081Z       Running [94mTestSuite::Tools.l4.process.Execution / TestRoutine::terminateWithDetachedChild[39;0m ..
+      2020-11-30T18:29:52.0223160Z  1 : function program1()
+      2020-11-30T18:29:52.0224260Z  2 :   {
+      2020-11-30T18:29:52.0225033Z  3 :     let _ = require( toolsPath );
+      2020-11-30T18:29:52.0226523Z  4 :     _.include( 'wProcess' );
+      2020-11-30T18:29:52.0227598Z  5 :     _.include( 'wFiles' );
+      2020-11-30T18:29:52.0228360Z  6 :     var o =
+      2020-11-30T18:29:52.0228955Z  7 :     {
+      2020-11-30T18:29:52.0230104Z  8 :       execPath : mode === 'fork' ? 'program2.js' : 'node program2.js',
+      2020-11-30T18:29:52.0231120Z  9 :       currentPath : __dirname,
+      2020-11-30T18:29:52.0231873Z 10 :       mode,
+      2020-11-30T18:29:52.0232826Z 11 :       stdio : 'pipe',
+      2020-11-30T18:29:52.0233615Z 12 :       detaching : 1,
+      2020-11-30T18:29:52.0234405Z 13 :       inputMirroring : 0,
+      2020-11-30T18:29:52.0235193Z 14 :       outputPiping : 1,
+      2020-11-30T18:29:52.0236034Z 15 :       outputCollecting : 0,
+      2020-11-30T18:29:52.0236880Z 16 :       throwingExitCode : 0,
+      2020-11-30T18:29:52.0237592Z 17 :     }
+      2020-11-30T18:29:52.0238510Z 18 :     _.process.startMinimal( o );
+      2020-11-30T18:29:52.0239243Z 19 :
+      2020-11-30T18:29:52.0240156Z 20 :     let timer = _.time.outError( context.t1*25 );
+      2020-11-30T18:29:52.0240904Z 21 :
+      2020-11-30T18:29:52.0242193Z 22 :     console.log( 'program1::begin' );
+      2020-11-30T18:29:52.0243299Z 23 :
+      2020-11-30T18:29:52.0244519Z 24 :   }
+      2020-11-30T18:29:52.0245142Z 25 :
+      2020-11-30T18:29:52.0245677Z 26 : var mode = `fork`;
+      2020-11-30T18:29:52.0246288Z 27 : var context = {
+      2020-11-30T18:29:52.0246835Z 28 :   "t0" : 100,
+      2020-11-30T18:29:52.0247521Z 29 :   "t1" : 1000,
+      2020-11-30T18:29:52.0248031Z 30 :   "t2" : 5000,
+      2020-11-30T18:29:52.0248550Z 31 :   "t3" : 15000
+      2020-11-30T18:29:52.0249041Z 32 : };
+      2020-11-30T18:29:52.0250066Z 33 : var toolsPath = `/home/runner/work/wProcess/wProcess/node_modules/wTools/proto/wtools/abase/Layer1.s`;
+      2020-11-30T18:29:52.0251992Z 34 :
+      2020-11-30T18:29:52.0254946Z 35 : program1();
+      2020-11-30T18:29:52.0256533Z 36 :
+      2020-11-30T18:29:52.0259582Z  1 : function program2()
+      2020-11-30T18:29:52.0261227Z  2 :   {
+      2020-11-30T18:29:52.0262747Z  3 :     let _ = require( toolsPath );
+      2020-11-30T18:29:52.0266611Z  4 :     _.include( 'wFiles' );
+      2020-11-30T18:29:52.0268924Z  5 :
+      2020-11-30T18:29:52.0270672Z  6 :     _.fileProvider.fileWrite
+      2020-11-30T18:29:52.0272218Z  7 :     ({
+      2020-11-30T18:29:52.0275836Z  8 :       filePath : _.path.join( __dirname, 'program2Pid' ),
+      2020-11-30T18:29:52.0277615Z  9 :       data : { pid : process.pid },
+      2020-11-30T18:29:52.0283357Z 10 :       encoding : 'json'
+      2020-11-30T18:29:52.0287344Z 11 :     })
+      2020-11-30T18:29:52.0290526Z 12 :
+      2020-11-30T18:29:52.0292218Z 13 :     setTimeout( () =>
+      2020-11-30T18:29:52.0292680Z 14 :     {
+      2020-11-30T18:29:52.0294763Z 15 :       console.log( 'program2::end' );
+      2020-11-30T18:29:52.0300567Z 16 :       _.fileProvider.fileWrite
+      2020-11-30T18:29:52.0301200Z 17 :       ({
+      2020-11-30T18:29:52.0302452Z 18 :         filePath : _.path.join( __dirname, 'program2end' ),
+      2020-11-30T18:29:52.0303312Z 19 :         data : 'end'
+      2020-11-30T18:29:52.0306008Z 20 :       })
+      2020-11-30T18:29:52.0307195Z 21 :     }, context.t1*10 )
+      2020-11-30T18:29:52.0307911Z 22 :
+      2020-11-30T18:29:52.0310536Z 23 :     console.log( 'program2::begin' );
+      2020-11-30T18:29:52.0311547Z 24 :
+      2020-11-30T18:29:52.0311906Z 25 :   }
+      2020-11-30T18:29:52.0313338Z 26 :
+      2020-11-30T18:29:52.0313802Z 27 : var context = {
+      2020-11-30T18:29:52.0314678Z 28 :   "t0" : 100,
+      2020-11-30T18:29:52.0315112Z 29 :   "t1" : 1000,
+      2020-11-30T18:29:52.0315491Z 30 :   "t2" : 5000,
+      2020-11-30T18:29:52.0315874Z 31 :   "t3" : 15000
+      2020-11-30T18:29:52.0316209Z 32 : };
+      2020-11-30T18:29:52.0317100Z 33 : var toolsPath = `/home/runner/work/wProcess/wProcess/node_modules/wTools/proto/wtools/abase/Layer1.s`;
+      2020-11-30T18:29:52.0317790Z 34 :
+      2020-11-30T18:29:52.0318192Z 35 : program2();
+      2020-11-30T18:29:52.0318549Z 36 :
+      2020-11-30T18:29:52.0344359Z [97m > [39;0mprogram1.js
+      2020-11-30T18:29:53.2273945Z [35mprogram1::begin[39;0m
+      2020-11-30T18:29:54.3630214Z [35m[35mprogram2::begin[39;0m[39;0m
+      2020-11-30T18:29:54.4356321Z [35mSIGTERM[39;0m
+      2020-11-30T18:29:54.4400160Z [31m--------------- uncaught error --------------->
+      2020-11-30T18:29:54.4401318Z [39;0m
+      2020-11-30T18:29:54.4424846Z [31m[91m = Message of error#2
+      2020-11-30T18:29:54.4426746Z     IPC channel is already disconnected
+      2020-11-30T18:29:54.4428094Z       code : 'ERR_IPC_DISCONNECTED'
+      2020-11-30T18:29:54.4429307Z     Error starting the process
+      2020-11-30T18:29:54.4429867Z         Exec path : program2.js
+      2020-11-30T18:29:54.4431403Z         Current path : /tmp/ProcessBasic-2020-11-30-17-14-19-131-6266.tmp/terminateWithDetachedChild
+      2020-11-30T18:29:54.4432624Z
+      2020-11-30T18:29:54.4433154Z  = Beautified calls stack
+      2020-11-30T18:29:54.4434075Z     at ChildProcess.target.disconnect (internal/child_process.js:837:26)
+      2020-11-30T18:29:54.4435166Z     at Pipe.channel.onread (internal/child_process.js:588:14)
+      2020-11-30T18:29:54.4435651Z
+      2020-11-30T18:29:54.4436336Z  = Throws stack
+      2020-11-30T18:29:54.4437365Z     thrown at ChildProcess.handleError @ /home/runner/work/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:840:13
+      2020-11-30T18:29:54.4438795Z     thrown at errRefine @ /home/runner/work/wProcess/wProcess/node_modules/wTools/proto/wtools/abase/l0/l5/fErr.s:125:16
+      2020-11-30T18:29:54.4439430Z
+      2020-11-30T18:29:54.4439782Z  = Process
+      2020-11-30T18:29:54.4441210Z     Current path : /tmp/ProcessBasic-2020-11-30-17-14-19-131-6266.tmp/terminateWithDetachedChild
+      2020-11-30T18:29:54.4443722Z     Exec path : /opt/hostedtoolcache/node/13.14.0/x64/bin/node /tmp/ProcessBasic-2020-11-30-17-14-19-131-6266.tmp/terminateWithDetachedChild/program1.js
+      2020-11-30T18:29:54.4445140Z
+      2020-11-30T18:29:54.4445785Z [39;0m[39;0m
+      2020-11-30T18:29:54.4453098Z [31m--------------- uncaught error ---------------<
+      2020-11-30T18:29:54.4453820Z [39;0m
+      2020-11-30T18:29:54.4638392Z [92m        [39;0m[92mTest check[39;0m[92m [39;0m[92m([39;0m[92m TestSuite[39;0m[92m:[39;0m[92m:[39;0m[92mTools.l4.process.Execution [39;0m[92m/[39;0m[92m TestRoutine[39;0m[92m:[39;0m[92m:[39;0m[92mterminateWithDetachedChild [39;0m[92m/[39;0m[92m mode [39;0m[92m:[39;0m[92m fork[39;0m[92m # [39;0m[92m1 [39;0m[92m)[39;0m[92m ... [39;0m[92mok[39;0m
+      2020-11-30T18:29:54.4756609Z [92m        [39;0m[92mTest check[39;0m[92m [39;0m[92m([39;0m[92m TestSuite[39;0m[92m:[39;0m[92m:[39;0m[92mTools.l4.process.Execution [39;0m[92m/[39;0m[92m TestRoutine[39;0m[92m:[39;0m[92m:[39;0m[92mterminateWithDetachedChild [39;0m[92m/[39;0m[92m mode [39;0m[92m:[39;0m[92m fork[39;0m[92m # [39;0m[92m2 [39;0m[92m)[39;0m[92m ... [39;0m[92mok[39;0m
+      2020-11-30T18:29:54.4886268Z [92m        [39;0m[92mTest check[39;0m[92m [39;0m[92m([39;0m[92m TestSuite[39;0m[92m:[39;0m[92m:[39;0m[92mTools.l4.process.Execution [39;0m[92m/[39;0m[92m TestRoutine[39;0m[92m:[39;0m[92m:[39;0m[92mterminateWithDetachedChild [39;0m[92m/[39;0m[92m mode [39;0m[92m:[39;0m[92m fork[39;0m[92m # [39;0m[92m3 [39;0m[92m)[39;0m[92m ... [39;0m[92mok[39;0m
+      2020-11-30T18:29:54.5011445Z [92m        [39;0m[92mTest check[39;0m[92m [39;0m[92m([39;0m[92m TestSuite[39;0m[92m:[39;0m[92m:[39;0m[92mTools.l4.process.Execution [39;0m[92m/[39;0m[92m TestRoutine[39;0m[92m:[39;0m[92m:[39;0m[92mterminateWithDetachedChild [39;0m[92m/[39;0m[92m mode [39;0m[92m:[39;0m[92m fork[39;0m[92m # [39;0m[92m4 [39;0m[92m)[39;0m[92m ... [39;0m[92mok[39;0m
+      2020-11-30T18:29:54.5133939Z [92m        [39;0m[92mTest check[39;0m[92m [39;0m[92m([39;0m[92m TestSuite[39;0m[92m:[39;0m[92m:[39;0m[92mTools.l4.process.Execution [39;0m[92m/[39;0m[92m TestRoutine[39;0m[92m:[39;0m[92m:[39;0m[92mterminateWithDetachedChild [39;0m[92m/[39;0m[92m mode [39;0m[92m:[39;0m[92m fork[39;0m[92m # [39;0m[92m5 [39;0m[92m)[39;0m[92m ... [39;0m[92mok[39;0m
+      2020-11-30T18:29:54.5282311Z [91m        - got :
+      2020-11-30T18:29:54.5283500Z           3
+      2020-11-30T18:29:54.5284258Z         - expected :
+      2020-11-30T18:29:54.5284644Z           0
+      2020-11-30T18:29:54.5285191Z         - difference :
+      2020-11-30T18:29:54.5285760Z           *[39;0m
+      2020-11-30T18:29:54.5303880Z [91m         [39;0m[91m 
+      2020-11-30T18:29:54.5304852Z         /home/runner/work/wProcess/wProcess/proto/wtools/abase/l4_process.test/Execution.test.s:34421:14
+      2020-11-30T18:29:54.5306502Z           34417 :         test.ge( _.strCount( o.output, 'program2::begin' ), 0 );
+      2020-11-30T18:29:54.5307147Z           34418 :         else
+      2020-11-30T18:29:54.5308261Z           34419 :         test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
+      2020-11-30T18:29:54.5309570Z           34420 :         test.identical( _.strCount( o.output, 'program2::end' ), 0 );
+      2020-11-30T18:29:54.5310609Z         * 34421 :         test.identical( _.strCount( o.output, 'error' ), 0 );
+      2020-11-30T18:29:54.5311359Z          [39;0m[91m [39;0m
+      2020-11-30T18:29:54.5359253Z [91m[40m        [49;0m[39;0m[91m[40mTest check[49;0m[39;0m[91m[40m [49;0m[39;0m[91m[40m([49;0m[39;0m[91m[40m TestSuite[49;0m[39;0m[91m[40m:[49;0m[39;0m[91m[40m:[49;0m[39;0m[91m[40mTools.l4.process.Execution [49;0m[39;0m[91m[40m/[49;0m[39;0m[91m[40m TestRoutine[49;0m[39;0m[91m[40m:[49;0m[39;0m[91m[40m:[49;0m[39;0m[91m[40mterminateWithDetachedChild [49;0m[39;0m[91m[40m/[49;0m[39;0m[91m[40m mode [49;0m[39;0m[91m[40m:[49;0m[39;0m[91m[40m fork[49;0m[39;0m[91m[40m # [49;0m[39;0m[91m[40m6 [49;0m[39;0m[91m[40m)[49;0m[39;0m[91m[40m ... [49;0m[39;0m[91m[40mfailed[49;0m[39;0m
+      2020-11-30T18:29:54.5513474Z [91m        Test routine TestSuite::Tools.l4.process.Execution / TestRoutine::terminateWithDetachedChild was canceled![39;0m
+      2020-11-30T18:29:54.5528198Z [91m[40m        Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::terminateWithDetachedChild / mode : fork # 7 ) ... failed, throwing error[49;0m[39;0m
+      */
 
       let testAppPath = a.program({ routine : program1, locals : { mode } });
       let testAppPath2 = a.program( program2 );
