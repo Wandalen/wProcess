@@ -15,6 +15,7 @@ _.assert( !!_realGlobal_ );
 
 let ProcessMinimal = _.Blueprint
 ({
+  typed : _.trait.typed( true ),
 
   execPath : null,
   currentPath : null,
@@ -49,7 +50,7 @@ let ProcessMinimal = _.Blueprint
   streamSizeLimit : null,
   timeOut : null,
 
-  throwingExitCode : 'full', /* [ bool-like, 'full', 'brief' ] */ /* must be on by default */  /* qqq for Yevhen : cover */
+  throwingExitCode : 'full', /* [ bool-like, 'full', 'brief' ] */ /* must be on by default */ /* qqq for Yevhen : cover */
   applyingExitCode : 0,
 
   verbosity : 2,

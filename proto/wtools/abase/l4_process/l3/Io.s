@@ -224,15 +224,30 @@ function inputReadTo( o )
   _.assert( _.objectIs( o.dst ), 'Expects map {-o.dst-}' );
   _.assert( _.objectIs( o.namesMap ), 'Expects map {-o.namesMap-}' );
 
-  for( let n in o.namesMap )
+  /*
+     Dmytro : keeps the order of properties in command if ordered map is used
+     Also, number of properties in propertiesMap < number of properties in namesMap
+  */
+  for( let n in o.propertiesMap )
   {
     if( o.propertiesMap[ n ] !== undefined )
+    if( n in o.namesMap )
     {
       set( o.namesMap[ n ], o.propertiesMap[ n ] );
       if( o.removing )
       delete o.propertiesMap[ n ];
     }
   }
+
+  // for( let n in o.namesMap )
+  // {
+  //   if( o.propertiesMap[ n ] !== undefined )
+  //   {
+  //     set( o.namesMap[ n ], o.propertiesMap[ n ] );
+  //     if( o.removing )
+  //     delete o.propertiesMap[ n ];
+  //   }
+  // }
 
   if( o.only )
   {

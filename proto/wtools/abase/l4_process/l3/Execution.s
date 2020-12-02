@@ -358,6 +358,7 @@ function startMinimal_body( o )
     // _.assert( o3 === o );
     // _.assert( !Object.isExtensible( o ) );
     // debugger;
+    // xxx
 
     /* */
 
@@ -767,9 +768,9 @@ function startMinimal_body( o )
 
   function handleClose( exitCode, exitSignal )
   {
-    /*
-    console.log( 'handleClose', _.process.realMainFile(), o.ended, ... arguments ); debugger;
-    */
+    // /*
+    // console.log( 'handleClose', _.process.realMainFile(), o.ended, ... arguments ); debugger;
+    // */
 
     if( o.ended )
     return;
@@ -829,9 +830,9 @@ function startMinimal_body( o )
   function handleExit( exitCode, exitSignal )
   {
     /* xxx : use handleExit */
-    /*
-    console.log( 'handleExit', _.process.realMainFile(), o.ended, ... arguments ); debugger;
-    */
+    // /*
+    // console.log( 'handleExit', _.process.realMainFile(), o.ended, ... arguments ); debugger;
+    // */
     // handleClose( exitCode, exitSignal );
   }
 
@@ -1156,6 +1157,8 @@ function startMinimal_body( o )
     if( channel === 'err' )
     _errOutput += data;
 
+    if( Object.isFrozen( o ) ) /* xxx */
+    debugger;
     if( o.outputCollecting )
     o.output += data;
 
