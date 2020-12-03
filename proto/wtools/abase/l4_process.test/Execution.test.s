@@ -28841,372 +28841,126 @@ function startSingleOptionOutputAdditive( test )
 
 //
 
-function startMultipleOptionOutputAdditive( test ) /* option:outputAdditive seems to have no impact on the resulting output */
+function startMultipleOptionOutputAdditive( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
   let testAppPath = a.program( testApp );
   let testAppPath2 = a.program( testApp2 );
-  let modes = [ 'fork', /*'spawn', 'shell' */];
-  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run({ mode, concurrent : 0, outputAdditive : 0 }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ mode, concurrent : 1, outputAdditive : 0 }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ mode, concurrent : 0, outputAdditive : 1 }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ mode, concurrent : 1, outputAdditive : 1 }) ) );
   return a.ready;
-
-  /*
-
-  Execution difference with/without option::outputAdditive
-
-  1. Execution with outputAdditive : 1, concurrent : 0
-
-  > /private/var/folders/cw/sbbjfvxj2hnggb61vf0p_w200000gn/T/ProcessBasic-2020-12-2-13-20-59-909-dfb3.tmp/startMultipleOptionOutputAdditive/testApp.js
-  Output1
-  Output1.2
-  |
-  V
-  > /private/var/folders/cw/sbbjfvxj2hnggb61vf0p_w200000gn/T/ProcessBasic-2020-12-2-13-20-59-909-dfb3.tmp/startMultipleOptionOutputAdditive/testApp.js
-  Output1
-  Output1.2
-  timeout1
-  |
-  V
-  > /private/var/folders/cw/sbbjfvxj2hnggb61vf0p_w200000gn/T/ProcessBasic-2020-12-2-13-20-59-909-dfb3.tmp/startMultipleOptionOutputAdditive/testApp.js
-  Output1
-  Output1.2
-  timeout1
-  timeout1.2
-
-  the same logic in the second program
-
-  =====
-
-  2. Execution with outputAdditive : 0, concurrent : 0
-
-  <waiting for the result>
-  |
-  V
-  > /private/var/folders/cw/sbbjfvxj2hnggb61vf0p_w200000gn/T/ProcessBasic-2020-12-2-13-20-59-909-dfb3.tmp/startMultipleOptionOutputAdditive/testApp.js
-  Output1
-  Output1.2
-  timeout1
-  timeout1.2
-
-  =====
-
-  3. Execution with outputAdditive : 1, concurrent : 1
-
-  > /private/var/folders/cw/sbbjfvxj2hnggb61vf0p_w200000gn/T/ProcessBasic-2020-12-2-13-36-44-991-9084.tmp/startMultipleOptionOutputAdditive/testApp2.js
-  Output2
-  Output2.2
-  |
-  V
-  > /private/var/folders/cw/sbbjfvxj2hnggb61vf0p_w200000gn/T/ProcessBasic-2020-12-2-13-36-44-991-9084.tmp/startMultipleOptionOutputAdditive/testApp2.js
-  Output2
-  Output2.2
-  timeout2
-  |
-  V
-  > /private/var/folders/cw/sbbjfvxj2hnggb61vf0p_w200000gn/T/ProcessBasic-2020-12-2-13-36-44-991-9084.tmp/startMultipleOptionOutputAdditive/testApp2.js
-  Output2
-  Output2.2
-  timeout2
-  timeout2.2
-  |
-  V
-  > /private/var/folders/cw/sbbjfvxj2hnggb61vf0p_w200000gn/T/ProcessBasic-2020-12-2-13-36-44-991-9084.tmp/startMultipleOptionOutputAdditive/testApp.js
-  Output1
-  Output1.2
-  |
-  V
-
-  ...
-
-  =====
-
-  4. Execution with outputAdditive : 0, concurrent : 1
-
-  <waiting fot the result>
-  |
-  V
-  > /private/var/folders/cw/sbbjfvxj2hnggb61vf0p_w200000gn/T/ProcessBasic-2020-12-2-13-36-44-991-9084.tmp/startMultipleOptionOutputAdditive/testApp2.js
-  Output2
-  Output2.2
-  timeout2
-  timeout2.2
-  |
-  V
-  <waiting fot the result>
-  |
-  V
-  > /private/var/folders/cw/sbbjfvxj2hnggb61vf0p_w200000gn/T/ProcessBasic-2020-12-2-13-36-44-991-9084.tmp/startMultipleOptionOutputAdditive/testApp.js
-  Output1
-  Output1.2
-  timeout1
-  timeout1.2
-  */
 
   /* - */
 
-  function run( mode )
+  function run( tops )
   {
     let ready = _.Consequence().take( null );
 
-    // ready.then( () =>
-    // {
-    //   test.case = `mode : ${mode}, outputAdditive : 1, concurrent : 0`;
-
-    //   let o =
-    //   {
-    //     execPath : mode === 'fork' ? [ testAppPath, testAppPath2 ] : [ 'node ' + testAppPath, 'node ' + testAppPath2 ],
-    //     outputCollecting : 1,
-    //     outputAdditive : 1,
-    //     concurrent : 0,
-    //     mode
-    //   }
-
-    //   return _.process.startMultiple( o )
-    //   .then( ( op ) =>
-    //   {
-    //     console.log( `outputAdditive : ${o.outputAdditive}, +++++ ${op.output} +++++ ` );
-    //     test.il( op.exitCode, 0 );
-    //     test.il( op.ended, true );
-    //     test.il( op.outputAdditive, true );
-    //     test.et( op.output, 'Output1\nOutput1.2\ntimeout1\ntimeout1.2\nOutput2\nOutput2.2\ntimeout2\ntimeout2.2' )
-
-    //     return null;
-    //   })
-    // })
-
-    // /* */
-
-    // ready.then( () =>
-    // {
-    //   test.case = `mode : ${mode}, outputAdditive : 0, concurrent : 0`;
-
-    //   let o =
-    //   {
-    //     execPath : mode === 'fork' ? [ testAppPath, testAppPath2 ] : [ 'node ' + testAppPath, 'node ' + testAppPath2 ],
-    //     outputCollecting : 1,
-    //     outputAdditive : 0,
-    //     concurrent : 0,
-    //     mode
-    //   }
-
-    //   return _.process.startMultiple( o )
-    //   .then( ( op ) =>
-    //   {
-    //     console.log( `outputAdditive : ${o.outputAdditive}, +++++ ${op.output} +++++ ` );
-    //     test.il( op.exitCode, 0 );
-    //     test.il( op.ended, true );
-    //     test.il( op.outputAdditive, false );
-    //     test.et( op.output, 'Output1\nOutput1.2\ntimeout1\ntimeout1.2\nOutput2\nOutput2.2\ntimeout2\ntimeout2.2' )
-
-    //     return null;
-    //   })
-    // })
-
-    /* */
-
-    // ready.then( () =>
-    // {
-    //   test.case = `mode : ${mode}, outputAdditive : 0, concurrent : 1`;
-
-    //   let o =
-    //   {
-    //     execPath : mode === 'fork' ? [ testAppPath, testAppPath2 ] : [ 'node ' + testAppPath, 'node ' + testAppPath2 ],
-    //     outputCollecting : 1,
-    //     outputAdditive : 0,
-    //     concurrent : 1,
-    //     mode
-    //   }
-
-    //   return _.process.startMultiple( o )
-    //   .then( ( op ) =>
-    //   {
-    //     console.log( `outputAdditive : ${o.outputAdditive}, +++++ ${op.output} +++++` );
-    //     test.il( op.exitCode, 0 );
-    //     test.il( op.ended, true );
-    //     test.il( op.outputAdditive, false );
-    //     test.et( op.output, 'Output1\nOutput1.2\nOutput2\nOutput2.2\ntimeout1\ntimeout2\ntimeout2.2\ntimeout1.2' )
-
-    //     return null;
-    //   })
-    // })
-
-    /* TEST================ */
-    // ready.then( () =>
-    // {
-    //   test.case = `mode : ${mode}, outputAdditive : 1, concurrent : 1`;
-
-    //   let o =
-    //   {
-    //     execPath : mode === 'fork' ? [ testAppPath, testAppPath2 ] : [ 'node ' + testAppPath, 'node ' + testAppPath2 ],
-    //     outputCollecting : 1,
-    //     outputAdditive : 1,
-    //     concurrent : 1,
-    //     mode
-    //   }
-
-    //   let returned = _.process.startMultiple( o );
-
-    //   _.time.out( context.t1 * 4, () =>
-    //   {
-    //     test.identical( o.pnd.killed, false );
-    //     o.pnd.kill( 'SIGKILL' );
-    //     return null;
-    //   })
-
-    //   returned.then( ( op ) =>
-    //   {
-    //     console.log( `outputAdditive : ${o.outputAdditive}, CONSTART : +++++ ${op.output} +++++` );
-    //     // test.il( op.exitCode, 0 );
-    //     // test.il( op.ended, true );
-    //     test.il( op.outputAdditive, true );
-    //     // test.et( op.output, 'Output1\nOutput1.2\nOutput2\nOutput2.2\ntimeout1\ntimeout2\ntimeout2.2\ntimeout1.2' )
-    //     return null;
-    //   })
-    //   return returned;
-    // })
-
-    // ready.then( () =>
-    // {
-    //   test.case = `mode : ${mode}, outputAdditive : 0, concurrent : 1`;
-
-    //   let o =
-    //   {
-    //     execPath : mode === 'fork' ? [ testAppPath, testAppPath2 ] : [ 'node ' + testAppPath, 'node ' + testAppPath2 ],
-    //     outputCollecting : 1,
-    //     outputAdditive : 0,
-    //     concurrent : 1,
-    //     throwingExitCode : 0,
-    //     mode
-    //   }
-
-    //   let returned = _.process.startMultiple( o );
-
-    //   _.time.out( context.t1 * 6, () =>
-    //   {
-    //     test.identical( o.sessions[ 0 ].pnd.killed, false );
-    //     // test.identical( o.sessions[ 1 ].pnd.killed, false );
-    //     console.log( 'out t1 * 4', o.output )
-    //     // o.sessions[ 0 ].pnd.kill( 'SIGKILL' );
-    //     // o.sessions[ 1 ].pnd.kill( 'SIGKILL' );
-    //     return null;
-    //   })
-
-    //   returned.then( ( op ) =>
-    //   {
-    //     // console.log( 'OP:', op )
-    //     console.log( `outputAdditive : ${o.outputAdditive}, CONSTART : +++++ ${op.output} +++++` );
-    //     // test.il( op.exitCode, 0 );
-    //     // test.il( op.ended, true );
-    //     // test.il( op.outputAdditive, false );
-    //     // test.et( op.output, 'Output1\nOutput1.2\nOutput2\nOutput2.2\ntimeout1\ntimeout2\ntimeout2.2\ntimeout1.2' )
-    //     return null;
-    //   })
-
-    //   return returned;
-    // })
-    /* TEST================ */
-
-    /* */
-
-  //   ready.then( () =>
-  //   {
-  //     test.case = `mode : ${mode}, outputAdditive : 1, concurrent : 1`;
-
-  //     let o =
-  //     {
-  //       execPath : mode === 'fork' ? [ testAppPath, testAppPath2 ] : [ 'node ' + testAppPath, 'node ' + testAppPath2 ],
-  //       outputCollecting : 1,
-  //       outputAdditive : 1,
-  //       concurrent : 1,
-  //       mode
-  //     }
-
-  //     return _.process.startMultiple( o )
-  //     .then( ( op ) =>
-  //     {
-  //       console.log( `outputAdditive : ${o.outputAdditive}, +++++ ${op.output} +++++` );
-  //       test.il( op.exitCode, 0 );
-  //       test.il( op.ended, true );
-  //       test.il( op.outputAdditive, true );
-  //       test.et( op.output, 'Output1\nOutput1.2\nOutput2\nOutput2.2\ntimeout1\ntimeout2\ntimeout2.2\ntimeout1.2' )
-
-  //       return null;
-  //     })
-  //   })
-
-  //   return ready;
-  // }
-
-    // ready.then( () =>
-    // {
-    //   test.case = `mode : ${mode}, outputAdditive default`;
-    //   let locals =
-    //   {
-    //     mode,
-    //     testAppPath,
-    //     testAppPath2,
-    //     outputAdditive : null,
-    //     concurrent : 0,
-    //   }
-    //   let testAppPathParent = a.program({ routine : testAppParent, locals });
-
-    //   let o =
-    //   {
-    //     execPath : mode === 'fork' ? testAppPathParent : 'node ' + testAppPathParent,
-    //     outputCollecting : 1,
-    //     mode
-    //   }
-
-    //   return _.process.startMinimal( o )
-    //   .then( ( op ) =>
-    //   {
-    //     console.log( `outputAdditive : ${o.outputAdditive}, OP OUT : +++++ ${op.output} +++++` );
-    //     // console.log( 'OP : ', op )
-    //     test.il( op.exitCode, 0 );
-    //     test.il( op.ended, true );
-    //     test.il( op.outputAdditive, true );
-    //     // test.et( op.output, 'Output1\nOutput2' )
-
-    //     console.log( '=================================' )
-
-    //     a.fileProvider.fileDelete( testAppPathParent );
-    //     return null;
-    //   })
-    // })
-
-    /* */
-
     ready.then( () =>
     {
-      test.case = `mode : ${mode}, outputAdditive : 0`;
+      test.case = `mode : ${tops.mode}, outputAdditive : ${tops.outputAdditive}, concurrent : ${tops.concurrent}`;
 
       let locals =
       {
-        mode,
+        mode : tops.mode,
         testAppPath,
         testAppPath2,
-        outputAdditive : 0,
-        concurrent : 1,
+        outputAdditive : tops.outputAdditive,
+        concurrent : tops.concurrent,
       }
+
       let testAppPathParent = a.program({ routine : testAppParent, locals });
 
       let o =
       {
-        execPath : mode === 'fork' ? testAppPathParent  :'node ' + testAppPathParent,
+        execPath : 'node ' + testAppPathParent,
         outputCollecting : 1,
-        mode
       }
+
+      /*
+        This executes before any of the processes finishes,
+        with option::outputAdditing : 0 - no output is logged
+      */
+      _.time.out( context.t1 * 7, () =>
+      {
+        // console.log( `out t1 * 7, concurrent : ${tops.concurrent}, additive : ${tops.outputAdditive}`, '++' +  o.output + '++'  );
+        if( !tops.outputAdditive )
+        {
+          test.identical( o.output, '' );
+        }
+        else
+        {
+          if( tops.concurrent )
+          {
+            test.true( _.dissector.dissect( `**<Output1>**<Output1.2>**<timeout1>**`, o.output ).matched );
+            test.true( _.dissector.dissect( `**<Output2>**<Output2.2>**<timeout1>**`, o.output ).matched );
+          }
+          else
+          {
+            test.true( _.dissector.dissect( `**<Output1>**<Output1.2>**<timeout1>**`, o.output ).matched );
+            test.true( !_.dissector.dissect( `**<Output2>**<Output2.2>**<timeout1>**`, o.output ).matched );
+          }
+        }
+        return null;
+      })
+
+      /*
+        If concurrent : 1
+        This executes after the second process finishes,
+        with option::outputAdditing : 0 - no output is logged from the first process,
+        all output is logged from the second process
+      */
+      _.time.out( context.t1 * 18, () =>
+      {
+        // console.log( `out t1 * 18, concurrent : ${tops.concurrent}, additive : ${tops.outputAdditive}`, '++' +  o.output + '++'  );
+
+        if( tops.concurrent )
+        {
+          if( tops.outputAdditive )
+          {
+            test.true( _.dissector.dissect( `**<Output1>**<Output1.2>**<timeout1>**`, o.output ).matched );
+            test.true( _.dissector.dissect( `**<Output2>**<Output2.2>**<timeout1>**`, o.output ).matched );
+            test.true( _.dissector.dissect( `**<timeout2>**<timeout2.2>**`, o.output ).matched );
+          }
+          else
+          {
+            /* First process is still running */
+            test.true( !_.dissector.dissect( `**<Output1>**<Output1.2>**`, o.output ).matched );
+            /* Second process is finished */
+            test.true( _.dissector.dissect( `**<Output2>**<Output2.2>**`, o.output ).matched );
+            test.true( _.dissector.dissect( `**<timeout2>**<timeout2.2>**`, o.output ).matched );
+          }
+        }
+        else
+        {
+          if( !tops.outputAdditive ) /* First process haven't finished yet, no output */
+          {
+            test.identical( o.output, '' );
+          }
+          else /* Only a part of the output from the first process is logged */
+          {
+            test.true( _.dissector.dissect( `**<Output1>**<Output1.2>**<timeout1>**`, o.output ).matched );
+            test.true( !_.dissector.dissect( `**<timeout1.2>**`, o.output ).matched )
+            test.true( !_.dissector.dissect( `**<Output2>**`, o.output ).matched )
+          }
+        }
+
+        return null;
+      })
 
       return _.process.startMinimal( o )
       .then( ( op ) =>
       {
-        console.log( `outputAdditive : ${o.outputAdditive}, OP OUT : +++++ ${op.output} +++++` );
-        // console.log( 'OP : ', op )
+        // console.log( `outputAdditive : ${o.outputAdditive}, OP OUT : +++++ ${op.output} +++++` );
         test.il( op.exitCode, 0 );
         test.il( op.ended, true );
-        test.il( op.outputAdditive, false );
-        // test.et( op.output, 'Output1\nOutput2' )
+
+        test.true( _.dissector.dissect( `**<Output1>**<Output1.2>**<timeout1>**<timeout1.2>**`, o.output ).matched );
+        test.true( _.dissector.dissect( `**<Output2>**<Output2.2>**<timeout2>**<timeout2.2>**`, o.output ).matched );
 
         a.fileProvider.fileDelete( testAppPathParent );
         return null;
@@ -29228,14 +28982,8 @@ function startMultipleOptionOutputAdditive( test ) /* option:outputAdditive seem
       currentPath : __dirname,
       outputCollecting : 1,
       mode,
-      outputAdditive : 0,
+      outputAdditive,
       concurrent,
-      // stdio : 'inherit',
-      // outputPiping : 0,
-      // outputCollecting : 1,
-      // inputMirroring : 1,
-      // verbosity : 3,
-      // throwingExitCode : 0
     }
     _.process.startMultiple( o )
     .then( ( op ) =>
