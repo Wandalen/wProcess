@@ -9,6 +9,7 @@ if( typeof module !== 'undefined' )
   _.include( 'wTesting' );
   _.include( 'wFiles' );
   _.include( 'wProcessWatcher' );
+
   require( '../l4_process/module/Process.s' );
 }
 
@@ -35,6 +36,423 @@ function suiteEnd()
   let context = this;
   _.assert( _.strHas( context.suiteTempPath, '/Io' ), `context.suiteTempPath : ${context.suiteTempPath}` );
   _.path.tempClose( context.suiteTempPath );
+}
+
+// --
+//
+// --
+
+function inputReadToWithArguments( test )
+{
+  /* read input to prevent side effect from testing input */
+  _.process.inputReadTo( { r : true }, { r : 'r' } );
+
+  /* */
+
+  test.case = 'dst - empty map';
+  var dst = {};
+  var namesMap = {};
+  var got = _.process.inputReadTo( dst, namesMap );
+  test.identical( dst, {} );
+  test.identical( got, {} );
+  test.true( got !== dst );
+
+  test.case = 'dst - empty map, namesMap - not empty';
+  var dst = {};
+  var namesMap = { routine : 'r' };
+  var got = _.process.inputReadTo( dst, namesMap );
+  test.identical( dst, {} );
+  test.identical( got, {} );
+  test.true( got !== dst );
+
+  /* */
+
+  test.case = 'dst - map with boolean';
+  var dst = { r : true };
+  var namesMap = {};
+  var got = _.process.inputReadTo( dst, namesMap );
+  test.identical( dst, { r : true } );
+  test.identical( got, {} );
+  test.true( got !== dst );
+
+  test.case = 'dst - map with number';
+  var dst = { r : 0 };
+  var namesMap = {};
+  var got = _.process.inputReadTo( dst, namesMap );
+  test.identical( dst, { r : 0 } );
+  test.identical( got, {} );
+  test.true( got !== dst );
+
+  test.case = 'dst - null';
+  var dst = { r : null };
+  var namesMap = {};
+  var got = _.process.inputReadTo( dst, namesMap );
+  test.identical( dst, { r : null } );
+  test.identical( got, {} );
+  test.true( got !== dst );
+
+  /* */
+
+  test.case = 'dst - map with boolean';
+  var dst = { r : true };
+  var namesMap = { routine : 'r' };
+  var got = _.process.inputReadTo( dst, namesMap );
+  test.identical( dst, { r : true } );
+  test.identical( got, {} );
+  test.true( got !== dst );
+
+  test.case = 'dst - map with number';
+  var dst = { r : 0 };
+  var namesMap = { routine : 'r' };
+  var got = _.process.inputReadTo( dst, namesMap );
+  test.identical( dst, { r : 0 } );
+  test.identical( got, {} );
+  test.true( got !== dst );
+
+  test.case = 'dst - null';
+  var dst = { r : null };
+  var namesMap = { routine : 'r' };
+  var got = _.process.inputReadTo( dst, namesMap );
+  test.identical( dst, { r : null } );
+  test.identical( got, {} );
+  test.true( got !== dst );
+
+  /* */
+
+  test.case = 'dst - null, namesMap - array';
+  var dst = { r : null };
+  var namesMap = [ 'r', 'a' ];
+  var got = _.process.inputReadTo( dst, namesMap );
+  test.identical( dst, { r : null } );
+  test.identical( got, {} );
+  test.true( got !== dst );
+
+  /* - */
+
+  if( !Config.debug )
+  return;
+
+  test.case = 'without arguments';
+  test.shouldThrowErrorSync( () => _.process.inputReadTo() );
+
+  test.case = 'extra arguments';
+  test.shouldThrowErrorSync( () => _.process.inputReadTo( { a : 1 }, { a : 'a', b : 'a' }, { extra : 1 } ) );
+
+  test.case = 'wrong type of options map o';
+  test.shouldThrowErrorSync( () => _.process.inputReadTo( 'wrong' ) );
+
+  test.case = 'wrong type of o.dst';
+  test.shouldThrowErrorSync( () => _.process.inputReadTo( 'wrong', { a : 'a', b : 'a' } ) );
+  test.shouldThrowErrorSync( () => _.process.inputReadTo({ dst : 'wrong', namesMap : { a : 'a', b : 'a' } }) );
+
+  test.case = 'wrong type of o.namesMap';
+  test.shouldThrowErrorSync( () => _.process.inputReadTo( {}, 'wrong' ) );
+  test.shouldThrowErrorSync( () => _.process.inputReadTo({ dst : {}, namesMap : 'wrong' }) );
+
+  test.case = 'options map has unknown option';
+  test.shouldThrowErrorSync( () => _.process.inputReadTo({ dst : {}, namesMap : { a : 'a' }, unknown : 1 }) );
+
+  test.case = 'dst - empty map, namesMap has unknown property';
+  test.shouldThrowErrorSync( () =>
+  {
+    let o = { dst : {}, namesMap : { a : 'a' }, propertiesMap : { b : 'b' } };
+    return _.process.inputReadTo( o );
+  });
+
+  test.case = 'dst - map with number, namesMap with valid property, NaN value';
+  test.shouldThrowErrorSync( () =>
+  {
+    let o = { dst : { a : 1 }, namesMap : { a : 'a' }, propertiesMap : { a : 'nan' } };
+    return _.process.inputReadTo( o );
+  });
+}
+
+//
+
+function inputReadToWithOptionsMap( test )
+{
+  /* read input to prevent side effect from testing input */
+  _.process.inputReadTo( { r : true }, { r : 'r' } );
+
+  /* - */
+
+  test.open( 'without propertiesMap' );
+
+  test.case = 'dst - empty map, namesMap - empty map';
+  var dst = {};
+  var namesMap = {};
+  var got = _.process.inputReadTo({ dst, namesMap });
+  test.identical( dst, {} );
+  test.identical( got, {} );
+  test.true( got !== dst );
+
+  test.case = 'dst - empty map, namesMap - not empty';
+  var dst = {};
+  var namesMap = { routine : 'r' };
+  var got = _.process.inputReadTo({ dst, namesMap });
+  test.identical( dst, {} );
+  test.identical( got, {} );
+  test.true( got !== dst );
+
+  /* */
+
+  test.case = 'dst - map with boolean, namesMap - empty';
+  var dst = { r : true };
+  var namesMap = {};
+  var got = _.process.inputReadTo({ dst, namesMap });
+  test.identical( dst, { r : true } );
+  test.identical( got, {} );
+  test.true( got !== dst );
+
+  test.case = 'dst - map with number, namesMap - empty';
+  var dst = { r : 0 };
+  var namesMap = {};
+  var got = _.process.inputReadTo({ dst, namesMap });
+  test.identical( dst, { r : 0 } );
+  test.identical( got, {} );
+  test.true( got !== dst );
+
+  test.case = 'dst - null, namesMap - empty';
+  var dst = { r : null };
+  var namesMap = {};
+  var got = _.process.inputReadTo({ dst, namesMap });
+  test.identical( dst, { r : null } );
+  test.identical( got, {} );
+  test.true( got !== dst );
+
+  /* */
+
+  test.case = 'dst - map with boolean, namesMap - not empty';
+  var dst = { r : true };
+  var namesMap = { routine : 'r' };
+  var got = _.process.inputReadTo({ dst, namesMap });
+  test.identical( dst, { r : true } );
+  test.identical( got, {} );
+  test.true( got !== dst );
+
+  test.case = 'dst - map with number, namesMap - not empty';
+  var dst = { r : 0 };
+  var namesMap = { routine : 'r' };
+  var got = _.process.inputReadTo({ dst, namesMap });
+  test.identical( dst, { r : 0 } );
+  test.identical( got, {} );
+  test.true( got !== dst );
+
+  test.case = 'dst - null, namesMap - not empty';
+  var dst = { r : null };
+  var namesMap = { routine : 'r' };
+  var got = _.process.inputReadTo({ dst, namesMap });
+  test.identical( dst, { r : null } );
+  test.identical( got, {} );
+  test.true( got !== dst );
+
+  /* */
+
+  test.case = 'dst - null, namesMap - array, namesMap - not empty';
+  var dst = { r : null };
+  var namesMap = [ 'r', 'a' ];
+  var got = _.process.inputReadTo({ dst, namesMap });
+  test.identical( dst, { r : null } );
+  test.identical( got, {} );
+  test.true( got !== dst );
+
+  test.close( 'without propertiesMap' );
+
+  /* - */
+
+  test.open( 'with propertiesMap' );
+
+  test.case = 'dst - empty map, namesMap - empty, propertiesMap - empty';
+  var dst = {};
+  var namesMap = {};
+  var propertiesMap = {};
+  var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
+  test.identical( dst, {} );
+  test.identical( got, {} );
+  test.true( got !== dst );
+  test.true( got === propertiesMap );
+
+  test.case = 'dst - empty map, namesMap - not empty, propertiesMap - empty';
+  var dst = {};
+  var namesMap = { routine : 'r' };
+  var propertiesMap = {};
+  var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
+  test.identical( dst, {} );
+  test.identical( got, {} );
+  test.true( got !== dst );
+  test.true( got === propertiesMap );
+
+  /* */
+
+  test.case = 'dst - map with boolean, namesMap - empty, propertiesMap - empty';
+  var dst = { r : true };
+  var namesMap = {};
+  var propertiesMap = {};
+  var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
+  test.identical( dst, { r : true } );
+  test.identical( got, {} );
+  test.true( got !== dst );
+  test.true( got === propertiesMap );
+
+  test.case = 'dst - map with number, namesMap - empty, propertiesMap - empty';
+  var dst = { r : 0 };
+  var namesMap = {};
+  var propertiesMap = {};
+  var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
+  test.identical( dst, { r : 0 } );
+  test.identical( got, {} );
+  test.true( got !== dst );
+  test.true( got === propertiesMap );
+
+  test.case = 'dst - null, namesMap - empty, propertiesMap - empty';
+  var dst = { r : null };
+  var namesMap = {};
+  var propertiesMap = {};
+  var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
+  test.identical( dst, { r : null } );
+  test.identical( got, {} );
+  test.true( got !== dst );
+  test.true( got === propertiesMap );
+
+  /* */
+
+  test.case = 'dst - map with boolean, namesMap - not empty, propertiesMap - empty';
+  var dst = { r : true };
+  var namesMap = { routine : 'r' };
+  var propertiesMap = {};
+  var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
+  test.identical( dst, { r : true } );
+  test.identical( got, {} );
+  test.true( got !== dst );
+  test.true( got === propertiesMap );
+
+  test.case = 'dst - map with number, namesMap - not empty, propertiesMap - empty';
+  var dst = { r : 0 };
+  var namesMap = { routine : 'r' };
+  var propertiesMap = {};
+  var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
+  test.identical( dst, { r : 0 } );
+  test.identical( got, {} );
+  test.true( got !== dst );
+  test.true( got === propertiesMap );
+
+  test.case = 'dst - null, namesMap - not empty, propertiesMap - empty';
+  var dst = { r : null };
+  var namesMap = { routine : 'r' };
+  var propertiesMap = {};
+  var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
+  test.identical( dst, { r : null } );
+  test.identical( got, {} );
+  test.true( got !== dst );
+  test.true( got === propertiesMap );
+
+  /* */
+
+  test.case = 'dst - null, namesMap - not empty array, propertiesMap - empty';
+  var dst = { r : null };
+  var namesMap = [ 'r', 'a' ];
+  var propertiesMap = {};
+  var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
+  test.identical( dst, { r : null } );
+  test.identical( got, {} );
+  test.true( got !== dst );
+  test.true( got === propertiesMap );
+
+  /* */
+
+  test.case = 'dst - map with boolean';
+  var dst = { r : true };
+  var namesMap = { routine : 'r', r : 'r' };
+  var propertiesMap = { 'r' : 1, 'routine' : 2 };
+  var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
+  test.identical( dst, { r : true } );
+  test.identical( got, {} );
+  test.true( got !== dst );
+  test.true( got === propertiesMap );
+
+  test.case = 'dst - map with number';
+  var dst = { r : 0 };
+  var namesMap = { routine : 'r', r : 'r' };
+  var propertiesMap = { 'r' : 1, 'routine' : 2 };
+  var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
+  test.identical( dst, { r : 2 } );
+  test.identical( got, {} );
+  test.true( got !== dst );
+  test.true( got === propertiesMap );
+
+  test.case = 'dst - null';
+  var dst = { r : null };
+  var namesMap = { routine : 'r', r : 'r' };
+  var propertiesMap = { 'r' : 1, 'routine' : 2 };
+  var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
+  test.identical( dst, { r : 2 } );
+  test.identical( got, {} );
+  test.true( got !== dst );
+  test.true( got === propertiesMap );
+
+  /* */
+
+  test.case = 'dst - null, namesMap - array';
+  var dst = { r : null, routine : () => true };
+  var namesMap = [ 'r', 'routine' ];
+  var propertiesMap = { 'r' : 1, 'routine' : 2 };
+  var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
+  test.identical( dst, { r : 1, routine : 2 } );
+  test.identical( got, {} );
+  test.true( got === propertiesMap );
+
+  test.close( 'with propertiesMap' );
+}
+
+//
+
+function inputReadToOptionsOnlyAndRemoving( test )
+{
+  test.open( 'removing - 1' );
+
+  test.case = 'only - 1, namesMap has less options than propertiesMap';
+  var dst = { r : null };
+  var namesMap = { r : 'r' };
+  var propertiesMap = { r : 1, routine : 2 };
+  var got = _.process.inputReadTo({ dst, namesMap, propertiesMap, only : 0, removing : 1 });
+  test.identical( dst, { r : 1 } );
+  test.identical( got, { routine : 2 } );
+  test.true( got === propertiesMap );
+
+  test.case = 'only - 1, namesMap has less options than propertiesMap';
+  test.shouldThrowErrorSync( () =>
+  {
+    var dst = { r : null };
+    var namesMap = { r : 'r' };
+    var propertiesMap = { r : 1, routine : 2 };
+    var got = _.process.inputReadTo({ dst, namesMap, propertiesMap, only : 1, removing : 1 });
+  });
+
+  test.close( 'removing - 1' );
+
+  /* - */
+
+  test.open( 'removing - 0' );
+
+  test.case = 'only - 1, namesMap has less options than propertiesMap';
+  var dst = { r : null };
+  var namesMap = { r : 'r' };
+  var propertiesMap = { r : 1, routine : 2 };
+  var got = _.process.inputReadTo({ dst, namesMap, propertiesMap, only : 0, removing : 0 });
+  test.identical( dst, { r : 1 } );
+  test.identical( got, { r : 1, routine : 2 } );
+  test.true( got === propertiesMap );
+
+  test.case = 'only - 1, namesMap has less options than propertiesMap';
+  test.shouldThrowErrorSync( () =>
+  {
+    var dst = { r : null };
+    var namesMap = { r : 'r' };
+    var propertiesMap = { r : 1, routine : 2 };
+    var got = _.process.inputReadTo({ dst, namesMap, propertiesMap, only : 1, removing : 0 });
+  });
+
+  test.close( 'removing - 0' );
 }
 
 // --
@@ -1589,6 +2007,10 @@ var Proto =
 
   tests :
   {
+
+    inputReadToWithArguments,
+    inputReadToWithOptionsMap,
+    inputReadToOptionsOnlyAndRemoving,
 
     // event
 
