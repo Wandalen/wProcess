@@ -27216,8 +27216,9 @@ function startMinimalOptionThrowingExitCode( test )
 
       _.process.startMinimal( options );
 
-      options.conTerminate.catch( ( err ) =>
+      options.conTerminate.finally( ( err, op ) =>
       {
+        test.identical( op, undefined );
         test.true( !_.errIsBrief( err ) );
         test.true( _.strHas( err.message, 'Process returned exit code' ) );
         test.true( _.strHas( err.message, 'Launched as' ) );
@@ -27247,8 +27248,9 @@ function startMinimalOptionThrowingExitCode( test )
 
       _.process.startMinimal( options );
 
-      options.conTerminate.catch( ( err ) =>
+      options.conTerminate.finally( ( err, op ) =>
       {
+        test.identical( op, undefined );
         test.true( !_.errIsBrief( err ) );
         test.true( _.strHas( err.message, 'Process returned exit code' ) );
         test.true( _.strHas( err.message, 'Launched as' ) );
@@ -27278,8 +27280,9 @@ function startMinimalOptionThrowingExitCode( test )
 
       _.process.startMinimal( options );
 
-      options.conTerminate.catch( ( err ) =>
+      options.conTerminate.finally( ( err, op ) =>
       {
+        test.identical( op, undefined );
         test.true( !_.errIsBrief( err ) );
         test.true( _.strHas( err.message, 'Process returned exit code' ) );
         test.true( _.strHas( err.message, 'Launched as' ) );
@@ -27309,8 +27312,9 @@ function startMinimalOptionThrowingExitCode( test )
 
       _.process.startMinimal( options );
 
-      options.conTerminate.catch( ( err ) =>
+      options.conTerminate.finally( ( err, op ) =>
       {
+        test.identical( op, undefined );
         test.true( _.errIsBrief( err ) );
         test.true( _.strHas( err.message, 'Process returned exit code' ) );
         test.true( _.strHas( err.message, 'Launched as' ) );
@@ -27323,6 +27327,36 @@ function startMinimalOptionThrowingExitCode( test )
       })
 
       return options.conTerminate;
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, with subprocess, throwingExitCode : brief`;
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath } });
+
+      let options =
+      {
+        execPath : 'node ' + testAppParentPath,
+        outputCollecting : 1,
+      }
+
+      return _.process.startMinimal( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.true( _.strHas( op.output, 'Process returned exit code' ) );
+        test.true( _.strHas( op.output, 'Launched as' ) );
+        test.true( _.strHas( op.output, 'Stderr' ) );
+        test.true( _.strHas( op.output, 'randomText is not defined' ) );
+        test.true( !_.strHas( op.output, 'stack' ) );
+
+        a.fileProvider.fileDelete( testAppParentPath );
+        return null;
+      })
+
     })
 
     /* */
@@ -27353,6 +27387,29 @@ function startMinimalOptionThrowingExitCode( test )
   }
 
   /* - */
+
+  function testAppParent()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+
+    let o =
+    {
+      execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+      mode,
+      inputMirroring : 0,
+      throwingExitCode : 'brief',
+    }
+
+    _.process.startMinimal( o );
+
+    o.conTerminate.finally( ( err, op ) =>
+    {
+      console.log( err );
+      return null;
+    })
+
+  }
 
   function testApp()
   {
