@@ -45,7 +45,14 @@ function suiteEnd()
 function inputReadToWithArguments( test )
 {
   /* read input to prevent side effect from testing input */
-  _.process.inputReadTo( { r : true }, { r : 'r' } );
+  var dst = Object.create( null );
+  var namesMap = _.process.input().map;
+  for( let key in namesMap )
+  {
+    namesMap[ key ] = key;
+    dst[ key ] = key;
+  }
+  _.process.inputReadTo( dst, namesMap );
 
   /* */
 
@@ -172,7 +179,14 @@ function inputReadToWithArguments( test )
 function inputReadToWithOptionsMap( test )
 {
   /* read input to prevent side effect from testing input */
-  _.process.inputReadTo( { r : true }, { r : 'r' } );
+  var dst = Object.create( null );
+  var namesMap = _.process.input().map;
+  for( let key in namesMap )
+  {
+    namesMap[ key ] = key;
+    dst[ key ] = key;
+  }
+  _.process.inputReadTo( dst, namesMap );
 
   /* - */
 
