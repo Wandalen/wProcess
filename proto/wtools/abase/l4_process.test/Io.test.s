@@ -47,49 +47,7 @@ function inputReadToWithArguments( test )
   let context = this;
   let a = test.assetFor( false );
 
-  // a.ready.then( () =>
-  // {
-  //   test.case = 'ORIGINAl';
-  //   let locals =
-  //   {
-  //     dst : { r : 'r' },
-  //     namesMap : { r : 'r' },
-  //     context : { t0 : context.t0 },
-  //     toolsPath : _.module.resolve( 'wTools' ),
-  //   };
-  //   let programPath = a.program( { routine : testApp, locals } );
-
-  //   let o =
-  //   {
-  //     execPath : programPath,
-  //     mode : 'fork',
-  //     args : [ 'r:routine' ],
-  //     throwingExitCode : 0,
-  //     outputPiping : 0,
-  //     ipc : 1,
-  //     outputCollecting : 1,
-  //   };
-
-  //   let returned = _.process.startMinimal( o );
-
-  //   o.pnd.on( 'message', ( got ) =>
-  //   {
-  //     test.identical( got[ 0 ], { r : 'routine' } );
-  //     test.identical( got[ 1 ], {} );
-  //     // _.process.terminate({ pnd : o.pnd, timeOut : /*context.t0*/ });
-  //   })
-
-  //   returned.then( ( op ) =>
-  //   {
-  //     test.identical( op.exitCode, 0 );
-  //     test.identical( op.ended, true );
-
-  //     a.fileProvider.fileDelete( programPath );
-  //     return null
-  //   })
-
-  //   return returned;
-  // })
+  /* */
 
   a.ready.then( () =>
   {
