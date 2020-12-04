@@ -1408,7 +1408,7 @@ function startSingle_body( o )
       when : null,
       sessionId : null
     }
-    let locals = { toolsPath, o : _.mapBut( o, excludeOptions ) };
+    let locals = { toolsPath, o : _.mapBut( o, excludeOptions ), parentPid : process.pid };
     let secondaryProcessRoutine = _.program.preform({ routine : afterDeathSecondaryProcess, locals })
     let secondaryFilePath = _.process.tempOpen({ sourceCode : secondaryProcessRoutine.sourceCode });
 
@@ -1431,10 +1431,57 @@ function startSingle_body( o )
     let _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
-    process.on( 'message', () =>
+    // let ipc = require( ipcPath );
+    
+    let ready = _.Consequence();
+    let terminated = false;
+    
+    waitForParent( 1000 );
+    
+    // setupIpc();
+    
+    ready.then( () =>
     {
-      process.on( 'disconnect', () => _.process.startMultiple( o ) )
+      // if( ipc.server.stop )
+      // ipc.server.stop();
+      
+      return _.process.startMultiple( o );
     })
+    
+    /* */
+    
+    function waitForParent( period )
+    {
+      return _.time.periodic( period, () => 
+      {
+        if( terminated )
+        return;
+        if( _.process.isAlive( parentPid ) )
+        return true;
+        ready.take( true )
+        debugger
+        terminated = true;
+      })
+    }
+    
+    // function setupIpc()
+    // {
+    //   ipc.config.id = 'afterdeath.' + process.pid;
+    //   ipc.config.retry= 1500;
+    //   ipc.config.silent = true;
+    //   ipc.serve( () =>
+    //   {
+    //     ipc.server.on( 'exit', () => 
+    //     {
+    //       waitForParent( 150 );
+    //     });
+    //   });
+
+    //   ipc.server.start();
+      
+    //   process.send( ipc.config.id )
+    // }
+    
   }
 
   /* */
@@ -1443,9 +1490,32 @@ function startSingle_body( o )
   {
     o.conStart.give( function( err, op )
     {
-      if( !err )
-      o.pnd.send( true );
-      this.take( err, op );
+      if( err )
+      return this.error( err );
+      
+      o.disconnect();
+      
+      // let ipc = require( 'node-ipc' );
+      
+      // o.pnd.on( 'message', ( ipcHostId ) => 
+      // {
+      //   o.disconnect();
+        
+      //   ipc.config.id = 'afterdeath.parent:' + process.pid;
+      //   ipc.config.retry = 1500;
+      //   ipc.config.silent = true;
+        
+      //   _.process.on( 'exit', () => 
+      //   {
+      //      ipc.connectTo( ipcHostId, () => 
+      //      {
+      //       ipc.of[ ipcHostId ].emit( 'exit', true );
+      //       ipc.disconnect( ipcHostId );
+      //      });
+      //   })
+      // })
+      
+      this.take( op );
     })
   }
 

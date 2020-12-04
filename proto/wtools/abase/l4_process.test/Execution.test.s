@@ -10843,7 +10843,6 @@ function startSingleAfterDeath( test )
     _.time.out( context.t2, () => /* 5000 */
     {
       console.log( 'program1::termination begin' );
-      _.procedure.terminationBegin();
       return null;
     })
   }
@@ -10871,6 +10870,163 @@ startSingleAfterDeath.description =
 `
 Spawns program1 as "main" process.
 Program1 starts program2 with mode:'afterdeath'
+Program2 is spawned after death of program1
+Program2 exits normally after short timeout
+`
+
+//
+
+function startSingleAfterDeathTerminatingMain( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let program1Path = a.program( program1 );
+  let program2Path = a.program( program2 );
+  let program2PidPath = a.abs( a.routinePath, 'program2Pid' );
+
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
+
+  /* */
+
+  function run( mode )
+  {
+    let ready = _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}`;
+      let stack = [];
+      let o =
+      {
+        execPath : mode === 'fork' ? 'program1.js' : 'node program1.js',
+        mode,
+        outputCollecting : 1,
+        outputPiping : 1,
+        currentPath : a.routinePath,
+        throwingExitCode : 0,
+        ipc : 1,
+      }
+
+      if( mode === 'shell' ) /* mode::shell doesn't support ipc */
+      return test.shouldThrowErrorSync( () => _.process.start( o ) )
+
+      // debugger;
+      _.process.start( o );
+      let secondaryPid;
+      // debugger;
+
+      o.pnd.on( 'message', ( e ) =>
+      {
+        secondaryPid = _.numberFrom( e );
+        _.process.terminate({ pid : o.pnd.pid, withChildren : 0 })
+      })
+
+      o.conTerminate.then( () =>
+      {
+        stack.push( 'conTerminate1' );
+
+        test.will = 'program1 terminated'
+        test.notIdentical( o.exitCode, 0 );
+
+        return _.time.out( context.t2 ); /* 5000 */
+      })
+      
+      o.conTerminate.then( () =>
+      {
+        test.will = 'secondary process is alive'
+        test.true( _.process.isAlive( secondaryPid ) );
+
+        test.will = 'child of secondary process is still alive'
+        test.true( !a.fileProvider.fileExists( program2PidPath ) );
+
+        return _.time.out( context.t2 * 2 ); /* 10000 */
+      })
+
+      o.conTerminate.then( () =>
+      {
+        stack.push( 'conTerminate2' );
+        test.identical( stack, [ 'conTerminate1', 'conTerminate2' ] );
+
+        test.case = 'secondary process is terminated'
+        test.true( !_.process.isAlive( secondaryPid ) );
+
+        test.case = 'child of secondary process is terminated'
+        test.true( a.fileProvider.fileExists( program2PidPath ) );
+        let program2Pid = a.fileProvider.fileRead( program2PidPath );
+        program2Pid = _.numberFrom( program2Pid );
+
+        test.case = 'secondary process and child are not same'
+        test.true( !_.process.isAlive( program2Pid ) );
+        test.notIdentical( secondaryPid, program2Pid );
+
+        a.fileProvider.fileDelete( program2PidPath );
+        return null;
+      })
+
+      return o.conTerminate;
+    })
+
+    return ready;
+
+  }
+
+  /* - */
+
+  function program1()
+  {
+    let _ = require( toolsPath );
+
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    let o =
+    {
+      execPath : 'node program2.js',
+      outputCollecting : 1,
+      when : 'afterdeath',
+      mode : 'spawn',
+    }
+
+    _.process.startSingle( o );
+
+    o.conStart.thenGive( () =>
+    {
+      process.send( o.pnd.pid );
+    })
+
+    _.time.out( context.t2, () => /* 5000 */
+    {
+      console.log( 'program1::termination begin' );
+      return null;
+    })
+  }
+
+  /* */
+
+  function program2()
+  {
+    let _ = require( toolsPath );
+
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    _.time.out( context.t2, () => /* 5000 */
+    {
+      let filePath = _.path.join( __dirname, 'program2Pid' );
+      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
+    })
+  }
+
+}
+
+startSingleAfterDeathTerminatingMain.timeOut = 35e4; /* Locally : 34.737s */
+startSingleAfterDeathTerminatingMain.description =
+`
+Spawns program1 as "main" process
+Program1 starts program2 with mode:'afterdeath'
+Tester kills program1
 Program2 is spawned after death of program1
 Program2 exits normally after short timeout
 `
@@ -10915,8 +11071,8 @@ function startSingleAfterDeathOutput( test )
         test.identical( op.ended, true );
         test.identical( _.strCount( op.output, 'program1::begin' ), 1 )
         test.identical( _.strCount( op.output, 'program1::end' ), 1 )
-        test.identical( _.strCount( op.output, 'program2::begin' ), 1 )
-        test.identical( _.strCount( op.output, 'program2::end' ), 1 )
+        test.identical( _.strCount( op.output, 'program2::begin' ), 0 )
+        test.identical( _.strCount( op.output, 'program2::end' ), 0 )
 
         return null;
       })
@@ -10980,15 +11136,9 @@ function startSingleAfterDeathOutput( test )
 
     _.process.startSingle( o );
 
-    o.pnd.on( 'exit', () => //zzz for Vova: remove after enabling exit handler in start
-    {
-      _.procedure.terminationBegin();
-    })
-
     _.time.out( context.t2, () =>
     {
       console.log( 'program1::end' );
-      o.pnd.disconnect();
       return null;
     })
   }
@@ -37528,6 +37678,7 @@ var Proto =
     startMinimalOptionWhenTime,
     startMinimalOptionTimeOut,
     startSingleAfterDeath, /* qqq for Vova : does not work if call is _.process.startSingle() aaa:fixed */
+    startSingleAfterDeathTerminatingMain,
     startSingleAfterDeathOutput, /* qqq for Vova : does not work if call is _.process.startSingle() aaa:fixed*/
 
     // detaching
