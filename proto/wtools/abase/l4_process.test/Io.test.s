@@ -47,59 +47,13 @@ function inputReadToWithArguments( test )
   let context = this;
   let a = test.assetFor( false );
 
-  a.ready.then( () =>
-  {
-    test.case = 'ORIGINAl';
-    let locals =
-    {
-      dst : { r : 'r' },
-      namesMap : { r : 'r' },
-      context : { t0 : context.t0 },
-      toolsPath : _.module.resolve( 'wTools' ),
-    };
-    let programPath = a.program( { routine : testApp, locals } );
-
-    let o =
-    {
-      execPath : programPath,
-      mode : 'fork',
-      args : [ 'r:routine' ],
-      throwingExitCode : 0,
-      outputPiping : 0,
-      ipc : 1,
-      outputCollecting : 1,
-    };
-
-    let returned = _.process.startMinimal( o );
-
-    o.pnd.on( 'message', ( got ) =>
-    {
-      test.identical( got[ 0 ], { r : 'routine' } );
-      test.identical( got[ 1 ], {} );
-      _.process.terminate({ pnd : o.pnd, timeOut : context.t0 });
-    })
-
-    returned.then( ( op ) =>
-    {
-      test.identical( op.exitCode, 0 );
-      test.identical( op.ended, true );
-
-      a.fileProvider.fileDelete( programPath );
-      return null
-    })
-
-    return returned;
-  })
-
-  // FIRST
-
   // a.ready.then( () =>
   // {
-  //   test.case = 'dst - empty map';
+  //   test.case = 'ORIGINAl';
   //   let locals =
   //   {
-  //     dst : { r : true },
-  //     namesMap : { r : 'routine' },
+  //     dst : { r : 'r' },
+  //     namesMap : { r : 'r' },
   //     context : { t0 : context.t0 },
   //     toolsPath : _.module.resolve( 'wTools' ),
   //   };
@@ -109,10 +63,10 @@ function inputReadToWithArguments( test )
   //   {
   //     execPath : programPath,
   //     mode : 'fork',
-  //     args : [ 'r:true' ],
-  //     // throwingExitCode : 0,
+  //     args : [ 'r:routine' ],
+  //     throwingExitCode : 0,
   //     outputPiping : 0,
-  //     // ipc : 1,
+  //     ipc : 1,
   //     outputCollecting : 1,
   //   };
 
@@ -120,9 +74,9 @@ function inputReadToWithArguments( test )
 
   //   o.pnd.on( 'message', ( got ) =>
   //   {
-  //     test.identical( got[ 0 ], {} );
+  //     test.identical( got[ 0 ], { r : 'routine' } );
   //     test.identical( got[ 1 ], {} );
-  //     _.process.terminate({ pnd : o.pnd, timeOut : context.t0 });
+  //     // _.process.terminate({ pnd : o.pnd, timeOut : /*context.t0*/ });
   //   })
 
   //   returned.then( ( op ) =>
@@ -137,6 +91,382 @@ function inputReadToWithArguments( test )
   //   return returned;
   // })
 
+  a.ready.then( () =>
+  {
+    test.case = 'dst - empty map';
+    let locals =
+    {
+      dst : {},
+      namesMap : {},
+      context : { t0 : context.t0 },
+      toolsPath : _.module.resolve( 'wTools' ),
+    };
+    let programPath = a.program( { routine : testApp, locals } );
+
+    let o =
+    {
+      execPath : programPath,
+      mode : 'fork',
+      outputPiping : 0,
+      outputCollecting : 1,
+    };
+
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( got ) =>
+    {
+      test.identical( got[ 0 ], {} );
+      test.identical( got[ 1 ], {} );
+    })
+
+    returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+
+      a.fileProvider.fileDelete( programPath );
+      return null
+    })
+
+    return returned;
+  })
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'dst - empty map, namesMap - not empty';
+    let locals =
+    {
+      dst : {},
+      namesMap : { routine : 'r' },
+      context : { t0 : context.t0 },
+      toolsPath : _.module.resolve( 'wTools' ),
+    };
+    let programPath = a.program( { routine : testApp, locals } );
+
+    let o =
+    {
+      execPath : programPath,
+      mode : 'fork',
+      outputPiping : 0,
+      outputCollecting : 1,
+    };
+
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( got ) =>
+    {
+      test.identical( got[ 0 ], {} );
+      test.identical( got[ 1 ], {} );
+    })
+
+    returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+
+      a.fileProvider.fileDelete( programPath );
+      return null
+    })
+
+    return returned;
+  })
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'dst - map with boolean';
+    let locals =
+    {
+      dst : { r : true },
+      namesMap : {},
+      context : { t0 : context.t0 },
+      toolsPath : _.module.resolve( 'wTools' ),
+    };
+    let programPath = a.program( { routine : testApp, locals } );
+
+    let o =
+    {
+      execPath : programPath,
+      mode : 'fork',
+      outputPiping : 0,
+      outputCollecting : 1,
+    };
+
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( got ) =>
+    {
+      test.identical( got[ 0 ], { r : true } );
+      test.identical( got[ 1 ], {} );
+    })
+
+    returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+
+      a.fileProvider.fileDelete( programPath );
+      return null
+    })
+
+    return returned;
+  })
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'dst - map with number';
+    let locals =
+    {
+      dst : { r : 0 },
+      namesMap : {},
+      context : { t0 : context.t0 },
+      toolsPath : _.module.resolve( 'wTools' ),
+    };
+    let programPath = a.program( { routine : testApp, locals } );
+
+    let o =
+    {
+      execPath : programPath,
+      mode : 'fork',
+      outputPiping : 0,
+      outputCollecting : 1,
+    };
+
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( got ) =>
+    {
+      test.identical( got[ 0 ], { r : 0 } );
+      test.identical( got[ 1 ], {} );
+    })
+
+    returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+
+      a.fileProvider.fileDelete( programPath );
+      return null
+    })
+
+    return returned;
+  })
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'dst - null';
+    let locals =
+    {
+      dst : { r : null },
+      namesMap : {},
+      context : { t0 : context.t0 },
+      toolsPath : _.module.resolve( 'wTools' ),
+    };
+    let programPath = a.program( { routine : testApp, locals } );
+
+    let o =
+    {
+      execPath : programPath,
+      mode : 'fork',
+      outputPiping : 0,
+      outputCollecting : 1,
+    };
+
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( got ) =>
+    {
+      test.identical( got[ 0 ], { r : null } );
+      test.identical( got[ 1 ], {} );
+    })
+
+    returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+
+      a.fileProvider.fileDelete( programPath );
+      return null
+    })
+
+    return returned;
+  })
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'dst - map with boolean, namesMap = { routine : \'r\' }';
+    let locals =
+    {
+      dst : { r : true },
+      namesMap : { routine : 'r' },
+      context : { t0 : context.t0 },
+      toolsPath : _.module.resolve( 'wTools' ),
+    };
+    let programPath = a.program( { routine : testApp, locals } );
+
+    let o =
+    {
+      execPath : programPath,
+      mode : 'fork',
+      outputPiping : 0,
+      outputCollecting : 1,
+    };
+
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( got ) =>
+    {
+      test.identical( got[ 0 ], { r : true } );
+      test.identical( got[ 1 ], {} );
+    })
+
+    returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+
+      a.fileProvider.fileDelete( programPath );
+      return null
+    })
+
+    return returned;
+  })
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'dst - map with number, namesMap = { routine : \'r\' }';
+    let locals =
+    {
+      dst : { r : 0 },
+      namesMap : { routine : 'r' },
+      context : { t0 : context.t0 },
+      toolsPath : _.module.resolve( 'wTools' ),
+    };
+    let programPath = a.program( { routine : testApp, locals } );
+
+    let o =
+    {
+      execPath : programPath,
+      mode : 'fork',
+      outputPiping : 0,
+      outputCollecting : 1,
+    };
+
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( got ) =>
+    {
+      test.identical( got[ 0 ], { r : 0 } );
+      test.identical( got[ 1 ], {} );
+    })
+
+    returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+
+      a.fileProvider.fileDelete( programPath );
+      return null
+    })
+
+    return returned;
+  })
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'dst - null, namesMap = { routine : \'r\' }';
+    let locals =
+    {
+      dst : { r : null },
+      namesMap : { routine : 'r' },
+      context : { t0 : context.t0 },
+      toolsPath : _.module.resolve( 'wTools' ),
+    };
+    let programPath = a.program( { routine : testApp, locals } );
+
+    let o =
+    {
+      execPath : programPath,
+      mode : 'fork',
+      outputPiping : 0,
+      outputCollecting : 1,
+    };
+
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( got ) =>
+    {
+      test.identical( got[ 0 ], { r : null } );
+      test.identical( got[ 1 ], {} );
+    })
+
+    returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+
+      a.fileProvider.fileDelete( programPath );
+      return null
+    })
+
+    return returned;
+  })
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'dst - null, namesMap - array';
+    let locals =
+    {
+      dst : { r : null },
+      namesMap : [ 'r', 'a' ],
+      context : { t0 : context.t0 },
+      toolsPath : _.module.resolve( 'wTools' ),
+    };
+    let programPath = a.program( { routine : testApp, locals } );
+
+    let o =
+    {
+      execPath : programPath,
+      mode : 'fork',
+      outputPiping : 0,
+      outputCollecting : 1,
+    };
+
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( got ) =>
+    {
+      test.identical( got[ 0 ], { r : null } );
+      test.identical( got[ 1 ], {} );
+    })
+
+    returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+
+      a.fileProvider.fileDelete( programPath );
+      return null
+    })
+
+    return returned;
+  })
+
   return a.ready;
 
   /* */
@@ -147,93 +477,9 @@ function inputReadToWithArguments( test )
 
     _.include( 'wProcess' );
 
-    // var dst = { r : 'r' };
-    // var namesMap = { r : 'r' };
     let result = _.process.inputReadTo( dst, namesMap );
     process.send( [ dst, result ] );
   }
-  /* read input to prevent side effect from testing input */
-  // _.process.inputReadTo( { r : true }, { r : 'r' } );
-
-  /* */
-
-  // test.case = 'dst - empty map';
-  // var dst = {};
-  // var namesMap = {};
-  // var got = _.process.inputReadTo( dst, namesMap );
-  // test.identical( dst, {} );
-  // test.identical( got, {} );
-  // test.true( got !== dst );
-
-  // test.case = 'dst - empty map, namesMap - not empty';
-  // var dst = {};
-  // var namesMap = { routine : 'r' };
-  // var got = _.process.inputReadTo( dst, namesMap );
-  // test.identical( dst, {} );
-  // test.identical( got, {} );
-  // test.true( got !== dst );
-
-  /* */
-
-  // test.case = 'dst - map with boolean';
-  // var dst = { r : true };
-  // var namesMap = {};
-  // var got = _.process.inputReadTo( dst, namesMap );
-  // test.identical( dst, { r : true } );
-  // test.identical( got, {} );
-  // test.true( got !== dst );
-
-  // test.case = 'dst - map with number';
-  // var dst = { r : 0 };
-  // var namesMap = {};
-  // var got = _.process.inputReadTo( dst, namesMap );
-  // test.identical( dst, { r : 0 } );
-  // test.identical( got, {} );
-  // test.true( got !== dst );
-
-  // test.case = 'dst - null';
-  // var dst = { r : null };
-  // var namesMap = {};
-  // var got = _.process.inputReadTo( dst, namesMap );
-  // test.identical( dst, { r : null } );
-  // test.identical( got, {} );
-  // test.true( got !== dst );
-
-  // /* */
-
-  // test.case = 'dst - map with boolean';
-  // var dst = { r : true };
-  // var namesMap = { routine : 'r' };
-  // var got = _.process.inputReadTo( dst, namesMap );
-  // test.identical( dst, { r : true } );
-  // test.identical( got, {} );
-  // test.true( got !== dst );
-
-  // test.case = 'dst - map with number';
-  // var dst = { r : 0 };
-  // var namesMap = { routine : 'r' };
-  // var got = _.process.inputReadTo( dst, namesMap );
-  // test.identical( dst, { r : 0 } );
-  // test.identical( got, {} );
-  // test.true( got !== dst );
-
-  // test.case = 'dst - null';
-  // var dst = { r : null };
-  // var namesMap = { routine : 'r' };
-  // var got = _.process.inputReadTo( dst, namesMap );
-  // test.identical( dst, { r : null } );
-  // test.identical( got, {} );
-  // test.true( got !== dst );
-
-  // /* */
-
-  // test.case = 'dst - null, namesMap - array';
-  // var dst = { r : null };
-  // var namesMap = [ 'r', 'a' ];
-  // var got = _.process.inputReadTo( dst, namesMap );
-  // test.identical( dst, { r : null } );
-  // test.identical( got, {} );
-  // test.true( got !== dst );
 
   /* ORIGINAL */
   // /* read input to prevent side effect from testing input */
