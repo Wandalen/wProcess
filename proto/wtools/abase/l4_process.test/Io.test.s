@@ -52,7 +52,7 @@ function inputReadToWithArguments( test )
     test.case = 'dst - empty map';
     let programPath = programMake( {}, {} );
     let o = optionsMake( programPath );
-    let got = _.process.startMinimal( o );
+    let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
     {
@@ -60,7 +60,7 @@ function inputReadToWithArguments( test )
       test.identical( op[ 1 ], {} );
     });
 
-    return got.then( ( op ) =>
+    return returned.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
@@ -77,7 +77,7 @@ function inputReadToWithArguments( test )
     test.case = 'dst - empty map, namesMap - not empty';
     let programPath = programMake( {}, { routine : 'r' } );
     let o = optionsMake( programPath );
-    let got = _.process.startMinimal( o );
+    let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
     {
@@ -85,7 +85,7 @@ function inputReadToWithArguments( test )
       test.identical( op[ 1 ], {} );
     });
 
-    return got.then( ( op ) =>
+    return returned.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
@@ -102,7 +102,7 @@ function inputReadToWithArguments( test )
     test.case = 'dst - map with boolean';
     let programPath = programMake( { r : true }, {} );
     let o = optionsMake( programPath );
-    let got = _.process.startMinimal( o );
+    let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
     {
@@ -110,7 +110,7 @@ function inputReadToWithArguments( test )
       test.identical( op[ 1 ], {} );
     });
 
-    return got.then( ( op ) =>
+    return returned.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
@@ -127,7 +127,7 @@ function inputReadToWithArguments( test )
     test.case = 'dst - map with number';
     let programPath = programMake( { r : 0 }, {} );
     let o = optionsMake( programPath );
-    let got = _.process.startMinimal( o );
+    let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
     {
@@ -135,7 +135,7 @@ function inputReadToWithArguments( test )
       test.identical( op[ 1 ], {} );
     });
 
-    return got.then( ( op ) =>
+    return returned.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
@@ -152,7 +152,7 @@ function inputReadToWithArguments( test )
     test.case = 'dst - null';
     let programPath = programMake( { r : null }, {} );
     let o = optionsMake( programPath );
-    let got = _.process.startMinimal( o );
+    let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
     {
@@ -160,7 +160,7 @@ function inputReadToWithArguments( test )
       test.identical( op[ 1 ], {} );
     });
 
-    return got.then( ( op ) =>
+    return returned.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
@@ -177,7 +177,7 @@ function inputReadToWithArguments( test )
     test.case = 'dst - map with boolean';
     let programPath = programMake( { r : true }, { routine : 'r' } );
     let o = optionsMake( programPath );
-    let got = _.process.startMinimal( o );
+    let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
     {
@@ -185,7 +185,7 @@ function inputReadToWithArguments( test )
       test.identical( op[ 1 ], {} );
     });
 
-    return got.then( ( op ) =>
+    return returned.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
@@ -202,7 +202,7 @@ function inputReadToWithArguments( test )
     test.case = 'dst - map with number';
     let programPath = programMake( { r : 0 }, { routine : 'r' } );
     let o = optionsMake( programPath );
-    let got = _.process.startMinimal( o );
+    let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
     {
@@ -210,7 +210,7 @@ function inputReadToWithArguments( test )
       test.identical( op[ 1 ], {} );
     });
 
-    return got.then( ( op ) =>
+    return returned.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
@@ -227,7 +227,7 @@ function inputReadToWithArguments( test )
     test.case = 'dst - null';
     let programPath = programMake( { r : null }, { routine : 'r' } );
     let o = optionsMake( programPath );
-    let got = _.process.startMinimal( o );
+    let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
     {
@@ -235,7 +235,7 @@ function inputReadToWithArguments( test )
       test.identical( op[ 1 ], {} );
     });
 
-    return got.then( ( op ) =>
+    return returned.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
@@ -252,7 +252,7 @@ function inputReadToWithArguments( test )
     test.case = 'dst - null';
     let programPath = programMake( { r : null }, { r : 'a' } );
     let o = optionsMake( programPath );
-    let got = _.process.startMinimal( o );
+    let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
     {
@@ -260,7 +260,7 @@ function inputReadToWithArguments( test )
       test.identical( op[ 1 ], {} );
     });
 
-    return got.then( ( op ) =>
+    return returned.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
@@ -366,7 +366,7 @@ function inputReadToWithOptionsMap( test )
     test.case = 'dst - empty map';
     let programPath = programMake( {}, {} );
     let o = optionsMake( programPath );
-    let got = _.process.startMinimal( o );
+    let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
     {
@@ -374,7 +374,7 @@ function inputReadToWithOptionsMap( test )
       test.identical( op[ 1 ], {} );
     });
 
-    return got.then( ( op ) =>
+    return returned.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
@@ -391,7 +391,7 @@ function inputReadToWithOptionsMap( test )
     test.case = 'dst - empty map, namesMap - not empty';
     let programPath = programMake( {}, { routine : 'r' } );
     let o = optionsMake( programPath );
-    let got = _.process.startMinimal( o );
+    let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
     {
@@ -399,7 +399,7 @@ function inputReadToWithOptionsMap( test )
       test.identical( op[ 1 ], {} );
     });
 
-    return got.then( ( op ) =>
+    return returned.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
@@ -416,7 +416,7 @@ function inputReadToWithOptionsMap( test )
     test.case = 'dst - map with boolean';
     let programPath = programMake( { r : true }, {} );
     let o = optionsMake( programPath );
-    let got = _.process.startMinimal( o );
+    let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
     {
@@ -424,7 +424,7 @@ function inputReadToWithOptionsMap( test )
       test.identical( op[ 1 ], {} );
     });
 
-    return got.then( ( op ) =>
+    return returned.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
@@ -441,7 +441,7 @@ function inputReadToWithOptionsMap( test )
     test.case = 'dst - map with number';
     let programPath = programMake( { r : 0 }, {} );
     let o = optionsMake( programPath );
-    let got = _.process.startMinimal( o );
+    let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
     {
@@ -449,7 +449,7 @@ function inputReadToWithOptionsMap( test )
       test.identical( op[ 1 ], {} );
     });
 
-    return got.then( ( op ) =>
+    return returned.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
@@ -466,7 +466,7 @@ function inputReadToWithOptionsMap( test )
     test.case = 'dst - null';
     let programPath = programMake( { r : null }, {} );
     let o = optionsMake( programPath );
-    let got = _.process.startMinimal( o );
+    let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
     {
@@ -474,7 +474,7 @@ function inputReadToWithOptionsMap( test )
       test.identical( op[ 1 ], {} );
     });
 
-    return got.then( ( op ) =>
+    return returned.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
@@ -491,7 +491,7 @@ function inputReadToWithOptionsMap( test )
     test.case = 'dst - map with boolean';
     let programPath = programMake( { r : true }, { routine : 'r' } );
     let o = optionsMake( programPath );
-    let got = _.process.startMinimal( o );
+    let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
     {
@@ -499,7 +499,7 @@ function inputReadToWithOptionsMap( test )
       test.identical( op[ 1 ], {} );
     });
 
-    return got.then( ( op ) =>
+    return returned.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
@@ -516,7 +516,7 @@ function inputReadToWithOptionsMap( test )
     test.case = 'dst - map with number';
     let programPath = programMake( { r : 0 }, { routine : 'r' } );
     let o = optionsMake( programPath );
-    let got = _.process.startMinimal( o );
+    let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
     {
@@ -524,7 +524,7 @@ function inputReadToWithOptionsMap( test )
       test.identical( op[ 1 ], {} );
     });
 
-    return got.then( ( op ) =>
+    return returned.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
@@ -541,7 +541,7 @@ function inputReadToWithOptionsMap( test )
     test.case = 'dst - null';
     let programPath = programMake( { r : null }, { routine : 'r' } );
     let o = optionsMake( programPath );
-    let got = _.process.startMinimal( o );
+    let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
     {
@@ -549,7 +549,7 @@ function inputReadToWithOptionsMap( test )
       test.identical( op[ 1 ], {} );
     });
 
-    return got.then( ( op ) =>
+    return returned.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
@@ -566,7 +566,7 @@ function inputReadToWithOptionsMap( test )
     test.case = 'dst - null';
     let programPath = programMake( { r : null }, { r : 'a' } );
     let o = optionsMake( programPath );
-    let got = _.process.startMinimal( o );
+    let returned = _.process.startMinimal( o );
 
     o.pnd.on( 'message', ( op ) =>
     {
@@ -574,7 +574,7 @@ function inputReadToWithOptionsMap( test )
       test.identical( op[ 1 ], {} );
     });
 
-    return got.then( ( op ) =>
+    return returned.then( ( op ) =>
     {
       test.identical( op.exitCode, 0 );
       test.identical( op.ended, true );
