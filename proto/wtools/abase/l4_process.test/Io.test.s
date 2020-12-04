@@ -467,6 +467,60 @@ function inputReadToWithArguments( test )
     return returned;
   })
 
+  /*  */
+
+  if( Config.debug )
+  {
+    test.case = 'without arguments';
+    test.shouldThrowErrorSync( () => _.process.inputReadTo() );
+
+    test.case = 'extra arguments';
+    test.shouldThrowErrorSync( () => _.process.inputReadTo( { a : 1 }, { a : 'a', b : 'a' }, { extra : 1 } ) );
+
+    test.case = 'wrong type of options map o';
+    test.shouldThrowErrorSync( () => _.process.inputReadTo( 'wrong' ) );
+
+    test.case = 'wrong type of o.dst';
+    test.shouldThrowErrorSync( () => _.process.inputReadTo( 'wrong', { a : 'a', b : 'a' } ) );
+    test.shouldThrowErrorSync( () => _.process.inputReadTo({ dst : 'wrong', namesMap : { a : 'a', b : 'a' } }) );
+
+    test.case = 'wrong type of o.namesMap';
+    test.shouldThrowErrorSync( () => _.process.inputReadTo( {}, 'wrong' ) );
+    test.shouldThrowErrorSync( () => _.process.inputReadTo({ dst : {}, namesMap : 'wrong' }) );
+
+    test.case = 'options map has unknown option';
+    test.shouldThrowErrorSync( () => _.process.inputReadTo({ dst : {}, namesMap : { a : 'a' }, unknown : 1 }) );
+
+    test.case = 'dst - empty map, namesMap has unknown property';
+    test.shouldThrowErrorSync( () =>
+    {
+      let o = { dst : {}, namesMap : { a : 'a' }, propertiesMap : { b : 'b' } };
+      return _.process.inputReadTo( o );
+    });
+
+    test.case = 'dst - map with number, namesMap with valid property, NaN value';
+    test.shouldThrowErrorSync( () =>
+    {
+      let o = { dst : { a : 1 }, namesMap : { a : 'a' }, propertiesMap : { a : 'nan' } };
+      return _.process.inputReadTo( o );
+    });
+
+  }
+
+  return a.ready;
+
+  /* - */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+
+    _.include( 'wProcess' );
+
+    let result = _.process.inputReadTo( dst, namesMap );
+    process.send( [ dst, result ] );
+  }
+
   /* */
 
   /* ORIGINAL */
@@ -553,58 +607,6 @@ function inputReadToWithArguments( test )
   // test.identical( got, {} );
   // test.true( got !== dst );
 
-  /* - */
-
-  if( !Config.debug )
-  return a.ready;
-
-  test.case = 'without arguments';
-  test.shouldThrowErrorSync( () => _.process.inputReadTo() );
-
-  test.case = 'extra arguments';
-  test.shouldThrowErrorSync( () => _.process.inputReadTo( { a : 1 }, { a : 'a', b : 'a' }, { extra : 1 } ) );
-
-  test.case = 'wrong type of options map o';
-  test.shouldThrowErrorSync( () => _.process.inputReadTo( 'wrong' ) );
-
-  test.case = 'wrong type of o.dst';
-  test.shouldThrowErrorSync( () => _.process.inputReadTo( 'wrong', { a : 'a', b : 'a' } ) );
-  test.shouldThrowErrorSync( () => _.process.inputReadTo({ dst : 'wrong', namesMap : { a : 'a', b : 'a' } }) );
-
-  test.case = 'wrong type of o.namesMap';
-  test.shouldThrowErrorSync( () => _.process.inputReadTo( {}, 'wrong' ) );
-  test.shouldThrowErrorSync( () => _.process.inputReadTo({ dst : {}, namesMap : 'wrong' }) );
-
-  test.case = 'options map has unknown option';
-  test.shouldThrowErrorSync( () => _.process.inputReadTo({ dst : {}, namesMap : { a : 'a' }, unknown : 1 }) );
-
-  test.case = 'dst - empty map, namesMap has unknown property';
-  test.shouldThrowErrorSync( () =>
-  {
-    let o = { dst : {}, namesMap : { a : 'a' }, propertiesMap : { b : 'b' } };
-    return _.process.inputReadTo( o );
-  });
-
-  test.case = 'dst - map with number, namesMap with valid property, NaN value';
-  test.shouldThrowErrorSync( () =>
-  {
-    let o = { dst : { a : 1 }, namesMap : { a : 'a' }, propertiesMap : { a : 'nan' } };
-    return _.process.inputReadTo( o );
-  });
-
-  /* - */
-
-  return a.ready;
-
-  function testApp()
-  {
-    let _ = require( toolsPath );
-
-    _.include( 'wProcess' );
-
-    let result = _.process.inputReadTo( dst, namesMap );
-    process.send( [ dst, result ] );
-  }
 }
 
 //
