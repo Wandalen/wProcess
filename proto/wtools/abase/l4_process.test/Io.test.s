@@ -467,19 +467,7 @@ function inputReadToWithArguments( test )
     return returned;
   })
 
-  return a.ready;
-
   /* */
-
-  function testApp()
-  {
-    let _ = require( toolsPath );
-
-    _.include( 'wProcess' );
-
-    let result = _.process.inputReadTo( dst, namesMap );
-    process.send( [ dst, result ] );
-  }
 
   /* ORIGINAL */
   // /* read input to prevent side effect from testing input */
@@ -568,7 +556,7 @@ function inputReadToWithArguments( test )
   /* - */
 
   if( !Config.debug )
-  return;
+  return a.ready;
 
   test.case = 'without arguments';
   test.shouldThrowErrorSync( () => _.process.inputReadTo() );
@@ -603,6 +591,20 @@ function inputReadToWithArguments( test )
     let o = { dst : { a : 1 }, namesMap : { a : 'a' }, propertiesMap : { a : 'nan' } };
     return _.process.inputReadTo( o );
   });
+
+  /* - */
+
+  return a.ready;
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+
+    _.include( 'wProcess' );
+
+    let result = _.process.inputReadTo( dst, namesMap );
+    process.send( [ dst, result ] );
+  }
 }
 
 //
