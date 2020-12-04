@@ -44,119 +44,238 @@ function suiteEnd()
 
 function inputReadToWithArguments( test )
 {
+  let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testApp );
 
-  a.shell( 'node ' + programPath );
-  a.ready.then( ( op ) =>
+  a.ready.then( () =>
   {
-    test.case = 'the wrapper to prevent tester input';
-    test.identical( op.exitCode, 0 );
-    test.identical( _.strCount( op.output, 'Launching several ( 1 ) test suite(s) ..' ), 1 );
-    test.identical( _.strCount( op.output, 'Running test suite ( inputReadToWithArguments ) ..' ), 1 );
-    test.identical( _.strCount( op.output, 'Passed TestSuite::inputReadToWithArguments / TestRoutine::run' ), 1 );
-    test.identical( _.strCount( op.output, 'Passed test checks 37 / 37' ), 2 );
-    test.identical( _.strCount( op.output, 'Passed test cases 17 / 17' ), 2 );
-    test.identical( _.strCount( op.output, 'Passed test routines 1 / 1' ), 2 );
-    test.identical( _.strCount( op.output, 'Test suite ( inputReadToWithArguments ) ... in' ), 1 );
-    return null;
-  });
+    test.case = 'dst - empty map';
+    let programPath = programMake( {}, {} );
+    let o = optionsMake( programPath );
+    let got = _.process.startMinimal( o );
 
-  return a.ready;
+    o.pnd.on( 'message', ( op ) =>
+    {
+      test.identical( op[ 0 ], {} );
+      test.identical( op[ 1 ], {} );
+    });
+
+    return got.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+
+      a.fileProvider.fileDelete( programPath );
+      return null
+    });
+  });
 
   /* */
 
-  function testApp()
+  a.ready.then( () =>
   {
-    let _ = require( toolsPath );
-    _.include( 'wTesting' );
-    _.include( 'wProcess' );
+    test.case = 'dst - empty map, namesMap - not empty';
+    let programPath = programMake( {}, { routine : 'r' } );
+    let o = optionsMake( programPath );
+    let got = _.process.startMinimal( o );
 
-    function run( test )
+    o.pnd.on( 'message', ( op ) =>
     {
-      test.case = 'dst - empty map';
-      var dst = {};
-      var namesMap = {};
-      var got = _.process.inputReadTo( dst, namesMap );
-      test.identical( dst, {} );
-      test.identical( got, {} );
-      test.true( got !== dst );
+      test.identical( op[ 0 ], {} );
+      test.identical( op[ 1 ], {} );
+    });
 
-      test.case = 'dst - empty map, namesMap - not empty';
-      var dst = {};
-      var namesMap = { routine : 'r' };
-      var got = _.process.inputReadTo( dst, namesMap );
-      test.identical( dst, {} );
-      test.identical( got, {} );
-      test.true( got !== dst );
+    return got.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
 
-      /* */
+      a.fileProvider.fileDelete( programPath );
+      return null
+    });
+  });
 
-      test.case = 'dst - map with boolean';
-      var dst = { r : true };
-      var namesMap = {};
-      var got = _.process.inputReadTo( dst, namesMap );
-      test.identical( dst, { r : true } );
-      test.identical( got, {} );
-      test.true( got !== dst );
+  /* */
 
-      test.case = 'dst - map with number';
-      var dst = { r : 0 };
-      var namesMap = {};
-      var got = _.process.inputReadTo( dst, namesMap );
-      test.identical( dst, { r : 0 } );
-      test.identical( got, {} );
-      test.true( got !== dst );
+  a.ready.then( () =>
+  {
+    test.case = 'dst - map with boolean';
+    let programPath = programMake( { r : true }, {} );
+    let o = optionsMake( programPath );
+    let got = _.process.startMinimal( o );
 
-      test.case = 'dst - null';
-      var dst = { r : null };
-      var namesMap = {};
-      var got = _.process.inputReadTo( dst, namesMap );
-      test.identical( dst, { r : null } );
-      test.identical( got, {} );
-      test.true( got !== dst );
+    o.pnd.on( 'message', ( op ) =>
+    {
+      test.identical( op[ 0 ], { r : true } );
+      test.identical( op[ 1 ], {} );
+    });
 
-      /* */
+    return got.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
 
-      test.case = 'dst - map with boolean';
-      var dst = { r : true };
-      var namesMap = { routine : 'r' };
-      var got = _.process.inputReadTo( dst, namesMap );
-      test.identical( dst, { r : true } );
-      test.identical( got, {} );
-      test.true( got !== dst );
+      a.fileProvider.fileDelete( programPath );
+      return null
+    });
+  });
 
-      test.case = 'dst - map with number';
-      var dst = { r : 0 };
-      var namesMap = { routine : 'r' };
-      var got = _.process.inputReadTo( dst, namesMap );
-      test.identical( dst, { r : 0 } );
-      test.identical( got, {} );
-      test.true( got !== dst );
+  /* */
 
-      test.case = 'dst - null';
-      var dst = { r : null };
-      var namesMap = { routine : 'r' };
-      var got = _.process.inputReadTo( dst, namesMap );
-      test.identical( dst, { r : null } );
-      test.identical( got, {} );
-      test.true( got !== dst );
+  a.ready.then( () =>
+  {
+    test.case = 'dst - map with number';
+    let programPath = programMake( { r : 0 }, {} );
+    let o = optionsMake( programPath );
+    let got = _.process.startMinimal( o );
 
-      /* */
+    o.pnd.on( 'message', ( op ) =>
+    {
+      test.identical( op[ 0 ], { r : 0 } );
+      test.identical( op[ 1 ], {} );
+    });
 
-      test.case = 'dst - null, namesMap - array';
-      var dst = { r : null };
-      var namesMap = [ 'r', 'a' ];
-      var got = _.process.inputReadTo( dst, namesMap );
-      test.identical( dst, { r : null } );
-      test.identical( got, {} );
-      test.true( got !== dst );
+    return got.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
 
-      /* - */
+      a.fileProvider.fileDelete( programPath );
+      return null
+    });
+  });
 
-      if( !Config.debug )
-      return;
+  /* */
 
+  a.ready.then( () =>
+  {
+    test.case = 'dst - null';
+    let programPath = programMake( { r : null }, {} );
+    let o = optionsMake( programPath );
+    let got = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      test.identical( op[ 0 ], { r : null } );
+      test.identical( op[ 1 ], {} );
+    });
+
+    return got.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+
+      a.fileProvider.fileDelete( programPath );
+      return null
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'dst - map with boolean';
+    let programPath = programMake( { r : true }, { routine : 'r' } );
+    let o = optionsMake( programPath );
+    let got = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      test.identical( op[ 0 ], { r : true } );
+      test.identical( op[ 1 ], {} );
+    });
+
+    return got.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+
+      a.fileProvider.fileDelete( programPath );
+      return null
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'dst - map with number';
+    let programPath = programMake( { r : 0 }, { routine : 'r' } );
+    let o = optionsMake( programPath );
+    let got = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      test.identical( op[ 0 ], { r : 0 } );
+      test.identical( op[ 1 ], {} );
+    });
+
+    return got.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+
+      a.fileProvider.fileDelete( programPath );
+      return null
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'dst - null';
+    let programPath = programMake( { r : null }, { routine : 'r' } );
+    let o = optionsMake( programPath );
+    let got = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      test.identical( op[ 0 ], { r : null } );
+      test.identical( op[ 1 ], {} );
+    });
+
+    return got.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+
+      a.fileProvider.fileDelete( programPath );
+      return null
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'dst - null';
+    let programPath = programMake( { r : null }, { r : 'a' } );
+    let o = optionsMake( programPath );
+    let got = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      test.identical( op[ 0 ], { r : null } );
+      test.identical( op[ 1 ], {} );
+    });
+
+    return got.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+
+      a.fileProvider.fileDelete( programPath );
+      return null
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    if( Config.debug )
+    {
       test.case = 'without arguments';
       test.shouldThrowErrorSync( () => _.process.inputReadTo() );
 
@@ -191,20 +310,51 @@ function inputReadToWithArguments( test )
         return _.process.inputReadTo( o );
       });
     }
+    return null;
+  });
 
-    //
+  /* - */
 
-    let Self =
+  return a.ready;
+
+  /* */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+
+    _.include( 'wProcess' );
+    _.process._exitHandlerRepair();
+
+    let result = _.process.inputReadTo( dst, namesMap );
+    process.send( [ dst, result ] );
+  }
+
+
+  function programMake( dst, namesMap )
+  {
+    let locals =
     {
-      name : 'inputReadToWithArguments',
-      tests : { run },
+      dst,
+      namesMap,
+      toolsPath : _.module.resolve( 'wTools' ),
     };
+    return a.program( { routine : testApp, locals } );
+  }
 
-    //
+  /* */
 
-    Self = wTestSuite( Self );
-    if( typeof module !== 'undefined' && !module.parent )
-    wTester.test( Self.name );
+  function optionsMake( routinePath )
+  {
+    let o =
+    {
+      execPath : routinePath,
+      mode : 'fork',
+      throwingExitCode : 1,
+      outputCollecting : 1,
+      ipc : 1,
+    };
+    return o;
   }
 }
 
