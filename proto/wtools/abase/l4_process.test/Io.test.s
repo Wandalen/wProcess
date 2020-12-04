@@ -584,6 +584,155 @@ function inputReadToWithOptionsMap( test )
     });
   });
 
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.open( 'with propertiesMap' );
+
+    test.case = 'dst - empty map, namesMap - empty, propertiesMap - empty';
+    var dst = {};
+    var namesMap = {};
+    var propertiesMap = {};
+    var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
+    test.identical( dst, {} );
+    test.identical( got, {} );
+    test.true( got !== dst );
+    test.true( got === propertiesMap );
+
+    test.case = 'dst - empty map, namesMap - not empty, propertiesMap - empty';
+    var dst = {};
+    var namesMap = { routine : 'r' };
+    var propertiesMap = {};
+    var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
+    test.identical( dst, {} );
+    test.identical( got, {} );
+    test.true( got !== dst );
+    test.true( got === propertiesMap );
+
+    /* */
+
+    test.case = 'dst - map with boolean, namesMap - empty, propertiesMap - empty';
+    var dst = { r : true };
+    var namesMap = {};
+    var propertiesMap = {};
+    var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
+    test.identical( dst, { r : true } );
+    test.identical( got, {} );
+    test.true( got !== dst );
+    test.true( got === propertiesMap );
+
+    test.case = 'dst - map with number, namesMap - empty, propertiesMap - empty';
+    var dst = { r : 0 };
+    var namesMap = {};
+    var propertiesMap = {};
+    var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
+    test.identical( dst, { r : 0 } );
+    test.identical( got, {} );
+    test.true( got !== dst );
+    test.true( got === propertiesMap );
+
+    test.case = 'dst - null, namesMap - empty, propertiesMap - empty';
+    var dst = { r : null };
+    var namesMap = {};
+    var propertiesMap = {};
+    var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
+    test.identical( dst, { r : null } );
+    test.identical( got, {} );
+    test.true( got !== dst );
+    test.true( got === propertiesMap );
+
+    /* */
+
+    test.case = 'dst - map with boolean, namesMap - not empty, propertiesMap - empty';
+    var dst = { r : true };
+    var namesMap = { routine : 'r' };
+    var propertiesMap = {};
+    var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
+    test.identical( dst, { r : true } );
+    test.identical( got, {} );
+    test.true( got !== dst );
+    test.true( got === propertiesMap );
+
+    test.case = 'dst - map with number, namesMap - not empty, propertiesMap - empty';
+    var dst = { r : 0 };
+    var namesMap = { routine : 'r' };
+    var propertiesMap = {};
+    var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
+    test.identical( dst, { r : 0 } );
+    test.identical( got, {} );
+    test.true( got !== dst );
+    test.true( got === propertiesMap );
+
+    test.case = 'dst - null, namesMap - not empty, propertiesMap - empty';
+    var dst = { r : null };
+    var namesMap = { routine : 'r' };
+    var propertiesMap = {};
+    var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
+    test.identical( dst, { r : null } );
+    test.identical( got, {} );
+    test.true( got !== dst );
+    test.true( got === propertiesMap );
+
+    /* */
+
+    test.case = 'dst - null, namesMap - not empty array, propertiesMap - empty';
+    var dst = { r : null };
+    var namesMap = [ 'r', 'a' ];
+    var propertiesMap = {};
+    var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
+    test.identical( dst, { r : null } );
+    test.identical( got, {} );
+    test.true( got !== dst );
+    test.true( got === propertiesMap );
+
+    /* */
+
+    test.case = 'dst - map with boolean';
+    var dst = { r : true };
+    var namesMap = { routine : 'r', r : 'r' };
+    var propertiesMap = { 'r' : 1, 'routine' : 2 };
+    var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
+    test.identical( dst, { r : true } );
+    test.identical( got, {} );
+    test.true( got !== dst );
+    test.true( got === propertiesMap );
+
+    test.case = 'dst - map with number';
+    var dst = { r : 0 };
+    var namesMap = { routine : 'r', r : 'r' };
+    var propertiesMap = { 'r' : 1, 'routine' : 2 };
+    var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
+    test.identical( dst, { r : 2 } );
+    test.identical( got, {} );
+    test.true( got !== dst );
+    test.true( got === propertiesMap );
+
+    test.case = 'dst - null';
+    var dst = { r : null };
+    var namesMap = { routine : 'r', r : 'r' };
+    var propertiesMap = { 'r' : 1, 'routine' : 2 };
+    var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
+    test.identical( dst, { r : 2 } );
+    test.identical( got, {} );
+    test.true( got !== dst );
+    test.true( got === propertiesMap );
+
+    /* */
+
+    test.case = 'dst - null, namesMap - array';
+    var dst = { r : null, routine : () => true };
+    var namesMap = [ 'r', 'routine' ];
+    var propertiesMap = { 'r' : 1, 'routine' : 2 };
+    var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
+    test.identical( dst, { r : 1, routine : 2 } );
+    test.identical( got, {} );
+    test.true( got === propertiesMap );
+
+    test.close( 'with propertiesMap' );
+    return null;
+  });
+
   /* - */
 
   return a.ready;
