@@ -183,15 +183,6 @@ function inputReadToWithArguments( test )
   // test.identical( got, {} );
   // test.true( got !== dst );
 
-  /* TEST */
-  test.case = 'dst - map with boolean';
-  var dst = { r : false };
-  var namesMap = { a : true };
-  var got = _.process.inputReadTo( dst, namesMap );
-  test.identical( dst, { r : true } );
-  test.identical( got, {} );
-  test.true( got !== dst );
-
   // test.case = 'dst - map with number';
   // var dst = { r : 0 };
   // var namesMap = {};
