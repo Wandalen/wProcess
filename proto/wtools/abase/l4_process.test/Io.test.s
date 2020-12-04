@@ -538,6 +538,75 @@ function inputReadToOptionsOnlyAndRemoving( test )
   test.close( 'removing - 0' );
 }
 
+//
+
+function inputReadToCheckInputInfluence( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let locals =
+  {
+    context : { t0 : context.t0 },
+    toolsPath : _.module.resolve( 'wTools' ),
+  };
+  let programPath = a.program( { routine : testApp, locals } );
+
+  let o =
+  {
+    execPath : programPath,
+    mode : 'fork',
+    args : [ 'r:routine' ],
+    throwingExitCode : 0,
+    outputPiping : 0,
+    ipc : 1,
+    outputCollecting : 1,
+  };
+
+  let con = _.process.startMinimal( o );
+
+  o.pnd.on( 'message', ( got ) =>
+  {
+    test.identical( got[ 0 ], { r : 'routine' } );
+    test.identical( got[ 1 ], {} );
+    _.process.terminate({ pnd : o.pnd, timeOut : context.t0 });
+  })
+
+  return con.finally( ( err, op ) =>
+  {
+    if( err )
+    throw _.err( err );
+    return null;
+  })
+
+  return a.ready;
+
+  /* */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+
+    _.include( 'wProcess' );
+    _.process._exitHandlerRepair();
+
+    let loop = true;
+    var dst = { r : 'r' };
+    var namesMap = { r : 'r' };
+    let result = _.process.inputReadTo( dst, namesMap );
+    process.send( [ dst, result ] );
+
+    setTimeout( () =>
+    {
+      loop = false;
+    }, context.t0 ) /* 5000 */
+    while( loop )
+    {
+      loop = loop;
+    }
+    console.log( 'Exit after release' );
+  }
+}
+
 // --
 // event
 // --
@@ -2094,6 +2163,7 @@ var Proto =
     inputReadToWithArguments,
     inputReadToWithOptionsMap,
     inputReadToOptionsOnlyAndRemoving,
+    inputReadToCheckInputInfluence,
 
     // event
 
