@@ -2669,7 +2669,7 @@ function signal_body( o )
       else
       {
         let execPath = _.process.execPathOf({ pid : p.pid, sync : 1, throwing : 0 });
-        info = `\nPID : ${p.pnd.pid}\nExecPath : ${execPath}`; /* qqq for Yevhen : seems not covered */
+        info = `\nPID : ${p.pid}\nExecPath : ${execPath}`; /* qqq for Yevhen : seems not covered */
       }
     }
     catch( err )
