@@ -1432,27 +1432,27 @@ function startSingle_body( o )
     _.include( 'wProcess' );
     _.include( 'wFiles' );
     // let ipc = require( ipcPath );
-    
+
     let ready = _.Consequence();
     let terminated = false;
-    
+
     waitForParent( 1000 );
-    
+
     // setupIpc();
-    
+
     ready.then( () =>
     {
       // if( ipc.server.stop )
       // ipc.server.stop();
-      
+
       return _.process.startMultiple( o );
     })
-    
+
     /* */
-    
+
     function waitForParent( period )
     {
-      return _.time.periodic( period, () => 
+      return _.time.periodic( period, () =>
       {
         if( terminated )
         return;
@@ -1463,7 +1463,7 @@ function startSingle_body( o )
         terminated = true;
       })
     }
-    
+
     // function setupIpc()
     // {
     //   ipc.config.id = 'afterdeath.' + process.pid;
@@ -1471,17 +1471,17 @@ function startSingle_body( o )
     //   ipc.config.silent = true;
     //   ipc.serve( () =>
     //   {
-    //     ipc.server.on( 'exit', () => 
+    //     ipc.server.on( 'exit', () =>
     //     {
     //       waitForParent( 150 );
     //     });
     //   });
 
     //   ipc.server.start();
-      
+
     //   process.send( ipc.config.id )
     // }
-    
+
   }
 
   /* */
@@ -1492,29 +1492,29 @@ function startSingle_body( o )
     {
       if( err )
       return this.error( err );
-      
+
       o.disconnect();
-      
+
       // let ipc = require( 'node-ipc' );
-      
-      // o.pnd.on( 'message', ( ipcHostId ) => 
+
+      // o.pnd.on( 'message', ( ipcHostId ) =>
       // {
       //   o.disconnect();
-        
+
       //   ipc.config.id = 'afterdeath.parent:' + process.pid;
       //   ipc.config.retry = 1500;
       //   ipc.config.silent = true;
-        
-      //   _.process.on( 'exit', () => 
+
+      //   _.process.on( 'exit', () =>
       //   {
-      //      ipc.connectTo( ipcHostId, () => 
+      //      ipc.connectTo( ipcHostId, () =>
       //      {
       //       ipc.of[ ipcHostId ].emit( 'exit', true );
       //       ipc.disconnect( ipcHostId );
       //      });
       //   })
       // })
-      
+
       this.take( op );
     })
   }
@@ -2626,6 +2626,7 @@ function signal_body( o )
 
   function handleError( err )
   {
+    console.log( 'handleError' ); /* xxx : remove later */
     // if( err.code === 'EINVAL' )
     // throw _.err( err, '\nAn invalid signal was specified:', _.strQuote( o.signal ) )
     if( err.code === 'EPERM' )
@@ -2641,14 +2642,22 @@ function signal_body( o )
   {
     let info;
 
-    if( p.pnd )
+    try
     {
-      info = `\nPID : ${p.pnd.pid}\nExecPath : ${p.pnd.spawnfile}\nArgs : ${p.pnd.spawnargs}`; /* qqq for Yevhen : seems not covered */
+      if( p.pnd )
+      {
+        info = `\nPID : ${p.pnd.pid}\nExecPath : ${p.pnd.spawnfile}\nArgs : ${p.pnd.spawnargs}`; /* qqq for Yevhen : seems not covered */
+      }
+      else
+      {
+        let execPath = _.process.execPathOf({ pid : p.pid, sync : 1, throwing : 0 });
+        info = `\nPID : ${p.pnd.pid}\nExecPath : ${execPath}`; /* qqq for Yevhen : seems not covered */
+      }
     }
-    else
+    catch( err )
     {
-      let execPath = _.process.execPathOf({ pid : p.pid, sync : 1, throwing : 0 });
-      info = `\nPID : ${p.pnd.pid}\nExecPath: ${execPath}`; /* qqq for Yevhen : seems not covered */
+      console.error( err );
+      info = `\nFailed to get ExecPath of proces with pid::${p.pnd.pid}`
     }
 
     return info;
@@ -2866,7 +2875,7 @@ function children( o )
     let con = new _.Consequence();
     if( o.format === 'list' )
     {
-      WindowsProcessTree.getProcessList( o.pid, ( result ) => con.take( result ) )
+      WindowsProcessTree.getProcessList( o.pid, ( result ) => con.take( result ) );
     }
     else
     {
