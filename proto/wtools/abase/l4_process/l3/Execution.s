@@ -1845,6 +1845,7 @@ function startMultiple_body( o )
 
     /* yyy : use abstract algorithm of consequence */
     /* xxx : introduce concurrent.limit */
+    /* xxx qqq : cover sessionsRun */
 
     let o2 = _.sessionsRun
     ({
@@ -2497,7 +2498,7 @@ function signal_body( o )
 
   ready.then( processKill );
   ready.then( handleResult );
-  ready.catch( handleError );
+  ready.catch( handleError1 );
 
   return end();
 
@@ -2532,11 +2533,12 @@ function signal_body( o )
     }
     catch( err )
     {
+      console.error( 'signalSend.error!' ); /* xxx : temp */
       if( o.ignoringErrorEsrch && err.code === 'ESRCH' )
       return true;
       if( o.ignoringErrorPerm && err.code === 'EPERM' )
       return true;
-      throw err;
+      throw handleError2( p, err );
     }
 
     let con = waitForDeath( p );
@@ -2624,16 +2626,32 @@ function signal_body( o )
 
   /* - */
 
-  function handleError( err )
+  function handleError1( err )
   {
-    console.log( 'handleError' ); /* xxx : remove later */
+    console.log( 'handleError1' ); /* xxx : remove later */
+    throw handleError2( o, err );
+  }
+
+  /* - */
+
+  function handleError2( p, err )
+  {
+    console.log( 'handleError2' ); /* xxx : remove later */
     // if( err.code === 'EINVAL' )
-    // throw _.err( err, '\nAn invalid signal was specified:', _.strQuote( o.signal ) )
+    // err = _.err( err, '\nAn invalid signal was specified:', _.strQuote( o.signal ) )
     if( err.code === 'EPERM' )
-    throw _.err( err, `\nCurrent process does not have permission to kill target process: ${o.pid}`, processInfoGet( o ) );
+    err = _.err( err, `\nCurrent process does not have permission to kill target process: ${o.pid}` );
     if( err.code === 'ESRCH' )
-    throw _.err( err, `\nTarget process does not exist.`, processInfoGet( o ) );
-    throw _.err( err );
+    err = _.err( err, `\nTarget process does not exist.` );
+
+    if( !err.processInfo && p )
+    {
+      let processInfo = processInfoGet( p );
+      _._errFields( err, { processInfo : processInfo } )
+      _.err( err, processInfo );
+    }
+
+    return _.err( err );
   }
 
   /* - */

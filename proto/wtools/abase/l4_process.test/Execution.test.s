@@ -11631,6 +11631,7 @@ function startMinimalDetachedOutputStdioPipe( test )
         execPath : `node testAppParent.js mode : ${mode} stdio : pipe`,
         mode : 'spawn',
         outputCollecting : 1,
+        outputPiping : 1,
         currentPath : a.routinePath,
       }
       let con = _.process.startMinimal( o );
@@ -11658,100 +11659,6 @@ function startMinimalDetachedOutputStdioPipe( test )
     return ready;
 
   }
-
-  /* */
-
-  /* ORIGINAL */
-  // a.ready
-
-  // .then( () =>
-  // {
-  //   test.case = 'mode : spawn, stdio : pipe';
-
-  //   let o =
-  //   {
-  //     execPath : 'node testAppParent.js mode : spawn stdio : pipe',
-  //     mode : 'spawn',
-  //     outputCollecting : 1,
-  //     currentPath : a.routinePath,
-  //   }
-  //   let con = _.process.start( o );
-
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 )
-  //     test.true( _.strHas( o.output, 'Child process start' ) )
-  //     test.true( _.strHas( o.output, 'Child process end' ) )
-  //     return null;
-  //   })
-
-  //   return con;
-  // })
-
-  // /*  */
-
-  // .then( () =>
-  // {
-  //   test.case = 'mode : fork, stdio : pipe';
-
-  //   let o =
-  //   {
-  //     execPath : 'node testAppParent.js mode : fork stdio : pipe',
-  //     mode : 'spawn',
-  //     outputCollecting : 1,
-  //     currentPath : a.routinePath,
-  //   }
-  //   let con = _.process.start( o );
-
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 )
-  //     test.true( _.strHas( o.output, 'Child process start' ) )
-  //     test.true( _.strHas( o.output, 'Child process end' ) )
-  //     return null;
-  //   })
-
-  //   return con;
-  // })
-
-  // /*  */
-
-  // .then( () =>
-  // {
-  //   test.case = 'mode : shell, stdio : pipe';
-
-  //   let o =
-  //   {
-  //     execPath : 'node testAppParent.js mode : shell stdio : pipe',
-  //     mode : 'spawn',
-  //     outputCollecting : 1,
-  //     currentPath : a.routinePath,
-  //   }
-  //   let con = _.process.start( o );
-
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 )
-
-  //     /*
-  //     zzz for Vova: output piping doesn't work as expected in mode "shell" on windows
-  //     investigate if its fixed in never verions of node or implement alternative solution
-  //     */
-
-  //     if( process.platform === 'win32' )
-  //     return null;
-
-  //     test.true( _.strHas( o.output, 'Child process start' ) )
-  //     test.true( _.strHas( o.output, 'Child process end' ) )
-  //     return null;
-  //   })
-
-  //   return con;
-  // })
-
-  // /*  */
-
-  // return a.ready;
 
   /* - */
 
@@ -11793,6 +11700,109 @@ function startMinimalDetachedOutputStdioPipe( test )
       return null;
     })
   }
+
+/* xxx qqq for Vova :
+2020-12-05T09:15:59.6229930Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachedOutputStdioPipe / mode : spawn, stdio : pipe # 6 ) : expected true ... ok
+2020-12-05T09:15:59.6326856Z  > node testAppParent.js mode : shell stdio : pipe
+2020-12-05T09:16:01.1396247Z  > node testAppChild.js
+2020-12-05T09:16:02.0428735Z --------------- uncaught asynchronous error --------------->
+2020-12-05T09:16:02.0432506Z
+2020-12-05T09:16:02.0433626Z  = Message of error#1
+2020-12-05T09:16:02.0434358Z     Process returned exit code 4294967295
+2020-12-05T09:16:02.0435099Z     Launched as "node testAppChild.js"
+2020-12-05T09:16:02.0436510Z     Launched at "/D/Temp/ProcessBasic-2020-12-5-8-52-54-828-a4f2.tmp/startMinimalDetachedOutputStdioPipe"
+2020-12-05T09:16:02.0437576Z
+2020-12-05T09:16:02.0438203Z  = Beautified calls stack
+2020-12-05T09:16:02.0439360Z     at ChildProcess.handleClose (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:806:19)
+2020-12-05T09:16:02.0442223Z     at ChildProcess.emit (events.js:315:20)
+2020-12-05T09:16:02.0443254Z     at maybeClose (internal/child_process.js:1026:16)
+2020-12-05T09:16:02.0444384Z     at Process.ChildProcess._handle.onexit (internal/child_process.js:286:5)
+2020-12-05T09:16:02.0445200Z
+2020-12-05T09:16:02.0446585Z     at Object.<anonymous> (D:\Temp\ProcessBasic-2020-12-5-8-52-54-828-a4f2.tmp\startMinimalDetachedOutputStdioPipe\testAppParent.js:33:1)
+2020-12-05T09:16:02.0447757Z
+2020-12-05T09:16:02.0448343Z  = Throws stack
+2020-12-05T09:16:02.0449675Z     thrown at ChildProcess.handleClose @ /D/a/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:806:19
+2020-12-05T09:16:02.0456992Z     thrown at errRefine @ /D/a/wProcess/wProcess/node_modules/wTools/proto/wtools/abase/l0/l5/fErr.s:125:16
+2020-12-05T09:16:02.0467364Z
+2020-12-05T09:16:02.0470022Z  = Process
+2020-12-05T09:16:02.0478019Z     Current path : D:\Temp\ProcessBasic-2020-12-5-8-52-54-828-a4f2.tmp\startMinimalDetachedOutputStdioPipe
+2020-12-05T09:16:02.0516583Z     Exec path : C:\hostedtoolcache\windows\node\13.14.0\x64\node.exe D:\Temp\ProcessBasic-2020-12-5-8-52-54-828-a4f2.tmp\startMinimalDetachedOutputStdioPipe\testAppParent.js mode : shell stdio : pipe
+2020-12-05T09:16:02.0518891Z
+2020-12-05T09:16:02.0520017Z  = Source code from /D/a/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:806:19
+2020-12-05T09:16:02.0520982Z       804 :     {
+2020-12-05T09:16:02.0521624Z       805 :       if( _.numberIs( exitCode ) )
+2020-12-05T09:16:02.0522650Z     * 806 :       o.error = _._err({ args : [ 'Process returned exit code', exitCode, '\n', infoGet() ], reason : 'exit code' });
+2020-12-05T09:16:02.0523590Z       807 :       else if( o.reason === 'time' )
+2020-12-05T09:16:02.0525260Z       808 :       o.error = _._err({ args : [ 'Process timed out, killed by exit signal', exitSignal, '\n', infoGet() ], reason : 'time out' });
+2020-12-05T09:16:02.0525937Z
+2020-12-05T09:16:02.0526462Z
+2020-12-05T09:16:02.0527451Z --------------- uncaught asynchronous error ---------------<
+2020-12-05T09:16:02.0528348Z
+2020-12-05T09:16:02.0673890Z          = Message of error#125
+2020-12-05T09:16:02.0674861Z             Process returned exit code 4294967295
+2020-12-05T09:16:02.0675764Z             Launched as "node testAppParent.js mode : shell stdio : pipe"
+2020-12-05T09:16:02.0677481Z             Launched at "/D/Temp/ProcessBasic-2020-12-5-8-52-54-828-a4f2.tmp/startMinimalDetachedOutputStdioPipe"
+2020-12-05T09:16:02.0680243Z
+2020-12-05T09:16:02.0680836Z              -> Stderr
+2020-12-05T09:16:02.0681661Z              -  --------------- uncaught asynchronous error --------------->
+2020-12-05T09:16:02.0682506Z              -
+2020-12-05T09:16:02.0683247Z              -   = Message of error#1
+2020-12-05T09:16:02.0683930Z              -      Process returned exit code 4294967295
+2020-12-05T09:16:02.0684705Z              -      Launched as "node testAppChild.js"
+2020-12-05T09:16:02.0686168Z              -      Launched at "/D/Temp/ProcessBasic-2020-12-5-8-52-54-828-a4f2.tmp/startMinimalDetachedOutputStdioPipe"
+2020-12-05T09:16:02.0687390Z              -
+2020-12-05T09:16:02.0687980Z              -   = Beautified calls stack
+2020-12-05T09:16:02.0689593Z              -      at ChildProcess.handleClose (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:806:19)
+2020-12-05T09:16:02.0690806Z              -      at ChildProcess.emit (events.js:315:20)
+2020-12-05T09:16:02.0691894Z              -      at maybeClose (internal/child_process.js:1026:16)
+2020-12-05T09:16:02.0692951Z              -      at Process.ChildProcess._handle.onexit (internal/child_process.js:286:5)
+2020-12-05T09:16:02.0693776Z              -
+2020-12-05T09:16:02.0695284Z              -      at Object.<anonymous> (D:\Temp\ProcessBasic-2020-12-5-8-52-54-828-a4f2.tmp\startMinimalDetachedOutputStdioPipe\testAppParent.js:33:1)
+2020-12-05T09:16:02.0696671Z              -
+2020-12-05T09:16:02.0697216Z              -   = Throws stack
+2020-12-05T09:16:02.0698386Z              -      thrown at ChildProcess.handleClose @ /D/a/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:806:19
+2020-12-05T09:16:02.0700015Z              -      thrown at errRefine @ /D/a/wProcess/wProcess/node_modules/wTools/proto/wtools/abase/l0/l5/fErr.s:125:16
+2020-12-05T09:16:02.0700873Z              -
+2020-12-05T09:16:02.0701421Z              -   = Process
+2020-12-05T09:16:02.0703142Z              -      Current path : D:\Temp\ProcessBasic-2020-12-5-8-52-54-828-a4f2.tmp\startMinimalDetachedOutputStdioPipe
+2020-12-05T09:16:02.0705629Z              -      Exec path : C:\hostedtoolcache\windows\node\13.14.0\x64\node.exe D:\Temp\ProcessBasic-2020-12-5-8-52-54-828-a4f2.tmp\startMinimalDetachedOutputStdioPipe\testAppParent.js mode : shell stdio : pipe
+2020-12-05T09:16:02.0707162Z              -
+2020-12-05T09:16:02.0708460Z              -   = Source code from /D/a/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:806:19
+2020-12-05T09:16:02.0709735Z              -        804 :     {
+2020-12-05T09:16:02.0710764Z              -        805 :       if( _.numberIs( exitCode ) )
+2020-12-05T09:16:02.0712097Z              -      * 806 :       o.error = _._err({ args : [ 'Process returned exit code', exitCode, '\n', infoGet() ], reason : 'exit code' });
+2020-12-05T09:16:02.0713257Z              -        807 :       else if( o.reason === 'time' )
+2020-12-05T09:16:02.0714318Z              -        808 :       o.error = _._err({ args : [ 'Process timed out, killed by exit signal', exitSignal, '\n', infoGet() ], reason : 'time out' });
+2020-12-05T09:16:02.0715155Z              -
+2020-12-05T09:16:02.0715635Z              -
+2020-12-05T09:16:02.0716382Z              -  --------------- uncaught asynchronous error ---------------<
+2020-12-05T09:16:02.0717030Z              -
+2020-12-05T09:16:02.0717517Z              -   '
+2020-12-05T09:16:02.0718255Z              -< Stderr
+2020-12-05T09:16:02.0718803Z
+2020-12-05T09:16:02.0719380Z          = Beautified calls stack
+2020-12-05T09:16:02.0720543Z             at ChildProcess.handleClose (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:806:19)
+2020-12-05T09:16:02.0721717Z             at ChildProcess.emit (events.js:327:22)
+2020-12-05T09:16:02.0722779Z             at maybeClose (internal/child_process.js:1026:16)
+2020-12-05T09:16:02.0723971Z             at Process.ChildProcess._handle.onexit (internal/child_process.js:286:5)
+2020-12-05T09:16:02.0724755Z
+2020-12-05T09:16:02.0725689Z             at Object.<anonymous> (D:\a\wProcess\wProcess\node_modules\wTesting\proto\wtools\atop\testing\entry\Exec:11:11)
+2020-12-05T09:16:02.0726504Z
+2020-12-05T09:16:02.0727164Z          = Throws stack
+2020-12-05T09:16:02.0728549Z             thrown at ChildProcess.handleClose @ /D/a/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:806:19
+2020-12-05T09:16:02.0729967Z             thrown at Object._err @ /D/a/wProcess/wProcess/node_modules/wTools/proto/wtools/abase/l0/l3/iErr.s:575:5
+2020-12-05T09:16:02.0730780Z
+2020-12-05T09:16:02.0731818Z          = Source code from /D/a/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:806:19
+2020-12-05T09:16:02.0732642Z               804 :     {
+2020-12-05T09:16:02.0733248Z               805 :       if( _.numberIs( exitCode ) )
+2020-12-05T09:16:02.0734268Z             * 806 :       o.error = _._err({ args : [ 'Process returned exit code', exitCode, '\n', infoGet() ], reason : 'exit code' });
+2020-12-05T09:16:02.0735178Z               807 :       else if( o.reason === 'time' )
+2020-12-05T09:16:02.0736236Z               808 :       o.error = _._err({ args : [ 'Process timed out, killed by exit signal', exitSignal, '\n', infoGet() ], reason : 'time out' });
+2020-12-05T09:16:02.0737024Z
+2020-12-05T09:16:02.0737497Z
+2020-12-05T09:16:02.0739596Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachedOutputStdioPipe / mode : shell, stdio : pipe # 7 ) ... failed, exit code
+2020-12-05T09:16:02.0749458Z       Failed ( exit code ) TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachedOutputStdioPipe in 18.539s
+*/
 
 }
 
@@ -28113,7 +28123,72 @@ function kill( test )
 
       let returned = _.process.startMinimal( o )
 
-      _.time.out( context.t1*2, () => _.process.kill( o.pnd.pid ) ) /* 1000 */
+      _.time.out( context.t1*5, () => _.process.kill( o.pnd.pid ) ) /* 1000 */ /* xxx : here! */
+
+/* xxx qqq for Vova :
+
+2020-12-05T09:48:27.5431818Z  > node D:\Temp\ProcessBasic-2020-12-5-8-52-54-59-8989.tmp\kill\testApp.js
+2020-12-05T09:48:29.5647579Z handleError
+2020-12-05T09:48:29.5676325Z TypeError: Cannot read property 'pid' of null
+2020-12-05T09:48:29.5677234Z     at processInfoGet (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2654:33)
+2020-12-05T09:48:29.5678330Z     at wConsequence.handleError (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2633:102)
+2020-12-05T09:48:29.5679464Z     at __iteration (D:\a\wProcess\wProcess\node_modules\wConsequence\proto\wtools\abase\l9\consequence\Consequence.s:3158:47)
+2020-12-05T09:48:29.5680713Z     at wConsequence.__handleResourceNow (D:\a\wProcess\wProcess\node_modules\wConsequence\proto\wtools\abase\l9\consequence\Consequence.s:3042:12)
+2020-12-05T09:48:29.5682022Z     at wConsequence.take (D:\a\wProcess\wProcess\node_modules\wConsequence\proto\wtools\abase\l9\consequence\Consequence.s:2701:8)
+2020-12-05T09:48:29.5683135Z     at Object.callback (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2878:67)
+2020-12-05T09:48:29.5684053Z     at D:\a\wProcess\wProcess\node_modules\w.process.tree.windows\lib\index.js:74:19
+2020-12-05T09:48:29.5684741Z     at Array.forEach (<anonymous>)
+2020-12-05T09:48:29.5685477Z     at D:\a\wProcess\wProcess\node_modules\w.process.tree.windows\lib\index.js:73:19
+2020-12-05T09:48:29.6667567Z --------------- uncaught asynchronous error --------------->
+2020-12-05T09:48:29.6668468Z
+2020-12-05T09:48:29.6679226Z  = Message of error#364
+2020-12-05T09:48:29.6679841Z     kill EPERM
+2020-12-05T09:48:29.6680654Z       errno : -4048
+2020-12-05T09:48:29.6681187Z       code : 'EPERM'
+2020-12-05T09:48:29.6681699Z       syscall : 'kill'
+2020-12-05T09:48:29.6682079Z
+2020-12-05T09:48:29.6682717Z  = Beautified calls stack
+2020-12-05T09:48:29.6683551Z     at process.kill (internal/process/per_thread.js:200:13)
+2020-12-05T09:48:29.6684589Z     at signalSend (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2531:15)
+2020-12-05T09:48:29.6685867Z     at wConsequence.processKill (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2568:7)
+2020-12-05T09:48:29.6687401Z     at wConsequence.take (D:\a\wProcess\wProcess\node_modules\wConsequence\proto\wtools\abase\l9\consequence\Consequence.s:2701:8)
+2020-12-05T09:48:29.6688779Z     at Object.callback (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2878:67)
+2020-12-05T09:48:29.6689972Z     at D:\a\wProcess\wProcess\node_modules\w.process.tree.windows\lib\index.js:74:19
+2020-12-05T09:48:29.6690870Z     at Array.forEach (<anonymous>)
+2020-12-05T09:48:29.6691830Z     at D:\a\wProcess\wProcess\node_modules\w.process.tree.windows\lib\index.js:73:19
+2020-12-05T09:48:29.6692579Z
+2020-12-05T09:48:29.6693555Z     at Function.signal_body [as body] (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2498:9)
+2020-12-05T09:48:29.6694760Z     at Object.kill_body (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2703:28)
+2020-12-05T09:48:29.6695958Z     at Object.kill (D:\a\wProcess\wProcess\node_modules\wTools\proto\wtools\abase\l0\l3\iRoutine.s:1070:23)
+2020-12-05T09:48:29.6697216Z     at Object.<anonymous> (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process.test\Execution.test.s:28116:49) *
+2020-12-05T09:48:29.6698733Z     at wConsequence.timeEnd2 (D:\a\wProcess\wProcess\node_modules\wConsequence\proto\wtools\abase\l9\consequence\Namespace.s:272:23)
+2020-12-05T09:48:29.6700341Z     at wConsequence.take (D:\a\wProcess\wProcess\node_modules\wConsequence\proto\wtools\abase\l9\consequence\Consequence.s:2701:8)
+2020-12-05T09:48:29.6701838Z     at timeEnd1 (D:\a\wProcess\wProcess\node_modules\wConsequence\proto\wtools\abase\l9\consequence\Namespace.s:293:9)
+2020-12-05T09:48:29.6703169Z     at Object._time (D:\a\wProcess\wProcess\node_modules\wTools\proto\wtools\abase\l0\l5\fTime.s:61:22)
+2020-12-05T09:48:29.6704456Z     at Object.time [as _time] (D:\a\wProcess\wProcess\node_modules\wprocedure\proto\wtools\abase\l8_procedure\Namespace.s:314:20)
+2020-12-05T09:48:29.6705817Z     at Timeout.time [as _onTimeout] (D:\a\wProcess\wProcess\node_modules\wTools\proto\wtools\abase\l0\l5\fTime.s:107:11)
+2020-12-05T09:48:29.6706808Z     at listOnTimeout (internal/timers.js:554:17)
+2020-12-05T09:48:29.6707605Z     at processTimers (internal/timers.js:497:7)
+2020-12-05T09:48:29.6708095Z
+2020-12-05T09:48:29.6708550Z  = Throws stack
+2020-12-05T09:48:29.6709773Z     thrown at wConsequence.__handleResourceNow @ /D/a/wProcess/wProcess/node_modules/wConsequence/proto/wtools/abase/l9/consequence/Consequence.s:3042:12
+2020-12-05T09:48:29.6711232Z     thrown at errRefine @ /D/a/wProcess/wProcess/node_modules/wTools/proto/wtools/abase/l0/l5/fErr.s:125:16
+2020-12-05T09:48:29.6711893Z
+2020-12-05T09:48:29.6712365Z  = Process
+2020-12-05T09:48:29.6712966Z     Current path : D:\a\wProcess\wProcess
+2020-12-05T09:48:29.6714468Z     Exec path : C:\hostedtoolcache\windows\node\14.15.1\x64\node.exe D:\a\wProcess\wProcess\node_modules\wTesting\proto\wtools\atop\testing\entry\Exec .run 'proto/**' rapidity:-1 verbosity:5 fails:5 s:0
+2020-12-05T09:48:29.6715451Z
+2020-12-05T09:48:29.6715883Z
+2020-12-05T09:48:29.6716682Z --------------- uncaught asynchronous error ---------------<
+2020-12-05T09:48:29.6717212Z
+2020-12-05T09:48:29.6761799Z         kill EPERM
+2020-12-05T09:48:29.6762385Z           errno : -4048
+2020-12-05T09:48:29.6762892Z           code : 'EPERM'
+2020-12-05T09:48:29.6763443Z           syscall : 'kill'
+2020-12-05T09:48:29.6773077Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::kill / mode : shell, kill child process using process id # 21 ) ... failed, throwing error
+2020-12-05T09:48:29.6806142Z       Failed ( throwing error ) TestSuite::Tools.l4.process.Execution / TestRoutine::kill in 12.528s
+
+*/
 
       returned.then( ( op ) =>
       {
@@ -28149,7 +28224,7 @@ function kill( test )
     setTimeout( () =>
     {
       console.log( 'Application timeout!' )
-    }, context.t2 ) /* 5000 */
+    }, context.t1*20 )
   }
 }
 
@@ -29599,7 +29674,7 @@ function endSignalsBasic( test )
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -29633,7 +29708,7 @@ program1:end
         console.log( `dtime:${dtime}` );
         /* if shell then parent process may ignore the signal */
         if( mode !== 'shell' )
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -29654,7 +29729,7 @@ program1:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -29691,7 +29766,7 @@ program1:end
         console.log( `dtime:${dtime}` );
         /* if shell then parent process may ignore the signal */
         if( mode !== 'shell' )
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -29712,7 +29787,7 @@ program1:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -29749,7 +29824,7 @@ program1:end
         console.log( `dtime:${dtime}` );
         /* if shell then parent process may ignore the signal */
         if( mode !== 'shell' )
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -29770,7 +29845,7 @@ program1:end
       var options = _.mapSupplement( null, o2, o3 );
       var time1 = _.time.now();
       var returned = _.process.startMinimal( options );
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -29817,7 +29892,7 @@ program1:end
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
         if( process.platform !== 'win32' )
-        test.ge( dtime, context.t1 * 10 );
+        test.ge( dtime, context.t1 * 10 ); /* yyy */
         return null;
       })
 
@@ -29838,7 +29913,7 @@ program1:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -29878,7 +29953,7 @@ deasync:end
         console.log( `dtime:${dtime}` );
         /* if shell then parent process may ignore the signal */
         if( mode !== 'shell' )
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -29914,7 +29989,7 @@ deasync:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -29948,7 +30023,7 @@ program1:end
         console.log( `dtime:${dtime}` );
         /* if shell then parent process may ignore the signal */
         if( mode !== 'shell' )
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -29969,7 +30044,7 @@ program1:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -30003,7 +30078,7 @@ program1:end
         console.log( `dtime:${dtime}` );
         /* if shell then parent process may ignore the signal */
         if( mode !== 'shell' )
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -30024,7 +30099,7 @@ program1:end
       var options = _.mapSupplement( null, o2, o3 );
       var time1;
       var returned = _.process.startMinimal( options );
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         time1 = _.time.now();
         test.identical( options.pnd.killed, false );
@@ -30061,7 +30136,7 @@ program1:end
         console.log( `dtime:${dtime}` );
         /* if shell then parent process may ignore the signal */
         if( mode !== 'shell' )
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -30082,7 +30157,7 @@ program1:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -30119,7 +30194,7 @@ program1:end
         console.log( `dtime:${dtime}` );
         /* if shell then parent process may ignore the signal */
         if( mode !== 'shell' )
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -30140,7 +30215,7 @@ program1:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -30177,7 +30252,7 @@ deasync:end
         console.log( `dtime:${dtime}` );
         /* if shell then parent process may ignore the signal */
         if( mode !== 'shell' )
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -30217,7 +30292,7 @@ deasync:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -30313,7 +30388,7 @@ TestRoutine::endSignalsBasic / mode:spawn, terminate # 592 ) ... ok
 
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -30334,7 +30409,7 @@ TestRoutine::endSignalsBasic / mode:spawn, terminate # 592 ) ... ok
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -30376,7 +30451,7 @@ TestRoutine::endSignalsBasic / mode:spawn, terminate # 592 ) ... ok
 
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -30397,7 +30472,7 @@ TestRoutine::endSignalsBasic / mode:spawn, terminate # 592 ) ... ok
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -30437,7 +30512,7 @@ sleep:begin
 
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -30458,12 +30533,12 @@ sleep:begin
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
         time1 = _.time.now();
-        _.process.terminate({ pid : options.pnd.pid, withChildren : 1, timeOut : context.t1 * 4 });
+        _.process.terminate({ pid : options.pnd.pid, withChildren : 1, timeOut : context.t1 * 5 });
         return null;
       })
       returned.finally( function()
@@ -30500,7 +30575,7 @@ sleep:begin
         console.log( `dtime:${dtime}` );
         /* kill without waiting in njs on Windows */
         if( process.platform !== 'win32' )
-        test.ge( dtime, context.t1 * 4 );
+        test.ge( dtime, context.t1 * 5 ); /* yyy */
         return null;
       })
 
@@ -30521,7 +30596,7 @@ sleep:begin
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -30565,7 +30640,7 @@ deasync:begin
 
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -30605,7 +30680,7 @@ deasync:begin
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -30644,7 +30719,7 @@ deasync:begin
 
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -30665,7 +30740,7 @@ deasync:begin
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -30708,7 +30783,7 @@ deasync:begin
 
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -30729,7 +30804,7 @@ deasync:begin
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -30769,7 +30844,7 @@ sleep:begin
 
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -30790,7 +30865,7 @@ sleep:begin
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -30853,7 +30928,7 @@ sleep:begin
         console.log( `dtime:${dtime}` );
         /* if shell then parent process may ignore the signal */
         if( mode !== 'shell' )
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -30874,7 +30949,7 @@ sleep:begin
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -30917,7 +30992,7 @@ deasync:begin
 
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -30953,7 +31028,7 @@ deasync:begin
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -30992,7 +31067,7 @@ deasync:begin
 
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -31013,7 +31088,7 @@ deasync:begin
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -31059,7 +31134,7 @@ program1:end
 
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -31080,7 +31155,7 @@ program1:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -31131,7 +31206,7 @@ program1:end
         console.log( `dtime:${dtime}` );
         /* if shell then parent process may ignore the signal */
         if( mode !== 'shell' )
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -31152,7 +31227,7 @@ program1:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -31203,7 +31278,7 @@ program1:end
         console.log( `dtime:${dtime}` );
         /* if shell then parent process may ignore the signal */
         if( mode !== 'shell' )
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -31224,7 +31299,7 @@ program1:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -31275,7 +31350,7 @@ deasync:end
         console.log( `dtime:${dtime}` );
         /* if shell then parent process may ignore the signal */
         if( mode !== 'shell' )
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -31306,13 +31381,13 @@ deasync:end
       _.process._exitHandlerRepair();
     }
 
-    setTimeout( () => { console.log( 'program1:end' ) }, context.t1 * 8 );
+    setTimeout( () => { console.log( 'program1:end' ) }, context.t1 * 10 );
 
     if( withSleep )
-    sleep( context.t1 * 10 );
+    sleep( context.t1 * 20 ); /* yyy */
 
     if( withDeasync )
-    deasync( context.t1 * 10 );
+    deasync( context.t1 * 20 );
 
     function onTime()
     {
@@ -32439,7 +32514,6 @@ function terminate( test )
       o.pnd.on( 'message', () =>
       {
         _.process.terminate({ pnd : o.pnd, timeOut : context.t1*4 });
-        // _.process.terminate({ pnd : o.pnd, timeOut : 1 }); /* yyy */
       })
 
       ready.then( ( op ) =>
@@ -32455,7 +32529,7 @@ function terminate( test )
         else
         {
           test.identical( op.exitCode, null );
-          test.identical( op.exitSignal, 'SIGTERM' ); /* yyy : sometimes SIGKILL */
+          test.identical( op.exitSignal, 'SIGTERM' );
           test.identical( op.ended, true );
           test.true( _.strHas( op.output, 'SIGTERM' ) );
           test.true( !_.strHas( op.output, 'Application timeout!' ) );
@@ -36642,7 +36716,7 @@ var Proto =
     startMinimalOptionWhenTime,
     startMinimalOptionTimeOut,
     startSingleAfterDeath,
-    // startSingleAfterDeathTerminatingMain, /* qqq for Vova : fix phantom issue please */
+    // startSingleAfterDeathTerminatingMain, /* qqq for Vova : write good stable test */
     startSingleAfterDeathOutput,
 
     // detaching
