@@ -29007,7 +29007,7 @@ function startMultipleOptionOutputAdditive( test )
   let a = context.assetFor( test, false );
   let testAppPath = a.program( testApp );
   let testAppPath2 = a.program( testApp2 );
-  let modes = [ 'fork', /*'spawn', 'shell'*/ ];
+  let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run({ mode, concurrent : 0, outputAdditive : 0 }) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run({ mode, concurrent : 1, outputAdditive : 0 }) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run({ mode, concurrent : 0, outputAdditive : 1 }) ) );
@@ -29045,10 +29045,9 @@ function startMultipleOptionOutputAdditive( test )
         This executes before any of the processes finishes,
         with option::outputAdditing : 0 - no output is logged
       */
-      // _.time.out( context.t1 * 7, () =>
       _.time.out( context.t1 * 15, () =>
       {
-        console.log( `out t1 * 15, concurrent : ${tops.concurrent}, additive : ${tops.outputAdditive}`, '++' +  o.output + '++'  );
+        // console.log( `out t1 * 15, concurrent : ${tops.concurrent}, additive : ${tops.outputAdditive}`, '++' +  o.output + '++'  );
         if( !tops.outputAdditive )
         {
           test.identical( o.output, '' );
@@ -29056,17 +29055,9 @@ function startMultipleOptionOutputAdditive( test )
         else
         {
           if( tops.concurrent )
-          {
-            test.equivalent( o.output, `> ${testAppPath}\n> ${testAppPath2}\nOutput1\nOutput2\nOutput1.2` );
-            // test.true( _.dissector.dissect( `**<Output1>**<Output1.2>**<timeout1>**`, o.output ).matched );
-            // test.true( _.dissector.dissect( `**<Output2>**<Output2.2>**<timeout1>**`, o.output ).matched );
-          }
+          test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}\n>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath2}\nOutput1\nOutput2\nOutput1.2` );
           else
-          {
-            test.equivalent( o.output, `> ${testAppPath}\nOutput1\nOutput1.2` );
-            // test.true( _.dissector.dissect( `**<Output1>**<Output1.2>**<timeout1>**`, o.output ).matched );
-            // test.true( !_.dissector.dissect( `**<Output2>**<Output2.2>**<timeout1>**`, o.output ).matched );
-          }
+          test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}\nOutput1\nOutput1.2` );
         }
         return null;
       })
@@ -29077,43 +29068,23 @@ function startMultipleOptionOutputAdditive( test )
         with option::outputAdditing : 0 - no output is logged from the first process,
         all output is logged from the second process
       */
-      // _.time.out( context.t1 * 18, () =>
       _.time.out( context.t1 * 35, () =>
       {
-        console.log( `out t1 * 35, concurrent : ${tops.concurrent}, additive : ${tops.outputAdditive}`, '++' +  o.output + '++'  );
+        // console.log( `out t1 * 35, concurrent : ${tops.concurrent}, additive : ${tops.outputAdditive}`, '++' +  o.output + '++'  );
 
         if( tops.concurrent )
         {
           if( tops.outputAdditive )
-          {
-            test.equivalent( o.output, `> ${testAppPath}\n> ${testAppPath2}\nOutput1\nOutput2\nOutput1.2\nOutput2.2\ntimeout1\ntimeout2\ntimeout2.2\n` );
-            // test.true( _.dissector.dissect( `**<Output1>**<Output1.2>**<timeout1>**`, o.output ).matched );
-            // test.true( _.dissector.dissect( `**<Output2>**<Output2.2>**<timeout1>**`, o.output ).matched );
-            // test.true( _.dissector.dissect( `**<timeout2>**<timeout2.2>**`, o.output ).matched );
-          }
-          else
-          {
-            test.equivalent( o.output, `> ${testAppPath2}\nOutput2\nOutput2.2\ntimeout2\ntimeout2.2\n` );
-            /* First process is still running */
-            // test.true( !_.dissector.dissect( `**<Output1>**<Output1.2>**`, o.output ).matched );
-            /* Second process is finished */
-            // test.true( _.dissector.dissect( `**<Output2>**<Output2.2>**`, o.output ).matched );
-            // test.true( _.dissector.dissect( `**<timeout2>**<timeout2.2>**`, o.output ).matched );
-          }
+          test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}\n>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath2}\nOutput1\nOutput2\nOutput1.2\nOutput2.2\ntimeout1\ntimeout2\ntimeout2.2\n` );
+          else /* First process is still running. Second process is finished. */
+          test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath2}\nOutput2\nOutput2.2\ntimeout2\ntimeout2.2\n` );
         }
         else
         {
           if( !tops.outputAdditive ) /* First process haven't finished yet, no output */
-          {
-            test.identical( o.output, '' );
-          }
+          test.identical( o.output, '' );
           else /* Only a part of the output from the first process is logged */
-          {
-            test.equivalent( o.output, `> ${testAppPath}\nOutput1\nOutput1.2\ntimeout1\n` );
-            // test.true( _.dissector.dissect( `**<Output1>**<Output1.2>**<timeout1>**`, o.output ).matched );
-            // test.true( !_.dissector.dissect( `**<timeout1.2>**`, o.output ).matched )
-            // test.true( !_.dissector.dissect( `**<Output2>**`, o.output ).matched )
-          }
+          test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}\nOutput1\nOutput1.2\ntimeout1\n` );
         }
 
         return null;
@@ -29122,16 +29093,24 @@ function startMultipleOptionOutputAdditive( test )
       return _.process.startMinimal( o )
       .then( ( op ) =>
       {
-        console.log( `outputAdditive : ${o.outputAdditive}, concurrent : ${tops.concurrent} OP OOOOUUUUTTTT : +++++ ${o.output} +++++` );
+        // console.log( `outputAdditive : ${tops.outputAdditive}, concurrent : ${tops.concurrent} OP OOOOUUUUTTTT : +++++ ${o.output} +++++` );
         test.il( op.exitCode, 0 );
         test.il( op.ended, true );
 
-        /* FIX! */
+        let exp1 = '\nOutput1\nOutput2\nOutput1.2\nOutput2.2\ntimeout1\ntimeout2\ntimeout2.2\ntimeout1.2\n';
+        let exp2 = '\nOutput1\nOutput1.2\ntimeout1\ntimeout1.2\n';
+        let exp3 = '\nOutput2\nOutput2.2\ntimeout2\ntimeout2.2\n';
         if( tops.concurrent )
-        // test.equivalent( o.output, `> ${testAppPath}\n> ${testAppPath2}\nOutput1\nOutput2\nOutput1.2\nOutput2.2\ntimeout1\ntimeout2\ntimeout2.2\ntimeout1.2\n` );
-
-        // test.true( _.dissector.dissect( `**<Output1>**<Output1.2>**<timeout1>**<timeout1.2>**`, o.output ).matched );
-        // test.true( _.dissector.dissect( `**<Output2>**<Output2.2>**<timeout2>**<timeout2.2>**`, o.output ).matched );
+        {
+          if( tops.outputAdditive )
+          test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}\n>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath2}${exp1}${exp1}` );
+          else
+          test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath2}${exp3}>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}${exp2}${exp1}` );
+        }
+        else
+        {
+          test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}${exp2}>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath2}${exp3}${exp2}${exp3}` );
+        }
 
         a.fileProvider.fileDelete( testAppPathParent );
         return null;
@@ -29168,7 +29147,6 @@ function startMultipleOptionOutputAdditive( test )
   function testApp()
   {
     console.log( 'Output1' )
-    // setTimeout( () => console.log( 'Output1' ), context.t1 );
     setTimeout( () => console.log( 'Output1.2' ), context.t1 * 10 );
     setTimeout( () => console.log( 'timeout1' ), context.t1 * 20 );
     setTimeout( () => console.log( 'timeout1.2' ), context.t1 * 40 );
@@ -29182,21 +29160,6 @@ function startMultipleOptionOutputAdditive( test )
     setTimeout( () => console.log( 'timeout2.2' ), context.t1 * 30 );
   }
 
-  // function testApp()
-  // {
-  //   console.log( 'Output1' );
-  //   setTimeout( () => console.log( 'timeout1' ), context.t1 * 5 );
-  //   console.log( 'Output1.2' );
-  //   setTimeout( () => console.log( 'timeout1.2' ), context.t1 * 25 );
-  // }
-
-  // function testApp2()
-  // {
-  //   console.log( 'Output2' );
-  //   setTimeout( () => console.log( 'timeout2' ), context.t1 * 10 );
-  //   console.log( 'Output2.2' );
-  //   setTimeout( () => console.log( 'timeout2.2' ), context.t1 * 15 );
-  // }
 }
 
 startMultipleOptionOutputAdditive.timeOut = 4e6; /* Locally : 394.840s */
