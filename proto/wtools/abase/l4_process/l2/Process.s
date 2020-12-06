@@ -13,7 +13,7 @@ _.assert( !!_realGlobal_ );
 // checker
 // --
 
-let ProcessMinimal = _.Blueprint
+let ProcessMinimalInput = _.Blueprint
 ({
   typed : _.trait.typed( true ),
 
@@ -64,9 +64,9 @@ let ProcessMinimal = _.Blueprint
 
 });
 
-let Process = _.Blueprint
+let ProcessMinimal = _.Blueprint
 ({
-  inherit : _.define.inherit( ProcessMinimal ),
+  inherit : _.define.inherit( ProcessMinimalInput ),
 
   disconnect : null,
   _end : null,
@@ -93,8 +93,8 @@ let Process = _.Blueprint
 let ToolsExtension =
 {
 
+  ProcessMinimalInput,
   ProcessMinimal,
-  Process,
 
 }
 

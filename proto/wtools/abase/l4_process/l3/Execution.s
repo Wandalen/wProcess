@@ -354,11 +354,11 @@ function startMinimal_body( o )
 
     /* */
 
-    // let o3 = _.Process.Retype( o );
+    // xxx
+    // let o3 = _.ProcessMinimal.Retype( o );
     // _.assert( o3 === o );
     // _.assert( !Object.isExtensible( o ) );
     // debugger;
-    // xxx
 
     /* */
 
@@ -1066,7 +1066,7 @@ function startMinimal_body( o )
     o2.windowsHide = !!o.hiding;
     if( o.streamSizeLimit )
     o2.maxBuffer = o.streamSizeLimit;
-    debugger;
+
     if( process.platform !== 'win32' )
     {
       o2.uid = o.uid;
@@ -1163,7 +1163,8 @@ function startMinimal_body( o )
     if( !o.outputPiping )
     return;
 
-    data = _.strRemoveEnd( data, '\n' );
+    /* xxx yyy qqq for Yevhen : cover and complete */
+    // data = _.strRemoveEnd( data, '\n' );
 
     /* qqq for Yevhen : changed how option outputPrefixing works | aaa : Done. */
     if( o.outputPrefixing )
@@ -1205,9 +1206,13 @@ function startMinimal_body( o )
     }
     else
     {
-      _decoratedOutOutput += msg + '\n';
+      _decoratedOutOutput += msg;
       if( channel === 'err' )
-      _decoratedErrOutput += msg + '\n';
+      _decoratedErrOutput += msg;
+      /* xxx yyy qqq for Yevhen : cover */
+      // _decoratedOutOutput += msg + '\n';
+      // if( channel === 'err' )
+      // _decoratedErrOutput += msg + '\n';
     }
 
   }
@@ -1843,7 +1848,6 @@ function startMultiple_body( o )
       o.sessions.push( o2 );
     }
 
-    /* yyy : use abstract algorithm of consequence */
     /* xxx : introduce concurrent.limit */
     /* xxx qqq : cover sessionsRun */
 
@@ -2533,7 +2537,7 @@ function signal_body( o )
     }
     catch( err )
     {
-      console.error( 'signalSend.error!' ); /* xxx : temp */
+      console.error( 'signalSend.error!' ); /* xxx : remove later */
       if( o.ignoringErrorEsrch && err.code === 'ESRCH' )
       return true;
       if( o.ignoringErrorPerm && err.code === 'EPERM' )
