@@ -24154,21 +24154,26 @@ function startSingleOptionDry( test )
   {
     let ready = new _.Consequence().take( null );
 
+    console.log( `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}` )
+
     if( tops.sync && !tops.deasync && tops.mode === 'fork' )
-    return test.shouldThrowErrorSync( () =>
     {
-      _.process.startSingle
-      ({
-        execPath : programPath + ` arg1`,
-        mode : tops.mode,
-        sync : tops.sync,
-        deasync : tops.deasync
-      })
-    });
+      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, throwing`;
+      return test.shouldThrowErrorSync( () =>
+      {
+        _.process.startSingle
+        ({
+          execPath : programPath + ` arg1`,
+          mode : tops.mode,
+          sync : tops.sync,
+          deasync : tops.deasync
+        })
+      });
+    }
 
     ready.then( () =>
     {
-      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, dry : 1, no error`
+      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, no error`;
       let o =
       {
         execPath : tops.mode === 'fork' ? programPath + ` arg1` : 'node ' + programPath + ` arg1`,
@@ -24275,14 +24280,16 @@ function startSingleOptionDry( test )
         return null;
       })
 
-      return null;
+      /* qqq for Yevhen : bad! */
+      // return null;
+      return o.conTerminate;
     })
 
     /* */
 
     ready.then( () =>
     {
-      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, dry : 1, wrong execPath`;
+      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, wrong execPath`;
       let o =
       {
         execPath : 'err ' + programPath + ' arg1',
@@ -24382,7 +24389,9 @@ function startSingleOptionDry( test )
         return null;
       })
 
-      return null;
+      /* qqq for Yevhen : bad! */
+      // return null;
+      return o.conTerminate;
     })
 
     return ready;
@@ -24397,6 +24406,7 @@ function startSingleOptionDry( test )
     var filePath = path.join( __dirname, 'file' );
     fs.writeFileSync( filePath, filePath );
   }
+
 }
 
 startSingleOptionDry.rapidity = -1;
@@ -24406,6 +24416,226 @@ startSingleOptionDry.description =
 Simulates run of routine start with all possible options.
 After execution checks fields of run descriptor.
 `
+
+/* xxx : fail on Windows, but it happen on any OS.
+should be fixed now
+
+2020-12-07T10:06:19.1318563Z       Running TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry ..
+2020-12-07T10:06:19.1687652Z  1 : function testApp()
+2020-12-07T10:06:19.1688441Z  2 :   {
+2020-12-07T10:06:19.1688987Z  3 :     var fs = require( 'fs' );
+2020-12-07T10:06:19.1689681Z  4 :     var path = require( 'path' );
+2020-12-07T10:06:19.1690355Z  5 :     var filePath = path.join( __dirname, 'file' );
+2020-12-07T10:06:19.1691098Z  6 :     fs.writeFileSync( filePath, filePath );
+2020-12-07T10:06:19.1691671Z  7 :   }
+2020-12-07T10:06:19.1692051Z  8 :
+2020-12-07T10:06:19.1692492Z  9 : var context = {
+2020-12-07T10:06:19.1693004Z 10 :   "t0" : 100,
+2020-12-07T10:06:19.1693497Z 11 :   "t1" : 1000,
+2020-12-07T10:06:19.1693956Z 12 :   "t2" : 5000,
+2020-12-07T10:06:19.1694402Z 13 :   "t3" : 15000
+2020-12-07T10:06:19.1694801Z 14 : };
+2020-12-07T10:06:19.1695988Z 15 : var toolsPath = `D:\\a\\wProcess\\wProcess\\node_modules\\wTools\\proto\\wtools\\abase\\Layer1.s`;
+2020-12-07T10:06:19.1696695Z 16 :
+2020-12-07T10:06:19.1697359Z 17 : testApp();
+2020-12-07T10:06:19.1697795Z 18 :
+2020-12-07T10:06:19.1795827Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 0, dry : 1, no error # 1 ) : expected true ... ok
+2020-12-07T10:06:19.1826758Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 0, dry : 1, no error # 2 ) ... ok
+2020-12-07T10:06:19.1957138Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 0, dry : 1, wrong execPath # 3 ) : expected true ... ok
+2020-12-07T10:06:19.1983589Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 0, dry : 1, wrong execPath # 4 ) ... ok
+2020-12-07T10:06:19.2101588Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : spawn, sync : 0, deasync : 0, dry : 1, no error # 5 ) : expected true ... ok
+2020-12-07T10:06:19.2127207Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : spawn, sync : 0, deasync : 0, dry : 1, no error # 6 ) ... ok
+2020-12-07T10:06:19.2243598Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : spawn, sync : 0, deasync : 0, dry : 1, wrong execPath # 7 ) : expected true ... ok
+2020-12-07T10:06:19.2269122Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : spawn, sync : 0, deasync : 0, dry : 1, wrong execPath # 8 ) ... ok
+2020-12-07T10:06:19.2410345Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : shell, sync : 0, deasync : 0, dry : 1, no error # 9 ) : expected true ... ok
+2020-12-07T10:06:19.2435652Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : shell, sync : 0, deasync : 0, dry : 1, no error # 10 ) ... ok
+2020-12-07T10:06:19.2555464Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : shell, sync : 0, deasync : 0, dry : 1, wrong execPath # 11 ) : expected true ... ok
+2020-12-07T10:06:19.2581911Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : shell, sync : 0, deasync : 0, dry : 1, wrong execPath # 12 ) ... ok
+2020-12-07T10:06:21.1840703Z  > D:\Temp\ProcessBasic-2020-12-7-9-12-48-621-4e69.tmp\startSingleOptionDry\testApp.js arg1 arg0
+2020-12-07T10:06:21.1900916Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 13 ) ... ok
+2020-12-07T10:06:21.1957658Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 14 ) ... ok
+2020-12-07T10:06:21.1963255Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 15 ) ... ok
+2020-12-07T10:06:21.1994073Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 16 ) ... ok
+2020-12-07T10:06:21.2023296Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 17 ) ... ok
+2020-12-07T10:06:21.2052815Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 18 ) ... ok
+2020-12-07T10:06:21.2082920Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 19 ) ... ok
+2020-12-07T10:06:21.2106827Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 20 ) ... ok
+2020-12-07T10:06:21.2132527Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 21 ) ... ok
+2020-12-07T10:06:21.2161777Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 22 ) ... ok
+2020-12-07T10:06:21.2187792Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 23 ) ... ok
+2020-12-07T10:06:21.2211230Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 24 ) ... ok
+2020-12-07T10:06:21.2238401Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 25 ) ... ok
+2020-12-07T10:06:21.2263943Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 26 ) ... ok
+2020-12-07T10:06:21.2408626Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 27 ) ... ok
+2020-12-07T10:06:21.2411961Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 28 ) ... ok
+2020-12-07T10:06:21.2415208Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 29 ) ... ok
+2020-12-07T10:06:21.2418519Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 30 ) ... ok
+2020-12-07T10:06:21.2428439Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 31 ) ... ok
+2020-12-07T10:06:21.2454455Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 32 ) ... ok
+2020-12-07T10:06:21.2480685Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 33 ) ... ok
+2020-12-07T10:06:21.2506630Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 34 ) ... ok
+2020-12-07T10:06:21.2531807Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 35 ) ... ok
+2020-12-07T10:06:21.2558544Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 36 ) ... ok
+2020-12-07T10:06:21.2584185Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 37 ) ... ok
+2020-12-07T10:06:21.2615223Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 38 ) ... ok
+2020-12-07T10:06:21.2637665Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 39 ) ... ok
+2020-12-07T10:06:21.2667537Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 40 ) : expected true ... ok
+2020-12-07T10:06:21.2696029Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 41 ) ... ok
+2020-12-07T10:06:21.2735477Z  > err D:\Temp\ProcessBasic-2020-12-7-9-12-48-621-4e69.tmp\startSingleOptionDry\testApp.js arg1 arg0
+2020-12-07T10:06:21.2765141Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 42 ) ... ok
+2020-12-07T10:06:21.2788579Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 43 ) ... ok
+2020-12-07T10:06:21.2812612Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 44 ) ... ok
+2020-12-07T10:06:21.2838947Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 45 ) ... ok
+2020-12-07T10:06:21.2873506Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 46 ) ... ok
+2020-12-07T10:06:21.2900667Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 47 ) ... ok
+2020-12-07T10:06:21.2927832Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 48 ) ... ok
+2020-12-07T10:06:21.2951102Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 49 ) ... ok
+2020-12-07T10:06:21.2975914Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 50 ) ... ok
+2020-12-07T10:06:21.2999450Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 51 ) ... ok
+2020-12-07T10:06:21.3026113Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 52 ) ... ok
+2020-12-07T10:06:21.3050216Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 53 ) ... ok
+2020-12-07T10:06:21.3077515Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 54 ) ... ok
+2020-12-07T10:06:21.3105057Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 55 ) ... ok
+2020-12-07T10:06:21.3131034Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 56 ) ... ok
+2020-12-07T10:06:21.3154668Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 57 ) ... ok
+2020-12-07T10:06:21.3180475Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 58 ) ... ok
+2020-12-07T10:06:21.3205534Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 59 ) ... ok
+2020-12-07T10:06:21.3237744Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 60 ) ... ok
+2020-12-07T10:06:21.3261615Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 61 ) ... ok
+2020-12-07T10:06:21.3285061Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 62 ) ... ok
+2020-12-07T10:06:21.3308715Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 63 ) ... ok
+2020-12-07T10:06:21.3342573Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 64 ) ... ok
+2020-12-07T10:06:21.3366965Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 65 ) ... ok
+2020-12-07T10:06:21.3393914Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 66 ) ... ok
+2020-12-07T10:06:21.3421484Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 67 ) ... ok
+2020-12-07T10:06:21.3444350Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 68 ) ... ok
+2020-12-07T10:06:21.3474038Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 69 ) : expected true ... ok
+2020-12-07T10:06:21.3508287Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 70 ) ... ok
+2020-12-07T10:06:21.3544967Z  > node D:\Temp\ProcessBasic-2020-12-7-9-12-48-621-4e69.tmp\startSingleOptionDry\testApp.js arg1 arg0
+2020-12-07T10:06:21.3571223Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 71 ) ... ok
+2020-12-07T10:06:21.3595039Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 72 ) ... ok
+2020-12-07T10:06:21.3618971Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 73 ) ... ok
+2020-12-07T10:06:21.3642778Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 74 ) ... ok
+2020-12-07T10:06:21.3667389Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 75 ) ... ok
+2020-12-07T10:06:21.3691998Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 76 ) ... ok
+2020-12-07T10:06:21.3718247Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 77 ) ... ok
+2020-12-07T10:06:21.3741220Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 78 ) ... ok
+2020-12-07T10:06:21.3765443Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 79 ) ... ok
+2020-12-07T10:06:21.3797996Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 80 ) ... ok
+2020-12-07T10:06:21.3822688Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 81 ) ... ok
+2020-12-07T10:06:21.3846831Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 82 ) ... ok
+2020-12-07T10:06:21.3873771Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 83 ) ... ok
+2020-12-07T10:06:21.3896586Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 84 ) ... ok
+2020-12-07T10:06:21.3921042Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 85 ) ... ok
+2020-12-07T10:06:21.3944000Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 86 ) ... ok
+2020-12-07T10:06:21.3968481Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 87 ) ... ok
+2020-12-07T10:06:21.3991323Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 88 ) ... ok
+2020-12-07T10:06:21.4018739Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 89 ) ... ok
+2020-12-07T10:06:21.4042157Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 90 ) ... ok
+2020-12-07T10:06:21.4066659Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 91 ) ... ok
+2020-12-07T10:06:21.4089655Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 92 ) ... ok
+2020-12-07T10:06:21.4112499Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 93 ) ... ok
+2020-12-07T10:06:21.4135393Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 94 ) ... ok
+2020-12-07T10:06:21.4163486Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 95 ) ... ok
+2020-12-07T10:06:21.4193829Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 96 ) ... ok
+2020-12-07T10:06:21.4229634Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 97 ) ... ok
+2020-12-07T10:06:21.4258926Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 98 ) : expected true ... ok
+2020-12-07T10:06:21.4286739Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 99 ) ... ok
+2020-12-07T10:06:21.4326305Z  > err D:\Temp\ProcessBasic-2020-12-7-9-12-48-621-4e69.tmp\startSingleOptionDry\testApp.js arg1 arg0
+2020-12-07T10:06:21.4353754Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 100 ) ... ok
+2020-12-07T10:06:21.4379270Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 101 ) ... ok
+2020-12-07T10:06:21.4404823Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 102 ) ... ok
+2020-12-07T10:06:21.4432863Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 103 ) ... ok
+2020-12-07T10:06:21.4458701Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 104 ) ... ok
+2020-12-07T10:06:21.4485007Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 105 ) ... ok
+2020-12-07T10:06:21.4512962Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 106 ) ... ok
+2020-12-07T10:06:21.4536415Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 107 ) ... ok
+2020-12-07T10:06:21.4561091Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 108 ) ... ok
+2020-12-07T10:06:21.4584799Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 109 ) ... ok
+2020-12-07T10:06:21.4609717Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 110 ) ... ok
+2020-12-07T10:06:21.4635103Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 111 ) ... ok
+2020-12-07T10:06:21.4665184Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 112 ) ... ok
+2020-12-07T10:06:21.4701859Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 113 ) ... ok
+2020-12-07T10:06:21.4726926Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 114 ) ... ok
+2020-12-07T10:06:21.4751382Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 115 ) ... ok
+2020-12-07T10:06:21.4774399Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 116 ) ... ok
+2020-12-07T10:06:21.4801631Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 117 ) ... ok
+2020-12-07T10:06:21.4829462Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 118 ) ... ok
+2020-12-07T10:06:21.4857004Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 119 ) ... ok
+2020-12-07T10:06:21.4885172Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 120 ) ... ok
+2020-12-07T10:06:21.4912984Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 121 ) ... ok
+2020-12-07T10:06:21.4941101Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 122 ) ... ok
+2020-12-07T10:06:21.4967805Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 123 ) ... ok
+2020-12-07T10:06:21.4990757Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 124 ) ... ok
+2020-12-07T10:06:21.5017730Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 125 ) ... ok
+2020-12-07T10:06:21.5040617Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 126 ) ... ok
+2020-12-07T10:06:21.5069403Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 127 ) : expected true ... ok
+2020-12-07T10:06:21.5098561Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 128 ) ... ok
+2020-12-07T10:06:21.5144381Z  > node D:\Temp\ProcessBasic-2020-12-7-9-12-48-621-4e69.tmp\startSingleOptionDry\testApp.js arg1 "arg0"
+2020-12-07T10:06:21.5182858Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 129 ) ... ok
+2020-12-07T10:06:21.5209084Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 130 ) ... ok
+2020-12-07T10:06:21.5233329Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 131 ) ... ok
+2020-12-07T10:06:21.5261009Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 132 ) ... ok
+2020-12-07T10:06:21.5288603Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 133 ) ... ok
+2020-12-07T10:06:21.5315573Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 134 ) ... ok
+2020-12-07T10:06:21.5342298Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 135 ) ... ok
+2020-12-07T10:06:21.5368860Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 136 ) ... ok
+2020-12-07T10:06:21.5395107Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 137 ) ... ok
+2020-12-07T10:06:21.5421302Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 138 ) ... ok
+2020-12-07T10:06:21.5446685Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 139 ) ... ok
+2020-12-07T10:06:21.5471371Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 140 ) ... ok
+2020-12-07T10:06:21.5496080Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 141 ) ... ok
+2020-12-07T10:06:21.5520694Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 142 ) ... ok
+2020-12-07T10:06:21.5544082Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 143 ) ... ok
+2020-12-07T10:06:21.5571058Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 144 ) ... ok
+2020-12-07T10:06:21.5599532Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 145 ) ... ok
+2020-12-07T10:06:21.5634162Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 146 ) ... ok
+2020-12-07T10:06:21.5667416Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 147 ) ... ok
+2020-12-07T10:06:21.5693980Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 148 ) ... ok
+2020-12-07T10:06:21.5721127Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 149 ) ... ok
+2020-12-07T10:06:21.5748436Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 150 ) ... ok
+2020-12-07T10:06:21.5775082Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 151 ) ... ok
+2020-12-07T10:06:21.5801859Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 152 ) ... ok
+2020-12-07T10:06:21.5827033Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 153 ) ... ok
+2020-12-07T10:06:21.5854741Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 154 ) ... ok
+2020-12-07T10:06:21.5878936Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 155 ) ... ok
+2020-12-07T10:06:21.5910651Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 156 ) : expected true ... ok
+2020-12-07T10:06:21.5942398Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 157 ) ... ok
+2020-12-07T10:06:21.5981835Z  > err D:\Temp\ProcessBasic-2020-12-7-9-12-48-621-4e69.tmp\startSingleOptionDry\testApp.js arg1 "arg0"
+2020-12-07T10:06:21.6009469Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 158 ) ... ok
+2020-12-07T10:06:21.6034216Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 159 ) ... ok
+2020-12-07T10:06:21.6061851Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 160 ) ... ok
+2020-12-07T10:06:21.6088727Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 161 ) ... ok
+2020-12-07T10:06:21.6114970Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 162 ) ... ok
+2020-12-07T10:06:21.6154168Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 163 ) ... ok
+2020-12-07T10:06:21.6178894Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 164 ) ... ok
+2020-12-07T10:06:21.6205867Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 165 ) ... ok
+2020-12-07T10:06:21.6229060Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 166 ) ... ok
+2020-12-07T10:06:21.6252668Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 167 ) ... ok
+2020-12-07T10:06:21.6278636Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 168 ) ... ok
+2020-12-07T10:06:21.6305059Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 169 ) ... ok
+2020-12-07T10:06:21.6331327Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 170 ) ... ok
+2020-12-07T10:06:21.6357629Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 171 ) ... ok
+2020-12-07T10:06:21.6385125Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 172 ) ... ok
+2020-12-07T10:06:21.6410665Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 173 ) ... ok
+2020-12-07T10:06:21.6436724Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 174 ) ... ok
+2020-12-07T10:06:21.6516054Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 175 ) ... ok
+2020-12-07T10:06:21.6519244Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 176 ) ... ok
+2020-12-07T10:06:21.6529469Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 177 ) ... ok
+2020-12-07T10:06:21.6555261Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 178 ) ... ok
+2020-12-07T10:06:21.6580884Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 179 ) ... ok
+2020-12-07T10:06:21.6605221Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 180 ) ... ok
+2020-12-07T10:06:21.6639804Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 181 ) ... ok
+2020-12-07T10:06:21.6666313Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 182 ) ... ok
+2020-12-07T10:06:21.6693091Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 183 ) ... ok
+2020-12-07T10:06:21.6720043Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 184 ) ... ok
+2020-12-07T10:06:21.6749452Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 185 ) : expected true ... ok
+2020-12-07T10:06:21.6778688Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 186 ) ... ok
+2020-12-07T10:06:21.6815087Z  > D:\Temp\ProcessBasic-2020-12-7-9-12-48-621-4e69.tmp\startSingleOptionDry\testApp.js arg1 arg0
+2020-12-07T10:14:39.6639254Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 187 ) : expected true ... ok
+2020-12-07T10:14:39.6903849Z       Failed ( test routine time limit ) TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry in 500.557s
+
+*/
 
 //
 
