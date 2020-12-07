@@ -10755,43 +10755,36 @@ function startSingleAfterDeathTerminatingMain( test )
       return test.shouldThrowErrorSync( () => _.process.start( o ) )
 
       _.process.start( o );
+      
       let secondaryPid;
+      let secondaryReady = _.Consequence();
 
       o.pnd.on( 'message', ( e ) =>
       {
         secondaryPid = _.numberFrom( e );
-        _.process.terminate({ pid : o.pnd.pid, withChildren : 0 })
+        secondaryReady.take( secondaryPid );
       })
-
+      
+      secondaryReady.then( () => 
+      {
+        stack.push( 'secondaryReady' );
+        
+        test.will = 'secondary process is alive'
+        test.true( _.process.isAlive( secondaryPid ) );
+        return _.process.terminate({ pid : o.pnd.pid, withChildren : 0 })
+      })
+      
       o.conTerminate.then( () =>
       {
         stack.push( 'conTerminate1' );
 
         test.will = 'program1 terminated'
         test.notIdentical( o.exitCode, 0 );
-
-        return _.time.out( context.t2 ); /* 5000 */
-      })
-
-      o.conTerminate.then( () =>
-      {
-/* xxx qqq for Vova : fails on osx
-2020-12-04T22:41:20.3777180Z         /Users/runner/work/wProcess/wProcess/proto/wtools/abase/l4_process.test/Execution.test.s:10939:18
-2020-12-04T22:41:20.3794880Z           10935 :
-2020-12-04T22:41:20.3795500Z           10936 :       o.conTerminate.then( () =>
-2020-12-04T22:41:20.3795960Z           10937 :       {
-2020-12-04T22:41:20.3798570Z           10938 :         test.will = 'secondary process is alive'
-2020-12-04T22:41:20.3799590Z         * 10939 :         test.true( _.process.isAlive( secondaryPid ) );
-2020-12-04T22:41:20.3801110Z
-2020-12-04T22:41:20.3849900Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleAfterDeathTerminatingMain / mode : fork < secondary process is alive # 2 ) : expected true ... failed
-*/
+        
         test.will = 'secondary process is alive'
         test.true( _.process.isAlive( secondaryPid ) );
-
-        test.will = 'child of secondary process is still alive'
-        test.true( !a.fileProvider.fileExists( program2PidPath ) );
-
-        return _.time.out( context.t2 * 2 ); /* 10000 */
+        
+        return _.time.out( context.t2 * 3 ); /* 15000 */
       })
 
       o.conTerminate.then( () =>
@@ -10856,7 +10849,7 @@ function startSingleAfterDeathTerminatingMain( test )
 
 */
         stack.push( 'conTerminate2' );
-        test.identical( stack, [ 'conTerminate1', 'conTerminate2' ] );
+        test.identical( stack, [ 'secondaryReady', 'conTerminate1', 'conTerminate2' ] );
 
         test.case = 'secondary process is terminated'
         test.true( !_.process.isAlive( secondaryPid ) );
@@ -10874,7 +10867,7 @@ function startSingleAfterDeathTerminatingMain( test )
         return null;
       })
 
-      return o.conTerminate;
+      return _.Consequence.And( o.conTerminate, secondaryReady );
     })
 
     return ready;
@@ -10905,7 +10898,7 @@ function startSingleAfterDeathTerminatingMain( test )
       process.send( o.pnd.pid );
     })
 
-    _.time.out( context.t2, () => /* 5000 */
+    _.time.out( context.t2 * 2, () => /* 10000 */
     {
       console.log( 'program1::termination begin' );
       return null;
@@ -13745,6 +13738,144 @@ Checks that detached child process continues to work after parent death.
 Parent spawns child in detached mode with different stdio and ipc.
 Child continues to work after parent death.
 `
+
+//
+
+function startMinimalDetachingWaitForDisconnect( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testFilePath = a.abs( a.routinePath, 'testFile' );
+  let modes = [ 'fork' ];
+
+  modes.forEach( ( mode ) =>
+  {
+    a.ready.then( () =>
+    {
+      a.fileProvider.filesDelete( a.routinePath );
+      let locals = { mode }
+      a.program({ routine : testAppParent, locals });
+      a.program( testAppChild );
+      return null;
+    })
+
+    a.ready.tap( () => test.open( mode ) );
+    a.ready.then( () => run( mode ) );
+    a.ready.tap( () => test.close( mode ) );
+  });
+
+  return a.ready;
+
+  /* - */
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null )
+
+    /*  */
+
+    ready.then( () =>
+    {
+      a.fileProvider.filesDelete( testFilePath );
+      a.fileProvider.dirMakeForFile( testFilePath );
+
+      let o =
+      {
+        execPath : 'node testAppParent.js',
+        mode : 'spawn',
+        outputCollecting : 1,
+        currentPath : a.routinePath,
+        throwingExitCode : 0,
+        ipc : 1,
+      }
+      let con = _.process.startMinimal( o );
+
+      let childPid;
+
+      o.pnd.on( 'message', ( data ) =>
+      {
+        childPid = _.numberFrom( data );
+        _.process.terminate({ pid : o.pnd.pid, withChildren : 0 })
+      })
+
+      con.then( ( op ) =>
+      {
+        test.notIdentical( op.exitCode, 0 );
+        test.true( _.process.isAlive( childPid ) );
+        return _.time.out( context.t2 * 3 );
+      })
+      
+      con.then( () =>
+      {
+        test.true( !_.process.isAlive( childPid ) );
+        test.true( a.fileProvider.fileExists( a.abs( 'testFile' ) ) );
+        let child2Pid = a.fileProvider.fileRead( a.abs( 'testFile' ) );
+        child2Pid = _.numberFrom( child2Pid );
+        test.true( !_.process.isAlive( child2Pid ) );
+        return null;
+      })
+
+      return con;
+    })
+    
+    return ready;
+  }
+
+  /*  */
+
+  function testAppParent()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    let args = _.process.input();
+
+    let o =
+    {
+      execPath : mode === 'fork' ? 'testAppChild.js' : 'node testAppChild.js',
+      mode,
+      detaching : 2,
+    }
+
+    _.mapExtend( o, args.map );
+
+    _.process.startMinimal( o );
+    
+    o.conStart.thenGive( () => 
+    {
+      process.send( o.pnd.pid )
+    })
+    
+    _.time.out( context.t2 * 2, () => 
+    {
+      console.log( 'parent::end' );
+    })
+
+  }
+
+  function testAppChild()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+    console.log( 'Child process start', process.pid )
+    _.time.out( context.t2 * 2, () => /* 10000 */
+    {
+      let filePath = _.path.join( __dirname, 'testFile' );
+      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
+      console.log( 'Child process end' )
+      return null;
+    })
+  }
+}
+
+startMinimalDetachingWaitForDisconnect.rapidity = -1;
+startMinimalDetachingWaitForDisconnect.timeOut = 3e5;
+startMinimalDetachingWaitForDisconnect.description =
+`
+`
+
 //
 
 function startMinimalDetachingThrowing( test )
@@ -36836,7 +36967,7 @@ var Proto =
     startMinimalOptionWhenTime,
     startMinimalOptionTimeOut,
     startSingleAfterDeath,
-    // startSingleAfterDeathTerminatingMain, /* qqq for Vova : write good stable test */
+    startSingleAfterDeathTerminatingMain, /* qqq for Vova : write good stable test */
     startSingleAfterDeathOutput,
 
     // detaching
@@ -36856,6 +36987,7 @@ var Proto =
     startMinimalDetachingChildExistsBeforeParentWaitForTermination,
     startMinimalDetachingEndCompetitorIsExecuted,
     startMinimalDetachingTerminationBegin,
+    startMinimalDetachingWaitForDisconnect,
     startMinimalEventClose,
     startMinimalEventExit,
     startMinimalDetachingThrowing,
