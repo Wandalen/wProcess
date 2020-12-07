@@ -42,10 +42,511 @@ function suiteEnd()
 //
 // --
 
+function input( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let programPath = a.program( testApp );
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'without passed arguments';
+    let o = optionsMake();
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      let exp =
+      {
+        keyValDelimeter : ':',
+        commandsDelimeter : ';',
+        caching : true,
+        parsingArrays : true,
+        interpreterPath : process.argv[ 0 ],
+        interpreterArgs : [],
+        scriptPath : a.abs( 'testApp.js' ),
+        scriptArgs : [],
+        interpreterArgsStrings : '',
+        scriptArgsString : '',
+        subject : '',
+        map : {},
+        subjects : [],
+        maps : [],
+        original : '',
+      };
+      test.identical( op, exp );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      return null;
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'only subject';
+    let o = optionsMake();
+    o.args = [ '.will.yml' ];
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      let exp =
+      {
+        keyValDelimeter : ':',
+        commandsDelimeter : ';',
+        caching : true,
+        parsingArrays : true,
+        interpreterPath : process.argv[ 0 ],
+        interpreterArgs : [],
+        scriptPath : a.abs( 'testApp.js' ),
+        scriptArgs : [ '.will.yml' ],
+        interpreterArgsStrings : '',
+        scriptArgsString : '.will.yml',
+        subject : '.will.yml',
+        map : {},
+        subjects : [ '.will.yml' ],
+        maps : [ {} ],
+        original : '.will.yml',
+      };
+      test.identical( op, exp );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      return null;
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'a few subjects in single command';
+    let o = optionsMake();
+    o.args = [ '.will.yml', 'file' ];
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      let exp =
+      {
+        keyValDelimeter : ':',
+        commandsDelimeter : ';',
+        caching : true,
+        parsingArrays : true,
+        interpreterPath : process.argv[ 0 ],
+        interpreterArgs : [],
+        scriptPath : a.abs( 'testApp.js' ),
+        scriptArgs : [ '.will.yml', 'file' ],
+        interpreterArgsStrings : '',
+        scriptArgsString : '.will.yml file',
+        subject : '.will.yml file',
+        map : {},
+        subjects : [ '.will.yml file' ],
+        maps : [ {} ],
+        original : '.will.yml file',
+      };
+      test.identical( op, exp );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      return null;
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'single option';
+    let o = optionsMake();
+    o.args = [ 'v:5' ];
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      let exp =
+      {
+        keyValDelimeter : ':',
+        commandsDelimeter : ';',
+        caching : true,
+        parsingArrays : true,
+        interpreterPath : process.argv[ 0 ],
+        interpreterArgs : [],
+        scriptPath : a.abs( 'testApp.js' ),
+        scriptArgs : [ 'v:5' ],
+        interpreterArgsStrings : '',
+        scriptArgsString : 'v:5',
+        subject : '',
+        map : { v : 5 },
+        subjects : [ '' ],
+        maps : [ { v : 5 } ],
+        original : 'v:5',
+      };
+      test.identical( op, exp );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      return null;
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'a few options';
+    let o = optionsMake();
+    o.args = [ 'v:5', 'r:some', 'a:1' ];
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      let exp =
+      {
+        keyValDelimeter : ':',
+        commandsDelimeter : ';',
+        caching : true,
+        parsingArrays : true,
+        interpreterPath : process.argv[ 0 ],
+        interpreterArgs : [],
+        scriptPath : a.abs( 'testApp.js' ),
+        scriptArgs : [ 'v:5', 'r:some', 'a:1' ],
+        interpreterArgsStrings : '',
+        scriptArgsString : 'v:5 r:some a:1',
+        subject : '',
+        map : { v : 5, r : 'some', a : 1 },
+        subjects : [ '' ],
+        maps : [ { v : 5, r : 'some', a : 1 } ],
+        original : 'v:5 r:some a:1',
+      };
+      test.identical( op, exp );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      return null;
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'a few subjects and a few options in command';
+    let o = optionsMake();
+    o.args = [ '.will.yml', 'file', 'v:5', 'r:some', 'a:1' ];
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      let exp =
+      {
+        keyValDelimeter : ':',
+        commandsDelimeter : ';',
+        caching : true,
+        parsingArrays : true,
+        interpreterPath : process.argv[ 0 ],
+        interpreterArgs : [],
+        scriptPath : a.abs( 'testApp.js' ),
+        scriptArgs : [ '.will.yml', 'file', 'v:5', 'r:some', 'a:1' ],
+        interpreterArgsStrings : '',
+        scriptArgsString : '.will.yml file v:5 r:some a:1',
+        subject : '.will.yml file',
+        map : { v : 5, r : 'some', a : 1 },
+        subjects : [ '.will.yml file' ],
+        maps : [ { v : 5, r : 'some', a : 1 } ],
+        original : '.will.yml file v:5 r:some a:1',
+      };
+      test.identical( op, exp );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      return null;
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'two commands without commandsDelimeter, subjects and options';
+    let o = optionsMake();
+    o.args = [ '.will.yml', 'v:5', 'r:some', 'file', 'a:1' ];
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      let exp =
+      {
+        keyValDelimeter : ':',
+        commandsDelimeter : ';',
+        caching : true,
+        parsingArrays : true,
+        interpreterPath : process.argv[ 0 ],
+        interpreterArgs : [],
+        scriptPath : a.abs( 'testApp.js' ),
+        scriptArgs : [ '.will.yml', 'v:5', 'r:some', 'file', 'a:1' ],
+        interpreterArgsStrings : '',
+        scriptArgsString : '.will.yml v:5 r:some file a:1',
+        subject : '.will.yml',
+        map : { v : 5, r : 'some file', a : 1 },
+        subjects : [ '.will.yml' ],
+        maps : [ { v : 5, r : 'some file', a : 1 } ],
+        original : '.will.yml v:5 r:some file a:1',
+      };
+      test.identical( op, exp );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      return null;
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'two commands with commandsDelimeter, subjects and options';
+    let o = optionsMake();
+    o.args = [ '.will.yml', 'v:5', 'r:some', ';', 'file', 'a:1' ];
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      let exp =
+      {
+        keyValDelimeter : ':',
+        commandsDelimeter : ';',
+        caching : true,
+        parsingArrays : true,
+        interpreterPath : process.argv[ 0 ],
+        interpreterArgs : [],
+        scriptPath : a.abs( 'testApp.js' ),
+        scriptArgs : [ '.will.yml', 'v:5', 'r:some', ';', 'file', 'a:1' ],
+        interpreterArgsStrings : '',
+        scriptArgsString : '.will.yml v:5 r:some ; file a:1',
+        subject : '.will.yml',
+        map : { v : 5, r : 'some' },
+        subjects : [ '.will.yml', 'file' ],
+        maps : [ { v : 5, r : 'some' }, { a : 1 } ],
+        original : '.will.yml v:5 r:some ; file a:1',
+      };
+      test.identical( op, exp );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      return null;
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'two commands with commandsDelimeter, args as single string';
+    let o = optionsMake();
+    o.args = [ '.will.yml v:5 r:some ; file a:1' ];
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      let exp =
+      {
+        keyValDelimeter : ':',
+        commandsDelimeter : ';',
+        caching : true,
+        parsingArrays : true,
+        interpreterPath : process.argv[ 0 ],
+        interpreterArgs : [],
+        scriptPath : a.abs( 'testApp.js' ),
+        scriptArgs : [ '.will.yml v:5 r:some ; file a:1' ],
+        interpreterArgsStrings : '',
+        scriptArgsString : '".will.yml v:5 r:some ; file a:1"',
+        subject : '.will.yml',
+        map : { v : 5, r : 'some' },
+        subjects : [ '.will.yml', 'file' ],
+        maps : [ { v : 5, r : 'some' }, { a : 1 } ],
+        original : '".will.yml v:5 r:some ; file a:1"',
+      };
+      test.identical( op, exp );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      return null;
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'subject - nativized path';
+    let o = optionsMake();
+    o.args = [ _.path.nativize( a.abs( '.will.yml' ) ) ];
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      let exp =
+      {
+        keyValDelimeter : ':',
+        commandsDelimeter : ';',
+        caching : true,
+        parsingArrays : true,
+        interpreterPath : process.argv[ 0 ],
+        interpreterArgs : [],
+        scriptPath : a.abs( 'testApp.js' ),
+        scriptArgs : [ _.path.nativize( a.abs( '.will.yml' ) ) ],
+        interpreterArgsStrings : '',
+        scriptArgsString : _.path.nativize( a.abs( '.will.yml' ) ),
+        subject : _.path.nativize( a.abs( '.will.yml' ) ),
+        map : {},
+        subjects : [ _.path.nativize( a.abs( '.will.yml' ) ) ],
+        maps : [ {} ],
+        original : _.path.nativize( a.abs( '.will.yml' ) ),
+      };
+      test.identical( op, exp );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      return null;
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'two calls of program, should return cached result';
+    let programPath = a.program( testApp2 );
+    let o =
+    {
+      execPath : programPath,
+      args : [ _.path.nativize( a.abs( '.will.yml' ) ) ],
+      mode : 'fork',
+      throwingExitCode : 1,
+      outputCollecting : 1,
+      ipc : 1,
+    };
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      let exp =
+      {
+        keyValDelimeter : ':',
+        commandsDelimeter : ';',
+        caching : true,
+        parsingArrays : true,
+        interpreterPath : process.argv[ 0 ],
+        interpreterArgs : [],
+        scriptPath : a.abs( 'testApp2.js' ),
+        scriptArgs : [ _.path.nativize( a.abs( '.will.yml' ) ) ],
+        interpreterArgsStrings : '',
+        scriptArgsString : _.path.nativize( a.abs( '.will.yml' ) ),
+        subject : _.path.nativize( a.abs( '.will.yml' ) ),
+        map : {},
+        subjects : [ _.path.nativize( a.abs( '.will.yml' ) ) ],
+        maps : [ {} ],
+        original : _.path.nativize( a.abs( '.will.yml' ) ),
+      };
+      test.identical( op[ 0 ], exp );
+      test.identical( op[ 1 ], true  );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      return null;
+    });
+  });
+
+  /* - */
+
+  return a.ready;
+
+  /* */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+
+    let result = _.process.input();
+    process.send( result );
+  }
+
+  /* */
+
+  function testApp2()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+
+    let result = _.process.input();
+    let result2 = _.process.input();
+    process.send([ result, result === result2 ]);
+  }
+
+  /* */
+
+  function optionsMake()
+  {
+    let o =
+    {
+      execPath : programPath,
+      mode : 'fork',
+      throwingExitCode : 1,
+      outputCollecting : 1,
+      ipc : 1,
+    };
+    return o;
+  }
+}
+
+//
+
 function inputReadToWithArguments( test )
 {
   let context = this;
   let a = test.assetFor( false );
+
+  /* */
 
   a.ready.then( () =>
   {
@@ -66,7 +567,7 @@ function inputReadToWithArguments( test )
       test.identical( op.ended, true );
 
       a.fileProvider.fileDelete( programPath );
-      return null
+      return null;
     });
   });
 
@@ -91,7 +592,7 @@ function inputReadToWithArguments( test )
       test.identical( op.ended, true );
 
       a.fileProvider.fileDelete( programPath );
-      return null
+      return null;
     });
   });
 
@@ -116,7 +617,7 @@ function inputReadToWithArguments( test )
       test.identical( op.ended, true );
 
       a.fileProvider.fileDelete( programPath );
-      return null
+      return null;
     });
   });
 
@@ -141,7 +642,7 @@ function inputReadToWithArguments( test )
       test.identical( op.ended, true );
 
       a.fileProvider.fileDelete( programPath );
-      return null
+      return null;
     });
   });
 
@@ -166,7 +667,7 @@ function inputReadToWithArguments( test )
       test.identical( op.ended, true );
 
       a.fileProvider.fileDelete( programPath );
-      return null
+      return null;
     });
   });
 
@@ -191,7 +692,7 @@ function inputReadToWithArguments( test )
       test.identical( op.ended, true );
 
       a.fileProvider.fileDelete( programPath );
-      return null
+      return null;
     });
   });
 
@@ -216,7 +717,7 @@ function inputReadToWithArguments( test )
       test.identical( op.ended, true );
 
       a.fileProvider.fileDelete( programPath );
-      return null
+      return null;
     });
   });
 
@@ -241,7 +742,7 @@ function inputReadToWithArguments( test )
       test.identical( op.ended, true );
 
       a.fileProvider.fileDelete( programPath );
-      return null
+      return null;
     });
   });
 
@@ -266,7 +767,7 @@ function inputReadToWithArguments( test )
       test.identical( op.ended, true );
 
       a.fileProvider.fileDelete( programPath );
-      return null
+      return null;
     });
   });
 
@@ -323,9 +824,10 @@ function inputReadToWithArguments( test )
     _.process._exitHandlerRepair();
 
     let result = _.process.inputReadTo( dst, namesMap );
-    process.send( [ dst, result ] );
+    process.send([ dst, result ]);
   }
 
+  /* */
 
   function programMake( dst, namesMap )
   {
@@ -335,7 +837,7 @@ function inputReadToWithArguments( test )
       namesMap,
       toolsPath : _.module.resolve( 'wTools' ),
     };
-    return a.program( { routine : testApp, locals } );
+    return a.program({ routine : testApp, locals });
   }
 
   /* */
@@ -361,6 +863,8 @@ function inputReadToWithOptionsMap( test )
   let context = this;
   let a = test.assetFor( false );
 
+  /* */
+
   a.ready.then( () =>
   {
     test.case = 'dst - empty map';
@@ -380,7 +884,7 @@ function inputReadToWithOptionsMap( test )
       test.identical( op.ended, true );
 
       a.fileProvider.fileDelete( programPath );
-      return null
+      return null;
     });
   });
 
@@ -405,7 +909,7 @@ function inputReadToWithOptionsMap( test )
       test.identical( op.ended, true );
 
       a.fileProvider.fileDelete( programPath );
-      return null
+      return null;
     });
   });
 
@@ -430,7 +934,7 @@ function inputReadToWithOptionsMap( test )
       test.identical( op.ended, true );
 
       a.fileProvider.fileDelete( programPath );
-      return null
+      return null;
     });
   });
 
@@ -455,7 +959,7 @@ function inputReadToWithOptionsMap( test )
       test.identical( op.ended, true );
 
       a.fileProvider.fileDelete( programPath );
-      return null
+      return null;
     });
   });
 
@@ -480,7 +984,7 @@ function inputReadToWithOptionsMap( test )
       test.identical( op.ended, true );
 
       a.fileProvider.fileDelete( programPath );
-      return null
+      return null;
     });
   });
 
@@ -505,7 +1009,7 @@ function inputReadToWithOptionsMap( test )
       test.identical( op.ended, true );
 
       a.fileProvider.fileDelete( programPath );
-      return null
+      return null;
     });
   });
 
@@ -530,7 +1034,7 @@ function inputReadToWithOptionsMap( test )
       test.identical( op.ended, true );
 
       a.fileProvider.fileDelete( programPath );
-      return null
+      return null;
     });
   });
 
@@ -555,7 +1059,7 @@ function inputReadToWithOptionsMap( test )
       test.identical( op.ended, true );
 
       a.fileProvider.fileDelete( programPath );
-      return null
+      return null;
     });
   });
 
@@ -580,7 +1084,7 @@ function inputReadToWithOptionsMap( test )
       test.identical( op.ended, true );
 
       a.fileProvider.fileDelete( programPath );
-      return null
+      return null;
     });
   });
 
@@ -747,9 +1251,10 @@ function inputReadToWithOptionsMap( test )
     _.process._exitHandlerRepair();
 
     let result = _.process.inputReadTo({ dst, namesMap });
-    process.send( [ dst, result ] );
+    process.send([ dst, result ]);
   }
 
+  /* */
 
   function programMake( dst, namesMap )
   {
@@ -759,7 +1264,7 @@ function inputReadToWithOptionsMap( test )
       namesMap,
       toolsPath : _.module.resolve( 'wTools' ),
     };
-    return a.program( { routine : testApp, locals } );
+    return a.program({ routine : testApp, locals });
   }
 
   /* */
@@ -2450,6 +2955,7 @@ var Proto =
 
   tests :
   {
+    input,
 
     inputReadToWithArguments,
     inputReadToWithOptionsMap,
