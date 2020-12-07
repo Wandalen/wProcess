@@ -66,7 +66,7 @@ function _inputInSamFormatNodejs( o )
   o.keyValDelimeter = !!o.keyValDelimeter;
 
   let isStandardOptions =
-       o.keyValDelimeter === _inputInSamFormatNodejs.defaults.keyValDelimeter
+    o.keyValDelimeter === _inputInSamFormatNodejs.defaults.keyValDelimeter
     && o.commandsDelimeter === _inputInSamFormatNodejs.defaults.commandsDelimeter
     && o.parsingArrays === _inputInSamFormatNodejs.defaults.parsingArrays
     && o.interpreterPath === _inputInSamFormatNodejs.defaults.interpreterPath
@@ -125,11 +125,14 @@ function _inputInSamFormatNodejs( o )
     commandsDelimeter : o.commandsDelimeter,
     parsingArrays : o.parsingArrays,
     severalValues : 1,
+    subjectWinPathsMaybe : process.platform === 'win32',
   });
 
   _.mapExtend( result, r );
 
   return result;
+
+  /* */
 
   function argsToString( args )
   {
