@@ -19677,6 +19677,9 @@ function startMinimalOptionOutputColoring( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
+  // xxx
+  // let modes = [ 'fork' ];
+
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -19737,7 +19740,7 @@ function startMinimalOptionOutputColoring( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.identical( op.output, '\u001b[35mLog\u001b[39;0m\n' )
+        test.identical( op.output, '\u001b[35mLog\u001b[39;0m\n' );
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -20491,9 +20494,7 @@ function startMinimalOptionOutputPrefixing( test )
   /* */
 
   let modes = [ 'fork', 'spawn', 'shell' ];
-
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
-
   return a.ready;
 
   function run( mode )
@@ -20794,6 +20795,8 @@ function startMinimalOptionOutputPrefixing( test )
         return null;
       })
     })
+
+    /* */
 
     return ready;
 
@@ -22632,8 +22635,7 @@ function startMinimalOptionLogger( test )
     execPath = 'node ' + execPath;
 
     let loggerOutput = '';
-
-    let logger = new _.Logger({ output : null, onTransformEnd });
+    let logger = new _.Logger({ output : console, onTransformEnd });
     logger.up();
 
     _.process.startMinimal
@@ -22660,7 +22662,8 @@ function startMinimalOptionLogger( test )
 
     function onTransformEnd( o )
     {
-      loggerOutput += o._outputForPrinter[ 0 ] + '\n';
+      loggerOutput += o.output + '\n';
+      // loggerOutput += o._outputForPrinter[ 0 ] + '\n';
     }
   })
 
@@ -22687,9 +22690,8 @@ function startMinimalOptionLoggerTransofrmation( test )
   /* */
 
   let modes = [ 'fork', 'spawn', 'shell' ];
-  var loggerOutput = '';
-
-  var logger = new _.Logger({ output : null, onTransformEnd });
+  let loggerOutput = '';
+  let logger = new _.Logger({ output : console, onTransformEnd });
 
   modes.forEach( ( mode ) =>
   {
@@ -22733,7 +22735,7 @@ function startMinimalOptionLoggerTransofrmation( test )
       return _.process.startMinimal( o )
       .then( () =>
       {
-        test.identical( o.output, 'testApp-output\n\n' );
+        test.identical( o.output, 'testApp-output\n' );
         test.true( !_.strHas( loggerOutput, 'testApp-output') );
         return true;
       })
@@ -22746,7 +22748,7 @@ function startMinimalOptionLoggerTransofrmation( test )
       return _.process.startMinimal( o )
       .then( () =>
       {
-        test.identical( o.output, 'testApp-output\n\n' );
+        test.identical( o.output, 'testApp-output\n' );
         test.true( _.strHas( loggerOutput, 'testApp-output') );
         return true;
       })
@@ -22757,12 +22759,12 @@ function startMinimalOptionLoggerTransofrmation( test )
 
   function onTransformEnd( o )
   {
-    loggerOutput += o._outputForPrinter[ 0 ];
+    loggerOutput += o.output;
   }
 
   function testApp()
   {
-    console.log( 'testApp-output\n' );
+    console.log( 'testApp-output' );
   }
 }
 
@@ -23329,8 +23331,8 @@ function startMinimalOptionVerbosity( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let capturedOutput;
-  let captureLogger = new _.Logger({ output : null, onTransformEnd, raw : 1 })
+  let loggerOutput;
+  let logger1 = new _.Logger({ output : console, onTransformEnd, raw : 1 })
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -23344,7 +23346,7 @@ function startMinimalOptionVerbosity( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}, verbosity : 0`;
-      capturedOutput = '';
+      loggerOutput = '';
 
       return _.process.startMinimal
       ({
@@ -23353,13 +23355,13 @@ function startMinimalOptionVerbosity( test )
         verbosity : 0,
         outputPiping : null,
         outputCollecting : 0,
-        logger : captureLogger,
+        logger : logger1,
       })
       .then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.identical( capturedOutput, '' );
+        test.identical( loggerOutput, '' );
         return true;
       })
     })
@@ -23369,7 +23371,7 @@ function startMinimalOptionVerbosity( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}, verbosity : 1`;
-      capturedOutput = '';
+      loggerOutput = '';
 
       return _.process.startMinimal
       ({
@@ -23378,20 +23380,20 @@ function startMinimalOptionVerbosity( test )
         verbosity : 1,
         outputPiping : null,
         outputCollecting : 0,
-        logger : captureLogger,
+        logger : logger1,
       })
       .then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         if( mode === 'shell' )
-        test.identical( _.strCount( capturedOutput, `node -e "console.log('message')"`), 1 );
+        test.identical( _.strCount( loggerOutput, `node -e "console.log('message')"`), 1 );
         else if( mode === 'spawn' )
-        test.identical( _.strCount( capturedOutput, `node -e console.log('message')`), 1 );
+        test.identical( _.strCount( loggerOutput, `node -e console.log('message')`), 1 );
         else
-        test.identical( _.strCount( capturedOutput, `-e console.log('message')`), 1 );
-        test.identical( _.strCount( capturedOutput, 'message' ), 1 );
-        test.identical( _.strCount( capturedOutput, '@ ' + _.path.current() ), 0 );
+        test.identical( _.strCount( loggerOutput, `-e console.log('message')`), 1 );
+        test.identical( _.strCount( loggerOutput, 'message' ), 1 );
+        test.identical( _.strCount( loggerOutput, '@ ' + _.path.current() ), 0 );
         return true;
       })
     })
@@ -23401,7 +23403,7 @@ function startMinimalOptionVerbosity( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}, verbosity : 2`;
-      capturedOutput = '';
+      loggerOutput = '';
 
       return _.process.startMinimal
       ({
@@ -23412,20 +23414,20 @@ function startMinimalOptionVerbosity( test )
         outputPiping : null,
         outputCollecting : 0,
         outputColoring : 0,
-        logger : captureLogger,
+        logger : logger1,
       })
       .then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         if( mode === 'shell' )
-        test.identical( _.strCount( capturedOutput, `node -e "console.log('message')"`), 1 );
+        test.identical( _.strCount( loggerOutput, `node -e "console.log('message')"`), 1 );
         else if( mode === 'spawn' )
-        test.identical( _.strCount( capturedOutput, `node -e console.log('message')`), 1 );
+        test.identical( _.strCount( loggerOutput, `node -e console.log('message')`), 1 );
         else
-        test.identical( _.strCount( capturedOutput, `-e console.log('message')`), 1 );
-        test.identical( _.strCount( capturedOutput, 'message' ), 2 );
-        test.identical( _.strCount( capturedOutput, '@ ' + _.path.current() ), 0 );
+        test.identical( _.strCount( loggerOutput, `-e console.log('message')`), 1 );
+        test.identical( _.strCount( loggerOutput, 'message' ), 2 );
+        test.identical( _.strCount( loggerOutput, '@ ' + _.path.current() ), 0 );
         return true;
       })
     })
@@ -23435,7 +23437,7 @@ function startMinimalOptionVerbosity( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}, verbosity : 3`;
-      capturedOutput = '';
+      loggerOutput = '';
 
       return _.process.startMinimal
       ({
@@ -23446,20 +23448,20 @@ function startMinimalOptionVerbosity( test )
         outputPiping : null,
         outputCollecting : 0,
         outputColoring : 0,
-        logger : captureLogger,
+        logger : logger1,
       })
       .then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         if( mode === 'shell' )
-        test.identical( _.strCount( capturedOutput, `node -e "console.log('message')"`), 1 );
+        test.identical( _.strCount( loggerOutput, `node -e "console.log('message')"`), 1 );
         else if( mode === 'spawn' )
-        test.identical( _.strCount( capturedOutput, `node -e console.log('message')`), 1 );
+        test.identical( _.strCount( loggerOutput, `node -e console.log('message')`), 1 );
         else
-        test.identical( _.strCount( capturedOutput, `-e console.log('message')`), 1 );
-        test.identical( _.strCount( capturedOutput, 'message' ), 2 );
-        test.identical( _.strCount( capturedOutput, '@ ' + _.path.current() ), 1 );
+        test.identical( _.strCount( loggerOutput, `-e console.log('message')`), 1 );
+        test.identical( _.strCount( loggerOutput, 'message' ), 2 );
+        test.identical( _.strCount( loggerOutput, '@ ' + _.path.current() ), 1 );
         return true;
       })
     })
@@ -23469,7 +23471,7 @@ function startMinimalOptionVerbosity( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}, verbosity : 5`;
-      capturedOutput = '';
+      loggerOutput = '';
 
       return _.process.startMinimal
       ({
@@ -23480,20 +23482,20 @@ function startMinimalOptionVerbosity( test )
         outputPiping : null,
         outputCollecting : 0,
         outputColoring : 0,
-        logger : captureLogger,
+        logger : logger1,
       })
       .then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         if( mode === 'shell' )
-        test.identical( _.strCount( capturedOutput, `node -e "console.log('message')"`), 1 );
+        test.identical( _.strCount( loggerOutput, `node -e "console.log('message')"`), 1 );
         else if( mode === 'spawn' )
-        test.identical( _.strCount( capturedOutput, `node -e console.log('message')`), 1 );
+        test.identical( _.strCount( loggerOutput, `node -e console.log('message')`), 1 );
         else
-        test.identical( _.strCount( capturedOutput, `-e console.log('message')`), 1 );
-        test.identical( _.strCount( capturedOutput, 'message' ), 2 );
-        test.identical( _.strCount( capturedOutput, '@ ' + _.path.current() ), 1 );
+        test.identical( _.strCount( loggerOutput, `-e console.log('message')`), 1 );
+        test.identical( _.strCount( loggerOutput, 'message' ), 2 );
+        test.identical( _.strCount( loggerOutput, '@ ' + _.path.current() ), 1 );
         return true;
       })
     })
@@ -23503,7 +23505,7 @@ function startMinimalOptionVerbosity( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}, error, verbosity : 0`;
-      capturedOutput = '';
+      loggerOutput = '';
 
       return _.process.startMinimal
       ({
@@ -23515,13 +23517,13 @@ function startMinimalOptionVerbosity( test )
         outputCollecting : 0,
         outputColoring : 0,
         throwingExitCode : 0,
-        logger : captureLogger,
+        logger : logger1,
       })
       .then( ( op ) =>
       {
         test.identical( op.exitCode, 1 );
         test.identical( op.ended, true );
-        test.identical( _.strCount( capturedOutput, 'Process returned error code ' + op.exitCode ), 0 );
+        test.identical( _.strCount( loggerOutput, 'Process returned error code ' + op.exitCode ), 0 );
         return true;
       })
     })
@@ -23531,7 +23533,7 @@ function startMinimalOptionVerbosity( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}, error, verbosity : 1`;
-      capturedOutput = '';
+      loggerOutput = '';
 
       return _.process.startMinimal
       ({
@@ -23543,13 +23545,13 @@ function startMinimalOptionVerbosity( test )
         outputCollecting : 0,
         outputColoring : 0,
         throwingExitCode : 0,
-        logger : captureLogger,
+        logger : logger1,
       })
       .then( ( op ) =>
       {
         test.identical( op.exitCode, 1 );
         test.identical( op.ended, true );
-        test.identical( _.strCount( capturedOutput, 'Process returned error code ' + op.exitCode ), 0 );
+        test.identical( _.strCount( loggerOutput, 'Process returned error code ' + op.exitCode ), 0 );
         return true;
       })
     })
@@ -23559,7 +23561,7 @@ function startMinimalOptionVerbosity( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}, error, verbosity : 2`;
-      capturedOutput = '';
+      loggerOutput = '';
 
       return _.process.startMinimal
       ({
@@ -23571,13 +23573,13 @@ function startMinimalOptionVerbosity( test )
         outputCollecting : 0,
         outputColoring : 0,
         throwingExitCode : 0,
-        logger : captureLogger,
+        logger : logger1,
       })
       .then( ( op ) =>
       {
         test.identical( op.exitCode, 1 );
         test.identical( op.ended, true );
-        test.identical( _.strCount( capturedOutput, 'Process returned error code ' + op.exitCode ), 0 );
+        test.identical( _.strCount( loggerOutput, 'Process returned error code ' + op.exitCode ), 0 );
         return true;
       })
     })
@@ -23587,7 +23589,7 @@ function startMinimalOptionVerbosity( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}, error, verbosity : 3`;
-      capturedOutput = '';
+      loggerOutput = '';
 
       return _.process.startMinimal
       ({
@@ -23599,13 +23601,13 @@ function startMinimalOptionVerbosity( test )
         outputCollecting : 0,
         outputColoring : 0,
         throwingExitCode : 0,
-        logger : captureLogger,
+        logger : logger1,
       })
       .then( ( op ) =>
       {
         test.identical( op.exitCode, 1 );
         test.identical( op.ended, true );
-        test.identical( _.strCount( capturedOutput, 'Process returned error code ' + op.exitCode ), 0 );
+        test.identical( _.strCount( loggerOutput, 'Process returned error code ' + op.exitCode ), 0 );
         return true;
       })
     })
@@ -23615,7 +23617,7 @@ function startMinimalOptionVerbosity( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}, error, verbosity : 5`;
-      capturedOutput = '';
+      loggerOutput = '';
 
       return _.process.startMinimal
       ({
@@ -23627,13 +23629,13 @@ function startMinimalOptionVerbosity( test )
         outputCollecting : 0,
         outputColoring : 0,
         throwingExitCode : 0,
-        logger : captureLogger,
+        logger : logger1,
       })
       .then( ( op ) =>
       {
         test.identical( op.exitCode, 1 );
         test.identical( op.ended, true );
-        test.identical( _.strCount( capturedOutput, 'Process returned error code ' + op.exitCode ), 1 );
+        test.identical( _.strCount( loggerOutput, 'Process returned error code ' + op.exitCode ), 1 );
         return true;
       })
     })
@@ -23643,7 +23645,7 @@ function startMinimalOptionVerbosity( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}, execPath has quotes, verbosity : 1`;
-      capturedOutput = '';
+      loggerOutput = '';
 
       return _.process.startMinimal
       ({
@@ -23655,7 +23657,7 @@ function startMinimalOptionVerbosity( test )
         outputCollecting : 0,
         outputColoring : 0,
         throwingExitCode : 1,
-        logger : captureLogger,
+        logger : logger1,
       })
       .then( ( op ) =>
       {
@@ -23664,17 +23666,17 @@ function startMinimalOptionVerbosity( test )
         if( mode === 'shell' )
         {
           test.identical( op.execPath2, `node -e "console.log( 'a', 'b', \`c\` )"` );
-          test.identical( _.strCount( capturedOutput, `node -e "console.log( 'a', 'b', \`c\` )"` ), 1 );
+          test.identical( _.strCount( loggerOutput, `node -e "console.log( 'a', 'b', \`c\` )"` ), 1 );
         }
         else if( mode === 'spawn' )
         {
           test.identical( op.execPath2, `node -e console.log( 'a', 'b', \`c\` )` );
-          test.identical( _.strCount( capturedOutput, `node -e console.log( 'a', 'b', \`c\` )` ), 1 );
+          test.identical( _.strCount( loggerOutput, `node -e console.log( 'a', 'b', \`c\` )` ), 1 );
         }
         else
         {
           test.identical( op.execPath2, `-e console.log( 'a', 'b', \`c\` )` );
-          test.identical( _.strCount( capturedOutput, `-e console.log( 'a', 'b', \`c\` )` ), 1 );
+          test.identical( _.strCount( loggerOutput, `-e console.log( 'a', 'b', \`c\` )` ), 1 );
         }
         return true;
       })
@@ -23685,7 +23687,7 @@ function startMinimalOptionVerbosity( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}, execPath has double quotes, verbosity : 1`;
-      capturedOutput = '';
+      loggerOutput = '';
 
       let options =
       {
@@ -23697,7 +23699,7 @@ function startMinimalOptionVerbosity( test )
         outputCollecting : 0,
         outputColoring : 0,
         throwingExitCode : 1,
-        logger : captureLogger,
+        logger : logger1,
       }
 
       /* in mode::shell on Linux and iOS
@@ -23717,17 +23719,17 @@ function startMinimalOptionVerbosity( test )
         if( mode === 'fork' )
         {
           test.identical( op.execPath2, `-e console.log( '"a"', "'b'", \`"c"\` )` );
-          test.identical( _.strCount( capturedOutput, `-e console.log( '"a"', "'b'", \`"c"\` )` ), 1 );
+          test.identical( _.strCount( loggerOutput, `-e console.log( '"a"', "'b'", \`"c"\` )` ), 1 );
         }
         else if( mode === 'spawn' )
         {
           test.identical( op.execPath2, `node -e console.log( '"a"', "'b'", \`"c"\` )` );
-          test.identical( _.strCount( capturedOutput, `node -e console.log( '"a"', "'b'", \`"c"\` )` ), 1 );
+          test.identical( _.strCount( loggerOutput, `node -e console.log( '"a"', "'b'", \`"c"\` )` ), 1 );
         }
         else
         {
           test.identical( op.execPath2, `node -e "console.log( '"a"', "'b'", \`"c"\` )"` );
-          test.identical( _.strCount( capturedOutput, `node -e "console.log( '"a"', "'b'", \`"c"\` )"` ), 1 );
+          test.identical( _.strCount( loggerOutput, `node -e "console.log( '"a"', "'b'", \`"c"\` )"` ), 1 );
         }
         return true;
       })
@@ -23737,312 +23739,9 @@ function startMinimalOptionVerbosity( test )
 
   }
 
-  /* ORIGINAL */
-  // testCase( 'verbosity : 0' )
-  // _.process.start
-  // ({
-  //   execPath : `node -e "console.log('message')"`,
-  //   mode : 'spawn',
-  //   verbosity : 0,
-  //   outputPiping : null,
-  //   outputCollecting : 0,
-  //   logger : captureLogger,
-  //   ready : a.ready
-  // })
-  // .then( ( op ) =>
-  // {
-  //   test.identical( op.exitCode, 0 );
-  //   test.identical( op.ended, true );
-  //   test.identical( capturedOutput, '' );
-  //   return true;
-  // })
-
-  // /* */
-
-  // testCase( 'verbosity : 1' )
-  // _.process.start
-  // ({
-  //   execPath : `node -e "console.log('message')"`,
-  //   mode : 'spawn',
-  //   verbosity : 1,
-  //   outputPiping : null,
-  //   outputCollecting : 0,
-  //   logger : captureLogger,
-  //   ready : a.ready
-  // })
-  // .then( ( op ) =>
-  // {
-  //   test.identical( op.exitCode, 0 );
-  //   test.identical( op.ended, true );
-  //   console.log( capturedOutput )
-  //   test.identical( _.strCount( capturedOutput, `node -e console.log('message')`), 1 );
-  //   test.identical( _.strCount( capturedOutput, 'message' ), 1 );
-  //   test.identical( _.strCount( capturedOutput, 'at ' + _.path.current() ), 0 );
-  //   return true;
-  // })
-
-  // /* */
-
-  // testCase( 'verbosity : 2' )
-  // _.process.start
-  // ({
-  //   execPath : `node -e "console.log('message')"`,
-  //   mode : 'spawn',
-  //   verbosity : 2,
-  //   stdio : 'pipe',
-  //   outputPiping : null,
-  //   outputCollecting : 0,
-  //   outputColoring : 0,
-  //   logger : captureLogger,
-  //   ready : a.ready
-  // })
-  // .then( ( op ) =>
-  // {
-  //   test.identical( op.exitCode, 0 );
-  //   test.identical( op.ended, true );
-  //   test.identical( _.strCount( capturedOutput, `node -e console.log('message')` ), 1 );
-  //   test.identical( _.strCount( capturedOutput, 'message' ), 2 );
-  //   test.identical( _.strCount( capturedOutput, 'at ' + _.path.current() ), 0 );
-  //   return true;
-  // })
-
-  // /* */
-
-  // testCase( 'verbosity : 3' )
-  // _.process.start
-  // ({
-  //   execPath : `node -e "console.log('message')"`,
-  //   mode : 'spawn',
-  //   verbosity : 3,
-  //   stdio : 'pipe',
-  //   outputPiping : null,
-  //   outputCollecting : 0,
-  //   outputColoring : 0,
-  //   logger : captureLogger,
-  //   ready : a.ready
-  // })
-  // .then( ( op ) =>
-  // {
-  //   test.identical( op.exitCode, 0 );
-  //   test.identical( op.ended, true );
-  //   test.identical( _.strCount( capturedOutput, `node -e console.log('message')` ), 1 );
-  //   test.identical( _.strCount( capturedOutput, 'message' ), 2 );
-  //   test.identical( _.strCount( capturedOutput, '@ ' + _.path.current() ), 1 );
-  //   return true;
-  // })
-
-  // /* */
-
-  // testCase( 'verbosity : 5' )
-  // _.process.start
-  // ({
-  //   execPath : `node -e "console.log('message')"`,
-  //   mode : 'spawn',
-  //   verbosity : 5,
-  //   stdio : 'pipe',
-  //   outputPiping : null,
-  //   outputCollecting : 0,
-  //   outputColoring : 0,
-  //   logger : captureLogger,
-  //   ready : a.ready
-  // })
-  // .then( ( op ) =>
-  // {
-  //   test.identical( op.exitCode, 0 );
-  //   test.identical( op.ended, true );
-  //   test.identical( _.strCount( capturedOutput, `node -e console.log('message')` ), 1 );
-  //   test.identical( _.strCount( capturedOutput, 'message' ), 2 );
-  //   test.identical( _.strCount( capturedOutput, '@ ' + _.path.current() ), 1 );
-  //   return true;
-  // })
-
-  // /* */
-
-  // testCase( 'error, verbosity : 0' )
-  // _.process.start
-  // ({
-  //   execPath : `node -e "process.exit(1)"`,
-  //   mode : 'spawn',
-  //   verbosity : 0,
-  //   stdio : 'pipe',
-  //   outputPiping : null,
-  //   outputCollecting : 0,
-  //   throwingExitCode : 0,
-  //   outputColoring : 0,
-  //   logger : captureLogger,
-  //   ready : a.ready
-  // })
-  // .then( ( op ) =>
-  // {
-  //   test.identical( op.exitCode, 1 );
-  //   test.identical( op.ended, true );
-  //   test.identical( _.strCount( capturedOutput, 'Process returned error code ' + op.exitCode ), 0 );
-  //   return true;
-  // })
-
-  // /* */
-
-  // testCase( 'error, verbosity : 1' )
-  // _.process.start
-  // ({
-  //   execPath : `node -e "process.exit(1)"`,
-  //   mode : 'spawn',
-  //   verbosity : 1,
-  //   stdio : 'pipe',
-  //   outputPiping : null,
-  //   outputCollecting : 0,
-  //   throwingExitCode : 0,
-  //   outputColoring : 0,
-  //   logger : captureLogger,
-  //   ready : a.ready
-  // })
-  // .then( ( op ) =>
-  // {
-  //   test.identical( op.exitCode, 1 );
-  //   test.identical( op.ended, true );
-  //   test.identical( _.strCount( capturedOutput, 'Process returned error code ' + op.exitCode ), 0 );
-  //   return true;
-  // })
-
-  // /* */
-
-  // testCase( 'error, verbosity : 2' )
-  // _.process.start
-  // ({
-  //   execPath : `node -e "process.exit(1)"`,
-  //   mode : 'spawn',
-  //   verbosity : 2,
-  //   stdio : 'pipe',
-  //   outputPiping : null,
-  //   outputCollecting : 0,
-  //   throwingExitCode : 0,
-  //   outputColoring : 0,
-  //   logger : captureLogger,
-  //   ready : a.ready
-  // })
-  // .then( ( op ) =>
-  // {
-  //   test.identical( op.exitCode, 1 );
-  //   test.identical( op.ended, true );
-  //   test.identical( _.strCount( capturedOutput, 'Process returned error code ' + op.exitCode ), 0 );
-  //   return true;
-  // })
-
-  // /* */
-
-  // testCase( 'error, verbosity : 3' )
-  // _.process.start
-  // ({
-  //   execPath : `node -e "process.exit(1)"`,
-  //   mode : 'spawn',
-  //   verbosity : 3,
-  //   stdio : 'pipe',
-  //   outputPiping : null,
-  //   outputCollecting : 0,
-  //   throwingExitCode : 0,
-  //   outputColoring : 0,
-  //   logger : captureLogger,
-  //   ready : a.ready
-  // })
-  // .then( ( op ) =>
-  // {
-  //   test.identical( op.exitCode, 1 );
-  //   test.identical( op.ended, true );
-  //   test.identical( _.strCount( capturedOutput, 'Process returned error code ' + op.exitCode ), 0 );
-  //   return true;
-  // })
-
-  // /* */
-
-  // testCase( 'error, verbosity : 5' )
-  // _.process.start
-  // ({
-  //   execPath : `node -e "process.exit(1)"`,
-  //   mode : 'spawn',
-  //   verbosity : 5,
-  //   stdio : 'pipe',
-  //   outputPiping : null,
-  //   outputCollecting : 0,
-  //   throwingExitCode : 0,
-  //   outputColoring : 0,
-  //   logger : captureLogger,
-  //   ready : a.ready
-  // })
-  // .then( ( op ) =>
-  // {
-  //   test.identical( op.exitCode, 1 );
-  //   test.identical( op.ended, true );
-  //   test.identical( _.strCount( capturedOutput, 'Process returned error code ' + op.exitCode ), 1 );
-  //   return true;
-  // })
-
-  // /* */
-
-  // testCase( 'execPath has quotes, verbosity : 1' )
-  // _.process.start
-  // ({
-  //   execPath : `node -e "console.log( \"a\", 'b', \`c\` )"`,
-  //   mode : 'spawn',
-  //   verbosity : 5,
-  //   stdio : 'pipe',
-  //   outputPiping : null,
-  //   outputCollecting : 0,
-  //   throwingExitCode : 1,
-  //   outputColoring : 0,
-  //   logger : captureLogger,
-  //   ready : a.ready
-  // })
-  // .then( ( op ) =>
-  // {
-  //   test.identical( op.exitCode, 0 );
-  //   test.identical( op.ended, true );
-  //   test.identical( op.execPath2, `node -e console.log( \"a\", 'b', \`c\` )` );
-  //   test.identical( _.strCount( capturedOutput, `node -e console.log( \"a\", 'b', \`c\` )` ), 1 );
-  //   return true;
-  // })
-
-  // /* */
-
-  // testCase( 'execPath has double quotes, verbosity : 1' )
-  // _.process.start
-  // ({
-  //   execPath : `node -e "console.log( '"a"', "'b'", \`"c"\` )"`,
-  //   mode : 'spawn',
-  //   verbosity : 5,
-  //   stdio : 'pipe',
-  //   outputPiping : null,
-  //   outputCollecting : 0,
-  //   throwingExitCode : 1,
-  //   outputColoring : 0,
-  //   logger : captureLogger,
-  //   ready : a.ready
-  // })
-  // .then( ( op ) =>
-  // {
-  //   test.identical( op.exitCode, 0 );
-  //   test.identical( op.ended, true );
-  //   test.identical( op.execPath2, `node -e console.log( '"a"', "'b'", \`"c"\` )` );
-  //   test.identical( _.strCount( capturedOutput, `node -e console.log( '"a"', "'b'", \`"c"\` )` ), 1 );
-  //   return true;
-  // })
-
-  // return a.ready;
-
-  // /*  */
-
-  // function testCase( src )
-  // {
-  //   a.ready.then( () =>
-  //   {
-  //     capturedOutput = '';
-  //     test.case = src;
-  //     return null
-  //   });
-  // }
-
   function onTransformEnd( o )
   {
-    capturedOutput += o._outputForPrinter[ 0 ] + '\n';
+    loggerOutput += o.output + '\n';
   }
 
 }

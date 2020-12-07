@@ -1149,6 +1149,10 @@ function startMinimal_body( o )
 
     if( _.bufferNodeIs( data ) )
     data = data.toString( 'utf8' );
+
+    if( !_.strIs( data ) )
+    data = String( data );
+
     if( o.outputGraying )
     data = StripAnsi( data );
 
@@ -1166,23 +1170,34 @@ function startMinimal_body( o )
     /* xxx yyy qqq for Yevhen : cover and complete */
     // data = _.strRemoveEnd( data, '\n' );
 
+    let splits;
+    if( o.outputPrefixing || ( channel === 'err' && o.outputColoring.err ) || ( channel === 'out' && o.outputColoring.out ) )
+    splits = data.split( '\n' );
+
     /* qqq for Yevhen : changed how option outputPrefixing works | aaa : Done. */
     if( o.outputPrefixing )
     {
       let prefix = channel === 'err' ? _errPrefix : _outPrefix;
-      data = prefix + _.strLinesIndentation( data, prefix );
+      splits = splits.map( ( split, i ) => ( i < splits.length-1 || split.length ) ? prefix + split : split );
+      // data = prefix + _.strLinesIndentation( data, prefix );
     }
 
     if( channel === 'err' )
     {
       if( o.outputColoring.err )
-      data = _.ct.format( data, 'pipe.negative' );
+      splits = splits.map( ( data ) => data ? _.ct.format( data, 'pipe.negative' ) : data );
+      // data = _.ct.format( data, 'pipe.negative' );
     }
-    else
+    else if( channel === 'out' )
     {
       if( o.outputColoring.out )
-      data = _.ct.format( data, 'pipe.neutral' );
+      splits = splits.map( ( data ) => data ? _.ct.format( data, 'pipe.neutral' ) : data );
+      // data = _.ct.format( data, 'pipe.neutral' );
     }
+    else _.assert( 0 );
+
+    if( splits !== undefined )
+    data = splits.join( '\n' )
 
     log( data, channel );
   }
@@ -1197,8 +1212,19 @@ function startMinimal_body( o )
     if( msg === undefined )
     return;
 
+    if( !_.strIs( msg ) )
+    msg = String( msg );
+
     if( o.outputAdditive )
     {
+      if( _.strEnds( msg, '\n' ) )
+      {
+        msg = _.strRemoveEnd( msg, '\n' );
+      }
+      else
+      {
+        /* xxx yyy qqq for Yevhen : not implemeted yet */
+      }
       if( channel === 'err' )
       o.logger.error( msg );
       else
