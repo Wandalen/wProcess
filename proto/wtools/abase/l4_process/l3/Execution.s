@@ -1213,7 +1213,11 @@ function startMinimal_body( o )
     return;
 
     if( !_.strIs( msg ) )
-    msg = String( msg );
+    {
+      msg = String( msg );
+      if( !_.strEnds( msg, '\n' ) )
+      msg = msg + '\n';
+    }
 
     if( o.outputAdditive )
     {
