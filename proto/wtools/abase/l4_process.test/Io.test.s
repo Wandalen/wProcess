@@ -451,12 +451,12 @@ function input( test )
 
   a.ready.then( () =>
   {
-    test.case = 'two calls of program, should return cached result';
+    test.case = 'two calls of routine, should return cached result';
     let programPath = a.program( testApp2 );
     let o =
     {
       execPath : programPath,
-      args : [ _.path.nativize( a.abs( '.will.yml' ) ) ],
+      args : [ '.will.yml' ],
       mode : 'fork',
       throwingExitCode : 1,
       outputCollecting : 1,
@@ -475,14 +475,14 @@ function input( test )
         interpreterPath : process.argv[ 0 ],
         interpreterArgs : [],
         scriptPath : a.abs( 'testApp2.js' ),
-        scriptArgs : [ _.path.nativize( a.abs( '.will.yml' ) ) ],
+        scriptArgs : [ '.will.yml' ],
         interpreterArgsStrings : '',
-        scriptArgsString : _.path.nativize( a.abs( '.will.yml' ) ),
-        subject : _.path.nativize( a.abs( '.will.yml' ) ),
+        scriptArgsString : '.will.yml',
+        subject : '.will.yml',
         map : {},
-        subjects : [ _.path.nativize( a.abs( '.will.yml' ) ) ],
+        subjects : [ '.will.yml' ],
         maps : [ {} ],
-        original : _.path.nativize( a.abs( '.will.yml' ) ),
+        original : '.will.yml',
       };
       test.identical( op[ 0 ], exp );
       test.identical( op[ 1 ], true  );
@@ -521,6 +521,209 @@ function input( test )
     let result = _.process.input();
     let result2 = _.process.input();
     process.send([ result, result === result2 ]);
+  }
+
+  /* */
+
+  function optionsMake()
+  {
+    let o =
+    {
+      execPath : programPath,
+      mode : 'fork',
+      throwingExitCode : 1,
+      outputCollecting : 1,
+      ipc : 1,
+    };
+    return o;
+  }
+}
+
+//
+
+function inputWithNotDefaultDelimeters( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let programPath = a.program( testApp );
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'a few options';
+    let o = optionsMake();
+    o.args = [ 'v:5', 'r:some', 'a:1' ];
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      let exp =
+      {
+        keyValDelimeter : '=',
+        commandsDelimeter : '|',
+        caching : true,
+        parsingArrays : true,
+        interpreterPath : process.argv[ 0 ],
+        interpreterArgs : [],
+        scriptPath : a.abs( 'testApp.js' ),
+        scriptArgs : [ 'v:5', 'r:some', 'a:1' ],
+        interpreterArgsStrings : '',
+        scriptArgsString : 'v:5 r:some a:1',
+        subject : 'v:5 r:some a:1',
+        map : {},
+        subjects : [ 'v:5 r:some a:1' ],
+        maps : [ {} ],
+        original : 'v:5 r:some a:1',
+      };
+      test.identical( op[ 0 ], exp );
+      test.identical( op[ 1 ], exp );
+      test.identical( op[ 2 ], true );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      return null;
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'two commands with default commandsDelimeter, subjects and options';
+    let o = optionsMake();
+    o.args = [ '.will.yml', 'v:5', 'r:some', ';', 'file', 'a:1' ];
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      let exp =
+      {
+        keyValDelimeter : '=',
+        commandsDelimeter : '|',
+        caching : true,
+        parsingArrays : true,
+        interpreterPath : process.argv[ 0 ],
+        interpreterArgs : [],
+        scriptPath : a.abs( 'testApp.js' ),
+        scriptArgs : [ '.will.yml', 'v:5', 'r:some', ';', 'file', 'a:1' ],
+        interpreterArgsStrings : '',
+        scriptArgsString : '.will.yml v:5 r:some ; file a:1',
+        subject : '.will.yml v:5 r:some ; file a:1',
+        map : {},
+        subjects : [ '.will.yml v:5 r:some ; file a:1' ],
+        maps : [ {} ],
+        original : '.will.yml v:5 r:some ; file a:1',
+      };
+      test.identical( op[ 0 ], exp );
+      test.identical( op[ 1 ], exp );
+      test.identical( op[ 2 ], true );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      return null;
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'two calls of routine';
+    let programPath = a.program( testApp2 );
+    let o =
+    {
+      execPath : programPath,
+      args : [ '.will.yml' ],
+      mode : 'fork',
+      throwingExitCode : 1,
+      outputCollecting : 1,
+      ipc : 1,
+    };
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      let exp =
+      {
+        keyValDelimeter : '=',
+        commandsDelimeter : '|',
+        caching : true,
+        parsingArrays : true,
+        interpreterPath : process.argv[ 0 ],
+        interpreterArgs : [],
+        scriptPath : a.abs( 'testApp2.js' ),
+        scriptArgs : [ '.will.yml' ],
+        interpreterArgsStrings : '',
+        scriptArgsString : '.will.yml',
+        subject : '.will.yml',
+        map : {},
+        subjects : [ '.will.yml' ],
+        maps : [ {} ],
+        original : '.will.yml',
+      };
+      test.identical( op[ 0 ], exp );
+      test.identical( op[ 1 ], exp );
+      test.identical( op[ 2 ], false );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      return null;
+    });
+  });
+
+  /* - */
+
+  return a.ready;
+
+  /* */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+
+    let o =
+    {
+      keyValDelimeter : '=',
+      commandsDelimeter : '|',
+    };
+
+    let result = _.process.input( o );
+    process.send([ result, o, result === o ]);
+  }
+
+  /* */
+
+  function testApp2()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+
+    let o =
+    {
+      keyValDelimeter : '=',
+      commandsDelimeter : '|',
+    };
+
+    let o2 =
+    {
+      keyValDelimeter : '=',
+      commandsDelimeter : '|',
+    };
+
+    let result = _.process.input( o );
+    let result2 = _.process.input( o2 );
+    process.send([ result, result2, result === result2 ]);
   }
 
   /* */
@@ -2956,6 +3159,7 @@ var Proto =
   tests :
   {
     input,
+    inputWithNotDefaultDelimeters,
 
     inputReadToWithArguments,
     inputReadToWithOptionsMap,
