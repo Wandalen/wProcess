@@ -27223,7 +27223,7 @@ function startMinimalOptionThrowingExitCode( test )
         test.true( _.strHas( err.message, 'Process returned exit code' ) );
         test.true( _.strHas( err.message, 'Launched as' ) );
         test.true( _.strHas( err.message, 'Stderr' ) );
-        test.true( _.strHas( err.message, 'randomText is not defined' ) );
+        test.true( _.strHas( err.message, '[MyError: my error is thrown]' ) );
         test.true( _.strHas( err.message, 'stack' ) );
 
         _.errAttend( err );
@@ -27255,7 +27255,7 @@ function startMinimalOptionThrowingExitCode( test )
         test.true( _.strHas( err.message, 'Process returned exit code' ) );
         test.true( _.strHas( err.message, 'Launched as' ) );
         test.true( _.strHas( err.message, 'Stderr' ) );
-        test.true( _.strHas( err.message, 'randomText is not defined' ) );
+        test.true( _.strHas( err.message, '[MyError: my error is thrown]' ) );
         test.true( _.strHas( err.message, 'stack' ) );
 
         _.errAttend( err );
@@ -27287,7 +27287,7 @@ function startMinimalOptionThrowingExitCode( test )
         test.true( _.strHas( err.message, 'Process returned exit code' ) );
         test.true( _.strHas( err.message, 'Launched as' ) );
         test.true( _.strHas( err.message, 'Stderr' ) );
-        test.true( _.strHas( err.message, 'randomText is not defined' ) );
+        test.true( _.strHas( err.message, '[MyError: my error is thrown]' ) );
         test.true( _.strHas( err.message, 'stack' ) );
 
         _.errAttend( err );
@@ -27307,6 +27307,7 @@ function startMinimalOptionThrowingExitCode( test )
       {
         execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
         mode,
+        verbosity : 0,
         throwingExitCode : 'brief'
       }
 
@@ -27314,13 +27315,13 @@ function startMinimalOptionThrowingExitCode( test )
 
       options.conTerminate.finally( ( err, op ) =>
       {
+        let exp = `Process returned exit code ${options.exitCode}\n`;
+        exp +=`Launched as ${mode === 'fork' || mode === 'shell' ? _.strQuote( options.execPath2 ) : _.strQuote( 'node ' + options.execPath2 )} \n`;
+        exp += `Launched at ${_.strQuote( options.currentPath )} \n`;
+        exp += `\n -> Stderr\n -  `;
+        exp += `${_.strLinesIndentation( `${options.execPath2}:13\n    throw new MyError();\n    ^\n\n[MyError: my error is thrown]\n`, ' -  ' )} '\n -< Stderr`;
+        test.equivalent( err.message, exp );
         test.identical( op, undefined );
-        test.true( _.errIsBrief( err ) );
-        test.true( _.strHas( err.message, 'Process returned exit code' ) );
-        test.true( _.strHas( err.message, 'Launched as' ) );
-        test.true( _.strHas( err.message, 'Stderr' ) );
-        test.true( _.strHas( err.message, 'randomText is not defined' ) );
-        test.true( !_.strHas( err.message, 'stack' ) );
 
         _.errAttend( err );
         return null;
@@ -27334,7 +27335,38 @@ function startMinimalOptionThrowingExitCode( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}, with subprocess, throwingExitCode : brief`;
-      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath } });
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath, throwingExitCode : 'brief' } });
+
+      let options =
+      {
+        execPath : 'node ' + testAppParentPath,
+        outputCollecting : 1,
+      }
+
+      return _.process.startMinimal( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        let exp = `Process returned exit code 1\n`;
+        exp +=`Launched as ${mode === 'fork' ? _.strQuote( testAppPath ) : _.strQuote( 'node ' + testAppPath )} \n`;
+        exp += `Launched at ${_.strQuote( options.currentPath )} \n`;
+        exp += `\n -> Stderr\n -  `;
+        exp += `${_.strLinesIndentation( `${testAppPath}:13\n    throw new MyError();\n    ^\n\n[MyError: my error is thrown]\n`, ' -  ' )} '\n -< Stderr`;
+        test.equivalent( op.output, exp );
+
+        a.fileProvider.fileDelete( testAppParentPath );
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, with subprocess, throwingExitCode : 'full'`;
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath, throwingExitCode : 'full' } });
 
       let options =
       {
@@ -27350,8 +27382,8 @@ function startMinimalOptionThrowingExitCode( test )
         test.true( _.strHas( op.output, 'Process returned exit code' ) );
         test.true( _.strHas( op.output, 'Launched as' ) );
         test.true( _.strHas( op.output, 'Stderr' ) );
-        test.true( _.strHas( op.output, 'randomText is not defined' ) );
-        test.true( !_.strHas( op.output, 'stack' ) );
+        test.true( _.strHas( op.output, '[MyError: my error is thrown]' ) );
+        test.true( _.strHas( op.output, 'stack' ) );
 
         a.fileProvider.fileDelete( testAppParentPath );
         return null;
@@ -27378,7 +27410,7 @@ function startMinimalOptionThrowingExitCode( test )
       {
         test.notIdentical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.true( _.strHas( op.output, 'randomText is not defined' ) );
+        test.true( _.strHas( op.output, '[MyError: my error is thrown]' ) );
         return null;
       })
     })
@@ -27398,7 +27430,8 @@ function startMinimalOptionThrowingExitCode( test )
       execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
       mode,
       inputMirroring : 0,
-      throwingExitCode : 'brief',
+      outputPiping : 0,
+      throwingExitCode,
     }
 
     _.process.startMinimal( o );
@@ -27413,7 +27446,17 @@ function startMinimalOptionThrowingExitCode( test )
 
   function testApp()
   {
-    randomText
+    class MyError extends Error
+    {
+      constructor( message )
+      {
+        super( message );
+        this.stack = null;
+        this.message = 'my error is thrown';
+      }
+    }
+
+    throw new MyError();
   }
 }
 
