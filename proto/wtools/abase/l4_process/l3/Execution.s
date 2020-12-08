@@ -355,10 +355,10 @@ function startMinimal_body( o )
     /* */
 
     // xxx
-    // _.assert( _.mapIs( o ) );
-    // let o3 = _.ProcessMinimal.Retype( o );
-    // _.assert( o3 === o );
-    // _.assert( !Object.isExtensible( o ) );
+    _.assert( _.mapIs( o ) );
+    let o3 = _.ProcessMinimal.Retype( o );
+    _.assert( o3 === o );
+    _.assert( !Object.isExtensible( o ) );
     // debugger;
 
     /* */
@@ -483,6 +483,7 @@ function startMinimal_body( o )
     }
     else
     {
+      console.log( 'run1', o.ready.exportString() );
       if( o.when.delay )
       o.ready.delay( o.when.delay );
       o.ready.thenGive( run2 );
@@ -495,6 +496,7 @@ function startMinimal_body( o )
 
   function run2()
   {
+    console.log( 'run2', o.ready.exportString() );
 
     try
     {
@@ -504,12 +506,15 @@ function startMinimal_body( o )
       timeOutForm();
       pipe();
 
+      console.log( 'run2:1' );
       if( o.dry )
       {
+        console.log( 'run2:2' );
         if( o.error )
         handleError( o.error );
         else
         handleClose( null, null );
+        console.log( 'run2:3' );
       }
       else
       {
@@ -521,6 +526,7 @@ function startMinimal_body( o )
           handleClose( o.pnd.status, o.pnd.signal );
         }
       }
+      console.log( 'run2:4' );
 
     }
     catch( err )
@@ -1778,10 +1784,10 @@ function startMultiple_body( o )
     o.currentPath = o.currentPath || _.path.current();
 
     // xxx
-    // _.assert( _.mapIs( o ) );
-    // let o3 = _.ProcessMultiple.Retype( o );
-    // _.assert( o3 === o );
-    // _.assert( !Object.isExtensible( o ) );
+    _.assert( _.mapIs( o ) );
+    let o3 = _.ProcessMultiple.Retype( o );
+    _.assert( o3 === o );
+    _.assert( !Object.isExtensible( o ) );
     // debugger;
 
     o.sessions = [];
