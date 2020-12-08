@@ -483,7 +483,8 @@ function startMinimal_body( o )
     }
     else
     {
-      console.log( 'run1', o.ready.exportString() );
+      /* qqq for Dmytro : ! */
+      // console.log( 'run1', o.ready.exportString() );
       if( o.when.delay )
       o.ready.delay( o.when.delay );
       o.ready.thenGive( run2 );
@@ -496,7 +497,7 @@ function startMinimal_body( o )
 
   function run2()
   {
-    console.log( 'run2', o.ready.exportString() );
+    // console.log( 'run2', o.ready.exportString() );
 
     try
     {
@@ -506,15 +507,16 @@ function startMinimal_body( o )
       timeOutForm();
       pipe();
 
-      console.log( 'run2:1' );
+      /* qqq for Dmytro : ! */
+      // console.log( 'run2:1' );
       if( o.dry )
       {
-        console.log( 'run2:2' );
+        // console.log( 'run2:2' );
         if( o.error )
         handleError( o.error );
         else
         handleClose( null, null );
-        console.log( 'run2:3' );
+        // console.log( 'run2:3' );
       }
       else
       {
@@ -526,7 +528,7 @@ function startMinimal_body( o )
           handleClose( o.pnd.status, o.pnd.signal );
         }
       }
-      console.log( 'run2:4' );
+      // console.log( 'run2:4' );
 
     }
     catch( err )
