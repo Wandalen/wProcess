@@ -11104,7 +11104,7 @@ function startMinimalDetachingResourceReady( test )
       o.conStart.thenGive( ( op ) =>
       {
         track.push( 'conStart' );
-        test.true( _.mapIs( op ) );
+        test.true( _.objectIs( op ) );
         test.identical( op, o );
         test.true( _.process.isAlive( o.pnd.pid ) );
         o.pnd.kill();
@@ -17676,7 +17676,7 @@ function startNjsWithReadyDelayStructural( test )
         'ended' : false,
         'error' : null,
         'disconnect' : options.disconnect,
-        'end' : options.end,
+        '_end' : options._end,
         'execPath2' : null,
         '_handleProcedureTerminationBegin' : false,
       }
@@ -17723,9 +17723,11 @@ function startNjsWithReadyDelayStructural( test )
           exp2.exitReason = 'normal';
         }
 
-        test.identical( options, exp2 );
+        test.identical( _.mapOwnProperties( options ), exp2 );
         test.identical( !!options.pnd, !tops.dry );
         test.true( _.routineIs( options.disconnect ) );
+        test.true( _.routineIs( options._end ) );
+        test.true( options.end === undefined );
         test.identical( _.streamIs( options.streamOut ), !tops.dry && ( !tops.sync || !!tops.deasync ) );
         test.identical( _.streamIs( options.streamErr ), !tops.dry && ( !tops.sync || !!tops.deasync ) );
         test.identical( options.streamOut !== options.streamErr, !tops.dry && ( !tops.sync || !!tops.deasync ) );
@@ -17764,7 +17766,7 @@ function startNjsWithReadyDelayStructural( test )
         exp2.output = tops.dry ? '' :'program1:begin\n';
         delete exp2.end;
 
-        test.identical( options, exp2 )
+        test.identical( _.mapOwnProperties( options ), exp2 );
       }
 
       test.true( _.routineIs( options.disconnect ) );
@@ -18662,7 +18664,7 @@ function startNjsWithReadyDelayStructuralMultiple( test )
           exp2.exitReason = 'normal';
         }
 
-        test.identical( options, exp2 );
+        test.identical( _.mapOwnProperties( options ), exp2 );
         test.true( !options.pnd );
         test.true( !options.disconnect );
         test.identical( _.streamIs( options.streamOut ), !tops.sync || ( !!tops.sync && !!tops.deasync ) );
@@ -28150,7 +28152,7 @@ function kill( test )
 
       let returned = _.process.startMinimal( o )
 
-      _.time.out( context.t1*5, () => _.process.kill( o.pnd.pid ) ) /* 1000 */ /* xxx : here! */
+      _.time.out( context.t1*5, () => _.process.kill( o.pnd.pid ) ) /* 1000 */ /* zzz : here! */
 
 /* xxx qqq for Vova :
 
@@ -30324,7 +30326,7 @@ deasync:end
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
         time1 = _.time.now();
-        _.process.terminate({ pid : options.pnd.pid, withChildren : 1 }); /* xxx : here! */
+        _.process.terminate({ pid : options.pnd.pid, withChildren : 1 }); /* zzz : here! */
         /* qqq for Yevhen : please, mark important lines and remove ansi codes like in this test case */
 
 /* xxx : windows

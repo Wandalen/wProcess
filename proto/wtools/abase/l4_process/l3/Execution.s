@@ -355,6 +355,7 @@ function startMinimal_body( o )
     /* */
 
     // xxx
+    // _.assert( _.mapIs( o ) );
     // let o3 = _.ProcessMinimal.Retype( o );
     // _.assert( o3 === o );
     // _.assert( !Object.isExtensible( o ) );
@@ -468,7 +469,7 @@ function startMinimal_body( o )
         o.ready.deasync();
         o.ready.thenGive( 1 );
         if( o.when.delay )
-        _.time._sleep( o.when.delay ); /* xxx : temp experiment */
+        _.time.sleep( o.when.delay );
         run2();
       }
       catch( err )
@@ -1167,7 +1168,7 @@ function startMinimal_body( o )
     if( !o.outputPiping )
     return;
 
-    /* xxx yyy qqq for Yevhen : cover and complete */
+    /* yyy qqq for Yevhen : cover and complete */
     // data = _.strRemoveEnd( data, '\n' );
 
     let splits;
@@ -1239,7 +1240,7 @@ function startMinimal_body( o )
       _decoratedOutOutput += msg;
       if( channel === 'err' )
       _decoratedErrOutput += msg;
-      /* xxx yyy qqq for Yevhen : cover */
+      /* yyy qqq for Yevhen : cover */
       // _decoratedOutOutput += msg + '\n';
       // if( channel === 'err' )
       // _decoratedErrOutput += msg + '\n';
@@ -1381,7 +1382,7 @@ function startSingle_body( o )
         o.ready.deasync();
         o.ready.thenGive( 1 );
         if( o.when.delay )
-        _.time._sleep( o.when.delay ); /* xxx : temp experiment */
+        _.time.sleep( o.when.delay );
         run2();
       }
       catch( err )
@@ -1775,6 +1776,13 @@ function startMultiple_body( o )
     o.outputAdditive = _.arrayIs( o.execPath ) && o.execPath.length > 1 && o.concurrent;
     _.assert( _.boolLike( o.outputAdditive ) );
     o.currentPath = o.currentPath || _.path.current();
+
+    // xxx
+    // _.assert( _.mapIs( o ) );
+    // let o3 = _.ProcessMultiple.Retype( o );
+    // _.assert( o3 === o );
+    // _.assert( !Object.isExtensible( o ) );
+    // debugger;
 
     o.sessions = [];
     o.state = 'initial'; /* `initial`, `starting`, `started`, `terminating`, `terminated`, `disconnected` */
@@ -2234,7 +2242,6 @@ function startNjs_body( o )
 
   if( interpreterArgs !== '' )
   o.interpreterArgs = _.arrayAppendArray( o.interpreterArgs, interpreterArgs );
-  // o.interpreterArgs = o.interpreterArgs === null ? interpreterArgs : o.interpreterArgs.concat( interpreterArgs );
 
   if( o.mode === 'spawn' || o.mode === 'shell' )
   execPath = _.strConcat([ 'node', execPath ]);
