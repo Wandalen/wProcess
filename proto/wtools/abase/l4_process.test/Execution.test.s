@@ -918,8 +918,8 @@ function startMinimal( test )
     ready.then( function()
     {
       /*
-      qqq for Yevheno : not enough!
-      xxx :
+      qqq for Yevhen : not enough!
+      zzz :
       Windows 15x, mode::fork
       [39;0m[92m/[39;0m[92m TestRoutine[39;0m[92m:[39;0m[92m:[39;0m[92mstartFork [39;0m[92m/[39;0m[92m test timeOut[39;0m[92m # [39;0m[92m22 [39;0m[92m)[39;0m[92m ... [39;0m[92mok[39;0m
       2020-11-25T10:55:41.8317809Z --------------- uncaught asynchronous error --------------->
@@ -9146,7 +9146,7 @@ function startMultipleProcedureStack( test )
     {
       /*
       qqq for Yevhen : not good enough. output of subprocess?
-      xxx :
+      zzz :
       Windows 13x, mode::fork
       [39;0m[92m/[39;0m[92m TestRoutine[39;0m[92m:[39;0m[92m:[39;0m[92mstartProcedureStackMultiple [39;0m[92m/[39;0m[92m sync[39;0m[92m:[39;0m[92m0 deasync[39;0m[92m:[39;0m[92m1 mode[39;0m[92m:[39;0m[92mfork stack[39;0m[92m:[39;0m[92mfalse[39;0m[92m # [39;0m[92m538 [39;0m[92m)[39;0m[92m [39;0m[92m:[39;0m[92m expected true[39;0m[92m ... [39;0m[92mok[39;0m
       2020-11-25T11:03:36.6940925Z [91m        - got :
@@ -10775,16 +10775,7 @@ function startSingleAfterDeathTerminatingMain( test )
 
       o.conTerminate.then( () =>
       {
-/* xxx qqq for Vova : fails on osx
-2020-12-04T22:41:20.3777180Z         /Users/runner/work/wProcess/wProcess/proto/wtools/abase/l4_process.test/Execution.test.s:10939:18
-2020-12-04T22:41:20.3794880Z           10935 :
-2020-12-04T22:41:20.3795500Z           10936 :       o.conTerminate.then( () =>
-2020-12-04T22:41:20.3795960Z           10937 :       {
-2020-12-04T22:41:20.3798570Z           10938 :         test.will = 'secondary process is alive'
-2020-12-04T22:41:20.3799590Z         * 10939 :         test.true( _.process.isAlive( secondaryPid ) );
-2020-12-04T22:41:20.3801110Z
-2020-12-04T22:41:20.3849900Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleAfterDeathTerminatingMain / mode : fork < secondary process is alive # 2 ) : expected true ... failed
-*/
+
         test.will = 'secondary process is alive'
         test.true( _.process.isAlive( secondaryPid ) );
 
@@ -11113,7 +11104,7 @@ function startMinimalDetachingResourceReady( test )
       o.conStart.thenGive( ( op ) =>
       {
         track.push( 'conStart' );
-        test.true( _.mapIs( op ) );
+        test.true( _.objectIs( op ) );
         test.identical( op, o );
         test.true( _.process.isAlive( o.pnd.pid ) );
         o.pnd.kill();
@@ -11631,6 +11622,7 @@ function startMinimalDetachedOutputStdioPipe( test )
         execPath : `node testAppParent.js mode : ${mode} stdio : pipe`,
         mode : 'spawn',
         outputCollecting : 1,
+        outputPiping : 1,
         currentPath : a.routinePath,
       }
       let con = _.process.startMinimal( o );
@@ -11658,100 +11650,6 @@ function startMinimalDetachedOutputStdioPipe( test )
     return ready;
 
   }
-
-  /* */
-
-  /* ORIGINAL */
-  // a.ready
-
-  // .then( () =>
-  // {
-  //   test.case = 'mode : spawn, stdio : pipe';
-
-  //   let o =
-  //   {
-  //     execPath : 'node testAppParent.js mode : spawn stdio : pipe',
-  //     mode : 'spawn',
-  //     outputCollecting : 1,
-  //     currentPath : a.routinePath,
-  //   }
-  //   let con = _.process.start( o );
-
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 )
-  //     test.true( _.strHas( o.output, 'Child process start' ) )
-  //     test.true( _.strHas( o.output, 'Child process end' ) )
-  //     return null;
-  //   })
-
-  //   return con;
-  // })
-
-  // /*  */
-
-  // .then( () =>
-  // {
-  //   test.case = 'mode : fork, stdio : pipe';
-
-  //   let o =
-  //   {
-  //     execPath : 'node testAppParent.js mode : fork stdio : pipe',
-  //     mode : 'spawn',
-  //     outputCollecting : 1,
-  //     currentPath : a.routinePath,
-  //   }
-  //   let con = _.process.start( o );
-
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 )
-  //     test.true( _.strHas( o.output, 'Child process start' ) )
-  //     test.true( _.strHas( o.output, 'Child process end' ) )
-  //     return null;
-  //   })
-
-  //   return con;
-  // })
-
-  // /*  */
-
-  // .then( () =>
-  // {
-  //   test.case = 'mode : shell, stdio : pipe';
-
-  //   let o =
-  //   {
-  //     execPath : 'node testAppParent.js mode : shell stdio : pipe',
-  //     mode : 'spawn',
-  //     outputCollecting : 1,
-  //     currentPath : a.routinePath,
-  //   }
-  //   let con = _.process.start( o );
-
-  //   con.then( () =>
-  //   {
-  //     test.identical( o.exitCode, 0 )
-
-  //     /*
-  //     zzz for Vova: output piping doesn't work as expected in mode "shell" on windows
-  //     investigate if its fixed in never verions of node or implement alternative solution
-  //     */
-
-  //     if( process.platform === 'win32' )
-  //     return null;
-
-  //     test.true( _.strHas( o.output, 'Child process start' ) )
-  //     test.true( _.strHas( o.output, 'Child process end' ) )
-  //     return null;
-  //   })
-
-  //   return con;
-  // })
-
-  // /*  */
-
-  // return a.ready;
 
   /* - */
 
@@ -11793,6 +11691,109 @@ function startMinimalDetachedOutputStdioPipe( test )
       return null;
     })
   }
+
+/* xxx qqq for Vova :
+2020-12-05T09:15:59.6229930Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachedOutputStdioPipe / mode : spawn, stdio : pipe # 6 ) : expected true ... ok
+2020-12-05T09:15:59.6326856Z  > node testAppParent.js mode : shell stdio : pipe
+2020-12-05T09:16:01.1396247Z  > node testAppChild.js
+2020-12-05T09:16:02.0428735Z --------------- uncaught asynchronous error --------------->
+2020-12-05T09:16:02.0432506Z
+2020-12-05T09:16:02.0433626Z  = Message of error#1
+2020-12-05T09:16:02.0434358Z     Process returned exit code 4294967295
+2020-12-05T09:16:02.0435099Z     Launched as "node testAppChild.js"
+2020-12-05T09:16:02.0436510Z     Launched at "/D/Temp/ProcessBasic-2020-12-5-8-52-54-828-a4f2.tmp/startMinimalDetachedOutputStdioPipe"
+2020-12-05T09:16:02.0437576Z
+2020-12-05T09:16:02.0438203Z  = Beautified calls stack
+2020-12-05T09:16:02.0439360Z     at ChildProcess.handleClose (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:806:19)
+2020-12-05T09:16:02.0442223Z     at ChildProcess.emit (events.js:315:20)
+2020-12-05T09:16:02.0443254Z     at maybeClose (internal/child_process.js:1026:16)
+2020-12-05T09:16:02.0444384Z     at Process.ChildProcess._handle.onexit (internal/child_process.js:286:5)
+2020-12-05T09:16:02.0445200Z
+2020-12-05T09:16:02.0446585Z     at Object.<anonymous> (D:\Temp\ProcessBasic-2020-12-5-8-52-54-828-a4f2.tmp\startMinimalDetachedOutputStdioPipe\testAppParent.js:33:1)
+2020-12-05T09:16:02.0447757Z
+2020-12-05T09:16:02.0448343Z  = Throws stack
+2020-12-05T09:16:02.0449675Z     thrown at ChildProcess.handleClose @ /D/a/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:806:19
+2020-12-05T09:16:02.0456992Z     thrown at errRefine @ /D/a/wProcess/wProcess/node_modules/wTools/proto/wtools/abase/l0/l5/fErr.s:125:16
+2020-12-05T09:16:02.0467364Z
+2020-12-05T09:16:02.0470022Z  = Process
+2020-12-05T09:16:02.0478019Z     Current path : D:\Temp\ProcessBasic-2020-12-5-8-52-54-828-a4f2.tmp\startMinimalDetachedOutputStdioPipe
+2020-12-05T09:16:02.0516583Z     Exec path : C:\hostedtoolcache\windows\node\13.14.0\x64\node.exe D:\Temp\ProcessBasic-2020-12-5-8-52-54-828-a4f2.tmp\startMinimalDetachedOutputStdioPipe\testAppParent.js mode : shell stdio : pipe
+2020-12-05T09:16:02.0518891Z
+2020-12-05T09:16:02.0520017Z  = Source code from /D/a/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:806:19
+2020-12-05T09:16:02.0520982Z       804 :     {
+2020-12-05T09:16:02.0521624Z       805 :       if( _.numberIs( exitCode ) )
+2020-12-05T09:16:02.0522650Z     * 806 :       o.error = _._err({ args : [ 'Process returned exit code', exitCode, '\n', infoGet() ], reason : 'exit code' });
+2020-12-05T09:16:02.0523590Z       807 :       else if( o.reason === 'time' )
+2020-12-05T09:16:02.0525260Z       808 :       o.error = _._err({ args : [ 'Process timed out, killed by exit signal', exitSignal, '\n', infoGet() ], reason : 'time out' });
+2020-12-05T09:16:02.0525937Z
+2020-12-05T09:16:02.0526462Z
+2020-12-05T09:16:02.0527451Z --------------- uncaught asynchronous error ---------------<
+2020-12-05T09:16:02.0528348Z
+2020-12-05T09:16:02.0673890Z          = Message of error#125
+2020-12-05T09:16:02.0674861Z             Process returned exit code 4294967295
+2020-12-05T09:16:02.0675764Z             Launched as "node testAppParent.js mode : shell stdio : pipe"
+2020-12-05T09:16:02.0677481Z             Launched at "/D/Temp/ProcessBasic-2020-12-5-8-52-54-828-a4f2.tmp/startMinimalDetachedOutputStdioPipe"
+2020-12-05T09:16:02.0680243Z
+2020-12-05T09:16:02.0680836Z              -> Stderr
+2020-12-05T09:16:02.0681661Z              -  --------------- uncaught asynchronous error --------------->
+2020-12-05T09:16:02.0682506Z              -
+2020-12-05T09:16:02.0683247Z              -   = Message of error#1
+2020-12-05T09:16:02.0683930Z              -      Process returned exit code 4294967295
+2020-12-05T09:16:02.0684705Z              -      Launched as "node testAppChild.js"
+2020-12-05T09:16:02.0686168Z              -      Launched at "/D/Temp/ProcessBasic-2020-12-5-8-52-54-828-a4f2.tmp/startMinimalDetachedOutputStdioPipe"
+2020-12-05T09:16:02.0687390Z              -
+2020-12-05T09:16:02.0687980Z              -   = Beautified calls stack
+2020-12-05T09:16:02.0689593Z              -      at ChildProcess.handleClose (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:806:19)
+2020-12-05T09:16:02.0690806Z              -      at ChildProcess.emit (events.js:315:20)
+2020-12-05T09:16:02.0691894Z              -      at maybeClose (internal/child_process.js:1026:16)
+2020-12-05T09:16:02.0692951Z              -      at Process.ChildProcess._handle.onexit (internal/child_process.js:286:5)
+2020-12-05T09:16:02.0693776Z              -
+2020-12-05T09:16:02.0695284Z              -      at Object.<anonymous> (D:\Temp\ProcessBasic-2020-12-5-8-52-54-828-a4f2.tmp\startMinimalDetachedOutputStdioPipe\testAppParent.js:33:1)
+2020-12-05T09:16:02.0696671Z              -
+2020-12-05T09:16:02.0697216Z              -   = Throws stack
+2020-12-05T09:16:02.0698386Z              -      thrown at ChildProcess.handleClose @ /D/a/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:806:19
+2020-12-05T09:16:02.0700015Z              -      thrown at errRefine @ /D/a/wProcess/wProcess/node_modules/wTools/proto/wtools/abase/l0/l5/fErr.s:125:16
+2020-12-05T09:16:02.0700873Z              -
+2020-12-05T09:16:02.0701421Z              -   = Process
+2020-12-05T09:16:02.0703142Z              -      Current path : D:\Temp\ProcessBasic-2020-12-5-8-52-54-828-a4f2.tmp\startMinimalDetachedOutputStdioPipe
+2020-12-05T09:16:02.0705629Z              -      Exec path : C:\hostedtoolcache\windows\node\13.14.0\x64\node.exe D:\Temp\ProcessBasic-2020-12-5-8-52-54-828-a4f2.tmp\startMinimalDetachedOutputStdioPipe\testAppParent.js mode : shell stdio : pipe
+2020-12-05T09:16:02.0707162Z              -
+2020-12-05T09:16:02.0708460Z              -   = Source code from /D/a/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:806:19
+2020-12-05T09:16:02.0709735Z              -        804 :     {
+2020-12-05T09:16:02.0710764Z              -        805 :       if( _.numberIs( exitCode ) )
+2020-12-05T09:16:02.0712097Z              -      * 806 :       o.error = _._err({ args : [ 'Process returned exit code', exitCode, '\n', infoGet() ], reason : 'exit code' });
+2020-12-05T09:16:02.0713257Z              -        807 :       else if( o.reason === 'time' )
+2020-12-05T09:16:02.0714318Z              -        808 :       o.error = _._err({ args : [ 'Process timed out, killed by exit signal', exitSignal, '\n', infoGet() ], reason : 'time out' });
+2020-12-05T09:16:02.0715155Z              -
+2020-12-05T09:16:02.0715635Z              -
+2020-12-05T09:16:02.0716382Z              -  --------------- uncaught asynchronous error ---------------<
+2020-12-05T09:16:02.0717030Z              -
+2020-12-05T09:16:02.0717517Z              -   '
+2020-12-05T09:16:02.0718255Z              -< Stderr
+2020-12-05T09:16:02.0718803Z
+2020-12-05T09:16:02.0719380Z          = Beautified calls stack
+2020-12-05T09:16:02.0720543Z             at ChildProcess.handleClose (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:806:19)
+2020-12-05T09:16:02.0721717Z             at ChildProcess.emit (events.js:327:22)
+2020-12-05T09:16:02.0722779Z             at maybeClose (internal/child_process.js:1026:16)
+2020-12-05T09:16:02.0723971Z             at Process.ChildProcess._handle.onexit (internal/child_process.js:286:5)
+2020-12-05T09:16:02.0724755Z
+2020-12-05T09:16:02.0725689Z             at Object.<anonymous> (D:\a\wProcess\wProcess\node_modules\wTesting\proto\wtools\atop\testing\entry\Exec:11:11)
+2020-12-05T09:16:02.0726504Z
+2020-12-05T09:16:02.0727164Z          = Throws stack
+2020-12-05T09:16:02.0728549Z             thrown at ChildProcess.handleClose @ /D/a/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:806:19
+2020-12-05T09:16:02.0729967Z             thrown at Object._err @ /D/a/wProcess/wProcess/node_modules/wTools/proto/wtools/abase/l0/l3/iErr.s:575:5
+2020-12-05T09:16:02.0730780Z
+2020-12-05T09:16:02.0731818Z          = Source code from /D/a/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:806:19
+2020-12-05T09:16:02.0732642Z               804 :     {
+2020-12-05T09:16:02.0733248Z               805 :       if( _.numberIs( exitCode ) )
+2020-12-05T09:16:02.0734268Z             * 806 :       o.error = _._err({ args : [ 'Process returned exit code', exitCode, '\n', infoGet() ], reason : 'exit code' });
+2020-12-05T09:16:02.0735178Z               807 :       else if( o.reason === 'time' )
+2020-12-05T09:16:02.0736236Z               808 :       o.error = _._err({ args : [ 'Process timed out, killed by exit signal', exitSignal, '\n', infoGet() ], reason : 'time out' });
+2020-12-05T09:16:02.0737024Z
+2020-12-05T09:16:02.0737497Z
+2020-12-05T09:16:02.0739596Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachedOutputStdioPipe / mode : shell, stdio : pipe # 7 ) ... failed, exit code
+2020-12-05T09:16:02.0749458Z       Failed ( exit code ) TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachedOutputStdioPipe in 18.539s
+*/
 
 }
 
@@ -17675,7 +17676,7 @@ function startNjsWithReadyDelayStructural( test )
         'ended' : false,
         'error' : null,
         'disconnect' : options.disconnect,
-        'end' : options.end,
+        '_end' : options._end,
         'execPath2' : null,
         '_handleProcedureTerminationBegin' : false,
       }
@@ -17722,9 +17723,11 @@ function startNjsWithReadyDelayStructural( test )
           exp2.exitReason = 'normal';
         }
 
-        test.identical( options, exp2 );
+        test.identical( _.mapOwnProperties( options ), exp2 );
         test.identical( !!options.pnd, !tops.dry );
         test.true( _.routineIs( options.disconnect ) );
+        test.true( _.routineIs( options._end ) );
+        test.true( options.end === undefined );
         test.identical( _.streamIs( options.streamOut ), !tops.dry && ( !tops.sync || !!tops.deasync ) );
         test.identical( _.streamIs( options.streamErr ), !tops.dry && ( !tops.sync || !!tops.deasync ) );
         test.identical( options.streamOut !== options.streamErr, !tops.dry && ( !tops.sync || !!tops.deasync ) );
@@ -17763,7 +17766,7 @@ function startNjsWithReadyDelayStructural( test )
         exp2.output = tops.dry ? '' :'program1:begin\n';
         delete exp2.end;
 
-        test.identical( options, exp2 )
+        test.identical( _.mapOwnProperties( options ), exp2 );
       }
 
       test.true( _.routineIs( options.disconnect ) );
@@ -18661,7 +18664,7 @@ function startNjsWithReadyDelayStructuralMultiple( test )
           exp2.exitReason = 'normal';
         }
 
-        test.identical( options, exp2 );
+        test.identical( _.mapOwnProperties( options ), exp2 );
         test.true( !options.pnd );
         test.true( !options.disconnect );
         test.identical( _.streamIs( options.streamOut ), !tops.sync || ( !!tops.sync && !!tops.deasync ) );
@@ -19727,7 +19730,7 @@ function startMinimalOptionOutputColoring( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.identical( op.output, '\u001b[35mLog\u001b[39;0m\n' )
+        test.identical( op.output, '\u001b[35mLog\u001b[39;0m\n' );
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -20481,9 +20484,7 @@ function startMinimalOptionOutputPrefixing( test )
   /* */
 
   let modes = [ 'fork', 'spawn', 'shell' ];
-
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
-
   return a.ready;
 
   function run( mode )
@@ -20662,8 +20663,6 @@ function startMinimalOptionOutputPrefixing( test )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.identical( op.output, '\u001b[35mLog\u001b[39;0m\n' ); /* xxx : check */
-        debugger;
-
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
 
@@ -20785,6 +20784,8 @@ function startMinimalOptionOutputPrefixing( test )
       })
     })
 
+    /* */
+
     return ready;
 
   }
@@ -20828,13 +20829,8 @@ function startMinimalOptionOutputPiping( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-
-  /* */
-
   let modes = [ 'fork', 'spawn', 'shell' ];
-
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
-
   return a.ready;
 
   function run( mode )
@@ -21442,7 +21438,124 @@ function startMinimalOptionOutputPiping( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.identical( _.strCount( op.output, 'throw new Error()' ), 2 );
+        test.identical( _.strCount( op.output, 'throw new Error()' ), 2 ); /* zzz : here startMinimalOptionOutputPiping */
+
+/* xxx : error on windows
+2020-12-05T17:31:19.5102011Z  1 : function testApp2Error2()
+2020-12-05T17:31:19.5102845Z  2 :   {
+2020-12-05T17:31:19.5103410Z  3 :     throw new Error();
+2020-12-05T17:31:19.5103907Z  4 :   }
+2020-12-05T17:31:19.5104337Z  5 :
+2020-12-05T17:31:19.5104802Z  6 : var context = {
+2020-12-05T17:31:19.5105292Z  7 :   "t0" : 100,
+2020-12-05T17:31:19.5105731Z  8 :   "t1" : 1000,
+2020-12-05T17:31:19.5106171Z  9 :   "t2" : 5000,
+2020-12-05T17:31:19.5106682Z 10 :   "t3" : 15000
+2020-12-05T17:31:19.5107136Z 11 : };
+2020-12-05T17:31:19.5108097Z 12 : var toolsPath = `D:\\a\\wProcess\\wProcess\\node_modules\\wTools\\proto\\wtools\\abase\\Layer1.s`;
+2020-12-05T17:31:19.5108882Z 13 :
+2020-12-05T17:31:19.5109436Z 14 : testApp2Error2();
+2020-12-05T17:31:19.5110073Z 15 :
+2020-12-05T17:31:19.5135695Z  1 : function testApp()
+2020-12-05T17:31:19.5136282Z  2 :   {
+2020-12-05T17:31:19.5136828Z  3 :     let _ = require( toolsPath );
+2020-12-05T17:31:19.5137453Z  4 :     _.include( 'wProcess' );
+2020-12-05T17:31:19.5138536Z  5 :     _.include( 'wFiles' );
+2020-12-05T17:31:19.5139083Z  6 :
+2020-12-05T17:31:19.5139568Z  7 :     let options =
+2020-12-05T17:31:19.5140179Z  8 :     {
+2020-12-05T17:31:19.5140924Z  9 :       execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+2020-12-05T17:31:19.5141643Z 10 :       mode,
+2020-12-05T17:31:19.5142223Z 11 :       inputMirroring : 0,
+2020-12-05T17:31:19.5142900Z 12 :       outputPiping : piping,
+2020-12-05T17:31:19.5143501Z 13 :       verbosity,
+2020-12-05T17:31:19.5144166Z 14 :       outputCollecting : 1,
+2020-12-05T17:31:19.5144858Z 15 :       throwingExitCode : 0,
+2020-12-05T17:31:19.5145537Z 16 :       outputColoring : 0,
+2020-12-05T17:31:19.5146248Z 17 :       outputPrefixing : prefixing
+2020-12-05T17:31:19.5146834Z 18 :     }
+2020-12-05T17:31:19.5147250Z 19 :
+2020-12-05T17:31:19.5147973Z 20 :     return _.process.startMinimal( options )
+2020-12-05T17:31:19.5148698Z 21 :     .then( ( op ) =>
+2020-12-05T17:31:19.5149161Z 22 :     {
+2020-12-05T17:31:19.5149754Z 23 :       console.log( op.output );
+2020-12-05T17:31:19.5150474Z 24 :       return null;
+2020-12-05T17:31:19.5150975Z 25 :     })
+2020-12-05T17:31:19.5151415Z 26 :   }
+2020-12-05T17:31:19.5151845Z 27 :
+2020-12-05T17:31:19.5152320Z 28 : var piping = 1;
+2020-12-05T17:31:19.5153899Z 29 : var programPath = `D:\\Temp\\ProcessBasic-2020-12-5-16-36-43-976-8109.tmp\\startMinimalOptionOutputPiping\\testApp2Error2.js`;
+2020-12-05T17:31:19.5155258Z 30 : var mode = `fork`;
+2020-12-05T17:31:19.5155829Z 31 : var verbosity = 1;
+2020-12-05T17:31:19.5156408Z 32 : var prefixing = 0;
+2020-12-05T17:31:19.5156949Z 33 : var context = {
+2020-12-05T17:31:19.5157453Z 34 :   "t0" : 100,
+2020-12-05T17:31:19.5157922Z 35 :   "t1" : 1000,
+2020-12-05T17:31:19.5158395Z 36 :   "t2" : 5000,
+2020-12-05T17:31:19.5158857Z 37 :   "t3" : 15000
+2020-12-05T17:31:19.5159297Z 38 : };
+2020-12-05T17:31:19.5160323Z 39 : var toolsPath = `D:\\a\\wProcess\\wProcess\\node_modules\\wTools\\proto\\wtools\\abase\\Layer1.s`;
+2020-12-05T17:31:19.5161133Z 40 :
+2020-12-05T17:31:19.5161617Z 41 : testApp();
+2020-12-05T17:31:19.5162117Z 42 :
+2020-12-05T17:31:19.5191635Z  > node D:\Temp\ProcessBasic-2020-12-5-16-36-43-976-8109.tmp\startMinimalOptionOutputPiping\testApp.js
+2020-12-05T17:31:21.4122055Z D:\Temp\ProcessBasic-2020-12-5-16-36-43-976-8109.tmp\startMinimalOptionOutputPiping\testApp2Error2.js:3
+2020-12-05T17:31:21.4123604Z     throw ne
+
+zzz ->
+2020-12-05T17:31:21.4123604Z     throw ne[39;0m
+2020-12-05T17:31:21.4147793Z [31mw Error();
+zzz <-
+
+2020-12-05T17:31:21.4147793Z w Error();
+2020-12-05T17:31:21.4148383Z     ^
+2020-12-05T17:31:21.4148724Z
+2020-12-05T17:31:21.4149172Z Error
+2020-12-05T17:31:21.4157614Z     at testApp2Error2 (D:\Temp\ProcessBasic-2020-12-5-16-36-43-976-8109.tmp\startMinimalOptionOutputPiping\testApp2Error2.js:3:11)
+2020-12-05T17:31:21.4160048Z D:\Temp\ProcessBasic-2020-12-5-16-36-43-976-8109.tmp\startMinimalOptionOutputPiping\testApp2Error2.js:3
+2020-12-05T17:31:21.4162463Z     at Object.<anonymous> (D:\Temp\ProcessBasic-2020-12-5-16-36-43-976-8109.tmp\startMinimalOptionOutputPiping\testApp2Error2.js:14:1)
+2020-12-05T17:31:21.4163739Z     throw new Error();
+2020-12-05T17:31:21.4164563Z     at Module._compile (internal/modules/cjs/loader.js:778:30)
+2020-12-05T17:31:21.4165100Z     ^
+2020-12-05T17:31:21.4165934Z     at Object.Module._extensions..js (internal/modules/cjs/loader.js:789:10)
+2020-12-05T17:31:21.4166472Z
+2020-12-05T17:31:21.4167191Z     at Module.load (internal/modules/cjs/loader.js:653:32)
+2020-12-05T17:31:21.4167718Z Error
+2020-12-05T17:31:21.4168475Z     at tryModuleLoad (internal/modules/cjs/loader.js:593:12)
+2020-12-05T17:31:21.4170062Z     at testApp2Error2 (D:\Temp\ProcessBasic-2020-12-5-16-36-43-976-8109.tmp\startMinimalOptionOutputPiping\testApp2Error2.js:3:11)
+2020-12-05T17:31:21.4171861Z     at Function.Module._load (internal/modules/cjs/loader.js:585:3)
+2020-12-05T17:31:21.4173407Z     at Object.<anonymous> (D:\Temp\ProcessBasic-2020-12-5-16-36-43-976-8109.tmp\startMinimalOptionOutputPiping\testApp2Error2.js:14:1)
+2020-12-05T17:31:21.4176878Z     at Function.Module.runMain (internal/modules/cjs/loader.js:831:12)
+2020-12-05T17:31:21.4177868Z     at Module._compile (internal/modules/cjs/loader.js:778:30)
+2020-12-05T17:31:21.4179140Z     at Object.Module._extensions..js (internal/modules/cjs/loader.js:789:10)
+2020-12-05T17:31:21.4180216Z     at startup (internal/bootstrap/node.js:283:19)
+2020-12-05T17:31:21.4181425Z     at Module.load (internal/modules/cjs/loader.js:653:32)
+2020-12-05T17:31:21.4182519Z     at bootstrapNodeJSCore (internal/bootstrap/node.js:623:3)
+2020-12-05T17:31:21.4183538Z     at tryModuleLoad (internal/modules/cjs/loader.js:593:12)
+2020-12-05T17:31:21.4184214Z
+2020-12-05T17:31:21.4184968Z     at Function.Module._load (internal/modules/cjs/loader.js:585:3)
+2020-12-05T17:31:21.4186140Z     at Function.Module.runMain (internal/modules/cjs/loader.js:831:12)
+2020-12-05T17:31:21.4187090Z     at startup (internal/bootstrap/node.js:283:19)
+2020-12-05T17:31:21.4188021Z     at bootstrapNodeJSCore (internal/bootstrap/node.js:623:3)
+2020-12-05T17:31:21.4188738Z
+2020-12-05T17:31:21.4578683Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalOptionOutputPiping / mode : fork, outputPiping : 1, verbosity : 1, error output # 67 ) ... ok
+2020-12-05T17:31:21.4724055Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalOptionOutputPiping / mode : fork, outputPiping : 1, verbosity : 1, error output # 68 ) ... ok
+2020-12-05T17:31:21.4897233Z         - got :
+2020-12-05T17:31:21.4898035Z           1
+2020-12-05T17:31:21.4898777Z         - expected :
+2020-12-05T17:31:21.4899270Z           2
+2020-12-05T17:31:21.4899793Z         - difference :
+2020-12-05T17:31:21.4900629Z           *
+2020-12-05T17:31:21.4916917Z
+2020-12-05T17:31:21.4917973Z         /D/a/wProcess/wProcess/proto/wtools/abase/l4_process.test/Execution.test.s:21455:14
+2020-12-05T17:31:21.4918884Z           21451 :       .then( ( op ) =>
+2020-12-05T17:31:21.4919413Z           21452 :       {
+2020-12-05T17:31:21.4920203Z           21453 :         test.identical( op.exitCode, 0 );
+2020-12-05T17:31:21.4921066Z           21454 :         test.identical( op.ended, true );
+2020-12-05T17:31:21.4921961Z         * 21455 :         test.identical( _.strCount( op.output, 'throw new Error()' ), 2 );
+2020-12-05T17:31:21.4922685Z
+2020-12-05T17:31:21.4985848Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalOptionOutputPiping / mode : fork, outputPiping : 1, verbosity : 1, error output # 69 ) ... failed
+*/
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -22502,8 +22615,7 @@ function startMinimalOptionLogger( test )
     execPath = 'node ' + execPath;
 
     let loggerOutput = '';
-
-    let logger = new _.Logger({ output : null, onTransformEnd });
+    let logger = new _.Logger({ output : console, onTransformEnd });
     logger.up();
 
     _.process.startMinimal
@@ -22530,7 +22642,8 @@ function startMinimalOptionLogger( test )
 
     function onTransformEnd( o )
     {
-      loggerOutput += o.outputForPrinter[ 0 ] + '\n';
+      loggerOutput += o.output + '\n';
+      // loggerOutput += o._outputForPrinter[ 0 ] + '\n';
     }
   })
 
@@ -22557,9 +22670,8 @@ function startMinimalOptionLoggerTransofrmation( test )
   /* */
 
   let modes = [ 'fork', 'spawn', 'shell' ];
-  var loggerOutput = '';
-
-  var logger = new _.Logger({ output : null, onTransformEnd });
+  let loggerOutput = '';
+  let logger = new _.Logger({ output : console, onTransformEnd });
 
   modes.forEach( ( mode ) =>
   {
@@ -22603,7 +22715,7 @@ function startMinimalOptionLoggerTransofrmation( test )
       return _.process.startMinimal( o )
       .then( () =>
       {
-        test.identical( o.output, 'testApp-output\n\n' );
+        test.identical( o.output, 'testApp-output\n' );
         test.true( !_.strHas( loggerOutput, 'testApp-output') );
         return true;
       })
@@ -22616,7 +22728,7 @@ function startMinimalOptionLoggerTransofrmation( test )
       return _.process.startMinimal( o )
       .then( () =>
       {
-        test.identical( o.output, 'testApp-output\n\n' );
+        test.identical( o.output, 'testApp-output\n' );
         test.true( _.strHas( loggerOutput, 'testApp-output') );
         return true;
       })
@@ -22627,12 +22739,12 @@ function startMinimalOptionLoggerTransofrmation( test )
 
   function onTransformEnd( o )
   {
-    loggerOutput += o.outputForPrinter[ 0 ];
+    loggerOutput += o.output;
   }
 
   function testApp()
   {
-    console.log( 'testApp-output\n' );
+    console.log( 'testApp-output' );
   }
 }
 
@@ -23199,8 +23311,8 @@ function startMinimalOptionVerbosity( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let capturedOutput;
-  let captureLogger = new _.Logger({ output : null, onTransformEnd, raw : 1 })
+  let loggerOutput;
+  let logger1 = new _.Logger({ output : console, onTransformEnd, raw : 1 })
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -23214,7 +23326,7 @@ function startMinimalOptionVerbosity( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}, verbosity : 0`;
-      capturedOutput = '';
+      loggerOutput = '';
 
       return _.process.startMinimal
       ({
@@ -23223,13 +23335,13 @@ function startMinimalOptionVerbosity( test )
         verbosity : 0,
         outputPiping : null,
         outputCollecting : 0,
-        logger : captureLogger,
+        logger : logger1,
       })
       .then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        test.identical( capturedOutput, '' );
+        test.identical( loggerOutput, '' );
         return true;
       })
     })
@@ -23239,7 +23351,7 @@ function startMinimalOptionVerbosity( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}, verbosity : 1`;
-      capturedOutput = '';
+      loggerOutput = '';
 
       return _.process.startMinimal
       ({
@@ -23248,20 +23360,20 @@ function startMinimalOptionVerbosity( test )
         verbosity : 1,
         outputPiping : null,
         outputCollecting : 0,
-        logger : captureLogger,
+        logger : logger1,
       })
       .then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         if( mode === 'shell' )
-        test.identical( _.strCount( capturedOutput, `node -e "console.log('message')"`), 1 );
+        test.identical( _.strCount( loggerOutput, `node -e "console.log('message')"`), 1 );
         else if( mode === 'spawn' )
-        test.identical( _.strCount( capturedOutput, `node -e console.log('message')`), 1 );
+        test.identical( _.strCount( loggerOutput, `node -e console.log('message')`), 1 );
         else
-        test.identical( _.strCount( capturedOutput, `-e console.log('message')`), 1 );
-        test.identical( _.strCount( capturedOutput, 'message' ), 1 );
-        test.identical( _.strCount( capturedOutput, '@ ' + _.path.current() ), 0 );
+        test.identical( _.strCount( loggerOutput, `-e console.log('message')`), 1 );
+        test.identical( _.strCount( loggerOutput, 'message' ), 1 );
+        test.identical( _.strCount( loggerOutput, '@ ' + _.path.current() ), 0 );
         return true;
       })
     })
@@ -23271,7 +23383,7 @@ function startMinimalOptionVerbosity( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}, verbosity : 2`;
-      capturedOutput = '';
+      loggerOutput = '';
 
       return _.process.startMinimal
       ({
@@ -23282,20 +23394,20 @@ function startMinimalOptionVerbosity( test )
         outputPiping : null,
         outputCollecting : 0,
         outputColoring : 0,
-        logger : captureLogger,
+        logger : logger1,
       })
       .then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         if( mode === 'shell' )
-        test.identical( _.strCount( capturedOutput, `node -e "console.log('message')"`), 1 );
+        test.identical( _.strCount( loggerOutput, `node -e "console.log('message')"`), 1 );
         else if( mode === 'spawn' )
-        test.identical( _.strCount( capturedOutput, `node -e console.log('message')`), 1 );
+        test.identical( _.strCount( loggerOutput, `node -e console.log('message')`), 1 );
         else
-        test.identical( _.strCount( capturedOutput, `-e console.log('message')`), 1 );
-        test.identical( _.strCount( capturedOutput, 'message' ), 2 );
-        test.identical( _.strCount( capturedOutput, '@ ' + _.path.current() ), 0 );
+        test.identical( _.strCount( loggerOutput, `-e console.log('message')`), 1 );
+        test.identical( _.strCount( loggerOutput, 'message' ), 2 );
+        test.identical( _.strCount( loggerOutput, '@ ' + _.path.current() ), 0 );
         return true;
       })
     })
@@ -23305,7 +23417,7 @@ function startMinimalOptionVerbosity( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}, verbosity : 3`;
-      capturedOutput = '';
+      loggerOutput = '';
 
       return _.process.startMinimal
       ({
@@ -23316,20 +23428,20 @@ function startMinimalOptionVerbosity( test )
         outputPiping : null,
         outputCollecting : 0,
         outputColoring : 0,
-        logger : captureLogger,
+        logger : logger1,
       })
       .then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         if( mode === 'shell' )
-        test.identical( _.strCount( capturedOutput, `node -e "console.log('message')"`), 1 );
+        test.identical( _.strCount( loggerOutput, `node -e "console.log('message')"`), 1 );
         else if( mode === 'spawn' )
-        test.identical( _.strCount( capturedOutput, `node -e console.log('message')`), 1 );
+        test.identical( _.strCount( loggerOutput, `node -e console.log('message')`), 1 );
         else
-        test.identical( _.strCount( capturedOutput, `-e console.log('message')`), 1 );
-        test.identical( _.strCount( capturedOutput, 'message' ), 2 );
-        test.identical( _.strCount( capturedOutput, '@ ' + _.path.current() ), 1 );
+        test.identical( _.strCount( loggerOutput, `-e console.log('message')`), 1 );
+        test.identical( _.strCount( loggerOutput, 'message' ), 2 );
+        test.identical( _.strCount( loggerOutput, '@ ' + _.path.current() ), 1 );
         return true;
       })
     })
@@ -23339,7 +23451,7 @@ function startMinimalOptionVerbosity( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}, verbosity : 5`;
-      capturedOutput = '';
+      loggerOutput = '';
 
       return _.process.startMinimal
       ({
@@ -23350,20 +23462,20 @@ function startMinimalOptionVerbosity( test )
         outputPiping : null,
         outputCollecting : 0,
         outputColoring : 0,
-        logger : captureLogger,
+        logger : logger1,
       })
       .then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         if( mode === 'shell' )
-        test.identical( _.strCount( capturedOutput, `node -e "console.log('message')"`), 1 );
+        test.identical( _.strCount( loggerOutput, `node -e "console.log('message')"`), 1 );
         else if( mode === 'spawn' )
-        test.identical( _.strCount( capturedOutput, `node -e console.log('message')`), 1 );
+        test.identical( _.strCount( loggerOutput, `node -e console.log('message')`), 1 );
         else
-        test.identical( _.strCount( capturedOutput, `-e console.log('message')`), 1 );
-        test.identical( _.strCount( capturedOutput, 'message' ), 2 );
-        test.identical( _.strCount( capturedOutput, '@ ' + _.path.current() ), 1 );
+        test.identical( _.strCount( loggerOutput, `-e console.log('message')`), 1 );
+        test.identical( _.strCount( loggerOutput, 'message' ), 2 );
+        test.identical( _.strCount( loggerOutput, '@ ' + _.path.current() ), 1 );
         return true;
       })
     })
@@ -23373,7 +23485,7 @@ function startMinimalOptionVerbosity( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}, error, verbosity : 0`;
-      capturedOutput = '';
+      loggerOutput = '';
 
       return _.process.startMinimal
       ({
@@ -23385,13 +23497,13 @@ function startMinimalOptionVerbosity( test )
         outputCollecting : 0,
         outputColoring : 0,
         throwingExitCode : 0,
-        logger : captureLogger,
+        logger : logger1,
       })
       .then( ( op ) =>
       {
         test.identical( op.exitCode, 1 );
         test.identical( op.ended, true );
-        test.identical( _.strCount( capturedOutput, 'Process returned error code ' + op.exitCode ), 0 );
+        test.identical( _.strCount( loggerOutput, 'Process returned error code ' + op.exitCode ), 0 );
         return true;
       })
     })
@@ -23401,7 +23513,7 @@ function startMinimalOptionVerbosity( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}, error, verbosity : 1`;
-      capturedOutput = '';
+      loggerOutput = '';
 
       return _.process.startMinimal
       ({
@@ -23413,13 +23525,13 @@ function startMinimalOptionVerbosity( test )
         outputCollecting : 0,
         outputColoring : 0,
         throwingExitCode : 0,
-        logger : captureLogger,
+        logger : logger1,
       })
       .then( ( op ) =>
       {
         test.identical( op.exitCode, 1 );
         test.identical( op.ended, true );
-        test.identical( _.strCount( capturedOutput, 'Process returned error code ' + op.exitCode ), 0 );
+        test.identical( _.strCount( loggerOutput, 'Process returned error code ' + op.exitCode ), 0 );
         return true;
       })
     })
@@ -23429,7 +23541,7 @@ function startMinimalOptionVerbosity( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}, error, verbosity : 2`;
-      capturedOutput = '';
+      loggerOutput = '';
 
       return _.process.startMinimal
       ({
@@ -23441,13 +23553,13 @@ function startMinimalOptionVerbosity( test )
         outputCollecting : 0,
         outputColoring : 0,
         throwingExitCode : 0,
-        logger : captureLogger,
+        logger : logger1,
       })
       .then( ( op ) =>
       {
         test.identical( op.exitCode, 1 );
         test.identical( op.ended, true );
-        test.identical( _.strCount( capturedOutput, 'Process returned error code ' + op.exitCode ), 0 );
+        test.identical( _.strCount( loggerOutput, 'Process returned error code ' + op.exitCode ), 0 );
         return true;
       })
     })
@@ -23457,7 +23569,7 @@ function startMinimalOptionVerbosity( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}, error, verbosity : 3`;
-      capturedOutput = '';
+      loggerOutput = '';
 
       return _.process.startMinimal
       ({
@@ -23469,13 +23581,13 @@ function startMinimalOptionVerbosity( test )
         outputCollecting : 0,
         outputColoring : 0,
         throwingExitCode : 0,
-        logger : captureLogger,
+        logger : logger1,
       })
       .then( ( op ) =>
       {
         test.identical( op.exitCode, 1 );
         test.identical( op.ended, true );
-        test.identical( _.strCount( capturedOutput, 'Process returned error code ' + op.exitCode ), 0 );
+        test.identical( _.strCount( loggerOutput, 'Process returned error code ' + op.exitCode ), 0 );
         return true;
       })
     })
@@ -23485,7 +23597,7 @@ function startMinimalOptionVerbosity( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}, error, verbosity : 5`;
-      capturedOutput = '';
+      loggerOutput = '';
 
       return _.process.startMinimal
       ({
@@ -23497,13 +23609,13 @@ function startMinimalOptionVerbosity( test )
         outputCollecting : 0,
         outputColoring : 0,
         throwingExitCode : 0,
-        logger : captureLogger,
+        logger : logger1,
       })
       .then( ( op ) =>
       {
         test.identical( op.exitCode, 1 );
         test.identical( op.ended, true );
-        test.identical( _.strCount( capturedOutput, 'Process returned error code ' + op.exitCode ), 1 );
+        test.identical( _.strCount( loggerOutput, 'Process returned error code ' + op.exitCode ), 1 );
         return true;
       })
     })
@@ -23513,7 +23625,7 @@ function startMinimalOptionVerbosity( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}, execPath has quotes, verbosity : 1`;
-      capturedOutput = '';
+      loggerOutput = '';
 
       return _.process.startMinimal
       ({
@@ -23525,7 +23637,7 @@ function startMinimalOptionVerbosity( test )
         outputCollecting : 0,
         outputColoring : 0,
         throwingExitCode : 1,
-        logger : captureLogger,
+        logger : logger1,
       })
       .then( ( op ) =>
       {
@@ -23534,17 +23646,17 @@ function startMinimalOptionVerbosity( test )
         if( mode === 'shell' )
         {
           test.identical( op.execPath2, `node -e "console.log( 'a', 'b', \`c\` )"` );
-          test.identical( _.strCount( capturedOutput, `node -e "console.log( 'a', 'b', \`c\` )"` ), 1 );
+          test.identical( _.strCount( loggerOutput, `node -e "console.log( 'a', 'b', \`c\` )"` ), 1 );
         }
         else if( mode === 'spawn' )
         {
           test.identical( op.execPath2, `node -e console.log( 'a', 'b', \`c\` )` );
-          test.identical( _.strCount( capturedOutput, `node -e console.log( 'a', 'b', \`c\` )` ), 1 );
+          test.identical( _.strCount( loggerOutput, `node -e console.log( 'a', 'b', \`c\` )` ), 1 );
         }
         else
         {
           test.identical( op.execPath2, `-e console.log( 'a', 'b', \`c\` )` );
-          test.identical( _.strCount( capturedOutput, `-e console.log( 'a', 'b', \`c\` )` ), 1 );
+          test.identical( _.strCount( loggerOutput, `-e console.log( 'a', 'b', \`c\` )` ), 1 );
         }
         return true;
       })
@@ -23555,7 +23667,7 @@ function startMinimalOptionVerbosity( test )
     ready.then( () =>
     {
       test.case = `mode : ${mode}, execPath has double quotes, verbosity : 1`;
-      capturedOutput = '';
+      loggerOutput = '';
 
       let options =
       {
@@ -23567,7 +23679,7 @@ function startMinimalOptionVerbosity( test )
         outputCollecting : 0,
         outputColoring : 0,
         throwingExitCode : 1,
-        logger : captureLogger,
+        logger : logger1,
       }
 
       /* in mode::shell on Linux and iOS
@@ -23587,17 +23699,17 @@ function startMinimalOptionVerbosity( test )
         if( mode === 'fork' )
         {
           test.identical( op.execPath2, `-e console.log( '"a"', "'b'", \`"c"\` )` );
-          test.identical( _.strCount( capturedOutput, `-e console.log( '"a"', "'b'", \`"c"\` )` ), 1 );
+          test.identical( _.strCount( loggerOutput, `-e console.log( '"a"', "'b'", \`"c"\` )` ), 1 );
         }
         else if( mode === 'spawn' )
         {
           test.identical( op.execPath2, `node -e console.log( '"a"', "'b'", \`"c"\` )` );
-          test.identical( _.strCount( capturedOutput, `node -e console.log( '"a"', "'b'", \`"c"\` )` ), 1 );
+          test.identical( _.strCount( loggerOutput, `node -e console.log( '"a"', "'b'", \`"c"\` )` ), 1 );
         }
         else
         {
           test.identical( op.execPath2, `node -e "console.log( '"a"', "'b'", \`"c"\` )"` );
-          test.identical( _.strCount( capturedOutput, `node -e "console.log( '"a"', "'b'", \`"c"\` )"` ), 1 );
+          test.identical( _.strCount( loggerOutput, `node -e "console.log( '"a"', "'b'", \`"c"\` )"` ), 1 );
         }
         return true;
       })
@@ -23607,312 +23719,9 @@ function startMinimalOptionVerbosity( test )
 
   }
 
-  /* ORIGINAL */
-  // testCase( 'verbosity : 0' )
-  // _.process.start
-  // ({
-  //   execPath : `node -e "console.log('message')"`,
-  //   mode : 'spawn',
-  //   verbosity : 0,
-  //   outputPiping : null,
-  //   outputCollecting : 0,
-  //   logger : captureLogger,
-  //   ready : a.ready
-  // })
-  // .then( ( op ) =>
-  // {
-  //   test.identical( op.exitCode, 0 );
-  //   test.identical( op.ended, true );
-  //   test.identical( capturedOutput, '' );
-  //   return true;
-  // })
-
-  // /* */
-
-  // testCase( 'verbosity : 1' )
-  // _.process.start
-  // ({
-  //   execPath : `node -e "console.log('message')"`,
-  //   mode : 'spawn',
-  //   verbosity : 1,
-  //   outputPiping : null,
-  //   outputCollecting : 0,
-  //   logger : captureLogger,
-  //   ready : a.ready
-  // })
-  // .then( ( op ) =>
-  // {
-  //   test.identical( op.exitCode, 0 );
-  //   test.identical( op.ended, true );
-  //   console.log( capturedOutput )
-  //   test.identical( _.strCount( capturedOutput, `node -e console.log('message')`), 1 );
-  //   test.identical( _.strCount( capturedOutput, 'message' ), 1 );
-  //   test.identical( _.strCount( capturedOutput, 'at ' + _.path.current() ), 0 );
-  //   return true;
-  // })
-
-  // /* */
-
-  // testCase( 'verbosity : 2' )
-  // _.process.start
-  // ({
-  //   execPath : `node -e "console.log('message')"`,
-  //   mode : 'spawn',
-  //   verbosity : 2,
-  //   stdio : 'pipe',
-  //   outputPiping : null,
-  //   outputCollecting : 0,
-  //   outputColoring : 0,
-  //   logger : captureLogger,
-  //   ready : a.ready
-  // })
-  // .then( ( op ) =>
-  // {
-  //   test.identical( op.exitCode, 0 );
-  //   test.identical( op.ended, true );
-  //   test.identical( _.strCount( capturedOutput, `node -e console.log('message')` ), 1 );
-  //   test.identical( _.strCount( capturedOutput, 'message' ), 2 );
-  //   test.identical( _.strCount( capturedOutput, 'at ' + _.path.current() ), 0 );
-  //   return true;
-  // })
-
-  // /* */
-
-  // testCase( 'verbosity : 3' )
-  // _.process.start
-  // ({
-  //   execPath : `node -e "console.log('message')"`,
-  //   mode : 'spawn',
-  //   verbosity : 3,
-  //   stdio : 'pipe',
-  //   outputPiping : null,
-  //   outputCollecting : 0,
-  //   outputColoring : 0,
-  //   logger : captureLogger,
-  //   ready : a.ready
-  // })
-  // .then( ( op ) =>
-  // {
-  //   test.identical( op.exitCode, 0 );
-  //   test.identical( op.ended, true );
-  //   test.identical( _.strCount( capturedOutput, `node -e console.log('message')` ), 1 );
-  //   test.identical( _.strCount( capturedOutput, 'message' ), 2 );
-  //   test.identical( _.strCount( capturedOutput, '@ ' + _.path.current() ), 1 );
-  //   return true;
-  // })
-
-  // /* */
-
-  // testCase( 'verbosity : 5' )
-  // _.process.start
-  // ({
-  //   execPath : `node -e "console.log('message')"`,
-  //   mode : 'spawn',
-  //   verbosity : 5,
-  //   stdio : 'pipe',
-  //   outputPiping : null,
-  //   outputCollecting : 0,
-  //   outputColoring : 0,
-  //   logger : captureLogger,
-  //   ready : a.ready
-  // })
-  // .then( ( op ) =>
-  // {
-  //   test.identical( op.exitCode, 0 );
-  //   test.identical( op.ended, true );
-  //   test.identical( _.strCount( capturedOutput, `node -e console.log('message')` ), 1 );
-  //   test.identical( _.strCount( capturedOutput, 'message' ), 2 );
-  //   test.identical( _.strCount( capturedOutput, '@ ' + _.path.current() ), 1 );
-  //   return true;
-  // })
-
-  // /* */
-
-  // testCase( 'error, verbosity : 0' )
-  // _.process.start
-  // ({
-  //   execPath : `node -e "process.exit(1)"`,
-  //   mode : 'spawn',
-  //   verbosity : 0,
-  //   stdio : 'pipe',
-  //   outputPiping : null,
-  //   outputCollecting : 0,
-  //   throwingExitCode : 0,
-  //   outputColoring : 0,
-  //   logger : captureLogger,
-  //   ready : a.ready
-  // })
-  // .then( ( op ) =>
-  // {
-  //   test.identical( op.exitCode, 1 );
-  //   test.identical( op.ended, true );
-  //   test.identical( _.strCount( capturedOutput, 'Process returned error code ' + op.exitCode ), 0 );
-  //   return true;
-  // })
-
-  // /* */
-
-  // testCase( 'error, verbosity : 1' )
-  // _.process.start
-  // ({
-  //   execPath : `node -e "process.exit(1)"`,
-  //   mode : 'spawn',
-  //   verbosity : 1,
-  //   stdio : 'pipe',
-  //   outputPiping : null,
-  //   outputCollecting : 0,
-  //   throwingExitCode : 0,
-  //   outputColoring : 0,
-  //   logger : captureLogger,
-  //   ready : a.ready
-  // })
-  // .then( ( op ) =>
-  // {
-  //   test.identical( op.exitCode, 1 );
-  //   test.identical( op.ended, true );
-  //   test.identical( _.strCount( capturedOutput, 'Process returned error code ' + op.exitCode ), 0 );
-  //   return true;
-  // })
-
-  // /* */
-
-  // testCase( 'error, verbosity : 2' )
-  // _.process.start
-  // ({
-  //   execPath : `node -e "process.exit(1)"`,
-  //   mode : 'spawn',
-  //   verbosity : 2,
-  //   stdio : 'pipe',
-  //   outputPiping : null,
-  //   outputCollecting : 0,
-  //   throwingExitCode : 0,
-  //   outputColoring : 0,
-  //   logger : captureLogger,
-  //   ready : a.ready
-  // })
-  // .then( ( op ) =>
-  // {
-  //   test.identical( op.exitCode, 1 );
-  //   test.identical( op.ended, true );
-  //   test.identical( _.strCount( capturedOutput, 'Process returned error code ' + op.exitCode ), 0 );
-  //   return true;
-  // })
-
-  // /* */
-
-  // testCase( 'error, verbosity : 3' )
-  // _.process.start
-  // ({
-  //   execPath : `node -e "process.exit(1)"`,
-  //   mode : 'spawn',
-  //   verbosity : 3,
-  //   stdio : 'pipe',
-  //   outputPiping : null,
-  //   outputCollecting : 0,
-  //   throwingExitCode : 0,
-  //   outputColoring : 0,
-  //   logger : captureLogger,
-  //   ready : a.ready
-  // })
-  // .then( ( op ) =>
-  // {
-  //   test.identical( op.exitCode, 1 );
-  //   test.identical( op.ended, true );
-  //   test.identical( _.strCount( capturedOutput, 'Process returned error code ' + op.exitCode ), 0 );
-  //   return true;
-  // })
-
-  // /* */
-
-  // testCase( 'error, verbosity : 5' )
-  // _.process.start
-  // ({
-  //   execPath : `node -e "process.exit(1)"`,
-  //   mode : 'spawn',
-  //   verbosity : 5,
-  //   stdio : 'pipe',
-  //   outputPiping : null,
-  //   outputCollecting : 0,
-  //   throwingExitCode : 0,
-  //   outputColoring : 0,
-  //   logger : captureLogger,
-  //   ready : a.ready
-  // })
-  // .then( ( op ) =>
-  // {
-  //   test.identical( op.exitCode, 1 );
-  //   test.identical( op.ended, true );
-  //   test.identical( _.strCount( capturedOutput, 'Process returned error code ' + op.exitCode ), 1 );
-  //   return true;
-  // })
-
-  // /* */
-
-  // testCase( 'execPath has quotes, verbosity : 1' )
-  // _.process.start
-  // ({
-  //   execPath : `node -e "console.log( \"a\", 'b', \`c\` )"`,
-  //   mode : 'spawn',
-  //   verbosity : 5,
-  //   stdio : 'pipe',
-  //   outputPiping : null,
-  //   outputCollecting : 0,
-  //   throwingExitCode : 1,
-  //   outputColoring : 0,
-  //   logger : captureLogger,
-  //   ready : a.ready
-  // })
-  // .then( ( op ) =>
-  // {
-  //   test.identical( op.exitCode, 0 );
-  //   test.identical( op.ended, true );
-  //   test.identical( op.execPath2, `node -e console.log( \"a\", 'b', \`c\` )` );
-  //   test.identical( _.strCount( capturedOutput, `node -e console.log( \"a\", 'b', \`c\` )` ), 1 );
-  //   return true;
-  // })
-
-  // /* */
-
-  // testCase( 'execPath has double quotes, verbosity : 1' )
-  // _.process.start
-  // ({
-  //   execPath : `node -e "console.log( '"a"', "'b'", \`"c"\` )"`,
-  //   mode : 'spawn',
-  //   verbosity : 5,
-  //   stdio : 'pipe',
-  //   outputPiping : null,
-  //   outputCollecting : 0,
-  //   throwingExitCode : 1,
-  //   outputColoring : 0,
-  //   logger : captureLogger,
-  //   ready : a.ready
-  // })
-  // .then( ( op ) =>
-  // {
-  //   test.identical( op.exitCode, 0 );
-  //   test.identical( op.ended, true );
-  //   test.identical( op.execPath2, `node -e console.log( '"a"', "'b'", \`"c"\` )` );
-  //   test.identical( _.strCount( capturedOutput, `node -e console.log( '"a"', "'b'", \`"c"\` )` ), 1 );
-  //   return true;
-  // })
-
-  // return a.ready;
-
-  // /*  */
-
-  // function testCase( src )
-  // {
-  //   a.ready.then( () =>
-  //   {
-  //     capturedOutput = '';
-  //     test.case = src;
-  //     return null
-  //   });
-  // }
-
   function onTransformEnd( o )
   {
-    capturedOutput += o.outputForPrinter[ 0 ] + '\n';
+    loggerOutput += o.output + '\n';
   }
 
 }
@@ -24347,21 +24156,26 @@ function startSingleOptionDry( test )
   {
     let ready = new _.Consequence().take( null );
 
+    console.log( `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}` )
+
     if( tops.sync && !tops.deasync && tops.mode === 'fork' )
-    return test.shouldThrowErrorSync( () =>
     {
-      _.process.startSingle
-      ({
-        execPath : programPath + ` arg1`,
-        mode : tops.mode,
-        sync : tops.sync,
-        deasync : tops.deasync
-      })
-    });
+      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, throwing`;
+      return test.shouldThrowErrorSync( () =>
+      {
+        _.process.startSingle
+        ({
+          execPath : programPath + ` arg1`,
+          mode : tops.mode,
+          sync : tops.sync,
+          deasync : tops.deasync
+        })
+      });
+    }
 
     ready.then( () =>
     {
-      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, dry : 1, no error`
+      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, no error`;
       let o =
       {
         execPath : tops.mode === 'fork' ? programPath + ` arg1` : 'node ' + programPath + ` arg1`,
@@ -24468,14 +24282,16 @@ function startSingleOptionDry( test )
         return null;
       })
 
-      return null;
+      /* qqq for Yevhen : bad! */
+      // return null;
+      return o.conTerminate;
     })
 
     /* */
 
     ready.then( () =>
     {
-      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, dry : 1, wrong execPath`;
+      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, wrong execPath`;
       let o =
       {
         execPath : 'err ' + programPath + ' arg1',
@@ -24575,7 +24391,9 @@ function startSingleOptionDry( test )
         return null;
       })
 
-      return null;
+      /* qqq for Yevhen : bad! */
+      // return null;
+      return o.conTerminate;
     })
 
     return ready;
@@ -24590,6 +24408,7 @@ function startSingleOptionDry( test )
     var filePath = path.join( __dirname, 'file' );
     fs.writeFileSync( filePath, filePath );
   }
+
 }
 
 startSingleOptionDry.rapidity = -1;
@@ -24599,6 +24418,226 @@ startSingleOptionDry.description =
 Simulates run of routine start with all possible options.
 After execution checks fields of run descriptor.
 `
+
+/* xxx : fail on Windows, but it happen on any OS.
+should be fixed now
+
+2020-12-07T10:06:19.1318563Z       Running TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry ..
+2020-12-07T10:06:19.1687652Z  1 : function testApp()
+2020-12-07T10:06:19.1688441Z  2 :   {
+2020-12-07T10:06:19.1688987Z  3 :     var fs = require( 'fs' );
+2020-12-07T10:06:19.1689681Z  4 :     var path = require( 'path' );
+2020-12-07T10:06:19.1690355Z  5 :     var filePath = path.join( __dirname, 'file' );
+2020-12-07T10:06:19.1691098Z  6 :     fs.writeFileSync( filePath, filePath );
+2020-12-07T10:06:19.1691671Z  7 :   }
+2020-12-07T10:06:19.1692051Z  8 :
+2020-12-07T10:06:19.1692492Z  9 : var context = {
+2020-12-07T10:06:19.1693004Z 10 :   "t0" : 100,
+2020-12-07T10:06:19.1693497Z 11 :   "t1" : 1000,
+2020-12-07T10:06:19.1693956Z 12 :   "t2" : 5000,
+2020-12-07T10:06:19.1694402Z 13 :   "t3" : 15000
+2020-12-07T10:06:19.1694801Z 14 : };
+2020-12-07T10:06:19.1695988Z 15 : var toolsPath = `D:\\a\\wProcess\\wProcess\\node_modules\\wTools\\proto\\wtools\\abase\\Layer1.s`;
+2020-12-07T10:06:19.1696695Z 16 :
+2020-12-07T10:06:19.1697359Z 17 : testApp();
+2020-12-07T10:06:19.1697795Z 18 :
+2020-12-07T10:06:19.1795827Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 0, dry : 1, no error # 1 ) : expected true ... ok
+2020-12-07T10:06:19.1826758Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 0, dry : 1, no error # 2 ) ... ok
+2020-12-07T10:06:19.1957138Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 0, dry : 1, wrong execPath # 3 ) : expected true ... ok
+2020-12-07T10:06:19.1983589Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 0, dry : 1, wrong execPath # 4 ) ... ok
+2020-12-07T10:06:19.2101588Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : spawn, sync : 0, deasync : 0, dry : 1, no error # 5 ) : expected true ... ok
+2020-12-07T10:06:19.2127207Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : spawn, sync : 0, deasync : 0, dry : 1, no error # 6 ) ... ok
+2020-12-07T10:06:19.2243598Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : spawn, sync : 0, deasync : 0, dry : 1, wrong execPath # 7 ) : expected true ... ok
+2020-12-07T10:06:19.2269122Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : spawn, sync : 0, deasync : 0, dry : 1, wrong execPath # 8 ) ... ok
+2020-12-07T10:06:19.2410345Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : shell, sync : 0, deasync : 0, dry : 1, no error # 9 ) : expected true ... ok
+2020-12-07T10:06:19.2435652Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : shell, sync : 0, deasync : 0, dry : 1, no error # 10 ) ... ok
+2020-12-07T10:06:19.2555464Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : shell, sync : 0, deasync : 0, dry : 1, wrong execPath # 11 ) : expected true ... ok
+2020-12-07T10:06:19.2581911Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : shell, sync : 0, deasync : 0, dry : 1, wrong execPath # 12 ) ... ok
+2020-12-07T10:06:21.1840703Z  > D:\Temp\ProcessBasic-2020-12-7-9-12-48-621-4e69.tmp\startSingleOptionDry\testApp.js arg1 arg0
+2020-12-07T10:06:21.1900916Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 13 ) ... ok
+2020-12-07T10:06:21.1957658Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 14 ) ... ok
+2020-12-07T10:06:21.1963255Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 15 ) ... ok
+2020-12-07T10:06:21.1994073Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 16 ) ... ok
+2020-12-07T10:06:21.2023296Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 17 ) ... ok
+2020-12-07T10:06:21.2052815Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 18 ) ... ok
+2020-12-07T10:06:21.2082920Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 19 ) ... ok
+2020-12-07T10:06:21.2106827Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 20 ) ... ok
+2020-12-07T10:06:21.2132527Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 21 ) ... ok
+2020-12-07T10:06:21.2161777Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 22 ) ... ok
+2020-12-07T10:06:21.2187792Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 23 ) ... ok
+2020-12-07T10:06:21.2211230Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 24 ) ... ok
+2020-12-07T10:06:21.2238401Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 25 ) ... ok
+2020-12-07T10:06:21.2263943Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 26 ) ... ok
+2020-12-07T10:06:21.2408626Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 27 ) ... ok
+2020-12-07T10:06:21.2411961Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 28 ) ... ok
+2020-12-07T10:06:21.2415208Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 29 ) ... ok
+2020-12-07T10:06:21.2418519Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 30 ) ... ok
+2020-12-07T10:06:21.2428439Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 31 ) ... ok
+2020-12-07T10:06:21.2454455Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 32 ) ... ok
+2020-12-07T10:06:21.2480685Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 33 ) ... ok
+2020-12-07T10:06:21.2506630Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 34 ) ... ok
+2020-12-07T10:06:21.2531807Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 35 ) ... ok
+2020-12-07T10:06:21.2558544Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 36 ) ... ok
+2020-12-07T10:06:21.2584185Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 37 ) ... ok
+2020-12-07T10:06:21.2615223Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 38 ) ... ok
+2020-12-07T10:06:21.2637665Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 39 ) ... ok
+2020-12-07T10:06:21.2667537Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 40 ) : expected true ... ok
+2020-12-07T10:06:21.2696029Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 41 ) ... ok
+2020-12-07T10:06:21.2735477Z  > err D:\Temp\ProcessBasic-2020-12-7-9-12-48-621-4e69.tmp\startSingleOptionDry\testApp.js arg1 arg0
+2020-12-07T10:06:21.2765141Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 42 ) ... ok
+2020-12-07T10:06:21.2788579Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 43 ) ... ok
+2020-12-07T10:06:21.2812612Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 44 ) ... ok
+2020-12-07T10:06:21.2838947Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 45 ) ... ok
+2020-12-07T10:06:21.2873506Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 46 ) ... ok
+2020-12-07T10:06:21.2900667Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 47 ) ... ok
+2020-12-07T10:06:21.2927832Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 48 ) ... ok
+2020-12-07T10:06:21.2951102Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 49 ) ... ok
+2020-12-07T10:06:21.2975914Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 50 ) ... ok
+2020-12-07T10:06:21.2999450Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 51 ) ... ok
+2020-12-07T10:06:21.3026113Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 52 ) ... ok
+2020-12-07T10:06:21.3050216Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 53 ) ... ok
+2020-12-07T10:06:21.3077515Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 54 ) ... ok
+2020-12-07T10:06:21.3105057Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 55 ) ... ok
+2020-12-07T10:06:21.3131034Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 56 ) ... ok
+2020-12-07T10:06:21.3154668Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 57 ) ... ok
+2020-12-07T10:06:21.3180475Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 58 ) ... ok
+2020-12-07T10:06:21.3205534Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 59 ) ... ok
+2020-12-07T10:06:21.3237744Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 60 ) ... ok
+2020-12-07T10:06:21.3261615Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 61 ) ... ok
+2020-12-07T10:06:21.3285061Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 62 ) ... ok
+2020-12-07T10:06:21.3308715Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 63 ) ... ok
+2020-12-07T10:06:21.3342573Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 64 ) ... ok
+2020-12-07T10:06:21.3366965Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 65 ) ... ok
+2020-12-07T10:06:21.3393914Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 66 ) ... ok
+2020-12-07T10:06:21.3421484Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 67 ) ... ok
+2020-12-07T10:06:21.3444350Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 68 ) ... ok
+2020-12-07T10:06:21.3474038Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 69 ) : expected true ... ok
+2020-12-07T10:06:21.3508287Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 70 ) ... ok
+2020-12-07T10:06:21.3544967Z  > node D:\Temp\ProcessBasic-2020-12-7-9-12-48-621-4e69.tmp\startSingleOptionDry\testApp.js arg1 arg0
+2020-12-07T10:06:21.3571223Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 71 ) ... ok
+2020-12-07T10:06:21.3595039Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 72 ) ... ok
+2020-12-07T10:06:21.3618971Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 73 ) ... ok
+2020-12-07T10:06:21.3642778Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 74 ) ... ok
+2020-12-07T10:06:21.3667389Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 75 ) ... ok
+2020-12-07T10:06:21.3691998Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 76 ) ... ok
+2020-12-07T10:06:21.3718247Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 77 ) ... ok
+2020-12-07T10:06:21.3741220Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 78 ) ... ok
+2020-12-07T10:06:21.3765443Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 79 ) ... ok
+2020-12-07T10:06:21.3797996Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 80 ) ... ok
+2020-12-07T10:06:21.3822688Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 81 ) ... ok
+2020-12-07T10:06:21.3846831Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 82 ) ... ok
+2020-12-07T10:06:21.3873771Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 83 ) ... ok
+2020-12-07T10:06:21.3896586Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 84 ) ... ok
+2020-12-07T10:06:21.3921042Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 85 ) ... ok
+2020-12-07T10:06:21.3944000Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 86 ) ... ok
+2020-12-07T10:06:21.3968481Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 87 ) ... ok
+2020-12-07T10:06:21.3991323Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 88 ) ... ok
+2020-12-07T10:06:21.4018739Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 89 ) ... ok
+2020-12-07T10:06:21.4042157Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 90 ) ... ok
+2020-12-07T10:06:21.4066659Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 91 ) ... ok
+2020-12-07T10:06:21.4089655Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 92 ) ... ok
+2020-12-07T10:06:21.4112499Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 93 ) ... ok
+2020-12-07T10:06:21.4135393Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 94 ) ... ok
+2020-12-07T10:06:21.4163486Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 95 ) ... ok
+2020-12-07T10:06:21.4193829Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 96 ) ... ok
+2020-12-07T10:06:21.4229634Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 97 ) ... ok
+2020-12-07T10:06:21.4258926Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 98 ) : expected true ... ok
+2020-12-07T10:06:21.4286739Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 99 ) ... ok
+2020-12-07T10:06:21.4326305Z  > err D:\Temp\ProcessBasic-2020-12-7-9-12-48-621-4e69.tmp\startSingleOptionDry\testApp.js arg1 arg0
+2020-12-07T10:06:21.4353754Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 100 ) ... ok
+2020-12-07T10:06:21.4379270Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 101 ) ... ok
+2020-12-07T10:06:21.4404823Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 102 ) ... ok
+2020-12-07T10:06:21.4432863Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 103 ) ... ok
+2020-12-07T10:06:21.4458701Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 104 ) ... ok
+2020-12-07T10:06:21.4485007Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 105 ) ... ok
+2020-12-07T10:06:21.4512962Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 106 ) ... ok
+2020-12-07T10:06:21.4536415Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 107 ) ... ok
+2020-12-07T10:06:21.4561091Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 108 ) ... ok
+2020-12-07T10:06:21.4584799Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 109 ) ... ok
+2020-12-07T10:06:21.4609717Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 110 ) ... ok
+2020-12-07T10:06:21.4635103Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 111 ) ... ok
+2020-12-07T10:06:21.4665184Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 112 ) ... ok
+2020-12-07T10:06:21.4701859Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 113 ) ... ok
+2020-12-07T10:06:21.4726926Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 114 ) ... ok
+2020-12-07T10:06:21.4751382Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 115 ) ... ok
+2020-12-07T10:06:21.4774399Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 116 ) ... ok
+2020-12-07T10:06:21.4801631Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 117 ) ... ok
+2020-12-07T10:06:21.4829462Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 118 ) ... ok
+2020-12-07T10:06:21.4857004Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 119 ) ... ok
+2020-12-07T10:06:21.4885172Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 120 ) ... ok
+2020-12-07T10:06:21.4912984Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 121 ) ... ok
+2020-12-07T10:06:21.4941101Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 122 ) ... ok
+2020-12-07T10:06:21.4967805Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 123 ) ... ok
+2020-12-07T10:06:21.4990757Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 124 ) ... ok
+2020-12-07T10:06:21.5017730Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 125 ) ... ok
+2020-12-07T10:06:21.5040617Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 126 ) ... ok
+2020-12-07T10:06:21.5069403Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 127 ) : expected true ... ok
+2020-12-07T10:06:21.5098561Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 128 ) ... ok
+2020-12-07T10:06:21.5144381Z  > node D:\Temp\ProcessBasic-2020-12-7-9-12-48-621-4e69.tmp\startSingleOptionDry\testApp.js arg1 "arg0"
+2020-12-07T10:06:21.5182858Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 129 ) ... ok
+2020-12-07T10:06:21.5209084Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 130 ) ... ok
+2020-12-07T10:06:21.5233329Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 131 ) ... ok
+2020-12-07T10:06:21.5261009Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 132 ) ... ok
+2020-12-07T10:06:21.5288603Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 133 ) ... ok
+2020-12-07T10:06:21.5315573Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 134 ) ... ok
+2020-12-07T10:06:21.5342298Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 135 ) ... ok
+2020-12-07T10:06:21.5368860Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 136 ) ... ok
+2020-12-07T10:06:21.5395107Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 137 ) ... ok
+2020-12-07T10:06:21.5421302Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 138 ) ... ok
+2020-12-07T10:06:21.5446685Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 139 ) ... ok
+2020-12-07T10:06:21.5471371Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 140 ) ... ok
+2020-12-07T10:06:21.5496080Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 141 ) ... ok
+2020-12-07T10:06:21.5520694Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 142 ) ... ok
+2020-12-07T10:06:21.5544082Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 143 ) ... ok
+2020-12-07T10:06:21.5571058Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 144 ) ... ok
+2020-12-07T10:06:21.5599532Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 145 ) ... ok
+2020-12-07T10:06:21.5634162Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 146 ) ... ok
+2020-12-07T10:06:21.5667416Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 147 ) ... ok
+2020-12-07T10:06:21.5693980Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 148 ) ... ok
+2020-12-07T10:06:21.5721127Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 149 ) ... ok
+2020-12-07T10:06:21.5748436Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 150 ) ... ok
+2020-12-07T10:06:21.5775082Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 151 ) ... ok
+2020-12-07T10:06:21.5801859Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 152 ) ... ok
+2020-12-07T10:06:21.5827033Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 153 ) ... ok
+2020-12-07T10:06:21.5854741Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 154 ) ... ok
+2020-12-07T10:06:21.5878936Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 155 ) ... ok
+2020-12-07T10:06:21.5910651Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 156 ) : expected true ... ok
+2020-12-07T10:06:21.5942398Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 157 ) ... ok
+2020-12-07T10:06:21.5981835Z  > err D:\Temp\ProcessBasic-2020-12-7-9-12-48-621-4e69.tmp\startSingleOptionDry\testApp.js arg1 "arg0"
+2020-12-07T10:06:21.6009469Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 158 ) ... ok
+2020-12-07T10:06:21.6034216Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 159 ) ... ok
+2020-12-07T10:06:21.6061851Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 160 ) ... ok
+2020-12-07T10:06:21.6088727Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 161 ) ... ok
+2020-12-07T10:06:21.6114970Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 162 ) ... ok
+2020-12-07T10:06:21.6154168Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 163 ) ... ok
+2020-12-07T10:06:21.6178894Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 164 ) ... ok
+2020-12-07T10:06:21.6205867Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 165 ) ... ok
+2020-12-07T10:06:21.6229060Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 166 ) ... ok
+2020-12-07T10:06:21.6252668Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 167 ) ... ok
+2020-12-07T10:06:21.6278636Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 168 ) ... ok
+2020-12-07T10:06:21.6305059Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 169 ) ... ok
+2020-12-07T10:06:21.6331327Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 170 ) ... ok
+2020-12-07T10:06:21.6357629Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 171 ) ... ok
+2020-12-07T10:06:21.6385125Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 172 ) ... ok
+2020-12-07T10:06:21.6410665Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 173 ) ... ok
+2020-12-07T10:06:21.6436724Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 174 ) ... ok
+2020-12-07T10:06:21.6516054Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 175 ) ... ok
+2020-12-07T10:06:21.6519244Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 176 ) ... ok
+2020-12-07T10:06:21.6529469Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 177 ) ... ok
+2020-12-07T10:06:21.6555261Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 178 ) ... ok
+2020-12-07T10:06:21.6580884Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 179 ) ... ok
+2020-12-07T10:06:21.6605221Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 180 ) ... ok
+2020-12-07T10:06:21.6639804Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 181 ) ... ok
+2020-12-07T10:06:21.6666313Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 182 ) ... ok
+2020-12-07T10:06:21.6693091Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 183 ) ... ok
+2020-12-07T10:06:21.6720043Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 184 ) ... ok
+2020-12-07T10:06:21.6749452Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 185 ) : expected true ... ok
+2020-12-07T10:06:21.6778688Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 186 ) ... ok
+2020-12-07T10:06:21.6815087Z  > D:\Temp\ProcessBasic-2020-12-7-9-12-48-621-4e69.tmp\startSingleOptionDry\testApp.js arg1 arg0
+2020-12-07T10:14:39.6639254Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry / mode : fork, sync : 0, deasync : 1, dry : 1, no error # 187 ) : expected true ... ok
+2020-12-07T10:14:39.6903849Z       Failed ( test routine time limit ) TestSuite::Tools.l4.process.Execution / TestRoutine::startSingleOptionDry in 500.557s
+
+*/
 
 //
 
@@ -28327,7 +28366,72 @@ function kill( test )
 
       let returned = _.process.startMinimal( o )
 
-      _.time.out( context.t1*2, () => _.process.kill( o.pnd.pid ) ) /* 1000 */
+      _.time.out( context.t1*5, () => _.process.kill( o.pnd.pid ) ) /* 1000 */ /* zzz : here! */
+
+/* xxx qqq for Vova :
+
+2020-12-05T09:48:27.5431818Z  > node D:\Temp\ProcessBasic-2020-12-5-8-52-54-59-8989.tmp\kill\testApp.js
+2020-12-05T09:48:29.5647579Z handleError
+2020-12-05T09:48:29.5676325Z TypeError: Cannot read property 'pid' of null
+2020-12-05T09:48:29.5677234Z     at processInfoGet (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2654:33)
+2020-12-05T09:48:29.5678330Z     at wConsequence.handleError (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2633:102)
+2020-12-05T09:48:29.5679464Z     at __iteration (D:\a\wProcess\wProcess\node_modules\wConsequence\proto\wtools\abase\l9\consequence\Consequence.s:3158:47)
+2020-12-05T09:48:29.5680713Z     at wConsequence.__handleResourceNow (D:\a\wProcess\wProcess\node_modules\wConsequence\proto\wtools\abase\l9\consequence\Consequence.s:3042:12)
+2020-12-05T09:48:29.5682022Z     at wConsequence.take (D:\a\wProcess\wProcess\node_modules\wConsequence\proto\wtools\abase\l9\consequence\Consequence.s:2701:8)
+2020-12-05T09:48:29.5683135Z     at Object.callback (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2878:67)
+2020-12-05T09:48:29.5684053Z     at D:\a\wProcess\wProcess\node_modules\w.process.tree.windows\lib\index.js:74:19
+2020-12-05T09:48:29.5684741Z     at Array.forEach (<anonymous>)
+2020-12-05T09:48:29.5685477Z     at D:\a\wProcess\wProcess\node_modules\w.process.tree.windows\lib\index.js:73:19
+2020-12-05T09:48:29.6667567Z --------------- uncaught asynchronous error --------------->
+2020-12-05T09:48:29.6668468Z
+2020-12-05T09:48:29.6679226Z  = Message of error#364
+2020-12-05T09:48:29.6679841Z     kill EPERM
+2020-12-05T09:48:29.6680654Z       errno : -4048
+2020-12-05T09:48:29.6681187Z       code : 'EPERM'
+2020-12-05T09:48:29.6681699Z       syscall : 'kill'
+2020-12-05T09:48:29.6682079Z
+2020-12-05T09:48:29.6682717Z  = Beautified calls stack
+2020-12-05T09:48:29.6683551Z     at process.kill (internal/process/per_thread.js:200:13)
+2020-12-05T09:48:29.6684589Z     at signalSend (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2531:15)
+2020-12-05T09:48:29.6685867Z     at wConsequence.processKill (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2568:7)
+2020-12-05T09:48:29.6687401Z     at wConsequence.take (D:\a\wProcess\wProcess\node_modules\wConsequence\proto\wtools\abase\l9\consequence\Consequence.s:2701:8)
+2020-12-05T09:48:29.6688779Z     at Object.callback (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2878:67)
+2020-12-05T09:48:29.6689972Z     at D:\a\wProcess\wProcess\node_modules\w.process.tree.windows\lib\index.js:74:19
+2020-12-05T09:48:29.6690870Z     at Array.forEach (<anonymous>)
+2020-12-05T09:48:29.6691830Z     at D:\a\wProcess\wProcess\node_modules\w.process.tree.windows\lib\index.js:73:19
+2020-12-05T09:48:29.6692579Z
+2020-12-05T09:48:29.6693555Z     at Function.signal_body [as body] (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2498:9)
+2020-12-05T09:48:29.6694760Z     at Object.kill_body (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2703:28)
+2020-12-05T09:48:29.6695958Z     at Object.kill (D:\a\wProcess\wProcess\node_modules\wTools\proto\wtools\abase\l0\l3\iRoutine.s:1070:23)
+2020-12-05T09:48:29.6697216Z     at Object.<anonymous> (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process.test\Execution.test.s:28116:49) *
+2020-12-05T09:48:29.6698733Z     at wConsequence.timeEnd2 (D:\a\wProcess\wProcess\node_modules\wConsequence\proto\wtools\abase\l9\consequence\Namespace.s:272:23)
+2020-12-05T09:48:29.6700341Z     at wConsequence.take (D:\a\wProcess\wProcess\node_modules\wConsequence\proto\wtools\abase\l9\consequence\Consequence.s:2701:8)
+2020-12-05T09:48:29.6701838Z     at timeEnd1 (D:\a\wProcess\wProcess\node_modules\wConsequence\proto\wtools\abase\l9\consequence\Namespace.s:293:9)
+2020-12-05T09:48:29.6703169Z     at Object._time (D:\a\wProcess\wProcess\node_modules\wTools\proto\wtools\abase\l0\l5\fTime.s:61:22)
+2020-12-05T09:48:29.6704456Z     at Object.time [as _time] (D:\a\wProcess\wProcess\node_modules\wprocedure\proto\wtools\abase\l8_procedure\Namespace.s:314:20)
+2020-12-05T09:48:29.6705817Z     at Timeout.time [as _onTimeout] (D:\a\wProcess\wProcess\node_modules\wTools\proto\wtools\abase\l0\l5\fTime.s:107:11)
+2020-12-05T09:48:29.6706808Z     at listOnTimeout (internal/timers.js:554:17)
+2020-12-05T09:48:29.6707605Z     at processTimers (internal/timers.js:497:7)
+2020-12-05T09:48:29.6708095Z
+2020-12-05T09:48:29.6708550Z  = Throws stack
+2020-12-05T09:48:29.6709773Z     thrown at wConsequence.__handleResourceNow @ /D/a/wProcess/wProcess/node_modules/wConsequence/proto/wtools/abase/l9/consequence/Consequence.s:3042:12
+2020-12-05T09:48:29.6711232Z     thrown at errRefine @ /D/a/wProcess/wProcess/node_modules/wTools/proto/wtools/abase/l0/l5/fErr.s:125:16
+2020-12-05T09:48:29.6711893Z
+2020-12-05T09:48:29.6712365Z  = Process
+2020-12-05T09:48:29.6712966Z     Current path : D:\a\wProcess\wProcess
+2020-12-05T09:48:29.6714468Z     Exec path : C:\hostedtoolcache\windows\node\14.15.1\x64\node.exe D:\a\wProcess\wProcess\node_modules\wTesting\proto\wtools\atop\testing\entry\Exec .run 'proto/**' rapidity:-1 verbosity:5 fails:5 s:0
+2020-12-05T09:48:29.6715451Z
+2020-12-05T09:48:29.6715883Z
+2020-12-05T09:48:29.6716682Z --------------- uncaught asynchronous error ---------------<
+2020-12-05T09:48:29.6717212Z
+2020-12-05T09:48:29.6761799Z         kill EPERM
+2020-12-05T09:48:29.6762385Z           errno : -4048
+2020-12-05T09:48:29.6762892Z           code : 'EPERM'
+2020-12-05T09:48:29.6763443Z           syscall : 'kill'
+2020-12-05T09:48:29.6773077Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::kill / mode : shell, kill child process using process id # 21 ) ... failed, throwing error
+2020-12-05T09:48:29.6806142Z       Failed ( throwing error ) TestSuite::Tools.l4.process.Execution / TestRoutine::kill in 12.528s
+
+*/
 
       returned.then( ( op ) =>
       {
@@ -28363,7 +28467,7 @@ function kill( test )
     setTimeout( () =>
     {
       console.log( 'Application timeout!' )
-    }, context.t2 ) /* 5000 */
+    }, context.t1*20 )
   }
 }
 
@@ -29813,7 +29917,7 @@ function endSignalsBasic( test )
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -29847,7 +29951,7 @@ program1:end
         console.log( `dtime:${dtime}` );
         /* if shell then parent process may ignore the signal */
         if( mode !== 'shell' )
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -29868,7 +29972,7 @@ program1:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -29905,7 +30009,7 @@ program1:end
         console.log( `dtime:${dtime}` );
         /* if shell then parent process may ignore the signal */
         if( mode !== 'shell' )
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -29926,7 +30030,7 @@ program1:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -29963,7 +30067,7 @@ program1:end
         console.log( `dtime:${dtime}` );
         /* if shell then parent process may ignore the signal */
         if( mode !== 'shell' )
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -29984,7 +30088,7 @@ program1:end
       var options = _.mapSupplement( null, o2, o3 );
       var time1 = _.time.now();
       var returned = _.process.startMinimal( options );
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -30031,7 +30135,7 @@ program1:end
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
         if( process.platform !== 'win32' )
-        test.ge( dtime, context.t1 * 10 );
+        test.ge( dtime, context.t1 * 10 ); /* yyy */
         return null;
       })
 
@@ -30052,7 +30156,7 @@ program1:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -30092,7 +30196,7 @@ deasync:end
         console.log( `dtime:${dtime}` );
         /* if shell then parent process may ignore the signal */
         if( mode !== 'shell' )
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -30128,7 +30232,7 @@ deasync:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -30162,7 +30266,7 @@ program1:end
         console.log( `dtime:${dtime}` );
         /* if shell then parent process may ignore the signal */
         if( mode !== 'shell' )
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -30183,7 +30287,7 @@ program1:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -30217,7 +30321,7 @@ program1:end
         console.log( `dtime:${dtime}` );
         /* if shell then parent process may ignore the signal */
         if( mode !== 'shell' )
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -30238,7 +30342,7 @@ program1:end
       var options = _.mapSupplement( null, o2, o3 );
       var time1;
       var returned = _.process.startMinimal( options );
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         time1 = _.time.now();
         test.identical( options.pnd.killed, false );
@@ -30275,7 +30379,7 @@ program1:end
         console.log( `dtime:${dtime}` );
         /* if shell then parent process may ignore the signal */
         if( mode !== 'shell' )
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -30296,7 +30400,7 @@ program1:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -30333,7 +30437,7 @@ program1:end
         console.log( `dtime:${dtime}` );
         /* if shell then parent process may ignore the signal */
         if( mode !== 'shell' )
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -30354,7 +30458,7 @@ program1:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -30391,7 +30495,7 @@ deasync:end
         console.log( `dtime:${dtime}` );
         /* if shell then parent process may ignore the signal */
         if( mode !== 'shell' )
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -30431,12 +30535,12 @@ deasync:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
         time1 = _.time.now();
-        _.process.terminate({ pid : options.pnd.pid, withChildren : 1 }); /* xxx : here! */
+        _.process.terminate({ pid : options.pnd.pid, withChildren : 1 }); /* zzz : here! */
         /* qqq for Yevhen : please, mark important lines and remove ansi codes like in this test case */
 
 /* xxx : windows
@@ -30527,7 +30631,7 @@ TestRoutine::endSignalsBasic / mode:spawn, terminate # 592 ) ... ok
 
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -30548,7 +30652,7 @@ TestRoutine::endSignalsBasic / mode:spawn, terminate # 592 ) ... ok
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -30590,7 +30694,7 @@ TestRoutine::endSignalsBasic / mode:spawn, terminate # 592 ) ... ok
 
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -30611,7 +30715,7 @@ TestRoutine::endSignalsBasic / mode:spawn, terminate # 592 ) ... ok
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -30651,7 +30755,7 @@ sleep:begin
 
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -30672,12 +30776,12 @@ sleep:begin
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
         time1 = _.time.now();
-        _.process.terminate({ pid : options.pnd.pid, withChildren : 1, timeOut : context.t1 * 4 });
+        _.process.terminate({ pid : options.pnd.pid, withChildren : 1, timeOut : context.t1 * 5 });
         return null;
       })
       returned.finally( function()
@@ -30714,7 +30818,7 @@ sleep:begin
         console.log( `dtime:${dtime}` );
         /* kill without waiting in njs on Windows */
         if( process.platform !== 'win32' )
-        test.ge( dtime, context.t1 * 4 );
+        test.ge( dtime, context.t1 * 5 ); /* yyy */
         return null;
       })
 
@@ -30735,7 +30839,7 @@ sleep:begin
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -30779,7 +30883,7 @@ deasync:begin
 
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -30819,7 +30923,7 @@ deasync:begin
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -30858,7 +30962,7 @@ deasync:begin
 
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -30879,7 +30983,7 @@ deasync:begin
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -30922,7 +31026,7 @@ deasync:begin
 
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -30943,7 +31047,7 @@ deasync:begin
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -30983,7 +31087,7 @@ sleep:begin
 
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -31004,7 +31108,7 @@ sleep:begin
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -31067,7 +31171,7 @@ sleep:begin
         console.log( `dtime:${dtime}` );
         /* if shell then parent process may ignore the signal */
         if( mode !== 'shell' )
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -31088,7 +31192,7 @@ sleep:begin
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -31131,7 +31235,7 @@ deasync:begin
 
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -31167,7 +31271,7 @@ deasync:begin
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -31206,7 +31310,7 @@ deasync:begin
 
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -31227,7 +31331,7 @@ deasync:begin
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -31273,7 +31377,7 @@ program1:end
 
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -31294,7 +31398,7 @@ program1:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -31345,7 +31449,7 @@ program1:end
         console.log( `dtime:${dtime}` );
         /* if shell then parent process may ignore the signal */
         if( mode !== 'shell' )
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -31366,7 +31470,7 @@ program1:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -31417,7 +31521,7 @@ program1:end
         console.log( `dtime:${dtime}` );
         /* if shell then parent process may ignore the signal */
         if( mode !== 'shell' )
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -31438,7 +31542,7 @@ program1:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -31489,7 +31593,7 @@ deasync:end
         console.log( `dtime:${dtime}` );
         /* if shell then parent process may ignore the signal */
         if( mode !== 'shell' )
-        test.le( dtime, context.t1 * 2 );
+        test.le( dtime, context.t1 * 3 );
         return null;
       })
 
@@ -31520,13 +31624,13 @@ deasync:end
       _.process._exitHandlerRepair();
     }
 
-    setTimeout( () => { console.log( 'program1:end' ) }, context.t1 * 8 );
+    setTimeout( () => { console.log( 'program1:end' ) }, context.t1 * 13 );
 
     if( withSleep )
-    sleep( context.t1 * 10 );
+    sleep( context.t1 * 20 ); /* yyy */
 
     if( withDeasync )
-    deasync( context.t1 * 10 );
+    deasync( context.t1 * 20 );
 
     function onTime()
     {
@@ -31630,7 +31734,7 @@ function endSignalsOnExit( test )
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -31705,7 +31809,7 @@ exit:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -31773,7 +31877,7 @@ exit:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -31841,7 +31945,7 @@ exit:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -31861,12 +31965,68 @@ exit:end
 `program1:begin
 `
 
-        test.identical( options.output, exp );
+        test.identical( options.output, exp ); /* zzz : here */
         test.identical( _.strCount( options.output, 'exit:' ), process.platform === 'win32' ? 0 : 1 );
         test.identical( options.ended, true );
         test.identical( options.state, 'terminated' );
         test.identical( options.error, null );
         test.identical( options.pnd.killed, false );
+
+/* xxx : phantom fail on windows
+2020-12-07T10:26:15.8037454Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsOnExit / mode:spawn, withExitHandler:1, withTools:1, terminate, native descriptor # 148 ) ... ok
+2020-12-07T10:26:15.8062866Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsOnExit / mode:spawn, withExitHandler:1, withTools:1, terminate, native descriptor # 149 ) : expected true ... ok
+2020-12-07T10:26:21.1509904Z program1:end
+2020-12-07T10:26:21.1556301Z exit:end
+2020-12-07T10:26:21.1784481Z         - got :
+2020-12-07T10:26:21.1785219Z           'program1:begin
+2020-12-07T10:26:21.1785816Z           program1:end
+2020-12-07T10:26:21.1786366Z           exit:end
+2020-12-07T10:26:21.1786829Z           '
+2020-12-07T10:26:21.1787344Z         - expected :
+2020-12-07T10:26:21.1787897Z           'program1:begin
+2020-12-07T10:26:21.1788403Z           '
+2020-12-07T10:26:21.1788898Z         - difference :
+2020-12-07T10:26:21.1789476Z           'program1:begin
+2020-12-07T10:26:21.1789972Z           *
+2020-12-07T10:26:21.1818868Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsOnExit / mode:spawn, withExitHandler:1, withTools:1, terminate, native descriptor # 150 ) ... failed
+2020-12-07T10:26:21.1848319Z         - got :
+2020-12-07T10:26:21.1848919Z           1
+2020-12-07T10:26:21.1849449Z         - expected :
+2020-12-07T10:26:21.1849941Z           0
+2020-12-07T10:26:21.1850471Z         - difference :
+2020-12-07T10:26:21.1850977Z           *
+2020-12-07T10:26:21.1882816Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsOnExit / mode:spawn, withExitHandler:1, withTools:1, terminate, native descriptor # 151 ) ... failed
+2020-12-07T10:26:21.1908278Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsOnExit / mode:spawn, withExitHandler:1, withTools:1, terminate, native descriptor # 152 ) ... ok
+2020-12-07T10:26:21.1934080Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsOnExit / mode:spawn, withExitHandler:1, withTools:1, terminate, native descriptor # 153 ) ... ok
+2020-12-07T10:26:21.1966654Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsOnExit / mode:spawn, withExitHandler:1, withTools:1, terminate, native descriptor # 154 ) ... ok
+2020-12-07T10:26:21.1992587Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsOnExit / mode:spawn, withExitHandler:1, withTools:1, terminate, native descriptor # 155 ) ... ok
+2020-12-07T10:26:21.2023568Z         - got :
+2020-12-07T10:26:21.2024101Z           0
+2020-12-07T10:26:21.2024636Z         - expected :
+2020-12-07T10:26:21.2025120Z           1
+2020-12-07T10:26:21.2025651Z         - difference :
+2020-12-07T10:26:21.2026149Z           *
+2020-12-07T10:26:21.2053075Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsOnExit / mode:spawn, withExitHandler:1, withTools:1, terminate, native descriptor # 156 ) ... failed
+2020-12-07T10:26:21.2080646Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsOnExit / mode:spawn, withExitHandler:1, withTools:1, terminate, native descriptor # 157 ) ... ok
+2020-12-07T10:26:21.2103133Z         - got :
+2020-12-07T10:26:21.2103680Z           'normal'
+2020-12-07T10:26:21.2104219Z         - expected :
+2020-12-07T10:26:21.2104733Z           'code'
+2020-12-07T10:26:21.2105267Z         - difference :
+2020-12-07T10:26:21.2105763Z           '*
+2020-12-07T10:26:21.2135363Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsOnExit / mode:spawn, withExitHandler:1, withTools:1, terminate, native descriptor # 158 ) ... failed
+2020-12-07T10:26:21.2171710Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsOnExit / mode:spawn, withExitHandler:1, withTools:1, terminate, native descriptor # 159 ) ... ok
+2020-12-07T10:26:21.2190674Z         - got :
+2020-12-07T10:26:21.2191231Z           0
+2020-12-07T10:26:21.2191777Z         - expected :
+2020-12-07T10:26:21.2192288Z           1
+2020-12-07T10:26:21.2192785Z         - difference :
+2020-12-07T10:26:21.2193312Z           *
+2020-12-07T10:26:21.2219044Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsOnExit / mode:spawn, withExitHandler:1, withTools:1, terminate, native descriptor # 160 ) ... failed
+2020-12-07T10:26:21.2345527Z         Test routine TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsOnExit was canceled!
+2020-12-07T10:26:21.2351649Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsOnExit / mode:spawn, withExitHandler:1, withTools:1, terminate, native descriptor # 161 ) ... failed, throwing error
+2020-12-07T10:26:21.2377279Z       Failed ( throwing error ) TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsOnExit in 74.454s
+*/
 
         if( process.platform === 'win32' )
         {
@@ -31922,7 +32082,7 @@ exit:end
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -31988,7 +32148,7 @@ Killed
       var options = _.mapSupplement( null, o2, o3 );
       var returned = _.process.startMinimal( options );
       var time1;
-      _.time.out( context.t1 * 4, () =>
+      _.time.out( context.t1 * 5, () =>
       {
         test.identical( options.pnd.killed, false );
         test.true( _.process.isAlive( options.pnd.pid ) );
@@ -32064,7 +32224,7 @@ Killed
     if( withExitHandler )
     process.once( 'exit', onExit );
 
-    setTimeout( () => { console.log( 'program1:end' ) }, context.t1 * 8 );
+    setTimeout( () => { console.log( 'program1:end' ) }, context.t1 * 13 );
 
     function onTime()
     {
@@ -32653,7 +32813,6 @@ function terminate( test )
       o.pnd.on( 'message', () =>
       {
         _.process.terminate({ pnd : o.pnd, timeOut : context.t1*4 });
-        // _.process.terminate({ pnd : o.pnd, timeOut : 1 }); /* yyy */
       })
 
       ready.then( ( op ) =>
@@ -32669,7 +32828,7 @@ function terminate( test )
         else
         {
           test.identical( op.exitCode, null );
-          test.identical( op.exitSignal, 'SIGTERM' ); /* yyy : sometimes SIGKILL */
+          test.identical( op.exitSignal, 'SIGTERM' );
           test.identical( op.ended, true );
           test.true( _.strHas( op.output, 'SIGTERM' ) );
           test.true( !_.strHas( op.output, 'Application timeout!' ) );
@@ -36856,7 +37015,7 @@ var Proto =
     startMinimalOptionWhenTime,
     startMinimalOptionTimeOut,
     startSingleAfterDeath,
-    // startSingleAfterDeathTerminatingMain, /* qqq for Vova : fix phantom issue please */
+    // startSingleAfterDeathTerminatingMain, /* qqq for Vova : write good stable test */
     startSingleAfterDeathOutput,
 
     // detaching
