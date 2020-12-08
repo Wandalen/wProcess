@@ -455,9 +455,9 @@ function input( test )
     let programPath = a.program( testApp2 );
     let o =
     {
-      execPath : programPath,
+      execPath : 'node ' + programPath,
       args : [ '.will.yml' ],
-      mode : 'fork',
+      mode : 'spawn',
       throwingExitCode : 1,
       outputCollecting : 1,
       ipc : 1,
@@ -529,8 +529,8 @@ function input( test )
   {
     let o =
     {
-      execPath : programPath,
-      mode : 'fork',
+      execPath : 'node ' + programPath,
+      mode : 'spawn',
       throwingExitCode : 1,
       outputCollecting : 1,
       ipc : 1,
@@ -639,9 +639,9 @@ function inputWithNotDefaultDelimeters( test )
     let programPath = a.program( testApp2 );
     let o =
     {
-      execPath : programPath,
+      execPath : 'node ' + programPath,
       args : [ '.will.yml' ],
-      mode : 'fork',
+      mode : 'spawn',
       throwingExitCode : 1,
       outputCollecting : 1,
       ipc : 1,
@@ -732,8 +732,8 @@ function inputWithNotDefaultDelimeters( test )
   {
     let o =
     {
-      execPath : programPath,
-      mode : 'fork',
+      execPath : 'node ' + programPath,
+      mode : 'spawn',
       throwingExitCode : 1,
       outputCollecting : 1,
       ipc : 1,
