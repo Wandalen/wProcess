@@ -354,11 +354,12 @@ function startMinimal_body( o )
 
     /* */
 
-    // let o3 = _.Process.Retype( o );
+    // xxx
+    // _.assert( _.mapIs( o ) );
+    // let o3 = _.ProcessMinimal.Retype( o );
     // _.assert( o3 === o );
     // _.assert( !Object.isExtensible( o ) );
     // debugger;
-    // xxx
 
     /* */
 
@@ -468,7 +469,7 @@ function startMinimal_body( o )
         o.ready.deasync();
         o.ready.thenGive( 1 );
         if( o.when.delay )
-        _.time._sleep( o.when.delay ); /* xxx : temp experiment */
+        _.time.sleep( o.when.delay );
         run2();
       }
       catch( err )
@@ -1066,7 +1067,7 @@ function startMinimal_body( o )
     o2.windowsHide = !!o.hiding;
     if( o.streamSizeLimit )
     o2.maxBuffer = o.streamSizeLimit;
-    debugger;
+
     if( process.platform !== 'win32' )
     {
       o2.uid = o.uid;
@@ -1149,6 +1150,10 @@ function startMinimal_body( o )
 
     if( _.bufferNodeIs( data ) )
     data = data.toString( 'utf8' );
+
+    if( !_.strIs( data ) )
+    data = String( data );
+
     if( o.outputGraying )
     data = StripAnsi( data );
 
@@ -1163,25 +1168,37 @@ function startMinimal_body( o )
     if( !o.outputPiping )
     return;
 
-    data = _.strRemoveEnd( data, '\n' );
+    /* yyy qqq for Yevhen : cover and complete */
+    // data = _.strRemoveEnd( data, '\n' );
+
+    let splits;
+    if( o.outputPrefixing || ( channel === 'err' && o.outputColoring.err ) || ( channel === 'out' && o.outputColoring.out ) )
+    splits = data.split( '\n' );
 
     /* qqq for Yevhen : changed how option outputPrefixing works | aaa : Done. */
     if( o.outputPrefixing )
     {
       let prefix = channel === 'err' ? _errPrefix : _outPrefix;
-      data = prefix + _.strLinesIndentation( data, prefix );
+      splits = splits.map( ( split, i ) => ( i < splits.length-1 || split.length ) ? prefix + split : split );
+      // data = prefix + _.strLinesIndentation( data, prefix );
     }
 
     if( channel === 'err' )
     {
       if( o.outputColoring.err )
-      data = _.ct.format( data, 'pipe.negative' );
+      splits = splits.map( ( data ) => data ? _.ct.format( data, 'pipe.negative' ) : data );
+      // data = _.ct.format( data, 'pipe.negative' );
     }
-    else
+    else if( channel === 'out' )
     {
       if( o.outputColoring.out )
-      data = _.ct.format( data, 'pipe.neutral' );
+      splits = splits.map( ( data ) => data ? _.ct.format( data, 'pipe.neutral' ) : data );
+      // data = _.ct.format( data, 'pipe.neutral' );
     }
+    else _.assert( 0 );
+
+    if( splits !== undefined )
+    data = splits.join( '\n' )
 
     log( data, channel );
   }
@@ -1196,8 +1213,23 @@ function startMinimal_body( o )
     if( msg === undefined )
     return;
 
+    if( !_.strIs( msg ) )
+    {
+      msg = String( msg );
+      if( !_.strEnds( msg, '\n' ) )
+      msg = msg + '\n';
+    }
+
     if( o.outputAdditive )
     {
+      if( _.strEnds( msg, '\n' ) )
+      {
+        msg = _.strRemoveEnd( msg, '\n' );
+      }
+      else
+      {
+        /* xxx yyy qqq for Yevhen : not implemeted yet */
+      }
       if( channel === 'err' )
       o.logger.error( msg );
       else
@@ -1205,9 +1237,13 @@ function startMinimal_body( o )
     }
     else
     {
-      _decoratedOutOutput += msg + '\n';
+      _decoratedOutOutput += msg;
       if( channel === 'err' )
-      _decoratedErrOutput += msg + '\n';
+      _decoratedErrOutput += msg;
+      /* yyy qqq for Yevhen : cover */
+      // _decoratedOutOutput += msg + '\n';
+      // if( channel === 'err' )
+      // _decoratedErrOutput += msg + '\n';
     }
 
   }
@@ -1346,7 +1382,7 @@ function startSingle_body( o )
         o.ready.deasync();
         o.ready.thenGive( 1 );
         if( o.when.delay )
-        _.time._sleep( o.when.delay ); /* xxx : temp experiment */
+        _.time.sleep( o.when.delay );
         run2();
       }
       catch( err )
@@ -1408,7 +1444,7 @@ function startSingle_body( o )
       when : null,
       sessionId : null
     }
-    let locals = { toolsPath, o : _.mapBut( o, excludeOptions ) };
+    let locals = { toolsPath, o : _.mapBut( o, excludeOptions ), parentPid : process.pid };
     let secondaryProcessRoutine = _.program.preform({ routine : afterDeathSecondaryProcess, locals })
     let secondaryFilePath = _.process.tempOpen({ sourceCode : secondaryProcessRoutine.sourceCode });
 
@@ -1431,10 +1467,57 @@ function startSingle_body( o )
     let _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
-    process.on( 'message', () =>
+    // let ipc = require( ipcPath );
+
+    let ready = _.Consequence();
+    let terminated = false;
+
+    waitForParent( 1000 );
+
+    // setupIpc();
+
+    ready.then( () =>
     {
-      process.on( 'disconnect', () => _.process.startMultiple( o ) )
+      // if( ipc.server.stop )
+      // ipc.server.stop();
+
+      return _.process.startMultiple( o );
     })
+
+    /* */
+
+    function waitForParent( period )
+    {
+      return _.time.periodic( period, () =>
+      {
+        if( terminated )
+        return;
+        if( _.process.isAlive( parentPid ) )
+        return true;
+        ready.take( true )
+        debugger
+        terminated = true;
+      })
+    }
+
+    // function setupIpc()
+    // {
+    //   ipc.config.id = 'afterdeath.' + process.pid;
+    //   ipc.config.retry= 1500;
+    //   ipc.config.silent = true;
+    //   ipc.serve( () =>
+    //   {
+    //     ipc.server.on( 'exit', () =>
+    //     {
+    //       waitForParent( 150 );
+    //     });
+    //   });
+
+    //   ipc.server.start();
+
+    //   process.send( ipc.config.id )
+    // }
+
   }
 
   /* */
@@ -1443,9 +1526,32 @@ function startSingle_body( o )
   {
     o.conStart.give( function( err, op )
     {
-      if( !err )
-      o.pnd.send( true );
-      this.take( err, op );
+      if( err )
+      return this.error( err );
+
+      o.disconnect();
+
+      // let ipc = require( 'node-ipc' );
+
+      // o.pnd.on( 'message', ( ipcHostId ) =>
+      // {
+      //   o.disconnect();
+
+      //   ipc.config.id = 'afterdeath.parent:' + process.pid;
+      //   ipc.config.retry = 1500;
+      //   ipc.config.silent = true;
+
+      //   _.process.on( 'exit', () =>
+      //   {
+      //      ipc.connectTo( ipcHostId, () =>
+      //      {
+      //       ipc.of[ ipcHostId ].emit( 'exit', true );
+      //       ipc.disconnect( ipcHostId );
+      //      });
+      //   })
+      // })
+
+      this.take( op );
     })
   }
 
@@ -1671,6 +1777,13 @@ function startMultiple_body( o )
     _.assert( _.boolLike( o.outputAdditive ) );
     o.currentPath = o.currentPath || _.path.current();
 
+    // xxx
+    // _.assert( _.mapIs( o ) );
+    // let o3 = _.ProcessMultiple.Retype( o );
+    // _.assert( o3 === o );
+    // _.assert( !Object.isExtensible( o ) );
+    // debugger;
+
     o.sessions = [];
     o.state = 'initial'; /* `initial`, `starting`, `started`, `terminating`, `terminated`, `disconnected` */
     o.exitReason = null;
@@ -1773,8 +1886,8 @@ function startMultiple_body( o )
       o.sessions.push( o2 );
     }
 
-    /* yyy : use abstract algorithm of consequence */
     /* xxx : introduce concurrent.limit */
+    /* xxx qqq : cover sessionsRun */
 
     let o2 = _.sessionsRun
     ({
@@ -2129,7 +2242,6 @@ function startNjs_body( o )
 
   if( interpreterArgs !== '' )
   o.interpreterArgs = _.arrayAppendArray( o.interpreterArgs, interpreterArgs );
-  // o.interpreterArgs = o.interpreterArgs === null ? interpreterArgs : o.interpreterArgs.concat( interpreterArgs );
 
   if( o.mode === 'spawn' || o.mode === 'shell' )
   execPath = _.strConcat([ 'node', execPath ]);
@@ -2427,7 +2539,7 @@ function signal_body( o )
 
   ready.then( processKill );
   ready.then( handleResult );
-  ready.catch( handleError );
+  ready.catch( handleError1 );
 
   return end();
 
@@ -2462,11 +2574,12 @@ function signal_body( o )
     }
     catch( err )
     {
+      console.error( 'signalSend.error!' ); /* xxx : remove later */
       if( o.ignoringErrorEsrch && err.code === 'ESRCH' )
       return true;
       if( o.ignoringErrorPerm && err.code === 'EPERM' )
       return true;
-      throw err;
+      throw handleError2( p, err );
     }
 
     let con = waitForDeath( p );
@@ -2554,15 +2667,32 @@ function signal_body( o )
 
   /* - */
 
-  function handleError( err )
+  function handleError1( err )
   {
+    console.log( 'handleError1' ); /* xxx : remove later */
+    throw handleError2( o, err );
+  }
+
+  /* - */
+
+  function handleError2( p, err )
+  {
+    console.log( 'handleError2' ); /* xxx : remove later */
     // if( err.code === 'EINVAL' )
-    // throw _.err( err, '\nAn invalid signal was specified:', _.strQuote( o.signal ) )
+    // err = _.err( err, '\nAn invalid signal was specified:', _.strQuote( o.signal ) )
     if( err.code === 'EPERM' )
-    throw _.err( err, `\nCurrent process does not have permission to kill target process: ${o.pid}`, processInfoGet( o ) );
+    err = _.err( err, `\nCurrent process does not have permission to kill target process: ${o.pid}` );
     if( err.code === 'ESRCH' )
-    throw _.err( err, `\nTarget process does not exist.`, processInfoGet( o ) );
-    throw _.err( err );
+    err = _.err( err, `\nTarget process does not exist.` );
+
+    if( !err.processInfo && p )
+    {
+      let processInfo = processInfoGet( p );
+      _._errFields( err, { processInfo : processInfo } )
+      _.err( err, processInfo );
+    }
+
+    return _.err( err );
   }
 
   /* - */
@@ -2571,14 +2701,22 @@ function signal_body( o )
   {
     let info;
 
-    if( p.pnd )
+    try
     {
-      info = `\nPID : ${p.pnd.pid}\nExecPath : ${p.pnd.spawnfile}\nArgs : ${p.pnd.spawnargs}`; /* qqq for Yevhen : seems not covered */
+      if( p.pnd )
+      {
+        info = `\nPID : ${p.pnd.pid}\nExecPath : ${p.pnd.spawnfile}\nArgs : ${p.pnd.spawnargs}`; /* qqq for Yevhen : seems not covered */
+      }
+      else
+      {
+        let execPath = _.process.execPathOf({ pid : p.pid, sync : 1, throwing : 0 });
+        info = `\nPID : ${p.pid}\nExecPath : ${execPath}`; /* qqq for Yevhen : seems not covered */
+      }
     }
-    else
+    catch( err )
     {
-      let execPath = _.process.execPathOf({ pid : p.pid, sync : 1, throwing : 0 });
-      info = `\nPID : ${p.pnd.pid}\nExecPath: ${execPath}`; /* qqq for Yevhen : seems not covered */
+      console.error( err );
+      info = `\nFailed to get ExecPath of proces with pid::${p.pnd.pid}`
     }
 
     return info;
@@ -2796,7 +2934,7 @@ function children( o )
     let con = new _.Consequence();
     if( o.format === 'list' )
     {
-      WindowsProcessTree.getProcessList( o.pid, ( result ) => con.take( result ) )
+      WindowsProcessTree.getProcessList( o.pid, ( result ) => con.take( result ) );
     }
     else
     {

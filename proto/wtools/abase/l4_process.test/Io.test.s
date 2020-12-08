@@ -42,366 +42,1448 @@ function suiteEnd()
 //
 // --
 
-function inputReadToWithArguments( test )
+function input( test )
 {
-  /* read input to prevent side effect from testing input */
-  _.process.inputReadTo( { r : true }, { r : 'r' } );
+  let context = this;
+  let a = test.assetFor( false );
+  let programPath = a.program( testApp );
 
   /* */
 
-  test.case = 'dst - empty map';
-  var dst = {};
-  var namesMap = {};
-  var got = _.process.inputReadTo( dst, namesMap );
-  test.identical( dst, {} );
-  test.identical( got, {} );
-  test.true( got !== dst );
+  a.ready.then( () =>
+  {
+    test.case = 'without passed arguments';
+    let o = optionsMake();
+    let returned = _.process.startMinimal( o );
 
-  test.case = 'dst - empty map, namesMap - not empty';
-  var dst = {};
-  var namesMap = { routine : 'r' };
-  var got = _.process.inputReadTo( dst, namesMap );
-  test.identical( dst, {} );
-  test.identical( got, {} );
-  test.true( got !== dst );
+    o.pnd.on( 'message', ( op ) =>
+    {
+      let exp =
+      {
+        keyValDelimeter : ':',
+        commandsDelimeter : ';',
+        caching : true,
+        parsingArrays : true,
+        interpreterPath : process.argv[ 0 ],
+        interpreterArgs : [],
+        scriptPath : a.abs( 'testApp.js' ),
+        scriptArgs : [],
+        interpreterArgsStrings : '',
+        scriptArgsString : '',
+        subject : '',
+        map : {},
+        subjects : [],
+        maps : [],
+        original : '',
+      };
+      test.identical( op, exp );
+    });
 
-  /* */
-
-  test.case = 'dst - map with boolean';
-  var dst = { r : true };
-  var namesMap = {};
-  var got = _.process.inputReadTo( dst, namesMap );
-  test.identical( dst, { r : true } );
-  test.identical( got, {} );
-  test.true( got !== dst );
-
-  test.case = 'dst - map with number';
-  var dst = { r : 0 };
-  var namesMap = {};
-  var got = _.process.inputReadTo( dst, namesMap );
-  test.identical( dst, { r : 0 } );
-  test.identical( got, {} );
-  test.true( got !== dst );
-
-  test.case = 'dst - null';
-  var dst = { r : null };
-  var namesMap = {};
-  var got = _.process.inputReadTo( dst, namesMap );
-  test.identical( dst, { r : null } );
-  test.identical( got, {} );
-  test.true( got !== dst );
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      return null;
+    });
+  });
 
   /* */
 
-  test.case = 'dst - map with boolean';
-  var dst = { r : true };
-  var namesMap = { routine : 'r' };
-  var got = _.process.inputReadTo( dst, namesMap );
-  test.identical( dst, { r : true } );
-  test.identical( got, {} );
-  test.true( got !== dst );
+  a.ready.then( () =>
+  {
+    test.case = 'only subject';
+    let o = optionsMake();
+    o.args = [ '.will.yml' ];
+    let returned = _.process.startMinimal( o );
 
-  test.case = 'dst - map with number';
-  var dst = { r : 0 };
-  var namesMap = { routine : 'r' };
-  var got = _.process.inputReadTo( dst, namesMap );
-  test.identical( dst, { r : 0 } );
-  test.identical( got, {} );
-  test.true( got !== dst );
+    o.pnd.on( 'message', ( op ) =>
+    {
+      let exp =
+      {
+        keyValDelimeter : ':',
+        commandsDelimeter : ';',
+        caching : true,
+        parsingArrays : true,
+        interpreterPath : process.argv[ 0 ],
+        interpreterArgs : [],
+        scriptPath : a.abs( 'testApp.js' ),
+        scriptArgs : [ '.will.yml' ],
+        interpreterArgsStrings : '',
+        scriptArgsString : '.will.yml',
+        subject : '.will.yml',
+        map : {},
+        subjects : [ '.will.yml' ],
+        maps : [ {} ],
+        original : '.will.yml',
+      };
+      test.identical( op, exp );
+    });
 
-  test.case = 'dst - null';
-  var dst = { r : null };
-  var namesMap = { routine : 'r' };
-  var got = _.process.inputReadTo( dst, namesMap );
-  test.identical( dst, { r : null } );
-  test.identical( got, {} );
-  test.true( got !== dst );
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      return null;
+    });
+  });
 
   /* */
 
-  test.case = 'dst - null, namesMap - array';
-  var dst = { r : null };
-  var namesMap = [ 'r', 'a' ];
-  var got = _.process.inputReadTo( dst, namesMap );
-  test.identical( dst, { r : null } );
-  test.identical( got, {} );
-  test.true( got !== dst );
+  a.ready.then( () =>
+  {
+    test.case = 'a few subjects in single command';
+    let o = optionsMake();
+    o.args = [ '.will.yml', 'file' ];
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      let exp =
+      {
+        keyValDelimeter : ':',
+        commandsDelimeter : ';',
+        caching : true,
+        parsingArrays : true,
+        interpreterPath : process.argv[ 0 ],
+        interpreterArgs : [],
+        scriptPath : a.abs( 'testApp.js' ),
+        scriptArgs : [ '.will.yml', 'file' ],
+        interpreterArgsStrings : '',
+        scriptArgsString : '.will.yml file',
+        subject : '.will.yml file',
+        map : {},
+        subjects : [ '.will.yml file' ],
+        maps : [ {} ],
+        original : '.will.yml file',
+      };
+      test.identical( op, exp );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      return null;
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'single option';
+    let o = optionsMake();
+    o.args = [ 'v:5' ];
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      let exp =
+      {
+        keyValDelimeter : ':',
+        commandsDelimeter : ';',
+        caching : true,
+        parsingArrays : true,
+        interpreterPath : process.argv[ 0 ],
+        interpreterArgs : [],
+        scriptPath : a.abs( 'testApp.js' ),
+        scriptArgs : [ 'v:5' ],
+        interpreterArgsStrings : '',
+        scriptArgsString : 'v:5',
+        subject : '',
+        map : { v : 5 },
+        subjects : [ '' ],
+        maps : [ { v : 5 } ],
+        original : 'v:5',
+      };
+      test.identical( op, exp );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      return null;
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'a few options';
+    let o = optionsMake();
+    o.args = [ 'v:5', 'r:some', 'a:1' ];
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      let exp =
+      {
+        keyValDelimeter : ':',
+        commandsDelimeter : ';',
+        caching : true,
+        parsingArrays : true,
+        interpreterPath : process.argv[ 0 ],
+        interpreterArgs : [],
+        scriptPath : a.abs( 'testApp.js' ),
+        scriptArgs : [ 'v:5', 'r:some', 'a:1' ],
+        interpreterArgsStrings : '',
+        scriptArgsString : 'v:5 r:some a:1',
+        subject : '',
+        map : { v : 5, r : 'some', a : 1 },
+        subjects : [ '' ],
+        maps : [ { v : 5, r : 'some', a : 1 } ],
+        original : 'v:5 r:some a:1',
+      };
+      test.identical( op, exp );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      return null;
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'a few subjects and a few options in command';
+    let o = optionsMake();
+    o.args = [ '.will.yml', 'file', 'v:5', 'r:some', 'a:1' ];
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      let exp =
+      {
+        keyValDelimeter : ':',
+        commandsDelimeter : ';',
+        caching : true,
+        parsingArrays : true,
+        interpreterPath : process.argv[ 0 ],
+        interpreterArgs : [],
+        scriptPath : a.abs( 'testApp.js' ),
+        scriptArgs : [ '.will.yml', 'file', 'v:5', 'r:some', 'a:1' ],
+        interpreterArgsStrings : '',
+        scriptArgsString : '.will.yml file v:5 r:some a:1',
+        subject : '.will.yml file',
+        map : { v : 5, r : 'some', a : 1 },
+        subjects : [ '.will.yml file' ],
+        maps : [ { v : 5, r : 'some', a : 1 } ],
+        original : '.will.yml file v:5 r:some a:1',
+      };
+      test.identical( op, exp );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      return null;
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'two commands without commandsDelimeter, subjects and options';
+    let o = optionsMake();
+    o.args = [ '.will.yml', 'v:5', 'r:some', 'file', 'a:1' ];
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      let exp =
+      {
+        keyValDelimeter : ':',
+        commandsDelimeter : ';',
+        caching : true,
+        parsingArrays : true,
+        interpreterPath : process.argv[ 0 ],
+        interpreterArgs : [],
+        scriptPath : a.abs( 'testApp.js' ),
+        scriptArgs : [ '.will.yml', 'v:5', 'r:some', 'file', 'a:1' ],
+        interpreterArgsStrings : '',
+        scriptArgsString : '.will.yml v:5 r:some file a:1',
+        subject : '.will.yml',
+        map : { v : 5, r : 'some file', a : 1 },
+        subjects : [ '.will.yml' ],
+        maps : [ { v : 5, r : 'some file', a : 1 } ],
+        original : '.will.yml v:5 r:some file a:1',
+      };
+      test.identical( op, exp );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      return null;
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'two commands with commandsDelimeter, subjects and options';
+    let o = optionsMake();
+    o.args = [ '.will.yml', 'v:5', 'r:some', ';', 'file', 'a:1' ];
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      let exp =
+      {
+        keyValDelimeter : ':',
+        commandsDelimeter : ';',
+        caching : true,
+        parsingArrays : true,
+        interpreterPath : process.argv[ 0 ],
+        interpreterArgs : [],
+        scriptPath : a.abs( 'testApp.js' ),
+        scriptArgs : [ '.will.yml', 'v:5', 'r:some', ';', 'file', 'a:1' ],
+        interpreterArgsStrings : '',
+        scriptArgsString : '.will.yml v:5 r:some ; file a:1',
+        subject : '.will.yml',
+        map : { v : 5, r : 'some' },
+        subjects : [ '.will.yml', 'file' ],
+        maps : [ { v : 5, r : 'some' }, { a : 1 } ],
+        original : '.will.yml v:5 r:some ; file a:1',
+      };
+      test.identical( op, exp );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      return null;
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'two commands with commandsDelimeter, args as single string';
+    let o = optionsMake();
+    o.args = [ '.will.yml v:5 r:some ; file a:1' ];
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      let exp =
+      {
+        keyValDelimeter : ':',
+        commandsDelimeter : ';',
+        caching : true,
+        parsingArrays : true,
+        interpreterPath : process.argv[ 0 ],
+        interpreterArgs : [],
+        scriptPath : a.abs( 'testApp.js' ),
+        scriptArgs : [ '.will.yml v:5 r:some ; file a:1' ],
+        interpreterArgsStrings : '',
+        scriptArgsString : '".will.yml v:5 r:some ; file a:1"',
+        subject : '.will.yml',
+        map : { v : 5, r : 'some' },
+        subjects : [ '.will.yml', 'file' ],
+        maps : [ { v : 5, r : 'some' }, { a : 1 } ],
+        original : '".will.yml v:5 r:some ; file a:1"',
+      };
+      test.identical( op, exp );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      return null;
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'subject - nativized path';
+    let o = optionsMake();
+    o.args = [ _.path.nativize( a.abs( '.will.yml' ) ) ];
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      let exp =
+      {
+        keyValDelimeter : ':',
+        commandsDelimeter : ';',
+        caching : true,
+        parsingArrays : true,
+        interpreterPath : process.argv[ 0 ],
+        interpreterArgs : [],
+        scriptPath : a.abs( 'testApp.js' ),
+        scriptArgs : [ _.path.nativize( a.abs( '.will.yml' ) ) ],
+        interpreterArgsStrings : '',
+        scriptArgsString : _.path.nativize( a.abs( '.will.yml' ) ),
+        subject : _.path.nativize( a.abs( '.will.yml' ) ),
+        map : {},
+        subjects : [ _.path.nativize( a.abs( '.will.yml' ) ) ],
+        maps : [ {} ],
+        original : _.path.nativize( a.abs( '.will.yml' ) ),
+      };
+      test.identical( op, exp );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      return null;
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'two calls of routine, should return cached result';
+    let programPath = a.program( testApp2 );
+    let o =
+    {
+      execPath : 'node ' + programPath,
+      args : [ '.will.yml' ],
+      mode : 'spawn',
+      throwingExitCode : 1,
+      outputCollecting : 1,
+      ipc : 1,
+    };
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      let exp =
+      {
+        keyValDelimeter : ':',
+        commandsDelimeter : ';',
+        caching : true,
+        parsingArrays : true,
+        interpreterPath : process.argv[ 0 ],
+        interpreterArgs : [],
+        scriptPath : a.abs( 'testApp2.js' ),
+        scriptArgs : [ '.will.yml' ],
+        interpreterArgsStrings : '',
+        scriptArgsString : '.will.yml',
+        subject : '.will.yml',
+        map : {},
+        subjects : [ '.will.yml' ],
+        maps : [ {} ],
+        original : '.will.yml',
+      };
+      test.identical( op[ 0 ], exp );
+      test.identical( op[ 1 ], true  );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      return null;
+    });
+  });
 
   /* - */
 
-  if( !Config.debug )
-  return;
+  return a.ready;
 
-  test.case = 'without arguments';
-  test.shouldThrowErrorSync( () => _.process.inputReadTo() );
+  /* */
 
-  test.case = 'extra arguments';
-  test.shouldThrowErrorSync( () => _.process.inputReadTo( { a : 1 }, { a : 'a', b : 'a' }, { extra : 1 } ) );
-
-  test.case = 'wrong type of options map o';
-  test.shouldThrowErrorSync( () => _.process.inputReadTo( 'wrong' ) );
-
-  test.case = 'wrong type of o.dst';
-  test.shouldThrowErrorSync( () => _.process.inputReadTo( 'wrong', { a : 'a', b : 'a' } ) );
-  test.shouldThrowErrorSync( () => _.process.inputReadTo({ dst : 'wrong', namesMap : { a : 'a', b : 'a' } }) );
-
-  test.case = 'wrong type of o.namesMap';
-  test.shouldThrowErrorSync( () => _.process.inputReadTo( {}, 'wrong' ) );
-  test.shouldThrowErrorSync( () => _.process.inputReadTo({ dst : {}, namesMap : 'wrong' }) );
-
-  test.case = 'options map has unknown option';
-  test.shouldThrowErrorSync( () => _.process.inputReadTo({ dst : {}, namesMap : { a : 'a' }, unknown : 1 }) );
-
-  test.case = 'dst - empty map, namesMap has unknown property';
-  test.shouldThrowErrorSync( () =>
+  function testApp()
   {
-    let o = { dst : {}, namesMap : { a : 'a' }, propertiesMap : { b : 'b' } };
-    return _.process.inputReadTo( o );
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+
+    let result = _.process.input();
+    process.send( result );
+  }
+
+  /* */
+
+  function testApp2()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+
+    let result = _.process.input();
+    let result2 = _.process.input();
+    process.send([ result, result === result2 ]);
+  }
+
+  /* */
+
+  function optionsMake()
+  {
+    let o =
+    {
+      execPath : 'node ' + programPath,
+      mode : 'spawn',
+      throwingExitCode : 1,
+      outputCollecting : 1,
+      ipc : 1,
+    };
+    return o;
+  }
+}
+
+//
+
+function inputWithNotDefaultDelimeters( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let programPath = a.program( testApp );
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'a few options';
+    let o = optionsMake();
+    o.args = [ 'v:5', 'r:some', 'a:1' ];
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      let exp =
+      {
+        keyValDelimeter : '=',
+        commandsDelimeter : '|',
+        caching : true,
+        parsingArrays : true,
+        interpreterPath : process.argv[ 0 ],
+        interpreterArgs : [],
+        scriptPath : a.abs( 'testApp.js' ),
+        scriptArgs : [ 'v:5', 'r:some', 'a:1' ],
+        interpreterArgsStrings : '',
+        scriptArgsString : 'v:5 r:some a:1',
+        subject : 'v:5 r:some a:1',
+        map : {},
+        subjects : [ 'v:5 r:some a:1' ],
+        maps : [ {} ],
+        original : 'v:5 r:some a:1',
+      };
+      test.identical( op[ 0 ], exp );
+      test.identical( op[ 1 ], exp );
+      test.identical( op[ 2 ], true );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      return null;
+    });
   });
 
-  test.case = 'dst - map with number, namesMap with valid property, NaN value';
-  test.shouldThrowErrorSync( () =>
+  /* */
+
+  a.ready.then( () =>
   {
-    let o = { dst : { a : 1 }, namesMap : { a : 'a' }, propertiesMap : { a : 'nan' } };
-    return _.process.inputReadTo( o );
+    test.case = 'two commands with default commandsDelimeter, subjects and options';
+    let o = optionsMake();
+    o.args = [ '.will.yml', 'v:5', 'r:some', ';', 'file', 'a:1' ];
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      let exp =
+      {
+        keyValDelimeter : '=',
+        commandsDelimeter : '|',
+        caching : true,
+        parsingArrays : true,
+        interpreterPath : process.argv[ 0 ],
+        interpreterArgs : [],
+        scriptPath : a.abs( 'testApp.js' ),
+        scriptArgs : [ '.will.yml', 'v:5', 'r:some', ';', 'file', 'a:1' ],
+        interpreterArgsStrings : '',
+        scriptArgsString : '.will.yml v:5 r:some ; file a:1',
+        subject : '.will.yml v:5 r:some ; file a:1',
+        map : {},
+        subjects : [ '.will.yml v:5 r:some ; file a:1' ],
+        maps : [ {} ],
+        original : '.will.yml v:5 r:some ; file a:1',
+      };
+      test.identical( op[ 0 ], exp );
+      test.identical( op[ 1 ], exp );
+      test.identical( op[ 2 ], true );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      return null;
+    });
   });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'two calls of routine';
+    let programPath = a.program( testApp2 );
+    let o =
+    {
+      execPath : 'node ' + programPath,
+      args : [ '.will.yml' ],
+      mode : 'spawn',
+      throwingExitCode : 1,
+      outputCollecting : 1,
+      ipc : 1,
+    };
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      let exp =
+      {
+        keyValDelimeter : '=',
+        commandsDelimeter : '|',
+        caching : true,
+        parsingArrays : true,
+        interpreterPath : process.argv[ 0 ],
+        interpreterArgs : [],
+        scriptPath : a.abs( 'testApp2.js' ),
+        scriptArgs : [ '.will.yml' ],
+        interpreterArgsStrings : '',
+        scriptArgsString : '.will.yml',
+        subject : '.will.yml',
+        map : {},
+        subjects : [ '.will.yml' ],
+        maps : [ {} ],
+        original : '.will.yml',
+      };
+      test.identical( op[ 0 ], exp );
+      test.identical( op[ 1 ], exp );
+      test.identical( op[ 2 ], false );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+      return null;
+    });
+  });
+
+  /* - */
+
+  return a.ready;
+
+  /* */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+
+    let o =
+    {
+      keyValDelimeter : '=',
+      commandsDelimeter : '|',
+    };
+
+    let result = _.process.input( o );
+    process.send([ result, o, result === o ]);
+  }
+
+  /* */
+
+  function testApp2()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+
+    let o =
+    {
+      keyValDelimeter : '=',
+      commandsDelimeter : '|',
+    };
+
+    let o2 =
+    {
+      keyValDelimeter : '=',
+      commandsDelimeter : '|',
+    };
+
+    let result = _.process.input( o );
+    let result2 = _.process.input( o2 );
+    process.send([ result, result2, result === result2 ]);
+  }
+
+  /* */
+
+  function optionsMake()
+  {
+    let o =
+    {
+      execPath : 'node ' + programPath,
+      mode : 'spawn',
+      throwingExitCode : 1,
+      outputCollecting : 1,
+      ipc : 1,
+    };
+    return o;
+  }
+}
+
+//
+
+function inputReadToWithArguments( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'dst - empty map';
+    let programPath = programMake( {}, {} );
+    let o = optionsMake( programPath );
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      test.identical( op[ 0 ], {} );
+      test.identical( op[ 1 ], {} );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+
+      a.fileProvider.fileDelete( programPath );
+      return null;
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'dst - empty map, namesMap - not empty';
+    let programPath = programMake( {}, { routine : 'r' } );
+    let o = optionsMake( programPath );
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      test.identical( op[ 0 ], {} );
+      test.identical( op[ 1 ], {} );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+
+      a.fileProvider.fileDelete( programPath );
+      return null;
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'dst - map with boolean';
+    let programPath = programMake( { r : true }, {} );
+    let o = optionsMake( programPath );
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      test.identical( op[ 0 ], { r : true } );
+      test.identical( op[ 1 ], {} );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+
+      a.fileProvider.fileDelete( programPath );
+      return null;
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'dst - map with number';
+    let programPath = programMake( { r : 0 }, {} );
+    let o = optionsMake( programPath );
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      test.identical( op[ 0 ], { r : 0 } );
+      test.identical( op[ 1 ], {} );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+
+      a.fileProvider.fileDelete( programPath );
+      return null;
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'dst - null';
+    let programPath = programMake( { r : null }, {} );
+    let o = optionsMake( programPath );
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      test.identical( op[ 0 ], { r : null } );
+      test.identical( op[ 1 ], {} );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+
+      a.fileProvider.fileDelete( programPath );
+      return null;
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'dst - map with boolean';
+    let programPath = programMake( { r : true }, { routine : 'r' } );
+    let o = optionsMake( programPath );
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      test.identical( op[ 0 ], { r : true } );
+      test.identical( op[ 1 ], {} );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+
+      a.fileProvider.fileDelete( programPath );
+      return null;
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'dst - map with number';
+    let programPath = programMake( { r : 0 }, { routine : 'r' } );
+    let o = optionsMake( programPath );
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      test.identical( op[ 0 ], { r : 0 } );
+      test.identical( op[ 1 ], {} );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+
+      a.fileProvider.fileDelete( programPath );
+      return null;
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'dst - null';
+    let programPath = programMake( { r : null }, { routine : 'r' } );
+    let o = optionsMake( programPath );
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      test.identical( op[ 0 ], { r : null } );
+      test.identical( op[ 1 ], {} );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+
+      a.fileProvider.fileDelete( programPath );
+      return null;
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'dst - null';
+    let programPath = programMake( { r : null }, { r : 'a' } );
+    let o = optionsMake( programPath );
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      test.identical( op[ 0 ], { r : null } );
+      test.identical( op[ 1 ], {} );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+
+      a.fileProvider.fileDelete( programPath );
+      return null;
+    });
+  });
+
+  /* */
+
+  if( Config.debug )
+  {
+    test.case = 'without arguments';
+    test.shouldThrowErrorSync( () => _.process.inputReadTo() );
+
+    test.case = 'extra arguments';
+    test.shouldThrowErrorSync( () => _.process.inputReadTo( { a : 1 }, { a : 'a', b : 'a' }, { extra : 1 } ) );
+
+    test.case = 'wrong type of options map o';
+    test.shouldThrowErrorSync( () => _.process.inputReadTo( 'wrong' ) );
+
+    test.case = 'wrong type of o.dst';
+    test.shouldThrowErrorSync( () => _.process.inputReadTo( 'wrong', { a : 'a', b : 'a' } ) );
+    test.shouldThrowErrorSync( () => _.process.inputReadTo({ dst : 'wrong', namesMap : { a : 'a', b : 'a' } }) );
+
+    test.case = 'wrong type of o.namesMap';
+    test.shouldThrowErrorSync( () => _.process.inputReadTo( {}, 'wrong' ) );
+    test.shouldThrowErrorSync( () => _.process.inputReadTo({ dst : {}, namesMap : 'wrong' }) );
+
+    test.case = 'options map has unknown option';
+    test.shouldThrowErrorSync( () => _.process.inputReadTo({ dst : {}, namesMap : { a : 'a' }, unknown : 1 }) );
+
+    test.case = 'dst - empty map, namesMap has unknown property';
+    test.shouldThrowErrorSync( () =>
+    {
+      let o = { dst : {}, namesMap : { a : 'a' }, propertiesMap : { b : 'b' } };
+      return _.process.inputReadTo( o );
+    });
+
+    test.case = 'dst - map with number, namesMap with valid property, NaN value';
+    test.shouldThrowErrorSync( () =>
+    {
+      let o = { dst : { a : 1 }, namesMap : { a : 'a' }, propertiesMap : { a : 'nan' } };
+      return _.process.inputReadTo( o );
+    });
+  }
+
+  /* - */
+
+  return a.ready;
+
+  /* */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+
+    _.include( 'wProcess' );
+    _.process._exitHandlerRepair();
+
+    let result = _.process.inputReadTo( dst, namesMap );
+    process.send([ dst, result ]);
+  }
+
+  /* */
+
+  function programMake( dst, namesMap )
+  {
+    let locals =
+    {
+      dst,
+      namesMap,
+      toolsPath : _.module.resolve( 'wTools' ),
+    };
+    return a.program({ routine : testApp, locals });
+  }
+
+  /* */
+
+  function optionsMake( routinePath )
+  {
+    let o =
+    {
+      execPath : routinePath,
+      mode : 'fork',
+      throwingExitCode : 1,
+      outputCollecting : 1,
+      ipc : 1,
+    };
+    return o;
+  }
 }
 
 //
 
 function inputReadToWithOptionsMap( test )
 {
-  /* read input to prevent side effect from testing input */
-  _.process.inputReadTo( { r : true }, { r : 'r' } );
+  let context = this;
+  let a = test.assetFor( false );
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'dst - empty map';
+    let programPath = programMake( {}, {} );
+    let o = optionsMake( programPath );
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      test.identical( op[ 0 ], {} );
+      test.identical( op[ 1 ], {} );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+
+      a.fileProvider.fileDelete( programPath );
+      return null;
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'dst - empty map, namesMap - not empty';
+    let programPath = programMake( {}, { routine : 'r' } );
+    let o = optionsMake( programPath );
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      test.identical( op[ 0 ], {} );
+      test.identical( op[ 1 ], {} );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+
+      a.fileProvider.fileDelete( programPath );
+      return null;
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'dst - map with boolean';
+    let programPath = programMake( { r : true }, {} );
+    let o = optionsMake( programPath );
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      test.identical( op[ 0 ], { r : true } );
+      test.identical( op[ 1 ], {} );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+
+      a.fileProvider.fileDelete( programPath );
+      return null;
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'dst - map with number';
+    let programPath = programMake( { r : 0 }, {} );
+    let o = optionsMake( programPath );
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      test.identical( op[ 0 ], { r : 0 } );
+      test.identical( op[ 1 ], {} );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+
+      a.fileProvider.fileDelete( programPath );
+      return null;
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'dst - null';
+    let programPath = programMake( { r : null }, {} );
+    let o = optionsMake( programPath );
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      test.identical( op[ 0 ], { r : null } );
+      test.identical( op[ 1 ], {} );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+
+      a.fileProvider.fileDelete( programPath );
+      return null;
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'dst - map with boolean';
+    let programPath = programMake( { r : true }, { routine : 'r' } );
+    let o = optionsMake( programPath );
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      test.identical( op[ 0 ], { r : true } );
+      test.identical( op[ 1 ], {} );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+
+      a.fileProvider.fileDelete( programPath );
+      return null;
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'dst - map with number';
+    let programPath = programMake( { r : 0 }, { routine : 'r' } );
+    let o = optionsMake( programPath );
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      test.identical( op[ 0 ], { r : 0 } );
+      test.identical( op[ 1 ], {} );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+
+      a.fileProvider.fileDelete( programPath );
+      return null;
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'dst - null';
+    let programPath = programMake( { r : null }, { routine : 'r' } );
+    let o = optionsMake( programPath );
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      test.identical( op[ 0 ], { r : null } );
+      test.identical( op[ 1 ], {} );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+
+      a.fileProvider.fileDelete( programPath );
+      return null;
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'dst - null';
+    let programPath = programMake( { r : null }, { r : 'a' } );
+    let o = optionsMake( programPath );
+    let returned = _.process.startMinimal( o );
+
+    o.pnd.on( 'message', ( op ) =>
+    {
+      test.identical( op[ 0 ], { r : null } );
+      test.identical( op[ 1 ], {} );
+    });
+
+    return returned.then( ( op ) =>
+    {
+      test.identical( op.exitCode, 0 );
+      test.identical( op.ended, true );
+
+      a.fileProvider.fileDelete( programPath );
+      return null;
+    });
+  });
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.open( 'with propertiesMap' );
+
+    test.case = 'dst - empty map, namesMap - empty, propertiesMap - empty';
+    var dst = {};
+    var namesMap = {};
+    var propertiesMap = {};
+    var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
+    test.identical( dst, {} );
+    test.identical( got, {} );
+    test.true( got !== dst );
+    test.true( got === propertiesMap );
+
+    test.case = 'dst - empty map, namesMap - not empty, propertiesMap - empty';
+    var dst = {};
+    var namesMap = { routine : 'r' };
+    var propertiesMap = {};
+    var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
+    test.identical( dst, {} );
+    test.identical( got, {} );
+    test.true( got !== dst );
+    test.true( got === propertiesMap );
+
+    /* */
+
+    test.case = 'dst - map with boolean, namesMap - empty, propertiesMap - empty';
+    var dst = { r : true };
+    var namesMap = {};
+    var propertiesMap = {};
+    var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
+    test.identical( dst, { r : true } );
+    test.identical( got, {} );
+    test.true( got !== dst );
+    test.true( got === propertiesMap );
+
+    test.case = 'dst - map with number, namesMap - empty, propertiesMap - empty';
+    var dst = { r : 0 };
+    var namesMap = {};
+    var propertiesMap = {};
+    var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
+    test.identical( dst, { r : 0 } );
+    test.identical( got, {} );
+    test.true( got !== dst );
+    test.true( got === propertiesMap );
+
+    test.case = 'dst - null, namesMap - empty, propertiesMap - empty';
+    var dst = { r : null };
+    var namesMap = {};
+    var propertiesMap = {};
+    var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
+    test.identical( dst, { r : null } );
+    test.identical( got, {} );
+    test.true( got !== dst );
+    test.true( got === propertiesMap );
+
+    /* */
+
+    test.case = 'dst - map with boolean, namesMap - not empty, propertiesMap - empty';
+    var dst = { r : true };
+    var namesMap = { routine : 'r' };
+    var propertiesMap = {};
+    var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
+    test.identical( dst, { r : true } );
+    test.identical( got, {} );
+    test.true( got !== dst );
+    test.true( got === propertiesMap );
+
+    test.case = 'dst - map with number, namesMap - not empty, propertiesMap - empty';
+    var dst = { r : 0 };
+    var namesMap = { routine : 'r' };
+    var propertiesMap = {};
+    var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
+    test.identical( dst, { r : 0 } );
+    test.identical( got, {} );
+    test.true( got !== dst );
+    test.true( got === propertiesMap );
+
+    test.case = 'dst - null, namesMap - not empty, propertiesMap - empty';
+    var dst = { r : null };
+    var namesMap = { routine : 'r' };
+    var propertiesMap = {};
+    var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
+    test.identical( dst, { r : null } );
+    test.identical( got, {} );
+    test.true( got !== dst );
+    test.true( got === propertiesMap );
+
+    /* */
+
+    test.case = 'dst - null, namesMap - not empty array, propertiesMap - empty';
+    var dst = { r : null };
+    var namesMap = [ 'r', 'a' ];
+    var propertiesMap = {};
+    var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
+    test.identical( dst, { r : null } );
+    test.identical( got, {} );
+    test.true( got !== dst );
+    test.true( got === propertiesMap );
+
+    /* */
+
+    test.case = 'dst - map with boolean';
+    var dst = { r : true };
+    var namesMap = { routine : 'r', r : 'r' };
+    var propertiesMap = { 'r' : 1, 'routine' : 2 };
+    var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
+    test.identical( dst, { r : true } );
+    test.identical( got, {} );
+    test.true( got !== dst );
+    test.true( got === propertiesMap );
+
+    test.case = 'dst - map with number';
+    var dst = { r : 0 };
+    var namesMap = { routine : 'r', r : 'r' };
+    var propertiesMap = { 'r' : 1, 'routine' : 2 };
+    var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
+    test.identical( dst, { r : 2 } );
+    test.identical( got, {} );
+    test.true( got !== dst );
+    test.true( got === propertiesMap );
+
+    test.case = 'dst - null';
+    var dst = { r : null };
+    var namesMap = { routine : 'r', r : 'r' };
+    var propertiesMap = { 'r' : 1, 'routine' : 2 };
+    var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
+    test.identical( dst, { r : 2 } );
+    test.identical( got, {} );
+    test.true( got !== dst );
+    test.true( got === propertiesMap );
+
+    /* */
+
+    test.case = 'dst - null, namesMap - array';
+    var dst = { r : null, routine : () => true };
+    var namesMap = [ 'r', 'routine' ];
+    var propertiesMap = { 'r' : 1, 'routine' : 2 };
+    var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
+    test.identical( dst, { r : 1, routine : 2 } );
+    test.identical( got, {} );
+    test.true( got === propertiesMap );
+
+    test.close( 'with propertiesMap' );
+    return null;
+  });
 
   /* - */
 
-  test.open( 'without propertiesMap' );
-
-  test.case = 'dst - empty map, namesMap - empty map';
-  var dst = {};
-  var namesMap = {};
-  var got = _.process.inputReadTo({ dst, namesMap });
-  test.identical( dst, {} );
-  test.identical( got, {} );
-  test.true( got !== dst );
-
-  test.case = 'dst - empty map, namesMap - not empty';
-  var dst = {};
-  var namesMap = { routine : 'r' };
-  var got = _.process.inputReadTo({ dst, namesMap });
-  test.identical( dst, {} );
-  test.identical( got, {} );
-  test.true( got !== dst );
+  return a.ready;
 
   /* */
 
-  test.case = 'dst - map with boolean, namesMap - empty';
-  var dst = { r : true };
-  var namesMap = {};
-  var got = _.process.inputReadTo({ dst, namesMap });
-  test.identical( dst, { r : true } );
-  test.identical( got, {} );
-  test.true( got !== dst );
+  function testApp()
+  {
+    let _ = require( toolsPath );
 
-  test.case = 'dst - map with number, namesMap - empty';
-  var dst = { r : 0 };
-  var namesMap = {};
-  var got = _.process.inputReadTo({ dst, namesMap });
-  test.identical( dst, { r : 0 } );
-  test.identical( got, {} );
-  test.true( got !== dst );
+    _.include( 'wProcess' );
+    _.process._exitHandlerRepair();
 
-  test.case = 'dst - null, namesMap - empty';
-  var dst = { r : null };
-  var namesMap = {};
-  var got = _.process.inputReadTo({ dst, namesMap });
-  test.identical( dst, { r : null } );
-  test.identical( got, {} );
-  test.true( got !== dst );
+    let result = _.process.inputReadTo({ dst, namesMap });
+    process.send([ dst, result ]);
+  }
 
   /* */
 
-  test.case = 'dst - map with boolean, namesMap - not empty';
-  var dst = { r : true };
-  var namesMap = { routine : 'r' };
-  var got = _.process.inputReadTo({ dst, namesMap });
-  test.identical( dst, { r : true } );
-  test.identical( got, {} );
-  test.true( got !== dst );
-
-  test.case = 'dst - map with number, namesMap - not empty';
-  var dst = { r : 0 };
-  var namesMap = { routine : 'r' };
-  var got = _.process.inputReadTo({ dst, namesMap });
-  test.identical( dst, { r : 0 } );
-  test.identical( got, {} );
-  test.true( got !== dst );
-
-  test.case = 'dst - null, namesMap - not empty';
-  var dst = { r : null };
-  var namesMap = { routine : 'r' };
-  var got = _.process.inputReadTo({ dst, namesMap });
-  test.identical( dst, { r : null } );
-  test.identical( got, {} );
-  test.true( got !== dst );
+  function programMake( dst, namesMap )
+  {
+    let locals =
+    {
+      dst,
+      namesMap,
+      toolsPath : _.module.resolve( 'wTools' ),
+    };
+    return a.program({ routine : testApp, locals });
+  }
 
   /* */
 
-  test.case = 'dst - null, namesMap - array, namesMap - not empty';
-  var dst = { r : null };
-  var namesMap = [ 'r', 'a' ];
-  var got = _.process.inputReadTo({ dst, namesMap });
-  test.identical( dst, { r : null } );
-  test.identical( got, {} );
-  test.true( got !== dst );
-
-  test.close( 'without propertiesMap' );
-
-  /* - */
-
-  test.open( 'with propertiesMap' );
-
-  test.case = 'dst - empty map, namesMap - empty, propertiesMap - empty';
-  var dst = {};
-  var namesMap = {};
-  var propertiesMap = {};
-  var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
-  test.identical( dst, {} );
-  test.identical( got, {} );
-  test.true( got !== dst );
-  test.true( got === propertiesMap );
-
-  test.case = 'dst - empty map, namesMap - not empty, propertiesMap - empty';
-  var dst = {};
-  var namesMap = { routine : 'r' };
-  var propertiesMap = {};
-  var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
-  test.identical( dst, {} );
-  test.identical( got, {} );
-  test.true( got !== dst );
-  test.true( got === propertiesMap );
-
-  /* */
-
-  test.case = 'dst - map with boolean, namesMap - empty, propertiesMap - empty';
-  var dst = { r : true };
-  var namesMap = {};
-  var propertiesMap = {};
-  var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
-  test.identical( dst, { r : true } );
-  test.identical( got, {} );
-  test.true( got !== dst );
-  test.true( got === propertiesMap );
-
-  test.case = 'dst - map with number, namesMap - empty, propertiesMap - empty';
-  var dst = { r : 0 };
-  var namesMap = {};
-  var propertiesMap = {};
-  var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
-  test.identical( dst, { r : 0 } );
-  test.identical( got, {} );
-  test.true( got !== dst );
-  test.true( got === propertiesMap );
-
-  test.case = 'dst - null, namesMap - empty, propertiesMap - empty';
-  var dst = { r : null };
-  var namesMap = {};
-  var propertiesMap = {};
-  var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
-  test.identical( dst, { r : null } );
-  test.identical( got, {} );
-  test.true( got !== dst );
-  test.true( got === propertiesMap );
-
-  /* */
-
-  test.case = 'dst - map with boolean, namesMap - not empty, propertiesMap - empty';
-  var dst = { r : true };
-  var namesMap = { routine : 'r' };
-  var propertiesMap = {};
-  var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
-  test.identical( dst, { r : true } );
-  test.identical( got, {} );
-  test.true( got !== dst );
-  test.true( got === propertiesMap );
-
-  test.case = 'dst - map with number, namesMap - not empty, propertiesMap - empty';
-  var dst = { r : 0 };
-  var namesMap = { routine : 'r' };
-  var propertiesMap = {};
-  var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
-  test.identical( dst, { r : 0 } );
-  test.identical( got, {} );
-  test.true( got !== dst );
-  test.true( got === propertiesMap );
-
-  test.case = 'dst - null, namesMap - not empty, propertiesMap - empty';
-  var dst = { r : null };
-  var namesMap = { routine : 'r' };
-  var propertiesMap = {};
-  var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
-  test.identical( dst, { r : null } );
-  test.identical( got, {} );
-  test.true( got !== dst );
-  test.true( got === propertiesMap );
-
-  /* */
-
-  test.case = 'dst - null, namesMap - not empty array, propertiesMap - empty';
-  var dst = { r : null };
-  var namesMap = [ 'r', 'a' ];
-  var propertiesMap = {};
-  var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
-  test.identical( dst, { r : null } );
-  test.identical( got, {} );
-  test.true( got !== dst );
-  test.true( got === propertiesMap );
-
-  /* */
-
-  test.case = 'dst - map with boolean';
-  var dst = { r : true };
-  var namesMap = { routine : 'r', r : 'r' };
-  var propertiesMap = { 'r' : 1, 'routine' : 2 };
-  var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
-  test.identical( dst, { r : true } );
-  test.identical( got, {} );
-  test.true( got !== dst );
-  test.true( got === propertiesMap );
-
-  test.case = 'dst - map with number';
-  var dst = { r : 0 };
-  var namesMap = { routine : 'r', r : 'r' };
-  var propertiesMap = { 'r' : 1, 'routine' : 2 };
-  var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
-  test.identical( dst, { r : 2 } );
-  test.identical( got, {} );
-  test.true( got !== dst );
-  test.true( got === propertiesMap );
-
-  test.case = 'dst - null';
-  var dst = { r : null };
-  var namesMap = { routine : 'r', r : 'r' };
-  var propertiesMap = { 'r' : 1, 'routine' : 2 };
-  var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
-  test.identical( dst, { r : 2 } );
-  test.identical( got, {} );
-  test.true( got !== dst );
-  test.true( got === propertiesMap );
-
-  /* */
-
-  test.case = 'dst - null, namesMap - array';
-  var dst = { r : null, routine : () => true };
-  var namesMap = [ 'r', 'routine' ];
-  var propertiesMap = { 'r' : 1, 'routine' : 2 };
-  var got = _.process.inputReadTo({ dst, namesMap, propertiesMap });
-  test.identical( dst, { r : 1, routine : 2 } );
-  test.identical( got, {} );
-  test.true( got === propertiesMap );
-
-  test.close( 'with propertiesMap' );
+  function optionsMake( routinePath )
+  {
+    let o =
+    {
+      execPath : routinePath,
+      mode : 'fork',
+      throwingExitCode : 1,
+      outputCollecting : 1,
+      ipc : 1,
+    };
+    return o;
+  }
 }
 
 //
@@ -453,6 +1535,75 @@ function inputReadToOptionsOnlyAndRemoving( test )
   });
 
   test.close( 'removing - 0' );
+}
+
+//
+
+function inputReadToCheckInputInfluence( test )
+{
+  let context = this;
+  let a = test.assetFor( false );
+  let locals =
+  {
+    context : { t0 : context.t0 },
+    toolsPath : _.module.resolve( 'wTools' ),
+  };
+  let programPath = a.program( { routine : testApp, locals } );
+
+  let o =
+  {
+    execPath : programPath,
+    mode : 'fork',
+    args : [ 'r:routine' ],
+    throwingExitCode : 0,
+    outputPiping : 0,
+    ipc : 1,
+    outputCollecting : 1,
+  };
+
+  let con = _.process.startMinimal( o );
+
+  o.pnd.on( 'message', ( got ) =>
+  {
+    test.identical( got[ 0 ], { r : 'routine' } );
+    test.identical( got[ 1 ], {} );
+    _.process.terminate({ pnd : o.pnd, timeOut : context.t0 });
+  })
+
+  return con.finally( ( err, op ) =>
+  {
+    if( err )
+    throw _.err( err );
+    return null;
+  })
+
+  return a.ready;
+
+  /* */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+
+    _.include( 'wProcess' );
+    _.process._exitHandlerRepair();
+
+    let loop = true;
+    var dst = { r : 'r' };
+    var namesMap = { r : 'r' };
+    let result = _.process.inputReadTo( dst, namesMap );
+    process.send( [ dst, result ] );
+
+    setTimeout( () =>
+    {
+      loop = false;
+    }, context.t0 ) /* 5000 */
+    while( loop )
+    {
+      loop = loop;
+    }
+    console.log( 'Exit after release' );
+  }
 }
 
 // --
@@ -2007,10 +3158,13 @@ var Proto =
 
   tests :
   {
+    input,
+    inputWithNotDefaultDelimeters,
 
     inputReadToWithArguments,
     inputReadToWithOptionsMap,
     inputReadToOptionsOnlyAndRemoving,
+    inputReadToCheckInputInfluence,
 
     // event
 
