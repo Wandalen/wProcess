@@ -921,20 +921,20 @@ function startMinimal( test )
       qqq for Yevhen : not enough!
       zzz :
       Windows 15x, mode::fork
-      [39;0m[92m/[39;0m[92m TestRoutine[39;0m[92m:[39;0m[92m:[39;0m[92mstartFork [39;0m[92m/[39;0m[92m test timeOut[39;0m[92m # [39;0m[92m22 [39;0m[92m)[39;0m[92m ... [39;0m[92mok[39;0m
+     / TestRoutine::startFork / test timeOut # 22 ) ... ok
       2020-11-25T10:55:41.8317809Z --------------- uncaught asynchronous error --------------->
       2020-11-25T10:55:41.8767341Z
-      2020-11-25T10:55:41.8768147Z [91m        kill EPERM
-      2020-11-25T10:55:41.8917163Z [91m = Message of error#10
+      2020-11-25T10:55:41.8768147Z         kill EPERM
+      2020-11-25T10:55:41.8917163Z  = Message of error#10
       2020-11-25T10:55:41.8917977Z           errno : -4048
       2020-11-25T10:55:41.9119950Z     kill EPERM
       2020-11-25T10:55:41.9120605Z           code : 'EPERM'
       2020-11-25T10:55:41.9121766Z       errno : -4048
       2020-11-25T10:55:41.9122245Z           syscall : 'kill'
       2020-11-25T10:55:41.9122822Z       code : 'EPERM'
-      2020-11-25T10:55:41.9123516Z         Current process does not have permission to kill target process 592[39;0m
+      2020-11-25T10:55:41.9123516Z         Current process does not have permission to kill target process 592
       2020-11-25T10:55:41.9124438Z       syscall : 'kill'
-      2020-11-25T10:55:41.9125794Z [91m[40m        Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startFork / test timeOut # 23 ) ... failed, throwing error[49;0m[39;0m
+      2020-11-25T10:55:41.9125794Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startFork / test timeOut # 23 ) ... failed, throwing error
       2020-11-25T10:55:41.9127260Z     Current process does not have permission to kill target process 592
       */
       test.case = 'test timeOut';
@@ -957,7 +957,7 @@ function startMinimal( test )
         outputCollecting : 1,
         outputPiping : 1,
         throwingExitCode : 1,
-        timeOut : context.t1, /* 1000 */
+        timeOut : context.t1, /* 1000 */ /* zzz : timeOut ( 1000 ) is less than program testApp5 runs ( 5000 ) */
       }
 
       return test.shouldThrowErrorAsync( _.process.startMinimal( o ) )
@@ -9148,13 +9148,13 @@ function startMultipleProcedureStack( test )
       qqq for Yevhen : not good enough. output of subprocess?
       zzz :
       Windows 13x, mode::fork
-      [39;0m[92m/[39;0m[92m TestRoutine[39;0m[92m:[39;0m[92m:[39;0m[92mstartProcedureStackMultiple [39;0m[92m/[39;0m[92m sync[39;0m[92m:[39;0m[92m0 deasync[39;0m[92m:[39;0m[92m1 mode[39;0m[92m:[39;0m[92mfork stack[39;0m[92m:[39;0m[92mfalse[39;0m[92m # [39;0m[92m538 [39;0m[92m)[39;0m[92m [39;0m[92m:[39;0m[92m expected true[39;0m[92m ... [39;0m[92mok[39;0m
-      2020-11-25T11:03:36.6940925Z [91m        - got :
+     / TestRoutine::startProcedureStackMultiple / sync:0 deasync:1 mode:fork stack:false # 538 ) : expected true ... ok
+      2020-11-25T11:03:36.6940925Z         - got :
       2020-11-25T11:03:36.6941792Z           4294967295
       2020-11-25T11:03:36.6942336Z         - expected :
       2020-11-25T11:03:36.6942850Z           0
       2020-11-25T11:03:36.6943358Z         - difference :
-      2020-11-25T11:03:36.6943875Z           *[39;0m
+      2020-11-25T11:03:36.6943875Z           *
       */
       test.case = `sync:${sync} deasync:${deasync} mode:${mode} stack:false`;
       let t1 = _.time.now();
@@ -9173,7 +9173,7 @@ function startMultipleProcedureStack( test )
 
       if( sync || deasync )
       {
-        test.identical( o.exitCode, 0 );
+        test.identical( o.exitCode, 0 ); /* zzz : here */
         test.identical( o.exitSignal, null );
         test.identical( o.exitReason, 'normal' );
         test.identical( o.ended, true );
@@ -30327,7 +30327,7 @@ deasync:end
         test.true( _.process.isAlive( options.pnd.pid ) );
         time1 = _.time.now();
         _.process.terminate({ pid : options.pnd.pid, withChildren : 1 }); /* zzz : here! */
-        /* qqq for Yevhen : please, mark important lines and remove ansi codes like in this test case */
+        /* qqq for Yevhen : please, mark important lines and remove ansi codes like in this test case | aaa : Done. */
 
 /* xxx : windows
 qqq for Vova : where is ExecPath?
