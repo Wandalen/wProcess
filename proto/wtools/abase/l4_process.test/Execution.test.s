@@ -921,20 +921,20 @@ function startMinimal( test )
       qqq for Yevhen : not enough!
       zzz :
       Windows 15x, mode::fork
-      [39;0m[92m/[39;0m[92m TestRoutine[39;0m[92m:[39;0m[92m:[39;0m[92mstartFork [39;0m[92m/[39;0m[92m test timeOut[39;0m[92m # [39;0m[92m22 [39;0m[92m)[39;0m[92m ... [39;0m[92mok[39;0m
+     / TestRoutine::startFork / test timeOut # 22 ) ... ok
       2020-11-25T10:55:41.8317809Z --------------- uncaught asynchronous error --------------->
       2020-11-25T10:55:41.8767341Z
-      2020-11-25T10:55:41.8768147Z [91m        kill EPERM
-      2020-11-25T10:55:41.8917163Z [91m = Message of error#10
+      2020-11-25T10:55:41.8768147Z         kill EPERM
+      2020-11-25T10:55:41.8917163Z  = Message of error#10
       2020-11-25T10:55:41.8917977Z           errno : -4048
       2020-11-25T10:55:41.9119950Z     kill EPERM
       2020-11-25T10:55:41.9120605Z           code : 'EPERM'
       2020-11-25T10:55:41.9121766Z       errno : -4048
       2020-11-25T10:55:41.9122245Z           syscall : 'kill'
       2020-11-25T10:55:41.9122822Z       code : 'EPERM'
-      2020-11-25T10:55:41.9123516Z         Current process does not have permission to kill target process 592[39;0m
+      2020-11-25T10:55:41.9123516Z         Current process does not have permission to kill target process 592
       2020-11-25T10:55:41.9124438Z       syscall : 'kill'
-      2020-11-25T10:55:41.9125794Z [91m[40m        Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startFork / test timeOut # 23 ) ... failed, throwing error[49;0m[39;0m
+      2020-11-25T10:55:41.9125794Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startFork / test timeOut # 23 ) ... failed, throwing error
       2020-11-25T10:55:41.9127260Z     Current process does not have permission to kill target process 592
       */
       test.case = 'test timeOut';
@@ -957,7 +957,7 @@ function startMinimal( test )
         outputCollecting : 1,
         outputPiping : 1,
         throwingExitCode : 1,
-        timeOut : context.t1, /* 1000 */
+        timeOut : context.t1, /* 1000 */ /* zzz : timeOut ( 1000 ) is less than program testApp5 runs ( 5000 ) */
       }
 
       return test.shouldThrowErrorAsync( _.process.startMinimal( o ) )
@@ -9148,13 +9148,13 @@ function startMultipleProcedureStack( test )
       qqq for Yevhen : not good enough. output of subprocess?
       zzz :
       Windows 13x, mode::fork
-      [39;0m[92m/[39;0m[92m TestRoutine[39;0m[92m:[39;0m[92m:[39;0m[92mstartProcedureStackMultiple [39;0m[92m/[39;0m[92m sync[39;0m[92m:[39;0m[92m0 deasync[39;0m[92m:[39;0m[92m1 mode[39;0m[92m:[39;0m[92mfork stack[39;0m[92m:[39;0m[92mfalse[39;0m[92m # [39;0m[92m538 [39;0m[92m)[39;0m[92m [39;0m[92m:[39;0m[92m expected true[39;0m[92m ... [39;0m[92mok[39;0m
-      2020-11-25T11:03:36.6940925Z [91m        - got :
+     / TestRoutine::startProcedureStackMultiple / sync:0 deasync:1 mode:fork stack:false # 538 ) : expected true ... ok
+      2020-11-25T11:03:36.6940925Z         - got :
       2020-11-25T11:03:36.6941792Z           4294967295
       2020-11-25T11:03:36.6942336Z         - expected :
       2020-11-25T11:03:36.6942850Z           0
       2020-11-25T11:03:36.6943358Z         - difference :
-      2020-11-25T11:03:36.6943875Z           *[39;0m
+      2020-11-25T11:03:36.6943875Z           *
       */
       test.case = `sync:${sync} deasync:${deasync} mode:${mode} stack:false`;
       let t1 = _.time.now();
@@ -9173,7 +9173,7 @@ function startMultipleProcedureStack( test )
 
       if( sync || deasync )
       {
-        test.identical( o.exitCode, 0 );
+        test.identical( o.exitCode, 0 ); /* zzz : here */
         test.identical( o.exitSignal, null );
         test.identical( o.exitReason, 'normal' );
         test.identical( o.ended, true );
@@ -30393,7 +30393,7 @@ deasync:end
         test.true( _.process.isAlive( options.pnd.pid ) );
         time1 = _.time.now();
         _.process.terminate({ pid : options.pnd.pid, withChildren : 1 }); /* zzz : here! */
-        /* qqq for Yevhen : please, mark important lines and remove ansi codes like in this test case */
+        /* qqq for Yevhen : please, mark important lines and remove ansi codes like in this test case | aaa : Done. */
 
 /* xxx : windows
 qqq for Vova : where is ExecPath?
@@ -32365,11 +32365,11 @@ function terminate( test )
       /*
       xxx :
       Windows 10x, 12x, mode::fork
-      2020-11-30T15:34:30.0854749Z [97m > [39;0mD:\Temp\ProcessBasic-2020-11-30-14-18-5-376-7be2.tmp\terminate\testApp.js
+      2020-11-30T15:34:30.0854749Z > D:\Temp\ProcessBasic-2020-11-30-14-18-5-376-7be2.tmp\terminate\testApp.js
       2020-11-30T15:34:30.1164087Z --------------- uncaught asynchronous error --------------->
       2020-11-30T15:34:30.1170776Z
-      2020-11-30T15:34:30.1171561Z [91m        kill EPERM
-      2020-11-30T15:34:30.1173713Z [91m = Message of error#367
+      2020-11-30T15:34:30.1171561Z         kill EPERM
+      2020-11-30T15:34:30.1173713Z  = Message of error#367
       2020-11-30T15:34:30.1174175Z           errno : 'EPERM'
       2020-11-30T15:34:30.1177929Z     kill EPERM
       2020-11-30T15:34:30.1178315Z           code : 'EPERM'
@@ -32382,11 +32382,11 @@ function terminate( test )
       2020-11-30T15:34:30.2738558Z     Current process does not have permission to kill target process: 508
       2020-11-30T15:34:30.2739265Z         ExecPath : node
       2020-11-30T15:34:30.3034891Z     PID : 508
-      2020-11-30T15:34:30.3035956Z         Args : node,D:\Temp\ProcessBasic-2020-11-30-14-18-5-376-7be2.tmp\terminate\testApp.js[39;0m
+      2020-11-30T15:34:30.3035956Z         Args : node,D:\Temp\ProcessBasic-2020-11-30-14-18-5-376-7be2.tmp\terminate\testApp.js
       2020-11-30T15:34:30.3164116Z     ExecPath : node
-      2020-11-30T15:34:30.3165600Z [91m[40m        Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::terminate / mode:fork, terminate process using descriptor( pnd ) # 31 ) ... failed, throwing error[49;0m[39;0m
+      2020-11-30T15:34:30.3165600Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::terminate / mode:fork, terminate process using descriptor( pnd ) # 31 ) ... failed, throwing error
       2020-11-30T15:34:30.5223290Z     Args : node,D:\Temp\ProcessBasic-2020-11-30-14-18-5-376-7be2.tmp\terminate\testApp.js
-      2020-11-30T15:34:30.5225520Z [91m[40m      Failed [49;0m[39;0m[91m[40m([49;0m[39;0m[91m[40m throwing error [49;0m[39;0m[91m[40m)[49;0m[39;0m[91m[40m TestSuite[49;0m[39;0m[91m[40m:[49;0m[39;0m[91m[40m:[49;0m[39;0m[91m[40mTools.l4.process.Execution [49;0m[39;0m[91m[40m/[49;0m[39;0m[91m[40m TestRoutine[49;0m[39;0m[91m[40m:[49;0m[39;0m[91m[40m:[49;0m[39;0m[91m[40mterminate[49;0m[39;0m[91m[40m in [49;0m[39;0m[91m[40m9.867s[49;0m[39;0m
+      2020-11-30T15:34:30.5225520Z       Failed (throwing error ) TestSuite::Tools.l4.process.Execution /TestRoutine::terminatein 9.867s
       2020-11-30T15:34:30.5727440Z
       2020-11-30T15:34:30.6043228Z  = Beautified calls stack
       2020-11-30T15:34:30.7287256Z     at process.kill (internal/process/per_thread.js:198:13)
@@ -32415,7 +32415,7 @@ function terminate( test )
       2020-11-30T15:34:31.2224450Z     Current path : D:\a\wProcess\wProcess
       2020-11-30T15:34:31.2225701Z     Exec path : C:\hostedtoolcache\windows\node\10.23.0\x64\node.exe D:\a\wProcess\wProcess\node_modules\wTesting\proto\wtools\atop\testing\entry\Exec .run 'proto/**' rapidity:-1 verbosity:5 fails:5 s:0
       2020-11-30T15:34:31.2226578Z
-      2020-11-30T15:34:31.2227031Z [39;0m
+      2020-11-30T15:34:31.2227031Z
       2020-11-30T15:34:31.2227684Z --------------- uncaught asynchronous error ---------------<
       */
       test.case = `mode:${mode}, terminate process using descriptor( pnd )`
@@ -32432,7 +32432,7 @@ function terminate( test )
 
       o.pnd.on( 'message', () =>
       {
-        _.process.terminate({ pnd : o.pnd });
+        _.process.terminate({ pnd : o.pnd }); /* zzz : here */
       })
 
       ready.then( ( op ) =>
@@ -33890,7 +33890,7 @@ function terminateWithDetachedChild( test )
       /*
       xxx :
       Ubuntu 12x, mode::fork
-      2020-11-30T18:29:51.9440081Z       Running [94mTestSuite::Tools.l4.process.Execution / TestRoutine::terminateWithDetachedChild[39;0m ..
+      2020-11-30T18:29:51.9440081Z       Running TestSuite::Tools.l4.process.Execution / TestRoutine::terminateWithDetachedChild ..
       2020-11-30T18:29:52.0223160Z  1 : function program1()
       2020-11-30T18:29:52.0224260Z  2 :   {
       2020-11-30T18:29:52.0225033Z  3 :     let _ = require( toolsPath );
@@ -33963,13 +33963,13 @@ function terminateWithDetachedChild( test )
       2020-11-30T18:29:52.0317790Z 34 :
       2020-11-30T18:29:52.0318192Z 35 : program2();
       2020-11-30T18:29:52.0318549Z 36 :
-      2020-11-30T18:29:52.0344359Z [97m > [39;0mprogram1.js
-      2020-11-30T18:29:53.2273945Z [35mprogram1::begin[39;0m
-      2020-11-30T18:29:54.3630214Z [35m[35mprogram2::begin[39;0m[39;0m
-      2020-11-30T18:29:54.4356321Z [35mSIGTERM[39;0m
-      2020-11-30T18:29:54.4400160Z [31m--------------- uncaught error --------------->
-      2020-11-30T18:29:54.4401318Z [39;0m
-      2020-11-30T18:29:54.4424846Z [31m[91m = Message of error#2
+      2020-11-30T18:29:52.0344359Z > program1.js
+      2020-11-30T18:29:53.2273945Z program1::begin
+      2020-11-30T18:29:54.3630214Z program2::begin
+      2020-11-30T18:29:54.4356321Z SIGTERM
+      2020-11-30T18:29:54.4400160Z --------------- uncaught error --------------->
+      2020-11-30T18:29:54.4401318Z 
+      2020-11-30T18:29:54.4424846Z = Message of error#2
       2020-11-30T18:29:54.4426746Z     IPC channel is already disconnected
       2020-11-30T18:29:54.4428094Z       code : 'ERR_IPC_DISCONNECTED'
       2020-11-30T18:29:54.4429307Z     Error starting the process
@@ -33988,31 +33988,31 @@ function terminateWithDetachedChild( test )
       2020-11-30T18:29:54.4441210Z     Current path : /tmp/ProcessBasic-2020-11-30-17-14-19-131-6266.tmp/terminateWithDetachedChild
       2020-11-30T18:29:54.4443722Z     Exec path : /opt/hostedtoolcache/node/13.14.0/x64/bin/node /tmp/ProcessBasic-2020-11-30-17-14-19-131-6266.tmp/terminateWithDetachedChild/program1.js
       2020-11-30T18:29:54.4445140Z
-      2020-11-30T18:29:54.4445785Z [39;0m[39;0m
-      2020-11-30T18:29:54.4453098Z [31m--------------- uncaught error ---------------<
-      2020-11-30T18:29:54.4453820Z [39;0m
-      2020-11-30T18:29:54.4638392Z [92m        [39;0m[92mTest check[39;0m[92m [39;0m[92m([39;0m[92m TestSuite[39;0m[92m:[39;0m[92m:[39;0m[92mTools.l4.process.Execution [39;0m[92m/[39;0m[92m TestRoutine[39;0m[92m:[39;0m[92m:[39;0m[92mterminateWithDetachedChild [39;0m[92m/[39;0m[92m mode [39;0m[92m:[39;0m[92m fork[39;0m[92m # [39;0m[92m1 [39;0m[92m)[39;0m[92m ... [39;0m[92mok[39;0m
-      2020-11-30T18:29:54.4756609Z [92m        [39;0m[92mTest check[39;0m[92m [39;0m[92m([39;0m[92m TestSuite[39;0m[92m:[39;0m[92m:[39;0m[92mTools.l4.process.Execution [39;0m[92m/[39;0m[92m TestRoutine[39;0m[92m:[39;0m[92m:[39;0m[92mterminateWithDetachedChild [39;0m[92m/[39;0m[92m mode [39;0m[92m:[39;0m[92m fork[39;0m[92m # [39;0m[92m2 [39;0m[92m)[39;0m[92m ... [39;0m[92mok[39;0m
-      2020-11-30T18:29:54.4886268Z [92m        [39;0m[92mTest check[39;0m[92m [39;0m[92m([39;0m[92m TestSuite[39;0m[92m:[39;0m[92m:[39;0m[92mTools.l4.process.Execution [39;0m[92m/[39;0m[92m TestRoutine[39;0m[92m:[39;0m[92m:[39;0m[92mterminateWithDetachedChild [39;0m[92m/[39;0m[92m mode [39;0m[92m:[39;0m[92m fork[39;0m[92m # [39;0m[92m3 [39;0m[92m)[39;0m[92m ... [39;0m[92mok[39;0m
-      2020-11-30T18:29:54.5011445Z [92m        [39;0m[92mTest check[39;0m[92m [39;0m[92m([39;0m[92m TestSuite[39;0m[92m:[39;0m[92m:[39;0m[92mTools.l4.process.Execution [39;0m[92m/[39;0m[92m TestRoutine[39;0m[92m:[39;0m[92m:[39;0m[92mterminateWithDetachedChild [39;0m[92m/[39;0m[92m mode [39;0m[92m:[39;0m[92m fork[39;0m[92m # [39;0m[92m4 [39;0m[92m)[39;0m[92m ... [39;0m[92mok[39;0m
-      2020-11-30T18:29:54.5133939Z [92m        [39;0m[92mTest check[39;0m[92m [39;0m[92m([39;0m[92m TestSuite[39;0m[92m:[39;0m[92m:[39;0m[92mTools.l4.process.Execution [39;0m[92m/[39;0m[92m TestRoutine[39;0m[92m:[39;0m[92m:[39;0m[92mterminateWithDetachedChild [39;0m[92m/[39;0m[92m mode [39;0m[92m:[39;0m[92m fork[39;0m[92m # [39;0m[92m5 [39;0m[92m)[39;0m[92m ... [39;0m[92mok[39;0m
-      2020-11-30T18:29:54.5282311Z [91m        - got :
+      2020-11-30T18:29:54.4445785Z 
+      2020-11-30T18:29:54.4453098Z [--------------- uncaught error ---------------<
+      2020-11-30T18:29:54.4453820Z 
+      2020-11-30T18:29:54.4638392Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::terminateWithDetachedChild / mode : fork # 1 ) ... ok
+      2020-11-30T18:29:54.4756609Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::terminateWithDetachedChild / mode : fork # 2 ) ... ok
+      2020-11-30T18:29:54.4886268Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::terminateWithDetachedChild / mode : fork # 3 ) ... ok
+      2020-11-30T18:29:54.5011445Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::terminateWithDetachedChild / mode : fork # 4 ) ... ok
+      2020-11-30T18:29:54.5133939Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::terminateWithDetachedChild / mode : fork # 5 ) ... ok
+      2020-11-30T18:29:54.5282311Z         - got :
       2020-11-30T18:29:54.5283500Z           3
       2020-11-30T18:29:54.5284258Z         - expected :
       2020-11-30T18:29:54.5284644Z           0
       2020-11-30T18:29:54.5285191Z         - difference :
-      2020-11-30T18:29:54.5285760Z           *[39;0m
-      2020-11-30T18:29:54.5303880Z [91m         [39;0m[91m
+      2020-11-30T18:29:54.5285760Z           *
+      2020-11-30T18:29:54.5303880Z
       2020-11-30T18:29:54.5304852Z         /home/runner/work/wProcess/wProcess/proto/wtools/abase/l4_process.test/Execution.test.s:34421:14
       2020-11-30T18:29:54.5306502Z           34417 :         test.ge( _.strCount( o.output, 'program2::begin' ), 0 );
       2020-11-30T18:29:54.5307147Z           34418 :         else
       2020-11-30T18:29:54.5308261Z           34419 :         test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
       2020-11-30T18:29:54.5309570Z           34420 :         test.identical( _.strCount( o.output, 'program2::end' ), 0 );
       2020-11-30T18:29:54.5310609Z         * 34421 :         test.identical( _.strCount( o.output, 'error' ), 0 );
-      2020-11-30T18:29:54.5311359Z          [39;0m[91m [39;0m
-      2020-11-30T18:29:54.5359253Z [91m[40m        [49;0m[39;0m[91m[40mTest check[49;0m[39;0m[91m[40m [49;0m[39;0m[91m[40m([49;0m[39;0m[91m[40m TestSuite[49;0m[39;0m[91m[40m:[49;0m[39;0m[91m[40m:[49;0m[39;0m[91m[40mTools.l4.process.Execution [49;0m[39;0m[91m[40m/[49;0m[39;0m[91m[40m TestRoutine[49;0m[39;0m[91m[40m:[49;0m[39;0m[91m[40m:[49;0m[39;0m[91m[40mterminateWithDetachedChild [49;0m[39;0m[91m[40m/[49;0m[39;0m[91m[40m mode [49;0m[39;0m[91m[40m:[49;0m[39;0m[91m[40m fork[49;0m[39;0m[91m[40m # [49;0m[39;0m[91m[40m6 [49;0m[39;0m[91m[40m)[49;0m[39;0m[91m[40m ... [49;0m[39;0m[91m[40mfailed[49;0m[39;0m
-      2020-11-30T18:29:54.5513474Z [91m        Test routine TestSuite::Tools.l4.process.Execution / TestRoutine::terminateWithDetachedChild was canceled![39;0m
-      2020-11-30T18:29:54.5528198Z [91m[40m        Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::terminateWithDetachedChild / mode : fork # 7 ) ... failed, throwing error[49;0m[39;0m
+      2020-11-30T18:29:54.5311359Z
+      2020-11-30T18:29:54.5359253Z Test check(TestSuite::Tools.l4.process.Execution /TestRoutine::terminateWithDetachedChild /mode : fork # 6 ) ... failed
+      2020-11-30T18:29:54.5513474Z         Test routine TestSuite::Tools.l4.process.Execution / TestRoutine::terminateWithDetachedChild was canceled!
+      2020-11-30T18:29:54.5528198Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::terminateWithDetachedChild / mode : fork # 7 ) ... failed, throwing error
       */
 
       let testAppPath = a.program({ routine : program1, locals : { mode } });
@@ -34104,7 +34104,7 @@ function terminateWithDetachedChild( test )
         else
         test.identical( _.strCount( o.output, 'program2::begin' ), 1 );
         test.identical( _.strCount( o.output, 'program2::end' ), 0 );
-        test.identical( _.strCount( o.output, 'error' ), 0 );
+        test.identical( _.strCount( o.output, 'error' ), 0 ); /* zzz : here */
         test.identical( _.strCount( o.output, 'Error' ), 0 );
         test.true( !_.process.isAlive( program2Pid ) );
         test.true( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
@@ -34631,7 +34631,7 @@ function terminateSeveralDetachedChildren( test )
         test.identical( _.strCount( o.output, 'program2::end' ), 0 );
         test.identical( _.strCount( o.output, 'program3::end' ), 0 );
         console.log( `_.process.execPathOf( program2Pid ) : ${_.process.execPathOf({ pid : program2Pid, throwing : 0 })}` );
-        test.true( !_.process.isAlive( program2Pid ) );
+        test.true( !_.process.isAlive( program2Pid ) ); /* zzz : here */
         console.log( `_.process.execPathOf( program3Pid ) : ${_.process.execPathOf({ pid : program3Pid, throwing : 0 })}` );
         test.true( !_.process.isAlive( program3Pid ) );
         test.true( !a.fileProvider.fileExists( a.abs( 'program2end' ) ) );
