@@ -355,10 +355,10 @@ function startMinimal_body( o )
     /* */
 
     // xxx
-    _.assert( _.mapIs( o ) );
-    let o3 = _.ProcessMinimal.Retype( o );
-    _.assert( o3 === o );
-    _.assert( !Object.isExtensible( o ) );
+    // _.assert( _.mapIs( o ) );
+    // let o3 = _.ProcessMinimal.Retype( o );
+    // _.assert( o3 === o );
+    // _.assert( !Object.isExtensible( o ) );
     // debugger;
 
     /* */
@@ -1786,10 +1786,10 @@ function startMultiple_body( o )
     o.currentPath = o.currentPath || _.path.current();
 
     // xxx
-    _.assert( _.mapIs( o ) );
-    let o3 = _.ProcessMultiple.Retype( o );
-    _.assert( o3 === o );
-    _.assert( !Object.isExtensible( o ) );
+    // _.assert( _.mapIs( o ) );
+    // let o3 = _.ProcessMultiple.Retype( o );
+    // _.assert( o3 === o );
+    // _.assert( !Object.isExtensible( o ) );
     // debugger;
 
     o.sessions = [];
