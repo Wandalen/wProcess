@@ -26662,10 +26662,10 @@ function startMinimalOptionThrowingExitCode( test )
       options.conTerminate.finally( ( err, op ) =>
       {
         let exp = `Process returned exit code ${options.exitCode}\n`;
-        exp +=`Launched as ${mode === 'fork' || mode === 'shell' ? _.strQuote( options.execPath2 ) : _.strQuote( 'node ' + options.execPath2 )} \n`;
+        exp +=`Launched as ${_.strQuote( options.execPath2 )}\n`;
         exp += `Launched at ${_.strQuote( options.currentPath )} \n`;
         exp += `\n -> Stderr\n -  `;
-        exp += `${_.strLinesIndentation( `${options.execPath2}:13\n    throw new MyError();\n    ^\n\n[MyError: my error is thrown]\n`, ' -  ' )} '\n -< Stderr`;
+        exp += `${_.strLinesIndentation( `${testAppPath}:13\n    throw new MyError();\n    ^\n\n[MyError: my error is thrown]\n`, ' -  ' )} '\n -< Stderr`;
         test.equivalent( err.message, exp );
         test.identical( op, undefined );
 
