@@ -355,6 +355,7 @@ function startMinimal_body( o )
     /* */
 
     // xxx
+    // _.assert( _.mapIs( o ) );
     // let o3 = _.ProcessMinimal.Retype( o );
     // _.assert( o3 === o );
     // _.assert( !Object.isExtensible( o ) );
@@ -468,7 +469,7 @@ function startMinimal_body( o )
         o.ready.deasync();
         o.ready.thenGive( 1 );
         if( o.when.delay )
-        _.time._sleep( o.when.delay ); /* xxx : temp experiment */
+        _.time.sleep( o.when.delay );
         run2();
       }
       catch( err )
@@ -482,6 +483,8 @@ function startMinimal_body( o )
     }
     else
     {
+      /* qqq for Dmytro : ! */
+      // console.log( 'run1', o.ready.exportString() );
       if( o.when.delay )
       o.ready.delay( o.when.delay );
       o.ready.thenGive( run2 );
@@ -494,6 +497,7 @@ function startMinimal_body( o )
 
   function run2()
   {
+    // console.log( 'run2', o.ready.exportString() );
 
     try
     {
@@ -503,12 +507,16 @@ function startMinimal_body( o )
       timeOutForm();
       pipe();
 
+      /* qqq for Dmytro : ! */
+      // console.log( 'run2:1' );
       if( o.dry )
       {
+        // console.log( 'run2:2' );
         if( o.error )
         handleError( o.error );
         else
         handleClose( null, null );
+        // console.log( 'run2:3' );
       }
       else
       {
@@ -520,6 +528,7 @@ function startMinimal_body( o )
           handleClose( o.pnd.status, o.pnd.signal );
         }
       }
+      // console.log( 'run2:4' );
 
     }
     catch( err )
@@ -1159,6 +1168,10 @@ function startMinimal_body( o )
 
     if( _.bufferNodeIs( data ) )
     data = data.toString( 'utf8' );
+
+    if( !_.strIs( data ) )
+    data = String( data );
+
     if( o.outputGraying )
     data = StripAnsi( data );
 
@@ -1173,26 +1186,37 @@ function startMinimal_body( o )
     if( !o.outputPiping )
     return;
 
-    /* xxx yyy qqq for Yevhen : cover and complete */
+    /* yyy qqq for Yevhen : cover and complete */
     // data = _.strRemoveEnd( data, '\n' );
+
+    let splits;
+    if( o.outputPrefixing || ( channel === 'err' && o.outputColoring.err ) || ( channel === 'out' && o.outputColoring.out ) )
+    splits = data.split( '\n' );
 
     /* qqq for Yevhen : changed how option outputPrefixing works | aaa : Done. */
     if( o.outputPrefixing )
     {
       let prefix = channel === 'err' ? _errPrefix : _outPrefix;
-      data = prefix + _.strLinesIndentation( data, prefix );
+      splits = splits.map( ( split, i ) => ( i < splits.length-1 || split.length ) ? prefix + split : split );
+      // data = prefix + _.strLinesIndentation( data, prefix );
     }
 
     if( channel === 'err' )
     {
       if( o.outputColoring.err )
-      data = _.ct.format( data, 'pipe.negative' );
+      splits = splits.map( ( data ) => data ? _.ct.format( data, 'pipe.negative' ) : data );
+      // data = _.ct.format( data, 'pipe.negative' );
     }
-    else
+    else if( channel === 'out' )
     {
       if( o.outputColoring.out )
-      data = _.ct.format( data, 'pipe.neutral' );
+      splits = splits.map( ( data ) => data ? _.ct.format( data, 'pipe.neutral' ) : data );
+      // data = _.ct.format( data, 'pipe.neutral' );
     }
+    else _.assert( 0 );
+
+    if( splits !== undefined )
+    data = splits.join( '\n' )
 
     log( data, channel );
   }
@@ -1207,8 +1231,23 @@ function startMinimal_body( o )
     if( msg === undefined )
     return;
 
+    if( !_.strIs( msg ) )
+    {
+      msg = String( msg );
+      if( !_.strEnds( msg, '\n' ) )
+      msg = msg + '\n';
+    }
+
     if( o.outputAdditive )
     {
+      if( _.strEnds( msg, '\n' ) )
+      {
+        msg = _.strRemoveEnd( msg, '\n' );
+      }
+      else
+      {
+        /* xxx yyy qqq for Yevhen : not implemeted yet */
+      }
       if( channel === 'err' )
       o.logger.error( msg );
       else
@@ -1219,7 +1258,7 @@ function startMinimal_body( o )
       _decoratedOutOutput += msg;
       if( channel === 'err' )
       _decoratedErrOutput += msg;
-      /* xxx yyy qqq for Yevhen : cover */
+      /* yyy qqq for Yevhen : cover */
       // _decoratedOutOutput += msg + '\n';
       // if( channel === 'err' )
       // _decoratedErrOutput += msg + '\n';
@@ -1274,7 +1313,7 @@ startMinimal_body.defaults =
   outputPrefixing : 0,
   outputPiping : null,
   outputCollecting : 0,
-  outputAdditive : null, /* qqq for Yevhen : cover the option */
+  outputAdditive : null, /* qqq for Yevhen : cover the option | aaa : Done. */
   outputColoring : 1,
   outputGraying : 0,
   inputMirroring : 1,
@@ -1361,7 +1400,7 @@ function startSingle_body( o )
         o.ready.deasync();
         o.ready.thenGive( 1 );
         if( o.when.delay )
-        _.time._sleep( o.when.delay ); /* xxx : temp experiment */
+        _.time.sleep( o.when.delay );
         run2();
       }
       catch( err )
@@ -1761,6 +1800,13 @@ function startMultiple_body( o )
     o.outputAdditive = _.arrayIs( o.execPath ) && o.execPath.length > 1 && o.concurrent;
     _.assert( _.boolLike( o.outputAdditive ) );
     o.currentPath = o.currentPath || _.path.current();
+
+    // xxx
+    // _.assert( _.mapIs( o ) );
+    // let o3 = _.ProcessMultiple.Retype( o );
+    // _.assert( o3 === o );
+    // _.assert( !Object.isExtensible( o ) );
+    // debugger;
 
     o.sessions = [];
     o.state = 'initial'; /* `initial`, `starting`, `started`, `terminating`, `terminated`, `disconnected` */
@@ -2220,7 +2266,6 @@ function startNjs_body( o )
 
   if( interpreterArgs !== '' )
   o.interpreterArgs = _.arrayAppendArray( o.interpreterArgs, interpreterArgs );
-  // o.interpreterArgs = o.interpreterArgs === null ? interpreterArgs : o.interpreterArgs.concat( interpreterArgs );
 
   if( o.mode === 'spawn' || o.mode === 'shell' )
   execPath = _.strConcat([ 'node', execPath ]);
