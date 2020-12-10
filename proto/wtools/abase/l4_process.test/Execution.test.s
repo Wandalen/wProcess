@@ -36716,6 +36716,140 @@ function childrenOptionFormatList( test )
 // experiment
 // --
 
+
+function outputLog( test )
+{
+  let context = this;
+  let a = context.assetFor( test, 'output' );
+  let testAppPath = a.program( testApp );
+  let modes = [ 'fork', /*'spawn', 'shell'*/ ];
+
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+
+  return a.ready;
+
+  /* - */
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, collect output`;
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath } });
+
+      let options =
+      {
+        // execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        execPath : 'node ' + testAppParentPath,
+        outputCollecting : 1,
+        // inputMirroring : 1,
+        // outputAdditive : 1,
+        // mode
+      }
+
+      let returned = _.process.startMinimal( options );
+
+      returned
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, 'abcabc\nabcabc' )
+        console.log( 'OUT : ', '++' +  op.output + '++' );
+
+        a.fileProvider.fileDelete( testAppParentPath );
+        return null;
+      })
+
+      // options.conStart
+      // .then( ( op ) =>
+      // {
+      //   test.identical( op.exitCode, null );
+      //   test.identical( op.ended, false );
+      //   console.log( 'OUT : ', '++' +  op.output + '++' );
+
+      //   // a.fileProvider.fileDelete( testAppParentPath );
+      //   return _.time.out( context.t0 );
+      // })
+
+      // options.ready
+      // .then( ( op ) =>
+      // {
+      //   console.log( 'OUT2 : ', '++' +  op.output + '++' );
+
+      //   // a.fileProvider.fileDelete( testAppParentPath );
+      //   // return _.time.out( context.t0 );
+      //   return null
+      // })
+
+      return returned;
+    })
+
+    return ready;
+  }
+
+  /* - */
+
+  function testAppParent()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+
+    let o =
+    {
+      // execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+      execPath : mode === 'fork' ? [ testAppPath, testAppPath ] : [ 'node ' + testAppPath, 'node ' + testAppPath ],
+      mode,
+      inputMirroring : 0,
+      // outputAdditive : 1,
+      outputPiping : 1,
+      outputCollecting : 1,
+      outputColoring : 0
+    }
+
+    // let returned =  _.process.startMinimal( o );
+    let returned =  _.process.startMultiple( o );
+
+    // o.pnd.stdout.on( 'data', ( data ) =>
+    // {
+      // console.log( 'd :', data.toString() );
+      // console.log( 'l :', data.length );
+      // process.stdout.write( data );
+    // })
+
+    return returned
+    .then( ( op ) =>
+    {
+      process.stdout.write( op.output );
+      // console.log( op.output )
+      return null;
+    })
+
+  }
+
+  function testApp()
+  {
+/*  let bytes10024 =
+`
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam ac dapibus eros. Suspendisse ac mauris eu nunc volutpat iaculis. Praesent malesuada pulvinar iaculis. Cras vel sagittis quam. Pellentesque dignissim hendrerit magna, in convallis libero varius in. Proin tempus cursus odio, eget malesuada mi mollis ac. Nullam a eleifend justo. Integer nunc nulla, dictum nec imperdiet et, dictum non purus. Etiam vel eros at nunc porta vehicula. Aenean ligula eros, fermentum sit amet vulputate eget, varius ac leo. Maecenas dictum nisi suscipit est sollicitudin ornare. Aliquam bibendum nunc malesuada, convallis mi in, accumsan nulla. Mauris tincidunt facilisis auctor. Praesent id elit pulvinar, blandit lorem vitae, porttitor odio.Duis vitae elit aliquet, porta dolor quis, bibendum nisl. Nunc consequat est ornare leo lobortis, a ultricies quam tempor. Aliquam nec nibh mattis, fermentum lectus eget, rhoncus enim. Sed tortor nulla, sollicitudin quis sollicitudin et, posuere sed nunc. Vestibulum blandit libero orci, ut facilisis erat vestibulum in. Maecenas mollis mi eget tellus fermentum finibus vel vitae sapien. Vivamus molestie a nulla et laoreet. Nullam cursus ante eget erat tincidunt, eget gravida nisl tristique. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Nunc diam sapien, tempor eu fringilla sed, luctus in dolor. Proin dignissim, quam vitae luctus faucibus, ante leo porttitor nunc, at pharetra nibh est at lorem. Mauris tempor ligula sed posuere congue. Morbi id sodales libero. Nam et nisi congue, finibus purus eget, porttitor massa. Donec facilisis ut orci vitae venenatis. Vivamus ac nulla sit amet eros vestibulum blandit vitae a eros.Cras luctus, diam a semper cursus, quam ligula imperdiet velit, eget elementum justo ante ut erat. Praesent faucibus molestie sapien et rhoncus. Sed pretium sem in auctor luctus. Duis tincidunt leo non turpis suscipit suscipit. Ut eu maximus tellus. Morbi suscipit urna eu leo posuere, at venenatis sem eleifend. Nam efficitur arcu ut lacus dignissim convallis at a ex. Nunc semper sodales turpis quis tristique. Morbi tincidunt luctus pulvinar. Vestibulum volutpat non metus quis finibus. Nullam egestas accumsan quam quis aliquet.Integer nec ipsum mi. Nulla scelerisque magna vel tincidunt varius. Vestibulum eleifend commodo maximus. Mauris a libero at nibh malesuada dignissim a vel ex. In augue metus, interdum ac risus ac, pulvinar fringilla mauris. Donec et varius libero, ac ultrices ipsum. Morbi quis nulla elementum, egestas mi et, imperdiet massa. Proin id lorem ante. Aliquam erat volutpat. Vestibulum tempus odio rhoncus eros volutpat, sed convallis nisl congue. Donec viverra, risus et rutrum consectetur, lectus risus elementum nibh, quis pretium nulla magna eu urna.Etiam nibh tellus, ultrices a purus at, ullamcorper pulvinar velit. Suspendisse congue dolor nec turpis eleifend, in tempor nisl accumsan. Praesent ut erat nisi. Sed sed libero bibendum, bibendum quam in, porttitor leo. Pellentesque pharetra vel orci id viverra. Aenean a dui eget mauris laoreet facilisis. Quisque nisi libero, iaculis vel posuere eget, molestie eu felis. Phasellus tempor diam vel nulla ornare, ac vestibulum neque vulputate. Donec vehicula, libero eget sagittis vehicula, libero arcu eleifend turpis, eu rutrum lectus nisi et neque. Aenean tempor vitae est a ornare. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi et consequat nibh, non suscipit lectus. Fusce malesuada nisi quam, facilisis gravida enim laoreet non. Ut et ante sodales, vehicula ante eget, sagittis enim. Pellentesque turpis mi, malesuada id lectus nec, rutrum porttitor neque.Nulla elementum vulputate lacus, ac consequat leo tincidunt sed. Praesent lorem enim, mollis eu tortor ut, egestas elementum urna. Nulla facilisi. Nunc eu tincidunt ipsum, quis dapibus nisl. Suspendisse ut elementum ex, eget dapibus ex. Ut vehicula, velit eget dignissim pharetra, nunc lacus fermentum nulla, in malesuada elit est ac arcu. Aenean consequat nibh sit amet tellus scelerisque, nec imperdiet nisi condimentum. Sed consectetur, nunc quis ultrices faucibus, purus dui tincidunt quam, et egestas nulla diam ac lorem. Duis ac gravida nisi, finibus feugiat libero. Nam magna tortor, dapibus eget posuere sit amet, luctus a enim. In finibus, urna eget scelerisque pulvinar, elit augue iaculis arcu, nec hendrerit dui dolor eget leo. Mauris in velit blandit, consequat augue eget, lobortis justo. Interdum et malesuada fames ac ante ipsum primis in faucibus. Ut ornare tortor quis sem auctor, at mattis leo tincidunt. Phasellus in justo nec turpis hendrerit efficitur sit amet vitae dui.Duis vehicula sem a arcu maximus semper. Quisque elementum pellentesque lorem, nec egestas lorem lobortis quis. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Maecenas congue dolor ut diam scelerisque, non cursus erat molestie. Aenean euismod finibus est non bibendum. Integer fermentum, neque in molestie aliquam, mauris libero viverra quam, et malesuada quam arcu vel eros. Mauris orci ante, pulvinar ut arcu luctus, sagittis aliquam nisi. In a ligula eu lorem vulputate vulputate commodo at turpis. Vivamus viverra dolor in arcu pretium, quis molestie mauris porttitor. Aenean eget neque nisi.Morbi eu tellus lacus. Nunc libero erat, gravida vitae ullamcorper eget, mollis at nisi. Duis posuere rutrum magna sed ornare. Vestibulum id fringilla est, eget lobortis risus. Sed fermentum justo eget nisl convallis vestibulum. Donec sit amet sollicitudin libero. Suspendisse placerat nulla id enim laoreet volutpat.Mauris dui tortor, volutpat blandit tincidunt vitae, vehicula non enim. Duis gravida sem vel lectus aliquam, id fringilla quam efficitur. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean maximus eu lacus at facilisis. Nulla magna ex, luctus ut ullamcorper sed, tempor id diam. In nec tortor id diam sagittis cursus vel blandit turpis. In fermentum finibus porta. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Praesent fringilla turpis id purus pretium, et ultrices nisl convallis. Nunc quis est a nisi consectetur vehicula. In quam sapien, tincidunt eget porttitor vitae, tempus id lectus. Sed non augue lobortis, condimentum eros sed, consequat urna. Etiam porttitor congue enim, tincidunt feugiat ligula efficitur vel.Phasellus vitae leo ut lacus vestibulum feugiat sed vel dolor. Proin pellentesque maximus est, sed malesuada velit cursus id. Mauris lacus risus, consequat ac arcu vel, vehicula tempor lorem. Integer efficitur cursus erat vel maximus. Vivamus at ullamcorper est, in blandit sapien. Sed congue risus et laoreet consequat. In mollis congue enim, sit amet convallis enim imperdiet sit amet. Cras eget odio congue, auctor orci id, sagittis est. Proin molestie quis dolor sit amet scelerisque. Praesent placerat, mi vel mollis lacinia, ante diam ullamcorper augue, eget molestie velit ligula quis velit. Pellentesque id iaculis eros. Nullam faucibus semper est ac feugiat.Fusce pulvinar risus erat, sit amet sollicitudin arcu congue sed. Vestibulum venenatis justo quis semper auctor. Vivamus euismod enim sed tincidunt posuere. Fusce viverra molestie mauris id ornare. Mauris pulvinar, leo eget sodales accumsan, dolor quam efficitur urna, vitae gravida neque leo et ligula. Ut aliquam felis id lorem lacinia volutpat. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Nam ac tortor vel urna aliquam ultrices venenatis et nunc. In facilisis pharetra lorem et mattis. Pellentesque egestas mi metus, quis placerat nulla consectetur vel. Sed mattis erat ac facilisis pulvinar. Donec tempus a urna a consectetur. Quisque in mi lectus. Sed et felis blandit, pretium risus eget, suscipit felis. Sed pulvinar risus at nulla lobortis, a iaculis turpis consequat.Nam eget lectus nibh. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Sed pulvinar turpis orci, vitae sodales libero semper porttitor. Vestibulum mattis enim nec gravida aliquam. Phasellus eget nisl ante. Suspendisse et velit a neque pulvinar posuere. Aenean quis lacus est a. NEXT CHUNK WITHOUT NEW LINE.
+`
+*/
+
+    // process.stdout.write( 'a1a2\na3b1b2b3\nc1c2c3' );
+    // process.stdout.write( 'again1\nagain2\nagain3' );
+
+    // process.stdout.write( bytes10024 );
+    process.stdout.write( 'a' );
+    setTimeout( () => process.stdout.write( 'c' ), context.t0 )
+    process.stdout.write( 'b' );
+    // process.stdout.write( 'c' );
+    // process.stdout.write( 'd' );
+  }
+}
+
+//
+
 function streamJoinExperiment()
 {
   let context = this;
@@ -37229,6 +37363,7 @@ var Proto =
 
     // experiments
 
+    outputLog,
     experimentIpcDeasync,
     streamJoinExperiment,
     experiment,
