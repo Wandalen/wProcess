@@ -28363,6 +28363,85 @@ startMultipleOptionOutputAdditive.rapidity = -1;
 
 //
 
+function outputLog( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( testApp );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
+
+  /* - */
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, collect output`;
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath } });
+
+      let options =
+      {
+        execPath : 'node ' + testAppParentPath,
+        outputCollecting : 1,
+      }
+
+      return _.process.startMinimal( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        /*
+          - got :
+            'a
+            b
+            c
+            '
+          - expected :
+            'abc'
+          - difference :
+            'a*
+        */
+        test.identical( op.output, 'abc' )
+
+        a.fileProvider.fileDelete( testAppParentPath );
+        return null;
+      })
+    })
+
+    return ready;
+  }
+
+  /* - */
+
+  function testAppParent()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+
+    let o =
+    {
+      execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+      mode,
+      inputMirroring : 0,
+      outputColoring : 0
+    }
+    return _.process.startMinimal( o );
+  }
+
+  function testApp()
+  {
+    process.stdout.write( 'a' );
+    setTimeout( () => process.stdout.write( 'c' ), context.t0 )
+    process.stdout.write( 'b' );
+  }
+}
+
+//
+
 function kill( test )
 {
   let context = this;
@@ -36716,86 +36795,6 @@ function childrenOptionFormatList( test )
 // experiment
 // --
 
-
-function outputLog( test )
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
-  let modes = [ 'fork', 'spawn', 'shell' ];
-  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
-  return a.ready;
-
-  /* - */
-
-  function run( mode )
-  {
-    let ready = new _.Consequence().take( null );
-
-    ready.then( () =>
-    {
-      test.case = `mode : ${mode}, collect output`;
-      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath } });
-
-      let options =
-      {
-        execPath : 'node ' + testAppParentPath,
-        outputCollecting : 1,
-      }
-
-      return _.process.startMinimal( options )
-      .then( ( op ) =>
-      {
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        /*
-          - got :
-            'a
-            b
-            c
-            '
-          - expected :
-            'abc'
-          - difference :
-            'a*
-        */
-        test.identical( op.output, 'abc' )
-
-        a.fileProvider.fileDelete( testAppParentPath );
-        return null;
-      })
-    })
-
-    return ready;
-  }
-
-  /* - */
-
-  function testAppParent()
-  {
-    let _ = require( toolsPath );
-    _.include( 'wProcess' );
-
-    let o =
-    {
-      execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
-      mode,
-      inputMirroring : 0,
-      outputColoring : 0
-    }
-    return _.process.startMinimal( o );
-  }
-
-  function testApp()
-  {
-    process.stdout.write( 'a' );
-    setTimeout( () => process.stdout.write( 'c' ), context.t0 )
-    process.stdout.write( 'b' );
-  }
-}
-
-//
-
 function streamJoinExperiment()
 {
   let context = this;
@@ -37233,6 +37232,7 @@ var Proto =
     startMultipleOptionStdioIgnore,
     startSingleOptionOutputAdditive,
     startMultipleOptionOutputAdditive,
+    outputLog,
 
     // etc
 
