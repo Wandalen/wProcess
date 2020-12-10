@@ -28389,7 +28389,7 @@ function outputLog( test )
         outputCollecting : 1,
       }
 
-      return _.process.startMinimal( options )
+      return _.process.startSingle( options )
       .then( ( op ) =>
       {
         test.identical( op.exitCode, 0 );
@@ -28427,9 +28427,10 @@ function outputLog( test )
       execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
       mode,
       inputMirroring : 0,
-      outputColoring : 0
+      outputColoring : 0,
+      outputPiping : 1
     }
-    return _.process.startMinimal( o );
+    return _.process.startSingle( o );
   }
 
   function testApp()
