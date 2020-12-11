@@ -506,6 +506,7 @@ function startMinimal_body( o )
       run3();
       timeOutForm();
       pipe();
+      disconnectMaybe();
 
       /* qqq for Dmytro : ! */
       // console.log( 'run2:1' );
@@ -584,15 +585,8 @@ function startMinimal_body( o )
 
     o.state = 'started';
     
-    if( o.detaching === 2 )
-    {
-      o.disconnect();
-      o.pnd.on( 'disconnect', () => o.conStart.take( o ) )
-    }
-    else
-    {
-      o.conStart.take( o );
-    }
+    if( o.detaching !== 2 )
+    o.conStart.take( o );
     
   }
 
@@ -912,6 +906,9 @@ function startMinimal_body( o )
     /* bad solution
     subprocess waits what does not let emit event "close" in parent process
     */
+   
+    if( o.detaching === 2 )
+    o.conStart.take( o );
 
   }
 
@@ -945,7 +942,7 @@ function startMinimal_body( o )
     if( !this.ended )
     {
       this.state = 'disconnected';
-      end2( undefined  );
+      end2( undefined );
     }
 
     return true;
@@ -1267,6 +1264,12 @@ function startMinimal_body( o )
   }
 
   /* */
+  
+  function disconnectMaybe()
+  {
+    if( o.detaching === 2 )
+    o.disconnect();
+  }
 
 }
 
