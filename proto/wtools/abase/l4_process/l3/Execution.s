@@ -702,7 +702,7 @@ function startMinimal_body( o )
 
   function end2( err )
   {
-
+    debugger
     if( Config.debug )
     try
     {
@@ -724,7 +724,7 @@ function startMinimal_body( o )
 
   function end3()
   {
-
+    debugger;
     if( o.procedure )
     if( o.procedure.isAlive() )
     o.procedure.end();
@@ -1231,33 +1231,48 @@ function startMinimal_body( o )
 
     if( o.outputAdditive )
     {
+      debugger;
+      if( o.inputMirroring )
+      {
+        if( _.strHas( msg, o.execPath2 ) )
+        msg = msg + '\n';
+      }
+
       if( _.strEnds( msg, '\n' ) )
       {
-        msg = _.strRemoveEnd( msg, '\n' );
-        // msg = _outputAdditive + _.strRemoveEnd( msg, '\n' );
+        debugger
+        // msg = _.strRemoveEnd( msg, '\n' );
+        msg = _outputAdditive + _.strRemoveEnd( msg, '\n' );
       }
       else
       {
+        debugger
         /* xxx yyy qqq for Yevhen : not implemeted yet */
-        // if( !_.strHas( msg, '\n' ) )
-        // {
-        //   debugger;
-        //   _outputAdditive += msg;
-        //   if( o.state !== `terminating` ) /* `initial`, `starting`, `started`, `terminating`, `terminated`, `disconnected` */
-        //   return;
-        // }
-        // else
-        // {
-        //   debugger;
-        //   let splitted = _.strSplit({ src : msg, delimiter : '\n', preservingDelimiters : 0, preservingEmpty : 1, stripping : 0 });
-        //   msg = splitted.slice( 0, splitted.length - 1 ).join( '\n' );
-        //   _outputAdditive += splitted[ splitted.length - 1 ];
-        // }
+        if( !_.strHas( msg, '\n' ) )
+        {
+          debugger;
+          /* Check whether `msg` is the last chunk */
+          _outputAdditive += msg;
+          return;
+        }
+        else
+        {
+          debugger;
+          let splitted = _.strSplitFast({ src : msg, delimeter : '\n', preservingDelimeters : 0, preservingEmpty : 1 });
+          msg = splitted.slice( 0, splitted.length - 1 ).join( '\n' );
+          _outputAdditive += splitted[ splitted.length - 1 ];
+          // console.log( 'splitted : ', splitted );
+          // console.log( 'msg : ', '++' + msg + '++' );
+          // console.log( 'output : ', '++' + splitted[ splitted.length - 1 ] + '++' );
+          // console.log( '_outputAdditive : ', '++' + _outputAdditive + '++' );
+        }
       }
       if( channel === 'err' )
       o.logger.error( msg );
       else
       o.logger.log( msg );
+      debugger
+      _outputAdditive = '';
     }
     else
     {
