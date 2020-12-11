@@ -28368,7 +28368,10 @@ function outputLog( test )
   let context = this;
   let a = context.assetFor( test, false );
   let testAppPath = a.program( testApp );
-  let modes = [ 'fork', 'spawn', 'shell' ];
+  let testAppPath2 = a.program( testApp2 );
+  let testAppPath3 = a.program( testApp3 );
+  let testAppPath4 = a.program( testApp4 );
+  let modes = [ 'fork', /*'spawn', 'shell'*/ ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
 
@@ -28380,7 +28383,7 @@ function outputLog( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${mode}, collect output`;
+      test.case = `mode : ${mode}, without new line`;
       let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath } });
 
       let options =
@@ -28406,6 +28409,117 @@ function outputLog( test )
             'a*
         */
         test.identical( op.output, 'abc' )
+
+        a.fileProvider.fileDelete( testAppParentPath );
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, new line ath the end`;
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath : testAppPath2 } });
+
+      let options =
+      {
+        execPath : 'node ' + testAppParentPath,
+        outputCollecting : 1,
+      }
+
+      return _.process.startSingle( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        /*
+          - got :
+            'a
+            bc
+            '
+          - expected :
+            'abc
+            '
+          - difference :
+            'a*
+        */
+        test.identical( op.output, 'abc\n' )
+
+        a.fileProvider.fileDelete( testAppParentPath );
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, new line at the middle`;
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath : testAppPath3 } });
+
+      let options =
+      {
+        execPath : 'node ' + testAppParentPath,
+        outputCollecting : 1,
+      }
+
+      return _.process.startSingle( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        /*
+          - got :
+            'ab
+            c
+            d
+            '
+          - expected :
+            'ab
+            cd'
+          - difference :
+            'a*
+        */
+        test.identical( op.output, 'ab\ncd' )
+
+        a.fileProvider.fileDelete( testAppParentPath );
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, new line at the middle & end`;
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath : testAppPath4 } });
+
+      let options =
+      {
+        execPath : 'node ' + testAppParentPath,
+        outputCollecting : 1,
+      }
+
+      return _.process.startSingle( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        /*
+          - got :
+            'ab
+            c
+            d
+            '
+          - expected :
+            'ab
+            cd
+            '
+          - difference :
+            'a*
+        */
+        test.identical( op.output, 'ab\ncd\n' )
 
         a.fileProvider.fileDelete( testAppParentPath );
         return null;
@@ -28438,6 +28552,27 @@ function outputLog( test )
     process.stdout.write( 'a' );
     setTimeout( () => process.stdout.write( 'c' ), context.t0 )
     process.stdout.write( 'b' );
+  }
+
+  function testApp2()
+  {
+    process.stdout.write( 'a' );
+    process.stdout.write( 'b' )
+    process.stdout.write( 'c' );
+    console.log()
+  }
+
+  function testApp3()
+  {
+    process.stdout.write( 'ab\nc' );
+    process.stdout.write( 'd' )
+  }
+
+  function testApp4()
+  {
+    process.stdout.write( 'ab\nc' );
+    process.stdout.write( 'd' )
+    console.log()
   }
 }
 

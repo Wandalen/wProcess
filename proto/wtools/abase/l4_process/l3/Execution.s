@@ -202,6 +202,7 @@ function startMinimal_body( o )
   /* qqq for Yevhen : use buffer instead */
   let _errOutput = '';
   let _decoratedOutOutput = '';
+  let _outputAdditive = '';
   let _decoratedErrOutput = '';
   let _errPrefix = null;
   let _outPrefix = null;
@@ -1233,10 +1234,25 @@ function startMinimal_body( o )
       if( _.strEnds( msg, '\n' ) )
       {
         msg = _.strRemoveEnd( msg, '\n' );
+        // msg = _outputAdditive + _.strRemoveEnd( msg, '\n' );
       }
       else
       {
         /* xxx yyy qqq for Yevhen : not implemeted yet */
+        // if( !_.strHas( msg, '\n' ) )
+        // {
+        //   debugger;
+        //   _outputAdditive += msg;
+        //   if( o.state !== `terminating` ) /* `initial`, `starting`, `started`, `terminating`, `terminated`, `disconnected` */
+        //   return;
+        // }
+        // else
+        // {
+        //   debugger;
+        //   let splitted = _.strSplit({ src : msg, delimiter : '\n', preservingDelimiters : 0, preservingEmpty : 1, stripping : 0 });
+        //   msg = splitted.slice( 0, splitted.length - 1 ).join( '\n' );
+        //   _outputAdditive += splitted[ splitted.length - 1 ];
+        // }
       }
       if( channel === 'err' )
       o.logger.error( msg );
