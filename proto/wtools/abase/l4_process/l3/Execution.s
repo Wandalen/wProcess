@@ -508,6 +508,7 @@ function startMinimal_body( o )
       run3();
       timeOutForm();
       pipe();
+      disconnectMaybe();
 
       /* qqq for Dmytro : ! */
       // console.log( 'run2:1' );
@@ -585,7 +586,10 @@ function startMinimal_body( o )
     /* state */
 
     o.state = 'started';
+    
+    if( o.detaching !== 2 )
     o.conStart.take( o );
+    
   }
 
   /* */
@@ -904,6 +908,9 @@ function startMinimal_body( o )
     /* bad solution
     subprocess waits what does not let emit event "close" in parent process
     */
+   
+    if( o.detaching === 2 )
+    o.conStart.take( o );
 
   }
 
@@ -928,16 +935,16 @@ function startMinimal_body( o )
     if( this.pnd.stderr )
     this.pnd.stderr.destroy();
 
+    this.pnd.unref();
+    
     if( this.pnd.disconnect )
     if( this.pnd.connected )
     this.pnd.disconnect();
 
-    this.pnd.unref();
-
     if( !this.ended )
     {
       this.state = 'disconnected';
-      end2( undefined  );
+      end2( undefined );
     }
 
     return true;
@@ -1320,6 +1327,12 @@ function startMinimal_body( o )
   }
 
   /* */
+  
+  function disconnectMaybe()
+  {
+    if( o.detaching === 2 )
+    o.disconnect();
+  }
 
 }
 
@@ -1524,10 +1537,11 @@ function startSingle_body( o )
     o.ipc = true;
     o.args = [];
     o.detaching = true;
-    o.stdio = _.dup( 'pipe', 3 );
+    o.stdio = _.dup( 'ignore', 3 );
     o.stdio.push( 'ipc' );
     o.inputMirroring = 0;
-    o.outputPiping = 1;
+    o.outputPiping = 0;
+    o.outputCollecting = 0;
 
   }
 
@@ -1554,6 +1568,8 @@ function startSingle_body( o )
 
       return _.process.startMultiple( o );
     })
+    
+    process.send( 'ready' );
 
     /* */
 
@@ -1595,13 +1611,18 @@ function startSingle_body( o )
 
   function runAfterDeath()
   {
-    o.conStart.give( function( err, op )
+    o.conStart.then( ( op ) =>
     {
-      if( err )
-      return this.error( err );
+      let disconnected = _.Consequence();
 
-      o.disconnect();
-
+      o.pnd.on( 'message', () => 
+      {
+        o.pnd.on( 'disconnect', () => disconnected.take( op ) );
+        o.disconnect();
+      })
+      
+      return disconnected;
+      
       // let ipc = require( 'node-ipc' );
 
       // o.pnd.on( 'message', ( ipcHostId ) =>
@@ -1621,8 +1642,6 @@ function startSingle_body( o )
       //      });
       //   })
       // })
-
-      this.take( op );
     })
   }
 
