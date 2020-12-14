@@ -10755,7 +10755,7 @@ function startSingleAfterDeathTerminatingMain( test )
       return test.shouldThrowErrorSync( () => _.process.start( o ) )
 
       _.process.start( o );
-      
+
       let secondaryPid;
       let secondaryReady = _.Consequence();
 
@@ -10764,26 +10764,26 @@ function startSingleAfterDeathTerminatingMain( test )
         secondaryPid = _.numberFrom( e );
         secondaryReady.take( secondaryPid );
       })
-      
-      secondaryReady.then( () => 
+
+      secondaryReady.then( () =>
       {
         stack.push( 'secondaryReady' );
-        
+
         test.will = 'secondary process is alive'
         test.true( _.process.isAlive( secondaryPid ) );
         return _.process.terminate({ pid : o.pnd.pid, withChildren : 0 })
       })
-      
+
       o.conTerminate.then( () =>
       {
         stack.push( 'conTerminate1' );
 
         test.will = 'program1 terminated'
         test.notIdentical( o.exitCode, 0 );
-        
+
         test.will = 'secondary process is alive'
         test.true( _.process.isAlive( secondaryPid ) );
-        
+
         return _.time.out( context.t2 * 3 ); /* 15000 */
       })
 
@@ -13804,7 +13804,7 @@ function startMinimalDetachingWaitForDisconnect( test )
         test.true( _.process.isAlive( childPid ) );
         return _.time.out( context.t2 * 3 );
       })
-      
+
       con.then( () =>
       {
         test.true( !_.process.isAlive( childPid ) );
@@ -13817,7 +13817,7 @@ function startMinimalDetachingWaitForDisconnect( test )
 
       return con;
     })
-    
+
     return ready;
   }
 
@@ -13841,13 +13841,13 @@ function startMinimalDetachingWaitForDisconnect( test )
     _.mapExtend( o, args.map );
 
     _.process.startMinimal( o );
-    
-    o.conStart.thenGive( () => 
+
+    o.conStart.thenGive( () =>
     {
       process.send( o.pnd.pid )
     })
-    
-    _.time.out( context.t2 * 2, () => 
+
+    _.time.out( context.t2 * 2, () =>
     {
       console.log( 'parent::end' );
     })
@@ -13874,6 +13874,129 @@ startMinimalDetachingWaitForDisconnect.rapidity = -1;
 startMinimalDetachingWaitForDisconnect.timeOut = 3e5;
 startMinimalDetachingWaitForDisconnect.description =
 `
+Disconnects detached process as soon as possible.
+Consequence conStart should give an message when process is disconnected.
+`
+//
+
+function startMinimalTrueDetachedWaitForParentDeath( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testFilePath = a.abs( a.routinePath, 'testFile' );
+  let modes = [ 'fork' ];
+
+  modes.forEach( ( mode ) =>
+  {
+    a.ready.then( () =>
+    {
+      a.fileProvider.filesDelete( a.routinePath );
+      let locals = { mode }
+      a.program({ routine : testAppParent, locals });
+      a.program( testAppChild );
+      return null;
+    })
+
+    a.ready.tap( () => test.open( mode ) );
+    a.ready.then( () => run( mode ) );
+    a.ready.tap( () => test.close( mode ) );
+  });
+
+  return a.ready;
+
+  /* - */
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null )
+
+    /*  */
+
+    ready.then( () =>
+    {
+      a.fileProvider.filesDelete( testFilePath );
+      a.fileProvider.dirMakeForFile( testFilePath );
+
+      let o =
+      {
+        execPath : 'node testAppParent.js',
+        mode : 'spawn',
+        currentPath : a.routinePath,
+      }
+      let con = _.process.startMinimal( o );
+
+      con.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        return _.time.out( context.t2 * 2 );
+      })
+
+      con.then( () =>
+      {
+        test.true( a.fileProvider.fileExists( a.abs( 'testFile' ) ) );
+        let childPid = a.fileProvider.fileRead( a.abs( 'testFile' ) );
+        childPid = _.numberFrom( childPid );
+        test.true( !_.process.isAlive( childPid ) );
+        return null;
+      })
+
+      return con;
+    })
+
+    return ready;
+  }
+
+  /*  */
+
+  function testAppParent()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    console.log( 'parent::start' );
+
+    let o =
+    {
+      execPath : mode === 'fork' ? 'testAppChild.js' : 'node testAppChild.js',
+      args : [ process.pid ],
+      mode,
+      detaching : 2,
+    }
+    _.process.startMinimal( o );
+
+    o.conStart.thenGive( () =>
+    {
+      console.log( 'parent::end' );
+    })
+  }
+
+  function testAppChild()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    let parentPid = _.numberFrom( process.argv[ 2 ] );
+    let timeBegin = _.time.begin( context.t2 * 3, () => timer.cancel() );
+
+    let timer = _.time.periodic( 1000, () =>
+    {
+      if( _.process.isAlive( parentPid ) )
+      return true;
+      timeBegin.cancel();
+      _.fileProvider.fileWrite( _.path.join( __dirname, 'testFile' ), process.pid.toString() );
+    })
+
+  }
+}
+
+startMinimalTrueDetachedWaitForParentDeath.rapidity = -1;
+startMinimalTrueDetachedWaitForParentDeath.timeOut = 3e5;
+startMinimalTrueDetachedWaitForParentDeath.description =
+`
+Parent spawn child in true detached mode.
+Child creates file on disk when parent exists.
 `
 
 //
@@ -37242,6 +37365,7 @@ var Proto =
     startMinimalDetachingEndCompetitorIsExecuted,
     startMinimalDetachingTerminationBegin,
     startMinimalDetachingWaitForDisconnect,
+    startMinimalTrueDetachedWaitForParentDeath,
     startMinimalEventClose,
     startMinimalEventExit,
     startMinimalDetachingThrowing,
