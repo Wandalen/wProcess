@@ -1008,20 +1008,27 @@ function startMinimal_body( o )
 
     if( !o.sync || o.deasync )
     {
-      // o.pnd.on( 'error', ( err ) =>
-      // {
-      //   if( o.outputAdditive )
-      //   o.logger.log( _outAdditive );
-      //   handleError( err );
-      // });
-      // o.pnd.on( 'close', ( exitCode, exitSignal ) =>
-      // {
-      //   // if( o.outputAdditive )
-      //   // o.logger.error( _errAdditive );
-      //   handleClose( exitCode, exitSignal );
-      // });
-      o.pnd.on( 'error', handleError );
-      o.pnd.on( 'close', handleClose );
+      o.pnd.on( 'error', ( err ) =>
+      {
+        if( o.outputAdditive && _errAdditive )
+        {
+          o.logger.error( _errAdditive );
+          _errAdditive = '';
+        }
+        handleError( err );
+      });
+
+      o.pnd.on( 'close', ( exitCode, exitSignal ) =>
+      {
+        if( o.outputAdditive && _outAdditive )
+        {
+          o.logger.log( _outAdditive );
+          _outAdditive = '';
+        }
+        handleClose( exitCode, exitSignal );
+      });
+      // o.pnd.on( 'error', handleError );
+      // o.pnd.on( 'close', handleClose );
       o.pnd.on( 'exit', handleExit );
       o.pnd.on( 'disconnect', handleDisconnect );
     }
@@ -1244,41 +1251,47 @@ function startMinimal_body( o )
 
     if( o.outputAdditive )
     {
-      debugger;
+
+      let isWithBreak = _.strEnds( msg, '\n' );
+
       if( o.inputMirroring )
       {
-        if( _.strHas( msg, o.execPath2 ) )
+        if( _.strHas( msg, o.execPath2 ) && !isWithBreak )
         msg = msg + '\n';
       }
 
-      if( _.strEnds( msg, '\n' ) )
+      if( isWithBreak )
       {
-        debugger
         // msg = _.strRemoveEnd( msg, '\n' );
-        if( channel === 'err' )
-        msg = _errAdditive + _.strRemoveEnd( msg, '\n' );
+        if( _errAdditive )
+        {
+          msg = _errAdditive + _.strRemoveEnd( msg, '\n' );
+          _errAdditive = '';
+        }
+        else if( _outAdditive )
+        {
+          msg = _outAdditive + _.strRemoveEnd( msg, '\n' );
+          _outAdditive = '';
+        }
         else
-        msg = _outAdditive + _.strRemoveEnd( msg, '\n' );
+        {
+          msg = _.strRemoveEnd( msg, '\n' );
+        }
       }
       else
       {
         debugger
-        /* xxx yyy qqq for Yevhen : not implemeted yet */
+        /* xxx yyy qqq for Yevhen : not implemeted yet | aaa : Implemented. */
         if( !_.strHas( msg, '\n' ) )
         {
-          debugger;
-          /* Check whether `msg` is the last chunk */
           if( channel === 'err' )
           _errAdditive += msg;
           else
           _outAdditive += msg;
-
           return;
-
         }
         else
         {
-          debugger;
           let splitted = msg.split( '\n' );
           msg = splitted.slice( 0, splitted.length - 1 ).join( '\n' );
           if( channel === 'err' )
