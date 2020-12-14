@@ -26661,11 +26661,14 @@ function startMinimalOptionThrowingExitCode( test )
 
       options.conTerminate.finally( ( err, op ) =>
       {
-        let exp = `Process returned exit code ${options.exitCode}\n`;
-        exp +=`Launched as ${_.strQuote( options.execPath2 )}\n`;
-        exp += `Launched at ${_.strQuote( options.currentPath )} \n`;
-        exp += `\n -> Stderr\n -  `;
-        exp += `${_.strLinesIndentation( `${testAppPath}:13\n    throw new MyError();\n    ^\n\n[MyError: my error is thrown]\n`, ' -  ' )} '\n -< Stderr`;
+        let exp =
+`
+Process returned exit code ${options.exitCode}\n
+Launched as ${_.strQuote( options.execPath2 )}\n
+Launched at ${_.strQuote( options.currentPath )} \n
+\n -> Stderr\n
+-  ${_.strLinesIndentation( `${testAppPath}:13\n    throw new MyError();\n    ^\n\n[MyError: my error is thrown]\n`, ' -  ' )} '\n -< Stderr
+`;
         test.equivalent( err.message, exp );
         test.identical( op, undefined );
 
@@ -26694,11 +26697,14 @@ function startMinimalOptionThrowingExitCode( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        let exp = `Process returned exit code 1\n`;
-        exp +=`Launched as ${mode === 'fork' ? _.strQuote( testAppPath ) : _.strQuote( 'node ' + testAppPath )} \n`;
-        exp += `Launched at ${_.strQuote( options.currentPath )} \n`;
-        exp += `\n -> Stderr\n -  `;
-        exp += `${_.strLinesIndentation( `${testAppPath}:13\n    throw new MyError();\n    ^\n\n[MyError: my error is thrown]\n`, ' -  ' )} '\n -< Stderr`;
+        let exp =
+`
+Process returned exit code 1\n
+Launched as ${mode === 'fork' ? _.strQuote( testAppPath ) : _.strQuote( 'node ' + testAppPath )} \n
+Launched at ${_.strQuote( options.currentPath )} \n
+\n -> Stderr\n
+-  ${_.strLinesIndentation( `${testAppPath}:13\n    throw new MyError();\n    ^\n\n[MyError: my error is thrown]\n`, ' -  ' )} '\n -< Stderr
+`;
         test.equivalent( op.output, exp );
 
         a.fileProvider.fileDelete( testAppParentPath );
