@@ -202,8 +202,9 @@ function startMinimal_body( o )
   /* qqq for Yevhen : use buffer instead */
   let _errOutput = '';
   let _decoratedOutOutput = '';
-  let _outputAdditive = '';
+  let _outAdditive = '';
   let _decoratedErrOutput = '';
+  let _errAdditive = '';
   let _errPrefix = null;
   let _outPrefix = null;
   let _readyCallback;
@@ -993,7 +994,7 @@ function startMinimal_body( o )
     o.pnd.stdout.on( 'data', ( data ) => handleStreamOutput( data, 'out' ) );
 
     /* piping error channel */
-
+    debugger
     /*
     there is no if options here because algorithm should collect error output in _errOutput anyway
     */
@@ -1007,6 +1008,18 @@ function startMinimal_body( o )
 
     if( !o.sync || o.deasync )
     {
+      // o.pnd.on( 'error', ( err ) =>
+      // {
+      //   if( o.outputAdditive )
+      //   o.logger.log( _outAdditive );
+      //   handleError( err );
+      // });
+      // o.pnd.on( 'close', ( exitCode, exitSignal ) =>
+      // {
+      //   // if( o.outputAdditive )
+      //   // o.logger.error( _errAdditive );
+      //   handleClose( exitCode, exitSignal );
+      // });
       o.pnd.on( 'error', handleError );
       o.pnd.on( 'close', handleClose );
       o.pnd.on( 'exit', handleExit );
@@ -1156,7 +1169,7 @@ function startMinimal_body( o )
 
   function handleStreamOutput( data, channel )
   {
-
+    debugger;
     if( _.bufferNodeIs( data ) )
     data = data.toString( 'utf8' );
 
@@ -1242,7 +1255,10 @@ function startMinimal_body( o )
       {
         debugger
         // msg = _.strRemoveEnd( msg, '\n' );
-        msg = _outputAdditive + _.strRemoveEnd( msg, '\n' );
+        if( channel === 'err' )
+        msg = _errAdditive + _.strRemoveEnd( msg, '\n' );
+        else
+        msg = _outAdditive + _.strRemoveEnd( msg, '\n' );
       }
       else
       {
@@ -1252,27 +1268,30 @@ function startMinimal_body( o )
         {
           debugger;
           /* Check whether `msg` is the last chunk */
-          _outputAdditive += msg;
+          if( channel === 'err' )
+          _errAdditive += msg;
+          else
+          _outAdditive += msg;
+
           return;
+
         }
         else
         {
           debugger;
-          let splitted = _.strSplitFast({ src : msg, delimeter : '\n', preservingDelimeters : 0, preservingEmpty : 1 });
+          let splitted = msg.split( '\n' );
           msg = splitted.slice( 0, splitted.length - 1 ).join( '\n' );
-          _outputAdditive += splitted[ splitted.length - 1 ];
-          // console.log( 'splitted : ', splitted );
-          // console.log( 'msg : ', '++' + msg + '++' );
-          // console.log( 'output : ', '++' + splitted[ splitted.length - 1 ] + '++' );
-          // console.log( '_outputAdditive : ', '++' + _outputAdditive + '++' );
+          if( channel === 'err' )
+          _errAdditive += splitted[ splitted.length - 1 ];
+          else
+          _outAdditive += splitted[ splitted.length - 1 ];
         }
       }
       if( channel === 'err' )
       o.logger.error( msg );
       else
       o.logger.log( msg );
-      debugger
-      _outputAdditive = '';
+
     }
     else
     {

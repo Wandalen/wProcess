@@ -28408,7 +28408,7 @@ function outputLog( test )
           - difference :
             'a*
         */
-        test.identical( op.output, 'abc' )
+        test.identical( op.output, 'abc\n' )
 
         a.fileProvider.fileDelete( testAppParentPath );
         return null;
@@ -28481,7 +28481,7 @@ function outputLog( test )
           - difference :
             'a*
         */
-        test.identical( op.output, 'ab\ncd' )
+        test.identical( op.output, 'ab\ncd\n' )
 
         a.fileProvider.fileDelete( testAppParentPath );
         return null;
@@ -28550,29 +28550,29 @@ function outputLog( test )
   function testApp()
   {
     process.stdout.write( 'a' );
-    setTimeout( () => process.stdout.write( 'c' ), context.t0 )
+    setTimeout( () => process.stdout.write( 'c' ), context.t0 );
     process.stdout.write( 'b' );
   }
 
   function testApp2()
   {
     process.stdout.write( 'a' );
-    process.stdout.write( 'b' )
+    process.stdout.write( 'b' );
     process.stdout.write( 'c' );
-    console.log()
+    console.log();
   }
 
   function testApp3()
   {
     process.stdout.write( 'ab\nc' );
-    process.stdout.write( 'd' )
+    process.stdout.write( 'd' );
   }
 
   function testApp4()
   {
     process.stdout.write( 'ab\nc' );
-    process.stdout.write( 'd' )
-    console.log()
+    process.stdout.write( 'd' );
+    console.log();
   }
 }
 
