@@ -37789,7 +37789,7 @@ var Proto =
     startMultipleOutput,
     startMultipleOptionStdioIgnore,
     startSingleOptionOutputAdditive,
-    // startMultipleOptionOutputAdditive, /* xxx qqq for Yevhen : fix */
+    startMultipleOptionOutputAdditive, /* xxx qqq for Yevhen : fix | aaa : Done. */
     outputLog,
 
     // etc

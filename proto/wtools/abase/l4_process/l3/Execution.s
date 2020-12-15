@@ -707,7 +707,7 @@ function startMinimal_body( o )
 
   function end2( err )
   {
-    debugger
+
     if( Config.debug )
     try
     {
@@ -729,7 +729,7 @@ function startMinimal_body( o )
 
   function end3()
   {
-    debugger;
+
     if( o.procedure )
     if( o.procedure.isAlive() )
     o.procedure.end();
@@ -1001,7 +1001,7 @@ function startMinimal_body( o )
     o.pnd.stdout.on( 'data', ( data ) => handleStreamOutput( data, 'out' ) );
 
     /* piping error channel */
-    debugger
+
     /*
     there is no if options here because algorithm should collect error output in _errOutput anyway
     */
@@ -1183,7 +1183,7 @@ function startMinimal_body( o )
 
   function handleStreamOutput( data, channel )
   {
-    debugger;
+
     if( _.bufferNodeIs( data ) )
     data = data.toString( 'utf8' );
 
@@ -1287,7 +1287,6 @@ function startMinimal_body( o )
       }
       else
       {
-        debugger
         /* xxx yyy qqq for Yevhen : not implemeted yet | aaa : Implemented. */
         if( !_.strHas( msg, '\n' ) )
         {
@@ -1311,7 +1310,6 @@ function startMinimal_body( o )
       o.logger.error( msg );
       else
       o.logger.log( msg );
-
     }
     else
     {
