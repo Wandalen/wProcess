@@ -1309,7 +1309,7 @@ startMinimal_body.defaults =
   streamSizeLimit : null,
   timeOut : null,
 
-  throwingExitCode : 'full', /* [ bool-like, 'full', 'brief' ] */ /* must be on by default */  /* qqq for Yevhen : cover */
+  throwingExitCode : 'full', /* [ bool-like, 'full', 'brief' ] */ /* must be on by default */  /* qqq for Yevhen : cover | aaa : Done. */
   applyingExitCode : 0,
 
   verbosity : 2,

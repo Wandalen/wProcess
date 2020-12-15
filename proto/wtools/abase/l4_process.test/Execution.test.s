@@ -26671,6 +26671,287 @@ function startMultipleOptionProcedure( test )
 
 startMultipleOptionProcedure.timeOut = 18e4; /* 17.983s */
 
+//
+
+function startMinimalOptionThrowingExitCode( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( testApp );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+
+  return a.ready;
+
+  /* - */
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, throwingExitCode : default`;
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+      }
+
+      _.process.startMinimal( options );
+
+      options.conTerminate.finally( ( err, op ) =>
+      {
+        test.identical( op, undefined );
+        test.true( !_.errIsBrief( err ) );
+        test.true( _.strHas( err.message, 'Process returned exit code' ) );
+        test.true( _.strHas( err.message, 'Launched as' ) );
+        test.true( _.strHas( err.message, 'Stderr' ) );
+        test.true( _.strHas( err.message, '[MyError: my error is thrown]' ) );
+        test.true( _.strHas( err.message, 'stack' ) );
+
+        _.errAttend( err );
+        return null;
+      })
+
+      return options.conTerminate;
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, throwingExitCode : full`;
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+        throwingExitCode : 'full'
+      }
+
+      _.process.startMinimal( options );
+
+      options.conTerminate.finally( ( err, op ) =>
+      {
+        test.identical( op, undefined );
+        test.true( !_.errIsBrief( err ) );
+        test.true( _.strHas( err.message, 'Process returned exit code' ) );
+        test.true( _.strHas( err.message, 'Launched as' ) );
+        test.true( _.strHas( err.message, 'Stderr' ) );
+        test.true( _.strHas( err.message, '[MyError: my error is thrown]' ) );
+        test.true( _.strHas( err.message, 'stack' ) );
+
+        _.errAttend( err );
+        return null;
+      })
+
+      return options.conTerminate;
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, throwingExitCode : 1`;
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+        throwingExitCode : 1
+      }
+
+      _.process.startMinimal( options );
+
+      options.conTerminate.finally( ( err, op ) =>
+      {
+        test.identical( op, undefined );
+        test.true( !_.errIsBrief( err ) );
+        test.true( _.strHas( err.message, 'Process returned exit code' ) );
+        test.true( _.strHas( err.message, 'Launched as' ) );
+        test.true( _.strHas( err.message, 'Stderr' ) );
+        test.true( _.strHas( err.message, '[MyError: my error is thrown]' ) );
+        test.true( _.strHas( err.message, 'stack' ) );
+
+        _.errAttend( err );
+        return null;
+      })
+
+      return options.conTerminate;
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, throwingExitCode : brief`;
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+        verbosity : 0,
+        throwingExitCode : 'brief'
+      }
+
+      _.process.startMinimal( options );
+
+      options.conTerminate.finally( ( err, op ) =>
+      {
+        let exp =
+`
+Process returned exit code ${options.exitCode}\n
+Launched as ${_.strQuote( options.execPath2 )}\n
+Launched at ${_.strQuote( options.currentPath )} \n
+\n -> Stderr\n
+-  ${_.strLinesIndentation( `${testAppPath}:13\n    throw new MyError();\n    ^\n\n[MyError: my error is thrown]\n`, ' -  ' )} '\n -< Stderr
+`;
+        test.equivalent( err.message, exp );
+        test.identical( op, undefined );
+
+        _.errAttend( err );
+        return null;
+      })
+
+      return options.conTerminate;
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, with subprocess, throwingExitCode : brief`;
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath, throwingExitCode : 'brief' } });
+
+      let options =
+      {
+        execPath : 'node ' + testAppParentPath,
+        outputCollecting : 1,
+      }
+
+      return _.process.startMinimal( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        let exp =
+`
+Process returned exit code 1\n
+Launched as ${mode === 'fork' ? _.strQuote( testAppPath ) : _.strQuote( 'node ' + testAppPath )} \n
+Launched at ${_.strQuote( options.currentPath )} \n
+\n -> Stderr\n
+-  ${_.strLinesIndentation( `${testAppPath}:13\n    throw new MyError();\n    ^\n\n[MyError: my error is thrown]\n`, ' -  ' )} '\n -< Stderr
+`;
+        test.equivalent( op.output, exp );
+
+        a.fileProvider.fileDelete( testAppParentPath );
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, with subprocess, throwingExitCode : 'full'`;
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath, throwingExitCode : 'full' } });
+
+      let options =
+      {
+        execPath : 'node ' + testAppParentPath,
+        outputCollecting : 1,
+      }
+
+      return _.process.startMinimal( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.true( _.strHas( op.output, 'Process returned exit code' ) );
+        test.true( _.strHas( op.output, 'Launched as' ) );
+        test.true( _.strHas( op.output, 'Stderr' ) );
+        test.true( _.strHas( op.output, '[MyError: my error is thrown]' ) );
+        test.true( _.strHas( op.output, 'stack' ) );
+
+        a.fileProvider.fileDelete( testAppParentPath );
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, throwingExitCode : 0`;
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+        throwingExitCode : 0,
+        outputCollecting : 1
+      }
+
+      return test.mustNotThrowError( () => _.process.startMinimal( options ) )
+      .then( ( op ) =>
+      {
+        test.notIdentical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.true( _.strHas( op.output, '[MyError: my error is thrown]' ) );
+        return null;
+      })
+    })
+
+    return ready;
+  }
+
+  /* - */
+
+  function testAppParent()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+
+    let o =
+    {
+      execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+      mode,
+      inputMirroring : 0,
+      outputPiping : 0,
+      throwingExitCode,
+    }
+
+    _.process.startMinimal( o );
+
+    o.conTerminate.finally( ( err, op ) =>
+    {
+      console.log( err );
+      return null;
+    })
+
+  }
+
+  function testApp()
+  {
+    class MyError extends Error
+    {
+      constructor( message )
+      {
+        super( message );
+        this.stack = null;
+        this.message = 'my error is thrown';
+      }
+    }
+
+    throw new MyError();
+  }
+}
+
 // --
 // pid
 // --
@@ -37313,6 +37594,7 @@ var Proto =
     startMinimalOptionGid,
     startSingleOptionProcedure,
     startMultipleOptionProcedure,
+    startMinimalOptionThrowingExitCode,
 
     // pid / status / exit
 
