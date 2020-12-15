@@ -26679,6 +26679,7 @@ function startMinimalOptionThrowingExitCode( test )
   let a = context.assetFor( test, false );
   let testAppPath = a.program( testApp );
   let modes = [ 'fork', 'spawn', 'shell' ];
+  let nodeVersion = parseInt( process.versions.node ); /* with node version 10 and below stack is logged even if it's null */
 
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
@@ -26709,8 +26710,11 @@ function startMinimalOptionThrowingExitCode( test )
         test.true( _.strHas( err.message, 'Process returned exit code' ) );
         test.true( _.strHas( err.message, 'Launched as' ) );
         test.true( _.strHas( err.message, 'Stderr' ) );
-        test.true( _.strHas( err.message, '[MyError: my error is thrown]' ) );
         test.true( _.strHas( err.message, 'stack' ) );
+        if( nodeVersion <= 10 )
+        test.true( _.strHas( err.message, 'null' ) );
+        else
+        test.true( _.strHas( err.message, '[MyError: my error is thrown]' ) );
 
         _.errAttend( err );
         return null;
@@ -26741,8 +26745,11 @@ function startMinimalOptionThrowingExitCode( test )
         test.true( _.strHas( err.message, 'Process returned exit code' ) );
         test.true( _.strHas( err.message, 'Launched as' ) );
         test.true( _.strHas( err.message, 'Stderr' ) );
-        test.true( _.strHas( err.message, '[MyError: my error is thrown]' ) );
         test.true( _.strHas( err.message, 'stack' ) );
+        if( nodeVersion <= 10 )
+        test.true( _.strHas( err.message, 'null' ) );
+        else
+        test.true( _.strHas( err.message, '[MyError: my error is thrown]' ) );
 
         _.errAttend( err );
         return null;
@@ -26773,8 +26780,11 @@ function startMinimalOptionThrowingExitCode( test )
         test.true( _.strHas( err.message, 'Process returned exit code' ) );
         test.true( _.strHas( err.message, 'Launched as' ) );
         test.true( _.strHas( err.message, 'Stderr' ) );
-        test.true( _.strHas( err.message, '[MyError: my error is thrown]' ) );
         test.true( _.strHas( err.message, 'stack' ) );
+        if( nodeVersion <= 10 )
+        test.true( _.strHas( err.message, 'null' ) );
+        else
+        test.true( _.strHas( err.message, '[MyError: my error is thrown]' ) );
 
         _.errAttend( err );
         return null;
@@ -26807,7 +26817,7 @@ Process returned exit code ${options.exitCode}\n
 Launched as ${_.strQuote( options.execPath2 )}\n
 Launched at ${_.strQuote( options.currentPath )} \n
 \n -> Stderr\n
--  ${_.strLinesIndentation( `${testAppPath}:13\n    throw new MyError();\n    ^\n\n[MyError: my error is thrown]\n`, ' -  ' )} '\n -< Stderr
+-  ${_.strLinesIndentation( `${testAppPath}:13\n    throw new MyError();\n    ^\n\n${nodeVersion <= 10 ? 'null' : '[MyError: my error is thrown]'}\n`, ' -  ' )} '\n -< Stderr
 `;
         test.equivalent( err.message, exp );
         test.identical( op, undefined );
@@ -26843,7 +26853,7 @@ Process returned exit code 1\n
 Launched as ${mode === 'fork' ? _.strQuote( testAppPath ) : _.strQuote( 'node ' + testAppPath )} \n
 Launched at ${_.strQuote( options.currentPath )} \n
 \n -> Stderr\n
--  ${_.strLinesIndentation( `${testAppPath}:13\n    throw new MyError();\n    ^\n\n[MyError: my error is thrown]\n`, ' -  ' )} '\n -< Stderr
+-  ${_.strLinesIndentation( `${testAppPath}:13\n    throw new MyError();\n    ^\n\n${nodeVersion <= 10 ? 'null' : '[MyError: my error is thrown]'}\n`, ' -  ' )} '\n -< Stderr
 `;
         test.equivalent( op.output, exp );
 
@@ -26874,8 +26884,11 @@ Launched at ${_.strQuote( options.currentPath )} \n
         test.true( _.strHas( op.output, 'Process returned exit code' ) );
         test.true( _.strHas( op.output, 'Launched as' ) );
         test.true( _.strHas( op.output, 'Stderr' ) );
-        test.true( _.strHas( op.output, '[MyError: my error is thrown]' ) );
         test.true( _.strHas( op.output, 'stack' ) );
+        if( nodeVersion <= 10 )
+        test.true( _.strHas( op.output, 'null' ) );
+        else
+        test.true( _.strHas( op.output, '[MyError: my error is thrown]' ) );
 
         a.fileProvider.fileDelete( testAppParentPath );
         return null;
@@ -26902,6 +26915,9 @@ Launched at ${_.strQuote( options.currentPath )} \n
       {
         test.notIdentical( op.exitCode, 0 );
         test.identical( op.ended, true );
+        if( nodeVersion <= 10 )
+        test.true( _.strHas( op.output, 'null' ) );
+        else
         test.true( _.strHas( op.output, '[MyError: my error is thrown]' ) );
         return null;
       })
