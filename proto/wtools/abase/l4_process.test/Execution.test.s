@@ -30351,7 +30351,7 @@ startMinimalTerminateAfterLoopRelease.description =
 /*
   xxx : Windows 15.x, mode::shell
 
-  Running [94mTestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic[39;0m ..
+  Running [94mTestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic ..
 2020-12-15T07:09:53.8285782Z  1 : function program1()
 2020-12-15T07:09:53.8286519Z  2 :   {
 2020-12-15T07:09:53.8287442Z  3 :     console.log( 'program1:begin' );
@@ -30372,7 +30372,7 @@ startMinimalTerminateAfterLoopRelease.description =
 2020-12-15T07:09:53.8298935Z 18 :     setTimeout( () => { console.log( 'program1:end' ) }, context.t1 * 13 );
 2020-12-15T07:09:53.8299618Z 19 :
 2020-12-15T07:09:53.8300139Z 20 :     if( withSleep )
-2020-12-15T07:09:53.8300820Z 21 :     sleep( context.t1 * 20 ); //yyy 
+2020-12-15T07:09:53.8300820Z 21 :     sleep( context.t1 * 20 ); //yyy
 2020-12-15T07:09:53.8301343Z 22 :
 2020-12-15T07:09:53.8301897Z 23 :     if( withDeasync )
 2020-12-15T07:09:53.8302562Z 24 :     deasync( context.t1 * 20 );
@@ -30423,7 +30423,7 @@ startMinimalTerminateAfterLoopRelease.description =
 2020-12-15T07:09:53.8332791Z 69 :
 2020-12-15T07:09:53.8333285Z 70 : program1();
 2020-12-15T07:09:53.8333777Z 71 :
-2020-12-15T07:09:53.8400559Z  > [39;0mD:\Temp\ProcessBasic-2020-12-15-6-8-31-376-392e.tmp\endSignalsBasic\program1.js
+2020-12-15T07:09:53.8400559Z  > D:\Temp\ProcessBasic-2020-12-15-6-8-31-376-392e.tmp\endSignalsBasic\program1.js
 2020-12-15T07:09:53.9113290Z program1:begin
 
   ....
