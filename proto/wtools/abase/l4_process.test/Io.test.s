@@ -46,7 +46,7 @@ function input( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testApp );
+  let programPath = a.path.nativize( a.program( testApp ) );
 
   /* */
 
@@ -64,7 +64,7 @@ function input( test )
         commandsDelimeter : ';',
         caching : true,
         parsingArrays : true,
-        interpreterPath : process.argv[ 0 ],
+        interpreterPath : a.path.normalize( process.argv[ 0 ] ),
         interpreterArgs : [],
         scriptPath : a.abs( 'testApp.js' ),
         scriptArgs : [],
@@ -104,7 +104,7 @@ function input( test )
         commandsDelimeter : ';',
         caching : true,
         parsingArrays : true,
-        interpreterPath : process.argv[ 0 ],
+        interpreterPath : a.path.normalize( process.argv[ 0 ] ),
         interpreterArgs : [],
         scriptPath : a.abs( 'testApp.js' ),
         scriptArgs : [ '.will.yml' ],
@@ -144,7 +144,7 @@ function input( test )
         commandsDelimeter : ';',
         caching : true,
         parsingArrays : true,
-        interpreterPath : process.argv[ 0 ],
+        interpreterPath : a.path.normalize( process.argv[ 0 ] ),
         interpreterArgs : [],
         scriptPath : a.abs( 'testApp.js' ),
         scriptArgs : [ '.will.yml', 'file' ],
@@ -184,7 +184,7 @@ function input( test )
         commandsDelimeter : ';',
         caching : true,
         parsingArrays : true,
-        interpreterPath : process.argv[ 0 ],
+        interpreterPath : a.path.normalize( process.argv[ 0 ] ),
         interpreterArgs : [],
         scriptPath : a.abs( 'testApp.js' ),
         scriptArgs : [ 'v:5' ],
@@ -224,7 +224,7 @@ function input( test )
         commandsDelimeter : ';',
         caching : true,
         parsingArrays : true,
-        interpreterPath : process.argv[ 0 ],
+        interpreterPath : a.path.normalize( process.argv[ 0 ] ),
         interpreterArgs : [],
         scriptPath : a.abs( 'testApp.js' ),
         scriptArgs : [ 'v:5', 'r:some', 'a:1' ],
@@ -264,7 +264,7 @@ function input( test )
         commandsDelimeter : ';',
         caching : true,
         parsingArrays : true,
-        interpreterPath : process.argv[ 0 ],
+        interpreterPath : a.path.normalize( process.argv[ 0 ] ),
         interpreterArgs : [],
         scriptPath : a.abs( 'testApp.js' ),
         scriptArgs : [ '.will.yml', 'file', 'v:5', 'r:some', 'a:1' ],
@@ -304,7 +304,7 @@ function input( test )
         commandsDelimeter : ';',
         caching : true,
         parsingArrays : true,
-        interpreterPath : process.argv[ 0 ],
+        interpreterPath : a.path.normalize( process.argv[ 0 ] ),
         interpreterArgs : [],
         scriptPath : a.abs( 'testApp.js' ),
         scriptArgs : [ '.will.yml', 'v:5', 'r:some', 'file', 'a:1' ],
@@ -344,7 +344,7 @@ function input( test )
         commandsDelimeter : ';',
         caching : true,
         parsingArrays : true,
-        interpreterPath : process.argv[ 0 ],
+        interpreterPath : a.path.normalize( process.argv[ 0 ] ),
         interpreterArgs : [],
         scriptPath : a.abs( 'testApp.js' ),
         scriptArgs : [ '.will.yml', 'v:5', 'r:some', ';', 'file', 'a:1' ],
@@ -384,7 +384,7 @@ function input( test )
         commandsDelimeter : ';',
         caching : true,
         parsingArrays : true,
-        interpreterPath : process.argv[ 0 ],
+        interpreterPath : a.path.normalize( process.argv[ 0 ] ),
         interpreterArgs : [],
         scriptPath : a.abs( 'testApp.js' ),
         scriptArgs : [ '.will.yml v:5 r:some ; file a:1' ],
@@ -424,7 +424,7 @@ function input( test )
         commandsDelimeter : ';',
         caching : true,
         parsingArrays : true,
-        interpreterPath : process.argv[ 0 ],
+        interpreterPath : a.path.normalize( process.argv[ 0 ] ),
         interpreterArgs : [],
         scriptPath : a.abs( 'testApp.js' ),
         scriptArgs : [ _.path.nativize( a.abs( '.will.yml' ) ) ],
@@ -452,7 +452,7 @@ function input( test )
   a.ready.then( () =>
   {
     test.case = 'two calls of routine, should return cached result';
-    let programPath = a.program( testApp2 );
+    let programPath = a.path.nativize( a.program( testApp2 ) );
     let o =
     {
       execPath : 'node ' + programPath,
@@ -472,7 +472,7 @@ function input( test )
         commandsDelimeter : ';',
         caching : true,
         parsingArrays : true,
-        interpreterPath : process.argv[ 0 ],
+        interpreterPath : a.path.normalize( process.argv[ 0 ] ),
         interpreterArgs : [],
         scriptPath : a.abs( 'testApp2.js' ),
         scriptArgs : [ '.will.yml' ],
@@ -485,7 +485,7 @@ function input( test )
         original : '.will.yml',
       };
       test.identical( op[ 0 ], exp );
-      test.identical( op[ 1 ], true  );
+      test.identical( op[ 1 ], true );
     });
 
     return returned.then( ( op ) =>
@@ -545,7 +545,7 @@ function inputWithNotDefaultDelimeters( test )
 {
   let context = this;
   let a = test.assetFor( false );
-  let programPath = a.program( testApp );
+  let programPath = a.path.nativize( a.program( testApp ) );
 
   /* */
 
@@ -564,7 +564,7 @@ function inputWithNotDefaultDelimeters( test )
         commandsDelimeter : '|',
         caching : true,
         parsingArrays : true,
-        interpreterPath : process.argv[ 0 ],
+        interpreterPath : a.path.normalize( process.argv[ 0 ] ),
         interpreterArgs : [],
         scriptPath : a.abs( 'testApp.js' ),
         scriptArgs : [ 'v:5', 'r:some', 'a:1' ],
@@ -606,7 +606,7 @@ function inputWithNotDefaultDelimeters( test )
         commandsDelimeter : '|',
         caching : true,
         parsingArrays : true,
-        interpreterPath : process.argv[ 0 ],
+        interpreterPath : a.path.normalize( process.argv[ 0 ] ),
         interpreterArgs : [],
         scriptPath : a.abs( 'testApp.js' ),
         scriptArgs : [ '.will.yml', 'v:5', 'r:some', ';', 'file', 'a:1' ],
@@ -636,7 +636,7 @@ function inputWithNotDefaultDelimeters( test )
   a.ready.then( () =>
   {
     test.case = 'two calls of routine';
-    let programPath = a.program( testApp2 );
+    let programPath = a.path.nativize( a.program( testApp2 ) );
     let o =
     {
       execPath : 'node ' + programPath,
@@ -656,7 +656,7 @@ function inputWithNotDefaultDelimeters( test )
         commandsDelimeter : '|',
         caching : true,
         parsingArrays : true,
-        interpreterPath : process.argv[ 0 ],
+        interpreterPath : a.path.normalize( process.argv[ 0 ] ),
         interpreterArgs : [],
         scriptPath : a.abs( 'testApp2.js' ),
         scriptArgs : [ '.will.yml' ],
