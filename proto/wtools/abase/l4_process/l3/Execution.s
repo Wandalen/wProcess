@@ -1259,15 +1259,7 @@ function startMinimal_body( o )
     if( o.outputAdditive )
     {
 
-      let isWithBreak = _.strEnds( msg, '\n' );
-
-      if( o.inputMirroring )
-      {
-        if( _.strHas( msg, o.execPath2 ) && !isWithBreak )
-        msg = msg + '\n';
-      }
-
-      if( isWithBreak )
+      if( _.strEnds( msg, '\n' ) )
       {
         // msg = _.strRemoveEnd( msg, '\n' );
         if( _errAdditive )
