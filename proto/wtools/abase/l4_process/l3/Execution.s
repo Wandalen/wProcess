@@ -809,7 +809,7 @@ function startMinimal_body( o )
 
     if( o.verbosity >= 5 && o.inputMirroring )
     {
-      log( ` < Process returned error code ${exitCode}`, 'out' );
+      log( ` < Process returned error code ${exitCode}\n`, 'out' );
       if( exitCode )
       log( infoGet(), 'out' );
     }
@@ -1060,7 +1060,7 @@ function startMinimal_body( o )
         output = _.ct.format( output, { fg : 'bright white' } ) + _.ct.format( o.currentPath, 'path' );
         else
         output = output + o.currentPath
-        log( output, 'out' );
+        log( output + '\n', 'out' );
       }
 
       if( o.verbosity )
@@ -1068,7 +1068,7 @@ function startMinimal_body( o )
         let prefix = ' > ';
         if( o.outputColoring.out )
         prefix = _.ct.format( prefix, { fg : 'bright white' } );
-        log( prefix + o.execPath2, 'out' );
+        log( prefix + o.execPath2 + '\n', 'out' );
       }
 
     }
@@ -1327,7 +1327,7 @@ function startMinimal_body( o )
   }
 
   /* */
-  
+
   function disconnectMaybe()
   {
     if( o.detaching === 2 )

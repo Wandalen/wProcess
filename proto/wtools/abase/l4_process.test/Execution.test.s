@@ -28511,7 +28511,7 @@ function outputLog( test )
   let testAppPath2 = a.program( testApp2 );
   let testAppPath3 = a.program( testApp3 );
   let testAppPath4 = a.program( testApp4 );
-  let modes = [ 'fork', /*'spawn', 'shell'*/ ];
+  let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
 
