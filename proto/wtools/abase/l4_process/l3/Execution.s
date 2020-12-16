@@ -1175,7 +1175,7 @@ function startMinimal_body( o )
     result += `Launched as ${_.strQuote( o.execPath2 )} \n`;
     result += `Launched at ${_.strQuote( o.currentPath )} \n`;
     if( _errOutput.length )
-    result += `\n -> Stderr\n -  ${_.strLinesIndentation( _errOutput, ' -  ' )} '\n -< Stderr`;
+    result += `\n -> Stderr\n -  ${_.strLinesIndentation( _errOutput, ' -  ' )} '\n -< Stderr\n`;
     return result;
   }
 
