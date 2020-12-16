@@ -26679,6 +26679,7 @@ function startMinimalOptionThrowingExitCode( test )
   let a = context.assetFor( test, false );
   let testAppPath = a.program( testApp );
   let modes = [ 'fork', 'spawn', 'shell' ];
+  let nodeVersion = parseInt( process.versions.node ); /* with node version 10 and below stack is logged even if it's null */
 
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
 
@@ -26709,8 +26710,11 @@ function startMinimalOptionThrowingExitCode( test )
         test.true( _.strHas( err.message, 'Process returned exit code' ) );
         test.true( _.strHas( err.message, 'Launched as' ) );
         test.true( _.strHas( err.message, 'Stderr' ) );
-        test.true( _.strHas( err.message, '[MyError: my error is thrown]' ) );
         test.true( _.strHas( err.message, 'stack' ) );
+        if( nodeVersion <= 10 )
+        test.true( _.strHas( err.message, 'null' ) );
+        else
+        test.true( _.strHas( err.message, '[MyError: my error is thrown]' ) );
 
         _.errAttend( err );
         return null;
@@ -26741,8 +26745,11 @@ function startMinimalOptionThrowingExitCode( test )
         test.true( _.strHas( err.message, 'Process returned exit code' ) );
         test.true( _.strHas( err.message, 'Launched as' ) );
         test.true( _.strHas( err.message, 'Stderr' ) );
-        test.true( _.strHas( err.message, '[MyError: my error is thrown]' ) );
         test.true( _.strHas( err.message, 'stack' ) );
+        if( nodeVersion <= 10 )
+        test.true( _.strHas( err.message, 'null' ) );
+        else
+        test.true( _.strHas( err.message, '[MyError: my error is thrown]' ) );
 
         _.errAttend( err );
         return null;
@@ -26773,8 +26780,11 @@ function startMinimalOptionThrowingExitCode( test )
         test.true( _.strHas( err.message, 'Process returned exit code' ) );
         test.true( _.strHas( err.message, 'Launched as' ) );
         test.true( _.strHas( err.message, 'Stderr' ) );
-        test.true( _.strHas( err.message, '[MyError: my error is thrown]' ) );
         test.true( _.strHas( err.message, 'stack' ) );
+        if( nodeVersion <= 10 )
+        test.true( _.strHas( err.message, 'null' ) );
+        else
+        test.true( _.strHas( err.message, '[MyError: my error is thrown]' ) );
 
         _.errAttend( err );
         return null;
@@ -26807,7 +26817,7 @@ Process returned exit code ${options.exitCode}\n
 Launched as ${_.strQuote( options.execPath2 )}\n
 Launched at ${_.strQuote( options.currentPath )} \n
 \n -> Stderr\n
--  ${_.strLinesIndentation( `${testAppPath}:13\n    throw new MyError();\n    ^\n\n[MyError: my error is thrown]\n`, ' -  ' )} '\n -< Stderr
+-  ${_.strLinesIndentation( `${testAppPath}:13\n    throw new MyError();\n    ^\n\n${nodeVersion <= 10 ? 'null' : '[MyError: my error is thrown]'}\n`, ' -  ' )} '\n -< Stderr
 `;
         test.equivalent( err.message, exp );
         test.identical( op, undefined );
@@ -26843,7 +26853,7 @@ Process returned exit code 1\n
 Launched as ${mode === 'fork' ? _.strQuote( testAppPath ) : _.strQuote( 'node ' + testAppPath )} \n
 Launched at ${_.strQuote( options.currentPath )} \n
 \n -> Stderr\n
--  ${_.strLinesIndentation( `${testAppPath}:13\n    throw new MyError();\n    ^\n\n[MyError: my error is thrown]\n`, ' -  ' )} '\n -< Stderr
+-  ${_.strLinesIndentation( `${testAppPath}:13\n    throw new MyError();\n    ^\n\n${nodeVersion <= 10 ? 'null' : '[MyError: my error is thrown]'}\n`, ' -  ' )} '\n -< Stderr
 `;
         test.equivalent( op.output, exp );
 
@@ -26874,8 +26884,11 @@ Launched at ${_.strQuote( options.currentPath )} \n
         test.true( _.strHas( op.output, 'Process returned exit code' ) );
         test.true( _.strHas( op.output, 'Launched as' ) );
         test.true( _.strHas( op.output, 'Stderr' ) );
-        test.true( _.strHas( op.output, '[MyError: my error is thrown]' ) );
         test.true( _.strHas( op.output, 'stack' ) );
+        if( nodeVersion <= 10 )
+        test.true( _.strHas( op.output, 'null' ) );
+        else
+        test.true( _.strHas( op.output, '[MyError: my error is thrown]' ) );
 
         a.fileProvider.fileDelete( testAppParentPath );
         return null;
@@ -26902,6 +26915,9 @@ Launched at ${_.strQuote( options.currentPath )} \n
       {
         test.notIdentical( op.exitCode, 0 );
         test.identical( op.ended, true );
+        if( nodeVersion <= 10 )
+        test.true( _.strHas( op.output, 'null' ) );
+        else
         test.true( _.strHas( op.output, '[MyError: my error is thrown]' ) );
         return null;
       })
@@ -30348,6 +30364,182 @@ startMinimalTerminateAfterLoopRelease.description =
 
 //
 
+/*
+  xxx : Windows 15.x, mode::shell
+
+  Running [94mTestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic ..
+2020-12-15T07:09:53.8285782Z  1 : function program1()
+2020-12-15T07:09:53.8286519Z  2 :   {
+2020-12-15T07:09:53.8287442Z  3 :     console.log( 'program1:begin' );
+2020-12-15T07:09:53.8288021Z  4 :
+2020-12-15T07:09:53.8288777Z  5 :     let withSleep = process.argv.includes( 'withSleep:1' );
+2020-12-15T07:09:53.8289800Z  6 :     let withTools = process.argv.includes( 'withTools:1' );
+2020-12-15T07:09:53.8290818Z  7 :     let withDeasync = process.argv.includes( 'withDeasync:1' );
+2020-12-15T07:09:53.8291544Z  8 :
+2020-12-15T07:09:53.8292415Z  9 :     // console.log( `withSleep:${withSleep} withTools:${withTools} withDeasync:${withDeasync}` );
+2020-12-15T07:09:53.8293240Z 10 :
+2020-12-15T07:09:53.8293851Z 11 :     if( withTools || withDeasync )
+2020-12-15T07:09:53.8294517Z 12 :     {
+2020-12-15T07:09:53.8295113Z 13 :       let _ = require( toolsPath );
+2020-12-15T07:09:53.8295837Z 14 :       _.include( 'wProcess' );
+2020-12-15T07:09:53.8296579Z 15 :       _.process._exitHandlerRepair();
+2020-12-15T07:09:53.8297592Z 16 :     }
+2020-12-15T07:09:53.8298052Z 17 :
+2020-12-15T07:09:53.8298935Z 18 :     setTimeout( () => { console.log( 'program1:end' ) }, context.t1 * 13 );
+2020-12-15T07:09:53.8299618Z 19 :
+2020-12-15T07:09:53.8300139Z 20 :     if( withSleep )
+2020-12-15T07:09:53.8300820Z 21 :     sleep( context.t1 * 20 ); //yyy
+2020-12-15T07:09:53.8301343Z 22 :
+2020-12-15T07:09:53.8301897Z 23 :     if( withDeasync )
+2020-12-15T07:09:53.8302562Z 24 :     deasync( context.t1 * 20 );
+2020-12-15T07:09:53.8303099Z 25 :
+2020-12-15T07:09:53.8303625Z 26 :     function onTime()
+2020-12-15T07:09:53.8304144Z 27 :     {
+2020-12-15T07:09:53.8304841Z 28 :       console.log( 'time:end' );
+2020-12-15T07:09:53.8305402Z 29 :     }
+2020-12-15T07:09:53.8305856Z 30 :
+2020-12-15T07:09:53.8306416Z 31 :     function sleep( delay )
+2020-12-15T07:09:53.8306997Z 32 :     {
+2020-12-15T07:09:53.8307783Z 33 :       console.log( 'sleep:begin' );
+2020-12-15T07:09:53.8308474Z 34 :       let now = Date.now();
+2020-12-15T07:09:53.8309169Z 35 :       while( ( Date.now() - now ) < delay )
+2020-12-15T07:09:53.8309718Z 36 :       {
+2020-12-15T07:09:53.8310280Z 37 :         let x = Number( '123' );
+2020-12-15T07:09:53.8310777Z 38 :       }
+2020-12-15T07:09:53.8311387Z 39 :       console.log( 'sleep:end' );
+2020-12-15T07:09:53.8311927Z 40 :     }
+2020-12-15T07:09:53.8312374Z 41 :
+2020-12-15T07:09:53.8312936Z 42 :     function deasync( delay )
+2020-12-15T07:09:53.8313484Z 43 :     {
+2020-12-15T07:09:53.8313994Z 44 :       let _ = wTools;
+2020-12-15T07:09:53.8316261Z 45 :       console.log( 'deasync:begin' );
+2020-12-15T07:09:53.8317042Z 46 :       let con = new _.Consequence().take( null );
+2020-12-15T07:09:53.8317791Z 47 :       con.delay( delay ).deasync();
+2020-12-15T07:09:53.8318508Z 48 :       console.log( 'deasync:end' );
+2020-12-15T07:09:53.8319051Z 49 :     }
+2020-12-15T07:09:53.8319495Z 50 :
+2020-12-15T07:09:53.8320105Z 51 :     function handlersRemove()
+2020-12-15T07:09:53.8320688Z 52 :     {
+2020-12-15T07:09:53.8321464Z 53 :       process.removeAllListeners( 'SIGHUP' );
+2020-12-15T07:09:53.8322687Z 54 :       process.removeAllListeners( 'SIGINT' );
+2020-12-15T07:09:53.8323731Z 55 :       process.removeAllListeners( 'SIGQUIT' );
+2020-12-15T07:09:53.8324927Z 56 :       process.removeAllListeners( 'SIGTERM' );
+2020-12-15T07:09:53.8325952Z 57 :       process.removeAllListeners( 'exit' );
+2020-12-15T07:09:53.8326667Z 58 :     }
+2020-12-15T07:09:53.8327120Z 59 :
+2020-12-15T07:09:53.8327548Z 60 :   }
+2020-12-15T07:09:53.8327996Z 61 :
+2020-12-15T07:09:53.8328485Z 62 : var context = {
+2020-12-15T07:09:53.8329034Z 63 :   "t0" : 100,
+2020-12-15T07:09:53.8329518Z 64 :   "t1" : 1000,
+2020-12-15T07:09:53.8330025Z 65 :   "t2" : 5000,
+2020-12-15T07:09:53.8330502Z 66 :   "t3" : 15000
+2020-12-15T07:09:53.8330971Z 67 : };
+2020-12-15T07:09:53.8331990Z 68 : var toolsPath = `D:\\a\\wProcess\\wProcess\\node_modules\\wTools\\proto\\wtools\\abase\\Layer1.s`;
+2020-12-15T07:09:53.8332791Z 69 :
+2020-12-15T07:09:53.8333285Z 70 : program1();
+2020-12-15T07:09:53.8333777Z 71 :
+2020-12-15T07:09:53.8400559Z  > D:\Temp\ProcessBasic-2020-12-15-6-8-31-376-392e.tmp\endSignalsBasic\program1.js
+2020-12-15T07:09:53.9113290Z program1:begin
+
+  ....
+
+  /TestRoutine::endSignalsBasic/ mode:spawn, terminate, withSleep:1 withTools:1 # 681 ) ... ok
+2020-12-15T07:17:41.7366965Z dtime:49
+2020-12-15T07:17:41.7416617Z  > node D:\Temp\ProcessBasic-2020-12-15-6-8-31-376-392e.tmp\endSignalsBasic\program1.js withDeasync:1
+2020-12-15T07:17:41.8055596Z program1:begin
+2020-12-15T07:17:42.9461046Z deasync:begin
+2020-12-15T07:17:46.7527423Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic / mode:spawn, terminate, withDeasync:1 # 682 ) ... ok
+2020-12-15T07:17:46.7555603Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic / mode:spawn, terminate, withDeasync:1 # 683 ) : expected true ... ok
+2020-12-15T07:17:46.7784947Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic / mode:spawn, terminate, withDeasync:1 # 684 ) ... ok
+2020-12-15T07:17:46.7811356Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic / mode:spawn, terminate, withDeasync:1 # 685 ) ... ok
+2020-12-15T07:17:46.7834935Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic / mode:spawn, terminate, withDeasync:1 # 686 ) ... ok
+2020-12-15T07:17:46.7858621Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic / mode:spawn, terminate, withDeasync:1 # 687 ) ... ok
+2020-12-15T07:17:46.7889338Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic / mode:spawn, terminate, withDeasync:1 # 688 ) ... ok
+2020-12-15T07:17:46.7914961Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic / mode:spawn, terminate, withDeasync:1 # 689 ) ... ok
+2020-12-15T07:17:46.7941502Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic / mode:spawn, terminate, withDeasync:1 # 690 ) ... ok
+2020-12-15T07:17:46.7961872Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic / mode:spawn, terminate, withDeasync:1 # 691 ) ... ok
+2020-12-15T07:17:46.7986848Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic / mode:spawn, terminate, withDeasync:1 # 692 ) ... ok
+2020-12-15T07:17:46.8007846Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic / mode:spawn, terminate, withDeasync:1 # 693 ) ... ok
+2020-12-15T07:17:46.8009191Z dtime:46
+2020-12-15T07:17:46.8027359Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic / mode:spawn, terminate, withDeasync:1 # 694 ) ... ok
+2020-12-15T07:17:46.8097056Z  > node D:\Temp\ProcessBasic-2020-12-15-6-8-31-376-392e.tmp\endSignalsBasic\program1.js
+2020-12-15T07:17:46.8789363Z program1:begin
+2020-12-15T07:17:51.8219830Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic / mode:shell, terminate # 695 ) ... ok
+2020-12-15T07:17:51.8245648Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic / mode:shell, terminate # 696 ) : expected true ... ok
+2020-12-15T07:17:51.8324379Z signalSend.error!
+2020-12-15T07:17:51.8324909Z handleError2
+2020-12-15T07:17:59.8810362Z program1:end
+2020-12-15T07:17:59.8911493Z         - got :
+2020-12-15T07:17:59.8912113Z           'program1:begin
+2020-12-15T07:17:59.8912588Z           program1:end
+2020-12-15T07:17:59.8912944Z           '
+2020-12-15T07:17:59.8913371Z         - expected :
+2020-12-15T07:17:59.8913773Z           'program1:begin
+2020-12-15T07:17:59.8914174Z           '
+2020-12-15T07:17:59.8914540Z         - difference :
+2020-12-15T07:17:59.8915173Z           'program1:begin
+2020-12-15T07:17:59.8915543Z           *
+2020-12-15T07:17:59.8939324Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic / mode:shell, terminate # 697 ) ... failed
+2020-12-15T07:17:59.9086936Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic / mode:shell, terminate # 698 ) ... ok
+2020-12-15T07:17:59.9089382Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic / mode:shell, terminate # 699 ) ... ok
+2020-12-15T07:17:59.9091598Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic / mode:shell, terminate # 700 ) ... ok
+2020-12-15T07:17:59.9093834Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic / mode:shell, terminate # 701 ) ... ok
+2020-12-15T07:17:59.9096160Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic / mode:shell, terminate # 702 ) ... ok
+2020-12-15T07:17:59.9098415Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic / mode:shell, terminate # 703 ) ... ok
+2020-12-15T07:17:59.9116889Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic / mode:shell, terminate # 704 ) ... ok
+2020-12-15T07:17:59.9138257Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic / mode:shell, terminate # 705 ) ... ok
+2020-12-15T07:17:59.9161927Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic / mode:shell, terminate # 706 ) ... ok
+2020-12-15T07:18:00.5441095Z dtime:8091
+2020-12-15T07:18:00.5441529Z         - got :
+2020-12-15T07:18:00.5441867Z           8091
+2020-12-15T07:18:00.5442330Z         - expected :
+2020-12-15T07:18:00.5442659Z           3000
+2020-12-15T07:18:00.5443034Z         - difference :
+2020-12-15T07:18:00.5443367Z           *
+2020-12-15T07:18:00.5445414Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic / mode:shell, terminate # 707 ) ... failed
+2020-12-15T07:18:00.5447184Z  > node D:\Temp\ProcessBasic-2020-12-15-6-8-31-376-392e.tmp\endSignalsBasic\program1.js "withTools:1"
+2020-12-15T07:18:00.5448033Z program1:begin
+2020-12-15T07:18:04.9366942Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic / mode:shell, terminate, withTools:1 # 708 ) ... ok
+2020-12-15T07:18:04.9405729Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic / mode:shell, terminate, withTools:1 # 709 ) : expected true ... ok
+2020-12-15T07:18:14.0882005Z program1:end
+2020-12-15T07:18:14.1126055Z         - got :
+2020-12-15T07:18:14.1126889Z           'program1:begin
+2020-12-15T07:18:14.1127741Z           program1:end
+2020-12-15T07:18:14.1128233Z           '
+2020-12-15T07:18:14.1128877Z         - expected :
+2020-12-15T07:18:14.1129469Z           'program1:begin
+2020-12-15T07:18:14.1129877Z           '
+2020-12-15T07:18:14.1130246Z         - difference :
+2020-12-15T07:18:14.1130659Z           'program1:begin
+2020-12-15T07:18:14.1131056Z           *
+2020-12-15T07:18:14.1133072Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic / mode:shell, terminate, withTools:1 # 710 ) ... failed
+2020-12-15T07:18:14.1159906Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic / mode:shell, terminate, withTools:1 # 711 ) ... ok
+2020-12-15T07:18:14.1183771Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic / mode:shell, terminate, withTools:1 # 712 ) ... ok
+2020-12-15T07:18:14.1205719Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic / mode:shell, terminate, withTools:1 # 713 ) ... ok
+2020-12-15T07:18:14.1225998Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic / mode:shell, terminate, withTools:1 # 714 ) ... ok
+2020-12-15T07:18:14.1250095Z         - got :
+2020-12-15T07:18:14.1250499Z           0
+2020-12-15T07:18:14.1250928Z         - expected :
+2020-12-15T07:18:14.1251329Z           1
+2020-12-15T07:18:14.1251697Z         - difference :
+2020-12-15T07:18:14.1252103Z           *
+2020-12-15T07:18:14.1270019Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic / mode:shell, terminate, withTools:1 # 715 ) ... failed
+2020-12-15T07:18:14.1299544Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic / mode:shell, terminate, withTools:1 # 716 ) ... ok
+2020-12-15T07:18:14.1321514Z         - got :
+2020-12-15T07:18:14.1322131Z           'normal'
+2020-12-15T07:18:14.1322723Z         - expected :
+2020-12-15T07:18:14.1323255Z           'code'
+2020-12-15T07:18:14.1323838Z         - difference :
+2020-12-15T07:18:14.1324360Z           '*
+2020-12-15T07:18:14.1349615Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic / mode:shell, terminate, withTools:1 # 717 ) ... failed
+2020-12-15T07:18:14.1562060Z         Test routine TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic was canceled!
+2020-12-15T07:18:14.1567745Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic / mode:shell, terminate, withTools:1 # 718 ) ... failed, throwing error
+2020-12-15T07:18:14.1602896Z       Failed ( throwing error ) TestSuite::Tools.l4.process.Execution / TestRoutine::endSignalsBasic in 500.363s
+2020-12-15T07:18:15.7195622Z     Thrown 1 error(s)
+
+*/
+
 function endSignalsBasic( test )
 {
   let context = this;
@@ -31092,7 +31284,7 @@ TestRoutine::endSignalsBasic / mode:spawn, terminate # 592 ) ... ok
         var exp1 =
 `program1:begin
 `
-        test.identical( options.output, exp1 );
+        test.identical( options.output, exp1 ); /* zzz : here */
         test.identical( options.ended, true );
         test.identical( options.state, 'terminated' );
         test.identical( options.error, null );
@@ -31118,7 +31310,7 @@ TestRoutine::endSignalsBasic / mode:spawn, terminate # 592 ) ... ok
 
         var dtime = _.time.now() - time1;
         console.log( `dtime:${dtime}` );
-        test.le( dtime, context.t1 * 3 );
+        test.le( dtime, context.t1 * 3 ); /* zzz : here */
         return null;
       })
 
@@ -31155,7 +31347,7 @@ TestRoutine::endSignalsBasic / mode:spawn, terminate # 592 ) ... ok
         /* poor implementation of signals in njs on Windows */
         if( process.platform !== 'win32' )
         exp1 += `SIGTERM\n`;
-        test.identical( options.output, exp1 );
+        test.identical( options.output, exp1 ); /* zzz : here */
         test.identical( options.ended, true );
         test.identical( options.state, 'terminated' );
         test.identical( options.error, null );
@@ -31164,9 +31356,9 @@ TestRoutine::endSignalsBasic / mode:spawn, terminate # 592 ) ... ok
         /* poor implementation of signals in njs on Windows */
         if( process.platform === 'win32' )
         {
-          test.identical( options.exitCode, 1 );
+          test.identical( options.exitCode, 1 ); /* zzz : here */
           test.identical( options.exitSignal, null );
-          test.identical( options.exitReason, 'code' );
+          test.identical( options.exitReason, 'code' ); /* zzz : here */
           test.identical( options.pnd.signalCode, null );
           test.identical( options.pnd.exitCode, 1 );
         }
