@@ -26940,7 +26940,8 @@ Process returned exit code ${options.exitCode}\n
 Launched as ${_.strQuote( options.execPath2 )}\n
 Launched at ${_.strQuote( options.currentPath )} \n
 \n -> Stderr\n
--  ${_.strLinesIndentation( `${testAppPath}:13\n    throw new MyError();\n    ^\n\n${nodeVersion <= 10 ? 'null' : '[MyError: my error is thrown]'}\n`, ' -  ' )} '\n -< Stderr
+-  ${_.strLinesIndentation( `${testAppPath}:13\n    throw new MyError();
+    ^\n\n${nodeVersion <= 10 ? 'null' : '[MyError: my error is thrown]'}${process.versions.node === '12.9.1' ? ` { message: 'my error is thrown' }` : '' }\n`, ' -  ' )} '\n -< Stderr
 `;
         test.equivalent( err.message, exp );
         test.identical( op, undefined );
@@ -26976,7 +26977,8 @@ Process returned exit code 1\n
 Launched as ${mode === 'fork' ? _.strQuote( testAppPath ) : _.strQuote( 'node ' + testAppPath )} \n
 Launched at ${_.strQuote( options.currentPath )} \n
 \n -> Stderr\n
--  ${_.strLinesIndentation( `${testAppPath}:13\n    throw new MyError();\n    ^\n\n${nodeVersion <= 10 ? 'null' : '[MyError: my error is thrown]'}\n`, ' -  ' )} '\n -< Stderr
+-  ${_.strLinesIndentation( `${testAppPath}:13\n    throw new MyError();
+    ^\n\n${nodeVersion <= 10 ? 'null' : '[MyError: my error is thrown]'}${process.versions.node === '12.9.1' ? ` { message: 'my error is thrown' }` : '' }\n`, ' -  ' )} '\n -< Stderr
 `;
         test.equivalent( op.output, exp );
 
