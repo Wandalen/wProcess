@@ -30036,7 +30036,98 @@ function startMinimalErrorAfterTerminationWithSend( test )
       test.description = 'Attempt to send data when ipc channel is closed';
       try
       {
-        o.pnd.send( 1 );
+        /*
+          xxx : Windows 10x
+          2020-12-16T20:59:20.4729817Z       Running TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalErrorAfterTerminationWithSend ..
+          2020-12-16T20:59:20.5249473Z  1 : function testApp()
+          2020-12-16T20:59:20.5250477Z  2 :   {
+          2020-12-16T20:59:20.5251340Z  3 :     setTimeout( () => {}, context.t1 ); // 1000
+          2020-12-16T20:59:20.5252093Z  4 :   }
+          2020-12-16T20:59:20.5252602Z  5 :
+          2020-12-16T20:59:20.5253114Z  6 : var context = {
+          2020-12-16T20:59:20.5253839Z  7 :   "t0" : 100,
+          2020-12-16T20:59:20.5254336Z  8 :   "t1" : 1000,
+          2020-12-16T20:59:20.5254823Z  9 :   "t2" : 5000,
+          2020-12-16T20:59:20.5255460Z 10 :   "t3" : 15000
+          2020-12-16T20:59:20.5256415Z 11 : };
+          2020-12-16T20:59:20.5257791Z 12 : var toolsPath = `D:\\a\\wProcess\\wProcess\\node_modules\\wTools\\proto\\wtools\\abase\\Layer1.s`;
+          2020-12-16T20:59:20.5258667Z 13 :
+          2020-12-16T20:59:20.5259219Z 14 : testApp();
+          2020-12-16T20:59:20.5259778Z 15 :
+          2020-12-16T20:59:20.5341807Z  > D:\Temp\ProcessBasic-2020-12-16-19-44-40-416-71b4.tmp\startMinimalErrorAfterTerminationWithSend\testApp.js
+          2020-12-16T20:59:21.7116943Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalErrorAfterTerminationWithSend /  # 1 ) ... ok
+          2020-12-16T20:59:21.7366568Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalErrorAfterTerminationWithSend /  # 2 ) ... ok
+          2020-12-16T20:59:21.7456178Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalErrorAfterTerminationWithSend /  # 3 ) ... ok
+          2020-12-16T20:59:21.7485053Z  = Message of error#378
+          2020-12-16T20:59:21.7485850Z     Channel closed
+          2020-12-16T20:59:21.7486492Z     Error starting the process
+          2020-12-16T20:59:21.7488450Z         Exec path : D:\Temp\ProcessBasic-2020-12-16-19-44-40-416-71b4.tmp\startMinimalErrorAfterTerminationWithSend\testApp.js
+          2020-12-16T20:59:21.7490482Z         Current path : /D/a/wProcess/wProcess
+          2020-12-16T20:59:21.7491040Z
+          2020-12-16T20:59:21.7491601Z  = Beautified calls stack
+          2020-12-16T20:59:21.7493259Z     at ChildProcess.target.send (internal/child_process.js:636:16)
+          2020-12-16T20:59:21.7525108Z     at wConsequence.o.conTerminate.finally (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process.test\Execution.test.s:30039:15) *
+          2020-12-16T20:59:21.7526594Z handleError1
+          2020-12-16T20:59:21.7527427Z handleError2
+          2020-12-16T20:59:21.7528877Z     at wConsequence.take (D:\a\wProcess\wProcess\node_modules\wConsequence\proto\wtools\abase\l9\consequence\Consequence.s:3727:8)
+          2020-12-16T20:59:21.7531681Z     at end3 (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:772:20)
+          2020-12-16T20:59:21.7533442Z     at end2 (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:723:12)
+          2020-12-16T20:59:21.7534828Z     at ChildProcess.handleClose (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:834:7)
+          2020-12-16T20:59:21.7536411Z     at ChildProcess.emit (events.js:203:15)
+          2020-12-16T20:59:21.7537771Z     at maybeClose (internal/child_process.js:982:16)
+          2020-12-16T20:59:21.7539141Z     at Process.ChildProcess._handle.onexit (internal/child_process.js:259:5)
+          2020-12-16T20:59:21.7541684Z     at Function.module.exports.loopWhile (D:\a\wProcess\wProcess\node_modules\wdeasync\index.js:71:23)
+          2020-12-16T20:59:21.7548162Z     at wConsequence._deasync (D:\a\wProcess\wProcess\node_modules\wConsequence\proto\wtools\abase\l9\consequence\Consequence.s:704:11)
+          2020-12-16T20:59:21.7550102Z     at wConsequence.deasync (D:\a\wProcess\wProcess\node_modules\wConsequence\proto\wtools\abase\l9\consequence\Consequence.s:747:15)
+          2020-12-16T20:59:21.7552095Z     at end (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:3128:13)
+          2020-12-16T20:59:21.7553551Z     at Object.execPathOf (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:3122:10)
+          2020-12-16T20:59:21.7554675Z     at processInfoGet (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2739:34)
+          2020-12-16T20:59:21.7556212Z     at handleError2 (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2717:25)
+          2020-12-16T20:59:21.7557328Z     at signalSend (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2609:13)
+          2020-12-16T20:59:21.7559283Z     at wConsequence.processKill (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2638:7)
+          2020-12-16T20:59:21.7562202Z     at wConsequence.take (D:\a\wProcess\wProcess\node_modules\wConsequence\proto\wtools\abase\l9\consequence\Consequence.s:3727:8)
+          2020-12-16T20:59:21.7565750Z     at Object.WindowsProcessTree.getProcessList [as callback] (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2964:67)
+          2020-12-16T20:59:21.7568369Z     at queue.forEach.r (D:\a\wProcess\wProcess\node_modules\w.process.tree.windows\lib\index.js:74:19)
+          2020-12-16T20:59:21.7569651Z     at Array.forEach (<anonymous>)
+          2020-12-16T20:59:21.7570972Z     at native.getProcessList (D:\a\wProcess\wProcess\node_modules\w.process.tree.windows\lib\index.js:73:19)
+          2020-12-16T20:59:21.7571914Z
+          2020-12-16T20:59:21.7572893Z     at Function.signal_body [as body] (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2567:9)
+          2020-12-16T20:59:21.7574054Z     at Object.kill_body (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process\l3\Execution.s:2789:28)
+          2020-12-16T20:59:21.7575315Z     at Object.kill (D:\a\wProcess\wProcess\node_modules\wTools\proto\wtools\abase\l0\l3\Routine.s:1068:23)
+          2020-12-16T20:59:21.7576683Z     at ChildProcess.o.pnd.on (D:\a\wProcess\wProcess\proto\wtools\abase\l4_process.test\Execution.test.s:29654:28) *
+          2020-12-16T20:59:21.7577762Z     at ChildProcess.emit (events.js:198:13)
+          2020-12-16T20:59:21.7578536Z     at emit (internal/child_process.js:832:12)
+          2020-12-16T20:59:21.7579558Z     at process._tickCallback (internal/process/next_tick.js:63:19)
+          2020-12-16T20:59:21.7580085Z
+          2020-12-16T20:59:21.7580453Z  = Throws stack
+          2020-12-16T20:59:21.7581406Z     thrown at ChildProcess.handleError @ /D/a/wProcess/wProcess/proto/wtools/abase/l4_process/l3/Execution.s:854:13
+          2020-12-16T20:59:21.7582237Z
+          2020-12-16T20:59:21.7582488Z
+          2020-12-16T20:59:21.7583296Z Error: async hook stack has become corrupted (actual: 101471, expected: 101400)
+          2020-12-16T20:59:22.2931653Z  1: 00007FF67B76888A v8::internal::GCIdleTimeHandler::GCIdleTimeHandler+4506
+          2020-12-16T20:59:22.2934048Z  2: 00007FF67B6AC1E8 v8::internal::ParseInfo::end_position+134984
+          2020-12-16T20:59:22.2935078Z  3: 00007FF67B776B53 node::CallbackScope::~CallbackScope+723
+          2020-12-16T20:59:22.2936642Z  4: 00007FF67B741C0C node::RemoveEnvironmentCleanupHook+556
+          2020-12-16T20:59:22.2938777Z  5: 00007FF67B741F66 node::MakeCallback+150
+          2020-12-16T20:59:22.2939412Z  6: 00007FF9412237F9
+          2020-12-16T20:59:22.2939964Z  7: 00007FF941222094
+          2020-12-16T20:59:22.2940451Z  8: 00007FF941221102
+          2020-12-16T20:59:22.2941253Z  9: 00007FF67B7B21B0 uv_timer_set_repeat+1824
+          2020-12-16T20:59:22.2942624Z 10: 00007FF67B7B2127 uv_timer_set_repeat+1687
+          2020-12-16T20:59:22.2943365Z 11: 00007FF67B7AD284 uv_dlerror+2452
+          2020-12-16T20:59:22.2943983Z 12: 00007FF67B7AE2A8 uv_run+232
+          2020-12-16T20:59:22.2944719Z 13: 00007FF67B74A92E node::NewContext+1390
+          2020-12-16T20:59:22.2946125Z 14: 00007FF67B74AF3B node::NewIsolate+603
+          2020-12-16T20:59:22.2947662Z 15: 00007FF67B74B397 node::Start+823
+          2020-12-16T20:59:22.2948824Z 16: 00007FF67B5F91EC node::MultiIsolatePlatform::MultiIsolatePlatform+604
+          2020-12-16T20:59:22.2950138Z 17: 00007FF67C2470AC v8::internal::compiler::OperationTyper::ToBoolean+129516
+          2020-12-16T20:59:22.2951227Z 18: 00007FF947867974 BaseThreadInitThunk+20
+          2020-12-16T20:59:22.2952147Z 19: 00007FF9494CA0B1 RtlUserThreadStart+33
+          2020-12-16T20:59:22.3536566Z npm ERR! Test failed.  See above for more details.
+          2020-12-16T20:59:22.5524525Z ##[error]Process completed with exit code 1.
+        */
+
+        o.pnd.send( 1 ); /* zzz : here */
       }
       catch( err )
       {
