@@ -787,6 +787,12 @@ function startMinimal_body( o )
     // console.log( 'handleClose', _.process.realMainFile(), o.ended, ... arguments ); debugger;
     // */
 
+    if( o.outputAdditive && _outAdditive )
+    {
+      o.logger.log( _outAdditive );
+      _outAdditive = '';
+    }
+
     if( o.ended )
     return;
 
@@ -860,6 +866,12 @@ function startMinimal_body( o )
       , `\n    Exec path : ${o.execPath2 || o.execPath}`
       , `\n    Current path : ${o.currentPath}`
     );
+
+    if( o.outputAdditive && _errAdditive )
+    {
+      o.logger.error( _errAdditive );
+      _errAdditive = '';
+    }
 
     if( o.ended )
     {
@@ -1015,27 +1027,8 @@ function startMinimal_body( o )
 
     if( !o.sync || o.deasync )
     {
-      o.pnd.on( 'error', ( err ) =>
-      {
-        if( o.outputAdditive && _errAdditive )
-        {
-          o.logger.error( _errAdditive );
-          _errAdditive = '';
-        }
-        handleError( err );
-      });
-
-      o.pnd.on( 'close', ( exitCode, exitSignal ) =>
-      {
-        if( o.outputAdditive && _outAdditive )
-        {
-          o.logger.log( _outAdditive );
-          _outAdditive = '';
-        }
-        handleClose( exitCode, exitSignal );
-      });
-      // o.pnd.on( 'error', handleError );
-      // o.pnd.on( 'close', handleClose );
+      o.pnd.on( 'error', handleError );
+      o.pnd.on( 'close', handleClose );
       o.pnd.on( 'exit', handleExit );
       o.pnd.on( 'disconnect', handleDisconnect );
     }
