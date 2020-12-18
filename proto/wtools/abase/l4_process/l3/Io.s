@@ -173,6 +173,8 @@ function _inputInSamFormatBrowser( o )
   let result = Object.create( null );
 
   result.map =  Object.create( null );
+  result.subject = '';
+  result.original = '';
 
   if( o.caching )
   if( o.keyValDelimeter === _inputInSamFormatBrowser.defaults.keyValDelimeter )
