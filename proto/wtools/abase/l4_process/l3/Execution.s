@@ -1236,7 +1236,7 @@ function startMinimal_body( o )
 
   function log( msg, channel )
   {
-
+    debugger;
     _.assert( channel === 'err' || channel === 'out' );
 
     if( msg === undefined )
