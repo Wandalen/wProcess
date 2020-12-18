@@ -28957,17 +28957,6 @@ function outputLog( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        /*
-          - got :
-            'a
-            b
-            c
-            '
-          - expected :
-            'abc'
-          - difference :
-            'a*
-        */
         test.identical( op.output, 'abc\n' )
 
         a.fileProvider.fileDelete( testAppParentPath );
@@ -28993,17 +28982,6 @@ function outputLog( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        /*
-          - got :
-            'a
-            bc
-            '
-          - expected :
-            'abc
-            '
-          - difference :
-            'a*
-        */
         test.identical( op.output, 'abc\n' )
 
         a.fileProvider.fileDelete( testAppParentPath );
@@ -29029,18 +29007,6 @@ function outputLog( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        /*
-          - got :
-            'ab
-            c
-            d
-            '
-          - expected :
-            'ab
-            cd'
-          - difference :
-            'a*
-        */
         test.identical( op.output, 'ab\ncd\n' )
 
         a.fileProvider.fileDelete( testAppParentPath );
@@ -29066,19 +29032,6 @@ function outputLog( test )
       {
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        /*
-          - got :
-            'ab
-            c
-            d
-            '
-          - expected :
-            'ab
-            cd
-            '
-          - difference :
-            'a*
-        */
         test.identical( op.output, 'ab\ncd\n' )
 
         a.fileProvider.fileDelete( testAppParentPath );
@@ -29133,6 +29086,220 @@ function outputLog( test )
     process.stdout.write( 'ab\nc' );
     process.stdout.write( 'd' );
     console.log();
+  }
+}
+
+//
+
+function outputLogStreams( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( testApp );
+  let testAppPath2 = a.program( testApp2 );
+  let testAppPath3 = a.program( testApp3 );
+  let testAppPath4 = a.program( testApp4 );
+  let modes = [ 'fork', /*'spawn', 'shell' */];
+  // let pieces = [];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
+
+  /* - */
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, without new line`;
+      let pieces = [];
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+        outputCollecting : 1,
+      }
+
+
+      _.process.startSingle( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( pieces, [ 'a', 'b', 'c' ] );
+        pieces = [];
+
+        return null;
+      })
+
+      options.pnd.stdout.on( 'data', ( data ) =>
+      {
+        pieces.push( data.toString() );
+        // console.log( 'piece : ', '++' + data + '++' );
+      })
+
+      return options.ready;
+
+    })
+
+    /* */
+
+    // ready.then( () =>
+    // {
+    //   test.case = `mode : ${mode}, new line at the end`;
+    //   let pieces = [];
+    //   // let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath : testAppPath2 } });
+
+    //   let options =
+    //   {
+    //     execPath : mode === 'fork' ? testAppPath2 : 'node ' + testAppPath2,
+    //     mode,
+    //     outputCollecting : 1,
+    //   }
+
+    //   _.process.startSingle( options )
+    //   .then( ( op ) =>
+    //   {
+    //     test.identical( op.exitCode, 0 );
+    //     test.identical( op.ended, true );
+    //     test.identical( pieces, [ 'a', 'b', 'c', '\n' ] );
+    //     // test.identical( pieces, [ 'a', 'bc', '\n' ] );
+    //     // test.identical( pieces, [ 'a', 'b', 'c\n' ] );
+    //     pieces = [];
+
+    //     return null;
+    //   })
+
+    //   options.pnd.stdout.on( 'data', ( data ) =>
+    //   {
+    //     pieces.push( data.toString() );
+    //     // console.log( 'piece : ', '++' + data + '++' );
+    //   })
+
+    //   return options.ready;
+    // })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, new line at the middle`;
+      let pieces = [];
+      // let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath : testAppPath3 } });
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath3 : 'node ' + testAppPath3,
+        mode,
+        outputCollecting : 1,
+      }
+
+      _.process.startSingle( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( pieces, [ 'ab\nc', 'd' ] );
+        pieces = [];
+
+        return null;
+      })
+
+      options.pnd.stdout.on( 'data', ( data ) =>
+      {
+        pieces.push( data.toString() );
+        // console.log( 'piece : ', '++' + data + '++' );
+      })
+
+      return options.ready;
+    })
+
+    /* */
+
+    // ready.then( () =>
+    // {
+    //   test.case = `mode : ${mode}, new line at the middle & end`;
+    //   let pieces = [];
+    //   // let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath : testAppPath4 } });
+
+    //   let options =
+    //   {
+    //     execPath : mode === 'fork' ? testAppPath4 : 'node ' + testAppPath4,
+    //     mode,
+    //     outputCollecting : 1,
+    //   }
+
+    //   _.process.startSingle( options )
+    //   .then( ( op ) =>
+    //   {
+    //     test.identical( op.exitCode, 0 );
+    //     test.identical( op.ended, true );
+    //     test.identical( pieces, [ 'ab\nc', 'd', '\n' ] );
+    //     pieces = [];
+
+    //     return null;
+    //   })
+
+    //   options.pnd.stdout.on( 'data', ( data ) =>
+    //   {
+    //     pieces.push( data.toString() );
+    //     // console.log( 'piece : ', '++' + data + '++' );
+    //   })
+
+    //   return options.ready;
+    // })
+
+    return ready;
+  }
+
+  /* - */
+
+  // function testAppParent()
+  // {
+  //   let _ = require( toolsPath );
+  //   _.include( 'wProcess' );
+
+  //   let o =
+  //   {
+  //     execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+  //     mode,
+  //     inputMirroring : 0,
+  //     outputColoring : 0,
+  //     outputPiping : 1
+  //   }
+  //   return _.process.startSingle( o );
+  // }
+
+  function testApp()
+  {
+    process.stdout.write( 'a' );
+    setTimeout( () => process.stdout.write( 'c' ), context.t0 );
+    process.stdout.write( 'b' );
+  }
+
+  function testApp2()
+  {
+    process.stdout.write( 'a' );
+    process.stdout.write( 'b' );
+    process.stdout.write( 'c' );
+    process.stdout.write( '\n' );
+    // console.log();
+  }
+
+  function testApp3()
+  {
+    process.stdout.write( 'ab\nc' );
+    process.stdout.write( 'd' );
+  }
+
+  function testApp4()
+  {
+    process.stdout.write( 'ab\nc' );
+    process.stdout.write( 'd' );
+    process.stdout.write( '\n' );
+    // console.log();
   }
 }
 
@@ -38107,6 +38274,7 @@ var Proto =
     startSingleOptionOutputAdditive,
     startMultipleOptionOutputAdditive, /* xxx qqq for Yevhen : fix | aaa : Done. */
     outputLog,
+    outputLogStreams,
 
     // etc
 

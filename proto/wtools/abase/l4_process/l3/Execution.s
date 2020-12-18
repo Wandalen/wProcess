@@ -988,7 +988,7 @@ function startMinimal_body( o )
 
   function pipe()
   {
-
+    debugger
     if( o.dry )
     return;
 
@@ -1176,7 +1176,7 @@ function startMinimal_body( o )
 
   function handleStreamOutput( data, channel )
   {
-
+    debugger
     if( _.bufferNodeIs( data ) )
     data = data.toString( 'utf8' );
 
