@@ -202,7 +202,9 @@ function startMinimal_body( o )
   /* qqq for Yevhen : use buffer instead */
   let _errOutput = '';
   let _decoratedOutOutput = '';
+  let _outAdditive = '';
   let _decoratedErrOutput = '';
+  let _errAdditive = '';
   let _errPrefix = null;
   let _outPrefix = null;
   let _readyCallback;
@@ -785,6 +787,12 @@ function startMinimal_body( o )
     // console.log( 'handleClose', _.process.realMainFile(), o.ended, ... arguments ); debugger;
     // */
 
+    if( o.outputAdditive && _outAdditive )
+    {
+      o.logger.log( _outAdditive );
+      _outAdditive = '';
+    }
+
     if( o.ended )
     return;
 
@@ -807,7 +815,7 @@ function startMinimal_body( o )
 
     if( o.verbosity >= 5 && o.inputMirroring )
     {
-      log( ` < Process returned error code ${exitCode}`, 'out' );
+      log( ` < Process returned error code ${exitCode}\n`, 'out' );
       if( exitCode )
       log( infoGet(), 'out' );
     }
@@ -858,6 +866,12 @@ function startMinimal_body( o )
       , `\n    Exec path : ${o.execPath2 || o.execPath}`
       , `\n    Current path : ${o.currentPath}`
     );
+
+    if( o.outputAdditive && _errAdditive )
+    {
+      o.logger.error( _errAdditive );
+      _errAdditive = '';
+    }
 
     if( o.ended )
     {
@@ -974,7 +988,7 @@ function startMinimal_body( o )
 
   function pipe()
   {
-
+    debugger
     if( o.dry )
     return;
 
@@ -1039,7 +1053,7 @@ function startMinimal_body( o )
         output = _.ct.format( output, { fg : 'bright white' } ) + _.ct.format( o.currentPath, 'path' );
         else
         output = output + o.currentPath
-        log( output, 'out' );
+        log( output + '\n', 'out' );
       }
 
       if( o.verbosity )
@@ -1047,7 +1061,7 @@ function startMinimal_body( o )
         let prefix = ' > ';
         if( o.outputColoring.out )
         prefix = _.ct.format( prefix, { fg : 'bright white' } );
-        log( prefix + o.execPath2, 'out' );
+        log( prefix + o.execPath2 + '\n', 'out' );
       }
 
     }
@@ -1154,7 +1168,7 @@ function startMinimal_body( o )
     result += `Launched as ${_.strQuote( o.execPath2 )} \n`;
     result += `Launched at ${_.strQuote( o.currentPath )} \n`;
     if( _errOutput.length )
-    result += `\n -> Stderr\n -  ${_.strLinesIndentation( _errOutput, ' -  ' )} '\n -< Stderr`;
+    result += `\n -> Stderr\n -  ${_.strLinesIndentation( _errOutput, ' -  ' )} '\n -< Stderr\n`;
     return result;
   }
 
@@ -1162,7 +1176,7 @@ function startMinimal_body( o )
 
   function handleStreamOutput( data, channel )
   {
-
+    debugger
     if( _.bufferNodeIs( data ) )
     data = data.toString( 'utf8' );
 
@@ -1222,7 +1236,7 @@ function startMinimal_body( o )
 
   function log( msg, channel )
   {
-
+    debugger;
     _.assert( channel === 'err' || channel === 'out' );
 
     if( msg === undefined )
@@ -1237,13 +1251,42 @@ function startMinimal_body( o )
 
     if( o.outputAdditive )
     {
+
       if( _.strEnds( msg, '\n' ) )
       {
-        msg = _.strRemoveEnd( msg, '\n' );
+        // msg = _.strRemoveEnd( msg, '\n' );
+        if( channel === 'err' )
+        {
+          msg = _errAdditive + _.strRemoveEnd( msg, '\n' );
+          _errAdditive = '';
+        }
+        else
+        {
+          msg = _outAdditive + _.strRemoveEnd( msg, '\n' );
+          _outAdditive = '';
+        }
       }
       else
       {
-        /* xxx yyy qqq for Yevhen : not implemeted yet */
+        /* xxx yyy qqq for Yevhen : not implemeted yet | aaa : Implemented. */
+        if( !_.strHas( msg, '\n' ) )
+        {
+          if( channel === 'err' )
+          _errAdditive += msg;
+          else
+          _outAdditive += msg;
+          return;
+        }
+        else
+        {
+          let lastBreak = msg.lastIndexOf( '\n' );
+          let left = msg.slice( lastBreak + 1 );
+          msg = msg.slice( 0, lastBreak );
+          if( channel === 'err' )
+          _errAdditive += left;
+          else
+          _outAdditive += left;
+        }
       }
       if( channel === 'err' )
       o.logger.error( msg );
@@ -1264,7 +1307,7 @@ function startMinimal_body( o )
   }
 
   /* */
-  
+
   function disconnectMaybe()
   {
     if( o.detaching === 2 )

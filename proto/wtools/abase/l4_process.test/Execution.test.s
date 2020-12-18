@@ -28925,6 +28925,444 @@ startMultipleOptionOutputAdditive.rapidity = -1;
 
 //
 
+function outputLog( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( testApp );
+  let testAppPath2 = a.program( testApp2 );
+  let testAppPath3 = a.program( testApp3 );
+  let testAppPath4 = a.program( testApp4 );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
+
+  /* - */
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, without new line`;
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath } });
+
+      let options =
+      {
+        execPath : 'node ' + testAppParentPath,
+        outputCollecting : 1,
+      }
+
+      return _.process.startSingle( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, 'abc\n' );
+
+        a.fileProvider.fileDelete( testAppParentPath );
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, new line ath the end`;
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath : testAppPath2 } });
+
+      let options =
+      {
+        execPath : 'node ' + testAppParentPath,
+        outputCollecting : 1,
+      }
+
+      return _.process.startSingle( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, 'abc\n' );
+
+        a.fileProvider.fileDelete( testAppParentPath );
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, new line at the middle`;
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath : testAppPath3 } });
+
+      let options =
+      {
+        execPath : 'node ' + testAppParentPath,
+        outputCollecting : 1,
+      }
+
+      return _.process.startSingle( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, 'ab\ncd\n' );
+
+        a.fileProvider.fileDelete( testAppParentPath );
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, new line at the middle & end`;
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath : testAppPath4 } });
+
+      let options =
+      {
+        execPath : 'node ' + testAppParentPath,
+        outputCollecting : 1,
+      }
+
+      return _.process.startSingle( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, 'ab\ncd\n' );
+
+        a.fileProvider.fileDelete( testAppParentPath );
+        return null;
+      })
+    })
+
+    return ready;
+  }
+
+  /* - */
+
+  function testAppParent()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+
+    let o =
+    {
+      execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+      mode,
+      inputMirroring : 0,
+      outputColoring : 0,
+      outputPiping : 1
+    }
+    return _.process.startSingle( o );
+  }
+
+  function testApp()
+  {
+    process.stdout.write( 'a' );
+    setTimeout( () => process.stdout.write( 'c' ), context.t0 );
+    process.stdout.write( 'b' );
+  }
+
+  function testApp2()
+  {
+    process.stdout.write( 'a' );
+    process.stdout.write( 'b' );
+    process.stdout.write( 'c' );
+    console.log();
+  }
+
+  function testApp3()
+  {
+    process.stdout.write( 'ab\nc' );
+    process.stdout.write( 'd' );
+  }
+
+  function testApp4()
+  {
+    process.stdout.write( 'ab\nc' );
+    process.stdout.write( 'd' );
+    console.log();
+  }
+}
+
+//
+
+function outputLogStreams( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( testApp );
+  let testAppPath2 = a.program( testApp2 );
+  let testAppPath3 = a.program( testApp3 );
+  let testAppPath4 = a.program( testApp4 );
+  let testAppPath5 = a.program( testApp5 );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
+
+  /* - */
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, without new line`;
+      let piecesOut = [];
+      let piecesErr = [];
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+        outputCollecting : 1,
+      }
+
+
+      _.process.startSingle( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( piecesOut.join( '' ), 'abc' );
+        test.identical( piecesErr.join( '' ), 'err1err2' );
+
+        return null;
+      })
+
+      options.pnd.stdout.on( 'data', ( data ) =>
+      {
+        piecesOut.push( data.toString() );
+      })
+
+      options.pnd.stderr.on( 'data', ( data ) =>
+      {
+        piecesErr.push( data.toString() );
+      })
+
+      return options.ready;
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, new line at the end`;
+      let piecesOut = [];
+      let piecesErr = [];
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath2 : 'node ' + testAppPath2,
+        mode,
+        outputCollecting : 1,
+      }
+
+      _.process.startSingle( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( piecesOut.join( '' ), 'abc\n' );
+        test.identical( piecesErr.join( '' ), 'err1err2err3\n' );
+
+        return null;
+      })
+
+      options.pnd.stdout.on( 'data', ( data ) =>
+      {
+        piecesOut.push( data.toString() );
+      })
+
+      options.pnd.stderr.on( 'data', ( data ) =>
+      {
+        piecesErr.push( data.toString() );
+      })
+
+      return options.ready;
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, new line at the middle`;
+      let piecesOut = [];
+      let piecesErr = [];
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath3 : 'node ' + testAppPath3,
+        mode,
+        outputCollecting : 1,
+      }
+
+      _.process.startSingle( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( piecesOut.join( '' ), 'ab\ncd' );
+        test.identical( piecesErr.join( '' ), 'err1\nerr2err3' );
+
+        return null;
+      })
+
+      options.pnd.stdout.on( 'data', ( data ) =>
+      {
+        piecesOut.push( data.toString() );
+      })
+
+      options.pnd.stderr.on( 'data', ( data ) =>
+      {
+        piecesErr.push( data.toString() );
+      })
+
+      return options.ready;
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, new line at the middle & end`;
+      let piecesOut = [];
+      let piecesErr = [];
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath4 : 'node ' + testAppPath4,
+        mode,
+        outputCollecting : 1,
+      }
+
+      _.process.startSingle( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( piecesOut.join( '' ), 'ab\ncd\n' );
+        test.identical( piecesErr.join( '' ), 'err1\nerr2err3\n' );
+
+        return null;
+      })
+
+      options.pnd.stdout.on( 'data', ( data ) =>
+      {
+        piecesOut.push( data.toString() );
+      })
+
+      options.pnd.stderr.on( 'data', ( data ) =>
+      {
+        piecesErr.push( data.toString() );
+      })
+
+      return options.ready;
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, new line at the end, both`;
+      let piecesOut = [];
+      let piecesErr = [];
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath5 : 'node ' + testAppPath5,
+        mode,
+        outputCollecting : 1,
+      }
+
+      _.process.startSingle( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( piecesOut.join( '' ), 'ac\n' );
+        test.identical( piecesErr.join( '' ), 'bd\n' );
+
+        return null;
+      })
+
+      options.pnd.stdout.on( 'data', ( data ) =>
+      {
+        piecesOut.push( data.toString() );
+      })
+
+      options.pnd.stderr.on( 'data', ( data ) =>
+      {
+        piecesErr.push( data.toString() );
+      })
+
+      return options.ready;
+    })
+
+    return ready;
+  }
+
+  /* - */
+
+  function testApp()
+  {
+    process.stdout.write( 'a' );
+    process.stderr.write( 'err1' );
+    setTimeout( () => process.stdout.write( 'c' ), context.t0 );
+    process.stderr.write( 'err2' );
+    process.stdout.write( 'b' );
+  }
+
+  function testApp2()
+  {
+    process.stdout.write( 'a' );
+    process.stderr.write( 'err1' );
+    process.stdout.write( 'b' );
+    process.stderr.write( 'err2' );
+    process.stdout.write( 'c' );
+    process.stderr.write( 'err3' );
+    process.stderr.write( '\n' );
+    console.log();
+  }
+
+  function testApp3()
+  {
+    process.stdout.write( 'ab\nc' );
+    process.stderr.write( 'err1\nerr2' );
+    process.stdout.write( 'd' );
+    process.stderr.write( 'err3' );
+  }
+
+  function testApp4()
+  {
+    process.stdout.write( 'ab\nc' );
+    process.stderr.write( 'err1\nerr2' );
+    process.stdout.write( 'd' );
+    process.stderr.write( 'err3\n' );
+    console.log();
+  }
+
+  function testApp5()
+  {
+    process.stdout.write( 'a' );
+    process.stderr.write( 'b' );
+    process.stdout.write( 'c\n' );
+    process.stderr.write( 'd\n' );
+  }
+
+}
+
+//
+
 function kill( test )
 {
   let context = this;
@@ -37968,7 +38406,9 @@ var Proto =
     startMultipleOutput,
     startMultipleOptionStdioIgnore,
     startSingleOptionOutputAdditive,
-    // startMultipleOptionOutputAdditive, /* xxx qqq for Yevhen : fix */
+    startMultipleOptionOutputAdditive, /* xxx qqq for Yevhen : fix | aaa : Done. */
+    outputLog,
+    outputLogStreams,
 
     // etc
 
