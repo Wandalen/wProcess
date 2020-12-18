@@ -6873,617 +6873,6 @@ function startMinimalImportantExecPathPassingThrough( test )
 
 //
 
-function startNjsPassingThroughDifferentTypesOfPaths( test )
-{
-  let context = this;
-  let a = context.assetFor( test, 'basic' );
-  let testAppPathParent = a.program( testAppParent );
-  let testAppPath = a.program( testApp );
-
-  let modes = [ 'fork', 'spawn', 'shell' ];
-  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
-
-  return a.ready;
-
-  /* */
-
-  function run( mode )
-  {
-    let ready = new _.Consequence().take( null );
-
-    ready.then( () =>
-    {
-      test.case = `mode : ${mode}, execute simple js program with normalized path`
-
-      let execPath = a.path.nativize( a.path.normalize( testAppPath ) );
-      let o =
-      {
-        execPath : mode === 'fork' ? _.strQuote( execPath ) : 'node ' + _.strQuote( execPath ),
-        mode,
-        stdio : 'pipe',
-        outputCollecting : 1,
-        outputPiping : 1,
-        outputColoring : 0,
-        throwingExitCode : 0,
-        applyingExitCode : 0,
-      };
-      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' })
-
-      let o2 =
-      {
-        execPath : 'node ' + testAppPathParent,
-        mode : 'spawn',
-        outputCollecting : 1,
-      }
-
-      return _.process.startMinimal( o2 )
-      .then( ( op ) =>
-      {
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.equivalent( op.output, '[]' );
-        test.true( a.fileProvider.fileExists( testAppPath ) );
-        return null;
-      })
-
-      /* ORIGINAL */
-      // return _.process.startNjsPassingThrough( o )
-      // .then( ( op ) =>
-      // {
-      //   test.identical( op.exitCode, 0 );
-      //   test.identical( op.ended, true );
-      //   test.true( a.fileProvider.fileExists( testAppPath ) );
-      //   test.true( !_.strHas( op.output, `Error: Cannot find module` ) );
-      //   return null;
-      // })
-
-    });
-
-    /* */
-
-    ready.then( () =>
-    {
-      test.case = `mode : ${mode}, execute simple js program with nativized path`
-
-      let o =
-      {
-        execPath : mode === 'fork' ? _.strQuote( testAppPath ) : 'node ' + _.strQuote( testAppPath ),
-        mode,
-        stdio : 'pipe',
-        outputCollecting : 1,
-        outputPiping : 1,
-        outputColoring : 0,
-        throwingExitCode : 0,
-        applyingExitCode : 0,
-      };
-
-      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' })
-
-      let o2 =
-      {
-        execPath : 'node ' + testAppPathParent,
-        mode : 'spawn',
-        outputCollecting : 1,
-      }
-
-      return _.process.startMinimal( o2 )
-      .then( ( op ) =>
-      {
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.equivalent( op.output, '[]' );
-        test.true( a.fileProvider.fileExists( testAppPath ) );
-        return null;
-      })
-
-      /* ORIGINAL */
-      // return _.process.startNjsPassingThrough( o )
-      // .then( ( op ) =>
-      // {
-      //   test.identical( op.exitCode, 0 );
-      //   test.identical( op.ended, true );
-      //   test.true( a.fileProvider.fileExists( testAppPath ) );
-      //   test.true( !_.strHas( op.output, `Error: Cannot find module` ) );
-      //   return null;
-      // })
-    })
-
-    ready.then( () =>
-    {
-      test.case = `mode : ${mode}, execute simple js program with normalized path, parent args : [ 'arg' ]`
-
-      let execPath = a.path.nativize( a.path.normalize( testAppPath ) );
-      let o =
-      {
-        execPath : mode === 'fork' ? _.strQuote( execPath ) : 'node ' + _.strQuote( execPath ),
-        mode,
-        args : [ 'arg' ],
-        stdio : 'pipe',
-        outputCollecting : 1,
-        outputPiping : 1,
-        outputColoring : 0,
-        throwingExitCode : 0,
-        applyingExitCode : 0,
-      };
-      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' })
-
-      let o2 =
-      {
-        execPath : 'node ' + testAppPathParent,
-        mode : 'spawn',
-        outputCollecting : 1,
-      }
-
-      return _.process.startMinimal( o2 )
-      .then( ( op ) =>
-      {
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.equivalent( op.output, `[ 'arg' ]` );
-        test.true( a.fileProvider.fileExists( testAppPath ) );
-        return null;
-      })
-
-    });
-
-    /* */
-
-    ready.then( () =>
-    {
-      test.case = `mode : ${mode}, execute simple js program with nativized path, parent args : [ 'arg' ]`
-
-      let o =
-      {
-        execPath : mode === 'fork' ? _.strQuote( testAppPath ) : 'node ' + _.strQuote( testAppPath ),
-        mode,
-        args : [ 'arg' ],
-        stdio : 'pipe',
-        outputCollecting : 1,
-        outputPiping : 1,
-        outputColoring : 0,
-        throwingExitCode : 0,
-        applyingExitCode : 0,
-      };
-
-      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' })
-
-      let o2 =
-      {
-        execPath : 'node ' + testAppPathParent,
-        mode : 'spawn',
-        outputCollecting : 1,
-      }
-
-      return _.process.startMinimal( o2 )
-      .then( ( op ) =>
-      {
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.equivalent( op.output, `[ 'arg' ]` );
-        test.true( a.fileProvider.fileExists( testAppPath ) );
-        return null;
-      })
-    })
-
-    return ready;
-  }
-
-  /* - */
-
-  function testAppParent()
-  {
-    let _ = require( toolsPath );
-    _.include( 'wFiles' );
-    _.include( 'wProcess' );
-
-    let o = _.fileProvider.fileRead({ filePath : _.path.join( __dirname, 'op.json' ), encoding : 'json' });
-    o.currentPath = __dirname;
-    _.process.startPassingThrough( o );
-  }
-
-  function testApp()
-  {
-    console.log( process.argv.slice( 2 ) );
-  }
-}
-
-//
-
-function startMinimalPassingThroughExecPathWithSpace( test )
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-  let testAppPath = a.program({ routine : testApp, dirPath : 'path with space' });
-  let testAppPathParent = a.program( testAppParent );
-  // let execPathWithSpace = 'node ' + testAppPath;
-  let modes = [ 'fork', 'spawn', 'shell' ];
-  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
-
-  return a.ready;
-
-  /* */
-
-  function run( mode )
-  {
-    let ready = new _.Consequence().take( null );
-
-    ready.then( () =>
-    {
-      test.case = `mode : ${mode}, execPath contains unquoted path with space`
-
-      let o =
-      {
-        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
-        outputCollecting : 1,
-        outputPiping : 0,
-        mode,
-        throwingExitCode : 0,
-        applyingExitCode : 0,
-        stdio : 'pipe'
-      }
-
-      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' })
-
-      let o2 =
-      {
-        execPath : 'node ' + testAppPathParent,
-        mode : 'spawn',
-        outputCollecting : 1,
-        throwingExitCode : 0,
-        stdio : 'pipe',
-      }
-
-      return _.process.startMinimal( o2 )
-      .then( ( op ) =>
-      {
-        let out = JSON.parse( op.output );
-        test.identical( op.ended, true );
-        test.true( a.fileProvider.fileExists( testAppPath ) );
-        test.true( !out.err );
-        test.true( _.strHas( out.output, `Error: Cannot find module` ) );
-        return null;
-      })
-    })
-
-    /* */
-
-    ready.then( () =>
-    {
-      test.case = `mode : ${mode}, args is a string with unquoted path with space`
-
-      let o =
-      {
-        args : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
-        mode,
-        outputCollecting : 1,
-        outputPiping : 0,
-        throwingExitCode : 0,
-        applyingExitCode : 0,
-        stdio : 'pipe'
-      }
-
-      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' })
-
-      let o2 =
-      {
-        execPath : 'node ' + testAppPathParent,
-        mode : 'spawn',
-        outputCollecting : 1,
-        throwingExitCode : 0,
-        stdio : 'pipe',
-      }
-
-      _.process.startMinimal( o2 )
-
-      o2.ready.then( ( op ) =>
-      {
-        test.identical( op.ended, true );
-        test.true( a.fileProvider.fileExists( testAppPath ) );
-        let out = JSON.parse( op.output );
-        if( mode === 'spawn' )
-        {
-          test.true( !!out.err );
-          test.true( a.fileProvider.fileExists( testAppPath ) );
-          test.identical( out.err.code, 'ENOENT' );
-        }
-        else
-        {
-          test.true( !out.err )
-          if( mode === 'fork' )
-          test.true( !_.strHas( out.output, `Cannot find module` ) );
-          else
-          test.true( _.strHas( out.output, `Cannot find module` ) );
-        }
-        return null;
-      })
-
-      return o2.ready;
-    })
-
-    /* */
-
-    ready.then( () =>
-    {
-      test.case = `mode : ${mode}, args is a string with unquoted path with space and argument`
-
-      let o =
-      {
-        args : mode === 'fork' ? testAppPath + ' arg' : 'node ' + testAppPath + ' arg',
-        mode,
-        outputCollecting : 1,
-        outputPiping : 0,
-        throwingExitCode : 0,
-        applyingExitCode : 0,
-        stdio : 'pipe'
-      }
-
-      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' })
-
-      let o2 =
-      {
-        execPath : 'node ' + testAppPathParent,
-        mode : 'spawn',
-        outputCollecting : 1,
-        throwingExitCode : 0,
-        stdio : 'pipe',
-      }
-
-      _.process.startMinimal( o2 )
-
-      o2.ready.then( ( op ) =>
-      {
-        let out = JSON.parse( op.output );
-        test.identical( op.ended, true );
-        test.true( a.fileProvider.fileExists( testAppPath ) );
-        if( mode === 'spawn' )
-        {
-          test.true( !!out.err );
-          test.true( a.fileProvider.fileExists( testAppPath ) );
-          test.identical( out.err.code, 'ENOENT' );
-        }
-        else
-        {
-          test.true( !out.err )
-          test.true( _.strHas( out.output, `Cannot find module` ) );
-        }
-        return null;
-      })
-
-      return o2.ready;
-    })
-
-    return ready;
-
-    /* ORIGINAL */
-    // a.ready.then( () =>
-    // {
-    //   test.case = 'execPath contains unquoted path with space, spawn'
-    //   return null;
-    // })
-
-    // _.process.startPassingThrough
-    // ({
-    //   execPath : execPathWithSpace,
-    //   ready : a.ready,
-    //   outputCollecting : 1,
-    //   outputPiping : 1,
-    //   mode : 'spawn',
-    //   throwingExitCode : 0,
-    //   applyingExitCode : 0,
-    //   stdio : 'pipe'
-    // });
-
-    // a.ready.then( ( op ) =>
-    // {
-    //   test.notIdentical( op.exitCode, 0 );
-    //   test.identical( op.ended, true );
-    //   test.true( a.fileProvider.fileExists( testAppPath ) );
-    //   test.true( _.strHas( op.output, `Error: Cannot find module` ) );
-    //   return null;
-    // })
-
-    // /* - */
-
-    // a.ready.then( () =>
-    // {
-    //   test.case = 'execPath contains unquoted path with space, shell'
-    //   return null;
-    // })
-
-    // _.process.startPassingThrough
-    // ({
-    //   execPath : execPathWithSpace,
-    //   ready : a.ready,
-    //   outputCollecting : 1,
-    //   outputPiping : 1,
-    //   mode : 'shell',
-    //   throwingExitCode : 0,
-    //   applyingExitCode : 0,
-    //   stdio : 'pipe'
-    // });
-
-    // a.ready.then( ( op ) =>
-    // {
-    //   test.notIdentical( op.exitCode, 0 );
-    //   test.identical( op.ended, true );
-    //   test.true( a.fileProvider.fileExists( testAppPath ) );
-    //   test.true( _.strHas( op.output, `Error: Cannot find module` ) );
-    //   return null;
-    // })
-
-    // /* - */
-
-    // a.ready.then( () =>
-    // {
-    //   test.case = 'execPath contains unquoted path with space, fork'
-    //   return null;
-    // })
-
-    // _.process.startPassingThrough
-    // ({
-    //   execPath : testAppPath,
-    //   ready : a.ready,
-    //   outputCollecting : 1,
-    //   outputPiping : 1,
-    //   mode : 'spawn',
-    //   throwingExitCode : 0,
-    //   applyingExitCode : 0,
-    //   stdio : 'pipe'
-    // });
-
-    // a.ready.then( ( op ) =>
-    // {
-    //   test.notIdentical( op.exitCode, 0 );
-    //   test.identical( op.ended, true );
-    //   test.true( a.fileProvider.fileExists( testAppPath ) );
-    //   test.true( _.strHas( op.output, `Error: Cannot find module` ) );
-    //   return null;
-    // })
-
-    // /* - */
-
-    // a.ready.then( () =>
-    // {
-    //   test.case = 'args is a string with unquoted path with space, spawn'
-    //   return null;
-    // })
-
-    // _.process.startPassingThrough
-    // ({
-    //   args : execPathWithSpace,
-    //   ready : a.ready,
-    //   outputCollecting : 1,
-    //   outputPiping : 1,
-    //   mode : 'spawn',
-    //   throwingExitCode : 0,
-    //   applyingExitCode : 0,
-    //   stdio : 'pipe'
-    // });
-
-    // a.ready.finally( ( err, op ) =>
-    // {
-    //   _.errAttend( err );
-    //   test.true( !!err );
-    //   test.true( a.fileProvider.fileExists( testAppPath ) );
-    //   test.true( _.strHas( err.message, `ENOENT` ) );
-    //   return null;
-    // })
-
-    // /* - */
-
-    // a.ready.then( () =>
-    // {
-    //   test.case = 'args is a string with unquoted path with space, shell'
-    //   return null;
-    // })
-
-    // _.process.startPassingThrough
-    // ({
-    //   args : execPathWithSpace,
-    //   ready : a.ready,
-    //   outputCollecting : 1,
-    //   outputPiping : 1,
-    //   mode : 'shell',
-    //   throwingExitCode : 0,
-    //   applyingExitCode : 0,
-    //   stdio : 'pipe'
-    // });
-
-    // a.ready.then( ( op ) =>
-    // {
-    //   test.notIdentical( op.exitCode, 0 );
-    //   test.identical( op.ended, true );
-    //   test.true( a.fileProvider.fileExists( testAppPath ) );
-    //   test.true( _.strHas( op.output, `Cannot find module` ) );
-    //   return null;
-    // })
-
-    // /* - */
-
-    // a.ready.then( () =>
-    // {
-    //   test.case = 'args is a string with unquoted path with space, fork'
-    //   return null;
-    // })
-
-    // _.process.startPassingThrough
-    // ({
-    //   args : testAppPath,
-    //   ready : a.ready,
-    //   outputCollecting : 1,
-    //   outputPiping : 1,
-    //   mode : 'fork',
-    //   throwingExitCode : 0,
-    //   applyingExitCode : 0,
-    //   stdio : 'pipe'
-    // });
-
-    // a.ready.then( ( op ) =>
-    // {
-    //   test.identical( op.exitCode, 0 );
-    //   test.identical( op.ended, true );
-    //   return null;
-    // })
-
-    // /* - */
-
-    // a.ready.then( () =>
-    // {
-    //   test.case = 'args is a string with unquoted path with space and argument, fork'
-    //   return null;
-    // })
-
-    // _.process.startPassingThrough
-    // ({
-    //   args : testAppPath + ' arg',
-    //   ready : a.ready,
-    //   outputCollecting : 1,
-    //   outputPiping : 1,
-    //   mode : 'fork',
-    //   throwingExitCode : 0,
-    //   applyingExitCode : 0,
-    //   stdio : 'pipe'
-    // });
-
-    // a.ready.then( ( op ) =>
-    // {
-    //   test.notIdentical( op.exitCode, 0 );
-    //   test.identical( op.ended, true );
-    //   test.true( a.fileProvider.fileExists( testAppPath ) );
-    //   test.true( _.strHas( op.output, `Cannot find module` ) );
-    //   return null;
-    // })
-
-  }
-
-
-  /* - */
-
-  function testAppParent()
-  {
-    let _ = require( toolsPath );
-    _.include( 'wFiles' );
-    _.include( 'wProcess' );
-
-    let o = _.fileProvider.fileRead({ filePath : _.path.join( __dirname, 'op.json' ), encoding : 'json' });
-    o.currentPath = __dirname;
-    _.process.startPassingThrough( o )
-    .finally( ( err, op ) =>
-    {
-      console.log( JSON.stringify({ output : op ? op.output : null, err : err ? _.errAttend( err ) : null }) );
-      return null;
-    })
-  }
-
-  function testApp()
-  {
-    console.log( process.pid )
-    setTimeout( () => {}, context.t1 * 2 ) /* 2000 */
-  }
-}
-
-//
-
 function startNormalizedExecPath( test )
 {
   let context = this;
@@ -8243,7 +7632,6 @@ function startMinimalDifferentTypesOfPaths( test )
 
 //
 
-
 function startNjsPassingThroughExecPathWithSpace( test )
 {
   let context = this;
@@ -8450,6 +7838,617 @@ function startNjsPassingThroughExecPathWithSpace( test )
   function testApp()
   {
     console.log( process.argv.slice( 2 ) );
+    console.log( process.pid )
+    setTimeout( () => {}, context.t1 * 2 ) /* 2000 */
+  }
+}
+
+//
+
+function startNjsPassingThroughDifferentTypesOfPaths( test )
+{
+  let context = this;
+  let a = context.assetFor( test, 'basic' );
+  let testAppPathParent = a.program( testAppParent );
+  let testAppPath = a.program( testApp );
+
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+
+  return a.ready;
+
+  /* */
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, execute simple js program with normalized path`
+
+      let execPath = a.path.nativize( a.path.normalize( testAppPath ) );
+      let o =
+      {
+        execPath : mode === 'fork' ? _.strQuote( execPath ) : 'node ' + _.strQuote( execPath ),
+        mode,
+        stdio : 'pipe',
+        outputCollecting : 1,
+        outputPiping : 1,
+        outputColoring : 0,
+        throwingExitCode : 0,
+        applyingExitCode : 0,
+      };
+      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' })
+
+      let o2 =
+      {
+        execPath : 'node ' + testAppPathParent,
+        mode : 'spawn',
+        outputCollecting : 1,
+      }
+
+      return _.process.startMinimal( o2 )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, '[]' );
+        test.true( a.fileProvider.fileExists( testAppPath ) );
+        return null;
+      })
+
+      /* ORIGINAL */
+      // return _.process.startNjsPassingThrough( o )
+      // .then( ( op ) =>
+      // {
+      //   test.identical( op.exitCode, 0 );
+      //   test.identical( op.ended, true );
+      //   test.true( a.fileProvider.fileExists( testAppPath ) );
+      //   test.true( !_.strHas( op.output, `Error: Cannot find module` ) );
+      //   return null;
+      // })
+
+    });
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, execute simple js program with nativized path`
+
+      let o =
+      {
+        execPath : mode === 'fork' ? _.strQuote( testAppPath ) : 'node ' + _.strQuote( testAppPath ),
+        mode,
+        stdio : 'pipe',
+        outputCollecting : 1,
+        outputPiping : 1,
+        outputColoring : 0,
+        throwingExitCode : 0,
+        applyingExitCode : 0,
+      };
+
+      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' })
+
+      let o2 =
+      {
+        execPath : 'node ' + testAppPathParent,
+        mode : 'spawn',
+        outputCollecting : 1,
+      }
+
+      return _.process.startMinimal( o2 )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, '[]' );
+        test.true( a.fileProvider.fileExists( testAppPath ) );
+        return null;
+      })
+
+      /* ORIGINAL */
+      // return _.process.startNjsPassingThrough( o )
+      // .then( ( op ) =>
+      // {
+      //   test.identical( op.exitCode, 0 );
+      //   test.identical( op.ended, true );
+      //   test.true( a.fileProvider.fileExists( testAppPath ) );
+      //   test.true( !_.strHas( op.output, `Error: Cannot find module` ) );
+      //   return null;
+      // })
+    })
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, execute simple js program with normalized path, parent args : [ 'arg' ]`
+
+      let execPath = a.path.nativize( a.path.normalize( testAppPath ) );
+      let o =
+      {
+        execPath : mode === 'fork' ? _.strQuote( execPath ) : 'node ' + _.strQuote( execPath ),
+        mode,
+        args : [ 'arg' ],
+        stdio : 'pipe',
+        outputCollecting : 1,
+        outputPiping : 1,
+        outputColoring : 0,
+        throwingExitCode : 0,
+        applyingExitCode : 0,
+      };
+      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' })
+
+      let o2 =
+      {
+        execPath : 'node ' + testAppPathParent,
+        mode : 'spawn',
+        outputCollecting : 1,
+      }
+
+      return _.process.startMinimal( o2 )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, `[ 'arg' ]` );
+        test.true( a.fileProvider.fileExists( testAppPath ) );
+        return null;
+      })
+
+    });
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, execute simple js program with nativized path, parent args : [ 'arg' ]`
+
+      let o =
+      {
+        execPath : mode === 'fork' ? _.strQuote( testAppPath ) : 'node ' + _.strQuote( testAppPath ),
+        mode,
+        args : [ 'arg' ],
+        stdio : 'pipe',
+        outputCollecting : 1,
+        outputPiping : 1,
+        outputColoring : 0,
+        throwingExitCode : 0,
+        applyingExitCode : 0,
+      };
+
+      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' })
+
+      let o2 =
+      {
+        execPath : 'node ' + testAppPathParent,
+        mode : 'spawn',
+        outputCollecting : 1,
+      }
+
+      return _.process.startMinimal( o2 )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.equivalent( op.output, `[ 'arg' ]` );
+        test.true( a.fileProvider.fileExists( testAppPath ) );
+        return null;
+      })
+    })
+
+    return ready;
+  }
+
+  /* - */
+
+  function testAppParent()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wFiles' );
+    _.include( 'wProcess' );
+
+    let o = _.fileProvider.fileRead({ filePath : _.path.join( __dirname, 'op.json' ), encoding : 'json' });
+    o.currentPath = __dirname;
+    _.process.startPassingThrough( o );
+  }
+
+  function testApp()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+}
+
+//
+
+function startMinimalPassingThroughExecPathWithSpace( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program({ routine : testApp, dirPath : 'path with space' });
+  let testAppPathParent = a.program( testAppParent );
+  // let execPathWithSpace = 'node ' + testAppPath;
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+
+  return a.ready;
+
+  /* */
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, execPath contains unquoted path with space`
+
+      let o =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+        outputPiping : 0,
+        mode,
+        throwingExitCode : 0,
+        applyingExitCode : 0,
+        stdio : 'pipe'
+      }
+
+      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' })
+
+      let o2 =
+      {
+        execPath : 'node ' + testAppPathParent,
+        mode : 'spawn',
+        outputCollecting : 1,
+        throwingExitCode : 0,
+        stdio : 'pipe',
+      }
+
+      return _.process.startMinimal( o2 )
+      .then( ( op ) =>
+      {
+        let out = JSON.parse( op.output );
+        test.identical( op.ended, true );
+        test.true( a.fileProvider.fileExists( testAppPath ) );
+        test.true( !out.err );
+        test.true( _.strHas( out.output, `Error: Cannot find module` ) );
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, args is a string with unquoted path with space`
+
+      let o =
+      {
+        args : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+        outputCollecting : 1,
+        outputPiping : 0,
+        throwingExitCode : 0,
+        applyingExitCode : 0,
+        stdio : 'pipe'
+      }
+
+      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' })
+
+      let o2 =
+      {
+        execPath : 'node ' + testAppPathParent,
+        mode : 'spawn',
+        outputCollecting : 1,
+        throwingExitCode : 0,
+        stdio : 'pipe',
+      }
+
+      _.process.startMinimal( o2 )
+
+      o2.ready.then( ( op ) =>
+      {
+        test.identical( op.ended, true );
+        test.true( a.fileProvider.fileExists( testAppPath ) );
+        let out = JSON.parse( op.output );
+        if( mode === 'spawn' )
+        {
+          test.true( !!out.err );
+          test.true( a.fileProvider.fileExists( testAppPath ) );
+          test.identical( out.err.code, 'ENOENT' );
+        }
+        else
+        {
+          test.true( !out.err )
+          if( mode === 'fork' )
+          test.true( !_.strHas( out.output, `Cannot find module` ) );
+          else
+          test.true( _.strHas( out.output, `Cannot find module` ) );
+        }
+        return null;
+      })
+
+      return o2.ready;
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, args is a string with unquoted path with space and argument`
+
+      let o =
+      {
+        args : mode === 'fork' ? testAppPath + ' arg' : 'node ' + testAppPath + ' arg',
+        mode,
+        outputCollecting : 1,
+        outputPiping : 0,
+        throwingExitCode : 0,
+        applyingExitCode : 0,
+        stdio : 'pipe'
+      }
+
+      a.fileProvider.fileWrite({ filePath : a.abs( 'op.json' ), data : o, encoding : 'json' })
+
+      let o2 =
+      {
+        execPath : 'node ' + testAppPathParent,
+        mode : 'spawn',
+        outputCollecting : 1,
+        throwingExitCode : 0,
+        stdio : 'pipe',
+      }
+
+      _.process.startMinimal( o2 )
+
+      o2.ready.then( ( op ) =>
+      {
+        let out = JSON.parse( op.output );
+        test.identical( op.ended, true );
+        test.true( a.fileProvider.fileExists( testAppPath ) );
+        if( mode === 'spawn' )
+        {
+          test.true( !!out.err );
+          test.true( a.fileProvider.fileExists( testAppPath ) );
+          test.identical( out.err.code, 'ENOENT' );
+        }
+        else
+        {
+          test.true( !out.err )
+          test.true( _.strHas( out.output, `Cannot find module` ) );
+        }
+        return null;
+      })
+
+      return o2.ready;
+    })
+
+    return ready;
+
+    /* ORIGINAL */
+    // a.ready.then( () =>
+    // {
+    //   test.case = 'execPath contains unquoted path with space, spawn'
+    //   return null;
+    // })
+
+    // _.process.startPassingThrough
+    // ({
+    //   execPath : execPathWithSpace,
+    //   ready : a.ready,
+    //   outputCollecting : 1,
+    //   outputPiping : 1,
+    //   mode : 'spawn',
+    //   throwingExitCode : 0,
+    //   applyingExitCode : 0,
+    //   stdio : 'pipe'
+    // });
+
+    // a.ready.then( ( op ) =>
+    // {
+    //   test.notIdentical( op.exitCode, 0 );
+    //   test.identical( op.ended, true );
+    //   test.true( a.fileProvider.fileExists( testAppPath ) );
+    //   test.true( _.strHas( op.output, `Error: Cannot find module` ) );
+    //   return null;
+    // })
+
+    // /* - */
+
+    // a.ready.then( () =>
+    // {
+    //   test.case = 'execPath contains unquoted path with space, shell'
+    //   return null;
+    // })
+
+    // _.process.startPassingThrough
+    // ({
+    //   execPath : execPathWithSpace,
+    //   ready : a.ready,
+    //   outputCollecting : 1,
+    //   outputPiping : 1,
+    //   mode : 'shell',
+    //   throwingExitCode : 0,
+    //   applyingExitCode : 0,
+    //   stdio : 'pipe'
+    // });
+
+    // a.ready.then( ( op ) =>
+    // {
+    //   test.notIdentical( op.exitCode, 0 );
+    //   test.identical( op.ended, true );
+    //   test.true( a.fileProvider.fileExists( testAppPath ) );
+    //   test.true( _.strHas( op.output, `Error: Cannot find module` ) );
+    //   return null;
+    // })
+
+    // /* - */
+
+    // a.ready.then( () =>
+    // {
+    //   test.case = 'execPath contains unquoted path with space, fork'
+    //   return null;
+    // })
+
+    // _.process.startPassingThrough
+    // ({
+    //   execPath : testAppPath,
+    //   ready : a.ready,
+    //   outputCollecting : 1,
+    //   outputPiping : 1,
+    //   mode : 'spawn',
+    //   throwingExitCode : 0,
+    //   applyingExitCode : 0,
+    //   stdio : 'pipe'
+    // });
+
+    // a.ready.then( ( op ) =>
+    // {
+    //   test.notIdentical( op.exitCode, 0 );
+    //   test.identical( op.ended, true );
+    //   test.true( a.fileProvider.fileExists( testAppPath ) );
+    //   test.true( _.strHas( op.output, `Error: Cannot find module` ) );
+    //   return null;
+    // })
+
+    // /* - */
+
+    // a.ready.then( () =>
+    // {
+    //   test.case = 'args is a string with unquoted path with space, spawn'
+    //   return null;
+    // })
+
+    // _.process.startPassingThrough
+    // ({
+    //   args : execPathWithSpace,
+    //   ready : a.ready,
+    //   outputCollecting : 1,
+    //   outputPiping : 1,
+    //   mode : 'spawn',
+    //   throwingExitCode : 0,
+    //   applyingExitCode : 0,
+    //   stdio : 'pipe'
+    // });
+
+    // a.ready.finally( ( err, op ) =>
+    // {
+    //   _.errAttend( err );
+    //   test.true( !!err );
+    //   test.true( a.fileProvider.fileExists( testAppPath ) );
+    //   test.true( _.strHas( err.message, `ENOENT` ) );
+    //   return null;
+    // })
+
+    // /* - */
+
+    // a.ready.then( () =>
+    // {
+    //   test.case = 'args is a string with unquoted path with space, shell'
+    //   return null;
+    // })
+
+    // _.process.startPassingThrough
+    // ({
+    //   args : execPathWithSpace,
+    //   ready : a.ready,
+    //   outputCollecting : 1,
+    //   outputPiping : 1,
+    //   mode : 'shell',
+    //   throwingExitCode : 0,
+    //   applyingExitCode : 0,
+    //   stdio : 'pipe'
+    // });
+
+    // a.ready.then( ( op ) =>
+    // {
+    //   test.notIdentical( op.exitCode, 0 );
+    //   test.identical( op.ended, true );
+    //   test.true( a.fileProvider.fileExists( testAppPath ) );
+    //   test.true( _.strHas( op.output, `Cannot find module` ) );
+    //   return null;
+    // })
+
+    // /* - */
+
+    // a.ready.then( () =>
+    // {
+    //   test.case = 'args is a string with unquoted path with space, fork'
+    //   return null;
+    // })
+
+    // _.process.startPassingThrough
+    // ({
+    //   args : testAppPath,
+    //   ready : a.ready,
+    //   outputCollecting : 1,
+    //   outputPiping : 1,
+    //   mode : 'fork',
+    //   throwingExitCode : 0,
+    //   applyingExitCode : 0,
+    //   stdio : 'pipe'
+    // });
+
+    // a.ready.then( ( op ) =>
+    // {
+    //   test.identical( op.exitCode, 0 );
+    //   test.identical( op.ended, true );
+    //   return null;
+    // })
+
+    // /* - */
+
+    // a.ready.then( () =>
+    // {
+    //   test.case = 'args is a string with unquoted path with space and argument, fork'
+    //   return null;
+    // })
+
+    // _.process.startPassingThrough
+    // ({
+    //   args : testAppPath + ' arg',
+    //   ready : a.ready,
+    //   outputCollecting : 1,
+    //   outputPiping : 1,
+    //   mode : 'fork',
+    //   throwingExitCode : 0,
+    //   applyingExitCode : 0,
+    //   stdio : 'pipe'
+    // });
+
+    // a.ready.then( ( op ) =>
+    // {
+    //   test.notIdentical( op.exitCode, 0 );
+    //   test.identical( op.ended, true );
+    //   test.true( a.fileProvider.fileExists( testAppPath ) );
+    //   test.true( _.strHas( op.output, `Cannot find module` ) );
+    //   return null;
+    // })
+
+  }
+
+
+  /* - */
+
+  function testAppParent()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wFiles' );
+    _.include( 'wProcess' );
+
+    let o = _.fileProvider.fileRead({ filePath : _.path.join( __dirname, 'op.json' ), encoding : 'json' });
+    o.currentPath = __dirname;
+    _.process.startPassingThrough( o )
+    .finally( ( err, op ) =>
+    {
+      console.log( JSON.stringify({ output : op ? op.output : null, err : err ? _.errAttend( err ) : null }) );
+      return null;
+    })
+  }
+
+  function testApp()
+  {
     console.log( process.pid )
     setTimeout( () => {}, context.t1 * 2 ) /* 2000 */
   }
@@ -12251,304 +12250,6 @@ startMinimalDetachingTrivial.timeOut = 26e4; /* Locally : 25.972s */
 
 //
 
-function startMinimalEventClose( test )
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-  let testAppPath = a.program({ routine : program1 });
-  let data = [];
-
-  let modes = [ 'spawn', 'fork', 'shell' ];
-  let ipc = [ false, true ]
-  let disconnecting = [ false, true ];
-
-  modes.forEach( mode =>
-  {
-    ipc.forEach( ipc =>
-    {
-      disconnecting.forEach( disconnecting =>
-      {
-        a.ready.then( () => run( mode,ipc,disconnecting ) );
-      })
-    })
-  })
-
-  a.ready.then( () =>
-  {
-    var dim = [ data.length / 4, 4 ];
-    var style = 'doubleBorder';
-    var topHead = [ 'mode', 'ipc', 'disconnecting', 'event close' ];
-    var got = _.strTable({ data, dim, style, topHead, colWidth : 18 });
-
-    var exp =
-`
-╔════════════════════════════════════════════════════════════════════════╗
-║       mode               ipc          disconnecting      event close   ║
-╟────────────────────────────────────────────────────────────────────────╢
-║       spawn             false             false             true       ║
-║       spawn             false             true              true       ║
-║       spawn             true              false             true       ║
-║       spawn             true              true              false      ║
-║       fork              true              false             true       ║
-║       fork              true              true              false      ║
-║       shell             false             false             true       ║
-║       shell             false             true              true       ║
-╚════════════════════════════════════════════════════════════════════════╝
-`
-    test.equivalent( got.result, exp );
-    console.log( got.result )
-    return null;
-  })
-
-  return a.ready;
-
-  /* - */
-
-  function run( mode, ipc, disconnecting )
-  {
-    let ready = new _.Consequence().take( null );
-
-    if( ipc && mode === 'shell' )
-    return ready;
-
-    if( !ipc && mode === 'fork' )
-    return ready;
-
-    let result = [ mode, ipc, disconnecting, false ];
-
-    ready.then( () =>
-    {
-      let o =
-      {
-        execPath : mode === 'fork' ? 'program1.js' : 'node program1.js',
-        currentPath : a.routinePath,
-        stdio : 'ignore',
-        detaching : 0,
-        mode,
-        ipc,
-      }
-
-      test.case = _.toJs({ mode, ipc, disconnecting });
-
-      _.process.startMinimal( o );
-
-      o.conStart.thenGive( () =>
-      {
-        if( disconnecting )
-        o.disconnect()
-      })
-      o.pnd.on( 'close', () =>
-      {
-        result[ 3 ] = true;
-      })
-
-      return _.time.out( context.t1 * 3, () =>
-      {
-        test.true( !_.process.isAlive( o.pnd.pid ) );
-
-        if( mode === 'shell' )
-        test.identical( result[ 3 ], true )
-
-        if( mode === 'spawn' )
-        test.identical( result[ 3 ], ipc && disconnecting ? false : true )
-
-        if( mode === 'fork' )
-        test.identical( result[ 3 ], !disconnecting )
-
-        data.push.apply( data, result );
-        return null;
-      })
-    })
-
-    return ready;
-  }
-
-  /* - */
-
-  function program1()
-  {
-    let _ = require( toolsPath )
-    console.log( 'program1::begin' );
-    setTimeout( () =>
-    {
-      console.log( 'program1::end' );
-    }, context.t1 * 2 );
-  }
-}
-
-startMinimalEventClose.timeOut = 5e5;
-startMinimalEventClose.description =
-`
-Check if close event is called.
-`
-
-//
-
-function startMinimalEventExit( test )
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-  let testAppPath = a.program({ routine : program1 });
-  let data = [];
-  let modes = [ 'spawn', 'fork', 'shell' ];
-  let stdio = [ 'inherit', 'pipe', 'ignore' ];
-  let ipc = [ false, true ]
-  let detaching = [ false, true ]
-  let disconnecting = [ false, true ];
-
-  modes.forEach( mode =>
-  {
-    stdio.forEach( stdio =>
-    {
-      ipc.forEach( ipc =>
-      {
-        detaching.forEach( detaching =>
-        {
-          disconnecting.forEach( disconnecting =>
-          {
-            a.ready.then(() => run( mode, stdio, ipc, detaching, disconnecting ) );
-          })
-        })
-      })
-    })
-  })
-
-  a.ready.then( () =>
-  {
-    var dim = [ data.length / 6, 6 ];
-    var style = 'doubleBorder';
-    var topHead = [ 'mode', 'stdio','ipc', 'detaching', 'disconnecting', 'event exit' ];
-    var got = _.strTable({ data, dim, style, topHead, colWidth : 18 });
-
-    var exp =
-`
-╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
-║       mode              stdio              ipc            detaching       disconnecting      event exit    ║
-╟────────────────────────────────────────────────────────────────────────────────────────────────────────────╢
-║       spawn            inherit            false             false             false             true       ║
-║       spawn            inherit            false             true              false             true       ║
-║       spawn            inherit            true              false             false             true       ║
-║       spawn            inherit            true              true              false             true       ║
-║       spawn             pipe              false             false             false             true       ║
-║       spawn             pipe              false             true              false             true       ║
-║       spawn             pipe              false             false             true              true       ║
-║       spawn             pipe              false             true              true              true       ║
-║       spawn             pipe              true              false             false             true       ║
-║       spawn             pipe              true              true              false             true       ║
-║       spawn             pipe              true              false             true              true       ║
-║       spawn             pipe              true              true              true              true       ║
-║       spawn            ignore             false             false             false             true       ║
-║       spawn            ignore             false             true              false             true       ║
-║       spawn            ignore             false             false             true              true       ║
-║       spawn            ignore             false             true              true              true       ║
-║       spawn            ignore             true              false             false             true       ║
-║       spawn            ignore             true              true              false             true       ║
-║       spawn            ignore             true              false             true              true       ║
-║       spawn            ignore             true              true              true              true       ║
-║       fork             inherit            true              false             false             true       ║
-║       fork             inherit            true              true              false             true       ║
-║       fork              pipe              true              false             false             true       ║
-║       fork              pipe              true              true              false             true       ║
-║       fork              pipe              true              false             true              true       ║
-║       fork              pipe              true              true              true              true       ║
-║       fork             ignore             true              false             false             true       ║
-║       fork             ignore             true              true              false             true       ║
-║       fork             ignore             true              false             true              true       ║
-║       fork             ignore             true              true              true              true       ║
-║       shell            inherit            false             false             false             true       ║
-║       shell            inherit            false             true              false             true       ║
-║       shell             pipe              false             false             false             true       ║
-║       shell             pipe              false             true              false             true       ║
-║       shell             pipe              false             false             true              true       ║
-║       shell             pipe              false             true              true              true       ║
-║       shell            ignore             false             false             false             true       ║
-║       shell            ignore             false             true              false             true       ║
-║       shell            ignore             false             false             true              true       ║
-║       shell            ignore             false             true              true              true       ║
-╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
-`
-    test.equivalent( got.result, exp );
-
-    console.log( got.result )
-    return null;
-  })
-
-  return a.ready;
-
-  /* - */
-
-  function run( mode, stdio, ipc, detaching, disconnecting )
-  {
-    let ready = new _.Consequence().take( null );
-
-    if( detaching && stdio === 'inherit' ) /* remove if assert in start is removed */
-    return ready;
-
-    if( ipc && mode === 'shell' )
-    return ready;
-
-    if( !ipc && mode === 'fork' )
-    return ready;
-
-    let result = [ mode, stdio, ipc, disconnecting, detaching, false ];
-
-    ready.then( () =>
-    {
-      let o =
-      {
-        execPath : mode === 'fork' ? 'program1.js' : 'node program1.js',
-        currentPath : a.routinePath,
-        outputPiping : 0,
-        outputCollecting : 0,
-        stdio,
-        mode,
-        ipc,
-        detaching
-      }
-
-      test.case = _.toJs({ mode, stdio, ipc, disconnecting, detaching });
-
-      _.process.startMinimal( o );
-
-      o.conStart.thenGive( () =>
-      {
-        if( disconnecting )
-        o.disconnect()
-      })
-      o.pnd.on( 'exit', () =>
-      {
-        result[ 5 ] = true;
-      })
-
-      return _.time.out( context.t1 * 3, () =>
-      {
-        test.true( !_.process.isAlive( o.pnd.pid ) );
-        test.identical( result[ 5 ], true );
-        data.push.apply( data, result );
-        return null;
-      })
-    })
-
-    return ready;
-  }
-
-  /* - */
-
-  function program1()
-  {
-    setTimeout( () => {}, context.t1 );
-  }
-}
-
-startMinimalEventExit.rapidity = -1;
-startMinimalEventExit.timeOut = 5e5;
-startMinimalEventExit.description =
-`
-Check if exit event is called.
-`
-
-//
-
 function startMinimalDetachingChildExitsAfterParent( test )
 {
   let context = this;
@@ -14001,6 +13702,304 @@ Child creates file on disk when parent exists.
 
 //
 
+function startMinimalEventClose( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program({ routine : program1 });
+  let data = [];
+
+  let modes = [ 'spawn', 'fork', 'shell' ];
+  let ipc = [ false, true ]
+  let disconnecting = [ false, true ];
+
+  modes.forEach( mode =>
+  {
+    ipc.forEach( ipc =>
+    {
+      disconnecting.forEach( disconnecting =>
+      {
+        a.ready.then( () => run( mode,ipc,disconnecting ) );
+      })
+    })
+  })
+
+  a.ready.then( () =>
+  {
+    var dim = [ data.length / 4, 4 ];
+    var style = 'doubleBorder';
+    var topHead = [ 'mode', 'ipc', 'disconnecting', 'event close' ];
+    var got = _.strTable({ data, dim, style, topHead, colWidth : 18 });
+
+    var exp =
+`
+╔════════════════════════════════════════════════════════════════════════╗
+║       mode               ipc          disconnecting      event close   ║
+╟────────────────────────────────────────────────────────────────────────╢
+║       spawn             false             false             true       ║
+║       spawn             false             true              true       ║
+║       spawn             true              false             true       ║
+║       spawn             true              true              false      ║
+║       fork              true              false             true       ║
+║       fork              true              true              false      ║
+║       shell             false             false             true       ║
+║       shell             false             true              true       ║
+╚════════════════════════════════════════════════════════════════════════╝
+`
+    test.equivalent( got.result, exp );
+    console.log( got.result )
+    return null;
+  })
+
+  return a.ready;
+
+  /* - */
+
+  function run( mode, ipc, disconnecting )
+  {
+    let ready = new _.Consequence().take( null );
+
+    if( ipc && mode === 'shell' )
+    return ready;
+
+    if( !ipc && mode === 'fork' )
+    return ready;
+
+    let result = [ mode, ipc, disconnecting, false ];
+
+    ready.then( () =>
+    {
+      let o =
+      {
+        execPath : mode === 'fork' ? 'program1.js' : 'node program1.js',
+        currentPath : a.routinePath,
+        stdio : 'ignore',
+        detaching : 0,
+        mode,
+        ipc,
+      }
+
+      test.case = _.toJs({ mode, ipc, disconnecting });
+
+      _.process.startMinimal( o );
+
+      o.conStart.thenGive( () =>
+      {
+        if( disconnecting )
+        o.disconnect()
+      })
+      o.pnd.on( 'close', () =>
+      {
+        result[ 3 ] = true;
+      })
+
+      return _.time.out( context.t1 * 3, () =>
+      {
+        test.true( !_.process.isAlive( o.pnd.pid ) );
+
+        if( mode === 'shell' )
+        test.identical( result[ 3 ], true )
+
+        if( mode === 'spawn' )
+        test.identical( result[ 3 ], ipc && disconnecting ? false : true )
+
+        if( mode === 'fork' )
+        test.identical( result[ 3 ], !disconnecting )
+
+        data.push.apply( data, result );
+        return null;
+      })
+    })
+
+    return ready;
+  }
+
+  /* - */
+
+  function program1()
+  {
+    let _ = require( toolsPath )
+    console.log( 'program1::begin' );
+    setTimeout( () =>
+    {
+      console.log( 'program1::end' );
+    }, context.t1 * 2 );
+  }
+}
+
+startMinimalEventClose.timeOut = 5e5;
+startMinimalEventClose.description =
+`
+Check if close event is called.
+`
+
+//
+
+function startMinimalEventExit( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program({ routine : program1 });
+  let data = [];
+  let modes = [ 'spawn', 'fork', 'shell' ];
+  let stdio = [ 'inherit', 'pipe', 'ignore' ];
+  let ipc = [ false, true ]
+  let detaching = [ false, true ]
+  let disconnecting = [ false, true ];
+
+  modes.forEach( mode =>
+  {
+    stdio.forEach( stdio =>
+    {
+      ipc.forEach( ipc =>
+      {
+        detaching.forEach( detaching =>
+        {
+          disconnecting.forEach( disconnecting =>
+          {
+            a.ready.then(() => run( mode, stdio, ipc, detaching, disconnecting ) );
+          })
+        })
+      })
+    })
+  })
+
+  a.ready.then( () =>
+  {
+    var dim = [ data.length / 6, 6 ];
+    var style = 'doubleBorder';
+    var topHead = [ 'mode', 'stdio','ipc', 'detaching', 'disconnecting', 'event exit' ];
+    var got = _.strTable({ data, dim, style, topHead, colWidth : 18 });
+
+    var exp =
+`
+╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+║       mode              stdio              ipc            detaching       disconnecting      event exit    ║
+╟────────────────────────────────────────────────────────────────────────────────────────────────────────────╢
+║       spawn            inherit            false             false             false             true       ║
+║       spawn            inherit            false             true              false             true       ║
+║       spawn            inherit            true              false             false             true       ║
+║       spawn            inherit            true              true              false             true       ║
+║       spawn             pipe              false             false             false             true       ║
+║       spawn             pipe              false             true              false             true       ║
+║       spawn             pipe              false             false             true              true       ║
+║       spawn             pipe              false             true              true              true       ║
+║       spawn             pipe              true              false             false             true       ║
+║       spawn             pipe              true              true              false             true       ║
+║       spawn             pipe              true              false             true              true       ║
+║       spawn             pipe              true              true              true              true       ║
+║       spawn            ignore             false             false             false             true       ║
+║       spawn            ignore             false             true              false             true       ║
+║       spawn            ignore             false             false             true              true       ║
+║       spawn            ignore             false             true              true              true       ║
+║       spawn            ignore             true              false             false             true       ║
+║       spawn            ignore             true              true              false             true       ║
+║       spawn            ignore             true              false             true              true       ║
+║       spawn            ignore             true              true              true              true       ║
+║       fork             inherit            true              false             false             true       ║
+║       fork             inherit            true              true              false             true       ║
+║       fork              pipe              true              false             false             true       ║
+║       fork              pipe              true              true              false             true       ║
+║       fork              pipe              true              false             true              true       ║
+║       fork              pipe              true              true              true              true       ║
+║       fork             ignore             true              false             false             true       ║
+║       fork             ignore             true              true              false             true       ║
+║       fork             ignore             true              false             true              true       ║
+║       fork             ignore             true              true              true              true       ║
+║       shell            inherit            false             false             false             true       ║
+║       shell            inherit            false             true              false             true       ║
+║       shell             pipe              false             false             false             true       ║
+║       shell             pipe              false             true              false             true       ║
+║       shell             pipe              false             false             true              true       ║
+║       shell             pipe              false             true              true              true       ║
+║       shell            ignore             false             false             false             true       ║
+║       shell            ignore             false             true              false             true       ║
+║       shell            ignore             false             false             true              true       ║
+║       shell            ignore             false             true              true              true       ║
+╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+`
+    test.equivalent( got.result, exp );
+
+    console.log( got.result )
+    return null;
+  })
+
+  return a.ready;
+
+  /* - */
+
+  function run( mode, stdio, ipc, detaching, disconnecting )
+  {
+    let ready = new _.Consequence().take( null );
+
+    if( detaching && stdio === 'inherit' ) /* remove if assert in start is removed */
+    return ready;
+
+    if( ipc && mode === 'shell' )
+    return ready;
+
+    if( !ipc && mode === 'fork' )
+    return ready;
+
+    let result = [ mode, stdio, ipc, disconnecting, detaching, false ];
+
+    ready.then( () =>
+    {
+      let o =
+      {
+        execPath : mode === 'fork' ? 'program1.js' : 'node program1.js',
+        currentPath : a.routinePath,
+        outputPiping : 0,
+        outputCollecting : 0,
+        stdio,
+        mode,
+        ipc,
+        detaching
+      }
+
+      test.case = _.toJs({ mode, stdio, ipc, disconnecting, detaching });
+
+      _.process.startMinimal( o );
+
+      o.conStart.thenGive( () =>
+      {
+        if( disconnecting )
+        o.disconnect()
+      })
+      o.pnd.on( 'exit', () =>
+      {
+        result[ 5 ] = true;
+      })
+
+      return _.time.out( context.t1 * 3, () =>
+      {
+        test.true( !_.process.isAlive( o.pnd.pid ) );
+        test.identical( result[ 5 ], true );
+        data.push.apply( data, result );
+        return null;
+      })
+    })
+
+    return ready;
+  }
+
+  /* - */
+
+  function program1()
+  {
+    setTimeout( () => {}, context.t1 );
+  }
+}
+
+startMinimalEventExit.rapidity = -1;
+startMinimalEventExit.timeOut = 5e5;
+startMinimalEventExit.description =
+`
+Check if exit event is called.
+`
+
+//
+
 function startMinimalDetachingThrowing( test )
 {
   let context = this;
@@ -15275,7 +15274,9 @@ function startMinimalOnIsNotConsequence( test )
 startMinimalOnIsNotConsequence.rapidity = -1;
 startMinimalOnIsNotConsequence.timeOut = 5e5;
 
-//
+// --
+// concurrent
+// --
 
 function startMultipleConcurrent( test )
 {
@@ -23989,6 +23990,1572 @@ function startMinimalOptionVerbosity( test )
 
 }
 
+//
+
+function startMinimalOptionVerbosityLogging( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
+
+  /* */
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `logging without error; mode : ${mode}; verbosity : 4`;
+      let testAppPath2 = a.program( testApp2 );
+      let locals = { programPath : testAppPath2, verbosity : 4 };
+      let testAppPath = a.program( { routine : testApp, locals } );
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+        throwingExitCode : 0,
+        outputCollecting : 1,
+      }
+
+      return _.process.startMinimal( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.exitSignal, null );
+        test.identical( op.exitReason, 'normal' );
+        test.identical( op.ended, true );
+        test.identical( op.state, 'terminated' );
+        test.identical( _.strCount( op.output, '< Process returned error code 0' ), 0 );
+        test.identical( _.strCount( op.output, `Launched as "node ${ testAppPath2 }"` ), 0 );
+        test.identical( _.strCount( op.output, `Launched at ${ _.strQuote( op.currentPath ) }` ), 0 );
+        test.identical( _.strCount( op.output, '-> Stderr' ), 0 );
+        test.identical( _.strCount( op.output, '-< Stderr' ), 0 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `logging with error; mode : ${mode}; verbosity : 4`;
+      let testAppPathError = a.program( testAppError );
+      let locals = { programPath : testAppPathError, verbosity : 4 };
+      let testAppPath = a.program( { routine : testApp, locals } );
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+        throwingExitCode : 0,
+        outputCollecting : 1,
+      }
+
+      return _.process.startMinimal( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.exitSignal, null );
+        test.identical( op.exitReason, 'normal' );
+        test.identical( op.ended, true );
+        test.identical( op.state, 'terminated' );
+        test.identical( _.strCount( op.output, '< Process returned error code 255' ), 0 );
+        test.identical( _.strCount( op.output, `Launched as "node ${ testAppPathError }"` ), 0 );
+        test.identical( _.strCount( op.output, `Launched at ${ _.strQuote( op.currentPath ) }` ), 0 );
+        test.identical( _.strCount( op.output, '-> Stderr' ), 0 );
+        test.true( !_.strHas( op.output, '= Message of error' ) );
+        test.true( !_.strHas( op.output, '= Beautified calls stack' ) );
+        test.true( !_.strHas( op.output, '= Throws stack' ) );
+        test.true( !_.strHas( op.output, '= Process' ) );
+        test.true( !_.strHas( op.output, 'Source code from' ) );
+        test.identical( _.strCount( op.output, '-< Stderr' ), 0 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPathError );
+
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `logging without error; mode : ${mode}; verbosity : 5`;
+      let testAppPath2 = a.program( testApp2 );
+      let locals = { programPath : testAppPath2, verbosity : 5 };
+      let testAppPath = a.program( { routine : testApp, locals } );
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+        throwingExitCode : 0,
+        outputCollecting : 1,
+      }
+
+      return _.process.startMinimal( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.exitSignal, null );
+        test.identical( op.exitReason, 'normal' );
+        test.identical( op.ended, true );
+        test.identical( op.state, 'terminated' );
+        test.identical( _.strCount( op.output, '< Process returned error code 0' ), 1 );
+        test.identical( _.strCount( op.output, `Launched as "node ${ testAppPath2 }"` ), 0 );
+        test.identical( _.strCount( op.output, `Launched at ${ _.strQuote( op.currentPath ) }` ), 0 );
+        test.identical( _.strCount( op.output, '-> Stderr' ), 0 );
+        test.identical( _.strCount( op.output, '-< Stderr' ), 0 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `logging with error; mode : ${mode}; verbosity : 5`;
+      let testAppPathError = a.program( testAppError );
+      let locals = { programPath : testAppPathError, verbosity : 5 };
+      let testAppPath = a.program( { routine : testApp, locals } );
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+        throwingExitCode : 0,
+        outputCollecting : 1,
+      }
+
+      return _.process.startMinimal( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.exitSignal, null );
+        test.identical( op.exitReason, 'normal' );
+        test.identical( op.ended, true );
+        test.identical( op.state, 'terminated' );
+        /* Windows returns 4294967295 which is -1 to uint32 */
+        if( process.platform === 'win32' )
+        test.identical( _.strCount( op.output, '< Process returned error code 4294967295' ), 1 );
+        else
+        test.identical( _.strCount( op.output, '< Process returned error code 255' ), 1 );
+        test.identical( _.strCount( op.output, `Launched as "node ${ testAppPathError }"` ), 1 );
+        test.identical( _.strCount( op.output, `Launched at ${ _.strQuote( op.currentPath ) }` ), 1 );
+        test.identical( _.strCount( op.output, '-> Stderr' ), 1 );
+        test.true( _.strHas( op.output, '= Message of error' ) );
+        test.true( _.strHas( op.output, '= Beautified calls stack' ) );
+        test.true( _.strHas( op.output, '= Throws stack' ) );
+        test.true( _.strHas( op.output, '= Process' ) );
+        test.true( _.strHas( op.output, 'Source code from' ) );
+        test.identical( _.strCount( op.output, '-< Stderr' ), 1 );
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPathError );
+
+        return null;
+      })
+
+    })
+
+    return ready;
+  }
+
+  /* - */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    let options =
+    {
+      execPath : 'node ' + programPath,
+      throwingExitCode : 0,
+      outputCollecting : 0,
+      outputPiping : 0,
+      verbosity
+    }
+
+    return _.process.startMinimal( options );
+  }
+
+  function testApp2()
+  {
+    console.log();
+  }
+
+  function testAppError()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    return _.process.startMinimal();
+  }
+
+}
+
+startMinimalOptionVerbosityLogging.timeOut = 3e5;
+
+//
+
+function startMultipleOutput( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let programPath = a.program( program1 );
+  let track = [];
+
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, mode }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, mode }) ) );
+  return a.ready;
+
+  /* - */
+
+  function run( tops )
+  {
+    let ready = new _.Consequence().take( null )
+
+    if( tops.sync && !tops.deasync && tops.mode === 'fork' )
+    return null;
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `sync:${tops.sync} deasync:${tops.deasync} concurrent:0 mode:${tops.mode}`;
+      track = [];
+      let t1 = _.time.now();
+      let ready2 = new _.Consequence().take( null ).delay( context.t1 / 10 );
+      let o =
+      {
+        execPath : [ ( tops.mode !== `fork` ?  `node ` : '' ) + `${programPath} id:1`, ( tops.mode !== `fork` ?  `node ` : '' ) + `${programPath} id:2` ],
+        currentPath : a.abs( '.' ),
+        outputPiping : 1,
+        outputCollecting : 1,
+        outputAdditive : 1,
+        sync : tops.sync,
+        deasync : tops.deasync,
+        concurrent : 0,
+        mode : tops.mode,
+        ready : ready2,
+      }
+
+      let returned = _.process.startMultiple( o );
+
+      o.conStart.tap( ( err, op ) =>
+      {
+        track.push( 'conStart' );
+        test.true( op === o );
+        processPipe( o, 0 );
+      });
+
+      o.conTerminate.tap( ( err, op ) =>
+      {
+        track.push( 'conTerminate' );
+        test.true( op === o );
+      });
+
+      o.ready.then( ( op ) =>
+      {
+        track.push( 'ready' );
+
+        if( tops.sync || tops.deasync )
+        {
+          var exp =
+          [
+            'conStart',
+            'conTerminate',
+            'ready',
+          ]
+          test.identical( track, exp );
+        }
+        else
+        {
+          /*
+          on older version of nodejs event finish goes before event end
+          */
+          // var exp =
+          // [
+          //   'conStart',
+          //   '0.out:1::begin',
+          //   '0.out:1::end',
+          //   '0.err:1::err',
+          //   '0.out:2::begin',
+          //   '0.out:2::end',
+          //   '0.err:2::err',
+          //   '0.err.finish',
+          //   '0.err.end',
+          //   '0.out.finish',
+          //   '0.out.end',
+          //   'conTerminate',
+          //   'ready',
+          // ]
+
+          // test.identical( new Set( ... track ), new Set( ... exp ) );
+
+          // test.lt( track.indexOf( '0.out:1::end' ), track.indexOf( '0.out:2::begin' ) );
+          // test.lt( track.indexOf( '0.out:1::begin' ), track.indexOf( '0.out:1::end' ) );
+          // test.lt( track.indexOf( '0.out:1::end' ), track.indexOf( '0.err:1::err' ) );
+          // test.lt( track.indexOf( '0.out:2::begin' ), track.indexOf( '0.out:2::end' ) );
+          // test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.err:2::err' ) );
+          // test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.err.finish' ) );
+          // test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.err.end' ) );
+          // test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.out.finish' ) );
+          // test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.out.end' ) );
+          // test.lt( track.indexOf( '0.err.finish' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( '0.err.end' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( '0.out.finish' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( '0.out.end' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( 'conTerminate' ), track.indexOf( 'ready' ) );
+
+          console.log( `track:\n${track.join( '\n' )}` );
+
+          var exp =
+          `
+          **<conStart>
+          **<0.out:1::begin>**<0.out:1::end>**<0.err:1::err>
+          **<0.err.end>
+          **<conTerminate>**<ready>**
+          `;
+          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
+          var exp =
+          `
+          **<conStart>
+          **<0.out:2::begin>**<0.out:2::end>**<0.err:2::err>
+          **<0.err.end>
+          **<conTerminate>**<ready>**
+          `;
+          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
+          var exp =`**<conStart>**<0.err.end>**<conTerminate>**`;
+          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
+          var exp =`**<conStart>**<0.err.finish>**<conTerminate>**`;
+          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
+          var exp =`**<conStart>**<0.out.end>**<conTerminate>**`;
+          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
+          var exp =`**<conStart>**<0.out.finish>**<conTerminate>**`;
+          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
+
+        }
+
+        var exp =
+`
+1::begin
+1::end
+1::err
+2::begin
+2::end
+2::err
+`
+        test.equivalent( op.output, exp );
+        test.identical( op.exitCode, 0 );
+        test.identical( op.exitSignal, null );
+        test.identical( op.exitReason, 'normal' );
+        test.identical( op.ended, true );
+        test.true( op === o );
+
+        if( !tops.sync && !tops.deasync )
+        test.true( _.longHas( track, '0.out.end' ) );
+        test.true( !_.longHas( track, '1.out.end' ) );
+        test.true( !_.longHas( track, '2.out.end' ) );
+
+        if( !tops.sync || tops.deasync )
+        {
+          test.identical( op.streamOut._writableState.ended, true );
+          test.identical( op.streamOut._readableState.ended, true );
+          test.identical( op.streamErr._writableState.ended, true );
+          test.identical( op.streamErr._readableState.ended, true );
+        }
+        else
+        {
+          test.true( op.streamOut === null );
+          test.true( op.streamErr === null );
+        }
+
+        op.sessions.forEach( ( op2, counter ) =>
+        {
+          test.identical( op2.exitCode, 0 );
+          test.identical( op2.exitSignal, null );
+          test.identical( op2.exitReason, 'normal' );
+          test.identical( op2.ended, true );
+          let parsed = a.fileProvider.fileRead({ filePath : a.abs( `${counter+1}.json` ), encoding : 'json' });
+          test.identical( parsed.id, counter+1 );
+
+          if( !tops.sync || tops.deasync )
+          {
+            test.identical( op2.streamOut._writableState.ended, false );
+            test.identical( op2.streamOut._readableState.ended, true );
+            test.identical( op2.streamErr._writableState.ended, false );
+            test.identical( op2.streamErr._readableState.ended, true );
+          }
+          else
+          {
+            test.true( op2.streamOut === null );
+            test.true( op2.streamErr === null );
+          }
+
+        });
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `sync:${tops.sync} deasync:${tops.deasync} concurrent:1 mode:${tops.mode}`;
+      if( tops.sync && !tops.deasync )
+      return null;
+      track = [];
+      let t1 = _.time.now();
+      let ready2 = new _.Consequence().take( null ).delay( context.t1 / 10 );
+      let o =
+      {
+        execPath : [ ( tops.mode !== `fork` ?  `node ` : '' ) + `${programPath} id:1`, ( tops.mode !== `fork` ?  `node ` : '' ) + `${programPath} id:2` ],
+        currentPath : a.abs( '.' ),
+        outputPiping : 1,
+        outputCollecting : 1,
+        outputAdditive : 1,
+        sync : tops.sync,
+        deasync : tops.deasync,
+        concurrent : 1,
+        mode : tops.mode,
+        ready : ready2,
+      }
+
+      let returned = _.process.startMultiple( o );
+
+      o.conStart.tap( ( err, op ) =>
+      {
+        track.push( 'conStart' );
+        test.true( op === o );
+        processPipe( o, 0 );
+        processPipe( o.sessions[ 0 ], 1 );
+        processPipe( o.sessions[ 1 ], 2 );
+      });
+
+      o.conTerminate.tap( ( err, op ) =>
+      {
+        track.push( 'conTerminate' );
+        test.true( op === o );
+      });
+
+      o.ready.then( ( op ) =>
+      {
+        track.push( 'ready' );
+
+        if( tops.sync || tops.deasync )
+        {
+          var exp =
+          [
+            'conStart',
+            'conTerminate',
+            'ready',
+          ]
+          test.identical( track, exp );
+        }
+        else
+        {
+
+          /*
+          on older version of nodejs event finish goes before event end
+          */
+/*
+          var exp =
+          [
+            'conStart',
+            '0.out:1::begin',
+            '1.out:1::begin',
+            '0.out:2::begin',
+            '2.out:2::begin',
+            '0.out:1::end',
+            '1.out:1::end',
+            '0.out:2::end',
+            '2.out:2::end',
+            '0.err:1::err',
+            '1.err:1::err',
+            '1.err.end',
+            '1.out.end',
+            '0.err:2::err',
+            '2.err:2::err',
+            '0.err.finish',
+            '2.err.end',
+            '0.err.end',
+            '0.out.finish',
+            '2.out.end',
+            '0.out.end',
+            'conTerminate',
+            'ready'
+          ]
+          let exp2 =
+          [
+            'conStart',
+            '0.out:1::begin',
+            '1.out:1::begin',
+            '0.out:2::begin',
+            '2.out:2::begin',
+            '0.out:1::end',
+            '1.out:1::end',
+            '0.out:2::end',
+            '2.out:2::end',
+            '0.err:1::err',
+            '1.err:1::err',
+            '1.err.end',
+            '1.out.end',
+            '0.err:2::err',
+            '2.err:2::err',
+            '2.err.end',
+            '0.err.end',
+            '0.err.finish',
+            '2.out.end',
+            '0.out.end',
+            '0.out.finish',
+            'conTerminate',
+            'ready'
+          ]
+*/
+          // var exp =
+          // [
+          //   'conStart',
+          //   '0.out:1::begin',
+          //   '1.out:1::begin',
+          //   '0.out:2::begin',
+          //   '2.out:2::begin',
+          //   '0.out:1::end',
+          //   '1.out:1::end',
+          //   '0.out:2::end',
+          //   '2.out:2::end',
+          //   '0.err:1::err',
+          //   '1.err:1::err',
+          //   '1.out.end',
+          //   '1.err.end',
+          //   '0.err:2::err',
+          //   '2.err:2::err',
+          //   '2.out.end',
+          //   '0.out.end',
+          //   '0.out.finish',
+          //   '2.err.end',
+          //   '0.err.end',
+          //   '0.err.finish',
+          //   'conTerminate',
+          //   'ready'
+          // ]
+
+          // test.identical( new Set( ... track ), new Set( ... exp ) );
+
+          // test.lt( track.indexOf( '0.out:1::begin' ), track.indexOf( '0.out:1::end' ) ); //
+          // test.lt( track.indexOf( '1.out:1::begin' ), track.indexOf( '0.out:1::end' ) );
+          // test.lt( track.indexOf( '0.out:2::begin' ), track.indexOf( '0.out:1::end' ) );
+          // test.lt( track.indexOf( '2.out:2::begin' ), track.indexOf( '0.out:1::end' ) );
+          // test.lt( track.indexOf( '0.out:1::end' ), track.indexOf( '0.err:1::err' ) );
+          // test.lt( track.indexOf( '1.out:1::end' ), track.indexOf( '0.err:1::err' ) );
+          // test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.err:1::err' ) );
+          // test.lt( track.indexOf( '2.out:2::end' ), track.indexOf( '0.err:1::err' ) );
+          // test.lt( track.indexOf( '0.err:1::err' ), track.indexOf( '1.out.end' ) );
+          // test.lt( track.indexOf( '1.err:1::err' ), track.indexOf( '1.out.end' ) );
+          // test.lt( track.indexOf( '1.out.end' ), track.indexOf( '0.err:2::err' ) );
+          // test.lt( track.indexOf( '1.err.end' ), track.indexOf( '0.err:2::err' ) );
+          // test.lt( track.indexOf( '1.out.end' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( '1.err.end' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( '0.err:2::err' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( '2.err:2::err' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( '2.out.end' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( '0.out.end' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( '0.out.finish' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( '2.err.end' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( '0.err.end' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( '0.err.finish' ), track.indexOf( 'conTerminate' ) );
+          // test.lt( track.indexOf( 'conTerminate' ), track.indexOf( 'ready' ) );
+
+          console.log( `track:\n${track.join( '\n' )}` );
+
+          var exp =
+          `
+          **<conStart>
+          **<0.out:1::begin>**<0.out:1::end>**<0.err:1::err>**<0.err:2::err>
+          **<conTerminate>**<ready>**
+          `;
+          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
+          var exp = `**<conStart>**<0.err.end>**<conTerminate>**`;
+          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
+          var exp = `**<conStart>**<0.err.finish>**<conTerminate>**`;
+          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
+          var exp = `**<conStart>**<0.out.end>**<conTerminate>**`;
+          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
+          var exp = `**<conStart>**<0.out.finish>**<conTerminate>**`;
+          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
+
+          var exp =
+          `
+          **<conStart>
+          **<1.out:1::begin>**<1.out:1::end>**<1.err:1::err>
+          **<conTerminate>**<ready>**
+          `;
+          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
+          var exp = `**<conStart>**<1.err.end>**<conTerminate>**`;
+          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
+          var exp = `**<conStart>**<1.out.end>**<conTerminate>**`;
+          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
+
+          var exp =
+          `
+          **<conStart>
+          **<0.out:2::begin>**<0.out:2::end>**<0.err:2::err>
+          **<conTerminate>**<ready>**
+          `;
+          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
+
+          var exp =
+          `
+          **<conStart>
+          **<2.out:2::begin>**<2.out:2::end>**<2.err:2::err>
+          **<conTerminate>**<ready>**
+          `;
+          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
+          var exp = `**<conStart>**<2.err.end>**<conTerminate>**`;
+          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
+          var exp = `**<conStart>**<2.out.end>**<conTerminate>**`;
+          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
+          /* qqq2 for Yevhen : bad! | aaa : Fixed. */
+
+        }
+
+        test.true( _.dissector.dissect( '**<1::begin>**<1::end>**<1::err>**', op.output ).matched );
+        test.true( _.dissector.dissect( '**<2::begin>**<2::end>**<2::err>**', op.output ).matched );
+
+        test.identical( op.exitCode, 0 );
+        test.identical( op.exitSignal, null );
+        test.identical( op.exitReason, 'normal' );
+        test.identical( op.ended, true );
+        test.true( op === o );
+
+        if( !tops.sync && !tops.deasync )
+        {
+          test.true( _.longHas( track, '0.out.end' ) );
+          test.true( _.longHas( track, '1.out.end' ) );
+          test.true( _.longHas( track, '2.out.end' ) );
+        }
+
+        if( !tops.sync || tops.deasync )
+        {
+          test.identical( op.streamOut._writableState.ended, true );
+          test.identical( op.streamOut._readableState.ended, true );
+          test.identical( op.streamErr._writableState.ended, true );
+          test.identical( op.streamErr._readableState.ended, true );
+        }
+        else
+        {
+          test.true( op.streamOut === null );
+          test.true( op.streamErr === null );
+        }
+
+        op.sessions.forEach( ( op2, counter ) =>
+        {
+          test.identical( op2.exitCode, 0 );
+          test.identical( op2.exitSignal, null );
+          test.identical( op2.exitReason, 'normal' );
+          test.identical( op2.ended, true );
+          let parsed = a.fileProvider.fileRead({ filePath : a.abs( `${counter+1}.json` ), encoding : 'json' });
+          test.identical( parsed.id, counter+1 );
+
+          if( !tops.sync || tops.deasync )
+          {
+            test.identical( op2.streamOut._writableState.ended, false );
+            test.identical( op2.streamOut._readableState.ended, true );
+            test.identical( op2.streamErr._writableState.ended, false );
+            test.identical( op2.streamErr._readableState.ended, true );
+          }
+          else
+          {
+            test.true( op2.streamOut === null );
+            test.true( op2.streamErr === null );
+          }
+
+        });
+
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* */
+
+    return ready;
+  }
+
+  /* - */
+
+  function processPipe( op, id )
+  {
+    streamPipe( op, op.streamOut, 'out', id );
+    streamPipe( op, op.streamErr, 'err', id );
+  }
+
+  function streamPipe( op, steam, streamName, id )
+  {
+    if( op.sync && !op.deasync )
+    return;
+    steam.on( 'data', ( data ) =>
+    {
+      if( _.bufferAnyIs( data ) )
+      data = _.bufferToStr( data );
+      data = data.trim();
+      console.log( `${id}.${streamName}`, data );
+      track.push( `${id}.${streamName}:` + data );
+    });
+    steam.on( 'end', ( data ) =>
+    {
+      console.log( `${id}.${streamName}.end` );
+      track.push( `${id}.${streamName}.end` );
+    });
+    steam.on( 'finish', ( data ) =>
+    {
+      console.log( `${id}.${streamName}.finish` );
+      track.push( `${id}.${streamName}.finish` );
+    });
+  }
+
+  function program1()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+    let args = _.process.input();
+    let data = { time : _.time.now(), id : args.map.id };
+    _.fileProvider.fileWrite({ filePath : _.path.join(__dirname, `${args.map.id}.json` ), data, encoding : 'json' });
+    let sessionDelay = context.t1 * 0.5*args.map.id;
+    setTimeout( () => console.log( `${args.map.id}::begin` ), sessionDelay );
+    setTimeout( () => console.log( `${args.map.id}::end` ), context.t1+sessionDelay );
+    setTimeout( () => console.error( `${args.map.id}::err` ), context.t1*2+sessionDelay );
+  }
+
+}
+
+startMultipleOutput.rapidity = -1;
+startMultipleOutput.timeOut = 5e5;
+startMultipleOutput.description =
+`
+  - callback of event exit of each stream is called
+  - streams of processes are joined
+  - output is collected in op.output
+`
+
+//
+
+function startMultipleOptionStdioIgnore( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let programPath = a.program( program1 );
+  let track = [];
+
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  let outputAdditives = [ true, false ]
+
+  outputAdditives.forEach( ( outputAdditive ) =>
+  {
+    a.ready.tap( () => test.open( `outputAdditive:${ outputAdditive }` ) );
+    modes.forEach( ( mode ) => a.ready.then( () => run({ outputAdditive, sync : 0, deasync : 0, mode }) ) );
+    modes.forEach( ( mode ) => a.ready.then( () => run({ outputAdditive, sync : 0, deasync : 1, mode }) ) );
+    modes.forEach( ( mode ) => a.ready.then( () => run({ outputAdditive, sync : 1, deasync : 0, mode }) ) );
+    modes.forEach( ( mode ) => a.ready.then( () => run({ outputAdditive, sync : 1, deasync : 1, mode }) ) );
+    a.ready.tap( () => test.close( `outputAdditive:${ outputAdditive }` ) );
+  });
+
+  return a.ready;
+
+  /* - */
+
+  function run( tops )
+  {
+    let ready = new _.Consequence().take( null )
+
+    if( tops.sync && !tops.deasync && tops.mode === 'fork' )
+    return null;
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `sync:${tops.sync} deasync:${tops.deasync} mode:${tops.mode} concurrent:0 `;
+      track = [];
+      let t1 = _.time.now();
+      let ready2 = new _.Consequence().take( null ).delay( context.t1 / 10 );
+      let o =
+      {
+        execPath : [ ( tops.mode !== `fork` ?  `node ` : '' ) + `${programPath} id:1`, ( tops.mode !== `fork` ?  `node ` : '' ) + `${programPath} id:2` ],
+        currentPath : a.abs( '.' ),
+        outputAdditive : tops.outputAdditive,
+        stdio : 'ignore',
+        sync : tops.sync,
+        deasync : tops.deasync,
+        concurrent : 0,
+        mode : tops.mode,
+        ready : ready2,
+      }
+
+      let returned = _.process.startMultiple( o );
+
+      o.conStart.tap( ( err, op ) =>
+      {
+        track.push( 'conStart' );
+        test.true( op === o );
+      });
+
+      o.conTerminate.tap( ( err, op ) =>
+      {
+        track.push( 'conTerminate' );
+        test.true( op === o );
+      });
+
+      o.ready.then( ( op ) =>
+      {
+        track.push( 'ready' );
+
+        var exp =
+        [
+          'conStart',
+          'conTerminate',
+          'ready',
+        ]
+        test.identical( track, exp );
+
+        test.identical( op.output, null );
+        test.identical( op.exitCode, 0 );
+        test.identical( op.exitSignal, null );
+        test.identical( op.exitReason, 'normal' );
+        test.identical( op.ended, true );
+        test.true( op === o );
+        test.true( op.streamOut === null );
+        test.true( op.streamErr === null );
+
+        op.sessions.forEach( ( op2, counter ) =>
+        {
+          test.identical( op2.exitCode, 0 );
+          test.identical( op2.exitSignal, null );
+          test.identical( op2.exitReason, 'normal' );
+          test.identical( op2.ended, true );
+          test.identical( op2.output, null );
+          let parsed = a.fileProvider.fileRead({ filePath : a.abs( `${counter+1}.json` ), encoding : 'json' });
+          test.identical( parsed.id, counter+1 );
+          test.true( op2.streamOut === null );
+          test.true( op2.streamErr === null );
+          test.true( op2.pnd.stdout === null );
+          test.true( op2.pnd.stderr === null );
+        });
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* */
+
+    return ready;
+  }
+
+  /* - */
+
+  function program1()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+    let args = _.process.input();
+    let data = { time : _.time.now(), id : args.map.id };
+    _.fileProvider.fileWrite({ filePath : _.path.join(__dirname, `${args.map.id}.json` ), data, encoding : 'json' });
+    let sessionDelay = context.t1 * 0.5*args.map.id;
+    setTimeout( () => console.log( `${args.map.id}::begin` ), sessionDelay );
+    setTimeout( () => console.log( `${args.map.id}::end` ), context.t1+sessionDelay );
+    setTimeout( () => console.error( `${args.map.id}::err` ), context.t1*2+sessionDelay );
+  }
+
+}
+
+startMultipleOptionStdioIgnore.rapidity = -1;
+startMultipleOptionStdioIgnore.timeOut = 1e6;
+startMultipleOptionStdioIgnore.description =
+`
+  - no problems in stdio:ignore mode
+`
+
+//
+
+function startSingleOptionOutputAdditive( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( testApp );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
+
+  /* - */
+
+  function run( mode )
+  {
+    let ready = _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, outputAdditive default`;
+
+      let o =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode
+      }
+
+      return _.process.startSingle( o )
+      .then( ( op ) =>
+      {
+        test.il( op.exitCode, 0 );
+        test.il( op.ended, true );
+        test.il( op.outputAdditive, true );
+
+        return null;
+      })
+    })
+
+    return ready;
+
+  }
+
+  function testApp()
+  {
+    console.log( 'Output' );
+  }
+}
+
+//
+
+function startMultipleOptionOutputAdditive( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( testApp );
+  let testAppPath2 = a.program( testApp2 );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run({ mode, concurrent : 0, outputAdditive : 0 }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ mode, concurrent : 1, outputAdditive : 0 }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ mode, concurrent : 0, outputAdditive : 1 }) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run({ mode, concurrent : 1, outputAdditive : 1 }) ) );
+  return a.ready;
+
+  /* - */
+
+  function run( tops )
+  {
+    let ready = _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${tops.mode}, outputAdditive : ${tops.outputAdditive}, concurrent : ${tops.concurrent}`;
+
+      let locals =
+      {
+        mode : tops.mode,
+        testAppPath,
+        testAppPath2,
+        outputAdditive : tops.outputAdditive,
+        concurrent : tops.concurrent,
+      }
+
+      let testAppPathParent = a.program({ routine : testAppParent, locals });
+
+      let o =
+      {
+        execPath : 'node ' + testAppPathParent,
+        outputCollecting : 1,
+      }
+
+      /*
+        This executes before any of the processes finishes,
+        with option::outputAdditing : 0 - no output is logged
+      */
+      _.time.out( context.t1 * 15, () =>
+      {
+        // console.log( `out t1 * 15, concurrent : ${tops.concurrent}, additive : ${tops.outputAdditive}`, '++' +  o.output + '++'  );
+        if( !tops.outputAdditive )
+        {
+          test.identical( o.output, '' );
+        }
+        else
+        {
+          if( tops.concurrent )
+          test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}\n>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath2}\nOutput1\nOutput2\nOutput1.2` );
+          else
+          test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}\nOutput1\nOutput1.2` );
+        }
+        return null;
+      })
+
+      /*
+        If concurrent : 1
+        This executes after the second process finishes,
+        with option::outputAdditing : 0 - no output is logged from the first process,
+        all output is logged from the second process
+      */
+      _.time.out( context.t1 * 35, () =>
+      {
+        // console.log( `out t1 * 35, concurrent : ${tops.concurrent}, additive : ${tops.outputAdditive}`, '++' +  o.output + '++'  );
+
+        if( tops.concurrent )
+        {
+          if( tops.outputAdditive )
+          test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}\n>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath2}\nOutput1\nOutput2\nOutput1.2\nOutput2.2\ntimeout1\ntimeout2\ntimeout2.2\n` );
+          else /* First process is still running. Second process is finished. */
+          test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath2}\nOutput2\nOutput2.2\ntimeout2\ntimeout2.2\n` );
+        }
+        else
+        {
+          if( !tops.outputAdditive ) /* First process haven't finished yet, no output */
+          test.identical( o.output, '' );
+          else /* Only a part of the output from the first process is logged */
+          test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}\nOutput1\nOutput1.2\ntimeout1\n` );
+        }
+
+        return null;
+      })
+
+      return _.process.startMinimal( o )
+      .then( ( op ) =>
+      {
+        // console.log( `outputAdditive : ${tops.outputAdditive}, concurrent : ${tops.concurrent} OP OOOOUUUUTTTT : +++++ ${o.output} +++++` );
+        test.il( op.exitCode, 0 );
+        test.il( op.ended, true );
+
+        let exp1 = '\nOutput1\nOutput2\nOutput1.2\nOutput2.2\ntimeout1\ntimeout2\ntimeout2.2\ntimeout1.2\n';
+        let exp2 = '\nOutput1\nOutput1.2\ntimeout1\ntimeout1.2\n';
+        let exp3 = '\nOutput2\nOutput2.2\ntimeout2\ntimeout2.2\n';
+        if( tops.concurrent )
+        {
+          if( tops.outputAdditive )
+          test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}\n>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath2}${exp1}${exp1}` );
+          else
+          test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath2}${exp3}>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}${exp2}${exp1}` );
+        }
+        else
+        {
+          test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}${exp2}>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath2}${exp3}${exp2}${exp3}` );
+        }
+
+        a.fileProvider.fileDelete( testAppPathParent );
+        return null;
+      })
+    })
+
+    return ready;
+
+  }
+
+  function testAppParent()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+
+    var o =
+    {
+      execPath : mode === 'fork' ? [ testAppPath, testAppPath2 ] : [ 'node ' + testAppPath, 'node ' + testAppPath2 ],
+      currentPath : __dirname,
+      outputCollecting : 1,
+      outputColoring : 0,
+      mode,
+      outputAdditive,
+      concurrent,
+    }
+    _.process.startMultiple( o )
+    .then( ( op ) =>
+    {
+      console.log( op.output )
+      return null;
+    });
+  }
+
+  function testApp()
+  {
+    console.log( 'Output1' )
+    setTimeout( () => console.log( 'Output1.2' ), context.t1 * 10 );
+    setTimeout( () => console.log( 'timeout1' ), context.t1 * 20 );
+    setTimeout( () => console.log( 'timeout1.2' ), context.t1 * 40 );
+  }
+
+  function testApp2()
+  {
+    setTimeout( () => console.log( 'Output2' ), context.t1 * 5 );
+    setTimeout( () => console.log( 'Output2.2' ), context.t1 * 15 );
+    setTimeout( () => console.log( 'timeout2' ), context.t1 * 25 );
+    setTimeout( () => console.log( 'timeout2.2' ), context.t1 * 30 );
+  }
+
+}
+
+startMultipleOptionOutputAdditive.timeOut = 4e6; /* Locally : 394.840s */
+startMultipleOptionOutputAdditive.rapidity = -1;
+
+//
+
+function outputLog( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( testApp );
+  let testAppPath2 = a.program( testApp2 );
+  let testAppPath3 = a.program( testApp3 );
+  let testAppPath4 = a.program( testApp4 );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
+
+  /* - */
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, without new line`;
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath } });
+
+      let options =
+      {
+        execPath : 'node ' + testAppParentPath,
+        outputCollecting : 1,
+      }
+
+      return _.process.startSingle( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, 'abc\n' );
+
+        a.fileProvider.fileDelete( testAppParentPath );
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, new line ath the end`;
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath : testAppPath2 } });
+
+      let options =
+      {
+        execPath : 'node ' + testAppParentPath,
+        outputCollecting : 1,
+      }
+
+      return _.process.startSingle( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, 'abc\n' );
+
+        a.fileProvider.fileDelete( testAppParentPath );
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, new line at the middle`;
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath : testAppPath3 } });
+
+      let options =
+      {
+        execPath : 'node ' + testAppParentPath,
+        outputCollecting : 1,
+      }
+
+      return _.process.startSingle( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, 'ab\ncd\n' );
+
+        a.fileProvider.fileDelete( testAppParentPath );
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, new line at the middle & end`;
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath : testAppPath4 } });
+
+      let options =
+      {
+        execPath : 'node ' + testAppParentPath,
+        outputCollecting : 1,
+      }
+
+      return _.process.startSingle( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( op.output, 'ab\ncd\n' );
+
+        a.fileProvider.fileDelete( testAppParentPath );
+        return null;
+      })
+    })
+
+    return ready;
+  }
+
+  /* - */
+
+  function testAppParent()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+
+    let o =
+    {
+      execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+      mode,
+      inputMirroring : 0,
+      outputColoring : 0,
+      outputPiping : 1
+    }
+    return _.process.startSingle( o );
+  }
+
+  function testApp()
+  {
+    process.stdout.write( 'a' );
+    setTimeout( () => process.stdout.write( 'c' ), context.t0 );
+    process.stdout.write( 'b' );
+  }
+
+  function testApp2()
+  {
+    process.stdout.write( 'a' );
+    process.stdout.write( 'b' );
+    process.stdout.write( 'c' );
+    console.log();
+  }
+
+  function testApp3()
+  {
+    process.stdout.write( 'ab\nc' );
+    process.stdout.write( 'd' );
+  }
+
+  function testApp4()
+  {
+    process.stdout.write( 'ab\nc' );
+    process.stdout.write( 'd' );
+    console.log();
+  }
+}
+
+//
+
+function outputLogStreams( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( testApp );
+  let testAppPath2 = a.program( testApp2 );
+  let testAppPath3 = a.program( testApp3 );
+  let testAppPath4 = a.program( testApp4 );
+  let testAppPath5 = a.program( testApp5 );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
+
+  /* - */
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, without new line`;
+      let piecesOut = [];
+      let piecesErr = [];
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+        mode,
+        outputCollecting : 1,
+      }
+
+
+      _.process.startSingle( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( piecesOut.join( '' ), 'abc' );
+        test.identical( piecesErr.join( '' ), 'err1err2' );
+
+        return null;
+      })
+
+      options.pnd.stdout.on( 'data', ( data ) =>
+      {
+        piecesOut.push( data.toString() );
+      })
+
+      options.pnd.stderr.on( 'data', ( data ) =>
+      {
+        piecesErr.push( data.toString() );
+      })
+
+      return options.ready;
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, new line at the end`;
+      let piecesOut = [];
+      let piecesErr = [];
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath2 : 'node ' + testAppPath2,
+        mode,
+        outputCollecting : 1,
+      }
+
+      _.process.startSingle( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( piecesOut.join( '' ), 'abc\n' );
+        test.identical( piecesErr.join( '' ), 'err1err2err3\n' );
+
+        return null;
+      })
+
+      options.pnd.stdout.on( 'data', ( data ) =>
+      {
+        piecesOut.push( data.toString() );
+      })
+
+      options.pnd.stderr.on( 'data', ( data ) =>
+      {
+        piecesErr.push( data.toString() );
+      })
+
+      return options.ready;
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, new line at the middle`;
+      let piecesOut = [];
+      let piecesErr = [];
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath3 : 'node ' + testAppPath3,
+        mode,
+        outputCollecting : 1,
+      }
+
+      _.process.startSingle( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( piecesOut.join( '' ), 'ab\ncd' );
+        test.identical( piecesErr.join( '' ), 'err1\nerr2err3' );
+
+        return null;
+      })
+
+      options.pnd.stdout.on( 'data', ( data ) =>
+      {
+        piecesOut.push( data.toString() );
+      })
+
+      options.pnd.stderr.on( 'data', ( data ) =>
+      {
+        piecesErr.push( data.toString() );
+      })
+
+      return options.ready;
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, new line at the middle & end`;
+      let piecesOut = [];
+      let piecesErr = [];
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath4 : 'node ' + testAppPath4,
+        mode,
+        outputCollecting : 1,
+      }
+
+      _.process.startSingle( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( piecesOut.join( '' ), 'ab\ncd\n' );
+        test.identical( piecesErr.join( '' ), 'err1\nerr2err3\n' );
+
+        return null;
+      })
+
+      options.pnd.stdout.on( 'data', ( data ) =>
+      {
+        piecesOut.push( data.toString() );
+      })
+
+      options.pnd.stderr.on( 'data', ( data ) =>
+      {
+        piecesErr.push( data.toString() );
+      })
+
+      return options.ready;
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, new line at the end, both`;
+      let piecesOut = [];
+      let piecesErr = [];
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath5 : 'node ' + testAppPath5,
+        mode,
+        outputCollecting : 1,
+      }
+
+      _.process.startSingle( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( piecesOut.join( '' ), 'ac\n' );
+        test.identical( piecesErr.join( '' ), 'bd\n' );
+
+        return null;
+      })
+
+      options.pnd.stdout.on( 'data', ( data ) =>
+      {
+        piecesOut.push( data.toString() );
+      })
+
+      options.pnd.stderr.on( 'data', ( data ) =>
+      {
+        piecesErr.push( data.toString() );
+      })
+
+      return options.ready;
+    })
+
+    return ready;
+  }
+
+  /* - */
+
+  function testApp()
+  {
+    process.stdout.write( 'a' );
+    process.stderr.write( 'err1' );
+    setTimeout( () => process.stdout.write( 'c' ), context.t0 );
+    process.stderr.write( 'err2' );
+    process.stdout.write( 'b' );
+  }
+
+  function testApp2()
+  {
+    process.stdout.write( 'a' );
+    process.stderr.write( 'err1' );
+    process.stdout.write( 'b' );
+    process.stderr.write( 'err2' );
+    process.stdout.write( 'c' );
+    process.stderr.write( 'err3' );
+    process.stderr.write( '\n' );
+    console.log();
+  }
+
+  function testApp3()
+  {
+    process.stdout.write( 'ab\nc' );
+    process.stderr.write( 'err1\nerr2' );
+    process.stdout.write( 'd' );
+    process.stderr.write( 'err3' );
+  }
+
+  function testApp4()
+  {
+    process.stdout.write( 'ab\nc' );
+    process.stderr.write( 'err1\nerr2' );
+    process.stdout.write( 'd' );
+    process.stderr.write( 'err3\n' );
+    console.log();
+  }
+
+  function testApp5()
+  {
+    process.stdout.write( 'a' );
+    process.stderr.write( 'b' );
+    process.stdout.write( 'c\n' );
+    process.stderr.write( 'd\n' );
+  }
+
+}
+
+
 // --
 // etc
 // --
@@ -27797,1571 +29364,6 @@ function exitCode( test )
 // --
 // termination
 // --
-
-function startMinimalOptionVerbosityLogging( test )
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-  let modes = [ 'fork', 'spawn', 'shell' ];
-  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
-  return a.ready;
-
-  /* */
-
-  function run( mode )
-  {
-    let ready = new _.Consequence().take( null );
-
-    ready.then( () =>
-    {
-      test.case = `logging without error; mode : ${mode}; verbosity : 4`;
-      let testAppPath2 = a.program( testApp2 );
-      let locals = { programPath : testAppPath2, verbosity : 4 };
-      let testAppPath = a.program( { routine : testApp, locals } );
-
-      let options =
-      {
-        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
-        mode,
-        throwingExitCode : 0,
-        outputCollecting : 1,
-      }
-
-      return _.process.startMinimal( options )
-      .then( ( op ) =>
-      {
-        test.identical( op.exitCode, 0 );
-        test.identical( op.exitSignal, null );
-        test.identical( op.exitReason, 'normal' );
-        test.identical( op.ended, true );
-        test.identical( op.state, 'terminated' );
-        test.identical( _.strCount( op.output, '< Process returned error code 0' ), 0 );
-        test.identical( _.strCount( op.output, `Launched as "node ${ testAppPath2 }"` ), 0 );
-        test.identical( _.strCount( op.output, `Launched at ${ _.strQuote( op.currentPath ) }` ), 0 );
-        test.identical( _.strCount( op.output, '-> Stderr' ), 0 );
-        test.identical( _.strCount( op.output, '-< Stderr' ), 0 );
-
-        a.fileProvider.fileDelete( testAppPath );
-        a.fileProvider.fileDelete( testAppPath2 );
-
-        return null;
-      })
-
-    })
-
-    /* */
-
-    ready.then( () =>
-    {
-      test.case = `logging with error; mode : ${mode}; verbosity : 4`;
-      let testAppPathError = a.program( testAppError );
-      let locals = { programPath : testAppPathError, verbosity : 4 };
-      let testAppPath = a.program( { routine : testApp, locals } );
-
-      let options =
-      {
-        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
-        mode,
-        throwingExitCode : 0,
-        outputCollecting : 1,
-      }
-
-      return _.process.startMinimal( options )
-      .then( ( op ) =>
-      {
-        test.identical( op.exitCode, 0 );
-        test.identical( op.exitSignal, null );
-        test.identical( op.exitReason, 'normal' );
-        test.identical( op.ended, true );
-        test.identical( op.state, 'terminated' );
-        test.identical( _.strCount( op.output, '< Process returned error code 255' ), 0 );
-        test.identical( _.strCount( op.output, `Launched as "node ${ testAppPathError }"` ), 0 );
-        test.identical( _.strCount( op.output, `Launched at ${ _.strQuote( op.currentPath ) }` ), 0 );
-        test.identical( _.strCount( op.output, '-> Stderr' ), 0 );
-        test.true( !_.strHas( op.output, '= Message of error' ) );
-        test.true( !_.strHas( op.output, '= Beautified calls stack' ) );
-        test.true( !_.strHas( op.output, '= Throws stack' ) );
-        test.true( !_.strHas( op.output, '= Process' ) );
-        test.true( !_.strHas( op.output, 'Source code from' ) );
-        test.identical( _.strCount( op.output, '-< Stderr' ), 0 );
-
-        a.fileProvider.fileDelete( testAppPath );
-        a.fileProvider.fileDelete( testAppPathError );
-
-        return null;
-      })
-
-    })
-
-    /* */
-
-    ready.then( () =>
-    {
-      test.case = `logging without error; mode : ${mode}; verbosity : 5`;
-      let testAppPath2 = a.program( testApp2 );
-      let locals = { programPath : testAppPath2, verbosity : 5 };
-      let testAppPath = a.program( { routine : testApp, locals } );
-
-      let options =
-      {
-        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
-        mode,
-        throwingExitCode : 0,
-        outputCollecting : 1,
-      }
-
-      return _.process.startMinimal( options )
-      .then( ( op ) =>
-      {
-        test.identical( op.exitCode, 0 );
-        test.identical( op.exitSignal, null );
-        test.identical( op.exitReason, 'normal' );
-        test.identical( op.ended, true );
-        test.identical( op.state, 'terminated' );
-        test.identical( _.strCount( op.output, '< Process returned error code 0' ), 1 );
-        test.identical( _.strCount( op.output, `Launched as "node ${ testAppPath2 }"` ), 0 );
-        test.identical( _.strCount( op.output, `Launched at ${ _.strQuote( op.currentPath ) }` ), 0 );
-        test.identical( _.strCount( op.output, '-> Stderr' ), 0 );
-        test.identical( _.strCount( op.output, '-< Stderr' ), 0 );
-
-        a.fileProvider.fileDelete( testAppPath );
-        a.fileProvider.fileDelete( testAppPath2 );
-
-        return null;
-      })
-
-    })
-
-    /* */
-
-    ready.then( () =>
-    {
-      test.case = `logging with error; mode : ${mode}; verbosity : 5`;
-      let testAppPathError = a.program( testAppError );
-      let locals = { programPath : testAppPathError, verbosity : 5 };
-      let testAppPath = a.program( { routine : testApp, locals } );
-
-      let options =
-      {
-        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
-        mode,
-        throwingExitCode : 0,
-        outputCollecting : 1,
-      }
-
-      return _.process.startMinimal( options )
-      .then( ( op ) =>
-      {
-        test.identical( op.exitCode, 0 );
-        test.identical( op.exitSignal, null );
-        test.identical( op.exitReason, 'normal' );
-        test.identical( op.ended, true );
-        test.identical( op.state, 'terminated' );
-        /* Windows returns 4294967295 which is -1 to uint32 */
-        if( process.platform === 'win32' )
-        test.identical( _.strCount( op.output, '< Process returned error code 4294967295' ), 1 );
-        else
-        test.identical( _.strCount( op.output, '< Process returned error code 255' ), 1 );
-        test.identical( _.strCount( op.output, `Launched as "node ${ testAppPathError }"` ), 1 );
-        test.identical( _.strCount( op.output, `Launched at ${ _.strQuote( op.currentPath ) }` ), 1 );
-        test.identical( _.strCount( op.output, '-> Stderr' ), 1 );
-        test.true( _.strHas( op.output, '= Message of error' ) );
-        test.true( _.strHas( op.output, '= Beautified calls stack' ) );
-        test.true( _.strHas( op.output, '= Throws stack' ) );
-        test.true( _.strHas( op.output, '= Process' ) );
-        test.true( _.strHas( op.output, 'Source code from' ) );
-        test.identical( _.strCount( op.output, '-< Stderr' ), 1 );
-
-        a.fileProvider.fileDelete( testAppPath );
-        a.fileProvider.fileDelete( testAppPathError );
-
-        return null;
-      })
-
-    })
-
-    return ready;
-  }
-
-  /* - */
-
-  function testApp()
-  {
-    let _ = require( toolsPath );
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-
-    let options =
-    {
-      execPath : 'node ' + programPath,
-      throwingExitCode : 0,
-      outputCollecting : 0,
-      outputPiping : 0,
-      verbosity
-    }
-
-    return _.process.startMinimal( options );
-  }
-
-  function testApp2()
-  {
-    console.log();
-  }
-
-  function testAppError()
-  {
-    let _ = require( toolsPath );
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-
-    return _.process.startMinimal();
-  }
-
-}
-
-startMinimalOptionVerbosityLogging.timeOut = 3e5;
-
-//
-
-function startMultipleOutput( test )
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-  let programPath = a.program( program1 );
-  let track = [];
-
-  let modes = [ 'fork', 'spawn', 'shell' ];
-  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 0, mode }) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 0, deasync : 1, mode }) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 0, mode }) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run({ sync : 1, deasync : 1, mode }) ) );
-  return a.ready;
-
-  /* - */
-
-  function run( tops )
-  {
-    let ready = new _.Consequence().take( null )
-
-    if( tops.sync && !tops.deasync && tops.mode === 'fork' )
-    return null;
-
-    /* */
-
-    ready.then( () =>
-    {
-      test.case = `sync:${tops.sync} deasync:${tops.deasync} concurrent:0 mode:${tops.mode}`;
-      track = [];
-      let t1 = _.time.now();
-      let ready2 = new _.Consequence().take( null ).delay( context.t1 / 10 );
-      let o =
-      {
-        execPath : [ ( tops.mode !== `fork` ?  `node ` : '' ) + `${programPath} id:1`, ( tops.mode !== `fork` ?  `node ` : '' ) + `${programPath} id:2` ],
-        currentPath : a.abs( '.' ),
-        outputPiping : 1,
-        outputCollecting : 1,
-        outputAdditive : 1,
-        sync : tops.sync,
-        deasync : tops.deasync,
-        concurrent : 0,
-        mode : tops.mode,
-        ready : ready2,
-      }
-
-      let returned = _.process.startMultiple( o );
-
-      o.conStart.tap( ( err, op ) =>
-      {
-        track.push( 'conStart' );
-        test.true( op === o );
-        processPipe( o, 0 );
-      });
-
-      o.conTerminate.tap( ( err, op ) =>
-      {
-        track.push( 'conTerminate' );
-        test.true( op === o );
-      });
-
-      o.ready.then( ( op ) =>
-      {
-        track.push( 'ready' );
-
-        if( tops.sync || tops.deasync )
-        {
-          var exp =
-          [
-            'conStart',
-            'conTerminate',
-            'ready',
-          ]
-          test.identical( track, exp );
-        }
-        else
-        {
-          /*
-          on older version of nodejs event finish goes before event end
-          */
-          // var exp =
-          // [
-          //   'conStart',
-          //   '0.out:1::begin',
-          //   '0.out:1::end',
-          //   '0.err:1::err',
-          //   '0.out:2::begin',
-          //   '0.out:2::end',
-          //   '0.err:2::err',
-          //   '0.err.finish',
-          //   '0.err.end',
-          //   '0.out.finish',
-          //   '0.out.end',
-          //   'conTerminate',
-          //   'ready',
-          // ]
-
-          // test.identical( new Set( ... track ), new Set( ... exp ) );
-
-          // test.lt( track.indexOf( '0.out:1::end' ), track.indexOf( '0.out:2::begin' ) );
-          // test.lt( track.indexOf( '0.out:1::begin' ), track.indexOf( '0.out:1::end' ) );
-          // test.lt( track.indexOf( '0.out:1::end' ), track.indexOf( '0.err:1::err' ) );
-          // test.lt( track.indexOf( '0.out:2::begin' ), track.indexOf( '0.out:2::end' ) );
-          // test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.err:2::err' ) );
-          // test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.err.finish' ) );
-          // test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.err.end' ) );
-          // test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.out.finish' ) );
-          // test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.out.end' ) );
-          // test.lt( track.indexOf( '0.err.finish' ), track.indexOf( 'conTerminate' ) );
-          // test.lt( track.indexOf( '0.err.end' ), track.indexOf( 'conTerminate' ) );
-          // test.lt( track.indexOf( '0.out.finish' ), track.indexOf( 'conTerminate' ) );
-          // test.lt( track.indexOf( '0.out.end' ), track.indexOf( 'conTerminate' ) );
-          // test.lt( track.indexOf( 'conTerminate' ), track.indexOf( 'ready' ) );
-
-          console.log( `track:\n${track.join( '\n' )}` );
-
-          var exp =
-          `
-          **<conStart>
-          **<0.out:1::begin>**<0.out:1::end>**<0.err:1::err>
-          **<0.err.end>
-          **<conTerminate>**<ready>**
-          `;
-          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
-          var exp =
-          `
-          **<conStart>
-          **<0.out:2::begin>**<0.out:2::end>**<0.err:2::err>
-          **<0.err.end>
-          **<conTerminate>**<ready>**
-          `;
-          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
-          var exp =`**<conStart>**<0.err.end>**<conTerminate>**`;
-          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
-          var exp =`**<conStart>**<0.err.finish>**<conTerminate>**`;
-          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
-          var exp =`**<conStart>**<0.out.end>**<conTerminate>**`;
-          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
-          var exp =`**<conStart>**<0.out.finish>**<conTerminate>**`;
-          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
-
-        }
-
-        var exp =
-`
-1::begin
-1::end
-1::err
-2::begin
-2::end
-2::err
-`
-        test.equivalent( op.output, exp );
-        test.identical( op.exitCode, 0 );
-        test.identical( op.exitSignal, null );
-        test.identical( op.exitReason, 'normal' );
-        test.identical( op.ended, true );
-        test.true( op === o );
-
-        if( !tops.sync && !tops.deasync )
-        test.true( _.longHas( track, '0.out.end' ) );
-        test.true( !_.longHas( track, '1.out.end' ) );
-        test.true( !_.longHas( track, '2.out.end' ) );
-
-        if( !tops.sync || tops.deasync )
-        {
-          test.identical( op.streamOut._writableState.ended, true );
-          test.identical( op.streamOut._readableState.ended, true );
-          test.identical( op.streamErr._writableState.ended, true );
-          test.identical( op.streamErr._readableState.ended, true );
-        }
-        else
-        {
-          test.true( op.streamOut === null );
-          test.true( op.streamErr === null );
-        }
-
-        op.sessions.forEach( ( op2, counter ) =>
-        {
-          test.identical( op2.exitCode, 0 );
-          test.identical( op2.exitSignal, null );
-          test.identical( op2.exitReason, 'normal' );
-          test.identical( op2.ended, true );
-          let parsed = a.fileProvider.fileRead({ filePath : a.abs( `${counter+1}.json` ), encoding : 'json' });
-          test.identical( parsed.id, counter+1 );
-
-          if( !tops.sync || tops.deasync )
-          {
-            test.identical( op2.streamOut._writableState.ended, false );
-            test.identical( op2.streamOut._readableState.ended, true );
-            test.identical( op2.streamErr._writableState.ended, false );
-            test.identical( op2.streamErr._readableState.ended, true );
-          }
-          else
-          {
-            test.true( op2.streamOut === null );
-            test.true( op2.streamErr === null );
-          }
-
-        });
-        return null;
-      })
-
-      return o.ready;
-    })
-
-    /* */
-
-    ready.then( () =>
-    {
-      test.case = `sync:${tops.sync} deasync:${tops.deasync} concurrent:1 mode:${tops.mode}`;
-      if( tops.sync && !tops.deasync )
-      return null;
-      track = [];
-      let t1 = _.time.now();
-      let ready2 = new _.Consequence().take( null ).delay( context.t1 / 10 );
-      let o =
-      {
-        execPath : [ ( tops.mode !== `fork` ?  `node ` : '' ) + `${programPath} id:1`, ( tops.mode !== `fork` ?  `node ` : '' ) + `${programPath} id:2` ],
-        currentPath : a.abs( '.' ),
-        outputPiping : 1,
-        outputCollecting : 1,
-        outputAdditive : 1,
-        sync : tops.sync,
-        deasync : tops.deasync,
-        concurrent : 1,
-        mode : tops.mode,
-        ready : ready2,
-      }
-
-      let returned = _.process.startMultiple( o );
-
-      o.conStart.tap( ( err, op ) =>
-      {
-        track.push( 'conStart' );
-        test.true( op === o );
-        processPipe( o, 0 );
-        processPipe( o.sessions[ 0 ], 1 );
-        processPipe( o.sessions[ 1 ], 2 );
-      });
-
-      o.conTerminate.tap( ( err, op ) =>
-      {
-        track.push( 'conTerminate' );
-        test.true( op === o );
-      });
-
-      o.ready.then( ( op ) =>
-      {
-        track.push( 'ready' );
-
-        if( tops.sync || tops.deasync )
-        {
-          var exp =
-          [
-            'conStart',
-            'conTerminate',
-            'ready',
-          ]
-          test.identical( track, exp );
-        }
-        else
-        {
-
-          /*
-          on older version of nodejs event finish goes before event end
-          */
-/*
-          var exp =
-          [
-            'conStart',
-            '0.out:1::begin',
-            '1.out:1::begin',
-            '0.out:2::begin',
-            '2.out:2::begin',
-            '0.out:1::end',
-            '1.out:1::end',
-            '0.out:2::end',
-            '2.out:2::end',
-            '0.err:1::err',
-            '1.err:1::err',
-            '1.err.end',
-            '1.out.end',
-            '0.err:2::err',
-            '2.err:2::err',
-            '0.err.finish',
-            '2.err.end',
-            '0.err.end',
-            '0.out.finish',
-            '2.out.end',
-            '0.out.end',
-            'conTerminate',
-            'ready'
-          ]
-          let exp2 =
-          [
-            'conStart',
-            '0.out:1::begin',
-            '1.out:1::begin',
-            '0.out:2::begin',
-            '2.out:2::begin',
-            '0.out:1::end',
-            '1.out:1::end',
-            '0.out:2::end',
-            '2.out:2::end',
-            '0.err:1::err',
-            '1.err:1::err',
-            '1.err.end',
-            '1.out.end',
-            '0.err:2::err',
-            '2.err:2::err',
-            '2.err.end',
-            '0.err.end',
-            '0.err.finish',
-            '2.out.end',
-            '0.out.end',
-            '0.out.finish',
-            'conTerminate',
-            'ready'
-          ]
-*/
-          // var exp =
-          // [
-          //   'conStart',
-          //   '0.out:1::begin',
-          //   '1.out:1::begin',
-          //   '0.out:2::begin',
-          //   '2.out:2::begin',
-          //   '0.out:1::end',
-          //   '1.out:1::end',
-          //   '0.out:2::end',
-          //   '2.out:2::end',
-          //   '0.err:1::err',
-          //   '1.err:1::err',
-          //   '1.out.end',
-          //   '1.err.end',
-          //   '0.err:2::err',
-          //   '2.err:2::err',
-          //   '2.out.end',
-          //   '0.out.end',
-          //   '0.out.finish',
-          //   '2.err.end',
-          //   '0.err.end',
-          //   '0.err.finish',
-          //   'conTerminate',
-          //   'ready'
-          // ]
-
-          // test.identical( new Set( ... track ), new Set( ... exp ) );
-
-          // test.lt( track.indexOf( '0.out:1::begin' ), track.indexOf( '0.out:1::end' ) ); //
-          // test.lt( track.indexOf( '1.out:1::begin' ), track.indexOf( '0.out:1::end' ) );
-          // test.lt( track.indexOf( '0.out:2::begin' ), track.indexOf( '0.out:1::end' ) );
-          // test.lt( track.indexOf( '2.out:2::begin' ), track.indexOf( '0.out:1::end' ) );
-          // test.lt( track.indexOf( '0.out:1::end' ), track.indexOf( '0.err:1::err' ) );
-          // test.lt( track.indexOf( '1.out:1::end' ), track.indexOf( '0.err:1::err' ) );
-          // test.lt( track.indexOf( '0.out:2::end' ), track.indexOf( '0.err:1::err' ) );
-          // test.lt( track.indexOf( '2.out:2::end' ), track.indexOf( '0.err:1::err' ) );
-          // test.lt( track.indexOf( '0.err:1::err' ), track.indexOf( '1.out.end' ) );
-          // test.lt( track.indexOf( '1.err:1::err' ), track.indexOf( '1.out.end' ) );
-          // test.lt( track.indexOf( '1.out.end' ), track.indexOf( '0.err:2::err' ) );
-          // test.lt( track.indexOf( '1.err.end' ), track.indexOf( '0.err:2::err' ) );
-          // test.lt( track.indexOf( '1.out.end' ), track.indexOf( 'conTerminate' ) );
-          // test.lt( track.indexOf( '1.err.end' ), track.indexOf( 'conTerminate' ) );
-          // test.lt( track.indexOf( '0.err:2::err' ), track.indexOf( 'conTerminate' ) );
-          // test.lt( track.indexOf( '2.err:2::err' ), track.indexOf( 'conTerminate' ) );
-          // test.lt( track.indexOf( '2.out.end' ), track.indexOf( 'conTerminate' ) );
-          // test.lt( track.indexOf( '0.out.end' ), track.indexOf( 'conTerminate' ) );
-          // test.lt( track.indexOf( '0.out.finish' ), track.indexOf( 'conTerminate' ) );
-          // test.lt( track.indexOf( '2.err.end' ), track.indexOf( 'conTerminate' ) );
-          // test.lt( track.indexOf( '0.err.end' ), track.indexOf( 'conTerminate' ) );
-          // test.lt( track.indexOf( '0.err.finish' ), track.indexOf( 'conTerminate' ) );
-          // test.lt( track.indexOf( 'conTerminate' ), track.indexOf( 'ready' ) );
-
-          console.log( `track:\n${track.join( '\n' )}` );
-
-          var exp =
-          `
-          **<conStart>
-          **<0.out:1::begin>**<0.out:1::end>**<0.err:1::err>**<0.err:2::err>
-          **<conTerminate>**<ready>**
-          `;
-          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
-          var exp = `**<conStart>**<0.err.end>**<conTerminate>**`;
-          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
-          var exp = `**<conStart>**<0.err.finish>**<conTerminate>**`;
-          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
-          var exp = `**<conStart>**<0.out.end>**<conTerminate>**`;
-          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
-          var exp = `**<conStart>**<0.out.finish>**<conTerminate>**`;
-          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
-
-          var exp =
-          `
-          **<conStart>
-          **<1.out:1::begin>**<1.out:1::end>**<1.err:1::err>
-          **<conTerminate>**<ready>**
-          `;
-          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
-          var exp = `**<conStart>**<1.err.end>**<conTerminate>**`;
-          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
-          var exp = `**<conStart>**<1.out.end>**<conTerminate>**`;
-          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
-
-          var exp =
-          `
-          **<conStart>
-          **<0.out:2::begin>**<0.out:2::end>**<0.err:2::err>
-          **<conTerminate>**<ready>**
-          `;
-          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
-
-          var exp =
-          `
-          **<conStart>
-          **<2.out:2::begin>**<2.out:2::end>**<2.err:2::err>
-          **<conTerminate>**<ready>**
-          `;
-          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
-          var exp = `**<conStart>**<2.err.end>**<conTerminate>**`;
-          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
-          var exp = `**<conStart>**<2.out.end>**<conTerminate>**`;
-          test.true( _.dissector.dissect( exp, track.join( '\n' ) ).matched );
-          /* qqq2 for Yevhen : bad! | aaa : Fixed. */
-
-        }
-
-        test.true( _.dissector.dissect( '**<1::begin>**<1::end>**<1::err>**', op.output ).matched );
-        test.true( _.dissector.dissect( '**<2::begin>**<2::end>**<2::err>**', op.output ).matched );
-
-        test.identical( op.exitCode, 0 );
-        test.identical( op.exitSignal, null );
-        test.identical( op.exitReason, 'normal' );
-        test.identical( op.ended, true );
-        test.true( op === o );
-
-        if( !tops.sync && !tops.deasync )
-        {
-          test.true( _.longHas( track, '0.out.end' ) );
-          test.true( _.longHas( track, '1.out.end' ) );
-          test.true( _.longHas( track, '2.out.end' ) );
-        }
-
-        if( !tops.sync || tops.deasync )
-        {
-          test.identical( op.streamOut._writableState.ended, true );
-          test.identical( op.streamOut._readableState.ended, true );
-          test.identical( op.streamErr._writableState.ended, true );
-          test.identical( op.streamErr._readableState.ended, true );
-        }
-        else
-        {
-          test.true( op.streamOut === null );
-          test.true( op.streamErr === null );
-        }
-
-        op.sessions.forEach( ( op2, counter ) =>
-        {
-          test.identical( op2.exitCode, 0 );
-          test.identical( op2.exitSignal, null );
-          test.identical( op2.exitReason, 'normal' );
-          test.identical( op2.ended, true );
-          let parsed = a.fileProvider.fileRead({ filePath : a.abs( `${counter+1}.json` ), encoding : 'json' });
-          test.identical( parsed.id, counter+1 );
-
-          if( !tops.sync || tops.deasync )
-          {
-            test.identical( op2.streamOut._writableState.ended, false );
-            test.identical( op2.streamOut._readableState.ended, true );
-            test.identical( op2.streamErr._writableState.ended, false );
-            test.identical( op2.streamErr._readableState.ended, true );
-          }
-          else
-          {
-            test.true( op2.streamOut === null );
-            test.true( op2.streamErr === null );
-          }
-
-        });
-
-        return null;
-      })
-
-      return o.ready;
-    })
-
-    /* */
-
-    return ready;
-  }
-
-  /* - */
-
-  function processPipe( op, id )
-  {
-    streamPipe( op, op.streamOut, 'out', id );
-    streamPipe( op, op.streamErr, 'err', id );
-  }
-
-  function streamPipe( op, steam, streamName, id )
-  {
-    if( op.sync && !op.deasync )
-    return;
-    steam.on( 'data', ( data ) =>
-    {
-      if( _.bufferAnyIs( data ) )
-      data = _.bufferToStr( data );
-      data = data.trim();
-      console.log( `${id}.${streamName}`, data );
-      track.push( `${id}.${streamName}:` + data );
-    });
-    steam.on( 'end', ( data ) =>
-    {
-      console.log( `${id}.${streamName}.end` );
-      track.push( `${id}.${streamName}.end` );
-    });
-    steam.on( 'finish', ( data ) =>
-    {
-      console.log( `${id}.${streamName}.finish` );
-      track.push( `${id}.${streamName}.finish` );
-    });
-  }
-
-  function program1()
-  {
-    let _ = require( toolsPath );
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-    let args = _.process.input();
-    let data = { time : _.time.now(), id : args.map.id };
-    _.fileProvider.fileWrite({ filePath : _.path.join(__dirname, `${args.map.id}.json` ), data, encoding : 'json' });
-    let sessionDelay = context.t1 * 0.5*args.map.id;
-    setTimeout( () => console.log( `${args.map.id}::begin` ), sessionDelay );
-    setTimeout( () => console.log( `${args.map.id}::end` ), context.t1+sessionDelay );
-    setTimeout( () => console.error( `${args.map.id}::err` ), context.t1*2+sessionDelay );
-  }
-
-}
-
-startMultipleOutput.rapidity = -1;
-startMultipleOutput.timeOut = 5e5;
-startMultipleOutput.description =
-`
-  - callback of event exit of each stream is called
-  - streams of processes are joined
-  - output is collected in op.output
-`
-
-//
-
-function startMultipleOptionStdioIgnore( test )
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-  let programPath = a.program( program1 );
-  let track = [];
-
-  let modes = [ 'fork', 'spawn', 'shell' ];
-  let outputAdditives = [ true, false ]
-
-  outputAdditives.forEach( ( outputAdditive ) =>
-  {
-    a.ready.tap( () => test.open( `outputAdditive:${ outputAdditive }` ) );
-    modes.forEach( ( mode ) => a.ready.then( () => run({ outputAdditive, sync : 0, deasync : 0, mode }) ) );
-    modes.forEach( ( mode ) => a.ready.then( () => run({ outputAdditive, sync : 0, deasync : 1, mode }) ) );
-    modes.forEach( ( mode ) => a.ready.then( () => run({ outputAdditive, sync : 1, deasync : 0, mode }) ) );
-    modes.forEach( ( mode ) => a.ready.then( () => run({ outputAdditive, sync : 1, deasync : 1, mode }) ) );
-    a.ready.tap( () => test.close( `outputAdditive:${ outputAdditive }` ) );
-  });
-
-  return a.ready;
-
-  /* - */
-
-  function run( tops )
-  {
-    let ready = new _.Consequence().take( null )
-
-    if( tops.sync && !tops.deasync && tops.mode === 'fork' )
-    return null;
-
-    /* */
-
-    ready.then( () =>
-    {
-      test.case = `sync:${tops.sync} deasync:${tops.deasync} mode:${tops.mode} concurrent:0 `;
-      track = [];
-      let t1 = _.time.now();
-      let ready2 = new _.Consequence().take( null ).delay( context.t1 / 10 );
-      let o =
-      {
-        execPath : [ ( tops.mode !== `fork` ?  `node ` : '' ) + `${programPath} id:1`, ( tops.mode !== `fork` ?  `node ` : '' ) + `${programPath} id:2` ],
-        currentPath : a.abs( '.' ),
-        outputAdditive : tops.outputAdditive,
-        stdio : 'ignore',
-        sync : tops.sync,
-        deasync : tops.deasync,
-        concurrent : 0,
-        mode : tops.mode,
-        ready : ready2,
-      }
-
-      let returned = _.process.startMultiple( o );
-
-      o.conStart.tap( ( err, op ) =>
-      {
-        track.push( 'conStart' );
-        test.true( op === o );
-      });
-
-      o.conTerminate.tap( ( err, op ) =>
-      {
-        track.push( 'conTerminate' );
-        test.true( op === o );
-      });
-
-      o.ready.then( ( op ) =>
-      {
-        track.push( 'ready' );
-
-        var exp =
-        [
-          'conStart',
-          'conTerminate',
-          'ready',
-        ]
-        test.identical( track, exp );
-
-        test.identical( op.output, null );
-        test.identical( op.exitCode, 0 );
-        test.identical( op.exitSignal, null );
-        test.identical( op.exitReason, 'normal' );
-        test.identical( op.ended, true );
-        test.true( op === o );
-        test.true( op.streamOut === null );
-        test.true( op.streamErr === null );
-
-        op.sessions.forEach( ( op2, counter ) =>
-        {
-          test.identical( op2.exitCode, 0 );
-          test.identical( op2.exitSignal, null );
-          test.identical( op2.exitReason, 'normal' );
-          test.identical( op2.ended, true );
-          test.identical( op2.output, null );
-          let parsed = a.fileProvider.fileRead({ filePath : a.abs( `${counter+1}.json` ), encoding : 'json' });
-          test.identical( parsed.id, counter+1 );
-          test.true( op2.streamOut === null );
-          test.true( op2.streamErr === null );
-          test.true( op2.pnd.stdout === null );
-          test.true( op2.pnd.stderr === null );
-        });
-        return null;
-      })
-
-      return o.ready;
-    })
-
-    /* */
-
-    return ready;
-  }
-
-  /* - */
-
-  function program1()
-  {
-    let _ = require( toolsPath );
-    _.include( 'wProcess' );
-    _.include( 'wFiles' );
-    let args = _.process.input();
-    let data = { time : _.time.now(), id : args.map.id };
-    _.fileProvider.fileWrite({ filePath : _.path.join(__dirname, `${args.map.id}.json` ), data, encoding : 'json' });
-    let sessionDelay = context.t1 * 0.5*args.map.id;
-    setTimeout( () => console.log( `${args.map.id}::begin` ), sessionDelay );
-    setTimeout( () => console.log( `${args.map.id}::end` ), context.t1+sessionDelay );
-    setTimeout( () => console.error( `${args.map.id}::err` ), context.t1*2+sessionDelay );
-  }
-
-}
-
-startMultipleOptionStdioIgnore.rapidity = -1;
-startMultipleOptionStdioIgnore.timeOut = 1e6;
-startMultipleOptionStdioIgnore.description =
-`
-  - no problems in stdio:ignore mode
-`
-
-//
-
-function startSingleOptionOutputAdditive( test )
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
-  let modes = [ 'fork', 'spawn', 'shell' ];
-  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
-  return a.ready;
-
-  /* - */
-
-  function run( mode )
-  {
-    let ready = _.Consequence().take( null );
-
-    ready.then( () =>
-    {
-      test.case = `mode : ${mode}, outputAdditive default`;
-
-      let o =
-      {
-        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
-        mode
-      }
-
-      return _.process.startSingle( o )
-      .then( ( op ) =>
-      {
-        test.il( op.exitCode, 0 );
-        test.il( op.ended, true );
-        test.il( op.outputAdditive, true );
-
-        return null;
-      })
-    })
-
-    return ready;
-
-  }
-
-  function testApp()
-  {
-    console.log( 'Output' );
-  }
-}
-
-//
-
-function startMultipleOptionOutputAdditive( test )
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
-  let testAppPath2 = a.program( testApp2 );
-  let modes = [ 'fork', 'spawn', 'shell' ];
-  modes.forEach( ( mode ) => a.ready.then( () => run({ mode, concurrent : 0, outputAdditive : 0 }) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run({ mode, concurrent : 1, outputAdditive : 0 }) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run({ mode, concurrent : 0, outputAdditive : 1 }) ) );
-  modes.forEach( ( mode ) => a.ready.then( () => run({ mode, concurrent : 1, outputAdditive : 1 }) ) );
-  return a.ready;
-
-  /* - */
-
-  function run( tops )
-  {
-    let ready = _.Consequence().take( null );
-
-    ready.then( () =>
-    {
-      test.case = `mode : ${tops.mode}, outputAdditive : ${tops.outputAdditive}, concurrent : ${tops.concurrent}`;
-
-      let locals =
-      {
-        mode : tops.mode,
-        testAppPath,
-        testAppPath2,
-        outputAdditive : tops.outputAdditive,
-        concurrent : tops.concurrent,
-      }
-
-      let testAppPathParent = a.program({ routine : testAppParent, locals });
-
-      let o =
-      {
-        execPath : 'node ' + testAppPathParent,
-        outputCollecting : 1,
-      }
-
-      /*
-        This executes before any of the processes finishes,
-        with option::outputAdditing : 0 - no output is logged
-      */
-      _.time.out( context.t1 * 15, () =>
-      {
-        // console.log( `out t1 * 15, concurrent : ${tops.concurrent}, additive : ${tops.outputAdditive}`, '++' +  o.output + '++'  );
-        if( !tops.outputAdditive )
-        {
-          test.identical( o.output, '' );
-        }
-        else
-        {
-          if( tops.concurrent )
-          test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}\n>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath2}\nOutput1\nOutput2\nOutput1.2` );
-          else
-          test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}\nOutput1\nOutput1.2` );
-        }
-        return null;
-      })
-
-      /*
-        If concurrent : 1
-        This executes after the second process finishes,
-        with option::outputAdditing : 0 - no output is logged from the first process,
-        all output is logged from the second process
-      */
-      _.time.out( context.t1 * 35, () =>
-      {
-        // console.log( `out t1 * 35, concurrent : ${tops.concurrent}, additive : ${tops.outputAdditive}`, '++' +  o.output + '++'  );
-
-        if( tops.concurrent )
-        {
-          if( tops.outputAdditive )
-          test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}\n>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath2}\nOutput1\nOutput2\nOutput1.2\nOutput2.2\ntimeout1\ntimeout2\ntimeout2.2\n` );
-          else /* First process is still running. Second process is finished. */
-          test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath2}\nOutput2\nOutput2.2\ntimeout2\ntimeout2.2\n` );
-        }
-        else
-        {
-          if( !tops.outputAdditive ) /* First process haven't finished yet, no output */
-          test.identical( o.output, '' );
-          else /* Only a part of the output from the first process is logged */
-          test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}\nOutput1\nOutput1.2\ntimeout1\n` );
-        }
-
-        return null;
-      })
-
-      return _.process.startMinimal( o )
-      .then( ( op ) =>
-      {
-        // console.log( `outputAdditive : ${tops.outputAdditive}, concurrent : ${tops.concurrent} OP OOOOUUUUTTTT : +++++ ${o.output} +++++` );
-        test.il( op.exitCode, 0 );
-        test.il( op.ended, true );
-
-        let exp1 = '\nOutput1\nOutput2\nOutput1.2\nOutput2.2\ntimeout1\ntimeout2\ntimeout2.2\ntimeout1.2\n';
-        let exp2 = '\nOutput1\nOutput1.2\ntimeout1\ntimeout1.2\n';
-        let exp3 = '\nOutput2\nOutput2.2\ntimeout2\ntimeout2.2\n';
-        if( tops.concurrent )
-        {
-          if( tops.outputAdditive )
-          test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}\n>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath2}${exp1}${exp1}` );
-          else
-          test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath2}${exp3}>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}${exp2}${exp1}` );
-        }
-        else
-        {
-          test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}${exp2}>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath2}${exp3}${exp2}${exp3}` );
-        }
-
-        a.fileProvider.fileDelete( testAppPathParent );
-        return null;
-      })
-    })
-
-    return ready;
-
-  }
-
-  function testAppParent()
-  {
-    let _ = require( toolsPath );
-    _.include( 'wProcess' );
-
-    var o =
-    {
-      execPath : mode === 'fork' ? [ testAppPath, testAppPath2 ] : [ 'node ' + testAppPath, 'node ' + testAppPath2 ],
-      currentPath : __dirname,
-      outputCollecting : 1,
-      outputColoring : 0,
-      mode,
-      outputAdditive,
-      concurrent,
-    }
-    _.process.startMultiple( o )
-    .then( ( op ) =>
-    {
-      console.log( op.output )
-      return null;
-    });
-  }
-
-  function testApp()
-  {
-    console.log( 'Output1' )
-    setTimeout( () => console.log( 'Output1.2' ), context.t1 * 10 );
-    setTimeout( () => console.log( 'timeout1' ), context.t1 * 20 );
-    setTimeout( () => console.log( 'timeout1.2' ), context.t1 * 40 );
-  }
-
-  function testApp2()
-  {
-    setTimeout( () => console.log( 'Output2' ), context.t1 * 5 );
-    setTimeout( () => console.log( 'Output2.2' ), context.t1 * 15 );
-    setTimeout( () => console.log( 'timeout2' ), context.t1 * 25 );
-    setTimeout( () => console.log( 'timeout2.2' ), context.t1 * 30 );
-  }
-
-}
-
-startMultipleOptionOutputAdditive.timeOut = 4e6; /* Locally : 394.840s */
-startMultipleOptionOutputAdditive.rapidity = -1;
-
-//
-
-function outputLog( test )
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
-  let testAppPath2 = a.program( testApp2 );
-  let testAppPath3 = a.program( testApp3 );
-  let testAppPath4 = a.program( testApp4 );
-  let modes = [ 'fork', 'spawn', 'shell' ];
-  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
-  return a.ready;
-
-  /* - */
-
-  function run( mode )
-  {
-    let ready = new _.Consequence().take( null );
-
-    ready.then( () =>
-    {
-      test.case = `mode : ${mode}, without new line`;
-      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath } });
-
-      let options =
-      {
-        execPath : 'node ' + testAppParentPath,
-        outputCollecting : 1,
-      }
-
-      return _.process.startSingle( options )
-      .then( ( op ) =>
-      {
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( op.output, 'abc\n' );
-
-        a.fileProvider.fileDelete( testAppParentPath );
-        return null;
-      })
-    })
-
-    /* */
-
-    ready.then( () =>
-    {
-      test.case = `mode : ${mode}, new line ath the end`;
-      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath : testAppPath2 } });
-
-      let options =
-      {
-        execPath : 'node ' + testAppParentPath,
-        outputCollecting : 1,
-      }
-
-      return _.process.startSingle( options )
-      .then( ( op ) =>
-      {
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( op.output, 'abc\n' );
-
-        a.fileProvider.fileDelete( testAppParentPath );
-        return null;
-      })
-    })
-
-    /* */
-
-    ready.then( () =>
-    {
-      test.case = `mode : ${mode}, new line at the middle`;
-      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath : testAppPath3 } });
-
-      let options =
-      {
-        execPath : 'node ' + testAppParentPath,
-        outputCollecting : 1,
-      }
-
-      return _.process.startSingle( options )
-      .then( ( op ) =>
-      {
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( op.output, 'ab\ncd\n' );
-
-        a.fileProvider.fileDelete( testAppParentPath );
-        return null;
-      })
-    })
-
-    /* */
-
-    ready.then( () =>
-    {
-      test.case = `mode : ${mode}, new line at the middle & end`;
-      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath : testAppPath4 } });
-
-      let options =
-      {
-        execPath : 'node ' + testAppParentPath,
-        outputCollecting : 1,
-      }
-
-      return _.process.startSingle( options )
-      .then( ( op ) =>
-      {
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( op.output, 'ab\ncd\n' );
-
-        a.fileProvider.fileDelete( testAppParentPath );
-        return null;
-      })
-    })
-
-    return ready;
-  }
-
-  /* - */
-
-  function testAppParent()
-  {
-    let _ = require( toolsPath );
-    _.include( 'wProcess' );
-
-    let o =
-    {
-      execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
-      mode,
-      inputMirroring : 0,
-      outputColoring : 0,
-      outputPiping : 1
-    }
-    return _.process.startSingle( o );
-  }
-
-  function testApp()
-  {
-    process.stdout.write( 'a' );
-    setTimeout( () => process.stdout.write( 'c' ), context.t0 );
-    process.stdout.write( 'b' );
-  }
-
-  function testApp2()
-  {
-    process.stdout.write( 'a' );
-    process.stdout.write( 'b' );
-    process.stdout.write( 'c' );
-    console.log();
-  }
-
-  function testApp3()
-  {
-    process.stdout.write( 'ab\nc' );
-    process.stdout.write( 'd' );
-  }
-
-  function testApp4()
-  {
-    process.stdout.write( 'ab\nc' );
-    process.stdout.write( 'd' );
-    console.log();
-  }
-}
-
-//
-
-function outputLogStreams( test )
-{
-  let context = this;
-  let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
-  let testAppPath2 = a.program( testApp2 );
-  let testAppPath3 = a.program( testApp3 );
-  let testAppPath4 = a.program( testApp4 );
-  let testAppPath5 = a.program( testApp5 );
-  let modes = [ 'fork', 'spawn', 'shell' ];
-
-  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
-  return a.ready;
-
-  /* - */
-
-  function run( mode )
-  {
-    let ready = new _.Consequence().take( null );
-
-    ready.then( () =>
-    {
-      test.case = `mode : ${mode}, without new line`;
-      let piecesOut = [];
-      let piecesErr = [];
-
-      let options =
-      {
-        execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
-        mode,
-        outputCollecting : 1,
-      }
-
-
-      _.process.startSingle( options )
-      .then( ( op ) =>
-      {
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( piecesOut.join( '' ), 'abc' );
-        test.identical( piecesErr.join( '' ), 'err1err2' );
-
-        return null;
-      })
-
-      options.pnd.stdout.on( 'data', ( data ) =>
-      {
-        piecesOut.push( data.toString() );
-      })
-
-      options.pnd.stderr.on( 'data', ( data ) =>
-      {
-        piecesErr.push( data.toString() );
-      })
-
-      return options.ready;
-
-    })
-
-    /* */
-
-    ready.then( () =>
-    {
-      test.case = `mode : ${mode}, new line at the end`;
-      let piecesOut = [];
-      let piecesErr = [];
-
-      let options =
-      {
-        execPath : mode === 'fork' ? testAppPath2 : 'node ' + testAppPath2,
-        mode,
-        outputCollecting : 1,
-      }
-
-      _.process.startSingle( options )
-      .then( ( op ) =>
-      {
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( piecesOut.join( '' ), 'abc\n' );
-        test.identical( piecesErr.join( '' ), 'err1err2err3\n' );
-
-        return null;
-      })
-
-      options.pnd.stdout.on( 'data', ( data ) =>
-      {
-        piecesOut.push( data.toString() );
-      })
-
-      options.pnd.stderr.on( 'data', ( data ) =>
-      {
-        piecesErr.push( data.toString() );
-      })
-
-      return options.ready;
-    })
-
-    /* */
-
-    ready.then( () =>
-    {
-      test.case = `mode : ${mode}, new line at the middle`;
-      let piecesOut = [];
-      let piecesErr = [];
-
-      let options =
-      {
-        execPath : mode === 'fork' ? testAppPath3 : 'node ' + testAppPath3,
-        mode,
-        outputCollecting : 1,
-      }
-
-      _.process.startSingle( options )
-      .then( ( op ) =>
-      {
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( piecesOut.join( '' ), 'ab\ncd' );
-        test.identical( piecesErr.join( '' ), 'err1\nerr2err3' );
-
-        return null;
-      })
-
-      options.pnd.stdout.on( 'data', ( data ) =>
-      {
-        piecesOut.push( data.toString() );
-      })
-
-      options.pnd.stderr.on( 'data', ( data ) =>
-      {
-        piecesErr.push( data.toString() );
-      })
-
-      return options.ready;
-    })
-
-    /* */
-
-    ready.then( () =>
-    {
-      test.case = `mode : ${mode}, new line at the middle & end`;
-      let piecesOut = [];
-      let piecesErr = [];
-
-      let options =
-      {
-        execPath : mode === 'fork' ? testAppPath4 : 'node ' + testAppPath4,
-        mode,
-        outputCollecting : 1,
-      }
-
-      _.process.startSingle( options )
-      .then( ( op ) =>
-      {
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( piecesOut.join( '' ), 'ab\ncd\n' );
-        test.identical( piecesErr.join( '' ), 'err1\nerr2err3\n' );
-
-        return null;
-      })
-
-      options.pnd.stdout.on( 'data', ( data ) =>
-      {
-        piecesOut.push( data.toString() );
-      })
-
-      options.pnd.stderr.on( 'data', ( data ) =>
-      {
-        piecesErr.push( data.toString() );
-      })
-
-      return options.ready;
-    })
-
-    /* */
-
-    ready.then( () =>
-    {
-      test.case = `mode : ${mode}, new line at the end, both`;
-      let piecesOut = [];
-      let piecesErr = [];
-
-      let options =
-      {
-        execPath : mode === 'fork' ? testAppPath5 : 'node ' + testAppPath5,
-        mode,
-        outputCollecting : 1,
-      }
-
-      _.process.startSingle( options )
-      .then( ( op ) =>
-      {
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-        test.identical( piecesOut.join( '' ), 'ac\n' );
-        test.identical( piecesErr.join( '' ), 'bd\n' );
-
-        return null;
-      })
-
-      options.pnd.stdout.on( 'data', ( data ) =>
-      {
-        piecesOut.push( data.toString() );
-      })
-
-      options.pnd.stderr.on( 'data', ( data ) =>
-      {
-        piecesErr.push( data.toString() );
-      })
-
-      return options.ready;
-    })
-
-    return ready;
-  }
-
-  /* - */
-
-  function testApp()
-  {
-    process.stdout.write( 'a' );
-    process.stderr.write( 'err1' );
-    setTimeout( () => process.stdout.write( 'c' ), context.t0 );
-    process.stderr.write( 'err2' );
-    process.stdout.write( 'b' );
-  }
-
-  function testApp2()
-  {
-    process.stdout.write( 'a' );
-    process.stderr.write( 'err1' );
-    process.stdout.write( 'b' );
-    process.stderr.write( 'err2' );
-    process.stdout.write( 'c' );
-    process.stderr.write( 'err3' );
-    process.stderr.write( '\n' );
-    console.log();
-  }
-
-  function testApp3()
-  {
-    process.stdout.write( 'ab\nc' );
-    process.stderr.write( 'err1\nerr2' );
-    process.stdout.write( 'd' );
-    process.stderr.write( 'err3' );
-  }
-
-  function testApp4()
-  {
-    process.stdout.write( 'ab\nc' );
-    process.stderr.write( 'err1\nerr2' );
-    process.stdout.write( 'd' );
-    process.stderr.write( 'err3\n' );
-    console.log();
-  }
-
-  function testApp5()
-  {
-    process.stdout.write( 'a' );
-    process.stderr.write( 'b' );
-    process.stdout.write( 'c\n' );
-    process.stderr.write( 'd\n' );
-  }
-
-}
-
-//
 
 function kill( test )
 {
@@ -38486,8 +38488,8 @@ var Proto =
 
     // experiments
 
-    experimentIpcDeasync,
     streamJoinExperiment,
+    experimentIpcDeasync,
     experiment,
     experiment2,
     experiment3,
