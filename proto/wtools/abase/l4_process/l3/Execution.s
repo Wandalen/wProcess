@@ -1283,12 +1283,13 @@ function startMinimal_body( o )
         }
         else
         {
-          let splitted = msg.split( '\n' );
-          msg = splitted.slice( 0, splitted.length - 1 ).join( '\n' );
+          let lastBreak = msg.lastIndexOf( '\n' );
+          let left = msg.slice( lastBreak + 1 );
+          msg = msg.slice( 0, lastBreak );
           if( channel === 'err' )
-          _errAdditive += splitted[ splitted.length - 1 ];
+          _errAdditive += left;
           else
-          _outAdditive += splitted[ splitted.length - 1 ];
+          _outAdditive += left;
         }
       }
       if( channel === 'err' )
