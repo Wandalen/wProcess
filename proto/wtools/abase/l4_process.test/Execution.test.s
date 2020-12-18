@@ -29101,6 +29101,7 @@ function outputLogStreams( test )
   let testAppPath2 = a.program( testApp2 );
   let testAppPath3 = a.program( testApp3 );
   let testAppPath4 = a.program( testApp4 );
+  let testAppPath5 = a.program( testApp5 );
   let modes = [ 'fork', 'spawn', 'shell' ];
 
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
@@ -29268,6 +29269,45 @@ function outputLogStreams( test )
       return options.ready;
     })
 
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, new line at the end, both`;
+      let piecesOut = [];
+      let piecesErr = [];
+
+      let options =
+      {
+        execPath : mode === 'fork' ? testAppPath5 : 'node ' + testAppPath5,
+        mode,
+        outputCollecting : 1,
+      }
+
+      _.process.startSingle( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( piecesOut.join( '' ), 'ac\n' );
+        test.identical( piecesErr.join( '' ), 'bd\n' );
+
+        return null;
+      })
+
+      options.pnd.stdout.on( 'data', ( data ) =>
+      {
+        piecesOut.push( data.toString() );
+      })
+
+      options.pnd.stderr.on( 'data', ( data ) =>
+      {
+        piecesErr.push( data.toString() );
+      })
+
+      return options.ready;
+    })
+
     return ready;
   }
 
@@ -29310,6 +29350,15 @@ function outputLogStreams( test )
     process.stderr.write( 'err3\n' );
     console.log();
   }
+
+  function testApp5()
+  {
+    process.stdout.write( 'a' );
+    process.stderr.write( 'b' );
+    process.stdout.write( 'c\n' );
+    process.stderr.write( 'd\n' );
+  }
+
 }
 
 //

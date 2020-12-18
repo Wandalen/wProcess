@@ -1255,19 +1255,15 @@ function startMinimal_body( o )
       if( _.strEnds( msg, '\n' ) )
       {
         // msg = _.strRemoveEnd( msg, '\n' );
-        if( _errAdditive )
+        if( channel === 'err' )
         {
           msg = _errAdditive + _.strRemoveEnd( msg, '\n' );
           _errAdditive = '';
         }
-        else if( _outAdditive )
+        else
         {
           msg = _outAdditive + _.strRemoveEnd( msg, '\n' );
           _outAdditive = '';
-        }
-        else
-        {
-          msg = _.strRemoveEnd( msg, '\n' );
         }
       }
       else
