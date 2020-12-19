@@ -586,10 +586,10 @@ function startMinimal_body( o )
     /* state */
 
     o.state = 'started';
-    
+
     if( o.detaching !== 2 )
     o.conStart.take( o );
-    
+
   }
 
   /* */
@@ -920,7 +920,7 @@ function startMinimal_body( o )
     /* bad solution
     subprocess waits what does not let emit event "close" in parent process
     */
-   
+
     if( o.detaching === 2 )
     o.conStart.take( o );
 
@@ -948,7 +948,7 @@ function startMinimal_body( o )
     this.pnd.stderr.destroy();
 
     this.pnd.unref();
-    
+
     if( this.pnd.disconnect )
     if( this.pnd.connected )
     this.pnd.disconnect();
@@ -1548,7 +1548,7 @@ function startSingle_body( o )
 
       return _.process.startMultiple( o );
     })
-    
+
     process.send( 'ready' );
 
     /* */
@@ -1595,14 +1595,14 @@ function startSingle_body( o )
     {
       let disconnected = _.Consequence();
 
-      o.pnd.on( 'message', () => 
+      o.pnd.on( 'message', () =>
       {
         o.pnd.on( 'disconnect', () => disconnected.take( op ) );
         o.disconnect();
       })
-      
+
       return disconnected;
-      
+
       // let ipc = require( 'node-ipc' );
 
       // o.pnd.on( 'message', ( ipcHostId ) =>
@@ -2644,7 +2644,7 @@ function signal_body( o )
     }
     catch( err )
     {
-      console.error( 'signalSend.error!' ); /* xxx : remove later */
+      console.error( 'signalSend.error :', err.code ); /* xxx : remove later */
       if( o.ignoringErrorEsrch && err.code === 'ESRCH' )
       return true;
       if( o.ignoringErrorPerm && err.code === 'EPERM' )
@@ -2760,6 +2760,7 @@ function signal_body( o )
       let processInfo = processInfoGet( p );
       _._errFields( err, { processInfo : processInfo } )
       _.err( err, processInfo );
+      console.log( 'handleError2 :', processInfo );
     }
 
     return _.err( err );
