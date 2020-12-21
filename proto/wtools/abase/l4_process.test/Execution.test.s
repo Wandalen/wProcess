@@ -38079,8 +38079,7 @@ function spawnTimeOf( test )
   {
     let o =
     {
-      execPath : 'node program.js',
-      currentPath : a.routinePath,
+      execPath : 'node ' + testAppPath,
       mode : 'spawn',
       outputCollecting : 1
     }
