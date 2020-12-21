@@ -38053,6 +38053,64 @@ function childrenOptionFormatList( test )
   }
 }
 
+//
+
+function spawnTimeOf( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( program );
+
+  if( process.platform !== 'win32' )
+  {
+    test.true( true );
+    return;
+  }
+
+  let times = 20;
+  let lastSpawnTime = 0;
+
+  for( let i = 0; i < times; i++ )
+  a.ready.then( run );
+
+  return a.ready;
+
+  function run()
+  {
+    let beforeSpawn = _.time.now();
+
+    let o =
+    {
+      execPath : 'node program.js',
+      currentPath : a.routinePath,
+      mode : 'spawn'
+    }
+
+    _.process.start( o );
+
+    o.conStart.then( () =>
+    {
+      let afterSpawn = _.time.now();
+      let spawnTime = _.process.spawnTimeOf( o.pnd );
+      test.true( _.numberIs( spawnTime ) );
+      test.gt( spawnTime - lastSpawnTime, context.t1 * 15 );
+      test.true( spawnTime >= beforeSpawn );
+      test.true( spawnTime <= afterSpawn );
+      lastSpawnTime = spawnTime;
+      return null;
+    })
+
+    return _.Consequence.AndKeep( o.conStart, o.conTerminate );
+  }
+
+  function program()
+  {
+    setTimeout( () => {}, context.t1 * 15 ) /* 1500 */
+  }
+}
+
+spawnTimeOf.routineTimeOut = 90000;
+
 // --
 // experiment
 // --
@@ -38572,6 +38630,8 @@ var Proto =
 
     children,
     childrenOptionFormatList,
+
+    spawnTimeOf,
 
     // experiments
 
