@@ -38115,7 +38115,7 @@ function spawnTimeOf( test )
   }
 }
 
-spawnTimeOf.routineTimeOut = 90000;
+spawnTimeOf.routineTimeOut = 120000;
 
 // --
 // experiment
