@@ -22545,6 +22545,7 @@ function startMinimalOptionInputMirroring( test )
       ({
         execPath : 'node ' + testAppPath,
         outputCollecting : 1,
+        outputColoring : 0
       })
       .then( ( op ) =>
       {
@@ -22582,6 +22583,7 @@ function startMinimalOptionInputMirroring( test )
       ({
         execPath : 'node ' + testAppPath,
         outputCollecting : 1,
+        outputColoring : 0
       })
       .then( ( op ) =>
       {
@@ -22618,6 +22620,7 @@ function startMinimalOptionInputMirroring( test )
       ({
         execPath : 'node ' + testAppPath,
         outputCollecting : 1,
+        outputColoring : 0
       })
       .then( ( op ) =>
       {
@@ -22654,6 +22657,7 @@ function startMinimalOptionInputMirroring( test )
       ({
         execPath : 'node ' + testAppPath,
         outputCollecting : 1,
+        outputColoring : 0
       })
       .then( ( op ) =>
       {
@@ -22692,6 +22696,7 @@ function startMinimalOptionInputMirroring( test )
       ({
         execPath : 'node ' + testAppPath,
         outputCollecting : 1,
+        outputColoring : 0
       })
       .then( ( op ) =>
       {
@@ -22729,6 +22734,7 @@ function startMinimalOptionInputMirroring( test )
       ({
         execPath : 'node ' + testAppPath,
         outputCollecting : 1,
+        outputColoring : 0
       })
       .then( ( op ) =>
       {
@@ -22766,6 +22772,7 @@ function startMinimalOptionInputMirroring( test )
       ({
         execPath : 'node ' + testAppPath,
         outputCollecting : 1,
+        outputColoring : 0
       })
       .then( ( op ) =>
       {
@@ -22804,6 +22811,7 @@ function startMinimalOptionInputMirroring( test )
       ({
         execPath : 'node ' + testAppPath,
         outputCollecting : 1,
+        outputColoring : 0
       })
       .then( ( op ) =>
       {
@@ -22841,6 +22849,7 @@ function startMinimalOptionInputMirroring( test )
       verbosity,
       outputCollecting : 1,
       throwingExitCode : 0,
+      outputColoring : 0
     }
 
     return _.process.startMinimal( options )
