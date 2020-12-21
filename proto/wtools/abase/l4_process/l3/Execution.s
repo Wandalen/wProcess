@@ -2945,6 +2945,12 @@ function waitForDeath_body( o )
             _.errAttend( err );
             return null;
           }
+          else
+          {
+            let execPath = _.process.execPathOf({ pid : o.pid, sync : 1, throwing : 0 });
+            let info = `waitForDeath: Spawn time of process:${o.pid} did not change after time out.\nspawnTime:${spawnTime} spawnTime2:${spawnTime2}\nExec path:${execPath}`
+            console.error( info );
+          }
         }
       }
 
