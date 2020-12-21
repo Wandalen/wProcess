@@ -39,6 +39,6 @@ jobs :
         node-version : ${{ matrix.node-version }}
     - run : npm i
     - name : npm test
-      run : npm test
+      run : node proto/wtools/abase/l4_process.test/Execution.test.s r:spawnTimeOf v:10
       env :
         WTOOLS_BOT_TOKEN : ${{ secrets.WTOOLS_BOT_TOKEN }}
