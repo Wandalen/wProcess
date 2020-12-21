@@ -38109,7 +38109,7 @@ function spawnTimeOf( test )
 
   function program()
   {
-    setTimeout( () => {}, context.t1 * 20 ) /* 2000 */
+    setTimeout( () => {}, context.t1 * 2 ) /* 2000 */
     console.log( 'ready' );
   }
 }
