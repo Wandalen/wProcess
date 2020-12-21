@@ -38067,8 +38067,8 @@ function spawnTimeOf( test )
     return;
   }
 
-  let times = 20;
-  let lastSpawnTime = 0;
+  let times = 10;
+  let lastSpawnTime = BigInt( 0 );
 
   for( let i = 0; i < times; i++ )
   a.ready.then( run );
@@ -38077,35 +38077,41 @@ function spawnTimeOf( test )
 
   function run()
   {
-    let beforeSpawn = _.time.now();
-
     let o =
     {
       execPath : 'node program.js',
       currentPath : a.routinePath,
-      mode : 'spawn'
+      mode : 'spawn',
+      outputCollecting : 1
     }
 
     _.process.start( o );
 
-    o.conStart.then( () =>
+    let con = _.Consequence();
+
+    _.time.periodic( 100, () =>
     {
-      let afterSpawn = _.time.now();
-      let spawnTime = _.process.spawnTimeOf( o.pnd );
-      test.true( _.numberIs( spawnTime ) );
-      test.gt( spawnTime - lastSpawnTime, context.t1 * 15 );
-      test.true( spawnTime >= beforeSpawn );
-      test.true( spawnTime <= afterSpawn );
-      lastSpawnTime = spawnTime;
-      return null;
+      if( !_.strHas( o.output, 'ready' ) )
+      return true;
+      con.take( null );
     })
 
-    return _.Consequence.AndKeep( o.conStart, o.conTerminate );
+    con.then( () =>
+    {
+      let spawnTime = _.process.spawnTimeOf( o.pnd );
+      test.true( _.bigIntIs( spawnTime ) );
+      test.gt( spawnTime, lastSpawnTime );
+      lastSpawnTime = spawnTime;
+      return null;
+    });
+
+    return _.Consequence.AndKeep( con, o.conTerminate );
   }
 
   function program()
   {
-    setTimeout( () => {}, context.t1 * 15 ) /* 1500 */
+    setTimeout( () => {}, context.t1 * 20 ) /* 2000 */
+    console.log( 'ready' );
   }
 }
 
