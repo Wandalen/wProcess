@@ -3246,6 +3246,50 @@ spawnTimeOf.defaults =
   pnd : null
 }
 
+//
+
+function _systemLike( pnd )
+{
+  let list =
+  [
+    'csrss.exe',
+    'wininit.exe',
+    'services.exe',
+    'smartscreen.exe',
+    'ShellExperienceHost.exe',
+    'SearchUI.exe',
+    'RuntimeBroker.exe',
+    'taskhostw.exe',
+    'provisioner.exe',
+    'conhost.exe',
+    'Runner.Listener.exe',
+    'Runner.Worker.exe',
+    'spoolsv.exe',
+    'sihost.exe',
+    'WaAppAgent.exe',
+    'WaSecAgentProv.exe',
+    'SMSvcHost.exe',
+    'IpOverUsbSvc.exe',
+    'WindowsAzureGuestAgent.exe',
+    'MsMpEng.exe',
+    'WindowsAzureNetAgent.exe',
+    'mqsvc.exe',
+    'SMSvcHost.exe',
+    'ctfmon.exe',
+    'vds.exe',
+    'msdtc.exe',
+    'svchost.exe',
+    'lsass.exe',
+    'fontdrvhost.exe',
+  ]
+
+  _.assert( arguments.length === 1 );
+  _.assert( _.objectIs( pnd ) );
+  _.assert( _.strDefined( pnd.name ) );
+
+  return list.indexOf( pnd.name ) !== -1;
+}
+
 // --
 // declare
 // --
@@ -3277,7 +3321,9 @@ let Extension =
 
   children,
   execPathOf,
-  spawnTimeOf
+  spawnTimeOf,
+
+  _systemLike
 
   // fields
 
