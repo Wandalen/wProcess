@@ -2645,6 +2645,7 @@ function signal_body( o )
     catch( err )
     {
       console.error( 'signalSend.error :', err.code ); /* xxx : remove later */
+      console.error( processInfoGet( p ) );
       if( o.ignoringErrorEsrch && err.code === 'ESRCH' )
       return true;
       if( o.ignoringErrorPerm && err.code === 'EPERM' )
