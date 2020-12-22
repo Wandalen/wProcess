@@ -2645,6 +2645,7 @@ function signal_body( o )
     catch( err )
     {
       console.error( 'signalSend.error :', err.code ); /* xxx : remove later */
+      console.error( processInfoGet( p ) );
       if( o.ignoringErrorEsrch && err.code === 'ESRCH' )
       return true;
       if( o.ignoringErrorPerm && err.code === 'EPERM' )
@@ -2950,6 +2951,12 @@ function waitForDeath_body( o )
           {
             _.errAttend( err );
             return null;
+          }
+          else
+          {
+            let execPath = _.process.execPathOf({ pid : o.pid, sync : 1, throwing : 0 });
+            let info = `waitForDeath: Spawn time of process:${o.pid} did not change after time out.\nspawnTime:${spawnTime} spawnTime2:${spawnTime2}\nExec path:${execPath}`
+            console.error( info );
           }
         }
       }
