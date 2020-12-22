@@ -2755,18 +2755,24 @@ function signal_body( o )
     if( err.code === 'ESRCH' )
     err = _.err( err, `\nTarget process does not exist.` );
 
-    // if( !err.processInfo && p )
-    if( p )
+    if( !err.processInfo && p )
+    // if( p )
     {
       let processInfo = processInfoGet( p );
       _._errFields( err, { processInfo : processInfo } )
       _.err( err, processInfo );
-      console.log( 'handleError2 :', processInfo );
+      // console.log( 'handleError2 :', processInfo );
     }
-    else
-    {
-      console.log( 'handleError2 :', 'no p' );
-    }
+    // else
+    // {
+    //   console.log( 'handleError2 :', 'no p' );
+    // }
+
+    if( err && err.processInfo )
+    console.log( 'handleError2 :', err.processInfo );
+
+    if( !p )
+    console.log( 'handleError2 : no p' );
 
     return _.err( err );
   }
