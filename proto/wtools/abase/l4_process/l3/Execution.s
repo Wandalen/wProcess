@@ -1,3 +1,5 @@
+const { read } = require('fs');
+
 ( function _Execution_s_()
 {
 
@@ -3290,6 +3292,95 @@ function _systemLike( pnd )
   return list.indexOf( pnd.name ) !== -1;
 }
 
+//
+
+function startTree( o )
+{
+  o = o || {};
+
+  _.routineOptions( startMultiple, o );
+
+  let locals = { toolsPath : _.module.resolve( 'wTools'), depth : o.depth, breadth : o.breadth };
+  let preformed = _.program.preform({ routine : program, locals });
+  let preformedFilePath = _.process.tempOpen({ sourceCode : preformed.sourceCode });
+  let result = [];
+
+  let op =
+  {
+    execPath : preformedFilePath,
+    mode : 'fork',
+    inputMirroring : 0
+  }
+
+  _.process.startSingle( op );
+
+  let numberOfLastNodes = 0;
+
+  let ready = _.Consequence();
+
+  op.pnd.on( 'message', ( descriptor ) =>
+  {
+    result.push( descriptor.pnd );
+
+    if( descriptor.isLast )
+    numberOfLastNodes += 1;
+
+    if( numberOfLastNodes === o.breadth )
+    ready.take({ result, rootProcessOptions : op } );
+  })
+
+  return ready;
+
+  function program()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    let currentDepth = _.numberFrom( process.argv[ 2 ] || 1 );
+
+    let descriptor =
+    {
+      pnd : { pid : process.pid, ppid : process.ppid },
+      isLast : currentDepth === depth
+    }
+
+    process.send( descriptor );
+
+    if( descriptor.isLast )
+    {
+      return setTimeout( () =>
+      {
+      }, 5000 );
+    }
+
+    for( let b = 0; b < breadth; b++ )
+    {
+      let op =
+      {
+        execPath : __filename,
+        mode : 'fork',
+        args : [ currentDepth + 1 ],
+        inputMirroring : 0,
+      }
+
+      _.process.startSingle( op );
+
+      op.pnd.on( 'message', ( data ) =>
+      {
+        process.send( data );
+      })
+    }
+
+  }
+}
+
+startMultiple.defaults =
+{
+  depth : 2,
+  breadth : 10
+}
+
 // --
 // declare
 // --
@@ -3323,7 +3414,8 @@ let Extension =
   execPathOf,
   spawnTimeOf,
 
-  _systemLike
+  _systemLike,
+  startTree
 
   // fields
 
