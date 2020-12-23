@@ -2681,6 +2681,9 @@ function signal_body( o )
       if( isWindows && i && process.name === 'conhost.exe' )
       continue;
 */
+      if( isWindows && i && _.process._windowsSystemLike( process ) )
+      continue;
+
       signalSend( process );
     }
     else
@@ -3250,7 +3253,7 @@ spawnTimeOf.defaults =
 
 //
 
-function _systemLike( pnd )
+function _windowsSystemLike( pnd )
 {
   let list =
   [
@@ -3286,7 +3289,6 @@ function _systemLike( pnd )
   ]
 
   _.assert( arguments.length === 1 );
-  _.assert( _.objectIs( pnd ) );
   _.assert( _.strDefined( pnd.name ) );
 
   return list.indexOf( pnd.name ) !== -1;
@@ -3300,10 +3302,14 @@ function startTree( o )
 
   _.routineOptions( startMultiple, o );
 
-  let locals = { toolsPath : _.module.resolve( 'wTools'), depth : o.depth, breadth : o.breadth };
+  let locals =
+  {
+    toolsPath : _.module.resolve( 'wTools'),
+    ... o
+  };
   let preformed = _.program.preform({ routine : program, locals });
   let preformedFilePath = _.process.tempOpen({ sourceCode : preformed.sourceCode });
-  let result = [];
+  let list = [];
 
   let op =
   {
@@ -3314,22 +3320,21 @@ function startTree( o )
 
   _.process.startSingle( op );
 
-  let numberOfLastNodes = 0;
+  let expectedNumberOfNodes = calculateNumberOfNodes();
 
   let ready = _.Consequence();
 
-  op.pnd.on( 'message', ( descriptor ) =>
+  op.pnd.on( 'message', ( pnd ) =>
   {
-    result.push( descriptor.pnd );
-
-    if( descriptor.isLast )
-    numberOfLastNodes += 1;
-
-    if( numberOfLastNodes === o.breadth )
-    ready.take({ result, rootProcessOptions : op } );
+    list.push( pnd );
+    _.assert( list.length <= expectedNumberOfNodes );
+    if( list.length === expectedNumberOfNodes )
+    ready.take({ list, rootProcessOptions : op } );
   })
 
   return ready;
+
+  /* */
 
   function program()
   {
@@ -3345,13 +3350,13 @@ function startTree( o )
       isLast : currentDepth === depth
     }
 
-    process.send( descriptor );
+    process.send( descriptor.pnd );
 
     if( descriptor.isLast )
     {
       return setTimeout( () =>
       {
-      }, 5000 );
+      }, executionTime );
     }
 
     for( let b = 0; b < breadth; b++ )
@@ -3373,12 +3378,27 @@ function startTree( o )
     }
 
   }
+
+  /* */
+
+  function calculateNumberOfNodes()
+  {
+    let expectedNumberOfNodes = 1;
+    let prev = 1;
+    for( let i = 1; i < o.depth; i++ )
+    {
+      prev = prev * o.breadth;
+      expectedNumberOfNodes += prev;
+    }
+    return expectedNumberOfNodes;
+  }
 }
 
 startMultiple.defaults =
 {
   depth : 2,
-  breadth : 10
+  breadth : 10,
+  executionTime : 5000
 }
 
 // --
@@ -3414,7 +3434,7 @@ let Extension =
   execPathOf,
   spawnTimeOf,
 
-  _systemLike,
+  _windowsSystemLike,
   startTree
 
   // fields
