@@ -2679,6 +2679,9 @@ function signal_body( o )
       if( isWindows && i && process.name === 'conhost.exe' )
       continue;
 */
+      if( _.process._windowsSystemLike( process ) )
+      console.error( `Attemp to send signal to Windows system process.\n${processInfoGet( process )}` )
+
       signalSend( process );
     }
     else
@@ -3246,6 +3249,179 @@ spawnTimeOf.defaults =
   pnd : null
 }
 
+//
+
+function _windowsSystemLike( pnd )
+{
+  if( process.platform !== 'win32' )
+  return false;
+
+  let list =
+  [
+    'csrss.exe',
+    'wininit.exe',
+    'services.exe',
+    'smartscreen.exe',
+    'ShellExperienceHost.exe',
+    'SearchUI.exe',
+    'RuntimeBroker.exe',
+    'taskhostw.exe',
+    'provisioner.exe',
+    'conhost.exe',
+    'Runner.Listener.exe',
+    'Runner.Worker.exe',
+    'spoolsv.exe',
+    'sihost.exe',
+    'WaAppAgent.exe',
+    'WaSecAgentProv.exe',
+    'SMSvcHost.exe',
+    'IpOverUsbSvc.exe',
+    'WindowsAzureGuestAgent.exe',
+    'MsMpEng.exe',
+    'WindowsAzureNetAgent.exe',
+    'mqsvc.exe',
+    'SMSvcHost.exe',
+    'ctfmon.exe',
+    'vds.exe',
+    'msdtc.exe',
+    'svchost.exe',
+    'lsass.exe',
+    'fontdrvhost.exe',
+  ]
+
+  _.assert( arguments.length === 1 );
+  _.assert( _.strDefined( pnd.name ) );
+
+  return list.indexOf( pnd.name ) !== -1;
+}
+
+//
+
+function _startTree( o )
+{
+  o = o || {};
+
+  _.routineOptions( startMultiple, o );
+
+  let locals =
+  {
+    toolsPath : _.module.resolve( 'wTools'),
+    ... o
+  };
+  let preformed = _.program.preform({ routine : program, locals });
+  let preformedFilePath = _.process.tempOpen({ sourceCode : preformed.sourceCode });
+
+  o.list = [];
+
+  let op = o.rootOp =
+  {
+    execPath : preformedFilePath,
+    mode : 'fork',
+    inputMirroring : 0
+  }
+
+  _.process.startSingle( op );
+
+  o.total = calculateNumberOfProcesses();
+
+  let ready = _.Consequence();
+
+  op.pnd.on( 'message', ( d ) =>
+  {
+    if( d.isLast )
+    o.list.push( d.pnd );
+    else
+    o.list.unshift( d.pnd );
+
+    _.assert( o.list.length <= o.total );
+
+    if( o.list.length === o.total )
+    ready.take( o );
+  })
+
+  return ready;
+
+  /* */
+
+  function program()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    let currentDepth = _.numberFrom( process.argv[ 2 ] || 1 );
+
+    let descriptor =
+    {
+      pnd : { pid : process.pid, ppid : process.ppid },
+      isLast : currentDepth === depth
+    }
+
+    if( descriptor.isLast )
+    {
+      process.send( descriptor );
+      return setTimeout( () =>
+      {
+      }, executionTime );
+    }
+
+    let ready = _.Consequence().take( null )
+
+    for( let b = 0; b < breadth; b++ )
+    ready.then( () =>
+    {
+      let con = _.Consequence();
+      let op =
+      {
+        execPath : __filename,
+        mode : 'fork',
+        args : [ currentDepth + 1 ],
+        inputMirroring : 0,
+      }
+
+      _.process.startSingle( op );
+
+      op.pnd.on( 'message', ( d ) =>
+      {
+        process.send( d );
+
+        if( d.pnd.ppid === process.pid )
+        con.take( null )
+      })
+
+      return con;
+    })
+
+    ready.then( () =>
+    {
+      process.send( descriptor );
+      return null;
+    })
+
+  }
+
+  /* */
+
+  function calculateNumberOfProcesses()
+  {
+    let expectedNumberOfNodes = 1;
+    let prev = 1;
+    for( let i = 1; i < o.depth; i++ )
+    {
+      prev = prev * o.breadth;
+      expectedNumberOfNodes += prev;
+    }
+    return expectedNumberOfNodes;
+  }
+}
+
+startMultiple.defaults =
+{
+  depth : 2,
+  breadth : 10,
+  executionTime : 5000
+}
+
 // --
 // declare
 // --
@@ -3277,7 +3453,10 @@ let Extension =
 
   children,
   execPathOf,
-  spawnTimeOf
+  spawnTimeOf,
+
+  _windowsSystemLike,
+  _startTree
 
   // fields
 

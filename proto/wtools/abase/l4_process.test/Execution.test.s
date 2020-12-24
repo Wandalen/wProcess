@@ -38206,6 +38206,141 @@ function spawnTimeOf( test )
 
 spawnTimeOf.routineTimeOut = 120000;
 
+//
+
+function _startTree( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+
+  //
+
+  a.ready
+  .then( () =>
+  {
+    test.case = 'depth:1'
+    return _.process._startTree
+    ({
+      depth : 1,
+      breadth : 3,
+      executionTime : 15000
+    })
+  })
+  .then( ( op ) =>
+  {
+    let list = op.list;
+    let rootOp = op.rootOp;
+
+    test.identical( op.total, 1 );
+    test.identical( list.length, 1 );
+
+    let rootPnd = list[ 0 ];
+    test.identical( rootPnd.pid, rootOp.pnd.pid );
+    test.identical( rootPnd.ppid, process.pid )
+
+    return _.process.children
+    ({
+      pid : rootPnd.pid,
+      format : 'list'
+    })
+    .then( ( children ) =>
+    {
+      let pids = list.map( ( pnd ) => pnd.pid );
+      let expectedPids = children.map( ( pnd ) => pnd.pid );
+
+      test.identical( pids.sort(), expectedPids.sort() );
+      return rootOp.conTerminate;
+    })
+  })
+
+  //
+
+  a.ready
+  .then( () =>
+  {
+    test.case = 'depth:2'
+    return _.process._startTree
+    ({
+      depth : 2,
+      breadth : 3,
+      executionTime : 15000
+    })
+  })
+  .then( ( op ) =>
+  {
+    let list = op.list;
+    let rootOp = op.rootOp;
+
+    test.identical( op.total, 4 );
+    test.identical( list.length, 4 );
+
+    let rootPnd = list[ 0 ];
+    test.identical( rootPnd.pid, rootOp.pnd.pid );
+    test.identical( rootPnd.ppid, process.pid )
+
+    return _.process.children
+    ({
+      pid : rootPnd.pid,
+      format : 'list'
+    })
+    .then( ( children ) =>
+    {
+      let pids = list.map( ( pnd ) => pnd.pid );
+      let expectedPids = children.map( ( pnd ) => pnd.pid );
+
+      test.identical( pids.sort(), expectedPids.sort() );
+      return rootOp.conTerminate;
+    })
+  })
+
+  //
+
+  a.ready
+  .then( () =>
+  {
+    test.case = 'depth:3'
+    return _.process._startTree
+    ({
+      depth : 3,
+      breadth : 3,
+      executionTime : 15000
+    })
+  })
+  .then( ( op ) =>
+  {
+    let list = op.list;
+    let rootOp = op.rootOp;
+
+    test.identical( op.total, 13 );
+    test.identical( list.length, 13 );
+
+    let rootPnd = list[ 0 ];
+    test.identical( rootPnd.pid, rootOp.pnd.pid );
+    test.identical( rootPnd.ppid, process.pid )
+
+    return _.process.children
+    ({
+      pid : rootPnd.pid,
+      format : 'list'
+    })
+    .then( ( children ) =>
+    {
+      let pids = list.map( ( pnd ) => pnd.pid );
+      let expectedPids = children.map( ( pnd ) => pnd.pid );
+
+      test.identical( pids.sort(), expectedPids.sort() );
+      return rootOp.conTerminate;
+    })
+  })
+
+  //
+
+  return a.ready;
+
+}
+
+_startTree.routineTimeOut = 120000;
+
 // --
 // experiment
 // --
@@ -38728,6 +38863,8 @@ var Proto =
     childrenOptionFormatList,
 
     spawnTimeOf,
+
+    _startTree,
 
     // experiments
 
