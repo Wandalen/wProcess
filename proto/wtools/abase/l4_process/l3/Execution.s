@@ -3310,9 +3310,10 @@ function _startTree( o )
   };
   let preformed = _.program.preform({ routine : program, locals });
   let preformedFilePath = _.process.tempOpen({ sourceCode : preformed.sourceCode });
-  let list = [];
 
-  let op =
+  o.list = [];
+
+  let op = o.rootOp =
   {
     execPath : preformedFilePath,
     mode : 'fork',
@@ -3321,20 +3322,21 @@ function _startTree( o )
 
   _.process.startSingle( op );
 
-  let expectedNumberOfNodes = calculateNumberOfNodes();
+  o.total = calculateNumberOfProcesses();
 
   let ready = _.Consequence();
 
   op.pnd.on( 'message', ( d ) =>
   {
     if( d.isLast )
-    list.push( d.pnd );
+    o.list.push( d.pnd );
     else
-    list.unshift( d.pnd )
+    o.list.unshift( d.pnd );
 
-    _.assert( list.length <= expectedNumberOfNodes );
-    if( list.length === expectedNumberOfNodes )
-    ready.take({ list, rootProcessOptions : op } );
+    _.assert( o.list.length <= o.total );
+
+    if( o.list.length === o.total )
+    ready.take( o );
   })
 
   return ready;
@@ -3400,7 +3402,7 @@ function _startTree( o )
 
   /* */
 
-  function calculateNumberOfNodes()
+  function calculateNumberOfProcesses()
   {
     let expectedNumberOfNodes = 1;
     let prev = 1;

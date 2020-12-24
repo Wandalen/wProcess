@@ -38136,16 +38136,17 @@ function _startTree( test )
       executionTime : 15000
     })
   })
-  .then( ( got ) =>
+  .then( ( op ) =>
   {
-    let list = got.list;
-    let rootOp = got.rootProcessOptions;
+    let list = op.list;
+    let rootOp = op.rootOp;
 
+    test.identical( op.total, 1 );
     test.identical( list.length, 1 );
 
-    let pnd = list[ 0 ];
-    test.identical( pnd.pid, rootOp.pnd.pid );
-    test.identical( pnd.ppid, process.pid )
+    let rootPnd = list[ 0 ];
+    test.identical( rootPnd.pid, rootOp.pnd.pid );
+    test.identical( rootPnd.ppid, process.pid )
 
     return _.process.children
     ({
@@ -38175,11 +38176,12 @@ function _startTree( test )
       executionTime : 15000
     })
   })
-  .then( ( got ) =>
+  .then( ( op ) =>
   {
-    let list = got.list;
-    let rootOp = got.rootProcessOptions;
+    let list = op.list;
+    let rootOp = op.rootOp;
 
+    test.identical( op.total, 4 );
     test.identical( list.length, 4 );
 
     let rootPnd = list[ 0 ];
@@ -38214,11 +38216,12 @@ function _startTree( test )
       executionTime : 15000
     })
   })
-  .then( ( got ) =>
+  .then( ( op ) =>
   {
-    let list = got.list;
-    let rootOp = got.rootProcessOptions;
+    let list = op.list;
+    let rootOp = op.rootOp;
 
+    test.identical( op.total, 13 );
     test.identical( list.length, 13 );
 
     let rootPnd = list[ 0 ];
