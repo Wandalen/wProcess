@@ -1283,9 +1283,17 @@ function startMinimal_body( o )
           let left = msg.slice( lastBreak + 1 );
           msg = msg.slice( 0, lastBreak );
           if( channel === 'err' )
-          _errAdditive += left;
+          {
+            // msg = _errAdditive + msg;
+            // _errAdditive = left;
+            _errAdditive += left;
+          }
           else
-          _outAdditive += left;
+          {
+            // msg = _outAdditive + msg;
+            // _outAdditive = left;
+            _outAdditive += left;
+          }
         }
       }
       if( channel === 'err' )

@@ -25295,6 +25295,273 @@ function outputLog( test )
 
 //
 
+function outputLogWithPrefix( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( testApp );
+  let testAppPath2 = a.program( testApp2 );
+  let testAppPath3 = a.program( testApp3 );
+  let testAppPath4 = a.program( testApp4 );
+  let testAppPath5 = a.program( testApp5 );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
+
+  /* - */
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, without new line`;
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath } });
+
+      let options =
+      {
+        execPath : 'node ' + testAppParentPath,
+        outputCollecting : 1,
+        outputPiping : 1,
+        throwingExitCode : 0
+      }
+
+
+      _.process.startSingle( options )
+      .then( ( op ) =>
+      {
+        test.ni( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        /* Check that each channel goes in the right order */
+        test.true( _.dissector.dissect( `**<out : a>**<b>**`, op.output ).matched );
+        test.true( _.dissector.dissect( `**<err : err1>**<err2>**`, op.output ).matched );
+
+        a.fileProvider.fileDelete( testAppParentPath );
+        return null;
+      })
+
+      return options.ready;
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, new line at the end`;
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath : testAppPath2 } });
+      let piecesOut = [];
+      let piecesErr = [];
+
+      let options =
+      {
+        execPath : 'node ' + testAppParentPath,
+        outputCollecting : 1,
+        outputPiping : 1,
+        throwingExitCode : 0
+      }
+
+      _.process.startSingle( options )
+      .then( ( op ) =>
+      {
+        test.ni( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        /* Check that each channel goes in the right order */
+        test.true( _.dissector.dissect( `**<out : a>**<b>**<c>**`, op.output ).matched );
+        test.true( _.dissector.dissect( `**<err : err1>**<err2>**<err3>**`, op.output ).matched );
+
+        a.fileProvider.fileDelete( testAppParentPath );
+        return null;
+      })
+
+      return options.ready;
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, new line at the middle`;
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath : testAppPath3 } });
+
+      let options =
+      {
+        execPath : 'node ' + testAppParentPath,
+        outputCollecting : 1,
+        outputPiping : 1,
+        throwingExitCode : 0
+      }
+
+      _.process.startSingle( options )
+      .then( ( op ) =>
+      {
+        test.ni( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        /* Check that each channel goes in the right order */
+        test.true( _.dissector.dissect( `**<out : a>**<b>**<c>**<d>**`, op.output ).matched );
+        test.true( _.dissector.dissect( `**<err : err1>**<err2>**<err3>**`, op.output ).matched );
+
+        a.fileProvider.fileDelete( testAppParentPath );
+        return null;
+      })
+
+      return options.ready;
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, new line at the middle & end`;
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath : testAppPath4 } });
+
+      let options =
+      {
+        execPath : 'node ' + testAppParentPath,
+        outputCollecting : 1,
+        outputPiping : 1,
+        throwingExitCode : 0
+      }
+
+      _.process.startSingle( options )
+      .then( ( op ) =>
+      {
+        test.ni( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        /* Check that each channel goes in the right order */
+        test.true( _.dissector.dissect( `**<out : a>**<b>**<c>**<d>**`, op.output ).matched );
+        test.true( _.dissector.dissect( `**<err : err1>**<err2>**<err3>**`, op.output ).matched );
+
+        a.fileProvider.fileDelete( testAppParentPath );
+        return null;
+      })
+
+      return options.ready;
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, new line at the end, both`;
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath : testAppPath5 } });
+
+      let options =
+      {
+        execPath : 'node ' + testAppParentPath,
+        outputCollecting : 1,
+        outputPiping : 1,
+        throwingExitCode : 0
+      }
+
+      _.process.startSingle( options )
+      .then( ( op ) =>
+      {
+        test.ni( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        /* Check that each channel goes in the right order */
+        test.true( _.dissector.dissect( `**<out : a>**<c>**`, op.output ).matched );
+        test.true( _.dissector.dissect( `**<err : b>**<d>**`, op.output ).matched );
+
+        a.fileProvider.fileDelete( testAppParentPath );
+        return null;
+      })
+
+      return options.ready;
+    })
+
+    return ready;
+  }
+
+  /* - */
+
+  function testAppParent()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+
+    let o =
+    {
+      execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+      mode,
+      inputMirroring : 0,
+      outputColoring : 0,
+      outputPiping : 1,
+      outputCollecting : 1,
+      outputPrefixing : 1,
+    }
+    return _.process.startSingle( o )
+    .then( ( op ) =>
+    {
+      console.log( op.output );
+      return null;
+
+    })
+
+  }
+
+  function testApp()
+  {
+    process.stdout.write( 'a' );
+    process.stderr.write( 'err1' );
+    setTimeout( () => process.stdout.write( 'c' ), context.t0 );
+    process.stderr.write( 'err2' );
+    process.stdout.write( 'b' );
+    throw new Error();
+  }
+
+  function testApp2()
+  {
+    process.stdout.write( 'a' );
+    process.stderr.write( 'err1' );
+    process.stdout.write( 'b' );
+    process.stderr.write( 'err2' );
+    process.stdout.write( 'c' );
+    process.stderr.write( 'err3' );
+    process.stderr.write( '\n' );
+    console.log();
+    throw new Error();
+  }
+
+  function testApp3()
+  {
+    process.stdout.write( 'ab\nc' );
+    process.stderr.write( 'err1\nerr2' );
+    process.stdout.write( 'd' );
+    process.stderr.write( 'err3' );
+    throw new Error();
+  }
+
+  function testApp4()
+  {
+    process.stdout.write( 'ab\nc' );
+    process.stderr.write( 'err1\nerr2' );
+    process.stdout.write( 'd' );
+    process.stderr.write( 'err3\n' );
+    console.log();
+    throw new Error();
+  }
+
+  function testApp5()
+  {
+    process.stdout.write( 'a' );
+    process.stderr.write( 'b' );
+    process.stdout.write( 'c\n' );
+    process.stderr.write( 'd\n' );
+    throw new Error();
+  }
+
+}
+
+//
+
 function outputLogStreams( test )
 {
   let context = this;
@@ -25332,10 +25599,15 @@ function outputLogStreams( test )
       _.process.startSingle( options )
       .then( ( op ) =>
       {
+        console.log( 'op.out :', op.output )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.identical( piecesOut.join( '' ), 'abc' );
         test.identical( piecesErr.join( '' ), 'err1err2' );
+
+        /* Check that each channel goes in the right order */
+        test.true( _.dissector.dissect( `**<a>**<b>**<c>**`, op.output ).matched );
+        test.true( _.dissector.dissect( `**<err1>**<err2>**`, op.output ).matched );
 
         return null;
       })
@@ -25377,6 +25649,10 @@ function outputLogStreams( test )
         test.identical( piecesOut.join( '' ), 'abc\n' );
         test.identical( piecesErr.join( '' ), 'err1err2err3\n' );
 
+        /* Check that each channel goes in the right order */
+        test.true( _.dissector.dissect( `**<a>**<b>**<c>**`, op.output ).matched );
+        test.true( _.dissector.dissect( `**<err1>**<err2>**<err3>**`, op.output ).matched );
+
         return null;
       })
 
@@ -25415,6 +25691,10 @@ function outputLogStreams( test )
         test.identical( op.ended, true );
         test.identical( piecesOut.join( '' ), 'ab\ncd' );
         test.identical( piecesErr.join( '' ), 'err1\nerr2err3' );
+
+        /* Check that each channel goes in the right order */
+        test.true( _.dissector.dissect( `**<a>**<b>**<c>**<d>**`, op.output ).matched );
+        test.true( _.dissector.dissect( `**<err1>**<err2>**<err3>**`, op.output ).matched );
 
         return null;
       })
@@ -25455,6 +25735,10 @@ function outputLogStreams( test )
         test.identical( piecesOut.join( '' ), 'ab\ncd\n' );
         test.identical( piecesErr.join( '' ), 'err1\nerr2err3\n' );
 
+        /* Check that each channel goes in the right order */
+        test.true( _.dissector.dissect( `**<a>**<b>**<c>**<d>**`, op.output ).matched );
+        test.true( _.dissector.dissect( `**<err1>**<err2>**<err3>**`, op.output ).matched );
+
         return null;
       })
 
@@ -25493,6 +25777,10 @@ function outputLogStreams( test )
         test.identical( op.ended, true );
         test.identical( piecesOut.join( '' ), 'ac\n' );
         test.identical( piecesErr.join( '' ), 'bd\n' );
+
+        /* Check that each channel goes in the right order */
+        test.true( _.dissector.dissect( `**<a>**<c>**`, op.output ).matched );
+        test.true( _.dissector.dissect( `**<b>**<d>**`, op.output ).matched );
 
         return null;
       })
@@ -25562,7 +25850,6 @@ function outputLogStreams( test )
   }
 
 }
-
 
 // --
 // etc
@@ -38506,6 +38793,7 @@ var Proto =
     startSingleOptionOutputAdditive,
     startMultipleOptionOutputAdditive, /* xxx qqq for Yevhen : fix | aaa : Done. */
     outputLog,
+    outputLogWithPrefix,
     outputLogStreams,
 
     // etc
