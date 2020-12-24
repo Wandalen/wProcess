@@ -2681,8 +2681,8 @@ function signal_body( o )
       if( isWindows && i && process.name === 'conhost.exe' )
       continue;
 */
-      if( isWindows && i && _.process._windowsSystemLike( process ) )
-      continue;
+      if( _.process._windowsSystemLike( process ) )
+      console.error( `Attemp to send signal to Windows system process.\n${processInfoGet( process )}` )
 
       signalSend( process );
     }
@@ -3255,6 +3255,9 @@ spawnTimeOf.defaults =
 
 function _windowsSystemLike( pnd )
 {
+  if( process.platform !== 'win32' )
+  return false;
+
   let list =
   [
     'csrss.exe',
@@ -3296,7 +3299,7 @@ function _windowsSystemLike( pnd )
 
 //
 
-function startTree( o )
+function _startTree( o )
 {
   o = o || {};
 
@@ -3324,9 +3327,13 @@ function startTree( o )
 
   let ready = _.Consequence();
 
-  op.pnd.on( 'message', ( pnd ) =>
+  op.pnd.on( 'message', ( d ) =>
   {
-    list.push( pnd );
+    if( d.isLast )
+    list.push( d.pnd );
+    else
+    list.unshift( d.pnd )
+
     _.assert( list.length <= expectedNumberOfNodes );
     if( list.length === expectedNumberOfNodes )
     ready.take({ list, rootProcessOptions : op } );
@@ -3350,17 +3357,20 @@ function startTree( o )
       isLast : currentDepth === depth
     }
 
-    process.send( descriptor.pnd );
-
     if( descriptor.isLast )
     {
+      process.send( descriptor );
       return setTimeout( () =>
       {
       }, executionTime );
     }
 
+    let ready = _.Consequence().take( null )
+
     for( let b = 0; b < breadth; b++ )
+    ready.then( () =>
     {
+      let con = _.Consequence();
       let op =
       {
         execPath : __filename,
@@ -3371,11 +3381,22 @@ function startTree( o )
 
       _.process.startSingle( op );
 
-      op.pnd.on( 'message', ( data ) =>
+      op.pnd.on( 'message', ( d ) =>
       {
-        process.send( data );
+        process.send( d );
+
+        if( d.pnd.ppid === process.pid )
+        con.take( null )
       })
-    }
+
+      return con;
+    })
+
+    ready.then( () =>
+    {
+      process.send( descriptor );
+      return null;
+    })
 
   }
 
@@ -3435,7 +3456,7 @@ let Extension =
   spawnTimeOf,
 
   _windowsSystemLike,
-  startTree
+  _startTree
 
   // fields
 
