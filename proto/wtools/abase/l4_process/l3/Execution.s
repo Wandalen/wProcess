@@ -1284,15 +1284,15 @@ function startMinimal_body( o )
           msg = msg.slice( 0, lastBreak );
           if( channel === 'err' )
           {
-            // msg = _errAdditive + msg;
-            // _errAdditive = left;
-            _errAdditive += left;
+            msg = _errAdditive + msg;
+            _errAdditive = left;
+            // _errAdditive += left;
           }
           else
           {
-            // msg = _outAdditive + msg;
-            // _outAdditive = left;
-            _outAdditive += left;
+            msg = _outAdditive + msg;
+            _outAdditive = left;
+            // _outAdditive += left;
           }
         }
       }
