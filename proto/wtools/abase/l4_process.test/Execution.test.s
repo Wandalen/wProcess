@@ -22860,6 +22860,96 @@ function startMinimalOptionInputMirroring( test )
 
 //
 
+function startMinimalOptionInputMirroringFail( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+
+  /* */
+
+  let modes = [ 'fork', 'spawn', 'shell' ];
+
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+
+  return a.ready;
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${ mode }, inputMirroring : 1, outputColoring : 1, error output`;
+
+      let testAppPath2 = a.program( testApp2Error );
+
+      let locals =
+      {
+        programPath : testAppPath2,
+        mode,
+        inputMirroring : 1,
+        verbosity : 2
+      }
+
+      let testAppPath = a.program({ routine : testApp, locals });
+
+      return _.process.startMinimal
+      ({
+        execPath : 'node ' + testAppPath,
+        outputCollecting : 1,
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.true( _.strHas( op.output, testAppPath2 ) );
+        test.true( _.strHas( op.output, 'throw new Error();' ) ) /* Yevhen : phantom fail on windows because of the text coloring */
+
+        a.fileProvider.fileDelete( testAppPath );
+        a.fileProvider.fileDelete( testAppPath2 );
+
+        return null;
+      })
+    })
+
+    /* */
+
+    return ready;
+  }
+
+  /* - */
+
+  function testApp()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    let options =
+    {
+      execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+      mode,
+      inputMirroring,
+      verbosity,
+      outputCollecting : 1,
+      throwingExitCode : 0,
+    }
+
+    return _.process.startMinimal( options )
+
+  }
+
+  function testApp2Error()
+  {
+    throw new Error();
+  }
+
+}
+
+//
+
 function startMinimalOptionLogger( test )
 {
   let context = this;
@@ -38550,6 +38640,7 @@ var Proto =
     startMinimalOptionOutputPrefixing,
     startMinimalOptionOutputPiping,
     startMinimalOptionInputMirroring,
+    startMinimalOptionInputMirroringFail,
     startMinimalOptionLogger,
     startMinimalOptionLoggerTransofrmation,
     startMinimalOutputOptionsCompatibilityLateCheck,
