@@ -3301,7 +3301,7 @@ function _startTree( o )
 {
   o = o || {};
 
-  _.routineOptions( startMultiple, o );
+  _.routineOptions( _startTree, o );
 
   let locals =
   {
@@ -3415,7 +3415,7 @@ function _startTree( o )
   }
 }
 
-startMultiple.defaults =
+_startTree.defaults =
 {
   depth : 2,
   breadth : 10,
