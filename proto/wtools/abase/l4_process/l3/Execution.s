@@ -1308,15 +1308,8 @@ function startMinimal_body( o )
 
     if( o.outputAdditive )
     {
-
       if( _.strEnds( msg, '\n' ) )
-      {
-        // msg = _.strRemoveEnd( msg, '\n' );
-        if( channel === 'err' )
-        msg = _.strRemoveEnd( msg, '\n' );
-        else
-        msg = _.strRemoveEnd( msg, '\n' );
-      }
+      msg = _.strRemoveEnd( msg, '\n' );
 
       if( channel === 'err' )
       o.logger.error( msg );
