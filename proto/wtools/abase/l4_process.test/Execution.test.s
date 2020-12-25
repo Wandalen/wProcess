@@ -22954,34 +22954,34 @@ function startMinimalOptionInputMirroringFail( test )
         2020-12-22T10:55:54.9608699Z 32 :
         2020-12-22T10:55:54.9609092Z 33 : testApp();
         2020-12-22T10:55:54.9609397Z 34 :
-        2020-12-22T10:55:54.9610935Z  > node D:\Temp\ProcessBasic-2020-12-22-10-2-35-551-d668.tmp\startMinimalOptionInputMirroring\testApp.js
-        2020-12-22T10:55:56.2458399Z  > node D:\Temp\ProcessBasic-2020-12-22-10-2-35-551-d668.tmp\startMinimalOptionInputMirroring\testApp2Error.js
-        2020-12-22T10:55:56.3303784Z D:\Temp\ProcessBasic-2020-12-22-10-2-35-551-d668.tmp\startMinimalOptionInputMirroring\testApp2Error.js:3
-        2020-12-22T10:55:56.3308216Z 
-        2020-12-22T10:55:56.3332675Z     throw new Error([39;0m[31m);
-        2020-12-22T10:55:56.3336119Z 
-        2020-12-22T10:55:56.3337318Z     ^
-        2020-12-22T10:55:56.3342325Z 
-        2020-12-22T10:55:56.3345084Z
-        2020-12-22T10:55:56.3347459Z 
-        2020-12-22T10:55:56.3366220Z Error
-        2020-12-22T10:55:56.3366689Z
-        2020-12-22T10:55:56.3367909Z     at testApp2Error (D:\Temp\ProcessBasic-2020-12-22-10-2-35-551-d668.tmp\startMinimalOptionInputMirroring\testApp2Error.js:3:11)
-        2020-12-22T10:55:56.3368968Z
-        2020-12-22T10:55:56.3370329Z     at Object.<anonymous> (D:\Temp\ProcessBasic-2020-12-22-10-2-35-551-d668.tmp\startMinimalOptionInputMirroring\testApp2Error.js:14:1)
-        2020-12-22T10:55:56.3371368Z
-        2020-12-22T10:55:56.3371982Z     at Module._compile (internal/modules/cjs/loader.js:936:30)
-        2020-12-22T10:55:56.3372496Z 
-        2020-12-22T10:55:56.3373401Z     at Object.Module._extensions..js (internal/modules/cjs/loader.js:947:10)
-        2020-12-22T10:55:56.3374323Z 
-        2020-12-22T10:55:56.3375131Z     at Module.load (internal/modules/cjs/loader.js:790:32)
-        2020-12-22T10:55:56.3375697Z 
-        2020-12-22T10:55:56.3376382Z     at Function.Module._load (internal/modules/cjs/loader.js:703:12)
-        2020-12-22T10:55:56.3376987Z 
-        2020-12-22T10:55:56.3377715Z     at Function.Module.runMain (internal/modules/cjs/loader.js:999:10)
-        2020-12-22T10:55:56.3378372Z 
-        2020-12-22T10:55:56.3378924Z     at internal/main/run_main_module.js:17:11
-        2020-12-22T10:55:56.3379554Z 
+        2020-12-22T10:55:54.9610935Z [97m > [39;0mnode D:\Temp\ProcessBasic-2020-12-22-10-2-35-551-d668.tmp\startMinimalOptionInputMirroring\testApp.js
+        2020-12-22T10:55:56.2458399Z [35m[97m > [39;0mnode D:\Temp\ProcessBasic-2020-12-22-10-2-35-551-d668.tmp\startMinimalOptionInputMirroring\testApp2Error.js[39;0m
+        2020-12-22T10:55:56.3303784Z [31m[31mD:\Temp\ProcessBasic-2020-12-22-10-2-35-551-d668.tmp\startMinimalOptionInputMirroring\testApp2Error.js:3
+        2020-12-22T10:55:56.3308216Z [39;0m[39;0m
+        2020-12-22T10:55:56.3332675Z [31m[31m    throw new Error([39;0m[31m);
+        2020-12-22T10:55:56.3336119Z [39;0m[39;0m
+        2020-12-22T10:55:56.3337318Z [31m[31m    ^
+        2020-12-22T10:55:56.3342325Z [39;0m[39;0m
+        2020-12-22T10:55:56.3345084Z [31m[31m
+        2020-12-22T10:55:56.3347459Z [39;0m[39;0m
+        2020-12-22T10:55:56.3366220Z [31m[31mError
+        2020-12-22T10:55:56.3366689Z [39;0m[39;0m
+        2020-12-22T10:55:56.3367909Z [31m[31m    at testApp2Error (D:\Temp\ProcessBasic-2020-12-22-10-2-35-551-d668.tmp\startMinimalOptionInputMirroring\testApp2Error.js:3:11)
+        2020-12-22T10:55:56.3368968Z [39;0m[39;0m
+        2020-12-22T10:55:56.3370329Z [31m[31m    at Object.<anonymous> (D:\Temp\ProcessBasic-2020-12-22-10-2-35-551-d668.tmp\startMinimalOptionInputMirroring\testApp2Error.js:14:1)
+        2020-12-22T10:55:56.3371368Z [39;0m[39;0m
+        2020-12-22T10:55:56.3371982Z [31m[31m    at Module._compile (internal/modules/cjs/loader.js:936:30)
+        2020-12-22T10:55:56.3372496Z [39;0m[39;0m
+        2020-12-22T10:55:56.3373401Z [31m[31m    at Object.Module._extensions..js (internal/modules/cjs/loader.js:947:10)
+        2020-12-22T10:55:56.3374323Z [39;0m[39;0m
+        2020-12-22T10:55:56.3375131Z [31m[31m    at Module.load (internal/modules/cjs/loader.js:790:32)
+        2020-12-22T10:55:56.3375697Z [39;0m[39;0m
+        2020-12-22T10:55:56.3376382Z [31m[31m    at Function.Module._load (internal/modules/cjs/loader.js:703:12)
+        2020-12-22T10:55:56.3376987Z [39;0m[39;0m
+        2020-12-22T10:55:56.3377715Z [31m[31m    at Function.Module.runMain (internal/modules/cjs/loader.js:999:10)
+        2020-12-22T10:55:56.3378372Z [39;0m[39;0m
+        2020-12-22T10:55:56.3378924Z [31m[31m    at internal/main/run_main_module.js:17:11
+        2020-12-22T10:55:56.3379554Z [39;0m[39;0m
         2020-12-22T10:55:56.3621367Z        Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalOptionInputMirroring / mode : shell, inputMirroring : 1, error output # 82 ) ... ok
         2020-12-22T10:55:56.3714855Z        Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalOptionInputMirroring / mode : shell, inputMirroring : 1, error output # 83 ) ... ok
         2020-12-22T10:55:56.3801661Z        Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalOptionInputMirroring / mode : shell, inputMirroring : 1, error output # 84 ) : expected true ... ok
