@@ -3324,7 +3324,7 @@ function _startTree( o )
   }
 
   if( o.onEnd === null )
-  o.onStart = () =>
+  o.onEnd = () =>
   {
   }
 
