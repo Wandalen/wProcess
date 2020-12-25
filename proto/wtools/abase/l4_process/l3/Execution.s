@@ -787,7 +787,7 @@ function startMinimal_body( o )
     // console.log( 'handleClose', _.process.realMainFile(), o.ended, ... arguments ); debugger;
     // */
 
-    if( o.outputAdditive && _outAdditive ) /* color & prefix & log stdout collected in a buffer */
+    if( o.outputAdditive && _outAdditive ) /* color & prefix & log stdout collected during execution */
     {
       if( o.outputPrefixing )
       _outAdditive = _outPrefix + _outAdditive;
@@ -873,7 +873,7 @@ function startMinimal_body( o )
       , `\n    Current path : ${o.currentPath}`
     );
 
-    if( o.outputAdditive && _errAdditive ) /* color & prefix & log stderr collected in a buffer */
+    if( o.outputAdditive && _errAdditive ) /* color & prefix & log stderr collected during execution */
     {
       if( o.outputPrefixing )
       _errAdditive = _errPrefix + _errAdditive;
