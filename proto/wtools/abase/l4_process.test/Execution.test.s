@@ -38221,6 +38221,8 @@ function _startTree( test )
     let list = op.list;
     let rootOp = op.rootOp;
 
+    console.log( _.toJs( list ) );
+
     test.identical( op.total, 13 );
     test.identical( list.length, 13 );
 
@@ -38250,6 +38252,65 @@ function _startTree( test )
 }
 
 _startTree.routineTimeOut = 120000;
+
+//
+
+//
+
+function _startTreeDetached( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+
+  //
+
+  a.ready
+  .then( () =>
+  {
+    return _.process._startTree
+    ({
+      depth : 3,
+      breadth : 3,
+      detached : 1,
+      executionTime : [ 3000, 5000 ]
+    })
+  })
+  .then( ( op ) =>
+  {
+    let list = op.list;
+    let rootOp = op.rootOp;
+
+    console.log( _.toJs( list ) )
+
+    test.identical( op.total, 13 );
+    test.identical( list.length, 13 );
+
+    let rootPnd = list[ 0 ];
+    test.identical( rootPnd.pid, rootOp.pnd.pid );
+    test.identical( rootPnd.ppid, process.pid )
+
+    return _.process.children
+    ({
+      pid : rootPnd.pid,
+      format : 'list'
+    })
+    .then( ( children ) =>
+    {
+      let pids = list.map( ( pnd ) => pnd.pid );
+      let expectedPids = children.map( ( pnd ) => pnd.pid );
+
+      test.identical( pids.sort(), expectedPids.sort() );
+      return _.time.out( 5000 );
+    })
+  })
+
+  //
+
+  return a.ready;
+
+}
+
+_startTreeDetached.routineTimeOut = 120000;
 
 // --
 // experiment
@@ -38774,6 +38835,7 @@ var Proto =
     spawnTimeOf,
 
     _startTree,
+    _startTreeDetached,
 
     // experiments
 

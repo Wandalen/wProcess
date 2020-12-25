@@ -3303,43 +3303,55 @@ function _startTree( o )
 
   _.routineOptions( startMultiple, o );
 
+  let ws = require( 'ws' );
   let locals =
   {
     toolsPath : _.module.resolve( 'wTools'),
+    wsPath : _.module.resolve( 'ws' ),
     ... o
   };
   let preformed = _.program.preform({ routine : program, locals });
   let preformedFilePath = _.process.tempOpen({ sourceCode : preformed.sourceCode });
 
   o.list = [];
-
-  let op = o.rootOp =
-  {
-    execPath : preformedFilePath,
-    mode : 'fork',
-    inputMirroring : 0
-  }
-
-  _.process.startSingle( op );
-
   o.total = calculateNumberOfProcesses();
+  o.ready = _.Consequence();
 
-  let ready = _.Consequence();
-
-  op.pnd.on( 'message', ( d ) =>
+  o.server = prepareServer( ( data ) =>
   {
-    if( d.isLast )
+    let d = JSON.parse( data );
     o.list.push( d.pnd );
-    else
-    o.list.unshift( d.pnd );
 
     _.assert( o.list.length <= o.total );
 
     if( o.list.length === o.total )
-    ready.take( o );
+    o.ready.take( true );
+  });
+
+  let op = o.rootOp =
+  {
+    execPath : 'node ' + preformedFilePath,
+    mode : 'spawn',
+    inputMirroring : 0,
+    ipc : 0,
+  }
+  _.process.startSingle( op );
+
+  o.ready.thenGive( () =>
+  {
+    o.server.clients.forEach( ( client ) =>
+    {
+      if( client.readyState === ws.OPEN )
+      client.send( 'ready' );
+    })
+
+    o.server.close( () =>
+    {
+      o.ready.take( o )
+    })
   })
 
-  return ready;
+  return o.ready;
 
   /* */
 
@@ -3349,7 +3361,10 @@ function _startTree( o )
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
+    let ws = require( wsPath );
+    let socket = new ws( 'ws://127.0.0.1:5999/' );
     let currentDepth = _.numberFrom( process.argv[ 2 ] || 1 );
+    let detaching = !detached ? 0 : 2;
 
     let descriptor =
     {
@@ -3357,47 +3372,38 @@ function _startTree( o )
       isLast : currentDepth === depth
     }
 
-    if( descriptor.isLast )
+    socket.on( 'open', () =>
     {
-      process.send( descriptor );
-      return setTimeout( () =>
-      {
-      }, executionTime );
-    }
+      socket.send( JSON.stringify( descriptor ) )
 
-    let ready = _.Consequence().take( null )
-
-    for( let b = 0; b < breadth; b++ )
-    ready.then( () =>
-    {
-      let con = _.Consequence();
-      let op =
+      socket.on( 'message', () =>
       {
-        execPath : __filename,
-        mode : 'fork',
-        args : [ currentDepth + 1 ],
-        inputMirroring : 0,
+        let timeOut = detaching ? _.numberRandom( executionTime ) : executionTime;
+        setTimeout( () =>
+        {
+        }, timeOut );
+
+        socket.terminate();
+      });
+
+      if( descriptor.isLast )
+      return;
+
+      for( let b = 0; b < breadth; b++ )
+      {
+        let op =
+        {
+          execPath : 'node ' + __filename,
+          mode : 'spawn',
+          ipc : 0,
+          detaching,
+          args : [ currentDepth + 1 ],
+          inputMirroring : 0,
+        }
+
+        _.process.startSingle( op );
       }
-
-      _.process.startSingle( op );
-
-      op.pnd.on( 'message', ( d ) =>
-      {
-        process.send( d );
-
-        if( d.pnd.ppid === process.pid )
-        con.take( null )
-      })
-
-      return con;
     })
-
-    ready.then( () =>
-    {
-      process.send( descriptor );
-      return null;
-    })
-
   }
 
   /* */
@@ -3413,13 +3419,31 @@ function _startTree( o )
     }
     return expectedNumberOfNodes;
   }
+
+  /* */
+
+  function prepareServer( onMessage )
+  {
+    let server = new ws.Server({ port: 5999 });
+
+    server.on( 'connection', ( socket ) =>
+    {
+      socket.on( 'message', ( data ) =>
+      {
+        onMessage( data );
+      })
+    })
+
+    return server;
+  }
 }
 
 startMultiple.defaults =
 {
   depth : 2,
   breadth : 10,
-  executionTime : 5000
+  executionTime : 5000,
+  detached : 0
 }
 
 // --
