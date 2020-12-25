@@ -3318,6 +3318,16 @@ function _startTree( o )
   o.alive = [];
   o.terminated = [];
 
+  if( o.onStart === null )
+  o.onStart = () =>
+  {
+  }
+
+  if( o.onEnd === null )
+  o.onStart = () =>
+  {
+  }
+
   let op = o.rootOp =
   {
     execPath : preformedFilePath,
