@@ -24,8 +24,8 @@ jobs :
     strategy :
       fail-fast : false
       matrix :
-        os : [ ubuntu-latest, windows-latest, macos-latest ]
-        node-version : [ 14.x ]
+        os : [ windows-latest ]
+        node-version : [ 14.x, 14.x, 14.x, 14.x, 14.x, 14.x, 14.x, 14.x, 14.x, 14.x ]
     steps :
     - run : git config --global core.autocrlf input
     - run : git config --global user.email "testing@testing.com"
@@ -39,6 +39,6 @@ jobs :
         node-version : ${{ matrix.node-version }}
     - run : npm i
     - name : npm test
-      run : npm test
+      run : node sample/Experiment.s
       env :
         WTOOLS_BOT_TOKEN : ${{ secrets.WTOOLS_BOT_TOKEN }}
