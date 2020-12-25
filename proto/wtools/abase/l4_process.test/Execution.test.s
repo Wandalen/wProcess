@@ -22902,10 +22902,158 @@ function startMinimalOptionInputMirroringFail( test )
       })
       .then( ( op ) =>
       {
+        /*
+        2020-12-22T10:55:22.9230824Z       Running TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalOptionInputMirroring ..
+        2020-12-22T10:55:22.9697164Z  1 : function testApp2()
+        2020-12-22T10:55:22.9697759Z  2 :   {
+        2020-12-22T10:55:22.9698258Z  3 :     console.log( 'Log' );
+        2020-12-22T10:55:22.9698683Z  4 :   }
+        2020-12-22T10:55:22.9699047Z  5 :
+        2020-12-22T10:55:22.9699434Z  6 : var context = {
+        2020-12-22T10:55:22.9699858Z  7 :   "t0" : 100,
+        2020-12-22T10:55:22.9700236Z  8 :   "t1" : 1000,
+        2020-12-22T10:55:22.9700792Z  9 :   "t2" : 5000,
+        2020-12-22T10:55:22.9701188Z 10 :   "t3" : 15000
+        2020-12-22T10:55:22.9701567Z 11 : };
+        2020-12-22T10:55:22.9702529Z 12 : var toolsPath = `D:\\a\\wProcess\\wProcess\\node_modules\\wTools\\proto\\wtools\\abase\\Layer1.s`;
+        2020-12-22T10:55:22.9703376Z 13 :
+        2020-12-22T10:55:22.9703980Z 14 : testApp2();
+        2020-12-22T10:55:22.9704371Z 15 :
+        2020-12-22T10:55:22.9729585Z  1 : function testApp()
+        2020-12-22T10:55:22.9730309Z  2 :   {
+        2020-12-22T10:55:22.9730879Z  3 :     let _ = require( toolsPath );
+        2020-12-22T10:55:22.9731579Z  4 :     _.include( 'wProcess' );
+        2020-12-22T10:55:22.9732390Z  5 :     _.include( 'wFiles' );
+        2020-12-22T10:55:22.9732756Z  6 :
+        2020-12-22T10:55:22.9733134Z  7 :     let options =
+        2020-12-22T10:55:22.9733486Z  8 :     {
+        2020-12-22T10:55:22.9734048Z  9 :       execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+        2020-12-22T10:55:22.9734584Z 10 :       mode,
+        2020-12-22T10:55:22.9735042Z 11 :       inputMirroring,
+        2020-12-22T10:55:22.9735486Z 12 :       verbosity,
+        2020-12-22T10:55:22.9735980Z 13 :       outputCollecting : 1,
+        2020-12-22T10:55:22.9736500Z 14 :       throwingExitCode : 0,
+        2020-12-22T10:55:22.9736990Z 15 :     }
+        2020-12-22T10:55:22.9737359Z 16 :
+        2020-12-22T10:55:22.9737899Z 17 :     return _.process.startMinimal( options )
+        2020-12-22T10:55:22.9738391Z 18 :
+        2020-12-22T10:55:22.9738718Z 19 :   }
+        2020-12-22T10:55:22.9739058Z 20 :
+        2020-12-22T10:55:22.9740165Z 21 : var programPath = `D:\\Temp\\ProcessBasic-2020-12-22-10-2-35-551-d668.tmp\\startMinimalOptionInputMirroring\\testApp2.js`;
+        2020-12-22T10:55:22.9741186Z 22 : var mode = `fork`;
+        2020-12-22T10:55:22.9741647Z 23 : var inputMirroring = 0;
+        2020-12-22T10:55:22.9742299Z 24 : var verbosity = 2;
+        2020-12-22T10:55:22.9743151Z 25 : var context = {
+        2020-12-22T10:55:22.9743603Z 26 :   "t0" : 100,
+        2020-12-22T10:55:22.9744025Z 27 :   "t1" : 1000,
+        2020-12-22T10:55:22.9744433Z 28 :   "t2" : 5000,
+        2020-12-22T10:55:22.9744856Z 29 :   "t3" : 15000
+        2020-12-22T10:55:22.9745237Z 30 : };
+        2020-12-22T10:55:22.9747120Z 31 : var toolsPath = `D:\\a\\wProcess\\wProcess\\node_modules\\wTools\\proto\\wtools\\abase\\Layer1.s`;
+        2020-12-22T10:55:22.9747763Z 32 :
+        2020-12-22T10:55:22.9748168Z 33 : testApp();
+        2020-12-22T10:55:22.9748547Z 34 :
+        2020-12-22T10:55:22.9780692Z  > node D:\Temp\ProcessBasic-2020-12-22-10-2-35-551-d668.tmp\startMinimalOptionInputMirroring\testApp.js
+        2020-12-22T10:55:24.4186749Z Log
+        2020-12-22T10:55:24.4508312Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalOptionInputMirroring / mode : fork, inputMirroring : 0 # 1 ) ... ok
+
+        ...
+
+      / TestRoutine::startMinimalOptionInputMirroring / mode : shell, inputMirroring : 1, verbosity : 5 # 81 ) : expected true ... ok
+        2020-12-22T10:55:54.9582307Z  1 : function testApp2Error()
+        2020-12-22T10:55:54.9582870Z  2 :   {
+        2020-12-22T10:55:54.9583407Z  3 :     throw new Error();
+        2020-12-22T10:55:54.9584189Z  4 :   }
+        2020-12-22T10:55:54.9584561Z  5 :
+        2020-12-22T10:55:54.9584870Z  6 : var context = {
+        2020-12-22T10:55:54.9585354Z  7 :   "t0" : 100,
+        2020-12-22T10:55:54.9585654Z  8 :   "t1" : 1000,
+        2020-12-22T10:55:54.9585938Z  9 :   "t2" : 5000,
+        2020-12-22T10:55:54.9587135Z 10 :   "t3" : 15000
+        2020-12-22T10:55:54.9587424Z 11 : };
+        2020-12-22T10:55:54.9588471Z 12 : var toolsPath = `D:\\a\\wProcess\\wProcess\\node_modules\\wTools\\proto\\wtools\\abase\\Layer1.s`;
+        2020-12-22T10:55:54.9589664Z 13 :
+        2020-12-22T10:55:54.9590252Z 14 : testApp2Error();
+        2020-12-22T10:55:54.9590773Z 15 :
+        2020-12-22T10:55:54.9591324Z  1 : function testApp()
+        2020-12-22T10:55:54.9591692Z  2 :   {
+        2020-12-22T10:55:54.9592259Z  3 :     let _ = require( toolsPath );
+        2020-12-22T10:55:54.9593041Z  4 :     _.include( 'wProcess' );
+        2020-12-22T10:55:54.9593597Z  5 :     _.include( 'wFiles' );
+        2020-12-22T10:55:54.9594228Z  6 :
+        2020-12-22T10:55:54.9594535Z  7 :     let options =
+        2020-12-22T10:55:54.9595042Z  8 :     {
+        2020-12-22T10:55:54.9595786Z  9 :       execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+        2020-12-22T10:55:54.9596339Z 10 :       mode,
+        2020-12-22T10:55:54.9596975Z 11 :       inputMirroring,
+        2020-12-22T10:55:54.9597585Z 12 :       verbosity,
+        2020-12-22T10:55:54.9598127Z 13 :       outputCollecting : 1,
+        2020-12-22T10:55:54.9598884Z 14 :       throwingExitCode : 0,
+        2020-12-22T10:55:54.9599734Z 15 :     }
+        2020-12-22T10:55:54.9600007Z 16 :
+        2020-12-22T10:55:54.9600710Z 17 :     return _.process.startMinimal( options )
+        2020-12-22T10:55:54.9601154Z 18 :
+        2020-12-22T10:55:54.9601664Z 19 :   }
+        2020-12-22T10:55:54.9601917Z 20 :
+        2020-12-22T10:55:54.9603102Z 21 : var programPath = `D:\\Temp\\ProcessBasic-2020-12-22-10-2-35-551-d668.tmp\\startMinimalOptionInputMirroring\\testApp2Error.js`;
+        2020-12-22T10:55:54.9604147Z 22 : var mode = `shell`;
+        2020-12-22T10:55:54.9604578Z 23 : var inputMirroring = 1;
+        2020-12-22T10:55:54.9604986Z 24 : var verbosity = 2;
+        2020-12-22T10:55:54.9605364Z 25 : var context = {
+        2020-12-22T10:55:54.9605688Z 26 :   "t0" : 100,
+        2020-12-22T10:55:54.9605995Z 27 :   "t1" : 1000,
+        2020-12-22T10:55:54.9606458Z 28 :   "t2" : 5000,
+        2020-12-22T10:55:54.9606773Z 29 :   "t3" : 15000
+        2020-12-22T10:55:54.9607225Z 30 : };
+        2020-12-22T10:55:54.9608142Z 31 : var toolsPath = `D:\\a\\wProcess\\wProcess\\node_modules\\wTools\\proto\\wtools\\abase\\Layer1.s`;
+        2020-12-22T10:55:54.9608699Z 32 :
+        2020-12-22T10:55:54.9609092Z 33 : testApp();
+        2020-12-22T10:55:54.9609397Z 34 :
+        2020-12-22T10:55:54.9610935Z  > node D:\Temp\ProcessBasic-2020-12-22-10-2-35-551-d668.tmp\startMinimalOptionInputMirroring\testApp.js
+        2020-12-22T10:55:56.2458399Z  > node D:\Temp\ProcessBasic-2020-12-22-10-2-35-551-d668.tmp\startMinimalOptionInputMirroring\testApp2Error.js
+        2020-12-22T10:55:56.3303784Z D:\Temp\ProcessBasic-2020-12-22-10-2-35-551-d668.tmp\startMinimalOptionInputMirroring\testApp2Error.js:3
+        2020-12-22T10:55:56.3308216Z 
+        2020-12-22T10:55:56.3332675Z     throw new Error([39;0m[31m);
+        2020-12-22T10:55:56.3336119Z 
+        2020-12-22T10:55:56.3337318Z     ^
+        2020-12-22T10:55:56.3342325Z 
+        2020-12-22T10:55:56.3345084Z
+        2020-12-22T10:55:56.3347459Z 
+        2020-12-22T10:55:56.3366220Z Error
+        2020-12-22T10:55:56.3366689Z
+        2020-12-22T10:55:56.3367909Z     at testApp2Error (D:\Temp\ProcessBasic-2020-12-22-10-2-35-551-d668.tmp\startMinimalOptionInputMirroring\testApp2Error.js:3:11)
+        2020-12-22T10:55:56.3368968Z
+        2020-12-22T10:55:56.3370329Z     at Object.<anonymous> (D:\Temp\ProcessBasic-2020-12-22-10-2-35-551-d668.tmp\startMinimalOptionInputMirroring\testApp2Error.js:14:1)
+        2020-12-22T10:55:56.3371368Z
+        2020-12-22T10:55:56.3371982Z     at Module._compile (internal/modules/cjs/loader.js:936:30)
+        2020-12-22T10:55:56.3372496Z 
+        2020-12-22T10:55:56.3373401Z     at Object.Module._extensions..js (internal/modules/cjs/loader.js:947:10)
+        2020-12-22T10:55:56.3374323Z 
+        2020-12-22T10:55:56.3375131Z     at Module.load (internal/modules/cjs/loader.js:790:32)
+        2020-12-22T10:55:56.3375697Z 
+        2020-12-22T10:55:56.3376382Z     at Function.Module._load (internal/modules/cjs/loader.js:703:12)
+        2020-12-22T10:55:56.3376987Z 
+        2020-12-22T10:55:56.3377715Z     at Function.Module.runMain (internal/modules/cjs/loader.js:999:10)
+        2020-12-22T10:55:56.3378372Z 
+        2020-12-22T10:55:56.3378924Z     at internal/main/run_main_module.js:17:11
+        2020-12-22T10:55:56.3379554Z 
+        2020-12-22T10:55:56.3621367Z        Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalOptionInputMirroring / mode : shell, inputMirroring : 1, error output # 82 ) ... ok
+        2020-12-22T10:55:56.3714855Z        Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalOptionInputMirroring / mode : shell, inputMirroring : 1, error output # 83 ) ... ok
+        2020-12-22T10:55:56.3801661Z        Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalOptionInputMirroring / mode : shell, inputMirroring : 1, error output # 84 ) : expected true ... ok
+        2020-12-22T10:55:56.3883749Z
+        2020-12-22T10:55:56.3884599Z         /D/a/wProcess/wProcess/proto/wtools/abase/l4_process.test/Execution.test.s:22738:18
+        2020-12-22T10:55:56.3885780Z           22734 :       {
+        2020-12-22T10:55:56.3886565Z           22735 :         test.identical( op.exitCode, 0 );
+        2020-12-22T10:55:56.3887216Z           22736 :         test.identical( op.ended, true );
+        2020-12-22T10:55:56.3888117Z           22737 :         test.true( _.strHas( op.output, testAppPath2 ) );
+        2020-12-22T10:55:56.3889033Z         * 22738 :         test.true( _.strHas( op.output, 'throw new Error();' ) )
+        2020-12-22T10:55:56.3899336Z           
+        2020-12-22T10:55:56.3930670Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalOptionInputMirroring / mode : shell, inputMirroring : 1, error output # 85 ): expected true ... failed
+        */
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.true( _.strHas( op.output, testAppPath2 ) );
-        test.true( _.strHas( op.output, 'throw new Error();' ) ) /* Yevhen : phantom fail on windows because of the text coloring */
+        test.true( _.strHas( op.output, 'throw new Error();' ) ) /* zzz : here */ /* Yevhen : phantom fail on windows because of the text coloring */
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
