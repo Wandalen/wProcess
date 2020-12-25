@@ -38221,8 +38221,6 @@ function _startTree( test )
     let list = op.list;
     let rootOp = op.rootOp;
 
-    console.log( _.toJs( list ) );
-
     test.identical( op.total, 13 );
     test.identical( list.length, 13 );
 
@@ -38255,62 +38253,61 @@ _startTree.routineTimeOut = 120000;
 
 //
 
-//
-
-function _startTreeDetached( test )
+function childrenWindows( test )
 {
   let context = this;
-  let a = context.assetFor( test, false );
 
-  //
-
-  a.ready
-  .then( () =>
+  let tree2 =
   {
-    return _.process._startTree
-    ({
-      depth : 3,
-      breadth : 3,
-      detached : 1,
-      executionTime : [ 3000, 5000 ]
-    })
-  })
-  .then( ( op ) =>
+    executionTime : [ 25, 50 ],
+  }
+  _.process._startTree( tree2 );
+
+  let stop = false;
+  let ready = _.Consequence();
+
+  let tree1 =
   {
-    let list = op.list;
-    let rootOp = op.rootOp;
-
-    console.log( _.toJs( list ) )
-
-    test.identical( op.total, 13 );
-    test.identical( list.length, 13 );
-
-    let rootPnd = list[ 0 ];
-    test.identical( rootPnd.pid, rootOp.pnd.pid );
-    test.identical( rootPnd.ppid, process.pid )
-
-    return _.process.children
-    ({
-      pid : rootPnd.pid,
-      format : 'list'
-    })
-    .then( ( children ) =>
+    executionTime : [ 25, 50 ],
+    onEnd : () =>
     {
-      let pids = list.map( ( pnd ) => pnd.pid );
-      let expectedPids = children.map( ( pnd ) => pnd.pid );
+      if( stop )
+      return;
 
-      test.identical( pids.sort(), expectedPids.sort() );
-      return _.time.out( 5000 );
-    })
+      _.process.children({ pid : tree1.rootOp.pnd.pid, format : 'list' })
+      .then( ( children ) =>
+      {
+        children.forEach( ( pnd ) =>
+        {
+          if( _.longHas( tree2.alive, pnd.pid ) || _.longHas( tree2.terminated, pnd.pid ) )
+          {
+            test.identical( 0, 1 )
+            console.log( `tree1.alive has pid: ${pnd.pid}`, _.longHas( tree1.alive, pnd.pid ));
+            console.log( `tree1.alive has ppid: ${pnd.ppid}`, _.longHas( tree1.alive, pnd.ppid ));
+            console.log( `tree1.terminated has pid: ${pnd.pid}`, _.longHas( tree1.terminated, pnd.pid ));
+            console.log( `tree1.terminated has ppid: ${pnd.ppid}`, _.longHas( tree1.terminated, pnd.ppid ));
+            stop = true;
+            ready.take( null )
+          }
+        })
+        return null;
+      })
+    }
+  }
+
+  _.process._startTree( tree1 );
+
+  ready.then( () =>
+  {
+    let r1 = _.process.kill({ pnd : tree1.rootOp.pnd });
+    let r2 = _.process.kill({ pnd : tree2.rootOp.pnd });
+    return _.Consequence.AndKeep( r1, r2 )
   })
 
-  //
-
-  return a.ready;
-
+  return ready;
 }
 
-_startTreeDetached.routineTimeOut = 120000;
+childrenWindows.routineTimeOut = 600000;
 
 // --
 // experiment
@@ -38835,7 +38832,8 @@ var Proto =
     spawnTimeOf,
 
     _startTree,
-    _startTreeDetached,
+
+    // childrenWindows,
 
     // experiments
 

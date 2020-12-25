@@ -42,11 +42,6 @@ submodule :
     enabled : 0 # submodule
     criterion :
       development : 1
-  ws :
-    path : npm:///ws
-    enabled : 0 # submodule
-    criterion :
-      development : 1
 
 path :
 

@@ -3301,57 +3301,49 @@ function _startTree( o )
 {
   o = o || {};
 
-  _.routineOptions( startMultiple, o );
+  _.routineOptions( _startTree, o );
 
-  let ws = require( 'ws' );
   let locals =
   {
     toolsPath : _.module.resolve( 'wTools'),
-    wsPath : _.module.resolve( 'ws' ),
     ... o
   };
+
+  let preformedChild = _.program.preform({ routine : child, locals });
+  let preformedChildPath = _.process.tempOpen({ sourceCode : preformedChild.sourceCode });
+  locals.childPath = preformedChildPath;
   let preformed = _.program.preform({ routine : program, locals });
   let preformedFilePath = _.process.tempOpen({ sourceCode : preformed.sourceCode });
 
-  o.list = [];
-  o.total = calculateNumberOfProcesses();
-  o.ready = _.Consequence();
-
-  o.server = prepareServer( ( data ) =>
-  {
-    let d = JSON.parse( data );
-    o.list.push( d.pnd );
-
-    _.assert( o.list.length <= o.total );
-
-    if( o.list.length === o.total )
-    o.ready.take( true );
-  });
+  o.alive = [];
+  o.terminated = [];
 
   let op = o.rootOp =
   {
-    execPath : 'node ' + preformedFilePath,
-    mode : 'spawn',
+    execPath : preformedFilePath,
+    mode : 'fork',
     inputMirroring : 0,
-    ipc : 0,
+    throwingExitCode : 0,
   }
+
   _.process.startSingle( op );
 
-  o.ready.thenGive( () =>
+  op.pnd.on( 'message', ( e ) =>
   {
-    o.server.clients.forEach( ( client ) =>
+    if( e.kind === 'start' )
     {
-      if( client.readyState === ws.OPEN )
-      client.send( 'ready' );
-    })
-
-    o.server.close( () =>
+      o.alive.push( e.pid )
+      o.onStart( e.pid )
+    }
+    else if( e.kind === 'end' )
     {
-      o.ready.take( o )
-    })
+      _.arrayRemoveOnce( o.alive, e.pid )
+      o.terminated.push( e.pid );
+      o.onEnd( e.pid )
+    }
   })
 
-  return o.ready;
+  return o;
 
   /* */
 
@@ -3361,49 +3353,54 @@ function _startTree( o )
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
-    let ws = require( wsPath );
-    let socket = new ws( 'ws://127.0.0.1:5999/' );
-    let currentDepth = _.numberFrom( process.argv[ 2 ] || 1 );
-    let detaching = !detached ? 0 : 2;
+    process.send({ kind : 'start', pid : process.pid, ppid : process.ppid })
 
-    let descriptor =
+    let current = 0;
+
+    _.time.periodic( 25, () =>
     {
-      pnd : { pid : process.pid, ppid : process.ppid },
-      isLast : currentDepth === depth
-    }
-
-    socket.on( 'open', () =>
-    {
-      socket.send( JSON.stringify( descriptor ) )
-
-      socket.on( 'message', () =>
+      if( current < max )
       {
-        let timeOut = detaching ? _.numberRandom( executionTime ) : executionTime;
-        setTimeout( () =>
-        {
-        }, timeOut );
+        current += 1;
 
-        socket.terminate();
-      });
-
-      if( descriptor.isLast )
-      return;
-
-      for( let b = 0; b < breadth; b++ )
-      {
         let op =
         {
-          execPath : 'node ' + __filename,
-          mode : 'spawn',
-          ipc : 0,
-          detaching,
-          args : [ currentDepth + 1 ],
+          execPath : childPath,
+          mode : 'fork',
           inputMirroring : 0,
+          throwingExitCode : 0,
         }
-
         _.process.startSingle( op );
+
+        op.conStart.tap( () =>
+        {
+          process.send({ kind : 'start', pid : op.pnd.pid, ppid : op.pnd.ppid })
+        })
+
+        op.conTerminate.tap( () =>
+        {
+          process.send({ kind : 'end', pid : op.pnd.pid, ppid : op.pnd.ppid })
+          current -= 1;
+        })
       }
+
+      return true;
     })
+  }
+
+  /* */
+
+  function child()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    let timeOut = _.numberRandom( executionTime );
+    setTimeout( () =>
+    {
+      process.exit( 0 )
+    }, timeOut );
   }
 
   /* */
@@ -3419,31 +3416,15 @@ function _startTree( o )
     }
     return expectedNumberOfNodes;
   }
-
-  /* */
-
-  function prepareServer( onMessage )
-  {
-    let server = new ws.Server({ port: 5999 });
-
-    server.on( 'connection', ( socket ) =>
-    {
-      socket.on( 'message', ( data ) =>
-      {
-        onMessage( data );
-      })
-    })
-
-    return server;
-  }
 }
 
-startMultiple.defaults =
+_startTree.defaults =
 {
-  depth : 2,
-  breadth : 10,
-  executionTime : 5000,
-  detached : 0
+  max : 20,
+  executionTime : null,
+  port : 5999,
+  onStart : null,
+  onEnd : null
 }
 
 // --
