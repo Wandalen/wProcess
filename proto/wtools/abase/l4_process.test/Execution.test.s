@@ -25335,9 +25335,8 @@ function outputLogWithPrefix( test )
         test.ni( op.exitCode, 0 );
         test.identical( op.ended, true );
 
-        /* Check that each channel goes in the right order */
-        test.true( _.dissector.dissect( `**<out : a>**<b>**`, op.output ).matched );
-        test.true( _.dissector.dissect( `**<err : err1>**<err2>**`, op.output ).matched );
+        test.true( _.strHas( op.output, 'out : ab\n' ) );
+        test.true( _.strHas( op.output, 'err : err1err2' ) );
 
         a.fileProvider.fileDelete( testAppParentPath );
         return null;
@@ -25353,13 +25352,12 @@ function outputLogWithPrefix( test )
     {
       test.case = `mode : ${mode}, new line at the end`;
       let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath : testAppPath2 } });
-      let piecesOut = [];
-      let piecesErr = [];
 
       let options =
       {
         execPath : 'node ' + testAppParentPath,
         outputCollecting : 1,
+        outputColoring : 0,
         outputPiping : 1,
         throwingExitCode : 0
       }
@@ -25370,9 +25368,8 @@ function outputLogWithPrefix( test )
         test.ni( op.exitCode, 0 );
         test.identical( op.ended, true );
 
-        /* Check that each channel goes in the right order */
-        test.true( _.dissector.dissect( `**<out : a>**<b>**<c>**`, op.output ).matched );
-        test.true( _.dissector.dissect( `**<err : err1>**<err2>**<err3>**`, op.output ).matched );
+        test.true( _.strHas( op.output, 'out : abc\n' ) );
+        test.true( _.strHas( op.output, 'err : err1err2err3' ) );
 
         a.fileProvider.fileDelete( testAppParentPath );
         return null;
@@ -25402,9 +25399,10 @@ function outputLogWithPrefix( test )
         test.ni( op.exitCode, 0 );
         test.identical( op.ended, true );
 
-        /* Check that each channel goes in the right order */
-        test.true( _.dissector.dissect( `**<out : a>**<b>**<c>**<d>**`, op.output ).matched );
-        test.true( _.dissector.dissect( `**<err : err1>**<err2>**<err3>**`, op.output ).matched );
+        test.true( _.strHas( op.output, 'out : ab\n' ) );
+        test.true( _.strHas( op.output, 'out : cd\n' ) );
+        test.true( _.strHas( op.output, 'err : err1\n' ) );
+        test.true( _.strHas( op.output, 'err : err2err3' ) );
 
         a.fileProvider.fileDelete( testAppParentPath );
         return null;
@@ -25434,9 +25432,10 @@ function outputLogWithPrefix( test )
         test.ni( op.exitCode, 0 );
         test.identical( op.ended, true );
 
-        /* Check that each channel goes in the right order */
-        test.true( _.dissector.dissect( `**<out : a>**<b>**<c>**<d>**`, op.output ).matched );
-        test.true( _.dissector.dissect( `**<err : err1>**<err2>**<err3>**`, op.output ).matched );
+        test.true( _.strHas( op.output, 'out : ab\n' ) );
+        test.true( _.strHas( op.output, 'out : cd\n' ) );
+        test.true( _.strHas( op.output, 'err : err1\n' ) );
+        test.true( _.strHas( op.output, 'err : err2err3\n' ) );
 
         a.fileProvider.fileDelete( testAppParentPath );
         return null;
@@ -25466,9 +25465,8 @@ function outputLogWithPrefix( test )
         test.ni( op.exitCode, 0 );
         test.identical( op.ended, true );
 
-        /* Check that each channel goes in the right order */
-        test.true( _.dissector.dissect( `**<out : a>**<c>**`, op.output ).matched );
-        test.true( _.dissector.dissect( `**<err : b>**<d>**`, op.output ).matched );
+        test.true( _.strHas( op.output, 'out : ac\n' ) );
+        test.true( _.strHas( op.output, 'err : bd\n' ) );
 
         a.fileProvider.fileDelete( testAppParentPath );
         return null;
@@ -25493,6 +25491,275 @@ function outputLogWithPrefix( test )
       mode,
       inputMirroring : 0,
       outputColoring : 0,
+      outputPiping : 1,
+      outputCollecting : 1,
+      outputPrefixing : 1,
+    }
+    return _.process.startSingle( o );
+
+  }
+
+  function testApp()
+  {
+    process.stdout.write( 'a' );
+    process.stderr.write( 'err1' );
+    setTimeout( () => process.stdout.write( 'c' ), context.t0 );
+    process.stderr.write( 'err2' );
+    process.stdout.write( 'b' );
+    throw new Error();
+  }
+
+  function testApp2()
+  {
+    process.stdout.write( 'a' );
+    process.stderr.write( 'err1' );
+    process.stdout.write( 'b' );
+    process.stderr.write( 'err2' );
+    process.stdout.write( 'c' );
+    process.stderr.write( 'err3' );
+    console.log();
+    throw new Error();
+  }
+
+  function testApp3()
+  {
+    process.stdout.write( 'ab\nc' );
+    process.stderr.write( 'err1\nerr2' );
+    process.stdout.write( 'd' );
+    process.stderr.write( 'err3' );
+    throw new Error();
+  }
+
+  function testApp4()
+  {
+    process.stdout.write( 'ab\nc' );
+    process.stderr.write( 'err1\nerr2' );
+    process.stdout.write( 'd' );
+    process.stderr.write( 'err3\n' );
+    console.log();
+    throw new Error();
+  }
+
+  function testApp5()
+  {
+    process.stdout.write( 'a' );
+    process.stderr.write( 'b' );
+    process.stdout.write( 'c\n' );
+    process.stderr.write( 'd\n' );
+    throw new Error();
+  }
+
+}
+
+//
+
+function outputLogWithColor( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( testApp );
+  let testAppPath2 = a.program( testApp2 );
+  let testAppPath3 = a.program( testApp3 );
+  let testAppPath4 = a.program( testApp4 );
+  let testAppPath5 = a.program( testApp5 );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
+
+  /* - */
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, without new line`;
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath } });
+
+      let options =
+      {
+        execPath : 'node ' + testAppParentPath,
+        outputCollecting : 1,
+        outputPiping : 1,
+        throwingExitCode : 0
+      }
+
+      _.process.startSingle( options )
+      .then( ( op ) =>
+      {
+        test.ni( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        var expOut = `\u001b[37mout\u001b[39;0m\u001b[35m : ab\u001b[39;0m\n`;
+        var expErr = `\u001b[31merr\u001b[39;0m\u001b[31m : err1err2`;
+        test.true( _.strHas( op.output, expOut ) );
+        test.true( _.strHas( op.output, expErr ) );
+
+        a.fileProvider.fileDelete( testAppParentPath );
+        return null;
+      })
+
+      return options.ready;
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, new line at the end`;
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath : testAppPath2 } });
+
+      let options =
+      {
+        execPath : 'node ' + testAppParentPath,
+        outputCollecting : 1,
+        outputPiping : 1,
+        throwingExitCode : 0
+      }
+
+      _.process.startSingle( options )
+      .then( ( op ) =>
+      {
+        test.ni( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        var expOut = `\u001b[37mout\u001b[39;0m\u001b[35m : abc\u001b[39;0m\n`;
+        var expErr = `\u001b[31merr\u001b[39;0m\u001b[31m : err1err2err3\u001b[39;0m\n`;
+        test.true( _.strHas( op.output, expOut ) );
+        test.true( _.strHas( op.output, expErr ) );
+
+        a.fileProvider.fileDelete( testAppParentPath );
+        return null;
+      })
+
+      return options.ready;
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, new line at the middle`;
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath : testAppPath3 } });
+
+      let options =
+      {
+        execPath : 'node ' + testAppParentPath,
+        outputCollecting : 1,
+        outputPiping : 1,
+        throwingExitCode : 0
+      }
+
+      _.process.startSingle( options )
+      .then( ( op ) =>
+      {
+        test.ni( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        var expOut = `\u001b[37mout\u001b[39;0m\u001b[35m : ab\u001b[39;0m\n`;
+        var expOut2 = `\u001b[37mout\u001b[39;0m\u001b[35m : cd\u001b[39;0m\n`;
+        var expErr = `\u001b[31merr\u001b[39;0m\u001b[31m : err1\u001b[39;0m\n`;
+        var expErr2 = `\u001b[31merr\u001b[39;0m\u001b[31m : err2err3`;
+        test.true( _.strHas( op.output, expOut ) );
+        test.true( _.strHas( op.output, expOut2 ) );
+        test.true( _.strHas( op.output, expErr ) );
+        test.true( _.strHas( op.output, expErr2 ) );
+
+        a.fileProvider.fileDelete( testAppParentPath );
+        return null;
+      })
+
+      return options.ready;
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, new line at the middle & end`;
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath : testAppPath4 } });
+
+      let options =
+      {
+        execPath : 'node ' + testAppParentPath,
+        outputCollecting : 1,
+        outputPiping : 1,
+        throwingExitCode : 0
+      }
+
+      _.process.startSingle( options )
+      .then( ( op ) =>
+      {
+        test.ni( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        var expOut = `\u001b[37mout\u001b[39;0m\u001b[35m : ab\u001b[39;0m\n`;
+        var expOut2 = `\u001b[37mout\u001b[39;0m\u001b[35m : cd\u001b[39;0m\n`;
+        var expErr = `\u001b[31merr\u001b[39;0m\u001b[31m : err1\u001b[39;0m\n`;
+        var expErr2 = `\u001b[31merr\u001b[39;0m\u001b[31m : err2err3\u001b[39;0m\n`;
+        test.true( _.strHas( op.output, expOut ) );
+        test.true( _.strHas( op.output, expOut2 ) );
+        test.true( _.strHas( op.output, expErr ) );
+        test.true( _.strHas( op.output, expErr2 ) );
+
+        a.fileProvider.fileDelete( testAppParentPath );
+        return null;
+      })
+
+      return options.ready;
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, new line at the end, both`;
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath : testAppPath5 } });
+
+      let options =
+      {
+        execPath : 'node ' + testAppParentPath,
+        outputCollecting : 1,
+        outputPiping : 1,
+        throwingExitCode : 0
+      }
+
+      _.process.startSingle( options )
+      .then( ( op ) =>
+      {
+        test.ni( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        var expOut = `\u001b[37mout\u001b[39;0m\u001b[35m : ac\u001b[39;0m\n`;
+        var expErr = `\u001b[31merr\u001b[39;0m\u001b[31m : bd\u001b[39;0m\n`;
+        test.true( _.strHas( op.output, expOut ) );
+        test.true( _.strHas( op.output, expErr ) );
+
+        a.fileProvider.fileDelete( testAppParentPath );
+        return null;
+      })
+
+      return options.ready;
+    })
+
+    return ready;
+  }
+
+  /* - */
+
+  function testAppParent()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+
+    let o =
+    {
+      execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+      mode,
+      inputMirroring : 0,
+      outputColoring : 1,
       outputPiping : 1,
       outputCollecting : 1,
       outputPrefixing : 1,
@@ -25545,7 +25812,6 @@ function outputLogWithPrefix( test )
     process.stderr.write( 'err1\nerr2' );
     process.stdout.write( 'd' );
     process.stderr.write( 'err3\n' );
-    console.log();
     throw new Error();
   }
 
@@ -25599,7 +25865,6 @@ function outputLogStreams( test )
       _.process.startSingle( options )
       .then( ( op ) =>
       {
-        console.log( 'op.out :', op.output )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.identical( piecesOut.join( '' ), 'abc' );
@@ -38794,6 +39059,7 @@ var Proto =
     startMultipleOptionOutputAdditive, /* xxx qqq for Yevhen : fix | aaa : Done. */
     outputLog,
     outputLogWithPrefix,
+    outputLogWithColor,
     outputLogStreams,
 
     // etc
