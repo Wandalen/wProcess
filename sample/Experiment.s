@@ -1,36 +1,72 @@
 var _ = require( '..')
 
-let tree2 =
+let mainTree =
 {
-  executionTime : [ 25, 100 ],
+  executionTime : [ 50, 150 ],
+  spawnPeriod : [ 25, 50 ],
 }
 
-_.process._startTree( tree2 );
+let additionalReady = runAdditionalTrees( 5 )
+let mainReady = _.process._startTree( mainTree );
+let snapshots = [];
+let timer;
 
-let tree1 =
+mainTree.rootOp.conStart.thenGive( () =>
 {
-  executionTime : [ 25, 100 ],
-  onEnd : () =>
+  timer = _.time.periodic( 10, () =>
   {
-    _.process.children({ pid : tree1.rootOp.pnd.pid, format : 'list' })
-    .then( ( children ) =>
+    _.process.children({ pid : mainTree.rootOp.pnd.pid, format : 'list' })
+    .thenGive( ( snapshot ) =>
     {
-      children.forEach( ( pnd ) =>
-      {
-        let tree2ContainsPnd = _.longHas( tree2.alive, pnd.pid ) || _.longHas( tree2.terminated, pnd.pid );
-
-        if( tree2ContainsPnd )
-        {
-          console.log( `tree1.alive has pid: ${pnd.pid}`, _.longHas( tree1.alive, pnd.pid ));
-          console.log( `tree1.alive has ppid: ${pnd.ppid}`, _.longHas( tree1.alive, pnd.ppid ));
-          console.log( `tree1.terminated has pid: ${pnd.pid}`, _.longHas( tree1.terminated, pnd.pid ));
-          console.log( `tree1.terminated has ppid: ${pnd.ppid}`, _.longHas( tree1.terminated, pnd.ppid ));
-          throw _.err( 'Found bug' );
-        }
-      })
-      return null;
+      if( snapshot.length > 1 )
+      snapshots.push( snapshot )
     })
-  }
-}
+    return true;
+  })
+})
 
-_.process._startTree( tree1 );
+mainReady
+.then( () =>
+{
+  timer.cancel();
+
+  // console.log( _.toJs( mainTree.list ) )
+
+  snapshots.forEach( ( snapshot ) =>
+  {
+    snapshot.forEach( ( targetPnd ) =>
+    {
+      let result = mainTree.list.filter( ( treePnd ) =>
+      {
+        return treePnd.pid === targetPnd.pid;
+      })
+
+      _.assert( result.length === 1, `Main tree does not have pnd: ${targetPnd}` );
+
+      let resultPnd = result[ 0 ];
+
+      _.assert( resultPnd.ppid === targetPnd.ppid, `Ppid changed.\nTree pnd: ${_.toJs( resultPnd )}\nSnapshot pnd: ${_.toJs( targetPnd )}` );
+    })
+  })
+
+  return additionalReady;
+})
+
+
+
+function runAdditionalTrees( n )
+{
+  let cons = [];
+  for( let i = 0; i < n; i++ )
+  {
+    let tree =
+    {
+      executionTime : [ 25, 100 ],
+      spawnPeriod : [ 25, 50 ],
+      max : 10
+    }
+    _.process._startTree( tree );
+    cons.push( tree.ready )
+  }
+  return _.Consequence.AndKeep( ... cons );
+}

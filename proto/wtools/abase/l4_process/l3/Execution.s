@@ -3315,18 +3315,7 @@ function _startTree( o )
   let preformed = _.program.preform({ routine : program, locals });
   let preformedFilePath = _.process.tempOpen({ sourceCode : preformed.sourceCode });
 
-  o.alive = [];
-  o.terminated = [];
-
-  if( o.onStart === null )
-  o.onStart = () =>
-  {
-  }
-
-  if( o.onEnd === null )
-  o.onEnd = () =>
-  {
-  }
+  o.list = [];
 
   let op = o.rootOp =
   {
@@ -3338,22 +3327,32 @@ function _startTree( o )
 
   _.process.startSingle( op );
 
-  op.pnd.on( 'message', ( e ) =>
+  o.ready = _.Consequence();
+
+  op.pnd.on( 'message', ( pnd ) =>
   {
-    if( e.kind === 'start' )
-    {
-      o.alive.push( e.pid )
-      o.onStart( e.pid )
-    }
-    else if( e.kind === 'end' )
-    {
-      _.arrayRemoveOnce( o.alive, e.pid )
-      o.terminated.push( e.pid );
-      o.onEnd( e.pid )
-    }
+    o.list.push( pnd );
+
+    if( o.list.length === o.max )
+    o.ready.take( null );
   })
 
-  return o;
+  // o.ready.then( () =>
+  // {
+  //   let cons = [ op.conTerminate  ];
+  //   o.list.forEach( ( pnd ) =>
+  //   {
+  //     if( !_.process.isAlive( pnd.pid ) )
+  //     return;
+  //     cons.push( _.process.waitForDeath({ pid : pnd.pid }) )
+  //   })
+  //   return _.Consequence.AndKeep( ... cons );
+  // })
+
+  o.ready.then( () => o.rootOp.ready );
+  o.ready.then( () => o );
+
+  return o.ready;
 
   /* */
 
@@ -3363,36 +3362,32 @@ function _startTree( o )
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
-    process.send({ kind : 'start', pid : process.pid, ppid : process.ppid })
+    process.send({ pid : process.pid, ppid : process.ppid });
 
-    let current = 0;
+    let c = 0;
 
-    _.time.periodic( 25, () =>
+    _.time.periodic( _.numberRandom( spawnPeriod ), () =>
     {
-      if( current < max )
+      if( c === max )
+      return;
+
+      c += 1;
+
+      let op =
       {
-        current += 1;
-
-        let op =
-        {
-          execPath : childPath,
-          mode : 'fork',
-          inputMirroring : 0,
-          throwingExitCode : 0,
-        }
-        _.process.startSingle( op );
-
-        op.conStart.tap( () =>
-        {
-          process.send({ kind : 'start', pid : op.pnd.pid, ppid : op.pnd.ppid })
-        })
-
-        op.conTerminate.tap( () =>
-        {
-          process.send({ kind : 'end', pid : op.pnd.pid, ppid : op.pnd.ppid })
-          current -= 1;
-        })
+        execPath : childPath,
+        mode : 'fork',
+        // detaching : 1,
+        inputMirroring : 0,
+        throwingExitCode : 0,
       }
+      _.process.startSingle( op );
+
+      op.conStart.tap( () =>
+      {
+        process.send({ pid : op.pnd.pid, ppid : process.pid });
+        // op.disconnect();
+      })
 
       return true;
     })
@@ -3431,10 +3426,8 @@ function _startTree( o )
 _startTree.defaults =
 {
   max : 20,
-  executionTime : null,
-  port : 5999,
-  onStart : null,
-  onEnd : null
+  spawnPeriod : null,
+  executionTime : null
 }
 
 // --
