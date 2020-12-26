@@ -39,7 +39,7 @@ function run()
     {
       snapshot.forEach( ( targetPnd ) =>
       {
-        _.assert( targetPnd.name === 'node.exe', `Unexpected process in tree ${_.toJs( targetPnd ) }` )
+        _.assert( targetPnd.name === 'node.exe', () => 'Unexpected process in tree.\n' + processInfo( snapshot, targetPnd ) );
 
         let result = mainTree.list.filter( ( treePnd ) =>
         {
@@ -57,6 +57,40 @@ function run()
     return additionalReady;
   })
   .then( () => run() )
+
+  /* */
+
+  function processInfo( snapshot, targetPnd )
+  {
+    let msg =
+`
+Process in snapshot: ${_.toJs( targetPnd ) }
+Process parent in snapshot: ${_.toJs( findParentFor( snapshot, targetPnd ) ) }
+Process in main tree: ${_.toJs( findProcess( mainTree.list, targetPnd ) ) }
+Process parent in main tree: ${_.toJs( findParentFor( mainTree.list, targetPnd ) ) }
+`
+  return msg;
+  }
+
+  function findParentFor( src, targetPnd )
+  {
+    let result = src.filter( ( pnd ) =>
+    {
+      return pnd.pid === targetPnd.ppid;
+    })
+    return result;
+  }
+
+  function findProcess( src, targetPnd )
+  {
+    let result = src.filter( ( pnd ) =>
+    {
+      return pnd.pid === targetPnd.pid;
+    })
+    return result;
+  }
+
+  /* */
 
   function runAdditionalTrees( n )
   {
