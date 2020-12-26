@@ -3303,6 +3303,12 @@ function _startTree( o )
 
   _.routineOptions( _startTree, o );
 
+  if( o.executionTime === null )
+  o.executionTime = [ 50, 100 ];
+
+  if( o.spawnPeriod === null )
+  o.spawnPeriod = [ 25, 50 ];
+
   let locals =
   {
     toolsPath : _.module.resolve( 'wTools'),
@@ -3427,7 +3433,7 @@ _startTree.defaults =
 {
   max : 20,
   spawnPeriod : null,
-  executionTime : null
+  executionTime : null,
 }
 
 // --
