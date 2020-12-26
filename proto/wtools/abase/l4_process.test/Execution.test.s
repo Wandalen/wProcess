@@ -22902,10 +22902,103 @@ function startMinimalOptionInputMirroringFail( test )
       })
       .then( ( op ) =>
       {
+        /*
+        2020-12-22T10:55:22.9230824Z       Running TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalOptionInputMirroring ..
+        ...
+        2020-12-22T10:55:54.9582307Z  1 : function testApp2Error()
+        2020-12-22T10:55:54.9582870Z  2 :   {
+        2020-12-22T10:55:54.9583407Z  3 :     throw new Error();
+        2020-12-22T10:55:54.9584189Z  4 :   }
+        2020-12-22T10:55:54.9584561Z  5 :
+        2020-12-22T10:55:54.9584870Z  6 : var context = {
+        2020-12-22T10:55:54.9585354Z  7 :   "t0" : 100,
+        2020-12-22T10:55:54.9585654Z  8 :   "t1" : 1000,
+        2020-12-22T10:55:54.9585938Z  9 :   "t2" : 5000,
+        2020-12-22T10:55:54.9587135Z 10 :   "t3" : 15000
+        2020-12-22T10:55:54.9587424Z 11 : };
+        2020-12-22T10:55:54.9588471Z 12 : var toolsPath = `D:\\a\\wProcess\\wProcess\\node_modules\\wTools\\proto\\wtools\\abase\\Layer1.s`;
+        2020-12-22T10:55:54.9589664Z 13 :
+        2020-12-22T10:55:54.9590252Z 14 : testApp2Error();
+        2020-12-22T10:55:54.9590773Z 15 :
+        2020-12-22T10:55:54.9591324Z  1 : function testApp()
+        2020-12-22T10:55:54.9591692Z  2 :   {
+        2020-12-22T10:55:54.9592259Z  3 :     let _ = require( toolsPath );
+        2020-12-22T10:55:54.9593041Z  4 :     _.include( 'wProcess' );
+        2020-12-22T10:55:54.9593597Z  5 :     _.include( 'wFiles' );
+        2020-12-22T10:55:54.9594228Z  6 :
+        2020-12-22T10:55:54.9594535Z  7 :     let options =
+        2020-12-22T10:55:54.9595042Z  8 :     {
+        2020-12-22T10:55:54.9595786Z  9 :       execPath : mode === 'fork' ? programPath : 'node ' + programPath,
+        2020-12-22T10:55:54.9596339Z 10 :       mode,
+        2020-12-22T10:55:54.9596975Z 11 :       inputMirroring,
+        2020-12-22T10:55:54.9597585Z 12 :       verbosity,
+        2020-12-22T10:55:54.9598127Z 13 :       outputCollecting : 1,
+        2020-12-22T10:55:54.9598884Z 14 :       throwingExitCode : 0,
+        2020-12-22T10:55:54.9599734Z 15 :     }
+        2020-12-22T10:55:54.9600007Z 16 :
+        2020-12-22T10:55:54.9600710Z 17 :     return _.process.startMinimal( options )
+        2020-12-22T10:55:54.9601154Z 18 :
+        2020-12-22T10:55:54.9601664Z 19 :   }
+        2020-12-22T10:55:54.9601917Z 20 :
+        2020-12-22T10:55:54.9603102Z 21 : var programPath = `D:\\Temp\\ProcessBasic-2020-12-22-10-2-35-551-d668.tmp\\startMinimalOptionInputMirroring\\testApp2Error.js`;
+        2020-12-22T10:55:54.9604147Z 22 : var mode = `shell`;
+        2020-12-22T10:55:54.9604578Z 23 : var inputMirroring = 1;
+        2020-12-22T10:55:54.9604986Z 24 : var verbosity = 2;
+        2020-12-22T10:55:54.9605364Z 25 : var context = {
+        2020-12-22T10:55:54.9605688Z 26 :   "t0" : 100,
+        2020-12-22T10:55:54.9605995Z 27 :   "t1" : 1000,
+        2020-12-22T10:55:54.9606458Z 28 :   "t2" : 5000,
+        2020-12-22T10:55:54.9606773Z 29 :   "t3" : 15000
+        2020-12-22T10:55:54.9607225Z 30 : };
+        2020-12-22T10:55:54.9608142Z 31 : var toolsPath = `D:\\a\\wProcess\\wProcess\\node_modules\\wTools\\proto\\wtools\\abase\\Layer1.s`;
+        2020-12-22T10:55:54.9608699Z 32 :
+        2020-12-22T10:55:54.9609092Z 33 : testApp();
+        2020-12-22T10:55:54.9609397Z 34 :
+        2020-12-22T10:55:54.9610935Z [97m > [39;0mnode D:\Temp\ProcessBasic-2020-12-22-10-2-35-551-d668.tmp\startMinimalOptionInputMirroring\testApp.js
+        2020-12-22T10:55:56.2458399Z [35m[97m > [39;0mnode D:\Temp\ProcessBasic-2020-12-22-10-2-35-551-d668.tmp\startMinimalOptionInputMirroring\testApp2Error.js[39;0m
+        2020-12-22T10:55:56.3303784Z [31m[31mD:\Temp\ProcessBasic-2020-12-22-10-2-35-551-d668.tmp\startMinimalOptionInputMirroring\testApp2Error.js:3
+        2020-12-22T10:55:56.3308216Z [39;0m[39;0m
+        2020-12-22T10:55:56.3332675Z [31m[31m    throw new Error([39;0m[31m);
+        2020-12-22T10:55:56.3336119Z [39;0m[39;0m
+        2020-12-22T10:55:56.3337318Z [31m[31m    ^
+        2020-12-22T10:55:56.3342325Z [39;0m[39;0m
+        2020-12-22T10:55:56.3345084Z [31m[31m
+        2020-12-22T10:55:56.3347459Z [39;0m[39;0m
+        2020-12-22T10:55:56.3366220Z [31m[31mError
+        2020-12-22T10:55:56.3366689Z [39;0m[39;0m
+        2020-12-22T10:55:56.3367909Z [31m[31m    at testApp2Error (D:\Temp\ProcessBasic-2020-12-22-10-2-35-551-d668.tmp\startMinimalOptionInputMirroring\testApp2Error.js:3:11)
+        2020-12-22T10:55:56.3368968Z [39;0m[39;0m
+        2020-12-22T10:55:56.3370329Z [31m[31m    at Object.<anonymous> (D:\Temp\ProcessBasic-2020-12-22-10-2-35-551-d668.tmp\startMinimalOptionInputMirroring\testApp2Error.js:14:1)
+        2020-12-22T10:55:56.3371368Z [39;0m[39;0m
+        2020-12-22T10:55:56.3371982Z [31m[31m    at Module._compile (internal/modules/cjs/loader.js:936:30)
+        2020-12-22T10:55:56.3372496Z [39;0m[39;0m
+        2020-12-22T10:55:56.3373401Z [31m[31m    at Object.Module._extensions..js (internal/modules/cjs/loader.js:947:10)
+        2020-12-22T10:55:56.3374323Z [39;0m[39;0m
+        2020-12-22T10:55:56.3375131Z [31m[31m    at Module.load (internal/modules/cjs/loader.js:790:32)
+        2020-12-22T10:55:56.3375697Z [39;0m[39;0m
+        2020-12-22T10:55:56.3376382Z [31m[31m    at Function.Module._load (internal/modules/cjs/loader.js:703:12)
+        2020-12-22T10:55:56.3376987Z [39;0m[39;0m
+        2020-12-22T10:55:56.3377715Z [31m[31m    at Function.Module.runMain (internal/modules/cjs/loader.js:999:10)
+        2020-12-22T10:55:56.3378372Z [39;0m[39;0m
+        2020-12-22T10:55:56.3378924Z [31m[31m    at internal/main/run_main_module.js:17:11
+        2020-12-22T10:55:56.3379554Z [39;0m[39;0m
+        2020-12-22T10:55:56.3621367Z        Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalOptionInputMirroring / mode : shell, inputMirroring : 1, error output # 82 ) ... ok
+        2020-12-22T10:55:56.3714855Z        Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalOptionInputMirroring / mode : shell, inputMirroring : 1, error output # 83 ) ... ok
+        2020-12-22T10:55:56.3801661Z        Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalOptionInputMirroring / mode : shell, inputMirroring : 1, error output # 84 ) : expected true ... ok
+        2020-12-22T10:55:56.3883749Z
+        2020-12-22T10:55:56.3884599Z         /D/a/wProcess/wProcess/proto/wtools/abase/l4_process.test/Execution.test.s:22738:18
+        2020-12-22T10:55:56.3885780Z           22734 :       {
+        2020-12-22T10:55:56.3886565Z           22735 :         test.identical( op.exitCode, 0 );
+        2020-12-22T10:55:56.3887216Z           22736 :         test.identical( op.ended, true );
+        2020-12-22T10:55:56.3888117Z           22737 :         test.true( _.strHas( op.output, testAppPath2 ) );
+        2020-12-22T10:55:56.3889033Z         * 22738 :         test.true( _.strHas( op.output, 'throw new Error();' ) )
+        2020-12-22T10:55:56.3899336Z           
+        2020-12-22T10:55:56.3930670Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalOptionInputMirroring / mode : shell, inputMirroring : 1, error output # 85 ): expected true ... failed
+        */
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
         test.true( _.strHas( op.output, testAppPath2 ) );
-        test.true( _.strHas( op.output, 'throw new Error();' ) ) /* Yevhen : phantom fail on windows because of the text coloring */
+        test.true( _.strHas( op.output, 'throw new Error();' ) ) /* zzz : here */ /* Yevhen : phantom fail on windows because of the text coloring */
 
         a.fileProvider.fileDelete( testAppPath );
         a.fileProvider.fileDelete( testAppPath2 );
@@ -38218,12 +38311,10 @@ function _startTree( test )
   a.ready
   .then( () =>
   {
-    test.case = 'depth:1'
+    test.case = 'trivial'
     return _.process._startTree
     ({
-      depth : 1,
-      breadth : 3,
-      executionTime : 15000
+      max : 5,
     })
   })
   .then( ( op ) =>
@@ -38231,106 +38322,20 @@ function _startTree( test )
     let list = op.list;
     let rootOp = op.rootOp;
 
-    test.identical( op.total, 1 );
-    test.identical( list.length, 1 );
+    test.identical( list.length, 6 );
 
     let rootPnd = list[ 0 ];
     test.identical( rootPnd.pid, rootOp.pnd.pid );
     test.identical( rootPnd.ppid, process.pid )
 
-    return _.process.children
-    ({
-      pid : rootPnd.pid,
-      format : 'list'
-    })
-    .then( ( children ) =>
+    for( let i = 1; i < list.length; i++ )
     {
-      let pids = list.map( ( pnd ) => pnd.pid );
-      let expectedPids = children.map( ( pnd ) => pnd.pid );
+      test.true( _.numberIs( list[ i ].pid ) );
+      test.true( _.numberIs( list[ i ].ppid ) );
+      test.identical( list[ i ].ppid, rootOp.pnd.pid );
+    }
 
-      test.identical( pids.sort(), expectedPids.sort() );
-      return rootOp.conTerminate;
-    })
-  })
-
-  //
-
-  a.ready
-  .then( () =>
-  {
-    test.case = 'depth:2'
-    return _.process._startTree
-    ({
-      depth : 2,
-      breadth : 3,
-      executionTime : 15000
-    })
-  })
-  .then( ( op ) =>
-  {
-    let list = op.list;
-    let rootOp = op.rootOp;
-
-    test.identical( op.total, 4 );
-    test.identical( list.length, 4 );
-
-    let rootPnd = list[ 0 ];
-    test.identical( rootPnd.pid, rootOp.pnd.pid );
-    test.identical( rootPnd.ppid, process.pid )
-
-    return _.process.children
-    ({
-      pid : rootPnd.pid,
-      format : 'list'
-    })
-    .then( ( children ) =>
-    {
-      let pids = list.map( ( pnd ) => pnd.pid );
-      let expectedPids = children.map( ( pnd ) => pnd.pid );
-
-      test.identical( pids.sort(), expectedPids.sort() );
-      return rootOp.conTerminate;
-    })
-  })
-
-  //
-
-  a.ready
-  .then( () =>
-  {
-    test.case = 'depth:3'
-    return _.process._startTree
-    ({
-      depth : 3,
-      breadth : 3,
-      executionTime : 15000
-    })
-  })
-  .then( ( op ) =>
-  {
-    let list = op.list;
-    let rootOp = op.rootOp;
-
-    test.identical( op.total, 13 );
-    test.identical( list.length, 13 );
-
-    let rootPnd = list[ 0 ];
-    test.identical( rootPnd.pid, rootOp.pnd.pid );
-    test.identical( rootPnd.ppid, process.pid )
-
-    return _.process.children
-    ({
-      pid : rootPnd.pid,
-      format : 'list'
-    })
-    .then( ( children ) =>
-    {
-      let pids = list.map( ( pnd ) => pnd.pid );
-      let expectedPids = children.map( ( pnd ) => pnd.pid );
-
-      test.identical( pids.sort(), expectedPids.sort() );
-      return rootOp.conTerminate;
-    })
+    return null;
   })
 
   //
@@ -38340,6 +38345,8 @@ function _startTree( test )
 }
 
 _startTree.routineTimeOut = 120000;
+
+//
 
 // --
 // experiment
