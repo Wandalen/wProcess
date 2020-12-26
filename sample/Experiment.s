@@ -39,6 +39,8 @@ function run()
     {
       snapshot.forEach( ( targetPnd ) =>
       {
+        _.assert( targetPnd.name === 'node.exe', `Unexpected process in tree ${_.toJs( targetPnd ) }` )
+
         let result = mainTree.list.filter( ( treePnd ) =>
         {
           return treePnd.pid === targetPnd.pid;
