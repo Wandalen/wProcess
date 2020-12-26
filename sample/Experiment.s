@@ -9,20 +9,19 @@ let mainTree =
 let additionalReady = runAdditionalTrees( 5 )
 let mainReady = _.process._startTree( mainTree );
 let snapshots = [];
-let timer;
 
-mainTree.rootOp.conStart.thenGive( () =>
+let timer = _.time.periodic( 10, () =>
 {
-  timer = _.time.periodic( 10, () =>
+  if( !_.process.isAlive( mainTree.rootOp.pnd.pid ) )
+  return true;
+
+  _.process.children({ pid : mainTree.rootOp.pnd.pid, format : 'list' })
+  .thenGive( ( snapshot ) =>
   {
-    _.process.children({ pid : mainTree.rootOp.pnd.pid, format : 'list' })
-    .thenGive( ( snapshot ) =>
-    {
-      if( snapshot.length > 1 )
-      snapshots.push( snapshot )
-    })
-    return true;
+    if( snapshot.length > 1 )
+    snapshots.push( snapshot )
   })
+  return true;
 })
 
 mainReady
