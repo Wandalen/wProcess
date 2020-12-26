@@ -38257,54 +38257,149 @@ function childrenWindows( test )
 {
   let context = this;
 
-  let tree2 =
+  if( process.platform !== 'win32' )
   {
-    executionTime : [ 25, 50 ],
+    test.identical( 1, 1 );
+    return;
   }
-  _.process._startTree( tree2 );
 
-  let stop = false;
-  let ready = _.Consequence();
-
-  let tree1 =
+  let mainTree =
   {
-    executionTime : [ 25, 50 ],
-    onEnd : () =>
+    executionTime : [ 50, 100 ],
+    spawnPeriod : [ 25, 50 ],
+  }
+
+  let additionalReady = runAdditionalTrees( 10 )
+  let mainReady = _.process._startTree( mainTree );
+  let snapshots = [];
+
+  let timer = _.time.periodic( 10, () =>
+  {
+    if( !_.process.isAlive( mainTree.rootOp.pnd.pid ) )
+    return true;
+
+    _.process.children({ pid : mainTree.rootOp.pnd.pid, format : 'list' })
+    .thenGive( ( snapshot ) =>
     {
-      if( stop )
-      return;
-
-      _.process.children({ pid : tree1.rootOp.pnd.pid, format : 'list' })
-      .then( ( children ) =>
-      {
-        children.forEach( ( pnd ) =>
-        {
-          if( _.longHas( tree2.alive, pnd.pid ) || _.longHas( tree2.terminated, pnd.pid ) )
-          {
-            test.identical( 0, 1 )
-            console.log( `tree1.alive has pid: ${pnd.pid}`, _.longHas( tree1.alive, pnd.pid ));
-            console.log( `tree1.alive has ppid: ${pnd.ppid}`, _.longHas( tree1.alive, pnd.ppid ));
-            console.log( `tree1.terminated has pid: ${pnd.pid}`, _.longHas( tree1.terminated, pnd.pid ));
-            console.log( `tree1.terminated has ppid: ${pnd.ppid}`, _.longHas( tree1.terminated, pnd.ppid ));
-            stop = true;
-            ready.take( null )
-          }
-        })
-        return null;
-      })
-    }
-  }
-
-  _.process._startTree( tree1 );
-
-  ready.then( () =>
-  {
-    let r1 = _.process.kill({ pnd : tree1.rootOp.pnd });
-    let r2 = _.process.kill({ pnd : tree2.rootOp.pnd });
-    return _.Consequence.AndKeep( r1, r2 )
+      if( snapshot.length > 1 )
+      snapshots.push( snapshot )
+    })
+    return true;
   })
 
-  return ready;
+  mainReady
+  .then( async () =>
+  {
+    timer.cancel();
+
+    console.log( 'Main tree:', _.toJs( mainTree.list ) )
+
+    let status = checkSnapshots();
+
+    await additionalReady;
+
+    return status;
+  })
+
+  return mainReady;
+
+  /* */
+
+  function checkSnapshots()
+  {
+    for( let s = 0; s < snapshots.length; s++ )
+    {
+      let snapshot = snapshots[ s ];
+      for( let i = 0; i < snapshot.length; i++ )
+      {
+        let targetPnd = snapshot[ i ];
+
+        let nodeIs = test.identical( targetPnd.name === 'node.exe' );
+
+        if( !nodeIs )
+        {
+          console.error( 'Unexpected process in tree.\n' + processInfo( snapshot, targetPnd ) );
+          return false;
+        }
+
+        let result = mainTree.list.filter( ( treePnd ) =>
+        {
+          return treePnd.pid === targetPnd.pid;
+        })
+
+        let mainTreeHasPid = test.identical( result.length, 1 );
+
+        if( !mainTreeHasPid )
+        {
+          console.error( `Main tree does not have pnd: ${targetPnd}` );
+          return false;
+        }
+
+        let resultPnd = result[ 0 ];
+
+        let ppidsAreSame = test.identical( resultPnd.ppid, targetPnd.ppid );
+
+        if( !ppidsAreSame )
+        {
+          console.error( `Ppid changed.\nTree pnd: ${_.toJs( resultPnd )}\nSnapshot pnd: ${_.toJs( targetPnd )}` )
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
+  /* */
+
+  function processInfo( snapshot, targetPnd )
+  {
+    let msg =
+`
+Process in snapshot: ${_.toJs( targetPnd ) }
+Process parent in snapshot: ${_.toJs( findParentFor( snapshot, targetPnd ) ) }
+Process in main tree: ${_.toJs( findProcess( mainTree.list, targetPnd ) ) }
+Process parent in main tree: ${_.toJs( findParentFor( mainTree.list, targetPnd ) ) }
+`
+  return msg;
+  }
+
+  function findParentFor( src, targetPnd )
+  {
+    let result = src.filter( ( pnd ) =>
+    {
+      return pnd.pid === targetPnd.ppid;
+    })
+    return result;
+  }
+
+  function findProcess( src, targetPnd )
+  {
+    let result = src.filter( ( pnd ) =>
+    {
+      return pnd.pid === targetPnd.pid;
+    })
+    return result;
+  }
+
+  /* */
+
+  function runAdditionalTrees( n )
+  {
+    let cons = [];
+    for( let i = 0; i < n; i++ )
+    {
+      let tree =
+      {
+        executionTime : [ 25, 100 ],
+        spawnPeriod : [ 25, 50 ],
+        max : 10
+      }
+      _.process._startTree( tree );
+      cons.push( tree.ready )
+    }
+    return _.Consequence.AndKeep( ... cons );
+  }
 }
 
 childrenWindows.routineTimeOut = 600000;
