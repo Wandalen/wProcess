@@ -1,5 +1,7 @@
 var _ = require( '..')
 
+run();
+
 function run()
 {
   let mainTree =
