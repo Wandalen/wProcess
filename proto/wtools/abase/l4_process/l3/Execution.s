@@ -787,17 +787,9 @@ function startMinimal_body( o )
     // console.log( 'handleClose', _.process.realMainFile(), o.ended, ... arguments ); debugger;
     // */
 
-    if( o.outputAdditive && _outAdditive ) /* color & prefix & log stdout collected during execution */
-    {
-      if( o.outputPrefixing )
-      _outAdditive = _outPrefix + _outAdditive;
+    stderrBufferLog( o ); /* color & prefix & log stderr collected during execution if no error is thrown */
 
-      if( o.outputColoring.out )
-      _outAdditive = _.ct.format( _outAdditive, 'pipe.neutral' )
-
-      o.logger.log( _outAdditive );
-      _outAdditive = '';
-    }
+    stdoutBufferLog( o ); /* color & prefix & log stdout collected during execution */
 
     if( o.ended )
     return;
@@ -873,17 +865,7 @@ function startMinimal_body( o )
       , `\n    Current path : ${o.currentPath}`
     );
 
-    if( o.outputAdditive && _errAdditive ) /* color & prefix & log stderr collected during execution */
-    {
-      if( o.outputPrefixing )
-      _errAdditive = _errPrefix + _errAdditive;
-
-      if( o.outputColoring.err )
-      _errAdditive = _.ct.format( _errAdditive, 'pipe.negative' )
-
-      o.logger.error( _errAdditive );
-      _errAdditive = '';
-    }
+    stderrBufferLog( o ); /* color & prefix & log stderr collected during execution */
 
     if( o.ended )
     {
@@ -936,6 +918,40 @@ function startMinimal_body( o )
     if( o.detaching === 2 )
     o.conStart.take( o );
 
+  }
+
+  /* */
+
+  function stdoutBufferLog( o )
+  {
+    if( o.outputAdditive && _outAdditive ) /* color & prefix & log stdout collected during execution */
+    {
+      if( o.outputPrefixing )
+      _outAdditive = _outPrefix + _outAdditive;
+
+      if( o.outputColoring.out )
+      _outAdditive = _.ct.format( _outAdditive, 'pipe.neutral' )
+
+      o.logger.log( _outAdditive );
+      _outAdditive = '';
+    }
+  }
+
+  /* */
+
+  function stderrBufferLog( o )
+  {
+    if( o.outputAdditive && _errAdditive ) /* color & prefix & log stderr collected during execution */
+    {
+      if( o.outputPrefixing )
+      _errAdditive = _errPrefix + _errAdditive;
+
+      if( o.outputColoring.err )
+      _errAdditive = _.ct.format( _errAdditive, 'pipe.negative' )
+
+      o.logger.error( _errAdditive );
+      _errAdditive = '';
+    }
   }
 
   /* */

@@ -25332,10 +25332,10 @@ function outputLogWithPrefix( test )
       _.process.startSingle( options )
       .then( ( op ) =>
       {
-        test.ni( op.exitCode, 0 );
+        test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
 
-        test.true( _.strHas( op.output, 'out : ab\n' ) );
+        test.true( _.strHas( op.output, 'out : abc\n' ) );
         test.true( _.strHas( op.output, 'err : err1err2' ) );
 
         a.fileProvider.fileDelete( testAppParentPath );
@@ -25365,7 +25365,7 @@ function outputLogWithPrefix( test )
       _.process.startSingle( options )
       .then( ( op ) =>
       {
-        test.ni( op.exitCode, 0 );
+        test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
 
         test.true( _.strHas( op.output, 'out : abc\n' ) );
@@ -25396,7 +25396,7 @@ function outputLogWithPrefix( test )
       _.process.startSingle( options )
       .then( ( op ) =>
       {
-        test.ni( op.exitCode, 0 );
+        test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
 
         test.true( _.strHas( op.output, 'out : ab\n' ) );
@@ -25429,7 +25429,7 @@ function outputLogWithPrefix( test )
       _.process.startSingle( options )
       .then( ( op ) =>
       {
-        test.ni( op.exitCode, 0 );
+        test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
 
         test.true( _.strHas( op.output, 'out : ab\n' ) );
@@ -25462,7 +25462,7 @@ function outputLogWithPrefix( test )
       _.process.startSingle( options )
       .then( ( op ) =>
       {
-        test.ni( op.exitCode, 0 );
+        test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
 
         test.true( _.strHas( op.output, 'out : ac\n' ) );
@@ -25506,7 +25506,6 @@ function outputLogWithPrefix( test )
     setTimeout( () => process.stdout.write( 'c' ), context.t0 );
     process.stderr.write( 'err2' );
     process.stdout.write( 'b' );
-    throw new Error();
   }
 
   function testApp2()
@@ -25518,7 +25517,6 @@ function outputLogWithPrefix( test )
     process.stdout.write( 'c' );
     process.stderr.write( 'err3' );
     console.log();
-    throw new Error();
   }
 
   function testApp3()
@@ -25527,7 +25525,6 @@ function outputLogWithPrefix( test )
     process.stderr.write( 'err1\nerr2' );
     process.stdout.write( 'd' );
     process.stderr.write( 'err3' );
-    throw new Error();
   }
 
   function testApp4()
@@ -25535,9 +25532,8 @@ function outputLogWithPrefix( test )
     process.stdout.write( 'ab\nc' );
     process.stderr.write( 'err1\nerr2' );
     process.stdout.write( 'd' );
-    process.stderr.write( 'err3\n' );
+    console.error( 'err3' );
     console.log();
-    throw new Error();
   }
 
   function testApp5()
@@ -25546,7 +25542,6 @@ function outputLogWithPrefix( test )
     process.stderr.write( 'b' );
     process.stdout.write( 'c\n' );
     process.stderr.write( 'd\n' );
-    throw new Error();
   }
 
 }
@@ -25589,9 +25584,9 @@ function outputLogWithColor( test )
       _.process.startSingle( options )
       .then( ( op ) =>
       {
-        test.ni( op.exitCode, 0 );
+        test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        var expOut = `\u001b[37mout\u001b[39;0m\u001b[35m : ab\u001b[39;0m\n`;
+        var expOut = `\u001b[37mout\u001b[39;0m\u001b[35m : abc\u001b[39;0m\n`;
         var expErr = `\u001b[31merr\u001b[39;0m\u001b[31m : err1err2`;
         test.true( _.strHas( op.output, expOut ) );
         test.true( _.strHas( op.output, expErr ) );
@@ -25622,7 +25617,7 @@ function outputLogWithColor( test )
       _.process.startSingle( options )
       .then( ( op ) =>
       {
-        test.ni( op.exitCode, 0 );
+        test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
 
         var expOut = `\u001b[37mout\u001b[39;0m\u001b[35m : abc\u001b[39;0m\n`;
@@ -25655,7 +25650,7 @@ function outputLogWithColor( test )
       _.process.startSingle( options )
       .then( ( op ) =>
       {
-        test.ni( op.exitCode, 0 );
+        test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
 
         var expOut = `\u001b[37mout\u001b[39;0m\u001b[35m : ab\u001b[39;0m\n`;
@@ -25692,7 +25687,7 @@ function outputLogWithColor( test )
       _.process.startSingle( options )
       .then( ( op ) =>
       {
-        test.ni( op.exitCode, 0 );
+        test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
 
         var expOut = `\u001b[37mout\u001b[39;0m\u001b[35m : ab\u001b[39;0m\n`;
@@ -25729,7 +25724,7 @@ function outputLogWithColor( test )
       _.process.startSingle( options )
       .then( ( op ) =>
       {
-        test.ni( op.exitCode, 0 );
+        test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
 
         var expOut = `\u001b[37mout\u001b[39;0m\u001b[35m : ac\u001b[39;0m\n`;
@@ -25781,7 +25776,6 @@ function outputLogWithColor( test )
     setTimeout( () => process.stdout.write( 'c' ), context.t0 );
     process.stderr.write( 'err2' );
     process.stdout.write( 'b' );
-    throw new Error();
   }
 
   function testApp2()
@@ -25794,7 +25788,6 @@ function outputLogWithColor( test )
     process.stderr.write( 'err3' );
     process.stderr.write( '\n' );
     console.log();
-    throw new Error();
   }
 
   function testApp3()
@@ -25803,7 +25796,6 @@ function outputLogWithColor( test )
     process.stderr.write( 'err1\nerr2' );
     process.stdout.write( 'd' );
     process.stderr.write( 'err3' );
-    throw new Error();
   }
 
   function testApp4()
@@ -25812,7 +25804,6 @@ function outputLogWithColor( test )
     process.stderr.write( 'err1\nerr2' );
     process.stdout.write( 'd' );
     process.stderr.write( 'err3\n' );
-    throw new Error();
   }
 
   function testApp5()
@@ -25821,7 +25812,6 @@ function outputLogWithColor( test )
     process.stderr.write( 'b' );
     process.stdout.write( 'c\n' );
     process.stderr.write( 'd\n' );
-    throw new Error();
   }
 
 }
