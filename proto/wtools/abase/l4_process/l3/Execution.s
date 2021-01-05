@@ -2684,6 +2684,7 @@ function signal_body( o )
     catch( err )
     {
       console.error( 'signalSend.error :', err.code ); /* xxx : remove later */
+      console.error( processInfoGet( p ) );
       if( o.ignoringErrorEsrch && err.code === 'ESRCH' )
       return true;
       if( o.ignoringErrorPerm && err.code === 'EPERM' )
@@ -2717,6 +2718,9 @@ function signal_body( o )
       if( isWindows && i && process.name === 'conhost.exe' )
       continue;
 */
+      if( _.process._windowsSystemLike( process ) )
+      console.error( `Attemp to send signal to Windows system process.\n${processInfoGet( process )}` )
+
       signalSend( process );
     }
     else
@@ -2795,12 +2799,23 @@ function signal_body( o )
     err = _.err( err, `\nTarget process does not exist.` );
 
     if( !err.processInfo && p )
+    // if( p )
     {
       let processInfo = processInfoGet( p );
       _._errFields( err, { processInfo : processInfo } )
       _.err( err, processInfo );
-      console.log( 'handleError2 :', processInfo );
+      // console.log( 'handleError2 :', processInfo );
     }
+    // else
+    // {
+    //   console.log( 'handleError2 :', 'no p' );
+    // }
+
+    if( err && err.processInfo )
+    console.log( 'handleError2 :', err.processInfo );
+
+    if( !p )
+    console.log( 'handleError2 : no p' );
 
     return _.err( err );
   }
@@ -2978,6 +2993,12 @@ function waitForDeath_body( o )
           {
             _.errAttend( err );
             return null;
+          }
+          else
+          {
+            let execPath = _.process.execPathOf({ pid : o.pid, sync : 1, throwing : 0 });
+            let info = `waitForDeath: Spawn time of process:${o.pid} did not change after time out.\nspawnTime:${spawnTime} spawnTime2:${spawnTime2}\nExec path:${execPath}`
+            console.error( info );
           }
         }
       }
@@ -3267,6 +3288,193 @@ spawnTimeOf.defaults =
   pnd : null
 }
 
+//
+
+function _windowsSystemLike( pnd )
+{
+  if( process.platform !== 'win32' )
+  return false;
+
+  let list =
+  [
+    'csrss.exe',
+    'wininit.exe',
+    'services.exe',
+    'smartscreen.exe',
+    'ShellExperienceHost.exe',
+    'SearchUI.exe',
+    'RuntimeBroker.exe',
+    'taskhostw.exe',
+    'provisioner.exe',
+    'conhost.exe',
+    'Runner.Listener.exe',
+    'Runner.Worker.exe',
+    'spoolsv.exe',
+    'sihost.exe',
+    'WaAppAgent.exe',
+    'WaSecAgentProv.exe',
+    'SMSvcHost.exe',
+    'IpOverUsbSvc.exe',
+    'WindowsAzureGuestAgent.exe',
+    'MsMpEng.exe',
+    'WindowsAzureNetAgent.exe',
+    'mqsvc.exe',
+    'SMSvcHost.exe',
+    'ctfmon.exe',
+    'vds.exe',
+    'msdtc.exe',
+    'svchost.exe',
+    'lsass.exe',
+    'fontdrvhost.exe',
+  ]
+
+  _.assert( arguments.length === 1 );
+  _.assert( _.strDefined( pnd.name ) );
+
+  return list.indexOf( pnd.name ) !== -1;
+}
+
+//
+
+function _startTree( o )
+{
+  o = o || {};
+
+  _.routineOptions( _startTree, o );
+
+  if( o.executionTime === null )
+  o.executionTime = [ 50, 100 ];
+
+  if( o.spawnPeriod === null )
+  o.spawnPeriod = [ 25, 50 ];
+
+  let locals =
+  {
+    toolsPath : _.module.resolve( 'wTools'),
+    ... o
+  };
+
+  let preformedChild = _.program.preform({ routine : child, locals });
+  let preformedChildPath = _.process.tempOpen({ sourceCode : preformedChild.sourceCode });
+  locals.childPath = preformedChildPath;
+  let preformed = _.program.preform({ routine : program, locals });
+  let preformedFilePath = _.process.tempOpen({ sourceCode : preformed.sourceCode });
+
+  o.list = [];
+
+  let op = o.rootOp =
+  {
+    execPath : preformedFilePath,
+    mode : 'fork',
+    inputMirroring : 0,
+    throwingExitCode : 0,
+  }
+
+  _.process.startSingle( op );
+
+  o.ready = _.Consequence();
+
+  op.pnd.on( 'message', ( pnd ) =>
+  {
+    o.list.push( pnd );
+
+    if( o.list.length === o.max )
+    o.ready.take( null );
+  })
+
+  // o.ready.then( () =>
+  // {
+  //   let cons = [ op.conTerminate  ];
+  //   o.list.forEach( ( pnd ) =>
+  //   {
+  //     if( !_.process.isAlive( pnd.pid ) )
+  //     return;
+  //     cons.push( _.process.waitForDeath({ pid : pnd.pid }) )
+  //   })
+  //   return _.Consequence.AndKeep( ... cons );
+  // })
+
+  o.ready.then( () => o.rootOp.ready );
+  o.ready.then( () => o );
+
+  return o.ready;
+
+  /* */
+
+  function program()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    process.send({ pid : process.pid, ppid : process.ppid });
+
+    let c = 0;
+
+    _.time.periodic( _.numberRandom( spawnPeriod ), () =>
+    {
+      if( c === max )
+      return;
+
+      c += 1;
+
+      let op =
+      {
+        execPath : childPath,
+        mode : 'fork',
+        // detaching : 1,
+        inputMirroring : 0,
+        throwingExitCode : 0,
+      }
+      _.process.startSingle( op );
+
+      op.conStart.tap( () =>
+      {
+        process.send({ pid : op.pnd.pid, ppid : process.pid });
+        // op.disconnect();
+      })
+
+      return true;
+    })
+  }
+
+  /* */
+
+  function child()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    let timeOut = _.numberRandom( executionTime );
+    setTimeout( () =>
+    {
+      process.exit( 0 )
+    }, timeOut );
+  }
+
+  /* */
+
+  function calculateNumberOfProcesses()
+  {
+    let expectedNumberOfNodes = 1;
+    let prev = 1;
+    for( let i = 1; i < o.depth; i++ )
+    {
+      prev = prev * o.breadth;
+      expectedNumberOfNodes += prev;
+    }
+    return expectedNumberOfNodes;
+  }
+}
+
+_startTree.defaults =
+{
+  max : 20,
+  spawnPeriod : null,
+  executionTime : null,
+}
+
 // --
 // declare
 // --
@@ -3298,7 +3506,10 @@ let Extension =
 
   children,
   execPathOf,
-  spawnTimeOf
+  spawnTimeOf,
+
+  _windowsSystemLike,
+  _startTree
 
   // fields
 
