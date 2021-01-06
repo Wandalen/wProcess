@@ -3309,11 +3309,21 @@ function _startTree( o )
 
   _.routineOptions( _startTree, o );
 
+  if( o.executionTime === null )
+  o.executionTime = [ 50, 100 ];
+
+  if( o.spawnPeriod === null )
+  o.spawnPeriod = [ 25, 50 ];
+
   let locals =
   {
     toolsPath : _.module.resolve( 'wTools'),
     ... o
   };
+
+  let preformedChild = _.program.preform({ routine : child, locals });
+  let preformedChildPath = _.process.tempOpen({ sourceCode : preformedChild.sourceCode });
+  locals.childPath = preformedChildPath;
   let preformed = _.program.preform({ routine : program, locals });
   let preformedFilePath = _.process.tempOpen({ sourceCode : preformed.sourceCode });
 
@@ -3323,29 +3333,38 @@ function _startTree( o )
   {
     execPath : preformedFilePath,
     mode : 'fork',
-    inputMirroring : 0
+    inputMirroring : 0,
+    throwingExitCode : 0,
   }
 
   _.process.startSingle( op );
 
-  o.total = calculateNumberOfProcesses();
+  o.ready = _.Consequence();
 
-  let ready = _.Consequence();
-
-  op.pnd.on( 'message', ( d ) =>
+  op.pnd.on( 'message', ( pnd ) =>
   {
-    if( d.isLast )
-    o.list.push( d.pnd );
-    else
-    o.list.unshift( d.pnd );
+    o.list.push( pnd );
 
-    _.assert( o.list.length <= o.total );
-
-    if( o.list.length === o.total )
-    ready.take( o );
+    if( o.list.length === o.max )
+    o.ready.take( null );
   })
 
-  return ready;
+  // o.ready.then( () =>
+  // {
+  //   let cons = [ op.conTerminate  ];
+  //   o.list.forEach( ( pnd ) =>
+  //   {
+  //     if( !_.process.isAlive( pnd.pid ) )
+  //     return;
+  //     cons.push( _.process.waitForDeath({ pid : pnd.pid }) )
+  //   })
+  //   return _.Consequence.AndKeep( ... cons );
+  // })
+
+  o.ready.then( () => o.rootOp.ready );
+  o.ready.then( () => o );
+
+  return o.ready;
 
   /* */
 
@@ -3355,55 +3374,50 @@ function _startTree( o )
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
-    let currentDepth = _.numberFrom( process.argv[ 2 ] || 1 );
+    process.send({ pid : process.pid, ppid : process.ppid });
 
-    let descriptor =
+    let c = 0;
+
+    _.time.periodic( _.numberRandom( spawnPeriod ), () =>
     {
-      pnd : { pid : process.pid, ppid : process.ppid },
-      isLast : currentDepth === depth
-    }
+      if( c === max )
+      return;
 
-    if( descriptor.isLast )
-    {
-      process.send( descriptor );
-      return setTimeout( () =>
-      {
-      }, executionTime );
-    }
+      c += 1;
 
-    let ready = _.Consequence().take( null )
-
-    for( let b = 0; b < breadth; b++ )
-    ready.then( () =>
-    {
-      let con = _.Consequence();
       let op =
       {
-        execPath : __filename,
+        execPath : childPath,
         mode : 'fork',
-        args : [ currentDepth + 1 ],
+        // detaching : 1,
         inputMirroring : 0,
+        throwingExitCode : 0,
       }
-
       _.process.startSingle( op );
 
-      op.pnd.on( 'message', ( d ) =>
+      op.conStart.tap( () =>
       {
-        process.send( d );
-
-        if( d.pnd.ppid === process.pid )
-        con.take( null )
+        process.send({ pid : op.pnd.pid, ppid : process.pid });
+        // op.disconnect();
       })
 
-      return con;
+      return true;
     })
+  }
 
-    ready.then( () =>
+  /* */
+
+  function child()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+    _.include( 'wFiles' );
+
+    let timeOut = _.numberRandom( executionTime );
+    setTimeout( () =>
     {
-      process.send( descriptor );
-      return null;
-    })
-
+      process.exit( 0 )
+    }, timeOut );
   }
 
   /* */
@@ -3423,9 +3437,9 @@ function _startTree( o )
 
 _startTree.defaults =
 {
-  depth : 2,
-  breadth : 10,
-  executionTime : 5000
+  max : 20,
+  spawnPeriod : null,
+  executionTime : null,
 }
 
 // --
