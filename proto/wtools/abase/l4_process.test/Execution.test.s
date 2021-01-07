@@ -27302,6 +27302,95 @@ function startMultipleOptionCurrentPath( test )
 
 //
 
+function startMultipleWithEmptySessions( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let programPath = a.program( testApp );
+
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
+
+  /* */
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+    let o =
+    {
+      stdio : 'pipe',
+      outputCollecting : 1,
+      mode,
+    };
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, execPath : empty, currentPath : empty`;
+
+      let o2 = { currentPath : [], execPath : [] };
+      let returned = _.process.startMultiple( _.mapSupplement( o2, o ) );
+      returned.then( ( op ) =>
+      {
+        test.identical( op.sessions, [] );
+        test.identical( op.execPath, [] );
+        test.identical( op.output, '' );
+        test.true( op.execPath === o2.execPath );
+        return op;
+      });
+
+      return returned;
+    });
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, execPath : empty, currentPath : single`;
+
+      let o2 = { currentPath : a.routinePath, execPath : [] };
+      let returned = _.process.startMultiple( _.mapSupplement( o2, o ) );
+      returned.then( ( op ) =>
+      {
+        test.identical( op.sessions, [] );
+        test.identical( op.execPath, [] );
+        test.identical( op.output, '' );
+        test.true( op.execPath === o2.execPath );
+        return op;
+      });
+
+      return returned;
+    });
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, execPath : command, currentPath : empty`;
+
+      let o2 = { currentPath : [], execPath : mode === 'fork' ? programPath : 'node ' + programPath };
+      let returned = _.process.startMultiple( _.mapSupplement( o2, o ) );
+      returned.then( ( op ) =>
+      {
+        test.identical( op.sessions, [] );
+        test.identical( op.execPath, mode === 'fork' ? programPath : 'node ' + programPath );
+        test.identical( op.output, '' );
+        test.true( op.execPath === o2.execPath );
+        return op;
+      });
+
+      return returned;
+    });
+
+    return ready;
+  }
+
+  /* - */
+
+  function testApp()
+  {
+    console.log( process.cwd() );
+  }
+}
+
+//
+
 function startPassingThrough( test )
 {
   let context = this;
@@ -38808,6 +38897,7 @@ var Proto =
     startMultipleOptionDry,
     startSingleOptionCurrentPath,
     startMultipleOptionCurrentPath,
+    startMultipleWithEmptySessions,
     startPassingThrough,
     startMinimalOptionUid,
     startMinimalOptionGid,
