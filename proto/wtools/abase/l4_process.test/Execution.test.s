@@ -17986,7 +17986,7 @@ function startNjsWithReadyDelayStructural( test )
           exp2.exitReason = 'normal';
         }
 
-        test.identical( _.property.own( options ), exp2 );
+        test.identical( _.property.onlyOwn( options ), exp2 );
         test.identical( !!options.pnd, !tops.dry );
         test.true( _.routineIs( options.disconnect ) );
         test.true( _.routineIs( options._end ) );
@@ -18029,7 +18029,7 @@ function startNjsWithReadyDelayStructural( test )
         exp2.output = tops.dry ? '' :'program1:begin\n';
         delete exp2.end;
 
-        test.identical( _.property.own( options ), exp2 );
+        test.identical( _.property.onlyOwn( options ), exp2 );
       }
 
       test.true( _.routineIs( options.disconnect ) );
@@ -18927,7 +18927,7 @@ function startNjsWithReadyDelayStructuralMultiple( test )
           exp2.exitReason = 'normal';
         }
 
-        test.identical( _.property.own( options ), exp2 );
+        test.identical( _.property.onlyOwn( options ), exp2 );
         test.true( !options.pnd );
         test.true( !options.disconnect );
         test.identical( _.streamIs( options.streamOut ), !tops.sync || ( !!tops.sync && !!tops.deasync ) );
