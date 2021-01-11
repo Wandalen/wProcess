@@ -787,9 +787,7 @@ function startMinimal_body( o )
     // console.log( 'handleClose', _.process.realMainFile(), o.ended, ... arguments ); debugger;
     // */
 
-    stderrBufferLog( o ); /* color & prefix & log stderr collected during execution if no error is thrown */
-
-    stdoutBufferLog( o ); /* color & prefix & log stdout collected during execution */
+    channelsBuffersLog( o, 'out' ); /* color & prefix & log stdout ( and stderr if any ) collected during execution */
 
     if( o.ended )
     return;
@@ -865,7 +863,7 @@ function startMinimal_body( o )
       , `\n    Current path : ${o.currentPath}`
     );
 
-    stderrBufferLog( o ); /* color & prefix & log stderr collected during execution */
+    channelsBuffersLog( o ); /* color & prefix & log stderr collected during execution */
 
     if( o.ended )
     {
@@ -922,24 +920,7 @@ function startMinimal_body( o )
 
   /* */
 
-  function stdoutBufferLog( o )
-  {
-    if( o.outputAdditive && _outAdditive ) /* color & prefix & log stdout collected during execution */
-    {
-      if( o.outputPrefixing )
-      _outAdditive = _outPrefix + _outAdditive;
-
-      if( o.outputColoring.out )
-      _outAdditive = _.ct.format( _outAdditive, 'pipe.neutral' )
-
-      o.logger.log( _outAdditive );
-      _outAdditive = '';
-    }
-  }
-
-  /* */
-
-  function stderrBufferLog( o )
+  function channelsBuffersLog( o, channel )
   {
     if( o.outputAdditive && _errAdditive ) /* color & prefix & log stderr collected during execution */
     {
@@ -951,6 +932,21 @@ function startMinimal_body( o )
 
       o.logger.error( _errAdditive );
       _errAdditive = '';
+    }
+
+    if( channel === 'out' )
+    {
+      if( o.outputAdditive && _outAdditive ) /* color & prefix & log stdout collected during execution */
+      {
+        if( o.outputPrefixing )
+        _outAdditive = _outPrefix + _outAdditive;
+
+        if( o.outputColoring.out )
+        _outAdditive = _.ct.format( _outAdditive, 'pipe.neutral' )
+
+        o.logger.log( _outAdditive );
+        _outAdditive = '';
+      }
     }
   }
 
@@ -1204,7 +1200,8 @@ function startMinimal_body( o )
 
   function handleStreamOutput( data, channel )
   {
-    debugger
+    let finish = false;
+
     if( _.bufferNodeIs( data ) )
     data = data.toString( 'utf8' );
 
@@ -1227,47 +1224,10 @@ function startMinimal_body( o )
 
     if( o.outputAdditive )
     {
-      if( _.strEnds( data, '\n' ) )
-      {
-        if( channel === 'err' )
-        {
-          data = _errAdditive + data;
-          _errAdditive = '';
-        }
-        else
-        {
-          data = _outAdditive + data;
-          _outAdditive = '';
-        }
-      }
-      else
-      {
-        /* xxx yyy qqq for Yevhen : not implemeted yet | aaa : Implemented. */
-        if( !_.strHas( data, '\n' ) )
-        {
-          if( channel === 'err' )
-          _errAdditive += data;
-          else
-          _outAdditive += data;
-          return;
-        }
-        else
-        {
-          let lastBreak = data.lastIndexOf( '\n' );
-          let left = data.slice( lastBreak + 1 );
-          data = data.slice( 0, lastBreak );
-          if( channel === 'err' )
-          {
-            data = _errAdditive + data;
-            _errAdditive = left;
-          }
-          else
-          {
-            data = _outAdditive + data;
-            _outAdditive = left;
-          }
-        }
-      }
+      handleOutputAdditive();
+
+      if( finish ) /* buffer data and return if no '\n' at the end */
+      return;
     }
 
     /* yyy qqq for Yevhen : cover and complete */
@@ -1303,6 +1263,54 @@ function startMinimal_body( o )
     data = splits.join( '\n' )
 
     log( data, channel );
+
+    /* - */
+
+    function handleOutputAdditive()
+    {
+      if( _.strEnds( data, '\n' ) )
+      {
+        if( channel === 'err' )
+        {
+          data = _errAdditive + data;
+          _errAdditive = '';
+        }
+        else
+        {
+          data = _outAdditive + data;
+          _outAdditive = '';
+        }
+      }
+      else
+      {
+        /* xxx yyy qqq for Yevhen : not implemeted yet | aaa : Implemented. */
+        if( !_.strHas( data, '\n' ) )
+        {
+          if( channel === 'err' )
+          _errAdditive += data;
+          else
+          _outAdditive += data;
+
+          finish = true;
+        }
+        else
+        {
+          let lastBreak = data.lastIndexOf( '\n' );
+          let left = data.slice( lastBreak + 1 );
+          data = data.slice( 0, lastBreak );
+          if( channel === 'err' )
+          {
+            data = _errAdditive + data;
+            _errAdditive = left;
+          }
+          else
+          {
+            data = _outAdditive + data;
+            _outAdditive = left;
+          }
+        }
+      }
+    }
   }
 
   /* */
