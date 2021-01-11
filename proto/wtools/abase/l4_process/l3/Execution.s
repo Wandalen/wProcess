@@ -1998,44 +1998,50 @@ function startMultiple_body( o )
     /* xxx : introduce concurrent.limit */
     /* xxx qqq : cover sessionsRun */
 
-    let o2 = _.sessionsRun
-    ({
-      concurrent : o.concurrent,
-      sessions : o.sessions,
-      conBeginName : 'conStart',
-      conEndName : 'conTerminate',
-      readyName : 'ready',
-      onRun : ( session ) =>
-      {
-        _.assertMapHasAll( session, _.process.startSingle.defaults );
-        _.process.startSingle.body.call( _.process, session );
-        if( !o.dry )
-        if( o.streamOut || o.streamErr )
-        processPipe( session );
-      },
-      onBegin : ( err, o2 ) =>
-      {
-        if( !o.ended )
-        o.state = o.concurrent ? 'started' : 'starting';
-        o.conStart.take( err, err ? undefined : o );
-      },
-      onEnd : ( err, o2 ) =>
-      {
-        if( !o.ended )
-        o.state = 'terminating';
-        o.conTerminate.take( err, err ? undefined : o );
-      },
-      onError : ( err ) =>
-      {
-        o.error = o.error || err;
-        if( o.state !== 'terminated' )
-        serialEnd();
-        throw err;
-      },
-      ready : null,
-    });
+    let o2;
+    if( o.sessions.length ) /* Dmytro : for empty sessions creates procedure that never ended. In new PR added assertion for it */
+    {
+      o2 = _.sessionsRun
+      ({
+        concurrent : o.concurrent,
+        sessions : o.sessions,
+        conBeginName : 'conStart',
+        conEndName : 'conTerminate',
+        readyName : 'ready',
+        onRun : ( session ) =>
+        {
+          _.assertMapHasAll( session, _.process.startSingle.defaults );
+          _.process.startSingle.body.call( _.process, session );
+          if( !o.dry )
+          if( o.streamOut || o.streamErr )
+          processPipe( session );
+        },
+        onBegin : ( err, o2 ) =>
+        {
+          if( !o.ended )
+          o.state = o.concurrent ? 'started' : 'starting';
+          o.conStart.take( err, err ? undefined : o );
+        },
+        onEnd : ( err, o2 ) =>
+        {
+          if( !o.ended )
+          o.state = 'terminating';
+          o.conTerminate.take( err, err ? undefined : o );
+        },
+        onError : ( err ) =>
+        {
+          o.error = o.error || err;
+          if( o.state !== 'terminated' )
+          serialEnd();
+          throw err;
+        },
+        ready : null,
+      });
 
-    return o2.ready;
+      return o2.ready;
+    }
+
+    return _.take( null );
   }
 
   /* */
