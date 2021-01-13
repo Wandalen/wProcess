@@ -37836,6 +37836,45 @@ function execPathOfOptionSync( test )
 
 //
 
+function execPathOfOptionThrowing( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync : 1, throwing : 0, wrong pid';
+
+    let returned = _.process.execPathOf({ pid : 111111, sync : 1, throwing : 0 });
+
+    test.identical( returned, null );
+
+    return null;
+  })
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync : 0, throwing : 0, wrong pid';
+
+    return _.process.execPathOf({ pid : 111111, sync : 0, throwing : 0 })
+    .then( ( op ) =>
+    {
+      test.identical( op, null );
+      return null;
+    });
+
+  })
+
+  return a.ready;
+
+}
+
+//
+
 function waitForDeath( test )
 {
   let context = this;
@@ -39048,6 +39087,7 @@ var Proto =
     killComplex,
     execPathOf,
     execPathOfOptionSync,
+    execPathOfOptionThrowing,
     waitForDeath,
 
     // children
