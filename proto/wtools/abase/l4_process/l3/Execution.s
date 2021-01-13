@@ -787,7 +787,8 @@ function startMinimal_body( o )
     // console.log( 'handleClose', _.process.realMainFile(), o.ended, ... arguments ); debugger;
     // */
 
-    channelsBuffersLog( o, 'out' ); /* color & prefix & log stdout ( and stderr if any ) collected during execution */
+    channelBufferLog( o, 'err' );
+    channelBufferLog( o, 'out' );
 
     if( o.ended )
     return;
@@ -863,7 +864,7 @@ function startMinimal_body( o )
       , `\n    Current path : ${o.currentPath}`
     );
 
-    channelsBuffersLog( o ); /* color & prefix & log stderr collected during execution */
+    channelBufferLog( o, 'err' );
 
     if( o.ended )
     {
@@ -920,31 +921,31 @@ function startMinimal_body( o )
 
   /* */
 
-  function channelsBuffersLog( o, channel )
+  function channelBufferLog( o, channel ) /* color & prefix & log channel data collected during execution */
   {
-    if( o.outputAdditive && _errAdditive ) /* color & prefix & log stderr collected during execution */
+    let isErr = channel === 'err';
+    let log = isErr ? _errAdditive : _outAdditive;
+
+    if( o.outputAdditive && log )
     {
-      if( o.outputPrefixing )
-      _errAdditive = _errPrefix + _errAdditive;
-
-      if( o.outputColoring.err )
-      _errAdditive = _.ct.format( _errAdditive, 'pipe.negative' )
-
-      o.logger.error( _errAdditive );
-      _errAdditive = '';
-    }
-
-    if( channel === 'out' )
-    {
-      if( o.outputAdditive && _outAdditive ) /* color & prefix & log stdout collected during execution */
+      if( isErr )
       {
         if( o.outputPrefixing )
-        _outAdditive = _outPrefix + _outAdditive;
+        log = _errPrefix + log;
+        if( o.outputColoring.err )
+        log = _.ct.format( log, 'pipe.negative' );
 
+        o.logger.error( log );
+        _errAdditive = '';
+      }
+      else
+      {
+        if( o.outputPrefixing )
+        log = _outPrefix + log;
         if( o.outputColoring.out )
-        _outAdditive = _.ct.format( _outAdditive, 'pipe.neutral' )
+        log = _.ct.format( log, 'pipe.neutral' )
 
-        o.logger.log( _outAdditive );
+        o.logger.log( log );
         _outAdditive = '';
       }
     }
