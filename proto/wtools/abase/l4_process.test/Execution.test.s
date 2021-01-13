@@ -1,3 +1,4 @@
+/* eslint-disable */
 ( function _Execution_test_s( )
 {
 
@@ -37741,6 +37742,97 @@ function execPathOf( test )
 
 //
 
+function execPathOfOptionSync( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( testApp );
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync : 1, no error';
+
+    let o = { execPath : testAppPath };
+    
+    _.process.startNjs( o )
+    
+    o.conStart.then( ( op ) =>
+    {
+      let execPath = _.process.execPathOf({ pnd : o.pnd, sync : 1 });
+      test.identical( execPath.split( ' ' )[ 1 ], op.execPath );
+
+      return null;
+    })
+
+    return _.Consequence.And( o.conStart, o.conTerminate );
+  })
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync : 0, no error';
+
+    let o = { execPath : testAppPath };
+    
+    _.process.startNjs( o )
+    
+    o.conStart.then( ( op ) =>
+    {
+      _.process.execPathOf({ pnd : o.pnd, sync : 0 })
+      .then( ( arg ) =>
+      {
+        test.identical( arg.split( ' ' )[ 1 ], op.execPath );
+        return null;
+      })
+
+      return null;
+    })
+
+    return _.Consequence.And( o.conStart, o.conTerminate );
+  })
+
+  /* */
+
+  // a.ready.then( () =>
+  // {
+  //   test.case = 'sync : 1, error';
+
+  //   let o = { execPath : testAppPath };
+    
+  //   _.process.startNjs( o )
+    
+  //   o.conStart.then( ( op ) =>
+  //   {
+  //     _.process.execPathOf({ pnd : o.pnd, sync : 1 })
+  //     .catch( ( err ) =>
+  //     {
+
+  //     })
+  //     // .then( ( arg ) =>
+  //     // {
+  //     //   test.identical( arg.split( ' ' )[ 1 ], op.execPath );
+  //     //   return null;
+  //     // })
+
+  //     return null;
+  //   })
+
+  //   return _.Consequence.And( o.conStart, o.conTerminate );
+  // })
+
+  return a.ready;
+
+  /* */
+
+  function testApp()
+  {
+    setTimeout( () => {}, context.t1 * 5 ) /* 5000 */
+  }
+}
+
+//
+
 function waitForDeath( test )
 {
   let context = this;
@@ -38952,6 +39044,7 @@ var Proto =
 
     killComplex,
     execPathOf,
+    execPathOfOptionSync,
     waitForDeath,
 
     // children
