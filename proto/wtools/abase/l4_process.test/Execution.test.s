@@ -37752,9 +37752,9 @@ function execPathOfOptionSync( test )
     test.case = 'sync : 1, no error';
 
     let o = { execPath : testAppPath };
-    
+
     _.process.startNjs( o )
-    
+
     o.conStart.then( ( op ) =>
     {
       let execPath = _.process.execPathOf({ pnd : o.pnd, sync : 1 });
@@ -37773,9 +37773,9 @@ function execPathOfOptionSync( test )
     test.case = 'sync : 0, no error';
 
     let o = { execPath : testAppPath };
-    
+
     _.process.startNjs( o )
-    
+
     o.conStart.then( ( op ) =>
     {
       _.process.execPathOf({ pnd : o.pnd, sync : 0 })
