@@ -25301,6 +25301,134 @@ startMultipleOptionOutputAdditive.rapidity = -1;
 
 //
 
+function outputLogStderrWithoutError( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( testApp );
+  let testAppPath2 = a.program( testApp2 );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
+
+  /* - */
+
+  function run( mode )
+  {
+    let ready = new _.Consequence().take( null );
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, stderr without '\\n', no error`;
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath } });
+
+      let options =
+      {
+        execPath : 'node ' + testAppParentPath,
+        outputCollecting : 1,
+        outputPiping : 1,
+        throwingExitCode : 0
+      }
+
+      _.process.startSingle( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        test.true( _.strHas( op.output, 'out' ) );
+        test.true( _.strHas( op.output, 'err1' ) );
+
+        a.fileProvider.fileDelete( testAppParentPath );
+        return null;
+      })
+
+      return options.ready;
+
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, part of stderr with '\\n', no error`;
+      let testAppParentPath = a.program({ routine : testAppParent, locals : { mode, testAppPath : testAppPath2 } });
+
+      let options =
+      {
+        execPath : 'node ' + testAppParentPath,
+        outputCollecting : 1,
+        outputColoring : 0,
+        outputPiping : 1,
+        throwingExitCode : 0
+      }
+
+      _.process.startSingle( options )
+      .then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        test.true( _.strHas( op.output, 'out1' ) );
+        test.true( _.strHas( op.output, 'out2' ) );
+        test.true( _.strHas( op.output, 'out3' ) );
+        test.true( _.strHas( op.output, 'err1' ) );
+        test.true( _.strHas( op.output, 'err2' ) );
+        test.true( _.strHas( op.output, 'err3' ) );
+
+        a.fileProvider.fileDelete( testAppParentPath );
+        return null;
+      })
+
+      return options.ready;
+    })
+
+    return ready;
+  }
+
+  /* - */
+
+  function testAppParent()
+  {
+    let _ = require( toolsPath );
+    _.include( 'wProcess' );
+
+    let o =
+    {
+      execPath : mode === 'fork' ? testAppPath : 'node ' + testAppPath,
+      mode,
+      inputMirroring : 0,
+      outputColoring : 0,
+      outputPiping : 1,
+      outputCollecting : 1,
+      outputPrefixing : 0,
+    }
+    return _.process.startSingle( o );
+
+  }
+
+  function testApp()
+  {
+    console.log( 'out' );
+    process.stderr.write( 'err1' );
+  }
+
+  function testApp2()
+  {
+    process.stdout.write( 'out1' );
+    process.stderr.write( 'err1' );
+    process.stdout.write( 'out2' );
+    console.error( 'err2' );
+    process.stdout.write( 'out3' );
+    process.stderr.write( 'err3' );
+    console.log();
+  }
+
+}
+
+//
+
 function outputLog( test )
 {
   let context = this;
@@ -38881,6 +39009,7 @@ var Proto =
     startMultipleOptionStdioIgnore,
     startSingleOptionOutputAdditive,
     startMultipleOptionOutputAdditive, /* xxx qqq for Yevhen : fix | aaa : Done. */
+    outputLogStderrWithoutError,
     outputLog,
     outputLogStreams,
 
