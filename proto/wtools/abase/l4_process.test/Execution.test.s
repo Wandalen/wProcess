@@ -37758,7 +37758,7 @@ function execPathOfOptionSync( test )
     o.conStart.then( ( op ) =>
     {
       let execPath = _.process.execPathOf({ pnd : o.pnd, sync : 1 });
-      test.identical( execPath.split( ' ' )[ 1 ], op.execPath );
+      test.true( _.strHas( execPath, op.execPath ) );
 
       return null;
     })
@@ -37781,7 +37781,7 @@ function execPathOfOptionSync( test )
       _.process.execPathOf({ pnd : o.pnd, sync : 0 })
       .then( ( arg ) =>
       {
-        test.identical( arg.split( ' ' )[ 1 ], op.execPath );
+        test.true( _.strHas( arg, op.execPath ) );
         return null;
       })
 
