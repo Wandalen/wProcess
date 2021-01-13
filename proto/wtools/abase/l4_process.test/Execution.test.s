@@ -37794,32 +37794,35 @@ function execPathOfOptionSync( test )
 
   /* */
 
-  // a.ready.then( () =>
-  // {
-  //   test.case = 'sync : 1, error';
+  a.ready.then( () =>
+  {
+    test.case = 'sync : 1, wrong pid';
 
-  //   let o = { execPath : testAppPath };
-    
-  //   _.process.startNjs( o )
-    
-  //   o.conStart.then( ( op ) =>
-  //   {
-  //     _.process.execPathOf({ pnd : o.pnd, sync : 1 })
-  //     .catch( ( err ) =>
-  //     {
+    let returned = test.shouldThrowErrorSync( () => _.process.execPathOf({ pid : 111111, sync : 1 }) );
 
-  //     })
-  //     // .then( ( arg ) =>
-  //     // {
-  //     //   test.identical( arg.split( ' ' )[ 1 ], op.execPath );
-  //     //   return null;
-  //     // })
+    test.true( _.errIs( returned ) );
+    test.equivalent( returned.message, 'Target process: "111111" does not exist.' )
 
-  //     return null;
-  //   })
+    return null;
+  })
 
-  //   return _.Consequence.And( o.conStart, o.conTerminate );
-  // })
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync : 0, wrong pid';
+
+    test.shouldThrowErrorAsync( () => _.process.execPathOf({ pid : 111111, sync : 0 }) )
+    .then( ( err ) =>
+    {
+      test.true( _.errIs( err ) );
+      test.equivalent( err.message, 'Target process: "111111" does not exist.' );
+
+      return null;
+    });
+
+    return null;
+  })
 
   return a.ready;
 
