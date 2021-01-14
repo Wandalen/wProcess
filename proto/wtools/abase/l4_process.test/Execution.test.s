@@ -38797,14 +38797,13 @@ function experimentBuffers( test )
         withBuffer : tops.withBuffer
       }
 
-
       time = _.time.now();
       return _.process.startSingle( options )
       .then( ( op ) =>
       {
+        let timeSpent = _.time.spent( time );
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
-        let timeSpent = _.time.spent( time );
         if( tops.withBuffer )
         times.timesBuffer.push( timeSpent );
         else

@@ -1364,7 +1364,7 @@ startMinimal_body.defaults =
   outputGraying : 0,
   inputMirroring : 1,
 
-  withBuffer : 0
+  withBuffer : 0 /* Yevhen : for experimenting with data storage format */
 
 }
 
