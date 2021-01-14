@@ -38735,7 +38735,7 @@ function experimentBuffers( test )
   let times = { timesNoBuffer : [], timesBuffer : [] }
   a.reflect();
 
-  let bigText = a.fileProvider.fileRead({ filePath : a.abs( 'dir/bigFile.txt' ) }) /* 1 462 559 bytes (2,2 MB on disk) */
+  let bigText = a.fileProvider.fileRead({ filePath : a.abs( 'dir/bigFile.txt' ) }) /* 2 925 118 bytes (3,2 MB on disk) */
   let testAppPath = a.program({ routine : testApp, locals : { bigText } });
   let modes = [ 'fork', 'spawn', 'shell' ];
 
