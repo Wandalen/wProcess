@@ -38809,7 +38809,6 @@ function experimentBuffers( test )
         else
         times.timesNoBuffer.push( timeSpent );
         // console.log( 'Time spent : ', timeSpent );
-        // test.identical( op.output, 'abc\n' );
 
         // a.fileProvider.fileDelete( testAppParentPath );
         return null;

@@ -200,11 +200,47 @@ function startMinimal_body( o )
   _.assert( arguments.length === 1, 'Expects single argument' );
 
   /* qqq for Yevhen : use buffer instead */
+  /*
+    used in :
+    `handleStreamOutput` - is being collected if channel = 'err'
+    `infoGet` - log if non-empty;
+  */
   let _errOutput = '';
+
+  /*
+    used in :
+    `log` - is being collected if channel = 'out' AND option::outputAdditive = 0
+    `end3` - log if non-empty AND option::outputAdditive = 0;
+  */
   let _decoratedOutOutput = '';
+
+  /*
+    used in :
+    `handleStreamOutput` :
+     - is being collected if no '\n'.
+     - fully logged through `log` if ends with '\n'.
+     - partly logged through `log` if '\n' is not at the end.
+    `channelBufferLog` - color & prefix & log ( through `handleClose` ) last part collected during execution
+  */
   let _outAdditive = '';
+
+  /*
+    used in :
+    `log` - is being collected if channel = 'err' AND option::outputAdditive = 0
+    `end3` - log if non-empty AND option::outputAdditive = 0;
+  */
   let _decoratedErrOutput = '';
+
+  /*
+    used in :
+    `handleStreamOutput` :
+     - is being collected if no '\n'.
+     - fully logged through `log` if ends with '\n'.
+     - partly logged through `log` if '\n' is not at the end.
+    `channelBufferLog` - color & prefix & log ( through `handleClose`, `handleError` ) last part collected during execution
+  */
   let _errAdditive = '';
+
   let _errPrefix = null;
   let _outPrefix = null;
   let _readyCallback;
