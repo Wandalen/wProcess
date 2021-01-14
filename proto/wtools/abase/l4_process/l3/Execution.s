@@ -1364,6 +1364,8 @@ startMinimal_body.defaults =
   outputGraying : 0,
   inputMirroring : 1,
 
+  withBuffer : 0
+
 }
 
 /* xxx : move advanced options to _.process.startSingle() */
