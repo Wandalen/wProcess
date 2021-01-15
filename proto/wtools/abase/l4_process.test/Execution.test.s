@@ -1004,12 +1004,7 @@ function startMinimal( test )
       .then( function( op )
       {
         if( process.platform === 'win32' )
-        {
-          if( mode === 'shell' )
-          test.identical( o.exitCode, 0 );
-          else
-          test.identical( o.exitCode, 1 );
-        }
+        test.identical( o.exitCode, 1 );
         else
         test.identical( o.exitCode, null );
 
