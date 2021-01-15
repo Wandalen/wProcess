@@ -220,7 +220,9 @@ function startMinimal_body( o )
      - is being collected if no '\n'.
      - fully logged through `log` if ends with '\n'.
      - partly logged through `log` if '\n' is not at the end.
-    `channelBufferLog` - color & prefix & log ( through `handleClose` ) last part collected during execution
+    `channelBufferLog` - color & prefix & log ( through `handleClose` ) last part collected during execution.
+
+    A lot of data transformations.
   */
   let _outAdditive = '';
 
@@ -237,7 +239,9 @@ function startMinimal_body( o )
      - is being collected if no '\n'.
      - fully logged through `log` if ends with '\n'.
      - partly logged through `log` if '\n' is not at the end.
-    `channelBufferLog` - color & prefix & log ( through `handleClose`, `handleError` ) last part collected during execution
+    `channelBufferLog` - color & prefix & log ( through `handleClose`, `handleError` ) last part collected during execution.
+
+    A lot of data transformations.
   */
   let _errAdditive = '';
 

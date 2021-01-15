@@ -38794,6 +38794,7 @@ function experimentBuffers( test )
         execPath : tops.mode === 'fork' ? testAppPath : 'node ' + testAppPath,
         mode : tops.mode,
         outputCollecting : 1,
+        outputAdditive : 0,
         withBuffer : tops.withBuffer
       }
 
@@ -38851,6 +38852,7 @@ function experimentBuffers( test )
 }
 
 experimentBuffers.experimental = true;
+experimentBuffers.timeOut = 120000;
 experimentBuffers.description =
 `
 Compare running times of 2 implementations : buffers to store process output and strings.
