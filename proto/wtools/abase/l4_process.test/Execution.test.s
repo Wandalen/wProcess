@@ -25416,13 +25416,12 @@ function outputLogStderrWithoutError( test )
 
   function testApp2()
   {
-    process.stdout.write( 'out1' );
+    console.log( 'out1' );
     process.stderr.write( 'err1' );
-    process.stdout.write( 'out2' );
+    console.log( 'out2' );
     console.error( 'err2' );
-    process.stdout.write( 'out3' );
+    console.log( 'out3' );
     process.stderr.write( 'err3' );
-    console.log();
   }
 
 }
