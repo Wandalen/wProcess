@@ -37749,7 +37749,7 @@ function execPathOfOptionSync( test )
 
   a.ready.then( () =>
   {
-    test.case = 'sync : 1, no error';
+    test.case = 'sync : 1, pnd, no error';
 
     let o = { execPath : testAppPath };
 
@@ -37770,7 +37770,7 @@ function execPathOfOptionSync( test )
 
   a.ready.then( () =>
   {
-    test.case = 'sync : 0, no error';
+    test.case = 'sync : 0, pnd, no error';
 
     let o = { execPath : testAppPath };
 
@@ -37779,6 +37779,52 @@ function execPathOfOptionSync( test )
     o.conStart.then( ( op ) =>
     {
       _.process.execPathOf({ pnd : o.pnd, sync : 0 })
+      .then( ( arg ) =>
+      {
+        test.true( _.strHas( arg, op.execPath ) );
+        return null;
+      })
+
+      return null;
+    })
+
+    return _.Consequence.And( o.conStart, o.conTerminate );
+  })
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync : 1, pid, no error';
+
+    let o = { execPath : testAppPath };
+
+    _.process.startNjs( o )
+
+    o.conStart.then( ( op ) =>
+    {
+      let execPath = _.process.execPathOf({ pid : o.pnd.pid, sync : 1 });
+      test.true( _.strHas( execPath, op.execPath ) );
+
+      return null;
+    })
+
+    return _.Consequence.And( o.conStart, o.conTerminate );
+  })
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync : 0, pid, no error';
+
+    let o = { execPath : testAppPath };
+
+    _.process.startNjs( o )
+
+    o.conStart.then( ( op ) =>
+    {
+      _.process.execPathOf({ pid : o.pnd.pid, sync : 0 })
       .then( ( arg ) =>
       {
         test.true( _.strHas( arg, op.execPath ) );
