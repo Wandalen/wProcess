@@ -25307,7 +25307,7 @@ function startMultipleOptionOutputAdditiveWithStderr( test )
   let a = context.assetFor( test, false );
   let testAppPath = a.program( testApp );
   let testAppPath2 = a.program( testApp2 );
-  let modes = [ 'fork', /* 'spawn', 'shell'*/ ];
+  let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run({ mode, concurrent : 0, outputAdditive : 0 }) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run({ mode, concurrent : 1, outputAdditive : 0 }) ) );
   modes.forEach( ( mode ) => a.ready.then( () => run({ mode, concurrent : 0, outputAdditive : 1 }) ) );
@@ -25377,7 +25377,7 @@ function startMultipleOptionOutputAdditiveWithStderr( test )
           if( tops.outputAdditive )
           test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}\n>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath2}\nOutput1\nOutput2\nOutput1.2\nOutput2.2\nError1\nError2\nError2.2\n` );
           else /* First process is still running. Second process is finished. */
-          test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath2}\nOutput2\nOutput2.2\nError2\nError2.2\n` );
+          test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath2}\nOutput2\nOutput2.2\nError2\nError2.2\nError2\nError2.2\n` );
         }
         else
         {
@@ -25400,16 +25400,21 @@ function startMultipleOptionOutputAdditiveWithStderr( test )
         let exp1 = '\nOutput1\nOutput2\nOutput1.2\nOutput2.2\nError1\nError2\nError2.2\nError1.2\n';
         let exp2 = '\nOutput1\nOutput1.2\nError1\nError1.2\n';
         let exp3 = '\nOutput2\nOutput2.2\nError2\nError2.2\n';
+        let exp4 = '\nError1\nError1.2\n';
+        let exp5 = '\nError2\nError2.2\n';
         if( tops.concurrent )
         {
           if( tops.outputAdditive )
           test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}\n>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath2}${exp1}${exp1}` );
           else
-          test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath2}${exp3}>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}${exp2}${exp1}` );
+          test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath2}${exp3}${exp5}>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}${exp2}${exp1}${exp4}` );
         }
         else
         {
+          if( tops.outputAdditive )
           test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}${exp2}>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath2}${exp3}${exp2}${exp3}` );
+          else
+          test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}${exp2}${exp4}>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath2}${exp3}${exp2}${exp3}${exp5}` );
         }
 
         a.fileProvider.fileDelete( testAppPathParent );
@@ -25462,7 +25467,7 @@ function startMultipleOptionOutputAdditiveWithStderr( test )
 
 }
 
-startMultipleOptionOutputAdditiveWithStderr.timeOut = 4e6; /* Locally : 391.220s */
+startMultipleOptionOutputAdditiveWithStderr.timeOut = 7e6; /* Locally : 678.255s */
 startMultipleOptionOutputAdditiveWithStderr.rapidity = -1;
 
 //
