@@ -38736,6 +38736,7 @@ function experimentBuffers( test )
   a.reflect();
 
   let bigText = a.fileProvider.fileRead({ filePath : a.abs( 'dir/bigFile.txt' ) }) /* 2 925 118 bytes (3,2 MB on disk) */
+  // let bigText = a.fileProvider.fileRead({ filePath : a.abs( 'dir/smallFile.txt' ) }) /* 1 273 304 bytes (2,1 MB on disk) */
   let testAppPath = a.program({ routine : testApp, locals : { bigText } });
   let modes = [ 'fork', 'spawn', 'shell' ];
 
@@ -38747,7 +38748,6 @@ function experimentBuffers( test )
 
   a.ready.then( () =>
   {
-    console.log( 'TABLE' );
     _.assert( times.timesNoBuffer.length === times.timesBuffer.length );
     let avgs = calculateAvg( times.timesNoBuffer, times.timesBuffer );
     times.timesNoBuffer.push( 'Avg : ' + avgs[ 0 ] );
@@ -38762,11 +38762,9 @@ function experimentBuffers( test )
     o.rowSplits = 1;
     o.style = 'doubleBorder';
     o.leftHead = [ 'NoBuffer', 'WithBuffer' ];
+    console.log( 'TABLE :' );
     console.log( _.strTable( o ).result );
 
-    // let arr1 = [ '2.490s', '1.748s', '1.825s', '1.836s', '1.769s', '1.010s', '0.714s', '0.746s', '0.601s' ];
-    // let arr2 = [ '2.490s', '1.748s', '1.825s', '1.836s', '1.769s', '1.010s', '0.714s', '0.746s', '0.601s' ];
-    // console.log( calculateAvg( arr1, arr2 ) )
     return null;
   })
 

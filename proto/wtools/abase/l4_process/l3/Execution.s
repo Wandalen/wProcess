@@ -212,7 +212,13 @@ function startMinimal_body( o )
     `log` - is being collected if channel = 'out' AND option::outputAdditive = 0
     `end3` - log if non-empty AND option::outputAdditive = 0;
   */
-  let _decoratedOutOutput = '';
+  // let _decoratedOutOutput = '';
+  let _decoratedOutOutput;
+  if( o.withBuffer )
+  _decoratedOutOutput = Buffer.alloc( 0 );
+  else
+  _decoratedOutOutput = '';
+
 
   /*
     used in :
@@ -784,8 +790,13 @@ function startMinimal_body( o )
 
     if( !o.outputAdditive )
     {
-      if( _decoratedOutOutput )
-      o.logger.log( _decoratedOutOutput );
+      if( _decoratedOutOutput.length )
+      {
+        if( o.withBuffer )
+        o.logger.log( _decoratedOutOutput.toString() );
+        else
+        o.logger.log( _decoratedOutOutput );
+      }
       if( _decoratedErrOutput )
       o.logger.error( _decoratedErrOutput );
     }
@@ -1335,7 +1346,12 @@ function startMinimal_body( o )
     }
     else
     {
+      debugger;
+      if( o.withBuffer )
+      _decoratedOutOutput = Buffer.concat([ _decoratedOutOutput, Buffer.from( msg ) ]);
+      else
       _decoratedOutOutput += msg;
+
       if( channel === 'err' )
       _decoratedErrOutput += msg;
       /* yyy qqq for Yevhen : cover */
