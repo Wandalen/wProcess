@@ -26,9 +26,10 @@
   {
     "wTools" : "",
     "wpathbasic" : "",
-    "wgdf" : "",
-    "wConsequence" : "",
     "wblueprint" : "",
+    "wgdf" : "",
+    "wFiles" : "",
+    "wConsequence" : "",
     "wdeasync" : "",
     "strip-ansi" : "6.0.0"
   },
