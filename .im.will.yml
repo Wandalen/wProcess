@@ -13,8 +13,11 @@ submodule :
   strip-ansi :
     path : npm:///strip-ansi#6.0.0
     enabled : 0 # submodule
-  wGdfStrategy :
+  wGdf :
     path : npm:///wgdf
+    enabled : 0 # submodule
+  wFiles :
+    path : npm:///wFiles
     enabled : 0 # submodule
   wConsequence :
     path : npm:///wConsequence
