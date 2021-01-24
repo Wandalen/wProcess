@@ -8,7 +8,7 @@ Collection of cross-platform routines to execute system commands, run shell, bat
 git clone https://github.com/Wandalen/wProcess
 cd wProcess
 npm install
-node sample/Sample.s
+node sample/trivial/Sample.s
 ```
 
 ## To add to your project
