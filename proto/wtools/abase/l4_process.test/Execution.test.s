@@ -27106,6 +27106,33 @@ function startSingleOptionCurrentPath( test )
       })
     })
 
+    /* */
+
+    ready.then( function()
+    {
+      test.case = 'soft link to a directory';
+
+      let currentPath = a.path.join( a.routinePath, 'softLinkToDir' );
+      a.fileProvider.softLink( currentPath, __dirname );
+
+      let o =
+      {
+        execPath :  mode !== 'fork' ? 'node ' + programPath : programPath,
+        currentPath,
+        mode,
+        stdio : 'pipe',
+        outputCollecting : 1,
+      }
+
+      return _.process.startSingle( o )
+      .then( function( op )
+      {
+        let got = a.fileProvider.fileRead( testFilePath );
+        test.identical( got, __dirname )
+        return null;
+      })
+    })
+
     return ready;
   }
 
