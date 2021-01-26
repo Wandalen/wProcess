@@ -553,7 +553,7 @@ function startMinimal_body( o )
     if( Config.debug )
     _.assert
     (
-      _.fileProvider.isDir( o.currentPath ),
+      _.fileProvider.resolvedIsDir( o.currentPath ),
       () => `Current path ( ${o.currentPath} ) doesn\'t exist or it\'s not a directory.\n> ${o.execPath2}`
     );
 
