@@ -3223,7 +3223,7 @@ function startMinimalArgumentsParsingNonTrivial( test )
         }
         else if( mode === 'fork' )
         {
-          test.ni( op.exitCode, 0 );
+          test.nil( op.exitCode, 0 );
           test.true( _.strHas( op.output, 'Error: Cannot find module' ) );
           test.identical( o.execPath, mode === 'shell' ? '"first arg"' : 'first arg' );
           test.identical( o.args, [] );
@@ -3231,7 +3231,7 @@ function startMinimalArgumentsParsingNonTrivial( test )
         }
         else
         {
-          test.ni( op.exitCode, 0 );
+          test.nil( op.exitCode, 0 );
           if( process.platform === 'darwin' )
           test.true( _.strHas( op.output, 'first arg: command not found' ) );
           // else if( process.platform === 'win32' )
@@ -3286,13 +3286,13 @@ function startMinimalArgumentsParsingNonTrivial( test )
         }
         else if( mode === 'fork' )
         {
-          test.ni( op.exitCode, 0 );
+          test.nil( op.exitCode, 0 );
           test.true( _.strHas( op.output, 'Error: Cannot find module' ) );
           test.identical( o.args2, [ 'second arg' ] );
         }
         else
         {
-          test.ni( op.exitCode, 0 );
+          test.nil( op.exitCode, 0 );
           if( process.platform === 'darwin' )
           test.true( _.strHas( op.output, 'first: command not found' ) );
           // else if( process.platform === 'win32' )
@@ -3347,13 +3347,13 @@ function startMinimalArgumentsParsingNonTrivial( test )
         }
         else if( mode === 'fork' )
         {
-          test.ni( op.exitCode, 0 );
+          test.nil( op.exitCode, 0 );
           test.true( _.strHas( op.output, ': command not found' ) );
           test.identical( o.args2, [ 'first', 'arg', '"' ] );
         }
         else
         {
-          test.ni( op.exitCode, 0 );
+          test.nil( op.exitCode, 0 );
           test.true( _.strHas( op.output, 'unexpected EOF' ) || _.strHas( op.output, 'Unterminated quoted string' ) );
           test.identical( o.args2, [ '"first"', '"arg"', '"\\""' ] );
         }
@@ -3401,13 +3401,13 @@ function startMinimalArgumentsParsingNonTrivial( test )
         }
         else if( mode === 'fork' )
         {
-          test.ni( op.exitCode, 0 );
+          test.nil( op.exitCode, 0 );
           test.true( _.strHas( op.output, 'unexpected EOF while looking for matching' ) );
           test.identical( o.args2, [ 'first', 'arg', '"' ] );
         }
         else
         {
-          test.ni( op.exitCode, 0 );
+          test.nil( op.exitCode, 0 );
           test.true( _.strHas( op.output, 'not found' ) );
           test.identical( o.args2, [ '"first"', '"arg"', '"\\""' ] );
         }
@@ -3453,13 +3453,13 @@ function startMinimalArgumentsParsingNonTrivial( test )
         }
         else if( mode === 'fork' )
         {
-          test.ni( op.exitCode, 0 );
+          test.nil( op.exitCode, 0 );
           test.true( _.strHas( op.output, 'unexpected EOF while looking for matching' ) );
           test.identical( o.args2, [ '"', 'first', 'arg', '"' ] );
         }
         else
         {
-          test.ni( op.exitCode, 0 );
+          test.nil( op.exitCode, 0 );
           if( process.platform === 'darwin' )
           test.true( _.strHas( op.output, 'unexpected EOF while looking for matching' ) );
           // else if( process.platform === 'win32' )
@@ -29500,7 +29500,7 @@ function exitCode( test )
       return _.process.startMinimal({ execPath : '1', throwingExitCode : 0, mode })
       .then( ( op ) =>
       {
-        test.ni( op.exitCode, 0 )
+        test.nil( op.exitCode, 0 )
         test.identical( op.ended, true );
         return null;
       })
