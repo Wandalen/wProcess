@@ -53,7 +53,7 @@ function startMinimalHeadCommon( routine, args )
   _.assert
   (
     o.args === null || _.arrayIs( o.args ) || _.strIs( o.args ) || _.routineIs( o.args )
-    , `If defined option::arg should be either [ string, array, routine ], but it is ${_.strType( o.args )}`
+    , `If defined option::arg should be either [ string, array, routine ], but it is ${_.entity.strType( o.args )}`
   );
 
   /* timeOut */
@@ -61,7 +61,7 @@ function startMinimalHeadCommon( routine, args )
   _.assert
   (
     o.timeOut === null || _.numberIs( o.timeOut ),
-    `Expects null or number {-o.timeOut-}, but got ${_.strType( o.timeOut )}`
+    `Expects null or number {-o.timeOut-}, but got ${_.entity.strType( o.timeOut )}`
   );
   _.assert
   (
@@ -180,13 +180,13 @@ function startMinimal_head( routine, args )
   _.assert
   (
     o.execPath === null || _.strIs( o.execPath )
-    , `Expects string or strings {-o.execPath-}, but got ${_.strType( o.execPath )}`
+    , `Expects string or strings {-o.execPath-}, but got ${_.entity.strType( o.execPath )}`
   );
 
   _.assert
   (
     o.currentPath === null || _.strIs( o.currentPath )
-    , `Expects string or strings {-o.currentPath-}, but got ${_.strType( o.currentPath )}`
+    , `Expects string or strings {-o.currentPath-}, but got ${_.entity.strType( o.currentPath )}`
   );
 
   return o;
@@ -402,7 +402,7 @@ function startMinimal_body( o )
     _.assert
     (
       _.arrayIs( o.args ) || _.strIs( o.args )
-      , `If defined option::arg should be either [ string, array ], but it is ${_.strType( o.args )}`
+      , `If defined option::arg should be either [ string, array ], but it is ${_.entity.strType( o.args )}`
     );
 
     argsForm();
@@ -1659,12 +1659,12 @@ function startMultiple_head( routine, args )
   _.assert
   (
     o.execPath === null || _.strIs( o.execPath ) || _.strsAreAll( o.execPath )
-    , `Expects string or strings {-o.execPath-}, but got ${_.strType( o.execPath )}`
+    , `Expects string or strings {-o.execPath-}, but got ${_.entity.strType( o.execPath )}`
   );
   _.assert
   (
     o.currentPath === null || _.strIs( o.currentPath ) || _.strsAreAll( o.currentPath )
-    , `Expects string or strings {-o.currentPath-}, but got ${_.strType( o.currentPath )}`
+    , `Expects string or strings {-o.currentPath-}, but got ${_.entity.strType( o.currentPath )}`
   );
 
   return o;
@@ -2509,7 +2509,7 @@ function starter( o0 )
       _.assert
       (
         _.arrayIs( src.execPath ) || _.strIs( src.execPath ),
-        () => `Expects string or array, but got ${_.strType( src.execPath )}`
+        () => `Expects string or array, but got ${_.entity.strType( src.execPath )}`
       );
       if( _.arrayIs( src.execPath ) )
       src.execPath = _.arrayFlatten( src.execPath );
