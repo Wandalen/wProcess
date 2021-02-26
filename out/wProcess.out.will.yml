@@ -3,14 +3,14 @@ root:
   - wProcess.out
 consistency:
   wProcess.out.will.yml: &ref_0
-    hash: 34b27ddc910ea8b0650971ff7d1281c5
-    size: 41717
+    hash: d6a49d898824bb716b31434a931c80e8
+    size: 41613
   ../.ex.will.yml: &ref_1
     hash: ad280127a9f801a3bf1cdd9b30cb663b
     size: 2161
   ../.im.will.yml: &ref_2
-    hash: 2695e7e3238e83acf83a129c70a2641c
-    size: 5630
+    hash: 317813a6a2ccfe5790e37303cc2c747d
+    size: 5686
 module:
   wProcess.out:
     about:
@@ -212,8 +212,12 @@ module:
         path: npm:///strip-ansi#6.0.0
         autoExporting: 0
         enabled: 0
-      wGdfStrategy:
+      wGdf:
         path: npm:///wgdf
+        autoExporting: 0
+        enabled: 0
+      wFiles:
+        path: npm:///wFiles
         autoExporting: 0
         enabled: 0
       wConsequence:
@@ -1020,8 +1024,12 @@ module:
         path: npm:///strip-ansi#6.0.0
         autoExporting: 0
         enabled: 0
-      wGdfStrategy:
+      wGdf:
         path: npm:///wgdf
+        autoExporting: 0
+        enabled: 0
+      wFiles:
+        path: npm:///wFiles
         autoExporting: 0
         enabled: 0
       wConsequence:
@@ -1591,6 +1599,6 @@ module:
         hash: ad280127a9f801a3bf1cdd9b30cb663b
         size: 2161
       ../.im.will.yml:
-        hash: 2695e7e3238e83acf83a129c70a2641c
-        size: 5630
+        hash: 317813a6a2ccfe5790e37303cc2c747d
+        size: 5686
       wProcess.out.will.yml: *ref_0

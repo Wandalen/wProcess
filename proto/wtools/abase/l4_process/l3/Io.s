@@ -457,7 +457,7 @@ function systemEntryAdd( o )
 
   // if( !_.mapIs( o ) )
   // o = { appPath : arguments[ 0 ] }
-  _.assert( _.mapIs( o ), `Expects option map {- o -}, but got: ${_.strType( o )} ` )
+  _.assert( _.mapIs( o ), `Expects option map {- o -}, but got: ${_.entity.strType( o )} ` )
 
   _.routineOptions( systemEntryAdd, o );
 

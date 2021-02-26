@@ -3223,7 +3223,7 @@ function startMinimalArgumentsParsingNonTrivial( test )
         }
         else if( mode === 'fork' )
         {
-          test.ni( op.exitCode, 0 );
+          test.nil( op.exitCode, 0 );
           test.true( _.strHas( op.output, 'Error: Cannot find module' ) );
           test.identical( o.execPath, mode === 'shell' ? '"first arg"' : 'first arg' );
           test.identical( o.args, [] );
@@ -3231,7 +3231,7 @@ function startMinimalArgumentsParsingNonTrivial( test )
         }
         else
         {
-          test.ni( op.exitCode, 0 );
+          test.nil( op.exitCode, 0 );
           if( process.platform === 'darwin' )
           test.true( _.strHas( op.output, 'first arg: command not found' ) );
           // else if( process.platform === 'win32' )
@@ -3286,13 +3286,13 @@ function startMinimalArgumentsParsingNonTrivial( test )
         }
         else if( mode === 'fork' )
         {
-          test.ni( op.exitCode, 0 );
+          test.nil( op.exitCode, 0 );
           test.true( _.strHas( op.output, 'Error: Cannot find module' ) );
           test.identical( o.args2, [ 'second arg' ] );
         }
         else
         {
-          test.ni( op.exitCode, 0 );
+          test.nil( op.exitCode, 0 );
           if( process.platform === 'darwin' )
           test.true( _.strHas( op.output, 'first: command not found' ) );
           // else if( process.platform === 'win32' )
@@ -3347,13 +3347,13 @@ function startMinimalArgumentsParsingNonTrivial( test )
         }
         else if( mode === 'fork' )
         {
-          test.ni( op.exitCode, 0 );
+          test.nil( op.exitCode, 0 );
           test.true( _.strHas( op.output, ': command not found' ) );
           test.identical( o.args2, [ 'first', 'arg', '"' ] );
         }
         else
         {
-          test.ni( op.exitCode, 0 );
+          test.nil( op.exitCode, 0 );
           test.true( _.strHas( op.output, 'unexpected EOF' ) || _.strHas( op.output, 'Unterminated quoted string' ) );
           test.identical( o.args2, [ '"first"', '"arg"', '"\\""' ] );
         }
@@ -3401,13 +3401,13 @@ function startMinimalArgumentsParsingNonTrivial( test )
         }
         else if( mode === 'fork' )
         {
-          test.ni( op.exitCode, 0 );
+          test.nil( op.exitCode, 0 );
           test.true( _.strHas( op.output, 'unexpected EOF while looking for matching' ) );
           test.identical( o.args2, [ 'first', 'arg', '"' ] );
         }
         else
         {
-          test.ni( op.exitCode, 0 );
+          test.nil( op.exitCode, 0 );
           test.true( _.strHas( op.output, 'not found' ) );
           test.identical( o.args2, [ '"first"', '"arg"', '"\\""' ] );
         }
@@ -3453,13 +3453,13 @@ function startMinimalArgumentsParsingNonTrivial( test )
         }
         else if( mode === 'fork' )
         {
-          test.ni( op.exitCode, 0 );
+          test.nil( op.exitCode, 0 );
           test.true( _.strHas( op.output, 'unexpected EOF while looking for matching' ) );
           test.identical( o.args2, [ '"', 'first', 'arg', '"' ] );
         }
         else
         {
-          test.ni( op.exitCode, 0 );
+          test.nil( op.exitCode, 0 );
           if( process.platform === 'darwin' )
           test.true( _.strHas( op.output, 'unexpected EOF while looking for matching' ) );
           // else if( process.platform === 'win32' )
@@ -10699,7 +10699,7 @@ function startSingleAfterDeath( test )
     _.time.out( context.t2, () => /* 5000 */
     {
       let filePath = _.path.join( __dirname, 'program2Pid' );
-      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
+      _.fileProvider.fileWrite( filePath, _.entity.exportString( process.pid ) );
     })
   }
 
@@ -10915,7 +10915,7 @@ function startSingleAfterDeathTerminatingMain( test )
     _.time.out( context.t2, () => /* 5000 */
     {
       let filePath = _.path.join( __dirname, 'program2Pid' );
-      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
+      _.fileProvider.fileWrite( filePath, _.entity.exportString( process.pid ) );
     })
   }
 
@@ -11144,7 +11144,7 @@ function startMinimalDetachingResourceReady( test )
     _.time.out( context.t2, () => /* 5000 */
     {
       let filePath = _.path.join( __dirname, 'testFile' );
-      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
+      _.fileProvider.fileWrite( filePath, _.entity.exportString( process.pid ) );
       console.log( 'Child process end' )
       return null;
     })
@@ -11416,7 +11416,7 @@ function startMinimalDetachingNoTerminationBegin( test )
     _.time.out( context.t2, () => /* 5000 */
     {
       let filePath = _.path.join( __dirname, 'testFile' );
-      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
+      _.fileProvider.fileWrite( filePath, _.entity.exportString( process.pid ) );
       console.log( 'Child process end' )
       return null;
     })
@@ -11907,7 +11907,7 @@ function startMinimalDetachedOutputStdioInherit( test )
     _.time.out( context.t2, () => /* 5000 */
     {
       let filePath = _.path.join( __dirname, 'testFile' );
-      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
+      _.fileProvider.fileWrite( filePath, _.entity.exportString( process.pid ) );
       console.log( 'Child process end' )
       return null;
     })
@@ -12238,7 +12238,7 @@ function startMinimalDetachingTrivial( test )
     {
       console.log( 'Child process end' );
       let filePath = _.path.join( __dirname, 'testFile' );
-      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
+      _.fileProvider.fileWrite( filePath, _.entity.exportString( process.pid ) );
       return null;
     })
 
@@ -12410,7 +12410,7 @@ function startMinimalDetachingChildExitsAfterParent( test )
     _.time.out( context.t1 * 5, () => /* 5000 */
     {
       let filePath = _.path.join( __dirname, 'testFile' );
-      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
+      _.fileProvider.fileWrite( filePath, _.entity.exportString( process.pid ) );
       console.log( 'Child process end' );
     })
   }
@@ -12615,7 +12615,7 @@ function startMinimalDetachingChildExitsBeforeParent( test )
     _.time.out( context.t1, () => /* 1000 */
     {
       let filePath = _.path.join( __dirname, 'testFile' );
-      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
+      _.fileProvider.fileWrite( filePath, _.entity.exportString( process.pid ) );
       console.log( 'Child process end' )
       return null;
     })
@@ -13423,7 +13423,7 @@ function startMinimalDetachingTerminationBegin( test )
     _.time.out( context.t1 * 2, () => /* 2000 */
     {
       let filePath = _.path.join( __dirname, 'testFile' );
-      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
+      _.fileProvider.fileWrite( filePath, _.entity.exportString( process.pid ) );
       console.log( 'Child process end' )
       return null;
     })
@@ -13563,7 +13563,7 @@ function startMinimalDetachingWaitForDisconnect( test )
     _.time.out( context.t2 * 2, () => /* 10000 */
     {
       let filePath = _.path.join( __dirname, 'testFile' );
-      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
+      _.fileProvider.fileWrite( filePath, _.entity.exportString( process.pid ) );
       console.log( 'Child process end' )
       return null;
     })
@@ -13778,7 +13778,7 @@ function startMinimalEventClose( test )
         ipc,
       }
 
-      test.case = _.toJs({ mode, ipc, disconnecting });
+      test.case = _.entity.exportJs({ mode, ipc, disconnecting });
 
       _.process.startMinimal( o );
 
@@ -13956,7 +13956,7 @@ function startMinimalEventExit( test )
         detaching
       }
 
-      test.case = _.toJs({ mode, stdio, ipc, disconnecting, detaching });
+      test.case = _.entity.exportJs({ mode, stdio, ipc, disconnecting, detaching });
 
       _.process.startMinimal( o );
 
@@ -14079,7 +14079,7 @@ function startMinimalDetachingThrowing( test )
     _.time.out( context.t2, () => /* 5000 */
     {
       let filePath = _.path.join( __dirname, 'testFile' );
-      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
+      _.fileProvider.fileWrite( filePath, _.entity.exportString( process.pid ) );
       console.log( 'Child process end' )
       return null;
     })
@@ -17798,7 +17798,7 @@ function startNjs( test )
       {
         test.identical( o.exitCode, 1 );
         test.identical( process.exitCode, 0 );
-        let spawnArgs = _.toStr( o.pnd.spawnargs, { levels : 99 } );
+        let spawnArgs = _.entity.exportString( o.pnd.spawnargs, { levels : 99 } );
         test.true( _.strHasAll( spawnArgs, [ '--expose-gc',  '--stack-trace-limit=999', '--max_old_space_size=' ] ) )
         test.true( !_.errIs( err ) );
         return true;
@@ -27106,6 +27106,33 @@ function startSingleOptionCurrentPath( test )
       })
     })
 
+    /* */
+
+    ready.then( function()
+    {
+      test.case = 'soft link to a directory';
+
+      let currentPath = a.path.join( a.routinePath, 'softLinkToDir' );
+      a.fileProvider.softLink( currentPath, __dirname );
+
+      let o =
+      {
+        execPath :  mode !== 'fork' ? 'node ' + programPath : programPath,
+        currentPath,
+        mode,
+        stdio : 'pipe',
+        outputCollecting : 1,
+      }
+
+      return _.process.startSingle( o )
+      .then( function( op )
+      {
+        let got = a.fileProvider.fileRead( testFilePath );
+        test.identical( got, __dirname )
+        return null;
+      })
+    })
+
     return ready;
   }
 
@@ -29074,7 +29101,7 @@ function startMinimalDiffPid( test )
     _.time.out( context.t1 * 2, () => /* 2000 */
     {
       let filePath = _.path.join( __dirname, 'testFile' );
-      _.fileProvider.fileWrite( filePath, _.toStr( process.pid ) );
+      _.fileProvider.fileWrite( filePath, _.entity.exportString( process.pid ) );
       console.log( 'Child process end' )
       return null;
     })
@@ -29473,7 +29500,7 @@ function exitCode( test )
       return _.process.startMinimal({ execPath : '1', throwingExitCode : 0, mode })
       .then( ( op ) =>
       {
-        test.ni( op.exitCode, 0 )
+        test.nil( op.exitCode, 0 )
         test.identical( op.ended, true );
         return null;
       })

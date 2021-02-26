@@ -55,7 +55,7 @@ function pidFrom( src )
     return src.pid;
   }
 
-  _.assert( 0, `Cant get PID from ${_.strType( src )}` );
+  _.assert( 0, `Cant get PID from ${_.entity.strType( src )}` );
 }
 
 // --
@@ -85,7 +85,7 @@ function tempOpen_body( o )
 {
   _.assertRoutineOptions( tempOpen, arguments );
   _.assert( arguments.length === 1, 'Expects single argument' );
-  _.assert( _.strIs( o.sourceCode ) || _.bufferRawIs( o.sourceCode ), 'Expects string or buffer raw {-o.sourceCode-}, but got', _.strType( o.sourceCode ) );
+  _.assert( _.strIs( o.sourceCode ) || _.bufferRawIs( o.sourceCode ), 'Expects string or buffer raw {-o.sourceCode-}, but got', _.entity.strType( o.sourceCode ) );
 
   let tempDirPath = _.path.tempOpen( _.path.realMainDir(), 'ProcessTempOpen' );
   let filePath = _.path.join( tempDirPath, _.idWithDateAndTime() + '.ss' );
@@ -125,7 +125,7 @@ function tempClose_body( o )
 {
   _.assertRoutineOptions( tempClose, arguments );
   _.assert( arguments.length === 1, 'Expects single argument' );
-  _.assert( _.strIs( o.filePath ) || o.filePath === null, 'Expects string or null {-o.filePath-}, but got', _.strType( o.filePath ) );
+  _.assert( _.strIs( o.filePath ) || o.filePath === null, 'Expects string or null {-o.filePath-}, but got', _.entity.strType( o.filePath ) );
 
   if( !o.filePath )
   {
