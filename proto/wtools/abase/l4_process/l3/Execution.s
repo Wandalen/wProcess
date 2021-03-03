@@ -2519,7 +2519,7 @@ function starter( o0 )
       */
 
       if( _.arrayIs( dst.execPath ) || _.arrayIs( src.execPath ) )
-      dst.execPath = _.eachSample( [ dst.execPath, src.execPath ] ).map( ( path ) => path.join( ' ' ) );
+      dst.execPath = _.eachSample_( [ dst.execPath, src.execPath ] ).map( ( path ) => path.join( ' ' ) );
       else
       dst.execPath = dst.execPath + ' ' + src.execPath;
 
