@@ -644,6 +644,8 @@ ${programPath}:end
   }
 }
 
+startMinimalBasic.timeOut = 31e4; /* Locally : 30.986s. Time out on git after 1 min ( started : 04.04.24, time out : 04.05.28 ) */
+
 //
 
 /*
