@@ -12837,6 +12837,42 @@ function startMinimalDetachingDisconnectedLate( test )
 
       result = _.time.out( context.t1 * 5, () => /* 5000 */
       {
+        /*
+          2021-03-03T18:26:52.5479890Z      Running TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachingDisconnectedLate ..
+          2021-03-03T18:26:52.5909470Z  1 : function program1()
+          2021-03-03T18:26:52.5909990Z  2 :   {
+          2021-03-03T18:26:52.5911370Z  3 :     console.log( 'program1:begin' );
+          2021-03-03T18:26:52.5912570Z  4 :     setTimeout( () => { console.log( 'program1:end' ) }, context.t1 * 2 ); / 2000 /
+          2021-03-03T18:26:52.5913550Z  5 :     let _ = require( toolsPath );
+          2021-03-03T18:26:52.5914470Z  6 :     _.include( 'wProcess' );
+          2021-03-03T18:26:52.5915580Z  7 :     _.include( 'wFiles' );
+          2021-03-03T18:26:52.5916040Z  8 :   }
+          2021-03-03T18:26:52.5916330Z  9 :
+          2021-03-03T18:26:52.5917180Z 10 : var context = {
+          2021-03-03T18:26:52.5925390Z 11 :   "t0" : 100,
+          2021-03-03T18:26:52.5925790Z 12 :   "t1" : 1000,
+          2021-03-03T18:26:52.5926150Z 13 :   "t2" : 5000,
+          2021-03-03T18:26:52.5926510Z 14 :   "t3" : 15000
+          2021-03-03T18:26:52.5927070Z 15 : };
+          2021-03-03T18:26:52.5927940Z 16 : var toolsPath = `/Users/runner/work/wProcess/wProcess/node_modules/wTools/proto/wtools/abase/Layer1.s`;
+          2021-03-03T18:26:52.5928590Z 17 :
+          2021-03-03T18:26:52.5928970Z 18 : program1();
+          2021-03-03T18:26:52.5929310Z 19 :
+          2021-03-03T18:26:52.6039060Z  > /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/ProcessBasic-2021-3-3-18-4-3-415-b660.tmp/startMinimalDetachingDisconnectedLate/program1.js
+          2021-03-03T18:26:52.6188220Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachingDisconnectedLate / detaching on, disconnected forked child, mode:fork # 1 ) ... ok
+            ...
+          2021-03-03T18:27:11.7235210Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachingDisconnectedLate / detaching on, disconnected forked child, mode:shell # 83 ) ... ok
+          2021-03-03T18:27:11.7454130Z
+          2021-03-03T18:27:11.7455450Z         /Users/runner/work/wProcess/wProcess/proto/wtools/abase/l4_process.test/Execution.test.s:12843:18
+          2021-03-03T18:27:11.7456740Z           12839 :       {
+          2021-03-03T18:27:11.7458100Z           12840 :         test.identical( o.state, 'disconnected' );
+          2021-03-03T18:27:11.7458820Z           12841 :         test.identical( o.ended, true );
+          2021-03-03T18:27:11.7460480Z           12842 :         test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate' ] );
+          2021-03-03T18:27:11.7462950Z         * 12843 :         test.true( !_.process.isAlive( o.pnd.pid ) )
+          2021-03-03T18:27:11.7463970Z
+          2021-03-03T18:27:11.7499050Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachingDisconnectedLate / detaching on, disconnected forked child, mode:shell # 84 ) : expected true ... failed
+          2021-03-03T18:27:11.7631960Z       Failed TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachingDisconnectedLate in 19.213s
+        */
         test.identical( o.state, 'disconnected' );
         test.identical( o.ended, true );
         test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate' ] );
