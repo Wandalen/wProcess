@@ -12838,6 +12838,7 @@ function startMinimalDetachingDisconnectedLate( test )
       result = _.time.out( context.t1 * 5, () => /* 5000 */
       {
         /*
+          xxx : mac 12.9.1
           2021-03-03T18:26:52.5479890Z      Running TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachingDisconnectedLate ..
           2021-03-03T18:26:52.5909470Z  1 : function program1()
           2021-03-03T18:26:52.5909990Z  2 :   {
@@ -12913,6 +12914,41 @@ ProcessWatched should not throw any error.
 
 //
 
+/*
+  xxx : mac 12.9.1
+  2021-03-03T18:27:11.8377020Z       Running TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachingChildExistsBeforeParentWaitForTermination ..
+  2021-03-03T18:27:11.8937490Z  1 : function testAppChild()
+  2021-03-03T18:27:11.8938320Z  2 :   {
+  2021-03-03T18:27:11.8938770Z  3 :     let _ = require( toolsPath );
+  2021-03-03T18:27:11.8940190Z  4 :     _.include( 'wProcess' );
+  2021-03-03T18:27:11.8941070Z  5 :     _.include( 'wFiles' );
+  2021-03-03T18:27:11.8941440Z  6 :
+  2021-03-03T18:27:11.8941870Z  7 :     var args = _.process.input();
+  2021-03-03T18:27:11.8942710Z  8 :
+  2021-03-03T18:27:11.8943170Z  9 :     _.time.out( context.t1 * 2, () => / 2000 /
+  2021-03-03T18:27:11.8943620Z 10 :     {
+  2021-03-03T18:27:11.8944620Z 11 :       console.log( 'Child process end' )
+  2021-03-03T18:27:11.8945130Z 12 :       return null;
+  2021-03-03T18:27:11.8945490Z 13 :     })
+  2021-03-03T18:27:11.8946070Z 14 :   }
+  2021-03-03T18:27:11.8946420Z 15 :
+  2021-03-03T18:27:11.8946790Z 16 : var context = {
+  2021-03-03T18:27:11.8947160Z 17 :   "t0" : 100,
+  2021-03-03T18:27:11.8947520Z 18 :   "t1" : 1000,
+  2021-03-03T18:27:11.8947880Z 19 :   "t2" : 5000,
+  2021-03-03T18:27:11.8948230Z 20 :   "t3" : 15000
+  2021-03-03T18:27:11.8948550Z 21 : };
+  2021-03-03T18:27:11.8950260Z 22 : var toolsPath = `/Users/runner/work/wProcess/wProcess/node_modules/wTools/proto/wtools/abase/Layer1.s`;
+  2021-03-03T18:27:11.8950980Z 23 :
+  2021-03-03T18:27:11.8951720Z 24 : testAppChild();
+  2021-03-03T18:27:11.8952090Z 25 :
+  2021-03-03T18:27:11.9161280Z  > testAppChild.js
+  2021-03-03T18:27:16.7137670Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachingChildExistsBeforeParentWaitForTermination / mode : fork, detaching on, disconnected child # 1 ) ... ok
+  2021-03-03T18:27:16.9098540Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachingChildExistsBeforeParentWaitForTermination / mode : fork, detaching on, disconnected child # 2 ) ... ok
+  2021-03-03T18:27:17.0189450Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachingChildExistsBeforeParentWaitForTermination / mode : fork, detaching on, disconnected child # 3 ) : expected true ... ok
+  2021-03-03T18:27:17.3153810Z  > node testAppChild.js
+  2021-03-03T18:29:24.5418240Z       Failed ( test routine time limit ) TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachingChildExistsBeforeParentWaitForTermination in 132.571s
+*/
 function startMinimalDetachingChildExistsBeforeParentWaitForTermination( test )
 {
   let context = this;
@@ -20737,8 +20773,8 @@ function startMinimalOptionOutputGraying( test )
       test.identical( op.ended, true );
       let output = _.strSplitNonPreserving({ src : op.output, delimeter : '\n' });
       test.identical( output.length, 2 );
-      test.identical( output[ 0 ], '\u001b[31m\u001b[43mColored message1\u001b[49;0m\u001b[39;0m' );
-      test.identical( output[ 1 ], '\u001b[31m\u001b[43mColored message2\u001b[49;0m\u001b[39;0m' );
+      test.identical( output[ 0 ], '\u001b[31m\u001b[43mColored message1\u001bu001b[39;0m' );
+      test.identical( output[ 1 ], '\u001b[31m\u001b[43mColored message2\u001bu001b[39;0m' );
       return null;
     })
 
