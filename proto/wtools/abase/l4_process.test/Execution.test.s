@@ -20875,8 +20875,8 @@ function startMinimalOptionOutputGraying( test )
       test.identical( op.ended, true );
       let output = _.strSplitNonPreserving({ src : op.output, delimeter : '\n' });
       test.identical( output.length, 2 );
-      test.identical( output[ 0 ], '\u001b[31m\u001b[43mColored message1\u001bu001b[39;0m' );
-      test.identical( output[ 1 ], '\u001b[31m\u001b[43mColored message2\u001bu001b[39;0m' );
+      test.identical( output[ 0 ], '\u001b[31m\u001b[43mColored message1\u001b[49;0m\u001b[39;0m' );
+      test.identical( output[ 1 ], '\u001b[31m\u001b[43mColored message2\u001b[49;0m\u001b[39;0m' );
       return null;
     })
 
