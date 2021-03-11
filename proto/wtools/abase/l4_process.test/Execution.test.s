@@ -19711,7 +19711,7 @@ function starterEslintProblem( test )
   let a = context.assetFor( test, false );
   let testAppPath = a.program( testApp );
   let testAppPath2 = a.program( testApp2 );
-  let modes = [ /*'fork', 'spawn',*/ 'shell' ];
+  let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
 
@@ -19723,7 +19723,7 @@ function starterEslintProblem( test )
 
     let starterOptions =
     {
-      execPath : 'node',
+      execPath : mode === 'fork' ? '' : 'node',
       outputCollecting : 1,
       args : [ 'arg1', 'arg2' ],
       mode,
@@ -19733,7 +19733,7 @@ function starterEslintProblem( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${mode}, 1`;
+      test.case = `mode : ${mode}, first run`;
 
       return shell
       ({
@@ -19741,8 +19741,13 @@ function starterEslintProblem( test )
       })
       .then( ( op ) =>
       {
-        // console.log( op );
-        let exec = `node ${testAppPath} "arg1" "arg2"`;
+        let exec;
+        if( mode === 'spawn' )
+        exec = `node ${testAppPath} arg1 arg2`;
+        else if( mode === 'fork' )
+        exec = `${testAppPath} arg1 arg2`;
+        else if( mode === 'shell' )
+        exec = `node ${testAppPath} "arg1" "arg2"`;
         test.identical( op.execPath2, exec );;
         return null;
       })
@@ -19752,7 +19757,7 @@ function starterEslintProblem( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${mode}, 2`;
+      test.case = `mode : ${mode}, second run`;
 
       return shell
       ({
@@ -19760,103 +19765,109 @@ function starterEslintProblem( test )
       })
       .then( ( op ) =>
       {
-        let exec = `node ${testAppPath2} "arg1" "arg2"`;
+        let exec;
+        if( mode === 'spawn' )
+        exec = `node ${testAppPath2} arg1 arg2`;
+        else if( mode === 'fork' )
+        exec = `${testAppPath2} arg1 arg2`;
+        else if( mode === 'shell' )
+        exec = `node ${testAppPath2} "arg1" "arg2"`;
         test.identical( op.execPath2, exec );
         return null;
       })
+    })
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, imitate eslint integration routine`;
+      let rootPath = a.path.join( __dirname, '../../../..' );
+      let eslint = process.platform === 'win32' ? 'node_modules/eslint/bin/eslint' : 'node_modules/.bin/eslint';
+      eslint = a.path.join( rootPath, eslint );
+      let sampleDir = a.path.join( rootPath, 'sample' );
+      let ready = _.take( null );
+
+      if( _.process.insideTestContainer() )
+      {
+        let validPlatform = process.platform === 'linux';
+        let validVersion = process.versions.node.split( '.' )[ 0 ] === '14';
+        if( !validPlatform || !validVersion )
+        {
+          test.true( true );
+          return;
+        }
+      }
+
+      let start = _.process.starter
+      ({
+        execPath : eslint,
+        mode : 'fork',
+        currentPath : rootPath,
+        args :
+        [
+          '-c', '.eslintrc.yml',
+          '--ext', '.js,.s,.ss',
+          '--ignore-pattern', '*.c',
+          '--ignore-pattern', '*.ts',
+          '--ignore-pattern', '*.html',
+          '--ignore-pattern', '*.txt',
+          '--ignore-pattern', '*.png',
+          '--ignore-pattern', '*.json',
+          '--ignore-pattern', '*.yml',
+          '--ignore-pattern', '*.yaml',
+          '--ignore-pattern', '*.md',
+          '--ignore-pattern', '*.xml',
+          '--ignore-pattern', '*.css',
+          '--ignore-pattern', '_asset',
+          '--ignore-pattern', 'out',
+          '--ignore-pattern', '*.tgs',
+          '--ignore-pattern', '*.bat',
+          '--ignore-pattern', '*.sh',
+          '--ignore-pattern', '*.jslike',
+          '--ignore-pattern', '*.less',
+          '--ignore-pattern', '*.hbs',
+          '--ignore-pattern', '*.noeslint',
+          '--quiet'
+        ],
+        throwingExitCode : 0,
+        outputCollecting : 1,
+      })
+
+      /* */
+
+      ready.then( () =>
+      {
+        test.case = 'eslint proto';
+        return start( 'proto/Integration.test.ss' );
+      })
+      .then( ( op ) =>
+      {
+        test.false( _.strHas( op.execPath2, 'sample/**' ) );
+        return null;
+      })
+
+      /* */
+
+      if( a.fileProvider.fileExists( sampleDir ) )
+      ready.then( () =>
+      {
+        test.case = 'eslint samples';
+        return start( 'sample/**' )
+        .then( ( op ) =>
+        {
+          test.false( _.strHas( op.execPath2, 'proto/Integration.test.ss' ) );
+          return null;
+        })
+      })
+
+      /**/
+
+      return ready;
     })
 
     return ready;
   }
 
   /* - */
-
-  // let rootPath = a.path.join( __dirname, '../../../..' );
-  // let eslint = process.platform === 'win32' ? 'node_modules/eslint/bin/eslint' : 'node_modules/.bin/eslint';
-  // eslint = a.path.join( rootPath, eslint );
-  // let sampleDir = a.path.join( rootPath, 'sample' );
-  // let ready = _.take( null );
-
-  // if( _.process.insideTestContainer() )
-  // {
-  //   let validPlatform = process.platform === 'linux';
-  //   let validVersion = process.versions.node.split( '.' )[ 0 ] === '14';
-  //   if( !validPlatform || !validVersion )
-  //   {
-  //     test.true( true );
-  //     return;
-  //   }
-  // }
-
-  // let start = _.process.starter
-  // ({
-  //   execPath : eslint,
-  //   mode : 'fork',
-  //   currentPath : rootPath,
-  //   args :
-  //   [
-  //     '-c', '.eslintrc.yml',
-  //     '--ext', '.js,.s,.ss',
-  //     '--ignore-pattern', '*.c',
-  //     '--ignore-pattern', '*.ts',
-  //     '--ignore-pattern', '*.html',
-  //     '--ignore-pattern', '*.txt',
-  //     '--ignore-pattern', '*.png',
-  //     '--ignore-pattern', '*.json',
-  //     '--ignore-pattern', '*.yml',
-  //     '--ignore-pattern', '*.yaml',
-  //     '--ignore-pattern', '*.md',
-  //     '--ignore-pattern', '*.xml',
-  //     '--ignore-pattern', '*.css',
-  //     '--ignore-pattern', '_asset',
-  //     '--ignore-pattern', 'out',
-  //     '--ignore-pattern', '*.tgs',
-  //     '--ignore-pattern', '*.bat',
-  //     '--ignore-pattern', '*.sh',
-  //     '--ignore-pattern', '*.jslike',
-  //     '--ignore-pattern', '*.less',
-  //     '--ignore-pattern', '*.hbs',
-  //     '--ignore-pattern', '*.noeslint',
-  //     '--quiet'
-  //   ],
-  //   throwingExitCode : 0,
-  //   outputCollecting : 1,
-  // })
-
-  // /* */
-
-  // ready.then( () =>
-  // {
-  //   test.case = 'eslint proto';
-  //   return start( 'proto/Integration.test.ss' );
-  // })
-  // .then( ( op ) =>
-  // {
-  //   test.identical( op.exitCode, 0 ); debugger;
-  //   if( op.output.length < 1000 )
-  //   logger.log( op.output );
-  //   return null;
-  // })
-
-  // /* */
-
-  // if( a.fileProvider.fileExists( sampleDir ) )
-  // ready.then( () =>
-  // {
-  //   test.case = 'eslint samples';
-  //   return start( 'sample/**' )
-  //   .then( ( op ) =>
-  //   {
-  //     test.identical( op.exitCode, 0 );
-  //     if( op.output.length < 1000 )
-  //     logger.log( op.output );
-  //     return null;
-  //   })
-  // })
-
-  // /**/
-
-  // return ready;
 
   function testApp()
   {
