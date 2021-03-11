@@ -2476,6 +2476,8 @@ function starter( o0 )
   {
     let o = optionsFrom( arguments[ 0 ] );
     let o00 = _.mapExtend( null, o0 );
+    o00.args = o00.args.slice(); /* copy array, not reference */
+    _.assert( o00.args !== o0.args );
     merge( o00, o );
     _.mapExtend( o, o00 )
 
@@ -2486,6 +2488,13 @@ function starter( o0 )
       _.mapExtend( o, o1 );
     }
 
+    /*
+      let o00 = _.mapExtend( null, o0 );
+      non-primitive values are coppied by reference to o00 from o0;
+      After this call execPath passed to instance of starter is unshifted to o0.args ( o0.args===o.args ).
+      Maybe another non primitive values are coppied by reference to o00 and then passed to startMultiple,
+      which might modify them and therefore pollute options with values from previous calls
+    */
     return _.process.startMultiple( o );
   }
 
