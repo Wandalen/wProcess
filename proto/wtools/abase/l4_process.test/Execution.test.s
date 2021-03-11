@@ -19705,7 +19705,7 @@ function starterFields( test )
 
 //
 
-function starterEslintProblem( test )
+function starterOptionsPollution( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -39067,7 +39067,7 @@ var Proto =
     starter,
     starterArgs,
     starterFields,
-    starterEslintProblem,
+    starterOptionsPollution,
 
     // output
 
