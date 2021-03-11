@@ -2476,7 +2476,7 @@ function starter( o0 )
   {
     let o = optionsFrom( arguments[ 0 ] );
     let o00 = _.mapExtend( null, o0 );
-    o00.args = o00.args.slice(); /* copy array, not reference */
+    o00.args = o00.args ? o00.args.slice() : o00.args; /* copy array, not reference */
     _.assert( o00.args !== o0.args );
     merge( o00, o );
     _.mapExtend( o, o00 )
