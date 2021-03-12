@@ -2474,9 +2474,25 @@ function starter( o0 )
 
   function er()
   {
+    /*
+      non-primitive options that are coppied by reference :
+
+      - execPath( in multiple runs )        : array
+      - currentPath( in multiple runs )     : array
+      - args                                : array
+      - interpreterArgs                     : array
+      - stdio                               : array
+      - logger                              : object
+      - procedure                           : object
+      - ready                               : routine
+      - conStart                            : routine
+      - conTerminate                        : routine
+      - conDisconnect                       : routine
+      - outputColoring                      : object with primitive values
+    */
     let o = optionsFrom( arguments[ 0 ] );
     let o00 = _.mapExtend( null, o0 );
-    for( let k in o00 ) /* copy arrays, not reference */
+    for( let k in o00 ) /* copy arrays, not references */
     if( _.arrayIs( o00[ k ] ) )
     o00[ k ] = o00[ k ].slice()
     merge( o00, o );
