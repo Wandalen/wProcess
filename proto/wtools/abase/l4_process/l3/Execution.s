@@ -2488,7 +2488,7 @@ function starter( o0 )
       - conStart                            : routine
       - conTerminate                        : routine
       - conDisconnect                       : routine
-      - outputColoring                      : object with primitive values
+      - outputColoring                      : map
     */
     let o = optionsFrom( arguments[ 0 ] );
     let o00 = _.mapExtend( null, o0 );
