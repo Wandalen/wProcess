@@ -19425,6 +19425,21 @@ function starter( test )
       })
     })
 
+    /* */
+
+    .then( () =>
+    {
+      test.case = `mode : ${mode}, option procedure`;
+      var shell = _.process.starter
+      ({
+        execPath : mode === 'fork' ? '' : 'node',
+        mode,
+        procedure : true
+      })
+
+      return test.shouldThrowErrorAsync( () => shell({ execPath : testAppPath }) );
+    })
+
     return ready;
   }
 
@@ -19728,7 +19743,7 @@ function starterOptionsPollution( test )
       args : [ 'arg1', 'arg2' ],
       mode,
       outputColoring : { out : 0, err : 0 },
-      // procedure : _.Procedure({ _name : 'name', _object : 'object', _stack : 'stackStarter' }),
+      env : { 'key1' : 'val', 'PATH' : process.env.PATH },
     }
 
     let shell = _.process.starter( starterOptions )
@@ -19883,6 +19898,7 @@ function starterOptionsPollution( test )
       {
         test.identical( starterOptions.outputColoring, { out : 0, err : 0 } );
         test.identical( op.outputColoring, { out : 0, err : 1 } );
+        test.true( starterOptions.outputColoring !== op.outputColoring );
         return null;
       })
     })
@@ -19901,46 +19917,49 @@ function starterOptionsPollution( test )
       {
         test.identical( starterOptions.outputColoring, { out : 0, err : 0 } );
         test.identical( op.outputColoring, { out : 0, err : 0 } );
+        test.true( starterOptions.outputColoring !== op.outputColoring );
         return null;
       })
     })
 
     /* */
 
-    // ready.then( () =>
-    // {
-    //   test.case = `mode : ${mode}, with procedure`;
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, with procedure`;
 
-    //   return shell
-    //   ({
-    //     execPath : testAppPath,
-    //     // procedure : _.Procedure({ _name : 'name', _object : 'object', _stack : 'stack' }),
-    //   })
-    //   .then( ( op ) =>
-    //   {
-    //     test.identical( starterOptions.procedure._stack, 'stackStarter' );
-    //     test.identical( op.procedure.procedure._stack, 'stack' );
-    //     return null;
-    //   })
-    // })
+      return shell
+      ({
+        execPath : testAppPath,
+        env : { 'key2' : 'val2', 'PATH' : process.env.PATH }
+      })
+      .then( ( op ) =>
+      {
+        test.identical( starterOptions.env, { 'key1' : 'val', 'PATH' : process.env.PATH } );
+        test.identical( op.env, { 'key2' : 'val2', 'PATH' : process.env.PATH } );
+        test.true( starterOptions.env !== op.env );
+        return null;
+      })
+    })
 
-    // /* */
+    /* */
 
-    // ready.then( () =>
-    // {
-    //   test.case = `mode : ${mode}, without procedure`;
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, without procedure`;
 
-    //   return shell
-    //   ({
-    //     execPath : testAppPath2
-    //   })
-    //   .then( ( op ) =>
-    //   {
-    //     test.identical( starterOptions.procedure._stack, 'stackStarter' );
-    //     test.identical( op.procedure.procedure._stack, 'stackStarter' );
-    //     return null;
-    //   })
-    // })
+      return shell
+      ({
+        execPath : testAppPath2
+      })
+      .then( ( op ) =>
+      {
+        test.identical( starterOptions.env, { 'key1' : 'val', 'PATH' : process.env.PATH } );
+        test.identical( op.env, { 'key1' : 'val', 'PATH' : process.env.PATH } );
+        test.true( starterOptions.env !== op.env );
+        return null;
+      })
+    })
 
     return ready;
   }

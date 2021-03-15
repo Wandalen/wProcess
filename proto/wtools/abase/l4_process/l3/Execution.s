@@ -2488,13 +2488,18 @@ function starter( o0 )
       - conStart                            : routine
       - conTerminate                        : routine
       - conDisconnect                       : routine
-      - outputColoring                      : map
+      - outputColoring                      : aux
+      - env                                 : aux
     */
     let o = optionsFrom( arguments[ 0 ] );
     let o00 = _.mapExtend( null, o0 );
-    for( let k in o00 ) /* copy arrays, not references */
-    if( _.arrayIs( o00[ k ] ) )
-    o00[ k ] = o00[ k ].slice();
+    for( let k in o00 )
+    {
+      if( _.arrayIs( o00[ k ] ) )
+      o00[ k ] = o00[ k ].slice();
+      else if( _.aux.is( o00[ k ] ) )
+      o00[ k ] = _.mapExtend( null, o00[ k ] );
+    }
     merge( o00, o );
     _.mapExtend( o, o00 )
 
@@ -2552,7 +2557,8 @@ function starter( o0 )
 
 }
 
-starter.defaults = Object.create( startMultiple.defaults );
+// starter.defaults = Object.create( startMultiple.defaults );
+starter.defaults = _.mapBut( startMultiple.defaults, [ 'procedure' ] );
 
 // --
 // children
