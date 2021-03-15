@@ -19430,14 +19430,7 @@ function starter( test )
     .then( () =>
     {
       test.case = `mode : ${mode}, option procedure`;
-      var shell = _.process.starter
-      ({
-        execPath : mode === 'fork' ? '' : 'node',
-        mode,
-        procedure : true
-      })
-
-      return test.shouldThrowErrorAsync( () => shell({ execPath : testAppPath }) );
+      return test.shouldThrowErrorSync( () => _.process.starter({ execPath : mode === 'fork' ? '' : 'node', mode, procedure : true }) );
     })
 
     return ready;
@@ -19750,7 +19743,7 @@ function starterOptionsPollution( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${mode}, first run`;
+      test.case = `mode : ${mode}, default options, first run`;
 
       return shell
       ({
@@ -19765,7 +19758,16 @@ function starterOptionsPollution( test )
         exec = `${testAppPath} arg1 arg2`;
         else if( mode === 'shell' )
         exec = `node ${testAppPath} "arg1" "arg2"`;
-        test.identical( op.execPath2, exec );;
+        test.identical( op.execPath2, exec );
+
+        test.identical( starterOptions.outputColoring, { out : 0, err : 0 } );
+        test.identical( op.outputColoring, { out : 0, err : 0 } );
+        test.true( starterOptions.outputColoring !== op.outputColoring );
+
+        test.identical( starterOptions.env, { 'key1' : 'val', 'PATH' : process.env.PATH } );
+        test.identical( op.env, { 'key1' : 'val', 'PATH' : process.env.PATH } );
+        test.true( starterOptions.env !== op.env );
+
         return null;
       })
     })
@@ -19774,7 +19776,7 @@ function starterOptionsPollution( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${mode}, second run`;
+      test.case = `mode : ${mode}, default options, second run`;
 
       return shell
       ({
@@ -19790,6 +19792,55 @@ function starterOptionsPollution( test )
         else if( mode === 'shell' )
         exec = `node ${testAppPath2} "arg1" "arg2"`;
         test.identical( op.execPath2, exec );
+
+        test.identical( starterOptions.outputColoring, { out : 0, err : 0 } );
+        test.identical( op.outputColoring, { out : 0, err : 0 } );
+        test.true( starterOptions.outputColoring !== op.outputColoring );
+
+        test.identical( starterOptions.env, { 'key1' : 'val', 'PATH' : process.env.PATH } );
+        test.identical( op.env, { 'key1' : 'val', 'PATH' : process.env.PATH } );
+        test.true( starterOptions.env !== op.env );
+
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, with outputColoring map`;
+
+      return shell
+      ({
+        execPath : testAppPath,
+        outputColoring : { out : 0, err : 1 }
+      })
+      .then( ( op ) =>
+      {
+        test.identical( starterOptions.outputColoring, { out : 0, err : 0 } );
+        test.identical( op.outputColoring, { out : 0, err : 1 } );
+        test.true( starterOptions.outputColoring !== op.outputColoring );
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, with env`;
+
+      return shell
+      ({
+        execPath : testAppPath,
+        env : { 'key2' : 'val2', 'PATH' : process.env.PATH }
+      })
+      .then( ( op ) =>
+      {
+        test.identical( starterOptions.env, { 'key1' : 'val', 'PATH' : process.env.PATH } );
+        test.identical( op.env, { 'key2' : 'val2', 'PATH' : process.env.PATH } );
+        test.true( starterOptions.env !== op.env );
         return null;
       })
     })
@@ -19881,84 +19932,6 @@ function starterOptionsPollution( test )
       /**/
 
       return ready;
-    })
-
-    /* */
-
-    ready.then( () =>
-    {
-      test.case = `mode : ${mode}, with outputColoring map`;
-
-      return shell
-      ({
-        execPath : testAppPath,
-        outputColoring : { out : 0, err : 1 }
-      })
-      .then( ( op ) =>
-      {
-        test.identical( starterOptions.outputColoring, { out : 0, err : 0 } );
-        test.identical( op.outputColoring, { out : 0, err : 1 } );
-        test.true( starterOptions.outputColoring !== op.outputColoring );
-        return null;
-      })
-    })
-
-    /* */
-
-    ready.then( () =>
-    {
-      test.case = `mode : ${mode}, without outputColoring map`;
-
-      return shell
-      ({
-        execPath : testAppPath2
-      })
-      .then( ( op ) =>
-      {
-        test.identical( starterOptions.outputColoring, { out : 0, err : 0 } );
-        test.identical( op.outputColoring, { out : 0, err : 0 } );
-        test.true( starterOptions.outputColoring !== op.outputColoring );
-        return null;
-      })
-    })
-
-    /* */
-
-    ready.then( () =>
-    {
-      test.case = `mode : ${mode}, with procedure`;
-
-      return shell
-      ({
-        execPath : testAppPath,
-        env : { 'key2' : 'val2', 'PATH' : process.env.PATH }
-      })
-      .then( ( op ) =>
-      {
-        test.identical( starterOptions.env, { 'key1' : 'val', 'PATH' : process.env.PATH } );
-        test.identical( op.env, { 'key2' : 'val2', 'PATH' : process.env.PATH } );
-        test.true( starterOptions.env !== op.env );
-        return null;
-      })
-    })
-
-    /* */
-
-    ready.then( () =>
-    {
-      test.case = `mode : ${mode}, without procedure`;
-
-      return shell
-      ({
-        execPath : testAppPath2
-      })
-      .then( ( op ) =>
-      {
-        test.identical( starterOptions.env, { 'key1' : 'val', 'PATH' : process.env.PATH } );
-        test.identical( op.env, { 'key1' : 'val', 'PATH' : process.env.PATH } );
-        test.true( starterOptions.env !== op.env );
-        return null;
-      })
     })
 
     return ready;
