@@ -1367,7 +1367,7 @@ startMinimal_body.defaults =
 
 /* xxx : move advanced options to _.process.startSingle() */
 
-let startMinimal = _.routineUnite( startMinimal_head, startMinimal_body );
+let startMinimal = _.routine.uniteCloning_( startMinimal_head, startMinimal_body );
 
 //
 
@@ -1640,7 +1640,7 @@ startSingle_body.defaults =
 
 }
 
-let startSingle = _.routineUnite( startSingle_head, startSingle_body );
+let startSingle = _.routine.uniteCloning_( startSingle_head, startSingle_body );
 
 //
 
@@ -2229,11 +2229,11 @@ startMultiple_body.defaults =
 
 }
 
-let startMultiple = _.routineUnite( startMultiple_head, startMultiple_body );
+let startMultiple = _.routine.uniteCloning_( startMultiple_head, startMultiple_body );
 
 //
 
-let startPassingThrough = _.routineUnite( startMultiple_head, startMultiple_body );
+let startPassingThrough = _.routine.uniteCloning_( startMultiple_head, startMultiple_body );
 
 var defaults = startPassingThrough.defaults;
 
@@ -2335,7 +2335,7 @@ defaults.applyingExitCode = 1;
 defaults.stdio = 'inherit';
 defaults.mode = 'fork';
 
-let startNjs = _.routineUnite( startMultiple_head, startNjs_body );
+let startNjs = _.routine.uniteCloning_( startMultiple_head, startNjs_body );
 
 //
 
@@ -2371,7 +2371,7 @@ let startNjs = _.routineUnite( startMultiple_head, startNjs_body );
  * @namespace Tools.process
  */
 
-let startNjsPassingThrough = _.routineUnite( startMultiple_head, startNjs.body );
+let startNjsPassingThrough = _.routine.uniteCloning_( startMultiple_head, startNjs.body );
 
 var defaults = startNjsPassingThrough.defaults;
 
@@ -2864,7 +2864,7 @@ signal_body.defaults =
   sync : 0,
 }
 
-let _signal = _.routineUnite( signal_head, signal_body );
+let _signal = _.routine.uniteCloning_( signal_head, signal_body );
 
 //
 
@@ -2882,7 +2882,7 @@ kill_body.defaults =
   ... _.mapBut( _signal.defaults, [ 'signal', 'timeOut' ] ),
 }
 
-let kill = _.routineUnite( signal_head, kill_body );
+let kill = _.routine.uniteCloning_( signal_head, kill_body );
 
 
 //
@@ -2904,7 +2904,7 @@ terminate_body.defaults =
   ... _.mapBut( _signal.defaults, [ 'signal' ] ),
 }
 
-let terminate = _.routineUnite( signal_head, terminate_body );
+let terminate = _.routine.uniteCloning_( signal_head, terminate_body );
 
 //
 
@@ -3008,7 +3008,7 @@ waitForDeath_body.defaults =
   sync : 0
 }
 
-let waitForDeath = _.routineUnite( signal_head, waitForDeath_body )
+let waitForDeath = _.routine.uniteCloning_( signal_head, waitForDeath_body )
 
 //
 

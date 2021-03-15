@@ -97,7 +97,7 @@ function tempOpen_body( o )
 var defaults = tempOpen_body.defaults = Object.create( null );
 defaults.sourceCode = null;
 
-let tempOpen = _.routineUnite( tempOpen_head, tempOpen_body );
+let tempOpen = _.routine.uniteCloning_( tempOpen_head, tempOpen_body );
 
 //
 
@@ -147,7 +147,7 @@ function tempClose_body( o )
 var defaults = tempClose_body.defaults = Object.create( null );
 defaults.filePath = null;
 
-let tempClose = _.routineUnite( tempClose_head, tempClose_body );
+let tempClose = _.routine.uniteCloning_( tempClose_head, tempClose_body );
 
 // --
 // eventer
