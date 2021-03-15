@@ -19727,7 +19727,8 @@ function starterOptionsPollution( test )
       outputCollecting : 1,
       args : [ 'arg1', 'arg2' ],
       mode,
-      outputColoring : { out : 0, err : 0 }
+      outputColoring : { out : 0, err : 0 },
+      // procedure : _.Procedure({ _name : 'name', _object : 'object', _stack : 'stackStarter' }),
     }
 
     let shell = _.process.starter( starterOptions )
@@ -19871,7 +19872,7 @@ function starterOptionsPollution( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${mode}, outputColoring map in shell`;
+      test.case = `mode : ${mode}, with outputColoring map`;
 
       return shell
       ({
@@ -19880,6 +19881,7 @@ function starterOptionsPollution( test )
       })
       .then( ( op ) =>
       {
+        test.identical( starterOptions.outputColoring, { out : 0, err : 0 } );
         test.identical( op.outputColoring, { out : 0, err : 1 } );
         return null;
       })
@@ -19889,7 +19891,7 @@ function starterOptionsPollution( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${mode}, without outputColoring map in shell`;
+      test.case = `mode : ${mode}, without outputColoring map`;
 
       return shell
       ({
@@ -19897,10 +19899,48 @@ function starterOptionsPollution( test )
       })
       .then( ( op ) =>
       {
+        test.identical( starterOptions.outputColoring, { out : 0, err : 0 } );
         test.identical( op.outputColoring, { out : 0, err : 0 } );
         return null;
       })
     })
+
+    /* */
+
+    // ready.then( () =>
+    // {
+    //   test.case = `mode : ${mode}, with procedure`;
+
+    //   return shell
+    //   ({
+    //     execPath : testAppPath,
+    //     // procedure : _.Procedure({ _name : 'name', _object : 'object', _stack : 'stack' }),
+    //   })
+    //   .then( ( op ) =>
+    //   {
+    //     test.identical( starterOptions.procedure._stack, 'stackStarter' );
+    //     test.identical( op.procedure.procedure._stack, 'stack' );
+    //     return null;
+    //   })
+    // })
+
+    // /* */
+
+    // ready.then( () =>
+    // {
+    //   test.case = `mode : ${mode}, without procedure`;
+
+    //   return shell
+    //   ({
+    //     execPath : testAppPath2
+    //   })
+    //   .then( ( op ) =>
+    //   {
+    //     test.identical( starterOptions.procedure._stack, 'stackStarter' );
+    //     test.identical( op.procedure.procedure._stack, 'stackStarter' );
+    //     return null;
+    //   })
+    // })
 
     return ready;
   }
