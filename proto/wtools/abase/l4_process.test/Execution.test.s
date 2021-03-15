@@ -19727,6 +19727,7 @@ function starterOptionsPollution( test )
       outputCollecting : 1,
       args : [ 'arg1', 'arg2' ],
       mode,
+      outputColoring : { out : 0, err : 0 }
     }
 
     let shell = _.process.starter( starterOptions )
@@ -19776,6 +19777,8 @@ function starterOptionsPollution( test )
         return null;
       })
     })
+
+    /* */
 
     ready.then( () =>
     {
@@ -19862,6 +19865,41 @@ function starterOptionsPollution( test )
       /**/
 
       return ready;
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, outputColoring map in shell`;
+
+      return shell
+      ({
+        execPath : testAppPath,
+        outputColoring : { out : 0, err : 1 }
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.outputColoring, { out : 0, err : 1 } );
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, without outputColoring map in shell`;
+
+      return shell
+      ({
+        execPath : testAppPath2
+      })
+      .then( ( op ) =>
+      {
+        test.identical( op.outputColoring, { out : 0, err : 0 } );
+        return null;
+      })
     })
 
     return ready;
