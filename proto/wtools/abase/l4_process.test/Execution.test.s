@@ -216,7 +216,7 @@ function assetFor( test, name )
 
   let oprogram = a.program;
   program_body.defaults = a.program.defaults;
-  a.program = _.routineUnite( a.program.head, program_body );
+  a.program = _.routine.uniteCloning_( a.program.head, program_body );
   return a;
 
   /* */
@@ -643,6 +643,8 @@ ${programPath}:end
     console.log( process.argv.slice( 2 ).join( ' ' ) );
   }
 }
+
+startMinimalBasic.timeOut = 31e4; /* Locally : 30.986s. Time out on git after 1 min ( started : 04.04.24, time out : 04.05.28 ) */
 
 //
 
