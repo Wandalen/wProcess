@@ -8499,7 +8499,7 @@ function startProcedureTrivial( test )
         test.identical( procedure[ 0 ].isAlive(), false );
         test.identical( o.procedure, procedure[ 0 ] );
         test.identical( procedure[ 0 ].object(), o.pnd );
-        test.true( _.strHas( o.procedure._sourcePath, 'Execution.s' ) );
+        test.true( _.strHas( o.procedure._sourcePath, 'Execution.test.s' ) );
         return null;
       })
     })
@@ -8578,7 +8578,7 @@ function startProcedureExists( test )
         test.identical( o.procedure, procedure[ 0 ] );
         test.identical( procedure[ 0 ].object(), o.pnd );
         test.identical( o.procedure, procedure[ 0 ] );
-        test.true( _.strHas( o.procedure._sourcePath, 'Execution.s' ) );
+        test.true( _.strHas( o.procedure._sourcePath, 'Execution.test.s' ) );
         return null;
       })
     })
@@ -8856,6 +8856,81 @@ startSingleProcedureStack.description =
   - stack may be defined relatively
   - stack may be switched off
 `
+
+//
+
+function startSingleProcedureSourcePath( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let programPath = a.program( program1 );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 0, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 1, mode ) ) );
+  return a.ready;
+
+  /*  */
+
+  function run( sync, deasync, mode )
+  {
+    let ready = new _.Consequence().take( null )
+
+    if( sync && !deasync && mode === 'fork' )
+    return null;
+
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `sync:${sync} deasync:${deasync} mode:${mode} stack:implicit`;
+      let t1 = _.time.now();
+      let o =
+      {
+        execPath : mode === `fork` ? `${programPath} id:1` : `node ${programPath} id:1`,
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+        mode,
+        sync,
+        deasync,
+      }
+
+      _.process.startSingle( o );
+
+      test.identical( _.strCount( o.procedure._sourcePath, 'Execution.test.s' ), 1 );
+      test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.procedure._sourcePath, 'Execution.test.s' ), 1 );
+        test.identical( _.strCount( op.procedure._sourcePath, 'case1' ), 1 );
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* */
+
+    return ready;
+  }
+
+  /* - */
+
+  function program1()
+  {
+    console.log( process.argv.slice( 2 ) );
+    // let _ = require( toolsPath );
+    // _.include( 'wProcess' );
+    // let args = _.process.input();
+    // let data = { time : _.time.now(), id : args.map.id };
+    // console.log( JSON.stringify( data ) );
+  }
+
+}
 
 //
 
@@ -38822,6 +38897,7 @@ var Proto =
     startProcedureTrivial, /* with routine::starter */
     startProcedureExists, /* with routine::starter */
     startSingleProcedureStack,
+    startSingleProcedureSourcePath,
     startMultipleProcedureStack,
     startMinimalOnTerminateSeveralCallbacksChronology,
     startMinimalChronology,
