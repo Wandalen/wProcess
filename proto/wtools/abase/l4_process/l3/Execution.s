@@ -392,6 +392,10 @@ function startMinimal_body( o )
     if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
     {
       o.procedure = _.Procedure({ _stack : o.stack });
+
+      let stackSplitted = o.stack.split( '\n' );
+      if( _.strHas( stackSplitted[ 1 ], /^at er (.)+Execution.s/g ) )
+      o.procedure._sourcePath = stackSplitted[ 2 ];
     }
 
     if( _.routineIs( o.args ) )
