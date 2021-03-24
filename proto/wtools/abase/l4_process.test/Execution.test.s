@@ -8923,11 +8923,6 @@ function startSingleProcedureSourcePath( test )
   function program1()
   {
     console.log( process.argv.slice( 2 ) );
-    // let _ = require( toolsPath );
-    // _.include( 'wProcess' );
-    // let args = _.process.input();
-    // let data = { time : _.time.now(), id : args.map.id };
-    // console.log( JSON.stringify( data ) );
   }
 
 }
