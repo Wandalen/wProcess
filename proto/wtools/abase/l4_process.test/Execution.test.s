@@ -9006,101 +9006,116 @@ function startProcedureSourcePath( test )
 
 //
 
-// function startProcedureDifferent( test )
-// {
-//   let context = this;
-//   let a = context.assetFor( test, false );
-//   let programPath = a.program( program1 );
-//   let modes = [ 'fork', 'spawn', 'shell' ];
+function startProcedureDifferent( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let programPath = a.program( program1 );
+  // let programPath2 = a.program( program2 );
+  let modes = [ 'fork', 'spawn', 'shell' ];
 
-//   const starter = _.process.starter
-//   ({
-//       outputCollecting : 1,
-//       currentPath : a.abs( '.' )
-//   })
+  const starter = _.process.starter
+  ({
+      outputCollecting : 1,
+      currentPath : a.abs( '.' )
+  })
 
-//   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
-//   // modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
-//   // modes.forEach( ( mode ) => a.ready.then( () => run( 1, 0, mode ) ) );
-//   // modes.forEach( ( mode ) => a.ready.then( () => run( 1, 1, mode ) ) );
-//   return a.ready;
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => run( 1, 0, mode ) ) );
+  // modes.forEach( ( mode ) => a.ready.then( () => run( 1, 1, mode ) ) );
+  return a.ready;
 
-//   /*  */
+  /*  */
 
-//   function run( mode/*, deasync, mode*/ )
-//   {
-//     let ready = new _.Consequence().take( null )
+  function run( mode/*, deasync, mode*/ )
+  {
+    let ready = new _.Consequence().take( null )
 
-//     // if( sync && !deasync && mode === 'fork' )
-//     // return null;
+    // if( sync && !deasync && mode === 'fork' )
+    // return null;
 
-//     /* */
+    /* */
 
-//     ready.then( function case1()
-//     {
-//       test.case = `mode:${mode}`;
-//       let o =
-//       {
-//         execPath : mode === `fork` ? `${programPath} id:1` : `node ${programPath} id:1`,
-//         mode,
-//         // sync,
-//         // deasync,
-//       }
+    ready.then( function case1()
+    {
+      test.case = `mode:${mode}`;
+      let o =
+      {
+        execPath : mode === `fork` ? `${programPath} id:1` : `node ${programPath} id:1`,
+        mode,
+        // sync,
+        // deasync,
+      }
 
-//       let o2 =
-//       {
-//         execPath : mode === `fork` ? `${programPath} id:1` : `node ${programPath} id:1`,
-//         mode,
-//         // sync,
-//         // deasync,
-//       }
+      let o2 =
+      {
+        execPath : mode === `fork` ? `${programPath} id:1` : `node ${programPath} id:1`,
+        mode,
+        // sync,
+        // deasync,
+      }
 
-//       let process1 = starter( o );
-//       let process2 = starter( o2 );
+      debugger
+      let process1 = starter( o );
+      debugger
+      let process2 = starter( o2 );
 
-//       test.false( o.procedure === o2.procedure );
+      // console.log( 'PPPPPP1111', o.procedure )
+      // console.log( 'PPPPPP2222', o2.procedure )
 
-//       // test.identical( _.strCount( o.procedure._sourcePath, 'Execution.test.s' ), 1 );
-//       // test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
+      test.false( o.procedure === o2.procedure );
 
-//       // o.ready.then( ( op ) =>
-//       // {
-//       //   test.identical( op.exitCode, 0 );
-//       //   test.identical( op.ended, true );
-//       //   // test.identical( _.strCount( op.procedure._sourcePath, 'Execution.test.s' ), 1 );
-//       //   // test.identical( _.strCount( op.procedure._sourcePath, 'case1' ), 1 );
-//       //   // console.log( '_stack', op.procedure._stack );
-//       //   // console.log( '_sourcePath', op.procedure._sourcePath );
-//       //   return null;
-//       // })
+      test.identical( _.strCount( o.procedure._sourcePath, 'Execution.test.s' ), 1 );
+      test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
 
-//       // o2.ready.then( ( op ) =>
-//       // {
-//       //   test.identical( op.exitCode, 0 );
-//       //   test.identical( op.ended, true );
-//       //   // test.identical( _.strCount( op.procedure._sourcePath, 'Execution.test.s' ), 1 );
-//       //   // test.identical( _.strCount( op.procedure._sourcePath, 'case1' ), 1 );
-//       //   // console.log( '_stack', op.procedure._stack );
-//       //   // console.log( '_sourcePath', op.procedure._sourcePath );
-//       //   return null;
-//       // })
+      test.identical( _.strCount( o2.procedure._sourcePath, 'Execution.test.s' ), 1 );
+      test.identical( _.strCount( o2.procedure._sourcePath, 'case1' ), 1 );
 
-//       return o.ready;
-//     })
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.procedure._sourcePath, 'Execution.test.s' ), 1 );
+        test.identical( _.strCount( op.procedure._sourcePath, 'case1' ), 1 );
+        // console.log( '_stack', op.procedure._stack );
+        // console.log( '_sourcePath', op.procedure._sourcePath );
+        return null;
+      })
 
-//     /* */
+      o2.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.procedure._sourcePath, 'Execution.test.s' ), 1 );
+        test.identical( _.strCount( op.procedure._sourcePath, 'case1' ), 1 );
+        // console.log( '_stack', op.procedure._stack );
+        // console.log( '_sourcePath', op.procedure._sourcePath );
+        return null;
+      })
 
-//     return ready;
-//   }
+      return _.time.out( context.t1 * 6 );
+      // return o.ready;
+    })
 
-//   /* - */
+    /* */
 
-//   function program1()
-//   {
-//     console.log( process.argv.slice( 2 ) );
-//   }
+    return ready;
+  }
 
-// }
+  /* - */
+
+  function program1()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+
+  // function program2()
+  // {
+  //   console.log( process.argv.slice( 2 ) );
+  // }
+
+}
 
 //
 
@@ -39069,7 +39084,7 @@ var Proto =
     startSingleProcedureStack,
     startSingleProcedureSourcePath,
     startProcedureSourcePath, /* with routine::starter */
-    // startProcedureDifferent, /* with routine::starter */
+    startProcedureDifferent, /* with routine::starter */
     startMultipleProcedureStack,
     startMinimalOnTerminateSeveralCallbacksChronology,
     startMinimalChronology,
