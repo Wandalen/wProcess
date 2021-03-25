@@ -394,7 +394,7 @@ function startMinimal_body( o )
       o.procedure = _.Procedure({ _stack : o.stack });
 
       let stackSplitted = o.stack.split( '\n' );
-      if( _.strHas( stackSplitted[ 1 ], /^at er (.)+Execution.s/g ) )
+      if( stackSplitted.length > 2 && _.strHas( stackSplitted[ 1 ], /^at er (.)+Execution.s/g ) )
       o.procedure._sourcePath = stackSplitted[ 2 ];
     }
 
@@ -2469,7 +2469,7 @@ function starter( o0 )
   if( _.strIs( o0 ) )
   o0 = { execPath : o0 }
   o0 = _.routineOptions( starter, o0 );
-  o0.ready = o0.ready || new _.Consequence().take( null );
+  // o0.ready = o0.ready || new _.Consequence().take( null ); /* processes launched have the same o.ready */
 
   _.routineExtend( er, _.process.startMultiple );
   er.predefined = o0;

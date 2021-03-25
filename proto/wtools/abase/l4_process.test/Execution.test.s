@@ -9056,15 +9056,20 @@ function startProcedureDifferent( test )
         // deasync,
       }
 
-      debugger
+      // debugger
       let process1 = starter( o );
-      debugger
+      // debugger
       let process2 = starter( o2 );
+      debugger
 
       // console.log( 'PPPPPP1111', o.procedure )
       // console.log( 'PPPPPP2222', o2.procedure )
 
       test.false( o.procedure === o2.procedure );
+      test.false( o.ready === o2.ready ); /* true */
+      test.false( o.conDisconnect === o2.conDisconnect );
+      test.false( o.conStart === o2.conStart );
+      test.false( o.conTerminate === o2.conTerminate );
 
       test.identical( _.strCount( o.procedure._sourcePath, 'Execution.test.s' ), 1 );
       test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
