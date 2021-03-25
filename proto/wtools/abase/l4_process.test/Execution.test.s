@@ -9011,7 +9011,6 @@ function startProcedureDifferent( test )
   let context = this;
   let a = context.assetFor( test, false );
   let programPath = a.program( program1 );
-  // let programPath2 = a.program( program2 );
   let modes = [ 'fork', 'spawn', 'shell' ];
 
   const starter = _.process.starter
@@ -9021,49 +9020,34 @@ function startProcedureDifferent( test )
   })
 
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => run( 1, 0, mode ) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => run( 1, 1, mode ) ) );
   return a.ready;
 
   /*  */
 
-  function run( mode/*, deasync, mode*/ )
+  function run( mode )
   {
     let ready = new _.Consequence().take( null )
-
-    // if( sync && !deasync && mode === 'fork' )
-    // return null;
 
     /* */
 
     ready.then( function case1()
     {
       test.case = `mode:${mode}`;
+
       let o =
       {
         execPath : mode === `fork` ? `${programPath} id:1` : `node ${programPath} id:1`,
         mode,
-        // sync,
-        // deasync,
       }
 
       let o2 =
       {
         execPath : mode === `fork` ? `${programPath} id:1` : `node ${programPath} id:1`,
         mode,
-        // sync,
-        // deasync,
       }
 
-      // debugger
       let process1 = starter( o );
-      // debugger
       let process2 = starter( o2 );
-      debugger
-
-      // console.log( 'PPPPPP1111', o.procedure )
-      // console.log( 'PPPPPP2222', o2.procedure )
 
       test.false( o.procedure === o2.procedure );
       test.false( o.ready === o2.ready ); /* true */
@@ -9083,8 +9067,6 @@ function startProcedureDifferent( test )
         test.identical( op.ended, true );
         test.identical( _.strCount( op.procedure._sourcePath, 'Execution.test.s' ), 1 );
         test.identical( _.strCount( op.procedure._sourcePath, 'case1' ), 1 );
-        // console.log( '_stack', op.procedure._stack );
-        // console.log( '_sourcePath', op.procedure._sourcePath );
         return null;
       })
 
@@ -9094,13 +9076,10 @@ function startProcedureDifferent( test )
         test.identical( op.ended, true );
         test.identical( _.strCount( op.procedure._sourcePath, 'Execution.test.s' ), 1 );
         test.identical( _.strCount( op.procedure._sourcePath, 'case1' ), 1 );
-        // console.log( '_stack', op.procedure._stack );
-        // console.log( '_sourcePath', op.procedure._sourcePath );
         return null;
       })
 
-      return _.time.out( context.t1 * 6 );
-      // return o.ready;
+      return _.time.out( context.t1 * 2 );
     })
 
     /* */
@@ -9114,12 +9093,6 @@ function startProcedureDifferent( test )
   {
     console.log( process.argv.slice( 2 ) );
   }
-
-  // function program2()
-  // {
-  //   console.log( process.argv.slice( 2 ) );
-  // }
-
 }
 
 //
