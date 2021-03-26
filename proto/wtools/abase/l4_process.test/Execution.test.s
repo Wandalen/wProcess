@@ -9049,6 +9049,12 @@ function startProcedureDifferent( test )
       let process1 = starter( o );
       let process2 = starter( o2 );
 
+      test.true( o.pnd !== null );
+      test.true( o.procedure !== null );
+
+      test.true( o2.pnd !== null );
+      test.true( o2.procedure !== null );
+
       test.false( o.procedure === o2.procedure );
       test.false( o.ready === o2.ready ); /* true */
       test.false( o.conDisconnect === o2.conDisconnect );
