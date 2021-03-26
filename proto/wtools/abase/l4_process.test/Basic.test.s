@@ -15,9 +15,9 @@ if( typeof module !== 'undefined' )
 
 }
 
-let _global = _global_;
-let _ = _global_.wTools;
-let Self = {};
+const _global = _global_;
+const _ = _global_.wTools;
+const Proto = {};
 
 // --
 // context
@@ -533,7 +533,7 @@ function _argCmdEscape( test )
 
 //
 
-var Proto =
+const Proto =
 {
 
   name : 'Tools.l4.process.Basic',
@@ -570,7 +570,7 @@ _.mapExtend( Self, Proto );
 
 //
 
-Self = wTestSuite( Self );
+const Self = wTestSuite( Proto );
 if( typeof module !== 'undefined' && !module.parent )
 wTester.test( Self )
 

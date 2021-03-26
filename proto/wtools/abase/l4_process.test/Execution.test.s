@@ -17,9 +17,9 @@ if( typeof module !== 'undefined' )
   Stream = require( 'stream' );
 }
 
-let _global = _global_;
-let _ = _global_.wTools;
-let Self = {};
+const _global = _global_;
+const _ = _global_.wTools;
+const Proto = {};
 
 /*
 experimentIpcDeasync:
@@ -38757,7 +38757,7 @@ Shows that timeOut kills the child process and handleClose is called
 // suite
 // --
 
-var Proto =
+const Proto =
 {
 
   name : 'Tools.l4.process.Execution',
@@ -39009,7 +39009,7 @@ _.mapExtend( Self, Proto );
 //
 
 
-Self = wTestSuite( Self );
+const Self = wTestSuite( Proto );
 if( typeof module !== 'undefined' && !module.parent )
 wTester.test( Self );
 
