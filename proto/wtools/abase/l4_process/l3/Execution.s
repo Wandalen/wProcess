@@ -2767,7 +2767,7 @@ function signal_body( o )
     // if( p )
     {
       let processInfo = processInfoGet( p );
-      _._errFields( err, { processInfo : processInfo } )
+      _.error.concealedSet( err, { processInfo : processInfo } )
       _.err( err, processInfo );
       // console.log( 'handleError2 :', processInfo );
     }

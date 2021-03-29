@@ -28696,7 +28696,7 @@ function startMinimalOptionThrowingExitCode( test )
       options.conTerminate.finally( ( err, op ) =>
       {
         test.identical( op, undefined );
-        test.true( !_.errIsBrief( err ) );
+        test.true( !_.error.isBrief( err ) );
         test.true( _.strHas( err.message, 'Process returned exit code' ) );
         test.true( _.strHas( err.message, 'Launched as' ) );
         test.true( _.strHas( err.message, 'Stderr' ) );
@@ -28731,7 +28731,7 @@ function startMinimalOptionThrowingExitCode( test )
       options.conTerminate.finally( ( err, op ) =>
       {
         test.identical( op, undefined );
-        test.true( !_.errIsBrief( err ) );
+        test.true( !_.error.isBrief( err ) );
         test.true( _.strHas( err.message, 'Process returned exit code' ) );
         test.true( _.strHas( err.message, 'Launched as' ) );
         test.true( _.strHas( err.message, 'Stderr' ) );
@@ -28766,7 +28766,7 @@ function startMinimalOptionThrowingExitCode( test )
       options.conTerminate.finally( ( err, op ) =>
       {
         test.identical( op, undefined );
-        test.true( !_.errIsBrief( err ) );
+        test.true( !_.error.isBrief( err ) );
         test.true( _.strHas( err.message, 'Process returned exit code' ) );
         test.true( _.strHas( err.message, 'Launched as' ) );
         test.true( _.strHas( err.message, 'Stderr' ) );

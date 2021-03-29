@@ -227,7 +227,7 @@ function _exitHandlerRepair()
         let err = _._err
         ({
           args : [ `Exit signal : ${signal} ( 128+${signalCode} )` ],
-          fields : { exitSignal : signal },
+          concealed : { exitSignal : signal },
           reason : 'exit signal',
         });
         _.process.exitReason( err );
