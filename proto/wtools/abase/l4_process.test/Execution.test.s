@@ -17,9 +17,9 @@ if( typeof module !== 'undefined' )
   Stream = require( 'stream' );
 }
 
-let _global = _global_;
-let _ = _global_.wTools;
-let Self = {};
+const _global = _global_;
+const _ = _global_.wTools;
+const Proto = {};
 
 /*
 experimentIpcDeasync:
@@ -28940,7 +28940,7 @@ function startMinimalOptionThrowingExitCode( test )
       options.conTerminate.finally( ( err, op ) =>
       {
         test.identical( op, undefined );
-        test.true( !_.errIsBrief( err ) );
+        test.true( !_.error.isBrief( err ) );
         test.true( _.strHas( err.message, 'Process returned exit code' ) );
         test.true( _.strHas( err.message, 'Launched as' ) );
         test.true( _.strHas( err.message, 'Stderr' ) );
@@ -28975,7 +28975,7 @@ function startMinimalOptionThrowingExitCode( test )
       options.conTerminate.finally( ( err, op ) =>
       {
         test.identical( op, undefined );
-        test.true( !_.errIsBrief( err ) );
+        test.true( !_.error.isBrief( err ) );
         test.true( _.strHas( err.message, 'Process returned exit code' ) );
         test.true( _.strHas( err.message, 'Launched as' ) );
         test.true( _.strHas( err.message, 'Stderr' ) );
@@ -29010,7 +29010,7 @@ function startMinimalOptionThrowingExitCode( test )
       options.conTerminate.finally( ( err, op ) =>
       {
         test.identical( op, undefined );
-        test.true( !_.errIsBrief( err ) );
+        test.true( !_.error.isBrief( err ) );
         test.true( _.strHas( err.message, 'Process returned exit code' ) );
         test.true( _.strHas( err.message, 'Launched as' ) );
         test.true( _.strHas( err.message, 'Stderr' ) );
@@ -39001,7 +39001,7 @@ Shows that timeOut kills the child process and handleClose is called
 // suite
 // --
 
-var Proto =
+const Proto =
 {
 
   name : 'Tools.l4.process.Execution',
@@ -39256,7 +39256,7 @@ _.mapExtend( Self, Proto );
 //
 
 
-Self = wTestSuite( Self );
+const Self = wTestSuite( Proto );
 if( typeof module !== 'undefined' && !module.parent )
 wTester.test( Self );
 
