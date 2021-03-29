@@ -19761,7 +19761,7 @@ function starterReady( test )
       test.true( o2.pnd !== null );
       test.true( o2.procedure !== null );
 
-      test.false( o.ready === o2.ready ); /* true */
+      test.false( o.ready === o2.ready );
 
       o.ready.then( ( op ) =>
       {
@@ -19815,7 +19815,7 @@ function starterReady( test )
       test.true( o2.pnd === null );
       test.true( o2.procedure === null );
 
-      test.true( o.ready === o2.ready ); /* true */
+      test.true( o.ready === o2.ready );
 
       o.ready.then( ( op ) =>
       {
