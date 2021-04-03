@@ -270,7 +270,7 @@ function startMinimal_body( o )
     /* procedure */
 
     if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
-    o.stack = _.Procedure.Stack( o.stack, 3 );
+    o.stack = _.Procedure.Stack( o.stack, 4 ); /* delta : 4 to not include info about `routine.unite` in the stack */
 
   }
 
@@ -2469,7 +2469,7 @@ function starter( o0 )
   if( _.strIs( o0 ) )
   o0 = { execPath : o0 }
   o0 = _.routineOptions( starter, o0 );
-  // o0.ready = o0.ready || new _.Consequence().take( null ); /* processes launched have the same o.ready */
+  o0.ready = o0.ready || new _.Consequence().take( null );
 
   _.routineExtend( er, _.process.startMultiple );
   er.predefined = o0;
