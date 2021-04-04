@@ -10,7 +10,7 @@
     { "name" : "Kostiantyn Wandalen", "email" : "wanalen@01.school" },
     { "name" : "Volodymyr M.", "email" : "volodymyr.migdal@gmail.com" }
   ],
-  "main" : "proto/wtools/abase/l4_process/module/Process.s",
+  "main" : "proto/node_modules/wprocess",
   "files" : [ "proto/wtools/abase/l4_process", "proto/wtools/Tools.s", "out", "proto/node_modules" ],
   "scripts" :
   {
