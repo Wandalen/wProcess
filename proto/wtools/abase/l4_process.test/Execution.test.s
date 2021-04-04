@@ -1682,19 +1682,19 @@ function startSingleSyncDeasync( test )
 
   /* */
 
-  function run( tops )
+  function run( env )
   {
     let ready = new _.Consequence().take( null );
 
-    if( tops.sync && !tops.deasync && tops.mode === 'fork' )
+    if( env.sync && !env.deasync && env.mode === 'fork' )
     return test.shouldThrowErrorSync( () =>
     {
       _.process.startSingle
       ({
         execPath : programPath,
-        mode : tops.mode,
-        sync : tops.sync,
-        deasync : tops.deasync
+        mode : env.mode,
+        sync : env.sync,
+        deasync : env.deasync
       })
     });
 
@@ -1708,8 +1708,8 @@ function startSingleSyncDeasync( test )
         outputCollecting : 1,
         applyingExitCode : 0,
         throwingExitCode : 1,
-        sync : tops.sync,
-        deasync : tops.deasync
+        sync : env.sync,
+        deasync : env.deasync
       }
 
       expectedOutput = programPath + '\n'
@@ -1719,24 +1719,24 @@ function startSingleSyncDeasync( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, stdio : pipe`;
+      test.case = `mode : ${env.mode}, sync : ${env.sync}, deasync : ${env.deasync}, stdio : pipe`;
       o2 =
       {
-        execPath : tops.mode === 'fork' ? programPath : 'node ' + programPath,
-        mode : tops.mode,
+        execPath : env.mode === 'fork' ? programPath : 'node ' + programPath,
+        mode : env.mode,
         stdio : 'pipe'
       }
 
       var options = _.mapSupplement( {}, o2, o3 );
       var returned = _.process.startSingle( options );
 
-      if( tops.sync )
+      if( env.sync )
       {
         test.true( !_.consequenceIs( returned ) );
         test.identical( returned.exitCode, 0 );
         test.true( returned === options );
         test.identical( returned, options );
-        if( tops.deasync )
+        if( env.deasync )
         test.identical( returned.pnd.constructor.name, 'ChildProcess' );
         else
         test.identical( returned.pnd.constructor.name, 'Object' );
@@ -1745,7 +1745,7 @@ function startSingleSyncDeasync( test )
       else
       {
         test.true( _.consequenceIs( returned ) );
-        if( tops.deasync )
+        if( env.deasync )
         test.identical( returned.resourcesCount(), 1 );
         else
         test.identical( returned.resourcesCount(), 0 );
@@ -1769,12 +1769,12 @@ function startSingleSyncDeasync( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, stdio : ignore`;
+      test.case = `mode : ${env.mode}, sync : ${env.sync}, deasync : ${env.deasync}, stdio : ignore`;
 
       o2 =
       {
-        execPath : tops.mode === 'fork' ? programPath : 'node ' + programPath,
-        mode : tops.mode,
+        execPath : env.mode === 'fork' ? programPath : 'node ' + programPath,
+        mode : env.mode,
         stdio : 'ignore',
         outputCollecting : 0,
         outputPiping : 0
@@ -1783,13 +1783,13 @@ function startSingleSyncDeasync( test )
       var options = _.mapSupplement( {}, o2, o3 );
       var returned = _.process.startSingle( options );
 
-      if( tops.sync )
+      if( env.sync )
       {
         test.true( !_.consequenceIs( returned ) );
         test.identical( returned.exitCode, 0 );
         test.true( returned === options );
         test.identical( returned, options );
-        if( tops.deasync )
+        if( env.deasync )
         test.identical( returned.pnd.constructor.name, 'ChildProcess' );
         else
         test.identical( returned.pnd.constructor.name, 'Object' );
@@ -1798,7 +1798,7 @@ function startSingleSyncDeasync( test )
       else
       {
         test.true( _.consequenceIs( returned ) );
-        if( tops.deasync )
+        if( env.deasync )
         test.identical( returned.resourcesCount(), 1 );
         else
         test.identical( returned.resourcesCount(), 0 );
@@ -1821,19 +1821,19 @@ function startSingleSyncDeasync( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, timeOut`;
+      test.case = `mode : ${env.mode}, sync : ${env.sync}, deasync : ${env.deasync}, timeOut`;
 
       o2 =
       {
-        execPath : tops.mode === 'fork' ? programPath + ' loop : 1' : 'node ' + programPath + ' loop : 1',
-        mode : tops.mode,
+        execPath : env.mode === 'fork' ? programPath + ' loop : 1' : 'node ' + programPath + ' loop : 1',
+        mode : env.mode,
         stdio : 'pipe',
         timeOut : 2*context.t1,
       }
 
       var options = _.mapSupplement( {}, o2, o3 );
 
-      if( tops.sync )
+      if( env.sync )
       return test.shouldThrowErrorSync( () => _.process.startSingle( options ) );
       else
       return test.shouldThrowErrorAsync( () => _.process.startSingle( options ) );
@@ -1843,24 +1843,24 @@ function startSingleSyncDeasync( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, return good code`;
+      test.case = `mode : ${env.mode}, sync : ${env.sync}, deasync : ${env.deasync}, return good code`;
       o2 =
       {
-        execPath : tops.mode === 'fork' ? programPath + ' exitWithCode : 0' : 'node ' + programPath + ' exitWithCode : 0',
-        mode : tops.mode,
+        execPath : env.mode === 'fork' ? programPath + ' exitWithCode : 0' : 'node ' + programPath + ' exitWithCode : 0',
+        mode : env.mode,
         stdio : 'pipe'
       }
 
       var options = _.mapSupplement( {}, o2, o3 );
       var returned = _.process.startSingle( options );
 
-      if( tops.sync )
+      if( env.sync )
       {
         test.true( !_.consequenceIs( returned ) );
         test.identical( returned.exitCode, 0 );
         test.true( returned === options );
         test.identical( returned, options );
-        if( tops.deasync )
+        if( env.deasync )
         test.identical( returned.pnd.constructor.name, 'ChildProcess' );
         else
         test.identical( returned.pnd.constructor.name, 'Object' );
@@ -1869,7 +1869,7 @@ function startSingleSyncDeasync( test )
       else
       {
         test.true( _.consequenceIs( returned ) );
-        if( tops.deasync )
+        if( env.deasync )
         test.identical( returned.resourcesCount(), 1 );
         else
         test.identical( returned.resourcesCount(), 0 );
@@ -1893,17 +1893,17 @@ function startSingleSyncDeasync( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, return good code`;
+      test.case = `mode : ${env.mode}, sync : ${env.sync}, deasync : ${env.deasync}, return good code`;
       o2 =
       {
-        execPath : tops.mode === 'fork' ? programPath + ' exitWithCode : 1' : 'node ' + programPath + ' exitWithCode : 1',
-        mode : tops.mode,
+        execPath : env.mode === 'fork' ? programPath + ' exitWithCode : 1' : 'node ' + programPath + ' exitWithCode : 1',
+        mode : env.mode,
         stdio : 'pipe'
       }
 
       var options = _.mapSupplement( {}, o2, o3 );
 
-      if( tops.sync )
+      if( env.sync )
       {
         test.shouldThrowErrorSync( () => _.process.startSingle( options ) );
         test.identical( options.exitCode, 1 )
@@ -1984,31 +1984,31 @@ function startMinimalSyncDeasyncTimeOut( test )
 
   /* */
 
-  function run( tops )
+  function run( env )
   {
-    test.case = `mode : ${ tops.mode }; sync : ${ tops.sync }; deasync : ${ tops.deasync }`;
+    test.case = `mode : ${ env.mode }; sync : ${ env.sync }; deasync : ${ env.deasync }`;
 
     let ready = new _.Consequence().take( null );
 
     ready.then( () =>
     {
-      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, timeOut : ${tops.timeOut}`;
+      test.case = `mode : ${env.mode}, sync : ${env.sync}, deasync : ${env.deasync}, timeOut : ${env.timeOut}`;
 
       let options =
       {
-        execPath : tops.mode === 'fork' ? programPath : 'node ' + programPath,
-        mode : tops.mode,
-        sync : tops.sync,
-        deasync : tops.deasync,
-        timeOut : tops.timeOut
+        execPath : env.mode === 'fork' ? programPath : 'node ' + programPath,
+        mode : env.mode,
+        sync : env.sync,
+        deasync : env.deasync,
+        timeOut : env.timeOut
       }
 
-      if( tops.mode === 'fork' && tops.sync && !tops.deasync ) /* Mode::fork is available only if either sync:0 or deasync:1 */
+      if( env.mode === 'fork' && env.sync && !env.deasync ) /* Mode::fork is available only if either sync:0 or deasync:1 */
       return test.shouldThrowErrorSync( () => _.process.startMinimal( options ) );
 
-      if( !( tops.timeOut === null || !tops.sync || !!tops.deasync ) ) /* Option::timeOut should not be defined if option::sync:1 and option::deasync:0 */
+      if( !( env.timeOut === null || !env.sync || !!env.deasync ) ) /* Option::timeOut should not be defined if option::sync:1 and option::deasync:0 */
       {
-        if( tops.sync && !tops.deasync )
+        if( env.sync && !env.deasync )
         return test.shouldThrowErrorSync( () => _.process.startMinimal( options ) );
         else
         return test.shouldThrowErrorAsync( () => _.process.startMinimal( options ) );
@@ -2048,24 +2048,24 @@ function startMinimalSyncDeasyncThrowing( test )
 
   /* */
 
-  function run( tops )
+  function run( env )
   {
-    test.case = `mode : ${ tops.mode }; sync : ${ tops.sync }; deasync : ${ tops.deasync }`;
+    test.case = `mode : ${ env.mode }; sync : ${ env.sync }; deasync : ${ env.deasync }`;
 
     let ready = new _.Consequence().take( null );
 
     ready.then( () =>
     {
-      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}`
+      test.case = `mode : ${env.mode}, sync : ${env.sync}, deasync : ${env.deasync}`
       let o =
       {
         execPath : 'node ' + programPath,
-        mode : tops.mode,
-        sync : tops.sync,
-        deasync : tops.deasync
+        mode : env.mode,
+        sync : env.sync,
+        deasync : env.deasync
       }
 
-      if( tops.sync )
+      if( env.sync )
       {
         test.shouldThrowErrorSync( () =>  _.process.startMinimal( o ) );
         return null;
@@ -2075,7 +2075,7 @@ function startMinimalSyncDeasyncThrowing( test )
         var returned = _.process.startMinimal( o );
 
         test.true( _.consequenceIs( returned ) );
-        if( tops.deasync )
+        if( env.deasync )
         test.identical( returned.resourcesCount(), 1 );
         else
         test.identical( returned.resourcesCount(), 0 );
@@ -16234,33 +16234,33 @@ function startMultipleConcurrentConsequences( test )
 
   /* - */
 
-  function run( tops )
+  function run( env )
   {
     let ready = _.Consequence().take( null );
-    if( tops.mode === 'fork' && tops.sync && !tops.deasync )
+    if( env.mode === 'fork' && env.sync && !env.deasync )
     return null;
 
     /* */
 
     ready.then( function( arg )
     {
-      test.case = `sync:${tops.sync} deasync:${tops.deasync} mode:${tops.mode} concurrent:0 arg arg`;
+      test.case = `sync:${env.sync} deasync:${env.deasync} mode:${env.mode} concurrent:0 arg arg`;
 
       clear();
       var time1 = _.time.now();
-      var execPath = tops.mode === `fork` ? `${programPath}` : `node ${programPath}`;
+      var execPath = env.mode === `fork` ? `${programPath}` : `node ${programPath}`;
       var o2 =
       {
         execPath : [ execPath, execPath ],
         args : ( op ) => [ `id:${op.procedure.id}` ],
-        conStart : conMake( tops, 'conStart' ),
-        conDisconnect : conMake( tops, 'conDisconnect' ),
-        conTerminate : conMake( tops, 'conTerminate' ),
-        ready : conMake( tops, 'ready' ),
+        conStart : conMake( env, 'conStart' ),
+        conDisconnect : conMake( env, 'conDisconnect' ),
+        conTerminate : conMake( env, 'conTerminate' ),
+        ready : conMake( env, 'ready' ),
         concurrent : 0,
-        sync : tops.sync,
-        deasync : tops.deasync,
-        mode : tops.mode,
+        sync : env.sync,
+        deasync : env.deasync,
+        mode : env.mode,
       }
 
       var options = _.mapSupplement( null, o2, o3 );
@@ -16324,7 +16324,7 @@ ${options.sessions[ 1 ].procedure.id}.end
           'conTerminate.arg',
           'ready.arg',
         ]
-        if( tops.consequence === 'routine' )
+        if( env.consequence === 'routine' )
         test.identical( track2, exp );
 
         test.identical( options.exitCode, 0 );
@@ -16357,31 +16357,31 @@ ${options.sessions[ 1 ].procedure.id}.end
 
     ready.then( function( arg )
     {
-      test.case = `sync:${tops.sync} deasync:${tops.deasync} mode:${tops.mode} concurrent:0 throwingExitCode:1 err arg`;
+      test.case = `sync:${env.sync} deasync:${env.deasync} mode:${env.mode} concurrent:0 throwingExitCode:1 err arg`;
 
       clear();
       var time1 = _.time.now();
       var counter = 0;
-      var execPath = tops.mode === `fork` ? `${programPath}` : `node ${programPath}`;
+      var execPath = env.mode === `fork` ? `${programPath}` : `node ${programPath}`;
       var o2 =
       {
         execPath : [ execPath, execPath ],
         args : ( op ) => [ `id:${op.procedure.id} throwing:${++counter === 1 ? 1 : 0}` ],
-        conStart : conMake( tops, 'conStart' ),
-        conDisconnect : conMake( tops, 'conDisconnect' ),
-        conTerminate : conMake( tops, 'conTerminate' ),
-        ready : conMake( tops, 'ready' ),
+        conStart : conMake( env, 'conStart' ),
+        conDisconnect : conMake( env, 'conDisconnect' ),
+        conTerminate : conMake( env, 'conTerminate' ),
+        ready : conMake( env, 'ready' ),
         concurrent : 0,
         throwingExitCode : 1,
-        sync : tops.sync,
-        deasync : tops.deasync,
-        mode : tops.mode,
+        sync : env.sync,
+        deasync : env.deasync,
+        mode : env.mode,
       }
 
       var options = _.mapSupplement( null, o2, o3 );
       var returned = null;
 
-      if( tops.sync )
+      if( env.sync )
       test.shouldThrowErrorSync( () => _.process.startMultiple( options ) );
       else
       returned = _.process.startMultiple( options );
@@ -16437,7 +16437,7 @@ ${options.sessions[ 1 ].procedure.id}.end
           'conTerminate.err',
           'ready.err',
         ]
-        if( tops.consequence === 'routine' )
+        if( env.consequence === 'routine' )
         test.identical( track2, exp );
 
         test.true( _.errIs( err ) );
@@ -16473,30 +16473,30 @@ ${options.sessions[ 1 ].procedure.id}.end
 
     ready.then( function( arg )
     {
-      test.case = `sync:${tops.sync} deasync:${tops.deasync} mode:${tops.mode} concurrent:0 throwingExitCode:1 arg err`;
+      test.case = `sync:${env.sync} deasync:${env.deasync} mode:${env.mode} concurrent:0 throwingExitCode:1 arg err`;
 
       clear();
       var time1 = _.time.now();
       var counter = 0;
-      var execPath = tops.mode === `fork` ? `${programPath}` : `node ${programPath}`;
+      var execPath = env.mode === `fork` ? `${programPath}` : `node ${programPath}`;
       var o2 =
       {
         execPath : [ execPath, execPath ],
         args : ( op ) => [ `id:${op.procedure.id} throwing:${++counter === 1 ? 0 : 1}` ],
-        conStart : conMake( tops, 'conStart' ),
-        conDisconnect : conMake( tops, 'conDisconnect' ),
-        conTerminate : conMake( tops, 'conTerminate' ),
-        ready : conMake( tops, 'ready' ),
+        conStart : conMake( env, 'conStart' ),
+        conDisconnect : conMake( env, 'conDisconnect' ),
+        conTerminate : conMake( env, 'conTerminate' ),
+        ready : conMake( env, 'ready' ),
         concurrent : 0,
-        sync : tops.sync,
-        deasync : tops.deasync,
-        mode : tops.mode,
+        sync : env.sync,
+        deasync : env.deasync,
+        mode : env.mode,
       }
 
       var options = _.mapSupplement( null, o2, o3 );
       var returned = null;
 
-      if( tops.sync )
+      if( env.sync )
       test.shouldThrowErrorSync( () => _.process.startMultiple( options ) );
       else
       returned = _.process.startMultiple( options );
@@ -16552,7 +16552,7 @@ ${options.sessions[ 1 ].procedure.id}.end
           'conTerminate.err',
           'ready.err',
         ]
-        if( tops.consequence === 'routine' )
+        if( env.consequence === 'routine' )
         test.identical( track2, exp );
 
         test.true( _.errIs( err ) );
@@ -16588,26 +16588,26 @@ ${options.sessions[ 1 ].procedure.id}.end
 
     ready.then( function( arg )
     {
-      test.case = `sync:${tops.sync} deasync:${tops.deasync} mode:${tops.mode} concurrent:1 arg arg`;
+      test.case = `sync:${env.sync} deasync:${env.deasync} mode:${env.mode} concurrent:1 arg arg`;
 
-      if( tops.sync && !tops.deasync )
+      if( env.sync && !env.deasync )
       return null;
 
       clear();
       var time1 = _.time.now();
-      var execPath = tops.mode === `fork` ? `${programPath}` : `node ${programPath}`;
+      var execPath = env.mode === `fork` ? `${programPath}` : `node ${programPath}`;
       var o2 =
       {
         execPath : [ execPath, execPath ],
         args : ( op ) => [ `id:${op.procedure.id}`, `sessionId:${op.sessionId}`, `concurrent:1` ],
-        conStart : conMake( tops, 'conStart' ),
-        conDisconnect : conMake( tops, 'conDisconnect' ),
-        conTerminate : conMake( tops, 'conTerminate' ),
-        ready : conMake( tops, 'ready' ),
+        conStart : conMake( env, 'conStart' ),
+        conDisconnect : conMake( env, 'conDisconnect' ),
+        conTerminate : conMake( env, 'conTerminate' ),
+        ready : conMake( env, 'ready' ),
         concurrent : 1,
-        sync : tops.sync,
-        deasync : tops.deasync,
-        mode : tops.mode,
+        sync : env.sync,
+        deasync : env.deasync,
+        mode : env.mode,
       }
 
       var options = _.mapSupplement( null, o2, o3 );
@@ -16671,7 +16671,7 @@ ${options.sessions[ 1 ].procedure.id}.end
           'conTerminate.arg',
           'ready.arg',
         ]
-        if( tops.consequence === 'routine' )
+        if( env.consequence === 'routine' )
         test.identical( track2, exp );
 
         test.identical( options.exitCode, 0 );
@@ -16704,34 +16704,34 @@ ${options.sessions[ 1 ].procedure.id}.end
 
     ready.then( function( arg )
     {
-      test.case = `sync:${tops.sync} deasync:${tops.deasync} mode:${tops.mode} concurrent:1 throwingExitCode:1 err arg`;
+      test.case = `sync:${env.sync} deasync:${env.deasync} mode:${env.mode} concurrent:1 throwingExitCode:1 err arg`;
 
-      if( tops.sync && !tops.deasync )
+      if( env.sync && !env.deasync )
       return null;
 
       clear();
       var time1 = _.time.now();
       var counter = 0;
-      var execPath = tops.mode === `fork` ? `${programPath}` : `node ${programPath}`;
+      var execPath = env.mode === `fork` ? `${programPath}` : `node ${programPath}`;
       var o2 =
       {
         execPath : [ execPath, execPath ],
         args : ( op ) => [ `id:${op.procedure.id}`, `throwing:${++counter === 1 ? 1 : 0}`, `sessionId:${op.sessionId}`, `concurrent:1` ],
-        conStart : conMake( tops, 'conStart' ),
-        conDisconnect : conMake( tops, 'conDisconnect' ),
-        conTerminate : conMake( tops, 'conTerminate' ),
-        ready : conMake( tops, 'ready' ),
+        conStart : conMake( env, 'conStart' ),
+        conDisconnect : conMake( env, 'conDisconnect' ),
+        conTerminate : conMake( env, 'conTerminate' ),
+        ready : conMake( env, 'ready' ),
         concurrent : 1,
         throwingExitCode : 1,
-        sync : tops.sync,
-        deasync : tops.deasync,
-        mode : tops.mode,
+        sync : env.sync,
+        deasync : env.deasync,
+        mode : env.mode,
       }
 
       var options = _.mapSupplement( null, o2, o3 );
       var returned = null;
 
-      if( tops.sync )
+      if( env.sync )
       test.shouldThrowErrorSync( () => _.process.startMultiple( options ) );
       else
       returned = _.process.startMultiple( options );
@@ -16787,7 +16787,7 @@ ${options.sessions[ 1 ].procedure.id}.end
           'conTerminate.err',
           'ready.err',
         ]
-        if( tops.consequence === 'routine' )
+        if( env.consequence === 'routine' )
         test.identical( track2, exp );
 
         test.notIdentical( options.exitCode, 0 );
@@ -16822,33 +16822,33 @@ ${options.sessions[ 1 ].procedure.id}.end
 
     ready.then( function( arg )
     {
-      test.case = `sync:${tops.sync} deasync:${tops.deasync} mode:${tops.mode} concurrent:1 throwingExitCode:1 arg err`;
+      test.case = `sync:${env.sync} deasync:${env.deasync} mode:${env.mode} concurrent:1 throwingExitCode:1 arg err`;
 
-      if( tops.sync && !tops.deasync )
+      if( env.sync && !env.deasync )
       return null;
 
       clear();
       var time1 = _.time.now();
       var counter = 0;
-      var execPath = tops.mode === `fork` ? `${programPath}` : `node ${programPath}`;
+      var execPath = env.mode === `fork` ? `${programPath}` : `node ${programPath}`;
       var o2 =
       {
         execPath : [ execPath, execPath ],
         args : ( op ) => [ `id:${op.procedure.id} throwing:${++counter === 1 ? 0 : 1}` ],
-        conStart : conMake( tops, 'conStart' ),
-        conDisconnect : conMake( tops, 'conDisconnect' ),
-        conTerminate : conMake( tops, 'conTerminate' ),
-        ready : conMake( tops, 'ready' ),
+        conStart : conMake( env, 'conStart' ),
+        conDisconnect : conMake( env, 'conDisconnect' ),
+        conTerminate : conMake( env, 'conTerminate' ),
+        ready : conMake( env, 'ready' ),
         concurrent : 1,
-        sync : tops.sync,
-        deasync : tops.deasync,
-        mode : tops.mode,
+        sync : env.sync,
+        deasync : env.deasync,
+        mode : env.mode,
       }
 
       var options = _.mapSupplement( null, o2, o3 );
       var returned = null;
 
-      if( tops.sync )
+      if( env.sync )
       test.shouldThrowErrorSync( () => _.process.startMultiple( options ) );
       else
       returned = _.process.startMultiple( options );
@@ -16929,7 +16929,7 @@ ${options.sessions[ 1 ].procedure.id}.end
           'conTerminate.err',
           'ready.err',
         ]
-        if( tops.consequence === 'routine' )
+        if( env.consequence === 'routine' )
         test.identical( track2, exp );
 
         test.true( _.errIs( err ) );
@@ -16968,28 +16968,28 @@ ${options.sessions[ 1 ].procedure.id}.end
 
   /* - */
 
-  function conMake( tops, name )
+  function conMake( env, name )
   {
 
     if( name === 'conDisconnect' )
     return null;
 
-    if( tops.consequence === 'consequence' )
+    if( env.consequence === 'consequence' )
     {
       if( name === 'ready' )
       return new _.Consequence().take( null );
       else
       return new _.Consequence();
     }
-    else if( tops.consequence === 'null' )
+    else if( env.consequence === 'null' )
     {
       return null;
     }
-    else if( tops.consequence === 'routine' )
+    else if( env.consequence === 'routine' )
     {
       return routine;
     }
-    else _.assert( 0, `Unknown ${tops.consequence}` );
+    else _.assert( 0, `Unknown ${env.consequence}` );
     function routine( err, arg )
     {
       if( err )
@@ -17851,11 +17851,11 @@ function startNjsWithReadyDelayStructural( test )
 
   /* */
 
-  function run( tops )
+  function run( env )
   {
     let ready = _.Consequence().take( null );
 
-    if( tops.sync && !tops.deasync && tops.mode === 'fork' )
+    if( env.sync && !env.deasync && env.mode === 'fork' )
     return null;
 
     ready.then( () =>
@@ -17863,53 +17863,53 @@ function startNjsWithReadyDelayStructural( test )
       /*
       output piping doesn't work as expected in mode "shell" on windows
       */
-      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, dry : ${tops.dry}, detaching : ${tops.detaching}`;
+      test.case = `mode : ${env.mode}, sync : ${env.sync}, deasync : ${env.deasync}, dry : ${env.dry}, detaching : ${env.detaching}`;
       let con = new _.Consequence().take( null ).delay( context.t1 ); /* 1000 */
 
       let options =
       {
-        mode : tops.mode,
-        detaching : tops.detaching,
-        dry : tops.dry,
+        mode : env.mode,
+        detaching : env.detaching,
+        dry : env.dry,
         execPath : programPath,
         currentPath : a.abs( '.' ),
         throwingExitCode : 1,
         inputMirroring : 1,
         outputCollecting : 1,
         stdio : 'pipe',
-        sync : tops.sync,
-        deasync : tops.deasync,
+        sync : env.sync,
+        deasync : env.deasync,
         ready : con,
       }
 
       let returned = _.process.startNjs( options );
 
-      if( tops.sync )
+      if( env.sync )
       test.true( !_.consequenceIs( returned ) )
       else
       test.true( _.consequenceIs( returned ) )
 
       var exp =
       {
-        'mode' : tops.mode,
-        'detaching' : tops.detaching,
-        'dry' : tops.dry,
-        'execPath' : ( tops.mode === 'fork' ? '' : 'node ' ) + programPath,
+        'mode' : env.mode,
+        'detaching' : env.detaching,
+        'dry' : env.dry,
+        'execPath' : ( env.mode === 'fork' ? '' : 'node ' ) + programPath,
         'currentPath' : a.abs( '.' ),
         'throwingExitCode' : 'full',
         'inputMirroring' : 1,
         'outputCollecting' : 1,
-        'sync' : tops.sync,
-        'deasync' : tops.deasync,
+        'sync' : env.sync,
+        'deasync' : env.deasync,
         'passingThrough' : 0,
         'maximumMemory' : 0,
         'applyingExitCode' : 1,
-        'stdio' : tops.mode === 'fork' ? [ 'pipe', 'pipe', 'pipe', 'ipc' ] : [ 'pipe', 'pipe', 'pipe' ],
+        'stdio' : env.mode === 'fork' ? [ 'pipe', 'pipe', 'pipe', 'ipc' ] : [ 'pipe', 'pipe', 'pipe' ],
         'args' : null,
         'args2' : null,
         'interpreterArgs' : null,
         'when' : 'instant',
-        'ipc' : tops.mode === 'fork' ? true : false,
+        'ipc' : env.mode === 'fork' ? true : false,
         'env' : null,
         'hiding' : 1,
         'concurrent' : 0,
@@ -17953,14 +17953,14 @@ function startNjsWithReadyDelayStructural( test )
         exp2.procedure = options.procedure;
         exp2.streamOut = options.streamOut;
         exp2.streamErr = options.streamErr;
-        exp2.execPath = tops.mode === 'fork' ? programPath : 'node';
-        exp2.args = tops.mode === 'fork' ? [] : [ programPath ];
-        exp2.args2 = tops.mode === 'fork' ? [] : [ programPath ];
-        exp2.execPath2 = ( tops.mode === 'fork' ? '' : 'node ' ) + programPath;
+        exp2.execPath = env.mode === 'fork' ? programPath : 'node';
+        exp2.args = env.mode === 'fork' ? [] : [ programPath ];
+        exp2.args2 = env.mode === 'fork' ? [] : [ programPath ];
+        exp2.execPath2 = ( env.mode === 'fork' ? '' : 'node ' ) + programPath;
         exp2.state = 'terminated';
         exp2.ended = true;
 
-        if( tops.dry )
+        if( env.dry )
         {
           test.identical( op.output, '' );
           test.identical( op.exitCode, null );
@@ -17972,7 +17972,7 @@ function startNjsWithReadyDelayStructural( test )
           /* exception in njs on Windows :
             no output from detached process in mode::shell
           */
-          if( tops.mode !== 'shell' || process.platform !== 'win32' || !tops.detaching )
+          if( env.mode !== 'shell' || process.platform !== 'win32' || !env.detaching )
           test.identical( op.output, 'program1:begin\n' );
           test.identical( op.exitCode, 0 );
           test.identical( op.ended, true );
@@ -17981,7 +17981,7 @@ function startNjsWithReadyDelayStructural( test )
           /* exception in njs on Windows :
             no output from detached process in mode::shell
           */
-          if( tops.mode !== 'shell' || process.platform !== 'win32' || !tops.detaching )
+          if( env.mode !== 'shell' || process.platform !== 'win32' || !env.detaching )
           exp2.output = 'program1:begin\n';
           exp2.exitCode = 0;
           exp2.exitSignal = null;
@@ -17989,15 +17989,15 @@ function startNjsWithReadyDelayStructural( test )
         }
 
         test.identical( _.property.onlyOwn( options ), exp2 );
-        test.identical( !!options.pnd, !tops.dry );
+        test.identical( !!options.pnd, !env.dry );
         test.true( _.routineIs( options.disconnect ) );
         test.true( _.routineIs( options._end ) );
         test.true( options.end === undefined );
-        test.identical( _.streamIs( options.streamOut ), !tops.dry && ( !tops.sync || !!tops.deasync ) );
-        test.identical( _.streamIs( options.streamErr ), !tops.dry && ( !tops.sync || !!tops.deasync ) );
-        test.identical( options.streamOut !== options.streamErr, !tops.dry && ( !tops.sync || !!tops.deasync ) );
+        test.identical( _.streamIs( options.streamOut ), !env.dry && ( !env.sync || !!env.deasync ) );
+        test.identical( _.streamIs( options.streamErr ), !env.dry && ( !env.sync || !!env.deasync ) );
+        test.identical( options.streamOut !== options.streamErr, !env.dry && ( !env.sync || !!env.deasync ) );
         test.true( options.conTerminate !== options.ready );
-        if( tops.sync || tops.deasync )
+        if( env.sync || env.deasync )
         test.identical( options.ready.exportString(), 'Consequence:: 0 / 0' );
         else
         test.identical( options.ready.exportString(), 'Consequence:: 0 / 1' );
@@ -18009,26 +18009,26 @@ function startNjsWithReadyDelayStructural( test )
         return null;
       });
 
-      if( !tops.sync && !tops.deasync )
+      if( !env.sync && !env.deasync )
       {
         test.identical( options, exp );
       }
       else
       {
         let exp2 = _.mapExtend( null, exp );
-        exp2.execPath = tops.mode === 'fork' ? exp2.execPath : 'node';
-        exp2.args = tops.mode === 'fork' ? [] : [ programPath ];
-        exp2.args2 = tops.mode === 'fork' ? [] : [ programPath ];
-        exp2.execPath2 = tops.mode === 'fork' ? programPath : 'node ' + programPath;
+        exp2.execPath = env.mode === 'fork' ? exp2.execPath : 'node';
+        exp2.args = env.mode === 'fork' ? [] : [ programPath ];
+        exp2.args2 = env.mode === 'fork' ? [] : [ programPath ];
+        exp2.execPath2 = env.mode === 'fork' ? programPath : 'node ' + programPath;
         exp2.streamOut = options.streamOut;
         exp2.streamErr = options.streamErr;
         exp2.procedure = options.procedure;
         exp2._end = options._end;
         exp2.state = 'terminated';
-        exp2.exitCode = tops.dry ? null : 0;
-        exp2.exitReason =  tops.dry ? null : 'normal';
+        exp2.exitCode = env.dry ? null : 0;
+        exp2.exitReason =  env.dry ? null : 'normal';
         exp2.ended = true;
-        exp2.output = tops.dry ? '' :'program1:begin\n';
+        exp2.output = env.dry ? '' :'program1:begin\n';
         delete exp2.end;
 
         test.identical( _.property.onlyOwn( options ), exp2 );
@@ -18036,7 +18036,7 @@ function startNjsWithReadyDelayStructural( test )
 
       test.true( _.routineIs( options.disconnect ) );
       test.true( options.conTerminate !== options.ready );
-      if( ( tops.sync || tops.deasync ) && !tops.dry )
+      if( ( env.sync || env.deasync ) && !env.dry )
       {
         test.notIdentical( options.pnd, null );
       }
@@ -18046,7 +18046,7 @@ function startNjsWithReadyDelayStructural( test )
       }
       test.true( !!options.logger );
       test.true( !!options.stack );
-      if( tops.sync || tops.deasync )
+      if( env.sync || env.deasync )
       {
         test.identical( options.ready.exportString(), 'Consequence:: 1 / 0' );
         test.identical( options.conDisconnect.exportString(), 'Consequence:: 1 / 0' );
@@ -18805,61 +18805,61 @@ function startNjsWithReadyDelayStructuralMultiple( test )
 
   /* */
 
-  function run( tops )
+  function run( env )
   {
     let ready = _.Consequence().take( null );
 
-    if( tops.sync && !tops.deasync && tops.mode === 'fork' )
+    if( env.sync && !env.deasync && env.mode === 'fork' )
     return null;
 
     ready.then( () =>
     {
-      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, dry : ${tops.dry}, detaching:${tops.detaching}`;
+      test.case = `mode : ${env.mode}, sync : ${env.sync}, deasync : ${env.deasync}, dry : ${env.dry}, detaching:${env.detaching}`;
       let con = new _.Consequence().take( null ).delay( context.t1 ); /* 1000 */
 
       let options =
       {
-        mode : tops.mode,
-        detaching : tops.detaching,
+        mode : env.mode,
+        detaching : env.detaching,
         execPath : programPath,
         currentPath : [ a.abs( '.' ), a.abs( '.' ) ],
         throwingExitCode : 1,
         inputMirroring : 1,
         outputCollecting : 1,
         stdio : 'pipe',
-        sync : tops.sync,
-        deasync : tops.deasync,
-        dry : tops.dry,
+        sync : env.sync,
+        deasync : env.deasync,
+        dry : env.dry,
         ready : con,
       }
 
       let returned = _.process.startNjs( options );
 
-      if( tops.sync )
+      if( env.sync )
       test.true( !_.consequenceIs( returned ) )
       else
       test.true( _.consequenceIs( returned ) )
 
       var exp =
       {
-        'mode' : tops.mode,
-        'detaching' : tops.detaching,
-        'execPath' : ( tops.mode === 'fork' ? '' : 'node ' ) + programPath,
+        'mode' : env.mode,
+        'detaching' : env.detaching,
+        'execPath' : ( env.mode === 'fork' ? '' : 'node ' ) + programPath,
         'currentPath' : [ a.abs( '.' ), a.abs( '.' ) ],
         'throwingExitCode' : 'full',
         'inputMirroring' : 1,
         'outputCollecting' : 1,
-        'sync' : tops.sync,
-        'deasync' : tops.deasync,
+        'sync' : env.sync,
+        'deasync' : env.deasync,
         'passingThrough' : 0,
         'maximumMemory' : 0,
         'applyingExitCode' : 1,
-        'stdio' : tops.mode === 'fork' ? [ 'pipe', 'pipe', 'pipe', 'ipc' ] : [ 'pipe', 'pipe', 'pipe' ],
+        'stdio' : env.mode === 'fork' ? [ 'pipe', 'pipe', 'pipe', 'ipc' ] : [ 'pipe', 'pipe', 'pipe' ],
         'args' : null,
         'interpreterArgs' : null,
         'when' : 'instant',
-        'dry' : tops.dry,
-        'ipc' : tops.mode === 'fork' ? true : false,
+        'dry' : env.dry,
+        'ipc' : env.mode === 'fork' ? true : false,
         'env' : null,
         'hiding' : 1,
         'concurrent' : 0,
@@ -18901,7 +18901,7 @@ function startNjsWithReadyDelayStructuralMultiple( test )
         exp2.exitReason = 'normal';
         exp2.ended = true;
 
-        if( tops.dry )
+        if( env.dry )
         {
           test.identical( op.output, '' );
           test.identical( op.exitCode, null );
@@ -18913,7 +18913,7 @@ function startNjsWithReadyDelayStructuralMultiple( test )
           /* exception in njs on Windows :
             no output from detached process in mode::shell
           */
-          if( tops.mode !== 'shell' || process.platform !== 'win32' || !tops.detaching )
+          if( env.mode !== 'shell' || process.platform !== 'win32' || !env.detaching )
           test.identical( op.output, 'program1:begin\nprogram1:begin\n' );
           test.identical( op.exitCode, 0 );
           test.identical( op.ended, true );
@@ -18922,7 +18922,7 @@ function startNjsWithReadyDelayStructuralMultiple( test )
           /* exception in njs on Windows :
             no output from detached process in mode::shell
           */
-          if( tops.mode !== 'shell' || process.platform !== 'win32' || !tops.detaching )
+          if( env.mode !== 'shell' || process.platform !== 'win32' || !env.detaching )
           exp2.output = 'program1:begin\nprogram1:begin\n';
           exp2.exitCode = 0;
           exp2.exitSignal = null;
@@ -18932,13 +18932,13 @@ function startNjsWithReadyDelayStructuralMultiple( test )
         test.identical( _.property.onlyOwn( options ), exp2 );
         test.true( !options.pnd );
         test.true( !options.disconnect );
-        test.identical( _.streamIs( options.streamOut ), !tops.sync || ( !!tops.sync && !!tops.deasync ) );
-        test.identical( _.streamIs( options.streamErr ), !tops.sync || ( !!tops.sync && !!tops.deasync ) );
-        test.identical( options.streamOut !== options.streamErr, !tops.sync || ( !!tops.sync && !!tops.deasync ) );
+        test.identical( _.streamIs( options.streamOut ), !env.sync || ( !!env.sync && !!env.deasync ) );
+        test.identical( _.streamIs( options.streamErr ), !env.sync || ( !!env.sync && !!env.deasync ) );
+        test.identical( options.streamOut !== options.streamErr, !env.sync || ( !!env.sync && !!env.deasync ) );
         test.true( options.conTerminate !== options.ready );
         test.true( _.arrayIs( options.sessions ) );
 
-        if( tops.sync || tops.deasync )
+        if( env.sync || env.deasync )
         {
           test.identical( options.ready.exportString(), 'Consequence:: 0 / 0' );
           test.identical( options.conTerminate.exportString(), 'Consequence:: 1 / 0' );
@@ -18956,7 +18956,7 @@ function startNjsWithReadyDelayStructuralMultiple( test )
         /* Added sessions' checks */
         op.sessions.forEach( ( session ) =>
         {
-          if( tops.dry )
+          if( env.dry )
           {
             test.identical( session.output, '' );
             test.identical( session.exitCode, null );
@@ -18967,7 +18967,7 @@ function startNjsWithReadyDelayStructuralMultiple( test )
             /* exception in njs on Windows :
               no output from detached process in mode::shell
             */
-            if( tops.mode !== 'shell' || process.platform !== 'win32' || !tops.detaching )
+            if( env.mode !== 'shell' || process.platform !== 'win32' || !env.detaching )
             test.identical( session.output, 'program1:begin\n' );
             else
             test.identical( session.output, '' );
@@ -18975,11 +18975,11 @@ function startNjsWithReadyDelayStructuralMultiple( test )
             test.identical( session.exitReason, 'normal' );
           }
           test.identical( session.exitSignal, null );
-          test.identical( !!session.pnd, !tops.dry );
+          test.identical( !!session.pnd, !env.dry );
           test.true( _.routineIs( session.disconnect ) );
-          test.identical( _.streamIs( session.streamOut ), !tops.dry && ( !tops.sync || !!tops.deasync ) );
-          test.identical( _.streamIs( session.streamErr ), !tops.dry && ( !tops.sync || !!tops.deasync ) );
-          test.identical( session.streamOut !== session.streamErr, !tops.dry && ( !tops.sync || !!tops.deasync ) );
+          test.identical( _.streamIs( session.streamOut ), !env.dry && ( !env.sync || !!env.deasync ) );
+          test.identical( _.streamIs( session.streamErr ), !env.dry && ( !env.sync || !!env.deasync ) );
+          test.identical( session.streamOut !== session.streamErr, !env.dry && ( !env.sync || !!env.deasync ) );
           test.true( session.conTerminate !== session.ready );
 
           test.identical( session.ready.exportString(), 'Consequence:: 1 / 0' );
@@ -18993,13 +18993,13 @@ function startNjsWithReadyDelayStructuralMultiple( test )
       });
 
       let exp3 = _.mapExtend( null, exp );
-      if( tops.sync || tops.deasync )
+      if( env.sync || env.deasync )
       {
         exp3.ended = true;
-        exp3.exitCode = tops.dry ? null : 0;
+        exp3.exitCode = env.dry ? null : 0;
         exp3.state = 'terminated';
         exp3.exitReason = 'normal';
-        exp3.output = tops.dry ? '' : 'program1:begin\nprogram1:begin\n';
+        exp3.output = env.dry ? '' : 'program1:begin\nprogram1:begin\n';
         exp3.sessions = options.sessions;
       }
 
@@ -19011,11 +19011,11 @@ function startNjsWithReadyDelayStructuralMultiple( test )
       test.true( !!options.procedure );
       test.true( !!options.logger );
       test.true( !!options.stack );
-      test.identical( _.streamIs( options.streamOut ), !tops.sync || ( !!tops.sync && !!tops.deasync ) );
-      test.identical( _.streamIs( options.streamErr ), !tops.sync || ( !!tops.sync && !!tops.deasync ) );
-      test.identical( options.streamOut !== options.streamErr, !tops.sync || ( !!tops.sync && !!tops.deasync ) );
+      test.identical( _.streamIs( options.streamOut ), !env.sync || ( !!env.sync && !!env.deasync ) );
+      test.identical( _.streamIs( options.streamErr ), !env.sync || ( !!env.sync && !!env.deasync ) );
+      test.identical( options.streamOut !== options.streamErr, !env.sync || ( !!env.sync && !!env.deasync ) );
       test.identical( options.conDisconnect, null );
-      if( tops.sync || tops.deasync )
+      if( env.sync || env.deasync )
       {
         test.identical( options.ready.exportString(), 'Consequence:: 1 / 0' );
         test.identical( options.conTerminate.exportString(), 'Consequence:: 1 / 0' );
@@ -24417,32 +24417,32 @@ function startMultipleOutput( test )
 
   /* - */
 
-  function run( tops )
+  function run( env )
   {
     let ready = new _.Consequence().take( null )
 
-    if( tops.sync && !tops.deasync && tops.mode === 'fork' )
+    if( env.sync && !env.deasync && env.mode === 'fork' )
     return null;
 
     /* */
 
     ready.then( () =>
     {
-      test.case = `sync:${tops.sync} deasync:${tops.deasync} concurrent:0 mode:${tops.mode}`;
+      test.case = `sync:${env.sync} deasync:${env.deasync} concurrent:0 mode:${env.mode}`;
       track = [];
       let t1 = _.time.now();
       let ready2 = new _.Consequence().take( null ).delay( context.t1 / 10 );
       let o =
       {
-        execPath : [ ( tops.mode !== `fork` ?  `node ` : '' ) + `${programPath} id:1`, ( tops.mode !== `fork` ?  `node ` : '' ) + `${programPath} id:2` ],
+        execPath : [ ( env.mode !== `fork` ?  `node ` : '' ) + `${programPath} id:1`, ( env.mode !== `fork` ?  `node ` : '' ) + `${programPath} id:2` ],
         currentPath : a.abs( '.' ),
         outputPiping : 1,
         outputCollecting : 1,
         outputAdditive : 1,
-        sync : tops.sync,
-        deasync : tops.deasync,
+        sync : env.sync,
+        deasync : env.deasync,
         concurrent : 0,
-        mode : tops.mode,
+        mode : env.mode,
         ready : ready2,
       }
 
@@ -24465,7 +24465,7 @@ function startMultipleOutput( test )
       {
         track.push( 'ready' );
 
-        if( tops.sync || tops.deasync )
+        if( env.sync || env.deasync )
         {
           var exp =
           [
@@ -24559,12 +24559,12 @@ function startMultipleOutput( test )
         test.identical( op.ended, true );
         test.true( op === o );
 
-        if( !tops.sync && !tops.deasync )
+        if( !env.sync && !env.deasync )
         test.true( _.longHas( track, '0.out.end' ) );
         test.true( !_.longHas( track, '1.out.end' ) );
         test.true( !_.longHas( track, '2.out.end' ) );
 
-        if( !tops.sync || tops.deasync )
+        if( !env.sync || env.deasync )
         {
           test.identical( op.streamOut._writableState.ended, true );
           test.identical( op.streamOut._readableState.ended, true );
@@ -24586,7 +24586,7 @@ function startMultipleOutput( test )
           let parsed = a.fileProvider.fileRead({ filePath : a.abs( `${counter+1}.json` ), encoding : 'json' });
           test.identical( parsed.id, counter+1 );
 
-          if( !tops.sync || tops.deasync )
+          if( !env.sync || env.deasync )
           {
             test.identical( op2.streamOut._writableState.ended, false );
             test.identical( op2.streamOut._readableState.ended, true );
@@ -24610,23 +24610,23 @@ function startMultipleOutput( test )
 
     ready.then( () =>
     {
-      test.case = `sync:${tops.sync} deasync:${tops.deasync} concurrent:1 mode:${tops.mode}`;
-      if( tops.sync && !tops.deasync )
+      test.case = `sync:${env.sync} deasync:${env.deasync} concurrent:1 mode:${env.mode}`;
+      if( env.sync && !env.deasync )
       return null;
       track = [];
       let t1 = _.time.now();
       let ready2 = new _.Consequence().take( null ).delay( context.t1 / 10 );
       let o =
       {
-        execPath : [ ( tops.mode !== `fork` ?  `node ` : '' ) + `${programPath} id:1`, ( tops.mode !== `fork` ?  `node ` : '' ) + `${programPath} id:2` ],
+        execPath : [ ( env.mode !== `fork` ?  `node ` : '' ) + `${programPath} id:1`, ( env.mode !== `fork` ?  `node ` : '' ) + `${programPath} id:2` ],
         currentPath : a.abs( '.' ),
         outputPiping : 1,
         outputCollecting : 1,
         outputAdditive : 1,
-        sync : tops.sync,
-        deasync : tops.deasync,
+        sync : env.sync,
+        deasync : env.deasync,
         concurrent : 1,
-        mode : tops.mode,
+        mode : env.mode,
         ready : ready2,
       }
 
@@ -24651,7 +24651,7 @@ function startMultipleOutput( test )
       {
         track.push( 'ready' );
 
-        if( tops.sync || tops.deasync )
+        if( env.sync || env.deasync )
         {
           var exp =
           [
@@ -24836,14 +24836,14 @@ function startMultipleOutput( test )
         test.identical( op.ended, true );
         test.true( op === o );
 
-        if( !tops.sync && !tops.deasync )
+        if( !env.sync && !env.deasync )
         {
           test.true( _.longHas( track, '0.out.end' ) );
           test.true( _.longHas( track, '1.out.end' ) );
           test.true( _.longHas( track, '2.out.end' ) );
         }
 
-        if( !tops.sync || tops.deasync )
+        if( !env.sync || env.deasync )
         {
           test.identical( op.streamOut._writableState.ended, true );
           test.identical( op.streamOut._readableState.ended, true );
@@ -24865,7 +24865,7 @@ function startMultipleOutput( test )
           let parsed = a.fileProvider.fileRead({ filePath : a.abs( `${counter+1}.json` ), encoding : 'json' });
           test.identical( parsed.id, counter+1 );
 
-          if( !tops.sync || tops.deasync )
+          if( !env.sync || env.deasync )
           {
             test.identical( op2.streamOut._writableState.ended, false );
             test.identical( op2.streamOut._readableState.ended, true );
@@ -24974,31 +24974,31 @@ function startMultipleOptionStdioIgnore( test )
 
   /* - */
 
-  function run( tops )
+  function run( env )
   {
     let ready = new _.Consequence().take( null )
 
-    if( tops.sync && !tops.deasync && tops.mode === 'fork' )
+    if( env.sync && !env.deasync && env.mode === 'fork' )
     return null;
 
     /* */
 
     ready.then( () =>
     {
-      test.case = `sync:${tops.sync} deasync:${tops.deasync} mode:${tops.mode} concurrent:0 `;
+      test.case = `sync:${env.sync} deasync:${env.deasync} mode:${env.mode} concurrent:0 `;
       track = [];
       let t1 = _.time.now();
       let ready2 = new _.Consequence().take( null ).delay( context.t1 / 10 );
       let o =
       {
-        execPath : [ ( tops.mode !== `fork` ?  `node ` : '' ) + `${programPath} id:1`, ( tops.mode !== `fork` ?  `node ` : '' ) + `${programPath} id:2` ],
+        execPath : [ ( env.mode !== `fork` ?  `node ` : '' ) + `${programPath} id:1`, ( env.mode !== `fork` ?  `node ` : '' ) + `${programPath} id:2` ],
         currentPath : a.abs( '.' ),
-        outputAdditive : tops.outputAdditive,
+        outputAdditive : env.outputAdditive,
         stdio : 'ignore',
-        sync : tops.sync,
-        deasync : tops.deasync,
+        sync : env.sync,
+        deasync : env.deasync,
         concurrent : 0,
-        mode : tops.mode,
+        mode : env.mode,
         ready : ready2,
       }
 
@@ -25152,21 +25152,21 @@ function startMultipleOptionOutputAdditive( test )
 
   /* - */
 
-  function run( tops )
+  function run( env )
   {
     let ready = _.Consequence().take( null );
 
     ready.then( () =>
     {
-      test.case = `mode : ${tops.mode}, outputAdditive : ${tops.outputAdditive}, concurrent : ${tops.concurrent}`;
+      test.case = `mode : ${env.mode}, outputAdditive : ${env.outputAdditive}, concurrent : ${env.concurrent}`;
 
       let locals =
       {
-        mode : tops.mode,
+        mode : env.mode,
         testAppPath,
         testAppPath2,
-        outputAdditive : tops.outputAdditive,
-        concurrent : tops.concurrent,
+        outputAdditive : env.outputAdditive,
+        concurrent : env.concurrent,
       }
 
       let testAppPathParent = a.program({ routine : testAppParent, locals });
@@ -25183,17 +25183,17 @@ function startMultipleOptionOutputAdditive( test )
       */
       _.time.out( context.t1 * 15, () =>
       {
-        // console.log( `out t1 * 15, concurrent : ${tops.concurrent}, additive : ${tops.outputAdditive}`, '++' +  o.output + '++'  );
-        if( !tops.outputAdditive )
+        // console.log( `out t1 * 15, concurrent : ${env.concurrent}, additive : ${env.outputAdditive}`, '++' +  o.output + '++'  );
+        if( !env.outputAdditive )
         {
           test.identical( o.output, '' );
         }
         else
         {
-          if( tops.concurrent )
-          test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}\n>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath2}\nOutput1\nOutput2\nOutput1.2` );
+          if( env.concurrent )
+          test.equivalent( o.output, `>${env.mode === 'fork' ? '' : ' node'} ${testAppPath}\n>${env.mode === 'fork' ? '' : ' node'} ${testAppPath2}\nOutput1\nOutput2\nOutput1.2` );
           else
-          test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}\nOutput1\nOutput1.2` );
+          test.equivalent( o.output, `>${env.mode === 'fork' ? '' : ' node'} ${testAppPath}\nOutput1\nOutput1.2` );
         }
         return null;
       })
@@ -25206,21 +25206,21 @@ function startMultipleOptionOutputAdditive( test )
       */
       _.time.out( context.t1 * 35, () =>
       {
-        // console.log( `out t1 * 35, concurrent : ${tops.concurrent}, additive : ${tops.outputAdditive}`, '++' +  o.output + '++'  );
+        // console.log( `out t1 * 35, concurrent : ${env.concurrent}, additive : ${env.outputAdditive}`, '++' +  o.output + '++'  );
 
-        if( tops.concurrent )
+        if( env.concurrent )
         {
-          if( tops.outputAdditive )
-          test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}\n>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath2}\nOutput1\nOutput2\nOutput1.2\nOutput2.2\ntimeout1\ntimeout2\ntimeout2.2\n` );
+          if( env.outputAdditive )
+          test.equivalent( o.output, `>${env.mode === 'fork' ? '' : ' node'} ${testAppPath}\n>${env.mode === 'fork' ? '' : ' node'} ${testAppPath2}\nOutput1\nOutput2\nOutput1.2\nOutput2.2\ntimeout1\ntimeout2\ntimeout2.2\n` );
           else /* First process is still running. Second process is finished. */
-          test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath2}\nOutput2\nOutput2.2\ntimeout2\ntimeout2.2\n` );
+          test.equivalent( o.output, `>${env.mode === 'fork' ? '' : ' node'} ${testAppPath2}\nOutput2\nOutput2.2\ntimeout2\ntimeout2.2\n` );
         }
         else
         {
-          if( !tops.outputAdditive ) /* First process haven't finished yet, no output */
+          if( !env.outputAdditive ) /* First process haven't finished yet, no output */
           test.identical( o.output, '' );
           else /* Only a part of the output from the first process is logged */
-          test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}\nOutput1\nOutput1.2\ntimeout1\n` );
+          test.equivalent( o.output, `>${env.mode === 'fork' ? '' : ' node'} ${testAppPath}\nOutput1\nOutput1.2\ntimeout1\n` );
         }
 
         return null;
@@ -25229,23 +25229,23 @@ function startMultipleOptionOutputAdditive( test )
       return _.process.startMinimal( o )
       .then( ( op ) =>
       {
-        // console.log( `outputAdditive : ${tops.outputAdditive}, concurrent : ${tops.concurrent} OP OOOOUUUUTTTT : +++++ ${o.output} +++++` );
+        // console.log( `outputAdditive : ${env.outputAdditive}, concurrent : ${env.concurrent} OP OOOOUUUUTTTT : +++++ ${o.output} +++++` );
         test.il( op.exitCode, 0 );
         test.il( op.ended, true );
 
         let exp1 = '\nOutput1\nOutput2\nOutput1.2\nOutput2.2\ntimeout1\ntimeout2\ntimeout2.2\ntimeout1.2\n';
         let exp2 = '\nOutput1\nOutput1.2\ntimeout1\ntimeout1.2\n';
         let exp3 = '\nOutput2\nOutput2.2\ntimeout2\ntimeout2.2\n';
-        if( tops.concurrent )
+        if( env.concurrent )
         {
-          if( tops.outputAdditive )
-          test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}\n>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath2}${exp1}${exp1}` );
+          if( env.outputAdditive )
+          test.equivalent( o.output, `>${env.mode === 'fork' ? '' : ' node'} ${testAppPath}\n>${env.mode === 'fork' ? '' : ' node'} ${testAppPath2}${exp1}${exp1}` );
           else
-          test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath2}${exp3}>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}${exp2}${exp1}` );
+          test.equivalent( o.output, `>${env.mode === 'fork' ? '' : ' node'} ${testAppPath2}${exp3}>${env.mode === 'fork' ? '' : ' node'} ${testAppPath}${exp2}${exp1}` );
         }
         else
         {
-          test.equivalent( o.output, `>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath}${exp2}>${tops.mode === 'fork' ? '' : ' node'} ${testAppPath2}${exp3}${exp2}${exp3}` );
+          test.equivalent( o.output, `>${env.mode === 'fork' ? '' : ' node'} ${testAppPath}${exp2}>${env.mode === 'fork' ? '' : ' node'} ${testAppPath2}${exp3}${exp2}${exp3}` );
         }
 
         a.fileProvider.fileDelete( testAppPathParent );
@@ -26166,21 +26166,21 @@ function timeBeginBugExperiment( test )
   test.true( true );
   return a.ready;
 
-  function run( tops )
+  function run( env )
   {
     let ready = new _.Consequence().take( null );
 
-    console.log( `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}` );
+    console.log( `mode : ${env.mode}, sync : ${env.sync}, deasync : ${env.deasync}` );
 
     ready.then( () =>
     {
-      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, no error`;
+      test.case = `mode : ${env.mode}, sync : ${env.sync}, deasync : ${env.deasync}, no error`;
       let o =
       {
-        execPath : tops.mode === 'fork' ? programPath + ` arg1` : 'node ' + programPath + ` arg1`,
-        mode : tops.mode,
-        sync : tops.sync,
-        deasync : tops.deasync,
+        execPath : env.mode === 'fork' ? programPath + ` arg1` : 'node ' + programPath + ` arg1`,
+        mode : env.mode,
+        sync : env.sync,
+        deasync : env.deasync,
         args : [ 'arg0' ],
         dry : 1,
         outputPiping : 1,
@@ -26230,43 +26230,43 @@ function startSingleOptionDry( test )
   // modes.forEach( ( mode ) => a.ready.then( () => run({ mode, sync : 1, deasync : 1 }) ) );
   return a.ready;
 
-  function run( tops )
+  function run( env )
   {
     let ready = new _.Consequence().take( null );
 
-    console.log( `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}` );
+    console.log( `mode : ${env.mode}, sync : ${env.sync}, deasync : ${env.deasync}` );
 
-    if( tops.sync && !tops.deasync && tops.mode === 'fork' )
+    if( env.sync && !env.deasync && env.mode === 'fork' )
     {
-      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, throwing`;
+      test.case = `mode : ${env.mode}, sync : ${env.sync}, deasync : ${env.deasync}, throwing`;
       return test.shouldThrowErrorSync( () =>
       {
         _.process.startSingle
         ({
           execPath : programPath + ` arg1`,
-          mode : tops.mode,
-          sync : tops.sync,
-          deasync : tops.deasync
+          mode : env.mode,
+          sync : env.sync,
+          deasync : env.deasync
         })
       });
     }
 
     ready.then( () =>
     {
-      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, no error`;
+      test.case = `mode : ${env.mode}, sync : ${env.sync}, deasync : ${env.deasync}, no error`;
       let o =
       {
-        execPath : tops.mode === 'fork' ? programPath + ` arg1` : 'node ' + programPath + ` arg1`,
-        mode : tops.mode,
-        sync : tops.sync,
-        deasync : tops.deasync,
+        execPath : env.mode === 'fork' ? programPath + ` arg1` : 'node ' + programPath + ` arg1`,
+        mode : env.mode,
+        sync : env.sync,
+        deasync : env.deasync,
         args : [ 'arg0' ],
         dry : 1,
         outputPiping : 1,
         outputCollecting : 1,
         throwingExitCode : 1,
         applyingExitCode : 1,
-        ipc : tops.mode === 'shell' ? 0 : 1,
+        ipc : env.mode === 'shell' ? 0 : 1,
         when : { delay : context.t1 * 2 }, /* 2000 */
       }
       let track = [];
@@ -26275,7 +26275,7 @@ function startSingleOptionDry( test )
       var returned = _.process.startSingle( o );
       console.log( '2' );
 
-      if( tops.sync )
+      if( env.sync )
       {
         test.true( !_.consequenceIs( returned ) );
         test.true( returned === o );
@@ -26283,7 +26283,7 @@ function startSingleOptionDry( test )
       else
       {
         test.true( _.consequenceIs( returned ) );
-        if( tops.deasync )
+        if( env.deasync )
         test.identical( returned.resourcesCount(), 1 );
         else
         test.identical( returned.resourcesCount(), 0 );
@@ -26338,12 +26338,12 @@ function startSingleOptionDry( test )
         test.identical( op.streamErr, null );
 
         /* qqq for Yevhen : bad | aaa : Fixed. */
-        if( tops.mode === 'shell' )
+        if( env.mode === 'shell' )
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe' ] );
           test.identical( op.execPath2, `node ${programPath} arg1 "arg0"` );
         }
-        else if( tops.mode === 'fork' )
+        else if( env.mode === 'fork' )
         {
           test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
           test.identical( op.execPath2, `${programPath} arg1 arg0` );
@@ -26355,7 +26355,7 @@ function startSingleOptionDry( test )
         }
 
         test.true( !a.fileProvider.fileExists( a.path.join( a.routinePath, 'file' ) ) )
-        if( tops.deasync || tops.sync )
+        if( env.deasync || env.sync )
         test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate', 'ready' ] );
         else
         test.identical( track, [ 'conStart', 'conTerminate', 'conDisconnect', 'ready' ] );
@@ -26371,27 +26371,27 @@ function startSingleOptionDry( test )
 
     // ready.then( () =>
     // {
-    //   test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, wrong execPath`;
+    //   test.case = `mode : ${env.mode}, sync : ${env.sync}, deasync : ${env.deasync}, wrong execPath`;
     //   let o =
     //   {
     //     execPath : 'err ' + programPath + ' arg1',
-    //     mode : tops.mode,
-    //     sync : tops.sync,
-    //     deasync : tops.deasync,
+    //     mode : env.mode,
+    //     sync : env.sync,
+    //     deasync : env.deasync,
     //     args : [ 'arg0' ],
     //     dry : 1,
     //     outputPiping : 1,
     //     outputCollecting : 1,
     //     throwingExitCode : 1,
     //     applyingExitCode : 1,
-    //     ipc : tops.mode === 'shell' ? 0 : 1,
+    //     ipc : env.mode === 'shell' ? 0 : 1,
     //     when : { delay : context.t1 * 2 }, /* 2000 */
     //   }
     //   let track = [];
     //   var t1 = _.time.now();
     //   var returned = _.process.startSingle( o );
     //
-    //   if( tops.sync )
+    //   if( env.sync )
     //   {
     //     test.true( !_.consequenceIs( returned ) );
     //     test.true( returned === o );
@@ -26399,7 +26399,7 @@ function startSingleOptionDry( test )
     //   else
     //   {
     //     test.true( _.consequenceIs( returned ) );
-    //     if( tops.deasync )
+    //     if( env.deasync )
     //     test.identical( returned.resourcesCount(), 1 );
     //     else
     //     test.identical( returned.resourcesCount(), 0 );
@@ -26452,7 +26452,7 @@ function startSingleOptionDry( test )
     //     test.identical( op.ended, true );
     //     test.identical( op.streamOut, null );
     //     test.identical( op.streamErr, null );
-    //     if( tops.mode === 'shell' )
+    //     if( env.mode === 'shell' )
     //     {
     //       test.identical( op.stdio, [ 'pipe', 'pipe', 'pipe' ] );
     //       test.identical( op.execPath2, `err ${programPath} arg1 "arg0"` );
@@ -26464,7 +26464,7 @@ function startSingleOptionDry( test )
     //     }
     //
     //     test.true( !a.fileProvider.fileExists( a.path.join( a.routinePath, 'file' ) ) )
-    //     if( tops.deasync || tops.sync )
+    //     if( env.deasync || env.sync )
     //     test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate', 'ready' ] );
     //     else
     //     test.identical( track, [ 'conStart', 'conTerminate', 'conDisconnect', 'ready' ] );
@@ -26735,32 +26735,32 @@ function startMultipleOptionDry( test )
   modes.forEach( ( mode ) => a.ready.then( () => run({ mode, sync : 1, deasync : 1 }) ) );
   return a.ready;
 
-  function run( tops )
+  function run( env )
   {
     let ready = new _.Consequence().take( null );
 
-    if( tops.sync && !tops.deasync && tops.mode === 'fork' )
+    if( env.sync && !env.deasync && env.mode === 'fork' )
     return test.shouldThrowErrorSync( () =>
     {
       _.process.startMultiple
       ({
         execPath : [ programPath + ` id:1`, programPath + ` id:2` ],
-        mode : tops.mode,
-        sync : tops.sync,
-        deasync : tops.deasync
+        mode : env.mode,
+        sync : env.sync,
+        deasync : env.deasync
       })
     });
 
     ready.then( () =>
     {
-      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync :${tops.deasync}, dry : 1, without error, con* checks`;
+      test.case = `mode : ${env.mode}, sync : ${env.sync}, deasync :${env.deasync}, dry : 1, without error, con* checks`;
 
       let options =
       {
-        execPath : [ tops.mode === 'fork' ? programPath + ' id:1' : 'node ' + programPath + ' id:1', tops.mode === 'fork' ? programPath + ' id:2' : 'node ' + programPath + ' id:2' ],
-        mode : tops.mode,
-        sync : tops.sync,
-        deasync : tops.deasync,
+        execPath : [ env.mode === 'fork' ? programPath + ' id:1' : 'node ' + programPath + ' id:1', env.mode === 'fork' ? programPath + ' id:2' : 'node ' + programPath + ' id:2' ],
+        mode : env.mode,
+        sync : env.sync,
+        deasync : env.deasync,
         outputCollecting : 1,
         dry : 1
       }
@@ -26776,7 +26776,7 @@ function startMultipleOptionDry( test )
       test.identical( options.pnd, undefined );
       test.identical( options.output, '' );
       test.identical( options.ended, true );
-      if( tops.sync && !tops.deasync )
+      if( env.sync && !env.deasync )
       {
         test.true( !_.streamIs( options.streamOut ) );
         test.true( !_.streamIs( options.streamErr ) );
@@ -26786,7 +26786,7 @@ function startMultipleOptionDry( test )
         test.true( _.streamIs( options.streamOut ) );
         test.true( _.streamIs( options.streamErr ) );
       }
-      if( tops.mode === 'fork' )
+      if( env.mode === 'fork' )
       {
         test.identical( options.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
       }
@@ -26843,7 +26843,7 @@ function startMultipleOptionDry( test )
           test.identical( op2.ended, true );
           test.identical( op2.streamOut, null );
           test.identical( op2.streamErr, null );
-          if( tops.mode === 'fork' )
+          if( env.mode === 'fork' )
           {
             test.identical( op2.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
             test.identical( op2.execPath2, programPath + ` id:${counter + 1}` );
@@ -26865,14 +26865,14 @@ function startMultipleOptionDry( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync :${tops.deasync}, dry : 1, without error, con* checks`;
+      test.case = `mode : ${env.mode}, sync : ${env.sync}, deasync :${env.deasync}, dry : 1, without error, con* checks`;
 
       let options =
       {
         execPath : [ 'err ' + programPath + ' id:1', 'err ' + programPath + ' id:2' ],
-        mode : tops.mode,
-        sync : tops.sync,
-        deasync : tops.deasync,
+        mode : env.mode,
+        sync : env.sync,
+        deasync : env.deasync,
         outputCollecting : 1,
         dry : 1
       }
@@ -26888,7 +26888,7 @@ function startMultipleOptionDry( test )
       test.identical( options.pnd, undefined );
       test.identical( options.output, '' );
       test.identical( options.ended, true );
-      if( tops.sync && !tops.deasync )
+      if( env.sync && !env.deasync )
       {
         test.true( !_.streamIs( options.streamOut ) );
         test.true( !_.streamIs( options.streamErr ) );
@@ -26898,7 +26898,7 @@ function startMultipleOptionDry( test )
         test.true( _.streamIs( options.streamOut ) );
         test.true( _.streamIs( options.streamErr ) );
       }
-      if( tops.mode === 'fork' )
+      if( env.mode === 'fork' )
       {
         test.identical( options.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
       }
@@ -26955,7 +26955,7 @@ function startMultipleOptionDry( test )
           test.identical( op2.ended, true );
           test.identical( op2.streamOut, null );
           test.identical( op2.streamErr, null );
-          if( tops.mode === 'fork' )
+          if( env.mode === 'fork' )
           test.identical( op2.stdio, [ 'pipe', 'pipe', 'pipe', 'ipc' ] );
           else
           test.identical( op2.stdio, [ 'pipe', 'pipe', 'pipe' ] );
@@ -28058,47 +28058,47 @@ function startSingleOptionProcedure( test )
 
   return a.ready;
 
-  function run( tops )
+  function run( env )
   {
     let ready = new _.Consequence().take( null );
 
-    if( tops.sync && !tops.deasync && tops.mode === 'fork' )
+    if( env.sync && !env.deasync && env.mode === 'fork' )
     return test.shouldThrowErrorSync( () =>
     {
       _.process.startSingle
       ({
         execPath : programPath,
-        mode : tops.mode,
-        sync : tops.sync,
-        deasync : tops.deasync
+        mode : env.mode,
+        sync : env.sync,
+        deasync : env.deasync
       })
     });
 
     ready.then( () =>
     {
-      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, procedure : null`;
+      test.case = `mode : ${env.mode}, sync : ${env.sync}, deasync : ${env.deasync}, procedure : null`;
 
       let options =
       {
-        execPath : tops.mode === 'fork' ? programPath : 'node ' + programPath,
+        execPath : env.mode === 'fork' ? programPath : 'node ' + programPath,
         args : 'a',
-        mode : tops.mode,
-        sync : tops.sync,
-        deasync : tops.deasync,
+        mode : env.mode,
+        sync : env.sync,
+        deasync : env.deasync,
         throwingExitCode : 0,
         outputCollecting : 1,
       }
 
       let returned = _.process.startSingle( options );
 
-      if( tops.sync )
+      if( env.sync )
       {
         test.true( !_.consequenceIs( returned ) );
       }
       else
       {
         test.true( _.consequenceIs( returned ) );
-        if( tops.deasync )
+        if( env.deasync )
         test.identical( returned.resourcesCount(), 1 );
         else
         test.identical( returned.resourcesCount(), 0 );
@@ -28123,14 +28123,14 @@ function startSingleOptionProcedure( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, procedure : false`;
+      test.case = `mode : ${env.mode}, sync : ${env.sync}, deasync : ${env.deasync}, procedure : false`;
 
       let options =
       {
-        execPath : tops.mode === 'fork' ? programPath : 'node ' + programPath,
-        mode : tops.mode,
-        sync : tops.sync,
-        deasync : tops.deasync,
+        execPath : env.mode === 'fork' ? programPath : 'node ' + programPath,
+        mode : env.mode,
+        sync : env.sync,
+        deasync : env.deasync,
         args : 'a',
         throwingExitCode : 0,
         procedure : false,
@@ -28139,14 +28139,14 @@ function startSingleOptionProcedure( test )
 
       let returned =  _.process.startSingle( options )
 
-      if( tops.sync )
+      if( env.sync )
       {
         test.true( !_.consequenceIs( returned ) );
       }
       else
       {
         test.true( _.consequenceIs( returned ) );
-        if( tops.deasync )
+        if( env.deasync )
         test.identical( returned.resourcesCount(), 1 );
         else
         test.identical( returned.resourcesCount(), 0 );
@@ -28170,14 +28170,14 @@ function startSingleOptionProcedure( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, procedure : true`;
+      test.case = `mode : ${env.mode}, sync : ${env.sync}, deasync : ${env.deasync}, procedure : true`;
 
       let options =
       {
-        execPath : tops.mode === 'fork' ? programPath : 'node ' + programPath,
-        mode : tops.mode,
-        sync : tops.sync,
-        deasync : tops.deasync,
+        execPath : env.mode === 'fork' ? programPath : 'node ' + programPath,
+        mode : env.mode,
+        sync : env.sync,
+        deasync : env.deasync,
         args : 'a',
         procedure : true,
         throwingExitCode : 0,
@@ -28186,14 +28186,14 @@ function startSingleOptionProcedure( test )
 
       let returned = _.process.startSingle( options );
 
-      if( tops.sync )
+      if( env.sync )
       {
         test.true( !_.consequenceIs( returned ) );
       }
       else
       {
         test.true( _.consequenceIs( returned ) );
-        if( tops.deasync )
+        if( env.deasync )
         test.identical( returned.resourcesCount(), 1 );
         else
         test.identical( returned.resourcesCount(), 0 );
@@ -28219,14 +28219,14 @@ function startSingleOptionProcedure( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, procedure : _.Procedure()`;
+      test.case = `mode : ${env.mode}, sync : ${env.sync}, deasync : ${env.deasync}, procedure : _.Procedure()`;
 
       let options =
       {
-        execPath : tops.mode === 'fork' ? programPath : 'node ' + programPath,
-        mode : tops.mode,
-        sync : tops.sync,
-        deasync : tops.deasync,
+        execPath : env.mode === 'fork' ? programPath : 'node ' + programPath,
+        mode : env.mode,
+        sync : env.sync,
+        deasync : env.deasync,
         args : 'a',
         throwingExitCode : 0,
         procedure : _.Procedure(),
@@ -28235,14 +28235,14 @@ function startSingleOptionProcedure( test )
 
       let returned =  _.process.startSingle( options );
 
-      if( tops.sync )
+      if( env.sync )
       {
         test.true( !_.consequenceIs( returned ) );
       }
       else
       {
         test.true( _.consequenceIs( returned ) );
-        if( tops.deasync )
+        if( env.deasync )
         test.identical( returned.resourcesCount(), 1 );
         else
         test.identical( returned.resourcesCount(), 0 );
@@ -28268,14 +28268,14 @@ function startSingleOptionProcedure( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, procedure : _.Procedure({ _name : 'name', _object : 'object', _stack : 'stack' })`;
+      test.case = `mode : ${env.mode}, sync : ${env.sync}, deasync : ${env.deasync}, procedure : _.Procedure({ _name : 'name', _object : 'object', _stack : 'stack' })`;
 
       let options =
       {
-        execPath : tops.mode === 'fork' ? programPath : 'node ' + programPath,
-        mode : tops.mode,
-        sync : tops.sync,
-        deasync : tops.deasync,
+        execPath : env.mode === 'fork' ? programPath : 'node ' + programPath,
+        mode : env.mode,
+        sync : env.sync,
+        deasync : env.deasync,
         args : 'a',
         throwingExitCode : 0,
         procedure : _.Procedure({ _name : 'name', _object : 'object', _stack : 'stack' }),
@@ -28284,14 +28284,14 @@ function startSingleOptionProcedure( test )
 
       let returned = _.process.startSingle( options );
 
-      if( tops.sync )
+      if( env.sync )
       {
         test.true( !_.consequenceIs( returned ) );
       }
       else
       {
         test.true( _.consequenceIs( returned ) );
-        if( tops.deasync )
+        if( env.deasync )
         test.identical( returned.resourcesCount(), 1 );
         else
         test.identical( returned.resourcesCount(), 0 );
@@ -28342,47 +28342,47 @@ function startMultipleOptionProcedure( test )
 
   return a.ready;
 
-  function run( tops )
+  function run( env )
   {
     let ready = new _.Consequence().take( null );
 
-    if( tops.sync && !tops.deasync && tops.mode === 'fork' )
+    if( env.sync && !env.deasync && env.mode === 'fork' )
     return test.shouldThrowErrorSync( () =>
     {
       _.process.startMultiple
       ({
         execPath : [ programPath, programPath ],
-        mode : tops.mode,
-        sync : tops.sync,
-        deasync : tops.deasync
+        mode : env.mode,
+        sync : env.sync,
+        deasync : env.deasync
       })
     });
 
     ready.then( () =>
     {
-      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, procedure : null`;
+      test.case = `mode : ${env.mode}, sync : ${env.sync}, deasync : ${env.deasync}, procedure : null`;
 
       let options =
       {
-        execPath : tops.mode === 'fork' ? [ programPath, programPath ] : [ 'node ' + programPath, 'node ' + programPath ],
+        execPath : env.mode === 'fork' ? [ programPath, programPath ] : [ 'node ' + programPath, 'node ' + programPath ],
         args : 'a',
-        mode : tops.mode,
-        sync : tops.sync,
-        deasync : tops.deasync,
+        mode : env.mode,
+        sync : env.sync,
+        deasync : env.deasync,
         throwingExitCode : 0,
         outputCollecting : 1,
       }
 
       let returned =  _.process.startMultiple( options );
 
-      if( tops.sync )
+      if( env.sync )
       {
         test.true( !_.consequenceIs( returned ) );
       }
       else
       {
         test.true( _.consequenceIs( returned ) );
-        if( tops.deasync )
+        if( env.deasync )
         test.identical( returned.resourcesCount(), 1 );
         else
         test.identical( returned.resourcesCount(), 0 );
@@ -28396,7 +28396,7 @@ function startMultipleOptionProcedure( test )
         test.equivalent( op.output, `[ 'a' ]\n[ 'a' ]` );
         test.identical( op.procedure._name, null );
         test.true( _.objectIs( op.procedure._object ) );
-        test.identical( op.procedure._object.execPath, [ `${tops.mode === 'fork' ? programPath : 'node ' + programPath}`, `${tops.mode === 'fork' ? programPath : 'node ' + programPath}` ] );
+        test.identical( op.procedure._object.execPath, [ `${env.mode === 'fork' ? programPath : 'node ' + programPath}`, `${env.mode === 'fork' ? programPath : 'node ' + programPath}` ] );
 
         op.sessions.forEach( ( session ) =>
         {
@@ -28419,14 +28419,14 @@ function startMultipleOptionProcedure( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, procedure : false`;
+      test.case = `mode : ${env.mode}, sync : ${env.sync}, deasync : ${env.deasync}, procedure : false`;
 
       let options =
       {
-        execPath : tops.mode === 'fork' ? [ programPath, programPath ] : [ 'node ' + programPath, 'node ' + programPath ],
-        mode : tops.mode,
-        sync : tops.sync,
-        deasync : tops.deasync,
+        execPath : env.mode === 'fork' ? [ programPath, programPath ] : [ 'node ' + programPath, 'node ' + programPath ],
+        mode : env.mode,
+        sync : env.sync,
+        deasync : env.deasync,
         args : 'a',
         throwingExitCode : 0,
         procedure : false,
@@ -28435,14 +28435,14 @@ function startMultipleOptionProcedure( test )
 
       let returned = _.process.startMultiple( options );
 
-      if( tops.sync )
+      if( env.sync )
       {
         test.true( !_.consequenceIs( returned ) );
       }
       else
       {
         test.true( _.consequenceIs( returned ) );
-        if( tops.deasync )
+        if( env.deasync )
         test.identical( returned.resourcesCount(), 1 );
         else
         test.identical( returned.resourcesCount(), 0 );
@@ -28474,14 +28474,14 @@ function startMultipleOptionProcedure( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, procedure : true`;
+      test.case = `mode : ${env.mode}, sync : ${env.sync}, deasync : ${env.deasync}, procedure : true`;
 
       let options =
       {
-        execPath : tops.mode === 'fork' ? [ programPath, programPath ] : [ 'node ' + programPath, 'node ' + programPath ],
-        mode : tops.mode,
-        sync : tops.sync,
-        deasync : tops.deasync,
+        execPath : env.mode === 'fork' ? [ programPath, programPath ] : [ 'node ' + programPath, 'node ' + programPath ],
+        mode : env.mode,
+        sync : env.sync,
+        deasync : env.deasync,
         args : 'a',
         procedure : true,
         throwingExitCode : 0,
@@ -28490,14 +28490,14 @@ function startMultipleOptionProcedure( test )
 
       let returned =  _.process.startMultiple( options );
 
-      if( tops.sync )
+      if( env.sync )
       {
         test.true( !_.consequenceIs( returned ) );
       }
       else
       {
         test.true( _.consequenceIs( returned ) );
-        if( tops.deasync )
+        if( env.deasync )
         test.identical( returned.resourcesCount(), 1 );
         else
         test.identical( returned.resourcesCount(), 0 );
@@ -28511,7 +28511,7 @@ function startMultipleOptionProcedure( test )
         test.equivalent( op.output, `[ 'a' ]\n[ 'a' ]` );
         test.identical( op.procedure._name, null );
         test.true( _.objectIs( op.procedure._object ) );
-        test.identical( op.procedure._object.execPath, [ `${tops.mode === 'fork' ? programPath : 'node ' + programPath}`, `${tops.mode === 'fork' ? programPath : 'node ' + programPath}` ] );
+        test.identical( op.procedure._object.execPath, [ `${env.mode === 'fork' ? programPath : 'node ' + programPath}`, `${env.mode === 'fork' ? programPath : 'node ' + programPath}` ] );
 
         op.sessions.forEach( ( session ) =>
         {
@@ -28533,14 +28533,14 @@ function startMultipleOptionProcedure( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync} procedure : _.Procedure()`;
+      test.case = `mode : ${env.mode}, sync : ${env.sync}, deasync : ${env.deasync} procedure : _.Procedure()`;
 
       let options =
       {
-        execPath : tops.mode === 'fork' ? [ programPath, programPath ] : [ 'node ' + programPath, 'node ' + programPath ],
-        mode : tops.mode,
-        sync : tops.sync,
-        deasync : tops.deasync,
+        execPath : env.mode === 'fork' ? [ programPath, programPath ] : [ 'node ' + programPath, 'node ' + programPath ],
+        mode : env.mode,
+        sync : env.sync,
+        deasync : env.deasync,
         args : 'a',
         throwingExitCode : 0,
         procedure : _.Procedure(),
@@ -28549,14 +28549,14 @@ function startMultipleOptionProcedure( test )
 
       let returned =  _.process.startMultiple( options );
 
-      if( tops.sync )
+      if( env.sync )
       {
         test.true( !_.consequenceIs( returned ) );
       }
       else
       {
         test.true( _.consequenceIs( returned ) );
-        if( tops.deasync )
+        if( env.deasync )
         test.identical( returned.resourcesCount(), 1 );
         else
         test.identical( returned.resourcesCount(), 0 );
@@ -28592,14 +28592,14 @@ function startMultipleOptionProcedure( test )
 
     ready.then( () =>
     {
-      test.case = `mode : ${tops.mode}, sync : ${tops.sync}, deasync : ${tops.deasync}, procedure : _.Procedure({ _name : 'name', _object : 'object', _stack : 'stack' })`;
+      test.case = `mode : ${env.mode}, sync : ${env.sync}, deasync : ${env.deasync}, procedure : _.Procedure({ _name : 'name', _object : 'object', _stack : 'stack' })`;
 
       let options =
       {
-        execPath : tops.mode === 'fork' ? [ programPath, programPath ] : [ 'node ' + programPath, 'node ' + programPath ],
-        mode : tops.mode,
-        sync : tops.sync,
-        deasync : tops.deasync,
+        execPath : env.mode === 'fork' ? [ programPath, programPath ] : [ 'node ' + programPath, 'node ' + programPath ],
+        mode : env.mode,
+        sync : env.sync,
+        deasync : env.deasync,
         args : 'a',
         throwingExitCode : 0,
         procedure : _.Procedure({ _name : 'name', _object : 'object', _stack : 'stack' }),
@@ -28608,14 +28608,14 @@ function startMultipleOptionProcedure( test )
 
       let returned =  _.process.startMultiple( options );
 
-      if( tops.sync )
+      if( env.sync )
       {
         test.true( !_.consequenceIs( returned ) );
       }
       else
       {
         test.true( _.consequenceIs( returned ) );
-        if( tops.deasync )
+        if( env.deasync )
         test.identical( returned.resourcesCount(), 1 );
         else
         test.identical( returned.resourcesCount(), 0 );

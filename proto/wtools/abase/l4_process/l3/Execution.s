@@ -127,7 +127,7 @@ function startMinimalHeadCommon( routine, args )
   );
 
   if( o.outputAdditive === null )
-  o.outputAdditive = true;
+  o.outputAdditive = true; /* yyy */
   o.outputAdditive = !!o.outputAdditive;
   _.assert( _.boolLike( o.outputAdditive ) );
 
@@ -744,6 +744,7 @@ function startMinimal_body( o )
 
     if( !o.outputAdditive )
     {
+      debugger;
       if( _decoratedOutOutput )
       o.logger.log( _decoratedOutOutput );
       if( _decoratedErrOutput )
@@ -789,6 +790,7 @@ function startMinimal_body( o )
 
     if( o.outputAdditive && _outAdditive )
     {
+      debugger;
       o.logger.log( _outAdditive );
       _outAdditive = '';
     }
@@ -1287,6 +1289,7 @@ function startMinimal_body( o )
           _outAdditive += left;
         }
       }
+      /* qqq : for Yevhen : bad : it cant be working */
       if( channel === 'err' )
       o.logger.error( msg );
       else
