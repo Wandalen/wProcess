@@ -340,7 +340,7 @@ function _argEscape2( test )
   test.identical( got, expected );
 
   var src = 'A:\\b\\';
-  var expected = isWin ? '^"A:\\b\\\\^"' : 'A\\:\\\\b\\\\'
+  var expected = isWin ? '^"A:\\b\\\\^"' : 'A\\:\\\\b\\\\';
   var got = _.process._argEscape2( src )
   test.identical( got, expected );
 
