@@ -299,7 +299,8 @@ function _eventExitHandle()
 {
   let args = arguments;
   _.process.exiting = true;
-  process.removeListener( 'exit', _.process._registeredExitHandler );
+  // process.removeListener( 'exit', _.process._registeredExitHandler ); /* _.process._registeredExitHandler : null */
+  process.removeListener( 'exit', _.process._eventExitHandle );
   _.process._registeredExitHandler = null;
   _.process.eventGive({ event : 'exit', args });
   _.process._ehandler.events.exit.splice( 0, _.process._ehandler.events.exit.length );
@@ -786,8 +787,7 @@ let Extension =
 
 _.mapExtend( Self, Extension );
 _.mapSupplement( Self._ehandler.events, Events );
-// _.assert( _.routineIs( _.process.start ) );
-_.assert( !_.process.start );
+// _.assert( !_.process.start ); /* wFiles, wProcessWatcher have wProcess in dependencies */
 _.process._Setup1();
 
 // --
