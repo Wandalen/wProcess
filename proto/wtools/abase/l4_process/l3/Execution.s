@@ -3,7 +3,7 @@
 
 'use strict';
 
-let System, ChildProcess, StripAnsi, WindowsProcessTree, Stream;
+let System, ChildProcess, WindowsProcessTree, Stream;
 const _global = _global_;
 const _ = _global_.wTools;
 const Self = _.process = _.process || Object.create( null );
@@ -421,9 +421,9 @@ function startMinimal_body( o )
     if( !ChildProcess )
     ChildProcess = require( 'child_process' );
 
-    if( o.outputGraying )
-    if( !StripAnsi )
-    StripAnsi = require( 'strip-ansi' );
+    // if( o.outputGraying )
+    // if( !StripAnsi )
+    // StripAnsi = require( 'strip-ansi' );
 
     if( o.outputColoring.err || o.outputColoring.out && typeof module !== 'undefined' )
     try
@@ -1186,7 +1186,8 @@ function startMinimal_body( o )
     data = String( data );
 
     if( o.outputGraying )
-    data = StripAnsi( data );
+    data = _.ct.stripAnsi( data );
+    // data = StripAnsi( data );
 
     if( channel === 'err' )
     _errOutput += data;
@@ -2214,7 +2215,8 @@ function startMultiple_body( o )
     if( _.bufferNodeIs( data ) )
     data = data.toString( 'utf8' );
     if( o.outputGraying )
-    data = StripAnsi( data );
+    data = _.ct.stripAnsi( data );
+    // data = StripAnsi( data );
     if( o.outputCollecting )
     o.output += data;
   }
