@@ -103,8 +103,8 @@ path:
       raw: compiled
       content: prime
   npm.proto.entry:
-    - /pro/module/wProcess/proto/wtools/abase/l4_process/module/Process.s
-    - /pro/module/wProcess/proto/node_modules/wprocess
+    - proto/wtools/abase/l4_process/module/Process.s
+    - proto/node_modules/wprocess
 reflector:
   reflect.proto:
     inherit: predefined.*
