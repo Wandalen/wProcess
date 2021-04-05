@@ -3,7 +3,7 @@
 
 'use strict';
 
-let System, ChildProcess, StripAnsi, WindowsProcessTree, Stream;
+let System, ChildProcess, WindowsProcessTree, Stream;
 const _global = _global_;
 const _ = _global_.wTools;
 const Self = _.process = _.process || Object.create( null );
@@ -127,7 +127,7 @@ function startMinimalHeadCommon( routine, args )
   );
 
   if( o.outputAdditive === null )
-  o.outputAdditive = true;
+  o.outputAdditive = true; /* yyy */
   o.outputAdditive = !!o.outputAdditive;
   _.assert( _.boolLike( o.outputAdditive ) );
 
@@ -421,9 +421,9 @@ function startMinimal_body( o )
     if( !ChildProcess )
     ChildProcess = require( 'child_process' );
 
-    if( o.outputGraying )
-    if( !StripAnsi )
-    StripAnsi = require( 'strip-ansi' );
+    // if( o.outputGraying )
+    // if( !StripAnsi )
+    // StripAnsi = require( 'strip-ansi' );
 
     if( o.outputColoring.err || o.outputColoring.out && typeof module !== 'undefined' )
     try
@@ -744,6 +744,7 @@ function startMinimal_body( o )
 
     if( !o.outputAdditive )
     {
+      debugger;
       if( _decoratedOutOutput )
       o.logger.log( _decoratedOutOutput );
       if( _decoratedErrOutput )
@@ -789,6 +790,7 @@ function startMinimal_body( o )
 
     if( o.outputAdditive && _outAdditive )
     {
+      debugger;
       o.logger.log( _outAdditive );
       _outAdditive = '';
     }
@@ -1184,7 +1186,8 @@ function startMinimal_body( o )
     data = String( data );
 
     if( o.outputGraying )
-    data = StripAnsi( data );
+    data = _.ct.stripAnsi( data );
+    // data = StripAnsi( data );
 
     if( channel === 'err' )
     _errOutput += data;
@@ -1287,6 +1290,7 @@ function startMinimal_body( o )
           _outAdditive += left;
         }
       }
+      /* qqq : for Yevhen : bad : it cant be working */
       if( channel === 'err' )
       o.logger.error( msg );
       else
@@ -2211,7 +2215,8 @@ function startMultiple_body( o )
     if( _.bufferNodeIs( data ) )
     data = data.toString( 'utf8' );
     if( o.outputGraying )
-    data = StripAnsi( data );
+    data = _.ct.stripAnsi( data );
+    // data = StripAnsi( data );
     if( o.outputCollecting )
     o.output += data;
   }

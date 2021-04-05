@@ -206,6 +206,7 @@ _inputInSamFormatBrowser.defaults = Object.create( _inputInSamFormatDefaults.def
  * @namespace Tools.process
  */
 
+/* xxx : qqq : deprecate? */
 function inputReadTo( o )
 {
 

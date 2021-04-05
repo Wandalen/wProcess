@@ -3,14 +3,14 @@ root:
   - wProcess.out
 consistency:
   wProcess.out.will.yml: &ref_0
-    hash: d6a49d898824bb716b31434a931c80e8
-    size: 41613
+    hash: 1759f227c6b180ec7f1d50972f8b1037
+    size: 42265
   ../.ex.will.yml: &ref_1
     hash: ad280127a9f801a3bf1cdd9b30cb663b
     size: 2161
   ../.im.will.yml: &ref_2
-    hash: 317813a6a2ccfe5790e37303cc2c747d
-    size: 5686
+    hash: 90a02518e5bf5aa3af38608602354854
+    size: 5564
 module:
   wProcess.out:
     about:
@@ -71,7 +71,7 @@ module:
       download:
         criterion:
           predefined: 1
-        path: ../
+        path: ..
       repository:
         path: 'git+https:///github.com/Wandalen/wProcess.git'
       origins:
@@ -152,6 +152,10 @@ module:
           raw: compiled
           content: prime
         path: '{path::out.*=}/source/Index.s'
+      npm.proto.entry:
+        path:
+          - ../proto/wtools/abase/l4_process/module/Process.s
+          - ../proto/node_modules/wprocess
       exported.dir.proto.export:
         criterion:
           generated: 1
@@ -930,7 +934,7 @@ module:
       download:
         criterion:
           predefined: 1
-        path: ./
+        path: .
       repository:
         path: 'git+https:///github.com/Wandalen/wProcess.git'
       origins:
@@ -1011,6 +1015,10 @@ module:
           raw: compiled
           content: prime
         path: '{path::out.*=}/source/Index.s'
+      npm.proto.entry:
+        path:
+          - proto/wtools/abase/l4_process/module/Process.s
+          - proto/node_modules/wprocess
     submodule:
       wTools:
         path: 'npm:///wTools'
@@ -1603,6 +1611,6 @@ module:
         hash: ad280127a9f801a3bf1cdd9b30cb663b
         size: 2161
       ../.im.will.yml:
-        hash: 317813a6a2ccfe5790e37303cc2c747d
-        size: 5686
+        hash: 90a02518e5bf5aa3af38608602354854
+        size: 5564
       wProcess.out.will.yml: *ref_0
