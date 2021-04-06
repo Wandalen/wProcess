@@ -20029,7 +20029,8 @@ function starterOptionsPollution( test )
 
       let start = _.process.starter
       ({
-        mode : 'fork',
+        execPath : 'node',
+        mode : 'shell',
         args : [ 'arg1', 'arg2' ],
         throwingExitCode : 0,
         outputCollecting : 1,
