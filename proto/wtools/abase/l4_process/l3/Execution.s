@@ -2479,8 +2479,32 @@ function starter( o0 )
 
   function er()
   {
+    /*
+      non-primitive options :
+
+      - execPath( in multiple runs )        : array
+      - currentPath( in multiple runs )     : array
+      - args                                : array
+      - interpreterArgs                     : array
+      - stdio                               : array
+      - logger                              : object
+      - procedure                           : object
+      - ready                               : routine
+      - conStart                            : routine
+      - conTerminate                        : routine
+      - conDisconnect                       : routine
+      - outputColoring                      : aux
+      - env                                 : aux
+    */
     let o = optionsFrom( arguments[ 0 ] );
     let o00 = _.mapExtend( null, o0 );
+    for( let k in o00 )
+    {
+      if( _.arrayIs( o00[ k ] ) )
+      o00[ k ] = o00[ k ].slice();
+      else if( _.aux.is( o00[ k ] ) )
+      o00[ k ] = _.mapExtend( null, o00[ k ] );
+    }
     merge( o00, o );
     _.mapExtend( o, o00 )
 
@@ -2538,7 +2562,8 @@ function starter( o0 )
 
 }
 
-starter.defaults = Object.create( startMultiple.defaults );
+// starter.defaults = Object.create( startMultiple.defaults );
+starter.defaults = _.mapBut_( startMultiple.defaults, [ 'procedure' ] );
 
 // --
 // children

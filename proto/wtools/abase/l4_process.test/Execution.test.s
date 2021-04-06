@@ -19599,6 +19599,14 @@ function starter( test )
       })
     })
 
+    /* */
+
+    .then( () =>
+    {
+      test.case = `mode : ${mode}, option procedure`;
+      return test.shouldThrowErrorSync( () => _.process.starter({ execPath : mode === 'fork' ? '' : 'node', mode, procedure : true }) );
+    })
+
     return ready;
   }
 
@@ -19652,19 +19660,19 @@ function starterArgs( test )
         {
           test.identical( op.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
           test.identical( op.args2, [ testAppPath, 'arg3', '"arg1"', '"arg2"' ] );
-          test.identical( starterOptions.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
+          test.identical( starterOptions.args, [ 'arg1', 'arg2' ] );
         }
         else if( mode === 'spawn' )
         {
           test.identical( op.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
           test.identical( op.args2, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
-          test.identical( starterOptions.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
+          test.identical( starterOptions.args, [ 'arg1', 'arg2' ] );
         }
         else
         {
           test.identical( op.args, [ 'arg3', 'arg1', 'arg2' ] );
           test.identical( op.args2, [ 'arg3', 'arg1', 'arg2' ] );
-          test.identical( starterOptions.args, [ 'arg3', 'arg1', 'arg2' ] );
+          test.identical( starterOptions.args, [ 'arg1', 'arg2' ] );
         }
         test.identical( _.strCount( op.output, `[ 'arg3', 'arg1', 'arg2' ]` ), 1 );
         test.identical( starterOptions.args2, undefined );
@@ -19691,19 +19699,19 @@ function starterArgs( test )
         {
           test.identical( op.args, [ testAppPath, 'arg3' ] );
           test.identical( op.args2, [ testAppPath, '"arg3"' ] );
-          test.identical( starterOptions.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
+          test.identical( starterOptions.args, [ 'arg1', 'arg2' ] );
         }
         else if( mode === 'spawn' )
         {
           test.identical( op.args, [ testAppPath, 'arg3' ] );
           test.identical( op.args2, [ testAppPath, 'arg3' ] );
-          test.identical( starterOptions.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
+          test.identical( starterOptions.args, [ 'arg1', 'arg2' ] );
         }
         else
         {
           test.identical( op.args, [ 'arg3' ] );
           test.identical( op.args2, [ 'arg3' ] );
-          test.identical( starterOptions.args, [ 'arg3', 'arg1', 'arg2' ] );
+          test.identical( starterOptions.args, [ 'arg1', 'arg2' ] );
         }
 
         test.identical( _.strCount( op.output, `[ 'arg3' ]` ), 1 );
@@ -19731,19 +19739,19 @@ function starterArgs( test )
         {
           test.identical( op.args, [ testAppPath, 'arg3' ] );
           test.identical( op.args2, [ _.strQuote( testAppPath ), '"arg3"' ] );
-          test.identical( starterOptions.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
+          test.identical( starterOptions.args, [ 'arg1', 'arg2' ] );
         }
         else if( mode === 'spawn' )
         {
           test.identical( op.args, [ testAppPath, 'arg3' ] );
           test.identical( op.args2, [ testAppPath, 'arg3' ] );
-          test.identical( starterOptions.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
+          test.identical( starterOptions.args, [ 'arg1', 'arg2' ] );
         }
         else
         {
           test.identical( op.args, [ 'arg3' ] );
           test.identical( op.args2, [ 'arg3' ] );
-          test.identical( starterOptions.args, [ 'arg3', 'arg1', 'arg2' ] );
+          test.identical( starterOptions.args, [ 'arg1', 'arg2' ] );
         }
 
         test.identical( _.strCount( op.output, `[ 'arg3' ]` ), 1 );
@@ -19876,6 +19884,215 @@ function starterFields( test )
   test.identical( start.predefined.args, [ 'arg1', 'arg2' ] );
   test.identical( start.predefined.ready, ready  );
 }
+
+//
+
+function starterOptionsPollution( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( first );
+  let testAppPath2 = a.program( second );
+  let testAppPath3 = a.program( program );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
+
+  /* */
+
+  function run( mode )
+  {
+    let ready = _.Consequence().take( null );
+
+    let starterOptions =
+    {
+      execPath : mode === 'fork' ? '' : 'node',
+      outputCollecting : 1,
+      args : [ 'arg1', 'arg2' ],
+      mode,
+      outputColoring : { out : 0, err : 0 },
+      env : { 'key1' : 'val', 'PATH' : process.env.PATH },
+    }
+
+    let shell = _.process.starter( starterOptions )
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, default options, first run`;
+
+      return shell
+      ({
+        execPath : testAppPath
+      })
+      .then( ( op ) =>
+      {
+        let exec;
+        if( mode === 'spawn' )
+        exec = `node ${testAppPath} arg1 arg2`;
+        else if( mode === 'fork' )
+        exec = `${testAppPath} arg1 arg2`;
+        else if( mode === 'shell' )
+        exec = `node ${testAppPath} "arg1" "arg2"`;
+        test.identical( op.execPath2, exec );
+
+        test.identical( starterOptions.outputColoring, { out : 0, err : 0 } );
+        test.identical( op.outputColoring, { out : 0, err : 0 } );
+        test.true( starterOptions.outputColoring !== op.outputColoring );
+
+        test.identical( starterOptions.env, { 'key1' : 'val', 'PATH' : process.env.PATH } );
+        test.identical( op.env, { 'key1' : 'val', 'PATH' : process.env.PATH } );
+        test.true( starterOptions.env !== op.env );
+
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, default options, second run`;
+
+      return shell
+      ({
+        execPath : testAppPath2
+      })
+      .then( ( op ) =>
+      {
+        let exec;
+        if( mode === 'spawn' )
+        exec = `node ${testAppPath2} arg1 arg2`;
+        else if( mode === 'fork' )
+        exec = `${testAppPath2} arg1 arg2`;
+        else if( mode === 'shell' )
+        exec = `node ${testAppPath2} "arg1" "arg2"`;
+        test.identical( op.execPath2, exec );
+
+        test.identical( starterOptions.outputColoring, { out : 0, err : 0 } );
+        test.identical( op.outputColoring, { out : 0, err : 0 } );
+        test.true( starterOptions.outputColoring !== op.outputColoring );
+
+        test.identical( starterOptions.env, { 'key1' : 'val', 'PATH' : process.env.PATH } );
+        test.identical( op.env, { 'key1' : 'val', 'PATH' : process.env.PATH } );
+        test.true( starterOptions.env !== op.env );
+
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, with outputColoring map`;
+
+      return shell
+      ({
+        execPath : testAppPath,
+        outputColoring : { out : 0, err : 1 }
+      })
+      .then( ( op ) =>
+      {
+        test.identical( starterOptions.outputColoring, { out : 0, err : 0 } );
+        test.identical( op.outputColoring, { out : 0, err : 1 } );
+        test.true( starterOptions.outputColoring !== op.outputColoring );
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, with env`;
+
+      return shell
+      ({
+        execPath : testAppPath,
+        env : { 'key2' : 'val2', 'PATH' : process.env.PATH }
+      })
+      .then( ( op ) =>
+      {
+        test.identical( starterOptions.env, { 'key1' : 'val', 'PATH' : process.env.PATH } );
+        test.identical( op.env, { 'key2' : 'val2', 'PATH' : process.env.PATH } );
+        test.true( starterOptions.env !== op.env );
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, imitate eslint integration routine`;
+
+      let ready = _.take( null );
+
+      let start = _.process.starter
+      ({
+        execPath : testAppPath3,
+        mode : 'fork',
+        args : [ 'arg1', 'arg2' ],
+        throwingExitCode : 0,
+        outputCollecting : 1,
+      });
+
+      /* */
+
+      ready.then( () =>
+      {
+        test.case = 'first run';
+        return start( testAppPath );
+      })
+      .then( ( op ) =>
+      {
+        test.false( _.strHas( op.execPath2, testAppPath2 ) );
+        test.true( _.strHas( op.execPath2, testAppPath3 ) );
+        test.true( _.strHas( op.execPath2, testAppPath ) );
+        return null;
+      })
+
+      /* */
+
+      ready.then( () =>
+      {
+        test.case = 'second run';
+        return start( testAppPath2 )
+        .then( ( op ) =>
+        {
+          test.false( _.strHas( op.execPath2, testAppPath ) );
+          test.true( _.strHas( op.execPath2, testAppPath3 ) );
+          test.true( _.strHas( op.execPath2, testAppPath2 ) );
+          return null;
+        })
+      })
+
+      /**/
+
+      return ready;
+    })
+
+    return ready;
+  }
+
+  /* - */
+
+  function first()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+
+  function second()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+
+  function program()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+}
+
 
 // --
 // output
@@ -39242,6 +39459,7 @@ const Proto =
     starter,
     starterArgs,
     starterFields,
+    starterOptionsPollution,
 
     // output
 
