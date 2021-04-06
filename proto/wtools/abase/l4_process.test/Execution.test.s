@@ -19825,20 +19825,16 @@ function starterReady( test )
         test.true( o.pnd !== null );
         test.true( o.procedure !== null );
 
-        return null;
+        return 'hello';
       })
 
       o2.ready.then( ( op ) =>
       {
-        test.identical( op.exitCode, 0 );
-        test.identical( op.ended, true );
-
-        test.true( o2.pnd !== null );
-        test.true( o2.procedure !== null );
+        test.identical( op, 'hello' ); /* op = returned value from o.ready */
         return null;
       })
 
-      return _.time.out( context.t1 * 3 );
+      return _.time.out( context.t1 * 5 );
     })
 
     /* */
