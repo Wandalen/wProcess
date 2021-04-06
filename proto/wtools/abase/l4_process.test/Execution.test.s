@@ -19892,7 +19892,7 @@ function starterOptionsPollution( test )
   let context = this;
   let a = context.assetFor( test, false );
   let testAppPath = a.program( testApp );
-  let testAppPath2 = a.program( testApp2 );
+  let testAppPath2 = a.program( second );
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -20019,6 +20019,59 @@ function starterOptionsPollution( test )
       })
     })
 
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, imitate eslint integration routine`;
+
+      let rootPath = a.path.join( __dirname, '../../../..' );
+      let eslint = process.platform === 'win32' ? 'node_modules/eslint/bin/eslint' : 'node_modules/.bin/eslint';
+      eslint = a.path.join( rootPath, eslint );
+      let ready = _.take( null );
+
+      let start = _.process.starter
+      ({
+        execPath : eslint,
+        mode : 'fork',
+        args : [ 'arg1', 'arg2' ],
+        throwingExitCode : 0,
+        outputCollecting : 1,
+      });
+
+      /* */
+
+      ready.then( () =>
+      {
+        test.case = 'eslint 1';
+        return start( testAppPath );
+      })
+      .then( ( op ) =>
+      {
+        test.false( _.strHas( op.execPath2, testAppPath2 ) );
+        test.true( _.strHas( op.execPath2, testAppPath ) );
+        return null;
+      })
+
+      /* */
+
+      ready.then( () =>
+      {
+        test.case = 'eslint 2';
+        return start( testAppPath2 )
+        .then( ( op ) =>
+        {
+          test.false( _.strHas( op.execPath2, testAppPath ) );
+          test.true( _.strHas( op.execPath2, testAppPath2 ) );
+          return null;
+        })
+      })
+
+      /**/
+
+      return ready;
+    })
+
     return ready;
   }
 
@@ -20029,7 +20082,7 @@ function starterOptionsPollution( test )
     console.log( process.argv.slice( 2 ) );
   }
 
-  function testApp2()
+  function second()
   {
     console.log( process.argv.slice( 2 ) );
   }
