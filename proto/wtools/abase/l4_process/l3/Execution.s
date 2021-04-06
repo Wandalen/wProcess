@@ -2563,7 +2563,7 @@ function starter( o0 )
 }
 
 // starter.defaults = Object.create( startMultiple.defaults );
-starter.defaults = _.mapBut( startMultiple.defaults, [ 'procedure' ] );
+starter.defaults = _.mapBut_( startMultiple.defaults, [ 'procedure' ] );
 
 // --
 // children
