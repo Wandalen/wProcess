@@ -37770,6 +37770,185 @@ function execPathOf( test )
 
 //
 
+function execPathOfOptionSync( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( testApp );
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync : 1, pnd, no error';
+
+    let o = { execPath : testAppPath };
+
+    _.process.startNjs( o )
+
+    o.conStart.then( ( op ) =>
+    {
+      let execPath = _.process.execPathOf({ pnd : o.pnd, sync : 1 });
+      test.true( _.strHas( execPath, op.execPath ) );
+
+      return null;
+    })
+
+    return _.Consequence.And( o.conStart, o.conTerminate );
+  })
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync : 0, pnd, no error';
+
+    let o = { execPath : testAppPath };
+
+    _.process.startNjs( o )
+
+    o.conStart.then( ( op ) =>
+    {
+      _.process.execPathOf({ pnd : o.pnd, sync : 0 })
+      .then( ( arg ) =>
+      {
+        test.true( _.strHas( arg, op.execPath ) );
+        return null;
+      })
+
+      return null;
+    })
+
+    return _.Consequence.And( o.conStart, o.conTerminate );
+  })
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync : 1, pid, no error';
+
+    let o = { execPath : testAppPath };
+
+    _.process.startNjs( o )
+
+    o.conStart.then( ( op ) =>
+    {
+      let execPath = _.process.execPathOf({ pid : o.pnd.pid, sync : 1 });
+      test.true( _.strHas( execPath, op.execPath ) );
+
+      return null;
+    })
+
+    return _.Consequence.And( o.conStart, o.conTerminate );
+  })
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync : 0, pid, no error';
+
+    let o = { execPath : testAppPath };
+
+    _.process.startNjs( o )
+
+    o.conStart.then( ( op ) =>
+    {
+      _.process.execPathOf({ pid : o.pnd.pid, sync : 0 })
+      .then( ( arg ) =>
+      {
+        test.true( _.strHas( arg, op.execPath ) );
+        return null;
+      })
+
+      return null;
+    })
+
+    return _.Consequence.And( o.conStart, o.conTerminate );
+  })
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync : 1, wrong pid';
+
+    let returned = test.shouldThrowErrorSync( () => _.process.execPathOf({ pid : 111111, sync : 1 }) );
+
+    test.true( _.errIs( returned ) );
+    test.equivalent( returned.message, 'Target process: "111111" does not exist.' )
+
+    return null;
+  })
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync : 0, wrong pid';
+
+    test.shouldThrowErrorAsync( () => _.process.execPathOf({ pid : 111111, sync : 0 }) )
+    .then( ( err ) =>
+    {
+      test.true( _.errIs( err ) );
+      test.equivalent( err.message, 'Target process: "111111" does not exist.' );
+
+      return null;
+    });
+
+    return null;
+  })
+
+  return a.ready;
+
+  /* */
+
+  function testApp()
+  {
+    setTimeout( () => {}, context.t1 * 5 ) /* 5000 */
+  }
+}
+
+//
+
+function execPathOfOptionThrowing( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync : 1, throwing : 0, wrong pid';
+
+    let returned = _.process.execPathOf({ pid : 111111, sync : 1, throwing : 0 });
+
+    test.identical( returned, null );
+
+    return null;
+  })
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync : 0, throwing : 0, wrong pid';
+
+    return _.process.execPathOf({ pid : 111111, sync : 0, throwing : 0 })
+    .then( ( op ) =>
+    {
+      test.identical( op, null );
+      return null;
+    });
+
+  })
+
+  return a.ready;
+
+}
+
+//
+
 function waitForDeath( test )
 {
   let context = this;
@@ -38981,6 +39160,8 @@ const Proto =
 
     killComplex,
     execPathOf,
+    execPathOfOptionSync,
+    execPathOfOptionThrowing,
     waitForDeath,
 
     // children
