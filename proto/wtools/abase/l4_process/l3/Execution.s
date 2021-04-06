@@ -1499,7 +1499,7 @@ function startSingle_body( o )
 
   function formAfterDeath()
   {
-    let toolsPath = _.path.nativize( _.path.join( __dirname, '../../../../wtools/Tools.s' ) );
+    let toolsPath = _.path.nativize( _.path.join( __dirname, '../../../../node_modules/Tools' ) );
     let excludeOptions =
     {
       ready : null,
