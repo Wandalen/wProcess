@@ -13,8 +13,8 @@ if( typeof module !== 'undefined' )
   require( '../l4_process/module/Process.s' );
 }
 
-let _global = _global_;
-let _ = _global_.wTools;
+const _global = _global_;
+const _ = _global_.wTools;
 let Self = {};
 
 // --
@@ -3140,7 +3140,7 @@ function systemEntryAddOptionForcing( test )
 
 //
 
-var Proto =
+const Proto =
 {
 
   name : 'Tools.l3.process.Io',
@@ -3204,7 +3204,7 @@ _.mapExtend( Self, Proto );
 
 //
 
-Self = wTestSuite( Self );
+Self = wTestSuite( Proto );
 
 if( typeof module !== 'undefined' && !module.parent )
 wTester.test( Self )

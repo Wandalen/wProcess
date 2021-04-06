@@ -1,59 +1,39 @@
 {
-  "name": "wprocess",
-  "version": "0.3.544",
-  "description": "Collection of cross-platform routines to execute system commands, run shell, batches, launch external processes from JavaScript application. Module Process leverages not only outputting data from an application but also inputting, makes application arguments parsing and accounting easier. Use the module to get uniform experience from interaction with an external processes on different platforms and operating systems.",
-  "license": "MIT",
-  "author": "Kostiantyn Wandalen <wanalen@01.school>",
-  "enabled": 1,
-  "contributors": [
-    {
-      "name": "Kostiantyn Wandalen",
-      "email": "wanalen@01.school"
-    },
-    {
-      "name": "Volodymyr M.",
-      "email": "volodymyr.migdal@gmail.com"
-    }
+  "name" : "wprocess",
+  "version" : "0.3.553",
+  "description" : "Collection of cross-platform routines to execute system commands, run shell, batches, launch external processes from JavaScript application. Module Process leverages not only outputting data from an application but also inputting, makes application arguments parsing and accounting easier. Use the module to get uniform experience from interaction with an external processes on different platforms and operating systems.",
+  "license" : "MIT",
+  "author" : "Kostiantyn Wandalen <wanalen@01.school>",
+  "enabled" : 1,
+  "contributors" :
+  [
+    { "name" : "Kostiantyn Wandalen", "email" : "wanalen@01.school" },
+    { "name" : "Volodymyr M.", "email" : "volodymyr.migdal@gmail.com" }
   ],
-  "main": "proto/wtools/abase/l4_process/module/Process.s",
-  "files": [
-    "proto/wtools/abase/l4_process",
-    "proto/wtools/Tools.s",
-    "out"
-  ],
-  "scripts": {
-    "test": "wtest .run 'proto/**' rapidity:-1 verbosity:5 fails:5 s:0",
-    "docgen": "wdocgen proto"
+  "main" : "proto/node_modules/wprocess",
+  "files" : [ "proto/wtools/abase/l4_process", "proto/wtools/Tools.s", "out", "proto/node_modules" ],
+  "scripts" :
+  {
+    "test" : "wtest .run 'proto/**' rapidity:-1 verbosity:5 fails:5 s:0",
+    "docgen" : "wdocgen proto"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Wandalen/wProcess.git"
+  "repository" : { "type" : "git", "url" : "https://github.com/Wandalen/wProcess.git" },
+  "bugs" :
+  {
+    "url" : "https://github.com/Wandalen/wProcess/issues"
   },
-  "bugs": {
-    "url": "https://github.com/Wandalen/wProcess/issues"
+  "dependencies" :
+  {
+    "strip-ansi" : "6.0.0",
+    "wTools" : "delta",
+    "wpathbasic" : "delta",
+    "wblueprint" : "delta",
+    "wgdf" : "delta",
+    "wFiles" : "delta",
+    "wConsequence" : "delta",
+    "wdeasync" : "delta"
   },
-  "dependencies": {
-    "strip-ansi": "6.0.0",
-    "wTools": "gamma",
-    "wpathbasic": "gamma",
-    "wblueprint": "gamma",
-    "wgdf": "gamma",
-    "wFiles": "gamma",
-    "wConsequence": "gamma",
-    "wdeasync": "gamma"
-  },
-  "optionalDependencies": {
-    "w.process.tree.windows": "alpha"
-  },
-  "devDependencies": {
-    "eslint": "7.1.0",
-    "wTesting": "gamma",
-    "wprocess": "file:."
-  },
-  "keywords": [
-    "wTools",
-    "exec file",
-    "shell script",
-    "run program"
-  ]
+  "optionalDependencies" : { "w.process.tree.windows" : "alpha" },
+  "devDependencies" : { "eslint" : "7.1.0", "wTesting" : "delta" },
+  "keywords" : [ "wTools", "exec file", "shell script", "run program" ]
 }

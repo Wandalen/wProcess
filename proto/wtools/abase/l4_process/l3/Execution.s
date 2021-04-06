@@ -3,10 +3,10 @@
 
 'use strict';
 
-let System, ChildProcess, StripAnsi, WindowsProcessTree, Stream;
-let _global = _global_;
-let _ = _global_.wTools;
-let Self = _.process = _.process || Object.create( null );
+let System, ChildProcess, WindowsProcessTree, Stream;
+const _global = _global_;
+const _ = _global_.wTools;
+const Self = _.process = _.process || Object.create( null );
 
 _.assert( !!_realGlobal_ );
 
@@ -127,7 +127,7 @@ function startMinimalHeadCommon( routine, args )
   );
 
   if( o.outputAdditive === null )
-  o.outputAdditive = true;
+  o.outputAdditive = true; /* yyy */
   o.outputAdditive = !!o.outputAdditive;
   _.assert( _.boolLike( o.outputAdditive ) );
 
@@ -421,9 +421,9 @@ function startMinimal_body( o )
     if( !ChildProcess )
     ChildProcess = require( 'child_process' );
 
-    if( o.outputGraying )
-    if( !StripAnsi )
-    StripAnsi = require( 'strip-ansi' );
+    // if( o.outputGraying )
+    // if( !StripAnsi )
+    // StripAnsi = require( 'strip-ansi' );
 
     if( o.outputColoring.err || o.outputColoring.out && typeof module !== 'undefined' )
     try
@@ -744,6 +744,7 @@ function startMinimal_body( o )
 
     if( !o.outputAdditive )
     {
+      debugger;
       if( _decoratedOutOutput )
       o.logger.log( _decoratedOutOutput );
       if( _decoratedErrOutput )
@@ -789,6 +790,7 @@ function startMinimal_body( o )
 
     if( o.outputAdditive && _outAdditive )
     {
+      debugger;
       o.logger.log( _outAdditive );
       _outAdditive = '';
     }
@@ -1184,7 +1186,8 @@ function startMinimal_body( o )
     data = String( data );
 
     if( o.outputGraying )
-    data = StripAnsi( data );
+    data = _.ct.stripAnsi( data );
+    // data = StripAnsi( data );
 
     if( channel === 'err' )
     _errOutput += data;
@@ -1287,6 +1290,7 @@ function startMinimal_body( o )
           _outAdditive += left;
         }
       }
+      /* qqq : for Yevhen : bad : it cant be working */
       if( channel === 'err' )
       o.logger.error( msg );
       else
@@ -1507,7 +1511,7 @@ function startSingle_body( o )
       when : null,
       sessionId : null
     }
-    let locals = { toolsPath, o : _.mapBut( o, excludeOptions ), parentPid : process.pid };
+    let locals = { toolsPath, o : _.mapBut_( null, o, excludeOptions ), parentPid : process.pid };
     let secondaryProcessRoutine = _.program.preform({ routine : afterDeathSecondaryProcess, locals })
     let secondaryFilePath = _.process.tempOpen({ sourceCode : secondaryProcessRoutine.sourceCode });
 
@@ -1629,7 +1633,7 @@ function startSingle_body( o )
 startSingle_body.defaults =
 {
 
-  ... _.mapBut( startMinimal.defaults, [ 'onStart', 'onTerminate', 'onDisconnect' ] ),
+  ... _.mapBut_( null, startMinimal.defaults, [ 'onStart', 'onTerminate', 'onDisconnect' ] ),
 
   when : 'instant',
 
@@ -1969,7 +1973,7 @@ function startMultiple_body( o )
         readyName : 'ready',
         onRun : ( session ) =>
         {
-          _.assertMapHasAll( session, _.process.startSingle.defaults );
+          _.map.assertHasAll( session, _.process.startSingle.defaults );
           _.process.startSingle.body.call( _.process, session );
           if( !o.dry )
           if( o.streamOut || o.streamErr )
@@ -2211,7 +2215,8 @@ function startMultiple_body( o )
     if( _.bufferNodeIs( data ) )
     data = data.toString( 'utf8' );
     if( o.outputGraying )
-    data = StripAnsi( data );
+    data = _.ct.stripAnsi( data );
+    // data = StripAnsi( data );
     if( o.outputCollecting )
     o.output += data;
   }
@@ -2223,7 +2228,7 @@ function startMultiple_body( o )
 startMultiple_body.defaults =
 {
 
-  ... _.mapBut( startSingle.defaults, [ 'sessionId' ] ),
+  ... _.mapBut_( null, startSingle.defaults, [ 'sessionId' ] ),
 
   concurrent : 0,
 
@@ -2518,7 +2523,7 @@ function starter( o0 )
     if( _.strIs( options ) || _.arrayIs( options ) )
     options = { execPath : options }
     options = options || Object.create( null );
-    _.assertMapHasOnly( options, starter.defaults );
+    _.map.assertHasOnly( options, starter.defaults );
     return options;
   }
 
@@ -2526,7 +2531,7 @@ function starter( o0 )
   {
     if( _.strIs( src ) || _.arrayIs( src ) )
     src = { execPath : src }
-    _.assertMapHasOnly( src, starter.defaults );
+    _.map.assertHasOnly( src, starter.defaults );
 
     if( src.execPath !== null && src.execPath !== undefined && dst.execPath !== null && dst.execPath !== undefined )
     {
@@ -2792,7 +2797,7 @@ function signal_body( o )
     // if( p )
     {
       let processInfo = processInfoGet( p );
-      _._errFields( err, { processInfo : processInfo } )
+      _.error.concealedSet( err, { processInfo : processInfo } )
       _.err( err, processInfo );
       // console.log( 'handleError2 :', processInfo );
     }
@@ -2879,7 +2884,7 @@ function kill_body( o )
 
 kill_body.defaults =
 {
-  ... _.mapBut( _signal.defaults, [ 'signal', 'timeOut' ] ),
+  ... _.mapBut_( null, _signal.defaults, [ 'signal', 'timeOut' ] ),
 }
 
 let kill = _.routine.uniteCloning_( signal_head, kill_body );
@@ -2901,7 +2906,7 @@ function terminate_body( o )
 
 terminate_body.defaults =
 {
-  ... _.mapBut( _signal.defaults, [ 'signal' ] ),
+  ... _.mapBut_( null, _signal.defaults, [ 'signal' ] ),
 }
 
 let terminate = _.routine.uniteCloning_( signal_head, terminate_body );

@@ -1,6 +1,6 @@
 {
   "name" : "wprocess",
-  "version" : "0.3.544",
+  "version" : "0.3.553",
   "description" : "Collection of cross-platform routines to execute system commands, run shell, batches, launch external processes from JavaScript application. Module Process leverages not only outputting data from an application but also inputting, makes application arguments parsing and accounting easier. Use the module to get uniform experience from interaction with an external processes on different platforms and operating systems.",
   "license" : "MIT",
   "author" : "Kostiantyn Wandalen <wanalen@01.school>",
@@ -10,8 +10,8 @@
     { "name" : "Kostiantyn Wandalen", "email" : "wanalen@01.school" },
     { "name" : "Volodymyr M.", "email" : "volodymyr.migdal@gmail.com" }
   ],
-  "main" : "proto/wtools/abase/l4_process/module/Process.s",
-  "files" : [ "proto/wtools/abase/l4_process", "proto/wtools/Tools.s", "out" ],
+  "main" : "proto/node_modules/wprocess",
+  "files" : [ "proto/wtools/abase/l4_process", "proto/wtools/Tools.s", "out", "proto/node_modules" ],
   "scripts" :
   {
     "test" : "wtest .run 'proto/**' rapidity:-1 verbosity:5 fails:5 s:0",
@@ -34,6 +34,6 @@
     "strip-ansi" : "6.0.0"
   },
   "optionalDependencies" : { "w.process.tree.windows" : "alpha" },
-  "devDependencies" : { "wTesting" : "", "wprocess" : "file:.", "eslint" : "7.1.0" },
+  "devDependencies" : { "wTesting" : "", "eslint" : "7.1.0" },
   "keywords" : [ "wTools", "exec file", "shell script", "run program" ]
 }

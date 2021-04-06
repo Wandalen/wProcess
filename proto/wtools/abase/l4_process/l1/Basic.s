@@ -4,9 +4,9 @@
 'use strict';
 
 let System, ChildProcess, StripAnsi, WindowsKill, WindowsProcessTree;
-let _global = _global_;
-let _ = _global_.wTools;
-let Self = _.process = _.process || Object.create( null );
+const _global = _global_;
+const _ = _global_.wTools;
+const Self = _.process = _.process || Object.create( null );
 
 _.assert( !!_realGlobal_ );
 
@@ -227,7 +227,7 @@ function _exitHandlerRepair()
         let err = _._err
         ({
           args : [ `Exit signal : ${signal} ( 128+${signalCode} )` ],
-          fields : { exitSignal : signal },
+          concealed : { exitSignal : signal },
           reason : 'exit signal',
         });
         _.process.exitReason( err );

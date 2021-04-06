@@ -3,9 +3,9 @@
 
 'use strict';
 
-let _global = _global_;
-let _ = _global_.wTools;
-let Self = _.process = _.process || Object.create( null );
+const _global = _global_;
+const _ = _global_.wTools;
+const Self = _.process = _.process || Object.create( null );
 
 _.assert( !!_realGlobal_ );
 
@@ -206,6 +206,7 @@ _inputInSamFormatBrowser.defaults = Object.create( _inputInSamFormatDefaults.def
  * @namespace Tools.process
  */
 
+/* xxx : qqq : deprecate? */
 function inputReadTo( o )
 {
 
@@ -256,7 +257,7 @@ function inputReadTo( o )
 
   if( o.only )
   {
-    let but = Object.keys( _.mapBut( o.propertiesMap, o.namesMap ) );
+    let but = Object.keys( _.mapBut_( null, o.propertiesMap, o.namesMap ) );
     if( but.length )
     {
       throw _.err( `Unknown application arguments : ${but.join( ', ' )}` );
