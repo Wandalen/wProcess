@@ -20025,14 +20025,10 @@ function starterOptionsPollution( test )
     {
       test.case = `mode : ${mode}, imitate eslint integration routine`;
 
-      let rootPath = a.path.join( __dirname, '../../../..' );
-      let eslint = process.platform === 'win32' ? 'node_modules/eslint/bin/eslint' : 'node_modules/.bin/eslint';
-      eslint = a.path.join( rootPath, eslint );
       let ready = _.take( null );
 
       let start = _.process.starter
       ({
-        execPath : eslint,
         mode : 'fork',
         args : [ 'arg1', 'arg2' ],
         throwingExitCode : 0,
@@ -20043,7 +20039,7 @@ function starterOptionsPollution( test )
 
       ready.then( () =>
       {
-        test.case = 'eslint 1';
+        test.case = 'first run';
         return start( testAppPath );
       })
       .then( ( op ) =>
@@ -20057,7 +20053,7 @@ function starterOptionsPollution( test )
 
       ready.then( () =>
       {
-        test.case = 'eslint 2';
+        test.case = 'second run';
         return start( testAppPath2 )
         .then( ( op ) =>
         {
