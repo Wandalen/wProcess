@@ -2,10 +2,13 @@ format: outwillfile-2.0
 root:
   - wProcess.out
 consistency:
-  ../.ex.will.yml: &ref_0
+  wProcess.out.will.yml: &ref_0
+    hash: 1636ae2c5f1d66d32a43910eb1c2a9c1
+    size: 42265
+  ../.ex.will.yml: &ref_1
     hash: ad280127a9f801a3bf1cdd9b30cb663b
     size: 2161
-  ../.im.will.yml: &ref_1
+  ../.im.will.yml: &ref_2
     hash: 30a81feb3065ecf3e2edd09e0b19b513
     size: 5522
 module:
@@ -22,22 +25,22 @@ module:
         an external processes on different platforms and operating systems.
       enabled: 1
       version: 0.4.0
-      interpreters: &ref_2
+      interpreters:
         - njs >= 10.0.0
         - chrome >= 60.0.0
         - firefox >= 60.0.0
-      keywords: &ref_3
+      keywords:
         - wTools
         - exec file
         - shell script
         - run program
       license: MIT
       author: Kostiantyn Wandalen <wanalen@01.school>
-      contributors: &ref_4
+      contributors:
         - Kostiantyn Wandalen <wanalen@01.school>
         - Volodymyr M. <volodymyr.migdal@gmail.com>
       npm.name: wprocess
-      npm.scripts: &ref_5
+      npm.scripts:
         test: wtest .run proto/**
         docgen: wdocgen .build proto
     path:
@@ -168,9 +171,9 @@ module:
           - ../proto
           - ../proto/Integration.test.ss
           - ../proto/node_modules
+          - ../proto/node_modules/Tools
           - ../proto/node_modules/wprocess
           - ../proto/wtools
-          - ../proto/wtools/Tools.s
           - ../proto/wtools/abase
           - ../proto/wtools/abase/l4_process
           - ../proto/wtools/abase/l4_process/include
@@ -763,6 +766,24 @@ module:
           content: prime
         inherit:
           - files.transpile
+      exported.proto.export:
+        opts:
+          filePath: 'reflector::exported.proto.export'
+        criterion:
+          generated: 1
+          content: proto
+          export: 1
+        inherit:
+          - files.reflect
+      exported.files.proto.export:
+        opts:
+          filePath: 'reflector::exported.files.proto.export'
+        criterion:
+          generated: 1
+          content: proto
+          export: 1
+        inherit:
+          - files.reflect
     build:
       proto.export:
         steps:
@@ -851,8 +872,9 @@ module:
           content: proto
           export: 1
     consistency:
-      ../.ex.will.yml: *ref_0
-      ../.im.will.yml: *ref_1
+      wProcess.out.will.yml: *ref_0
+      ../.ex.will.yml: *ref_1
+      ../.im.will.yml: *ref_2
   ../:
     about:
       name: wProcess
@@ -866,13 +888,24 @@ module:
         an external processes on different platforms and operating systems.
       enabled: 1
       version: 0.4.0
-      interpreters: *ref_2
-      keywords: *ref_3
+      interpreters:
+        - njs >= 10.0.0
+        - chrome >= 60.0.0
+        - firefox >= 60.0.0
+      keywords:
+        - wTools
+        - exec file
+        - shell script
+        - run program
       license: MIT
       author: Kostiantyn Wandalen <wanalen@01.school>
-      contributors: *ref_4
+      contributors:
+        - Kostiantyn Wandalen <wanalen@01.school>
+        - Volodymyr M. <volodymyr.migdal@gmail.com>
       npm.name: wprocess
-      npm.scripts: *ref_5
+      npm.scripts:
+        test: wtest .run proto/**
+        docgen: wdocgen .build proto
     path:
       module.willfiles:
         criterion:
@@ -1580,3 +1613,6 @@ module:
       ../.im.will.yml:
         hash: 30a81feb3065ecf3e2edd09e0b19b513
         size: 5522
+      wProcess.out.will.yml:
+        hash: 1636ae2c5f1d66d32a43910eb1c2a9c1
+        size: 42265
