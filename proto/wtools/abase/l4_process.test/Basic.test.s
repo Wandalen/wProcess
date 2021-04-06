@@ -17,7 +17,6 @@ if( typeof module !== 'undefined' )
 
 const _global = _global_;
 const _ = _global_.wTools;
-let Self = {};
 
 // --
 // context
@@ -566,11 +565,9 @@ const Proto =
 
 }
 
-_.mapExtend( Self, Proto );
-
 //
 
-Self = wTestSuite( Proto );
+const Self = wTestSuite( Proto );
 if( typeof module !== 'undefined' && !module.parent )
 wTester.test( Self )
 
