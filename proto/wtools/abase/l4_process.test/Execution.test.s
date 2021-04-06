@@ -19891,8 +19891,9 @@ function starterOptionsPollution( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
-  let testAppPath = a.program( testApp );
+  let testAppPath = a.program( first );
   let testAppPath2 = a.program( second );
+  let testAppPath3 = a.program( program );
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
   return a.ready;
@@ -20029,8 +20030,8 @@ function starterOptionsPollution( test )
 
       let start = _.process.starter
       ({
-        execPath : 'node',
-        mode : 'shell',
+        execPath : testAppPath3,
+        mode : 'fork',
         args : [ 'arg1', 'arg2' ],
         throwingExitCode : 0,
         outputCollecting : 1,
@@ -20046,6 +20047,7 @@ function starterOptionsPollution( test )
       .then( ( op ) =>
       {
         test.false( _.strHas( op.execPath2, testAppPath2 ) );
+        test.true( _.strHas( op.execPath2, testAppPath3 ) );
         test.true( _.strHas( op.execPath2, testAppPath ) );
         return null;
       })
@@ -20059,6 +20061,7 @@ function starterOptionsPollution( test )
         .then( ( op ) =>
         {
           test.false( _.strHas( op.execPath2, testAppPath ) );
+          test.true( _.strHas( op.execPath2, testAppPath3 ) );
           test.true( _.strHas( op.execPath2, testAppPath2 ) );
           return null;
         })
@@ -20074,12 +20077,17 @@ function starterOptionsPollution( test )
 
   /* - */
 
-  function testApp()
+  function first()
   {
     console.log( process.argv.slice( 2 ) );
   }
 
   function second()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+
+  function program()
   {
     console.log( process.argv.slice( 2 ) );
   }
