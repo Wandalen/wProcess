@@ -3,14 +3,14 @@ root:
   - wProcess.out
 consistency:
   wProcess.out.will.yml: &ref_0
-    hash: 1759f227c6b180ec7f1d50972f8b1037
+    hash: 1636ae2c5f1d66d32a43910eb1c2a9c1
     size: 42265
   ../.ex.will.yml: &ref_1
     hash: ad280127a9f801a3bf1cdd9b30cb663b
     size: 2161
   ../.im.will.yml: &ref_2
-    hash: 90a02518e5bf5aa3af38608602354854
-    size: 5564
+    hash: 30a81feb3065ecf3e2edd09e0b19b513
+    size: 5522
 module:
   wProcess.out:
     about:
@@ -171,9 +171,9 @@ module:
           - ../proto
           - ../proto/Integration.test.ss
           - ../proto/node_modules
+          - ../proto/node_modules/Tools
           - ../proto/node_modules/wprocess
           - ../proto/wtools
-          - ../proto/wtools/Tools.s
           - ../proto/wtools/abase
           - ../proto/wtools/abase/l4_process
           - ../proto/wtools/abase/l4_process/include
@@ -1611,6 +1611,6 @@ module:
         hash: ad280127a9f801a3bf1cdd9b30cb663b
         size: 2161
       ../.im.will.yml:
-        hash: 90a02518e5bf5aa3af38608602354854
-        size: 5564
+        hash: 30a81feb3065ecf3e2edd09e0b19b513
+        size: 5522
       wProcess.out.will.yml: *ref_0
