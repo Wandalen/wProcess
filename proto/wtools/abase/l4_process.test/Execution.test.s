@@ -39598,7 +39598,6 @@ const Proto =
     startSingleProcedureStack,
     startAllProcedureSourcePath,
     starterProcedureSourcePath, /* with routine::starter */
-    starterProcedureDifferent, /* with routine::starter */
     startMultipleProcedureStack,
     startMinimalOnTerminateSeveralCallbacksChronology,
     startMinimalChronology,
