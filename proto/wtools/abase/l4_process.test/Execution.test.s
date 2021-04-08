@@ -9527,7 +9527,7 @@ function startMinimalOnTerminateSeveralCallbacksChronology( test )
       test.case = `mode : ${mode}, parent disconnects detached child process and exits, child contiues to work`
       let o =
       {
-        execPath : mode === 'fork' ? 'program1.js' : 'node program1.js',
+        execPath : mode === 'fork' ? 'program1' : 'node program1',
         mode,
         stdio : 'pipe',
         outputPiping : 1,
