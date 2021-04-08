@@ -8858,7 +8858,7 @@ startSingleProcedureStack.description =
 
 //
 
-function startSingleProcedureSourcePath( test )
+function startAllProcedureSourcePath( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -8883,7 +8883,7 @@ function startSingleProcedureSourcePath( test )
 
     ready.then( function case1()
     {
-      test.case = `sync:${sync} deasync:${deasync} mode:${mode}`;
+      test.case = `startSingle, sync:${sync} deasync:${deasync} mode:${mode}`;
       let o =
       {
         execPath : mode === `fork` ? `${programPath} id:1` : `node ${programPath} id:1`,
@@ -8915,6 +8915,72 @@ function startSingleProcedureSourcePath( test )
 
     /* */
 
+    ready.then( function case1()
+    {
+      test.case = `startMinimal, sync:${sync} deasync:${deasync} mode:${mode}`;
+      let o =
+      {
+        execPath : mode === `fork` ? `${programPath} id:1` : `node ${programPath} id:1`,
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+        mode,
+        sync,
+        deasync,
+      }
+
+      _.process.startMinimal( o );
+
+      test.identical( _.strCount( o.procedure._sourcePath, 'Execution.test.s' ), 1 );
+      test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.procedure._sourcePath, 'Execution.test.s' ), 1 );
+        test.identical( _.strCount( op.procedure._sourcePath, 'case1' ), 1 );
+        console.log( '_stack', op.procedure._stack );
+        console.log( '_sourcePath', op.procedure._sourcePath );
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `startMultiple, sync:${sync} deasync:${deasync} mode:${mode}`;
+      let o =
+      {
+        execPath : mode === `fork` ? `${programPath} id:1` : `node ${programPath} id:1`,
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+        mode,
+        sync,
+        deasync,
+      }
+
+      _.process.startMultiple( o );
+
+      test.identical( _.strCount( o.procedure._sourcePath, 'Execution.test.s' ), 1 );
+      test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+        test.identical( _.strCount( op.procedure._sourcePath, 'Execution.test.s' ), 1 );
+        test.identical( _.strCount( op.procedure._sourcePath, 'case1' ), 1 );
+        console.log( '_stack', op.procedure._stack );
+        console.log( '_sourcePath', op.procedure._sourcePath );
+        return null;
+      })
+
+      return o.ready;
+    })
+
     return ready;
   }
 
@@ -8929,7 +8995,7 @@ function startSingleProcedureSourcePath( test )
 
 //
 
-function startProcedureSourcePath( test )
+function starterProcedureSourcePath( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -9005,7 +9071,7 @@ function startProcedureSourcePath( test )
 
 //
 
-function startProcedureDifferent( test )
+function starterProcedureDifferent( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -39635,9 +39701,9 @@ const Proto =
     startProcedureTrivial, /* with routine::starter */
     startProcedureExists, /* with routine::starter */
     startSingleProcedureStack,
-    startSingleProcedureSourcePath,
-    startProcedureSourcePath, /* with routine::starter */
-    startProcedureDifferent, /* with routine::starter */
+    startAllProcedureSourcePath,
+    starterProcedureSourcePath, /* with routine::starter */
+    starterProcedureDifferent, /* with routine::starter */
     startMultipleProcedureStack,
     startMinimalOnTerminateSeveralCallbacksChronology,
     startMinimalChronology,
