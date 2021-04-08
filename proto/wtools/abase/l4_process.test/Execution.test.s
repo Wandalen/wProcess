@@ -5474,7 +5474,7 @@ function startMinimalExecPathSeveralCommands( test )
       test.case = `mode : ${mode}, quoted`;
       let o =
       {
-        execPath : mode === 'fork' ? '"app.js arg1 && app.js arg2"' : '"node app.js arg1 && node app.js arg2"',
+        execPath : mode === 'fork' ? '"app arg1 && app arg2"' : '"node app arg1 && node app arg2"',
         mode,
         currentPath : a.routinePath,
         outputPiping : 1,
@@ -5492,7 +5492,7 @@ function startMinimalExecPathSeveralCommands( test )
       test.case = `mode : ${mode}, no quotes`;
       let o =
       {
-        execPath : mode === 'fork' ? 'app.js arg1 && app.js arg2' : 'node app.js arg1 && node app.js arg2',
+        execPath : mode === 'fork' ? 'app arg1 && app arg2' : 'node app arg1 && node app arg2',
         mode,
         currentPath : a.routinePath,
         outputPiping : 1,
@@ -5509,11 +5509,11 @@ function startMinimalExecPathSeveralCommands( test )
         }
         else if( mode === 'spawn' )
         {
-          test.identical( _.strCount( op.output, `[ 'arg1', '&&', 'node', 'app.js', 'arg2' ]` ), 1 );
+          test.identical( _.strCount( op.output, `[ 'arg1', '&&', 'node', 'app', 'arg2' ]` ), 1 );
         }
         else
         {
-          test.identical( _.strCount( op.output, `[ 'arg1', '&&', 'app.js', 'arg2' ]` ), 1 );
+          test.identical( _.strCount( op.output, `[ 'arg1', '&&', 'app', 'arg2' ]` ), 1 );
         }
         return null;
       })
@@ -10504,7 +10504,7 @@ function startMinimalOptionTimeOut( test )
 
       let o =
       {
-        execPath : mode === 'fork' ? 'program1.js' : `node program1.js`,
+        execPath : mode === 'fork' ? 'program1' : `node program1`,
         mode,
         currentPath : a.routinePath,
         timeOut : context.t1*3,
@@ -10540,7 +10540,7 @@ function startMinimalOptionTimeOut( test )
 
       let o =
       {
-        execPath : mode === 'fork' ? 'program2.js' : `node program2.js`,
+        execPath : mode === 'fork' ? 'program2' : `node program2`,
         mode,
         currentPath : a.routinePath,
         timeOut : context.t1*3,
@@ -10584,8 +10584,8 @@ function startMinimalOptionTimeOut( test )
 
       let o =
       {
-        execPath : mode === 'fork' ? 'program3.js' : `node program3.js`,
-        args : 'program1.js',
+        execPath : mode === 'fork' ? 'program3' : `node program3`,
+        args : 'program1',
         mode,
         currentPath : a.routinePath,
         timeOut : context.t1*3,
@@ -10624,8 +10624,8 @@ function startMinimalOptionTimeOut( test )
 
       let o =
       {
-        execPath : mode === 'fork' ? 'program4.js' : `node program4.js`,
-        args : 'program2.js',
+        execPath : mode === 'fork' ? 'program4' : `node program4`,
+        args : 'program2',
         mode,
         currentPath : a.routinePath,
         timeOut : context.t1*3,
