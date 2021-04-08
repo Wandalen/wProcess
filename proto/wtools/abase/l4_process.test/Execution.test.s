@@ -8905,8 +8905,6 @@ function startAllProcedureSourcePath( test )
         test.identical( op.ended, true );
         test.identical( _.strCount( op.procedure._sourcePath, 'Execution.test.s' ), 1 );
         test.identical( _.strCount( op.procedure._sourcePath, 'case1' ), 1 );
-        console.log( '_stack', op.procedure._stack );
-        console.log( '_sourcePath', op.procedure._sourcePath );
         return null;
       })
 
@@ -8939,8 +8937,6 @@ function startAllProcedureSourcePath( test )
         test.identical( op.ended, true );
         test.identical( _.strCount( op.procedure._sourcePath, 'Execution.test.s' ), 1 );
         test.identical( _.strCount( op.procedure._sourcePath, 'case1' ), 1 );
-        console.log( '_stack', op.procedure._stack );
-        console.log( '_sourcePath', op.procedure._sourcePath );
         return null;
       })
 
@@ -8973,8 +8969,6 @@ function startAllProcedureSourcePath( test )
         test.identical( op.ended, true );
         test.identical( _.strCount( op.procedure._sourcePath, 'Execution.test.s' ), 1 );
         test.identical( _.strCount( op.procedure._sourcePath, 'case1' ), 1 );
-        console.log( '_stack', op.procedure._stack );
-        console.log( '_sourcePath', op.procedure._sourcePath );
         return null;
       })
 
@@ -9047,8 +9041,6 @@ function starterProcedureSourcePath( test )
         test.identical( op.ended, true );
         test.identical( _.strCount( op.procedure._sourcePath, 'Execution.test.s' ), 1 );
         test.identical( _.strCount( op.procedure._sourcePath, 'case1' ), 1 );
-        console.log( '_stack', op.procedure._stack );
-        console.log( '_sourcePath', op.procedure._sourcePath );
         return null;
       })
 
