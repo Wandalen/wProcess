@@ -786,7 +786,8 @@ let Extension =
 
 _.mapExtend( Self, Extension );
 _.mapSupplement( Self._ehandler.events, Events );
-// _.assert( !_.process.start );
+// _.assert( _.routineIs( _.process.start ) );
+_.assert( !_.process.start );
 _.process._Setup1();
 
 // --
