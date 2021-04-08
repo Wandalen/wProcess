@@ -1532,7 +1532,7 @@ function startSingle_body( o )
 
   function afterDeathSecondaryProcess()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
     // let ipc = require( ipcPath );
@@ -1723,7 +1723,7 @@ function startMultiple_head( routine, args )
  *
  * @example //short way, command and arguments in one string
  *
- * let _ = require( 'wTools' )
+ * const _ = require( 'wTools' )
  * _.include( 'wProcessBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
@@ -1738,7 +1738,7 @@ function startMultiple_head( routine, args )
  *
  * @example //command and arguments as options
  *
- * let _ = require( 'wTools' )
+ * const _ = require( 'wTools' )
  * _.include( 'wProcessBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
@@ -2266,7 +2266,7 @@ defaults.mode = 'spawn';
  *
  * @example
  *
- * let _ = require( 'wTools' )
+ * const _ = require( 'wTools' )
  * _.include( 'wProcessBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
@@ -2358,7 +2358,7 @@ let startNjs = _.routine.uniteCloning_( startMultiple_head, startNjs_body );
  *
  * @example
  *
- * let _ = require( 'wTools' )
+ * const _ = require( 'wTools' )
  * _.include( 'wProcessBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
@@ -2399,7 +2399,7 @@ defaults.mode = 'fork';
  *
  * @example //single command execution
  *
- * let _ = require( 'wTools' )
+ * const _ = require( 'wTools' )
  * _.include( 'wProcessBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
@@ -2416,7 +2416,7 @@ defaults.mode = 'fork';
  *
  * @example //multiple commands execution with same args
  *
- * let _ = require( 'wTools' )
+ * const _ = require( 'wTools' )
  * _.include( 'wProcessBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
@@ -2435,7 +2435,7 @@ defaults.mode = 'fork';
  * //multiple commands execution with same args, using sinle consequence
  * //second command will be executed when first is finished
  *
- * let _ = require( 'wTools' )
+ * const _ = require( 'wTools' )
  * _.include( 'wProcessBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
@@ -3399,7 +3399,7 @@ function _startTree( o )
 
   function program()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -3438,7 +3438,7 @@ function _startTree( o )
 
   function child()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 

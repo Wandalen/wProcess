@@ -7,7 +7,7 @@ let Stream;
 
 if( typeof module !== 'undefined' )
 {
-  let _ = require( '../../../node_modules/Tools' );
+  const _ = require( '../../../node_modules/Tools' );
 
   _.include( 'wTesting' );
   _.include( 'wFiles' );
@@ -621,7 +621,7 @@ ${programPath}:end
   function program1()
   {
     console.log( `${__filename}:begin` );
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     let process = _global_.process;
 
     _.include( 'wProcess' );
@@ -1474,7 +1474,7 @@ function startMinimalErrorHandling( test )
 
   function program2()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
     _.include( 'wProcess' );
 
@@ -1610,7 +1610,7 @@ function startMinimalSync( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     let process = _global_.process;
 
     _.include( 'wProcess' );
@@ -1636,7 +1636,7 @@ function startMinimalSync( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     let process = _global_.process;
 
     _.include( 'wProcess' );
@@ -1931,7 +1931,7 @@ function startSingleSyncDeasync( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     let process = _global_.process;
 
     _.include( 'wProcess' );
@@ -2309,7 +2309,7 @@ function startMinimalWithoutExecPath( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     var ended = 0;
     var fs = require( 'fs' );
     var path = require( 'path' );
@@ -2979,7 +2979,7 @@ function startMinimalArgumentsParsing( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
@@ -3573,7 +3573,7 @@ function startMinimalArgumentsParsingNonTrivial( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
@@ -3997,7 +3997,7 @@ function startMinimalArgumentsNestedQuotes( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
@@ -5440,7 +5440,7 @@ function startMinimalExecPathQuotesClosing( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
@@ -6855,7 +6855,7 @@ function startMinimalImportantExecPathPassingThrough( test )
 
   function testAppParent()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
     _.include( 'wProcess' );
 
@@ -7626,7 +7626,7 @@ function startMinimalDifferentTypesOfPaths( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     console.log( _.path.normalize( __filename ) );
   }
 }
@@ -7822,7 +7822,7 @@ function startNjsPassingThroughExecPathWithSpace( test )
 
   function testAppParent()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
     _.include( 'wProcess' );
 
@@ -8045,7 +8045,7 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
 
   function testAppParent()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
     _.include( 'wProcess' );
 
@@ -8434,7 +8434,7 @@ function startMinimalPassingThroughExecPathWithSpace( test )
 
   function testAppParent()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
     _.include( 'wProcess' );
 
@@ -8838,7 +8838,7 @@ function startSingleProcedureStack( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     let args = _.process.input();
     let data = { time : _.time.now(), id : args.map.id };
@@ -9287,7 +9287,7 @@ function startMultipleProcedureStack( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     let args = _.process.input();
     let data = { time : _.time.now(), id : args.map.id };
@@ -9959,7 +9959,7 @@ function startSingleReadyDelay( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     let args = _.process.input();
     let data = { time : _.time.now(), id : args.map.id };
@@ -10107,7 +10107,7 @@ function startMultipleReadyDelay( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
     let args = _.process.input();
@@ -10191,7 +10191,7 @@ function startMinimalOptionWhenDelay( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     let data = { time : _.time.now() };
     console.log( JSON.stringify( data ) );
   }
@@ -10265,7 +10265,7 @@ function startMinimalOptionWhenTime( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     let data = { time : _.time.now() };
     console.log( JSON.stringify( data ) );
@@ -10493,7 +10493,7 @@ function startMinimalOptionTimeOut( test )
 
   function program3()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
     _.include( 'wProcess' );
 
@@ -10531,7 +10531,7 @@ function startMinimalOptionTimeOut( test )
 
   function program4()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
     _.include( 'wProcess' );
 
@@ -10661,7 +10661,7 @@ function startSingleAfterDeath( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wProcess' );
     _.include( 'wFiles' );
@@ -10692,7 +10692,7 @@ function startSingleAfterDeath( test )
 
   function program2()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wProcess' );
     _.include( 'wFiles' );
@@ -10877,7 +10877,7 @@ function startSingleAfterDeathTerminatingMain( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wProcess' );
     _.include( 'wFiles' );
@@ -10908,7 +10908,7 @@ function startSingleAfterDeathTerminatingMain( test )
 
   function program2()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wProcess' );
     _.include( 'wFiles' );
@@ -11020,7 +11020,7 @@ function startSingleAfterDeathOutput( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -11048,7 +11048,7 @@ function startSingleAfterDeathOutput( test )
 
   function program2()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -11135,7 +11135,7 @@ function startMinimalDetachingResourceReady( test )
 
   function testAppChild()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wProcess' );
     _.include( 'wFiles' );
@@ -11383,7 +11383,7 @@ function startMinimalDetachingNoTerminationBegin( test )
 
   function testAppParent()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -11408,7 +11408,7 @@ function startMinimalDetachingNoTerminationBegin( test )
 
   function testAppChild()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -11557,7 +11557,7 @@ function startMinimalDetachedOutputStdioIgnore( test )
 
   function testAppParent()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -11581,7 +11581,7 @@ function startMinimalDetachedOutputStdioIgnore( test )
 
   function testAppChild()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -11656,7 +11656,7 @@ function startMinimalDetachedOutputStdioPipe( test )
 
   function testAppParent()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -11680,7 +11680,7 @@ function startMinimalDetachedOutputStdioPipe( test )
 
   function testAppChild()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -11899,7 +11899,7 @@ function startMinimalDetachedOutputStdioInherit( test )
 
   function testAppChild()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -12037,7 +12037,7 @@ function startMinimalDetachingIpc( test )
 
   function testAppChild()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -12122,7 +12122,7 @@ function startMinimalDetachingTrivial( test )
           2021-03-03T19:29:14.0759680Z       Running TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachingTrivial ..
           2021-03-03T19:29:14.1596220Z  1 : function testAppParent()
           2021-03-03T19:29:14.1596850Z  2 :   {
-          2021-03-03T19:29:14.1597290Z  3 :     let _ = require( toolsPath );
+          2021-03-03T19:29:14.1597290Z  3 :     const _ = require( toolsPath );
           2021-03-03T19:29:14.1598570Z  4 :     _.include( 'wProcess' );
           2021-03-03T19:29:14.1599360Z  5 :     _.include( 'wFiles' );
           2021-03-03T19:29:14.1599730Z  6 :     let o =
@@ -12163,7 +12163,7 @@ function startMinimalDetachingTrivial( test )
           2021-03-03T19:29:14.1620230Z 41 :
           2021-03-03T19:29:14.1637380Z  1 : function testAppChild()
           2021-03-03T19:29:14.1637910Z  2 :   {
-          2021-03-03T19:29:14.1638320Z  3 :     let _ = require( toolsPath );
+          2021-03-03T19:29:14.1638320Z  3 :     const _ = require( toolsPath );
           2021-03-03T19:29:14.1640090Z  4 :     _.include( 'wProcess' );
           2021-03-03T19:29:14.1641360Z  5 :     _.include( 'wFiles' );
           2021-03-03T19:29:14.1641890Z  6 :
@@ -12295,7 +12295,7 @@ function startMinimalDetachingTrivial( test )
 
   function testAppParent()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
     let o =
@@ -12325,7 +12325,7 @@ function startMinimalDetachingTrivial( test )
 
   function testAppChild()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -12481,7 +12481,7 @@ function startMinimalDetachingChildExitsAfterParent( test )
 
   function testAppParent()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -12504,7 +12504,7 @@ function startMinimalDetachingChildExitsAfterParent( test )
 
   function testAppChild()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -12678,7 +12678,7 @@ function startMinimalDetachingChildExitsBeforeParent( test )
 
   function testAppParent()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -12709,7 +12709,7 @@ function startMinimalDetachingChildExitsBeforeParent( test )
 
   function testAppChild()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -12837,7 +12837,7 @@ function startMinimalDetachingDisconnectedEarly( test )
   {
     console.log( 'program1:begin' );
     setTimeout( () => { console.log( 'program1:end' ) }, context.t1 * 2 ); /* 2000 */
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
   }
@@ -12945,7 +12945,7 @@ function startMinimalDetachingDisconnectedLate( test )
           2021-03-03T18:26:52.5909990Z  2 :   {
           2021-03-03T18:26:52.5911370Z  3 :     console.log( 'program1:begin' );
           2021-03-03T18:26:52.5912570Z  4 :     setTimeout( () => { console.log( 'program1:end' ) }, context.t1 * 2 ); / 2000 /
-          2021-03-03T18:26:52.5913550Z  5 :     let _ = require( toolsPath );
+          2021-03-03T18:26:52.5913550Z  5 :     const _ = require( toolsPath );
           2021-03-03T18:26:52.5914470Z  6 :     _.include( 'wProcess' );
           2021-03-03T18:26:52.5915580Z  7 :     _.include( 'wFiles' );
           2021-03-03T18:26:52.5916040Z  8 :   }
@@ -12996,7 +12996,7 @@ function startMinimalDetachingDisconnectedLate( test )
   {
     console.log( 'program1:begin' );
     setTimeout( () => { console.log( 'program1:end' ) }, context.t1 * 2 ); /* 2000 */
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
   }
@@ -13020,7 +13020,7 @@ ProcessWatched should not throw any error.
   2021-03-03T18:27:11.8377020Z       Running TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachingChildExistsBeforeParentWaitForTermination ..
   2021-03-03T18:27:11.8937490Z  1 : function testAppChild()
   2021-03-03T18:27:11.8938320Z  2 :   {
-  2021-03-03T18:27:11.8938770Z  3 :     let _ = require( toolsPath );
+  2021-03-03T18:27:11.8938770Z  3 :     const _ = require( toolsPath );
   2021-03-03T18:27:11.8940190Z  4 :     _.include( 'wProcess' );
   2021-03-03T18:27:11.8941070Z  5 :     _.include( 'wFiles' );
   2021-03-03T18:27:11.8941440Z  6 :
@@ -13126,7 +13126,7 @@ function startMinimalDetachingChildExistsBeforeParentWaitForTermination( test )
 
   function testAppChild()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -13267,7 +13267,7 @@ function startMinimalDetachingEndCompetitorIsExecuted( test )
 
   function testAppChild()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -13560,7 +13560,7 @@ function startMinimalDetachingTerminationBegin( test )
 
   function testAppParent()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -13591,7 +13591,7 @@ function startMinimalDetachingTerminationBegin( test )
 
   function testAppChild()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
     console.log( 'Child process start', process.pid )
@@ -13700,7 +13700,7 @@ function startMinimalDetachingWaitForDisconnect( test )
 
   function testAppParent()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -13731,7 +13731,7 @@ function startMinimalDetachingWaitForDisconnect( test )
 
   function testAppChild()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
     console.log( 'Child process start', process.pid )
@@ -13825,7 +13825,7 @@ function startMinimalTrueDetachedWaitForParentDeath( test )
 
   function testAppParent()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -13848,7 +13848,7 @@ function startMinimalTrueDetachedWaitForParentDeath( test )
 
   function testAppChild()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -13992,7 +13992,7 @@ function startMinimalEventClose( test )
 
   function program1()
   {
-    let _ = require( toolsPath )
+    const _ = require( toolsPath )
     console.log( 'program1::begin' );
     setTimeout( () =>
     {
@@ -14245,7 +14245,7 @@ function startMinimalDetachingThrowing( test )
 
   function testAppChild()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -14663,7 +14663,7 @@ function startMinimalOnStart( test )
   {
     console.log( 'Child process begin' );
 
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -15013,7 +15013,7 @@ function startMinimalOnTerminate( test )
 
   function testAppChild()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -15233,7 +15233,7 @@ function startMinimalWithDelayOnReady( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     console.log( 'program1:begin' );
     setTimeout( () => { console.log( 'program1:end' ) }, context.t1 * 15 ); /* 15000 */
   }
@@ -17212,7 +17212,7 @@ ${options.sessions[ 1 ].procedure.id}.end
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     let args = _.process.input();
 
@@ -17835,7 +17835,7 @@ function starterConcurrentMultipleOnWindowsExperiment( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wConsequence' );
     _.include( 'wProcedure' );
@@ -17848,7 +17848,7 @@ function starterConcurrentMultipleOnWindowsExperiment( test )
 
   function program2()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wConsequence' );
     _.include( 'wProcedure' );
@@ -20521,7 +20521,7 @@ function startMinimalOptionOutputColoring( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -20757,7 +20757,7 @@ function startMinimalOptionOutputColoringStderr( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -21027,7 +21027,7 @@ function startMinimalOptionOutputColoringStdout( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -21449,7 +21449,7 @@ function startMinimalOptionOutputPrefixing( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -22113,7 +22113,7 @@ function startMinimalOptionOutputPiping( test )
 2020-12-05T17:31:19.5110073Z 15 :
 2020-12-05T17:31:19.5135695Z  1 : function testApp()
 2020-12-05T17:31:19.5136282Z  2 :   {
-2020-12-05T17:31:19.5136828Z  3 :     let _ = require( toolsPath );
+2020-12-05T17:31:19.5136828Z  3 :     const _ = require( toolsPath );
 2020-12-05T17:31:19.5137453Z  4 :     _.include( 'wProcess' );
 2020-12-05T17:31:19.5138536Z  5 :     _.include( 'wFiles' );
 2020-12-05T17:31:19.5139083Z  6 :
@@ -22848,7 +22848,7 @@ zzz <-
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -23221,7 +23221,7 @@ function startMinimalOptionInputMirroring( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -23314,7 +23314,7 @@ function startMinimalOptionInputMirroringFail( test )
         2020-12-22T10:55:54.9590773Z 15 :
         2020-12-22T10:55:54.9591324Z  1 : function testApp()
         2020-12-22T10:55:54.9591692Z  2 :   {
-        2020-12-22T10:55:54.9592259Z  3 :     let _ = require( toolsPath );
+        2020-12-22T10:55:54.9592259Z  3 :     const _ = require( toolsPath );
         2020-12-22T10:55:54.9593041Z  4 :     _.include( 'wProcess' );
         2020-12-22T10:55:54.9593597Z  5 :     _.include( 'wFiles' );
         2020-12-22T10:55:54.9594228Z  6 :
@@ -23408,7 +23408,7 @@ function startMinimalOptionInputMirroringFail( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -24121,13 +24121,13 @@ function startMinimalOutputOptionsCompatibilityLateCheck( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     console.log( 'Test output' );
   }
 
   function testAppParent()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
     _.include( 'wProcess' );
 
@@ -24755,7 +24755,7 @@ function startMinimalOptionVerbosityLogging( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -24778,7 +24778,7 @@ function startMinimalOptionVerbosityLogging( test )
 
   function testAppError()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -25315,7 +25315,7 @@ function startMultipleOutput( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
     let args = _.process.input();
@@ -25456,7 +25456,7 @@ function startMultipleOptionStdioIgnore( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
     let args = _.process.input();
@@ -25649,7 +25649,7 @@ function startMultipleOptionOutputAdditive( test )
 
   function testAppParent()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
 
     var o =
@@ -25816,7 +25816,7 @@ function outputLog( test )
 
   function testAppParent()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
 
     let o =
@@ -27534,7 +27534,7 @@ function startSingleOptionCurrentPath( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
     _.fileProvider.fileWrite( testFilePath, process.cwd() );
   }
@@ -28295,7 +28295,7 @@ function startPassingThrough( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
     _.include( 'wProcess' );
 
@@ -28306,7 +28306,7 @@ function startPassingThrough( test )
 
   function program2()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
     _.include( 'wProcess' );
 
@@ -28366,7 +28366,7 @@ function startMinimalOptionUid( test ) /* Runs only through `sudo` ( i.e. with s
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
     _.include( 'wProcess' );
 
@@ -28423,7 +28423,7 @@ function startMinimalOptionGid( test ) /* Runs only through `sudo` ( i.e. with s
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
     _.include( 'wProcess' );
 
@@ -29312,7 +29312,7 @@ Launched at ${_.strQuote( options.currentPath )} \n
 
   function testAppParent()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
 
     let o =
@@ -29455,7 +29455,7 @@ function startMinimalDiffPid( test )
 
   function testAppParent()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -29486,7 +29486,7 @@ function startMinimalDiffPid( test )
 
   function testAppChild()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
     console.log( 'Child process start', process.pid );
@@ -29750,7 +29750,7 @@ function exitReason( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     let result = [];
 
@@ -30016,7 +30016,7 @@ function exitCode( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -30030,7 +30030,7 @@ function exitCode( test )
 
   function testAppExit()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -30039,7 +30039,7 @@ function exitCode( test )
 
   function testAppExitCode()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -31061,7 +31061,7 @@ function killOptionWithChildren( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
     var o =
@@ -31088,7 +31088,7 @@ function killOptionWithChildren( test )
 
   function testApp3()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
     let detaching = process.argv[ 2 ] === 'detached';
@@ -31488,7 +31488,7 @@ function startMinimalTerminateHangedWithExitHandler( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.process._exitHandlerRepair();
     process.send( process.pid )
@@ -31677,7 +31677,7 @@ function startMinimalTerminateAfterLoopRelease( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wProcess' );
     _.process._exitHandlerRepair();
@@ -32799,7 +32799,7 @@ deasync:begin
         2020-12-15T07:09:53.8293240Z 10 :
         2020-12-15T07:09:53.8293851Z 11 :     if( withTools || withDeasync )
         2020-12-15T07:09:53.8294517Z 12 :     {
-        2020-12-15T07:09:53.8295113Z 13 :       let _ = require( toolsPath );
+        2020-12-15T07:09:53.8295113Z 13 :       const _ = require( toolsPath );
         2020-12-15T07:09:53.8295837Z 14 :       _.include( 'wProcess' );
         2020-12-15T07:09:53.8296579Z 15 :       _.process._exitHandlerRepair();
         2020-12-15T07:09:53.8297592Z 16 :     }
@@ -32830,7 +32830,7 @@ deasync:begin
         2020-12-15T07:09:53.8312374Z 41 :
         2020-12-15T07:09:53.8312936Z 42 :     function deasync( delay )
         2020-12-15T07:09:53.8313484Z 43 :     {
-        2020-12-15T07:09:53.8313994Z 44 :       let _ = wTools;
+        2020-12-15T07:09:53.8313994Z 44 :       const _ = _global_.wTools;
         2020-12-15T07:09:53.8316261Z 45 :       console.log( 'deasync:begin' );
         2020-12-15T07:09:53.8317042Z 46 :       let con = new _.Consequence().take( null );
         2020-12-15T07:09:53.8317791Z 47 :       con.delay( delay ).deasync();
@@ -33714,7 +33714,7 @@ deasync:end
 
     if( withTools || withDeasync )
     {
-      let _ = require( toolsPath );
+      const _ = require( toolsPath );
       _.include( 'wProcess' );
       _.process._exitHandlerRepair();
     }
@@ -33745,7 +33745,7 @@ deasync:end
 
     function deasync( delay )
     {
-      let _ = wTools;
+      const _ = _global_.wTools;
       console.log( 'deasync:begin' );
       let con = new _.Consequence().take( null );
       con.delay( delay ).deasync();
@@ -34312,7 +34312,7 @@ Killed
 
     if( withTools )
     {
-      let _ = require( toolsPath );
+      const _ = require( toolsPath );
       _.include( 'wProcess' );
       _.process._exitHandlerRepair();
     }
@@ -34544,7 +34544,7 @@ exit:${exitCode}
 
     if( withTools )
     {
-      let _ = require( toolsPath );
+      const _ = require( toolsPath );
       _.include( 'wProcess' );
       _.process._exitHandlerRepair();
     }
@@ -35225,7 +35225,7 @@ function terminate( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.process._exitHandlerRepair();
     if( process.send )
@@ -35392,7 +35392,7 @@ function terminateSync( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.process._exitHandlerRepair();
     if( process.send )
@@ -35579,7 +35579,7 @@ function terminateFirstChild( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -35611,7 +35611,7 @@ function terminateFirstChild( test )
 
   function program2()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
 
     console.log( `childPid : ${process.pid}` );
@@ -35784,7 +35784,7 @@ function terminateSecondChild( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
     var o =
@@ -35827,7 +35827,7 @@ function terminateSecondChild( test )
 
   function program2()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
 
     _.fileProvider.fileWrite
@@ -35997,7 +35997,7 @@ function terminateDetachedFirstChild( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
     var o =
@@ -36024,7 +36024,7 @@ function terminateDetachedFirstChild( test )
 
   function program2()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
 
     _.fileProvider.fileWrite
@@ -36139,7 +36139,7 @@ function terminateWithDetachedChild( test )
       2020-11-30T18:29:51.9440081Z       Running TestSuite::Tools.l4.process.Execution / TestRoutine::terminateWithDetachedChild ..
       2020-11-30T18:29:52.0223160Z  1 : function program1()
       2020-11-30T18:29:52.0224260Z  2 :   {
-      2020-11-30T18:29:52.0225033Z  3 :     let _ = require( toolsPath );
+      2020-11-30T18:29:52.0225033Z  3 :     const _ = require( toolsPath );
       2020-11-30T18:29:52.0226523Z  4 :     _.include( 'wProcess' );
       2020-11-30T18:29:52.0227598Z  5 :     _.include( 'wFiles' );
       2020-11-30T18:29:52.0228360Z  6 :     var o =
@@ -36175,7 +36175,7 @@ function terminateWithDetachedChild( test )
       2020-11-30T18:29:52.0256533Z 36 :
       2020-11-30T18:29:52.0259582Z  1 : function program2()
       2020-11-30T18:29:52.0261227Z  2 :   {
-      2020-11-30T18:29:52.0262747Z  3 :     let _ = require( toolsPath );
+      2020-11-30T18:29:52.0262747Z  3 :     const _ = require( toolsPath );
       2020-11-30T18:29:52.0266611Z  4 :     _.include( 'wFiles' );
       2020-11-30T18:29:52.0268924Z  5 :
       2020-11-30T18:29:52.0270672Z  6 :     _.fileProvider.fileWrite
@@ -36393,7 +36393,7 @@ function terminateWithDetachedChild( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
     var o =
@@ -36420,7 +36420,7 @@ function terminateWithDetachedChild( test )
 
   function program2()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
 
     _.fileProvider.fileWrite
@@ -36702,7 +36702,7 @@ function terminateSeveralChildren( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -36728,7 +36728,7 @@ function terminateSeveralChildren( test )
 
   function program2()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
 
     _.fileProvider.fileWrite
@@ -36756,7 +36756,7 @@ function terminateSeveralChildren( test )
 
   function program3()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
 
     _.fileProvider.fileWrite
@@ -36907,7 +36907,7 @@ function terminateSeveralDetachedChildren( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -36934,7 +36934,7 @@ function terminateSeveralDetachedChildren( test )
 
   function program2()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
 
     _.fileProvider.fileWrite
@@ -36962,7 +36962,7 @@ function terminateSeveralDetachedChildren( test )
 
   function program3()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
 
     _.fileProvider.fileWrite
@@ -38095,7 +38095,7 @@ function killComplex( test )
 
   function testApp2()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
     var testAppPath = _.fileProvider.path.nativize( _.path.join( __dirname, 'testApp.js' ) );
@@ -38731,7 +38731,7 @@ function children( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
     var o =
@@ -38900,7 +38900,7 @@ function childrenOptionFormatList( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     var o =
     {
@@ -39240,7 +39240,7 @@ function experiment( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
