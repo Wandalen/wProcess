@@ -5,7 +5,7 @@
 
 if( typeof module !== 'undefined' )
 {
-  let _ = require( './../../../wtools/Tools.s' );
+  const _ = require( './../../../node_modules/Tools' );
   _.include( 'wTesting' );
   _.include( 'wFiles' );
   _.include( 'wProcessWatcher' );
@@ -15,7 +15,6 @@ if( typeof module !== 'undefined' )
 
 const _global = _global_;
 const _ = _global_.wTools;
-let Self = {};
 
 // --
 // context
@@ -504,7 +503,7 @@ function input( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
 
     let result = _.process.input();
@@ -515,7 +514,7 @@ function input( test )
 
   function testApp2()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
 
     let result = _.process.input();
@@ -689,7 +688,7 @@ function inputWithNotDefaultDelimeters( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
 
     let o =
@@ -706,7 +705,7 @@ function inputWithNotDefaultDelimeters( test )
 
   function testApp2()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
 
     let o =
@@ -1021,7 +1020,7 @@ function inputReadToWithArguments( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wProcess' );
     _.process._exitHandlerRepair();
@@ -1448,7 +1447,7 @@ function inputReadToWithOptionsMap( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wProcess' );
     _.process._exitHandlerRepair();
@@ -1583,7 +1582,7 @@ function inputReadToCheckInputInfluence( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wProcess' );
     _.process._exitHandlerRepair();
@@ -1675,7 +1674,7 @@ function processOnExitEvent( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
@@ -1826,7 +1825,7 @@ function processOffExitEvent( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
@@ -1949,7 +1948,7 @@ function processArgsBase( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
     _.include( 'wFiles' )
@@ -2197,7 +2196,7 @@ function processArgsPropertiesBase( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
@@ -2293,7 +2292,7 @@ function processArgsMultipleCommands( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
@@ -2391,7 +2390,7 @@ function processArgsPaths( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
@@ -2852,7 +2851,7 @@ function processArgsWithSpace( test ) /* qqq : split test cases | aaa : Done. Ye
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
@@ -2902,7 +2901,7 @@ function realMainFile( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
 
     console.log( _.process.realMainFile() )
@@ -3200,11 +3199,9 @@ const Proto =
 
 }
 
-_.mapExtend( Self, Proto );
-
 //
 
-Self = wTestSuite( Proto );
+const Self = wTestSuite( Proto );
 
 if( typeof module !== 'undefined' && !module.parent )
 wTester.test( Self )

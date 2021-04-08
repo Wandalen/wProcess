@@ -28,7 +28,7 @@ _.assert( !!_realGlobal_ );
  *
  * @example
  *
- * let _ = require('wTools')
+ * const _ = require('wTools')
  * _.include( 'wProcessBasic' )
  * let result = _.process.input();
  * console.log( result );

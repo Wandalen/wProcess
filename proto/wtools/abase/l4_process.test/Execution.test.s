@@ -7,7 +7,7 @@ let Stream;
 
 if( typeof module !== 'undefined' )
 {
-  let _ = require( '../../../wtools/Tools.s' );
+  const _ = require( '../../../node_modules/Tools' );
 
   _.include( 'wTesting' );
   _.include( 'wFiles' );
@@ -19,7 +19,6 @@ if( typeof module !== 'undefined' )
 
 const _global = _global_;
 const _ = _global_.wTools;
-let Self = {};
 
 /*
 experimentIpcDeasync:
@@ -622,7 +621,7 @@ ${programPath}:end
   function program1()
   {
     console.log( `${__filename}:begin` );
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     let process = _global_.process;
 
     _.include( 'wProcess' );
@@ -1475,7 +1474,7 @@ function startMinimalErrorHandling( test )
 
   function program2()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
     _.include( 'wProcess' );
 
@@ -1611,7 +1610,7 @@ function startMinimalSync( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     let process = _global_.process;
 
     _.include( 'wProcess' );
@@ -1637,7 +1636,7 @@ function startMinimalSync( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     let process = _global_.process;
 
     _.include( 'wProcess' );
@@ -1932,7 +1931,7 @@ function startSingleSyncDeasync( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     let process = _global_.process;
 
     _.include( 'wProcess' );
@@ -2310,7 +2309,7 @@ function startMinimalWithoutExecPath( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     var ended = 0;
     var fs = require( 'fs' );
     var path = require( 'path' );
@@ -2980,7 +2979,7 @@ function startMinimalArgumentsParsing( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
@@ -3574,7 +3573,7 @@ function startMinimalArgumentsParsingNonTrivial( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
@@ -3998,7 +3997,7 @@ function startMinimalArgumentsNestedQuotes( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
@@ -5441,7 +5440,7 @@ function startMinimalExecPathQuotesClosing( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wProcess' );
     _.include( 'wStringsExtra' )
@@ -6856,7 +6855,7 @@ function startMinimalImportantExecPathPassingThrough( test )
 
   function testAppParent()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
     _.include( 'wProcess' );
 
@@ -7627,7 +7626,7 @@ function startMinimalDifferentTypesOfPaths( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     console.log( _.path.normalize( __filename ) );
   }
 }
@@ -7823,7 +7822,7 @@ function startNjsPassingThroughExecPathWithSpace( test )
 
   function testAppParent()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
     _.include( 'wProcess' );
 
@@ -8046,7 +8045,7 @@ function startNjsPassingThroughDifferentTypesOfPaths( test )
 
   function testAppParent()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
     _.include( 'wProcess' );
 
@@ -8435,7 +8434,7 @@ function startMinimalPassingThroughExecPathWithSpace( test )
 
   function testAppParent()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
     _.include( 'wProcess' );
 
@@ -8839,7 +8838,7 @@ function startSingleProcedureStack( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     let args = _.process.input();
     let data = { time : _.time.now(), id : args.map.id };
@@ -9288,7 +9287,7 @@ function startMultipleProcedureStack( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     let args = _.process.input();
     let data = { time : _.time.now(), id : args.map.id };
@@ -9960,7 +9959,7 @@ function startSingleReadyDelay( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     let args = _.process.input();
     let data = { time : _.time.now(), id : args.map.id };
@@ -10108,7 +10107,7 @@ function startMultipleReadyDelay( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
     let args = _.process.input();
@@ -10192,7 +10191,7 @@ function startMinimalOptionWhenDelay( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     let data = { time : _.time.now() };
     console.log( JSON.stringify( data ) );
   }
@@ -10266,7 +10265,7 @@ function startMinimalOptionWhenTime( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     let data = { time : _.time.now() };
     console.log( JSON.stringify( data ) );
@@ -10494,7 +10493,7 @@ function startMinimalOptionTimeOut( test )
 
   function program3()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
     _.include( 'wProcess' );
 
@@ -10532,7 +10531,7 @@ function startMinimalOptionTimeOut( test )
 
   function program4()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
     _.include( 'wProcess' );
 
@@ -10662,7 +10661,7 @@ function startSingleAfterDeath( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wProcess' );
     _.include( 'wFiles' );
@@ -10693,7 +10692,7 @@ function startSingleAfterDeath( test )
 
   function program2()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wProcess' );
     _.include( 'wFiles' );
@@ -10878,7 +10877,7 @@ function startSingleAfterDeathTerminatingMain( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wProcess' );
     _.include( 'wFiles' );
@@ -10909,7 +10908,7 @@ function startSingleAfterDeathTerminatingMain( test )
 
   function program2()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wProcess' );
     _.include( 'wFiles' );
@@ -11021,7 +11020,7 @@ function startSingleAfterDeathOutput( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -11049,7 +11048,7 @@ function startSingleAfterDeathOutput( test )
 
   function program2()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -11136,7 +11135,7 @@ function startMinimalDetachingResourceReady( test )
 
   function testAppChild()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wProcess' );
     _.include( 'wFiles' );
@@ -11384,7 +11383,7 @@ function startMinimalDetachingNoTerminationBegin( test )
 
   function testAppParent()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -11409,7 +11408,7 @@ function startMinimalDetachingNoTerminationBegin( test )
 
   function testAppChild()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -11558,7 +11557,7 @@ function startMinimalDetachedOutputStdioIgnore( test )
 
   function testAppParent()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -11582,7 +11581,7 @@ function startMinimalDetachedOutputStdioIgnore( test )
 
   function testAppChild()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -11657,7 +11656,7 @@ function startMinimalDetachedOutputStdioPipe( test )
 
   function testAppParent()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -11681,7 +11680,7 @@ function startMinimalDetachedOutputStdioPipe( test )
 
   function testAppChild()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -11900,7 +11899,7 @@ function startMinimalDetachedOutputStdioInherit( test )
 
   function testAppChild()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -12038,7 +12037,7 @@ function startMinimalDetachingIpc( test )
 
   function testAppChild()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -12118,6 +12117,108 @@ function startMinimalDetachingTrivial( test )
 
       o.conTerminate.then( () =>
       {
+        /*
+          xxx : mac 13.x
+          2021-03-03T19:29:14.0759680Z       Running TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachingTrivial ..
+          2021-03-03T19:29:14.1596220Z  1 : function testAppParent()
+          2021-03-03T19:29:14.1596850Z  2 :   {
+          2021-03-03T19:29:14.1597290Z  3 :     const _ = require( toolsPath );
+          2021-03-03T19:29:14.1598570Z  4 :     _.include( 'wProcess' );
+          2021-03-03T19:29:14.1599360Z  5 :     _.include( 'wFiles' );
+          2021-03-03T19:29:14.1599730Z  6 :     let o =
+          2021-03-03T19:29:14.1600050Z  7 :     {
+          2021-03-03T19:29:14.1600840Z  8 :       execPath : 'testAppChild.js',
+          2021-03-03T19:29:14.1601300Z  9 :       mode,
+          2021-03-03T19:29:14.1601800Z 10 :       outputCollecting : 1,
+          2021-03-03T19:29:14.1602900Z 11 :       stdio : 'pipe',
+          2021-03-03T19:29:14.1603720Z 12 :       detaching : 1,
+          2021-03-03T19:29:14.1604420Z 13 :       applyingExitCode : 0,
+          2021-03-03T19:29:14.1605350Z 14 :       throwingExitCode : 0,
+          2021-03-03T19:29:14.1606060Z 15 :       outputPiping : 1,
+          2021-03-03T19:29:14.1606600Z 16 :       ipc : 1,
+          2021-03-03T19:29:14.1607020Z 17 :     }
+          2021-03-03T19:29:14.1607460Z 18 :     _.process.startNjs( o );
+          2021-03-03T19:29:14.1607860Z 19 :
+          2021-03-03T19:29:14.1608320Z 20 :     o.conStart.thenGive( () =>
+          2021-03-03T19:29:14.1609200Z 21 :     {
+          2021-03-03T19:29:14.1609700Z 22 :       process.send( o.pnd.pid )
+          2021-03-03T19:29:14.1610660Z 23 :       o.pnd.send( 'data' );
+          2021-03-03T19:29:14.1611510Z 24 :       o.pnd.on( 'message', () =>
+          2021-03-03T19:29:14.1611900Z 25 :       {
+          2021-03-03T19:29:14.1612290Z 26 :         o.disconnect();
+          2021-03-03T19:29:14.1612670Z 27 :       })
+          2021-03-03T19:29:14.1612980Z 28 :     })
+          2021-03-03T19:29:14.1613290Z 29 :   }
+          2021-03-03T19:29:14.1613570Z 30 :
+          2021-03-03T19:29:14.1613940Z 31 : var mode = `fork`;
+          2021-03-03T19:29:14.1614330Z 32 : var context = {
+          2021-03-03T19:29:14.1615440Z 33 :   "t0" : 100,
+          2021-03-03T19:29:14.1616000Z 34 :   "t1" : 1000,
+          2021-03-03T19:29:14.1616770Z 35 :   "t2" : 5000,
+          2021-03-03T19:29:14.1617360Z 36 :   "t3" : 15000
+          2021-03-03T19:29:14.1617700Z 37 : };
+          2021-03-03T19:29:14.1618510Z 38 : var toolsPath = `/Users/runner/work/wProcess/wProcess/node_modules/wTools/proto/wtools/abase/Layer1.s`;
+          2021-03-03T19:29:14.1619450Z 39 :
+          2021-03-03T19:29:14.1619850Z 40 : testAppParent();
+          2021-03-03T19:29:14.1620230Z 41 :
+          2021-03-03T19:29:14.1637380Z  1 : function testAppChild()
+          2021-03-03T19:29:14.1637910Z  2 :   {
+          2021-03-03T19:29:14.1638320Z  3 :     const _ = require( toolsPath );
+          2021-03-03T19:29:14.1640090Z  4 :     _.include( 'wProcess' );
+          2021-03-03T19:29:14.1641360Z  5 :     _.include( 'wFiles' );
+          2021-03-03T19:29:14.1641890Z  6 :
+          2021-03-03T19:29:14.1642750Z  7 :     console.log( 'Child process start' )
+          2021-03-03T19:29:14.1643160Z  8 :
+          2021-03-03T19:29:14.1643930Z  9 :     process.on( 'message', ( data ) =>
+          2021-03-03T19:29:14.1644350Z 10 :     {
+          2021-03-03T19:29:14.1645200Z 11 :       console.log( 'from parent:', data );
+          2021-03-03T19:29:14.1646190Z 12 :       process.send( 'ready to disconnect' )
+          2021-03-03T19:29:14.1646660Z 13 :     })
+          2021-03-03T19:29:14.1647280Z 14 :
+          2021-03-03T19:29:14.1647760Z 15 :     _.time.out( context.t2, () => / 5000 /
+          2021-03-03T19:29:14.1648160Z 16 :     {
+          2021-03-03T19:29:14.1649060Z 17 :       console.log( 'Child process end' );
+          2021-03-03T19:29:14.1650140Z 18 :       let filePath = _.path.join( __dirname, 'testFile' );
+          2021-03-03T19:29:14.1651510Z 19 :       _.fileProvider.fileWrite( filePath, _.entity.exportString( process.pid ) );
+          2021-03-03T19:29:14.1652890Z 20 :       return null;
+          2021-03-03T19:29:14.1653260Z 21 :     })
+          2021-03-03T19:29:14.1653560Z 22 :
+          2021-03-03T19:29:14.1653860Z 23 :   }
+          2021-03-03T19:29:14.1654160Z 24 :
+          2021-03-03T19:29:14.1654510Z 25 : var context = {
+          2021-03-03T19:29:14.1654880Z 26 :   "t0" : 100,
+          2021-03-03T19:29:14.1655210Z 27 :   "t1" : 1000,
+          2021-03-03T19:29:14.1655560Z 28 :   "t2" : 5000,
+          2021-03-03T19:29:14.1655900Z 29 :   "t3" : 15000
+          2021-03-03T19:29:14.1656200Z 30 : };
+          2021-03-03T19:29:14.1657340Z 31 : var toolsPath = `/Users/runner/work/wProcess/wProcess/node_modules/wTools/proto/wtools/abase/Layer1.s`;
+          2021-03-03T19:29:14.1658030Z 32 :
+          2021-03-03T19:29:14.1658420Z 33 : testAppChild();
+          2021-03-03T19:29:14.1658770Z 34 :
+          2021-03-03T19:29:14.1723980Z  > testAppParent.js
+          2021-03-03T19:29:15.4247630Z  > testAppChild.js
+          2021-03-03T19:29:16.6808500Z Child process start
+          2021-03-03T19:29:16.6861780Z from parent: data
+          2021-03-03T19:29:16.7089980Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachingTrivial / mode : fork, trivial use case # 1 ) : expected true ... ok
+          2021-03-03T19:29:16.7182460Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachingTrivial / mode : fork, trivial use case # 2 ) ... ok
+          2021-03-03T19:29:16.7266790Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachingTrivial / mode : fork, trivial use case # 3 ) ... ok
+          2021-03-03T19:29:16.7347830Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachingTrivial / mode : fork, trivial use case # 4 ) : expected true ... ok
+          2021-03-03T19:29:16.7430260Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachingTrivial / mode : fork, trivial use case # 5 ) : expected true ... ok
+          2021-03-03T19:29:16.7513290Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachingTrivial / mode : fork, trivial use case # 6 ) : expected true ... ok
+          2021-03-03T19:29:16.7595170Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachingTrivial / mode : fork, trivial use case # 7 ) ... ok
+          2021-03-03T19:29:16.7674850Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachingTrivial / mode : fork, trivial use case # 8 ) ... ok
+          2021-03-03T19:30:00.7328210Z
+          2021-03-03T19:30:00.7329490Z         /Users/runner/work/wProcess/wProcess/proto/wtools/abase/l4_process.test/Execution.test.s:12122:18
+          2021-03-03T19:30:00.7330890Z           12118 :
+          2021-03-03T19:30:00.7331700Z           12119 :       o.conTerminate.then( () =>
+          2021-03-03T19:30:00.7332460Z           12120 :       {
+          2021-03-03T19:30:00.7333770Z           12121 :         track.push( 'conTerminate' );
+          2021-03-03T19:30:00.7334760Z         * 12122 :         test.true( !_.process.isAlive( childPid ) );
+          2021-03-03T19:30:00.7335950Z
+          2021-03-03T19:30:00.7748610Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachingTrivial / mode : fork, trivial use case # 9 ) : expected true ... failed
+          2021-03-03T19:30:01.5226970Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachingTrivial / mode : fork, trivial use case # 10 ) : expected true ... ok
+
+        */
         track.push( 'conTerminate' );
         test.true( !_.process.isAlive( childPid ) );
 
@@ -12194,7 +12295,7 @@ function startMinimalDetachingTrivial( test )
 
   function testAppParent()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
     let o =
@@ -12224,7 +12325,7 @@ function startMinimalDetachingTrivial( test )
 
   function testAppChild()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -12380,7 +12481,7 @@ function startMinimalDetachingChildExitsAfterParent( test )
 
   function testAppParent()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -12403,7 +12504,7 @@ function startMinimalDetachingChildExitsAfterParent( test )
 
   function testAppChild()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -12577,7 +12678,7 @@ function startMinimalDetachingChildExitsBeforeParent( test )
 
   function testAppParent()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -12608,7 +12709,7 @@ function startMinimalDetachingChildExitsBeforeParent( test )
 
   function testAppChild()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -12736,7 +12837,7 @@ function startMinimalDetachingDisconnectedEarly( test )
   {
     console.log( 'program1:begin' );
     setTimeout( () => { console.log( 'program1:end' ) }, context.t1 * 2 ); /* 2000 */
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
   }
@@ -12837,6 +12938,43 @@ function startMinimalDetachingDisconnectedLate( test )
 
       result = _.time.out( context.t1 * 5, () => /* 5000 */
       {
+        /*
+          xxx : mac 12.9.1
+          2021-03-03T18:26:52.5479890Z      Running TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachingDisconnectedLate ..
+          2021-03-03T18:26:52.5909470Z  1 : function program1()
+          2021-03-03T18:26:52.5909990Z  2 :   {
+          2021-03-03T18:26:52.5911370Z  3 :     console.log( 'program1:begin' );
+          2021-03-03T18:26:52.5912570Z  4 :     setTimeout( () => { console.log( 'program1:end' ) }, context.t1 * 2 ); / 2000 /
+          2021-03-03T18:26:52.5913550Z  5 :     const _ = require( toolsPath );
+          2021-03-03T18:26:52.5914470Z  6 :     _.include( 'wProcess' );
+          2021-03-03T18:26:52.5915580Z  7 :     _.include( 'wFiles' );
+          2021-03-03T18:26:52.5916040Z  8 :   }
+          2021-03-03T18:26:52.5916330Z  9 :
+          2021-03-03T18:26:52.5917180Z 10 : var context = {
+          2021-03-03T18:26:52.5925390Z 11 :   "t0" : 100,
+          2021-03-03T18:26:52.5925790Z 12 :   "t1" : 1000,
+          2021-03-03T18:26:52.5926150Z 13 :   "t2" : 5000,
+          2021-03-03T18:26:52.5926510Z 14 :   "t3" : 15000
+          2021-03-03T18:26:52.5927070Z 15 : };
+          2021-03-03T18:26:52.5927940Z 16 : var toolsPath = `/Users/runner/work/wProcess/wProcess/node_modules/wTools/proto/wtools/abase/Layer1.s`;
+          2021-03-03T18:26:52.5928590Z 17 :
+          2021-03-03T18:26:52.5928970Z 18 : program1();
+          2021-03-03T18:26:52.5929310Z 19 :
+          2021-03-03T18:26:52.6039060Z  > /private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/ProcessBasic-2021-3-3-18-4-3-415-b660.tmp/startMinimalDetachingDisconnectedLate/program1.js
+          2021-03-03T18:26:52.6188220Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachingDisconnectedLate / detaching on, disconnected forked child, mode:fork # 1 ) ... ok
+            ...
+          2021-03-03T18:27:11.7235210Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachingDisconnectedLate / detaching on, disconnected forked child, mode:shell # 83 ) ... ok
+          2021-03-03T18:27:11.7454130Z
+          2021-03-03T18:27:11.7455450Z         /Users/runner/work/wProcess/wProcess/proto/wtools/abase/l4_process.test/Execution.test.s:12843:18
+          2021-03-03T18:27:11.7456740Z           12839 :       {
+          2021-03-03T18:27:11.7458100Z           12840 :         test.identical( o.state, 'disconnected' );
+          2021-03-03T18:27:11.7458820Z           12841 :         test.identical( o.ended, true );
+          2021-03-03T18:27:11.7460480Z           12842 :         test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate' ] );
+          2021-03-03T18:27:11.7462950Z         * 12843 :         test.true( !_.process.isAlive( o.pnd.pid ) )
+          2021-03-03T18:27:11.7463970Z
+          2021-03-03T18:27:11.7499050Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachingDisconnectedLate / detaching on, disconnected forked child, mode:shell # 84 ) : expected true ... failed
+          2021-03-03T18:27:11.7631960Z       Failed TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachingDisconnectedLate in 19.213s
+        */
         test.identical( o.state, 'disconnected' );
         test.identical( o.ended, true );
         test.identical( track, [ 'conStart', 'conDisconnect', 'conTerminate' ] );
@@ -12858,7 +12996,7 @@ function startMinimalDetachingDisconnectedLate( test )
   {
     console.log( 'program1:begin' );
     setTimeout( () => { console.log( 'program1:end' ) }, context.t1 * 2 ); /* 2000 */
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
   }
@@ -12877,6 +13015,41 @@ ProcessWatched should not throw any error.
 
 //
 
+/*
+  xxx : mac 12.9.1
+  2021-03-03T18:27:11.8377020Z       Running TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachingChildExistsBeforeParentWaitForTermination ..
+  2021-03-03T18:27:11.8937490Z  1 : function testAppChild()
+  2021-03-03T18:27:11.8938320Z  2 :   {
+  2021-03-03T18:27:11.8938770Z  3 :     const _ = require( toolsPath );
+  2021-03-03T18:27:11.8940190Z  4 :     _.include( 'wProcess' );
+  2021-03-03T18:27:11.8941070Z  5 :     _.include( 'wFiles' );
+  2021-03-03T18:27:11.8941440Z  6 :
+  2021-03-03T18:27:11.8941870Z  7 :     var args = _.process.input();
+  2021-03-03T18:27:11.8942710Z  8 :
+  2021-03-03T18:27:11.8943170Z  9 :     _.time.out( context.t1 * 2, () => / 2000 /
+  2021-03-03T18:27:11.8943620Z 10 :     {
+  2021-03-03T18:27:11.8944620Z 11 :       console.log( 'Child process end' )
+  2021-03-03T18:27:11.8945130Z 12 :       return null;
+  2021-03-03T18:27:11.8945490Z 13 :     })
+  2021-03-03T18:27:11.8946070Z 14 :   }
+  2021-03-03T18:27:11.8946420Z 15 :
+  2021-03-03T18:27:11.8946790Z 16 : var context = {
+  2021-03-03T18:27:11.8947160Z 17 :   "t0" : 100,
+  2021-03-03T18:27:11.8947520Z 18 :   "t1" : 1000,
+  2021-03-03T18:27:11.8947880Z 19 :   "t2" : 5000,
+  2021-03-03T18:27:11.8948230Z 20 :   "t3" : 15000
+  2021-03-03T18:27:11.8948550Z 21 : };
+  2021-03-03T18:27:11.8950260Z 22 : var toolsPath = `/Users/runner/work/wProcess/wProcess/node_modules/wTools/proto/wtools/abase/Layer1.s`;
+  2021-03-03T18:27:11.8950980Z 23 :
+  2021-03-03T18:27:11.8951720Z 24 : testAppChild();
+  2021-03-03T18:27:11.8952090Z 25 :
+  2021-03-03T18:27:11.9161280Z  > testAppChild.js
+  2021-03-03T18:27:16.7137670Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachingChildExistsBeforeParentWaitForTermination / mode : fork, detaching on, disconnected child # 1 ) ... ok
+  2021-03-03T18:27:16.9098540Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachingChildExistsBeforeParentWaitForTermination / mode : fork, detaching on, disconnected child # 2 ) ... ok
+  2021-03-03T18:27:17.0189450Z         Test check ( TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachingChildExistsBeforeParentWaitForTermination / mode : fork, detaching on, disconnected child # 3 ) : expected true ... ok
+  2021-03-03T18:27:17.3153810Z  > node testAppChild.js
+  2021-03-03T18:29:24.5418240Z       Failed ( test routine time limit ) TestSuite::Tools.l4.process.Execution / TestRoutine::startMinimalDetachingChildExistsBeforeParentWaitForTermination in 132.571s
+*/
 function startMinimalDetachingChildExistsBeforeParentWaitForTermination( test )
 {
   let context = this;
@@ -12953,7 +13126,7 @@ function startMinimalDetachingChildExistsBeforeParentWaitForTermination( test )
 
   function testAppChild()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -13094,7 +13267,7 @@ function startMinimalDetachingEndCompetitorIsExecuted( test )
 
   function testAppChild()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -13387,7 +13560,7 @@ function startMinimalDetachingTerminationBegin( test )
 
   function testAppParent()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -13418,7 +13591,7 @@ function startMinimalDetachingTerminationBegin( test )
 
   function testAppChild()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
     console.log( 'Child process start', process.pid )
@@ -13527,7 +13700,7 @@ function startMinimalDetachingWaitForDisconnect( test )
 
   function testAppParent()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -13558,7 +13731,7 @@ function startMinimalDetachingWaitForDisconnect( test )
 
   function testAppChild()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
     console.log( 'Child process start', process.pid )
@@ -13652,7 +13825,7 @@ function startMinimalTrueDetachedWaitForParentDeath( test )
 
   function testAppParent()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -13675,7 +13848,7 @@ function startMinimalTrueDetachedWaitForParentDeath( test )
 
   function testAppChild()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -13819,7 +13992,7 @@ function startMinimalEventClose( test )
 
   function program1()
   {
-    let _ = require( toolsPath )
+    const _ = require( toolsPath )
     console.log( 'program1::begin' );
     setTimeout( () =>
     {
@@ -14072,7 +14245,7 @@ function startMinimalDetachingThrowing( test )
 
   function testAppChild()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -14490,7 +14663,7 @@ function startMinimalOnStart( test )
   {
     console.log( 'Child process begin' );
 
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -14840,7 +15013,7 @@ function startMinimalOnTerminate( test )
 
   function testAppChild()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -15060,7 +15233,7 @@ function startMinimalWithDelayOnReady( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     console.log( 'program1:begin' );
     setTimeout( () => { console.log( 'program1:end' ) }, context.t1 * 15 ); /* 15000 */
   }
@@ -17039,7 +17212,7 @@ ${options.sessions[ 1 ].procedure.id}.end
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     let args = _.process.input();
 
@@ -17662,7 +17835,7 @@ function starterConcurrentMultipleOnWindowsExperiment( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wConsequence' );
     _.include( 'wProcedure' );
@@ -17675,7 +17848,7 @@ function starterConcurrentMultipleOnWindowsExperiment( test )
 
   function program2()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wConsequence' );
     _.include( 'wProcedure' );
@@ -19425,6 +19598,14 @@ function starter( test )
       })
     })
 
+    /* */
+
+    .then( () =>
+    {
+      test.case = `mode : ${mode}, option procedure`;
+      return test.shouldThrowErrorSync( () => _.process.starter({ execPath : mode === 'fork' ? '' : 'node', mode, procedure : true }) );
+    })
+
     return ready;
   }
 
@@ -19478,19 +19659,19 @@ function starterArgs( test )
         {
           test.identical( op.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
           test.identical( op.args2, [ testAppPath, 'arg3', '"arg1"', '"arg2"' ] );
-          test.identical( starterOptions.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
+          test.identical( starterOptions.args, [ 'arg1', 'arg2' ] );
         }
         else if( mode === 'spawn' )
         {
           test.identical( op.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
           test.identical( op.args2, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
-          test.identical( starterOptions.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
+          test.identical( starterOptions.args, [ 'arg1', 'arg2' ] );
         }
         else
         {
           test.identical( op.args, [ 'arg3', 'arg1', 'arg2' ] );
           test.identical( op.args2, [ 'arg3', 'arg1', 'arg2' ] );
-          test.identical( starterOptions.args, [ 'arg3', 'arg1', 'arg2' ] );
+          test.identical( starterOptions.args, [ 'arg1', 'arg2' ] );
         }
         test.identical( _.strCount( op.output, `[ 'arg3', 'arg1', 'arg2' ]` ), 1 );
         test.identical( starterOptions.args2, undefined );
@@ -19517,19 +19698,19 @@ function starterArgs( test )
         {
           test.identical( op.args, [ testAppPath, 'arg3' ] );
           test.identical( op.args2, [ testAppPath, '"arg3"' ] );
-          test.identical( starterOptions.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
+          test.identical( starterOptions.args, [ 'arg1', 'arg2' ] );
         }
         else if( mode === 'spawn' )
         {
           test.identical( op.args, [ testAppPath, 'arg3' ] );
           test.identical( op.args2, [ testAppPath, 'arg3' ] );
-          test.identical( starterOptions.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
+          test.identical( starterOptions.args, [ 'arg1', 'arg2' ] );
         }
         else
         {
           test.identical( op.args, [ 'arg3' ] );
           test.identical( op.args2, [ 'arg3' ] );
-          test.identical( starterOptions.args, [ 'arg3', 'arg1', 'arg2' ] );
+          test.identical( starterOptions.args, [ 'arg1', 'arg2' ] );
         }
 
         test.identical( _.strCount( op.output, `[ 'arg3' ]` ), 1 );
@@ -19557,19 +19738,19 @@ function starterArgs( test )
         {
           test.identical( op.args, [ testAppPath, 'arg3' ] );
           test.identical( op.args2, [ _.strQuote( testAppPath ), '"arg3"' ] );
-          test.identical( starterOptions.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
+          test.identical( starterOptions.args, [ 'arg1', 'arg2' ] );
         }
         else if( mode === 'spawn' )
         {
           test.identical( op.args, [ testAppPath, 'arg3' ] );
           test.identical( op.args2, [ testAppPath, 'arg3' ] );
-          test.identical( starterOptions.args, [ testAppPath, 'arg3', 'arg1', 'arg2' ] );
+          test.identical( starterOptions.args, [ 'arg1', 'arg2' ] );
         }
         else
         {
           test.identical( op.args, [ 'arg3' ] );
           test.identical( op.args2, [ 'arg3' ] );
-          test.identical( starterOptions.args, [ 'arg3', 'arg1', 'arg2' ] );
+          test.identical( starterOptions.args, [ 'arg1', 'arg2' ] );
         }
 
         test.identical( _.strCount( op.output, `[ 'arg3' ]` ), 1 );
@@ -19702,6 +19883,215 @@ function starterFields( test )
   test.identical( start.predefined.args, [ 'arg1', 'arg2' ] );
   test.identical( start.predefined.ready, ready  );
 }
+
+//
+
+function starterOptionsPollution( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( first );
+  let testAppPath2 = a.program( second );
+  let testAppPath3 = a.program( program );
+  let modes = [ 'fork', 'spawn', 'shell' ];
+  modes.forEach( ( mode ) => a.ready.then( () => run( mode ) ) );
+  return a.ready;
+
+  /* */
+
+  function run( mode )
+  {
+    let ready = _.Consequence().take( null );
+
+    let starterOptions =
+    {
+      execPath : mode === 'fork' ? '' : 'node',
+      outputCollecting : 1,
+      args : [ 'arg1', 'arg2' ],
+      mode,
+      outputColoring : { out : 0, err : 0 },
+      env : { 'key1' : 'val', 'PATH' : process.env.PATH },
+    }
+
+    let shell = _.process.starter( starterOptions )
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, default options, first run`;
+
+      return shell
+      ({
+        execPath : testAppPath
+      })
+      .then( ( op ) =>
+      {
+        let exec;
+        if( mode === 'spawn' )
+        exec = `node ${testAppPath} arg1 arg2`;
+        else if( mode === 'fork' )
+        exec = `${testAppPath} arg1 arg2`;
+        else if( mode === 'shell' )
+        exec = `node ${testAppPath} "arg1" "arg2"`;
+        test.identical( op.execPath2, exec );
+
+        test.identical( starterOptions.outputColoring, { out : 0, err : 0 } );
+        test.identical( op.outputColoring, { out : 0, err : 0 } );
+        test.true( starterOptions.outputColoring !== op.outputColoring );
+
+        test.identical( starterOptions.env, { 'key1' : 'val', 'PATH' : process.env.PATH } );
+        test.identical( op.env, { 'key1' : 'val', 'PATH' : process.env.PATH } );
+        test.true( starterOptions.env !== op.env );
+
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, default options, second run`;
+
+      return shell
+      ({
+        execPath : testAppPath2
+      })
+      .then( ( op ) =>
+      {
+        let exec;
+        if( mode === 'spawn' )
+        exec = `node ${testAppPath2} arg1 arg2`;
+        else if( mode === 'fork' )
+        exec = `${testAppPath2} arg1 arg2`;
+        else if( mode === 'shell' )
+        exec = `node ${testAppPath2} "arg1" "arg2"`;
+        test.identical( op.execPath2, exec );
+
+        test.identical( starterOptions.outputColoring, { out : 0, err : 0 } );
+        test.identical( op.outputColoring, { out : 0, err : 0 } );
+        test.true( starterOptions.outputColoring !== op.outputColoring );
+
+        test.identical( starterOptions.env, { 'key1' : 'val', 'PATH' : process.env.PATH } );
+        test.identical( op.env, { 'key1' : 'val', 'PATH' : process.env.PATH } );
+        test.true( starterOptions.env !== op.env );
+
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, with outputColoring map`;
+
+      return shell
+      ({
+        execPath : testAppPath,
+        outputColoring : { out : 0, err : 1 }
+      })
+      .then( ( op ) =>
+      {
+        test.identical( starterOptions.outputColoring, { out : 0, err : 0 } );
+        test.identical( op.outputColoring, { out : 0, err : 1 } );
+        test.true( starterOptions.outputColoring !== op.outputColoring );
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, with env`;
+
+      return shell
+      ({
+        execPath : testAppPath,
+        env : { 'key2' : 'val2', 'PATH' : process.env.PATH }
+      })
+      .then( ( op ) =>
+      {
+        test.identical( starterOptions.env, { 'key1' : 'val', 'PATH' : process.env.PATH } );
+        test.identical( op.env, { 'key2' : 'val2', 'PATH' : process.env.PATH } );
+        test.true( starterOptions.env !== op.env );
+        return null;
+      })
+    })
+
+    /* */
+
+    ready.then( () =>
+    {
+      test.case = `mode : ${mode}, imitate eslint integration routine`;
+
+      let ready = _.take( null );
+
+      let start = _.process.starter
+      ({
+        execPath : testAppPath3,
+        mode : 'fork',
+        args : [ 'arg1', 'arg2' ],
+        throwingExitCode : 0,
+        outputCollecting : 1,
+      });
+
+      /* */
+
+      ready.then( () =>
+      {
+        test.case = 'first run';
+        return start( testAppPath );
+      })
+      .then( ( op ) =>
+      {
+        test.false( _.strHas( op.execPath2, testAppPath2 ) );
+        test.true( _.strHas( op.execPath2, testAppPath3 ) );
+        test.true( _.strHas( op.execPath2, testAppPath ) );
+        return null;
+      })
+
+      /* */
+
+      ready.then( () =>
+      {
+        test.case = 'second run';
+        return start( testAppPath2 )
+        .then( ( op ) =>
+        {
+          test.false( _.strHas( op.execPath2, testAppPath ) );
+          test.true( _.strHas( op.execPath2, testAppPath3 ) );
+          test.true( _.strHas( op.execPath2, testAppPath2 ) );
+          return null;
+        })
+      })
+
+      /**/
+
+      return ready;
+    })
+
+    return ready;
+  }
+
+  /* - */
+
+  function first()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+
+  function second()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+
+  function program()
+  {
+    console.log( process.argv.slice( 2 ) );
+  }
+}
+
 
 // --
 // output
@@ -20131,7 +20521,7 @@ function startMinimalOptionOutputColoring( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -20367,7 +20757,7 @@ function startMinimalOptionOutputColoringStderr( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -20637,7 +21027,7 @@ function startMinimalOptionOutputColoringStdout( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -21059,7 +21449,7 @@ function startMinimalOptionOutputPrefixing( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -21723,7 +22113,7 @@ function startMinimalOptionOutputPiping( test )
 2020-12-05T17:31:19.5110073Z 15 :
 2020-12-05T17:31:19.5135695Z  1 : function testApp()
 2020-12-05T17:31:19.5136282Z  2 :   {
-2020-12-05T17:31:19.5136828Z  3 :     let _ = require( toolsPath );
+2020-12-05T17:31:19.5136828Z  3 :     const _ = require( toolsPath );
 2020-12-05T17:31:19.5137453Z  4 :     _.include( 'wProcess' );
 2020-12-05T17:31:19.5138536Z  5 :     _.include( 'wFiles' );
 2020-12-05T17:31:19.5139083Z  6 :
@@ -22458,7 +22848,7 @@ zzz <-
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -22831,7 +23221,7 @@ function startMinimalOptionInputMirroring( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -22924,7 +23314,7 @@ function startMinimalOptionInputMirroringFail( test )
         2020-12-22T10:55:54.9590773Z 15 :
         2020-12-22T10:55:54.9591324Z  1 : function testApp()
         2020-12-22T10:55:54.9591692Z  2 :   {
-        2020-12-22T10:55:54.9592259Z  3 :     let _ = require( toolsPath );
+        2020-12-22T10:55:54.9592259Z  3 :     const _ = require( toolsPath );
         2020-12-22T10:55:54.9593041Z  4 :     _.include( 'wProcess' );
         2020-12-22T10:55:54.9593597Z  5 :     _.include( 'wFiles' );
         2020-12-22T10:55:54.9594228Z  6 :
@@ -23018,7 +23408,7 @@ function startMinimalOptionInputMirroringFail( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -23731,13 +24121,13 @@ function startMinimalOutputOptionsCompatibilityLateCheck( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     console.log( 'Test output' );
   }
 
   function testAppParent()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
     _.include( 'wProcess' );
 
@@ -24365,7 +24755,7 @@ function startMinimalOptionVerbosityLogging( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -24388,7 +24778,7 @@ function startMinimalOptionVerbosityLogging( test )
 
   function testAppError()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -24925,7 +25315,7 @@ function startMultipleOutput( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
     let args = _.process.input();
@@ -25066,7 +25456,7 @@ function startMultipleOptionStdioIgnore( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
     let args = _.process.input();
@@ -25259,7 +25649,7 @@ function startMultipleOptionOutputAdditive( test )
 
   function testAppParent()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
 
     var o =
@@ -25426,7 +25816,7 @@ function outputLog( test )
 
   function testAppParent()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
 
     let o =
@@ -27144,7 +27534,7 @@ function startSingleOptionCurrentPath( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
     _.fileProvider.fileWrite( testFilePath, process.cwd() );
   }
@@ -27905,7 +28295,7 @@ function startPassingThrough( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
     _.include( 'wProcess' );
 
@@ -27916,7 +28306,7 @@ function startPassingThrough( test )
 
   function program2()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
     _.include( 'wProcess' );
 
@@ -27976,7 +28366,7 @@ function startMinimalOptionUid( test ) /* Runs only through `sudo` ( i.e. with s
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
     _.include( 'wProcess' );
 
@@ -28033,7 +28423,7 @@ function startMinimalOptionGid( test ) /* Runs only through `sudo` ( i.e. with s
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
     _.include( 'wProcess' );
 
@@ -28922,7 +29312,7 @@ Launched at ${_.strQuote( options.currentPath )} \n
 
   function testAppParent()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
 
     let o =
@@ -29065,7 +29455,7 @@ function startMinimalDiffPid( test )
 
   function testAppParent()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -29096,7 +29486,7 @@ function startMinimalDiffPid( test )
 
   function testAppChild()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
     console.log( 'Child process start', process.pid );
@@ -29360,7 +29750,7 @@ function exitReason( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     let result = [];
 
@@ -29626,7 +30016,7 @@ function exitCode( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -29640,7 +30030,7 @@ function exitCode( test )
 
   function testAppExit()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -29649,7 +30039,7 @@ function exitCode( test )
 
   function testAppExitCode()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -30671,7 +31061,7 @@ function killOptionWithChildren( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
     var o =
@@ -30698,7 +31088,7 @@ function killOptionWithChildren( test )
 
   function testApp3()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
     let detaching = process.argv[ 2 ] === 'detached';
@@ -31098,7 +31488,7 @@ function startMinimalTerminateHangedWithExitHandler( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.process._exitHandlerRepair();
     process.send( process.pid )
@@ -31287,7 +31677,7 @@ function startMinimalTerminateAfterLoopRelease( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
 
     _.include( 'wProcess' );
     _.process._exitHandlerRepair();
@@ -32409,7 +32799,7 @@ deasync:begin
         2020-12-15T07:09:53.8293240Z 10 :
         2020-12-15T07:09:53.8293851Z 11 :     if( withTools || withDeasync )
         2020-12-15T07:09:53.8294517Z 12 :     {
-        2020-12-15T07:09:53.8295113Z 13 :       let _ = require( toolsPath );
+        2020-12-15T07:09:53.8295113Z 13 :       const _ = require( toolsPath );
         2020-12-15T07:09:53.8295837Z 14 :       _.include( 'wProcess' );
         2020-12-15T07:09:53.8296579Z 15 :       _.process._exitHandlerRepair();
         2020-12-15T07:09:53.8297592Z 16 :     }
@@ -32440,7 +32830,7 @@ deasync:begin
         2020-12-15T07:09:53.8312374Z 41 :
         2020-12-15T07:09:53.8312936Z 42 :     function deasync( delay )
         2020-12-15T07:09:53.8313484Z 43 :     {
-        2020-12-15T07:09:53.8313994Z 44 :       let _ = wTools;
+        2020-12-15T07:09:53.8313994Z 44 :       const _ = _global_.wTools;
         2020-12-15T07:09:53.8316261Z 45 :       console.log( 'deasync:begin' );
         2020-12-15T07:09:53.8317042Z 46 :       let con = new _.Consequence().take( null );
         2020-12-15T07:09:53.8317791Z 47 :       con.delay( delay ).deasync();
@@ -33324,7 +33714,7 @@ deasync:end
 
     if( withTools || withDeasync )
     {
-      let _ = require( toolsPath );
+      const _ = require( toolsPath );
       _.include( 'wProcess' );
       _.process._exitHandlerRepair();
     }
@@ -33355,7 +33745,7 @@ deasync:end
 
     function deasync( delay )
     {
-      let _ = wTools;
+      const _ = _global_.wTools;
       console.log( 'deasync:begin' );
       let con = new _.Consequence().take( null );
       con.delay( delay ).deasync();
@@ -33922,7 +34312,7 @@ Killed
 
     if( withTools )
     {
-      let _ = require( toolsPath );
+      const _ = require( toolsPath );
       _.include( 'wProcess' );
       _.process._exitHandlerRepair();
     }
@@ -34154,7 +34544,7 @@ exit:${exitCode}
 
     if( withTools )
     {
-      let _ = require( toolsPath );
+      const _ = require( toolsPath );
       _.include( 'wProcess' );
       _.process._exitHandlerRepair();
     }
@@ -34835,7 +35225,7 @@ function terminate( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.process._exitHandlerRepair();
     if( process.send )
@@ -35002,7 +35392,7 @@ function terminateSync( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.process._exitHandlerRepair();
     if( process.send )
@@ -35189,7 +35579,7 @@ function terminateFirstChild( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -35221,7 +35611,7 @@ function terminateFirstChild( test )
 
   function program2()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
 
     console.log( `childPid : ${process.pid}` );
@@ -35394,7 +35784,7 @@ function terminateSecondChild( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
     var o =
@@ -35437,7 +35827,7 @@ function terminateSecondChild( test )
 
   function program2()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
 
     _.fileProvider.fileWrite
@@ -35607,7 +35997,7 @@ function terminateDetachedFirstChild( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
     var o =
@@ -35634,7 +36024,7 @@ function terminateDetachedFirstChild( test )
 
   function program2()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
 
     _.fileProvider.fileWrite
@@ -35749,7 +36139,7 @@ function terminateWithDetachedChild( test )
       2020-11-30T18:29:51.9440081Z       Running TestSuite::Tools.l4.process.Execution / TestRoutine::terminateWithDetachedChild ..
       2020-11-30T18:29:52.0223160Z  1 : function program1()
       2020-11-30T18:29:52.0224260Z  2 :   {
-      2020-11-30T18:29:52.0225033Z  3 :     let _ = require( toolsPath );
+      2020-11-30T18:29:52.0225033Z  3 :     const _ = require( toolsPath );
       2020-11-30T18:29:52.0226523Z  4 :     _.include( 'wProcess' );
       2020-11-30T18:29:52.0227598Z  5 :     _.include( 'wFiles' );
       2020-11-30T18:29:52.0228360Z  6 :     var o =
@@ -35785,7 +36175,7 @@ function terminateWithDetachedChild( test )
       2020-11-30T18:29:52.0256533Z 36 :
       2020-11-30T18:29:52.0259582Z  1 : function program2()
       2020-11-30T18:29:52.0261227Z  2 :   {
-      2020-11-30T18:29:52.0262747Z  3 :     let _ = require( toolsPath );
+      2020-11-30T18:29:52.0262747Z  3 :     const _ = require( toolsPath );
       2020-11-30T18:29:52.0266611Z  4 :     _.include( 'wFiles' );
       2020-11-30T18:29:52.0268924Z  5 :
       2020-11-30T18:29:52.0270672Z  6 :     _.fileProvider.fileWrite
@@ -36003,7 +36393,7 @@ function terminateWithDetachedChild( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
     var o =
@@ -36030,7 +36420,7 @@ function terminateWithDetachedChild( test )
 
   function program2()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
 
     _.fileProvider.fileWrite
@@ -36312,7 +36702,7 @@ function terminateSeveralChildren( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -36338,7 +36728,7 @@ function terminateSeveralChildren( test )
 
   function program2()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
 
     _.fileProvider.fileWrite
@@ -36366,7 +36756,7 @@ function terminateSeveralChildren( test )
 
   function program3()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
 
     _.fileProvider.fileWrite
@@ -36517,7 +36907,7 @@ function terminateSeveralDetachedChildren( test )
 
   function program1()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -36544,7 +36934,7 @@ function terminateSeveralDetachedChildren( test )
 
   function program2()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
 
     _.fileProvider.fileWrite
@@ -36572,7 +36962,7 @@ function terminateSeveralDetachedChildren( test )
 
   function program3()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wFiles' );
 
     _.fileProvider.fileWrite
@@ -37705,7 +38095,7 @@ function killComplex( test )
 
   function testApp2()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
     var testAppPath = _.fileProvider.path.nativize( _.path.join( __dirname, 'testApp.js' ) );
@@ -37766,6 +38156,185 @@ function execPathOf( test )
   {
     setTimeout( () => {}, context.t1 * 5 ) /* 5000 */
   }
+}
+
+//
+
+function execPathOfOptionSync( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+  let testAppPath = a.program( testApp );
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync : 1, pnd, no error';
+
+    let o = { execPath : testAppPath };
+
+    _.process.startNjs( o )
+
+    o.conStart.then( ( op ) =>
+    {
+      let execPath = _.process.execPathOf({ pnd : o.pnd, sync : 1 });
+      test.true( _.strHas( execPath, op.execPath ) );
+
+      return null;
+    })
+
+    return _.Consequence.And( o.conStart, o.conTerminate );
+  })
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync : 0, pnd, no error';
+
+    let o = { execPath : testAppPath };
+
+    _.process.startNjs( o )
+
+    o.conStart.then( ( op ) =>
+    {
+      _.process.execPathOf({ pnd : o.pnd, sync : 0 })
+      .then( ( arg ) =>
+      {
+        test.true( _.strHas( arg, op.execPath ) );
+        return null;
+      })
+
+      return null;
+    })
+
+    return _.Consequence.And( o.conStart, o.conTerminate );
+  })
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync : 1, pid, no error';
+
+    let o = { execPath : testAppPath };
+
+    _.process.startNjs( o )
+
+    o.conStart.then( ( op ) =>
+    {
+      let execPath = _.process.execPathOf({ pid : o.pnd.pid, sync : 1 });
+      test.true( _.strHas( execPath, op.execPath ) );
+
+      return null;
+    })
+
+    return _.Consequence.And( o.conStart, o.conTerminate );
+  })
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync : 0, pid, no error';
+
+    let o = { execPath : testAppPath };
+
+    _.process.startNjs( o )
+
+    o.conStart.then( ( op ) =>
+    {
+      _.process.execPathOf({ pid : o.pnd.pid, sync : 0 })
+      .then( ( arg ) =>
+      {
+        test.true( _.strHas( arg, op.execPath ) );
+        return null;
+      })
+
+      return null;
+    })
+
+    return _.Consequence.And( o.conStart, o.conTerminate );
+  })
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync : 1, wrong pid';
+
+    let returned = test.shouldThrowErrorSync( () => _.process.execPathOf({ pid : 111111, sync : 1 }) );
+
+    test.true( _.errIs( returned ) );
+    test.equivalent( returned.message, 'Target process: "111111" does not exist.' )
+
+    return null;
+  })
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync : 0, wrong pid';
+
+    test.shouldThrowErrorAsync( () => _.process.execPathOf({ pid : 111111, sync : 0 }) )
+    .then( ( err ) =>
+    {
+      test.true( _.errIs( err ) );
+      test.equivalent( err.message, 'Target process: "111111" does not exist.' );
+
+      return null;
+    });
+
+    return null;
+  })
+
+  return a.ready;
+
+  /* */
+
+  function testApp()
+  {
+    setTimeout( () => {}, context.t1 * 5 ) /* 5000 */
+  }
+}
+
+//
+
+function execPathOfOptionThrowing( test )
+{
+  let context = this;
+  let a = context.assetFor( test, false );
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync : 1, throwing : 0, wrong pid';
+
+    let returned = _.process.execPathOf({ pid : 111111, sync : 1, throwing : 0 });
+
+    test.identical( returned, null );
+
+    return null;
+  })
+
+  /* */
+
+  a.ready.then( () =>
+  {
+    test.case = 'sync : 0, throwing : 0, wrong pid';
+
+    return _.process.execPathOf({ pid : 111111, sync : 0, throwing : 0 })
+    .then( ( op ) =>
+    {
+      test.identical( op, null );
+      return null;
+    });
+
+  })
+
+  return a.ready;
+
 }
 
 //
@@ -38162,7 +38731,7 @@ function children( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
     var o =
@@ -38331,7 +38900,7 @@ function childrenOptionFormatList( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     var o =
     {
@@ -38671,7 +39240,7 @@ function experiment( test )
 
   function testApp()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -38889,6 +39458,7 @@ const Proto =
     starter,
     starterArgs,
     starterFields,
+    starterOptionsPollution,
 
     // output
 
@@ -38981,6 +39551,8 @@ const Proto =
 
     killComplex,
     execPathOf,
+    execPathOfOptionSync,
+    execPathOfOptionThrowing,
     waitForDeath,
 
     // children
@@ -39004,12 +39576,9 @@ const Proto =
 
 }
 
-_.mapExtend( Self, Proto );
-
 //
 
-
-Self = wTestSuite( Proto );
+const Self = wTestSuite( Proto );
 if( typeof module !== 'undefined' && !module.parent )
 wTester.test( Self );
 
