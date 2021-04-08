@@ -4,6 +4,8 @@
 /builder
 /binding
 /node_modules
+/.module
+/package-lock.json
 
 -*
 .module

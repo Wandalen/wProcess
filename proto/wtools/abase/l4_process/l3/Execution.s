@@ -3,7 +3,7 @@
 
 'use strict';
 
-let System, ChildProcess, StripAnsi, WindowsProcessTree, Stream;
+let System, ChildProcess, WindowsProcessTree, Stream;
 const _global = _global_;
 const _ = _global_.wTools;
 const Self = _.process = _.process || Object.create( null );
@@ -127,7 +127,7 @@ function startMinimalHeadCommon( routine, args )
   );
 
   if( o.outputAdditive === null )
-  o.outputAdditive = true;
+  o.outputAdditive = true; /* yyy */
   o.outputAdditive = !!o.outputAdditive;
   _.assert( _.boolLike( o.outputAdditive ) );
 
@@ -425,9 +425,9 @@ function startMinimal_body( o )
     if( !ChildProcess )
     ChildProcess = require( 'child_process' );
 
-    if( o.outputGraying )
-    if( !StripAnsi )
-    StripAnsi = require( 'strip-ansi' );
+    // if( o.outputGraying )
+    // if( !StripAnsi )
+    // StripAnsi = require( 'strip-ansi' );
 
     if( o.outputColoring.err || o.outputColoring.out && typeof module !== 'undefined' )
     try
@@ -748,6 +748,7 @@ function startMinimal_body( o )
 
     if( !o.outputAdditive )
     {
+      debugger;
       if( _decoratedOutOutput )
       o.logger.log( _decoratedOutOutput );
       if( _decoratedErrOutput )
@@ -793,6 +794,7 @@ function startMinimal_body( o )
 
     if( o.outputAdditive && _outAdditive )
     {
+      debugger;
       o.logger.log( _outAdditive );
       _outAdditive = '';
     }
@@ -1188,7 +1190,8 @@ function startMinimal_body( o )
     data = String( data );
 
     if( o.outputGraying )
-    data = StripAnsi( data );
+    data = _.ct.stripAnsi( data );
+    // data = StripAnsi( data );
 
     if( channel === 'err' )
     _errOutput += data;
@@ -1291,6 +1294,7 @@ function startMinimal_body( o )
           _outAdditive += left;
         }
       }
+      /* qqq : for Yevhen : bad : it cant be working */
       if( channel === 'err' )
       o.logger.error( msg );
       else
@@ -1499,7 +1503,7 @@ function startSingle_body( o )
 
   function formAfterDeath()
   {
-    let toolsPath = _.path.nativize( _.path.join( __dirname, '../../../../wtools/Tools.s' ) );
+    let toolsPath = _.path.nativize( _.path.join( __dirname, '../../../../node_modules/Tools' ) );
     let excludeOptions =
     {
       ready : null,
@@ -1532,7 +1536,7 @@ function startSingle_body( o )
 
   function afterDeathSecondaryProcess()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
     // let ipc = require( ipcPath );
@@ -1723,7 +1727,7 @@ function startMultiple_head( routine, args )
  *
  * @example //short way, command and arguments in one string
  *
- * let _ = require( 'wTools' )
+ * const _ = require( 'wTools' )
  * _.include( 'wProcessBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
@@ -1738,7 +1742,7 @@ function startMultiple_head( routine, args )
  *
  * @example //command and arguments as options
  *
- * let _ = require( 'wTools' )
+ * const _ = require( 'wTools' )
  * _.include( 'wProcessBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
@@ -2215,7 +2219,8 @@ function startMultiple_body( o )
     if( _.bufferNodeIs( data ) )
     data = data.toString( 'utf8' );
     if( o.outputGraying )
-    data = StripAnsi( data );
+    data = _.ct.stripAnsi( data );
+    // data = StripAnsi( data );
     if( o.outputCollecting )
     o.output += data;
   }
@@ -2265,7 +2270,7 @@ defaults.mode = 'spawn';
  *
  * @example
  *
- * let _ = require( 'wTools' )
+ * const _ = require( 'wTools' )
  * _.include( 'wProcessBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
@@ -2357,7 +2362,7 @@ let startNjs = _.routine.uniteCloning_( startMultiple_head, startNjs_body );
  *
  * @example
  *
- * let _ = require( 'wTools' )
+ * const _ = require( 'wTools' )
  * _.include( 'wProcessBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
@@ -2398,7 +2403,7 @@ defaults.mode = 'fork';
  *
  * @example //single command execution
  *
- * let _ = require( 'wTools' )
+ * const _ = require( 'wTools' )
  * _.include( 'wProcessBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
@@ -2415,7 +2420,7 @@ defaults.mode = 'fork';
  *
  * @example //multiple commands execution with same args
  *
- * let _ = require( 'wTools' )
+ * const _ = require( 'wTools' )
  * _.include( 'wProcessBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
@@ -2434,7 +2439,7 @@ defaults.mode = 'fork';
  * //multiple commands execution with same args, using sinle consequence
  * //second command will be executed when first is finished
  *
- * let _ = require( 'wTools' )
+ * const _ = require( 'wTools' )
  * _.include( 'wProcessBasic' )
  * _.include( 'wConsequence' )
  * _.include( 'wLogger' )
@@ -2478,8 +2483,32 @@ function starter( o0 )
 
   function er()
   {
+    /*
+      non-primitive options :
+
+      - execPath( in multiple runs )        : array
+      - currentPath( in multiple runs )     : array
+      - args                                : array
+      - interpreterArgs                     : array
+      - stdio                               : array
+      - logger                              : object
+      - procedure                           : object
+      - ready                               : routine
+      - conStart                            : routine
+      - conTerminate                        : routine
+      - conDisconnect                       : routine
+      - outputColoring                      : aux
+      - env                                 : aux
+    */
     let o = optionsFrom( arguments[ 0 ] );
     let o00 = _.mapExtend( null, o0 );
+    for( let k in o00 )
+    {
+      if( _.arrayIs( o00[ k ] ) )
+      o00[ k ] = o00[ k ].slice();
+      else if( _.aux.is( o00[ k ] ) )
+      o00[ k ] = _.mapExtend( null, o00[ k ] );
+    }
     merge( o00, o );
     _.mapExtend( o, o00 )
 
@@ -2537,7 +2566,9 @@ function starter( o0 )
 
 }
 
-starter.defaults = Object.create( startMultiple.defaults );
+// starter.defaults = Object.create( startMultiple.defaults );
+// starter.defaults = _.mapBut_( startMultiple.defaults, [ 'procedure' ] ); /* qqq : for Yevhen : very bad */
+starter.defaults = _.mapBut_( null, startMultiple.defaults, [ 'procedure' ] );
 
 // --
 // children
@@ -3372,7 +3403,7 @@ function _startTree( o )
 
   function program()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
@@ -3411,7 +3442,7 @@ function _startTree( o )
 
   function child()
   {
-    let _ = require( toolsPath );
+    const _ = require( toolsPath );
     _.include( 'wProcess' );
     _.include( 'wFiles' );
 
