@@ -393,9 +393,6 @@ function startMinimal_body( o )
     {
       o.procedure = _.Procedure({ _stack : o.stack });
 
-      // let stackSplitted = o.stack.split( '\n' );
-      // if( stackSplitted.length > 2 && _.strHas( stackSplitted[ 1 ], /^at er (.)+Execution.s/g ) )
-      // o.procedure._sourcePath = stackSplitted[ 2 ];
     }
 
     if( _.routineIs( o.args ) )
@@ -1797,7 +1794,11 @@ function startMultiple_body( o )
   function form0()
   {
     if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
-    o.stack = _.Procedure.Stack( o.stack, 4 ); /* delta : 4 to not include info about `routine.unite` in the stack */
+    {
+      o.stack = _.Procedure.Stack( o.stack, 4 ); /* delta : 4 to not include info about `routine.unite` in the stack */
+      if( _.strHas( o.stack, /^at er (.)+Execution.s/g ) ) /* launced from `starter` */
+      o.stack = o.stack.slice( o.stack.indexOf( '\n' ) + 1 )
+    }
   }
 
   /* */
