@@ -9215,9 +9215,9 @@ function startAllProcedureStack( test )
   let programPath = a.program( program1 );
   let modes = [ 'fork', 'spawn', 'shell' ];
   modes.forEach( ( mode ) => a.ready.then( () => run( 0, 0, mode ) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => run( 1, 0, mode ) ) );
-  // modes.forEach( ( mode ) => a.ready.then( () => run( 1, 1, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 0, 1, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 0, mode ) ) );
+  modes.forEach( ( mode ) => a.ready.then( () => run( 1, 1, mode ) ) );
   return a.ready;
 
   /*  */
@@ -9519,8 +9519,6 @@ function startAllProcedureStack( test )
 
       o.ready.then( ( op ) =>
       {
-        console.log( '00000', op.procedure._stack )
-
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
 
@@ -9553,7 +9551,6 @@ function startAllProcedureStack( test )
 
       o.ready.then( ( op ) =>
       {
-        console.log( '00000', op.procedure._sourcePath )
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
 
@@ -9618,8 +9615,6 @@ function startAllProcedureStack( test )
 
       o.ready.then( ( op ) =>
       {
-        console.log( '11111', op.procedure._stack )
-
         test.identical( op.exitCode, 0 );
         test.identical( op.ended, true );
 
@@ -9754,6 +9749,8 @@ function startAllProcedureStack( test )
   }
 
 }
+
+startAllProcedureStack.timeOut = 8e5; /* Locally : 82.736s */
 
 //
 
