@@ -37130,7 +37130,7 @@ function terminateDetachedFirstChild( test )
 
       let o =
       {
-        execPath : 'node program1.js',
+        execPath : 'node program1',
         currentPath : a.routinePath,
         mode : 'spawn',
         outputPiping : 1,
@@ -37245,7 +37245,7 @@ function terminateDetachedFirstChild( test )
     _.include( 'wFiles' );
     var o =
     {
-      execPath : mode === 'fork' ? 'program2.js' : 'node program2.js',
+      execPath : mode === 'fork' ? 'program2' : 'node program2',
       currentPath : __dirname,
       mode,
       stdio : 'pipe',
@@ -37509,7 +37509,7 @@ function terminateWithDetachedChild( test )
 
       let o =
       {
-        execPath : mode === 'fork' ? 'program1.js' : 'node program1.js',
+        execPath : mode === 'fork' ? 'program1' : 'node program1',
         currentPath : a.routinePath,
         mode,
         outputPiping : 1,
@@ -37641,7 +37641,7 @@ function terminateWithDetachedChild( test )
     _.include( 'wFiles' );
     var o =
     {
-      execPath : mode === 'fork' ? 'program2.js' : 'node program2.js',
+      execPath : mode === 'fork' ? 'program2' : 'node program2',
       currentPath : __dirname,
       mode,
       stdio : 'pipe',
@@ -37726,7 +37726,7 @@ function terminateSeveralChildren( test )
 
       let o =
       {
-        execPath : mode === 'fork' ? 'program1.js' : 'node program1.js',
+        execPath : mode === 'fork' ? 'program1' : 'node program1',
         currentPath : a.routinePath,
         mode,
         outputPiping : 1,
@@ -37959,8 +37959,8 @@ function terminateSeveralChildren( test )
       throwingExitCode : 0,
     }
 
-    _.process.startMinimal( _.mapExtend( null, o, { execPath : 'node program2.js', mode : 'spawn' }));
-    _.process.startMinimal( _.mapExtend( null, o, { execPath : 'node program3.js', mode : 'spawn' }));
+    _.process.startMinimal( _.mapExtend( null, o, { execPath : 'node program2', mode : 'spawn' }));
+    _.process.startMinimal( _.mapExtend( null, o, { execPath : 'node program3', mode : 'spawn' }));
 
     let timer = _.time.outError( context.t1*32 );
 
@@ -38056,7 +38056,7 @@ function terminateSeveralDetachedChildren( test )
 
       let o =
       {
-        execPath : mode === 'fork' ? 'program1.js' : 'node program1.js',
+        execPath : mode === 'fork' ? 'program1' : 'node program1',
         currentPath : a.routinePath,
         mode,
         outputPiping : 1,
@@ -38165,8 +38165,8 @@ function terminateSeveralDetachedChildren( test )
       throwingExitCode : 0,
     }
 
-    _.process.startMinimal( _.mapExtend( null, o, { execPath : 'node program2.js', mode : 'spawn' }));
-    _.process.startMinimal( _.mapExtend( null, o, { execPath : 'node program3.js', mode : 'spawn' }));
+    _.process.startMinimal( _.mapExtend( null, o, { execPath : 'node program2', mode : 'spawn' }));
+    _.process.startMinimal( _.mapExtend( null, o, { execPath : 'node program3', mode : 'spawn' }));
 
     let timer = _.time.outError( context.t1*25 );
 
@@ -38259,7 +38259,7 @@ function terminateDeadProcess( test )
       test.case = `mode : ${mode}`;
       let o =
       {
-        execPath : mode === 'fork' ? 'program1.js' : 'node program1.js',
+        execPath : mode === 'fork' ? 'program1' : 'node program1',
         currentPath : a.routinePath,
         mode,
         outputPiping : 1,
@@ -39979,7 +39979,7 @@ function children( test )
     _.include( 'wFiles' );
     var o =
     {
-      execPath : 'node testApp2.js',
+      execPath : 'node testApp2',
       currentPath : __dirname,
       mode : 'spawn',
       inputMirroring : 0
@@ -40147,7 +40147,7 @@ function childrenOptionFormatList( test )
     _.include( 'wProcess' );
     var o =
     {
-      execPath : 'node testApp2.js',
+      execPath : 'node testApp2',
       currentPath : __dirname,
       mode : 'spawn',
       inputMirroring : 0,
