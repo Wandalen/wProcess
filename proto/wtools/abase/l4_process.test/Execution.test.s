@@ -11837,7 +11837,7 @@ function startSingleAfterDeath( test )
       let stack = [];
       let o =
       {
-        execPath : mode === 'fork' ? 'program1.js' : 'node program1.js',
+        execPath : mode === 'fork' ? 'program1' : 'node program1',
         mode,
         outputCollecting : 1,
         outputPiping : 1,
@@ -11911,7 +11911,7 @@ function startSingleAfterDeath( test )
 
     let o =
     {
-      execPath : 'node program2.js',
+      execPath : 'node program2',
       outputCollecting : 1,
       when : 'afterdeath',
       mode : 'spawn',
@@ -11984,7 +11984,7 @@ function startSingleAfterDeathTerminatingMain( test )
       let stack = [];
       let o =
       {
-        execPath : mode === 'fork' ? 'program1.js' : 'node program1.js',
+        execPath : mode === 'fork' ? 'program1' : 'node program1',
         mode,
         outputCollecting : 1,
         outputPiping : 1,
@@ -12271,7 +12271,7 @@ function startSingleAfterDeathOutput( test )
 
     let o =
     {
-      execPath : 'node program2.js',
+      execPath : 'node program2',
       mode : 'spawn',
       currentPath : __dirname,
       when : 'afterdeath',
@@ -21097,16 +21097,20 @@ function starterFields( test )
   test.contains( _.mapKeys( start ), _.mapKeys( _.process.start ) );
   test.identical( _.mapKeys( start.defaults ), _.mapKeys( _.process.start.body.defaults ) );
   test.identical( start.head, _.process.start.head );
-  test.identical( start.body, _.process.start.body );
-  test.identical( _.mapKeys( start.predefined ), _.mapKeys( _.process.start.body.defaults ) );
+  // test.identical( start.body, _.process.start.body ); /* created through `routine.uniteCloning`, reference is not the same */
+  test.identical( start.body.defaults, _.process.start.body.defaults );
+  test.identical( start.body.name, _.process.start.body.name );
+  test.identical( _.mapKeys( start.predefined ), _.mapKeys( _.mapBut_( null, _.process.start.body.defaults, [ 'procedure' ] ) ) ); /* starter doesn't have option::procedure */
 
   test.case = 'execPath';
   var start = _.process.starter( 'node -v' );
   test.contains( _.mapKeys( start ), _.mapKeys( _.process.start ) );
   test.identical( _.mapKeys( start.defaults ), _.mapKeys( _.process.start.body.defaults ) );
   test.identical( start.head, _.process.start.head );
-  test.identical( start.body, _.process.start.body );
-  test.identical( _.mapKeys( start.predefined ), _.mapKeys( _.process.start.body.defaults ) );
+  // test.identical( start.body, _.process.start.body ); /* created through `routine.uniteCloning`, reference is not the same */
+  test.identical( start.body.defaults, _.process.start.body.defaults );
+  test.identical( start.body.name, _.process.start.body.name );
+  test.identical( _.mapKeys( start.predefined ), _.mapKeys( _.mapBut_( null, _.process.start.body.defaults, [ 'procedure' ] ) ) ); /* starter doesn't have option::procedure */
   test.identical( start.predefined.execPath, 'node -v' );
 
   test.case = 'object';
@@ -21120,11 +21124,13 @@ function starterFields( test )
   test.contains( _.mapKeys( start ), _.mapKeys( _.process.start ) );
   test.identical( _.mapKeys( start.defaults ), _.mapKeys( _.process.start.body.defaults ) );
   test.identical( start.head, _.process.start.head );
-  test.identical( start.body, _.process.start.body );
-  test.true( _.arraySetIdentical( _.mapKeys( start.predefined ), _.mapKeys( _.process.start.body.defaults ) ) );
+  // test.identical( start.body, _.process.start.body ); /* created through `routine.uniteCloning`, reference is not the same */
+  test.identical( start.body.defaults, _.process.start.body.defaults );
+  test.identical( start.body.name, _.process.start.body.name );
+  test.true( _.arraySetIdentical( _.mapKeys( start.predefined ), _.mapKeys( _.mapBut_( null, _.process.start.body.defaults, [ 'procedure' ] ) ) ) ); /* starter doesn't have option::procedure */
   test.identical( start.predefined.execPath, 'node -v' );
   test.identical( start.predefined.args, [ 'arg1', 'arg2' ] );
-  test.identical( start.predefined.ready, ready  );
+  test.identical( start.predefined.ready, ready );
 }
 
 //
