@@ -27591,7 +27591,7 @@ function startMinimalOptionStreamSizeLimit( test )
       let returned = test.shouldThrowErrorSync( () => _.process.startMinimal( options ) )
 
       test.true( _.errIs( returned ) );
-      test.true( _.strHas( returned.message, `code : 'ENOBUFS'`) )
+      test.true( _.strHas( returned.message, 'ENOBUFS' ) )
 
       test.notIdentical( options.exitCode, 0 );
 
