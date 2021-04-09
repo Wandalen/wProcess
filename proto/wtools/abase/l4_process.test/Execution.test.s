@@ -8987,6 +8987,8 @@ function startAllProcedureSourcePath( test )
 
 }
 
+startAllProcedureSourcePath.timeOut = 8e4; /* Locally : 7.923s */
+
 //
 
 function startAllProcedureSourcePathInSubprocess( test )
@@ -9204,6 +9206,8 @@ function startAllProcedureSourcePathInSubprocess( test )
   }
 
 }
+
+startAllProcedureSourcePathInSubprocess.timeOut = 5e5; /* Locally : 41.865s */
 
 //
 
