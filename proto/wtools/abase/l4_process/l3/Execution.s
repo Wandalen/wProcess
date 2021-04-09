@@ -397,7 +397,6 @@ function startMinimal_body( o )
     if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
     {
       o.procedure = _.Procedure({ _stack : o.stack });
-
     }
 
     if( _.routineIs( o.args ) )
