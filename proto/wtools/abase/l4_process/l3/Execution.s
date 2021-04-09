@@ -1796,8 +1796,6 @@ function startMultiple_body( o )
     if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
     {
       o.stack = _.Procedure.Stack( o.stack, 4 ); /* delta : 4 to not include info about `routine.unite` in the stack */
-      if( _.strHas( o.stack, /^at er (.)+Execution.s/g ) ) /* launced from `starter` */
-      o.stack = o.stack.slice( o.stack.indexOf( '\n' ) + 1 )
     }
   }
 
@@ -2519,6 +2517,9 @@ function starter( o0 )
       merge( o, o1 );
       _.mapExtend( o, o1 );
     }
+
+    if( o.stack === null || o.stack === undefined )
+    o.stack = _.Procedure.Stack( 1 );
 
     return _.process.startMultiple( o );
   }
