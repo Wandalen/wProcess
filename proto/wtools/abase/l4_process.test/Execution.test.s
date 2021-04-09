@@ -23823,7 +23823,7 @@ function startMinimalOutputOptionsCompatibilityLateCheck( test )
   {
     let commonOptions =
     {
-      execPath : mode === 'fork' ? 'testApp.js' : 'node testApp.js',
+      execPath : mode === 'fork' ? 'testApp' : 'node testApp',
       mode,
       currentPath : a.routinePath,
     }
@@ -24029,7 +24029,7 @@ function startMinimalOutputOptionsCompatibilityLateCheck( test )
 
       let o2 =
       {
-        execPath : 'node testAppParent.js',
+        execPath : 'node testAppParent',
         mode : 'spawn',
         ipc : 1,
         currentPath : a.routinePath,
@@ -24266,7 +24266,7 @@ function startMinimalOutputOptionsCompatibilityLateCheck( test )
 
       let o2 =
       {
-        execPath : 'node testAppParent.js',
+        execPath : 'node testAppParent',
         mode : 'spawn',
         ipc : 1,
         currentPath : a.routinePath,
@@ -29604,7 +29604,7 @@ function startMinimalDiffPid( test )
 
       let o =
       {
-        execPath : 'node testAppParent.js stdio : ignore outputPiping : 0 outputCollecting : 0',
+        execPath : 'node testAppParent stdio : ignore outputPiping : 0 outputCollecting : 0',
         mode : 'spawn',
         outputCollecting : 1,
         currentPath : a.routinePath,
@@ -29668,7 +29668,7 @@ function startMinimalDiffPid( test )
 
     let o =
     {
-      execPath : mode === 'fork' ? 'testAppChild.js' : 'node testAppChild.js',
+      execPath : mode === 'fork' ? 'testAppChild' : 'node testAppChild',
       mode,
       detaching : true,
     }
@@ -31271,7 +31271,7 @@ function killOptionWithChildren( test )
     _.include( 'wFiles' );
     var o =
     {
-      execPath : mode === 'fork' ? 'testApp2.js' : 'node testApp2.js',
+      execPath : mode === 'fork' ? 'testApp2' : 'node testApp2',
       currentPath : __dirname,
       mode,
       stdio : 'inherit',
@@ -31299,7 +31299,7 @@ function killOptionWithChildren( test )
     let detaching = process.argv[ 2 ] === 'detached';
     var o1 =
     {
-      execPath : mode === 'fork' ? 'testApp2.js' : 'node testApp2.js',
+      execPath : mode === 'fork' ? 'testApp2' : 'node testApp2',
       currentPath : __dirname,
       mode,
       detaching,
@@ -31309,7 +31309,7 @@ function killOptionWithChildren( test )
     _.process.startMinimal( o1 );
     var o2 =
     {
-      execPath : mode === 'fork' ? 'testApp2.js' : 'node testApp2.js',
+      execPath : mode === 'fork' ? 'testApp2' : 'node testApp2',
       currentPath : __dirname,
       mode,
       detaching,
@@ -35654,7 +35654,7 @@ function terminateFirstChild( test )
 
       let o =
       {
-        execPath : mode === `fork` ? `program1.js` : `node program1.js`,
+        execPath : mode === `fork` ? `program1` : `node program1`,
         currentPath : a.routinePath,
         mode,
         outputPiping : 1,
@@ -35792,7 +35792,7 @@ function terminateFirstChild( test )
 
     var o =
     {
-      execPath : mode === 'fork' ? 'program2.js' : 'node program2.js',
+      execPath : mode === 'fork' ? 'program2' : 'node program2',
       currentPath : __dirname,
       mode,
       stdio : 'pipe',
@@ -35892,7 +35892,7 @@ function terminateSecondChild( test )
 
       let o =
       {
-        execPath : mode === 'fork' ? 'program1.js' : 'node program1.js',
+        execPath : mode === 'fork' ? 'program1' : 'node program1',
         currentPath : a.routinePath,
         mode,
         outputPiping : 1,
@@ -35994,7 +35994,7 @@ function terminateSecondChild( test )
     _.include( 'wFiles' );
     var o =
     {
-      execPath : mode === 'fork' ? 'program2.js' : 'node program2.js',
+      execPath : mode === 'fork' ? 'program2' : 'node program2',
       currentPath : __dirname,
       mode,
       stdio : 'inherit',
