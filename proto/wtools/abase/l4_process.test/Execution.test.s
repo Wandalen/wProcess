@@ -11159,7 +11159,7 @@ function startSingleAfterDeathOutput( test )
     {
       let o =
       {
-        execPath : mode === 'fork' ? 'program1.js' : 'node program1.js',
+        execPath : mode === 'fork' ? 'program1' : 'node program1',
         mode,
         outputCollecting : 1,
         currentPath : a.routinePath,
@@ -11296,7 +11296,7 @@ function startMinimalDetachingResourceReady( test )
 
       let o =
       {
-        execPath : mode === 'fork' ? 'testAppChild.js' : 'node testAppChild.js',
+        execPath : mode === 'fork' ? 'testAppChild' : 'node testAppChild',
         mode,
         detaching : 1,
         currentPath : a.routinePath,
@@ -11385,7 +11385,7 @@ function startMinimalDetachingNoTerminationBegin( test )
       let testAppChildPath = a.program( testAppChild );
       let o =
       {
-        execPath : 'node testAppParent.js stdio : ignore ipc : false outputPiping : 0 outputCollecting : 0',
+        execPath : 'node testAppParent stdio : ignore ipc : false outputPiping : 0 outputCollecting : 0',
         mode : 'spawn',
         outputCollecting : 1,
         currentPath : a.routinePath,
@@ -11440,7 +11440,7 @@ function startMinimalDetachingNoTerminationBegin( test )
 
       let o =
       {
-        execPath : 'node testAppParent.js stdio : ignore ipc : true outputPiping : 0 outputCollecting : 0',
+        execPath : 'node testAppParent stdio : ignore ipc : true outputPiping : 0 outputCollecting : 0',
         mode : 'spawn',
         outputCollecting : 1,
         currentPath : a.routinePath,
@@ -11488,7 +11488,7 @@ function startMinimalDetachingNoTerminationBegin( test )
 
       let o =
       {
-        execPath : 'node testAppParent.js stdio : pipe',
+        execPath : 'node testAppParent stdio : pipe',
         mode : 'spawn',
         outputCollecting : 1,
         currentPath : a.routinePath,
@@ -11542,7 +11542,7 @@ function startMinimalDetachingNoTerminationBegin( test )
 
       let o =
       {
-        execPath : 'node testAppParent.js stdio : pipe ipc : true',
+        execPath : 'node testAppParent stdio : pipe ipc : true',
         mode : 'spawn',
         outputCollecting : 1,
         currentPath : a.routinePath,
@@ -11596,7 +11596,7 @@ function startMinimalDetachingNoTerminationBegin( test )
 
     let o =
     {
-      execPath : mode === 'fork' ? 'testAppChild.js' : 'node testAppChild.js',
+      execPath : mode === 'fork' ? 'testAppChild' : 'node testAppChild',
       mode,
       ipc : mode === 'fork' ? 1 : 0,
       detaching : true,
@@ -11657,7 +11657,7 @@ function startMinimalDetachedOutputStdioIgnore( test )
 
       let o =
       {
-        execPath : `node testAppParent.js mode : ${mode} stdio : ignore`,
+        execPath : `node testAppParent mode : ${mode} stdio : ignore`,
         mode : 'spawn',
         outputCollecting : 1,
         currentPath : a.routinePath,
@@ -11770,7 +11770,7 @@ function startMinimalDetachedOutputStdioIgnore( test )
 
     let o =
     {
-      execPath : 'testAppChild.js',
+      execPath : 'testAppChild',
       detaching : true,
     }
 
@@ -11825,7 +11825,7 @@ function startMinimalDetachedOutputStdioPipe( test )
 
       let o =
       {
-        execPath : `node testAppParent.js mode : ${mode} stdio : pipe`,
+        execPath : `node testAppParent mode : ${mode} stdio : pipe`,
         mode : 'spawn',
         outputCollecting : 1,
         outputPiping : 1,
@@ -11869,7 +11869,7 @@ function startMinimalDetachedOutputStdioPipe( test )
 
     let o =
     {
-      execPath : 'testAppChild.js',
+      execPath : 'testAppChild',
       detaching : true,
     }
 
@@ -12035,7 +12035,7 @@ function startMinimalDetachedOutputStdioInherit( test )
       test.case = `mode : ${mode}, stdio : inherit`;
       let o =
       {
-        execPath : mode === 'fork' ? 'testAppChild.js' : 'node testAppChild.js',
+        execPath : mode === 'fork' ? 'testAppChild' : 'node testAppChild',
         mode,
         stdio : 'inherit',
         detaching : 1,
@@ -12143,7 +12143,7 @@ function startMinimalDetachingIpc( test )
 
       let o =
       {
-        execPath : mode === 'fork' ? 'testAppChild.js' : 'node testAppChild.js',
+        execPath : mode === 'fork' ? 'testAppChild' : 'node testAppChild',
         mode,
         outputPiping : 0,
         outputCollecting : 0,
@@ -12193,7 +12193,7 @@ function startMinimalDetachingIpc( test )
 
       let o =
       {
-        execPath : mode === 'fork' ? 'testAppChild.js' : 'node testAppChild.js',
+        execPath : mode === 'fork' ? 'testAppChild' : 'node testAppChild',
         mode,
         outputCollecting : 1,
         stdio : 'pipe',
@@ -12289,7 +12289,7 @@ function startMinimalDetachingTrivial( test )
 
       let o =
       {
-        execPath : 'testAppParent.js',
+        execPath : 'testAppParent',
         outputCollecting : 1,
         mode : 'fork',
         stdio : 'pipe',
@@ -12505,7 +12505,7 @@ function startMinimalDetachingTrivial( test )
     _.include( 'wFiles' );
     let o =
     {
-      execPath : 'testAppChild.js',
+      execPath : 'testAppChild',
       mode,
       outputCollecting : 1,
       stdio : 'pipe',
