@@ -9207,7 +9207,7 @@ function startAllProcedureSourcePathInSubprocess( test )
 
 //
 
-function startAllProcedureStackInSubprocess( test )
+function startAllProcedureStack( test )
 {
   let context = this;
   let a = context.assetFor( test, false );
@@ -9489,6 +9489,205 @@ function startAllProcedureStackInSubprocess( test )
         test.true( _.strHas( op.output, /at Object.<anonymous>(.)+startMultipleApp:/g ) );
 
         a.fileProvider.fileDelete( startMultiplePath );
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* without subprocess */
+
+    /* stack : 0 */
+
+    ready.then( function case1()
+    {
+      test.case = `stack : 0, without subprocess, startSingle, sync:${sync} deasync:${deasync} mode:${mode}`;
+      let o =
+      {
+        execPath : mode === `fork` ? `${programPath} id:1` : `node ${programPath} id:1`,
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+        stack : 0,
+        mode,
+        sync,
+        deasync,
+      }
+
+      _.process.startSingle( o );
+
+      test.true( _.strHas( o.procedure._sourcePath, /at wConsequence.case1(.)+Execution.test.s/ ) );
+
+      o.ready.then( ( op ) =>
+      {
+        console.log( '00000', op.procedure._stack )
+
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        test.true( _.strHas( o.procedure._sourcePath, /at wConsequence.case1(.)+Execution.test.s/ ) );
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `stack : 0, without subprocess, startMinimal, sync:${sync} deasync:${deasync} mode:${mode}`;
+      let o =
+      {
+        execPath : mode === `fork` ? `${programPath} id:1` : `node ${programPath} id:1`,
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+        stack : 0,
+        mode,
+        sync,
+        deasync,
+      }
+
+      _.process.startMinimal( o );
+
+      test.true( _.strHas( o.procedure._sourcePath, /at wConsequence.case1(.)+Execution.test.s/ ) );
+
+      o.ready.then( ( op ) =>
+      {
+        console.log( '00000', op.procedure._sourcePath )
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        test.true( _.strHas( o.procedure._sourcePath, /at wConsequence.case1(.)+Execution.test.s/ ) );
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `stack : 0, without subprocess, startMultiple, sync:${sync} deasync:${deasync} mode:${mode}`;
+      let o =
+      {
+        execPath : mode === `fork` ? `${programPath} id:1` : `node ${programPath} id:1`,
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+        stack : 0,
+        mode,
+        sync,
+        deasync,
+      }
+
+      _.process.startMultiple( o );
+
+      test.true( _.strHas( o.procedure._sourcePath, /at wConsequence.case1(.)+Execution.test.s/ ) );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        test.true( _.strHas( o.procedure._sourcePath, /at wConsequence.case1(.)+Execution.test.s/ ) );
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* stack : 1 */
+
+    ready.then( function case1()
+    {
+      test.case = `stack : 1, without subprocess, startSingle, sync:${sync} deasync:${deasync} mode:${mode}`;
+      let o =
+      {
+        execPath : mode === `fork` ? `${programPath} id:1` : `node ${programPath} id:1`,
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+        stack : 1,
+        mode,
+        sync,
+        deasync,
+      }
+
+      _.process.startSingle( o );
+
+      test.true( _.strHas( o.procedure._sourcePath, /at __iteration(.)+Consequence.s/ ) );
+
+      o.ready.then( ( op ) =>
+      {
+        console.log( '11111', op.procedure._stack )
+
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        test.true( _.strHas( o.procedure._sourcePath, /at __iteration(.)+Consequence.s/ ) );
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `stack : 1, without subprocess, startMinimal, sync:${sync} deasync:${deasync} mode:${mode}`;
+      let o =
+      {
+        execPath : mode === `fork` ? `${programPath} id:1` : `node ${programPath} id:1`,
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+        stack : 1,
+        mode,
+        sync,
+        deasync,
+      }
+
+      _.process.startMinimal( o );
+
+      test.true( _.strHas( o.procedure._sourcePath, /at __iteration(.)+Consequence.s/ ) );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        test.true( _.strHas( o.procedure._sourcePath, /at __iteration(.)+Consequence.s/ ) );
+        return null;
+      })
+
+      return o.ready;
+    })
+
+    /* */
+
+    ready.then( function case1()
+    {
+      test.case = `stack : 1, without subprocess, startMultiple, sync:${sync} deasync:${deasync} mode:${mode}`;
+      let o =
+      {
+        execPath : mode === `fork` ? `${programPath} id:1` : `node ${programPath} id:1`,
+        currentPath : a.abs( '.' ),
+        outputCollecting : 1,
+        stack : 1,
+        mode,
+        sync,
+        deasync,
+      }
+
+      _.process.startMultiple( o );
+
+      test.true( _.strHas( o.procedure._sourcePath, /at __iteration(.)+Consequence.s/ ) );
+
+      o.ready.then( ( op ) =>
+      {
+        test.identical( op.exitCode, 0 );
+        test.identical( op.ended, true );
+
+        test.true( _.strHas( o.procedure._sourcePath, /at __iteration(.)+Consequence.s/ ) );
         return null;
       })
 
@@ -40167,7 +40366,7 @@ const Proto =
     startSingleProcedureStack,
     startAllProcedureSourcePath,
     startAllProcedureSourcePathInSubprocess,
-    startAllProcedureStackInSubprocess,
+    startAllProcedureStack,
     starterProcedureSourcePath, /* with routine::starter */
     startMultipleProcedureStack,
     startMinimalOnTerminateSeveralCallbacksChronology,
