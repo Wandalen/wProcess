@@ -2531,7 +2531,13 @@ function starter( o0 )
     }
 
     if( o.stack === null || o.stack === undefined )
-    o.stack = _.Procedure.Stack( 1 );
+    {
+      o.stack = _.Procedure.Stack( 1 );
+    }
+    else if( _.numberIs( o.stack ) )
+    {
+      o.stack = _.Procedure.Stack( o.stack + 1 );
+    }
 
     return _.process.startMultiple( o );
   }
