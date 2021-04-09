@@ -270,7 +270,12 @@ function startMinimal_body( o )
     /* procedure */
 
     if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
-    o.stack = _.Procedure.Stack( o.stack, 4 ); /* delta : 4 to not include info about `routine.unite` in the stack */
+    {
+      if( _.numberIs( o.stack ) )
+      o.stack = _.Procedure.Stack( null, 4 + o.stack );
+      else
+      o.stack = _.Procedure.Stack( o.stack, 4 ); /* delta : 4 to not include info about `routine.unite` in the stack */
+    }
 
   }
 
@@ -1434,7 +1439,12 @@ function startSingle_body( o )
     /* procedure */
 
     if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
-    o.stack = _.Procedure.Stack( o.stack, 4 ); /* delta : 4 to not include info about `routine.unite` in the stack */
+    {
+      if( _.numberIs( o.stack ) )
+      o.stack = _.Procedure.Stack( null, 4 + o.stack );
+      else
+      o.stack = _.Procedure.Stack( o.stack, 4 ); /* delta : 4 to not include info about `routine.unite` in the stack */
+    }
 
   }
 
@@ -1795,6 +1805,9 @@ function startMultiple_body( o )
   {
     if( o.procedure === null || _.boolLikeTrue( o.procedure ) )
     {
+      if( _.numberIs( o.stack ) )
+      o.stack = _.Procedure.Stack( null, 4 + o.stack );
+      else
       o.stack = _.Procedure.Stack( o.stack, 4 ); /* delta : 4 to not include info about `routine.unite` in the stack */
     }
   }
