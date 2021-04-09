@@ -9856,43 +9856,6 @@ function starterProcedureStack( test )
 
     /* */
 
-    // ready.then( function case1()
-    // {
-    //   test.case = `without subprocess, stack starter : 0, instance : 0, sync:${sync} deasync:${deasync} mode:${mode}`;
-
-    //   const starter = _.process.starter
-    //   ({
-    //       outputCollecting : 1,
-    //       currentPath : a.abs( '.' )
-    //   })
-
-    //   let o =
-    //   {
-    //     execPath : mode === `fork` ? `${programPath}` : `node ${programPath}`,
-    //     mode,
-    //     sync,
-    //     deasync,
-    //   }
-
-    //   starter( o );
-
-    //   test.identical( _.strCount( o.procedure._sourcePath, 'Execution.test.s' ), 1 );
-    //   test.identical( _.strCount( o.procedure._sourcePath, 'case1' ), 1 );
-
-    //   o.ready.then( ( op ) =>
-    //   {
-    //     test.identical( op.exitCode, 0 );
-    //     test.identical( op.ended, true );
-    //     test.identical( _.strCount( op.procedure._sourcePath, 'Execution.test.s' ), 1 );
-    //     test.identical( _.strCount( op.procedure._sourcePath, 'case1' ), 1 );
-    //     return null;
-    //   })
-
-    //   return o.ready;
-    // })
-
-    /* */
-
     ready.then( function case1()
     {
       test.case = `in subprocess, stack starter : 0, stack instance : 0, sync:${sync} deasync:${deasync} mode:${mode}`;
